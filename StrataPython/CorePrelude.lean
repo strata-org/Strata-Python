@@ -6,14 +6,14 @@
 
 import Strata.DDM.Elab
 import Strata.DDM.AST
-import Strata.Languages.Boogie.DDMTransform.Parse
-import Strata.Languages.Boogie.Verifier
+import Strata.Languages.Core.DDMTransform.Parse
+import Strata.Languages.Core.Verifier
 
 namespace Strata
 
-def boogiePrelude :=
+def corePrelude :=
 #strata
-program Boogie;
+program Core;
 
 datatype None () {
   None_none()
@@ -183,7 +183,7 @@ datatype Client () {
 //  - -999999999 <= days <= 999999999
 // ""
 
-// In Boogie representation, an int type that corresponds to the full
+// In the Strata Core representation, an int type that corresponds to the full
 // milliseconds is simply used. See Timedelta_mk.
 
 procedure timedelta(days: IntOrNone, hours: IntOrNone) returns (delta : int, maybe_except: ExceptOrNone)
@@ -357,7 +357,7 @@ spec {
 
 #end
 
-def Boogie.prelude : Boogie.Program :=
-   Boogie.getProgram Strata.boogiePrelude |>.fst
+def Core.prelude : Core.Program :=
+   Core.getProgram Strata.corePrelude |>.fst
 
 end Strata
