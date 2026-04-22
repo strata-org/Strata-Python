@@ -384,6 +384,7 @@ def DictStrAny_get_param (dict : StmtExprMd) (key : String) (isOptional : Bool) 
 def resolveDispatch (ctx : TranslationContext)
     (f : Python.expr SourceRange)
     (args : Array (Python.expr SourceRange))
+    (kwords : List (Python.keyword SourceRange) := [])
     : Except TranslationError (Option String) := do
   let funcName := match f with
     | .Attribute _ _ attr _ => attr.val
@@ -392,15 +393,22 @@ def resolveDispatch (ctx : TranslationContext)
   match ctx.overloadTable[funcName]? with
   | none => return none
   | some fnOverloads =>
-    let .isTrue _ := decideProp (args.size > 0)
-      | throw (.typeError
-          s!"Dispatched function '{funcName}' called with no \
-            arguments (expected a string literal first argument)")
-    match args[0] with
+    let kwPairs := kwords.map Python.keyword.nameAndValue
+    let some firstArg := fnOverloads.findDispatchArg args kwPairs
+      | let msg := match fnOverloads.paramName, kwPairs.filterMap (·.1) with
+          | some expected, provided@(_ :: _) =>
+            s!"Dispatched function '{funcName}' called with wrong \
+              keyword argument, expected '{expected}' but got \
+              '{String.intercalate "', '" provided}'"
+          | _, _ =>
+            s!"Dispatched function '{funcName}' called with no \
+              arguments (expected a string literal first argument)"
+        throw (.typeError msg)
+    match firstArg with
     | .Constant range (.ConString _ s) _ =>
-      let some ident := fnOverloads[s.val]?
-        | let knownServices := fnOverloads.keysArray.insertionSort.take 2
-          let suffix := if fnOverloads.size > 2 then s!" ... ({fnOverloads.size} total)" else ""
+      let some ident := fnOverloads.entries[s.val]?
+        | let knownServices := fnOverloads.entries.keysArray.insertionSort.take 2
+          let suffix := if fnOverloads.entries.size > 2 then s!" ... ({fnOverloads.entries.size} total)" else ""
           throwUserError range
               s!"'{funcName}' called with unknown string \"{s.val}\"; known services: {knownServices}{suffix}"
       let className :=
@@ -783,15 +791,18 @@ partial def inferExprType (ctx : TranslationContext) (e: Python.expr SourceRange
   -- FormattedValue produces string-typed Any
   | .FormattedValue _ _ _ _ => return PyLauType.Str
 
-  | .Call _ f args _ => getFunctionReturnType ctx f args.val
+  | .Call _ f args kwargs =>
+    getFunctionReturnType ctx f args.val kwargs.val.toList
 
   | _ => return PyLauType.Any
 
 partial def getFunctionReturnType (ctx : TranslationContext) (func: Python.expr SourceRange) (args : Array (Python.expr SourceRange))
+    (kwords : List (Python.keyword SourceRange) := [])
     : Except TranslationError String := do
-  match resolveDispatch ctx func args with
-  |.ok (some classname) => return classname
-  | _=>
+  match resolveDispatch ctx func args kwords with
+  | .ok (some classname) => return classname
+  | .error e => throw e
+  | .ok none =>
     let (fname, _) ← refineFunctionCallExpr ctx func
     match ctx.functionSignatures.find? (λ f => f.name == fname) with
       | some funcDecl => match funcDecl.ret with
@@ -955,7 +966,7 @@ partial def translateCall (ctx : TranslationContext)
                           (kwords : List (Python.keyword SourceRange))
     : Except TranslationError StmtExprMd := do
   -- Step 1: factory dispatch (e.g., boto3.client('iam'))
-  if let some className ← resolveDispatch ctx f args.toArray then
+  if let some className ← resolveDispatch ctx f args.toArray kwords then
     return mkStmtExprMd (.New className)
   -- Step 2: method call on typed variable (e.g., iam.get_role())
   --   Resolve to ClassName_method(obj, args)
@@ -2402,7 +2413,7 @@ def pythonToLaurel' (info : PreludeInfo)
   }
 
   let overloadCompositeType := Std.HashSet.ofList $
-      (overloadTable.values.flatMap (·.values)).map fun ident =>
+      (overloadTable.values.flatMap (·.entries.values)).map fun ident =>
         if ident.pythonModule.isEmpty then
           ident.name
         else
