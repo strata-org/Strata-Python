@@ -6,6 +6,7 @@ testDriver = "StrataTestMain"
 [[require]]
 name = "Strata"
 git = "https://github.com/strata-org/Strata.git"
+rev = "port/main2-core-to-main"
 
 [[input_file]]
 name = "PythonDialectIon"
