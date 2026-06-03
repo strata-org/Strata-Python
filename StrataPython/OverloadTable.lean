@@ -5,11 +5,11 @@
 -/
 module
 public import Std.Data.HashMap.Basic
-public import Strata.Languages.Python.PythonIdent
+public import StrataPython.PythonIdent
 
 public section
 
-namespace Strata.Python
+namespace StrataPython
 
 /--
 All overloads for a single function name: maps a string literal
@@ -44,6 +44,6 @@ def FunctionOverloads.findDispatchArg (fo : FunctionOverloads)
 /-- Dispatch table: function name → its overloads. -/
 @[expose] abbrev OverloadTable := Std.HashMap String FunctionOverloads
 
-end Strata.Python
+end StrataPython
 
 end -- public section

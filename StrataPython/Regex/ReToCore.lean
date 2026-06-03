@@ -5,12 +5,13 @@
 -/
 module
 
-public import Strata.Languages.Python.Regex.ReParser
+public import StrataPython.Regex.ReParser
 public import Strata.Languages.Core.Expressions
 import Strata.Languages.Core.Factory
 
-namespace Strata
-namespace Python
+open Strata
+
+namespace StrataPython
 
 public section
 

@@ -3,17 +3,12 @@
 
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
+module
+meta import StrataPythonTest.TestExamples
+meta import StrataPythonTest.Util.Python
 
-import StrataTest.Languages.Python.TestExamples
-import StrataTest.Util.TestDiagnostics
-import StrataTest.Util.Python
-
-open StrataTest.Util
-open Strata.Python (processPythonFile withPython)
 open StrataDDM.Parser (stringInputContext)
-open Strata
-
-namespace Strata.Python.Issue1000
+open StrataPython (withPython processPythonFile)
 
 /-! ## Test: Procedure call inside negated if-condition (Issue #1000)
 
@@ -38,5 +33,3 @@ def main() -> None:
   let diags ← processPythonFile pythonCmd (stringInputContext "test.py" program)
   if diags.size ≠ 0 then
     throw <| .userError s!"Expected 0 diagnostics, got {diags.size}: {diags.map (·.message)}"
-
-end Strata.Python.Issue1000

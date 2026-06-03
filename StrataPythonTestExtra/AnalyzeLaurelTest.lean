@@ -6,11 +6,12 @@
 module
 
 meta import Strata.SimpleAPI
-meta import Strata.Languages.Python.PySpecPipeline
+meta import StrataPython.PySpecPipeline
 meta import Strata.Languages.Laurel.Resolution
 meta import Strata.Transform.ProcedureInlining
-meta import Strata.Languages.Python.PyFactory
-meta import StrataTest.Util.Python
+meta import StrataPython.PyFactory
+meta import StrataPythonTest.Util.Python
+meta import StrataPython
 
 /-! ## End-to-end tests for `pyAnalyzeLaurel` with dispatch
 
@@ -20,16 +21,15 @@ with `--dispatch` through the SimpleAPI. The mock services (Storage,
 Messaging) are generic and not tied to any cloud provider.
 -/
 
-namespace Strata.Python.AnalyzeLaurelTest
-
-open Strata (pythonAndSpecToLaurel pySpecsDir)
 open Strata.Pipeline (PipelineContext)
+
+namespace StrataPython.AnalyzeLaurelTest
 
 meta def quietCtx : BaseIO PipelineContext :=
   PipelineContext.create (outputMode := .quiet)
 
 meta def testDir : System.FilePath :=
-  "StrataTestExtra/Languages/Python/Specs/dispatch_test"
+  "StrataPythonTestExtra/Specs/dispatch_test"
 
 /-- Compile a Python source file to a `.python.st.ion` Ion file.
     Returns the path to the generated Ion file. -/
@@ -64,7 +64,7 @@ meta def compilePython
 meta def setupFixture (pythonCmd : System.FilePath)
     (outDir : System.FilePath) : IO Unit := do
   IO.FS.withTempFile fun _handle dialectFile => do
-    IO.FS.writeBinFile dialectFile Python.Python.toIon
+    IO.FS.writeBinFile dialectFile Python.toIon
     -- Compile all servicelib modules (dispatch + individual services)
     match ← pySpecsDir testDir outDir dialectFile
         (modules := #["servicelib", "servicelib.Storage", "servicelib.Messaging", "servicelib.Database"])
@@ -78,7 +78,7 @@ meta def compileTestScript (pythonCmd : System.FilePath)
     (pyFile : System.FilePath)
     (outDir : System.FilePath) : IO System.FilePath := do
   IO.FS.withTempFile fun _handle dialectFile => do
-    IO.FS.writeBinFile dialectFile Python.Python.toIon
+    IO.FS.writeBinFile dialectFile Python.toIon
     compilePython pythonCmd dialectFile pyFile outDir
 
 /-- Run pyAnalyzeLaurel on a test script within the shared fixture. -/
@@ -89,7 +89,7 @@ meta def runAnalyze
   let testIon ← compileTestScript pythonCmd (testDir / scriptName) tmpDir
   let pctx ← quietCtx
   let laurel ←
-    match ← (Strata.pythonAndSpecToLaurel testIon.toString
+    match ← (pythonAndSpecToLaurel testIon.toString
         (dispatchModules := #["servicelib"])
         (specDir := tmpDir)).run pctx |>.toBaseIO with
     | .ok r => pure r
@@ -102,10 +102,10 @@ meta def runAnalyze
       if let some m := (←pctx.getMessages).back? then
         return .error m.message
       return .error "Pipeline aborted for unspecified reason (bug)"
-  match ← Strata.translateCombinedLaurel laurel with
+  match ← translateCombinedLaurel laurel with
   | (some core, []) =>
     -- Also run Core type checking to catch semantic errors (e.g. Heap vs Any)
-    match Core.typeCheck Core.VerifyOptions.quiet core (moreFns := Strata.Python.ReFactory) with
+    match Core.typeCheck Core.VerifyOptions.quiet core (moreFns := StrataPython.ReFactory) with
     | .error diag => return .error s!"Core type checking failed: {diag}"
     | .ok _ => return .ok core
   | (_, errors) => return .error s!"Laurel to Core translation failed: {errors}"
@@ -121,7 +121,7 @@ meta def runAnalyzeAndVerify
   let testIon ← compileTestScript pythonCmd (testDir / scriptName) tmpDir
   let pctx ← quietCtx
   let laurel ←
-    match ← (Strata.pythonAndSpecToLaurel testIon.toString
+    match ← (pythonAndSpecToLaurel testIon.toString
         (dispatchModules := #["servicelib"])
         (specDir := tmpDir)).run pctx |>.toBaseIO with
     | .ok r => pure r
@@ -129,14 +129,14 @@ meta def runAnalyzeAndVerify
       let msgs ← pctx.getMessages
       let detail := match msgs.back? with | some m => m.message | none => "Pipeline aborted"
       return .error detail
-  let (coreProgramOption, _) ← Strata.translateCombinedLaurel laurel
+  let (coreProgramOption, _) ← translateCombinedLaurel laurel
   let coreProgram ← match coreProgramOption with
     | none => return .error "Laurel to Core translation failed"
     | some core => pure core
   -- Determine entry points
   let entryPoints ←
     if useRoots then
-      let (_preludeNames, userProcNames) := Strata.splitProcNames coreProgram
+      let (_preludeNames, userProcNames) := splitProcNames coreProgram
       let cg := coreProgram.toProcedureCG
       let userSet := Std.HashSet.ofList userProcNames
       pure ((cg.computeRoots (preferredRoots := userProcNames)).filter userSet.contains)
@@ -152,8 +152,8 @@ meta def runAnalyzeAndVerify
     { Core.VerifyOptions.default with
       stopOnFirstError := false, verbose := .quiet, solver := "z3",
       checkMode := .bugFinding, checkLevel := .full }
-  match ← Core.verifyProgram coreProgram options
-      (moreFns := Strata.Python.ReFactory)
+  match ← Strata.Core.verifyProgram coreProgram options
+      (moreFns := StrataPython.ReFactory)
       (proceduresToVerify := some entryPoints)
       (externalPhases := [Strata.frontEndPhase])
       (prefixPhases := inlinePhases) |>.toBaseIO with
@@ -265,7 +265,7 @@ meta def runTestCase (pythonCmd : System.FilePath) (tmpDir : System.FilePath)
       let testIon ← compileTestScript pythonCmd (testDir / "test_class_any_as_composite.py") tmpDir
       let pctx ← quietCtx
       let laurel ←
-        match ← (Strata.pythonAndSpecToLaurel testIon.toString
+        match ← (pythonAndSpecToLaurel testIon.toString
             (dispatchModules := #["servicelib"])
             (pyspecModules := #["servicelib.Storage"])
             (specDir := tmpDir)).run pctx |>.toBaseIO with
@@ -274,9 +274,9 @@ meta def runTestCase (pythonCmd : System.FilePath) (tmpDir : System.FilePath)
           let msgs ← pctx.getMessages
           let detail := match msgs.back? with | some m => m.message | none => "Pipeline aborted"
           return some s!"test_class_any_as_composite.py: {detail}"
-      match ← Strata.translateCombinedLaurel laurel with
+      match ← translateCombinedLaurel laurel with
       | (some core, []) =>
-        match Core.typeCheck Core.VerifyOptions.quiet core (moreFns := Strata.Python.ReFactory) with
+        match Core.typeCheck Core.VerifyOptions.quiet core (moreFns := StrataPython.ReFactory) with
         | .error diag =>
           -- Expected: assigning str (Any) to a Composite-typed field is a type error
           if (diag.message.splitOn "Impossible to unify").length > 1 then return none
@@ -395,7 +395,7 @@ recursively translates subclasses, so the type
       (testDir / "test_resolution_after_filter.py") tmpDir
     let pctx ← quietCtx
     let combined ←
-      match ← (Strata.pythonAndSpecToLaurel testIon.toString
+      match ← (pythonAndSpecToLaurel testIon.toString
           (dispatchModules := #["servicelib"])
           (specDir := tmpDir)).run pctx |>.toBaseIO with
       | .ok r => pure r
@@ -403,7 +403,7 @@ recursively translates subclasses, so the type
         let msgs ← pctx.getMessages
         let detail := match msgs.back? with | some m => m.message | none => "Pipeline aborted"
         throw <| IO.userError s!"pyAnalyzeLaurel failed: {detail}"
-    let result := Laurel.resolve combined
+    let result := Strata.Laurel.resolve combined
     unless result.errors.isEmpty do
       let msgs := result.errors.toList.map (·.message)
       throw <| IO.userError s!"Resolution errors after FilterPrelude:\n{"\n".intercalate msgs}"
@@ -433,4 +433,4 @@ invoking the Storage spec, so precondition violations would go undetected. -/
         throw <| IO.userError
           "Expected ✖️ always false for empty bucket violation via self.field dispatch"
 
-end Strata.Python.AnalyzeLaurelTest
+end StrataPython.AnalyzeLaurelTest

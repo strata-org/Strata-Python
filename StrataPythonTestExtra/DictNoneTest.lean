@@ -3,10 +3,11 @@
 
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
+module
 
-import StrataTest.Languages.Python.TestExamples
-import StrataTest.Util.TestDiagnostics
-import StrataTest.Util.Python
+meta import StrataPythonTest.TestExamples
+meta import StrataTest.Util.TestDiagnostics
+meta import StrataPythonTest.Util.Python
 
 /-! ## Tests: None-for-typed-parameter detection
 
@@ -14,10 +15,8 @@ These tests verify that passing `None` where a typed parameter is expected
 is correctly detected as a bug, both for direct assignments and dict unpacking.
 -/
 
-namespace Strata.Python.DictNoneTest
-
-open Strata.Python (processPythonFile withPython)
 open StrataDDM.Parser (stringInputContext)
+open StrataPython
 
 -- Test 1: Using a valid int should succeed (0 diagnostics).
 #guard_msgs in
@@ -112,5 +111,3 @@ def main() -> None:
   | .error err =>
     unless (toString err).contains "len() is not supported" do
       throw <| IO.userError s!"Unexpected error: {err}"
-
-end Strata.Python.DictNoneTest

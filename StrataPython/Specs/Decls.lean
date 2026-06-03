@@ -5,11 +5,11 @@
 -/
 module
 public import StrataDDM.Util.SourceRange
-public import Strata.Languages.Python.PythonIdent
+public import StrataPython.PythonIdent
 open StrataDDM
 
 public section
-namespace Strata.Python
+namespace StrataPython
 
 namespace PythonIdent
 
@@ -599,5 +599,5 @@ inductive Signature where
   | typeDef (d : TypeDef)
   deriving Inhabited
 
-end Strata.Python.Specs
+end StrataPython.Specs
 end -- public section

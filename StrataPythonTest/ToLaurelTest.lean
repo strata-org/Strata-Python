@@ -5,7 +5,7 @@
 -/
 module
 
-meta import all Strata.Languages.Python.Specs.ToLaurel
+meta import all StrataPython.Specs.ToLaurel
 meta import all Strata.Languages.Laurel.Grammar.AbstractToConcreteTreeTranslator
 
 meta section
@@ -16,10 +16,12 @@ Tests for `signaturesToLaurel`: translating PySpec function/class/type
 signatures into Laurel programs.
 -/
 
-namespace Strata.Python.Specs.ToLaurel.Tests
+namespace StrataPython.Specs.ToLaurel.Tests
 
-open Strata.Python (ModuleName)
-open Strata.Python.Specs
+open StrataPython (ModuleName)
+open StrataPython.Specs
+open StrataPython.Specs.ToLaurel
+open Strata
 open Strata.Laurel
 
 /-! ## Test Infrastructure -/
@@ -1090,5 +1092,5 @@ private def translateFunc (args : Array Arg := #[])
   -- return type assume
   assert! body.contains "assume Any..isfrom_str(result)"
 
-end Strata.Python.Specs.ToLaurel.Tests
+end StrataPython.Specs.ToLaurel.Tests
 end

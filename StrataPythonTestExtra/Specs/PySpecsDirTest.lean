@@ -6,8 +6,9 @@
 module
 
 meta import Strata.SimpleAPI
-import Strata.Languages.Python.PythonDialect
-meta import StrataTest.Util.Python
+import StrataPython.PythonDialect
+meta import StrataPythonTest.Util.Python
+meta import StrataPython
 
 /-! ## Tests for directory-based pySpecsDir
 
@@ -15,12 +16,10 @@ Verifies that `pySpecsDir` correctly discovers, translates, and writes
 PySpec Ion files for a directory of Python modules.
 -/
 
-namespace Strata.Python.Specs.PySpecsDirTest
-
-open Strata (pySpecsDir pySpecOutputPath)
+namespace StrataPython.Specs.PySpecsDirTest
 
 private meta def testDir : System.FilePath :=
-  "StrataTestExtra/Languages/Python/Specs/pyspecs_dir_test"
+  "StrataPythonTestExtra/Specs/pyspecs_dir_test"
 
 /-- Check that a file exists at the given path. -/
 private meta def fileExists (path : System.FilePath) : IO Bool := do
@@ -34,7 +33,7 @@ private meta def fileExists (path : System.FilePath) : IO Bool := do
 
 private meta def testFullDirectory : IO Unit := withPython fun pythonCmd => do
   IO.FS.withTempFile fun _handle dialectFile => do
-    IO.FS.writeBinFile dialectFile Strata.Python.Python.toIon
+    IO.FS.writeBinFile dialectFile StrataPython.Python.toIon
     IO.FS.withTempDir fun outDir => do
       -- broken.py has a duplicate class, so pySpecsDir will report a failure.
       -- But continue-on-error means the good modules should still be translated.
@@ -66,7 +65,7 @@ private meta def testFullDirectory : IO Unit := withPython fun pythonCmd => do
 
 private meta def testModuleFilter : IO Unit := withPython fun pythonCmd => do
   IO.FS.withTempFile fun _handle dialectFile => do
-    IO.FS.writeBinFile dialectFile Strata.Python.Python.toIon
+    IO.FS.writeBinFile dialectFile StrataPython.Python.toIon
     IO.FS.withTempDir fun outDir => do
       let r ← pySpecsDir testDir outDir dialectFile
         (modules := #["standalone"])
@@ -89,7 +88,7 @@ private meta def testModuleFilter : IO Unit := withPython fun pythonCmd => do
 
 private meta def testModulePackage : IO Unit := withPython fun pythonCmd => do
   IO.FS.withTempFile fun _handle dialectFile => do
-    IO.FS.writeBinFile dialectFile Strata.Python.Python.toIon
+    IO.FS.writeBinFile dialectFile StrataPython.Python.toIon
     IO.FS.withTempDir fun outDir => do
       let r ← pySpecsDir testDir outDir dialectFile
         (modules := #["testpkg"])
@@ -109,7 +108,7 @@ private meta def testModulePackage : IO Unit := withPython fun pythonCmd => do
 
 private meta def testSubdirRelativeImport : IO Unit := withPython fun pythonCmd => do
   IO.FS.withTempFile fun _handle dialectFile => do
-    IO.FS.writeBinFile dialectFile Strata.Python.Python.toIon
+    IO.FS.writeBinFile dialectFile StrataPython.Python.toIon
     IO.FS.withTempDir fun outDir => do
       let r ← pySpecsDir testDir outDir dialectFile
         (modules := #["testpkg.consumer"])
@@ -128,7 +127,7 @@ private meta def testSubdirRelativeImport : IO Unit := withPython fun pythonCmd 
 
 private meta def testIncremental : IO Unit := withPython fun pythonCmd => do
   IO.FS.withTempFile fun _handle dialectFile => do
-    IO.FS.writeBinFile dialectFile Strata.Python.Python.toIon
+    IO.FS.writeBinFile dialectFile StrataPython.Python.toIon
     IO.FS.withTempDir fun outDir => do
       -- First run
       match ← pySpecsDir testDir outDir dialectFile
@@ -168,7 +167,7 @@ private meta def testIncremental : IO Unit := withPython fun pythonCmd => do
 
 private meta def testContinueOnError : IO Unit := withPython fun pythonCmd => do
   IO.FS.withTempFile fun _handle dialectFile => do
-    IO.FS.writeBinFile dialectFile Strata.Python.Python.toIon
+    IO.FS.writeBinFile dialectFile StrataPython.Python.toIon
     IO.FS.withTempDir fun outDir => do
       -- Translate both standalone (good) and broken (has duplicate class)
       let r ← pySpecsDir testDir outDir dialectFile
@@ -219,4 +218,4 @@ private meta def runAllTests : IO Unit := do
 #guard_msgs in
 #eval runAllTests
 
-end Strata.Python.Specs.PySpecsDirTest
+end StrataPython.Specs.PySpecsDirTest

@@ -7,14 +7,16 @@ module
 
 public import Strata.Languages.Core.EntryPoint
 public import Strata.Languages.Core.Verifier
-import Strata.Languages.Python.PySpecPipeline
-import Strata.Languages.Python.PyFactory
+import StrataPython.PySpecPipeline
+import StrataPython.PyFactory
 import Strata.Languages.Laurel.Grammar.AbstractToConcreteTreeTranslator
 import Strata.SimpleAPI
 import Strata.Languages.Core.DDMTransform.ASTtoCST
 import Strata.Pipeline.Diagnostic
 
-namespace Strata.Pipeline
+open Strata.Pipeline
+
+namespace StrataPython.Pipeline
 
 /-- The outcome of the full pyAnalyzeLaurel pipeline.
     Error details are derived from the accumulated messages in PipelineContext. -/
@@ -44,7 +46,7 @@ public structure PyAnalyzeConfig where
 private def runPipeline (config : PyAnalyzeConfig)
     : PipelineM (PyAnalyzeOutcome × Statistics) := do
   let combinedLaurel ← withPhase "pythonAndSpecToLaurel" do
-    Strata.pythonAndSpecToLaurel
+    StrataPython.pythonAndSpecToLaurel
       (specDir := config.specDir)
       config.filePath config.dispatchModules config.pyspecModules config.sourcePath
 
@@ -59,7 +61,7 @@ private def runPipeline (config : PyAnalyzeConfig)
   let (coreProgram, laurelPassStats) ← withPhase "laurelToCore" do
     let ctx ← read
     let laurelResult ←
-      Strata.translateCombinedLaurelWithLowered combinedLaurel
+      StrataPython.translateCombinedLaurelWithLowered combinedLaurel
         (keepAllFilesPrefix := config.keepAllFilesPrefix)
         (pipelineCtx := some ctx) |>.toBaseIO
     match laurelResult with
@@ -87,7 +89,7 @@ private def runPipeline (config : PyAnalyzeConfig)
   let verifyResult ← withPhase "verification" do
     let ctx ← read
     let userSourcePath := config.sourcePath.getD config.filePath
-    let (_, userProcNames) := Strata.splitProcNames coreProgram [userSourcePath]
+    let (_, userProcNames) := StrataPython.splitProcNames coreProgram [userSourcePath]
     let (proceduresToVerify, inlinePhases) :=
       if config.isBugFinding then
         let ⟨p, i⟩ := Core.chooseEntryProceduresAndBuildInlinePhases
@@ -95,7 +97,7 @@ private def runPipeline (config : PyAnalyzeConfig)
         (p, [i])
       else (userProcNames, [])
     Strata.Core.verifyProgram coreProgram config.verifyOptions
-        (moreFns := Strata.Python.ReFactory)
+        (moreFns := StrataPython.ReFactory)
         (proceduresToVerify := some proceduresToVerify)
         (externalPhases := [Strata.frontEndPhase])
         (prefixPhases := inlinePhases)
@@ -139,4 +141,4 @@ public def runPyAnalyzePipeline (config : PyAnalyzeConfig)
   | .ok (outcome, stats) => return (outcome, stats, ctx)
   | .error () => return (.failed, {}, ctx)
 
-end Strata.Pipeline
+end StrataPython.Pipeline

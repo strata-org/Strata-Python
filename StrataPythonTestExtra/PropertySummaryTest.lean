@@ -3,10 +3,11 @@
 
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
-
-import StrataTest.Util.Python
-import Strata.SimpleAPI
-import Strata.Languages.Python.PyFactory
+module
+meta import Strata.Languages.Core
+meta import StrataPython
+meta import StrataPython.PyFactory
+meta import StrataPythonTest.Util.Python
 
 /-! ## Test: Python assert messages propagate as property summaries
 
@@ -14,19 +15,18 @@ Verifies that `assert cond, "message"` in Python flows through as a
 property summary in the Core verification results.
 -/
 
-namespace Strata.Python.PropertySummaryTest
-
-open Strata (pyTranslateLaurel)
+open Strata.Core (verifyProgram)
+open StrataPython (Python ReFactory pyTranslateLaurel withPython)
 
 /-- Compile a Python string to Ion, translate to Core, verify, and return
     the property summaries from the VCResults. -/
-private def getPropertySummaries (pythonCmd : System.FilePath) (source : String)
+meta def getPropertySummaries (pythonCmd : System.FilePath) (source : String)
     : IO (Array String) := do
   IO.FS.withTempDir fun tmpDir => do
     let pyFile := tmpDir / "test.py"
     IO.FS.writeFile pyFile source
     let dialectFile := tmpDir / "dialect.ion"
-    IO.FS.writeBinFile dialectFile Python.Python.toIon
+    IO.FS.writeBinFile dialectFile Python.toIon
     let ionFile := tmpDir / "test.python.st.ion"
     let child ← IO.Process.spawn {
       cmd := pythonCmd.toString
@@ -43,8 +43,8 @@ private def getPropertySummaries (pythonCmd : System.FilePath) (source : String)
     let (core, _diags) ← match ← pyTranslateLaurel ionFile.toString |>.toBaseIO with
       | .ok r => pure r
       | .error msg => throw <| .userError s!"pyTranslateLaurel failed: {msg}"
-    let results ← match ← Core.verifyProgram core Core.VerifyOptions.quiet
-        (moreFns := Strata.Python.ReFactory) |>.toBaseIO with
+    let results ← match ← verifyProgram core Core.VerifyOptions.quiet
+        (moreFns := ReFactory) |>.toBaseIO with
       | .ok r => pure r
       | .error msg => throw <| .userError s!"verifyCore failed: {msg}"
     return results.filterMap fun vcr =>
@@ -58,5 +58,3 @@ private def getPropertySummaries (pythonCmd : System.FilePath) (source : String)
   for msg in expected do
     unless summaries.any (· == msg) do
       throw <| .userError s!"FAIL: \"{msg}\" not found in summaries: {summaries}"
-
-end Strata.Python.PropertySummaryTest

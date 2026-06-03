@@ -6,11 +6,12 @@
 module
 
 meta import Strata.SimpleAPI
-meta import Strata.Languages.Python.PySpecPipeline
-meta import Strata.Languages.Python.ReadPython
-meta import Strata.Languages.Python.PythonToCore
-meta import Strata.Languages.Python.Specs.IdentifyOverloads
-meta import StrataTest.Util.Python
+meta import StrataPython.PySpecPipeline
+meta import StrataPython.ReadPython
+meta import StrataPython.PythonToCore
+meta import StrataPython.Specs.IdentifyOverloads
+meta import StrataPythonTest.Util.Python
+meta import StrataPython
 
 /-! ## Unit tests for `resolveOverloads`
 
@@ -19,15 +20,13 @@ sets, ensuring we identify precisely the needed specs — no more, no
 fewer.
 -/
 
-namespace Strata.Python.Specs.IdentifyOverloadsTest
+open Strata (SourceRange)
 
-open Strata (readDispatchOverloads pySpecsDir pySpecOutputPath)
-open Strata.Python (ModuleName)
-open Strata.Python.Specs.IdentifyOverloads (resolveOverloads)
-open Strata.Python (OverloadTable)
+open StrataPython
+open StrataPython.Specs.IdentifyOverloads
 
 private meta def testDir : System.FilePath :=
-  "StrataTestExtra/Languages/Python/Specs/dispatch_test"
+  "StrataPythonTestExtra/Specs/dispatch_test"
 
 /-- Compile a Python source file to Ion and return the path. -/
 private meta def compilePython
@@ -35,7 +34,7 @@ private meta def compilePython
     (pyFile : System.FilePath) (outDir : System.FilePath)
     : IO System.FilePath := do
   IO.FS.withTempFile fun _handle dialectFile => do
-    IO.FS.writeBinFile dialectFile Python.Python.toIon
+    IO.FS.writeBinFile dialectFile Python.toIon
     let some stem := pyFile.fileStem
       | throw <| .userError s!"No stem for {pyFile}"
     let ionPath := outDir / s!"{stem}.python.st.ion"
@@ -64,7 +63,7 @@ private meta def buildOverloadTable
     (pythonCmd : System.FilePath)
     (outDir : System.FilePath) : IO OverloadTable := do
   IO.FS.withTempFile fun _handle dialectFile => do
-    IO.FS.writeBinFile dialectFile Python.Python.toIon
+    IO.FS.writeBinFile dialectFile Python.toIon
     -- Compile servicelib dispatch file to pyspec Ion
     let pyFile := testDir / "servicelib" / "__init__.py"
     match ← pySpecsDir testDir outDir dialectFile
@@ -84,8 +83,8 @@ private meta def buildOverloadTable
 
 /-- Parse a user Python Ion file into statements. -/
 private meta def parseStmts (ionPath : System.FilePath)
-    : IO (Array (Python.stmt SourceRange)) := do
-  match ← Strata.Python.readPythonStrata ionPath.toString |>.toBaseIO with
+    : IO (Array (stmt SourceRange)) := do
+  match ← StrataPython.readPythonStrata ionPath.toString |>.toBaseIO with
   | .ok stmts =>
     return stmts
   | .error msg =>
@@ -165,5 +164,3 @@ private meta def runTestCase
       | .error e => errors := errors.push s!"Task error: {e}"
     if errors.size > 0 then
       throw <| IO.userError ("\n".intercalate errors.toList)
-
-end Strata.Python.Specs.IdentifyOverloadsTest

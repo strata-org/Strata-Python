@@ -5,8 +5,8 @@
 -/
 module
 
-public import Strata.Languages.Python.OverloadTable
-public import Strata.Languages.Python.PythonDialect
+public import StrataPython.OverloadTable
+public import StrataPython.PythonDialect
 import Strata.Languages.Core.Factory
 
 /-!
@@ -23,9 +23,7 @@ The result is a deduplicated set of module names that can be used
 to determine which `.pyspec.st.ion` files are needed.
 -/
 
-namespace Strata.Python.Specs.IdentifyOverloads
-
-open Strata.Python (stmt expr keyword FunctionOverloads OverloadTable PythonIdent)
+namespace StrataPython.Specs.IdentifyOverloads
 
 /-- State accumulated while walking the AST. -/
 public structure ResolveState where
@@ -155,7 +153,7 @@ partial def walkExpr
 
 /-- Walk a comprehension's sub-expressions. -/
 partial def walkComprehension
-    (g : Strata.Python.comprehension SourceRange)
+    (g : comprehension SourceRange)
     : ResolveM Unit := do
   match g with
   | .mk_comprehension _ target iter ⟨_, ifs⟩ _ =>
@@ -277,4 +275,4 @@ public def resolveOverloads
     : ResolveState :=
   (walkStmts stmts |>.run overloads |>.run {}).2
 
-end Strata.Python.Specs.IdentifyOverloads
+end StrataPython.Specs.IdentifyOverloads
