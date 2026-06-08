@@ -28,10 +28,13 @@ StrataPython provides:
 
 ## File Structure
 
+The package is the repository root:
+
 ```
-StrataPython/
+.
 ├── StrataPython.lean              # Public API (readPythonIon, pySpecsDir, pyTranslateLaurel, etc.)
 ├── StrataPython/
+│   ├── Cli.lean                   # Shared CLI helpers for the Scripts/ executables
 │   ├── PythonDialect.lean         # DDM dialect definition + generated types (expr, stmt, etc.)
 │   ├── PythonIdent.lean           # Module-qualified Python identifiers
 │   ├── ReadPython.lean            # Read Python AST from Ion format
@@ -57,10 +60,14 @@ StrataPython/
 │   │   └── ReToCore.lean          # Regex → Core SMT translation
 │   └── Pipeline/
 │       └── PyAnalyzeLaurel.lean   # Full analysis pipeline (Python → Laurel → Core → SMT)
+├── Scripts/                       # Executable entry points (pyInterpret, pyAnalyzeLaurel, etc.)
+├── Tools/
+│   └── strata-python/             # Python tooling package (Ion reader, dialect generator)
 ├── StrataPythonTest/              # Compile-time tests (built with lake build)
 ├── StrataPythonTestExtra/         # Runtime tests (run with lake test, require Python)
 ├── DiffTestCore.lean              # Regex differential testing tool
 ├── StrataTestMain.lean            # Test driver for StrataPythonTestExtra
+├── AGENTS.md                      # Guide for AI agents working in this package
 ├── lakefile.toml
 ├── lean-toolchain
 └── lake-manifest.json
@@ -74,10 +81,18 @@ StrataPython/
 lake build StrataPythonTest
 ```
 
-### Runtime tests (require `pip install Tools/Python`)
+### Runtime tests (require the `strata` Python packages installed)
 
 ```bash
 PYTHON=python lake test
+```
+
+The runtime tests require both the `strata-base` package (from the parent
+Strata repository) and the in-repo `strata-python` package:
+
+```bash
+pip install <strata-repo>/Tools/Python-base
+pip install ./Tools/strata-python
 ```
 
 ### Regex differential tests
