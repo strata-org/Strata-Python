@@ -5,7 +5,7 @@ testDriver = "StrataTestMain"
 
 [[require]]
 name = "Strata"
-path = ".."
+git = "https://github.com/strata-org/Strata.git"
 
 [[input_file]]
 name = "PythonDialectIon"

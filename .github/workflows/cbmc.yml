@@ -1,0 +1,72 @@
+name: CBMC
+
+on:
+  workflow_call:
+
+jobs:
+  cbmc_test:
+    name: Run CBMC tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Install cvc5
+        uses: ./.github/actions/install-cvc5
+      - name: Install z3
+        uses: ./.github/actions/install-z3
+      - name: Restore lake cache
+        # The cache is safe to use here because we just saved it for this exact
+        # SHA in the build_and_test_lean job from ci.yml. Restoring it also
+        # brings back the cloned Strata dependency under .lake/packages/Strata,
+        # which holds the Laurel/regex/quantifier CBMC patches applied below.
+        # https://github.com/strata-org/Strata/issues/952
+        uses: ./.github/actions/restore-lake-cache
+        with:
+          path: .lake
+          fail-on-cache-miss: "true"
+          use-restore-keys: "false"
+      - name: Prepare ccache
+        uses: actions/cache@v5
+        with:
+          save-always: true
+          path: .ccache
+          key: cbmc-${{ runner.os }}-${{ runner.arch }}-cbmc-${{ github.sha }}
+          restore-keys: |
+            cbmc-${{ runner.os }}-${{ runner.arch }}-cbmc
+      - name: Build CBMC from source (with string support patch)
+        shell: bash
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install -y cmake ninja-build flex bison ccache
+          git clone --depth 1 --branch cbmc-6.8.0 https://github.com/diffblue/cbmc.git cbmc-src
+          cd cbmc-src
+          STRATA="$GITHUB_WORKSPACE/.lake/packages/Strata"
+          git apply "$GITHUB_WORKSPACE/StrataPythonTest/cbmc-string-support.patch"
+          git apply "$STRATA/StrataTest/Languages/Laurel/cbmc-bounds-check.patch"
+          git apply "$STRATA/StrataTest/Backends/CBMC/cbmc-regex-support.patch"
+          git apply "$STRATA/StrataTest/Backends/CBMC/cbmc-quantifier-simplify.patch"
+          export CCACHE_BASEDIR=$PWD
+          export CCACHE_DIR=$GITHUB_WORKSPACE/.ccache
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DWITH_JBMC=OFF
+          ccache -z --max-size=500M
+          ninja -C build cbmc symtab2gb goto-cc goto-instrument
+          ccache -s
+          echo "$GITHUB_WORKSPACE/cbmc-src/build/bin/" >> $GITHUB_PATH
+      - name: Build StrataPython
+        uses: leanprover/lean-action@v1
+        with:
+          auto-config: false
+          build: true
+          use-github-cache: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - name: Run Python CBMC pipeline tests
+        shell: bash
+        run: |
+          pip install ./.lake/packages/Strata/Tools/Python-base ./Tools/strata-python
+          ./StrataPythonTest/run_py_cbmc_tests.sh
