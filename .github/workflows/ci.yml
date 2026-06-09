@@ -1,0 +1,193 @@
+name: Build
+
+on:
+  pull_request:
+  merge_group:
+  push:
+    branches: [main]
+
+jobs:
+  build_and_test_lean:
+    name: Build and test Lean
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain:
+          - stable
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Install cvc5
+        uses: strata-org/Strata/.github/actions/install-cvc5@main
+      - name: Install z3
+        uses: strata-org/Strata/.github/actions/install-z3@main
+      - name: Restore lake cache
+        # Only use the caches on PRs because there is a risk of stale results:
+        # https://github.com/strata-org/Strata/issues/952
+        if: github.event_name == 'pull_request'
+        uses: ./.github/actions/restore-lake-cache
+        with:
+          path: .lake
+      - name: Build StrataPython and compile-time tests
+        # Building StrataPythonTest runs the compile-time test suite: the tests
+        # are `#guard_msgs` / `#eval` checks that execute during elaboration.
+        # This also resolves the `Strata` git dependency, cloning it into
+        # `.lake/packages/Strata`.
+        uses: leanprover/lean-action@v1
+        with:
+          build-args: StrataPython StrataPythonTest
+          use-github-cache: false
+          test: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - name: Build using pip
+        # `strata-base` lives in the Strata package that lake cloned into
+        # `.lake/packages/Strata`; `strata-python` is in this repo.
+        run: |
+          pip install ./.lake/packages/Strata/Tools/Python-base
+          pip install ./Tools/strata-python
+      - name: Run pyInterpret golden-file tests
+        working-directory: StrataPythonTest
+        shell: bash
+        run: ./run_py_interpret.sh
+      - name: Run pyAnalyze SARIF tests
+        working-directory: StrataPythonTest
+        shell: bash
+        run: python run_py_analyze_sarif.py
+      - name: Run pyAnalyze golden-file tests
+        working-directory: StrataPythonTest
+        shell: bash
+        run: ./run_py_analyze.sh
+      - name: Run regex differential tests
+        working-directory: StrataPythonTest/Regex
+        run: python diff_test.py
+      - name: Save lake cache
+        uses: ./.github/actions/save-lake-cache
+        with:
+          path: .lake
+
+  check_pending_python:
+    needs: build_and_test_lean
+    name: Check pending Python tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v6
+    - uses: actions/setup-python@v6
+      with:
+        python-version: '3.14'
+    - name: Restore Lean build cache
+      # The cache is safe to use here because we just saved it for this exact SHA
+      # in the build_and_test_lean job
+      # https://github.com/strata-org/Strata/issues/952
+      uses: ./.github/actions/restore-lake-cache
+      with:
+        path: .lake
+        fail-on-cache-miss: "true"
+        use-restore-keys: "false"
+    - name: Build using pip
+      run: |
+        pip install ./.lake/packages/Strata/Tools/Python-base
+        pip install ./Tools/strata-python
+    - name: Install Lean
+      uses: leanprover/lean-action@v1
+      with:
+        auto-config: false
+        build: false
+    - name: Install cvc5
+      uses: strata-org/Strata/.github/actions/install-cvc5@main
+      with:
+        install-to: system
+    - name: Check pending tests for newly passing
+      working-directory: StrataPythonTest
+      shell: bash
+      run: ./run_py_analyze.sh --check-pending
+
+  lint_checks:
+    name: Run lint checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        toolchain:
+          - stable
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Check copyright headers
+        uses: strata-org/Strata/.github/actions/check-copyright-headers@main
+      - name: Check for trailing whitespace
+        uses: strata-org/Strata/.github/actions/lint-whitespace@main
+        with:
+          directory: .
+      - name: Check for import Lean
+        uses: strata-org/Strata/.github/actions/check-lean-import@main
+      - name: Check for new panic! usage
+        uses: strata-org/Strata/.github/actions/check-no-panic@main
+        with:
+          base-ref: "origin/${{ github.base_ref || 'main' }}"
+
+  build_python:
+    needs: build_and_test_lean
+    name: Build and test Python
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        python_version: [3.11, 3.12, 3.13, 3.14]
+    steps:
+    - uses: actions/checkout@v6
+    - uses: actions/setup-python@v6
+      with:
+        python-version: ${{ matrix.python_version }}
+    - name: Restore Lean build cache
+      # The cache is safe to use here because we just saved it for this exact SHA
+      # in the build_and_test_lean job
+      # https://github.com/strata-org/Strata/issues/952
+      uses: ./.github/actions/restore-lake-cache
+      with:
+        path: .lake
+        fail-on-cache-miss: "true"
+        use-restore-keys: "false"
+    - name: Build using pip
+      run: |
+        pip install ./.lake/packages/Strata/Tools/Python-base
+        pip install ./Tools/strata-python
+    - name: Install Lean (for lake env)
+      uses: leanprover/lean-action@v1
+      with:
+        auto-config: false
+        build: false
+        use-github-cache: false
+    - name: Install cvc5
+      uses: strata-org/Strata/.github/actions/install-cvc5@main
+      with:
+        install-to: system
+    - name: Install z3
+      uses: strata-org/Strata/.github/actions/install-z3@main
+      with:
+        install-to: system
+    - name: Run PySpec and dispatch tests
+      # Excludes the CPython differential test, which is run separately below
+      # against a full CPython checkout; here it would be a no-op anyway since
+      # CPYTHON_DIR is unset.
+      run: PYTHON=python lake test -- --exclude CpythonDiffTest
+    - name: Run CPython differential tests
+      # Clones CPython at the matrix version and round-trips its whole test
+      # suite through the Strata generator + Ion (de)serializer. The round-trip
+      # check runs in-process inside the StrataPythonTestExtra/CpythonDiffTest
+      # Lean test (driven by this script), so no separate `strata` CLI is built.
+      run: FAIL_FAST=1 ./scripts/run_cpython_tests.sh ${{ matrix.python_version }}
+      working-directory: Tools/strata-python
+
+  cbmc:
+    needs: build_and_test_lean
+    permissions:
+      contents: read
+    uses: ./.github/workflows/cbmc.yml

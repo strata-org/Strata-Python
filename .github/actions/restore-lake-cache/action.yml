@@ -1,0 +1,76 @@
+# Copyright Strata Contributors
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+name: Restore lake cache
+description: >
+  Thin wrapper around actions/cache/restore@v5 using the cache key
+    lake-<os>-<arch>-<lean-toolchain>-<lake-manifest>-<sha>
+  with two fallback keys dropping each trailing component in turn. The
+  manifest hash covers the cloned Strata dependency.
+inputs:
+  fail-on-cache-miss:
+    description: >
+      If 'true', the step fails when no cache entry matches. Use this in
+      jobs that depend on a cache saved by an upstream job for the same
+      SHA (see https://github.com/strata-org/Strata/issues/952).
+    required: false
+    default: "false"
+  path:
+    description: Cache path(s), newline-separated.
+    required: false
+    default: ".lake"
+  key-prefix:
+    description: >
+      Prefix used in the cache key. The action also hashes the
+      repo-root `lean-toolchain` and `lake-manifest.json`, so changing
+      only this prefix is appropriate for caches keyed on the same
+      root-level Lean build (e.g. distinguishing different artifact
+      names with the same source set). Sub-projects with their own
+      toolchain/manifest do not currently fit this action and should
+      not reuse it as-is.
+    required: false
+    default: "lake"
+  use-restore-keys:
+    description: >
+      Must be the string `'true'` or `'false'`.
+
+      If `'true'` (default), include two fallback `restore-keys` so
+      that a near match (same toolchain/manifest but different SHA) is
+      used when no exact-SHA cache exists.
+
+      Set to `'false'` for downstream jobs that depend on a cache saved
+      by an upstream job for the *same* SHA (typically together with
+      `fail-on-cache-miss: 'true'`); see
+      https://github.com/strata-org/Strata/issues/952. With fallback
+      keys present, `fail-on-cache-miss` only triggers when every
+      fallback also misses, which silently allows stale cross-SHA cache
+      matches and defeats the safety net.
+    required: false
+    default: "true"
+
+outputs:
+  cache-hit:
+    description: Whether a cache entry was restored (see actions/cache/restore@v5).
+    value: ${{ steps.restore-with-fallback.outputs.cache-hit || steps.restore-exact.outputs.cache-hit }}
+
+runs:
+  using: composite
+  steps:
+    - name: Restore lake cache (with fallback keys)
+      id: restore-with-fallback
+      if: inputs.use-restore-keys != 'false'
+      uses: actions/cache/restore@v5
+      with:
+        path: ${{ inputs.path }}
+        key: ${{ inputs.key-prefix }}-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
+        restore-keys: |
+          ${{ inputs.key-prefix }}-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
+          ${{ inputs.key-prefix }}-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}
+        fail-on-cache-miss: ${{ inputs.fail-on-cache-miss }}
+    - name: Restore lake cache (exact SHA only)
+      id: restore-exact
+      if: inputs.use-restore-keys == 'false'
+      uses: actions/cache/restore@v5
+      with:
+        path: ${{ inputs.path }}
+        key: ${{ inputs.key-prefix }}-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
+        fail-on-cache-miss: ${{ inputs.fail-on-cache-miss }}
