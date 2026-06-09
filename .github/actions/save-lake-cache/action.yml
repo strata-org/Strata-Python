@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 name: Save lake cache
 description: >
-  Save the lake build cache using the canonical Strata cache-key pattern.
+  Save the lake build cache.
   Companion to `restore-lake-cache`: the two actions share the same key
   construction so downstream jobs that consume the saved cache via
   `restore-lake-cache` with `use-restore-keys: "false"` will hit it
@@ -32,4 +32,4 @@ runs:
       uses: actions/cache/save@v5
       with:
         path: ${{ inputs.path }}
-        key: ${{ inputs.key-prefix }}-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ hashFiles('**/*.st') }}-${{ github.sha }}
+        key: ${{ inputs.key-prefix }}-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
