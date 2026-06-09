@@ -13,9 +13,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
       - name: Install cvc5
-        uses: ./.github/actions/install-cvc5
+        uses: strata-org/Strata/.github/actions/install-cvc5@main
       - name: Install z3
-        uses: ./.github/actions/install-z3
+        uses: strata-org/Strata/.github/actions/install-z3@main
       - name: Restore lake cache
         # The cache is safe to use here because we just saved it for this exact
         # SHA in the build_and_test_lean job from ci.yml. Restoring it also

@@ -18,9 +18,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
       - name: Install cvc5
-        uses: ./.github/actions/install-cvc5
+        uses: strata-org/Strata/.github/actions/install-cvc5@main
       - name: Install z3
-        uses: ./.github/actions/install-z3
+        uses: strata-org/Strata/.github/actions/install-z3@main
       - name: Restore lake cache
         # Only use the caches on PRs because there is a risk of stale results:
         # https://github.com/strata-org/Strata/issues/952
@@ -97,7 +97,7 @@ jobs:
         auto-config: false
         build: false
     - name: Install cvc5
-      uses: ./.github/actions/install-cvc5
+      uses: strata-org/Strata/.github/actions/install-cvc5@main
       with:
         install-to: system
     - name: Check pending tests for newly passing
@@ -120,13 +120,15 @@ jobs:
         with:
           fetch-depth: 0
       - name: Check copyright headers
-        uses: ./.github/actions/check-copyright-headers
+        uses: strata-org/Strata/.github/actions/check-copyright-headers@main
       - name: Check for trailing whitespace
-        uses: ./.github/actions/lint-whitespace
+        uses: strata-org/Strata/.github/actions/lint-whitespace@main
+        with:
+          directory: .
       - name: Check for import Lean
-        uses: ./.github/actions/check-lean-import
+        uses: strata-org/Strata/.github/actions/check-lean-import@main
       - name: Check for new panic! usage
-        uses: ./.github/actions/check-no-panic
+        uses: strata-org/Strata/.github/actions/check-no-panic@main
         with:
           base-ref: "origin/${{ github.base_ref || 'main' }}"
 
@@ -164,11 +166,11 @@ jobs:
         build: false
         use-github-cache: false
     - name: Install cvc5
-      uses: ./.github/actions/install-cvc5
+      uses: strata-org/Strata/.github/actions/install-cvc5@main
       with:
         install-to: system
     - name: Install z3
-      uses: ./.github/actions/install-z3
+      uses: strata-org/Strata/.github/actions/install-z3@main
       with:
         install-to: system
     - name: Run PySpec and dispatch tests
