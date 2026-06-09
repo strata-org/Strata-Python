@@ -168,17 +168,9 @@ jobs:
       with:
         install-to: system
     - name: Install z3
-      shell: bash
-      run: |
-            pip install z3-solver
-            Z3_PATH=$(python -c "import z3; import os; print(os.path.join(os.path.dirname(z3.__file__), 'lib', 'z3'))")
-            sudo cp "$Z3_PATH" /usr/local/bin/z3 || true
-            # Fallback: install from GitHub release
-            if ! command -v z3 &> /dev/null; then
-              wget https://github.com/Z3Prover/z3/releases/download/z3-4.13.4/z3-4.13.4-x64-glibc-2.35.zip
-              unzip z3-4.13.4-x64-glibc-2.35.zip
-              sudo cp z3-4.13.4-x64-glibc-2.35/bin/z3 /usr/local/bin/
-            fi
+      uses: ./.github/actions/install-z3
+      with:
+        install-to: system
     - name: Run PySpec and dispatch tests
       # Excludes the CPython differential test, which is run separately below
       # against a full CPython checkout; here it would be a no-op anyway since

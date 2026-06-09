@@ -55,8 +55,8 @@ esac
 
 # Select the interpreter. Prefer the requested version via mise, falling back to
 # python3; export it as PYTHON so the Lean test's `withPython` picks it up.
-if command -v mise >/dev/null 2>&1 && mise where "Python@$VER" >/dev/null 2>&1; then
-  PYTHON="$(mise where "Python@$VER")/bin/python"
+if command -v mise >/dev/null 2>&1 && mise where "python@$VER" >/dev/null 2>&1; then
+  PYTHON="$(mise where "python@$VER")/bin/python"
 else
   PYTHON="python3"
 fi
