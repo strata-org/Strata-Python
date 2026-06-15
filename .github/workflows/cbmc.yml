@@ -68,5 +68,5 @@ jobs:
       - name: Run Python CBMC pipeline tests
         shell: bash
         run: |
-          pip install ./.lake/packages/Strata/Tools/Python-base ./Tools/strata-python
+          pip install ./Tools/Python-base ./Tools/strata-python
           ./StrataPythonTest/run_py_cbmc_tests.sh
