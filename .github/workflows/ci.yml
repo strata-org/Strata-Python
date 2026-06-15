@@ -42,10 +42,10 @@ jobs:
         with:
           python-version: '3.14'
       - name: Build using pip
-        # `strata-base` lives in the Strata package that lake cloned into
-        # `.lake/packages/Strata`; `strata-python` is in this repo.
+        # `strata-base` (Tools/Python-base) and `strata-python` (Tools/strata-python)
+        # both live in this repo.
         run: |
-          pip install ./.lake/packages/Strata/Tools/Python-base
+          pip install ./Tools/Python-base
           pip install ./Tools/strata-python
       - name: Run pyInterpret golden-file tests
         working-directory: StrataPythonTest
@@ -89,7 +89,7 @@ jobs:
         use-restore-keys: "false"
     - name: Build using pip
       run: |
-        pip install ./.lake/packages/Strata/Tools/Python-base
+        pip install ./Tools/Python-base
         pip install ./Tools/strata-python
     - name: Install Lean
       uses: leanprover/lean-action@v1
@@ -157,7 +157,7 @@ jobs:
         use-restore-keys: "false"
     - name: Build using pip
       run: |
-        pip install ./.lake/packages/Strata/Tools/Python-base
+        pip install ./Tools/Python-base
         pip install ./Tools/strata-python
     - name: Install Lean (for lake env)
       uses: leanprover/lean-action@v1
