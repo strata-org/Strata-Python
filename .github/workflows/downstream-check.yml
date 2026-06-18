@@ -1,0 +1,107 @@
+# Copyright Strata Contributors
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+#
+# Downstream check: builds Strata-CLI against this PR's Strata-Python code, so
+# we catch breakage before it lands on main. Advisory only — visible on the PR
+# but does not gate merge.
+#
+# Mechanism: check out the PR's Strata-Python, clone Strata-CLI, rewrite
+# Strata-CLI's `require "StrataPython"` to a local path pointing at the
+# checked-out PR code (fork-safe: no need for the PR head SHA to exist on the
+# strata-org remote), then `lake update StrataPython` + build + test. CLI's
+# other requires (Strata, StrataDDM at rev = "main") resolve from their remotes
+# as usual — only the StrataPython edge is overridden.
+#
+# Trigger logic (non-draft PRs on ready_for_review/synchronize; the
+# `!downstream-check` comment from a collaborator) lives in the shared
+# downstream-gate composite action hosted in Strata.
+
+name: Downstream check
+
+on:
+  pull_request:
+    types: [ready_for_review, synchronize]
+  issue_comment:
+    types: [created]
+
+concurrency:
+  group: downstream-${{ github.event.issue.number || github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.gate.outputs.run }}
+      head_sha: ${{ steps.gate.outputs.head_sha }}
+    steps:
+      - name: Gate
+        id: gate
+        uses: strata-org/Strata/.github/actions/downstream-gate@main
+
+  downstream:
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    name: Strata-CLI
+    steps:
+      - name: Check out PR's Strata-Python
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.gate.outputs.head_sha }}
+          path: upstream
+
+      - name: Clone Strata-CLI
+        run: git clone --depth 1 https://github.com/strata-org/Strata-CLI.git downstream
+
+      - name: Override StrataPython require -> local PR checkout
+        uses: strata-org/Strata/.github/actions/rewrite-require@main
+        with:
+          lakefile: downstream/lakefile.toml
+          package: StrataPython
+          path: ../upstream
+
+      # Strata-CLI links the full toolchain (cvc5 + z3), same as its own CI.
+      - name: Install cvc5
+        uses: strata-org/Strata/.github/actions/install-cvc5@main
+      - name: Install z3
+        uses: strata-org/Strata/.github/actions/install-z3@main
+
+      - name: Restore lake cache
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            downstream/.lake
+          key: downstream-Strata-CLI-${{ runner.os }}-${{ needs.gate.outputs.head_sha }}
+          restore-keys: |
+            downstream-Strata-CLI-${{ runner.os }}-
+
+      - name: lake update StrataPython
+        working-directory: downstream
+        run: lake update StrataPython
+
+      # Strata-CLI has no lake testDriver; its own CI builds, then exercises the
+      # binary + examples. Mirror that so a green check means the same thing.
+      - name: Build Strata-CLI
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: downstream
+          use-github-cache: false
+          test: false
+      - name: Run `strata` CLI
+        working-directory: downstream
+        run: lake exe strata --help
+      - name: Validate examples against expected output
+        working-directory: downstream
+        run: ./scripts/run_examples.sh
+
+      - name: Save lake cache
+        if: always()
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            downstream/.lake
+          key: downstream-Strata-CLI-${{ runner.os }}-${{ needs.gate.outputs.head_sha }}
