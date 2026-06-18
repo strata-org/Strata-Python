@@ -12,46 +12,31 @@
 # other requires (Strata, StrataDDM at rev = "main") resolve from their remotes
 # as usual — only the StrataPython edge is overridden.
 #
-# Trigger logic (non-draft PRs on ready_for_review/synchronize; the
-# `!downstream-check` comment from a collaborator) lives in the shared
-# downstream-gate composite action hosted in Strata.
+# Trigger: non-draft PRs only (ready_for_review + every push via synchronize).
 
 name: Downstream check
 
 on:
   pull_request:
     types: [ready_for_review, synchronize]
-  issue_comment:
-    types: [created]
 
 concurrency:
-  group: downstream-${{ github.event.issue.number || github.event.pull_request.number }}
+  group: downstream-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  gate:
-    runs-on: ubuntu-latest
-    outputs:
-      run: ${{ steps.gate.outputs.run }}
-      head_sha: ${{ steps.gate.outputs.head_sha }}
-    steps:
-      - name: Gate
-        id: gate
-        uses: strata-org/Strata/.github/actions/downstream-gate@main
-
   downstream:
-    needs: gate
-    if: needs.gate.outputs.run == 'true'
+    if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
     name: Strata-CLI
     steps:
       - name: Check out PR's Strata-Python
         uses: actions/checkout@v6
         with:
-          ref: ${{ needs.gate.outputs.head_sha }}
+          ref: ${{ github.event.pull_request.head.sha }}
           path: upstream
 
       - name: Clone Strata-CLI
@@ -75,7 +60,7 @@ jobs:
         with:
           path: |
             downstream/.lake
-          key: downstream-Strata-CLI-${{ runner.os }}-${{ needs.gate.outputs.head_sha }}
+          key: downstream-Strata-CLI-${{ runner.os }}-${{ github.event.pull_request.head.sha }}
           restore-keys: |
             downstream-Strata-CLI-${{ runner.os }}-
 
@@ -104,4 +89,4 @@ jobs:
         with:
           path: |
             downstream/.lake
-          key: downstream-Strata-CLI-${{ runner.os }}-${{ needs.gate.outputs.head_sha }}
+          key: downstream-Strata-CLI-${{ runner.os }}-${{ github.event.pull_request.head.sha }}
