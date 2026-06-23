@@ -16,7 +16,7 @@ jobs:
           - stable
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install cvc5
         uses: strata-org/Strata/.github/actions/install-cvc5@main
       - name: Install z3
@@ -74,7 +74,7 @@ jobs:
     permissions:
       contents: read
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: actions/setup-python@v6
       with:
         python-version: '3.14'
@@ -116,7 +116,7 @@ jobs:
           - stable
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Check copyright headers
@@ -142,7 +142,7 @@ jobs:
       matrix:
         python_version: [3.11, 3.12, 3.13, 3.14]
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python_version }}
