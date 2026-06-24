@@ -10,7 +10,6 @@ git = "https://github.com/strata-org/Strata.git"
 [[input_file]]
 name = "PythonDialectIon"
 path = "Tools/strata-python/dialects/Python.dialect.st.ion"
-text = true
 
 [[lean_lib]]
 name = "StrataPython"
