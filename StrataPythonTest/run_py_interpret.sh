@@ -69,7 +69,7 @@ for test_file in "$TESTS_DIR"/test_*.py; do
     fi
 
     # Compile Python to Ion
-    if ! (cd "$STRATA_PYTHON_DIR/Tools/strata-python" && python3 -m strata_python.gen py_to_strata \
+    if ! (cd "$STRATA_PYTHON_DIR/Python/strata-python" && python3 -m strata_python.gen py_to_strata \
         --dialect "dialects/Python.dialect.st.ion" \
         "$test_file" "$ion_file") 2>/dev/null; then
         echo "SKIP (parse): $base_name"

@@ -5,17 +5,19 @@
 -/
 module
 
+public import StrataDDM.Util.IO
+public import StrataDDM.Util.SourceRange
 public import Strata.Languages.Core
+
+import StrataPython.CorePrelude
+public import StrataPython.Pipeline.PyAnalyzeLaurel
 public import StrataPython.PythonDialect
 public import StrataPython.PythonIdent
-public import StrataDDM.Util.SourceRange
+import StrataPython.PythonToCore
+public import StrataPython.PySpecPipeline
+import StrataPython.ReadPython
 import StrataPython.Specs
 import StrataPython.Specs.DDM
-import StrataPython.CorePrelude
-import StrataPython.PythonToCore
-import StrataPython.ReadPython
-public import StrataPython.PySpecPipeline
-public import StrataDDM.Util.IO
 
 open StrataDDM (SourceRange)
 open StrataPython (ModuleName)

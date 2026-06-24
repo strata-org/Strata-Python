@@ -1,0 +1,760 @@
+# Regex differential test corpus: (regex, string, mode) triples, tab-separated.
+# mode is one of match / fullmatch / search.
+# Lines starting with '#' (after optional leading whitespace) and blank lines are
+# comments/separators and skipped by the parser. Section headers below preserve the
+# original case categories. Do not reorder or alter the data rows.
+
+# ── Literals ────────────────────────────────────────────────────────────────
+a	a	fullmatch
+a	b	fullmatch
+ab	ab	fullmatch
+ab	a	fullmatch
+ab	abc	fullmatch
+
+# match mode: anchored at start, trailing content allowed
+a	abc	match
+a	bcd	match
+ab	abc	match
+ab	bcd	match
+
+# ── Character atoms ─────────────────────────────────────────────────────────
+
+# Dot (anychar): matches exactly one character
+.	a	fullmatch
+.		fullmatch
+.	ab	fullmatch
+.+	abc	fullmatch
+
+# Character ranges
+[a-z]	a	fullmatch
+[a-z]	z	fullmatch
+[a-z]	A	fullmatch
+[abc]	b	fullmatch
+[abc]	d	fullmatch
+[a-z]+	hello	fullmatch
+[a-z]+	Hello	fullmatch
+
+# Negated classes [^...]: complement intersected with allchar
+[^a-z]	A	fullmatch
+[^a-z]	a	fullmatch
+[^b]	a	fullmatch
+[^b]	b	fullmatch
+[^A-Z]+	hello	fullmatch
+[^A-Z]+	Hello	fullmatch
+# Complement must be single-char, not multi-char or empty
+[^a]		fullmatch
+[^a]	bc	fullmatch
+[^a]	bb	fullmatch
+[^b]+		fullmatch
+
+# ── Quantifiers ─────────────────────────────────────────────────────────────
+
+# * (star): zero or more
+a*		fullmatch
+a*	aaa	fullmatch
+a*	b	fullmatch
+
+# + (plus = concat r (star r)): one or more
+a+		fullmatch
+a+	a	fullmatch
+a+	aaa	fullmatch
+
+# deeply nested plus — a few cases to verify recursion depth, not re-testing a+ semantics
+((((((a+)+)+)+)+)+)+	a	fullmatch
+((((((a+)+)+)+)+)+)+	b	fullmatch
+((((((a+)+)+)+)+)+)+	aab	match
+((((((a+)+)+)+)+)+)+	bab	search
+
+# (a+)* — plus inside star: equivalent to a*
+(a+)*		fullmatch
+(a+)*	a	fullmatch
+(a+)*	aaa	fullmatch
+(a+)*	b	fullmatch
+(a+)*	ab	match
+(a+)*	bab	search
+
+# (a*)+ — star inside plus: equivalent to a*
+(a*)+		fullmatch
+(a*)+	a	fullmatch
+(a*)+	aaa	fullmatch
+(a*)+	b	fullmatch
+(a*)+	ab	match
+(a*)+	bab	search
+
+# (a+b+)+ — concat of pluses inside plus
+(a+b+)+		fullmatch
+(a+b+)+	ab	fullmatch
+(a+b+)+	aabb	fullmatch
+(a+b+)+	abab	fullmatch
+(a+b+)+	a	fullmatch
+(a+b+)+	ba	fullmatch
+(a+b+)+	abx	match
+(a+b+)+	xab	search
+
+# (a+|b+)+ — alternation of pluses inside plus
+(a+|b+)+		fullmatch
+(a+|b+)+	a	fullmatch
+(a+|b+)+	b	fullmatch
+(a+|b+)+	aabb	fullmatch
+(a+|b+)+	abba	fullmatch
+(a+|b+)+	c	fullmatch
+(a+|b+)+	ac	match
+(a+|b+)+	cab	search
+
+# ? (optional = union empty r): zero or one
+a?		fullmatch
+a?	a	fullmatch
+a?	aa	fullmatch
+
+# {n,m} and exact {n}
+a{2,4}	a	fullmatch
+a{2,4}	aa	fullmatch
+a{2,4}	aaaa	fullmatch
+a{2,4}	aaaaa	fullmatch
+a{3}	aaa	fullmatch
+a{3}	aa	fullmatch
+
+# Zero and exact counts
+a{0}		fullmatch
+a{0}	a	fullmatch
+a{1}	a	fullmatch
+a{1}	aa	fullmatch
+a{0,1}		fullmatch
+a{0,1}	a	fullmatch
+a{0,1}	aa	fullmatch
+
+# Group loops
+(ab){2}	abab	fullmatch
+(ab){2}	ab	fullmatch
+(ab){2}	ababab	fullmatch
+(ab){2,3}	abab	fullmatch
+(ab){2,3}	ababab	fullmatch
+(ab){2,3}	ab	fullmatch
+(ab){2,3}	abababab	fullmatch
+
+# Multi-char class with loop: ok_chars-style identifier check
+[a-z0-9.\-]{1,10}	test-str-1	fullmatch
+[a-z0-9.\-]{1,10}	test-str!	fullmatch
+[a-z0-9.\-]{1,10}		fullmatch
+[a-z0-9.\-]{1,10}	0123456789a	fullmatch
+
+# Loops in search mode
+a{2}	xaax	search
+a{2}	xa	search
+(ab){2}	xababx	search
+(ab){2}	xabx	search
+
+# Anchored loops: ^ and $ alongside {n,m}
+^a{3}$	aaa	fullmatch
+^a{3}$	aa	fullmatch
+^a{3}$	aaaa	fullmatch
+^a{2,4}$	a	fullmatch
+^a{2,4}$	aa	fullmatch
+^a{2,4}$	aaaa	fullmatch
+^a{2,4}$	aaaaa	fullmatch
+^a{3}$	aaa	match
+^a{3}$	aaab	match
+a{3}	aaab	match
+
+# ── Alternation ─────────────────────────────────────────────────────────────
+a|b	a	fullmatch
+a|b	b	fullmatch
+a|b	c	fullmatch
+a|b|c	c	fullmatch
+a|b|c	d	fullmatch
+
+# ── Groups ──────────────────────────────────────────────────────────────────
+(ab)+	ab	fullmatch
+(ab)+	abab	fullmatch
+(ab)+	aba	fullmatch
+(a|b)+	abba	fullmatch
+(a|b)+	abbc	fullmatch
+
+# ── Anchors: basic behavior ──────────────────────────────────────────────────
+
+# fullmatch: ^ and $ are effectively redundant (whole string must match anyway)
+^a	a	fullmatch
+^a	ba	fullmatch
+a$	a	fullmatch
+a$	ab	fullmatch
+^a$	a	fullmatch
+^a$	ab	fullmatch
+^a$	ba	fullmatch
+
+# match mode: ^ is a no-op (match already anchors at start); $ cuts off trailing content
+^a	a	match
+^a	ab	match
+^a	ba	match
+^a$	a	match
+^a$	ab	match
+
+# ^$ matches only the empty string, across all modes
+^$		fullmatch
+^$	a	fullmatch
+^$		match
+^$	a	match
+^$		search
+^$	a	search
+
+# Empty pattern: same language as ^$
+		fullmatch
+	a	fullmatch
+
+# search mode basics
+a	xax	search
+a	xyz	search
+^a$	a	search
+^a$	xa	search
+^a$	ax	search
+
+# ^ in search: prevents a free prefix
+^a	abc	search
+^a	xabc	search
+^a	a	search
+
+# $ in search: prevents a free suffix
+a$	ba	search
+a$	ab	search
+a$	xyzba	search
+a$	xyzbax	search
+
+# Alternation with anchors across all modes
+^a|b$	a	fullmatch
+^a|b$	b	fullmatch
+^a|b$	ab	fullmatch
+^a|b$	a	match
+^a|b$	b	match
+^a|b$	ab	match
+^a|b$	xb	match
+^a|b$	axyz	search
+^a|b$	xyzb	search
+^a|b$	xyzc	search
+^a|b$	axyzb	search
+
+# Group with both anchors, across all modes
+^(a|b)$	a	fullmatch
+^(a|b)$	b	fullmatch
+^(a|b)$	ab	fullmatch
+^(a|b)$	a	match
+^(a|b)$	b	match
+^(a|b)$	ab	match
+^(a|b)$	a	search
+^(a|b)$	ab	search
+
+# Anchors inside groups / alternation
+(^a$)|(^b$)	a	fullmatch
+(^a$)|(^b$)	b	fullmatch
+(^a$)|(^b$)	c	fullmatch
+^a$|^$b	a	fullmatch
+^a$|^$b		fullmatch
+
+# ── Anchors: $ followed by non-consuming suffix (concat | true, false => branch) ──
+# When r1 always consumes and r2 may be empty, $ in r1 can still fire if
+# r2 = "".  Strata splits into: Case 1 (r2 = "", $ fires) | Case 2 (r2 ≠ "").
+
+# a$.*: a (always-consuming) followed by .* (non-consuming)
+a$.*	a	fullmatch
+a$.*	ab	fullmatch
+a$.*	a	match
+a$.*	ab	match
+a$.*	ba	search
+a$.*	ab	search
+
+# $ followed by b* or b?: b*/b? can match "", so $ can still fire
+a$b*	a	fullmatch
+a$b*	ab	fullmatch
+a$b?	a	fullmatch
+a$b?	ab	fullmatch
+
+# $ followed by always-consuming suffix: $ is forced unmatchable (concat | true,true =>)
+a$.+	a	match
+a$.+	ab	match
+a$b+	a	fullmatch
+a$b+	ab	fullmatch
+
+# Double $: second is redundant
+a$$	a	match
+a$$	ab	match
+
+# $ in match mode: terminates the match, no trailing content allowed
+a$	a	match
+a$	ab	match
+a$	ba	match
+a$	aab	match
+
+# a.*$ in match mode: .* followed by $
+a.*$	axyz	match
+a.*$	a	match
+a.*$	b	match
+
+# a.*b in match mode: must start with a and reach b; trailing content allowed
+a.*b	axyzb	match
+a.*b	ab	match
+a.*b	axyz	match
+a.*b	baxyzb	match
+
+# Multi-char consuming prefix before $
+ab$.*	ab	fullmatch
+ab$.*	abc	fullmatch
+ab$.*	ab	match
+ab$.*	abc	match
+ab$.*	xab	search
+ab$.*	xabc	search
+
+# Range prefix before $
+[a-z]$.*	a	fullmatch
+[a-z]$.*	ab	fullmatch
+[a-z]$.*	xa	search
+[a-z]$.*	xa1	search
+
+# Group prefix before $
+(ab)$.*	ab	fullmatch
+(ab)$.*	abc	fullmatch
+(ab)$.*	ab	match
+
+# ── Anchors: ^ preceded by non-consuming content (concat | false, true => branch) ─
+# When r1 may be empty and r2 always consumes with ^, Strata splits into:
+# Case 1 (r1 = "", ^ fires at original position) | Case 2 (r1 ≠ "", ^ blocked).
+
+# .*^a: .* may be empty, so ^ can still fire at position 0
+.*^a	a	match
+.*^a	ab	match
+.*^a	ba	match
+
+# .*^a in search: dotStar wrapper means ^ must still fire at position 0
+.*^a	a	search
+.*^a	ba	search
+.*^a	xa	search
+
+# a?(^b): a? non-consuming with content, (^b) always-consuming with ^
+a?(^b)	b	fullmatch
+a?(^b)	ab	fullmatch
+a?(^b)	b	match
+a?(^b)	ba	match
+a?(^b)	ab	match
+
+# a?(^b) in search: core_ft/core_ff have atStart=false; ^ must not fire mid-string
+a?(^b)	b	search
+a?(^b)	xb	search
+a?(^b)	ab	search
+a?(^b)	xab	search
+a?(^b)	ba	search
+a?(^b)	bx	search
+
+# ^?(^b) in search: r1=^? has no non-anchor content → split doesn't fire → simple path.
+# The fix (passing atStart instead of true to r2) matters here: with atStart=false in
+# core_ft/core_ff, ^ in r2 must be blocked even though the split condition was not met.
+^?(^b)	b	search
+^?(^b)	xb	search
+^?(^b)	ab	search
+
+# ── Anchors: concat(false, false) — both sides may be empty ─────────────────
+# When both sides may be empty and r2 contains ^, Strata splits into:
+# Case 1 (r1 = "", ^ fires) | Case 2 (r1 ≠ "", ^ blocked).
+
+# a?^b: parses as concat(concat(a?,^),b); inner false,false; ^ fires only when a? = ""
+a?^b	b	fullmatch
+a?^b	a	fullmatch
+a?^b	ab	fullmatch
+a?^b	b	match
+a?^b	ba	match
+a?^b	ab	match
+
+# a?^b?: outer concat(a?, concat(^,b?)) — false,false with ^ in r2 and content in r1
+a?^b?		fullmatch
+a?^b?	b	fullmatch
+a?^b?	a	fullmatch
+a?^b?	ab	fullmatch
+a?^b?		match
+a?^b?	b	match
+a?^b?	a	match
+
+# $ in the middle with always-consuming suffix: unmatchable
+a$b	ab	match
+
+# ── Anchors: inside quantified expressions ───────────────────────────────────
+# For star/loop, Strata splits the iterations into first (atStart), middle
+# (false,false), and last (atEnd) when the inner regex is always-consuming
+# or contains an anchor.
+
+# (^a)*: ^ only fires for the first iteration; subsequent iterations get atStart=false
+(^a)*		fullmatch
+(^a)*	a	fullmatch
+(^a)*	aa	fullmatch
+(^a)*	a	match
+(^a)*	aa	match
+
+# (a$)*: $ only fires for the last iteration; earlier iterations get atEnd=false
+(a$)*		fullmatch
+(a$)*	a	fullmatch
+(a$)*	aa	fullmatch
+(a$)*	a	match
+(a$)*	ab	match
+
+# (^a$)*: both anchors — only 1 iteration possible
+(^a$)*		fullmatch
+(^a$)*	a	fullmatch
+(^a$)*	aa	fullmatch
+
+# Anchor inside loop: repeated iteration blocked
+(^a){2}	aa	fullmatch
+(^a){2}	a	fullmatch
+(a$){2}	aa	fullmatch
+(a$){2}	a	fullmatch
+
+# (^a){0,2}: loop(0,m) with always-consuming anchored inner — first/middle/last split
+(^a){0,2}		fullmatch
+(^a){0,2}	a	fullmatch
+(^a){0,2}	aa	fullmatch
+
+# (a$){0,2}: loop(0,m) with always-consuming anchored inner
+(a$){0,2}		fullmatch
+(a$){0,2}	a	fullmatch
+(a$){0,2}	aa	fullmatch
+
+# {n,m} with n≥1: recursed via concat; anchor handling falls to concat cases
+(^a){1,2}	a	fullmatch
+(^a){1,2}	aa	fullmatch
+(a$){1,2}	a	fullmatch
+(a$){1,2}	aa	fullmatch
+
+# star with non-consuming inner — simple path (no anchor split needed)
+(a?)*		fullmatch
+(a?)*	a	fullmatch
+(a?)*	aaa	fullmatch
+
+# star with anchored non-consuming inner — split still required
+(^a?)*		fullmatch
+(^a?)*	a	fullmatch
+(^a?)*	aa	fullmatch
+(a?$)*		fullmatch
+(a?$)*	a	fullmatch
+(a?$)*	aa	fullmatch
+
+# loop(0,m) with non-consuming inner — simple path
+(a?){0,2}		fullmatch
+(a?){0,2}	a	fullmatch
+(a?){0,2}	aa	fullmatch
+(a?){0,2}	aaa	fullmatch
+
+# loop(0,m) with anchored non-consuming inner — split required
+(^a?){0,2}		fullmatch
+(^a?){0,2}	a	fullmatch
+(^a?){0,2}	aa	fullmatch
+(a?$){0,2}		fullmatch
+(a?$){0,2}	a	fullmatch
+(a?$){0,2}	aa	fullmatch
+
+# ── Anchors: unusual / unmatchable positions ─────────────────────────────────
+
+# ^ after an always-consuming prefix: ^ is past the start
+x(^a)	xa	fullmatch
+x(^a)	a	fullmatch
+x(^a|b)	xb	fullmatch
+x(^a|b)	xa	fullmatch
+
+# $ blocked by following content
+(a$)b	ab	fullmatch
+(a$)(b)	ab	fullmatch
+(a$)b	ab	match
+
+# Alternation where one branch has a context-killed anchor
+(a$|b)c	ac	fullmatch
+(a$|b)c	bc	fullmatch
+(a$|b)c	abc	fullmatch
+(a|b$)c	ac	fullmatch
+(a|b$)c	bc	fullmatch
+
+# Two anchors that cannot both fire
+(^a)(^b)	ab	fullmatch
+(^a)(^b)	a	fullmatch
+(a$)(b$)	ab	fullmatch
+(a$)(b$)	a	fullmatch
+
+# ^ or $ at a position where it can't fire cleanly
+(^|$)c	c	fullmatch
+(^|$)c	xc	fullmatch
+a(^|$)b	ab	fullmatch
+
+# Anchors blocked by surrounding always-consuming chars
+c(^a|b$)d	cad	fullmatch
+c(^a|b$)d	cbd	fullmatch
+c(^a|b$)d	ccd	fullmatch
+(^a|b$)(^c|d$)	ac	fullmatch
+(^a|b$)(^c|d$)	bd	fullmatch
+(^a|b$)(^c|d$)	bc	fullmatch
+
+# Search mode: anchor inside group restricts positional freedom
+(^a)(b)	ab	search
+(^a)(b)	xab	search
+(a)(b$)	ab	search
+(a)(b$)	abx	search
+(^a)(b$)	ab	search
+(^a)(b$)	xab	search
+(^a)(b$)	abx	search
+
+# Match mode: $ inside group cuts off trailing content
+(a$|b)c	bc	match
+(a$|b)c	bcd	match
+
+# ── $ in (false,false) concat — atEnd case-split ────────────────────────────
+# a?$b?: both sides may be empty. $ in r1 should only fire when r2="".
+# Without the atEnd split, $ fires even when b? matches non-empty.
+# The split fires at the inner concat($, b?) level.
+a?$b?		fullmatch
+a?$b?	a	fullmatch
+a?$b?	b	fullmatch
+a?$b?	ab	fullmatch
+a?$b?		match
+a?$b?	a	match
+a?$b?	b	match
+a?$b?	ab	match
+a?$b?	a	search
+a?$b?	b	search
+a?$b?	xb	search
+a?$b?	ab	search
+
+# (a?$)b?: semantically identical to a?$b? but the $-split fires at the outer
+# concat level (r1=group(a?$) contains $, r2=b? has non-anchor content), exercising
+# the false,false $-split path at a different point in the tree.
+(a?$)b?		fullmatch
+(a?$)b?	a	fullmatch
+(a?$)b?	ab	fullmatch
+(a?$)b?	b	fullmatch
+
+# ── Multi-char literals and patterns ─────────────────────────────────────────
+
+# Basic multi-char literals
+abc	abc	fullmatch
+abc	ab	fullmatch
+abc	abcd	fullmatch
+abc	ABC	fullmatch
+abc	abc	match
+abc	abcd	match
+abc	xabc	match
+abc	xabc	search
+abc	xabcx	search
+abc	xabx	search
+
+# Multi-char alternation
+abc|def	abc	fullmatch
+abc|def	def	fullmatch
+abc|def	abcdef	fullmatch
+abc|def	abd	fullmatch
+abc|def	xdef	search
+abc|def	xabx	search
+
+# Multi-char groups with quantifiers
+(abc)+	abc	fullmatch
+(abc)+	abcabc	fullmatch
+(abc)+	abcab	fullmatch
+(abc){2}	abcabc	fullmatch
+(abc){2}	abc	fullmatch
+(abc){2}	abcabcabc	fullmatch
+(abc){1,3}	abc	fullmatch
+(abc){1,3}	abcabcabc	fullmatch
+(abc){1,3}	abcabcabcabc	fullmatch
+
+# Multi-char alternation inside groups
+(ab|cd)+	abcd	fullmatch
+(ab|cd)+	cdab	fullmatch
+(ab|cd)+	abce	fullmatch
+(ab|cd)+	xabcdy	search
+(ab|cd)+	xacx	search
+
+# Multi-char character class sequences
+[a-z][0-9]	a1	fullmatch
+[a-z][0-9]	a12	fullmatch
+[a-z][0-9]	11	fullmatch
+[a-z][0-9]+	a123	fullmatch
+[a-z][0-9]+	a	fullmatch
+[a-z]{2}[0-9]{2}	ab12	fullmatch
+[a-z]{2}[0-9]{2}	a12	fullmatch
+[a-z]{2}[0-9]{2}	ab1	fullmatch
+[a-z]{2}[0-9]{2}	xab12y	search
+[a-z]{2}[0-9]{2}	xab1y	search
+
+# Multi-char patterns with anchors
+^abc$	abc	fullmatch
+^abc$	xabc	fullmatch
+^abc$	abcx	fullmatch
+^abc	abcxyz	search
+^abc	xabc	search
+abc$	xyzabc	search
+abc$	abcx	search
+^abc$	abc	search
+^abc$	xabc	search
+^abc$	abcx	search
+
+# Multi-char with .* wildcard
+abc.*def	abcdef	fullmatch
+abc.*def	abcXXdef	fullmatch
+abc.*def	abcdef	search
+abc.*def	xabcXXdefy	search
+abc.*def	abcXXdeg	fullmatch
+abc.+def	abcdef	fullmatch
+abc.+def	abcXdef	fullmatch
+
+# Multi-char search: overlapping candidates
+ab	ababab	search
+ab	bbbabb	search
+ab	aabb	search
+ab	ba	search
+abc	aabbc	search
+abc	aabcbc	search
+
+# ── Special characters: colon, backslash, and escaped metacharacters ─────────
+
+# Literal colon
+a:b	a:b	fullmatch
+a:b	ab	fullmatch
+a:b	a:b:c	fullmatch
+a:b	a:b	match
+a:b	a:bc	match
+a:b	xa:b	match
+a:b	xa:by	search
+a:b	xaby	search
+[a-z]+:[0-9]+	foo:42	fullmatch
+[a-z]+:[0-9]+	foo42	fullmatch
+[a-z]+:[0-9]+	foo:42	match
+[a-z]+:[0-9]+	foo:42x	match
+[a-z]+:[0-9]+	foo:42	search
+[a-z]+:[0-9]+	xfoo:42y	search
+(a:b)+	a:b	fullmatch
+(a:b)+	a:ba:b	fullmatch
+(a:b)+	a:ba:	fullmatch
+(a:b)+	a:b	match
+(a:b)+	a:bx	match
+^[a-z]+:[0-9]+$	foo:42	fullmatch
+^[a-z]+:[0-9]+$	foo:42	match
+^[a-z]+:[0-9]+$	foo:42x	match
+^[a-z]+:[0-9]+$	foo:42	search
+^[a-z]+:[0-9]+$	xfoo:42	search
+
+# Escaped metacharacters as literals
+a\.b	a.b	fullmatch
+a\.b	axb	fullmatch
+a\.b	a.b	match
+a\.b	a.bc	match
+a\.b	a.b	search
+a\.b	xaxbx	search
+a\+b	a+b	fullmatch
+a\+b	ab	fullmatch
+a\+b	a+b	match
+a\+b	a+bc	match
+a\*b	a*b	fullmatch
+a\*b	aab	fullmatch
+a\*b	a*b	match
+a\?b	a?b	fullmatch
+a\?b	ab	fullmatch
+a\?b	a?b	match
+a\(b\)	a(b)	fullmatch
+a\(b\)	ab	fullmatch
+a\(b\)	a(b)	match
+a\[b\]	a[b]	fullmatch
+a\[b\]	ab	fullmatch
+a\[b\]	a[b]	match
+a\\b	a\b	fullmatch
+a\\b	ab	fullmatch
+a\\b	a\b	match
+a\\b	a\bc	match
+a\\b	xa\by	search
+a\\b	xaby	search
+
+# Escaped metacharacter as range start: [\.-z] = range from '.' to 'z'
+[\.-z]+	abc	fullmatch
+[\.-z]+	ABC	fullmatch
+[\.-z]+	-	fullmatch
+[\.-z]+	.	fullmatch
+[\.-z]+	abc	search
+
+# Mixed: colon and escaped metacharacters together
+\w+:\d+\.\d+	foo:3.14	fullmatch
+\w+:\d+\.\d+	foo:3x14	fullmatch
+\w+:\d+\.\d+	foo:3.14	match
+\w+:\d+\.\d+	foo:3.14x	match
+\w+:\d+\.\d+	xfoo:3.14y	search
+\w+:\d+\.\d+	xfoo:3x14y	search
+
+# ── Error cases ──────────────────────────────────────────────────────────────
+x{100,2}	x	fullmatch
+(abc	abc	fullmatch
+a**	a	fullmatch
+
+# ── Unimplemented: lookahead / lookbehind ────────────────────────────────────
+a(?=b)	ab	match
+a(?!b)	ac	match
+(?<=a)b	ab	match
+(?<!a)b	cb	match
+
+# ── Unimplemented: non-greedy (lazy) quantifiers ─────────────────────────────
+a*?	aaa	fullmatch
+a*?		fullmatch
+a+?	a	fullmatch
+a+?	aaa	fullmatch
+a??		fullmatch
+a??	a	fullmatch
+a*?b	aaab	search
+a+?b	ab	search
+
+# ── Unimplemented: \d \w \s shorthand classes ────────────────────────────────
+\d	5	fullmatch
+\d	a	fullmatch
+\d+	123	fullmatch
+\d+	12a	fullmatch
+\D	a	fullmatch
+\D	5	fullmatch
+\w	a	fullmatch
+\w	!	fullmatch
+\w+	hello	fullmatch
+\W	!	fullmatch
+\W	a	fullmatch
+\s	 	fullmatch
+\s	a	fullmatch
+\S	a	fullmatch
+\S	 	fullmatch
+\d+\s\w+	42 abc	fullmatch
+
+# ── Unimplemented: \b \B word-boundary assertions ────────────────────────────
+\bcat\b	cat	search
+\bcat\b	cats	search
+\bcat\b	the cat now	search
+\bcat\b	concatenate	search
+\Bcat\B	concatenate	search
+
+# ── Unimplemented: \A \Z absolute anchors ────────────────────────────────────
+\Aa	abc	search
+\Aa	xabc	search
+a\Z	ba	search
+a\Z	ab	search
+\Aa\Z	a	fullmatch
+\Aa\Z	ab	fullmatch
+
+# ── Unimplemented: non-capturing groups (?:...) ──────────────────────────────
+(?:ab)+	abab	fullmatch
+(?:ab)+	ab	fullmatch
+(?:a|b)+	abba	fullmatch
+x(?:a|b)y	xay	fullmatch
+x(?:a|b)y	xcy	fullmatch
+
+# ── Unimplemented: named groups (?P<name>...) ────────────────────────────────
+(?P<x>a)	a	fullmatch
+(?P<x>a)	b	fullmatch
+(?P<x>a)(?P<y>b)	ab	fullmatch
+
+# ── Unimplemented: inline flags (?i) (?m) (?s) ──────────────────────────────
+(?i)hello	HELLO	fullmatch
+(?i)hello	Hello	fullmatch
+(?i)hello	world	fullmatch
+(?i)[a-z]+	ABC	fullmatch
+(?s)a.b	axb	fullmatch
+(?m)^a	a	search
+
+# ── Unimplemented: backreferences ────────────────────────────────────────────
+(a)\1	aa	fullmatch
+(a)\1	ab	fullmatch
+(a|b)\1	aa	fullmatch
+(a|b)\1	bb	fullmatch
+(a|b)\1	ab	fullmatch
+(.)\1	aa	fullmatch
+(.)\1	ab	fullmatch

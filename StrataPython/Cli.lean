@@ -20,7 +20,6 @@ public import Strata.Transform.ProcedureInlining
 public import Strata.Util.Json
 public import StrataPython
 public import StrataPython.PyFactory
-public import StrataPython.Pipeline.PyAnalyzeLaurel
 public import StrataPython.Specs
 public import StrataPython.Specs.DDM
 public import StrataPython.Specs.IdentifyOverloads

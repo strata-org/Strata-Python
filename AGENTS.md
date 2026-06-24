@@ -55,7 +55,7 @@ The pipeline orchestration framework (`PipelineM`, `MessageKind`,
 
 `PythonDialect.lean` uses `#load_dialect` and `#strata_gen Python` to generate
 the Python AST types at compile time from
-`Tools/Python/dialects/Python.dialect.st.ion`. Key generated types:
+`Python/strata-python/dialects/Python.dialect.st.ion`. Key generated types:
 
 - `StrataPython.expr` — Python expressions
 - `StrataPython.stmt` — Python statements

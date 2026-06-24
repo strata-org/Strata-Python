@@ -8,7 +8,8 @@ Python language support for Strata. This package translates Python programs into
 lake build
 ```
 
-This builds the `StrataPython` library, `DiffTestCore` executable, and the `StrataPythonTest` compile-time tests.
+This builds the `StrataPython` library and the
+`StrataPythonTest` compile-time tests.
 
 ## Package Purpose
 
@@ -65,7 +66,6 @@ The package is the repository root:
 │   └── strata-python/             # Python tooling package (Ion reader, dialect generator)
 ├── StrataPythonTest/              # Compile-time tests (built with lake build)
 ├── StrataPythonTestExtra/         # Runtime tests (run with lake test, require Python)
-├── DiffTestCore.lean              # Regex differential testing tool
 ├── StrataTestMain.lean            # Test driver for StrataPythonTestExtra
 ├── AGENTS.md                      # Guide for AI agents working in this package
 ├── lakefile.toml
