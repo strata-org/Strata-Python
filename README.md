@@ -60,7 +60,7 @@ The package is the repository root:
 │   │   └── ReToCore.lean          # Regex → Core SMT translation
 │   └── Pipeline/
 │       └── PyAnalyzeLaurel.lean   # Full analysis pipeline (Python → Laurel → Core → SMT)
-├── Scripts/                       # Executable entry points (pyInterpret, pyAnalyzeLaurel, etc.)
+├── Scripts/                       # Executable entry points (pyAnalyzeLaurel, pyAnalyzeLaurelToGoto)
 ├── Tools/
 │   └── strata-python/             # Python tooling package (Ion reader, dialect generator)
 ├── StrataPythonTest/              # Compile-time tests (built with lake build)
