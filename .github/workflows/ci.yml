@@ -48,20 +48,27 @@ jobs:
           pip install ./Tools/Python-base
           pip install ./Tools/strata-python
       - name: Run pyInterpret golden-file tests
-        working-directory: StrataPythonTest
-        shell: bash
-        run: ./run_py_interpret.sh
+        # InterpretTest is the StrataPythonTestExtra Lean port of the old
+        # run_py_interpret.sh: it runs the interpreter pipeline in-process per
+        # tests/test_*.py and checks outcomes against expected_interpret/.
+        # Excluded from the build_python matrix below so it runs once here.
+        run: PYTHON=python lake test -- InterpretTest
       - name: Run pyAnalyze SARIF tests
-        working-directory: StrataPythonTest
-        shell: bash
-        run: python run_py_analyze_sarif.py
+        # SarifTest is the StrataPythonTestExtra Lean port of the old
+        # run_py_analyze_sarif.py: it runs the analysis pipeline in-process and
+        # asserts on the SARIF document. Excluded from the build_python matrix
+        # below so the (SMT-heavy) suite runs once here rather than per version.
+        run: PYTHON=python lake test -- SarifTest
       - name: Run pyAnalyze golden-file tests
         working-directory: StrataPythonTest
         shell: bash
         run: ./run_py_analyze.sh
       - name: Run regex differential tests
-        working-directory: StrataPythonTest/Regex
-        run: python diff_test.py
+        # RegexDiffTest is the StrataPythonTestExtra Lean port of the old
+        # Regex/diff_test.py: it runs Strata's SMT regex backend in-process and
+        # compares against the Python `re` oracle (spawned once). Excluded from
+        # the build_python matrix below so the (SMT-heavy) suite runs once here.
+        run: PYTHON=python lake test -- RegexDiffTest
       - name: Save lake cache
         uses: ./.github/actions/save-lake-cache
         with:
@@ -174,10 +181,12 @@ jobs:
       with:
         install-to: system
     - name: Run PySpec and dispatch tests
-      # Excludes the CPython differential test, which is run separately below
-      # against a full CPython checkout; here it would be a no-op anyway since
-      # CPYTHON_DIR is unset.
-      run: PYTHON=python lake test -- --exclude CpythonDiffTest
+      # Excludes:
+      #  - CpythonDiffTest: run separately below against a full CPython checkout
+      #    (here it would be a no-op anyway since CPYTHON_DIR is unset).
+      #  - SarifTest, RegexDiffTest, InterpretTest: version-independent, run once
+      #    in build_and_test_lean rather than per Python version.
+      run: PYTHON=python lake test -- --exclude CpythonDiffTest --exclude SarifTest --exclude RegexDiffTest --exclude InterpretTest
     - name: Run CPython differential tests
       # Clones CPython at the matrix version and round-trips its whole test
       # suite through the Strata generator + Ion (de)serializer. The round-trip
