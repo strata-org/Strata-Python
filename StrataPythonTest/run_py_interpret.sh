@@ -90,6 +90,12 @@ for test_file in "$TESTS_DIR"/test_*.py; do
         # Expected file exists → test should fail, output should match regex
         pattern=$(cat "$expected_file")
 
+        if [ -z "$pattern" ]; then
+            echo "ERR:  $base_name (empty .expected file — must contain a pattern)"
+            errors=$((errors + 1))
+            continue
+        fi
+
         if [ $update -eq 1 ]; then
             if [ $exit_code -ne 0 ]; then
                 echo "$output" | grep -oE "$pattern" | head -1 > "$expected_file"
