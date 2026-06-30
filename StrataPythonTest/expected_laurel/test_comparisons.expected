@@ -1,11 +1,11 @@
-test_comparisons.py(3, 4): ✅ pass - assert(57)
-test_comparisons.py(4, 4): ✅ pass - assert(73)
+test_comparisons.py(3, 4): ✅ pass - assert(…)
+test_comparisons.py(4, 4): ✅ pass - assert(…)
 test_comparisons.py(5, 4): ✅ pass - equality implemented incorrectly
-test_comparisons.py(7, 4): ✅ pass - assert(148)
-test_comparisons.py(8, 4): ✅ pass - assert(169)
+test_comparisons.py(7, 4): ✅ pass - assert(…)
+test_comparisons.py(8, 4): ✅ pass - assert(…)
 test_comparisons.py(9, 4): ✅ pass - string equality implemented incorrectly
-test_comparisons.py(12, 4): ✅ pass - assert(298)
-test_comparisons.py(13, 4): ✅ pass - assert(313)
+test_comparisons.py(12, 4): ✅ pass - assert(…)
+test_comparisons.py(13, 4): ✅ pass - assert(…)
 test_comparisons.py(14, 11): ✅ pass - Check PGt exception
 test_comparisons.py(14, 4): ✅ pass - greater than implemented incorrectly
 test_comparisons.py(15, 11): ✅ pass - Check PLt exception

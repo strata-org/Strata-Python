@@ -1,5 +1,5 @@
-test_boolean_logic.py(3, 4): ✅ pass - assert(34)
-test_boolean_logic.py(4, 4): ✅ pass - assert(53)
+test_boolean_logic.py(3, 4): ✅ pass - assert(…)
+test_boolean_logic.py(4, 4): ✅ pass - assert(…)
 test_boolean_logic.py(5, 11): ✅ pass - Check PAnd exception
 test_boolean_logic.py(5, 4): ✅ pass - True and True should be True
 test_boolean_logic.py(6, 11): ✅ pass - Check PNot exception
@@ -12,9 +12,9 @@ test_boolean_logic.py(13, 11): ✅ pass - Check PNot exception
 test_boolean_logic.py(13, 4): ✅ pass - not False should be True
 test_boolean_logic.py(14, 11): ✅ pass - Check PNot exception
 test_boolean_logic.py(14, 4): ✅ pass - not not True should be True
-test_boolean_logic.py(17, 4): ✅ pass - assert(444)
-test_boolean_logic.py(18, 4): ✅ pass - assert(460)
-test_boolean_logic.py(19, 4): ✅ pass - assert(476)
+test_boolean_logic.py(17, 4): ✅ pass - assert(…)
+test_boolean_logic.py(18, 4): ✅ pass - assert(…)
+test_boolean_logic.py(19, 4): ✅ pass - assert(…)
 test_boolean_logic.py(21, 7): ✅ pass - Check PAnd exception
 test_boolean_logic.py(25, 4): ✅ pass - combined and condition failed
 test_boolean_logic.py(27, 7): ✅ pass - Check POr exception

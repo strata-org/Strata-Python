@@ -1,6 +1,6 @@
-test_chained_compare_mixed.py(2, 4): ✅ pass - assert(38)
-test_chained_compare_mixed.py(3, 4): ✅ pass - assert(53)
-test_chained_compare_mixed.py(4, 4): ✅ pass - assert(68)
+test_chained_compare_mixed.py(2, 4): ✅ pass - assert(…)
+test_chained_compare_mixed.py(3, 4): ✅ pass - assert(…)
+test_chained_compare_mixed.py(4, 4): ✅ pass - assert(…)
 test_chained_compare_mixed.py(5, 11): ✅ pass - Check PAnd exception
 test_chained_compare_mixed.py(5, 4): ✅ pass - mixed operators
 test_chained_compare_mixed.py(6, 11): ✅ pass - Check PAnd exception

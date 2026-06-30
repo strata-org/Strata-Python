@@ -1,5 +1,5 @@
 test_try_except_nested.py(5, 26): ✅ pass - (might_fail ensures) Return type constraint
-test_try_except_nested.py(9, 4): ✅ pass - assert(256)
+test_try_except_nested.py(9, 4): ✅ pass - assert(…)
 test_try_except_nested.py(12, 12): ✅ pass - (might_fail requires) Type constraint of x
 test_try_except_nested.py(15, 4): ❓ unknown - should succeed
 test_try_except_nested.py(8, 28): ✅ pass - (test_nested_except ensures) Return type constraint

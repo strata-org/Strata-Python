@@ -144,7 +144,33 @@ private def runPyAnalyze (ionFile : System.FilePath) (pyFile : String)
         | none => ""
       let messageSuffix := match vcResult.obligation.metadata.getPropertySummary with
         | some msg => s!" - {msg}"
-        | none => s!" - {vcResult.obligation.label}"
+        | none =>
+          -- Strip unstable numeric parts from generated labels. Labels follow
+          -- patterns like `name(NNN)_NNN` or `name(NNN)` where `(NNN)` is a
+          -- location ID and `_NNN` is a uniqueness counter — both change when
+          -- internal pipeline numbering shifts. We normalize to `name(…)` for
+          -- stable golden-test comparison.
+          let label := vcResult.obligation.label
+          -- Normalize: find `(` and `)`, check content is numeric, replace.
+          -- Only normalize if the text after `)` is empty or a bare `_NNN`
+          -- counter. Labels like `assert_assert(71)_calls_Any_get_0` have
+          -- meaningful suffixes and must NOT be normalized.
+          let label := match label.splitOn "(" with
+            | [pfx, rest] =>
+              match rest.splitOn ")" with
+              | [inside, afterParen] =>
+                if inside.all Char.isDigit && !inside.isEmpty then
+                  if afterParen.isEmpty then
+                    pfx ++ "(…)"
+                  else match afterParen.splitOn "_" with
+                    | ["", digits] =>
+                      if digits.all Char.isDigit && !digits.isEmpty then pfx ++ "(…)"
+                      else label
+                    | _ => label
+                else label
+              | _ => label
+            | _ => label
+          s!" - {label}"
       let outcomeStr := vcResult.formatOutcome
       let loc := if !location.isEmpty then s!"{location}: " else "unknown location: "
       s := s ++ s!"{loc}{outcomeStr}{messageSuffix}\n"

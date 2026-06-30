@@ -1,4 +1,4 @@
-test_pass_stmt.py(2, 4): ✅ pass - assert(26)
+test_pass_stmt.py(2, 4): ✅ pass - assert(…)
 test_pass_stmt.py(3, 7): ✅ pass - Check PGt exception
 test_pass_stmt.py(6, 12): ✅ pass - Check PAdd exception
 test_pass_stmt.py(7, 4): ✅ pass - pass is noop
