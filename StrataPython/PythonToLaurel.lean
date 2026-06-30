@@ -1816,7 +1816,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
     let whileWrapped := mkStmtExprMdWithLoc (StmtExpr.Block [whileStmt] (some breakLabel)) md
     return (loopCtx, preamble ++ [whileWrapped])
 
-  -- Return statement: assign to the LaurelResult output parameter, then exit the body block.
+  -- Return statement: assign to the LaurelResult output parameter, then return.
   | .Return _ value => do
     let stmts ← match value.val with
       | some expr => do
@@ -1825,8 +1825,8 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
         -- Coerce Composite return values to Any for LaurelResult : Any
         let eRef ← coerceToAny ctx expr eRef
         let assign := mkStmtExprMdWithLoc (StmtExpr.Assign [mkVariableMd (.Local PyLauFuncReturnVar)] eRef) md
-        .ok $ preamble ++ [assign, mkStmtExprMdWithLoc (StmtExpr.Exit bodyLabel) md]
-      | none => .ok [mkStmtExprMdWithLoc (StmtExpr.Exit bodyLabel) md]
+        .ok $ preamble ++ [assign, mkStmtExprMdWithLoc (StmtExpr.Return none) md]
+      | none => .ok [mkStmtExprMdWithLoc (StmtExpr.Return none) md]
     return (ctx, stmts)
 
   -- Assert statement
