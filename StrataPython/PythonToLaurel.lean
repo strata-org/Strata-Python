@@ -1978,12 +1978,12 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
         | some varExpr =>
           let varName := pyExprToString varExpr
           if varName ∈ currentCtx.variableTypes.unzip.fst then
-            let assignStmt := mkStmtExprMd (StmtExpr.Assign
-              [mkVariableMd (.Local varName)] enterCall)
+            let assignStmt := mkStmtExprMdWithLoc (StmtExpr.Assign
+              [mkVariableMd (.Local varName)] enterCall) md
             setupStmts := setupStmts ++ [mgrDecl, assignStmt]
           else
             -- New variable — declare outside the block so it's visible after
-            let varDecl := mkVarDeclInit varName AnyTy enterCall
+            let varDecl := mkVarDeclInitWithLoc varName AnyTy enterCall md
             currentCtx := {currentCtx with variableTypes := currentCtx.variableTypes ++ [(varName, PyLauType.Any)]}
             setupStmts := setupStmts ++ [mgrDecl, varDecl]
         | none =>
