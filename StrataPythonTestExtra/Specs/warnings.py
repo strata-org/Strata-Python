@@ -1,9 +1,5 @@
 from typing import Any, Dict, List, NotRequired, TypedDict, Unpack
 
-# Unsupported assert pattern: equality comparison
-def unsupported_assert(**kw: int) -> None:
-    assert kw["x"] == 1, 'x must be 1'
-
 # Unsupported __init__ assignment value (not self._ClassName() pattern)
 class BadInit:
     def __init__(self):
@@ -30,3 +26,8 @@ def for_else_loop(**kw: Unpack[LoopRequest]) -> None:
 # Skipped Expr in function body (non-ellipsis expression statement)
 def skipped_expr(**kw: int) -> None:
     kw["a"]
+
+# Equality whose right-hand side is unsupported: the warning must be emitted
+# once, not duplicated by the transCompare .Eq fall-through.
+def eq_bad_rhs(**kw: int) -> None:
+    assert kw["a"] == kw["a"].bit_length(), 'eq bad rhs'

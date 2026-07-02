@@ -552,7 +552,6 @@ def warningTestCase : IO Unit := withPython fun pythonCmd => do
           throw <| IO.userError "Expected warnings from warnings.py but got none"
         -- Check for specific expected warning substrings
         let expectedWarnings := #[
-          "unsupported comparison",               -- assert kw["x"] == 1
           "unsupported __init__ assignment",   -- self.name = "hello"
           "skipped Assign in function body",   -- x = kw["a"]
           "For: else clause not supported",    -- for/else loop
@@ -563,6 +562,16 @@ def warningTestCase : IO Unit := withPython fun pythonCmd => do
             let warnStr := warnings.foldl (init := "") fun acc w => s!"{acc}\n  {w}"
             throw <| IO.userError
               s!"Missing expected warning containing \"{expected}\". Actual warnings:{warnStr}"
+        -- eq_bad_rhs: the unsupported right-hand side must warn exactly once.
+        -- The transCompare `.Eq` fall-through previously re-translated it,
+        -- emitting the "unsupported expression" warning twice for one line.
+        let unsupportedRhs := warnings.filter fun w =>
+          w.contains "unsupported expression" && w.contains "bit_length"
+        if unsupportedRhs.size != 1 then
+          let warnStr := unsupportedRhs.foldl (init := "") fun acc w => s!"{acc}\n  {w}"
+          throw <| IO.userError
+            s!"Expected exactly 1 unsupported-rhs warning for eq_bad_rhs, \
+               got {unsupportedRhs.size}:{warnStr}"
       | .error e =>
         throw <| IO.userError e
 
@@ -584,6 +593,61 @@ def testIntRoundTrip (v : Int) : Bool :=
 #guard testIntRoundTrip (-1)
 #guard testIntRoundTrip (42)
 #guard testIntRoundTrip (-100)
+
+/-- `SourceRange` tag for the round-trip samples. -/
+def rtLoc : SourceRange := .none
+
+/-- Round-trip a `SpecExpr` through `toDDM` then `fromDDM`. -/
+def rtSpecExpr (e : SpecExpr) : SpecExpr := e.toDDM.fromDDM
+
+/-- One representative `SpecExpr` per constructor. -/
+def specExprSamples : List (String × SpecExpr) :=
+  let x  := SpecExpr.var "x" rtLoc
+  let y  := SpecExpr.var "y" rtLoc
+  let i1 := SpecExpr.intLit 1 rtLoc
+  let bt := SpecExpr.boolLit true rtLoc
+  let bf := SpecExpr.boolLit false rtLoc
+  [ ("placeholder",  .placeholder rtLoc),
+    ("var",          x),
+    ("getIndex",     .getIndex x "f" rtLoc),
+    ("isInstanceOf", .isInstanceOf x "str" rtLoc),
+    ("stringLen",    .stringLen x rtLoc),
+    ("intLit",       i1),
+    ("boolLit",      bt),
+    ("noneLit",      .noneLit rtLoc),
+    ("intGe",        .intGe x i1 rtLoc),
+    ("intLe",        .intLe x i1 rtLoc),
+    ("eq",           .pcmp .eq x y rtLoc),
+    ("add",          .add x y rtLoc),
+    ("sub",          .sub x y rtLoc),
+    ("mul",          .mul x y rtLoc),
+    ("floorDiv",     .floorDiv x y rtLoc),
+    ("mod",          .mod x y rtLoc),
+    ("pow",          .pow x y rtLoc),
+    ("neg",          .neg x rtLoc),
+    ("and",          .and bt bf rtLoc),
+    ("or",           .or bt bf rtLoc),
+    ("pcmp",         .pcmp .isIn x y rtLoc),
+    ("floatLit",     .floatLit "3.14" rtLoc),
+    ("floatGe",      .floatGe x (.floatLit "0.0" rtLoc) rtLoc),
+    ("floatLe",      .floatLe x (.floatLit "1.0" rtLoc) rtLoc),
+    ("enumMember",   .enumMember x #["A", "B"] rtLoc),
+    ("regexMatch",   .regexMatch x "^a+$" rtLoc),
+    ("containsKey",  .containsKey x "k" rtLoc),
+    ("implies",      .implies bt bf rtLoc),
+    ("not",          .not bt rtLoc),
+    ("forallList",   .forallList x "i" bt rtLoc),
+    ("forallDict",   .forallDict x "k" "val" bt rtLoc) ]
+
+/-- DDM round-trip regression: every `SpecExpr` ctor must survive `toDDM`/`fromDDM` up to `softBEq`. -/
+def specExprRoundTripTest : IO Unit := do
+  for (name, e) in specExprSamples do
+    let e' := rtSpecExpr e
+    unless e'.softBEq e do
+      throw <| IO.userError s!"round-trip mismatch for '{name}': {e} -> {e'}"
+
+#guard_msgs in
+#eval specExprRoundTripTest
 
 /-- DDM `toDDM` → `fromDDM` round-trip for the contract fields. The recognition
     tests above never cross the DDM boundary, so a regression that dropped a

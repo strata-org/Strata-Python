@@ -289,6 +289,9 @@ private def asAny (loc : SourceRange) (act : ToLaurelExprM SomeTypedStmtExpr) : 
     return ⟨se.2.stmt⟩
   match se with
   | ⟨.UserDefined "Any", e⟩ => pure e
+  -- Box a scalar (bool/int) sub-expression into Any when used as a value.
+  | ⟨.TBool, e⟩ => pure (.fromBool e)
+  | ⟨.TInt, e⟩ => pure (.fromInt e)
   | ⟨tp, e⟩ =>
     let pn := (← read).procName
     reportError .typeError loc s!"Expected Any-typed expression but got {repr tp} in '{pn}'"
@@ -301,6 +304,9 @@ private def asBool (loc : SourceRange) (act : ToLaurelExprM SomeTypedStmtExpr) :
     return ⟨se.2.stmt⟩
   match se with
   | ⟨.TBool, e⟩ => pure e
+  -- Coerce an Any-typed operand (e.g. a bool param, which lowers to Any) into a
+  -- bool via `Any_to_bool`, mirroring the body translator's boolean contexts.
+  | ⟨.UserDefined "Any", e⟩ => pure (.anyToBool e)
   | ⟨tp, e⟩ =>
     let pn := (← read).procName
     reportError .typeError loc s!"Expected Bool-typed expression but got {repr tp} in '{pn}'"
@@ -316,6 +322,16 @@ private def lookupIdentifier (name : String) (loc : SourceRange) (source : Optio
     let pn := (← read).procName
     reportError .typeError loc s!"Unknown identifier '{name}' in '{pn}'"
     return default
+
+/-- Laurel prelude function realizing each abstract `PCmpOp`. This is the single
+    place that maps the backend-agnostic PySpec operator onto a prelude name. -/
+def pcmpPreludeName : PCmpOp → String
+  | .lt => "PLt"
+  | .gt => "PGt"
+  | .eq => "PEq"
+  | .ne => "PNEq"
+  | .isIn => "PIn"
+  | .notIn => "PNotIn"
 
 /-- Translate a SpecExpr to a typed Laurel expression (`SomeTypedStmtExpr`).
     Returns `default` (a `Hole`) for unsupported expressions; callers use
@@ -341,9 +357,18 @@ def specExprToLaurel (e : SpecExpr) (source : Option FileRange)
   | .var name loc => do
     let src ← nodeSource loc
     lookupIdentifier name loc src
+  -- Scalar literals box into `Any`: `from{Int,Bool,None}` build the prelude
+  -- `from_int`/`from_bool`/`from_None` calls, and `mkSome` packages the result
+  -- as a `SomeTypedStmtExpr` (its `HighType` paired with the typed expression).
   | .intLit v loc => do
     let src ← nodeSource loc
     return .mkSome <| .fromInt (.literalInt v src)
+  | .boolLit b loc => do
+    let src ← nodeSource loc
+    return .mkSome <| .fromBool (.literalBool b src)
+  | .noneLit loc => do
+    let src ← nodeSource loc
+    return .mkSome <| .fromNone src
   | .floatLit _ loc => do
     reportError .floatLiteral loc "Float literals not yet supported in preconditions"
     return default
@@ -368,12 +393,65 @@ def specExprToLaurel (e : SpecExpr) (source : Option FileRange)
     let src ← nodeSource loc
     let s ← asAny loc <| specExprToLaurel subject src
     let b ← asAny loc <| specExprToLaurel bound src
-    return .mkSome <| .intGeq (.anyAsInt s) (.anyAsInt b)
+    -- `>=` -> runtime `Any_to_bool(PGe(..))`, matching the body translator.
+    let cmp : StmtExprMd := { val := .StaticCall (mkId "PGe") [s.stmt, b.stmt], source := src }
+    return .mkSome (⟨{ val := .StaticCall (mkId "Any_to_bool") [cmp], source := src }⟩ : TypedStmtExpr .TBool)
   | .intLe subject bound loc => do
     let src ← nodeSource loc
     let s ← asAny loc <| specExprToLaurel subject src
     let b ← asAny loc <| specExprToLaurel bound src
-    return .mkSome <| .intLeq (.anyAsInt s) (.anyAsInt b)
+    let cmp : StmtExprMd := { val := .StaticCall (mkId "PLe") [s.stmt, b.stmt], source := src }
+    return .mkSome (⟨{ val := .StaticCall (mkId "Any_to_bool") [cmp], source := src }⟩ : TypedStmtExpr .TBool)
+  | .pcmp op lhs rhs loc => do
+    let src ← nodeSource loc
+    let l ← asAny loc <| specExprToLaurel lhs src
+    let r ← asAny loc <| specExprToLaurel rhs src
+    let cmp : StmtExprMd := { val := .StaticCall (mkId (pcmpPreludeName op)) [l.stmt, r.stmt], source := src }
+    return .mkSome (⟨{ val := .StaticCall (mkId "Any_to_bool") [cmp], source := src }⟩ : TypedStmtExpr .TBool)
+  | .add lhs rhs loc => do
+    -- Addition -> runtime `PAdd` over Any operands.
+    let src ← nodeSource loc
+    let l ← asAny loc <| specExprToLaurel lhs src
+    let r ← asAny loc <| specExprToLaurel rhs src
+    let addExpr : StmtExprMd := { val := .StaticCall (mkId "PAdd") [l.stmt, r.stmt], source := src }
+    return .mkSome (⟨addExpr⟩ : TypedStmtExpr StrataPython.Laurel.tyAny)
+  | .sub lhs rhs loc => do
+    let src ← nodeSource loc
+    let l ← asAny loc <| specExprToLaurel lhs src
+    let r ← asAny loc <| specExprToLaurel rhs src
+    let subExpr : StmtExprMd := { val := .StaticCall (mkId "PSub") [l.stmt, r.stmt], source := src }
+    return .mkSome (⟨subExpr⟩ : TypedStmtExpr StrataPython.Laurel.tyAny)
+  | .mul lhs rhs loc => do
+    let src ← nodeSource loc
+    let l ← asAny loc <| specExprToLaurel lhs src
+    let r ← asAny loc <| specExprToLaurel rhs src
+    let mulExpr : StmtExprMd := { val := .StaticCall (mkId "PMul") [l.stmt, r.stmt], source := src }
+    return .mkSome (⟨mulExpr⟩ : TypedStmtExpr StrataPython.Laurel.tyAny)
+  | .floorDiv lhs rhs loc => do
+    let src ← nodeSource loc
+    let l ← asAny loc <| specExprToLaurel lhs src
+    let r ← asAny loc <| specExprToLaurel rhs src
+    let e : StmtExprMd := { val := .StaticCall (mkId "PFloorDiv") [l.stmt, r.stmt], source := src }
+    return .mkSome (⟨e⟩ : TypedStmtExpr StrataPython.Laurel.tyAny)
+  | .mod lhs rhs loc => do
+    let src ← nodeSource loc
+    let l ← asAny loc <| specExprToLaurel lhs src
+    let r ← asAny loc <| specExprToLaurel rhs src
+    let e : StmtExprMd := { val := .StaticCall (mkId "PMod") [l.stmt, r.stmt], source := src }
+    return .mkSome (⟨e⟩ : TypedStmtExpr StrataPython.Laurel.tyAny)
+  | .pow lhs rhs loc => do
+    -- Exponentiation -> runtime `PPow` over Any operands.
+    let src ← nodeSource loc
+    let l ← asAny loc <| specExprToLaurel lhs src
+    let r ← asAny loc <| specExprToLaurel rhs src
+    let e : StmtExprMd := { val := .StaticCall (mkId "PPow") [l.stmt, r.stmt], source := src }
+    return .mkSome (⟨e⟩ : TypedStmtExpr StrataPython.Laurel.tyAny)
+  | .neg operand loc => do
+    -- Unary minus -> runtime `PNeg` over an Any operand.
+    let src ← nodeSource loc
+    let o ← asAny loc <| specExprToLaurel operand src
+    let e : StmtExprMd := { val := .StaticCall (mkId "PNeg") [o.stmt], source := src }
+    return .mkSome (⟨e⟩ : TypedStmtExpr StrataPython.Laurel.tyAny)
   | .floatGe subject bound loc => do
     let src ← nodeSource loc
     let s ← asAny loc <| specExprToLaurel subject src
@@ -388,6 +466,16 @@ def specExprToLaurel (e : SpecExpr) (source : Option FileRange)
     let src ← nodeSource loc
     let i ← asBool loc <| specExprToLaurel inner src
     return .mkSome <| .not i
+  | .and lhs rhs loc => do
+    let src ← nodeSource loc
+    let l ← asBool loc <| specExprToLaurel lhs src
+    let r ← asBool loc <| specExprToLaurel rhs src
+    return .mkSome <| .and l r
+  | .or lhs rhs loc => do
+    let src ← nodeSource loc
+    let l ← asBool loc <| specExprToLaurel lhs src
+    let r ← asBool loc <| specExprToLaurel rhs src
+    return .mkSome <| .or l r
   | .implies cond body loc => do
     let src ← nodeSource loc
     let c ← asBool loc <| specExprToLaurel cond src

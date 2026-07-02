@@ -469,6 +469,39 @@ def count (ad : ArgDecls) := ad.args.size + ad.kwonly.size
 
 end ArgDecls
 
+/-- A runtime comparison/membership operator. Abstract over any backend: the
+    PySpec model names the operation, and lowering (`ToLaurel`) decides which
+    prelude function realizes it. Keeping this a closed enum rather than a raw
+    string makes typos impossible and decouples the model from the Laurel
+    prelude. -/
+inductive PCmpOp where
+  | lt
+  | gt
+  | eq
+  | ne
+  | isIn
+  | notIn
+deriving Inhabited, Repr, DecidableEq, BEq
+
+/-- Stable serialization tag for `PCmpOp` (backend-agnostic; not a prelude name). -/
+def PCmpOp.tag : PCmpOp → String
+  | .lt => "lt"
+  | .gt => "gt"
+  | .eq => "eq"
+  | .ne => "ne"
+  | .isIn => "in"
+  | .notIn => "notIn"
+
+/-- Parse a `PCmpOp.tag` back into a `PCmpOp`. -/
+def PCmpOp.ofTag? : String → Option PCmpOp
+  | "lt" => some .lt
+  | "gt" => some .gt
+  | "eq" => some .eq
+  | "ne" => some .ne
+  | "in" => some .isIn
+  | "notIn" => some .notIn
+  | _ => none
+
 /--
 A composable expression tree for translating Python `assert` statements into
 structured preconditions and postconditions. Leaf nodes are `var`, `intLit`,
@@ -486,8 +519,26 @@ inductive SpecExpr where
     Used in preconditions like `assert len(name) >= 1`. -/
 | stringLen (subject : SpecExpr) (loc : SourceRange)
 | intLit (value : Int) (loc : SourceRange)
+| boolLit (value : Bool) (loc : SourceRange)
+| noneLit (loc : SourceRange)
 | intGe (subject : SpecExpr) (bound : SpecExpr) (loc : SourceRange)
 | intLe (subject : SpecExpr) (bound : SpecExpr) (loc : SourceRange)
+/-- Addition `lhs + rhs`. -/
+| add (lhs : SpecExpr) (rhs : SpecExpr) (loc : SourceRange)
+/-- Subtraction / multiplication. -/
+| sub (lhs : SpecExpr) (rhs : SpecExpr) (loc : SourceRange)
+| mul (lhs : SpecExpr) (rhs : SpecExpr) (loc : SourceRange)
+| floorDiv (lhs : SpecExpr) (rhs : SpecExpr) (loc : SourceRange)
+| mod (lhs : SpecExpr) (rhs : SpecExpr) (loc : SourceRange)
+/-- Exponentiation `lhs ** rhs`. -/
+| pow (lhs : SpecExpr) (rhs : SpecExpr) (loc : SourceRange)
+/-- Unary minus `-operand` (non-literal; negative literals fold to int/float). -/
+| neg (operand : SpecExpr) (loc : SourceRange)
+/-- Boolean conjunction / disjunction. -/
+| and (lhs : SpecExpr) (rhs : SpecExpr) (loc : SourceRange)
+| or (lhs : SpecExpr) (rhs : SpecExpr) (loc : SourceRange)
+/-- Runtime comparison/membership `op(lhs, rhs)` (e.g. `<`, `>`, `!=`, `in`). -/
+| pcmp (op : PCmpOp) (lhs : SpecExpr) (rhs : SpecExpr) (loc : SourceRange)
 /-- A floating-point literal, stored as a string to preserve precision. -/
 | floatLit (value : String) (loc : SourceRange)
 | floatGe (subject : SpecExpr) (bound : SpecExpr) (loc : SourceRange)
@@ -523,12 +574,24 @@ def SpecExpr.containsPlaceholder : SpecExpr → Bool
   | .placeholder _ => true
   | .var .. => false
   | .intLit .. => false
+  | .boolLit .. => false
+  | .noneLit .. => false
   | .floatLit .. => false
   | .getIndex s _ _ => s.containsPlaceholder
   | .isInstanceOf s _ _ => s.containsPlaceholder
   | .stringLen s _ => s.containsPlaceholder
   | .intGe s b _ => s.containsPlaceholder || b.containsPlaceholder
   | .intLe s b _ => s.containsPlaceholder || b.containsPlaceholder
+  | .add l r _ => l.containsPlaceholder || r.containsPlaceholder
+  | .sub l r _ => l.containsPlaceholder || r.containsPlaceholder
+  | .mul l r _ => l.containsPlaceholder || r.containsPlaceholder
+  | .floorDiv l r _ => l.containsPlaceholder || r.containsPlaceholder
+  | .mod l r _ => l.containsPlaceholder || r.containsPlaceholder
+  | .pow l r _ => l.containsPlaceholder || r.containsPlaceholder
+  | .neg o _ => o.containsPlaceholder
+  | .and l r _ => l.containsPlaceholder || r.containsPlaceholder
+  | .or l r _ => l.containsPlaceholder || r.containsPlaceholder
+  | .pcmp _ l r _ => l.containsPlaceholder || r.containsPlaceholder
   | .floatGe s b _ => s.containsPlaceholder || b.containsPlaceholder
   | .floatLe s b _ => s.containsPlaceholder || b.containsPlaceholder
   | .enumMember s _ _ => s.containsPlaceholder
@@ -549,6 +612,18 @@ def SpecExpr.softBEq : SpecExpr → SpecExpr → Bool
   | .intLit v₁ _, .intLit v₂ _ => v₁ == v₂
   | .intGe s₁ b₁ _, .intGe s₂ b₂ _ => s₁.softBEq s₂ && b₁.softBEq b₂
   | .intLe s₁ b₁ _, .intLe s₂ b₂ _ => s₁.softBEq s₂ && b₁.softBEq b₂
+  | .add l₁ r₁ _, .add l₂ r₂ _ => l₁.softBEq l₂ && r₁.softBEq r₂
+  | .sub l₁ r₁ _, .sub l₂ r₂ _ => l₁.softBEq l₂ && r₁.softBEq r₂
+  | .mul l₁ r₁ _, .mul l₂ r₂ _ => l₁.softBEq l₂ && r₁.softBEq r₂
+  | .floorDiv l₁ r₁ _, .floorDiv l₂ r₂ _ => l₁.softBEq l₂ && r₁.softBEq r₂
+  | .mod l₁ r₁ _, .mod l₂ r₂ _ => l₁.softBEq l₂ && r₁.softBEq r₂
+  | .pow l₁ r₁ _, .pow l₂ r₂ _ => l₁.softBEq l₂ && r₁.softBEq r₂
+  | .neg o₁ _, .neg o₂ _ => o₁.softBEq o₂
+  | .and l₁ r₁ _, .and l₂ r₂ _ => l₁.softBEq l₂ && r₁.softBEq r₂
+  | .or l₁ r₁ _, .or l₂ r₂ _ => l₁.softBEq l₂ && r₁.softBEq r₂
+  | .pcmp op₁ l₁ r₁ _, .pcmp op₂ l₂ r₂ _ => op₁ == op₂ && l₁.softBEq l₂ && r₁.softBEq r₂
+  | .boolLit b₁ _, .boolLit b₂ _ => b₁ == b₂
+  | .noneLit _, .noneLit _ => true
   | .floatLit v₁ _, .floatLit v₂ _ => v₁ == v₂
   | .floatGe s₁ b₁ _, .floatGe s₂ b₂ _ => s₁.softBEq s₂ && b₁.softBEq b₂
   | .floatLe s₁ b₁ _, .floatLe s₂ b₂ _ => s₁.softBEq s₂ && b₁.softBEq b₂

@@ -95,15 +95,30 @@ def or (x y : TypedStmtExpr .TBool)
     (source : Option FileRange := x.stmt.source) : TypedStmtExpr .TBool :=
   .ofStmt (.PrimitiveOp .Or [x.stmt, y.stmt]) source
 
+def and (x y : TypedStmtExpr .TBool)
+    (source : Option FileRange := x.stmt.source) : TypedStmtExpr .TBool :=
+  .ofStmt (.PrimitiveOp .And [x.stmt, y.stmt]) source
+
 abbrev tyDictStrAny : HighType := .UserDefined "DictStrAny"
 
 def anyIsfromNone (v : TypedStmtExpr tyAny)
     (source : Option FileRange := v.stmt.source) : TypedStmtExpr .TBool :=
   .ofStmt (.StaticCall (mkId "Any..isfrom_None") [v.stmt]) source
 
+def anyToBool (v : TypedStmtExpr tyAny)
+    (source : Option FileRange := v.stmt.source) : TypedStmtExpr .TBool :=
+  .ofStmt (.StaticCall (mkId "Any_to_bool") [v.stmt]) source
+
 def fromInt (v : TypedStmtExpr .TInt)
     (source : Option FileRange := v.stmt.source) : TypedStmtExpr tyAny :=
   .ofStmt (.StaticCall (mkId "from_int") [v.stmt]) source
+
+def fromBool (v : TypedStmtExpr .TBool)
+    (source : Option FileRange := v.stmt.source) : TypedStmtExpr tyAny :=
+  .ofStmt (.StaticCall (mkId "from_bool") [v.stmt]) source
+
+def fromNone (source : Option FileRange := none) : TypedStmtExpr tyAny :=
+  .ofStmt (.StaticCall (mkId "from_None") []) source
 
 def anyAsInt (a : TypedStmtExpr tyAny)
     (source : Option FileRange := a.stmt.source) : TypedStmtExpr .TInt :=
