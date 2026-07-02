@@ -12,9 +12,9 @@ public import StrataPython.ReadPython
 # Decorator-recognition framework for PySpec
 
 Generic gearing for recognizing PySpec decorator surfaces (`@requires`,
-`@ensures`, `@overload`, …): `DecoratorScheme` provides composable recognizers
-(`seq`/`run`). Depends only on `PySpecMClass` and the Python AST, not the spec
-pipeline.
+`@ensures`, `@overload`, …): `DecoratorScheme` provides a first-class recognizer
+over an accumulator. Depends only on `PySpecMClass` and the Python AST, not the
+spec pipeline.
 -/
 
 namespace StrataPython.Specs.Decorators
@@ -59,6 +59,12 @@ public def DecoratorForm.ofExpr? (pyd : expr SourceRange) : Option DecoratorForm
 public def DecoratorForm.isQualifiedBy (f : DecoratorForm) (qualifier : String) : Bool :=
   f.qualifier == some qualifier
 
+/-- The decorator's source name for diagnostics: `qualifier.name` or `name`. -/
+public def DecoratorForm.display (f : DecoratorForm) : String :=
+  match f.qualifier with
+  | some q => s!"{q}.{f.name}"
+  | none => f.name
+
 /-! ## Call-argument helpers -/
 
 /-- Binder names of a lambda's argument list (positional-only, positional, and
@@ -67,16 +73,34 @@ public def lambdaBinderNames (lamArgs : arguments SourceRange) : Array String :=
   let .mk_arguments _ ⟨_, posonly⟩ ⟨_, pos⟩ _ ⟨_, kwonly⟩ _ _ _ := lamArgs
   (posonly ++ pos ++ kwonly).map fun a => let .mk_arg _ ⟨_, n⟩ _ _ := a; n
 
+/-- All parameter names of a function's argument list, including the `*args`
+    (vararg) and `**kwargs` (kwarg) names. Used to compute the set of valid
+    contract-lambda binders, so a binder matching the function's `**kwargs`
+    parameter is not flagged as unbound. -/
+public def functionParamNames (a : arguments SourceRange) : Array String :=
+  let .mk_arguments _ ⟨_, posonly⟩ ⟨_, pos⟩ ⟨_, vararg⟩ ⟨_, kwonly⟩ _ ⟨_, kwarg⟩ _ := a
+  let names := (posonly ++ pos ++ kwonly).map fun arg => let .mk_arg _ ⟨_, n⟩ _ _ := arg; n
+  let names := match vararg with
+    | some (.mk_arg _ ⟨_, n⟩ _ _) => names.push n
+    | none => names
+  match kwarg with
+    | some (.mk_arg _ ⟨_, n⟩ _ _) => names.push n
+    | none => names
+
 /-- Extract the lambda body and binder names from `args[0]`. Reports via `report`
     (severity chosen by the caller) and returns `none` when the argument is
-    missing or not a lambda. -/
-public def expectLambda? {m : Type → Type} [Monad m]
+    missing or not a lambda. Warns (but still succeeds) when there are extra
+    positional arguments after the lambda. -/
+public def expectLambda? {m : Type → Type} [Monad m] [PySpecMClass m]
     (report : SourceRange → String → m Unit)
     (what : String) (loc : SourceRange) (args : Array (expr SourceRange))
     : m (Option (expr SourceRange × Array String)) := do
   if h : args.size ≥ 1 then
     match args[0] with
-    | .Lambda _ lamArgs lamBody => return some (lamBody, lambdaBinderNames lamArgs)
+    | .Lambda _ lamArgs lamBody =>
+      if args.size > 1 then
+        specWarning loc s!"{what} ignores extra positional arguments after the lambda"
+      return some (lamBody, lambdaBinderNames lamArgs)
     | _ => report loc s!"{what} expects a lambda as its first argument"; return none
   else
     report loc s!"{what} requires at least one argument"
@@ -108,6 +132,31 @@ public def stringKeyword? {m : Type → Type} [Monad m] [PySpecMClass m]
         | _ => specError kw.value.ann s!"{what}: {key}= must be a string literal"
   return value
 
+/-- Read an optional keyword `key=<expr>` whose value may be any expression (used
+    for `@ghost(type=…, init=…)`, whose values are resolved later). Reports a
+    duplicate via a `what`-prefixed error; returns `none` when the keyword is
+    absent. -/
+public def exprKeyword? {m : Type → Type} [Monad m] [PySpecMClass m]
+    (what : String) (key : String) (kwargs : Array (keyword SourceRange))
+    : m (Option (expr SourceRange)) := do
+  let mut value : Option (expr SourceRange) := none
+  for kw in kwargs do
+    if let ⟨_, some ⟨_, k⟩⟩ := kw.arg then
+      if k == key then
+        if value.isSome then
+          specError kw.value.ann s!"{what}: duplicate {key}= keyword"
+        if value.isNone then value := some kw.value
+  return value
+
+/-- True when a keyword argument named `key` is present (regardless of its
+    value). Used to distinguish an absent keyword from one present with an
+    invalid value, so the two cases are not double-reported. -/
+public def hasKeyword (key : String) (kwargs : Array (keyword SourceRange)) : Bool :=
+  kwargs.any fun kw =>
+    match kw.arg with
+    | ⟨_, some ⟨_, k⟩⟩ => k == key
+    | _ => false
+
 /-- Report (via `report`, at a caller-chosen severity) each keyword whose name is
     not in `allowed`. -/
 public def reportUnexpectedKeywords {m : Type → Type} [Monad m]
@@ -119,7 +168,7 @@ public def reportUnexpectedKeywords {m : Type → Type} [Monad m]
       unless allowed.contains k do
         report kw.value.ann s!"{what}: unexpected keyword '{k}'"
 
-/-! ## Composable recognizers -/
+/-! ## Recognizer -/
 
 /-- A first-class decorator recognizer over an accumulator `σ`. A decline
     (`none`) is necessarily a no-op — the accumulator is untouched — since the
@@ -130,30 +179,5 @@ public structure DecoratorScheme (m : Type → Type) (σ : Type) where
   init : σ
   /-- Try to absorb one normalized form; `none` declines it. -/
   absorb : DecoratorForm → σ → m (Option σ)
-
-/-- Compose two schemes: a form is offered to `a` first, then to `b` if `a`
-    declines. -/
-public def DecoratorScheme.seq {m : Type → Type} [Monad m] {σ₁ σ₂ : Type}
-    (a : DecoratorScheme m σ₁) (b : DecoratorScheme m σ₂)
-    : DecoratorScheme m (σ₁ × σ₂) where
-  init := (a.init, b.init)
-  absorb form := fun (s₁, s₂) => do
-    match ← a.absorb form s₁ with
-    | some s₁' => return some (s₁', s₂)
-    | none => return (← b.absorb form s₂).map fun s₂' => (s₁, s₂')
-
-/-- Fold a scheme over a decorator list; any form not absorbed (or not a
-    recognized shape) is passed to `onUnknown`. -/
-public def DecoratorScheme.run {m : Type → Type} [Monad m] {σ : Type}
-    (scheme : DecoratorScheme m σ)
-    (decorators : Array (expr SourceRange))
-    (onUnknown : expr SourceRange → m Unit) : m σ :=
-  decorators.foldlM (init := scheme.init) fun acc pyd =>
-    match DecoratorForm.ofExpr? pyd with
-    | none => do onUnknown pyd; return acc
-    | some form => do
-      match ← scheme.absorb form acc with
-      | some acc' => return acc'
-      | none => onUnknown pyd; return acc
 
 end StrataPython.Specs.Decorators

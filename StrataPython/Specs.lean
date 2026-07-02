@@ -11,6 +11,7 @@ import        StrataPython.Specs.DDM
 public import StrataPython.Specs.Decls
 public import StrataPython.Specs.Diagnostics
 public import StrataPython.Specs.Decorators
+import StrataPython.Specs.Native
 import StrataPython.Specs.MessageKind
 import        Strata.Util.DecideProp
 
@@ -655,11 +656,21 @@ structure SpecAssertionContext where
   kwargs : Option (String × SpecType) := none
   /-- Local variable type bindings (e.g., from for-loop iteration variables). -/
   localTypes : Std.HashMap String SpecType := {}
+  /-- Whether `transExpr` may translate `obj.attr` (else it is unsupported).
+      See the `.Attribute` case in `transExpr` for which contracts enable it. -/
+  allowFieldAccess : Bool := false
 
 /-- State for `SpecAssertionM`. -/
 structure SpecAssertionState where
   assertions : Array Assertion := #[]
   postconditions : Array SpecExpr := #[]
+  /-- Frame targets from `@modifies`, translated to `SpecExpr`. -/
+  modifies : Array SpecExpr := #[]
+  /-- Pre-state captures from `@snapshot`, translated to `Snapshot`. -/
+  snapshots : Array Snapshot := #[]
+  /-- Spec-only ghost variables from `@ghost`, with their (optional) initializer
+      expressions translated to `SpecExpr`. -/
+  ghosts : Array Ghost := #[]
   errors : Array PipelineMessage := #[]
   warnings : Array PipelineMessage := #[]
 
@@ -828,6 +839,17 @@ partial def transExpr (e : expr SourceRange)
       else
         specWarning loc s!"subscript subject is not a TypedDict"
     return (.getIndex innerExpr fieldName (loc := loc), fieldTp.getD anyType)
+  -- On for the not-yet-lowered kinds (`@invariant`/`@modifies`/`@snapshot`/`@ghost`
+  -- init); off for `@requires`/`@ensures`/`assert`, whose lowering can't bind such
+  -- a receiver yet — there it stays unsupported.
+  | .Attribute _ inner ⟨_, attrName⟩ (.Load _) =>
+    if (← read).allowFieldAccess then
+      let (innerExpr, innerTp) ← transExpr inner
+      let fieldTp := innerTp.lookupTypedDictField attrName
+      return (.getIndex innerExpr attrName (loc := loc), fieldTp.getD anyType)
+    else
+      specWarning loc s!"unsupported expression: {eformat e.toAst}"
+      return placeholder
   -- Integer literal
   | .Constant _ (.ConPos _ ⟨_, n⟩) _ =>
     return (.intLit (Int.ofNat n) (loc := loc), intType)
@@ -1053,6 +1075,30 @@ def collectAssertions (decls : ArgDecls) (_returnType : SpecType)
   modify fun s => { s with errors := as.errors, warnings := as.warnings }
   pure as
 
+/-- Translate a contract body to `SpecExpr`, or `none` if it can't be fully
+    translated: rejected when `transExpr` emits a diagnostic (the `runNoWarn`
+    clean flag) or the result contains a `placeholder` anywhere (a buried
+    untranslatable subexpression). `allowFieldAccess` enables `obj.attr`. -/
+def translateContractValue? (allowFieldAccess : Bool) (e : expr SourceRange)
+    : SpecAssertionM (Option SpecExpr) := do
+  let act : SpecAssertionM (SpecExpr × SpecType) :=
+    if allowFieldAccess
+    then withReader (fun ctx => { ctx with allowFieldAccess := true }) (transExpr e)
+    else transExpr e
+  let (clean, (formula, _)) ← runNoWarn act
+  if clean && formula.containsPlaceholder then
+    -- Clean translation that still contains a placeholder (e.g. a bare
+    -- string-literal predicate, whose `transExpr` branch is silent): surface it.
+    specWarning e.ann "unsupported expression in contract; dropped"
+  return if clean && !formula.containsPlaceholder then some formula else none
+
+/-- Translate a contract body and, when it translated, pass the result to
+    `store`; otherwise drop it (`transExpr` already emitted a diagnostic). -/
+def translateContractBody (allowFieldAccess : Bool) (e : expr SourceRange)
+    (store : SpecExpr → SpecAssertionM Unit) : SpecAssertionM Unit := do
+  if let some formula ← translateContractValue? allowFieldAccess e then
+    store formula
+
 def pySpecFunctionArgs (fnLoc : SourceRange)
                        (className : Option String)
                        (funName : String)
@@ -1060,15 +1106,25 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
                        (body : Array (stmt SourceRange))
                        (decorators : Array (expr SourceRange))
                        (returns : Option (expr SourceRange)) : PySpecM FunctionDecl := do
+  let scheme := Native.methodScheme (Decorators.functionParamNames arguments)
   let mut overload : Bool := false
+  let mut nativeBundle : Native.MethodBundle := scheme.init
+  -- The native scheme absorbs `@requires` etc.; anything it declines (e.g.
+  -- `@overload`) falls through to the existing value-resolution path.
   for pyd in decorators do
-    let (success, d) ← runChecked <| pySpecValue pyd
-    if success then
-      match d with
-      | .typingOverload =>
-        overload := true
-      | _ =>
-        specError pyd.ann s!"Decorator {repr d} not supported."
+    let absorbed ←
+      match Decorators.DecoratorForm.ofExpr? pyd with
+      | some form =>
+        match ← scheme.absorb form nativeBundle with
+        | some bundle' => nativeBundle := bundle'; pure true
+        | none => pure false
+      | none => pure false
+    unless absorbed do
+      let (success, d) ← runChecked <| pySpecValue pyd
+      if success then
+        match d with
+        | .typingOverload => overload := true
+        | _ => specError pyd.ann s!"Decorator {repr d} not supported."
 
   let .mk_arguments _ ⟨_, posonly⟩ ⟨_, posArgs⟩ ⟨_, vararg⟩ ⟨_, kwonly⟩ ⟨_, kw_defaults⟩ ⟨_, kwarg⟩ ⟨_, defaults⟩ := arguments
   assert! posonly.size = 0
@@ -1131,7 +1187,12 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
         match returns with
         | none => pure <| .ident fnLoc .typingAny
         | some tp => pySpecType tp
-  let as ← collectAssertions argDecls returnType <|
+  -- `@ghost` types resolve here in `PySpecM` (where `pySpecType` lives); their
+  -- `init=` expressions are translated below in the assertion monad. Resolve
+  -- the type paired with its ghost so name/type/init never drift apart.
+  let ghostsWithTypes : Array (Native.RawGhost × Option SpecType) ←
+    nativeBundle.ghosts.mapM fun g => do return (g, ← g.type.mapM pySpecType)
+  let as ← collectAssertions argDecls returnType <| do
     if overload then
       -- Overload stubs should have `...` as their only body statement.
       unless body.size = 1 &&
@@ -1139,6 +1200,29 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
         specWarning fnLoc "overload body is not `...`"
     else
       body.forM blockStmt
+    -- The bool is the field-access flag: off for the lowered `@requires`/`@ensures`,
+    -- on for the deferred targets (`self.x` only lowerable there).
+    let pushBodies (allowFieldAccess : Bool) (bodies : Array (expr SourceRange))
+        (store : SpecExpr → SpecAssertionState → SpecAssertionState) : SpecAssertionM Unit :=
+      bodies.forM fun body =>
+        translateContractBody allowFieldAccess body fun f => modify (store f)
+    pushBodies false nativeBundle.requires fun f s =>
+      { s with assertions := s.assertions.push { message := #[], formula := f } }
+    pushBodies false nativeBundle.ensures fun f s =>
+      { s with postconditions := s.postconditions.push f }
+    pushBodies true nativeBundle.modifies fun f s =>
+      { s with modifies := s.modifies.push f }
+    for snap in nativeBundle.snapshots do
+      translateContractBody (allowFieldAccess := true) snap.capture fun capExpr =>
+        modify fun s => { s with
+          snapshots := s.snapshots.push { name := snap.name, capture := capExpr, loc := snap.loc } }
+    for (g, gtype) in ghostsWithTypes do
+      let ginit : Option SpecExpr ←
+        match g.init with
+        | some iE => translateContractValue? (allowFieldAccess := true) iE
+        | none => pure none
+      modify fun s => { s with
+        ghosts := s.ghosts.push { name := g.name, type := gtype, init := ginit, loc := g.loc } }
 
   return {
     loc := fnLoc
@@ -1149,6 +1233,9 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
     isOverload := overload
     preconditions := as.assertions
     postconditions := as.postconditions
+    modifies := as.modifies
+    snapshots := as.snapshots
+    ghosts := as.ghosts
   }
 
 /-- Resolve an array of base class expressions into PythonIdents. -/
@@ -1175,7 +1262,8 @@ private def resolveBaseClasses (bases : Array (expr SourceRange))
 
 partial def pySpecClassBody (loc : SourceRange) (className : String)
     (bases : Array PythonIdent)
-    (body : Array (stmt StrataDDM.SourceRange)) : PySpecM ClassDef := do
+    (body : Array (stmt StrataDDM.SourceRange))
+    (classInvariants : Array (expr SourceRange) := #[]) : PySpecM ClassDef := do
   let mut usedNames : Std.HashSet String := {}
   let mut fields : Array ClassField := #[]
   let mut classVars : Array ClassVariable := #[]
@@ -1246,6 +1334,15 @@ partial def pySpecClassBody (loc : SourceRange) (className : String)
         methods := methods.push d
     | _ =>
       specError stmt.ann s!"Unknown class statement {stmt}"
+  -- Translate `@invariant` predicate bodies via the assertion translator with
+  -- field access on, so `self.<field>` becomes a `getIndex` read.
+  let invSt ← collectAssertions { args := #[], kwonly := #[] }
+      (.ident loc .typingAny) <| do
+    for invBody in classInvariants do
+      translateContractBody (allowFieldAccess := true) invBody fun formula =>
+        modify fun s => { s with
+          assertions := s.assertions.push { message := #[], formula } }
+  let invariants := invSt.assertions.map (·.formula)
   return {
     loc := loc
     name := className
@@ -1254,6 +1351,7 @@ partial def pySpecClassBody (loc : SourceRange) (className : String)
     classVars := classVars
     subclasses := subclasses
     methods := methods
+    invariants := invariants
   }
 
 def translateImportFrom (mod : ModuleName) (types : Std.HashMap String SpecValue)
@@ -1534,17 +1632,27 @@ partial def translate (body : Array (stmt StrataDDM.SourceRange)) : PySpecM Unit
         continue
       assert! _classNameLoc.isNone
       assert! keywords.size = 0
-      let isExhaustive := decorators.any fun d =>
-        match d with
-        | .Name _ ⟨_, "exhaustive"⟩ _ => true
-        | _ => false
-      assert! decorators.size = 0 || (decorators.size = 1 && isExhaustive)
+      -- `@exhaustive` is a bare structural marker; `@invariant(lambda self: …)`
+      -- goes to the native class scheme. Everything else is unsupported.
+      let classScheme := Native.classScheme
+      let mut isExhaustive := false
+      let mut classBundle : Native.ClassBundle := classScheme.init
+      for cd in decorators do
+        match Decorators.DecoratorForm.ofExpr? cd with
+        | none => specError cd.ann "Unsupported class decorator expression."
+        | some form =>
+          if !form.isCall && form.name == "exhaustive" && form.qualifier == none then
+            isExhaustive := true
+          else
+            match ← classScheme.absorb form classBundle with
+            | some b => classBundle := b
+            | none => specError cd.ann s!"Class decorator @{form.display} not supported."
       assert! typeParams.size = 0
       let baseIdents ← resolveBaseClasses bases
       let (success, _) ← runChecked <| recordTypeDef loc className
       -- Add the class to nameMap so it can be used in forward references
       setNameValue className (.typeValue (.ident loc ((← read).currentModule.mkIdent className) #[]))
-      let d ← pySpecClassBody loc className baseIdents stmts
+      let d ← pySpecClassBody loc className baseIdents stmts classBundle.invariants
       let d := { d with exhaustive := isExhaustive }
       if success then
         pushSignature (.classDef d)
