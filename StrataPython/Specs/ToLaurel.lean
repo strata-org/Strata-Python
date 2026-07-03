@@ -650,7 +650,6 @@ def funcDeclToLaurel (procName : String) (func : FunctionDecl)
     outputs := outputs
     preconditions := []
     decreases := none
-    isFunctional := false
     body := body
   }
 
