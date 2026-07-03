@@ -575,7 +575,7 @@ def pyInterpretCommand : _root_.Command where
           IO.FS.createDirAll dir
           IO.FS.writeFile (dir ++ "/laurel.st") (toString (Std.format laurel))
         match ← StrataPython.translateCombinedLaurel laurel keepDir
-            (alwaysCallCoreFunctions := false) with
+            (analysisMode := .Execute) with
         | (some core, diags) => pure (core, diags)
         | (none, diags) => exitFailure s!"Laurel to Core translation failed: {diags}"
       | .error () =>

@@ -20,7 +20,7 @@ private def runPyInterpret (ionFile : String) (fuel : Nat := 100000) : IO (UInt3
   let (core, _diags) ←
     match ← (pythonAndSpecToLaurel ionFile (specDir := ".")).run quietCtx |>.toBaseIO with
     | .ok laurel =>
-      match ← translateCombinedLaurel laurel (alwaysCallCoreFunctions := false) with
+      match ← translateCombinedLaurel laurel (analysisMode := .Execute) with
       | (some core, diags) => pure (core, diags)
       | (none, diags) => return (1, s!"Laurel to Core translation failed: {diags}")
     | .error () =>

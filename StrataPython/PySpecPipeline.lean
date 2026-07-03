@@ -8,6 +8,7 @@ module
 import all StrataDDM.Util.String
 import Strata.Languages.Laurel.FilterPrelude
 import Strata.Languages.Laurel.LaurelCompilationPipeline
+public import Strata.Languages.Laurel.LaurelPass
 public import StrataPython.PythonToLaurel
 import StrataPython.ReadPython
 import StrataPython.PythonLaurelCorePrelude
@@ -396,21 +397,21 @@ public def splitProcNames (prog : Core.Program)
 public def translateCombinedLaurelWithLowered (combined : Laurel.Program)
     (keepAllFilesPrefix : Option String := none)
     (pipelineCtx : Option Pipeline.PipelineContext := none)
-    (alwaysCallCoreFunctions : Bool := true)
+    (analysisMode : Laurel.AnalysisMode := .Verify)
     : IO (Option Core.Program × List DiagnosticModel × Laurel.Program × Statistics) := do
   let (coreOption, errors, lowered, stats) ←
-    Laurel.translateWithLaurel { inlineFunctionsWhenPossible := true, keepAllFilesPrefix, alwaysCallCoreFunctions }
+    Laurel.translateWithLaurel { inlineFunctionsWhenPossible := true, keepAllFilesPrefix, analysisMode }
       combined (pipelineCtx := pipelineCtx)
   return (coreOption.map appendCorePartOfRuntime, errors, lowered, stats)
 
 /-- Translate a combined Laurel program to Core and prepend the full
     runtime prelude. -/
 public def translateCombinedLaurel (combined : Laurel.Program) (keepAllFilesPrefix : Option String := none)
-    (alwaysCallCoreFunctions : Bool := true)
+    (analysisMode : Laurel.AnalysisMode := .Verify)
     : IO (Option Core.Program × List DiagnosticModel) := do
   let (coreOption, errors, _, _) ←
     translateCombinedLaurelWithLowered combined keepAllFilesPrefix
-      (alwaysCallCoreFunctions := alwaysCallCoreFunctions)
+      (analysisMode := analysisMode)
   return (coreOption, errors)
 
 /-- Run the pyAnalyzeLaurel pipeline: read a Python Ion program,
