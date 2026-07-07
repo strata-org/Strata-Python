@@ -9,6 +9,12 @@ dependencies = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["strata_python"]
+# Ship the committed dialect Ion file inside the strata_python package (as
+# strata_python/dialects/Python.dialect.st.ion) so consumers can locate it via
+# importlib.resources without guessing a site-packages path. force-include maps
+# the source dialects/ dir into the package at build time.
+[tool.hatch.build.targets.wheel.force-include]
+"dialects/Python.dialect.st.ion" = "strata_python/dialects/Python.dialect.st.ion"
 
 [build-system]
 requires = ["hatchling"]
