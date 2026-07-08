@@ -36,6 +36,17 @@ done
 
 expected_dir="expected_laurel"
 
+# Python interpreter. Prefer the one the build exported (PYTHON), which has
+# strata_python importable; fall back to python3 for manual local runs.
+python="${PYTHON:-python3}"
+
+# Normalize unstable assertion-label IDs in analyzer output so it matches the
+# golden .expected files (see normalize_labels.py). The compiled binary emits
+# raw labels like `assert(556)`; the goldens store the normalized `assert(…)`.
+normalize_labels() {
+    "$python" normalize_labels.py
+}
+
 # Build the pyAnalyzeLaurel exe in the StrataPython package.
 (cd .. && lake build pyAnalyzeLaurel > /dev/null)
 pyAnalyzeLaurel="../.lake/build/bin/pyAnalyzeLaurel"
@@ -59,13 +70,13 @@ for test_file in tests/test_*.py; do
         expected_file="${expected_dir}/${base_name}.expected"
 
         if [ -f "$expected_file" ]; then
-            (cd ../Python/strata-python && python3 -m strata_python.gen py_to_strata --dialect "dialects/Python.dialect.st.ion" "../../StrataPythonTest/$test_file" "../../StrataPythonTest/$ion_file")
+            (cd ../Python/strata-python && "$python" -m strata_python.gen py_to_strata --dialect "dialects/Python.dialect.st.ion" "../../StrataPythonTest/$test_file" "../../StrataPythonTest/$ion_file")
 
             # Check for per-file strata arguments (e.g. # strata-args: --check-mode bugFinding)
             extra_args=$(grep '^# strata-args:' "$test_file" | sed 's/^# strata-args://' | head -1)
             vc_flag=""
             [ -n "$vc_directory" ] && vc_flag="--vc-directory $vc_directory"
-            output=$("$pyAnalyzeLaurel" $extra_args $vc_flag "$ion_file")
+            output=$("$pyAnalyzeLaurel" $extra_args $vc_flag "$ion_file" | normalize_labels)
 
             if [ $update -eq 1 ]; then
                 echo "$output" > "$expected_file"
@@ -151,7 +162,7 @@ if [ $pending -eq 1 ]; then
         pending_total=$((pending_total + 1))
         ion_file="tests/pending/${base_name}.python.st.ion"
 
-        parse_output=$(cd ../Python/strata-python && python3 -m strata_python.gen py_to_strata --dialect "dialects/Python.dialect.st.ion" "../../StrataPythonTest/$test_file" "../../StrataPythonTest/$ion_file" 2>&1)
+        parse_output=$(cd ../Python/strata-python && "$python" -m strata_python.gen py_to_strata --dialect "dialects/Python.dialect.st.ion" "../../StrataPythonTest/$test_file" "../../StrataPythonTest/$ion_file" 2>&1)
         parse_exit=$?
 
         if [ $parse_exit -ne 0 ]; then
