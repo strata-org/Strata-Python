@@ -12,13 +12,13 @@ Python programs through Laurel to Core for SMT verification.
 
 2. **Install the Python bindings** (requires CPython 3.14):
    ```
-   cd StrataPython/Tools/strata-python
+   cd Python/strata-python
    pip install .
    ```
 
 3. **Generate the Python dialect file** (one-time setup):
    ```
-   cd StrataPython/Tools/strata-python
+   cd Python/strata-python
    python -m strata_python.gen dialect dialects
    ```
 
@@ -58,7 +58,7 @@ Source program (.py)                  PySpec library stubs (.py)
 Translate a Python source file to a Strata Ion program file:
 
 ```
-cd StrataPython/Tools/strata-python
+cd Python/strata-python
 python -m strata_python.gen py_to_strata \
    --dialect dialects/Python.dialect.st.ion \
    ../../StrataPythonTest/test.py \
