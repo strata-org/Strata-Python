@@ -62,7 +62,7 @@ The package is the repository root:
 │   └── Pipeline/
 │       └── PyAnalyzeLaurel.lean   # Full analysis pipeline (Python → Laurel → Core → SMT)
 ├── Scripts/                       # Executable entry points (pyInterpret, pyAnalyzeLaurel, etc.)
-├── Tools/
+├── Python/
 │   └── strata-python/             # Python tooling package (Ion reader, dialect generator)
 ├── StrataPythonTest/              # Compile-time tests (built with lake build)
 ├── StrataPythonTestExtra/         # Runtime tests (run with lake test, require Python)
@@ -92,7 +92,7 @@ Strata repository) and the in-repo `strata-python` package:
 
 ```bash
 pip install <strata-repo>/Tools/Python-base
-pip install ./Tools/strata-python
+pip install ./Python/strata-python
 ```
 
 ### Regex differential tests

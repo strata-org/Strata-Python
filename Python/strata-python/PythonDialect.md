@@ -52,7 +52,7 @@ A few Python field names conflict with DDM reserved words and are renamed:
 Install both packages from the repo root:
 
 ```
-pip install ./Tools/Python-base ./StrataPython/Tools/strata-python
+pip install ./Tools/Python-base ./Python/strata-python
 ```
 
 This requires Python 3.11 or later and installs the `amazon.ion` dependency.
