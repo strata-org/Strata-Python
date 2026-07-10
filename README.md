@@ -91,7 +91,7 @@ The runtime tests require both the `strata-base` package (from the parent
 Strata repository) and the in-repo `strata-python` package:
 
 ```bash
-pip install <strata-repo>/Tools/Python-base
+pip install <StrataDDM-repo>/Python/strata
 pip install ./Python/strata-python
 ```
 

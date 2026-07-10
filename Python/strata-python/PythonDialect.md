@@ -49,10 +49,11 @@ A few Python field names conflict with DDM reserved words and are renamed:
 
 ## Installation
 
-Install both packages from the repo root:
+Install these two packages (`.` refers to the repo root):
 
-```
-pip install ./Tools/Python-base ./Python/strata-python
+```bash
+pip install <StrataDDM-repo>/Python/strata
+pip install ./Python/strata-python
 ```
 
 This requires Python 3.11 or later and installs the `amazon.ion` dependency.
