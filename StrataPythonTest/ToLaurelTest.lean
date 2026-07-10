@@ -673,10 +673,11 @@ info: errors: 1
 /-! ## Nested dict access in preconditions (issue #800) -/
 
 -- Regression test for issue #800: nested dict access `kwargs["Outer"]["Inner"]`
--- should generate `Any_get` (dict lookup), not `FieldSelect`.
+-- should generate `Any_get` (dict lookup), not `FieldSelect`. The precondition
+-- is caller-checked, so it lives in `proc.preconditions`, not the body.
 /--
-info: body contains Any_get: true
-body contains FieldSelect: false
+info: precondition contains Any_get: true
+precondition contains FieldSelect: false
 -/
 #guard_msgs in
 #eval do
@@ -696,12 +697,10 @@ body contains FieldSelect: false
   assert! result.errors.size = 0
   match result.program.staticProcedures with
   | proc :: _ =>
-    let bodyStr := match proc.body with
-      | .Transparent body => toString (Strata.Laurel.formatStmtExpr body)
-      | .Opaque _ (some body) _ => toString (Strata.Laurel.formatStmtExpr body)
-      | _ => ""
-    IO.println s!"body contains Any_get: {bodyStr.contains "Any_get"}"
-    IO.println s!"body contains FieldSelect: {bodyStr.contains "#"}"
+    let preStr := String.intercalate "\n" (proc.preconditions.map fun (c : Strata.Laurel.Condition) =>
+      toString (Strata.Laurel.formatStmtExpr c.condition))
+    IO.println s!"precondition contains Any_get: {preStr.contains "Any_get"}"
+    IO.println s!"precondition contains FieldSelect: {preStr.contains "#"}"
   | [] => IO.println "no procedures"
 
 /-! ## Warning kind tests -/
@@ -898,22 +897,31 @@ info: pySpecToLaurel.overloadReturnNotClass: Overloaded function 'bad': return t
 
 /-! ## Precondition integration tests
 
-End-to-end tests that precondition formulas translate to the expected Laurel
-operations.  Each test runs `signaturesToLaurel` with a precondition and
-checks that the formatted procedure body contains the correct operation
-names (concrete Laurel syntax).  These catch bugs where `TypedStmtExpr`
-wrappers emit wrong operations or wrong return types that cause assertions
-to be silently dropped. -/
+Run `signaturesToLaurel` with a precondition and check the rendered
+precondition text (via `getPreconditions`) for the expected Laurel
+operations, catching wrong-operation and silently-dropped-precondition bugs. -/
 
-/-- Extract formatted body text from the first procedure in a translation result.
-    Returns `none` if there are no procedures or the body is opaque/empty. -/
+/-- Formatted body text of the first procedure, or `none` if there is no
+    procedure or the body is empty. Preconditions are inspected via
+    `getPreconditions`. -/
 private def getBody (result : TranslationResult) : Option String :=
   match result.program.staticProcedures with
-  | proc :: _ => match proc.body with
+  | proc :: _ =>
+    match proc.body with
     | .Transparent body => some (toString (Strata.Laurel.formatStmtExpr body))
     | .Opaque _ (some body) _ => some (toString (Strata.Laurel.formatStmtExpr body))
     | _ => none
   | [] => none
+
+/-- Render the first procedure's preconditions as `requires <cond> summary "…"`
+    lines, one per `Condition`. -/
+private def getPreconditions (result : TranslationResult) : String :=
+  match result.program.staticProcedures with
+  | proc :: _ =>
+    String.intercalate "\n" (proc.preconditions.map fun c =>
+      let summ := match c.summary with | some s => s!" summary \"{s}\"" | none => ""
+      s!"requires {toString (Strata.Laurel.formatStmtExpr c.condition)}{summ}")
+  | [] => ""
 
 /-- Translate a single function with preconditions. -/
 private def translatePrecondResult (preconditions : Array Assertion)
@@ -927,27 +935,28 @@ private def translatePrecondResult (preconditions : Array Assertion)
     }] testModule
 
 /-- Translate a single function with preconditions and return
-    `(bodyString, errorCount)`. -/
+    `(preconditionText, errorCount)`. User `@requires` lower to caller-checked
+    procedure preconditions, so the integration assertions inspect that text. -/
 private def translatePrecond (preconditions : Array Assertion)
     (args : Array Arg := #[]) : String × Nat :=
   let result := translatePrecondResult preconditions args
-  (getBody result |>.getD "", result.errors.size)
+  (getPreconditions result, result.errors.size)
 
 -- enumMember: or and eq via `|` and `==` infix syntax
 #eval do
-  let (body, errs) := translatePrecond
+  let (pre, errs) := translatePrecond
     #[{ message := #[], formula :=
           .enumMember (.var "x" loc) #["a", "b"] loc }]
     (args := #[arg "x" str])
   assert! errs == 0
   -- `or` renders as `|`, `eq` as `==`; would have been `<=` before fix #1
-  assert! body.contains " | "
-  assert! body.contains "=="
-  assert! !body.contains "<="
+  assert! pre.contains " | "
+  assert! pre.contains "=="
+  assert! !pre.contains "<="
 
 -- implies: `==>` infix syntax
 #eval do
-  let (body, errs) := translatePrecond
+  let (pre, errs) := translatePrecond
     #[{ message := #[], formula :=
           .implies
             (.intGe (.var "x" loc) (.intLit 0 loc) loc)
@@ -956,7 +965,7 @@ private def translatePrecond (preconditions : Array Assertion)
     (args := #[arg "x" str, arg "y" str])
   assert! errs == 0
   -- `implies` renders as `==>`; would have been `<=` before fix #1
-  assert! body.contains "==>"
+  assert! pre.contains "==>"
 
 -- not via containsKey on kwargs: `!` prefix syntax
 #eval do
@@ -972,22 +981,22 @@ private def translatePrecond (preconditions : Array Assertion)
           .containsKey (.var "kwargs" loc) "key" loc }]
       postconditions := #[] }] testModule
   let body := getBody result |>.getD ""
+  let pre := getPreconditions result
   assertEq result.errors.size 0
   assert! body.contains "result := <??>"
   assert! body.contains "Any..isfrom_None(key) | Any..isfrom_str(key)"
-  assert! body.contains "assert !Any..isfrom_None(key) summary \"precondition 0\""
+  assert! pre.contains "requires !Any..isfrom_None(key) summary \"precondition 0\""
   assert! body.contains "assume Any..isfrom_str(result)"
 
--- containsKey on a non-kwargs dict: DictStrAny_contains in an assert
+-- containsKey on a non-kwargs dict: DictStrAny_contains in a precondition
 -- (would have been silently dropped before fix #2)
 #eval do
-  let (body, errs) := translatePrecond
+  let (pre, errs) := translatePrecond
     #[{ message := #[], formula :=
           .containsKey (.var "d" loc) "mykey" loc }]
     (args := #[arg "d" str])
   assert! errs == 0
-  assert! body.contains "DictStrAny_contains"
-
+  assert! pre.contains "DictStrAny_contains"
 
 /-! ## typeError warning coverage -/
 
@@ -1039,13 +1048,57 @@ private def translateFunc (args : Array Arg := #[])
   assert! body.contains "assert Any..isfrom_int(x)"
   assert! !body.contains "isfrom_None"
 
--- Optional bool arg (has default): type assert uses Or, no required-param assert
+-- Optional bool arg (has default): type assert uses Or, no required-param check
 #eval do
-  let (body, errs) := translateFunc
-    (args := #[arg "flag" bool_ (some .none)])
-  assert! errs == 0
+  let result := translatePrecondResult #[] (args := #[arg "flag" bool_ (some .none)])
+  let body := getBody result |>.getD ""
+  let preConds := match result.program.staticProcedures with
+    | proc :: _ => proc.preconditions
+    | [] => []
+  assert! result.errors.size == 0
   assert! body.contains "Any..isfrom_None(flag) | Any..isfrom_bool(flag)"
+  -- an optional param carries no required-param obligation at all
+  assert! preConds.isEmpty
   assert! !body.contains "'flag' is required"
+
+-- Any-typed arg with no default: the required-param check is a caller-checked
+-- precondition (`!isfrom_None`) in `proc.preconditions`, not an in-body assert.
+#eval do
+  let result := translatePrecondResult #[] (args := #[arg "x" any])
+  let preConds := match result.program.staticProcedures with
+    | proc :: _ => proc.preconditions
+    | [] => []
+  let body := getBody result |>.getD ""
+  let preText := getPreconditions result
+  assert! result.errors.size == 0
+  -- exactly one required-param precondition, carrying the "'x' is required"
+  -- summary and the `!isfrom_None(x)` obligation
+  assert! preConds.length == 1
+  assert! preConds.any fun (c : Strata.Laurel.Condition) => c.summary == some "'x' is required"
+  assert! preText.contains "requires !Any..isfrom_None(x) summary \"'x' is required\""
+  -- caller-checked means mode `.Both` (proven at call sites, assumed in callee)
+  assert! preConds.all fun (c : Strata.Laurel.Condition) => c.mode == ConditionMode.Both
+  -- and is NOT emitted as an in-body assert
+  assert! !body.contains "'x' is required"
+
+-- Any-typed required param AND a user `@requires` coexist: pins the
+-- `requiredParamConds ++ userPreconds` concatenation — both survive and the
+-- required-param check is ordered first.
+#eval do
+  let pre : Assertion :=
+    { message := #[.str "x in enum"]
+      formula := .enumMember (.var "x" loc) #["a", "b"] loc }
+  let result := translatePrecondResult #[pre] (args := #[arg "x" any])
+  let preConds := match result.program.staticProcedures with
+    | proc :: _ => proc.preconditions
+    | [] => []
+  assert! result.errors.size == 0
+  -- both the required-param obligation and the user precondition are present
+  assert! preConds.length == 2
+  -- required-param check ordered first (requiredParamConds ++ userPreconds)
+  assert! (preConds.head?.bind (·.summary)) == some "'x' is required"
+  -- the user precondition survives with its own summary
+  assert! preConds.any fun (c : Strata.Laurel.Condition) => c.summary == some "x in enum"
 
 -- Float return type: assume Any..isfrom_float(result)
 #eval do
@@ -1075,17 +1128,22 @@ private def translateFunc (args : Array Arg := #[])
 #eval do
   let geZero (v : String) : SpecExpr := .intGe (.var v loc) (.intLit 0 loc) loc
   let pre : Assertion := { message := #[.str "n >= 0"], formula := geZero "n" }
-  let (body, errs) := translateFunc
-    (args := #[arg "n" int])
-    (preconditions := #[pre])
-    (postconditions := #[geZero "result"])
-  assert! errs == 0
+  let result := signaturesToLaurel "<test>" #[
+    .functionDecl {
+      loc := loc, nameLoc := loc, name := "f"
+      args := { args := #[arg "n" int], kwonly := #[] }
+      returnType := str, isOverload := false
+      preconditions := #[pre], postconditions := #[geZero "result"]
+    }] testModule
+  let body := getBody result |>.getD ""
+  let preText := getPreconditions result
+  assert! result.errors.size == 0
   -- type assert for n (implies not-None, so no separate check)
   assert! body.contains "assert Any..isfrom_int(n)"
   assert! !body.contains "isfrom_None(n)"
-  -- user precondition
-  assert! body.contains "assert" && body.contains "summary \"n >= 0\""
-  -- postcondition as assume
+  -- user precondition (caller-checked) surfaces with its summary
+  assert! preText.contains "requires" && preText.contains "summary \"n >= 0\""
+  -- postcondition as assume in body
   assert! body.contains "assume"
   -- return type assume
   assert! body.contains "assume Any..isfrom_str(result)"

@@ -528,23 +528,26 @@ def SpecAssertMsg.render : SpecAssertMsg → String
   | .userAssertion text  => text
   | .unnamed index       => s!"precondition {index}"
 
-/-- Build a Transparent procedure body with havoc, type assertions,
-    required-param checks, user preconditions, and return-type assumption. -/
+/-- Build the procedure body (havoc, type asserts, postcondition/return-type
+    assumes) and return the required-param not-None checks as caller-checked
+    `Condition`s for `funcDeclToLaurel` to merge into the preconditions. -/
 def buildSpecBody (allArgs : Array Arg)
-    (preconditions : Array Assertion)
     (postconditions : Array SpecExpr)
     (returnType : SpecType)
     (source : Option FileRange)
     (ctx : SpecExprContext)
-    : ToLaurelM Body := do
+    : ToLaurelM (Body × List Condition) := do
   let fileSource ← mkFileSource
   let mut stmts : Array StmtExprMd := #[]
+  let mut requiredParamConds : List Condition := []
   -- 1. Havoc the result: result := Hole(nondet)
   let holeExpr : StmtExprMd := { val := .Hole (deterministic := false), source := source }
   let resultId : AstNode Variable := { val := Variable.Local (mkId "result"), source := source }
   let assignStmt ← mkStmtWithLoc (.Assign [resultId] holeExpr) default
   stmts := stmts.push assignStmt
-  -- 2. Assert type / required-param preconditions
+  -- 2. Type constraints stay in-body (caller-checking them would reject
+  --    gradually-typed Any callers); only a no-default param's not-None
+  --    check becomes a caller-checked precondition.
   for arg in allArgs do
     let paramId : StmtExprMd := { val := .Var $ Variable.Local (mkId arg.name), source := source }
     match ← typeAssertion? arg.type paramId source with
@@ -561,25 +564,9 @@ def buildSpecBody (allArgs : Array Arg)
       if arg.default.isNone then
         let cond : TypedStmtExpr _ := .not (.anyIsfromNone (.identifier arg.name StrataPython.Laurel.tyAny))
         let msg := SpecAssertMsg.requiredParam arg.name |>.render
-        let assertStmt ← mkStmtWithLoc (.Assert cond.stmt (some msg)) default
-        stmts := stmts.push assertStmt
-  -- 3. Assert user pyspec preconditions
-  let mut idx := 0
-  for assertion in preconditions do
-    let formattedMsg := formatAssertionMessage assertion.message
-    let msg := if formattedMsg.isEmpty
-      then SpecAssertMsg.unnamed idx |>.render
-      else SpecAssertMsg.userAssertion formattedMsg |>.render
-    let (⟨condType, condExpr⟩, success) ← runChecked <| specExprToLaurel assertion.formula source ctx
-    if success then
-      if let .TBool := condType then
-        let assertStmt ← mkStmtWithLoc (.Assert condExpr.stmt (some msg)) default
-        stmts := stmts.push assertStmt
-      else
-        reportError .typeError default
-          s!"Precondition expression is not Bool in '{ctx.procName}' (skipping): {msg}"
-    idx := idx + 1
-  -- 4. Assert user pyspec postconditions
+        requiredParamConds := requiredParamConds ++
+          [{ condition := cond.stmt, summary := some msg }]
+  -- 3. Assume user pyspec postconditions
   for postExpr in postconditions do
     let (⟨condType, condExpr⟩, success) ← runChecked <| specExprToLaurel postExpr source ctx
     if success then
@@ -589,7 +576,7 @@ def buildSpecBody (allArgs : Array Arg)
       else
         reportError .typeError default
           s!"Postcondition expression is not Bool in '{ctx.procName}' (skipping)"
-  -- 5. Assume return type postcondition
+  -- 4. Assume return type postcondition
   -- NOTE. Skip NoneType: generated stubs currently declare `-> None` even for methods
   -- that return values. Assuming isfrom_None would make callers unreachable.
   if returnType.asIdent != some .noneType then
@@ -601,7 +588,32 @@ def buildSpecBody (allArgs : Array Arg)
       val := .Block stmts.toList none,
       source := fileSource
   }
-  return .Opaque [] (some body) [{ val := .All, source := none }]
+  return (.Opaque [] (some body) [{ val := .All, source := none }], requiredParamConds)
+
+/-- Lower user `@requires` preconditions into caller-checked Laurel
+    `Condition`s (default `ConditionMode.Both`: proven at each call site,
+    assumed inside the callee). -/
+def buildPreconditionConds
+    (preconditions : Array Assertion)
+    (source : Option FileRange)
+    (ctx : SpecExprContext)
+    : ToLaurelM (List Condition) := do
+  let mut conds : List Condition := []
+  let mut idx := 0
+  for assertion in preconditions do
+    let formattedMsg := formatAssertionMessage assertion.message
+    let msg := if formattedMsg.isEmpty
+      then SpecAssertMsg.unnamed idx |>.render
+      else SpecAssertMsg.userAssertion formattedMsg |>.render
+    let (⟨condType, condExpr⟩, success) ← runChecked <| specExprToLaurel assertion.formula source ctx
+    if success then
+      if let .TBool := condType then
+        conds := conds ++ [{ condition := condExpr.stmt, summary := some msg }]
+      else
+        reportError .typeError default
+          s!"Precondition expression is not Bool in '{ctx.procName}' (skipping): {msg}"
+    idx := idx + 1
+  return conds
 
 /-! ## Declaration Translation -/
 
@@ -641,14 +653,15 @@ def funcDeclToLaurel (procName : String) (func : FunctionDecl)
     inputs.foldl (init := ({} : Std.HashMap String HighType).insert "result" StrataPython.Laurel.tyAny) fun m p =>
       m.insert p.name.text p.type.val
   let specCtx : SpecExprContext := { procName, argTypes }
-  let body ← buildSpecBody allArgs func.preconditions func.postconditions
+  let (body, requiredParamConds) ← buildSpecBody allArgs func.postconditions
     func.returnType none specCtx
+  let userPreconds ← buildPreconditionConds func.preconditions none specCtx
   let src ← mkSourceWithFileRange func.loc
   return {
     name := { text := procName, source := src }
     inputs := inputs.toList
     outputs := outputs
-    preconditions := []
+    preconditions := requiredParamConds ++ userPreconds
     decreases := none
     body := body
   }
