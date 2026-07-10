@@ -31,6 +31,8 @@ meta section
     throw <| IO.userError s!"analyze golden test script not found: {script} \
                             (run from the package root, e.g. via `lake test`)"
   -- The script resolves paths relative to `StrataPythonTest/`, so run it there.
+  -- Use .inherit for stdout/stderr so output streams to the terminal in real
+  -- time rather than being buffered until the process exits.
   let child ← IO.Process.spawn {
     cmd := "bash"
     args := #["run_py_analyze.sh"]
@@ -38,16 +40,10 @@ meta section
     -- Inherit PYTHON / PYTHONPATH exported by the build so the script's
     -- `strata_python.gen` and normalizer use the right interpreter.
     inheritEnv := true
-    stdout := .piped
-    stderr := .piped
+    stdout := .inherit
+    stderr := .inherit
   }
-  let stdout ← IO.asTask child.stdout.readToEnd Task.Priority.dedicated
-  let stderr ← child.stderr.readToEnd
   let exitCode ← child.wait
-  let out := (← IO.ofExcept stdout.get)
-  -- Surface the script's output so failures are diagnosable in test logs.
-  IO.print out
-  unless stderr.isEmpty do IO.eprint stderr
   if exitCode != 0 then
     throw <| IO.userError s!"run_py_analyze.sh failed (exit {exitCode}); see output above"
 

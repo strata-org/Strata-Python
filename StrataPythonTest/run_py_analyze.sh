@@ -14,6 +14,8 @@
 # Strata incorrectly verifies as valid).  These are expected to "pass" and
 # are reported separately; they do NOT trigger a --check-pending failure.
 
+set -eo pipefail
+
 failed=0
 update=0
 pending=0
@@ -48,7 +50,7 @@ normalize_labels() {
 }
 
 # Build the pyAnalyzeLaurel exe in the StrataPython package.
-(cd .. && lake build pyAnalyzeLaurel > /dev/null)
+(cd .. && lake build pyAnalyzeLaurel)
 pyAnalyzeLaurel="../.lake/build/bin/pyAnalyzeLaurel"
 
 pending_total=0
@@ -70,20 +72,28 @@ for test_file in tests/test_*.py; do
         expected_file="${expected_dir}/${base_name}.expected"
 
         if [ -f "$expected_file" ]; then
-            (cd ../Python/strata-python && "$python" -m strata_python.gen py_to_strata --dialect "dialects/Python.dialect.st.ion" "../../StrataPythonTest/$test_file" "../../StrataPythonTest/$ion_file")
+            (cd ../Python/strata-python && "$python" -m strata_python.gen py_to_strata --dialect "dialects/Python.dialect.st.ion" "../../StrataPythonTest/$test_file" "../../StrataPythonTest/$ion_file") || {
+                echo "ERROR: py_to_strata failed for $base_name"
+                failed=1
+                continue
+            }
 
             # Check for per-file strata arguments (e.g. # strata-args: --check-mode bugFinding)
-            extra_args=$(grep '^# strata-args:' "$test_file" | sed 's/^# strata-args://' | head -1)
+            extra_args=$(grep -m1 '^# strata-args:' "$test_file" | sed 's/^# strata-args://' || true)
             vc_flag=""
             [ -n "$vc_directory" ] && vc_flag="--vc-directory $vc_directory"
-            output=$("$pyAnalyzeLaurel" $extra_args $vc_flag "$ion_file" | normalize_labels)
+            # pyAnalyzeLaurel exits non-zero when it finds verification failures,
+            # which is expected — we compare its output against the golden file.
+            # Suppress its exit code so pipefail doesn't abort the script, but
+            # let normalize_labels failures propagate.
+            output=$({ "$pyAnalyzeLaurel" $extra_args $vc_flag "$ion_file" || true; } | normalize_labels)
 
             if [ $update -eq 1 ]; then
                 echo "$output" > "$expected_file"
                 echo "Updated: $expected_file"
             elif ! echo "$output" | diff -q "$expected_file" - > /dev/null; then
                 echo "ERROR: Analysis output for $base_name does not match expected result"
-                echo "$output" | diff "$expected_file" -
+                echo "$output" | diff "$expected_file" - || true
                 failed=1
             else
                 echo "Test passed: " $base_name
@@ -102,7 +112,7 @@ for test_file in tests/test_*.py; do
                     failed=1
                 elif ! diff -q "$user_errors_expected" "$user_errors_file" > /dev/null; then
                     echo "ERROR: user_errors.txt content for $base_name does not match expected"
-                    diff "$user_errors_expected" "$user_errors_file"
+                    diff "$user_errors_expected" "$user_errors_file" || true
                     failed=1
                 else
                     echo "Test passed:  ${base_name} (user_errors.txt)"
@@ -115,7 +125,7 @@ done
 
 # --- --metrics integration test ---
 # Run one test file with --metrics and validate the JSONL output.
-metrics_test_file=$(ls tests/test_*.py 2>/dev/null | head -1)
+metrics_test_file=$(ls tests/test_*.py 2>/dev/null | head -1 || true)
 if [ -n "$metrics_test_file" ] && [ -z "$filter" ]; then
     metrics_base=$(basename "$metrics_test_file" .py)
     metrics_ion="tests/${metrics_base}.python.st.ion"
@@ -162,8 +172,7 @@ if [ $pending -eq 1 ]; then
         pending_total=$((pending_total + 1))
         ion_file="tests/pending/${base_name}.python.st.ion"
 
-        parse_output=$(cd ../Python/strata-python && "$python" -m strata_python.gen py_to_strata --dialect "dialects/Python.dialect.st.ion" "../../StrataPythonTest/$test_file" "../../StrataPythonTest/$ion_file" 2>&1)
-        parse_exit=$?
+        parse_output=$(cd ../Python/strata-python && "$python" -m strata_python.gen py_to_strata --dialect "dialects/Python.dialect.st.ion" "../../StrataPythonTest/$test_file" "../../StrataPythonTest/$ion_file" 2>&1) && parse_exit=0 || parse_exit=$?
 
         if [ $parse_exit -ne 0 ]; then
             echo "Pending (parse error):    $base_name"
@@ -172,11 +181,10 @@ if [ $pending -eq 1 ]; then
             continue
         fi
 
-        extra_args=$(grep '^# strata-args:' "$test_file" | sed 's/^# strata-args://' | head -1)
+        extra_args=$(grep -m1 '^# strata-args:' "$test_file" | sed 's/^# strata-args://' || true)
         vc_flag=""
         [ -n "$vc_directory" ] && vc_flag="--vc-directory $vc_directory"
-        output=$(timeout 20 "$pyAnalyzeLaurel" $extra_args $vc_flag "${ion_file}" 2>&1)
-        exit_code=$?
+        output=$(timeout 20 "$pyAnalyzeLaurel" $extra_args $vc_flag "${ion_file}" 2>&1) && exit_code=0 || exit_code=$?
 
         if [ $exit_code -ne 0 ] || echo "$output" | grep -q "error\|Error\|ERROR\|panic\|PANIC"; then
             echo "Pending (analysis error): $base_name"
