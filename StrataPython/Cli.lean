@@ -592,14 +592,20 @@ def pyInterpretCommand : _root_.Command where
         IO.Process.exit ExitCode.userError
     match core.run with
     | .ok E =>
-      let mainProc := Core.Program.Procedure.find? core ⟨"__main__", ()⟩
-      let outputNames := match mainProc with
-        | some p => p.header.outputs.keys.map (·.name)
-        | none => []
-      let (lhs, exprEnv) := Core.Env.genVars outputNames E.exprEnv
-      let E := { E with exprEnv }
-      let E := Core.Statement.Command.runCall lhs "__main__" [] fuel E
-      match E.error with
+      -- Run the entry point(s) the producer marked (the Python→Laurel
+      -- translator marks the synthetic `__main__` wrapper). Fall back to a
+      -- by-name `__main__` lookup if nothing is marked, so a Core program from
+      -- a path that predates the marker still runs as before — and a genuinely
+      -- absent `__main__` surfaces the same "procedure not found" error.
+      -- Each marked entry runs from the base `E` independently, matching
+      -- StrataCLI's `laurelInterpret`; folding `E` through them would leak the
+      -- first entry's post-state into the next.
+      let runs : List Core.Env := match Core.Program.entryProcedures core with
+        | [] => match Core.Program.Procedure.find? core ⟨"__main__", ()⟩ with
+          | some mainProc => [Core.Program.runEntry E mainProc fuel]
+          | none => [Core.Statement.Command.runCall [] "__main__" [] fuel E]
+        | entries => entries.map (fun p => Core.Program.runEntry E p fuel)
+      match runs.findSome? (·.error) with
       | none =>
         IO.println "Execution completed successfully."
       | some e =>

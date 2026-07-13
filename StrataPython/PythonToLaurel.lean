@@ -2979,6 +2979,10 @@ def pythonToLaurel (info : PreludeInfo)
     preconditions := [],
     decreases := none,
     body := .Opaque [] (some bodyBlock) wildcardModifies
+    -- This synthetic `__main__` wrapper (not the Python `__name__` dunder) is
+    -- the program's entry point for concrete interpretation; mark it so the
+    -- interpreter finds it via metadata instead of by name. See pyInterpret.
+    isInterpretEntry := true
   }
 
   -- Generate $composite_to_string_<type> and $composite_to_string_any_<type>
