@@ -585,12 +585,12 @@ def pyInterpretCommand : _root_.Command where
     if let some dir := keepDir then
       IO.FS.writeFile (dir ++ "/core.st") (toString (Std.format core))
     let core ← match Core.typeCheck Core.VerifyOptions.quiet core
-        (moreFns := StrataPython.ReFactory) with
+        (moreFns := StrataPython.RuntimeFactory) with
       | .ok prog => pure prog
       | .error e =>
         println!  s!"Core type checking failed: {e.message}"
         IO.Process.exit ExitCode.userError
-    match core.run with
+    match core.run (moreFns := StrataPython.RuntimeFactory) with
     | .ok E =>
       -- Run the entry point(s) the producer marked (the Python→Laurel
       -- translator marks the synthetic `__main__` wrapper). Fall back to a

@@ -16,7 +16,7 @@ property summary in the Core verification results.
 -/
 
 open Strata.Core (verifyProgram)
-open StrataPython (Python ReFactory pyTranslateLaurel withPython)
+open StrataPython (Python RuntimeFactory pyTranslateLaurel withPython)
 
 /-- Compile a Python string to Ion, translate to Core, verify, and return
     the property summaries from the VCResults. -/
@@ -44,7 +44,7 @@ meta def getPropertySummaries (pythonCmd : System.FilePath) (source : String)
       | .ok r => pure r
       | .error msg => throw <| .userError s!"pyTranslateLaurel failed: {msg}"
     let results ← match ← verifyProgram core Core.VerifyOptions.quiet
-        (moreFns := ReFactory) |>.toBaseIO with
+        (moreFns := RuntimeFactory) |>.toBaseIO with
       | .ok r => pure r
       | .error msg => throw <| .userError s!"verifyCore failed: {msg}"
     return results.filterMap fun vcr =>

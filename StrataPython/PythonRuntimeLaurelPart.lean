@@ -146,7 +146,7 @@ datatype DictStrAny {
 // with pos=0 and endpos=str.len(s), which is sound for the module-level
 // API (no pos/endpos parameters).
 //
-// Mode-specific factory functions are declared via ReFactory (with concreteEval
+// Mode-specific factory functions are declared via RuntimeFactory (with concreteEval
 // for literal pattern expansion), not in this prelude, to avoid duplicate
 // definitions.
 

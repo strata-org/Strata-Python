@@ -28,10 +28,10 @@ private def runPyInterpret (ionFile : String) (fuel : Nat := 100000) : IO (UInt3
       let detail := match msgs.back? with | some m => m.message | none => "Pipeline aborted"
       return (1, detail)
   let core ← match Core.typeCheck Core.VerifyOptions.quiet core
-      (moreFns := StrataPython.ReFactory) with
+      (moreFns := StrataPython.RuntimeFactory) with
     | .ok prog => pure prog
     | .error e => return (1, s!"Core type checking failed: {e.message}")
-  match core.run with
+  match core.run (moreFns := StrataPython.RuntimeFactory) with
   | .ok E =>
     let mainProc := Core.Program.Procedure.find? core ⟨"__main__", ()⟩
     let outputNames := match mainProc with

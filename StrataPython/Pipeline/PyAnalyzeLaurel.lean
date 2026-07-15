@@ -97,7 +97,7 @@ private def runPipeline (config : PyAnalyzeConfig)
         (p, [i])
       else (userProcNames, [])
     Strata.Core.verifyProgram coreProgram config.verifyOptions
-        (moreFns := StrataPython.ReFactory)
+        (moreFns := StrataPython.RuntimeFactory)
         (proceduresToVerify := some proceduresToVerify)
         (externalPhases := [Strata.frontEndPhase])
         (prefixPhases := inlinePhases)

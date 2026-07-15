@@ -33,7 +33,7 @@ private def verifyPrelude : IO (Array DiagnosticModel) := do
     let r ← EIO.toIO (IO.Error.userError ∘ toString)
       (_root_.Core.verify prog tempDir
         (options := .quiet)
-        (moreFns := StrataPython.ReFactory)
+        (moreFns := StrataPython.RuntimeFactory)
         (externalPhases := [Strata.frontEndPhase]))
     return r.flatMap (fun vcr => (toDiagnosticModel vcr []).toArray)
 

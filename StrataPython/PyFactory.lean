@@ -117,6 +117,15 @@ def rePatternErrorFunc : LFunc Core.CoreLParams :=
           | _ => .none)
       }
 
+-- Guard for exponent-driven factory functions (`int_pow`, `int_rshift`).
+-- Lean's `Nat.pow` panics when the exponent exceeds `UInt32.max`, and even
+-- well below that a large exponent materializes gigabyte-scale bignums that
+-- freeze `pyInterpret`. Refuse to fold when the exponent is out of range or
+-- negative — the call stays symbolic (`.none`), matching the pre-CR
+-- behavior for pathological inputs. 10 000 is well below `UInt32.max` and
+-- keeps the resulting bignum bounded to reasonable memory.
+private def maxPowExponent : Int := 10000
+
 -- Integer exponentiation with constant folding via concreteEval.
 -- Forward-declared before CoreOnlyDelimiter in PythonLaurelCorePrelude so
 -- PPow can reference it. The factory provides the concreteEval implementation.
@@ -129,7 +138,9 @@ def intPowFunc : LFunc Core.CoreLParams :=
         (fun md args => match args with
           | [b, e] => match LExpr.denoteInt b, LExpr.denoteInt e with
             | some bv, some ev =>
-              if ev ≥ 0 then .some (LExpr.intConst md (bv ^ ev.toNat)) else .none
+              if 0 ≤ ev ∧ ev ≤ maxPowExponent then
+                .some (LExpr.intConst md (bv ^ ev.toNat))
+              else .none
             | _, _ => .none
           | _ => .none)
       }
@@ -145,7 +156,8 @@ def floatPowFunc : LFunc Core.CoreLParams :=
       }
 
 -- Integer right shift with constant folding via concreteEval.
--- Computes floor(x / 2^n) for n ≥ 0, avoiding Int.SafeDiv preconditions.
+-- Computes floor(x / 2^n) for 0 <= n <= maxPowExponent, avoiding
+-- Int.SafeDiv preconditions and Nat.pow's out-of-range panic on huge `n`.
 def intRshiftFunc : LFunc Core.CoreLParams :=
     { name := "int_rshift",
       typeArgs := [],
@@ -155,12 +167,14 @@ def intRshiftFunc : LFunc Core.CoreLParams :=
         (fun md args => match args with
           | [x, n] => match LExpr.denoteInt x, LExpr.denoteInt n with
             | some xv, some nv =>
-              if nv ≥ 0 then .some (LExpr.intConst md (xv / (2 ^ nv.toNat))) else .none
+              if 0 ≤ nv ∧ nv ≤ maxPowExponent then
+                .some (LExpr.intConst md (xv / (2 ^ nv.toNat)))
+              else .none
             | _, _ => .none
           | _ => .none)
       }
 
-def ReFactory : Factory Core.CoreLParams := .ofArray
+def RuntimeFactory : Factory Core.CoreLParams := .ofArray
     #[
       reFullmatchBoolFunc,
       reMatchBoolFunc,
@@ -173,7 +187,7 @@ def ReFactory : Factory Core.CoreLParams := .ofArray
 
 /-- Core.Factory extended with regex factory functions. -/
 def PythonFactory : @Lambda.Factory Core.CoreLParams :=
-    Core.Factory.append ReFactory.toArray
+    Core.Factory.append RuntimeFactory.toArray
 end StrataPython
 end -- public section
 
