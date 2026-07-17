@@ -824,12 +824,19 @@ return if Any..isexception(v1) then v1 else
 // /////////////////////////////////////////////////////////////////////////////////////
 // Modelling of Python arithmetic and bitwise operations
 // /////////////////////////////////////////////////////////////////////////////////////
-// int_pow, int_rshift, and float_pow are provided by the factory (PyFactory.lean) with concreteEval.
-// Declared here as external so PPow/PRShift can reference them; they are filtered
-// during Laurel-to-Core translation and the factory provides the Core versions.
+// int_pow, int_rshift, int_band, int_bor, int_bxor, and float_pow are provided
+// by the factory (PyFactory.lean) with concreteEval. Declared here as external
+// so the P* wrappers below can reference them; they are filtered during
+// Laurel-to-Core translation and the factory provides the Core versions.
 procedure int_pow (base: int, exp: int) : int
   external;
 procedure int_rshift (x: int, n: int) : int
+  external;
+procedure int_band (x: int, y: int) : int
+  external;
+procedure int_bor (x: int, y: int) : int
+  external;
+procedure int_bxor (x: int, y: int) : int
   external;
 procedure float_pow (base: real, exp: real) : real
   external;
@@ -890,6 +897,60 @@ return if Any..isexception(v1) then v1 else if Any..isexception(v2) then v2
     from_int(int_rshift(Any..as_int!(v1), bool_to_int(Any..as_bool!(v2))))
   else if Any..isfrom_bool(v1) && Any..isfrom_bool(v2) then
     from_int(int_rshift(bool_to_int(Any..as_bool!(v1)), bool_to_int(Any..as_bool!(v2))))
+  else
+    exception(UndefinedError ("Operand Type is not defined"));
+
+// /////////////////////////////////////////////////////////////////////////////////////
+// Modelling of Python bitwise AND / OR / XOR
+// /////////////////////////////////////////////////////////////////////////////////////
+//
+// Delegate to `int_band` / `int_bor` / `int_bxor`, which the factory folds
+// concretely for non-negative operands. Two's-complement negatives stay
+// symbolic (concreteEval returns .none for those inputs).
+//
+// The `bool op bool` branch returns `from_bool(...)`, not `from_int(...)`,
+// because CPython preserves the `bool` type for bitwise operations on two
+// booleans (unlike `<<`/`>>`, which always return `int` even for
+// `bool << bool`). Modelling `True & True` as `from_int(1)` would break
+// downstream `isfrom_bool` checks (equality is unaffected: `PEq` compares
+// through `normalize_any`, which maps `from_bool(true)` to `from_int(1)`).
+
+procedure PBitAnd (v1: Any, v2: Any) : Any
+return if Any..isexception(v1) then v1 else if Any..isexception(v2) then v2
+  else if Any..isfrom_int(v1) && Any..isfrom_int(v2) then
+    from_int(int_band(Any..as_int!(v1), Any..as_int!(v2)))
+  else if Any..isfrom_bool(v1) && Any..isfrom_int(v2) then
+    from_int(int_band(bool_to_int(Any..as_bool!(v1)), Any..as_int!(v2)))
+  else if Any..isfrom_int(v1) && Any..isfrom_bool(v2) then
+    from_int(int_band(Any..as_int!(v1), bool_to_int(Any..as_bool!(v2))))
+  else if Any..isfrom_bool(v1) && Any..isfrom_bool(v2) then
+    from_bool(Any..as_bool!(v1) && Any..as_bool!(v2))
+  else
+    exception(UndefinedError ("Operand Type is not defined"));
+
+procedure PBitOr (v1: Any, v2: Any) : Any
+return if Any..isexception(v1) then v1 else if Any..isexception(v2) then v2
+  else if Any..isfrom_int(v1) && Any..isfrom_int(v2) then
+    from_int(int_bor(Any..as_int!(v1), Any..as_int!(v2)))
+  else if Any..isfrom_bool(v1) && Any..isfrom_int(v2) then
+    from_int(int_bor(bool_to_int(Any..as_bool!(v1)), Any..as_int!(v2)))
+  else if Any..isfrom_int(v1) && Any..isfrom_bool(v2) then
+    from_int(int_bor(Any..as_int!(v1), bool_to_int(Any..as_bool!(v2))))
+  else if Any..isfrom_bool(v1) && Any..isfrom_bool(v2) then
+    from_bool(Any..as_bool!(v1) || Any..as_bool!(v2))
+  else
+    exception(UndefinedError ("Operand Type is not defined"));
+
+procedure PBitXor (v1: Any, v2: Any) : Any
+return if Any..isexception(v1) then v1 else if Any..isexception(v2) then v2
+  else if Any..isfrom_int(v1) && Any..isfrom_int(v2) then
+    from_int(int_bxor(Any..as_int!(v1), Any..as_int!(v2)))
+  else if Any..isfrom_bool(v1) && Any..isfrom_int(v2) then
+    from_int(int_bxor(bool_to_int(Any..as_bool!(v1)), Any..as_int!(v2)))
+  else if Any..isfrom_int(v1) && Any..isfrom_bool(v2) then
+    from_int(int_bxor(Any..as_int!(v1), bool_to_int(Any..as_bool!(v2))))
+  else if Any..isfrom_bool(v1) && Any..isfrom_bool(v2) then
+    from_bool(Any..as_bool!(v1) != Any..as_bool!(v2))
   else
     exception(UndefinedError ("Operand Type is not defined"));
 
@@ -982,7 +1043,8 @@ Parse the Laurel DDM prelude into a Laurel Program.
 -- Prelude functions that may return an exception value as Any.
 -- We should make sure that all functions in this list propagate the exceptions from their arguments.
 public def AnyMaybeExceptionList := ["Any_get!", "Any_set!", "Any_sets!", "PNeg", "PBitNot", "PNot", "PAdd", "PSub", "PMul",
-   "PFloorDiv", "PLt", "PLe", "PGt", "PGe", "PPow", "PMod", "PLShift", "PRShift", "PAnd", "POr"]
+   "PFloorDiv", "PLt", "PLe", "PGt", "PGe", "PPow", "PMod", "PLShift", "PRShift",
+   "PBitAnd", "PBitOr", "PBitXor", "PAnd", "POr"]
 
 public def pythonRuntimeLaurelPart : Laurel.Program :=
   match Laurel.TransM.run (some $ .file "") (Laurel.parseProgram pythonRuntimeLaurelPartDDM) with

@@ -610,9 +610,9 @@ partial def translateExpr (ctx : TranslationContext) (e : expr SourceRange)
       | .Pow _ => .ok "PPow"
       | .LShift _ => .ok "PLShift"
       | .RShift _ => .ok "PRShift"
-      | .BitAnd _ => return mkStmtExprMd .Hole --TODO: Adding BitVector subtype in Any type, then the related operations
-      | .BitOr _ => return mkStmtExprMd .Hole
-      | .BitXor _ => return mkStmtExprMd .Hole
+      | .BitAnd _ => .ok "PBitAnd"
+      | .BitOr _ => .ok "PBitOr"
+      | .BitXor _ => .ok "PBitXor"
       -- Unsupported for now
       | _ => throw (.unsupportedConstruct s!"Binary operator not yet supported: {repr op}" (toString (repr e)))
     return mkStmtExprMdWithLoc (StmtExpr.StaticCall preludeOpnames [leftExpr, rightExpr]) md

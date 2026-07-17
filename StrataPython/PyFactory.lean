@@ -174,6 +174,53 @@ def intRshiftFunc : LFunc Core.CoreLParams :=
           | _ => .none)
       }
 
+-- Bitwise AND/OR/XOR on arbitrary-precision ints.
+--
+-- Python's semantics on negatives is two's-complement over an infinite bit
+-- width. Lean's `Int` has no native bitwise operator; only `Nat` does. We
+-- therefore fold only the non-negative case (both operands >= 0), where
+-- `Nat.land`/`Nat.lor`/`Nat.xor` agree with Python. Any negative operand
+-- returns .none, leaving the call symbolic — the same fallback style
+-- `int_pow` uses for negative exponents.
+--
+-- Positives cover every current test in the differential corpus's
+-- `binary_bitwise` section; extending to negatives is a straightforward
+-- follow-up (add more match arms here) if a test needs it.
+private def foldNonNegBinop (md : Unit) (args : List (LExpr Core.CoreLParams.mono))
+    (op : Nat → Nat → Nat) : Option (LExpr Core.CoreLParams.mono) :=
+  match args with
+  | [x, y] => match LExpr.denoteInt x, LExpr.denoteInt y with
+    | some xv, some yv =>
+      if xv ≥ 0 ∧ yv ≥ 0 then
+        .some (LExpr.intConst md ((op xv.toNat yv.toNat) : Int))
+      else .none
+    | _, _ => .none
+  | _ => .none
+
+def intBandFunc : LFunc Core.CoreLParams :=
+    { name := "int_band",
+      typeArgs := [],
+      inputs := [("x", mty[int]), ("y", mty[int])],
+      output := mty[int],
+      concreteEval := some (fun md args => foldNonNegBinop md args Nat.land)
+      }
+
+def intBorFunc : LFunc Core.CoreLParams :=
+    { name := "int_bor",
+      typeArgs := [],
+      inputs := [("x", mty[int]), ("y", mty[int])],
+      output := mty[int],
+      concreteEval := some (fun md args => foldNonNegBinop md args Nat.lor)
+      }
+
+def intBxorFunc : LFunc Core.CoreLParams :=
+    { name := "int_bxor",
+      typeArgs := [],
+      inputs := [("x", mty[int]), ("y", mty[int])],
+      output := mty[int],
+      concreteEval := some (fun md args => foldNonNegBinop md args Nat.xor)
+      }
+
 def RuntimeFactory : Factory Core.CoreLParams := .ofArray
     #[
       reFullmatchBoolFunc,
@@ -182,7 +229,10 @@ def RuntimeFactory : Factory Core.CoreLParams := .ofArray
       rePatternErrorFunc,
       intPowFunc,
       floatPowFunc,
-      intRshiftFunc
+      intRshiftFunc,
+      intBandFunc,
+      intBorFunc,
+      intBxorFunc
     ]
 
 /-- Core.Factory extended with regex factory functions. -/
