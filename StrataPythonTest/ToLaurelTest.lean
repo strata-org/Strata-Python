@@ -68,7 +68,6 @@ private def fmtHighType : HighType → String
   | .TMap _ _ => "TMap"
   | .UserDefined name => s!"UserDefined({name})"
   | .Applied _ _ => "Applied"
-  | .Pure _ => "Pure"
   | .Intersection _ => "Intersection"
   | .TBv n => s!"TBv({n})"
   | .Unknown => "Unknown"
