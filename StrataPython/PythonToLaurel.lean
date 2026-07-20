@@ -1881,7 +1881,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
       else []
     match expr.val with
     | .StaticCall fnname _ =>
-        match ctx.functionSignatures.find? (λ funsig => funsig.name == fnname) with
+        match ctx.functionSignatures.find? (λ funsig => funsig.name == fnname.text) with
         | some funsig =>
             let targets := if funsig.ret.isNone then [] else [nullcall_var]
             let targets := if withException ctx fnname.text then targets++[maybeExceptVar] else targets
@@ -1920,7 +1920,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
     -- without intervening modifications are redundant and create unnecessary
     -- ite branches in the verification conditions.
     let targetIsMaybeExcept (target : AstNode Variable) : Bool :=
-      match target.val with | .Local n => n == "maybe_except" | _ => false
+      match target.val with | .Local n => n.text == "maybe_except" | _ => false
     let rec modifiesMaybeExceptVal (e : StmtExpr) : Bool :=
       match e with
       | .Assign targets _ => targets.any targetIsMaybeExcept
@@ -2055,7 +2055,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
       | .Name _ n _ =>
         let targetVar := mkStmtExprMd (StmtExpr.Var (.Local n.val))
         let isAnyNone (s: StmtExprMd) := match s.val with
-          | .StaticCall constructor _ => constructor == AnyConstructor.None | _ => false
+          | .StaticCall constructor _ => constructor.text == AnyConstructor.None | _ => false
         match iterExpr.val with
           | .StaticCall "range" (startExpr::stopExpr::stepExpr::_) =>
             if ¬ (isAnyNone stopExpr && isAnyNone stepExpr) then
