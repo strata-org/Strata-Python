@@ -44,7 +44,7 @@ jobs:
           cd cbmc-src
           STRATA="$GITHUB_WORKSPACE/.lake/packages/Strata"
           git apply "$GITHUB_WORKSPACE/StrataPythonTest/cbmc-string-support.patch"
-          git apply "$STRATA/StrataTest/Languages/Laurel/cbmc-bounds-check.patch"
+          git apply "$STRATA/StrataTest/Languages/Laurel/CBMC/cbmc-bounds-check.patch"
           git apply "$STRATA/StrataTest/Backends/CBMC/cbmc-regex-support.patch"
           git apply "$STRATA/StrataTest/Backends/CBMC/cbmc-quantifier-simplify.patch"
           export CCACHE_BASEDIR=$PWD
