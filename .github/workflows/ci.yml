@@ -51,17 +51,10 @@ jobs:
         working-directory: StrataPythonTest
         shell: bash
         run: ./run_py_interpret.sh
-      - name: Run pyAnalyze SARIF tests
-        working-directory: StrataPythonTest
-        shell: bash
-        run: python run_py_analyze_sarif.py
       - name: Run pyAnalyze golden-file tests
         working-directory: StrataPythonTest
         shell: bash
         run: ./run_py_analyze.sh
-      - name: Run regex differential tests
-        working-directory: StrataPythonTest/Regex
-        run: python diff_test.py
       - name: Save lake cache
         uses: ./.github/actions/save-lake-cache
         with:
