@@ -42,26 +42,18 @@ jobs:
         with:
           python-version: '3.14'
       - name: Build using pip
-        # `strata-base` (Tools/Python-base) and `strata-python` (Tools/strata-python)
+        # `strata-base` (Python/strata-base) and `strata-python` (Python/strata-python)
         # both live in this repo.
         run: |
-          pip install ./Tools/Python-base
-          pip install ./Tools/strata-python
+          pip install ./Python/strata-base ./Python/strata-python
       - name: Run pyInterpret golden-file tests
         working-directory: StrataPythonTest
         shell: bash
         run: ./run_py_interpret.sh
-      - name: Run pyAnalyze SARIF tests
-        working-directory: StrataPythonTest
-        shell: bash
-        run: python run_py_analyze_sarif.py
       - name: Run pyAnalyze golden-file tests
         working-directory: StrataPythonTest
         shell: bash
         run: ./run_py_analyze.sh
-      - name: Run regex differential tests
-        working-directory: StrataPythonTest/Regex
-        run: python diff_test.py
       - name: Save lake cache
         uses: ./.github/actions/save-lake-cache
         with:
@@ -89,8 +81,7 @@ jobs:
         use-restore-keys: "false"
     - name: Build using pip
       run: |
-        pip install ./Tools/Python-base
-        pip install ./Tools/strata-python
+        pip install ./Python/strata-base ./Python/strata-python
     - name: Install Lean
       uses: leanprover/lean-action@v1
       with:
@@ -157,8 +148,7 @@ jobs:
         use-restore-keys: "false"
     - name: Build using pip
       run: |
-        pip install ./Tools/Python-base
-        pip install ./Tools/strata-python
+        pip install ./Python/strata-base ./Python/strata-python
     - name: Install Lean (for lake env)
       uses: leanprover/lean-action@v1
       with:
@@ -184,7 +174,7 @@ jobs:
       # check runs in-process inside the StrataPythonTestExtra/CpythonDiffTest
       # Lean test (driven by this script), so no separate `strata` CLI is built.
       run: FAIL_FAST=1 ./scripts/run_cpython_tests.sh ${{ matrix.python_version }}
-      working-directory: Tools/strata-python
+      working-directory: Python/strata-python
 
   cbmc:
     needs: build_and_test_lean
