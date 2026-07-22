@@ -42,11 +42,11 @@ jobs:
         with:
           python-version: '3.14'
       - name: Build using pip
-        # `strata-base` (Tools/Python-base) and `strata-python` (Tools/strata-python)
-        # both live in this repo.
+        # `strata-python` lives in Python/strata-python in this repo.
+        # The `strata` base dependency is provided by StrataDDM on Brazil;
+        # on GitHub CI we install without deps since tests don't need it.
         run: |
-          pip install ./Tools/Python-base
-          pip install ./Tools/strata-python
+          pip install --no-deps ./Python/strata-python
       - name: Run pyInterpret golden-file tests
         working-directory: StrataPythonTest
         shell: bash
@@ -89,8 +89,7 @@ jobs:
         use-restore-keys: "false"
     - name: Build using pip
       run: |
-        pip install ./Tools/Python-base
-        pip install ./Tools/strata-python
+        pip install --no-deps ./Python/strata-python
     - name: Install Lean
       uses: leanprover/lean-action@v1
       with:
@@ -157,8 +156,7 @@ jobs:
         use-restore-keys: "false"
     - name: Build using pip
       run: |
-        pip install ./Tools/Python-base
-        pip install ./Tools/strata-python
+        pip install --no-deps ./Python/strata-python
     - name: Install Lean (for lake env)
       uses: leanprover/lean-action@v1
       with:
@@ -184,7 +182,7 @@ jobs:
       # check runs in-process inside the StrataPythonTestExtra/CpythonDiffTest
       # Lean test (driven by this script), so no separate `strata` CLI is built.
       run: FAIL_FAST=1 ./scripts/run_cpython_tests.sh ${{ matrix.python_version }}
-      working-directory: Tools/strata-python
+      working-directory: Python/strata-python
 
   cbmc:
     needs: build_and_test_lean
