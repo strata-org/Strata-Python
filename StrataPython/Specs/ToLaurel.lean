@@ -6,6 +6,7 @@
 module
 
 public import Strata.Languages.Laurel.LaurelAST
+public import StrataPython.UnknownSource
 import StrataPython.PythonLaurelTypedExpr
 public import StrataPython.Specs.Decls
 public import Strata.Pipeline.Messages
@@ -166,11 +167,11 @@ def prefixName (name : String) : ToLaurelM String := do
 
 /-- Create a HighTypeMd with default metadata. -/
 private def mkTy (ty : HighType) : HighTypeMd :=
-  { val := ty, source := none }
+  { val := ty, source := unknownSource }
 
 /-- Create a UserDefined type referencing a Laurel prelude type by name. -/
 private def mkUserDefined (s : String) : HighTypeMd :=
-  { val := .UserDefined (mkId s), source := none }
+  { val := .UserDefined (mkId s), source := unknownSource }
 
 /-! ### Laurel type constants -/
 
@@ -202,7 +203,7 @@ def specTypeToLaurelType (ty : SpecType) : ToLaurelM HighTypeMd := do
     When `isUnion` is true, warns on ident atoms that lack testers.
     Always warns on TypedDict (needs a dedicated checker). -/
 private def atomAssertion? (atom : SpecAtomType) (ty : SpecType)
-    (value : StmtExprMd) (source : Option FileRange)
+    (value : StmtExprMd) (source : FileRange)
     (isUnion : Bool) : ToLaurelM (Option StmtExprMd) := do
   let mk (e : StmtExpr) : StmtExprMd := { val := e, source := source }
   match atom with
@@ -232,7 +233,7 @@ private def atomAssertion? (atom : SpecAtomType) (ty : SpecType)
     Returns `none` when no assertion is needed (all atoms are Any/composites).
     For union types, builds a disjunction over per-atom assertions. -/
 private def typeAssertion? (ty : SpecType) (value : StmtExprMd)
-    (source : Option FileRange) : ToLaurelM (Option StmtExprMd) := do
+    (source : FileRange) : ToLaurelM (Option StmtExprMd) := do
   let mut result : Option StmtExprMd := none
   for atom in ty.atoms do
     match atom with
@@ -254,24 +255,22 @@ private def typeAssertion? (ty : SpecType) (value : StmtExprMd)
 /-- Create file-level source from the current pyspec filepath.
     Uses a default (zero) source range; callers with a specific location
     should use `mkSourceWithFileRange` instead. -/
-private def mkFileSource : ToLaurelM (Option FileRange) := do
+private def mkFileSource : ToLaurelM FileRange := do
   let ctx ← read
-  let fr : FileRange := { file := .file ctx.filepath.toString, range := default }
-  return some fr
+  return { file := .file ctx.filepath.toString, range := default }
 
 /-- Create source with a file range from the current pyspec file. -/
 private def mkSourceWithFileRange (loc : SourceRange)
-    : ToLaurelM (Option FileRange) := do
+    : ToLaurelM FileRange := do
   let ctx ← read
-  let fr : FileRange := { file := .file ctx.filepath.toString, range := loc }
-  return some fr
+  return { file := .file ctx.filepath.toString, range := loc }
 
 /-- Wrap a StmtExpr with source containing a file range. -/
 private def mkStmtWithLoc (e : StmtExpr) (loc : SourceRange)
     : ToLaurelM StmtExprMd := do
   let ctx ← read
   let fr : FileRange := { file := .file ctx.filepath.toString, range := loc }
-  return { val := e, source := some fr }
+  return { val := e, source := fr }
 
 /--
 Context for resolving identifiers.
@@ -288,7 +287,12 @@ private def asAny (loc : SourceRange) (act : ToLaurelExprM SomeTypedStmtExpr) : 
   if !success then
     return ⟨se.2.stmt⟩
   match se with
-  | ⟨.UserDefined "Any", e⟩ => pure e
+  | ⟨.UserDefined id, e⟩ =>
+    if id.text == "Any" then pure ⟨e.stmt⟩
+    else
+      let pn := (← read).procName
+      reportError .typeError loc s!"Expected Any-typed expression but got {repr (HighType.UserDefined id)} in '{pn}'"
+      pure ⟨e.stmt⟩
   -- Box a scalar (bool/int) sub-expression into Any when used as a value.
   | ⟨.TBool, e⟩ => pure (.fromBool e)
   | ⟨.TInt, e⟩ => pure (.fromInt e)
@@ -306,7 +310,12 @@ private def asBool (loc : SourceRange) (act : ToLaurelExprM SomeTypedStmtExpr) :
   | ⟨.TBool, e⟩ => pure e
   -- Coerce an Any-typed operand (e.g. a bool param, which lowers to Any) into a
   -- bool via `Any_to_bool`, mirroring the body translator's boolean contexts.
-  | ⟨.UserDefined "Any", e⟩ => pure (.anyToBool e)
+  | ⟨.UserDefined id, e⟩ =>
+    if id.text == "Any" then pure (.anyToBool ⟨e.stmt⟩)
+    else
+      let pn := (← read).procName
+      reportError .typeError loc s!"Expected Bool-typed expression but got {repr (HighType.UserDefined id)} in '{pn}'"
+      pure ⟨e.stmt⟩
   | ⟨tp, e⟩ =>
     let pn := (← read).procName
     reportError .typeError loc s!"Expected Bool-typed expression but got {repr tp} in '{pn}'"
@@ -314,7 +323,7 @@ private def asBool (loc : SourceRange) (act : ToLaurelExprM SomeTypedStmtExpr) :
 
 /-- Look up an identifier's type from the SpecExprContext and create a typed identifier.
     Reports a typeError if the name is not found in argTypes. -/
-private def lookupIdentifier (name : String) (loc : SourceRange) (source : Option FileRange)
+private def lookupIdentifier (name : String) (loc : SourceRange) (source : FileRange)
     : ToLaurelExprM SomeTypedStmtExpr := do
   match (← read).argTypes[name]? with
   | some tp => return .mkSome <| .identifier name tp source
@@ -338,18 +347,18 @@ def pcmpPreludeName : PCmpOp → String
     `runChecked` to detect whether errors were reported during translation.
     Uses Core prelude function names (Any_len, DictStrAny_contains, etc.)
     which are resolved after the Core prelude is prepended. -/
-def specExprToLaurel (e : SpecExpr) (source : Option FileRange)
+def specExprToLaurel (e : SpecExpr) (source : FileRange)
   : ToLaurelExprM SomeTypedStmtExpr :=
   -- Use per-node source range when available, falling back to the
   -- nearest ancestor's source for nodes with default (empty) locations.
   -- This is intentional: the parent's location is a closer approximation
   -- than the function-level source for nodes without their own location.
-  let nodeSource (loc : SourceRange) : ToLaurelM (Option FileRange) := do
+  let nodeSource (loc : SourceRange) : ToLaurelM FileRange := do
     if loc == default then
       pure source
     else do
       let fr : FileRange := { file := .file (← read).filepath.toString, range := loc }
-      pure (some fr)
+      pure fr
   match e with
   | .placeholder loc => do
     reportError .placeholderExpr loc "Placeholder expression not translatable"
@@ -534,7 +543,7 @@ def SpecAssertMsg.render : SpecAssertMsg → String
 def buildSpecBody (allArgs : Array Arg)
     (postconditions : Array SpecExpr)
     (returnType : SpecType)
-    (source : Option FileRange)
+    (source : FileRange)
     (ctx : SpecExprContext)
     : ToLaurelM (Body × List Condition) := do
   let fileSource ← mkFileSource
@@ -588,14 +597,14 @@ def buildSpecBody (allArgs : Array Arg)
       val := .Block stmts.toList none,
       source := fileSource
   }
-  return (.Opaque [] (some body) [{ val := .All, source := none }], requiredParamConds)
+  return (.Opaque [] (some body) [{ val := .All, source := unknownSource }], requiredParamConds)
 
 /-- Lower user `@requires` preconditions into caller-checked Laurel
     `Condition`s (default `ConditionMode.Both`: proven at each call site,
     assumed inside the callee). -/
 def buildPreconditionConds
     (preconditions : Array Assertion)
-    (source : Option FileRange)
+    (source : FileRange)
     (ctx : SpecExprContext)
     : ToLaurelM (List Condition) := do
   let mut conds : List Condition := []
@@ -654,8 +663,8 @@ def funcDeclToLaurel (procName : String) (func : FunctionDecl)
       m.insert p.name.text p.type.val
   let specCtx : SpecExprContext := { procName, argTypes }
   let (body, requiredParamConds) ← buildSpecBody allArgs func.postconditions
-    func.returnType none specCtx
-  let userPreconds ← buildPreconditionConds func.preconditions none specCtx
+    func.returnType unknownSource specCtx
+  let userPreconds ← buildPreconditionConds func.preconditions unknownSource specCtx
   let src ← mkSourceWithFileRange func.loc
   return {
     name := { text := procName, source := src }

@@ -1047,7 +1047,9 @@ public def AnyMaybeExceptionList := ["Any_get!", "Any_set!", "Any_sets!", "PNeg"
    "PBitAnd", "PBitOr", "PBitXor", "PAnd", "POr"]
 
 public def pythonRuntimeLaurelPart : Laurel.Program :=
-  match Laurel.TransM.run (some $ .file "") (Laurel.parseProgram pythonRuntimeLaurelPartDDM) with
+  match Laurel.TransM.run
+      (.file "StrataPython/PythonRuntimeLaurelPart.lean")
+      (Laurel.parseProgram pythonRuntimeLaurelPartDDM) (synthesized := true) with
   | .ok p => p
   | .error e => dbg_trace s!"SOUND BUG: Failed to parse Python runtime Laurel part: {e}"; default
 
