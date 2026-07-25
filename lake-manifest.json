@@ -25,7 +25,7 @@
    "type": "git",
    "subDir": null,
    "scope": "",
-   "rev": "4ea13cd3ef6e6e0bc70629ef818155c808c47320",
+   "rev": "18c1ade5cd00b4c955d5b9f341ab70d5573f27ba",
    "name": "StrataDDM",
    "manifestFile": "lake-manifest.json",
    "inputRev": "main",

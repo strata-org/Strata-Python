@@ -42,10 +42,10 @@ jobs:
         with:
           python-version: '3.14'
       - name: Build using pip
-        # `strata-base` (Python/strata-base) and `strata-python` (Python/strata-python)
-        # both live in this repo.
+        # `strata` (base package) comes from the StrataDDM dependency under .lake;
+        # `strata-python` lives in this repo.
         run: |
-          pip install ./Python/strata-base ./Python/strata-python
+          pip install ./.lake/packages/StrataDDM/Python/strata ./Python/strata-python
       - name: Run pyInterpret golden-file tests
         working-directory: StrataPythonTest
         shell: bash
@@ -81,7 +81,7 @@ jobs:
         use-restore-keys: "false"
     - name: Build using pip
       run: |
-        pip install ./Python/strata-base ./Python/strata-python
+        pip install ./.lake/packages/StrataDDM/Python/strata ./Python/strata-python
     - name: Install Lean
       uses: leanprover/lean-action@v1
       with:
@@ -148,7 +148,7 @@ jobs:
         use-restore-keys: "false"
     - name: Build using pip
       run: |
-        pip install ./Python/strata-base ./Python/strata-python
+        pip install ./.lake/packages/StrataDDM/Python/strata ./Python/strata-python
     - name: Install Lean (for lake env)
       uses: leanprover/lean-action@v1
       with:
