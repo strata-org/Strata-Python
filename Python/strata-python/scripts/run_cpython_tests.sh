@@ -25,6 +25,8 @@ VER="$1"
 prefix="cpython-$VER"
 if [ -d "$prefix" ]; then
   echo "Skipping download: $prefix already exists"
+else
+  git clone https://github.com/python/cpython.git --branch "$VER" --depth 1 "$prefix"
 fi
 
 # Files in the CPython test suite that are expected to fail to parse (and so
