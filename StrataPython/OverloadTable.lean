@@ -42,7 +42,7 @@ def FunctionOverloads.findDispatchArg (fo : FunctionOverloads)
         none
 
 /-- Dispatch table: function name → its overloads. -/
-@[expose] abbrev OverloadTable := Std.HashMap String FunctionOverloads
+abbrev OverloadTable := Std.HashMap String FunctionOverloads
 
 end StrataPython
 

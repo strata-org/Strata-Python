@@ -1431,8 +1431,7 @@ termination_by sizeOf s
 def blockStmts (as : Array (stmt SourceRange)) : SpecAssertionM Unit := do
   as.attach.forM fun ⟨b, _⟩ => blockStmt b
 termination_by sizeOf as
-decreasing_by
-· decreasing_tactic
+decreasing_by decreasing_tactic
 
 end
 

@@ -9,7 +9,7 @@ public import StrataPython.Specs.Decls
 public import StrataDDM.AST
 import StrataDDM.Format
 import StrataDDM.Ion
-import StrataDDM.Integration.Lean -- shake: keep
+public import StrataDDM.Integration.Lean -- shake: keep
 open StrataDDM
 
 namespace StrataPython
@@ -20,6 +20,8 @@ def PythonIdent.toDDM (d : PythonIdent) : Ann String SourceRange :=
 
 namespace Specs
 namespace DDM
+
+public section
 
 #dialect
 dialect PythonSpecs;
@@ -252,6 +254,8 @@ op moduleGhostDecl (decl : GhostDecl) : Command => decl;
 #strata_gen PythonSpecs
 
 abbrev Signature := Command
+
+end -- public section
 
 end DDM
 

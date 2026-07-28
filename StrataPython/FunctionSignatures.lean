@@ -14,7 +14,7 @@ namespace StrataPython
 open Strata
 
 /-- A type identifier in the Strata Core prelude for Python. -/
-@[expose] abbrev TypeId := String
+abbrev TypeId := String
 
 /-- An argument declaration for a Python method -/
 structure ArgDecl where
@@ -53,7 +53,7 @@ instance : Inhabited FuncDecl where
   default := { args := #[], argIndexMap := {} }
 
 /-- The name of a Python method as encoded in the Strata Core dialect-/
-@[expose] abbrev FuncName := String
+abbrev FuncName := String
 
 /-- A collection of function signatures. -/
 class Signatures where
