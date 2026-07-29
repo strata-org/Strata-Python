@@ -25,7 +25,7 @@ datatype None () {
 
 type Object;
 function Object_len(x : Object) : int;
-axiom [Object_len_ge_zero]: (forall x : Object :: Object_len(x) >= 0);
+axiom [Object_len_ge_zero]: (forall x : Object :: int.ge(Object_len(x), 0));
 
 function inheritsFrom(child : string, parent : string) : (bool);
 axiom [inheritsFrom_refl]: (forall s: string :: {inheritsFrom(s, s)} inheritsFrom(s, s));
@@ -177,11 +177,11 @@ spec{
   if (IntOrNone..isIntOrNone_mk_int(hours)) {
         hours_i := IntOrNone..int_val!(hours);
   }
-  assume [assume_timedelta_sign_matches]: (delta == (((days_i * 24) + hours_i) * 3600) * 1000000);
+  assume [assume_timedelta_sign_matches]: (delta == int.mul(int.mul(int.add(int.mul(days_i, 24), hours_i), 3600), 1000000));
 };
 
 function Timedelta_mk(days : int, seconds : int, microseconds : int): int {
-  ((days * 3600 * 24) + seconds) * 1000000 + microseconds
+  int.add(int.mul(int.add(int.mul(int.mul(days, 3600), 24), seconds), 1000000), microseconds)
 }
 
 function Timedelta_get_days(timedelta : int) : int;
@@ -194,9 +194,9 @@ axiom [Timedelta_deconstructors]:
             :: {(Timedelta_mk(days0, seconds0, msecs0))}
       Timedelta_mk(days0, seconds0, msecs0) ==
           Timedelta_mk(days, seconds, msecs) &&
-      0 <= msecs && msecs < 1000000 &&
-      0 <= seconds && seconds < 3600 * 24 &&
-      -999999999 <= days && days <= 999999999
+      int.le(0, msecs) && int.lt(msecs, 1000000) &&
+      int.le(0, seconds) && int.lt(seconds, int.mul(3600, 24)) &&
+      int.le(int.neg(999999999), days) && int.le(days, 999999999)
       ==> Timedelta_get_days(Timedelta_mk(days0, seconds0, msecs0)) == days &&
           Timedelta_get_seconds(Timedelta_mk(days0, seconds0, msecs0)) == seconds &&
           Timedelta_get_microseconds(Timedelta_mk(days0, seconds0, msecs0)) == msecs);
@@ -236,14 +236,14 @@ spec {
 // Addition/subtraction of Datetime and Timedelta.
 function Datetime_add(d:Datetime, timedelta:int):Datetime;
 function Datetime_sub(d:Datetime, timedelta:int):Datetime {
-  Datetime_add(d, -timedelta)
+  Datetime_add(d, int.neg(timedelta))
 }
 
 axiom [Datetime_add_ax]:
     (forall d:Datetime, timedelta:int :: {}
         Datetime_get_base(Datetime_add(d,timedelta)) == Datetime_get_base(d) &&
         Datetime_get_timedelta(Datetime_add(d,timedelta)) ==
-          Datetime_get_timedelta(d)  + timedelta);
+          int.add(Datetime_get_timedelta(d), timedelta));
 
 // Comparison of Datetimes is abstractly defined so that the result is
 // meaningful only if the two datetimes have same base.
@@ -253,7 +253,7 @@ axiom [Datetime_lt_ax]:
     (forall d1:Datetime, d2:Datetime :: {}
         Datetime_get_base(d1) == Datetime_get_base(d2)
         ==> Datetime_lt(d1, d2) ==
-            (Datetime_get_timedelta(d1) < Datetime_get_timedelta(d2)));
+            (int.lt(Datetime_get_timedelta(d1), Datetime_get_timedelta(d2))));
 
 
 type Date;
