@@ -66,7 +66,7 @@ private def runPipeline (config : PyAnalyzeConfig)
     match laurelResult with
     | .ok (coreOpt, diags, _, stats) =>
       let phase ← getPhase
-      for msg in PipelineMessage.fromDiagnostics phase diags do
+      for msg in PipelineMessage.fromMessages phase diags do
         addMessage msg
         if msg.kind.impact.isFatal then throw ()
       match coreOpt with

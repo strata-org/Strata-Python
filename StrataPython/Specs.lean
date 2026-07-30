@@ -4,6 +4,7 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
+public import Strata.Pipeline.Messages
 
 import all    StrataDDM.Util.Fin
 import        StrataPython.ReadPython
@@ -283,7 +284,7 @@ def shouldSkip (name : String) : PySpecM Bool := do
 private def pySpecParsingPhase : Phase := Phase.base "pySpecParsing"
 
 def specErrorAt (file : System.FilePath) (loc : SourceRange) (message : String) : PySpecM Unit := do
-  let e : PipelineMessage := { file, loc, phase := pySpecParsingPhase, kind := .pySpecParsingError, message }
+  let e : PipelineMessage := { phase := pySpecParsingPhase, message := { fileRange := { file := .file file.toString, range := loc }, message, kind := .pySpecParsingError } }
   modify fun s => { s with errors := s.errors.push e }
 
 instance : PySpecMClass PySpecM where
@@ -291,7 +292,7 @@ instance : PySpecMClass PySpecM where
     specErrorAt (←read).pythonFile loc message
   specWarning loc message := do
     let file := (←read).pythonFile
-    let w : PipelineMessage := { file, loc, phase := pySpecParsingPhase, kind := .pySpecParsingWarning, message }
+    let w : PipelineMessage := { phase := pySpecParsingPhase, message := { fileRange := { file := .file file.toString, range := loc }, message, kind := .pySpecParsingWarning } }
     modify fun s => { s with warnings := s.warnings.push w }
   runChecked act := do
     let cnt := (←get).errors.size
@@ -680,11 +681,11 @@ abbrev SpecAssertionM := ReaderT SpecAssertionContext (StateM SpecAssertionState
 instance : PySpecMClass SpecAssertionM where
   specError loc message := do
     let file := (←read) |>.filePath
-    let e : PipelineMessage := { file, loc, phase := pySpecParsingPhase, kind := .pySpecParsingError, message }
+    let e : PipelineMessage := { phase := pySpecParsingPhase, message := { fileRange := { file := .file file.toString, range := loc }, message, kind := .pySpecParsingError } }
     modify fun s => { s with errors := s.errors.push e }
   specWarning loc message := do
     let file := (←read) |>.filePath
-    let w : PipelineMessage := { file, loc, phase := pySpecParsingPhase, kind := .pySpecParsingWarning, message }
+    let w : PipelineMessage := { phase := pySpecParsingPhase, message := { fileRange := { file := .file file.toString, range := loc }, message, kind := .pySpecParsingWarning } }
     modify fun s => { s with warnings := s.warnings.push w }
   runChecked act := do
     let cnt := (←get).errors.size
@@ -1173,7 +1174,7 @@ def droppedAssertionWarning := "unsupported expression in assert; dropped"
 def specWarningOfKind (kind : MessageKind) (loc : SourceRange) (message : String)
     : SpecAssertionM Unit := do
   let file := (←read) |>.filePath
-  let w : PipelineMessage := { file, loc, phase := pySpecParsingPhase, kind, message }
+  let w : PipelineMessage := { phase := pySpecParsingPhase, message := { fileRange := { file := .file file.toString, range := loc }, message, kind } }
   modify fun s => { s with warnings := s.warnings.push w }
 
 mutual
@@ -2012,7 +2013,7 @@ public def translateFile
         | none =>
           throw s!"No location information for {e.file}"
         | some fm =>
-          pure s!"{e.loc.format e.file fm}: {e.message}"
+          pure s!"{e.loc.format e.file fm}: {e.message.message}"
   if errors.size > 0 then
     let msg := "Translation errors:\n"
     let msg ←

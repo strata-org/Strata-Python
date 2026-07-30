@@ -25,7 +25,7 @@ private def runPyInterpret (ionFile : String) (fuel : Nat := 100000) : IO (UInt3
       | (none, diags) => return (1, s!"Laurel to Core translation failed: {diags}")
     | .error () =>
       let msgs ← quietCtx.getMessages
-      let detail := match msgs.back? with | some m => m.message | none => "Pipeline aborted"
+      let detail := match msgs.back? with | some m => m.message.message | none => "Pipeline aborted"
       return (1, detail)
   let core ← match Core.typeCheck Core.VerifyOptions.quiet core
       (moreFns := StrataPython.RuntimeFactory) with

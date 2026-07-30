@@ -48,7 +48,7 @@ def withPythonToLaurel (pythonCmd : System.FilePath) (input : InputContext)
     | .error () =>
       let msgs ← pctx.getMessages
       let detail := match msgs.back? with
-        | some m => m.message
+        | some m => m.message.message
         | none => "Pipeline aborted"
       throw <| .userError s!"pythonAndSpecToLaurel failed: {detail}"
 
