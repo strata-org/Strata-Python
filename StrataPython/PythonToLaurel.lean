@@ -9,6 +9,7 @@ public import Strata.Languages.Core.Program
 public import Strata.Languages.Laurel.LaurelAST
 public import StrataPython.OverloadTable
 public import StrataPython.PythonDialect
+public import StrataPython.UnknownSource
 import StrataPython.PythonRuntimeLaurelPart
 import Std.Tactic.BVDecide.Normalize.Prop
 import Strata.Util.Tactics
@@ -59,13 +60,13 @@ deriving Inhabited
 
 structure PyArgInfo where
   name : String
-  source : Option FileRange
+  source : FileRange := unknownSource
   laurelType : HighTypeMd
   typeTesters : Array String
   default : Option (expr SourceRange)
 
 structure PyRetInfo where
-  source : Option FileRange
+  source : FileRange := unknownSource
   laurelType : HighTypeMd
   typeTesters : Array String
 
@@ -178,27 +179,27 @@ def sourceRangeToFileRange (filePath : String) (sr : SourceRange) : FileRange :=
   ⟨ uri, sr ⟩
 
 /-- Backward-compatible: create source from a SourceRange. -/
-def sourceRangeToSource (filePath : String) (sr : SourceRange) : Option FileRange :=
-  some (sourceRangeToFileRange filePath sr)
+def sourceRangeToSource (filePath : String) (sr : SourceRange) : FileRange :=
+  sourceRangeToFileRange filePath sr
 
 /-- Create a HighTypeMd with default metadata -/
 def mkHighTypeMd (ty : HighType) : HighTypeMd :=
-  { val := ty, source := none }
+  { val := ty, source := unknownSource }
 
 /-- Create a HighTypeMd with source location metadata. -/
-def mkHighTypeMdWithLoc (ty : HighType) (source : Option FileRange) : HighTypeMd :=
+def mkHighTypeMdWithLoc (ty : HighType) (source : FileRange) : HighTypeMd :=
   { val := ty, source := source }
 
 def mkCoreType (s: String): HighTypeMd :=
-  {val := .UserDefined (mkId s), source := none }
+  {val := .UserDefined (mkId s), source := unknownSource }
 
 /-- Create a StmtExprMd with default metadata -/
 def mkStmtExprMd (expr : StmtExpr) : StmtExprMd :=
-  { val := expr, source := none }
+  { val := expr, source := unknownSource }
 
 /-- Create a VariableMd with default metadata -/
 def mkVariableMd (v : Variable) : VariableMd :=
-  { val := v, source := none }
+  { val := v, source := unknownSource }
 
 /-- Extract a Variable from a StmtExpr. Throws if the expression is not a Var. -/
 def stmtExprToVar (e : StmtExprMd) : Except TranslationError VariableMd :=
@@ -210,7 +211,7 @@ def stmtExprToVar (e : StmtExprMd) : Except TranslationError VariableMd :=
 def wildcardModifies : List StmtExprMd := [mkStmtExprMd .All]
 
 /-- Create a StmtExprMd with source location metadata. -/
-def mkStmtExprMdWithLoc (expr : StmtExpr) (source : Option FileRange) : StmtExprMd :=
+def mkStmtExprMdWithLoc (expr : StmtExpr) (source : FileRange) : StmtExprMd :=
   { val := expr, source := source }
 
 /-- Create a local variable declaration with initializer. -/
@@ -218,7 +219,7 @@ def mkVarDeclInit (name : Identifier) (ty : AstNode HighType) (init : StmtExprMd
   mkStmtExprMd (.Assign [mkVariableMd (.Declare ⟨name, ty⟩)] init)
 
 /-- Create a local variable declaration with initializer and source location. -/
-def mkVarDeclInitWithLoc (name : Identifier) (ty : AstNode HighType) (init : StmtExprMd) (source : Option FileRange) : StmtExprMd :=
+def mkVarDeclInitWithLoc (name : Identifier) (ty : AstNode HighType) (init : StmtExprMd) (source : FileRange) : StmtExprMd :=
   mkStmtExprMdWithLoc (.Assign [mkVariableMd (.Declare ⟨name, ty⟩)] init) source
 
 /-- Mangle a class name and method name into a flat procedure name: `ClassName@methodName`. -/
@@ -229,7 +230,7 @@ def manglePythonMethod (className : String) (methodName : String) : String :=
     For Any-typed receivers (no model available), returns a Hole instead. -/
 def mkInstanceMethodCall (className : String) (methodName : String)
     (self : StmtExprMd) (args : List StmtExprMd)
-    (source : Option FileRange := none) : StmtExprMd :=
+    (source : FileRange := unknownSource) : StmtExprMd :=
   if className == "Any" then mkStmtExprMdWithLoc .Hole source
   else mkStmtExprMdWithLoc (StmtExpr.StaticCall (manglePythonMethod className methodName) (self :: args)) source
 
@@ -1410,7 +1411,7 @@ partial def translateAssign  (ctx : TranslationContext)
                              (lhs: expr SourceRange)
                              (annotation: Option (expr SourceRange) )
                              (rhs: expr SourceRange)
-                             (source: Option FileRange)
+                             (source: FileRange)
                     : Except TranslationError (TranslationContext × List StmtExprMd × Bool) := do
   -- Returns (ctx, stmts, typeAssertSafe) where typeAssertSafe indicates
   -- whether a post-assignment type assertion on the target variable is valid.
@@ -2028,8 +2029,9 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
         ([varDecl], varRef)
       | _ => ([], iterRaw)
     if let .Call _ (.Name _ {val:= "range",..} _) _ _  := iter then
-      if let .StaticCall "range" _ := iterExpr.val then
-        pure ()
+      if let .StaticCall id _ := iterExpr.val then
+        if id.text == "range" then pure ()
+        else throw (.internalError "Translation of Python range function changed")
       else
         throw (.internalError "Translation of Python range function changed")
     -- Create context with target(s) and loop labels
@@ -2057,26 +2059,35 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
         let isAnyNone (s: StmtExprMd) := match s.val with
           | .StaticCall constructor _ => constructor.text == AnyConstructor.None | _ => false
         match iterExpr.val with
-          | .StaticCall "range" (startExpr::stopExpr::stepExpr::_) =>
-            if ¬ (isAnyNone stopExpr && isAnyNone stepExpr) then
-              throw (.unsupportedConstruct "Unsupport range function with more than 1 input" (toString (repr iter)))
-            let asIntStart := mkStmtExprMd $ .StaticCall "Any..as_int!" [startExpr]
-            let assumeTypeInt := mkStmtExprMdWithLoc (.Assume $ mkStmtExprMd (.StaticCall "Any..isfrom_int" [targetVar])) md
-            let asIntTarget := mkStmtExprMd $ .StaticCall "Any..as_int!" [targetVar]
-            let inRangeExpr := mkStmtExprMd $ .PrimitiveOp .And [
-                  (mkStmtExprMd $ .PrimitiveOp .Geq [asIntTarget, mkStmtExprMd $ .LiteralInt 0]),
-                  (mkStmtExprMd $ .PrimitiveOp .Lt [asIntTarget, asIntStart]) ]
-            let assumeInRange := mkStmtExprMdWithLoc (.Assume inRangeExpr) md
-            pure [assumeTypeInt, assumeInRange]
+          | .StaticCall id (startExpr::stopExpr::stepExpr::_) =>
+            if id.text != "range" then
+              let targetInIter := mkStmtExprMdWithLoc (.StaticCall "PIn" [targetVar, iterExpr]) md
+              let assumeInStmt := mkStmtExprMdWithLoc (.Assume (Any_to_bool targetInIter)) md
+              pure [assumeInStmt]
+            else
+              if ¬ (isAnyNone stopExpr && isAnyNone stepExpr) then
+                throw (.unsupportedConstruct "Unsupport range function with more than 1 input" (toString (repr iter)))
+              let asIntStart := mkStmtExprMd $ .StaticCall "Any..as_int!" [startExpr]
+              let assumeTypeInt := mkStmtExprMdWithLoc (.Assume $ mkStmtExprMd (.StaticCall "Any..isfrom_int" [targetVar])) md
+              let asIntTarget := mkStmtExprMd $ .StaticCall "Any..as_int!" [targetVar]
+              let inRangeExpr := mkStmtExprMd $ .PrimitiveOp .And [
+                    (mkStmtExprMd $ .PrimitiveOp .Geq [asIntTarget, mkStmtExprMd $ .LiteralInt 0]),
+                    (mkStmtExprMd $ .PrimitiveOp .Lt [asIntTarget, asIntStart]) ]
+              let assumeInRange := mkStmtExprMdWithLoc (.Assume inRangeExpr) md
+              pure [assumeTypeInt, assumeInRange]
           | _ =>
             let targetInIter := mkStmtExprMdWithLoc (.StaticCall "PIn" [targetVar, iterExpr]) md
             let assumeInStmt := mkStmtExprMdWithLoc (.Assume (Any_to_bool targetInIter)) md
             pure [assumeInStmt]
       | _ => pure []
     let counterLtLen := match iterExpr.val with
-      | .StaticCall "range" (boundExpr::_) =>
+      | .StaticCall id (boundExpr::_) =>
+        if id.text == "range" then
           mkStmtExprMd $ .PrimitiveOp .Lt [counterExpr,
                           mkStmtExprMd $ .StaticCall "Any..as_int!" [boundExpr]]
+        else
+          mkStmtExprMd $ .PrimitiveOp .Lt [counterExpr,
+                          mkStmtExprMd $ .StaticCall "Any_len" [iterExpr]]
       | _ =>
           mkStmtExprMd $ .PrimitiveOp .Lt [counterExpr,
                           mkStmtExprMd $ .StaticCall "Any_len" [iterExpr]]
@@ -2280,7 +2291,7 @@ def pyFuncDefToPythonFunctionDecl (ctx : TranslationContext) (f : stmt SourceRan
     for a mutable local copy inside the procedure body. -/
 def paramInputPrefix : String := "$in_"
 
-def getTypeConstraint (var : String) (source : Option FileRange) (testers : Array String)
+def getTypeConstraint (var : String) (source : FileRange) (testers : Array String)
     (funcname : String) (displayName : String := var) : Option Condition :=
   let constraints := testers.toList.map fun callee =>
     mkStmtExprMd (.StaticCall (mkId callee) [freeVarExpr var])
@@ -2288,7 +2299,7 @@ def getTypeConstraint (var : String) (source : Option FileRange) (testers : Arra
     some { condition := { createBoolOrExpr constraints with source := source },
            summary := some $ "(" ++ funcname ++ " requires) Type constraint of " ++ displayName }
 
-def getReturnTypeEnsure (source : Option FileRange) (testers : Array String) (funcname : String) : Option Condition :=
+def getReturnTypeEnsure (source : FileRange) (testers : Array String) (funcname : String) : Option Condition :=
   getTypeConstraint PyLauFuncReturnVar source testers funcname
   |>.map fun c => { c with summary := some $ "(" ++ funcname ++ " ensures) Return type constraint" }
 
@@ -2426,7 +2437,7 @@ def preludeSignatureToPythonFunctionDecl (prelude : Core.Program) : List PythonF
       let retParam := proc.header.outputs.head?
       let ret := retParam.map fun (_, tp) =>
         let tys := [getTypeName tp]
-        { source := none,
+        { source := unknownSource,
           laurelType := mkHighTypeMd (.UserDefined (mkId (getTypeName tp))),
           typeTesters := pyLauTypeTesters tys : PyRetInfo }
       some {
@@ -2434,7 +2445,7 @@ def preludeSignatureToPythonFunctionDecl (prelude : Core.Program) : List PythonF
         args:=  proc.header.inputs |>.map λ(nm,tp) =>
         {
           name:= nm.name,
-          source := none,
+          source := unknownSource,
           laurelType := AnyTy,
           typeTesters := pyLauTypeTesters [getTypeName tp],
           default:= noneexpr
@@ -2550,7 +2561,7 @@ def mkDefaultInitDecl (className : String) : PythonFunctionDecl × Procedure :=
     -- where `self` is stripped via `.tail` for methods inside a class.
     args := []
     kwargsName := none
-    ret := some { source := none,
+    ret := some { source := unknownSource,
                   laurelType := mkHighTypeMd (.UserDefined { text := className }),
                   typeTesters := #[] }
   }
@@ -2772,10 +2783,10 @@ def PreludeInfo.ofLaurelProgram (prog : Laurel.Program) : PreludeInfo where
           let argName := if param.name.text.startsWith paramInputPrefix then
             (param.name.text.drop paramInputPrefix.length).toString
           else param.name.text
-          {name:= argName, source := none, laurelType := param.type, typeTesters := pyLauTypeTesters [getHighTypeName param.type.val], default:= some noneexpr}
+          {name:= argName, source := unknownSource, laurelType := param.type, typeTesters := pyLauTypeTesters [getHighTypeName param.type.val], default:= some noneexpr}
         let ret := p.outputs.head?.map fun param =>
           let tys := [getHighTypeName param.type.val]
-          { source := none, laurelType := param.type,
+          { source := unknownSource, laurelType := param.type,
             typeTesters := pyLauTypeTesters tys : PyRetInfo }
         some { name := p.name.text, args := args, kwargsName := none, ret := ret }
   functions :=

@@ -239,9 +239,6 @@ def pyAnalyzeLaurelCommand (mkDischarge : Core.MkDischargeFn := Core.mkDischarge
             { name := "pyspec",
               help := "PySpec module name (e.g., servicelib.Storage).",
               takesArg := .repeat "module" },
-            { name := "keep-all-files",
-              help := "Store intermediate Laurel and Core programs in <dir>.",
-              takesArg := .arg "dir" },
             { name := "entry-point",
               help := "Which procedures to verify: main (main fn only), roots (user procs with no user callers, default), or all (all user procs). Only valid in bugFinding mode.",
               takesArg := .arg "mode" },
@@ -278,13 +275,12 @@ def pyAnalyzeLaurelCommand (mkDischarge : Core.MkDischargeFn := Core.mkDischarge
       | some path => some <$> IO.FS.Handle.mk path .write
       | none => pure none
 
-    let keepPrefix := keepDir.map (s!"{·}/{baseName}")
     let baseVcDir := keepDir.map (fun dir => (s!"{dir}/{baseName}" : System.FilePath))
     let pyAnalyzeBase : VerifyOptions :=
       { VerifyOptions.default with
         verbose := .quiet, removeIrrelevantAxioms := .Precise,
         vcDirectory := baseVcDir }
-    let options ← parseVerifyOptions pflags pyAnalyzeBase
+    let options ← parseVerifyOptions pflags pyAnalyzeBase (inputFile := some filePath)
     let isBugFinding := options.checkMode == .bugFinding
                       || options.checkMode == .bugFindingAssumingCompleteSpec
 
@@ -313,7 +309,6 @@ def pyAnalyzeLaurelCommand (mkDischarge : Core.MkDischargeFn := Core.mkDischarge
     let (outcome, laurelPassStats, pctx) ← StrataPython.Pipeline.runPyAnalyzePipeline {
       filePath, specDir
       dispatchModules, pyspecModules, sourcePath
-      keepAllFilesPrefix := keepPrefix
       verifyOptions := options
       entryPoint, isBugFinding
       outputMode, skipVerification
@@ -555,12 +550,18 @@ def pyResolveOverloadsCommand : _root_.Command where
 def pyInterpretCommand : _root_.Command where
   name := "pyInterpret"
   args := [ "file" ]
-  flags := [{ name := "fuel", help := "Maximum execution steps.", takesArg := .arg "n" }]
-            ++ laurelTranslateFlags
+  flags := [{ name := "fuel", help := "Maximum execution steps.", takesArg := .arg "n" },
+            { name := "keep-all-files",
+              help := "Store intermediate Laurel and Core programs in <dir>.",
+              takesArg := .arg "dir" }]
   help := "Interpret a Python Ion program concretely (Python → Laurel → Core → execute)."
   callback := fun v pflags => do
     let filePath := v[0]
     let keepDir := pflags.getString "keep-all-files"
+    -- Derive a prefix *inside* the directory so pipeline-emitted intermediates
+    -- (`<dir>/<baseName>.<n>.<pass>.laurel.st`) land alongside the final
+    -- programs instead of as siblings of the directory.
+    let keepPrefix := keepDir.map (s!"{·}/{deriveBaseName filePath}")
     let fuel ← match pflags.getString "fuel" with
       | some s => match s.toNat? with
         | .some n => pure n
@@ -574,7 +575,7 @@ def pyInterpretCommand : _root_.Command where
         if let some dir := keepDir then
           IO.FS.createDirAll dir
           IO.FS.writeFile (dir ++ "/laurel.st") (toString (Std.format laurel))
-        match ← StrataPython.translateCombinedLaurel laurel keepDir
+        match ← StrataPython.translateCombinedLaurel laurel keepPrefix
             (analysisMode := .Execute) with
         | (some core, diags) => pure (core, diags)
         | (none, diags) => exitFailure s!"Laurel to Core translation failed: {diags}"

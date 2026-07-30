@@ -38,12 +38,15 @@ def specCtx : SpecExprContext := { procName := "test", argTypes }
 
 def laurelCtx : ToLaurelContext := { filepath := "test.py", modulePrefix := "" }
 
-/-- Lower a `SpecExpr` and return the resulting top-level `StmtExpr` plus the
-    number of reported errors (0 means the lowering succeeded). -/
-def lower (e : SpecExpr) : StmtExpr × Nat :=
-  let act := specExprToLaurel e none specCtx laurelCtx
+/-- Lower a `SpecExpr` in `ctx` and return the resulting top-level `StmtExpr`
+    plus the number of reported errors (0 means the lowering succeeded). -/
+private def lowerIn (ctx : SpecExprContext) (e : SpecExpr) : StmtExpr × Nat :=
+  let act := specExprToLaurel e unknownSource ctx laurelCtx
   let (res, st) := act.run {}
   (res.2.stmt.val, st.errors.size)
+
+/-- Lower a `SpecExpr` in the default all-`Any` context. -/
+def lower (e : SpecExpr) : StmtExpr × Nat := lowerIn specCtx e
 
 /-- Describe the head node of a lowered `StmtExpr`: the callee name of a
     `StaticCall`, or the operator tag of a `PrimitiveOp`. -/
@@ -202,6 +205,35 @@ def asAnyBoxingTests : IO Unit := do
       throw <| IO.userError s!"asAny add: expected right from_bool, got {headName r.val}"
   | _ => throw <| IO.userError s!"asAny add: expected PAdd(.., ..), got {headName stmt}"
 
+/-- A `.UserDefined` operand that is *not* `Any` is a type error in both
+    coercion positions. `asAny` and `asBool` each match `.UserDefined id` and
+    then test `id.text == "Any"`, so a non-`Any` user-defined type takes the
+    error arm rather than being coerced — the operand is still returned, so the
+    surrounding expression keeps its shape and only the error count moves. -/
+def nonAnyUserDefinedTests : IO Unit := do
+  let customCtx : SpecExprContext :=
+    { procName := "test"
+      argTypes := .ofList [("z", HighType.UserDefined (mkId "SomeType"))] }
+  let z : SpecExpr := .var "z" loc
+  -- `asAny`: an arithmetic operand must be `Any`-typed.
+  let (addStmt, addErrs) := lowerIn customCtx (.add z z loc)
+  unless addErrs == 2 do
+    throw <| IO.userError s!"asAny (SomeType operand): expected 2 errors, got {addErrs}"
+  unless headName addStmt == "PAdd" do
+    throw <| IO.userError s!"asAny (SomeType operand): expected PAdd, got {headName addStmt}"
+  -- `asBool`: a boolean-operator operand must be `TBool` or `Any`.
+  let (andStmt, andErrs) := lowerIn customCtx (.and z z loc)
+  unless andErrs == 2 do
+    throw <| IO.userError s!"asBool (SomeType operand): expected 2 errors, got {andErrs}"
+  match andStmt with
+  | .PrimitiveOp actual _ _ =>
+    unless toString actual == toString Operation.And do
+      throw <| IO.userError
+        s!"asBool (SomeType operand): expected PrimitiveOp And, got {toString actual}"
+  | _ =>
+    throw <| IO.userError
+      s!"asBool (SomeType operand): expected PrimitiveOp, got {headName andStmt}"
+
 def allTests : IO Unit := do
   arithmeticTests
   pcmpTests
@@ -211,6 +243,7 @@ def allTests : IO Unit := do
   boolAnyOperandTests
   literalTests
   asAnyBoxingTests
+  nonAnyUserDefinedTests
 
 #guard_msgs in
 #eval allTests

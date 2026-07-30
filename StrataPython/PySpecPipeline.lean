@@ -73,7 +73,7 @@ private def specArgLaurelType (arg : Specs.Arg) : Laurel.HighTypeMd :=
     redundant. -/
 private def specArgToFuncDeclArg (arg : Specs.Arg) : PyArgInfo :=
   { name := arg.name,
-    source := none,
+    source := unknownSource,
     laurelType := specArgLaurelType arg,
     typeTesters := #[],
     default := arg.default.map specDefaultToExpr
@@ -177,7 +177,7 @@ private def buildPySpecLaurelM (pyspecEntries : Array (ModuleName × String))
     match seenTypes.get? ident.text with
     | some prevFile =>
       emitMessageAndAbort .typeNameCollision s!"'{ident.text}' already defined in {prevFile}"
-        (file := srcFile) (loc := ident.source.map (·.range) |>.getD default)
+        (file := srcFile) (loc := ident.source.range)
     | none =>
       seenTypes := seenTypes.insert ident.text srcFile
       dedupedTypes := dedupedTypes.push (td, srcFile)
@@ -187,7 +187,7 @@ private def buildPySpecLaurelM (pyspecEntries : Array (ModuleName × String))
     match seenProcs[proc.name.text]? with
     | some prevFile =>
       emitMessageAndAbort .procedureNameCollision s!"'{proc.name.text}' already defined in {prevFile}"
-        (file := srcFile) (loc := proc.name.source.map (·.range) |>.getD default)
+        (file := srcFile) (loc := proc.name.source.range)
     | none =>
       seenProcs := seenProcs.insert proc.name.text srcFile
       dedupedProcs := dedupedProcs.push (proc, srcFile)

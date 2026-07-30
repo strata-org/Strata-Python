@@ -33,7 +33,6 @@ public structure PyAnalyzeConfig where
   dispatchModules : Array String := #[]
   pyspecModules : Array String := #[]
   sourcePath : Option String := none
-  keepAllFilesPrefix : Option String := none
   verifyOptions : Core.VerifyOptions
   entryPoint : Core.EntryPoint := Core.EntryPoint.roots
   isBugFinding : Bool := true
@@ -62,7 +61,7 @@ private def runPipeline (config : PyAnalyzeConfig)
     let ctx ← read
     let laurelResult ←
       StrataPython.translateCombinedLaurelWithLowered combinedLaurel
-        (keepAllFilesPrefix := config.keepAllFilesPrefix)
+        (keepAllFilesPrefix := config.verifyOptions.keepAllFilesPrefix)
         (pipelineCtx := some ctx) |>.toBaseIO
     match laurelResult with
     | .ok (coreOpt, diags, _, stats) =>
@@ -101,7 +100,6 @@ private def runPipeline (config : PyAnalyzeConfig)
         (proceduresToVerify := some proceduresToVerify)
         (externalPhases := [Strata.frontEndPhase])
         (prefixPhases := inlinePhases)
-        (keepAllFilesPrefix := config.keepAllFilesPrefix)
         (mkDischarge := config.mkDischarge)
         (pipelineCtx := some ctx)
         |>.toBaseIO
