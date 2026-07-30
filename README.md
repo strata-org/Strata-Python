@@ -73,6 +73,50 @@ The package is the repository root:
 └── lake-manifest.json
 ```
 
+## Spec quantifiers
+
+Within a PySpec function body, each supported `assert P` contributes the formula
+`P` to the function's generated preconditions; the imperative `assert` itself is
+not part of the logical expression. PySpec expressions may quantify over lists
+and dictionaries using `all()` and `any()`:
+
+- **Universal** — `all(P(x) for x in xs)` lowers to `∀`.
+- **Existential** — `any(P(x) for x in xs)` lowers to `∃`.
+
+Supported collection forms (the iterable's static type determines the domain):
+
+| Syntax | Domain |
+|--------|--------|
+| `for x in xs` | List elements |
+| `for k in d` or `for k in d.keys()` | Dict string keys |
+| `for v in d.values()` | Dict values (via `d[k]` lookup) |
+| `for k, v in d.items()` | Dict key-value pairs |
+
+Statement-form universal quantifiers (`for ...: assert ...`) remain supported
+for compatibility with generated PySpecs; `assert all(...)` is preferred for
+new specifications. List domains currently bind only the element, not its index,
+so a quantified assertion message cannot identify the failing index.
+
+An optional `if` guard filters the quantification:
+`assert all(len(k) >= 1 for k in Keys if k != sentinel)` lowers to
+`∀ k. membership(k) ⟹ (k ≠ sentinel ⟹ len(k) ≥ 1)`.
+
+**Caveat: an `any(...)` (∃) precondition can be refuted but never proven.**
+The encoding uses collection membership as the SMT trigger. In goal position
+triggers do not synthesize a witness, so a *genuinely satisfied* existential
+verifies as `unknown` — not `✔️` — while a *false* one is refuted. An `any(...)`
+precondition therefore only flags the case where no element can satisfy it; it
+is a bug-finding signal, not a guarantee the verifier can discharge. Do not
+write an `any(...)` precondition expecting callers that satisfy it to verify
+green.
+
+If you need a guarantee callers can discharge, state it universally or
+structurally instead. For non-emptiness, require `len(xs) >= 1`. Where the
+witness matters, take it as a parameter and assert a property of it directly —
+`assert Needle in Keys` is a membership check the solver can prove, unlike
+`assert any(k == Needle for k in Keys)`, which expresses the same requirement
+existentially and therefore cannot be.
+
 ## Testing
 
 ### Compile-time tests (no Python required)

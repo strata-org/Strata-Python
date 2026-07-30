@@ -278,6 +278,15 @@ Context for resolving identifiers.
 structure SpecExprContext where
   procName : String
   argTypes : Std.HashMap String HighType
+  /-- Quantifier-bound names that resolve to a prebuilt Any-typed expression
+      rather than a plain identifier. Used to inline a dict `for k, v` value
+      binder as `d[k]`, so a single key quantifier suffices (avoiding a fragile
+      two-binder trigger). -/
+  boundValues : Std.HashMap String StmtExprMd := {}
+  /-- Current quantifier nesting depth. Nested binders are alpha-renamed to
+      Laurel-only names so they cannot capture identifiers embedded in an outer
+      `boundValues` expression. -/
+  quantifierDepth : Nat := 0
 
 abbrev ToLaurelExprM := ReaderT SpecExprContext ToLaurelM
 
@@ -325,11 +334,13 @@ private def asBool (loc : SourceRange) (act : ToLaurelExprM SomeTypedStmtExpr) :
     Reports a typeError if the name is not found in argTypes. -/
 private def lookupIdentifier (name : String) (loc : SourceRange) (source : FileRange)
     : ToLaurelExprM SomeTypedStmtExpr := do
-  match (← read).argTypes[name]? with
+  let ctx ← read
+  if let some stmt := ctx.boundValues[name]? then
+    return .mkSome (⟨stmt⟩ : TypedStmtExpr StrataPython.Laurel.tyAny)
+  match ctx.argTypes[name]? with
   | some tp => return .mkSome <| .identifier name tp source
   | none =>
-    let pn := (← read).procName
-    reportError .typeError loc s!"Unknown identifier '{name}' in '{pn}'"
+    reportError .typeError loc s!"Unknown identifier '{name}' in '{ctx.procName}'"
     return default
 
 /-- Laurel prelude function realizing each abstract `PCmpOp`. This is the single
@@ -511,12 +522,89 @@ def specExprToLaurel (e : SpecExpr) (source : FileRange)
     let s ← asAny loc <| specExprToLaurel subject src
     let sStr := .anyAsString s
     return .mkSome <| .reSearchBool (.literalString pattern) sStr
-  | .forallList _ _ _ loc => do
-    reportError .forallListUnsupported loc "forallList quantifier not yet supported in preconditions"
-    return default
-  | .forallDict _ _ _ _ loc => do
-    reportError .forallDictUnsupported loc "forallDict quantifier not yet supported in preconditions"
-    return default
+  | .quantifier quant domain collection body loc => do
+    -- The domain supplies the binder, membership guard, trigger, and body
+    -- environment. QuantKind determines how the guard combines with the body.
+    let src ← nodeSource loc
+    let collExpr ← asAny loc <| specExprToLaurel collection src
+    let ctx ← read
+    -- Keep top-level names readable unless that name occurs in the collection:
+    -- `for xs in xs` must retain the outer `xs` in the membership expression.
+    -- Nested binders always use Laurel-only names, as compiler-generated
+    -- temporaries elsewhere do, so they cannot capture identifiers embedded in
+    -- an outer prebuilt value such as d[k].
+    let freshBinderName (name : String) : String :=
+      if ctx.quantifierDepth == 0 && !collection.mentionsVar name then name
+      else s!"$quant_{ctx.quantifierDepth}_{loc.start.byteIdx}_{name}"
+    let (param, guard, trigger, bodyEnv) ←
+      match domain with
+      | .overList varName =>
+        let actualName := freshBinderName varName
+        let elemVar := TypedStmtExpr.identifier actualName StrataPython.Laurel.tyAny src
+        let membership := collExpr.anyAsList.listContains elemVar src
+        let param : Parameter :=
+          { name := mkId actualName, type := { val := StrataPython.Laurel.tyAny, source := src } }
+        let bodyEnv := fun (c : SpecExprContext) => { c with
+          argTypes := c.argTypes.insert varName StrataPython.Laurel.tyAny
+          boundValues := if actualName == varName
+            then c.boundValues.erase varName
+            else c.boundValues.insert varName elemVar.stmt
+          quantifierDepth := c.quantifierDepth + 1 }
+        pure (param, membership, membership.stmt, bodyEnv)
+      | .overDictItems keyVar valVar =>
+        -- Quantify over the string key only and expose the Python value binder
+        -- as the requires-free d[k] lookup. A nested key is alpha-renamed, so
+        -- this prebuilt lookup continues to reference its own outer key.
+        let actualKey := freshBinderName keyVar
+        let dictExpr := collExpr.anyAsDict
+        let keyStr := TypedStmtExpr.identifier actualKey .TString src
+        let membership := dictExpr.dictStrAnyContains keyStr src
+        let valueLookup := dictExpr.dictStrAnyGetOrNone keyStr src
+        let keyBoxed := keyStr.fromStr src
+        let param : Parameter :=
+          { name := mkId actualKey, type := { val := .TString, source := src } }
+        let bodyEnv := fun (c : SpecExprContext) => { c with
+          boundValues := c.boundValues
+            |>.insert keyVar keyBoxed.stmt
+            |>.insert valVar valueLookup.stmt
+          quantifierDepth := c.quantifierDepth + 1 }
+        pure (param, membership, membership.stmt, bodyEnv)
+      | .overDictKeys keyVar =>
+        let actualKey := freshBinderName keyVar
+        let dictExpr := collExpr.anyAsDict
+        let keyStr := TypedStmtExpr.identifier actualKey .TString src
+        let membership := dictExpr.dictStrAnyContains keyStr src
+        let keyBoxed := keyStr.fromStr src
+        let param : Parameter :=
+          { name := mkId actualKey, type := { val := .TString, source := src } }
+        let bodyEnv := fun (c : SpecExprContext) => { c with
+          boundValues := c.boundValues.insert keyVar keyBoxed.stmt
+          quantifierDepth := c.quantifierDepth + 1 }
+        pure (param, membership, membership.stmt, bodyEnv)
+      | .overDictValues valVar =>
+        -- The quantified key is hidden from Python. Retain the readable `$v`
+        -- name at top level and make nested hidden keys unique as well.
+        let keyName := if ctx.quantifierDepth == 0 then "$" ++ valVar
+          else s!"$quant_{ctx.quantifierDepth}_{loc.start.byteIdx}_key"
+        let dictExpr := collExpr.anyAsDict
+        let keyStr := TypedStmtExpr.identifier keyName .TString src
+        let membership := dictExpr.dictStrAnyContains keyStr src
+        let valueLookup := dictExpr.dictStrAnyGetOrNone keyStr src
+        let param : Parameter :=
+          { name := mkId keyName, type := { val := .TString, source := src } }
+        let bodyEnv := fun (c : SpecExprContext) => { c with
+          boundValues := c.boundValues.insert valVar valueLookup.stmt
+          quantifierDepth := c.quantifierDepth + 1 }
+        pure (param, membership, membership.stmt, bodyEnv)
+    let bodyBool ← withReader bodyEnv <| asBool loc <| specExprToLaurel body src
+    return .mkSome <|
+      match quant with
+      | .forall =>
+        TypedStmtExpr.forallTrigger param trigger (guard.implies bodyBool) src
+      | .exists =>
+        -- See README.md "Spec quantifiers" for the user-visible limitation of
+        -- membership-triggered existential preconditions.
+        TypedStmtExpr.existsTrigger param trigger (guard.and bodyBool) src
 
 private def formatAssertionMessage (msg : Array MessagePart) : String :=
   let parts := msg.map fun

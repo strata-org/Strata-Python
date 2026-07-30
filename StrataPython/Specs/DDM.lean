@@ -125,6 +125,19 @@ op forallListExpr(list : SpecExprDecl, varName : Ident, body : SpecExprDecl) : S
 op forallDictExpr(dict : SpecExprDecl, keyVar : Ident,
     valVar : Ident, body : SpecExprDecl) : SpecExprDecl =>
   "forallDict" "(" dict ", " keyVar ", " valVar ", " body ")";
+op existsListExpr(list : SpecExprDecl, varName : Ident, body : SpecExprDecl) : SpecExprDecl =>
+  "exists" "(" list ", " varName ", " body ")";
+op forallKeysExpr(dict : SpecExprDecl, keyVar : Ident, body : SpecExprDecl) : SpecExprDecl =>
+  "forallKeys" "(" dict ", " keyVar ", " body ")";
+op forallValuesExpr(dict : SpecExprDecl, valVar : Ident, body : SpecExprDecl) : SpecExprDecl =>
+  "forallValues" "(" dict ", " valVar ", " body ")";
+op existsKeysExpr(dict : SpecExprDecl, keyVar : Ident, body : SpecExprDecl) : SpecExprDecl =>
+  "existsKeys" "(" dict ", " keyVar ", " body ")";
+op existsValuesExpr(dict : SpecExprDecl, valVar : Ident, body : SpecExprDecl) : SpecExprDecl =>
+  "existsValues" "(" dict ", " valVar ", " body ")";
+op existsDictExpr(dict : SpecExprDecl, keyVar : Ident,
+    valVar : Ident, body : SpecExprDecl) : SpecExprDecl =>
+  "existsDict" "(" dict ", " keyVar ", " valVar ", " body ")";
 
 category MessagePart;
 op strMessagePart(s : Str) : MessagePart => s;
@@ -350,10 +363,27 @@ protected def SpecExpr.toDDM (e : SpecExpr) : DDM.SpecExprDecl SourceRange :=
   | .and lhs rhs loc => .andExpr loc lhs.toDDM rhs.toDDM
   | .or lhs rhs loc => .orExpr loc lhs.toDDM rhs.toDDM
   | .pcmp op lhs rhs loc => .pcmpExpr loc ⟨loc, op.tag⟩ lhs.toDDM rhs.toDDM
-  | .forallList list varName body loc =>
-    .forallListExpr loc list.toDDM ⟨loc, varName⟩ body.toDDM
-  | .forallDict dict keyVar valVar body loc =>
-    .forallDictExpr loc dict.toDDM ⟨loc, keyVar⟩ ⟨loc, valVar⟩ body.toDDM
+  | .quantifier quant domain collection body loc =>
+    -- Each (quant, domain) pair maps to its own text op, so every constructible
+    -- quantifier survives the round-trip. `exists`/`overDictItems` is produced
+    -- by `any(P(k, v) for k, v in d.items())` and has its own text operation.
+    match quant, domain with
+    | .forall, .overList varName =>
+      .forallListExpr loc collection.toDDM ⟨loc, varName⟩ body.toDDM
+    | .forall, .overDictItems keyVar valVar =>
+      .forallDictExpr loc collection.toDDM ⟨loc, keyVar⟩ ⟨loc, valVar⟩ body.toDDM
+    | .forall, .overDictKeys keyVar =>
+      .forallKeysExpr loc collection.toDDM ⟨loc, keyVar⟩ body.toDDM
+    | .forall, .overDictValues valVar =>
+      .forallValuesExpr loc collection.toDDM ⟨loc, valVar⟩ body.toDDM
+    | .exists, .overList varName =>
+      .existsListExpr loc collection.toDDM ⟨loc, varName⟩ body.toDDM
+    | .exists, .overDictKeys keyVar =>
+      .existsKeysExpr loc collection.toDDM ⟨loc, keyVar⟩ body.toDDM
+    | .exists, .overDictValues valVar =>
+      .existsValuesExpr loc collection.toDDM ⟨loc, valVar⟩ body.toDDM
+    | .exists, .overDictItems keyVar valVar =>
+      .existsDictExpr loc collection.toDDM ⟨loc, keyVar⟩ ⟨loc, valVar⟩ body.toDDM
 
 def specExprFormatContext : FormatContext :=
   .ofDialects DDM.PythonSpecs_map
@@ -544,9 +574,21 @@ def DDM.SpecExprDecl.fromDDM (d : DDM.SpecExprDecl SourceRange) : Specs.SpecExpr
     | some op => .pcmp op lhs.fromDDM rhs.fromDDM loc
     | none => .placeholder loc
   | .forallListExpr loc list ⟨_, varName⟩ body =>
-    .forallList list.fromDDM varName body.fromDDM loc
+    .quantifier .forall (.overList varName) list.fromDDM body.fromDDM loc
   | .forallDictExpr loc dict ⟨_, keyVar⟩ ⟨_, valVar⟩ body =>
-    .forallDict dict.fromDDM keyVar valVar body.fromDDM loc
+    .quantifier .forall (.overDictItems keyVar valVar) dict.fromDDM body.fromDDM loc
+  | .existsListExpr loc list ⟨_, varName⟩ body =>
+    .quantifier .exists (.overList varName) list.fromDDM body.fromDDM loc
+  | .forallKeysExpr loc dict ⟨_, keyVar⟩ body =>
+    .quantifier .forall (.overDictKeys keyVar) dict.fromDDM body.fromDDM loc
+  | .forallValuesExpr loc dict ⟨_, valVar⟩ body =>
+    .quantifier .forall (.overDictValues valVar) dict.fromDDM body.fromDDM loc
+  | .existsKeysExpr loc dict ⟨_, keyVar⟩ body =>
+    .quantifier .exists (.overDictKeys keyVar) dict.fromDDM body.fromDDM loc
+  | .existsValuesExpr loc dict ⟨_, valVar⟩ body =>
+    .quantifier .exists (.overDictValues valVar) dict.fromDDM body.fromDDM loc
+  | .existsDictExpr loc dict ⟨_, keyVar⟩ ⟨_, valVar⟩ body =>
+    .quantifier .exists (.overDictItems keyVar valVar) dict.fromDDM body.fromDDM loc
 
 def DDM.MessagePart.fromDDM (d : DDM.MessagePart SourceRange) : Specs.MessagePart :=
   match d with

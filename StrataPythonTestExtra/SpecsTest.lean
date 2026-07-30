@@ -528,7 +528,7 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
   let m ← findMethod c "m"
   expect (m.preconditions.size == 1) s!"expected 1 method precondition, got {m.preconditions.size}"
 
-/-- Test that unsupported patterns emit appropriate warnings. -/
+/-- Test that recoverable unsupported patterns emit warnings without blocking output. -/
 def warningTestCase : IO Unit := withPython fun pythonCmd => do
   IO.FS.withTempFile fun _handle dialectFile => do
     IO.FS.writeBinFile dialectFile StrataPython.Python.toIon
@@ -544,27 +544,25 @@ def warningTestCase : IO Unit := withPython fun pythonCmd => do
           |>.toBaseIO
       match r with
       | .ok (sigs, warnings) =>
-        -- Check that we still produced some output despite warnings
         if sigs.isEmpty then
           throw <| IO.userError "Expected signatures from warnings.py but got none"
-        -- Check that we got warnings (not zero)
-        if warnings.isEmpty then
-          throw <| IO.userError "Expected warnings from warnings.py but got none"
-        -- Check for specific expected warning substrings
+        let loopWithDocstring ← findFn sigs "for_loop_with_docstring"
+        if loopWithDocstring.preconditions.size != 1 then
+          throw <| IO.userError
+            s!"Expected the legacy loop with a docstring to retain 1 precondition, got \
+               {loopWithDocstring.preconditions.size}"
         let expectedWarnings := #[
-          "unsupported __init__ assignment",   -- self.name = "hello"
-          "skipped Assign in function body",   -- x = kw["a"]
-          "For: else clause not supported",    -- for/else loop
-          "skipped Expr in function body"      -- kw["a"] (bare expression)
+          "unsupported __init__ assignment",
+          "skipped Assign in function body",
+          "skipped Expr in function body"
         ]
         for expected in expectedWarnings do
           if !warnings.any (·.contains expected) then
             let warnStr := warnings.foldl (init := "") fun acc w => s!"{acc}\n  {w}"
             throw <| IO.userError
               s!"Missing expected warning containing \"{expected}\". Actual warnings:{warnStr}"
-        -- eq_bad_rhs: the unsupported right-hand side must warn exactly once.
-        -- The transCompare `.Eq` fall-through previously re-translated it,
-        -- emitting the "unsupported expression" warning twice for one line.
+        -- eq_bad_rhs must warn exactly once: a duplicated warning means the Eq
+        -- fall-through is re-translating the unsupported right side.
         let unsupportedRhs := warnings.filter fun w =>
           w.contains "unsupported expression" && w.contains "bit_length"
         if unsupportedRhs.size != 1 then
@@ -577,6 +575,52 @@ def warningTestCase : IO Unit := withPython fun pythonCmd => do
 
 #guard_msgs in
 #eval warningTestCase
+
+/-- Unsupported quantifier shapes must abort PySpec translation rather than
+    silently weakening the generated contract. One fixture covers each refusal
+    branch for expression- and statement-form quantifiers. -/
+def quantifierErrorTestCase : IO Unit := withPython fun pythonCmd => do
+  IO.FS.withTempFile fun _handle dialectFile => do
+    IO.FS.writeBinFile dialectFile StrataPython.Python.toIon
+    IO.FS.withTempDir fun strataDir => do
+      let r ←
+        translateFile
+          (pythonCmd := toString pythonCmd)
+          (dialectFile := dialectFile)
+          (strataDir := strataDir)
+          (pythonFile := testDir / "quantifier_errors.py")
+          (searchPath := testDir)
+          (.ofComponent (.ofString "quantifier_errors"))
+          |>.toBaseIO
+      match r with
+      | .ok _ =>
+        throw <| IO.userError "Expected unsupported quantifiers to produce hard errors"
+      | .error e =>
+        let expectedErrors := #[
+          ("any: iterable type is not a supported collection", 1),
+          ("any: iterable could not be translated", 1),
+          ("any: only `any(body for x in iterable)` is supported", 1),
+          ("any: argument must be a generator expression", 1),
+          ("any: exactly one `for` clause is supported", 1),
+          ("any: list quantifier expects a single loop variable", 1),
+          ("any: dict items quantifier expects `for k, v in d.items()`", 1),
+          ("all: at most one `if` clause is supported", 1),
+          ("any: dict quantifier requires str keys", 1),
+          ("any: quantifier body could not be translated", 2),
+          ("all: quantifier guard could not be translated", 2),
+          ("For: iterable type is not a supported collection", 1),
+          ("For: iterable could not be translated", 1),
+          ("For: loop body could not be fully translated", 2),
+          ("For: else clause not supported", 1)
+        ]
+        for (expected, expectedCount) in expectedErrors do
+          let actualCount := (e.splitOn expected).length - 1
+          unless actualCount == expectedCount do
+            throw <| IO.userError
+              s!"Expected exactly {expectedCount} hard error(s) containing \"{expected}\", got {actualCount}. Actual errors:\n{e}"
+
+#guard_msgs in
+#eval quantifierErrorTestCase
 
 
 meta def testNegRoundTrip (v : Nat) : Bool :=
@@ -636,8 +680,15 @@ def specExprSamples : List (String × SpecExpr) :=
     ("containsKey",  .containsKey x "k" rtLoc),
     ("implies",      .implies bt bf rtLoc),
     ("not",          .not bt rtLoc),
-    ("forallList",   .forallList x "i" bt rtLoc),
-    ("forallDict",   .forallDict x "k" "val" bt rtLoc) ]
+    ("forallList",   .quantifier .forall (.overList "i") x bt rtLoc),
+    ("forallDict",   .quantifier .forall (.overDictItems "k" "val") x bt rtLoc),
+    ("forallKeys",   .quantifier .forall (.overDictKeys "k") x bt rtLoc),
+    ("forallValues", .quantifier .forall (.overDictValues "val") x bt rtLoc),
+    ("existsList",   .quantifier .exists (.overList "i") x bt rtLoc),
+    ("existsKeys",   .quantifier .exists (.overDictKeys "k") x bt rtLoc),
+    ("existsValues", .quantifier .exists (.overDictValues "val") x bt rtLoc),
+    -- Surface form: `any(P(k, val) for k, val in d.items())`.
+    ("existsDict",   .quantifier .exists (.overDictItems "k" "val") x bt rtLoc) ]
 
 /-- DDM round-trip regression: every `SpecExpr` ctor must survive `toDDM`/`fromDDM` up to `softBEq`. -/
 def specExprRoundTripTest : IO Unit := do

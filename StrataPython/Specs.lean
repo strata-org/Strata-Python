@@ -654,7 +654,7 @@ def pySpecArg (usedNames : Std.HashSet String)
 structure SpecAssertionContext where
   filePath : System.FilePath
   kwargs : Option (String × SpecType) := none
-  /-- Local variable type bindings (e.g., from for-loop iteration variables). -/
+  /-- Local variable type bindings (e.g., quantifier iteration variables). -/
   localTypes : Std.HashMap String SpecType := {}
   /-- Whether `transExpr` may translate `obj.attr` (else it is unsupported).
       See the `.Attribute` case in `transExpr` for which contracts enable it. -/
@@ -820,6 +820,106 @@ private def transCompare (loc : SourceRange)
   | _ =>
     return none
 
+/-- Translate `any(body for x in iterable)` / `all(body for x in iterable)` into
+    an existential/universal quantifier respectively. Unsupported quantifier
+    shapes are hard errors: silently omitting a requested contract would weaken
+    the generated specification. Both single-name domains and the two-name
+    `d.items()` domain are accepted. -/
+def transQuantCall (loc : SourceRange)
+    (callee : String) (kind : QuantKind)
+    (args : Array (expr SourceRange))
+    (transExpr : expr SourceRange → SpecAssertionM (SpecExpr × SpecType))
+    : SpecAssertionM (Option SpecExpr) := do
+  -- Peel `any/all(<gen>)` down to a single-`for` comprehension.
+  let .isTrue _ := decideProp (args.size = 1)
+    | specError loc s!"{callee}: only `{callee}(body for x in iterable)` is supported"
+      return none
+  let .GeneratorExp _ elt ⟨_, gens⟩ := args[0]
+    | specError loc s!"{callee}: argument must be a generator expression"
+      return none
+  let .isTrue _ := decideProp (gens.size = 1)
+    | specError loc s!"{callee}: exactly one `for` clause is supported"
+      return none
+  let .mk_comprehension _ target iter ⟨_, ifs⟩ _ := gens[0]
+  -- Domain is chosen purely from the iterable's static type.
+  let (cleanIter, (iterExpr, iterTp)) ← runNoWarn (transExpr iter)
+  if not cleanIter || iterExpr.containsPlaceholder then
+    specError loc s!"{callee}: iterable could not be translated"
+    return none
+  let some domainInfo := iterTp.selectQuantDomain
+    | specError loc s!"{callee}: iterable type is not a supported collection"
+      return none
+  -- The Laurel model only has `DictStrAny`, so reject non-`str`-keyed dicts.
+  if let some kTp := domainInfo.dictKeyType? then
+    unless kTp.isStringType do
+      specError loc s!"{callee}: dict quantifier requires str keys (only Dict[str, _] is supported)"
+      return none
+  -- Match the target binder against the domain to determine bindings and domain.
+  -- For single-name targets we get one (name, type); for tuple targets we get two.
+  let (bindings, domain) ← match target, domainInfo with
+    -- Single name over list: `all(P for x in xs)`
+    | .Name _ ⟨_, varName⟩ (.Store _), .list elemTp =>
+      pure (#[(varName, elemTp)], SpecQuantDomain.overList varName)
+    -- Single name over dict keys: `all(P for k in d)` / `d.keys()`
+    | .Name _ ⟨_, varName⟩ (.Store _), .dictKeys kTp _ =>
+      pure (#[(varName, kTp)], SpecQuantDomain.overDictKeys varName)
+    -- Single name over dict values: `all(P for v in d.values())`
+    | .Name _ ⟨_, varName⟩ (.Store _), .dictValues _kTp vTp =>
+      pure (#[(varName, vTp)], SpecQuantDomain.overDictValues varName)
+    -- Tuple over dict items: `all(P for k, v in d.items())`
+    | .Tuple _ ⟨_, elts⟩ (.Store _), .dictItems kTp vTp =>
+      if h : elts.size = 2 then
+        match elts[0], elts[1] with
+        | .Name _ ⟨_, kVar⟩ (.Store _), .Name _ ⟨_, vVar⟩ (.Store _) =>
+          pure (#[(kVar, kTp), (vVar, vTp)], SpecQuantDomain.overDictItems kVar vVar)
+        | _, _ =>
+          specError loc s!"{callee}: tuple target must contain simple names"
+          return none
+      else
+        specError loc s!"{callee}: tuple target must have exactly 2 variables"
+        return none
+    | .Tuple _ _ (.Store _), .list _ =>
+      specError loc s!"{callee}: list quantifier expects a single loop variable"
+      return none
+    | .Name _ _ (.Store _), .dictItems _ _ =>
+      specError loc s!"{callee}: dict items quantifier expects `for k, v in d.items()`"
+      return none
+    | _, _ =>
+      specError loc s!"{callee}: quantifier over this collection is not supported"
+      return none
+  -- Seed the local type context with the quantifier-bound variable(s).
+  let seedLocalTypes (lt : Std.HashMap String SpecType) : Std.HashMap String SpecType :=
+    bindings.foldl (fun acc (n, tp) => acc.insert n tp) lt
+  -- Translate the body with the loop variable(s) bound to their element type(s).
+  let (cleanBody, (bodyExpr, _)) ← runNoWarn <|
+    withReader (fun ctx =>
+      { ctx with localTypes := seedLocalTypes ctx.localTypes }) <|
+      transExpr elt
+  if not cleanBody || bodyExpr.containsPlaceholder then
+    specError loc s!"{callee}: quantifier body could not be translated"
+    return none
+  -- Translate `if` guards (at most one supported) into guard expressions.
+  let guardExpr ← if ifs.size == 0 then pure none
+    else if ifs.size > 1 then
+      specError loc s!"{callee}: at most one `if` clause is supported"
+      return none
+    else
+      let (cleanGuard, (gExpr, _)) ← runNoWarn <|
+        withReader (fun ctx =>
+          { ctx with localTypes := seedLocalTypes ctx.localTypes }) <|
+          transExpr ifs[0]!
+      if not cleanGuard || gExpr.containsPlaceholder then
+        specError loc s!"{callee}: quantifier guard could not be translated"
+        return none
+      pure (some gExpr)
+  -- Wrap the body with the guard: for `forall`, guard ⟹ body; for `exists`, guard ∧ body.
+  let wrappedBody := match guardExpr with
+    | none => bodyExpr
+    | some guard => match kind with
+      | .forall => .implies guard bodyExpr loc
+      | .exists => .and guard bodyExpr loc
+  return some (.quantifier kind domain iterExpr wrappedBody (loc := loc))
+
 /-- Unified expression translator. Translates a Python expression into a `SpecExpr`
     paired with its inferred `SpecType`. Handles value expressions (variables,
     subscripts, literals, `len`), assertion expressions (`isinstance`, comparisons,
@@ -939,9 +1039,21 @@ partial def transExpr (e : expr SourceRange)
           | _ =>
             specWarning loc s!"isinstance: unsupported type argument"
             return placeholder
+    -- Quantifier builtins: `any(body for x in iterable)` → ∃,
+    -- `all(body for x in iterable)` → ∀.
+    if funcName == "any" then
+      match ← transQuantCall loc "any" .exists args transExpr with
+      | some quant => return (quant, boolType)
+      | none => return placeholder
+    if funcName == "all" then
+      match ← transQuantCall loc "all" .forall args transExpr with
+      | some quant => return (quant, boolType)
+      | none => return placeholder
     specWarning loc s!"unsupported call: {funcName}(...)"
     return placeholder
-  -- compile("pattern").search(subject) — translate to regexMatch
+  -- compile("pattern").search(subject) — translate to regexMatch. Matched before
+  -- the generic method-view arm below: its attribute object is a nested `.Call`,
+  -- which the view arm's bare-`dictExpr` object also matches, so order matters.
   | .Call _ (.Attribute _ (.Call _ (.Name _ ⟨_, compileName⟩ (.Load _)) ⟨_, compileArgs⟩ _)
       ⟨_, searchAttr⟩ (.Load _)) ⟨_, searchArgs⟩ _ =>
     if compileName == "compile" && searchAttr == "search" then
@@ -955,6 +1067,35 @@ partial def transExpr (e : expr SourceRange)
           | _ => pure ()
     specWarning loc s!"unsupported method call expression"
     return placeholder
+  -- d.items() / d.keys() / d.values() — dict views. Each translates to the dict
+  -- subject expression, retyped as `ItemsView`/`KeysView`/`ValuesView` so that
+  -- quantifier-domain selection is driven by the type rather than by matching
+  -- the view method syntactically downstream.
+  | .Call _ (.Attribute _ dictExpr ⟨_, viewName⟩ (.Load _)) ⟨_, viewArgs⟩ _ =>
+    let mkView (loc : SourceRange) (kTp vTp : SpecType) : Option SpecType :=
+      match viewName with
+      | "items"  => some (SpecType.itemsView loc kTp vTp)
+      | "keys"   => some (SpecType.keysView loc kTp vTp)
+      | "values" => some (SpecType.valuesView loc kTp vTp)
+      | _        => none
+    if (mkView loc anyType anyType).isNone then
+      -- Not a dict view (e.g. `x.bit_length()`); emit the same generic
+      -- "unsupported expression" warning as the catch-all arm rather than a
+      -- view-specific message, so unrelated method calls translate uniformly.
+      specWarning loc s!"unsupported expression: {eformat e.toAst}"
+      return placeholder
+    if viewArgs.size != 0 then
+      specWarning loc s!"{viewName}: .{viewName}() call should have no arguments"
+      return placeholder
+    let (clean, (dictSubj, dictTp)) ← runNoWarn (transExpr dictExpr)
+    if not clean then
+      return placeholder
+    let some (kTp, vTp) := dictTp.extractDictKeyValueTypes
+      | specWarning loc s!"{viewName}: .{viewName}() subject is not a Dict/Mapping type"
+        return placeholder
+    let some viewTp := mkView loc kTp vTp
+      | return placeholder
+    return (dictSubj, viewTp)
   -- Compare: "key" in container, then dispatch to transCompare
   | .Compare _ lhs ⟨_, ops⟩ ⟨_, comparators⟩ =>
     -- "key" in container
@@ -1021,6 +1162,20 @@ partial def transExpr (e : expr SourceRange)
     specWarning loc s!"unsupported expression: {eformat e.toAst}"
     return placeholder
 
+/-- Message text for an `assert` whose formula could not be translated. The
+    warning is classified by `MessageKind.pySpecDroppedAssertion`; match on that
+    kind rather than on this text. -/
+def droppedAssertionWarning := "unsupported expression in assert; dropped"
+
+/-- Emit a warning carrying an explicit `MessageKind`. `specWarning` always uses
+    the generic `pySpecParsingWarning` kind, which consumers cannot distinguish;
+    use this when a warning has to be recognized programmatically. -/
+def specWarningOfKind (kind : MessageKind) (loc : SourceRange) (message : String)
+    : SpecAssertionM Unit := do
+  let file := (←read) |>.filePath
+  let w : PipelineMessage := { file, loc, phase := pySpecParsingPhase, kind, message }
+  modify fun s => { s with warnings := s.warnings.push w }
+
 mutual
 
 def blockStmt (s : stmt SourceRange) : SpecAssertionM Unit := do
@@ -1035,7 +1190,9 @@ def blockStmt (s : stmt SourceRange) : SpecAssertionM Unit := do
     specWarning s.ann "skipped Expr in function body"
   | .Assert _ test msg =>
     let (clean, (formula, _)) ← runNoWarn (transExpr test)
-    if !clean then pure ()
+    if !clean || formula.containsPlaceholder then
+      specWarningOfKind .pySpecDroppedAssertion test.ann droppedAssertionWarning
+      return
     else
     let message ← match msg with
       | ⟨_, some (.Constant _ (.ConString _ ⟨_, str⟩) _)⟩ => pure #[MessagePart.str str]
@@ -1065,57 +1222,77 @@ def blockStmt (s : stmt SourceRange) : SpecAssertionM Unit := do
     specError s.ann s!"Inner classes are not supported."
   | .For _ target iter ⟨_, body⟩ ⟨_, orelse⟩ ⟨_, type_comment⟩ =>
     if type_comment.isSome then
-      specWarning s.ann "For: type_comment not supported"
+      specError s.ann "For: type_comment not supported"
+      return
     if orelse.size > 0 then
-      specWarning s.ann "For: else clause not supported"
-    match target, iter with
-    -- for varName in iterable:
-    | .Name _ ⟨_, varName⟩ (.Store _), _ =>
-      let (clean, (listExpr, iterTp)) ← runNoWarn (transExpr iter)
-      if not clean then
-        return ()
-      let some elemTp := iterTp.extractElementType
-        | specWarning s.ann "For: iterable is not a List/Sequence type"
-          return
+      specError s.ann "For: else clause not supported"
+      return
+    -- Preserve the legacy generated-spec form while all()/any() adoption rolls
+    -- out. Domain choice is type-directed; target syntax is validated afterward.
+    let (clean, (iterExpr, iterTp)) ← runNoWarn (transExpr iter)
+    if not clean || iterExpr.containsPlaceholder then
+      specError s.ann "For: iterable could not be translated"
+      return
+    let some domainInfo := iterTp.selectQuantDomain
+      | specError s.ann "For: iterable type is not a supported collection"
+        return
+    if let some kTp := domainInfo.dictKeyType? then
+      unless kTp.isStringType do
+        specError s.ann "For: dict quantifier requires str keys (only Dict[str, _] is supported)"
+        return
+    -- Run the loop body with its binders typed, then wrap each assertion in a
+    -- universal over the selected domain. Multiple assertions remain separate
+    -- preconditions, matching the legacy generated PySpec behavior.
+    let quantifyBody (seed : SpecAssertionContext → SpecAssertionContext)
+        (domain : SpecQuantDomain) : SpecAssertionM Unit := do
       let prevAssertions := (←get).assertions
-      modify fun s => { s with assertions := #[] }
-      withReader (fun ctx =>
-        { ctx with localTypes := ctx.localTypes.insert varName elemTp }) <|
-        blockStmts body
-      let bodyAssertions := (←get).assertions
-      let wrapped := bodyAssertions.map fun a =>
-        { a with formula := .forallList listExpr varName a.formula s.ann }
-      modify fun s => { s with assertions := prevAssertions ++ wrapped }
-    -- for keyVar, valVar in dictExpr.items():
-    | .Tuple _ ⟨_, elts⟩ (.Store _),
-      .Call _ (.Attribute _ dictExpr ⟨_, "items"⟩ (.Load _)) ⟨_, args⟩ _ =>
-      if elts.size != 2 then
-        specWarning s.ann "For: dict unpacking requires exactly 2 variables"
-      else if args.size != 0 then
-        specWarning s.ann "For: .items() call should have no arguments"
+      let warningStart := (←get).warnings.size
+      modify fun st => { st with assertions := #[] }
+      let (errorFree, ()) ← runChecked <| withReader seed (blockStmts body)
+      let bodyState ← get
+      let newWarnings := bodyState.warnings.extract warningStart bodyState.warnings.size
+      let droppedAssertion := newWarnings.any fun w => w.kind == .pySpecDroppedAssertion
+      if !errorFree || droppedAssertion then
+        specError s.ann "For: loop body could not be fully translated"
+        modify fun st => { st with assertions := prevAssertions }
       else
-        match elts[0]!, elts[1]! with
-        | .Name _ ⟨_, keyVar⟩ (.Store _), .Name _ ⟨_, valVar⟩ (.Store _) =>
-          let (clean, (dictSubj, dictTp)) ← runNoWarn (transExpr dictExpr)
-          if not clean then
-            return ()
-          let some (kTp, vTp) := dictTp.extractDictKeyValueTypes
-            | specWarning s.ann s!"For: .items() subject is not a Dict/Mapping type"
-              return
-          let prevAssertions := (←get).assertions
-          modify fun st => { st with assertions := #[] }
-          withReader (fun ctx => { ctx with
-            localTypes := ctx.localTypes |>.insert keyVar kTp |>.insert valVar vTp
-            })
-            (blockStmts body)
-          let bodyAssertions := (←get).assertions
-          let wrapped := bodyAssertions.map fun a =>
-            { a with formula := .forallDict dictSubj keyVar valVar a.formula s.ann }
-          modify fun st => { st with assertions := prevAssertions ++ wrapped }
-        | _, _ =>
-          specWarning s.ann "For: dict unpacking requires Name targets"
-    | _, _ =>
-      specWarning s.ann "For: unsupported target pattern"
+        let wrapped := bodyState.assertions.map fun a =>
+          { a with formula := .quantifier .forall domain iterExpr a.formula s.ann }
+        modify fun st => { st with assertions := prevAssertions ++ wrapped }
+    match domainInfo with
+    | .list elemTp =>
+      match target with
+      | .Name _ ⟨_, varName⟩ (.Store _) =>
+        quantifyBody (fun ctx => { ctx with localTypes := ctx.localTypes.insert varName elemTp })
+          (.overList varName)
+      | _ => specError s.ann "For: list quantifier expects a single loop variable"
+    | .dictItems kTp vTp =>
+      match target with
+      | .Tuple _ ⟨_, elts⟩ (.Store _) =>
+        if elts.size != 2 then
+          specError s.ann "For: dict unpacking requires exactly 2 variables"
+        else
+          match elts[0]!, elts[1]! with
+          | .Name _ ⟨_, keyVar⟩ (.Store _), .Name _ ⟨_, valVar⟩ (.Store _) =>
+            quantifyBody
+              (fun ctx => { ctx with
+                localTypes := ctx.localTypes |>.insert keyVar kTp |>.insert valVar vTp })
+              (.overDictItems keyVar valVar)
+          | _, _ =>
+            specError s.ann "For: dict unpacking requires Name targets"
+      | _ => specError s.ann "For: dict quantifier expects `for k, v in d.items()`"
+    | .dictKeys kTp _vTp =>
+      match target with
+      | .Name _ ⟨_, keyVar⟩ (.Store _) =>
+        quantifyBody (fun ctx => { ctx with localTypes := ctx.localTypes.insert keyVar kTp })
+          (.overDictKeys keyVar)
+      | _ => specError s.ann "For: dict keys quantifier expects a single loop variable"
+    | .dictValues _kTp vTp =>
+      match target with
+      | .Name _ ⟨_, valVar⟩ (.Store _) =>
+        quantifyBody (fun ctx => { ctx with localTypes := ctx.localTypes.insert valVar vTp })
+          (.overDictValues valVar)
+      | _ => specError s.ann "For: dict values quantifier expects a single loop variable"
   | .If _ pred ⟨_, t⟩ ⟨_, f⟩ =>
     let (clean, (cond, _)) ← runNoWarn (transExpr pred)
     if clean then
@@ -1146,9 +1323,14 @@ def collectAssertions (decls : ArgDecls) (_returnType : SpecType)
   let warnings := (←get).warnings
   modify fun s => { s with errors := #[], warnings := #[] }
   let filePath := (←read).pythonFile
+  -- Seed local types from the args so a quantified iterable such as `Keys`
+  -- resolves to its declared collection type rather than `Any`.
+  let localTypes := (decls.args ++ decls.kwonly).foldl
+    (init := {}) fun acc a => acc.insert a.name a.type
   let ctx : SpecAssertionContext :=
     { filePath
-      kwargs := decls.kwargs }
+      kwargs := decls.kwargs
+      localTypes }
   let ((), as) := action ctx { errors, warnings }
   modify fun s => { s with errors := as.errors, warnings := as.warnings }
   pure as

@@ -789,23 +789,6 @@ info: pySpecToLaurel.isinstanceUnsupported: isinstance check for 'MyType' not ye
   #[func "f" str
     (preconditions := #[{ message := #[], formula := .isInstanceOf (.var "x" loc) "MyType" loc }])]
 
--- Precondition: forallListUnsupported
-/--
-info: pySpecToLaurel.forallListUnsupported: forallList quantifier not yet supported in preconditions
--/
-#guard_msgs in
-#eval runTestWarningKinds
-  #[func "f" str
-    (preconditions := #[{ message := #[], formula := .forallList (.var "xs" loc) "x" (.var "x" loc) loc }])]
-
--- Precondition: forallDictUnsupported
-/--
-info: pySpecToLaurel.forallDictUnsupported: forallDict quantifier not yet supported in preconditions
--/
-#guard_msgs in
-#eval runTestWarningKinds
-  #[func "f" str
-    (preconditions := #[{ message := #[], formula := .forallDict (.var "d" loc) "k" "v" (.var "k" loc) loc }])]
 
 -- Declaration: missingMethodSelf
 /--
@@ -996,6 +979,132 @@ private def translatePrecond (preconditions : Array Assertion)
     (args := #[arg "d" str])
   assert! errs == 0
   assert! pre.contains "DictStrAny_contains"
+
+/-! ## Quantifier lowering shape
+
+Semantic coverage for quantifiers (does the formula prove/refute what the
+Python means?) lives in the end-to-end suite
+`StrataPythonTestExtra/AnalyzeLaurelTest.lean`, which runs PySpec fixtures
+through the solver and checks pass/violation verdicts per domain.
+
+The checks here pin only what solver verdicts cannot observe: the *shape* of
+the emitted Laurel — the membership trigger `{...}`, the guard/body combiner
+(`==>` for ∀ vs `&` for ∃), and binder naming/renaming. One representative
+pin per shape aspect; the remaining domain combinations are covered
+semantically. -/
+
+/-- Render the single precondition produced for `formulas` and require the
+    exact Laurel text `expectedFormula` (with no translation errors). -/
+private def precondPins (args : Array Arg)
+    (formula : Assertion) (expectedFormula : String) : Bool :=
+  let (rendered, errs) := translatePrecond #[formula] (args := args)
+  errs == 0 && rendered == s!"requires {expectedFormula} summary \"precondition 0\""
+
+-- Canonical ∀-over-list shape: `all(len(x) >= 1 for x in xs)`. The binder is
+-- Any-typed, the List_contains membership guard doubles as the trigger, and
+-- the guard is combined with the body by implication.
+#guard precondPins #[arg "xs" str]
+  { message := #[], formula :=
+      .quantifier .forall (.overList "x") (.var "xs" loc)
+        (.intGe (.stringLen (.var "x" loc) loc) (.intLit 1 loc) loc) loc }
+  "forall(x: Any){List_contains(Any..as_ListAny!(xs), x)} => \
+     List_contains(Any..as_ListAny!(xs), x) ==> \
+       Any_to_bool(PGe(from_int(Str.Length(Any..as_string!(x))), from_int(1)))"
+
+-- ∃ is the dual: same trigger and guard, but conjoined (`&`) with the body —
+-- an implication here would make the existential vacuously witnessable.
+#guard precondPins #[arg "xs" str]
+  { message := #[], formula :=
+      .quantifier .exists (.overList "x") (.var "xs" loc)
+        (.intGe (.stringLen (.var "x" loc) loc) (.intLit 1 loc) loc) loc }
+  "exists(x: Any){List_contains(Any..as_ListAny!(xs), x)} => \
+     List_contains(Any..as_ListAny!(xs), x) & \
+       Any_to_bool(PGe(from_int(Str.Length(Any..as_string!(x))), from_int(1)))"
+
+-- Dict `.values()` shape: `all(len(v) >= 1 for v in d.values())` quantifies
+-- over a synthetic string key `$v` (not the user's `v`, which is the value)
+-- and binds the body occurrence of `v` to the `d[$v]` lookup.
+#guard precondPins #[arg "d" str]
+  { message := #[], formula :=
+      .quantifier .forall (.overDictValues "v") (.var "d" loc)
+        (.intGe (.stringLen (.var "v" loc) loc) (.intLit 1 loc) loc) loc }
+  "forall($v: string){DictStrAny_contains(Any..as_Dict!(d), $v)} => \
+     DictStrAny_contains(Any..as_Dict!(d), $v) ==> \
+       Any_to_bool(PGe(from_int(Str.Length(Any..as_string!(\
+         DictStrAny_get_or_none(Any..as_Dict!(d), $v)))), from_int(1)))"
+
+-- Binder/collection shadowing: in `all(len(xs) >= 1 for xs in xs)` the binder
+-- is alpha-renamed to a fresh `$quant_…` name so the membership guard still
+-- reads the outer function argument `xs` instead of the binder.
+-- (Semantic counterpart: `require_shadowed_nonempty` in AnalyzeLaurelTest.)
+#guard precondPins #[arg "xs" str]
+  { message := #[], formula :=
+      .quantifier .forall (.overList "xs") (.var "xs" loc)
+        (.intGe (.stringLen (.var "xs" loc) loc) (.intLit 1 loc) loc) loc }
+  "forall($quant_0_0_xs: Any){\
+       List_contains(Any..as_ListAny!(xs), $quant_0_0_xs)} => \
+     List_contains(Any..as_ListAny!(xs), $quant_0_0_xs) ==> \
+       Any_to_bool(PGe(from_int(Str.Length(Any..as_string!(\
+         $quant_0_0_xs))), from_int(1)))"
+
+-- Nested-capture regression: the inner ∀ binds `k`, shadowing the outer dict
+-- key `k`, while its body reads the outer value `v` (inlined as `d[k]`). The
+-- inlined lookup must keep reading the *outer* `k`; capturing the renamed
+-- inner binder would leave the formula ill-scoped.
+-- (Semantic counterpart: `require_groups_nonempty` in AnalyzeLaurelTest.)
+#guard precondPins #[arg "d" str]
+  { message := #[], formula :=
+      .quantifier .forall (.overDictItems "k" "v") (.var "d" loc)
+        (.quantifier .forall (.overList "k") (.var "v" loc)
+          (.intGe (.stringLen (.var "v" loc) loc) (.intLit 1 loc) loc) loc) loc }
+  "forall(k: string){DictStrAny_contains(Any..as_Dict!(d), k)} => \
+     DictStrAny_contains(Any..as_Dict!(d), k) ==> \
+       forall($quant_1_0_k: Any){\
+           List_contains(Any..as_ListAny!(\
+             DictStrAny_get_or_none(Any..as_Dict!(d), k)), $quant_1_0_k)} => \
+         List_contains(Any..as_ListAny!(\
+           DictStrAny_get_or_none(Any..as_Dict!(d), k)), $quant_1_0_k) ==> \
+           Any_to_bool(PGe(from_int(Str.Length(Any..as_string!(\
+             DictStrAny_get_or_none(Any..as_Dict!(d), k)))), from_int(1)))"
+
+
+/-! ## Type-directed quantifier domain selection -/
+
+-- `List[T]` / `Sequence[T]` select the list domain; dict views select their
+-- respective domains, while bare `Dict`/`Mapping` selects key iteration. An
+-- unsupported collection selects nothing, so quantifier translation hard-errors.
+-- Each check pins the carried payload types, not just the variant: the
+-- element/key/value types seed `localTypes` for the quantifier body, so a
+-- domain that fired with the wrong payload would type the binder wrongly.
+#guard (match (listOf str).selectQuantDomain with
+        | some (.list elemTp) => elemTp == str | _ => false)
+#guard (match (SpecType.ident loc .typingSequence #[int]).selectQuantDomain with
+        | some (.list elemTp) => elemTp == int | _ => false)
+#guard (match (SpecType.itemsView loc str int).selectQuantDomain with
+        | some (.dictItems kTp vTp) => kTp == str && vTp == int | _ => false)
+#guard (match (SpecType.keysView loc str int).selectQuantDomain with
+        | some (.dictKeys kTp vTp) => kTp == str && vTp == int | _ => false)
+#guard (match (SpecType.valuesView loc str int).selectQuantDomain with
+        | some (.dictValues kTp vTp) => kTp == str && vTp == int | _ => false)
+#guard (match (SpecType.ident loc .typingDict #[str, int]).selectQuantDomain with
+        | some (.dictKeys kTp vTp) => kTp == str && vTp == int | _ => false)
+#guard (match (SpecType.ident loc .typingMapping #[str, int]).selectQuantDomain with
+        | some (.dictKeys kTp vTp) => kTp == str && vTp == int | _ => false)
+-- `Set[str]` is not a supported collection: no domain, so quantifying is refused.
+#guard (SpecType.ident loc (PythonIdent.ofComponent "builtins" "set") #[str])
+  |>.selectQuantDomain |>.isNone
+
+-- `dictKeyType?` reports the key type for every dict domain (so the single
+-- str-key guard fires) and `none` for the list domain (which has no key).
+-- The returned type is pinned to the domain's actual key type — reporting the
+-- value type instead would let a non-str-keyed dict slip past the guard.
+#guard (QuantDomainInfo.list str).dictKeyType?.isNone
+#guard (QuantDomainInfo.dictItems str int).dictKeyType? == some str
+#guard (QuantDomainInfo.dictKeys int str).dictKeyType? == some int
+#guard (QuantDomainInfo.dictValues int str).dictKeyType? == some int
+-- The reported key type is the actual key type, so a non-`str` key is caught.
+#guard (match (QuantDomainInfo.dictKeys int str).dictKeyType? with
+        | some kTp => !kTp.isStringType | none => false)
 
 /-! ## typeError warning coverage -/
 

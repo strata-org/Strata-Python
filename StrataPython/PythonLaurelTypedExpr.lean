@@ -25,7 +25,7 @@ public section
 namespace StrataPython.Laurel
 
 open Strata (FileRange)
-open Strata.Laurel (HighType HighTypeMd StmtExpr StmtExprMd mkId)
+open Strata.Laurel (HighType HighTypeMd StmtExpr StmtExprMd mkId Parameter QuantifierMode)
 
 abbrev tyAny : HighType := .UserDefined "Any"
 
@@ -148,6 +148,46 @@ def dictStrAnyContains (d : TypedStmtExpr tyDictStrAny) (k : TypedStmtExpr .TStr
 def anyGet (a i : TypedStmtExpr tyAny)
     (source : FileRange := unknownSource) : TypedStmtExpr tyAny :=
   .ofStmt (.StaticCall (mkId "Any_get") [a.stmt, i.stmt]) source
+
+abbrev tyListAny : HighType := .UserDefined "ListAny"
+
+def anyAsList (a : TypedStmtExpr tyAny)
+    (source : Option FileRange := a.stmt.source) : TypedStmtExpr tyListAny :=
+  .ofStmt (.StaticCall (mkId "Any..as_ListAny!") [a.stmt]) source
+
+-- Membership `x ∈ l`; also serves as the trigger for list universals.
+def listContains (l : TypedStmtExpr tyListAny) (x : TypedStmtExpr tyAny)
+    (source : Option FileRange := l.stmt.source) : TypedStmtExpr .TBool :=
+  .ofStmt (.StaticCall (mkId "List_contains") [l.stmt, x.stmt]) source
+
+-- `d[k]` lookup on a `DictStrAny` (total under the dict quantifier's contains guard).
+def dictStrAnyGet (d : TypedStmtExpr tyDictStrAny) (k : TypedStmtExpr .TString)
+    (source : Option FileRange := d.stmt.source) : TypedStmtExpr tyAny :=
+  .ofStmt (.StaticCall (mkId "DictStrAny_get") [d.stmt, k.stmt]) source
+
+-- Total `d[k]` lookup returning `None` on a missing key. Unlike the underlying
+-- Laurel prelude function `DictStrAny_get` (wrapped by `dictStrAnyGet` above),
+-- this carries no `requires`, so Laurel's transparency pass keeps it a pure
+-- function usable inside quantifier/contract bodies (a `requires`-bearing helper
+-- gets a procedural twin and is rejected as an imperative call in pure contexts).
+-- Under the dict quantifier's `contains` guard the two agree, so this is the
+-- form the `.values()`/`.items()` value binder inlines.
+def dictStrAnyGetOrNone (d : TypedStmtExpr tyDictStrAny) (k : TypedStmtExpr .TString)
+    (source : Option FileRange := d.stmt.source) : TypedStmtExpr tyAny :=
+  .ofStmt (.StaticCall (mkId "DictStrAny_get_or_none") [d.stmt, k.stmt]) source
+
+-- Universal over `param` with an SMT `trigger`. Nest to bind several variables,
+-- placing the trigger on the innermost so all bound variables are in scope.
+def forallTrigger (param : Parameter) (trigger : StmtExprMd)
+    (body : TypedStmtExpr .TBool)
+    (source : Option FileRange := body.stmt.source) : TypedStmtExpr .TBool :=
+  .ofStmt (.Quantifier QuantifierMode.Forall param (some trigger) body.stmt) source
+
+-- Existential over `param` with an SMT `trigger`.
+def existsTrigger (param : Parameter) (trigger : StmtExprMd)
+    (body : TypedStmtExpr .TBool)
+    (source : Option FileRange := body.stmt.source) : TypedStmtExpr .TBool :=
+  .ofStmt (.Quantifier QuantifierMode.Exists param (some trigger) body.stmt) source
 
 def strLength (a : TypedStmtExpr .TString)
     (source : FileRange := a.stmt.source) : TypedStmtExpr .TInt :=

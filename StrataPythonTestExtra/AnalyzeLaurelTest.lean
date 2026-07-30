@@ -470,4 +470,295 @@ invoking the Storage spec, so precondition violations would go undetected. -/
         throw <| IO.userError
           "Expected ✖️/❓ (violation not proven safe) for empty bucket violation via self.field dispatch"
 
+/-! ## Universal quantifier precondition tests
+
+End-to-end checks that `Storage.require_all_nonempty`/`require_map_nonempty` quantified preconditions reach
+the solver: a satisfying caller verifies (`✔️`, not merely non-`✖️`) while a
+violating one stays unproven, and neither times out (a bad trigger can make the
+solver take excessively long). The pass/violation asymmetry rules out a
+silently-dropped precondition.
+
+`@requires` preconditions are caller-checked (see the note above the regex
+violation test): each quantified precondition is asserted at the call site, so
+its obligation carries a bare `assert(<offset>)` label in user code — NOT the
+callee's `servicelib_…` label (that label only covers the spec's internal type
+checks, which always pass). Obligations are therefore selected by property
+summary (the spec's assert message), which uniquely identifies the quantified
+precondition within each single-call fixture. -/
+
+meta section
+
+/-- Select the caller-side precondition obligation whose property summary
+    contains `summaryPart` (the quantified assert's message), excluding
+    callee-internal spec obligations (`servicelib_…` labels). -/
+def isQuantPrecondVC (summaryPart : String) (r : Core.VCResult) : Bool :=
+  r.obligation.label.contains "assert("
+  && !r.obligation.label.startsWith "servicelib_"
+  && (r.obligation.metadata.getPropertySummary.getD "").contains summaryPart
+
+def isAllNonemptyVC : Core.VCResult → Bool :=
+  isQuantPrecondVC "each key must be non-empty"
+
+-- `require_map_nonempty` asserts both a key and a value condition; both become
+-- caller-side obligations and both belong to the quantified precondition.
+def isMapNonemptyVC (r : Core.VCResult) : Bool :=
+  isQuantPrecondVC "each key must be non-empty" r
+  || isQuantPrecondVC "each value must be non-empty" r
+
+def isOthersNonemptyVC : Core.VCResult → Bool :=
+  isQuantPrecondVC "each key other than the sentinel must be non-empty"
+
+def isSomeMatchVC : Core.VCResult → Bool :=
+  isQuantPrecondVC "at least one key must match the needle"
+
+def isSomeValueMatchVC : Core.VCResult → Bool :=
+  isQuantPrecondVC "at least one value must match the needle"
+
+def isKeysNonemptyVC : Core.VCResult → Bool :=
+  isQuantPrecondVC "each key must be non-empty"
+
+def isValuesNonemptyVC : Core.VCResult → Bool :=
+  isQuantPrecondVC "each value must be non-empty"
+
+def isShadowedNonemptyVC : Core.VCResult → Bool :=
+  isQuantPrecondVC "each shadowed key must be non-empty"
+
+def isGroupsNonemptyVC : Core.VCResult → Bool :=
+  isQuantPrecondVC "each group member must be non-empty"
+
+/-- Run `fixture` through the pipeline and return the obligations selected by
+    `isVC`, failing if the pipeline errored or produced no matching obligation. -/
+def quantVCs (pythonCmd : System.FilePath) (tmpDir : System.FilePath)
+    (fixture : String) (isVC : Core.VCResult → Bool)
+    : IO (Array Core.VCResult) := do
+  let result ← runAnalyzeAndVerify pythonCmd tmpDir fixture (useRoots := true)
+  match result with
+  | .error msg => throw <| IO.userError s!"Pipeline failed: {msg}"
+  | .ok vcResults =>
+    let vcs := vcResults.filter isVC
+    if vcs.isEmpty then
+      throw <| IO.userError s!"Expected a quantified obligation in {fixture} but found none"
+    for r in vcs do
+      if r.isTimeout then
+        throw <| IO.userError s!"quantified obligation timed out (trigger bug): {r.formatOutcome}"
+      -- Rule out encoding/solver errors so the violation tests' `!isSuccess` check
+      -- can't pass on a spurious error masquerading as "not proven".
+      if r.isImplementationError || r.hasSMTError then
+        throw <| IO.userError s!"quantified obligation hit an encoding/solver error: {r.formatOutcome}"
+    return vcs
+
+end -- meta section
+
+-- List, pass: `require_all_nonempty(["alice", "bob"])` — every obligation must be `isSuccess`.
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let putAll ← quantVCs pythonCmd tmpDir "test_forall_pass.py" isAllNonemptyVC
+    for r in putAll do
+      if !r.isSuccess then
+        throw <| IO.userError
+          s!"Expected require_all_nonempty quantified precondition to pass but got: {r.formatOutcome}"
+
+-- List, violation: `require_all_nonempty(["alice", ""])` — at least one obligation must stay unproven.
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let putAll ← quantVCs pythonCmd tmpDir "test_forall_violation.py" isAllNonemptyVC
+    unless putAll.any (!·.isSuccess) do
+      throw <| IO.userError
+        "Expected require_all_nonempty quantified precondition to stay unproven for a list containing an empty string"
+
+-- List, empty: `require_all_nonempty([])` verifies vacuously (guard must not misfire on `[]`).
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let putAll ← quantVCs pythonCmd tmpDir "test_forall_empty.py" isAllNonemptyVC
+    for r in putAll do
+      if !r.isSuccess then
+        throw <| IO.userError
+          s!"Expected require_all_nonempty quantified precondition to pass vacuously for an empty list but got: {r.formatOutcome}"
+
+
+-- Dict, pass: `require_map_nonempty({"alice": "x", "bob": "y"})` — key and value obligations both pass.
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let putMap ← quantVCs pythonCmd tmpDir "test_forall_dict_pass.py" isMapNonemptyVC
+    for r in putMap do
+      if !r.isSuccess then
+        throw <| IO.userError
+          s!"Expected require_map_nonempty quantified precondition to pass but got: {r.formatOutcome}"
+
+-- Dict, violation: `require_map_nonempty({"alice": "x", "bob": ""})` — at least one obligation
+-- must stay unproven, exercising the `v = d[k]` inlining via
+-- `DictStrAny_get_or_none` under the `DictStrAny_contains` membership trigger.
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let putMap ← quantVCs pythonCmd tmpDir "test_forall_dict_violation.py" isMapNonemptyVC
+    unless putMap.any (!·.isSuccess) do
+      throw <| IO.userError
+        "Expected require_map_nonempty quantified precondition to stay unproven for a dict with an empty value"
+
+-- Keys, pass: `require_keys_nonempty({"alice": "x", "bob": "y"})` — quantifies over
+-- `Items.keys()`; every key obligation must pass.
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let vcs ← quantVCs pythonCmd tmpDir "test_forall_keys_pass.py" isKeysNonemptyVC
+    for r in vcs do
+      if !r.isSuccess then
+        throw <| IO.userError
+          s!"Expected require_keys_nonempty quantified precondition to pass but got: {r.formatOutcome}"
+
+-- Keys, violation: `require_keys_nonempty({"": "x"})` — an empty key stays unproven.
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let vcs ← quantVCs pythonCmd tmpDir "test_forall_keys_violation.py" isKeysNonemptyVC
+    unless vcs.any (!·.isSuccess) do
+      throw <| IO.userError
+        "Expected require_keys_nonempty quantified precondition to stay unproven for a dict with an empty key"
+
+-- Values, pass: `require_values_nonempty({"alice": "x"})` — quantifies over
+-- `Items.values()`, binding the loop var to `d[k]`; every value obligation passes.
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let vcs ← quantVCs pythonCmd tmpDir "test_forall_values_pass.py" isValuesNonemptyVC
+    for r in vcs do
+      if !r.isSuccess then
+        throw <| IO.userError
+          s!"Expected require_values_nonempty quantified precondition to pass but got: {r.formatOutcome}"
+
+-- Values, violation: `require_values_nonempty({"alice": ""})` — an empty value stays unproven,
+-- exercising the `DictStrAny_get` value inlining under `.values()`.
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let vcs ← quantVCs pythonCmd tmpDir "test_forall_values_violation.py" isValuesNonemptyVC
+    unless vcs.any (!·.isSuccess) do
+      throw <| IO.userError
+        "Expected require_values_nonempty quantified precondition to stay unproven for a dict with an empty value"
+
+-- Guarded, pass: `require_others_nonempty(["alice", ""], Sentinel="")` — the empty
+-- string equals the sentinel, so `k != Sentinel` excludes it and the contract holds.
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let vcs ← quantVCs pythonCmd tmpDir "test_forall_guard_pass.py" isOthersNonemptyVC
+    for r in vcs do
+      if !r.isSuccess then
+        throw <| IO.userError
+          s!"Expected require_others_nonempty to pass when the only empty key is the sentinel but got: {r.formatOutcome}"
+
+-- Guarded, violation: `require_others_nonempty(["alice", ""], Sentinel="bob")` — the
+-- empty string is not the sentinel, so the guard does not exclude it and it stays unproven.
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let vcs ← quantVCs pythonCmd tmpDir "test_forall_guard_violation.py" isOthersNonemptyVC
+    unless vcs.any (!·.isSuccess) do
+      throw <| IO.userError
+        "Expected require_others_nonempty to stay unproven for a non-sentinel empty key"
+
+/- Shadowing semantics: `require_shadowed_nonempty` binds `Keys` over the
+   collection `Keys` itself, and `require_groups_nonempty` nests a quantifier
+   whose inner binder shadows the outer dict key. A renaming/capture bug makes
+   the formula ill-scoped or vacuous, flipping one of the verdicts below. -/
+
+-- Shadowed binder, pass: `require_shadowed_nonempty(["alice", "bob"])` — the
+-- membership guard must read the argument list, not the binder, to prove this.
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let vcs ← quantVCs pythonCmd tmpDir "test_forall_shadow_pass.py" isShadowedNonemptyVC
+    for r in vcs do
+      if !r.isSuccess then
+        throw <| IO.userError
+          s!"Expected require_shadowed_nonempty to pass but got: {r.formatOutcome}"
+
+-- Shadowed binder, violation: `require_shadowed_nonempty(["alice", ""])` — must
+-- stay unproven; a capture bug that vacuously satisfied the quantifier would
+-- wrongly verify this call.
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let vcs ← quantVCs pythonCmd tmpDir "test_forall_shadow_violation.py" isShadowedNonemptyVC
+    unless vcs.any (!·.isSuccess) do
+      throw <| IO.userError
+        "Expected require_shadowed_nonempty to stay unproven for a list containing an empty string"
+
+-- Nested shadowing, pass: `require_groups_nonempty({"team": ["alice", "bob"]})` —
+-- the inner quantifier's domain is the outer value `v`, inlined as a lookup on
+-- the *outer* key `k`, while the inner binder (also `k` in source) is renamed.
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let vcs ← quantVCs pythonCmd tmpDir "test_forall_nested_pass.py" isGroupsNonemptyVC
+    for r in vcs do
+      if !r.isSuccess then
+        throw <| IO.userError
+          s!"Expected require_groups_nonempty to pass but got: {r.formatOutcome}"
+
+-- Nested shadowing, violation: `require_groups_nonempty({"team": ["alice", ""]})` —
+-- if the inlined lookup captured the renamed inner binder, the counterexample
+-- (the empty member) would no longer be expressible and this would wrongly verify.
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let vcs ← quantVCs pythonCmd tmpDir "test_forall_nested_violation.py" isGroupsNonemptyVC
+    unless vcs.any (!·.isSuccess) do
+      throw <| IO.userError
+        "Expected require_groups_nonempty to stay unproven for a group containing an empty member"
+
+/- Existential expectations follow the user-visible solver limitation documented
+   in README.md under "Spec quantifiers": false cases can be refuted, while true
+   cases remain unknown rather than verifying successfully. -/
+
+-- Exists, violation: `require_some_match(["alice", "bob"], Needle="carol")` — no
+-- element matches, so the existential is refuted.
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let vcs ← quantVCs pythonCmd tmpDir "test_exists_violation.py" isSomeMatchVC
+    unless vcs.any (·.isFailure) do
+      throw <| IO.userError
+        "Expected require_some_match existential to be refuted when no element matches"
+
+-- Exists, pass: `require_some_match(["alice", "bob"], Needle="bob")` — a matching
+-- element exists, so the existential must NOT be refuted (it stays unknown, which is
+-- sound: the verifier never falsely reports the satisfiable case as a bug).
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let vcs ← quantVCs pythonCmd tmpDir "test_exists_pass.py" isSomeMatchVC
+    if vcs.any (·.isFailure) then
+      throw <| IO.userError
+        "Expected require_some_match existential not to be refuted when a match exists"
+
+-- Exists over dict items, violation: `require_some_value_match({"alice": "x",
+-- "bob": "y"}, Needle="carol")` — no value matches, so the existential is refuted.
+-- This is the one combination the ∀ verdicts don't observe: the `v = d[k]` value
+-- inlining (`DictStrAny_get_or_none`) under the existential's `&` combiner rather
+-- than the universal's `==>`.
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let vcs ← quantVCs pythonCmd tmpDir "test_exists_dict_violation.py" isSomeValueMatchVC
+    unless vcs.any (·.isFailure) do
+      throw <| IO.userError
+        "Expected require_some_value_match existential to be refuted when no dict value matches"
+
+-- Exists over dict items, pass: `require_some_value_match({"alice": "x",
+-- "bob": "y"}, Needle="y")` — a matching value exists, so the existential must NOT
+-- be refuted (it stays unknown, per the limitation noted above).
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let vcs ← quantVCs pythonCmd tmpDir "test_exists_dict_pass.py" isSomeValueMatchVC
+    if vcs.any (·.isFailure) then
+      throw <| IO.userError
+        "Expected require_some_value_match existential not to be refuted when a dict value matches"
+
 end StrataPython.AnalyzeLaurelTest

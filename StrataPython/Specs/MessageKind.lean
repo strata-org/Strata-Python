@@ -50,10 +50,11 @@ def floatLiteral : MessageKind :=
   { category := "floatLiteral", impact := .knownLimitation }
 def isinstanceUnsupported : MessageKind :=
   { category := "isinstanceUnsupported", impact := .knownLimitation }
-def forallListUnsupported : MessageKind :=
-  { category := "forallListUnsupported", impact := .knownLimitation }
-def forallDictUnsupported : MessageKind :=
-  { category := "forallDictUnsupported", impact := .knownLimitation }
+/-- An `assert` whose formula could not be translated, so the assertion was
+    dropped from the generated contract. Kept as its own kind so consumers can
+    detect it structurally instead of matching the user-facing message text. -/
+def pySpecDroppedAssertion : MessageKind :=
+  { category := "droppedAssertion", impact := .knownLimitation }
 
 -- PySpec-to-Laurel assembly phase
 def functionSignatureError : MessageKind :=

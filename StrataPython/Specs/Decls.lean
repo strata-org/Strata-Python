@@ -28,6 +28,9 @@ def typingAny := ofComponent "typing" "Any"
 def typingBinaryIO := ofComponent "typing" "BinaryIO"
 def typingDict := ofComponent "typing" "Dict"
 def typingGenerator := ofComponent "typing" "Generator"
+def typingItemsView := ofComponent "typing" "ItemsView"
+def typingKeysView := ofComponent "typing" "KeysView"
+def typingValuesView := ofComponent "typing" "ValuesView"
 def typingList := ofComponent "typing" "List"
 def typingLiteral := ofComponent "typing" "Literal"
 def typingMapping := ofComponent "typing" "Mapping"
@@ -424,6 +427,44 @@ def extractDictKeyValueTypes (tp : SpecType) : Option (SpecType × SpecType) := 
     none
   else none
 
+/-- The `ItemsView[K, V]` type produced by `d.items()`: an iterable of key-value
+    pairs. Carries the dict's key/value types so a quantifier can bind both. -/
+def itemsView (loc : SourceRange) (keyTp valTp : SpecType) : SpecType :=
+  ident loc .typingItemsView #[keyTp, valTp]
+
+/-- The `KeysView[K, V]` type produced by `d.keys()`. Carries both key/value
+    types so type-directed domain selection has the same payload as bare
+    `Dict[K, V]`/`Mapping[K, V]` iteration. -/
+def keysView (loc : SourceRange) (keyTp valTp : SpecType) : SpecType :=
+  ident loc .typingKeysView #[keyTp, valTp]
+
+/-- The `ValuesView[K, V]` type produced by `d.values()`; binds the value,
+    reached as `d[k]` for a quantified-over key. -/
+def valuesView (loc : SourceRange) (keyTp valTp : SpecType) : SpecType :=
+  ident loc .typingValuesView #[keyTp, valTp]
+
+/-- Extract `(key, value)` types from a dict view (`ItemsView`/`KeysView`/
+    `ValuesView`), given the expected view identifier. -/
+private def extractViewTypes (viewName : PythonIdent) (tp : SpecType)
+    : Option (SpecType × SpecType) := do
+  guard (tp.intLits.size == 0 && tp.stringLits.size == 0
+       && tp.typedDicts.size == 0)
+  if h : tp.idents.size = 1 then
+    let si := tp.idents[0]
+    if si.name == viewName && si.args.size == 2 then
+      return (si.args[0]!, si.args[1]!)
+    none
+  else none
+
+private def extractItemsViewTypes (tp : SpecType) : Option (SpecType × SpecType) :=
+  extractViewTypes .typingItemsView tp
+
+private def extractKeysViewTypes (tp : SpecType) : Option (SpecType × SpecType) :=
+  extractViewTypes .typingKeysView tp
+
+private def extractValuesViewTypes (tp : SpecType) : Option (SpecType × SpecType) :=
+  extractViewTypes .typingValuesView tp
+
 def asStringLiteral (tp : SpecType) : Option String := do
   guard (tp.idents.size == 0 && tp.intLits.size == 0
        && tp.typedDicts.size == 0 && tp.stringLits.size == 1)
@@ -502,6 +543,72 @@ def PCmpOp.ofTag? : String → Option PCmpOp
   | "notIn" => some .notIn
   | _ => none
 
+/-- Which quantifier a `SpecExpr.quantifier` node introduces. Orthogonal to the
+    domain being quantified over: `forall`/`exists` combine with any
+    `SpecQuantDomain`. The kind determines how the domain's membership guard
+    combines with the body: `forall` uses implication and `exists` conjunction. -/
+inductive QuantKind where
+  | «forall»
+  | «exists»
+deriving Inhabited, Repr, DecidableEq, BEq
+
+/-- The domain a quantifier ranges over, carrying only its binder names. The
+    collection being ranged over is a separate `SpecExpr` field of the
+    `quantifier` node; the domain supplies the membership guard/trigger and how
+    the binders map into the body (see `ToLaurel`). New domains (list indices,
+    ranges, …) slot in here without touching the quantifier machinery. -/
+inductive SpecQuantDomain where
+  /-- Elements of a list; `varName` is bound to each element. -/
+  | overList (varName : String)
+  /-- Key-value pairs of a str-keyed dict; `keyVar`/`valVar` bound per entry. -/
+  | overDictItems (keyVar : String) (valVar : String)
+  /-- Keys of a str-keyed dict (from `d` or `d.keys()`); `keyVar` bound per key. -/
+  | overDictKeys (keyVar : String)
+  /-- Values of a str-keyed dict (from `d.values()`); `valVar` bound to `d[k]`
+      for the quantified-over string key. -/
+  | overDictValues (valVar : String)
+deriving Inhabited, Repr, DecidableEq, BEq
+
+/-- Result of type-directed domain selection: exactly one domain implied by the
+    collection's static type, plus the element or key/value types needed to seed
+    `localTypes` for the body. -/
+inductive QuantDomainInfo where
+  /-- Collection is either `List[T]` or `Sequence[T]`; elements have type `elemTp`. -/
+  | list (elemTp : SpecType)
+  /-- Collection is `ItemsView[K,V]` (from `d.items()`); keys/values typed. -/
+  | dictItems (keyTp : SpecType) (valTp : SpecType)
+  /-- Collection is `Dict[K,V]`, `Mapping[K,V]`, or `KeysView[K,V]`; keys typed. -/
+  | dictKeys (keyTp : SpecType) (valTp : SpecType)
+  /-- Collection is `ValuesView[K,V]` (from `d.values()`); values typed. -/
+  | dictValues (keyTp : SpecType) (valTp : SpecType)
+deriving Inhabited, Repr
+
+/-- The key type for a dict-backed domain, or `none` for the list domain. The
+    Laurel model only has `DictStrAny`, so every dict domain must be str-keyed;
+    this is the single place callers consult to enforce that (rather than
+    repeating the `isStringType` check per domain arm). -/
+def QuantDomainInfo.dictKeyType? : QuantDomainInfo → Option SpecType
+  | .list _ => none
+  | .dictItems kTp _ | .dictKeys kTp _ | .dictValues kTp _ => some kTp
+
+/-- Given the static type of a collection being iterated, select its one
+    quantifier domain. Dispatch is purely type-directed: dict view calls are
+    represented by `ItemsView`/`KeysView`/`ValuesView`, while a bare
+    `Dict[K,V]` or `Mapping[K,V]` selects key iteration. -/
+def SpecType.selectQuantDomain (iterTp : SpecType) : Option QuantDomainInfo :=
+  if let some (kTp, vTp) := iterTp.extractItemsViewTypes then
+    some (.dictItems kTp vTp)
+  else if let some (kTp, vTp) := iterTp.extractKeysViewTypes then
+    some (.dictKeys kTp vTp)
+  else if let some (kTp, vTp) := iterTp.extractValuesViewTypes then
+    some (.dictValues kTp vTp)
+  else if let some (kTp, vTp) := iterTp.extractDictKeyValueTypes then
+    some (.dictKeys kTp vTp)
+  else if let some elemTp := iterTp.extractElementType then
+    some (.list elemTp)
+  else
+    none
+
 /--
 A composable expression tree for translating Python `assert` statements into
 structured preconditions and postconditions. Leaf nodes are `var`, `intLit`,
@@ -556,14 +663,14 @@ inductive SpecExpr where
 | implies (condition : SpecExpr) (body : SpecExpr) (loc : SourceRange)
 /-- Logical negation. Used for else-branch conditions. -/
 | not (e : SpecExpr) (loc : SourceRange)
-/-- `forallList list varName body` asserts that `body` holds for every element
-    of `list`, with `varName` bound to each element in turn. Only `body` may
-    refer to `varName`. Corresponds to `for varName in list: assert body`. -/
-| forallList (list : SpecExpr) (varName : String) (body : SpecExpr) (loc : SourceRange)
-/-- `forallDict dict keyVar valVar body` asserts that `body` holds for every
-    key-value pair in `dict`. Both `keyVar` and `valVar` are bound in `body`.
-    Corresponds to `for keyVar, valVar in dict.items(): assert body`. -/
-| forallDict (dict : SpecExpr) (keyVar : String) (valVar : String) (body : SpecExpr) (loc : SourceRange)
+/-- `quantifier quant domain collection body` asserts that `body` holds for the
+    `quant` (∀/∃) of the elements of `collection`, with `domain`'s binders in
+    scope in `body`. The quantifier and the domain vary independently, e.g.
+    `all(body for x in xs)` is `quantifier .forall (.overList "x") xs body`,
+    `any(body for x in xs)` swaps in `.exists`, and dict `.items()` swaps the
+    domain. -/
+| quantifier (quant : QuantKind) (domain : SpecQuantDomain)
+    (collection : SpecExpr) (body : SpecExpr) (loc : SourceRange)
 deriving Inhabited
 
 /-- True when `placeholder` appears ANYWHERE in the expression tree, including
@@ -599,8 +706,44 @@ def SpecExpr.containsPlaceholder : SpecExpr → Bool
   | .containsKey c _ _ => c.containsPlaceholder
   | .implies c b _ => c.containsPlaceholder || b.containsPlaceholder
   | .not e _ => e.containsPlaceholder
-  | .forallList l _ b _ => l.containsPlaceholder || b.containsPlaceholder
-  | .forallDict d _ _ b _ => d.containsPlaceholder || b.containsPlaceholder
+  | .quantifier _ _ c b _ => c.containsPlaceholder || b.containsPlaceholder
+
+/-- Conservatively reports whether an identifier occurs anywhere in an expression.
+    Quantifier lowering uses this to alpha-rename a binder that shadows its own
+    collection: in the pathological `all(... for xs in xs)`, the binder `xs`
+    would otherwise capture the outer collection `xs` in the generated Laurel
+    expression. -/
+def SpecExpr.mentionsVar (e : SpecExpr) (name : String) : Bool :=
+  match e with
+  | .placeholder _ => false
+  | .var n _ => n == name
+  | .intLit .. => false
+  | .boolLit .. => false
+  | .noneLit .. => false
+  | .floatLit .. => false
+  | .getIndex s _ _ => s.mentionsVar name
+  | .isInstanceOf s _ _ => s.mentionsVar name
+  | .stringLen s _ => s.mentionsVar name
+  | .intGe s b _ => s.mentionsVar name || b.mentionsVar name
+  | .intLe s b _ => s.mentionsVar name || b.mentionsVar name
+  | .add l r _ => l.mentionsVar name || r.mentionsVar name
+  | .sub l r _ => l.mentionsVar name || r.mentionsVar name
+  | .mul l r _ => l.mentionsVar name || r.mentionsVar name
+  | .floorDiv l r _ => l.mentionsVar name || r.mentionsVar name
+  | .mod l r _ => l.mentionsVar name || r.mentionsVar name
+  | .pow l r _ => l.mentionsVar name || r.mentionsVar name
+  | .neg o _ => o.mentionsVar name
+  | .and l r _ => l.mentionsVar name || r.mentionsVar name
+  | .or l r _ => l.mentionsVar name || r.mentionsVar name
+  | .pcmp _ l r _ => l.mentionsVar name || r.mentionsVar name
+  | .floatGe s b _ => s.mentionsVar name || b.mentionsVar name
+  | .floatLe s b _ => s.mentionsVar name || b.mentionsVar name
+  | .enumMember s _ _ => s.mentionsVar name
+  | .regexMatch s _ _ => s.mentionsVar name
+  | .containsKey c _ _ => c.mentionsVar name
+  | .implies c b _ => c.mentionsVar name || b.mentionsVar name
+  | .not inner _ => inner.mentionsVar name
+  | .quantifier _ _ c b _ => c.mentionsVar name || b.mentionsVar name
 
 /-- Structural equality ignoring source locations. -/
 def SpecExpr.softBEq : SpecExpr → SpecExpr → Bool
@@ -632,10 +775,8 @@ def SpecExpr.softBEq : SpecExpr → SpecExpr → Bool
   | .containsKey c₁ k₁ _, .containsKey c₂ k₂ _ => c₁.softBEq c₂ && k₁ == k₂
   | .implies c₁ b₁ _, .implies c₂ b₂ _ => c₁.softBEq c₂ && b₁.softBEq b₂
   | .not e₁ _, .not e₂ _ => e₁.softBEq e₂
-  | .forallList l₁ v₁ b₁ _, .forallList l₂ v₂ b₂ _ =>
-    l₁.softBEq l₂ && v₁ == v₂ && b₁.softBEq b₂
-  | .forallDict d₁ k₁ v₁ b₁ _, .forallDict d₂ k₂ v₂ b₂ _ =>
-    d₁.softBEq d₂ && k₁ == k₂ && v₁ == v₂ && b₁.softBEq b₂
+  | .quantifier q₁ d₁ c₁ b₁ _, .quantifier q₂ d₂ c₂ b₂ _ =>
+    q₁ == q₂ && d₁ == d₂ && c₁.softBEq c₂ && b₁.softBEq b₂
   | _, _ => false
 
 inductive MessagePart where
