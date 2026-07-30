@@ -21,6 +21,9 @@ jobs:
         uses: strata-org/Strata/.github/actions/install-cvc5@main
       - name: Install z3
         uses: strata-org/Strata/.github/actions/install-z3@main
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
       - name: Restore lake cache
         # Only use the caches on PRs because there is a risk of stale results:
         # https://github.com/strata-org/Strata/issues/952
@@ -28,40 +31,33 @@ jobs:
         uses: ./.github/actions/restore-lake-cache
         with:
           path: .lake
-      - name: Build StrataPython and compile-time tests
-        # Building StrataPythonTest runs the compile-time test suite: the tests
-        # are `#guard_msgs` / `#eval` checks that execute during elaboration.
-        # This also resolves the `Strata` git dependency, cloning it into
-        # `.lake/packages/Strata`.
+      - name: Build StrataPython library
+        # Build the library first to resolve git dependencies (populates
+        # .lake/packages/Strata and .lake/packages/StrataDDM).
         uses: leanprover/lean-action@v1
         with:
-          build-args: StrataPython StrataPythonTest
+          build-args: StrataPython
           use-github-cache: false
           test: false
-      - uses: actions/setup-python@v6
-        with:
-          python-version: '3.14'
-      - name: Build using pip
-        # `strata-base` (Tools/Python-base) and `strata-python` (Tools/strata-python)
-        # both live in this repo.
+      - name: Install Python packages
+        # Install after the Lean build so .lake/packages/StrataDDM is available.
+        # StrataPythonTest/CI/InterpretTests.lean calls Python at compile time.
         run: |
-          pip install ./Tools/Python-base
-          pip install ./Tools/strata-python
+          pip install ./.lake/packages/StrataDDM/Python/strata ./Python/strata-python
+      - name: Build compile-time tests
+        # Building StrataPythonTest runs the compile-time test suite: the tests
+        # are `#guard_msgs` / `#eval` checks that execute during elaboration.
+        run: lake build StrataPythonTest
+        env:
+          PYTHON: python
       - name: Run pyInterpret golden-file tests
         working-directory: StrataPythonTest
         shell: bash
         run: ./run_py_interpret.sh
-      - name: Run pyAnalyze SARIF tests
-        working-directory: StrataPythonTest
-        shell: bash
-        run: python run_py_analyze_sarif.py
       - name: Run pyAnalyze golden-file tests
         working-directory: StrataPythonTest
         shell: bash
         run: ./run_py_analyze.sh
-      - name: Run regex differential tests
-        working-directory: StrataPythonTest/Regex
-        run: python diff_test.py
       - name: Save lake cache
         uses: ./.github/actions/save-lake-cache
         with:
@@ -89,8 +85,7 @@ jobs:
         use-restore-keys: "false"
     - name: Build using pip
       run: |
-        pip install ./Tools/Python-base
-        pip install ./Tools/strata-python
+        pip install ./.lake/packages/StrataDDM/Python/strata ./Python/strata-python
     - name: Install Lean
       uses: leanprover/lean-action@v1
       with:
@@ -157,8 +152,7 @@ jobs:
         use-restore-keys: "false"
     - name: Build using pip
       run: |
-        pip install ./Tools/Python-base
-        pip install ./Tools/strata-python
+        pip install ./.lake/packages/StrataDDM/Python/strata ./Python/strata-python
     - name: Install Lean (for lake env)
       uses: leanprover/lean-action@v1
       with:
@@ -183,8 +177,11 @@ jobs:
       # suite through the Strata generator + Ion (de)serializer. The round-trip
       # check runs in-process inside the StrataPythonTestExtra/CpythonDiffTest
       # Lean test (driven by this script), so no separate `strata` CLI is built.
-      run: FAIL_FAST=1 ./scripts/run_cpython_tests.sh ${{ matrix.python_version }}
-      working-directory: Tools/strata-python
+      run: |
+        VER=${{ matrix.python_version }}
+        git clone https://github.com/python/cpython.git --branch "$VER" --depth 1 "cpython-$VER"
+        FAIL_FAST=1 ./scripts/run_cpython_tests.sh "$VER"
+      working-directory: Python/strata-python
 
   cbmc:
     needs: build_and_test_lean

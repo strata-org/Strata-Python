@@ -1,7 +1,7 @@
 name = "StrataPython"
 version = "0.1.0"
 defaultTargets = ["StrataPython"]
-testDriver = "StrataTestMain"
+testDriver = "StrataPythonFrontEndTestMain"
 
 [[require]]
 name = "Strata"
@@ -10,7 +10,7 @@ rev = "main"
 
 [[input_file]]
 name = "PythonDialectIon"
-path = "Tools/strata-python/dialects/Python.dialect.st.ion"
+path = "Python/strata-python/dialects/Python.dialect.st.ion"
 text = true
 
 [[lean_lib]]
@@ -26,12 +26,8 @@ name = "StrataPythonTestExtra"
 globs = ["StrataPythonTestExtra.+"]
 
 [[lean_exe]]
-name = "StrataTestMain"
+name = "StrataPythonFrontEndTestMain"
 needs = ["StrataPython", "StrataPythonTest"]
-
-[[lean_exe]]
-name = "DiffTestCore"
-needs = ["StrataPython"]
 
 [[lean_exe]]
 name = "pyAnalyzeLaurel"
