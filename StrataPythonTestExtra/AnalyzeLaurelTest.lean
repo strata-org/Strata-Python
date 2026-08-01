@@ -8,6 +8,7 @@ module
 meta import Strata.SimpleAPI
 meta import StrataPython.PySpecPipeline
 meta import Strata.Languages.Laurel.Resolution
+meta import Strata.Languages.Laurel.CoreDefinitionsForLaurel
 meta import Strata.Transform.ProcedureInlining
 meta import StrataPython.PyFactory
 meta import StrataPythonTest.Util.Python
@@ -428,6 +429,15 @@ recursively translates subclasses, so the type
         let msgs ← pctx.getMessages
         let detail := match msgs.back? with | some m => m.message | none => "Pipeline aborted"
         throw <| IO.userError s!"pyAnalyzeLaurel failed: {detail}"
+    -- Operators are `StaticCall`s to the built-in wrappers (`$add`, `$eq`, …),
+    -- which the compilation pipeline prepends before its own `resolve`. Resolving
+    -- `combined` standalone must do the same, or every operator in the program
+    -- reports an undefined callee.
+    let combined := { combined with
+      staticProcedures :=
+        Strata.Laurel.coreDefinitionsForLaurel.staticProcedures ++ combined.staticProcedures,
+      types := Strata.Laurel.coreDefinitionsForLaurel.types ++ combined.types
+    }
     let result := Strata.Laurel.resolve combined
     unless result.errors.isEmpty do
       let msgs := result.errors.toList.map (·.message)

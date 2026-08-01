@@ -25,7 +25,7 @@ public section
 namespace StrataPython.Laurel
 
 open Strata (FileRange)
-open Strata.Laurel (HighType HighTypeMd StmtExpr StmtExprMd mkId Parameter QuantifierMode)
+open Strata.Laurel (HighType HighTypeMd Operation StmtExpr StmtExprMd mkId Parameter QuantifierMode)
 
 abbrev tyAny : HighType := .UserDefined "Any"
 
@@ -66,39 +66,39 @@ def literalString (v : String)
 
 def stringEq (x y : TypedStmtExpr .TString)
     (source : FileRange := x.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.PrimitiveOp .Eq [x.stmt, y.stmt]) source
+  .ofStmt (.StaticCall (mkId Operation.Eq.procName) [x.stmt, y.stmt]) source
 
 def intGeq (x y : TypedStmtExpr .TInt)
     (source : FileRange := x.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.PrimitiveOp .Geq [x.stmt, y.stmt]) source
+  .ofStmt (.StaticCall (mkId Operation.Geq.procName) [x.stmt, y.stmt]) source
 
 def intLeq (x y : TypedStmtExpr .TInt)
     (source : FileRange := x.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.PrimitiveOp .Leq [x.stmt, y.stmt]) source
+  .ofStmt (.StaticCall (mkId Operation.Leq.procName) [x.stmt, y.stmt]) source
 
 def realGeq (x y : TypedStmtExpr .TReal)
     (source : FileRange := x.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.PrimitiveOp .Geq [x.stmt, y.stmt]) source
+  .ofStmt (.StaticCall (mkId Operation.Geq.procName) [x.stmt, y.stmt]) source
 
 def realLeq (x y : TypedStmtExpr .TReal)
     (source : FileRange := x.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.PrimitiveOp .Leq [x.stmt, y.stmt]) source
+  .ofStmt (.StaticCall (mkId Operation.Leq.procName) [x.stmt, y.stmt]) source
 
 def not (x : TypedStmtExpr .TBool)
     (source : FileRange := x.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.PrimitiveOp .Not [x.stmt]) source
+  .ofStmt (.StaticCall (mkId Operation.Not.procName) [x.stmt]) source
 
 def implies (x y : TypedStmtExpr .TBool)
     (source : FileRange := x.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.PrimitiveOp .Implies [x.stmt, y.stmt]) source
+  .ofStmt (.StaticCall (mkId Operation.Implies.procName) [x.stmt, y.stmt]) source
 
 def or (x y : TypedStmtExpr .TBool)
     (source : FileRange := x.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.PrimitiveOp .Or [x.stmt, y.stmt]) source
+  .ofStmt (.StaticCall (mkId Operation.Or.procName) [x.stmt, y.stmt]) source
 
 def and (x y : TypedStmtExpr .TBool)
     (source : FileRange := x.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.PrimitiveOp .And [x.stmt, y.stmt]) source
+  .ofStmt (.StaticCall (mkId Operation.And.procName) [x.stmt, y.stmt]) source
 
 abbrev tyDictStrAny : HighType := .UserDefined "DictStrAny"
 

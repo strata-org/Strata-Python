@@ -516,7 +516,7 @@ def createBoolOrExpr (exprs: List StmtExprMd) : StmtExprMd :=
   match exprs with
   | [] => mkStmtExprMd (.LiteralBool false)
   | [expr] => expr
-  | expr::exprs => mkStmtExprMd (.PrimitiveOp .Or [expr, createBoolOrExpr exprs])
+  | expr::exprs => mkStmtExprMd (.StaticCall (mkId Operation.Or.procName) [expr, createBoolOrExpr exprs])
 
 mutual
 
@@ -763,7 +763,7 @@ partial def translateExpr (ctx : TranslationContext) (e : expr SourceRange)
       let parts ← values.val.toList.mapM (translateExpr ctx ·)
       let unwrap (e : StmtExprMd) := mkStmtExprMd (.StaticCall "Any..as_string!" [e])
       let concat := parts.foldl (fun acc part =>
-        mkStmtExprMd (.PrimitiveOp .StrConcat [acc, unwrap part]))
+        mkStmtExprMd (.StaticCall (mkId Operation.StrConcat.procName) [acc, unwrap part]))
         (mkStmtExprMd (.LiteralString ""))
       return mkStmtExprMd (.StaticCall "from_str" [concat])
 
@@ -813,7 +813,7 @@ partial def translateExpr (ctx : TranslationContext) (e : expr SourceRange)
                 let lenExpr := mkStmtExprMd (.StaticCall "List_len" [listExpr])
                 let nLit := mkStmtExprMd (.LiteralInt n)
                 mkStmtExprMd (.StaticCall "from_int"
-                  [mkStmtExprMd (.PrimitiveOp .Sub [lenExpr, nLit])])
+                  [mkStmtExprMd (.StaticCall (mkId Operation.Sub.procName) [lenExpr, nLit])])
             | none => index
           return mkStmtExprMdWithLoc (.StaticCall "Any_get" [dictOrList, index]) md
 
@@ -1290,7 +1290,7 @@ partial def translateCall (ctx : TranslationContext)
         let checks := arg.typeTesters.map fun callee =>
           mkStmtExprMd (.StaticCall (mkId callee) [val])
         let isCorrectType := createBoolOrExpr checks.toList
-        let cond := mkStmtExprMd (.PrimitiveOp .Implies [keyPresent, isCorrectType])
+        let cond := mkStmtExprMd (.StaticCall (mkId Operation.Implies.procName) [keyPresent, isCorrectType])
         typeAsserts := typeAsserts.push (mkStmtExprMd (.Assert cond none))
     let typeAssertsOrdered := typeAsserts.toList
     let call ← emitCall (allArgs ++ kwargsArg)
@@ -1362,14 +1362,6 @@ def extractMultiOutputCalls (ctx : TranslationContext) (e : StmtExprMd)
         return ([], e)
       else
         return (preamble, mkStmtExprMdWithLoc (.StaticCall callee.text newArgs) e.source)
-  | .PrimitiveOp op args _ =>
-    let results ← args.attach.mapM fun ⟨arg, _⟩ => extractMultiOutputCalls ctx arg
-    let preamble := (results.map (fun (pre, _) => pre)).flatten
-    let newArgs := results.map (·.2)
-    if preamble.isEmpty then
-      return ([], e)
-    else
-      return (preamble, mkStmtExprMdWithLoc (.PrimitiveOp op newArgs) e.source)
   | .IfThenElse cond thenBr elseBr =>
     let (preCond, cond') ← extractMultiOutputCalls ctx cond
     let (preThen, then') ← extractMultiOutputCalls ctx thenBr
@@ -1653,14 +1645,13 @@ partial def getMaybeExceptionExprs (ctx : TranslationContext) (e : StmtExprMd) :
     if isMaybeExceptAnyFunc ctx funcname.text then
       [e]
     else args.flatMap $ getMaybeExceptionExprs ctx
-  | .PrimitiveOp _ args _ => args.flatMap $ getMaybeExceptionExprs ctx
   | .IfThenElse cond thenBranch elseBranch =>
       ([cond, thenBranch] ++ elseBranch.toList).flatMap $ getMaybeExceptionExprs ctx
   | _ => []
 
 /-- Build a single exception-check assert: `assert !Any..isexception(e)`. -/
 def mkExceptionCheckAssert (e : StmtExprMd) (summary : String) : StmtExprMd :=
-  let condExpr := mkStmtExprMd (.PrimitiveOp .Not [mkStmtExprMd $ .StaticCall "Any..isexception" [e]])
+  let condExpr := mkStmtExprMd (.StaticCall (mkId Operation.Not.procName) [mkStmtExprMd $ .StaticCall "Any..isexception" [e]])
   mkStmtExprMdWithLoc (.Assert condExpr (some summary)) e.source
 
 partial def getExceptionAssertions (ctx : TranslationContext) (e : StmtExprMd) : List StmtExprMd :=
@@ -1679,7 +1670,6 @@ partial def containsUserCall (ctx : TranslationContext) (e : StmtExprMd) : Bool 
     callee.text ∈ ctx.userFunctions ||
     withException ctx callee.text ||
     args.any (containsUserCall ctx)
-  | .PrimitiveOp _ args _ => args.any (containsUserCall ctx)
   | .IfThenElse cond thenBranch elseBranch =>
     containsUserCall ctx cond || containsUserCall ctx thenBranch ||
       elseBranch.any (containsUserCall ctx)
@@ -2043,7 +2033,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
     let counterVarMd := freeVarMd counterName
     let counterExpr := freeVarExpr counterName
     let counterDecl := mkVarDeclInit counterName (mkHighTypeMd $ .TInt) (mkStmtExprMd $ .LiteralInt 0)
-    let counterIncrease := mkStmtExprMd $ .Assign [counterVarMd] (mkStmtExprMd $ .PrimitiveOp .Add [counterExpr, mkStmtExprMd $ .LiteralInt 1])
+    let counterIncrease := mkStmtExprMd $ .Assign [counterVarMd] (mkStmtExprMd $ .StaticCall (mkId Operation.Add.procName) [counterExpr, mkStmtExprMd $ .LiteralInt 1])
     let indexRhs := expr.Call sr (.Name sr {val:= "Any_iter_index", ann:= sr} default)
                         {val:= #[iter, .Name sr {val:= counterName, ann:= sr} default], ann:= sr} {val:= #[], ann:= sr}
     -- Any_iter_index is defined in PythonRuntimeLaurelPart, so indexRhs would be translated into .StaticCall "Any_iter_index" ..., hot .Hole
@@ -2070,9 +2060,9 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
               let asIntStart := mkStmtExprMd $ .StaticCall "Any..as_int!" [startExpr]
               let assumeTypeInt := mkStmtExprMdWithLoc (.Assume $ mkStmtExprMd (.StaticCall "Any..isfrom_int" [targetVar])) md
               let asIntTarget := mkStmtExprMd $ .StaticCall "Any..as_int!" [targetVar]
-              let inRangeExpr := mkStmtExprMd $ .PrimitiveOp .And [
-                    (mkStmtExprMd $ .PrimitiveOp .Geq [asIntTarget, mkStmtExprMd $ .LiteralInt 0]),
-                    (mkStmtExprMd $ .PrimitiveOp .Lt [asIntTarget, asIntStart]) ]
+              let inRangeExpr := mkStmtExprMd $ .StaticCall (mkId Operation.And.procName) [
+                    (mkStmtExprMd $ .StaticCall (mkId Operation.Geq.procName) [asIntTarget, mkStmtExprMd $ .LiteralInt 0]),
+                    (mkStmtExprMd $ .StaticCall (mkId Operation.Lt.procName) [asIntTarget, asIntStart]) ]
               let assumeInRange := mkStmtExprMdWithLoc (.Assume inRangeExpr) md
               pure [assumeTypeInt, assumeInRange]
           | _ =>
@@ -2083,13 +2073,13 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
     let counterLtLen := match iterExpr.val with
       | .StaticCall id (boundExpr::_) =>
         if id.text == "range" then
-          mkStmtExprMd $ .PrimitiveOp .Lt [counterExpr,
+          mkStmtExprMd $ .StaticCall (mkId Operation.Lt.procName) [counterExpr,
                           mkStmtExprMd $ .StaticCall "Any..as_int!" [boundExpr]]
         else
-          mkStmtExprMd $ .PrimitiveOp .Lt [counterExpr,
+          mkStmtExprMd $ .StaticCall (mkId Operation.Lt.procName) [counterExpr,
                           mkStmtExprMd $ .StaticCall "Any_len" [iterExpr]]
       | _ =>
-          mkStmtExprMd $ .PrimitiveOp .Lt [counterExpr,
+          mkStmtExprMd $ .StaticCall (mkId Operation.Lt.procName) [counterExpr,
                           mkStmtExprMd $ .StaticCall "Any_len" [iterExpr]]
     -- The continue-labeled block contains the body but *not* the counter
     -- increment: `continue` (translated to `exit continueLabel`) must skip

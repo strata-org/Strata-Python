@@ -49,16 +49,15 @@ private def lowerIn (ctx : SpecExprContext) (e : SpecExpr) : StmtExpr × Nat :=
 def lower (e : SpecExpr) : StmtExpr × Nat := lowerIn specCtx e
 
 /-- Describe the head node of a lowered `StmtExpr`: the callee name of a
-    `StaticCall`, or the operator tag of a `PrimitiveOp`. -/
+    `StaticCall`, otherwise the constructor name. Operators are `StaticCall`s to
+    their built-in wrapper, so a boolean operator's head reads as `$and`/`$or`. -/
 def headName : StmtExpr → String
   | .StaticCall callee _ => callee.text
-  | .PrimitiveOp op _ _  => toString op
   | other                => other.constructorName
 
-/-- Number of arguments passed to a head `StaticCall`/`PrimitiveOp`. -/
+/-- Number of arguments passed to a head `StaticCall`. -/
 def headArgCount : StmtExpr → Nat
   | .StaticCall _ args  => args.length
-  | .PrimitiveOp _ args _ => args.length
   | _                   => 0
 
 def expectHead (name : String) (e : SpecExpr) : IO Unit := do
@@ -138,16 +137,14 @@ def errorPathTests : IO Unit := do
   unless errs ≥ 1 do
     throw <| IO.userError s!"floatLit: expected ≥ 1 reported error, got {errs}"
 
-/-- `.and`/`.or` lower to the boolean `PrimitiveOp` `And`/`Or` of their (boolean)
-    operands. Operands here are `pcmp` comparisons, which are `Bool`-typed. -/
+/-- `.and`/`.or` lower to a call to the boolean wrapper `$and`/`$or` of their
+    (boolean) operands. Operands here are `pcmp` comparisons, which are
+    `Bool`-typed. -/
 def expectBoolOp (label : String) (op : Operation) (e : SpecExpr) : IO Unit := do
   let (stmt, errs) := lower e
   unless errs == 0 do throw <| IO.userError s!"{label}: lowering reported {errs} error(s)"
-  match stmt with
-  | .PrimitiveOp actual _ _ =>
-    unless toString actual == toString op do
-      throw <| IO.userError s!"{label}: expected PrimitiveOp {toString op}, got {toString actual}"
-  | _ => throw <| IO.userError s!"{label}: expected PrimitiveOp, got {headName stmt}"
+  unless headName stmt == op.procName do
+    throw <| IO.userError s!"{label}: expected a call to {op.procName}, got {headName stmt}"
 
 def boolTests : IO Unit := do
   let cmp := SpecExpr.pcmp .lt x y loc
@@ -166,23 +163,26 @@ def boolAnyOperandTests : IO Unit := do
     let (stmt, errs) := lower e
     unless errs == 0 do throw <| IO.userError s!"{label} (Any operands): {errs} error(s)"
     match stmt with
-    | .PrimitiveOp actual [l, r] _ =>
-      unless toString actual == toString op do
-        throw <| IO.userError s!"{label}: expected PrimitiveOp {toString op}, got {toString actual}"
+    | .StaticCall actual [l, r] =>
+      unless actual.text == op.procName do
+        throw <| IO.userError s!"{label}: expected a call to {op.procName}, got {actual.text}"
       unless headName l.val == "Any_to_bool" && headName r.val == "Any_to_bool" do
         throw <| IO.userError
           s!"{label}: expected Any_to_bool operands, got {headName l.val} / {headName r.val}"
-    | _ => throw <| IO.userError s!"{label}: expected PrimitiveOp .. [l, r], got {headName stmt}"
-  -- Unary `not` over an `Any` operand: `Not [Any_to_bool(x)]`.
+    | _ => throw <| IO.userError s!"{label}: expected {op.procName}(l, r), got {headName stmt}"
+  -- Unary `not` over an `Any` operand: `$not(Any_to_bool(x))`.
   let (notStmt, notErrs) := lower (.not x loc)
   unless notErrs == 0 do throw <| IO.userError s!"not (Any operand): {notErrs} error(s)"
   match notStmt with
-  | .PrimitiveOp actual [arg] _ =>
-    unless toString actual == toString Operation.Not do
-      throw <| IO.userError s!"not: expected PrimitiveOp Not, got {toString actual}"
+  | .StaticCall actual [arg] =>
+    unless actual.text == Operation.Not.procName do
+      throw <| IO.userError
+        s!"not: expected a call to {Operation.Not.procName}, got {actual.text}"
     unless headName arg.val == "Any_to_bool" do
       throw <| IO.userError s!"not: expected Any_to_bool operand, got {headName arg.val}"
-  | _ => throw <| IO.userError s!"not: expected PrimitiveOp Not [arg], got {headName notStmt}"
+  | _ =>
+    throw <| IO.userError
+      s!"not: expected {Operation.Not.procName}(arg), got {headName notStmt}"
 
 /-- Literal boxing: each scalar literal becomes its `from_*` prelude call. -/
 def literalTests : IO Unit := do
@@ -225,14 +225,16 @@ def nonAnyUserDefinedTests : IO Unit := do
   let (andStmt, andErrs) := lowerIn customCtx (.and z z loc)
   unless andErrs == 2 do
     throw <| IO.userError s!"asBool (SomeType operand): expected 2 errors, got {andErrs}"
+  -- Operators are `StaticCall`s to the `$`-prefixed built-in wrappers, so the
+  -- head's callee name is what identifies the operator.
   match andStmt with
-  | .PrimitiveOp actual _ _ =>
-    unless toString actual == toString Operation.And do
+  | .StaticCall callee _ =>
+    unless callee.text == Operation.And.procName do
       throw <| IO.userError
-        s!"asBool (SomeType operand): expected PrimitiveOp And, got {toString actual}"
+        s!"asBool (SomeType operand): expected a call to {Operation.And.procName}, got {callee.text}"
   | _ =>
     throw <| IO.userError
-      s!"asBool (SomeType operand): expected PrimitiveOp, got {headName andStmt}"
+      s!"asBool (SomeType operand): expected a StaticCall, got {headName andStmt}"
 
 def allTests : IO Unit := do
   arithmeticTests

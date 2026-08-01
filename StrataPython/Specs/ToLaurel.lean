@@ -218,13 +218,13 @@ private def atomAssertion? (atom : SpecAtomType) (ty : SpecType)
   | .intLiteral v =>
     let typeCheck := mk (.StaticCall (mkId "Any..isfrom_int") [value])
     let unwrap := mk (.StaticCall (mkId "Any..as_int!") [value])
-    let eqCheck := mk (.PrimitiveOp .Eq [unwrap, mk (.LiteralInt v)])
-    return some <| mk (.PrimitiveOp .And [typeCheck, eqCheck])
+    let eqCheck := mk (.StaticCall (mkId Operation.Eq.procName) [unwrap, mk (.LiteralInt v)])
+    return some <| mk (.StaticCall (mkId Operation.And.procName) [typeCheck, eqCheck])
   | .stringLiteral v =>
     let typeCheck := mk (.StaticCall (mkId "Any..isfrom_str") [value])
     let unwrap := mk (.StaticCall (mkId "Any..as_string!") [value])
-    let eqCheck := mk (.PrimitiveOp .Eq [unwrap, mk (.LiteralString v)])
-    return some <| mk (.PrimitiveOp .And [typeCheck, eqCheck])
+    let eqCheck := mk (.StaticCall (mkId Operation.Eq.procName) [unwrap, mk (.LiteralString v)])
+    return some <| mk (.StaticCall (mkId Operation.And.procName) [typeCheck, eqCheck])
   | .typedDict .. =>
     reportError .unsupportedUnion ty.loc s!"TypedDict '{atom}' approximated as DictStrAny in type '{ty}'"
     return some <| mk (.StaticCall (mkId "Any..isfrom_DictStrAny") [value])
@@ -246,7 +246,7 @@ private def typeAssertion? (ty : SpecType) (value : StmtExprMd)
       match result with
       | none => result := some call
       | some prev =>
-        result := some { val := .PrimitiveOp .Or [prev, call], source := source }
+        result := some { val := .StaticCall (mkId Operation.Or.procName) [prev, call], source := source }
     | none => pure ()
   return result
 
@@ -651,7 +651,7 @@ def buildSpecBody (allArgs : Array Arg)
     | some assertion =>
       if arg.default.isSome then
         let noneCheck : StmtExprMd := { val := .StaticCall (mkId "Any..isfrom_None") [paramId], source := source }
-        let orExpr : StmtExprMd := { val := .PrimitiveOp .Or [noneCheck, assertion], source := source }
+        let orExpr : StmtExprMd := { val := .StaticCall (mkId Operation.Or.procName) [noneCheck, assertion], source := source }
         let assertStmt ← mkStmtWithLoc (.Assert orExpr none) default
         stmts := stmts.push assertStmt
       else
