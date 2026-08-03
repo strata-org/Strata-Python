@@ -41,40 +41,87 @@ public structure PyAnalyzeConfig where
   profilePipeline : Bool := true
   metricsHandle : Option IO.FS.Handle := none
   mkDischarge : Core.MkDischargeFn := Core.mkDischargeFn
+  /-- When true, route Python→Core through the V2 pipeline (Resolution → Translation →
+      Elaboration → resolve+coerce → laurel passes → Core), bypassing the old
+      `pythonAndSpecToLaurel`. -/
+  useV2 : Bool := false
 
 private def runPipeline (config : PyAnalyzeConfig)
     : PipelineM (PyAnalyzeOutcome × Statistics) := do
-  let combinedLaurel ← withPhase "pythonAndSpecToLaurel" do
-    StrataPython.pythonAndSpecToLaurel
-      (specDir := config.specDir)
-      config.filePath config.dispatchModules config.pyspecModules config.sourcePath
-
-  if config.outputMode == .verbose then
-    let _ ← (show IO Unit from do
-      IO.println "---- BEGIN Laurel Program ----"
-      IO.println (toString (Std.format combinedLaurel))
-      IO.println "---- END Laurel Program ----").toBaseIO
-
   let uri := config.sourcePath.getD config.filePath
 
-  let (coreProgram, laurelPassStats) ← withPhase "laurelToCore" do
-    let ctx ← read
-    let laurelResult ←
-      StrataPython.translateCombinedLaurelWithLowered combinedLaurel
-        (keepAllFilesPrefix := config.verifyOptions.keepAllFilesPrefix)
-        (pipelineCtx := some ctx) |>.toBaseIO
-    match laurelResult with
-    | .ok (coreOpt, diags, _, stats) =>
-      let phase ← getPhase
-      for msg in PipelineMessage.fromMessages phase diags do
-        addMessage msg
-        if msg.kind.impact.isFatal then throw ()
-      match coreOpt with
-      | some core => pure (core, stats)
-      | none =>
-        emitMessageAndAbort (file := uri) .laurelToCoreError s!"Laurel to Core translation failed: {diags}"
-    | .error e =>
-      emitMessageAndAbort (file := uri) .laurelToCoreError s!"Laurel translation error: {e}"
+  let (coreProgram, laurelPassStats) ←
+    if config.useV2 then
+      -- `pyAnalyzeV2ToCore` consumes only the source file: it does NOT read PySpec
+      -- (`--spec-dir`/`--dispatch`/`--pyspec`). Rather than silently ignore those flags
+      -- and report success for a verification that never loaded the requested specs,
+      -- fail loudly so the user knows the flag is not honored on `--v2`.
+      -- `--keep-all-files` IS honored on `--v2`: it writes the elaborated V2 Laurel.
+      let droppedFlags : List String :=
+        (if config.specDir != "." then ["--spec-dir"] else [])
+        ++ (if !config.dispatchModules.isEmpty then ["--dispatch"] else [])
+        ++ (if !config.pyspecModules.isEmpty then ["--pyspec"] else [])
+      unless droppedFlags.isEmpty do
+        let flagList := String.intercalate ", " droppedFlags
+        emitMessageAndAbort (file := uri) .laurelToCoreError
+          s!"--v2 does not support {flagList}; these flags are only honored on the v1 pipeline. Re-run without --v2, or without the listed flag(s)."
+      withPhase "pyAnalyzeV2ToCore" do
+        let v2Result ← StrataPython.pyAnalyzeV2ToCore config.filePath config.sourcePath
+          config.verifyOptions.keepAllFilesPrefix |>.toBaseIO
+        match v2Result with
+        | .ok (.ok (some core, diags)) =>
+          let phase ← getPhase
+          for msg in PipelineMessage.fromMessages phase diags do
+            addMessage msg
+            if msg.kind.impact.isFatal then throw ()
+          pure (core, ({} : Statistics))
+        | .ok (.ok (none, diags)) =>
+          -- No Core produced. Surface the underlying diagnostics with THEIR OWN kinds — a
+          -- user error (e.g. a reserved-name binding, or an unresolved reference) stays a user
+          -- error (routed to the user-code-error bucket, reported as "User error"), and must
+          -- not be relabeled a `.laurelToCoreError` internal failure. A fatal diagnostic aborts
+          -- via `throw`. Only when there is no diagnostic to explain the empty result do we
+          -- synthesize an internal error (the soundness backstop: a discarded program must
+          -- carry at least one error).
+          let phase ← getPhase
+          let msgs := PipelineMessage.fromMessages phase diags
+          for msg in msgs do
+            addMessage msg
+            if msg.kind.impact.isFatal then throw ()
+          emitMessageAndAbort (file := uri) .laurelToCoreError
+            "V2 pipeline produced no Core and no fatal diagnostic explains why"
+        | .ok (.error msg) =>
+          emitMessageAndAbort (file := uri) .laurelToCoreError s!"V2 pipeline failed: {msg}"
+        | .error e =>
+          emitMessageAndAbort (file := uri) .laurelToCoreError s!"V2 pipeline IO error: {e}"
+    else do
+      let combinedLaurel ← withPhase "pythonAndSpecToLaurel" do
+        StrataPython.pythonAndSpecToLaurel
+          (specDir := config.specDir)
+          config.filePath config.dispatchModules config.pyspecModules config.sourcePath
+      if config.outputMode == .verbose then
+        let _ ← (show IO Unit from do
+          IO.println "---- BEGIN Laurel Program ----"
+          IO.println (toString (Std.format combinedLaurel))
+          IO.println "---- END Laurel Program ----").toBaseIO
+      withPhase "laurelToCore" do
+        let ctx ← read
+        let laurelResult ←
+          StrataPython.translateCombinedLaurelWithLowered combinedLaurel
+            (keepAllFilesPrefix := config.verifyOptions.keepAllFilesPrefix)
+            (pipelineCtx := some ctx) |>.toBaseIO
+        match laurelResult with
+        | .ok (coreOpt, diags, _, stats) =>
+          let phase ← getPhase
+          for msg in PipelineMessage.fromMessages phase diags do
+            addMessage msg
+            if msg.kind.impact.isFatal then throw ()
+          match coreOpt with
+          | some core => pure (core, stats)
+          | none =>
+            emitMessageAndAbort (file := uri) .laurelToCoreError s!"Laurel to Core translation failed: {diags}"
+        | .error e =>
+          emitMessageAndAbort (file := uri) .laurelToCoreError s!"Laurel translation error: {e}"
 
   if config.outputMode == .verbose then
     let _ ← (show IO Unit from do

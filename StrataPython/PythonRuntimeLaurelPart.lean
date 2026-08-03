@@ -470,7 +470,22 @@ return if ListAny..isListAny_nil(indices) then dictOrList
   else Any_set!(dictOrList, ListAny..head!(indices),
     Any_sets!(ListAny..tail!(indices), Any_get!(dictOrList, ListAny..head!(indices)), val));
 
+// Chained-subscript assignment: models `container[i0][i1]...[in] = val`.
+// `indices` is the subscript list [i0, ..., in]. Recurses down the chain, reading
+// each intermediate container with `Any_get!`, then rebuilds bottom-up: set the
+// deepest index to `val`, then re-set each parent to its updated child. Base cases:
+// empty index list returns the container unchanged; a single index is one `Any_set!`.
+// Same shape as `Any_sets!` above; the recursive call here is `Any_sets` (this
+// procedure).
+procedure Any_sets (indices: ListAny, dictOrList: Any, val: Any): Any
+return
+  if ListAny..isListAny_nil(indices) then dictOrList
+  else if ListAny..isListAny_nil(ListAny..tail!(indices)) then Any_set!(dictOrList, ListAny..head!(indices), val)
+  else Any_set!(dictOrList, ListAny..head!(indices),
+    Any_sets(ListAny..tail!(indices), Any_get!(dictOrList, ListAny..head!(indices)), val));
+
 procedure Any_len (v: Any) : int;
+procedure Any_range_to_Any (v: Any) : Any;
 
 procedure Any_len_to_Any (v: Any) : Any
 return from_int(Any_len(v));
@@ -534,6 +549,42 @@ procedure bool_to_int (bval: bool) : int
 return if bval then 1 else 0;
 procedure bool_to_real (b: bool) : real
 return if b then 1.0 else 0.0;
+procedure int_to_bool (n: int) : bool return !(n == 0);
+procedure str_to_bool (s: string) : bool return !(s == "");
+procedure list_to_bool (l: ListAny) : bool return !(l == ListAny_nil());
+procedure dict_to_bool (d: DictStrAny) : bool;
+procedure float_to_bool (f: real) : bool return !(f == 0.0);
+procedure Any_set_to_Any (v: Any) : Any;
+procedure Any_list_to_Any (v: Any) : Any;
+procedure Any_enumerate_to_Any (v: Any) : Any;
+procedure Any_dict_to_Any (v: Any) : Any;
+procedure Any_sum_to_Any (v: Any) : Any;
+procedure Any_isinstance_to_bool (v: Any, t: Any) : bool;
+// Unmodeled builtins the resolver remaps to (Resolution.lean builtinContext): declared
+// as uninterpreted stubs (sound) so the elaborator's lookupFuncSig finds a signature —
+// otherwise a `type(e)`/`abs(x)`/etc. is a hard elaboration failure instead of an opaque
+// Any. Arities match the resolver's mkBuiltinSig; params are `Any` per prelude convention.
+procedure Any_type_to_Any (obj: Any) : Any;
+procedure Any_abs_to_Any (x: Any) : Any;
+procedure Any_chr_to_Any (i: Any) : Any;
+procedure Any_ord_to_Any (c: Any) : Any;
+procedure Any_getattr_to_Any (obj: Any, name: Any) : Any;
+procedure Any_setattr_to_Any (obj: Any, name: Any, value: Any) : Any;
+procedure to_int_any (v: Any) : Any;
+procedure to_float_any (v: Any) : Any;
+procedure PDiv (v1: Any, v2: Any) : Any;
+procedure Any_max_to_Any (v1: Any, v2: Any) : Any;
+procedure Any_min_to_Any (v1: Any, v2: Any) : Any;
+procedure Any_hasattr_to_bool (v: Any, attr: Any) : bool;
+procedure Any_any_to_bool (v: Any) : bool;
+procedure Any_all_to_bool (v: Any) : bool;
+procedure Any_zip_to_Any (v1: Any, v2: Any) : Any;
+procedure Any_map_to_Any (f: Any, v: Any) : Any;
+procedure Any_filter_to_Any (f: Any, v: Any) : Any;
+procedure Any_sorted_to_Any (v: Any) : Any;
+procedure Any_reversed_to_Any (v: Any) : Any;
+procedure Any_tuple_to_Any (v: Any) : Any;
+procedure Any_frozenset_to_Any (v: Any) : Any;
 
 // /////////////////////////////////////////////////////////////////////////////////////
 // Python floored division and modulo
@@ -679,6 +730,21 @@ return if Any..isexception(v1) then v1 else if Any..isexception(v2) then v2
     from_float(Any..as_float!(v1) * Any..as_float!(v2))
   else
     exception(UndefinedError ("Operand Type is not defined"));
+
+procedure PInvert (v1: Any) : Any;
+
+// Composite ↔ Any bridge stubs (uninterpreted, sound: the value round-trips).
+// The resolver's coercion realizer boxes a class instance into Any via the bare
+// constructor-style `from_Composite` and recovers the pointer via the accessor-style
+// `Any..as_Composite!`. `Composite` cannot be named in the prelude (it is synthesized
+// by heapParameterizationPass), so the parameter is typed via `re_Match` — a named
+// composite that `compositeRefToComposite` (type-hierarchy pass) flattens to the flat
+// `Composite` datatype, so at Core these are `Composite → Any` / `Any → Composite`,
+// matching the boxed/unboxed class pointer. (`from_Composite` is BARE, not `Any..`:
+// the `Any..` prefix triggers accessor `!`-name-mangling for a constructor-style name.)
+procedure Any..as_Composite! (v: Any) : re_Match;
+procedure Any..isfrom_Composite (v: Any) : bool;
+procedure from_Composite (v: re_Match) : Any;
 
 procedure PFloorDiv (v1: Any, v2: Any) : Any
   requires (Any..isfrom_bool(v2)==>Any..as_bool!(v2)) && (Any..isfrom_int(v2)==>Any..as_int!(v2)!=0)
@@ -1092,11 +1158,15 @@ procedure print(msg : Any, opt : Any, sep : Any, end : Any, file : Any, flush : 
 Parse the Laurel DDM prelude into a Laurel Program.
 -/
 
--- Prelude functions that may return an exception value as Any.
--- We should make sure that all functions in this list propagate the exceptions from their arguments.
-public def AnyMaybeExceptionList := ["Any_get!", "Any_set!", "Any_sets!", "PNeg", "PBitNot", "PNot", "PAdd", "PSub", "PMul",
-   "PFloorDiv", "PLt", "PLe", "PGt", "PGe", "PPow", "PMod", "PLShift", "PRShift",
-   "PBitAnd", "PBitOr", "PBitXor", "PAnd", "POr"]
+-- Runtime functions that may propagate exception values encoded as Any.
+-- These functions return `Any` where the value might be `exception(...)`.
+-- Used to determine which procs can elevate their caller's grade to `.err`.
+-- (HashSet for the elaborator's membership check; includes the bitwise operators.)
+public def AnyMaybeExceptionList : Std.HashSet String :=
+  (["Any_get!", "Any_set!", "Any_sets!", "PNeg", "PBitNot", "PNot", "PAdd", "PSub", "PMul",
+    "PFloorDiv", "PLt", "PLe", "PGt", "PGe", "PPow", "PMod", "PLShift", "PRShift",
+    "PBitAnd", "PBitOr", "PBitXor", "PAnd", "POr"]
+   : List String).foldl (fun s n => s.insert n) {}
 
 public def pythonRuntimeLaurelPart : Laurel.Program :=
   match Laurel.TransM.run
