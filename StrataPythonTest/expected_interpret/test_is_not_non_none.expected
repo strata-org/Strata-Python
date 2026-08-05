@@ -1,1 +1,1 @@
-`is not` is only supported with None
+`is not` is only supported against the singletons None, True and False

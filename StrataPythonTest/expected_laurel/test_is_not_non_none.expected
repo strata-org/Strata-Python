@@ -1,4 +1,4 @@
-DETAIL: Unsupported construct: `is not` is only supported with None
+DETAIL: Unsupported construct: `is not` is only supported against the singletons None, True and False
 AST: StrataPython.expr.Compare
   { start := { byteIdx := 65 }, stop := { byteIdx := 75 } }
   (StrataPython.expr.Name

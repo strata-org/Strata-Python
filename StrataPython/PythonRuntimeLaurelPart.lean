@@ -830,6 +830,38 @@ procedure PNEq (v: Any, v': Any) : Any
 return from_bool(normalize_any(v) != normalize_any (v'));
 
 // /////////////////////////////////////////////////////////////////////////////////////
+// Modelling of Python identity comparisons `is` / `is not`
+//
+// `is` is object identity, NOT equality, so it must not go through
+// `normalize_any`: that collapses `from_bool(true)` into `from_int(1)`, which
+// is exactly the distinction `is` has to preserve (`True == 1` is true in
+// Python, but `True is 1` is false).
+//
+// These are only used for the *immortal singletons* None/True/False, where
+// Python guarantees a unique object per value, so structural equality on the
+// `Any` constructor coincides with identity. The translator restricts `is` to
+// those three literals (see `PythonToLaurel.lean`); it deliberately does not
+// use these for ints, strings or containers, whose identity depends on
+// allocation and on CPython interning details that are not language
+// guarantees (`1000 is 1000` can be either).
+//
+// Comparing the `Any` values directly gives the right answer for the
+// singletons: `from_bool(true)`, `from_bool(false)` and `from_None()` are
+// distinct constructors (or distinct payloads), so no two of them compare
+// equal, and each compares equal only to itself.
+//
+// Like `PEq`/`PNEq`, these are total: every `Any` is comparable, so they never
+// introduce an exception and are deliberately NOT in `AnyMaybeExceptionList`.
+// Adding them there would make the translator emit a "Check PIs exception"
+// proof obligation at every `is`, which is noise for an operator that cannot
+// fail.
+procedure PIs (v: Any, v': Any) : Any
+return from_bool(v == v');
+
+procedure PIsNot (v: Any, v': Any) : Any
+return from_bool(v != v');
+
+// /////////////////////////////////////////////////////////////////////////////////////
 // Modelling of Python Boolean operations And and Or
 // /////////////////////////////////////////////////////////////////////////////////////
 
