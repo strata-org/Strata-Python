@@ -73,3 +73,12 @@ def for_else(Items: List[str]) -> None:
         assert len(x) >= 1, 'for else'
     else:
         pass
+
+# Nested Dict[int, _] inside an outer for: the inner loop's non-str-key
+# warning uses .pySpecDroppedAssertion, so the outer quantifyBody detects
+# the incomplete body and fires "loop body could not be fully translated".
+def for_nested_int_dict(D: Dict[str, Dict[int, str]]) -> None:
+    for k, v in D.items():
+        assert len(k) >= 1, 'outer precondition'
+        for i in v:
+            assert i >= 0, 'inner precondition on int key'
