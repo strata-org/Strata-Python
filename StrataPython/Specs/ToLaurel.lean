@@ -686,7 +686,7 @@ def buildSpecBody (allArgs : Array Arg)
       val := .Block stmts.toList none,
       source := fileSource
   }
-  return (.Opaque [] (some body) [{ val := .All, source := unknownSource }], requiredParamConds)
+  return (.Opaque [] (some body) [{ targets := [{ val := .All, source := unknownSource }] }], requiredParamConds)
 
 /-- Lower user `@requires` preconditions into caller-checked Laurel
     `Condition`s (default `ConditionMode.Both`: proven at each call site,

@@ -1257,5 +1257,41 @@ private def translateFunc (args : Array Arg := #[])
   -- return type assume
   assert! body.contains "assume Any..isfrom_str(result)"
 
+/-! ## The modifies clause is one unguarded wildcard group
+
+Strata's `Body.Opaque` carries `List ModifiesGroup`; this frontend always emits
+the degenerate form — exactly one unguarded, summary-less group whose sole
+target is the wildcard (`*`). The single-group wrapping is load-bearing: zero
+groups would mean "unframed" downstream, while an empty-target group would mean
+"nothing changes". Pinned directly because the shape is otherwise only
+exercised incidentally, end to end. -/
+
+private def isWildcardOnly (g : ModifiesGroup) : Bool :=
+  match g.targets with
+  | [t] => (t.val matches .All)
+  | _ => false
+
+private def firstProcGroups (result : TranslationResult) : Option (List ModifiesGroup) :=
+  match result.program.staticProcedures with
+  | proc :: _ =>
+    match proc.body with
+    | .Opaque _ _ groups => some groups
+    | _ => none
+  | [] => none
+
+/--
+info: groups: 1
+unguarded: true, wildcard-only target: true, no summary: true
+-/
+#guard_msgs in
+#eval do
+  let result := signaturesToLaurel "<test>" #[mkFuncSig "f" (identType .builtinsInt)] testModule
+  match firstProcGroups result with
+  | none => IO.println "no opaque procedure found"
+  | some groups =>
+    IO.println s!"groups: {groups.length}"
+    for g in groups do
+      IO.println s!"unguarded: {g.guard.isNone}, wildcard-only target: {isWildcardOnly g}, no summary: {g.summary.isNone}"
+
 end StrataPython.Specs.ToLaurel.Tests
 end
