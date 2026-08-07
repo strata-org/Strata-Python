@@ -627,10 +627,31 @@ partial def translateExpr (ctx : TranslationContext) (e : expr SourceRange)
       have ⟨hN, hComp⟩ : 0 < n ∧ comparators.val.size = n := by
         simp_all [Bool.or_eq_true, beq_iff_eq, bne_iff_ne]; omega
       -- Translate a single comparison operator to its Laurel prelude name.
-      -- `is`/`is not` are only sound when the RHS is None, because Python's
-      -- `is` checks object identity, not equality (e.g., True == 1 but
-      -- True is not 1). In the Any value model, None is a singleton so
-      -- identity and equality coincide for None comparisons.
+      --
+      -- `is`/`is not` are object identity, not equality (e.g. `True == 1` but
+      -- `True is not 1`), so they lower to `PIs`/`PIsNot`, which compare `Any`
+      -- values structurally *without* the bool/int normalization `PEq` applies.
+      --
+      -- They are restricted to the three immortal singletons `None`, `True`
+      -- and `False`. Python guarantees exactly one object per singleton, so
+      -- structural equality on the `Any` constructor coincides with identity.
+      -- Any other RHS is refused: identity of ints, strings and containers
+      -- depends on allocation and on CPython interning that is not a language
+      -- guarantee (`1000 is 1000` may be true or false), so accepting it would
+      -- risk being unsound rather than merely incomplete.
+      let isSingletonLiteral (pyExpr : expr SourceRange) : Bool :=
+        match pyExpr with
+        | .Constant _ (.ConNone _) _ | .Constant _ (.ConTrue _) _
+        | .Constant _ (.ConFalse _) _ => true
+        | _ => false
+      -- Python allows the singleton on either side (`x is None`, `None is x`),
+      -- so accept the comparison when *either* operand of this link is one.
+      -- For link `i` the left operand is `left` when `i = 0` and the previous
+      -- comparator otherwise (`a is b is c` chains as `a is b` and `b is c`).
+      let isSingletonOperand (i : Nat) : Bool :=
+        let lhs := if i = 0 then left else comparators.val[i - 1]!
+        let rhs := comparators.val[i]!
+        isSingletonLiteral lhs || isSingletonLiteral rhs
       let cmpopName (i : Nat) (hi : i < n) : Except TranslationError String := do
         match ops.val[i]'hi with
           | .Eq _ => .ok "PEq"
@@ -641,12 +662,16 @@ partial def translateExpr (ctx : TranslationContext) (e : expr SourceRange)
           | .GtE _ => .ok "PGe"
           | .In _ => .ok "PIn"
           | .NotIn _ => .ok "PNotIn"
-          | .Is _ => match comparators.val[i]'(by omega) with
-              | .Constant _ (.ConNone _) _ => .ok "PEq"
-              | _ => throw (.unsupportedConstruct "`is` is only supported with None" (toString (repr e)))
-          | .IsNot _ => match comparators.val[i]'(by omega) with
-              | .Constant _ (.ConNone _) _ => .ok "PNEq"
-              | _ => throw (.unsupportedConstruct "`is not` is only supported with None" (toString (repr e)))
+          | .Is _ =>
+              if isSingletonOperand i then .ok "PIs"
+              else throw (.unsupportedConstruct
+                "`is` is only supported against the singletons None, True and False"
+                (toString (repr e)))
+          | .IsNot _ =>
+              if isSingletonOperand i then .ok "PIsNot"
+              else throw (.unsupportedConstruct
+                "`is not` is only supported against the singletons None, True and False"
+                (toString (repr e)))
       -- Check if a Python expression is simple (no side effects when duplicated).
       -- Only `Name` and `Constant` are treated as simple. `Subscript` (e.g.,
       -- `a[0]`) and `Attribute` (e.g., `self.x`) are intentionally non-simple

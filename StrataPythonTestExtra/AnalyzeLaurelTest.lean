@@ -97,11 +97,11 @@ meta def runAnalyze
     | .error () =>
       -- Flag tool errors, then user errors, then general
       if let some r := (← pctx.getToolErrors).back? then
-        return .error <| r.message
+        return .error <| r.message.message
       if let some r := (← pctx.getUserCodeErrors).back? then
-        return .error <| s!"User code error: {r.message}"
+        return .error <| s!"User code error: {r.message.message}"
       if let some m := (←pctx.getMessages).back? then
-        return .error m.message
+        return .error m.message.message
       return .error "Pipeline aborted for unspecified reason (bug)"
   match ← translateCombinedLaurel laurel with
   | (some core, []) =>
@@ -128,7 +128,7 @@ meta def runAnalyzeAndVerify
     | .ok r => pure r
     | .error () =>
       let msgs ← pctx.getMessages
-      let detail := match msgs.back? with | some m => m.message | none => "Pipeline aborted"
+      let detail := match msgs.back? with | some m => m.message.message | none => "Pipeline aborted"
       return .error detail
   let (coreProgramOption, _) ← translateCombinedLaurel laurel
   let coreProgram ← match coreProgramOption with
@@ -273,7 +273,7 @@ meta def runTestCase (pythonCmd : System.FilePath) (tmpDir : System.FilePath)
         | .ok r => pure r
         | .error () =>
           let msgs ← pctx.getMessages
-          let detail := match msgs.back? with | some m => m.message | none => "Pipeline aborted"
+          let detail := match msgs.back? with | some m => m.message.message | none => "Pipeline aborted"
           return some s!"test_class_any_as_composite.py: {detail}"
       match ← translateCombinedLaurel laurel with
       | (some core, []) =>
@@ -427,7 +427,7 @@ recursively translates subclasses, so the type
       | .ok r => pure r
       | .error () =>
         let msgs ← pctx.getMessages
-        let detail := match msgs.back? with | some m => m.message | none => "Pipeline aborted"
+        let detail := match msgs.back? with | some m => m.message.message | none => "Pipeline aborted"
         throw <| IO.userError s!"pyAnalyzeLaurel failed: {detail}"
     -- Operators are `StaticCall`s to the built-in wrappers (`$add`, `$eq`, …),
     -- which the compilation pipeline prepends before its own `resolve`. Resolving

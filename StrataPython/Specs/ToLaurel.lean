@@ -91,7 +91,8 @@ abbrev ToLaurelM := ReaderT ToLaurelContext (StateM ToLaurelState)
     this monad always runs during that phase. -/
 def reportError (kind : MessageKind) (loc : SourceRange) (message : String) : ToLaurelM Unit := do
   let phase := Phase.base "pySpecToLaurel"
-  let e : PipelineMessage := ⟨(←read).filepath, loc, phase, kind, message⟩
+  let e : PipelineMessage :=
+    { phase, message := { fileRange := { file := .file (←read).filepath.toString, range := loc }, message, kind } }
   modify fun s => { s with errors := s.errors.push e }
 
 def runChecked (act : ToLaurelM α) : ToLaurelM (α × Bool) := do

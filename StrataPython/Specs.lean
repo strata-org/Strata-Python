@@ -4,6 +4,7 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
+public import Strata.Pipeline.Messages
 
 import all    StrataDDM.Util.Fin
 import        StrataPython.ReadPython
@@ -283,7 +284,7 @@ def shouldSkip (name : String) : PySpecM Bool := do
 private def pySpecParsingPhase : Phase := Phase.base "pySpecParsing"
 
 def specErrorAt (file : System.FilePath) (loc : SourceRange) (message : String) : PySpecM Unit := do
-  let e : PipelineMessage := { file, loc, phase := pySpecParsingPhase, kind := .pySpecParsingError, message }
+  let e : PipelineMessage := { phase := pySpecParsingPhase, message := { fileRange := { file := .file file.toString, range := loc }, message, kind := .pySpecParsingError } }
   modify fun s => { s with errors := s.errors.push e }
 
 instance : PySpecMClass PySpecM where
@@ -291,7 +292,7 @@ instance : PySpecMClass PySpecM where
     specErrorAt (←read).pythonFile loc message
   specWarning loc message := do
     let file := (←read).pythonFile
-    let w : PipelineMessage := { file, loc, phase := pySpecParsingPhase, kind := .pySpecParsingWarning, message }
+    let w : PipelineMessage := { phase := pySpecParsingPhase, message := { fileRange := { file := .file file.toString, range := loc }, message, kind := .pySpecParsingWarning } }
     modify fun s => { s with warnings := s.warnings.push w }
   runChecked act := do
     let cnt := (←get).errors.size
@@ -680,11 +681,11 @@ abbrev SpecAssertionM := ReaderT SpecAssertionContext (StateM SpecAssertionState
 instance : PySpecMClass SpecAssertionM where
   specError loc message := do
     let file := (←read) |>.filePath
-    let e : PipelineMessage := { file, loc, phase := pySpecParsingPhase, kind := .pySpecParsingError, message }
+    let e : PipelineMessage := { phase := pySpecParsingPhase, message := { fileRange := { file := .file file.toString, range := loc }, message, kind := .pySpecParsingError } }
     modify fun s => { s with errors := s.errors.push e }
   specWarning loc message := do
     let file := (←read) |>.filePath
-    let w : PipelineMessage := { file, loc, phase := pySpecParsingPhase, kind := .pySpecParsingWarning, message }
+    let w : PipelineMessage := { phase := pySpecParsingPhase, message := { fileRange := { file := .file file.toString, range := loc }, message, kind := .pySpecParsingWarning } }
     modify fun s => { s with warnings := s.warnings.push w }
   runChecked act := do
     let cnt := (←get).errors.size
@@ -820,6 +821,15 @@ private def transCompare (loc : SourceRange)
   | _ =>
     return none
 
+/-- Emit a warning carrying an explicit `MessageKind`. `specWarning` always uses
+    the generic `pySpecParsingWarning` kind, which consumers cannot distinguish;
+    use this when a warning has to be recognized programmatically. -/
+private def specWarningOfKind (kind : MessageKind) (loc : SourceRange) (message : String)
+    : SpecAssertionM Unit := do
+  let file := (←read) |>.filePath
+  let w : PipelineMessage := { phase := pySpecParsingPhase, message := { fileRange := { file := .file file.toString, range := loc }, message, kind } }
+  modify fun s => { s with warnings := s.warnings.push w }
+
 /-- Translate `any(body for x in iterable)` / `all(body for x in iterable)` into
     an existential/universal quantifier respectively. Unsupported quantifier
     shapes are hard errors: silently omitting a requested contract would weaken
@@ -852,7 +862,7 @@ def transQuantCall (loc : SourceRange)
   -- The Laurel model only has `DictStrAny`, so reject non-`str`-keyed dicts.
   if let some kTp := domainInfo.dictKeyType? then
     unless kTp.isStringType do
-      specError loc s!"{callee}: dict quantifier requires str keys (only Dict[str, _] is supported)"
+      specWarningOfKind .pySpecDroppedAssertion loc s!"{callee}: dict quantifier requires str keys (only Dict[str, _] is supported)"
       return none
   -- Match the target binder against the domain to determine bindings and domain.
   -- For single-name targets we get one (name, type); for tuple targets we get two.
@@ -1167,15 +1177,6 @@ partial def transExpr (e : expr SourceRange)
     kind rather than on this text. -/
 def droppedAssertionWarning := "unsupported expression in assert; dropped"
 
-/-- Emit a warning carrying an explicit `MessageKind`. `specWarning` always uses
-    the generic `pySpecParsingWarning` kind, which consumers cannot distinguish;
-    use this when a warning has to be recognized programmatically. -/
-def specWarningOfKind (kind : MessageKind) (loc : SourceRange) (message : String)
-    : SpecAssertionM Unit := do
-  let file := (←read) |>.filePath
-  let w : PipelineMessage := { file, loc, phase := pySpecParsingPhase, kind, message }
-  modify fun s => { s with warnings := s.warnings.push w }
-
 mutual
 
 def blockStmt (s : stmt SourceRange) : SpecAssertionM Unit := do
@@ -1238,7 +1239,8 @@ def blockStmt (s : stmt SourceRange) : SpecAssertionM Unit := do
         return
     if let some kTp := domainInfo.dictKeyType? then
       unless kTp.isStringType do
-        specError s.ann "For: dict quantifier requires str keys (only Dict[str, _] is supported)"
+        specWarningOfKind .pySpecDroppedAssertion s.ann
+          "For: dict quantifier requires str keys (only Dict[str, _] is supported)"
         return
     -- Run the loop body with its binders typed, then wrap each assertion in a
     -- universal over the selected domain. Multiple assertions remain separate
@@ -1349,7 +1351,7 @@ def translateContractValue? (allowFieldAccess : Bool) (e : expr SourceRange)
   if clean && formula.containsPlaceholder then
     -- Clean translation that still contains a placeholder (e.g. a bare
     -- string-literal predicate, whose `transExpr` branch is silent): surface it.
-    specWarning e.ann "unsupported expression in contract; dropped"
+    specWarningOfKind .pySpecDroppedAssertion e.ann "unsupported expression in contract; dropped"
   return if clean && !formula.containsPlaceholder then some formula else none
 
 /-- Translate a contract body and, when it translated, pass the result to
@@ -2012,7 +2014,7 @@ public def translateFile
         | none =>
           throw s!"No location information for {e.file}"
         | some fm =>
-          pure s!"{e.loc.format e.file fm}: {e.message}"
+          pure s!"{e.loc.format e.file fm}: {e.message.message}"
   if errors.size > 0 then
     let msg := "Translation errors:\n"
     let msg ←

@@ -1,4 +1,4 @@
-DETAIL: Unsupported construct: `is` is only supported with None
+DETAIL: Unsupported construct: `is` is only supported against the singletons None, True and False
 AST: StrataPython.expr.Compare
   { start := { byteIdx := 61 }, stop := { byteIdx := 67 } }
   (StrataPython.expr.Name

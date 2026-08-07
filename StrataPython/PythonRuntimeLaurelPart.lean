@@ -536,6 +536,26 @@ procedure bool_to_real (b: bool) : real
 return if b then 1.0 else 0.0;
 
 // /////////////////////////////////////////////////////////////////////////////////////
+// Python floored division and modulo
+//
+// Core's `/` and `%` on int are Euclidean (`Int.ediv`/`Int.emod`): the
+// remainder is always non-negative, so `7 % (-3) == 1` and `7 / (-3) == -2`.
+// Python instead specifies *floored* division -- the quotient rounds toward
+// negative infinity and the remainder takes the sign of the DIVISOR, so
+// `7 // -3 == -3` and `7 % -3 == -2`. See Python Language Reference 6.7:
+// `x == (x//y)*y + (x%y)`.
+//
+// The two agree whenever the divisor is positive (Euclidean already floors
+// there). They differ only for a negative divisor with a nonzero remainder,
+// where the floored quotient is one less and the floored remainder is shifted
+// by the divisor. Both helpers keep the divisor-is-zero case to the caller's
+// `requires`, exactly as the raw operators did.
+procedure int_floordiv (a: int, b: int) : int
+return if b < 0 && a % b != 0 then (a / b) - 1 else a / b;
+procedure int_floormod (a: int, b: int) : int
+return if b < 0 && a % b != 0 then (a % b) + b else a % b;
+
+// /////////////////////////////////////////////////////////////////////////////////////
 // Modelling of Python unary operations
 // /////////////////////////////////////////////////////////////////////////////////////
 
@@ -664,13 +684,13 @@ procedure PFloorDiv (v1: Any, v2: Any) : Any
   requires (Any..isfrom_bool(v2)==>Any..as_bool!(v2)) && (Any..isfrom_int(v2)==>Any..as_int!(v2)!=0)
 return if Any..isexception(v1) then v1 else if Any..isexception(v2) then v2
   else if Any..isfrom_bool(v1) && Any..isfrom_bool(v2) then
-    from_int( bool_to_int(Any..as_bool!(v1)) / bool_to_int(Any..as_bool!(v2)))
+    from_int( int_floordiv(bool_to_int(Any..as_bool!(v1)), bool_to_int(Any..as_bool!(v2))))
   else if Any..isfrom_bool(v1) && Any..isfrom_int(v2) then
-    from_int(bool_to_int(Any..as_bool!(v1)) / Any..as_int!(v2))
+    from_int(int_floordiv(bool_to_int(Any..as_bool!(v1)), Any..as_int!(v2)))
   else if Any..isfrom_int(v1) && Any..isfrom_bool(v2) then
-    from_int(Any..as_int!(v1) / bool_to_int(Any..as_bool!(v2)))
+    from_int(int_floordiv(Any..as_int!(v1), bool_to_int(Any..as_bool!(v2))))
   else if Any..isfrom_int(v1) && Any..isfrom_int(v2) then
-    from_int(Any..as_int!(v1) / Any..as_int!(v2))
+    from_int(int_floordiv(Any..as_int!(v1), Any..as_int!(v2)))
   else
     exception(UndefinedError ("Operand Type is not defined"));
 
@@ -810,6 +830,38 @@ procedure PNEq (v: Any, v': Any) : Any
 return from_bool(normalize_any(v) != normalize_any (v'));
 
 // /////////////////////////////////////////////////////////////////////////////////////
+// Modelling of Python identity comparisons `is` / `is not`
+//
+// `is` is object identity, NOT equality, so it must not go through
+// `normalize_any`: that collapses `from_bool(true)` into `from_int(1)`, which
+// is exactly the distinction `is` has to preserve (`True == 1` is true in
+// Python, but `True is 1` is false).
+//
+// These are only used for the *immortal singletons* None/True/False, where
+// Python guarantees a unique object per value, so structural equality on the
+// `Any` constructor coincides with identity. The translator restricts `is` to
+// those three literals (see `PythonToLaurel.lean`); it deliberately does not
+// use these for ints, strings or containers, whose identity depends on
+// allocation and on CPython interning details that are not language
+// guarantees (`1000 is 1000` can be either).
+//
+// Comparing the `Any` values directly gives the right answer for the
+// singletons: `from_bool(true)`, `from_bool(false)` and `from_None()` are
+// distinct constructors (or distinct payloads), so no two of them compare
+// equal, and each compares equal only to itself.
+//
+// Like `PEq`/`PNEq`, these are total: every `Any` is comparable, so they never
+// introduce an exception and are deliberately NOT in `AnyMaybeExceptionList`.
+// Adding them there would make the translator emit a "Check PIs exception"
+// proof obligation at every `is`, which is noise for an operator that cannot
+// fail.
+procedure PIs (v: Any, v': Any) : Any
+return from_bool(v == v');
+
+procedure PIsNot (v: Any, v': Any) : Any
+return from_bool(v != v');
+
+// /////////////////////////////////////////////////////////////////////////////////////
 // Modelling of Python Boolean operations And and Or
 // /////////////////////////////////////////////////////////////////////////////////////
 
@@ -860,13 +912,13 @@ procedure PMod (v1: Any, v2: Any) : Any
   requires (Any..isfrom_bool(v2)==>Any..as_bool!(v2)) && (Any..isfrom_int(v2)==>Any..as_int!(v2)!=0)
 return if Any..isexception(v1) then v1 else if Any..isexception(v2) then v2
   else if Any..isfrom_bool(v1) && Any..isfrom_bool(v2) then
-    from_int( bool_to_int(Any..as_bool!(v1)) % bool_to_int(Any..as_bool!(v2)))
+    from_int( int_floormod(bool_to_int(Any..as_bool!(v1)), bool_to_int(Any..as_bool!(v2))))
   else if Any..isfrom_bool(v1) && Any..isfrom_int(v2) then
-    from_int(bool_to_int(Any..as_bool!(v1)) % Any..as_int!(v2))
+    from_int(int_floormod(bool_to_int(Any..as_bool!(v1)), Any..as_int!(v2)))
   else if Any..isfrom_int(v1) && Any..isfrom_bool(v2) then
-    from_int(Any..as_int!(v1) % bool_to_int(Any..as_bool!(v2)))
+    from_int(int_floormod(Any..as_int!(v1), bool_to_int(Any..as_bool!(v2))))
   else if Any..isfrom_int(v1) && Any..isfrom_int(v2) then
-    from_int(Any..as_int!(v1) % Any..as_int!(v2))
+    from_int(int_floormod(Any..as_int!(v1), Any..as_int!(v2)))
   else
     exception(UndefinedError ("Operand Type is not defined"));
 

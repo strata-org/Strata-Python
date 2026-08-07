@@ -4,6 +4,7 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
+public import Strata.Pipeline.Messages
 
 public import StrataDDM.Util.IO
 public import StrataDDM.Util.SourceRange
@@ -218,7 +219,7 @@ def pyTranslateLaurel
     (dispatchModules : Array String := #[])
     (pyspecModules : Array String := #[])
     (specDir : System.FilePath := ".")
-    : EIO String (Core.Program × List Strata.DiagnosticModel) := do
+    : EIO String (Core.Program × List Strata.Message) := do
   let pctx ← PipelineContext.create (outputMode := .quiet)
   let laurel ←
     match ← (pythonAndSpecToLaurel pythonIonPath dispatchModules pyspecModules (specDir := specDir)).run pctx |>.toBaseIO with
@@ -226,7 +227,7 @@ def pyTranslateLaurel
     | .error () =>
       let msgs ← pctx.getMessages
       let detail := match msgs.back? with
-        | some m => m.message
+        | some m => m.message.message
         | none => "Pipeline aborted"
       throw detail
   let (coreOption, laurelTranslateErrors) ← IO.toEIO (fun e => s!"{e}") (translateCombinedLaurel laurel)

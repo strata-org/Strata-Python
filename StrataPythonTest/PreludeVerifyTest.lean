@@ -4,6 +4,7 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
+public import Strata.Pipeline.Messages
 
 meta import all StrataPython.PySpecPipeline
 meta import all StrataPython.PyFactory
@@ -27,7 +28,7 @@ private def preludeProgram : IO Core.Program := do
   | some prog => return prog
   | none => return { decls := [] }
 
-private def verifyPrelude : IO (Array DiagnosticModel) := do
+private def verifyPrelude : IO (Array Message) := do
   let prog ← preludeProgram
   IO.FS.withTempDir fun tempDir => do
     let r ← EIO.toIO (IO.Error.userError ∘ toString)
@@ -35,7 +36,7 @@ private def verifyPrelude : IO (Array DiagnosticModel) := do
         (options := .quiet)
         (moreFns := StrataPython.RuntimeFactory)
         (externalPhases := [Strata.frontEndPhase]))
-    return r.flatMap (fun vcr => (toDiagnosticModel vcr []).toArray)
+    return r.flatMap (fun vcr => (toMessage vcr []).toArray)
 
 /-- info: #[] -/
 #guard_msgs in

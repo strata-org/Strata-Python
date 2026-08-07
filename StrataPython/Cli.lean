@@ -320,7 +320,7 @@ def pyAnalyzeLaurelCommand (mkDischarge : Core.MkDischargeFn := Core.mkDischarge
       IO.eprintln s!"{msgs.size} pipeline warning(s)"
       if verbose then
         for err in msgs do
-          IO.eprintln s!"  {err.file}: {err.phase}.{err.kind}: {err.message}"
+          IO.eprintln s!"  {err.file}: {err.phase}.{err.kind}: {err.message.message}"
 
     if profile && !laurelPassStats.data.isEmpty then
       IO.println laurelPassStats.format
@@ -338,12 +338,12 @@ def pyAnalyzeLaurelCommand (mkDischarge : Core.MkDischargeFn := Core.mkDischarge
     let userErrors ← pctx.getUserCodeErrors
 
     if let some lastErr := toolErrors.back? then
-      emitOutcome "internalError" ExitCode.internalError (detail := lastErr.message)
-      exitPyAnalyzeInternalError lastErr.message
+      emitOutcome "internalError" ExitCode.internalError (detail := lastErr.message.message)
+      exitPyAnalyzeInternalError lastErr.message.message
     if let some lastErr := userErrors.back? then
-      emitOutcome "userError" ExitCode.userError (detail := lastErr.message)
-      let location ← reportUserCodeError lastErr.loc lastErr.message mfm (sourcePath.getD filePath)
-      exitPyAnalyzeUserError s!"{lastErr.message}{location}"
+      emitOutcome "userError" ExitCode.userError (detail := lastErr.message.message)
+      let location ← reportUserCodeError lastErr.loc lastErr.message.message mfm (sourcePath.getD filePath)
+      exitPyAnalyzeUserError s!"{lastErr.message.message}{location}"
     match outcome with
     | .verified vcResults _coreProgram =>
       emitOutcome "verified" 0
@@ -373,11 +373,11 @@ def pyAnalyzeLaurelCommand (mkDischarge : Core.MkDischargeFn := Core.mkDischarge
       let knownLimitations := msgs.filter (·.kind.impact == .knownLimitation)
       match knownLimitations.back? with
       | some lastErr =>
-        emitOutcome "knownLimitation" ExitCode.knownLimitation (detail := lastErr.message)
-        exitPyAnalyzeKnownLimitation lastErr.message
+        emitOutcome "knownLimitation" ExitCode.knownLimitation (detail := lastErr.message.message)
+        exitPyAnalyzeKnownLimitation lastErr.message.message
       | none =>
         let msg : String := match msgs.back? with
-          | some m => m.message
+          | some m => m.message.message
           | none => "Pipeline aborted"
         emitOutcome "internalError" ExitCode.internalError (detail := msg)
         exitPyAnalyzeInternalError msg
@@ -506,7 +506,7 @@ def pySpecToLaurelCommand : _root_.Command where
     if result.errors.size > 0 then
       IO.eprintln s!"{result.errors.size} translation warning(s):"
       for err in result.errors do
-        IO.eprintln s!"  {err.file}: {err.message}"
+        IO.eprintln s!"  {err.file}: {err.message.message}"
     let pgm := result.program
     IO.println s!"Laurel: {pgm.staticProcedures.length} procedure(s), {pgm.types.length} type(s)"
     IO.println s!"Overloads: {result.overloads.size} function(s)"
@@ -581,7 +581,7 @@ def pyInterpretCommand : _root_.Command where
         | (none, diags) => exitFailure s!"Laurel to Core translation failed: {diags}"
       | .error () =>
         let msgs ← quietCtx.getMessages
-        let detail := match msgs.back? with | some m => m.message | none => "Pipeline aborted"
+        let detail := match msgs.back? with | some m => m.message.message | none => "Pipeline aborted"
         exitFailure detail
     if let some dir := keepDir then
       IO.FS.writeFile (dir ++ "/core.st") (toString (Std.format core))

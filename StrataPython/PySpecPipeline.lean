@@ -4,6 +4,7 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
+public import Strata.Pipeline.Messages
 
 import all StrataDDM.Util.String
 import Strata.Languages.Laurel.FilterPrelude
@@ -398,7 +399,7 @@ public def translateCombinedLaurelWithLowered (combined : Laurel.Program)
     (keepAllFilesPrefix : Option String := none)
     (pipelineCtx : Option Pipeline.PipelineContext := none)
     (analysisMode : Laurel.AnalysisMode := .Verify)
-    : IO (Option Core.Program × List DiagnosticModel × Laurel.Program × Statistics) := do
+    : IO (Option Core.Program × List Message × Laurel.Program × Statistics) := do
   let (coreOption, errors, lowered, stats) ←
     Laurel.translateWithLaurel { inlineFunctionsWhenPossible := true, keepAllFilesPrefix, analysisMode }
       combined (pipelineCtx := pipelineCtx)
@@ -408,7 +409,7 @@ public def translateCombinedLaurelWithLowered (combined : Laurel.Program)
     runtime prelude. -/
 public def translateCombinedLaurel (combined : Laurel.Program) (keepAllFilesPrefix : Option String := none)
     (analysisMode : Laurel.AnalysisMode := .Verify)
-    : IO (Option Core.Program × List DiagnosticModel) := do
+    : IO (Option Core.Program × List Message) := do
   let (coreOption, errors, _, _) ←
     translateCombinedLaurelWithLowered combined keepAllFilesPrefix
       (analysisMode := analysisMode)

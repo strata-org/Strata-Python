@@ -528,6 +528,17 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
   let m ← findMethod c "m"
   expect (m.preconditions.size == 1) s!"expected 1 method precondition, got {m.preconditions.size}"
 
+-- @requires with a Dict[int, _] quantifier: the clause is dropped (0 preconditions)
+-- and exactly one "dict quantifier requires str keys" warning is emitted.
+#guard_msgs in
+#eval runNativeCase "requires_int_dict_quant" fun sigs warnings => do
+  let f ← findFn sigs "f"
+  expect (f.preconditions.size == 0)
+    s!"expected 0 preconditions (int-key dict quantifier dropped), got {f.preconditions.size}"
+  let dictKeyWarns := warnings.filter (·.contains "dict quantifier requires str keys")
+  expect (dictKeyWarns.size == 1)
+    s!"expected exactly 1 dict-key warning, got {dictKeyWarns.size}"
+
 /-- Test that recoverable unsupported patterns emit warnings without blocking output. -/
 def warningTestCase : IO Unit := withPython fun pythonCmd => do
   IO.FS.withTempFile fun _handle dialectFile => do
@@ -577,8 +588,9 @@ def warningTestCase : IO Unit := withPython fun pythonCmd => do
 #eval warningTestCase
 
 /-- Unsupported quantifier shapes must abort PySpec translation rather than
-    silently weakening the generated contract. One fixture covers each refusal
-    branch for expression- and statement-form quantifiers. -/
+    silently weakening the generated contract (except Dict[int, _] quantifiers,
+    which warn and proceed — see `dictIntKeyWarnTestCase`). One fixture covers
+    each refusal branch for expression- and statement-form quantifiers. -/
 def quantifierErrorTestCase : IO Unit := withPython fun pythonCmd => do
   IO.FS.withTempFile fun _handle dialectFile => do
     IO.FS.writeBinFile dialectFile StrataPython.Python.toIon
@@ -605,12 +617,11 @@ def quantifierErrorTestCase : IO Unit := withPython fun pythonCmd => do
           ("any: list quantifier expects a single loop variable", 1),
           ("any: dict items quantifier expects `for k, v in d.items()`", 1),
           ("all: at most one `if` clause is supported", 1),
-          ("any: dict quantifier requires str keys", 1),
           ("any: quantifier body could not be translated", 2),
           ("all: quantifier guard could not be translated", 2),
           ("For: iterable type is not a supported collection", 1),
           ("For: iterable could not be translated", 1),
-          ("For: loop body could not be fully translated", 2),
+          ("For: loop body could not be fully translated", 3),
           ("For: else clause not supported", 1)
         ]
         for (expected, expectedCount) in expectedErrors do
@@ -621,6 +632,51 @@ def quantifierErrorTestCase : IO Unit := withPython fun pythonCmd => do
 
 #guard_msgs in
 #eval quantifierErrorTestCase
+
+/-- `Dict[int, _]` quantifiers warn and proceed instead of aborting translation.
+    A top-level case produces `.ok` with the warning and no preconditions.
+    The nested case (Dict[int, _] inside an outer for) is tested in
+    `quantifierErrorTestCase` via `for_nested_int_dict`. -/
+private def dictIntKeyWarnTestCase : IO Unit := withPython fun pythonCmd => do
+  IO.FS.withTempFile fun _handle dialectFile => do
+    IO.FS.writeBinFile dialectFile StrataPython.Python.toIon
+    IO.FS.withTempDir fun strataDir => do
+      let r ←
+        translateFile
+          (pythonCmd := toString pythonCmd)
+          (dialectFile := dialectFile)
+          (strataDir := strataDir)
+          (pythonFile := testDir / "dict_int_key_warn.py")
+          (searchPath := testDir)
+          (.ofComponent (.ofString "dict_int_key_warn"))
+          |>.toBaseIO
+      match r with
+      | .ok (sigs, warnings) =>
+        -- Exactly 2 warnings: one from the statement-form (For-arm) and one
+        -- from the expression-form (transQuantCall). No double-emission.
+        let dictKeyWarnings := warnings.filter (·.contains "dict quantifier requires str keys")
+        unless dictKeyWarnings.size == 2 do
+          let warnStr := warnings.foldl (init := "") fun acc w => s!"{acc}\n  {w}"
+          throw <| IO.userError
+            s!"expected exactly 2 warnings containing \"dict quantifier requires str keys\", \
+               got {dictKeyWarnings.size}. Actual warnings:{warnStr}"
+        -- top_level_int_dict (statement-form): warn-and-proceed, 0 preconditions.
+        let topLevel ← findFn sigs "top_level_int_dict"
+        unless topLevel.preconditions.isEmpty do
+          throw <| IO.userError
+            s!"expected top_level_int_dict to have 0 preconditions (quantifier dropped), \
+               got {topLevel.preconditions.size}"
+        -- expr_form_int_dict (expression-form): warn-and-proceed, 0 preconditions.
+        let exprForm ← findFn sigs "expr_form_int_dict"
+        unless exprForm.preconditions.isEmpty do
+          throw <| IO.userError
+            s!"expected expr_form_int_dict to have 0 preconditions (quantifier dropped), \
+               got {exprForm.preconditions.size}"
+      | .error e =>
+        throw <| IO.userError s!"expected warn-and-proceed (.ok), got hard error: {e}"
+
+#guard_msgs in
+#eval dictIntKeyWarnTestCase
 
 
 meta def testNegRoundTrip (v : Nat) : Bool :=

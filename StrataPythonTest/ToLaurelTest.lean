@@ -4,6 +4,7 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
+public import Strata.Pipeline.Messages
 
 meta import all StrataPython.Specs.ToLaurel
 meta import all Strata.Languages.Laurel.Grammar.AbstractToConcreteTreeTranslator
@@ -97,7 +98,7 @@ private def fmtTypeDef : TypeDefinition → String
 private def runTest (sigs : Array Signature) (moduleName : ModuleName := testModule) : IO Unit := do
   let result := signaturesToLaurel "<test>" sigs moduleName
   for err in result.errors do
-    IO.println s!"warning: {err.phase}.{err.kind.category}: {err.message}"
+    IO.println s!"warning: {err.phase}.{err.kind.category}: {err.message.message}"
   for td in result.program.types do
     IO.println (fmtTypeDef td)
   for proc in result.program.staticProcedures do
@@ -108,14 +109,14 @@ private def runTestErrors (sigs : Array Signature) (moduleName : ModuleName := t
   let result := signaturesToLaurel "<test>" sigs moduleName
   assert! result.errors.size > 0
   for err in result.errors do
-    IO.println err.message
+    IO.println err.message.message
 
 /-- Run signaturesToLaurel and print warning kinds (phase.category: message). -/
 private def runTestWarningKinds (sigs : Array Signature) (moduleName : ModuleName := testModule) : IO Unit := do
   let result := signaturesToLaurel "<test>" sigs moduleName
   assert! result.errors.size > 0
   for err in result.errors do
-    IO.println s!"{err.phase}.{err.kind.category}: {err.message}"
+    IO.println s!"{err.phase}.{err.kind.category}: {err.message.message}"
 
 /-- Helper to make a function signature with preconditions. -/
 private def mkFuncSigWithPrecond (name : String) (returnType : SpecType)
@@ -352,7 +353,7 @@ private def runFullTest (sigs : Array Signature) (moduleName : ModuleName := tes
   if result.errors.size > 0 then
     IO.println s!"errors: {result.errors.size}"
     for err in result.errors do
-      IO.println s!"  {err.message}"
+      IO.println s!"  {err.message.message}"
   for td in result.program.types do
     IO.println (fmtTypeDef td)
   for proc in result.program.staticProcedures do
@@ -370,7 +371,7 @@ private def runDispatchTest (sigs : Array Signature) : IO Unit := do
   if errors.size > 0 then
     IO.println s!"errors: {errors.size}"
     for err in errors do
-      IO.println s!"  {err.message}"
+      IO.println s!"  {err.message.message}"
   let entries := overloads.toArray.qsort (·.1 < ·.1)
   for (funcName, fnOverloads) in entries do
     IO.println s!"dispatch {funcName}:"
