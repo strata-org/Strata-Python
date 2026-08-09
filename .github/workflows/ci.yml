@@ -21,7 +21,7 @@ jobs:
         uses: strata-org/Strata/.github/actions/install-cvc5@main
       - name: Install z3
         uses: strata-org/Strata/.github/actions/install-z3@main
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.14'
       - name: Restore lake cache
@@ -71,7 +71,7 @@ jobs:
       contents: read
     steps:
     - uses: actions/checkout@v6
-    - uses: actions/setup-python@v6
+    - uses: actions/setup-python@v7
       with:
         python-version: '3.14'
     - name: Restore Lean build cache
@@ -138,7 +138,7 @@ jobs:
         python_version: [3.11, 3.12, 3.13, 3.14]
     steps:
     - uses: actions/checkout@v6
-    - uses: actions/setup-python@v6
+    - uses: actions/setup-python@v7
       with:
         python-version: ${{ matrix.python_version }}
     - name: Restore Lean build cache
