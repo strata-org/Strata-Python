@@ -821,6 +821,15 @@ private def transCompare (loc : SourceRange)
   | _ =>
     return none
 
+/-- Emit a warning carrying an explicit `MessageKind`. `specWarning` always uses
+    the generic `pySpecParsingWarning` kind, which consumers cannot distinguish;
+    use this when a warning has to be recognized programmatically. -/
+private def specWarningOfKind (kind : MessageKind) (loc : SourceRange) (message : String)
+    : SpecAssertionM Unit := do
+  let file := (←read) |>.filePath
+  let w : PipelineMessage := { phase := pySpecParsingPhase, message := { fileRange := { file := .file file.toString, range := loc }, message, kind } }
+  modify fun s => { s with warnings := s.warnings.push w }
+
 /-- Translate `any(body for x in iterable)` / `all(body for x in iterable)` into
     an existential/universal quantifier respectively. Unsupported quantifier
     shapes are hard errors: silently omitting a requested contract would weaken
@@ -853,7 +862,7 @@ def transQuantCall (loc : SourceRange)
   -- The Laurel model only has `DictStrAny`, so reject non-`str`-keyed dicts.
   if let some kTp := domainInfo.dictKeyType? then
     unless kTp.isStringType do
-      specError loc s!"{callee}: dict quantifier requires str keys (only Dict[str, _] is supported)"
+      specWarningOfKind .pySpecDroppedAssertion loc s!"{callee}: dict quantifier requires str keys (only Dict[str, _] is supported)"
       return none
   -- Match the target binder against the domain to determine bindings and domain.
   -- For single-name targets we get one (name, type); for tuple targets we get two.
@@ -1168,15 +1177,6 @@ partial def transExpr (e : expr SourceRange)
     kind rather than on this text. -/
 def droppedAssertionWarning := "unsupported expression in assert; dropped"
 
-/-- Emit a warning carrying an explicit `MessageKind`. `specWarning` always uses
-    the generic `pySpecParsingWarning` kind, which consumers cannot distinguish;
-    use this when a warning has to be recognized programmatically. -/
-def specWarningOfKind (kind : MessageKind) (loc : SourceRange) (message : String)
-    : SpecAssertionM Unit := do
-  let file := (←read) |>.filePath
-  let w : PipelineMessage := { phase := pySpecParsingPhase, message := { fileRange := { file := .file file.toString, range := loc }, message, kind } }
-  modify fun s => { s with warnings := s.warnings.push w }
-
 mutual
 
 def blockStmt (s : stmt SourceRange) : SpecAssertionM Unit := do
@@ -1239,7 +1239,8 @@ def blockStmt (s : stmt SourceRange) : SpecAssertionM Unit := do
         return
     if let some kTp := domainInfo.dictKeyType? then
       unless kTp.isStringType do
-        specError s.ann "For: dict quantifier requires str keys (only Dict[str, _] is supported)"
+        specWarningOfKind .pySpecDroppedAssertion s.ann
+          "For: dict quantifier requires str keys (only Dict[str, _] is supported)"
         return
     -- Run the loop body with its binders typed, then wrap each assertion in a
     -- universal over the selected domain. Multiple assertions remain separate
@@ -1350,7 +1351,7 @@ def translateContractValue? (allowFieldAccess : Bool) (e : expr SourceRange)
   if clean && formula.containsPlaceholder then
     -- Clean translation that still contains a placeholder (e.g. a bare
     -- string-literal predicate, whose `transExpr` branch is silent): surface it.
-    specWarning e.ann "unsupported expression in contract; dropped"
+    specWarningOfKind .pySpecDroppedAssertion e.ann "unsupported expression in contract; dropped"
   return if clean && !formula.containsPlaceholder then some formula else none
 
 /-- Translate a contract body and, when it translated, pass the result to
