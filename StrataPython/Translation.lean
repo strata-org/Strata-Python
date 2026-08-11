@@ -815,7 +815,7 @@ partial def translateFunction (sig : FuncSig) (body : Array (StrataPython.stmt R
     -- emits no frame condition; an empty modifies clause would impose a "heap unchanged"
     -- obligation that contradicts the writes. Postconditions stay empty — the declared return
     -- type lives on the output param.
-    body := .Opaque [] (some bodyBlock) [← mkExpr sr .All]
+    body := .Opaque [] (some bodyBlock) (ModifiesGroup.wildcard (sourceRangeToMd (← get).filePath sr))
   }
 
 partial def translateClass (name : PythonIdentifier) (attributes : List (PythonIdentifier × PythonType))
@@ -858,7 +858,7 @@ partial def translateClass (name : PythonIdentifier) (attributes : List (PythonI
                   { name := rtMaybeExcept, type := mkTypeDefault (.UserDefined { text := "Error" }) }]
       preconditions := []
       decreases := none
-      body := .Opaque [] (some (mkExprDefault (.Block [] none))) [mkExprDefault .All] }
+      body := .Opaque [] (some (mkExprDefault (.Block [] none))) (ModifiesGroup.wildcard .unknown) }
     procs ++ [defaultInit]
   let ct : CompositeType := { name := name.toLaurel, extending := [], fields := laurelFields, instanceProcedures := [] }
   pure (.Composite ct, procs)
@@ -923,7 +923,7 @@ partial def translateModule (program : ResolvedPythonProgram) : TransM Strata.La
         [{ name := rtLaurelResult, type := mkTypeDefault (.UserDefined { text := "Any" }) },
          { name := rtMaybeExcept, type := mkTypeDefault (.UserDefined { text := "Error" }) }]
       let mainName := { (rt "__main__") with source := sourceRangeToMd (← get).filePath sr }
-      let mainProc : Procedure := { name := mainName, inputs := [], outputs := mainOutputs, preconditions := [], decreases := none, body := .Opaque [] (some bodyBlock) [← mkExpr sr .All] }
+      let mainProc : Procedure := { name := mainName, inputs := [], outputs := mainOutputs, preconditions := [], decreases := none, body := .Opaque [] (some bodyBlock) (ModifiesGroup.wildcard (sourceRangeToMd (← get).filePath sr)) }
       pure (procedures ++ [mainProc])
   return { staticProcedures := procedures, staticFields := [], types, constants := [] }
 
