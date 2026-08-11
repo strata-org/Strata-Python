@@ -334,6 +334,34 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
   expect (f.postconditions[0]!.softBEq (.intGe (.var "result" .none) (.intLit 0 .none) .none))
     "postcondition formula did not match `result >= 0`"
 
+-- Native `@admit(lambda result: pred)` populates
+-- `FunctionDecl.admittedPostconditions`, not `postconditions`.
+#guard_msgs in
+#eval runNativeCase "admit_basic" fun sigs _ => do
+  let f ← findFn sigs "f"
+  expect (f.admittedPostconditions.size == 1)
+    s!"expected 1 admitted postcondition, got {f.admittedPostconditions.size}"
+  expect (f.admittedPostconditions[0]!.softBEq
+      (.intGe (.var "result" .none) (.intLit 0 .none) .none))
+    "admitted postcondition formula did not match `result >= 0`"
+  expect f.postconditions.isEmpty
+    "@admit must not populate the verified `postconditions` store"
+
+-- `@ensures` and `@admit` on one function populate their own stores with no
+-- cross-wiring.
+#guard_msgs in
+#eval runNativeCase "admit_with_ensures" fun sigs _ => do
+  let f ← findFn sigs "f"
+  expect (f.postconditions.size == 1)
+    s!"expected 1 postcondition, got {f.postconditions.size}"
+  expect (f.postconditions[0]!.softBEq (.intGe (.var "result" .none) (.intLit 0 .none) .none))
+    "postcondition formula did not match `result >= 0`"
+  expect (f.admittedPostconditions.size == 1)
+    s!"expected 1 admitted postcondition, got {f.admittedPostconditions.size}"
+  expect (f.admittedPostconditions[0]!.softBEq
+      (.intLe (.var "result" .none) (.intLit 100 .none) .none))
+    "admitted postcondition formula did not match `result <= 100`"
+
 -- Native `@modifies(lambda …: target)` populates `FunctionDecl.modifies`.
 #guard_msgs in
 #eval runNativeCase "modifies_basic" fun sigs _ => do
@@ -468,6 +496,20 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
   expect (warnings.any (·.contains "unbound at the use site"))
     "expected a warning that the `@ensures` binder is unbound at the use site"
 
+-- An `@admit` lambda binder that is neither a parameter nor `result` is still
+-- recognized as an admitted postcondition, but warned as unbound at the use site.
+#guard_msgs in
+#eval runNativeCase "admit_unbound" fun sigs warnings => do
+  let f ← findFn sigs "f"
+  expect (f.admittedPostconditions.size == 1)
+    s!"expected 1 admitted postcondition, got {f.admittedPostconditions.size}"
+  expect (warnings.any (·.contains "@admit: lambda parameter 'q' is unbound at the use site"))
+    "expected a warning that the `@admit` binder is unbound at the use site"
+
+-- Malformed `@admit` (argument is not a lambda) is a hard error.
+#guard_msgs in
+#eval expectNativeCaseError "admit_malformed" "expects a lambda"
+
 -- An unexpected keyword on `@requires` (empty allow-list) is a hard error.
 #guard_msgs in
 #eval expectNativeCaseError "requires_unexpected_kw" "unexpected keyword"
@@ -506,13 +548,15 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
   expect (warnings.any (·.contains "exactly one"))
     "expected a warning that the `@invariant` lambda must take exactly one parameter"
 
--- Integration: all five native method decorators on one function each populate
+-- Integration: all six native method decorators on one function each populate
 -- their own field, with no cross-wiring between the per-kind stores.
 #guard_msgs in
 #eval runNativeCase "mixed_method" fun sigs _ => do
   let f ← findFn sigs "f"
   expect (f.preconditions.size == 1) s!"expected 1 precondition, got {f.preconditions.size}"
   expect (f.postconditions.size == 1) s!"expected 1 postcondition, got {f.postconditions.size}"
+  expect (f.admittedPostconditions.size == 1)
+    s!"expected 1 admitted postcondition, got {f.admittedPostconditions.size}"
   expect (f.modifies.size == 1) s!"expected 1 modifies target, got {f.modifies.size}"
   expect (f.snapshots.size == 1) s!"expected 1 snapshot, got {f.snapshots.size}"
   expect (f.ghosts.size == 1) s!"expected 1 ghost, got {f.ghosts.size}"

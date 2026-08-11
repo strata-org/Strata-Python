@@ -150,6 +150,8 @@ op mkAssertion(formula : SpecExprDecl, message : Seq MessagePart) : Assertion =>
 category PostconditionEntry;
 op mkPostconditionEntry(expr : SpecExprDecl) : PostconditionEntry =>
   expr "\n";
+op mkAdmittedPostconditionEntry(expr : SpecExprDecl) : PostconditionEntry =>
+  "admitted " expr "\n";
 
 category SnapshotDecl;
 op mkSnapshotDecl(name : Str, capture : SpecExprDecl) : SnapshotDecl =>
@@ -436,8 +438,10 @@ def FunctionDecl.toDDM (d : FunctionDecl) : DDM.FunDecl SourceRange :=
     (isOverload := ⟨.none, d.isOverload⟩)
     (preconditions := ⟨.none, d.preconditions.map (·.toDDM)⟩)
     (postconditions := ⟨.none,
-      d.postconditions.map fun e =>
-        .mkPostconditionEntry .none e.toDDM⟩)
+      (d.postconditions.map fun e =>
+        (.mkPostconditionEntry .none e.toDDM : DDM.PostconditionEntry SourceRange))
+      ++ d.admittedPostconditions.map fun e =>
+        .mkAdmittedPostconditionEntry .none e.toDDM⟩)
     (snapshots := ⟨.none,
       if d.snapshots.isEmpty then none
       else some (.mkSnapshotsClause .none ⟨.none, d.snapshots.map (·.toDDM)⟩)⟩)
@@ -610,6 +614,18 @@ def DDM.FunDecl.fromDDM (d : DDM.FunDecl SourceRange) : FromDDM Specs.FunctionDe
       pure <| some (kn, ← tp.fromDDM)
     | none =>
       pure none
+  -- Split the postconditions sequence by entry op: verified `@ensures` entries
+  -- vs `@admit` entries. Encoding admitted entries as a PostconditionEntry
+  -- variant (instead of a new FunDecl clause) keeps `mkFunDecl`'s shape — and
+  -- therefore previously serialized spec Ion — parseable by this frontend.
+  let verifiedPostconditions : Array Specs.SpecExpr :=
+    postconditions.filterMap fun
+      | .mkPostconditionEntry _ e => some e.fromDDM
+      | .mkAdmittedPostconditionEntry _ _ => none
+  let admittedPostconditions : Array Specs.SpecExpr :=
+    postconditions.filterMap fun
+      | .mkAdmittedPostconditionEntry _ e => some e.fromDDM
+      | .mkPostconditionEntry _ _ => none
   let snapshots : Array Specs.Snapshot :=
     match snapshotsClause with
     | some (.mkSnapshotsClause _ ⟨_, ss⟩) =>
@@ -619,8 +635,11 @@ def DDM.FunDecl.fromDDM (d : DDM.FunDecl SourceRange) : FromDDM Specs.FunctionDe
   let modifies : Array Specs.SpecExpr :=
     match modifiesClause with
     | some (.mkModifiesClause _ ⟨_, ms⟩) =>
-      ms.map fun (.mkPostconditionEntry _ e) => e.fromDDM
+      ms.map fun
+        | .mkPostconditionEntry _ e => e.fromDDM
+        | .mkAdmittedPostconditionEntry _ _ => .placeholder .none
     | none => #[]
+
   let ghosts : Array Specs.Ghost ←
     match ghostsClause with
     | some (.mkGhostsClause _ ⟨_, gs⟩) =>
@@ -640,8 +659,8 @@ def DDM.FunDecl.fromDDM (d : DDM.FunDecl SourceRange) : FromDDM Specs.FunctionDe
     returnType := ← returnType.fromDDM
     isOverload := isOverload
     preconditions := preconditions.map (·.fromDDM)
-    postconditions := postconditions.map fun
-      | .mkPostconditionEntry _ e => e.fromDDM
+    postconditions := verifiedPostconditions
+    admittedPostconditions := admittedPostconditions
     snapshots := snapshots
     modifies := modifies
     ghosts := ghosts
@@ -654,7 +673,9 @@ def DDM.ClassDecl.fromDDM (d : DDM.ClassDecl SourceRange) : FromDDM Specs.ClassD
   let invariants : Array Specs.SpecExpr :=
     match invariantsClause with
     | some (.mkInvariantsClause _ ⟨_, inv⟩) =>
-      inv.map fun (.mkPostconditionEntry _ e) => e.fromDDM
+      inv.map fun
+        | .mkPostconditionEntry _ e => e.fromDDM
+        | .mkAdmittedPostconditionEntry _ _ => .placeholder .none
     | none => #[]
   pure {
     loc := ann

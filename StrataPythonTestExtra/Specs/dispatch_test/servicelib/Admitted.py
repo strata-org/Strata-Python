@@ -1,0 +1,3 @@
+@admit(lambda result: result >= 0)
+def admitted_value() -> int:
+    ...

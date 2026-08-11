@@ -130,8 +130,17 @@ def pushOverloadEntry (funcName : String) (paramName : String)
           { existing with entries := existing.entries.insert literalValue returnType }
       }
 
-/-- Extract an overload dispatch entry from an `@overload` function declaration. -/
+/-- Extract an overload dispatch entry from an `@overload` function declaration.
+    Contracts are rejected first: no procedure is generated for a dispatch-only
+    stub, so an `@ensures` or `@admit` on it would otherwise be silently
+    dropped. -/
 def extractOverloadEntry (func : FunctionDecl) : ToLaurelM Unit := do
+  for postExpr in func.postconditions do
+    reportError .unsupportedPostcondition postExpr.loc
+      s!"Modeled @ensures cannot be verified for '{func.name}': {postExpr}. An @overload stub is a dispatch-only declaration; no procedure is generated for it, so the postcondition would be silently dropped. Attach the contract to a non-overload declaration instead."
+  for admittedExpr in func.admittedPostconditions do
+    reportError .unsupportedAdmit admittedExpr.loc
+      s!"@admit is not supported on @overload stub '{func.name}': {admittedExpr}. No procedure body is generated for a dispatch-only declaration, so there is nowhere to assume the predicate. Attach the @admit to a non-overload declaration instead."
   let args := func.args.args
   let .isTrue _ := decideProp (args.size > 0)
     | reportError .overloadNoArgs func.loc
@@ -626,11 +635,18 @@ def SpecAssertMsg.render : SpecAssertMsg → String
   | .userAssertion text  => text
   | .unnamed index       => s!"precondition {index}"
 
-/-- Build the procedure body (havoc, type asserts, postcondition/return-type
-    assumes) and return the required-param not-None checks as caller-checked
-    `Condition`s for `funcDeclToLaurel` to merge into the preconditions. -/
+/-- Build an opaque procedure body with havoc and type/required-param
+    assertions. Modeled `@ensures` postconditions are rejected for now:
+    generated PySpec procedures have no implementation against which Strata can
+    prove an `@ensures`, so silently exposing one to callers would be unsound.
+    `@admit` postconditions — explicitly acknowledged as unverified modeling
+    assumptions — are lowered as in-body `assume`s, like the trusted
+    return-type assumption; an `@admit` that cannot be lowered is fatal.
+    Returns the required-param not-None checks as caller-checked `Condition`s
+    for `funcDeclToLaurel` to merge into the preconditions. -/
 def buildSpecBody (allArgs : Array Arg)
     (postconditions : Array SpecExpr)
+    (admittedPostconditions : Array SpecExpr)
     (returnType : SpecType)
     (source : FileRange)
     (ctx : SpecExprContext)
@@ -664,17 +680,30 @@ def buildSpecBody (allArgs : Array Arg)
         let msg := SpecAssertMsg.requiredParam arg.name |>.render
         requiredParamConds := requiredParamConds ++
           [{ condition := cond.stmt, summary := some msg }]
-  -- 3. Assume user pyspec postconditions
+  -- 3. Reject modeled `@ensures`. A PySpec declaration has no implementation
+  --    to verify the predicate against, so it must not enter caller reasoning
+  --    silently; `@admit` is the explicit opt-in for that assumption.
   for postExpr in postconditions do
-    let (⟨condType, condExpr⟩, success) ← runChecked <| specExprToLaurel postExpr source ctx
+    reportError .unsupportedPostcondition postExpr.loc
+      s!"Modeled @ensures cannot be verified for '{ctx.procName}': {postExpr}. A PySpec declaration is a bodyless model, so Strata cannot verify this postcondition against an implementation and will not assume it at call sites. Loading a PySpec module containing @ensures aborts analysis even if the affected function is unused. Use @admit to accept the postcondition as an unverified modeling assumption, or model the function with a real body if the property must be checked."
+  -- 4. Assume `@admit` postconditions in-body. The decorator is the author's
+  --    acknowledgment that the predicate is an unverified assumption the
+  --    verification depends on, so it joins the trusted return-type assume —
+  --    and one that cannot be lowered must not be dropped silently.
+  for admittedExpr in admittedPostconditions do
+    let (⟨condType, condExpr⟩, success) ← runChecked <| specExprToLaurel admittedExpr source ctx
     if success then
       if let .TBool := condType then
         let assumeStmt ← mkStmtWithLoc (.Assume condExpr.stmt) default
         stmts := stmts.push assumeStmt
       else
-        reportError .typeError default
-          s!"Postcondition expression is not Bool in '{ctx.procName}' (skipping)"
-  -- 4. Assume return type postcondition
+        reportError .unsupportedAdmit admittedExpr.loc
+          s!"@admit predicate is not Bool in '{ctx.procName}': {admittedExpr}. The verification depends on this acknowledged assumption, so it will not be dropped silently. Fix the predicate to be a boolean expression."
+    else
+      reportError .unsupportedAdmit admittedExpr.loc
+        s!"@admit predicate of '{ctx.procName}' could not be translated: {admittedExpr}. The verification depends on this acknowledged assumption, so it will not be dropped silently. Rewrite the predicate using supported constructs."
+  -- 5. Keep the return type postcondition in-body. Exposing inferred return
+  --    types to callers is a separate semantic change from user contracts.
   -- NOTE. Skip NoneType: generated stubs currently declare `-> None` even for methods
   -- that return values. Assuming isfrom_None would make callers unreachable.
   if returnType.asIdent != some .noneType then
@@ -752,7 +781,7 @@ def funcDeclToLaurel (procName : String) (func : FunctionDecl)
       m.insert p.name.text p.type.val
   let specCtx : SpecExprContext := { procName, argTypes }
   let (body, requiredParamConds) ← buildSpecBody allArgs func.postconditions
-    func.returnType unknownSource specCtx
+    func.admittedPostconditions func.returnType unknownSource specCtx
   let userPreconds ← buildPreconditionConds func.preconditions unknownSource specCtx
   let src ← mkSourceWithFileRange func.loc
   return {

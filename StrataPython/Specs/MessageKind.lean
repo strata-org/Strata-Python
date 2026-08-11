@@ -43,6 +43,22 @@ def kwargsExpansionError : MessageKind :=
 def unsupportedUnion : MessageKind :=
   { category := "unsupportedUnion", impact := .knownLimitation }
 
+-- Contract errors
+/-- PySpec models do not provide an implementation against which Strata can
+    prove an `@ensures`, so the unsupported contract is rejected rather than
+    silently assumed in caller verification conditions. Postconditions that
+    are deliberately unverified modeling assumptions can be acknowledged
+    explicitly with `@admit` instead — the same division as Dafny's verified
+    `ensures` versus `{:extern}`/`{:axiom}` assumptions. -/
+def unsupportedPostcondition : MessageKind :=
+  { category := "unsupportedPostcondition", impact := .userCodeError }
+
+/-- An `@admit` predicate that cannot be lowered to a Laurel assumption.
+    Fatal: silently dropping an acknowledged assumption would resurface as a
+    confusing verification failure far from the broken decorator. -/
+def unsupportedAdmit : MessageKind :=
+  { category := "unsupportedAdmit", impact := .userCodeError }
+
 -- Precondition warnings
 def placeholderExpr : MessageKind :=
   { category := "placeholderExpr", impact := .knownLimitation }

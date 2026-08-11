@@ -673,6 +673,21 @@ inductive SpecExpr where
     (collection : SpecExpr) (body : SpecExpr) (loc : SourceRange)
 deriving Inhabited
 
+/-- The source location carried by the expression's outermost constructor.
+    Lets diagnostics point at the offending predicate itself rather than the
+    enclosing declaration. -/
+def SpecExpr.loc : SpecExpr → SourceRange
+  | .placeholder l | .noneLit l
+  | .var _ l | .intLit _ l | .boolLit _ l | .floatLit _ l
+  | .stringLen _ l | .neg _ l | .not _ l
+  | .getIndex _ _ l | .isInstanceOf _ _ l
+  | .intGe _ _ l | .intLe _ _ l | .floatGe _ _ l | .floatLe _ _ l
+  | .add _ _ l | .sub _ _ l | .mul _ _ l | .floorDiv _ _ l
+  | .mod _ _ l | .pow _ _ l
+  | .and _ _ l | .or _ _ l | .implies _ _ l
+  | .enumMember _ _ l | .regexMatch _ _ l | .containsKey _ _ l
+  | .pcmp _ _ _ l | .quantifier _ _ _ _ l => l
+
 /-- True when `placeholder` appears ANYWHERE in the expression tree, including
     buried inside a translated wrapper (e.g. `getIndex placeholder "f"`). A
     contract whose translation contains a placeholder is not fully supported and
@@ -819,6 +834,10 @@ structure FunctionDecl where
   isOverload : Bool
   preconditions : Array Assertion
   postconditions : Array SpecExpr
+  /-- Postconditions from `@admit`: explicitly acknowledged, unverified
+      modeling assumptions. Lowered as in-body
+      `assume`s rather than verified caller-visible contracts. -/
+  admittedPostconditions : Array SpecExpr := #[]
   /-- Pre-state captures from `@snapshot`; `OLD.<name>` references in
       postconditions resolve against these. Recognized + round-tripped;
       lowering is deferred. -/

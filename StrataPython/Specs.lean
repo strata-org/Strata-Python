@@ -665,6 +665,8 @@ structure SpecAssertionContext where
 structure SpecAssertionState where
   assertions : Array Assertion := #[]
   postconditions : Array SpecExpr := #[]
+  /-- Postconditions from `@admit`, translated to `SpecExpr`. -/
+  admittedPostconditions : Array SpecExpr := #[]
   /-- Frame targets from `@modifies`, translated to `SpecExpr`. -/
   modifies : Array SpecExpr := #[]
   /-- Pre-state captures from `@snapshot`, translated to `Snapshot`. -/
@@ -969,7 +971,7 @@ partial def transExpr (e : expr SourceRange)
         specWarning loc s!"subscript subject is not a TypedDict"
     return (.getIndex innerExpr fieldName (loc := loc), fieldTp.getD anyType)
   -- On for the not-yet-lowered kinds (`@invariant`/`@modifies`/`@snapshot`/`@ghost`
-  -- init); off for `@requires`/`@ensures`/`assert`, whose lowering can't bind such
+  -- init); off for `@requires`/`@ensures`/`@admit`/`assert`, whose lowering can't bind such
   -- a receiver yet — there it stays unsupported.
   | .Attribute _ inner ⟨_, attrName⟩ (.Load _) =>
     if (← read).allowFieldAccess then
@@ -1462,7 +1464,7 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
         specWarning fnLoc "overload body is not `...`"
     else
       body.forM blockStmt
-    -- The bool is the field-access flag: off for the lowered `@requires`/`@ensures`,
+    -- The bool is the field-access flag: off for the lowered `@requires`/`@ensures`/`@admit`,
     -- on for the deferred targets (`self.x` only lowerable there).
     let pushBodies (allowFieldAccess : Bool) (bodies : Array (expr SourceRange))
         (store : SpecExpr → SpecAssertionState → SpecAssertionState) : SpecAssertionM Unit :=
@@ -1472,6 +1474,8 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
       { s with assertions := s.assertions.push { message := #[], formula := f } }
     pushBodies false nativeBundle.ensures fun f s =>
       { s with postconditions := s.postconditions.push f }
+    pushBodies false nativeBundle.admitted fun f s =>
+      { s with admittedPostconditions := s.admittedPostconditions.push f }
     pushBodies true nativeBundle.modifies fun f s =>
       { s with modifies := s.modifies.push f }
     for snap in nativeBundle.snapshots do
@@ -1495,6 +1499,7 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
     isOverload := overload
     preconditions := as.assertions
     postconditions := as.postconditions
+    admittedPostconditions := as.admittedPostconditions
     modifies := as.modifies
     snapshots := as.snapshots
     ghosts := as.ghosts

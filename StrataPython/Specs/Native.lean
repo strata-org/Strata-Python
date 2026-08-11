@@ -11,7 +11,7 @@ public import StrataPython.Specs.Decorators
 /-! # Native PySpec contract decorators
 
 Recognizers for PySpec's unqualified contract decorators — `@requires`,
-`@ensures`, `@modifies`, `@snapshot`, `@ghost` (per method) and `@invariant`
+`@ensures`, `@admit`, `@modifies`, `@snapshot`, `@ghost` (per method) and `@invariant`
 (per class) — built on the `Specs/Decorators.lean` framework. Each scheme
 collects the raw Python lambda bodies into a bundle; `Specs.lean` translates
 them to `SpecExpr` via the same `transExpr` path used for `assert`. Recognition
@@ -50,8 +50,12 @@ deriving Inhabited
 public structure MethodBundle where
   /-- `@requires` lambda bodies (preconditions). -/
   requires : Array (expr SourceRange) := #[]
-  /-- `@ensures` lambda bodies (postconditions). -/
+  /-- `@ensures` lambda bodies (postconditions to verify against an
+      implementation). -/
   ensures : Array (expr SourceRange) := #[]
+  /-- `@admit` lambda bodies: postconditions the spec author explicitly
+      acknowledges as unverified modeling assumptions. -/
+  admitted : Array (expr SourceRange) := #[]
   /-- `@modifies` lambda bodies (frame targets — lvalue expressions). -/
   modifies : Array (expr SourceRange) := #[]
   /-- `@snapshot(lambda …: capture, name="n")` pre-state captures. -/
@@ -62,7 +66,8 @@ deriving Inhabited
 
 /-! ## Recognition scheme -/
 
-/-- Binder naming the procedure's return value inside an `@ensures` lambda. -/
+/-- Binder naming the procedure's return value inside an `@ensures` or `@admit`
+    lambda. -/
 public def resultBinder : String := "result"
 
 /-- Recognize `@label(lambda <params>: <body>)`, warning about any keyword and any
@@ -114,6 +119,9 @@ public def methodScheme {m : Type → Type} [Monad m] [PySpecMClass m]
     | "ensures" =>
       absorbLambda "@ensures" (validParams.push resultBinder) form args bundle fun body =>
         { bundle with ensures := bundle.ensures.push body }
+    | "admit" =>
+      absorbLambda "@admit" (validParams.push resultBinder) form args bundle fun body =>
+        { bundle with admitted := bundle.admitted.push body }
     | "modifies" =>
       absorbLambda "@modifies" validParams form args bundle fun body =>
         { bundle with modifies := bundle.modifies.push body }

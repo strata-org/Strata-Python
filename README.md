@@ -22,6 +22,42 @@ StrataPython provides:
 - **Regex support** - Translates Python regular expressions to Core SMT assertions
 - **Overload resolution** - Identifies and resolves dispatch-based service overloads
 
+## Modeled postconditions: `@ensures` vs `@admit`
+
+PySpec declarations model external APIs; they do not contain implementations
+that Strata can execute and verify. An `@ensures` contract claims a property
+that should be *verified* against an implementation, so Strata currently
+rejects modeled `@ensures` contracts with a fatal `unsupportedPostcondition`
+diagnostic rather than silently assuming an unverified predicate at call
+sites.
+
+Verification of real code still depends on assumptions about code that will
+not or cannot be verified (e.g. standard library models). Those assumptions
+are supported — they just have to be acknowledged explicitly with `@admit`:
+
+```python
+@admit(lambda result: result >= 0)
+def modeled_value() -> int:
+    ...
+```
+
+An `@admit` postcondition is assumed in the generated procedure body as an
+unverified modeling assumption the verification depends on, like the trusted
+return-type assumption.
+
+Because the `@ensures` diagnostic is fatal, loading any PySpec module that
+contains a modeled `@ensures` aborts the analysis, even when the analyzed code
+never calls the affected procedure. This loud failure prevents Strata from
+silently weakening a user-authored contract; switching the contract to
+`@admit` restores the assumption while making its unverified status explicit.
+
+The split is by whether there is a body to verify: `@ensures` is a claim to
+*verify* against an implementation, `@admit` is the acknowledged, unverified
+assumption for bodyless declarations. PySpec declarations are bodyless models,
+so `@ensures` is rejected there and `@admit` is the supported form — the same
+division as Dafny's verified `ensures` versus `{:extern}` declarations, whose
+postconditions must be acknowledged with `{:axiom}`.
+
 ## Dependencies
 
 - `Strata` (parent package) - Core IR, Laurel IR, verification infrastructure, SMT backend

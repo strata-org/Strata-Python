@@ -7,7 +7,9 @@ module
 
 meta import Strata.SimpleAPI
 meta import StrataPython.PySpecPipeline
+meta import StrataPython.Specs.MessageKind
 meta import Strata.Languages.Laurel.Resolution
+meta import Strata.Languages.Laurel.Grammar.AbstractToConcreteTreeTranslator
 meta import Strata.Languages.Laurel.CoreDefinitionsForLaurel
 meta import Strata.Transform.ProcedureInlining
 meta import StrataPython.PyFactory
@@ -68,7 +70,9 @@ meta def setupFixture (pythonCmd : System.FilePath)
     IO.FS.writeBinFile dialectFile Python.toIon
     -- Compile all servicelib modules (dispatch + individual services)
     match ← pySpecsDir testDir outDir dialectFile
-        (modules := #["servicelib", "servicelib.Storage", "servicelib.Messaging", "servicelib.Database"])
+        (modules := #["servicelib", "servicelib.Storage", "servicelib.Messaging",
+          "servicelib.Database", "servicelib.Counter", "servicelib.Contract",
+          "servicelib.Admitted"])
         (warningOutput := .none)
         (pythonCmd := toString pythonCmd) |>.toBaseIO with
     | .ok () => pure ()
@@ -111,30 +115,14 @@ meta def runAnalyze
     | .ok _ => return .ok core
   | (_, errors) => return .error s!"Laurel to Core translation failed: {errors}"
 
-/-- Run pyAnalyzeLaurel with inlining and verification.
-    When `useRoots` is true, entry points are determined via the call graph
-    (the CLI `--entry-point roots` default); otherwise only `__main__` is used. -/
-meta def runAnalyzeAndVerify
-    (pythonCmd : System.FilePath)
-    (tmpDir : System.FilePath) (scriptName : String)
-    (useRoots : Bool := false)
+/-- Verify an already-generated Laurel program. -/
+private meta def verifyLaurel
+    (laurel : Strata.Laurel.Program) (useRoots : Bool := false)
     : IO (Except String (Array Core.VCResult)) := do
-  let testIon ← compileTestScript pythonCmd (testDir / scriptName) tmpDir
-  let pctx ← quietCtx
-  let laurel ←
-    match ← (pythonAndSpecToLaurel testIon.toString
-        (dispatchModules := #["servicelib"])
-        (specDir := tmpDir)).run pctx |>.toBaseIO with
-    | .ok r => pure r
-    | .error () =>
-      let msgs ← pctx.getMessages
-      let detail := match msgs.back? with | some m => m.message.message | none => "Pipeline aborted"
-      return .error detail
   let (coreProgramOption, _) ← translateCombinedLaurel laurel
   let coreProgram ← match coreProgramOption with
     | none => return .error "Laurel to Core translation failed"
     | some core => pure core
-  -- Determine entry points
   let entryPoints ←
     if useRoots then
       let (_preludeNames, userProcNames) := splitProcNames coreProgram
@@ -160,6 +148,28 @@ meta def runAnalyzeAndVerify
       (prefixPhases := inlinePhases) |>.toBaseIO with
   | .ok results => return .ok results
   | .error msg => return .error (toString msg)
+
+/-- Run pyAnalyzeLaurel with inlining and verification.
+    When `useRoots` is true, entry points are determined via the call graph
+    (the CLI `--entry-point roots` default); otherwise only `__main__` is used. -/
+meta def runAnalyzeAndVerify
+    (pythonCmd : System.FilePath)
+    (tmpDir : System.FilePath) (scriptName : String)
+    (useRoots : Bool := false) (pyspecModules : Array String := #[])
+    : IO (Except String (Array Core.VCResult)) := do
+  let testIon ← compileTestScript pythonCmd (testDir / scriptName) tmpDir
+  let pctx ← quietCtx
+  let laurel ←
+    match ← (pythonAndSpecToLaurel testIon.toString
+        (dispatchModules := #["servicelib"])
+        (pyspecModules := pyspecModules)
+        (specDir := tmpDir)).run pctx |>.toBaseIO with
+    | .ok r => pure r
+    | .error () =>
+      let msgs ← pctx.getMessages
+      let detail := match msgs.back? with | some m => m.message.message | none => "Pipeline aborted"
+      return .error detail
+  verifyLaurel laurel useRoots
 
 /-- Expected outcome for a test case. -/
 inductive Expected where
@@ -480,6 +490,105 @@ invoking the Storage spec, so precondition violations would go undetected. -/
         throw <| IO.userError
           "Expected ✖️/❓ (violation not proven safe) for empty bucket violation via self.field dispatch"
 
+/-! ## Supported PySpec contract assumptions
+
+A modeled function without `@ensures` retains both its caller-checked
+`@requires` and its trusted return-type assumption. After inlining, the valid
+precondition and the caller's return-type assertion must both verify. -/
+
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let result ← runAnalyzeAndVerify pythonCmd tmpDir
+      "test_contract_assumptions.py" (useRoots := true)
+      (pyspecModules := #["servicelib.Contract"])
+    match result with
+    | .error msg => throw <| IO.userError s!"Pipeline failed: {msg}"
+    | .ok vcResults =>
+      let mut foundPrecondition := false
+      let mut foundReturnTypeAssertion := false
+      for r in vcResults do
+        let summary := r.obligation.metadata.getPropertySummary.getD ""
+        if !r.isSuccess then
+          throw <| IO.userError
+            s!"Expected mixed-contract verification to pass but got: {r.formatOutcome}; summary: {summary}"
+        if summary.contains "precondition 0" then
+          foundPrecondition := true
+        if summary.contains "modeled text must not be None" then
+          foundReturnTypeAssertion := true
+      unless foundPrecondition do
+        throw <| IO.userError "Expected a successful caller-checked @requires VC"
+      unless foundReturnTypeAssertion do
+        throw <| IO.userError
+          "Expected the return-type assumption to discharge the caller assertion"
+
+/-! ## Unsupported PySpec postconditions
+
+Modeled `@ensures` clauses cannot be verified against an implementation. The
+pipeline must therefore fail before the condition can enter a caller VC. -/
+
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let testIon ← compileTestScript pythonCmd
+      (testDir / "test_postcondition_caller.py") tmpDir
+    let pctx ← quietCtx
+    let result ← (pythonAndSpecToLaurel testIon.toString
+      (dispatchModules := #["servicelib"])
+      (pyspecModules := #["servicelib.Counter"])
+      (specDir := tmpDir)).run pctx |>.toBaseIO
+    match result with
+    | .ok _ => throw (IO.userError
+        "Expected modeled @ensures to abort Python-to-Laurel translation")
+    | .error () => pure ()
+
+    let unsupportedMessages := (← pctx.getMessages).filter fun message =>
+      message.message.kind == .unsupportedPostcondition
+    match unsupportedMessages.toList with
+    | [pipelineMessage] =>
+      let message := pipelineMessage.message
+      unless message.kind.impact.isFatal do
+        throw <| IO.userError
+          "Expected unsupportedPostcondition to be fatal"
+      unless message.message.contains
+          "Strata cannot verify this postcondition against an implementation"
+          && message.message.contains "will not assume it at call sites"
+          && message.message.contains
+            "aborts analysis even if the affected function is unused"
+          && message.message.contains
+            "Use @admit to accept the postcondition as an unverified modeling assumption"
+          && message.message.contains
+            "model the function with a real body if the property must be checked" do
+        throw <| IO.userError s!"Unexpected diagnostic: {message.message}"
+    | _ => throw (IO.userError
+        s!"Expected exactly one unsupportedPostcondition diagnostic, got {unsupportedMessages.size}")
+
+/-! ## Admitted PySpec postconditions
+
+An `@admit` postcondition is an explicitly acknowledged, unverified modeling
+assumption. The pipeline must load the module without error and the assumption
+must discharge a caller assertion that the return type alone cannot. -/
+
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let result ← runAnalyzeAndVerify pythonCmd tmpDir
+      "test_admitted_assumptions.py" (useRoots := true)
+      (pyspecModules := #["servicelib.Admitted"])
+    match result with
+    | .error msg => throw <| IO.userError s!"Pipeline failed: {msg}"
+    | .ok vcResults =>
+      let mut foundAdmittedAssertion := false
+      for r in vcResults do
+        let summary := r.obligation.metadata.getPropertySummary.getD ""
+        if !r.isSuccess then
+          throw <| IO.userError
+            s!"Expected admitted-contract verification to pass but got: {r.formatOutcome}; summary: {summary}"
+        if summary.contains "admitted value must be non-negative" then
+          foundAdmittedAssertion := true
+      unless foundAdmittedAssertion do
+        throw <| IO.userError
+          "Expected the @admit assumption to discharge the caller assertion"
 /-! ## Universal quantifier precondition tests
 
 End-to-end checks that `Storage.require_all_nonempty`/`require_map_nonempty` quantified preconditions reach

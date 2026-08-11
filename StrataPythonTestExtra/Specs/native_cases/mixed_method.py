@@ -2,6 +2,7 @@
 # field with no cross-wiring.
 @requires(lambda x: x >= 0)
 @ensures(lambda result: result >= 0)
+@admit(lambda result: result <= 100)
 @modifies(lambda x: x)
 @snapshot(lambda x: x, name="v0")
 @ghost(name="g")

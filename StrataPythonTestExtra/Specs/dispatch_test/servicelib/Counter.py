@@ -1,0 +1,3 @@
+@ensures(lambda result: result is None)
+def modeled_value() -> None:
+    ...

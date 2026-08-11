@@ -1,0 +1,3 @@
+@requires(lambda name: len(name) >= 1)
+def modeled_text(name: str) -> str:
+    ...
