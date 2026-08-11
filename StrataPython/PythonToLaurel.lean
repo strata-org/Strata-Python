@@ -208,11 +208,9 @@ def stmtExprToVar (e : StmtExprMd) : Except TranslationError VariableMd :=
   | _ => .error (.internalError "stmtExprToVar: expected Var node")
 
 /-- The wildcard modifies clause — one unguarded group whose only target is `*`,
-    meaning the procedure may modify anything. The single-group wrapping is the
-    degenerate form every frontend emits; keeping the group present (rather than
-    emitting zero groups) is load-bearing, since an absent group list means
-    "unframed" while an empty-target group would mean "nothing changes". -/
-def wildcardModifies : List ModifiesGroup := [{ targets := [mkStmtExprMd .All] }]
+    meaning the procedure may modify anything (`ModifiesGroup.wildcard`, which
+    also documents why the single-group wrapping is load-bearing). -/
+def wildcardModifies : List ModifiesGroup := ModifiesGroup.wildcard unknownSource
 
 /-- Create a StmtExprMd with source location metadata. -/
 def mkStmtExprMdWithLoc (expr : StmtExpr) (source : FileRange) : StmtExprMd :=
@@ -2405,7 +2403,7 @@ def translateFunction (ctx : TranslationContext) (sourceRange: SourceRange) (fun
     | some body =>
         let (bodyBlock, newCtx) ←  translateFunctionBody ctx funcDecl.kwargsName inputs body
         pure $ (Body.Opaque typeConstraintPostcondition bodyBlock wildcardModifies, newCtx)
-    | _ =>  pure $ (Body.Opaque [] none [{ targets := [] }], ctx)
+    | _ =>  pure $ (Body.Opaque [] none ModifiesGroup.nothingChanges, ctx)
 
     let renamedInputs := inputs.map fun p =>
       if p.name.text == "self" then p
