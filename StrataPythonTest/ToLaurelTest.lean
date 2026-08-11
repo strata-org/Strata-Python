@@ -73,6 +73,10 @@ private def fmtHighType : HighType → String
   | .TBv n => s!"TBv({n})"
   | .Unknown => "Unknown"
   | .MultiValuedExpr _ => "MultiValuedExpr"
+  -- The `.TVar` arm keeps `fmtHighType` total over `HighType`. No SPFE ToLaurel path
+  -- constructs a `.TVar` — Python has no generic-type-parameter surface — so there is no
+  -- end-to-end translation that produces one to pin; the guard below pins just this arm.
+  | .TVar name => s!"TVar({name})"
 
 private def fmtParam (p : Parameter) : String :=
   s!"{p.name}:{fmtHighType p.type.val}"
@@ -1536,6 +1540,32 @@ unguarded: true, wildcard-only target: true, no summary: true
     IO.println s!"groups: {groups.length}"
     for g in groups do
       IO.println s!"unguarded: {g.guard.isNone}, wildcard-only target: {isWildcardOnly g}, no summary: {g.summary.isNone}"
+
+/-! ## `classDefToLaurel` emits the `extending` list, structurally pinned.
+
+`fmtTypeDef` drops `extending`, so a print-based test cannot see it — these `#guard`s pin it
+directly through a shared `extendingOf` helper, covering the three boundary shapes of the
+`cls.bases.toList.map` path: empty, single, and multiple (order-preserving). -/
+
+private def extendingOf (name : String) (bases : Array PythonIdent)
+    : Option (List Strata.Laurel.HighTypeMd) :=
+  let r := signaturesToLaurel "<test>" #[.classDef { loc, name, bases, methods := #[] }] testModule
+  if r.errors.size != 0 then none
+  else r.program.types.findSome? fun td =>
+    match td with
+    | .Composite ty => if ty.name.text == s!"test_{name}" then some ty.extending else none
+    | _ => none
+
+-- A HighTypeMd base reference from its emitted (already-`toLaurelName`d) name.
+private def udBase (n : String) : Strata.Laurel.HighTypeMd := ⟨.UserDefined (mkId n), unknownSource⟩
+
+#guard extendingOf "Leaf" #[] == some []
+#guard extendingOf "Derived" #[externIdent "mod" "Base"] == some [udBase "mod_Base"]
+#guard extendingOf "Multi" #[externIdent "m1" "A", externIdent "m2" "B"]
+       == some [udBase "m1_A", udBase "m2_B"]
+
+-- Totality guard for `fmtHighType`'s `.TVar` arm (no SPFE path constructs a `.TVar`).
+#guard fmtHighType (.TVar (mkId "T")) == "TVar(T)"
 
 end StrataPython.Specs.ToLaurel.Tests
 end

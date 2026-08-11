@@ -33,6 +33,7 @@ private meta def testDir : System.FilePath :=
     (needed for files inside packages like `service/`). -/
 private meta def runTest (pythonCmd : System.FilePath) (dialectFile : System.FilePath)
     (file : String) (expectedErrors : Array String)
+    (forbiddenErrors : Array String := #[])
     (searchFromTestDir : Bool := false) : IO (Option String) := do
   IO.FS.withTempDir fun strataDir => do
     let pythonFile := testDir / file
@@ -60,6 +61,9 @@ private meta def runTest (pythonCmd : System.FilePath) (dialectFile : System.Fil
         for expected in expectedErrors do
           if !msg.contains expected then
             return some s!"{file}: error missing expected substring \"{expected}\"\nActual error:\n{msg}"
+        for forbidden in forbiddenErrors do
+          if msg.contains forbidden then
+            return some s!"{file}: error contains forbidden substring \"{forbidden}\" (a regression)\nActual error:\n{msg}"
         return none
 
 -- ============================================================
@@ -69,6 +73,8 @@ private meta def runTest (pythonCmd : System.FilePath) (dialectFile : System.Fil
 private structure TestCase where
   file : String
   expectedErrors : Array String := #[]
+  /-- Substrings that must NOT appear in the error — regression guards. -/
+  forbiddenErrors : Array String := #[]
   /-- Use `testDir` as searchPath (needed for files inside packages). -/
   searchFromTestDir : Bool := false
 
@@ -93,8 +99,13 @@ private meta def testCases : Array TestCase := #[
   { file := "service/mixed_imports.py", searchFromTestDir := true },
   -- Level 2 relative import: from ..module import ServiceClass (inside sub/)
   { file := "service/sub/rel_import_parent.py", searchFromTestDir := true },
-  -- Nested import (depth 2): error in leaf module should include source location
-  { file := "nested_import_error.py", expectedErrors := #["already defined"] },
+  -- Nested import (depth 2): error in leaf module should include source location.
+  -- `forbiddenErrors := #[".py("]` asserts the error output carries no raw byte-range
+  -- prefix (`<file>.py(<start>-<stop>)`): `ppErr` reads `.message.message`, so the
+  -- location is only the `file:line:col` it formats, never `ToString Message`'s byte range.
+  { file := "nested_import_error.py"
+    expectedErrors := #["already defined"]
+    forbiddenErrors := #[".py("] },
   -- Bare import of missing module: import NonExistentModule
   { file := "bare_import_missing.py", expectedErrors := #["not found"] },
   -- Relative import from a top-level module (no package): should error
@@ -126,7 +137,7 @@ private meta def runAllTests : IO Unit := withPython fun pythonCmd => do
     let mut errors : Array String := #[]
     for tc in testCases do
       match ← runTest pythonCmd dialectFile tc.file tc.expectedErrors
-          tc.searchFromTestDir with
+          tc.forbiddenErrors tc.searchFromTestDir with
       | some err => errors := errors.push err
       | none => pure ()
     if errors.size > 0 then

@@ -288,7 +288,7 @@ def eraseType : HighType → LowType
     | _ => .TUser id.text
   | .TReal => .TCore "real"
   | .TSet _ | .TMap _ _ | .Applied _ _ | .Intersection _ | .Unknown
-  | .TBv _ | .MultiValuedExpr _ => .TCore "Any"
+  | .TVar _ | .TBv _ | .MultiValuedExpr _ => .TCore "Any"
 
 /-- Inverse of erasure (partial): lifts a LowType back to HighType for env extension. -/
 def liftType : LowType → HighType
