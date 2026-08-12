@@ -1,5 +1,6 @@
 /-
   Copyright Strata Contributors
+
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 -- Minimal strata entrypoint for the incremental hybrid branch.
