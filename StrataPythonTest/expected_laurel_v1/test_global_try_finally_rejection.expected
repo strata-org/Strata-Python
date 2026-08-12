@@ -1,0 +1,23 @@
+DETAIL: Unsupported construct: try-else and try-finally are not supported
+AST: StrataPython.stmt.Try
+  { start := { byteIdx := 16 }, stop := { byteIdx := 52 } }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+    val := #[StrataPython.stmt.Pass { start := { byteIdx := 25 }, stop := { byteIdx := 29 } }] }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+    val := #[StrataPython.stmt.Assign
+               { start := { byteIdx := 43 }, stop := { byteIdx := 52 } }
+               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+                 val := #[StrataPython.expr.Name
+                            { start := { byteIdx := 43 }, stop := { byteIdx := 48 } }
+                            { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "state" }
+                            (StrataPython.expr_context.Store { start := { byteIdx := 0 }, stop := { byteIdx := 0 } })] }
+               (StrataPython.expr.Constant
+                 { start := { byteIdx := 51 }, stop := { byteIdx := 52 } }
+                 (StrataPython.constant.ConPos
+                   { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }
+                   { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := 1 })
+                 { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none })
+               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }] }
+RESULT: Known limitation

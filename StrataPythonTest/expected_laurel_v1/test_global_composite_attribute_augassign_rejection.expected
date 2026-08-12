@@ -1,0 +1,10 @@
+DETAIL: Unsupported construct: attribute write on module variable 'counter' with composite or type-alias value is not supported
+AST: StrataPython.expr.Attribute
+  { start := { byteIdx := 117 }, stop := { byteIdx := 126 } }
+  (StrataPython.expr.Name
+    { start := { byteIdx := 117 }, stop := { byteIdx := 124 } }
+    { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "counter" }
+    (StrataPython.expr_context.Load { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }))
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "n" }
+  (StrataPython.expr_context.Store { start := { byteIdx := 0 }, stop := { byteIdx := 0 } })
+RESULT: Known limitation

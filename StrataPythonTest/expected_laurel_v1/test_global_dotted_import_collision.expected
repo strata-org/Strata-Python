@@ -1,0 +1,16 @@
+DETAIL: Unsupported construct: module variable 'xml' cannot be lowered to a Laurel static field because its name collides with a top-level definition
+AST: StrataPython.stmt.Assign
+  { start := { byteIdx := 16 }, stop := { byteIdx := 23 } }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+    val := #[StrataPython.expr.Name
+               { start := { byteIdx := 16 }, stop := { byteIdx := 19 } }
+               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "xml" }
+               (StrataPython.expr_context.Store { start := { byteIdx := 0 }, stop := { byteIdx := 0 } })] }
+  (StrataPython.expr.Constant
+    { start := { byteIdx := 22 }, stop := { byteIdx := 23 } }
+    (StrataPython.constant.ConPos
+      { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }
+      { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := 1 })
+    { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none })
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }
+RESULT: Known limitation

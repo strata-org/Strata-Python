@@ -1,0 +1,1 @@
+global variable 'inherited_value' is used in a method whose body is opaque because the class participates in inheritance

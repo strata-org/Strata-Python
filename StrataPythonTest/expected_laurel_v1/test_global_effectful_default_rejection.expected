@@ -1,0 +1,10 @@
+DETAIL: Unsupported construct: effectful default argument expressions are not supported
+AST: StrataPython.expr.Call
+  { start := { byteIdx := 90 }, stop := { byteIdx := 96 } }
+  (StrataPython.expr.Name
+    { start := { byteIdx := 90 }, stop := { byteIdx := 94 } }
+    { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "mark" }
+    (StrataPython.expr_context.Load { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }))
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+RESULT: Known limitation

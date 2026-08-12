@@ -1,0 +1,28 @@
+DETAIL: Unsupported construct: global variable 'leaked' is declared directly in a class body, whose execution is not modeled
+AST: StrataPython.stmt.ClassDef
+  { start := { byteIdx := 0 }, stop := { byteIdx := 46 } }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "Holder" }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+    val := #[StrataPython.stmt.Global
+               { start := { byteIdx := 18 }, stop := { byteIdx := 31 } }
+               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+                 val := #[{ ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "leaked" }] },
+             StrataPython.stmt.Assign
+               { start := { byteIdx := 36 }, stop := { byteIdx := 46 } }
+               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+                 val := #[StrataPython.expr.Name
+                            { start := { byteIdx := 36 }, stop := { byteIdx := 42 } }
+                            { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "leaked" }
+                            (StrataPython.expr_context.Store { start := { byteIdx := 0 }, stop := { byteIdx := 0 } })] }
+               (StrataPython.expr.Constant
+                 { start := { byteIdx := 45 }, stop := { byteIdx := 46 } }
+                 (StrataPython.constant.ConPos
+                   { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }
+                   { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := 1 })
+                 { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none })
+               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }] }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+RESULT: Known limitation

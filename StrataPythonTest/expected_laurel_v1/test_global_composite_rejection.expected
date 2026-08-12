@@ -1,0 +1,6 @@
+DETAIL: Unsupported construct: global variable 'box' cannot be lowered to a Laurel static field because its name collides with a top-level definition or it is assigned a composite value
+AST: StrataPython.stmt.Global
+  { start := { byteIdx := 59 }, stop := { byteIdx := 69 } }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+    val := #[{ ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "box" }] }
+RESULT: Known limitation

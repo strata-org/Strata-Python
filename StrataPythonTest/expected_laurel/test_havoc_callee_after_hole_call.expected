@@ -6,5 +6,12 @@ test_havoc_callee_after_hole_call.py(25, 0): ✔️ always true if reached - ass
 test_havoc_callee_after_hole_call.py(30, 0): ✔️ always true if reached - assert(…)
 test_havoc_callee_after_hole_call.py(36, 0): ❓ unknown - precondition
 test_havoc_callee_after_hole_call.py(37, 4): ✔️ always true if reached - assert(…)
-DETAIL: 7 passed, 0 failed, 1 inconclusive
+test_havoc_callee_after_hole_call.py(43, 0): ✔️ always true if reached - assert(…)
+test_havoc_callee_after_hole_call.py(47, 0): ✔️ always true if reached - assert(…)
+test_havoc_callee_after_hole_call.py(51, 0): ✔️ always true if reached - assert(…)
+test_havoc_callee_after_hole_call.py(55, 0): ✔️ always true if reached - assert(…)
+test_havoc_callee_after_hole_call.py(59, 0): ✔️ always true if reached - assert(…)
+test_havoc_callee_after_hole_call.py(63, 0): ✔️ always true if reached - assert(…)
+test_havoc_callee_after_hole_call.py(71, 0): ✔️ always true if reached - havoc_kwargs_assert(…)
+DETAIL: 14 passed, 0 failed, 1 inconclusive
 RESULT: Inconclusive

@@ -1,0 +1,14 @@
+test_global_var.py(6, 11): ❓ unknown - global 'G' is bound
+test_global_var.py(6, 4): ❓ unknown - global variable
+test_global_var.py(7, 11): ❓ unknown - global 'H' is bound
+test_global_var.py(7, 4): ❓ unknown - module initialization order
+test_global_var.py(11, 11): ❓ unknown - global 'LATER' is bound
+test_global_var.py(10, 27): ❓ unknown - (read_later_global ensures) Return type constraint
+test_global_var.py(1, 0): ✅ pass - assert(…)
+test_global_var.py(2, 9): ✅ pass - global 'G' is bound
+test_global_var.py(2, 9): ✅ pass - Check PAdd exception
+test_global_var.py(2, 0): ✅ pass - assert(…)
+test_global_var.py(14, 0): ✅ pass - assert(…)
+test_global_var.py(18, 0): ❓ unknown - function resolves a later module assignment
+DETAIL: 5 passed, 0 failed, 7 inconclusive
+RESULT: Inconclusive

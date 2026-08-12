@@ -1,0 +1,6 @@
+test_soundness_global_while_body_unbound.py(1, 0): ✅ pass - assert(…)
+test_soundness_global_while_body_unbound.py(3, 6): ✅ pass - global 'keep_going' is bound
+test_soundness_global_while_body_unbound.py(6, 7): ❓ unknown - global 'while_value' is bound
+test_soundness_global_while_body_unbound.py(6, 0): ❓ unknown - unsound: Python raises NameError
+DETAIL: 2 passed, 0 failed, 2 inconclusive
+RESULT: Inconclusive

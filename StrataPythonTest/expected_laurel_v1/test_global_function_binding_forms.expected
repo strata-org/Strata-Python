@@ -1,0 +1,20 @@
+test_global_function_binding_forms.py(10, 4): ✅ pass - precondition
+test_global_function_binding_forms.py(12, 22): ✅ pass - precondition
+test_global_function_binding_forms.py(1, 0): ✅ pass - assert(…)
+test_global_function_binding_forms.py(2, 0): ✅ pass - assert(…)
+test_global_function_binding_forms.py(3, 0): ✅ pass - assert(…)
+test_global_function_binding_forms.py(4, 0): ✅ pass - assert(…)
+test_global_function_binding_forms.py(5, 18): ✅ pass - Check PNeg exception
+test_global_function_binding_forms.py(5, 0): ✅ pass - assert(…)
+test_global_function_binding_forms.py(17, 7): ❓ unknown - global 'first' is bound
+test_global_function_binding_forms.py(17, 0): ❓ unknown - global tuple assignment updates first target
+test_global_function_binding_forms.py(18, 7): ❓ unknown - global 'second' is bound
+test_global_function_binding_forms.py(18, 0): ❓ unknown - global tuple assignment updates second target
+test_global_function_binding_forms.py(19, 7): ❓ unknown - global 'chain_left' is bound
+test_global_function_binding_forms.py(19, 0): ❓ unknown - global chained assignment updates first target
+test_global_function_binding_forms.py(20, 7): ❓ unknown - global 'chain_right' is bound
+test_global_function_binding_forms.py(20, 0): ❓ unknown - global chained assignment updates second target
+test_global_function_binding_forms.py(21, 7): ❓ unknown - global 'loop_index' is bound
+test_global_function_binding_forms.py(21, 0): ❓ unknown - global for target is bound by iteration
+DETAIL: 8 passed, 0 failed, 10 inconclusive
+RESULT: Inconclusive

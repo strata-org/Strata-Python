@@ -1,0 +1,6 @@
+test_global_builtin_shadowing.py(5, 11): ❓ unknown - global 'len' is bound
+test_global_builtin_shadowing.py(4, 18): ❓ unknown - (read_len ensures) Return type constraint
+test_global_builtin_shadowing.py(1, 0): ✅ pass - assert(…)
+test_global_builtin_shadowing.py(8, 0): ❓ unknown - Python builtin shadowing remains valid
+DETAIL: 1 passed, 0 failed, 3 inconclusive
+RESULT: Inconclusive
