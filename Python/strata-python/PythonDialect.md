@@ -114,6 +114,9 @@ validating the parser against a corpus.
 
 - `-q` / `--quiet` — suppress the warning about the `amazon.ion` C extension
   not being available.
+- `--recursion-limit <n>` — set the Python interpreter's maximum recursion
+  depth (default: 5000).  Increase this when parsing deeply nested Python
+  files that trigger a `RecursionError`.
 
 ## Python API
 

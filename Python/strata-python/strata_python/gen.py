@@ -13,7 +13,8 @@ from strata.base import Dialect, Program
 import strata_python.pythonast as pythonast
 import sys
 
-sys.setrecursionlimit(2500)
+# Default recursion limit used when none is provided on the command line.
+default_recursion_limit = 5000
 
 def write_dialect(dialect : Dialect, dir : Path):
     if dir.exists():
@@ -87,6 +88,9 @@ def main():
                     description='Strata interface to Python parser')
     parser.add_argument('-q', '--quiet', action='store_true',
                         help='Suppress warnings.')
+    parser.add_argument('--recursion-limit', type=int, default=default_recursion_limit,
+                        help=f'Maximum recursion depth for the Python interpreter '
+                             f'(default: {default_recursion_limit}).')
     subparsers = parser.add_subparsers(help="subcommand help")
 
     def write_python_dialect(args):
@@ -111,6 +115,7 @@ def main():
     checkast_command.set_defaults(func=check_ast_imp)
 
     args = parser.parse_args()
+    sys.setrecursionlimit(args.recursion_limit)
     if not args.quiet and not ion.__IS_C_EXTENSION_SUPPORTED:
         print("warning: amazon.ion C extension is not available. "
               "Ion serialization will be significantly slower. "
