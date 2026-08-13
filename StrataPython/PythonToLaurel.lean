@@ -759,11 +759,12 @@ partial def translateExpr (ctx : TranslationContext) (e : expr SourceRange)
   -- Unary operations
   | .UnaryOp _ op operand => do
     let operandExpr ← translateExpr ctx operand
-    let preludeOpnames ← match op with
-      | .Not _ => .ok "PNot"
-      | .USub _ => .ok "PNeg"
-      | .Invert _ => .ok "PBitNot"
-      | _ => throw (.unsupportedConstruct s!"Unary operator not yet supported: {repr op}" (toString (repr e)))
+    -- `unaryop` has exactly four constructors, so this match is exhaustive.
+    let preludeOpnames := match op with
+      | .Not _ => "PNot"
+      | .UAdd _ => "PPos"
+      | .USub _ => "PNeg"
+      | .Invert _ => "PBitNot"
     return mkStmtExprMdWithLoc (StmtExpr.StaticCall preludeOpnames [operandExpr]) md
 
   -- FormattedValue (f-string interpolation {expr}) - convert to string-typed Any

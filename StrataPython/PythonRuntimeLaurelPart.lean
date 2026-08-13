@@ -621,6 +621,20 @@ return if Any..isexception(v) then v
   else
     exception(UndefinedError ("Operand Type is not defined"));
 
+// Unary plus is not the identity: Python's `+` applies the numeric coercion
+// without changing the value, so `+True` is the int 1, not the bool True.
+// Non-numeric operands (str, list, dict, None) raise TypeError in Python.
+procedure PPos (v: Any) : Any
+return if Any..isexception(v) then v
+  else if Any..isfrom_bool(v) then
+    from_int(bool_to_int(Any..as_bool!(v)))
+  else if Any..isfrom_int(v) then
+    from_int(Any..as_int!(v))
+  else if Any..isfrom_float(v) then
+    from_float(Any..as_float!(v))
+  else
+    exception(UndefinedError ("Operand Type is not defined"));
+
 procedure PBitNot (v: Any) : Any
 return if Any..isexception(v) then v
   else if Any..isfrom_bool(v) then
@@ -1163,7 +1177,7 @@ Parse the Laurel DDM prelude into a Laurel Program.
 -- Used to determine which procs can elevate their caller's grade to `.err`.
 -- (HashSet for the elaborator's membership check; includes the bitwise operators.)
 public def AnyMaybeExceptionList : Std.HashSet String :=
-  (["Any_get!", "Any_set!", "Any_sets!", "PNeg", "PBitNot", "PNot", "PAdd", "PSub", "PMul",
+  (["Any_get!", "Any_set!", "Any_sets!", "PPos", "PNeg", "PBitNot", "PNot", "PAdd", "PSub", "PMul",
     "PFloorDiv", "PLt", "PLe", "PGt", "PGe", "PPow", "PMod", "PLShift", "PRShift",
     "PBitAnd", "PBitOr", "PBitXor", "PAnd", "POr"]
    : List String).foldl (fun s n => s.insert n) {}
