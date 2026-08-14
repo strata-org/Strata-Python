@@ -133,18 +133,6 @@ private def mkFuncSigWithPrecond (name : String) (returnType : SpecType)
     preconditions := preconditions, postconditions := #[]
   }
 
-/-- Helper to make a function signature with postconditions. -/
-private def mkFuncSigWithPostcond (name : String) (returnType : SpecType)
-    (postconditions : Array SpecExpr) : Signature :=
-  .functionDecl {
-    loc := loc, nameLoc := loc, name := name
-    args := { args := #[], kwonly := #[] }
-    returnType := returnType
-    isOverload := false
-    preconditions := #[], postconditions := postconditions
-  }
-
-
 /-! ## All function params and returns map to Any -/
 
 /--
@@ -1566,6 +1554,56 @@ private def udBase (n : String) : Strata.Laurel.HighTypeMd := ⟨.UserDefined (m
 
 -- Totality guard for `fmtHighType`'s `.TVar` arm (no SPFE path constructs a `.TVar`).
 #guard fmtHighType (.TVar (mkId "T")) == "TVar(T)"
+
+/-! ## `OLD(expr)` two-state lowering
+
+`SpecExpr.old` is a generic structural wrapper. An admitted post-state
+predicate lowers it to Laurel's `old(...)` inside an in-body `assume`, where
+`PushOldInward` can distribute it to inout state. End-to-end heap semantics
+also depend on later `@modifies` lowering. -/
+
+/-- Run `signaturesToLaurel` for a single admitted postcondition and print the
+    error count and the full rendered body, so `#guard_msgs` pins the complete
+    Laurel output (not just a substring) at elaboration time. -/
+private def runAdmittedBody (admittedPostconditions : Array SpecExpr)
+    (args : Array Arg := #[]) : IO Unit := do
+  let result := translateFuncResult
+    (args := args)
+    (returnType := identType .builtinsInt)
+    (admittedPostconditions := admittedPostconditions)
+  IO.println s!"errors: {result.errors.size}"
+  IO.println (getBody result |>.getD "<no body>")
+
+-- `OLD(x)` in @admit lowers to an in-body assume with `old(x)`.
+/--
+info: errors: 0
+{
+  result := <??>;
+  assert Any..isfrom_int(x);
+  assume Any_to_bool(PGe(old(x), x));
+  assume Any..isfrom_int(result)
+}
+-/
+#guard_msgs in
+#eval runAdmittedBody
+  #[.intGe (.old (.var "x" loc) loc) (.var "x" loc) loc]
+  #[mkArg "x" (identType .builtinsInt)]
+
+-- `OLD` on an arithmetic expression wraps the whole subexpression:
+-- `old(PAdd(x, x))`, not `PAdd(old(x), old(x))`.
+/--
+info: errors: 0
+{
+  result := <??>;
+  assert Any..isfrom_int(x);
+  assume Any_to_bool(PGe(old(PAdd(x, x)), x));
+  assume Any..isfrom_int(result)
+}
+-/
+#guard_msgs in
+#eval runAdmittedBody
+  #[.intGe (.old (.add (.var "x" loc) (.var "x" loc) loc) loc) (.var "x" loc) loc]
+  #[mkArg "x" (identType .builtinsInt)]
 
 end StrataPython.Specs.ToLaurel.Tests
 end

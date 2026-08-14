@@ -11,11 +11,12 @@ public import StrataPython.Specs.Decorators
 /-! # Native PySpec contract decorators
 
 Recognizers for PySpec's unqualified contract decorators — `@requires`,
-`@ensures`, `@admit`, `@modifies`, `@snapshot`, `@ghost` (per method) and `@invariant`
+`@ensures`, `@admit`, `@modifies`, `@ghost` (per method) and `@invariant`
 (per class) — built on the `Specs/Decorators.lean` framework. Each scheme
-collects the raw Python lambda bodies into a bundle; `Specs.lean` translates
-them to `SpecExpr` via the same `transExpr` path used for `assert`. Recognition
-only — lowering to Laurel/Core is deferred. -/
+collects raw Python lambda bodies into a bundle; `Specs.lean` translates them
+to `SpecExpr` via the same generic path used for `assert`. Two-state
+`OLD(expr)` is an expression form accepted by post-state predicates
+(`@ensures` and `@admit`), not a decorator-specific construct. -/
 
 namespace StrataPython.Specs.Native
 
@@ -25,14 +26,6 @@ open Decorators (DecoratorForm DecoratorScheme expectLambda? warnUnknownBinders
   stringKeyword? exprKeyword? hasKeyword reportUnexpectedKeywords)
 
 /-! ## Bundles produced by recognition -/
-
-/-- A `@snapshot` capture before its body is translated: the declared name, the
-    raw Python capture expression, and the decorator's source location. -/
-public structure RawSnapshot where
-  name : String
-  capture : expr SourceRange
-  loc : SourceRange
-deriving Inhabited
 
 /-- A `@ghost(name="g", type=…, init=…)` declaration before its `type`/`init`
     expressions are resolved: the declared name, the raw (optional) Python type
@@ -58,8 +51,6 @@ public structure MethodBundle where
   admitted : Array (expr SourceRange) := #[]
   /-- `@modifies` lambda bodies (frame targets — lvalue expressions). -/
   modifies : Array (expr SourceRange) := #[]
-  /-- `@snapshot(lambda …: capture, name="n")` pre-state captures. -/
-  snapshots : Array RawSnapshot := #[]
   /-- `@ghost(name="g", …)` declarations. -/
   ghosts : Array RawGhost := #[]
 deriving Inhabited
@@ -125,15 +116,6 @@ public def methodScheme {m : Type → Type} [Monad m] [PySpecMClass m]
     | "modifies" =>
       absorbLambda "@modifies" validParams form args bundle fun body =>
         { bundle with modifies := bundle.modifies.push body }
-    | "snapshot" =>
-      reportUnexpectedKeywords specError "@snapshot" #["name"] form.kwargs
-      let some (body, binders) ← expectLambda? specError "@snapshot" form.loc args
-        | return some bundle
-      let some name ← uniqueName? "@snapshot" form (bundle.snapshots.map (·.name))
-        | return some bundle
-      warnUnknownBinders form.loc binders validParams fun n =>
-        s!"@snapshot: lambda parameter '{n}' is unbound at the use site"
-      return some { bundle with snapshots := bundle.snapshots.push { name, capture := body, loc := form.loc } }
     | "ghost" =>
       let type? ← exprKeyword? "@ghost" "type" form.kwargs
       let init? ← exprKeyword? "@ghost" "init" form.kwargs

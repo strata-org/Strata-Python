@@ -21,7 +21,7 @@ def rtSpecExpr (e : SpecExpr) : SpecExpr := e.toDDM.fromDDM
 
 /-- Every `PCmpOp` variant. -/
 def allPCmpOps : List PCmpOp :=
-  [.lt, .gt, .eq, .ne, .isIn, .notIn]
+  [.lt, .le, .gt, .ge, .eq, .ne, .isIn, .notIn]
 
 -- `PCmpOp.ofTag?` inverts `PCmpOp.tag` for every variant.
 #guard allPCmpOps.all (fun op => PCmpOp.ofTag? op.tag == some op)
@@ -70,7 +70,13 @@ private def nestedRoundTripTest : IO Unit := do
         .and (.intGe (.add x y rtLoc) (.intLit 3 rtLoc) rtLoc)
              (.intLe (.mul x y rtLoc) (.intLit 10 rtLoc) rtLoc) rtLoc),
       ("neg of neg",
-        .neg (.neg (.neg x rtLoc) rtLoc) rtLoc) ]
+        .neg (.neg (.neg x rtLoc) rtLoc) rtLoc),
+      ("old wrapping arith",
+        .old (.add x y rtLoc) rtLoc),
+      ("old wrapping getIndex",
+        .old (.getIndex x "field" rtLoc) rtLoc),
+      ("old wrapping old",
+        .old (.old x rtLoc) rtLoc) ]
   for (name, e) in samples do
     let e' := rtSpecExpr e
     unless e'.softBEq e do

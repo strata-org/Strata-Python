@@ -60,6 +60,18 @@ def headArgCount : StmtExpr → Nat
   | .StaticCall _ args  => args.length
   | _                   => 0
 
+/-- Render the *full concrete structure* of a lowered `StmtExpr` — constructor,
+    local-variable names, and call arguments in order — so a test can pin the
+    exact term rather than just its top-level shape. Only covers the node kinds
+    reached by these lowering tests; anything else falls back to the constructor
+    name. -/
+private partial def describeStmt : StmtExpr → String
+  | .Var (.Local id)      => s!"Var(Local {id.text})"
+  | .StaticCall callee as =>
+      s!"StaticCall({callee.text}, [{", ".intercalate (as.map fun a => describeStmt a.val)}])"
+  | .Old inner            => s!"Old({describeStmt inner.val})"
+  | other                 => other.constructorName
+
 def expectHead (name : String) (e : SpecExpr) : IO Unit := do
   let (stmt, errs) := lower e
   unless errs == 0 do
@@ -74,7 +86,9 @@ def y : SpecExpr := .var "y" loc
 /-! ## pcmpPreludeName is the single source of prelude comparison names -/
 
 #guard pcmpPreludeName .lt    == "PLt"
+#guard pcmpPreludeName .le    == "PLe"
 #guard pcmpPreludeName .gt    == "PGt"
+#guard pcmpPreludeName .ge    == "PGe"
 #guard pcmpPreludeName .eq    == "PEq"
 #guard pcmpPreludeName .ne    == "PNEq"
 #guard pcmpPreludeName .isIn  == "PIn"
@@ -99,7 +113,7 @@ def arithmeticTests : IO Unit := do
 
 /-- `.pcmp op l r` lowers to `Any_to_bool(StaticCall (pcmpPreludeName op) [l, r])`. -/
 def pcmpTests : IO Unit := do
-  for op in [PCmpOp.lt, .gt, .eq, .ne, .isIn, .notIn] do
+  for op in [PCmpOp.lt, .le, .gt, .ge, .eq, .ne, .isIn, .notIn] do
     let (stmt, errs) := lower (.pcmp op x y loc)
     unless errs == 0 do throw <| IO.userError s!"pcmp {op.tag}: {errs} error(s)"
     match stmt with
@@ -236,6 +250,30 @@ def nonAnyUserDefinedTests : IO Unit := do
     throw <| IO.userError
       s!"asBool (SomeType operand): expected a StaticCall, got {headName andStmt}"
 
+/-- `SpecExpr.old` wraps its argument in Laurel's `Old(…)`. A bare variable
+    wraps to `Old(Var)`; a compound inner expression is lowered recursively and
+    the whole result sits under the `Old` wrapper (e.g. `old(x + y)` becomes
+    `Old(PAdd(x, y))`, not `PAdd(Old(x), Old(y))`).
+
+    Both cases pin the *full concrete term* via `describeStmt` — variable names
+    and operand order included — so a renamed variable or swapped operands would
+    fail the check, not just a wrong top-level constructor. -/
+private def oldTests : IO Unit := do
+  -- Bare variable: the inner term is exactly the local `x`, wrapped in `Old`.
+  let (stmt, errs) := lower (.old x loc)
+  unless errs == 0 do throw <| IO.userError s!"old: {errs} error(s)"
+  let bare := describeStmt stmt
+  unless bare == "Old(Var(Local x))" do
+    throw <| IO.userError s!"old: expected Old(Var(Local x)), got {bare}"
+  -- Compound inner expression: the binary op is lowered under the `Old` wrapper,
+  -- preserving the callee (`PAdd`) and both operands in order (`x` then `y`).
+  let (compound, cErrs) := lower (.old (.add x y loc) loc)
+  unless cErrs == 0 do throw <| IO.userError s!"old(compound): {cErrs} error(s)"
+  let comp := describeStmt compound
+  unless comp == "Old(StaticCall(PAdd, [Var(Local x), Var(Local y)]))" do
+    throw <| IO.userError
+      s!"old(compound): expected Old(StaticCall(PAdd, [Var(Local x), Var(Local y)])), got {comp}"
+
 def allTests : IO Unit := do
   arithmeticTests
   pcmpTests
@@ -246,6 +284,7 @@ def allTests : IO Unit := do
   literalTests
   asAnyBoxingTests
   nonAnyUserDefinedTests
+  oldTests
 
 #guard_msgs in
 #eval allTests

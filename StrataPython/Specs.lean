@@ -10,6 +10,7 @@ import all    StrataDDM.Util.Fin
 import        StrataPython.ReadPython
 import        StrataPython.Specs.DDM
 public import StrataPython.Specs.Decls
+public import StrataPython.Specs.DeclsProps
 public import StrataPython.Specs.Diagnostics
 public import StrataPython.Specs.Decorators
 import StrataPython.Specs.Native
@@ -652,14 +653,48 @@ def pySpecArg (usedNames : Std.HashSet String)
     default := argDefault
   }
 
+/-- Semantic role of an expression translated by `transExpr`. The role controls
+    constructs whose meaning depends on evaluation state without coupling the
+    expression grammar to individual decorators. -/
+inductive SpecExprRole where
+  | preState
+  | postState
+  | frame
+  | invariant
+  | initializer
+deriving BEq
+
+def SpecExprRole.allowsFieldAccess : SpecExprRole → Bool
+  | .postState | .frame | .invariant | .initializer => true
+  | .preState => false
+
+def SpecExprRole.allowsOld : SpecExprRole → Bool
+  | .postState => true
+  | _ => false
+
+def SpecExprRole.description : SpecExprRole → String
+  | .preState => "pre-state predicates"
+  | .postState => "post-state predicates"
+  | .frame => "frame targets"
+  | .invariant => "invariants"
+  | .initializer => "initializers"
+
 structure SpecAssertionContext where
   filePath : System.FilePath
   kwargs : Option (String × SpecType) := none
   /-- Local variable type bindings (e.g., quantifier iteration variables). -/
   localTypes : Std.HashMap String SpecType := {}
-  /-- Whether `transExpr` may translate `obj.attr` (else it is unsupported).
-      See the `.Attribute` case in `transExpr` for which contracts enable it. -/
-  allowFieldAccess : Bool := false
+  /-- Names currently shadowed by quantifier binders. -/
+  quantifierBindings : Std.HashSet String := {}
+  /-- A method receiver removed from generated Laurel procedure inputs. -/
+  unloweredReceiver : Option String := none
+  role : SpecExprRole := .preState
+
+private def SpecAssertionContext.bindQuantifier
+    (ctx : SpecAssertionContext) (name : String) (tp : SpecType) : SpecAssertionContext :=
+  { ctx with
+    localTypes := ctx.localTypes.insert name tp
+    quantifierBindings := ctx.quantifierBindings.insert name }
 
 /-- State for `SpecAssertionM`. -/
 structure SpecAssertionState where
@@ -669,8 +704,6 @@ structure SpecAssertionState where
   admittedPostconditions : Array SpecExpr := #[]
   /-- Frame targets from `@modifies`, translated to `SpecExpr`. -/
   modifies : Array SpecExpr := #[]
-  /-- Pre-state captures from `@snapshot`, translated to `Snapshot`. -/
-  snapshots : Array Snapshot := #[]
   /-- Spec-only ghost variables from `@ghost`, with their (optional) initializer
       expressions translated to `SpecExpr`. -/
   ghosts : Array Ghost := #[]
@@ -752,6 +785,12 @@ private def makeComparison
   else
     none
 
+/-- Whether an expression is a field read, possibly from the pre-state. -/
+private def SpecExpr.isFieldRead : SpecExpr → Bool
+  | .getIndex .. => true
+  | .old inner _ => inner.isFieldRead
+  | _ => false
+
 private def transCompare (loc : SourceRange)
     (lhsExpr : SpecExpr) (lhsType : SpecType)
     (ops : Array (cmpop SourceRange))
@@ -811,9 +850,26 @@ private def transCompare (loc : SourceRange)
 
   match ops[0] with
   | .GtE _ =>
-    return makeComparison (.floatGe · · (loc := loc)) (.intGe · · (loc := loc)) lhsExpr lhsType boundExpr boundType
+    match makeComparison (.floatGe · · (loc := loc)) (.intGe · · (loc := loc))
+        lhsExpr lhsType boundExpr boundType with
+    | some comparison => return some comparison
+    | none =>
+      -- Class field types are not yet available in the expression context.
+      -- Preserve field-to-field relations where field access is valid; other
+      -- nonnumeric comparisons remain unsupported.
+      if (← read).role.allowsFieldAccess &&
+          lhsExpr.isFieldRead && boundExpr.isFieldRead then
+        return some (.pcmp .ge lhsExpr boundExpr (loc := loc))
+      return none
   | .LtE _ =>
-    return makeComparison (.floatLe · · (loc := loc)) (.intLe · · (loc := loc)) lhsExpr lhsType boundExpr boundType
+    match makeComparison (.floatLe · · (loc := loc)) (.intLe · · (loc := loc))
+        lhsExpr lhsType boundExpr boundType with
+    | some comparison => return some comparison
+    | none =>
+      if (← read).role.allowsFieldAccess &&
+          lhsExpr.isFieldRead && boundExpr.isFieldRead then
+        return some (.pcmp .le lhsExpr boundExpr (loc := loc))
+      return none
   | .Gt _ => return some (.pcmp .gt lhsExpr boundExpr (loc := loc))
   | .Lt _ => return some (.pcmp .lt lhsExpr boundExpr (loc := loc))
   | .NotEq _ => return some (.pcmp .ne lhsExpr boundExpr (loc := loc))
@@ -899,14 +955,11 @@ def transQuantCall (loc : SourceRange)
     | _, _ =>
       specError loc s!"{callee}: quantifier over this collection is not supported"
       return none
-  -- Seed the local type context with the quantifier-bound variable(s).
-  let seedLocalTypes (lt : Std.HashMap String SpecType) : Std.HashMap String SpecType :=
-    bindings.foldl (fun acc (n, tp) => acc.insert n tp) lt
+  let bindQuantifiers (ctx : SpecAssertionContext) : SpecAssertionContext :=
+    bindings.foldl (fun acc (n, tp) => acc.bindQuantifier n tp) ctx
   -- Translate the body with the loop variable(s) bound to their element type(s).
   let (cleanBody, (bodyExpr, _)) ← runNoWarn <|
-    withReader (fun ctx =>
-      { ctx with localTypes := seedLocalTypes ctx.localTypes }) <|
-      transExpr elt
+    withReader bindQuantifiers (transExpr elt)
   if not cleanBody || bodyExpr.containsPlaceholder then
     specError loc s!"{callee}: quantifier body could not be translated"
     return none
@@ -917,9 +970,7 @@ def transQuantCall (loc : SourceRange)
       return none
     else
       let (cleanGuard, (gExpr, _)) ← runNoWarn <|
-        withReader (fun ctx =>
-          { ctx with localTypes := seedLocalTypes ctx.localTypes }) <|
-          transExpr ifs[0]!
+        withReader bindQuantifiers (transExpr ifs[0]!)
       if not cleanGuard || gExpr.containsPlaceholder then
         specError loc s!"{callee}: quantifier guard could not be translated"
         return none
@@ -956,6 +1007,9 @@ partial def transExpr (e : expr SourceRange)
   match e with
   -- Variable name
   | .Name _ ⟨_, name⟩ (.Load _) =>
+    if name == "OLD" then
+      specError loc "OLD is reserved in specification expressions and must be called: OLD(expr)"
+      return placeholder
     let tp := match (←read).localTypes[name]? with
       | some tp => tp
       | none => anyType
@@ -970,11 +1024,19 @@ partial def transExpr (e : expr SourceRange)
       else
         specWarning loc s!"subscript subject is not a TypedDict"
     return (.getIndex innerExpr fieldName (loc := loc), fieldTp.getD anyType)
-  -- On for the not-yet-lowered kinds (`@invariant`/`@modifies`/`@snapshot`/`@ghost`
-  -- init); off for `@requires`/`@ensures`/`@admit`/`assert`, whose lowering can't bind such
-  -- a receiver yet — there it stays unsupported.
+  -- Attribute access becomes a `getIndex` field read. Method receiver fields
+  -- are rejected in post-state contracts because Laurel strips that receiver.
   | .Attribute _ inner ⟨_, attrName⟩ (.Load _) =>
-    if (← read).allowFieldAccess then
+    let ctx ← read
+    if ctx.role == .postState then
+      if let some receiver := ctx.unloweredReceiver then
+        if let .Name _ ⟨_, name⟩ (.Load _) := inner then
+          if name == receiver && !ctx.quantifierBindings.contains name then
+            specWarningOfKind .pySpecDroppedAssertion loc
+              s!"method receiver field access `{receiver}.{attrName}` is not supported \
+                in post-state PySpec contracts; contract dropped"
+            return placeholder
+    if ctx.role.allowsFieldAccess then
       let (innerExpr, innerTp) ← transExpr inner
       let fieldTp := innerTp.lookupTypedDictField attrName
       return (.getIndex innerExpr attrName (loc := loc), fieldTp.getD anyType)
@@ -1032,8 +1094,29 @@ partial def transExpr (e : expr SourceRange)
   -- String literal (extract value for use in messages)
   | .Constant _ (.ConString _ ⟨_, _s⟩) _ =>
     return (.placeholder (loc := loc), SpecType.ident loc .builtinsStr)
-  -- Call expressions: len(...), isinstance(...)
-  | .Call _ (.Name _ ⟨_, funcName⟩ (.Load _)) ⟨_, args⟩ _ =>
+  -- Call expressions: OLD(...), len(...), isinstance(...)
+  | .Call _ (.Name _ ⟨_, funcName⟩ (.Load _)) ⟨_, args⟩ ⟨_, kwargs⟩ =>
+    if funcName == "OLD" then
+      if !kwargs.isEmpty then
+        specError loc "OLD takes no keyword arguments"
+        return placeholder
+      else if args.size != 1 then
+        specError loc s!"OLD expected 1 argument, got {args.size}"
+        return placeholder
+      let role := (←read).role
+      if !role.allowsOld then
+        specError loc
+          s!"OLD(...) is only allowed in post-state predicates (@ensures or @admit), not {role.description}"
+        return placeholder
+      else if h : args.size = 1 then
+        let (innerExpr, innerTp) ← transExpr args[0]
+        if innerExpr.hasFreeVar Native.resultBinder then
+          specError loc
+            "OLD(result) is meaningless: the return value does not exist in the pre-state"
+          return placeholder
+        return (.old innerExpr (loc := loc), innerTp)
+      else
+        return placeholder
     if funcName == "len" then
       if h : args.size = 1 then
         let (subjExpr, _subjTp) ← transExpr args[0]
@@ -1267,7 +1350,7 @@ def blockStmt (s : stmt SourceRange) : SpecAssertionM Unit := do
     | .list elemTp =>
       match target with
       | .Name _ ⟨_, varName⟩ (.Store _) =>
-        quantifyBody (fun ctx => { ctx with localTypes := ctx.localTypes.insert varName elemTp })
+        quantifyBody (fun ctx => ctx.bindQuantifier varName elemTp)
           (.overList varName)
       | _ => specError s.ann "For: list quantifier expects a single loop variable"
     | .dictItems kTp vTp =>
@@ -1279,8 +1362,7 @@ def blockStmt (s : stmt SourceRange) : SpecAssertionM Unit := do
           match elts[0]!, elts[1]! with
           | .Name _ ⟨_, keyVar⟩ (.Store _), .Name _ ⟨_, valVar⟩ (.Store _) =>
             quantifyBody
-              (fun ctx => { ctx with
-                localTypes := ctx.localTypes |>.insert keyVar kTp |>.insert valVar vTp })
+              (fun ctx => (ctx.bindQuantifier keyVar kTp).bindQuantifier valVar vTp)
               (.overDictItems keyVar valVar)
           | _, _ =>
             specError s.ann "For: dict unpacking requires Name targets"
@@ -1288,13 +1370,13 @@ def blockStmt (s : stmt SourceRange) : SpecAssertionM Unit := do
     | .dictKeys kTp _vTp =>
       match target with
       | .Name _ ⟨_, keyVar⟩ (.Store _) =>
-        quantifyBody (fun ctx => { ctx with localTypes := ctx.localTypes.insert keyVar kTp })
+        quantifyBody (fun ctx => ctx.bindQuantifier keyVar kTp)
           (.overDictKeys keyVar)
       | _ => specError s.ann "For: dict keys quantifier expects a single loop variable"
     | .dictValues _kTp vTp =>
       match target with
       | .Name _ ⟨_, valVar⟩ (.Store _) =>
-        quantifyBody (fun ctx => { ctx with localTypes := ctx.localTypes.insert valVar vTp })
+        quantifyBody (fun ctx => ctx.bindQuantifier valVar vTp)
           (.overDictValues valVar)
       | _ => specError s.ann "For: dict values quantifier expects a single loop variable"
   | .If _ pred ⟨_, t⟩ ⟨_, f⟩ =>
@@ -1327,8 +1409,7 @@ def collectAssertions (decls : ArgDecls) (_returnType : SpecType)
   let warnings := (←get).warnings
   modify fun s => { s with errors := #[], warnings := #[] }
   let filePath := (←read).pythonFile
-  -- Seed local types from the args so a quantified iterable such as `Keys`
-  -- resolves to its declared collection type rather than `Any`.
+  -- Seed declared parameters; post-state `result` and `**kwargs` use dedicated paths.
   let localTypes := (decls.args ++ decls.kwonly).foldl
     (init := {}) fun acc a => acc.insert a.name a.type
   let ctx : SpecAssertionContext :=
@@ -1342,13 +1423,12 @@ def collectAssertions (decls : ArgDecls) (_returnType : SpecType)
 /-- Translate a contract body to `SpecExpr`, or `none` if it can't be fully
     translated: rejected when `transExpr` emits a diagnostic (the `runNoWarn`
     clean flag) or the result contains a `placeholder` anywhere (a buried
-    untranslatable subexpression). `allowFieldAccess` enables `obj.attr`. -/
-def translateContractValue? (allowFieldAccess : Bool) (e : expr SourceRange)
+    untranslatable subexpression). State-sensitive syntax is governed by the
+    semantic expression role. -/
+def translateContractValue? (role : SpecExprRole) (e : expr SourceRange)
     : SpecAssertionM (Option SpecExpr) := do
   let act : SpecAssertionM (SpecExpr × SpecType) :=
-    if allowFieldAccess
-    then withReader (fun ctx => { ctx with allowFieldAccess := true }) (transExpr e)
-    else transExpr e
+    withReader (fun ctx => { ctx with role }) (transExpr e)
   let (clean, (formula, _)) ← runNoWarn act
   if clean && formula.containsPlaceholder then
     -- Clean translation that still contains a placeholder (e.g. a bare
@@ -1358,9 +1438,9 @@ def translateContractValue? (allowFieldAccess : Bool) (e : expr SourceRange)
 
 /-- Translate a contract body and, when it translated, pass the result to
     `store`; otherwise drop it (`transExpr` already emitted a diagnostic). -/
-def translateContractBody (allowFieldAccess : Bool) (e : expr SourceRange)
+def translateContractBody (role : SpecExprRole) (e : expr SourceRange)
     (store : SpecExpr → SpecAssertionM Unit) : SpecAssertionM Unit := do
-  if let some formula ← translateContractValue? allowFieldAccess e then
+  if let some formula ← translateContractValue? role e then
     store formula
 
 def pySpecFunctionArgs (fnLoc : SourceRange)
@@ -1456,7 +1536,10 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
   -- the type paired with its ghost so name/type/init never drift apart.
   let ghostsWithTypes : Array (Native.RawGhost × Option SpecType) ←
     nativeBundle.ghosts.mapM fun g => do return (g, ← g.type.mapM pySpecType)
-  let as ← collectAssertions argDecls returnType <| do
+  let unloweredReceiver :=
+    if isMethod then specArgs[0]?.map (·.name) else none
+  let as ← collectAssertions argDecls returnType <|
+      withReader (fun ctx => { ctx with unloweredReceiver }) <| do
     if overload then
       -- Overload stubs should have `...` as their only body statement.
       unless body.size = 1 &&
@@ -1464,28 +1547,27 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
         specWarning fnLoc "overload body is not `...`"
     else
       body.forM blockStmt
-    -- The bool is the field-access flag: off for the lowered `@requires`/`@ensures`/`@admit`,
-    -- on for the deferred targets (`self.x` only lowerable there).
-    let pushBodies (allowFieldAccess : Bool) (bodies : Array (expr SourceRange))
+    let pushBodies (role : SpecExprRole) (bodies : Array (expr SourceRange))
         (store : SpecExpr → SpecAssertionState → SpecAssertionState) : SpecAssertionM Unit :=
       bodies.forM fun body =>
-        translateContractBody allowFieldAccess body fun f => modify (store f)
-    pushBodies false nativeBundle.requires fun f s =>
+        translateContractBody role body fun f => modify (store f)
+    pushBodies .preState nativeBundle.requires fun f s =>
       { s with assertions := s.assertions.push { message := #[], formula := f } }
-    pushBodies false nativeBundle.ensures fun f s =>
-      { s with postconditions := s.postconditions.push f }
-    pushBodies false nativeBundle.admitted fun f s =>
-      { s with admittedPostconditions := s.admittedPostconditions.push f }
-    pushBodies true nativeBundle.modifies fun f s =>
+    -- Both post-state forms bind `result` and admit generic `OLD(expr)` reads.
+    withReader (fun ctx => { ctx with
+        localTypes := ctx.localTypes.insert Native.resultBinder returnType }) <|
+      pushBodies .postState nativeBundle.ensures fun f s =>
+        { s with postconditions := s.postconditions.push f }
+    withReader (fun ctx => { ctx with
+        localTypes := ctx.localTypes.insert Native.resultBinder returnType }) <|
+      pushBodies .postState nativeBundle.admitted fun f s =>
+        { s with admittedPostconditions := s.admittedPostconditions.push f }
+    pushBodies .frame nativeBundle.modifies fun f s =>
       { s with modifies := s.modifies.push f }
-    for snap in nativeBundle.snapshots do
-      translateContractBody (allowFieldAccess := true) snap.capture fun capExpr =>
-        modify fun s => { s with
-          snapshots := s.snapshots.push { name := snap.name, capture := capExpr, loc := snap.loc } }
     for (g, gtype) in ghostsWithTypes do
       let ginit : Option SpecExpr ←
         match g.init with
-        | some iE => translateContractValue? (allowFieldAccess := true) iE
+        | some iE => translateContractValue? .initializer iE
         | none => pure none
       modify fun s => { s with
         ghosts := s.ghosts.push { name := g.name, type := gtype, init := ginit, loc := g.loc } }
@@ -1501,7 +1583,6 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
     postconditions := as.postconditions
     admittedPostconditions := as.admittedPostconditions
     modifies := as.modifies
-    snapshots := as.snapshots
     ghosts := as.ghosts
   }
 
@@ -1606,7 +1687,7 @@ partial def pySpecClassBody (loc : SourceRange) (className : String)
   let invSt ← collectAssertions { args := #[], kwonly := #[] }
       (.ident loc .typingAny) <| do
     for invBody in classInvariants do
-      translateContractBody (allowFieldAccess := true) invBody fun formula =>
+      translateContractBody .invariant invBody fun formula =>
         modify fun s => { s with
           assertions := s.assertions.push { message := #[], formula } }
   let invariants := invSt.assertions.map (·.formula)

@@ -189,6 +189,12 @@ def existsTrigger (param : Parameter) (trigger : StmtExprMd)
     (source : FileRange := body.stmt.source) : TypedStmtExpr .TBool :=
   .ofStmt (.Quantifier QuantifierMode.Exists param (some trigger) body.stmt) source
 
+/-- Two-state pre-state read: wraps `x` in Laurel's `old(…)` so it evaluates in
+    the procedure's pre-state. Used to realize `OLD(expr)` in contract lambdas. -/
+def old {tp} (x : TypedStmtExpr tp)
+    (source : FileRange := x.stmt.source) : TypedStmtExpr tp :=
+  .ofStmt (.Old x.stmt) source
+
 def strLength (a : TypedStmtExpr .TString)
     (source : FileRange := a.stmt.source) : TypedStmtExpr .TInt :=
   .ofStmt (.StaticCall (mkId "Str.Length") [a.stmt]) source

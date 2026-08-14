@@ -517,7 +517,9 @@ end ArgDecls
     prelude. -/
 inductive PCmpOp where
   | lt
+  | le
   | gt
+  | ge
   | eq
   | ne
   | isIn
@@ -527,7 +529,9 @@ deriving Inhabited, Repr, DecidableEq, BEq
 /-- Stable serialization tag for `PCmpOp` (backend-agnostic; not a prelude name). -/
 def PCmpOp.tag : PCmpOp → String
   | .lt => "lt"
+  | .le => "le"
   | .gt => "gt"
+  | .ge => "ge"
   | .eq => "eq"
   | .ne => "ne"
   | .isIn => "in"
@@ -536,7 +540,9 @@ def PCmpOp.tag : PCmpOp → String
 /-- Parse a `PCmpOp.tag` back into a `PCmpOp`. -/
 def PCmpOp.ofTag? : String → Option PCmpOp
   | "lt" => some .lt
+  | "le" => some .le
   | "gt" => some .gt
+  | "ge" => some .ge
   | "eq" => some .eq
   | "ne" => some .ne
   | "in" => some .isIn
@@ -568,6 +574,14 @@ inductive SpecQuantDomain where
       for the quantified-over string key. -/
   | overDictValues (valVar : String)
 deriving Inhabited, Repr, DecidableEq, BEq
+
+/-- Whether this quantifier domain binds `name` in its body. -/
+def SpecQuantDomain.bindsVar (domain : SpecQuantDomain) (name : String) : Bool :=
+  match domain with
+  | .overList varName
+  | .overDictKeys varName
+  | .overDictValues varName => varName == name
+  | .overDictItems keyVar valVar => keyVar == name || valVar == name
 
 /-- Result of type-directed domain selection: exactly one domain implied by the
     collection's static type, plus the element or key/value types needed to seed
@@ -620,6 +634,10 @@ inductive SpecExpr where
     The original Python expression is preserved in `Assertion.message`. -/
 | placeholder (loc : SourceRange)
 | var (name : String) (loc : SourceRange)
+/-- Two-state pre-state read. This is a generic expression wrapper; contract
+    translation decides whether the surrounding expression has post-state
+    semantics. Laurel's `PushOldInward` later distributes it to inout state. -/
+| old (inner : SpecExpr) (loc : SourceRange)
 | getIndex (subject : SpecExpr) (field : String) (loc : SourceRange)
 | isInstanceOf (subject : SpecExpr) (typeName : String) (loc : SourceRange)
 /-- `stringLen subject` represents `len(subject)` where `subject` is a string.
@@ -679,7 +697,7 @@ deriving Inhabited
 def SpecExpr.loc : SpecExpr → SourceRange
   | .placeholder l | .noneLit l
   | .var _ l | .intLit _ l | .boolLit _ l | .floatLit _ l
-  | .stringLen _ l | .neg _ l | .not _ l
+  | .stringLen _ l | .neg _ l | .not _ l | .old _ l
   | .getIndex _ _ l | .isInstanceOf _ _ l
   | .intGe _ _ l | .intLe _ _ l | .floatGe _ _ l | .floatLe _ _ l
   | .add _ _ l | .sub _ _ l | .mul _ _ l | .floorDiv _ _ l
@@ -695,6 +713,7 @@ def SpecExpr.loc : SpecExpr → SourceRange
 def SpecExpr.containsPlaceholder : SpecExpr → Bool
   | .placeholder _ => true
   | .var .. => false
+  | .old e _ => e.containsPlaceholder
   | .intLit .. => false
   | .boolLit .. => false
   | .noneLit .. => false
@@ -728,10 +747,11 @@ def SpecExpr.containsPlaceholder : SpecExpr → Bool
     collection: in the pathological `all(... for xs in xs)`, the binder `xs`
     would otherwise capture the outer collection `xs` in the generated Laurel
     expression. -/
-def SpecExpr.mentionsVar (e : SpecExpr) (name : String) : Bool :=
+@[expose] def SpecExpr.mentionsVar (e : SpecExpr) (name : String) : Bool :=
   match e with
   | .placeholder _ => false
   | .var n _ => n == name
+  | .old inner _ => inner.mentionsVar name
   | .intLit .. => false
   | .boolLit .. => false
   | .noneLit .. => false
@@ -760,10 +780,48 @@ def SpecExpr.mentionsVar (e : SpecExpr) (name : String) : Bool :=
   | .not inner _ => inner.mentionsVar name
   | .quantifier _ _ c b _ => c.mentionsVar name || b.mentionsVar name
 
+/-- Reports whether `name` occurs free in an expression. Quantifier binders are
+    in scope in the body but not in the collection being iterated. -/
+@[expose] def SpecExpr.hasFreeVar (e : SpecExpr) (name : String) : Bool :=
+  match e with
+  | .placeholder _ => false
+  | .var n _ => n == name
+  | .old inner _ => inner.hasFreeVar name
+  | .intLit .. => false
+  | .boolLit .. => false
+  | .noneLit .. => false
+  | .floatLit .. => false
+  | .getIndex s _ _ => s.hasFreeVar name
+  | .isInstanceOf s _ _ => s.hasFreeVar name
+  | .stringLen s _ => s.hasFreeVar name
+  | .intGe s b _ => s.hasFreeVar name || b.hasFreeVar name
+  | .intLe s b _ => s.hasFreeVar name || b.hasFreeVar name
+  | .add l r _ => l.hasFreeVar name || r.hasFreeVar name
+  | .sub l r _ => l.hasFreeVar name || r.hasFreeVar name
+  | .mul l r _ => l.hasFreeVar name || r.hasFreeVar name
+  | .floorDiv l r _ => l.hasFreeVar name || r.hasFreeVar name
+  | .mod l r _ => l.hasFreeVar name || r.hasFreeVar name
+  | .pow l r _ => l.hasFreeVar name || r.hasFreeVar name
+  | .neg o _ => o.hasFreeVar name
+  | .and l r _ => l.hasFreeVar name || r.hasFreeVar name
+  | .or l r _ => l.hasFreeVar name || r.hasFreeVar name
+  | .pcmp _ l r _ => l.hasFreeVar name || r.hasFreeVar name
+  | .floatGe s b _ => s.hasFreeVar name || b.hasFreeVar name
+  | .floatLe s b _ => s.hasFreeVar name || b.hasFreeVar name
+  | .enumMember s _ _ => s.hasFreeVar name
+  | .regexMatch s _ _ => s.hasFreeVar name
+  | .containsKey c _ _ => c.hasFreeVar name
+  | .implies c b _ => c.hasFreeVar name || b.hasFreeVar name
+  | .not inner _ => inner.hasFreeVar name
+  | .quantifier _ domain collection body _ =>
+    collection.hasFreeVar name ||
+      (!domain.bindsVar name && body.hasFreeVar name)
+
 /-- Structural equality ignoring source locations. -/
 def SpecExpr.softBEq : SpecExpr → SpecExpr → Bool
   | .placeholder _, .placeholder _ => true
   | .var n₁ _, .var n₂ _ => n₁ == n₂
+  | .old e₁ _, .old e₂ _ => e₁.softBEq e₂
   | .getIndex s₁ f₁ _, .getIndex s₂ f₂ _ => s₁.softBEq s₂ && f₁ == f₂
   | .isInstanceOf s₁ t₁ _, .isInstanceOf s₂ t₂ _ => s₁.softBEq s₂ && t₁ == t₂
   | .stringLen s₁ _, .stringLen s₂ _ => s₁.softBEq s₂
@@ -804,16 +862,6 @@ structure Assertion where
   formula : SpecExpr
 deriving Inhabited
 
-/-- A pre-state value captured by `@snapshot(lambda …: capture, name="n")`,
-    referenced inside `@ensures` lambdas as `OLD.n`. The `capture` expression is
-    evaluated in the procedure's pre-state; the lowering layer realizes
-    `OLD.n` against this capture (e.g. via Core's two-state `old()`). -/
-structure Snapshot where
-  name : String
-  capture : SpecExpr
-  loc : SourceRange
-deriving Inhabited
-
 /-- A spec-only ghost variable declared by `@ghost(name="g", …)`. Carries an
     optional declared type and/or initializer expression. Ghosts are auxiliary
     state usable in other contracts; they are not part of the executable
@@ -838,10 +886,6 @@ structure FunctionDecl where
       modeling assumptions. Lowered as in-body
       `assume`s rather than verified caller-visible contracts. -/
   admittedPostconditions : Array SpecExpr := #[]
-  /-- Pre-state captures from `@snapshot`; `OLD.<name>` references in
-      postconditions resolve against these. Recognized + round-tripped;
-      lowering is deferred. -/
-  snapshots : Array Snapshot := #[]
   /-- Frame condition from `@modifies`: the lvalue targets (e.g. `self.x`, a
       global name) this procedure is permitted to modify. Recognized +
       round-tripped; lowering is deferred. -/

@@ -86,6 +86,7 @@ op powExpr(lhs : SpecExprDecl, rhs : SpecExprDecl) : SpecExprDecl =>
   "pow" "(" lhs ", " rhs ")";
 op negExpr(operand : SpecExprDecl) : SpecExprDecl =>
   "neg" "(" operand ")";
+op oldExpr(inner : SpecExprDecl) : SpecExprDecl => "old" "(" inner ")";
 op getIndexExpr(subject : SpecExprDecl, field : Ident) : SpecExprDecl =>
   @[prec(50)] subject "[" field "]";
 op isInstanceOfExpr(subject : SpecExprDecl, typeName : Str) : SpecExprDecl =>
@@ -343,6 +344,7 @@ protected def SpecExpr.toDDM (e : SpecExpr) : DDM.SpecExprDecl SourceRange :=
   | .mod lhs rhs loc => .modExpr loc lhs.toDDM rhs.toDDM
   | .pow lhs rhs loc => .powExpr loc lhs.toDDM rhs.toDDM
   | .neg operand loc => .negExpr loc operand.toDDM
+  | .old inner loc => .oldExpr loc inner.toDDM
   | .getIndex subj field loc => .getIndexExpr loc subj.toDDM ⟨loc, field⟩
   | .isInstanceOf subj tn loc => .isInstanceOfExpr loc subj.toDDM ⟨loc, tn⟩
   | .stringLen subj loc => .stringLenExpr loc subj.toDDM
@@ -411,9 +413,6 @@ def MessagePart.toDDM (p : MessagePart) : DDM.MessagePart SourceRange :=
 def Assertion.toDDM (a : Assertion) : DDM.Assertion SourceRange :=
   .mkAssertion .none a.formula.toDDM ⟨.none, a.message.map (·.toDDM)⟩
 
-def Snapshot.toDDM (s : Snapshot) : DDM.SnapshotDecl SourceRange :=
-  .mkSnapshotDecl .none ⟨.none, s.name⟩ s.capture.toDDM
-
 def Ghost.toDDM (g : Ghost) : DDM.GhostDecl SourceRange :=
   .mkGhostDecl .none ⟨.none, g.name⟩
     ⟨.none, g.type.map (·.toDDM)⟩
@@ -442,9 +441,7 @@ def FunctionDecl.toDDM (d : FunctionDecl) : DDM.FunDecl SourceRange :=
         (.mkPostconditionEntry .none e.toDDM : DDM.PostconditionEntry SourceRange))
       ++ d.admittedPostconditions.map fun e =>
         .mkAdmittedPostconditionEntry .none e.toDDM⟩)
-    (snapshots := ⟨.none,
-      if d.snapshots.isEmpty then none
-      else some (.mkSnapshotsClause .none ⟨.none, d.snapshots.map (·.toDDM)⟩)⟩)
+    (snapshots := ⟨.none, none⟩)
     (modifiesClause := ⟨.none,
       if d.modifies.isEmpty then none
       else some (.mkModifiesClause .none ⟨.none, specExprsToEntries d.modifies⟩)⟩)
@@ -556,6 +553,7 @@ def DDM.SpecExprDecl.fromDDM (d : DDM.SpecExprDecl SourceRange) : Specs.SpecExpr
   | .modExpr loc lhs rhs => .mod lhs.fromDDM rhs.fromDDM loc
   | .powExpr loc lhs rhs => .pow lhs.fromDDM rhs.fromDDM loc
   | .negExpr loc operand => .neg operand.fromDDM loc
+  | .oldExpr loc inner => .old inner.fromDDM loc
   | .getIndexExpr loc subj ⟨_, field⟩ => .getIndex subj.fromDDM field loc
   | .isInstanceOfExpr loc subj ⟨_, tn⟩ => .isInstanceOf subj.fromDDM tn loc
   | .lenExpr loc subj => .stringLen subj.fromDDM loc
@@ -604,10 +602,12 @@ def DDM.Assertion.fromDDM (d : DDM.Assertion SourceRange) : Specs.Assertion :=
   { message := message.map (·.fromDDM), formula := formula.fromDDM }
 
 def DDM.FunDecl.fromDDM (d : DDM.FunDecl SourceRange) : FromDDM Specs.FunctionDecl := do
+  -- `snapshots` remains in the wire format for compatibility. Its contents are
+  -- intentionally discarded because snapshots are absent from `FunctionDecl`.
   let .mkFunDecl loc ⟨nameLoc, name⟩ ⟨_, args⟩ ⟨_, kwonly⟩
                  ⟨_, kwargs⟩ returnType ⟨_, isOverload⟩
                  ⟨_, preconditions⟩ ⟨_, postconditions⟩
-                 ⟨_, snapshotsClause⟩ ⟨_, modifiesClause⟩ ⟨_, ghostsClause⟩ := d
+                 ⟨_, _legacySnapshots⟩ ⟨_, modifiesClause⟩ ⟨_, ghostsClause⟩ := d
   let kwargsOpt : Option (String × Specs.SpecType) ←
     match kwargs with
     | some (.mkKwargsDecl _ ⟨_, kn⟩ tp) =>
@@ -626,12 +626,6 @@ def DDM.FunDecl.fromDDM (d : DDM.FunDecl SourceRange) : FromDDM Specs.FunctionDe
     postconditions.filterMap fun
       | .mkAdmittedPostconditionEntry _ e => some e.fromDDM
       | .mkPostconditionEntry _ _ => none
-  let snapshots : Array Specs.Snapshot :=
-    match snapshotsClause with
-    | some (.mkSnapshotsClause _ ⟨_, ss⟩) =>
-      ss.map fun (.mkSnapshotDecl _ ⟨_, sn⟩ cap) =>
-        { name := sn, capture := cap.fromDDM, loc := .none }
-    | none => #[]
   let modifies : Array Specs.SpecExpr :=
     match modifiesClause with
     | some (.mkModifiesClause _ ⟨_, ms⟩) =>
@@ -661,7 +655,6 @@ def DDM.FunDecl.fromDDM (d : DDM.FunDecl SourceRange) : FromDDM Specs.FunctionDe
     preconditions := preconditions.map (·.fromDDM)
     postconditions := verifiedPostconditions
     admittedPostconditions := admittedPostconditions
-    snapshots := snapshots
     modifies := modifies
     ghosts := ghosts
   }

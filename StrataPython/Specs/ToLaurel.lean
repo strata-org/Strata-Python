@@ -357,7 +357,9 @@ private def lookupIdentifier (name : String) (loc : SourceRange) (source : FileR
     place that maps the backend-agnostic PySpec operator onto a prelude name. -/
 def pcmpPreludeName : PCmpOp → String
   | .lt => "PLt"
+  | .le => "PLe"
   | .gt => "PGt"
+  | .ge => "PGe"
   | .eq => "PEq"
   | .ne => "PNEq"
   | .isIn => "PIn"
@@ -387,6 +389,10 @@ def specExprToLaurel (e : SpecExpr) (source : FileRange)
   | .var name loc => do
     let src ← nodeSource loc
     lookupIdentifier name loc src
+  | .old inner loc => do
+    let src ← nodeSource loc
+    let ⟨tp, e⟩ ← specExprToLaurel inner src
+    return ⟨tp, .old e⟩
   -- Scalar literals box into `Any`: `from{Int,Bool,None}` build the prelude
   -- `from_int`/`from_bool`/`from_None` calls, and `mkSome` packages the result
   -- as a `SomeTypedStmtExpr` (its `HighType` paired with the typed expression).

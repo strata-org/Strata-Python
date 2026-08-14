@@ -6,6 +6,7 @@
 module
 meta import StrataPython.Specs
 meta import all StrataPython.Specs.DDM
+meta import StrataPython.Specs.ToLaurel
 meta import StrataPython.PythonDialect
 meta import StrataPythonTest.Util.Python
 
@@ -369,14 +370,6 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
   expect (f.modifies.size == 1) s!"expected 1 modifies target, got {f.modifies.size}"
   expect (f.modifies[0]!.softBEq (.var "x" .none)) "modifies target did not match `x`"
 
--- Native `@snapshot(lambda …: capture, name="v0")` populates `FunctionDecl.snapshots`.
-#guard_msgs in
-#eval runNativeCase "snapshot_basic" fun sigs _ => do
-  let f ← findFn sigs "f"
-  expect (f.snapshots.size == 1) s!"expected 1 snapshot, got {f.snapshots.size}"
-  expect (f.snapshots[0]!.name == "v0") s!"expected snapshot name `v0`, got {f.snapshots[0]!.name}"
-  expect (f.snapshots[0]!.capture.softBEq (.var "x" .none)) "snapshot capture did not match `x`"
-
 -- Native `@ghost(name="g")` populates `FunctionDecl.ghosts`; name-only carries no
 -- type/init.
 #guard_msgs in
@@ -407,6 +400,28 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
     .intGe (.getIndex (.var "self" .none) "x" .none) (.intLit 0 .none) .none
   expect (c.invariants[0]!.softBEq expected)
     "invariant was not translated to `self.x >= 0` (placeholder or mismatch)"
+
+-- Field-to-field ordering uses generic comparisons in every role that permits
+-- field access, including class invariants.
+#guard_msgs in
+#eval runNativeCase "invariant_field_order" fun sigs warnings => do
+  expect warnings.isEmpty s!"expected no warnings, got {warnings}"
+  let ge ← findClass sigs "CGe"
+  let le ← findClass sigs "CLe"
+  expect (ge.invariants.size == 1) s!"expected 1 >= invariant, got {ge.invariants.size}"
+  expect (le.invariants.size == 1) s!"expected 1 <= invariant, got {le.invariants.size}"
+  expect (ge.invariants[0]!.softBEq
+            (.pcmp .ge
+              (.getIndex (.var "self" .none) "a" .none)
+              (.getIndex (.var "self" .none) "b" .none)
+              .none))
+    "field-to-field >= invariant was not preserved"
+  expect (le.invariants[0]!.softBEq
+            (.pcmp .le
+              (.getIndex (.var "self" .none) "a" .none)
+              (.getIndex (.var "self" .none) "b" .none)
+              .none))
+    "field-to-field <= invariant was not preserved"
 
 -- Multiple `@requires` on one function accumulate (order-independent).
 #guard_msgs in
@@ -482,11 +497,6 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
 #guard_msgs in
 #eval expectNativeCaseError "ghost_dup" "duplicate"
 
--- Duplicate `@snapshot` name= on one method is a hard error (a distinct error site from
--- `ghost_dup`).
-#guard_msgs in
-#eval expectNativeCaseError "snapshot_dup" "duplicate"
-
 -- An `@ensures` lambda binder that is neither a parameter nor `result` is still
 -- recognized as a postcondition, but warned as unbound at the use site.
 #guard_msgs in
@@ -526,10 +536,6 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
 #guard_msgs in
 #eval expectNativeCaseError "ghost_positional" "takes no positional arguments"
 
--- `@snapshot` without a name= keyword is a hard error.
-#guard_msgs in
-#eval expectNativeCaseError "snapshot_missing_name" "requires a name="
-
 -- `@invariant(lambda s: …)` (binder not `self`) is warned and the invariant is
 -- skipped (not recognized).
 #guard_msgs in
@@ -548,7 +554,7 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
   expect (warnings.any (·.contains "exactly one"))
     "expected a warning that the `@invariant` lambda must take exactly one parameter"
 
--- Integration: all six native method decorators on one function each populate
+-- Integration: all five native method decorators on one function each populate
 -- their own field, with no cross-wiring between the per-kind stores.
 #guard_msgs in
 #eval runNativeCase "mixed_method" fun sigs _ => do
@@ -558,9 +564,7 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
   expect (f.admittedPostconditions.size == 1)
     s!"expected 1 admitted postcondition, got {f.admittedPostconditions.size}"
   expect (f.modifies.size == 1) s!"expected 1 modifies target, got {f.modifies.size}"
-  expect (f.snapshots.size == 1) s!"expected 1 snapshot, got {f.snapshots.size}"
   expect (f.ghosts.size == 1) s!"expected 1 ghost, got {f.ghosts.size}"
-  expect (f.snapshots[0]!.name == "v0") s!"expected snapshot name `v0`, got {f.snapshots[0]!.name}"
   expect (f.ghosts[0]!.name == "g") s!"expected ghost name `g`, got {f.ghosts[0]!.name}"
 
 -- A class-level `@invariant` and a method-level `@requires` are recognized
@@ -582,6 +586,197 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
   let dictKeyWarns := warnings.filter (·.contains "dict quantifier requires str keys")
   expect (dictKeyWarns.size == 1)
     s!"expected exactly 1 dict-key warning, got {dictKeyWarns.size}"
+
+/-! ## `OLD(expr)` recognition and rejection -/
+
+-- `OLD` is a generic expression wrapper accepted by verified post-state predicates.
+#guard_msgs in
+#eval runNativeCase "old_ensures" fun sigs _ => do
+  let f ← findFn sigs "f"
+  expect (f.postconditions.size == 1) s!"expected 1 postcondition, got {f.postconditions.size}"
+  expect (f.postconditions[0]!.softBEq
+            (.intGe (.old (.var "x" .none) .none) (.var "x" .none) .none))
+    "postcondition formula did not match OLD(x) >= x"
+
+-- Admitted post-state predicates have the same expression semantics as @ensures.
+#guard_msgs in
+#eval runNativeCase "old_admit" fun sigs _ => do
+  let f ← findFn sigs "f"
+  expect (f.admittedPostconditions.size == 1)
+    s!"expected 1 admitted postcondition, got {f.admittedPostconditions.size}"
+  expect (f.admittedPostconditions[0]!.softBEq
+            (.intGe (.var "result" .none) (.old (.var "x" .none) .none) .none))
+    "admitted postcondition did not match result >= OLD(x)"
+
+-- OLD in roles without post-state semantics is a hard error.
+#guard_msgs in
+#eval expectNativeCaseError "old_in_requires" "only allowed in post-state predicates"
+
+#guard_msgs in
+#eval expectNativeCaseError "old_in_assert" "only allowed in post-state predicates"
+
+#guard_msgs in
+#eval expectNativeCaseError "old_in_modifies" "only allowed in post-state predicates"
+
+#guard_msgs in
+#eval expectNativeCaseError "old_in_ghost" "only allowed in post-state predicates"
+
+#guard_msgs in
+#eval expectNativeCaseError "old_in_invariant" "only allowed in post-state predicates"
+
+-- OLD with wrong arity is a hard error.
+#guard_msgs in
+#eval expectNativeCaseError "old_arity" "OLD expected 1 argument"
+
+-- OLD(result) is a hard error (result doesn't exist in the pre-state).
+#guard_msgs in
+#eval expectNativeCaseError "old_result" "does not exist in the pre-state"
+
+-- A quantifier binder named `result` shadows the post-state result binder.
+#guard_msgs in
+#eval runNativeCase "old_result_shadowed" fun sigs _ => do
+  let f ← findFn sigs "f"
+  expect (f.admittedPostconditions.size == 1)
+    s!"expected 1 admitted postcondition, got {f.admittedPostconditions.size}"
+  expect (f.admittedPostconditions[0]!.softBEq
+            (.old
+              (.quantifier .exists (.overList "result") (.var "xs" .none)
+                (.intGe (.var "result" .none) (.intLit 0 .none) .none) .none)
+              .none))
+    "quantifier-local result was confused with the post-state result binder"
+
+-- Free uses of the post-state result remain invalid inside quantifiers.
+#guard_msgs in
+#eval expectNativeCaseError "old_result_free_body" "does not exist in the pre-state"
+
+#guard_msgs in
+#eval expectNativeCaseError "old_result_free_collection" "does not exist in the pre-state"
+
+-- OLD does not make nonnumeric post-state orderings valid.
+#guard_msgs in
+#eval runNativeCase "old_nonnumeric" fun sigs warnings => do
+  let f ← findFn sigs "f"
+  expect (f.admittedPostconditions.size == 0)
+    s!"expected unsupported comparison to be dropped, got {f.admittedPostconditions.size}"
+  expect (warnings.any (·.contains "unsupported comparison"))
+    "expected an unsupported-comparison warning"
+
+-- A bare `OLD` (not applied) is a hard error: OLD must be called.
+#guard_msgs in
+#eval expectNativeCaseError "old_bare" "must be called"
+
+-- Nested OLD is structurally preserved; Laurel owns normalization/diagnostics.
+#guard_msgs in
+#eval runNativeCase "old_nested" fun sigs _ => do
+  let f ← findFn sigs "f"
+  expect (f.admittedPostconditions.size == 1)
+    s!"expected 1 admitted postcondition, got {f.admittedPostconditions.size}"
+  expect (f.admittedPostconditions[0]!.softBEq
+            (.intGe (.old (.old (.var "x" .none) .none) .none) (.var "x" .none) .none))
+    "nested OLD wrappers were not preserved structurally"
+
+-- OLD with a keyword argument is a hard error.
+#guard_msgs in
+#eval expectNativeCaseError "old_kwargs" "no keyword arguments"
+
+-- Method receiver fields are rejected during recognition because Laurel method
+-- procedures do not retain the receiver as an input.
+#guard_msgs in
+#eval runNativeCase "old_field" fun sigs warnings => do
+  let m ← findMethod (← findClass sigs "C") "m"
+  expect m.admittedPostconditions.isEmpty
+    s!"expected receiver contract to be dropped, got {m.admittedPostconditions.size}"
+  expect (warnings.any (·.contains "method receiver field access"))
+    "expected an unsupported method-receiver warning"
+  let lowered := Specs.ToLaurel.signaturesToLaurel
+    (testDir / "native_cases" / "old_field.py") sigs
+    (StrataPython.ModuleName.ofString! "native_cases.old_field")
+  expect lowered.errors.isEmpty
+    s!"receiver rejection should prevent Laurel errors, got {lowered.errors.size}"
+
+-- Exercise the symmetric receiver rejection for <=.
+#guard_msgs in
+#eval runNativeCase "old_field_le" fun sigs warnings => do
+  let m ← findMethod (← findClass sigs "C") "m"
+  expect m.admittedPostconditions.isEmpty
+    s!"expected receiver contract to be dropped, got {m.admittedPostconditions.size}"
+  expect (warnings.any (·.contains "method receiver field access"))
+    "expected an unsupported method-receiver warning"
+
+-- A quantifier binder may shadow the method receiver name. Its field reads are
+-- local to the quantifier and remain lowerable.
+#guard_msgs in
+#eval runNativeCase "old_field_receiver_shadowed" fun sigs warnings => do
+  let m ← findMethod (← findClass sigs "C") "m"
+  expect warnings.isEmpty s!"expected no warnings, got {warnings}"
+  expect (m.admittedPostconditions.size == 1)
+    s!"expected 1 admitted postcondition, got {m.admittedPostconditions.size}"
+  expect (m.admittedPostconditions[0]!.softBEq
+            (.quantifier .forall (.overList "self") (.var "xs" .none)
+              (.intGe
+                (.getIndex (.var "self" .none) "x" .none)
+                (.intLit 0 .none)
+                .none)
+              .none))
+    "quantifier-local self was confused with the method receiver"
+  let lowered := Specs.ToLaurel.signaturesToLaurel
+    (testDir / "native_cases" / "old_field_receiver_shadowed.py") sigs
+    (StrataPython.ModuleName.ofString! "native_cases.old_field_receiver_shadowed")
+  expect lowered.errors.isEmpty
+    s!"shadowed receiver failed Laurel lowering with {lowered.errors.size} errors"
+
+-- Non-receiver field reads remain supported. Unknown field types use a generic
+-- runtime comparison rather than claiming integer semantics.
+#guard_msgs in
+#eval runNativeCase "old_field_arg" fun sigs warnings => do
+  let f ← findFn sigs "f"
+  expect warnings.isEmpty s!"expected no warnings, got {warnings}"
+  expect (f.admittedPostconditions.size == 1)
+    s!"expected 1 admitted postcondition, got {f.admittedPostconditions.size}"
+  expect (f.admittedPostconditions[0]!.softBEq
+            (.pcmp .ge
+              (.getIndex (.var "obj" .none) "value" .none)
+              (.old (.getIndex (.var "obj" .none) "value" .none) .none)
+              .none))
+    "admitted postcondition did not preserve generic field comparison"
+  let lowered := Specs.ToLaurel.signaturesToLaurel
+    (testDir / "native_cases" / "old_field_arg.py") sigs
+    (StrataPython.ModuleName.ofString! "native_cases.old_field_arg")
+  expect lowered.errors.isEmpty
+    s!"generic field comparison failed Laurel lowering with {lowered.errors.size} errors"
+
+-- Exercise the symmetric generic <= fallback.
+#guard_msgs in
+#eval runNativeCase "old_field_arg_le" fun sigs warnings => do
+  let f ← findFn sigs "f"
+  expect warnings.isEmpty s!"expected no warnings, got {warnings}"
+  expect (f.admittedPostconditions.size == 1)
+    s!"expected 1 admitted postcondition, got {f.admittedPostconditions.size}"
+  expect (f.admittedPostconditions[0]!.softBEq
+            (.pcmp .le
+              (.getIndex (.var "obj" .none) "value" .none)
+              (.old (.getIndex (.var "obj" .none) "value" .none) .none)
+              .none))
+    "admitted postcondition did not preserve generic <= field comparison"
+  let lowered := Specs.ToLaurel.signaturesToLaurel
+    (testDir / "native_cases" / "old_field_arg_le.py") sigs
+    (StrataPython.ModuleName.ofString! "native_cases.old_field_arg_le")
+  expect lowered.errors.isEmpty
+    s!"generic <= field comparison failed Laurel lowering with {lowered.errors.size} errors"
+
+-- The generic fallback requires two field reads; a field compared with a bare
+-- variable remains unsupported.
+#guard_msgs in
+#eval runNativeCase "old_field_mixed" fun sigs warnings => do
+  let ge ← findFn sigs "f_ge"
+  let le ← findFn sigs "f_le"
+  expect ge.admittedPostconditions.isEmpty
+    s!"expected mixed >= comparison to be dropped, got {ge.admittedPostconditions.size}"
+  expect le.admittedPostconditions.isEmpty
+    s!"expected mixed <= comparison to be dropped, got {le.admittedPostconditions.size}"
+  let unsupported := warnings.filter (·.contains "unsupported comparison")
+  expect (unsupported.size == 2)
+    s!"expected 2 unsupported-comparison warnings, got {unsupported.size}"
 
 /-- Test that recoverable unsupported patterns emit warnings without blocking output. -/
 def warningTestCase : IO Unit := withPython fun pythonCmd => do
@@ -753,6 +948,7 @@ def specExprSamples : List (String × SpecExpr) :=
   let bf := SpecExpr.boolLit false rtLoc
   [ ("placeholder",  .placeholder rtLoc),
     ("var",          x),
+    ("old",          .old x rtLoc),
     ("getIndex",     .getIndex x "f" rtLoc),
     ("isInstanceOf", .isInstanceOf x "str" rtLoc),
     ("stringLen",    .stringLen x rtLoc),
@@ -814,7 +1010,9 @@ meta def serdeRoundTripTest : IO Unit := do
     isOverload := false
     preconditions := #[{ message := #[], formula := .intGe (.var "x" .none) (.intLit 0 .none) .none }]
     postconditions := #[.intGe (.var "result" .none) (.intLit 0 .none) .none]
-    snapshots := #[{ name := "v0", capture := .var "x" .none, loc := .none }]
+    admittedPostconditions := #[
+      .intGe (.var "result" .none) (.old (.var "x" .none) .none) .none
+    ]
     modifies := #[.var "self_x" .none]
     ghosts := #[{ name := "g", type := some (SpecType.ident .none .builtinsInt),
                   init := some (.intLit 7 .none), loc := .none }]
@@ -822,15 +1020,41 @@ meta def serdeRoundTripTest : IO Unit := do
   let fd' ← match DDM.FunDecl.fromDDM (FunctionDecl.toDDM fd) with
     | .ok r => pure r
     | .error (_, msg) => throw <| IO.userError s!"FunDecl.fromDDM failed: {msg}"
+  -- The DDM boundary accepts an optional `snapshots` clause for wire
+  -- compatibility and intentionally discards its contents.
+  let legacyDDM := match FunctionDecl.toDDM fd with
+    | .mkFunDecl loc name args kwonly kwargs returnType isOverload
+        preconditions postconditions _snapshots modifiesClause ghosts =>
+      .mkFunDecl loc name args kwonly kwargs returnType isOverload
+        preconditions postconditions
+        ⟨.none, some (.mkSnapshotsClause .none ⟨.none, #[
+          .mkSnapshotDecl .none ⟨.none, "v0"⟩ (SpecExpr.var "x" .none).toDDM
+        ]⟩)⟩
+        modifiesClause ghosts
+  let legacyFd ← match DDM.FunDecl.fromDDM legacyDDM with
+    | .ok r => pure r
+    | .error (_, msg) => throw <| IO.userError s!"legacy FunDecl.fromDDM failed: {msg}"
+  expect (legacyFd.name == fd.name) "legacy snapshots clause corrupted function declaration"
+  expect (legacyFd.postconditions.size == fd.postconditions.size)
+    "legacy snapshots clause corrupted postconditions"
+  expect (legacyFd.postconditions[0]!.softBEq fd.postconditions[0]!)
+    "legacy snapshots clause corrupted postcondition formula content"
+  expect (legacyFd.admittedPostconditions.size == fd.admittedPostconditions.size)
+    "legacy snapshots clause corrupted admitted postconditions"
+  expect (legacyFd.admittedPostconditions[0]!.softBEq fd.admittedPostconditions[0]!)
+    "legacy snapshots clause corrupted admitted postcondition formula content"
   expect (fd'.preconditions.size == 1) s!"round-trip dropped preconditions: got {fd'.preconditions.size}"
   expect (fd'.preconditions[0]!.formula.softBEq (.intGe (.var "x" .none) (.intLit 0 .none) .none))
     "round-trip corrupted precondition formula"
   expect (fd'.postconditions.size == 1) s!"round-trip dropped postconditions: got {fd'.postconditions.size}"
-  expect (fd'.postconditions[0]!.softBEq (.intGe (.var "result" .none) (.intLit 0 .none) .none))
-    "round-trip corrupted postcondition formula"
-  expect (fd'.snapshots.size == 1) s!"round-trip dropped snapshots: got {fd'.snapshots.size}"
-  expect (fd'.snapshots[0]!.name == "v0") "round-trip corrupted snapshot name"
-  expect (fd'.snapshots[0]!.capture.softBEq (.var "x" .none)) "round-trip corrupted snapshot capture"
+  expect (fd'.postconditions[0]!.softBEq
+            (.intGe (.var "result" .none) (.intLit 0 .none) .none))
+    "round-trip corrupted verified postcondition formula"
+  expect (fd'.admittedPostconditions.size == 1)
+    s!"round-trip dropped admitted postconditions: got {fd'.admittedPostconditions.size}"
+  expect (fd'.admittedPostconditions[0]!.softBEq
+            (.intGe (.var "result" .none) (.old (.var "x" .none) .none) .none))
+    "round-trip corrupted admitted postcondition formula (old wrapping must survive)"
   expect (fd'.modifies.size == 1) s!"round-trip dropped modifies: got {fd'.modifies.size}"
   expect (fd'.modifies[0]!.softBEq (.var "self_x" .none)) "round-trip corrupted modifies target"
   expect (fd'.ghosts.size == 1) s!"round-trip dropped ghosts: got {fd'.ghosts.size}"
@@ -851,10 +1075,10 @@ meta def serdeRoundTripTest : IO Unit := do
   expect (cd'.invariants.size == 1) s!"round-trip dropped invariants: got {cd'.invariants.size}"
   expect (cd'.invariants[0]!.softBEq (.var "inv" .none)) "round-trip corrupted invariant expression"
   expect (cd'.methods.size == 1) s!"round-trip dropped class method: got {cd'.methods.size}"
-  expect (cd'.methods[0]!.snapshots.size == 1
+  expect (cd'.methods[0]!.admittedPostconditions.size == 1
           && cd'.methods[0]!.modifies.size == 1
           && cd'.methods[0]!.ghosts.size == 1)
-    "round-trip dropped a class method's snapshot/modifies/ghost fields"
+    "round-trip dropped a class method's admitted/modifies/ghost fields"
 
 #guard_msgs in
 #eval serdeRoundTripTest
