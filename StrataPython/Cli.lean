@@ -590,7 +590,7 @@ def pyInterpretCommand : _root_.Command where
         exitFailure detail
     if let some dir := keepDir then
       IO.FS.writeFile (dir ++ "/core.st") (toString (Std.format core))
-    let core ← match Core.typeCheck Core.VerifyOptions.quiet core
+    let core ← match Strata.Core.typeCheck Core.VerifyOptions.quiet core
         (moreFns := StrataPython.RuntimeFactory) with
       | .ok prog => pure prog
       | .error e =>

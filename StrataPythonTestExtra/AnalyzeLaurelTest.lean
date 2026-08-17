@@ -110,7 +110,7 @@ meta def runAnalyze
   match ← translateCombinedLaurel laurel with
   | (some core, []) =>
     -- Also run Core type checking to catch semantic errors (e.g. Heap vs Any)
-    match Core.typeCheck Core.VerifyOptions.quiet core (moreFns := StrataPython.RuntimeFactory) with
+    match Strata.Core.typeCheck Core.VerifyOptions.quiet core (moreFns := StrataPython.RuntimeFactory) with
     | .error diag => return .error s!"Core type checking failed: {diag}"
     | .ok _ => return .ok core
   | (_, errors) => return .error s!"Laurel to Core translation failed: {errors}"
@@ -287,7 +287,7 @@ meta def runTestCase (pythonCmd : System.FilePath) (tmpDir : System.FilePath)
           return some s!"test_class_any_as_composite.py: {detail}"
       match ← translateCombinedLaurel laurel with
       | (some core, []) =>
-        match Core.typeCheck Core.VerifyOptions.quiet core (moreFns := StrataPython.RuntimeFactory) with
+        match Strata.Core.typeCheck Core.VerifyOptions.quiet core (moreFns := StrataPython.RuntimeFactory) with
         | .error diag =>
           -- Expected: assigning str (Any) to a Composite-typed field is a type error
           if (diag.message.splitOn "Impossible to unify").length > 1 then return none
