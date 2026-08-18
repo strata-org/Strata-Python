@@ -32,6 +32,16 @@ private def intLiteral (value : Nat) : expr SourceRange :=
 private def assign (name : String) (value : expr SourceRange) : stmt SourceRange :=
   .Assign sr { val := #[storeName name], ann := sr } value { val := none, ann := sr }
 
+private def assignChained (first second : String)
+    (value : expr SourceRange) : stmt SourceRange :=
+  .Assign sr { val := #[storeName first, storeName second], ann := sr } value
+    { val := none, ann := sr }
+
+private def annAssign (name : String) (annotation : expr SourceRange)
+    (value : Option (expr SourceRange)) : stmt SourceRange :=
+  .AnnAssign sr (storeName name) annotation { val := value, ann := sr }
+    (.IntPos sr { val := 1, ann := sr })
+
 private def augAssign (name : String) (value : expr SourceRange) : stmt SourceRange :=
   .AugAssign sr (storeName name) (.Add sr) value
 
@@ -387,6 +397,41 @@ private def isValueAugAssign : StmtExprMd → Bool
     message ==
       "module variable '__strata_python_global_bound_value' cannot be lowered to a Laurel static field because its name collides with a top-level definition"
   | _ => false
+
+-- Every spelling of a module-scope type alias is kept out of static fields, so
+-- the alias is never exposed to downstream checks as an unconstrained `Any`.
+#guard
+  let aliasForms : List (stmt SourceRange) := [
+    assign "T" (loadName "int"),
+    assignChained "T" "T2" (loadName "int"),
+    annAssign "T" (loadName "type") (some (loadName "int")),
+    annAssign "T" (loadName "TypeAlias") (some (loadName "int")),
+    annAssign "T" (loadName "TypeAlias") none
+  ]
+  aliasForms.all fun aliasStmt =>
+    match pythonToLaurel {} #[aliasStmt] with
+    | .ok (program, ctx) =>
+      !(program.staticFields.map (·.name.text)).contains "T" &&
+      ctx.unsupportedModuleGlobals.contains "T"
+    | .error _ => false
+
+-- Chained targets share the right-hand side, so both aliases are poisoned.
+#guard
+  match pythonToLaurel {} #[assignChained "T1" "T2" (loadName "int")] with
+  | .ok (program, ctx) =>
+    let fields := program.staticFields.map (·.name.text)
+    !fields.contains "T1" && !fields.contains "T2" &&
+    ctx.unsupportedModuleGlobals.contains "T1" &&
+    ctx.unsupportedModuleGlobals.contains "T2"
+  | .error _ => false
+
+-- An ordinary annotated global is still lowered to a static field.
+#guard
+  match pythonToLaurel {} #[annAssign "value" (loadName "int") (some (intLiteral 1))] with
+  | .ok (program, ctx) =>
+    (program.staticFields.map (·.name.text)).contains "value" &&
+    !ctx.unsupportedModuleGlobals.contains "value"
+  | .error _ => false
 
 end StrataPython.ToLaurel.Tests
 

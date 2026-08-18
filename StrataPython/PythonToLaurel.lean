@@ -3488,13 +3488,31 @@ private partial def collectModuleGlobals (ctx : TranslationContext)
   let isExcluded (name : String) : Bool :=
     name == "__name__" ||
     moduleGlobalNameCollides ctx name
+  let isTypeNameExpr (value : expr SourceRange) : Bool :=
+    match value with
+    | .Name _ rhsName _ => isKnownType ctx rhsName.val
+    | _ => false
+  -- A type alias binds a type rather than a value, so no target of the
+  -- assignment can be lowered to a static field. Chained targets share one
+  -- right-hand side (`T1 = T2 = int`), so every target aliases the same type.
   let isTypeAliasAssign (targets : Array (expr SourceRange))
       (value : expr SourceRange) : Bool :=
-    if _h : targets.size = 1 then
-      match targets[0], value with
-      | .Name _ _ _, .Name _ rhsName _ => isKnownType ctx rhsName.val
-      | _, _ => false
-    else false
+    !targets.isEmpty
+      && targets.all (fun target => match target with
+        | .Name _ _ _ => true
+        | _ => false)
+      && isTypeNameExpr value
+  -- Annotated aliases (`T: TypeAlias = int`, `T: type = int`) declare a type
+  -- through the annotation, and `T: Alias = int` through the right-hand side.
+  let isAnnotatedTypeAlias (annotation : expr SourceRange)
+      (value : Option (expr SourceRange)) : Bool :=
+    let annotationNamesType := match annotation with
+      | .Name _ annName _ => annName.val == "type" || annName.val == "TypeAlias"
+      | _ => false
+    let valueNamesType := match value with
+      | some v => isTypeNameExpr v
+      | none => false
+    annotationNamesType || valueNamesType
   -- Any composite or type-alias assignment keeps that name out of static fields.
   let add (acc : Array (String × SourceRange) × Std.HashSet String × Std.HashSet String)
       (name : String) (sr : SourceRange) :=
@@ -3528,11 +3546,12 @@ private partial def collectModuleGlobals (ctx : TranslationContext)
           || (inferClassTypeFromLaurelExpr ctx value).isSome then
         poison acc activeNames
       else activeNames.foldl (init := acc) fun acc (name, sr) => add acc name sr
-    | .AnnAssign _ target _ value _ =>
+    | .AnnAssign _ target annotation value _ =>
       match target with
       | .Name sr n _ =>
         if !isActiveTarget scopeGlobals n.val then acc
-        else if (value.val.bind (inferClassTypeFromLaurelExpr ctx ·)).isSome then
+        else if (value.val.bind (inferClassTypeFromLaurelExpr ctx ·)).isSome
+            || (scopeGlobals.isNone && isAnnotatedTypeAlias annotation value.val) then
           poison acc [(n.val, sr)]
         else add acc n.val sr
       | _ => acc
