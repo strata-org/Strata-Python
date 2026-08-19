@@ -1553,13 +1553,12 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
         translateContractBody role body fun f => modify (store f)
     pushBodies .preState nativeBundle.requires fun f s =>
       { s with assertions := s.assertions.push { message := #[], formula := f } }
-    -- Both post-state forms bind `result` and admit generic `OLD(expr)` reads.
+    -- Both post-state forms bind `result` and admit generic `OLD(expr)` reads,
+    -- so they share one wrapper that binds `result` in scope.
     withReader (fun ctx => { ctx with
-        localTypes := ctx.localTypes.insert Native.resultBinder returnType }) <|
+        localTypes := ctx.localTypes.insert Native.resultBinder returnType }) <| do
       pushBodies .postState nativeBundle.ensures fun f s =>
         { s with postconditions := s.postconditions.push f }
-    withReader (fun ctx => { ctx with
-        localTypes := ctx.localTypes.insert Native.resultBinder returnType }) <|
       pushBodies .postState nativeBundle.admitted fun f s =>
         { s with admittedPostconditions := s.admittedPostconditions.push f }
     pushBodies .frame nativeBundle.modifies fun f s =>

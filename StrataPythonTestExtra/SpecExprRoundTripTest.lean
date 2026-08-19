@@ -23,8 +23,8 @@ def rtSpecExpr (e : SpecExpr) : SpecExpr := e.toDDM.fromDDM
 def allPCmpOps : List PCmpOp :=
   [.lt, .le, .gt, .ge, .eq, .ne, .isIn, .notIn]
 
--- `PCmpOp.ofTag?` inverts `PCmpOp.tag` for every variant.
-#guard allPCmpOps.all (fun op => PCmpOp.ofTag? op.tag == some op)
+-- `PCmpOp.ofTag?` inverts `PCmpOp.tag` for every variant: see the kernel-checked
+-- `PCmpOp.ofTag_tag` in `StrataPython.Specs.DeclsProps`.
 
 -- An unknown tag string is not parsed back into a `PCmpOp`.
 #guard PCmpOp.ofTag? "definitely-not-a-tag" == none

@@ -527,7 +527,7 @@ inductive PCmpOp where
 deriving Inhabited, Repr, DecidableEq, BEq
 
 /-- Stable serialization tag for `PCmpOp` (backend-agnostic; not a prelude name). -/
-def PCmpOp.tag : PCmpOp → String
+@[expose] def PCmpOp.tag : PCmpOp → String
   | .lt => "lt"
   | .le => "le"
   | .gt => "gt"
@@ -538,7 +538,7 @@ def PCmpOp.tag : PCmpOp → String
   | .notIn => "notIn"
 
 /-- Parse a `PCmpOp.tag` back into a `PCmpOp`. -/
-def PCmpOp.ofTag? : String → Option PCmpOp
+@[expose] def PCmpOp.ofTag? : String → Option PCmpOp
   | "lt" => some .lt
   | "le" => some .le
   | "gt" => some .gt

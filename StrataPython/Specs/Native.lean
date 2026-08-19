@@ -125,6 +125,10 @@ public def methodScheme {m : Type → Type} [Monad m] [PySpecMClass m]
       let some name ← uniqueName? "@ghost" form (bundle.ghosts.map (·.name))
         | return some bundle
       return some { bundle with ghosts := bundle.ghosts.push { name, type := type?, init := init?, loc := form.loc } }
+    | "snapshot" =>
+      specError form.loc
+        "@snapshot is no longer supported; use OLD(<expr>) inside an @ensures/@admit lambda instead"
+      return some bundle
     | _ =>
       return none
 
