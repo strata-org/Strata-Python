@@ -1,6 +1,6 @@
 test_nested_dict.py(3, 11): ✅ pass - precondition
 test_nested_dict.py(3, 11): ✅ pass - precondition
 test_nested_dict.py(3, 11): ✅ pass - precondition
-test_nested_dict.py(3, 4): ✅ pass - nested dict
+test_nested_dict.py(3, 4): ✅ pass - assert(…)
 DETAIL: 4 passed, 0 failed, 0 inconclusive
 RESULT: Analysis success

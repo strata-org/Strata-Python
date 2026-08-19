@@ -1,5 +1,4 @@
 test_pin_any.py(4, 15): ❓ unknown - precondition
-test_pin_any.py(4, 8): ❓ unknown - key could be in results
-test_pin_any.py(2, 36): ✔️ always true if reached - (test_in_on_any ensures) Return type constraint
-DETAIL: 1 passed, 0 failed, 2 inconclusive
+test_pin_any.py(4, 8): ❓ unknown - assert(…)
+DETAIL: 0 passed, 0 failed, 2 inconclusive
 RESULT: Inconclusive

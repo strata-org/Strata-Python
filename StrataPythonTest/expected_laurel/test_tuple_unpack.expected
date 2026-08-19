@@ -1,5 +1,6 @@
 test_tuple_unpack.py(3, 4): ✅ pass - precondition
-test_tuple_unpack.py(4, 4): ✅ pass - unpack first
-test_tuple_unpack.py(5, 4): ✅ pass - unpack second
-DETAIL: 3 passed, 0 failed, 0 inconclusive
+test_tuple_unpack.py(3, 7): ✅ pass - precondition
+test_tuple_unpack.py(4, 4): ✅ pass - assert(…)
+test_tuple_unpack.py(5, 4): ✅ pass - assert(…)
+DETAIL: 4 passed, 0 failed, 0 inconclusive
 RESULT: Analysis success

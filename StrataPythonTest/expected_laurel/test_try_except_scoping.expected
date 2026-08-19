@@ -1,5 +1,5 @@
-test_try_except_scoping.py(15, 4): ✅ pass - inner try body should have executed
-test_try_except_scoping.py(24, 4): ✅ pass - x should be visible after try/except
-test_try_except_scoping.py(35, 4): ✅ pass - x from try body
-DETAIL: 3 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+test_try_except_scoping.py(35, 4): ❓ unknown (pass on 2 paths, unknown on 1 path) - assert(…)
+test_try_except_scoping.py(24, 4): ❓ unknown (pass on 1 path, unknown on 1 path) - assert(…)
+test_try_except_scoping.py(15, 4): ❓ unknown (pass on 9 paths, unknown on 1 path) - assert(…)
+DETAIL: 0 passed, 0 failed, 3 inconclusive
+RESULT: Inconclusive

@@ -1,0 +1,5 @@
+test_unary_plus_float.py(5, 4): ✅ pass - assert(…)
+test_unary_plus_float.py(6, 11): ✅ pass - Check PGt exception
+test_unary_plus_float.py(6, 4): ✅ pass - unary plus on float
+DETAIL: 3 passed, 0 failed, 0 inconclusive
+RESULT: Analysis success

@@ -1,16 +1,15 @@
-test_unary_plus.py(2, 4): ✅ pass - assert(…)
-test_unary_plus.py(3, 13): ✅ pass - Check PPos exception
-test_unary_plus.py(3, 4): ✅ pass - assert(…)
-test_unary_plus.py(4, 4): ✅ pass - unary plus on int
+test_unary_plus.py(3, 4): ✅ pass - Check PPos exception
+test_unary_plus.py(4, 4): ✅ pass - assert(…)
+test_unary_plus.py(5, 13): ✅ pass - Check PNeg exception
 test_unary_plus.py(5, 11): ✅ pass - Check PPos exception
 test_unary_plus.py(5, 20): ✅ pass - Check PNeg exception
-test_unary_plus.py(5, 4): ✅ pass - unary plus preserves sign
+test_unary_plus.py(5, 4): ✅ pass - assert(…)
 test_unary_plus.py(6, 11): ✅ pass - Check PPos exception
-test_unary_plus.py(6, 4): ✅ pass - unary plus on zero
+test_unary_plus.py(6, 4): ✅ pass - assert(…)
+test_unary_plus.py(7, 13): ✅ pass - Check PPos exception
 test_unary_plus.py(7, 11): ✅ pass - Check PPos exception
-test_unary_plus.py(7, 4): ✅ pass - double unary plus
-test_unary_plus.py(9, 4): ✅ pass - assert(…)
+test_unary_plus.py(7, 4): ✅ pass - assert(…)
 test_unary_plus.py(10, 11): ✅ pass - Check PPos exception
-test_unary_plus.py(10, 4): ✅ pass - unary plus on bool yields 1
-DETAIL: 14 passed, 0 failed, 0 inconclusive
+test_unary_plus.py(10, 4): ✅ pass - assert(…)
+DETAIL: 13 passed, 0 failed, 0 inconclusive
 RESULT: Analysis success

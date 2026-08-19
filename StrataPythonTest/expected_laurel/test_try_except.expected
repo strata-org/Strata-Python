@@ -1,4 +1,4 @@
-test_try_except.py(7, 4): ✅ pass - body should have executed
-test_try_except.py(17, 4): ❓ unknown - handler should have executed
+test_try_except.py(7, 4): ❓ unknown (pass on 1 path, unknown on 1 path) - assert(…)
+test_try_except.py(17, 4): ✅ pass - assert(…)
 DETAIL: 1 passed, 0 failed, 1 inconclusive
 RESULT: Inconclusive

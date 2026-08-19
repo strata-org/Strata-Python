@@ -1,0 +1,7 @@
+test_bitand.py(2, 4): ✅ pass - assert(…)
+test_bitand.py(3, 4): ✅ pass - assert(…)
+test_bitand.py(4, 13): ✅ pass - Check PBitAnd exception
+test_bitand.py(4, 4): ✅ pass - assert(…)
+test_bitand.py(5, 4): ✅ pass - bitwise and
+DETAIL: 5 passed, 0 failed, 0 inconclusive
+RESULT: Analysis success

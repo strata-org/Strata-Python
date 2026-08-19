@@ -1,0 +1,2 @@
+(set-info :file "tests/test_missing_models.py")
+(set-info :error-message "Resolution failed: 'Client' is not defined")

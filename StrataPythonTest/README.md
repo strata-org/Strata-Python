@@ -113,6 +113,14 @@ lake exe strata pyAnalyzeLaurel [flags] <program.python.st.ion>
   and procedures, and collects the overload dispatch table and method
   registry.
 
+`--v2`
+: Use the V2 front-end (Resolution → Translation → Elaboration → Core)
+  instead of the default V1 front-end. `pyAnalyzeV2` is an alias for
+  `pyAnalyzeLaurel --v2`. V2 is under construction: it rejects
+  `--spec-dir`, `--pyspec` and `--dispatch`, and still differs from V1
+  on most of the golden corpus — see
+  [`expected_laurel/README.md`](./expected_laurel/README.md).
+
 `--dispatch <ion_file>`
 : Extract only the overload dispatch table from a PySpec Ion file (no
   Laurel translation). Repeatable. Use for files that define overloaded
@@ -157,6 +165,33 @@ Each line shows the source location, outcome, and assertion name:
 test_arithmetic.py(7, 4): ✅ pass - assert(102)
 test_arithmetic.py(14, 4): ❌ fail - assert(200)
 ```
+
+## Golden Test Suite
+
+`run_py_analyze.sh` is the golden runner for `tests/test_*.py`. It compiles each
+test to Ion, runs the analyzer, normalizes unstable assertion-label IDs
+(`normalize_labels.py`), and diffs against the golden files.
+
+CI runs it for **both** front-ends, back to back, from
+`../StrataPythonTestExtra/AnalyzeGoldenTest.lean`:
+
+```
+./run_py_analyze.sh              # V1, goldens in expected_laurel_v1/
+./run_py_analyze.sh --v2         # V2, goldens in expected_laurel/
+```
+
+Note the paths: `expected_laurel/` is the **V2** set, because V2 was introduced
+by rewriting those files in place so the change would be reviewable as a diff
+per test. [`expected_laurel/README.md`](./expected_laurel/README.md) explains
+that and inventories what currently differs between the two front-ends.
+
+A test is part of a front-end's suite iff that front-end's directory has a
+`<name>.expected` for it. Regenerate goldens with `--update` (add `--v2` for the
+V2 set), and narrow a run with `--filter <substring>`. Each `--v2` run ends with
+a `V1/V2 divergence: N of M golden(s) differ` line.
+
+The two runs share scratch files (`tests/*.python.st.ion`, and `user_errors.txt`
+in the working directory), so they must not be run concurrently.
 
 ## Diagnostic Commands
 

@@ -1,6 +1,8 @@
-test_bool_complex.py(2, 4): ✅ pass - assert(…)
-test_bool_complex.py(3, 4): ✅ pass - assert(…)
+test_bool_complex.py(4, 12): ✅ pass - Check PGt exception
+test_bool_complex.py(4, 22): ✅ pass - Check PGt exception
+test_bool_complex.py(4, 12): ✅ pass - Check PAnd exception
+test_bool_complex.py(4, 33): ✅ pass - Check PGt exception
 test_bool_complex.py(4, 11): ✅ pass - Check POr exception
-test_bool_complex.py(4, 4): ✅ pass - complex bool
-DETAIL: 4 passed, 0 failed, 0 inconclusive
+test_bool_complex.py(4, 4): ✅ pass - assert(…)
+DETAIL: 6 passed, 0 failed, 0 inconclusive
 RESULT: Analysis success

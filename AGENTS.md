@@ -19,6 +19,25 @@ There are two Python-to-IR pipelines:
    overload support. Do not extend this path; if you need new behavior here,
    consider porting the consumer to the Laurel path instead.
 
+Within the Laurel path there are two **front-ends**, selected by the `--v2`
+flag on `pyAnalyzeLaurel` (`pyAnalyzeV2` is an alias for `pyAnalyzeLaurel
+--v2`):
+
+- **V1** (default) — `pythonAndSpecToLaurel`, then `laurelToCore`. The shipping
+  front-end; it is what supports `--spec-dir` / `--dispatch` / `--pyspec`.
+- **V2** — `pyAnalyzeV2ToCore` (`FineGrainLaurel/Elaborate.lean`): Resolution →
+  Translation → Elaboration → Core. Under construction. It rejects the PySpec
+  flags outright, and still differs from V1 on most of the golden corpus.
+
+Both front-ends run the whole `StrataPythonTest/tests/` corpus in CI, via
+`StrataPythonTestExtra/AnalyzeGoldenTest.lean`, each against its own golden set.
+Watch the directory names — they are not what you would guess:
+`StrataPythonTest/expected_laurel/` is the **V2** set and
+`StrataPythonTest/expected_laurel_v1/` the **V1** set. Regenerate with
+`./run_py_analyze.sh [--v2] --update` from `StrataPythonTest/`, and read
+[`StrataPythonTest/expected_laurel/README.md`](./StrataPythonTest/expected_laurel/README.md)
+for why the paths are that way round and what currently differs between them.
+
 ## Convention: `open Strata` pattern
 
 Since StrataPython was extracted from the `Strata` package, many files use

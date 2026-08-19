@@ -1,8 +1,3 @@
-test_cmp_le.py(2, 11): ✅ pass - Check PLe exception
-test_cmp_le.py(2, 4): ✅ pass - le equal
-test_cmp_le.py(3, 11): ✅ pass - Check PLe exception
-test_cmp_le.py(3, 4): ✅ pass - le less
-test_cmp_le.py(4, 11): ✅ pass - Check PNot exception
-test_cmp_le.py(4, 4): ✅ pass - not le
-DETAIL: 6 passed, 0 failed, 0 inconclusive
+test_cmp_le.py(6, 0): ✅ pass - precondition
+DETAIL: 1 passed, 0 failed, 0 inconclusive
 RESULT: Analysis success

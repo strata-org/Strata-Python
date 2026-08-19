@@ -1,5 +1,5 @@
 test_list_assign.py(3, 4): ✅ pass - Check Any_sets! exception
 test_list_assign.py(4, 11): ✅ pass - precondition
-test_list_assign.py(4, 4): ✅ pass - list element assignment
+test_list_assign.py(4, 4): ✅ pass - assert(…)
 DETAIL: 3 passed, 0 failed, 0 inconclusive
 RESULT: Analysis success

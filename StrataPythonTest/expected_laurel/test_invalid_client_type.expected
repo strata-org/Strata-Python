@@ -1,2 +1,4 @@
-DETAIL: 0 passed, 0 failed, 0 inconclusive
+test_invalid_client_type.py(13, 10): ✅ pass - Check PAdd exception
+test_invalid_client_type.py(15, 10): ✅ pass - Check PAdd exception
+DETAIL: 2 passed, 0 failed, 0 inconclusive
 RESULT: Analysis success
