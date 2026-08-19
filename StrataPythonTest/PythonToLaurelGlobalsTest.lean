@@ -45,6 +45,9 @@ private def annAssign (name : String) (annotation : expr SourceRange)
 private def augAssign (name : String) (value : expr SourceRange) : stmt SourceRange :=
   .AugAssign sr (storeName name) (.Add sr) value
 
+private def subscriptType (base : String) (arg : expr SourceRange) : expr SourceRange :=
+  .Subscript sr (loadName base) arg (.Load sr)
+
 private def emptyArguments : arguments SourceRange :=
   .mk_arguments sr
     { val := #[], ann := sr }
@@ -244,12 +247,25 @@ private def isValueAugAssign : StmtExprMd → Bool
     { val := #[innerTuple, intLiteral 2], ann := sr } (.Load sr)
   let unstableTuple := expr.Tuple sr
     { val := #[intLiteral 1, call], ann := sr } (.Load sr)
+  let negOne := expr.UnaryOp sr (.USub sr) (intLiteral 1)
+  let posOne := expr.UnaryOp sr (.UAdd sr) (intLiteral 1)
+  let invertOne := expr.UnaryOp sr (.Invert sr) (intLiteral 1)
+  let nestedNeg := expr.UnaryOp sr (.USub sr) negOne
+  let signedTuple := expr.Tuple sr
+    { val := #[negOne, posOne], ann := sr } (.Load sr)
+  let unaryCall := expr.UnaryOp sr (.USub sr) call
   let cases : List (expr SourceRange × Bool) := [
     (intLiteral 1, true),
     (stableTuple, true),
     (nestedTuple, true),
     (unstableTuple, false),
-    (loadName "captured", false)
+    (loadName "captured", false),
+    (negOne, true),
+    (posOne, true),
+    (invertOne, true),
+    (nestedNeg, true),
+    (signedTuple, true),
+    (unaryCall, false)
   ]
   cases.all fun (value, expected) =>
     isCallTimeStableDefault value == expected
@@ -406,7 +422,9 @@ private def isValueAugAssign : StmtExprMd → Bool
     assignChained "T" "T2" (loadName "int"),
     annAssign "T" (loadName "type") (some (loadName "int")),
     annAssign "T" (loadName "TypeAlias") (some (loadName "int")),
-    annAssign "T" (loadName "TypeAlias") none
+    annAssign "T" (loadName "TypeAlias") none,
+    assign "T" (subscriptType "list" (loadName "int")),
+    assign "T" (subscriptType "dict" (loadName "int"))
   ]
   aliasForms.all fun aliasStmt =>
     match pythonToLaurel {} #[aliasStmt] with

@@ -619,6 +619,11 @@ partial def containsDefinitionTimeEffect (e : expr SourceRange) : Bool :=
 partial def isCallTimeStableDefault (e : expr SourceRange) : Bool :=
   match e with
   | .Constant .. => true
+  -- `-1`/`+1`/`~1` parse as `UnaryOp` over a constant, not `.Constant`; these
+  -- remain immutable, so treat a sign/invert over a stable operand as stable.
+  | .UnaryOp _ (.USub _) operand
+  | .UnaryOp _ (.UAdd _) operand
+  | .UnaryOp _ (.Invert _) operand => isCallTimeStableDefault operand
   | .Tuple _ values _ => values.val.all isCallTimeStableDefault
   | _ => false
 
@@ -2576,7 +2581,15 @@ def unpackPyArguments (ctx : TranslationContext) (args: arguments SourceRange)
 def pyFuncDefToPythonFunctionDecl (ctx : TranslationContext) (f : stmt SourceRange) : Except TranslationError PythonFunctionDecl := do
   match f with
   | .FunctionDef _ name args _body decoratorList returns _type_comment _ =>
-    if !decoratorList.val.isEmpty then
+    -- Common method decorators are handled by name resolution and the spec
+    -- pipeline, so only unknown decorators are a translation limitation here.
+    let supportedDecorator (d : expr SourceRange) : Bool :=
+      match d with
+      | .Name _ dName _ =>
+        dName.val ∈ ["staticmethod", "classmethod", "property",
+                     "overload", "abstractmethod"]
+      | _ => false
+    if decoratorList.val.toList.any (!supportedDecorator ·) then
       throw (.unsupportedConstruct
         "function decorators are not supported"
         (toString (repr decoratorList)))
@@ -3491,6 +3504,13 @@ private partial def collectModuleGlobals (ctx : TranslationContext)
   let isTypeNameExpr (value : expr SourceRange) : Bool :=
     match value with
     | .Name _ rhsName _ => isKnownType ctx rhsName.val
+    -- Subscripted constructors (`list[int]`, `Optional[str]`) also name a type,
+    -- so an unannotated alias to one must stay out of static fields.
+    | .Subscript _ (.Name _ baseName _) _ _ =>
+      isKnownType ctx baseName.val ||
+        baseName.val ∈ ["list", "dict", "tuple", "set", "frozenset",
+                        "Optional", "Union", "Callable",
+                        "List", "Dict", "Tuple", "Set", "FrozenSet"]
     | _ => false
   -- A type alias binds a type rather than a value, so no target of the
   -- assignment can be lowered to a static field. Chained targets share one
