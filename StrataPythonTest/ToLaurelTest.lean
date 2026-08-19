@@ -94,6 +94,7 @@ private def fmtTypeDef : TypeDefinition → String
   | .Constrained ty => s!"constrained {ty.name}"
   | .Datatype ty => s!"datatype {ty.name}"
   | .Alias ty => s!"alias {ty.name}"
+  | .Opaque ty => s!"opaque {ty.name}"
 
 /-! ### Test Runners -/
 

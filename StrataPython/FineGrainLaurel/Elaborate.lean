@@ -183,6 +183,7 @@ def buildElabEnvFromProgram (program : Laurel.Program) (runtime : Laurel.Program
         names := names.insert ctor.name.text (.function { name := ctor.name.text, params := ctorParams, returnType := retTy })
     | .Constrained _ => pure ()
     | .Alias _ => pure ()
+    | .Opaque _ => pure ()
   { names, classFields }
 
 def mkLaurel (md : Option FileRange) (e : StmtExpr) : StmtExprMd :=

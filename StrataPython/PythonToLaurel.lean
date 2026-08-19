@@ -3176,6 +3176,8 @@ def PreludeInfo.ofLaurelProgram (prog : Laurel.Program) : PreludeInfo where
       | .Constrained ct => s.insert ct.name.text
       | .Datatype dt => s.insert dt.name.text
       | .Alias ta => s.insert ta.name.text
+      -- Opaque types have no constructors but are still prelude type names.
+      | .Opaque ot => s.insert ot.name.text
   compositeTypes :=
     prog.types.foldl (init := {}) fun s td =>
       match td with

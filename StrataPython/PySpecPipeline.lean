@@ -206,6 +206,7 @@ private def buildPySpecLaurelM (pyspecEntries : Array (ModuleName × String))
       | .Constrained ct => ct.name
       | .Datatype dt => dt.name
       | .Alias ta => ta.name
+      | .Opaque ot => ot.name
     match seenTypes.get? ident.text with
     | some prevFile =>
       emitMessageAndAbort .typeNameCollision s!"'{ident.text}' already defined in {prevFile}"
