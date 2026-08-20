@@ -1,0 +1,47 @@
+DETAIL: Unsupported construct: Statement type not yet supported
+AST: StrataPython.stmt.TryStar
+  { start := { byteIdx := 218 }, stop := { byteIdx := 283 } }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+    val := #[StrataPython.stmt.Assign
+               { start := { byteIdx := 231 }, stop := { byteIdx := 241 } }
+               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+                 val := #[StrataPython.expr.Name
+                            { start := { byteIdx := 231 }, stop := { byteIdx := 237 } }
+                            { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "result" }
+                            (StrataPython.expr_context.Store { start := { byteIdx := 0 }, stop := { byteIdx := 0 } })] }
+               (StrataPython.expr.Constant
+                 { start := { byteIdx := 240 }, stop := { byteIdx := 241 } }
+                 (StrataPython.constant.ConPos
+                   { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }
+                   { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := 1 })
+                 { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none })
+               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }] }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+    val := #[StrataPython.excepthandler.ExceptHandler
+               { start := { byteIdx := 246 }, stop := { byteIdx := 283 } }
+               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+                 val := some (StrataPython.expr.Name
+                          { start := { byteIdx := 254 }, stop := { byteIdx := 263 } }
+                          { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "Exception" }
+                          (StrataPython.expr_context.Load { start := { byteIdx := 0 }, stop := { byteIdx := 0 } })) }
+               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }
+               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+                 val := #[StrataPython.stmt.Assign
+                            { start := { byteIdx := 273 }, stop := { byteIdx := 283 } }
+                            { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+                              val := #[StrataPython.expr.Name
+                                         { start := { byteIdx := 273 }, stop := { byteIdx := 279 } }
+                                         { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+                                           val := "result" }
+                                         (StrataPython.expr_context.Store
+                                           { start := { byteIdx := 0 }, stop := { byteIdx := 0 } })] }
+                            (StrataPython.expr.Constant
+                              { start := { byteIdx := 282 }, stop := { byteIdx := 283 } }
+                              (StrataPython.constant.ConPos
+                                { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }
+                                { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := 2 })
+                              { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none })
+                            { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }] }] }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+RESULT: Known limitation

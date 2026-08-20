@@ -1,5 +1,2 @@
-test_missing_required_param.py(38, 10): ✅ pass - Check PAdd exception
-test_missing_required_param.py(23, 10): ✅ pass - Check PAdd exception
-test_missing_required_param.py(25, 10): ✅ pass - Check PAdd exception
-DETAIL: 3 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+DETAIL: unsupported construct: multiple `except` handlers are not yet modeled in --v2; merge them into a single catch-all handler
+RESULT: Known limitation

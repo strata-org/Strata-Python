@@ -1,4 +1,2 @@
-(set-info :file "tests/test_missing_models.py")
-(set-info :error-message "Resolution failed: 'Client' is not defined")
-DETAIL: Resolution failed: 'Client' is not defined
-RESULT: User error
+DETAIL: unsupported construct: multiple `except` handlers are not yet modeled in --v2; merge them into a single catch-all handler
+RESULT: Known limitation

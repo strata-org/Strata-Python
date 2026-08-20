@@ -1,4 +1,2 @@
-test_multiple_except.py(31, 4): ✅ pass - assert(…)
-test_multiple_except.py(8, 4): ✅ pass - assert(…)
-DETAIL: 2 passed, 0 failed, 0 inconclusive
-RESULT: Analysis success
+DETAIL: unsupported construct: `except … as <name>` is not yet modeled in --v2; drop the binding
+RESULT: Known limitation

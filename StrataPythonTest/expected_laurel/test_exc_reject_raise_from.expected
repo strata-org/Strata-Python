@@ -1,0 +1,2 @@
+DETAIL: unsupported construct: `raise … from …` (exception chaining) is not supported
+RESULT: Known limitation

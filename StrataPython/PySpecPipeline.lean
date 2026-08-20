@@ -730,7 +730,19 @@ public def pyAnalyzeV2ToCore (pythonIonPath : String) (sourcePath : Option Strin
     | .ok (prog, _) => (prog, [])
     | .error e => (default, [Message.fromString s!"demanded-import translation failed: {repr e}"])
   let userLaurel ← match Translation.runTranslation resolveResult.program metadataPath with
-    | .error e => return .error s!"translation: {repr e}"
+    | .error e =>
+      -- A translation rejection is a DIAGNOSTIC, not an internal failure: a
+      -- deliberately unsupported construct is a known limitation (reported as
+      -- `RESULT: Known limitation`), a user error keeps its user-error kind, and
+      -- only a translator bug remains an internal error. Routing these through
+      -- `.error` (as before) relabeled every rejection `RESULT: Internal error`.
+      match e with
+      | .unsupportedConstruct msg =>
+        return .ok (none, [Message.fromString s!"unsupported construct: {msg}" .notYetImplemented])
+      | .userError range msg =>
+        return .ok (none, [{ fileRange := { file := .file metadataPath, range }, message := msg, kind := .userError }])
+      | .internalError msg =>
+        return .error s!"translation: internal error: {msg}"
     | .ok (prog, _) => pure prog
   -- Step 3a: map each demanded imported class to a Laurel `Composite` type, so a
   -- `.UserDefined C` reference resolves instead of erroring "'C' is not defined".

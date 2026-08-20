@@ -1,0 +1,2 @@
+DETAIL: unsupported construct: `except*` (exception groups) is not supported
+RESULT: Known limitation

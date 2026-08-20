@@ -1,0 +1,4 @@
+test_exc_reject_bare_raise.py(6, 4): ✅ pass - assert(…)
+test_exc_reject_bare_raise.py(5, 17): ✅ pass - (reraise ensures) Return type constraint
+DETAIL: 2 passed, 0 failed, 0 inconclusive
+RESULT: Analysis success

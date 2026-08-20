@@ -1,0 +1,2 @@
+DETAIL: unsupported construct: type-selective `except ValueError:` is not yet modeled in --v2; only a catch-all handler (`except:` or `except Exception:`) is supported
+RESULT: Known limitation

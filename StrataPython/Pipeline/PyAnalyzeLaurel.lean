@@ -88,6 +88,11 @@ private def runPipeline (config : PyAnalyzeConfig)
           for msg in msgs do
             addMessage msg
             if msg.kind.impact.isFatal then throw ()
+          -- A known-limitation diagnostic (e.g. a deliberately rejected construct,
+          -- reported as `RESULT: Known limitation` by the CLI) explains the empty
+          -- result just as a fatal one does: abort without synthesizing an
+          -- internal error on top of it.
+          if msgs.any (·.kind.impact == .knownLimitation) then throw ()
           emitMessageAndAbort (file := uri) .laurelToCoreError
             "V2 pipeline produced no Core and no fatal diagnostic explains why"
         | .ok (.error msg) =>

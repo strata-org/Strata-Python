@@ -1,0 +1,2 @@
+DETAIL: unsupported construct: bare `raise` (re-raise) is not supported; raise a new exception instance instead
+RESULT: Known limitation

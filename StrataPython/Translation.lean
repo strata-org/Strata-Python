@@ -297,6 +297,37 @@ private def parseFloatString (s : String) : Option Decimal := do
     some { mantissa, exponent := sciExp }
   | _ => none
 
+/-- The `except` shapes the current v2 encoding translates faithfully: exactly one
+    catch-all handler. Today's translation enters the handler for ANY in-flight
+    exception — there is no type dispatch — so a type-selective handler
+    (`except ValueError:`), several handlers, or a computed exception spec would be
+    silently mistranslated (a `KeyError` running a `ValueError` handler): a
+    potential false pass. Reject those shapes loudly until native Laurel exception
+    dispatch lands. `except Exception:` / `except BaseException:` are accepted as
+    catch-alls — indistinguishable from a bare `except:` for everything the
+    runtime prelude raises. The `as <name>` binding is rejected too: the caught
+    value is not reconstructible under the current encoding, so binding it would
+    hand the handler a fabricated value. -/
+private def validateExceptHandlers
+    (handlers : List (StrataPython.excepthandler ResolvedAnn)) : TransM Unit := do
+  match handlers with
+  | [.ExceptHandler _ ty name _] => do
+    if name.val.isSome then
+      throw (.unsupportedConstruct
+        "`except … as <name>` is not yet modeled in --v2; drop the binding")
+    match ty.val with
+    | none => pure ()
+    | some (.Name _ n _) =>
+      if n.val == "Exception" || n.val == "BaseException" then pure ()
+      else throw (.unsupportedConstruct
+        s!"type-selective `except {n.val}:` is not yet modeled in --v2; only a catch-all handler (`except:` or `except Exception:`) is supported")
+    | some _ =>
+      throw (.unsupportedConstruct
+        "this `except` clause's exception specification is not yet modeled in --v2; only a literal catch-all (`except:` or `except Exception:`) is supported")
+  | _ =>
+    throw (.unsupportedConstruct
+      "multiple `except` handlers are not yet modeled in --v2; merge them into a single catch-all handler")
+
 mutual
 
 partial def translateExpr (e : StrataPython.expr ResolvedAnn) : TransM StmtExprMd := do
@@ -575,11 +606,14 @@ partial def translateStmt (s : StrataPython.stmt ResolvedAnn) : TransM Unit := d
   | .Try _ body handlers orelse finalbody => do
       unless orelse.val.isEmpty && finalbody.val.isEmpty do
         throw (.unsupportedConstruct "try/else/finally not yet modeled")
+      validateExceptHandlers handlers.val.toList
       translateTryExcept sr body handlers
-  | .TryStar _ body handlers orelse finalbody => do
-      unless orelse.val.isEmpty && finalbody.val.isEmpty do
-        throw (.unsupportedConstruct "try/else/finally not yet modeled")
-      translateTryExcept sr body handlers
+  -- `except*` matches SUBGROUPS of an ExceptionGroup (each handler can fire, the
+  -- rest re-raises as a residual group) — semantics with no counterpart in the
+  -- current encoding or in native Laurel catch clauses. Permanently out of the
+  -- supported subset, alongside the other dynamic exception features.
+  | .TryStar _ _ _ _ _ =>
+      throw (.unsupportedConstruct "`except*` (exception groups) is not supported")
 
   | .With _ items body _ => do
       let (pre, post) ← items.val.toList.foldlM (fun acc item => do
@@ -606,19 +640,30 @@ partial def translateStmt (s : StrataPython.stmt ResolvedAnn) : TransM Unit := d
       let bodyStmts ← execWriter body.val.toList
       tell (pre ++ bodyStmts ++ post)
 
-  | .Raise _ exc _ => do
+  | .Raise _ exc cause => do
       -- `raise` assigns the exception to `maybe_except` AND terminates the current function body,
       -- exactly as `Return` does (see the `.Return` case: assign then `Exit "$body"`). Without the
       -- exit, statements following a `raise` outside a `try` keep executing at the Laurel level,
       -- diverging from Python. (Inside a `try`, `wrapBodyWithErrorChecks` masks it, but the exit is
       -- the correct general behavior on both paths.)
+      --
+      -- Two `raise` forms are permanently outside the supported subset (dynamic
+      -- exception features, rejected rather than approximated):
+      --  * `raise … from …` — exception chaining mutates `__cause__` at runtime;
+      --  * bare `raise` — re-raises the exception "currently being handled", an
+      --    implicit dynamic lookup (previously mistranslated as a `Hole`, silently
+      --    re-raising an ARBITRARY value: a potential false pass).
+      if cause.val.isSome then
+        throw (.unsupportedConstruct
+          "`raise … from …` (exception chaining) is not supported")
       match exc.val with
       | some excExpr => do
         let errorExpr ← translateExpr excExpr
         tell [← mkExpr sr (.Assign [{ val := .Local rtMaybeExcept, source := sourceRangeToMd (← get).filePath sr }] errorExpr),
               ← mkExpr sr (.Exit "$body")]
-      | none => tell [← mkExpr sr (.Assign [{ val := .Local rtMaybeExcept, source := sourceRangeToMd (← get).filePath sr }] (← mkExpr sr .Hole)),
-                      ← mkExpr sr (.Exit "$body")]
+      | none =>
+        throw (.unsupportedConstruct
+          "bare `raise` (re-raise) is not supported; raise a new exception instance instead")
 
   | .Import _ _ => pure ()
   | .ImportFrom _ _ _ _ => pure ()
