@@ -1,7 +1,7 @@
 test_deep_inline.py(6, 4): ✔️ always true if reached - Check PAdd exception
 test_deep_inline.py(10, 4): ✔️ always true if reached - Check PMul exception
 test_deep_inline.py(11, 4): ✔️ always true if reached - Check PAdd exception
-test_deep_inline.py(21, 4): ✔️ always true if reached - main_assert(…)
-test_deep_inline.py(21, 4): ✖️ always false if reached - main_assert(…)
+test_deep_inline.py(21, 4): ✔️ always true if reached - $__inline2_assert(…)
+test_deep_inline.py(21, 4): ✖️ always false if reached - $__inline2_assert(…)
 DETAIL: 4 passed, 1 failed, 0 inconclusive
 RESULT: Failures found

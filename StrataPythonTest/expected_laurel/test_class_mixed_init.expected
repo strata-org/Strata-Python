@@ -1,4 +1,4 @@
-test_class_mixed_init.py(19, 0): ❓ unknown - test_assert(…)
-test_class_mixed_init.py(19, 0): ❓ unknown - test_assert(…)
+test_class_mixed_init.py(19, 0): ❓ unknown - $__inline1_assert(…)
+test_class_mixed_init.py(19, 0): ❓ unknown - $__inline1_assert(…)
 DETAIL: 0 passed, 0 failed, 2 inconclusive
 RESULT: Inconclusive

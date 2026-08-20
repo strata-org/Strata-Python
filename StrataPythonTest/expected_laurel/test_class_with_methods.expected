@@ -1,6 +1,6 @@
 test_class_with_methods.py(20, 4): ✔️ always true if reached - Check PAdd exception
 test_class_with_methods.py(21, 4): ✔️ always true if reached - Check PAdd exception
-test_class_with_methods.py(32, 4): ✔️ always true if reached - main_assert(…)
-test_class_with_methods.py(32, 4): ✔️ always true if reached - main_assert(…)
+test_class_with_methods.py(32, 4): ✔️ always true if reached - $__inline3_assert(…)
+test_class_with_methods.py(32, 4): ✔️ always true if reached - $__inline3_assert(…)
 DETAIL: 4 passed, 0 failed, 0 inconclusive
 RESULT: Analysis success
