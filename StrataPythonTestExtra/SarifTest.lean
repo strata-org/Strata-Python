@@ -49,6 +49,7 @@ def skipTests : Std.HashSet String := Std.HashSet.ofList [
   "test_unsupported_config",
   "test_with_void_enter",
   "test_class_no_init_extra_args", -- No SARIF output: does not run SMT analysis
+  "test_exc_reject_except_star",   -- No SARIF output: V1 cannot translate TryStar (except*)
   "test_user_error_metadata",      -- No SARIF output: does not run SMT analysis
   "test_is_non_none",              -- No SARIF output: does not run SMT analysis
   "test_is_not_non_none",          -- No SARIF output: does not run SMT analysis
