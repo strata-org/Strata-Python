@@ -551,7 +551,7 @@ def specExprToLaurel (e : SpecExpr) (source : FileRange)
     -- an outer prebuilt value such as d[k].
     let freshBinderName (name : String) : String :=
       if ctx.quantifierDepth == 0 && !collection.mentionsVar name then name
-      else s!"$quant_{ctx.quantifierDepth}_{loc.start.byteIdx}_{name}"
+      else s!"{pythonGeneratedPrefix}quant_{ctx.quantifierDepth}_{loc.start.byteIdx}_{name}"
     let (param, guard, trigger, bodyEnv) ←
       match domain with
       | .overList varName =>
@@ -598,10 +598,10 @@ def specExprToLaurel (e : SpecExpr) (source : FileRange)
           quantifierDepth := c.quantifierDepth + 1 }
         pure (param, membership, membership.stmt, bodyEnv)
       | .overDictValues valVar =>
-        -- The quantified key is hidden from Python. Retain the readable `$v`
-        -- name at top level and make nested hidden keys unique as well.
-        let keyName := if ctx.quantifierDepth == 0 then "$" ++ valVar
-          else s!"$quant_{ctx.quantifierDepth}_{loc.start.byteIdx}_key"
+        -- The quantified key is hidden from Python. Retain the readable
+        -- `py$<valVar>` name at top level and make nested hidden keys unique as well.
+        let keyName := if ctx.quantifierDepth == 0 then pythonGeneratedPrefix ++ valVar
+          else s!"{pythonGeneratedPrefix}quant_{ctx.quantifierDepth}_{loc.start.byteIdx}_key"
         let dictExpr := collExpr.anyAsDict
         let keyStr := TypedStmtExpr.identifier keyName .TString src
         let membership := dictExpr.dictStrAnyContains keyStr src

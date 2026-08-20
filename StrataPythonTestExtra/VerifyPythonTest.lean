@@ -646,8 +646,8 @@ def retry(func: typing.Callable[..., typing.Any], retries: int = 3) -> typing.An
   if diags.size ≠ 0 then
     throw <| .userError s!"Expected 0 diagnostics, got {diags.size}: {diags.map (·.message)}"
 
--- PreludeInfo.ofLaurelProgram should strip the $in_ prefix from parameter
--- names so that cross-module keyword argument calls use the original names.
+-- PreludeInfo.ofLaurelProgram should strip `paramInputPrefix` from parameter names so that
+-- cross-module keyword argument calls use the original names.
 #guard_msgs in
 #eval withPython fun pythonCmd => do
   let program :=
@@ -659,9 +659,9 @@ def retry(func: typing.Callable[..., typing.Any], retries: int = 3) -> typing.An
   match prelude.functionSignatures.find? (fun f => f.name == "add") with
   | none => throw <| .userError "add not found in functionSignatures"
   | some sig =>
-    for arg in sig.args do
-      if arg.name.startsWith "$in_" then
-        throw <| .userError s!"Parameter '{arg.name}' still has $in_ prefix in PreludeInfo"
+    let names := sig.args.map (·.name)
+    if names != ["x", "y"] then
+      throw <| .userError s!"Expected parameter names [x, y] in PreludeInfo, got {names}"
 
 -- End-to-end bug-finding test for method resolution:
 -- The assertion `result == 7` can only be verified if Calculator.add's body

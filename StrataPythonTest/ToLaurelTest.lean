@@ -1027,30 +1027,30 @@ private def precondPins (args : Array Arg)
        Any_to_bool(PGe(from_int(Str.Length(Any..as_string!(x))), from_int(1)))"
 
 -- Dict `.values()` shape: `all(len(v) >= 1 for v in d.values())` quantifies
--- over a synthetic string key `$v` (not the user's `v`, which is the value)
--- and binds the body occurrence of `v` to the `d[$v]` lookup.
+-- over a synthetic string key `py$v` (not the user's `v`, which is the value)
+-- and binds the body occurrence of `v` to the `d[py$v]` lookup.
 #guard precondPins #[arg "d" str]
   { message := #[], formula :=
       .quantifier .forall (.overDictValues "v") (.var "d" loc)
         (.intGe (.stringLen (.var "v" loc) loc) (.intLit 1 loc) loc) loc }
-  "forall($v: string){DictStrAny_contains(Any..as_Dict!(d), $v)} => \
-     DictStrAny_contains(Any..as_Dict!(d), $v) ==> \
+  "forall(py$v: string){DictStrAny_contains(Any..as_Dict!(d), py$v)} => \
+     DictStrAny_contains(Any..as_Dict!(d), py$v) ==> \
        Any_to_bool(PGe(from_int(Str.Length(Any..as_string!(\
-         DictStrAny_get_or_none(Any..as_Dict!(d), $v)))), from_int(1)))"
+         DictStrAny_get_or_none(Any..as_Dict!(d), py$v)))), from_int(1)))"
 
 -- Binder/collection shadowing: in `all(len(xs) >= 1 for xs in xs)` the binder
--- is alpha-renamed to a fresh `$quant_…` name so the membership guard still
+-- is alpha-renamed to a fresh `py$quant_…` name so the membership guard still
 -- reads the outer function argument `xs` instead of the binder.
 -- (Semantic counterpart: `require_shadowed_nonempty` in AnalyzeLaurelTest.)
 #guard precondPins #[arg "xs" str]
   { message := #[], formula :=
       .quantifier .forall (.overList "xs") (.var "xs" loc)
         (.intGe (.stringLen (.var "xs" loc) loc) (.intLit 1 loc) loc) loc }
-  "forall($quant_0_0_xs: Any){\
-       List_contains(Any..as_ListAny!(xs), $quant_0_0_xs)} => \
-     List_contains(Any..as_ListAny!(xs), $quant_0_0_xs) ==> \
+  "forall(py$quant_0_0_xs: Any){\
+       List_contains(Any..as_ListAny!(xs), py$quant_0_0_xs)} => \
+     List_contains(Any..as_ListAny!(xs), py$quant_0_0_xs) ==> \
        Any_to_bool(PGe(from_int(Str.Length(Any..as_string!(\
-         $quant_0_0_xs))), from_int(1)))"
+         py$quant_0_0_xs))), from_int(1)))"
 
 -- Nested-capture regression: the inner ∀ binds `k`, shadowing the outer dict
 -- key `k`, while its body reads the outer value `v` (inlined as `d[k]`). The
@@ -1064,11 +1064,11 @@ private def precondPins (args : Array Arg)
           (.intGe (.stringLen (.var "v" loc) loc) (.intLit 1 loc) loc) loc) loc }
   "forall(k: string){DictStrAny_contains(Any..as_Dict!(d), k)} => \
      DictStrAny_contains(Any..as_Dict!(d), k) ==> \
-       forall($quant_1_0_k: Any){\
+       forall(py$quant_1_0_k: Any){\
            List_contains(Any..as_ListAny!(\
-             DictStrAny_get_or_none(Any..as_Dict!(d), k)), $quant_1_0_k)} => \
+             DictStrAny_get_or_none(Any..as_Dict!(d), k)), py$quant_1_0_k)} => \
          List_contains(Any..as_ListAny!(\
-           DictStrAny_get_or_none(Any..as_Dict!(d), k)), $quant_1_0_k) ==> \
+           DictStrAny_get_or_none(Any..as_Dict!(d), k)), py$quant_1_0_k) ==> \
            Any_to_bool(PGe(from_int(Str.Length(Any..as_string!(\
              DictStrAny_get_or_none(Any..as_Dict!(d), k)))), from_int(1)))"
 

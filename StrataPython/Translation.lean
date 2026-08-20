@@ -590,8 +590,8 @@ partial def translateStmt (s : StrataPython.stmt ResolvedAnn) : TransM Unit := d
       match value.val with
       | some expr => do
         let e ← translateExpr expr
-        tell [← mkExpr sr (.Assign [{ val := .Local rtLaurelResult, source := sourceRangeToMd (← get).filePath sr }] e), ← mkExpr sr (.Exit "$body")]
-      | none => tell [← mkExpr sr (.Exit "$body")]
+        tell [← mkExpr sr (.Assign [{ val := .Local rtLaurelResult, source := sourceRangeToMd (← get).filePath sr }] e), ← mkExpr sr (.Exit bodyLabel)]
+      | none => tell [← mkExpr sr (.Exit bodyLabel)]
 
   | .Assert _ test _ => tell [← mkExpr sr (.Assert (← translateExpr test) none)]
   | .Expr _ (.Constant _ (.ConString _ _) _) => pure ()
@@ -642,7 +642,7 @@ partial def translateStmt (s : StrataPython.stmt ResolvedAnn) : TransM Unit := d
 
   | .Raise _ exc cause => do
       -- `raise` assigns the exception to `maybe_except` AND terminates the current function body,
-      -- exactly as `Return` does (see the `.Return` case: assign then `Exit "$body"`). Without the
+      -- exactly as `Return` does (see the `.Return` case: assign then `Exit bodyLabel`). Without the
       -- exit, statements following a `raise` outside a `try` keep executing at the Laurel level,
       -- diverging from Python. (Inside a `try`, `wrapBodyWithErrorChecks` masks it, but the exit is
       -- the correct general behavior on both paths.)
@@ -660,7 +660,7 @@ partial def translateStmt (s : StrataPython.stmt ResolvedAnn) : TransM Unit := d
       | some excExpr => do
         let errorExpr ← translateExpr excExpr
         tell [← mkExpr sr (.Assign [{ val := .Local rtMaybeExcept, source := sourceRangeToMd (← get).filePath sr }] errorExpr),
-              ← mkExpr sr (.Exit "$body")]
+              ← mkExpr sr (.Exit bodyLabel)]
       | none =>
         throw (.unsupportedConstruct
           "bare `raise` (re-raise) is not supported; raise a new exception instance instead")
@@ -782,7 +782,7 @@ partial def renameParamsToInputs (paramNames : List String) (e : StmtExprMd) : S
   let rwList := fun (l : List StmtExprMd) => l.map rw
   let rwVar := fun (v : VariableMd) => match v.val with
     | .Local name =>
-      if paramNames.contains name.text then { v with val := .Local { name with text := s!"$in_{name.text}" } } else v
+      if paramNames.contains name.text then { v with val := .Local { name with text := s!"{pythonGeneratedPrefix}in_{name.text}" } } else v
     | .Field t fn => { v with val := .Field (rw t) fn }
     | .Declare _ => v
   let rwVarList := fun (l : List VariableMd) => l.map rwVar
@@ -807,7 +807,7 @@ partial def renameParamsToInputs (paramNames : List String) (e : StmtExprMd) : S
 
 private partial def buildProcInputs (aliases : Std.HashMap String HighType) (sig : FuncSig) : List Parameter :=
   sig.laurelDeclInputs.map fun (lId, pTy) =>
-    { name := { text := s!"$in_{lId.text}", uniqueId := none }, type := mkTypeDefault (pythonTypeToHighType aliases pTy) }
+    { name := { text := s!"{pythonGeneratedPrefix}in_{lId.text}", uniqueId := none }, type := mkTypeDefault (pythonTypeToHighType aliases pTy) }
 
 private partial def buildProcOutputs (aliases : Std.HashMap String HighType) (sig : FuncSig) : List Parameter :=
   -- LaurelResult is typed by the user-declared return type: the frontend trusts the
@@ -825,7 +825,7 @@ private partial def buildProcOutputs (aliases : Std.HashMap String HighType) (si
 private partial def buildParamCopies (aliases : Std.HashMap String HighType) (sig : FuncSig) : List StmtExprMd :=
   sig.laurelDeclInputs.map fun (lId, pTy) =>
     mkLocalDeclDefault lId (mkTypeDefault (pythonTypeToHighType aliases pTy))
-      (some (mkExprDefault (.Var (.Local { text := s!"$in_{lId.text}", uniqueId := none }))))
+      (some (mkExprDefault (.Var (.Local { text := s!"{pythonGeneratedPrefix}in_{lId.text}", uniqueId := none }))))
 
 private partial def buildLocalDecls (aliases : Std.HashMap String HighType) (sig : FuncSig) : List StmtExprMd :=
   sig.laurelLocals.map fun (lId, lTy) =>
@@ -848,7 +848,7 @@ partial def translateFunction (sig : FuncSig) (body : Array (StrataPython.stmt R
     | .Assert _ test _ => do pure ({ condition := renameParamsToInputs paramNames (← translateExpr test) } : Condition)
     | _ => throw (.internalError "non-Assert statement in precondition prefix")
   let bodyStmts ← execWriter restBody
-  let bodyBlock ← mkExpr sr (.Block (paramCopies ++ localDecls ++ bodyStmts) (some "$body"))
+  let bodyBlock ← mkExpr sr (.Block (paramCopies ++ localDecls ++ bodyStmts) (some bodyLabel))
   -- There is no Procedure metadata field: the source range lives on the proc name's
   -- `.source`. The pass that separates user procs from prelude reads it; without it every
   -- user proc looks like prelude and nothing is verified.
@@ -964,7 +964,7 @@ partial def translateModule (program : ResolvedPythonProgram) : TransM Strata.La
       let localDecls := program.moduleLocals.map fun (lId, lTy) =>
         mkLocalDeclDefault lId.toLaurel (mkTypeDefault (pythonTypeToHighType aliases lTy)) none
       let bodyStmts ← execWriter otherStmts
-      let bodyBlock ← mkExpr sr (.Block ([nameDecl] ++ localDecls ++ bodyStmts) (some "$body"))
+      let bodyBlock ← mkExpr sr (.Block ([nameDecl] ++ localDecls ++ bodyStmts) (some bodyLabel))
       let mainOutputs : List Parameter :=
         [{ name := rtLaurelResult, type := mkTypeDefault (.UserDefined { text := "Any" }) },
          { name := rtMaybeExcept, type := mkTypeDefault (.UserDefined { text := "Error" }) }]

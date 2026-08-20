@@ -382,8 +382,8 @@ def translateFieldType (ctx : TranslationContext) (typeStr : String) : Except Tr
   | _ => .ok (mkCoreType PyLauType.Any)
 
 def AnyTy := mkCoreType PyLauType.Any
-def compositeToStringName (typeName : String) : String := "$composite_to_string_" ++ typeName
-def compositeToStringAnyName (typeName : String) : String := "$composite_to_string_any_" ++ typeName
+def compositeToStringName (typeName : String) : String := pythonGeneratedPrefix ++ "composite_to_string_" ++ typeName
+def compositeToStringAnyName (typeName : String) : String := pythonGeneratedPrefix ++ "composite_to_string_any_" ++ typeName
 
 def isCompositeType (ctx : TranslationContext) (typeName : String) : Bool :=
   typeName != PyLauType.Any && (ctx.importedSymbols[typeName]?.any fun s =>
@@ -828,7 +828,7 @@ partial def translateExpr (ctx : TranslationContext) (e : expr SourceRange)
           -- user variables. Shadowing is semantically fine, but a formal
           -- non-collision proof would require threading variable-scope info
           -- through the translator.
-          let freshVar := s!"$cmp_tmp_{e.toAst.ann.start.byteIdx}_{i}"
+          let freshVar := s!"{pythonGeneratedPrefix}cmp_tmp_{e.toAst.ann.start.byteIdx}_{i}"
           let varDecl := mkVarDeclInit { text := freshVar } AnyTy comp
           tempDecls := tempDecls.push varDecl
           operandRefs := operandRefs.push (mkStmtExprMd (StmtExpr.Var (.Local { text := freshVar })))
@@ -1608,7 +1608,7 @@ def extractMultiOutputCalls (ctx : TranslationContext) (e : StmtExprMd)
       -- Multi-output call: extract into a temp assignment and add exception check
       let n ← get
       set (n + 1)
-      let varName := s!"$mo_{n}"
+      let varName := s!"{pythonGeneratedPrefix}mo_{n}"
       let varDecl := mkVarDeclInit varName AnyTy AnyNone
       let assign := mkStmtExprMdWithLoc (StmtExpr.Assign
         [mkVariableMd (.Local varName), maybeExceptVar]
@@ -2124,7 +2124,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
     else do
       let (_, elseStmts) ← translateStmtList bodyCtx orelse.val.toList
       .ok (some (mkStmtExprMd (StmtExpr.Block elseStmts none)))
-    let (preamble, condRef) := getExceptionCheckPreamble ctx condExpr s!"$if_cond_{test.toAst.ann.start.byteIdx}"
+    let (preamble, condRef) := getExceptionCheckPreamble ctx condExpr s!"{pythonGeneratedPrefix}if_cond_{test.toAst.ann.start.byteIdx}"
     let ifStmt := mkStmtExprMdWithLoc (StmtExpr.IfThenElse (Any_to_bool condRef) bodyBlock elseBlock) md
 
     return (bodyCtx, preamble ++ [ifStmt])
@@ -2151,7 +2151,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
             | _ => false
         | _ => false) e
     if writesScopedGlobal condExpr then
-      let condVar := s!"$while_cond_{test.toAst.ann.start.byteIdx}"
+      let condVar := s!"{pythonGeneratedPrefix}while_cond_{test.toAst.ann.start.byteIdx}"
       let condDecl := mkVarDeclInit condVar AnyTy condExpr
       let condRef := mkStmtExprMd (StmtExpr.Var (.Local condVar))
       let exceptionChecks :=
@@ -2169,7 +2169,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
         (StmtExpr.Block [whileStmt] (some breakLabel)) md
       return (loopCtx, [condDecl] ++ exceptionChecks ++ [whileWrapped])
     let bodyBlock := mkStmtExprMdWithLoc (StmtExpr.Block bodyStmts (some continueLabel)) md
-    let (preamble, condRef) := getExceptionCheckPreamble ctx condExpr s!"$while_cond_{test.toAst.ann.start.byteIdx}"
+    let (preamble, condRef) := getExceptionCheckPreamble ctx condExpr s!"{pythonGeneratedPrefix}while_cond_{test.toAst.ann.start.byteIdx}"
     let whileStmt := mkStmtExprMdWithLoc (StmtExpr.While (Any_to_bool condRef) [] none bodyBlock false) md
     let whileWrapped := mkStmtExprMdWithLoc (StmtExpr.Block [whileStmt] (some breakLabel)) md
     return (loopCtx, preamble ++ [whileWrapped])
@@ -2184,7 +2184,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
     let stmts ← match value.val with
       | some expr => do
         let e ← translateExpr ctx expr
-        let (preamble, eRef) := getExceptionCheckPreamble ctx e s!"$ret_exc_{expr.toAst.ann.start.byteIdx}"
+        let (preamble, eRef) := getExceptionCheckPreamble ctx e s!"{pythonGeneratedPrefix}ret_exc_{expr.toAst.ann.start.byteIdx}"
         -- Coerce Composite return values to Any for LaurelResult : Any
         let eRef ← coerceToAny ctx expr eRef
         let assign := mkStmtExprMdWithLoc (StmtExpr.Assign [mkVariableMd (.Local PyLauFuncReturnVar)] eRef) md
@@ -2218,7 +2218,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
     else
       mkStmtExprMdWithLoc (StmtExpr.Block (condStmts ++ [assertStmt]) none) md
 
-    let (preamble, _) := getExceptionCheckPreamble ctx condExpr s!"$assert_exc_{test.toAst.ann.start.byteIdx}"
+    let (preamble, _) := getExceptionCheckPreamble ctx condExpr s!"{pythonGeneratedPrefix}assert_exc_{test.toAst.ann.start.byteIdx}"
 
     return (condCtx, preamble ++ [result])
 
@@ -2326,7 +2326,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
     -- `else` runs only if the body completed without an exception (tracked by
     -- a flag set as the body's last action). It is emitted after the handlers
     -- so exceptions it raises propagate outward instead of re-entering this try.
-    let completedVar := s!"$try_completed_{s.toAst.ann.start.byteIdx}"
+    let completedVar := s!"{pythonGeneratedPrefix}try_completed_{s.toAst.ann.start.byteIdx}"
     let markCompleted :=
       if orelse.val.isEmpty then []
       else [mkStmtExprMd (StmtExpr.Assign
@@ -2434,7 +2434,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
     let iterRaw ← translateExpr ctx iter
     let (iterPreamble, iterExpr) := match iterRaw.val with
       | .Block (_ :: _ :: _) _ =>
-        let varName := s!"$for_iter_{iter.toAst.ann.start.byteIdx}"
+        let varName := s!"{pythonGeneratedPrefix}for_iter_{iter.toAst.ann.start.byteIdx}"
         let varDecl := mkVarDeclInit varName AnyTy iterRaw
         let varRef  := mkStmtExprMd (StmtExpr.Var (.Local varName))
         ([varDecl], varRef)
@@ -2515,7 +2515,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
     let whileBody := mkStmtExprMd (StmtExpr.Block bodyStmts none)
     let loopStmt := mkStmtExprMdWithLoc (StmtExpr.While counterLtLen [] none whileBody false) md
     let loopBlock := mkStmtExprMdWithLoc (StmtExpr.Block [loopStmt] (some breakLabel)) md
-    let (preamble, _) := getExceptionCheckPreamble ctx iterExpr s!"$for_iter_{iter.toAst.ann.start.byteIdx}"
+    let (preamble, _) := getExceptionCheckPreamble ctx iterExpr s!"{pythonGeneratedPrefix}for_iter_{iter.toAst.ann.start.byteIdx}"
     return (finalCtx, iterPreamble ++ preamble ++ [counterDecl] ++ [loopBlock])
 
   | .Break _ =>
@@ -2550,7 +2550,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
       | .Subscript _ _ _ _ =>
         match getSubscriptList target with
         | base :: slices =>
-            let tempVars := (List.range slices.length).map λ n => s!"$augAssignTempVar_{sr.start}_{n}"
+            let tempVars := (List.range slices.length).map λ n => s!"{pythonGeneratedPrefix}augAssignTempVar_{sr.start}_{n}"
             let tempVarExprs: List (expr SourceRange) := tempVars.map
                 (fun var => .Name sr {val:= var, ann:= sr} (.Load sr))
             let target: expr SourceRange := tempVarExprs.foldl (λ s t =>
@@ -2746,7 +2746,7 @@ def pyFuncDefToPythonFunctionDecl (ctx : TranslationContext) (f : stmt SourceRan
 
 /-- Prefix applied to Core input parameters so the original name can be used
     for a mutable local copy inside the procedure body. -/
-def paramInputPrefix : String := "$in_"
+def paramInputPrefix : String := pythonGeneratedPrefix ++ "in_"
 
 def getTypeConstraint (var : String) (source : FileRange) (testers : Array String)
     (funcname : String) (displayName : String := var) : Option Condition :=
@@ -2904,7 +2904,7 @@ def translateFunction (ctx : TranslationContext) (sourceRange: SourceRange) (fun
 
     let renamedInputs := inputs.map fun p =>
       if p.name.text == "self" then p
-      else { p with name := mkId ("$in_" ++ p.name.text) }
+      else { p with name := mkId (paramInputPrefix ++ p.name.text) }
 
     -- Create procedure
     let proc : Procedure := {
