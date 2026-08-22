@@ -1,1 +1,0 @@
-global variable 'box' cannot be lowered to a Laurel static field because its name collides with a top-level definition or it is assigned a composite value

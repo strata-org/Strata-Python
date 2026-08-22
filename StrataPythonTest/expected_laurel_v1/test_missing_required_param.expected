@@ -1,12 +1,4 @@
 test_missing_required_param.py(8, 0): ✅ pass - assert(…)
 test_missing_required_param.py(9, 0): ✅ pass - assert(…)
-test_missing_required_param.py(14, 29): ✅ pass - global 'storage_client' is bound
-test_missing_required_param.py(14, 29): ✅ pass - global 'folder_name' is bound
-test_missing_required_param.py(14, 29): ✅ pass - global 'key' is bound
-test_missing_required_param.py(14, 29): ✅ pass - global 'payload' is bound
-test_missing_required_param.py(29, 29): ✅ pass - global 'storage_client' is bound
-test_missing_required_param.py(29, 29): ✅ pass - global 'folder_name' is bound
-test_missing_required_param.py(29, 29): ✅ pass - global 'key' is bound
-test_missing_required_param.py(29, 29): ✅ pass - global 'payload' is bound
-DETAIL: 10 passed, 0 failed, 0 inconclusive
+DETAIL: 2 passed, 0 failed, 0 inconclusive
 RESULT: Analysis success

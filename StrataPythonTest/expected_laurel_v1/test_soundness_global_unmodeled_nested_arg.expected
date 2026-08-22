@@ -1,5 +1,0 @@
-test_soundness_global_unmodeled_nested_arg.py(1, 0): ❓ unknown - global 'late_value' is bound
-test_soundness_global_unmodeled_nested_arg.py(2, 0): ✅ pass - assert(…)
-test_soundness_global_unmodeled_nested_arg.py(3, 0): ✅ pass - assert(…)
-DETAIL: 2 passed, 0 failed, 1 inconclusive
-RESULT: Inconclusive

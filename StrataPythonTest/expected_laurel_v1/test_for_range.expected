@@ -1,19 +1,13 @@
 test_for_range.py(10, 9): ✅ pass - precondition
 test_for_range.py(3, 9): ✅ pass - precondition
-test_for_range.py(4, 11): ✅ pass - global 'i' is bound
 test_for_range.py(4, 11): ✅ pass - Check PLt exception
 test_for_range.py(4, 4): ✅ pass - assert(…)
-test_for_range.py(5, 11): ✅ pass - global 'i' is bound
 test_for_range.py(5, 11): ✅ pass - Check PGe exception
 test_for_range.py(5, 4): ✅ pass - assert(…)
-test_for_range.py(6, 8): ✅ pass - global 'numbers' is bound
-test_for_range.py(6, 17): ✅ pass - global 'i' is bound
 test_for_range.py(6, 4): ✅ pass - precondition
-test_for_range.py(7, 11): ✅ pass - global 'j' is bound
 test_for_range.py(7, 11): ✅ pass - Check PLt exception
 test_for_range.py(7, 4): ✅ pass - assert(…)
 test_for_range.py(10, 15): ✅ pass - Check PNeg exception
-test_for_range.py(13, 7): ✅ pass - global 'x' is bound
 test_for_range.py(13, 0): ✅ pass - assert(…)
-DETAIL: 17 passed, 0 failed, 0 inconclusive
+DETAIL: 11 passed, 0 failed, 0 inconclusive
 RESULT: Analysis success

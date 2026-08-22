@@ -1,41 +1,11 @@
-test_havoc_callee_after_hole_call.py(7, 0): ✔️ always true if reached - global 'xs' is bound
-test_havoc_callee_after_hole_call.py(8, 7): ✔️ always true if reached - global 'xs' is bound
 test_havoc_callee_after_hole_call.py(8, 0): ❓ unknown - expected unknown because xs should be havocked
-test_havoc_callee_after_hole_call.py(11, 16): ✔️ always true if reached - global 'xs' is bound
-test_havoc_callee_after_hole_call.py(12, 7): ✔️ always true if reached - global 'xs' is bound
 test_havoc_callee_after_hole_call.py(12, 0): ❓ unknown - expected unknown because xs should be havocked
-test_havoc_callee_after_hole_call.py(15, 0): ✔️ always true if reached - global 'xs' is bound
-test_havoc_callee_after_hole_call.py(16, 7): ✔️ always true if reached - global 'xs' is bound
-test_havoc_callee_after_hole_call.py(16, 0): ❓ unknown - chained call: receiver not havocked (chained attribute is not a Name)
-test_havoc_callee_after_hole_call.py(20, 7): ✔️ always true if reached - global 'xs' is bound
+test_havoc_callee_after_hole_call.py(16, 0): ✔️ always true if reached - chained call: receiver not havocked (chained attribute is not a Name)
 test_havoc_callee_after_hole_call.py(20, 0): ✔️ always true if reached - unrelated variable: nothing should be havocked
 test_havoc_callee_after_hole_call.py(22, 0): ✔️ always true if reached - (MyClass@__init__ requires) Type constraint of n
 test_havoc_callee_after_hole_call.py(25, 0): ✔️ always true if reached - composite arg: heap not havocked (out of scope)
-test_havoc_callee_after_hole_call.py(29, 0): ✔️ always true if reached - global 'xs2' is bound
-test_havoc_callee_after_hole_call.py(29, 0): ✔️ always true if reached - global 'ys2' is bound
-test_havoc_callee_after_hole_call.py(30, 7): ✔️ always true if reached - global 'ys2' is bound
 test_havoc_callee_after_hole_call.py(30, 0): ❓ unknown - expected unknown because argument locals should be havocked
-test_havoc_callee_after_hole_call.py(36, 11): ✔️ always true if reached - global 'response' is bound
 test_havoc_callee_after_hole_call.py(36, 0): ❓ unknown - precondition
 test_havoc_callee_after_hole_call.py(37, 4): ✔️ always true if reached - for-loop over unmodeled iterator should not crash
-test_havoc_callee_after_hole_call.py(42, 0): ✔️ always true if reached - global 'global_receiver' is bound
-test_havoc_callee_after_hole_call.py(43, 7): ✔️ always true if reached - global 'global_receiver' is bound
-test_havoc_callee_after_hole_call.py(43, 0): ❓ unknown - module-global receiver should be havocked
-test_havoc_callee_after_hole_call.py(46, 0): ✔️ always true if reached - global 'global_arg' is bound
-test_havoc_callee_after_hole_call.py(47, 7): ✔️ always true if reached - global 'global_arg' is bound
-test_havoc_callee_after_hole_call.py(47, 0): ❓ unknown - module-global positional argument should be havocked
-test_havoc_callee_after_hole_call.py(50, 0): ✔️ always true if reached - global 'global_kwarg' is bound
-test_havoc_callee_after_hole_call.py(51, 7): ✔️ always true if reached - global 'global_kwarg' is bound
-test_havoc_callee_after_hole_call.py(51, 0): ❓ unknown - module-global keyword argument should be havocked
-test_havoc_callee_after_hole_call.py(54, 0): ✔️ always true if reached - global 'global_nested' is bound
-test_havoc_callee_after_hole_call.py(55, 7): ✔️ always true if reached - global 'global_nested' is bound
-test_havoc_callee_after_hole_call.py(55, 0): ❓ unknown - module-global reachable receiver should be havocked
-test_havoc_callee_after_hole_call.py(58, 0): ✔️ always true if reached - global 'global_wrapped' is bound
-test_havoc_callee_after_hole_call.py(59, 7): ✔️ always true if reached - global 'global_wrapped' is bound
-test_havoc_callee_after_hole_call.py(59, 0): ❓ unknown - module-global root in aggregate should be havocked
-test_havoc_callee_after_hole_call.py(62, 0): ✔️ always true if reached - global 'global_conditional' is bound
-test_havoc_callee_after_hole_call.py(63, 7): ✔️ always true if reached - global 'global_conditional' is bound
-test_havoc_callee_after_hole_call.py(63, 0): ❓ unknown - module-global root in conditional should be havocked
-test_havoc_callee_after_hole_call.py(71, 0): ❓ unknown - kwargs should be havocked
-DETAIL: 27 passed, 0 failed, 12 inconclusive
+DETAIL: 5 passed, 0 failed, 4 inconclusive
 RESULT: Inconclusive

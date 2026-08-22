@@ -1,7 +1,0 @@
-DETAIL: Unsupported construct: class decorators are not supported
-AST: { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
-  val := #[StrataPython.expr.Name
-             { start := { byteIdx := 1 }, stop := { byteIdx := 18 } }
-             { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "unknown_decorator" }
-             (StrataPython.expr_context.Load { start := { byteIdx := 0 }, stop := { byteIdx := 0 } })] }
-RESULT: Known limitation

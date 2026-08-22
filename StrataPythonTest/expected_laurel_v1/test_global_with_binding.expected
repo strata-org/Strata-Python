@@ -1,8 +1,0 @@
-test_global_with_binding.py(5, 27): ❓ unknown - (Resource@__enter__ ensures) Return type constraint
-test_global_with_binding.py(8, 33): ✅ pass - (Resource@__exit__ ensures) Return type constraint
-test_global_with_binding.py(18, 11): ❓ unknown - global 'entered' is bound
-test_global_with_binding.py(17, 22): ❓ unknown - (read_entered ensures) Return type constraint
-test_global_with_binding.py(12, 0): ✅ pass - (Resource@__init__ requires) Type constraint of value
-test_global_with_binding.py(21, 0): ❓ unknown - with-as target creates module field
-DETAIL: 2 passed, 0 failed, 4 inconclusive
-RESULT: Inconclusive

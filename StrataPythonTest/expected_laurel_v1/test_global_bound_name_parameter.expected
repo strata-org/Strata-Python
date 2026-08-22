@@ -1,7 +1,0 @@
-test_global_bound_name_parameter.py(5, 11): ❓ unknown - global 'value' is bound
-test_global_bound_name_parameter.py(4, 60): ❓ unknown - (read_value ensures) Return type constraint
-test_global_bound_name_parameter.py(1, 0): ✅ pass - assert(…)
-test_global_bound_name_parameter.py(8, 7): ✅ pass - (read_value requires) Type constraint of __strata_python_global_bound_value
-test_global_bound_name_parameter.py(8, 0): ❓ unknown - assert(…)
-DETAIL: 2 passed, 0 failed, 3 inconclusive
-RESULT: Inconclusive

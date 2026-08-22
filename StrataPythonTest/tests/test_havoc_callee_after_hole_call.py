@@ -35,37 +35,3 @@ assert ys2 == [], "expected unknown because argument locals should be havocked"
 response: dict = {"messages": []}
 for msg in response.unmodeled_iter_method():
     assert True, "for-loop over unmodeled iterator should not crash"
-
-# Module globals use static fields rather than local declarations, but unknown
-# calls can mutate their reachable values in exactly the same ways.
-global_receiver: list[int] = [1, 2]
-global_receiver.some_unmodeled_call_7()
-assert global_receiver == [1, 2], "module-global receiver should be havocked"
-
-global_arg: list[int] = [1, 2]
-some_unmodeled_call_8(global_arg)
-assert global_arg == [1, 2], "module-global positional argument should be havocked"
-
-global_kwarg: list[int] = [1, 2]
-some_unmodeled_call_9(value=global_kwarg)
-assert global_kwarg == [1, 2], "module-global keyword argument should be havocked"
-
-global_nested: dict = {"items": []}
-global_nested["items"].some_unmodeled_call_10()
-assert global_nested == {"items": []}, "module-global reachable receiver should be havocked"
-
-global_wrapped: list[int] = [1, 2]
-some_unmodeled_call_11([global_wrapped])
-assert global_wrapped == [1, 2], "module-global root in aggregate should be havocked"
-
-global_conditional: list[int] = [1, 2]
-some_unmodeled_call_12(global_conditional if True else [])
-assert global_conditional == [1, 2], "module-global root in conditional should be havocked"
-
-
-def havoc_kwargs(**kwargs):
-    some_unmodeled_call_13(kwargs)
-    assert kwargs == {"value": [1, 2]}, "kwargs should be havocked"
-
-
-havoc_kwargs(value=[1, 2])

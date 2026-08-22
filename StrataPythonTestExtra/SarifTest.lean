@@ -50,40 +50,6 @@ def skipTests : Std.HashSet String := Std.HashSet.ofList [
   "test_with_void_enter",
   "test_class_no_init_extra_args", -- No SARIF output: does not run SMT analysis
   "test_exc_reject_except_star",   -- No SARIF output: V1 cannot translate TryStar (except*)
-  "test_class_decorator_rejection",
-  "test_effectful_return_annotation_rejection",
-  "test_for_else_break",
-  "test_function_decorator_rejection",
-  "test_global_collision",         -- Expected frontend rejection before SMT analysis
-  "test_global_async_method_rejection",
-  "test_global_builtin_call_shadowing",
-  "test_global_class_body_rejection",
-  "test_global_class_control_flow_rejection",
-  "test_global_composite_attribute_augassign_rejection",
-  "test_global_composite_attribute_read_rejection",
-  "test_global_composite_attribute_write_rejection",
-  "test_global_composite_read_rejection",
-  "test_global_composite_rejection",
-  "test_global_definition_default_rejection",
-  "test_global_destructured_with_rejection",
-  "test_global_dotted_import_collision",
-  "test_global_effectful_annotation_rejection",
-  "test_global_effectful_default_rejection",
-  "test_global_function_import",
-  "test_global_import_rebinding_in_control_flow_rejection",
-  "test_global_import_rebinding_in_function_rejection",
-  "test_global_import_rebinding_rejection",
-  "test_global_inherited_nested_rejection",
-  "test_global_inherited_method_rejection",
-  "test_global_nested_class_rejection",
-  "test_global_nested_function_control_flow_rejection",
-  "test_global_prelude_collision",
-  "test_global_reserved_name_rejection",
-  "test_global_try_finally_rejection",
-  "test_global_type_collision",
-  "test_global_wildcard_import_rejection",
-  "test_try_else_rejection",
-  "test_while_else_rejection",
   "test_user_error_metadata",      -- No SARIF output: does not run SMT analysis
   "test_is_non_none",              -- No SARIF output: does not run SMT analysis
   "test_is_not_non_none",          -- No SARIF output: does not run SMT analysis
@@ -169,12 +135,6 @@ def validate (doc : Strata.Sarif.SarifDocument) (baseName : String) : Option Str
       return some s!"expected 0 errors, got {errorResults.size}"
     if locatedResults.size < 1 then
       return some s!"expected results with locations, got {locatedResults.size}"
-
-  if baseName == "test_soundness_global_read_before_assignment" then
-    if errorResults.size < 1 then
-      return some "expected an error for an unbound module global"
-    if locatedResults.size < 1 then
-      return some "expected the unbound-global error to have a source location"
 
   return none
 

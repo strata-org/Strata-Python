@@ -1,9 +1,0 @@
-DETAIL: Unsupported construct: import binding 'os' cannot overwrite a modeled module variable
-AST: StrataPython.stmt.Import
-  { start := { byteIdx := 33 }, stop := { byteIdx := 42 } }
-  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
-    val := #[StrataPython.alias.mk_alias
-               { start := { byteIdx := 40 }, stop := { byteIdx := 42 } }
-               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "os" }
-               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }] }
-RESULT: Known limitation

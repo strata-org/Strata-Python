@@ -1,5 +1,0 @@
-test_soundness_global_read_before_assignment.py(1, 7): ❓ unknown - global 'late_value' is bound
-test_soundness_global_read_before_assignment.py(1, 0): ❓ unknown - unsound: Python raises NameError
-test_soundness_global_read_before_assignment.py(2, 0): ✅ pass - assert(…)
-DETAIL: 1 passed, 0 failed, 2 inconclusive
-RESULT: Inconclusive
