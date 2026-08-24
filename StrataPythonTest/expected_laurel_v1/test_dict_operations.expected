@@ -1,26 +1,36 @@
+test_dict_operations.py(7, 7): ✅ pass - global 'config' is bound
 test_dict_operations.py(7, 7): ✅ pass - precondition
 test_dict_operations.py(7, 0): ✅ pass - assert(…)
+test_dict_operations.py(8, 7): ✅ pass - global 'config' is bound
 test_dict_operations.py(8, 7): ✅ pass - precondition
 test_dict_operations.py(8, 0): ✅ pass - assert(…)
+test_dict_operations.py(10, 0): ✅ pass - global 'config' is bound
 test_dict_operations.py(10, 0): ✅ pass - Check Any_sets! exception
+test_dict_operations.py(11, 7): ✅ pass - global 'config' is bound
 test_dict_operations.py(11, 7): ✅ pass - precondition
 test_dict_operations.py(11, 0): ✅ pass - assert(…)
+test_dict_operations.py(13, 17): ✅ pass - global 'config' is bound
 test_dict_operations.py(13, 7): ✅ pass - precondition
 test_dict_operations.py(13, 0): ✅ pass - assert(…)
+test_dict_operations.py(14, 24): ✅ pass - global 'config' is bound
 test_dict_operations.py(14, 7): ✅ pass - precondition
 test_dict_operations.py(14, 0): ✅ pass - assert(…)
+test_dict_operations.py(23, 7): ✅ pass - global 'nested' is bound
 test_dict_operations.py(23, 7): ✅ pass - precondition
 test_dict_operations.py(23, 7): ✅ pass - precondition
 test_dict_operations.py(23, 7): ✅ pass - precondition
 test_dict_operations.py(23, 0): ✅ pass - assert(…)
+test_dict_operations.py(24, 7): ✅ pass - global 'nested' is bound
 test_dict_operations.py(24, 7): ✅ pass - precondition
 test_dict_operations.py(24, 7): ✅ pass - precondition
 test_dict_operations.py(24, 7): ✅ pass - precondition
 test_dict_operations.py(24, 0): ✅ pass - assert(…)
+test_dict_operations.py(26, 0): ✅ pass - global 'nested' is bound
 test_dict_operations.py(26, 0): ✅ pass - Check Any_sets! exception
+test_dict_operations.py(27, 7): ✅ pass - global 'nested' is bound
 test_dict_operations.py(27, 7): ✅ pass - precondition
 test_dict_operations.py(27, 7): ✅ pass - precondition
 test_dict_operations.py(27, 7): ✅ pass - precondition
 test_dict_operations.py(27, 0): ✅ pass - assert(…)
-DETAIL: 24 passed, 0 failed, 0 inconclusive
+DETAIL: 34 passed, 0 failed, 0 inconclusive
 RESULT: Analysis success

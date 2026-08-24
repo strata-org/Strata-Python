@@ -11,6 +11,8 @@ public import StrataPython.OverloadTable
 public import StrataPython.PythonDialect
 public import StrataPython.UnknownSource
 import StrataPython.PythonRuntimeLaurelPart
+import StrataPython.Resolution
+import Strata.Languages.Laurel.MapStmtExpr
 import Std.Tactic.BVDecide.Normalize.Prop
 import Strata.Util.Tactics
 
@@ -91,6 +93,19 @@ deriving Inhabited
 
 structure TranslationContext where
   variableTypes : List (String × String) := []
+  /-- Module names lowered to static fields; distinguishes global values from
+      package references and local declarations. -/
+  moduleGlobals : Std.HashSet String := {}
+  /-- Module globals selected by Python name resolution in the current scope. -/
+  scopeGlobals : Std.HashSet String := {}
+  /-- Names lexically owned by the current function scope. Kept separate from
+      `variableTypes` so Python name resolution does not depend on type inference. -/
+  scopeLocals : Std.HashSet String := {}
+  /-- Module-bound values that cannot be represented as Laurel static fields,
+      such as composites and type aliases. -/
+  unsupportedModuleGlobals : Std.HashSet String := {}
+  /-- Module-bound names represented outside static fields, such as imports. -/
+  moduleSymbols : Std.HashSet String := {}
   /-- List of function signatures -/
   functionSignatures : List PythonFunctionDecl := []
   /-- Names of user-defined functions -/
@@ -105,6 +120,7 @@ structure TranslationContext where
   preludeTypes : Std.HashSet String := {}
   /-- Prelude procedure signatures (for multi-output detection) -/
   preludeProcedures : Std.HashMap String CoreProcedureSignature := {}
+  preludeFunctions : List String := []
   /-- Overload dispatch table from PySpec: function name → overloads -/
   overloadTable : OverloadTable := {}
   /-- Behavior for unmodeled functions -/
@@ -182,6 +198,27 @@ def sourceRangeToFileRange (filePath : String) (sr : SourceRange) : FileRange :=
 def sourceRangeToSource (filePath : String) (sr : SourceRange) : FileRange :=
   sourceRangeToFileRange filePath sr
 
+private def moduleGlobalBoundPrefix : String :=
+  "__strata_python_global_bound_"
+
+/-- Internal field tracking whether a Python module name is currently bound. -/
+private def moduleGlobalBoundName (name : String) : String :=
+  moduleGlobalBoundPrefix ++ name
+
+/-- Qualified reference to an internal module-global bound-state field. -/
+private def moduleGlobalBoundRefName (name : String) : String :=
+  "$static." ++ moduleGlobalBoundName name
+
+private def resolvesToModuleScope (ctx : TranslationContext) (name : String) : Bool :=
+  ctx.scopeGlobals.contains name || !ctx.scopeLocals.contains name
+
+private def isScopedModuleGlobal (ctx : TranslationContext) (name : String) : Bool :=
+  ctx.moduleGlobals.contains name && resolvesToModuleScope ctx name
+
+private def isScopedUnsupportedModuleGlobal
+    (ctx : TranslationContext) (name : String) : Bool :=
+  ctx.unsupportedModuleGlobals.contains name && resolvesToModuleScope ctx name
+
 /-- Create a HighTypeMd with default metadata -/
 def mkHighTypeMd (ty : HighType) : HighTypeMd :=
   { val := ty, source := unknownSource }
@@ -201,10 +238,18 @@ def mkStmtExprMd (expr : StmtExpr) : StmtExprMd :=
 def mkVariableMd (v : Variable) : VariableMd :=
   { val := v, source := unknownSource }
 
-/-- Extract a Variable from a StmtExpr. Throws if the expression is not a Var. -/
+/-- Extract a Variable from a variable expression, including a checked block
+    whose final expression is the variable. -/
 def stmtExprToVar (e : StmtExprMd) : Except TranslationError VariableMd :=
   match e.val with
   | .Var v => .ok { val := v, source := e.source }
+  | .Block stmts _ =>
+    match stmts.getLast? with
+    | some last =>
+      match last.val with
+      | .Var v => .ok { val := v, source := last.source }
+      | _ => .error (.internalError "stmtExprToVar: expected Var node")
+    | none => .error (.internalError "stmtExprToVar: expected Var node")
   | _ => .error (.internalError "stmtExprToVar: expected Var node")
 
 /-- The wildcard modifies clause — one unguarded group whose only target is `*`,
@@ -505,6 +550,18 @@ def resolveDispatch (ctx : TranslationContext)
 def hasModel (ctx : TranslationContext) (funcName : String) : Bool :=
   funcName ∈ ctx.importedSymbols || funcName ∈ ctx.userFunctions
 
+private def frontendReservedGlobalNames : Std.HashSet String :=
+  Std.HashSet.ofList ["nullcall_ret", "maybe_except", "LaurelResult", "__main__"]
+
+private def moduleSymbolExists (ctx : TranslationContext) (name : String) : Bool :=
+  isKnownType ctx name ||
+  ctx.moduleSymbols.contains name ||
+  ctx.importedSymbols.contains name ||
+  name ∈ ctx.userFunctions ||
+  name ∈ ctx.preludeFunctions ||
+  ctx.preludeProcedures.contains name ||
+  ctx.functionSignatures.any (·.name == name)
+
 /-- Check if a type's spec is exhaustive, meaning unmodeled method
     calls should be reported as errors. -/
 def isExhaustiveType (ctx : TranslationContext) (typeName : String) : Bool :=
@@ -519,6 +576,57 @@ def createBoolOrExpr (exprs: List StmtExprMd) : StmtExprMd :=
   | [] => mkStmtExprMd (.LiteralBool false)
   | [expr] => expr
   | expr::exprs => mkStmtExprMd (.StaticCall (mkId Operation.Or.procName) [expr, createBoolOrExpr exprs])
+
+partial def containsDefinitionTimeEffect (e : expr SourceRange) : Bool :=
+  match e with
+  | .Call .. | .Await .. | .Yield .. | .YieldFrom .. | .NamedExpr .. | .Lambda ..
+  | .ListComp .. | .SetComp .. | .DictComp .. | .GeneratorExp .. => true
+  | .Attribute _ value _ _ | .Starred _ value _ | .UnaryOp _ _ value =>
+    containsDefinitionTimeEffect value
+  | .BinOp _ left _ right =>
+    containsDefinitionTimeEffect left || containsDefinitionTimeEffect right
+  | .BoolOp _ _ values | .List _ values _ | .Tuple _ values _ =>
+    values.val.any containsDefinitionTimeEffect
+  | .Set _ values =>
+    values.val.any containsDefinitionTimeEffect
+  | .Compare _ left _ comparators =>
+    containsDefinitionTimeEffect left || comparators.val.any containsDefinitionTimeEffect
+  | .IfExp _ condition thenValue elseValue =>
+    containsDefinitionTimeEffect condition ||
+      containsDefinitionTimeEffect thenValue ||
+      containsDefinitionTimeEffect elseValue
+  | .Subscript _ value slice _ =>
+    containsDefinitionTimeEffect value || containsDefinitionTimeEffect slice
+  | .Dict _ keys values =>
+    keys.val.any (fun key => match key with
+      | .some_expr _ value => containsDefinitionTimeEffect value
+      | .missing_expr _ => false) ||
+    values.val.any containsDefinitionTimeEffect
+  | .Slice _ lower upper step =>
+    [lower, upper, step].any fun value => match value.val with
+      | some value => containsDefinitionTimeEffect value
+      | none => false
+  | .JoinedStr _ values => values.val.any containsDefinitionTimeEffect
+  | .FormattedValue _ value _ formatSpec =>
+    containsDefinitionTimeEffect value ||
+      (match formatSpec.val with
+       | some value => containsDefinitionTimeEffect value
+       | none => false)
+  | _ => false
+
+/-- Defaults are currently substituted into each call site. Only immutable
+    constants are safe under that lowering; all other defaults require storage
+    evaluated when the function definition executes. -/
+partial def isCallTimeStableDefault (e : expr SourceRange) : Bool :=
+  match e with
+  | .Constant .. => true
+  -- `-1`/`+1`/`~1` parse as `UnaryOp` over a constant, not `.Constant`; these
+  -- remain immutable, so treat a sign/invert over a stable operand as stable.
+  | .UnaryOp _ (.USub _) operand
+  | .UnaryOp _ (.UAdd _) operand
+  | .UnaryOp _ (.Invert _) operand => isCallTimeStableDefault operand
+  | .Tuple _ values _ => values.val.all isCallTimeStableDefault
+  | _ => false
 
 mutual
 
@@ -596,7 +704,19 @@ partial def translateExpr (ctx : TranslationContext) (e : expr SourceRange)
 
   -- Variable references
   | .Name _ name _ =>
-    return mkStmtExprMd (StmtExpr.Var (.Local name.val))
+    if isScopedUnsupportedModuleGlobal ctx name.val then
+      throw (.unsupportedConstruct
+        s!"module variable '{name.val}' has a composite or type-alias value and cannot be read from another scope"
+        (toString (repr e)))
+    -- Module-global reads must first check Python's bound-name state.
+    let value := mkStmtExprMdWithLoc (StmtExpr.Var (.Local name.val)) md
+    if isScopedModuleGlobal ctx name.val then
+      let isBound := mkStmtExprMdWithLoc
+        (StmtExpr.Var (.Local (moduleGlobalBoundRefName name.val))) md
+      let check := mkStmtExprMdWithLoc
+        (StmtExpr.Assert isBound (some s!"global '{name.val}' is bound")) md
+      return mkStmtExprMdWithLoc (StmtExpr.Block [check, value] none) md
+    return value
 
   -- Binary operations
   | .BinOp _ left op right => do
@@ -686,10 +806,11 @@ partial def translateExpr (ctx : TranslationContext) (e : expr SourceRange)
         | .Name .. | .Constant .. => true
         | _ => false
       -- Translate all operands
-      let leftExpr ← translateExpr ctx left
+      let leftExpr ← translateExpr ctx left >>= coerceToAny ctx left
       let mut compExprs : Array StmtExprMd := #[]
       for c in comparators.val do
-        compExprs := compExprs.push (← translateExpr ctx c)
+        let compExpr ← translateExpr ctx c >>= coerceToAny ctx c
+        compExprs := compExprs.push compExpr
       let ⟨hCompSize⟩ ← guardProp (p := compExprs.size ≥ n) "compExprs size < n"
       -- For chained comparisons (n > 1), introduce temp variables for
       -- intermediate operands that are not simple names/literals.
@@ -846,11 +967,18 @@ partial def translateExpr (ctx : TranslationContext) (e : expr SourceRange)
           return mkStmtExprMdWithLoc (.StaticCall "Any_get" [dictOrList, index]) md
 
   -- Attribute access: obj.attr or obj.method
-  | .Attribute _ obj attr _ => do
+  | .Attribute _ obj attr attrCtx => do
+    let isLoad := match attrCtx with
+      | .Load _ => true
+      | _ => false
     -- Check if this is self.field access in a method
     match obj with
     | .Name _ name _ =>
-      if name.val == "self" && ctx.currentClassName.isSome then
+      if isLoad && isScopedUnsupportedModuleGlobal ctx name.val then
+        throw (.unsupportedConstruct
+          s!"attribute read on module variable '{name.val}' with composite or type-alias value is not supported"
+          (toString (repr e)))
+      else if name.val == "self" && ctx.currentClassName.isSome then
         -- self.field in a method - field type is Any (builtins) or Composite (classes)
         let fieldExpr := mkStmtExprMd (StmtExpr.Var (.Field
           (mkStmtExprMd (StmtExpr.Var (.Local "self")))
@@ -940,7 +1068,8 @@ partial def reMapFunctionName (_ctx: TranslationContext) (fname: String) : Strin
 partial def isPackage (ctx : TranslationContext) (expr: expr SourceRange) : Bool :=
   let (root, _):= getListAttributes expr
   match root with
-  | .Name _ n _ => n.val ∉ ctx.variableTypes.unzip.fst
+  | .Name _ n _ =>
+    n.val ∉ ctx.variableTypes.unzip.fst && !ctx.moduleGlobals.contains n.val
   | _ => false
 
 partial def inferExprType (ctx : TranslationContext) (e: expr SourceRange) : Except TranslationError String := do
@@ -960,7 +1089,9 @@ partial def inferExprType (ctx : TranslationContext) (e: expr SourceRange) : Exc
   | .Name _ n _ =>
       match ctx.variableTypes.find? (λ v => v.fst == n.val) with
       | some (_, ty) => return ty
-      | _ => return PyLauType.Package
+      | _ =>
+        if ctx.moduleGlobals.contains n.val then return PyLauType.Any
+        else return PyLauType.Package
   | .Attribute _ v attr _ =>
     let vty ← inferExprType ctx v
     match tryLookupFieldHighType ctx vty attr.val with
@@ -1016,6 +1147,8 @@ partial def coerceToAny (ctx : TranslationContext) (expr : expr SourceRange)
   let ty ← inferExprType ctx expr
   if isCompositeType ctx ty then
     pure <| mkStmtExprMd (.Hole)
+  else if ty == PyLauType.DictStrAny then
+    pure <| mkStmtExprMd (.StaticCall "from_DictStrAny" [translated])
   else pure translated
 
 partial def refineFunctionCallExpr (ctx : TranslationContext) (func: expr SourceRange) :
@@ -1173,6 +1306,69 @@ partial def translateExprAsReceiver (ctx : TranslationContext)
     | _ => translateExpr ctx e
   | _ => translateExpr ctx e
 
+/-- Return variables whose values are reachable from an expression passed to
+    an unmodeled call. Access chains retain their base root, while aggregate
+    and conditional expressions may expose roots from any contained value. -/
+private partial def mutableRootNames (e : expr SourceRange) : List String :=
+  match e with
+  | .Name _ name _ => [name.val]
+  | .Attribute _ value _ _
+  | .Subscript _ value _ _
+  | .Starred _ value _
+  | .Await _ value
+  | .YieldFrom _ value => mutableRootNames value
+  | .NamedExpr _ target value =>
+    mutableRootNames target ++ mutableRootNames value
+  | .BoolOp _ _ values =>
+    values.val.toList.flatMap mutableRootNames
+  | .IfExp _ _ body orelse =>
+    mutableRootNames body ++ mutableRootNames orelse
+  | .Dict _ keys values =>
+    (keys.val.toList.flatMap fun key =>
+      match key with
+      | .some_expr _ value => mutableRootNames value
+      | .missing_expr _ => []) ++
+      values.val.toList.flatMap mutableRootNames
+  | .Set _ values
+  | .List _ values _
+  | .Tuple _ values _ =>
+    values.val.toList.flatMap mutableRootNames
+  | .Call _ func args keywords =>
+    let receiverRoots := match func with
+      | .Attribute _ receiver _ _ => mutableRootNames receiver
+      | _ => []
+    receiverRoots ++
+      args.val.toList.flatMap mutableRootNames ++
+      keywords.val.toList.flatMap fun keyword =>
+        match keyword with
+        | .mk_keyword _ _ value => mutableRootNames value
+  | _ => []
+
+private partial def shouldHavocUnmodeledCallRoot
+    (ctx : TranslationContext) (name : String) (isReceiver : Bool) : Bool :=
+  if isScopedModuleGlobal ctx name then
+    true
+  else
+    match ctx.variableTypes.find? (fun entry => entry.1 == name) with
+    | some (_, ty) =>
+      isReceiver || ty == PyLauType.Any || ty == PyLauType.ListAny ||
+        ty == PyLauType.ListStr || ty == PyLauType.DictStrAny
+    | none => false
+
+private partial def mkUnmodeledCallRootHavoc (ctx : TranslationContext)
+    (name : String) (source : FileRange)
+    : Except TranslationError (List StmtExprMd) := do
+  let holeType ←
+    if isScopedModuleGlobal ctx name then
+      pure AnyTy
+    else
+      match ctx.variableTypes.find? (fun entry => entry.1 == name) with
+      | some (_, ty) => translateType ctx ty
+      | none => pure AnyTy
+  return [mkStmtExprMdWithLoc
+    (StmtExpr.Assign [mkVariableMd (.Local name)]
+      (mkStmtExprMd (.Hole false (some holeType)))) source]
+
 /-- Translate a Python call expression to Laurel.
     Tries factory dispatch, then method dispatch on typed variables,
     then falls back to a static call by flattened name. -/
@@ -1181,6 +1377,11 @@ partial def translateCall (ctx : TranslationContext)
                           (args : List (expr SourceRange))
                           (kwords : List (keyword SourceRange))
     : Except TranslationError StmtExprMd := do
+  if let .Name _ name _ := f then
+    if isScopedModuleGlobal ctx name.val then
+      throw (.unsupportedConstruct
+        s!"calling a value stored in variable '{name.val}' is not supported"
+        (toString (repr f)))
   -- Step 1: factory dispatch (e.g., boto3.client('iam'))
   -- Suppressed when translating the RHS of self.field assignments to avoid
   -- composite coercion issues; dispatch-initialized fields are tracked
@@ -1204,35 +1405,47 @@ partial def translateCall (ctx : TranslationContext)
           | .Attribute range _ attr _ => (attr.val, range)
           | _ => (funcName, .none)
         throwUserError range s!"Unknown method '{methodName}'"
-    -- Havoc the receiver and Any-typed arguments since the unmodeled call
-    -- may mutate them and value-typed locals are not reachable via heap havoc.
-    -- Note: composite-typed arguments are NOT havoc'd here. If the unmodeled
-    -- call mutates a composite's fields, the heap should be havoc'd, but that
-    -- requires coordination with HeapParameterization and is out of scope.
-    let receiverHavoc := match f with
-      | .Attribute _ (.Name _ receiverName _) _ _ =>
-        if receiverName.val ∈ ctx.variableTypes.unzip.1 then
-          [mkStmtExprMd (StmtExpr.Assign
-            [mkVariableMd (.Local receiverName.val)]
-            (mkStmtExprMd .Hole))]
-        else []
+    -- Havoc every reachable value root that the unmodeled call may mutate.
+    -- Module globals need the same conservative treatment as locals; otherwise
+    -- later assertions can incorrectly reuse their pre-call value.
+    let receiverRoots := match f with
+      | .Attribute _ receiver _ _ =>
+        (mutableRootNames receiver).map fun name => (name, true)
       | _ => []
-    let argHavoc := args.flatMap fun arg =>
-      if let .Name _ n _ := arg then
-        match ctx.variableTypes.find? (λ v => Prod.fst v == n.val) with
-        | some (varName, ty) =>
-          if ty == PyLauType.Any then
-            [mkStmtExprMd (StmtExpr.Assign
-              [mkVariableMd (.Local varName)]
-              (mkStmtExprMd (.Hole false none)))]
-          else []
-        | _ => []
-      else []
-    let havocStmts := receiverHavoc ++ argHavoc
-    if havocStmts.isEmpty then
+    let argumentRoots :=
+      args.flatMap mutableRootNames |>.map fun name => (name, false)
+    let keywordRoots := kwords.flatMap fun keyword =>
+      match keyword with
+      | .mk_keyword _ _ value =>
+        (mutableRootNames value).map fun name => (name, false)
+    let havocNames := (receiverRoots ++ argumentRoots ++ keywordRoots).foldl
+      (init := ([] : List String)) fun names (name, isReceiver) =>
+        if name ∈ names || !shouldHavocUnmodeledCallRoot ctx name isReceiver then
+          names
+        else
+          names ++ [name]
+    let havocSource := sourceRangeToSource ctx.filePath f.ann
+    let evaluatedNames :=
+      (Resolution.collectNameReadsExpr f ++
+        args.flatMap Resolution.collectNameReadsExpr ++
+        kwords.flatMap fun keyword =>
+          match keyword with
+          | .mk_keyword _ _ value => Resolution.collectNameReadsExpr value)
+        |>.map fun name => name.toLaurel.text
+    let boundNames := evaluatedNames.foldl (init := ([] : List String)) fun names name =>
+      if name ∈ names || !isScopedModuleGlobal ctx name then names else names ++ [name]
+    let boundChecks := boundNames.map fun name =>
+      let isBound := mkStmtExprMdWithLoc
+        (StmtExpr.Var (.Local (moduleGlobalBoundRefName name))) havocSource
+      mkStmtExprMdWithLoc
+        (StmtExpr.Assert isBound (some s!"global '{name}' is bound")) havocSource
+    let havocStmts := (← havocNames.mapM fun name =>
+      mkUnmodeledCallRootHavoc ctx name havocSource).flatten
+    let preamble := boundChecks ++ havocStmts
+    if preamble.isEmpty then
       return mkStmtExprMd .Hole
     else
-      return mkStmtExprMd (.Block (havocStmts ++ [mkStmtExprMd .Hole]) none)
+      return mkStmtExprMd (.Block (preamble ++ [mkStmtExprMd .Hole]) none)
   -- Step 3: translate the resolved call
   let methodName := match f with
     | .Attribute _ _ attr _ => attr.val
@@ -1363,6 +1576,27 @@ def freeVarExpr (name: String) := mkStmtExprMd (.Var (.Local name))
 def maybeExceptVar := freeVarMd "maybe_except"
 def nullcall_var := freeVarMd "nullcall_ret"
 
+private def importBoundNames (s : stmt SourceRange) : List String :=
+  let aliasName (fromImport : Bool) (a : alias SourceRange) :=
+    match a with
+    | .mk_alias _ name asName =>
+      let defaultName :=
+        if fromImport then name.val else (name.val.splitOn ".").head!
+      asName.val.map (·.val) |>.getD defaultName
+  match s with
+  | .Import _ aliases => aliases.val.toList.map (aliasName false)
+  | .ImportFrom _ _ aliases _ => aliases.val.toList.map (aliasName true)
+  | _ => []
+
+private def markModuleGlobalBound (ctx : TranslationContext) (name : String)
+    (source : FileRange) (stmts : List StmtExprMd) : List StmtExprMd :=
+  if isScopedModuleGlobal ctx name then
+    stmts ++ [mkStmtExprMdWithLoc
+      (.Assign [mkVariableMd (.Local (moduleGlobalBoundRefName name))]
+        (mkStmtExprMd (.LiteralBool true))) source]
+  else
+    stmts
+
 /-- Walk an expression tree and extract any nested multi-output procedure calls
     into preceding multi-target assignments. Returns (preamble, rewritten expr).
     Uses a mutable counter for unique variable names. -/
@@ -1487,7 +1721,9 @@ partial def translateAssign  (ctx : TranslationContext)
     | .Name _ n _ =>
       if n.val ∈ ctx.variableTypes.unzip.1 then
         let target := mkVariableMd (.Local n.val)
-        return (ctx, [mkStmtExprMd (StmtExpr.Assign [target] rhs_trans)] ++ exceptHavoc, true)
+        let stmts := markModuleGlobalBound ctx n.val source
+          [mkStmtExprMd (StmtExpr.Assign [target] rhs_trans)]
+        return (ctx, stmts ++ exceptHavoc, true)
       else
         -- Use type annotation if it matches a known composite type
         let annType := annotation.map (fun a => pyExprToString a) |>.getD "Any"
@@ -1499,7 +1735,8 @@ partial def translateAssign  (ctx : TranslationContext)
           | _ => pure (AnyTy, "Any")
         let initStmt := mkVarDeclInit n.val varTy (mkStmtExprMd .Hole)
         let newctx := {ctx with variableTypes:=(n.val, trackType)::ctx.variableTypes}
-        return (newctx, [initStmt] ++ exceptHavoc, true)
+        let stmts := markModuleGlobalBound ctx n.val source [initStmt]
+        return (newctx, stmts ++ exceptHavoc, true)
     | _ => return (ctx, [mkStmtExprMd .Hole] ++ exceptHavoc, false)
   }
   let mut newctx := ctx
@@ -1541,7 +1778,8 @@ partial def translateAssign  (ctx : TranslationContext)
             {newctx with variableTypes:= newctx.variableTypes ++ [(n.val, className.text)]}
         | _=> newctx
         if n.val ∈ newctx.variableTypes.unzip.1 then
-          return (newctx, moExtracts ++ assignStmts, true)
+          return (newctx,
+            moExtracts ++ markModuleGlobalBound ctx n.val source assignStmts, true)
         else
           let inferType ← inferExprType ctx rhs
           let type := match annotation with
@@ -1553,7 +1791,9 @@ partial def translateAssign  (ctx : TranslationContext)
                if isKnownType ctx annStr then annStr else inferType
           let initStmt := mkVarDeclInit n.val AnyTy AnyNone
           newctx := {ctx with variableTypes:=(n.val, type)::ctx.variableTypes}
-          return (newctx, moExtracts ++ (initStmt :: assignStmts), true)
+          return (newctx,
+            moExtracts ++ markModuleGlobalBound ctx n.val source
+              (initStmt :: assignStmts), true)
     | .Subscript _ _ _ _ =>
         match getSubscriptList lhs with
         | target :: slices =>
@@ -1567,7 +1807,21 @@ partial def translateAssign  (ctx : TranslationContext)
     | .Attribute _ obj attr _ =>
       match obj with
       | .Name _ name _ =>
-        if name.val == "self" && ctx.currentClassName.isSome then
+        if isScopedUnsupportedModuleGlobal ctx name.val then
+          throw (.unsupportedConstruct
+            s!"attribute write on module variable '{name.val}' with composite or type-alias value is not supported"
+            (toString (repr lhs)))
+        else if isScopedModuleGlobal ctx name.val then
+          let isBound := mkStmtExprMdWithLoc
+            (StmtExpr.Var (.Local (moduleGlobalBoundRefName name.val))) source
+          let check := mkStmtExprMdWithLoc
+            (StmtExpr.Assert isBound (some s!"global '{name.val}' is bound")) source
+          let base := mkStmtExprMdWithLoc (StmtExpr.Var (.Local name.val)) source
+          let fieldAccess := mkVariableMd (.Field base attr.val)
+          let assignStmt := mkStmtExprMdWithLoc
+            (StmtExpr.Assign [fieldAccess] rhs_trans) source
+          return (ctx, moExtracts ++ [check, assignStmt], true)
+        else if name.val == "self" && ctx.currentClassName.isSome then
           -- self.field : type = value in a method
           let fieldAccess := mkVariableMd (.Field
             (mkStmtExprMd (StmtExpr.Var (.Local "self")))
@@ -1611,11 +1865,18 @@ partial def getForLoopVars (targetIter: expr SourceRange) :List (String × Strin
     | _ => []
 
 def inferClassTypeFromLaurelExpr (ctx : TranslationContext) (value : expr SourceRange) : Option String :=
-  match translateExpr ctx value with
-  | .ok {val := .New classname, ..} => classname.text
-  | .ok {val := .StaticCall funcname _, ..} =>
-      if isCompositeType ctx funcname.text then funcname.text else none
-  | _ => none
+  let translated : Option String :=
+    match translateExpr ctx value with
+    | .ok {val := .New classname, ..} => classname.text
+    | .ok {val := .StaticCall funcname _, ..} =>
+        if isCompositeType ctx funcname.text then funcname.text else none
+    | _ => none
+  match value with
+  | .Call _ (.Name _ className _) _ _ =>
+    match ctx.importedSymbols[className.val]? with
+    | some (.compositeType laurelName) => some laurelName
+    | _ => translated
+  | _ => translated
 
 partial def collectDeclaredNamesAndTypes (ctx : TranslationContext) (stmts : List (stmt SourceRange)) : List (String × String) :=
   let rec go (s : stmt SourceRange) : List (String × String) :=
@@ -1711,9 +1972,16 @@ partial def containsUserCall (ctx : TranslationContext) (e : StmtExprMd) : Bool 
     See issue #1000. -/
 def getExceptionCheckPreamble (ctx : TranslationContext) (e : StmtExprMd) (varName : String)
     : List StmtExprMd × StmtExprMd :=
+  -- Expressions embedding statement effects (e.g. module-global havoc) must
+  -- be hoisted: duplicating them into the assert would re-run the effect and
+  -- put a global write in a restricted position.
+  let containsStatementEffect :=
+    anyStmtExpr (fun node => match node.val with
+      | .Assign _ _ => true
+      | _ => false) e
   if (getMaybeExceptionExprs ctx e).isEmpty then
     ([], e)
-  else if containsUserCall ctx e then
+  else if containsUserCall ctx e || containsStatementEffect then
     let varDecl := mkVarDeclInit varName AnyTy e
     let varRef := mkStmtExprMd (StmtExpr.Var (.Local varName))
     ([varDecl, mkExceptionCheckAssert varRef "Check exception"], varRef)
@@ -1727,7 +1995,13 @@ def withExceptionChecks (ctx : TranslationContext)
   -- Generate exception checks for the last assignment's RHS.
   -- Find the last Assign in the list (there may be trailing type assertions).
   let lastAssignIdx := stmts.reverse.findIdx? fun s =>
-    match s.val with | .Assign _ _ => true | _ => false
+    match s.val with
+    | .Assign [target] _ =>
+      match target.val with
+      | .Local n => !n.text.startsWith ("$static." ++ moduleGlobalBoundPrefix)
+      | _ => true
+    | .Assign _ _ => true
+    | _ => false
   let rhs_exprs := match lastAssignIdx with
     | some revIdx =>
       let idx := stmts.length - 1 - revIdx
@@ -1744,6 +2018,36 @@ def withExceptionChecks (ctx : TranslationContext)
       let rest := stmts.drop idx
       (newctx, before ++ exceptionCheck ++ rest)
     | none => (newctx, exceptionCheck ++ stmts)
+
+/-- Whether the statements can transfer control out of an enclosing `try`
+    statement: a `return` anywhere, or a `break`/`continue` that is not
+    enclosed in a loop nested inside these statements. Nested function and
+    class definitions are opaque scopes whose control flow cannot escape. -/
+private partial def containsTryEscape (stmts : List (stmt SourceRange)) : Bool :=
+  let rec go (inLoop : Bool) (s : stmt SourceRange) : Bool :=
+    match s with
+    | .Return _ _ => true
+    | .Break _ | .Continue _ => !inLoop
+    | .If _ _ thenb elseb =>
+      thenb.val.toList.any (go inLoop) || elseb.val.toList.any (go inLoop)
+    | .While _ _ wbody orelse =>
+      wbody.val.toList.any (go true) || orelse.val.toList.any (go inLoop)
+    | .For _ _ _ fbody orelse _
+    | .AsyncFor _ _ _ fbody orelse _ =>
+      fbody.val.toList.any (go true) || orelse.val.toList.any (go inLoop)
+    | .With _ _ wbody _
+    | .AsyncWith _ _ wbody _ => wbody.val.toList.any (go inLoop)
+    | .Try _ tbody handlers orelse finalbody
+    | .TryStar _ tbody handlers orelse finalbody =>
+      tbody.val.toList.any (go inLoop) ||
+        (handlers.val.toList.any fun h => match h with
+          | .ExceptHandler _ _ _ hbody => hbody.val.toList.any (go inLoop)) ||
+        orelse.val.toList.any (go inLoop) || finalbody.val.toList.any (go inLoop)
+    | .Match _ _ cases =>
+      cases.val.toList.any fun c => match c with
+        | .mk_match_case _ _ _ cbody => cbody.val.toList.any (go inLoop)
+    | _ => false
+  stmts.any (go false)
 
 mutual
 
@@ -1773,6 +2077,10 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
 
   -- Annotated assignment: x: int = expr or x: ClassName = ClassName(args) or self.field: int = expr
   | .AnnAssign _ target annotation value _ => do
+    if containsDefinitionTimeEffect annotation then
+      throw (.unsupportedConstruct
+        "effectful annotation expressions are not supported"
+        (toString (repr annotation)))
     match value.val with
     | some value =>
       let (ctx, stmts, typeAssertSafe) ← translateAssign ctx target annotation value md
@@ -1822,13 +2130,44 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
     return (bodyCtx, preamble ++ [ifStmt])
 
   -- While loop
-  | .While _ test body _orelse => do
-    -- Note: Python while-else not supported yet
+  | .While _ test body orelse => do
+    if !orelse.val.isEmpty then
+      throw (.unsupportedConstruct "while-else is not supported"
+        (toString (repr s)))
     let condExpr ← translateExpr ctx test
     let breakLabel := s!"loop_break_{test.toAst.ann.start.byteIdx}"
     let continueLabel := s!"loop_continue_{test.toAst.ann.start.byteIdx}"
     let loopCtx := { ctx with loopBreakLabel := some breakLabel, loopContinueLabel := some continueLabel }
     let (_, bodyStmts) ← translateStmtList loopCtx body.val.toList
+    -- A guard whose unmodeled calls havoc module globals may not appear in
+    -- loop-condition position (restricted); evaluate it in statement position
+    -- before the loop and at the end of every iteration.
+    let writesScopedGlobal (e : StmtExprMd) : Bool :=
+      anyStmtExpr (fun node =>
+        match node.val with
+        | .Assign targets _ => targets.any fun target =>
+            match target.val with
+            | .Local n => isScopedModuleGlobal ctx n.text
+            | _ => false
+        | _ => false) e
+    if writesScopedGlobal condExpr then
+      let condVar := s!"$while_cond_{test.toAst.ann.start.byteIdx}"
+      let condDecl := mkVarDeclInit condVar AnyTy condExpr
+      let condRef := mkStmtExprMd (StmtExpr.Var (.Local condVar))
+      let exceptionChecks :=
+        if (getMaybeExceptionExprs ctx condExpr).isEmpty then []
+        else [mkExceptionCheckAssert condRef "Check exception"]
+      let reEval := mkStmtExprMdWithLoc
+        (StmtExpr.Assign [mkVariableMd (.Local condVar)] condExpr) md
+      let continueBlock := mkStmtExprMdWithLoc
+        (StmtExpr.Block bodyStmts (some continueLabel)) md
+      let whileBody := mkStmtExprMd
+        (StmtExpr.Block ([continueBlock, reEval] ++ exceptionChecks) none)
+      let whileStmt := mkStmtExprMdWithLoc
+        (StmtExpr.While (Any_to_bool condRef) [] none whileBody false) md
+      let whileWrapped := mkStmtExprMdWithLoc
+        (StmtExpr.Block [whileStmt] (some breakLabel)) md
+      return (loopCtx, [condDecl] ++ exceptionChecks ++ [whileWrapped])
     let bodyBlock := mkStmtExprMdWithLoc (StmtExpr.Block bodyStmts (some continueLabel)) md
     let (preamble, condRef) := getExceptionCheckPreamble ctx condExpr s!"$while_cond_{test.toAst.ann.start.byteIdx}"
     let whileStmt := mkStmtExprMdWithLoc (StmtExpr.While (Any_to_bool condRef) [] none bodyBlock false) md
@@ -1916,10 +2255,31 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
     | .Block _ _ => return (ctx, [expr] ++ holeExceptHavoc)
     | _ => return (ctx, exceptionCheck ++ [expr])
 
-  | .Import _ _ | .ImportFrom _ _ _ _ |.Pass _ => return (ctx, [])
+  | .Import _ _ | .ImportFrom _ _ _ _ =>
+    let stmts := (importBoundNames s).flatMap fun name =>
+      if isScopedModuleGlobal ctx name then
+        let assign := mkStmtExprMdWithLoc
+          (.Assign [mkVariableMd (.Local name)]
+            (mkStmtExprMd (.Hole false (some AnyTy)))) md
+        markModuleGlobalBound ctx name md [assign]
+      else
+        []
+    return (ctx, stmts)
+
+  | .Pass _ => return (ctx, [])
 
   -- Try/except - wrap body with exception checks and handlers
-  | .Try _ body handlers _ _ => do
+  | .Try _ body handlers orelse finalbody => do
+    -- An early exit would jump past the finally body, which this lowering
+    -- runs on fall-through only.
+    if !finalbody.val.isEmpty &&
+        (containsTryEscape body.val.toList ||
+          handlers.val.toList.any (fun h => match h with
+            | .ExceptHandler _ _ _ hbody => containsTryEscape hbody.val.toList) ||
+          containsTryEscape orelse.val.toList) then
+      throw (.unsupportedConstruct
+        "try-finally with return, break, or continue in the try statement is not supported"
+        (toString (repr s)))
     let tryLabel := s!"try_end_{s.toAst.ann.start.byteIdx}"
     let catchersLabel := s!"exception_handlers_{s.toAst.ann.start.byteIdx}"
     let (bodyCtx, bodyStmts) ← translateStmtList ctx body.val.toList
@@ -1963,18 +2323,42 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
     -- Normal completion: exit the try block, skipping handlers
     let exitTry := mkStmtExprMd (StmtExpr.Exit tryLabel)
 
-    -- catchers block: body + exit try (normal path)
+    -- `else` runs only if the body completed without an exception (tracked by
+    -- a flag set as the body's last action). It is emitted after the handlers
+    -- so exceptions it raises propagate outward instead of re-entering this try.
+    let completedVar := s!"$try_completed_{s.toAst.ann.start.byteIdx}"
+    let markCompleted :=
+      if orelse.val.isEmpty then []
+      else [mkStmtExprMd (StmtExpr.Assign
+        [mkVariableMd (.Local completedVar)]
+        (mkStmtExprMd (.LiteralBool true)))]
+
+    -- catchers block: body + completion mark + exit try (normal path)
     let catchersBlock := mkStmtExprMd (StmtExpr.Block
-      (bodyStmtsWithChecks ++ [exitTry]) (some catchersLabel))
+      (bodyStmtsWithChecks ++ markCompleted ++ [exitTry]) (some catchersLabel))
 
     -- try block: catchers block + handler code
     let tryBlock := mkStmtExprMdWithLoc (StmtExpr.Block
       ([catchersBlock] ++ handlerStmts) (some tryLabel)) md
-    let mergedVars := bodyCtx.variableTypes ++
+    let (completedDecl, elseCtx, elseStmts) ←
+      if orelse.val.isEmpty then
+        pure ([], bodyCtx, [])
+      else do
+        let decl := mkVarDeclInit completedVar (mkHighTypeMd .TBool)
+          (mkStmtExprMd (.LiteralBool false))
+        let (elseCtx, elseBody) ← translateStmtList bodyCtx orelse.val.toList
+        let guardedElse := mkStmtExprMdWithLoc (StmtExpr.IfThenElse
+          (mkStmtExprMd (StmtExpr.Var (.Local completedVar)))
+          (mkStmtExprMd (StmtExpr.Block elseBody none)) none) md
+        pure ([decl], elseCtx, [guardedElse])
+    -- `finally` runs after the try on every fall-through path: normal
+    -- completion, handled exceptions, and re-raised exceptions.
+    let (finalCtx, finallyStmts) ← translateStmtList elseCtx finalbody.val.toList
+    let mergedVars := finalCtx.variableTypes ++
       (handlerCtx.variableTypes.filter fun (n, _) =>
-        !bodyCtx.variableTypes.any fun (bn, _) => bn == n)
-    let finalCtx := { bodyCtx with variableTypes := mergedVars }
-    return (finalCtx, [tryBlock])
+        !finalCtx.variableTypes.any fun (bn, _) => bn == n)
+    let finalCtx := { finalCtx with variableTypes := mergedVars }
+    return (finalCtx, completedDecl ++ [tryBlock] ++ elseStmts ++ finallyStmts)
 
   -- FIXME: Placeholder — `raise` is dropped so the Hole type inferrer doesn't
   -- produce Unknown types. Must be replaced to correctly model exceptions later.
@@ -1999,17 +2383,23 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
         let enterCall := mkInstanceMethodCall mgrTy "__enter__" mgrRef [] md
         let exitCall := mkInstanceMethodCall mgrTy "__exit__" mgrRef [] md
         match optVars.val with
-        | some varExpr =>
-          let varName := pyExprToString varExpr
+        | some (.Name _ varName _) =>
+          let varName := varName.val
           if varName ∈ currentCtx.variableTypes.unzip.fst then
             let assignStmt := mkStmtExprMdWithLoc (StmtExpr.Assign
               [mkVariableMd (.Local varName)] enterCall) md
-            setupStmts := setupStmts ++ [mgrDecl, assignStmt]
+            setupStmts := setupStmts ++
+              [mgrDecl] ++ markModuleGlobalBound currentCtx varName md [assignStmt]
           else
             -- New variable — declare outside the block so it's visible after
             let varDecl := mkVarDeclInitWithLoc varName AnyTy enterCall md
             currentCtx := {currentCtx with variableTypes := currentCtx.variableTypes ++ [(varName, PyLauType.Any)]}
-            setupStmts := setupStmts ++ [mgrDecl, varDecl]
+            setupStmts := setupStmts ++
+              [mgrDecl] ++ markModuleGlobalBound currentCtx varName md [varDecl]
+        | some target =>
+          throw (.unsupportedConstruct
+            "destructured with-as targets are not supported"
+            (toString (repr target)))
         | none =>
           setupStmts := setupStmts ++ [mgrDecl, enterCall]
         cleanupStmts := cleanupStmts ++ [exitCall]
@@ -2031,7 +2421,10 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
   -- Note that Any_iter_index(iter, index) should not return an exception when 0 <= index < Any_len(iter)
   -- and Any_iter_index is only called inside the loop body where that condition is satisfied,
   -- so it is sound to not put it inside AnyMaybeExceptionList
-  | .For _ target iter body _orelse _ => do
+  | .For _ target iter body orelse _ => do
+    if !orelse.val.isEmpty then
+      throw (.unsupportedConstruct "for-else is not supported"
+        (toString (repr s)))
     -- The iterator expression (we abstract it away).
     -- When the expression contains side-effect statements (e.g. a block with
     -- receiver havoc from an unmodeled method call), bind it to a temporary
@@ -2133,6 +2526,20 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
     match ctx.loopContinueLabel with
     | some lbl => return (ctx, [mkStmtExprMdWithLoc (StmtExpr.Exit lbl) md])
     | none => return (ctx, [mkStmtExprMdWithLoc (StmtExpr.Assert (mkStmtExprMd .Hole) none) md])
+
+  -- Register globals as scope variables so assignments resolve to static fields.
+  | .Global _ names =>
+    match names.val.find? fun n =>
+        !ctx.moduleGlobals.contains n.val && !moduleSymbolExists ctx n.val with
+    | some unsupported =>
+      throw (.unsupportedConstruct
+        s!"global variable '{unsupported.val}' cannot be lowered to a Laurel static field because its name collides with a top-level definition or it is assigned a composite value"
+        (toString (repr s)))
+    | none =>
+      let newCtx := names.val.foldl (init := ctx) fun c n =>
+        if n.val ∈ c.variableTypes.unzip.fst then c
+        else { c with variableTypes := (n.val, PyLauType.Any) :: c.variableTypes }
+      return (newCtx, [])
 
   -- Augmented assignment: x += expr  →  x = x op expr
   | .AugAssign sr target op value => do
@@ -2271,7 +2678,39 @@ def unpackPyArguments (ctx : TranslationContext) (args: arguments SourceRange)
 
 def pyFuncDefToPythonFunctionDecl (ctx : TranslationContext) (f : stmt SourceRange) : Except TranslationError PythonFunctionDecl := do
   match f with
-  | .FunctionDef _ name args _body _decorator_list returns _type_comment _ =>
+  | .FunctionDef _ name args _body decoratorList returns _type_comment _ =>
+    -- Common method decorators are handled by name resolution and the spec
+    -- pipeline, so only unknown decorators are a translation limitation here.
+    let supportedDecorator (d : expr SourceRange) : Bool :=
+      match d with
+      | .Name _ dName _ =>
+        dName.val ∈ ["staticmethod", "classmethod", "property",
+                     "overload", "abstractmethod"]
+      | _ => false
+    if decoratorList.val.toList.any (!supportedDecorator ·) then
+      throw (.unsupportedConstruct
+        "function decorators are not supported"
+        (toString (repr decoratorList)))
+    let defaults : List (expr SourceRange) := match args with
+      | .mk_arguments _ _ _ _ _ kwDefaults _ defaults =>
+        defaults.val.toList ++ kwDefaults.val.toList.filterMap fun value =>
+          match value with
+          | opt_expr.some_expr _ value => some value
+          | opt_expr.missing_expr _ => none
+    if let some effectful := defaults.find? containsDefinitionTimeEffect then
+      throw (TranslationError.unsupportedConstruct
+        "effectful default argument expressions are not supported"
+        (toString (repr effectful)))
+    if let some unstable := defaults.find? fun default =>
+        !isCallTimeStableDefault default then
+      throw (TranslationError.unsupportedConstruct
+        "non-constant default argument expressions are not supported because defaults are evaluated at function definition time"
+        (toString (repr unstable)))
+    if let some returnType := returns.val then
+      if containsDefinitionTimeEffect returnType then
+        throw (.unsupportedConstruct
+          "effectful return annotations are not supported"
+          (toString (repr returnType)))
     let name := match ctx.currentClassName with | none => name.val | some classname => manglePythonMethod classname name.val
     let args_trans ← unpackPyArguments ctx args
     let args := if ctx.currentClassName.isSome then args_trans.fst.tail else args_trans.fst
@@ -2337,17 +2776,68 @@ def renameInputParams (inputs : List Parameter) (exclude : String → Bool := fu
       (mkStmtExprMd (StmtExpr.Var (.Local prefixed)))
   (renamed, copies)
 
+/-- Collect declarations before translation because Python applies `global` to
+    the entire function, excluding nested function and class scopes. -/
+private partial def collectGlobalDeclNames (stmts : List (stmt SourceRange)) : List String :=
+  let rec go (s : stmt SourceRange) : List String :=
+    match s with
+    | .Global _ names => names.val.toList.map (·.val)
+    | .If _ _ thenb elseb => thenb.val.toList.flatMap go ++ elseb.val.toList.flatMap go
+    | .While _ _ body orelse => body.val.toList.flatMap go ++ orelse.val.toList.flatMap go
+    | .For _ _ _ body orelse _
+    | .AsyncFor _ _ _ body orelse _ => body.val.toList.flatMap go ++ orelse.val.toList.flatMap go
+    | .With _ _ body _
+    | .AsyncWith _ _ body _ => body.val.toList.flatMap go
+    | .Try _ body handlers orelse finalbody
+    | .TryStar _ body handlers orelse finalbody =>
+      body.val.toList.flatMap go
+        ++ (handlers.val.toList.flatMap fun h => match h with
+            | .ExceptHandler _ _ _ hbody => hbody.val.toList.flatMap go)
+        ++ orelse.val.toList.flatMap go ++ finalbody.val.toList.flatMap go
+    | .Match _ _ cases =>
+      cases.val.toList.flatMap fun c => match c with
+        | .mk_match_case _ _ _ cbody => cbody.val.toList.flatMap go
+    | _ => []
+  stmts.flatMap go
+
 /-- Translate a Python function body: collect all variable declarations, hoist them
     to the top, and translate the remaining statements. --/
-def translateFunctionBody (ctx : TranslationContext) (kwargsName : Option String) (inputs: List Parameter) (body: List (stmt SourceRange))
+def translateFunctionBody (ctx : TranslationContext)
+    (inputs : List Parameter) (body : List (stmt SourceRange))
+    (isModuleScope : Bool := false)
   : Except TranslationError (StmtExprMd × TranslationContext) := do
-    let newDecls := collectDeclaredNamesAndTypes ctx body
+    let globalNames := collectGlobalDeclNames body
+    let localNames := if isModuleScope then [] else
+      (StrataPython.Resolution.computeLocals body.toArray []).map fun (name, _) =>
+        name.toLaurel.text
+    let scopeGlobals := globalNames.foldl (init := ctx.scopeGlobals) fun names n =>
+      if ctx.moduleGlobals.contains n then names.insert n else names
+    let scopeLocals := (inputs.map (·.name.text) ++ localNames).foldl
+      (init := ({} : Std.HashSet String)) fun names n =>
+        if n ∈ globalNames then names else names.insert n
+    let scopeLocals :=
+      if isModuleScope then scopeLocals.union ctx.unsupportedModuleGlobals
+      else scopeLocals
+    let ctx := { ctx with
+      scopeGlobals := scopeGlobals
+      scopeLocals := scopeLocals }
+    let ctx := globalNames.foldl (init := ctx) fun c n =>
+      if !c.moduleGlobals.contains n || n ∈ c.variableTypes.unzip.fst then c
+      else { c with variableTypes := (n, PyLauType.Any) :: c.variableTypes }
+    -- Lexical ownership in real functions comes from Resolution.computeLocals.
+    -- The synthetic module wrapper uses dynamic declaration behavior because
+    -- module bindings do not follow the function-local rule.
+    let inferredDecls := collectDeclaredNamesAndTypes ctx body
+    let newDecls := if isModuleScope then inferredDecls else
+      localNames.map fun name =>
+        match inferredDecls.find? (fun (candidate, _) => candidate == name) with
+        | some (_, ty) => (name, ty)
+        | none => (name, PyLauType.Any)
     let (varDecls, ctx) ←  createVarDeclStmtsAndCtx ctx newDecls
     let (newctx, bodyStmts) ← translateStmtList ctx body
     let bodyStmts := prependExceptHandlingHelper (varDecls ++ bodyStmts)
     let nonSelfParams := inputs.filter (fun p => p.name.text != "self")
     let (_, paramCopies) := renameInputParams nonSelfParams
-      (match kwargsName with | some kw => (· == kw) | none => fun _ => false)
     let noneReturn := mkStmtExprMd (.Assign [mkVariableMd (.Local PyLauFuncReturnVar)] AnyNone)
     let bodyStmts := noneReturn::paramCopies ++ bodyStmts
     let bodyStmts := (mkStmtExprMd (.Assign [mkVariableMd $ .Declare ⟨ "nullcall_ret", AnyTy⟩] AnyNone)) :: bodyStmts
@@ -2396,13 +2886,19 @@ def translateFunction (ctx : TranslationContext) (sourceRange: SourceRange) (fun
     -- Translate function body
     let inputTypes := funcDecl.args.map fun arg =>
       (arg.name, highTypeToPyLauType arg.laurelType.val)
-    let ctx := {ctx with variableTypes:= ("nullcall_ret", PyLauType.Any)::inputTypes}
+    let inputTypes := match funcDecl.kwargsName with
+      | some kwargs => (kwargs, PyLauType.DictStrAny) :: inputTypes
+      | none => inputTypes
+    let ctx := {ctx with
+      variableTypes:= ("nullcall_ret", PyLauType.Any)::inputTypes
+      scopeGlobals := {}
+      scopeLocals := {}}
     let ctx := match ctx.currentClassName with
       | some cn => {ctx with variableTypes := ("self", cn) :: ctx.variableTypes}
       | none => ctx
     let (bodyTrans, newCtx) ← match body with
     | some body =>
-        let (bodyBlock, newCtx) ←  translateFunctionBody ctx funcDecl.kwargsName inputs body
+        let (bodyBlock, newCtx) ← translateFunctionBody ctx inputs body
         pure $ (Body.Opaque typeConstraintPostcondition bodyBlock wildcardModifies, newCtx)
     | _ =>  pure $ (Body.Opaque [] none ModifiesGroup.nothingChanges, ctx)
 
@@ -2846,12 +3342,456 @@ def PreludeInfo.merge (a b : PreludeInfo) : PreludeInfo where
   callableProcedures := b.callableProcedures.fold (init := a.callableProcedures) fun s n => s.insert n
   importedSymbols := b.importedSymbols.fold (init := a.importedSymbols) fun m k v => m.insert k v
 
+private def moduleGlobalNameCollides (ctx : TranslationContext) (name : String) : Bool :=
+  frontendReservedGlobalNames.contains name ||
+  name.startsWith moduleGlobalBoundPrefix ||
+  moduleSymbolExists ctx name ||
+  moduleSymbolExists ctx (moduleGlobalBoundName name)
+
+private partial def collectTargetNames
+    (target : expr SourceRange) : List (String × SourceRange) :=
+  match target with
+  | .Name sr name _ => [(name.val, sr)]
+  | .Tuple _ elts _
+  | .List _ elts _ => elts.val.toList.flatMap collectTargetNames
+  | .Starred _ inner _ => collectTargetNames inner
+  | _ => []
+
+private partial def collectModuleBoundNames
+    (stmts : List (stmt SourceRange)) : List (String × stmt SourceRange) :=
+  let rec go (s : stmt SourceRange) : List (String × stmt SourceRange) :=
+    match s with
+    | .Assign _ targets _ _ =>
+      targets.val.toList.flatMap fun target =>
+        (collectTargetNames target).map fun (name, _) => (name, s)
+    | .AnnAssign _ target _ _ _ =>
+      (collectTargetNames target).map fun (name, _) => (name, s)
+    | .AugAssign _ target _ _ =>
+      (collectTargetNames target).map fun (name, _) => (name, s)
+    | .If _ _ body orelse =>
+      body.val.toList.flatMap go ++ orelse.val.toList.flatMap go
+    | .While _ _ body orelse =>
+      body.val.toList.flatMap go ++ orelse.val.toList.flatMap go
+    | .For _ target _ body orelse _
+    | .AsyncFor _ target _ body orelse _ =>
+      (collectTargetNames target).map (fun (name, _) => (name, s))
+        ++ body.val.toList.flatMap go ++ orelse.val.toList.flatMap go
+    | .With _ items body _
+    | .AsyncWith _ items body _ =>
+      let bound := items.val.toList.flatMap fun item =>
+        match item with
+        | .mk_withitem _ _ optVars =>
+          match optVars.val with
+          | some target =>
+            (collectTargetNames target).map fun (name, _) => (name, s)
+          | none => []
+      bound ++ body.val.toList.flatMap go
+    | .Try _ body handlers orelse finalbody
+    | .TryStar _ body handlers orelse finalbody =>
+      body.val.toList.flatMap go
+        ++ (handlers.val.toList.flatMap fun h => match h with
+            | .ExceptHandler _ _ _ hbody => hbody.val.toList.flatMap go)
+        ++ orelse.val.toList.flatMap go ++ finalbody.val.toList.flatMap go
+    | .Match _ _ cases =>
+      cases.val.toList.flatMap fun c => match c with
+        | .mk_match_case _ _ _ body => body.val.toList.flatMap go
+    | _ => []
+  stmts.flatMap go
+
+private partial def collectAllGlobalDeclNames
+    (stmts : List (stmt SourceRange)) : List String :=
+  let rec go (s : stmt SourceRange) : List String :=
+    match s with
+    | .Global _ names => names.val.toList.map (·.val)
+    | .FunctionDef _ _ _ body _ _ _ _
+    | .AsyncFunctionDef _ _ _ body _ _ _ _
+    | .ClassDef _ _ _ _ body _ _ => collectAllGlobalDeclNames body.val.toList
+    | .If _ _ body orelse
+    | .While _ _ body orelse =>
+      body.val.toList.flatMap go ++ orelse.val.toList.flatMap go
+    | .For _ _ _ body orelse _
+    | .AsyncFor _ _ _ body orelse _ =>
+      body.val.toList.flatMap go ++ orelse.val.toList.flatMap go
+    | .With _ _ body _
+    | .AsyncWith _ _ body _ => body.val.toList.flatMap go
+    | .Try _ body handlers orelse finalbody
+    | .TryStar _ body handlers orelse finalbody =>
+      body.val.toList.flatMap go
+        ++ (handlers.val.toList.flatMap fun h => match h with
+            | .ExceptHandler _ _ _ hbody => hbody.val.toList.flatMap go)
+        ++ orelse.val.toList.flatMap go ++ finalbody.val.toList.flatMap go
+    | .Match _ _ cases =>
+      cases.val.toList.flatMap fun c => match c with
+        | .mk_match_case _ _ _ body => body.val.toList.flatMap go
+    | _ => []
+  stmts.flatMap go
+
+private partial def collectGlobalsInDroppedClassConstructs
+    (stmts : List (stmt SourceRange)) : List String :=
+  let rec go (s : stmt SourceRange) : List String :=
+    match s with
+    | .AsyncFunctionDef _ _ _ body _ _ _ _
+    | .ClassDef _ _ _ _ body _ _ => collectAllGlobalDeclNames body.val.toList
+    | .FunctionDef _ _ _ _ _ _ _ _ => []
+    | .If _ _ body orelse
+    | .While _ _ body orelse =>
+      body.val.toList.flatMap go ++ orelse.val.toList.flatMap go
+    | .For _ _ _ body orelse _
+    | .AsyncFor _ _ _ body orelse _ =>
+      body.val.toList.flatMap go ++ orelse.val.toList.flatMap go
+    | .With _ _ body _
+    | .AsyncWith _ _ body _ => body.val.toList.flatMap go
+    | .Try _ body handlers orelse finalbody
+    | .TryStar _ body handlers orelse finalbody =>
+      body.val.toList.flatMap go
+        ++ (handlers.val.toList.flatMap fun h => match h with
+            | .ExceptHandler _ _ _ hbody => hbody.val.toList.flatMap go)
+        ++ orelse.val.toList.flatMap go ++ finalbody.val.toList.flatMap go
+    | .Match _ _ cases =>
+      cases.val.toList.flatMap fun c => match c with
+        | .mk_match_case _ _ _ body => body.val.toList.flatMap go
+    | _ => []
+  stmts.flatMap go
+
+private structure ModuleImportBinding where
+  name : String
+  statement : stmt SourceRange
+  isModuleScope : Bool
+
+private structure DirectImportBinding where
+  localName : String
+  moduleName : String
+  importedName : Option String
+  source : SourceRange
+
+/-- Collect direct, absolute module imports with their local binding names. -/
+private def collectDirectImportBindings
+    (stmts : Array (stmt SourceRange)) : List DirectImportBinding :=
+  stmts.toList.flatMap fun s => match s with
+    | .Import sr aliases => aliases.val.toList.map fun a => match a with
+      | .mk_alias _ moduleName asName =>
+        let localName := asName.val.map (·.val) |>.getD (moduleName.val.splitOn ".").head!
+        { localName, moduleName := moduleName.val, importedName := none, source := sr }
+    | .ImportFrom sr moduleName aliases level =>
+      let isAbsolute := level.val.all fun value => value.value == 0
+      if !isAbsolute then [] else
+        match moduleName.val with
+        | none => []
+        | some moduleName => aliases.val.toList.map fun a => match a with
+          | .mk_alias _ importedName asName =>
+            let localName := asName.val.map (·.val) |>.getD importedName.val
+            { localName, moduleName := moduleName.val,
+              importedName := some importedName.val, source := sr }
+    | _ => []
+
+/-- Collect imports whose targets resolve to the module namespace. Imports in
+    module control flow are module-scoped; imports in functions/classes are
+    included only when their target is explicitly declared global. -/
+private partial def collectModuleImports
+    (stmts : List (stmt SourceRange)) : List ModuleImportBinding :=
+  let rec go (scopeGlobals : Option (Std.HashSet String))
+      (s : stmt SourceRange) : List ModuleImportBinding :=
+    let scanStmts body := body.val.toList.flatMap (go scopeGlobals)
+    match s with
+    | .Import _ _
+    | .ImportFrom _ _ _ _ =>
+      (importBoundNames s).filterMap fun name =>
+        if scopeGlobals.all (·.contains name) then
+          some {
+            name := name
+            statement := s
+            isModuleScope := scopeGlobals.isNone
+          }
+        else
+          none
+    | .FunctionDef _ _ _ body _ _ _ _
+    | .AsyncFunctionDef _ _ _ body _ _ _ _
+    | .ClassDef _ _ _ _ body _ _ =>
+      let globals := Std.HashSet.ofList (collectGlobalDeclNames body.val.toList)
+      body.val.toList.flatMap (go (some globals))
+    | .If _ _ body orelse
+    | .While _ _ body orelse =>
+      scanStmts body ++ scanStmts orelse
+    | .For _ _ _ body orelse _
+    | .AsyncFor _ _ _ body orelse _ =>
+      scanStmts body ++ scanStmts orelse
+    | .With _ _ body _
+    | .AsyncWith _ _ body _ => scanStmts body
+    | .Try _ body handlers orelse finalbody
+    | .TryStar _ body handlers orelse finalbody =>
+      scanStmts body
+        ++ (handlers.val.toList.flatMap fun handler =>
+          match handler with
+          | .ExceptHandler _ _ _ handlerBody => scanStmts handlerBody)
+        ++ scanStmts orelse ++ scanStmts finalbody
+    | .Match _ _ cases =>
+      cases.val.toList.flatMap fun c =>
+        match c with
+        | .mk_match_case _ _ _ body => scanStmts body
+    | _ => []
+  stmts.flatMap (go none)
+
+/-- Collect definitions executed in module scope, including definitions nested
+    under module-level control flow, without entering a nested definition. -/
+private partial def collectModuleScopeDefinitions
+    (stmts : List (stmt SourceRange)) : List (stmt SourceRange) :=
+  let rec go (s : stmt SourceRange) : List (stmt SourceRange) :=
+    let scanStmts body := body.val.toList.flatMap go
+    match s with
+    | .FunctionDef ..
+    | .AsyncFunctionDef ..
+    | .ClassDef .. => [s]
+    | .If _ _ body orelse
+    | .While _ _ body orelse =>
+      scanStmts body ++ scanStmts orelse
+    | .For _ _ _ body orelse _
+    | .AsyncFor _ _ _ body orelse _ =>
+      scanStmts body ++ scanStmts orelse
+    | .With _ _ body _
+    | .AsyncWith _ _ body _ => scanStmts body
+    | .Try _ body handlers orelse finalbody
+    | .TryStar _ body handlers orelse finalbody =>
+      scanStmts body
+        ++ (handlers.val.toList.flatMap fun handler =>
+          match handler with
+          | .ExceptHandler _ _ _ handlerBody => scanStmts handlerBody)
+        ++ scanStmts orelse ++ scanStmts finalbody
+    | .Match _ _ cases =>
+      cases.val.toList.flatMap fun c =>
+        match c with
+        | .mk_match_case _ _ _ body => scanStmts body
+    | _ => []
+  stmts.flatMap go
+
+private def collectModuleValueRebindings
+    (stmts : Array (stmt SourceRange)) : Std.HashSet String :=
+  let assigned := (collectModuleBoundNames stmts.toList).foldl
+    (init := ({} : Std.HashSet String)) fun names (name, _) => names.insert name
+  (collectModuleScopeDefinitions stmts.toList).foldl (init := assigned) fun names s =>
+    match s with
+    | .FunctionDef _ name _ _ _ _ _ _
+    | .AsyncFunctionDef _ name _ _ _ _ _ _
+    | .ClassDef _ name _ _ _ _ _ => names.insert name.val
+    | _ => names
+
+private def hasTrustedDirectImport
+    (imports : List DirectImportBinding)
+    (rebindings : Std.HashSet String)
+    (localName moduleName : String)
+    (importedName : Option String)
+    (useSource : SourceRange) : Bool :=
+  if rebindings.contains localName then false else
+    let matching := imports.filter (·.localName == localName)
+    !matching.isEmpty &&
+      matching.all (fun binding =>
+        binding.moduleName == moduleName && binding.importedName == importedName) &&
+      matching.any (·.source.start.byteIdx <= useSource.start.byteIdx)
+
+private partial def collectExplicitGlobalWrites
+    (stmts : List (stmt SourceRange)) : List (String × stmt SourceRange) :=
+  let rec scanScope (globals : Std.HashSet String)
+      (s : stmt SourceRange) : List (String × stmt SourceRange) :=
+    let activeTargets (target : expr SourceRange) :=
+      (collectTargetNames target).filterMap fun (name, _) =>
+        if globals.contains name then some (name, s) else none
+    let scanStmts body :=
+      body.val.toList.flatMap (scanScope globals)
+    match s with
+    | .Assign _ targets _ _ => targets.val.toList.flatMap activeTargets
+    | .AnnAssign _ target _ value _ =>
+      if value.val.isSome then activeTargets target else []
+    | .AugAssign _ target _ _ => activeTargets target
+    | .Delete _ targets => targets.val.toList.flatMap activeTargets
+    | .Import _ _
+    | .ImportFrom _ _ _ _ =>
+      (importBoundNames s).filterMap fun name =>
+        if globals.contains name then some (name, s) else none
+    | .FunctionDef _ _ _ body _ _ _ _
+    | .AsyncFunctionDef _ _ _ body _ _ _ _
+    | .ClassDef _ _ _ _ body _ _ =>
+      let nestedGlobals := Std.HashSet.ofList (collectGlobalDeclNames body.val.toList)
+      body.val.toList.flatMap (scanScope nestedGlobals)
+    | .If _ _ body orelse
+    | .While _ _ body orelse =>
+      scanStmts body ++ scanStmts orelse
+    | .For _ target _ body orelse _
+    | .AsyncFor _ target _ body orelse _ =>
+      activeTargets target ++ scanStmts body ++ scanStmts orelse
+    | .With _ items body _
+    | .AsyncWith _ items body _ =>
+      let bound := items.val.toList.flatMap fun item => match item with
+        | .mk_withitem _ _ optVars =>
+          optVars.val.map activeTargets |>.getD []
+      bound ++ scanStmts body
+    | .Try _ body handlers orelse finalbody
+    | .TryStar _ body handlers orelse finalbody =>
+      scanStmts body
+        ++ (handlers.val.toList.flatMap fun h => match h with
+            | .ExceptHandler _ _ _ hbody => scanStmts hbody)
+        ++ scanStmts orelse ++ scanStmts finalbody
+    | .Match _ _ cases =>
+      cases.val.toList.flatMap fun c => match c with
+        | .mk_match_case _ _ _ body => scanStmts body
+    | _ => []
+  (collectModuleScopeDefinitions stmts).flatMap fun s => match s with
+    | .FunctionDef _ _ _ body _ _ _ _
+    | .AsyncFunctionDef _ _ _ body _ _ _ _
+    | .ClassDef _ _ _ _ body _ _ =>
+      let globals := Std.HashSet.ofList (collectGlobalDeclNames body.val.toList)
+      body.val.toList.flatMap (scanScope globals)
+    | _ => []
+
+/-- Collect simple names that require static fields. Function and class bodies
+    contribute only assignments declared `global`; aliases, composites, and
+    conflicting top-level names are excluded from static fields and handled
+    separately. -/
+private partial def collectModuleGlobals (ctx : TranslationContext)
+    (body : Array (stmt SourceRange))
+    : Array (String × SourceRange) × Std.HashSet String :=
+  let directImports := collectDirectImportBindings body
+  let moduleValueRebindings := collectModuleValueRebindings body
+  let isLoggingHandle (value : expr SourceRange) : Bool :=
+    match value with
+    | .Call _ (.Attribute _ (.Name _ moduleName _) methodName _) _ _ =>
+      methodName.val == "getLogger" &&
+        hasTrustedDirectImport directImports moduleValueRebindings
+          moduleName.val "logging" none value.ann
+    | _ => false
+  let isExcluded (name : String) : Bool :=
+    name == "__name__" ||
+    moduleGlobalNameCollides ctx name
+  let isTypeNameExpr (value : expr SourceRange) : Bool :=
+    match value with
+    | .Name _ rhsName _ => isKnownType ctx rhsName.val
+    -- Subscripted constructors (`list[int]`, `Optional[str]`) also name a type,
+    -- so an unannotated alias to one must stay out of static fields.
+    | .Subscript _ (.Name _ baseName _) _ _ =>
+      isKnownType ctx baseName.val ||
+        baseName.val ∈ ["list", "dict", "tuple", "set", "frozenset",
+                        "Optional", "Union", "Callable",
+                        "List", "Dict", "Tuple", "Set", "FrozenSet"]
+    | _ => false
+  -- A type alias binds a type rather than a value, so no target of the
+  -- assignment can be lowered to a static field. Chained targets share one
+  -- right-hand side (`T1 = T2 = int`), so every target aliases the same type.
+  let isTypeAliasAssign (targets : Array (expr SourceRange))
+      (value : expr SourceRange) : Bool :=
+    !targets.isEmpty
+      && targets.all (fun target => match target with
+        | .Name _ _ _ => true
+        | _ => false)
+      && isTypeNameExpr value
+  -- Annotated aliases (`T: TypeAlias = int`, `T: type = int`) declare a type
+  -- through the annotation, and `T: Alias = int` through the right-hand side.
+  let isAnnotatedTypeAlias (annotation : expr SourceRange)
+      (value : Option (expr SourceRange)) : Bool :=
+    let annotationNamesType := match annotation with
+      | .Name _ annName _ => annName.val == "type" || annName.val == "TypeAlias"
+      | _ => false
+    let valueNamesType := match value with
+      | some v => isTypeNameExpr v
+      | none => false
+    annotationNamesType || valueNamesType
+  -- Any composite or type-alias assignment keeps that name out of static fields.
+  let add (acc : Array (String × SourceRange) × Std.HashSet String × Std.HashSet String)
+      (name : String) (sr : SourceRange) :=
+    let (found, seen, poisoned) := acc
+    if seen.contains name || isExcluded name then acc
+    else (found.push (name, sr), seen.insert name, poisoned)
+  let poison (acc : Array (String × SourceRange) × Std.HashSet String × Std.HashSet String)
+      (names : List (String × SourceRange)) :=
+    names.foldl (init := acc) fun (found, seen, poisoned) (name, _) =>
+      (found, seen, poisoned.insert name)
+  let isActiveTarget (scopeGlobals : Option (Std.HashSet String))
+      (name : String) : Bool := scopeGlobals.all (·.contains name)
+  let addTarget (scopeGlobals : Option (Std.HashSet String))
+      (acc : Array (String × SourceRange) × Std.HashSet String × Std.HashSet String)
+      (target : expr SourceRange) :=
+    (collectTargetNames target).foldl (init := acc) fun acc (name, sr) =>
+      if isActiveTarget scopeGlobals name then add acc name sr else acc
+  let rec go (scopeGlobals : Option (Std.HashSet String))
+      (acc : Array (String × SourceRange) × Std.HashSet String × Std.HashSet String)
+      (s : stmt SourceRange) : Array (String × SourceRange) × Std.HashSet String × Std.HashSet String :=
+    let goStmts (scopeGlobals : Option (Std.HashSet String))
+        (acc : Array (String × SourceRange) × Std.HashSet String × Std.HashSet String)
+        (stmts : Array (stmt SourceRange)) :=
+      stmts.foldl (go scopeGlobals) acc
+    match s with
+    | .Assign _ targets value _ =>
+      let activeNames := targets.val.toList.flatMap collectTargetNames
+        |>.filter fun (name, _) => isActiveTarget scopeGlobals name
+      if activeNames.isEmpty then acc
+      else if (scopeGlobals.isNone && isTypeAliasAssign targets.val value)
+          || (inferClassTypeFromLaurelExpr ctx value).isSome then
+        poison acc activeNames
+      else if scopeGlobals.isNone && isLoggingHandle value then acc
+      else activeNames.foldl (init := acc) fun acc (name, sr) => add acc name sr
+    | .AnnAssign _ target annotation value _ =>
+      match target with
+      | .Name sr n _ =>
+        if !isActiveTarget scopeGlobals n.val then acc
+        else if (value.val.bind (inferClassTypeFromLaurelExpr ctx ·)).isSome
+            || (scopeGlobals.isNone && isAnnotatedTypeAlias annotation value.val) then
+          poison acc [(n.val, sr)]
+        else if scopeGlobals.isNone && value.val.any isLoggingHandle then acc
+        else add acc n.val sr
+      | _ => acc
+    | .AugAssign _ target _ _ =>
+      match target with
+      | .Name sr n _ =>
+        if isActiveTarget scopeGlobals n.val then add acc n.val sr else acc
+      | _ => acc
+    | .Global sr names =>
+      names.val.foldl (init := acc) fun acc n => add acc n.val sr
+    | .FunctionDef _ _ _ fbody _ _ _ _
+    | .AsyncFunctionDef _ _ _ fbody _ _ _ _ =>
+      let globals := Std.HashSet.ofList (collectGlobalDeclNames fbody.val.toList)
+      goStmts (some globals) acc fbody.val
+    | .ClassDef _ _ _ _ cbody _ _ =>
+      let globals := Std.HashSet.ofList (collectGlobalDeclNames cbody.val.toList)
+      goStmts (some globals) acc cbody.val
+    | .If _ _ thenb elseb =>
+      goStmts scopeGlobals (goStmts scopeGlobals acc thenb.val) elseb.val
+    | .While _ _ wbody orelse =>
+      goStmts scopeGlobals (goStmts scopeGlobals acc wbody.val) orelse.val
+    | .For _ target _ fbody orelse _
+    | .AsyncFor _ target _ fbody orelse _ =>
+      let acc := addTarget scopeGlobals acc target
+      goStmts scopeGlobals (goStmts scopeGlobals acc fbody.val) orelse.val
+    | .With _ items wbody _
+    | .AsyncWith _ items wbody _ =>
+      let acc := items.val.foldl (init := acc) fun acc item =>
+        match item with
+        | .mk_withitem _ _ optVars =>
+          match optVars.val with
+          | some target => addTarget scopeGlobals acc target
+          | none => acc
+      goStmts scopeGlobals acc wbody.val
+    | .Try _ tbody handlers orelse finalbody
+    | .TryStar _ tbody handlers orelse finalbody =>
+      let acc := goStmts scopeGlobals acc tbody.val
+      let acc := handlers.val.foldl (init := acc) fun acc h =>
+        match h with
+        | .ExceptHandler _ _ _ hbody => goStmts scopeGlobals acc hbody.val
+      let acc := goStmts scopeGlobals acc orelse.val
+      goStmts scopeGlobals acc finalbody.val
+    | .Match _ _ cases =>
+      cases.val.foldl (init := acc) fun acc c =>
+        match c with
+        | .mk_match_case _ _ _ cbody => goStmts scopeGlobals acc cbody.val
+    | _ => acc
+  let (found, _, poisoned) := body.foldl (go none) (#[], {}, {})
+  (found.filter fun (n, _) => !poisoned.contains n, poisoned)
+
 /-- Translate Python module to Laurel Program using pre-extracted prelude info. -/
 def pythonToLaurel (info : PreludeInfo)
     (body : Array (stmt SourceRange))
     (filePath : String := "")
     (overloadTable : OverloadTable := {})
     : Except TranslationError (Laurel.Program × TranslationContext) := do
+  let moduleDefinitions := collectModuleScopeDefinitions body.toList
+  let directImports := collectDirectImportBindings body
+  let moduleValueRebindings := collectModuleValueRebindings body
   -- Collect user function names (top-level and class methods)
   let userFunctions := body.toList.flatMap fun stmt =>
     match stmt with
@@ -2866,7 +3806,8 @@ def pythonToLaurel (info : PreludeInfo)
   -- Identify classes involved in inheritance hierarchies. Method calls on
   -- these classes may be dynamically dispatched, so call sites conservatively
   -- emit holes instead of static calls.
-  let classesInHierarchy : Std.HashSet String := body.toList.foldl (init := {}) fun acc stmt =>
+  let classesInHierarchy : Std.HashSet String :=
+      moduleDefinitions.foldl (init := {}) fun acc stmt =>
     match stmt with
     | .ClassDef _ className bases _ _ _ _ =>
       let hasNontrivialBases := bases.val.toList.any fun b =>
@@ -2880,6 +3821,46 @@ def pythonToLaurel (info : PreludeInfo)
         | _ => acc'
       if hasNontrivialBases then acc.insert className.val else acc
     | _ => acc
+  -- Reject globals where this frontend would otherwise drop their effects.
+  for stmt in moduleDefinitions do
+    if let .ClassDef _ className _ _ classBody decoratorList _ := stmt then
+      -- Accept dataclass only when the decorator name is bound directly to the
+      -- standard-library module and has not been rebound in module scope.
+      let isDataclassRef (d : expr SourceRange) : Bool :=
+        match d with
+        | .Name _ dName _ =>
+          hasTrustedDirectImport directImports moduleValueRebindings
+            dName.val "dataclasses" (some "dataclass") d.ann
+        | .Attribute _ (.Name _ moduleName _) dName _ =>
+          dName.val == "dataclass" &&
+            hasTrustedDirectImport directImports moduleValueRebindings
+              moduleName.val "dataclasses" none d.ann
+        | _ => false
+      let isKnownClassDecorator (d : expr SourceRange) : Bool :=
+        match d with
+        | .Call _ callee _ _ => isDataclassRef callee
+        | _ => isDataclassRef d
+      if decoratorList.val.toList.any (!isKnownClassDecorator ·) then
+        throw (.unsupportedConstruct
+          "class decorators are not supported"
+          (toString (repr decoratorList)))
+      if let some name := (collectGlobalDeclNames classBody.val.toList).head? then
+        throw (.unsupportedConstruct
+          s!"global variable '{name}' is declared directly in a class body, whose execution is not modeled"
+          (toString (repr stmt)))
+      if let some name :=
+          (collectGlobalsInDroppedClassConstructs classBody.val.toList).head? then
+        throw (.unsupportedConstruct
+          s!"global variable '{name}' is used in a class construct whose execution is not modeled"
+          (toString (repr stmt)))
+      if classesInHierarchy.contains className.val then
+        for classStmt in classBody.val do
+          if let .FunctionDef _ _ _ methodBody _ _ _ _ := classStmt then
+            if let some name := (collectAllGlobalDeclNames methodBody.val.toList).head? then
+              throw (.unsupportedConstruct
+                s!"global variable '{name}' is used in a method whose body is opaque because the class participates in inheritance"
+                (toString (repr classStmt)))
+
   let pyErrorTy : CompositeType := {
     name := {text := "PythonError" }
     extending := []  -- No inheritance support for now
@@ -2890,6 +3871,64 @@ def pythonToLaurel (info : PreludeInfo)
   let overloadCompositeType := Std.HashSet.ofList $
       (overloadTable.values.flatMap (·.entries.values)).map fun ident =>
         ident.toString (sep := "_")
+
+  -- Discover globals before method translation and composite-value detection.
+  let userClassNames := body.foldl (init := ({} : Std.HashSet String)) fun names stmt =>
+    match stmt with
+    | .ClassDef _ name _ _ _ _ _ => names.insert name.val
+    | _ => names
+  let discoveryTypeNames :=
+    ((info.compositeTypes.union overloadCompositeType).union userClassNames).insert "PythonError"
+  let discoverySymbols := discoveryTypeNames.fold
+    (init := info.importedSymbols) fun symbols name =>
+      symbols.insert name (ImportedSymbol.compositeType name)
+  let moduleImports := collectModuleImports body.toList
+  let moduleSymbols := moduleImports.foldl
+    (init := ({} : Std.HashSet String)) fun names binding =>
+      if binding.isModuleScope && binding.name != "*" then
+        names.insert binding.name
+      else
+        names
+  let discoveryCtx : TranslationContext := {
+    functionSignatures := info.functionSignatures
+    preludeTypes := info.types
+    preludeProcedures := info.procedures
+    preludeFunctions := info.functions
+    userFunctions := userFunctions
+    maybeExceptionFunctions := info.maybeExceptionFunctions
+    importedSymbols := discoverySymbols
+    moduleSymbols := moduleSymbols
+    overloadTable := overloadTable
+    classesInHierarchy := classesInHierarchy
+    filePath := filePath
+  }
+  if let some (name, assignment) :=
+      (collectModuleBoundNames body.toList).find?
+        (fun (name, _) => moduleGlobalNameCollides discoveryCtx name) then
+    throw (.unsupportedConstruct
+      s!"module variable '{name}' cannot be lowered to a Laurel static field because its name collides with a top-level definition"
+      (toString (repr assignment)))
+  if let some (name, assignment) :=
+      (collectExplicitGlobalWrites body.toList).find?
+        (fun (name, _) => moduleGlobalNameCollides discoveryCtx name) then
+    throw (.unsupportedConstruct
+      s!"global variable '{name}' cannot rebind a top-level definition"
+      (toString (repr assignment)))
+
+  let (moduleGlobalDecls, unsupportedModuleGlobals) :=
+    collectModuleGlobals discoveryCtx body
+  let moduleGlobals := moduleGlobalDecls.foldl
+    (fun globals (name, _) => globals.insert name) {}
+  for binding in moduleImports do
+    if binding.name == "*" && !moduleGlobals.isEmpty then
+      throw (.unsupportedConstruct
+        "wildcard import cannot coexist with modeled module variables"
+        (toString (repr binding.statement)))
+    else if moduleGlobals.contains binding.name then
+      throw (.unsupportedConstruct
+        s!"import binding '{binding.name}' cannot overwrite a modeled module variable"
+        (toString (repr binding.statement)))
+
   let mut compositeTypeNames := info.compositeTypes.union overloadCompositeType
 
   -- FIRST PASS: Collect all class definitions and field type info
@@ -2907,9 +3946,13 @@ def pythonToLaurel (info : PreludeInfo)
         (init := info.importedSymbols) fun m name =>
           m.insert name (ImportedSymbol.compositeType name)
       let initCtx : TranslationContext := {
+        moduleGlobals := moduleGlobals
+        unsupportedModuleGlobals := unsupportedModuleGlobals
         functionSignatures := info.functionSignatures ++ allClassFuncDecls
         preludeTypes := info.types,
+        preludeFunctions := info.functions
         importedSymbols := localSymbols,
+        moduleSymbols := moduleSymbols
         compositeTypeReverse := localSymbols.fold (init := ({}:Std.HashMap String String)) fun m k v =>
           match v with
           | .compositeType laurelName => if laurelName != k then m.insert laurelName k else m
@@ -2945,14 +3988,18 @@ def pythonToLaurel (info : PreludeInfo)
 
   let mut ctx : TranslationContext := {
     currentClassName := none,
+    moduleGlobals := moduleGlobals
+    unsupportedModuleGlobals := unsupportedModuleGlobals
     functionSignatures := info.functionSignatures ++ allClassFuncDecls
     preludeTypes := info.types,
     preludeProcedures := info.procedures,
+    preludeFunctions := info.functions
     userFunctions := userFunctions,
     maybeExceptionFunctions := info.maybeExceptionFunctions
     classFieldHighType := classFieldHighType,
     overloadTable := overloadTable,
     importedSymbols := importedSymbols,
+    moduleSymbols := moduleSymbols
     compositeTypeReverse := compositeTypeReverse,
     exhaustiveClasses := exhaustiveClasses,
     classesInHierarchy := classesInHierarchy,
@@ -3000,7 +4047,13 @@ def pythonToLaurel (info : PreludeInfo)
                               (.Name default {val:= "str", ann:= default} default)
                               {val:= some $ .Constant default (.ConString default {val:= "__main__", ann:= default}) default , ann:= default}
                               default
-  let (bodyBlock, _) ← translateFunctionBody ctx none [] (nameDecl::otherStmts.toList)
+  -- Prevent `__main__` from hoisting shadowing local declarations.
+  let ctxForMain := { ctx with
+    variableTypes :=
+      moduleGlobalDecls.toList.map (fun (n, _) => (n, PyLauType.Any)) ++ ctx.variableTypes
+    scopeGlobals := moduleGlobals }
+  let (bodyBlock, _) ← translateFunctionBody ctxForMain []
+    (nameDecl::otherStmts.toList) true
 
   let md := sourceRangeToSource ctx.filePath { start := 0, stop := 0 }
   let mainProc : Procedure := {
@@ -3040,9 +4093,21 @@ def pythonToLaurel (info : PreludeInfo)
         decreases := none
         body := .Opaque [] none wildcardModifies }
 
+  -- Keep each value unconstrained while tracking Python's bound-name state separately.
+  let staticFields : List Laurel.Field := moduleGlobalDecls.toList.flatMap fun (n, sr) =>
+    let source := sourceRangeToSource filePath sr
+    [{ name := { text := n, source := source }
+       isMutable := true
+       type := AnyTy
+       initializer := some (mkStmtExprMd (.Hole false (some AnyTy))) },
+     { name := { text := moduleGlobalBoundName n, source := source }
+       isMutable := true
+       type := mkHighTypeMd .TBool
+       initializer := some (mkStmtExprMd (.LiteralBool false)) }]
+
   let program : Laurel.Program := {
     staticProcedures := (procedures.push mainProc).toList
-    staticFields := []
+    staticFields := staticFields
     types := compositeTypes.toList
     constants := []
   }

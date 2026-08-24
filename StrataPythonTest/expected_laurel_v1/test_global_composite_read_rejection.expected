@@ -1,0 +1,6 @@
+DETAIL: Unsupported construct: module variable 'box' has a composite or type-alias value and cannot be read from another scope
+AST: StrataPython.expr.Name
+  { start := { byteIdx := 63 }, stop := { byteIdx := 66 } }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "box" }
+  (StrataPython.expr_context.Load { start := { byteIdx := 0 }, stop := { byteIdx := 0 } })
+RESULT: Known limitation

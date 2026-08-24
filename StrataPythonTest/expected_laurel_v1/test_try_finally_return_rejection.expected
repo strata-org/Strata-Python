@@ -1,0 +1,33 @@
+DETAIL: Unsupported construct: try-finally with return, break, or continue in the try statement is not supported
+AST: StrataPython.stmt.Try
+  { start := { byteIdx := 28 }, stop := { byteIdx := 87 } }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+    val := #[StrataPython.stmt.Return
+               { start := { byteIdx := 41 }, stop := { byteIdx := 49 } }
+               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+                 val := some (StrataPython.expr.Constant
+                          { start := { byteIdx := 48 }, stop := { byteIdx := 49 } }
+                          (StrataPython.constant.ConPos
+                            { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }
+                            { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := 1 })
+                          { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }) }] }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+    val := #[StrataPython.stmt.Expr
+               { start := { byteIdx := 71 }, stop := { byteIdx := 87 } }
+               (StrataPython.expr.Call
+                 { start := { byteIdx := 71 }, stop := { byteIdx := 87 } }
+                 (StrataPython.expr.Name
+                   { start := { byteIdx := 71 }, stop := { byteIdx := 76 } }
+                   { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "print" }
+                   (StrataPython.expr_context.Load { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }))
+                 { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+                   val := #[StrataPython.expr.Constant
+                              { start := { byteIdx := 77 }, stop := { byteIdx := 86 } }
+                              (StrataPython.constant.ConString
+                                { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }
+                                { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "cleanup" })
+                              { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }] }
+                 { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] })] }
+RESULT: Known limitation

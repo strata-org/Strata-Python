@@ -1,0 +1,16 @@
+DETAIL: Unsupported construct: global variable 'target' cannot rebind a top-level definition
+AST: StrataPython.stmt.Assign
+  { start := { byteIdx := 96 }, stop := { byteIdx := 106 } }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+    val := #[StrataPython.expr.Name
+               { start := { byteIdx := 96 }, stop := { byteIdx := 102 } }
+               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "target" }
+               (StrataPython.expr_context.Store { start := { byteIdx := 0 }, stop := { byteIdx := 0 } })] }
+  (StrataPython.expr.Constant
+    { start := { byteIdx := 105 }, stop := { byteIdx := 106 } }
+    (StrataPython.constant.ConPos
+      { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }
+      { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := 1 })
+    { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none })
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }
+RESULT: Known limitation

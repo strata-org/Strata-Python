@@ -1,13 +1,19 @@
+test_module_level.py(9, 7): ✅ pass - global 'data' is bound
 test_module_level.py(9, 7): ✅ pass - precondition
 test_module_level.py(9, 0): ✅ pass - assert(…)
+test_module_level.py(10, 7): ✅ pass - global 'data' is bound
 test_module_level.py(10, 7): ✅ pass - precondition
 test_module_level.py(10, 0): ✅ pass - assert(…)
+test_module_level.py(12, 0): ✅ pass - global 'data' is bound
 test_module_level.py(12, 0): ✅ pass - Check Any_sets! exception
+test_module_level.py(13, 7): ✅ pass - global 'data' is bound
 test_module_level.py(13, 7): ✅ pass - precondition
 test_module_level.py(13, 0): ✅ pass - assert(…)
+test_module_level.py(14, 17): ✅ pass - global 'data' is bound
 test_module_level.py(14, 7): ✅ pass - precondition
 test_module_level.py(14, 0): ✅ pass - assert(…)
+test_module_level.py(15, 24): ✅ pass - global 'data' is bound
 test_module_level.py(15, 7): ✅ pass - precondition
 test_module_level.py(15, 0): ✅ pass - assert(…)
-DETAIL: 11 passed, 0 failed, 0 inconclusive
+DETAIL: 17 passed, 0 failed, 0 inconclusive
 RESULT: Analysis success

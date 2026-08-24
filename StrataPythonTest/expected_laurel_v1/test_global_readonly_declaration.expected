@@ -1,0 +1,5 @@
+test_global_readonly_declaration.py(4, 16): ✅ pass - (helper ensures) Return type constraint
+test_global_readonly_declaration.py(12, 21): ✅ pass - (call_helper ensures) Return type constraint
+test_global_readonly_declaration.py(17, 0): ❓ unknown - read-only global declaration preserves function calls
+DETAIL: 2 passed, 0 failed, 1 inconclusive
+RESULT: Inconclusive

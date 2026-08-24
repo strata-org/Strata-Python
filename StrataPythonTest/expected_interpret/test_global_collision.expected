@@ -1,0 +1,1 @@
+module variable 'value' cannot be lowered to a Laurel static field because its name collides with a top-level definition

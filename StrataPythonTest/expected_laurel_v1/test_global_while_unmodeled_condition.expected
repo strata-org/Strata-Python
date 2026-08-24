@@ -1,0 +1,7 @@
+test_global_while_unmodeled_condition.py(5, 6): ✅ pass - global 'output_dir' is bound
+test_global_while_unmodeled_condition.py(5, 6): ✅ pass - global 'i' is bound
+test_global_while_unmodeled_condition.py(6, 8): ❓ unknown - global 'i' is bound
+test_global_while_unmodeled_condition.py(6, 8): ❓ unknown - Check PAdd exception
+test_global_while_unmodeled_condition.py(8, 6): ❓ unknown - global 'i' is bound
+DETAIL: 2 passed, 0 failed, 3 inconclusive
+RESULT: Inconclusive

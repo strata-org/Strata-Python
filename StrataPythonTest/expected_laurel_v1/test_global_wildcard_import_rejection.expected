@@ -1,0 +1,15 @@
+DETAIL: Unsupported construct: wildcard import cannot coexist with modeled module variables
+AST: StrataPython.stmt.ImportFrom
+  { start := { byteIdx := 0 }, stop := { byteIdx := 17 } }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+    val := some { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "sys" } }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+    val := #[StrataPython.alias.mk_alias
+               { start := { byteIdx := 16 }, stop := { byteIdx := 17 } }
+               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "*" }
+               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }] }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+    val := some (StrataPython.int.IntPos
+             { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }
+             { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := 0 }) }
+RESULT: Known limitation

@@ -1,0 +1,8 @@
+test_global_function_with_binding.py(5, 27): ❓ unknown - (Resource@__enter__ ensures) Return type constraint
+test_global_function_with_binding.py(8, 33): ✅ pass - (Resource@__exit__ ensures) Return type constraint
+test_global_function_with_binding.py(17, 4): ✅ pass - (Resource@__init__ requires) Type constraint of value
+test_global_function_with_binding.py(12, 0): ✅ pass - assert(…)
+test_global_function_with_binding.py(23, 7): ❓ unknown - global 'entered' is bound
+test_global_function_with_binding.py(23, 0): ❓ unknown - global with-as target is updated
+DETAIL: 3 passed, 0 failed, 3 inconclusive
+RESULT: Inconclusive

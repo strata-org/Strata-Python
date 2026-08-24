@@ -1,0 +1,6 @@
+test_global_method_binding.py(1, 0): ✅ pass - assert(…)
+test_global_method_binding.py(10, 0): ✅ pass - precondition
+test_global_method_binding.py(12, 7): ❓ unknown - global 'method_value' is bound
+test_global_method_binding.py(12, 0): ❓ unknown - method global assignment
+DETAIL: 2 passed, 0 failed, 2 inconclusive
+RESULT: Inconclusive

@@ -1,0 +1,43 @@
+DETAIL: Unsupported construct: global variable 'inherited_value' is used in a method whose body is opaque because the class participates in inheritance
+AST: StrataPython.stmt.FunctionDef
+  { start := { byteIdx := 46 }, stop := { byteIdx := 125 } }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "set_value" }
+  (StrataPython.arguments.mk_arguments
+    { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }
+    { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+    { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+      val := #[StrataPython.arg.mk_arg
+                 { start := { byteIdx := 60 }, stop := { byteIdx := 64 } }
+                 { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "self" }
+                 { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }
+                 { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }] }
+    { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }
+    { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+    { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+    { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }
+    { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] })
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+    val := #[StrataPython.stmt.Global
+               { start := { byteIdx := 75 }, stop := { byteIdx := 97 } }
+               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+                 val := #[{ ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+                            val := "inherited_value" }] },
+             StrataPython.stmt.Assign
+               { start := { byteIdx := 106 }, stop := { byteIdx := 125 } }
+               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+                 val := #[StrataPython.expr.Name
+                            { start := { byteIdx := 106 }, stop := { byteIdx := 121 } }
+                            { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "inherited_value" }
+                            (StrataPython.expr_context.Store { start := { byteIdx := 0 }, stop := { byteIdx := 0 } })] }
+               (StrataPython.expr.Constant
+                 { start := { byteIdx := 124 }, stop := { byteIdx := 125 } }
+                 (StrataPython.constant.ConPos
+                   { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }
+                   { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := 1 })
+                 { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none })
+               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }] }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+RESULT: Known limitation
