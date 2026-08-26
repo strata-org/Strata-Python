@@ -3,6 +3,9 @@ version = "0.1.0"
 defaultTargets = ["StrataPython"]
 testDriver = "StrataPythonFrontEndTestMain"
 
+[leanOptions]
+warningAsError = true
+
 [[require]]
 name = "Strata"
 git = "https://github.com/strata-org/Strata.git"
@@ -11,7 +14,6 @@ rev = "main"
 [[input_file]]
 name = "PythonDialectIon"
 path = "Python/strata-python/dialects/Python.dialect.st.ion"
-text = true
 
 [[lean_lib]]
 name = "StrataPython"
@@ -32,6 +34,11 @@ needs = ["StrataPython", "StrataPythonTest"]
 [[lean_exe]]
 name = "pyAnalyzeLaurel"
 root = "Scripts.pyAnalyzeLaurel"
+needs = ["StrataPython"]
+
+[[lean_exe]]
+name = "pyAnalyzeV2"
+root = "Scripts.pyAnalyzeV2"
 needs = ["StrataPython"]
 
 [[lean_exe]]
@@ -67,4 +74,9 @@ needs = ["StrataPython"]
 [[lean_exe]]
 name = "pySpecs"
 root = "Scripts.pySpecs"
+needs = ["StrataPython"]
+
+[[lean_exe]]
+name = "strata"
+root = "StrataMain"
 needs = ["StrataPython"]
