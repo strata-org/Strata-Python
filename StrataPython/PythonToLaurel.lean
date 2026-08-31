@@ -2198,8 +2198,8 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
         -- Coerce Composite return values to Any for LaurelResult : Any
         let eRef ← coerceToAny ctx expr eRef
         let assign := mkStmtExprMdWithLoc (StmtExpr.Assign [mkVariableMd (.Local PyLauFuncReturnVar)] eRef) md
-        .ok $ preamble ++ [assign, mkStmtExprMdWithLoc (StmtExpr.Return none) md]
-      | none => .ok [mkStmtExprMdWithLoc (StmtExpr.Return none) md]
+        .ok $ preamble ++ [assign, mkStmtExprMdWithLoc (StmtExpr.Return []) md]
+      | none => .ok [mkStmtExprMdWithLoc (StmtExpr.Return []) md]
     return (ctx, stmts)
 
   -- Assert statement

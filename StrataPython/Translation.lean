@@ -955,7 +955,7 @@ partial def renameParamsToInputs (paramNames : List String) (e : StmtExprMd) : S
     | .Fresh v => .Fresh (rw v)
     | .Assert c s => .Assert (rw c) s
     | .Assume c => .Assume (rw c)
-    | .Return v => .Return (rwOpt v)
+    | .Return v => .Return (rwList v)
     | other => other
   { e with val }
 
