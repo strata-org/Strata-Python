@@ -1345,13 +1345,16 @@ private partial def mutableRootNames (e : expr SourceRange) : List String :=
   | _ => []
 
 private partial def shouldHavocUnmodeledCallRoot
-    (ctx : TranslationContext) (name : String) (isReceiver : Bool) : Bool :=
+    (ctx : TranslationContext) (name : String) : Bool :=
   if isScopedModuleGlobal ctx name then
     true
   else
+    -- A call cannot rebind the caller's locals, so only Any-family
+    -- bindings are havocked; reassigning a composite-typed binding to an
+    -- Any hole fails Laurel type-checking.
     match ctx.variableTypes.find? (fun entry => entry.1 == name) with
     | some (_, ty) =>
-      isReceiver || ty == PyLauType.Any || ty == PyLauType.ListAny ||
+      ty == PyLauType.Any || ty == PyLauType.ListAny ||
         ty == PyLauType.ListStr || ty == PyLauType.DictStrAny
     | none => false
 
@@ -1409,18 +1412,15 @@ partial def translateCall (ctx : TranslationContext)
     -- Module globals need the same conservative treatment as locals; otherwise
     -- later assertions can incorrectly reuse their pre-call value.
     let receiverRoots := match f with
-      | .Attribute _ receiver _ _ =>
-        (mutableRootNames receiver).map fun name => (name, true)
+      | .Attribute _ receiver _ _ => mutableRootNames receiver
       | _ => []
-    let argumentRoots :=
-      args.flatMap mutableRootNames |>.map fun name => (name, false)
+    let argumentRoots := args.flatMap mutableRootNames
     let keywordRoots := kwords.flatMap fun keyword =>
       match keyword with
-      | .mk_keyword _ _ value =>
-        (mutableRootNames value).map fun name => (name, false)
+      | .mk_keyword _ _ value => mutableRootNames value
     let havocNames := (receiverRoots ++ argumentRoots ++ keywordRoots).foldl
-      (init := ([] : List String)) fun names (name, isReceiver) =>
-        if name ∈ names || !shouldHavocUnmodeledCallRoot ctx name isReceiver then
+      (init := ([] : List String)) fun names name =>
+        if name ∈ names || !shouldHavocUnmodeledCallRoot ctx name then
           names
         else
           names ++ [name]
