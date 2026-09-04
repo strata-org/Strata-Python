@@ -72,11 +72,16 @@ open Pipeline (emitMessage emitMessageAndAbort)
 public structure PySpecLaurelResult where
   laurelProgram : Laurel.Program
   overloads : OverloadTable
-  functionSignatures : List PythonFunctionDecl := []
+  /-- Modeled function/method signatures, each tagged with the PySpec module
+      that declared it (V2 name resolution binds per module). -/
+  functionSignatures : List (ModuleName × PythonFunctionDecl) := []
   /-- Maps unprefixed class names to prefixed names for type resolution. -/
   typeAliases : Std.HashMap String String := {}
   /-- Classes whose spec is considered exhaustive (lists all methods). -/
   exhaustiveClasses : Std.HashSet String := {}
+  /-- Every loaded PySpec module, including ones contributing only types;
+      used to attribute methodless Composite classes to their module. -/
+  pyspecModuleNames : List ModuleName := []
   deriving Inhabited
 
 /-! ### Private Helpers -/
@@ -121,7 +126,8 @@ private def funcDeclToFunctionDecl (name : String) (args : Specs.ArgDecls)
     name,
     args := allArgs.toList.map specArgToFuncDeclArg,
     kwargsName := none,
-    ret := none
+    ret := none,
+    kwonlyCount := args.kwonly.size + kwargsArgs.size
   }
 
 /-- Extract PythonFunctionDecl entries from pyspec signatures.
@@ -157,6 +163,22 @@ private def mergeOverloads (old new : OverloadTable) : OverloadTable :=
                entries := existing.entries.union n.entries }
       | none => some n
 
+/-- Dedup of `(declaration, sourceFile)` pairs by declaration name. Returns the input
+    unchanged when all names are distinct, or `(name, firstFile, collidingFile)` for
+    the first collision (same-file duplicates included). -/
+public def dedupPySpecDecls (items : Array (α × String)) (nameOf : α → Laurel.Identifier)
+    : Except (Laurel.Identifier × String × String) (Array (α × String)) := Id.run do
+  let mut seen : Std.HashMap String String := {}
+  let mut deduped : Array (α × String) := #[]
+  for (item, srcFile) in items do
+    let ident := nameOf item
+    match seen[ident.text]? with
+    | some prevFile => return .error (ident, prevFile, srcFile)
+    | none =>
+      seen := seen.insert ident.text srcFile
+      deduped := deduped.push (item, srcFile)
+  return .ok deduped
+
 /-- Read PySpec Ion files and collect their Laurel declarations and overload
     tables into a single combined result. Each Ion file is parsed and translated
     to Laurel via `signaturesToLaurel`. The resulting procedures and types are
@@ -169,9 +191,10 @@ private def mergeOverloads (old new : OverloadTable) : OverloadTable :=
 private def buildPySpecLaurelM (pyspecEntries : Array (ModuleName × String))
     (overloads : OverloadTable) : Pipeline.PipelineM PySpecLaurelResult := do
   let mut combinedProcedures : Array (Laurel.Procedure × String) := #[]
+  let mut combinedFields : Array (Laurel.Field × String) := #[]
   let mut combinedTypes : Array (Laurel.TypeDefinition × String) := #[]
   let mut allOverloads := overloads
-  let mut funcSigs : Array PythonFunctionDecl := #[]
+  let mut funcSigs : Array (ModuleName × PythonFunctionDecl) := #[]
   let mut allTypeAliases : Std.HashMap String String := {}
   let mut allExhaustiveClasses : Std.HashSet String := {}
   for (moduleName, ionPath) in pyspecEntries do
@@ -190,51 +213,45 @@ private def buildPySpecLaurelM (pyspecEntries : Array (ModuleName × String))
     allTypeAliases := typeAliases.fold (init := allTypeAliases) fun m k v => m.insert k v
     allExhaustiveClasses := exhaustiveClasses.fold (init := allExhaustiveClasses) fun s name => s.insert name
     match extractFunctionSignatures sigs moduleName with
-    | .ok fs => funcSigs := funcSigs ++ fs
+    | .ok fs => funcSigs := funcSigs ++ fs.map ((moduleName, ·))
     | .error msg =>
       emitMessageAndAbort .functionSignatureError msg (file := ionFile)
     for td in program.types do
       combinedTypes := combinedTypes.push (td, ionPath)
     for proc in program.staticProcedures do
       combinedProcedures := combinedProcedures.push (proc, ionPath)
+    -- `signaturesToLaurel` does not currently emit static fields, so this loop is a no-op
+    -- in production; the collision check below is exercised only by unit tests.
+    for field in program.staticFields do
+      combinedFields := combinedFields.push (field, ionPath)
   -- Reject name collisions across PySpec files (first-wins)
-  let mut seenTypes : Std.HashMap String String := {}
-  let mut dedupedTypes : Array (Laurel.TypeDefinition × String) := #[]
-  for (td, srcFile) in combinedTypes do
-    let ident := match td with
-      | .Composite ct => ct.name
-      | .Constrained ct => ct.name
-      | .Datatype dt => dt.name
-      | .Alias ta => ta.name
-      | .Opaque ot => ot.name
-    match seenTypes.get? ident.text with
-    | some prevFile =>
+  let dedupedTypes ← match dedupPySpecDecls combinedTypes (·.name) with
+    | .ok r => pure r
+    | .error (ident, prevFile, srcFile) =>
       emitMessageAndAbort .typeNameCollision s!"'{ident.text}' already defined in {prevFile}"
         (file := srcFile) (loc := ident.source.range)
-    | none =>
-      seenTypes := seenTypes.insert ident.text srcFile
-      dedupedTypes := dedupedTypes.push (td, srcFile)
-  let mut seenProcs : Std.HashMap String String := {}
-  let mut dedupedProcs : Array (Laurel.Procedure × String) := #[]
-  for (proc, srcFile) in combinedProcedures do
-    match seenProcs[proc.name.text]? with
-    | some prevFile =>
-      emitMessageAndAbort .procedureNameCollision s!"'{proc.name.text}' already defined in {prevFile}"
-        (file := srcFile) (loc := proc.name.source.range)
-    | none =>
-      seenProcs := seenProcs.insert proc.name.text srcFile
-      dedupedProcs := dedupedProcs.push (proc, srcFile)
+  let dedupedProcs ← match dedupPySpecDecls combinedProcedures (·.name) with
+    | .ok r => pure r
+    | .error (ident, prevFile, srcFile) =>
+      emitMessageAndAbort .procedureNameCollision s!"'{ident.text}' already defined in {prevFile}"
+        (file := srcFile) (loc := ident.source.range)
+  let dedupedFields ← match dedupPySpecDecls combinedFields (·.name) with
+    | .ok r => pure r
+    | .error (ident, prevFile, srcFile) =>
+      emitMessageAndAbort .staticFieldNameCollision s!"'{ident.text}' already defined in {prevFile}"
+        (file := srcFile) (loc := ident.source.range)
 
   let combinedLaurel : Laurel.Program := {
     staticProcedures := pythonRuntimeLaurelPart.staticProcedures ++ dedupedProcs.toList.map Prod.fst
-    staticFields := []
+    staticFields := dedupedFields.toList.map Prod.fst
     types := pythonRuntimeLaurelPart.types ++ dedupedTypes.toList.map Prod.fst
     constants := []
   }
   return { laurelProgram := combinedLaurel, overloads := allOverloads
            functionSignatures := funcSigs.toList,
            typeAliases := allTypeAliases
-           exhaustiveClasses := allExhaustiveClasses }
+           exhaustiveClasses := allExhaustiveClasses
+           pyspecModuleNames := pyspecEntries.toList.map (·.1) }
 
 /-- Read PySpec Ion files and collect their Laurel declarations and overload
     tables into a single combined result. -/
@@ -375,7 +392,7 @@ public def buildPreludeInfo (result : PySpecLaurelResult) : PreludeInfo :=
       if result.exhaustiveClasses.contains prefixed then s.insert unprefixed else s
   { merged with
     functionSignatures :=
-      result.functionSignatures ++ merged.functionSignatures
+      result.functionSignatures.map (·.2) ++ merged.functionSignatures
     importedSymbols := symbols
     exhaustiveClasses := exhaustive }
 
@@ -705,12 +722,96 @@ public def bodilessTypeNamesFor (candidates : List String) (prelude : Laurel.Pro
     prelude.types.foldl (fun acc t => acc.insert t.name.text) {}
   candidates.filter (fun n => !preludeTypeNames.contains n)
 
+/-- Build per-module resolution contexts from the PySpec function signatures so
+    name resolution can bind calls against existing models. Also returns
+    human-readable anomalies for declarations that cannot bind. -/
+private def externalModuleDecls (r : PySpecLaurelResult)
+    : Resolution.ExternalModuleDecls × List String :=
+  let compositeFields : Std.HashMap String (List String) :=
+    r.laurelProgram.types.foldl (init := {}) fun m t =>
+      match t with
+      | .Composite ct => m.insert ct.name.text (ct.fields.map (·.name.text))
+      | _ => m
+  let (decls, anomalies) :=
+    r.functionSignatures.foldl (init := (({} : Resolution.ExternalModuleDecls), ([] : List String)))
+      fun (acc, anomalies) (mod, decl) =>
+    let pfx := mod.toString (sep := "_") ++ "_"
+    let member := decl.name.drop pfx.length |>.toString
+    let modKey := mod.toString
+    let memberCtx := acc.getD modKey {}
+    let args := decl.args.map fun a => (a.name, a.default)
+    match member.splitOn "@" with
+    | [fname] =>
+      (acc.insert modKey <| memberCtx.insert (Resolution.PythonIdentifier.builtin fname)
+        (.function (Resolution.externalFunctionSig fname decl.name args decl.kwonlyCount
+          (kwargsName := decl.kwargsName)) none),
+       anomalies)
+    | [cls, meth] =>
+      let classId := Resolution.PythonIdentifier.builtin cls
+      let methId := Resolution.PythonIdentifier.builtin meth
+      let mSig := Resolution.externalFunctionSig meth decl.name args decl.kwonlyCount
+        (kwargsName := decl.kwargsName) (className := some classId)
+      let (entry, anomalies) := match memberCtx[classId]? with
+        | some (.class_ cid flds methods asts) =>
+          (Resolution.CtxEntry.class_ cid flds (methods ++ [(methId, mSig)]) asts, anomalies)
+        | _ =>
+          let fieldNames := compositeFields.getD (pfx ++ cls) []
+          let anomalies := if (compositeFields[pfx ++ cls]?).isNone then
+              s!"PySpec class '{pfx ++ cls}' has no encoded Composite; \
+                its fields are unknown to resolution" :: anomalies
+            else anomalies
+          (Resolution.CtxEntry.class_ classId (Resolution.externalClassFields fieldNames)
+            [(methId, mSig)] [], anomalies)
+      (acc.insert modKey (memberCtx.insert classId entry), anomalies)
+    | _ =>
+      (acc, s!"PySpec declaration '{decl.name}' has an unsupported member shape; \
+        its contract will not bind under V2" :: anomalies)
+  -- Seed modeled classes with NO method signature (a bare Composite): without this,
+  -- their constructor and type-annotation uses resolve as unmodeled. The composite
+  -- belongs to the loaded module with the LONGEST matching prefix, so a nested
+  -- module (`servicelib.Storage`) is not mistaken for a class of its parent.
+  let decls := compositeFields.fold (init := decls) fun acc prefixedName fields =>
+    let owner := r.pyspecModuleNames.foldl (init := none) fun best mod =>
+      let pfx := mod.toString (sep := "_") ++ "_"
+      if prefixedName.startsWith pfx then
+        match best with
+        | some (_, bestPfx) => if pfx.length > bestPfx.length then some (mod.toString, pfx) else best
+        | none => some (mod.toString, pfx)
+      else best
+    match owner with
+    | none => acc
+    | some (modKey, pfx) =>
+      let classId := Resolution.PythonIdentifier.builtin (prefixedName.drop pfx.length |>.toString)
+      let memberCtx := acc.getD modKey {}
+      if memberCtx.contains classId then acc
+      else acc.insert modKey (memberCtx.insert classId
+        (.class_ classId (Resolution.externalClassFields fields) [] []))
+  (decls, anomalies)
+
+/-- Extend `prelude` with an `Alias unprefixed → prefixed` type definition for each PySpec
+    type alias whose unprefixed name is not already taken by a prelude type or user class. -/
+private def addUnprefixedTypeAliases (prelude : Laurel.Program)
+    (typeAliases : Std.HashMap String String)
+    (userClassNames : Std.HashSet String) : Laurel.Program :=
+  let existing := prelude.types.foldl (fun st t => st.insert t.name.text) userClassNames
+  let aliasTypes : List Laurel.TypeDefinition :=
+    typeAliases.fold (init := []) fun acc unprefixed prefixed =>
+      if existing.contains unprefixed then acc
+      else
+        .Alias { name := { text := unprefixed },
+                 target := mkHighTypeMd (.UserDefined { text := prefixed }) } :: acc
+  { prelude with types := prelude.types ++ aliasTypes }
+
 /-- Drive the full pipeline: Resolution → Translation → Elaboration → resolve → Core.
     Specs/imports enter via `Resolution.resolve` (loads `.python.st.ion` stubs)
     → `Translation.runTranslation`; exceptions are threaded by `fullElaborate`;
     the resolve + coerce + laurel passes happen in `translateCombinedLaurel`. -/
 public def pyAnalyzeV2ToCore (pythonIonPath : String) (sourcePath : Option String := none)
     (keepAllFilesPrefix : Option String := none)
+    (specDir : System.FilePath := ".")
+    (dispatchModules : Array String := #[])
+    (pyspecModules : Array String := #[])
+    (pipelineCtx : Option Pipeline.PipelineContext := none)
     : IO (Except String (Option Core.Program × List Message)) := do
   let baseDir     := System.FilePath.mk pythonIonPath |>.parent.getD "."
   let metadataPath := sourcePath.getD pythonIonPath
@@ -718,9 +819,37 @@ public def pyAnalyzeV2ToCore (pythonIonPath : String) (sourcePath : Option Strin
   let stmts ← match ← (readPythonStrata pythonIonPath).toBaseIO with
     | .error msg => return .error s!"read: {msg}"
     | .ok s => pure s
-  let resolveResult ← match ← (Resolution.resolve stmts baseDir).toBaseIO with
+  let pyspecResult : Option PySpecLaurelResult ←
+    if pyspecModules.isEmpty && dispatchModules.isEmpty then pure none
+    else do
+      let some ctx := pipelineCtx
+        | return .error "PySpec modules require a pipeline context"
+      match ← (resolveAndBuildLaurelPrelude dispatchModules pyspecModules stmts specDir |>.run ctx).toBaseIO with
+      | .ok r => pure (some r)
+      | .error () => return .error "PySpec prelude construction failed (see diagnostics)"
+  let (externalModules, externalAnomalies) : Resolution.ExternalModuleDecls × List String :=
+    match pyspecResult with
+    | some r => externalModuleDecls r
+    | none => ({}, [])
+  let dispatchOverloads := pyspecResult.map (·.overloads) |>.getD {}
+  -- The configured dispatch module names gate dispatch-factory resolution.
+  let dispatchModuleNames : Std.HashSet String :=
+    dispatchModules.foldl (init := {}) fun s m => s.insert m
+  let resolveResult ← match ←
+      (Resolution.resolve stmts baseDir externalModules dispatchOverloads dispatchModuleNames).toBaseIO with
     | .error msg => return .error s!"resolution: {msg}"
     | .ok r => pure r
+  let modelDiags : List Message :=
+    externalAnomalies.map (Message.fromString · (kind := .notYetImplemented))
+  let modelPrelude : Laurel.Program := match pyspecResult with
+    | some r =>
+      let userClassNames : Std.HashSet String :=
+        resolveResult.program.stmts.foldl (init := {}) fun st stmt =>
+          match stmt with
+          | .ClassDef _ cName .. => st.insert cName.val
+          | _ => st
+      addUnprefixedTypeAliases r.laurelProgram r.typeAliases userClassNames
+    | none => pythonRuntimeLaurelPart
   -- Step 2: Translate the demanded imported stubs, then the user program.
   -- On a demanded-import translation error, return a diagnostic (surfaced at the
   -- final return) rather than an empty program: an empty program would still leave
@@ -773,12 +902,12 @@ public def pyAnalyzeV2ToCore (pythonIonPath : String) (sourcePath : Option Strin
   -- runtime prelude already defines as types (see `bodilessTypeNamesFor`) — aliasing a
   -- prelude type name would duplicate its definition and abort the resolver.
   let bodilessTypeNames : List String :=
-    bodilessTypeNamesFor (resolveResult.unmodeledImports ++ coreTypeNames) pythonRuntimeLaurelPart
+    bodilessTypeNamesFor (resolveResult.unmodeledImports ++ coreTypeNames) modelPrelude
   let bodilessTypes : List Laurel.TypeDefinition := bodilessTypeNames.map fun n =>
     .Alias { name := { text := n }, target := mkHighTypeMd (.UserDefined { text := "Any" }) }
   -- Step 3: Elaborate (exception threading)
   let toElaborate  := assembleElaborationInput userLaurel importedLaurel (demandedTypes ++ bodilessTypes)
-  let fullRuntime  := pythonRuntimeLaurelPart
+  let fullRuntime  := modelPrelude
   -- Build runtime grade map: maps each proc name to its inferred grade.
   let runtimeGrades := fullRuntime.staticProcedures.foldl
     (fun acc proc => acc.insert proc.name.text
@@ -814,6 +943,6 @@ public def pyAnalyzeV2ToCore (pythonIonPath : String) (sourcePath : Option Strin
   -- uninterpreted instead of "'Config' is not defined".
   let importedNames := collectImportedNames stmts
   let (coreOpt, errs) ← translateCombinedLaurelV2 combined importedNames
-  return .ok (coreOpt, importedTranslationDiags ++ elabFailureDiags ++ errs)
+  return .ok (coreOpt, modelDiags ++ importedTranslationDiags ++ elabFailureDiags ++ errs)
 
 end StrataPython

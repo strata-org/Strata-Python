@@ -77,6 +77,9 @@ structure PythonFunctionDecl where
   args : List PyArgInfo
   kwargsName: Option String
   ret : Option PyRetInfo
+  /-- How many trailing entries of `args` are keyword-only (pyspec kwonly
+      plus expanded `**kwargs` fields); V2 uses it to split the signature. -/
+  kwonlyCount : Nat := 0
 deriving Inhabited
 
 /-- A symbol imported from a PySpec module, carrying its Laurel-internal

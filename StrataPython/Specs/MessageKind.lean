@@ -79,6 +79,8 @@ def typeNameCollision : MessageKind :=
   { category := "typeNameCollision", impact := .internalError }
 def procedureNameCollision : MessageKind :=
   { category := "procedureNameCollision", impact := .internalError }
+def staticFieldNameCollision : MessageKind :=
+  { category := "staticFieldNameCollision", impact := .internalError }
 
 -- Module resolution phase
 def invalidModuleName : MessageKind :=

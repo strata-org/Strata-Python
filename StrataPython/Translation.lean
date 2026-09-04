@@ -415,6 +415,16 @@ partial def translateExpr (e : StrataPython.expr ResolvedAnn) : TransM StmtExprM
             else
               pure sig.laurelName
         mkExpr sr (.StaticCall callee (← sig.matchArgs (receiver ++ posArgs) kwargPairs translateExpr (mkKwargs := (do return some (← mkKwargDict sr kwargPairs)))))
+    | .dispatchNew cls _ => do
+        tellDispatchArgEffects sr args.val kwargs.val
+        -- Bind the New to a temp (as `.classNew` does): a bare `.New` value statement is
+        -- rejected by elaboration when the result is discarded (`connect(...)` on its own line).
+        -- EAGER ALLOCATION invariant: inside an IfExp/BoolOp the temp decl is told into the
+        -- ENCLOSING scope, so the `new` runs on every path. Sound only because a dispatch
+        -- `New` carries no preconditions and an unused empty allocation is unobservable.
+        let tmp ← freshId "new"
+        tell [← mkLocalDecl sr tmp (mkTypeDefault (.UserDefined cls.toLaurel)) (some (← mkExpr sr (.New cls.toLaurel)))]
+        mkExpr sr (.Var (.Local tmp))
     | .classNew cls initSig => do
         let tmp ← freshId "new"
         let tmpRef ← mkExpr sr (.Var (.Local tmp))
@@ -555,10 +565,38 @@ partial def execWriter (stmts : List (StrataPython.stmt ResolvedAnn)) : TransM (
   let (_, s) ← collect (translateStmtList stmts)
   pure s
 
+/-- Emit side effects of dispatch-factory arguments that are discarded by the
+    `New` lowering. Non-trivial expressions are bound to discard locals because
+    elaboration rejects bare value statements. Caveat: an argument the pipeline
+    already lowers to a `.Hole` (comprehensions, lambdas) loses calls evaluated
+    inside it; that is V2's general comprehension lowering, not specific to
+    dispatch arguments. -/
+partial def tellDispatchArgEffects (sr : SourceRange)
+    (args : Array (StrataPython.expr ResolvedAnn))
+    (kwargs : Array (StrataPython.keyword ResolvedAnn)) : TransM Unit := do
+  let tellEffects (e : StrataPython.expr ResolvedAnn) : TransM Unit := do
+    let v ← translateExpr e
+    match v.val with
+    -- effects, if any, were already told by translateExpr (e.g. classNew returns its temp)
+    | .LiteralInt _ | .LiteralBool _ | .LiteralString _ | .LiteralDecimal _
+    | .Var _ | .Hole .. => pure ()
+    | _ => do
+      let tmp ← freshId "dispatchArg"
+      tell [← mkLocalDecl sr tmp (mkTypeDefault (.UserDefined { text := "Any" })) (some v)]
+  for arg in args do
+    tellEffects arg
+  for kw in kwargs do
+    match kw with
+    | .mk_keyword _ _ value => tellEffects value
+
 partial def translateAssign (sr : SourceRange) (target : StrataPython.expr ResolvedAnn)
     (value : StrataPython.expr ResolvedAnn) : TransM Unit := do
   match value with
   | .Call ann _ args kwargs => match ann.info with
+    | .dispatchNew cls _ => do
+        tellDispatchArgEffects sr args.val kwargs.val
+        let targetExpr ← translateExpr target
+        tell [← mkExpr sr (.Assign [toVarTarget targetExpr] (← mkExpr sr (.New cls.toLaurel)))]
     | .classNew cls initSig => do
         let targetExpr ← translateExpr target
         let assignNew ← mkExpr sr (.Assign [toVarTarget targetExpr] (← mkExpr sr (.New cls.toLaurel)))
@@ -654,7 +692,15 @@ partial def translateStmt (s : StrataPython.stmt ResolvedAnn) : TransM Unit := d
 
   | .Assert _ test _ => tell [← mkExpr sr (.Assert (← translateExpr test) none)]
   | .Expr _ (.Constant _ (.ConString _ _) _) => pure ()
-  | .Expr _ value => tell [← translateExpr value]
+  | .Expr _ value => do
+      let v ← translateExpr value
+      -- Any effects (factory allocations, init calls) were told during translation. A
+      -- remaining bare variable or field read (a factory temp, `x` or `obj.attr` on its
+      -- own line) carries nothing further and would be rejected by elaboration as a
+      -- non-final value statement, so it is dropped.
+      match v.val with
+      | .Var _ => pure ()
+      | _ => tell [v]
   | .Pass _ => pure ()
   | .Break _ => tell [← mkExpr sr (.Exit ((← currentBreakLabel).map (·.text) |>.getD "break"))]
   | .Continue _ => tell [← mkExpr sr (.Exit ((← currentContinueLabel).map (·.text) |>.getD "continue"))]

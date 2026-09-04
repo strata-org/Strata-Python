@@ -26,8 +26,9 @@ flag on `pyAnalyzeLaurel` (`pyAnalyzeV2` is an alias for `pyAnalyzeLaurel
 - **V1** (default) — `pythonAndSpecToLaurel`, then `laurelToCore`. The shipping
   front-end; it is what supports `--spec-dir` / `--dispatch` / `--pyspec`.
 - **V2** — `pyAnalyzeV2ToCore` (`FineGrainLaurel/Elaborate.lean`): Resolution →
-  Translation → Elaboration → Core. Under construction. It rejects the PySpec
-  flags outright, and still differs from V1 on most of the golden corpus.
+  Translation → Elaboration → Core. Under construction. It honors `--spec-dir`
+  / `--dispatch` / `--pyspec` (existing PySpec models bind through name
+  Resolution), and still differs from V1 on most of the golden corpus.
 
 Both front-ends run the whole `StrataPythonTest/tests/` corpus in CI, via
 `StrataPythonTestExtra/AnalyzeGoldenTest.lean`, each against its own golden set.

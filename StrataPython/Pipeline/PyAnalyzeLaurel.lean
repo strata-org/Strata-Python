@@ -63,22 +63,11 @@ private def runPipeline (config : PyAnalyzeConfig)
 
   let (coreProgram, laurelPassStats) ←
     if config.useV2 then
-      -- `pyAnalyzeV2ToCore` consumes only the source file: it does NOT read PySpec
-      -- (`--spec-dir`/`--dispatch`/`--pyspec`). Rather than silently ignore those flags
-      -- and report success for a verification that never loaded the requested specs,
-      -- fail loudly so the user knows the flag is not honored on `--v2`.
-      -- `--keep-all-files` IS honored on `--v2`: it writes the elaborated V2 Laurel.
-      let droppedFlags : List String :=
-        (if config.specDir != "." then ["--spec-dir"] else [])
-        ++ (if !config.dispatchModules.isEmpty then ["--dispatch"] else [])
-        ++ (if !config.pyspecModules.isEmpty then ["--pyspec"] else [])
-      unless droppedFlags.isEmpty do
-        let flagList := String.intercalate ", " droppedFlags
-        emitMessageAndAbort (file := uri) .laurelToCoreError
-          s!"--v2 does not support {flagList}; these flags are only honored on the v1 pipeline. Re-run without --v2, or without the listed flag(s)."
       withPhase "pyAnalyzeV2ToCore" do
+        let ctx ← read
         let v2Result ← StrataPython.pyAnalyzeV2ToCore config.filePath config.sourcePath
-          config.verifyOptions.keepAllFilesPrefix |>.toBaseIO
+          config.verifyOptions.keepAllFilesPrefix config.specDir
+          config.dispatchModules config.pyspecModules (some ctx) |>.toBaseIO
         match v2Result with
         | .ok (.ok (some core, diags)) =>
           let phase ← getPhase

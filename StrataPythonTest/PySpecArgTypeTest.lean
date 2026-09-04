@@ -58,7 +58,7 @@ private def buildSpecs (sigs : Array Signature) : IO StrataPython.PySpecLaurelRe
       throw <| .userError s!"buildPySpecLaurel failed: {msgs.map toString}"
 
 private def getFuncSigs (sigs : Array Signature) : IO (List PythonFunctionDecl) := do
-  return (← buildSpecs sigs).functionSignatures
+  return (← buildSpecs sigs).functionSignatures.map (·.2)
 
 private def unionType (elts : Array SpecType) : SpecType :=
   SpecType.unionArray loc elts

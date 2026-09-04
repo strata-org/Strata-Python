@@ -116,8 +116,9 @@ lake exe strata pyAnalyzeLaurel [flags] <program.python.st.ion>
 `--v2`
 : Use the V2 front-end (Resolution → Translation → Elaboration → Core)
   instead of the default V1 front-end. `pyAnalyzeV2` is an alias for
-  `pyAnalyzeLaurel --v2`. V2 is under construction: it rejects
-  `--spec-dir`, `--pyspec` and `--dispatch`, and still differs from V1
+  `pyAnalyzeLaurel --v2`. V2 is under construction: it honors
+  `--spec-dir`, `--pyspec` and `--dispatch` (existing PySpec models bind
+  through name Resolution), and still differs from V1
   on most of the golden corpus — see
   [`expected_laurel/README.md`](./expected_laurel/README.md).
 

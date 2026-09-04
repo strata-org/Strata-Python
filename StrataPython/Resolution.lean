@@ -9,6 +9,8 @@ public import StrataLaurel.Implementation.LaurelAST
 public import StrataPython.PythonDialect
 import StrataDDM.Util.SourceRange
 import StrataPython.ReadPython
+public import StrataPython.OverloadTable
+import StrataPython.PythonIdent
 
 /-!
 # Pass 1: Name Resolution
@@ -27,10 +29,12 @@ every node carries proof of what it refers to.
 
 ## Phase Distinction
 
-All Resolution types are purely Python-level. No `Laurel.Identifier` is
-stored anywhere. Translation obtains Laurel identifiers by calling accessor
-functions on the Python-level structures. This makes the phase boundary
-explicit and prevents mixing.
+All Resolution types are purely Python-level, with one cached exception:
+`FuncSig.laurelNameOverride` holds a pre-computed `Laurel.Identifier` for
+PySpec-modeled procedures, read only through `FuncSig.laurelName`. Translation
+obtains every other Laurel identifier by calling accessor functions on the
+Python-level structures. This makes the phase boundary explicit and prevents
+mixing.
 
 ## What Resolution Does
 
@@ -171,6 +175,9 @@ structure FuncSig where
       into the caller's body, so the caller must declare the const in scope too. Filtered to
       genuine module consts (`.variable` in `ctx`) at extraction — never callables/types. -/
   defaultConstReads : List PythonIdentifier := []
+  /-- Pre-computed Laurel procedure name for a PySpec-modeled procedure; read only
+      through `FuncSig.laurelName` (see the Phase Distinction note above). -/
+  laurelNameOverride : Option Identifier := none
 
 /-- The resolution annotation on each Python AST node.
     Each variant carries exactly what Translation needs to emit Laurel. -/
@@ -183,6 +190,9 @@ inductive NodeInfo where
   | funcDecl (sig : FuncSig)
   /-- A class instantiation (`ClassName(...)`) with class name and `__init__` sig. -/
   | classNew (className : PythonIdentifier) (initSig : FuncSig)
+  /-- A dispatch-factory call (`client("s3")`) resolved through the overload
+      table to the dispatched class; lowers to a bare allocation. -/
+  | dispatchNew (className : PythonIdentifier) (returnType : PythonType)
   /-- A class declaration with its fields and method signatures. -/
   | classDecl (name : PythonIdentifier) (attributes : List (PythonIdentifier × PythonType)) (methods : List FuncSig)
   /-- An attribute access (bare field name; Elaboration resolves via receiver type). -/
@@ -263,12 +273,14 @@ inductive CtxEntry where
       Each carries its index, sig, and raw AST (for on-demand body resolution). -/
   | overloadedFunction (overloads : List (Nat × FuncSig × Option PythonStmt))
   /-- An imported module with its resolved context. -/
-  | module_ (moduleCtx : Std.DHashMap.Raw PythonIdentifier (fun _ => CtxEntry))
+  | module_ (moduleCtx : Std.DHashMap.Raw PythonIdentifier (fun _ => CtxEntry)) (name : String)
   /-- An imported name whose type/kind is unknown. -/
   | unresolved
   deriving Inhabited
 
 abbrev Ctx := Std.HashMap PythonIdentifier CtxEntry
+
+abbrev ExternalModuleDecls := Std.HashMap String Ctx
 
 /-- An imported module with its source path (for cache filename) and resolved program. -/
 structure ImportedModule where
@@ -298,6 +310,18 @@ structure ResolveState where
       type-annotation reference to one lowers to the opaque `Unknown` instead of a
       `.UserDefined` type. See ResolvedPythonProgram. -/
   nonTypeImports : Std.HashSet String := {}
+  /-- Imported names bound to a modeled callable/class; the `moduleLocals` filter
+      drops their pre-registered `var` decls. -/
+  importedCallables : Std.HashSet String := {}
+  /-- Names imported FROM a configured dispatch module (aliases included). Only
+      these may dispatch as bare factory calls; a same-named import from an
+      unrelated module must not pick up the dispatch table. -/
+  dispatchImportedNames : Std.HashSet String := {}
+  /-- Configured dispatch module names (immutable). Which NAME currently denotes such a
+      module is tracked in `Ctx` via `CtxEntry.module_`, so scoping and rebinds apply. -/
+  dispatchModuleNames : Std.HashSet String := {}
+  externalModules : ExternalModuleDecls := {}
+  dispatchOverloads : OverloadTable := {}
 
 /-- The resolution monad. Reader carries baseDir, State collects imported module programs. -/
 abbrev ResolveM := ReaderT System.FilePath (StateT ResolveState (EIO String))
@@ -553,7 +577,8 @@ partial def collectLocalsFromStmt (s : PythonStmt) : List (PythonIdentifier × P
       let caseLocals := cases.val.toList.flatMap fun c =>
         match c with
         | .mk_match_case _ _pattern guardOpt caseBody =>
-            -- TODO: extract pattern bindings from _pattern (requires walking StrataPython.pattern)
+            -- Pattern captures are collected by `collectPatternNames` for rebind
+            -- shadowing; typed LOCALS for them are not extracted here (they stay Any).
             let guardW := match guardOpt.val with
               | some g => (collectWalrusNames g).map fun n => (n, annotationToPythonType none)
               | none => []
@@ -667,6 +692,81 @@ partial def collectSelfFields (s : PythonStmt) : List (PythonIdentifier × Pytho
     | .Match _ _ cases => cases.val.toList.flatMap (fun c => match c with | .mk_match_case _ _ _ cb => cb.val.toList.flatMap collectSelfFields)
     | _ => []
   here ++ nested
+
+/-- Names bound by a `match` case pattern (PEP 634 captures): bare and `as`
+    captures, `*rest`, and `**rest`, recursing through sequence, or, class, and
+    mapping sub-patterns. Value and singleton patterns bind nothing. -/
+partial def collectPatternNames (p : StrataPython.pattern SourceRange) : List PythonIdentifier :=
+  match p with
+  | .MatchAs _ sub nameOpt =>
+      ((sub.val.map collectPatternNames).getD []) ++
+      ((nameOpt.val.map (fun n => [PythonIdentifier.fromAst n])).getD [])
+  | .MatchStar _ nameOpt =>
+      (nameOpt.val.map (fun n => [PythonIdentifier.fromAst n])).getD []
+  | .MatchSequence _ ps | .MatchOr _ ps =>
+      ps.val.toList.flatMap collectPatternNames
+  | .MatchMapping _ _keys ps rest =>
+      ps.val.toList.flatMap collectPatternNames ++
+      ((rest.val.map (fun n => [PythonIdentifier.fromAst n])).getD [])
+  | .MatchClass _ _cls ps _kwdAttrs kwdPs =>
+      ps.val.toList.flatMap collectPatternNames ++
+      kwdPs.val.toList.flatMap collectPatternNames
+  | _ => []
+
+/-- Names bound in a statement by assignments, `match` pattern captures, or nested
+    `def`/`class` declarations, recursing into control-flow blocks (but not into
+    def/class bodies).
+    Unlike `collectLocalsFromStmt`, import aliases contribute nothing — even nested ones,
+    so a `try: import ujson as json / except: import json` fallback is not mistaken for an
+    assignment by the import-shadowing guard. -/
+partial def collectAssignedNames (s : PythonStmt) : List PythonIdentifier :=
+  match s with
+  | .Import .. | .ImportFrom .. => []
+  -- Annotation-only (`x: int`, no RHS) does not bind a name in Python.
+  | .AnnAssign _ target _ value _ =>
+      match value.val with
+      | some v => collectNamesFromTarget target ++ collectWalrusNames v
+      | none => []
+  | .If _ test body orelse =>
+      collectWalrusNames test ++
+      body.val.toList.flatMap collectAssignedNames ++
+      orelse.val.toList.flatMap collectAssignedNames
+  | .For _ target iter body orelse _ | .AsyncFor _ target iter body orelse _ =>
+      collectNamesFromTarget target ++ collectWalrusNames iter ++
+      body.val.toList.flatMap collectAssignedNames ++
+      orelse.val.toList.flatMap collectAssignedNames
+  | .While _ cond body orelse =>
+      collectWalrusNames cond ++
+      body.val.toList.flatMap collectAssignedNames ++
+      orelse.val.toList.flatMap collectAssignedNames
+  | .Try _ body handlers orelse finalbody | .TryStar _ body handlers orelse finalbody =>
+      body.val.toList.flatMap collectAssignedNames ++
+      handlers.val.toList.flatMap (fun h => match h with
+        | .ExceptHandler _ ty nameOpt hBody =>
+          -- The handler TYPE is an expression too (`except (name := E):`).
+          (ty.val.map collectWalrusNames).getD [] ++
+          (nameOpt.val.map (fun n => [PythonIdentifier.fromAst n])).getD [] ++
+          hBody.val.toList.flatMap collectAssignedNames) ++
+      orelse.val.toList.flatMap collectAssignedNames ++
+      finalbody.val.toList.flatMap collectAssignedNames
+  | .With _ items body _ | .AsyncWith _ items body _ =>
+      items.val.toList.flatMap (fun item => match item with
+        | .mk_withitem _ ctxExpr optVars =>
+          collectWalrusNames ctxExpr ++
+          (optVars.val.map collectNamesFromTarget).getD []) ++
+      body.val.toList.flatMap collectAssignedNames
+  | .Match _ subject cases =>
+      collectWalrusNames subject ++
+      cases.val.toList.flatMap (fun c => match c with
+        | .mk_match_case _ pat guardOpt caseBody =>
+          collectPatternNames pat ++
+          (guardOpt.val.map collectWalrusNames).getD [] ++
+          caseBody.val.toList.flatMap collectAssignedNames)
+  -- A nested `def`/`class` binds its name in the enclosing scope; do not recurse into their
+  -- bodies (Python gives them their own scope).
+  | .FunctionDef _ name .. | .AsyncFunctionDef _ name .. => [PythonIdentifier.fromAst name]
+  | .ClassDef _ cname .. => [PythonIdentifier.fromAst cname]
+  | _ => (collectLocalsFromStmt s).map (·.1)
 
 /-- Python scoping: any assignment target in a function body is local to that function.
     Collects all such names (excluding params, globals, nonlocals, and nested def/class names),
@@ -812,13 +912,16 @@ def PythonIdentifier.toLaurel (id : PythonIdentifier) : Identifier :=
     functions (`len` → `Any_len_to_Any`) and class qualification for methods
     (`get_x` with `className = some "Account"` → `Account@get_x`). -/
 def FuncSig.laurelName (sig : FuncSig) : Identifier :=
-  let baseName := match sig.className with
-    | some cls => s!"{cls.val}@{sig.name.val}"
-    | none => pythonNameToLaurel sig.name.val
-  let name := match sig.overloadIndex with
-    | some idx => s!"{baseName}${idx}"
-    | none => baseName
-  { text := name, uniqueId := none }
+  match sig.laurelNameOverride with
+  | some id => id
+  | none =>
+    let baseName := match sig.className with
+      | some cls => s!"{cls.val}@{sig.name.val}"
+      | none => pythonNameToLaurel sig.name.val
+    let name := match sig.overloadIndex with
+      | some idx => s!"{baseName}${idx}"
+      | none => baseName
+    { text := name, uniqueId := none }
 
 private def ParamList.allParams (pl : ParamList) : List (PythonIdentifier × PythonType) :=
   pl.required ++ pl.optional.map (fun (n, ty, _) => (n, ty)) ++ pl.kwonly.map (fun (n, ty, _) => (n, ty))
@@ -997,6 +1100,163 @@ private def mapAnnArr (f : α → β) (mapT : T₁ → T₂) (a : Ann (Array T�
 -- Threads Ctx as accumulator. Declarations extend it. References look up from it.
 -- Non-reference nodes get .none. Reference nodes get their lookup result.
 -- ═══════════════════════════════════════════════════════════════════════════════
+
+private def dottedPath : PythonExpr → Option String
+  | .Name _ n _ => some n.val
+  | .Attribute _ obj attr _ => (dottedPath obj).map (· ++ "." ++ attr.val)
+  | _ => none
+
+private def pythonIdentType (ident : PythonIdent) : PythonType :=
+  let components := ident.pythonModule.toString.splitOn "."
+  let rootName := components.head?.getD ident.name
+  let root : PythonType := .Name .none ⟨.none, rootName⟩ (.Load .none)
+  let modulePath := components.drop 1 |>.foldl
+    (fun obj component => .Attribute .none obj ⟨.none, component⟩ (.Load .none)) root
+  .Attribute .none modulePath ⟨.none, ident.name⟩ (.Load .none)
+
+/-- Resolves a dispatch-factory call (`connect("storage")`) against the overload table.
+    Returns `none` for calls that are not dispatch calls: an attribute receiver must be
+    bound to a CONFIGURED dispatch module in the current scope (aliases copy the module
+    entry, and any local rebind shadows it), and a bare name must be an unresolved import
+    FROM a configured dispatch module, so same-named methods on other modules, unrelated
+    imports, or user objects never trigger dispatch. For genuine dispatch calls, fails
+    with the V1 diagnostics on an unknown service string or a wrong keyword argument. -/
+private def resolveDispatchCall (ctx : Ctx) (dispatchModuleNames : Std.HashSet String)
+    (dispatchImportedNames : Std.HashSet String)
+    (overloads : OverloadTable) (func : PythonExpr)
+    (args : Array PythonExpr) (kwargs : Array (StrataPython.keyword SourceRange))
+    : Except String (Option NodeInfo) := do
+  let some funcName := (match func with
+    | .Attribute _ (.Name _ recvName _) attr _ =>
+      match ctx[PythonIdentifier.fromAst recvName]? with
+      | some (.module_ _ modName) =>
+        if dispatchModuleNames.contains modName then some attr.val else none
+      | _ => none
+    | .Name _ name _ =>
+      -- Only a name imported (possibly aliased) from a dispatch module and left
+      -- unresolved dispatches: an unbound name is a Python NameError, and an
+      -- unrelated import must not pick up the dispatch table by name.
+      match ctx[PythonIdentifier.fromAst name]? with
+      | some .unresolved =>
+        if dispatchImportedNames.contains name.val then some name.val else none
+      | _ => none
+    | _ => none) | return none
+  let some functionOverloads := overloads[funcName]? | return none
+  let kwPairs := kwargs.toList.map StrataPython.keyword.nameAndValue
+  let some dispatchArg := functionOverloads.findDispatchArg args kwPairs
+    | match kwPairs.filterMap (·.1) with
+      | provided@(_ :: _) =>
+        throw s!"Dispatched function '{funcName}' called with wrong keyword argument, \
+          expected '{functionOverloads.paramName}' but got \
+          '{String.intercalate "', '" provided}'"
+      | _ =>
+        throw s!"Dispatched function '{funcName}' called with no arguments \
+          (expected a string literal first argument)"
+  let some literal := (match dispatchArg with
+    | .Constant _ (.ConString _ value) _ => some value.val
+    | _ => none) | return none
+  let some target := functionOverloads.entries[literal]?
+    | let knownServices := functionOverloads.entries.keysArray.insertionSort.take 2
+      let suffix := if functionOverloads.entries.size > 2 then
+          s!" ... ({functionOverloads.entries.size} total)" else ""
+      throw s!"'{funcName}' called with unknown string \"{literal}\"; \
+        known services: {knownServices}{suffix}"
+  let className := PythonIdentifier.builtin (target.toString (sep := "_"))
+  return some (.dispatchNew className (pythonIdentType target))
+
+/-- The `.module_` entry aliased by an assignment RHS: a bare name currently bound to a
+    module (`sl = servicelib`). Copying it keeps attribute calls on the alias resolving
+    (and dispatching) exactly like the original name. -/
+private def moduleEntryOfValue (ctx : Ctx) : StrataPython.expr SourceRange → Option CtxEntry
+  | .Name _ src _ =>
+    match ctx[PythonIdentifier.fromAst src]? with
+    | some e@(.module_ _ _) => some e
+    | _ => none
+  | _ => none
+
+/-- Rebinds binder-introduced names (loop targets, `with ... as` vars) to plain variables,
+    shadowing any module or callable entry the name previously held: Python rebinds these
+    names, so dispatch and modeled calls must stop resolving through them. -/
+private def shadowBoundNames (ctx : Ctx) (names : List PythonIdentifier) : Ctx :=
+  names.foldl (fun c n => c.insert n (CtxEntry.variable (annotationToPythonType Option.none))) ctx
+
+/-- The names bound by `with ... as <target>` items. -/
+private def withItemNames (items : Array (StrataPython.withitem SourceRange)) : List PythonIdentifier :=
+  items.toList.flatMap fun
+    | .mk_withitem _ _ optVars => (optVars.val.map collectNamesFromTarget).getD []
+
+/-- The subset of `names` whose current entry is a module, callable, or class: a rebind
+    must downgrade these so dispatch and modeled contracts stop resolving through them.
+    `.variable` entries are left alone (already conservative). -/
+private def nonVariableRebinds (ctx : Ctx) (names : List PythonIdentifier) : List PythonIdentifier :=
+  names.filter fun n =>
+    match ctx[n]? with
+    | some (.module_ ..) | some (.function ..) | some (.overloadedFunction _)
+    | some (.class_ ..) => true
+    | _ => false
+
+/-- Walrus-bound names in every expression the STATEMENT ITSELF evaluates in the
+    enclosing scope: assignment targets and values, tests and messages, iterators,
+    raise operands, with-items, match subjects and guards, decorators, parameter
+    defaults, return annotations, and class bases/keywords. Nested block statements
+    are excluded; they shadow for themselves when resolved. -/
+private def stmtHeadWalrusNames (s : PythonStmt) : List PythonIdentifier :=
+  let opt : Ann (Option PythonExpr) SourceRange → List PythonIdentifier :=
+    fun o => (o.val.map collectWalrusNames).getD []
+  match s with
+  | .Assign _ targets value _ =>
+      targets.val.toList.flatMap collectWalrusNames ++ collectWalrusNames value
+  | .AnnAssign _ target ann value _ =>
+      collectWalrusNames target ++ collectWalrusNames ann ++ opt value
+  | .AugAssign _ target _ value => collectWalrusNames target ++ collectWalrusNames value
+  | .Expr _ value => collectWalrusNames value
+  | .Return _ value => opt value
+  | .Assert _ test msg => collectWalrusNames test ++ opt msg
+  | .Raise _ exc cause => opt exc ++ opt cause
+  | .Delete _ targets => targets.val.toList.flatMap collectWalrusNames
+  | .If _ test _ _ | .While _ test _ _ => collectWalrusNames test
+  | .For _ target iter _ _ _ | .AsyncFor _ target iter _ _ _ =>
+      collectWalrusNames target ++ collectWalrusNames iter
+  | .Match _ subject cases =>
+      collectWalrusNames subject ++
+      cases.val.toList.flatMap (fun c => match c with
+        | .mk_match_case _ _ guardOpt _ => (guardOpt.val.map collectWalrusNames).getD [])
+  | .With _ items _ _ | .AsyncWith _ items _ _ =>
+      items.val.toList.flatMap (fun item => match item with
+        | .mk_withitem _ ctxExpr _ => collectWalrusNames ctxExpr)
+  | .Try _ _ handlers _ _ | .TryStar _ _ handlers _ _ =>
+      handlers.val.toList.flatMap (fun h => match h with
+        | .ExceptHandler _ ty _ _ => (ty.val.map collectWalrusNames).getD [])
+  | .FunctionDef _ _ args _ decorators returns _ _
+  | .AsyncFunctionDef _ _ args _ decorators returns _ _ =>
+      let argWalruses := match args with
+        | .mk_arguments _ posonlyargs argList vararg kwonlyargs kwDefaults kwarg defaults =>
+          -- Parameter ANNOTATIONS are evaluated at def time in the enclosing scope.
+          let annOf : StrataPython.arg SourceRange → List PythonIdentifier :=
+            fun | .mk_arg _ _ ann _ => (ann.val.map collectWalrusNames).getD []
+          (posonlyargs.val.toList ++ argList.val.toList ++ kwonlyargs.val.toList).flatMap annOf ++
+          (vararg.val.map annOf).getD [] ++ (kwarg.val.map annOf).getD [] ++
+          defaults.val.toList.flatMap collectWalrusNames ++
+          kwDefaults.val.toList.flatMap (fun e => match e with
+            | .some_expr _ x => collectWalrusNames x
+            | .missing_expr _ => [])
+      decorators.val.toList.flatMap collectWalrusNames ++ opt returns ++ argWalruses
+  | .ClassDef _ _ bases keywords _ decorators _ =>
+      bases.val.toList.flatMap collectWalrusNames ++
+      keywords.val.toList.flatMap (fun kw => match kw with
+        | .mk_keyword _ _ value => collectWalrusNames value) ++
+      decorators.val.toList.flatMap collectWalrusNames
+  | _ => []
+
+/-- Downgrades the module, callable, and class entries among the names a statement's nested
+    blocks may bind (assignments, loop/with targets, walrus, except handlers, and nested
+    `def`/`class` names): Python keeps such rebinds after the block, so dispatch or a modeled
+    contract must stop resolving through the name even when the rebind sits under `if`,
+    `while`, `try`, `match`, or a nested `for`/`with` body. `collectAssignedNames` is
+    recomputed per control-flow statement, so cost is quadratic in nesting depth; fine for
+    typical module sizes. -/
+private def shadowModuleRebinds (ctx : Ctx) (s : PythonStmt) : Ctx :=
+  shadowBoundNames ctx (nonVariableRebinds ctx (collectAssignedNames s))
 
 mutual
 
@@ -1235,17 +1495,21 @@ partial def resolveExpr (ctx : Ctx) (f : SourceRange → ResolvedAnn) (e : Pytho
   match e with
   | .Name a n ectx =>
       let nId := PythonIdentifier.fromAst n
-      let info := match ctx[nId]? with
-        | some (.variable _) => .variable nId
-        | some (.function _ _) => .unresolved
-        | some (.overloadedFunction _) => .unresolved
-        | some (.class_ _ _ _ _) => .unresolved
-        | some (.module_ _) => .irrelevant
-        | some .unresolved => .unresolved
-        | none => .unresolved
+      -- An assignment TARGET rebinds the name to a variable regardless of what it
+      -- currently denotes (`x = ...` after `from m import x` is a plain rebind).
+      let info := match ectx with
+        | .Store _ => .variable nId
+        | _ => match ctx[nId]? with
+          | some (.variable _) => .variable nId
+          | some (.function _ _) => .unresolved
+          | some (.overloadedFunction _) => .unresolved
+          | some (.class_ _ _ _ _) => .unresolved
+          | some (.module_ _ _) => .irrelevant
+          | some .unresolved => .unresolved
+          | none => .unresolved
       return .Name { sr := a, info } (mapAnnVal f n) (resolveExprCtx f ectx)
   | .Call a func args kwargs =>
-      let callInfo : NodeInfo ← match func with
+      let regularInfo : NodeInfo ← match func with
         | .Name _ n _ =>
           let nId := PythonIdentifier.fromAst n
           match ctx[nId]? with
@@ -1272,6 +1536,11 @@ partial def resolveExpr (ctx : Ctx) (f : SourceRange → ResolvedAnn) (e : Pytho
         | .Attribute _ receiver methodName _ =>
             resolveMethodCall ctx receiver methodName args.val
         | _ => pure .unresolved
+      let st ← get
+      let callInfo ← match resolveDispatchCall ctx st.dispatchModuleNames
+          st.dispatchImportedNames st.dispatchOverloads func args.val kwargs.val with
+        | .ok info => pure (info.getD regularInfo)
+        | .error msg => throw msg
       let rFunc ← resolveExpr ctx f func
       let mut rArgs : Array ResolvedPythonExpr := #[]
       for arg in args.val do
@@ -1523,7 +1792,7 @@ partial def typeOfExpr (ctx : Ctx) : PythonExpr → ResolveM (Option PythonType)
       match ctx[classId]? with
       | some (.class_ _ fields _ _) =>
         pure (fields.find? (fun (fName, _) => fName == PythonIdentifier.fromAst fieldName) |>.map (·.2))
-      | some (.module_ moduleRaw) =>
+      | some (.module_ moduleRaw _) =>
         let moduleCtx : Ctx := moduleRaw.fold (fun c k v => c.insert k v) {}
         let fieldId := PythonIdentifier.fromAst fieldName
         match moduleCtx[fieldId]? with
@@ -1586,12 +1855,60 @@ partial def resolveFunctionAstSig (ctx : Ctx) (f : SourceRange → ResolvedAnn)
       modify fun s => { s with demandedFunctions := s.demandedFunctions.insert key resolvedStmt }
   | _ => pure ()
 
+/-- Resolves a `pkg.sub.func(...)` call whose receiver is a dotted module path rooted at an
+    in-scope module import. Returns `none` when the receiver is not such a path. -/
+partial def resolveDottedModuleCall (ctx : Ctx) (receiver : PythonExpr)
+    (methId : PythonIdentifier) (callArgs : Array PythonExpr)
+    (f : SourceRange → ResolvedAnn) : ResolveM (Option NodeInfo) := do
+  let some path := dottedPath receiver | return none
+  let first :: _ :: _ := path.splitOn "." | return none
+  let some (.module_ _ _) := ctx[PythonIdentifier.builtin first]? | return none
+  let baseDir ← read
+  let (moduleCtx, _) ← resolveModule path baseDir f
+  match moduleCtx[methId]? with
+  | some (.function sig ast) =>
+    if let some fAst := ast then resolveFunctionAstSig moduleCtx f sig fAst
+    return some (.funcCall sig)
+  | some (.overloadedFunction overloads) =>
+    let some (idx, sig, astOpt) := overloads.find? fun (_, olSig, _) => matchOverload olSig callArgs
+      | return none
+    let sig := { sig with overloadIndex := some idx }
+    if let some fAst := astOpt then resolveFunctionAstSig moduleCtx f sig fAst
+    return some (.funcCall sig)
+  | _ => return none
+
+/-- Resolves a method call whose receiver's annotation is a dotted class path
+    (`x: pkg.sub.Class`) rooted at an in-scope module import. -/
+partial def resolveDottedClassMethod (ctx : Ctx) (tyPath : String)
+    (methId : PythonIdentifier) (f : SourceRange → ResolvedAnn)
+    : ResolveM (Option NodeInfo) := do
+  let comps := tyPath.splitOn "."
+  let first :: _ :: _ :: _ := comps | return none
+  let some clsName := comps.getLast? | return none
+  let some (.module_ _ _) := ctx[PythonIdentifier.builtin first]? | return none
+  let modPath := String.intercalate "." comps.dropLast
+  let baseDir ← read
+  let (moduleCtx, _) ← resolveModule modPath baseDir f
+  let some (.class_ classId fields methods methodAsts) :=
+      moduleCtx[PythonIdentifier.builtin clsName]? | return none
+  if let some (_, sig) := methods.find? (fun (mName, _) => mName == methId) then
+    return some (.funcCall sig)
+  let some (_, mAst) := methodAsts.find? (fun (mName, _) => mName == methId) | return none
+  return some (.funcCall (← resolveMethodAstSig moduleCtx f classId fields mAst))
+
 /-- Resolves `receiver.method(...)` calls. Monadic: uses `typeOfExpr` which may
     trigger demand-driven module loads. -/
 partial def resolveMethodCall (ctx : Ctx) (receiver : PythonExpr) (methodName : Ann String SourceRange) (callArgs : Array PythonExpr := #[]) : ResolveM NodeInfo := do
   let methId := PythonIdentifier.fromAst methodName
   let f : SourceRange → ResolvedAnn := fun sr => { sr, info := .irrelevant }
-  match ← typeOfExpr ctx receiver with
+  -- Last resort: a dotted module path call (`pkg.sub.func(...)`).
+  let dottedModuleFallback : ResolveM NodeInfo :=
+    return (← resolveDottedModuleCall ctx receiver methId callArgs f).getD .unresolved
+  let tyOpt ← typeOfExpr ctx receiver
+  if let some tyPath := tyOpt.bind dottedPath then
+    if let some r ← resolveDottedClassMethod ctx tyPath methId f then
+      return r
+  match tyOpt with
   | some (.Name _ className _) =>
     let classId := PythonIdentifier.fromAst className
     match ctx[classId]? with
@@ -1622,7 +1939,7 @@ partial def resolveMethodCall (ctx : Ctx) (receiver : PythonExpr) (methodName : 
     | _ =>
       -- Fall back: maybe the name is a class directly in the parent module's ctx
       match ctx[modId]? with
-      | some (.module_ moduleRaw) =>
+      | some (.module_ moduleRaw _) =>
         let moduleCtx : Ctx := moduleRaw.fold (fun c k v => c.insert k v) {}
         match moduleCtx[PythonIdentifier.fromAst clsName]? with
         | some (.class_ classId fields methods methodAsts) =>
@@ -1639,7 +1956,7 @@ partial def resolveMethodCall (ctx : Ctx) (receiver : PythonExpr) (methodName : 
     | .Name _ rName _ =>
       let rId := PythonIdentifier.fromAst rName
       match ctx[rId]? with
-      | some (.module_ moduleRaw) =>
+      | some (.module_ moduleRaw _) =>
         let moduleCtx : Ctx := moduleRaw.fold (fun c k v => c.insert k v) {}
         match moduleCtx[methId]? with
         | some (.function sig ast) => do
@@ -1673,8 +1990,8 @@ partial def resolveMethodCall (ctx : Ctx) (receiver : PythonExpr) (methodName : 
               let emptySig : FuncSig := { name := initId, className := some cId, params := .static {required := [], optional := [], kwonly := []}, returnType := anyType, locals := [] }
               pure (.classNew cId emptySig)
         | _ => pure .unresolved
-      | _ => pure .unresolved
-    | _ => pure .unresolved
+      | _ => dottedModuleFallback
+    | _ => dottedModuleFallback
 
 /-- Demand-load a BARE type-annotation name (e.g. `S3` under `import boto3`) that is not
     locally resolvable, by probing each in-scope imported module for a submodule of that
@@ -1692,7 +2009,7 @@ partial def demandBareTypeName (ctx : Ctx) (name : String) (f : SourceRange → 
   let baseDir ← read
   -- Only in-scope imported modules are probe roots (typically just `boto3`); bounded set.
   let moduleNames : List String := ctx.toList.filterMap fun (k, v) =>
-    match v with | .module_ _ => some k.val | _ => none
+    match v with | .module_ _ _ => some k.val | _ => none
   for modName in moduleNames do
     let (subCtx, _) ← resolveModuleComponent name (baseDir / modName) f
     match subCtx[PythonIdentifier.fromAst ⟨SourceRange.none, name⟩]? with
@@ -1766,7 +2083,10 @@ partial def resolveModuleComponent (name : String) (dir : System.FilePath) (f : 
 
 /-- Resolve a dotted module name (e.g. "boto3.AccessAnalyzer") by converting dots to path
     separators and loading the final component. -/
-partial def resolveModule (dottedName : String) (dir : System.FilePath) (f : SourceRange → ResolvedAnn) : ResolveM (Ctx × ResolvedPythonProgram) := do
+partial def resolveModule (dottedName : String) (dir : System.FilePath)
+    (f : SourceRange → ResolvedAnn) : ResolveM (Ctx × ResolvedPythonProgram) := do
+  if let some memberCtx := (← get).externalModules[dottedName]? then
+    return (memberCtx, { stmts := #[], moduleLocals := [] })
   let components := dottedName.splitOn "."
   let moduleDir := components.dropLast.foldl (· / ·) dir
   match components.getLast? with
@@ -1781,8 +2101,15 @@ partial def resolveModule (dottedName : String) (dir : System.FilePath) (f : Sou
     - `Import`/`ImportFrom` → extends ctx with module or imported names.
     - `Assign`/`AnnAssign` → extends ctx with assigned names.
     - `AugAssign` → annotates with operator sig (`.funcCall`) for Translation.
-    - Control flow → resolves sub-blocks in current ctx (no ctx extension from if/for/while). -/
+    - Control flow → resolves sub-blocks in the current ctx (loop/with targets shadowed
+      first) and returns a ctx with rebindable entries the block may bind downgraded
+      (see `shadowModuleRebinds`). Statement-head walruses are downgraded on entry. -/
 partial def resolveStmt (ctx : Ctx) (f : SourceRange → ResolvedAnn) (s : PythonStmt) : ResolveM (Ctx × ResolvedPythonStmt) := do
+  -- Walrus bindings anywhere in the statement's own expressions take effect during
+  -- evaluation: downgrade rebindable entries BEFORE resolving, so a use after the
+  -- walrus cannot bind a stale module or model entry. Conservative for uses that
+  -- precede the walrus (they lose precision, never gain a dropped contract).
+  let ctx := shadowBoundNames ctx (nonVariableRebinds ctx (stmtHeadWalrusNames s))
   match s with
   | .FunctionDef a name args body decorators returns tc typeParams =>
       let nameId := PythonIdentifier.fromAst name
@@ -1811,8 +2138,10 @@ partial def resolveStmt (ctx : Ctx) (f : SourceRange → ResolvedAnn) (s : Pytho
           -- indexed before their bodies are resolved). A same-named callable
           -- from an enclosing scope is a lexical shadow, not this declaration.
           let sig ← match ctx[nameId]? with
+            -- Reuse only an exact locally pre-registered signature. A same-named
+            -- PySpec model or enclosing callable must not lend its contract to this def.
             | some (.function existingSig ..) =>
-              if existingSig.definitionRange == some a then
+              if existingSig.definitionRange == some a && existingSig.laurelNameOverride.isNone then
                 pure existingSig
               else do
                 let freshSig ← extractFuncSig ctx f nameId none args decorators.val returns body.val
@@ -1827,7 +2156,7 @@ partial def resolveStmt (ctx : Ctx) (f : SourceRange → ResolvedAnn) (s : Pytho
       let nameId := PythonIdentifier.fromAst name
       let sig ← match ctx[nameId]? with
         | some (.function existingSig ..) =>
-          if existingSig.definitionRange == some a then
+          if existingSig.definitionRange == some a && existingSig.laurelNameOverride.isNone then
             pure existingSig
           else do
             let freshSig ← extractFuncSig ctx f nameId none args decorators.val returns body.val
@@ -1952,10 +2281,21 @@ partial def resolveStmt (ctx : Ctx) (f : SourceRange → ResolvedAnn) (s : Pytho
           let registeredId := match asName.val with
             | some aliasName => PythonIdentifier.fromAst aliasName
             | none => PythonIdentifier.fromImport modName
+          -- Imports rebind unconditionally (`computeLocals` pre-registrations included);
+          -- statement order decides who wins a name.
           let (moduleCtx, _) ← resolveModule modName.val baseDir f
-          ctx' := ctx'.insert registeredId (CtxEntry.module_ moduleCtx.inner.inner)
+          -- An unaliased dotted `import a.b` binds the ROOT name `a`; only an alias
+          -- denotes the full dotted module.
+          let boundModule := match asName.val with
+            | some _ => modName.val
+            | none => (modName.val.splitOn ".").headD modName.val
+          ctx' := ctx'.insert registeredId (CtxEntry.module_ moduleCtx.inner.inner boundModule)
       return (ctx', .Import (f a) (mapAnnArr f (resolveAlias f) aliases))
   | .ImportFrom a modName imports level => do
+      -- Known limitations: `level` is ignored (a level-1 relative import resolves
+      -- via baseDir like an absolute one; deeper levels do not resolve), and a `*`
+      -- import copies nothing, so starred names stay unbound and their calls lower
+      -- to havoc rather than to a model.
       let baseDir ← read
       let mut ctx' := ctx
       match modName.val with
@@ -1968,6 +2308,16 @@ partial def resolveStmt (ctx : Ctx) (f : SourceRange → ResolvedAnn) (s : Pytho
               | some aliasName => PythonIdentifier.fromAst aliasName
               | none => PythonIdentifier.fromAst impName
             let impId := PythonIdentifier.fromAst impName
+            -- A name imported from a configured dispatch module may dispatch as a
+            -- bare factory call; record it (under its alias) to gate that path.
+            -- The set tracks the CURRENT binding: any other import of the same
+            -- local name revokes it (Python import shadowing).
+            if (← get).dispatchModuleNames.contains modAnn.val then
+              modify fun s => { s with
+                dispatchImportedNames := s.dispatchImportedNames.insert registeredId.val }
+            else
+              modify fun s => { s with
+                dispatchImportedNames := s.dispatchImportedNames.erase registeredId.val }
             -- Record names whose imported symbol has no on-disk model, so the `moduleLocals`
             -- filter below can drop the `var` decl (else a type-annotation use of the name fails
             -- to resolve). A symbol that IS present in the resolved module (real value/class) is
@@ -1980,14 +2330,19 @@ partial def resolveStmt (ctx : Ctx) (f : SourceRange → ResolvedAnn) (s : Pytho
               | .function _ | .overloadedFunction _ | .variable _ =>
                 modify fun s => { s with nonTypeImports := s.nonTypeImports.insert registeredId.val }
               | _ => pure ()
-              match ctx'[registeredId]? with
-              | some _ => pure ()
-              | none => ctx' := ctx'.insert registeredId entry
+              match entry with
+              | .function .. | .overloadedFunction _ | .class_ .. =>
+                modify fun s => { s with importedCallables := s.importedCallables.insert registeredId.val }
+              | _ => pure ()
+              ctx' := ctx'.insert registeredId entry
             | none =>
-              modify fun s => { s with unmodeledImports := s.unmodeledImports.insert registeredId.val }
+              -- A FAILING import must not evict an earlier resolved callable: `.unresolved`
+              -- is strictly weaker and would silently drop modeled preconditions.
               match ctx'[registeredId]? with
-              | some _ => pure ()
-              | none => ctx' := ctx'.insert registeredId CtxEntry.unresolved
+              | some (.function ..) | some (.overloadedFunction _) | some (.class_ ..) => pure ()
+              | _ =>
+                modify fun s => { s with unmodeledImports := s.unmodeledImports.insert registeredId.val }
+                ctx' := ctx'.insert registeredId CtxEntry.unresolved
       | none =>
         for imp in imports.val do
           match imp with
@@ -1995,7 +2350,10 @@ partial def resolveStmt (ctx : Ctx) (f : SourceRange → ResolvedAnn) (s : Pytho
             let registeredId := match asName.val with
               | some aliasName => PythonIdentifier.fromAst aliasName
               | none => PythonIdentifier.fromAst impName
-            modify fun s => { s with unmodeledImports := s.unmodeledImports.insert registeredId.val }
+            -- This import rebinds the name away from any dispatch-module origin.
+            modify fun s => { s with
+              unmodeledImports := s.unmodeledImports.insert registeredId.val
+              dispatchImportedNames := s.dispatchImportedNames.erase registeredId.val }
             match ctx'[registeredId]? with
             | some _ => pure ()
             | none => ctx' := ctx'.insert registeredId CtxEntry.unresolved
@@ -2003,7 +2361,7 @@ partial def resolveStmt (ctx : Ctx) (f : SourceRange → ResolvedAnn) (s : Pytho
   | .Assign a targets value tc => do
       let newNames := targets.val.toList.flatMap collectNamesFromTarget
       let mut rTargets : Array ResolvedPythonExpr := #[]
-      for t in targets.val do rTargets := rTargets.push (← resolveExpr ctx f t)
+      for target in targets.val do rTargets := rTargets.push (← resolveExpr ctx f target)
       let rValue ← resolveExpr ctx f value
       -- A single-Name assignment recovers the RHS call's resolved return type
       -- (e.g. cw = boto3.client("cloudwatch") -> CloudWatch) so method calls on it
@@ -2014,14 +2372,18 @@ partial def resolveStmt (ctx : Ctx) (f : SourceRange → ResolvedAnn) (s : Pytho
       -- that resolveMethodCall can demand as a class. Bare names / None / TypedDict
       -- returns (e.g. describe_alarms -> None) keep Any, avoiding downstream unify breaks.
       let assignedTy : PythonType := match rValue with
+        | .Call { info := .dispatchNew _ returnType, .. } .. => returnType
         | .Call { info := .funcCall sig, .. } .. =>
           match sig.returnType with
           | .Attribute _ (.Name _ _ _) _ _ => sig.returnType
           | _ => annotationToPythonType Option.none
         | _ => annotationToPythonType Option.none
-      let ctx' := match newNames with
-        | [n] => ctx.insert n (CtxEntry.variable assignedTy)
-        | _ => newNames.foldl (fun c n => c.insert n (CtxEntry.variable (annotationToPythonType Option.none))) ctx
+      -- `sl = servicelib` aliases the module: copy its ctx entry so attribute calls on
+      -- the alias resolve (and dispatch) exactly like the original name.
+      let ctx' := match moduleEntryOfValue ctx value, newNames with
+        | some e, _ => newNames.foldl (fun c n => c.insert n e) ctx
+        | none, [n] => ctx.insert n (CtxEntry.variable assignedTy)
+        | none, _ => newNames.foldl (fun c n => c.insert n (CtxEntry.variable (annotationToPythonType Option.none))) ctx
       return (ctx', .Assign (f a) ⟨f targets.ann, rTargets⟩ rValue (mapAnnOpt f (mapAnnVal f) tc))
   | .AnnAssign a target ann value simple => do
       let newNames := collectNamesFromTarget target
@@ -2034,37 +2396,48 @@ partial def resolveStmt (ctx : Ctx) (f : SourceRange → ResolvedAnn) (s : Pytho
       -- written annotation (e.g. S3), so method calls on the variable resolve
       -- through the module and demand the class.
       let varTy : PythonType := match rValue with
+        | some (.Call { info := .dispatchNew _ returnType, .. } ..) => returnType
         | some (.Call { info := .funcCall sig, .. } ..) => sig.returnType
         | _ => ann
-      let ctx' := newNames.foldl (fun c n => c.insert n (CtxEntry.variable varTy)) ctx
+      -- Same aliasing rule as `.Assign`; a bare annotation (`x: T`) binds nothing.
+      let ctx' := match value.val with
+        | none => ctx
+        | some v => match moduleEntryOfValue ctx v with
+          | some e => newNames.foldl (fun c n => c.insert n e) ctx
+          | none => newNames.foldl (fun c n => c.insert n (CtxEntry.variable varTy)) ctx
       return (ctx', .AnnAssign (f a) rTarget rAnn ⟨f value.ann, rValue⟩ (resolveInt f simple))
   | .AugAssign a target op value => do
       let opSig : FuncSig := { name := .builtin (operatorToLaurel op), className := none, params := .static {required := [(.builtin "left", anyType), (.builtin "right", anyType)], optional := [], kwonly := []}, returnType := anyType, locals := [] }
       let rTarget ← resolveExpr ctx f target
       let rValue ← resolveExpr ctx f value
-      return (ctx, .AugAssign { sr := a, info := .funcCall opSig } rTarget (resolveOperator f op) rValue)
+      -- `name += v` rebinds `name`.
+      let ctx' := shadowBoundNames ctx (nonVariableRebinds ctx (collectNamesFromTarget target))
+      return (ctx', .AugAssign { sr := a, info := .funcCall opSig } rTarget (resolveOperator f op) rValue)
   | .If a test body orelse => do
       let rTest ← resolveExpr ctx f test
       let rBody ← resolveBlock ctx f body.val
       let rElse ← resolveBlock ctx f orelse.val
-      return (ctx, .If (f a) rTest ⟨f body.ann, rBody⟩ ⟨f orelse.ann, rElse⟩)
+      return (shadowModuleRebinds ctx s, .If (f a) rTest ⟨f body.ann, rBody⟩ ⟨f orelse.ann, rElse⟩)
   | .For a target iter body orelse tc => do
       let rTarget ← resolveExpr ctx f target
       let rIter ← resolveExpr ctx f iter
-      let rBody ← resolveBlock ctx f body.val
-      let rElse ← resolveBlock ctx f orelse.val
-      return (ctx, .For (f a) rTarget rIter ⟨f body.ann, rBody⟩ ⟨f orelse.ann, rElse⟩ (mapAnnOpt f (mapAnnVal f) tc))
+      -- Loop targets rebind their names (persisting past the loop in Python).
+      let ctx' := shadowBoundNames ctx (collectNamesFromTarget target)
+      let rBody ← resolveBlock ctx' f body.val
+      let rElse ← resolveBlock ctx' f orelse.val
+      return (shadowModuleRebinds ctx' s, .For (f a) rTarget rIter ⟨f body.ann, rBody⟩ ⟨f orelse.ann, rElse⟩ (mapAnnOpt f (mapAnnVal f) tc))
   | .AsyncFor a target iter body orelse tc => do
       let rTarget ← resolveExpr ctx f target
       let rIter ← resolveExpr ctx f iter
-      let rBody ← resolveBlock ctx f body.val
-      let rElse ← resolveBlock ctx f orelse.val
-      return (ctx, .AsyncFor (f a) rTarget rIter ⟨f body.ann, rBody⟩ ⟨f orelse.ann, rElse⟩ (mapAnnOpt f (mapAnnVal f) tc))
+      let ctx' := shadowBoundNames ctx (collectNamesFromTarget target)
+      let rBody ← resolveBlock ctx' f body.val
+      let rElse ← resolveBlock ctx' f orelse.val
+      return (shadowModuleRebinds ctx' s, .AsyncFor (f a) rTarget rIter ⟨f body.ann, rBody⟩ ⟨f orelse.ann, rElse⟩ (mapAnnOpt f (mapAnnVal f) tc))
   | .While a test body orelse => do
       let rTest ← resolveExpr ctx f test
       let rBody ← resolveBlock ctx f body.val
       let rElse ← resolveBlock ctx f orelse.val
-      return (ctx, .While (f a) rTest ⟨f body.ann, rBody⟩ ⟨f orelse.ann, rElse⟩)
+      return (shadowModuleRebinds ctx s, .While (f a) rTest ⟨f body.ann, rBody⟩ ⟨f orelse.ann, rElse⟩)
   | .Try a body handlers orelse finalbody => do
       let rBody ← resolveBlock ctx f body.val
       let mut rHandlers : Array (StrataPython.excepthandler ResolvedAnn) := #[]
@@ -2072,7 +2445,7 @@ partial def resolveStmt (ctx : Ctx) (f : SourceRange → ResolvedAnn) (s : Pytho
         rHandlers := rHandlers.push (← resolveExcepthandler ctx f h)
       let rElse ← resolveBlock ctx f orelse.val
       let rFinally ← resolveBlock ctx f finalbody.val
-      return (ctx, .Try (f a) ⟨f body.ann, rBody⟩ ⟨f handlers.ann, rHandlers⟩ ⟨f orelse.ann, rElse⟩ ⟨f finalbody.ann, rFinally⟩)
+      return (shadowModuleRebinds ctx s, .Try (f a) ⟨f body.ann, rBody⟩ ⟨f handlers.ann, rHandlers⟩ ⟨f orelse.ann, rElse⟩ ⟨f finalbody.ann, rFinally⟩)
   | .TryStar a body handlers orelse finalbody => do
       let rBody ← resolveBlock ctx f body.val
       let mut rHandlers : Array (StrataPython.excepthandler ResolvedAnn) := #[]
@@ -2080,17 +2453,20 @@ partial def resolveStmt (ctx : Ctx) (f : SourceRange → ResolvedAnn) (s : Pytho
         rHandlers := rHandlers.push (← resolveExcepthandler ctx f h)
       let rElse ← resolveBlock ctx f orelse.val
       let rFinally ← resolveBlock ctx f finalbody.val
-      return (ctx, .TryStar (f a) ⟨f body.ann, rBody⟩ ⟨f handlers.ann, rHandlers⟩ ⟨f orelse.ann, rElse⟩ ⟨f finalbody.ann, rFinally⟩)
+      return (shadowModuleRebinds ctx s, .TryStar (f a) ⟨f body.ann, rBody⟩ ⟨f handlers.ann, rHandlers⟩ ⟨f orelse.ann, rElse⟩ ⟨f finalbody.ann, rFinally⟩)
   | .With a items body tc => do
       let mut rItems : Array (StrataPython.withitem ResolvedAnn) := #[]
       for item in items.val do rItems := rItems.push (← resolveWithitem ctx f item)
-      let rBody ← resolveBlock ctx f body.val
-      return (ctx, .With (f a) ⟨f items.ann, rItems⟩ ⟨f body.ann, rBody⟩ (mapAnnOpt f (mapAnnVal f) tc))
+      -- `with ... as x` rebinds x (persisting past the block in Python).
+      let ctx' := shadowBoundNames ctx (withItemNames items.val)
+      let rBody ← resolveBlock ctx' f body.val
+      return (shadowModuleRebinds ctx' s, .With (f a) ⟨f items.ann, rItems⟩ ⟨f body.ann, rBody⟩ (mapAnnOpt f (mapAnnVal f) tc))
   | .AsyncWith a items body tc => do
       let mut rItems : Array (StrataPython.withitem ResolvedAnn) := #[]
       for item in items.val do rItems := rItems.push (← resolveWithitem ctx f item)
-      let rBody ← resolveBlock ctx f body.val
-      return (ctx, .AsyncWith (f a) ⟨f items.ann, rItems⟩ ⟨f body.ann, rBody⟩ (mapAnnOpt f (mapAnnVal f) tc))
+      let ctx' := shadowBoundNames ctx (withItemNames items.val)
+      let rBody ← resolveBlock ctx' f body.val
+      return (shadowModuleRebinds ctx' s, .AsyncWith (f a) ⟨f items.ann, rItems⟩ ⟨f body.ann, rBody⟩ (mapAnnOpt f (mapAnnVal f) tc))
   | .Return a value => do
       let rValue ← match value.val with
         | some v => pure (some (← resolveExpr ctx f v))
@@ -2099,7 +2475,11 @@ partial def resolveStmt (ctx : Ctx) (f : SourceRange → ResolvedAnn) (s : Pytho
   | .Delete a targets => do
       let mut rTargets : Array ResolvedPythonExpr := #[]
       for t in targets.val do rTargets := rTargets.push (← resolveExpr ctx f t)
-      return (ctx, .Delete (f a) ⟨f targets.ann, rTargets⟩)
+      -- `del name` unbinds it; downgrade to a plain variable so a later use
+      -- cannot resolve through a stale module or model entry.
+      let deleted := targets.val.toList.flatMap collectNamesFromTarget
+      let ctx' := shadowBoundNames ctx (nonVariableRebinds ctx deleted)
+      return (ctx', .Delete (f a) ⟨f targets.ann, rTargets⟩)
   | .Raise a exc cause => do
       let rExc ← match exc.val with
         | some e => pure (some (← resolveExpr ctx f e))
@@ -2127,7 +2507,7 @@ partial def resolveStmt (ctx : Ctx) (f : SourceRange → ResolvedAnn) (s : Pytho
       let mut resolvedCases : Array (StrataPython.match_case ResolvedAnn) := #[]
       for c in cases.val do
         resolvedCases := resolvedCases.push (← resolveMatchCase ctx f c)
-      return (ctx, .Match (f a) rSubject ⟨f cases.ann, resolvedCases⟩)
+      return (shadowModuleRebinds ctx s, .Match (f a) rSubject ⟨f cases.ann, resolvedCases⟩)
   | .TypeAlias a name typeParams value => do
       let rName ← resolveExpr ctx f name
       let mut rTypeParams : Array (StrataPython.type_param ResolvedAnn) := #[]
@@ -2135,6 +2515,50 @@ partial def resolveStmt (ctx : Ctx) (f : SourceRange → ResolvedAnn) (s : Pytho
       let rValue ← resolveExpr ctx f value
       return (ctx, .TypeAlias (f a) rName ⟨f typeParams.ann, rTypeParams⟩ rValue)
 end
+
+/-- Any-typed `CtxEntry.class_` fields for a PySpec class whose Composite
+    encoding lists these field names. -/
+def externalClassFields (names : List String) : List (PythonIdentifier × PythonType) :=
+  names.map fun n => (PythonIdentifier.builtin n, anyType)
+
+/-- A `FuncSig` for a PySpec-modeled procedure: splits `args` into
+    required/optional/kwonly (the last `kwonlyCount` entries are keyword-only)
+    and pins `laurelNameOverride` to the model's Laurel procedure name.
+    Caveat: `matchArgs` does not validate Python argument binding (a call that
+    would raise `TypeError` at runtime can still bind); this predates V2 model
+    support and applies to every `FuncSig` alike. -/
+def externalFunctionSig (pythonName : String) (laurelProcName : String)
+    (args : List (String × Option (StrataPython.expr SourceRange)))
+    (kwonlyCount : Nat := 0)
+    (kwargsName : Option String := none)
+    (className : Option PythonIdentifier := none) : FuncSig :=
+  let f : SourceRange → ResolvedAnn := fun sr => { sr, info := .irrelevant }
+  -- A non-constant (or absent) default keeps its parameter and resolves to an `.unresolved`
+  -- Name, which Translation lowers to a nondeterministic Hole; dropping the parameter would
+  -- corrupt the arity `matchArgs` relies on.
+  let unresolvedDefault : StrataPython.expr ResolvedAnn :=
+    .Name { sr := .none, info := .unresolved } ⟨f .none, "default"⟩ (.Load (f .none))
+  let resolveDefault : StrataPython.expr SourceRange → StrataPython.expr ResolvedAnn :=
+    fun e => match e with
+      | .Constant a c tc => .Constant (f a) (resolveConstant f c) (mapAnnOpt f (mapAnnVal f) tc)
+      | _ => unresolvedDefault
+  let kwonlyCount := min kwonlyCount args.length
+  let positionalCount := args.length - kwonlyCount
+  let positional := args.take positionalCount
+  let requiredCount := (positional.findIdx? (·.2.isSome)).getD positional.length
+  let required := positional.take requiredCount |>.map fun (n, _) =>
+    (PythonIdentifier.builtin n, anyType)
+  let optional := positional.drop requiredCount |>.map fun (n, default) =>
+    (PythonIdentifier.builtin n, anyType, (default.map resolveDefault).getD unresolvedDefault)
+  let kwonly := args.drop positionalCount |>.map fun (n, default) =>
+    (PythonIdentifier.builtin n, anyType, default.map resolveDefault)
+  { name := PythonIdentifier.builtin pythonName
+    className
+    params := .static { required, optional, kwonly }
+    returnType := anyType
+    locals := []
+    kwargName := kwargsName.map PythonIdentifier.builtin
+    laurelNameOverride := some { text := laurelProcName, uniqueId := none } }
 
 /-- Result of resolving a program: the resolved AST plus the imported
     declarations the program demanded (methods, functions, classes). -/
@@ -2152,9 +2576,18 @@ structure ResolveResult where
 
 /-- Entry point: resolves a full Python module. Folds `resolveStmt` over top-level
     statements, threading the context. Imports are loaded on demand. -/
-def resolve (stmts : PythonProgram) (baseDir : System.FilePath := ".") : EIO String ResolveResult := do
+def resolve (stmts : PythonProgram) (baseDir : System.FilePath := ".")
+    (externalModules : ExternalModuleDecls := {})
+    (dispatchOverloads : OverloadTable := {})
+    (dispatchModuleNames : Std.HashSet String := {}) : EIO String ResolveResult := do
   let f : SourceRange → ResolvedAnn := fun sr => { sr, info := .irrelevant }
   let moduleLocals := computeLocals stmts []
+  -- Names that receive ANY real assignment at module level (control-flow binders included):
+  -- their `var` decl must survive even when an import wins the binding, else the assignment
+  -- statement in `__main__` orphans and elaboration aborts.
+  let everAssignedNames : Std.HashSet String :=
+    stmts.toList.foldl (init := {}) fun s stmt =>
+      (collectAssignedNames stmt).foldl (fun acc n => acc.insert n.val) s
   let initCtx := moduleLocals.foldl (fun c (n, ty) => c.insert n (CtxEntry.variable ty)) builtinContext
   let action : ResolveM ResolvedPythonProgram := do
     let mut ctx := initCtx
@@ -2173,13 +2606,16 @@ def resolve (stmts : PythonProgram) (baseDir : System.FilePath := ".") : EIO Str
       | some (.variable ty') => (n, ty')
       | _ => (n, ty)
     return { stmts := resolved, moduleLocals := moduleLocals }
-  let (prog, state) ← action.run baseDir |>.run {}
+  let (prog, state) ← action.run baseDir |>.run
+    { externalModules, dispatchOverloads, dispatchModuleNames }
   -- Drop module locals that name an unmodeled import (no on-disk model). Without this they get
   -- a `var X` decl → Laurel `.variable` → shadows the external `.unresolved` registration, making
   -- a type-annotation use `x: X` fail to resolve. Dropping the decl lets the external `.unresolved`
   -- registration stand; value uses stay sound via the same external mechanism.
   let prog := { prog with
-    moduleLocals := prog.moduleLocals.filter fun (n, _) => !state.unmodeledImports.contains n.val
+    moduleLocals := prog.moduleLocals.filter fun (n, _) =>
+      everAssignedNames.contains n.val ||
+      (!state.unmodeledImports.contains n.val && !state.importedCallables.contains n.val)
     nonTypeImports := state.nonTypeImports.toList }
   let demandedStmts := (state.demandedMethods.toList.map (·.2) ++ state.demandedFunctions.toList.map (·.2)).toArray
   let demandedClasses := state.demandedClasses.toList.map (·.2)
