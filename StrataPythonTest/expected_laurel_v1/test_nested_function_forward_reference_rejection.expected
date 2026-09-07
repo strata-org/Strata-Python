@@ -1,0 +1,32 @@
+DETAIL: Unsupported construct: Statement type not yet supported
+AST: StrataPython.stmt.FunctionDef
+  { start := { byteIdx := 82 }, stop := { byteIdx := 119 } }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "helper" }
+  (StrataPython.arguments.mk_arguments
+    { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }
+    { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+    { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+    { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }
+    { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+    { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+    { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }
+    { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] })
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+    val := #[StrataPython.stmt.Return
+               { start := { byteIdx := 111 }, stop := { byteIdx := 119 } }
+               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+                 val := some (StrataPython.expr.Constant
+                          { start := { byteIdx := 118 }, stop := { byteIdx := 119 } }
+                          (StrataPython.constant.ConPos
+                            { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }
+                            { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := 2 })
+                          { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }) }] }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+    val := some (StrataPython.expr.Name
+             { start := { byteIdx := 98 }, stop := { byteIdx := 101 } }
+             { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "int" }
+             (StrataPython.expr_context.Load { start := { byteIdx := 0 }, stop := { byteIdx := 0 } })) }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
+RESULT: Known limitation

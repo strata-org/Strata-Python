@@ -55,6 +55,12 @@ instance : ToString TransError where
 -- Monad (State for fresh counter + loop labels)
 -- ═══════════════════════════════════════════════════════════════════════════════
 
+/-- Emitted Laurel target for one lexically nested Python declaration. -/
+structure NestedFunctionTarget where
+  pythonName : String
+  definitionRange : SourceRange
+  callee : Identifier
+
 /-- Mutable state threaded through translation: fresh name counter, source file path,
     and a stack of loop break/continue labels for translating `break`/`continue`. -/
 structure TransState where
@@ -68,6 +74,12 @@ structure TransState where
       `pythonTypeToHighType` so annotations referring to an alias resolve to the
       aliased type rather than a phantom composite. Set once in `translateModule`. -/
   typeAliases : Std.HashMap String HighType := {}
+  /-- Nested-function declarations, innermost lexical scope first. Calls are
+      matched by declaration identity; names are retained only for rejecting
+      ambiguous pre-definition calls and unsupported function-value uses. -/
+  nestedFunctionTargets : List (List NestedFunctionTarget) := []
+  /-- Procedures lifted while recursively translating function bodies. -/
+  liftedProcedures : List Procedure := []
   deriving Inhabited
 
 abbrev BaseM := StateT TransState (Except TransError)
@@ -85,6 +97,14 @@ instance : Monad TransM where
     let (a, w1) ← ma.run
     let (b, w2) ← (f a).run
     pure (b, w1 ++ w2)⟩
+
+instance [Nonempty α] : Nonempty (TransM α) :=
+  let ⟨a⟩ := ‹Nonempty α›
+  ⟨pure a⟩
+
+private instance : Nonempty Procedure := ⟨{
+  name := default, inputs := [], outputs := [], preconditions := [],
+  decreases := none, body := .External }⟩
 
 instance : MonadLift BaseM TransM where
   monadLift ma := ⟨do let a ← ma; pure (a, [])⟩
@@ -150,6 +170,24 @@ def mkLocalDecl (sr : SourceRange) (id : Identifier) (ty : HighTypeMd)
 def freshId (pfx : String) : TransM Identifier := do
   let s ← get; set { s with freshCounter := s.freshCounter + 1 }
   pure { text := s!"{pfx}_{s.freshCounter}", uniqueId := none }
+
+private def nestedFunctionTarget? (sig : FuncSig) : TransM (Option NestedFunctionTarget) := do
+  match sig.definitionRange with
+  | some definitionRange =>
+    pure ((← get).nestedFunctionTargets.findSome? fun scope =>
+      scope.find? fun target =>
+        target.pythonName == sig.laurelName.text && target.definitionRange == definitionRange)
+  | none => pure none
+
+private def nestedFunctionTargetNamed? (name : String) : TransM (Option NestedFunctionTarget) := do
+  pure ((← get).nestedFunctionTargets.findSome? fun scope =>
+    scope.find? fun target => target.pythonName == name)
+
+private def pushNestedFunctionTargets (targets : List NestedFunctionTarget) : TransM Unit :=
+  modify fun s => { s with nestedFunctionTargets := targets :: s.nestedFunctionTargets }
+
+private def popNestedFunctionTargets : TransM Unit :=
+  modify fun s => { s with nestedFunctionTargets := s.nestedFunctionTargets.tail! }
 
 def pushLoopLabel (pfx : String) : TransM (Identifier × Identifier) := do
   let s ← get
@@ -345,9 +383,13 @@ partial def translateExpr (e : StrataPython.expr ResolvedAnn) : TransM StmtExprM
     | none => mkExpr sr .Hole  -- inf/nan: unrepresentable as Decimal → sound hole
 
   | .Constant _ _ _ => mkExpr sr .Hole
-  | .Name ann _ _ => match ann.info with
+  | .Name ann n _ => match ann.info with
     | .variable name => mkExpr sr (.Var (.Local name.toLaurel))
-    | .unresolved => mkExpr sr (.Hole (deterministic := false))
+    | .unresolved =>
+      if (← nestedFunctionTargetNamed? n.val).isSome then
+        throw (.unsupportedConstruct
+          s!"nested function '{n.val}' is used as a value; only direct static calls are supported")
+      else mkExpr sr (.Hole (deterministic := false))
     | .irrelevant => mkExpr sr (.Hole (deterministic := false))
     | _ => panic! "Resolution bug: invalid NodeInfo on Name node"
   | .Call ann func args kwargs => match ann.info with
@@ -363,7 +405,16 @@ partial def translateExpr (e : StrataPython.expr ResolvedAnn) : TransM StmtExprM
           | .mk_keyword _ kwName kwExpr => do
             let val ← translateExpr kwExpr
             match kwName.val with | some n => pure (some (n.val, val)) | none => pure none
-        mkExpr sr (.StaticCall sig.laurelName (← sig.matchArgs (receiver ++ posArgs) kwargPairs translateExpr (mkKwargs := (do return some (← mkKwargDict sr kwargPairs)))))
+        let nestedTarget ← nestedFunctionTarget? sig
+        let callee ← match nestedTarget with
+          | some target => pure target.callee
+          | none =>
+            if (← nestedFunctionTargetNamed? sig.laurelName.text).isSome then
+              throw (.unsupportedConstruct
+                s!"nested function '{sig.laurelName.text}' is called before its declaration or cannot be resolved statically")
+            else
+              pure sig.laurelName
+        mkExpr sr (.StaticCall callee (← sig.matchArgs (receiver ++ posArgs) kwargPairs translateExpr (mkKwargs := (do return some (← mkKwargDict sr kwargPairs)))))
     | .classNew cls initSig => do
         let tmp ← freshId "new"
         let tmpRef ← mkExpr sr (.Var (.Local tmp))
@@ -379,7 +430,15 @@ partial def translateExpr (e : StrataPython.expr ResolvedAnn) : TransM StmtExprM
         let initCall ← mkExpr sr (.StaticCall initSig.laurelName (← initSig.matchArgs ([tmpRef] ++ posArgs) kwargPairs translateExpr (mkKwargs := (do return some (← mkKwargDict sr kwargPairs)))))
         tell [assignNew, initCall]
         pure tmpRef
-    | .unresolved => mkExpr sr (.Hole (deterministic := false))
+    | .unresolved =>
+      match func with
+      | .Name _ name _ =>
+        if (← nestedFunctionTargetNamed? name.val).isSome then
+          throw (.unsupportedConstruct
+            s!"nested function '{name.val}' is called before its declaration or cannot be resolved statically")
+        else
+          mkExpr sr (.Hole (deterministic := false))
+      | _ => mkExpr sr (.Hole (deterministic := false))
     | _ => mkExpr sr (.Hole (deterministic := false))
   | .BinOp ann left _ right => match ann.info with
     | .funcCall sig => do
@@ -831,12 +890,79 @@ private partial def buildLocalDecls (aliases : Std.HashMap String HighType) (sig
   sig.laurelLocals.map fun (lId, lTy) =>
     mkLocalDeclDefault lId (mkTypeDefault (pythonTypeToHighType aliases lTy)) none
 
+private partial def nestedCaptures (outer nested : FuncSig) : List String :=
+  let outerOwned := (outer.laurelDeclInputs.map (·.1.text) ++
+    outer.laurelOwnLocals.map (·.1.text)).eraseDups
+  let nestedOwned := (nested.laurelDeclInputs.map (·.1.text) ++
+    nested.laurelOwnLocals.map (·.1.text)).eraseDups
+  let nestedReads := (nested.laurelLocals.map (·.1.text) ++
+    nested.laurelDefaultConstReads.map (·.text)).eraseDups
+  nestedReads.filter fun name => outerOwned.contains name && !nestedOwned.contains name
+
+private partial def definitionsUnderControlFlow
+    (stmts : List (StrataPython.stmt ResolvedAnn)) (insideControl : Bool := false) : List String :=
+  stmts.flatMap fun stmt => match stmt with
+    | .FunctionDef _ name _ _ _ _ _ _ | .AsyncFunctionDef _ name _ _ _ _ _ _ =>
+      if insideControl then [name.val] else []
+    | .If _ _ body orelse | .While _ _ body orelse =>
+      definitionsUnderControlFlow body.val.toList true ++
+        definitionsUnderControlFlow orelse.val.toList true
+    | .For _ _ _ body orelse _ | .AsyncFor _ _ _ body orelse _ =>
+      definitionsUnderControlFlow body.val.toList true ++
+        definitionsUnderControlFlow orelse.val.toList true
+    | .Try _ body handlers orelse finalbody | .TryStar _ body handlers orelse finalbody =>
+      definitionsUnderControlFlow body.val.toList true ++
+        handlers.val.toList.flatMap (fun h => match h with
+          | .ExceptHandler _ _ _ hb => definitionsUnderControlFlow hb.val.toList true) ++
+        definitionsUnderControlFlow orelse.val.toList true ++
+        definitionsUnderControlFlow finalbody.val.toList true
+    | .With _ _ body _ | .AsyncWith _ _ body _ =>
+      definitionsUnderControlFlow body.val.toList true
+    | .Match _ _ cases =>
+      cases.val.toList.flatMap fun case => match case with
+        | .mk_match_case _ _ _ caseBody =>
+          definitionsUnderControlFlow caseBody.val.toList true
+    | _ => []
+
 private partial def splitPreconditions (body : List (StrataPython.stmt ResolvedAnn))
     : List (StrataPython.stmt ResolvedAnn) × List (StrataPython.stmt ResolvedAnn) :=
   body.span fun s => match s with | .Assert _ _ _ => true | _ => false
 
 partial def translateFunction (sig : FuncSig) (body : Array (StrataPython.stmt ResolvedAnn))
-    (sr : SourceRange) : TransM Procedure := do
+    (sr : SourceRange) (enclosingSigs : List FuncSig := []) : TransM Procedure := do
+  let nestedDefs := body.toList.filterMap fun stmt => match stmt with
+    | .FunctionDef ann _ _ nestedBody decorators _ _ _ => match ann.info with
+      | .funcDecl nestedSig => some (nestedSig, nestedBody.val, decorators.val, ann.sr)
+      | _ => none
+    | .AsyncFunctionDef ann _ _ nestedBody decorators _ _ _ => match ann.info with
+      | .funcDecl nestedSig => some (nestedSig, nestedBody.val, decorators.val, ann.sr)
+      | _ => none
+    | _ => none
+  let conditionalDefs := definitionsUnderControlFlow body.toList
+  unless conditionalDefs.isEmpty do
+    throw (.unsupportedConstruct
+      s!"nested function definitions under control flow are not yet supported: {", ".intercalate conditionalDefs.eraseDups}")
+  let nestedNames := nestedDefs.map (fun (nestedSig, _, _, _) => nestedSig.laurelName.text)
+  let duplicateNames := nestedNames.filter (fun name => nestedNames.count name > 1) |>.eraseDups
+  unless duplicateNames.isEmpty do
+    throw (.unsupportedConstruct
+      s!"redefinition of nested function(s) is not yet supported: {", ".intercalate duplicateNames}")
+  for (nestedSig, _, decorators, _) in nestedDefs do
+    unless decorators.isEmpty do
+      throw (.unsupportedConstruct
+        s!"decorated nested function '{nestedSig.laurelName.text}' is not yet supported")
+    let captures := (sig :: enclosingSigs).flatMap fun enclosingSig =>
+      nestedCaptures enclosingSig nestedSig
+    let captures := captures.eraseDups
+    unless captures.isEmpty do
+      throw (.unsupportedConstruct
+        s!"nested function '{nestedSig.laurelName.text}' captures enclosing binding(s): {", ".intercalate captures}")
+  let nestedTargets := nestedDefs.map fun (nestedSig, _, _, nestedSr) =>
+    let callee : Identifier := {
+      text := s!"{sig.laurelName.text}$nested${nestedSr.start.byteIdx}${nestedSig.laurelName.text}"
+      uniqueId := none }
+    ({ pythonName := nestedSig.laurelName.text, definitionRange := nestedSr, callee } : NestedFunctionTarget)
+  pushNestedFunctionTargets nestedTargets
   let aliases := (← get).typeAliases
   let inputs := buildProcInputs aliases sig
   let outputs := buildProcOutputs aliases sig
@@ -853,7 +979,7 @@ partial def translateFunction (sig : FuncSig) (body : Array (StrataPython.stmt R
   -- `.source`. The pass that separates user procs from prelude reads it; without it every
   -- user proc looks like prelude and nothing is verified.
   let procName := { sig.laurelName with source := sourceRangeToMd (← get).filePath sr }
-  pure {
+  let proc : Procedure := {
     name := procName
     inputs, outputs, preconditions
     decreases := none
@@ -863,10 +989,26 @@ partial def translateFunction (sig : FuncSig) (body : Array (StrataPython.stmt R
     -- type lives on the output param.
     body := .Opaque [] (some bodyBlock) (ModifiesGroup.wildcard (sourceRangeToMd (← get).filePath sr))
   }
+  for (nestedSig, nestedBody, _, nestedSr) in nestedDefs do
+    let some target := nestedTargets.find? (fun target =>
+        target.pythonName == nestedSig.laurelName.text && target.definitionRange == nestedSr)
+      | throw (.internalError s!"missing lifted target for nested function '{nestedSig.laurelName.text}'")
+    let liftedSig := { nestedSig with
+      name := PythonIdentifier.builtin target.callee.text
+      className := none }
+    let nestedProc ← translateFunction liftedSig nestedBody nestedSr (sig :: enclosingSigs)
+    modify fun s => { s with liftedProcedures := s.liftedProcedures ++ [nestedProc] }
+  popNestedFunctionTargets
+  pure proc
 
 partial def translateClass (name : PythonIdentifier) (attributes : List (PythonIdentifier × PythonType))
-    (_methods : List FuncSig) (body : Array (StrataPython.stmt ResolvedAnn))
+    (methods : List FuncSig) (body : Array (StrataPython.stmt ResolvedAnn))
     : TransM (TypeDefinition × List Procedure) := do
+  let methodNames := methods.map (·.name.toLaurel.text)
+  let duplicateMethods := methodNames.filter (fun methodName => methodNames.count methodName > 1) |>.eraseDups
+  unless duplicateMethods.isEmpty do
+    throw (.unsupportedConstruct
+      s!"redefinition of class method(s) is not yet supported: {", ".intercalate duplicateMethods}")
   -- Composite fields keep their USER-DECLARED type. The Python frontend trusts user
   -- annotations; the coercion mechanism handles impedance (e.g. boxing to `Any` where a
   -- value context demands it). The box protocol stores/loads each field at its declared
@@ -971,6 +1113,7 @@ partial def translateModule (program : ResolvedPythonProgram) : TransM Strata.La
       let mainName := { (rt "__main__") with source := sourceRangeToMd (← get).filePath sr }
       let mainProc : Procedure := { name := mainName, inputs := [], outputs := mainOutputs, preconditions := [], decreases := none, body := .Opaque [] (some bodyBlock) (ModifiesGroup.wildcard (sourceRangeToMd (← get).filePath sr)) }
       pure (procedures ++ [mainProc])
+  let procedures := procedures ++ (← get).liftedProcedures
   return { staticProcedures := procedures, staticFields := [], types, constants := [] }
 
 end -- mutual

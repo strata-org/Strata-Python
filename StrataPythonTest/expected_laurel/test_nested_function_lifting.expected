@@ -1,0 +1,12 @@
+test_nested_function_lifting.py(3, 4): ✅ pass - Check PAdd exception
+test_nested_function_lifting.py(9, 8): ✅ pass - Check PAdd exception
+test_nested_function_lifting.py(10, 4): ✅ pass - precondition
+test_nested_function_lifting.py(16, 8): ✅ pass - Check PAdd exception
+test_nested_function_lifting.py(17, 4): ✅ pass - precondition
+test_nested_function_lifting.py(42, 0): ❓ unknown - assert(…)
+test_nested_function_lifting.py(43, 0): ❓ unknown - assert(…)
+test_nested_function_lifting.py(44, 0): ❓ unknown - assert(…)
+test_nested_function_lifting.py(45, 0): ❓ unknown - assert(…)
+test_nested_function_lifting.py(46, 0): ❓ unknown - assert(…)
+DETAIL: 5 passed, 0 failed, 5 inconclusive
+RESULT: Inconclusive

@@ -147,8 +147,17 @@ structure FuncSig where
   params : FuncParams
   /-- The declared return type annotation (defaults to Any if absent). -/
   returnType : PythonType
-  /-- All local variables in the function body (computed by `computeLocals`). -/
+  /-- All local variables in the function body (computed by `computeLocals`),
+      plus compatibility locals added for globals/module constants. -/
   locals : List (PythonIdentifier × PythonType)
+  /-- Bindings owned by this function itself, before globals/module constants are
+      added. Used to distinguish a nested function's own shadowing locals from
+      unsupported reads captured from an enclosing function. -/
+  ownLocals : List (PythonIdentifier × PythonType) := []
+  /-- Source range of a declaration pre-registered for forward/class-body lookup.
+      Resolution reuses a visible signature only when this identifies the exact
+      declaration, never merely because an enclosing callable has the same name. -/
+  definitionRange : Option SourceRange := none
   /-- Overload index for disambiguated naming. `none` for non-overloaded functions. -/
   overloadIndex : Option Nat := none
   /-- The `**kwargs` parameter name, if present. A declared input (Any-typed) but not
@@ -883,6 +892,14 @@ def FuncSig.matchArgs [Monad m] [Inhabited (m α)] (sig : FuncSig) (posArgs : Li
   else
     return result
 
+/-- Module constants referenced by default expressions, as Laurel identifiers. -/
+def FuncSig.laurelDefaultConstReads (sig : FuncSig) : List Identifier :=
+  sig.defaultConstReads.map fun id => { text := id.val, uniqueId := none }
+
+/-- Locals owned by this function before module/global compatibility entries. -/
+def FuncSig.laurelOwnLocals (sig : FuncSig) : List (Identifier × PythonType) :=
+  sig.ownLocals.map fun (id, ty) => ({ text := id.val, uniqueId := none }, ty)
+
 /-- Locals as `(Laurel.Identifier × PythonType)` for `LocalVariable` declarations. -/
 def FuncSig.laurelLocals (sig : FuncSig) : List (Identifier × PythonType) :=
   sig.locals.map fun (id, ty) => ({ text := id.val, uniqueId := none }, ty)
@@ -1027,6 +1044,7 @@ partial def extractFuncSig (ctx : Ctx) (f : SourceRange → ResolvedAnn)
       match ctx[n]? with | some (.variable _) => true | _ => false
   let allParamNames := extractAllParamNames args
   let locals := computeLocals body allParamNames
+  let ownLocals := locals
   -- Include global variables as Any-typed locals so the elaborator finds them in scope
   let globalNames := body.toList.flatMap collectGlobalNonlocalNames
   let anyTy : PythonType := .Name SourceRange.none ⟨SourceRange.none, "Any"⟩ (.Load SourceRange.none)
@@ -1075,7 +1093,8 @@ partial def extractFuncSig (ctx : Ctx) (f : SourceRange → ResolvedAnn)
     | .mk_arguments _ _ _ vararg _ _ _ _ => match vararg.val with
       | some (.mk_arg _ n _ _) => some (PythonIdentifier.fromAst n)
       | none => none
-  return { name := pythonName, className, params := funcParams, returnType := retTy, locals, kwargName, varargName, defaultConstReads }
+  return { name := pythonName, className, params := funcParams, returnType := retTy,
+           locals, ownLocals, kwargName, varargName, defaultConstReads }
 
 /-- Builds the body context for resolving statements inside a function. Extends ctx with
     all params (including vararg/kwarg) and locals. Used by `resolveFuncDef` to create the
@@ -1769,6 +1788,7 @@ partial def resolveStmt (ctx : Ctx) (f : SourceRange → ResolvedAnn) (s : Pytho
       let nameId := PythonIdentifier.fromAst name
       if hasOverloadDecorator decorators.val then
         let sig ← extractFuncSig ctx f nameId none args decorators.val returns body.val
+        let sig := { sig with definitionRange := some a }
         let overloads := match ctx[nameId]? with
           | some (.overloadedFunction existing) => existing
           | _ => []
@@ -1782,21 +1802,39 @@ partial def resolveStmt (ctx : Ctx) (f : SourceRange → ResolvedAnn) (s : Pytho
         | some (.overloadedFunction _) =>
           -- Non-@overload def after overloads = implementation stub. Keep the overload list.
           let sig ← extractFuncSig ctx f nameId none args decorators.val returns body.val
+          let sig := { sig with definitionRange := some a }
           let (_, ann, rName, rArgs, rBody, rDecs, rRets, rTc, rTps) ←
             resolveFuncDef ctx f sig a name args body decorators returns tc typeParams
           return (ctx, .FunctionDef ann rName rArgs rBody rDecs rRets rTc rTps)
         | _ =>
+          -- Reuse only an exact pre-registered declaration (class methods are
+          -- indexed before their bodies are resolved). A same-named callable
+          -- from an enclosing scope is a lexical shadow, not this declaration.
           let sig ← match ctx[nameId]? with
-            | some (.function existingSig ..) => pure existingSig
-            | _ => extractFuncSig ctx f nameId none args decorators.val returns body.val
+            | some (.function existingSig ..) =>
+              if existingSig.definitionRange == some a then
+                pure existingSig
+              else do
+                let freshSig ← extractFuncSig ctx f nameId none args decorators.val returns body.val
+                pure { freshSig with definitionRange := some a }
+            | _ => do
+              let freshSig ← extractFuncSig ctx f nameId none args decorators.val returns body.val
+              pure { freshSig with definitionRange := some a }
           let (ctx', ann, rName, rArgs, rBody, rDecs, rRets, rTc, rTps) ←
             resolveFuncDef ctx f sig a name args body decorators returns tc typeParams
           return (ctx', .FunctionDef ann rName rArgs rBody rDecs rRets rTc rTps)
   | .AsyncFunctionDef a name args body decorators returns tc typeParams =>
       let nameId := PythonIdentifier.fromAst name
       let sig ← match ctx[nameId]? with
-        | some (.function existingSig ..) => pure existingSig
-        | _ => extractFuncSig ctx f nameId none args decorators.val returns body.val
+        | some (.function existingSig ..) =>
+          if existingSig.definitionRange == some a then
+            pure existingSig
+          else do
+            let freshSig ← extractFuncSig ctx f nameId none args decorators.val returns body.val
+            pure { freshSig with definitionRange := some a }
+        | _ => do
+          let freshSig ← extractFuncSig ctx f nameId none args decorators.val returns body.val
+          pure { freshSig with definitionRange := some a }
       let (ctx', ann, rName, rArgs, rBody, rDecs, rRets, rTc, rTps) ←
         resolveFuncDef ctx f sig a name args body decorators returns tc typeParams
       return (ctx', .AsyncFunctionDef ann rName rArgs rBody rDecs rRets rTc rTps)
@@ -1859,20 +1897,38 @@ partial def resolveStmt (ctx : Ctx) (f : SourceRange → ResolvedAnn) (s : Pytho
       let mut methods : List (PythonIdentifier × FuncSig) := []
       for s in body.val.toList do
         match s with
-        | .FunctionDef _ mName mArgs ⟨_, mBody⟩ mDecs mReturns _ _ =>
+        | .FunctionDef mRange mName mArgs ⟨_, mBody⟩ mDecs mReturns _ _ =>
             let mId := PythonIdentifier.fromAst mName
             let sig ← extractFuncSig ctx f mId (some classId) mArgs mDecs.val mReturns mBody
+            let sig := { sig with definitionRange := some mRange }
             methods := methods ++ [(mId, sig)]
-        | .AsyncFunctionDef _ mName mArgs ⟨_, mBody⟩ mDecs mReturns _ _ =>
+        | .AsyncFunctionDef mRange mName mArgs ⟨_, mBody⟩ mDecs mReturns _ _ =>
             let mId := PythonIdentifier.fromAst mName
             let sig ← extractFuncSig ctx f mId (some classId) mArgs mDecs.val mReturns mBody
+            let sig := { sig with definitionRange := some mRange }
             methods := methods ++ [(mId, sig)]
         | _ => pure ()
       let ctx' := ctx.insert classId (CtxEntry.class_ classId fields methods)
       let classCtx := ctx'.insert (PythonIdentifier.fromAst ⟨SourceRange.none, "self"⟩) (CtxEntry.variable classType)
       let classCtx := methods.foldl (fun c (mId, mSig) => c.insert mId (CtxEntry.function mSig)) classCtx
       let methodSigs := methods.map (·.2)
-      let resolvedBody ← resolveBlock classCtx f body.val
+      -- Select pre-scanned method signatures by declaration range, not merely by
+      -- method name. This preserves receiver/class metadata for duplicate method
+      -- declarations while still allowing nested same-name functions to shadow.
+      let mut currentClassCtx := classCtx
+      let mut resolvedBody : Array ResolvedPythonStmt := #[]
+      for classStmt in body.val do
+        let stmtCtx := match classStmt with
+          | .FunctionDef stmtRange stmtName _ _ _ _ _ _
+          | .AsyncFunctionDef stmtRange stmtName _ _ _ _ _ _ =>
+            match methods.find? (fun (_, methodSig) => methodSig.definitionRange == some stmtRange) with
+            | some (_, methodSig) =>
+              currentClassCtx.insert (PythonIdentifier.fromAst stmtName) (.function methodSig)
+            | none => currentClassCtx
+          | _ => currentClassCtx
+        let (nextCtx, resolvedStmt) ← resolveStmt stmtCtx f classStmt
+        currentClassCtx := nextCtx
+        resolvedBody := resolvedBody.push resolvedStmt
       let mut rBases : Array ResolvedPythonExpr := #[]
       for b in bases.val do rBases := rBases.push (← resolveExpr ctx' f b)
       let mut rKeywords : Array (StrataPython.keyword ResolvedAnn) := #[]

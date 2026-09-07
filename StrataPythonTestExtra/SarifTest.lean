@@ -78,6 +78,12 @@ def skipTests : Std.HashSet String := Std.HashSet.ofList [
   "test_global_inherited_method_rejection",
   "test_global_nested_class_rejection",
   "test_global_nested_function_control_flow_rejection",
+  "test_nested_function_ancestor_capture_rejection", -- V2-only: V1 rejects nested FunctionDef before SMT analysis
+  "test_nested_function_capture_rejection",
+  "test_nested_function_control_flow_rejection",
+  "test_nested_function_forward_reference_rejection",
+  "test_nested_function_lifting",
+  "test_nested_function_value_rejection",
   "test_global_prelude_collision",
   "test_global_reserved_name_rejection",
   "test_global_type_collision",

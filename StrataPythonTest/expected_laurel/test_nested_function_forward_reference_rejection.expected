@@ -1,0 +1,2 @@
+DETAIL: unsupported construct: nested function 'helper' is called before its declaration or cannot be resolved statically
+RESULT: Known limitation

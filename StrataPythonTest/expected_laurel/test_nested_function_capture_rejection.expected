@@ -1,0 +1,2 @@
+DETAIL: unsupported construct: nested function 'captures_param' captures enclosing binding(s): x
+RESULT: Known limitation

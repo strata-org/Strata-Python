@@ -1,0 +1,4 @@
+test_class_method_redefinition.py(2, 31): ✅ pass - (Duplicate@value ensures) Return type constraint
+test_class_method_redefinition.py(5, 23): ✅ pass - (Duplicate@value ensures) Return type constraint
+DETAIL: 2 passed, 0 failed, 0 inconclusive
+RESULT: Analysis success

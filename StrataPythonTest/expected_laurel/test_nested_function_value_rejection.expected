@@ -1,0 +1,2 @@
+DETAIL: unsupported construct: nested function 'inner' is used as a value; only direct static calls are supported
+RESULT: Known limitation
