@@ -66,92 +66,92 @@ def literalString (v : String)
 
 def stringEq (x y : TypedStmtExpr .TString)
     (source : FileRange := x.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.StaticCall (mkId Operation.Eq.procName) [x.stmt, y.stmt]) source
+  .ofStmt (.StaticCall (mkId Operation.Eq.procName) [x.stmt, y.stmt] []) source
 
 def intGeq (x y : TypedStmtExpr .TInt)
     (source : FileRange := x.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.StaticCall (mkId Operation.Geq.procName) [x.stmt, y.stmt]) source
+  .ofStmt (.StaticCall (mkId Operation.Geq.procName) [x.stmt, y.stmt] []) source
 
 def intLeq (x y : TypedStmtExpr .TInt)
     (source : FileRange := x.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.StaticCall (mkId Operation.Leq.procName) [x.stmt, y.stmt]) source
+  .ofStmt (.StaticCall (mkId Operation.Leq.procName) [x.stmt, y.stmt] []) source
 
 def realGeq (x y : TypedStmtExpr .TReal)
     (source : FileRange := x.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.StaticCall (mkId Operation.Geq.procName) [x.stmt, y.stmt]) source
+  .ofStmt (.StaticCall (mkId Operation.Geq.procName) [x.stmt, y.stmt] []) source
 
 def realLeq (x y : TypedStmtExpr .TReal)
     (source : FileRange := x.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.StaticCall (mkId Operation.Leq.procName) [x.stmt, y.stmt]) source
+  .ofStmt (.StaticCall (mkId Operation.Leq.procName) [x.stmt, y.stmt] []) source
 
 def not (x : TypedStmtExpr .TBool)
     (source : FileRange := x.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.StaticCall (mkId Operation.Not.procName) [x.stmt]) source
+  .ofStmt (.StaticCall (mkId Operation.Not.procName) [x.stmt] []) source
 
 def implies (x y : TypedStmtExpr .TBool)
     (source : FileRange := x.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.StaticCall (mkId Operation.Implies.procName) [x.stmt, y.stmt]) source
+  .ofStmt (.StaticCall (mkId Operation.Implies.procName) [x.stmt, y.stmt] []) source
 
 def or (x y : TypedStmtExpr .TBool)
     (source : FileRange := x.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.StaticCall (mkId Operation.Or.procName) [x.stmt, y.stmt]) source
+  .ofStmt (.StaticCall (mkId Operation.Or.procName) [x.stmt, y.stmt] []) source
 
 def and (x y : TypedStmtExpr .TBool)
     (source : FileRange := x.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.StaticCall (mkId Operation.And.procName) [x.stmt, y.stmt]) source
+  .ofStmt (.StaticCall (mkId Operation.And.procName) [x.stmt, y.stmt] []) source
 
 abbrev tyDictStrAny : HighType := .UserDefined "DictStrAny"
 
 def anyIsfromNone (v : TypedStmtExpr tyAny)
     (source : FileRange := v.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.StaticCall (mkId "Any..isfrom_None") [v.stmt]) source
+  .ofStmt (.StaticCall (mkId "Any..isfrom_None") [v.stmt] []) source
 
 def anyIsfromDict (v : TypedStmtExpr tyAny)
     (source : FileRange := v.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.StaticCall (mkId "Any..isfrom_DictStrAny") [v.stmt]) source
+  .ofStmt (.StaticCall (mkId "Any..isfrom_DictStrAny") [v.stmt] []) source
 
 def anyToBool (v : TypedStmtExpr tyAny)
     (source : FileRange := v.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.StaticCall (mkId "Any_to_bool") [v.stmt]) source
+  .ofStmt (.StaticCall (mkId "Any_to_bool") [v.stmt] []) source
 
 def fromInt (v : TypedStmtExpr .TInt)
     (source : FileRange := v.stmt.source) : TypedStmtExpr tyAny :=
-  .ofStmt (.StaticCall (mkId "from_int") [v.stmt]) source
+  .ofStmt (.StaticCall (mkId "from_int") [v.stmt] []) source
 
 def fromBool (v : TypedStmtExpr .TBool)
     (source : FileRange := v.stmt.source) : TypedStmtExpr tyAny :=
-  .ofStmt (.StaticCall (mkId "from_bool") [v.stmt]) source
+  .ofStmt (.StaticCall (mkId "from_bool") [v.stmt] []) source
 
 def fromNone (source : FileRange := unknownSource) : TypedStmtExpr tyAny :=
-  .ofStmt (.StaticCall (mkId "from_None") []) source
+  .ofStmt (.StaticCall (mkId "from_None") [] []) source
 
 def anyAsInt (a : TypedStmtExpr tyAny)
     (source : FileRange := a.stmt.source) : TypedStmtExpr .TInt :=
-  .ofStmt (.StaticCall (mkId "Any..as_int!") [a.stmt]) source
+  .ofStmt (.StaticCall (mkId "Any..as_int!") [a.stmt] []) source
 
 def fromStr (v : TypedStmtExpr .TString)
     (source : FileRange := unknownSource) : TypedStmtExpr tyAny :=
-  .ofStmt (.StaticCall (mkId "from_str") [v.stmt]) source
+  .ofStmt (.StaticCall (mkId "from_str") [v.stmt] []) source
 
 def anyAsString (a : TypedStmtExpr tyAny)
     (source : FileRange := a.stmt.source) : TypedStmtExpr .TString :=
-  .ofStmt (.StaticCall (mkId "Any..as_string!") [a.stmt]) source
+  .ofStmt (.StaticCall (mkId "Any..as_string!") [a.stmt] []) source
 
 def anyAsStringChecked (a : TypedStmtExpr tyAny)
     (source : FileRange := a.stmt.source) : TypedStmtExpr .TString :=
-  .ofStmt (.StaticCall (mkId "Any..as_string") [a.stmt]) source
+  .ofStmt (.StaticCall (mkId "Any..as_string") [a.stmt] []) source
 
 def anyAsFloat (a : TypedStmtExpr tyAny)
     (source : FileRange := a.stmt.source) : TypedStmtExpr .TReal :=
-  .ofStmt (.StaticCall (mkId "Any..as_float!") [a.stmt]) source
+  .ofStmt (.StaticCall (mkId "Any..as_float!") [a.stmt] []) source
 
 def anyAsDict (a : TypedStmtExpr tyAny)
     (source : FileRange := a.stmt.source) : TypedStmtExpr tyDictStrAny :=
-  .ofStmt (.StaticCall (mkId "Any..as_Dict!") [a.stmt]) source
+  .ofStmt (.StaticCall (mkId "Any..as_Dict!") [a.stmt] []) source
 
 def dictStrAnyContains (d : TypedStmtExpr tyDictStrAny) (k : TypedStmtExpr .TString)
     (source : FileRange := d.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.StaticCall (mkId "DictStrAny_contains") [d.stmt, k.stmt]) source
+  .ofStmt (.StaticCall (mkId "DictStrAny_contains") [d.stmt, k.stmt] []) source
 
 /-! ### Spec-only partial-map dictionary view -/
 
@@ -163,44 +163,44 @@ abbrev tyPySpecDictMap : HighType :=
 
 def pySpecDictModelOf (d : TypedStmtExpr tyDictStrAny)
     (source : FileRange := d.stmt.source) : TypedStmtExpr tyPySpecDictMap :=
-  .ofStmt (.StaticCall (mkId "PySpecDict_modelOf") [d.stmt]) source
+  .ofStmt (.StaticCall (mkId "PySpecDict_modelOf") [d.stmt] []) source
 
 def pySpecDictSelect (d : TypedStmtExpr tyPySpecDictMap) (k : TypedStmtExpr .TString)
     (source : FileRange := d.stmt.source) : TypedStmtExpr tyPySpecDictValue :=
-  .ofStmt (.StaticCall (mkId "select") [d.stmt, k.stmt]) source
+  .ofStmt (.StaticCall (mkId "select") [d.stmt, k.stmt] []) source
 
 def pySpecDictIsPresent (v : TypedStmtExpr tyPySpecDictValue)
     (source : FileRange := v.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.StaticCall (mkId "PySpecDictValue..isPresent") [v.stmt]) source
+  .ofStmt (.StaticCall (mkId "PySpecDictValue..isPresent") [v.stmt] []) source
 
 def pySpecDictValueChecked (v : TypedStmtExpr tyPySpecDictValue)
     (source : FileRange := v.stmt.source) : TypedStmtExpr tyAny :=
-  .ofStmt (.StaticCall (mkId "PySpecDictValue..value") [v.stmt]) source
+  .ofStmt (.StaticCall (mkId "PySpecDictValue..value") [v.stmt] []) source
 
 /-- Use only beneath a same-select `pySpecDictIsPresent` guard. -/
 def pySpecDictValueUnchecked (v : TypedStmtExpr tyPySpecDictValue)
     (source : FileRange := v.stmt.source) : TypedStmtExpr tyAny :=
-  .ofStmt (.StaticCall (mkId "PySpecDictValue..value!") [v.stmt]) source
+  .ofStmt (.StaticCall (mkId "PySpecDictValue..value!") [v.stmt] []) source
 
 def anyGet (a i : TypedStmtExpr tyAny)
     (source : FileRange := unknownSource) : TypedStmtExpr tyAny :=
-  .ofStmt (.StaticCall (mkId "Any_get") [a.stmt, i.stmt]) source
+  .ofStmt (.StaticCall (mkId "Any_get") [a.stmt, i.stmt] []) source
 
 abbrev tyListAny : HighType := .UserDefined "ListAny"
 
 def anyAsList (a : TypedStmtExpr tyAny)
     (source : FileRange := a.stmt.source) : TypedStmtExpr tyListAny :=
-  .ofStmt (.StaticCall (mkId "Any..as_ListAny!") [a.stmt]) source
+  .ofStmt (.StaticCall (mkId "Any..as_ListAny!") [a.stmt] []) source
 
 -- Membership `x ∈ l`; also serves as the trigger for list universals.
 def listContains (l : TypedStmtExpr tyListAny) (x : TypedStmtExpr tyAny)
     (source : FileRange := l.stmt.source) : TypedStmtExpr .TBool :=
-  .ofStmt (.StaticCall (mkId "List_contains") [l.stmt, x.stmt]) source
+  .ofStmt (.StaticCall (mkId "List_contains") [l.stmt, x.stmt] []) source
 
 -- `d[k]` lookup on a `DictStrAny` (total under the dict quantifier's contains guard).
 def dictStrAnyGet (d : TypedStmtExpr tyDictStrAny) (k : TypedStmtExpr .TString)
     (source : FileRange := d.stmt.source) : TypedStmtExpr tyAny :=
-  .ofStmt (.StaticCall (mkId "DictStrAny_get") [d.stmt, k.stmt]) source
+  .ofStmt (.StaticCall (mkId "DictStrAny_get") [d.stmt, k.stmt] []) source
 
 -- Total `d[k]` lookup returning `None` on a missing key. Unlike the underlying
 -- Laurel prelude function `DictStrAny_get` (wrapped by `dictStrAnyGet` above),
@@ -211,7 +211,7 @@ def dictStrAnyGet (d : TypedStmtExpr tyDictStrAny) (k : TypedStmtExpr .TString)
 -- form the `.values()`/`.items()` value binder inlines.
 def dictStrAnyGetOrNone (d : TypedStmtExpr tyDictStrAny) (k : TypedStmtExpr .TString)
     (source : FileRange := d.stmt.source) : TypedStmtExpr tyAny :=
-  .ofStmt (.StaticCall (mkId "DictStrAny_get_or_none") [d.stmt, k.stmt]) source
+  .ofStmt (.StaticCall (mkId "DictStrAny_get_or_none") [d.stmt, k.stmt] []) source
 
 -- Universal over `param` with an SMT `trigger`. Nest to bind several variables,
 -- placing the trigger on the innermost so all bound variables are in scope.
@@ -234,11 +234,11 @@ def old {tp} (x : TypedStmtExpr tp)
 
 def strLength (a : TypedStmtExpr .TString)
     (source : FileRange := a.stmt.source) : TypedStmtExpr .TInt :=
-  .ofStmt (.StaticCall (mkId "Str.Length") [a.stmt]) source
+  .ofStmt (.StaticCall (mkId "Str.Length") [a.stmt] []) source
 
 def reSearchBool (pattern s : TypedStmtExpr .TString)
     (source : FileRange := unknownSource) : TypedStmtExpr .TBool :=
-  .ofStmt (.StaticCall (mkId "re_search_bool") [pattern.stmt, s.stmt]) source
+  .ofStmt (.StaticCall (mkId "re_search_bool") [pattern.stmt, s.stmt] []) source
 
 end TypedStmtExpr
 

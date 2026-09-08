@@ -164,7 +164,7 @@ private def isValueAugAssign : StmtExprMd → Bool
     | [{ val := .Local target, .. }],
       { val := .StaticCall addFn [
           { val := .Var (.Local source), .. },
-          { val := .StaticCall fromInt [{ val := .LiteralInt value, .. }], .. }], .. } =>
+          { val := .StaticCall fromInt [{ val := .LiteralInt value, .. }] _, .. }] _, .. } =>
       target.text == "value" &&
       addFn.text == "PAdd" &&
       source.text == "value" &&
@@ -206,9 +206,9 @@ private def isValueAugAssign : StmtExprMd → Bool
   match translateAssign globalCtx (storeName "value") none (intLiteral 1) unknownSource with
   | .ok (_, [
       { val := .Assign [{ val := .Declare decl, .. }]
-          { val := .StaticCall initFn [], .. }, .. },
+          { val := .StaticCall initFn [] _, .. }, .. },
       { val := .Assign [{ val := .Local target, .. }]
-          { val := .StaticCall fromInt [{ val := .LiteralInt value, .. }], .. }, .. },
+          { val := .StaticCall fromInt [{ val := .LiteralInt value, .. }] _, .. }, .. },
       { val := .Assign [{ val := .Local bound, .. }]
           { val := .LiteralBool true, .. }, .. }], true) =>
     decl.name.text == "value" &&
@@ -228,7 +228,7 @@ private def isValueAugAssign : StmtExprMd → Bool
       _,
       { val := .Assert _ (some summary), .. },
       { val := .Assign [{ val := .Local target, .. }]
-          { val := .StaticCall operation _, .. }, .. },
+          { val := .StaticCall operation _ _, .. }, .. },
       { val := .Assign [{ val := .Local bound, .. }]
           { val := .LiteralBool isBound, .. }, .. }]) =>
     summary == "Check PAdd exception" &&
@@ -352,11 +352,11 @@ private def isValueAugAssign : StmtExprMd → Bool
       [augAssign "value" (intLiteral 1)] with
   | .ok ({ val := .Block [
       { val := .Assign [{ val := .Declare nullcall, .. }]
-          { val := .StaticCall nullcallInit [], .. }, .. },
+          { val := .StaticCall nullcallInit [] _, .. }, .. },
       { val := .Assign [{ val := .Local result, .. }]
-          { val := .StaticCall resultInit [], .. }, .. },
+          { val := .StaticCall resultInit [] _, .. }, .. },
       { val := .Assign [{ val := .Declare maybeExcept, .. }]
-          { val := .StaticCall maybeExceptInit [], .. }, .. },
+          { val := .StaticCall maybeExceptInit [] _, .. }, .. },
       { val := .Assign [{ val := .Declare localValue, .. }]
           { val := .Hole, .. }, .. },
       valueAugAssign] _, .. }, ctx) =>

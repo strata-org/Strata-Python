@@ -308,10 +308,10 @@ private def rtDictStrAnyCons := rt "DictStrAny_cons"
 private def rtDictStrAnyEmpty := rt "DictStrAny_empty"
 
 private def mkKwargDict (sr : SourceRange) (pairs : List (String × StmtExprMd)) : TransM StmtExprMd := do
-  let empty ← mkExpr sr (.StaticCall rtDictStrAnyEmpty [])
+  let empty ← mkExpr sr (.StaticCall rtDictStrAnyEmpty [] [])
   pairs.foldrM (fun (k, v) acc => do
     let key ← mkExpr sr (.LiteralString k)
-    mkExpr sr (.StaticCall rtDictStrAnyCons [key, v, acc])) empty
+    mkExpr sr (.StaticCall rtDictStrAnyCons [key, v, acc] [])) empty
 private def rtFromDictStrAny := rt "from_DictStrAny"
 private def rtFromNone := rt "from_None"
 private def rtAnyGet := rt "Any_get"
@@ -417,7 +417,7 @@ partial def translateExpr (e : StrataPython.expr ResolvedAnn) : TransM StmtExprM
   | .Constant _ (.ConString _ s) _ => mkExpr sr (.LiteralString s.val)
   | .Constant _ (.ConTrue _) _ => mkExpr sr (.LiteralBool true)
   | .Constant _ (.ConFalse _) _ => mkExpr sr (.LiteralBool false)
-  | .Constant _ (.ConNone _) _ => mkExpr sr (.StaticCall rtFromNone [])
+  | .Constant _ (.ConNone _) _ => mkExpr sr (.StaticCall rtFromNone [] [])
   | .Constant _ (.ConFloat _ f) _ =>
     match parseFloatString f.val with
     | some d => mkExpr sr (.LiteralDecimal d)
@@ -461,7 +461,7 @@ partial def translateExpr (e : StrataPython.expr ResolvedAnn) : TransM StmtExprM
         -- Captured variables are read at the CALL, matching Python's late binding:
         -- the nested function observes the enclosing binding's current value.
         let captureVals ← captureArgs.mapM fun cid => mkExpr sr (.Var (.Local cid))
-        mkExpr sr (.StaticCall callee (matchedArgs ++ captureVals))
+        mkExpr sr (.StaticCall callee (matchedArgs ++ captureVals) [])
     | .dispatchNew cls _ => do
         tellDispatchArgEffects sr args.val kwargs.val
         -- Bind the New to a temp (as `.classNew` does): a bare `.New` value statement is
@@ -484,7 +484,7 @@ partial def translateExpr (e : StrataPython.expr ResolvedAnn) : TransM StmtExprM
           | .mk_keyword _ kwName kwExpr => do
             let val ← translateExpr kwExpr
             match kwName.val with | some n => pure (some (n.val, val)) | none => pure none
-        let initCall ← mkExpr sr (.StaticCall initSig.laurelName (← initSig.matchArgs ([tmpRef] ++ posArgs) kwargPairs translateExpr (mkKwargs := (do return some (← mkKwargDict sr kwargPairs)))))
+        let initCall ← mkExpr sr (.StaticCall initSig.laurelName (← initSig.matchArgs ([tmpRef] ++ posArgs) kwargPairs translateExpr (mkKwargs := (do return some (← mkKwargDict sr kwargPairs)))) [])
         tell [assignNew, initCall]
         pure tmpRef
     | .unresolved =>
@@ -500,7 +500,7 @@ partial def translateExpr (e : StrataPython.expr ResolvedAnn) : TransM StmtExprM
   | .BinOp ann left _ right => match ann.info with
     | .funcCall sig => do
         let l ← translateExpr left; let r ← translateExpr right
-        mkExpr sr (.StaticCall sig.laurelName (← sig.matchArgs [l, r] [] translateExpr))
+        mkExpr sr (.StaticCall sig.laurelName (← sig.matchArgs [l, r] [] translateExpr) [])
     | _ => mkExpr sr .Hole
   | .BoolOp ann _ operands => match ann.info with
     | .funcCall sig => do
@@ -509,11 +509,11 @@ partial def translateExpr (e : StrataPython.expr ResolvedAnn) : TransM StmtExprM
         | [] => mkExpr sr .Hole
         | first :: rest => rest.foldlM (fun acc e => do
             let args ← sig.matchArgs [acc, e] [] translateExpr
-            mkExpr sr (.StaticCall sig.laurelName args)) first
+            mkExpr sr (.StaticCall sig.laurelName args [])) first
     | _ => mkExpr sr .Hole
   | .UnaryOp ann _ operand => match ann.info with
     | .funcCall sig => do
-        mkExpr sr (.StaticCall sig.laurelName (← sig.matchArgs [← translateExpr operand] [] translateExpr))
+        mkExpr sr (.StaticCall sig.laurelName (← sig.matchArgs [← translateExpr operand] [] translateExpr) [])
     | _ => mkExpr sr .Hole
   | .Compare ann left ops comparators => match ann.info with
     | .funcCall sig => do
@@ -522,7 +522,7 @@ partial def translateExpr (e : StrataPython.expr ResolvedAnn) : TransM StmtExprM
           -- uninterpreted PIs/PIsNot for `is`/`is not`). matchArgs still wraps the operands.
           let opName := cmpopResolvedToLaurel (ops.val[0]!) (comparators.val[0]!)
           let l ← translateExpr left; let r ← translateExpr comparators.val[0]!
-          mkExpr sr (.StaticCall (rt opName) (← sig.matchArgs [l, r] [] translateExpr))
+          mkExpr sr (.StaticCall (rt opName) (← sig.matchArgs [l, r] [] translateExpr) [])
         else do
           -- Chained comparison `e0 op0 e1 op1 e2 ...` lowers to
           -- `(e0 op0 e1) and (e1 op1 e2) and ...`. Each operand is translated once;
@@ -539,10 +539,10 @@ partial def translateExpr (e : StrataPython.expr ResolvedAnn) : TransM StmtExprM
             let opName := cmpopResolvedToLaurel (ops.val[i]!) (comparators.val[i]!)
             let li := translated[i]!
             let ri := translated[i+1]!
-            let cmp ← mkExpr sr (.StaticCall (rt opName) [li, ri])
+            let cmp ← mkExpr sr (.StaticCall (rt opName) [li, ri] [])
             acc := some (← match acc with
               | none => pure cmp
-              | some prev => mkExpr sr (.StaticCall (rt "PAnd") [prev, cmp]))
+              | some prev => mkExpr sr (.StaticCall (rt "PAnd") [prev, cmp] []))
           match acc with
           | some result => pure result
           | none => mkExpr sr .Hole  -- unreachable: comparators non-empty
@@ -558,26 +558,26 @@ partial def translateExpr (e : StrataPython.expr ResolvedAnn) : TransM StmtExprM
             | some e => translateExpr e
             | none => mkExpr sr (.LiteralInt 0)
           let e ← match stop.val with
-            | some e => mkExpr sr (.StaticCall rtOptSome [← translateExpr e])
-            | none => mkExpr sr (.StaticCall rtOptNone [])
-          mkExpr sr (.StaticCall rtFromSlice [s, e])
+            | some e => mkExpr sr (.StaticCall rtOptSome [← translateExpr e] [])
+            | none => mkExpr sr (.StaticCall rtOptNone [] [])
+          mkExpr sr (.StaticCall rtFromSlice [s, e] [])
         | _ => translateExpr slice
-      mkExpr sr (.StaticCall rtAnyGet [c, idx])
+      mkExpr sr (.StaticCall rtAnyGet [c, idx] [])
   | .List _ elts _ => do
       let es ← elts.val.toList.mapM translateExpr
-      let nil ← mkExpr sr (.StaticCall rtListAnyNil [])
-      es.foldrM (fun e acc => mkExpr sr (.StaticCall rtListAnyCons [e, acc])) nil
+      let nil ← mkExpr sr (.StaticCall rtListAnyNil [] [])
+      es.foldrM (fun e acc => mkExpr sr (.StaticCall rtListAnyCons [e, acc] [])) nil
   | .Tuple _ elts _ => do
       let es ← elts.val.toList.mapM translateExpr
-      let nil ← mkExpr sr (.StaticCall rtListAnyNil [])
-      es.foldrM (fun e acc => mkExpr sr (.StaticCall rtListAnyCons [e, acc])) nil
+      let nil ← mkExpr sr (.StaticCall rtListAnyNil [] [])
+      es.foldrM (fun e acc => mkExpr sr (.StaticCall rtListAnyCons [e, acc] [])) nil
   | .Dict _ keys vals => do
       let ks ← keys.val.toList.mapM (fun k => match k with
         | .some_expr _ e => translateExpr e | .missing_expr _ => mkExpr sr .Hole)
       let vs ← vals.val.toList.mapM translateExpr
-      let empty ← mkExpr sr (.StaticCall rtDictStrAnyEmpty [])
+      let empty ← mkExpr sr (.StaticCall rtDictStrAnyEmpty [] [])
       (List.zip ks vs).foldrM (fun (k, v) acc =>
-        mkExpr sr (.StaticCall rtDictStrAnyCons [k, v, acc])) empty
+        mkExpr sr (.StaticCall rtDictStrAnyCons [k, v, acc] [])) empty
   | .IfExp _ test body orelse => do
       mkExpr sr (.IfThenElse (← translateExpr test) (← translateExpr body) (some (← translateExpr orelse)))
   | .JoinedStr _ values => do
@@ -585,9 +585,9 @@ partial def translateExpr (e : StrataPython.expr ResolvedAnn) : TransM StmtExprM
       else do
         let parts ← values.val.toList.mapM translateExpr
         let init ← mkExpr sr (.LiteralString "")
-        parts.foldlM (fun acc p => mkExpr sr (.StaticCall rtPAdd [acc, p])) init
+        parts.foldlM (fun acc p => mkExpr sr (.StaticCall rtPAdd [acc, p] [])) init
   | .FormattedValue _ value _ _ => do
-      mkExpr sr (.StaticCall rtToStringAny [← translateExpr value])
+      mkExpr sr (.StaticCall rtToStringAny [← translateExpr value] [])
   | _ => mkExpr sr .Hole
 
 where
@@ -652,7 +652,7 @@ partial def translateAssign (sr : SourceRange) (target : StrataPython.expr Resol
           | .mk_keyword _ kwName kwExpr => do
             let val ← translateExpr kwExpr
             match kwName.val with | some n => pure (some (n.val, val)) | none => pure none
-        let initCall ← mkExpr sr (.StaticCall initSig.laurelName (← initSig.matchArgs ([targetExpr] ++ posArgs) kwargPairs translateExpr (mkKwargs := (do return some (← mkKwargDict sr kwargPairs)))))
+        let initCall ← mkExpr sr (.StaticCall initSig.laurelName (← initSig.matchArgs ([targetExpr] ++ posArgs) kwargPairs translateExpr (mkKwargs := (do return some (← mkKwargDict sr kwargPairs)))) [])
         tell [assignNew, initCall]
     | _ => tell [← mkExpr sr (.Assign [toVarTarget (← translateExpr target)] (← translateExpr value))]
   | _ => tell [← mkExpr sr (.Assign [toVarTarget (← translateExpr target)] (← translateExpr value))]
@@ -689,7 +689,7 @@ partial def translateStmt (s : StrataPython.stmt ResolvedAnn) : TransM Unit := d
   | .AugAssign ann target _ value => match ann.info with
     | .funcCall sig => do
         let t ← translateExpr target; let v ← translateExpr value
-        let newVal ← mkExpr sr (.StaticCall sig.laurelName (← sig.matchArgs [t, v] [] translateExpr))
+        let newVal ← mkExpr sr (.StaticCall sig.laurelName (← sig.matchArgs [t, v] [] translateExpr) [])
         match target with
         | .Subscript .. => subscriptWriteBack sr target newVal
         | _ => tell [← mkExpr sr (.Assign [toVarTarget t] newVal)]
@@ -725,7 +725,7 @@ partial def translateStmt (s : StrataPython.stmt ResolvedAnn) : TransM Unit := d
           let tgt ← translateExpr target
           let havoc ← mkExpr sr (.Assign [toVarTarget tgt] (← mkExpr sr (.Hole (deterministic := false))))
           pure ([havoc], tgt)
-      let assume ← mkExpr sr (.Assume (← mkExpr sr (.StaticCall rtPIn [assumeTarget, iterExpr])))
+      let assume ← mkExpr sr (.Assume (← mkExpr sr (.StaticCall rtPIn [assumeTarget, iterExpr] [])))
       let inner ← mkExpr sr (.Block (havocStmts ++ [assume] ++ bodyStmts) (some ct.text))
       let outer ← mkExpr sr (.Block [inner] (some bk.text))
       popLoopLabel; tell [outer]
@@ -775,8 +775,8 @@ partial def translateStmt (s : StrataPython.stmt ResolvedAnn) : TransM Unit := d
           let mgr ← translateExpr ctxExpr
           match ann.info with
           | .withCtx enterSig exitSig =>
-            let enterCall ← mkExpr sr (.StaticCall enterSig.laurelName [mgr])
-            let exitCall ← mkExpr sr (.StaticCall exitSig.laurelName [mgr])
+            let enterCall ← mkExpr sr (.StaticCall enterSig.laurelName [mgr] [])
+            let exitCall ← mkExpr sr (.StaticCall exitSig.laurelName [mgr] [])
             match optVars.val with
             | some varExpr =>
               pure (pre ++ [← mkExpr sr (.Assign [toVarTarget (← translateExpr varExpr)] enterCall)], post ++ [exitCall])
@@ -844,7 +844,7 @@ where
 partial def unpackTargets (sr : SourceRange) (elts : List (StrataPython.expr ResolvedAnn))
     (sourceRef : StmtExprMd) : TransM Unit := do
   for (elt, idx) in elts.zipIdx do
-    let getExpr ← mkExpr sr (.StaticCall rtAnyGet [sourceRef, ← mkExpr sr (.LiteralInt ↑idx)])
+    let getExpr ← mkExpr sr (.StaticCall rtAnyGet [sourceRef, ← mkExpr sr (.LiteralInt ↑idx)] [])
     match elt with
     | .Tuple _ innerElts _ => do
       let innerTmp ← freshId "unpack"
@@ -874,16 +874,16 @@ partial def subscriptWriteBack (sr : SourceRange) (target : StrataPython.expr Re
     let idxExpr ← match idx with
       | .Slice _ start stop _ => do
         let s' ← match start.val with
-          | some e => mkExpr sr (.StaticCall rtAnyAsInt [← translateExpr e])
+          | some e => mkExpr sr (.StaticCall rtAnyAsInt [← translateExpr e] [])
           | none => mkExpr sr (.LiteralInt 0)
         let e' ← match stop.val with
-          | some e => mkExpr sr (.StaticCall rtOptSome [← mkExpr sr (.StaticCall rtAnyAsInt [← translateExpr e])])
-          | none => mkExpr sr (.StaticCall rtOptNone [])
-        mkExpr sr (.StaticCall rtFromSlice [s', e'])
+          | some e => mkExpr sr (.StaticCall rtOptSome [← mkExpr sr (.StaticCall rtAnyAsInt [← translateExpr e] [])] [])
+          | none => mkExpr sr (.StaticCall rtOptNone [] [])
+        mkExpr sr (.StaticCall rtFromSlice [s', e'] [])
       | _ => translateExpr idx
-    mkExpr sr (.StaticCall rtListAnyCons [idxExpr, acc])
-  ) (← mkExpr sr (.StaticCall rtListAnyNil []))
-  let setsCall ← mkExpr sr (.StaticCall rtAnySets [idxList, rootExpr, rhs])
+    mkExpr sr (.StaticCall rtListAnyCons [idxExpr, acc] [])
+  ) (← mkExpr sr (.StaticCall rtListAnyNil [] []))
+  let setsCall ← mkExpr sr (.StaticCall rtAnySets [idxList, rootExpr, rhs] [])
   -- Write the updated container back to its root — but ONLY when the root is a real lvalue
   -- (a `.Var`). When the root is not a `.Var` (e.g. an unmodeled-module attribute that lowers to
   -- a `.Hole`), there is no name to assign to, so emit the `Any_sets` call for its effect and skip
@@ -897,7 +897,7 @@ private partial def wrapBodyWithErrorChecks (sr : SourceRange) (catchersLabel : 
     (bodyStmts : List StmtExprMd) : TransM (List StmtExprMd) :=
   bodyStmts.foldlM (fun acc stmt => do
     let ref ← mkExpr sr (.Var (.Local rtMaybeExcept))
-    let check ← mkExpr sr (.StaticCall rtIsError [ref])
+    let check ← mkExpr sr (.StaticCall rtIsError [ref] [])
     let ifCheck ← mkExpr sr (.IfThenElse check (← mkExpr sr (.Exit catchersLabel)) none)
     pure (acc ++ [stmt, ifCheck])) []
 
@@ -944,7 +944,9 @@ partial def renameParamsToInputs (paramNames : List String) (e : StmtExprMd) : S
     | .Block ss l => .Block (rwList ss) l
     | .Assign ts v => .Assign (rwVarList ts) (rw v)
     | .PureFieldUpdate t fn nv => .PureFieldUpdate (rw t) fn (rw nv)
-    | .StaticCall c args => .StaticCall c (rwList args)
+    -- `typeArgs` preserved: they are a resolution output on the Laurel side, and this
+    -- rewriter only rebuilds the argument list.
+    | .StaticCall c args tyArgs => .StaticCall c (rwList args) tyArgs
     | .ReferenceEquals l r => .ReferenceEquals (rw l) (rw r)
     | .AsType t ty => .AsType (rw t) ty
     | .IsType t ty => .IsType (rw t) ty

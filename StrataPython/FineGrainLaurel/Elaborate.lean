@@ -651,7 +651,7 @@ partial def synthValue (expr : StmtExprMd) : ElabM (FGLValue × HighType) := do
     | none => throw "synthValueLiteral: unsupported literal form"
   | .Var (.Local id) => synthValueVar md id
   | .Var (.Field obj field) => synthValueFieldSelect md obj field
-  | .StaticCall callee args => synthValueStaticCall md callee args
+  | .StaticCall callee args _ => synthValueStaticCall md callee args
   | _ => throw "synthValue: unsupported value form"
 
 /-- Helper: check a list of arguments as values against parameter types. -/
@@ -956,7 +956,7 @@ partial def checkProducer (stmt : StmtExprMd) (rest : List StmtExprMd) (retTy : 
   | .Assign targets value => match targets with
     | [target] => checkAssign target value rest retTy grade
     | _ => throw "checkProducer: multi-target Assign unsupported"
-  | .StaticCall callee args => checkProducerStaticCall md callee args rest retTy grade
+  | .StaticCall callee args _ => checkProducerStaticCall md callee args rest retTy grade
   | .Block stmts label => checkProducerBlock md stmts label rest retTy grade
   | .New classId =>
     -- A constructor `.New` in PRODUCER position (e.g. the then-branch of a ternary
@@ -1087,7 +1087,7 @@ partial def checkAssign (target : VariableMd) (value : StmtExprMd) (rest : List 
   | .Local id =>
     let .variable targetTy := (← lookupEnv id.text) | throw s!"checkAssign: target {id.text} not bound as a variable"
     match value.val with
-    | .StaticCall callee args => checkAssignStaticCall md id.text targetTy callee args rest retTy grade
+    | .StaticCall callee args _ => checkAssignStaticCall md id.text targetTy callee args rest retTy grade
     | .New classId => checkAssignNew md id.text targetTy classId rest retTy grade
     | _ => checkAssignVar md id.text targetTy value rest retTy grade
 
@@ -1267,22 +1267,22 @@ def projectValue : FGLValue → StmtExprMd
   | .litString md s => mkLaurel md (.LiteralString s)
   | .litDecimal md d => mkLaurel md (.LiteralDecimal d)
   | .var md name => mkLaurel md (.Var (.Local { text := name }))
-  | .fromInt md v => mkLaurel md (.StaticCall { text := "from_int" } [projectValue v])
-  | .fromStr md v => mkLaurel md (.StaticCall { text := "from_str" } [projectValue v])
-  | .fromBool md v => mkLaurel md (.StaticCall { text := "from_bool" } [projectValue v])
-  | .fromFloat md v => mkLaurel md (.StaticCall { text := "from_float" } [projectValue v])
+  | .fromInt md v => mkLaurel md (.StaticCall { text := "from_int" } [projectValue v] [])
+  | .fromStr md v => mkLaurel md (.StaticCall { text := "from_str" } [projectValue v] [])
+  | .fromBool md v => mkLaurel md (.StaticCall { text := "from_bool" } [projectValue v] [])
+  | .fromFloat md v => mkLaurel md (.StaticCall { text := "from_float" } [projectValue v] [])
   | .fromComposite md v =>
     -- The target IR has no structural `Composite → Any` constructor (from_ClassInstance takes
     -- (classname, attr-dict), a different representation). Use the value-PRESERVING
     -- uninterpreted stub `Any..from_Composite(v)` so the term type-checks (Composite⇒Any)
     -- and stays sound-but-uninterpreted, rather than discarding `v` into an empty
     -- from_ClassInstance("", {}) (which both loses the value and mis-types).
-    mkLaurel md (.StaticCall { text := "Any..from_Composite" } [projectValue v])
-  | .fromListAny md v => mkLaurel md (.StaticCall { text := "from_ListAny" } [projectValue v])
-  | .fromDictStrAny md v => mkLaurel md (.StaticCall { text := "from_DictStrAny" } [projectValue v])
-  | .fromNone md => mkLaurel md (.StaticCall { text := "from_None" } [])
+    mkLaurel md (.StaticCall { text := "Any..from_Composite" } [projectValue v] [])
+  | .fromListAny md v => mkLaurel md (.StaticCall { text := "from_ListAny" } [projectValue v] [])
+  | .fromDictStrAny md v => mkLaurel md (.StaticCall { text := "from_DictStrAny" } [projectValue v] [])
+  | .fromNone md => mkLaurel md (.StaticCall { text := "from_None" } [] [])
   | .fieldAccess md obj f => mkLaurel md (.Var (.Field (projectValue obj) { text := f }))
-  | .staticCall md name args => mkLaurel md (.StaticCall { text := name } (args.map projectValue))
+  | .staticCall md name args => mkLaurel md (.StaticCall { text := name } (args.map projectValue) [])
   | .new md className => mkLaurel md (.New { text := className })
 
 /-- Project an FGL value used as an assignment destination into a `VariableMd`.
@@ -1408,7 +1408,7 @@ partial def projIfThenElse (dest : Option VariableMd) (md : Md) (cond : FGLValue
       -- at `.TBool`, so it projects to a bool — negate with the boolean `$not` wrapper
       -- (NOT `Any_to_bool(PNot ·)`, which assumes an Any-typed cond and yields an
       -- arrow-type mismatch when cond is already bool, e.g. `if x > 10: pass`).
-      let negCond := mkLaurel md (.StaticCall "$not" [projectValue cond])
+      let negCond := mkLaurel md (.StaticCall "$not" [projectValue cond] [])
       mkLaurel md (.IfThenElse negCond (mkLaurel md (.Block elsStmts none)) none)
     | false, false =>
       mkLaurel md (.IfThenElse (projectValue cond) (mkLaurel md (.Block thnStmts none))
@@ -1457,7 +1457,7 @@ partial def projProcedureCall (dest : Option VariableMd) (md : Md) (callee : Str
   for (n, ty) in outputs do
     projDecl (mkLaurel md (.Var (.Declare { name := { text := n }, type := mkHighTypeMd md (liftType ty) })))
   let targets : List VariableMd := outputs.map fun (n, _) => ⟨.Local { text := n }, md.getD .unknown⟩
-  let call := mkLaurel md (.Assign targets (mkLaurel md (.StaticCall { text := callee } (args.map projectValue))))
+  let call := mkLaurel md (.Assign targets (mkLaurel md (.StaticCall { text := callee } (args.map projectValue) [])))
   let bodyStmts ← proj dest body
   pure ([call] ++ bodyStmts)
 

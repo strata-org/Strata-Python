@@ -55,12 +55,12 @@ def lower (e : SpecExpr) : StmtExpr × Nat := lowerIn specCtx e
     `StaticCall`, otherwise the constructor name. Operators are `StaticCall`s to
     their built-in wrapper, so a boolean operator's head reads as `$and`/`$or`. -/
 def headName : StmtExpr → String
-  | .StaticCall callee _ => callee.text
+  | .StaticCall callee _ _ => callee.text
   | other                => other.constructorName
 
 /-- Number of arguments passed to a head `StaticCall`. -/
 def headArgCount : StmtExpr → Nat
-  | .StaticCall _ args  => args.length
+  | .StaticCall _ args _  => args.length
   | _                   => 0
 
 /-- Render the *full concrete structure* of a lowered `StmtExpr` — constructor,
@@ -72,7 +72,7 @@ private partial def describeStmt : StmtExpr → String
   | .Var (.Local id)      => s!"Var(Local {id.text})"
   | .LiteralInt v         => s!"LiteralInt({v})"
   | .LiteralBool v        => s!"LiteralBool({v})"
-  | .StaticCall callee as =>
+  | .StaticCall callee as _ =>
       s!"StaticCall({callee.text}, [{", ".intercalate (as.map fun a => describeStmt a.val)}])"
   | .Old inner            => s!"Old({describeStmt inner.val})"
   | other                 => other.constructorName
@@ -122,7 +122,7 @@ def pcmpTests : IO Unit := do
     let (stmt, errs) := lower (.pcmp op x y loc)
     unless errs == 0 do throw <| IO.userError s!"pcmp {op.tag}: {errs} error(s)"
     match stmt with
-    | .StaticCall outer [inner] =>
+    | .StaticCall outer [inner] _ =>
       unless outer.text == "Any_to_bool" do
         throw <| IO.userError s!"pcmp {op.tag}: expected outer Any_to_bool, got {outer.text}"
       unless headName inner.val == pcmpPreludeName op do
@@ -141,7 +141,7 @@ def intBoundTests : IO Unit := do
     let (stmt, errs) := lower e
     unless errs == 0 do throw <| IO.userError s!"{label}: lowering reported {errs} error(s)"
     match stmt with
-    | .StaticCall outer [arg] =>
+    | .StaticCall outer [arg] _ =>
       unless outer.text == "Any_to_bool" do
         throw <| IO.userError s!"{label}: expected outer Any_to_bool, got {outer.text}"
       unless headName arg.val == inner do
@@ -182,7 +182,7 @@ def boolAnyOperandTests : IO Unit := do
     let (stmt, errs) := lower e
     unless errs == 0 do throw <| IO.userError s!"{label} (Any operands): {errs} error(s)"
     match stmt with
-    | .StaticCall actual [l, r] =>
+    | .StaticCall actual [l, r] _ =>
       unless actual.text == op.procName do
         throw <| IO.userError s!"{label}: expected a call to {op.procName}, got {actual.text}"
       unless headName l.val == "Any_to_bool" && headName r.val == "Any_to_bool" do
@@ -193,7 +193,7 @@ def boolAnyOperandTests : IO Unit := do
   let (notStmt, notErrs) := lower (.not x loc)
   unless notErrs == 0 do throw <| IO.userError s!"not (Any operand): {notErrs} error(s)"
   match notStmt with
-  | .StaticCall actual [arg] =>
+  | .StaticCall actual [arg] _ =>
     unless actual.text == Operation.Not.procName do
       throw <| IO.userError
         s!"not: expected a call to {Operation.Not.procName}, got {actual.text}"
@@ -215,7 +215,7 @@ def asAnyBoxingTests : IO Unit := do
   let (stmt, errs) := lower (.add (.intLit 1 loc) (.boolLit true loc) loc)
   unless errs == 0 do throw <| IO.userError s!"asAny add: {errs} error(s)"
   match stmt with
-  | .StaticCall callee [l, r] =>
+  | .StaticCall callee [l, r] _ =>
     unless callee.text == "PAdd" do
       throw <| IO.userError s!"asAny add: expected PAdd, got {callee.text}"
     unless headName l.val == "from_int" do
@@ -247,7 +247,7 @@ def nonAnyUserDefinedTests : IO Unit := do
   -- Operators are `StaticCall`s to the `$`-prefixed built-in wrappers, so the
   -- head's callee name is what identifies the operator.
   match andStmt with
-  | .StaticCall callee _ =>
+  | .StaticCall callee _ _ =>
     unless callee.text == Operation.And.procName do
       throw <| IO.userError
         s!"asBool (SomeType operand): expected a call to {Operation.And.procName}, got {callee.text}"

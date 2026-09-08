@@ -250,23 +250,23 @@ private def atomAssertion? (atom : SpecAtomType) (ty : SpecType)
   | .ident nm _ =>
     match typeTestersMap[nm]? with
     | some testerName =>
-      return some <| mk (.StaticCall (mkId testerName) [value])
+      return some <| mk (.StaticCall (mkId testerName) [value] [])
     | none =>
       if nm != .typingAny && isUnion then
         reportError .unsupportedUnion ty.loc s!"No type tester for '{nm}' in type '{ty}'"
       return none
   | .intLiteral v =>
-    let typeCheck := mk (.StaticCall (mkId "Any..isfrom_int") [value])
-    let unwrap := mk (.StaticCall (mkId "Any..as_int!") [value])
-    let eqCheck := mk (.StaticCall (mkId Operation.Eq.procName) [unwrap, mk (.LiteralInt v)])
-    return some <| mk (.StaticCall (mkId Operation.And.procName) [typeCheck, eqCheck])
+    let typeCheck := mk (.StaticCall (mkId "Any..isfrom_int") [value] [])
+    let unwrap := mk (.StaticCall (mkId "Any..as_int!") [value] [])
+    let eqCheck := mk (.StaticCall (mkId Operation.Eq.procName) [unwrap, mk (.LiteralInt v)] [])
+    return some <| mk (.StaticCall (mkId Operation.And.procName) [typeCheck, eqCheck] [])
   | .stringLiteral v =>
-    let typeCheck := mk (.StaticCall (mkId "Any..isfrom_str") [value])
-    let unwrap := mk (.StaticCall (mkId "Any..as_string!") [value])
-    let eqCheck := mk (.StaticCall (mkId Operation.Eq.procName) [unwrap, mk (.LiteralString v)])
-    return some <| mk (.StaticCall (mkId Operation.And.procName) [typeCheck, eqCheck])
+    let typeCheck := mk (.StaticCall (mkId "Any..isfrom_str") [value] [])
+    let unwrap := mk (.StaticCall (mkId "Any..as_string!") [value] [])
+    let eqCheck := mk (.StaticCall (mkId Operation.Eq.procName) [unwrap, mk (.LiteralString v)] [])
+    return some <| mk (.StaticCall (mkId Operation.And.procName) [typeCheck, eqCheck] [])
   | .typedDict .. =>
-    return some <| mk (.StaticCall (mkId "Any..isfrom_DictStrAny") [value])
+    return some <| mk (.StaticCall (mkId "Any..isfrom_DictStrAny") [value] [])
 
 /-- Build a type-assertion expression for `value` given its declared `SpecType`.
     Returns `none` when no assertion is needed (all atoms are Any/composites).
@@ -285,7 +285,7 @@ private def typeAssertion? (ty : SpecType) (value : StmtExprMd)
       match result with
       | none => result := some call
       | some prev =>
-        result := some { val := .StaticCall (mkId Operation.Or.procName) [prev, call], source := source }
+        result := some { val := .StaticCall (mkId Operation.Or.procName) [prev, call] [], source := source }
     | none => pure ()
   return result
 
@@ -391,7 +391,7 @@ private def asDictAny (loc : SourceRange) (act : ToLaurelExprM SomeTypedStmtExpr
   match se with
   | ⟨.UserDefined id, e⟩ =>
     if id.text == "DictStrAny" then
-      pure (.ofStmt (.StaticCall (mkId "from_DictStrAny") [e.stmt]) e.stmt.source)
+      pure (.ofStmt (.StaticCall (mkId "from_DictStrAny") [e.stmt] []) e.stmt.source)
     else if id.text == "Any" then
       pure ⟨e.stmt⟩
     else
@@ -453,13 +453,13 @@ private def dictScalarEq
     (left right : TypedStmtExpr StrataPython.Laurel.TypedStmtExpr.tyDictStrAny)
     (source : FileRange) : TypedStmtExpr .TBool :=
   .ofStmt (.StaticCall (mkId "PySpecDict_scalarEq")
-    [left.stmt, right.stmt]) source
+    [left.stmt, right.stmt] []) source
 
 private def anyScalarEq
     (left right : TypedStmtExpr StrataPython.Laurel.tyAny)
     (source : FileRange) : TypedStmtExpr .TBool :=
   .ofStmt (.StaticCall (mkId "PySpecAny_scalarEq")
-    [left.stmt, right.stmt]) source
+    [left.stmt, right.stmt] []) source
 
 /-- Look up an identifier's type from the SpecExprContext and create a typed identifier.
     Reports a typeError if the name is not found in argTypes. -/
@@ -561,14 +561,14 @@ def specExprToLaurel (e : SpecExpr) (source : FileRange)
     let s ← asAny loc <| specExprToLaurel subject src
     let b ← asAny loc <| specExprToLaurel bound src
     -- `>=` -> runtime `Any_to_bool(PGe(..))`, matching the body translator.
-    let cmp : StmtExprMd := { val := .StaticCall (mkId "PGe") [s.stmt, b.stmt], source := src }
-    return .mkSome (⟨{ val := .StaticCall (mkId "Any_to_bool") [cmp], source := src }⟩ : TypedStmtExpr .TBool)
+    let cmp : StmtExprMd := { val := .StaticCall (mkId "PGe") [s.stmt, b.stmt] [], source := src }
+    return .mkSome (⟨{ val := .StaticCall (mkId "Any_to_bool") [cmp] [], source := src }⟩ : TypedStmtExpr .TBool)
   | .intLe subject bound loc => do
     let src ← nodeSource loc
     let s ← asAny loc <| specExprToLaurel subject src
     let b ← asAny loc <| specExprToLaurel bound src
-    let cmp : StmtExprMd := { val := .StaticCall (mkId "PLe") [s.stmt, b.stmt], source := src }
-    return .mkSome (⟨{ val := .StaticCall (mkId "Any_to_bool") [cmp], source := src }⟩ : TypedStmtExpr .TBool)
+    let cmp : StmtExprMd := { val := .StaticCall (mkId "PLe") [s.stmt, b.stmt] [], source := src }
+    return .mkSome (⟨{ val := .StaticCall (mkId "Any_to_bool") [cmp] [], source := src }⟩ : TypedStmtExpr .TBool)
   | .pcmp op lhs rhs loc => do
     let src ← nodeSource loc
     let lhsDictKind ← specDictKindOf? lhs
@@ -594,51 +594,51 @@ def specExprToLaurel (e : SpecExpr) (source : FileRange)
     else
       let l ← asAny loc <| specExprToLaurel lhs src
       let r ← asAny loc <| specExprToLaurel rhs src
-      let cmp : StmtExprMd := { val := .StaticCall (mkId (pcmpPreludeName op)) [l.stmt, r.stmt], source := src }
-      return .mkSome (⟨{ val := .StaticCall (mkId "Any_to_bool") [cmp], source := src }⟩ : TypedStmtExpr .TBool)
+      let cmp : StmtExprMd := { val := .StaticCall (mkId (pcmpPreludeName op)) [l.stmt, r.stmt] [], source := src }
+      return .mkSome (⟨{ val := .StaticCall (mkId "Any_to_bool") [cmp] [], source := src }⟩ : TypedStmtExpr .TBool)
   | .add lhs rhs loc => do
     -- Addition -> runtime `PAdd` over Any operands.
     let src ← nodeSource loc
     let l ← asAny loc <| specExprToLaurel lhs src
     let r ← asAny loc <| specExprToLaurel rhs src
-    let addExpr : StmtExprMd := { val := .StaticCall (mkId "PAdd") [l.stmt, r.stmt], source := src }
+    let addExpr : StmtExprMd := { val := .StaticCall (mkId "PAdd") [l.stmt, r.stmt] [], source := src }
     return .mkSome (⟨addExpr⟩ : TypedStmtExpr StrataPython.Laurel.tyAny)
   | .sub lhs rhs loc => do
     let src ← nodeSource loc
     let l ← asAny loc <| specExprToLaurel lhs src
     let r ← asAny loc <| specExprToLaurel rhs src
-    let subExpr : StmtExprMd := { val := .StaticCall (mkId "PSub") [l.stmt, r.stmt], source := src }
+    let subExpr : StmtExprMd := { val := .StaticCall (mkId "PSub") [l.stmt, r.stmt] [], source := src }
     return .mkSome (⟨subExpr⟩ : TypedStmtExpr StrataPython.Laurel.tyAny)
   | .mul lhs rhs loc => do
     let src ← nodeSource loc
     let l ← asAny loc <| specExprToLaurel lhs src
     let r ← asAny loc <| specExprToLaurel rhs src
-    let mulExpr : StmtExprMd := { val := .StaticCall (mkId "PMul") [l.stmt, r.stmt], source := src }
+    let mulExpr : StmtExprMd := { val := .StaticCall (mkId "PMul") [l.stmt, r.stmt] [], source := src }
     return .mkSome (⟨mulExpr⟩ : TypedStmtExpr StrataPython.Laurel.tyAny)
   | .floorDiv lhs rhs loc => do
     let src ← nodeSource loc
     let l ← asAny loc <| specExprToLaurel lhs src
     let r ← asAny loc <| specExprToLaurel rhs src
-    let e : StmtExprMd := { val := .StaticCall (mkId "PFloorDiv") [l.stmt, r.stmt], source := src }
+    let e : StmtExprMd := { val := .StaticCall (mkId "PFloorDiv") [l.stmt, r.stmt] [], source := src }
     return .mkSome (⟨e⟩ : TypedStmtExpr StrataPython.Laurel.tyAny)
   | .mod lhs rhs loc => do
     let src ← nodeSource loc
     let l ← asAny loc <| specExprToLaurel lhs src
     let r ← asAny loc <| specExprToLaurel rhs src
-    let e : StmtExprMd := { val := .StaticCall (mkId "PMod") [l.stmt, r.stmt], source := src }
+    let e : StmtExprMd := { val := .StaticCall (mkId "PMod") [l.stmt, r.stmt] [], source := src }
     return .mkSome (⟨e⟩ : TypedStmtExpr StrataPython.Laurel.tyAny)
   | .pow lhs rhs loc => do
     -- Exponentiation -> runtime `PPow` over Any operands.
     let src ← nodeSource loc
     let l ← asAny loc <| specExprToLaurel lhs src
     let r ← asAny loc <| specExprToLaurel rhs src
-    let e : StmtExprMd := { val := .StaticCall (mkId "PPow") [l.stmt, r.stmt], source := src }
+    let e : StmtExprMd := { val := .StaticCall (mkId "PPow") [l.stmt, r.stmt] [], source := src }
     return .mkSome (⟨e⟩ : TypedStmtExpr StrataPython.Laurel.tyAny)
   | .neg operand loc => do
     -- Unary minus -> runtime `PNeg` over an Any operand.
     let src ← nodeSource loc
     let o ← asAny loc <| specExprToLaurel operand src
-    let e : StmtExprMd := { val := .StaticCall (mkId "PNeg") [o.stmt], source := src }
+    let e : StmtExprMd := { val := .StaticCall (mkId "PNeg") [o.stmt] [], source := src }
     return .mkSome (⟨e⟩ : TypedStmtExpr StrataPython.Laurel.tyAny)
   | .floatGe subject bound loc => do
     let src ← nodeSource loc
@@ -833,8 +833,8 @@ def buildSpecBody (allArgs : Array Arg)
     | some assertion =>
       let cond ←
         if arg.default.isSome then
-          let noneCheck : StmtExprMd := { val := .StaticCall (mkId "Any..isfrom_None") [paramId], source := source }
-          pure { val := .StaticCall (mkId Operation.Or.procName) [noneCheck, assertion], source := source }
+          let noneCheck : StmtExprMd := { val := .StaticCall (mkId "Any..isfrom_None") [paramId] [], source := source }
+          pure { val := .StaticCall (mkId Operation.Or.procName) [noneCheck, assertion] [], source := source }
         else pure assertion
       requiredParamConds := requiredParamConds ++
         [{ condition := cond, summary := some s!"declared type of parameter '{arg.name}'" }]
@@ -950,9 +950,9 @@ private def stringListExpr (values : List String)
   values.foldr
     (fun value tail => {
       val := .StaticCall (mkId "ListStr_cons")
-        [{ val := .LiteralString value, source }, tail]
+        [{ val := .LiteralString value, source }, tail] []
       source })
-    { val := .StaticCall (mkId "ListStr_nil") [], source }
+    { val := .StaticCall (mkId "ListStr_nil") [] [], source }
 
 private partial def schemaValueAssertion? (typedDictMode : TypedDictSchemaMode)
     (path : String) (tp : SpecType)
@@ -1006,7 +1006,7 @@ private partial def schemaValueAssertion? (typedDictMode : TypedDictSchemaMode)
           conditions := conditions ++ [
             TypedStmtExpr.ofStmt
               (.StaticCall (mkId "DictStrAny_keysAllowed")
-                [dict.stmt, allowedKeys]) source]
+                [dict.stmt, allowedKeys] []) source]
           let keyName := s!"{pythonGeneratedPrefix}schema_dict_key_{binderPath}"
           let key := TypedStmtExpr.identifier keyName .TString source
           let selected := TypedStmtExpr.pySpecDictSelect model key source
@@ -1035,7 +1035,7 @@ private partial def schemaValueAssertion? (typedDictMode : TypedDictSchemaMode)
   if let some elemType := tp.extractElementType then
     let listValue : TypedStmtExpr StrataPython.Laurel.tyAny := ⟨value⟩
     let isList : TypedStmtExpr .TBool :=
-      .ofStmt (.StaticCall (mkId "Any..isfrom_ListAny") [value]) source
+      .ofStmt (.StaticCall (mkId "Any..isfrom_ListAny") [value] []) source
     let list := listValue.anyAsList source
     let binderPath := (path.replace "." "_").replace "[]" "_list"
     let elemName := s!"{pythonGeneratedPrefix}schema_list_{binderPath}"
@@ -1131,7 +1131,7 @@ private def dictSchemaConditions (arg : Arg) (rawDictInput : Bool)
       let structural : TypedStmtExpr .TBool :=
         TypedStmtExpr.ofStmt
           (.StaticCall (mkId "DictStrAny_keysAllowed")
-            [dict.stmt, allowedKeys]) source
+            [dict.stmt, allowedKeys] []) source
       let keyName := s!"{pythonGeneratedPrefix}schema_key_{arg.name}"
       let key := TypedStmtExpr.identifier keyName .TString source
       let selected := TypedStmtExpr.pySpecDictSelect model key source
