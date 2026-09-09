@@ -194,6 +194,55 @@ a `V1/V2 divergence: N of M golden(s) differ` line.
 The two runs share scratch files (`tests/*.python.st.ion`, and `user_errors.txt`
 in the working directory), so they must not be run concurrently.
 
+## Interpret Test Suite
+
+`run_py_interpret.sh` runs the same `tests/test_*.py` corpus through `pyInterpret`
+— Python → Core → concrete execution, with **no verification**. It answers a
+different question from the analyze suite: not "what does the verifier prove" but
+"does the model run this program at all, and does it get the right answer".
+
+CI runs it for **both** front ends, back to back, from
+`../StrataPythonTestExtra/InterpretGoldenTest.lean`:
+
+```
+./run_py_interpret.sh            # V1, expectations in expected_interpret_v1/
+./run_py_interpret.sh --v2       # V2, expectations in expected_interpret/
+```
+
+The paths mirror the analyze sets: `expected_interpret/` is the **V2** set. See
+[`expected_interpret/README.md`](./expected_interpret/README.md).
+
+The two runs do not cover the same cases. V2 runs all 1,478; V1 runs only the 310
+hand-written ones, because the 1,168 imported regression cases are V2-only — V1 is
+slated for deletion, so a second baseline for them has no consumer. The runner tells
+them apart by `expected_interpret/<case>.desired`, which every imported case has and
+no hand-written case does, so an import is V2-only without a list to maintain.
+
+Expectations work by absence as much as by presence, which is the main difference
+from the analyze goldens:
+
+| Sidecar | Meaning |
+|---|---|
+| *(none)* | the case must run to completion, exit 0 |
+| `<case>.expected` | the case must fail, and its output must match this regex |
+| `<case>.skip` | do not run the case; the file holds the reason |
+
+So a case that fails under one front end and passes under the other has a file in
+only one of the two sets — the `V1/V2 divergence: N of M case(s) differ` line at
+the end of the `--v2` run compares whole cases, not just the files present, over the
+310 cases both front ends run.
+
+Regenerate with `--update` (add `--v2` for the V2 set). A stored pattern that still
+matches is kept byte for byte, so deliberate relaxations survive; one that no longer
+matches is rewritten from the actual failure with assertion identifiers and Ion byte
+offsets relaxed. Narrow a run with `--filter <substring>`.
+
+`<case>.desired` sidecars record what a case ought to conclude, rather than what it
+does, and `completeness_report.py` is what reads them as expectations. The runner
+reads one only to decide whether the V1 run skips the case.
+
+The two runs share `tests/*.python.st.ion`, so they must not be run concurrently.
+
 ## Diagnostic Commands
 
 These commands are useful for inspecting intermediate artifacts.

@@ -1,0 +1,1 @@
+Str.Substr is uninterpreted in the concrete interpreter, so string slice results do not reduce

@@ -1,0 +1,1 @@
+V2 pipeline produced no Core: \[unsupported construct: this `except` clause's exception specification is not yet modeled in --v2; only a literal catch-all \(`except:` or `except Exception:`\) is supported\]

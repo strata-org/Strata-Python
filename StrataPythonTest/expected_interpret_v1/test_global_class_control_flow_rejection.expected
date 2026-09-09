@@ -1,0 +1,1 @@
+global variable 'leaked' is declared directly in a class body, whose execution is not modeled

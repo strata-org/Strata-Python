@@ -1,0 +1,1 @@
+V2 pipeline produced no Core: \[test_leak_iterator_exhaustion_variant_stopiteration_subclass\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Error', got 'Done'\]

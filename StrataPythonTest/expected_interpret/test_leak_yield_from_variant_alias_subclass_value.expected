@@ -1,0 +1,1 @@
+V2 pipeline produced no Core: \[test_leak_yield_from_variant_alias_subclass_value\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Error', got 'Done'\]

@@ -21,6 +21,21 @@
 
 set -eo pipefail
 
+# `run_py_interpret.sh` runs the same corpus and regenerates the same
+# tests/*.python.st.ion scratch files, and the test driver (Strata.IOTests.testMain)
+# launches every test file concurrently, so both suites can be in flight at once.
+# Serialize them on a shared lock rather than giving each its own scratch directory:
+# the Ion path appears in analyzer and interpreter output, and expectations match on
+# it. The lock is released when the script exits.
+LOCK_FILE="$(cd "$(dirname "$0")" && pwd)/.corpus-ion.lock"
+if command -v flock > /dev/null 2>&1; then
+    exec 9> "$LOCK_FILE"
+    if ! flock -n 9; then
+        echo "Waiting for the shared tests/*.python.st.ion lock (the other corpus suite is running) ..."
+        flock 9
+    fi
+fi
+
 failed=0
 update=0
 pending=0

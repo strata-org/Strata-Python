@@ -1,1 +1,1 @@
-\[ASSERT ERROR\] Assertion assert\([0-9]+\) failed!
+\[ERROR\] assert \(assert\([0-9]+\)\) condition did not reduce to bool

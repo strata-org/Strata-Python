@@ -651,6 +651,8 @@ private def pythonReservedNames : Std.HashSet String :=
     unmodeled modules like `botocore.config.Config`, `pyspark.SparkContext`). -/
 private def translateCombinedLaurelV2 (combined : Laurel.Program)
     (extraExternalNames : Std.HashSet String := {})
+    (analysisMode : Laurel.AnalysisMode := .Verify)
+    (keepAllFilesPrefix : Option String := none)
     : IO (Option Core.Program × List Message) := do
   -- Names imported from unmodeled modules (e.g. `from botocore.model import OperationModel`) are
   -- dynamically unknown. As TYPE ANNOTATIONS they must be gradual, else `x: OperationModel` lowers
@@ -665,7 +667,9 @@ private def translateCombinedLaurelV2 (combined : Laurel.Program)
         gradualTypes := allGradual
         realizeCoercion := some pythonRealizeCoercion
         toBool := some pythonToBool
-        reservedNames := pythonReservedNames }
+        reservedNames := pythonReservedNames
+        keepAllFilesPrefix
+        analysisMode }
       combined
   return (coreOption.map appendCorePartOfRuntime, errors)
 
@@ -805,13 +809,18 @@ private def addUnprefixedTypeAliases (prelude : Laurel.Program)
 /-- Drive the full pipeline: Resolution → Translation → Elaboration → resolve → Core.
     Specs/imports enter via `Resolution.resolve` (loads `.python.st.ion` stubs)
     → `Translation.runTranslation`; exceptions are threaded by `fullElaborate`;
-    the resolve + coerce + laurel passes happen in `translateCombinedLaurel`. -/
+    the resolve + coerce + laurel passes happen in `translateCombinedLaurel`.
+
+    `analysisMode` picks how the transparency pass lowers procedures: `.Verify` for
+    analysis (the default), `.Execute` for concrete interpretation, which must keep
+    imperative calls as calls instead of folding them into pure `$asFunction` twins. -/
 public def pyAnalyzeV2ToCore (pythonIonPath : String) (sourcePath : Option String := none)
     (keepAllFilesPrefix : Option String := none)
     (specDir : System.FilePath := ".")
     (dispatchModules : Array String := #[])
     (pyspecModules : Array String := #[])
     (pipelineCtx : Option Pipeline.PipelineContext := none)
+    (analysisMode : Laurel.AnalysisMode := .Verify)
     : IO (Except String (Option Core.Program × List Message)) := do
   let baseDir     := System.FilePath.mk pythonIonPath |>.parent.getD "."
   let metadataPath := sourcePath.getD pythonIonPath
@@ -942,7 +951,8 @@ public def pyAnalyzeV2ToCore (pythonIonPath : String) (sourcePath : Option Strin
   -- external: register them so the Laurel resolver treats their uses as sound-but-
   -- uninterpreted instead of "'Config' is not defined".
   let importedNames := collectImportedNames stmts
-  let (coreOpt, errs) ← translateCombinedLaurelV2 combined importedNames
+  let (coreOpt, errs) ←
+    translateCombinedLaurelV2 combined importedNames analysisMode keepAllFilesPrefix
   return .ok (coreOpt, modelDiags ++ importedTranslationDiags ++ elabFailureDiags ++ errs)
 
 end StrataPython

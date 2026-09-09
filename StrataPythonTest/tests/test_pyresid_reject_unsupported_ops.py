@@ -1,0 +1,10 @@
+a = 3 @ 4
+b = 3 | 4
+c = None
+d = c is None
+e = c is not None
+xs = [1, 2, 3]
+s = xs[0:2]
+r = ...
+bs = b"bytes"
+z = 1j

@@ -1,0 +1,1 @@
+V2 pipeline produced no Core: \[unsupported construct: type-selective `except Plain:` is not yet modeled in --v2; only a catch-all handler \(`except:` or `except Exception:`\) is supported\]

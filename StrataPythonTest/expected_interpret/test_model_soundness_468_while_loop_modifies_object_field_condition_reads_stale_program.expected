@@ -1,0 +1,1 @@
+V2 pipeline produced no Core: \[test_model_soundness_468_while_loop_modifies_object_field_condition_reads_stale_program\.python\.st\.ion\([0-9]+-[0-9]+\) calling multi-output procedure 'count_to_limit' is not \(yet\) supported from a transparent procedure or contract\]

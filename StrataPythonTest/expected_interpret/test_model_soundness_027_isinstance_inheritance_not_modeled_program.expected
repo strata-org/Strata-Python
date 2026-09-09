@@ -1,0 +1,1 @@
+V2 pipeline produced no Core: \[test_model_soundness_027_isinstance_inheritance_not_modeled_program\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Animal', got 'Dog', test_model_soundness_027_isinstance_inheritance_not_modeled_program\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Animal', got 'Dog'\]

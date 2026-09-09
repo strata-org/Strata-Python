@@ -559,10 +559,14 @@ def pyInterpretCommand : _root_.Command where
   flags := [{ name := "fuel", help := "Maximum execution steps.", takesArg := .arg "n" },
             { name := "keep-all-files",
               help := "Store intermediate Laurel and Core programs in <dir>.",
-              takesArg := .arg "dir" }]
+              takesArg := .arg "dir" },
+            { name := "v2",
+              help := "Use the V2 pipeline (Resolution → Translation → Elaboration → Core).",
+              takesArg := .none }]
   help := "Interpret a Python Ion program concretely (Python → Laurel → Core → execute)."
   callback := fun v pflags => do
     let filePath := v[0]
+    let useV2 := pflags.getBool "v2"
     let keepDir := pflags.getString "keep-all-files"
     -- Derive a prefix *inside* the directory so pipeline-emitted intermediates
     -- (`<dir>/<baseName>.<n>.<pass>.laurel.st`) land alongside the final
@@ -576,19 +580,29 @@ def pyInterpretCommand : _root_.Command where
 
     let quietCtx ← Strata.Pipeline.PipelineContext.create (outputMode := .quiet)
     let (core, _diags) ←
-      match ← (StrataPython.pythonAndSpecToLaurel filePath (specDir := ".")).run quietCtx |>.toBaseIO with
-      | .ok laurel =>
-        if let some dir := keepDir then
-          IO.FS.createDirAll dir
-          IO.FS.writeFile (dir ++ "/laurel.st") (toString (Std.format laurel))
-        match ← StrataPython.translateCombinedLaurel laurel keepPrefix
+      if useV2 then
+        -- `.Execute` matters as much here as on the V1 path: the transparency pass must
+        -- keep imperative calls as calls rather than redirecting them to pure twins,
+        -- which have no executable body.
+        match ← StrataPython.pyAnalyzeV2ToCore filePath (keepAllFilesPrefix := keepPrefix)
             (analysisMode := .Execute) with
-        | (some core, diags) => pure (core, diags)
-        | (none, diags) => exitFailure s!"Laurel to Core translation failed: {diags}"
-      | .error () =>
-        let msgs ← quietCtx.getMessages
-        let detail := match msgs.back? with | some m => m.message.message | none => "Pipeline aborted"
-        exitFailure detail
+        | .error msg => exitFailure s!"V2 pipeline failed: {msg}"
+        | .ok (some core, diags) => pure (core, diags)
+        | .ok (none, diags) => exitFailure s!"V2 pipeline produced no Core: {diags}"
+      else
+        match ← (StrataPython.pythonAndSpecToLaurel filePath (specDir := ".")).run quietCtx |>.toBaseIO with
+        | .ok laurel =>
+          if let some dir := keepDir then
+            IO.FS.createDirAll dir
+            IO.FS.writeFile (dir ++ "/laurel.st") (toString (Std.format laurel))
+          match ← StrataPython.translateCombinedLaurel laurel keepPrefix
+              (analysisMode := .Execute) with
+          | (some core, diags) => pure (core, diags)
+          | (none, diags) => exitFailure s!"Laurel to Core translation failed: {diags}"
+        | .error () =>
+          let msgs ← quietCtx.getMessages
+          let detail := match msgs.back? with | some m => m.message.message | none => "Pipeline aborted"
+          exitFailure detail
     if let some dir := keepDir then
       IO.FS.writeFile (dir ++ "/core.st") (toString (Std.format core))
     let core ← match Strata.Core.typeCheck Core.VerifyOptions.quiet core

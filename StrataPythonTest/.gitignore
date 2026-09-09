@@ -1,4 +1,5 @@
 *.python.st.ion
 *.sarif
+.corpus-ion.lock
 
 __pycache__

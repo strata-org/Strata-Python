@@ -1,0 +1,1 @@
+V2 pipeline produced no Core: \[test_model_soundness_191_field_write_requires_full_reconstruction_program\.python\.st\.ion\([0-9]+-[0-9]+\) calling multi-output procedure 'write_one_field_preserves_others' is not \(yet\) supported from a transparent procedure or contract\]

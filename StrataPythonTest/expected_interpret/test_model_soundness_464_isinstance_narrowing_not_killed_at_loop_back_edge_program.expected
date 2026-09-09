@@ -1,0 +1,1 @@
+V2 pipeline produced no Core: \[test_model_soundness_464_isinstance_narrowing_not_killed_at_loop_back_edge_program\.python\.st\.ion\([0-9]+-[0-9]+\) Resolution failed: 'tricks' is not defined, identifier 'tricks' missing uniqueId \(not resolved\)\]

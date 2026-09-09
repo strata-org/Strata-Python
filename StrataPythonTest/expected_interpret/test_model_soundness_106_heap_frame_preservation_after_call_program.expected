@@ -1,0 +1,1 @@
+V2 pipeline produced no Core: \[test_model_soundness_106_heap_frame_preservation_after_call_program\.python\.st\.ion\([0-9]+-[0-9]+\) calling multi-output procedure 'independent_counters' is not \(yet\) supported from a transparent procedure or contract\]

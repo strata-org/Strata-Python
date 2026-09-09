@@ -1,1 +1,1 @@
-destructured with-as targets are not supported
+V2 pipeline produced no Core: \[elaboration failure: __main__ \(grade Strata\.FineGrainLaurel\.Grade\.err; REASON=lookupEnv: defaultIdentifier not in env; #6/7: Assign at StrataPythonTest/tests/test_global_destructured_with_rejection\.python\.st\.ion:16-55 \[elaborates-at: \] \(RHS=Hole\)\), test_global_destructured_with_rejection\.python\.st\.ion\([0-9]+-[0-9]+\) Resolution failed: 'defaultIdentifier' is not defined\]

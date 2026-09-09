@@ -1,0 +1,1 @@
+V2 pipeline produced no Core: \[test_type_checker_differentials_mypy_a13_enum_narrowing_program\.python\.st\.ion\([0-9]+-[0-9]+\) Resolution failed: 'value' is not defined, identifier 'value' missing uniqueId \(not resolved\)\]

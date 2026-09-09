@@ -30,14 +30,31 @@ flag on `pyAnalyzeLaurel` (`pyAnalyzeV2` is an alias for `pyAnalyzeLaurel
   / `--dispatch` / `--pyspec` (existing PySpec models bind through name
   Resolution), and still differs from V1 on most of the golden corpus.
 
-Both front-ends run the whole `StrataPythonTest/tests/` corpus in CI, via
-`StrataPythonTestExtra/AnalyzeGoldenTest.lean`, each against its own golden set.
-Watch the directory names — they are not what you would guess:
-`StrataPythonTest/expected_laurel/` is the **V2** set and
-`StrataPythonTest/expected_laurel_v1/` the **V1** set. Regenerate with
-`./run_py_analyze.sh [--v2] --update` from `StrataPythonTest/`, and read
+Both front-ends run the `StrataPythonTest/tests/` corpus in CI, twice over — once
+verified and once executed — each run against its own per-front-end set:
+
+| Suite | Driver | V1 set | V2 set |
+|---|---|---|---|
+| analyze (SMT verification) | `StrataPythonTestExtra/AnalyzeGoldenTest.lean` → `run_py_analyze.sh` | `expected_laurel_v1/` | `expected_laurel/` |
+| interpret (concrete execution) | `StrataPythonTestExtra/InterpretGoldenTest.lean` → `run_py_interpret.sh` | `expected_interpret_v1/` | `expected_interpret/` |
+
+The interpret suite is the exception to "the whole corpus": V2 runs all 1,478 cases,
+V1 only the 310 hand-written ones. The 1,168 imported regression cases are V2-only
+since V1 is slated for deletion. The discriminator is an
+`expected_interpret/<case>.desired` sidecar — every imported case has one and no
+hand-written case does — so a new import is V2-only with no list to maintain.
+
+Watch the directory names — they are not what you would guess: the **unqualified**
+path is the **V2** set in both suites. Regenerate with
+`./run_py_analyze.sh [--v2] --update` / `./run_py_interpret.sh [--v2] --update` from
+`StrataPythonTest/`, and read
 [`StrataPythonTest/expected_laurel/README.md`](./StrataPythonTest/expected_laurel/README.md)
+and
+[`StrataPythonTest/expected_interpret/README.md`](./StrataPythonTest/expected_interpret/README.md)
 for why the paths are that way round and what currently differs between them.
+
+Neither suite runs at Lean elaboration time: both shell out to the compiled binary,
+so a mismatch is a test failure, not a build error.
 
 ## Convention: `open Strata` pattern
 

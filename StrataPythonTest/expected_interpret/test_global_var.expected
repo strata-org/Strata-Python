@@ -1,0 +1,1 @@
+V2 pipeline produced no Core: \[elaboration failure: test_global_var precondition \(REASON=lookupEnv: G not in env\), elaboration failure: test_global_var precondition \(REASON=lookupEnv: H not in env\), test_global_var\.python\.st\.ion\([0-9]+-[0-9]+\) Resolution failed: 'G' is not defined, test_global_var\.python\.st\.ion\([0-9]+-[0-9]+\) Resolution failed: 'H' is not defined\]

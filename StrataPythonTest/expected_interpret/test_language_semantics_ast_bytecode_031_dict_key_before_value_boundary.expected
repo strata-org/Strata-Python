@@ -1,0 +1,1 @@
+V2 pipeline produced no Core: \[test_language_semantics_ast_bytecode_031_dict_key_before_value_boundary\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'string', got 'int'\]

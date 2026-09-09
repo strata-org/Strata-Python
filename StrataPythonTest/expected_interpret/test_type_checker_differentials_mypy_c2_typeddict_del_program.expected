@@ -1,0 +1,1 @@
+V2 pipeline produced no Core: \[test_type_checker_differentials_mypy_c2_typeddict_del_program\.python\.st\.ion\([0-9]+-[0-9]+\) expected 'Point', got 'DictStrAny'\]

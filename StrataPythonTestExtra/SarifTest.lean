@@ -15,7 +15,7 @@ import Strata.Languages.Core.Verifier
 /-! ## SARIF output tests for `pyAnalyzeLaurel`
 
 Ports `run_py_analyze_sarif.py` + `validate_sarif.py` to a Lean test. For each
-`tests/test_*.py` file the test:
+file named in `sarifTests` the test:
 
 1. Spawns `strata_python.gen py_to_strata` to compile the Python source to Ion.
 2. Runs `StrataPython.Pipeline.runPyAnalyzePipeline` in-process — the same
@@ -30,6 +30,23 @@ single run, valid `level`, present `ruleId`/`message`) are guaranteed by the
 types. The remaining checks — tool name, the per-test expectations for
 `test_precondition_verification` and `test_arithmetic` — are asserted below.
 
+### Why a fixed list rather than the whole corpus
+
+This used to walk every `tests/test_*.py` minus a skip list. That bought one
+repetition of the same three input-independent checks per case — version, one run,
+tool name — plus "the pipeline emitted a document at all", which the analyze goldens
+already record per case as their `RESULT:` line. The only input-dependent assertions
+are the three named cases in `validate`.
+
+The cost was not small: over a 1,478-case corpus it was ~794 analyses at ~4s each,
+about 52 minutes of SMT per build, against ~5 minutes for the list below. It also
+needed a 684-entry skip list to suppress the cases where the pipeline declines,
+which had to be maintained by hand every time the corpus or the front end moved.
+
+So the list is explicit. Add a case here when it asserts something about SARIF that
+no case here already asserts — not to give a program SARIF coverage for its own
+sake, which is the analyze goldens' job.
+
 This is a runtime test (needs Python with `strata_python.gen`, plus the SMT
 solvers cvc5 and z3 on PATH), run from `StrataPythonTestExtra/` via `lake test`.
 -/
@@ -41,59 +58,23 @@ namespace StrataPython.SarifTest
 
 meta section
 
-/-- Test files that produce no usable SARIF output and are skipped, mirroring
-    `SKIP_TESTS` in the original `run_py_analyze_sarif.py`. -/
-def skipTests : Std.HashSet String := Std.HashSet.ofList [
-  "test_foo_client_folder",
-  "test_invalid_client_type",
-  "test_unsupported_config",
-  "test_with_void_enter",
-  "test_class_no_init_extra_args", -- No SARIF output: does not run SMT analysis
-  "test_exc_reject_except_star",   -- No SARIF output: V1 cannot translate TryStar (except*)
-  "test_class_decorator_rejection",
-  "test_dataclass_shadow_rejection",
-  "test_effectful_return_annotation_rejection",
-  "test_for_else_break",
-  "test_function_decorator_rejection",
-  "test_global_collision",         -- Expected frontend rejection before SMT analysis
-  "test_global_async_method_rejection",
-  "test_global_builtin_call_shadowing",
-  "test_global_class_body_rejection",
-  "test_global_class_control_flow_rejection",
-  "test_global_composite_attribute_augassign_rejection",
-  "test_global_composite_attribute_read_rejection",
-  "test_global_composite_attribute_write_rejection",
-  "test_global_composite_read_rejection",
-  "test_global_composite_rejection",
-  "test_global_definition_default_rejection",
-  "test_global_destructured_with_rejection",
-  "test_global_dotted_import_collision",
-  "test_global_effectful_annotation_rejection",
-  "test_global_effectful_default_rejection",
-  "test_global_function_import",
-  "test_global_import_rebinding_in_control_flow_rejection",
-  "test_global_import_rebinding_in_function_rejection",
-  "test_global_import_rebinding_rejection",
-  "test_global_inherited_nested_rejection",
-  "test_global_inherited_method_rejection",
-  "test_global_nested_class_rejection",
-  "test_global_nested_function_control_flow_rejection",
-  "test_nested_function_ancestor_capture_rejection", -- V2-only: V1 rejects nested FunctionDef before SMT analysis
-  "test_nested_function_capture_rejection",
-  "test_nested_function_control_flow_rejection",
-  "test_nested_function_forward_reference_rejection",
-  "test_nested_function_lifting",
-  "test_nested_function_value_rejection",
-  "test_global_prelude_collision",
-  "test_global_reserved_name_rejection",
-  "test_global_type_collision",
-  "test_global_wildcard_import_rejection",
-  "test_try_finally_return_rejection",
-  "test_while_else_rejection",
-  "test_user_error_metadata",      -- No SARIF output: does not run SMT analysis
-  "test_is_non_none",              -- No SARIF output: does not run SMT analysis
-  "test_is_not_non_none",          -- No SARIF output: does not run SMT analysis
-  "test_list"                      -- Module-level asserts: "asserts not supported" error
+/-- The cases this suite analyzes. Each one is here because it asserts something
+    about the SARIF document that no other case here asserts; see the note above
+    before adding to it.
+
+    The first three carry the input-dependent assertions in `validate`. The rest
+    cover distinct pipeline shapes that reach SMT, so a document is produced and
+    the structural checks run against more than one program. -/
+def sarifTests : Array String := #[
+  -- Asserted individually in `validate`.
+  "test_precondition_verification",              -- must report error-level results
+  "test_arithmetic",                             -- must report no errors, with locations
+  "test_soundness_global_read_before_assignment",-- unbound global: error with a location
+  -- Shape coverage: gradual types, loops, context managers, slicing.
+  "test_any_arithmetic",
+  "test_while_loop",
+  "test_with_statement",
+  "test_list_slice"
 ]
 
 def testsDir : System.FilePath := "StrataPythonTest/tests"
@@ -184,30 +165,19 @@ def validate (doc : Strata.Sarif.SarifDocument) (baseName : String) : Option Str
 
   return none
 
-/-- Recursively unused: tests live directly under `testsDir`; collect `test_*.py`. -/
-def findTestFiles : IO (Array System.FilePath) := do
-  let mut results := #[]
-  for entry in ← testsDir.readDir do
-    let p := entry.path
-    if p.extension == some "py" then
-      if let some stem := p.fileStem then
-        if stem.startsWith "test_" then
-          results := results.push p
-  return results.qsort (·.toString < ·.toString)
-
 def main : IO Unit := do
   withPython fun pythonCmd => do
     IO.FS.withTempDir fun tmpDir => do
       let dialectFile := tmpDir / "Python.dialect.st.ion"
       IO.FS.writeBinFile dialectFile Python.toIon
 
-      let files ← findTestFiles
       let mut failures := 0
-      for pyFile in files do
-        let some stem := pyFile.fileStem
-          | continue
-        if skipTests.contains stem then
-          IO.println s!"Skipping: {stem}"
+      for stem in sarifTests do
+        let pyFile := testsDir / s!"{stem}.py"
+        -- A name here that no longer exists is a stale list, not a skip.
+        unless ← pyFile.pathExists do
+          IO.println s!"ERROR: {stem} is listed in sarifTests but {pyFile} is missing"
+          failures := failures + 1
           continue
         IO.println s!"Testing SARIF output for {stem}..."
         let ionFile ← compilePython pythonCmd dialectFile pyFile tmpDir

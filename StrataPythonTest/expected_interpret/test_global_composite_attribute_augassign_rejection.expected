@@ -1,1 +1,1 @@
-attribute write on module variable 'counter' with composite or type-alias value is not supported
+V2 pipeline produced no Core: \[test_global_composite_attribute_augassign_rejection\.python\.st\.ion\([0-9]+-[0-9]+\) Duplicate definition 'increment' is already defined in this scope \(this name collides with one introduced by an internal lowering pass; rename the identifier — a reserved internal type name \(e\.g\. `Heap`, `Field`, `TypeTag`, `Composite`\) or a name containing `\$` / the `\$aN\$` instantiation-tag shape can clash with a synthetic name\)\]
