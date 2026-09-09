@@ -18,6 +18,17 @@ open Strata.Pipeline
 
 namespace StrataPython.Pipeline
 
+/-- The pipeline this front end verifies with: the default Core order, with the
+    bug-finding phases placed where structured bodies still exist.  Verification
+    must be given the same options, since the filter phases read them. -/
+public def buildVerificationPipeline (options : Core.VerifyOptions)
+    (inlinePhases : List Core.PipelinePhase) :
+    Except String (Core.ValidatedPipeline Core.ProgramFactSet.empty) :=
+  Strata.Core.splicePhasesAfter "assertNoCFGBodies" inlinePhases
+    (Strata.Core.corePipelinePhases (options := options)
+      (moreFns := StrataPython.RuntimeFactory))
+    |>.bind Strata.Core.validatePipeline
+
 /-- The outcome of the full pyAnalyzeLaurel pipeline.
     Error details are derived from the accumulated messages in PipelineContext. -/
 public inductive PyAnalyzeOutcome where
@@ -147,14 +158,20 @@ private def runPipeline (config : PyAnalyzeConfig)
           coreProgram userProcNames config.entryPoint
         (p, [i])
       else (userProcNames, [])
-    Strata.Core.verifyProgram coreProgram config.verifyOptions
-        (moreFns := StrataPython.RuntimeFactory)
-        (proceduresToVerify := some proceduresToVerify)
-        (externalPhases := [Strata.frontEndPhase])
-        (prefixPhases := inlinePhases)
-        (mkDischarge := config.mkDischarge)
-        (pipelineCtx := some ctx)
-        |>.toBaseIO
+    let verifyOptions :=
+      { config.verifyOptions with proceduresToVerify := some proceduresToVerify }
+    match buildVerificationPipeline verifyOptions inlinePhases with
+    | .error e =>
+      emitMessageAndAbort (file := uri) .verificationError
+        s!"Cannot assemble a verification pipeline: {e}"
+    | .ok pipeline =>
+      Strata.Core.verifyProgram coreProgram verifyOptions
+          (moreFns := StrataPython.RuntimeFactory)
+          (externalPhases := [Strata.frontEndPhase])
+          (pipeline := some pipeline)
+          (mkDischarge := config.mkDischarge)
+          (pipelineCtx := some ctx)
+          |>.toBaseIO
 
   let vcResults ←
     match verifyResult with

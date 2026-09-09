@@ -95,7 +95,7 @@ def checkMatch (pyRegex testStr : String) (mode : MatchMode) : IO StrataResult :
       let msgs ← errors.toList.mapM (·.toString)
       return .smtError s!"elab: {String.intercalate "; " msgs}"
     | .ok pgm =>
-      let vcResults ← Strata.Core.verify pgm inputCtx none .quiet
+      let vcResults ← Strata.Core.verify pgm inputCtx .quiet
       match vcResults[0]? with
       | none    => return .smtError "no VCs generated"
       | some vc =>

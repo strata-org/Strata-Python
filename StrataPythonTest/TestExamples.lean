@@ -77,7 +77,7 @@ public def processPythonFile (pythonCmd : System.FilePath) (input : InputContext
         { Core.VerifyOptions.quiet with removeIrrelevantAxioms := .Precise }
       let vcResults ← IO.FS.withTempDir fun vcDir =>
         EIO.toIO (fun f => IO.Error.userError (toString f))
-          (_root_.Core.verify core vcDir .none options
+          (_root_.Core.verify core vcDir options
             (moreFns := StrataPython.RuntimeFactory)
             (externalPhases := [Strata.frontEndPhase]))
       let vcDiags := vcResults.toList.filterMap (fun vcr => vcr.toDiagnostic files Core.coreAbstractedPhases)

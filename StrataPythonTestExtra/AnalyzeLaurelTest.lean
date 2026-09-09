@@ -140,14 +140,19 @@ private meta def verifyLaurel
   let options : Core.VerifyOptions :=
     { Core.VerifyOptions.default with
       stopOnFirstError := false, verbose := .quiet, solver := "z3",
-      checkMode := .bugFinding, checkLevel := .full }
-  match ← Strata.Core.verifyProgram coreProgram options
-      (moreFns := StrataPython.RuntimeFactory)
-      (proceduresToVerify := some entryPoints)
-      (externalPhases := [Strata.frontEndPhase])
-      (prefixPhases := inlinePhases) |>.toBaseIO with
-  | .ok results => return .ok results
-  | .error msg => return .error (toString msg)
+      checkMode := .bugFinding, checkLevel := .full,
+      proceduresToVerify := some entryPoints }
+  match StrataPython.Pipeline.buildVerificationPipeline options inlinePhases with
+  | .error e =>
+    -- The default phase order always validates; an error here is a test bug.
+    return .error s!"Cannot assemble the verification pipeline for this test: {e}"
+  | .ok pipeline =>
+    match ← Strata.Core.verifyProgram coreProgram options
+        (moreFns := StrataPython.RuntimeFactory)
+        (externalPhases := [Strata.frontEndPhase])
+        (pipeline := some pipeline) |>.toBaseIO with
+    | .ok results => return .ok results
+    | .error msg => return .error (toString msg)
 
 /-- Run pyAnalyzeLaurel with inlining and verification.
     When `useRoots` is true, entry points are determined via the call graph
