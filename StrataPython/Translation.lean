@@ -5,7 +5,7 @@
 -/
 module
 
-public import Strata.Languages.Laurel.LaurelAST
+public import StrataLaurel.Implementation.LaurelAST
 public import StrataPython.PythonDialect
 public import StrataPython.Resolution
 import StrataDDM.Util.SourceRange

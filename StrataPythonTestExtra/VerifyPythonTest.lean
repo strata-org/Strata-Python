@@ -8,9 +8,9 @@ module
 meta import all StrataPythonTest.TestExamples
 meta import StrataPythonTest.Util.Python -- shake: keep
 meta import all StrataTest.Util.TestDiagnostics
-meta import Strata.Languages.Laurel.Grammar.AbstractToConcreteTreeTranslator
+meta import StrataLaurel.Implementation.Grammar.AbstractToConcreteTreeTranslator
 
-import Strata.Languages.Laurel.LaurelAST
+import StrataLaurel.Implementation.LaurelAST
 
 /-! ## Test: Inline Python verification via processPythonFile
 

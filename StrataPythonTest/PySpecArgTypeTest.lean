@@ -8,7 +8,7 @@ module
 public import StrataPython.PythonIdent
 meta import all StrataPython.PySpecPipeline
 meta import all StrataPython.Specs.DDM
-import Strata.Languages.Laurel.Grammar.AbstractToConcreteTreeTranslator
+import StrataLaurel.Implementation.Grammar.AbstractToConcreteTreeTranslator
 
 meta section
 

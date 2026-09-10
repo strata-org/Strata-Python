@@ -7,7 +7,7 @@ module
 public import Strata.Pipeline.Messages
 
 meta import all StrataPython.Specs.ToLaurel
-meta import all Strata.Languages.Laurel.Grammar.AbstractToConcreteTreeTranslator
+meta import all StrataLaurel.Implementation.Grammar.AbstractToConcreteTreeTranslator
 
 meta section
 

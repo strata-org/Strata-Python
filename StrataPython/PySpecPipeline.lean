@@ -7,9 +7,9 @@ module
 public import Strata.Pipeline.Messages
 
 import all StrataDDM.Util.String
-import Strata.Languages.Laurel.FilterPrelude
-import Strata.Languages.Laurel.LaurelCompilationPipeline
-public import Strata.Languages.Laurel.LaurelPass
+import StrataLaurel.Implementation.FilterPrelude
+import StrataLaurel.Implementation.LaurelCompilationPipeline
+public import StrataLaurel.Implementation.LaurelPass
 public import StrataPython.PythonToLaurel
 import StrataPython.ReadPython
 import StrataPython.PythonLaurelCorePrelude

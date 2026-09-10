@@ -5,9 +5,9 @@
 -/
 module
 
-public import Strata.Languages.Laurel.LaurelAST
-public import Strata.Languages.Laurel.HeapParameterizationConstants
-public import Strata.Languages.Laurel.CoreDefinitionsForLaurel
+public import StrataLaurel.Implementation.LaurelAST
+public import StrataLaurel.Implementation.HeapParameterizationConstants
+public import StrataLaurel.Implementation.CoreDefinitionsForLaurel
 
 /-!
 # Pass 3: Elaboration

@@ -4,9 +4,9 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
-import Strata.Languages.Laurel.Grammar.LaurelGrammar
-import Strata.Languages.Laurel.Grammar.ConcreteToAbstractTreeTranslator
-public import Strata.Languages.Laurel.LaurelAST
+import StrataLaurel.Implementation.Grammar.LaurelGrammar
+import StrataLaurel.Implementation.Grammar.ConcreteToAbstractTreeTranslator
+public import StrataLaurel.Implementation.LaurelAST
 public import StrataDDM.AST
 public import StrataDDM.Integration.Lean.HashCommands -- shake: keep
 

@@ -8,9 +8,9 @@ module
 meta import Strata.SimpleAPI
 meta import StrataPython.PySpecPipeline
 meta import StrataPython.Specs.MessageKind
-meta import Strata.Languages.Laurel.Resolution
-meta import Strata.Languages.Laurel.Grammar.AbstractToConcreteTreeTranslator
-meta import Strata.Languages.Laurel.CoreDefinitionsForLaurel
+meta import StrataLaurel.Implementation.Resolution
+meta import StrataLaurel.Implementation.Grammar.AbstractToConcreteTreeTranslator
+meta import StrataLaurel.Implementation.CoreDefinitionsForLaurel
 meta import Strata.Transform.ProcedureInlining
 meta import StrataPython.PyFactory
 meta import StrataPythonTest.Util.Python

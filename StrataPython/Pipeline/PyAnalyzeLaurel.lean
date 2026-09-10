@@ -9,7 +9,7 @@ public import Strata.Languages.Core.EntryPoint
 public import Strata.Languages.Core.Verifier
 import StrataPython.PySpecPipeline
 import StrataPython.PyFactory
-import Strata.Languages.Laurel.Grammar.AbstractToConcreteTreeTranslator
+import StrataLaurel.Implementation.Grammar.AbstractToConcreteTreeTranslator
 import Strata.SimpleAPI
 import Strata.Languages.Core.DDMTransform.ASTtoCST
 import Strata.Pipeline.Diagnostic

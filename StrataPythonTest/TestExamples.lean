@@ -6,7 +6,7 @@
 module
 
 public import Strata.Languages.Core
-public import Strata.Languages.Laurel
+public import StrataLaurel.Implementation
 import StrataPython.PySpecPipeline
 import StrataPython.PyFactory
 import StrataDDM.Ion

@@ -5,7 +5,7 @@
 -/
 module
 
-public import Strata.Languages.Laurel.LaurelAST
+public import StrataLaurel.Implementation.LaurelAST
 public import StrataPython.UnknownSource
 import StrataPython.PythonLaurelTypedExpr
 public import StrataPython.Specs.Decls

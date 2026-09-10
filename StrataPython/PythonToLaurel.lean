@@ -6,13 +6,13 @@
 module
 
 public import Strata.Languages.Core.Program
-public import Strata.Languages.Laurel.LaurelAST
+public import StrataLaurel.Implementation.LaurelAST
 public import StrataPython.OverloadTable
 public import StrataPython.PythonDialect
 public import StrataPython.UnknownSource
 import StrataPython.PythonRuntimeLaurelPart
 import StrataPython.Resolution
-import Strata.Languages.Laurel.MapStmtExpr
+import StrataLaurel.Implementation.MapStmtExpr
 import Std.Tactic.BVDecide.Normalize.Prop
 import Strata.Util.Tactics
 

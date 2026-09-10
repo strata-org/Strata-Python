@@ -15,8 +15,8 @@ public import Strata.Languages.Core.SarifOutput
 public import Strata.Languages.Core.ProgramEval
 public import Strata.Languages.Core.StatementEval
 public import Strata.Pipeline.Diagnostic
-public import Strata.Languages.Laurel.Grammar.AbstractToConcreteTreeTranslator
-public import Strata.Languages.Laurel.LaurelCompilationPipeline
+public import StrataLaurel.Implementation.Grammar.AbstractToConcreteTreeTranslator
+public import StrataLaurel.Implementation.LaurelCompilationPipeline
 public import Strata.Transform.ProcedureInlining
 public import Strata.Util.Json
 public import StrataPython
