@@ -182,6 +182,7 @@ procedure re_search_bool(pattern : string, s : string) : bool
 
 procedure Str.InRegEx(s: string, r: Core regex): bool external;
 procedure Str.Length(s: string): int external;
+procedure Str.Substr(s: string, start: int, len: int): string external;
 
 // /////////////////////////////////////////////////////////////////////////////////////
 
@@ -368,6 +369,19 @@ return List_slice_non_neg (l,
     if stop >= 0 then stop else int_max (List_len(l) + stop, 0)
   );
 
+// SMT-LIB str.substr clamps at the end of the string and returns "" for an
+// out-of-range start or non-positive length, matching Python's s[start:stop]
+// once negative indices are normalized.
+procedure Str_slice_non_neg (s : string, start : int, stop: int) : string
+  requires start >= 0 && stop >= 0
+return Str.Substr(s, start, stop - start);
+
+procedure Str_slice (s : string, start : int, stop: int) : string
+return Str_slice_non_neg (s,
+    if start >= 0 then start else int_max (Str.Length(s) + start, 0),
+    if stop >= 0 then stop else int_max (Str.Length(s) + stop, 0)
+  );
+
 procedure List_set_non_neg (l : ListAny, i : int, v: Any) : ListAny
   requires i >= 0 && i < List_len(l)
 return if ListAny..isListAny_nil(l) then ListAny_nil()
@@ -421,8 +435,15 @@ return if Any..isfrom_DictStrAny(dictOrList) then
     List_get(Any..as_ListAny!(dictOrList), Any..as_int!(index));
 
 procedure Any_get_slice (list: Any, index: Any): Any
-  requires (Any..isfrom_ListAny(list) && Any..isfrom_Slice(index))
-return from_ListAny(List_slice(
+  requires ((Any..isfrom_ListAny(list) || Any..isfrom_str(list)) && Any..isfrom_Slice(index))
+return if Any..isfrom_str(list) then
+    from_str(Str_slice(
+      Any..as_string!(list),
+      Any..start!(index),
+      if OptionInt..isOptSome(Any..stop!(index))
+      then OptionInt..unwrap!(Any..stop!(index))
+      else Str.Length(Any..as_string!(list))))
+  else from_ListAny(List_slice(
     Any..as_ListAny!(list),
     Any..start!(index),
     if OptionInt..isOptSome(Any..stop!(index))

@@ -1,0 +1,18 @@
+test_str_slice.py(3, 7): ❓ unknown - precondition
+test_str_slice.py(3, 0): ❓ unknown - assert(…)
+test_str_slice.py(5, 7): ❓ unknown - precondition
+test_str_slice.py(5, 0): ❓ unknown - assert(…)
+test_str_slice.py(7, 7): ❓ unknown - precondition
+test_str_slice.py(7, 0): ❓ unknown - assert(…)
+test_str_slice.py(9, 7): ❓ unknown - precondition
+test_str_slice.py(9, 0): ❓ unknown - assert(…)
+test_str_slice.py(11, 12): ✅ pass - Check PNeg exception
+test_str_slice.py(11, 7): ❓ unknown - precondition
+test_str_slice.py(11, 0): ❓ unknown - assert(…)
+test_str_slice.py(13, 12): ✅ pass - Check PNeg exception
+test_str_slice.py(13, 7): ❓ unknown - precondition
+test_str_slice.py(13, 0): ❓ unknown - assert(…)
+test_str_slice.py(15, 7): ❓ unknown - precondition
+test_str_slice.py(15, 0): ❓ unknown - assert(…)
+DETAIL: 2 passed, 0 failed, 14 inconclusive
+RESULT: Inconclusive
