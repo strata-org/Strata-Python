@@ -7,7 +7,7 @@ module
 
 meta import Strata.SimpleAPI
 meta import StrataPython.PySpecPipeline
-meta import Strata.Languages.Laurel.Resolution
+meta import StrataLaurel.Implementation.Resolution
 meta import Strata.Transform.ProcedureInlining
 meta import StrataPython.PyFactory
 meta import StrataPythonTest.Util.Python

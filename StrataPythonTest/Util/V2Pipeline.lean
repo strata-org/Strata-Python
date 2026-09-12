@@ -8,7 +8,7 @@ module
 public meta import Strata.SimpleAPI
 public meta import StrataPython.PySpecPipeline
 public meta import StrataPython.Resolution
-public meta import Strata.Languages.Laurel.Resolution
+public meta import StrataLaurel.Implementation.Resolution
 public meta import Strata.Transform.ProcedureInlining
 public meta import StrataPython.PyFactory
 public meta import StrataPythonTest.Util.Python
@@ -93,14 +93,18 @@ public def verifyCore (coreProgram : Core.Program) (userSources : List String :=
   let options : Core.VerifyOptions :=
     { Core.VerifyOptions.default with
       stopOnFirstError := false, verbose := .quiet, solver := "z3",
-      checkMode := .bugFinding, checkLevel := .full }
-  match ← Strata.Core.verifyProgram coreProgram options
-      (moreFns := StrataPython.RuntimeFactory)
-      (proceduresToVerify := some entryPoints)
-      (externalPhases := [Strata.frontEndPhase])
-      (prefixPhases := inlinePhases) |>.toBaseIO with
-  | .ok results => return .ok results
-  | .error msg => return .error (toString msg)
+      checkMode := .bugFinding, checkLevel := .full,
+      proceduresToVerify := some entryPoints }
+  match StrataPython.Pipeline.buildVerificationPipeline options inlinePhases with
+  | .error e =>
+    return .error s!"Cannot assemble the verification pipeline for this test: {e}"
+  | .ok pipeline =>
+    match ← Strata.Core.verifyProgram coreProgram options
+        (moreFns := StrataPython.RuntimeFactory)
+        (externalPhases := [Strata.frontEndPhase])
+        (pipeline := some pipeline) |>.toBaseIO with
+    | .ok results => return .ok results
+    | .error msg => return .error (toString msg)
 
 public def runAndVerify (pythonCmd : System.FilePath) (tmpDir : System.FilePath)
     (scriptName : String) (pyspecModules : Array String := #[])
