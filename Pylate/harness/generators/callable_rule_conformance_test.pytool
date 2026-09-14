@@ -1,0 +1,303 @@
+#!/usr/bin/env python3
+"""Structural and CPython regression checks for the callable-rule corpus."""
+
+from __future__ import annotations
+
+import collections
+import json
+import os
+import pathlib
+import re
+import subprocess
+import sys
+import tempfile
+import unittest
+
+
+HERE = pathlib.Path(__file__).resolve().parent
+ROOT = HERE.parent
+LEAN_ROOT = ROOT / "pyresid-lean"
+MATRIX = HERE / "callable_rule_scenarios.json"
+EVIDENCE = HERE / "cpython_callable_expected.json"
+BUILDER = HERE / "callable_rule_build_corpus.pytool"
+PROBE = HERE / "cpython_callable_probe.pytool"
+CATALOG = LEAN_ROOT / "RULE_REVIEW_CATALOG.md"
+
+EXPECTED_FAMILY_COUNTS = {
+    "list": 11,
+    "set": 17,
+    "tuple": 2,
+    "range": 2,
+    "dict": 11,
+    "str": 47,
+    "gen": 3,
+    "builtin": 12,
+}
+EXPECTED_DIMENSIONS = {
+    "inventory",
+    "normal",
+    "invalid",
+    "mixed_abstract",
+    "hook_effect",
+    "mutation_phase",
+    "alias_emptiness",
+    "cpython_evidence",
+}
+
+
+def load(path: pathlib.Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def command_env() -> dict[str, str]:
+    env = dict(os.environ)
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    return env
+
+
+def compiled_rule_keys() -> set[str]:
+    """Ask Lean for keys after compileRules validation and duplicate removal."""
+    source = """
+import PyResid.Python.RuleBuiltinsV2
+
+open PyResid
+open PyResid.RuleDriven.V2
+
+def printRuleKeys : List (RuleKey × CallableRule) → IO Unit
+  | [] => pure ()
+  | (key, _) :: rest => do
+      IO.println s!"RULEKEY:{key.render}"
+      printRuleKeys rest
+
+#eval printRuleKeys compiledBuiltinRules.entries
+"""
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        suffix=".lean",
+        prefix="callable_rule_inventory_",
+        encoding="utf-8",
+        delete=False,
+    ) as stream:
+        stream.write(source)
+        path = pathlib.Path(stream.name)
+    try:
+        completed = subprocess.run(
+            ["lake", "env", "lean", str(path)],
+            cwd=LEAN_ROOT,
+            env=command_env(),
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+    finally:
+        path.unlink(missing_ok=True)
+    if completed.returncode != 0:
+        raise AssertionError(
+            "could not extract compiled RuleKeys:\n"
+            + (completed.stderr or completed.stdout)
+        )
+    return {
+        line.removeprefix("RULEKEY:")
+        for line in completed.stdout.splitlines()
+        if line.startswith("RULEKEY:")
+    }
+
+
+def catalog_exception_classes() -> set[str]:
+    text = CATALOG.read_text(encoding="utf-8")
+    return set(
+        re.findall(
+            r"`([A-Za-z_][A-Za-z0-9_]*(?:Error|Exception|Iteration))`",
+            text,
+        )
+    )
+
+
+class CallableRuleCorpusTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.matrix = load(MATRIX)
+        cls.evidence = load(EVIDENCE)
+        cls.inventory = {row["key"]: row for row in cls.matrix["inventory"]}
+        cls.scenarios = {row["id"]: row for row in cls.matrix["scenarios"]}
+
+    def test_generated_matrix_is_current(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="callable_rule_matrix_") as tmp:
+            generated = pathlib.Path(tmp) / "matrix.json"
+            completed = subprocess.run(
+                [sys.executable, str(BUILDER), "--output", str(generated)],
+                cwd=ROOT,
+                env=command_env(),
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            self.assertEqual(
+                generated.read_bytes(),
+                MATRIX.read_bytes(),
+                "callable_rule_scenarios.json is stale",
+            )
+
+    def test_inventory_matches_compiled_rules(self) -> None:
+        actual = compiled_rule_keys()
+        self.assertEqual(len(actual), 105)
+        self.assertEqual(actual, set(self.inventory))
+
+    def test_inventory_family_counts_and_opaque_rows(self) -> None:
+        counts = collections.Counter(
+            row["family"] for row in self.inventory.values()
+        )
+        self.assertEqual(dict(counts), EXPECTED_FAMILY_COUNTS)
+        opaque = {
+            key
+            for key, row in self.inventory.items()
+            if row["formerly_opaque"]
+        }
+        self.assertEqual(len(opaque), 13)
+        normal_rules = {
+            row["rule_key"]
+            for row in self.scenarios.values()
+            if "normal" in row["categories"]
+        }
+        self.assertLessEqual(opaque, normal_rules)
+
+    def test_every_rule_has_exactly_one_normal_cpython_witness(self) -> None:
+        counts = collections.Counter(
+            row["rule_key"]
+            for row in self.scenarios.values()
+            if "normal" in row["categories"] and "execution" in row
+        )
+        self.assertEqual(set(counts), set(self.inventory))
+        self.assertTrue(all(count == 1 for count in counts.values()))
+
+    def test_requested_dimensions_are_distinct(self) -> None:
+        self.assertEqual(set(self.matrix["dimensions"]), EXPECTED_DIMENSIONS)
+        observed = {
+            category
+            for row in self.scenarios.values()
+            for category in row["categories"]
+        }
+        self.assertEqual(observed, EXPECTED_DIMENSIONS)
+        coverage_pairs = {
+            (row["rule_key"], row["dimension"])
+            for row in self.matrix["coverage"]
+        }
+        self.assertEqual(
+            len(coverage_pairs),
+            len(self.inventory) * len(EXPECTED_DIMENSIONS),
+        )
+
+    def test_every_catalog_exception_class_has_cpython_evidence(self) -> None:
+        declared = set(self.matrix["catalog_exception_classes"])
+        self.assertEqual(declared, catalog_exception_classes())
+        observed = {
+            row["expect"]["outcome"]["type"].removeprefix("builtins.")
+            for row in self.scenarios.values()
+            if "execution" in row
+            and row["expect"]["outcome"]["kind"] == "raise"
+        }
+        self.assertLessEqual(declared, observed)
+
+    def test_mixed_abstract_rows_have_distinct_concrete_outcomes(self) -> None:
+        for row in self.scenarios.values():
+            if "mixed_abstract" not in row["categories"]:
+                continue
+            self.assertNotIn("execution", row)
+            self.assertGreaterEqual(len(row["witnesses"]), 2)
+            witnesses = [self.scenarios[sid] for sid in row["witnesses"]]
+            self.assertTrue(all("execution" in witness for witness in witnesses))
+            self.assertTrue(
+                all(witness["rule_key"] == row["rule_key"]
+                    for witness in witnesses)
+            )
+            concrete = {
+                f"{witness['expect']['outcome']['kind']}:"
+                f"{witness['expect']['outcome']['type']}"
+                for witness in witnesses
+            }
+            self.assertEqual(
+                sorted(concrete), row["expect"]["abstract_outcomes"]
+            )
+
+    def test_evidence_has_full_state_for_every_concrete_scenario(self) -> None:
+        results = self.evidence["results"]
+        self.assertEqual(set(results), set(self.scenarios))
+        for sid, row in self.scenarios.items():
+            result = results[sid]
+            if "execution" not in row:
+                self.assertEqual(result["kind"], "abstract_witness_join")
+                continue
+            self.assertIn("outcome", result)
+            self.assertIn("pre_state", result)
+            self.assertIn("post_state", result)
+            self.assertIn("events", result)
+            self.assertIn("changed_roots", result)
+            self.assertIn("alias_groups_after", result)
+
+    def test_cpython_evidence_regression(self) -> None:
+        completed = subprocess.run(
+            [
+                sys.executable,
+                str(PROBE),
+                "--matrix",
+                str(MATRIX),
+                "--check-evidence",
+                str(EVIDENCE),
+            ],
+            cwd=ROOT,
+            env=command_env(),
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        self.assertEqual(
+            completed.returncode,
+            0,
+            (completed.stderr or completed.stdout),
+        )
+
+
+def print_summary() -> None:
+    matrix = load(MATRIX)
+    by_category = collections.Counter(
+        category
+        for row in matrix["scenarios"]
+        for category in row["categories"]
+    )
+    by_status = collections.Counter(
+        row["status"] for row in matrix["coverage"]
+    )
+    covered_by_dimension = collections.Counter(
+        row["dimension"]
+        for row in matrix["coverage"]
+        if row["status"] == "covered"
+    )
+    print(
+        "\ncallable-rule corpus: "
+        f"{len(matrix['inventory'])} keys, "
+        f"{len(matrix['scenarios'])} scenarios"
+    )
+    print(
+        "scenario dimensions: "
+        + ", ".join(
+            f"{name}={by_category[name]}" for name in matrix["dimensions"]
+        )
+    )
+    print(
+        "coverage cells: "
+        + ", ".join(f"{name}={count}" for name, count in sorted(by_status.items()))
+    )
+    print(
+        "covered RuleKeys by dimension: "
+        + ", ".join(
+            f"{name}={covered_by_dimension[name]}"
+            for name in matrix["dimensions"]
+        )
+    )
+
+
+if __name__ == "__main__":
+    program = unittest.main(exit=False, verbosity=2)
+    print_summary()
+    raise SystemExit(0 if program.result.wasSuccessful() else 1)

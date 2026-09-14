@@ -1,0 +1,15 @@
+{
+  "note": "Scenarios whose CPython witness cannot be written in the admitted fragment. Each names the admission rule that excludes it; none is an analyzer gap.",
+  "skip": {
+    "dict_get_hash_hook_raises_after_effect": "hash-eq-contract: the corpus class defines __hash__ without __eq__, which the launch policy rejects",
+    "list_count_hook_memory_error": "hash-eq-contract, and MemoryError is excluded by the resource-exhaustion policy",
+    "list_remove_equality_hook_raises": "hash-eq-contract: the corpus class defines __eq__ without __hash__",
+    "set_add_hash_hook_raises_after_effect": "hash-eq-contract: the corpus class defines __hash__ without __eq__",
+    "tuple_count_equality_hook_raises": "hash-eq-contract: the corpus class defines __eq__ without __hash__",
+    "gen_close_normal": "yield in value position is not admitted; the sent value is not modeled",
+    "gen_send_normal": "yield in value position is not admitted; the sent value is not modeled",
+    "gen_throw_normal": "yield in value position is not admitted; the sent value is not modeled",
+    "str_format_missing_attribute": "unmodeled-scalar-constructor: runtime use of a builtin type object",
+    "str_translate_invalid_replacement": "unmodeled-scalar-constructor: runtime use of a builtin type object"
+  }
+}

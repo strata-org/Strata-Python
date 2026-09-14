@@ -1,0 +1,4167 @@
+{
+ "admission/bad_subset.py": {
+  "rules": [
+   "class-body-stmt",
+   "global-stmt",
+   "hash-eq-contract",
+   "hook-override",
+   "import",
+   "lambda",
+   "metaclass-keyword",
+   "multi-generator-comprehension",
+   "nested-function",
+   "starred-arg",
+   "starred-arg",
+   "unsupported-node",
+   "with-stmt"
+  ],
+  "status": "rejected"
+ },
+ "admission/gm_after_first.py": {
+  "rules": [
+   "banned-builtin",
+   "import",
+   "unsupported-node",
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/gm_both_branches.py": {
+  "rules": [
+   "import",
+   "lambda"
+  ],
+  "status": "rejected"
+ },
+ "admission/gm_class_soup.py": {
+  "rules": [
+   "async-construct",
+   "class-body-stmt",
+   "hook-override"
+  ],
+  "status": "rejected"
+ },
+ "admission/gm_lambda_holding_eval.py": {
+  "rules": [
+   "lambda"
+  ],
+  "status": "rejected"
+ },
+ "admission/gm_nested_in_rejected.py": {
+  "rules": [
+   "banned-builtin",
+   "nested-function",
+   "shadowed-builtin"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_as_def.py": {
+  "rules": [
+   "async-construct"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_as_inner.py": {
+  "rules": [
+   "async-construct"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_as_method.py": {
+  "rules": [
+   "async-construct"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_bb_getattr.py": {
+  "rules": [
+   "banned-builtin"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_bb_getattr_func.py": {
+  "rules": [
+   "banned-builtin"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_bb_globals.py": {
+  "rules": [
+   "banned-builtin"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_bb_super.py": {
+  "rules": [
+   "banned-builtin"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_bb_type.py": {
+  "rules": [
+   "banned-builtin"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_bb_vars.py": {
+  "rules": [
+   "banned-builtin"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_cb_ann_nonname.py": {
+  "rules": [
+   "class-body-stmt"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_cb_expr.py": {
+  "rules": [
+   "class-body-stmt"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_cb_field_default.py": {
+  "rules": [
+   "class-body-stmt"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_cb_stmt.py": {
+  "rules": [
+   "class-body-stmt"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_cb_td_method.py": {
+  "rules": [
+   "class-body-stmt"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_cd_dataclass_kw.py": {
+  "rules": [
+   "class-decorator"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_cd_expr.py": {
+  "rules": [
+   "class-decorator"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_cd_nondataclass.py": {
+  "rules": [
+   "class-decorator"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_he_eq_only.py": {
+  "rules": [
+   "hash-eq-contract"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_he_hash_only.py": {
+  "rules": [
+   "hash-eq-contract"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_ho_init_subclass.py": {
+  "rules": [
+   "hook-override"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_ho_setattr_hook.py": {
+  "rules": [
+   "hook-override"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_im_dataclasses_field.py": {
+  "rules": [
+   "import"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_im_from.py": {
+  "rules": [
+   "import"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_im_plain.py": {
+  "rules": [
+   "import"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_rd_iadd.py": {
+  "rules": [
+   "reflected-dunder"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_sh_assign.py": {
+  "rules": [
+   "shadowed-builtin"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_sh_assign_func.py": {
+  "rules": [
+   "shadowed-builtin"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_sh_assign_method.py": {
+  "rules": [
+   "shadowed-builtin"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_sh_class.py": {
+  "rules": [
+   "shadowed-builtin"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_sh_comp_target.py": {
+  "rules": [
+   "shadowed-builtin"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_sh_def.py": {
+  "rules": [
+   "shadowed-builtin"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_sh_handler.py": {
+  "rules": [
+   "shadowed-builtin"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_sh_param.py": {
+  "rules": [
+   "shadowed-builtin"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_st_call_kwstar.py": {
+  "rules": [
+   "starred-arg"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_st_call_star.py": {
+  "rules": [
+   "starred-arg"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_st_def_kwstar.py": {
+  "rules": [
+   "starred-arg"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_st_def_star.py": {
+  "rules": [
+   "starred-arg"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_st_dict_splat.py": {
+  "rules": [
+   "starred-arg"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_st_expr_star.py": {
+  "rules": [
+   "starred-arg"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_st_target_star.py": {
+  "rules": [
+   "starred-arg"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_uf_bare.py": {
+  "rules": [
+   "unfrozen-dataclass"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_uf_false.py": {
+  "rules": [
+   "unfrozen-dataclass"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_un_augop_shift.py": {
+  "rules": [
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_un_binop_matmul.py": {
+  "rules": [
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_un_binop_matmul_func.py": {
+  "rules": [
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_un_comp_target_tuple.py": {
+  "rules": [
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_un_const_bytes.py": {
+  "rules": [
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_un_const_bytes_func.py": {
+  "rules": [
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_un_const_complex.py": {
+  "rules": [
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_un_exceptstar.py": {
+  "rules": [
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_un_expr_yield_expr.py": {
+  "rules": [
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_un_kwonly.py": {
+  "rules": [
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_un_raise_from.py": {
+  "rules": [
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_un_raise_nonname.py": {
+  "rules": [
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_un_slice.py": {
+  "rules": [
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_un_slice_func.py": {
+  "rules": [
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_un_target_list.py": {
+  "rules": [
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/gr_un_typealias.py": {
+  "rules": [
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/gt_aug_ok.py": {
+  "rules": [
+   "unsupported-node",
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_async.py": {
+  "rules": [
+   "async-construct"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_banned_builtin.py": {
+  "rules": [
+   "banned-builtin",
+   "banned-builtin",
+   "banned-builtin",
+   "banned-builtin"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_class_body_stmt.py": {
+  "rules": [
+   "class-body-stmt",
+   "class-body-stmt",
+   "class-body-stmt"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_class_decorator.py": {
+  "rules": [
+   "class-decorator"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_duplicate_class.py": {
+  "rules": [
+   "duplicate-class"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_except_tuple.py": {
+  "rules": [
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_field_default.py": {
+  "rules": [
+   "class-body-stmt"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_function_decorator.py": {
+  "rules": [
+   "function-decorator"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_global.py": {
+  "rules": [
+   "global-stmt"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_handler_name_collision.py": {
+  "rules": [
+   "handler-name-collision"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_hash_eq.py": {
+  "rules": [
+   "hash-eq-contract",
+   "hash-eq-contract"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_hook_override.py": {
+  "rules": [
+   "hook-override",
+   "hook-override",
+   "hook-override",
+   "hook-override"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_identity_comparison.py": {
+  "rules": [
+   "identity-comparison",
+   "identity-comparison",
+   "identity-comparison"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_import.py": {
+  "rules": [
+   "import",
+   "import",
+   "import",
+   "import"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_import_star.py": {
+  "rules": [
+   "import-star"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_invalid_c3.py": {
+  "rules": [
+   "invalid-mro"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_lambda.py": {
+  "rules": [
+   "lambda"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_match.py": {
+  "rules": [
+   "match-stmt"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_metaclass.py": {
+  "rules": [
+   "metaclass-keyword"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_multigen_comp.py": {
+  "rules": [
+   "multi-generator-comprehension"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_nested_class.py": {
+  "rules": [
+   "nested-class"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_nested_function.py": {
+  "rules": [
+   "nested-function"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_non_exception_classes.py": {
+  "rules": [
+   "non-exception-class",
+   "non-exception-class",
+   "non-exception-class",
+   "non-exception-class"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_nonlocal.py": {
+  "rules": [
+   "nested-function",
+   "nonlocal-stmt"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_nonlocal_delete.py": {
+  "rules": [
+   "shape-mutation",
+   "shape-mutation"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_nonstatic_base.py": {
+  "rules": [
+   "non-static-base"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_raise_from.py": {
+  "rules": [
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_realworld.py": {
+  "rules": [
+   "banned-builtin",
+   "banned-builtin",
+   "function-decorator",
+   "import",
+   "import",
+   "lambda",
+   "shadowed-builtin",
+   "with-stmt"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_recursion.py": {
+  "rules": [
+   "recursive-call",
+   "recursive-call",
+   "recursive-call"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_reflected_dunder.py": {
+  "rules": [
+   "reflected-dunder"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_scalar_constructors.py": {
+  "rules": [
+   "unmodeled-scalar-constructor",
+   "unmodeled-scalar-constructor",
+   "unmodeled-scalar-constructor",
+   "unmodeled-scalar-constructor",
+   "unmodeled-scalar-constructor",
+   "unmodeled-scalar-constructor"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_shadowed_builtin.py": {
+  "rules": [
+   "shadowed-builtin",
+   "shadowed-builtin",
+   "shadowed-builtin",
+   "shadowed-builtin"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_shape_store_class_attr.py": {
+  "rules": [
+   "shape-store"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_shape_store_dict.py": {
+  "rules": [
+   "shape-store"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_shape_store_primitive.py": {
+  "rules": [
+   "shape-store"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_slots_mismatch.py": {
+  "rules": [
+   "slots-mismatch"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_starred.py": {
+  "rules": [
+   "starred-arg",
+   "starred-arg",
+   "starred-arg",
+   "starred-arg"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_stub_without_return.py": {
+  "rules": [
+   "stub-without-return-annotation"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_super_builtin_base.py": {
+  "rules": [
+   "super-builtin-base"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_super_builtin_via_subclass.py": {
+  "rules": [
+   "super-builtin-base"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_super_first_param.py": {
+  "rules": [
+   "super-form"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_super_outside_method.py": {
+  "rules": [
+   "banned-builtin",
+   "super-form"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_super_two_arg.py": {
+  "rules": [
+   "super-form"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_type_params.py": {
+  "rules": [
+   "unsupported-node",
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_unbound_base.py": {
+  "rules": [
+   "unbound-base"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_unfrozen_dataclass.py": {
+  "rules": [
+   "class-decorator",
+   "unfrozen-dataclass",
+   "unfrozen-dataclass"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_unsupported_base.py": {
+  "rules": [
+   "unsupported-base"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_unsupported_ops.py": {
+  "rules": [
+   "unsupported-node",
+   "unsupported-node",
+   "unsupported-node",
+   "unsupported-node",
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_walrus.py": {
+  "rules": [
+   "walrus"
+  ],
+  "status": "rejected"
+ },
+ "admission/reject_with.py": {
+  "rules": [
+   "with-stmt"
+  ],
+  "status": "rejected"
+ },
+ "admission/t5_typed.py": {
+  "rules": [
+   "unfrozen-dataclass"
+  ],
+  "status": "rejected"
+ },
+ "admission/t6_handler.py": {
+  "rules": [
+   "handler-name-collision",
+   "handler-name-collision"
+  ],
+  "status": "rejected"
+ },
+ "admission/t9_dunder.py": {
+  "rules": [
+   "hash-eq-contract"
+  ],
+  "status": "rejected"
+ },
+ "baseline/baseline_assignment_target_order.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 3,
+   "status": "accepted"
+  }
+ },
+ "baseline/baseline_builtin_protocol.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 3,
+   "devirt": 3,
+   "policy": "audit",
+   "sites": 6,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 3,
+   "devirt": 3,
+   "policy": "eafp",
+   "sites": 6,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 3,
+   "devirt": 3,
+   "policy": "strict",
+   "sites": 6,
+   "status": "accepted"
+  }
+ },
+ "baseline/baseline_callee_order.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 8,
+   "policy": "audit",
+   "sites": 8,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 8,
+   "policy": "eafp",
+   "sites": 8,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 8,
+   "policy": "strict",
+   "sites": 8,
+   "status": "accepted"
+  }
+ },
+ "baseline/baseline_comparison_protocol.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "baseline/baseline_comprehension_fixpoint.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 28,
+   "policy": "audit",
+   "sites": 28,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 28,
+   "policy": "eafp",
+   "sites": 28,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 28,
+   "policy": "strict",
+   "sites": 28,
+   "status": "accepted"
+  }
+ },
+ "baseline/baseline_dict_literal_order.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 3,
+   "status": "accepted"
+  }
+ },
+ "baseline/baseline_exception_init.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "baseline/baseline_exceptional_assignment.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "audit",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "eafp",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "strict",
+   "sites": 1,
+   "status": "accepted"
+  }
+ },
+ "baseline/baseline_genexpr_kind.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 0,
+   "policy": "audit",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 0,
+   "policy": "eafp",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 0,
+   "policy": "strict",
+   "sites": 1,
+   "status": "accepted"
+  }
+ },
+ "baseline/baseline_init_failure.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "baseline/baseline_loop_fixpoint.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "baseline/baseline_membership_protocol.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "baseline/baseline_nested_annotations.py": {
+  "audit": {
+   "aborts": 4,
+   "deferred": 0,
+   "devirt": 5,
+   "policy": "audit",
+   "sites": 7,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 5,
+   "deferred": 0,
+   "devirt": 6,
+   "policy": "eafp",
+   "sites": 7,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 6,
+   "deferred": 0,
+   "devirt": 6,
+   "policy": "strict",
+   "sites": 7,
+   "status": "accepted"
+  }
+ },
+ "baseline/baseline_no_backward_flow.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 4,
+   "policy": "audit",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 4,
+   "policy": "eafp",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 4,
+   "policy": "strict",
+   "sites": 4,
+   "status": "accepted"
+  }
+ },
+ "baseline/baseline_not_protocol.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "baseline/baseline_string_protocol.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 4,
+   "devirt": 4,
+   "policy": "audit",
+   "sites": 8,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 4,
+   "devirt": 4,
+   "policy": "eafp",
+   "sites": 8,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 4,
+   "devirt": 4,
+   "policy": "strict",
+   "sites": 8,
+   "status": "accepted"
+  }
+ },
+ "baseline/baseline_try_else_escape.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "audit",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "eafp",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "strict",
+   "sites": 1,
+   "status": "accepted"
+  }
+ },
+ "baseline/baseline_unbound_reads.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "audit",
+   "sites": 5,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "eafp",
+   "sites": 5,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "strict",
+   "sites": 5,
+   "status": "accepted"
+  }
+ },
+ "defects/corr_flip_bug.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 6,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 4,
+   "policy": "eafp",
+   "sites": 6,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 4,
+   "policy": "strict",
+   "sites": 6,
+   "status": "accepted"
+  }
+ },
+ "defects/corr_flip_ok.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "audit",
+   "sites": 7,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 5,
+   "policy": "eafp",
+   "sites": 7,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 5,
+   "policy": "strict",
+   "sites": 7,
+   "status": "accepted"
+  }
+ },
+ "defects/corr_isinstance.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 6,
+   "policy": "audit",
+   "sites": 6,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 6,
+   "policy": "eafp",
+   "sites": 6,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 6,
+   "policy": "strict",
+   "sites": 6,
+   "status": "accepted"
+  }
+ },
+ "defects/defects.py": {
+  "audit": {
+   "aborts": 1,
+   "deferred": 7,
+   "devirt": 38,
+   "policy": "audit",
+   "sites": 54,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 7,
+   "deferred": 7,
+   "devirt": 39,
+   "policy": "eafp",
+   "sites": 54,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 12,
+   "deferred": 7,
+   "devirt": 39,
+   "policy": "strict",
+   "sites": 54,
+   "status": "accepted"
+  }
+ },
+ "defects/inherited_field_uninitialized.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "audit",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "eafp",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "strict",
+   "sites": 1,
+   "status": "accepted"
+  }
+ },
+ "defects/mb_unbound_frozen.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "audit",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "eafp",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "strict",
+   "sites": 1,
+   "status": "accepted"
+  }
+ },
+ "defects/mb_wrong_types.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "defects/slots_shape_stores.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 3,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 3,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "defects/soundness_heap_dispatch.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 17,
+   "policy": "audit",
+   "sites": 18,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 17,
+   "policy": "eafp",
+   "sites": 18,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 17,
+   "policy": "strict",
+   "sites": 18,
+   "status": "accepted"
+  }
+ },
+ "generated/fuzz.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 604,
+   "policy": "audit",
+   "sites": 627,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 604,
+   "policy": "eafp",
+   "sites": 627,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 604,
+   "policy": "strict",
+   "sites": 627,
+   "status": "accepted"
+  }
+ },
+ "generated/matrix.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 4,
+   "devirt": 115,
+   "policy": "audit",
+   "sites": 127,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 2,
+   "deferred": 4,
+   "devirt": 115,
+   "policy": "eafp",
+   "sites": 127,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 5,
+   "deferred": 4,
+   "devirt": 115,
+   "policy": "strict",
+   "sites": 127,
+   "status": "accepted"
+  }
+ },
+ "generated/stress.py": {
+  "rules": [
+   "hash-eq-contract",
+   "unsupported-node",
+   "unsupported-node"
+  ],
+  "status": "rejected"
+ },
+ "pyhard/01_correlated_dispatch.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 4,
+   "status": "accepted"
+  }
+ },
+ "pyhard/02_nested_property_dispatch.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 6,
+   "policy": "audit",
+   "sites": 6,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 6,
+   "policy": "eafp",
+   "sites": 6,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 6,
+   "policy": "strict",
+   "sites": 6,
+   "status": "accepted"
+  }
+ },
+ "pyhard/03_double_dispatch.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 1,
+   "deferred": 1,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 1,
+   "deferred": 1,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 3,
+   "status": "accepted"
+  }
+ },
+ "pyhard/04_exception_hierarchy.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "pyhard/05_boundness_and_loops.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "audit",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "eafp",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "strict",
+   "sites": 3,
+   "status": "accepted"
+  }
+ },
+ "pyhard/06_typed_dict_shapes.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 4,
+   "policy": "audit",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 4,
+   "policy": "eafp",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 4,
+   "policy": "strict",
+   "sites": 4,
+   "status": "accepted"
+  }
+ },
+ "pyhard/07_recursive_container_types.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "audit",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 3,
+   "status": "accepted"
+  }
+ },
+ "pyhard/08_pure_comprehension.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 5,
+   "policy": "audit",
+   "sites": 5,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 5,
+   "policy": "eafp",
+   "sites": 5,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 5,
+   "policy": "strict",
+   "sites": 5,
+   "status": "accepted"
+  }
+ },
+ "pyhard/09_typed_dict_alias_presence.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "pyhard/10_builtin_binary_matrix.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 3,
+   "status": "accepted"
+  }
+ },
+ "pyhard/11_membership_protocols.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "audit",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "eafp",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "strict",
+   "sites": 3,
+   "status": "accepted"
+  }
+ },
+ "pyhard/12_inherited_mro_dispatch.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "pyhard/13_subscript_read_write.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "audit",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 3,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 3,
+   "status": "accepted"
+  }
+ },
+ "pyhard/14_chained_comparisons.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "audit",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "eafp",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "strict",
+   "sites": 3,
+   "status": "accepted"
+  }
+ },
+ "pyhard/15_short_circuit_values.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "pyhard/16_conditional_expression.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "eafp",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "strict",
+   "sites": 3,
+   "status": "accepted"
+  }
+ },
+ "pyhard/17_for_else_boundness.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "audit",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "eafp",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "strict",
+   "sites": 3,
+   "status": "accepted"
+  }
+ },
+ "pyhard/18_exception_routing.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "audit",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "eafp",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "strict",
+   "sites": 1,
+   "status": "accepted"
+  }
+ },
+ "pyhard/19_delete_and_rebind.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "audit",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "eafp",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "strict",
+   "sites": 0,
+   "status": "accepted"
+  }
+ },
+ "pyhard/20_frozen_dataclass_fields.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "pyhard/21_exception_target_lifetime.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "audit",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "eafp",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "strict",
+   "sites": 0,
+   "status": "accepted"
+  }
+ },
+ "pyhard/22_exceptional_assignment.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "audit",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "eafp",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "strict",
+   "sites": 3,
+   "status": "accepted"
+  }
+ },
+ "pyhard/23_exception_path_value_sets.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 4,
+   "policy": "audit",
+   "sites": 5,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 4,
+   "policy": "eafp",
+   "sites": 5,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 4,
+   "policy": "strict",
+   "sites": 5,
+   "status": "accepted"
+  }
+ },
+ "pyhard/24_alias_transitions.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 4,
+   "policy": "audit",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 4,
+   "policy": "eafp",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 4,
+   "policy": "strict",
+   "sites": 4,
+   "status": "accepted"
+  }
+ },
+ "pyhard/25_handler_loop_control.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "audit",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "eafp",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "strict",
+   "sites": 1,
+   "status": "accepted"
+  }
+ },
+ "pyhard/26_comprehension_failure_boundness.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "audit",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "eafp",
+   "sites": 3,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "strict",
+   "sites": 3,
+   "status": "accepted"
+  }
+ },
+ "pyhard/27_numeric_tower.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 1,
+   "policy": "audit",
+   "sites": 5,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 2,
+   "deferred": 1,
+   "devirt": 1,
+   "policy": "eafp",
+   "sites": 5,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 3,
+   "deferred": 1,
+   "devirt": 1,
+   "policy": "strict",
+   "sites": 5,
+   "status": "accepted"
+  }
+ },
+ "pyhard/28_versioned_predicates.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 4,
+   "devirt": 10,
+   "policy": "audit",
+   "sites": 14,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 4,
+   "devirt": 10,
+   "policy": "eafp",
+   "sites": 14,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 4,
+   "devirt": 10,
+   "policy": "strict",
+   "sites": 14,
+   "status": "accepted"
+  }
+ },
+ "pyhard/29_mixed_lookup_chain.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 5,
+   "policy": "audit",
+   "sites": 5,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 5,
+   "policy": "eafp",
+   "sites": 5,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 5,
+   "policy": "strict",
+   "sites": 5,
+   "status": "accepted"
+  }
+ },
+ "semantics/annotation_entailment.py": {
+  "audit": {
+   "aborts": 4,
+   "deferred": 2,
+   "devirt": 11,
+   "policy": "audit",
+   "sites": 14,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 4,
+   "deferred": 2,
+   "devirt": 11,
+   "policy": "eafp",
+   "sites": 14,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 5,
+   "deferred": 2,
+   "devirt": 12,
+   "policy": "strict",
+   "sites": 14,
+   "status": "accepted"
+  }
+ },
+ "semantics/binary_dispatch_soundness.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 43,
+   "policy": "audit",
+   "sites": 66,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 19,
+   "deferred": 1,
+   "devirt": 43,
+   "policy": "eafp",
+   "sites": 66,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 21,
+   "deferred": 1,
+   "devirt": 43,
+   "policy": "strict",
+   "sites": 66,
+   "status": "accepted"
+  }
+ },
+ "semantics/binary_protocol_effect_state.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 15,
+   "policy": "audit",
+   "sites": 20,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 16,
+   "policy": "eafp",
+   "sites": 20,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 16,
+   "policy": "strict",
+   "sites": 20,
+   "status": "accepted"
+  }
+ },
+ "semantics/builtin_surface_holes.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 16,
+   "policy": "audit",
+   "sites": 23,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 3,
+   "deferred": 1,
+   "devirt": 16,
+   "policy": "eafp",
+   "sites": 23,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 4,
+   "deferred": 1,
+   "devirt": 16,
+   "policy": "strict",
+   "sites": 23,
+   "status": "accepted"
+  }
+ },
+ "semantics/bytes_surface.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 4,
+   "policy": "audit",
+   "sites": 10,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 4,
+   "policy": "eafp",
+   "sites": 10,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 4,
+   "policy": "strict",
+   "sites": 10,
+   "status": "accepted"
+  }
+ },
+ "semantics/chain_demo.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 5,
+   "policy": "audit",
+   "sites": 5,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 5,
+   "policy": "eafp",
+   "sites": 5,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 5,
+   "policy": "strict",
+   "sites": 5,
+   "status": "accepted"
+  }
+ },
+ "semantics/dict_store_key_presence.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 4,
+   "status": "accepted"
+  }
+ },
+ "semantics/dict_update_keywords.py": {
+  "audit": {
+   "aborts": 4,
+   "deferred": 0,
+   "devirt": 14,
+   "policy": "audit",
+   "sites": 14,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 4,
+   "deferred": 0,
+   "devirt": 14,
+   "policy": "eafp",
+   "sites": 14,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 4,
+   "deferred": 0,
+   "devirt": 14,
+   "policy": "strict",
+   "sites": 14,
+   "status": "accepted"
+  }
+ },
+ "semantics/generator_close_cleanup.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 2,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 6,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 2,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 6,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 2,
+   "deferred": 2,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 6,
+   "status": "accepted"
+  }
+ },
+ "semantics/getitem_stop_signal.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 4,
+   "status": "accepted"
+  }
+ },
+ "semantics/heterogeneous_cell.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 4,
+   "policy": "audit",
+   "sites": 6,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 1,
+   "deferred": 1,
+   "devirt": 4,
+   "policy": "eafp",
+   "sites": 6,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 3,
+   "deferred": 1,
+   "devirt": 4,
+   "policy": "strict",
+   "sites": 6,
+   "status": "accepted"
+  }
+ },
+ "semantics/interface_contracts.py": {
+  "audit": {
+   "aborts": 3,
+   "deferred": 0,
+   "devirt": 6,
+   "policy": "audit",
+   "sites": 6,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 3,
+   "deferred": 0,
+   "devirt": 6,
+   "policy": "eafp",
+   "sites": 6,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 3,
+   "deferred": 0,
+   "devirt": 6,
+   "policy": "strict",
+   "sites": 6,
+   "status": "accepted"
+  }
+ },
+ "semantics/key_presence_precision.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 11,
+   "policy": "audit",
+   "sites": 14,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 11,
+   "policy": "eafp",
+   "sites": 14,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 3,
+   "deferred": 0,
+   "devirt": 11,
+   "policy": "strict",
+   "sites": 14,
+   "status": "accepted"
+  }
+ },
+ "semantics/policy_eafp.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 6,
+   "policy": "audit",
+   "sites": 8,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 6,
+   "policy": "eafp",
+   "sites": 8,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 6,
+   "policy": "strict",
+   "sites": 8,
+   "status": "accepted"
+  }
+ },
+ "semantics/policy_strict.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 6,
+   "policy": "audit",
+   "sites": 8,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 6,
+   "policy": "eafp",
+   "sites": 8,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 6,
+   "policy": "strict",
+   "sites": 8,
+   "status": "accepted"
+  }
+ },
+ "semantics/reject_delete.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "audit",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "eafp",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "strict",
+   "sites": 0,
+   "status": "accepted"
+  }
+ },
+ "semantics/rule_inventory.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 9,
+   "devirt": 101,
+   "policy": "audit",
+   "sites": 132,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 8,
+   "deferred": 9,
+   "devirt": 104,
+   "policy": "eafp",
+   "sites": 132,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 21,
+   "deferred": 9,
+   "devirt": 120,
+   "policy": "strict",
+   "sites": 132,
+   "status": "accepted"
+  }
+ },
+ "semantics/sequence_index_typing.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "audit",
+   "sites": 14,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 12,
+   "deferred": 0,
+   "devirt": 6,
+   "policy": "eafp",
+   "sites": 14,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 12,
+   "deferred": 0,
+   "devirt": 6,
+   "policy": "strict",
+   "sites": 14,
+   "status": "accepted"
+  }
+ },
+ "semantics/t1_recency.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 10,
+   "policy": "audit",
+   "sites": 11,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 11,
+   "policy": "eafp",
+   "sites": 11,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 11,
+   "policy": "strict",
+   "sites": 11,
+   "status": "accepted"
+  }
+ },
+ "semantics/t2_dispatch.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 4,
+   "devirt": 4,
+   "policy": "audit",
+   "sites": 10,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 1,
+   "deferred": 4,
+   "devirt": 5,
+   "policy": "eafp",
+   "sites": 10,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 1,
+   "deferred": 4,
+   "devirt": 5,
+   "policy": "strict",
+   "sites": 10,
+   "status": "accepted"
+  }
+ },
+ "semantics/t3_flow.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 7,
+   "policy": "audit",
+   "sites": 9,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 9,
+   "policy": "eafp",
+   "sites": 9,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 9,
+   "policy": "strict",
+   "sites": 9,
+   "status": "accepted"
+  }
+ },
+ "semantics/t4_comp.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 9,
+   "policy": "audit",
+   "sites": 10,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 10,
+   "policy": "eafp",
+   "sites": 10,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 10,
+   "policy": "strict",
+   "sites": 10,
+   "status": "accepted"
+  }
+ },
+ "semantics/t7_init.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 4,
+   "policy": "audit",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 4,
+   "policy": "eafp",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 4,
+   "policy": "strict",
+   "sites": 4,
+   "status": "accepted"
+  }
+ },
+ "semantics/t8_annotations.py": {
+  "audit": {
+   "aborts": 2,
+   "deferred": 3,
+   "devirt": 6,
+   "policy": "audit",
+   "sites": 9,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 2,
+   "deferred": 3,
+   "devirt": 6,
+   "policy": "eafp",
+   "sites": 9,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 2,
+   "deferred": 3,
+   "devirt": 6,
+   "policy": "strict",
+   "sites": 9,
+   "status": "accepted"
+  }
+ },
+ "semantics/td_demo.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "audit",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "eafp",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "strict",
+   "sites": 4,
+   "status": "accepted"
+  }
+ },
+ "semantics/wb_inventory.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 4,
+   "devirt": 6,
+   "policy": "audit",
+   "sites": 12,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 3,
+   "deferred": 4,
+   "devirt": 6,
+   "policy": "eafp",
+   "sites": 12,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 3,
+   "deferred": 4,
+   "devirt": 6,
+   "policy": "strict",
+   "sites": 12,
+   "status": "accepted"
+  }
+ },
+ "semantics/wb_shapes.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 4,
+   "devirt": 10,
+   "policy": "audit",
+   "sites": 14,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 4,
+   "devirt": 10,
+   "policy": "eafp",
+   "sites": 14,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 4,
+   "devirt": 10,
+   "policy": "strict",
+   "sites": 14,
+   "status": "accepted"
+  }
+ },
+ "syntax/gp_binop_matrix.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 91,
+   "policy": "audit",
+   "sites": 972,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 879,
+   "deferred": 0,
+   "devirt": 91,
+   "policy": "eafp",
+   "sites": 972,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 883,
+   "deferred": 0,
+   "devirt": 91,
+   "policy": "strict",
+   "sites": 972,
+   "status": "accepted"
+  }
+ },
+ "syntax/gp_builtin_calls.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 3,
+   "devirt": 9,
+   "policy": "audit",
+   "sites": 12,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 3,
+   "devirt": 9,
+   "policy": "eafp",
+   "sites": 12,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 3,
+   "devirt": 9,
+   "policy": "strict",
+   "sites": 12,
+   "status": "accepted"
+  }
+ },
+ "syntax/gp_methods.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 73,
+   "policy": "audit",
+   "sites": 81,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 3,
+   "deferred": 0,
+   "devirt": 73,
+   "policy": "eafp",
+   "sites": 81,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 12,
+   "deferred": 0,
+   "devirt": 81,
+   "policy": "strict",
+   "sites": 81,
+   "status": "accepted"
+  }
+ },
+ "syntax/gp_threeway.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 9,
+   "policy": "audit",
+   "sites": 14,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 5,
+   "deferred": 0,
+   "devirt": 9,
+   "policy": "eafp",
+   "sites": 14,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 5,
+   "deferred": 0,
+   "devirt": 9,
+   "policy": "strict",
+   "sites": 14,
+   "status": "accepted"
+  }
+ },
+ "syntax/gr_im_typing_any.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "audit",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "eafp",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "strict",
+   "sites": 0,
+   "status": "accepted"
+  }
+ },
+ "syntax/gr_rd_radd.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "audit",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "eafp",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "strict",
+   "sites": 0,
+   "status": "accepted"
+  }
+ },
+ "syntax/gr_un_binop_bitand.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "audit",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "eafp",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "strict",
+   "sites": 1,
+   "status": "accepted"
+  }
+ },
+ "syntax/gr_un_binop_shift.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "audit",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "eafp",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "strict",
+   "sites": 1,
+   "status": "accepted"
+  }
+ },
+ "syntax/gr_un_cmp_is.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "audit",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "eafp",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "strict",
+   "sites": 0,
+   "status": "accepted"
+  }
+ },
+ "syntax/gr_un_cmp_is_func.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "audit",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "eafp",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "strict",
+   "sites": 1,
+   "status": "accepted"
+  }
+ },
+ "syntax/gr_un_cmp_isnot.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "audit",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "eafp",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "strict",
+   "sites": 0,
+   "status": "accepted"
+  }
+ },
+ "syntax/gt_attr_named_list.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "audit",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "eafp",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "strict",
+   "sites": 1,
+   "status": "accepted"
+  }
+ },
+ "syntax/gt_bare_except.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "audit",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "eafp",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "strict",
+   "sites": 0,
+   "status": "accepted"
+  }
+ },
+ "syntax/gt_chained_cmp.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "syntax/gt_dictcomp.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "syntax/gt_docstrings.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "audit",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "eafp",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "strict",
+   "sites": 0,
+   "status": "accepted"
+  }
+ },
+ "syntax/gt_dunder_ok.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "audit",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "eafp",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "strict",
+   "sites": 1,
+   "status": "accepted"
+  }
+ },
+ "syntax/gt_eq_and_hash.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "audit",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "eafp",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "strict",
+   "sites": 0,
+   "status": "accepted"
+  }
+ },
+ "syntax/gt_except_baseexception.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "audit",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "eafp",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "strict",
+   "sites": 0,
+   "status": "accepted"
+  }
+ },
+ "syntax/gt_frozen_dataclass.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "audit",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "eafp",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "strict",
+   "sites": 0,
+   "status": "accepted"
+  }
+ },
+ "syntax/gt_fstring.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "audit",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "eafp",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "strict",
+   "sites": 1,
+   "status": "accepted"
+  }
+ },
+ "syntax/gt_genexp.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 1,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 1,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 1,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "syntax/gt_kwargs_at_call.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "syntax/gt_method_named_builtin.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "audit",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "eafp",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "strict",
+   "sites": 1,
+   "status": "accepted"
+  }
+ },
+ "syntax/gt_raise_name_call.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "syntax/gt_setcomp.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "syntax/gt_single_gen_comp.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "audit",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "eafp",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 1,
+   "policy": "strict",
+   "sites": 1,
+   "status": "accepted"
+  }
+ },
+ "syntax/gt_ternary.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 4,
+   "policy": "audit",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 4,
+   "policy": "eafp",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 4,
+   "policy": "strict",
+   "sites": 4,
+   "status": "accepted"
+  }
+ },
+ "syntax/gt_typing_whitelist.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "audit",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "eafp",
+   "sites": 0,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "strict",
+   "sites": 0,
+   "status": "accepted"
+  }
+ },
+ "syntax/gt_uadd_ok.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "syntax/gt_unary_invert_ok.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "syntax/ix_alias_strong.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 2,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 2,
+   "status": "accepted"
+  }
+ },
+ "syntax/ix_alloc_loop_try.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 7,
+   "policy": "audit",
+   "sites": 7,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 7,
+   "policy": "eafp",
+   "sites": 7,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 7,
+   "policy": "strict",
+   "sites": 7,
+   "status": "accepted"
+  }
+ },
+ "syntax/ix_corr_eafp.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "audit",
+   "sites": 6,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 4,
+   "policy": "eafp",
+   "sites": 6,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 4,
+   "policy": "strict",
+   "sites": 6,
+   "status": "accepted"
+  }
+ },
+ "syntax/ix_diamond_mro.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 3,
+   "policy": "audit",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 3,
+   "policy": "eafp",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 3,
+   "policy": "strict",
+   "sites": 4,
+   "status": "accepted"
+  }
+ },
+ "syntax/ix_except_hierarchy.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "audit",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "eafp",
+   "sites": 4,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 3,
+   "policy": "strict",
+   "sites": 4,
+   "status": "accepted"
+  }
+ },
+ "syntax/ix_finally_modes.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 6,
+   "policy": "audit",
+   "sites": 8,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 6,
+   "policy": "eafp",
+   "sites": 8,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 6,
+   "policy": "strict",
+   "sites": 8,
+   "status": "accepted"
+  }
+ },
+ "syntax/ix_gen_send.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 2,
+   "devirt": 2,
+   "policy": "audit",
+   "sites": 6,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 1,
+   "deferred": 2,
+   "devirt": 2,
+   "policy": "eafp",
+   "sites": 6,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 2,
+   "deferred": 2,
+   "devirt": 2,
+   "policy": "strict",
+   "sites": 6,
+   "status": "accepted"
+  }
+ },
+ "syntax/ix_havoc_narrow.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 5,
+   "policy": "audit",
+   "sites": 5,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 5,
+   "policy": "eafp",
+   "sites": 5,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 5,
+   "policy": "strict",
+   "sites": 5,
+   "status": "accepted"
+  }
+ },
+ "syntax/ix_inherited_field.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 25,
+   "policy": "audit",
+   "sites": 25,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 25,
+   "policy": "eafp",
+   "sites": 25,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 25,
+   "policy": "strict",
+   "sites": 25,
+   "status": "accepted"
+  }
+ },
+ "syntax/ix_slots_shape.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 13,
+   "policy": "audit",
+   "sites": 13,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 13,
+   "policy": "eafp",
+   "sites": 13,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 13,
+   "policy": "strict",
+   "sites": 13,
+   "status": "accepted"
+  }
+ },
+ "syntax/ix_super_dispatch.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 12,
+   "policy": "audit",
+   "sites": 13,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 12,
+   "policy": "eafp",
+   "sites": 13,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 0,
+   "deferred": 1,
+   "devirt": 12,
+   "policy": "strict",
+   "sites": 13,
+   "status": "accepted"
+  }
+ },
+ "syntax/ix_td_raise_eafp.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "audit",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "eafp",
+   "sites": 1,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 0,
+   "policy": "strict",
+   "sites": 1,
+   "status": "accepted"
+  }
+ },
+ "syntax/ops_demo.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 8,
+   "policy": "audit",
+   "sites": 10,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 1,
+   "deferred": 0,
+   "devirt": 9,
+   "policy": "eafp",
+   "sites": 10,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 2,
+   "deferred": 0,
+   "devirt": 10,
+   "policy": "strict",
+   "sites": 10,
+   "status": "accepted"
+  }
+ },
+ "syntax/unary_operators.py": {
+  "audit": {
+   "aborts": 0,
+   "deferred": 0,
+   "devirt": 8,
+   "policy": "audit",
+   "sites": 11,
+   "status": "accepted"
+  },
+  "eafp": {
+   "aborts": 3,
+   "deferred": 0,
+   "devirt": 8,
+   "policy": "eafp",
+   "sites": 11,
+   "status": "accepted"
+  },
+  "strict": {
+   "aborts": 3,
+   "deferred": 0,
+   "devirt": 8,
+   "policy": "strict",
+   "sites": 11,
+   "status": "accepted"
+  }
+ }
+}

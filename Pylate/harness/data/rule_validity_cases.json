@@ -1,0 +1,1110 @@
+{
+ "cases": [
+  {
+   "name": "normal",
+   "rule": "bytes.capitalize",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.capitalize()\n"
+  },
+  {
+   "name": "width",
+   "rule": "bytes.center",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.center(20)\n"
+  },
+  {
+   "name": "fill",
+   "rule": "bytes.center",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.center(20, \"-\".encode())\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.count",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.count(\"a\".encode())\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.decode",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.decode()\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.endswith",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.endswith(\"a\".encode())\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.expandtabs",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.expandtabs()\n"
+  },
+  {
+   "name": "present",
+   "rule": "bytes.find",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.find(\"A\".encode())\n"
+  },
+  {
+   "name": "absent",
+   "rule": "bytes.find",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.find(\"zz\".encode())\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.fromhex",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.fromhex(\"41\")\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.hex",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.hex()\n"
+  },
+  {
+   "name": "present",
+   "rule": "bytes.index",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.index(\"A\".encode())\n"
+  },
+  {
+   "name": "absent",
+   "rule": "bytes.index",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.index(\"zz\".encode())\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.isalnum",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.isalnum()\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.isalpha",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.isalpha()\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.isascii",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.isascii()\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.isdigit",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.isdigit()\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.islower",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.islower()\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.isspace",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.isspace()\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.istitle",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.istitle()\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.isupper",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.isupper()\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.join",
+   "source": "b = \"Alpha Beta\".encode()\nr = \"-\".encode().join([b, b])\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.ljust",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.ljust(20)\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.lower",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.lower()\n"
+  },
+  {
+   "name": "default",
+   "rule": "bytes.lstrip",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.lstrip()\n"
+  },
+  {
+   "name": "chars",
+   "rule": "bytes.lstrip",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.lstrip(\"Al\".encode())\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.maketrans",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.maketrans(\"a\".encode(), \"b\".encode())\n"
+  },
+  {
+   "name": "present",
+   "rule": "bytes.partition",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.partition(\" \".encode())\n"
+  },
+  {
+   "name": "absent",
+   "rule": "bytes.partition",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.partition(\"zz\".encode())\n"
+  },
+  {
+   "name": "empty_separator",
+   "rule": "bytes.partition",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.partition(\"\".encode())\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.removeprefix",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.removeprefix(\"Al\".encode())\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.removesuffix",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.removesuffix(\"ta\".encode())\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.replace",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.replace(\"a\".encode(), \"b\".encode())\n"
+  },
+  {
+   "name": "present",
+   "rule": "bytes.rfind",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.rfind(\"a\".encode())\n"
+  },
+  {
+   "name": "absent",
+   "rule": "bytes.rfind",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.rfind(\"zz\".encode())\n"
+  },
+  {
+   "name": "present",
+   "rule": "bytes.rindex",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.rindex(\"a\".encode())\n"
+  },
+  {
+   "name": "absent",
+   "rule": "bytes.rindex",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.rindex(\"zz\".encode())\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.rjust",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.rjust(20)\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.rpartition",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.rpartition(\" \".encode())\n"
+  },
+  {
+   "name": "empty_separator",
+   "rule": "bytes.rpartition",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.rpartition(\"\".encode())\n"
+  },
+  {
+   "name": "default",
+   "rule": "bytes.rsplit",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.rsplit()\n"
+  },
+  {
+   "name": "sep",
+   "rule": "bytes.rsplit",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.rsplit(\" \".encode())\n"
+  },
+  {
+   "name": "empty_separator",
+   "rule": "bytes.rsplit",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.rsplit(\"\".encode())\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.rstrip",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.rstrip()\n"
+  },
+  {
+   "name": "default",
+   "rule": "bytes.split",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.split()\n"
+  },
+  {
+   "name": "sep",
+   "rule": "bytes.split",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.split(\" \".encode())\n"
+  },
+  {
+   "name": "empty_separator",
+   "rule": "bytes.split",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.split(\"\".encode())\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.splitlines",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.splitlines()\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.startswith",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.startswith(\"A\".encode())\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.strip",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.strip()\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.swapcase",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.swapcase()\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.title",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.title()\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.translate",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.translate(b.maketrans(\"a\".encode(), \"b\".encode()))\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.upper",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.upper()\n"
+  },
+  {
+   "name": "normal",
+   "rule": "bytes.zfill",
+   "source": "b = \"Alpha Beta\".encode()\nr = b.zfill(20)\n"
+  },
+  {
+   "name": "admits_anything",
+   "rule": "ann:any",
+   "source": "from typing import Any\n\na: Any = 1\n"
+  },
+  {
+   "name": "int_holds",
+   "rule": "ann:atom",
+   "source": "a: int = 1\n"
+  },
+  {
+   "name": "str_holds",
+   "rule": "ann:atom",
+   "source": "a: str = \"x\"\n"
+  },
+  {
+   "name": "list_of_int",
+   "rule": "ann:generic",
+   "source": "xs: list[int] = [1, 2]\nv = xs[0]\n"
+  },
+  {
+   "name": "dict_of_str_int",
+   "rule": "ann:generic",
+   "source": "d: dict[str, int] = {\"a\": 1}\nv = d[\"a\"]\n"
+  },
+  {
+   "name": "holds",
+   "rule": "ann:literal",
+   "source": "from typing import Literal\n\na: Literal[\"x\"] = \"x\"\n"
+  },
+  {
+   "name": "absent_key_raises",
+   "rule": "ann:notRequired",
+   "source": "from typing import TypedDict, Required, NotRequired\n\nclass T(TypedDict):\n    a: Required[int]\n    b: NotRequired[str]\n\nt: T = {\"a\": 1}\nv = t[\"b\"]\n"
+  },
+  {
+   "name": "present_key_reads",
+   "rule": "ann:notRequired",
+   "source": "from typing import TypedDict, Required, NotRequired\n\nclass T(TypedDict):\n    a: Required[int]\n    b: NotRequired[str]\n\nt: T = {\"a\": 1, \"b\": \"s\"}\nv = t[\"b\"]\n"
+  },
+  {
+   "min_python": [
+    3,
+    13
+   ],
+   "name": "reads",
+   "rule": "ann:readOnly",
+   "source": "from typing import TypedDict, ReadOnly\n\nclass T(TypedDict):\n    a: ReadOnly[int]\n\nt: T = {\"a\": 1}\nv = t[\"a\"]\n"
+  },
+  {
+   "name": "present",
+   "rule": "ann:required",
+   "source": "from typing import TypedDict, Required, NotRequired\n\nclass T(TypedDict):\n    a: Required[int]\n\nt: T = {\"a\": 1}\nv = t[\"a\"]\n"
+  },
+  {
+   "name": "takes_int",
+   "rule": "ann:union",
+   "source": "a: int | None = 1\n"
+  },
+  {
+   "name": "takes_none",
+   "rule": "ann:union",
+   "source": "a: int | None = None\n"
+  },
+  {
+   "name": "present",
+   "rule": "expr:attr",
+   "source": "class C:\n    def __init__(self):\n        self.x = 1\n\no = C()\nv = o.x\n"
+  },
+  {
+   "name": "absent",
+   "rule": "expr:attr",
+   "source": "class C:\n    def __init__(self):\n        self.x = 1\n\no = C()\nv = o.nosuch\n"
+  },
+  {
+   "name": "arithmetic",
+   "rule": "expr:binop",
+   "source": "i = 1 + 2\nd = 7 // 2\nm = 7 % 2\np = 2 ** 3\n"
+  },
+  {
+   "name": "true_divide_is_float",
+   "rule": "expr:binop",
+   "source": "f = 4 / 2\n"
+  },
+  {
+   "name": "str_concat",
+   "rule": "expr:binop",
+   "source": "s = \"a\" + \"b\"\nr = \"a\" * 3\n"
+  },
+  {
+   "name": "mixed_int_float",
+   "rule": "expr:binop",
+   "source": "v = 1 + 1.5\n"
+  },
+  {
+   "name": "zero_division",
+   "rule": "expr:binop",
+   "source": "v = 1 // 0\n"
+  },
+  {
+   "name": "str_plus_int",
+   "rule": "expr:binop",
+   "source": "v = \"a\" + 1\n"
+  },
+  {
+   "name": "truthy_left_yields_right",
+   "rule": "expr:boolAnd",
+   "source": "a = 1 and \"x\"\n"
+  },
+  {
+   "name": "falsy_left_yields_left",
+   "rule": "expr:boolAnd",
+   "source": "a = 0 and \"x\"\n"
+  },
+  {
+   "name": "falsy_left_yields_right",
+   "rule": "expr:boolOr",
+   "source": "a = 0 or \"x\"\n"
+  },
+  {
+   "name": "truthy_left_yields_left",
+   "rule": "expr:boolOr",
+   "source": "a = 1 or \"x\"\n"
+  },
+  {
+   "name": "builtin",
+   "rule": "expr:call",
+   "source": "n = len([1, 2])\ns = str(1)\n"
+  },
+  {
+   "name": "user",
+   "rule": "expr:call",
+   "source": "def f(a):\n    return a + 1\n\nv = f(1)\n"
+  },
+  {
+   "name": "wrong_arity",
+   "rule": "expr:call",
+   "source": "def f(a):\n    return a\n\nv = f()\n"
+  },
+  {
+   "name": "ordering",
+   "rule": "expr:cmp",
+   "source": "a = 1 < 2\nb = 2 <= 2\nc = 3 > 4\n"
+  },
+  {
+   "name": "chained",
+   "rule": "expr:cmp",
+   "source": "a = 1 < 2 < 3\nb = 1 < 0 < 3\n"
+  },
+  {
+   "name": "equality_across_types",
+   "rule": "expr:cmp",
+   "source": "a = \"a\" == 1\nb = None is None\n"
+  },
+  {
+   "name": "membership",
+   "rule": "expr:cmp",
+   "source": "a = 1 in [1, 2]\nb = 5 not in [1, 2]\n"
+  },
+  {
+   "name": "unorderable",
+   "rule": "expr:cmp",
+   "source": "v = \"a\" < 1\n"
+  },
+  {
+   "name": "each",
+   "rule": "expr:const",
+   "source": "i = 1\nf = 1.5\ns = \"x\"\nn = None\nt = True\nfa = False\n"
+  },
+  {
+   "name": "normal",
+   "rule": "expr:dictComp",
+   "source": "d = {i: str(i) for i in range(3)}\n"
+  },
+  {
+   "name": "mixed",
+   "rule": "expr:dictlit",
+   "source": "d = {\"a\": 1, \"b\": \"s\"}\nempty = {}\n"
+  },
+  {
+   "name": "interpolates",
+   "rule": "expr:fstr",
+   "source": "n = 1\ns = f\"n={n}\"\n"
+  },
+  {
+   "name": "lazy",
+   "rule": "expr:genComp",
+   "source": "g = (i for i in range(3))\nvals = list(g)\n"
+  },
+  {
+   "name": "takes_then",
+   "rule": "expr:ifexp",
+   "source": "a = 1 if 1 else \"x\"\n"
+  },
+  {
+   "name": "takes_else",
+   "rule": "expr:ifexp",
+   "source": "a = 1 if 0 else \"x\"\n"
+  },
+  {
+   "name": "normal",
+   "rule": "expr:listComp",
+   "source": "xs = [i + 1 for i in range(3)]\n"
+  },
+  {
+   "name": "filtered",
+   "rule": "expr:listComp",
+   "source": "xs = [i for i in range(5) if i > 2]\n"
+  },
+  {
+   "name": "mixed",
+   "rule": "expr:listlit",
+   "source": "xs = [1, \"a\"]\nempty = []\n"
+  },
+  {
+   "name": "read",
+   "rule": "expr:name",
+   "source": "a = 1\nb = a\n"
+  },
+  {
+   "name": "rebound",
+   "rule": "expr:name",
+   "source": "a = 1\na = \"x\"\nb = a\n"
+  },
+  {
+   "name": "each",
+   "rule": "expr:not",
+   "source": "a = not 0\nb = not [1]\nc = not None\n"
+  },
+  {
+   "name": "normal",
+   "rule": "expr:setComp",
+   "source": "s = {i for i in range(3)}\n"
+  },
+  {
+   "name": "normal",
+   "rule": "expr:setlit",
+   "source": "s = {1, 2}\n"
+  },
+  {
+   "name": "list_in_range",
+   "rule": "expr:subscr",
+   "source": "xs = [1, 2]\nv = xs[0]\n"
+  },
+  {
+   "name": "list_out_of_range",
+   "rule": "expr:subscr",
+   "source": "xs = [1, 2]\nv = xs[5]\n"
+  },
+  {
+   "name": "dict_present",
+   "rule": "expr:subscr",
+   "source": "d = {\"k\": 1}\nv = d[\"k\"]\n"
+  },
+  {
+   "name": "dict_absent",
+   "rule": "expr:subscr",
+   "source": "d = {\"k\": 1}\nv = d[\"other\"]\n"
+  },
+  {
+   "name": "str_index",
+   "rule": "expr:subscr",
+   "source": "s = \"ab\"\nv = s[0]\n"
+  },
+  {
+   "name": "tuple_index",
+   "rule": "expr:subscr",
+   "source": "t = (1, \"a\")\nv = t[1]\n"
+  },
+  {
+   "name": "wrong_index_type",
+   "rule": "expr:subscr",
+   "source": "t = (1, 2)\nv = t[\"k\"]\n"
+  },
+  {
+   "name": "mixed",
+   "rule": "expr:tuplelit",
+   "source": "t = (1, \"a\")\nempty = ()\n"
+  },
+  {
+   "name": "each",
+   "rule": "expr:unary",
+   "source": "a = -1\nb = +1\nc = ~1\nd = -1.5\n"
+  },
+  {
+   "name": "not_a_number",
+   "rule": "expr:unary",
+   "source": "v = -\"a\"\n"
+  },
+  {
+   "name": "values",
+   "rule": "expr:yield",
+   "source": "def g():\n    yield 1\n    yield 2\n\nvals = list(g())\n"
+  },
+  {
+   "name": "delegates",
+   "rule": "expr:yieldFrom",
+   "source": "def g():\n    yield from [1, 2]\n\nvals = list(g())\n"
+  },
+  {
+   "name": "with_value",
+   "rule": "stmt:annAssign",
+   "source": "a: int = 1\n"
+  },
+  {
+   "name": "bare_leaves_unbound",
+   "rule": "stmt:annAssign",
+   "source": "a: int\nb = 1\n"
+  },
+  {
+   "name": "holds",
+   "rule": "stmt:assert",
+   "source": "a = 1\nassert a\nv = 2\n"
+  },
+  {
+   "name": "fails",
+   "rule": "stmt:assert",
+   "source": "a = 0\nassert a\nv = 2\n"
+  },
+  {
+   "name": "chained",
+   "rule": "stmt:assign",
+   "source": "a = b = 1\n"
+  },
+  {
+   "name": "single",
+   "rule": "stmt:assign",
+   "source": "a = 1\n"
+  },
+  {
+   "name": "exits_loop",
+   "rule": "stmt:break",
+   "source": "t = 0\nfor i in range(5):\n    if i == 2:\n        break\n    t = t + i\n"
+  },
+  {
+   "name": "skips_else",
+   "rule": "stmt:break",
+   "source": "for i in range(5):\n    break\nelse:\n    done = 1\nafter = 1\n"
+  },
+  {
+   "name": "skips_rest",
+   "rule": "stmt:continue",
+   "source": "i = 0\nt = 0\nwhile i < 5:\n    i = i + 1\n    if i == 2:\n        continue\n    t = t + i\n"
+  },
+  {
+   "name": "name",
+   "rule": "stmt:del",
+   "source": "a = 1\nb = 2\ndel a\n"
+  },
+  {
+   "expect": "rejected",
+   "name": "dict_key_rejected",
+   "rule": "stmt:del",
+   "source": "d = {\"k\": 1}\ndel d[\"k\"]\n"
+  },
+  {
+   "name": "discards_value",
+   "rule": "stmt:exprS",
+   "source": "xs = [1]\nxs.append(2)\nn = len(xs)\n"
+  },
+  {
+   "name": "over_range",
+   "rule": "stmt:for",
+   "source": "t = 0\nfor i in range(3):\n    t = t + i\n"
+  },
+  {
+   "name": "over_list",
+   "rule": "stmt:for",
+   "source": "last = None\nfor x in [1, \"a\"]:\n    last = x\n"
+  },
+  {
+   "name": "empty_leaves_target_unbound",
+   "rule": "stmt:for",
+   "source": "for x in []:\n    v = x\nn = 0\n"
+  },
+  {
+   "name": "else_runs_without_break",
+   "rule": "stmt:for",
+   "source": "for i in range(2):\n    pass\nelse:\n    done = 1\n"
+  },
+  {
+   "name": "takes_else",
+   "rule": "stmt:if",
+   "source": "a = 0\nif a:\n    v = 1\nelse:\n    v = \"x\"\n"
+  },
+  {
+   "name": "takes_then",
+   "rule": "stmt:if",
+   "source": "a = 1\nif a:\n    v = 1\nelse:\n    v = \"x\"\n"
+  },
+  {
+   "name": "elif_chain",
+   "rule": "stmt:if",
+   "source": "n = 2\nif n == 1:\n    v = \"one\"\nelif n == 2:\n    v = 2\nelse:\n    v = None\n"
+  },
+  {
+   "name": "no_else_may_leave_unbound",
+   "rule": "stmt:if",
+   "source": "a = 0\nif a:\n    v = 1\nn = 0\n"
+  },
+  {
+   "name": "only",
+   "rule": "stmt:pass",
+   "source": "pass\na = 1\n"
+  },
+  {
+   "name": "caught",
+   "rule": "stmt:raise",
+   "source": "try:\n    raise ValueError(\"x\")\nexcept ValueError as e:\n    v = 1\n"
+  },
+  {
+   "name": "escapes",
+   "rule": "stmt:raise",
+   "source": "raise ValueError(\"x\")\n"
+  },
+  {
+   "name": "from_function",
+   "rule": "stmt:raise",
+   "source": "def f():\n    raise KeyError(\"k\")\n\nf()\n"
+  },
+  {
+   "name": "value",
+   "rule": "stmt:return",
+   "source": "def f():\n    return 1\n\nv = f()\n"
+  },
+  {
+   "name": "bare_returns_none",
+   "rule": "stmt:return",
+   "source": "def f():\n    return\n\nv = f()\n"
+  },
+  {
+   "name": "falls_off_end_returns_none",
+   "rule": "stmt:return",
+   "source": "def f():\n    a = 1\n\nv = f()\n"
+  },
+  {
+   "name": "from_branch",
+   "rule": "stmt:return",
+   "source": "def f(n):\n    if n:\n        return 1\n    return \"x\"\n\nv = f(0)\n"
+  },
+  {
+   "name": "else_on_normal",
+   "rule": "stmt:try",
+   "source": "try:\n    v = 1\nexcept ValueError as e:\n    v = 2\nelse:\n    w = 3\n"
+  },
+  {
+   "name": "handler_on_raise",
+   "rule": "stmt:try",
+   "source": "xs = [1]\ntry:\n    v = xs[5]\nexcept IndexError as e:\n    v = 0\n"
+  },
+  {
+   "name": "finally_after_normal",
+   "rule": "stmt:try",
+   "source": "try:\n    v = 1\nfinally:\n    f = 1\n"
+  },
+  {
+   "name": "handler_matches_base",
+   "rule": "stmt:try",
+   "source": "xs = [1]\ntry:\n    v = xs[5]\nexcept LookupError as e:\n    v = 0\n"
+  },
+  {
+   "name": "unmatched_escapes",
+   "rule": "stmt:try",
+   "source": "xs = [1]\ntry:\n    v = xs[5]\nexcept KeyError as e:\n    v = 0\n"
+  },
+  {
+   "name": "counts",
+   "rule": "stmt:while",
+   "source": "i = 0\nwhile i < 3:\n    i = i + 1\n"
+  },
+  {
+   "name": "never_runs",
+   "rule": "stmt:while",
+   "source": "i = 5\nv = \"before\"\nwhile i < 3:\n    v = 1\n"
+  },
+  {
+   "name": "else_runs_without_break",
+   "rule": "stmt:while",
+   "source": "i = 0\nwhile i < 2:\n    i = i + 1\nelse:\n    done = 1\n"
+  },
+  {
+   "name": "retypes",
+   "rule": "target:attr",
+   "source": "class C:\n    def __init__(self):\n        self.x = 1\n\no = C()\no.x = \"s\"\nv = o.x\n"
+  },
+  {
+   "name": "declared_attribute",
+   "rule": "target:attr",
+   "source": "class C:\n    def __init__(self):\n        self.x = 1\n\no = C()\no.x = 2\nv = o.x\n"
+  },
+  {
+   "name": "retypes",
+   "rule": "target:name",
+   "source": "a = 1\na = \"x\"\n"
+  },
+  {
+   "name": "list_slot",
+   "rule": "target:subscript",
+   "source": "xs = [1, 2]\nxs[0] = \"s\"\nv = xs[0]\n"
+  },
+  {
+   "name": "dict_insert",
+   "rule": "target:subscript",
+   "source": "d = {}\nd[\"k\"] = 1\nv = d[\"k\"]\n"
+  },
+  {
+   "name": "list_out_of_range",
+   "rule": "target:subscript",
+   "source": "xs = [1]\nxs[5] = 1\n"
+  },
+  {
+   "name": "immutable_receiver",
+   "rule": "target:subscript",
+   "source": "t = (1, 2)\nt[0] = 1\n"
+  },
+  {
+   "name": "from_tuple",
+   "rule": "target:tuple",
+   "source": "a, b = 1, \"x\"\n"
+  },
+  {
+   "name": "from_list",
+   "rule": "target:tuple",
+   "source": "a, b = [1, 2]\n"
+  },
+  {
+   "name": "length_mismatch",
+   "rule": "target:tuple",
+   "source": "a, b = [1, 2, 3]\n"
+  },
+  {
+   "name": "instance_shadows_class",
+   "rule": "transfer:attr-instance-then-mro",
+   "source": "class B:\n    def m(self):\n        return 1\n\nclass D(B):\n    def m(self):\n        return 2\n\nv = D().m()\n"
+  },
+  {
+   "name": "inherited_from_base",
+   "rule": "transfer:attr-instance-then-mro",
+   "source": "class B:\n    def m(self):\n        return 1\n\nclass D(B):\n    def __init__(self):\n        self.x = 1\n\nv = D().m()\n"
+  },
+  {
+   "name": "miss_raises",
+   "rule": "transfer:attr-miss-is-attributeerror",
+   "source": "class C:\n    def __init__(self):\n        self.x = 1\n\no = C()\nv = o.nosuch\n"
+  },
+  {
+   "expect": "rejected",
+   "name": "getattr_hook_rejected",
+   "rule": "transfer:attr-miss-is-attributeerror",
+   "source": "class C:\n    def __getattr__(self, name):\n        return 7\n\no = C()\nv = o.nosuch\n"
+  },
+  {
+   "name": "write_visible",
+   "rule": "transfer:attr-write-then-read",
+   "source": "class C:\n    def __init__(self):\n        self.x = 1\n\no = C()\no.x = \"s\"\nv = o.x\n"
+  },
+  {
+   "name": "radd_runs",
+   "rule": "transfer:binop-reflected-on-notimplemented",
+   "source": "class C:\n    def __radd__(self, other):\n        return 7\n\no = C()\nv = 1 + o\n"
+  },
+  {
+   "name": "both_decline",
+   "rule": "transfer:binop-reflected-on-notimplemented",
+   "source": "class C:\n    def __init__(self):\n        self.x = 1\n\no = C()\nv = 1 + o\n"
+  },
+  {
+   "name": "subclass_radd_precedes_base_add",
+   "rule": "transfer:binop-subclass-reflected-first",
+   "source": "class B:\n    def __add__(self, other):\n        return 1\n    def __radd__(self, other):\n        return 2\n\nclass D(B):\n    def __radd__(self, other):\n        return 3\n\nv = B() + D()\n"
+  },
+  {
+   "name": "right_not_evaluated",
+   "rule": "transfer:boolop-shortcircuits",
+   "source": "xs = []\nv = xs and xs[0]\n"
+  },
+  {
+   "name": "or_right_not_evaluated",
+   "rule": "transfer:boolop-shortcircuits",
+   "source": "xs = [1]\nv = xs or xs[5]\n"
+  },
+  {
+   "name": "by_keyword",
+   "rule": "transfer:call-binds-positional-then-keyword",
+   "source": "def f(a, b):\n    return a\n\nv = f(b=1, a=\"x\")\n"
+  },
+  {
+   "name": "defaults_fill",
+   "rule": "transfer:call-binds-positional-then-keyword",
+   "source": "def f(a, b=2):\n    return b\n\nv = f(1)\n"
+  },
+  {
+   "name": "duplicate_argument",
+   "rule": "transfer:call-binds-positional-then-keyword",
+   "source": "def f(a):\n    return a\n\nv = f(1, a=2)\n"
+  },
+  {
+   "name": "unexpected_keyword",
+   "rule": "transfer:call-binds-positional-then-keyword",
+   "source": "def f(a):\n    return a\n\nv = f(a=1, c=2)\n"
+  },
+  {
+   "name": "init_runs",
+   "rule": "transfer:call-constructs-instance",
+   "source": "class C:\n    def __init__(self, n):\n        self.n = n\n\no = C(\"x\")\nv = o.n\n"
+  },
+  {
+   "name": "init_arity_checked",
+   "rule": "transfer:call-constructs-instance",
+   "source": "class C:\n    def __init__(self, n):\n        self.n = n\n\no = C()\n"
+  },
+  {
+   "name": "reflected_lt",
+   "rule": "transfer:comparison-reflected",
+   "source": "class C:\n    def __gt__(self, other):\n        return True\n\no = C()\nv = 1 < o\n"
+  },
+  {
+   "name": "eq_defaults_to_identity",
+   "rule": "transfer:comparison-reflected",
+   "source": "class C:\n    def __init__(self):\n        self.x = 1\n\no = C()\np = C()\nsame = o == o\nother = o == p\n"
+  },
+  {
+   "name": "target_does_not_leak",
+   "rule": "transfer:comprehension-scope",
+   "source": "i = \"outer\"\nxs = [j for j in range(3)]\nv = i\n"
+  },
+  {
+   "name": "failing_element_abandons_binding",
+   "rule": "transfer:comprehension-scope",
+   "source": "xs = [1]\nbefore = \"kept\"\nbefore = [x for x in xs][5]\n"
+  },
+  {
+   "name": "missing_yields_default",
+   "rule": "transfer:dict-get-default",
+   "source": "d = {\"a\": 1}\nv = d.get(\"zz\")\nw = d.get(\"zz\", 0)\n"
+  },
+  {
+   "name": "present_yields_value",
+   "rule": "transfer:dict-get-default",
+   "source": "d = {\"a\": 1}\nv = d.get(\"a\")\n"
+  },
+  {
+   "name": "missing_raises",
+   "rule": "transfer:dict-pop-missing",
+   "source": "d = {\"a\": 1}\nv = d.pop(\"zz\")\n"
+  },
+  {
+   "name": "missing_with_default",
+   "rule": "transfer:dict-pop-missing",
+   "source": "d = {\"a\": 1}\nv = d.pop(\"zz\", 0)\n"
+  },
+  {
+   "name": "inserts_and_returns",
+   "rule": "transfer:dict-setdefault-inserts",
+   "source": "d = {}\nv = d.setdefault(\"k\", 1)\nn = len(d)\n"
+  },
+  {
+   "name": "keyword_keys",
+   "rule": "transfer:dict-update-keywords",
+   "source": "d = {\"a\": 1}\nd.update(b=2)\nv = d[\"b\"]\n"
+  },
+  {
+   "name": "mapping_arg",
+   "rule": "transfer:dict-update-keywords",
+   "source": "d = {\"a\": 1}\nd.update({\"b\": 2})\nv = d[\"b\"]\n"
+  },
+  {
+   "name": "keys_values_items",
+   "rule": "transfer:dict-view-types",
+   "source": "d = {\"a\": 1}\nk = d.keys()\nv = d.values()\ni = d.items()\n"
+  },
+  {
+   "name": "after_raise",
+   "rule": "transfer:finally-on-every-completion",
+   "source": "xs = [1]\nf = 0\ntry:\n    v = xs[5]\nexcept IndexError as e:\n    v = 0\nfinally:\n    f = 1\n"
+  },
+  {
+   "name": "after_return",
+   "rule": "transfer:finally-on-every-completion",
+   "source": "def h():\n    try:\n        return 1\n    finally:\n        pass\n\nv = h()\n"
+  },
+  {
+   "name": "after_break",
+   "rule": "transfer:finally-on-every-completion",
+   "source": "f = 0\nfor i in range(3):\n    try:\n        break\n    finally:\n        f = 1\n"
+  },
+  {
+   "name": "calls_format",
+   "rule": "transfer:fstring-formats",
+   "source": "class C:\n    def __str__(self):\n        return \"c\"\n\no = C()\ns = f\"{o}\"\n"
+  },
+  {
+   "name": "body_raise_surfaces_in_loop",
+   "rule": "transfer:generator-raises-at-consumption",
+   "source": "def g():\n    yield 1\n    raise ValueError(2)\n\nseen = []\nfor x in g():\n    seen.append(x)\n"
+  },
+  {
+   "name": "base_catches_derived",
+   "rule": "transfer:handler-matches-subclass",
+   "source": "class MyError(ValueError):\n    pass\n\ntry:\n    raise MyError(1)\nexcept ValueError as e:\n    v = 1\n"
+  },
+  {
+   "name": "target_unbound_after_handler",
+   "rule": "transfer:handler-target-cleanup",
+   "source": "xs = [1]\nkept = None\ntry:\n    v = xs[5]\nexcept IndexError as e:\n    kept = e\n    v = 0\nafter = 1\n"
+  },
+  {
+   "name": "no_iter_uses_getitem",
+   "rule": "transfer:iteration-getitem-fallback",
+   "source": "class C:\n    def __getitem__(self, i):\n        if i > 2:\n            raise IndexError(i)\n        return i\n\nseen = []\nfor x in C():\n    seen.append(x)\n"
+  },
+  {
+   "name": "generator_exhausts",
+   "rule": "transfer:iteration-stopiteration-ends-loop",
+   "source": "def g():\n    yield 1\n    yield 2\n\nseen = []\nfor x in g():\n    seen.append(x)\n"
+  },
+  {
+   "name": "empty_body_never_runs",
+   "rule": "transfer:iteration-stopiteration-ends-loop",
+   "source": "v = \"before\"\nfor x in []:\n    v = x\n"
+  },
+  {
+   "name": "pairs_unpack",
+   "rule": "transfer:iteration-unpack-arity",
+   "source": "d = {\"a\": 1}\nks = []\nfor k, v in d.items():\n    ks.append(k)\n"
+  },
+  {
+   "name": "wrong_arity_raises",
+   "rule": "transfer:iteration-unpack-arity",
+   "source": "for a, b in [(1, 2, 3)]:\n    v = a\n"
+  },
+  {
+   "name": "user_len",
+   "rule": "transfer:len-calls-dunder-len",
+   "source": "class C:\n    def __len__(self):\n        return 3\n\nv = len(C())\n"
+  },
+  {
+   "name": "negative_len_raises",
+   "rule": "transfer:len-calls-dunder-len",
+   "source": "class C:\n    def __len__(self):\n        return -1\n\nv = len(C())\n"
+  },
+  {
+   "name": "non_int_len_raises",
+   "rule": "transfer:len-calls-dunder-len",
+   "source": "class C:\n    def __len__(self):\n        return \"x\"\n\nv = len(C())\n"
+  },
+  {
+   "name": "no_len_raises",
+   "rule": "transfer:len-calls-dunder-len",
+   "source": "class C:\n    def __init__(self):\n        self.x = 1\n\nv = len(C())\n"
+  },
+  {
+   "name": "type_changes_across_iterations",
+   "rule": "transfer:loop-fixpoint-widens",
+   "source": "v = 0\nfor i in range(3):\n    v = \"x\" if i else 1\n"
+  },
+  {
+   "name": "accumulates",
+   "rule": "transfer:loop-fixpoint-widens",
+   "source": "xs = []\nfor i in range(3):\n    xs.append(i)\nn = len(xs)\n"
+  },
+  {
+   "name": "contains_wins",
+   "rule": "transfer:membership-contains-then-iter-then-getitem",
+   "source": "class C:\n    def __contains__(self, item):\n        return True\n\no = C()\nv = 99 in o\n"
+  },
+  {
+   "name": "iter_fallback",
+   "rule": "transfer:membership-contains-then-iter-then-getitem",
+   "source": "class C:\n    def __iter__(self):\n        return iter([1, 2])\n\no = C()\nv = 2 in o\n"
+  },
+  {
+   "name": "getitem_fallback",
+   "rule": "transfer:membership-contains-then-iter-then-getitem",
+   "source": "class C:\n    def __getitem__(self, i):\n        if i > 1:\n            raise IndexError(i)\n        return i\n\no = C()\nv = 1 in o\nw = 9 in o\n"
+  },
+  {
+   "name": "indexerror_subclass_means_absent",
+   "rule": "transfer:membership-getitem-stop-is-false",
+   "source": "class PastEnd(IndexError):\n    pass\n\nclass C:\n    def __getitem__(self, i):\n        if i > 1:\n            raise PastEnd(i)\n        return i\n\no = C()\nv = 9 in o\n"
+  },
+  {
+   "name": "user_str",
+   "rule": "transfer:str-calls-dunder-str",
+   "source": "class C:\n    def __str__(self):\n        return \"c\"\n\nv = str(C())\n"
+  },
+  {
+   "name": "default_str_is_repr_like",
+   "rule": "transfer:str-calls-dunder-str",
+   "source": "class C:\n    def __init__(self):\n        self.x = 1\n\nv = str(C())\n"
+  },
+  {
+   "name": "user_getitem",
+   "rule": "transfer:subscript-getitem-dunder",
+   "source": "class C:\n    def __getitem__(self, i):\n        return i * 2\n\no = C()\nv = o[3]\n"
+  },
+  {
+   "name": "getitem_raises",
+   "rule": "transfer:subscript-getitem-dunder",
+   "source": "class C:\n    def __getitem__(self, i):\n        raise KeyError(i)\n\no = C()\nv = o[3]\n"
+  },
+  {
+   "name": "user_setitem",
+   "rule": "transfer:subscript-setitem-dunder",
+   "source": "class C:\n    def __init__(self):\n        self.seen = 0\n    def __setitem__(self, i, value):\n        self.seen = i\n\no = C()\no[2] = 1\nv = o.seen\n"
+  },
+  {
+   "name": "dunder_bool_wins",
+   "rule": "transfer:truth-bool-then-len",
+   "source": "class C:\n    def __bool__(self):\n        return False\n    def __len__(self):\n        return 5\n\no = C()\nv = 1 if o else \"x\"\n"
+  },
+  {
+   "name": "falls_back_to_len",
+   "rule": "transfer:truth-bool-then-len",
+   "source": "class C:\n    def __len__(self):\n        return 0\n\no = C()\nv = 1 if o else \"x\"\n"
+  },
+  {
+   "name": "neither_is_true",
+   "rule": "transfer:truth-bool-then-len",
+   "source": "class C:\n    def __init__(self):\n        self.x = 1\n\no = C()\nv = 1 if o else \"x\"\n"
+  },
+  {
+   "name": "bool_returning_non_bool",
+   "rule": "transfer:truth-bool-then-len",
+   "source": "class C:\n    def __bool__(self):\n        return 1\n\no = C()\nv = 1 if o else \"x\"\n"
+  },
+  {
+   "name": "else_skipped_on_raise",
+   "rule": "transfer:try-else-only-on-normal",
+   "source": "xs = [1]\nw = \"before\"\ntry:\n    v = xs[5]\nexcept IndexError as e:\n    v = 0\nelse:\n    w = 1\n"
+  }
+ ]
+}

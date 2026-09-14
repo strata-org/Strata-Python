@@ -1,0 +1,1384 @@
+{
+  "concrete_run_count": 38988,
+  "format_scenarios": [
+    {
+      "events": [
+        "Value.__str__"
+      ],
+      "name": "%s invokes __str__",
+      "outcome": {
+        "class": "str",
+        "kind": "return",
+        "value": "'converted'"
+      }
+    },
+    {
+      "events": [
+        "Value.__str__"
+      ],
+      "name": "%s propagates __str__ exception",
+      "outcome": {
+        "class": "RuntimeError",
+        "kind": "raise"
+      }
+    },
+    {
+      "events": [
+        "Value.__repr__"
+      ],
+      "name": "%r propagates __repr__ exception",
+      "outcome": {
+        "class": "LookupError",
+        "kind": "raise"
+      }
+    },
+    {
+      "events": [
+        "Value.__float__"
+      ],
+      "name": "%f invokes __float__",
+      "outcome": {
+        "class": "str",
+        "kind": "return",
+        "value": "'1.500000'"
+      }
+    },
+    {
+      "events": [
+        "Value.__index__"
+      ],
+      "name": "%x invokes __index__",
+      "outcome": {
+        "class": "str",
+        "kind": "return",
+        "value": "'f'"
+      }
+    },
+    {
+      "events": [
+        "Mapping.__getitem__('x')"
+      ],
+      "name": "mapping format invokes __getitem__",
+      "outcome": {
+        "class": "str",
+        "kind": "return",
+        "value": "'mapped'"
+      }
+    },
+    {
+      "events": [
+        "Mapping.__getitem__('x')"
+      ],
+      "name": "mapping format propagates lookup exception",
+      "outcome": {
+        "class": "OSError",
+        "kind": "raise"
+      }
+    }
+  ],
+  "nontrivial_cells": {
+    "add|bool|bool": [
+      "return:int"
+    ],
+    "add|bool|float": [
+      "return:float"
+    ],
+    "add|bool|int": [
+      "return:int"
+    ],
+    "add|float|bool": [
+      "return:float"
+    ],
+    "add|float|float": [
+      "return:float"
+    ],
+    "add|float|int": [
+      "return:float"
+    ],
+    "add|int|bool": [
+      "return:int"
+    ],
+    "add|int|float": [
+      "return:float"
+    ],
+    "add|int|int": [
+      "return:int"
+    ],
+    "add|list|list": [
+      "return:list"
+    ],
+    "add|str|str": [
+      "return:str"
+    ],
+    "add|tuple|tuple": [
+      "return:tuple"
+    ],
+    "and|bool|bool": [
+      "return:bool"
+    ],
+    "and|bool|int": [
+      "return:int"
+    ],
+    "and|dict_view|dict": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|dict_view|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|dict_view|gen": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|dict_view|list": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|dict_view|range": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|dict_view|set": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|dict_view|str": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|dict_view|tuple": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|dict|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|gen|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|int|bool": [
+      "return:int"
+    ],
+    "and|int|int": [
+      "return:int"
+    ],
+    "and|list|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|range|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|set|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|set|set": [
+      "return:set"
+    ],
+    "and|str|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|tuple|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "floordiv|bool|bool": [
+      "raise:ZeroDivisionError",
+      "return:int"
+    ],
+    "floordiv|bool|float": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "floordiv|bool|int": [
+      "raise:ZeroDivisionError",
+      "return:int"
+    ],
+    "floordiv|float|bool": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "floordiv|float|float": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "floordiv|float|int": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "floordiv|int|bool": [
+      "raise:ZeroDivisionError",
+      "return:int"
+    ],
+    "floordiv|int|float": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "floordiv|int|int": [
+      "raise:ZeroDivisionError",
+      "return:int"
+    ],
+    "lshift|bool|bool": [
+      "return:int"
+    ],
+    "lshift|bool|int": [
+      "raise:ValueError",
+      "return:int"
+    ],
+    "lshift|int|bool": [
+      "return:int"
+    ],
+    "lshift|int|int": [
+      "raise:ValueError",
+      "return:int"
+    ],
+    "mod|bool|bool": [
+      "raise:ZeroDivisionError",
+      "return:int"
+    ],
+    "mod|bool|float": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "mod|bool|int": [
+      "raise:ZeroDivisionError",
+      "return:int"
+    ],
+    "mod|float|bool": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "mod|float|float": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "mod|float|int": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "mod|int|bool": [
+      "raise:ZeroDivisionError",
+      "return:int"
+    ],
+    "mod|int|float": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "mod|int|int": [
+      "raise:ZeroDivisionError",
+      "return:int"
+    ],
+    "mod|str|NotImplemented": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|bool": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|dict": [
+      "raise:KeyError",
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|dict_view": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|float": [
+      "raise:OverflowError",
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|func": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|gen": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|int": [
+      "raise:OverflowError",
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|list": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|none": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|obj": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|range": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|set": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|str": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|tuple": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|type": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mul|bool|bool": [
+      "return:int"
+    ],
+    "mul|bool|float": [
+      "return:float"
+    ],
+    "mul|bool|int": [
+      "return:int"
+    ],
+    "mul|bool|list": [
+      "return:list"
+    ],
+    "mul|bool|str": [
+      "return:str"
+    ],
+    "mul|bool|tuple": [
+      "return:tuple"
+    ],
+    "mul|float|bool": [
+      "return:float"
+    ],
+    "mul|float|float": [
+      "return:float"
+    ],
+    "mul|float|int": [
+      "return:float"
+    ],
+    "mul|int|bool": [
+      "return:int"
+    ],
+    "mul|int|float": [
+      "return:float"
+    ],
+    "mul|int|int": [
+      "return:int"
+    ],
+    "mul|int|list": [
+      "return:list"
+    ],
+    "mul|int|str": [
+      "return:str"
+    ],
+    "mul|int|tuple": [
+      "return:tuple"
+    ],
+    "mul|list|bool": [
+      "return:list"
+    ],
+    "mul|list|int": [
+      "return:list"
+    ],
+    "mul|str|bool": [
+      "return:str"
+    ],
+    "mul|str|int": [
+      "return:str"
+    ],
+    "mul|tuple|bool": [
+      "return:tuple"
+    ],
+    "mul|tuple|int": [
+      "return:tuple"
+    ],
+    "or|bool|bool": [
+      "return:bool"
+    ],
+    "or|bool|int": [
+      "return:int"
+    ],
+    "or|dict_view|dict": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|dict_view|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|dict_view|gen": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|dict_view|list": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|dict_view|range": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|dict_view|set": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|dict_view|str": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|dict_view|tuple": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|dict|dict": [
+      "return:dict"
+    ],
+    "or|dict|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|gen|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|int|bool": [
+      "return:int"
+    ],
+    "or|int|int": [
+      "return:int"
+    ],
+    "or|list|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|none|type": [
+      "return:type_union"
+    ],
+    "or|range|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|set|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|set|set": [
+      "return:set"
+    ],
+    "or|str|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|tuple|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|type|none": [
+      "return:type_union"
+    ],
+    "or|type|type": [
+      "return:type"
+    ],
+    "pow|bool|bool": [
+      "return:int"
+    ],
+    "pow|bool|float": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "pow|bool|int": [
+      "raise:ZeroDivisionError",
+      "return:float",
+      "return:int"
+    ],
+    "pow|float|bool": [
+      "return:float"
+    ],
+    "pow|float|float": [
+      "raise:OverflowError",
+      "raise:ZeroDivisionError",
+      "return:complex",
+      "return:float"
+    ],
+    "pow|float|int": [
+      "raise:OverflowError",
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "pow|int|bool": [
+      "return:int"
+    ],
+    "pow|int|float": [
+      "raise:OverflowError",
+      "raise:ZeroDivisionError",
+      "return:complex",
+      "return:float"
+    ],
+    "pow|int|int": [
+      "raise:ZeroDivisionError",
+      "return:float",
+      "return:int"
+    ],
+    "rshift|bool|bool": [
+      "return:int"
+    ],
+    "rshift|bool|int": [
+      "raise:ValueError",
+      "return:int"
+    ],
+    "rshift|int|bool": [
+      "return:int"
+    ],
+    "rshift|int|int": [
+      "raise:ValueError",
+      "return:int"
+    ],
+    "sub|bool|bool": [
+      "return:int"
+    ],
+    "sub|bool|float": [
+      "return:float"
+    ],
+    "sub|bool|int": [
+      "return:int"
+    ],
+    "sub|dict_view|dict": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|dict_view|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|dict_view|gen": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|dict_view|list": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|dict_view|range": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|dict_view|set": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|dict_view|str": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|dict_view|tuple": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|dict|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|float|bool": [
+      "return:float"
+    ],
+    "sub|float|float": [
+      "return:float"
+    ],
+    "sub|float|int": [
+      "return:float"
+    ],
+    "sub|gen|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|int|bool": [
+      "return:int"
+    ],
+    "sub|int|float": [
+      "return:float"
+    ],
+    "sub|int|int": [
+      "return:int"
+    ],
+    "sub|list|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|range|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|set|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|set|set": [
+      "return:set"
+    ],
+    "sub|str|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|tuple|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "truediv|bool|bool": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "truediv|bool|float": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "truediv|bool|int": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "truediv|float|bool": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "truediv|float|float": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "truediv|float|int": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "truediv|int|bool": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "truediv|int|float": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "truediv|int|int": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "xor|bool|bool": [
+      "return:bool"
+    ],
+    "xor|bool|int": [
+      "return:int"
+    ],
+    "xor|dict_view|dict": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|dict_view|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|dict_view|gen": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|dict_view|list": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|dict_view|range": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|dict_view|set": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|dict_view|str": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|dict_view|tuple": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|dict|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|gen|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|int|bool": [
+      "return:int"
+    ],
+    "xor|int|int": [
+      "return:int"
+    ],
+    "xor|list|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|range|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|set|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|set|set": [
+      "return:set"
+    ],
+    "xor|str|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|tuple|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ]
+  },
+  "operator_count": 12,
+  "operator_sha256": {
+    "add": "ebeaae95905353fa84fb2c50a516b8c0f194c0a5663817f7f53b257638442a2c",
+    "and": "fde1f1014aebe67dea9f22328aa7955c48f3245a47e913a35294dab74db48c2e",
+    "floordiv": "3eba5e315c809c6ec537e62d8567190c48dfa9cb9336013b63a9703db980cce3",
+    "lshift": "ea3116fe964f7a6d81870973a37e04cac3e1bf7e0bbf24f185e2390e5cbcfbc4",
+    "mod": "725d1372ffd16a97766f2c9d487ec108df6e83327cd44177dca7208cc5eae0dd",
+    "mul": "57222bd109e3f81eda089ffd434762f7644e19044e9b038bb2b5196bd4a587c4",
+    "or": "fcd92085339e6e4aeca297142b95d9bbe2df9de8adcc52609b7b5eadebf2ee6a",
+    "pow": "6e511e32fb7fd30ed1480377eb623de2292fd368b72688349e9640abbf327098",
+    "rshift": "a91d3dd1cd7d6eca876116a7c96f1e27c31ba0a167bb1ebb4b4c1a9d11c442f3",
+    "sub": "6c71fc297b35fe60ea918e0ef887953e6b31ebc74dd2d31e2185540a030384eb",
+    "truediv": "c34a4054926d2d29b4ccfe6f1bd5808b2111cff17de886a212276294bb0adba7",
+    "xor": "c90788f42fd7e201d00bfb3bf83e2f44cdbc4693f450555d8a243902aeb3b7c6"
+  },
+  "protocol_scenarios": [
+    {
+      "events": [
+        "Left.__add__"
+      ],
+      "name": "forward result suppresses reflected",
+      "outcome": {
+        "class": "str",
+        "kind": "return",
+        "value": "'forward'"
+      }
+    },
+    {
+      "events": [
+        "Left.__add__",
+        "Right.__radd__"
+      ],
+      "name": "NotImplemented falls through to reflected",
+      "outcome": {
+        "class": "str",
+        "kind": "return",
+        "value": "'reflected'"
+      }
+    },
+    {
+      "events": [
+        "Left.__add__"
+      ],
+      "name": "forward exception suppresses reflected",
+      "outcome": {
+        "class": "LookupError",
+        "kind": "raise"
+      }
+    },
+    {
+      "events": [
+        "Both.__add__"
+      ],
+      "name": "same runtime type skips reflected",
+      "outcome": {
+        "class": "TypeError",
+        "kind": "raise"
+      }
+    },
+    {
+      "events": [
+        "Sub.__radd__"
+      ],
+      "name": "proper subclass reflected override runs first",
+      "outcome": {
+        "class": "str",
+        "kind": "return",
+        "value": "'reflected'"
+      }
+    },
+    {
+      "events": [
+        "Sub.__radd__",
+        "Base.__add__"
+      ],
+      "name": "subclass reflected NotImplemented then forward",
+      "outcome": {
+        "class": "str",
+        "kind": "return",
+        "value": "'forward'"
+      }
+    },
+    {
+      "events": [
+        "Right.__radd__"
+      ],
+      "name": "builtin numeric lhs reaches user __radd__",
+      "outcome": {
+        "class": "int",
+        "kind": "return",
+        "value": "7"
+      }
+    },
+    {
+      "events": [
+        "Right.__radd__"
+      ],
+      "name": "builtin sequence lhs reaches user __radd__",
+      "outcome": {
+        "class": "int",
+        "kind": "return",
+        "value": "7"
+      }
+    },
+    {
+      "events": [
+        "Right.__radd__"
+      ],
+      "name": "sequence concat follows reflected NotImplemented",
+      "outcome": {
+        "class": "TypeError",
+        "kind": "raise"
+      }
+    },
+    {
+      "events": [],
+      "name": "str formatting exception suppresses __rmod__",
+      "outcome": {
+        "class": "TypeError",
+        "kind": "raise"
+      }
+    },
+    {
+      "events": [
+        "Left.__mod__",
+        "Right.__rmod__"
+      ],
+      "name": "custom modulo NotImplemented reaches __rmod__",
+      "outcome": {
+        "class": "str",
+        "kind": "return",
+        "value": "'reflected'"
+      }
+    }
+  ],
+  "sample_count": 57,
+  "schema": 1,
+  "semantic_sha256": "c30f63daf9bd727b34f0918d8b11c8bb446a222c9ee8159b4fac47aa61b9eaef",
+  "value_sensitive_cells": {
+    "and|dict_view|dict": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|dict_view|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|dict_view|gen": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|dict_view|list": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|dict_view|range": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|dict_view|set": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|dict_view|str": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|dict_view|tuple": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|dict|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|gen|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|list|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|range|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|set|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|str|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "and|tuple|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "floordiv|bool|bool": [
+      "raise:ZeroDivisionError",
+      "return:int"
+    ],
+    "floordiv|bool|float": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "floordiv|bool|int": [
+      "raise:ZeroDivisionError",
+      "return:int"
+    ],
+    "floordiv|float|bool": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "floordiv|float|float": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "floordiv|float|int": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "floordiv|int|bool": [
+      "raise:ZeroDivisionError",
+      "return:int"
+    ],
+    "floordiv|int|float": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "floordiv|int|int": [
+      "raise:ZeroDivisionError",
+      "return:int"
+    ],
+    "lshift|bool|int": [
+      "raise:ValueError",
+      "return:int"
+    ],
+    "lshift|int|int": [
+      "raise:ValueError",
+      "return:int"
+    ],
+    "mod|bool|bool": [
+      "raise:ZeroDivisionError",
+      "return:int"
+    ],
+    "mod|bool|float": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "mod|bool|int": [
+      "raise:ZeroDivisionError",
+      "return:int"
+    ],
+    "mod|float|bool": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "mod|float|float": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "mod|float|int": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "mod|int|bool": [
+      "raise:ZeroDivisionError",
+      "return:int"
+    ],
+    "mod|int|float": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "mod|int|int": [
+      "raise:ZeroDivisionError",
+      "return:int"
+    ],
+    "mod|str|NotImplemented": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|bool": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|dict": [
+      "raise:KeyError",
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|dict_view": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|float": [
+      "raise:OverflowError",
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|func": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|gen": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|int": [
+      "raise:OverflowError",
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|list": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|none": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|obj": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|range": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|set": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|str": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|tuple": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "mod|str|type": [
+      "raise:TypeError",
+      "raise:ValueError",
+      "return:str"
+    ],
+    "or|dict_view|dict": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|dict_view|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|dict_view|gen": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|dict_view|list": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|dict_view|range": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|dict_view|set": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|dict_view|str": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|dict_view|tuple": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|dict|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|gen|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|list|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|range|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|set|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|str|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "or|tuple|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "pow|bool|float": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "pow|bool|int": [
+      "raise:ZeroDivisionError",
+      "return:float",
+      "return:int"
+    ],
+    "pow|float|float": [
+      "raise:OverflowError",
+      "raise:ZeroDivisionError",
+      "return:complex",
+      "return:float"
+    ],
+    "pow|float|int": [
+      "raise:OverflowError",
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "pow|int|float": [
+      "raise:OverflowError",
+      "raise:ZeroDivisionError",
+      "return:complex",
+      "return:float"
+    ],
+    "pow|int|int": [
+      "raise:ZeroDivisionError",
+      "return:float",
+      "return:int"
+    ],
+    "rshift|bool|int": [
+      "raise:ValueError",
+      "return:int"
+    ],
+    "rshift|int|int": [
+      "raise:ValueError",
+      "return:int"
+    ],
+    "sub|dict_view|dict": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|dict_view|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|dict_view|gen": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|dict_view|list": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|dict_view|range": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|dict_view|set": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|dict_view|str": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|dict_view|tuple": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|dict|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|gen|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|list|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|range|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|set|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|str|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "sub|tuple|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "truediv|bool|bool": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "truediv|bool|float": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "truediv|bool|int": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "truediv|float|bool": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "truediv|float|float": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "truediv|float|int": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "truediv|int|bool": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "truediv|int|float": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "truediv|int|int": [
+      "raise:ZeroDivisionError",
+      "return:float"
+    ],
+    "xor|dict_view|dict": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|dict_view|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|dict_view|gen": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|dict_view|list": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|dict_view|range": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|dict_view|set": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|dict_view|str": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|dict_view|tuple": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|dict|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|gen|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|list|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|range|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|set|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|str|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ],
+    "xor|tuple|dict_view": [
+      "raise:TypeError",
+      "return:set"
+    ]
+  }
+}

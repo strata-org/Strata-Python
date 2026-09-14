@@ -1,0 +1,1148 @@
+{
+ "_comment": [
+  "The admission outcome each corpus program is expected to have, stated",
+  "rather than implied by a digest. `rejected` lists the violation rules the",
+  "subset checker must report -- exactly, as a set: an extra or missing rule",
+  "is a failure even when the accept/reject verdict is unchanged.",
+  "Derived once from the blessed digests, and asserted from then on by",
+  "`gates/admission.py`. This is the accept/reject half of the expectation",
+  "story; the value-level half (isinstance/is/cover assertions checked",
+  "against a fuzzed CPython run) is separate."
+ ],
+ "programs": {
+  "admission/bad_subset.py": {
+   "admission": "rejected",
+   "violations": [
+    "class-body-stmt",
+    "global-stmt",
+    "hash-eq-contract",
+    "hook-override",
+    "import",
+    "lambda",
+    "metaclass-keyword",
+    "multi-generator-comprehension",
+    "nested-function",
+    "starred-arg",
+    "unsupported-node",
+    "with-stmt"
+   ]
+  },
+  "admission/gm_after_first.py": {
+   "admission": "rejected",
+   "violations": [
+    "banned-builtin",
+    "import",
+    "unsupported-node"
+   ]
+  },
+  "admission/gm_both_branches.py": {
+   "admission": "rejected",
+   "violations": [
+    "import",
+    "lambda"
+   ]
+  },
+  "admission/gm_class_soup.py": {
+   "admission": "rejected",
+   "violations": [
+    "async-construct",
+    "class-body-stmt",
+    "hook-override"
+   ]
+  },
+  "admission/gm_lambda_holding_eval.py": {
+   "admission": "rejected",
+   "violations": [
+    "lambda"
+   ]
+  },
+  "admission/gm_nested_in_rejected.py": {
+   "admission": "rejected",
+   "violations": [
+    "banned-builtin",
+    "nested-function",
+    "shadowed-builtin"
+   ]
+  },
+  "admission/gr_as_def.py": {
+   "admission": "rejected",
+   "violations": [
+    "async-construct"
+   ]
+  },
+  "admission/gr_as_inner.py": {
+   "admission": "rejected",
+   "violations": [
+    "async-construct"
+   ]
+  },
+  "admission/gr_as_method.py": {
+   "admission": "rejected",
+   "violations": [
+    "async-construct"
+   ]
+  },
+  "admission/gr_bb_getattr.py": {
+   "admission": "rejected",
+   "violations": [
+    "banned-builtin"
+   ]
+  },
+  "admission/gr_bb_getattr_func.py": {
+   "admission": "rejected",
+   "violations": [
+    "banned-builtin"
+   ]
+  },
+  "admission/gr_bb_globals.py": {
+   "admission": "rejected",
+   "violations": [
+    "banned-builtin"
+   ]
+  },
+  "admission/gr_bb_super.py": {
+   "admission": "rejected",
+   "violations": [
+    "banned-builtin"
+   ]
+  },
+  "admission/gr_bb_type.py": {
+   "admission": "rejected",
+   "violations": [
+    "banned-builtin"
+   ]
+  },
+  "admission/gr_bb_vars.py": {
+   "admission": "rejected",
+   "violations": [
+    "banned-builtin"
+   ]
+  },
+  "admission/gr_cb_ann_nonname.py": {
+   "admission": "rejected",
+   "violations": [
+    "class-body-stmt"
+   ]
+  },
+  "admission/gr_cb_expr.py": {
+   "admission": "rejected",
+   "violations": [
+    "class-body-stmt"
+   ]
+  },
+  "admission/gr_cb_field_default.py": {
+   "admission": "rejected",
+   "violations": [
+    "class-body-stmt"
+   ]
+  },
+  "admission/gr_cb_stmt.py": {
+   "admission": "rejected",
+   "violations": [
+    "class-body-stmt"
+   ]
+  },
+  "admission/gr_cb_td_method.py": {
+   "admission": "rejected",
+   "violations": [
+    "class-body-stmt"
+   ]
+  },
+  "admission/gr_cd_dataclass_kw.py": {
+   "admission": "rejected",
+   "violations": [
+    "class-decorator"
+   ]
+  },
+  "admission/gr_cd_expr.py": {
+   "admission": "rejected",
+   "violations": [
+    "class-decorator"
+   ]
+  },
+  "admission/gr_cd_nondataclass.py": {
+   "admission": "rejected",
+   "violations": [
+    "class-decorator"
+   ]
+  },
+  "admission/gr_he_eq_only.py": {
+   "admission": "rejected",
+   "violations": [
+    "hash-eq-contract"
+   ]
+  },
+  "admission/gr_he_hash_only.py": {
+   "admission": "rejected",
+   "violations": [
+    "hash-eq-contract"
+   ]
+  },
+  "admission/gr_ho_init_subclass.py": {
+   "admission": "rejected",
+   "violations": [
+    "hook-override"
+   ]
+  },
+  "admission/gr_ho_setattr_hook.py": {
+   "admission": "rejected",
+   "violations": [
+    "hook-override"
+   ]
+  },
+  "admission/gr_im_dataclasses_field.py": {
+   "admission": "rejected",
+   "violations": [
+    "import"
+   ]
+  },
+  "admission/gr_im_from.py": {
+   "admission": "rejected",
+   "violations": [
+    "import"
+   ]
+  },
+  "admission/gr_im_plain.py": {
+   "admission": "rejected",
+   "violations": [
+    "import"
+   ]
+  },
+  "admission/gr_rd_iadd.py": {
+   "admission": "rejected",
+   "violations": [
+    "reflected-dunder"
+   ]
+  },
+  "admission/gr_sh_assign.py": {
+   "admission": "rejected",
+   "violations": [
+    "shadowed-builtin"
+   ]
+  },
+  "admission/gr_sh_assign_func.py": {
+   "admission": "rejected",
+   "violations": [
+    "shadowed-builtin"
+   ]
+  },
+  "admission/gr_sh_assign_method.py": {
+   "admission": "rejected",
+   "violations": [
+    "shadowed-builtin"
+   ]
+  },
+  "admission/gr_sh_class.py": {
+   "admission": "rejected",
+   "violations": [
+    "shadowed-builtin"
+   ]
+  },
+  "admission/gr_sh_comp_target.py": {
+   "admission": "rejected",
+   "violations": [
+    "shadowed-builtin"
+   ]
+  },
+  "admission/gr_sh_def.py": {
+   "admission": "rejected",
+   "violations": [
+    "shadowed-builtin"
+   ]
+  },
+  "admission/gr_sh_handler.py": {
+   "admission": "rejected",
+   "violations": [
+    "shadowed-builtin"
+   ]
+  },
+  "admission/gr_sh_param.py": {
+   "admission": "rejected",
+   "violations": [
+    "shadowed-builtin"
+   ]
+  },
+  "admission/gr_st_call_kwstar.py": {
+   "admission": "rejected",
+   "violations": [
+    "starred-arg"
+   ]
+  },
+  "admission/gr_st_call_star.py": {
+   "admission": "rejected",
+   "violations": [
+    "starred-arg"
+   ]
+  },
+  "admission/gr_st_def_kwstar.py": {
+   "admission": "rejected",
+   "violations": [
+    "starred-arg"
+   ]
+  },
+  "admission/gr_st_def_star.py": {
+   "admission": "rejected",
+   "violations": [
+    "starred-arg"
+   ]
+  },
+  "admission/gr_st_dict_splat.py": {
+   "admission": "rejected",
+   "violations": [
+    "starred-arg"
+   ]
+  },
+  "admission/gr_st_expr_star.py": {
+   "admission": "rejected",
+   "violations": [
+    "starred-arg"
+   ]
+  },
+  "admission/gr_st_target_star.py": {
+   "admission": "rejected",
+   "violations": [
+    "starred-arg"
+   ]
+  },
+  "admission/gr_uf_bare.py": {
+   "admission": "rejected",
+   "violations": [
+    "unfrozen-dataclass"
+   ]
+  },
+  "admission/gr_uf_false.py": {
+   "admission": "rejected",
+   "violations": [
+    "unfrozen-dataclass"
+   ]
+  },
+  "admission/gr_un_augop_shift.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-node"
+   ]
+  },
+  "admission/gr_un_binop_matmul.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-node"
+   ]
+  },
+  "admission/gr_un_binop_matmul_func.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-node"
+   ]
+  },
+  "admission/gr_un_comp_target_tuple.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-node"
+   ]
+  },
+  "admission/gr_un_const_bytes.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-node"
+   ]
+  },
+  "admission/gr_un_const_bytes_func.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-node"
+   ]
+  },
+  "admission/gr_un_const_complex.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-node"
+   ]
+  },
+  "admission/gr_un_exceptstar.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-node"
+   ]
+  },
+  "admission/gr_un_expr_yield_expr.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-node"
+   ]
+  },
+  "admission/gr_un_kwonly.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-node"
+   ]
+  },
+  "admission/gr_un_raise_from.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-node"
+   ]
+  },
+  "admission/gr_un_raise_nonname.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-node"
+   ]
+  },
+  "admission/gr_un_slice.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-node"
+   ]
+  },
+  "admission/gr_un_slice_func.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-node"
+   ]
+  },
+  "admission/gr_un_target_list.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-node"
+   ]
+  },
+  "admission/gr_un_typealias.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-node"
+   ]
+  },
+  "admission/gt_aug_ok.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-node"
+   ]
+  },
+  "admission/reject_async.py": {
+   "admission": "rejected",
+   "violations": [
+    "async-construct"
+   ]
+  },
+  "admission/reject_banned_builtin.py": {
+   "admission": "rejected",
+   "violations": [
+    "banned-builtin"
+   ]
+  },
+  "admission/reject_class_body_stmt.py": {
+   "admission": "rejected",
+   "violations": [
+    "class-body-stmt"
+   ]
+  },
+  "admission/reject_class_decorator.py": {
+   "admission": "rejected",
+   "violations": [
+    "class-decorator"
+   ]
+  },
+  "admission/reject_duplicate_class.py": {
+   "admission": "rejected",
+   "violations": [
+    "duplicate-class"
+   ]
+  },
+  "admission/reject_except_tuple.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-node"
+   ]
+  },
+  "admission/reject_field_default.py": {
+   "admission": "rejected",
+   "violations": [
+    "class-body-stmt"
+   ]
+  },
+  "admission/reject_function_decorator.py": {
+   "admission": "rejected",
+   "violations": [
+    "function-decorator"
+   ]
+  },
+  "admission/reject_global.py": {
+   "admission": "rejected",
+   "violations": [
+    "global-stmt"
+   ]
+  },
+  "admission/reject_handler_name_collision.py": {
+   "admission": "rejected",
+   "violations": [
+    "handler-name-collision"
+   ]
+  },
+  "admission/reject_hash_eq.py": {
+   "admission": "rejected",
+   "violations": [
+    "hash-eq-contract"
+   ]
+  },
+  "admission/reject_hook_override.py": {
+   "admission": "rejected",
+   "violations": [
+    "hook-override"
+   ]
+  },
+  "admission/reject_identity_comparison.py": {
+   "admission": "rejected",
+   "violations": [
+    "identity-comparison"
+   ]
+  },
+  "admission/reject_import.py": {
+   "admission": "rejected",
+   "violations": [
+    "import"
+   ]
+  },
+  "admission/reject_import_star.py": {
+   "admission": "rejected",
+   "violations": [
+    "import-star"
+   ]
+  },
+  "admission/reject_invalid_c3.py": {
+   "admission": "rejected",
+   "violations": [
+    "invalid-mro"
+   ]
+  },
+  "admission/reject_lambda.py": {
+   "admission": "rejected",
+   "violations": [
+    "lambda"
+   ]
+  },
+  "admission/reject_match.py": {
+   "admission": "rejected",
+   "violations": [
+    "match-stmt"
+   ]
+  },
+  "admission/reject_metaclass.py": {
+   "admission": "rejected",
+   "violations": [
+    "metaclass-keyword"
+   ]
+  },
+  "admission/reject_multigen_comp.py": {
+   "admission": "rejected",
+   "violations": [
+    "multi-generator-comprehension"
+   ]
+  },
+  "admission/reject_nested_class.py": {
+   "admission": "rejected",
+   "violations": [
+    "nested-class"
+   ]
+  },
+  "admission/reject_nested_function.py": {
+   "admission": "rejected",
+   "violations": [
+    "nested-function"
+   ]
+  },
+  "admission/reject_non_exception_classes.py": {
+   "admission": "rejected",
+   "violations": [
+    "non-exception-class"
+   ]
+  },
+  "admission/reject_nonlocal.py": {
+   "admission": "rejected",
+   "violations": [
+    "nested-function",
+    "nonlocal-stmt"
+   ]
+  },
+  "admission/reject_nonlocal_delete.py": {
+   "admission": "rejected",
+   "violations": [
+    "shape-mutation"
+   ]
+  },
+  "admission/reject_nonstatic_base.py": {
+   "admission": "rejected",
+   "violations": [
+    "non-static-base"
+   ]
+  },
+  "admission/reject_raise_from.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-node"
+   ]
+  },
+  "admission/reject_realworld.py": {
+   "admission": "rejected",
+   "violations": [
+    "banned-builtin",
+    "function-decorator",
+    "import",
+    "lambda",
+    "shadowed-builtin",
+    "with-stmt"
+   ]
+  },
+  "admission/reject_recursion.py": {
+   "admission": "rejected",
+   "violations": [
+    "recursive-call"
+   ]
+  },
+  "admission/reject_reflected_dunder.py": {
+   "admission": "rejected",
+   "violations": [
+    "reflected-dunder"
+   ]
+  },
+  "admission/reject_scalar_constructors.py": {
+   "admission": "rejected",
+   "violations": [
+    "unmodeled-scalar-constructor"
+   ]
+  },
+  "admission/reject_shadowed_builtin.py": {
+   "admission": "rejected",
+   "violations": [
+    "shadowed-builtin"
+   ]
+  },
+  "admission/reject_shape_store_class_attr.py": {
+   "admission": "rejected",
+   "violations": [
+    "shape-store"
+   ]
+  },
+  "admission/reject_shape_store_dict.py": {
+   "admission": "rejected",
+   "violations": [
+    "shape-store"
+   ]
+  },
+  "admission/reject_shape_store_primitive.py": {
+   "admission": "rejected",
+   "violations": [
+    "shape-store"
+   ]
+  },
+  "admission/reject_slots_mismatch.py": {
+   "admission": "rejected",
+   "violations": [
+    "slots-mismatch"
+   ]
+  },
+  "admission/reject_starred.py": {
+   "admission": "rejected",
+   "violations": [
+    "starred-arg"
+   ]
+  },
+  "admission/reject_stub_without_return.py": {
+   "admission": "rejected",
+   "violations": [
+    "stub-without-return-annotation"
+   ]
+  },
+  "admission/reject_super_builtin_base.py": {
+   "admission": "rejected",
+   "violations": [
+    "super-builtin-base"
+   ]
+  },
+  "admission/reject_super_builtin_via_subclass.py": {
+   "admission": "rejected",
+   "violations": [
+    "super-builtin-base"
+   ]
+  },
+  "admission/reject_super_first_param.py": {
+   "admission": "rejected",
+   "violations": [
+    "super-form"
+   ]
+  },
+  "admission/reject_super_outside_method.py": {
+   "admission": "rejected",
+   "violations": [
+    "banned-builtin",
+    "super-form"
+   ]
+  },
+  "admission/reject_super_two_arg.py": {
+   "admission": "rejected",
+   "violations": [
+    "super-form"
+   ]
+  },
+  "admission/reject_type_params.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-node"
+   ]
+  },
+  "admission/reject_unbound_base.py": {
+   "admission": "rejected",
+   "violations": [
+    "unbound-base"
+   ]
+  },
+  "admission/reject_unfrozen_dataclass.py": {
+   "admission": "rejected",
+   "violations": [
+    "class-decorator",
+    "unfrozen-dataclass"
+   ]
+  },
+  "admission/reject_unsupported_base.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-base"
+   ]
+  },
+  "admission/reject_unsupported_ops.py": {
+   "admission": "rejected",
+   "violations": [
+    "unsupported-node"
+   ]
+  },
+  "admission/reject_walrus.py": {
+   "admission": "rejected",
+   "violations": [
+    "walrus"
+   ]
+  },
+  "admission/reject_with.py": {
+   "admission": "rejected",
+   "violations": [
+    "with-stmt"
+   ]
+  },
+  "admission/t5_typed.py": {
+   "admission": "rejected",
+   "violations": [
+    "unfrozen-dataclass"
+   ]
+  },
+  "admission/t6_handler.py": {
+   "admission": "rejected",
+   "violations": [
+    "handler-name-collision"
+   ]
+  },
+  "admission/t9_dunder.py": {
+   "admission": "rejected",
+   "violations": [
+    "hash-eq-contract"
+   ]
+  },
+  "baseline/baseline_assignment_target_order.py": {
+   "admission": "accepted"
+  },
+  "baseline/baseline_builtin_protocol.py": {
+   "admission": "accepted"
+  },
+  "baseline/baseline_callee_order.py": {
+   "admission": "accepted"
+  },
+  "baseline/baseline_comparison_protocol.py": {
+   "admission": "accepted"
+  },
+  "baseline/baseline_comprehension_fixpoint.py": {
+   "admission": "accepted"
+  },
+  "baseline/baseline_dict_literal_order.py": {
+   "admission": "accepted"
+  },
+  "baseline/baseline_exception_init.py": {
+   "admission": "accepted"
+  },
+  "baseline/baseline_exceptional_assignment.py": {
+   "admission": "accepted"
+  },
+  "baseline/baseline_genexpr_kind.py": {
+   "admission": "accepted"
+  },
+  "baseline/baseline_init_failure.py": {
+   "admission": "accepted"
+  },
+  "baseline/baseline_loop_fixpoint.py": {
+   "admission": "accepted"
+  },
+  "baseline/baseline_membership_protocol.py": {
+   "admission": "accepted"
+  },
+  "baseline/baseline_nested_annotations.py": {
+   "admission": "accepted"
+  },
+  "baseline/baseline_no_backward_flow.py": {
+   "admission": "accepted"
+  },
+  "baseline/baseline_not_protocol.py": {
+   "admission": "accepted"
+  },
+  "baseline/baseline_string_protocol.py": {
+   "admission": "accepted"
+  },
+  "baseline/baseline_try_else_escape.py": {
+   "admission": "accepted"
+  },
+  "baseline/baseline_unbound_reads.py": {
+   "admission": "accepted"
+  },
+  "defects/corr_flip_bug.py": {
+   "admission": "accepted"
+  },
+  "defects/corr_flip_ok.py": {
+   "admission": "accepted"
+  },
+  "defects/corr_isinstance.py": {
+   "admission": "accepted"
+  },
+  "defects/defects.py": {
+   "admission": "accepted"
+  },
+  "defects/inherited_field_uninitialized.py": {
+   "admission": "accepted"
+  },
+  "defects/mb_unbound_frozen.py": {
+   "admission": "accepted"
+  },
+  "defects/mb_wrong_types.py": {
+   "admission": "accepted"
+  },
+  "defects/slots_shape_stores.py": {
+   "admission": "accepted"
+  },
+  "defects/soundness_heap_dispatch.py": {
+   "admission": "accepted"
+  },
+  "generated/comp.py": {
+   "admission": "accepted"
+  },
+  "generated/fuzz.py": {
+   "admission": "accepted"
+  },
+  "generated/matrix.py": {
+   "admission": "accepted"
+  },
+  "generated/stress.py": {
+   "admission": "rejected",
+   "violations": [
+    "hash-eq-contract",
+    "unsupported-node"
+   ]
+  },
+  "pyhard/01_correlated_dispatch.py": {
+   "admission": "accepted"
+  },
+  "pyhard/02_nested_property_dispatch.py": {
+   "admission": "accepted"
+  },
+  "pyhard/03_double_dispatch.py": {
+   "admission": "accepted"
+  },
+  "pyhard/04_exception_hierarchy.py": {
+   "admission": "accepted"
+  },
+  "pyhard/05_boundness_and_loops.py": {
+   "admission": "accepted"
+  },
+  "pyhard/06_typed_dict_shapes.py": {
+   "admission": "accepted"
+  },
+  "pyhard/07_recursive_container_types.py": {
+   "admission": "accepted"
+  },
+  "pyhard/08_pure_comprehension.py": {
+   "admission": "accepted"
+  },
+  "pyhard/09_typed_dict_alias_presence.py": {
+   "admission": "accepted"
+  },
+  "pyhard/10_builtin_binary_matrix.py": {
+   "admission": "accepted"
+  },
+  "pyhard/11_membership_protocols.py": {
+   "admission": "accepted"
+  },
+  "pyhard/12_inherited_mro_dispatch.py": {
+   "admission": "accepted"
+  },
+  "pyhard/13_subscript_read_write.py": {
+   "admission": "accepted"
+  },
+  "pyhard/14_chained_comparisons.py": {
+   "admission": "accepted"
+  },
+  "pyhard/15_short_circuit_values.py": {
+   "admission": "accepted"
+  },
+  "pyhard/16_conditional_expression.py": {
+   "admission": "accepted"
+  },
+  "pyhard/17_for_else_boundness.py": {
+   "admission": "accepted"
+  },
+  "pyhard/18_exception_routing.py": {
+   "admission": "accepted"
+  },
+  "pyhard/19_delete_and_rebind.py": {
+   "admission": "accepted"
+  },
+  "pyhard/20_frozen_dataclass_fields.py": {
+   "admission": "accepted"
+  },
+  "pyhard/21_exception_target_lifetime.py": {
+   "admission": "accepted"
+  },
+  "pyhard/22_exceptional_assignment.py": {
+   "admission": "accepted"
+  },
+  "pyhard/23_exception_path_value_sets.py": {
+   "admission": "accepted"
+  },
+  "pyhard/24_alias_transitions.py": {
+   "admission": "accepted"
+  },
+  "pyhard/25_handler_loop_control.py": {
+   "admission": "accepted"
+  },
+  "pyhard/26_comprehension_failure_boundness.py": {
+   "admission": "accepted"
+  },
+  "pyhard/27_numeric_tower.py": {
+   "admission": "accepted"
+  },
+  "pyhard/28_versioned_predicates.py": {
+   "admission": "accepted"
+  },
+  "pyhard/29_mixed_lookup_chain.py": {
+   "admission": "accepted"
+  },
+  "semantics/annotation_entailment.py": {
+   "admission": "accepted"
+  },
+  "semantics/binary_dispatch_soundness.py": {
+   "admission": "accepted"
+  },
+  "semantics/binary_protocol_effect_state.py": {
+   "admission": "accepted"
+  },
+  "semantics/builtin_surface_holes.py": {
+   "admission": "accepted"
+  },
+  "semantics/bytes_surface.py": {
+   "admission": "accepted"
+  },
+  "semantics/chain_demo.py": {
+   "admission": "accepted"
+  },
+  "semantics/dict_store_key_presence.py": {
+   "admission": "accepted"
+  },
+  "semantics/dict_update_keywords.py": {
+   "admission": "accepted"
+  },
+  "semantics/generator_close_cleanup.py": {
+   "admission": "accepted"
+  },
+  "semantics/getitem_stop_signal.py": {
+   "admission": "accepted"
+  },
+  "semantics/heterogeneous_cell.py": {
+   "admission": "accepted"
+  },
+  "semantics/interface_contracts.py": {
+   "admission": "accepted"
+  },
+  "semantics/key_presence_precision.py": {
+   "admission": "accepted"
+  },
+  "semantics/policy_eafp.py": {
+   "admission": "accepted"
+  },
+  "semantics/policy_strict.py": {
+   "admission": "accepted"
+  },
+  "semantics/reject_delete.py": {
+   "admission": "accepted"
+  },
+  "semantics/rule_inventory.py": {
+   "admission": "accepted"
+  },
+  "semantics/sequence_index_typing.py": {
+   "admission": "accepted"
+  },
+  "semantics/t1_recency.py": {
+   "admission": "accepted"
+  },
+  "semantics/t2_dispatch.py": {
+   "admission": "accepted"
+  },
+  "semantics/t3_flow.py": {
+   "admission": "accepted"
+  },
+  "semantics/t4_comp.py": {
+   "admission": "accepted"
+  },
+  "semantics/t7_init.py": {
+   "admission": "accepted"
+  },
+  "semantics/t8_annotations.py": {
+   "admission": "accepted"
+  },
+  "semantics/td_demo.py": {
+   "admission": "accepted"
+  },
+  "semantics/wb_inventory.py": {
+   "admission": "accepted"
+  },
+  "semantics/wb_shapes.py": {
+   "admission": "accepted"
+  },
+  "syntax/gp_binop_matrix.py": {
+   "admission": "accepted"
+  },
+  "syntax/gp_builtin_calls.py": {
+   "admission": "accepted"
+  },
+  "syntax/gp_methods.py": {
+   "admission": "accepted"
+  },
+  "syntax/gp_threeway.py": {
+   "admission": "accepted"
+  },
+  "syntax/gr_im_typing_any.py": {
+   "admission": "accepted"
+  },
+  "syntax/gr_rd_radd.py": {
+   "admission": "accepted"
+  },
+  "syntax/gr_un_binop_bitand.py": {
+   "admission": "accepted"
+  },
+  "syntax/gr_un_binop_shift.py": {
+   "admission": "accepted"
+  },
+  "syntax/gr_un_cmp_is.py": {
+   "admission": "accepted"
+  },
+  "syntax/gr_un_cmp_is_func.py": {
+   "admission": "accepted"
+  },
+  "syntax/gr_un_cmp_isnot.py": {
+   "admission": "accepted"
+  },
+  "syntax/gt_attr_named_list.py": {
+   "admission": "accepted"
+  },
+  "syntax/gt_bare_except.py": {
+   "admission": "accepted"
+  },
+  "syntax/gt_chained_cmp.py": {
+   "admission": "accepted"
+  },
+  "syntax/gt_dictcomp.py": {
+   "admission": "accepted"
+  },
+  "syntax/gt_docstrings.py": {
+   "admission": "accepted"
+  },
+  "syntax/gt_dunder_ok.py": {
+   "admission": "accepted"
+  },
+  "syntax/gt_eq_and_hash.py": {
+   "admission": "accepted"
+  },
+  "syntax/gt_except_baseexception.py": {
+   "admission": "accepted"
+  },
+  "syntax/gt_frozen_dataclass.py": {
+   "admission": "accepted"
+  },
+  "syntax/gt_fstring.py": {
+   "admission": "accepted"
+  },
+  "syntax/gt_genexp.py": {
+   "admission": "accepted"
+  },
+  "syntax/gt_kwargs_at_call.py": {
+   "admission": "accepted"
+  },
+  "syntax/gt_method_named_builtin.py": {
+   "admission": "accepted"
+  },
+  "syntax/gt_raise_name_call.py": {
+   "admission": "accepted"
+  },
+  "syntax/gt_setcomp.py": {
+   "admission": "accepted"
+  },
+  "syntax/gt_single_gen_comp.py": {
+   "admission": "accepted"
+  },
+  "syntax/gt_ternary.py": {
+   "admission": "accepted"
+  },
+  "syntax/gt_typing_whitelist.py": {
+   "admission": "accepted"
+  },
+  "syntax/gt_uadd_ok.py": {
+   "admission": "accepted"
+  },
+  "syntax/gt_unary_invert_ok.py": {
+   "admission": "accepted"
+  },
+  "syntax/ix_alias_strong.py": {
+   "admission": "accepted"
+  },
+  "syntax/ix_alloc_loop_try.py": {
+   "admission": "accepted"
+  },
+  "syntax/ix_corr_eafp.py": {
+   "admission": "accepted"
+  },
+  "syntax/ix_diamond_mro.py": {
+   "admission": "accepted"
+  },
+  "syntax/ix_except_hierarchy.py": {
+   "admission": "accepted"
+  },
+  "syntax/ix_finally_modes.py": {
+   "admission": "accepted"
+  },
+  "syntax/ix_gen_send.py": {
+   "admission": "accepted"
+  },
+  "syntax/ix_havoc_narrow.py": {
+   "admission": "accepted"
+  },
+  "syntax/ix_inherited_field.py": {
+   "admission": "accepted"
+  },
+  "syntax/ix_slots_shape.py": {
+   "admission": "accepted"
+  },
+  "syntax/ix_super_dispatch.py": {
+   "admission": "accepted"
+  },
+  "syntax/ix_td_raise_eafp.py": {
+   "admission": "accepted"
+  },
+  "syntax/ops_demo.py": {
+   "admission": "accepted"
+  },
+  "syntax/unary_operators.py": {
+   "admission": "accepted"
+  }
+ }
+}

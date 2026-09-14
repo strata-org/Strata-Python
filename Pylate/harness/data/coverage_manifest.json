@@ -1,0 +1,498 @@
+{
+ "_comment": "Coverage contract: every entry must be exercised by at least one golden log. run_all.py --coverage enforces it. resource category has no mraise site by design (recursion is the recursion-cut obligation). exhaustion is absent from abort_categories on purpose: StopIteration is Python's loop-termination signal, so no policy may abort it. threeway_opaque_tags is empty on purpose: every callable rule is now modelled, so no opaque arm exists to exercise (catalog sections 10, 12).",
+ "abort_categories": [
+  "dispatch",
+  "frozen",
+  "key",
+  "index",
+  "arith",
+  "value"
+ ],
+ "binop_cells": [
+  [
+   "Add",
+   "int",
+   "int"
+  ],
+  [
+   "Add",
+   "int",
+   "str"
+  ],
+  [
+   "Add",
+   "str",
+   "str"
+  ],
+  [
+   "Add",
+   "str",
+   "int"
+  ],
+  [
+   "Add",
+   "list",
+   "list"
+  ],
+  [
+   "Add",
+   "list",
+   "int"
+  ],
+  [
+   "Add",
+   "none",
+   "int"
+  ],
+  [
+   "Mult",
+   "int",
+   "str"
+  ],
+  [
+   "Mult",
+   "str",
+   "int"
+  ],
+  [
+   "Mult",
+   "int",
+   "list"
+  ],
+  [
+   "Mult",
+   "list",
+   "int"
+  ],
+  [
+   "Mult",
+   "float",
+   "str"
+  ],
+  [
+   "Div",
+   "int",
+   "int"
+  ],
+  [
+   "FloorDiv",
+   "int",
+   "int"
+  ],
+  [
+   "Mod",
+   "int",
+   "int"
+  ],
+  [
+   "Mod",
+   "str",
+   "int"
+  ],
+  [
+   "Pow",
+   "int",
+   "int"
+  ],
+  [
+   "Sub",
+   "int",
+   "float"
+  ],
+  [
+   "Sub",
+   "bool",
+   "int"
+  ],
+  [
+   "Sub",
+   "str",
+   "str"
+  ]
+ ],
+ "builtin_calls": [
+  "len",
+  "range",
+  "print",
+  "isinstance",
+  "next",
+  "iter",
+  "str",
+  "repr",
+  "list",
+  "dict",
+  "set",
+  "tuple"
+ ],
+ "dispatch_kinds": [
+  "code",
+  "field",
+  "builtin",
+  "construct",
+  "deferred",
+  "raise",
+  "abort"
+ ],
+ "modeled_builtins": [
+  "list.append",
+  "list.clear",
+  "list.copy",
+  "list.count",
+  "list.extend",
+  "list.index",
+  "list.insert",
+  "list.pop",
+  "list.remove",
+  "list.reverse",
+  "list.sort",
+  "dict.clear",
+  "dict.copy",
+  "dict.get",
+  "dict.items",
+  "dict.keys",
+  "dict.pop",
+  "dict.setdefault",
+  "dict.update",
+  "dict.values",
+  "set.add",
+  "set.clear",
+  "set.copy",
+  "set.difference",
+  "set.discard",
+  "set.intersection",
+  "set.isdisjoint",
+  "set.issubset",
+  "set.issuperset",
+  "set.pop",
+  "set.remove",
+  "set.symmetric_difference",
+  "set.union",
+  "set.update",
+  "tuple.count",
+  "tuple.index",
+  "range.count",
+  "range.index",
+  "str.capitalize",
+  "str.casefold",
+  "str.center",
+  "str.count",
+  "str.endswith",
+  "str.expandtabs",
+  "str.find",
+  "str.format",
+  "str.index",
+  "str.isalnum",
+  "str.isalpha",
+  "str.isascii",
+  "str.isdecimal",
+  "str.isdigit",
+  "str.isidentifier",
+  "str.islower",
+  "str.isnumeric",
+  "str.isprintable",
+  "str.isspace",
+  "str.istitle",
+  "str.isupper",
+  "str.join",
+  "str.ljust",
+  "str.lower",
+  "str.lstrip",
+  "str.removeprefix",
+  "str.removesuffix",
+  "str.replace",
+  "str.rfind",
+  "str.rindex",
+  "str.rjust",
+  "str.rsplit",
+  "str.rstrip",
+  "str.split",
+  "str.splitlines",
+  "str.startswith",
+  "str.strip",
+  "str.swapcase",
+  "str.title",
+  "str.upper",
+  "str.zfill"
+ ],
+ "threeway_absent_tags": [
+  "list",
+  "dict",
+  "str",
+  "gen"
+ ],
+ "threeway_opaque_tags": [],
+ "violation_sites": [
+  [
+   "unsupported-node",
+   "constant of unsupported kind"
+  ],
+  [
+   "unsupported-node",
+   "operator MatMult"
+  ],
+  [
+   "unsupported-node",
+   "slice expressions"
+  ],
+  [
+   "unsupported-node",
+   "comprehension target must be a name"
+  ],
+  [
+   "unsupported-node",
+   "assignment target"
+  ],
+  [
+   "unsupported-node",
+   "augmented assignment"
+  ],
+  [
+   "unsupported-node",
+   "except* "
+  ],
+  [
+   "unsupported-node",
+   "raise ... from"
+  ],
+  [
+   "unsupported-node",
+   "raise of a non-name"
+  ],
+  [
+   "unsupported-node",
+   "keyword-only parameters"
+  ],
+  [
+   "unsupported-node",
+   "yield in value position"
+  ],
+  [
+   "unsupported-node",
+   "type parameters (PEP 695) on def"
+  ],
+  [
+   "unsupported-node",
+   "type parameters (PEP 695) on class"
+  ],
+  [
+   "unsupported-node",
+   "except clause must name a single exception"
+  ],
+  [
+   "starred-arg",
+   "*args at a call site"
+  ],
+  [
+   "starred-arg",
+   "**kwargs at a call site"
+  ],
+  [
+   "starred-arg",
+   "**mapping inside a dict literal"
+  ],
+  [
+   "starred-arg",
+   "starred expression"
+  ],
+  [
+   "starred-arg",
+   "starred assignment target"
+  ],
+  [
+   "starred-arg",
+   "*args parameter"
+  ],
+  [
+   "starred-arg",
+   "**kwargs parameter"
+  ],
+  [
+   "shadowed-builtin",
+   "binding "
+  ],
+  [
+   "shadowed-builtin",
+   "parameter "
+  ],
+  [
+   "shadowed-builtin",
+   "def "
+  ],
+  [
+   "shadowed-builtin",
+   "class "
+  ],
+  [
+   "shadowed-builtin",
+   "except ... as"
+  ],
+  [
+   "shadowed-builtin",
+   "comprehension target"
+  ],
+  [
+   "class-body-stmt",
+   "TypedDict"
+  ],
+  [
+   "class-body-stmt",
+   "carries a default value"
+  ],
+  [
+   "class-body-stmt",
+   "annotated non-name"
+  ],
+  [
+   "class-body-stmt",
+   "expression statement"
+  ],
+  [
+   "class-body-stmt",
+   " body: class bodies hold"
+  ],
+  [
+   "async-construct",
+   "async def"
+  ],
+  [
+   "async-construct",
+   "async method"
+  ],
+  [
+   "import",
+   "imports are outside the subset"
+  ],
+  [
+   "import",
+   "import from "
+  ],
+  [
+   "import",
+   "from dataclasses only"
+  ],
+  [
+   "import",
+   "from typing only"
+  ],
+  [
+   "import-star",
+   "import *"
+  ],
+  [
+   "class-decorator",
+   "decorator @"
+  ],
+  [
+   "class-decorator",
+   "computed decorator"
+  ],
+  [
+   "class-decorator",
+   "@dataclass keyword"
+  ],
+  [
+   "unfrozen-dataclass",
+   "@dataclass on "
+  ],
+  [
+   "unfrozen-dataclass",
+   "@dataclass(...) on "
+  ],
+  [
+   "banned-builtin",
+   "eval"
+  ],
+  [
+   "banned-builtin",
+   "getattr"
+  ],
+  [
+   "banned-builtin",
+   "super"
+  ],
+  [
+   "banned-builtin",
+   "type"
+  ],
+  [
+   "banned-builtin",
+   "globals"
+  ],
+  [
+   "hook-override",
+   "__getattr__"
+  ],
+  [
+   "hook-override",
+   "__setattr__"
+  ],
+  [
+   "hook-override",
+   "__init_subclass__"
+  ],
+  [
+   "hook-override",
+   "__new__"
+  ],
+  [
+   "reflected-dunder",
+   "__iadd__"
+  ],
+  [
+   "hash-eq-contract",
+   "__eq__ without __hash__"
+  ],
+  [
+   "hash-eq-contract",
+   "__hash__ without __eq__"
+  ],
+  [
+   "lambda",
+   "lambda"
+  ],
+  [
+   "walrus",
+   "assignment expressions"
+  ],
+  [
+   "match-stmt",
+   "match"
+  ],
+  [
+   "with-stmt",
+   "with"
+  ],
+  [
+   "global-stmt",
+   "global"
+  ],
+  [
+   "nonlocal-stmt",
+   "nonlocal"
+  ],
+  [
+   "nested-function",
+   "nested inside"
+  ],
+  [
+   "nested-class",
+   "not at module top level"
+  ],
+  [
+   "non-static-base",
+   "not a static name"
+  ],
+  [
+   "metaclass-keyword",
+   "unsupported class keyword"
+  ],
+  [
+   "multi-generator-comprehension",
+   "generators"
+  ],
+  [
+   "function-decorator",
+   "decorator on def"
+  ]
+ ]
+}

@@ -1,0 +1,1430 @@
+#!/usr/bin/env python3
+"""Build the machine-readable callable-rule conformance matrix.
+
+This file contains corpus declarations only.  The independent CPython runner
+loads the emitted JSON and executes each concrete witness in a fresh namespace.
+Abstract mixed-value cases refer to two or more concrete witnesses because
+CPython cannot directly execute an abstract union.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import pathlib
+import re
+from typing import Any
+
+
+METHODS: dict[str, list[str]] = {
+    "list": [
+        "append", "clear", "copy", "count", "extend", "index", "insert",
+        "pop", "remove", "reverse", "sort",
+    ],
+    "dict": [
+        "clear", "copy", "fromkeys", "get", "items", "keys", "pop",
+        "popitem", "setdefault", "update", "values",
+    ],
+    "set": [
+        "add", "clear", "copy", "difference", "difference_update",
+        "discard", "intersection", "intersection_update", "isdisjoint",
+        "issubset", "issuperset", "pop", "remove",
+        "symmetric_difference", "symmetric_difference_update", "union",
+        "update",
+    ],
+    "tuple": ["count", "index"],
+    "range": ["count", "index"],
+    "gen": ["close", "send", "throw"],
+    "str": [
+        "capitalize", "casefold", "center", "count", "encode", "endswith",
+        "expandtabs", "find", "format", "format_map", "index", "isalnum",
+        "isalpha", "isascii", "isdecimal", "isdigit", "isidentifier",
+        "islower", "isnumeric", "isprintable", "isspace", "istitle",
+        "isupper", "join", "ljust", "lower", "lstrip", "maketrans",
+        "partition", "removeprefix", "removesuffix", "replace", "rfind",
+        "rindex", "rjust", "rpartition", "rsplit", "rstrip", "split",
+        "splitlines", "startswith", "strip", "swapcase", "title",
+        "translate", "upper", "zfill",
+    ],
+}
+
+FUNCTIONS = [
+    "len", "range", "print", "isinstance", "next", "iter", "str", "repr",
+    "list", "dict", "set", "tuple",
+]
+
+FORMERLY_OPAQUE = {
+    "dict.popitem",
+    "set.difference_update",
+    "set.intersection_update",
+    "set.symmetric_difference_update",
+    "str.encode",
+    "str.format_map",
+    "str.maketrans",
+    "str.partition",
+    "str.rpartition",
+    "str.translate",
+    "gen.close",
+    "gen.send",
+    "gen.throw",
+}
+
+DIMENSIONS = [
+    "inventory",
+    "normal",
+    "invalid",
+    "mixed_abstract",
+    "hook_effect",
+    "mutation_phase",
+    "alias_emptiness",
+    "cpython_evidence",
+]
+
+CATALOG_EXCEPTION_CLASSES = [
+    "AttributeError",
+    "IndexError",
+    "KeyError",
+    "LookupError",
+    "MemoryError",
+    "RuntimeError",
+    "StopIteration",
+    "TypeError",
+    "UnicodeEncodeError",
+    "ValueError",
+]
+
+
+def scenario_id(rule_key: str, label: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", f"{rule_key}_{label}".lower()).strip("_")
+
+
+def inferred_roots(setup: str) -> list[str]:
+    names = set(re.findall(r"(?m)^\s*(receiver|alias|arg\d+)\s*=", setup))
+    return sorted(
+        names,
+        key=lambda name: (
+            0 if name == "receiver" else 1 if name == "alias" else 2,
+            name,
+        ),
+    )
+
+
+class Corpus:
+    def __init__(self) -> None:
+        self.scenarios: list[dict[str, Any]] = []
+
+    def concrete(
+        self,
+        rule_key: str,
+        label: str,
+        setup: str,
+        call: str,
+        outcome_kind: str,
+        outcome_type: str,
+        *,
+        categories: list[str],
+        events: list[str] | None = None,
+        roots: list[str] | None = None,
+        changed: list[str] | None = None,
+        unchanged: list[str] | None = None,
+        aliases: list[list[str]] | None = None,
+        obligations: list[str] | None = None,
+        note: str | None = None,
+    ) -> str:
+        sid = scenario_id(rule_key, label)
+        row: dict[str, Any] = {
+            "id": sid,
+            "rule_key": rule_key,
+            "scenario": label,
+            "categories": sorted(set(categories + ["cpython_evidence"])),
+            "execution": {
+                "setup": setup.strip(),
+                "call": call,
+                "roots": roots if roots is not None else inferred_roots(setup),
+            },
+            "expect": {
+                "outcome": {
+                    "kind": outcome_kind,
+                    "type": outcome_type,
+                },
+                "events": events if events is not None else [],
+                "changed_roots": changed if changed is not None else [],
+                "unchanged_roots": unchanged if unchanged is not None else [],
+                "alias_groups_after": aliases if aliases is not None else [],
+            },
+            "obligations": obligations or [],
+        }
+        if note:
+            row["note"] = note
+        self.scenarios.append(row)
+        return sid
+
+    def normal(
+        self,
+        rule_key: str,
+        setup: str,
+        call: str,
+        outcome_type: str,
+        *,
+        events: list[str] | None = None,
+        roots: list[str] | None = None,
+        changed: list[str] | None = None,
+        unchanged: list[str] | None = None,
+        aliases: list[list[str]] | None = None,
+        note: str | None = None,
+    ) -> str:
+        return self.concrete(
+            rule_key,
+            "normal",
+            setup,
+            call,
+            "return",
+            outcome_type,
+            categories=["inventory", "normal"],
+            events=events,
+            roots=roots,
+            changed=changed,
+            unchanged=unchanged,
+            aliases=aliases,
+            obligations=["normal-result", "post-state"],
+            note=note,
+        )
+
+    def raises(
+        self,
+        rule_key: str,
+        label: str,
+        setup: str,
+        call: str,
+        exception: str,
+        *,
+        categories: list[str] | None = None,
+        events: list[str] | None = None,
+        roots: list[str] | None = None,
+        changed: list[str] | None = None,
+        unchanged: list[str] | None = None,
+        aliases: list[list[str]] | None = None,
+        note: str | None = None,
+    ) -> str:
+        return self.concrete(
+            rule_key,
+            label,
+            setup,
+            call,
+            "raise",
+            f"builtins.{exception}",
+            categories=["invalid"] + (categories or []),
+            events=events,
+            roots=roots,
+            changed=changed,
+            unchanged=unchanged,
+            aliases=aliases,
+            obligations=["raised-class", "raise-point-state"],
+            note=note,
+        )
+
+    def mixed(
+        self,
+        rule_key: str,
+        label: str,
+        witnesses: list[str],
+        outcomes: list[str],
+        *,
+        note: str,
+    ) -> None:
+        self.scenarios.append(
+            {
+                "id": scenario_id(rule_key, label),
+                "rule_key": rule_key,
+                "scenario": label,
+                "categories": ["cpython_evidence", "mixed_abstract"],
+                "witnesses": witnesses,
+                "expect": {
+                    "abstract_outcomes": sorted(outcomes),
+                    "same_abstract_input_state": True,
+                },
+                "obligations": [
+                    "cartesian-alternative-inclusion",
+                    "same-input-state",
+                    "normal-and-raised-flow",
+                ],
+                "note": note,
+            }
+        )
+
+
+def add_normal_scenarios(c: Corpus) -> dict[str, str]:
+    normal: dict[str, str] = {}
+
+    def n(
+        key: str,
+        setup: str,
+        call: str,
+        typ: str,
+        **kwargs: Any,
+    ) -> None:
+        normal[key] = c.normal(key, setup, call, typ, **kwargs)
+
+    # list
+    n("list.append", "receiver = [1]\narg0 = 2",
+      "receiver.append(arg0)", "builtins.NoneType", changed=["receiver"])
+    n("list.clear", "receiver = [1]", "receiver.clear()",
+      "builtins.NoneType", changed=["receiver"])
+    n("list.copy", "receiver = [[1]]", "receiver.copy()", "builtins.list")
+    n("list.count", "receiver = [1, 1, 2]\narg0 = 1",
+      "receiver.count(arg0)", "builtins.int")
+    n("list.extend", "receiver = [1]\narg0 = [2, 3]",
+      "receiver.extend(arg0)", "builtins.NoneType", changed=["receiver"])
+    n("list.index", "receiver = [1, 2]\narg0 = 2",
+      "receiver.index(arg0)", "builtins.int")
+    n("list.insert", "receiver = [1]\narg0 = 0\narg1 = 2",
+      "receiver.insert(arg0, arg1)", "builtins.NoneType",
+      changed=["receiver"])
+    n("list.pop", "receiver = [1, 2]", "receiver.pop()", "builtins.int",
+      changed=["receiver"])
+    n("list.remove", "receiver = [1, 2]\narg0 = 1",
+      "receiver.remove(arg0)", "builtins.NoneType", changed=["receiver"])
+    n("list.reverse", "receiver = [1, 2]", "receiver.reverse()",
+      "builtins.NoneType", changed=["receiver"])
+    n("list.sort", "receiver = [2, 1]", "receiver.sort(reverse=False)",
+      "builtins.NoneType", changed=["receiver"])
+
+    # dict
+    n("dict.clear", "receiver = {'a': 1}", "receiver.clear()",
+      "builtins.NoneType", changed=["receiver"])
+    n("dict.copy", "receiver = {'a': [1]}", "receiver.copy()",
+      "builtins.dict")
+    n("dict.fromkeys", "receiver = {}\narg0 = ['a', 'b']\narg1 = 1",
+      "receiver.fromkeys(arg0, arg1)", "builtins.dict")
+    n("dict.get", "receiver = {'a': 1}\narg0 = 'a'\narg1 = 0",
+      "receiver.get(arg0, arg1)", "builtins.int")
+    n("dict.items", "receiver = {'a': 1}", "receiver.items()",
+      "builtins.dict_items")
+    n("dict.keys", "receiver = {'a': 1}", "receiver.keys()",
+      "builtins.dict_keys")
+    n("dict.pop", "receiver = {'a': 1}\narg0 = 'a'",
+      "receiver.pop(arg0)", "builtins.int", changed=["receiver"])
+    n("dict.popitem", "receiver = {'a': 1}", "receiver.popitem()",
+      "builtins.tuple", changed=["receiver"])
+    n("dict.setdefault", "receiver = {}\narg0 = 'a'\narg1 = 1",
+      "receiver.setdefault(arg0, arg1)", "builtins.int",
+      changed=["receiver"])
+    n("dict.update", "receiver = {'a': 1}\narg0 = {'b': 2}",
+      "receiver.update(arg0, c=3)", "builtins.NoneType",
+      changed=["receiver"])
+    n("dict.values", "receiver = {'a': 1}", "receiver.values()",
+      "builtins.dict_values")
+
+    # set
+    n("set.add", "receiver = {1}\narg0 = 2", "receiver.add(arg0)",
+      "builtins.NoneType", changed=["receiver"])
+    n("set.clear", "receiver = {1}", "receiver.clear()",
+      "builtins.NoneType", changed=["receiver"])
+    n("set.copy", "receiver = {1}", "receiver.copy()", "builtins.set")
+    n("set.difference", "receiver = {1, 2}\narg0 = {2}",
+      "receiver.difference(arg0)", "builtins.set")
+    n("set.difference_update", "receiver = {1, 2}\narg0 = {2}",
+      "receiver.difference_update(arg0)", "builtins.NoneType",
+      changed=["receiver"])
+    n("set.discard", "receiver = {1, 2}\narg0 = 1",
+      "receiver.discard(arg0)", "builtins.NoneType", changed=["receiver"])
+    n("set.intersection", "receiver = {1, 2}\narg0 = {2, 3}",
+      "receiver.intersection(arg0)", "builtins.set")
+    n("set.intersection_update", "receiver = {1, 2}\narg0 = {2, 3}",
+      "receiver.intersection_update(arg0)", "builtins.NoneType",
+      changed=["receiver"])
+    n("set.isdisjoint", "receiver = {1}\narg0 = {2}",
+      "receiver.isdisjoint(arg0)", "builtins.bool")
+    n("set.issubset", "receiver = {1}\narg0 = {1, 2}",
+      "receiver.issubset(arg0)", "builtins.bool")
+    n("set.issuperset", "receiver = {1, 2}\narg0 = {1}",
+      "receiver.issuperset(arg0)", "builtins.bool")
+    n("set.pop", "receiver = {1}", "receiver.pop()", "builtins.int",
+      changed=["receiver"])
+    n("set.remove", "receiver = {1, 2}\narg0 = 1",
+      "receiver.remove(arg0)", "builtins.NoneType", changed=["receiver"])
+    n("set.symmetric_difference", "receiver = {1, 2}\narg0 = {2, 3}",
+      "receiver.symmetric_difference(arg0)", "builtins.set")
+    n("set.symmetric_difference_update",
+      "receiver = {1, 2}\narg0 = {2, 3}",
+      "receiver.symmetric_difference_update(arg0)", "builtins.NoneType",
+      changed=["receiver"])
+    n("set.union", "receiver = {1}\narg0 = {2}",
+      "receiver.union(arg0)", "builtins.set")
+    n("set.update", "receiver = {1}\narg0 = {2}",
+      "receiver.update(arg0)", "builtins.NoneType", changed=["receiver"])
+
+    # tuple and range
+    n("tuple.count", "receiver = (1, 2, 1)\narg0 = 1",
+      "receiver.count(arg0)", "builtins.int")
+    n("tuple.index", "receiver = (1, 2)\narg0 = 2",
+      "receiver.index(arg0)", "builtins.int")
+    n("range.count", "receiver = range(5)\narg0 = 2",
+      "receiver.count(arg0)", "builtins.int")
+    n("range.index", "receiver = range(5)\narg0 = 2",
+      "receiver.index(arg0)", "builtins.int")
+
+    # strings
+    string_normals = [
+        ("capitalize", "receiver.capitalize()", "builtins.str"),
+        ("casefold", "receiver.casefold()", "builtins.str"),
+        ("center", "receiver.center(8, '.')", "builtins.str"),
+        ("count", "receiver.count('a', 0, 8)", "builtins.int"),
+        ("encode", "receiver.encode('utf-8', 'strict')", "builtins.bytes"),
+        ("endswith", "receiver.endswith('a', 0, 8)", "builtins.bool"),
+        ("expandtabs", "receiver.expandtabs(4)", "builtins.str"),
+        ("find", "receiver.find('a', 0, 8)", "builtins.int"),
+        ("format", "'{}:{}'.format('a', 1)", "builtins.str"),
+        ("format_map", "'{name}'.format_map({'name': 'value'})",
+         "builtins.str"),
+        ("index", "receiver.index('a', 0, 8)", "builtins.int"),
+        ("isalnum", "receiver.isalnum()", "builtins.bool"),
+        ("isalpha", "receiver.isalpha()", "builtins.bool"),
+        ("isascii", "receiver.isascii()", "builtins.bool"),
+        ("isdecimal", "'12'.isdecimal()", "builtins.bool"),
+        ("isdigit", "'12'.isdigit()", "builtins.bool"),
+        ("isidentifier", "'name'.isidentifier()", "builtins.bool"),
+        ("islower", "'abc'.islower()", "builtins.bool"),
+        ("isnumeric", "'12'.isnumeric()", "builtins.bool"),
+        ("isprintable", "receiver.isprintable()", "builtins.bool"),
+        ("isspace", "' \\t'.isspace()", "builtins.bool"),
+        ("istitle", "'A Title'.istitle()", "builtins.bool"),
+        ("isupper", "'ABC'.isupper()", "builtins.bool"),
+        ("join", "','.join(['a', 'b'])", "builtins.str"),
+        ("ljust", "receiver.ljust(8, '.')", "builtins.str"),
+        ("lower", "receiver.lower()", "builtins.str"),
+        ("lstrip", "receiver.lstrip()", "builtins.str"),
+        ("maketrans", "receiver.maketrans('ab', 'AB', ' ')", "builtins.dict"),
+        ("partition", "receiver.partition('a')", "builtins.tuple"),
+        ("removeprefix", "receiver.removeprefix('A')", "builtins.str"),
+        ("removesuffix", "receiver.removesuffix('a')", "builtins.str"),
+        ("replace", "receiver.replace('a', 'A', 1)", "builtins.str"),
+        ("rfind", "receiver.rfind('a', 0, 8)", "builtins.int"),
+        ("rindex", "receiver.rindex('a', 0, 8)", "builtins.int"),
+        ("rjust", "receiver.rjust(8, '.')", "builtins.str"),
+        ("rpartition", "receiver.rpartition('a')", "builtins.tuple"),
+        ("rsplit", "receiver.rsplit('a', 1)", "builtins.list"),
+        ("rstrip", "receiver.rstrip()", "builtins.str"),
+        ("split", "receiver.split('a', 1)", "builtins.list"),
+        ("splitlines", "'a\\nb'.splitlines(True)", "builtins.list"),
+        ("startswith", "receiver.startswith('A', 0, 8)", "builtins.bool"),
+        ("strip", "receiver.strip()", "builtins.str"),
+        ("swapcase", "receiver.swapcase()", "builtins.str"),
+        ("title", "receiver.title()", "builtins.str"),
+        ("translate", "receiver.translate({97: 'A'})", "builtins.str"),
+        ("upper", "receiver.upper()", "builtins.str"),
+        ("zfill", "'12'.zfill(4)", "builtins.str"),
+    ]
+    for method, call, typ in string_normals:
+        n(f"str.{method}", "receiver = 'Alpha'", call, typ)
+
+    # generators
+    generator_setup = """
+def worker():
+    received = yield 'ready'
+    try:
+        yield received
+    except ValueError:
+        yield 'caught'
+receiver = worker()
+arg0 = None
+"""
+    n("gen.close", generator_setup + "\nnext(receiver)",
+      "receiver.close()", "builtins.NoneType", changed=["receiver"])
+    n("gen.send", generator_setup + "\nnext(receiver)\narg0 = 7",
+      "receiver.send(arg0)", "builtins.int", changed=["receiver"])
+    n("gen.throw",
+      generator_setup
+      + "\nnext(receiver)\nreceiver.send(None)\narg0 = ValueError('x')",
+      "receiver.throw(arg0)", "builtins.str", changed=["receiver"])
+
+    # builtin functions and constructors
+    n("len", "arg0 = [1, 2]", "len(arg0)", "builtins.int")
+    n("range", "arg0 = 0\narg1 = 3\narg2 = 1",
+      "range(arg0, arg1, arg2)", "builtins.range")
+    n(
+        "print",
+        """
+class Sink:
+    def __init__(self):
+        self.parts = []
+    def write(self, text):
+        self.parts.append(text)
+    def flush(self):
+        self.parts.append('<flush>')
+arg0 = 'x'
+arg1 = 'y'
+sink = Sink()
+""",
+        "print(arg0, arg1, sep=':', end='!', file=sink, flush=True)",
+        "builtins.NoneType",
+        roots=["arg0", "arg1", "sink"],
+        changed=["sink"],
+    )
+    n("isinstance", "arg0 = []\narg1 = list",
+      "isinstance(arg0, arg1)", "builtins.bool")
+    n("next", "arg0 = iter([1])", "next(arg0)", "builtins.int",
+      changed=["arg0"])
+    n("iter", "arg0 = [1]", "iter(arg0)", "builtins.list_iterator")
+    n("str", "arg0 = 12", "str(arg0)", "builtins.str")
+    n("repr", "arg0 = [1]", "repr(arg0)", "builtins.str")
+    n("list", "arg0 = (1, 2)", "list(arg0)", "builtins.list")
+    n("dict", "arg0 = {'a': 1}", "dict(arg0, b=2)", "builtins.dict")
+    n("set", "arg0 = [1, 2]", "set(arg0)", "builtins.set")
+    n("tuple", "arg0 = [1, 2]", "tuple(arg0)", "builtins.tuple")
+
+    return normal
+
+
+def add_failure_and_effect_scenarios(
+    c: Corpus, normal: dict[str, str]
+) -> dict[str, str]:
+    witnesses: dict[str, str] = {}
+
+    def remember(name: str, sid: str) -> None:
+        witnesses[name] = sid
+
+    # SupportsIndex, ordered iteration, search, and mutation phases.
+    remember("list_insert_type", c.raises(
+        "list.insert", "invalid_index_type",
+        "receiver = [1]\narg0 = 'bad'\narg1 = 2",
+        "receiver.insert(arg0, arg1)", "TypeError",
+        categories=["mutation_phase"], unchanged=["receiver"],
+    ))
+    c.concrete(
+        "list.insert", "index_hook_effect",
+        """
+class Index:
+    def __init__(self):
+        self.calls = 0
+    def __index__(self):
+        self.calls += 1
+        events.append('Index.__index__')
+        return 0
+receiver = [1]
+arg0 = Index()
+arg1 = 2
+""",
+        "receiver.insert(arg0, arg1)", "return", "builtins.NoneType",
+        categories=["hook_effect", "mutation_phase"],
+        events=["Index.__index__"], changed=["receiver", "arg0"],
+    )
+    c.raises(
+        "list.insert", "index_hook_raises_after_effect",
+        """
+class Index:
+    def __init__(self):
+        self.calls = 0
+    def __index__(self):
+        self.calls += 1
+        events.append('Index.__index__')
+        raise ValueError('index failed')
+receiver = [1]
+arg0 = Index()
+arg1 = 2
+""",
+        "receiver.insert(arg0, arg1)", "ValueError",
+        categories=["hook_effect", "mutation_phase"],
+        events=["Index.__index__"], changed=["arg0"], unchanged=["receiver"],
+    )
+    remember("list_extend_type", c.raises(
+        "list.extend", "non_iterable",
+        "receiver = [1]\narg0 = 3",
+        "receiver.extend(arg0)", "TypeError",
+        categories=["mutation_phase"], unchanged=["receiver"],
+    ))
+    c.raises(
+        "list.extend", "partial_iteration_then_raise",
+        """
+class Source:
+    def __init__(self):
+        self.index = 0
+    def __iter__(self):
+        events.append('Source.__iter__')
+        return self
+    def __next__(self):
+        events.append(f'Source.__next__:{self.index}')
+        if self.index == 0:
+            self.index += 1
+            return 2
+        raise LookupError('iteration failed')
+receiver = [1]
+arg0 = Source()
+""",
+        "receiver.extend(arg0)", "LookupError",
+        categories=["hook_effect", "mutation_phase"],
+        events=["Source.__iter__", "Source.__next__:0", "Source.__next__:1"],
+        changed=["receiver", "arg0"],
+    )
+    remember("list_pop_empty", c.raises(
+        "list.pop", "empty", "receiver = []", "receiver.pop()", "IndexError",
+        categories=["alias_emptiness", "mutation_phase"], unchanged=["receiver"],
+    ))
+    c.raises(
+        "list.pop", "invalid_index_type",
+        "receiver = [1]\narg0 = 'bad'", "receiver.pop(arg0)", "TypeError",
+        categories=["mutation_phase"], unchanged=["receiver"],
+    )
+    c.raises(
+        "list.remove", "missing",
+        "receiver = [1]\narg0 = 2", "receiver.remove(arg0)", "ValueError",
+        categories=["alias_emptiness"], unchanged=["receiver"],
+    )
+    c.raises(
+        "list.remove", "equality_hook_raises",
+        """
+class Element:
+    def __init__(self):
+        self.comparisons = 0
+    def __eq__(self, other):
+        self.comparisons += 1
+        events.append('Element.__eq__')
+        raise RuntimeError('comparison failed')
+receiver = [Element()]
+arg0 = 2
+""",
+        "receiver.remove(arg0)", "RuntimeError",
+        categories=["hook_effect", "mutation_phase"],
+        events=["Element.__eq__"], changed=["receiver"], unchanged=["arg0"],
+    )
+    c.raises(
+        "list.count", "hook_memory_error",
+        """
+class Element:
+    def __eq__(self, other):
+        events.append('Element.__eq__')
+        raise MemoryError('deliberate oracle witness')
+receiver = [Element()]
+arg0 = 2
+""",
+        "receiver.count(arg0)", "MemoryError",
+        categories=["hook_effect"], events=["Element.__eq__"],
+    )
+    c.raises(
+        "list.index", "invalid_bound_type",
+        "receiver = [1]\narg0 = 1\narg1 = 'bad'",
+        "receiver.index(arg0, arg1)", "TypeError",
+        categories=["mutation_phase"], unchanged=["receiver"],
+    )
+    c.raises(
+        "list.sort", "key_callback_raises",
+        """
+class Key:
+    def __init__(self):
+        self.calls = 0
+    def __call__(self, value):
+        self.calls += 1
+        events.append(f'Key:{value}')
+        if value == 1:
+            raise OSError('key failed')
+        return value
+receiver = [2, 1]
+arg0 = Key()
+""",
+        "receiver.sort(key=arg0)", "OSError",
+        categories=["hook_effect", "mutation_phase"],
+        events=["Key:2", "Key:1"], changed=["arg0"],
+    )
+    c.concrete(
+        "list.append", "must_alias_receiver",
+        "receiver = []\nalias = receiver\narg0 = 1",
+        "receiver.append(arg0)", "return", "builtins.NoneType",
+        categories=["alias_emptiness", "mutation_phase"],
+        changed=["receiver", "alias"], aliases=[["alias", "receiver"]],
+    )
+    c.concrete(
+        "list.clear", "must_alias_receiver",
+        "receiver = [1]\nalias = receiver",
+        "receiver.clear()", "return", "builtins.NoneType",
+        categories=["alias_emptiness", "mutation_phase"],
+        changed=["receiver", "alias"], aliases=[["alias", "receiver"]],
+    )
+
+    # Hashing, set emptiness, partial updates, and self aliases.
+    remember("set_add_type", c.raises(
+        "set.add", "unhashable",
+        "receiver = {1}\narg0 = []", "receiver.add(arg0)", "TypeError",
+        categories=["mutation_phase"], unchanged=["receiver"],
+    ))
+    c.raises(
+        "set.add", "hash_hook_raises_after_effect",
+        """
+class Key:
+    def __init__(self):
+        self.calls = 0
+    def __hash__(self):
+        self.calls += 1
+        events.append('Key.__hash__')
+        raise LookupError('hash failed')
+receiver = {1}
+arg0 = Key()
+""",
+        "receiver.add(arg0)", "LookupError",
+        categories=["hook_effect", "mutation_phase"],
+        events=["Key.__hash__"], changed=["arg0"], unchanged=["receiver"],
+    )
+    c.raises(
+        "set.remove", "missing",
+        "receiver = {1}\narg0 = 2", "receiver.remove(arg0)", "KeyError",
+        categories=["alias_emptiness"], unchanged=["receiver"],
+    )
+    remember("set_pop_empty", c.raises(
+        "set.pop", "empty", "receiver = set()", "receiver.pop()", "KeyError",
+        categories=["alias_emptiness", "mutation_phase"], unchanged=["receiver"],
+    ))
+    c.raises(
+        "set.update", "partial_update_then_unhashable",
+        "receiver = {0}\narg0 = [1, []]",
+        "receiver.update(arg0)", "TypeError",
+        categories=["mutation_phase"], changed=["receiver"],
+    )
+    c.raises(
+        "set.difference_update", "non_iterable",
+        "receiver = {1, 2}\narg0 = 3",
+        "receiver.difference_update(arg0)", "TypeError",
+        categories=["mutation_phase"], unchanged=["receiver"],
+    )
+    c.raises(
+        "set.intersection_update", "non_iterable",
+        "receiver = {1, 2}\narg0 = 3",
+        "receiver.intersection_update(arg0)", "TypeError",
+        categories=["mutation_phase"],
+    )
+    c.raises(
+        "set.symmetric_difference_update", "non_iterable",
+        "receiver = {1, 2}\narg0 = 3",
+        "receiver.symmetric_difference_update(arg0)", "TypeError",
+        categories=["mutation_phase"], unchanged=["receiver"],
+    )
+    for method in (
+        "difference_update",
+        "intersection_update",
+        "symmetric_difference_update",
+    ):
+        changes = [] if method == "intersection_update" else ["receiver", "alias"]
+        c.concrete(
+            f"set.{method}", "self_alias",
+            "receiver = {1, 2}\nalias = receiver",
+            f"receiver.{method}(alias)", "return", "builtins.NoneType",
+            categories=["alias_emptiness", "mutation_phase"],
+            changed=changes, aliases=[["alias", "receiver"]],
+        )
+
+    # Equality-search methods.
+    c.raises(
+        "tuple.index", "missing",
+        "receiver = (1,)\narg0 = 2", "receiver.index(arg0)", "ValueError",
+        categories=["alias_emptiness"],
+    )
+    c.raises(
+        "tuple.index", "invalid_bound_type",
+        "receiver = (1,)\narg0 = 1\narg1 = 'bad'",
+        "receiver.index(arg0, arg1)", "TypeError",
+    )
+    c.raises(
+        "tuple.count", "equality_hook_raises",
+        """
+class Element:
+    def __eq__(self, other):
+        events.append('Element.__eq__')
+        raise RuntimeError('comparison failed')
+receiver = (Element(),)
+arg0 = 1
+""",
+        "receiver.count(arg0)", "RuntimeError",
+        categories=["hook_effect"], events=["Element.__eq__"],
+    )
+    c.raises(
+        "range.index", "missing",
+        "receiver = range(2)\narg0 = 4", "receiver.index(arg0)", "ValueError",
+        categories=["alias_emptiness"],
+    )
+
+    # Dictionary hash/equality, live views, partial mutation, and emptiness.
+    remember("dict_get_type", c.raises(
+        "dict.get", "unhashable_key",
+        "receiver = {'a': 1}\narg0 = []",
+        "receiver.get(arg0)", "TypeError", unchanged=["receiver"],
+    ))
+    c.raises(
+        "dict.get", "hash_hook_raises_after_effect",
+        """
+class Key:
+    def __init__(self):
+        self.calls = 0
+    def __hash__(self):
+        self.calls += 1
+        events.append('Key.__hash__')
+        raise LookupError('hash failed')
+receiver = {'a': 1}
+arg0 = Key()
+""",
+        "receiver.get(arg0)", "LookupError",
+        categories=["hook_effect"], events=["Key.__hash__"],
+        changed=["arg0"], unchanged=["receiver"],
+    )
+    c.raises(
+        "dict.pop", "missing",
+        "receiver = {}\narg0 = 'a'", "receiver.pop(arg0)", "KeyError",
+        categories=["alias_emptiness", "mutation_phase"], unchanged=["receiver"],
+    )
+    c.concrete(
+        "dict.keys", "live_view_observes_mutation",
+        """
+receiver = {'a': 1}
+def invoke():
+    view = receiver.keys()
+    receiver['b'] = 2
+    return (view, list(view))
+""",
+        "invoke()", "return", "builtins.tuple",
+        categories=["alias_emptiness", "mutation_phase"],
+        changed=["receiver"],
+    )
+    c.concrete(
+        "dict.values", "live_view_observes_mutation",
+        """
+receiver = {'a': 1}
+def invoke():
+    view = receiver.values()
+    receiver['b'] = 2
+    return (view, list(view))
+""",
+        "invoke()", "return", "builtins.tuple",
+        categories=["alias_emptiness", "mutation_phase"],
+        changed=["receiver"],
+    )
+    c.concrete(
+        "dict.items", "live_view_observes_mutation",
+        """
+receiver = {'a': 1}
+def invoke():
+    view = receiver.items()
+    receiver['b'] = 2
+    return (view, list(view))
+""",
+        "invoke()", "return", "builtins.tuple",
+        categories=["alias_emptiness", "mutation_phase"],
+        changed=["receiver"],
+    )
+    c.raises(
+        "dict.setdefault", "unhashable_key",
+        "receiver = {}\narg0 = []\narg1 = 1",
+        "receiver.setdefault(arg0, arg1)", "TypeError",
+        categories=["mutation_phase"], unchanged=["receiver"],
+    )
+    c.raises(
+        "dict.update", "partial_pairs_then_bad_arity",
+        "receiver = {}\narg0 = [('a', 1), ('bad',)]",
+        "receiver.update(arg0)", "ValueError",
+        categories=["mutation_phase"], changed=["receiver"],
+    )
+    c.raises(
+        "dict.update", "partial_pairs_then_unhashable",
+        "receiver = {}\narg0 = [('a', 1), ([], 2)]",
+        "receiver.update(arg0)", "TypeError",
+        categories=["mutation_phase"], changed=["receiver"],
+    )
+    c.raises(
+        "dict.fromkeys", "iterator_raises",
+        """
+class Source:
+    def __init__(self):
+        self.index = 0
+    def __iter__(self):
+        events.append('Source.__iter__')
+        return self
+    def __next__(self):
+        events.append(f'Source.__next__:{self.index}')
+        if self.index == 0:
+            self.index += 1
+            return 'a'
+        raise RuntimeError('iteration failed')
+receiver = {}
+arg0 = Source()
+""",
+        "receiver.fromkeys(arg0)", "RuntimeError",
+        categories=["hook_effect", "mutation_phase"],
+        events=["Source.__iter__", "Source.__next__:0", "Source.__next__:1"],
+        changed=["arg0"], unchanged=["receiver"],
+    )
+    remember("dict_popitem_empty", c.raises(
+        "dict.popitem", "empty", "receiver = {}", "receiver.popitem()",
+        "KeyError", categories=["alias_emptiness", "mutation_phase"],
+        unchanged=["receiver"],
+    ))
+
+    # String contracts, format protocols, codecs, and opaque rows.
+    for method in ("strip", "lstrip", "rstrip"):
+        sid = c.raises(
+            f"str.{method}", "invalid_chars",
+            "receiver = 'abc'\narg0 = 1",
+            f"receiver.{method}(arg0)", "TypeError",
+        )
+        if method == "strip":
+            remember("str_strip_type", sid)
+    c.raises(
+        "str.replace", "invalid_old",
+        "receiver = 'abc'\narg0 = 1\narg1 = 'x'",
+        "receiver.replace(arg0, arg1)", "TypeError",
+    )
+    c.raises(
+        "str.join", "invalid_element",
+        "receiver = ','\narg0 = ['a', 1]",
+        "receiver.join(arg0)", "TypeError",
+        categories=["mutation_phase"],
+    )
+    c.raises(
+        "str.join", "iterator_raises_after_yield",
+        """
+class Source:
+    def __init__(self):
+        self.index = 0
+    def __iter__(self):
+        events.append('Source.__iter__')
+        return self
+    def __next__(self):
+        events.append(f'Source.__next__:{self.index}')
+        if self.index == 0:
+            self.index += 1
+            return 'a'
+        raise RuntimeError('iteration failed')
+receiver = ','
+arg0 = Source()
+""",
+        "receiver.join(arg0)", "RuntimeError",
+        categories=["hook_effect", "mutation_phase"],
+        events=[
+            "Source.__iter__",
+            "Source.__iter__",
+            "Source.__next__:0",
+            "Source.__next__:1",
+        ],
+        changed=["arg0"],
+    )
+    c.raises(
+        "str.format", "missing_attribute",
+        "receiver = '{0.missing}'\narg0 = object()",
+        "receiver.format(arg0)", "AttributeError",
+    )
+    c.raises(
+        "str.format", "format_hook_raises",
+        """
+class Value:
+    def __format__(self, spec):
+        events.append(f'Value.__format__:{spec}')
+        raise RuntimeError('format failed')
+receiver = '{:x}'
+arg0 = Value()
+""",
+        "receiver.format(arg0)", "RuntimeError",
+        categories=["hook_effect"], events=["Value.__format__:x"],
+    )
+    for method, parameter in (
+        ("removeprefix", "prefix"),
+        ("removesuffix", "suffix"),
+    ):
+        c.raises(
+            f"str.{method}", f"invalid_{parameter}",
+            "receiver = 'abc'\narg0 = 1",
+            f"receiver.{method}(arg0)", "TypeError",
+        )
+    for method in ("ljust", "rjust", "center"):
+        c.raises(
+            f"str.{method}", "invalid_fillchar",
+            "receiver = 'a'\narg0 = 3\narg1 = '..'",
+            f"receiver.{method}(arg0, arg1)", "TypeError",
+        )
+    for method in ("zfill", "expandtabs"):
+        c.raises(
+            f"str.{method}", "invalid_index",
+            "receiver = 'a'\narg0 = 'bad'",
+            f"receiver.{method}(arg0)", "TypeError",
+        )
+    for method in ("startswith", "endswith"):
+        c.raises(
+            f"str.{method}", "invalid_string_tuple",
+            "receiver = 'abc'\narg0 = (1,)",
+            f"receiver.{method}(arg0)", "TypeError",
+        )
+    for method in ("count", "find", "rfind"):
+        c.raises(
+            f"str.{method}", "invalid_substring",
+            "receiver = 'abc'\narg0 = 1",
+            f"receiver.{method}(arg0)", "TypeError",
+        )
+    for method in ("index", "rindex"):
+        c.raises(
+            f"str.{method}", "missing",
+            "receiver = 'abc'\narg0 = 'z'",
+            f"receiver.{method}(arg0)", "ValueError",
+        )
+    for method in ("split", "rsplit"):
+        c.raises(
+            f"str.{method}", "empty_separator",
+            "receiver = 'abc'\narg0 = ''",
+            f"receiver.{method}(arg0)", "ValueError",
+        )
+    c.raises(
+        "str.splitlines", "keepends_truth_hook_raises",
+        """
+class Flag:
+    def __bool__(self):
+        events.append('Flag.__bool__')
+        raise LookupError('truth failed')
+receiver = 'a\\nb'
+arg0 = Flag()
+""",
+        "receiver.splitlines(arg0)", "LookupError",
+        categories=["hook_effect"], events=["Flag.__bool__"],
+    )
+    c.raises(
+        "str.encode", "unknown_codec",
+        "receiver = 'abc'\narg0 = 'not-a-real-codec'",
+        "receiver.encode(arg0)", "LookupError",
+    )
+    c.raises(
+        "str.encode", "unicode_encode_failure",
+        "receiver = 'é'\narg0 = 'ascii'",
+        "receiver.encode(arg0)", "UnicodeEncodeError",
+    )
+    c.raises(
+        "str.format_map", "missing_key",
+        "receiver = '{missing}'\narg0 = {}",
+        "receiver.format_map(arg0)", "KeyError",
+    )
+    c.raises(
+        "str.format_map", "mapping_hook_raises",
+        """
+class Mapping:
+    def __getitem__(self, key):
+        events.append(f'Mapping.__getitem__:{key}')
+        raise OSError('lookup failed')
+receiver = '{name}'
+arg0 = Mapping()
+""",
+        "receiver.format_map(arg0)", "OSError",
+        categories=["hook_effect"], events=["Mapping.__getitem__:name"],
+    )
+    c.raises(
+        "str.maketrans", "unequal_lengths",
+        "receiver = ''\narg0 = 'a'\narg1 = 'bc'",
+        "receiver.maketrans(arg0, arg1)", "ValueError",
+    )
+    for method in ("partition", "rpartition"):
+        c.raises(
+            f"str.{method}", "empty_separator",
+            "receiver = 'abc'\narg0 = ''",
+            f"receiver.{method}(arg0)", "ValueError",
+        )
+        c.raises(
+            f"str.{method}", "invalid_separator",
+            "receiver = 'abc'\narg0 = 1",
+            f"receiver.{method}(arg0)", "TypeError",
+        )
+    c.raises(
+        "str.translate", "invalid_replacement",
+        "receiver = 'a'\narg0 = {97: object()}",
+        "receiver.translate(arg0)", "TypeError",
+    )
+    c.concrete(
+        "str.translate", "getitem_hook_effect",
+        """
+class Table:
+    def __getitem__(self, key):
+        events.append(f'Table.__getitem__:{key}')
+        return key
+receiver = 'ab'
+arg0 = Table()
+""",
+        "receiver.translate(arg0)", "return", "builtins.str",
+        categories=["hook_effect"],
+        events=["Table.__getitem__:97", "Table.__getitem__:98"],
+    )
+
+    # Generator resume/close behavior.
+    c.raises(
+        "gen.close", "generator_ignores_exit",
+        """
+def worker():
+    try:
+        yield 1
+    except GeneratorExit:
+        events.append('caught GeneratorExit')
+        yield 2
+receiver = worker()
+next(receiver)
+""",
+        "receiver.close()", "RuntimeError",
+        categories=["hook_effect", "mutation_phase"],
+        events=["caught GeneratorExit"], changed=["receiver"],
+    )
+    remember("gen_send_created", c.raises(
+        "gen.send", "non_none_to_created",
+        """
+def worker():
+    yield 1
+receiver = worker()
+arg0 = 2
+""",
+        "receiver.send(arg0)", "TypeError",
+        categories=["mutation_phase"], unchanged=["receiver"],
+    ))
+    c.raises(
+        "gen.send", "exhausted",
+        """
+def worker():
+    if False:
+        yield None
+receiver = worker()
+arg0 = None
+""",
+        "receiver.send(arg0)", "StopIteration",
+        categories=["alias_emptiness", "mutation_phase"], changed=["receiver"],
+    )
+    c.raises(
+        "gen.throw", "uncaught_injected_exception",
+        """
+def worker():
+    yield 1
+receiver = worker()
+next(receiver)
+arg0 = ValueError('injected')
+""",
+        "receiver.throw(arg0)", "ValueError",
+        categories=["mutation_phase"], changed=["receiver"],
+    )
+
+    # Builtin protocol functions and constructor consumption.
+    remember("len_type", c.raises(
+        "len", "unsized", "arg0 = 1", "len(arg0)", "TypeError",
+    ))
+    c.raises(
+        "len", "negative_hook_result",
+        """
+class Sized:
+    def __len__(self):
+        events.append('Sized.__len__')
+        return -1
+arg0 = Sized()
+""",
+        "len(arg0)", "ValueError",
+        categories=["hook_effect"], events=["Sized.__len__"],
+    )
+    c.raises(
+        "str", "invalid_hook_result",
+        """
+class Value:
+    def __str__(self):
+        events.append('Value.__str__')
+        return 1
+arg0 = Value()
+""",
+        "str(arg0)", "TypeError",
+        categories=["hook_effect"], events=["Value.__str__"],
+    )
+    c.raises(
+        "repr", "invalid_hook_result",
+        """
+class Value:
+    def __repr__(self):
+        events.append('Value.__repr__')
+        return 1
+arg0 = Value()
+""",
+        "repr(arg0)", "TypeError",
+        categories=["hook_effect"], events=["Value.__repr__"],
+    )
+    c.raises(
+        "print", "file_write_raises",
+        """
+class Sink:
+    def write(self, text):
+        events.append(f'Sink.write:{text}')
+        raise OSError('write failed')
+arg0 = 'x'
+sink = Sink()
+""",
+        "print(arg0, file=sink)", "OSError",
+        categories=["hook_effect", "mutation_phase"],
+        events=["Sink.write:x"], roots=["arg0", "sink"],
+    )
+    c.raises(
+        "isinstance", "invalid_classinfo",
+        "arg0 = 1\narg1 = 2", "isinstance(arg0, arg1)", "TypeError",
+    )
+    remember("range_type", c.raises(
+        "range", "invalid_operand",
+        "arg0 = 'bad'", "range(arg0)", "TypeError",
+    ))
+    c.raises(
+        "range", "zero_step",
+        "arg0 = 0\narg1 = 3\narg2 = 0",
+        "range(arg0, arg1, arg2)", "ValueError",
+    )
+    remember("iter_type", c.raises(
+        "iter", "non_iterable", "arg0 = 1", "iter(arg0)", "TypeError",
+    ))
+    c.concrete(
+        "iter", "sequence_fallback",
+        """
+class Sequence:
+    def __init__(self):
+        self.reads = 0
+    def __getitem__(self, index):
+        self.reads += 1
+        events.append(f'Sequence.__getitem__:{index}')
+        if index == 0:
+            return 'x'
+        raise IndexError(index)
+arg0 = Sequence()
+""",
+        "list(iter(arg0))", "return", "builtins.list",
+        categories=["hook_effect", "mutation_phase"],
+        events=["Sequence.__getitem__:0", "Sequence.__getitem__:1"],
+        changed=["arg0"],
+    )
+    remember("next_type", c.raises(
+        "next", "non_iterator", "arg0 = 1", "next(arg0)", "TypeError",
+    ))
+    remember("next_empty", c.raises(
+        "next", "exhausted", "arg0 = iter([])", "next(arg0)",
+        "StopIteration", categories=["alias_emptiness", "mutation_phase"],
+    ))
+    for constructor in ("list", "tuple"):
+        c.raises(
+            constructor, "non_iterable", "arg0 = 1",
+            f"{constructor}(arg0)", "TypeError",
+        )
+    c.raises(
+        "list", "iterator_raises_after_yield",
+        """
+class Source:
+    def __init__(self):
+        self.index = 0
+    def __iter__(self):
+        events.append('Source.__iter__')
+        return self
+    def __next__(self):
+        events.append(f'Source.__next__:{self.index}')
+        if self.index == 0:
+            self.index += 1
+            return 1
+        raise RuntimeError('iteration failed')
+arg0 = Source()
+""",
+        "list(arg0)", "RuntimeError",
+        categories=["hook_effect", "mutation_phase"],
+        events=["Source.__iter__", "Source.__next__:0", "Source.__next__:1"],
+        changed=["arg0"],
+    )
+    c.raises(
+        "set", "unhashable_element",
+        "arg0 = [1, []]", "set(arg0)", "TypeError",
+        categories=["mutation_phase"],
+    )
+    c.raises(
+        "dict", "bad_pair_arity",
+        "arg0 = [('a', 1), ('bad',)]", "dict(arg0)", "ValueError",
+        categories=["mutation_phase"],
+    )
+    c.raises(
+        "dict", "unhashable_key",
+        "arg0 = [('a', 1), ([], 2)]", "dict(arg0)", "TypeError",
+        categories=["mutation_phase"],
+    )
+
+    # Mixed abstract values are represented by their concrete witnesses.
+    c.mixed(
+        "list.insert", "mixed_int_or_str_index",
+        [normal["list.insert"], witnesses["list_insert_type"]],
+        ["raise:builtins.TypeError", "return:builtins.NoneType"],
+        note="Abstract index tag set int|str must retain both paths.",
+    )
+    c.mixed(
+        "list.extend", "mixed_iterable_or_int",
+        [normal["list.extend"], witnesses["list_extend_type"]],
+        ["raise:builtins.TypeError", "return:builtins.NoneType"],
+        note="Iterable and non-iterable alternatives start from one state.",
+    )
+    c.mixed(
+        "list.pop", "mixed_empty_or_nonempty",
+        [normal["list.pop"], witnesses["list_pop_empty"]],
+        ["raise:builtins.IndexError", "return:builtins.int"],
+        note="Top emptiness must retain success and IndexError.",
+    )
+    c.mixed(
+        "set.add", "mixed_hashable_or_unhashable",
+        [normal["set.add"], witnesses["set_add_type"]],
+        ["raise:builtins.TypeError", "return:builtins.NoneType"],
+        note="Hashability splitting precedes insertion.",
+    )
+    c.mixed(
+        "set.pop", "mixed_empty_or_nonempty",
+        [normal["set.pop"], witnesses["set_pop_empty"]],
+        ["raise:builtins.KeyError", "return:builtins.int"],
+        note="Top emptiness must retain success and KeyError.",
+    )
+    c.mixed(
+        "dict.get", "mixed_hashable_or_unhashable_key",
+        [normal["dict.get"], witnesses["dict_get_type"]],
+        ["raise:builtins.TypeError", "return:builtins.int"],
+        note="Every key-tag alternative starts from the pre-hash state.",
+    )
+    c.mixed(
+        "dict.popitem", "mixed_empty_or_nonempty",
+        [normal["dict.popitem"], witnesses["dict_popitem_empty"]],
+        ["raise:builtins.KeyError", "return:builtins.tuple"],
+        note="Top dictionary emptiness retains both outcomes.",
+    )
+    c.mixed(
+        "str.strip", "mixed_none_or_int_chars",
+        [normal["str.strip"], witnesses["str_strip_type"]],
+        ["raise:builtins.TypeError", "return:builtins.str"],
+        note="Optional string contract splits valid and invalid tags.",
+    )
+    c.mixed(
+        "len", "mixed_sized_or_int",
+        [normal["len"], witnesses["len_type"]],
+        ["raise:builtins.TypeError", "return:builtins.int"],
+        note="Sized and unsized receiver alternatives are both retained.",
+    )
+    c.mixed(
+        "range", "mixed_int_or_str_operand",
+        [normal["range"], witnesses["range_type"]],
+        ["raise:builtins.TypeError", "return:builtins.range"],
+        note="SupportsIndex alternatives split before allocation.",
+    )
+    c.mixed(
+        "iter", "mixed_iterable_or_int",
+        [normal["iter"], witnesses["iter_type"]],
+        ["raise:builtins.TypeError", "return:builtins.list_iterator"],
+        note="Iteration protocol alternatives retain the non-iterable error.",
+    )
+    c.mixed(
+        "next", "mixed_iterator_or_int",
+        [normal["next"], witnesses["next_type"]],
+        ["raise:builtins.TypeError", "return:builtins.int"],
+        note="Iterator and non-iterator tags remain separate.",
+    )
+    c.mixed(
+        "gen.send", "mixed_suspended_or_created",
+        [normal["gen.send"], witnesses["gen_send_created"]],
+        ["raise:builtins.TypeError", "return:builtins.int"],
+        note="Generator suspension state controls initial non-None send.",
+    )
+
+    return witnesses
+
+
+def inventory() -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for receiver, names in METHODS.items():
+        for name in names:
+            key = f"{receiver}.{name}"
+            rows.append(
+                {
+                    "key": key,
+                    "kind": "method",
+                    "receiver": receiver,
+                    "name": name,
+                    "family": receiver,
+                    "formerly_opaque": key in FORMERLY_OPAQUE,
+                }
+            )
+    for name in FUNCTIONS:
+        rows.append(
+            {
+                "key": name,
+                "kind": "function",
+                "name": name,
+                "family": "builtin",
+                "formerly_opaque": False,
+            }
+        )
+    return sorted(rows, key=lambda row: row["key"])
+
+
+def coverage_rows(
+    rule_inventory: list[dict[str, Any]],
+    scenarios: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    by_rule: dict[str, dict[str, list[str]]] = {}
+    for row in rule_inventory:
+        by_rule[row["key"]] = {dimension: [] for dimension in DIMENSIONS}
+    for scenario in scenarios:
+        for category in scenario["categories"]:
+            by_rule[scenario["rule_key"]][category].append(scenario["id"])
+
+    rows: list[dict[str, Any]] = []
+    for rule in rule_inventory:
+        key = rule["key"]
+        for dimension in DIMENSIONS:
+            ids = sorted(by_rule[key][dimension])
+            if ids:
+                status = "covered"
+                reason = None
+            elif dimension in ("inventory", "normal", "cpython_evidence"):
+                status = "missing"
+                reason = "required for every RuleKey"
+            elif dimension == "mixed_abstract":
+                status = "gap"
+                reason = "requires V2 Flow test plus concrete witness alternatives"
+            else:
+                status = "gap"
+                reason = "catalog applicability must be discharged or marked inapplicable"
+            row = {
+                "rule_key": key,
+                "dimension": dimension,
+                "status": status,
+                "scenarios": ids,
+            }
+            if reason:
+                row["reason"] = reason
+            rows.append(row)
+    return rows
+
+
+def build() -> dict[str, Any]:
+    c = Corpus()
+    normal = add_normal_scenarios(c)
+    add_failure_and_effect_scenarios(c, normal)
+    rules = inventory()
+    return {
+        "schema_version": 1,
+        "target": {
+            "implementation": "CPython",
+            "major": 3,
+            "minor": 13,
+        },
+        "dimensions": DIMENSIONS,
+        "catalog_exception_classes": CATALOG_EXCEPTION_CLASSES,
+        "inventory": rules,
+        "scenarios": sorted(c.scenarios, key=lambda row: row["id"]),
+        "coverage": coverage_rows(rules, c.scenarios),
+    }
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--output",
+        type=pathlib.Path,
+        default=pathlib.Path(__file__).with_name(
+            "callable_rule_scenarios.json"
+        ),
+    )
+    args = parser.parse_args()
+    matrix = build()
+    args.output.write_text(
+        json.dumps(matrix, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    print(
+        f"wrote {len(matrix['inventory'])} RuleKeys and "
+        f"{len(matrix['scenarios'])} scenarios to {args.output}"
+    )
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,556 @@
+#!/usr/bin/env python3
+"""Independent CPython 3.13 oracle for callable-rule scenarios.
+
+The probe executes only concrete witnesses.  Each witness runs in a fresh
+namespace and records:
+
+* exact return or exception type;
+* a graph snapshot rooted at the receiver, arguments, and requested observers;
+* root alias groups and changed roots;
+* ordered events emitted by user protocol hooks.
+
+Mixed abstract scenarios are checked by joining references to separately
+executed concrete witnesses.  No PyResid or Lean implementation is imported.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import inspect
+import io
+import json
+import math
+import pathlib
+import platform
+import sys
+import textwrap
+import types
+from typing import Any
+
+
+HERE = pathlib.Path(__file__).resolve().parent
+DEFAULT_MATRIX = HERE / "callable_rule_scenarios.json"
+DEFAULT_EVIDENCE = HERE / "cpython_callable_expected.json"
+
+DICT_KEYS = type({}.keys())
+DICT_VALUES = type({}.values())
+DICT_ITEMS = type({}.items())
+BUILTIN_ITERATOR_TYPES = {
+    type(iter([])),
+    type(iter(())),
+    type(iter("")),
+    type(iter(range(0))),
+    type(iter({})),
+    type(iter({}.keys())),
+    type(iter({}.values())),
+    type(iter({}.items())),
+    type(iter(set())),
+}
+IMMUTABLE_TYPES = (
+    type(None),
+    bool,
+    int,
+    float,
+    complex,
+    str,
+    bytes,
+    range,
+    type,
+)
+
+
+def type_name(value_or_type: object) -> str:
+    cls = value_or_type if isinstance(value_or_type, type) else type(value_or_type)
+    return f"{cls.__module__}.{cls.__qualname__}"
+
+
+def stable_json(value: object) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+
+
+def scalar(value: object) -> dict[str, Any] | None:
+    if value is None:
+        return {"kind": "none"}
+    if value is NotImplemented:
+        return {"kind": "not_implemented"}
+    if value is Ellipsis:
+        return {"kind": "ellipsis"}
+    if type(value) is bool:
+        return {"kind": "bool", "value": value}
+    if type(value) is int:
+        return {"kind": "int", "value": str(value)}
+    if type(value) is float:
+        if math.isnan(value):
+            text = "nan"
+        elif math.isinf(value):
+            text = "inf" if value > 0 else "-inf"
+        else:
+            text = value.hex()
+        return {"kind": "float", "value": text}
+    if type(value) is complex:
+        return {
+            "kind": "complex",
+            "real": scalar(value.real)["value"],
+            "imag": scalar(value.imag)["value"],
+        }
+    if type(value) is str:
+        return {"kind": "str", "value": value}
+    if type(value) is bytes:
+        return {"kind": "bytes", "hex": value.hex()}
+    return None
+
+
+def safe_sort_key(value: object) -> tuple[str, str]:
+    encoded = scalar(value)
+    if encoded is not None:
+        return (encoded["kind"], stable_json(encoded))
+    if type(value) is tuple:
+        parts = [safe_sort_key(item) for item in value]
+        return ("tuple", stable_json(parts))
+    return (type_name(value), "")
+
+
+class GraphEncoder:
+    """Identity-preserving snapshot that never calls user repr/hash/equality."""
+
+    def __init__(self) -> None:
+        self.identities: dict[int, str] = {}
+        self.objects: dict[str, dict[str, Any]] = {}
+
+    def reference(self, value: object) -> dict[str, Any]:
+        immediate = scalar(value)
+        if immediate is not None:
+            return immediate
+        if isinstance(value, type):
+            return {"kind": "type", "name": type_name(value)}
+        if isinstance(value, types.BuiltinFunctionType):
+            return {
+                "kind": "builtin_function",
+                "name": f"{value.__module__}.{value.__qualname__}",
+            }
+        if isinstance(value, types.FunctionType):
+            return {
+                "kind": "function",
+                "name": f"{value.__module__}.{value.__qualname__}",
+            }
+
+        identity = id(value)
+        known = self.identities.get(identity)
+        if known is not None:
+            return {"ref": known}
+        name = f"o{len(self.identities)}"
+        self.identities[identity] = name
+        self.objects[name] = {"type": type_name(value), "kind": "pending"}
+        self.objects[name] = self.describe(value)
+        return {"ref": name}
+
+    def describe(self, value: object) -> dict[str, Any]:
+        cls_name = type_name(value)
+        if type(value) is list:
+            return {
+                "type": cls_name,
+                "kind": "list",
+                "items": [self.reference(item) for item in value],
+            }
+        if type(value) is tuple:
+            return {
+                "type": cls_name,
+                "kind": "tuple",
+                "items": [self.reference(item) for item in value],
+            }
+        if type(value) in (set, frozenset):
+            ordered = sorted(value, key=safe_sort_key)
+            return {
+                "type": cls_name,
+                "kind": "set" if type(value) is set else "frozenset",
+                "items": [self.reference(item) for item in ordered],
+            }
+        if type(value) is dict:
+            return {
+                "type": cls_name,
+                "kind": "dict",
+                "entries": [
+                    [self.reference(key), self.reference(item)]
+                    for key, item in value.items()
+                ],
+            }
+        if type(value) is range:
+            return {
+                "type": cls_name,
+                "kind": "range",
+                "start": value.start,
+                "stop": value.stop,
+                "step": value.step,
+            }
+        if type(value) in (DICT_KEYS, DICT_VALUES, DICT_ITEMS):
+            return {
+                "type": cls_name,
+                "kind": "dict_view",
+                "items": [self.reference(item) for item in value],
+            }
+        if isinstance(value, types.GeneratorType):
+            frame = value.gi_frame
+            return {
+                "type": cls_name,
+                "kind": "generator",
+                "state": inspect.getgeneratorstate(value),
+                "running": value.gi_running,
+                "suspended": value.gi_suspended,
+                "frame": None
+                if frame is None
+                else {
+                    "lasti": frame.f_lasti,
+                    "lineno": frame.f_lineno,
+                    "locals": {
+                        name: self.reference(item)
+                        for name, item in sorted(frame.f_locals.items())
+                    },
+                },
+            }
+        if type(value) in BUILTIN_ITERATOR_TYPES:
+            reduced = value.__reduce__()
+            return {
+                "type": cls_name,
+                "kind": "builtin_iterator",
+                "state": self.reference(reduced),
+            }
+        if isinstance(value, io.StringIO):
+            return {
+                "type": cls_name,
+                "kind": "string_io",
+                "value": value.getvalue(),
+                "position": value.tell(),
+                "closed": value.closed,
+            }
+        if isinstance(value, BaseException):
+            return {
+                "type": cls_name,
+                "kind": "exception",
+                "args": self.reference(value.args),
+                "attrs": self.object_attributes(value),
+            }
+        return {
+            "type": cls_name,
+            "kind": "object",
+            "attrs": self.object_attributes(value),
+        }
+
+    def object_attributes(self, value: object) -> dict[str, Any]:
+        attrs: dict[str, Any] = {}
+        try:
+            namespace = object.__getattribute__(value, "__dict__")
+        except (AttributeError, TypeError):
+            namespace = None
+        if isinstance(namespace, dict):
+            for name, item in sorted(namespace.items()):
+                attrs[name] = self.reference(item)
+
+        seen_slots: set[str] = set()
+        for cls in type(value).__mro__:
+            slots = vars(cls).get("__slots__", ())
+            if isinstance(slots, str):
+                slots = (slots,)
+            for name in slots:
+                if name in ("__dict__", "__weakref__") or name in seen_slots:
+                    continue
+                seen_slots.add(name)
+                try:
+                    item = object.__getattribute__(value, name)
+                except AttributeError:
+                    continue
+                attrs[name] = self.reference(item)
+        return attrs
+
+    def snapshot(self, roots: dict[str, object]) -> dict[str, Any]:
+        encoded_roots = {
+            name: self.reference(value) for name, value in roots.items()
+        }
+        return {"roots": encoded_roots, "objects": self.objects}
+
+
+def snapshot(roots: dict[str, object]) -> dict[str, Any]:
+    return GraphEncoder().snapshot(roots)
+
+
+def individual_root_states(roots: dict[str, object]) -> dict[str, Any]:
+    return {name: snapshot({name: value}) for name, value in roots.items()}
+
+
+def alias_groups(roots: dict[str, object]) -> list[list[str]]:
+    by_identity: dict[int, list[str]] = {}
+    for name, value in roots.items():
+        if (
+            isinstance(value, IMMUTABLE_TYPES)
+            or value is NotImplemented
+            or value is Ellipsis
+        ):
+            continue
+        by_identity.setdefault(id(value), []).append(name)
+    return sorted(
+        [sorted(names) for names in by_identity.values() if len(names) > 1]
+    )
+
+
+def outcome_key(outcome: dict[str, Any]) -> str:
+    return f"{outcome['kind']}:{outcome['type']}"
+
+
+def execute_concrete(row: dict[str, Any]) -> dict[str, Any]:
+    execution = row["execution"]
+    namespace: dict[str, object] = {
+        "__builtins__": __builtins__,
+        "__name__": "__callable_rule_scenario__",
+        "events": [],
+    }
+    source = textwrap.dedent(execution["setup"])
+    exec(compile(source, f"<{row['id']}:setup>", "exec"), namespace)
+    events = namespace["events"]
+    if not isinstance(events, list):
+        raise AssertionError(f"{row['id']}: setup replaced the event list")
+    events.clear()
+
+    root_names = execution["roots"]
+    missing = [name for name in root_names if name not in namespace]
+    if missing:
+        raise AssertionError(f"{row['id']}: missing roots {missing}")
+    before_roots = {name: namespace[name] for name in root_names}
+    before = snapshot(before_roots)
+    before_individual = individual_root_states(before_roots)
+    aliases_before = alias_groups(before_roots)
+
+    result: object | None = None
+    exception: BaseException | None = None
+    try:
+        result = eval(
+            compile(execution["call"], f"<{row['id']}:call>", "eval"),
+            namespace,
+        )
+        outcome = {"kind": "return", "type": type_name(result)}
+    except BaseException as caught:
+        exception = caught
+        outcome = {
+            "kind": "raise",
+            "type": type_name(caught),
+            "args": snapshot({"args": caught.args}),
+        }
+
+    after_roots = {name: namespace[name] for name in root_names}
+    post_graph_roots = dict(after_roots)
+    if exception is None:
+        post_graph_roots["$result"] = result
+    else:
+        post_graph_roots["$exception"] = exception
+    after = snapshot(post_graph_roots)
+    after_individual = individual_root_states(after_roots)
+    aliases_after = alias_groups(after_roots)
+    changed = sorted(
+        name
+        for name in root_names
+        if before_individual[name] != after_individual[name]
+    )
+
+    actual_events = list(events)
+    expected = row["expect"]
+    if outcome["kind"] != expected["outcome"]["kind"]:
+        raise AssertionError(
+            f"{row['id']}: expected {expected['outcome']}, got {outcome}"
+        )
+    if outcome["type"] != expected["outcome"]["type"]:
+        raise AssertionError(
+            f"{row['id']}: expected type {expected['outcome']['type']}, "
+            f"got {outcome['type']}"
+        )
+    if actual_events != expected["events"]:
+        raise AssertionError(
+            f"{row['id']}: expected events {expected['events']}, "
+            f"got {actual_events}"
+        )
+    for name in expected["changed_roots"]:
+        if name not in changed:
+            raise AssertionError(
+                f"{row['id']}: root {name!r} was expected to change"
+            )
+    for name in expected["unchanged_roots"]:
+        if name in changed:
+            raise AssertionError(
+                f"{row['id']}: root {name!r} changed before failure"
+            )
+    for group in expected["alias_groups_after"]:
+        if sorted(group) not in aliases_after:
+            raise AssertionError(
+                f"{row['id']}: missing post-state alias group {group}"
+            )
+
+    return {
+        "rule_key": row["rule_key"],
+        "categories": row["categories"],
+        "outcome": outcome,
+        "events": actual_events,
+        "changed_roots": changed,
+        "alias_groups_before": aliases_before,
+        "alias_groups_after": aliases_after,
+        "pre_state": before,
+        "post_state": after,
+    }
+
+
+def validate_matrix(matrix: dict[str, Any]) -> None:
+    if matrix.get("schema_version") != 1:
+        raise AssertionError("unsupported callable-rule matrix schema")
+    target = matrix["target"]
+    if platform.python_implementation() != target["implementation"]:
+        raise AssertionError(
+            f"oracle requires {target['implementation']}, "
+            f"got {platform.python_implementation()}"
+        )
+    if list(sys.version_info[:2]) != [target["major"], target["minor"]]:
+        raise AssertionError(
+            f"oracle requires Python {target['major']}.{target['minor']}, "
+            f"got {platform.python_version()}"
+        )
+
+    inventory = [row["key"] for row in matrix["inventory"]]
+    if len(inventory) != 105 or len(set(inventory)) != 105:
+        raise AssertionError(
+            f"matrix must contain 105 unique RuleKeys, got {len(inventory)}"
+        )
+    known = set(inventory)
+    scenario_ids: set[str] = set()
+    for row in matrix["scenarios"]:
+        if row["id"] in scenario_ids:
+            raise AssertionError(f"duplicate scenario id {row['id']}")
+        scenario_ids.add(row["id"])
+        if row["rule_key"] not in known:
+            raise AssertionError(
+                f"{row['id']}: unknown RuleKey {row['rule_key']}"
+            )
+
+
+def run(matrix: dict[str, Any]) -> dict[str, Any]:
+    validate_matrix(matrix)
+    results: dict[str, dict[str, Any]] = {}
+    abstract_rows: list[dict[str, Any]] = []
+    for row in matrix["scenarios"]:
+        if "execution" in row:
+            results[row["id"]] = execute_concrete(row)
+        else:
+            abstract_rows.append(row)
+
+    for row in abstract_rows:
+        missing = [sid for sid in row["witnesses"] if sid not in results]
+        if missing:
+            raise AssertionError(f"{row['id']}: missing witnesses {missing}")
+        concrete_outcomes = sorted(
+            {outcome_key(results[sid]["outcome"]) for sid in row["witnesses"]}
+        )
+        expected = row["expect"]["abstract_outcomes"]
+        if concrete_outcomes != expected:
+            raise AssertionError(
+                f"{row['id']}: expected witness outcomes {expected}, "
+                f"got {concrete_outcomes}"
+            )
+        results[row["id"]] = {
+            "rule_key": row["rule_key"],
+            "categories": row["categories"],
+            "kind": "abstract_witness_join",
+            "witnesses": row["witnesses"],
+            "outcomes": concrete_outcomes,
+            "same_abstract_input_state": row["expect"][
+                "same_abstract_input_state"
+            ],
+        }
+
+    matrix_bytes = stable_json(matrix).encode("utf-8")
+    return {
+        "schema_version": 1,
+        "implementation": platform.python_implementation(),
+        "version": platform.python_version(),
+        "version_info": list(sys.version_info[:3]),
+        "matrix_sha256": hashlib.sha256(matrix_bytes).hexdigest(),
+        "rule_count": len(matrix["inventory"]),
+        "scenario_count": len(matrix["scenarios"]),
+        "concrete_scenario_count": sum(
+            "execution" in row for row in matrix["scenarios"]
+        ),
+        "abstract_scenario_count": len(abstract_rows),
+        "results": results,
+    }
+
+
+def load_matrix(path: pathlib.Path) -> dict[str, Any]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def write_json(path: pathlib.Path, value: object) -> None:
+    path.write_text(
+        json.dumps(value, indent=2, sort_keys=True, ensure_ascii=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--matrix", type=pathlib.Path, default=DEFAULT_MATRIX)
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "--write-evidence",
+        type=pathlib.Path,
+        metavar="FILE",
+        help="write the full CPython observation baseline",
+    )
+    group.add_argument(
+        "--check-evidence",
+        type=pathlib.Path,
+        metavar="FILE",
+        help="compare full CPython observations with a pinned baseline",
+    )
+    args = parser.parse_args()
+
+    report = run(load_matrix(args.matrix))
+    if args.write_evidence:
+        write_json(args.write_evidence, report)
+        print(
+            f"wrote {report['concrete_scenario_count']} concrete and "
+            f"{report['abstract_scenario_count']} abstract scenarios "
+            f"to {args.write_evidence}"
+        )
+        return
+    if args.check_evidence:
+        expected = json.loads(args.check_evidence.read_text(encoding="utf-8"))
+        if report != expected:
+            expected_results = expected.get("results", {})
+            changed = sorted(
+                sid
+                for sid in set(expected_results) | set(report["results"])
+                if expected_results.get(sid) != report["results"].get(sid)
+            )
+            print("CPython callable-rule semantics drift", file=sys.stderr)
+            for key in (
+                "implementation",
+                "version_info",
+                "matrix_sha256",
+                "rule_count",
+                "scenario_count",
+                "concrete_scenario_count",
+                "abstract_scenario_count",
+            ):
+                if report.get(key) != expected.get(key):
+                    print(f"  changed: {key}", file=sys.stderr)
+            for sid in changed[:40]:
+                print(f"  changed scenario: {sid}", file=sys.stderr)
+            raise SystemExit(1)
+        print(
+            f"CPython {platform.python_version()}: "
+            f"{report['concrete_scenario_count']} concrete callable "
+            f"observations and {report['abstract_scenario_count']} "
+            "abstract joins match"
+        )
+        return
+
+    json.dump(report, sys.stdout, indent=2, sort_keys=True)
+    print()
+
+
+if __name__ == "__main__":
+    main()
