@@ -1261,7 +1261,12 @@ partial def translateModule (program : ResolvedPythonProgram) : TransM Strata.La
         [{ name := rtLaurelResult, type := mkTypeDefault (.UserDefined { text := "Any" }) },
          { name := rtMaybeExcept, type := mkTypeDefault (.UserDefined { text := "Error" }) }]
       let mainName := { (rt "__main__") with source := sourceRangeToMd (← get).filePath sr }
-      let mainProc : Procedure := { name := mainName, inputs := [], outputs := mainOutputs, preconditions := [], decreases := none, body := .Opaque [] (some bodyBlock) (ModifiesGroup.wildcard (sourceRangeToMd (← get).filePath sr)) }
+      -- This synthetic `__main__` wrapper is the program's entry point for concrete
+      -- interpretation. The marker decides how GlobalParameterization lowers file-scope
+      -- globals: an interpret entry declares them as body-prologue locals initialized
+      -- from their declaration initializers, while any other procedure receives them as
+      -- parameters. `__main__` has no caller to pass a heap, so it must be the former.
+      let mainProc : Procedure := { name := mainName, inputs := [], outputs := mainOutputs, preconditions := [], decreases := none, body := .Opaque [] (some bodyBlock) (ModifiesGroup.wildcard (sourceRangeToMd (← get).filePath sr)), isInterpretEntry := true }
       pure (procedures ++ [mainProc])
   let procedures := procedures ++ (← get).liftedProcedures
   return { staticProcedures := procedures, staticFields := [], types, constants := [] }

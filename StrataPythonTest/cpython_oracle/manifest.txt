@@ -1,0 +1,82 @@
+# CPython test files this suite draws from, one per line.
+#
+# Methods are not pinned individually: selector.py decides which methods in each
+# file are eligible, so the set tracks CPython and Strata rather than needing hand
+# maintenance. The report prints the per-file method count, so a change in
+# eligibility after a CPython or front-end bump shows up in the diff.
+#
+# These are the LANGUAGE-level test files -- they test Python's semantics rather
+# than a library. Library tests (IO, OS, networking, C internals) are out of scope:
+# their assertions exercise a stdlib module Strata does not model, so the verdicts
+# would carry no information about the language.
+#
+# The list is deliberately broad. A construct Strata cannot handle yet is a RESULT
+# of this suite, not a reason to leave a file out, so files are included even when
+# most of their methods are expected to come back unsupported.
+
+test_grammar.py
+test_syntax.py
+test_compile.py
+test_scope.py
+test_class.py
+test_descr.py
+test_super.py
+test_isinstance.py
+test_metaclass.py
+test_subclassinit.py
+test_genericclass.py
+test_property.py
+test_decorators.py
+test_call.py
+test_funcattrs.py
+test_keywordonlyarg.py
+test_positional_only_arg.py
+test_unpack.py
+test_unpack_ex.py
+test_augassign.py
+test_binop.py
+test_unary.py
+test_compare.py
+test_richcmp.py
+test_bool.py
+test_int.py
+test_int_literal.py
+test_long.py
+test_float.py
+test_complex.py
+test_numeric_tower.py
+test_string_literals.py
+test_fstring.py
+test_bytes.py
+test_unicode.py
+test_list.py
+test_tuple.py
+test_dict.py
+test_dictcomps.py
+test_dictviews.py
+test_set.py
+test_setcomps.py
+test_listcomps.py
+test_slice.py
+test_index.py
+test_iter.py
+test_enumerate.py
+test_generators.py
+test_genexps.py
+test_generator_stop.py
+test_yield_from.py
+test_coroutines.py
+test_exceptions.py
+test_exception_group.py
+test_exception_variations.py
+test_raise.py
+test_with.py
+test_contextlib.py
+test_global.py
+test_opcodes.py
+test_typechecks.py
+test_userdict.py
+test_userlist.py
+test_userstring.py
+test_builtin.py
+test_operator.py

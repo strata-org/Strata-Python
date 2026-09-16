@@ -1669,12 +1669,16 @@ def fullElaborate (program : Laurel.Program) (runtime : Laurel.Program := defaul
   let mut elabFailures : List String := []
   let mut globalCounter : Nat := 0
   for proc in program.staticProcedures do
-    let bodyOpt2 : Option (StmtExprMd × Bool) := match proc.body with
-      | .Transparent b => some (b, false)
-      | .Opaque _ (some impl) _ => some (impl, true)
+    -- The original `modifies` groups are carried through. An empty modifies clause is
+    -- not "no frame" but the "nothing changes" frame, and an entry procedure that writes
+    -- the heap must declare `modifies *`, since its heap is a body local and no narrower
+    -- frame can be stated about it.
+    let bodyOpt2 : Option (StmtExprMd × Bool × List Laurel.ModifiesGroup) := match proc.body with
+      | .Transparent b => some (b, false, [])
+      | .Opaque _ (some impl) mods => some (impl, true, mods)
       | _ => none
     match bodyOpt2 with
-    | some (bodyExpr, isOpaque) =>
+    | some (bodyExpr, isOpaque, bodyModifies) =>
       let extEnv := (proc.inputs ++ proc.outputs).foldl
         (fun (e : ElabTypeEnv) p => { e with names := e.names.insert p.name.text (.variable p.type.val) }) typeEnv
       let inputList := proc.inputs.map fun p => (p.name.text, p.type.val)
@@ -1720,7 +1724,7 @@ def fullElaborate (program : Laurel.Program) (runtime : Laurel.Program := defaul
         let errOutParam : Laurel.Parameter := { name := { text := "maybe_except" }, type := mkHighTypeMd md (.UserDefined { text := "Error" }) }
         let resultOutputs := proc.outputs.filter fun o => eraseType o.type.val != .TCore "Error"
         let mkBody (b : StmtExprMd) : Laurel.Body :=
-          if isOpaque then .Opaque [] (some b) [] else .Transparent b
+          if isOpaque then .Opaque [] (some b) bodyModifies else .Transparent b
         match g with
         | .err =>
           procs := procs ++ [{ proc with
