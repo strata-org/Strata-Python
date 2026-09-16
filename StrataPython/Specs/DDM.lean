@@ -89,6 +89,8 @@ op negExpr(operand : SpecExprDecl) : SpecExprDecl =>
 op oldExpr(inner : SpecExprDecl) : SpecExprDecl => "old" "(" inner ")";
 op getIndexExpr(subject : SpecExprDecl, field : Ident) : SpecExprDecl =>
   @[prec(50)] subject "[" field "]";
+op getItemExpr(subject : SpecExprDecl, key : SpecExprDecl) : SpecExprDecl =>
+  "getItem" "(" subject ", " key ")";
 op isInstanceOfExpr(subject : SpecExprDecl, typeName : Str) : SpecExprDecl =>
   "isinstance" "(" subject ", " typeName ")";
 op lenExpr(subject : SpecExprDecl) : SpecExprDecl =>
@@ -346,6 +348,7 @@ protected def SpecExpr.toDDM (e : SpecExpr) : DDM.SpecExprDecl SourceRange :=
   | .neg operand loc => .negExpr loc operand.toDDM
   | .old inner loc => .oldExpr loc inner.toDDM
   | .getIndex subj field loc => .getIndexExpr loc subj.toDDM ⟨loc, field⟩
+  | .getItem subj key loc => .getItemExpr loc subj.toDDM key.toDDM
   | .isInstanceOf subj tn loc => .isInstanceOfExpr loc subj.toDDM ⟨loc, tn⟩
   | .stringLen subj loc => .stringLenExpr loc subj.toDDM
   | .intLit v loc => .intExpr loc (toDDMInt loc v)
@@ -555,6 +558,7 @@ def DDM.SpecExprDecl.fromDDM (d : DDM.SpecExprDecl SourceRange) : Specs.SpecExpr
   | .negExpr loc operand => .neg operand.fromDDM loc
   | .oldExpr loc inner => .old inner.fromDDM loc
   | .getIndexExpr loc subj ⟨_, field⟩ => .getIndex subj.fromDDM field loc
+  | .getItemExpr loc subj key => .getItem subj.fromDDM key.fromDDM loc
   | .isInstanceOfExpr loc subj ⟨_, tn⟩ => .isInstanceOf subj.fromDDM tn loc
   | .lenExpr loc subj => .stringLen subj.fromDDM loc
   | .stringLenExpr loc subj => .stringLen subj.fromDDM loc

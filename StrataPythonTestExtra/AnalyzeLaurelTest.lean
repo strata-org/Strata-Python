@@ -115,9 +115,16 @@ meta def runAnalyze
     | .ok _ => return .ok core
   | (_, errors) => return .error s!"Laurel to Core translation failed: {errors}"
 
+/-- Shared verifier configuration for the pipeline tests in this file. -/
+meta def testVerifyOptions : Core.VerifyOptions :=
+  { Core.VerifyOptions.default with
+    stopOnFirstError := false, verbose := .quiet, solver := "z3",
+    checkMode := .bugFinding, checkLevel := .full }
+
 /-- Verify an already-generated Laurel program. -/
 private meta def verifyLaurel
     (laurel : Strata.Laurel.Program) (useRoots : Bool := false)
+    (verifyOptions : Core.VerifyOptions := testVerifyOptions)
     : IO (Except String (Array Core.VCResult)) := do
   let (coreProgramOption, _) ← translateCombinedLaurel laurel
   let coreProgram ← match coreProgramOption with
@@ -138,10 +145,7 @@ private meta def verifyLaurel
           (match caller with | some c => entrySet.contains c | none => false)
           && _root_.Core.doInlineNonRecursive callee a }]
   let options : Core.VerifyOptions :=
-    { Core.VerifyOptions.default with
-      stopOnFirstError := false, verbose := .quiet, solver := "z3",
-      checkMode := .bugFinding, checkLevel := .full,
-      proceduresToVerify := some entryPoints }
+    { verifyOptions with proceduresToVerify := some entryPoints }
   match StrataPython.Pipeline.buildVerificationPipeline options inlinePhases with
   | .error e =>
     -- The default phase order always validates; an error here is a test bug.
@@ -161,6 +165,7 @@ meta def runAnalyzeAndVerify
     (pythonCmd : System.FilePath)
     (tmpDir : System.FilePath) (scriptName : String)
     (useRoots : Bool := false) (pyspecModules : Array String := #[])
+    (verifyOptions : Core.VerifyOptions := testVerifyOptions)
     : IO (Except String (Array Core.VCResult)) := do
   let testIon ← compileTestScript pythonCmd (testDir / scriptName) tmpDir
   let pctx ← quietCtx
@@ -174,7 +179,7 @@ meta def runAnalyzeAndVerify
       let msgs ← pctx.getMessages
       let detail := match msgs.back? with | some m => m.message.message | none => "Pipeline aborted"
       return .error detail
-  verifyLaurel laurel useRoots
+  verifyLaurel laurel useRoots verifyOptions
 
 /-- Expected outcome for a test case. -/
 inductive Expected where
@@ -209,16 +214,13 @@ meta def testCases : List (String × Expected) := [
     .failPrefix "User code error: 'connect' called with unknown string \"invalid\"; known services:",
   .mk "test_invalid_method.py" $
     .fail "User code error: Unknown method 'nonexistent_method'",
-  .mk "test_invalid_args.py" $
-    .fail "User code error: 'put_item' called with unknown keyword arguments: [Wrong]",
-  .mk "test_missing_required.py" $
-    .fail "User code error: 'put_item' called with missing required arguments: [Key, Data]",
-  .mk "test_extra_kwarg.py" $
-    .fail "User code error: 'get_item' called with unknown keyword arguments: [Bogus]",
-  .mk "test_no_args.py" $
-    .fail "User code error: 'put_item' called with missing required arguments: [Bucket, Key, Data]",
-  .mk "test_optional_missing_required.py" $
-    .fail "User code error: 'list_items' called with missing required arguments: [Bucket]",
+  -- TypedDict kwargs remain one dictionary input. These calls translate, then
+  -- fail their caller-side map schema obligations below.
+  .mk "test_invalid_args.py" .success,
+  .mk "test_missing_required.py" .success,
+  .mk "test_extra_kwarg.py" .success,
+  .mk "test_no_args.py" .success,
+  .mk "test_optional_missing_required.py" .success,
   .mk "test_positional_missing.py" $
     .fail "User code error: 'delete_item' called with missing required arguments: [Key]",
   -- Type alias resolution tests (TDD for resolveTypeName refactoring)
@@ -654,8 +656,10 @@ def isGroupsNonemptyVC : Core.VCResult → Bool :=
     `isVC`, failing if the pipeline errored or produced no matching obligation. -/
 def quantVCs (pythonCmd : System.FilePath) (tmpDir : System.FilePath)
     (fixture : String) (isVC : Core.VCResult → Bool)
+    (verifyOptions : Core.VerifyOptions := testVerifyOptions)
     : IO (Array Core.VCResult) := do
-  let result ← runAnalyzeAndVerify pythonCmd tmpDir fixture (useRoots := true)
+  let result ← runAnalyzeAndVerify pythonCmd tmpDir fixture
+    (useRoots := true) (verifyOptions := verifyOptions)
   match result with
   | .error msg => throw <| IO.userError s!"Pipeline failed: {msg}"
   | .ok vcResults =>
@@ -670,6 +674,31 @@ def quantVCs (pythonCmd : System.FilePath) (tmpDir : System.FilePath)
       if r.isImplementationError || r.hasSMTError then
         throw <| IO.userError s!"quantified obligation hit an encoding/solver error: {r.formatOutcome}"
     return vcs
+
+/-- Map fixtures keep the default solver and use precise axiom pruning. -/
+def mapVerifyOptions : Core.VerifyOptions :=
+  { testVerifyOptions with
+    solver := Core.VerifyOptions.default.solver,
+    removeIrrelevantAxioms := .Precise }
+
+def expectMapVC (pythonCmd tmpDir : System.FilePath)
+    (fixture summary : String) (shouldPass : Bool) : IO Unit := do
+  let vcs ← quantVCs pythonCmd tmpDir fixture
+    (isQuantPrecondVC summary)
+    (verifyOptions := mapVerifyOptions)
+  match vcs.toList with
+  | [vc] =>
+    if shouldPass then
+      unless vc.isSuccess do
+        throw <| IO.userError
+          s!"Expected {fixture} to pass, got: {vc.formatOutcome}"
+    else
+      unless vc.isFailure do
+        throw <| IO.userError
+          s!"Expected {fixture} to fail, got: {vc.formatOutcome}"
+  | _ =>
+    throw <| IO.userError
+      s!"Expected one matching obligation in {fixture}, got {vcs.size}"
 
 end -- meta section
 
@@ -884,5 +913,79 @@ end -- meta section
     if vcs.any (·.isFailure) then
       throw <| IO.userError
         "Expected require_some_value_match existential not to be refuted when a dict value matches"
+
+-- Map-native dictionary contracts preserve lookup, equality, and TypedDict
+-- schema semantics through the complete caller pipeline.
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    expectMapVC pythonCmd tmpDir
+      "test_dynamic_lookup_pass.py"
+      "each dynamic value must be non-empty" true
+    expectMapVC pythonCmd tmpDir
+      "test_dynamic_lookup_violation.py"
+      "each dynamic value must be non-empty" false
+    expectMapVC pythonCmd tmpDir
+      "test_dict_equality_pass.py"
+      "dictionaries must be equal" true
+    expectMapVC pythonCmd tmpDir
+      "test_dict_equality_violation.py"
+      "dictionaries must be equal" false
+    expectMapVC pythonCmd tmpDir
+      "test_dict_equality_empty_pass.py"
+      "dictionaries must be equal" true
+    -- Three-level nesting with a list inside: exercises the mutually
+    -- recursive Any/Dict/List equality procedures beyond one level.
+    expectMapVC pythonCmd tmpDir
+      "test_dict_equality_deep_pass.py"
+      "dictionaries must be equal" true
+    expectMapVC pythonCmd tmpDir
+      "test_dict_equality_deep_violation.py"
+      "dictionaries must be equal" false
+    -- Mixed static typing: the looked-up operand is `Any`, so equality goes
+    -- through `PySpecAny_scalarEq` (extensional for a runtime dict, false for
+    -- a runtime non-dict).
+    expectMapVC pythonCmd tmpDir
+      "test_lookup_equal_pass.py"
+      "looked-up config must equal the expected dictionary" true
+    expectMapVC pythonCmd tmpDir
+      "test_lookup_equal_violation.py"
+      "looked-up config must equal the expected dictionary" false
+    expectMapVC pythonCmd tmpDir
+      "test_mapping_schema_pass.py"
+      "'kwargs' must contain only declared keys" true
+    expectMapVC pythonCmd tmpDir
+      "test_mapping_schema_violation.py"
+      "'kwargs' must contain only declared keys" false
+    expectMapVC pythonCmd tmpDir
+      "test_typed_dict_width_pass.py"
+      "'Item' must contain required key 'Name'" true
+    -- Gradually-typed callers: a concrete dict passed through an `Any`
+    -- annotation still discharges the schema tag; an `Any` value that is not
+    -- a dictionary fails the schema obligation at the call site.
+    expectMapVC pythonCmd tmpDir
+      "test_gradual_any_pass.py"
+      "'Item' must contain required key 'Name'" true
+    expectMapVC pythonCmd tmpDir
+      "test_gradual_any_violation.py"
+      "'Item' must contain required key 'Name'" false
+    expectMapVC pythonCmd tmpDir
+      "test_kwargs_forwarding_pass.py"
+      "'kwargs' must contain required key 'Key'" true
+    expectMapVC pythonCmd tmpDir
+      "test_invalid_args.py"
+      "'kwargs' must contain only declared keys" false
+    expectMapVC pythonCmd tmpDir
+      "test_missing_required.py"
+      "'kwargs' must contain required key 'Key'" false
+    expectMapVC pythonCmd tmpDir
+      "test_extra_kwarg.py"
+      "'kwargs' must contain only declared keys" false
+    expectMapVC pythonCmd tmpDir
+      "test_no_args.py"
+      "'kwargs' must contain required key 'Bucket'" false
+    expectMapVC pythonCmd tmpDir
+      "test_optional_missing_required.py"
+      "'kwargs' must contain required key 'Bucket'" false
 
 end StrataPython.AnalyzeLaurelTest

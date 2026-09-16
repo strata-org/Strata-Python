@@ -182,8 +182,7 @@ procedure test_typed_dict() returns(result:UserDefined(Any))
 /-! ## Literal types, TypedDict, and string-literal unions → Any -/
 
 /--
-info: warning: pySpecToLaurel.unsupportedUnion: TypedDict 'TypedDict(f : builtins.str)' approximated as DictStrAny in type 'TypedDict(f : builtins.str)'
-procedure test_int_literal_ret() returns(result:UserDefined(Any))
+info: procedure test_int_literal_ret() returns(result:UserDefined(Any))
 procedure test_str_literal_ret() returns(result:UserDefined(Any))
 procedure test_typed_dict_ret() returns(result:UserDefined(Any))
 procedure test_str_enum() returns(result:UserDefined(Any))
@@ -204,8 +203,7 @@ procedure test_str_enum() returns(result:UserDefined(Any))
 /-! ## Optional type patterns (Union[None, T]) → Any -/
 
 /--
-info: warning: pySpecToLaurel.unsupportedUnion: TypedDict 'TypedDict(x : builtins.str)' approximated as DictStrAny in type 'Union[_types.NoneType, TypedDict(x : builtins.str)]'
-procedure test_opt_str() returns(result:UserDefined(Any))
+info: procedure test_opt_str() returns(result:UserDefined(Any))
 procedure test_opt_int() returns(result:UserDefined(Any))
 procedure test_opt_bool(x:UserDefined(Any)) returns(result:UserDefined(Any))
 procedure test_opt_typed_dict() returns(result:UserDefined(Any))
@@ -476,8 +474,7 @@ procedure test_typed_dict() returns(result:UserDefined(Any))
 /-! ## Literal types, TypedDict, and string-literal unions → Any -/
 
 /--
-info: warning: pySpecToLaurel.unsupportedUnion: TypedDict 'TypedDict(f : builtins.str)' approximated as DictStrAny in type 'TypedDict(f : builtins.str)'
-procedure test_int_literal_ret() returns(result:UserDefined(Any))
+info: procedure test_int_literal_ret() returns(result:UserDefined(Any))
 procedure test_str_literal_ret() returns(result:UserDefined(Any))
 procedure test_typed_dict_ret() returns(result:UserDefined(Any))
 procedure test_str_enum() returns(result:UserDefined(Any))
@@ -495,8 +492,7 @@ procedure test_str_enum() returns(result:UserDefined(Any))
 /-! ## Optional type patterns (Union[None, T]) → Any -/
 
 /--
-info: warning: pySpecToLaurel.unsupportedUnion: TypedDict 'TypedDict(x : builtins.str)' approximated as DictStrAny in type 'Union[_types.NoneType, TypedDict(x : builtins.str)]'
-procedure test_opt_str() returns(result:UserDefined(Any))
+info: procedure test_opt_str() returns(result:UserDefined(Any))
 procedure test_opt_int() returns(result:UserDefined(Any))
 procedure test_opt_bool(x:UserDefined(Any)) returns(result:UserDefined(Any))
 procedure test_opt_typed_dict() returns(result:UserDefined(Any))
@@ -663,16 +659,10 @@ info: errors: 1
 #guard_msgs in
 #eval runFullTest #[externType "Foo" (externIdent "pkg" "Foo")]
 
-/-! ## Nested dict access in preconditions (issue #800) -/
+/-! ## Nested dictionary access -/
 
--- Regression test for issue #800: nested dict access `kwargs["Outer"]["Inner"]`
--- should generate `Any_get` (dict lookup), not `FieldSelect`. The precondition
--- is caller-checked, so it lives in `proc.preconditions`, not the body.
-/--
-info: precondition contains Any_get: true
-precondition contains FieldSelect: false
--/
-#guard_msgs in
+-- Nested dictionaries retain their source type and lower through the logical
+-- map at every level; the precondition text is pinned in full.
 #eval do
   let kwargsTy := SpecType.typedDict loc #["Outer"] #[dict_] #[true]
   let result := signaturesToLaurel "<test>" #[
@@ -687,14 +677,34 @@ precondition contains FieldSelect: false
           loc
       }])
   ] testModule
-  assert! result.errors.size = 0
+  assertEq result.errors.size 0
   match result.program.staticProcedures with
   | proc :: _ =>
-    let preStr := String.intercalate "\n" (proc.preconditions.map fun (c : Strata.Laurel.Condition) =>
-      toString (Strata.Laurel.formatStmtExpr c.condition))
-    IO.println s!"precondition contains Any_get: {preStr.contains "Any_get"}"
-    IO.println s!"precondition contains FieldSelect: {preStr.contains "#"}"
-  | [] => IO.println "no procedures"
+    let preStr := String.intercalate "\n"
+      (proc.preconditions.map fun (c : Strata.Laurel.Condition) =>
+        toString (Strata.Laurel.formatStmtExpr c.condition))
+    assertEq preStr (
+      "true & (DictStrAny_keysAllowed(kwargs, " ++
+      "ListStr_cons(\"Outer\", ListStr_nil())) & " ++
+      "forall(py$schema_key_kwargs: string)" ++
+      "{select(PySpecDict_modelOf(kwargs), py$schema_key_kwargs)} => " ++
+      "PySpecDictValue..isPresent(select(" ++
+      "PySpecDict_modelOf(kwargs), py$schema_key_kwargs)) ==> " ++
+      "false | py$schema_key_kwargs == \"Outer\")\n" ++
+      "true & PySpecDictValue..isPresent(select(" ++
+      "PySpecDict_modelOf(kwargs), \"Outer\"))\n" ++
+      "true & (PySpecDictValue..isPresent(select(" ++
+      "PySpecDict_modelOf(kwargs), \"Outer\")) ==> " ++
+      "Any..isfrom_DictStrAny(PySpecDictValue..value!(select(" ++
+      "PySpecDict_modelOf(kwargs), \"Outer\"))) & " ++
+      "forall(py$schema_dict_kwargs_Outer: string)" ++
+      "{select(PySpecDict_modelOf(Any..as_Dict!(PySpecDictValue..value!(select(" ++
+      "PySpecDict_modelOf(kwargs), \"Outer\")))), py$schema_dict_kwargs_Outer)} => " ++
+      "true)\n" ++
+      "Any_to_bool(PGe(PySpecDictValue..value(select(" ++
+      "PySpecDict_modelOf(Any..as_Dict!(PySpecDictValue..value(select(" ++
+      "PySpecDict_modelOf(kwargs), \"Outer\")))), \"Inner\")), from_int(0)))")
+  | [] => throw <| IO.userError "no procedures"
 
 /-! ## Warning kind tests -/
 
@@ -801,9 +811,9 @@ info: pySpecToLaurel.missingMethodSelf: Method 'bad_method' has no arguments (ex
     ]
   }]
 
--- Declaration: kwargsExpansionError
+-- Declaration: non-TypedDict `**kwargs` warns and is dropped from the model
 /--
-info: pySpecToLaurel.kwargsExpansionError: **kw has non-TypedDict type; kwargs not expanded
+info: pySpecToLaurel.kwargsExpansionError: **kw must use Unpack[TypedDict], got 'builtins.str'; **kw is dropped from the model
 -/
 #guard_msgs in
 #eval runTestWarningKinds
@@ -954,7 +964,7 @@ private def translatePrecond (preconditions : Array Assertion)
   -- `implies` renders as `==>`; would have been `<=` before fix #1
   assert! pre.contains "==>"
 
--- not via containsKey on kwargs: `!` prefix syntax
+-- containsKey on kwargs checks presence in the logical map.
 #eval do
   let kwargsTy := SpecType.typedDict loc #["key"] #[str] #[false]
   let result := signaturesToLaurel "<test>" #[
@@ -965,15 +975,174 @@ private def translatePrecond (preconditions : Array Assertion)
       returnType := str, isOverload := false
       preconditions := #[{
         message := #[], formula :=
-          .containsKey (.var "kwargs" loc) "key" loc }]
+          .containsKey (.var "kw" loc) "key" loc }]
       postconditions := #[] }] testModule
   let body := getBody result |>.getD ""
   let pre := getPreconditions result
   assertEq result.errors.size 0
-  assert! body.contains "result := <??>"
-  assert! body.contains "Any..isfrom_None(key) | Any..isfrom_str(key)"
-  assert! pre.contains "requires !Any..isfrom_None(key) summary \"precondition 0\""
-  assert! body.contains "assume Any..isfrom_str(result)"
+  assertEq body
+    "{\n  result := <??>;\n  assume Any..isfrom_str(result)\n}"
+  assertEq pre (
+    "requires true & (DictStrAny_keysAllowed(kw, " ++
+    "ListStr_cons(\"key\", ListStr_nil())) & forall(py$schema_key_kw: string)" ++
+    "{select(PySpecDict_modelOf(kw), py$schema_key_kw)} => " ++
+    "PySpecDictValue..isPresent(select(PySpecDict_modelOf(kw), py$schema_key_kw)) ==> " ++
+    "false | py$schema_key_kw == \"key\") " ++
+    "summary \"'kw' must contain only declared keys\"\n" ++
+    "requires true & " ++
+    "(PySpecDictValue..isPresent(select(PySpecDict_modelOf(kw), \"key\")) ==> " ++
+    "Any..isfrom_str(PySpecDictValue..value!(select(" ++
+    "PySpecDict_modelOf(kw), \"key\")))) " ++
+    "summary \"'kw.key' must satisfy its declared type\"\n" ++
+    "requires PySpecDictValue..isPresent(select(" ++
+    "PySpecDict_modelOf(kw), \"key\")) summary \"precondition 0\"")
+
+-- Ordinary TypedDict parameters are structurally open: declared fields retain
+-- their required/type checks without an allowed-key quantifier.
+#eval do
+  let itemTy := SpecType.typedDict loc #["name"] #[str] #[true]
+  let result := signaturesToLaurel "<test>"
+    #[func "f" str (args := #[arg "item" itemTy])] testModule
+  let pre := getPreconditions result
+  assertEq result.errors.size 0
+  assertEq pre (
+    "requires Any..isfrom_DictStrAny(item) & " ++
+    "PySpecDictValue..isPresent(select(" ++
+    "PySpecDict_modelOf(Any..as_Dict!(item)), \"name\")) " ++
+    "summary \"'item' must contain required key 'name'\"\n" ++
+    "requires Any..isfrom_DictStrAny(item) & " ++
+    "(PySpecDictValue..isPresent(select(" ++
+    "PySpecDict_modelOf(Any..as_Dict!(item)), \"name\")) ==> " ++
+    "Any..isfrom_str(PySpecDictValue..value!(select(" ++
+    "PySpecDict_modelOf(Any..as_Dict!(item)), \"name\")))) " ++
+    "summary \"'item.name' must satisfy its declared type\"")
+
+-- Equality between a dict-valued lookup (statically `Any`) and a dict-typed
+-- parameter routes through extensional `PySpecAny_scalarEq`, not `PEq`.
+#eval do
+  let (pre, errs) := translatePrecond
+    #[{ message := #[], formula :=
+          .pcmp .eq
+            (.getIndex (.var "Items" loc) "config" loc)
+            (.var "Expected" loc)
+            loc }]
+    (args := #[arg "Items" (dictOf str any), arg "Expected" (dictOf str any)])
+  assertEq errs 0
+  assertEq pre (
+    "requires Any..isfrom_DictStrAny(Items) & " ++
+    "forall(py$schema_Items: string)" ++
+    "{select(PySpecDict_modelOf(Any..as_Dict!(Items)), py$schema_Items)} => " ++
+    "true summary \"'Items' must satisfy its declared dictionary type\"\n" ++
+    "requires Any..isfrom_DictStrAny(Expected) & " ++
+    "forall(py$schema_Expected: string)" ++
+    "{select(PySpecDict_modelOf(Any..as_Dict!(Expected)), py$schema_Expected)} => " ++
+    "true summary \"'Expected' must satisfy its declared dictionary type\"\n" ++
+    "requires PySpecAny_scalarEq(PySpecDictValue..value(select(" ++
+    "PySpecDict_modelOf(Any..as_Dict!(Items)), \"config\")), Expected) " ++
+    "summary \"precondition 0\"")
+
+-- A dynamic dictionary subscript `d[k]` lowers through the logical map with a
+-- checked string key.
+#eval do
+  let (pre, errs) := translatePrecond
+    #[{ message := #[], formula :=
+          .intGe
+            (.stringLen (.getItem (.var "d" loc) (.var "k" loc) loc) loc)
+            (.intLit 1 loc)
+            loc }]
+    (args := #[arg "d" (dictOf str str), arg "k" str])
+  assertEq errs 0
+  assertEq pre (
+    "requires Any..isfrom_DictStrAny(d) & " ++
+    "forall(py$schema_d: string)" ++
+    "{select(PySpecDict_modelOf(Any..as_Dict!(d)), py$schema_d)} => " ++
+    "PySpecDictValue..isPresent(select(" ++
+    "PySpecDict_modelOf(Any..as_Dict!(d)), py$schema_d)) ==> " ++
+    "Any..isfrom_str(PySpecDictValue..value!(select(" ++
+    "PySpecDict_modelOf(Any..as_Dict!(d)), py$schema_d))) " ++
+    "summary \"'d' must satisfy its declared dictionary type\"\n" ++
+    "requires Any_to_bool(PGe(from_int(Str.Length(Any..as_string!(" ++
+    "PySpecDictValue..value(select(PySpecDict_modelOf(Any..as_Dict!(d)), " ++
+    "Any..as_string(k)))))), from_int(1))) summary \"precondition 0\"")
+
+-- Schema preconditions recurse into nested containers: a homogeneous dict
+-- whose values are lists checks each list element under the value quantifier.
+#eval do
+  let (pre, errs) := translatePrecond #[]
+    (args := #[arg "nested" (dictOf str (listOf int))])
+  assertEq errs 0
+  assertEq pre (
+    "requires Any..isfrom_DictStrAny(nested) & " ++
+    "forall(py$schema_nested: string)" ++
+    "{select(PySpecDict_modelOf(Any..as_Dict!(nested)), py$schema_nested)} => " ++
+    "PySpecDictValue..isPresent(select(" ++
+    "PySpecDict_modelOf(Any..as_Dict!(nested)), py$schema_nested)) ==> " ++
+    "Any..isfrom_ListAny(PySpecDictValue..value!(select(" ++
+    "PySpecDict_modelOf(Any..as_Dict!(nested)), py$schema_nested))) & " ++
+    "forall(py$schema_list_nested: Any)" ++
+    "{List_contains(Any..as_ListAny!(PySpecDictValue..value!(select(" ++
+    "PySpecDict_modelOf(Any..as_Dict!(nested)), py$schema_nested))), " ++
+    "py$schema_list_nested)} => " ++
+    "List_contains(Any..as_ListAny!(PySpecDictValue..value!(select(" ++
+    "PySpecDict_modelOf(Any..as_Dict!(nested)), py$schema_nested))), " ++
+    "py$schema_list_nested) ==> " ++
+    "Any..isfrom_int(py$schema_list_nested) " ++
+    "summary \"'nested' must satisfy its declared dictionary type\"")
+
+-- Closing the top-level **kwargs dictionary must not close a nested TypedDict.
+#eval do
+  let innerTy := SpecType.typedDict loc #["name"] #[str] #[true]
+  let kwargsTy := SpecType.typedDict loc #["item"] #[innerTy] #[true]
+  let result := signaturesToLaurel "<test>" #[
+    func "f" str (kwargs := some ("kw", kwargsTy))] testModule
+  let pre := getPreconditions result
+  assertEq result.errors.size 0
+  assertEq pre (
+    "requires true & (DictStrAny_keysAllowed(kw, " ++
+    "ListStr_cons(\"item\", ListStr_nil())) & " ++
+    "forall(py$schema_key_kw: string)" ++
+    "{select(PySpecDict_modelOf(kw), py$schema_key_kw)} => " ++
+    "PySpecDictValue..isPresent(select(" ++
+    "PySpecDict_modelOf(kw), py$schema_key_kw)) ==> " ++
+    "false | py$schema_key_kw == \"item\") " ++
+    "summary \"'kw' must contain only declared keys\"\n" ++
+    "requires true & PySpecDictValue..isPresent(select(" ++
+    "PySpecDict_modelOf(kw), \"item\")) " ++
+    "summary \"'kw' must contain required key 'item'\"\n" ++
+    "requires true & " ++
+    "(PySpecDictValue..isPresent(select(" ++
+    "PySpecDict_modelOf(kw), \"item\")) ==> " ++
+    "Any..isfrom_DictStrAny(PySpecDictValue..value!(select(" ++
+    "PySpecDict_modelOf(kw), \"item\"))) & (true & " ++
+    "PySpecDictValue..isPresent(select(" ++
+    "PySpecDict_modelOf(Any..as_Dict!(PySpecDictValue..value!(select(" ++
+    "PySpecDict_modelOf(kw), \"item\")))), \"name\")) & " ++
+    "(PySpecDictValue..isPresent(select(" ++
+    "PySpecDict_modelOf(Any..as_Dict!(PySpecDictValue..value!(select(" ++
+    "PySpecDict_modelOf(kw), \"item\")))), \"name\")) ==> " ++
+    "Any..isfrom_str(PySpecDictValue..value!(select(" ++
+    "PySpecDict_modelOf(Any..as_Dict!(PySpecDictValue..value!(select(" ++
+    "PySpecDict_modelOf(kw), \"item\")))), \"name\")))))) " ++
+    "summary \"'kw.item' must satisfy its declared type\"")
+
+-- TypedDict return assumptions are open but still constrain declared fields.
+#eval do
+  let resultTy := SpecType.typedDict loc #["name"] #[str] #[true]
+  let result := signaturesToLaurel "<test>"
+    #[func "f" resultTy] testModule
+  let body := getBody result |>.getD ""
+  assertEq result.errors.size 0
+  assertEq body (
+    "{\n  result := <??>;\n" ++
+    "  assume Any..isfrom_DictStrAny(result);\n" ++
+    "  assume Any..isfrom_DictStrAny(result) & " ++
+    "PySpecDictValue..isPresent(select(" ++
+    "PySpecDict_modelOf(Any..as_Dict!(result)), \"name\"));\n" ++
+    "  assume Any..isfrom_DictStrAny(result) & " ++
+    "(PySpecDictValue..isPresent(select(" ++
+    "PySpecDict_modelOf(Any..as_Dict!(result)), \"name\")) ==> " ++
+    "Any..isfrom_str(PySpecDictValue..value!(select(" ++
+    "PySpecDict_modelOf(Any..as_Dict!(result)), \"name\"))))\n}")
 
 -- containsKey on a non-kwargs dict: DictStrAny_contains in a precondition
 -- (would have been silently dropped before fix #2)
@@ -984,6 +1153,92 @@ private def translatePrecond (preconditions : Array Assertion)
     (args := #[arg "d" str])
   assert! errs == 0
   assert! pre.contains "DictStrAny_contains"
+
+-- Dictionary equality is extensional rather than representation-order based.
+#eval do
+  let dictTy := dictOf str int
+  let result := translatePrecondResult
+    #[{ message := #[], formula :=
+          .pcmp .eq (.var "left" loc) (.var "right" loc) loc }]
+    (args := #[arg "left" dictTy, arg "right" dictTy])
+  let preconditions := match result.program.staticProcedures with
+    | proc :: _ => proc.preconditions
+    | [] => []
+  assertEq result.errors.size 0
+  match preconditions with
+  | [leftSchema, rightSchema, equality] =>
+    assertEq (formatCondition leftSchema)
+      ("Any..isfrom_DictStrAny(left) & forall(py$schema_left: string)" ++
+       "{select(PySpecDict_modelOf(Any..as_Dict!(left)), py$schema_left)} => " ++
+       "PySpecDictValue..isPresent(select(PySpecDict_modelOf(Any..as_Dict!(left)), py$schema_left)) ==> " ++
+       "Any..isfrom_int(PySpecDictValue..value!(select(" ++
+       "PySpecDict_modelOf(Any..as_Dict!(left)), py$schema_left)))")
+    assertEq (formatCondition rightSchema)
+      ("Any..isfrom_DictStrAny(right) & forall(py$schema_right: string)" ++
+       "{select(PySpecDict_modelOf(Any..as_Dict!(right)), py$schema_right)} => " ++
+       "PySpecDictValue..isPresent(select(PySpecDict_modelOf(Any..as_Dict!(right)), py$schema_right)) ==> " ++
+       "Any..isfrom_int(PySpecDictValue..value!(select(" ++
+       "PySpecDict_modelOf(Any..as_Dict!(right)), py$schema_right)))")
+    assertEq (formatCondition equality)
+      "PySpecDict_scalarEq(Any..as_Dict!(left), Any..as_Dict!(right))"
+  | _ =>
+    throw <| IO.userError
+      s!"expected two dictionary schemas and equality, got {preconditions.length}"
+
+-- Literal-key domains are not modeled: the schema is skipped with a warning
+-- and the declaration still loads.
+#eval do
+  let keyType := mkUnion #[
+    SpecType.stringLiteral loc "left",
+    SpecType.stringLiteral loc "right"]
+  let result := signaturesToLaurel "<test>"
+    #[func "f" str (args := #[arg "items" (dictOf keyType int)])] testModule
+  match result.errors.toList with
+  | [error] =>
+    assertEq error.kind Pipeline.MessageKind.dictionarySchemaWarning
+    assertEq error.kind.impact.isFatal false
+    assertEq result.program.staticProcedures.length 1
+  | errors =>
+    throw <| IO.userError
+      s!"expected one literal-key dictionary warning, got {errors.length}"
+
+-- A parameter-only non-string-keyed dict never rejects the declaration: its
+-- schema is skipped with a non-fatal warning. Fatal rejection is reserved for
+-- conditions that actually reference the dictionary.
+private def expectSchemaWarningOnly (containerTy : SpecType) : IO Unit := do
+  let result := signaturesToLaurel "<test>"
+    #[func "f" str (args := #[arg "data" containerTy])] testModule
+  match result.errors.toList with
+  | [error] =>
+    assertEq error.kind Pipeline.MessageKind.dictionarySchemaWarning
+    assertEq error.kind.impact.isFatal false
+    assertEq result.program.staticProcedures.length 1
+  | errors =>
+    throw <| IO.userError
+      s!"expected one schema warning, got {errors.length}"
+
+#eval expectSchemaWarningOnly (dictOf int str)
+#eval expectSchemaWarningOnly (SpecType.ident loc .typingMapping #[int, str])
+
+-- A dropped non-TypedDict `**kwargs` leaves a procedure without that input.
+#eval do
+  let result := signaturesToLaurel "<test>" #[
+    .functionDecl {
+      loc := loc, nameLoc := loc, name := "f"
+      args := { args := #[arg "x" int], kwonly := #[],
+                kwargs := some ("kw", str) }
+      returnType := str, isOverload := false
+      preconditions := #[], postconditions := #[] }] testModule
+  match result.errors.toList with
+  | [error] => assertEq error.kind.impact.isFatal false
+  | errors =>
+    throw <| IO.userError s!"expected one kwargs warning, got {errors.length}"
+  match result.program.staticProcedures with
+  | [proc] =>
+    let names := proc.inputs.map fun (p : Laurel.Parameter) => p.name.text
+    assertEq names ["x"]
+  | procs =>
+    throw <| IO.userError s!"expected one procedure, got {procs.length}"
 
 /-! ## Quantifier lowering shape
 
@@ -1033,10 +1288,13 @@ private def precondPins (args : Array Arg)
   { message := #[], formula :=
       .quantifier .forall (.overDictValues "v") (.var "d" loc)
         (.intGe (.stringLen (.var "v" loc) loc) (.intLit 1 loc) loc) loc }
-  "forall(py$v: string){DictStrAny_contains(Any..as_Dict!(d), py$v)} => \
-     DictStrAny_contains(Any..as_Dict!(d), py$v) ==> \
+  "forall(py$v: string){select(\
+       PySpecDict_modelOf(Any..as_Dict!(d)), py$v)} => \
+     PySpecDictValue..isPresent(select(\
+       PySpecDict_modelOf(Any..as_Dict!(d)), py$v)) ==> \
        Any_to_bool(PGe(from_int(Str.Length(Any..as_string!(\
-         DictStrAny_get_or_none(Any..as_Dict!(d), py$v)))), from_int(1)))"
+         PySpecDictValue..value!(select(\
+           PySpecDict_modelOf(Any..as_Dict!(d)), py$v))))), from_int(1)))"
 
 -- Binder/collection shadowing: in `all(len(xs) >= 1 for xs in xs)` the binder
 -- is alpha-renamed to a fresh `py$quant_…` name so the membership guard still
@@ -1062,15 +1320,20 @@ private def precondPins (args : Array Arg)
       .quantifier .forall (.overDictItems "k" "v") (.var "d" loc)
         (.quantifier .forall (.overList "k") (.var "v" loc)
           (.intGe (.stringLen (.var "v" loc) loc) (.intLit 1 loc) loc) loc) loc }
-  "forall(k: string){DictStrAny_contains(Any..as_Dict!(d), k)} => \
-     DictStrAny_contains(Any..as_Dict!(d), k) ==> \
+  "forall(k: string){select(\
+       PySpecDict_modelOf(Any..as_Dict!(d)), k)} => \
+     PySpecDictValue..isPresent(select(\
+       PySpecDict_modelOf(Any..as_Dict!(d)), k)) ==> \
        forall(py$quant_1_0_k: Any){\
            List_contains(Any..as_ListAny!(\
-             DictStrAny_get_or_none(Any..as_Dict!(d), k)), py$quant_1_0_k)} => \
+             PySpecDictValue..value!(select(\
+               PySpecDict_modelOf(Any..as_Dict!(d)), k))), py$quant_1_0_k)} => \
          List_contains(Any..as_ListAny!(\
-           DictStrAny_get_or_none(Any..as_Dict!(d), k)), py$quant_1_0_k) ==> \
+           PySpecDictValue..value!(select(\
+             PySpecDict_modelOf(Any..as_Dict!(d)), k))), py$quant_1_0_k) ==> \
            Any_to_bool(PGe(from_int(Str.Length(Any..as_string!(\
-             DictStrAny_get_or_none(Any..as_Dict!(d), k)))), from_int(1)))"
+             PySpecDictValue..value!(select(\
+               PySpecDict_modelOf(Any..as_Dict!(d)), k))))), from_int(1)))"
 
 
 /-! ## Type-directed quantifier domain selection -/
@@ -1358,6 +1621,46 @@ private def t_admittedPostconditionReferencesParam : Bool :=
     && body.contains "assume Any_to_bool(PGe(result, x))"
 
 #guard t_admittedPostconditionReferencesParam
+
+-- The map lowering applies uniformly inside `OLD(...)`: pre-state dictionary
+-- field reads and equality use the same model as post-state ones.
+#eval do
+  let itemTy := SpecType.typedDict loc #["name"] #[str] #[true]
+  let admitted := SpecExpr.intGe
+    (.stringLen (.getIndex (.old (.var "d" loc) loc) "name" loc) loc)
+    (.intLit 1 loc) loc
+  let result := translateFuncResult
+    (args := #[arg "d" itemTy])
+    (returnType := int)
+    (admittedPostconditions := #[admitted])
+  let body := getBody result |>.getD ""
+  assertEq result.errors.size 0
+  assertEq body (
+    "{\n" ++
+    "  result := <??>;\n" ++
+    "  assert Any..isfrom_DictStrAny(d);\n" ++
+    "  assume Any_to_bool(PGe(from_int(Str.Length(Any..as_string!(" ++
+    "PySpecDictValue..value(select(PySpecDict_modelOf(Any..as_Dict!(old(d))), " ++
+    "\"name\"))))), from_int(1)));\n" ++
+    "  assume Any..isfrom_int(result)\n" ++
+    "}")
+
+#eval do
+  let dictTy := dictOf str int
+  let admitted := SpecExpr.pcmp .eq (.old (.var "d" loc) loc) (.var "d" loc) loc
+  let result := translateFuncResult
+    (args := #[arg "d" dictTy])
+    (returnType := int)
+    (admittedPostconditions := #[admitted])
+  let body := getBody result |>.getD ""
+  assertEq result.errors.size 0
+  assertEq body (
+    "{\n" ++
+    "  result := <??>;\n" ++
+    "  assert Any..isfrom_DictStrAny(d);\n" ++
+    "  assume PySpecDict_scalarEq(Any..as_Dict!(old(d)), Any..as_Dict!(d));\n" ++
+    "  assume Any..isfrom_int(result)\n" ++
+    "}")
 
 -- Every @admit predicate is assumed, in order, and none is caller-visible.
 private def t_multipleAdmittedPostconditionsAssumed : Bool :=

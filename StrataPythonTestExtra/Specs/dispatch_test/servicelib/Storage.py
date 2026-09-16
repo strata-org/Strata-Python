@@ -12,7 +12,7 @@
 # The `require_*` methods below each pin one quantifier domain: list elements,
 # dict items/keys/values, a guarded (`if`) quantifier, and existentials over a
 # list and over dict items.
-from typing import TypedDict, Required, NotRequired, Unpack, List, Dict
+from typing import Any, TypedDict, Required, NotRequired, Unpack, List, Dict
 
 PutItemRequest = TypedDict('PutItemRequest', {
     'Bucket': Required[str],
@@ -36,6 +36,14 @@ ListItemsRequest = TypedDict('ListItemsRequest', {
     'NextToken': NotRequired[str],
 })
 
+NamedItem = TypedDict('NamedItem', {
+    'Name': Required[str],
+})
+
+ExplicitKeyRequest = TypedDict('ExplicitKeyRequest', {
+    'Key': Required[str],
+})
+
 @exhaustive
 class Storage:
     def put_item(self, **kwargs: Unpack[PutItemRequest]) -> None:
@@ -49,6 +57,11 @@ class Storage:
         ...
     def list_items(self, **kwargs: Unpack[ListItemsRequest]) -> None:
         ...
+    def require_named_item(self, Item: NamedItem) -> None:
+        assert len(Item["Name"]) >= 1, "item name must not be empty"
+    def put_with_explicit_bucket(self, Bucket: str, **kwargs: Unpack[ExplicitKeyRequest]) -> None:
+        assert len(Bucket) >= 1, "explicit bucket must not be empty"
+        assert len(kwargs["Key"]) >= 1, "forwarded key must not be empty"
     def require_all_nonempty(self, Keys: List[str]) -> None:
         assert all(len(k) >= 1 for k in Keys), "each key must be non-empty"
     def require_map_nonempty(self, Items: Dict[str, str]) -> None:
@@ -67,6 +80,14 @@ class Storage:
         assert all(len(k) >= 1 for k in Items.keys()), "each key must be non-empty"
     def require_values_nonempty(self, Items: Dict[str, str]) -> None:
         assert all(len(v) >= 1 for v in Items.values()), "each value must be non-empty"
+    def require_dynamic_values_nonempty(self, Items: Dict[str, str]) -> None:
+        assert all(len(Items[k]) >= 1 for k in Items), "each dynamic value must be non-empty"
+    def require_dict_equal(self, Left: Dict[str, Any], Right: Dict[str, Any]) -> None:
+        assert Left == Right, "dictionaries must be equal"
+    # The looked-up value is statically `Any`, so this pins the mixed
+    # (gradually-typed) dictionary equality path.
+    def require_lookup_equal(self, Items: Dict[str, Any], Expected: Dict[str, Any]) -> None:
+        assert Items["config"] == Expected, "looked-up config must equal the expected dictionary"
     # The binder deliberately shadows its own collection: the generated
     # quantifier must keep reading the argument `Keys`, not the binder.
     def require_shadowed_nonempty(self, Keys: List[str]) -> None:

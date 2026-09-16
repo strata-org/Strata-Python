@@ -34,10 +34,19 @@ def overloadResolveWarning : MessageKind :=
 -- PySpec.ToLaurel internal warnings/errors
 def missingMethodSelf : MessageKind :=
   { category := "missingMethodSelf", impact := .internalWarning }
+/-- A violated invariant between source-type selection and Laurel expression
+    lowering. This indicates a translator defect, not invalid user code. -/
+def loweringTypeError : MessageKind :=
+  { category := "loweringTypeError", impact := .internalError }
 def typeError : MessageKind :=
   { category := "typeError", impact := .internalWarning }
+/-- A dictionary type the map model cannot express (e.g. non-string keys):
+    the schema condition is skipped; conditions referencing such a dictionary
+    are rejected separately at condition translation. -/
+def dictionarySchemaWarning : MessageKind :=
+  { category := "dictionarySchemaWarning", impact := .userCodeWarning }
 def kwargsExpansionError : MessageKind :=
-  { category := "kwargsExpansionError", impact := .internalWarning }
+  { category := "kwargsExpansionError", impact := .userCodeWarning }
 
 -- Type translation warnings
 def unsupportedUnion : MessageKind :=

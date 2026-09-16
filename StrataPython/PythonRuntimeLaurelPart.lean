@@ -426,6 +426,24 @@ return if DictStrAny..isDictStrAny_empty(d) then DictStrAny_cons(key, val, DictS
   else if DictStrAny..key!(d) == key then DictStrAny_cons(key, val, DictStrAny..tail!(d))
   else DictStrAny_cons(DictStrAny..key!(d), DictStrAny..val!(d), DictStrAny_insert(DictStrAny..tail!(d), key, val));
 
+procedure DictStrAny_remove (d : DictStrAny, key: string) : DictStrAny
+return if DictStrAny..isDictStrAny_empty(d) then DictStrAny_empty()
+  else if DictStrAny..key!(d) == key then DictStrAny_remove(DictStrAny..tail!(d), key)
+  else DictStrAny_cons(
+    DictStrAny..key!(d),
+    DictStrAny..val!(d),
+    DictStrAny_remove(DictStrAny..tail!(d), key));
+
+procedure ListStr_contains (values: ListStr, value: string) : bool
+return if ListStr..isListStr_nil(values) then false
+  else ListStr..head!(values) == value ||
+    ListStr_contains(ListStr..tail!(values), value);
+
+procedure DictStrAny_keysAllowed (d: DictStrAny, allowed: ListStr) : bool
+return if DictStrAny..isDictStrAny_empty(d) then true
+  else ListStr_contains(allowed, DictStrAny..key!(d)) &&
+    DictStrAny_keysAllowed(DictStrAny..tail!(d), allowed);
+
 procedure Any_get (dictOrList: Any, index: Any): Any
   requires  (Any..isfrom_DictStrAny(dictOrList) && Any..isfrom_str(index) && DictStrAny_contains(Any..as_Dict!(dictOrList), Any..as_string!(index))) ||
             (Any..isfrom_ListAny(dictOrList) && Any..isfrom_int(index) && Any..as_int!(index) >= - List_len(Any..as_ListAny!(dictOrList)) && Any..as_int!(index) < List_len(Any..as_ListAny!(dictOrList)))

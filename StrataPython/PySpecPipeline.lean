@@ -14,6 +14,7 @@ public import StrataPython.PythonToLaurel
 import StrataPython.ReadPython
 import StrataPython.PythonLaurelCorePrelude
 import StrataPython.PythonRuntimeLaurelPart
+import StrataPython.PySpecRuntimeLaurelPart
 import StrataPython.Specs
 import StrataPython.Specs.DDM
 import StrataPython.Specs.IdentifyOverloads
@@ -116,23 +117,27 @@ private def specArgToFuncDeclArg (arg : Specs.Arg) : PyArgInfo :=
     default := arg.default.map specDefaultToExpr
   }
 
-/-- Build a PythonFunctionDecl from a PySpec FunctionDecl or class method,
-    expanding `**kwargs` TypedDict fields into individual parameters. -/
+/-- Build caller metadata for a PySpec function or class method.
+    `**kwargs: Unpack[TypedDict]` remains one dictionary argument; a
+    non-TypedDict `**kwargs` is dropped (warned during Laurel translation). -/
 private def funcDeclToFunctionDecl (name : String) (args : Specs.ArgDecls)
     : Except String PythonFunctionDecl := do
-  let kwargsArgs ← Specs.ToLaurel.expandKwargsArgs args.kwargs
-  let allArgs := args.args ++ args.kwonly ++ kwargsArgs
+  let kwargsName := match args.kwargs with
+    | some (kwargsName, kwargsType) =>
+      if kwargsType.isTypedDict then some kwargsName else none
+    | none => none
+  let allArgs := args.args ++ args.kwonly
   pure {
     name,
     args := allArgs.toList.map specArgToFuncDeclArg,
-    kwargsName := none,
+    kwargsName,
     ret := none,
-    kwonlyCount := args.kwonly.size + kwargsArgs.size
+    kwonlyCount := args.kwonly.size
   }
 
 /-- Extract PythonFunctionDecl entries from pyspec signatures.
     Handles both top-level functions and class methods.
-    Strips `self` from class methods and expands `**kwargs` TypedDict fields. -/
+    Strips `self` from class methods. -/
 private def extractFunctionSignatures (sigs : Array Specs.Signature)
     (moduleName : ModuleName) : Except String (Array PythonFunctionDecl) := do
   let funcPrefix := moduleName.toString (sep := "_") ++ "_"
@@ -242,9 +247,11 @@ private def buildPySpecLaurelM (pyspecEntries : Array (ModuleName × String))
         (file := srcFile) (loc := ident.source.range)
 
   let combinedLaurel : Laurel.Program := {
-    staticProcedures := pythonRuntimeLaurelPart.staticProcedures ++ dedupedProcs.toList.map Prod.fst
+    staticProcedures := pythonRuntimeLaurelPart.staticProcedures ++
+      pySpecRuntimeLaurelPart.staticProcedures ++ dedupedProcs.toList.map Prod.fst
     staticFields := dedupedFields.toList.map Prod.fst
-    types := pythonRuntimeLaurelPart.types ++ dedupedTypes.toList.map Prod.fst
+    types := pythonRuntimeLaurelPart.types ++
+      pySpecRuntimeLaurelPart.types ++ dedupedTypes.toList.map Prod.fst
     constants := []
   }
   return { laurelProgram := combinedLaurel, overloads := allOverloads

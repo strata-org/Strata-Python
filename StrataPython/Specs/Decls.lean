@@ -400,6 +400,24 @@ def isTypedDict (tp : SpecType) : Bool :=
   tp.idents.size == 0 && tp.intLits.size == 0 && tp.stringLits.size == 0
     && tp.typedDicts.size == 1
 
+/-- Whether the type admits a dictionary value, including dictionary atoms in
+    unions such as `Optional[Dict[str, T]]`. -/
+def hasDictionaryAtom (tp : SpecType) : Bool :=
+  tp.atoms.any fun
+    | .typedDict .. => true
+    | .ident name _ =>
+      name == .builtinsDict || name == .typingDict || name == .typingMapping
+    | _ => false
+
+/-- Whether the type admits a modeled container value. -/
+def hasContainerAtom (tp : SpecType) : Bool :=
+  tp.atoms.any fun
+    | .typedDict .. => true
+    | .ident name _ =>
+      name == .builtinsDict || name == .typingDict || name == .typingMapping ||
+      name == .typingList || name == .typingSequence
+    | _ => false
+
 def lookupTypedDictField (tp : SpecType) (field : String) : Option SpecType := do
   guard tp.isTypedDict
   let td := tp.typedDicts[0]!
@@ -639,6 +657,8 @@ inductive SpecExpr where
     semantics. Laurel's `PushOldInward` later distributes it to inout state. -/
 | old (inner : SpecExpr) (loc : SourceRange)
 | getIndex (subject : SpecExpr) (field : String) (loc : SourceRange)
+/-- Dynamic dictionary lookup `subject[key]`. -/
+| getItem (subject : SpecExpr) (key : SpecExpr) (loc : SourceRange)
 | isInstanceOf (subject : SpecExpr) (typeName : String) (loc : SourceRange)
 /-- `stringLen subject` represents `len(subject)` where `subject` is a string.
     Used in preconditions like `assert len(name) >= 1`. -/
@@ -698,7 +718,7 @@ def SpecExpr.loc : SpecExpr → SourceRange
   | .placeholder l | .noneLit l
   | .var _ l | .intLit _ l | .boolLit _ l | .floatLit _ l
   | .stringLen _ l | .neg _ l | .not _ l | .old _ l
-  | .getIndex _ _ l | .isInstanceOf _ _ l
+  | .getIndex _ _ l | .getItem _ _ l | .isInstanceOf _ _ l
   | .intGe _ _ l | .intLe _ _ l | .floatGe _ _ l | .floatLe _ _ l
   | .add _ _ l | .sub _ _ l | .mul _ _ l | .floorDiv _ _ l
   | .mod _ _ l | .pow _ _ l
@@ -719,6 +739,7 @@ def SpecExpr.containsPlaceholder : SpecExpr → Bool
   | .noneLit .. => false
   | .floatLit .. => false
   | .getIndex s _ _ => s.containsPlaceholder
+  | .getItem s k _ => s.containsPlaceholder || k.containsPlaceholder
   | .isInstanceOf s _ _ => s.containsPlaceholder
   | .stringLen s _ => s.containsPlaceholder
   | .intGe s b _ => s.containsPlaceholder || b.containsPlaceholder
@@ -757,6 +778,7 @@ def SpecExpr.containsPlaceholder : SpecExpr → Bool
   | .noneLit .. => false
   | .floatLit .. => false
   | .getIndex s _ _ => s.mentionsVar name
+  | .getItem s k _ => s.mentionsVar name || k.mentionsVar name
   | .isInstanceOf s _ _ => s.mentionsVar name
   | .stringLen s _ => s.mentionsVar name
   | .intGe s b _ => s.mentionsVar name || b.mentionsVar name
@@ -792,6 +814,7 @@ def SpecExpr.containsPlaceholder : SpecExpr → Bool
   | .noneLit .. => false
   | .floatLit .. => false
   | .getIndex s _ _ => s.hasFreeVar name
+  | .getItem s k _ => s.hasFreeVar name || k.hasFreeVar name
   | .isInstanceOf s _ _ => s.hasFreeVar name
   | .stringLen s _ => s.hasFreeVar name
   | .intGe s b _ => s.hasFreeVar name || b.hasFreeVar name
@@ -823,6 +846,7 @@ def SpecExpr.softBEq : SpecExpr → SpecExpr → Bool
   | .var n₁ _, .var n₂ _ => n₁ == n₂
   | .old e₁ _, .old e₂ _ => e₁.softBEq e₂
   | .getIndex s₁ f₁ _, .getIndex s₂ f₂ _ => s₁.softBEq s₂ && f₁ == f₂
+  | .getItem s₁ k₁ _, .getItem s₂ k₂ _ => s₁.softBEq s₂ && k₁.softBEq k₂
   | .isInstanceOf s₁ t₁ _, .isInstanceOf s₂ t₂ _ => s₁.softBEq s₂ && t₁ == t₂
   | .stringLen s₁ _, .stringLen s₂ _ => s₁.softBEq s₂
   | .intLit v₁ _, .intLit v₂ _ => v₁ == v₂

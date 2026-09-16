@@ -363,6 +363,31 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
       (.intLe (.var "result" .none) (.intLit 100 .none) .none))
     "admitted postcondition formula did not match `result <= 100`"
 
+-- A dynamic-key dict comparison is admitted through the numeric fallback
+-- rather than dropped (`isFieldRead` covers `getItem`).
+#guard_msgs in
+#eval runNativeCase "admit_dict_dynamic_ge" fun sigs warnings => do
+  let f ← findFn sigs "f"
+  expect warnings.isEmpty s!"unexpected warnings: {warnings}"
+  expect (f.admittedPostconditions.size == 1)
+    s!"expected 1 admitted postcondition, got {f.admittedPostconditions.size}"
+  expect (f.admittedPostconditions[0]!.softBEq
+      (.pcmp .ge
+        (.getItem (.var "d1" .none) (.var "k1" .none) .none)
+        (.getItem (.var "d2" .none) (.var "k2" .none) .none)
+        .none))
+    "admitted postcondition did not match `d1[k1] >= d2[k2]`"
+
+-- A constant-key subscript on a non-str-keyed dict is dropped with the same
+-- message as the dynamic-key branch, not mistranslated as a string lookup.
+#guard_msgs in
+#eval runNativeCase "admit_int_dict_const_subscript" fun sigs warnings => do
+  let f ← findFn sigs "f"
+  expect f.admittedPostconditions.isEmpty
+    s!"expected the int-keyed subscript contract to be dropped, got {f.admittedPostconditions.size}"
+  expect (warnings.any (·.contains "subscript subject is not a string-keyed Dict/Mapping/TypedDict"))
+    s!"expected the non-string-keyed dict warning, got: {warnings}"
+
 -- Native `@modifies(lambda …: target)` populates `FunctionDecl.modifies`.
 #guard_msgs in
 #eval runNativeCase "modifies_basic" fun sigs _ => do
@@ -576,16 +601,24 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
   let m ← findMethod c "m"
   expect (m.preconditions.size == 1) s!"expected 1 method precondition, got {m.preconditions.size}"
 
--- @requires with a Dict[int, _] quantifier: the clause is dropped (0 preconditions)
--- and exactly one "dict quantifier requires str keys" warning is emitted.
+-- A Dict[int, _] quantifier is rejected because the logical model has string keys.
 #guard_msgs in
-#eval runNativeCase "requires_int_dict_quant" fun sigs warnings => do
-  let f ← findFn sigs "f"
-  expect (f.preconditions.size == 0)
-    s!"expected 0 preconditions (int-key dict quantifier dropped), got {f.preconditions.size}"
-  let dictKeyWarns := warnings.filter (·.contains "dict quantifier requires str keys")
-  expect (dictKeyWarns.size == 1)
-    s!"expected exactly 1 dict-key warning, got {dictKeyWarns.size}"
+#eval expectNativeCaseError "requires_int_dict_quant"
+  "dict quantifier requires str keys"
+
+-- Non-TypedDict `**kwargs` are dropped from the model; a contract referencing
+-- them fails loudly at lowering instead of silently weakening.
+#guard_msgs in
+#eval runNativeCase "requires_nontypeddict_kwargs" fun sigs _ => do
+  let lowered := Specs.ToLaurel.signaturesToLaurel
+    (testDir / "native_cases" / "requires_nontypeddict_kwargs.py") sigs
+    (StrataPython.ModuleName.ofString! "native_cases.requires_nontypeddict_kwargs")
+  let messages := lowered.errors.map (·.message.message)
+  let expected := #[
+    "**kw must use Unpack[TypedDict], got 'builtins.int'; **kw is dropped from the model",
+    "Unknown identifier 'kw' in 'native_cases_requires_nontypeddict_kwargs_h'"]
+  expect (messages == expected)
+    s!"expected exactly the kwargs drop and dangling identifier errors, got {messages}"
 
 /-! ## `OLD(expr)` recognition and rejection -/
 
@@ -827,9 +860,8 @@ def warningTestCase : IO Unit := withPython fun pythonCmd => do
 #eval warningTestCase
 
 /-- Unsupported quantifier shapes must abort PySpec translation rather than
-    silently weakening the generated contract (except Dict[int, _] quantifiers,
-    which warn and proceed — see `dictIntKeyWarnTestCase`). One fixture covers
-    each refusal branch for expression- and statement-form quantifiers. -/
+    silently weakening the generated contract. One fixture covers each refusal
+    branch for expression- and statement-form quantifiers. -/
 def quantifierErrorTestCase : IO Unit := withPython fun pythonCmd => do
   IO.FS.withTempFile fun _handle dialectFile => do
     IO.FS.writeBinFile dialectFile StrataPython.Python.toIon
@@ -872,11 +904,8 @@ def quantifierErrorTestCase : IO Unit := withPython fun pythonCmd => do
 #guard_msgs in
 #eval quantifierErrorTestCase
 
-/-- `Dict[int, _]` quantifiers warn and proceed instead of aborting translation.
-    A top-level case produces `.ok` with the warning and no preconditions.
-    The nested case (Dict[int, _] inside an outer for) is tested in
-    `quantifierErrorTestCase` via `for_nested_int_dict`. -/
-private def dictIntKeyWarnTestCase : IO Unit := withPython fun pythonCmd => do
+/-- String-key maps cannot faithfully represent `Dict[int, _]` quantifiers. -/
+private def dictIntKeyErrorTestCase : IO Unit := withPython fun pythonCmd => do
   IO.FS.withTempFile fun _handle dialectFile => do
     IO.FS.writeBinFile dialectFile StrataPython.Python.toIon
     IO.FS.withTempDir fun strataDir => do
@@ -890,32 +919,49 @@ private def dictIntKeyWarnTestCase : IO Unit := withPython fun pythonCmd => do
           (.ofComponent (.ofString "dict_int_key_warn"))
           |>.toBaseIO
       match r with
-      | .ok (sigs, warnings) =>
-        -- Exactly 2 warnings: one from the statement-form (For-arm) and one
-        -- from the expression-form (transQuantCall). No double-emission.
-        let dictKeyWarnings := warnings.filter (·.contains "dict quantifier requires str keys")
-        unless dictKeyWarnings.size == 2 do
-          let warnStr := warnings.foldl (init := "") fun acc w => s!"{acc}\n  {w}"
-          throw <| IO.userError
-            s!"expected exactly 2 warnings containing \"dict quantifier requires str keys\", \
-               got {dictKeyWarnings.size}. Actual warnings:{warnStr}"
-        -- top_level_int_dict (statement-form): warn-and-proceed, 0 preconditions.
-        let topLevel ← findFn sigs "top_level_int_dict"
-        unless topLevel.preconditions.isEmpty do
-          throw <| IO.userError
-            s!"expected top_level_int_dict to have 0 preconditions (quantifier dropped), \
-               got {topLevel.preconditions.size}"
-        -- expr_form_int_dict (expression-form): warn-and-proceed, 0 preconditions.
-        let exprForm ← findFn sigs "expr_form_int_dict"
-        unless exprForm.preconditions.isEmpty do
-          throw <| IO.userError
-            s!"expected expr_form_int_dict to have 0 preconditions (quantifier dropped), \
-               got {exprForm.preconditions.size}"
+      | .ok _ =>
+        throw <| IO.userError "expected Dict[int, _] quantifiers to be rejected"
       | .error e =>
-        throw <| IO.userError s!"expected warn-and-proceed (.ok), got hard error: {e}"
+        let actualCount := (e.splitOn "dict quantifier requires str keys").length - 1
+        unless actualCount == 2 do
+          throw <| IO.userError
+            s!"expected 2 dictionary-key errors, got {actualCount}. Actual errors:\n{e}"
 
 #guard_msgs in
-#eval dictIntKeyWarnTestCase
+#eval dictIntKeyErrorTestCase
+
+/-- A dynamic subscript on a non-dict subject warns about the subject, not the key. -/
+private def listSubscriptWarnTestCase : IO Unit := withPython fun pythonCmd => do
+  IO.FS.withTempFile fun _handle dialectFile => do
+    IO.FS.writeBinFile dialectFile StrataPython.Python.toIon
+    IO.FS.withTempDir fun strataDir => do
+      let r ←
+        translateFile
+          (pythonCmd := toString pythonCmd)
+          (dialectFile := dialectFile)
+          (strataDir := strataDir)
+          (pythonFile := testDir / "list_subscript_warn.py")
+          (searchPath := testDir)
+          (.ofComponent (.ofString "list_subscript_warn"))
+          |>.toBaseIO
+      match r with
+      | .ok (_sigs, warnings) =>
+        unless warnings.size == 3 do
+          throw <| IO.userError s!"expected exactly 3 warnings, got {warnings.size}:\n  {warnings}"
+        let expected := #[
+          ("subscript subject is not a string-keyed Dict/Mapping/TypedDict", 1),
+          ("dictionary subscript key must have type str", 0),
+          ("unsupported comparison", 1),
+          ("unsupported expression in assert; dropped", 1)]
+        for (needle, expectedCount) in expected do
+          let actualCount := warnings.filter (·.contains needle) |>.size
+          unless actualCount == expectedCount do
+            throw <| IO.userError
+              s!"expected {expectedCount} warning(s) containing \"{needle}\", got {actualCount}:\n  {warnings}"
+      | .error e => throw <| IO.userError e
+
+#guard_msgs in
+#eval listSubscriptWarnTestCase
 
 
 meta def testNegRoundTrip (v : Nat) : Bool :=

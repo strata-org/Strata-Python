@@ -106,6 +106,10 @@ def anyIsfromNone (v : TypedStmtExpr tyAny)
     (source : FileRange := v.stmt.source) : TypedStmtExpr .TBool :=
   .ofStmt (.StaticCall (mkId "Any..isfrom_None") [v.stmt]) source
 
+def anyIsfromDict (v : TypedStmtExpr tyAny)
+    (source : FileRange := v.stmt.source) : TypedStmtExpr .TBool :=
+  .ofStmt (.StaticCall (mkId "Any..isfrom_DictStrAny") [v.stmt]) source
+
 def anyToBool (v : TypedStmtExpr tyAny)
     (source : FileRange := v.stmt.source) : TypedStmtExpr .TBool :=
   .ofStmt (.StaticCall (mkId "Any_to_bool") [v.stmt]) source
@@ -133,6 +137,10 @@ def anyAsString (a : TypedStmtExpr tyAny)
     (source : FileRange := a.stmt.source) : TypedStmtExpr .TString :=
   .ofStmt (.StaticCall (mkId "Any..as_string!") [a.stmt]) source
 
+def anyAsStringChecked (a : TypedStmtExpr tyAny)
+    (source : FileRange := a.stmt.source) : TypedStmtExpr .TString :=
+  .ofStmt (.StaticCall (mkId "Any..as_string") [a.stmt]) source
+
 def anyAsFloat (a : TypedStmtExpr tyAny)
     (source : FileRange := a.stmt.source) : TypedStmtExpr .TReal :=
   .ofStmt (.StaticCall (mkId "Any..as_float!") [a.stmt]) source
@@ -144,6 +152,35 @@ def anyAsDict (a : TypedStmtExpr tyAny)
 def dictStrAnyContains (d : TypedStmtExpr tyDictStrAny) (k : TypedStmtExpr .TString)
     (source : FileRange := d.stmt.source) : TypedStmtExpr .TBool :=
   .ofStmt (.StaticCall (mkId "DictStrAny_contains") [d.stmt, k.stmt]) source
+
+/-! ### Spec-only partial-map dictionary view -/
+
+abbrev tyPySpecDictValue : HighType := .UserDefined "PySpecDictValue"
+
+abbrev tyPySpecDictMap : HighType :=
+  .TMap { val := .TString, source := unknownSource }
+    { val := tyPySpecDictValue, source := unknownSource }
+
+def pySpecDictModelOf (d : TypedStmtExpr tyDictStrAny)
+    (source : FileRange := d.stmt.source) : TypedStmtExpr tyPySpecDictMap :=
+  .ofStmt (.StaticCall (mkId "PySpecDict_modelOf") [d.stmt]) source
+
+def pySpecDictSelect (d : TypedStmtExpr tyPySpecDictMap) (k : TypedStmtExpr .TString)
+    (source : FileRange := d.stmt.source) : TypedStmtExpr tyPySpecDictValue :=
+  .ofStmt (.StaticCall (mkId "select") [d.stmt, k.stmt]) source
+
+def pySpecDictIsPresent (v : TypedStmtExpr tyPySpecDictValue)
+    (source : FileRange := v.stmt.source) : TypedStmtExpr .TBool :=
+  .ofStmt (.StaticCall (mkId "PySpecDictValue..isPresent") [v.stmt]) source
+
+def pySpecDictValueChecked (v : TypedStmtExpr tyPySpecDictValue)
+    (source : FileRange := v.stmt.source) : TypedStmtExpr tyAny :=
+  .ofStmt (.StaticCall (mkId "PySpecDictValue..value") [v.stmt]) source
+
+/-- Use only beneath a same-select `pySpecDictIsPresent` guard. -/
+def pySpecDictValueUnchecked (v : TypedStmtExpr tyPySpecDictValue)
+    (source : FileRange := v.stmt.source) : TypedStmtExpr tyAny :=
+  .ofStmt (.StaticCall (mkId "PySpecDictValue..value!") [v.stmt]) source
 
 def anyGet (a i : TypedStmtExpr tyAny)
     (source : FileRange := unknownSource) : TypedStmtExpr tyAny :=

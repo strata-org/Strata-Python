@@ -236,7 +236,6 @@ private def atomAssertion? (atom : SpecAtomType) (ty : SpecType)
     let eqCheck := mk (.StaticCall (mkId Operation.Eq.procName) [unwrap, mk (.LiteralString v)])
     return some <| mk (.StaticCall (mkId Operation.And.procName) [typeCheck, eqCheck])
   | .typedDict .. =>
-    reportError .unsupportedUnion ty.loc s!"TypedDict '{atom}' approximated as DictStrAny in type '{ty}'"
     return some <| mk (.StaticCall (mkId "Any..isfrom_DictStrAny") [value])
 
 /-- Build a type-assertion expression for `value` given its declared `SpecType`.
@@ -288,6 +287,8 @@ Context for resolving identifiers.
 structure SpecExprContext where
   procName : String
   argTypes : Std.HashMap String HighType
+  /-- Source-level types used to select map-native dictionary lowering. -/
+  specTypes : Std.HashMap String SpecType := {}
   /-- Quantifier-bound names that resolve to a prebuilt Any-typed expression
       rather than a plain identifier. Used to inline a dict `for k, v` value
       binder as `d[k]`, so a single key quantifier suffices (avoiding a fragile
@@ -339,6 +340,109 @@ private def asBool (loc : SourceRange) (act : ToLaurelExprM SomeTypedStmtExpr) :
     let pn := (← read).procName
     reportError .typeError loc s!"Expected Bool-typed expression but got {repr tp} in '{pn}'"
     pure ⟨e.stmt⟩
+
+private def asDict (loc : SourceRange) (act : ToLaurelExprM SomeTypedStmtExpr)
+    : ToLaurelExprM (TypedStmtExpr StrataPython.Laurel.TypedStmtExpr.tyDictStrAny) := do
+  let ctx ← read
+  let (se, success) ← runChecked <| act ctx
+  if !success then
+    return ⟨se.2.stmt⟩
+  match se with
+  | ⟨.UserDefined id, e⟩ =>
+    if id.text == "DictStrAny" then
+      pure ⟨e.stmt⟩
+    else if id.text == "Any" then
+      pure (TypedStmtExpr.anyAsDict ⟨e.stmt⟩)
+    else
+      let pn := (← read).procName
+      reportError .loweringTypeError loc
+        s!"Expected dictionary expression but got {repr (HighType.UserDefined id)} in '{pn}'"
+      pure ⟨e.stmt⟩
+  | ⟨tp, e⟩ =>
+    let pn := (← read).procName
+    reportError .loweringTypeError loc s!"Expected dictionary expression but got {repr tp} in '{pn}'"
+    pure ⟨e.stmt⟩
+
+-- A dictionary operand boxed as `Any`: the bare `DictStrAny` of `**kwargs`
+-- boxes via `from_DictStrAny`; `Any`-represented dictionaries pass through.
+private def asDictAny (loc : SourceRange) (act : ToLaurelExprM SomeTypedStmtExpr)
+    : ToLaurelExprM (TypedStmtExpr StrataPython.Laurel.tyAny) := do
+  let ctx ← read
+  let (se, success) ← runChecked <| act ctx
+  if !success then
+    return ⟨se.2.stmt⟩
+  match se with
+  | ⟨.UserDefined id, e⟩ =>
+    if id.text == "DictStrAny" then
+      pure (.ofStmt (.StaticCall (mkId "from_DictStrAny") [e.stmt]) e.stmt.source)
+    else if id.text == "Any" then
+      pure ⟨e.stmt⟩
+    else
+      let pn := (← read).procName
+      reportError .loweringTypeError loc
+        s!"Expected dictionary expression but got {repr (HighType.UserDefined id)} in '{pn}'"
+      pure ⟨e.stmt⟩
+  | ⟨tp, e⟩ =>
+    let pn := (← read).procName
+    reportError .loweringTypeError loc s!"Expected dictionary expression but got {repr tp} in '{pn}'"
+    pure ⟨e.stmt⟩
+
+private inductive SpecDictKind where
+  | homogeneous (valueType : SpecType)
+  | typedDict
+
+private def specDictKind? (tp : SpecType) : Option SpecDictKind :=
+  if let some (keyType, valueType) := tp.extractDictKeyValueTypes then
+    if keyType.isStringType then some (.homogeneous valueType) else none
+  else if tp.asIdent == some .builtinsDict ||
+      tp.asIdent == some .typingDict ||
+      tp.asIdent == some .typingMapping then
+    some (.homogeneous (.ident tp.loc .typingAny))
+  else
+    if tp.isTypedDict then some .typedDict else none
+
+private partial def specTypeOf? : SpecExpr → ToLaurelExprM (Option SpecType)
+  | .var name _ => do return (← read).specTypes[name]?
+  | .old inner _ => specTypeOf? inner
+  | .getIndex subject field _ => do
+    let some subjectType ← specTypeOf? subject | return none
+    if let some fieldType := subjectType.lookupTypedDictField field then
+      return some fieldType
+    match specDictKind? subjectType with
+    | some (.homogeneous valueType) => return some valueType
+    | _ => return none
+  | .getItem subject _ _ => do
+    let some subjectType ← specTypeOf? subject | return none
+    match specDictKind? subjectType with
+    | some (.homogeneous valueType) => return some valueType
+    | _ => return none
+  | _ => return none
+
+private def specDictKindOf? (e : SpecExpr) : ToLaurelExprM (Option SpecDictKind) := do
+  return (← specTypeOf? e).bind specDictKind?
+
+private def dictModelOf (dict : TypedStmtExpr StrataPython.Laurel.TypedStmtExpr.tyDictStrAny)
+    (source : FileRange) :
+    TypedStmtExpr StrataPython.Laurel.TypedStmtExpr.tyPySpecDictMap :=
+  TypedStmtExpr.pySpecDictModelOf dict source
+
+private def dictSelect
+    (dict : TypedStmtExpr StrataPython.Laurel.TypedStmtExpr.tyDictStrAny)
+    (key : TypedStmtExpr .TString) (source : FileRange) :
+    TypedStmtExpr StrataPython.Laurel.TypedStmtExpr.tyPySpecDictValue :=
+  TypedStmtExpr.pySpecDictSelect (dictModelOf dict source) key source
+
+private def dictScalarEq
+    (left right : TypedStmtExpr StrataPython.Laurel.TypedStmtExpr.tyDictStrAny)
+    (source : FileRange) : TypedStmtExpr .TBool :=
+  .ofStmt (.StaticCall (mkId "PySpecDict_scalarEq")
+    [left.stmt, right.stmt]) source
+
+private def anyScalarEq
+    (left right : TypedStmtExpr StrataPython.Laurel.tyAny)
+    (source : FileRange) : TypedStmtExpr .TBool :=
+  .ofStmt (.StaticCall (mkId "PySpecAny_scalarEq")
+    [left.stmt, right.stmt]) source
 
 /-- Look up an identifier's type from the SpecExprContext and create a typed identifier.
     Reports a typeError if the name is not found in argTypes. -/
@@ -408,16 +512,23 @@ def specExprToLaurel (e : SpecExpr) (source : FileRange)
   | .floatLit _ loc => do
     reportError .floatLiteral loc "Float literals not yet supported in preconditions"
     return default
-  | .getIndex subject field loc =>
-    match subject with
-    | .var "kwargs" .. => do
+  | .getIndex subject field loc => do
+    if (← specDictKindOf? subject).isSome then do
       let src ← nodeSource loc
-      lookupIdentifier field loc src
-    | _ => do
+      let dict ← asDict loc <| specExprToLaurel subject src
+      let selected := dictSelect dict (.literalString field src) src
+      return .mkSome <| TypedStmtExpr.pySpecDictValueChecked selected src
+    else do
       let src ← nodeSource loc
       let s ← asAny loc <| specExprToLaurel subject src
-      let from_str := .fromStr (.literalString field src) src
+      let from_str := TypedStmtExpr.fromStr (.literalString field src) src
       return .mkSome <| .anyGet s from_str src
+  | .getItem subject key loc => do
+    let src ← nodeSource loc
+    let dict ← asDict loc <| specExprToLaurel subject src
+    let keyAny ← asAny loc <| specExprToLaurel key src
+    let selected := dictSelect dict (keyAny.anyAsStringChecked src) src
+    return .mkSome <| TypedStmtExpr.pySpecDictValueChecked selected src
   | .isInstanceOf _ typeName loc => do
     reportError .isinstanceUnsupported loc s!"isinstance check for '{typeName}' not yet supported in preconditions"
     return default
@@ -440,10 +551,31 @@ def specExprToLaurel (e : SpecExpr) (source : FileRange)
     return .mkSome (⟨{ val := .StaticCall (mkId "Any_to_bool") [cmp], source := src }⟩ : TypedStmtExpr .TBool)
   | .pcmp op lhs rhs loc => do
     let src ← nodeSource loc
-    let l ← asAny loc <| specExprToLaurel lhs src
-    let r ← asAny loc <| specExprToLaurel rhs src
-    let cmp : StmtExprMd := { val := .StaticCall (mkId (pcmpPreludeName op)) [l.stmt, r.stmt], source := src }
-    return .mkSome (⟨{ val := .StaticCall (mkId "Any_to_bool") [cmp], source := src }⟩ : TypedStmtExpr .TBool)
+    let lhsDictKind ← specDictKindOf? lhs
+    let rhsDictKind ← specDictKindOf? rhs
+    if (op == .eq || op == .ne) && lhsDictKind.isSome && rhsDictKind.isSome then
+      let l ← asDict loc <| specExprToLaurel lhs src
+      let r ← asDict loc <| specExprToLaurel rhs src
+      let eq := dictScalarEq l r src
+      if op == .eq then
+        return .mkSome eq
+      return .mkSome <| TypedStmtExpr.not eq src
+    else if (op == .eq || op == .ne) && (lhsDictKind.isSome || rhsDictKind.isSome) then
+      -- One statically-dict side: `PySpecAny_scalarEq` stays extensional when
+      -- the other operand is a dict at runtime, unlike order-sensitive `PEq`.
+      let l ← if lhsDictKind.isSome then asDictAny loc <| specExprToLaurel lhs src
+              else asAny loc <| specExprToLaurel lhs src
+      let r ← if rhsDictKind.isSome then asDictAny loc <| specExprToLaurel rhs src
+              else asAny loc <| specExprToLaurel rhs src
+      let eq := anyScalarEq l r src
+      if op == .eq then
+        return .mkSome eq
+      return .mkSome <| TypedStmtExpr.not eq src
+    else
+      let l ← asAny loc <| specExprToLaurel lhs src
+      let r ← asAny loc <| specExprToLaurel rhs src
+      let cmp : StmtExprMd := { val := .StaticCall (mkId (pcmpPreludeName op)) [l.stmt, r.stmt], source := src }
+      return .mkSome (⟨{ val := .StaticCall (mkId "Any_to_bool") [cmp], source := src }⟩ : TypedStmtExpr .TBool)
   | .add lhs rhs loc => do
     -- Addition -> runtime `PAdd` over Any operands.
     let src ← nodeSource loc
@@ -526,11 +658,11 @@ def specExprToLaurel (e : SpecExpr) (source : FileRange)
         .or acc (.stringEq sStr (.literalString v src))
   | .containsKey container key loc => do
     let src ← nodeSource loc
-    match container with
-    | .var "kwargs" .. =>
-      let keyAny ← asAny loc <| lookupIdentifier key loc src
-      return .mkSome <| .not (.anyIsfromNone keyAny)
-    | _ =>
+    if (← specDictKindOf? container).isSome then do
+      let dict ← asDict loc <| specExprToLaurel container src
+      let selected := dictSelect dict (.literalString key src) src
+      return .mkSome <| TypedStmtExpr.pySpecDictIsPresent selected src
+    else do
       let c ← asAny loc <| specExprToLaurel container src
       return .mkSome <| .dictStrAnyContains (c.anyAsDict) (.literalString key)
   | .regexMatch subject pattern loc => do
@@ -542,7 +674,6 @@ def specExprToLaurel (e : SpecExpr) (source : FileRange)
     -- The domain supplies the binder, membership guard, trigger, and body
     -- environment. QuantKind determines how the guard combines with the body.
     let src ← nodeSource loc
-    let collExpr ← asAny loc <| specExprToLaurel collection src
     let ctx ← read
     -- Keep top-level names readable unless that name occurs in the collection:
     -- `for xs in xs` must retain the outer `xs` in the membership expression.
@@ -555,63 +686,85 @@ def specExprToLaurel (e : SpecExpr) (source : FileRange)
     let (param, guard, trigger, bodyEnv) ←
       match domain with
       | .overList varName =>
+        let collExpr ← asAny loc <| specExprToLaurel collection src
         let actualName := freshBinderName varName
         let elemVar := TypedStmtExpr.identifier actualName StrataPython.Laurel.tyAny src
         let membership := collExpr.anyAsList.listContains elemVar src
+        let elemType := (← specTypeOf? collection).bind (·.extractElementType)
         let param : Parameter :=
           { name := mkId actualName, type := { val := StrataPython.Laurel.tyAny, source := src } }
         let bodyEnv := fun (c : SpecExprContext) => { c with
           argTypes := c.argTypes.insert varName StrataPython.Laurel.tyAny
+          specTypes := match elemType with
+            | some tp => c.specTypes.insert varName tp
+            | none => c.specTypes
           boundValues := if actualName == varName
             then c.boundValues.erase varName
             else c.boundValues.insert varName elemVar.stmt
           quantifierDepth := c.quantifierDepth + 1 }
         pure (param, membership, membership.stmt, bodyEnv)
       | .overDictItems keyVar valVar =>
-        -- Quantify over the string key only and expose the Python value binder
-        -- as the requires-free d[k] lookup. A nested key is alpha-renamed, so
-        -- this prebuilt lookup continues to reference its own outer key.
+        let dict ← asDict loc <| specExprToLaurel collection src
+        let valueType := match (← specDictKindOf? collection) with
+          | some (.homogeneous tp) => some tp
+          | _ => none
         let actualKey := freshBinderName keyVar
-        let dictExpr := collExpr.anyAsDict
         let keyStr := TypedStmtExpr.identifier actualKey .TString src
-        let membership := dictExpr.dictStrAnyContains keyStr src
-        let valueLookup := dictExpr.dictStrAnyGetOrNone keyStr src
+        let selected := dictSelect dict keyStr src
+        let membership := TypedStmtExpr.pySpecDictIsPresent selected src
+        let valueLookup := TypedStmtExpr.pySpecDictValueUnchecked selected src
         let keyBoxed := keyStr.fromStr src
         let param : Parameter :=
           { name := mkId actualKey, type := { val := .TString, source := src } }
         let bodyEnv := fun (c : SpecExprContext) => { c with
+          argTypes := c.argTypes.insert keyVar StrataPython.Laurel.tyAny
+            |>.insert valVar StrataPython.Laurel.tyAny
+          specTypes := match valueType with
+            | some tp => c.specTypes
+                |>.insert keyVar (.ident loc .builtinsStr)
+                |>.insert valVar tp
+            | none => c.specTypes.insert keyVar (.ident loc .builtinsStr)
           boundValues := c.boundValues
             |>.insert keyVar keyBoxed.stmt
             |>.insert valVar valueLookup.stmt
           quantifierDepth := c.quantifierDepth + 1 }
-        pure (param, membership, membership.stmt, bodyEnv)
+        pure (param, membership, selected.stmt, bodyEnv)
       | .overDictKeys keyVar =>
+        let dict ← asDict loc <| specExprToLaurel collection src
         let actualKey := freshBinderName keyVar
-        let dictExpr := collExpr.anyAsDict
         let keyStr := TypedStmtExpr.identifier actualKey .TString src
-        let membership := dictExpr.dictStrAnyContains keyStr src
+        let selected := dictSelect dict keyStr src
+        let membership := TypedStmtExpr.pySpecDictIsPresent selected src
         let keyBoxed := keyStr.fromStr src
         let param : Parameter :=
           { name := mkId actualKey, type := { val := .TString, source := src } }
         let bodyEnv := fun (c : SpecExprContext) => { c with
+          argTypes := c.argTypes.insert keyVar StrataPython.Laurel.tyAny
+          specTypes := c.specTypes.insert keyVar (.ident loc .builtinsStr)
           boundValues := c.boundValues.insert keyVar keyBoxed.stmt
           quantifierDepth := c.quantifierDepth + 1 }
-        pure (param, membership, membership.stmt, bodyEnv)
+        pure (param, membership, selected.stmt, bodyEnv)
       | .overDictValues valVar =>
-        -- The quantified key is hidden from Python. Retain the readable
-        -- `py$<valVar>` name at top level and make nested hidden keys unique as well.
+        let dict ← asDict loc <| specExprToLaurel collection src
+        let valueType := match (← specDictKindOf? collection) with
+          | some (.homogeneous tp) => some tp
+          | _ => none
         let keyName := if ctx.quantifierDepth == 0 then pythonGeneratedPrefix ++ valVar
           else s!"{pythonGeneratedPrefix}quant_{ctx.quantifierDepth}_{loc.start.byteIdx}_key"
-        let dictExpr := collExpr.anyAsDict
         let keyStr := TypedStmtExpr.identifier keyName .TString src
-        let membership := dictExpr.dictStrAnyContains keyStr src
-        let valueLookup := dictExpr.dictStrAnyGetOrNone keyStr src
+        let selected := dictSelect dict keyStr src
+        let membership := TypedStmtExpr.pySpecDictIsPresent selected src
+        let valueLookup := TypedStmtExpr.pySpecDictValueUnchecked selected src
         let param : Parameter :=
           { name := mkId keyName, type := { val := .TString, source := src } }
         let bodyEnv := fun (c : SpecExprContext) => { c with
+          argTypes := c.argTypes.insert valVar StrataPython.Laurel.tyAny
+          specTypes := match valueType with
+            | some tp => c.specTypes.insert valVar tp
+            | none => c.specTypes
           boundValues := c.boundValues.insert valVar valueLookup.stmt
           quantifierDepth := c.quantifierDepth + 1 }
-        pure (param, membership, membership.stmt, bodyEnv)
+        pure (param, membership, selected.stmt, bodyEnv)
     let bodyBool ← withReader bodyEnv <| asBool loc <| specExprToLaurel body src
     return .mkSome <|
       match quant with
@@ -748,24 +901,273 @@ def buildPreconditionConds
     idx := idx + 1
   return conds
 
+private def andAll (conditions : List (TypedStmtExpr .TBool))
+    (source : FileRange) : TypedStmtExpr .TBool :=
+  conditions.foldl (·.and · source) (.literalBool true source)
+
+private def orAll (conditions : List (TypedStmtExpr .TBool))
+    (source : FileRange) : TypedStmtExpr .TBool :=
+  conditions.foldl (·.or · source) (.literalBool false source)
+
+private def singletonSpecType (loc : SourceRange) : SpecAtomType → SpecType
+  | .ident name args => .ident loc name args
+  | .intLiteral value => .intLiteral loc value
+  | .stringLiteral value => .stringLiteral loc value
+  | .typedDict fields fieldTypes required =>
+    .typedDict loc fields fieldTypes required
+
+private inductive TypedDictSchemaMode where
+  | openKeys
+  | closedKeys
+  deriving BEq
+
+private def stringListExpr (values : List String)
+    (source : FileRange) : StmtExprMd :=
+  values.foldr
+    (fun value tail => {
+      val := .StaticCall (mkId "ListStr_cons")
+        [{ val := .LiteralString value, source }, tail]
+      source })
+    { val := .StaticCall (mkId "ListStr_nil") [], source }
+
+private partial def schemaValueAssertion? (typedDictMode : TypedDictSchemaMode)
+    (path : String) (tp : SpecType)
+    (value : StmtExprMd) (source : FileRange)
+    : ToLaurelM (Option StmtExprMd) := do
+  let hasAny := tp.atoms.any fun
+    | .ident name _ => name == .typingAny
+    | _ => false
+  if hasAny then
+    return none
+  if tp.atoms.size > 1 && tp.hasContainerAtom then
+    let mut arms : List (TypedStmtExpr .TBool) := []
+    for atom in tp.atoms do
+      let atomType := singletonSpecType tp.loc atom
+      match ← schemaValueAssertion? typedDictMode path atomType value source with
+      | some condition =>
+        arms := arms ++ [(⟨condition⟩ : TypedStmtExpr .TBool)]
+      | none => return none
+    return some (orAll arms source).stmt
+  if let some kind := specDictKind? tp then
+    let anyValue : TypedStmtExpr StrataPython.Laurel.tyAny := ⟨value⟩
+    let isDict := anyValue.anyIsfromDict source
+    let dict := anyValue.anyAsDict source
+    let model := dictModelOf dict source
+    let binderPath := (path.replace "." "_").replace "[]" "_list"
+    let schema ←
+      match kind with
+      | .homogeneous valueType => do
+        let keyName := s!"{pythonGeneratedPrefix}schema_dict_{binderPath}"
+        let key := TypedStmtExpr.identifier keyName .TString source
+        let selected := TypedStmtExpr.pySpecDictSelect model key source
+        let present := TypedStmtExpr.pySpecDictIsPresent selected source
+        let nestedValue := TypedStmtExpr.pySpecDictValueUnchecked selected source
+        let nestedCondition ←
+          schemaValueAssertion? .openKeys s!"{path}.value"
+            valueType nestedValue.stmt source
+        let body := match nestedCondition with
+          | some condition =>
+            present.implies (⟨condition⟩ : TypedStmtExpr .TBool) source
+          | none => .literalBool true source
+        let param : Parameter :=
+          { name := mkId keyName, type := { val := .TString, source } }
+        pure <| TypedStmtExpr.forallTrigger param selected.stmt body source
+      | .typedDict => do
+        let fields := tp.asTypedDict.getD #[]
+        let mut conditions : List (TypedStmtExpr .TBool) := []
+        if typedDictMode == .closedKeys then
+          -- Keep the map universal as the logical contract. The equivalent
+          -- structural check gives concrete dictionaries a finite solver witness.
+          let allowedKeys := stringListExpr (fields.toList.map (·.name)) source
+          conditions := conditions ++ [
+            TypedStmtExpr.ofStmt
+              (.StaticCall (mkId "DictStrAny_keysAllowed")
+                [dict.stmt, allowedKeys]) source]
+          let keyName := s!"{pythonGeneratedPrefix}schema_dict_key_{binderPath}"
+          let key := TypedStmtExpr.identifier keyName .TString source
+          let selected := TypedStmtExpr.pySpecDictSelect model key source
+          let present := TypedStmtExpr.pySpecDictIsPresent selected source
+          let allowed := fields.foldl
+            (init := TypedStmtExpr.literalBool false source) fun acc field =>
+              acc.or (key.stringEq (.literalString field.name source) source) source
+          let keyParam : Parameter :=
+            { name := mkId keyName, type := { val := .TString, source } }
+          conditions := conditions ++ [
+            TypedStmtExpr.forallTrigger keyParam selected.stmt
+              (present.implies allowed source) source]
+        for field in fields do
+          let fieldKey := TypedStmtExpr.literalString field.name source
+          let selected := TypedStmtExpr.pySpecDictSelect model fieldKey source
+          let present := TypedStmtExpr.pySpecDictIsPresent selected source
+          if field.required then
+            conditions := conditions ++ [present]
+          let nestedValue := TypedStmtExpr.pySpecDictValueUnchecked selected source
+          if let some condition ← schemaValueAssertion? .openKeys
+              s!"{path}.{field.name}" field.type nestedValue.stmt source then
+            conditions := conditions ++
+              [present.implies (⟨condition⟩ : TypedStmtExpr .TBool) source]
+        pure <| andAll conditions source
+    return some (isDict.and schema source).stmt
+  if let some elemType := tp.extractElementType then
+    let listValue : TypedStmtExpr StrataPython.Laurel.tyAny := ⟨value⟩
+    let isList : TypedStmtExpr .TBool :=
+      .ofStmt (.StaticCall (mkId "Any..isfrom_ListAny") [value]) source
+    let list := listValue.anyAsList source
+    let binderPath := (path.replace "." "_").replace "[]" "_list"
+    let elemName := s!"{pythonGeneratedPrefix}schema_list_{binderPath}"
+    let elem := TypedStmtExpr.identifier elemName StrataPython.Laurel.tyAny source
+    let contains := TypedStmtExpr.listContains list elem source
+    let elemCondition ← schemaValueAssertion? .openKeys
+      s!"{path}[]" elemType elem.stmt source
+    let body := match elemCondition with
+      | some condition =>
+        contains.implies (⟨condition⟩ : TypedStmtExpr .TBool) source
+      | none => .literalBool true source
+    let param : Parameter :=
+      { name := mkId elemName, type := { val := StrataPython.Laurel.tyAny, source } }
+    let allElements := TypedStmtExpr.forallTrigger param contains.stmt body source
+    return some (isList.and allElements source).stmt
+  if tp.hasContainerAtom then
+    reportError .dictionarySchemaWarning tp.loc
+      s!"Container type '{tp}' cannot be modeled (dictionaries require string keys); the schema of '{path}' is not enforced"
+    return none
+  let hasUnsupportedAtom := tp.atoms.any fun
+    | .ident name _ => typeTestersMap[name]?.isNone
+    | .intLiteral _ | .stringLiteral _ => false
+    | .typedDict .. => true
+  if hasUnsupportedAtom then
+    return none
+  let assertion ← typeAssertion? tp value source
+  return assertion
+
+/-- Caller-visible schema for a dictionary-typed parameter. Runtime values stay
+    in `DictStrAny`; these conditions inspect only their logical map view.
+    TypedDict schemas are split per aspect so a violated obligation names the
+    offending field. -/
+private def dictSchemaConditions (arg : Arg) (rawDictInput : Bool)
+    (typedDictMode : TypedDictSchemaMode) (source : FileRange)
+    : ToLaurelM (List Condition) := do
+  if (specDictKind? arg.type).isNone then
+    if rawDictInput || !arg.type.hasDictionaryAtom then
+      return []
+    let value :=
+      TypedStmtExpr.identifier arg.name StrataPython.Laurel.tyAny source
+    let some condition ←
+        schemaValueAssertion? typedDictMode arg.name arg.type value.stmt source
+      | return []
+    return [{
+      condition
+      summary := some s!"'{arg.name}' must satisfy its declared dictionary type" }]
+  let some kind := specDictKind? arg.type
+    | return []
+  let (dict, tagCondition) :=
+    if rawDictInput then
+      (TypedStmtExpr.identifier arg.name
+          StrataPython.Laurel.TypedStmtExpr.tyDictStrAny source,
+        TypedStmtExpr.literalBool true source)
+    else
+      let value := TypedStmtExpr.identifier arg.name StrataPython.Laurel.tyAny source
+      (value.anyAsDict source, value.anyIsfromDict source)
+  let model := dictModelOf dict source
+  let mkCondition (aspect : TypedStmtExpr .TBool) (summary : String) : Condition :=
+    let condition := tagCondition.and aspect source
+    let condition :=
+      if arg.default.isSome && !rawDictInput then
+        let value := TypedStmtExpr.identifier arg.name StrataPython.Laurel.tyAny source
+        value.anyIsfromNone source |>.or condition source
+      else condition
+    { condition := condition.stmt, summary := some summary }
+  match kind with
+  | .homogeneous valueType =>
+    let keyName := s!"{pythonGeneratedPrefix}schema_{arg.name}"
+    let key := TypedStmtExpr.identifier keyName .TString source
+    let selected := TypedStmtExpr.pySpecDictSelect model key source
+    let present := TypedStmtExpr.pySpecDictIsPresent selected source
+    let value := TypedStmtExpr.pySpecDictValueUnchecked selected source
+    let valueCondition ←
+      schemaValueAssertion? .openKeys arg.name valueType value.stmt source
+    let body := match valueCondition with
+      | some condition =>
+        present.implies
+          (⟨condition⟩ : TypedStmtExpr .TBool) source
+      | none => .literalBool true source
+    let param : Parameter :=
+      { name := mkId keyName, type := { val := .TString, source := source } }
+    let schema := TypedStmtExpr.forallTrigger param selected.stmt body source
+    return [mkCondition schema
+      s!"'{arg.name}' must satisfy its declared dictionary type"]
+  | .typedDict =>
+    let mut conditions : List Condition := []
+    let fields := arg.type.asTypedDict.getD #[]
+    if typedDictMode == .closedKeys then
+      let allowedKeys := stringListExpr (fields.toList.map (·.name)) source
+      let structural : TypedStmtExpr .TBool :=
+        TypedStmtExpr.ofStmt
+          (.StaticCall (mkId "DictStrAny_keysAllowed")
+            [dict.stmt, allowedKeys]) source
+      let keyName := s!"{pythonGeneratedPrefix}schema_key_{arg.name}"
+      let key := TypedStmtExpr.identifier keyName .TString source
+      let selected := TypedStmtExpr.pySpecDictSelect model key source
+      let present := TypedStmtExpr.pySpecDictIsPresent selected source
+      let allowed := fields.foldl (init := TypedStmtExpr.literalBool false source)
+        fun acc field =>
+          acc.or (key.stringEq (.literalString field.name source) source) source
+      let keyBody := present.implies allowed source
+      let keyParam : Parameter :=
+        { name := mkId keyName, type := { val := .TString, source := source } }
+      let universal := TypedStmtExpr.forallTrigger keyParam selected.stmt keyBody source
+      conditions := conditions ++ [
+        mkCondition (structural.and universal source)
+          s!"'{arg.name}' must contain only declared keys"]
+    for field in fields do
+      let key := TypedStmtExpr.literalString field.name source
+      let selected := TypedStmtExpr.pySpecDictSelect model key source
+      let present := TypedStmtExpr.pySpecDictIsPresent selected source
+      if field.required then
+        conditions := conditions ++ [
+          mkCondition present
+            s!"'{arg.name}' must contain required key '{field.name}'"]
+      let value := TypedStmtExpr.pySpecDictValueUnchecked selected source
+      let valueCondition ←
+        schemaValueAssertion? .openKeys s!"{arg.name}.{field.name}"
+          field.type value.stmt source
+      if let some valueCondition := valueCondition then
+        conditions := conditions ++ [
+          mkCondition (present.implies (⟨valueCondition⟩ : TypedStmtExpr .TBool) source)
+            s!"'{arg.name}.{field.name}' must satisfy its declared type"]
+    return conditions
+
+private def buildDictSchemaConds (args : Array Arg)
+    (kwargs : Option (String × SpecType)) (source : FileRange)
+    : ToLaurelM (List Condition) := do
+  let mut conditions : List Condition := []
+  for arg in args do
+    conditions := conditions ++ (← dictSchemaConditions arg false .openKeys source)
+  if let some (name, tp) := kwargs then
+    let arg : Arg := { name, type := tp }
+    conditions := conditions ++ (← dictSchemaConditions arg true .closedKeys source)
+  return conditions
+
+private def addReturnSchemaAssume (body : Body)
+    (conditions : List Condition) : Body :=
+  match body, conditions with
+  | _, [] => body
+  | .Opaque postconditions (some implementation) modifies, conditions =>
+    let assumeStmts : List StmtExprMd := conditions.map fun c =>
+      { val := .Assume c.condition, source := c.condition.source }
+    let implementation := match implementation.val with
+      | .Block statements label =>
+        { implementation with val := .Block (statements ++ assumeStmts) label }
+      | _ =>
+        { implementation with val := .Block (implementation :: assumeStmts) none }
+    .Opaque postconditions (some implementation) modifies
+  | _, _ => body
+
 /-! ## Declaration Translation -/
 
-/-- Expand a `**kwargs: Unpack[TypedDict]` into individual `Arg` entries.
-    Returns an error if kwargs is present but not a TypedDict. -/
-public def expandKwargsArgs (kwargs : Option (String × SpecType))
-    : Except String (Array Arg) :=
-  match kwargs with
-  | none => .ok #[]
-  | some (name, specType) =>
-    match specType.asTypedDict with
-    | some fields =>
-      .ok <| fields.map fun f =>
-        { name := f.name
-          type := f.type
-          default := if f.required then none else some .none }
-    | none => .error s!"**{name} has non-TypedDict type; kwargs not expanded"
-
 /-- Convert a function declaration to a Laurel Procedure.
+    `**kwargs: Unpack[TypedDict]` is passed as one `DictStrAny` input; its
+    schema is expressed as a map condition on the logical dictionary model.
     When `isMethod` is true, the first positional arg (`self`) is stripped. -/
 def funcDeclToLaurel (procName : String) (func : FunctionDecl)
     (isMethod : Bool := false) : ToLaurelM Procedure := do
@@ -774,27 +1176,49 @@ def funcDeclToLaurel (procName : String) (func : FunctionDecl)
       s!"Method '{func.name}' has no arguments (expected 'self' as first parameter)"
   let posArgs := if isMethod then func.args.args.extract 1 func.args.args.size
                  else func.args.args
-  let kwargsArgs ← match expandKwargsArgs func.args.kwargs with
-    | .ok args => pure args
-    | .error msg => do reportError .kwargsExpansionError default msg; pure #[]
-  let allArgs := posArgs ++ func.args.kwonly ++ kwargsArgs
-  let inputs ← allArgs.mapM fun a => do
+  let kwargs ← match func.args.kwargs with
+    | some (name, tp) =>
+      if tp.isTypedDict then
+        pure (some (name, tp))
+      else do
+        reportError .kwargsExpansionError tp.loc
+          s!"**{name} must use Unpack[TypedDict], got '{tp}'; **{name} is dropped from the model"
+        pure none
+    | none => pure none
+  let allArgs := posArgs ++ func.args.kwonly
+  let explicitInputs ← allArgs.mapM fun a => do
     let ty ← specTypeToLaurelType a.type
     return ({ name := a.name, type := ty } : Parameter)
+  let inputs := match kwargs with
+    | some (name, _) =>
+      explicitInputs.push {
+        name := name
+        type := mkUserDefined "DictStrAny" }
+    | none => explicitInputs
   let outputs : List Parameter := [{ name := "result", type := tyAny }]
   let argTypes : Std.HashMap String HighType :=
     inputs.foldl (init := ({} : Std.HashMap String HighType).insert "result" StrataPython.Laurel.tyAny) fun m p =>
       m.insert p.name.text p.type.val
-  let specCtx : SpecExprContext := { procName, argTypes }
+  let specTypes := allArgs.foldl
+    (init := ({} : Std.HashMap String SpecType).insert "result" func.returnType)
+    fun m a => m.insert a.name a.type
+  let specTypes := match kwargs with
+    | some (name, tp) => specTypes.insert name tp
+    | none => specTypes
+  let specCtx : SpecExprContext := { procName, argTypes, specTypes }
   let (body, requiredParamConds) ← buildSpecBody allArgs func.postconditions
     func.admittedPostconditions func.returnType unknownSource specCtx
   let userPreconds ← buildPreconditionConds func.preconditions unknownSource specCtx
+  let dictSchemaConds ← buildDictSchemaConds allArgs kwargs unknownSource
+  let returnSchema ← dictSchemaConditions
+    { name := "result", type := func.returnType } false .openKeys unknownSource
+  let body := addReturnSchemaAssume body returnSchema
   let src ← mkSourceWithFileRange func.loc
   return {
     name := { text := procName, source := src }
     inputs := inputs.toList
     outputs := outputs
-    preconditions := requiredParamConds ++ userPreconds
+    preconditions := dictSchemaConds ++ requiredParamConds ++ userPreconds
     decreases := none
     body := body
   }

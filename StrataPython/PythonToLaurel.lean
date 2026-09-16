@@ -1520,7 +1520,14 @@ partial def translateCall (ctx : TranslationContext)
     let trans_dictArgs := remainingParams.map fun arg =>
       DictStrAny_get_param trans_dict arg.name arg.default.isSome
     let allArgs := trans_posArgs ++ trans_dictArgs
-    let kwargsArg := if funcDecl.kwargsName.isSome then [trans_dict] else []
+    let rawDict := mkStmtExprMd (.StaticCall "Any..as_Dict!" [trans_dict])
+    let remainingKwargs := remainingParams.foldl (init := rawDict) fun dict arg =>
+      mkStmtExprMd (.StaticCall "DictStrAny_remove"
+        [dict, mkStmtExprMd (.LiteralString arg.name)])
+    let kwargsArg :=
+      if funcDecl.kwargsName.isSome then
+        [remainingKwargs]
+      else []
     -- Emit type assertions: if a key is present in the dict, its value
     -- must match the declared parameter type. This catches {"key": None}
     -- where the parameter type is str/int/bool/float.

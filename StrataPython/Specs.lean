@@ -785,9 +785,11 @@ private def makeComparison
   else
     none
 
-/-- Whether an expression is a field read, possibly from the pre-state. -/
+/-- Whether an expression is a field or dictionary read, possibly from the
+    pre-state. -/
 private def SpecExpr.isFieldRead : SpecExpr → Bool
   | .getIndex .. => true
+  | .getItem .. => true
   | .old inner _ => inner.isFieldRead
   | _ => false
 
@@ -920,7 +922,8 @@ def transQuantCall (loc : SourceRange)
   -- The Laurel model only has `DictStrAny`, so reject non-`str`-keyed dicts.
   if let some kTp := domainInfo.dictKeyType? then
     unless kTp.isStringType do
-      specWarningOfKind .pySpecDroppedAssertion loc s!"{callee}: dict quantifier requires str keys (only Dict[str, _] is supported)"
+      specError loc
+        s!"{callee}: dict quantifier requires str keys (only Dict[str, _] is supported)"
       return none
   -- Match the target binder against the domain to determine bindings and domain.
   -- For single-name targets we get one (name, type); for tuple targets we get two.
@@ -1017,13 +1020,44 @@ partial def transExpr (e : expr SourceRange)
   -- Nested subscript: x["field"]
   | .Subscript _ inner (.Constant _ (.ConString _ ⟨_, fieldName⟩) _) (.Load _) =>
     let (innerExpr, innerTp) ← transExpr inner
-    let fieldTp := innerTp.lookupTypedDictField fieldName
+    let fieldTp :=
+      innerTp.lookupTypedDictField fieldName <|>
+      (innerTp.extractDictKeyValueTypes.bind fun (keyType, valueType) =>
+        if keyType.isStringType then some valueType else none)
     if fieldTp.isNone then
       if innerTp.isTypedDict then
         specWarning loc s!"field \"{fieldName}\" not found in TypedDict"
+      else if innerTp.extractDictKeyValueTypes.isSome then
+        -- A string-keyed dict resolves `fieldTp` above, so this dict has
+        -- non-str keys and cannot be read through the string-keyed model.
+        specWarning loc
+          "subscript subject is not a string-keyed Dict/Mapping/TypedDict"
+        return placeholder
       else
         specWarning loc s!"subscript subject is not a TypedDict"
     return (.getIndex innerExpr fieldName (loc := loc), fieldTp.getD anyType)
+  -- Dynamic string-keyed dictionary lookup: d[k].
+  | .Subscript _ inner key (.Load _) =>
+    let (subjectClean, (innerExpr, innerTp)) ← runNoWarn (transExpr inner)
+    let (keyClean, (keyExpr, keyTp)) ← runNoWarn (transExpr key)
+    if !subjectClean || !keyClean then
+      specWarning loc s!"unsupported subscript expression: {eformat e.toAst}"
+      return placeholder
+    let valueTp :=
+      if let some (dictKeyTp, dictValueTp) := innerTp.extractDictKeyValueTypes then
+        if dictKeyTp.isStringType then some dictValueTp else none
+      else if innerTp.isTypedDict then
+        some anyType
+      else
+        none
+    let some valueTp := valueTp
+      | specWarning loc
+          "subscript subject is not a string-keyed Dict/Mapping/TypedDict"
+        return placeholder
+    unless keyTp.isStringType do
+      specWarning loc "dictionary subscript key must have type str"
+      return placeholder
+    return (.getItem innerExpr keyExpr (loc := loc), valueTp)
   -- Attribute access becomes a `getIndex` field read. Method receiver fields
   -- are rejected in post-state contracts because Laurel strips that receiver.
   | .Attribute _ inner ⟨_, attrName⟩ (.Load _) =>
@@ -1324,7 +1358,7 @@ def blockStmt (s : stmt SourceRange) : SpecAssertionM Unit := do
         return
     if let some kTp := domainInfo.dictKeyType? then
       unless kTp.isStringType do
-        specWarningOfKind .pySpecDroppedAssertion s.ann
+        specError s.ann
           "For: dict quantifier requires str keys (only Dict[str, _] is supported)"
         return
     -- Run the loop body with its binders typed, then wrap each assertion in a
@@ -1411,7 +1445,8 @@ def collectAssertions (decls : ArgDecls) (_returnType : SpecType)
   let filePath := (←read).pythonFile
   -- Seed declared parameters; post-state `result` and `**kwargs` use dedicated paths.
   let localTypes := (decls.args ++ decls.kwonly).foldl
-    (init := {}) fun acc a => acc.insert a.name a.type
+    (init := ({} : Std.HashMap String SpecType))
+    fun acc a => acc.insert a.name a.type
   let ctx : SpecAssertionContext :=
     { filePath
       kwargs := decls.kwargs

@@ -21,15 +21,15 @@ after PrecondElim generates WF-checking procedures. -/
 open Strata
 namespace StrataPython.PreludeVerifyTest
 
-/-- Build the full Core prelude program (Laurel-translated + Core-only parts). -/
-private def preludeProgram : IO Core.Program := do
-  let (coreOption, _) ← StrataPython.translateCombinedLaurel pythonRuntimeLaurelPart
+/-- Build a full Core prelude program (Laurel-translated + Core-only parts). -/
+private def preludeProgram (runtime : Laurel.Program) : IO Core.Program := do
+  let (coreOption, _) ← StrataPython.translateCombinedLaurel runtime
   match coreOption with
   | some prog => return prog
   | none => return { decls := [] }
 
-private def verifyPrelude : IO (Array Message) := do
-  let prog ← preludeProgram
+private def verifyPrelude (runtime : Laurel.Program) : IO (Array Message) := do
+  let prog ← preludeProgram runtime
   IO.FS.withTempDir fun tempDir => do
     let r ← EIO.toIO (IO.Error.userError ∘ toString)
       (_root_.Core.verify prog tempDir
@@ -40,7 +40,13 @@ private def verifyPrelude : IO (Array Message) := do
 
 /-- info: #[] -/
 #guard_msgs in
-#eval verifyPrelude
+#eval verifyPrelude pythonRuntimeLaurelPart
+
+/-- info: #[] -/
+#guard_msgs in
+#eval verifyPrelude <|
+  StrataPython.combinePySpecLaurel
+    pythonRuntimeLaurelPart pySpecRuntimeLaurelPart
 
 end StrataPython.PreludeVerifyTest
 end
