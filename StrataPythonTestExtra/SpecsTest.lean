@@ -606,8 +606,8 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
 #eval expectNativeCaseError "requires_int_dict_quant"
   "dict quantifier requires str keys"
 
--- Non-TypedDict `**kwargs` are dropped from the model; a contract referencing
--- them fails loudly at lowering instead of silently weakening.
+-- Non-TypedDict `**kwargs` are rejected with a fatal user-code error, so a
+-- contract referencing them cannot be silently weakened.
 #guard_msgs in
 #eval runNativeCase "requires_nontypeddict_kwargs" fun sigs _ => do
   let lowered := Specs.ToLaurel.signaturesToLaurel
@@ -615,7 +615,7 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
     (StrataPython.ModuleName.ofString! "native_cases.requires_nontypeddict_kwargs")
   let messages := lowered.errors.map (·.message.message)
   let expected := #[
-    "**kw must use Unpack[TypedDict], got 'builtins.int'; **kw is dropped from the model",
+    "**kw must use Unpack[TypedDict], got 'builtins.int'; **kw cannot be modeled",
     "Unknown identifier 'kw' in 'native_cases_requires_nontypeddict_kwargs_h'"]
   expect (messages == expected)
     s!"expected exactly the kwargs drop and dangling identifier errors, got {messages}"

@@ -45,8 +45,12 @@ def typeError : MessageKind :=
     are rejected separately at condition translation. -/
 def dictionarySchemaWarning : MessageKind :=
   { category := "dictionarySchemaWarning", impact := .userCodeWarning }
+/-- A `**kwargs` parameter without `Unpack[TypedDict]` cannot be modeled.
+    Fatal: the parameter would be dropped from the model, so a `@requires`
+    mentioning it would fail to lower and silently weaken the contract —
+    the same silent-weakening `unsupportedPostcondition` is fatal to avoid. -/
 def kwargsExpansionError : MessageKind :=
-  { category := "kwargsExpansionError", impact := .userCodeWarning }
+  { category := "kwargsExpansionError", impact := .userCodeError }
 
 -- Type translation warnings
 def unsupportedUnion : MessageKind :=

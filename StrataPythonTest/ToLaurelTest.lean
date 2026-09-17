@@ -811,9 +811,9 @@ info: pySpecToLaurel.missingMethodSelf: Method 'bad_method' has no arguments (ex
     ]
   }]
 
--- Declaration: non-TypedDict `**kwargs` warns and is dropped from the model
+-- Declaration: non-TypedDict `**kwargs` is a fatal user-code error
 /--
-info: pySpecToLaurel.kwargsExpansionError: **kw must use Unpack[TypedDict], got 'builtins.str'; **kw is dropped from the model
+info: pySpecToLaurel.kwargsExpansionError: **kw must use Unpack[TypedDict], got 'builtins.str'; **kw cannot be modeled
 -/
 #guard_msgs in
 #eval runTestWarningKinds
@@ -1125,7 +1125,9 @@ private def translatePrecond (preconditions : Array Assertion)
     "PySpecDict_modelOf(kw), \"item\")))), \"name\")))))) " ++
     "summary \"'kw.item' must satisfy its declared type\"")
 
--- TypedDict return assumptions are open but still constrain declared fields.
+-- A TypedDict return annotation only assumes the coarse type tag: its schema
+-- (required keys, field types) is not assumed at call sites without @admit,
+-- matching the @ensures trust rule.
 #eval do
   let resultTy := SpecType.typedDict loc #["name"] #[str] #[true]
   let result := signaturesToLaurel "<test>"
@@ -1134,15 +1136,7 @@ private def translatePrecond (preconditions : Array Assertion)
   assertEq result.errors.size 0
   assertEq body (
     "{\n  result := <??>;\n" ++
-    "  assume Any..isfrom_DictStrAny(result);\n" ++
-    "  assume Any..isfrom_DictStrAny(result) & " ++
-    "PySpecDictValue..isPresent(select(" ++
-    "PySpecDict_modelOf(Any..as_Dict!(result)), \"name\"));\n" ++
-    "  assume Any..isfrom_DictStrAny(result) & " ++
-    "(PySpecDictValue..isPresent(select(" ++
-    "PySpecDict_modelOf(Any..as_Dict!(result)), \"name\")) ==> " ++
-    "Any..isfrom_str(PySpecDictValue..value!(select(" ++
-    "PySpecDict_modelOf(Any..as_Dict!(result)), \"name\"))))\n}")
+    "  assume Any..isfrom_DictStrAny(result)\n}")
 
 -- containsKey on a non-kwargs dict: DictStrAny_contains in a precondition
 -- (would have been silently dropped before fix #2)
@@ -1153,6 +1147,15 @@ private def translatePrecond (preconditions : Array Assertion)
     (args := #[arg "d" str])
   assert! errs == 0
   assert! pre.contains "DictStrAny_contains"
+
+-- A `List[TypedDict]` parameter gets its element schema enforced at call
+-- sites: the schema gate covers containers, not just top-level dict atoms.
+#eval do
+  let itemTy := SpecType.typedDict loc #["Name"] #[str] #[true]
+  let (pre, errs) := translatePrecond #[]
+    (args := #[arg "Batch" (listOf itemTy)])
+  assert! errs == 0
+  assert! pre.contains "'Batch' must satisfy its declared dictionary type"
 
 -- Dictionary equality is extensional rather than representation-order based.
 #eval do
@@ -1220,7 +1223,8 @@ private def expectSchemaWarningOnly (containerTy : SpecType) : IO Unit := do
 #eval expectSchemaWarningOnly (dictOf int str)
 #eval expectSchemaWarningOnly (SpecType.ident loc .typingMapping #[int, str])
 
--- A dropped non-TypedDict `**kwargs` leaves a procedure without that input.
+-- A rejected non-TypedDict `**kwargs` is a fatal error and the procedure is
+-- lowered without that input.
 #eval do
   let result := signaturesToLaurel "<test>" #[
     .functionDecl {
@@ -1230,9 +1234,9 @@ private def expectSchemaWarningOnly (containerTy : SpecType) : IO Unit := do
       returnType := str, isOverload := false
       preconditions := #[], postconditions := #[] }] testModule
   match result.errors.toList with
-  | [error] => assertEq error.kind.impact.isFatal false
+  | [error] => assertEq error.kind.impact.isFatal true
   | errors =>
-    throw <| IO.userError s!"expected one kwargs warning, got {errors.length}"
+    throw <| IO.userError s!"expected one kwargs error, got {errors.length}"
   match result.program.staticProcedures with
   | [proc] =>
     let names := proc.inputs.map fun (p : Laurel.Parameter) => p.name.text
@@ -1309,6 +1313,21 @@ private def precondPins (args : Array Arg)
      List_contains(Any..as_ListAny!(xs), py$quant_0_0_xs) ==> \
        Any_to_bool(PGe(from_int(Str.Length(Any..as_string!(\
          py$quant_0_0_xs))), from_int(1)))"
+
+-- A binder shadowing an outer *dict* name over a collection with unknown
+-- element type must erase the outer spec type: in
+-- `all(Items == Items for Items in Rows)` with an outer `Items: Dict[str, str]`
+-- and an untyped `Rows`, the body equality lowers via generic `PEq` on `Any`,
+-- not through the dict map model over an unchecked `as_Dict!(Items)`.
+#eval do
+  let (pre, errs) := translatePrecond
+    #[{ message := #[], formula :=
+          .quantifier .forall (.overList "Items") (.var "Rows" loc)
+            (.pcmp .eq (.var "Items" loc) (.var "Items" loc) loc) loc }]
+    (args := #[arg "Items" (dictOf str str),
+               arg "Rows" (SpecType.ident loc .typingList #[])])
+  assert! errs == 0
+  assert! pre.contains "PEq(Items, Items)"
 
 -- Nested-capture regression: the inner ∀ binds `k`, shadowing the outer dict
 -- key `k`, while its body reads the outer value `v` (inlined as `d[k]`). The

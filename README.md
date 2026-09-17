@@ -58,6 +58,21 @@ so `@ensures` is rejected there and `@admit` is the supported form — the same
 division as Dafny's verified `ensures` versus `{:extern}` declarations, whose
 postconditions must be acknowledged with `{:axiom}`.
 
+## Rejection over silent mistranslation
+
+Spec constructs the dictionary map model cannot express are rejected with
+fatal diagnostics rather than lowered approximately: dict quantifiers over
+non-string keys ("dict quantifier requires str keys") and `**kwargs` without
+`Unpack[TypedDict]` (`kwargsExpansionError`, which would otherwise silently
+drop any `@requires` mentioning it). A return annotation's dict schema is
+likewise never assumed at call sites, only the coarse type tag is; schema
+claims require `@admit`, same as `@ensures`.
+
+Diagnostic strings are not a stable interface; consumers classify runs by
+exit code and the `RESULT:`/`DETAIL:` lines. Known completeness limitation
+(not a soundness risk): a fully-havoced `Any` hitting a caller-side map
+schema quantifier can verify as UNKNOWN.
+
 ## Dependencies
 
 - `Strata` (parent package) - Core IR, Laurel IR, verification infrastructure, SMT backend

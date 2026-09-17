@@ -697,7 +697,7 @@ def specExprToLaurel (e : SpecExpr) (source : FileRange)
           argTypes := c.argTypes.insert varName StrataPython.Laurel.tyAny
           specTypes := match elemType with
             | some tp => c.specTypes.insert varName tp
-            | none => c.specTypes
+            | none => c.specTypes.erase varName
           boundValues := if actualName == varName
             then c.boundValues.erase varName
             else c.boundValues.insert varName elemVar.stmt
@@ -723,7 +723,7 @@ def specExprToLaurel (e : SpecExpr) (source : FileRange)
             | some tp => c.specTypes
                 |>.insert keyVar (.ident loc .builtinsStr)
                 |>.insert valVar tp
-            | none => c.specTypes.insert keyVar (.ident loc .builtinsStr)
+            | none => (c.specTypes.insert keyVar (.ident loc .builtinsStr)).erase valVar
           boundValues := c.boundValues
             |>.insert keyVar keyBoxed.stmt
             |>.insert valVar valueLookup.stmt
@@ -761,7 +761,7 @@ def specExprToLaurel (e : SpecExpr) (source : FileRange)
           argTypes := c.argTypes.insert valVar StrataPython.Laurel.tyAny
           specTypes := match valueType with
             | some tp => c.specTypes.insert valVar tp
-            | none => c.specTypes
+            | none => c.specTypes.erase valVar
           boundValues := c.boundValues.insert valVar valueLookup.stmt
           quantifierDepth := c.quantifierDepth + 1 }
         pure (param, membership, selected.stmt, bodyEnv)
@@ -1027,9 +1027,12 @@ private partial def schemaValueAssertion? (typedDictMode : TypedDictSchemaMode)
       { name := mkId elemName, type := { val := StrataPython.Laurel.tyAny, source } }
     let allElements := TypedStmtExpr.forallTrigger param contains.stmt body source
     return some (isList.and allElements source).stmt
-  if tp.hasContainerAtom then
+  if tp.hasDictionaryAtom then
     reportError .dictionarySchemaWarning tp.loc
       s!"Container type '{tp}' cannot be modeled (dictionaries require string keys); the schema of '{path}' is not enforced"
+    return none
+  if tp.hasContainerAtom then
+    -- A bare list/sequence declares no element schema; nothing to enforce.
     return none
   let hasUnsupportedAtom := tp.atoms.any fun
     | .ident name _ => typeTestersMap[name]?.isNone
@@ -1048,7 +1051,7 @@ private def dictSchemaConditions (arg : Arg) (rawDictInput : Bool)
     (typedDictMode : TypedDictSchemaMode) (source : FileRange)
     : ToLaurelM (List Condition) := do
   if (specDictKind? arg.type).isNone then
-    if rawDictInput || !arg.type.hasDictionaryAtom then
+    if rawDictInput || !arg.type.hasContainerAtom then
       return []
     let value :=
       TypedStmtExpr.identifier arg.name StrataPython.Laurel.tyAny source
@@ -1148,21 +1151,6 @@ private def buildDictSchemaConds (args : Array Arg)
     conditions := conditions ++ (← dictSchemaConditions arg true .closedKeys source)
   return conditions
 
-private def addReturnSchemaAssume (body : Body)
-    (conditions : List Condition) : Body :=
-  match body, conditions with
-  | _, [] => body
-  | .Opaque postconditions (some implementation) modifies, conditions =>
-    let assumeStmts : List StmtExprMd := conditions.map fun c =>
-      { val := .Assume c.condition, source := c.condition.source }
-    let implementation := match implementation.val with
-      | .Block statements label =>
-        { implementation with val := .Block (statements ++ assumeStmts) label }
-      | _ =>
-        { implementation with val := .Block (implementation :: assumeStmts) none }
-    .Opaque postconditions (some implementation) modifies
-  | _, _ => body
-
 /-! ## Declaration Translation -/
 
 /-- Convert a function declaration to a Laurel Procedure.
@@ -1182,7 +1170,7 @@ def funcDeclToLaurel (procName : String) (func : FunctionDecl)
         pure (some (name, tp))
       else do
         reportError .kwargsExpansionError tp.loc
-          s!"**{name} must use Unpack[TypedDict], got '{tp}'; **{name} is dropped from the model"
+          s!"**{name} must use Unpack[TypedDict], got '{tp}'; **{name} cannot be modeled"
         pure none
     | none => pure none
   let allArgs := posArgs ++ func.args.kwonly
@@ -1210,9 +1198,10 @@ def funcDeclToLaurel (procName : String) (func : FunctionDecl)
     func.admittedPostconditions func.returnType unknownSource specCtx
   let userPreconds ← buildPreconditionConds func.preconditions unknownSource specCtx
   let dictSchemaConds ← buildDictSchemaConds allArgs kwargs unknownSource
-  let returnSchema ← dictSchemaConditions
-    { name := "result", type := func.returnType } false .openKeys unknownSource
-  let body := addReturnSchemaAssume body returnSchema
+  -- The return type's dict schema is deliberately NOT assumed at call sites:
+  -- an annotation is weaker evidence than a hand-written @ensures, which
+  -- already requires @admit to be trusted. Authors who want callers to rely
+  -- on the return schema must state it with @admit.
   let src ← mkSourceWithFileRange func.loc
   return {
     name := { text := procName, source := src }
