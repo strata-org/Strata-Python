@@ -606,6 +606,12 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
 #eval expectNativeCaseError "requires_int_dict_quant"
   "dict quantifier requires str keys"
 
+-- Literal string keys are str at runtime, so the dict quantifier is accepted.
+#guard_msgs in
+#eval runNativeCase "requires_literal_dict_quant" fun sigs _ => do
+  let f ← findFn sigs "f"
+  expect (f.preconditions.size == 1) s!"expected 1 precondition, got {f.preconditions.size}"
+
 -- Non-TypedDict `**kwargs` are rejected with a fatal user-code error, so a
 -- contract referencing them cannot be silently weakened.
 #guard_msgs in

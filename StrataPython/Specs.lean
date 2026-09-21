@@ -921,7 +921,7 @@ def transQuantCall (loc : SourceRange)
       return none
   -- The Laurel model only has `DictStrAny`, so reject non-`str`-keyed dicts.
   if let some kTp := domainInfo.dictKeyType? then
-    unless kTp.isStringType do
+    unless kTp.isStringLikeType do
       specError loc
         s!"{callee}: dict quantifier requires str keys (only Dict[str, _] is supported)"
       return none
@@ -1023,7 +1023,7 @@ partial def transExpr (e : expr SourceRange)
     let fieldTp :=
       innerTp.lookupTypedDictField fieldName <|>
       (innerTp.extractDictKeyValueTypes.bind fun (keyType, valueType) =>
-        if keyType.isStringType then some valueType else none)
+        if keyType.isStringLikeType then some valueType else none)
     if fieldTp.isNone then
       if innerTp.isTypedDict then
         specWarning loc s!"field \"{fieldName}\" not found in TypedDict"
@@ -1045,7 +1045,7 @@ partial def transExpr (e : expr SourceRange)
       return placeholder
     let valueTp :=
       if let some (dictKeyTp, dictValueTp) := innerTp.extractDictKeyValueTypes then
-        if dictKeyTp.isStringType then some dictValueTp else none
+        if dictKeyTp.isStringLikeType then some dictValueTp else none
       else if innerTp.isTypedDict then
         some anyType
       else
@@ -1054,7 +1054,7 @@ partial def transExpr (e : expr SourceRange)
       | specWarning loc
           "subscript subject is not a string-keyed Dict/Mapping/TypedDict"
         return placeholder
-    unless keyTp.isStringType do
+    unless keyTp.isStringLikeType do
       specWarning loc "dictionary subscript key must have type str"
       return placeholder
     return (.getItem innerExpr keyExpr (loc := loc), valueTp)
@@ -1357,7 +1357,7 @@ def blockStmt (s : stmt SourceRange) : SpecAssertionM Unit := do
       | specError s.ann "For: iterable type is not a supported collection"
         return
     if let some kTp := domainInfo.dictKeyType? then
-      unless kTp.isStringType do
+      unless kTp.isStringLikeType do
         specError s.ann
           "For: dict quantifier requires str keys (only Dict[str, _] is supported)"
         return

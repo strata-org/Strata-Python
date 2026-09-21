@@ -1393,6 +1393,16 @@ private def precondPins (args : Array Arg)
 #guard (match (QuantDomainInfo.dictKeys int str).dictKeyType? with
         | some kTp => !kTp.isStringType | none => false)
 
+-- `isStringLikeType` accepts `str`, string-literal Literals, and their unions,
+-- but rejects int literals, mixed unions with non-str idents, and empty types.
+#guard str.isStringLikeType
+#guard (SpecType.stringLiteral loc "JPEGQuality").isStringLikeType
+#guard (SpecType.union loc str (SpecType.stringLiteral loc "a")).isStringLikeType
+#guard !int.isStringLikeType
+#guard !(SpecType.intLiteral loc 1).isStringLikeType
+#guard !(SpecType.union loc int (SpecType.stringLiteral loc "a")).isStringLikeType
+#guard !(SpecType.union loc str (SpecType.intLiteral loc 1)).isStringLikeType
+
 /-! ## typeError warning coverage -/
 
 private def hasTypeError (result : TranslationResult) : Bool :=

@@ -394,6 +394,14 @@ def isFloatType (tp : SpecType) : Bool := tp.asIdent == some .builtinsFloat
 
 def isStringType (tp : SpecType) : Bool := tp.asIdent == some .builtinsStr
 
+/-- Whether every value of the type is a `str`: `str` itself, a `Literal[...]`
+    of string literals, or a union of the two. Such types fit the string-keyed
+    `DictStrAny` model even when narrower than `str`. -/
+def isStringLikeType (tp : SpecType) : Bool :=
+  tp.intLits.size == 0 && tp.typedDicts.size == 0 &&
+  (tp.idents.size > 0 || tp.stringLits.size > 0) &&
+  tp.idents.all fun si => si.name == .builtinsStr && si.args.size == 0
+
 def isBoolType (tp : SpecType) : Bool := tp.asIdent == some .builtinsBool
 
 def isTypedDict (tp : SpecType) : Bool :=

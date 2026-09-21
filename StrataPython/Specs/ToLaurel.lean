@@ -393,7 +393,7 @@ private inductive SpecDictKind where
 
 private def specDictKind? (tp : SpecType) : Option SpecDictKind :=
   if let some (keyType, valueType) := tp.extractDictKeyValueTypes then
-    if keyType.isStringType then some (.homogeneous valueType) else none
+    if keyType.isStringLikeType then some (.homogeneous valueType) else none
   else if tp.asIdent == some .builtinsDict ||
       tp.asIdent == some .typingDict ||
       tp.asIdent == some .typingMapping then
