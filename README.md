@@ -41,9 +41,9 @@ def modeled_value() -> int:
     ...
 ```
 
-An `@admit` postcondition is assumed in the generated procedure body as an
-unverified modeling assumption the verification depends on, like the trusted
-return-type assumption.
+An `@admit` postcondition becomes a free (assume-only) postcondition of the
+generated bodiless procedure: an unverified modeling assumption the
+verification depends on, like the trusted return-type assumption.
 
 Because the `@ensures` diagnostic is fatal, loading any PySpec module that
 contains a modeled `@ensures` aborts the analysis, even when the analyzed code
@@ -167,6 +167,13 @@ witness matters, take it as a parameter and assert a property of it directly —
 `assert Needle in Keys` is a membership check the solver can prove, unlike
 `assert any(k == Needle for k in Keys)`, which expresses the same requirement
 existentially and therefore cannot be.
+
+## Signature order: module ghosts are emitted first
+
+Module-scope `ghost(...)` declarations are always emitted before all other
+signatures, regardless of source position, so a contract can forward-reference
+a ghost declared later in the file. Consumers should bucket signatures by kind
+rather than rely on array order.
 
 ## Testing
 

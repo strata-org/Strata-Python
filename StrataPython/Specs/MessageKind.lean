@@ -92,8 +92,18 @@ def typeNameCollision : MessageKind :=
   { category := "typeNameCollision", impact := .internalError }
 def procedureNameCollision : MessageKind :=
   { category := "procedureNameCollision", impact := .internalError }
-def staticFieldNameCollision : MessageKind :=
-  { category := "staticFieldNameCollision", impact := .internalError }
+/-- Two PySpec inputs produce the same canonical module-ghost name. -/
+def ghostNameCollision : MessageKind :=
+  { category := "ghostNameCollision", impact := .userCodeError }
+/-- A parameter shadows a module ghost the contract references. -/
+def ghostShadowedByParam : MessageKind :=
+  { category := "ghostShadowedByParam", impact := .userCodeError }
+/-- A module ghost's initializer could not be translated. -/
+def ghostInitializerError : MessageKind :=
+  { category := "ghostInitializerError", impact := .userCodeError }
+/-- `OLD` over a module ghost not listed in `@modifies`. -/
+def ghostOldWithoutModifies : MessageKind :=
+  { category := "ghostOldWithoutModifies", impact := .userCodeError }
 
 -- Module resolution phase
 def invalidModuleName : MessageKind :=

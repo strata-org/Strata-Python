@@ -66,12 +66,36 @@ namespace Specs.ToLaurel
 
 /-! ## ToLaurelM Monad -/
 
+/-- Readable, injective escape of a name component. -/
+def encodeGeneratedComponent (value : String) : String :=
+  String.join <| value.toList.map fun c =>
+    if c == '_' then "_u" else if c == '.' then "_d"
+    else if c == '$' then "_s" else toString c
+
+/-- Legal, injective Laurel field identity for a module ghost. -/
+def ghostFieldName (moduleName sourceName : String) : String :=
+  pythonGeneratedPrefix ++ "ghost_" ++ encodeGeneratedComponent moduleName ++
+    "$" ++ encodeGeneratedComponent sourceName
+
 /-- Context for PySpec to Laurel translation. -/
 structure ToLaurelContext where
   filepath : System.FilePath
   /-- Module prefix prepended to generated type and procedure names
       to avoid collisions when multiple PySpec files are combined. -/
   modulePrefix : String
+  /-- Dotted module name for ghost field names. -/
+  ghostModule : String := ""
+
+/-- A module ghost resolved to its canonical Laurel identity. -/
+structure GhostSymbol where
+  sourceName : String
+  /-- Legal, injectively encoded `Program.staticField` name. -/
+  fieldName : String
+  /-- Qualified reference used in expressions and assignment targets. -/
+  referenceName : String
+  type : HighTypeMd
+  specType : SpecType
+  loc : SourceRange
 
 /-- State for PySpec to Laurel translation. -/
 structure ToLaurelState where
@@ -83,6 +107,12 @@ structure ToLaurelState where
   typeAliases : Std.HashMap String String := {}
   /-- Classes whose spec is considered exhaustive (lists all methods). -/
   exhaustiveClasses : Std.HashSet String := {}
+  /-- Module-scope ghost variables, lowered to Laurel `staticField`s. -/
+  ghostFields : Array Laurel.Field := #[]
+  /-- Source names to canonical symbols. -/
+  ghostSymbols : Std.HashMap String GhostSymbol := {}
+  /-- Ghost names in declaration order; emission order is observable. -/
+  ghostOrder : Array String := #[]
 
 /-- Monad for PySpec to Laurel translation. -/
 abbrev ToLaurelM := ReaderT ToLaurelContext (StateM ToLaurelState)
@@ -140,7 +170,7 @@ def extractOverloadEntry (func : FunctionDecl) : ToLaurelM Unit := do
       s!"Modeled @ensures cannot be verified for '{func.name}': {postExpr}. An @overload stub is a dispatch-only declaration; no procedure is generated for it, so the postcondition would be silently dropped. Attach the contract to a non-overload declaration instead."
   for admittedExpr in func.admittedPostconditions do
     reportError .unsupportedAdmit admittedExpr.loc
-      s!"@admit is not supported on @overload stub '{func.name}': {admittedExpr}. No procedure body is generated for a dispatch-only declaration, so there is nowhere to assume the predicate. Attach the @admit to a non-overload declaration instead."
+      s!"@admit is not supported on @overload stub '{func.name}': {admittedExpr}. No procedure is generated for a dispatch-only declaration, so there is nothing to carry the assumed postcondition. Attach the @admit to a non-overload declaration instead."
   let args := func.args.args
   let .isTrue _ := decideProp (args.size > 0)
     | reportError .overloadNoArgs func.loc
@@ -261,25 +291,12 @@ private def typeAssertion? (ty : SpecType) (value : StmtExprMd)
 
 /-! ## SpecExpr to Laurel Translation -/
 
-/-- Create file-level source from the current pyspec filepath.
-    Uses a default (zero) source range; callers with a specific location
-    should use `mkSourceWithFileRange` instead. -/
-private def mkFileSource : ToLaurelM FileRange := do
-  let ctx ← read
-  return { file := .file ctx.filepath.toString, range := default }
-
 /-- Create source with a file range from the current pyspec file. -/
 private def mkSourceWithFileRange (loc : SourceRange)
     : ToLaurelM FileRange := do
   let ctx ← read
   return { file := .file ctx.filepath.toString, range := loc }
 
-/-- Wrap a StmtExpr with source containing a file range. -/
-private def mkStmtWithLoc (e : StmtExpr) (loc : SourceRange)
-    : ToLaurelM StmtExprMd := do
-  let ctx ← read
-  let fr : FileRange := { file := .file ctx.filepath.toString, range := loc }
-  return { val := e, source := fr }
 
 /--
 Context for resolving identifiers.
@@ -454,6 +471,9 @@ private def lookupIdentifier (name : String) (loc : SourceRange) (source : FileR
   match ctx.argTypes[name]? with
   | some tp => return .mkSome <| .identifier name tp source
   | none =>
+    -- Ghosts resolve only after local scope is ruled out (parameters shadow).
+    if let some symbol := (← getThe ToLaurelState).ghostSymbols[name]? then
+      return .mkSome <| .identifier symbol.referenceName symbol.type.val source
     reportError .typeError loc s!"Unknown identifier '{name}' in '{ctx.procName}'"
     return default
 
@@ -794,87 +814,91 @@ def SpecAssertMsg.render : SpecAssertMsg → String
   | .userAssertion text  => text
   | .unnamed index       => s!"precondition {index}"
 
-/-- Build an opaque procedure body with havoc and type/required-param
-    assertions. Modeled `@ensures` postconditions are rejected for now:
-    generated PySpec procedures have no implementation against which Strata can
-    prove an `@ensures`, so silently exposing one to callers would be unsound.
-    `@admit` postconditions — explicitly acknowledged as unverified modeling
-    assumptions — are lowered as in-body `assume`s, like the trusted
-    return-type assumption; an `@admit` that cannot be lowered is fatal.
-    Returns the required-param not-None checks as caller-checked `Condition`s
-    for `funcDeclToLaurel` to merge into the preconditions. -/
+/-- Build a bodiless opaque procedure spec and its caller-checked preconditions. -/
 def buildSpecBody (allArgs : Array Arg)
     (postconditions : Array SpecExpr)
     (admittedPostconditions : Array SpecExpr)
     (returnType : SpecType)
+    (ghostReads ghostWrites : List String)
     (source : FileRange)
     (ctx : SpecExprContext)
     : ToLaurelM (Body × List Condition) := do
-  let fileSource ← mkFileSource
-  let mut stmts : Array StmtExprMd := #[]
   let mut requiredParamConds : List Condition := []
-  -- 1. Havoc the result: result := Hole(nondet)
-  let holeExpr : StmtExprMd := { val := .Hole (deterministic := false), source := source }
-  let resultId : AstNode Variable := { val := Variable.Local (mkId "result"), source := source }
-  let assignStmt ← mkStmtWithLoc (.Assign [resultId] holeExpr) default
-  stmts := stmts.push assignStmt
-  -- 2. Type constraints stay in-body (caller-checking them would reject
-  --    gradually-typed Any callers); only a no-default param's not-None
-  --    check becomes a caller-checked precondition.
+  let mut opaquePosts : List Condition := []
+  -- Declared parameter types become caller-checked preconditions: with no
+  -- body there is nowhere to assert them.
   for arg in allArgs do
     let paramId : StmtExprMd := { val := .Var $ Variable.Local (mkId arg.name), source := source }
     match ← typeAssertion? arg.type paramId source with
     | some assertion =>
-      if arg.default.isSome then
-        let noneCheck : StmtExprMd := { val := .StaticCall (mkId "Any..isfrom_None") [paramId], source := source }
-        let orExpr : StmtExprMd := { val := .StaticCall (mkId Operation.Or.procName) [noneCheck, assertion], source := source }
-        let assertStmt ← mkStmtWithLoc (.Assert orExpr none) default
-        stmts := stmts.push assertStmt
-      else
-        let assertStmt ← mkStmtWithLoc (.Assert assertion none) default
-        stmts := stmts.push assertStmt
+      let cond ←
+        if arg.default.isSome then
+          let noneCheck : StmtExprMd := { val := .StaticCall (mkId "Any..isfrom_None") [paramId], source := source }
+          pure { val := .StaticCall (mkId Operation.Or.procName) [noneCheck, assertion], source := source }
+        else pure assertion
+      requiredParamConds := requiredParamConds ++
+        [{ condition := cond, summary := some s!"declared type of parameter '{arg.name}'" }]
     | none =>
       if arg.default.isNone then
         let cond : TypedStmtExpr _ := .not (.anyIsfromNone (.identifier arg.name StrataPython.Laurel.tyAny))
         let msg := SpecAssertMsg.requiredParam arg.name |>.render
         requiredParamConds := requiredParamConds ++
           [{ condition := cond.stmt, summary := some msg }]
-  -- 3. Reject modeled `@ensures`. A PySpec declaration has no implementation
+  -- Reject modeled `@ensures`. A PySpec declaration has no implementation
   --    to verify the predicate against, so it must not enter caller reasoning
   --    silently; `@admit` is the explicit opt-in for that assumption.
   for postExpr in postconditions do
     reportError .unsupportedPostcondition postExpr.loc
       s!"Modeled @ensures cannot be verified for '{ctx.procName}': {postExpr}. A PySpec declaration is a bodyless model, so Strata cannot verify this postcondition against an implementation and will not assume it at call sites. Loading a PySpec module containing @ensures aborts analysis even if the affected function is unused. Use @admit to accept the postcondition as an unverified modeling assumption, or model the function with a real body if the property must be checked."
-  -- 4. Assume `@admit` postconditions in-body. The decorator is the author's
-  --    acknowledgment that the predicate is an unverified assumption the
-  --    verification depends on, so it joins the trusted return-type assume —
-  --    and one that cannot be lowered must not be dropped silently.
+  -- Ghost declared types become free postconditions, in declaration order;
+  -- a written global is threaded as an inout, so `old(<ghost>)` needs no havoc.
+  let ghostSymbols := (←get).ghostSymbols
+  let declaredGhosts := (←get).ghostOrder.toList.filter
+      (fun name => ghostReads.contains name || ghostWrites.contains name)
+    |>.filterMap (ghostSymbols[·]?)
+  for ghost in declaredGhosts do
+    let ghostSource ← mkSourceWithFileRange ghost.loc
+    let reference : StmtExprMd := {
+      val := .Var (.Local { text := ghost.referenceName })
+      source := ghostSource
+    }
+    if let some assertion ← typeAssertion? ghost.specType reference ghostSource then
+      opaquePosts := opaquePosts ++ [{
+        condition := assertion
+        summary := some s!"declared type of module ghost '{ghost.sourceName}'"
+        mode := .Assume }]
+  -- `@admit` becomes a free (assume-only) postcondition; `OLD` over a ghost
+  -- requires that ghost to be written.
   for admittedExpr in admittedPostconditions do
     let (⟨condType, condExpr⟩, success) ← runChecked <| specExprToLaurel admittedExpr source ctx
     if success then
       if let .TBool := condType then
-        let assumeStmt ← mkStmtWithLoc (.Assume condExpr.stmt) default
-        stmts := stmts.push assumeStmt
+        if let some offender := ghostReads.find? (admittedExpr.oldReadsVar ·) then
+          reportError .ghostOldWithoutModifies admittedExpr.loc
+            s!"@admit of '{ctx.procName}' uses OLD over module ghost '{offender}', which is not listed in @modifies. Laurel only relates a global's pre- and post-state for a procedure that declares it writes that global, so `old` here would be dropped and this relative postcondition assumed false at every call site. Add @modifies(lambda: {offender}) or restate the contract without OLD."
+        else
+          opaquePosts := opaquePosts ++ [{
+            condition := condExpr.stmt
+            summary := some s!"admitted postcondition of '{ctx.procName}'"
+            mode := .Assume }]
       else
         reportError .unsupportedAdmit admittedExpr.loc
           s!"@admit predicate is not Bool in '{ctx.procName}': {admittedExpr}. The verification depends on this acknowledged assumption, so it will not be dropped silently. Fix the predicate to be a boolean expression."
     else
       reportError .unsupportedAdmit admittedExpr.loc
         s!"@admit predicate of '{ctx.procName}' could not be translated: {admittedExpr}. The verification depends on this acknowledged assumption, so it will not be dropped silently. Rewrite the predicate using supported constructs."
-  -- 5. Keep the return type postcondition in-body. Exposing inferred return
-  --    types to callers is a separate semantic change from user contracts.
+  -- The return type also becomes a free postcondition.
   -- NOTE. Skip NoneType: generated stubs currently declare `-> None` even for methods
   -- that return values. Assuming isfrom_None would make callers unreachable.
   if returnType.asIdent != some .noneType then
     let resultRef : StmtExprMd := { val := .Var $ Variable.Local (mkId "result"), source := source }
     if let some retAssertion ← typeAssertion? returnType resultRef source then
-      let assumeStmt ← mkStmtWithLoc (.Assume retAssertion) default
-      stmts := stmts.push assumeStmt
-  let body := {
-      val := .Block stmts.toList none,
-      source := fileSource
-  }
-  return (.Opaque [] (some body) (ModifiesGroup.wildcard unknownSource), requiredParamConds)
+      opaquePosts := opaquePosts ++ [{
+        condition := retAssertion
+        summary := some s!"return type of '{ctx.procName}'"
+        mode := .Assume }]
+  -- Bodiless: new obligations go in `opaquePosts`, or as readsGlobals/writesGlobals.
+  return (.Opaque opaquePosts none (ModifiesGroup.wildcard unknownSource), requiredParamConds)
 
 /-- Lower user `@requires` preconditions into caller-checked Laurel
     `Condition`s (default `ConditionMode.Both`: proven at each call site,
@@ -1174,6 +1198,33 @@ def funcDeclToLaurel (procName : String) (func : FunctionDecl)
         pure none
     | none => pure none
   let allArgs := posArgs ++ func.args.kwonly
+  -- A contract mentioning a name that is both parameter and ghost is ambiguous.
+  -- The stripped method receiver still shadows: its name is never a ghost ref.
+  let ghostSymbols := (←get).ghostSymbols
+  let contractExprs := func.preconditions.map (·.formula) ++ func.postconditions
+    ++ func.admittedPostconditions ++ func.modifies
+  let paramNames := (func.args.args ++ func.args.kwonly).map (·.name) ++
+    match kwargs with | some (name, _) => #[name] | none => #[]
+  for name in paramNames do
+    if ghostSymbols.contains name && contractExprs.any (·.hasFreeVar name) then
+      reportError .ghostShadowedByParam func.loc
+        s!"parameter '{name}' of '{func.name}' shadows the module ghost of the \
+           same name; the ghost cannot be referenced in this procedure's contract"
+  -- Declared global effects, declaration-ordered; parameters shadow ghosts,
+  -- and non-ghost targets add nothing to the wildcard heap frame.
+  let shadowed (name : String) : Bool := paramNames.contains name
+  let writtenNames : Std.HashSet String :=
+    func.modifies.foldl (init := {}) fun acc target =>
+      match target with
+      | .var name _ =>
+        if ghostSymbols.contains name && !shadowed name then acc.insert name else acc
+      | _ => acc
+  let ghostWrites : List String :=
+    (←get).ghostOrder.toList.filter writtenNames.contains
+  let ghostReads : List String :=
+    (←get).ghostOrder.toList.filter fun name =>
+      !shadowed name && !ghostWrites.contains name
+        && contractExprs.any (·.hasFreeVar name)
   let explicitInputs ← allArgs.mapM fun a => do
     let ty ← specTypeToLaurelType a.type
     return ({ name := a.name, type := ty } : Parameter)
@@ -1195,7 +1246,7 @@ def funcDeclToLaurel (procName : String) (func : FunctionDecl)
     | none => specTypes
   let specCtx : SpecExprContext := { procName, argTypes, specTypes }
   let (body, requiredParamConds) ← buildSpecBody allArgs func.postconditions
-    func.admittedPostconditions func.returnType unknownSource specCtx
+    func.admittedPostconditions func.returnType ghostReads ghostWrites unknownSource specCtx
   let userPreconds ← buildPreconditionConds func.preconditions unknownSource specCtx
   let dictSchemaConds ← buildDictSchemaConds allArgs kwargs unknownSource
   -- The return type's dict schema is deliberately NOT assumed at call sites:
@@ -1203,6 +1254,8 @@ def funcDeclToLaurel (procName : String) (func : FunctionDecl)
   -- already requires @admit to be trusted. Authors who want callers to rely
   -- on the return schema must state it with @admit.
   let src ← mkSourceWithFileRange func.loc
+  let globalId (name : String) : Option Identifier :=
+    ghostSymbols[name]?.map fun g => mkId g.fieldName
   return {
     name := { text := procName, source := src }
     inputs := inputs.toList
@@ -1210,6 +1263,8 @@ def funcDeclToLaurel (procName : String) (func : FunctionDecl)
     preconditions := dictSchemaConds ++ requiredParamConds ++ userPreconds
     decreases := none
     body := body
+    readsGlobals := ghostReads.filterMap globalId
+    writesGlobals := ghostWrites.filterMap globalId
   }
 
 /-- Convert a class definition to Laurel types and procedures. -/
@@ -1252,6 +1307,88 @@ def typeDefToLaurel (td : TypeDef) : ToLaurelM Unit := do
     instanceProcedures := []
   })
 
+/-- Numeric-tower acceptance of an initializer's type. -/
+private def ghostInitAtomAccepts (declared actual : PythonIdent) : Bool :=
+  declared == .typingAny ||
+  declared == actual ||
+  (declared == .builtinsFloat && (actual == .builtinsInt || actual == .builtinsBool)) ||
+  (declared == .builtinsInt && actual == .builtinsBool)
+
+private def specTypeAcceptsGhostInit (declared actual : SpecType) : Bool :=
+  match actual.asIdent with
+  | none => false
+  | some a =>
+    match declared.asIdent with
+    | some d => ghostInitAtomAccepts d a
+    | none =>
+      -- Union types accept the initializer if any scalar atom does.
+      declared.atoms.any fun
+        | .ident nm args => args.isEmpty && ghostInitAtomAccepts nm a
+        | _ => false
+
+/-- Register a ghost before translation, so resolution ignores declaration order. -/
+private def registerGhost (g : Ghost) : ToLaurelM Unit := do
+  if (←get).ghostSymbols.contains g.name then
+    reportError .ghostNameCollision g.loc
+      s!"module ghost '{g.name}' is declared more than once"
+    return
+  let specType := g.type.getD (.ident g.loc .typingAny)
+  let type ← specTypeToLaurelType specType
+  let fieldName := ghostFieldName (←read).ghostModule g.name
+  let symbol : GhostSymbol := {
+    sourceName := g.name
+    fieldName
+    referenceName := "$static." ++ fieldName
+    type
+    specType
+    loc := g.loc
+  }
+  modify fun s => { s with
+    ghostSymbols := s.ghostSymbols.insert g.name symbol
+    ghostOrder := s.ghostOrder.push g.name }
+
+/-- Lower a registered ghost to a mutable static field; a missing `init=` is a
+    nondeterministic hole. -/
+private def ghostDeclToLaurel (g : Ghost) : ToLaurelM Unit := do
+  let some symbol := (←get).ghostSymbols[g.name]?
+    | reportError .ghostInitializerError g.loc
+        s!"internal: module ghost '{g.name}' was not registered"
+      return
+  let source ← mkSourceWithFileRange g.loc
+  -- Nondeterministic hole: constrains no further than the declared type.
+  let hole : StmtExprMd := { val := .Hole (deterministic := false), source }
+  let initializer ←
+    match g.init with
+    | none => pure hole
+    | some initExpr =>
+      match initExpr.ghostInitializerType? with
+      | none => do
+        reportError .ghostInitializerError initExpr.loc
+          s!"initializer of module ghost '{g.name}' does not have a \
+             statically guaranteed runtime type"
+        pure hole
+      | some actual => do
+        if specTypeAcceptsGhostInit symbol.specType actual then
+          let initCtx : SpecExprContext := {
+            procName := s!"initializer of module ghost '{g.name}'"
+            argTypes := {}
+          }
+          let typed ←
+            (asAny initExpr.loc <| specExprToLaurel initExpr source).run initCtx
+          pure typed.stmt
+        else do
+          reportError .ghostInitializerError initExpr.loc
+            s!"initializer of module ghost '{g.name}' has type '{actual}', \
+               which its declared type '{symbol.specType}' does not accept"
+          -- Keep a backing field so a referencing contract cannot dangle.
+          pure hole
+  modify fun s => { s with ghostFields := s.ghostFields.push {
+    name := mkId symbol.fieldName
+    isMutable := true
+    type := symbol.type
+    initializer := some initializer
+  } }
+
 /-- Convert a single PySpec signature to Laurel declarations. -/
 def signatureToLaurel (sig : Signature) : ToLaurelM Unit :=
   match sig with
@@ -1269,6 +1406,8 @@ def signatureToLaurel (sig : Signature) : ToLaurelM Unit :=
       let proc ← funcDeclToLaurel procName func
       pushProcedure proc
   | .classDef cls => classDefToLaurel cls
+  -- Ghosts are lowered in a pre-pass (see `signaturesToLaurel`).
+  | .ghostDecl _ => pure ()
 
 /-- Result of translating PySpec signatures to Laurel. -/
 public structure TranslationResult where
@@ -1287,12 +1426,24 @@ public def signaturesToLaurel (filepath : System.FilePath) (sigs : Array Signatu
     : TranslationResult :=
   let ctx : ToLaurelContext := {
     filepath,
-    modulePrefix := moduleName.toString (sep := "_")
+    modulePrefix := moduleName.toString (sep := "_"),
+    ghostModule := moduleName.toString (sep := ".")
   }
-  let ((), state) := (sigs.forM signatureToLaurel).run ctx |>.run {}
+  -- Predeclare all ghosts first, so procedures may reference one declared later.
+  let action : ToLaurelM Unit := do
+    for sig in sigs do
+      if let .ghostDecl g := sig then registerGhost g
+    let mut emittedGhosts : Std.HashSet String := {}
+    for sig in sigs do
+      if let .ghostDecl g := sig then
+        if !emittedGhosts.contains g.name && (←get).ghostSymbols.contains g.name then
+          ghostDeclToLaurel g
+          emittedGhosts := emittedGhosts.insert g.name
+    sigs.forM signatureToLaurel
+  let ((), state) := action.run ctx |>.run {}
   let pgm : Laurel.Program := {
     staticProcedures := state.procedures.toList
-    staticFields := []
+    staticFields := state.ghostFields.toList
     types := state.types.toList
     constants := []
   }

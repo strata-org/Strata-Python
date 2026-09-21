@@ -3338,6 +3338,13 @@ def PreludeInfo.ofLaurelProgram (prog : Laurel.Program) : PreludeInfo where
       match p.body with
       | .Transparent _ => s.insert p.name.text
       | .Opaque _ (some _) _ => s.insert p.name.text
+      | .Opaque _ none mods =>
+        -- A bodiless PySpec model is a real callable procedure when it
+        -- declares a contract or effects (wildcard frame, module ghosts).
+        if !p.preconditions.isEmpty || mods.any (!·.targets.isEmpty)
+            || !p.readsGlobals.isEmpty || !p.writesGlobals.isEmpty then
+          s.insert p.name.text
+        else s
       | _ => if !p.preconditions.isEmpty then s.insert p.name.text else s
 
 /-- Merge two `PreludeInfo` values by concatenating each field. -/

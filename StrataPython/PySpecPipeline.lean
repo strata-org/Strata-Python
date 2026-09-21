@@ -105,10 +105,8 @@ private def specArgLaurelType (arg : Specs.Arg) : Laurel.HighTypeMd :=
       mkHighTypeMd (.UserDefined { text := id.toLaurelName })
   | none => AnyTy
 
-/-- Convert a pyspec Arg to a PythonFunctionDecl arg info.
-    `typeTesters` is empty because `buildSpecBody` already generates type
-    assertions in the procedure body — call-site preconditions would be
-    redundant. -/
+/-- Convert a pyspec Arg to a PythonFunctionDecl arg info; `typeTesters` stays
+    empty because declared types are already caller-checked preconditions. -/
 private def specArgToFuncDeclArg (arg : Specs.Arg) : PyArgInfo :=
   { name := arg.name,
     source := unknownSource,
@@ -196,8 +194,9 @@ public def dedupPySpecDecls (items : Array (α × String)) (nameOf : α → Laur
 private def buildPySpecLaurelM (pyspecEntries : Array (ModuleName × String))
     (overloads : OverloadTable) : Pipeline.PipelineM PySpecLaurelResult := do
   let mut combinedProcedures : Array (Laurel.Procedure × String) := #[]
-  let mut combinedFields : Array (Laurel.Field × String) := #[]
   let mut combinedTypes : Array (Laurel.TypeDefinition × String) := #[]
+  -- Module-ghost static fields, referenced as `$static.<field>`.
+  let mut combinedFields : Array (Laurel.Field × String) := #[]
   let mut allOverloads := overloads
   let mut funcSigs : Array (ModuleName × PythonFunctionDecl) := #[]
   let mut allTypeAliases : Std.HashMap String String := {}
@@ -225,8 +224,6 @@ private def buildPySpecLaurelM (pyspecEntries : Array (ModuleName × String))
       combinedTypes := combinedTypes.push (td, ionPath)
     for proc in program.staticProcedures do
       combinedProcedures := combinedProcedures.push (proc, ionPath)
-    -- `signaturesToLaurel` does not currently emit static fields, so this loop is a no-op
-    -- in production; the collision check below is exercised only by unit tests.
     for field in program.staticFields do
       combinedFields := combinedFields.push (field, ionPath)
   -- Reject name collisions across PySpec files (first-wins)
@@ -240,11 +237,21 @@ private def buildPySpecLaurelM (pyspecEntries : Array (ModuleName × String))
     | .error (ident, prevFile, srcFile) =>
       emitMessageAndAbort .procedureNameCollision s!"'{ident.text}' already defined in {prevFile}"
         (file := srcFile) (loc := ident.source.range)
-  let dedupedFields ← match dedupPySpecDecls combinedFields (·.name) with
-    | .ok r => pure r
-    | .error (ident, prevFile, srcFile) =>
-      emitMessageAndAbort .staticFieldNameCollision s!"'{ident.text}' already defined in {prevFile}"
-        (file := srcFile) (loc := ident.source.range)
+
+  -- Names are module-qualified, so a collision means a duplicate module input.
+  let mut seenFields : Std.HashMap String String := {}
+  let mut dedupedFields : Array (Laurel.Field × String) := #[]
+  for (field, srcFile) in combinedFields do
+    match seenFields[field.name.text]? with
+    | some prevFile =>
+      emitMessageAndAbort .ghostNameCollision
+        s!"module ghost field '{field.name.text}' already defined in {prevFile}; \
+           two PySpec modules lower a ghost to the same Laurel field, which \
+           means a duplicate module input"
+        (file := srcFile) (loc := field.name.source.range)
+    | none =>
+      seenFields := seenFields.insert field.name.text srcFile
+      dedupedFields := dedupedFields.push (field, srcFile)
 
   let combinedLaurel : Laurel.Program := {
     staticProcedures := pythonRuntimeLaurelPart.staticProcedures ++
@@ -515,13 +522,19 @@ public def pythonAndSpecToLaurel
         .laurelLoweringError s!"Python to Laurel translation failed: {e}"
     | .ok result => pure result
 
+  -- Ghost fields ride the user side: `filterPrelude` rejects prelude statics.
+  let ghostFields := result.laurelProgram.staticFields
+  let preludeForFilter := { result.laurelProgram with staticFields := [] }
+  let userWithGhosts :=
+    { laurelProgram with staticFields := laurelProgram.staticFields ++ ghostFields }
+
   let filteredPrelude ←
-    match Laurel.filterPrelude result.laurelProgram laurelProgram with
+    match Laurel.filterPrelude preludeForFilter userWithGhosts with
     | .ok prog => pure prog
     | .error msg =>
       emitMessageAndAbort (file := sourcePath.getD pythonIonPath) .laurelLoweringError msg
 
-  let combined := combinePySpecLaurel filteredPrelude laurelProgram
+  let combined := combinePySpecLaurel filteredPrelude userWithGhosts
   return combined
 
 

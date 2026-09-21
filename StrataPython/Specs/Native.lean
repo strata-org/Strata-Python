@@ -59,7 +59,7 @@ deriving Inhabited
 
 /-- Binder naming the procedure's return value inside an `@ensures` or `@admit`
     lambda. -/
-public def resultBinder : String := "result"
+public def resultBinder : String := StrataPython.Specs.resultBinder
 
 /-- Recognize `@label(lambda <params>: <body>)`, warning about any keyword and any
     lambda binder outside `allowed`, then hand the body to `push`. Common shape of
@@ -91,6 +91,19 @@ private def uniqueName? {m : Type → Type} [Monad m] [PySpecMClass m]
     return none
   return some name
 
+/-- Parse a `@ghost`/`ghost` form into a `RawGhost`. -/
+public def parseGhostForm? {m : Type → Type} [Monad m] [PySpecMClass m]
+    (label : String) (form : DecoratorForm) (existing : Array String)
+    : m (Option RawGhost) := do
+  let type? ← exprKeyword? label "type" form.kwargs
+  let init? ← exprKeyword? label "init" form.kwargs
+  reportUnexpectedKeywords specError label #["name", "type", "init"] form.kwargs
+  unless (form.args.getD #[]).isEmpty do
+    specError form.loc s!"{label}: takes no positional arguments (use name=, type=, init=)"
+  let some name ← uniqueName? label form existing
+    | return none
+  return some { name, type := type?, init := init?, loc := form.loc }
+
 /-- The `DecoratorScheme` for native contract decorators on a function/method.
     `validParams` is the function's parameter list, used to flag lambda binders
     that bind nothing at the use site (a vacuous predicate).
@@ -117,14 +130,9 @@ public def methodScheme {m : Type → Type} [Monad m] [PySpecMClass m]
       absorbLambda "@modifies" validParams form args bundle fun body =>
         { bundle with modifies := bundle.modifies.push body }
     | "ghost" =>
-      let type? ← exprKeyword? "@ghost" "type" form.kwargs
-      let init? ← exprKeyword? "@ghost" "init" form.kwargs
-      reportUnexpectedKeywords specError "@ghost" #["name", "type", "init"] form.kwargs
-      unless args.isEmpty do
-        specError form.loc "@ghost: takes no positional arguments (use name=, type=, init=)"
-      let some name ← uniqueName? "@ghost" form (bundle.ghosts.map (·.name))
+      let some raw ← parseGhostForm? "@ghost" form (bundle.ghosts.map (·.name))
         | return some bundle
-      return some { bundle with ghosts := bundle.ghosts.push { name, type := type?, init := init?, loc := form.loc } }
+      return some { bundle with ghosts := bundle.ghosts.push raw }
     | "snapshot" =>
       specError form.loc
         "@snapshot is no longer supported; use OLD(<expr>) inside an @ensures/@admit lambda instead"

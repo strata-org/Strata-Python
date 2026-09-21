@@ -1134,4 +1134,238 @@ meta def serdeRoundTripTest : IO Unit := do
 
 #guard_msgs in
 #eval serdeRoundTripTest
+
+/-! ## Module-scope ghost declarations -/
+
+meta def findModuleGhost (sigs : Array Signature) (name : String) : IO Specs.Ghost := do
+  let some g := sigs.findSome?
+      (fun | .ghostDecl g => if g.name == name then some g else none | _ => none)
+    | throw <| IO.userError s!"module ghost `{name}` not found"
+  return g
+
+-- Explicit `init=` is retained; an omitted one stays nondeterministic.
+#guard_msgs in
+#eval runNativeCase "module_ghost_decl" fun sigs _ => do
+  let counter ← findModuleGhost sigs "counter"
+  let some tp := counter.type
+    | throw <| IO.userError "module ghost 'counter' lost its declared type"
+  expect (compare tp (SpecType.ident .none .builtinsInt) == .eq)
+    "module ghost 'counter' type did not resolve to `int`"
+  let some init := counter.init
+    | throw <| IO.userError "module ghost 'counter' lost its initializer"
+  expect (init.softBEq (.intLit 0 .none)) "initializer of 'counter' did not match `0`"
+  let flag ← findModuleGhost sigs "flag"
+  expect flag.init.isNone "module ghost 'flag' gained an initializer"
+  let _ ← findFn sigs "read_counter"
+  pure ()
+
+-- A contract's ghost reference survives translation.
+#guard_msgs in
+#eval runNativeCase "module_ghost_ref" fun sigs _ => do
+  let f ← findFn sigs "read_counter"
+  expect (f.admittedPostconditions.size == 1)
+    s!"contract referencing a module ghost was dropped: got \
+       {f.admittedPostconditions.size} admitted postconditions"
+  expect (f.admittedPostconditions[0]!.softBEq
+      (.intGe (.var "result" .none) (.var "counter" .none) .none))
+    "admitted postcondition did not match `result >= counter`"
+
+-- A contract may reference a ghost declared later in the file.
+#guard_msgs in
+#eval runNativeCase "module_ghost_forward_ref" fun sigs _ => do
+  let _ ← findModuleGhost sigs "later"
+  let f ← findFn sigs "read_later"
+  expect (f.admittedPostconditions.size == 1)
+    s!"forward reference to a module ghost was dropped: got \
+       {f.admittedPostconditions.size} admitted postconditions"
+  expect (f.admittedPostconditions[0]!.softBEq
+      (.intGe (.var "result" .none) (.var "later" .none) .none))
+    "admitted postcondition did not match `result >= later`"
+
+-- A parameter shadows a module ghost of the same name inside that procedure.
+#guard_msgs in
+#eval runNativeCase "module_ghost_shadowed" fun sigs _ => do
+  let _ ← findModuleGhost sigs "counter"
+  let f ← findFn sigs "takes_counter"
+  expect (f.preconditions.size == 1)
+    s!"expected 1 precondition, got {f.preconditions.size}"
+  expect (f.preconditions[0]!.formula.softBEq
+      (.intGe (.var "counter" .none) (.intLit 0 .none) .none))
+    "precondition did not match `counter >= 0`"
+
+-- A module ghost survives the DDM serialization round-trip.
+#guard_msgs in
+#eval runNativeCase "module_ghost_decl" fun sigs _ => do
+  let counter ← findModuleGhost sigs "counter"
+  let cmd := Signature.toDDM (.ghostDecl counter)
+  let back ← match DDM.Command.fromDDM cmd with
+    | .ok r => pure r
+    | .error (_, msg) => throw <| IO.userError s!"Command.fromDDM failed: {msg}"
+  let some counter' := (fun | .ghostDecl g => some g | _ => none) back
+    | throw <| IO.userError "round-trip did not yield a ghostDecl"
+  expect (counter'.name == "counter") s!"round-trip corrupted ghost name: {counter'.name}"
+  let some tp := counter.type
+    | throw <| IO.userError "source ghost 'counter' has no type to round-trip"
+  let some tp' := counter'.type
+    | throw <| IO.userError "round-trip dropped the ghost type"
+  expect (compare tp' tp == .eq) "round-trip corrupted the ghost type"
+  let some init' := counter'.init
+    | throw <| IO.userError "round-trip dropped the ghost initializer"
+  expect (init'.softBEq (.intLit 0 .none)) "round-trip corrupted the ghost initializer"
+
+-- A repeated ghost name is a duplicate in the module-wide namespace.
+#guard_msgs in
+#eval expectNativeCaseError "module_ghost_dup" "duplicate"
+
+-- A ghost's `type=` resolves a module-local alias declared before it.
+#guard_msgs in
+#eval runNativeCase "module_ghost_type_alias" fun sigs _ => do
+  let counter ← findModuleGhost sigs "counter"
+  let some tp := counter.type
+    | throw <| IO.userError "module ghost 'counter' lost its aliased type"
+  expect (compare tp (SpecType.ident .none .builtinsInt) == .eq)
+    "aliased ghost type did not resolve to `int`"
+  let some init := counter.init
+    | throw <| IO.userError "module ghost 'counter' lost its initializer"
+  expect (init.softBEq (.intLit 0 .none)) "initializer of 'counter' did not match `0`"
+
+-- A ghost's `type=` resolves a TypedDict alias declared before it.
+#guard_msgs in
+#eval runNativeCase "module_ghost_typeddict_alias" fun sigs _ => do
+  let pending ← findModuleGhost sigs "pending"
+  let some tp := pending.type
+    | throw <| IO.userError "module ghost 'pending' lost its TypedDict type"
+  let expected := SpecType.typedDict .none #["k"] #[SpecType.ident .none .builtinsStr] #[true]
+  expect (compare tp expected == .eq)
+    "ghost type did not resolve to the TypedDict alias `Item`"
+
+-- A ghost's `type=` resolves a user-declared class defined before it.
+#guard_msgs in
+#eval runNativeCase "module_ghost_class_ref" fun sigs _ => do
+  let pending ← findModuleGhost sigs "pending"
+  let some tp := pending.type
+    | throw <| IO.userError "module ghost 'pending' lost its class type"
+  let item : PythonIdent :=
+    { pythonModule := ModuleName.ofString! "native_cases.module_ghost_class_ref"
+      name := "Item" }
+  expect (compare tp (SpecType.ident .none item) == .eq)
+    "ghost type did not resolve to the user-declared class `Item`"
+
+-- A ghost's `type=` sees only bindings declared before it (source order).
+#guard_msgs in
+#eval expectNativeCaseError "module_ghost_alias_after_ghost" "Unknown identifier MyInt"
+
+-- An import rebinding an alias before the ghost wins over the earlier assign.
+#guard_msgs in
+#eval runNativeCase "module_ghost_import_shadows_alias" fun sigs _ => do
+  let g ← findModuleGhost sigs "g"
+  let some tp := g.type
+    | throw <| IO.userError "module ghost 'g' lost its type"
+  expect (compare tp (SpecType.ident .none .typingAny) == .eq)
+    "ghost type did not resolve to the import binding `Any`"
+
+-- A rebind after the ghost does not change the binding the ghost resolved.
+#guard_msgs in
+#eval runNativeCase "module_ghost_rebind_after_ghost" fun sigs _ => do
+  let counter ← findModuleGhost sigs "counter"
+  let some tp := counter.type
+    | throw <| IO.userError "module ghost 'counter' lost its type"
+  expect (compare tp (SpecType.ident .none .builtinsInt) == .eq)
+    "ghost type did not keep the binding from before the rebind"
+
+-- Ghost scoping does not broaden module resolution: a forward alias reference
+-- still errors.
+#guard_msgs in
+#eval expectNativeCaseError "forward_alias_rejected" "Unknown identifier LATER"
+
+-- The main loop must not see pre-scanned import bindings early.
+#guard_msgs in
+#eval expectNativeCaseError "forward_import_rejected" "Unknown identifier MyAlias"
+
+-- Import-created extern signatures keep their source position: the extern
+-- rebinding of `T` must come after the class it shadows.
+#guard_msgs in
+#eval runNativeCase "extern_import_after_class" fun sigs _ => do
+  let classIdx := sigs.findIdx? fun | .classDef d => d.name == "T" | _ => false
+  let externIdx := sigs.findIdx? fun | .externTypeDecl n _ => n == "T" | _ => false
+  let some c := classIdx | throw <| IO.userError "classDef T not found"
+  let some e := externIdx | throw <| IO.userError "externTypeDecl T not found"
+  unless c < e do
+    throw <| IO.userError s!"extern T at {e} precedes classDef T at {c}"
+
+-- Ghost scoping does not broaden module resolution: a forward class base
+-- still errors.
+#guard_msgs in
+#eval expectNativeCaseError "forward_class_base_rejected" "Unknown base class 'B'"
+
+-- A shadowed `ghost` name is an ordinary expression, not a declaration form.
+#guard_msgs in
+#eval runNativeCase "ghost_name_shadowed" fun sigs warnings => do
+  let ghosts := sigs.filterMap fun | .ghostDecl g => some g.name | _ => none
+  expect ghosts.isEmpty
+    s!"a shadowed ghost name still produced ghost declaration(s): {ghosts}"
+  expect (warnings.any (·.contains "skipped Expr at module level"))
+    "the shadowed ghost call was not reported as a skipped expression"
+
+-- A function definition shadowing `ghost` is detected like an assignment.
+#guard_msgs in
+#eval runNativeCase "ghost_name_shadowed_def" fun sigs warnings => do
+  let ghosts := sigs.filterMap fun | .ghostDecl g => some g.name | _ => none
+  expect ghosts.isEmpty
+    s!"a def-shadowed ghost name still produced ghost declaration(s): {ghosts}"
+  expect (warnings.any (·.contains "skipped Expr at module level"))
+    "the def-shadowed ghost call was not reported as a skipped expression"
+
+-- An import alias shadowing `ghost` is detected like an assignment.
+#guard_msgs in
+#eval runNativeCase "ghost_name_shadowed_import" fun sigs warnings => do
+  let ghosts := sigs.filterMap fun | .ghostDecl g => some g.name | _ => none
+  expect ghosts.isEmpty
+    s!"an import-shadowed ghost name still produced ghost declaration(s): {ghosts}"
+  expect (warnings.any (·.contains "skipped Expr at module level"))
+    "the import-shadowed ghost call was not reported as a skipped expression"
+
+-- A tuple assignment shadowing `ghost` is detected; the unsupported tuple
+-- target itself stays a fatal error.
+#guard_msgs in
+#eval expectNativeCaseError "ghost_name_shadowed_tuple" "Unsupported target"
+
+-- A module-level walrus binding shadowing `ghost` is detected like an
+-- assignment.
+#guard_msgs in
+#eval runNativeCase "ghost_name_shadowed_walrus" fun sigs warnings => do
+  let ghosts := sigs.filterMap fun | .ghostDecl g => some g.name | _ => none
+  expect ghosts.isEmpty
+    s!"a walrus-shadowed ghost name still produced ghost declaration(s): {ghosts}"
+  expect (warnings.any (·.contains "skipped Expr at module level"))
+    "the walrus-shadowed ghost call was not reported as a skipped expression"
+
+-- A walrus nested inside another expression still shadows `ghost`.
+#guard_msgs in
+#eval runNativeCase "ghost_name_shadowed_walrus_nested" fun sigs warnings => do
+  let ghosts := sigs.filterMap fun | .ghostDecl g => some g.name | _ => none
+  expect ghosts.isEmpty
+    s!"a nested-walrus-shadowed ghost name still produced ghost declaration(s): {ghosts}"
+  expect (warnings.any (·.contains "skipped Expr at module level"))
+    "the nested-walrus-shadowed ghost call was not reported as a skipped expression"
+
+-- A walrus rebinding a type alias drops the stale binding: the later ghost
+-- `type=` use is rejected instead of resolving to the pre-rebind value.
+#guard_msgs in
+#eval expectNativeCaseError "module_ghost_walrus_rebind_alias" "Unknown identifier MyInt"
+
+-- A def rebinding a type alias drops the stale binding likewise.
+#guard_msgs in
+#eval expectNativeCaseError "module_ghost_def_shadows_alias" "Unknown identifier MyInt"
+
+-- A tuple assignment rebinding a type alias drops the stale binding likewise
+-- (the tuple target itself is also a fatal error in the main loop).
+#guard_msgs in
+#eval expectNativeCaseError "module_ghost_tuple_rebind_alias" "Unknown identifier MyInt"
+
+-- A dotted un-aliased import binds its top-level name, so a scratch class of
+-- that name drops its stale binding for later ghost types.
+#guard_msgs in
+#eval expectNativeCaseError "module_ghost_dotted_import_shadows_class"
+  "Unknown identifier import_test"
 end

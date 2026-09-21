@@ -413,12 +413,15 @@ private def freshVar (pfx : String := "tmp") : ElabM String := do
 
 /-- A procedure is functional (pure, callable as a `StaticCall`) when its body is a
     transparent expression or an uninterpreted opaque stub (opaque with no imperative
-    implementation). An opaque body WITH an implementation is a real procedure, not
-    functional. -/
+    implementation) that declares no effects. An opaque body WITH an implementation,
+    or a bodiless one that declares effects (a PySpec model keeps its wildcard frame
+    and may read/write module ghosts), is a real procedure, not functional. -/
 def procIsFunctional (proc : Laurel.Procedure) : Bool :=
   match proc.body with
   | .Transparent _ => true
-  | .Opaque _ none _ => true
+  | .Opaque _ none mods =>
+    mods.all (·.targets.isEmpty)
+      && proc.readsGlobals.isEmpty && proc.writesGlobals.isEmpty
   | _ => false
 
 /-- Reads a runtime procedure's grade structurally from its signature: does it

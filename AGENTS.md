@@ -135,5 +135,6 @@ let { program, errors, overloads, ... } :=
 ### Review Policies
 
 - Constructs the dictionary map model cannot express are rejected with fatal diagnostics by design (see "Rejection over silent mistranslation" in README.md). The hard errors on non-str-keyed dict quantifiers ("dict quantifier requires str keys") and on non-TypedDict `**kwargs` (`kwargsExpansionError`) are intentional, pinned by requires_int_dict_quant and requires_nontypeddict_kwargs in SpecsTest.lean; do not flag them as regressions.
+- `preScanModule`/`translate` in `Specs.lean` always emit module `ghost(...)` signatures before all other signatures, regardless of source position (see "Signature order: module ghosts are emitted first" in README.md). This is intentional, not a bug.
 - Translator diagnostic strings on stderr are not a stable interface. Consumers classify runs by exit code and the `RESULT:`/`DETAIL:` lines only, never by message wording.
 - UNKNOWN verifier results on fully-havoced `Any` arguments hitting the caller-side map schema quantifier are a known completeness limitation, not a soundness risk; they should not block merges.

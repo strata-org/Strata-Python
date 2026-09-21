@@ -680,8 +680,14 @@ info: errors: 1
   assertEq result.errors.size 0
   match result.program.staticProcedures with
   | proc :: _ =>
+    -- A declared parameter type is also a precondition; pin only the
+    -- schema and user conditions.
+    let pinned := proc.preconditions.filter fun (c : Strata.Laurel.Condition) =>
+      match c.summary with
+      | some summary => !summary.startsWith "declared type of parameter "
+      | none => true
     let preStr := String.intercalate "\n"
-      (proc.preconditions.map fun (c : Strata.Laurel.Condition) =>
+      (pinned.map fun (c : Strata.Laurel.Condition) =>
         toString (Strata.Laurel.formatStmtExpr c.condition))
     assertEq preStr (
       "true & (DictStrAny_keysAllowed(kwargs, " ++
@@ -887,17 +893,20 @@ Run `signaturesToLaurel` with a precondition and check the rendered
 precondition text (via `getPreconditions`) for the expected Laurel
 operations, catching wrong-operation and silently-dropped-precondition bugs. -/
 
-/-- Formatted body text of the first procedure, or `none` if there is no
-    procedure or the body is empty. Preconditions are inspected via
-    `getPreconditions`. -/
-private def getBody (result : TranslationResult) : Option String :=
+/-- The first procedure's spec as text: each checked precondition as
+    `assert <cond>`, each free postcondition as `assume <cond>`. -/
+private def getSpecText (result : TranslationResult) : String :=
   match result.program.staticProcedures with
   | proc :: _ =>
-    match proc.body with
-    | .Transparent body => some (toString (Strata.Laurel.formatStmtExpr body))
-    | .Opaque _ (some body) _ => some (toString (Strata.Laurel.formatStmtExpr body))
-    | _ => none
-  | [] => none
+    let pres := proc.preconditions.map fun c =>
+      s!"assert {toString (Strata.Laurel.formatStmtExpr c.condition)}"
+    let posts := match proc.body with
+      | .Opaque postconditions _ _ =>
+        postconditions.map fun c =>
+          s!"assume {toString (Strata.Laurel.formatStmtExpr c.condition)}"
+      | _ => []
+    String.intercalate ";\n" (pres ++ posts)
+  | [] => ""
 
 /-- Render the first procedure's preconditions as `requires <cond> summary "…"`
     lines, one per `Condition`. -/
@@ -916,6 +925,43 @@ private def getPostconditions (result : TranslationResult) : List Condition :=
     | .Opaque postconditions _ _ => postconditions
     | _ => []
   | [] => []
+
+/-- A declared parameter type is a generated precondition. These tests pin
+    the *user* preconditions, so drop the generated ones. -/
+private def userPreconditions (result : TranslationResult) : List Condition :=
+  match result.program.staticProcedures with
+  | proc :: _ => proc.preconditions.filter fun c =>
+      match c.summary with
+      | some summary => !summary.startsWith "declared type of parameter "
+      | none => true
+  | [] => []
+
+/-- `getPreconditions` text without the generated declared-parameter-type
+    lines, for exact pins of the schema and user conditions. -/
+private def userPreconditionText (pre : String) : String :=
+  String.intercalate "\n" <|
+    (pre.splitOn "\n").filter (fun l => !l.contains "declared type of parameter")
+
+/-- True when the `@admit` predicate reached callers as a *free* postcondition:
+    assumed at every call site, never checked. That is what `@admit` means, and
+    for a bodiless model a free postcondition is where it has to live. -/
+private def hasAdmittedPostcondition (result : TranslationResult) : Bool :=
+  (getPostconditions result).any fun c =>
+    c.mode == .Assume &&
+      (match c.summary with
+       | some summary => summary.startsWith "admitted postcondition of "
+       | none => false)
+
+/-- True when no *user* contract reached the caller-visible postconditions.
+    The generated ones always do: a PySpec model is bodiless, so its declared
+    return type and any module-ghost type are free postconditions rather than
+    in-body assumes. Those carry generated summaries; a user contract carries
+    an `admitted postcondition` summary or none at all. -/
+private def noUserPostconditions (result : TranslationResult) : Bool :=
+  (getPostconditions result).all fun c =>
+    match c.summary with
+    | some s => s.startsWith "return type of " || s.startsWith "declared type of module ghost "
+    | none => false
 
 private def formatCondition (condition : Condition) : String :=
   toString (Strata.Laurel.formatStmtExpr condition.condition)
@@ -977,11 +1023,18 @@ private def translatePrecond (preconditions : Array Assertion)
         message := #[], formula :=
           .containsKey (.var "kw" loc) "key" loc }]
       postconditions := #[] }] testModule
-  let body := getBody result |>.getD ""
+  let spec := getSpecText result
   let pre := getPreconditions result
   assertEq result.errors.size 0
-  assertEq body
-    "{\n  result := <??>;\n  assume Any..isfrom_str(result)\n}"
+  assertEq spec (
+    "assert true & (DictStrAny_keysAllowed(kw, ListStr_cons(\"key\", ListStr_nil())) & " ++
+    "forall(py$schema_key_kw: string){select(PySpecDict_modelOf(kw), py$schema_key_kw)} => " ++
+    "PySpecDictValue..isPresent(select(PySpecDict_modelOf(kw), py$schema_key_kw)) ==> " ++
+    "false | py$schema_key_kw == \"key\");\n" ++
+    "assert true & (PySpecDictValue..isPresent(select(PySpecDict_modelOf(kw), \"key\")) ==> " ++
+    "Any..isfrom_str(PySpecDictValue..value!(select(PySpecDict_modelOf(kw), \"key\"))));\n" ++
+    "assert PySpecDictValue..isPresent(select(PySpecDict_modelOf(kw), \"key\"));\n" ++
+    "assume Any..isfrom_str(result)")
   assertEq pre (
     "requires true & (DictStrAny_keysAllowed(kw, " ++
     "ListStr_cons(\"key\", ListStr_nil())) & forall(py$schema_key_kw: string)" ++
@@ -1004,6 +1057,7 @@ private def translatePrecond (preconditions : Array Assertion)
   let result := signaturesToLaurel "<test>"
     #[func "f" str (args := #[arg "item" itemTy])] testModule
   let pre := getPreconditions result
+  let pre := userPreconditionText pre
   assertEq result.errors.size 0
   assertEq pre (
     "requires Any..isfrom_DictStrAny(item) & " ++
@@ -1027,6 +1081,7 @@ private def translatePrecond (preconditions : Array Assertion)
             (.var "Expected" loc)
             loc }]
     (args := #[arg "Items" (dictOf str any), arg "Expected" (dictOf str any)])
+  let pre := userPreconditionText pre
   assertEq errs 0
   assertEq pre (
     "requires Any..isfrom_DictStrAny(Items) & " ++
@@ -1051,6 +1106,7 @@ private def translatePrecond (preconditions : Array Assertion)
             (.intLit 1 loc)
             loc }]
     (args := #[arg "d" (dictOf str str), arg "k" str])
+  let pre := userPreconditionText pre
   assertEq errs 0
   assertEq pre (
     "requires Any..isfrom_DictStrAny(d) & " ++
@@ -1070,6 +1126,7 @@ private def translatePrecond (preconditions : Array Assertion)
 #eval do
   let (pre, errs) := translatePrecond #[]
     (args := #[arg "nested" (dictOf str (listOf int))])
+  let pre := userPreconditionText pre
   assertEq errs 0
   assertEq pre (
     "requires Any..isfrom_DictStrAny(nested) & " ++
@@ -1132,11 +1189,10 @@ private def translatePrecond (preconditions : Array Assertion)
   let resultTy := SpecType.typedDict loc #["name"] #[str] #[true]
   let result := signaturesToLaurel "<test>"
     #[func "f" resultTy] testModule
-  let body := getBody result |>.getD ""
+  let spec := getSpecText result
   assertEq result.errors.size 0
-  assertEq body (
-    "{\n  result := <??>;\n" ++
-    "  assume Any..isfrom_DictStrAny(result)\n}")
+  assertEq spec "assume Any..isfrom_DictStrAny(result)"
+  assert! !spec.contains "PySpecDict_modelOf(Any..as_Dict!(result))"
 
 -- containsKey on a non-kwargs dict: DictStrAny_contains in a precondition
 -- (would have been silently dropped before fix #2)
@@ -1164,9 +1220,7 @@ private def translatePrecond (preconditions : Array Assertion)
     #[{ message := #[], formula :=
           .pcmp .eq (.var "left" loc) (.var "right" loc) loc }]
     (args := #[arg "left" dictTy, arg "right" dictTy])
-  let preconditions := match result.program.staticProcedures with
-    | proc :: _ => proc.preconditions
-    | [] => []
+  let preconditions := userPreconditions result
   assertEq result.errors.size 0
   match preconditions with
   | [leftSchema, rightSchema, equality] =>
@@ -1199,7 +1253,13 @@ private def translatePrecond (preconditions : Array Assertion)
   assertEq result.errors.size 0
   match result.program.staticProcedures with
   | [proc] =>
-    match proc.preconditions with
+    -- A declared parameter type is also a precondition now; pin only the
+    -- schema, per the `userPreconditions` convention used above.
+    let pinned := proc.preconditions.filter fun (c : Strata.Laurel.Condition) =>
+      match c.summary with
+      | some summary => !summary.startsWith "declared type of parameter "
+      | none => true
+    match pinned with
     | [schema] =>
       assertEq (formatCondition schema)
         ("Any..isfrom_DictStrAny(items) & forall(py$schema_items: string)" ++
@@ -1264,12 +1324,16 @@ the emitted Laurel — the membership trigger `{...}`, the guard/body combiner
 pin per shape aspect; the remaining domain combinations are covered
 semantically. -/
 
-/-- Render the single precondition produced for `formulas` and require the
-    exact Laurel text `expectedFormula` (with no translation errors). -/
+/-- Render the user precondition produced for `formula` and require the exact
+    Laurel text `expectedFormula` (with no translation errors). Only the
+    `precondition N` lines are compared: a declared parameter type is also a
+    precondition now, and it is pinned separately by `PySpecArgTypeTest`. -/
 private def precondPins (args : Array Arg)
     (formula : Assertion) (expectedFormula : String) : Bool :=
   let (rendered, errs) := translatePrecond #[formula] (args := args)
-  errs == 0 && rendered == s!"requires {expectedFormula} summary \"precondition 0\""
+  let userLines := (rendered.splitOn "\n").filter (·.contains "summary \"precondition ")
+  errs == 0 &&
+    userLines == [s!"requires {expectedFormula} summary \"precondition 0\""]
 
 -- Canonical ∀-over-list shape: `all(len(x) >= 1 for x in xs)`. The binder is
 -- Any-typed, the List_contains membership guard doubles as the trigger, and
@@ -1427,9 +1491,10 @@ private def hasTypeError (result : TranslationResult) : Bool :=
     #[{ message := #[], formula := .intLit 42 loc }]
   assert! hasTypeError result
 
-/-! ## Body structure tests
+/-! ## Spec structure tests
 
-Verify the havoc + assert + assume pattern generated by `buildSpecBody`. -/
+Verify the precondition + free-postcondition spec generated by
+`buildSpecBody`. -/
 
 /-- Translate a function declaration for body/postcondition tests. -/
 private def translateFuncResult (args : Array Arg := #[])
@@ -1451,44 +1516,38 @@ private def translateFunc (args : Array Arg := #[])
     (preconditions : Array Assertion := #[])
     (postconditions : Array SpecExpr := #[]) : String × Nat :=
   let result := translateFuncResult args returnType preconditions postconditions
-  (getBody result |>.getD "", result.errors.size)
+  (getSpecText result, result.errors.size)
 
--- No args, no preconditions: body has havoc + return type assume
+-- No args, no preconditions: the return type is a free postcondition
 #eval do
-  let (body, errs) := translateFunc
+  let (spec, errs) := translateFunc
   assert! errs == 0
-  assert! body.contains "result := <??>"
-  assert! body.contains "assume Any..isfrom_str(result)"
+  assertEq spec "assume Any..isfrom_str(result)"
 
 -- Int arg with no default: type assert (implies not-None, so no separate check)
 #eval do
-  let (body, errs) := translateFunc
+  let (spec, errs) := translateFunc
     (args := #[arg "x" int])
   assert! errs == 0
-  assert! body.contains "assert Any..isfrom_int(x)"
-  assert! !body.contains "isfrom_None"
+  assertEq spec "assert Any..isfrom_int(x);\nassume Any..isfrom_str(result)"
 
 -- Optional bool arg (has default): type assert uses Or, no required-param check
 #eval do
   let result := translatePrecondResult #[] (args := #[arg "flag" bool_ (some .none)])
-  let body := getBody result |>.getD ""
-  let preConds := match result.program.staticProcedures with
-    | proc :: _ => proc.preconditions
-    | [] => []
+  let spec := getSpecText result
+  let preConds := userPreconditions result
   assert! result.errors.size == 0
-  assert! body.contains "Any..isfrom_None(flag) | Any..isfrom_bool(flag)"
+  assertEq spec
+    "assert Any..isfrom_None(flag) | Any..isfrom_bool(flag);\nassume Any..isfrom_str(result)"
   -- an optional param carries no required-param obligation at all
   assert! preConds.isEmpty
-  assert! !body.contains "'flag' is required"
 
 -- Any-typed arg with no default: the required-param check is a caller-checked
 -- precondition (`!isfrom_None`) in `proc.preconditions`, not an in-body assert.
 #eval do
   let result := translatePrecondResult #[] (args := #[arg "x" any])
-  let preConds := match result.program.staticProcedures with
-    | proc :: _ => proc.preconditions
-    | [] => []
-  let body := getBody result |>.getD ""
+  let preConds := userPreconditions result
+  let spec := getSpecText result
   let preText := getPreconditions result
   assert! result.errors.size == 0
   -- exactly one required-param precondition, carrying the "'x' is required"
@@ -1499,7 +1558,7 @@ private def translateFunc (args : Array Arg := #[])
   -- caller-checked means mode `.Both` (proven at call sites, assumed in callee)
   assert! preConds.all fun (c : Strata.Laurel.Condition) => c.mode == ConditionMode.Both
   -- and is NOT emitted as an in-body assert
-  assert! !body.contains "'x' is required"
+  assert! !spec.contains "'x' is required"
 
 -- Any-typed required param AND a user `@requires` coexist: pins the
 -- `requiredParamConds ++ userPreconds` concatenation — both survive and the
@@ -1509,9 +1568,7 @@ private def translateFunc (args : Array Arg := #[])
     { message := #[.str "x in enum"]
       formula := .enumMember (.var "x" loc) #["a", "b"] loc }
   let result := translatePrecondResult #[pre] (args := #[arg "x" any])
-  let preConds := match result.program.staticProcedures with
-    | proc :: _ => proc.preconditions
-    | [] => []
+  let preConds := userPreconditions result
   assert! result.errors.size == 0
   -- both the required-param obligation and the user precondition are present
   assert! preConds.length == 2
@@ -1522,17 +1579,17 @@ private def translateFunc (args : Array Arg := #[])
 
 -- Float return type: assume Any..isfrom_float(result)
 #eval do
-  let (body, errs) := translateFunc
+  let (spec, errs) := translateFunc
     (returnType := float_)
   assert! errs == 0
-  assert! body.contains "assume Any..isfrom_float(result)"
+  assertEq spec "assume Any..isfrom_float(result)"
 
 -- Composite return type: no assume (no tester for user-defined types)
 #eval do
-  let (body, errs) := translateFunc
+  let (spec, errs) := translateFunc
     (returnType := SpecType.ident loc (PythonIdent.ofComponent "mod" "Cls"))
   assert! errs == 0
-  assert! !body.contains "assume"
+  assertEq spec ""
 
 private def isUnsupportedPostconditionError
     (error : Strata.Pipeline.PipelineMessage) (predicate : String) : Bool :=
@@ -1550,13 +1607,13 @@ private def t_userPostconditionRejected : Bool :=
   let result := translateFuncResult
     (args := #[arg "x" int])
     (postconditions := #[postcondition])
-  let body := getBody result |>.getD ""
+  let spec := getSpecText result
   (match result.errors.toList with
     | [error] => isUnsupportedPostconditionError error (toString postcondition)
     | _ => false)
-    && (getPostconditions result).isEmpty
-    && !body.contains "PGe(result, from_int(0))"
-    && body.contains "assume Any..isfrom_str(result)"
+    && noUserPostconditions result
+    && !spec.contains "PGe(result, from_int(0))"
+    && spec.contains "assume Any..isfrom_str(result)"
 
 #guard t_userPostconditionRejected
 
@@ -1567,16 +1624,16 @@ private def t_multiplePostconditionsRejected : Bool :=
   let result := translateFuncResult
     (returnType := int)
     (postconditions := #[first, second])
-  let body := getBody result |>.getD ""
+  let spec := getSpecText result
   (match result.errors.toList with
     | [firstError, secondError] =>
         isUnsupportedPostconditionError firstError (toString first)
           && isUnsupportedPostconditionError secondError (toString second)
     | _ => false)
-    && (getPostconditions result).isEmpty
-    && !body.contains "PGe(result, from_int(0))"
-    && !body.contains "PGe(result, from_int(10))"
-    && body.contains "assume Any..isfrom_int(result)"
+    && noUserPostconditions result
+    && !spec.contains "PGe(result, from_int(0))"
+    && !spec.contains "PGe(result, from_int(10))"
+    && spec.contains "assume Any..isfrom_int(result)"
 
 #guard t_multiplePostconditionsRejected
 
@@ -1588,8 +1645,8 @@ private def t_nonBoolPostconditionRejected : Bool :=
   (match result.errors.toList with
     | [error] => isUnsupportedPostconditionError error (toString postcondition)
     | _ => false)
-    && (getPostconditions result).isEmpty
-    && (getBody result |>.getD "").contains "assume Any..isfrom_str(result)"
+    && noUserPostconditions result
+    && (getSpecText result).contains "assume Any..isfrom_str(result)"
 
 #guard t_nonBoolPostconditionRejected
 
@@ -1603,58 +1660,57 @@ private def t_preconditionAndPostconditionRejected : Bool :=
     (args := #[arg "n" int])
     (preconditions := #[pre])
     (postconditions := #[postcondition])
-  let body := getBody result |>.getD ""
-  let procedurePreconditions := match result.program.staticProcedures with
-    | proc :: _ => proc.preconditions
-    | [] => []
+  let spec := getSpecText result
+  let procedurePreconditions := userPreconditions result
   (match result.errors.toList with
     | [error] => isUnsupportedPostconditionError error (toString postcondition)
     | _ => false)
-    && body.contains "assert Any..isfrom_int(n)"
-    && !body.contains "isfrom_None(n)"
+    && spec.contains "assert Any..isfrom_int(n)"
+    && !spec.contains "isfrom_None(n)"
     && (match procedurePreconditions with
       | [condition] =>
           condition.mode == .Both
             && condition.summary == some "n >= 0"
             && formatCondition condition == "Any_to_bool(PGe(n, from_int(0)))"
       | _ => false)
-    && (getPostconditions result).isEmpty
-    && !body.contains "PGe(result, from_int(0))"
-    && body.contains "assume Any..isfrom_str(result)"
+    && noUserPostconditions result
+    && !spec.contains "PGe(result, from_int(0))"
+    && spec.contains "assume Any..isfrom_str(result)"
 
 #guard t_preconditionAndPostconditionRejected
 
 /-! ## Admitted postconditions (`@admit`)
 
 An `@admit` predicate is an explicitly acknowledged, unverified modeling
-assumption: it is assumed in the opaque body (like the trusted return-type
-assumption) and never becomes a caller-visible contract. -/
+assumption. A PySpec model is bodiless, so it lowers to a *free* postcondition:
+assumed at every call site, never checked -- exactly like the trusted
+return-type assumption it sits beside. -/
 
--- @admit lowers to an in-body assume with no errors.
+-- @admit lowers to a free postcondition with no errors.
 private def t_admittedPostconditionAssumed : Bool :=
   let admitted := .intGe (.var "result" loc) (.intLit 0 loc) loc
   let result := translateFuncResult
     (returnType := int)
     (admittedPostconditions := #[admitted])
-  let body := getBody result |>.getD ""
+  let spec := getSpecText result
   result.errors.isEmpty
-    && (getPostconditions result).isEmpty
-    && body.contains "assume Any_to_bool(PGe(result, from_int(0)))"
-    && body.contains "assume Any..isfrom_int(result)"
+    && hasAdmittedPostcondition result
+    && spec.contains "assume Any_to_bool(PGe(result, from_int(0)))"
+    && spec.contains "assume Any..isfrom_int(result)"
 
 #guard t_admittedPostconditionAssumed
 
 -- An @admit predicate may relate the result to a parameter: both identifiers
--- resolve inside the assumed body.
+-- resolve inside the free postcondition.
 private def t_admittedPostconditionReferencesParam : Bool :=
   let admitted := .intGe (.var "result" loc) (.var "x" loc) loc
   let result := translateFuncResult
     (args := #[arg "x" int])
     (returnType := int)
     (admittedPostconditions := #[admitted])
-  let body := getBody result |>.getD ""
+  let spec := getSpecText result
   result.errors.isEmpty
-    && body.contains "assume Any_to_bool(PGe(result, x))"
+    && spec.contains "assume Any_to_bool(PGe(result, x))"
 
 #guard t_admittedPostconditionReferencesParam
 
@@ -1669,17 +1725,19 @@ private def t_admittedPostconditionReferencesParam : Bool :=
     (args := #[arg "d" itemTy])
     (returnType := int)
     (admittedPostconditions := #[admitted])
-  let body := getBody result |>.getD ""
+  let spec := getSpecText result
   assertEq result.errors.size 0
-  assertEq body (
-    "{\n" ++
-    "  result := <??>;\n" ++
-    "  assert Any..isfrom_DictStrAny(d);\n" ++
-    "  assume Any_to_bool(PGe(from_int(Str.Length(Any..as_string!(" ++
+  assertEq spec (
+    "assert Any..isfrom_DictStrAny(d) & PySpecDictValue..isPresent(select(" ++
+    "PySpecDict_modelOf(Any..as_Dict!(d)), \"name\"));\n" ++
+    "assert Any..isfrom_DictStrAny(d) & (PySpecDictValue..isPresent(select(" ++
+    "PySpecDict_modelOf(Any..as_Dict!(d)), \"name\")) ==> Any..isfrom_str(" ++
+    "PySpecDictValue..value!(select(PySpecDict_modelOf(Any..as_Dict!(d)), \"name\"))));\n" ++
+    "assert Any..isfrom_DictStrAny(d);\n" ++
+    "assume Any_to_bool(PGe(from_int(Str.Length(Any..as_string!(" ++
     "PySpecDictValue..value(select(PySpecDict_modelOf(Any..as_Dict!(old(d))), " ++
     "\"name\"))))), from_int(1)));\n" ++
-    "  assume Any..isfrom_int(result)\n" ++
-    "}")
+    "assume Any..isfrom_int(result)")
 
 #eval do
   let dictTy := dictOf str int
@@ -1688,28 +1746,30 @@ private def t_admittedPostconditionReferencesParam : Bool :=
     (args := #[arg "d" dictTy])
     (returnType := int)
     (admittedPostconditions := #[admitted])
-  let body := getBody result |>.getD ""
+  let spec := getSpecText result
   assertEq result.errors.size 0
-  assertEq body (
-    "{\n" ++
-    "  result := <??>;\n" ++
-    "  assert Any..isfrom_DictStrAny(d);\n" ++
-    "  assume PySpecDict_scalarEq(Any..as_Dict!(old(d)), Any..as_Dict!(d));\n" ++
-    "  assume Any..isfrom_int(result)\n" ++
-    "}")
+  assertEq spec (
+    "assert Any..isfrom_DictStrAny(d) & forall(py$schema_d: string)" ++
+    "{select(PySpecDict_modelOf(Any..as_Dict!(d)), py$schema_d)} => " ++
+    "PySpecDictValue..isPresent(select(PySpecDict_modelOf(Any..as_Dict!(d)), py$schema_d)) ==> " ++
+    "Any..isfrom_int(PySpecDictValue..value!(select(" ++
+    "PySpecDict_modelOf(Any..as_Dict!(d)), py$schema_d)));\n" ++
+    "assert Any..isfrom_DictStrAny(d);\n" ++
+    "assume PySpecDict_scalarEq(Any..as_Dict!(old(d)), Any..as_Dict!(d));\n" ++
+    "assume Any..isfrom_int(result)")
 
--- Every @admit predicate is assumed, in order, and none is caller-visible.
+-- Every @admit predicate becomes a free postcondition, in order.
 private def t_multipleAdmittedPostconditionsAssumed : Bool :=
   let first := .intGe (.var "result" loc) (.intLit 0 loc) loc
   let second := .intGe (.var "result" loc) (.intLit 10 loc) loc
   let result := translateFuncResult
     (returnType := int)
     (admittedPostconditions := #[first, second])
-  let body := getBody result |>.getD ""
+  let spec := getSpecText result
   result.errors.isEmpty
-    && (getPostconditions result).isEmpty
-    && body.contains "assume Any_to_bool(PGe(result, from_int(0)))"
-    && body.contains "assume Any_to_bool(PGe(result, from_int(10)))"
+    && hasAdmittedPostcondition result
+    && spec.contains "assume Any_to_bool(PGe(result, from_int(0)))"
+    && spec.contains "assume Any_to_bool(PGe(result, from_int(10)))"
 
 #guard t_multipleAdmittedPostconditionsAssumed
 
@@ -1718,7 +1778,7 @@ private def t_multipleAdmittedPostconditionsAssumed : Bool :=
 private def t_nonBoolAdmittedPostconditionRejected : Bool :=
   let admitted := .intLit 42 loc
   let result := translateFuncResult (admittedPostconditions := #[admitted])
-  let body := getBody result |>.getD ""
+  let spec := getSpecText result
   (match result.errors.toList with
     | [error] =>
         error.kind == .unsupportedAdmit
@@ -1727,8 +1787,8 @@ private def t_nonBoolAdmittedPostconditionRejected : Bool :=
           && error.message.message.contains "@admit predicate is not Bool in 'test_f'"
           && error.message.message.contains "will not be dropped silently"
     | _ => false)
-    && !body.contains "from_int(42)"
-    && body.contains "assume Any..isfrom_str(result)"
+    && !spec.contains "from_int(42)"
+    && spec.contains "assume Any..isfrom_str(result)"
 
 #guard t_nonBoolAdmittedPostconditionRejected
 
@@ -1737,7 +1797,7 @@ private def t_nonBoolAdmittedPostconditionRejected : Bool :=
 private def t_untranslatableAdmittedPostconditionRejected : Bool :=
   let admitted := .placeholder loc
   let result := translateFuncResult (admittedPostconditions := #[admitted])
-  let body := getBody result |>.getD ""
+  let spec := getSpecText result
   (match result.errors.toList with
     | [limitation, error] =>
         limitation.kind == .placeholderExpr
@@ -1748,12 +1808,12 @@ private def t_untranslatableAdmittedPostconditionRejected : Bool :=
           && error.message.message.contains "@admit predicate of 'test_f' could not be translated"
           && error.message.message.contains "will not be dropped silently"
     | _ => false)
-    && body.contains "assume Any..isfrom_str(result)"
+    && spec.contains "assume Any..isfrom_str(result)"
 
 #guard t_untranslatableAdmittedPostconditionRejected
 
--- Mixed contracts: @requires stays caller-checked, @admit is assumed in-body,
--- and a modeled @ensures alongside them is still rejected.
+-- Mixed contracts: @requires stays caller-checked, @admit becomes a free
+-- postcondition, and a modeled @ensures alongside them is still rejected.
 private def t_mixedRequiresAdmitEnsures : Bool :=
   let geZero (v : String) : SpecExpr := .intGe (.var v loc) (.intLit 0 loc) loc
   let pre : Assertion := { message := #[.str "n >= 0"], formula := geZero "n" }
@@ -1764,22 +1824,20 @@ private def t_mixedRequiresAdmitEnsures : Bool :=
     (preconditions := #[pre])
     (postconditions := #[postcondition])
     (admittedPostconditions := #[admitted])
-  let body := getBody result |>.getD ""
-  let procedurePreconditions := match result.program.staticProcedures with
-    | proc :: _ => proc.preconditions
-    | [] => []
+  let spec := getSpecText result
+  let procedurePreconditions := userPreconditions result
   (match result.errors.toList with
     | [error] => isUnsupportedPostconditionError error (toString postcondition)
     | _ => false)
     && (match procedurePreconditions with
       | [condition] => condition.summary == some "n >= 0"
       | _ => false)
-    && (getPostconditions result).isEmpty
-    -- the admitted predicate is assumed in-body …
-    && body.contains "PGe(result, from_int(0))"
+    && hasAdmittedPostcondition result
+    -- the admitted predicate is assumed at call sites …
+    && spec.contains "PGe(result, from_int(0))"
     -- … while the rejected @ensures predicate is not
-    && !body.contains "PGe(result, from_int(10))"
-    && body.contains "assume Any..isfrom_str(result)"
+    && !spec.contains "PGe(result, from_int(10))"
+    && spec.contains "assume Any..isfrom_str(result)"
 
 #guard t_mixedRequiresAdmitEnsures
 
@@ -1817,7 +1875,7 @@ private def t_overloadEnsuresRejected : Bool :=
 
 #guard t_overloadEnsuresRejected
 
--- @admit on an @overload stub is fatal: no body is generated to hold the assume.
+-- @admit on an @overload stub is fatal: no procedure is generated to carry it.
 private def t_overloadAdmitRejected : Bool :=
   let admitted := .intGe (.var "result" loc) (.intLit 0 loc) loc
   let result := translateOverloadResult (admittedPostconditions := #[admitted])
@@ -1898,12 +1956,11 @@ private def udBase (n : String) : Strata.Laurel.HighTypeMd := ⟨.UserDefined (m
 /-! ## `OLD(expr)` two-state lowering
 
 `SpecExpr.old` is a generic structural wrapper. An admitted post-state
-predicate lowers it to Laurel's `old(...)` inside an in-body `assume`, where
-`PushOldInward` can distribute it to inout state. End-to-end heap semantics
-also depend on later `@modifies` lowering. -/
+predicate lowers it to Laurel's `old(...)` in a free postcondition, where
+`PushOldInward` can distribute it to inout state. -/
 
 /-- Run `signaturesToLaurel` for a single admitted postcondition and print the
-    error count and the full rendered body, so `#guard_msgs` pins the complete
+    error count and the full rendered spec, so `#guard_msgs` pins the complete
     Laurel output (not just a substring) at elaboration time. -/
 private def runAdmittedBody (admittedPostconditions : Array SpecExpr)
     (args : Array Arg := #[]) : IO Unit := do
@@ -1912,17 +1969,14 @@ private def runAdmittedBody (admittedPostconditions : Array SpecExpr)
     (returnType := identType .builtinsInt)
     (admittedPostconditions := admittedPostconditions)
   IO.println s!"errors: {result.errors.size}"
-  IO.println (getBody result |>.getD "<no body>")
+  IO.println (getSpecText result)
 
--- `OLD(x)` in @admit lowers to an in-body assume with `old(x)`.
+-- `OLD(x)` in @admit lowers to a free postcondition with `old(x)`.
 /--
 info: errors: 0
-{
-  result := <??>;
-  assert Any..isfrom_int(x);
-  assume Any_to_bool(PGe(old(x), x));
-  assume Any..isfrom_int(result)
-}
+assert Any..isfrom_int(x);
+assume Any_to_bool(PGe(old(x), x));
+assume Any..isfrom_int(result)
 -/
 #guard_msgs in
 #eval runAdmittedBody
@@ -1933,12 +1987,9 @@ info: errors: 0
 -- `old(PAdd(x, x))`, not `PAdd(old(x), old(x))`.
 /--
 info: errors: 0
-{
-  result := <??>;
-  assert Any..isfrom_int(x);
-  assume Any_to_bool(PGe(old(PAdd(x, x)), x));
-  assume Any..isfrom_int(result)
-}
+assert Any..isfrom_int(x);
+assume Any_to_bool(PGe(old(PAdd(x, x)), x));
+assume Any..isfrom_int(result)
 -/
 #guard_msgs in
 #eval runAdmittedBody

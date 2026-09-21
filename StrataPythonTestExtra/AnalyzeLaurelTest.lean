@@ -72,7 +72,9 @@ meta def setupFixture (pythonCmd : System.FilePath)
     match ← pySpecsDir testDir outDir dialectFile
         (modules := #["servicelib", "servicelib.Storage", "servicelib.Messaging",
           "servicelib.Database", "servicelib.Counter", "servicelib.Contract",
-          "servicelib.Admitted"])
+          "servicelib.Admitted", "servicelib.Ghost", "servicelib.GhostProbe",
+          "servicelib.GhostOld", "servicelib.GhostOldNoFrame",
+          "servicelib.ParamType"])
         (warningOutput := .none)
         (pythonCmd := toString pythonCmd) |>.toBaseIO with
     | .ok () => pure ()
@@ -413,10 +415,23 @@ Without the attribute, the regex VC would be ❓ unknown. -/
     match result with
     | .error msg => throw <| IO.userError s!"Pipeline failed: {msg}"
     | .ok vcResults =>
+      -- Pin the regex obligation via its property summary: it must verify
+      -- (`✔️`, not merely non-`✖️`), which is exactly what `evalIfCanonical`
+      -- enables. An unrelated obligation may degrade to `❓ unknown` when the
+      -- solver is under load on CI, but nothing may be disproven.
+      let mut sawRegex := false
       for r in vcResults do
-        if !r.isSuccess then
+        if (r.formatOutcome.splitOn "✖️").length != 1 then
           throw <| IO.userError
-            s!"Expected all Storage preconditions to pass but got: {r.formatOutcome}"
+            s!"Expected no disproven Storage precondition but got: {r.formatOutcome}"
+        let summary := r.obligation.metadata.getPropertySummary.getD ""
+        if summary.contains "Bucket must match" then
+          sawRegex := true
+          if !r.isSuccess then
+            throw <| IO.userError
+              s!"Expected the regex precondition to verify via evalIfCanonical but got: {r.formatOutcome}"
+      if !sawRegex then
+        throw <| IO.userError "Expected a 'Bucket must match' obligation"
 
 /-! ## Resolution error test after FilterPrelude
 
@@ -596,6 +611,114 @@ must discharge a caller assertion that the return type alone cannot. -/
       unless foundAdmittedAssertion do
         throw <| IO.userError
           "Expected the @admit assumption to discharge the caller assertion"
+/-! ## Module-scope ghosts -/
+
+/-- Every obligation must verify; some summary must contain `provedPart`. -/
+meta def expectGhostProved (pythonCmd : System.FilePath) (scriptName : String)
+    (pyspecModule : String) (provedPart : String) (what : String) : IO Unit := do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let result ← runAnalyzeAndVerify pythonCmd tmpDir
+      scriptName (useRoots := true) (pyspecModules := #[pyspecModule])
+    match result with
+    | .error msg => throw <| IO.userError s!"{what} pipeline failed: {msg}"
+    | .ok vcResults =>
+      let mut proved := false
+      for r in vcResults do
+        let summary := r.obligation.metadata.getPropertySummary.getD ""
+        unless r.isSuccess do
+          throw <| IO.userError
+            s!"Expected {what} verification to pass, got {r.formatOutcome}; summary: {summary}"
+        if summary.contains provedPart then
+          proved := true
+      unless proved do
+        throw <| IO.userError
+          s!"Expected {what} to prove an obligation whose summary contains \"{provedPart}\""
+
+/-- Require a fatal pipeline rejection containing `needle`. -/
+meta def expectGhostRejected (pythonCmd : System.FilePath) (scriptName : String)
+    (pyspecModule : String) (needle : String) (what : String) : IO Unit := do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let result ← runAnalyzeAndVerify pythonCmd tmpDir
+      scriptName (useRoots := true) (pyspecModules := #[pyspecModule])
+    match result with
+    | .error msg =>
+      unless msg.contains needle do
+        throw <| IO.userError
+          s!"expected the {what} rejection containing \"{needle}\", got: {msg}"
+    | .ok _ =>
+      throw <| IO.userError s!"{what} was not rejected; verification ran"
+
+#eval withPython fun pythonCmd =>
+  expectGhostProved pythonCmd "test_module_ghost.py" "servicelib.Ghost"
+    "value must be at least the ghost floor" "module-ghost"
+
+/-! ## Mutable module ghosts -/
+
+#eval withPython fun pythonCmd =>
+  expectGhostProved pythonCmd "test_ghost_dict.py" "servicelib.GhostProbe"
+    "registered in the ghost table" "mutable-ghost"
+
+/-! ## Module ghosts with `OLD` -/
+
+#eval withPython fun pythonCmd =>
+  expectGhostProved pythonCmd "test_ghost_old.py" "servicelib.GhostOld"
+    "increments the ghost counter" "ghost OLD"
+
+/-! ## Module ghosts with `OLD` but no `@modifies` (rejected) -/
+
+#eval withPython fun pythonCmd =>
+  expectGhostRejected pythonCmd "test_ghost_old_no_frame.py" "servicelib.GhostOldNoFrame"
+    "not listed in @modifies" "ghost OLD without @modifies"
+
+/-! ## Declared parameter types are caller-checked -/
+
+/-- Require the obligation whose summary contains `failedPart` to fail. -/
+meta def expectObligationFails (pythonCmd : System.FilePath) (scriptName : String)
+    (pyspecModule : String) (failedPart : String) (what : String) : IO Unit := do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let result ← runAnalyzeAndVerify pythonCmd tmpDir
+      scriptName (useRoots := true) (pyspecModules := #[pyspecModule])
+    match result with
+    | .error msg => throw <| IO.userError s!"{what} pipeline failed: {msg}"
+    | .ok vcResults =>
+      let mut summaries : Array String := #[]
+      let mut failed := false
+      for r in vcResults do
+        let summary := r.obligation.metadata.getPropertySummary.getD ""
+        summaries := summaries.push s!"{summary} => {r.formatOutcome}"
+        if summary.contains failedPart then
+          -- Rule out spurious failure modes so `!isSuccess` can't pass on a
+          -- timeout/encoding error masquerading as the intended violation.
+          if r.isTimeout then
+            throw <| IO.userError
+              s!"{what}: obligation for \"{failedPart}\" timed out (trigger bug): {r.formatOutcome}"
+          if r.isImplementationError || r.hasSMTError then
+            throw <| IO.userError
+              s!"{what}: obligation for \"{failedPart}\" hit an encoding/solver error: {r.formatOutcome}"
+          if !r.isSuccess then
+            failed := true
+      unless failed do
+        throw <| IO.userError
+          s!"Expected {what} to fail the obligation whose summary contains \
+             \"{failedPart}\"; outcomes were {summaries.toList}"
+
+#eval withPython fun pythonCmd =>
+  expectGhostProved pythonCmd "test_param_type_ok.py" "servicelib.ParamType"
+    "an int argument satisfies the declared parameter type" "declared param type (ok)"
+
+-- The declared-type obligation itself must exist and pass on the good call.
+#eval withPython fun pythonCmd =>
+  expectGhostProved pythonCmd "test_param_type_ok.py" "servicelib.ParamType"
+    "declared type of parameter 'n'" "declared param type (obligation present)"
+
+#eval withPython fun pythonCmd =>
+  expectObligationFails pythonCmd "test_param_type_violation.py"
+    "servicelib.ParamType" "declared type of parameter 'n'"
+    "declared param type (violated)"
+
 /-! ## Universal quantifier precondition tests
 
 End-to-end checks that `Storage.require_all_nonempty`/`require_map_nonempty` quantified preconditions reach

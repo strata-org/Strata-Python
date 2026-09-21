@@ -1443,10 +1443,18 @@ def collectAssertions (decls : ArgDecls) (_returnType : SpecType)
   let warnings := (←get).warnings
   modify fun s => { s with errors := #[], warnings := #[] }
   let filePath := (←read).pythonFile
+  -- Ghost types first: a same-named parameter shadows the ghost.
+  let ghostTypes : Std.HashMap String SpecType :=
+    (←get).elements.foldl (init := {}) fun acc sig =>
+      match sig with
+      | .ghostDecl g => match g.type with
+        | some tp => acc.insert g.name tp
+        | none => acc
+      | _ => acc
   -- Seed declared parameters; post-state `result` and `**kwargs` use dedicated paths.
-  let localTypes := (decls.args ++ decls.kwonly).foldl
-    (init := ({} : Std.HashMap String SpecType))
-    fun acc a => acc.insert a.name a.type
+  let localTypes : Std.HashMap String SpecType :=
+    (decls.args ++ decls.kwonly).foldl (init := ghostTypes) fun acc a =>
+      acc.insert a.name a.type
   let ctx : SpecAssertionContext :=
     { filePath
       kwargs := decls.kwargs
@@ -1770,6 +1778,8 @@ def signatureValueMap (mod : ModuleName) (sigs : Array Signature) : Std.HashMap 
         | .externTypeDecl name source =>
           m.insert name (.typeValue (.ident default source))
         | .functionDecl .. => m
+        -- A module ghost defines no type/value name, so it contributes nothing.
+        | .ghostDecl .. => m
   sigs.foldl (init := {}) addType
 
 def checkOverloadBody (stmt : stmt SourceRange) : PySpecM Unit := do
@@ -1806,6 +1816,34 @@ def resolveRelativeModuleName (loc : SourceRange) (relName : String) (level : In
         s!"the current module is only {pfx.components.size} package level(s) deep"
       return default
   return base ++ m
+
+/-- Whether a module-level statement is a bare `ghost(...)` declaration call. -/
+private def moduleGhostForm? (s : stmt StrataDDM.SourceRange)
+    : Option Decorators.DecoratorForm :=
+  match s with
+  | .Expr _ value =>
+    match Decorators.DecoratorForm.ofExpr? value with
+    | some form =>
+      if form.qualifier == none && form.isCall && form.name == "ghost" then
+        some form
+      else
+        none
+    | none => none
+  | _ => none
+
+/-- The name bindings one import statement contributed. -/
+private def importDelta (before : Std.HashMap String SpecValue)
+    (explicit : Array String) : PySpecM (Array (String × SpecValue)) := do
+  let after := (←get).nameMap
+  let mut caps : Array (String × SpecValue) := #[]
+  for (k, v) in after do
+    if !before.contains k then
+      caps := caps.push (k, v)
+  for n in explicit do
+    if !caps.any (·.1 == n) then
+      if let some v := after[n]? then
+        caps := caps.push (n, v)
+  return caps
 
 mutual
 
@@ -1956,8 +1994,213 @@ partial def translateImportFromStmt (loc : SourceRange)
       let mod ← resolveRelativeModuleName loc relMod lvl
       resolveAndRegisterModule loc mod asname
 
+/-- Register a module-scope `ghost(...)` declaration. -/
+private partial def translateModuleGhost (form : Decorators.DecoratorForm) : PySpecM Unit := do
+  let existing := (←get).elements.filterMap fun
+    | .ghostDecl g => some g.name
+    | _ => none
+  let some raw ← Native.parseGhostForm? "ghost" form existing
+    | return
+  if raw.name == Native.resultBinder then
+    specError form.loc
+      s!"ghost: name=\"{raw.name}\" collides with the reserved result binder"
+    return
+  let type? ← raw.type.mapM pySpecType
+  let mut init? : Option SpecExpr := none
+  let mut initOk := true
+  if let some initExpr := raw.init then
+    let errorStart := (←get).errors.size
+    let translated ← collectAssertions { args := #[], kwonly := #[] }
+        (.ident form.loc .typingAny) do
+      match ← translateContractValue? .initializer initExpr with
+      | some init =>
+        modify fun s => { s with ghosts := s.ghosts.push {
+          name := raw.name, type := type?, init := some init, loc := raw.loc
+        } }
+      | none => pure ()
+    match translated.ghosts[0]? with
+    | some ghost => init? := ghost.init
+    | none =>
+      initOk := false
+      if (←get).errors.size == errorStart then
+        specError initExpr.ann
+          s!"ghost: initializer for '{raw.name}' could not be translated"
+  -- Register even after a bad initializer so duplicate checks stay stable.
+  pushSignature (.ghostDecl {
+    name := raw.name
+    type := type?
+    init := if initOk then init? else none
+    loc := raw.loc
+  })
+
+/-- Names bound by an assignment target, including nested patterns. -/
+private partial def collectBoundNames (t : expr StrataDDM.SourceRange)
+    (acc : Std.HashSet String) : Std.HashSet String :=
+  match t with
+  | .Name _ ⟨_, n⟩ _ => acc.insert n
+  | .Tuple _ ⟨_, elts⟩ _ | .List _ ⟨_, elts⟩ _ =>
+    elts.foldl (init := acc) fun a e => collectBoundNames e a
+  | .Starred _ inner _ => collectBoundNames inner acc
+  | _ => acc
+
+/-- Names bound in the enclosing scope by walrus targets (PEP 572);
+    lambda bodies are not descended. -/
+private partial def collectWalrusNames (e : expr StrataDDM.SourceRange)
+    (acc : Std.HashSet String) : Std.HashSet String :=
+  let comps (gens : Array (comprehension StrataDDM.SourceRange))
+      (acc : Std.HashSet String) : Std.HashSet String :=
+    gens.foldl (init := acc) fun a g =>
+      match g with
+      | .mk_comprehension _ _ iter ⟨_, ifs⟩ _ =>
+        ifs.foldl (init := collectWalrusNames iter a) fun a e => collectWalrusNames e a
+  match e with
+  | .NamedExpr _ target value =>
+    collectWalrusNames value (collectBoundNames target acc)
+  | .Lambda .. | .Name .. | .Constant .. => acc
+  | .BinOp _ l _ r => collectWalrusNames r (collectWalrusNames l acc)
+  | .BoolOp _ _ ⟨_, values⟩ =>
+    values.foldl (init := acc) fun a e => collectWalrusNames e a
+  | .UnaryOp _ _ operand => collectWalrusNames operand acc
+  | .IfExp _ test body orelse =>
+    collectWalrusNames orelse (collectWalrusNames body (collectWalrusNames test acc))
+  | .Compare _ left _ ⟨_, comparators⟩ =>
+    comparators.foldl (init := collectWalrusNames left acc) fun a e => collectWalrusNames e a
+  | .Call _ func ⟨_, args⟩ ⟨_, kwargs⟩ =>
+    let a := collectWalrusNames func acc
+    let a := args.foldl (init := a) fun a e => collectWalrusNames e a
+    kwargs.foldl (init := a) fun a kw => collectWalrusNames kw.value a
+  | .Dict _ ⟨_, keys⟩ ⟨_, values⟩ =>
+    let a := keys.foldl (init := acc) fun a k =>
+      match k with
+      | .some_expr _ e => collectWalrusNames e a
+      | .missing_expr _ => a
+    values.foldl (init := a) fun a e => collectWalrusNames e a
+  | .Set _ ⟨_, elts⟩ | .Tuple _ ⟨_, elts⟩ _ | .List _ ⟨_, elts⟩ _ =>
+    elts.foldl (init := acc) fun a e => collectWalrusNames e a
+  | .ListComp _ elt ⟨_, gens⟩ | .SetComp _ elt ⟨_, gens⟩ | .GeneratorExp _ elt ⟨_, gens⟩ =>
+    comps gens (collectWalrusNames elt acc)
+  | .DictComp _ key value ⟨_, gens⟩ =>
+    comps gens (collectWalrusNames value (collectWalrusNames key acc))
+  | .Await _ inner | .YieldFrom _ inner => collectWalrusNames inner acc
+  | .Yield _ ⟨_, value⟩ =>
+    value.elim acc (collectWalrusNames · acc)
+  | .FormattedValue _ value _ ⟨_, fmtSpec⟩ =>
+    let a := collectWalrusNames value acc
+    fmtSpec.elim a (collectWalrusNames · a)
+  | .Interpolation _ value _ _ ⟨_, fmtSpec⟩ =>
+    let a := collectWalrusNames value acc
+    fmtSpec.elim a (collectWalrusNames · a)
+  | .JoinedStr _ ⟨_, values⟩ | .TemplateStr _ ⟨_, values⟩ =>
+    values.foldl (init := acc) fun a e => collectWalrusNames e a
+  | .Subscript _ obj slice _ =>
+    collectWalrusNames slice (collectWalrusNames obj acc)
+  | .Attribute _ obj _ _ => collectWalrusNames obj acc
+  | .Starred _ inner _ => collectWalrusNames inner acc
+  | .Slice _ ⟨_, lower⟩ ⟨_, upper⟩ ⟨_, step⟩ =>
+    let a := lower.elim acc (collectWalrusNames · acc)
+    let a := upper.elim a (collectWalrusNames · a)
+    step.elim a (collectWalrusNames · a)
+
+/-- Source-ordered pre-pass registering imports and module ghosts, so
+    contracts can forward-reference a ghost declared later.
+
+    Invariant: ghosts are always emitted before every other signature,
+    regardless of source position, because every ghost must be registered
+    before any contract can reference one. Safe because consumers bucket
+    signatures by kind, not by array order. -/
+private partial def preScanModule (body : Array (stmt StrataDDM.SourceRange)) :
+    PySpecM (Std.HashMap Nat (Array (String × SpecValue)) ×
+      Std.HashMap Nat (Array Signature) × Std.HashSet Nat) := do
+  let mut ghostScope : Std.HashMap String SpecValue := {}
+  let mut boundNames : Std.HashSet String := {}
+  let mut importBinds : Std.HashMap Nat (Array (String × SpecValue)) := {}
+  let mut importSigs : Std.HashMap Nat (Array Signature) := {}
+  let mut shadowedGhosts : Std.HashSet Nat := {}
+  for h : i in [0:body.size] do
+    let stmt := body[i]
+    match stmt with
+    | .Import loc ⟨_, names⟩ =>
+      let before := (←get).nameMap
+      let sigsBefore := (←get).elements.size
+      translateImport loc names
+      -- A resolvable bare import binds qualified names; capture the delta.
+      let explicit := names.map fun a =>
+        match a.asname with
+        | some as_ => as_
+        | none => (a.name.takeWhile (· != '.')).toString
+      importBinds := importBinds.insert i (← importDelta before explicit)
+      importSigs := importSigs.insert i ((←get).elements.extract sigsBefore)
+      for bare in explicit do
+        boundNames := boundNames.insert bare
+        ghostScope := ghostScope.erase bare
+    | .ImportFrom loc ⟨_, pyModule⟩ ⟨_, names⟩ ⟨_, level⟩ =>
+      let before := (←get).nameMap
+      let sigsBefore := (←get).elements.size
+      translateImportFromStmt loc pyModule names level
+      let explicit := names.map fun a => a.asname.getD a.name
+      importBinds := importBinds.insert i (← importDelta before explicit)
+      importSigs := importSigs.insert i ((←get).elements.extract sigsBefore)
+      for a in names do
+        boundNames := boundNames.insert (a.asname.getD a.name)
+        ghostScope := ghostScope.erase (a.asname.getD a.name)
+    | .ClassDef loc ⟨_, className⟩ _ _ _ _ _ =>
+      boundNames := boundNames.insert className
+      ghostScope := ghostScope.erase className
+      unless ← shouldSkip className do
+        ghostScope := ghostScope.insert className
+          (.typeValue (.ident loc ((← read).currentModule.mkIdent className) #[]))
+    | .FunctionDef _ ⟨_, funName⟩ .. =>
+      boundNames := boundNames.insert funName
+      ghostScope := ghostScope.erase funName
+    | .Assign _ ⟨_, targets⟩ value _ =>
+      let assignBound := targets.foldl (init := (∅ : Std.HashSet String)) fun acc t =>
+        collectBoundNames t acc
+      let assignBound := collectWalrusNames value assignBound
+      boundNames := assignBound.fold (init := boundNames) fun s n => s.insert n
+      -- Rebinding drops the scratch binding first.
+      ghostScope := assignBound.fold (init := ghostScope) fun m n => m.erase n
+      if let #[.Name _ ⟨_, name⟩ _] := targets then
+        let saved ← get
+        modify fun s =>
+          { s with nameMap := ghostScope.fold (init := s.nameMap) fun m k v => m.insert k v }
+        let (success, v) ← runChecked <| pySpecValue value
+        set saved
+        if success then
+          ghostScope := ghostScope.insert name v
+    | .Expr _ value =>
+      if let some form := moduleGhostForm? stmt then
+        if boundNames.contains "ghost" then
+          shadowedGhosts := shadowedGhosts.insert i
+        else
+          let savedNames := (←get).nameMap
+          modify fun s =>
+            { s with nameMap := ghostScope.fold (init := s.nameMap) fun m k v => m.insert k v }
+          translateModuleGhost form
+          modify fun s => { s with nameMap := savedNames }
+      -- A walrus target binds at module scope.
+      let walrusBound := collectWalrusNames value {}
+      boundNames := walrusBound.fold (init := boundNames) fun s n => s.insert n
+      ghostScope := walrusBound.fold (init := ghostScope) fun m n => m.erase n
+    | _ => pure ()
+  return (importBinds, importSigs, shadowedGhosts)
+
 partial def translate (body : Array (stmt StrataDDM.SourceRange)) : PySpecM Unit := do
-  for stmt in body do
+  -- Restore `nameMap`: nothing may resolve a name bound only by a later import.
+  -- Import-created signatures are also unwound (ghost registrations stay) and
+  -- replayed at their own position, so signature order stays source order.
+  --
+  -- Ghosts are the exception: see the invariant documented on `preScanModule` above.
+  let namesBefore := (←get).nameMap
+  let sigsBefore := (←get).elements.size
+  let (importBinds, importSigs, shadowedGhosts) ← preScanModule body
+  modify fun s => { s with
+    nameMap := namesBefore
+    elements := (s.elements.extract 0 sigsBefore) ++
+      ((s.elements.extract sigsBefore).filter fun
+        | .ghostDecl _ => true
+        | _ => false) }
+  for h : i in [0:body.size] do
+    let stmt := body[i]
     match stmt with
     | .Assign loc ⟨_, targets⟩ value _typeAnn =>
       let (success, v) ← runChecked <| pySpecValue value
@@ -1982,7 +2225,9 @@ partial def translate (body : Array (stmt StrataDDM.SourceRange)) : PySpecM Unit
       | _ =>
         specWarning loc s!"skipped non-type Assign ({name})"
     | .Expr .. =>
-      specWarning stmt.ann "skipped Expr at module level"
+      -- Ghosts were registered by the pre-scan; anything else is skipped.
+      if (moduleGhostForm? stmt).isNone || shadowedGhosts.contains i then
+        specWarning stmt.ann "skipped Expr at module level"
     | .FunctionDef loc
                    ⟨_funNameLoc, funName⟩
                    args
@@ -2004,10 +2249,13 @@ partial def translate (body : Array (stmt StrataDDM.SourceRange)) : PySpecM Unit
       assert! typeParams.size = 0
       let d ← pySpecFunctionArgs (className := none) loc funName args body decorators returns
       pushSignature (.functionDecl d)
-    | .Import loc ⟨_, names⟩ =>
-      translateImport loc names
-    | .ImportFrom loc ⟨_, pyModule⟩ ⟨_, names⟩ ⟨_, level⟩ =>
-      translateImportFromStmt loc pyModule names level
+    | .Import .. | .ImportFrom .. =>
+      -- Replay the pre-scanned bindings and signatures at the import's position.
+      for (n, v) in importBinds.getD i #[] do
+        setNameValue n v
+      for sig in importSigs.getD i #[] do
+        if !(sig matches .ghostDecl _) then
+          pushSignature sig
     | .ClassDef loc ⟨_classNameLoc, className⟩ ⟨_, bases⟩ ⟨_, keywords⟩ ⟨_, stmts⟩ ⟨_, decorators⟩ ⟨_, typeParams⟩ =>
       if ←shouldSkip className then
         logEvent "skip" s!"Skipping class {className}"

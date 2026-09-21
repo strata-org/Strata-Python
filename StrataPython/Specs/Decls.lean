@@ -734,6 +734,24 @@ def SpecExpr.loc : SpecExpr → SourceRange
   | .enumMember _ _ l | .regexMatch _ _ l | .containsKey _ _ l
   | .pcmp _ _ _ l | .quantifier _ _ _ _ l => l
 
+/-- The runtime type an initializer is statically guaranteed to produce. -/
+def SpecExpr.ghostInitializerType? (e : SpecExpr) : Option SpecType :=
+  let ident (name : PythonIdent) := SpecType.ident e.loc name
+  match e with
+  | .intLit .. => some (ident .builtinsInt)
+  | .boolLit .. => some (ident .builtinsBool)
+  | .noneLit .. => some (SpecType.noneType e.loc)
+  | .floatLit .. => some (ident .builtinsFloat)
+  | .intGe .. | .intLe .. | .pcmp ..
+  | .floatGe .. | .floatLe .. | .enumMember .. | .regexMatch ..
+  | .containsKey .. | .implies .. | .not .. | .quantifier .. =>
+      some (ident .builtinsBool)
+  | .stringLen .. => some (ident .builtinsInt)
+  | .placeholder .. | .var .. | .old .. | .getIndex .. | .getItem ..
+  | .isInstanceOf .. | .add .. | .sub .. | .mul .. | .floorDiv ..
+  | .mod .. | .pow .. | .neg .. | .and .. | .or .. =>
+      none
+
 /-- True when `placeholder` appears ANYWHERE in the expression tree, including
     buried inside a translated wrapper (e.g. `getIndex placeholder "f"`). A
     contract whose translation contains a placeholder is not fully supported and
@@ -848,6 +866,20 @@ def SpecExpr.containsPlaceholder : SpecExpr → Bool
     collection.hasFreeVar name ||
       (!domain.bindsVar name && body.hasFreeVar name)
 
+/-- Whether some `OLD(...)` in the expression reads `name` free in its operand. -/
+def SpecExpr.oldReadsVar (e : SpecExpr) (name : String) : Bool :=
+  match e with
+  | .old inner _ => inner.hasFreeVar name
+  | .placeholder _ | .var .. | .intLit .. | .boolLit .. | .noneLit .. | .floatLit .. => false
+  | .stringLen s _ | .neg s _ | .not s _ | .getIndex s _ _ | .isInstanceOf s _ _
+  | .enumMember s _ _ | .regexMatch s _ _ | .containsKey s _ _ => s.oldReadsVar name
+  | .intGe a b _ | .intLe a b _ | .floatGe a b _ | .floatLe a b _
+  | .add a b _ | .sub a b _ | .mul a b _ | .floorDiv a b _ | .mod a b _ | .pow a b _
+  | .and a b _ | .or a b _ | .implies a b _ | .getItem a b _ => a.oldReadsVar name || b.oldReadsVar name
+  | .pcmp _ a b _ => a.oldReadsVar name || b.oldReadsVar name
+  | .quantifier _ domain c b _ =>
+    c.oldReadsVar name || (!domain.bindsVar name && b.oldReadsVar name)
+
 /-- Structural equality ignoring source locations. -/
 def SpecExpr.softBEq : SpecExpr → SpecExpr → Bool
   | .placeholder _, .placeholder _ => true
@@ -905,6 +937,9 @@ structure Ghost where
   loc : SourceRange
 deriving Inhabited
 
+/-- Contract lambdas' return binder; reserved. -/
+def resultBinder : String := "result"
+
 structure FunctionDecl where
   loc : SourceRange
   nameLoc : SourceRange
@@ -915,8 +950,8 @@ structure FunctionDecl where
   preconditions : Array Assertion
   postconditions : Array SpecExpr
   /-- Postconditions from `@admit`: explicitly acknowledged, unverified
-      modeling assumptions. Lowered as in-body
-      `assume`s rather than verified caller-visible contracts. -/
+      modeling assumptions. Lowered as free (assume-only) postconditions
+      rather than verified contracts. -/
   admittedPostconditions : Array SpecExpr := #[]
   /-- Frame condition from `@modifies`: the lvalue targets (e.g. `self.x`, a
       global name) this procedure is permitted to modify. Recognized +
@@ -969,6 +1004,8 @@ inductive Signature where
   | classDef (d : ClassDef)
   | functionDecl (d : FunctionDecl)
   | typeDef (d : TypeDef)
+  /-- A module-scope `ghost(...)` declaration. -/
+  | ghostDecl (d : Ghost)
   deriving Inhabited
 
 end StrataPython.Specs

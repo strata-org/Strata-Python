@@ -246,6 +246,7 @@ op classDef (decl : ClassDecl) : Command => decl;
 op functionDecl (decl : FunDecl) : Command => decl;
 op typeDef (name : Str, definition : SpecType) : Command =>
   "type " name " = " definition "\n";
+op moduleGhostDecl (decl : GhostDecl) : Command => decl;
 #end
 
 #strata_gen PythonSpecs
@@ -417,7 +418,7 @@ def Assertion.toDDM (a : Assertion) : DDM.Assertion SourceRange :=
   .mkAssertion .none a.formula.toDDM ⟨.none, a.message.map (·.toDDM)⟩
 
 def Ghost.toDDM (g : Ghost) : DDM.GhostDecl SourceRange :=
-  .mkGhostDecl .none ⟨.none, g.name⟩
+  .mkGhostDecl g.loc ⟨.none, g.name⟩
     ⟨.none, g.type.map (·.toDDM)⟩
     ⟨.none, g.init.map (·.toDDM)⟩
 
@@ -479,6 +480,8 @@ def Signature.toDDM (sig : Signature) : DDM.Signature SourceRange :=
     .functionDecl d.loc d.toDDM
   | .typeDef d =>
     .typeDef d.loc (.mk d.nameLoc d.name) d.definition.toDDM
+  | .ghostDecl g =>
+    .moduleGhostDecl g.loc g.toDDM
 
 abbrev FromDDM := Except (SourceRange × String)
 
@@ -641,9 +644,9 @@ def DDM.FunDecl.fromDDM (d : DDM.FunDecl SourceRange) : FromDDM Specs.FunctionDe
   let ghosts : Array Specs.Ghost ←
     match ghostsClause with
     | some (.mkGhostsClause _ ⟨_, gs⟩) =>
-      gs.mapM fun (.mkGhostDecl _ ⟨_, gn⟩ ⟨_, gtp⟩ ⟨_, gini⟩) => do
+      gs.mapM fun (.mkGhostDecl gLoc ⟨_, gn⟩ ⟨_, gtp⟩ ⟨_, gini⟩) => do
         pure { name := gn, type := ← gtp.mapM (·.fromDDM),
-               init := gini.map (·.fromDDM), loc := .none }
+               init := gini.map (·.fromDDM), loc := gLoc }
     | none => pure #[]
   pure {
     loc := loc
@@ -709,6 +712,14 @@ def DDM.Command.fromDDM (cmd : DDM.Command SourceRange) : FromDDM Specs.Signatur
       definition := ← definition.fromDDM
     }
     pure <| .typeDef d
+  | .moduleGhostDecl loc (.mkGhostDecl _ ⟨_, gn⟩ ⟨_, gtp⟩ ⟨_, gini⟩) => do
+    let g : Specs.Ghost := {
+      name := gn
+      type := ← gtp.mapM (·.fromDDM)
+      init := gini.map (·.fromDDM)
+      loc := loc
+    }
+    pure <| .ghostDecl g
 
 /-- Reads Python spec signatures from a DDM Ion file. -/
 public def readDDM (path : System.FilePath) : EIO String (Array Signature) := do
