@@ -1188,22 +1188,29 @@ private def translatePrecond (preconditions : Array Assertion)
     throw <| IO.userError
       s!"expected two dictionary schemas and equality, got {preconditions.length}"
 
--- Literal-key domains are not modeled: the schema is skipped with a warning
--- and the declaration still loads.
+-- Literal-key domains are modeled as string-keyed maps: the schema lowers
+-- like `Dict[str, _]` with no warning.
 #eval do
   let keyType := mkUnion #[
     SpecType.stringLiteral loc "left",
     SpecType.stringLiteral loc "right"]
   let result := signaturesToLaurel "<test>"
     #[func "f" str (args := #[arg "items" (dictOf keyType int)])] testModule
-  match result.errors.toList with
-  | [error] =>
-    assertEq error.kind Pipeline.MessageKind.dictionarySchemaWarning
-    assertEq error.kind.impact.isFatal false
-    assertEq result.program.staticProcedures.length 1
-  | errors =>
-    throw <| IO.userError
-      s!"expected one literal-key dictionary warning, got {errors.length}"
+  assertEq result.errors.size 0
+  match result.program.staticProcedures with
+  | [proc] =>
+    match proc.preconditions with
+    | [schema] =>
+      assertEq (formatCondition schema)
+        ("Any..isfrom_DictStrAny(items) & forall(py$schema_items: string)" ++
+         "{select(PySpecDict_modelOf(Any..as_Dict!(items)), py$schema_items)} => " ++
+         "PySpecDictValue..isPresent(select(PySpecDict_modelOf(Any..as_Dict!(items)), py$schema_items)) ==> " ++
+         "Any..isfrom_int(PySpecDictValue..value!(select(" ++
+         "PySpecDict_modelOf(Any..as_Dict!(items)), py$schema_items)))")
+    | pres =>
+      throw <| IO.userError s!"expected one schema precondition, got {pres.length}"
+  | procs =>
+    throw <| IO.userError s!"expected one procedure, got {procs.length}"
 
 -- A parameter-only non-string-keyed dict never rejects the declaration: its
 -- schema is skipped with a non-fatal warning. Fatal rejection is reserved for
