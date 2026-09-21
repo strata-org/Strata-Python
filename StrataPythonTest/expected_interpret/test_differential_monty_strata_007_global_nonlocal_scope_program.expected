@@ -1,1 +1,1 @@
-V2 pipeline produced no Core: \[unsupported construct: nested function 'add' captures enclosing binding\(s\): total\]
+V2 pipeline produced no Core: \[unsupported construct: nested function 'add' declares nonlocal binding\(s\): total; mutable captures are not yet supported\]

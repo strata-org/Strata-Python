@@ -1,1 +1,1 @@
-V2 pipeline produced no Core: \[unsupported construct: nested function 'inner2' captures enclosing binding\(s\): x\]
+V2 pipeline produced no Core: \[unsupported construct: nested function 'inner2' declares nonlocal binding\(s\): x; mutable captures are not yet supported\]

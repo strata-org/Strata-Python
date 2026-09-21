@@ -60,6 +60,10 @@ structure NestedFunctionTarget where
   pythonName : String
   definitionRange : SourceRange
   callee : Identifier
+  /-- Read-only value captures, in declaration order: each call site appends
+      these variables (by name, read at call time — Python's late binding) after
+      the arguments `matchArgs` produced for the user-declared parameters. -/
+  captureArgs : List Identifier := []
 
 /-- Mutable state threaded through translation: fresh name counter, source file path,
     and a stack of loop break/continue labels for translating `break`/`continue`. -/
@@ -78,6 +82,13 @@ structure TransState where
       matched by declaration identity; names are retained only for rejecting
       ambiguous pre-definition calls and unsupported function-value uses. -/
   nestedFunctionTargets : List (List NestedFunctionTarget) := []
+  /-- Names bound in the procedure currently being translated (inputs + locals),
+      innermost first. -/
+  scopeBindings : List (List String) := []
+  /-- Value-capture input names of the procedure currently being translated,
+      innermost first (parallel to `scopeBindings`). Consulted by
+      `requireCapturesInScope`, whose docstring states the forwarding rule. -/
+  captureInputNames : List (List String) := []
   /-- Procedures lifted while recursively translating function bodies. -/
   liftedProcedures : List Procedure := []
   deriving Inhabited
@@ -188,6 +199,36 @@ private def pushNestedFunctionTargets (targets : List NestedFunctionTarget) : Tr
 
 private def popNestedFunctionTargets : TransM Unit :=
   modify fun s => { s with nestedFunctionTargets := s.nestedFunctionTargets.tail! }
+
+private def pushScopeBindings (names captureNames : List String) : TransM Unit :=
+  modify fun s => { s with
+    scopeBindings := names :: s.scopeBindings
+    captureInputNames := captureNames :: s.captureInputNames }
+
+private def popScopeBindings : TransM Unit :=
+  modify fun s => { s with
+    scopeBindings := s.scopeBindings.tail!
+    captureInputNames := s.captureInputNames.tail! }
+
+/-- Reject a call that would forward a value capture to the wrong binding.
+    Forwarding is sound only when the caller OWNS the captured binding — it is
+    the target's immediate enclosing function, so the target sits in the current
+    (head) target frame — or when the caller itself received the captured name as
+    one of its OWN value-capture inputs and merely threads it on. Anywhere else,
+    the captured name in the caller's scope is a DIFFERENT binding (a sibling's or
+    descendant's same-named local), and forwarding it by name would bind the wrong
+    value, so the call rejects. -/
+private def requireCapturesInScope (target : NestedFunctionTarget) : TransM Unit := do
+  unless target.captureArgs.isEmpty do
+    let s ← get
+    let ownedHere := (s.nestedFunctionTargets.head?.getD []).any fun t =>
+      t.pythonName == target.pythonName && t.definitionRange == target.definitionRange
+    unless ownedHere do
+      let forwardable := (s.captureInputNames.head?).getD []
+      let missing := target.captureArgs.filter fun cid => !forwardable.contains cid.text
+      unless missing.isEmpty do
+        throw (.unsupportedConstruct
+          s!"nested function '{target.pythonName}' captures binding(s) not forwardable from this call site: {", ".intercalate (missing.map (·.text))}; the call is outside the defining function and does not itself capture them (a same-named local here would be a different binding), so transitive capture propagation is not yet supported")
 
 def pushLoopLabel (pfx : String) : TransM (Identifier × Identifier) := do
   let s ← get
@@ -406,15 +447,21 @@ partial def translateExpr (e : StrataPython.expr ResolvedAnn) : TransM StmtExprM
             let val ← translateExpr kwExpr
             match kwName.val with | some n => pure (some (n.val, val)) | none => pure none
         let nestedTarget ← nestedFunctionTarget? sig
-        let callee ← match nestedTarget with
-          | some target => pure target.callee
+        let (callee, captureArgs) ← match nestedTarget with
+          | some target => do
+            requireCapturesInScope target
+            pure (target.callee, target.captureArgs)
           | none =>
             if (← nestedFunctionTargetNamed? sig.laurelName.text).isSome then
               throw (.unsupportedConstruct
                 s!"nested function '{sig.laurelName.text}' is called before its declaration or cannot be resolved statically")
             else
-              pure sig.laurelName
-        mkExpr sr (.StaticCall callee (← sig.matchArgs (receiver ++ posArgs) kwargPairs translateExpr (mkKwargs := (do return some (← mkKwargDict sr kwargPairs)))))
+              pure (sig.laurelName, [])
+        let matchedArgs ← sig.matchArgs (receiver ++ posArgs) kwargPairs translateExpr (mkKwargs := (do return some (← mkKwargDict sr kwargPairs)))
+        -- Captured variables are read at the CALL, matching Python's late binding:
+        -- the nested function observes the enclosing binding's current value.
+        let captureVals ← captureArgs.mapM fun cid => mkExpr sr (.Var (.Local cid))
+        mkExpr sr (.StaticCall callee (matchedArgs ++ captureVals))
     | .dispatchNew cls _ => do
         tellDispatchArgEffects sr args.val kwargs.val
         -- Bind the New to a temp (as `.classNew` does): a bare `.New` value statement is
@@ -970,6 +1017,28 @@ private partial def definitionsUnderControlFlow
           definitionsUnderControlFlow caseBody.val.toList true
     | _ => []
 
+/-- Names declared `nonlocal` anywhere in a statement (recursing into nested
+    control-flow blocks, NOT into nested function definitions — their nonlocals
+    are checked when they are themselves lifted). -/
+private partial def collectNonlocalNames (stmt : StrataPython.stmt ResolvedAnn) : List String :=
+  match stmt with
+  | .Nonlocal _ names => names.val.toList.map (·.val)
+  | .If _ _ body orelse | .While _ _ body orelse =>
+    body.val.toList.flatMap collectNonlocalNames ++ orelse.val.toList.flatMap collectNonlocalNames
+  | .For _ _ _ body orelse _ | .AsyncFor _ _ _ body orelse _ =>
+    body.val.toList.flatMap collectNonlocalNames ++ orelse.val.toList.flatMap collectNonlocalNames
+  | .Try _ body handlers orelse finalbody | .TryStar _ body handlers orelse finalbody =>
+    body.val.toList.flatMap collectNonlocalNames ++
+      handlers.val.toList.flatMap (fun h => match h with
+        | .ExceptHandler _ _ _ hb => hb.val.toList.flatMap collectNonlocalNames) ++
+      orelse.val.toList.flatMap collectNonlocalNames ++
+      finalbody.val.toList.flatMap collectNonlocalNames
+  | .With _ _ body _ | .AsyncWith _ _ body _ => body.val.toList.flatMap collectNonlocalNames
+  | .Match _ _ cases =>
+    cases.val.toList.flatMap fun case => match case with
+      | .mk_match_case _ _ _ caseBody => caseBody.val.toList.flatMap collectNonlocalNames
+  | _ => []
+
 private partial def splitPreconditions (body : List (StrataPython.stmt ResolvedAnn))
     : List (StrataPython.stmt ResolvedAnn) × List (StrataPython.stmt ResolvedAnn) :=
   body.span fun s => match s with | .Assert _ _ _ => true | _ => false
@@ -993,22 +1062,52 @@ partial def translateFunction (sig : FuncSig) (body : Array (StrataPython.stmt R
   unless duplicateNames.isEmpty do
     throw (.unsupportedConstruct
       s!"redefinition of nested function(s) is not yet supported: {", ".intercalate duplicateNames}")
-  for (nestedSig, _, decorators, _) in nestedDefs do
+  -- Classify each nested definition's captures: read-only value captures of the
+  -- IMMEDIATE enclosing function lift as synthesized trailing parameters; every
+  -- other capture form rejects loudly, each with its own diagnostic below.
+  let mut nestedCaptureInputs : List (String × SourceRange × List (Identifier × PythonType)) := []
+  for (nestedSig, nestedBody, decorators, nestedSr) in nestedDefs do
     unless decorators.isEmpty do
       throw (.unsupportedConstruct
         s!"decorated nested function '{nestedSig.laurelName.text}' is not yet supported")
-    let captures := (sig :: enclosingSigs).flatMap fun enclosingSig =>
-      nestedCaptures enclosingSig nestedSig
-    let captures := captures.eraseDups
-    unless captures.isEmpty do
+    let nonlocalWrites := nestedBody.toList.flatMap collectNonlocalNames
+    unless nonlocalWrites.isEmpty do
       throw (.unsupportedConstruct
-        s!"nested function '{nestedSig.laurelName.text}' captures enclosing binding(s): {", ".intercalate captures}")
+        s!"nested function '{nestedSig.laurelName.text}' declares nonlocal binding(s): {", ".intercalate nonlocalWrites.eraseDups}; mutable captures are not yet supported")
+    let immediateCaptures := nestedCaptures sig nestedSig
+    -- `*args` + capture: `laurelDeclInputs` declares a vararg input, but
+    -- `FuncSig.matchArgs` emits no positional value for it, so appending the
+    -- capture arguments would hand the Core arity check one argument too few
+    -- (an internal error instead of a diagnostic). Reject the combination.
+    if nestedSig.varargName.isSome && !immediateCaptures.isEmpty then
+      throw (.unsupportedConstruct
+        s!"nested function '{nestedSig.laurelName.text}' combines *args with enclosing binding capture(s): {", ".intercalate immediateCaptures}; not yet supported")
+    let defaultReads := nestedSig.laurelDefaultConstReads.map (·.text)
+    let defaultCaptures := immediateCaptures.filter defaultReads.contains
+    unless defaultCaptures.isEmpty do
+      throw (.unsupportedConstruct
+        s!"nested function '{nestedSig.laurelName.text}' reads enclosing binding(s) in default argument(s): {", ".intercalate defaultCaptures}; Python evaluates defaults at definition time, which this lowering cannot preserve")
+    let ancestorCaptures := (enclosingSigs.flatMap fun enclosingSig =>
+      nestedCaptures enclosingSig nestedSig).eraseDups.filter fun name =>
+        !immediateCaptures.contains name
+    unless ancestorCaptures.isEmpty do
+      throw (.unsupportedConstruct
+        s!"nested function '{nestedSig.laurelName.text}' captures enclosing binding(s): {", ".intercalate ancestorCaptures}")
+    -- Type each captured name from the immediate enclosing binding.
+    let enclosingBindings := sig.laurelDeclInputs ++ sig.laurelLocals
+    let capturePairs := immediateCaptures.filterMap fun name =>
+      (enclosingBindings.find? fun (bid, _) => bid.text == name).map fun (bid, ty) => (bid, ty)
+    nestedCaptureInputs := nestedCaptureInputs ++ [(nestedSig.laurelName.text, nestedSr, capturePairs)]
   let nestedTargets := nestedDefs.map fun (nestedSig, _, _, nestedSr) =>
     let callee : Identifier := {
       text := s!"{sig.laurelName.text}$nested${nestedSr.start.byteIdx}${nestedSig.laurelName.text}"
       uniqueId := none }
-    ({ pythonName := nestedSig.laurelName.text, definitionRange := nestedSr, callee } : NestedFunctionTarget)
+    let captureArgs := (nestedCaptureInputs.find? fun (name, defSr, _) =>
+      name == nestedSig.laurelName.text && defSr == nestedSr).map (·.2.2.map (·.1)) |>.getD []
+    ({ pythonName := nestedSig.laurelName.text, definitionRange := nestedSr, callee, captureArgs } : NestedFunctionTarget)
   pushNestedFunctionTargets nestedTargets
+  pushScopeBindings ((sig.laurelDeclInputs.map (·.1.text)) ++ (sig.laurelLocals.map (·.1.text)))
+    sig.captureInputNames
   let aliases := (← get).typeAliases
   let inputs := buildProcInputs aliases sig
   let outputs := buildProcOutputs aliases sig
@@ -1035,11 +1134,14 @@ partial def translateFunction (sig : FuncSig) (body : Array (StrataPython.stmt R
     -- type lives on the output param.
     body := .Opaque [] (some bodyBlock) (ModifiesGroup.wildcard (sourceRangeToMd (← get).filePath sr))
   }
+  popScopeBindings
   for (nestedSig, nestedBody, _, nestedSr) in nestedDefs do
     let some target := nestedTargets.find? (fun target =>
         target.pythonName == nestedSig.laurelName.text && target.definitionRange == nestedSr)
       | throw (.internalError s!"missing lifted target for nested function '{nestedSig.laurelName.text}'")
-    let liftedSig := { nestedSig with
+    let capturePairs := (nestedCaptureInputs.find? fun (name, defSr, _) =>
+      name == nestedSig.laurelName.text && defSr == nestedSr).map (·.2.2) |>.getD []
+    let liftedSig := { nestedSig.withValueCaptureInputs capturePairs with
       name := PythonIdentifier.builtin target.callee.text
       className := none }
     let nestedProc ← translateFunction liftedSig nestedBody nestedSr (sig :: enclosingSigs)

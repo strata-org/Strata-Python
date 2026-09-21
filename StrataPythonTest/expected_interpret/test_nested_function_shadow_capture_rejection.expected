@@ -1,0 +1,1 @@
+V2 pipeline produced no Core: \[unsupported construct: nested function 'reads_x' captures binding\(s\) not forwardable from this call site: x; the call is outside the defining function and does not itself capture them \(a same-named local here would be a different binding\), so transitive capture propagation is not yet supported\]

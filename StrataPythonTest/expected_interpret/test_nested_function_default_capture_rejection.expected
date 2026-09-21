@@ -1,0 +1,1 @@
+V2 pipeline produced no Core: \[unsupported construct: nested function 'clamp' reads enclosing binding\(s\) in default argument\(s\): limit; Python evaluates defaults at definition time, which this lowering cannot preserve\]

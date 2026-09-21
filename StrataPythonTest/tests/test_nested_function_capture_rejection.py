@@ -1,13 +1,12 @@
-def outer(x: int) -> int:
-    local = 1
+def outer() -> int:
+    count = 0
 
-    def captures_param() -> int:
-        return x
+    def bump() -> None:
+        nonlocal count
+        count = count + 1
 
-    def captures_local() -> int:
-        return local
-
-    return captures_param() + captures_local()
+    bump()
+    return count
 
 
-outer(3)
+outer()

@@ -1,0 +1,2 @@
+DETAIL: unsupported construct: nested function 'inner' combines *args with enclosing binding capture(s): bonus; not yet supported
+RESULT: Known limitation

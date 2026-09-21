@@ -1,1 +1,1 @@
-V2 pipeline produced no Core: \[unsupported construct: nested function 'get' captures enclosing binding\(s\): x\]
+V2 pipeline produced no Core: \[unsupported construct: nested function 'Any_set_to_Any' declares nonlocal binding\(s\): x; mutable captures are not yet supported\]

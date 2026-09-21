@@ -1,2 +1,2 @@
-DETAIL: unsupported construct: nested function 'captures_param' captures enclosing binding(s): x
+DETAIL: unsupported construct: nested function 'bump' declares nonlocal binding(s): count; mutable captures are not yet supported
 RESULT: Known limitation

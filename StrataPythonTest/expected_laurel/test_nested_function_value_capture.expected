@@ -1,0 +1,11 @@
+test_nested_function_value_capture.py(5, 15): ✅ pass - Check PAdd exception
+test_nested_function_value_capture.py(5, 8): ✅ pass - Check PAdd exception
+test_nested_function_value_capture.py(24, 8): ✅ pass - Check PAdd exception
+test_nested_function_value_capture.py(31, 11): ✅ pass - Check PGe exception
+test_nested_function_value_capture.py(33, 20): ✅ pass - Check PAdd exception
+test_nested_function_value_capture.py(38, 0): ❓ unknown - assert(…)
+test_nested_function_value_capture.py(39, 0): ❓ unknown - assert(…)
+test_nested_function_value_capture.py(40, 0): ❓ unknown - assert(…)
+test_nested_function_value_capture.py(41, 0): ❓ unknown - assert(…)
+DETAIL: 5 passed, 0 failed, 4 inconclusive
+RESULT: Inconclusive

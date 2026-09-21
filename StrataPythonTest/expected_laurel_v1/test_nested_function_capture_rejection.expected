@@ -1,7 +1,7 @@
 DETAIL: Unsupported construct: Statement type not yet supported
 AST: StrataPython.stmt.FunctionDef
-  { start := { byteIdx := 45 }, stop := { byteIdx := 90 } }
-  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "captures_param" }
+  { start := { byteIdx := 39 }, stop := { byteIdx := 107 } }
+  { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "bump" }
   (StrataPython.arguments.mk_arguments
     { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }
     { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
@@ -12,19 +12,37 @@ AST: StrataPython.stmt.FunctionDef
     { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }
     { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] })
   { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
-    val := #[StrataPython.stmt.Return
-               { start := { byteIdx := 82 }, stop := { byteIdx := 90 } }
+    val := #[StrataPython.stmt.Nonlocal
+               { start := { byteIdx := 67 }, stop := { byteIdx := 81 } }
                { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
-                 val := some (StrataPython.expr.Name
-                          { start := { byteIdx := 89 }, stop := { byteIdx := 90 } }
-                          { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "x" }
-                          (StrataPython.expr_context.Load { start := { byteIdx := 0 }, stop := { byteIdx := 0 } })) }] }
+                 val := #[{ ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "count" }] },
+             StrataPython.stmt.Assign
+               { start := { byteIdx := 90 }, stop := { byteIdx := 107 } }
+               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
+                 val := #[StrataPython.expr.Name
+                            { start := { byteIdx := 90 }, stop := { byteIdx := 95 } }
+                            { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "count" }
+                            (StrataPython.expr_context.Store { start := { byteIdx := 0 }, stop := { byteIdx := 0 } })] }
+               (StrataPython.expr.BinOp
+                 { start := { byteIdx := 98 }, stop := { byteIdx := 107 } }
+                 (StrataPython.expr.Name
+                   { start := { byteIdx := 98 }, stop := { byteIdx := 103 } }
+                   { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "count" }
+                   (StrataPython.expr_context.Load { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }))
+                 (StrataPython.operator.Add { start := { byteIdx := 0 }, stop := { byteIdx := 0 } })
+                 (StrataPython.expr.Constant
+                   { start := { byteIdx := 106 }, stop := { byteIdx := 107 } }
+                   (StrataPython.constant.ConPos
+                     { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }
+                     { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := 1 })
+                   { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }))
+               { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }] }
   { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
   { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } },
-    val := some (StrataPython.expr.Name
-             { start := { byteIdx := 69 }, stop := { byteIdx := 72 } }
-             { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := "int" }
-             (StrataPython.expr_context.Load { start := { byteIdx := 0 }, stop := { byteIdx := 0 } })) }
+    val := some (StrataPython.expr.Constant
+             { start := { byteIdx := 53 }, stop := { byteIdx := 57 } }
+             (StrataPython.constant.ConNone { start := { byteIdx := 0 }, stop := { byteIdx := 0 } })
+             { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }) }
   { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := none }
   { ann := { start := { byteIdx := 0 }, stop := { byteIdx := 0 } }, val := #[] }
 RESULT: Known limitation

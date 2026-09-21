@@ -1,1 +1,1 @@
-V2 pipeline produced no Core: \[unsupported construct: nested function 'add' captures enclosing binding\(s\): n\]
+V2 pipeline produced no Core: \[unsupported construct: nested function 'add' is used as a value; only direct static calls are supported\]

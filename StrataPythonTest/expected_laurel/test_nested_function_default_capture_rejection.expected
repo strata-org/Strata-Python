@@ -1,0 +1,2 @@
+DETAIL: unsupported construct: nested function 'clamp' reads enclosing binding(s) in default argument(s): limit; Python evaluates defaults at definition time, which this lowering cannot preserve
+RESULT: Known limitation

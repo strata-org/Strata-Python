@@ -162,6 +162,13 @@ structure FuncSig where
       Resolution reuses a visible signature only when this identifies the exact
       declaration, never merely because an enclosing callable has the same name. -/
   definitionRange : Option SourceRange := none
+  /-- Synthesized trailing inputs for read-only value captures on a LIFTED nested
+      function. Each captured enclosing binding becomes a parameter here (not in
+      `params`, so `matchArgs` never matches it positionally); call sites append
+      the captured variables after the matched arguments. Set only by
+      `withValueCaptureInputs` during lifting — always empty on user-declared
+      signatures. -/
+  captureInputs : List (PythonIdentifier × PythonType) := []
   /-- Overload index for disambiguated naming. `none` for non-overloaded functions. -/
   overloadIndex : Option Nat := none
   /-- The `**kwargs` parameter name, if present. A declared input (Any-typed) but not
@@ -949,9 +956,12 @@ def FuncSig.laurelDeclInputs (sig : FuncSig) : List (Identifier × PythonType) :
   let withKwarg := match sig.kwargName with
     | some kw => base ++ [({ text := kw.val, uniqueId := none }, anyTy)]
     | none => base
-  match sig.varargName with
-  | some va => withKwarg ++ [({ text := va.val, uniqueId := none }, anyTy)]
-  | none => withKwarg
+  let withVararg := match sig.varargName with
+    | some va => withKwarg ++ [({ text := va.val, uniqueId := none }, anyTy)]
+    | none => withKwarg
+  -- Value-capture inputs come LAST so call sites can always append the captured
+  -- variables after whatever `matchArgs` produced for the user-declared slots.
+  withVararg ++ sig.captureInputs.map fun (id, ty) => ({ text := id.val, uniqueId := none }, ty)
 
 /-- Zip-fold arg matching. Each param slot is filled in order:
     1. If a positional arg remains → consume it
@@ -998,6 +1008,26 @@ def FuncSig.matchArgs [Monad m] [Inhabited (m α)] (sig : FuncSig) (posArgs : Li
 /-- Module constants referenced by default expressions, as Laurel identifiers. -/
 def FuncSig.laurelDefaultConstReads (sig : FuncSig) : List Identifier :=
   sig.defaultConstReads.map fun id => { text := id.val, uniqueId := none }
+
+/-- Extend a lifted nested-function signature with read-only value-capture inputs.
+    Each captured enclosing binding becomes a trailing input (see `captureInputs`)
+    and stops being a body-local: the lifted procedure receives the captured value
+    from its call sites instead of declaring an uninitialized local. The body's
+    reads of the name keep working because the standard parameter copy declares
+    the local from the input. -/
+def FuncSig.withValueCaptureInputs (sig : FuncSig) (captures : List (Identifier × PythonType)) : FuncSig :=
+  if captures.isEmpty then sig else
+    let captureNames := captures.map (·.1.text)
+    { sig with
+      captureInputs := sig.captureInputs ++ captures.map fun (id, ty) => (PythonIdentifier.builtin id.text, ty)
+      locals := sig.locals.filter fun (id, _) => !captureNames.contains id.val }
+
+/-- Names this (lifted) signature forwards as trailing value-capture inputs;
+    empty on user-declared signatures. Lets a call site decide whether a caller
+    can soundly forward a capture: it either owns the binding or received the
+    name here and merely threads it on. -/
+def FuncSig.captureInputNames (sig : FuncSig) : List String :=
+  sig.captureInputs.map (·.1.val)
 
 /-- Locals owned by this function before module/global compatibility entries. -/
 def FuncSig.laurelOwnLocals (sig : FuncSig) : List (Identifier × PythonType) :=
