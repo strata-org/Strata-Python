@@ -2669,7 +2669,7 @@ def unpackPyArguments (ctx : TranslationContext) (args: arguments SourceRange)
             match defaultType with
             | .some "None" => --Only None is allowed to add to type list
               if tys != [PyLauType.Any] then
-                tys:= (PyLauType.None::tys).dedup
+                tys:= (PyLauType.None::tys).uniq
             | .some defaultType =>
               if isOfAnyType defaultType && tys != [PyLauType.Any] && defaultType ∉ tys then
                 throw (.unsupportedConstruct "Default value type is invalid" (toString (repr arg)))

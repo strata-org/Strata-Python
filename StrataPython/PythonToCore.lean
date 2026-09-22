@@ -326,7 +326,7 @@ def deduplicateTypeAnnotations (l : List (String × Option String)) : List (Stri
       | .none => m := (name, ty) :: m
     | .none => ()
   let names := l.map (λ p => p.fst)
-  let unique_names := names.dedup
+  let unique_names := names.uniq
   unique_names.map (λ n =>
     match m.find? n with
     | .some ty => (n, ty)
