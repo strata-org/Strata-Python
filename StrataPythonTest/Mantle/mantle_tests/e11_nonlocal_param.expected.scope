@@ -1,0 +1,11 @@
+module
+  f: local (assigned)
+  function f
+    params: x
+    x: cell (parameter)
+    g: local (assigned)
+    function f.<locals>.g
+      params: x
+      x: free (parameter, nonlocal)
+diagnostics:
+  syntax error at 3:8-3:18: name 'x' is parameter and nonlocal

@@ -1,0 +1,8 @@
+module top
+  C: local (assigned)
+  class C
+    k: local (assigned)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (assigned, referenced)
+    ys: local (assigned)
+qualnames: C

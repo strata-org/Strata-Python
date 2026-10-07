@@ -1,0 +1,14 @@
+module
+  f: local (assigned)
+  function f
+    params: cmd
+    cmd: local (parameter, referenced)
+    x: local (assigned, referenced)
+    rest: local (assigned, referenced)
+    v: local (assigned, referenced)
+    others: local (assigned, referenced)
+    Point: global implicit (referenced)
+    px: local (assigned, referenced)
+    whole: local (assigned, referenced)
+diagnostics:
+  unsupported at 3:4-11:23: 'match' is not supported

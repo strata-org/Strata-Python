@@ -1,0 +1,8 @@
+module top
+  f: local (assigned)
+  myservice: local (imported)
+  function f
+    client: local (assigned, referenced)
+    myservice: global implicit (referenced)
+    result: local (assigned)
+qualnames: f

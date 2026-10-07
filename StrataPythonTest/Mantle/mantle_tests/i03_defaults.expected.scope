@@ -1,0 +1,17 @@
+module
+  c: local (assigned, referenced)
+  kwd: local (assigned, referenced)
+  function c
+    params: a, b, n, s, f, t
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    n: local (parameter, referenced)
+    s: local (parameter, referenced)
+    f: local (parameter, referenced)
+    t: local (parameter, referenced)
+    print: global implicit (referenced)
+  function kwd
+    params: a, *, k
+    a: local (parameter, referenced)
+    k: local (parameter, referenced)
+    print: global implicit (referenced)

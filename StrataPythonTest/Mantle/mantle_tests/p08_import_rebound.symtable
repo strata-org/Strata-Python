@@ -1,0 +1,6 @@
+module top
+  f: local (assigned)
+  os: local (assigned, imported)
+  function f
+    os: global implicit (referenced)
+qualnames: f

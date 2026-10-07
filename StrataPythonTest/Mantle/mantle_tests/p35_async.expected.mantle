@@ -1,0 +1,36 @@
+-- unsupported: async def is not supported at 2:0-5:25
+module p35_async {
+  func @p35_async.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "p35_async"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "p35_async"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Code = const @p35_async.f
+      %7 : py.Value = py.mkClosure %6
+      %8 : base.String = const str "p35_async"
+      %9 : base.String = const str "f"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : py.Value = py.noneLit
+      %13 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %12
+      ret %13
+    propagate.0(%14 : py.Value):
+      %15 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %14
+      ret %15
+  }
+  func @p35_async.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "async def"
+      %3 : py.Value = py.strLit %2
+      %4 : py.Value = py.unsupported %3
+      %5 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %4
+      ret %5
+    propagate.0(%6 : py.Value):
+      %7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %6
+      ret %7
+  }
+}
+

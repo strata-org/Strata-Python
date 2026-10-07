@@ -1,0 +1,7 @@
+module top
+  age: local (assigned, referenced, annotated)
+  detail: local (assigned)
+  greeting: local (assigned)
+  name: local (assigned, referenced, annotated)
+  plain: local (assigned)
+qualnames: 

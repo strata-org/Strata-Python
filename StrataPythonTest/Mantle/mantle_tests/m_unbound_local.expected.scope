@@ -1,0 +1,10 @@
+module
+  y: local (assigned)
+  with_global: local (assigned)
+  without_global: local (assigned)
+  function with_global
+    z: local (assigned, referenced)
+    y: local (assigned, referenced)
+  function without_global
+    w: local (assigned, referenced)
+    v: local (assigned, referenced)

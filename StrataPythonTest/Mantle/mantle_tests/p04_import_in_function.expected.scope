@@ -1,0 +1,14 @@
+module
+  f: local (assigned)
+  g: local (assigned)
+  function f
+    import math: module math
+    import s: member sep of os
+    math: local (imported, referenced)
+    s: local (imported, referenced)
+  function g
+    import json: module json
+    json: cell (imported)
+    h: local (assigned, referenced)
+    function g.<locals>.h
+      json: free (referenced)

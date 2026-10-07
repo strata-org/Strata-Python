@@ -1,0 +1,12 @@
+module
+  risky: local (assigned, referenced)
+  result: local (assigned)
+  ValueError: global implicit (referenced)
+  e: local (assigned, referenced)
+  msg: local (assigned)
+  str: global implicit (referenced)
+  value: local (assigned)
+  KeyError: global implicit (referenced)
+  Exception: global implicit (referenced)
+  function risky
+    ValueError: global implicit (referenced)

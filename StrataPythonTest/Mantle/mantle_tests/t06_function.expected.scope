@@ -1,0 +1,16 @@
+module
+  add: local (assigned, referenced)
+  greet: local (assigned, referenced)
+  result: local (assigned)
+  msg: local (assigned)
+  msg2: local (assigned)
+  do_nothing: local (assigned, referenced)
+  function add
+    params: a, b
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+  function greet
+    params: name, greeting
+    name: local (parameter, referenced)
+    greeting: local (parameter, referenced)
+  function do_nothing

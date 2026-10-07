@@ -1,0 +1,71 @@
+module tc04_comparisons {
+  func @tc04_comparisons.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "tc04_comparisons"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "tc04_comparisons"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Code = const @tc04_comparisons.f
+      %7 : py.Value = py.mkClosure %6
+      %8 : base.String = const str "tc04_comparisons"
+      %9 : base.String = const str "f"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : py.Value = py.noneLit
+      %13 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %12
+      ret %13
+    propagate.0(%14 : py.Value):
+      %15 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %14
+      ret %15
+  }
+  func @tc04_comparisons.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "a"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : base.String = const str "b"
+      %6 : py.Value = py.undef %5
+      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
+      %8 : base.String = const str "c"
+      %9 : py.Value = py.undef %8
+      %10 : base.Ref(py.Value) = base.refNew[py.Value] %9
+      %11 : py.Value = py.tupleLen %0
+      %12 : base.String = const str "kwargs"
+      %13 : py.Value = py.undef %12
+      %14 : py.Value = py.dictFirstKey %1 %13
+      %15 : base.String = const str "TypeError"
+      %16 : base.String = const str "f() got an unexpected keyword argument {}"
+      %17 : base.Unit = py.requireUndefined %14 %15 %16 ^propagate.0()
+      %18 : base.Int = const int 0
+      %19 : base.String = const str "TypeError"
+      %20 : base.String = const str "f() takes 0 positional arguments but {} {was} given"
+      %21 : base.Unit = py.requireAtMost %11 %18 %19 %20 ^propagate.0()
+      %22 : base.Int = const int 1
+      %23 : py.Value = py.intLit %22
+      %24 : base.Int = const int 2
+      %25 : py.Value = py.intLit %24
+      %26 : py.Value = py.lt %23 %25 ^propagate.0()
+      %27 : base.Unit = base.refSet[py.Value] %4 %26
+      %28 : base.String = const str "x"
+      %29 : py.Value = py.strLit %28
+      %30 : base.String = const str "y"
+      %31 : py.Value = py.strLit %30
+      %32 : py.Value = py.eq %29 %31 ^propagate.0()
+      %33 : base.Unit = base.refSet[py.Value] %7 %32
+      %34 : base.Float64 = const float "3.0"
+      %35 : py.Value = py.floatLit %34
+      %36 : base.Float64 = const float "1.0"
+      %37 : py.Value = py.floatLit %36
+      %38 : py.Value = py.gtE %35 %37 ^propagate.0()
+      %39 : base.Unit = base.refSet[py.Value] %10 %38
+      %40 : py.Value = py.noneLit
+      %41 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %40
+      ret %41
+    propagate.0(%42 : py.Value):
+      %43 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %42
+      ret %43
+  }
+}
+

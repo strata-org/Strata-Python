@@ -94,6 +94,15 @@ def instantiateList (args : Array Raw) : List Raw → List Raw
 end
 
 
+/-! ### The variables in scope -/
+
+/-- The variables `0, …, n - 1`, in order: the arguments that apply a type constructor of
+arity `n` to its own parameters. -/
+@[expose]
+def vars : Nat → Array Raw
+  | 0 => #[]
+  | n + 1 => (vars n).push (.var n)
+
 /-! ### Folding -/
 
 universe u

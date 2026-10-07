@@ -1,0 +1,12 @@
+module
+  C: local (assigned)
+  class C
+    xs: local (assigned, referenced)
+    k: local (assigned)
+    ys: local (assigned)
+    x: local (assigned, referenced, comp_iter)
+    inlined comprehension C.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+      k: global implicit (referenced)

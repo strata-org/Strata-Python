@@ -1,0 +1,8 @@
+module
+  f: local (assigned)
+  function f
+    params: a, b, a
+    a: local (parameter)
+    b: local (parameter)
+diagnostics:
+  syntax error at 1:12-1:13: duplicate argument 'a' in function definition

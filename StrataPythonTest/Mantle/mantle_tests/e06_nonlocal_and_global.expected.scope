@@ -1,0 +1,10 @@
+module
+  f: local (assigned)
+  x: global explicit (declared_global)
+  function f
+    x: local (assigned)
+    g: local (assigned)
+    function f.<locals>.g
+      x: global explicit (declared_global, nonlocal)
+diagnostics:
+  syntax error at 5:8-5:16: name 'x' is nonlocal and global

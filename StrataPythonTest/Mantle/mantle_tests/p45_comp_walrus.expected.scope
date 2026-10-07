@@ -1,0 +1,56 @@
+module
+  f: local (assigned)
+  g: local (assigned)
+  h: local (assigned)
+  evens: local (assigned)
+  range: global implicit (referenced)
+  seen: global explicit (declared_global)
+  n: local (assigned, referenced, comp_iter)
+  function f
+    params: xs
+    xs: local (parameter, referenced)
+    a: local (assigned, referenced)
+    last: local (assigned, referenced)
+    x: local (assigned, referenced, comp_iter)
+    inlined comprehension f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+      last: free (assigned, nonlocal)
+  function g
+    params: rows
+    rows: local (parameter, referenced)
+    a: local (assigned, referenced)
+    cell: local (assigned, referenced)
+    row: local (assigned, referenced, comp_iter)
+    c: local (assigned, referenced, comp_iter)
+    inlined comprehension g.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      row: local (assigned, referenced, comp_iter)
+      c: local (assigned, referenced, comp_iter)
+      cell: free (assigned, nonlocal)
+      inlined comprehension g.<locals>.<listcomp>.<listcomp>
+        params: .0
+        .0: local (parameter)
+        c: local (assigned, referenced, comp_iter)
+        cell: free (assigned, nonlocal)
+  function h
+    params: xs
+    xs: cell (parameter)
+    total: cell (assigned)
+    add: local (assigned, referenced)
+    function h.<locals>.add
+      total: free (assigned, nonlocal)
+      xs: free (referenced)
+      x: local (assigned, referenced, comp_iter)
+      inlined comprehension h.<locals>.add.<locals>.<listcomp>
+        params: .0
+        .0: local (parameter)
+        x: local (assigned, referenced, comp_iter)
+        total: free (assigned, referenced, nonlocal)
+  inlined comprehension <listcomp>
+    params: .0
+    .0: local (parameter)
+    n: local (assigned, referenced, comp_iter)
+    seen: global explicit (assigned, declared_global)

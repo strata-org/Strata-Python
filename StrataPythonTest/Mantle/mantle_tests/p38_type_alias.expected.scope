@@ -1,0 +1,9 @@
+module
+  Alias: local (assigned)
+  f: local (assigned)
+  function f
+    params: x
+    x: local (parameter, referenced)
+diagnostics:
+  unsupported at 2:0-2:16: 'type' statements are not supported
+  unsupported at 5:0-6:12: type parameters are not supported

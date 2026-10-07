@@ -1,0 +1,15 @@
+module top
+  Point: local (assigned, referenced)
+  d: local (assigned)
+  p: local (assigned, referenced)
+  class Point
+    __init__: local (assigned)
+    dimensions: local (assigned, annotated)
+    distance: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      x: local (parameter, referenced)
+      y: local (parameter, referenced)
+    function distance
+      self: local (parameter, referenced)
+qualnames: Point, Point.__init__, Point.distance

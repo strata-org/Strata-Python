@@ -1,0 +1,10 @@
+module
+  risky: local (assigned, referenced)
+  x: local (assigned)
+  a: local (assigned)
+  b: local (assigned)
+  c: local (assigned)
+  ValueError: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  function risky
+    ValueError: global implicit (referenced)

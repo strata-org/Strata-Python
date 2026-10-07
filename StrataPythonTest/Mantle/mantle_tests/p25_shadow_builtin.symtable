@@ -1,0 +1,11 @@
+module top
+  f: local (assigned)
+  len: local (assigned)
+  function len
+    x: local (parameter)
+  function f
+    len: global implicit (referenced)
+    list: local (assigned, referenced)
+    max: global implicit (referenced)
+    xs: local (parameter, referenced)
+qualnames: f, len

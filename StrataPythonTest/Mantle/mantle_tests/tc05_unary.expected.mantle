@@ -1,0 +1,65 @@
+module tc05_unary {
+  func @tc05_unary.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "tc05_unary"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "tc05_unary"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Code = const @tc05_unary.f
+      %7 : py.Value = py.mkClosure %6
+      %8 : base.String = const str "tc05_unary"
+      %9 : base.String = const str "f"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : py.Value = py.noneLit
+      %13 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %12
+      ret %13
+    propagate.0(%14 : py.Value):
+      %15 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %14
+      ret %15
+  }
+  func @tc05_unary.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "a"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : base.String = const str "b"
+      %6 : py.Value = py.undef %5
+      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
+      %8 : base.String = const str "c"
+      %9 : py.Value = py.undef %8
+      %10 : base.Ref(py.Value) = base.refNew[py.Value] %9
+      %11 : py.Value = py.tupleLen %0
+      %12 : base.String = const str "kwargs"
+      %13 : py.Value = py.undef %12
+      %14 : py.Value = py.dictFirstKey %1 %13
+      %15 : base.String = const str "TypeError"
+      %16 : base.String = const str "f() got an unexpected keyword argument {}"
+      %17 : base.Unit = py.requireUndefined %14 %15 %16 ^propagate.0()
+      %18 : base.Int = const int 0
+      %19 : base.String = const str "TypeError"
+      %20 : base.String = const str "f() takes 0 positional arguments but {} {was} given"
+      %21 : base.Unit = py.requireAtMost %11 %18 %19 %20 ^propagate.0()
+      %22 : base.Bool = const bool (true)
+      %23 : py.Value = py.boolLit %22
+      %24 : py.Value = py.not %23 ^propagate.0()
+      %25 : base.Unit = base.refSet[py.Value] %4 %24
+      %26 : base.Int = const int 42
+      %27 : py.Value = py.intLit %26
+      %28 : py.Value = py.uSub %27 ^propagate.0()
+      %29 : base.Unit = base.refSet[py.Value] %7 %28
+      %30 : base.Float64 = const float "3.140000000000000124344978758017532527446746826171875"
+      %31 : py.Value = py.floatLit %30
+      %32 : py.Value = py.uSub %31 ^propagate.0()
+      %33 : base.Unit = base.refSet[py.Value] %10 %32
+      %34 : py.Value = py.noneLit
+      %35 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %34
+      ret %35
+    propagate.0(%36 : py.Value):
+      %37 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %36
+      ret %37
+  }
+}
+

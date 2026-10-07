@@ -1,0 +1,10 @@
+module top
+  ET: local (imported)
+  M: local (imported)
+  j: local (imported)
+  local_import: local (assigned)
+  os: local (imported)
+  pi: local (imported)
+  function local_import
+    sys: local (imported, referenced)
+qualnames: local_import

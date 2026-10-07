@@ -1,0 +1,1 @@
+error: assignment expression cannot rebind comprehension iteration variable 'row' (line 2)

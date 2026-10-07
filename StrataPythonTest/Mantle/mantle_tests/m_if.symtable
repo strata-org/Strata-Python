@@ -1,0 +1,9 @@
+module top
+  classify: local (assigned)
+  sign: local (assigned)
+  function classify
+    r: local (assigned, referenced)
+    x: local (parameter, referenced)
+  function sign
+    x: local (parameter, referenced)
+qualnames: classify, sign

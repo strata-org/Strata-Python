@@ -32,7 +32,7 @@ import StrataDDM.Util.String
 
 /-! # Python CLI command definitions
 
-Holds the 8 Python-related `Command` definitions plus their helpers.
+Holds the Python-related `Command` definitions plus their helpers.
 -/
 
 public section
@@ -635,6 +635,19 @@ def pyInterpretCommand : _root_.Command where
     | .error diag =>
       IO.eprintln s!"Error: {diag}"
       IO.Process.exit ExitCode.failuresFound
+
+/-! ### Python feature usage -/
+
+def pyFeaturesCommand : _root_.Command where
+  name := "features"
+  args := [ "file" ]
+  help := "Analyze a Python Ion program and print feature usage statistics."
+  callback := fun v _ => do
+    let stmts ← match ← StrataPython.readPythonStrata v[0] |>.toBaseIO with
+      | .ok s => pure s
+      | .error msg => exitFailure msg
+    let result := StrataPython.FeatureUsage.analyzeFeatures stmts
+    IO.print (StrataPython.FeatureUsage.formatReport result)
 
 end StrataPython.Cli
 

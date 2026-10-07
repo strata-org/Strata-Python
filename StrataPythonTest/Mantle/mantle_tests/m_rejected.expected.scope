@@ -1,0 +1,15 @@
+module
+  sibling: local (imported)
+  outer: local (assigned)
+  bad_default: local (assigned)
+  y: local (assigned, referenced)
+  i: local (assigned)
+  function outer
+    inner: local (assigned, referenced)
+    function outer.<locals>.inner
+  function bad_default
+    params: x
+    x: local (parameter, referenced)
+diagnostics:
+  unsupported at 2:0-2:21: relative imports are not supported
+  unsupported at 3:15-3:16: 'import *' is not supported

@@ -1,0 +1,13 @@
+module
+  validate: local (assigned)
+  check_bounds: local (assigned)
+  function validate
+    params: x
+    x: local (parameter, referenced)
+    isinstance: global implicit (referenced)
+    int: global implicit (referenced)
+    result: local (assigned, referenced, annotated)
+  function check_bounds
+    params: lo, hi
+    lo: local (parameter, referenced)
+    hi: local (parameter, referenced)

@@ -1,0 +1,13 @@
+module top
+  f: local (assigned)
+  function f
+    a: local (assigned, referenced)
+    b: local (assigned, referenced)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+    y: cell (parameter)
+    function genexpr
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+      y: free (referenced)
+qualnames: f, f.<locals>.<genexpr>

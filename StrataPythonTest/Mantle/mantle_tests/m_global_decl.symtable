@@ -1,0 +1,9 @@
+module top
+  counter: global explicit (declared_global)
+  get_counter: local (assigned)
+  set_counter: local (assigned)
+  function set_counter
+    counter: global explicit (assigned, declared_global)
+  function get_counter
+    counter: global implicit (referenced)
+qualnames: get_counter, set_counter

@@ -1,0 +1,6 @@
+module top
+  data: local (assigned, referenced)
+  filtered: local (assigned)
+  x: local (assigned, referenced, comp_iter)
+  y: global explicit (declared_global)
+qualnames: 

@@ -1,0 +1,11 @@
+module
+  C: local (assigned)
+  class C
+    x: local (assigned)
+    m: local (assigned)
+    function C.m
+      params: self
+      self: local (parameter)
+      x: free (nonlocal)
+diagnostics:
+  syntax error at 5:8-5:18: no binding for nonlocal 'x' found

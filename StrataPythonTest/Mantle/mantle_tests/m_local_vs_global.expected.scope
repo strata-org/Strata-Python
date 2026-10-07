@@ -1,0 +1,8 @@
+module
+  x: local (assigned)
+  reads_global: local (assigned)
+  shadows_global: local (assigned)
+  function reads_global
+    x: global implicit (referenced)
+  function shadows_global
+    x: local (assigned, referenced)

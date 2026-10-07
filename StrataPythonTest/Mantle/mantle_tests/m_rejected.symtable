@@ -1,0 +1,12 @@
+module top
+  bad_default: local (assigned)
+  i: local (assigned)
+  outer: local (assigned)
+  sibling: local (imported)
+  y: local (assigned, referenced)
+  function outer
+    inner: local (assigned, referenced)
+    function inner
+  function bad_default
+    x: local (parameter, referenced)
+qualnames: bad_default, outer, outer.<locals>.inner

@@ -1,0 +1,6 @@
+module
+  name: local (assigned, referenced, annotated)
+  age: local (assigned, referenced, annotated)
+  greeting: local (assigned)
+  detail: local (assigned)
+  plain: local (assigned)

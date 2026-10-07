@@ -1,0 +1,8 @@
+module
+  import myservice: module myservice
+  myservice: local (imported)
+  f: local (assigned)
+  function f
+    client: local (assigned, referenced)
+    myservice: global implicit (referenced)
+    result: local (assigned)

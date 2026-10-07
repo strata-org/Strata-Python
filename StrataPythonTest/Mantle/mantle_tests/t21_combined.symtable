@@ -1,0 +1,34 @@
+module top
+  Optional: local (imported)
+  ResourceManager: local (assigned, referenced)
+  data: local (assigned, referenced)
+  json: local (imported)
+  mgr: local (assigned, referenced)
+  process_items: local (assigned, referenced)
+  result: local (assigned)
+  total: local (assigned)
+  class ResourceManager
+    __init__: local (assigned)
+    add_resource: local (assigned)
+    get_resource: local (assigned)
+    function __init__
+      name: local (parameter, referenced)
+      self: local (parameter, referenced)
+    function add_resource
+      key: local (parameter, referenced)
+      self: local (parameter, referenced)
+      value: local (parameter, referenced)
+    function get_resource
+      key: local (parameter, referenced)
+      self: local (parameter, referenced)
+  function process_items
+    KeyError: global implicit (referenced)
+    count: local (assigned, referenced, annotated)
+    e: local (assigned)
+    item: local (assigned, referenced)
+    items: local (parameter, referenced)
+    key: local (assigned, referenced)
+    manager: local (parameter, referenced)
+    success: local (assigned, referenced)
+    value: local (assigned, referenced)
+qualnames: ResourceManager, ResourceManager.__init__, ResourceManager.add_resource, ResourceManager.get_resource, process_items

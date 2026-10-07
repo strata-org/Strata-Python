@@ -1,0 +1,6 @@
+module
+  n: local (assigned, referenced)
+  len: global implicit (referenced)
+  m: local (assigned, referenced)
+  min: global implicit (referenced)
+  print: local (assigned, referenced)

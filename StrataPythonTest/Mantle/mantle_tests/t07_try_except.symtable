@@ -1,0 +1,11 @@
+module top
+  TypeError: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  a: local (assigned)
+  b: local (assigned)
+  c: local (assigned)
+  risky: local (assigned, referenced)
+  x: local (assigned)
+  function risky
+    ValueError: global implicit (referenced)
+qualnames: risky

@@ -1,0 +1,19 @@
+module top
+  helper: global explicit (declared_global)
+  outer: local (assigned)
+  x: global explicit (declared_global)
+  function outer
+    g: local (assigned, referenced)
+    mid: local (assigned, referenced)
+    x: cell (assigned)
+    function mid
+      inner: local (assigned, referenced)
+      x: global explicit (declared_global)
+      function inner
+        x: global implicit (referenced)
+    function g
+      helper: global explicit (assigned, declared_global)
+      x: free
+      function helper
+        x: free (referenced)
+qualnames: helper, outer, outer.<locals>.g, outer.<locals>.mid, outer.<locals>.mid.<locals>.inner

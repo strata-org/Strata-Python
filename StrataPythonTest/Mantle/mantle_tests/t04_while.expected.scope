@@ -1,0 +1,5 @@
+module
+  i: local (assigned, referenced, annotated)
+  j: local (assigned, referenced, annotated)
+  k: local (assigned, referenced, annotated)
+  total: local (assigned, annotated)

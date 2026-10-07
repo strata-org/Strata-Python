@@ -1,0 +1,43 @@
+module
+  h: local (assigned, referenced)
+  g: local (assigned, referenced)
+  d: local (assigned, referenced)
+  k: local (assigned, referenced)
+  po: local (assigned, referenced)
+  z: local (assigned, referenced)
+  t: local (assigned, referenced)
+  function h
+    params: x
+    x: local (parameter, referenced)
+    print: global implicit (referenced)
+  function g
+    params: x, y
+    x: local (parameter, referenced)
+    y: local (parameter, referenced)
+    print: global implicit (referenced)
+  function d
+    params: a, b
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    print: global implicit (referenced)
+  function k
+    params: a, *, key
+    a: local (parameter, referenced)
+    key: local (parameter, referenced)
+    print: global implicit (referenced)
+  function po
+    params: a, /, b
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    print: global implicit (referenced)
+  function z
+    print: global implicit (referenced)
+  function t
+    params: label, fn, *a, **kw
+    label: local (parameter, referenced)
+    fn: local (parameter, referenced)
+    a: local (parameter, referenced)
+    kw: local (parameter, referenced)
+    TypeError: global implicit (referenced)
+    e: local (assigned, referenced)
+    print: global implicit (referenced)

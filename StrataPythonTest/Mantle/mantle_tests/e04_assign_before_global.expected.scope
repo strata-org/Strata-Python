@@ -1,0 +1,7 @@
+module
+  f: local (assigned)
+  x: global explicit (declared_global)
+  function f
+    x: global explicit (assigned, declared_global)
+diagnostics:
+  syntax error at 3:4-3:12: name 'x' is assigned to before global declaration

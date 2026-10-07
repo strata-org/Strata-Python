@@ -1,0 +1,12 @@
+module top
+  f: local (assigned)
+  g: local (assigned)
+  function f
+    math: local (imported, referenced)
+    s: local (imported, referenced)
+  function g
+    h: local (assigned, referenced)
+    json: cell (imported)
+    function h
+      json: free (referenced)
+qualnames: f, g, g.<locals>.h

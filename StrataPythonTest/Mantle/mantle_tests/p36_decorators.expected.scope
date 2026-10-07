@@ -1,0 +1,15 @@
+module
+  deco: local (assigned)
+  outer: local (assigned)
+  function deco
+    params: fn
+    fn: local (parameter, referenced)
+  function outer
+    params: base
+    base: local (parameter, referenced)
+    inner: local (assigned, referenced)
+    deco: global implicit (referenced)
+    K: local (assigned, referenced)
+    type: global implicit (referenced)
+    function outer.<locals>.inner
+    class outer.<locals>.K

@@ -1,0 +1,10 @@
+module
+  data: local (assigned, referenced)
+  filtered: local (assigned)
+  y: global explicit (declared_global)
+  x: local (assigned, referenced, comp_iter)
+  inlined comprehension <listcomp>
+    params: .0
+    .0: local (parameter)
+    x: local (assigned, referenced, comp_iter)
+    y: global explicit (assigned, referenced, declared_global)

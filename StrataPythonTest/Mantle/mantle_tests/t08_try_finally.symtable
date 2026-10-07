@@ -1,0 +1,7 @@
+module top
+  cleanup: local (assigned, referenced)
+  work: local (assigned, referenced)
+  x: local (assigned)
+  function work
+  function cleanup
+qualnames: cleanup, work

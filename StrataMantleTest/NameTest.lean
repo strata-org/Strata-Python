@@ -14,7 +14,7 @@ set_option autoImplicit false
 Checks that `Name.cmpStr` gives the same results under `decide` and in compiled code, on
 prefixes, digits and multi-byte code points. -/
 
-namespace StrataMantleTest.NameTest
+namespace Strata.Mantle.NameTest
 
 open Strata.Mantle
 
@@ -53,4 +53,4 @@ def cases : List (String × String) :=
 example : Std.TransOrd Name := inferInstance
 example : Std.LawfulEqOrd Name := inferInstance
 
-end StrataMantleTest.NameTest
+end Strata.Mantle.NameTest

@@ -1,0 +1,18 @@
+module top
+  MyCtx: local (assigned, referenced)
+  ctx: local (assigned)
+  risky: local (assigned, referenced)
+  x: local (assigned)
+  class MyCtx
+    __enter__: local (assigned)
+    __exit__: local (assigned)
+    function __enter__
+      self: local (parameter, referenced)
+    function __exit__
+      exc_tb: local (parameter)
+      exc_type: local (parameter)
+      exc_val: local (parameter)
+      self: local (parameter)
+  function risky
+    ValueError: global implicit (referenced)
+qualnames: MyCtx, MyCtx.__enter__, MyCtx.__exit__, risky

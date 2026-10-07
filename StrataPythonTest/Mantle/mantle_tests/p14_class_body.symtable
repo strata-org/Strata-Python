@@ -1,0 +1,30 @@
+module top
+  C: local (assigned)
+  g: local (assigned)
+  outer: local (assigned)
+  class C
+    a: local (assigned, referenced)
+    b: local (assigned)
+    c: local (assigned)
+    g: global implicit (referenced)
+    len: global implicit (referenced)
+    m: local (assigned)
+    n: local (assigned)
+    function m
+      a: global implicit (referenced)
+      b: global implicit (referenced)
+      self: local (parameter)
+    function n
+      self: local (parameter, referenced)
+  function outer
+    D: local (assigned, referenced)
+    v: cell (assigned)
+    class D
+      m: local (assigned)
+      v: free (referenced, free_class)
+      w: local (assigned)
+      function m
+        self: local (parameter)
+        v: free (referenced)
+        w: global implicit (referenced)
+qualnames: C, C.m, C.n, outer, outer.<locals>.D, outer.<locals>.D.m

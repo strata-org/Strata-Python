@@ -1,0 +1,12 @@
+module top
+  exprs: local (assigned)
+  function exprs
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    by: local (assigned)
+    c: local (parameter, referenced)
+    e: local (assigned)
+    s: local (assigned)
+    t: local (assigned)
+    u: local (assigned)
+qualnames: exprs

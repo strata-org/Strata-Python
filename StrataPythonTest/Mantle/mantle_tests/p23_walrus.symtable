@@ -1,0 +1,28 @@
+module top
+  f: local (assigned)
+  g: local (assigned)
+  h: local (assigned)
+  range: global implicit (referenced)
+  total: global explicit (declared_global)
+  y: local (assigned, referenced, comp_iter)
+  ys: local (assigned)
+  function f
+    any: global implicit (referenced)
+    hit: cell (assigned, referenced)
+    last: local (assigned, referenced)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+    function genexpr
+      .0: local (parameter)
+      hit: free (assigned, nonlocal)
+      x: local (assigned, referenced, comp_iter)
+  function g
+    deep: local (assigned, referenced)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+    y: local (assigned, referenced, comp_iter)
+  function h
+    len: global implicit (referenced)
+    n: local (assigned, referenced)
+    xs: local (parameter, referenced)
+qualnames: f, f.<locals>.<genexpr>, g, h

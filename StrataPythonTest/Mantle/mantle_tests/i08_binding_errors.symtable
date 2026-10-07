@@ -1,0 +1,38 @@
+module top
+  d: local (assigned, referenced)
+  g: local (assigned, referenced)
+  h: local (assigned, referenced)
+  k: local (assigned, referenced)
+  po: local (assigned, referenced)
+  t: local (assigned, referenced)
+  z: local (assigned, referenced)
+  function h
+    print: global implicit (referenced)
+    x: local (parameter, referenced)
+  function g
+    print: global implicit (referenced)
+    x: local (parameter, referenced)
+    y: local (parameter, referenced)
+  function d
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    print: global implicit (referenced)
+  function k
+    a: local (parameter, referenced)
+    key: local (parameter, referenced)
+    print: global implicit (referenced)
+  function po
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    print: global implicit (referenced)
+  function z
+    print: global implicit (referenced)
+  function t
+    TypeError: global implicit (referenced)
+    a: local (parameter, referenced)
+    e: local (assigned, referenced)
+    fn: local (parameter, referenced)
+    kw: local (parameter, referenced)
+    label: local (parameter, referenced)
+    print: global implicit (referenced)
+qualnames: d, g, h, k, po, t, z

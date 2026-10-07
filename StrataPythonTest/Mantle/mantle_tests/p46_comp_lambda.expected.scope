@@ -1,0 +1,61 @@
+module
+  f: local (assigned)
+  g: local (assigned)
+  h: local (assigned)
+  k: local (assigned)
+  fs: local (assigned)
+  range: global implicit (referenced)
+  n: cell (assigned, comp_iter, comp_cell)
+  function f
+    params: xs
+    xs: local (parameter, referenced)
+    x: cell (assigned, comp_iter, comp_cell)
+    inlined comprehension f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: cell (assigned, comp_iter)
+      lambda f.<locals>.<lambda>
+        x: free (referenced)
+  function g
+    params: xs
+    xs: local (parameter, referenced)
+    x: cell (assigned, referenced, comp_cell)
+    fs: local (assigned, referenced)
+    inlined comprehension g.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: cell (assigned, comp_iter)
+      lambda g.<locals>.<lambda>
+        x: free (referenced)
+  function h
+    params: xs, ys
+    xs: local (parameter, referenced)
+    ys: local (parameter)
+    x: cell (assigned, comp_iter, comp_cell)
+    y: cell (assigned, comp_iter, comp_cell)
+    inlined comprehension h.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: cell (assigned, comp_iter)
+      y: cell (assigned, comp_iter)
+      ys: free (referenced)
+      lambda h.<locals>.<lambda>
+        x: free (referenced)
+        y: free (referenced)
+  function k
+    params: xs
+    xs: local (parameter, referenced)
+    x: local (assigned, referenced, comp_iter)
+    inlined comprehension k.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+      lambda k.<locals>.<lambda>
+        params: y
+        y: local (parameter, referenced)
+  inlined comprehension <listcomp>
+    params: .0
+    .0: local (parameter)
+    n: cell (assigned, comp_iter)
+    lambda <lambda>
+      n: free (referenced)

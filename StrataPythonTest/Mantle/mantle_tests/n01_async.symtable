@@ -1,0 +1,11 @@
+module top
+  asyncio: local (imported)
+  fetch_data: local (assigned)
+  sync_helper: local (assigned)
+  function fetch_data
+    asyncio: global implicit (referenced)
+    result: local (assigned, referenced)
+    url: local (parameter, referenced)
+  function sync_helper
+    x: local (parameter, referenced)
+qualnames: fetch_data, sync_helper

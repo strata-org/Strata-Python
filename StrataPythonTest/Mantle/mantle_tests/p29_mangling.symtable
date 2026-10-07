@@ -1,0 +1,14 @@
+module top
+  _Foo: local (assigned)
+  class _Foo
+    _Foo__Inner: local (assigned)
+    _Foo__a: local (assigned)
+    _Foo__m: local (assigned)
+    __b__: local (assigned)
+    function __m
+      _Foo__local: local (assigned, referenced)
+      _Foo__p: local (parameter, referenced)
+      self: local (parameter, referenced)
+    class __Inner
+      _Inner__c: local (assigned)
+qualnames: _Foo, _Foo.__Inner, _Foo.__m

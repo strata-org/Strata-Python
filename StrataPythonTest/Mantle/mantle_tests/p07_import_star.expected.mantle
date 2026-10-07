@@ -1,0 +1,37 @@
+-- unsupported: import * is not supported at 2:0-2:21
+module p07_import_star {
+  func @p07_import_star.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "p07_import_star"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "p07_import_star"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.String = const str "p07_import_star"
+      %7 : base.String = const str "join"
+      %8 : base.Ref(py.Value) = py.globalCell %6 %7
+      %9 : py.Value = base.refGet[py.Value] %8
+      %10 : base.String = const str "NameError"
+      %11 : base.String = const str "name 'join' is not defined"
+      %12 : py.Value = py.requireDefined %9 %10 %11 ^propagate.0()
+      %13 : base.String = const str "a"
+      %14 : py.Value = py.strLit %13
+      %15 : base.String = const str "b"
+      %16 : py.Value = py.strLit %15
+      %17 : py.Value = py.mkTuple %14 %16
+      %18 : py.Value = py.mkDict
+      %19 : py.Value = py.call %12 %17 %18 ^propagate.0()
+      %20 : base.String = const str "p07_import_star"
+      %21 : base.String = const str "x"
+      %22 : base.Ref(py.Value) = py.globalCell %20 %21
+      %23 : base.Unit = base.refSet[py.Value] %22 %19
+      %24 : py.Value = py.noneLit
+      %25 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %24
+      ret %25
+    propagate.0(%26 : py.Value):
+      %27 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %26
+      ret %27
+  }
+}
+

@@ -34,6 +34,19 @@ environment layers are polymorphic in it and never read it.
 
 /-! ## Declarations -/
 
+namespace Name
+
+/-- The name of the case instruction of the datatype named `n`: `case` under `n`. -/
+@[expose] def caseName (n : Name) : Name := .str n "case"
+
+/-- The last string component of a name, or `""` if it does not end in one.  A case
+instruction names the successor of each constructor so. -/
+@[expose] def lastString : Name → String
+  | .str _ s => s
+  | _ => ""
+
+end Name
+
 -- Exposed so that `decide` can compare parameters in other modules.
 @[expose] section
 
@@ -116,9 +129,11 @@ instance [DecidableEq α] [DecidableEq τ] : DecidableEq (DataGroup α τ) := fu
 @[expose] def typeOf? (g : DataGroup α τ) (n : Name) : Option (TypeDecl α) :=
   (g.members.find? (·.name == n)).map (·.toTypeDecl)
 
-/-- Every name the group introduces: one per member, then one per constructor. -/
+/-- Every name the group introduces: one per member, then one per constructor, then each
+member's case instruction. -/
 @[expose] def names (g : DataGroup α τ) : Array Name :=
-  g.members.map (·.name) ++ g.members.flatMap fun m => m.ctors.map (·.name)
+  g.members.map (·.name) ++
+    ((g.members.flatMap fun m => m.ctors.map (·.name)) ++ g.members.map (·.name.caseName))
 
 /-- The constructor at an address inside the group. -/
 @[expose] def ctor? (g : DataGroup α τ) (i j : Nat) : Option (Ctor α τ) := do
@@ -126,6 +141,49 @@ instance [DecidableEq α] [DecidableEq τ] : DecidableEq (DataGroup α τ) := fu
   m.ctors[j]?
 
 end DataGroup
+
+/-- Where a constructor sits: the head of its mutual group, which datatype of the group, and
+which constructor of that datatype.  An instruction declaration carrying one is that
+constructor; the datatype's own constructor list is what the address is read against. -/
+structure CtorAddr where
+  head : Name
+  dataIdx : Nat
+  /-- Which constructor of the datatype. -/
+  idx : Nat
+deriving DecidableEq
+
+/-- Which datatype a case instruction eliminates: the head of its mutual group, and which
+datatype of the group.  An instruction declaration carrying one is that case instruction. -/
+structure CaseAddr where
+  head : Name
+  dataIdx : Nat
+deriving DecidableEq
+
+/-- What an instruction declaration is.  A constructor and a case instruction are declared
+only with their group, which well-formedness checks the declaration against. -/
+inductive InsnKind where
+  /-- An ordinary instruction: nothing derives it. -/
+  | decl
+  /-- Constructor `addr.idx` of member `addr.dataIdx` of the group headed by `addr.head`. -/
+  | ctor (addr : CtorAddr)
+  /-- The case instruction of member `addr.dataIdx` of the group headed by `addr.head`. -/
+  | case (addr : CaseAddr)
+deriving DecidableEq
+
+namespace InsnKind
+
+/-- The head of the group a constructor or case instruction belongs to. -/
+@[expose] def head? : InsnKind → Option Name
+  | .decl => none
+  | .ctor a => some a.head
+  | .case a => some a.head
+
+/-- Where a constructor sits, if the instruction is one. -/
+@[expose] def ctor? : InsnKind → Option CtorAddr
+  | .ctor a => some a
+  | _ => none
+
+end InsnKind
 
 /-! ### Changing the type representation
 

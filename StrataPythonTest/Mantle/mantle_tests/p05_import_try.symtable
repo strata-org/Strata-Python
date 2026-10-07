@@ -1,0 +1,10 @@
+module top
+  ImportError: global implicit (referenced)
+  f: local (assigned)
+  json: local (imported, referenced)
+  path: local (assigned, imported)
+  function f
+    json: global implicit (referenced)
+    path: global implicit (referenced)
+    x: local (parameter, referenced)
+qualnames: f

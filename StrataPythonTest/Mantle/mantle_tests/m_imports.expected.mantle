@@ -1,0 +1,93 @@
+module m_imports {
+  func @m_imports.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "m_imports"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "m_imports"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.String = const str "os"
+      %7 : py.Value = py.importModule %6 ^propagate.0()
+      %8 : base.String = const str "m_imports"
+      %9 : base.String = const str "os"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : base.String = const str "os.path"
+      %13 : py.Value = py.importModule %12 ^propagate.0()
+      %14 : base.String = const str "os"
+      %15 : py.Value = py.importModule %14 ^propagate.0()
+      %16 : base.String = const str "m_imports"
+      %17 : base.String = const str "os"
+      %18 : base.Ref(py.Value) = py.globalCell %16 %17
+      %19 : base.Unit = base.refSet[py.Value] %18 %15
+      %20 : base.String = const str "xml.etree.ElementTree"
+      %21 : py.Value = py.importModule %20 ^propagate.0()
+      %22 : base.String = const str "m_imports"
+      %23 : base.String = const str "ET"
+      %24 : base.Ref(py.Value) = py.globalCell %22 %23
+      %25 : base.Unit = base.refSet[py.Value] %24 %21
+      %26 : base.String = const str "json"
+      %27 : py.Value = py.importModule %26 ^propagate.0()
+      %28 : base.String = const str "m_imports"
+      %29 : base.String = const str "j"
+      %30 : base.Ref(py.Value) = py.globalCell %28 %29
+      %31 : base.Unit = base.refSet[py.Value] %30 %27
+      %32 : base.String = const str "collections.abc"
+      %33 : base.String = const str "Mapping"
+      %34 : py.Value = py.importFrom %32 %33 ^propagate.0()
+      %35 : base.String = const str "m_imports"
+      %36 : base.String = const str "M"
+      %37 : base.Ref(py.Value) = py.globalCell %35 %36
+      %38 : base.Unit = base.refSet[py.Value] %37 %34
+      %39 : base.String = const str "math"
+      %40 : base.String = const str "pi"
+      %41 : py.Value = py.importFrom %39 %40 ^propagate.0()
+      %42 : base.String = const str "m_imports"
+      %43 : base.String = const str "pi"
+      %44 : base.Ref(py.Value) = py.globalCell %42 %43
+      %45 : base.Unit = base.refSet[py.Value] %44 %41
+      %46 : base.Code = const @m_imports.local_import
+      %47 : py.Value = py.mkClosure %46
+      %48 : base.String = const str "m_imports"
+      %49 : base.String = const str "local_import"
+      %50 : base.Ref(py.Value) = py.globalCell %48 %49
+      %51 : base.Unit = base.refSet[py.Value] %50 %47
+      %52 : py.Value = py.noneLit
+      %53 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %52
+      ret %53
+    propagate.0(%54 : py.Value):
+      %55 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %54
+      ret %55
+  }
+  func @m_imports.local_import(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "sys"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : py.Value = py.tupleLen %0
+      %6 : base.String = const str "kwargs"
+      %7 : py.Value = py.undef %6
+      %8 : py.Value = py.dictFirstKey %1 %7
+      %9 : base.String = const str "TypeError"
+      %10 : base.String = const str "local_import() got an unexpected keyword argument {}"
+      %11 : base.Unit = py.requireUndefined %8 %9 %10 ^propagate.0()
+      %12 : base.Int = const int 0
+      %13 : base.String = const str "TypeError"
+      %14 : base.String = const str "local_import() takes 0 positional arguments but {} {was} given"
+      %15 : base.Unit = py.requireAtMost %5 %12 %13 %14 ^propagate.0()
+      %16 : base.String = const str "sys"
+      %17 : py.Value = py.importModule %16 ^propagate.0()
+      %18 : base.Unit = base.refSet[py.Value] %4 %17
+      %19 : py.Value = base.refGet[py.Value] %4
+      %20 : base.String = const str "UnboundLocalError"
+      %21 : base.String = const str "cannot access local variable 'sys' where it is not associated with a value"
+      %22 : py.Value = py.requireDefined %19 %20 %21 ^propagate.0()
+      %23 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %22
+      ret %23
+    propagate.0(%24 : py.Value):
+      %25 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %24
+      ret %25
+  }
+}
+

@@ -1,0 +1,12 @@
+module top
+  f: local (assigned)
+  function f
+    C: local (assigned, referenced)
+    x: cell (assigned)
+    class C
+      m: local (assigned)
+      x: local (assigned, free_class)
+      function m
+        self: local (parameter)
+        x: free (assigned, referenced, nonlocal)
+qualnames: f, f.<locals>.C, f.<locals>.C.m

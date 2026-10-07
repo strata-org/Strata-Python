@@ -1,0 +1,8 @@
+module top
+  cond: local (assigned, referenced, annotated)
+  use_x: local (assigned)
+  use_y: local (assigned)
+  x: local (assigned, referenced)
+  y: local (assigned, referenced)
+  z: local (assigned)
+qualnames: 

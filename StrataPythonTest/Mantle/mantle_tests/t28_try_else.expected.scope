@@ -1,0 +1,12 @@
+module
+  risky: local (assigned, referenced)
+  cleanup: local (assigned, referenced)
+  x: local (assigned, referenced)
+  y: local (assigned)
+  ValueError: global implicit (referenced)
+  a: local (assigned, referenced)
+  b: local (assigned)
+  inner: local (assigned)
+  outer: local (assigned)
+  function risky
+  function cleanup

@@ -1,0 +1,10 @@
+module
+  x: local (assigned)
+  with_global: local (assigned)
+  without_global: local (assigned)
+  function with_global
+    print: global implicit (referenced)
+    x: local (assigned, referenced)
+  function without_global
+    print: global implicit (referenced)
+    y: local (assigned, referenced)

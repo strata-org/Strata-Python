@@ -1,0 +1,6 @@
+module
+  work: local (assigned, referenced)
+  cleanup: local (assigned, referenced)
+  x: local (assigned)
+  function work
+  function cleanup

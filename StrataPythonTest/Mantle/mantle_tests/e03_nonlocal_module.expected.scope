@@ -1,0 +1,5 @@
+module
+  x: free (referenced, nonlocal)
+  print: global implicit (referenced)
+diagnostics:
+  syntax error at 1:0-1:10: nonlocal declaration not allowed at module level

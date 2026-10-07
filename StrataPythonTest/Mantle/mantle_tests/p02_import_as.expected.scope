@@ -1,0 +1,11 @@
+module
+  import osp: module os.path
+  import j: module json
+  osp: local (imported)
+  j: local (imported)
+  f: local (assigned)
+  function f
+    params: p
+    p: local (parameter, referenced)
+    osp: global implicit (referenced)
+    j: global implicit (referenced)

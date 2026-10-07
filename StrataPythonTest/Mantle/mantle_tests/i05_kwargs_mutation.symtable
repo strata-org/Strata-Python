@@ -1,0 +1,14 @@
+module top
+  f: local (assigned, referenced)
+  g: local (assigned, referenced)
+  m: local (assigned, referenced)
+  print: global implicit (referenced)
+  xs: local (assigned, referenced)
+  function f
+    kwargs: local (parameter, referenced)
+    len: global implicit (referenced)
+    print: global implicit (referenced)
+  function g
+    args: local (parameter, referenced)
+    print: global implicit (referenced)
+qualnames: f, g

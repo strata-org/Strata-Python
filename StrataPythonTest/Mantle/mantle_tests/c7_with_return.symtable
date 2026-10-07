@@ -1,0 +1,9 @@
+module top
+  acquire: local (assigned)
+  f: local (assigned)
+  function acquire
+  function f
+    acquire: global implicit (referenced)
+    r: local (assigned, referenced)
+    x: local (parameter)
+qualnames: acquire, f

@@ -361,23 +361,6 @@ def typedDict (loc : SourceRange) (fields : Array String)
 def unionArray (loc : SourceRange) (elts : Array SpecType) : SpecType :=
   elts.foldl (init := empty loc) (union loc · ·)
 
-private def asSingleton (tp : SpecType) : Option SpecAtomType := do
-  guard (tp.size == 1)
-  if h : tp.idents.size = 1 then
-    let si := tp.idents[0]
-    return .ident si.name si.args
-  else if tp.intLits.size == 1 then
-    let v := tp.intLits.toArray[0]!
-    return .intLiteral v
-  else if tp.stringLits.size == 1 then
-    let v := tp.stringLits.toArray[0]!
-    return .stringLiteral v
-  else if h : tp.typedDicts.size = 1 then
-    let td := tp.typedDicts[0]
-    return .typedDict td.fields td.fieldTypes td.fieldRequired
-  else
-    none
-
 def asIdent (tp : SpecType) : Option PythonIdent := do
   guard (tp.intLits.size == 0 && tp.stringLits.size == 0
        && tp.typedDicts.size == 0)

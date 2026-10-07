@@ -1,0 +1,24 @@
+module
+  Config: local (assigned, referenced)
+  c: local (assigned, referenced)
+  flag: local (assigned)
+  Inner: local (assigned)
+  Outer: local (assigned, referenced)
+  o: local (assigned, referenced)
+  v: local (assigned)
+  class Config
+    __init__: local (assigned)
+    function Config.__init__
+      params: self
+      self: local (parameter, referenced)
+  class Inner
+    __init__: local (assigned)
+    function Inner.__init__
+      params: self
+      self: local (parameter, referenced)
+  class Outer
+    __init__: local (assigned)
+    function Outer.__init__
+      params: self
+      self: local (parameter, referenced)
+      Inner: global implicit (referenced)

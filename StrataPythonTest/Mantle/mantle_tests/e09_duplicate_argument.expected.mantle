@@ -1,0 +1,115 @@
+-- syntax error: duplicate argument 'a' in function definition at 1:12-1:13
+module e09_duplicate_argument {
+  func @e09_duplicate_argument.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "e09_duplicate_argument"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "e09_duplicate_argument"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Code = const @e09_duplicate_argument.f
+      %7 : py.Value = py.mkClosure %6
+      %8 : base.String = const str "e09_duplicate_argument"
+      %9 : base.String = const str "f"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : py.Value = py.noneLit
+      %13 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %12
+      ret %13
+    propagate.0(%14 : py.Value):
+      %15 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %14
+      ret %15
+  }
+  func @e09_duplicate_argument.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "a"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : base.String = const str "b"
+      %6 : py.Value = py.undef %5
+      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
+      %8 : py.Value = py.tupleLen %0
+      %9 : base.String = const str "a"
+      %10 : py.Value = py.undef %9
+      %11 : base.String = const str "b"
+      %12 : py.Value = py.undef %11
+      %13 : base.String = const str "a"
+      %14 : py.Value = py.undef %13
+      %15 : py.Value = py.mkTuple %10 %12 %14
+      %16 : py.Value = py.noneLit
+      %17 : py.Value = py.getSlice %15 %8 %16 %16 ^propagate.0()
+      %18 : py.Value = py.add %0 %17 ^propagate.0()
+      %19 : base.Int = const int 0
+      %20 : py.Value = py.intLit %19
+      %21 : py.Value = py.getItem %18 %20 ^propagate.0()
+      %22 : base.String = const str "a"
+      %23 : py.Value = py.strLit %22
+      %24 : py.Value = py.dictGet %1 %23 %21
+      %25 : py.Value = py.in %23 %1 ^propagate.0()
+      %26 : base.Unit = py.dictDiscard %1 %23
+      %27 : base.Int = const int 1
+      %28 : py.Value = py.intLit %27
+      %29 : py.Value = py.getItem %18 %28 ^propagate.0()
+      %30 : base.String = const str "b"
+      %31 : py.Value = py.strLit %30
+      %32 : py.Value = py.dictGet %1 %31 %29
+      %33 : py.Value = py.in %31 %1 ^propagate.0()
+      %34 : base.Unit = py.dictDiscard %1 %31
+      %35 : base.Int = const int 2
+      %36 : py.Value = py.intLit %35
+      %37 : py.Value = py.getItem %18 %36 ^propagate.0()
+      %38 : base.String = const str "a"
+      %39 : py.Value = py.strLit %38
+      %40 : py.Value = py.dictGet %1 %39 %37
+      %41 : py.Value = py.in %39 %1 ^propagate.0()
+      %42 : base.Unit = py.dictDiscard %1 %39
+      %43 : py.Value = py.lt %20 %8 ^propagate.0()
+      %44 : py.Value = py.mult %25 %43 ^propagate.0()
+      %45 : base.Int = const int 0
+      %46 : base.String = const str "TypeError"
+      %47 : base.String = const str "f() got multiple values for argument 'a'"
+      %48 : base.Unit = py.requireAtMost %44 %45 %46 %47 ^propagate.0()
+      %49 : py.Value = py.lt %28 %8 ^propagate.0()
+      %50 : py.Value = py.mult %33 %49 ^propagate.0()
+      %51 : base.Int = const int 0
+      %52 : base.String = const str "TypeError"
+      %53 : base.String = const str "f() got multiple values for argument 'b'"
+      %54 : base.Unit = py.requireAtMost %50 %51 %52 %53 ^propagate.0()
+      %55 : py.Value = py.lt %36 %8 ^propagate.0()
+      %56 : py.Value = py.mult %41 %55 ^propagate.0()
+      %57 : base.Int = const int 0
+      %58 : base.String = const str "TypeError"
+      %59 : base.String = const str "f() got multiple values for argument 'a'"
+      %60 : base.Unit = py.requireAtMost %56 %57 %58 %59 ^propagate.0()
+      %61 : base.String = const str "kwargs"
+      %62 : py.Value = py.undef %61
+      %63 : py.Value = py.dictFirstKey %1 %62
+      %64 : base.String = const str "TypeError"
+      %65 : base.String = const str "f() got an unexpected keyword argument {}"
+      %66 : base.Unit = py.requireUndefined %63 %64 %65 ^propagate.0()
+      %67 : base.Int = const int 3
+      %68 : base.String = const str "TypeError"
+      %69 : base.String = const str "f() takes 3 positional arguments but {} {was} given"
+      %70 : base.Unit = py.requireAtMost %8 %67 %68 %69 ^propagate.0()
+      %71 : base.String = const str "TypeError"
+      %72 : base.String = const str "f() missing 1 required positional argument: 'a'"
+      %73 : py.Value = py.requireDefined %24 %71 %72 ^propagate.0()
+      %74 : base.Unit = base.refSet[py.Value] %4 %73
+      %75 : base.String = const str "TypeError"
+      %76 : base.String = const str "f() missing 1 required positional argument: 'b'"
+      %77 : py.Value = py.requireDefined %32 %75 %76 ^propagate.0()
+      %78 : base.Unit = base.refSet[py.Value] %7 %77
+      %79 : base.String = const str "TypeError"
+      %80 : base.String = const str "f() missing 1 required positional argument: 'a'"
+      %81 : py.Value = py.requireDefined %40 %79 %80 ^propagate.0()
+      %82 : base.Unit = base.refSet[py.Value] %4 %81
+      %83 : py.Value = py.noneLit
+      %84 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %83
+      ret %84
+    propagate.0(%85 : py.Value):
+      %86 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %85
+      ret %86
+  }
+}
+

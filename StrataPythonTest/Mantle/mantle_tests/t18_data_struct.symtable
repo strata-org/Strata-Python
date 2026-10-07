@@ -1,0 +1,10 @@
+module top
+  d: local (assigned, referenced)
+  elem: local (assigned)
+  every_other: local (assigned)
+  first: local (assigned)
+  nums: local (assigned, referenced)
+  sliced: local (assigned)
+  t: local (assigned, referenced)
+  val: local (assigned)
+qualnames: 

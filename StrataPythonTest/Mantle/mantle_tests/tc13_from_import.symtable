@@ -1,0 +1,10 @@
+module top
+  f: local (assigned)
+  pi: local (imported)
+  sqrt: local (imported)
+  function f
+    pi: global implicit (referenced)
+    sqrt: global implicit (referenced)
+    x: local (assigned)
+    y: local (assigned)
+qualnames: f

@@ -1,0 +1,33 @@
+module top
+  MAX_RETRIES: local (assigned)
+  __name__: global implicit (referenced)
+  boolop_assignment: local (assigned)
+  ifexp_assignment: local (assigned)
+  local_shadows_module_var: local (assigned)
+  logger: local (assigned)
+  logging: local (imported, referenced)
+  mixed_imports_and_vars: local (assigned)
+  param_shadows_module_var: local (assigned)
+  threshold: local (assigned, annotated)
+  use_module_vars: local (assigned)
+  function use_module_vars
+    MAX_RETRIES: global implicit (referenced)
+    i: local (assigned, referenced)
+    logger: global implicit (referenced)
+    range: global implicit (referenced)
+    threshold: global implicit (referenced)
+  function param_shadows_module_var
+    logger: local (parameter, referenced)
+  function local_shadows_module_var
+    MAX_RETRIES: local (assigned, referenced)
+  function mixed_imports_and_vars
+    MAX_RETRIES: global implicit (referenced)
+    logging: global implicit (referenced)
+    new_logger: local (assigned, referenced)
+  function ifexp_assignment
+    result: local (assigned, referenced)
+    x: local (parameter, referenced)
+  function boolop_assignment
+    value: local (assigned, referenced)
+    x: local (parameter, referenced)
+qualnames: boolop_assignment, ifexp_assignment, local_shadows_module_var, mixed_imports_and_vars, param_shadows_module_var, use_module_vars

@@ -1,0 +1,6 @@
+module top
+  f: local (assigned)
+  json: global explicit (declared_global)
+  function f
+    json: global explicit (imported, referenced, declared_global)
+qualnames: f

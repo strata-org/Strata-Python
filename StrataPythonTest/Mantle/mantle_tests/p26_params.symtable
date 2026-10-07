@@ -1,0 +1,15 @@
+module top
+  d: local (assigned, referenced)
+  f: local (assigned)
+  h: local (assigned)
+  function f
+    a: local (parameter, referenced)
+    args: local (parameter, referenced)
+    b: local (parameter, referenced)
+    c: local (parameter, referenced)
+    e: local (parameter, referenced)
+    g: local (parameter, referenced)
+    kwargs: local (parameter, referenced)
+  function h
+    k: local (parameter, referenced)
+qualnames: f, h

@@ -1,0 +1,8 @@
+module top
+  nums: local (assigned, referenced)
+  sum: global implicit (referenced)
+  total: local (assigned)
+  function genexpr
+    .0: local (parameter)
+    x: local (assigned, referenced, comp_iter)
+qualnames: <genexpr>

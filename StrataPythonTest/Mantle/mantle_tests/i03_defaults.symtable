@@ -1,0 +1,16 @@
+module top
+  c: local (assigned, referenced)
+  kwd: local (assigned, referenced)
+  function c
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    f: local (parameter, referenced)
+    n: local (parameter, referenced)
+    print: global implicit (referenced)
+    s: local (parameter, referenced)
+    t: local (parameter, referenced)
+  function kwd
+    a: local (parameter, referenced)
+    k: local (parameter, referenced)
+    print: global implicit (referenced)
+qualnames: c, kwd

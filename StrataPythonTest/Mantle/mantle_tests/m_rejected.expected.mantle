@@ -1,0 +1,63 @@
+-- unsupported: relative import is not supported at 2:0-2:21
+-- unsupported: import * is not supported at 3:0-3:16
+-- unsupported: nested function is not supported at 6:4-7:12
+-- unsupported: non-constant default is not supported at 10:18-10:20
+-- unsupported: operator << is not supported at 13:4-13:10
+-- unsupported: for loop is not supported at 14:0-15:8
+module m_rejected {
+  func @m_rejected.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "m_rejected"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "m_rejected"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Code = const @m_rejected.outer
+      %7 : py.Value = py.mkClosure %6
+      %8 : base.String = const str "m_rejected"
+      %9 : base.String = const str "outer"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : base.String = const str "operator <<"
+      %13 : py.Value = py.strLit %12
+      %14 : py.Value = py.unsupported %13
+      %15 : base.String = const str "m_rejected"
+      %16 : base.String = const str "y"
+      %17 : base.Ref(py.Value) = py.globalCell %15 %16
+      %18 : base.Unit = base.refSet[py.Value] %17 %14
+      %19 : py.Value = py.noneLit
+      %20 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %19
+      ret %20
+    propagate.0(%21 : py.Value):
+      %22 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %21
+      ret %22
+  }
+  func @m_rejected.outer(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "inner"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : py.Value = py.tupleLen %0
+      %6 : base.String = const str "kwargs"
+      %7 : py.Value = py.undef %6
+      %8 : py.Value = py.dictFirstKey %1 %7
+      %9 : base.String = const str "TypeError"
+      %10 : base.String = const str "outer() got an unexpected keyword argument {}"
+      %11 : base.Unit = py.requireUndefined %8 %9 %10 ^propagate.0()
+      %12 : base.Int = const int 0
+      %13 : base.String = const str "TypeError"
+      %14 : base.String = const str "outer() takes 0 positional arguments but {} {was} given"
+      %15 : base.Unit = py.requireAtMost %5 %12 %13 %14 ^propagate.0()
+      %16 : py.Value = base.refGet[py.Value] %4
+      %17 : base.String = const str "UnboundLocalError"
+      %18 : base.String = const str "cannot access local variable 'inner' where it is not associated with a value"
+      %19 : py.Value = py.requireDefined %16 %17 %18 ^propagate.0()
+      %20 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %19
+      ret %20
+    propagate.0(%21 : py.Value):
+      %22 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %21
+      ret %22
+  }
+}
+

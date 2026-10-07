@@ -1,0 +1,17 @@
+module top
+  f: local (assigned)
+  function f
+    a: local (assigned, referenced)
+    b: local (assigned, referenced)
+    c: local (assigned, referenced)
+    data: local (assigned, referenced)
+    declared: local (assigned, annotated)
+    fh: local (assigned, referenced)
+    g: local (assigned)
+    m: local (assigned, referenced, annotated)
+    n: local (assigned, referenced)
+    obj: global implicit (referenced)
+    open: global implicit (referenced)
+    pairs: local (parameter, referenced)
+    path: local (parameter, referenced)
+qualnames: f

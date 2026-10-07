@@ -1,0 +1,11 @@
+module
+  f: local (assigned)
+  function f
+    y: local (assigned)
+    x: local (assigned, referenced, comp_iter)
+    inlined comprehension f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+diagnostics:
+  syntax error at 2:24-2:35: assignment expression cannot be used in a comprehension iterable expression

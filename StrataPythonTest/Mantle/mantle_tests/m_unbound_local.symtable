@@ -1,0 +1,11 @@
+module top
+  with_global: local (assigned)
+  without_global: local (assigned)
+  y: local (assigned)
+  function with_global
+    y: local (assigned, referenced)
+    z: local (assigned, referenced)
+  function without_global
+    v: local (assigned, referenced)
+    w: local (assigned, referenced)
+qualnames: with_global, without_global

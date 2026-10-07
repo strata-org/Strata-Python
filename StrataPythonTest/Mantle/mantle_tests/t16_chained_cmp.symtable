@@ -1,0 +1,9 @@
+module top
+  r1: local (assigned)
+  r2: local (assigned)
+  r3: local (assigned)
+  r4: local (assigned)
+  x: local (assigned, referenced, annotated)
+  y: local (assigned, referenced, annotated)
+  z: local (assigned, referenced, annotated)
+qualnames: 

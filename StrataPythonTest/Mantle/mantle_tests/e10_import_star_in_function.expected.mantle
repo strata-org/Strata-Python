@@ -1,0 +1,46 @@
+-- syntax error: import * only allowed at module level at 2:4-2:20
+-- unsupported: import * is not supported at 2:4-2:20
+module e10_import_star_in_function {
+  func @e10_import_star_in_function.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "e10_import_star_in_function"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "e10_import_star_in_function"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Code = const @e10_import_star_in_function.f
+      %7 : py.Value = py.mkClosure %6
+      %8 : base.String = const str "e10_import_star_in_function"
+      %9 : base.String = const str "f"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : py.Value = py.noneLit
+      %13 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %12
+      ret %13
+    propagate.0(%14 : py.Value):
+      %15 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %14
+      ret %15
+  }
+  func @e10_import_star_in_function.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : py.Value = py.tupleLen %0
+      %3 : base.String = const str "kwargs"
+      %4 : py.Value = py.undef %3
+      %5 : py.Value = py.dictFirstKey %1 %4
+      %6 : base.String = const str "TypeError"
+      %7 : base.String = const str "f() got an unexpected keyword argument {}"
+      %8 : base.Unit = py.requireUndefined %5 %6 %7 ^propagate.0()
+      %9 : base.Int = const int 0
+      %10 : base.String = const str "TypeError"
+      %11 : base.String = const str "f() takes 0 positional arguments but {} {was} given"
+      %12 : base.Unit = py.requireAtMost %2 %9 %10 %11 ^propagate.0()
+      %13 : py.Value = py.noneLit
+      %14 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %13
+      ret %14
+    propagate.0(%15 : py.Value):
+      %16 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %15
+      ret %16
+  }
+}
+

@@ -1,0 +1,8 @@
+module
+  f: local (assigned)
+  function f
+    g: local (assigned, referenced)
+    function f.<locals>.g
+      x: free (assigned, nonlocal)
+diagnostics:
+  syntax error at 3:8-3:18: no binding for nonlocal 'x' found

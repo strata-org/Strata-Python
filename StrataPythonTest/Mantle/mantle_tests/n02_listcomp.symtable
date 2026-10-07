@@ -1,0 +1,7 @@
+module top
+  doubled: local (assigned, referenced)
+  items: local (assigned, referenced)
+  sum: global implicit (referenced)
+  total: local (assigned)
+  x: local (assigned, referenced, comp_iter)
+qualnames: 

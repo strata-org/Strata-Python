@@ -1,0 +1,11 @@
+module top
+  a: local (assigned)
+  b: local (assigned)
+  data: local (assigned, annotated)
+  flag: local (assigned, annotated)
+  name: local (assigned, annotated)
+  nothing: local (assigned)
+  pi: local (assigned, annotated)
+  x: local (assigned)
+  y: local (assigned, annotated)
+qualnames: 

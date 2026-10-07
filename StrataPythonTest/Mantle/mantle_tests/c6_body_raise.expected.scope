@@ -1,0 +1,10 @@
+module
+  boom: local (assigned)
+  f: local (assigned)
+  function boom
+    ValueError: global implicit (referenced)
+  function f
+    params: xs
+    xs: local (parameter, referenced)
+    x: local (assigned)
+    boom: global implicit (referenced)

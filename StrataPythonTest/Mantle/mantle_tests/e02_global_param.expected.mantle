@@ -1,0 +1,72 @@
+-- syntax error: name 'x' is parameter and global at 2:4-2:12
+module e02_global_param {
+  func @e02_global_param.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "e02_global_param"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "e02_global_param"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Code = const @e02_global_param.f
+      %7 : py.Value = py.mkClosure %6
+      %8 : base.String = const str "e02_global_param"
+      %9 : base.String = const str "f"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : py.Value = py.noneLit
+      %13 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %12
+      ret %13
+    propagate.0(%14 : py.Value):
+      %15 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %14
+      ret %15
+  }
+  func @e02_global_param.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : py.Value = py.tupleLen %0
+      %3 : base.String = const str "x"
+      %4 : py.Value = py.undef %3
+      %5 : py.Value = py.mkTuple %4
+      %6 : py.Value = py.noneLit
+      %7 : py.Value = py.getSlice %5 %2 %6 %6 ^propagate.0()
+      %8 : py.Value = py.add %0 %7 ^propagate.0()
+      %9 : base.Int = const int 0
+      %10 : py.Value = py.intLit %9
+      %11 : py.Value = py.getItem %8 %10 ^propagate.0()
+      %12 : base.String = const str "x"
+      %13 : py.Value = py.strLit %12
+      %14 : py.Value = py.dictGet %1 %13 %11
+      %15 : py.Value = py.in %13 %1 ^propagate.0()
+      %16 : base.Unit = py.dictDiscard %1 %13
+      %17 : py.Value = py.lt %10 %2 ^propagate.0()
+      %18 : py.Value = py.mult %15 %17 ^propagate.0()
+      %19 : base.Int = const int 0
+      %20 : base.String = const str "TypeError"
+      %21 : base.String = const str "f() got multiple values for argument 'x'"
+      %22 : base.Unit = py.requireAtMost %18 %19 %20 %21 ^propagate.0()
+      %23 : base.String = const str "kwargs"
+      %24 : py.Value = py.undef %23
+      %25 : py.Value = py.dictFirstKey %1 %24
+      %26 : base.String = const str "TypeError"
+      %27 : base.String = const str "f() got an unexpected keyword argument {}"
+      %28 : base.Unit = py.requireUndefined %25 %26 %27 ^propagate.0()
+      %29 : base.Int = const int 1
+      %30 : base.String = const str "TypeError"
+      %31 : base.String = const str "f() takes 1 positional argument but {} {was} given"
+      %32 : base.Unit = py.requireAtMost %2 %29 %30 %31 ^propagate.0()
+      %33 : base.String = const str "TypeError"
+      %34 : base.String = const str "f() missing 1 required positional argument: 'x'"
+      %35 : py.Value = py.requireDefined %14 %33 %34 ^propagate.0()
+      %36 : base.String = const str "e02_global_param"
+      %37 : base.String = const str "x"
+      %38 : base.Ref(py.Value) = py.globalCell %36 %37
+      %39 : base.Unit = base.refSet[py.Value] %38 %35
+      %40 : py.Value = py.noneLit
+      %41 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %40
+      ret %41
+    propagate.0(%42 : py.Value):
+      %43 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %42
+      ret %43
+  }
+}
+

@@ -1,0 +1,38 @@
+module top
+  absorb: local (assigned, referenced)
+  both: local (assigned, referenced)
+  kw: local (assigned, referenced)
+  kwonly: local (assigned, referenced)
+  pos: local (assigned, referenced)
+  posonly: local (assigned, referenced)
+  rest: local (assigned, referenced)
+  function pos
+    print: global implicit (referenced)
+    x: local (parameter, referenced)
+    y: local (parameter, referenced)
+  function rest
+    more: local (parameter, referenced)
+    print: global implicit (referenced)
+    x: local (parameter, referenced)
+  function kw
+    opts: local (parameter, referenced)
+    print: global implicit (referenced)
+    x: local (parameter, referenced)
+  function both
+    first: local (parameter, referenced)
+    more: local (parameter, referenced)
+    opts: local (parameter, referenced)
+    print: global implicit (referenced)
+  function kwonly
+    a: local (parameter, referenced)
+    k: local (parameter, referenced)
+    print: global implicit (referenced)
+  function posonly
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    print: global implicit (referenced)
+  function absorb
+    a: local (parameter, referenced)
+    opts: local (parameter, referenced)
+    print: global implicit (referenced)
+qualnames: absorb, both, kw, kwonly, pos, posonly, rest

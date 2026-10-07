@@ -1,0 +1,9 @@
+module
+  nums: local (assigned, referenced)
+  first: local (assigned)
+  sliced: local (assigned)
+  d: local (assigned, referenced)
+  val: local (assigned)
+  t: local (assigned, referenced)
+  elem: local (assigned)
+  every_other: local (assigned)

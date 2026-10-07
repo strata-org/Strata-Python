@@ -1,0 +1,18 @@
+module
+  import join: member join of os.path
+  import base: member basename of os.path
+  import OrderedDict: member OrderedDict of collections
+  import dd: member defaultdict of collections
+  join: local (imported)
+  base: local (imported)
+  OrderedDict: local (imported)
+  dd: local (imported)
+  f: local (assigned)
+  function f
+    params: p
+    p: local (parameter, referenced)
+    join: global implicit (referenced)
+    base: global implicit (referenced)
+    OrderedDict: global implicit (referenced)
+    dd: global implicit (referenced)
+    list: global implicit (referenced)

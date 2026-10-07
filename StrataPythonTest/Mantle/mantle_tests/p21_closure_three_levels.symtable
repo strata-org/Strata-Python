@@ -1,0 +1,17 @@
+module top
+  f: local (assigned)
+  function f
+    a: cell (assigned)
+    g: local (assigned, referenced)
+    function g
+      a: free
+      b: cell (assigned)
+      h: local (assigned, referenced)
+      function h
+        a: free
+        b: free
+        k: local (assigned, referenced)
+        function k
+          a: free (referenced)
+          b: free (referenced)
+qualnames: f, f.<locals>.g, f.<locals>.g.<locals>.h, f.<locals>.g.<locals>.h.<locals>.k

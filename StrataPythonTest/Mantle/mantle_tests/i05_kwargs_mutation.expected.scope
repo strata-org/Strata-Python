@@ -1,0 +1,15 @@
+module
+  f: local (assigned, referenced)
+  m: local (assigned, referenced)
+  print: global implicit (referenced)
+  g: local (assigned, referenced)
+  xs: local (assigned, referenced)
+  function f
+    params: **kwargs
+    kwargs: local (parameter, referenced)
+    print: global implicit (referenced)
+    len: global implicit (referenced)
+  function g
+    params: *args
+    args: local (parameter, referenced)
+    print: global implicit (referenced)

@@ -1,0 +1,18 @@
+module top
+  A: local (assigned, referenced)
+  B: local (assigned)
+  class A
+    m: local (assigned)
+    function m
+      __class__: free (referenced)
+      self: local (parameter)
+      super: global implicit (referenced)
+  class B
+    m: local (assigned)
+    function m
+      __class__: free
+      inner: local (assigned, referenced)
+      self: local (parameter)
+      function inner
+        __class__: free (referenced)
+qualnames: A, A.m, B, B.m, B.m.<locals>.inner

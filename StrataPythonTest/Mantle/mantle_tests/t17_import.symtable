@@ -1,0 +1,9 @@
+module top
+  Optional: local (imported)
+  check: local (assigned)
+  cwd: local (assigned)
+  exists: local (imported, referenced)
+  full_path: local (assigned, referenced)
+  join: local (imported, referenced)
+  os: local (imported, referenced)
+qualnames: 

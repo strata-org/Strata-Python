@@ -1,0 +1,10 @@
+module top
+  get_x: local (assigned)
+  print: global implicit (referenced)
+  set_x: local (assigned, referenced)
+  x: global explicit (referenced, declared_global)
+  function set_x
+    x: global explicit (assigned, declared_global)
+  function get_x
+    x: global implicit (referenced)
+qualnames: get_x, set_x

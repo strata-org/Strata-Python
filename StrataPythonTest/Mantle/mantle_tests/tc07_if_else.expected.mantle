@@ -1,0 +1,70 @@
+module tc07_if_else {
+  func @tc07_if_else.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "tc07_if_else"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "tc07_if_else"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Code = const @tc07_if_else.f
+      %7 : py.Value = py.mkClosure %6
+      %8 : base.String = const str "tc07_if_else"
+      %9 : base.String = const str "f"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : py.Value = py.noneLit
+      %13 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %12
+      ret %13
+    propagate.0(%14 : py.Value):
+      %15 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %14
+      ret %15
+  }
+  func @tc07_if_else.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "x"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : base.String = const str "y"
+      %6 : py.Value = py.undef %5
+      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
+      %8 : py.Value = py.tupleLen %0
+      %9 : base.String = const str "kwargs"
+      %10 : py.Value = py.undef %9
+      %11 : py.Value = py.dictFirstKey %1 %10
+      %12 : base.String = const str "TypeError"
+      %13 : base.String = const str "f() got an unexpected keyword argument {}"
+      %14 : base.Unit = py.requireUndefined %11 %12 %13 ^propagate.0()
+      %15 : base.Int = const int 0
+      %16 : base.String = const str "TypeError"
+      %17 : base.String = const str "f() takes 0 positional arguments but {} {was} given"
+      %18 : base.Unit = py.requireAtMost %8 %15 %16 %17 ^propagate.0()
+      %19 : base.Bool = const bool (true)
+      %20 : py.Value = py.boolLit %19
+      %21 : base.Bool = py.truthy %20 ^propagate.0()
+      branch %21 ^then.0() ^else.0()
+    then.0():
+      %22 : base.Int = const int 1
+      %23 : py.Value = py.intLit %22
+      %24 : base.Unit = base.refSet[py.Value] %4 %23
+      jump ^join.0()
+    else.0():
+      %25 : base.String = const str "hello"
+      %26 : py.Value = py.strLit %25
+      %27 : base.Unit = base.refSet[py.Value] %4 %26
+      jump ^join.0()
+    join.0():
+      %28 : py.Value = base.refGet[py.Value] %4
+      %29 : base.String = const str "UnboundLocalError"
+      %30 : base.String = const str "cannot access local variable 'x' where it is not associated with a value"
+      %31 : py.Value = py.requireDefined %28 %29 %30 ^propagate.0()
+      %32 : base.Unit = base.refSet[py.Value] %7 %31
+      %33 : py.Value = py.noneLit
+      %34 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %33
+      ret %34
+    propagate.0(%35 : py.Value):
+      %36 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %35
+      ret %36
+  }
+}
+

@@ -1,0 +1,90 @@
+-- unsupported: match is not supported at 3:4-11:23
+module p34_match {
+  func @p34_match.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "p34_match"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "p34_match"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Code = const @p34_match.f
+      %7 : py.Value = py.mkClosure %6
+      %8 : base.String = const str "p34_match"
+      %9 : base.String = const str "f"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : py.Value = py.noneLit
+      %13 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %12
+      ret %13
+    propagate.0(%14 : py.Value):
+      %15 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %14
+      ret %15
+  }
+  func @p34_match.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "cmd"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : base.String = const str "x"
+      %6 : py.Value = py.undef %5
+      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
+      %8 : base.String = const str "rest"
+      %9 : py.Value = py.undef %8
+      %10 : base.Ref(py.Value) = base.refNew[py.Value] %9
+      %11 : base.String = const str "v"
+      %12 : py.Value = py.undef %11
+      %13 : base.Ref(py.Value) = base.refNew[py.Value] %12
+      %14 : base.String = const str "others"
+      %15 : py.Value = py.undef %14
+      %16 : base.Ref(py.Value) = base.refNew[py.Value] %15
+      %17 : base.String = const str "px"
+      %18 : py.Value = py.undef %17
+      %19 : base.Ref(py.Value) = base.refNew[py.Value] %18
+      %20 : base.String = const str "whole"
+      %21 : py.Value = py.undef %20
+      %22 : base.Ref(py.Value) = base.refNew[py.Value] %21
+      %23 : py.Value = py.tupleLen %0
+      %24 : base.String = const str "cmd"
+      %25 : py.Value = py.undef %24
+      %26 : py.Value = py.mkTuple %25
+      %27 : py.Value = py.noneLit
+      %28 : py.Value = py.getSlice %26 %23 %27 %27 ^propagate.0()
+      %29 : py.Value = py.add %0 %28 ^propagate.0()
+      %30 : base.Int = const int 0
+      %31 : py.Value = py.intLit %30
+      %32 : py.Value = py.getItem %29 %31 ^propagate.0()
+      %33 : base.String = const str "cmd"
+      %34 : py.Value = py.strLit %33
+      %35 : py.Value = py.dictGet %1 %34 %32
+      %36 : py.Value = py.in %34 %1 ^propagate.0()
+      %37 : base.Unit = py.dictDiscard %1 %34
+      %38 : py.Value = py.lt %31 %23 ^propagate.0()
+      %39 : py.Value = py.mult %36 %38 ^propagate.0()
+      %40 : base.Int = const int 0
+      %41 : base.String = const str "TypeError"
+      %42 : base.String = const str "f() got multiple values for argument 'cmd'"
+      %43 : base.Unit = py.requireAtMost %39 %40 %41 %42 ^propagate.0()
+      %44 : base.String = const str "kwargs"
+      %45 : py.Value = py.undef %44
+      %46 : py.Value = py.dictFirstKey %1 %45
+      %47 : base.String = const str "TypeError"
+      %48 : base.String = const str "f() got an unexpected keyword argument {}"
+      %49 : base.Unit = py.requireUndefined %46 %47 %48 ^propagate.0()
+      %50 : base.Int = const int 1
+      %51 : base.String = const str "TypeError"
+      %52 : base.String = const str "f() takes 1 positional argument but {} {was} given"
+      %53 : base.Unit = py.requireAtMost %23 %50 %51 %52 ^propagate.0()
+      %54 : base.String = const str "TypeError"
+      %55 : base.String = const str "f() missing 1 required positional argument: 'cmd'"
+      %56 : py.Value = py.requireDefined %35 %54 %55 ^propagate.0()
+      %57 : base.Unit = base.refSet[py.Value] %4 %56
+      %58 : py.Value = py.noneLit
+      %59 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %58
+      ret %59
+    propagate.0(%60 : py.Value):
+      %61 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %60
+      ret %61
+  }
+}
+

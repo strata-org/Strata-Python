@@ -1,0 +1,8 @@
+module
+  f: local (assigned)
+  function f
+    a: local (assigned)
+    b: local (assigned)
+    c: local (assigned)
+    d: local (assigned)
+    e: local (assigned)

@@ -1,0 +1,15 @@
+module top
+  add: local (assigned, referenced)
+  do_nothing: local (assigned, referenced)
+  greet: local (assigned, referenced)
+  msg: local (assigned)
+  msg2: local (assigned)
+  result: local (assigned)
+  function add
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+  function greet
+    greeting: local (parameter, referenced)
+    name: local (parameter, referenced)
+  function do_nothing
+qualnames: add, do_nothing, greet

@@ -19,7 +19,9 @@ public import StrataPython.PySpecPipeline
 import StrataPython.ReadPython
 import StrataPython.Specs
 import StrataPython.Specs.DDM
-import StrataPython.Util.IndexMap
+public import StrataPython.FeatureUsage
+public import StrataPython.Mantle.Scope
+public import StrataPython.Mantle.Translate
 
 open StrataDDM (SourceRange)
 open StrataPython (ModuleName)

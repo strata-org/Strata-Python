@@ -1,0 +1,27 @@
+module top
+  C: local (imported)
+  make: local (assigned)
+  os: local (imported)
+  function make
+    Box: local (assigned, referenced)
+    count: cell (assigned)
+    json: cell (imported)
+    prefix: cell (parameter)
+    total: local (assigned, referenced)
+    class Box
+      count: free
+      json: free
+      label: local (assigned)
+      prefix: free (referenced, free_class)
+      show: local (assigned)
+      function show
+        count: free (assigned, referenced, nonlocal)
+        json: free (referenced)
+        label: global implicit (referenced)
+        prefix: free (referenced)
+        self: local (parameter)
+    function total
+      count: free
+      function lambda
+        count: free (referenced)
+qualnames: make, make.<locals>.Box, make.<locals>.Box.show, make.<locals>.total, make.<locals>.total.<locals>.<lambda>

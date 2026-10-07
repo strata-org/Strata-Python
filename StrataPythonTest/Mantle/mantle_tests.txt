@@ -1,0 +1,152 @@
+# The Python-to-Mantle translator's tests, and whether it supports each.
+# Columns: `.py` path under StrataPythonTest/Mantle/mantle_tests/ without its extension |
+# status | expected rejections.  Status is `yes` if the translator supports the test and `no`
+# if not yet; a supported test's golden is NAME.expected.mantle beside NAME.py.  A rejection
+# is a construct's name, or the message of a scope error (the e* tests).
+# StrataPythonTestExtra/MantleTranslateTest.lean reads this file.
+t01_assign | yes |
+t02_operators | no |
+t03_if_else | yes |
+t04_while | yes |
+t05_for | no |
+t06_function | no |
+t07_try_except | no |
+t08_try_finally | no |
+t09_nested_try | no |
+t10_except_type | no |
+t11_with | no |
+t12_class | no |
+t13_fstring | no |
+t14_bool_short | no |
+t15_ifexp | no |
+t16_chained_cmp | yes |
+t17_import | no |
+t18_data_struct | no |
+t19_attribute | no |
+t20_raise | no |
+t21_combined | no |
+t22_star_args | no |
+t23_kwargs_boto3 | no |
+t24_assert | no |
+t25_tuple_unpack | no |
+t26_with_as_use | no |
+t27_module_vars | no |
+t28_try_else | no |
+t29_dict_unpack | no |
+t30_loop_try_nested | no |
+n01_async | yes | async def
+n02_listcomp | no | list comprehension
+n03_dictcomp | no | dict comprehension
+n04_generator | no | generator expression
+n05_lambda | yes | lambda
+n06_yield | yes | generator function
+n07_walrus | no | list comprehension
+n08_mixed | no | async def, list comprehension
+i01_call_forms | no |
+i02_param_kinds | no |
+i03_defaults | no |
+i04_dict_unpack | no |
+i05_kwargs_mutation | no |
+i06_call_errors | no |
+i07_methods | no |
+i08_binding_errors | no |
+tc01_literals | yes |
+tc02_arithmetic | yes |
+tc03_string_ops | yes |
+tc04_comparisons | yes |
+tc05_unary | yes |
+tc06_collections | no |
+tc07_if_else | yes |
+tc08_fstring | no |
+tc09_import | no |
+tc10_class_method | no |
+tc11_class_field | no |
+tc12_exhaustive | no |
+tc13_from_import | yes |
+tc14_overload_dispatch | no |
+tc15_arg_count | no |
+tc16_unknown_attr | no |
+tc17_transitive_dispatch | no |
+c1_return_finally | no |
+c2_return_in_for_finally | no |
+c3_break_finally | no |
+c4_continue_finally | no |
+c5_body_finally_vs_loop_exit | no |
+c6_body_raise | no |
+c7_with_return | no |
+m_builtins | yes |
+m_expressions | yes |
+m_global_decl | yes |
+m_if | yes |
+m_imports | yes |
+m_local_vs_global | yes |
+m_params | yes |
+m_unbound_local | yes |
+m_while | yes |
+m_rejected | yes | relative import, import *, nested function, non-constant default, operator <<, for loop
+e01_nonlocal_unbound | no | no binding for nonlocal 'x' found
+e02_global_param | yes | name 'x' is parameter and global
+e03_nonlocal_module | no | nonlocal declaration not allowed at module level
+e04_assign_before_global | yes | name 'x' is assigned to before global declaration
+e05_use_before_global | yes | name 'x' is used prior to global declaration
+e06_nonlocal_and_global | no | name 'x' is nonlocal and global
+e07_walrus_class_comprehension | no | assignment expression within a comprehension cannot be used in a class body
+e08_walrus_rebinds_iteration | no | assignment expression cannot rebind comprehension iteration variable 'x'
+e09_duplicate_argument | yes | duplicate argument 'a' in function definition
+e10_import_star_in_function | yes | import * only allowed at module level, import *
+e11_nonlocal_param | no | name 'x' is parameter and nonlocal
+e12_nonlocal_top_function | no | no binding for nonlocal 'x' found
+e13_walrus_comprehension_iterable | no | assignment expression cannot be used in a comprehension iterable expression
+e14_nonlocal_class_scope | no | no binding for nonlocal 'x' found
+e15_comprehension_inner_rebind | no | comprehension inner loop cannot rebind assignment expression target 'j'
+e16_yield_in_comprehension | no | 'yield' inside list comprehension
+e17_yield_in_genexpr | yes | generator expression, 'yield' inside generator expression
+e18_walrus_lambda_in_iterable | no | assignment expression cannot be used in a comprehension iterable expression
+e19_walrus_rebinds_outer_iteration | no | assignment expression cannot rebind comprehension iteration variable 'row'
+e20_yield_in_dictcomp | no | 'yield' inside dict comprehension
+p01_import_dotted | no |
+p02_import_as | no |
+p03_from_import | no |
+p04_import_in_function | no |
+p05_import_try | no |
+p06_import_relative | no | relative import
+p07_import_star | yes | import *
+p08_import_rebound | yes |
+p09_read_before_assign | yes |
+p10_conditional_local | no |
+p11_shadow_under_control | no |
+p12_del | no |
+p13_except_as | no |
+p14_class_body | no |
+p15_global | yes |
+p16_closures | no |
+p17_conditional_def | no |
+p18_builtins | no |
+p19_builtin_shadowed | no |
+p20_global_mutated | yes |
+p21_closure_three_levels | no |
+p22_comprehensions | no | generator expression
+p23_walrus | no | generator expression
+p24_lambda | no |
+p25_shadow_builtin | no |
+p26_params | no |
+p27_nonlocal_chain | no |
+p28_global_nested | no |
+p29_mangling | no |
+p30_super | no |
+p31_free_class | no |
+p32_class_comprehension | no |
+p33_with_for_targets | no |
+p34_match | yes | match
+p35_async | yes | async def
+p36_decorators | no |
+p37_global_import | yes |
+p38_type_alias | yes | type alias, type parameters
+p39_nested_sample | no |
+p40_comp_shadow | no |
+p41_comp_nested | no |
+p42_comp_reads_outer | no | generator expression
+p43_comp_class_body | no |
+p44_comp_and_genexpr | no | generator expression
+p45_comp_walrus | no |
+p46_comp_lambda | no |

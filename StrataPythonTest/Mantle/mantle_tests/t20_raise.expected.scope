@@ -1,0 +1,28 @@
+module
+  fail_hard: local (assigned)
+  reraise_example: local (assigned)
+  raise_with_msg: local (assigned)
+  reraise_named: local (assigned)
+  reraise_bare: local (assigned)
+  reraise_after_work: local (assigned)
+  function fail_hard
+    ValueError: global implicit (referenced)
+  function reraise_example
+    fail_hard: global implicit (referenced)
+    ValueError: global implicit (referenced)
+  function raise_with_msg
+    params: msg
+    msg: local (parameter, referenced)
+    RuntimeError: global implicit (referenced)
+  function reraise_named
+    fail_hard: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    e: local (assigned, referenced)
+    print: global implicit (referenced)
+  function reraise_bare
+    fail_hard: global implicit (referenced)
+  function reraise_after_work
+    x: local (assigned)
+    fail_hard: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    y: local (assigned)

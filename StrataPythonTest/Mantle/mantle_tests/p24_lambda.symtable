@@ -1,0 +1,17 @@
+module top
+  add: local (assigned)
+  f: local (assigned)
+  k: local (assigned, referenced)
+  function lambda
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    k: global implicit (referenced)
+  function f
+    n: cell (parameter, referenced)
+    function lambda
+      kw: local (parameter)
+      n: free (referenced)
+      r: local (parameter)
+      x: local (parameter, referenced)
+      y: local (parameter, referenced)
+qualnames: <lambda>, f, f.<locals>.<lambda>

@@ -1,0 +1,24 @@
+module
+  log_all: local (assigned, referenced)
+  create_config: local (assigned, referenced)
+  flexible: local (assigned, referenced)
+  items: local (assigned, referenced)
+  params: local (assigned, referenced)
+  extra_args: local (assigned, referenced)
+  extra_kwargs: local (assigned, referenced)
+  function log_all
+    params: prefix, *args
+    prefix: local (parameter, referenced)
+    args: local (parameter, referenced)
+    item: local (assigned, referenced)
+    print: global implicit (referenced)
+  function create_config
+    params: **kwargs
+    kwargs: local (parameter, referenced)
+    config: local (assigned, referenced)
+    key: local (assigned, referenced)
+  function flexible
+    params: first, *args, **kwargs
+    first: local (parameter, referenced)
+    args: local (parameter)
+    kwargs: local (parameter)

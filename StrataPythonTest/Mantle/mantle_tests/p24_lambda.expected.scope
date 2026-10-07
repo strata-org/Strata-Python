@@ -1,0 +1,19 @@
+module
+  k: local (assigned, referenced)
+  add: local (assigned)
+  f: local (assigned)
+  lambda <lambda>
+    params: a, b
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    k: global implicit (referenced)
+  function f
+    params: n
+    n: cell (parameter, referenced)
+    lambda f.<locals>.<lambda>
+      params: x, *r, y, **kw
+      x: local (parameter, referenced)
+      y: local (parameter, referenced)
+      r: local (parameter)
+      kw: local (parameter)
+      n: free (referenced)

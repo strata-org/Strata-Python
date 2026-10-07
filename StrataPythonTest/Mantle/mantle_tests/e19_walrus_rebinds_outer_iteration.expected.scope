@@ -1,0 +1,19 @@
+module
+  f: local (assigned)
+  function f
+    params: rows
+    rows: local (parameter, referenced)
+    row: local (assigned, referenced, comp_iter)
+    c: local (assigned, referenced, comp_iter)
+    inlined comprehension f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      row: local (assigned, referenced, comp_iter)
+      c: local (assigned, referenced, comp_iter)
+      inlined comprehension f.<locals>.<listcomp>.<listcomp>
+        params: .0
+        .0: local (parameter)
+        c: local (assigned, referenced, comp_iter)
+        row: local (assigned)
+diagnostics:
+  syntax error at 2:14-2:22: assignment expression cannot rebind comprehension iteration variable 'row'

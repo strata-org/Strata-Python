@@ -15,7 +15,7 @@ set_option autoImplicit false
 Checks that `decide` evaluates the array helpers, parameter names, and `TypeExpr.Raw`
 equality, instantiation and folding. -/
 
-namespace StrataMantleTest.DataTest
+namespace Strata.Mantle.DataTest
 
 open Strata.Mantle
 
@@ -56,4 +56,4 @@ example : (list (.var 0)).instantiate #[int] = list int := by decide
 example : (list (.var 1)).instantiate #[int] = list (.var 1) := by decide
 example : (list int).fold (fun _ => 0) (fun _ as => as.foldl (· + ·) 1) = 2 := by decide
 
-end StrataMantleTest.DataTest
+end Strata.Mantle.DataTest

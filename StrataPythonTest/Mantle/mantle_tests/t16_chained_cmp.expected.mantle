@@ -1,0 +1,170 @@
+module t16_chained_cmp {
+  func @t16_chained_cmp.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "t16_chained_cmp"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "t16_chained_cmp"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Int = const int 5
+      %7 : py.Value = py.intLit %6
+      %8 : base.String = const str "t16_chained_cmp"
+      %9 : base.String = const str "x"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : base.Int = const int 10
+      %13 : py.Value = py.intLit %12
+      %14 : base.String = const str "t16_chained_cmp"
+      %15 : base.String = const str "y"
+      %16 : base.Ref(py.Value) = py.globalCell %14 %15
+      %17 : base.Unit = base.refSet[py.Value] %16 %13
+      %18 : base.Int = const int 15
+      %19 : py.Value = py.intLit %18
+      %20 : base.String = const str "t16_chained_cmp"
+      %21 : base.String = const str "z"
+      %22 : base.Ref(py.Value) = py.globalCell %20 %21
+      %23 : base.Unit = base.refSet[py.Value] %22 %19
+      %24 : base.String = const str "t16_chained_cmp"
+      %25 : base.String = const str "x"
+      %26 : base.Ref(py.Value) = py.globalCell %24 %25
+      %27 : py.Value = base.refGet[py.Value] %26
+      %28 : base.String = const str "NameError"
+      %29 : base.String = const str "name 'x' is not defined"
+      %30 : py.Value = py.requireDefined %27 %28 %29 ^propagate.0()
+      %31 : base.String = const str "t16_chained_cmp"
+      %32 : base.String = const str "y"
+      %33 : base.Ref(py.Value) = py.globalCell %31 %32
+      %34 : py.Value = base.refGet[py.Value] %33
+      %35 : base.String = const str "NameError"
+      %36 : base.String = const str "name 'y' is not defined"
+      %37 : py.Value = py.requireDefined %34 %35 %36 ^propagate.0()
+      %38 : py.Value = py.lt %30 %37 ^propagate.0()
+      %39 : base.Bool = py.truthy %38 ^propagate.0()
+      branch %39 ^cmp.0() ^join.0(%38)
+    cmp.0():
+      %40 : base.String = const str "t16_chained_cmp"
+      %41 : base.String = const str "z"
+      %42 : base.Ref(py.Value) = py.globalCell %40 %41
+      %43 : py.Value = base.refGet[py.Value] %42
+      %44 : base.String = const str "NameError"
+      %45 : base.String = const str "name 'z' is not defined"
+      %46 : py.Value = py.requireDefined %43 %44 %45 ^propagate.0()
+      %47 : py.Value = py.lt %37 %46 ^propagate.0()
+      jump ^join.0(%47)
+    join.0(%48 : py.Value):
+      %49 : base.String = const str "t16_chained_cmp"
+      %50 : base.String = const str "r1"
+      %51 : base.Ref(py.Value) = py.globalCell %49 %50
+      %52 : base.Unit = base.refSet[py.Value] %51 %48
+      %53 : base.Int = const int 0
+      %54 : py.Value = py.intLit %53
+      %55 : base.String = const str "t16_chained_cmp"
+      %56 : base.String = const str "x"
+      %57 : base.Ref(py.Value) = py.globalCell %55 %56
+      %58 : py.Value = base.refGet[py.Value] %57
+      %59 : base.String = const str "NameError"
+      %60 : base.String = const str "name 'x' is not defined"
+      %61 : py.Value = py.requireDefined %58 %59 %60 ^propagate.0()
+      %62 : py.Value = py.lt %54 %61 ^propagate.0()
+      %63 : base.Bool = py.truthy %62 ^propagate.0()
+      branch %63 ^cmp.1() ^join.1(%62)
+    cmp.1():
+      %64 : base.String = const str "t16_chained_cmp"
+      %65 : base.String = const str "y"
+      %66 : base.Ref(py.Value) = py.globalCell %64 %65
+      %67 : py.Value = base.refGet[py.Value] %66
+      %68 : base.String = const str "NameError"
+      %69 : base.String = const str "name 'y' is not defined"
+      %70 : py.Value = py.requireDefined %67 %68 %69 ^propagate.0()
+      %71 : py.Value = py.lt %61 %70 ^propagate.0()
+      %72 : base.Bool = py.truthy %71 ^propagate.0()
+      branch %72 ^cmp.2() ^join.1(%71)
+    cmp.2():
+      %73 : base.String = const str "t16_chained_cmp"
+      %74 : base.String = const str "z"
+      %75 : base.Ref(py.Value) = py.globalCell %73 %74
+      %76 : py.Value = base.refGet[py.Value] %75
+      %77 : base.String = const str "NameError"
+      %78 : base.String = const str "name 'z' is not defined"
+      %79 : py.Value = py.requireDefined %76 %77 %78 ^propagate.0()
+      %80 : py.Value = py.lt %70 %79 ^propagate.0()
+      jump ^join.1(%80)
+    join.1(%81 : py.Value):
+      %82 : base.String = const str "t16_chained_cmp"
+      %83 : base.String = const str "r2"
+      %84 : base.Ref(py.Value) = py.globalCell %82 %83
+      %85 : base.Unit = base.refSet[py.Value] %84 %81
+      %86 : base.String = const str "t16_chained_cmp"
+      %87 : base.String = const str "x"
+      %88 : base.Ref(py.Value) = py.globalCell %86 %87
+      %89 : py.Value = base.refGet[py.Value] %88
+      %90 : base.String = const str "NameError"
+      %91 : base.String = const str "name 'x' is not defined"
+      %92 : py.Value = py.requireDefined %89 %90 %91 ^propagate.0()
+      %93 : base.String = const str "t16_chained_cmp"
+      %94 : base.String = const str "y"
+      %95 : base.Ref(py.Value) = py.globalCell %93 %94
+      %96 : py.Value = base.refGet[py.Value] %95
+      %97 : base.String = const str "NameError"
+      %98 : base.String = const str "name 'y' is not defined"
+      %99 : py.Value = py.requireDefined %96 %97 %98 ^propagate.0()
+      %100 : py.Value = py.ltE %92 %99 ^propagate.0()
+      %101 : base.Bool = py.truthy %100 ^propagate.0()
+      branch %101 ^cmp.3() ^join.2(%100)
+    cmp.3():
+      %102 : base.String = const str "t16_chained_cmp"
+      %103 : base.String = const str "z"
+      %104 : base.Ref(py.Value) = py.globalCell %102 %103
+      %105 : py.Value = base.refGet[py.Value] %104
+      %106 : base.String = const str "NameError"
+      %107 : base.String = const str "name 'z' is not defined"
+      %108 : py.Value = py.requireDefined %105 %106 %107 ^propagate.0()
+      %109 : py.Value = py.lt %99 %108 ^propagate.0()
+      jump ^join.2(%109)
+    join.2(%110 : py.Value):
+      %111 : base.String = const str "t16_chained_cmp"
+      %112 : base.String = const str "r3"
+      %113 : base.Ref(py.Value) = py.globalCell %111 %112
+      %114 : base.Unit = base.refSet[py.Value] %113 %110
+      %115 : base.String = const str "t16_chained_cmp"
+      %116 : base.String = const str "x"
+      %117 : base.Ref(py.Value) = py.globalCell %115 %116
+      %118 : py.Value = base.refGet[py.Value] %117
+      %119 : base.String = const str "NameError"
+      %120 : base.String = const str "name 'x' is not defined"
+      %121 : py.Value = py.requireDefined %118 %119 %120 ^propagate.0()
+      %122 : base.String = const str "t16_chained_cmp"
+      %123 : base.String = const str "y"
+      %124 : base.Ref(py.Value) = py.globalCell %122 %123
+      %125 : py.Value = base.refGet[py.Value] %124
+      %126 : base.String = const str "NameError"
+      %127 : base.String = const str "name 'y' is not defined"
+      %128 : py.Value = py.requireDefined %125 %126 %127 ^propagate.0()
+      %129 : py.Value = py.lt %121 %128 ^propagate.0()
+      %130 : base.Bool = py.truthy %129 ^propagate.0()
+      branch %130 ^cmp.4() ^join.3(%129)
+    cmp.4():
+      %131 : base.String = const str "t16_chained_cmp"
+      %132 : base.String = const str "z"
+      %133 : base.Ref(py.Value) = py.globalCell %131 %132
+      %134 : py.Value = base.refGet[py.Value] %133
+      %135 : base.String = const str "NameError"
+      %136 : base.String = const str "name 'z' is not defined"
+      %137 : py.Value = py.requireDefined %134 %135 %136 ^propagate.0()
+      %138 : py.Value = py.gtE %128 %137 ^propagate.0()
+      jump ^join.3(%138)
+    join.3(%139 : py.Value):
+      %140 : base.String = const str "t16_chained_cmp"
+      %141 : base.String = const str "r4"
+      %142 : base.Ref(py.Value) = py.globalCell %140 %141
+      %143 : base.Unit = base.refSet[py.Value] %142 %139
+      %144 : py.Value = py.noneLit
+      %145 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %144
+      ret %145
+    propagate.0(%146 : py.Value):
+      %147 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %146
+      ret %147
+  }
+}
+

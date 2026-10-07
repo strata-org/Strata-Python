@@ -56,6 +56,31 @@ for why the paths are that way round and what currently differs between them.
 Neither suite runs at Lean elaboration time: both shell out to the compiled binary,
 so a mismatch is a test failure, not a build error.
 
+## Mantle layout
+
+[`README.md`](./README.md#mantle) lists the directories. The rules:
+
+- New Mantle core work goes in `StrataMantle/`, which must not import `StrataPython*`.
+- Python on Mantle goes in `StrataPython/Mantle/`.
+- Tests (`StrataMantleTest/`, `StrataPythonTest/Mantle/`) are `module` files; `import all` is
+  allowed. Prove well-formedness with `decide +kernel`, not `native_decide`.
+
+The scope pass and the translator share their tests. To add one, put `NAME.py` in
+`StrataPythonTest/Mantle/mantle_tests/` and:
+
+- add the line `NAME | yes | REJECTS` to `StrataPythonTest/Mantle/mantle_tests.txt` (`no` if
+  the translator should not handle it yet; `REJECTS` lists the constructs it must reject and
+  the messages of its scope errors, often empty), and write its translator golden
+  `NAME.expected.mantle` by running `StrataPythonTestExtra/MantleTranslateTest.lean` with
+  `MANTLE_UPDATE=1`;
+- write `NAME.symtable` by running `StrataPythonTest/Mantle/scope_symtable.py` with CPython
+  3.12, and its scope golden `NAME.expected.scope` by running
+  `StrataPythonTestExtra/PyScopeTest.lean` with `PYSCOPE_UPDATE=1`.
+
+The translator test fails on any `.py` that is not listed, and the scope test on any `.py`
+without both scope files.
+`lake exe pymantle mantle FILE.py` prints the diagnostics and the module for one file.
+
 ## Convention: `open Strata` pattern
 
 Since StrataPython was extracted from the `Strata` package, many files use

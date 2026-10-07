@@ -1,0 +1,8 @@
+module
+  f: local (assigned)
+  x: global explicit (declared_global)
+  function f
+    params: x
+    x: global explicit (parameter, declared_global)
+diagnostics:
+  syntax error at 2:4-2:12: name 'x' is parameter and global

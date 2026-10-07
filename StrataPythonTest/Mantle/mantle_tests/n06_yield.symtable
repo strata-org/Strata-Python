@@ -1,0 +1,9 @@
+module top
+  count_up: local (assigned)
+  normal_func: local (assigned)
+  function count_up
+    i: local (assigned, referenced)
+    n: local (parameter, referenced)
+  function normal_func
+    x: local (parameter, referenced)
+qualnames: count_up, normal_func

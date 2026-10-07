@@ -1,0 +1,10 @@
+module
+  classify: local (assigned)
+  sign: local (assigned)
+  function classify
+    params: x
+    x: local (parameter, referenced)
+    r: local (assigned, referenced)
+  function sign
+    params: x
+    x: local (parameter, referenced)

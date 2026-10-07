@@ -1,0 +1,10 @@
+module
+  show: local (assigned, referenced)
+  xs: local (assigned, referenced)
+  m: local (assigned, referenced)
+  function show
+    params: *args, **kwargs
+    args: local (parameter, referenced)
+    kwargs: local (parameter, referenced)
+    print: global implicit (referenced)
+    len: global implicit (referenced)

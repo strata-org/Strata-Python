@@ -1,0 +1,13 @@
+module top
+  Exception: global implicit (referenced)
+  KeyError: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  e: local (assigned, referenced)
+  msg: local (assigned)
+  result: local (assigned)
+  risky: local (assigned, referenced)
+  str: global implicit (referenced)
+  value: local (assigned)
+  function risky
+    ValueError: global implicit (referenced)
+qualnames: risky

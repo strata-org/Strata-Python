@@ -1,0 +1,15 @@
+module top
+  async_fetch: local (assigned)
+  asyncio: local (imported)
+  doubled: local (assigned)
+  items: local (assigned, referenced)
+  result: local (assigned)
+  sync_add: local (assigned, referenced)
+  x: local (assigned, referenced, comp_iter)
+  function sync_add
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+  function async_fetch
+    asyncio: global implicit (referenced)
+    url: local (parameter, referenced)
+qualnames: async_fetch, sync_add

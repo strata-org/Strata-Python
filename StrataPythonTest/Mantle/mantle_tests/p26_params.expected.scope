@@ -1,0 +1,16 @@
+module
+  d: local (assigned, referenced)
+  f: local (assigned)
+  h: local (assigned)
+  function f
+    params: a, b, /, c, *args, e, g, **kwargs
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    c: local (parameter, referenced)
+    e: local (parameter, referenced)
+    g: local (parameter, referenced)
+    args: local (parameter, referenced)
+    kwargs: local (parameter, referenced)
+  function h
+    params: *, k
+    k: local (parameter, referenced)

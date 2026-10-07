@@ -1,0 +1,12 @@
+module
+  f: local (assigned)
+  function f
+    params: xs
+    xs: local (parameter, referenced)
+    x: local (assigned, referenced, comp_iter)
+    inlined comprehension f.<locals>.<dictcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+diagnostics:
+  syntax error at 2:16-2:23: 'yield' inside dict comprehension

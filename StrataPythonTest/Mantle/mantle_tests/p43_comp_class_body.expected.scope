@@ -1,0 +1,47 @@
+module
+  outer: local (assigned)
+  function outer
+    params: rows
+    rows: cell (parameter)
+    scale: cell (assigned)
+    C: local (assigned, referenced)
+    class outer.<locals>.C (needs __class__ cell)
+      k: local (assigned)
+      a: local (assigned)
+      rows: free (referenced, free_class)
+      fs: local (assigned)
+      own: local (assigned)
+      m: local (assigned)
+      r: local (assigned, referenced, comp_iter, comp_cell)
+      scale: free (referenced, free_class)
+      _: local (assigned, comp_iter)
+      __class__: global implicit (referenced)
+      inlined comprehension outer.<locals>.C.<listcomp>
+        params: .0
+        .0: local (parameter)
+        r: local (assigned, referenced, comp_iter)
+        scale: free (referenced)
+        k: global implicit (referenced)
+      inlined comprehension outer.<locals>.C.<listcomp>
+        params: .0
+        .0: local (parameter)
+        r: cell (assigned, comp_iter)
+        lambda outer.<locals>.C.<lambda>
+          r: free (referenced)
+      inlined comprehension outer.<locals>.C.<listcomp>
+        params: .0
+        .0: local (parameter)
+        _: local (assigned, comp_iter)
+      function outer.<locals>.C.m
+        params: self
+        self: local (parameter)
+        rows: free (referenced)
+        _: local (assigned, comp_iter)
+        super: global implicit (referenced)
+        __class__: free (referenced)
+        inlined comprehension outer.<locals>.C.m.<locals>.<listcomp>
+          params: .0
+          .0: local (parameter)
+          _: local (assigned, comp_iter)
+          super: global implicit (referenced)
+          __class__: free (referenced)

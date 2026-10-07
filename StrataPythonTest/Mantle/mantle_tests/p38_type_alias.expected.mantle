@@ -1,0 +1,20 @@
+-- unsupported: type alias is not supported at 2:0-2:16
+-- unsupported: type parameters is not supported at 5:0-6:12
+module p38_type_alias {
+  func @p38_type_alias.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "p38_type_alias"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "p38_type_alias"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : py.Value = py.noneLit
+      %7 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %6
+      ret %7
+    propagate.0(%8 : py.Value):
+      %9 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %8
+      ret %9
+  }
+}
+

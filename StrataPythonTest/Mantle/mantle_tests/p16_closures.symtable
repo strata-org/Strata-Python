@@ -1,0 +1,23 @@
+module top
+  counter: local (assigned)
+  outer: local (assigned)
+  reader: local (assigned)
+  function reader
+    r: local (assigned, referenced)
+    x: cell (assigned)
+    function r
+      x: free (referenced)
+  function counter
+    inc: local (assigned, referenced)
+    n: cell (assigned)
+    function inc
+      n: free (assigned, referenced, nonlocal)
+  function outer
+    middle: local (assigned, referenced)
+    p: cell (parameter)
+    function middle
+      inner: local (assigned, referenced)
+      p: free
+      function inner
+        p: free (referenced)
+qualnames: counter, counter.<locals>.inc, outer, outer.<locals>.middle, outer.<locals>.middle.<locals>.inner, reader, reader.<locals>.r

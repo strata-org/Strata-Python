@@ -1,0 +1,13 @@
+module
+  import json: module simplejson
+  import json: module json
+  import path: member path of os
+  json: local (imported, referenced)
+  ImportError: global implicit (referenced)
+  path: local (assigned, imported)
+  f: local (assigned)
+  function f
+    params: x
+    x: local (parameter, referenced)
+    json: global implicit (referenced)
+    path: global implicit (referenced)

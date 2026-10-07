@@ -1,0 +1,9 @@
+module top
+  f: local (assigned)
+  function f
+    g: global implicit (referenced)
+    l: local (assigned, referenced)
+    lock: global implicit (referenced)
+    x: local (assigned, referenced)
+    xs: local (parameter, referenced)
+qualnames: f

@@ -1,0 +1,15 @@
+module top
+  c: local (assigned)
+  f: local (assigned)
+  g: local (assigned)
+  range: global implicit (referenced)
+  x: local (assigned)
+  function f
+    a: local (assigned, referenced)
+    x: local (assigned, referenced)
+    xs: local (parameter, referenced)
+  function g
+    b: local (assigned, referenced)
+    xs: local (parameter, referenced)
+    y: local (assigned, referenced)
+qualnames: f, g

@@ -1,0 +1,12 @@
+module top
+  f: local (assigned)
+  function f
+    Point: global implicit (referenced)
+    cmd: local (parameter, referenced)
+    others: local (assigned, referenced)
+    px: local (assigned, referenced)
+    rest: local (assigned, referenced)
+    v: local (assigned, referenced)
+    whole: local (assigned, referenced)
+    x: local (assigned, referenced)
+qualnames: f

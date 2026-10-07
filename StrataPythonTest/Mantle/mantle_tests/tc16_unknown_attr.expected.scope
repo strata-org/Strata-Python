@@ -1,0 +1,7 @@
+module
+  import math: module math
+  math: local (imported)
+  f: local (assigned)
+  function f
+    x: local (assigned)
+    math: global implicit (referenced)

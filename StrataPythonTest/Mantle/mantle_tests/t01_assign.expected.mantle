@@ -1,0 +1,69 @@
+module t01_assign {
+  func @t01_assign.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "t01_assign"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "t01_assign"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Int = const int 42
+      %7 : py.Value = py.intLit %6
+      %8 : base.String = const str "t01_assign"
+      %9 : base.String = const str "x"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : base.Int = const int 10
+      %13 : py.Value = py.intLit %12
+      %14 : base.String = const str "t01_assign"
+      %15 : base.String = const str "y"
+      %16 : base.Ref(py.Value) = py.globalCell %14 %15
+      %17 : base.Unit = base.refSet[py.Value] %16 %13
+      %18 : base.String = const str "hello"
+      %19 : py.Value = py.strLit %18
+      %20 : base.String = const str "t01_assign"
+      %21 : base.String = const str "name"
+      %22 : base.Ref(py.Value) = py.globalCell %20 %21
+      %23 : base.Unit = base.refSet[py.Value] %22 %19
+      %24 : base.Bool = const bool (true)
+      %25 : py.Value = py.boolLit %24
+      %26 : base.String = const str "t01_assign"
+      %27 : base.String = const str "flag"
+      %28 : base.Ref(py.Value) = py.globalCell %26 %27
+      %29 : base.Unit = base.refSet[py.Value] %28 %25
+      %30 : py.Value = py.noneLit
+      %31 : base.String = const str "t01_assign"
+      %32 : base.String = const str "nothing"
+      %33 : base.Ref(py.Value) = py.globalCell %31 %32
+      %34 : base.Unit = base.refSet[py.Value] %33 %30
+      %35 : base.Float64 = const float "3.140000000000000124344978758017532527446746826171875"
+      %36 : py.Value = py.floatLit %35
+      %37 : base.String = const str "t01_assign"
+      %38 : base.String = const str "pi"
+      %39 : base.Ref(py.Value) = py.globalCell %37 %38
+      %40 : base.Unit = base.refSet[py.Value] %39 %36
+      %41 : base.String = const str "raw"
+      %42 : py.Value = py.bytesLit %41
+      %43 : base.String = const str "t01_assign"
+      %44 : base.String = const str "data"
+      %45 : base.Ref(py.Value) = py.globalCell %43 %44
+      %46 : base.Unit = base.refSet[py.Value] %45 %42
+      %47 : base.Int = const int 100
+      %48 : py.Value = py.intLit %47
+      %49 : base.String = const str "t01_assign"
+      %50 : base.String = const str "a"
+      %51 : base.Ref(py.Value) = py.globalCell %49 %50
+      %52 : base.Unit = base.refSet[py.Value] %51 %48
+      %53 : base.String = const str "t01_assign"
+      %54 : base.String = const str "b"
+      %55 : base.Ref(py.Value) = py.globalCell %53 %54
+      %56 : base.Unit = base.refSet[py.Value] %55 %48
+      %57 : py.Value = py.noneLit
+      %58 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %57
+      ret %58
+    propagate.0(%59 : py.Value):
+      %60 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %59
+      ret %60
+  }
+}
+

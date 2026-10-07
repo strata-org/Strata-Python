@@ -1,0 +1,8 @@
+module top
+  cloudkit: local (imported)
+  f: local (assigned)
+  function f
+    cache_client: local (assigned)
+    cloudkit: global implicit (referenced)
+    db_client: local (assigned)
+qualnames: f

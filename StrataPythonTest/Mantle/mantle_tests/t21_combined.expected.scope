@@ -1,0 +1,39 @@
+module
+  import json: module json
+  import Optional: member Optional of typing
+  json: local (imported)
+  Optional: local (imported)
+  ResourceManager: local (assigned, referenced)
+  process_items: local (assigned, referenced)
+  mgr: local (assigned, referenced)
+  data: local (assigned, referenced)
+  total: local (assigned)
+  result: local (assigned)
+  class ResourceManager
+    __init__: local (assigned)
+    add_resource: local (assigned)
+    get_resource: local (assigned)
+    function ResourceManager.__init__
+      params: self, name
+      self: local (parameter, referenced)
+      name: local (parameter, referenced)
+    function ResourceManager.add_resource
+      params: self, key, value
+      self: local (parameter, referenced)
+      key: local (parameter, referenced)
+      value: local (parameter, referenced)
+    function ResourceManager.get_resource
+      params: self, key
+      self: local (parameter, referenced)
+      key: local (parameter, referenced)
+  function process_items
+    params: items, manager
+    items: local (parameter, referenced)
+    manager: local (parameter, referenced)
+    count: local (assigned, referenced, annotated)
+    item: local (assigned, referenced)
+    key: local (assigned, referenced)
+    value: local (assigned, referenced)
+    success: local (assigned, referenced)
+    KeyError: global implicit (referenced)
+    e: local (assigned)

@@ -1,0 +1,56 @@
+module p37_global_import {
+  func @p37_global_import.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "p37_global_import"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "p37_global_import"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Code = const @p37_global_import.f
+      %7 : py.Value = py.mkClosure %6
+      %8 : base.String = const str "p37_global_import"
+      %9 : base.String = const str "f"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : py.Value = py.noneLit
+      %13 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %12
+      ret %13
+    propagate.0(%14 : py.Value):
+      %15 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %14
+      ret %15
+  }
+  func @p37_global_import.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : py.Value = py.tupleLen %0
+      %3 : base.String = const str "kwargs"
+      %4 : py.Value = py.undef %3
+      %5 : py.Value = py.dictFirstKey %1 %4
+      %6 : base.String = const str "TypeError"
+      %7 : base.String = const str "f() got an unexpected keyword argument {}"
+      %8 : base.Unit = py.requireUndefined %5 %6 %7 ^propagate.0()
+      %9 : base.Int = const int 0
+      %10 : base.String = const str "TypeError"
+      %11 : base.String = const str "f() takes 0 positional arguments but {} {was} given"
+      %12 : base.Unit = py.requireAtMost %2 %9 %10 %11 ^propagate.0()
+      %13 : base.String = const str "json"
+      %14 : py.Value = py.importModule %13 ^propagate.0()
+      %15 : base.String = const str "p37_global_import"
+      %16 : base.String = const str "json"
+      %17 : base.Ref(py.Value) = py.globalCell %15 %16
+      %18 : base.Unit = base.refSet[py.Value] %17 %14
+      %19 : base.String = const str "p37_global_import"
+      %20 : base.String = const str "json"
+      %21 : base.Ref(py.Value) = py.globalCell %19 %20
+      %22 : py.Value = base.refGet[py.Value] %21
+      %23 : base.String = const str "NameError"
+      %24 : base.String = const str "name 'json' is not defined"
+      %25 : py.Value = py.requireDefined %22 %23 %24 ^propagate.0()
+      %26 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %25
+      ret %26
+    propagate.0(%27 : py.Value):
+      %28 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %27
+      ret %28
+  }
+}
+

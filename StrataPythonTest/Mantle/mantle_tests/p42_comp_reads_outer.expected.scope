@@ -1,0 +1,51 @@
+module
+  f: local (assigned)
+  g: local (assigned)
+  h: local (assigned)
+  outer: local (assigned)
+  function f
+    params: xs, n
+    xs: local (parameter, referenced)
+    n: local (parameter)
+    k: local (assigned)
+    x: local (assigned, referenced, comp_iter)
+    inlined comprehension f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+      k: free (referenced)
+      n: free (referenced)
+  function g
+    params: xs
+    xs: local (parameter, referenced)
+    k: cell (assigned)
+    generator expression g.<locals>.<genexpr>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+      k: free (referenced)
+  function h
+    params: xs
+    xs: local (parameter, referenced)
+    k: cell (assigned)
+    x: local (assigned, comp_iter)
+    inlined comprehension h.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, comp_iter)
+      k: free
+      lambda h.<locals>.<lambda>
+        k: free (referenced)
+  function outer
+    m: cell (assigned)
+    inner: local (assigned, referenced)
+    function outer.<locals>.inner
+      params: xs
+      xs: local (parameter, referenced)
+      x: local (assigned, referenced, comp_iter)
+      m: free (referenced)
+      inlined comprehension outer.<locals>.inner.<locals>.<listcomp>
+        params: .0
+        .0: local (parameter)
+        x: local (assigned, referenced, comp_iter)
+        m: free (referenced)

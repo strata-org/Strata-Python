@@ -1,0 +1,5 @@
+module
+  items: local (assigned, referenced)
+  total: local (assigned, annotated)
+  x: local (assigned, referenced)
+  even_sum: local (assigned, annotated)

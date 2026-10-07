@@ -1,0 +1,5 @@
+module
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  print: global implicit (referenced)
+  dict: global implicit (referenced)

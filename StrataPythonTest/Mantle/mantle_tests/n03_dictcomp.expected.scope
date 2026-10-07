@@ -1,0 +1,10 @@
+module
+  keys: local (assigned, referenced)
+  d: local (assigned)
+  k: local (assigned, referenced, comp_iter)
+  len: global implicit (referenced)
+  inlined comprehension <dictcomp>
+    params: .0
+    .0: local (parameter)
+    k: local (assigned, referenced, comp_iter)
+    len: global implicit (referenced)

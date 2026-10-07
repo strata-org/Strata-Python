@@ -1,0 +1,13 @@
+module
+  import asyncio: module asyncio
+  asyncio: local (imported)
+  fetch_data: local (assigned)
+  sync_helper: local (assigned)
+  function fetch_data
+    params: url
+    url: local (parameter, referenced)
+    result: local (assigned, referenced)
+    asyncio: global implicit (referenced)
+  function sync_helper
+    params: x
+    x: local (parameter, referenced)

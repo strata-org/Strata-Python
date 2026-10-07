@@ -1,0 +1,6 @@
+module
+  loop: local (assigned)
+  function loop
+    params: n
+    n: local (parameter, referenced)
+    i: local (assigned, referenced)

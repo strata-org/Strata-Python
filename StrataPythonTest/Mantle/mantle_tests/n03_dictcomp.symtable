@@ -1,0 +1,6 @@
+module top
+  d: local (assigned)
+  k: local (assigned, referenced, comp_iter)
+  keys: local (assigned, referenced)
+  len: global implicit (referenced)
+qualnames: 

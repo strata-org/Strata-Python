@@ -1,0 +1,1 @@
+error: assignment expression within a comprehension cannot be used in a class body (line 2)

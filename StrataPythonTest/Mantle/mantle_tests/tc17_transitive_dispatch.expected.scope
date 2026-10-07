@@ -1,0 +1,8 @@
+module
+  import cloudkit: module cloudkit
+  cloudkit: local (imported)
+  f: local (assigned)
+  function f
+    db: local (assigned, referenced)
+    cloudkit: global implicit (referenced)
+    result: local (assigned)

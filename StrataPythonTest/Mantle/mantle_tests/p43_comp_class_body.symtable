@@ -1,0 +1,26 @@
+module top
+  outer: local (assigned)
+  function outer
+    C: local (assigned, referenced)
+    rows: cell (parameter)
+    scale: cell (assigned)
+    class C
+      _: local (assigned, comp_iter)
+      __class__: global implicit (referenced)
+      a: local (assigned)
+      fs: local (assigned)
+      k: local (assigned)
+      m: local (assigned)
+      own: local (assigned)
+      r: local (assigned, referenced, comp_iter, comp_cell)
+      rows: free (referenced, free_class)
+      scale: free (referenced, free_class)
+      function lambda
+        r: free (referenced)
+      function m
+        _: local (assigned, comp_iter)
+        __class__: free (referenced)
+        rows: free (referenced)
+        self: local (parameter)
+        super: global implicit (referenced)
+qualnames: outer, outer.<locals>.C, outer.<locals>.C.<lambda>, outer.<locals>.C.m

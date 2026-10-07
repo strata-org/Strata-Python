@@ -1,0 +1,61 @@
+module p08_import_rebound {
+  func @p08_import_rebound.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "p08_import_rebound"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "p08_import_rebound"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.String = const str "os"
+      %7 : py.Value = py.importModule %6 ^propagate.0()
+      %8 : base.String = const str "p08_import_rebound"
+      %9 : base.String = const str "os"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : py.Value = py.noneLit
+      %13 : base.String = const str "p08_import_rebound"
+      %14 : base.String = const str "os"
+      %15 : base.Ref(py.Value) = py.globalCell %13 %14
+      %16 : base.Unit = base.refSet[py.Value] %15 %12
+      %17 : base.Code = const @p08_import_rebound.f
+      %18 : py.Value = py.mkClosure %17
+      %19 : base.String = const str "p08_import_rebound"
+      %20 : base.String = const str "f"
+      %21 : base.Ref(py.Value) = py.globalCell %19 %20
+      %22 : base.Unit = base.refSet[py.Value] %21 %18
+      %23 : py.Value = py.noneLit
+      %24 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %23
+      ret %24
+    propagate.0(%25 : py.Value):
+      %26 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %25
+      ret %26
+  }
+  func @p08_import_rebound.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : py.Value = py.tupleLen %0
+      %3 : base.String = const str "kwargs"
+      %4 : py.Value = py.undef %3
+      %5 : py.Value = py.dictFirstKey %1 %4
+      %6 : base.String = const str "TypeError"
+      %7 : base.String = const str "f() got an unexpected keyword argument {}"
+      %8 : base.Unit = py.requireUndefined %5 %6 %7 ^propagate.0()
+      %9 : base.Int = const int 0
+      %10 : base.String = const str "TypeError"
+      %11 : base.String = const str "f() takes 0 positional arguments but {} {was} given"
+      %12 : base.Unit = py.requireAtMost %2 %9 %10 %11 ^propagate.0()
+      %13 : base.String = const str "p08_import_rebound"
+      %14 : base.String = const str "os"
+      %15 : base.Ref(py.Value) = py.globalCell %13 %14
+      %16 : py.Value = base.refGet[py.Value] %15
+      %17 : base.String = const str "NameError"
+      %18 : base.String = const str "name 'os' is not defined"
+      %19 : py.Value = py.requireDefined %16 %17 %18 ^propagate.0()
+      %20 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %19
+      ret %20
+    propagate.0(%21 : py.Value):
+      %22 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %21
+      ret %22
+  }
+}
+

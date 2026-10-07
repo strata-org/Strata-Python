@@ -1,0 +1,31 @@
+module
+  process_pairs: local (assigned)
+  use_enumerate: local (assigned)
+  dict_iteration: local (assigned)
+  tuple_assign: local (assigned)
+  function process_pairs
+    params: items
+    items: local (parameter, referenced)
+    k: local (assigned, referenced)
+    v: local (assigned, referenced)
+    print: global implicit (referenced)
+  function use_enumerate
+    params: names
+    names: local (parameter, referenced)
+    i: local (assigned, referenced)
+    name: local (assigned, referenced)
+    enumerate: global implicit (referenced)
+    print: global implicit (referenced)
+  function dict_iteration
+    params: d
+    d: local (parameter, referenced)
+    key: local (assigned, referenced)
+    value: local (assigned, referenced)
+    print: global implicit (referenced)
+  function tuple_assign
+    a: local (assigned, referenced)
+    b: local (assigned, referenced)
+    x: local (assigned, referenced)
+    y: local (assigned, referenced)
+    z: local (assigned, referenced)
+    print: global implicit (referenced)

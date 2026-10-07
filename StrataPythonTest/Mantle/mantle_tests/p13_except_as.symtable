@@ -1,0 +1,10 @@
+module top
+  Exception: global implicit (referenced)
+  err: local (assigned)
+  f: local (assigned)
+  function f
+    ValueError: global implicit (referenced)
+    e: local (assigned, referenced)
+    g: global implicit (referenced)
+    print: global implicit (referenced)
+qualnames: f

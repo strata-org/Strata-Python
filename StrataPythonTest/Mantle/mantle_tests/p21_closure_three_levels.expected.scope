@@ -1,0 +1,16 @@
+module
+  f: local (assigned)
+  function f
+    a: cell (assigned)
+    g: local (assigned, referenced)
+    function f.<locals>.g
+      b: cell (assigned)
+      h: local (assigned, referenced)
+      a: free
+      function f.<locals>.g.<locals>.h
+        k: local (assigned, referenced)
+        a: free
+        b: free
+        function f.<locals>.g.<locals>.h.<locals>.k
+          a: free (referenced)
+          b: free (referenced)

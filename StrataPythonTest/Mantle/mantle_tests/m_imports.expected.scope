@@ -1,0 +1,16 @@
+module
+  import os: module os
+  import os: module os (loads os.path)
+  import ET: module xml.etree.ElementTree
+  import j: module json
+  import M: member Mapping of collections.abc
+  import pi: member pi of math
+  os: local (imported)
+  ET: local (imported)
+  j: local (imported)
+  M: local (imported)
+  pi: local (imported)
+  local_import: local (assigned)
+  function local_import
+    import sys: module sys
+    sys: local (imported, referenced)

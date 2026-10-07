@@ -1,0 +1,11 @@
+module top
+  f: local (assigned)
+  function f
+    divmod: global implicit (referenced)
+    frozenset: global implicit (referenced)
+    memoryview: global implicit (referenced)
+    reversed: global implicit (referenced)
+    sorted: global implicit (referenced)
+    vars: global implicit (referenced)
+    xs: local (parameter, referenced)
+qualnames: f

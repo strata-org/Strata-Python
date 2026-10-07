@@ -1,0 +1,13 @@
+module
+  sibling: local (imported)
+  t: local (imported)
+  other: local (imported)
+  f: local (assigned)
+  function f
+    sibling: global implicit (referenced)
+    t: global implicit (referenced)
+    other: global implicit (referenced)
+diagnostics:
+  unsupported at 2:0-2:21: relative imports are not supported
+  unsupported at 3:0-3:32: relative imports are not supported
+  unsupported at 4:0-4:22: relative imports are not supported

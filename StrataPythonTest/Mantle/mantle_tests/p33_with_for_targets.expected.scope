@@ -1,0 +1,17 @@
+module
+  f: local (assigned)
+  function f
+    params: path, pairs
+    path: local (parameter, referenced)
+    pairs: local (parameter, referenced)
+    open: global implicit (referenced)
+    fh: local (assigned, referenced)
+    g: local (assigned)
+    data: local (assigned, referenced)
+    a: local (assigned, referenced)
+    b: local (assigned, referenced)
+    c: local (assigned, referenced)
+    n: local (assigned, referenced)
+    m: local (assigned, referenced, annotated)
+    declared: local (assigned, annotated)
+    obj: global implicit (referenced)

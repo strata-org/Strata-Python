@@ -1,0 +1,5 @@
+module
+  cond: local (assigned, referenced, annotated)
+  x: local (assigned)
+  y: local (assigned)
+  z: local (assigned, annotated)

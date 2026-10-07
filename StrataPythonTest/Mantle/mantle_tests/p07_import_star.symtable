@@ -1,0 +1,4 @@
+module top
+  join: global implicit (referenced)
+  x: local (assigned)
+qualnames: 

@@ -1,0 +1,32 @@
+module
+  g: local (assigned)
+  C: local (assigned)
+  outer: local (assigned)
+  class C
+    a: local (assigned, referenced)
+    b: local (assigned)
+    g: global implicit (referenced)
+    c: local (assigned)
+    len: global implicit (referenced)
+    m: local (assigned)
+    n: local (assigned)
+    function C.m
+      params: self
+      self: local (parameter)
+      a: global implicit (referenced)
+      b: global implicit (referenced)
+    function C.n
+      params: self
+      self: local (parameter, referenced)
+  function outer
+    v: cell (assigned)
+    D: local (assigned, referenced)
+    class outer.<locals>.D
+      w: local (assigned)
+      v: free (referenced, free_class)
+      m: local (assigned)
+      function outer.<locals>.D.m
+        params: self
+        self: local (parameter)
+        v: free (referenced)
+        w: global implicit (referenced)

@@ -1,0 +1,10 @@
+module top
+  m: local (assigned, referenced)
+  show: local (assigned, referenced)
+  xs: local (assigned, referenced)
+  function show
+    args: local (parameter, referenced)
+    kwargs: local (parameter, referenced)
+    len: global implicit (referenced)
+    print: global implicit (referenced)
+qualnames: show

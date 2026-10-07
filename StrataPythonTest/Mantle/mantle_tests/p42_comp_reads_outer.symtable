@@ -1,0 +1,31 @@
+module top
+  f: local (assigned)
+  g: local (assigned)
+  h: local (assigned)
+  outer: local (assigned)
+  function f
+    k: local (assigned)
+    n: local (parameter)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+  function g
+    k: cell (assigned)
+    xs: local (parameter, referenced)
+    function genexpr
+      .0: local (parameter)
+      k: free (referenced)
+      x: local (assigned, referenced, comp_iter)
+  function h
+    k: cell (assigned)
+    x: local (assigned, comp_iter)
+    xs: local (parameter, referenced)
+    function lambda
+      k: free (referenced)
+  function outer
+    inner: local (assigned, referenced)
+    m: cell (assigned)
+    function inner
+      m: free (referenced)
+      x: local (assigned, referenced, comp_iter)
+      xs: local (parameter, referenced)
+qualnames: f, g, g.<locals>.<genexpr>, h, h.<locals>.<lambda>, outer, outer.<locals>.inner

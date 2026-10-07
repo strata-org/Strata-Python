@@ -56,6 +56,25 @@ theorem fold_app {β : Type _} (var : Nat → β) (app : Name → Array β → �
   obtain ⟨as⟩ := as
   simp [fold, foldList_eq_map, Array.map]
 
+/-- There are `n` variables below `n`. -/
+@[simp] theorem size_vars (n : Nat) : (vars n).size = n := by
+  induction n <;> simp_all [vars]
+
+/-- The variables below `n` are exactly the `var k` with `k < n`. -/
+theorem mem_vars {n : Nat} {a : Raw} : a ∈ vars n ↔ ∃ k < n, a = .var k := by
+  induction n with
+  | zero => simp [vars]
+  | succ n ih =>
+    simp only [vars, Array.mem_push, ih]
+    constructor
+    · rintro (⟨k, hk, rfl⟩ | rfl)
+      · exact ⟨k, by omega, rfl⟩
+      · exact ⟨n, by omega, rfl⟩
+    · rintro ⟨k, hk, rfl⟩
+      by_cases h : k = n
+      · exact .inr (by rw [h])
+      · exact .inl ⟨k, by omega, rfl⟩
+
 end TypeExpr.Raw
 
 end

@@ -1,0 +1,35 @@
+module top
+  f: local (assigned)
+  fs: local (assigned)
+  g: local (assigned)
+  h: local (assigned)
+  k: local (assigned)
+  n: cell (assigned, comp_iter, comp_cell)
+  range: global implicit (referenced)
+  function f
+    x: cell (assigned, comp_iter, comp_cell)
+    xs: local (parameter, referenced)
+    function lambda
+      x: free (referenced)
+  function g
+    fs: local (assigned, referenced)
+    x: cell (assigned, referenced, comp_cell)
+    xs: local (parameter, referenced)
+    function lambda
+      x: free (referenced)
+  function h
+    x: cell (assigned, comp_iter, comp_cell)
+    xs: local (parameter, referenced)
+    y: cell (assigned, comp_iter, comp_cell)
+    ys: local (parameter)
+    function lambda
+      x: free (referenced)
+      y: free (referenced)
+  function k
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+    function lambda
+      y: local (parameter, referenced)
+  function lambda
+    n: free (referenced)
+qualnames: <lambda>, f, f.<locals>.<lambda>, g, g.<locals>.<lambda>, h, h.<locals>.<lambda>, k, k.<locals>.<lambda>

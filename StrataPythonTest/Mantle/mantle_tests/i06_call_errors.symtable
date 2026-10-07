@@ -1,0 +1,14 @@
+module top
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  f: local (assigned, referenced)
+  g: local (assigned, referenced)
+  m: local (assigned, referenced)
+  print: global implicit (referenced)
+  function f
+    kwargs: local (parameter)
+    print: global implicit (referenced)
+  function g
+    args: local (parameter)
+    print: global implicit (referenced)
+qualnames: f, g

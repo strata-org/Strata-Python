@@ -24,7 +24,7 @@ inductive Name where
 | base
 | num (n : Name) (i : Nat) -- A counter suffix used for generating fresh names.
 | str (n : Name) (s : String)
-deriving DecidableEq, Hashable
+deriving DecidableEq, Hashable, Repr
 
 namespace Name
 

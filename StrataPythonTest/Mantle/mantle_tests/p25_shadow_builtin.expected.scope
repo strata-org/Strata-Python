@@ -1,0 +1,12 @@
+module
+  len: local (assigned)
+  f: local (assigned)
+  function len
+    params: x
+    x: local (parameter)
+  function f
+    params: xs
+    xs: local (parameter, referenced)
+    list: local (assigned, referenced)
+    len: global implicit (referenced)
+    max: global implicit (referenced)

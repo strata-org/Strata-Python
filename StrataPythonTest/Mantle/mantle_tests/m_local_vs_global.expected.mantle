@@ -1,0 +1,91 @@
+module m_local_vs_global {
+  func @m_local_vs_global.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "m_local_vs_global"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "m_local_vs_global"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Int = const int 1
+      %7 : py.Value = py.intLit %6
+      %8 : base.String = const str "m_local_vs_global"
+      %9 : base.String = const str "x"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : base.Code = const @m_local_vs_global.reads_global
+      %13 : py.Value = py.mkClosure %12
+      %14 : base.String = const str "m_local_vs_global"
+      %15 : base.String = const str "reads_global"
+      %16 : base.Ref(py.Value) = py.globalCell %14 %15
+      %17 : base.Unit = base.refSet[py.Value] %16 %13
+      %18 : base.Code = const @m_local_vs_global.shadows_global
+      %19 : py.Value = py.mkClosure %18
+      %20 : base.String = const str "m_local_vs_global"
+      %21 : base.String = const str "shadows_global"
+      %22 : base.Ref(py.Value) = py.globalCell %20 %21
+      %23 : base.Unit = base.refSet[py.Value] %22 %19
+      %24 : py.Value = py.noneLit
+      %25 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %24
+      ret %25
+    propagate.0(%26 : py.Value):
+      %27 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %26
+      ret %27
+  }
+  func @m_local_vs_global.reads_global(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : py.Value = py.tupleLen %0
+      %3 : base.String = const str "kwargs"
+      %4 : py.Value = py.undef %3
+      %5 : py.Value = py.dictFirstKey %1 %4
+      %6 : base.String = const str "TypeError"
+      %7 : base.String = const str "reads_global() got an unexpected keyword argument {}"
+      %8 : base.Unit = py.requireUndefined %5 %6 %7 ^propagate.0()
+      %9 : base.Int = const int 0
+      %10 : base.String = const str "TypeError"
+      %11 : base.String = const str "reads_global() takes 0 positional arguments but {} {was} given"
+      %12 : base.Unit = py.requireAtMost %2 %9 %10 %11 ^propagate.0()
+      %13 : base.String = const str "m_local_vs_global"
+      %14 : base.String = const str "x"
+      %15 : base.Ref(py.Value) = py.globalCell %13 %14
+      %16 : py.Value = base.refGet[py.Value] %15
+      %17 : base.String = const str "NameError"
+      %18 : base.String = const str "name 'x' is not defined"
+      %19 : py.Value = py.requireDefined %16 %17 %18 ^propagate.0()
+      %20 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %19
+      ret %20
+    propagate.0(%21 : py.Value):
+      %22 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %21
+      ret %22
+  }
+  func @m_local_vs_global.shadows_global(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "x"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : py.Value = py.tupleLen %0
+      %6 : base.String = const str "kwargs"
+      %7 : py.Value = py.undef %6
+      %8 : py.Value = py.dictFirstKey %1 %7
+      %9 : base.String = const str "TypeError"
+      %10 : base.String = const str "shadows_global() got an unexpected keyword argument {}"
+      %11 : base.Unit = py.requireUndefined %8 %9 %10 ^propagate.0()
+      %12 : base.Int = const int 0
+      %13 : base.String = const str "TypeError"
+      %14 : base.String = const str "shadows_global() takes 0 positional arguments but {} {was} given"
+      %15 : base.Unit = py.requireAtMost %5 %12 %13 %14 ^propagate.0()
+      %16 : base.Int = const int 2
+      %17 : py.Value = py.intLit %16
+      %18 : base.Unit = base.refSet[py.Value] %4 %17
+      %19 : py.Value = base.refGet[py.Value] %4
+      %20 : base.String = const str "UnboundLocalError"
+      %21 : base.String = const str "cannot access local variable 'x' where it is not associated with a value"
+      %22 : py.Value = py.requireDefined %19 %20 %21 ^propagate.0()
+      %23 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %22
+      ret %23
+    propagate.0(%24 : py.Value):
+      %25 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %24
+      ret %25
+  }
+}
+

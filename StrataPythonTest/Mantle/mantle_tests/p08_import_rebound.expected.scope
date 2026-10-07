@@ -1,0 +1,6 @@
+module
+  import os: module os
+  os: local (assigned, imported)
+  f: local (assigned)
+  function f
+    os: global implicit (referenced)

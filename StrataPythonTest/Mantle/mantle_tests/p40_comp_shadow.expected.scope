@@ -1,0 +1,28 @@
+module
+  f: local (assigned)
+  g: local (assigned)
+  x: local (assigned)
+  c: local (assigned)
+  range: global implicit (referenced)
+  function f
+    params: xs
+    xs: local (parameter, referenced)
+    x: local (assigned, referenced)
+    a: local (assigned, referenced)
+    inlined comprehension f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+  function g
+    params: xs
+    xs: local (parameter, referenced)
+    b: local (assigned, referenced)
+    y: local (assigned, referenced)
+    inlined comprehension g.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      y: local (assigned, referenced, comp_iter)
+  inlined comprehension <listcomp>
+    params: .0
+    .0: local (parameter)
+    x: local (assigned, referenced, comp_iter)

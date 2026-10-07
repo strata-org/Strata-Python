@@ -1,0 +1,7 @@
+module top
+  f: local (assigned)
+  math: local (imported)
+  function f
+    math: global implicit (referenced)
+    x: local (assigned)
+qualnames: f

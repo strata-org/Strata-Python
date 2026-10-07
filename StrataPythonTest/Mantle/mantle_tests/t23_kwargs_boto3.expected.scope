@@ -1,0 +1,23 @@
+module
+  import boto3: module boto3
+  boto3: local (imported, referenced)
+  put_item: local (assigned)
+  put_item_from_dict: local (assigned)
+  build_and_call: local (assigned)
+  iam: local (assigned, referenced)
+  function put_item
+    params: client, bucket, key, data
+    client: local (parameter, referenced)
+    bucket: local (parameter, referenced)
+    key: local (parameter, referenced)
+    data: local (parameter, referenced)
+  function put_item_from_dict
+    params: client, params
+    client: local (parameter, referenced)
+    params: local (parameter, referenced)
+  function build_and_call
+    params: client, bucket, key
+    client: local (parameter, referenced)
+    bucket: local (parameter, referenced)
+    key: local (parameter, referenced)
+    kwargs: local (assigned, referenced)

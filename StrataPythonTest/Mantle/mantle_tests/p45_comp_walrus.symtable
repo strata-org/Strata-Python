@@ -1,0 +1,28 @@
+module top
+  evens: local (assigned)
+  f: local (assigned)
+  g: local (assigned)
+  h: local (assigned)
+  n: local (assigned, referenced, comp_iter)
+  range: global implicit (referenced)
+  seen: global explicit (declared_global)
+  function f
+    a: local (assigned, referenced)
+    last: local (assigned, referenced)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+  function g
+    a: local (assigned, referenced)
+    c: local (assigned, referenced, comp_iter)
+    cell: local (assigned, referenced)
+    row: local (assigned, referenced, comp_iter)
+    rows: local (parameter, referenced)
+  function h
+    add: local (assigned, referenced)
+    total: cell (assigned)
+    xs: cell (parameter)
+    function add
+      total: free (assigned, nonlocal)
+      x: local (assigned, referenced, comp_iter)
+      xs: free (referenced)
+qualnames: f, g, h, h.<locals>.add

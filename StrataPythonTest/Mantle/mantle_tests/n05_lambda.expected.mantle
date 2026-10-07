@@ -1,0 +1,44 @@
+-- unsupported: lambda is not supported at 4:4-4:22
+module n05_lambda {
+  func @n05_lambda.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "n05_lambda"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "n05_lambda"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.String = const str "lambda"
+      %7 : py.Value = py.strLit %6
+      %8 : py.Value = py.unsupported %7
+      %9 : base.String = const str "n05_lambda"
+      %10 : base.String = const str "f"
+      %11 : base.Ref(py.Value) = py.globalCell %9 %10
+      %12 : base.Unit = base.refSet[py.Value] %11 %8
+      %13 : base.String = const str "n05_lambda"
+      %14 : base.String = const str "f"
+      %15 : base.Ref(py.Value) = py.globalCell %13 %14
+      %16 : py.Value = base.refGet[py.Value] %15
+      %17 : base.String = const str "NameError"
+      %18 : base.String = const str "name 'f' is not defined"
+      %19 : py.Value = py.requireDefined %16 %17 %18 ^propagate.0()
+      %20 : base.Int = const int 1
+      %21 : py.Value = py.intLit %20
+      %22 : base.Int = const int 2
+      %23 : py.Value = py.intLit %22
+      %24 : py.Value = py.mkTuple %21 %23
+      %25 : py.Value = py.mkDict
+      %26 : py.Value = py.call %19 %24 %25 ^propagate.0()
+      %27 : base.String = const str "n05_lambda"
+      %28 : base.String = const str "result"
+      %29 : base.Ref(py.Value) = py.globalCell %27 %28
+      %30 : base.Unit = base.refSet[py.Value] %29 %26
+      %31 : py.Value = py.noneLit
+      %32 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %31
+      ret %32
+    propagate.0(%33 : py.Value):
+      %34 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %33
+      ret %34
+  }
+}
+

@@ -1,0 +1,5 @@
+module
+  x: local (assigned)
+  join: global implicit (referenced)
+diagnostics:
+  unsupported at 2:20-2:21: 'import *' is not supported

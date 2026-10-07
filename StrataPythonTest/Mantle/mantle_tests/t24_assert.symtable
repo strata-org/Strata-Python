@@ -1,0 +1,12 @@
+module top
+  check_bounds: local (assigned)
+  validate: local (assigned)
+  function validate
+    int: global implicit (referenced)
+    isinstance: global implicit (referenced)
+    result: local (assigned, referenced, annotated)
+    x: local (parameter, referenced)
+  function check_bounds
+    hi: local (parameter, referenced)
+    lo: local (parameter, referenced)
+qualnames: check_bounds, validate

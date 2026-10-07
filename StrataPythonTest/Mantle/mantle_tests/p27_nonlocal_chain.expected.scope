@@ -1,0 +1,12 @@
+module
+  f: local (assigned)
+  function f
+    x: cell (assigned)
+    C: local (assigned, referenced)
+    class f.<locals>.C
+      x: local (assigned, free_class)
+      m: local (assigned)
+      function f.<locals>.C.m
+        params: self
+        self: local (parameter)
+        x: free (assigned, referenced, nonlocal)

@@ -1,0 +1,12 @@
+module
+  import os: module os
+  import join: member join of os.path
+  import exists: member exists of os.path
+  import Optional: member Optional of typing
+  os: local (imported, referenced)
+  join: local (imported, referenced)
+  exists: local (imported, referenced)
+  Optional: local (imported)
+  cwd: local (assigned)
+  full_path: local (assigned, referenced)
+  check: local (assigned)

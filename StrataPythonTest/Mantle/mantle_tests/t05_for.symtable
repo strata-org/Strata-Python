@@ -1,0 +1,6 @@
+module top
+  even_sum: local (assigned, annotated)
+  items: local (assigned, referenced)
+  total: local (assigned, annotated)
+  x: local (assigned, referenced)
+qualnames: 

@@ -1,0 +1,6 @@
+module top
+  loop: local (assigned)
+  function loop
+    i: local (assigned, referenced)
+    n: local (parameter, referenced)
+qualnames: loop

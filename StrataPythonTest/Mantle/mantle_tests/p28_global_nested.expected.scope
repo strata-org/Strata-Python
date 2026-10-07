@@ -1,0 +1,18 @@
+module
+  outer: local (assigned)
+  x: global explicit (declared_global)
+  helper: global explicit (declared_global)
+  function outer
+    x: cell (assigned)
+    mid: local (assigned, referenced)
+    g: local (assigned, referenced)
+    function outer.<locals>.mid
+      x: global explicit (declared_global)
+      inner: local (assigned, referenced)
+      function outer.<locals>.mid.<locals>.inner
+        x: global implicit (referenced)
+    function outer.<locals>.g
+      helper: global explicit (assigned, declared_global)
+      x: free
+      function helper
+        x: free (referenced)

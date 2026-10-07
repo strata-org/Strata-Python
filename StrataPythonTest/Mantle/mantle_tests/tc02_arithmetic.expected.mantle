@@ -1,0 +1,89 @@
+module tc02_arithmetic {
+  func @tc02_arithmetic.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "tc02_arithmetic"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "tc02_arithmetic"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Code = const @tc02_arithmetic.f
+      %7 : py.Value = py.mkClosure %6
+      %8 : base.String = const str "tc02_arithmetic"
+      %9 : base.String = const str "f"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : py.Value = py.noneLit
+      %13 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %12
+      ret %13
+    propagate.0(%14 : py.Value):
+      %15 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %14
+      ret %15
+  }
+  func @tc02_arithmetic.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "a"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : base.String = const str "b"
+      %6 : py.Value = py.undef %5
+      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
+      %8 : base.String = const str "c"
+      %9 : py.Value = py.undef %8
+      %10 : base.Ref(py.Value) = base.refNew[py.Value] %9
+      %11 : base.String = const str "d"
+      %12 : py.Value = py.undef %11
+      %13 : base.Ref(py.Value) = base.refNew[py.Value] %12
+      %14 : base.String = const str "e"
+      %15 : py.Value = py.undef %14
+      %16 : base.Ref(py.Value) = base.refNew[py.Value] %15
+      %17 : py.Value = py.tupleLen %0
+      %18 : base.String = const str "kwargs"
+      %19 : py.Value = py.undef %18
+      %20 : py.Value = py.dictFirstKey %1 %19
+      %21 : base.String = const str "TypeError"
+      %22 : base.String = const str "f() got an unexpected keyword argument {}"
+      %23 : base.Unit = py.requireUndefined %20 %21 %22 ^propagate.0()
+      %24 : base.Int = const int 0
+      %25 : base.String = const str "TypeError"
+      %26 : base.String = const str "f() takes 0 positional arguments but {} {was} given"
+      %27 : base.Unit = py.requireAtMost %17 %24 %25 %26 ^propagate.0()
+      %28 : base.Int = const int 1
+      %29 : py.Value = py.intLit %28
+      %30 : base.Int = const int 2
+      %31 : py.Value = py.intLit %30
+      %32 : py.Value = py.add %29 %31 ^propagate.0()
+      %33 : base.Unit = base.refSet[py.Value] %4 %32
+      %34 : base.Float64 = const float "1.0"
+      %35 : py.Value = py.floatLit %34
+      %36 : base.Int = const int 2
+      %37 : py.Value = py.intLit %36
+      %38 : py.Value = py.add %35 %37 ^propagate.0()
+      %39 : base.Unit = base.refSet[py.Value] %7 %38
+      %40 : base.Int = const int 1
+      %41 : py.Value = py.intLit %40
+      %42 : base.Int = const int 2
+      %43 : py.Value = py.intLit %42
+      %44 : py.Value = py.div %41 %43 ^propagate.0()
+      %45 : base.Unit = base.refSet[py.Value] %10 %44
+      %46 : base.Int = const int 1
+      %47 : py.Value = py.intLit %46
+      %48 : base.Int = const int 2
+      %49 : py.Value = py.intLit %48
+      %50 : py.Value = py.mult %47 %49 ^propagate.0()
+      %51 : base.Unit = base.refSet[py.Value] %13 %50
+      %52 : base.Float64 = const float "3.0"
+      %53 : py.Value = py.floatLit %52
+      %54 : base.Float64 = const float "2.0"
+      %55 : py.Value = py.floatLit %54
+      %56 : py.Value = py.mult %53 %55 ^propagate.0()
+      %57 : base.Unit = base.refSet[py.Value] %16 %56
+      %58 : py.Value = py.noneLit
+      %59 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %58
+      ret %59
+    propagate.0(%60 : py.Value):
+      %61 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %60
+      ret %61
+  }
+}
+

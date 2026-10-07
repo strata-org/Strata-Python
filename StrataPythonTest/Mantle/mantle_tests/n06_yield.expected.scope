@@ -1,0 +1,10 @@
+module
+  count_up: local (assigned)
+  normal_func: local (assigned)
+  function count_up
+    params: n
+    n: local (parameter, referenced)
+    i: local (assigned, referenced)
+  function normal_func
+    params: x
+    x: local (parameter, referenced)

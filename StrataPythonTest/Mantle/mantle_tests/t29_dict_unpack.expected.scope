@@ -1,0 +1,10 @@
+module
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  only_literal: local (assigned)
+  only_star: local (assigned)
+  star_then_literal: local (assigned)
+  literal_then_star: local (assigned)
+  two_stars: local (assigned)
+  mixed: local (assigned)
+  empty: local (assigned)

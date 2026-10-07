@@ -1,0 +1,12 @@
+module
+  f: local (assigned)
+  function f
+    params: xs
+    xs: local (parameter, referenced)
+    x: local (assigned, comp_iter)
+    inlined comprehension f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, comp_iter)
+diagnostics:
+  syntax error at 2:12-2:18: assignment expression cannot rebind comprehension iteration variable 'x'

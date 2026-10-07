@@ -1,0 +1,7 @@
+module top
+  counter: local (assigned)
+  print: global implicit (referenced)
+  read: local (assigned, referenced)
+  function read
+    counter: global implicit (referenced)
+qualnames: read

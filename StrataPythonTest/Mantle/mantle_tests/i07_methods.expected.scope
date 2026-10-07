@@ -1,0 +1,29 @@
+module
+  K: local (assigned, referenced)
+  k: local (assigned, referenced)
+  Base: local (assigned, referenced)
+  Child: local (assigned, referenced)
+  class K
+    __init__: local (assigned)
+    show: local (assigned)
+    function K.__init__
+      params: self, n, **opts
+      self: local (parameter, referenced)
+      n: local (parameter, referenced)
+      opts: local (parameter, referenced)
+    function K.show
+      params: self, tag, *extra, **kw
+      self: local (parameter, referenced)
+      tag: local (parameter, referenced)
+      extra: local (parameter, referenced)
+      kw: local (parameter, referenced)
+      print: global implicit (referenced)
+      len: global implicit (referenced)
+  class Base
+    greet: local (assigned)
+    function Base.greet
+      params: self, who
+      self: local (parameter)
+      who: local (parameter, referenced)
+      print: global implicit (referenced)
+  class Child

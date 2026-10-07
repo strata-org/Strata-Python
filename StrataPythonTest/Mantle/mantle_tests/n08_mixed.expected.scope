@@ -1,0 +1,21 @@
+module
+  import asyncio: module asyncio
+  asyncio: local (imported)
+  sync_add: local (assigned, referenced)
+  async_fetch: local (assigned)
+  items: local (assigned, referenced)
+  doubled: local (assigned)
+  result: local (assigned)
+  x: local (assigned, referenced, comp_iter)
+  function sync_add
+    params: a, b
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+  function async_fetch
+    params: url
+    url: local (parameter, referenced)
+    asyncio: global implicit (referenced)
+  inlined comprehension <listcomp>
+    params: .0
+    .0: local (parameter)
+    x: local (assigned, referenced, comp_iter)

@@ -1,0 +1,86 @@
+module m_builtins {
+  func @m_builtins.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "m_builtins"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "m_builtins"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.String = const str "builtins"
+      %7 : base.String = const str "len"
+      %8 : py.Value = py.qualifiedRef %6 %7 ^propagate.0()
+      %9 : base.String = const str "abc"
+      %10 : py.Value = py.strLit %9
+      %11 : py.Value = py.mkTuple %10
+      %12 : py.Value = py.mkDict
+      %13 : py.Value = py.call %8 %11 %12 ^propagate.0()
+      %14 : base.String = const str "m_builtins"
+      %15 : base.String = const str "n"
+      %16 : base.Ref(py.Value) = py.globalCell %14 %15
+      %17 : base.Unit = base.refSet[py.Value] %16 %13
+      %18 : base.String = const str "builtins"
+      %19 : base.String = const str "min"
+      %20 : py.Value = py.qualifiedRef %18 %19 ^propagate.0()
+      %21 : base.Int = const int 1
+      %22 : py.Value = py.intLit %21
+      %23 : base.Int = const int 2
+      %24 : py.Value = py.intLit %23
+      %25 : py.Value = py.mkTuple %22 %24
+      %26 : py.Value = py.mkDict
+      %27 : py.Value = py.call %20 %25 %26 ^propagate.0()
+      %28 : base.String = const str "m_builtins"
+      %29 : base.String = const str "m"
+      %30 : base.Ref(py.Value) = py.globalCell %28 %29
+      %31 : base.Unit = base.refSet[py.Value] %30 %27
+      %32 : base.String = const str "m_builtins"
+      %33 : base.String = const str "n"
+      %34 : base.Ref(py.Value) = py.globalCell %32 %33
+      %35 : py.Value = base.refGet[py.Value] %34
+      %36 : base.String = const str "NameError"
+      %37 : base.String = const str "name 'n' is not defined"
+      %38 : py.Value = py.requireDefined %35 %36 %37 ^propagate.0()
+      %39 : base.Bool = py.truthy %38 ^propagate.0()
+      branch %39 ^then.0() ^else.0()
+    then.0():
+      %40 : base.Int = const int 3
+      %41 : py.Value = py.intLit %40
+      %42 : base.String = const str "m_builtins"
+      %43 : base.String = const str "print"
+      %44 : base.Ref(py.Value) = py.globalCell %42 %43
+      %45 : base.Unit = base.refSet[py.Value] %44 %41
+      jump ^join.0()
+    else.0():
+      jump ^join.0()
+    join.0():
+      %46 : base.String = const str "m_builtins"
+      %47 : base.String = const str "print"
+      %48 : base.Ref(py.Value) = py.globalCell %46 %47
+      %49 : py.Value = base.refGet[py.Value] %48
+      %50 : base.Bool = py.isDefined %49
+      branch %50 ^join.1(%49) ^builtin.0()
+    builtin.0():
+      %51 : base.String = const str "builtins"
+      %52 : base.String = const str "print"
+      %53 : py.Value = py.qualifiedRef %51 %52 ^propagate.0()
+      jump ^join.1(%53)
+    join.1(%54 : py.Value):
+      %55 : base.String = const str "m_builtins"
+      %56 : base.String = const str "m"
+      %57 : base.Ref(py.Value) = py.globalCell %55 %56
+      %58 : py.Value = base.refGet[py.Value] %57
+      %59 : base.String = const str "NameError"
+      %60 : base.String = const str "name 'm' is not defined"
+      %61 : py.Value = py.requireDefined %58 %59 %60 ^propagate.0()
+      %62 : py.Value = py.mkTuple %61
+      %63 : py.Value = py.mkDict
+      %64 : py.Value = py.call %54 %62 %63 ^propagate.0()
+      %65 : py.Value = py.noneLit
+      %66 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %65
+      ret %66
+    propagate.0(%67 : py.Value):
+      %68 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %67
+      ret %68
+  }
+}
+

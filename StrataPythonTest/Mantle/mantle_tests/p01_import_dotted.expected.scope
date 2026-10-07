@@ -1,0 +1,9 @@
+module
+  import os: module os (loads os.path)
+  import a: module a (loads a.b.c)
+  os: local (imported)
+  a: local (imported)
+  f: local (assigned)
+  function f
+    os: global implicit (referenced)
+    a: global implicit (referenced)

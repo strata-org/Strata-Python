@@ -1,0 +1,1 @@
+error: comprehension inner loop cannot rebind assignment expression target 'j' (line 2)

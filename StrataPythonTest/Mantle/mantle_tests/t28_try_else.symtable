@@ -1,0 +1,13 @@
+module top
+  ValueError: global implicit (referenced)
+  a: local (assigned, referenced)
+  b: local (assigned)
+  cleanup: local (assigned, referenced)
+  inner: local (assigned)
+  outer: local (assigned)
+  risky: local (assigned, referenced)
+  x: local (assigned, referenced)
+  y: local (assigned)
+  function risky
+  function cleanup
+qualnames: cleanup, risky

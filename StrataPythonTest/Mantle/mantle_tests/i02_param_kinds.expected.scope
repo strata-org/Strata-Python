@@ -1,0 +1,44 @@
+module
+  pos: local (assigned, referenced)
+  rest: local (assigned, referenced)
+  kw: local (assigned, referenced)
+  both: local (assigned, referenced)
+  kwonly: local (assigned, referenced)
+  posonly: local (assigned, referenced)
+  absorb: local (assigned, referenced)
+  function pos
+    params: x, y
+    x: local (parameter, referenced)
+    y: local (parameter, referenced)
+    print: global implicit (referenced)
+  function rest
+    params: x, *more
+    x: local (parameter, referenced)
+    more: local (parameter, referenced)
+    print: global implicit (referenced)
+  function kw
+    params: x, **opts
+    x: local (parameter, referenced)
+    opts: local (parameter, referenced)
+    print: global implicit (referenced)
+  function both
+    params: first, *more, **opts
+    first: local (parameter, referenced)
+    more: local (parameter, referenced)
+    opts: local (parameter, referenced)
+    print: global implicit (referenced)
+  function kwonly
+    params: a, *, k
+    a: local (parameter, referenced)
+    k: local (parameter, referenced)
+    print: global implicit (referenced)
+  function posonly
+    params: a, /, b
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    print: global implicit (referenced)
+  function absorb
+    params: a, /, **opts
+    a: local (parameter, referenced)
+    opts: local (parameter, referenced)
+    print: global implicit (referenced)

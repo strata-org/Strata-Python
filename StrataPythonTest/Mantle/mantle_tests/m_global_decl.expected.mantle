@@ -1,0 +1,82 @@
+module m_global_decl {
+  func @m_global_decl.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "m_global_decl"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "m_global_decl"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Code = const @m_global_decl.set_counter
+      %7 : py.Value = py.mkClosure %6
+      %8 : base.String = const str "m_global_decl"
+      %9 : base.String = const str "set_counter"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : base.Code = const @m_global_decl.get_counter
+      %13 : py.Value = py.mkClosure %12
+      %14 : base.String = const str "m_global_decl"
+      %15 : base.String = const str "get_counter"
+      %16 : base.Ref(py.Value) = py.globalCell %14 %15
+      %17 : base.Unit = base.refSet[py.Value] %16 %13
+      %18 : py.Value = py.noneLit
+      %19 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %18
+      ret %19
+    propagate.0(%20 : py.Value):
+      %21 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %20
+      ret %21
+  }
+  func @m_global_decl.set_counter(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : py.Value = py.tupleLen %0
+      %3 : base.String = const str "kwargs"
+      %4 : py.Value = py.undef %3
+      %5 : py.Value = py.dictFirstKey %1 %4
+      %6 : base.String = const str "TypeError"
+      %7 : base.String = const str "set_counter() got an unexpected keyword argument {}"
+      %8 : base.Unit = py.requireUndefined %5 %6 %7 ^propagate.0()
+      %9 : base.Int = const int 0
+      %10 : base.String = const str "TypeError"
+      %11 : base.String = const str "set_counter() takes 0 positional arguments but {} {was} given"
+      %12 : base.Unit = py.requireAtMost %2 %9 %10 %11 ^propagate.0()
+      %13 : base.Int = const int 1
+      %14 : py.Value = py.intLit %13
+      %15 : base.String = const str "m_global_decl"
+      %16 : base.String = const str "counter"
+      %17 : base.Ref(py.Value) = py.globalCell %15 %16
+      %18 : base.Unit = base.refSet[py.Value] %17 %14
+      %19 : py.Value = py.noneLit
+      %20 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %19
+      ret %20
+    propagate.0(%21 : py.Value):
+      %22 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %21
+      ret %22
+  }
+  func @m_global_decl.get_counter(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : py.Value = py.tupleLen %0
+      %3 : base.String = const str "kwargs"
+      %4 : py.Value = py.undef %3
+      %5 : py.Value = py.dictFirstKey %1 %4
+      %6 : base.String = const str "TypeError"
+      %7 : base.String = const str "get_counter() got an unexpected keyword argument {}"
+      %8 : base.Unit = py.requireUndefined %5 %6 %7 ^propagate.0()
+      %9 : base.Int = const int 0
+      %10 : base.String = const str "TypeError"
+      %11 : base.String = const str "get_counter() takes 0 positional arguments but {} {was} given"
+      %12 : base.Unit = py.requireAtMost %2 %9 %10 %11 ^propagate.0()
+      %13 : base.String = const str "m_global_decl"
+      %14 : base.String = const str "counter"
+      %15 : base.Ref(py.Value) = py.globalCell %13 %14
+      %16 : py.Value = base.refGet[py.Value] %15
+      %17 : base.String = const str "NameError"
+      %18 : base.String = const str "name 'counter' is not defined"
+      %19 : py.Value = py.requireDefined %16 %17 %18 ^propagate.0()
+      %20 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %19
+      ret %20
+    propagate.0(%21 : py.Value):
+      %22 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %21
+      ret %22
+  }
+}
+

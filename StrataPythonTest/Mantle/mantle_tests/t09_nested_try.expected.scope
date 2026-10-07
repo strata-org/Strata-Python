@@ -1,0 +1,11 @@
+module
+  inner_risky: local (assigned, referenced)
+  outer_risky: local (assigned, referenced)
+  x: local (assigned)
+  ValueError: global implicit (referenced)
+  y: local (assigned)
+  TypeError: global implicit (referenced)
+  function inner_risky
+    ValueError: global implicit (referenced)
+  function outer_risky
+    TypeError: global implicit (referenced)

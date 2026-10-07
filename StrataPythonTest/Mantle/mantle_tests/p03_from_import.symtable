@@ -1,0 +1,14 @@
+module top
+  OrderedDict: local (imported)
+  base: local (imported)
+  dd: local (imported)
+  f: local (assigned)
+  join: local (imported)
+  function f
+    OrderedDict: global implicit (referenced)
+    base: global implicit (referenced)
+    dd: global implicit (referenced)
+    join: global implicit (referenced)
+    list: global implicit (referenced)
+    p: local (parameter, referenced)
+qualnames: f

@@ -1,0 +1,10 @@
+module
+  import sys: module sys
+  sys: local (imported, referenced)
+  f: local (assigned)
+  g: local (assigned)
+  Exception: global implicit (referenced)
+  function f
+  function f
+  function g
+    f: global implicit (referenced)

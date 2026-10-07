@@ -1,0 +1,2 @@
+nonlocal x
+print(x)

@@ -1,0 +1,8 @@
+module
+  f: local (assigned)
+  x: global explicit (declared_global)
+  function f
+    print: global implicit (referenced)
+    x: global explicit (referenced, declared_global)
+diagnostics:
+  syntax error at 3:4-3:12: name 'x' is used prior to global declaration

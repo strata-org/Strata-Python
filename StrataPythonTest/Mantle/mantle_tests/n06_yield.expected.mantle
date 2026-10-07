@@ -1,0 +1,95 @@
+-- unsupported: generator function is not supported at 7:8-7:15
+module n06_yield {
+  func @n06_yield.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "n06_yield"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "n06_yield"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Code = const @n06_yield.count_up
+      %7 : py.Value = py.mkClosure %6
+      %8 : base.String = const str "n06_yield"
+      %9 : base.String = const str "count_up"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : base.Code = const @n06_yield.normal_func
+      %13 : py.Value = py.mkClosure %12
+      %14 : base.String = const str "n06_yield"
+      %15 : base.String = const str "normal_func"
+      %16 : base.Ref(py.Value) = py.globalCell %14 %15
+      %17 : base.Unit = base.refSet[py.Value] %16 %13
+      %18 : py.Value = py.noneLit
+      %19 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %18
+      ret %19
+    propagate.0(%20 : py.Value):
+      %21 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %20
+      ret %21
+  }
+  func @n06_yield.count_up(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "generator function"
+      %3 : py.Value = py.strLit %2
+      %4 : py.Value = py.unsupported %3
+      %5 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %4
+      ret %5
+    propagate.0(%6 : py.Value):
+      %7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %6
+      ret %7
+  }
+  func @n06_yield.normal_func(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "x"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : py.Value = py.tupleLen %0
+      %6 : base.String = const str "x"
+      %7 : py.Value = py.undef %6
+      %8 : py.Value = py.mkTuple %7
+      %9 : py.Value = py.noneLit
+      %10 : py.Value = py.getSlice %8 %5 %9 %9 ^propagate.0()
+      %11 : py.Value = py.add %0 %10 ^propagate.0()
+      %12 : base.Int = const int 0
+      %13 : py.Value = py.intLit %12
+      %14 : py.Value = py.getItem %11 %13 ^propagate.0()
+      %15 : base.String = const str "x"
+      %16 : py.Value = py.strLit %15
+      %17 : py.Value = py.dictGet %1 %16 %14
+      %18 : py.Value = py.in %16 %1 ^propagate.0()
+      %19 : base.Unit = py.dictDiscard %1 %16
+      %20 : py.Value = py.lt %13 %5 ^propagate.0()
+      %21 : py.Value = py.mult %18 %20 ^propagate.0()
+      %22 : base.Int = const int 0
+      %23 : base.String = const str "TypeError"
+      %24 : base.String = const str "normal_func() got multiple values for argument 'x'"
+      %25 : base.Unit = py.requireAtMost %21 %22 %23 %24 ^propagate.0()
+      %26 : base.String = const str "kwargs"
+      %27 : py.Value = py.undef %26
+      %28 : py.Value = py.dictFirstKey %1 %27
+      %29 : base.String = const str "TypeError"
+      %30 : base.String = const str "normal_func() got an unexpected keyword argument {}"
+      %31 : base.Unit = py.requireUndefined %28 %29 %30 ^propagate.0()
+      %32 : base.Int = const int 1
+      %33 : base.String = const str "TypeError"
+      %34 : base.String = const str "normal_func() takes 1 positional argument but {} {was} given"
+      %35 : base.Unit = py.requireAtMost %5 %32 %33 %34 ^propagate.0()
+      %36 : base.String = const str "TypeError"
+      %37 : base.String = const str "normal_func() missing 1 required positional argument: 'x'"
+      %38 : py.Value = py.requireDefined %17 %36 %37 ^propagate.0()
+      %39 : base.Unit = base.refSet[py.Value] %4 %38
+      %40 : py.Value = base.refGet[py.Value] %4
+      %41 : base.String = const str "UnboundLocalError"
+      %42 : base.String = const str "cannot access local variable 'x' where it is not associated with a value"
+      %43 : py.Value = py.requireDefined %40 %41 %42 ^propagate.0()
+      %44 : base.Int = const int 2
+      %45 : py.Value = py.intLit %44
+      %46 : py.Value = py.mult %43 %45 ^propagate.0()
+      %47 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %46
+      ret %47
+    propagate.0(%48 : py.Value):
+      %49 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %48
+      ret %49
+  }
+}
+

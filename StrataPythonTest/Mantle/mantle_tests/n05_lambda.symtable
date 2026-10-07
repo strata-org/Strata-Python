@@ -1,0 +1,7 @@
+module top
+  f: local (assigned, referenced)
+  result: local (assigned)
+  function lambda
+    x: local (parameter, referenced)
+    y: local (parameter, referenced)
+qualnames: <lambda>

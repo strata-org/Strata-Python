@@ -1,0 +1,146 @@
+module m_params {
+  func @m_params.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "m_params"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "m_params"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Code = const @m_params.f
+      %7 : py.Value = py.mkClosure %6
+      %8 : base.String = const str "m_params"
+      %9 : base.String = const str "f"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : base.String = const str "m_params"
+      %13 : base.String = const str "f"
+      %14 : base.Ref(py.Value) = py.globalCell %12 %13
+      %15 : py.Value = base.refGet[py.Value] %14
+      %16 : base.String = const str "NameError"
+      %17 : base.String = const str "name 'f' is not defined"
+      %18 : py.Value = py.requireDefined %15 %16 %17 ^propagate.0()
+      %19 : base.Int = const int 1
+      %20 : py.Value = py.intLit %19
+      %21 : base.Int = const int 2
+      %22 : py.Value = py.intLit %21
+      %23 : py.Value = py.mkTuple %20 %22
+      %24 : py.Value = py.mkDict
+      %25 : py.Value = py.call %18 %23 %24 ^propagate.0()
+      %26 : py.Value = py.noneLit
+      %27 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %26
+      ret %27
+    propagate.0(%28 : py.Value):
+      %29 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %28
+      ret %29
+  }
+  func @m_params.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "a"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : base.String = const str "b"
+      %6 : py.Value = py.undef %5
+      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
+      %8 : base.String = const str "c"
+      %9 : py.Value = py.undef %8
+      %10 : base.Ref(py.Value) = base.refNew[py.Value] %9
+      %11 : base.String = const str "d"
+      %12 : py.Value = py.undef %11
+      %13 : base.Ref(py.Value) = base.refNew[py.Value] %12
+      %14 : base.String = const str "e"
+      %15 : py.Value = py.undef %14
+      %16 : base.Ref(py.Value) = base.refNew[py.Value] %15
+      %17 : base.String = const str "rest"
+      %18 : py.Value = py.undef %17
+      %19 : base.Ref(py.Value) = base.refNew[py.Value] %18
+      %20 : base.String = const str "kw"
+      %21 : py.Value = py.undef %20
+      %22 : base.Ref(py.Value) = base.refNew[py.Value] %21
+      %23 : py.Value = py.tupleLen %0
+      %24 : base.String = const str "a"
+      %25 : py.Value = py.undef %24
+      %26 : base.String = const str "b"
+      %27 : py.Value = py.undef %26
+      %28 : base.Int = const int 2
+      %29 : py.Value = py.intLit %28
+      %30 : py.Value = py.mkTuple %25 %27 %29
+      %31 : py.Value = py.noneLit
+      %32 : py.Value = py.getSlice %30 %23 %31 %31 ^propagate.0()
+      %33 : py.Value = py.add %0 %32 ^propagate.0()
+      %34 : base.Int = const int 0
+      %35 : py.Value = py.intLit %34
+      %36 : py.Value = py.getItem %33 %35 ^propagate.0()
+      %37 : base.Int = const int 1
+      %38 : py.Value = py.intLit %37
+      %39 : py.Value = py.getItem %33 %38 ^propagate.0()
+      %40 : base.String = const str "b"
+      %41 : py.Value = py.strLit %40
+      %42 : py.Value = py.dictGet %1 %41 %39
+      %43 : py.Value = py.in %41 %1 ^propagate.0()
+      %44 : base.Unit = py.dictDiscard %1 %41
+      %45 : base.Int = const int 2
+      %46 : py.Value = py.intLit %45
+      %47 : py.Value = py.getItem %33 %46 ^propagate.0()
+      %48 : base.String = const str "c"
+      %49 : py.Value = py.strLit %48
+      %50 : py.Value = py.dictGet %1 %49 %47
+      %51 : py.Value = py.in %49 %1 ^propagate.0()
+      %52 : base.Unit = py.dictDiscard %1 %49
+      %53 : base.Int = const int 3
+      %54 : py.Value = py.intLit %53
+      %55 : py.Value = py.noneLit
+      %56 : py.Value = py.getSlice %0 %54 %55 %55 ^propagate.0()
+      %57 : base.Unit = base.refSet[py.Value] %19 %56
+      %58 : base.String = const str "d"
+      %59 : py.Value = py.strLit %58
+      %60 : base.String = const str "d"
+      %61 : py.Value = py.undef %60
+      %62 : py.Value = py.dictGet %1 %59 %61
+      %63 : base.Unit = py.dictDiscard %1 %59
+      %64 : base.String = const str "e"
+      %65 : py.Value = py.strLit %64
+      %66 : base.Float64 = const float "1.5"
+      %67 : py.Value = py.floatLit %66
+      %68 : py.Value = py.uSub %67 ^propagate.0()
+      %69 : py.Value = py.dictGet %1 %65 %68
+      %70 : base.Unit = py.dictDiscard %1 %65
+      %71 : py.Value = py.lt %38 %23 ^propagate.0()
+      %72 : py.Value = py.mult %43 %71 ^propagate.0()
+      %73 : base.Int = const int 0
+      %74 : base.String = const str "TypeError"
+      %75 : base.String = const str "f() got multiple values for argument 'b'"
+      %76 : base.Unit = py.requireAtMost %72 %73 %74 %75 ^propagate.0()
+      %77 : py.Value = py.lt %46 %23 ^propagate.0()
+      %78 : py.Value = py.mult %51 %77 ^propagate.0()
+      %79 : base.Int = const int 0
+      %80 : base.String = const str "TypeError"
+      %81 : base.String = const str "f() got multiple values for argument 'c'"
+      %82 : base.Unit = py.requireAtMost %78 %79 %80 %81 ^propagate.0()
+      %83 : base.String = const str "TypeError"
+      %84 : base.String = const str "f() missing 1 required positional argument: 'a'"
+      %85 : py.Value = py.requireDefined %36 %83 %84 ^propagate.0()
+      %86 : base.Unit = base.refSet[py.Value] %4 %85
+      %87 : base.String = const str "TypeError"
+      %88 : base.String = const str "f() missing 1 required positional argument: 'b'"
+      %89 : py.Value = py.requireDefined %42 %87 %88 ^propagate.0()
+      %90 : base.Unit = base.refSet[py.Value] %7 %89
+      %91 : base.Unit = base.refSet[py.Value] %10 %50
+      %92 : base.String = const str "TypeError"
+      %93 : base.String = const str "f() missing 1 required keyword-only argument: 'd'"
+      %94 : py.Value = py.requireDefined %62 %92 %93 ^propagate.0()
+      %95 : base.Unit = base.refSet[py.Value] %13 %94
+      %96 : base.Unit = base.refSet[py.Value] %16 %69
+      %97 : base.Unit = base.refSet[py.Value] %22 %1
+      %98 : py.Value = base.refGet[py.Value] %4
+      %99 : base.String = const str "UnboundLocalError"
+      %100 : base.String = const str "cannot access local variable 'a' where it is not associated with a value"
+      %101 : py.Value = py.requireDefined %98 %99 %100 ^propagate.0()
+      %102 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %101
+      ret %102
+    propagate.0(%103 : py.Value):
+      %104 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %103
+      ret %104
+  }
+}
+

@@ -1,0 +1,68 @@
+module
+  f: local (assigned)
+  h: local (assigned)
+  function f
+    params: rows
+    rows: local (parameter, referenced)
+    a: local (assigned, referenced)
+    b: local (assigned, referenced)
+    g: local (assigned, referenced)
+    r: local (assigned, comp_iter)
+    row: local (assigned, referenced, comp_iter)
+    c: local (assigned, referenced, comp_iter)
+    k: local (assigned, referenced, comp_iter)
+    vs: local (assigned, referenced, comp_iter)
+    v: local (assigned, referenced, comp_iter)
+    list: global implicit (referenced)
+    inlined comprehension f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      r: local (assigned, comp_iter)
+      row: local (assigned, referenced, comp_iter)
+      c: local (assigned, referenced, comp_iter)
+      inlined comprehension f.<locals>.<listcomp>.<listcomp>
+        params: .0
+        .0: local (parameter)
+        c: local (assigned, referenced, comp_iter)
+        r: free (referenced)
+    inlined comprehension f.<locals>.<dictcomp>
+      params: .0
+      .0: local (parameter)
+      k: local (assigned, referenced, comp_iter)
+      vs: local (assigned, referenced, comp_iter)
+      v: local (assigned, referenced, comp_iter)
+      inlined comprehension f.<locals>.<dictcomp>.<setcomp>
+        params: .0
+        .0: local (parameter)
+        v: local (assigned, referenced, comp_iter)
+    inlined comprehension f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      row: local (assigned, referenced, comp_iter)
+      list: global implicit (referenced)
+      generator expression f.<locals>.<genexpr>
+        params: .0
+        .0: local (parameter)
+        q: local (assigned, referenced, comp_iter)
+  function h
+    params: rows
+    rows: local (parameter, referenced)
+    i: local (assigned, referenced, comp_iter)
+    range: global implicit (referenced)
+    j: local (assigned, referenced, comp_iter)
+    generator expression h.<locals>.<genexpr>
+      params: .0
+      .0: local (parameter)
+      r: local (assigned, referenced, comp_iter)
+      len: global implicit (referenced)
+    inlined comprehension h.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      i: local (assigned, referenced, comp_iter)
+      range: global implicit (referenced)
+      j: local (assigned, referenced, comp_iter)
+      inlined comprehension h.<locals>.<listcomp>.<listcomp>
+        params: .0
+        .0: local (parameter)
+        j: local (assigned, referenced, comp_iter)
+        i: free (referenced)

@@ -1,0 +1,12 @@
+module
+  exprs: local (assigned)
+  function exprs
+    params: a, b, c
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    c: local (parameter, referenced)
+    s: local (assigned)
+    by: local (assigned)
+    e: local (assigned)
+    t: local (assigned)
+    u: local (assigned)

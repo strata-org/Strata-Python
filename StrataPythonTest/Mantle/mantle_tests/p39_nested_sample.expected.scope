@@ -1,0 +1,31 @@
+module
+  import os: module os (loads os.path)
+  import C: member Counter of collections
+  os: local (imported)
+  C: local (imported)
+  make: local (assigned)
+  function make
+    params: prefix
+    import json: module json
+    prefix: cell (parameter)
+    json: cell (imported)
+    count: cell (assigned)
+    Box: local (assigned, referenced)
+    total: local (assigned, referenced)
+    class make.<locals>.Box
+      label: local (assigned)
+      prefix: free (referenced, free_class)
+      show: local (assigned)
+      count: free
+      json: free
+      function make.<locals>.Box.show
+        params: self
+        self: local (parameter)
+        count: free (assigned, referenced, nonlocal)
+        json: free (referenced)
+        prefix: free (referenced)
+        label: global implicit (referenced)
+    function make.<locals>.total
+      count: free
+      lambda make.<locals>.total.<locals>.<lambda>
+        count: free (referenced)

@@ -1,0 +1,10 @@
+module top
+  f: local (assigned)
+  len: local (assigned)
+  sys: local (imported, referenced)
+  function lambda
+    xs: local (parameter)
+  function f
+    len: global implicit (referenced)
+    xs: local (parameter, referenced)
+qualnames: <lambda>, f

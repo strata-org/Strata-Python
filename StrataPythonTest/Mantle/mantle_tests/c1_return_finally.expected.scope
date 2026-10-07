@@ -1,0 +1,8 @@
+module
+  cleanup: local (assigned)
+  f: local (assigned)
+  function cleanup
+  function f
+    params: x
+    x: local (parameter)
+    cleanup: global implicit (referenced)

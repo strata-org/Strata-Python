@@ -1,0 +1,7 @@
+module
+  f: local (assigned, referenced)
+  result: local (assigned)
+  lambda <lambda>
+    params: x, y
+    x: local (parameter, referenced)
+    y: local (parameter, referenced)

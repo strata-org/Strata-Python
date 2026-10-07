@@ -1,0 +1,7 @@
+module top
+  len: global implicit (referenced)
+  m: local (assigned, referenced)
+  min: global implicit (referenced)
+  n: local (assigned, referenced)
+  print: local (assigned, referenced)
+qualnames: 

@@ -1,0 +1,10 @@
+module
+  items: local (assigned, referenced)
+  doubled: local (assigned, referenced)
+  total: local (assigned)
+  sum: global implicit (referenced)
+  x: local (assigned, referenced, comp_iter)
+  inlined comprehension <listcomp>
+    params: .0
+    .0: local (parameter)
+    x: local (assigned, referenced, comp_iter)

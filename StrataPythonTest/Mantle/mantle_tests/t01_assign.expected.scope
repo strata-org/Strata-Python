@@ -1,0 +1,10 @@
+module
+  x: local (assigned)
+  y: local (assigned, annotated)
+  name: local (assigned, annotated)
+  flag: local (assigned, annotated)
+  nothing: local (assigned)
+  pi: local (assigned, annotated)
+  data: local (assigned, annotated)
+  a: local (assigned)
+  b: local (assigned)

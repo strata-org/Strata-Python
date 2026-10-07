@@ -1,0 +1,58 @@
+-- syntax error: name 'x' is used prior to global declaration at 3:4-3:12
+module e05_use_before_global {
+  func @e05_use_before_global.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "e05_use_before_global"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "e05_use_before_global"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Code = const @e05_use_before_global.f
+      %7 : py.Value = py.mkClosure %6
+      %8 : base.String = const str "e05_use_before_global"
+      %9 : base.String = const str "f"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : py.Value = py.noneLit
+      %13 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %12
+      ret %13
+    propagate.0(%14 : py.Value):
+      %15 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %14
+      ret %15
+  }
+  func @e05_use_before_global.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : py.Value = py.tupleLen %0
+      %3 : base.String = const str "kwargs"
+      %4 : py.Value = py.undef %3
+      %5 : py.Value = py.dictFirstKey %1 %4
+      %6 : base.String = const str "TypeError"
+      %7 : base.String = const str "f() got an unexpected keyword argument {}"
+      %8 : base.Unit = py.requireUndefined %5 %6 %7 ^propagate.0()
+      %9 : base.Int = const int 0
+      %10 : base.String = const str "TypeError"
+      %11 : base.String = const str "f() takes 0 positional arguments but {} {was} given"
+      %12 : base.Unit = py.requireAtMost %2 %9 %10 %11 ^propagate.0()
+      %13 : base.String = const str "builtins"
+      %14 : base.String = const str "print"
+      %15 : py.Value = py.qualifiedRef %13 %14 ^propagate.0()
+      %16 : base.String = const str "e05_use_before_global"
+      %17 : base.String = const str "x"
+      %18 : base.Ref(py.Value) = py.globalCell %16 %17
+      %19 : py.Value = base.refGet[py.Value] %18
+      %20 : base.String = const str "NameError"
+      %21 : base.String = const str "name 'x' is not defined"
+      %22 : py.Value = py.requireDefined %19 %20 %21 ^propagate.0()
+      %23 : py.Value = py.mkTuple %22
+      %24 : py.Value = py.mkDict
+      %25 : py.Value = py.call %15 %23 %24 ^propagate.0()
+      %26 : py.Value = py.noneLit
+      %27 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %26
+      ret %27
+    propagate.0(%28 : py.Value):
+      %29 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %28
+      ret %29
+  }
+}
+

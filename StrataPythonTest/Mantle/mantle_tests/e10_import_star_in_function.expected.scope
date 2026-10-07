@@ -1,0 +1,6 @@
+module
+  f: local (assigned)
+  function f
+diagnostics:
+  syntax error at 2:4-2:20: import * only allowed at module level
+  unsupported at 2:19-2:20: 'import *' is not supported

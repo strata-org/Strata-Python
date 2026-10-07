@@ -1,0 +1,1 @@
+error: assignment expression cannot be used in a comprehension iterable expression (line 2)

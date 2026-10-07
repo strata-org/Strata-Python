@@ -1,0 +1,6 @@
+module
+  f: local (assigned)
+  json: global explicit (declared_global)
+  function f
+    import json: module json
+    json: global explicit (imported, referenced, declared_global)

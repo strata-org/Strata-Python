@@ -110,19 +110,41 @@ The package is the repository root:
 │   ├── Regex/
 │   │   ├── ReParser.lean          # Python regex parser
 │   │   └── ReToCore.lean          # Regex → Core SMT translation
+│   ├── Mantle/                    # Python on Mantle: environment, builder, scopes, translator
 │   └── Pipeline/
 │       └── PyAnalyzeLaurel.lean   # Full analysis pipeline (Python → Laurel → Core → SMT)
+├── StrataMantle/                  # Mantle, a typed SSA IR (independent of StrataPython)
+├── StrataMantleTest/              # Mantle core tests
 ├── Scripts/                       # Executable entry points (pyInterpret, pyAnalyzeLaurel, etc.)
 ├── Python/
 │   └── strata-python/             # Python tooling package (Ion reader, dialect generator)
 ├── StrataPythonTest/              # Compile-time tests (built with lake build)
 ├── StrataPythonTestExtra/         # Runtime tests (run with lake test, require Python)
-├── StrataTestMain.lean            # Test driver for StrataPythonTestExtra
+├── StrataPythonFrontEndTestMain.lean # Test driver (`lake test`) for StrataPythonTestExtra
+├── docs/                          # Mantle reference and Python-to-Mantle spec
 ├── AGENTS.md                      # Guide for AI agents working in this package
 ├── lakefile.toml
 ├── lean-toolchain
 └── lake-manifest.json
 ```
+
+## Mantle
+
+Mantle is a typed SSA intermediate representation in Lean, whose types and instructions are
+declared by a layered environment. It is split across two directories:
+
+| Directory | Contents | Tests |
+|---|---|---|
+| `StrataMantle/` | The core IR, builder, environment DSL and well-formedness checker (namespace `Strata.Mantle`). Imports nothing from StrataPython | `StrataMantleTest/` |
+| `StrataPython/Mantle/` | Python on Mantle: the Python environment (`Env.lean`), the emission helpers (`Build.lean`), name resolution (`Scope.lean`), the translator (`Translate.lean`) and the `pymantle mantle` command (`Cli.lean`) | `StrataPythonTest/Mantle/`; `StrataPythonTestExtra/MantleTranslateTest.lean` and `PyScopeTest.lean` run the translator and the scope pass over the programs in `StrataPythonTest/Mantle/mantle_tests/`, listed in `StrataPythonTest/Mantle/mantle_tests.txt` |
+
+[`docs/Mantle.md`](./docs/Mantle.md) is the Mantle reference, and
+[`docs/PythonToMantle.md`](./docs/PythonToMantle.md) specifies how Python lowers to it.
+
+`lake exe pymantle mantle FILE` prints the diagnostics and the Mantle module for `FILE`, a
+`.py` file (parsed with `python -m strata_python.gen`; `PYTHON` selects the interpreter) or a
+Python Ion file. `lake exe pymantle features FILE` prints the Python features a Python Ion
+file uses; `pymantle --help` lists the subcommands.
 
 ## Spec quantifiers
 
@@ -215,3 +237,5 @@ python diff_test.py
 | `StrataPython.Specs.IdentifyOverloads` | Overload resolution AST walker |
 | `StrataPython.Laurel` | Type-tagged Laurel expression builders |
 | `StrataPython.Pipeline` | Full pyAnalyzeLaurel pipeline |
+| `Strata.Mantle` | The Mantle IR (`StrataMantle/`) |
+| `StrataPython.Mantle` | Python on Mantle (`PyScope`, `PyBuild`, `PyTranslate`) |

@@ -1,0 +1,197 @@
+module m_expressions {
+  func @m_expressions.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "m_expressions"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "m_expressions"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Code = const @m_expressions.exprs
+      %7 : py.Value = py.mkClosure %6
+      %8 : base.String = const str "m_expressions"
+      %9 : base.String = const str "exprs"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : py.Value = py.noneLit
+      %13 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %12
+      ret %13
+    propagate.0(%14 : py.Value):
+      %15 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %14
+      ret %15
+  }
+  func @m_expressions.exprs(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "a"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : base.String = const str "b"
+      %6 : py.Value = py.undef %5
+      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
+      %8 : base.String = const str "c"
+      %9 : py.Value = py.undef %8
+      %10 : base.Ref(py.Value) = base.refNew[py.Value] %9
+      %11 : base.String = const str "s"
+      %12 : py.Value = py.undef %11
+      %13 : base.Ref(py.Value) = base.refNew[py.Value] %12
+      %14 : base.String = const str "by"
+      %15 : py.Value = py.undef %14
+      %16 : base.Ref(py.Value) = base.refNew[py.Value] %15
+      %17 : base.String = const str "e"
+      %18 : py.Value = py.undef %17
+      %19 : base.Ref(py.Value) = base.refNew[py.Value] %18
+      %20 : base.String = const str "t"
+      %21 : py.Value = py.undef %20
+      %22 : base.Ref(py.Value) = base.refNew[py.Value] %21
+      %23 : base.String = const str "u"
+      %24 : py.Value = py.undef %23
+      %25 : base.Ref(py.Value) = base.refNew[py.Value] %24
+      %26 : py.Value = py.tupleLen %0
+      %27 : base.String = const str "a"
+      %28 : py.Value = py.undef %27
+      %29 : base.String = const str "b"
+      %30 : py.Value = py.undef %29
+      %31 : base.String = const str "c"
+      %32 : py.Value = py.undef %31
+      %33 : py.Value = py.mkTuple %28 %30 %32
+      %34 : py.Value = py.noneLit
+      %35 : py.Value = py.getSlice %33 %26 %34 %34 ^propagate.0()
+      %36 : py.Value = py.add %0 %35 ^propagate.0()
+      %37 : base.Int = const int 0
+      %38 : py.Value = py.intLit %37
+      %39 : py.Value = py.getItem %36 %38 ^propagate.0()
+      %40 : base.String = const str "a"
+      %41 : py.Value = py.strLit %40
+      %42 : py.Value = py.dictGet %1 %41 %39
+      %43 : py.Value = py.in %41 %1 ^propagate.0()
+      %44 : base.Unit = py.dictDiscard %1 %41
+      %45 : base.Int = const int 1
+      %46 : py.Value = py.intLit %45
+      %47 : py.Value = py.getItem %36 %46 ^propagate.0()
+      %48 : base.String = const str "b"
+      %49 : py.Value = py.strLit %48
+      %50 : py.Value = py.dictGet %1 %49 %47
+      %51 : py.Value = py.in %49 %1 ^propagate.0()
+      %52 : base.Unit = py.dictDiscard %1 %49
+      %53 : base.Int = const int 2
+      %54 : py.Value = py.intLit %53
+      %55 : py.Value = py.getItem %36 %54 ^propagate.0()
+      %56 : base.String = const str "c"
+      %57 : py.Value = py.strLit %56
+      %58 : py.Value = py.dictGet %1 %57 %55
+      %59 : py.Value = py.in %57 %1 ^propagate.0()
+      %60 : base.Unit = py.dictDiscard %1 %57
+      %61 : py.Value = py.lt %38 %26 ^propagate.0()
+      %62 : py.Value = py.mult %43 %61 ^propagate.0()
+      %63 : base.Int = const int 0
+      %64 : base.String = const str "TypeError"
+      %65 : base.String = const str "exprs() got multiple values for argument 'a'"
+      %66 : base.Unit = py.requireAtMost %62 %63 %64 %65 ^propagate.0()
+      %67 : py.Value = py.lt %46 %26 ^propagate.0()
+      %68 : py.Value = py.mult %51 %67 ^propagate.0()
+      %69 : base.Int = const int 0
+      %70 : base.String = const str "TypeError"
+      %71 : base.String = const str "exprs() got multiple values for argument 'b'"
+      %72 : base.Unit = py.requireAtMost %68 %69 %70 %71 ^propagate.0()
+      %73 : py.Value = py.lt %54 %26 ^propagate.0()
+      %74 : py.Value = py.mult %59 %73 ^propagate.0()
+      %75 : base.Int = const int 0
+      %76 : base.String = const str "TypeError"
+      %77 : base.String = const str "exprs() got multiple values for argument 'c'"
+      %78 : base.Unit = py.requireAtMost %74 %75 %76 %77 ^propagate.0()
+      %79 : base.String = const str "kwargs"
+      %80 : py.Value = py.undef %79
+      %81 : py.Value = py.dictFirstKey %1 %80
+      %82 : base.String = const str "TypeError"
+      %83 : base.String = const str "exprs() got an unexpected keyword argument {}"
+      %84 : base.Unit = py.requireUndefined %81 %82 %83 ^propagate.0()
+      %85 : base.Int = const int 3
+      %86 : base.String = const str "TypeError"
+      %87 : base.String = const str "exprs() takes 3 positional arguments but {} {was} given"
+      %88 : base.Unit = py.requireAtMost %26 %85 %86 %87 ^propagate.0()
+      %89 : base.String = const str "TypeError"
+      %90 : base.String = const str "exprs() missing 1 required positional argument: 'a'"
+      %91 : py.Value = py.requireDefined %42 %89 %90 ^propagate.0()
+      %92 : base.Unit = base.refSet[py.Value] %4 %91
+      %93 : base.String = const str "TypeError"
+      %94 : base.String = const str "exprs() missing 1 required positional argument: 'b'"
+      %95 : py.Value = py.requireDefined %50 %93 %94 ^propagate.0()
+      %96 : base.Unit = base.refSet[py.Value] %7 %95
+      %97 : base.String = const str "TypeError"
+      %98 : base.String = const str "exprs() missing 1 required positional argument: 'c'"
+      %99 : py.Value = py.requireDefined %58 %97 %98 ^propagate.0()
+      %100 : base.Unit = base.refSet[py.Value] %10 %99
+      %101 : base.String = const str "s"
+      %102 : py.Value = py.strLit %101
+      %103 : base.Unit = base.refSet[py.Value] %13 %102
+      %104 : base.String = const str "\x00ÿ"
+      %105 : py.Value = py.bytesLit %104
+      %106 : base.Unit = base.refSet[py.Value] %16 %105
+      %107 : base.String = const str "builtins"
+      %108 : base.String = const str "Ellipsis"
+      %109 : py.Value = py.qualifiedRef %107 %108 ^propagate.0()
+      %110 : base.Unit = base.refSet[py.Value] %19 %109
+      %111 : py.Value = base.refGet[py.Value] %4
+      %112 : base.String = const str "UnboundLocalError"
+      %113 : base.String = const str "cannot access local variable 'a' where it is not associated with a value"
+      %114 : py.Value = py.requireDefined %111 %112 %113 ^propagate.0()
+      %115 : py.Value = base.refGet[py.Value] %7
+      %116 : base.String = const str "UnboundLocalError"
+      %117 : base.String = const str "cannot access local variable 'b' where it is not associated with a value"
+      %118 : py.Value = py.requireDefined %115 %116 %117 ^propagate.0()
+      %119 : py.Value = py.add %114 %118 ^propagate.0()
+      %120 : py.Value = base.refGet[py.Value] %10
+      %121 : base.String = const str "UnboundLocalError"
+      %122 : base.String = const str "cannot access local variable 'c' where it is not associated with a value"
+      %123 : py.Value = py.requireDefined %120 %121 %122 ^propagate.0()
+      %124 : base.Int = const int 2
+      %125 : py.Value = py.intLit %124
+      %126 : py.Value = py.mult %123 %125 ^propagate.0()
+      %127 : base.Int = const int 3
+      %128 : py.Value = py.intLit %127
+      %129 : py.Value = py.div %126 %128 ^propagate.0()
+      %130 : base.Int = const int 4
+      %131 : py.Value = py.intLit %130
+      %132 : py.Value = py.floorDiv %129 %131 ^propagate.0()
+      %133 : base.Int = const int 5
+      %134 : py.Value = py.intLit %133
+      %135 : py.Value = py.mod %132 %134 ^propagate.0()
+      %136 : py.Value = py.sub %119 %135 ^propagate.0()
+      %137 : base.Int = const int 2
+      %138 : py.Value = py.intLit %137
+      %139 : py.Value = py.pow %136 %138 ^propagate.0()
+      %140 : base.Unit = base.refSet[py.Value] %22 %139
+      %141 : py.Value = base.refGet[py.Value] %4
+      %142 : base.String = const str "UnboundLocalError"
+      %143 : base.String = const str "cannot access local variable 'a' where it is not associated with a value"
+      %144 : py.Value = py.requireDefined %141 %142 %143 ^propagate.0()
+      %145 : py.Value = py.uSub %144 ^propagate.0()
+      %146 : py.Value = py.not %145 ^propagate.0()
+      %147 : base.Unit = base.refSet[py.Value] %25 %146
+      %148 : py.Value = base.refGet[py.Value] %4
+      %149 : base.String = const str "UnboundLocalError"
+      %150 : base.String = const str "cannot access local variable 'a' where it is not associated with a value"
+      %151 : py.Value = py.requireDefined %148 %149 %150 ^propagate.0()
+      %152 : py.Value = base.refGet[py.Value] %7
+      %153 : base.String = const str "UnboundLocalError"
+      %154 : base.String = const str "cannot access local variable 'b' where it is not associated with a value"
+      %155 : py.Value = py.requireDefined %152 %153 %154 ^propagate.0()
+      %156 : py.Value = py.lt %151 %155 ^propagate.0()
+      %157 : base.Bool = py.truthy %156 ^propagate.0()
+      branch %157 ^cmp.0() ^join.0(%156)
+    cmp.0():
+      %158 : py.Value = base.refGet[py.Value] %10
+      %159 : base.String = const str "UnboundLocalError"
+      %160 : base.String = const str "cannot access local variable 'c' where it is not associated with a value"
+      %161 : py.Value = py.requireDefined %158 %159 %160 ^propagate.0()
+      %162 : py.Value = py.ltE %155 %161 ^propagate.0()
+      jump ^join.0(%162)
+    join.0(%163 : py.Value):
+      %164 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %163
+      ret %164
+    propagate.0(%165 : py.Value):
+      %166 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %165
+      ret %166
+  }
+}
+

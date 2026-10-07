@@ -1,0 +1,9 @@
+module
+  f: local (assigned)
+  Exception: global implicit (referenced)
+  err: local (assigned)
+  function f
+    g: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    e: local (assigned, referenced)
+    print: global implicit (referenced)

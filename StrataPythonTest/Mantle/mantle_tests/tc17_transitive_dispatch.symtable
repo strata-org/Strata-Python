@@ -1,0 +1,8 @@
+module top
+  cloudkit: local (imported)
+  f: local (assigned)
+  function f
+    cloudkit: global implicit (referenced)
+    db: local (assigned, referenced)
+    result: local (assigned)
+qualnames: f

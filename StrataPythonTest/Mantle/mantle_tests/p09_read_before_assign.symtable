@@ -1,0 +1,11 @@
+module top
+  with_global: local (assigned)
+  without_global: local (assigned)
+  x: local (assigned)
+  function with_global
+    print: global implicit (referenced)
+    x: local (assigned, referenced)
+  function without_global
+    print: global implicit (referenced)
+    y: local (assigned, referenced)
+qualnames: with_global, without_global
