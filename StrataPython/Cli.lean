@@ -28,7 +28,7 @@ public import StrataPython.Specs.ToLaurel
 public import StrataPython.ReadPython
 
 public import StrataDDM.Util.IO
-import StrataDDM.Util.String
+import Strata.DL.SMT.StringLit
 
 /-! # Python CLI command definitions
 
@@ -167,6 +167,8 @@ private def printPyAnalyzeSummary (vcResults : Array Core.VCResult)
     and return a human-readable location suffix (e.g., " at line 42, col 5"). -/
 def reportUserCodeError (range : StrataDDM.SourceRange) (msg : String)
     (mfm : Option (String × Lean.FileMap)) (filePath : String) : IO String := do
+  let fileLiteral := Strata.SMT.StringLit.toDiagnosticSMTString filePath
+  let messageLiteral := Strata.SMT.StringLit.toDiagnosticSMTString msg
   let location := if range.isNone then "" else
     match mfm with
     | some (_, fm) =>
@@ -174,12 +176,12 @@ def reportUserCodeError (range : StrataDDM.SourceRange) (msg : String)
       s!" at line {pos.line}, col {pos.column}"
     | none => ""
   let mut lines := #[
-    s!"(set-info :file {StrataDDM.escapeSMTStringLit filePath})"
+    s!"(set-info :file {fileLiteral})"
   ]
   unless range.isNone do
     lines := lines.push s!"(set-info :start {range.start})"
     lines := lines.push s!"(set-info :stop {range.stop})"
-  lines := lines.push s!"(set-info :error-message {StrataDDM.escapeSMTStringLit msg})"
+  lines := lines.push s!"(set-info :error-message {messageLiteral})"
   for line in lines do
     IO.println line
   IO.FS.Handle.mk "user_errors.txt" .write >>= fun h =>
