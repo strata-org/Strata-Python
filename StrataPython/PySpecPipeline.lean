@@ -71,7 +71,7 @@ open Pipeline (emitMessage emitMessageAndAbort)
 
 /-- Result of reading PySpec files: combined Laurel declarations and overload table. -/
 public structure PySpecLaurelResult where
-  laurelProgram : Laurel.Program
+  laurelProgram : Laurel.LaurelProgram
   overloads : OverloadTable
   /-- Modeled function/method signatures, each tagged with the PySpec module
       that declared it (V2 name resolution binds per module). -/
@@ -185,7 +185,7 @@ public def dedupPySpecDecls (items : Array (α × String)) (nameOf : α → Laur
 /-- Read PySpec Ion files and collect their Laurel declarations and overload
     tables into a single combined result. Each Ion file is parsed and translated
     to Laurel via `signaturesToLaurel`. The resulting procedures and types are
-    accumulated into one `Laurel.Program`, and overload dispatch entries are
+    accumulated into one `Laurel.LaurelProgram`, and overload dispatch entries are
     merged into a single table.
 
     Each entry is a `(moduleName, ionPath)` pair. The module name is used
@@ -253,7 +253,7 @@ private def buildPySpecLaurelM (pyspecEntries : Array (ModuleName × String))
       seenFields := seenFields.insert field.name.text srcFile
       dedupedFields := dedupedFields.push (field, srcFile)
 
-  let combinedLaurel : Laurel.Program := {
+  let combinedLaurel : Laurel.LaurelProgram := {
     staticProcedures := pythonRuntimeLaurelPart.staticProcedures ++
       pySpecRuntimeLaurelPart.staticProcedures ++ dedupedProcs.toList.map Prod.fst
     staticFields := dedupedFields.toList.map Prod.fst
@@ -414,7 +414,7 @@ public def buildPreludeInfo (result : PySpecLaurelResult) : PreludeInfo :=
     prepending External stubs so the Laurel `resolve` pass can see
     prelude names (e.g. `print`, `from_string`). -/
 public def combinePySpecLaurel
-    (pySpec user : Laurel.Program) : Laurel.Program :=
+    (pySpec user : Laurel.LaurelProgram) : Laurel.LaurelProgram :=
   { staticProcedures := pySpec.staticProcedures ++ user.staticProcedures
     staticFields := pySpec.staticFields ++ user.staticFields
     types := pySpec.types ++ user.types
@@ -458,11 +458,11 @@ public def splitProcNames (prog : Core.Program)
 
     When `keepAllFilesPrefix` is provided, the program state after each named
     Laurel pass is written to `{prefix}.{n}.{passName}.laurel.st`. -/
-public def translateCombinedLaurelWithLowered (combined : Laurel.Program)
+public def translateCombinedLaurelWithLowered (combined : Laurel.LaurelProgram)
     (keepAllFilesPrefix : Option String := none)
     (pipelineCtx : Option Pipeline.PipelineContext := none)
     (analysisMode : Laurel.AnalysisMode := .Verify)
-    : IO (Option Core.Program × List Message × Laurel.Program × Statistics) := do
+    : IO (Option Core.Program × List Message × Laurel.LaurelProgram × Statistics) := do
   let (coreOption, errors, lowered, stats) ←
     Laurel.translateWithLaurel { inlineFunctionsWhenPossible := true, keepAllFilesPrefix, analysisMode }
       combined (pipelineCtx := pipelineCtx)
@@ -470,7 +470,7 @@ public def translateCombinedLaurelWithLowered (combined : Laurel.Program)
 
 /-- Translate a combined Laurel program to Core and prepend the full
     runtime prelude. -/
-public def translateCombinedLaurel (combined : Laurel.Program) (keepAllFilesPrefix : Option String := none)
+public def translateCombinedLaurel (combined : Laurel.LaurelProgram) (keepAllFilesPrefix : Option String := none)
     (analysisMode : Laurel.AnalysisMode := .Verify)
     : IO (Option Core.Program × List Message) := do
   let (coreOption, errors, _, _) ←
@@ -496,7 +496,7 @@ public def pythonAndSpecToLaurel
     (pyspecModules : Array String := #[])
     (sourcePath : Option String := none)
     (specDir : System.FilePath := ".")
-    : Pipeline.PipelineM Laurel.Program := do
+    : Pipeline.PipelineM Laurel.LaurelProgram := do
   let stmts ← Pipeline.withPhase "readPythonIon" do
     match ← readPythonStrata pythonIonPath |>.toBaseIO with
     | .ok r => pure r
@@ -669,7 +669,7 @@ private def pythonReservedNames : Std.HashSet String :=
     external names so the Laurel resolver emits no "not defined" diagnostics for them.
     `extraExternalNames` adds program-specific unmodeled names (e.g. names imported from
     unmodeled modules like `botocore.config.Config`, `pyspark.SparkContext`). -/
-private def translateCombinedLaurelV2 (combined : Laurel.Program)
+private def translateCombinedLaurelV2 (combined : Laurel.LaurelProgram)
     (extraExternalNames : Std.HashSet String := {})
     (analysisMode : Laurel.AnalysisMode := .Verify)
     (keepAllFilesPrefix : Option String := none)
@@ -725,8 +725,8 @@ private def collectImportedNames (stmts : Array (StrataPython.stmt SourceRange))
     imported class (e.g. `boto3.S3`) has no matching `type C` definition and the Laurel
     resolver reports "'C' is not defined". -/
 private def assembleElaborationInput
-    (userLaurel importedLaurel : Laurel.Program)
-    (demandedTypes : List Laurel.TypeDefinition := []) : Laurel.Program :=
+    (userLaurel importedLaurel : Laurel.LaurelProgram)
+    (demandedTypes : List Laurel.TypeDefinition := []) : Laurel.LaurelProgram :=
   { staticProcedures := userLaurel.staticProcedures ++ importedLaurel.staticProcedures
     staticFields := userLaurel.staticFields
     types := userLaurel.types ++ importedLaurel.types ++ demandedTypes
@@ -741,7 +741,7 @@ private def assembleElaborationInput
     `prelude.types` rather than a fixed list, so a new prelude datatype is excluded automatically.
     Names that are NOT prelude types (e.g. `Composite`, which types the `Any..as_Composite!` bridge
     stubs) are kept — dropping them would leave `Any`'s generated destructors unresolved. -/
-public def bodilessTypeNamesFor (candidates : List String) (prelude : Laurel.Program) : List String :=
+public def bodilessTypeNamesFor (candidates : List String) (prelude : Laurel.LaurelProgram) : List String :=
   let preludeTypeNames : Std.HashSet String :=
     prelude.types.foldl (fun acc t => acc.insert t.name.text) {}
   candidates.filter (fun n => !preludeTypeNames.contains n)
@@ -814,9 +814,9 @@ private def externalModuleDecls (r : PySpecLaurelResult)
 
 /-- Extend `prelude` with an `Alias unprefixed → prefixed` type definition for each PySpec
     type alias whose unprefixed name is not already taken by a prelude type or user class. -/
-private def addUnprefixedTypeAliases (prelude : Laurel.Program)
+private def addUnprefixedTypeAliases (prelude : Laurel.LaurelProgram)
     (typeAliases : Std.HashMap String String)
-    (userClassNames : Std.HashSet String) : Laurel.Program :=
+    (userClassNames : Std.HashSet String) : Laurel.LaurelProgram :=
   let existing := prelude.types.foldl (fun st t => st.insert t.name.text) userClassNames
   let aliasTypes : List Laurel.TypeDefinition :=
     typeAliases.fold (init := []) fun acc unprefixed prefixed =>
@@ -870,7 +870,7 @@ public def pyAnalyzeV2ToCore (pythonIonPath : String) (sourcePath : Option Strin
     | .ok r => pure r
   let modelDiags : List Message :=
     externalAnomalies.map (Message.fromString · (kind := .notYetImplemented))
-  let modelPrelude : Laurel.Program := match pyspecResult with
+  let modelPrelude : Laurel.LaurelProgram := match pyspecResult with
     | some r =>
       let userClassNames : Std.HashSet String :=
         resolveResult.program.stmts.foldl (init := {}) fun st stmt =>
@@ -884,7 +884,7 @@ public def pyAnalyzeV2ToCore (pythonIonPath : String) (sourcePath : Option Strin
   -- final return) rather than an empty program: an empty program would still leave
   -- `demandedTypes` declaring those classes with no method procedures, producing
   -- misleading "not defined" errors at each downstream method call.
-  let (importedLaurel, importedTranslationDiags) : Laurel.Program × List Message :=
+  let (importedLaurel, importedTranslationDiags) : Laurel.LaurelProgram × List Message :=
     match Translation.runTranslation { stmts := resolveResult.demandedStmts, moduleLocals := [] } metadataPath with
     | .ok (prog, _) => (prog, [])
     | .error e => (default, [Message.fromString s!"demanded-import translation failed: {repr e}"])

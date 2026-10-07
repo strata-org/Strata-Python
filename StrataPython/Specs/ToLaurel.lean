@@ -1411,7 +1411,7 @@ def signatureToLaurel (sig : Signature) : ToLaurelM Unit :=
 
 /-- Result of translating PySpec signatures to Laurel. -/
 public structure TranslationResult where
-  program : Laurel.Program
+  program : Laurel.LaurelProgram
   errors : Array PipelineMessage
   overloads : OverloadTable
   /-- Maps unprefixed class names to prefixed names for type resolution. -/
@@ -1441,7 +1441,7 @@ public def signaturesToLaurel (filepath : System.FilePath) (sigs : Array Signatu
           emittedGhosts := emittedGhosts.insert g.name
     sigs.forM signatureToLaurel
   let ((), state) := action.run ctx |>.run {}
-  let pgm : Laurel.Program := {
+  let pgm : Laurel.LaurelProgram := {
     staticProcedures := state.procedures.toList
     staticFields := state.ghostFields.toList
     types := state.types.toList

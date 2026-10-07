@@ -140,7 +140,7 @@ return if Any..isexception(left) || Any..isexception(right)
 
 #end
 
-public def pySpecRuntimeLaurelPart : Laurel.Program :=
+public def pySpecRuntimeLaurelPart : Laurel.LaurelProgram :=
   match Laurel.TransM.run
       (.file "StrataPython/PySpecRuntimeLaurelPart.lean")
       (Laurel.parseProgram pySpecRuntimeLaurelPartDDM) (synthesized := true) with

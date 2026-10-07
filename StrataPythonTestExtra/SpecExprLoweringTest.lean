@@ -317,7 +317,7 @@ private def ghostModuleFn (pres : Array SpecExpr := #[]) (admits : Array SpecExp
 
 /-- Lower one ghost `g` plus a procedure whose precondition is `body`. -/
 private def lowerModuleWithGhost (body : SpecExpr) (args : Array Arg := #[])
-    : Laurel.Program × Array Pipeline.PipelineMessage :=
+    : Laurel.LaurelProgram × Array Pipeline.PipelineMessage :=
   let r := signaturesToLaurel "m.py"
     #[ghostDecl "g" (some (.intLit 0 loc)), ghostModuleFn (pres := #[body]) (args := args)]
     ghostModuleName
@@ -329,7 +329,7 @@ private def hasKind (errs : Array Pipeline.PipelineMessage) (category : String) 
 /-- Like `lowerModuleWithGhost` but with `@admit` and optional `@modifies`. -/
 private def lowerModuleWithGhostAdmit (admits : Array SpecExpr) (args : Array Arg := #[])
     (mods : Array SpecExpr := #[])
-    : Laurel.Program × Array Pipeline.PipelineMessage :=
+    : Laurel.LaurelProgram × Array Pipeline.PipelineMessage :=
   let r := signaturesToLaurel "m.py"
     #[ghostDecl "g" (some (.intLit 0 loc)),
       ghostModuleFn (admits := admits) (mods := mods) (args := args)]
@@ -337,19 +337,19 @@ private def lowerModuleWithGhostAdmit (admits : Array SpecExpr) (args : Array Ar
   (r.program, r.errors)
 
 /-- The emitted procedure `f` of a lowered module. -/
-private def procF (pgm : Laurel.Program) : IO Procedure := do
+private def procF (pgm : Laurel.LaurelProgram) : IO Procedure := do
   let some proc := pgm.staticProcedures.find? (·.name.text.endsWith "f")
     | throw <| IO.userError "procedure 'f' not emitted"
   return proc
 
 /-- A model is bodiless: its contract lives entirely in its spec. -/
-private def procFIsBodiless (pgm : Laurel.Program) : IO Unit := do
+private def procFIsBodiless (pgm : Laurel.LaurelProgram) : IO Unit := do
   let proc ← procF pgm
   if proc.body.implementation.isSome then
     throw <| IO.userError "procedure 'f' carries an implementation; models must be bodiless"
 
 /-- `f`'s declared global effects and free postconditions, by summary. -/
-private def procFSpec (pgm : Laurel.Program)
+private def procFSpec (pgm : Laurel.LaurelProgram)
     : IO (List String × List String × List (String × String)) := do
   procFIsBodiless pgm
   let proc ← procF pgm
@@ -795,7 +795,7 @@ private def ghostSurvivesFilterPreludeTest : IO Unit := do
     throw <| IO.userError "expected one ghost field to route through the pipeline"
   let ghostFields := r.program.staticFields
   let preludeForFilter := { r.program with staticFields := [] }
-  let user : Strata.Laurel.Program :=
+  let user : Strata.Laurel.LaurelProgram :=
     { staticProcedures := [], staticFields := ghostFields, types := [], constants := [] }
   match Strata.Laurel.filterPrelude preludeForFilter user with
   | .error e =>

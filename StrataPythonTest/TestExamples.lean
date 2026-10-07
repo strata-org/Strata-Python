@@ -22,7 +22,7 @@ namespace StrataPython
 /-- Run the Python → Ion → Laurel pipeline inside a temp directory and pass
     the resulting Laurel program and the temp source path to a continuation. -/
 def withPythonToLaurel (pythonCmd : System.FilePath) (input : InputContext)
-    (k : Laurel.Program → System.FilePath → IO α) : IO α := do
+    (k : Laurel.LaurelProgram → System.FilePath → IO α) : IO α := do
   IO.FS.withTempDir fun tmpDir => do
     let pyFile := tmpDir / "test.py"
     IO.FS.writeFile pyFile input.inputString
@@ -55,7 +55,7 @@ def withPythonToLaurel (pythonCmd : System.FilePath) (input : InputContext)
 /-- Run the Python → Ion → Laurel pipeline and return the Laurel program.
     The caller can inspect the Laurel IR directly or continue to Core/SMT. -/
 public def processPythonToLaurel (pythonCmd : System.FilePath) (input : InputContext)
-    : IO Laurel.Program :=
+    : IO Laurel.LaurelProgram :=
   withPythonToLaurel pythonCmd input fun laurel _ => pure laurel
 
 /-- Process a Python source file through the full verification pipeline

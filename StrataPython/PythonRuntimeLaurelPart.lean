@@ -1221,7 +1221,7 @@ public def AnyMaybeExceptionList : Std.HashSet String :=
     "PBitAnd", "PBitOr", "PBitXor", "PAnd", "POr"]
    : List String).foldl (fun s n => s.insert n) {}
 
-public def pythonRuntimeLaurelPart : Laurel.Program :=
+public def pythonRuntimeLaurelPart : Laurel.LaurelProgram :=
   match Laurel.TransM.run
       (.file "StrataPython/PythonRuntimeLaurelPart.lean")
       (Laurel.parseProgram pythonRuntimeLaurelPartDDM) (synthesized := true) with

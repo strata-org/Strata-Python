@@ -125,7 +125,7 @@ meta def testVerifyOptions : Core.VerifyOptions :=
 
 /-- Verify an already-generated Laurel program. -/
 private meta def verifyLaurel
-    (laurel : Strata.Laurel.Program) (useRoots : Bool := false)
+    (laurel : Strata.Laurel.LaurelProgram) (useRoots : Bool := false)
     (verifyOptions : Core.VerifyOptions := testVerifyOptions)
     : IO (Except String (Array Core.VCResult)) := do
   let (coreProgramOption, _) ← translateCombinedLaurel laurel

@@ -22,13 +22,13 @@ open Strata
 namespace StrataPython.PreludeVerifyTest
 
 /-- Build a full Core prelude program (Laurel-translated + Core-only parts). -/
-private def preludeProgram (runtime : Laurel.Program) : IO Core.Program := do
+private def preludeProgram (runtime : Laurel.LaurelProgram) : IO Core.Program := do
   let (coreOption, _) ← StrataPython.translateCombinedLaurel runtime
   match coreOption with
   | some prog => return prog
   | none => return { decls := [] }
 
-private def verifyPrelude (runtime : Laurel.Program) : IO (Array Message) := do
+private def verifyPrelude (runtime : Laurel.LaurelProgram) : IO (Array Message) := do
   let prog ← preludeProgram runtime
   IO.FS.withTempDir fun tempDir => do
     let r ← EIO.toIO (IO.Error.userError ∘ toString)

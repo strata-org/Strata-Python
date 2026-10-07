@@ -18,7 +18,7 @@ NodeInfo and emits Laurel constructs. Never constructs Laurel.Identifier
 from strings — only forwards what Resolution provided.
 
 Input:  ResolvedPythonProgram
-Output: Laurel.Program
+Output: Laurel.LaurelProgram
 -/
 
 namespace StrataPython.Translation
@@ -1201,7 +1201,7 @@ partial def translateClass (name : PythonIdentifier) (attributes : List (PythonI
   let ct : CompositeType := { name := name.toLaurel, extending := [], fields := laurelFields, instanceProcedures := [] }
   pure (.Composite ct, procs)
 
-partial def translateModule (program : ResolvedPythonProgram) : TransM Strata.Laurel.Program := do
+partial def translateModule (program : ResolvedPythonProgram) : TransM Strata.Laurel.LaurelProgram := do
   -- Collect module-level assignment type-aliases: `MyInt = int` where the RHS is a
   -- type-name expression. These resolve annotations like `x: MyInt` to the aliased
   -- type rather than a phantom `UserDefined` composite. (Only bare `Name = <typeExpr>`
@@ -1281,7 +1281,7 @@ end -- mutual
     Returns the Laurel program and final translator state, or a `TransError`. -/
 def runTranslation (program : ResolvedPythonProgram)
     (filePath : String := "")
-    : Except TransError (Strata.Laurel.Program × TransState) :=
+    : Except TransError (Strata.Laurel.LaurelProgram × TransState) :=
   (translateModule program).run.run { filePath := filePath } |>.map fun ((prog, _stmts), state) => (prog, state)
 
 end -- public section

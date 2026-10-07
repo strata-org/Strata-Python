@@ -3276,7 +3276,7 @@ def getHighTypeName : Laurel.HighType → String
   | _ => "unknown"
 
 /-- Extract `PreludeInfo` from a Laurel `Program`. -/
-def PreludeInfo.ofLaurelProgram (prog : Laurel.Program) : PreludeInfo where
+def PreludeInfo.ofLaurelProgram (prog : Laurel.LaurelProgram) : PreludeInfo where
   types :=
     prog.types.foldl (init := {}) fun s td =>
       match td with
@@ -3805,7 +3805,7 @@ def pythonToLaurel (info : PreludeInfo)
     (body : Array (stmt SourceRange))
     (filePath : String := "")
     (overloadTable : OverloadTable := {})
-    : Except TranslationError (Laurel.Program × TranslationContext) := do
+    : Except TranslationError (Laurel.LaurelProgram × TranslationContext) := do
   let moduleDefinitions := collectModuleScopeDefinitions body.toList
   let directImports := collectDirectImportBindings body
   let moduleValueRebindings := collectModuleValueRebindings body
@@ -4122,7 +4122,7 @@ def pythonToLaurel (info : PreludeInfo)
        type := mkHighTypeMd .TBool
        initializer := some (mkStmtExprMd (.LiteralBool false)) }]
 
-  let program : Laurel.Program := {
+  let program : Laurel.LaurelProgram := {
     staticProcedures := (procedures.push mainProc).toList
     staticFields := staticFields
     types := compositeTypes.toList

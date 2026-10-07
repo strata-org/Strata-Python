@@ -29,13 +29,13 @@ meta section
 /-- Run the Python → Laurel pipeline and return the Laurel program together
     with its formatted string representation. -/
 def toLaurel (pythonCmd : System.FilePath) (program : String)
-    : IO (Laurel.Program × String) := do
+    : IO (Laurel.LaurelProgram × String) := do
   let laurel ← processPythonToLaurel pythonCmd (stringInputContext "test.py" program)
   pure (laurel, toString (Laurel.formatProgram laurel))
 
 /-- Assert that a procedure has an implementation body available for verification
     (either Transparent or Opaque with an implementation). -/
-def assertHasBody (laurel : Laurel.Program) (procName : String) : IO Unit := do
+def assertHasBody (laurel : Laurel.LaurelProgram) (procName : String) : IO Unit := do
   match laurel.staticProcedures.find? (fun p => p.name.text == procName) with
   | none => throw <| .userError s!"{procName} procedure not found in Laurel output"
   | some proc =>
@@ -45,7 +45,7 @@ def assertHasBody (laurel : Laurel.Program) (procName : String) : IO Unit := do
     | _ => throw <| .userError s!"{procName} has no implementation body (External or Opaque without implementation)"
 
 /-- Assert that a procedure with the given name exists and has an Opaque body. -/
-def assertOpaque (laurel : Laurel.Program) (procName : String) : IO Unit := do
+def assertOpaque (laurel : Laurel.LaurelProgram) (procName : String) : IO Unit := do
   match laurel.staticProcedures.find? (fun p => p.name.text == procName) with
   | none => throw <| .userError s!"{procName} procedure not found in Laurel output"
   | some proc =>

@@ -124,7 +124,7 @@ public section
 
 /-! ## Internal Types
 
-Elaboration builds its own environment from `Laurel.Program` declarations.
+Elaboration builds its own environment from `Laurel.LaurelProgram` declarations.
 Ideally call sites would carry callee signatures directly (no lookup needed),
 but the Laurel AST uses string-named `StaticCall` nodes. -/
 
@@ -160,7 +160,7 @@ structure ElabTypeEnv where
 
 /-- Builds the type environment from a Laurel program's declarations. Scans all
     procedures (user + runtime) for signatures, all types for class fields. -/
-def buildElabEnvFromProgram (program : Laurel.Program) (runtime : Laurel.Program := default) : ElabTypeEnv := Id.run do
+def buildElabEnvFromProgram (program : Laurel.LaurelProgram) (runtime : Laurel.LaurelProgram := default) : ElabTypeEnv := Id.run do
   let mut names : Std.HashMap String NameInfo := {}
   let mut classFields : Std.HashMap String (List (String × HighType)) := {}
   for proc in program.staticProcedures ++ runtime.staticProcedures do
@@ -390,9 +390,9 @@ structure ElabEnv where
   /-- The typing context (names + class fields). -/
   typeEnv : ElabTypeEnv
   /-- The user program being elaborated. -/
-  program : Laurel.Program
+  program : Laurel.LaurelProgram
   /-- The runtime prelude (builtins, data structure operations). -/
-  runtime : Laurel.Program := default
+  runtime : Laurel.LaurelProgram := default
   /-- Inferred grades for all procedures. -/
   procGrades : Std.HashMap String Grade := {}
   /-- Current procedure's input params (used as hole arguments). -/
@@ -1625,7 +1625,7 @@ private partial def firstFailingStmt (procEnv : ElabEnv) (st : ElabState) (bodyE
 
 /-- Entry point: elaborates a Laurel program. Returns the elaborated program
     and a list of procedure names that failed to elaborate (emitted unchanged). -/
-def fullElaborate (program : Laurel.Program) (runtime : Laurel.Program := default) (initialGrades : Std.HashMap String Grade := {}) : Except String (Laurel.Program × List String) := do
+def fullElaborate (program : Laurel.LaurelProgram) (runtime : Laurel.LaurelProgram := default) (initialGrades : Std.HashMap String Grade := {}) : Except String (Laurel.LaurelProgram × List String) := do
   let typeEnv := buildElabEnvFromProgram program runtime
   let baseEnv : ElabEnv := { typeEnv := typeEnv, program := program, runtime := runtime }
 
@@ -1758,7 +1758,7 @@ def fullElaborate (program : Laurel.Program) (runtime : Laurel.Program := defaul
       preconditions := []
       decreases := none
       body := .Opaque [] none [] : Laurel.Procedure }
-  let result : Laurel.Program :=
+  let result : Laurel.LaurelProgram :=
     { program with
       staticProcedures := holeProcs ++ procs }
   pure (result, elabFailures)
