@@ -25,8 +25,8 @@ recursion depth" under the default `maxRecDepth`, at its own size: a reference's
 `mem_env` at 217.  This block is past all four.  A batch is still limited, at about 500
 instructions, by the reference to instruction `j`, whose type reduces `ops[j]`.
 
-The block takes about 25 s.  Most of it is the stage's freshness, which the kernel checks
-by comparing every pair of names: quadratic in the batch.
+The block takes about 19 s, most of it the DSL's elaboration and about 6 s the kernel's.  The
+stage's freshness check is a `NameSet` build and takes a fraction of a second.
 -/
 
 namespace Strata.Mantle.DSLScaleTest

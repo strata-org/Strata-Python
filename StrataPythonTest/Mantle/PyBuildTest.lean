@@ -62,7 +62,7 @@ private def f : Except Errors (Func Py.env Unit) :=
     let _ ← writeCell y (← emitFailing "sum" Py.add #v[] #[args[0]!, ← intLit 1])
     emitReturn (← readCell y "y")
 
-example : Holds (Func.WF #[]) f := by decide +kernel
+example : Holds (Func.WF ∅) f := by decide +kernel
 
 /-- `f`'s only failing operation reports to the handler `buildFunc` installs. -/
 example : Holds (errTargets · = #[lbl "propagate" 0]) f := by decide +kernel
@@ -97,7 +97,7 @@ it. -/
 private def g : Except Errors (Func Py.env Unit) :=
   buildFunc (Py.pn "g") #[] () fun _ => emitReturnNone
 
-example : Holds (Func.WF #[]) g := by decide +kernel
+example : Holds (Func.WF ∅) g := by decide +kernel
 
 example : Holds (·.blocks.size = 2) g := by decide +kernel
 
@@ -118,7 +118,7 @@ private def hWith (takesExc : Bool) : Except Errors (Func Py.env Unit) :=
 
 private def h : Except Errors (Func Py.env Unit) := hWith true
 
-example : Holds (Func.WF #[]) h := by decide +kernel
+example : Holds (Func.WF ∅) h := by decide +kernel
 
 /-- Three blocks: the body, the `except` block, and the propagating handler `buildFunc`
 installs.  The last is unreachable here, because nothing outside the `try` can fail. -/
@@ -134,7 +134,7 @@ example :
 
 /-- A handler must take the exception: `err` supplies it to its target, so an `except`
 block that declares no parameter is ill formed. -/
-example : Holds (¬ Func.WF #[] ·) (hWith false) := by decide +kernel
+example : Holds (¬ Func.WF ∅ ·) (hWith false) := by decide +kernel
 
 /-! ## `try` / `finally`, by completion
 
@@ -165,7 +165,7 @@ private def kWith (superseded : Bool) : Except Errors (Func Py.env Unit) :=
 
 private def k : Except Errors (Func Py.env Unit) := kWith true
 
-example : Holds (Func.WF #[]) k := by decide +kernel
+example : Holds (Func.WF ∅) k := by decide +kernel
 
 /-- The cleanup body appears once: block 2, with two instructions. -/
 example : Holds (fun k => (k.blocks.map (·.instrs.size))[2]? = some 2) k := by decide +kernel
@@ -177,7 +177,7 @@ example : Holds (·.blocks.size = 11) k := by decide +kernel
 
 /-- Without `superseded`, the `finally` body fails to the enclosing handler and `fin`
 dispatches itself: no `superseded` or `disp` block. -/
-example : Holds (fun k => Func.WF #[] k ∧ k.blocks.size = 9) (kWith false) := by decide +kernel
+example : Holds (fun k => Func.WF ∅ k ∧ k.blocks.size = 9) (kWith false) := by decide +kernel
 
 /-- info: module py.k {
   func @py.k(%0 : py.Value) -> base.Except(py.Value, py.Value) {
@@ -310,7 +310,7 @@ private def globals : Except Errors (Func Py.env Unit) :=
     let _ ← writeGlobal "m" "n" sum
     emitReturnNone
 
-example : Holds (Func.WF #[]) globals := by decide +kernel
+example : Holds (Func.WF ∅) globals := by decide +kernel
 
 /-- info: module py.|<module>| {
   func @py.|<module>|() -> base.Except(py.Value, py.Value) {
@@ -378,7 +378,8 @@ private def addFn : Except Errors (Func Py.env Unit) :=
     let _ ← funcValue mAdd
     emitReturn (← emitFailing "sum" Py.add #v[] #[args[0]!, args[0]!])
 
-example : Holds (Func.WF #[mAdd]) addFn := by decide +kernel
+example : OptHolds (NameSet.of? #[mAdd]) (fun fs => Holds (Func.WF fs) addFn) := by
+  decide +kernel
 
 /-- info: module m.add {
   func @m.add(%0 : py.Value) -> base.Except(py.Value, py.Value) {

@@ -98,7 +98,7 @@ private def fWith (box op : Instruction Py.env Unit) (ok : Instruction Py.env Un
 
 private def f : Func Py.env Unit := fWith box (op3 Py.add #v[] #[0, 2])
 
-example : Func.WF #[] f := by decide +kernel
+example : Func.WF ∅ f := by decide +kernel
 
 /-! ## `def g(x): return 1 if x else 2`
 
@@ -146,7 +146,7 @@ private def g : Func Py.env Unit where
   names   := #[⟨"x", 0⟩]
   info    := ()
 
-example : Func.WF #[] g := by decide +kernel
+example : Func.WF ∅ g := by decide +kernel
 
 private def m : Module Py.env Unit where
   name  := Py.pn "test"
@@ -161,23 +161,23 @@ An operand of the wrong type, a handler where none is declared or none where one
 result of the wrong type, and the wrong number of operands. -/
 
 /-- `add` applied to the base integer rather than to the boxed Python value. -/
-example : ¬ Func.WF #[] (fWith box (op3 Py.add #v[] #[0, 1])) := by decide +kernel
+example : ¬ Func.WF ∅ (fWith box (op3 Py.add #v[] #[0, 1])) := by decide +kernel
 
 /-- A handler on `intLit`, which cannot fail. -/
-example : ¬ Func.WF #[] (fWith
+example : ¬ Func.WF ∅ (fWith
     (.apply () (d 2 Py.Value.ty) Py.intLit #v[] #[⟨1⟩] #[to "propagate"] #[])
     (op3 Py.add #v[] #[0, 2])) := by
   decide +kernel
 
 /-- `add` with no handler: it declares an `err` successor, so a use site must name one. -/
-example : ¬ Func.WF #[] (fWith box (op3 Py.add #v[] #[0, 2] (ks := #[]))) := by decide +kernel
+example : ¬ Func.WF ∅ (fWith box (op3 Py.add #v[] #[0, 2] (ks := #[]))) := by decide +kernel
 
 /-- `add`'s result is the success type, not `Except`. -/
-example : ¬ Func.WF #[] (fWith box (op3 Py.add #v[] #[0, 2] (t := Py.failing.ty)) (mkOk 4 2)) := by
+example : ¬ Func.WF ∅ (fWith box (op3 Py.add #v[] #[0, 2] (t := Py.failing.ty)) (mkOk 4 2)) := by
   decide +kernel
 
 /-- Two operands for a unary operation. -/
-example : ¬ Func.WF #[] (fWith box (op3 Py.uSub #v[] #[0, 2])) := by decide +kernel
+example : ¬ Func.WF ∅ (fWith box (op3 Py.uSub #v[] #[0, 2])) := by decide +kernel
 
 /-! ## Variadic operations
 
@@ -188,11 +188,11 @@ example : ¬ Func.WF #[] (fWith box (op3 Py.uSub #v[] #[0, 2])) := by decide +ke
 #guard ((Py.mkClosure.sig (e := Py.env)).variadic.map (·.name)) == some "cells"
 #guard ((Py.strConcat.sig (e := Py.env)).variadic.map (·.name)) == some "parts"
 
-example : Func.WF #[] (fWith box (op3 Py.mkTuple #v[] #[0, 2, 0] (ks := #[]))) := by
+example : Func.WF ∅ (fWith box (op3 Py.mkTuple #v[] #[0, 2, 0] (ks := #[]))) := by
   decide +kernel
 
 /-- A variadic run is still typed: a base integer is not a Python value. -/
-example : ¬ Func.WF #[] (fWith box (op3 Py.mkTuple #v[] #[0, 1] (ks := #[]))) := by
+example : ¬ Func.WF ∅ (fWith box (op3 Py.mkTuple #v[] #[0, 1] (ks := #[]))) := by
   decide +kernel
 
 /-! ## `py.Completion`'s constructors
@@ -234,10 +234,10 @@ private def compFunc : Func Py.env Unit where
   names   := #[]
   info    := ()
 
-example : Func.WF #[] compFunc := by decide +kernel
+example : Func.WF ∅ compFunc := by decide +kernel
 
 /-- `completionReturn` takes its payload: one with none is rejected. -/
-example : ¬ Func.WF #[] { compFunc with blocks := compFunc.blocks.set! 0 { compBlock with
+example : ¬ Func.WF ∅ { compFunc with blocks := compFunc.blocks.set! 0 { compBlock with
     instrs := #[.apply () (d 1 Py.Completion.ty) Py.Completion.completionReturn #v[] #[] #[] #[]] } } := by
   decide +kernel
 

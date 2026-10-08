@@ -6,6 +6,7 @@
 module
 import all StrataMantle.Util.Array
 import StrataMantle.Env.WF
+public import StrataMantle.Util.NameMap
 public import StrataMantle.Env.Data
 public import StrataMantle.Env.TypeExprRaw
 import StrataMantle.Env.DataProps
@@ -609,15 +610,15 @@ end
 @[simp, grind =] public theorem freshNames_iff {s : Env α} {ns : Array Name} :
     s.FreshNames ns ↔ ns.toList.Nodup ∧ ∀ n ∈ ns, n ∉ s := Iff.rfl
 
-/-- Freshness against an environment whose names are all in `L`, as one Boolean check.  When
-`ns` and `L` are literals, `decide` proves `h`.  The kernel does not unfold `Array.map`, so
-`decide` fails on an `ns` written as one. -/
+/-- Freshness against an environment whose names are all in `L`, as one check: no name occurs
+twice in `L ++ ns`, so `L` must itself name nothing twice.  When `ns` and `L` are literals,
+`decide +kernel` proves `h`. -/
 public theorem FreshNames.of_list {s : Env α} {ns : Array Name} (L : List Name)
     (hs : ∀ {n}, n ∈ s → n ∈ L)
-    (h : ns.toList.Nodup ∧ ns.toList.all (fun n => decide (n ∉ L)) = true) :
-    s.FreshNames ns :=
-  ⟨h.1, fun n hn hm => by
-    simpa [hs hm] using List.all_eq_true.mp h.2 n (Array.mem_toList_iff.mpr hn)⟩
+    (h : (NameSet.of? (L ++ ns.toList).toArray).isSome = true) :
+    s.FreshNames ns := by
+  rw [NameSet.of?_isSome_iff, List.toList_toArray, List.nodup_append] at h
+  exact ⟨h.2.1, fun n hn hm => h.2.2 n (hs hm) n (Array.mem_toList_iff.mpr hn) rfl⟩
 
 theorem freshList_of_freshNames {s : Env α} {ds : Array (Decl.Raw α)}
     (h : s.FreshNames (ds.map (·.name))) : s.raw.FreshList ds.toList :=

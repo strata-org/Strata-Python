@@ -71,7 +71,7 @@ private def f : Except Errors (Func base Unit) :=
     let r ← emitApply "r" intT Base.refGet #v[intT] #[cell]
     finishBlock (.ret () r)
 
-example : Holds (Func.WF #[]) f := by decide +kernel
+example : Holds (Func.WF ∅) f := by decide +kernel
 
 example : Holds (·.blocks.size = 3) f := by decide +kernel
 
@@ -130,7 +130,7 @@ private def h : Except Errors (Func base Unit) :=
     terminate Base.Except.case #v[strT, intT] #[o] #[goto okL, goto errL]
     finishBlock (.ret () (← startBlockWith okL "v" intT))
 
-example : Holds (Func.WF #[]) h := by decide +kernel
+example : Holds (Func.WF ∅) h := by decide +kernel
 
 /-- `errL` was finished before `okL`; the successors still name the labels they were
 given. -/
@@ -149,7 +149,7 @@ private def hSwapped : Except Errors (Func base Unit) :=
         term := .apply () Base.Except.case #v[strT, intT] #[⟨1⟩]
           #[⟨lbl "err" 0, #[]⟩, ⟨lbl "ok" 0, #[]⟩] #[] } }
 
-example : Holds (¬ Func.WF #[] ·) hSwapped := by decide +kernel
+example : Holds (¬ Func.WF ∅ ·) hSwapped := by decide +kernel
 
 /-! ## The other constants, and a failure inspected, as a module
 
@@ -170,7 +170,7 @@ private def hConsts : Except Errors (Func base Unit) :=
     let _ ← startBlockWith errL "err" strT
     finishBlock (.unreachable ())
 
-example : Holds (Func.WF #[]) hConsts := by decide +kernel
+example : Holds (Func.WF ∅) hConsts := by decide +kernel
 
 private def m : Except Errors (Module base Unit) :=
   return { name := .str .base "m", funcs := #[← f, ← hConsts], info := () }

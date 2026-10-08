@@ -5,6 +5,8 @@
 -/
 module
 public import StrataMantle.IR
+public import StrataMantle.Util.NameMap
+public import StrataMantle.Util.Array
 -- The instances evaluate the environment representation at code-generation time.
 import StrataMantle.Env.WF
 
@@ -34,8 +36,8 @@ what the thing it names demands:
 * a `Module` names no function twice, and its functions are all well formed.
 
 `Decidable` instances decide every predicate, so `decide` is the checker.  The combinators
-`OptHolds` and `Agrees` keep the rules decidable, and the checker's maps are tries, so
-`decide +kernel` runs it in the kernel.
+`OptHolds` and `Agrees` keep the rules decidable, and the checker's maps are tries and 2-3
+trees, so `decide +kernel` runs it in the kernel.
 
 The rules do not check:
 
@@ -72,14 +74,18 @@ instance {α : Type} [DecidableEq α] (a b : Option α) : Decidable (Agrees a b)
 
 /-! ## Maps the kernel reduces
 
-The checker's maps are tries, so `decide +kernel` evaluates it:
+The checker's maps are tries and trees, so `decide +kernel` evaluates it:
 
 * `NatTrie`: a map from `Nat`, on the key's binary digits;
 * `LabelMap`: a map from labels, on each label's counter;
-* `Label.Distinct`: no label occurs twice, decided through a `LabelMap`. -/
+* `Label.Distinct`: no label occurs twice, decided through a `LabelMap`;
+* `NameSet` (`StrataMantle.Util.NameMap`): a set of names, as a 2-3 tree on `Name.key`.  It
+  holds a module's function names, which `Module.WF` builds once and every function reference
+  is looked up in. -/
 
 /-- A map from `Nat`: a trie on the key's bijective binary digits.  Key `0` is at the root,
-and `2k+1` and `2k+2` are key `k` of the left and right subtrees. -/
+and `2k+1` and `2k+2` are key `k` of the left and right subtrees.  Its depth is the key's bit
+length, so it suits small keys such as value ids and label counters. -/
 inductive NatTrie (β : Type) where
   | leaf
   | node (v : Option β) (l r : NatTrie β)
@@ -257,11 +263,11 @@ abbrev RegionType (env : Env Unit) := Array (TypeExpr env 0) × TypeExpr env 0
 
 /-- A constant's rule, with `funcs` the module's functions: a function reference names one of
 them. -/
-@[expose, reducible] def Const.WF (funcs : Array Name) : Const → Prop
+@[expose, reducible] def Const.WF (funcs : NameSet) : Const → Prop
   | .func target => target ∈ funcs
   | _ => True
 
-instance (funcs : Array Name) (c : Const) : Decidable (c.WF funcs) :=
+instance (funcs : NameSet) (c : Const) : Decidable (c.WF funcs) :=
   match c with
   | .func target => inferInstanceAs (Decidable (target ∈ funcs))
   | .unit | .bool _ | .int _ | .float _ | .str _ => inferInstanceAs (Decidable True)
@@ -278,7 +284,7 @@ and `funcs` the module's functions.
   declared types.  A constructor is applied as any operation is: its signature is the one
   `Env.addData` derived from its datatype. -/
 @[expose] def Instruction.WF {env : Env Unit} {α : Type} [base ⊑ env]
-    (ctx : Ctx env) (bs : BlockSigs env) (funcs : Array Name) : Instruction env α → Prop
+    (ctx : Ctx env) (bs : BlockSigs env) (funcs : NameSet) : Instruction env α → Prop
   | .const _ d c => d.type = c.typeOf ∧ c.WF funcs
   | @Instruction.apply _ _ _ d isig _ typeArgs args succs ⟨regions⟩ =>
     isig.returnType.map (·.instantiate typeArgs) = some d.type ∧
@@ -287,7 +293,7 @@ and `funcs` the module's functions.
 
 /-- `Instruction.WF` of each. -/
 @[expose] def Instruction.WFList {env : Env Unit} {α : Type} [base ⊑ env]
-    (ctx : Ctx env) (bs : BlockSigs env) (funcs : Array Name) :
+    (ctx : Ctx env) (bs : BlockSigs env) (funcs : NameSet) :
     List (Instruction env α) → Prop
   | [] => True
   | i :: is => Instruction.WF ctx bs funcs i ∧ Instruction.WFList ctx bs funcs is
@@ -296,7 +302,7 @@ and `funcs` the module's functions.
 `InsnSig.callWF`, that supplies its regions as `Instruction.apply` does.  Any successor may be
 taken and any region run. -/
 @[expose] def Terminator.WF {env : Env Unit} {α : Type} [base ⊑ env]
-    (ctx : Ctx env) (bs : BlockSigs env) (funcs : Array Name) : Terminator env α → Prop
+    (ctx : Ctx env) (bs : BlockSigs env) (funcs : NameSet) : Terminator env α → Prop
   | @Terminator.apply _ _ _ isig _ typeArgs args succs ⟨regions⟩ =>
     isig.returnType = none ∧ isig.callWF ctx bs typeArgs args succs ∧
       Region.WFList ctx funcs (isig.regionTypes typeArgs) regions
@@ -304,13 +310,13 @@ taken and any region run. -/
 /-- A block is well formed when its instructions and its terminator are, against the
 blocks `bs` of its region.  `Func.ctx?` checks its parameters. -/
 @[expose] def Block.WF {env : Env Unit} {α : Type} [base ⊑ env]
-    (ctx : Ctx env) (bs : BlockSigs env) (funcs : Array Name) : Block env α → Prop
+    (ctx : Ctx env) (bs : BlockSigs env) (funcs : NameSet) : Block env α → Prop
   | ⟨_, _, ⟨instrs⟩, term, _⟩ =>
     Instruction.WFList ctx bs funcs instrs ∧ Terminator.WF ctx bs funcs term
 
 /-- `Block.WF` of each. -/
 @[expose] def Block.WFList {env : Env Unit} {α : Type} [base ⊑ env]
-    (ctx : Ctx env) (bs : BlockSigs env) (funcs : Array Name) : List (Block env α) → Prop
+    (ctx : Ctx env) (bs : BlockSigs env) (funcs : NameSet) : List (Block env α) → Prop
   | [] => True
   | b :: l => Block.WF ctx bs funcs b ∧ Block.WFList ctx bs funcs l
 
@@ -319,13 +325,13 @@ every block is well formed against the region's own blocks and its exit, taking 
 result.  So control leaves the region only through its exit, with a value of the declared
 type. -/
 @[expose] def Region.WF {env : Env Unit} {α : Type} [base ⊑ env]
-    (ctx : Ctx env) (funcs : Array Name) (sig : RegionType env) : Region env α → Prop
+    (ctx : Ctx env) (funcs : NameSet) (sig : RegionType env) : Region env α → Prop
   | ⟨⟨blocks⟩⟩ =>
     Region.entryWF sig.1 blocks ∧ Block.WFList ctx (BlockSigs.of blocks sig.2) funcs blocks
 
 /-- One region per signature, each well formed at it: the same number, in the same order. -/
 @[expose] def Region.WFList {env : Env Unit} {α : Type} [base ⊑ env]
-    (ctx : Ctx env) (funcs : Array Name) :
+    (ctx : Ctx env) (funcs : NameSet) :
     List (RegionType env) → List (Region env α) → Prop
   | [], [] => True
   | s :: ss, r :: rs => Region.WF ctx funcs s r ∧ Region.WFList ctx funcs ss rs
@@ -335,7 +341,7 @@ end
 
 section Decide
 
-variable {env : Env Unit} {α : Type} [base ⊑ env] (ctx : Ctx env) (funcs : Array Name)
+variable {env : Env Unit} {α : Type} [base ⊑ env] (ctx : Ctx env) (funcs : NameSet)
 
 mutual
 
@@ -493,17 +499,33 @@ formed in the context those definitions give, against the top-level blocks and t
 No transfer names an entry block, the function's or a region's: `BlockSigs.of` leaves
 entries out. -/
 @[expose, reducible] def Func.WF {env : Env Unit} {α : Type} [base ⊑ env]
-    (funcs : Array Name) (fn : Func env α) : Prop :=
+    (funcs : NameSet) (fn : Func env α) : Prop :=
   0 < fn.blocks.size ∧ Label.Distinct (Label.exit :: fn.labels) ∧
     OptHolds fn.ctx? fun ctx =>
       ∀ b ∈ fn.blocks, Block.WF ctx fn.blockSigs funcs b
 
-/-- A module is well formed when it names no function twice and every function in it is
-well formed. -/
+/-- A module is well formed when it names no function twice (`Module.WF.nodup`) and every
+function in it is well formed against the set of its function names (`Module.WF.mem_funcs`). -/
 @[expose, reducible] def Module.WF {env : Env Unit} [base ⊑ env] {α : Type}
     (m : Module env α) : Prop :=
-  (m.funcs.toList.map (·.name)).Nodup ∧ ∀ f ∈ m.funcs, Func.WF (m.funcs.map (·.name)) f
+  -- `NameSet.of?` fails on a repeated name, so one build is both the duplicate check and the
+  -- set that function references are looked up in.
+  OptHolds (NameSet.of? (m.funcs.mapK (·.name))) fun fs => ∀ f ∈ m.funcs, Func.WF fs f
 
 end
+
+/-- A well-formed module names no function twice. -/
+public theorem Module.WF.nodup {env : Env Unit} [base ⊑ env] {α : Type} {m : Module env α}
+    (h : m.WF) : (m.funcs.toList.map (·.name)).Nodup := by
+  obtain ⟨fs, hfs, -⟩ := h
+  have hnd := NameSet.of?_isSome_iff.mp (Option.isSome_iff_exists.mpr ⟨fs, hfs⟩)
+  rwa [Array.mapK_eq_map_fun, Array.toList_map] at hnd
+
+/-- The set `Module.WF` checks function references against holds exactly the module's function
+names. -/
+public theorem Module.WF.mem_funcs {env : Env Unit} [base ⊑ env] {α : Type} {m : Module env α}
+    {fs : NameSet} (h : NameSet.of? (m.funcs.mapK (·.name)) = some fs) (n : Name) :
+    n ∈ fs ↔ ∃ f ∈ m.funcs, f.name = n := by
+  rw [NameSet.mem_of? h, Array.mapK_eq_map_fun, Array.mem_map]
 
 end Strata.Mantle

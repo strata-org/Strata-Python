@@ -10,7 +10,8 @@ set_option autoImplicit false
 /-!
 # Array utilities to help with kernel evaluation of array literals.
 
-Nothing here is public; a module that uses it imports it with `import all`.
+Only `mapK` is public, so that exposed definitions may use it.  A module that uses the rest
+imports it with `import all`.
 -/
 
 namespace Array
@@ -39,9 +40,17 @@ def allK (p : α → Bool) : Array α → Bool
 @[simp] theorem allK_eq_all {p : α → Bool} {as : Array α} : as.allK p = as.all p := by
   cases as; simp [allK]
 
+public section
+
 /-- `Array.map` in a form `decide` can evaluate. -/
-def mapK (f : α → β) : Array α → Array β
+@[expose] def mapK (f : α → β) : Array α → Array β
   | ⟨l⟩ => ⟨l.map f⟩
+
+/-- Compiled code runs `Array.map` for `mapK`. -/
+@[csimp] theorem mapK_eq_map_fun : @mapK = @Array.map := by
+  funext α β f as; cases as; simp only [mapK, List.map_toArray]
+
+end
 
 /-- `mapK` computes `Array.map`. -/
 @[simp] theorem mapK_eq_map {f : α → β} {as : Array α} : as.mapK f = as.map f := by

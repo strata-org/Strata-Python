@@ -88,8 +88,8 @@ private def fPy : Except Build.Errors (Func Py.env Unit) :=
 private def fExt3 : Except Build.Errors (Func Ext3.env Unit) :=
   Build.build (.str .base "f") Base.Int.ty () body
 
-example : Build.Holds (Func.WF #[]) fPy := by decide +kernel
-example : Build.Holds (Func.WF #[]) fExt3 := by decide +kernel
+example : Build.Holds (Func.WF ∅) fPy := by decide +kernel
+example : Build.Holds (Func.WF ∅) fExt3 := by decide +kernel
 
 /-! ## A failing query: the base does not refine `Py` -/
 

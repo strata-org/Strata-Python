@@ -94,7 +94,7 @@ private def sum : Except Errors (Func E Unit) :=
     startBlock r #[c', a', b']
     propagate b'.id
 
-example : Holds (Func.WF #[]) sum := by decide +kernel
+example : Holds (Func.WF ∅) sum := by decide +kernel
 
 /-! ## Terminal instructions
 
@@ -117,7 +117,7 @@ private def raiser : Except Errors (Func E Unit) :=
     finishBlock (.ret () ok)
     propagate (← startBlockWith h "exc" valT)
 
-example : Holds (Func.WF #[]) raiser := by decide +kernel
+example : Holds (Func.WF ∅) raiser := by decide +kernel
 
 /-! ## A terminal instruction with a region
 
@@ -138,7 +138,7 @@ private def counter : Except Errors (Func E Unit) :=
     startBlock done #[n]
     finishBlock (.ret () n.id)
 
-example : Holds (Func.WF #[]) counter := by decide +kernel
+example : Holds (Func.WF ∅) counter := by decide +kernel
 
 /-- The region's blocks count among the function's. -/
 example : Holds (·.labels.map (·.name) =
@@ -212,12 +212,12 @@ private def addRet (x : ValId) (ks : Array BlockValue) : BuildM E Unit Unit := d
 private def wrongCount (n : Nat) : Except Errors (Func E Unit) :=
   handled fun x h => addRet x (Array.replicate n (goto h))
 
-example : Holds (Func.WF #[]) (wrongCount 1) := by decide +kernel
-example : Holds (¬ Func.WF #[] ·) (wrongCount 0) := by decide +kernel
-example : Holds (¬ Func.WF #[] ·) (wrongCount 2) := by decide +kernel
+example : Holds (Func.WF ∅) (wrongCount 1) := by decide +kernel
+example : Holds (¬ Func.WF ∅ ·) (wrongCount 0) := by decide +kernel
+example : Holds (¬ Func.WF ∅ ·) (wrongCount 2) := by decide +kernel
 
 /-- The handler takes an `Int`, but `err` passes a `Value`: `wrongCount 1` otherwise. -/
-example : Holds (¬ Func.WF #[] ·) (handled (fun x h => addRet x #[goto h]) intT) := by
+example : Holds (¬ Func.WF ∅ ·) (handled (fun x h => addRet x #[goto h]) intT) := by
   decide +kernel
 
 /-- A successor inside a region naming a block outside it. -/
@@ -236,7 +236,7 @@ private def outsideRegion : Except Errors (Func E Unit) :=
     finishBlock (.ret () ok)
     propagate (← startBlockWith h "exc" valT)
 
-example : Holds (¬ Func.WF #[] ·) outsideRegion := by decide +kernel
+example : Holds (¬ Func.WF ∅ ·) outsideRegion := by decide +kernel
 
 /-- A successor naming the entry block, even one whose parameters match the payload. -/
 private def toEntry : Except Errors (Func E Unit) :=
@@ -245,17 +245,17 @@ private def toEntry : Except Errors (Func E Unit) :=
     let entry ← startFreshBlock #[x] "entry"
     addRet x.id #[goto entry]
 
-example : Holds (¬ Func.WF #[] ·) toEntry := by decide +kernel
+example : Holds (¬ Func.WF ∅ ·) toEntry := by decide +kernel
 
 /-- A terminal instruction in the middle of a block. -/
-example : Holds (¬ Func.WF #[] ·) (handled fun x h => do
+example : Holds (¬ Func.WF ∅ ·) (handled fun x h => do
     let _ ← emitApply "u" unitT Demo.raise #v[] #[x] #[goto h]
     finishBlock (.ret () (← emitApply "ok" raisingT Base.Except.ok #v[valT, valT] #[x]))) := by
   decide +kernel
 
 /-- A non-terminal instruction in terminator position: `add` would fall through, and
 there is nothing to fall through to. -/
-example : Holds (¬ Func.WF #[] ·) (handled fun x h =>
+example : Holds (¬ Func.WF ∅ ·) (handled fun x h =>
     finishBlock (.apply () Demo.add #v[] #[x, x] #[goto h] #[])) := by
   decide +kernel
 
@@ -272,6 +272,6 @@ private def badLoopBody : Except Errors (Func E Unit) :=
     startBlock done #[n]
     finishBlock (.ret () n.id)
 
-example : Holds (¬ Func.WF #[] ·) badLoopBody := by decide +kernel
+example : Holds (¬ Func.WF ∅ ·) badLoopBody := by decide +kernel
 
 end Strata.Mantle.SuccTest

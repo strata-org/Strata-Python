@@ -323,7 +323,7 @@ private def body {e : Env _root_.Unit} [Demo.env ⊑ e] : BuildM e _root_.Unit _
 private def f : Except Build.Errors (Func Demo.env _root_.Unit) :=
   Build.build (.str .base "f") (Demo.raising.ty Demo.Value.ty) () body
 
-example : Build.Holds (Func.WF #[]) f := by decide +kernel
+example : Build.Holds (Func.WF ∅) f := by decide +kernel
 
 /-! ### Keywords
 

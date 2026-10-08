@@ -83,7 +83,7 @@ private def pick : Except Errors (Func E Unit) :=
     let r ← emitApply "r" intT Reg.«if» #v[intT] #[c.id] (regions := #[thn, els])
     finishBlock (.ret () r)
 
-example : Holds (Func.WF #[]) pick := by decide +kernel
+example : Holds (Func.WF ∅) pick := by decide +kernel
 
 /-- The open entry block survives the regions: one top-level block, holding the `if`. -/
 example : Holds (fun f => f.blocks.size = 1 ∧ (f.blocks.map (·.instrs.size)) = #[1]) pick := by
@@ -123,7 +123,7 @@ private def guarded : Except Errors (Func E Unit) :=
     let r ← emitApply "r" complT Reg.«try» #v[intT] #[] (regions := #[body, handler])
     finishBlock (.ret () r)
 
-example : Holds (Func.WF #[]) guarded := by decide +kernel
+example : Holds (Func.WF ∅) guarded := by decide +kernel
 
 private def m : Except Errors (Module E Unit) :=
   return { name := .str .base "regions", funcs := #[← pick, ← guarded], info := () }
@@ -190,7 +190,7 @@ private def retRegion (v : ValId) : BuildM E Unit (Region E Unit) :=
   region #[] (finishBlock (.ret () v))
 
 /-- An `if` with its `else` missing. -/
-example : Holds (¬ Func.WF #[] ·) (fCX fun c x _ => do
+example : Holds (¬ Func.WF ∅ ·) (fCX fun c x _ => do
     let r ← emitApply "r" intT Reg.«if» #v[intT] #[c] (regions := #[← retRegion x])
     finishBlock (.ret () r)) := by
   decide +kernel
@@ -208,10 +208,10 @@ private def wrongEntry : Except Errors (Func E Unit) :=
     let r ← emitApply "r" complT Reg.«try» #v[intT] #[] (regions := #[body, handler])
     finishBlock (.ret () r)
 
-example : Holds (¬ Func.WF #[] ·) wrongEntry := by decide +kernel
+example : Holds (¬ Func.WF ∅ ·) wrongEntry := by decide +kernel
 
 /-- A `then` region returning the condition, not an `Int`. -/
-example : Holds (¬ Func.WF #[] ·) (fCX fun c x _ => do
+example : Holds (¬ Func.WF ∅ ·) (fCX fun c x _ => do
     let regions := #[← retRegion c, ← retRegion x]
     finishBlock (.ret () (← emitApply "r" intT Reg.«if» #v[intT] #[c] (regions := regions)))) := by
   decide +kernel
@@ -226,9 +226,9 @@ private def escape (escapes : Bool) : Except Errors (Func E Unit) :=
     startBlock done
     finishBlock (.ret () x)
 
-example : Holds (Func.WF #[]) (escape false) := by decide +kernel
+example : Holds (Func.WF ∅) (escape false) := by decide +kernel
 
-example : Holds (¬ Func.WF #[] ·) (escape true) := by decide +kernel
+example : Holds (¬ Func.WF ∅ ·) (escape true) := by decide +kernel
 
 /-- A region's exit is its own, and the function's is not visible inside it: `ret` in the
 `then` region leaves the `if` with an `Int`, so it cannot return the function's `Bool`. -/
@@ -238,12 +238,12 @@ private def outerExit (fromRegion : Bool) : Except Errors (Func E Unit) :=
     let _ ← emitApply "r" intT Reg.«if» #v[intT] #[c] (regions := regions)
     finishBlock (.ret () c)
 
-example : Holds (Func.WF #[]) (outerExit false) := by decide +kernel
+example : Holds (Func.WF ∅) (outerExit false) := by decide +kernel
 
-example : Holds (¬ Func.WF #[] ·) (outerExit true) := by decide +kernel
+example : Holds (¬ Func.WF ∅ ·) (outerExit true) := by decide +kernel
 
 /-- A region block reusing the function entry's label. -/
-example : Holds (¬ Func.WF #[] ·) (fCX fun c x entry => do
+example : Holds (¬ Func.WF ∅ ·) (fCX fun c x entry => do
     let thn ← region #[] do
       finishBlock (.jump () (goto entry))
       startBlock entry

@@ -373,8 +373,9 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
         (← `(by simp [$(R "types"):ident, $(R "names"):ident])))
       cs := cs.push (← thmCmd (mkDoc s!"Stage {k}'s types may be added.") svis? false
         (I "fresh") #[] (← `(Strata.Mantle.Env.FreshTypes $prev $(R "types")))
+        -- `+kernel`: the freshness check is a `NameSet` build, which the kernel runs.
         (← `(⟨Strata.Mantle.Env.FreshNames.of_list $prevList $(prevMem).mp
-              (by rw [$(R "names_eq"):ident]; decide), by decide⟩)))
+              (by rw [$(R "names_eq"):ident]; decide +kernel), by decide⟩)))
       let val ← `(Strata.Mantle.Env.addTypes $prev $(R "types") $(R "fresh"))
       if isLast then
         cs := cs.push (← defCmd (docOr envDoc? s!"The environment `{envStr}`.") vis? false
@@ -401,8 +402,9 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
         (← `(by simp [$(R "hdr"):ident, $(R "hdrNames"):ident])))
       cs := cs.push (← thmCmd (mkDoc s!"Stage {k}'s members may be added as types.") svis?
         false (I "fresh") #[] (← `(Strata.Mantle.Env.FreshTypes $prev $(R "hdr")))
+        -- `+kernel`: the freshness check is a `NameSet` build, which the kernel runs.
         (← `(⟨Strata.Mantle.Env.FreshNames.of_list $prevList $(prevMem).mp
-              (by rw [$(R "hdrNames_eq"):ident]; decide), by decide⟩)))
+              (by rw [$(R "hdrNames_eq"):ident]; decide +kernel), by decide⟩)))
       let t ← `(Strata.Mantle.Env.addTypes $prev $(R "hdr") $(R "fresh"))
       -- The payloads' other types, as references built from literals.  `admissible`'s
       -- `decide` reads each one's parameters, and cannot unfold `TypeRef.ofSubset` or an
@@ -462,7 +464,7 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
                 rw [Strata.Mantle.Env.mem_addTypes, $(R "hdrNames_eq"):ident,
                   $prevMem:ident] at hn
                 exact List.mem_append.mpr (hn.imp Array.mem_toList_iff.mpr id))
-              (by rw [$(R "cnames_eq"):ident]; decide))))
+              (by rw [$(R "cnames_eq"):ident]; decide +kernel))))
       cs := cs.push (← thmCmd (mkDoc s!"Stage {k}'s constructors make a datatype group.") svis?
         false (I "adm") #[]
         (← `(Strata.Mantle.Env.admissible $(R "hdr") $(R "ctors") = true)) (← `(by decide)))
@@ -513,7 +515,8 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
         (← `(($(R "ops")).size = $(quote ds.size))) (← `(by decide +kernel)))
       cs := cs.push (← thmCmd (mkDoc s!"Stage {k}'s names are fresh.") svis? false
         (I "fresh") #[] (← `(Strata.Mantle.Env.FreshNames $prev (($(R "ops")).map (·.1))))
-        -- `+kernel`: the check is quadratic in the batch, and elaborator evaluation is slow.
+        -- `+kernel`: the check builds a `NameSet` of the batch and of what came before, which
+        -- the kernel runs far faster than the elaborator evaluates.
         (← `(Strata.Mantle.Env.FreshNames.of_list $prevList $(prevMem).mp
               (by rw [$(R "names_eq"):ident]; decide +kernel))))
       let val ← `(Strata.Mantle.Env.addInsns $prev $(R "ops") $(R "fresh"))

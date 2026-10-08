@@ -47,6 +47,39 @@ def dropOuter : Name → Nat → Name
 def cmpStr (a b : String) : Ordering :=
   List.compareLex compare a.toByteArray.data.toList b.toByteArray.data.toList
 
+/-! ### A name as one `Nat`
+
+* `key`: an injective encoding of a name as a base-259 numeral.
+* `keyBytes`, `keyNat`: a segment's digits, below those of the segments nearer the root. -/
+
+/-- The bytes `bs` as base-259 digits below `acc`, `bs`'s head least significant. -/
+def keyBytes : List UInt8 → Nat → Nat
+| [], acc => acc
+| b :: bs, acc => b.toNat + 259 * keyBytes bs acc
+
+/-- `n` in base 256, as base-259 digits below `acc`, least significant first, in at most
+`fuel` digits. -/
+def keyNatAux : (fuel n acc : Nat) → Nat
+| 0, _, acc => acc
+| _+1, 0, acc => acc
+| f+1, n+1, acc => (n+1) % 256 + 259 * keyNatAux f ((n+1) / 256) acc
+
+/-- `n` in base 256, as base-259 digits below `acc`, least significant first.  `n` bounds its
+own digit count. -/
+def keyNat (n acc : Nat) : Nat := keyNatAux n n acc
+
+/-- An injective encoding of a name as one `Nat` (`Name.key_inj`): a base-259 numeral whose
+digits are, from the most significant down, `258` for the root and then, for each segment from
+the root outwards, its digits and then its marker.  A string segment's digits are its UTF-8
+bytes and its marker is `256`; a numeric segment's digits are its base-256 digits and its
+marker is `257`.
+
+The order on keys is not `Name.compare`'s. -/
+def key : Name → Nat
+| .base => 258
+| .num n i => 257 + 259 * keyNat i (key n)
+| .str n s => 256 + 259 * keyBytes s.toByteArray.data.toList (key n)
+
 end Name
 
 end

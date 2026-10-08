@@ -111,10 +111,13 @@ def nameText : Name → String
   | .str p s => s!"{nameText p}.{s}"
   | .num p i => s!"{nameText p}.{i}"
 
-/-- The functions of `m` that are not well formed, by `Func.WF`. -/
+/-- The functions of `m` that are not well formed, by `Func.WF`.  A module that names a
+function twice fails `Module.WF` as a whole, and every function is reported. -/
 def illFormed {α : Type} (m : Module Py.env α) : Array Name :=
   let names := m.funcs.map (·.name)
-  (m.funcs.filter fun f => !decide (Func.WF names f)).map (·.name)
+  match NameSet.of? names with
+  | none => names
+  | some fs => (m.funcs.filter fun f => !decide (Func.WF fs f)).map (·.name)
 
 /-- A diagnostic as one comment line: `-- unsupported: lambda is not supported at 4:4-4:22`. -/
 def formatDiagnostic (fileMap : Option Lean.FileMap) (d : Diagnostic) : String :=
