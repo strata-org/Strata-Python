@@ -17,8 +17,8 @@ t10_except_type | no |
 t11_with | no |
 t12_class | no |
 t13_fstring | no |
-t14_bool_short | no |
-t15_ifexp | no |
+t14_bool_short | yes |
+t15_ifexp | yes |
 t16_chained_cmp | yes |
 t17_import | no |
 t18_data_struct | no |
@@ -75,6 +75,7 @@ c5_body_finally_vs_loop_exit | no |
 c6_body_raise | no |
 c7_with_return | no |
 m_builtins | yes |
+m_cond | yes |
 m_expressions | yes |
 m_global_decl | yes |
 m_if | yes |

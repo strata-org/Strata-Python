@@ -106,34 +106,33 @@ module t03_if_else {
       %86 : base.String = const str "NameError"
       %87 : base.String = const str "name 'cond' is not defined"
       %88 : py.Value = py.requireDefined %85 %86 %87 ^propagate.0()
-      %89 : py.Value = py.not %88 ^propagate.0()
-      %90 : base.Bool = py.truthy %89 ^propagate.0()
-      branch %90 ^then.3() ^else.3()
+      %89 : base.Bool = py.truthy %88 ^propagate.0()
+      branch %89 ^else.3() ^then.3()
     then.3():
-      %91 : base.String = const str "b"
-      %92 : py.Value = py.strLit %91
-      %93 : base.String = const str "t03_if_else"
-      %94 : base.String = const str "z"
-      %95 : base.Ref(py.Value) = py.globalCell %93 %94
-      %96 : base.Unit = base.refSet[py.Value] %95 %92
+      %90 : base.String = const str "b"
+      %91 : py.Value = py.strLit %90
+      %92 : base.String = const str "t03_if_else"
+      %93 : base.String = const str "z"
+      %94 : base.Ref(py.Value) = py.globalCell %92 %93
+      %95 : base.Unit = base.refSet[py.Value] %94 %91
       jump ^join.3()
     else.3():
-      %97 : base.String = const str "c"
-      %98 : py.Value = py.strLit %97
-      %99 : base.String = const str "t03_if_else"
-      %100 : base.String = const str "z"
-      %101 : base.Ref(py.Value) = py.globalCell %99 %100
-      %102 : base.Unit = base.refSet[py.Value] %101 %98
+      %96 : base.String = const str "c"
+      %97 : py.Value = py.strLit %96
+      %98 : base.String = const str "t03_if_else"
+      %99 : base.String = const str "z"
+      %100 : base.Ref(py.Value) = py.globalCell %98 %99
+      %101 : base.Unit = base.refSet[py.Value] %100 %97
       jump ^join.3()
     join.3():
       jump ^join.2()
     join.2():
-      %103 : py.Value = py.noneLit
-      %104 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %103
-      ret %104
-    propagate.0(%105 : py.Value):
-      %106 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %105
-      ret %106
+      %102 : py.Value = py.noneLit
+      %103 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %102
+      ret %103
+    propagate.0(%104 : py.Value):
+      %105 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %104
+      ret %105
   }
 }
 

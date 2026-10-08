@@ -41,8 +41,10 @@ with a diagnostic is a failure.
   augmented assignment to a name, `if`/`elif`/`else`, `while`/`else`, `break`, `continue`,
   `return`, `global`, `import a.b [as c]` and `from a.b import x [as y]`.
 * Expressions: `int`, `float`, `str`, `bytes`, `bool`, `None` and `...` literals, names,
-  `+ - * / // % **`, unary `-`, `not`, comparisons (chained too), and calls with positional
-  arguments.
+  `+ - * / // % **`, unary `-`, `not`, comparisons (chained too), `and`, `or`,
+  `x if c else y`, and calls with positional arguments.
+* Conditions: an `if` or `while` test, and the test of `x if c else y`, lower to branches by
+  `transCond`, so each operand's truth is tested at most once.
 
 ## Adding a construct
 
@@ -64,8 +66,7 @@ with a diagnostic is a failure.
   let head ← build (freshLabel "head")       -- and `body`, `else`, `exit`
   jump head
   build (startBlock head)
-  let t ← build (truthy (← transExpr c))
-  branch t bodyL (elseL?.getD exit)
+  transCond c bodyL (elseL?.getD exit)
   build (startBlock bodyL)
   withExit (.loop exit head) (transStmts B)
   if ← isOpen then jump head
@@ -159,6 +160,8 @@ inductive Exit where
 structure FuncJob where
   name : Name
   scope : ScopeId
+  /-- `table.scopes[scope]`. -/
+  cur : Scope
   qualname : String
   args : arguments SourceRange
   body : Array (stmt SourceRange)
@@ -176,6 +179,8 @@ structure Ctx where
   /-- The names some scope binds as module globals. -/
   globals : Std.HashSet String
   scope : ScopeId
+  /-- `table.scopes[scope]`, the scope being translated. -/
+  cur : Scope
   /-- The function's `__qualname__`, for the prologue's error messages. -/
   qualname : String
 
@@ -217,6 +222,11 @@ def withExit (e : Exit) (act : TransM β) : TransM β := do
   return r
 
 /-! ## Diagnostics -/
+
+/-- Record a bug in the translator, `what`, at `range`. -/
+def internalError (what : String) (range : SourceRange) : TransM Unit :=
+  let d : Diagnostic := { kind := .internal, message := what, range }
+  modify fun s => { s with diagnostics := s.diagnostics.push d }
 
 /-- Record that `what` is not supported at `range`. -/
 def reject (what : String) (range : SourceRange) : TransM Unit :=
@@ -268,9 +278,7 @@ inductive Place where
   | unresolved
 
 /-- The current scope. -/
-def curScope : TransM Scope := do
-  let c ← read
-  return c.table.scopes[c.scope]!
+def curScope : TransM Scope := return (← read).cur
 
 /-- `name`, mangled in the current scope. -/
 def mangled (name : String) : TransM String := do
@@ -510,10 +518,10 @@ partial def transExpr (e : expr SourceRange) : TransM ValId := withRange e.ann d
     | .Invert _ => unsupportedValue "operator ~" sr
   | .Compare _ l ops rs => compare l ops.val rs.val
   | .Call sr f args kws => call sr f args.val kws.val
-  | .BoolOp sr .. => unsupportedValue "boolean operator" sr
+  | .BoolOp _ op vs => boolOp (op matches .And _) vs.val
   | .NamedExpr sr .. => unsupportedValue "assignment expression" sr
   | .Lambda sr .. => unsupportedValue "lambda" sr
-  | .IfExp sr .. => unsupportedValue "conditional expression" sr
+  | .IfExp _ c a b => ifExp c a b
   | .Dict sr .. => unsupportedValue "dict display" sr
   | .Set sr .. => unsupportedValue "set display" sr
   | .List sr .. => unsupportedValue "list display" sr
@@ -537,23 +545,88 @@ comparison; its value is the last comparison's. -/
 partial def compare (l : expr SourceRange) (ops : Array (cmpop SourceRange))
     (rs : Array (expr SourceRange)) : TransM ValId := do
   let a ← transExpr l
-  if ops.size = 1 && rs.size = 1 then
-    return ← cmpOp ops[0]! a (← transExpr rs[0]!)
+  let links := ops.zip rs
+  if h : links.size = 1 then
+    let (op, r) := links[0]
+    return ← cmpOp op a (← transExpr r)
   let join ← build (freshLabel "join")
+  jump join #[← chainLinks a links join (#[·])]
+  build (startBlockWith join "cmp")
+
+/-- The links `op₀ r₀ op₁ r₁ …` of a comparison chain whose left operand `a` is evaluated,
+in CPython's order: each operand is evaluated once.  Every link but the last is tested, and
+a false one jumps to `exit` with `args` of its result.  Returns the last link's result. -/
+partial def chainLinks (a : ValId) (links : Array (cmpop SourceRange × expr SourceRange))
+    (exit : Label) (args : ValId → Array ValId) : TransM ValId := do
   let mut lhs := a
-  for i in [:rs.size] do
-    let some op := ops[i]? | break
-    let b ← transExpr rs[i]!
-    let r ← cmpOp op lhs b
-    if i + 1 < rs.size then
-      let t ← build (truthy r)
+  let mut last := a
+  for h : i in [:links.size] do
+    let (op, r) := links[i]
+    let b ← transExpr r
+    last ← cmpOp op lhs b
+    if i + 1 < links.size then
+      let t ← build (truthy last)
       let next ← build (freshLabel "cmp")
-      branch t next join #[] #[r]
+      branch t next exit #[] (args last)
+      build (startBlock next)
+    lhs := b
+  return last
+
+/-- `a and b …` (`isAnd`) or `a or b …`, as a value: each operand but the last is tested, and
+the first that decides the result is the result. -/
+partial def boolOp (isAnd : Bool) (vs : Array (expr SourceRange)) : TransM ValId := do
+  let join ← build (freshLabel "join")
+  for h : i in [:vs.size] do
+    let v ← transExpr vs[i]
+    if i + 1 < vs.size then
+      let t ← build (truthy v)
+      let next ← build (freshLabel (if isAnd then "and" else "or"))
+      if isAnd then branch t next join #[] #[v] else branch t join next #[v]
       build (startBlock next)
     else
-      jump join #[r]
-    lhs := b
-  build (startBlockWith join "cmp")
+      jump join #[v]
+  build (startBlockWith join "bool")
+
+/-- `a if c else b`, as a value.  `c` is a condition. -/
+partial def ifExp (c a b : expr SourceRange) : TransM ValId := do
+  let thenL ← build (freshLabel "then")
+  let elseL ← build (freshLabel "else")
+  let join ← build (freshLabel "join")
+  transCond c thenL elseL
+  build (startBlock thenL)
+  jump join #[← transExpr a]
+  build (startBlock elseL)
+  jump join #[← transExpr b]
+  build (startBlockWith join "ifexp")
+
+/-- Lower `e` as a condition: end the open block with a jump to `t` if `e` is true and to `f`
+otherwise, as CPython's `compiler_jump_if` does.  `not`, `and`, `or`, `x if c else y` and a
+chained comparison become branches, so each operand's truth is tested at most once. -/
+partial def transCond (e : expr SourceRange) (t f : Label) : TransM Unit := withRange e.ann do
+  match e with
+  | .UnaryOp _ (.Not _) x => transCond x f t
+  | .BoolOp _ op vs =>
+    let isAnd := op matches .And _
+    let vs := vs.val
+    for h : i in [:vs.size] do
+      if i + 1 < vs.size then
+        let next ← build (freshLabel (if isAnd then "and" else "or"))
+        if isAnd then transCond vs[i] next f else transCond vs[i] t next
+        build (startBlock next)
+      else
+        transCond vs[i] t f
+  | .IfExp _ c a b =>
+    let thenL ← build (freshLabel "then")
+    let elseL ← build (freshLabel "else")
+    transCond c thenL elseL
+    build (startBlock thenL)
+    transCond a t f
+    build (startBlock elseL)
+    transCond b t f
+  | .Compare _ l ops rs =>
+    let last ← chainLinks (← transExpr l) (ops.val.zip rs.val) f fun _ => #[]
+    branch (← build (truthy last)) t f
+  | _ => branch (← build (truthy (← transExpr e))) t f
 
 /-- `f(a, …)`: `py.call f (mkTuple a …) (mkDict)`. -/
 partial def call (sr : SourceRange) (f : expr SourceRange) (args : Array (expr SourceRange))
@@ -719,13 +792,15 @@ def defStmt (sr : SourceRange) (name : String) (args : arguments SourceRange)
     return ← reject "non-constant default" (p.default.map (·.ann) |>.getD sr)
   let some scope := ctx.table.childAt? ctx.scope sr
     | return ← reject "function without a scope" sr
+  let some cur := ctx.table.scopes[scope]?
+    | return ← internalError s!"scope {scope} is not in the table" sr
   let stub ← if isAsync then do reject "async def" sr; pure (some "async def")
     else match bodiesYield? #[body] with
       | some r => do reject "generator function" r; pure (some "generator function")
       | none => pure none
   let fname ← allocName name
-  let qualname := (ctx.table.scopes[scope]?.map (·.qualname)).getD name
-  let job : FuncJob := { name := fname, scope, qualname, args, body, range := sr, stub }
+  let job : FuncJob :=
+    { name := fname, scope, cur, qualname := cur.qualname, args, body, range := sr, stub }
   modify fun s => { s with pending := s.pending.push job }
   writeName name (← build (funcValue fname)) sr
 
@@ -810,11 +885,10 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
 /-- `if test: body else: orelse` (§6.2).  `elif` is an `if` in `orelse`. -/
 partial def ifStmt (test : expr SourceRange) (body orelse : Array (stmt SourceRange)) :
     TransM Unit := do
-  let t ← build (truthy (← transExpr test))
   let thenL ← build (freshLabel "then")
   let elseL ← build (freshLabel "else")
   let join ← build (freshLabel "join")
-  branch t thenL elseL
+  transCond test thenL elseL
   build (startBlock thenL)
   transStmts body
   if ← isOpen then jump join
@@ -832,8 +906,7 @@ partial def whileStmt (test : expr SourceRange) (body orelse : Array (stmt Sourc
   let exit ← build (freshLabel "exit")
   jump head
   build (startBlock head)
-  let t ← build (truthy (← transExpr test))
-  branch t bodyL (elseL?.getD exit)
+  transCond test bodyL (elseL?.getD exit)
   build (startBlock bodyL)
   withExit (.loop exit head) (transStmts body)
   if ← isOpen then jump head
@@ -878,7 +951,7 @@ def builtFunc (range : SourceRange) (built : Build.Built (Func Py.env SourceRang
 
 /-- Emit the function `job` queues. -/
 def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) : Func Py.env SourceRange × TState :=
-  let ctx := { ctx with scope := job.scope, qualname := job.qualname }
+  let ctx := { ctx with scope := job.scope, cur := job.cur, qualname := job.qualname }
   let argTypes := #[("args", Py.Value.ty), ("kwargs", Py.Value.ty)]
   builtFunc job.range <| buildFuncTypedWith job.name argTypes job.range fun ps =>
     runBody ctx st job.range do
@@ -891,7 +964,9 @@ def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) : Func Py.env SourceRang
         for sym in sc.symbols do
           if sym.scope == .«local» || sym.scope == .cell then
             discard <| build (declareLocal sym.name)
-        prologue (params job.args) ps[0]! ps[1]!
+        let #[args, kwargs] := ps
+          | internalError "a function without its args and kwargs parameters" job.range
+        prologue (params job.args) args kwargs
         transStmts job.body
 
 /-- The Mantle name of the Python module `m`: one segment per dotted component. -/
@@ -904,12 +979,15 @@ public section
 def translate (moduleName : String) (stmts : Array (stmt SourceRange)) : Result := Id.run do
   let table := PyScope.analyze stmts
   let mname := moduleNameOf moduleName
-  let ctx : Ctx :=
-    { table, module := moduleName, moduleName := mname, globals := moduleGlobals table
-      scope := 0, qualname := "<module>" }
   let range : SourceRange := match stmts[0]?, stmts.back? with
     | some a, some b => ⟨a.ann.start, b.ann.stop⟩
     | _, _ => .none
+  let some cur := table.scopes[0]?
+    | return { module := { name := mname, funcs := #[], info := range }
+               diagnostics := #[{ kind := .internal, message := "no module scope", range }] }
+  let ctx : Ctx :=
+    { table, module := moduleName, moduleName := mname, globals := moduleGlobals table
+      scope := 0, cur, qualname := "<module>" }
   let bodyName := mname.str "<module>"
   let st : TState := { funcNames := ({} : Std.HashSet Name).insert bodyName }
   let (body, st) := builtFunc range <| buildFuncTypedWith bodyName #[] range fun _ =>

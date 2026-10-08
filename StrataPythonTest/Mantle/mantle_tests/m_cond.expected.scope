@@ -1,0 +1,10 @@
+module
+  a: global implicit (referenced)
+  b: global implicit (referenced)
+  r: local (assigned)
+  c: global implicit (referenced)
+  d: global implicit (referenced)
+  e: global implicit (referenced)
+  v: local (assigned)
+  w: local (assigned)
+  u: local (assigned)

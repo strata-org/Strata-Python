@@ -1,0 +1,11 @@
+module top
+  a: global implicit (referenced)
+  b: global implicit (referenced)
+  c: global implicit (referenced)
+  d: global implicit (referenced)
+  e: global implicit (referenced)
+  r: local (assigned)
+  u: local (assigned)
+  v: local (assigned)
+  w: local (assigned)
+qualnames: 

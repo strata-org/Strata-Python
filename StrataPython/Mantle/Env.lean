@@ -263,15 +263,12 @@ public environment Py extends Base where
   selects a loop's exit edge. -/
   insn isStopIteration (exc : Value) : Bool
 
-  -- Strings, assertions and degradation.
+  -- Strings and degradation.
 
   /-- `format(val)`, as an f-string field does. -/
   insn fmtValue (val : Value) (^err (exc : Value)) : Value
   /-- The concatenation of `parts`. -/
   insn strConcat (*parts : Value) (^err (exc : Value)) : Value
-  /-- Raises `AssertionError(msg)` unless `cond` is truthy.  `msg` is `None` if the source
-  gave none. -/
-  insn assert_ as "assert" (cond msg : Value) (^err (exc : Value)) : Unit
   /-- A stand-in for a construct the translator does not handle. -/
   insn unsupported (name : Value) : Value
   end py

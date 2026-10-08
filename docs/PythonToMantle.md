@@ -10,10 +10,9 @@ The scope is the Python subset the front end analyses: functions, classes, closu
 control flow, exceptions, `with`, and comprehensions. Generators, `async` and `match` are
 rejected (§6.9). The gaps this spec found in the environment and builder are listed in §8.
 
-**The translator** is `PyTranslate.translate` in `StrataPython/Mantle/Translate.lean`. It
-supports 39 of its 146 tests and rejects constructs in the other 107. §11 marks what is
-implemented, and the module docstring has a recipe for adding a construct. `pymantle mantle
-FILE` prints the diagnostics and the module for a `.py` or Python Ion file.
+**The translator** is `PyTranslate.translate` in `StrataPython/Mantle/Translate.lean`. §11
+marks what it implements, and the module docstring has a recipe for adding a construct.
+`pymantle mantle FILE` prints the diagnostics and the module for a `.py` or Python Ion file.
 The tests are the programs `NAME.py` in `StrataPythonTest/Mantle/mantle_tests/`.
 `StrataPythonTestExtra/MantleTranslateTest.lean` runs every one, as listed in
 `StrataPythonTest/Mantle/mantle_tests.txt`, and compares each one marked supported with its
@@ -477,8 +476,8 @@ jump to the function's exit.
 | `x: T = e` | as `x = e`. The annotation is not evaluated | `x: T` with no value only makes `x` local |
 | `del x` | `requireDefined` (raises `NameError` or `UnboundLocalError`), then `refSet` of `undef "x"` | |
 | `del o.a`, `del o[k]` | **rejected** until `py.delAttr` and `py.delItem` exist (§8) | |
-| `assert c` | `py.assert c (noneLit)` | |
-| `assert c, m` | `m` a literal: `py.assert c m`. Otherwise `truthy c` and a branch. The failing successor evaluates `m`, then `py.call` builtins `AssertionError` on it, then raises (§7.1) | `m` is evaluated only when the assertion fails |
+| `assert c` | as `assert c, m`, with `AssertionError` called on no arguments | |
+| `assert c, m` | `c` as a condition (§6.2). The true target continues; the false target evaluates `m`, then `py.call`s the `AssertionError` class on it, then raises (§7.1) | `c` is tested once; `m` is evaluated only when the assertion fails; `AssertionError` is the class itself, as CPython's `LOAD_ASSERTION_ERROR`, even if `builtins.AssertionError` is rebound |
 | `global x`, `nonlocal x` | nothing: the scope pass makes `x` `globalExplicit` or `free` | |
 | imports | below | |
 
@@ -513,6 +512,14 @@ on the module value.
 `elif` is a nested `if` in the else branch. Truthiness is `py.truthy`, which raises, because
 `__bool__` and `__len__` are arbitrary code.
 
+**Conditions.** Every place Python tests a value for truth lowers the test to branches, as
+CPython's `compiler_jump_if` does (`transCond`): `if`/`elif`, `while`, `x if c else y`,
+`assert`, a comprehension's `if` and, once supported, a `match` guard. `not x` swaps the targets, `and`/`or`
+branch on each operand, `x if c else y` branches on `c`, and a chained comparison branches on
+each link. Any other test is `truthy` of its value. So `if (a and b) or c:` tests `a`,
+`b` and `c` at most once each, while the value `(a and b) or c` tests `a` twice when it is
+false, as in CPython.
+
 ### 6.3 Expressions
 
 | Expression | Lowering |
@@ -526,7 +533,7 @@ on the module value.
 | `a < b` (single comparison) | `py.lt`, …, `py.in`, `py.notIn`, `py.is`, `py.isNot` |
 | `a < b < c` | evaluate `a`, `b`, then `%r = py.lt`. `truthy %r`, then branch: true evaluates `c` and compares `b` with `c`; false jumps to `join(%r)`. `b` is evaluated once |
 | `a and b` / `a or b` | see the example below |
-| `x if c else y` | `truthy c`, then branch. Each side jumps to `join(v)` |
+| `x if c else y` | `c` as a condition (§6.2). Each side jumps to `join(v)` |
 | `f(…)` | see the calls paragraph below |
 | `o.a` | `py.attr o "a"` |
 | `o[k]` | `py.getItem o k` |
@@ -547,8 +554,8 @@ parameters.
 
 ```
     %5 : base.Bool = py.truthy %4 ^propagate.0()     -- a and b
-    branch %5 ^rhs.0() ^join.0(%4)
-  rhs.0():
+    branch %5 ^and.0() ^join.0(%4)
+  and.0():
     …                                                -- %8 = b
     jump ^join.0(%8)
   join.0(%9 : py.Value):
@@ -702,7 +709,7 @@ Finalising it means giving the body a result that carries an exception, such as
 4. `forEach xs ^body ^err(H)`, `H` the enclosing handler. The body region, with its own
    `propagate` handler and an empty exits stack:
    - writes `item` to `x`'s cell;
-   - for `if c`: `truthy c`, then a branch. Its false successor ends the region;
+   - for `if c`: `c` as a condition (§6.2). Its false successor ends the region;
    - for `for y in ys`: evaluates `ys` and emits a nested `forEach` whose `err` is the
      region's handler;
    - innermost: `py.listAppend acc e` (`setAdd`; `dictSet` with the key evaluated before the
@@ -874,8 +881,6 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 
 - `unsupported` takes its construct name as a `py.Value`; the other name-carrying operands
   are `base.String`.
-- `assert` takes `msg` already evaluated, so §6.1 branches when the message is not a
-  literal.
 
 **Builder (`PyBuild`) and translator (`PyTranslate`):**
 
@@ -987,9 +992,10 @@ a diagnostic.
 | `del o.a`, `del o[k]` | §6.1 | unsupported |
 | `nonlocal` | §6.6 | specified |
 | `if` / `elif` / `else` | §6.2 | specified; implemented |
-| literals, `...`, `+ - * / // % **`, `-a`, `not a`, comparisons (chained too) | §6.3 | specified; implemented |
+| literals, `...`, `+ - * / // % **`, `-a`, `not a`, comparisons (chained too), `and`, `or`, `x if c else y` | §6.3 | specified; implemented |
+| conditions (`transCond`) | §6.2 | specified; implemented for `if`, `while` and `x if c else y` |
 | calls with positional arguments | §6.3 | specified; implemented |
-| `and`, `or`, `x if c else y`, calls with keywords, `*` and `**`, attribute, subscript, slice | §6.3 | specified |
+| calls with keywords, `*` and `**`, attribute, subscript, slice | §6.3 | specified |
 | displays and unpacking in them, f-strings, walrus | §6.3 | specified |
 | complex literal, t-string, slice inside a tuple | §6.3 | unsupported |
 | `@ << >> & \| ^`, unary `+`, `~` | §6.3 | unsupported |

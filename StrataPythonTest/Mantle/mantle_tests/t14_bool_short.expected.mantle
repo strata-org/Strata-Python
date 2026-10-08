@@ -1,0 +1,137 @@
+module t14_bool_short {
+  func @t14_bool_short.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "t14_bool_short"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "t14_bool_short"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Bool = const bool (true)
+      %7 : py.Value = py.boolLit %6
+      %8 : base.String = const str "t14_bool_short"
+      %9 : base.String = const str "a"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : base.Bool = const bool (false)
+      %13 : py.Value = py.boolLit %12
+      %14 : base.String = const str "t14_bool_short"
+      %15 : base.String = const str "b"
+      %16 : base.Ref(py.Value) = py.globalCell %14 %15
+      %17 : base.Unit = base.refSet[py.Value] %16 %13
+      %18 : base.String = const str "t14_bool_short"
+      %19 : base.String = const str "a"
+      %20 : base.Ref(py.Value) = py.globalCell %18 %19
+      %21 : py.Value = base.refGet[py.Value] %20
+      %22 : base.String = const str "NameError"
+      %23 : base.String = const str "name 'a' is not defined"
+      %24 : py.Value = py.requireDefined %21 %22 %23 ^propagate.0()
+      %25 : base.Bool = py.truthy %24 ^propagate.0()
+      branch %25 ^and.0() ^join.0(%24)
+    and.0():
+      %26 : base.String = const str "t14_bool_short"
+      %27 : base.String = const str "b"
+      %28 : base.Ref(py.Value) = py.globalCell %26 %27
+      %29 : py.Value = base.refGet[py.Value] %28
+      %30 : base.String = const str "NameError"
+      %31 : base.String = const str "name 'b' is not defined"
+      %32 : py.Value = py.requireDefined %29 %30 %31 ^propagate.0()
+      jump ^join.0(%32)
+    join.0(%33 : py.Value):
+      %34 : base.String = const str "t14_bool_short"
+      %35 : base.String = const str "r1"
+      %36 : base.Ref(py.Value) = py.globalCell %34 %35
+      %37 : base.Unit = base.refSet[py.Value] %36 %33
+      %38 : base.String = const str "t14_bool_short"
+      %39 : base.String = const str "a"
+      %40 : base.Ref(py.Value) = py.globalCell %38 %39
+      %41 : py.Value = base.refGet[py.Value] %40
+      %42 : base.String = const str "NameError"
+      %43 : base.String = const str "name 'a' is not defined"
+      %44 : py.Value = py.requireDefined %41 %42 %43 ^propagate.0()
+      %45 : base.Bool = py.truthy %44 ^propagate.0()
+      branch %45 ^join.1(%44) ^or.0()
+    or.0():
+      %46 : base.String = const str "t14_bool_short"
+      %47 : base.String = const str "b"
+      %48 : base.Ref(py.Value) = py.globalCell %46 %47
+      %49 : py.Value = base.refGet[py.Value] %48
+      %50 : base.String = const str "NameError"
+      %51 : base.String = const str "name 'b' is not defined"
+      %52 : py.Value = py.requireDefined %49 %50 %51 ^propagate.0()
+      jump ^join.1(%52)
+    join.1(%53 : py.Value):
+      %54 : base.String = const str "t14_bool_short"
+      %55 : base.String = const str "r2"
+      %56 : base.Ref(py.Value) = py.globalCell %54 %55
+      %57 : base.Unit = base.refSet[py.Value] %56 %53
+      %58 : base.String = const str "t14_bool_short"
+      %59 : base.String = const str "a"
+      %60 : base.Ref(py.Value) = py.globalCell %58 %59
+      %61 : py.Value = base.refGet[py.Value] %60
+      %62 : base.String = const str "NameError"
+      %63 : base.String = const str "name 'a' is not defined"
+      %64 : py.Value = py.requireDefined %61 %62 %63 ^propagate.0()
+      %65 : base.Bool = py.truthy %64 ^propagate.0()
+      branch %65 ^and.1() ^join.3(%64)
+    and.1():
+      %66 : base.String = const str "t14_bool_short"
+      %67 : base.String = const str "b"
+      %68 : base.Ref(py.Value) = py.globalCell %66 %67
+      %69 : py.Value = base.refGet[py.Value] %68
+      %70 : base.String = const str "NameError"
+      %71 : base.String = const str "name 'b' is not defined"
+      %72 : py.Value = py.requireDefined %69 %70 %71 ^propagate.0()
+      jump ^join.3(%72)
+    join.3(%73 : py.Value):
+      %74 : base.Bool = py.truthy %73 ^propagate.0()
+      branch %74 ^join.2(%73) ^or.1()
+    or.1():
+      %75 : base.String = const str "t14_bool_short"
+      %76 : base.String = const str "a"
+      %77 : base.Ref(py.Value) = py.globalCell %75 %76
+      %78 : py.Value = base.refGet[py.Value] %77
+      %79 : base.String = const str "NameError"
+      %80 : base.String = const str "name 'a' is not defined"
+      %81 : py.Value = py.requireDefined %78 %79 %80 ^propagate.0()
+      jump ^join.2(%81)
+    join.2(%82 : py.Value):
+      %83 : base.String = const str "t14_bool_short"
+      %84 : base.String = const str "r3"
+      %85 : base.Ref(py.Value) = py.globalCell %83 %84
+      %86 : base.Unit = base.refSet[py.Value] %85 %82
+      %87 : base.Int = const int 0
+      %88 : py.Value = py.intLit %87
+      %89 : base.Bool = py.truthy %88 ^propagate.0()
+      branch %89 ^join.4(%88) ^or.2()
+    or.2():
+      %90 : base.Int = const int 42
+      %91 : py.Value = py.intLit %90
+      jump ^join.4(%91)
+    join.4(%92 : py.Value):
+      %93 : base.String = const str "t14_bool_short"
+      %94 : base.String = const str "x"
+      %95 : base.Ref(py.Value) = py.globalCell %93 %94
+      %96 : base.Unit = base.refSet[py.Value] %95 %92
+      %97 : base.String = const str "hello"
+      %98 : py.Value = py.strLit %97
+      %99 : base.Bool = py.truthy %98 ^propagate.0()
+      branch %99 ^and.2() ^join.5(%98)
+    and.2():
+      %100 : base.String = const str "world"
+      %101 : py.Value = py.strLit %100
+      jump ^join.5(%101)
+    join.5(%102 : py.Value):
+      %103 : base.String = const str "t14_bool_short"
+      %104 : base.String = const str "y"
+      %105 : base.Ref(py.Value) = py.globalCell %103 %104
+      %106 : base.Unit = base.refSet[py.Value] %105 %102
+      %107 : py.Value = py.noneLit
+      %108 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %107
+      ret %108
+    propagate.0(%109 : py.Value):
+      %110 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %109
+      ret %110
+  }
+}
+

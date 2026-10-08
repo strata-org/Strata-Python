@@ -1,0 +1,106 @@
+module t15_ifexp {
+  func @t15_ifexp.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "t15_ifexp"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "t15_ifexp"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Bool = const bool (true)
+      %7 : py.Value = py.boolLit %6
+      %8 : base.String = const str "t15_ifexp"
+      %9 : base.String = const str "cond"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : base.String = const str "t15_ifexp"
+      %13 : base.String = const str "cond"
+      %14 : base.Ref(py.Value) = py.globalCell %12 %13
+      %15 : py.Value = base.refGet[py.Value] %14
+      %16 : base.String = const str "NameError"
+      %17 : base.String = const str "name 'cond' is not defined"
+      %18 : py.Value = py.requireDefined %15 %16 %17 ^propagate.0()
+      %19 : base.Bool = py.truthy %18 ^propagate.0()
+      branch %19 ^then.0() ^else.0()
+    then.0():
+      %20 : base.Int = const int 1
+      %21 : py.Value = py.intLit %20
+      jump ^join.0(%21)
+    else.0():
+      %22 : base.Int = const int 2
+      %23 : py.Value = py.intLit %22
+      jump ^join.0(%23)
+    join.0(%24 : py.Value):
+      %25 : base.String = const str "t15_ifexp"
+      %26 : base.String = const str "x"
+      %27 : base.Ref(py.Value) = py.globalCell %25 %26
+      %28 : base.Unit = base.refSet[py.Value] %27 %24
+      %29 : base.String = const str "t15_ifexp"
+      %30 : base.String = const str "cond"
+      %31 : base.Ref(py.Value) = py.globalCell %29 %30
+      %32 : py.Value = base.refGet[py.Value] %31
+      %33 : base.String = const str "NameError"
+      %34 : base.String = const str "name 'cond' is not defined"
+      %35 : py.Value = py.requireDefined %32 %33 %34 ^propagate.0()
+      %36 : base.Bool = py.truthy %35 ^propagate.0()
+      branch %36 ^then.1() ^else.1()
+    then.1():
+      %37 : base.String = const str "a"
+      %38 : py.Value = py.strLit %37
+      jump ^join.1(%38)
+    else.1():
+      %39 : base.String = const str "t15_ifexp"
+      %40 : base.String = const str "cond"
+      %41 : base.Ref(py.Value) = py.globalCell %39 %40
+      %42 : py.Value = base.refGet[py.Value] %41
+      %43 : base.String = const str "NameError"
+      %44 : base.String = const str "name 'cond' is not defined"
+      %45 : py.Value = py.requireDefined %42 %43 %44 ^propagate.0()
+      %46 : base.Bool = py.truthy %45 ^propagate.0()
+      branch %46 ^else.2() ^then.2()
+    then.2():
+      %47 : base.String = const str "b"
+      %48 : py.Value = py.strLit %47
+      jump ^join.2(%48)
+    else.2():
+      %49 : base.String = const str "c"
+      %50 : py.Value = py.strLit %49
+      jump ^join.2(%50)
+    join.2(%51 : py.Value):
+      jump ^join.1(%51)
+    join.1(%52 : py.Value):
+      %53 : base.String = const str "t15_ifexp"
+      %54 : base.String = const str "y"
+      %55 : base.Ref(py.Value) = py.globalCell %53 %54
+      %56 : base.Unit = base.refSet[py.Value] %55 %52
+      %57 : base.String = const str "t15_ifexp"
+      %58 : base.String = const str "cond"
+      %59 : base.Ref(py.Value) = py.globalCell %57 %58
+      %60 : py.Value = base.refGet[py.Value] %59
+      %61 : base.String = const str "NameError"
+      %62 : base.String = const str "name 'cond' is not defined"
+      %63 : py.Value = py.requireDefined %60 %61 %62 ^propagate.0()
+      %64 : base.Bool = py.truthy %63 ^propagate.0()
+      branch %64 ^then.3() ^else.3()
+    then.3():
+      %65 : base.Int = const int 10
+      %66 : py.Value = py.intLit %65
+      jump ^join.3(%66)
+    else.3():
+      %67 : base.Int = const int 20
+      %68 : py.Value = py.intLit %67
+      jump ^join.3(%68)
+    join.3(%69 : py.Value):
+      %70 : base.String = const str "t15_ifexp"
+      %71 : base.String = const str "z"
+      %72 : base.Ref(py.Value) = py.globalCell %70 %71
+      %73 : base.Unit = base.refSet[py.Value] %72 %69
+      %74 : py.Value = py.noneLit
+      %75 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %74
+      ret %75
+    propagate.0(%76 : py.Value):
+      %77 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %76
+      ret %77
+  }
+}
+

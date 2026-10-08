@@ -1,0 +1,574 @@
+module m_cond {
+  func @m_cond.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "m_cond"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "m_cond"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.String = const str "m_cond"
+      %7 : base.String = const str "a"
+      %8 : base.Ref(py.Value) = py.globalCell %6 %7
+      %9 : py.Value = base.refGet[py.Value] %8
+      %10 : base.String = const str "NameError"
+      %11 : base.String = const str "name 'a' is not defined"
+      %12 : py.Value = py.requireDefined %9 %10 %11 ^propagate.0()
+      %13 : base.Bool = py.truthy %12 ^propagate.0()
+      branch %13 ^and.0() ^else.0()
+    and.0():
+      %14 : base.String = const str "m_cond"
+      %15 : base.String = const str "b"
+      %16 : base.Ref(py.Value) = py.globalCell %14 %15
+      %17 : py.Value = base.refGet[py.Value] %16
+      %18 : base.String = const str "NameError"
+      %19 : base.String = const str "name 'b' is not defined"
+      %20 : py.Value = py.requireDefined %17 %18 %19 ^propagate.0()
+      %21 : base.Bool = py.truthy %20 ^propagate.0()
+      branch %21 ^then.0() ^else.0()
+    then.0():
+      %22 : base.Int = const int 1
+      %23 : py.Value = py.intLit %22
+      %24 : base.String = const str "m_cond"
+      %25 : base.String = const str "r"
+      %26 : base.Ref(py.Value) = py.globalCell %24 %25
+      %27 : base.Unit = base.refSet[py.Value] %26 %23
+      jump ^join.0()
+    else.0():
+      jump ^join.0()
+    join.0():
+      %28 : base.String = const str "m_cond"
+      %29 : base.String = const str "a"
+      %30 : base.Ref(py.Value) = py.globalCell %28 %29
+      %31 : py.Value = base.refGet[py.Value] %30
+      %32 : base.String = const str "NameError"
+      %33 : base.String = const str "name 'a' is not defined"
+      %34 : py.Value = py.requireDefined %31 %32 %33 ^propagate.0()
+      %35 : base.Bool = py.truthy %34 ^propagate.0()
+      branch %35 ^then.1() ^or.0()
+    or.0():
+      %36 : base.String = const str "m_cond"
+      %37 : base.String = const str "b"
+      %38 : base.Ref(py.Value) = py.globalCell %36 %37
+      %39 : py.Value = base.refGet[py.Value] %38
+      %40 : base.String = const str "NameError"
+      %41 : base.String = const str "name 'b' is not defined"
+      %42 : py.Value = py.requireDefined %39 %40 %41 ^propagate.0()
+      %43 : base.Bool = py.truthy %42 ^propagate.0()
+      branch %43 ^then.1() ^else.1()
+    then.1():
+      %44 : base.Int = const int 2
+      %45 : py.Value = py.intLit %44
+      %46 : base.String = const str "m_cond"
+      %47 : base.String = const str "r"
+      %48 : base.Ref(py.Value) = py.globalCell %46 %47
+      %49 : base.Unit = base.refSet[py.Value] %48 %45
+      jump ^join.1()
+    else.1():
+      jump ^join.1()
+    join.1():
+      %50 : base.String = const str "m_cond"
+      %51 : base.String = const str "a"
+      %52 : base.Ref(py.Value) = py.globalCell %50 %51
+      %53 : py.Value = base.refGet[py.Value] %52
+      %54 : base.String = const str "NameError"
+      %55 : base.String = const str "name 'a' is not defined"
+      %56 : py.Value = py.requireDefined %53 %54 %55 ^propagate.0()
+      %57 : base.Bool = py.truthy %56 ^propagate.0()
+      branch %57 ^else.2() ^then.2()
+    then.2():
+      %58 : base.Int = const int 3
+      %59 : py.Value = py.intLit %58
+      %60 : base.String = const str "m_cond"
+      %61 : base.String = const str "r"
+      %62 : base.Ref(py.Value) = py.globalCell %60 %61
+      %63 : base.Unit = base.refSet[py.Value] %62 %59
+      jump ^join.2()
+    else.2():
+      jump ^join.2()
+    join.2():
+      %64 : base.String = const str "m_cond"
+      %65 : base.String = const str "a"
+      %66 : base.Ref(py.Value) = py.globalCell %64 %65
+      %67 : py.Value = base.refGet[py.Value] %66
+      %68 : base.String = const str "NameError"
+      %69 : base.String = const str "name 'a' is not defined"
+      %70 : py.Value = py.requireDefined %67 %68 %69 ^propagate.0()
+      %71 : base.Bool = py.truthy %70 ^propagate.0()
+      branch %71 ^and.1() ^or.1()
+    and.1():
+      %72 : base.String = const str "m_cond"
+      %73 : base.String = const str "b"
+      %74 : base.Ref(py.Value) = py.globalCell %72 %73
+      %75 : py.Value = base.refGet[py.Value] %74
+      %76 : base.String = const str "NameError"
+      %77 : base.String = const str "name 'b' is not defined"
+      %78 : py.Value = py.requireDefined %75 %76 %77 ^propagate.0()
+      %79 : base.Bool = py.truthy %78 ^propagate.0()
+      branch %79 ^then.3() ^or.1()
+    or.1():
+      %80 : base.String = const str "m_cond"
+      %81 : base.String = const str "c"
+      %82 : base.Ref(py.Value) = py.globalCell %80 %81
+      %83 : py.Value = base.refGet[py.Value] %82
+      %84 : base.String = const str "NameError"
+      %85 : base.String = const str "name 'c' is not defined"
+      %86 : py.Value = py.requireDefined %83 %84 %85 ^propagate.0()
+      %87 : base.Bool = py.truthy %86 ^propagate.0()
+      branch %87 ^then.3() ^else.3()
+    then.3():
+      %88 : base.Int = const int 4
+      %89 : py.Value = py.intLit %88
+      %90 : base.String = const str "m_cond"
+      %91 : base.String = const str "r"
+      %92 : base.Ref(py.Value) = py.globalCell %90 %91
+      %93 : base.Unit = base.refSet[py.Value] %92 %89
+      jump ^join.3()
+    else.3():
+      jump ^join.3()
+    join.3():
+      %94 : base.String = const str "m_cond"
+      %95 : base.String = const str "b"
+      %96 : base.Ref(py.Value) = py.globalCell %94 %95
+      %97 : py.Value = base.refGet[py.Value] %96
+      %98 : base.String = const str "NameError"
+      %99 : base.String = const str "name 'b' is not defined"
+      %100 : py.Value = py.requireDefined %97 %98 %99 ^propagate.0()
+      %101 : base.Bool = py.truthy %100 ^propagate.0()
+      branch %101 ^then.5() ^else.5()
+    then.5():
+      %102 : base.String = const str "m_cond"
+      %103 : base.String = const str "a"
+      %104 : base.Ref(py.Value) = py.globalCell %102 %103
+      %105 : py.Value = base.refGet[py.Value] %104
+      %106 : base.String = const str "NameError"
+      %107 : base.String = const str "name 'a' is not defined"
+      %108 : py.Value = py.requireDefined %105 %106 %107 ^propagate.0()
+      %109 : base.Bool = py.truthy %108 ^propagate.0()
+      branch %109 ^then.4() ^else.4()
+    else.5():
+      %110 : base.String = const str "m_cond"
+      %111 : base.String = const str "c"
+      %112 : base.Ref(py.Value) = py.globalCell %110 %111
+      %113 : py.Value = base.refGet[py.Value] %112
+      %114 : base.String = const str "NameError"
+      %115 : base.String = const str "name 'c' is not defined"
+      %116 : py.Value = py.requireDefined %113 %114 %115 ^propagate.0()
+      %117 : base.Bool = py.truthy %116 ^propagate.0()
+      branch %117 ^then.4() ^else.4()
+    then.4():
+      %118 : base.Int = const int 5
+      %119 : py.Value = py.intLit %118
+      %120 : base.String = const str "m_cond"
+      %121 : base.String = const str "r"
+      %122 : base.Ref(py.Value) = py.globalCell %120 %121
+      %123 : base.Unit = base.refSet[py.Value] %122 %119
+      jump ^join.4()
+    else.4():
+      jump ^join.4()
+    join.4():
+      %124 : base.String = const str "m_cond"
+      %125 : base.String = const str "a"
+      %126 : base.Ref(py.Value) = py.globalCell %124 %125
+      %127 : py.Value = base.refGet[py.Value] %126
+      %128 : base.String = const str "NameError"
+      %129 : base.String = const str "name 'a' is not defined"
+      %130 : py.Value = py.requireDefined %127 %128 %129 ^propagate.0()
+      %131 : base.String = const str "m_cond"
+      %132 : base.String = const str "b"
+      %133 : base.Ref(py.Value) = py.globalCell %131 %132
+      %134 : py.Value = base.refGet[py.Value] %133
+      %135 : base.String = const str "NameError"
+      %136 : base.String = const str "name 'b' is not defined"
+      %137 : py.Value = py.requireDefined %134 %135 %136 ^propagate.0()
+      %138 : py.Value = py.lt %130 %137 ^propagate.0()
+      %139 : base.Bool = py.truthy %138 ^propagate.0()
+      branch %139 ^cmp.0() ^else.6()
+    cmp.0():
+      %140 : base.String = const str "m_cond"
+      %141 : base.String = const str "c"
+      %142 : base.Ref(py.Value) = py.globalCell %140 %141
+      %143 : py.Value = base.refGet[py.Value] %142
+      %144 : base.String = const str "NameError"
+      %145 : base.String = const str "name 'c' is not defined"
+      %146 : py.Value = py.requireDefined %143 %144 %145 ^propagate.0()
+      %147 : py.Value = py.lt %137 %146 ^propagate.0()
+      %148 : base.Bool = py.truthy %147 ^propagate.0()
+      branch %148 ^then.6() ^else.6()
+    then.6():
+      %149 : base.Int = const int 6
+      %150 : py.Value = py.intLit %149
+      %151 : base.String = const str "m_cond"
+      %152 : base.String = const str "r"
+      %153 : base.Ref(py.Value) = py.globalCell %151 %152
+      %154 : base.Unit = base.refSet[py.Value] %153 %150
+      jump ^join.5()
+    else.6():
+      jump ^join.5()
+    join.5():
+      %155 : base.String = const str "m_cond"
+      %156 : base.String = const str "a"
+      %157 : base.Ref(py.Value) = py.globalCell %155 %156
+      %158 : py.Value = base.refGet[py.Value] %157
+      %159 : base.String = const str "NameError"
+      %160 : base.String = const str "name 'a' is not defined"
+      %161 : py.Value = py.requireDefined %158 %159 %160 ^propagate.0()
+      %162 : base.String = const str "m_cond"
+      %163 : base.String = const str "b"
+      %164 : base.Ref(py.Value) = py.globalCell %162 %163
+      %165 : py.Value = base.refGet[py.Value] %164
+      %166 : base.String = const str "NameError"
+      %167 : base.String = const str "name 'b' is not defined"
+      %168 : py.Value = py.requireDefined %165 %166 %167 ^propagate.0()
+      %169 : py.Value = py.lt %161 %168 ^propagate.0()
+      %170 : base.Bool = py.truthy %169 ^propagate.0()
+      branch %170 ^cmp.1() ^else.7()
+    cmp.1():
+      %171 : base.String = const str "m_cond"
+      %172 : base.String = const str "c"
+      %173 : base.Ref(py.Value) = py.globalCell %171 %172
+      %174 : py.Value = base.refGet[py.Value] %173
+      %175 : base.String = const str "NameError"
+      %176 : base.String = const str "name 'c' is not defined"
+      %177 : py.Value = py.requireDefined %174 %175 %176 ^propagate.0()
+      %178 : py.Value = py.lt %168 %177 ^propagate.0()
+      %179 : base.Bool = py.truthy %178 ^propagate.0()
+      branch %179 ^cmp.2() ^else.7()
+    cmp.2():
+      %180 : base.String = const str "m_cond"
+      %181 : base.String = const str "d"
+      %182 : base.Ref(py.Value) = py.globalCell %180 %181
+      %183 : py.Value = base.refGet[py.Value] %182
+      %184 : base.String = const str "NameError"
+      %185 : base.String = const str "name 'd' is not defined"
+      %186 : py.Value = py.requireDefined %183 %184 %185 ^propagate.0()
+      %187 : py.Value = py.lt %177 %186 ^propagate.0()
+      %188 : base.Bool = py.truthy %187 ^propagate.0()
+      branch %188 ^then.7() ^else.7()
+    then.7():
+      %189 : base.Int = const int 7
+      %190 : py.Value = py.intLit %189
+      %191 : base.String = const str "m_cond"
+      %192 : base.String = const str "r"
+      %193 : base.Ref(py.Value) = py.globalCell %191 %192
+      %194 : base.Unit = base.refSet[py.Value] %193 %190
+      jump ^join.6()
+    else.7():
+      jump ^join.6()
+    join.6():
+      %195 : base.String = const str "m_cond"
+      %196 : base.String = const str "a"
+      %197 : base.Ref(py.Value) = py.globalCell %195 %196
+      %198 : py.Value = base.refGet[py.Value] %197
+      %199 : base.String = const str "NameError"
+      %200 : base.String = const str "name 'a' is not defined"
+      %201 : py.Value = py.requireDefined %198 %199 %200 ^propagate.0()
+      %202 : base.Bool = py.truthy %201 ^propagate.0()
+      branch %202 ^and.2() ^then.8()
+    and.2():
+      %203 : base.String = const str "m_cond"
+      %204 : base.String = const str "b"
+      %205 : base.Ref(py.Value) = py.globalCell %203 %204
+      %206 : py.Value = base.refGet[py.Value] %205
+      %207 : base.String = const str "NameError"
+      %208 : base.String = const str "name 'b' is not defined"
+      %209 : py.Value = py.requireDefined %206 %207 %208 ^propagate.0()
+      %210 : base.Bool = py.truthy %209 ^propagate.0()
+      branch %210 ^else.8() ^then.8()
+    then.8():
+      %211 : base.Int = const int 8
+      %212 : py.Value = py.intLit %211
+      %213 : base.String = const str "m_cond"
+      %214 : base.String = const str "r"
+      %215 : base.Ref(py.Value) = py.globalCell %213 %214
+      %216 : base.Unit = base.refSet[py.Value] %215 %212
+      jump ^join.7()
+    else.8():
+      jump ^join.7()
+    join.7():
+      %217 : base.String = const str "m_cond"
+      %218 : base.String = const str "a"
+      %219 : base.Ref(py.Value) = py.globalCell %217 %218
+      %220 : py.Value = base.refGet[py.Value] %219
+      %221 : base.String = const str "NameError"
+      %222 : base.String = const str "name 'a' is not defined"
+      %223 : py.Value = py.requireDefined %220 %221 %222 ^propagate.0()
+      %224 : base.String = const str "m_cond"
+      %225 : base.String = const str "b"
+      %226 : base.Ref(py.Value) = py.globalCell %224 %225
+      %227 : py.Value = base.refGet[py.Value] %226
+      %228 : base.String = const str "NameError"
+      %229 : base.String = const str "name 'b' is not defined"
+      %230 : py.Value = py.requireDefined %227 %228 %229 ^propagate.0()
+      %231 : py.Value = py.lt %223 %230 ^propagate.0()
+      %232 : base.Bool = py.truthy %231 ^propagate.0()
+      branch %232 ^cmp.3() ^then.9()
+    cmp.3():
+      %233 : base.String = const str "m_cond"
+      %234 : base.String = const str "c"
+      %235 : base.Ref(py.Value) = py.globalCell %233 %234
+      %236 : py.Value = base.refGet[py.Value] %235
+      %237 : base.String = const str "NameError"
+      %238 : base.String = const str "name 'c' is not defined"
+      %239 : py.Value = py.requireDefined %236 %237 %238 ^propagate.0()
+      %240 : py.Value = py.lt %230 %239 ^propagate.0()
+      %241 : base.Bool = py.truthy %240 ^propagate.0()
+      branch %241 ^else.9() ^then.9()
+    then.9():
+      %242 : base.Int = const int 9
+      %243 : py.Value = py.intLit %242
+      %244 : base.String = const str "m_cond"
+      %245 : base.String = const str "r"
+      %246 : base.Ref(py.Value) = py.globalCell %244 %245
+      %247 : base.Unit = base.refSet[py.Value] %246 %243
+      jump ^join.8()
+    else.9():
+      jump ^join.8()
+    join.8():
+      %248 : base.String = const str "m_cond"
+      %249 : base.String = const str "d"
+      %250 : base.Ref(py.Value) = py.globalCell %248 %249
+      %251 : py.Value = base.refGet[py.Value] %250
+      %252 : base.String = const str "NameError"
+      %253 : base.String = const str "name 'd' is not defined"
+      %254 : py.Value = py.requireDefined %251 %252 %253 ^propagate.0()
+      %255 : base.Bool = py.truthy %254 ^propagate.0()
+      branch %255 ^then.11() ^else.11()
+    then.11():
+      %256 : base.String = const str "m_cond"
+      %257 : base.String = const str "b"
+      %258 : base.Ref(py.Value) = py.globalCell %256 %257
+      %259 : py.Value = base.refGet[py.Value] %258
+      %260 : base.String = const str "NameError"
+      %261 : base.String = const str "name 'b' is not defined"
+      %262 : py.Value = py.requireDefined %259 %260 %261 ^propagate.0()
+      %263 : base.Bool = py.truthy %262 ^propagate.0()
+      branch %263 ^then.12() ^else.12()
+    then.12():
+      %264 : base.String = const str "m_cond"
+      %265 : base.String = const str "a"
+      %266 : base.Ref(py.Value) = py.globalCell %264 %265
+      %267 : py.Value = base.refGet[py.Value] %266
+      %268 : base.String = const str "NameError"
+      %269 : base.String = const str "name 'a' is not defined"
+      %270 : py.Value = py.requireDefined %267 %268 %269 ^propagate.0()
+      %271 : base.Bool = py.truthy %270 ^propagate.0()
+      branch %271 ^then.10() ^else.10()
+    else.12():
+      %272 : base.String = const str "m_cond"
+      %273 : base.String = const str "c"
+      %274 : base.Ref(py.Value) = py.globalCell %272 %273
+      %275 : py.Value = base.refGet[py.Value] %274
+      %276 : base.String = const str "NameError"
+      %277 : base.String = const str "name 'c' is not defined"
+      %278 : py.Value = py.requireDefined %275 %276 %277 ^propagate.0()
+      %279 : base.Bool = py.truthy %278 ^propagate.0()
+      branch %279 ^then.10() ^else.10()
+    else.11():
+      %280 : base.String = const str "m_cond"
+      %281 : base.String = const str "e"
+      %282 : base.Ref(py.Value) = py.globalCell %280 %281
+      %283 : py.Value = base.refGet[py.Value] %282
+      %284 : base.String = const str "NameError"
+      %285 : base.String = const str "name 'e' is not defined"
+      %286 : py.Value = py.requireDefined %283 %284 %285 ^propagate.0()
+      %287 : base.Bool = py.truthy %286 ^propagate.0()
+      branch %287 ^then.10() ^else.10()
+    then.10():
+      %288 : base.Int = const int 10
+      %289 : py.Value = py.intLit %288
+      %290 : base.String = const str "m_cond"
+      %291 : base.String = const str "r"
+      %292 : base.Ref(py.Value) = py.globalCell %290 %291
+      %293 : base.Unit = base.refSet[py.Value] %292 %289
+      jump ^join.9()
+    else.10():
+      jump ^join.9()
+    join.9():
+      jump ^head.0()
+    head.0():
+      %294 : base.String = const str "m_cond"
+      %295 : base.String = const str "a"
+      %296 : base.Ref(py.Value) = py.globalCell %294 %295
+      %297 : py.Value = base.refGet[py.Value] %296
+      %298 : base.String = const str "NameError"
+      %299 : base.String = const str "name 'a' is not defined"
+      %300 : py.Value = py.requireDefined %297 %298 %299 ^propagate.0()
+      %301 : base.Bool = py.truthy %300 ^propagate.0()
+      branch %301 ^and.3() ^exit.0()
+    and.3():
+      %302 : base.String = const str "m_cond"
+      %303 : base.String = const str "b"
+      %304 : base.Ref(py.Value) = py.globalCell %302 %303
+      %305 : py.Value = base.refGet[py.Value] %304
+      %306 : base.String = const str "NameError"
+      %307 : base.String = const str "name 'b' is not defined"
+      %308 : py.Value = py.requireDefined %305 %306 %307 ^propagate.0()
+      %309 : base.Bool = py.truthy %308 ^propagate.0()
+      branch %309 ^exit.0() ^body.0()
+    body.0():
+      %310 : base.Int = const int 11
+      %311 : py.Value = py.intLit %310
+      %312 : base.String = const str "m_cond"
+      %313 : base.String = const str "r"
+      %314 : base.Ref(py.Value) = py.globalCell %312 %313
+      %315 : base.Unit = base.refSet[py.Value] %314 %311
+      jump ^head.0()
+    exit.0():
+      jump ^head.1()
+    head.1():
+      %316 : base.String = const str "m_cond"
+      %317 : base.String = const str "a"
+      %318 : base.Ref(py.Value) = py.globalCell %316 %317
+      %319 : py.Value = base.refGet[py.Value] %318
+      %320 : base.String = const str "NameError"
+      %321 : base.String = const str "name 'a' is not defined"
+      %322 : py.Value = py.requireDefined %319 %320 %321 ^propagate.0()
+      %323 : base.Bool = py.truthy %322 ^propagate.0()
+      branch %323 ^body.1() ^or.2()
+    or.2():
+      %324 : base.String = const str "m_cond"
+      %325 : base.String = const str "b"
+      %326 : base.Ref(py.Value) = py.globalCell %324 %325
+      %327 : py.Value = base.refGet[py.Value] %326
+      %328 : base.String = const str "NameError"
+      %329 : base.String = const str "name 'b' is not defined"
+      %330 : py.Value = py.requireDefined %327 %328 %329 ^propagate.0()
+      %331 : base.Bool = py.truthy %330 ^propagate.0()
+      branch %331 ^body.1() ^else.13()
+    body.1():
+      %332 : base.Int = const int 12
+      %333 : py.Value = py.intLit %332
+      %334 : base.String = const str "m_cond"
+      %335 : base.String = const str "r"
+      %336 : base.Ref(py.Value) = py.globalCell %334 %335
+      %337 : base.Unit = base.refSet[py.Value] %336 %333
+      jump ^head.1()
+    else.13():
+      %338 : base.Int = const int 13
+      %339 : py.Value = py.intLit %338
+      %340 : base.String = const str "m_cond"
+      %341 : base.String = const str "r"
+      %342 : base.Ref(py.Value) = py.globalCell %340 %341
+      %343 : base.Unit = base.refSet[py.Value] %342 %339
+      jump ^exit.1()
+    exit.1():
+      %344 : base.String = const str "m_cond"
+      %345 : base.String = const str "a"
+      %346 : base.Ref(py.Value) = py.globalCell %344 %345
+      %347 : py.Value = base.refGet[py.Value] %346
+      %348 : base.String = const str "NameError"
+      %349 : base.String = const str "name 'a' is not defined"
+      %350 : py.Value = py.requireDefined %347 %348 %349 ^propagate.0()
+      %351 : base.Bool = py.truthy %350 ^propagate.0()
+      branch %351 ^and.4() ^join.11(%350)
+    and.4():
+      %352 : base.String = const str "m_cond"
+      %353 : base.String = const str "b"
+      %354 : base.Ref(py.Value) = py.globalCell %352 %353
+      %355 : py.Value = base.refGet[py.Value] %354
+      %356 : base.String = const str "NameError"
+      %357 : base.String = const str "name 'b' is not defined"
+      %358 : py.Value = py.requireDefined %355 %356 %357 ^propagate.0()
+      jump ^join.11(%358)
+    join.11(%359 : py.Value):
+      %360 : base.Bool = py.truthy %359 ^propagate.0()
+      branch %360 ^join.10(%359) ^or.3()
+    or.3():
+      %361 : base.String = const str "m_cond"
+      %362 : base.String = const str "c"
+      %363 : base.Ref(py.Value) = py.globalCell %361 %362
+      %364 : py.Value = base.refGet[py.Value] %363
+      %365 : base.String = const str "NameError"
+      %366 : base.String = const str "name 'c' is not defined"
+      %367 : py.Value = py.requireDefined %364 %365 %366 ^propagate.0()
+      jump ^join.10(%367)
+    join.10(%368 : py.Value):
+      %369 : base.String = const str "m_cond"
+      %370 : base.String = const str "v"
+      %371 : base.Ref(py.Value) = py.globalCell %369 %370
+      %372 : base.Unit = base.refSet[py.Value] %371 %368
+      %373 : base.String = const str "m_cond"
+      %374 : base.String = const str "b"
+      %375 : base.Ref(py.Value) = py.globalCell %373 %374
+      %376 : py.Value = base.refGet[py.Value] %375
+      %377 : base.String = const str "NameError"
+      %378 : base.String = const str "name 'b' is not defined"
+      %379 : py.Value = py.requireDefined %376 %377 %378 ^propagate.0()
+      %380 : base.Bool = py.truthy %379 ^propagate.0()
+      branch %380 ^and.5() ^else.14()
+    and.5():
+      %381 : base.String = const str "m_cond"
+      %382 : base.String = const str "c"
+      %383 : base.Ref(py.Value) = py.globalCell %381 %382
+      %384 : py.Value = base.refGet[py.Value] %383
+      %385 : base.String = const str "NameError"
+      %386 : base.String = const str "name 'c' is not defined"
+      %387 : py.Value = py.requireDefined %384 %385 %386 ^propagate.0()
+      %388 : base.Bool = py.truthy %387 ^propagate.0()
+      branch %388 ^then.13() ^else.14()
+    then.13():
+      %389 : base.String = const str "m_cond"
+      %390 : base.String = const str "a"
+      %391 : base.Ref(py.Value) = py.globalCell %389 %390
+      %392 : py.Value = base.refGet[py.Value] %391
+      %393 : base.String = const str "NameError"
+      %394 : base.String = const str "name 'a' is not defined"
+      %395 : py.Value = py.requireDefined %392 %393 %394 ^propagate.0()
+      jump ^join.12(%395)
+    else.14():
+      %396 : base.String = const str "m_cond"
+      %397 : base.String = const str "b"
+      %398 : base.Ref(py.Value) = py.globalCell %396 %397
+      %399 : py.Value = base.refGet[py.Value] %398
+      %400 : base.String = const str "NameError"
+      %401 : base.String = const str "name 'b' is not defined"
+      %402 : py.Value = py.requireDefined %399 %400 %401 ^propagate.0()
+      jump ^join.12(%402)
+    join.12(%403 : py.Value):
+      %404 : base.String = const str "m_cond"
+      %405 : base.String = const str "w"
+      %406 : base.Ref(py.Value) = py.globalCell %404 %405
+      %407 : base.Unit = base.refSet[py.Value] %406 %403
+      %408 : base.String = const str "m_cond"
+      %409 : base.String = const str "a"
+      %410 : base.Ref(py.Value) = py.globalCell %408 %409
+      %411 : py.Value = base.refGet[py.Value] %410
+      %412 : base.String = const str "NameError"
+      %413 : base.String = const str "name 'a' is not defined"
+      %414 : py.Value = py.requireDefined %411 %412 %413 ^propagate.0()
+      %415 : base.Bool = py.truthy %414 ^propagate.0()
+      branch %415 ^join.13(%414) ^or.4()
+    or.4():
+      %416 : base.String = const str "m_cond"
+      %417 : base.String = const str "b"
+      %418 : base.Ref(py.Value) = py.globalCell %416 %417
+      %419 : py.Value = base.refGet[py.Value] %418
+      %420 : base.String = const str "NameError"
+      %421 : base.String = const str "name 'b' is not defined"
+      %422 : py.Value = py.requireDefined %419 %420 %421 ^propagate.0()
+      %423 : base.Bool = py.truthy %422 ^propagate.0()
+      branch %423 ^join.13(%422) ^or.5()
+    or.5():
+      %424 : base.String = const str "m_cond"
+      %425 : base.String = const str "c"
+      %426 : base.Ref(py.Value) = py.globalCell %424 %425
+      %427 : py.Value = base.refGet[py.Value] %426
+      %428 : base.String = const str "NameError"
+      %429 : base.String = const str "name 'c' is not defined"
+      %430 : py.Value = py.requireDefined %427 %428 %429 ^propagate.0()
+      jump ^join.13(%430)
+    join.13(%431 : py.Value):
+      %432 : base.String = const str "m_cond"
+      %433 : base.String = const str "u"
+      %434 : base.Ref(py.Value) = py.globalCell %432 %433
+      %435 : base.Unit = base.refSet[py.Value] %434 %431
+      %436 : py.Value = py.noneLit
+      %437 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %436
+      ret %437
+    propagate.0(%438 : py.Value):
+      %439 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %438
+      ret %439
+  }
+}
+
