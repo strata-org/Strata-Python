@@ -42,8 +42,8 @@ with a diagnostic is a failure.
   `return`, `global`, `import a.b [as c]` and `from a.b import x [as y]`.
 * Expressions: `int`, `float`, `str`, `bytes`, `bool`, `None` and `...` literals, names,
   `+ - * / // % **`, unary `-`, `not`, comparisons (chained too), `and`, `or`,
-  `x if c else y`, tuple, list, set and dict displays with `*x` and `**d`, and calls with
-  keyword, `*` and `**` arguments.
+  `x if c else y`, tuple, list, set and dict displays with `*x` and `**d`, calls with
+  keyword, `*` and `**` arguments, attributes (mangled in a class), subscripts and slices.
 * Conditions: an `if` or `while` test, and the test of `x if c else y`, lower to branches by
   `transCond`, so each operand's truth is tested at most once.
 
@@ -551,10 +551,17 @@ partial def transExpr (e : expr SourceRange) : TransM ValId := withRange e.ann d
   | .YieldFrom sr .. => unsupportedValue "yield from" sr
   | .FormattedValue sr .. | .JoinedStr sr .. => unsupportedValue "f-string" sr
   | .Interpolation sr .. | .TemplateStr sr .. => unsupportedValue "t-string" sr
-  | .Attribute sr .. => unsupportedValue "attribute access" sr
-  | .Subscript sr .. => unsupportedValue "subscript" sr
+  | .Attribute _ v ⟨_, a⟩ _ => do build (getAttr (← transExpr v) (← mangled a))
+  | .Subscript _ v k _ => do
+    let o ← transExpr v
+    match k with
+    | .Slice _ lo hi st =>
+      let bs ← bounds #[lo.val, hi.val, st.val]
+      build (emitFailing "slice" Py.getSlice #v[] (#[o] ++ bs))
+    | k => build (emitFailing "item" Py.getItem #v[] #[o, ← transExpr k])
   | .Starred sr .. => unsupportedValue "starred expression" sr
-  | .Slice sr .. => unsupportedValue "slice" sr
+  | .Slice _ lo hi st => do
+    build (emitTotal "slice" Py.mkSlice #v[] (← bounds #[lo.val, hi.val, st.val]))
 
 /-- `l op₀ r₀ op₁ r₁ …`.  A chain evaluates each operand once and stops at the first false
 comparison; its value is the last comparison's. -/
@@ -587,6 +594,12 @@ partial def chainLinks (a : ValId) (links : Array (cmpop SourceRange × expr Sou
       build (startBlock next)
     lhs := b
   return last
+
+/-- The bounds of a slice, in order, `None` for an absent one. -/
+partial def bounds (bs : Array (Option (expr SourceRange))) : TransM (Array ValId) :=
+  bs.mapM fun
+    | some b => transExpr b
+    | none => build noneLit
 
 /-- `a and b …` (`isAnd`) or `a or b …`, as a value: each operand but the last is tested, and
 the first that decides the result is the result. -/

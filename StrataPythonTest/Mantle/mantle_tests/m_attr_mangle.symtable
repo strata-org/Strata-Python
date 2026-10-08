@@ -1,0 +1,11 @@
+module top
+  C: local (assigned)
+  class C
+    m: local (assigned)
+    function m
+      f: global implicit (referenced)
+      h: local (assigned, referenced)
+      self: cell (parameter, referenced)
+      function h
+        self: free (referenced)
+qualnames: C, C.m, C.m.<locals>.h

@@ -1,0 +1,94 @@
+module p01_import_dotted {
+  func @p01_import_dotted.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "p01_import_dotted"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "p01_import_dotted"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.String = const str "os.path"
+      %7 : py.Value = py.importModule %6 ^propagate.0()
+      %8 : base.String = const str "os"
+      %9 : py.Value = py.importModule %8 ^propagate.0()
+      %10 : base.String = const str "p01_import_dotted"
+      %11 : base.String = const str "os"
+      %12 : base.Ref(py.Value) = py.globalCell %10 %11
+      %13 : base.Unit = base.refSet[py.Value] %12 %9
+      %14 : base.String = const str "a.b.c"
+      %15 : py.Value = py.importModule %14 ^propagate.0()
+      %16 : base.String = const str "a"
+      %17 : py.Value = py.importModule %16 ^propagate.0()
+      %18 : base.String = const str "p01_import_dotted"
+      %19 : base.String = const str "a"
+      %20 : base.Ref(py.Value) = py.globalCell %18 %19
+      %21 : base.Unit = base.refSet[py.Value] %20 %17
+      %22 : base.Code = const @p01_import_dotted.f
+      %23 : py.Value = py.mkClosure %22
+      %24 : base.String = const str "p01_import_dotted"
+      %25 : base.String = const str "f"
+      %26 : base.Ref(py.Value) = py.globalCell %24 %25
+      %27 : base.Unit = base.refSet[py.Value] %26 %23
+      %28 : py.Value = py.noneLit
+      %29 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %28
+      ret %29
+    propagate.0(%30 : py.Value):
+      %31 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %30
+      ret %31
+  }
+  func @p01_import_dotted.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : py.Value = py.tupleLen %0
+      %3 : base.String = const str "kwargs"
+      %4 : py.Value = py.undef %3
+      %5 : py.Value = py.dictFirstKey %1 %4
+      %6 : base.String = const str "TypeError"
+      %7 : base.String = const str "f() got an unexpected keyword argument {}"
+      %8 : base.Unit = py.requireUndefined %5 %6 %7 ^propagate.0()
+      %9 : base.Int = const int 0
+      %10 : base.String = const str "TypeError"
+      %11 : base.String = const str "f() takes 0 positional arguments but {} {was} given"
+      %12 : base.Unit = py.requireAtMost %2 %9 %10 %11 ^propagate.0()
+      %13 : base.String = const str "p01_import_dotted"
+      %14 : base.String = const str "os"
+      %15 : base.Ref(py.Value) = py.globalCell %13 %14
+      %16 : py.Value = base.refGet[py.Value] %15
+      %17 : base.String = const str "NameError"
+      %18 : base.String = const str "name 'os' is not defined"
+      %19 : py.Value = py.requireDefined %16 %17 %18 ^propagate.0()
+      %20 : base.String = const str "path"
+      %21 : py.Value = py.attr %19 %20 ^propagate.0()
+      %22 : base.String = const str "join"
+      %23 : py.Value = py.attr %21 %22 ^propagate.0()
+      %24 : base.String = const str "x"
+      %25 : py.Value = py.strLit %24
+      %26 : base.String = const str "y"
+      %27 : py.Value = py.strLit %26
+      %28 : py.Value = py.mkTuple %25 %27
+      %29 : py.Value = py.mkKwargs
+      %30 : py.Value = py.call %23 %28 %29 ^propagate.0()
+      %31 : base.String = const str "p01_import_dotted"
+      %32 : base.String = const str "a"
+      %33 : base.Ref(py.Value) = py.globalCell %31 %32
+      %34 : py.Value = base.refGet[py.Value] %33
+      %35 : base.String = const str "NameError"
+      %36 : base.String = const str "name 'a' is not defined"
+      %37 : py.Value = py.requireDefined %34 %35 %36 ^propagate.0()
+      %38 : base.String = const str "b"
+      %39 : py.Value = py.attr %37 %38 ^propagate.0()
+      %40 : base.String = const str "c"
+      %41 : py.Value = py.attr %39 %40 ^propagate.0()
+      %42 : base.String = const str "g"
+      %43 : py.Value = py.attr %41 %42 ^propagate.0()
+      %44 : py.Value = py.mkTuple
+      %45 : py.Value = py.mkKwargs
+      %46 : py.Value = py.call %43 %44 %45 ^propagate.0()
+      %47 : py.Value = py.mkTuple %30 %46
+      %48 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %47
+      ret %48
+    propagate.0(%49 : py.Value):
+      %50 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %49
+      ret %50
+  }
+}
+

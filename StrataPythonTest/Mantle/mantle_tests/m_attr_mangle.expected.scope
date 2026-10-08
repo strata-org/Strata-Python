@@ -1,0 +1,11 @@
+module
+  C: local (assigned)
+  class C
+    m: local (assigned)
+    function C.m
+      params: self
+      self: cell (parameter, referenced)
+      f: global implicit (referenced)
+      h: local (assigned, referenced)
+      function C.m.<locals>.h
+        self: free (referenced)

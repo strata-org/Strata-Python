@@ -1,0 +1,79 @@
+module tc12_exhaustive {
+  func @tc12_exhaustive.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "tc12_exhaustive"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "tc12_exhaustive"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.String = const str "myservice"
+      %7 : py.Value = py.importModule %6 ^propagate.0()
+      %8 : base.String = const str "tc12_exhaustive"
+      %9 : base.String = const str "myservice"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : base.Code = const @tc12_exhaustive.f
+      %13 : py.Value = py.mkClosure %12
+      %14 : base.String = const str "tc12_exhaustive"
+      %15 : base.String = const str "f"
+      %16 : base.Ref(py.Value) = py.globalCell %14 %15
+      %17 : base.Unit = base.refSet[py.Value] %16 %13
+      %18 : py.Value = py.noneLit
+      %19 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %18
+      ret %19
+    propagate.0(%20 : py.Value):
+      %21 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %20
+      ret %21
+  }
+  func @tc12_exhaustive.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "client"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : base.String = const str "result"
+      %6 : py.Value = py.undef %5
+      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
+      %8 : py.Value = py.tupleLen %0
+      %9 : base.String = const str "kwargs"
+      %10 : py.Value = py.undef %9
+      %11 : py.Value = py.dictFirstKey %1 %10
+      %12 : base.String = const str "TypeError"
+      %13 : base.String = const str "f() got an unexpected keyword argument {}"
+      %14 : base.Unit = py.requireUndefined %11 %12 %13 ^propagate.0()
+      %15 : base.Int = const int 0
+      %16 : base.String = const str "TypeError"
+      %17 : base.String = const str "f() takes 0 positional arguments but {} {was} given"
+      %18 : base.Unit = py.requireAtMost %8 %15 %16 %17 ^propagate.0()
+      %19 : base.String = const str "tc12_exhaustive"
+      %20 : base.String = const str "myservice"
+      %21 : base.Ref(py.Value) = py.globalCell %19 %20
+      %22 : py.Value = base.refGet[py.Value] %21
+      %23 : base.String = const str "NameError"
+      %24 : base.String = const str "name 'myservice' is not defined"
+      %25 : py.Value = py.requireDefined %22 %23 %24 ^propagate.0()
+      %26 : base.String = const str "Client"
+      %27 : py.Value = py.attr %25 %26 ^propagate.0()
+      %28 : py.Value = py.mkTuple
+      %29 : py.Value = py.mkKwargs
+      %30 : py.Value = py.call %27 %28 %29 ^propagate.0()
+      %31 : base.Unit = base.refSet[py.Value] %4 %30
+      %32 : py.Value = base.refGet[py.Value] %4
+      %33 : base.String = const str "UnboundLocalError"
+      %34 : base.String = const str "cannot access local variable 'client' where it is not associated with a value"
+      %35 : py.Value = py.requireDefined %32 %33 %34 ^propagate.0()
+      %36 : base.String = const str "nonexistent_method"
+      %37 : py.Value = py.attr %35 %36 ^propagate.0()
+      %38 : py.Value = py.mkTuple
+      %39 : py.Value = py.mkKwargs
+      %40 : py.Value = py.call %37 %38 %39 ^propagate.0()
+      %41 : base.Unit = base.refSet[py.Value] %7 %40
+      %42 : py.Value = py.noneLit
+      %43 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %42
+      ret %43
+    propagate.0(%44 : py.Value):
+      %45 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %44
+      ret %45
+  }
+}
+

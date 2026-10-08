@@ -1,0 +1,100 @@
+module t17_import {
+  func @t17_import.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "t17_import"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "t17_import"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.String = const str "os"
+      %7 : py.Value = py.importModule %6 ^propagate.0()
+      %8 : base.String = const str "t17_import"
+      %9 : base.String = const str "os"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : base.String = const str "os.path"
+      %13 : base.String = const str "join"
+      %14 : py.Value = py.importFrom %12 %13 ^propagate.0()
+      %15 : base.String = const str "t17_import"
+      %16 : base.String = const str "join"
+      %17 : base.Ref(py.Value) = py.globalCell %15 %16
+      %18 : base.Unit = base.refSet[py.Value] %17 %14
+      %19 : base.String = const str "os.path"
+      %20 : base.String = const str "exists"
+      %21 : py.Value = py.importFrom %19 %20 ^propagate.0()
+      %22 : base.String = const str "t17_import"
+      %23 : base.String = const str "exists"
+      %24 : base.Ref(py.Value) = py.globalCell %22 %23
+      %25 : base.Unit = base.refSet[py.Value] %24 %21
+      %26 : base.String = const str "typing"
+      %27 : base.String = const str "Optional"
+      %28 : py.Value = py.importFrom %26 %27 ^propagate.0()
+      %29 : base.String = const str "t17_import"
+      %30 : base.String = const str "Optional"
+      %31 : base.Ref(py.Value) = py.globalCell %29 %30
+      %32 : base.Unit = base.refSet[py.Value] %31 %28
+      %33 : base.String = const str "t17_import"
+      %34 : base.String = const str "os"
+      %35 : base.Ref(py.Value) = py.globalCell %33 %34
+      %36 : py.Value = base.refGet[py.Value] %35
+      %37 : base.String = const str "NameError"
+      %38 : base.String = const str "name 'os' is not defined"
+      %39 : py.Value = py.requireDefined %36 %37 %38 ^propagate.0()
+      %40 : base.String = const str "getcwd"
+      %41 : py.Value = py.attr %39 %40 ^propagate.0()
+      %42 : py.Value = py.mkTuple
+      %43 : py.Value = py.mkKwargs
+      %44 : py.Value = py.call %41 %42 %43 ^propagate.0()
+      %45 : base.String = const str "t17_import"
+      %46 : base.String = const str "cwd"
+      %47 : base.Ref(py.Value) = py.globalCell %45 %46
+      %48 : base.Unit = base.refSet[py.Value] %47 %44
+      %49 : base.String = const str "t17_import"
+      %50 : base.String = const str "join"
+      %51 : base.Ref(py.Value) = py.globalCell %49 %50
+      %52 : py.Value = base.refGet[py.Value] %51
+      %53 : base.String = const str "NameError"
+      %54 : base.String = const str "name 'join' is not defined"
+      %55 : py.Value = py.requireDefined %52 %53 %54 ^propagate.0()
+      %56 : base.String = const str "/tmp"
+      %57 : py.Value = py.strLit %56
+      %58 : base.String = const str "file.txt"
+      %59 : py.Value = py.strLit %58
+      %60 : py.Value = py.mkTuple %57 %59
+      %61 : py.Value = py.mkKwargs
+      %62 : py.Value = py.call %55 %60 %61 ^propagate.0()
+      %63 : base.String = const str "t17_import"
+      %64 : base.String = const str "full_path"
+      %65 : base.Ref(py.Value) = py.globalCell %63 %64
+      %66 : base.Unit = base.refSet[py.Value] %65 %62
+      %67 : base.String = const str "t17_import"
+      %68 : base.String = const str "exists"
+      %69 : base.Ref(py.Value) = py.globalCell %67 %68
+      %70 : py.Value = base.refGet[py.Value] %69
+      %71 : base.String = const str "NameError"
+      %72 : base.String = const str "name 'exists' is not defined"
+      %73 : py.Value = py.requireDefined %70 %71 %72 ^propagate.0()
+      %74 : base.String = const str "t17_import"
+      %75 : base.String = const str "full_path"
+      %76 : base.Ref(py.Value) = py.globalCell %74 %75
+      %77 : py.Value = base.refGet[py.Value] %76
+      %78 : base.String = const str "NameError"
+      %79 : base.String = const str "name 'full_path' is not defined"
+      %80 : py.Value = py.requireDefined %77 %78 %79 ^propagate.0()
+      %81 : py.Value = py.mkTuple %80
+      %82 : py.Value = py.mkKwargs
+      %83 : py.Value = py.call %73 %81 %82 ^propagate.0()
+      %84 : base.String = const str "t17_import"
+      %85 : base.String = const str "check"
+      %86 : base.Ref(py.Value) = py.globalCell %84 %85
+      %87 : base.Unit = base.refSet[py.Value] %86 %83
+      %88 : py.Value = py.noneLit
+      %89 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %88
+      ret %89
+    propagate.0(%90 : py.Value):
+      %91 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %90
+      ret %91
+  }
+}
+

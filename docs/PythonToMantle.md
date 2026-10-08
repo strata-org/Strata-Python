@@ -135,9 +135,9 @@ are in `StrataPython/Mantle/Build.lean`.
   receives the exception as a `py.Value`. The operation's result is its success value. The
   translator passes the label of the enclosing handler as `err`.
 - **Total operations** have no successors. These are the literals, `undef`, `isDefined`,
-  `is`/`isNot`, `mkTuple`/`mkList`/`mkKwargs`, `listToTuple`, `tupleLen`, `dictLen`, `dictGet`,
-  `dictFirstKey`, `dictDiscard`, `listAppend`, `isStopIteration`, `globalCell`, `mkClosure`
-  and `unsupported`. `mkSet` and `mkDict` raise, because hashing a key runs `__hash__` and
+  `is`/`isNot`, `mkTuple`/`mkList`/`mkKwargs`, `listToTuple`, `mkSlice`, `tupleLen`,
+  `dictLen`, `dictGet`, `dictFirstKey`, `dictDiscard`, `listAppend`, `isStopIteration`,
+  `globalCell`, `mkClosure` and `unsupported`. `mkSet` and `mkDict` raise, because hashing a key runs `__hash__` and
   `__eq__`.
 - **Cells.** A cell is a `base.Ref(py.Value)`, a mutable location. Every Python local is a
   cell: `refNew` creates it, `refSet` writes it and `refGet` reads it. A cell that has not
@@ -537,10 +537,10 @@ false, as in CPython.
 | `a and b` / `a or b` | see the example below |
 | `x if c else y` | `c` as a condition (§6.2). Each side jumps to `join(v)` |
 | `f(…)` | see the calls paragraph below |
-| `o.a` | `py.attr o "a"` |
+| `o.a` | `py.attr o "a"`. Inside a class, `a` is mangled, as in CPython (`self.__a` reads `_C__a`); a keyword argument name is not |
 | `o[k]` | `py.getItem o k` |
 | `o[i:j:s]` | `py.getSlice o i j s`, with `None` for an absent bound |
-| `o[i:j, k]` (a slice inside a tuple) | **rejected** until `py.mkSlice` exists (§8) |
+| `o[i:j, k]` (a slice inside a tuple) | `py.mkSlice i j None`, as CPython's `BUILD_SLICE`, then `k`, then `mkTuple`, then `py.getItem` |
 | `(a, b)`, `[a, b]`, `{a, b}` | `py.mkTuple` / `mkList` / `mkSet` over the evaluated elements |
 | `[a, *xs, b]`, `{a, *xs, b}` | as CPython: `mkList` (`mkSet`) of the elements before the first `*x`, then `listExtend` (`setUpdate`) for each `*x` and `listAppend` (`setAdd`) for each later element |
 | `(a, *xs, b)` | the list display, then `listToTuple` |
@@ -880,7 +880,6 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 | unary operators | `uAdd`, `invert`, as `uSub` | `+a`, `~a` |
 | in-place operators | `iadd` … `ipow` and the bitwise ones, as `add` | `x op= e` |
 | `delAttr`, `delItem` | as `setAttr`/`setItem` without `val` | `del o.a`, `del o[k]` |
-| `mkSlice` | `insn mkSlice (lo hi step : Value) : Value` | slices inside tuples, `slice` values |
 | `mkGenerator` | `insn mkGenerator (code : Code) (cells : Ref Value…) : Value` | generators (stage 1, opaque) |
 
 **Declarations to fix:**
@@ -1002,9 +1001,9 @@ a diagnostic.
 | conditions (`transCond`) | §6.2 | specified; implemented for `if`, `while` and `x if c else y` |
 | calls, with keywords, `*` and `**` | §6.3 | specified; implemented |
 | displays and unpacking in them | §6.3 | specified; implemented |
-| attribute, subscript, slice | §6.3 | specified |
+| attribute, subscript, slice (inside a tuple too) | §6.3 | specified; implemented |
 | f-strings, walrus | §6.3 | specified |
-| complex literal, t-string, slice inside a tuple | §6.3 | unsupported |
+| complex literal, t-string | §6.3 | unsupported |
 | `@ << >> & \| ^`, unary `+`, `~` | §6.3 | unsupported |
 | `while` / `else`, `break`, `continue` | §6.4–§6.5 | specified; implemented |
 | `for` / `else` | §6.4 | specified |

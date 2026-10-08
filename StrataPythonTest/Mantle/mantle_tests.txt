@@ -20,7 +20,7 @@ t13_fstring | no |
 t14_bool_short | yes |
 t15_ifexp | yes |
 t16_chained_cmp | yes |
-t17_import | no |
+t17_import | yes |
 t18_data_struct | no |
 t19_attribute | no |
 t20_raise | no |
@@ -58,15 +58,15 @@ tc05_unary | yes |
 tc06_collections | yes |
 tc07_if_else | yes |
 tc08_fstring | no |
-tc09_import | no |
-tc10_class_method | no |
-tc11_class_field | no |
-tc12_exhaustive | no |
+tc09_import | yes |
+tc10_class_method | yes |
+tc11_class_field | yes |
+tc12_exhaustive | yes |
 tc13_from_import | yes |
-tc14_overload_dispatch | no |
-tc15_arg_count | no |
-tc16_unknown_attr | no |
-tc17_transitive_dispatch | no |
+tc14_overload_dispatch | yes |
+tc15_arg_count | yes |
+tc16_unknown_attr | yes |
+tc17_transitive_dispatch | yes |
 c1_return_finally | no |
 c2_return_in_for_finally | no |
 c3_break_finally | no |
@@ -74,6 +74,7 @@ c4_continue_finally | no |
 c5_body_finally_vs_loop_exit | no |
 c6_body_raise | no |
 c7_with_return | no |
+m_attr_mangle | yes | class
 m_builtins | yes |
 m_calls | yes |
 m_cond | yes |
@@ -86,6 +87,7 @@ m_local_vs_global | yes |
 m_params | yes |
 m_unbound_local | yes |
 m_while | yes |
+m_subscripts | yes |
 m_rejected | yes | relative import, import *, nested function, non-constant default, operator <<, for loop
 e01_nonlocal_unbound | no | no binding for nonlocal 'x' found
 e02_global_param | yes | name 'x' is parameter and global
@@ -108,8 +110,8 @@ e18_walrus_lambda_in_iterable | no | assignment expression cannot be used in a c
 e19_walrus_rebinds_outer_iteration | no | assignment expression cannot rebind comprehension iteration variable 'row'
 e20_yield_in_dictcomp | no | 'yield' inside dict comprehension
 e21_repeated_keyword | yes | keyword argument repeated: k
-p01_import_dotted | no |
-p02_import_as | no |
+p01_import_dotted | yes |
+p02_import_as | yes |
 p03_from_import | yes |
 p04_import_in_function | no |
 p05_import_try | no |

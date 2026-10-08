@@ -1,0 +1,83 @@
+module tc17_transitive_dispatch {
+  func @tc17_transitive_dispatch.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "tc17_transitive_dispatch"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "tc17_transitive_dispatch"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.String = const str "cloudkit"
+      %7 : py.Value = py.importModule %6 ^propagate.0()
+      %8 : base.String = const str "tc17_transitive_dispatch"
+      %9 : base.String = const str "cloudkit"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : base.Code = const @tc17_transitive_dispatch.f
+      %13 : py.Value = py.mkClosure %12
+      %14 : base.String = const str "tc17_transitive_dispatch"
+      %15 : base.String = const str "f"
+      %16 : base.Ref(py.Value) = py.globalCell %14 %15
+      %17 : base.Unit = base.refSet[py.Value] %16 %13
+      %18 : py.Value = py.noneLit
+      %19 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %18
+      ret %19
+    propagate.0(%20 : py.Value):
+      %21 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %20
+      ret %21
+  }
+  func @tc17_transitive_dispatch.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "db"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : base.String = const str "result"
+      %6 : py.Value = py.undef %5
+      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
+      %8 : py.Value = py.tupleLen %0
+      %9 : base.String = const str "kwargs"
+      %10 : py.Value = py.undef %9
+      %11 : py.Value = py.dictFirstKey %1 %10
+      %12 : base.String = const str "TypeError"
+      %13 : base.String = const str "f() got an unexpected keyword argument {}"
+      %14 : base.Unit = py.requireUndefined %11 %12 %13 ^propagate.0()
+      %15 : base.Int = const int 0
+      %16 : base.String = const str "TypeError"
+      %17 : base.String = const str "f() takes 0 positional arguments but {} {was} given"
+      %18 : base.Unit = py.requireAtMost %8 %15 %16 %17 ^propagate.0()
+      %19 : base.String = const str "tc17_transitive_dispatch"
+      %20 : base.String = const str "cloudkit"
+      %21 : base.Ref(py.Value) = py.globalCell %19 %20
+      %22 : py.Value = base.refGet[py.Value] %21
+      %23 : base.String = const str "NameError"
+      %24 : base.String = const str "name 'cloudkit' is not defined"
+      %25 : py.Value = py.requireDefined %22 %23 %24 ^propagate.0()
+      %26 : base.String = const str "client"
+      %27 : py.Value = py.attr %25 %26 ^propagate.0()
+      %28 : base.String = const str "database"
+      %29 : py.Value = py.strLit %28
+      %30 : py.Value = py.mkTuple %29
+      %31 : py.Value = py.mkKwargs
+      %32 : py.Value = py.call %27 %30 %31 ^propagate.0()
+      %33 : base.Unit = base.refSet[py.Value] %4 %32
+      %34 : py.Value = base.refGet[py.Value] %4
+      %35 : base.String = const str "UnboundLocalError"
+      %36 : base.String = const str "cannot access local variable 'db' where it is not associated with a value"
+      %37 : py.Value = py.requireDefined %34 %35 %36 ^propagate.0()
+      %38 : base.String = const str "query"
+      %39 : py.Value = py.attr %37 %38 ^propagate.0()
+      %40 : base.String = const str "SELECT 1"
+      %41 : py.Value = py.strLit %40
+      %42 : py.Value = py.mkTuple %41
+      %43 : py.Value = py.mkKwargs
+      %44 : py.Value = py.call %39 %42 %43 ^propagate.0()
+      %45 : base.Unit = base.refSet[py.Value] %7 %44
+      %46 : py.Value = py.noneLit
+      %47 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %46
+      ret %47
+    propagate.0(%48 : py.Value):
+      %49 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %48
+      ret %49
+  }
+}
+

@@ -222,6 +222,9 @@ public environment Py extends Base where
   insn getItem (obj key : Value) (^err (exc : Value)) : Value
   /-- `obj[key] = val`. -/
   insn setItem (obj key val : Value) (^err (exc : Value)) : Unit
+  /-- `slice(lo, hi, step)`: CPython's `BUILD_SLICE`, for a slice that is not the whole
+  subscript, as in `obj[lo:hi, k]`.  An absent bound is `None`. -/
+  insn mkSlice (lo hi step : Value) : Value
   /-- `obj[lo:hi:step]`.  An absent bound is `None`, as in Python. -/
   insn getSlice (obj lo hi step : Value) (^err (exc : Value)) : Value
   /-- A tuple of the elements of `list`, a list the emitting code made: CPython's
