@@ -472,10 +472,11 @@ jump to the function's exit.
 | target `x` | `refSet` on the cell (§5.1) | |
 | target `o.a` | evaluate `o`, then `py.setAttr o "a" v` | Python evaluates the right-hand side first, then `o` |
 | target `o[k]` | evaluate `o` and `k`, then `py.setItem o k v` | right-hand side first, then `o`, then `k` |
+| target `o[i:j:s]` | evaluate `o`, `i`, `j` and `s`, then `py.setItem o (py.mkSlice i j s) v`, with `None` for an absent bound | as CPython's `STORE_SLICE`, which calls `__setitem__` with a slice |
 | target `a, b` / `[a, b]` | `t = py.unpackSeq v 2` (§8), then `getItem t i` for each target, recursively | an exact length check, `ValueError: not enough / too many values to unpack` |
 | target `a, *b` | `py.unpackEx v before after` (§8) | |
 | `x op= e` | read `x` once (evaluating `o` and `k` once for `o.a` and `o[k]`), apply the in-place operation (`py.iAdd` … `py.iBitXor`), write back | in place: `xs += ys` mutates `xs` |
-| `x: T = e` | as `x = e`. The annotation is not evaluated | `x: T` with no value only makes `x` local |
+| `x: T = e` | as `x = e`. The annotation is not evaluated | `x: T` with no value only makes `x` local. `o.a: T` and `o[k]: T` evaluate `o` and `k`, as CPython does |
 | `del x` | `requireDefined` (raises `NameError` or `UnboundLocalError`), then `refSet` of `undef "x"` | |
 | `del o.a`, `del o[k]` | **rejected** until `py.delAttr` and `py.delItem` exist (§8) | |
 | `assert c` | as `assert c, m`, with `AssertionError` called on no arguments | |
@@ -986,10 +987,10 @@ a diagnostic.
 | `import`, `from … import` | §6.1 | specified; implemented |
 | relative import, `import *` | §6.1 | unsupported (rejected by the scope pass and the translator) |
 | expression statement, `pass`, assignment to a name (chained too) | §6.1 | specified; implemented |
-| assignment to an attribute or subscript | §6.1 | specified |
+| assignment to an attribute or subscript | §6.1 | specified; implemented |
 | tuple and starred targets | §6.1 | specified, open question (`unpackSeq`, Q7) |
-| augmented assignment | §6.1 | specified; implemented on names |
-| annotated assignment | §6.1 | specified; implemented on names |
+| augmented assignment | §6.1 | specified; implemented |
+| annotated assignment | §6.1 | specified; implemented |
 | `del x`, `assert` | §6.1 | specified |
 | `del o.a`, `del o[k]` | §6.1 | unsupported |
 | `nonlocal` | §6.6 | specified |

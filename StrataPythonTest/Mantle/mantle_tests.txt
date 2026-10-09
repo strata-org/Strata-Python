@@ -21,12 +21,12 @@ t14_bool_short | yes |
 t15_ifexp | yes |
 t16_chained_cmp | yes |
 t17_import | yes |
-t18_data_struct | no |
+t18_data_struct | yes |
 t19_attribute | no |
 t20_raise | no |
 t21_combined | no |
 t22_star_args | no |
-t23_kwargs_boto3 | no |
+t23_kwargs_boto3 | yes |
 t24_assert | no |
 t25_tuple_unpack | no |
 t26_with_as_use | no |
@@ -46,7 +46,7 @@ i01_call_forms | yes |
 i02_param_kinds | yes |
 i03_defaults | yes |
 i04_dict_unpack | yes |
-i05_kwargs_mutation | no |
+i05_kwargs_mutation | yes |
 i06_call_errors | no |
 i07_methods | no |
 i08_binding_errors | no |
@@ -89,6 +89,7 @@ m_local_vs_global | yes |
 m_operators | yes |
 m_params | yes |
 m_subscripts | yes |
+m_targets | yes |
 m_unbound_local | yes |
 m_walrus | yes |
 m_while | yes |

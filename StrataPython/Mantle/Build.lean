@@ -26,7 +26,7 @@ The operations:
 * `emitConst`, `emitTotal`, `emitFailing`, `emitActing`, `emitTest`, `truthy`: emit a
   constant or an operation;
 * `intLit`, `floatLit`, `strLit`, `boolLit`, `bytesLit`, `noneLit`: a boxed literal;
-* `getAttr`: `obj.name`;
+* `getAttr`, `setAttr`: `obj.name` and `obj.name = val`;
 * `freshVal`, `freshLabel`, `startBlock`, `startBlockWith`, `startFreshBlock`, `isOpen`,
   `finishBlock`, `jump`, `branch`, `unreachable`: `Mantle.Build`'s, over `Py.env`;
 * `emitFunc`, `mkClosure`, `funcValue`: code pointers and closures;
@@ -236,6 +236,11 @@ def unreachable (info : Option α := none) : PyM α Unit :=
 /-- `obj.name`, which can raise. -/
 def getAttr (obj : ValId) (name : String) (info : Option α := none) : PyM α ValId := do
   emitFailing name Py.attr #v[] #[obj, ← emitConst "attr" (.str name) info] info
+
+/-- `obj.name = val`, which can raise. -/
+def setAttr (obj : ValId) (name : String) (val : ValId) (info : Option α := none) :
+    PyM α ValId := do
+  emitActing name Py.setAttr #v[] #[obj, ← emitConst "attr" (.str name) info, val] info
 
 /-! ## Closures
 

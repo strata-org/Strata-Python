@@ -37,8 +37,8 @@ with a diagnostic is a failure.
 
 * `def` at module level: positional, positional-only, keyword-only, `*args` and `**kwargs`
   parameters, and constant defaults.  The argument-binding prologue is the spec's §5.4.
-* Statements: expression statements, `pass`, assignment and annotated assignment to names,
-  augmented assignment to a name,
+* Statements: expression statements, `pass`, assignment, annotated assignment and augmented
+  assignment to names, attributes and subscripts,
   `if`/`elif`/`else`, `while`/`else`, `break`, `continue`, `return`, `global`,
   `import a.b [as c]` and `from a.b import x [as y]`.
 * Expressions: `int`, `float`, `str`, `bytes`, `bool`, `None` and `...` literals, names,
@@ -453,8 +453,6 @@ def stmtName : stmt SourceRange → String
 
 /-- The name of an assignment to a target other than a name. -/
 def targetName : expr SourceRange → String
-  | .Attribute .. => "attribute assignment"
-  | .Subscript .. => "subscript assignment"
   | .Tuple .. | .List .. => "unpacking assignment"
   | .Starred .. => "starred assignment"
   | _ => "assignment target"
@@ -828,6 +826,47 @@ partial def call (f : expr SourceRange) (args : Array (expr SourceRange))
 
 end
 
+/-! ## Assignment targets -/
+
+/-- An assignment target whose object and key are evaluated (§6.1). -/
+inductive Lhs where
+  | name (name : String) (range : SourceRange)
+  | attr (obj : ValId) (name : String)
+  | item (obj key : ValId)
+  /-- `obj[lo:hi:step]`, with `None` for an absent bound. -/
+  | slice (obj : ValId) (bounds : Array ValId)
+
+/-- The evaluation of the target `t`, or `none` if `t` is not a name, an attribute or a
+subscript: `o` for `o.a`, then `o` and `k` for `o[k]`.  The attribute name is mangled, as in
+a read. -/
+def target? : expr SourceRange → Option (TransM Lhs)
+  | .Name sr ⟨_, n⟩ _ => some (pure (.name n sr))
+  | .Attribute _ v ⟨_, a⟩ _ => some do return .attr (← transExpr v) (← mangled a)
+  | .Subscript _ v k _ => some do
+    let o ← transExpr v
+    match k with
+    | .Slice _ lo hi st => return .slice o (← bounds #[lo.val, hi.val, st.val])
+    | k => return .item o (← transExpr k)
+  | _ => none
+
+/-- Read the target `l`, as `x op= e` does. -/
+def readLhs : Lhs → TransM ValId
+  | .name n r => readName n r
+  | .attr o a => build (getAttr o a)
+  | .item o k => build (emitFailing "item" Py.getItem #v[] #[o, k])
+  | .slice o bs => build (emitFailing "slice" Py.getSlice #v[] (#[o] ++ bs))
+
+/-- Write `v` to the target `l`.  A name is written at `range`, the statement's.  A slice is
+written by `setItem` of a `mkSlice`, as CPython's `STORE_SLICE` does. -/
+def writeLhs (l : Lhs) (v : ValId) (range : SourceRange) : TransM Unit :=
+  match l with
+  | .name n _ => writeName n v range
+  | .attr o a => discard <| build (setAttr o a v)
+  | .item o k => discard <| build (emitActing "store" Py.setItem #v[] #[o, k, v])
+  | .slice o bs => do
+    let k ← build (emitTotal "slice" Py.mkSlice #v[] bs)
+    discard <| build (emitActing "store" Py.setItem #v[] #[o, k, v])
+
 /-! ## Functions
 
 A `def` is bound where it runs, and its function is emitted after the current one, from a
@@ -1029,23 +1068,23 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
   | .Expr _ v => discard <| transExpr v
   | .Pass _ | .Global .. => pure ()
   | .Assign sr ⟨_, targets⟩ v _ =>
-    let names := targets.filterMap fun | .Name _ ⟨_, n⟩ _ => some n | _ => none
-    if let some t := targets.find? (fun | .Name .. => false | _ => true) then
+    if let some t := targets.find? (target? · |>.isNone) then
       return ← reject (targetName t) t.ann
     let x ← transExpr v
-    for n in names do writeName n x sr
+    for eval in targets.filterMap target? do writeLhs (← eval) x sr
   | .AnnAssign sr target _ ⟨_, value⟩ _ =>
-    match target, value with
-    | .Name _ ⟨_, n⟩ _, some v => writeName n (← transExpr v) sr
-    | .Name .., none => pure ()
-    | t, _ => reject (targetName t) t.ann
+    let some eval := target? target | reject (targetName target) target.ann
+    match value with
+    | none => discard eval
+    | some v =>
+      let x ← transExpr v
+      writeLhs (← eval) x sr
   | .AugAssign sr target op v =>
-    match target with
-    | .Name nsr ⟨_, n⟩ _ =>
-      let cur ← readName n nsr
-      let rhs ← transExpr v
-      writeName n (← inPlaceOp op cur rhs) sr
-    | t => reject s!"augmented {targetName t}" t.ann
+    let some eval := target? target | reject s!"augmented {targetName target}" target.ann
+    let l ← eval
+    let cur ← readLhs l
+    let rhs ← transExpr v
+    writeLhs l (← inPlaceOp op cur rhs) sr
   | .If _ test body orelse => ifStmt test body.val orelse.val
   | .While _ test body orelse => whileStmt test body.val orelse.val
   | .Break sr => exitWalk true none sr
