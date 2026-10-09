@@ -1,0 +1,82 @@
+module t13_fstring {
+  func @t13_fstring.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "t13_fstring"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "t13_fstring"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.String = const str "world"
+      %7 : py.Value = py.strLit %6
+      %8 : base.String = const str "t13_fstring"
+      %9 : base.String = const str "name"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : base.Int = const int 30
+      %13 : py.Value = py.intLit %12
+      %14 : base.String = const str "t13_fstring"
+      %15 : base.String = const str "age"
+      %16 : base.Ref(py.Value) = py.globalCell %14 %15
+      %17 : base.Unit = base.refSet[py.Value] %16 %13
+      %18 : base.String = const str "Hello "
+      %19 : py.Value = py.strLit %18
+      %20 : base.String = const str "t13_fstring"
+      %21 : base.String = const str "name"
+      %22 : base.Ref(py.Value) = py.globalCell %20 %21
+      %23 : py.Value = base.refGet[py.Value] %22
+      %24 : base.String = const str "NameError"
+      %25 : base.String = const str "name 'name' is not defined"
+      %26 : py.Value = py.requireDefined %23 %24 %25 ^propagate.0()
+      %27 : base.String = const str ""
+      %28 : py.Value = py.strLit %27
+      %29 : py.Value = py.fmtValue %26 %28 ^propagate.0()
+      %30 : py.Value = py.strConcat %19 %29
+      %31 : base.String = const str "t13_fstring"
+      %32 : base.String = const str "greeting"
+      %33 : base.Ref(py.Value) = py.globalCell %31 %32
+      %34 : base.Unit = base.refSet[py.Value] %33 %30
+      %35 : base.String = const str "t13_fstring"
+      %36 : base.String = const str "name"
+      %37 : base.Ref(py.Value) = py.globalCell %35 %36
+      %38 : py.Value = base.refGet[py.Value] %37
+      %39 : base.String = const str "NameError"
+      %40 : base.String = const str "name 'name' is not defined"
+      %41 : py.Value = py.requireDefined %38 %39 %40 ^propagate.0()
+      %42 : base.String = const str ""
+      %43 : py.Value = py.strLit %42
+      %44 : py.Value = py.fmtValue %41 %43 ^propagate.0()
+      %45 : base.String = const str " is "
+      %46 : py.Value = py.strLit %45
+      %47 : base.String = const str "t13_fstring"
+      %48 : base.String = const str "age"
+      %49 : base.Ref(py.Value) = py.globalCell %47 %48
+      %50 : py.Value = base.refGet[py.Value] %49
+      %51 : base.String = const str "NameError"
+      %52 : base.String = const str "name 'age' is not defined"
+      %53 : py.Value = py.requireDefined %50 %51 %52 ^propagate.0()
+      %54 : base.String = const str ""
+      %55 : py.Value = py.strLit %54
+      %56 : py.Value = py.fmtValue %53 %55 ^propagate.0()
+      %57 : base.String = const str " years old"
+      %58 : py.Value = py.strLit %57
+      %59 : py.Value = py.strConcat %44 %46 %56 %58
+      %60 : base.String = const str "t13_fstring"
+      %61 : base.String = const str "detail"
+      %62 : base.Ref(py.Value) = py.globalCell %60 %61
+      %63 : base.Unit = base.refSet[py.Value] %62 %59
+      %64 : base.String = const str "no interpolation"
+      %65 : py.Value = py.strLit %64
+      %66 : base.String = const str "t13_fstring"
+      %67 : base.String = const str "plain"
+      %68 : base.Ref(py.Value) = py.globalCell %66 %67
+      %69 : base.Unit = base.refSet[py.Value] %68 %65
+      %70 : py.Value = py.noneLit
+      %71 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %70
+      ret %71
+    propagate.0(%72 : py.Value):
+      %73 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %72
+      ret %73
+  }
+}
+

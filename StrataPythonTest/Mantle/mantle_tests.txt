@@ -16,7 +16,7 @@ t09_nested_try | no |
 t10_except_type | no |
 t11_with | no |
 t12_class | no |
-t13_fstring | no |
+t13_fstring | yes |
 t14_bool_short | yes |
 t15_ifexp | yes |
 t16_chained_cmp | yes |
@@ -57,7 +57,7 @@ tc04_comparisons | yes |
 tc05_unary | yes |
 tc06_collections | yes |
 tc07_if_else | yes |
-tc08_fstring | no |
+tc08_fstring | yes |
 tc09_import | yes |
 tc10_class_method | yes |
 tc11_class_field | yes |
@@ -80,6 +80,7 @@ m_calls | yes |
 m_cond | yes |
 m_displays | yes |
 m_expressions | yes |
+m_fstring | yes |
 m_global_decl | yes |
 m_if | yes |
 m_imports | yes |

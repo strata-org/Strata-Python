@@ -283,10 +283,19 @@ public environment Py extends Base where
 
   -- Strings and degradation.
 
-  /-- `format(val)`, as an f-string field does. -/
-  insn fmtValue (val : Value) (^err (exc : Value)) : Value
-  /-- The concatenation of `parts`. -/
-  insn strConcat (*parts : Value) (^err (exc : Value)) : Value
+  /-- `repr(val)`, without looking up the builtin: an f-string's `!r` (`FORMAT_VALUE`). -/
+  insn repr (val : Value) (^err (exc : Value)) : Value
+  /-- `str(val)`, without looking up the builtin: an f-string's `!s`. -/
+  insn toStr as "str" (val : Value) (^err (exc : Value)) : Value
+  /-- `ascii(val)`, without looking up the builtin: an f-string's `!a`. -/
+  insn ascii (val : Value) (^err (exc : Value)) : Value
+  /-- `format(val, spec)`, without looking up the builtin: an f-string field after its
+  conversion (`FORMAT_VALUE`).  Raises what `__format__` raises, or `TypeError` if it does
+  not return a `str`. -/
+  insn fmtValue (val spec : Value) (^err (exc : Value)) : Value
+  /-- The concatenation of `parts`, each a `str`: CPython's `BUILD_STRING`.  Total: joining
+  `str`s runs no user code. -/
+  insn strConcat (*parts : Value) : Value
   /-- A stand-in for a construct the translator does not handle. -/
   insn unsupported (name : Value) : Value
   end py

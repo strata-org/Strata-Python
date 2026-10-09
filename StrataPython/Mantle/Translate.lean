@@ -43,7 +43,8 @@ with a diagnostic is a failure.
 * Expressions: `int`, `float`, `str`, `bytes`, `bool`, `None` and `...` literals, names,
   `+ - * / // % **`, unary `-`, `not`, comparisons (chained too), `and`, `or`,
   `x if c else y`, tuple, list, set and dict displays with `*x` and `**d`, calls with
-  keyword, `*` and `**` arguments, attributes (mangled in a class), subscripts and slices.
+  keyword, `*` and `**` arguments, attributes (mangled in a class), subscripts, slices, and
+  f-strings.
 * Conditions: an `if` or `while` test, and the test of `x if c else y`, lower to branches by
   `transCond`, so each operand's truth is tested at most once.
 
@@ -549,7 +550,8 @@ partial def transExpr (e : expr SourceRange) : TransM ValId := withRange e.ann d
   | .Await sr .. => unsupportedValue "await" sr
   | .Yield sr .. => unsupportedValue "yield" sr
   | .YieldFrom sr .. => unsupportedValue "yield from" sr
-  | .FormattedValue sr .. | .JoinedStr sr .. => unsupportedValue "f-string" sr
+  | .JoinedStr _ vs => fString vs.val
+  | .FormattedValue _ v conv spec => formatted v conv spec.val
   | .Interpolation sr .. | .TemplateStr sr .. => unsupportedValue "t-string" sr
   | .Attribute _ v ⟨_, a⟩ _ => do build (getAttr (← transExpr v) (← mangled a))
   | .Subscript _ v k _ => do
@@ -594,6 +596,30 @@ partial def chainLinks (a : ValId) (links : Array (cmpop SourceRange × expr Sou
       build (startBlock next)
     lhs := b
   return last
+
+/-- `f"a{x}b"`: `strConcat` of the parts, as CPython's `BUILD_STRING`.  Every part is a
+`str`: a literal, or a formatted field.  A lone part is itself, as in CPython. -/
+partial def fString (vs : Array (expr SourceRange)) : TransM ValId := do
+  if h : vs.size = 1 then transExpr vs[0]
+  else build (emitTotal "fstr" Py.strConcat #v[] (← vs.mapM transExpr))
+
+/-- An f-string field `{v!c:spec}`, as CPython's `FORMAT_VALUE`: `v`, then `spec` (`""` if
+absent), then the conversion `!s`, `!r` or `!a`, then `fmtValue`. -/
+partial def formatted (v : expr SourceRange) (conv : StrataPython.int SourceRange)
+    (spec : Option (expr SourceRange)) : TransM ValId := do
+  let x ← transExpr v
+  let sp ← match spec with
+    | some s => transExpr s
+    | none => build (strLit "")
+  let x ← match conv with
+    | .IntNeg .. => pure x
+    | .IntPos sr ⟨_, c⟩ =>
+      match Char.ofNat c with
+      | 's' => build (emitFailing "str" Py.toStr #v[] #[x])
+      | 'r' => build (emitFailing "repr" Py.repr #v[] #[x])
+      | 'a' => build (emitFailing "ascii" Py.ascii #v[] #[x])
+      | _ => unsupportedValue "f-string conversion" sr  -- the parser gives no other
+  build (emitFailing "fmt" Py.fmtValue #v[] #[x, sp])
 
 /-- The bounds of a slice, in order, `None` for an absent one. -/
 partial def bounds (bs : Array (Option (expr SourceRange))) : TransM (Array ValId) :=

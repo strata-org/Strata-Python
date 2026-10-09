@@ -137,7 +137,7 @@ are in `StrataPython/Mantle/Build.lean`.
 - **Total operations** have no successors. These are the literals, `undef`, `isDefined`,
   `is`/`isNot`, `mkTuple`/`mkList`/`mkKwargs`, `listToTuple`, `mkSlice`, `tupleLen`,
   `dictLen`, `dictGet`, `dictFirstKey`, `dictDiscard`, `listAppend`, `isStopIteration`,
-  `globalCell`, `mkClosure` and `unsupported`. `mkSet` and `mkDict` raise, because hashing a key runs `__hash__` and
+  `strConcat`, `globalCell`, `mkClosure` and `unsupported`. `mkSet` and `mkDict` raise, because hashing a key runs `__hash__` and
   `__eq__`.
 - **Cells.** A cell is a `base.Ref(py.Value)`, a mutable location. Every Python local is a
   cell: `refNew` creates it, `refSet` writes it and `refGet` reads it. A cell that has not
@@ -546,7 +546,7 @@ false, as in CPython.
 | `(a, *xs, b)` | the list display, then `listToTuple` |
 | `{k: v, **d}` | as CPython: `py.mkDict k v …` for each run of pairs (keys and values interleaved, each key before its value), and `py.dictUpdate` for each `**d`, last one winning. The first run is the dict; a later run is built, then added by `dictUpdate` |
 | a set of more than 30 elements, a long dict run | as CPython (`STACK_USE_GUIDELINE`): a set starts empty and adds each element as it is evaluated (`setAdd`). A dict run is cut into chunks of 17 pairs; a chunk of more than 15 pairs starts empty and adds each pair (`dictSet`), and each later chunk is added by `dictUpdate`. So an unhashable key raises before the next element is evaluated |
-| `f"a{x}b"` | `py.strConcat` over `strLit` parts and `py.fmtValue x`. `{x!r}` applies builtins `repr` first (`str`, `ascii` likewise). `{x:spec}` calls builtins `format(x, spec)`, where `spec` is itself a joined string |
+| `f"a{x}b"` | as CPython's `FORMAT_VALUE` and `BUILD_STRING`: a total `py.strConcat` over `strLit` parts and fields, or the lone part itself. A field `{x!r:spec}` evaluates `x`, then `spec` (itself an f-string, `""` if absent), then applies `py.repr` (`py.str`, `py.ascii`), then `py.fmtValue x spec`. None of these looks up a builtin: CPython ignores `builtins.repr = …` here |
 | `(x := e)` | evaluate `e`, `refSet` the target's cell, and use the value `e`. In a comprehension, the target is the enclosing function's local, a `cell` only if a nested scope captures it (§6.8) |
 | `lambda` | §5.3, as an expression |
 | comprehensions | §6.8 |
@@ -1002,7 +1002,8 @@ a diagnostic.
 | calls, with keywords, `*` and `**` | §6.3 | specified; implemented |
 | displays and unpacking in them | §6.3 | specified; implemented |
 | attribute, subscript, slice (inside a tuple too) | §6.3 | specified; implemented |
-| f-strings, walrus | §6.3 | specified |
+| f-strings | §6.3 | specified; implemented |
+| walrus | §6.3 | specified |
 | complex literal, t-string | §6.3 | unsupported |
 | `@ << >> & \| ^`, unary `+`, `~` | §6.3 | unsupported |
 | `while` / `else`, `break`, `continue` | §6.4–§6.5 | specified; implemented |
