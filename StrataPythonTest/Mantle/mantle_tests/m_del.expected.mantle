@@ -1,0 +1,224 @@
+module m_del {
+  func @m_del.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "m_del"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "m_del"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Int = const int 1
+      %7 : py.Value = py.intLit %6
+      %8 : base.String = const str "m_del"
+      %9 : base.String = const str "x"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : base.String = const str "m_del"
+      %13 : base.String = const str "x"
+      %14 : base.Ref(py.Value) = py.globalCell %12 %13
+      %15 : py.Value = base.refGet[py.Value] %14
+      %16 : base.String = const str "NameError"
+      %17 : base.String = const str "name 'x' is not defined"
+      %18 : py.Value = py.requireDefined %15 %16 %17 ^propagate.0()
+      %19 : base.String = const str "x"
+      %20 : py.Value = py.undef %19
+      %21 : base.String = const str "m_del"
+      %22 : base.String = const str "x"
+      %23 : base.Ref(py.Value) = py.globalCell %21 %22
+      %24 : base.Unit = base.refSet[py.Value] %23 %20
+      %25 : base.String = const str "m_del"
+      %26 : base.String = const str "o"
+      %27 : base.Ref(py.Value) = py.globalCell %25 %26
+      %28 : py.Value = base.refGet[py.Value] %27
+      %29 : base.String = const str "NameError"
+      %30 : base.String = const str "name 'o' is not defined"
+      %31 : py.Value = py.requireDefined %28 %29 %30 ^propagate.0()
+      %32 : base.String = const str "a"
+      %33 : base.Unit = py.delAttr %31 %32 ^propagate.0()
+      %34 : base.String = const str "m_del"
+      %35 : base.String = const str "o"
+      %36 : base.Ref(py.Value) = py.globalCell %34 %35
+      %37 : py.Value = base.refGet[py.Value] %36
+      %38 : base.String = const str "NameError"
+      %39 : base.String = const str "name 'o' is not defined"
+      %40 : py.Value = py.requireDefined %37 %38 %39 ^propagate.0()
+      %41 : base.String = const str "m_del"
+      %42 : base.String = const str "k"
+      %43 : base.Ref(py.Value) = py.globalCell %41 %42
+      %44 : py.Value = base.refGet[py.Value] %43
+      %45 : base.String = const str "NameError"
+      %46 : base.String = const str "name 'k' is not defined"
+      %47 : py.Value = py.requireDefined %44 %45 %46 ^propagate.0()
+      %48 : base.Unit = py.delItem %40 %47 ^propagate.0()
+      %49 : base.String = const str "m_del"
+      %50 : base.String = const str "o"
+      %51 : base.Ref(py.Value) = py.globalCell %49 %50
+      %52 : py.Value = base.refGet[py.Value] %51
+      %53 : base.String = const str "NameError"
+      %54 : base.String = const str "name 'o' is not defined"
+      %55 : py.Value = py.requireDefined %52 %53 %54 ^propagate.0()
+      %56 : base.String = const str "m_del"
+      %57 : base.String = const str "a"
+      %58 : base.Ref(py.Value) = py.globalCell %56 %57
+      %59 : py.Value = base.refGet[py.Value] %58
+      %60 : base.String = const str "NameError"
+      %61 : base.String = const str "name 'a' is not defined"
+      %62 : py.Value = py.requireDefined %59 %60 %61 ^propagate.0()
+      %63 : base.String = const str "m_del"
+      %64 : base.String = const str "b"
+      %65 : base.Ref(py.Value) = py.globalCell %63 %64
+      %66 : py.Value = base.refGet[py.Value] %65
+      %67 : base.String = const str "NameError"
+      %68 : base.String = const str "name 'b' is not defined"
+      %69 : py.Value = py.requireDefined %66 %67 %68 ^propagate.0()
+      %70 : py.Value = py.noneLit
+      %71 : py.Value = py.mkSlice %62 %69 %70
+      %72 : base.Unit = py.delItem %55 %71 ^propagate.0()
+      %73 : base.String = const str "m_del"
+      %74 : base.String = const str "p"
+      %75 : base.Ref(py.Value) = py.globalCell %73 %74
+      %76 : py.Value = base.refGet[py.Value] %75
+      %77 : base.String = const str "NameError"
+      %78 : base.String = const str "name 'p' is not defined"
+      %79 : py.Value = py.requireDefined %76 %77 %78 ^propagate.0()
+      %80 : base.String = const str "p"
+      %81 : py.Value = py.undef %80
+      %82 : base.String = const str "m_del"
+      %83 : base.String = const str "p"
+      %84 : base.Ref(py.Value) = py.globalCell %82 %83
+      %85 : base.Unit = base.refSet[py.Value] %84 %81
+      %86 : base.String = const str "m_del"
+      %87 : base.String = const str "q"
+      %88 : base.Ref(py.Value) = py.globalCell %86 %87
+      %89 : py.Value = base.refGet[py.Value] %88
+      %90 : base.String = const str "NameError"
+      %91 : base.String = const str "name 'q' is not defined"
+      %92 : py.Value = py.requireDefined %89 %90 %91 ^propagate.0()
+      %93 : base.String = const str "q"
+      %94 : py.Value = py.undef %93
+      %95 : base.String = const str "m_del"
+      %96 : base.String = const str "q"
+      %97 : base.Ref(py.Value) = py.globalCell %95 %96
+      %98 : base.Unit = base.refSet[py.Value] %97 %94
+      %99 : base.String = const str "m_del"
+      %100 : base.String = const str "r"
+      %101 : base.Ref(py.Value) = py.globalCell %99 %100
+      %102 : py.Value = base.refGet[py.Value] %101
+      %103 : base.String = const str "NameError"
+      %104 : base.String = const str "name 'r' is not defined"
+      %105 : py.Value = py.requireDefined %102 %103 %104 ^propagate.0()
+      %106 : base.String = const str "r"
+      %107 : py.Value = py.undef %106
+      %108 : base.String = const str "m_del"
+      %109 : base.String = const str "r"
+      %110 : base.Ref(py.Value) = py.globalCell %108 %109
+      %111 : base.Unit = base.refSet[py.Value] %110 %107
+      %112 : base.Int = const int 1
+      %113 : py.Value = py.intLit %112
+      %114 : base.String = const str "m_del"
+      %115 : base.String = const str "len"
+      %116 : base.Ref(py.Value) = py.globalCell %114 %115
+      %117 : base.Unit = base.refSet[py.Value] %116 %113
+      %118 : base.String = const str "m_del"
+      %119 : base.String = const str "len"
+      %120 : base.Ref(py.Value) = py.globalCell %118 %119
+      %121 : py.Value = base.refGet[py.Value] %120
+      %122 : base.String = const str "NameError"
+      %123 : base.String = const str "name 'len' is not defined"
+      %124 : py.Value = py.requireDefined %121 %122 %123 ^propagate.0()
+      %125 : base.String = const str "len"
+      %126 : py.Value = py.undef %125
+      %127 : base.String = const str "m_del"
+      %128 : base.String = const str "len"
+      %129 : base.Ref(py.Value) = py.globalCell %127 %128
+      %130 : base.Unit = base.refSet[py.Value] %129 %126
+      %131 : base.Code = const @m_del.f
+      %132 : py.Value = py.mkClosure %131
+      %133 : base.String = const str "m_del"
+      %134 : base.String = const str "f"
+      %135 : base.Ref(py.Value) = py.globalCell %133 %134
+      %136 : base.Unit = base.refSet[py.Value] %135 %132
+      %137 : base.Code = const @m_del.g
+      %138 : py.Value = py.mkClosure %137
+      %139 : base.String = const str "m_del"
+      %140 : base.String = const str "g"
+      %141 : base.Ref(py.Value) = py.globalCell %139 %140
+      %142 : base.Unit = base.refSet[py.Value] %141 %138
+      %143 : py.Value = py.noneLit
+      %144 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %143
+      ret %144
+    propagate.0(%145 : py.Value):
+      %146 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %145
+      ret %146
+  }
+  func @m_del.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "y"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : py.Value = py.tupleLen %0
+      %6 : base.String = const str "kwargs"
+      %7 : py.Value = py.undef %6
+      %8 : py.Value = py.dictFirstKey %1 %7
+      %9 : base.String = const str "TypeError"
+      %10 : base.String = const str "f() got an unexpected keyword argument {}"
+      %11 : base.Unit = py.requireUndefined %8 %9 %10 ^propagate.0()
+      %12 : base.Int = const int 0
+      %13 : base.String = const str "TypeError"
+      %14 : base.String = const str "f() takes 0 positional arguments but {} {was} given"
+      %15 : base.Unit = py.requireAtMost %5 %12 %13 %14 ^propagate.0()
+      %16 : base.Int = const int 1
+      %17 : py.Value = py.intLit %16
+      %18 : base.Unit = base.refSet[py.Value] %4 %17
+      %19 : py.Value = base.refGet[py.Value] %4
+      %20 : base.String = const str "UnboundLocalError"
+      %21 : base.String = const str "cannot access local variable 'y' where it is not associated with a value"
+      %22 : py.Value = py.requireDefined %19 %20 %21 ^propagate.0()
+      %23 : base.String = const str "y"
+      %24 : py.Value = py.undef %23
+      %25 : base.Unit = base.refSet[py.Value] %4 %24
+      %26 : py.Value = base.refGet[py.Value] %4
+      %27 : base.String = const str "UnboundLocalError"
+      %28 : base.String = const str "cannot access local variable 'y' where it is not associated with a value"
+      %29 : py.Value = py.requireDefined %26 %27 %28 ^propagate.0()
+      %30 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %29
+      ret %30
+    propagate.0(%31 : py.Value):
+      %32 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %31
+      ret %32
+  }
+  func @m_del.g(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : py.Value = py.tupleLen %0
+      %3 : base.String = const str "kwargs"
+      %4 : py.Value = py.undef %3
+      %5 : py.Value = py.dictFirstKey %1 %4
+      %6 : base.String = const str "TypeError"
+      %7 : base.String = const str "g() got an unexpected keyword argument {}"
+      %8 : base.Unit = py.requireUndefined %5 %6 %7 ^propagate.0()
+      %9 : base.Int = const int 0
+      %10 : base.String = const str "TypeError"
+      %11 : base.String = const str "g() takes 0 positional arguments but {} {was} given"
+      %12 : base.Unit = py.requireAtMost %2 %9 %10 %11 ^propagate.0()
+      %13 : base.String = const str "m_del"
+      %14 : base.String = const str "z"
+      %15 : base.Ref(py.Value) = py.globalCell %13 %14
+      %16 : py.Value = base.refGet[py.Value] %15
+      %17 : base.String = const str "NameError"
+      %18 : base.String = const str "name 'z' is not defined"
+      %19 : py.Value = py.requireDefined %16 %17 %18 ^propagate.0()
+      %20 : base.String = const str "z"
+      %21 : py.Value = py.undef %20
+      %22 : base.String = const str "m_del"
+      %23 : base.String = const str "z"
+      %24 : base.Ref(py.Value) = py.globalCell %22 %23
+      %25 : base.Unit = base.refSet[py.Value] %24 %21
+      %26 : py.Value = py.noneLit
+      %27 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %26
+      ret %27
+    propagate.0(%28 : py.Value):
+      %29 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %28
+      ret %29
+  }
+}
+

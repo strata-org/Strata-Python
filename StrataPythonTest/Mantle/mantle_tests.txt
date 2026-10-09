@@ -79,6 +79,7 @@ m_builtins | yes |
 m_calls | yes |
 m_complex | yes | complex literal
 m_cond | yes |
+m_del | yes |
 m_displays | yes |
 m_expressions | yes |
 m_for | yes |
@@ -130,7 +131,7 @@ p08_import_rebound | yes |
 p09_read_before_assign | yes |
 p10_conditional_local | yes |
 p11_shadow_under_control | yes |
-p12_del | no |
+p12_del | yes |
 p13_except_as | no |
 p14_class_body | no |
 p15_global | yes |

@@ -41,7 +41,7 @@ with a diagnostic is a failure.
 * Statements: expression statements, `pass`, assignment, annotated assignment and augmented
   assignment to names, attributes and subscripts, assignment to tuple and list targets (with a
   starred element too),
-  `if`/`elif`/`else`, `while`/`else`, `for`/`else`, `break`, `continue`, `return`, `global`,
+  `del`, `if`/`elif`/`else`, `while`/`else`, `for`/`else`, `break`, `continue`, `return`, `global`,
   `import a.b [as c]` and `from a.b import x [as y]`.
 * Expressions: `int`, `float`, `str`, `bytes`, `bool`, `None` and `...` literals, names,
   every binary and unary operator, comparisons (chained too), `and`, `or`,
@@ -170,7 +170,6 @@ structure FuncJob where
   scope : ScopeId
   /-- `table.scopes[scope]`. -/
   cur : Scope
-  qualname : String
   args : arguments SourceRange
   body : Array (stmt SourceRange)
   range : SourceRange
@@ -189,8 +188,6 @@ structure Ctx where
   scope : ScopeId
   /-- `table.scopes[scope]`, the scope being translated. -/
   cur : Scope
-  /-- The function's `__qualname__`, for the prologue's error messages. -/
-  qualname : String
 
 /-- What translation accumulates.  The first three fields are module-wide; `exits` and
 `targeted` belong to the function being emitted. -/
@@ -332,14 +329,17 @@ def readGlobalName (name : String) : TransM ValId := do
   else if builtin then builtinRef name
   else build (readGlobal ctx.module name)
 
+/-- Read the local `name`'s cell `c`, raising `UnboundLocalError` if it is unassigned. -/
+def readLocal (c : ValId) (name : String) : TransM ValId := do
+  let v ← build (readCell c name)
+  requireDefined v name "UnboundLocalError"
+    s!"cannot access local variable '{name}' where it is not associated with a value"
+
 /-- Read the name `name` at `range`. -/
 def readName (name : String) (range : SourceRange) : TransM ValId := do
   let name ← mangled name
   match ← place name with
-  | .cell c =>
-    let v ← build (readCell c name)
-    requireDefined v name "UnboundLocalError"
-      s!"cannot access local variable '{name}' where it is not associated with a value"
+  | .cell c => readLocal c name
   | .global => readGlobalName name
   | .free => unsupportedValue "closure variable" range
   | .unresolved => unsupportedValue "unresolved local" range
@@ -351,6 +351,22 @@ def writeName (name : String) (v : ValId) (range : SourceRange) : TransM Unit :=
   | .cell c => discard <| build (writeCell c v)
   | .global => discard <| build (writeGlobal (← read).module name v)
   | .free => reject "nonlocal assignment" range
+  | .unresolved => reject "unresolved local" range
+
+/-- `del name` at `range`: raise as a read does, but without the builtins fallback, then
+unassign the name. -/
+def deleteName (name : String) (range : SourceRange) : TransM Unit := do
+  let name ← mangled name
+  let undef := do build (emitTotal name Py.undef #v[] #[← build (emitConst "n" (.str name))])
+  match ← place name with
+  | .cell c =>
+    discard <| readLocal c name
+    discard <| build (writeCell c (← undef))
+  | .global =>
+    let m := (← read).module
+    discard <| build (readGlobal m name)
+    discard <| build (writeGlobal m name (← undef))
+  | .free => reject "nonlocal del" range
   | .unresolved => reject "unresolved local" range
 
 /-! ## Operators -/
@@ -439,7 +455,6 @@ def literal (c : constant SourceRange) (range : SourceRange) : TransM ValId :=
 /-- The name of a statement `transStmt` rejects. -/
 def stmtName : stmt SourceRange → String
   | .ClassDef .. => "class"
-  | .Delete .. => "del"
   | .TypeAlias .. => "type alias"
   | .AsyncFor .. => "async for"
   | .With .. => "with"
@@ -897,6 +912,26 @@ def badTarget (t : expr SourceRange) : TransM Unit := do
   if (← read).table.syntaxErrors.any (·.range == t.ann) then return
   internalError "a target CPython rejects" t.ann
 
+/-- Delete the target `l`. -/
+def deleteLhs : Lhs → TransM Unit
+  | .name n r => deleteName n r
+  | .attr o a => discard <| build (delAttr o a)
+  | .item o k => discard <| build (emitActing "del" Py.delItem #v[] #[o, k])
+  | .slice o bs => do
+    let k ← build (emitTotal "slice" Py.mkSlice #v[] bs)
+    discard <| build (emitActing "del" Py.delItem #v[] #[o, k])
+
+/-- The deletion of the target `t`, or the part of `t` the translator does not lower.  A
+tuple or list deletes its elements left to right. -/
+partial def deleter (t : expr SourceRange) : Except (expr SourceRange) (TransM Unit) :=
+  match t with
+  | .Tuple _ ts _ | .List _ ts _ => do
+    let dels ← ts.val.mapM deleter
+    return dels.forM id
+  | t => match target? t with
+    | some eval => return do deleteLhs (← eval)
+    | none => throw t
+
 /-! ## Functions
 
 A `def` is bound where it runs, and its function is emitted after the current one, from a
@@ -943,7 +978,7 @@ def isConstantDefault : expr SourceRange → Bool
 run in CPython's order: a duplicate value, an unexpected keyword, too many positional
 arguments, a missing argument. -/
 def prologue (ps : Array ParamWithDefault) (args kwargs : ValId) : TransM Unit := do
-  let fn := (← read).qualname
+  let fn := (← read).cur.qualname
   let pos := ps.filter fun p => p.kind == .posOnly || p.kind == .positional
   let varPos := ps.find? (·.kind == .varPositional)
   let kwOnly := ps.filter (·.kind == .kwOnly)
@@ -1055,7 +1090,7 @@ def defStmt (sr : SourceRange) (name : String) (args : arguments SourceRange)
       | none => pure none
   let fname ← allocName name
   let job : FuncJob :=
-    { name := fname, scope, cur, qualname := cur.qualname, args, body, range := sr, stub }
+    { name := fname, scope, cur, args, body, range := sr, stub }
   modify fun s => { s with pending := s.pending.push job }
   writeName name (← build (funcValue fname)) sr
 
@@ -1134,6 +1169,10 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
     else aliases.forM importAlias
   | .FunctionDef sr ⟨_, n⟩ args body decs _ _ tps =>
     defStmt sr n args body.val decs.val (!tps.val.isEmpty) false
+  | .Delete _ ⟨_, targets⟩ =>
+    match targets.mapM deleter with
+    | .error t => badTarget t
+    | .ok dels => dels.forM id
   | .AsyncFunctionDef sr ⟨_, n⟩ args body decs _ _ tps =>
     defStmt sr n args body.val decs.val (!tps.val.isEmpty) true
   | other => reject (stmtName other) other.ann
@@ -1236,7 +1275,7 @@ def builtFunc (range : SourceRange) (built : Build.Built (Func Py.env SourceRang
 
 /-- Emit the function `job` queues. -/
 def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) : Func Py.env SourceRange × TState :=
-  let ctx := { ctx with scope := job.scope, cur := job.cur, qualname := job.qualname }
+  let ctx := { ctx with scope := job.scope, cur := job.cur }
   let argTypes := #[("args", Py.Value.ty), ("kwargs", Py.Value.ty)]
   builtFunc job.range <| buildFuncTypedWith job.name argTypes job.range fun ps =>
     runBody ctx st job.range do
@@ -1272,7 +1311,7 @@ def translate (moduleName : String) (stmts : Array (stmt SourceRange)) : Result 
                diagnostics := #[{ kind := .internal, message := "no module scope", range }] }
   let ctx : Ctx :=
     { table, module := moduleName, moduleName := mname, globals := moduleGlobals table
-      scope := 0, cur, qualname := "<module>" }
+      scope := 0, cur }
   let bodyName := mname.str "<module>"
   let st : TState := { funcNames := ({} : Std.HashSet Name).insert bodyName }
   let (body, st) := builtFunc range <| buildFuncTypedWith bodyName #[] range fun _ =>

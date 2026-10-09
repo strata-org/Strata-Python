@@ -235,8 +235,8 @@ emission state of the Python builder. `Ctx` is fixed while one function is trans
 |---|---|---|---|
 | enclosing handler: the block every raising operation names as `err` | `Frame.handler : BlockValue` | yes | `buildFuncTypedWith` (`propagate.0`), `withHandler` and `withHandlerTo` (`try`, `with`, `for`) |
 | locals: name ↦ cell | `Frame.locals` | yes | `declareLocal` |
-| scope: the `PyScope.Table` and the current `ScopeId`, giving each name's kind (`local`, `cell`, `free`, `globalExplicit`, `globalImplicit`). Imports are `Table.imports`, a separate list of fully qualified targets | `Ctx.table`, `Ctx.scope` | yes | `PyScope.analyze` (§5.1), `transFunc` |
-| the Python module name, the Mantle module name, the names some scope binds as globals, the function's `__qualname__` | `Ctx.module`, `Ctx.moduleName`, `Ctx.globals`, `Ctx.qualname` | yes | `translate`, `transFunc` |
+| scope: the `PyScope.Table`, the current `ScopeId` and its `Scope` (with the `__qualname__`), giving each name's kind (`local`, `cell`, `free`, `globalExplicit`, `globalImplicit`). Imports are `Table.imports`, a separate list of fully qualified targets | `Ctx.table`, `Ctx.scope`, `Ctx.cur` | yes | `PyScope.analyze` (§5.1), `transFunc` |
+| the Python module name, the Mantle module name, the names some scope binds as globals | `Ctx.module`, `Ctx.moduleName`, `Ctx.globals` | yes | `translate` |
 | diagnostics | `TState.diagnostics` | yes | `reject` |
 | functions to emit after the current one, and the names taken | `TState.pending : Array FuncJob`, `TState.funcNames` | yes | `defStmt`, `allocName` |
 | exits stack (below) | `TState.exits : Array Exit` | yes, `loop` only | `withExit`: loops; later `try`/`finally`, `with`, `except … as` |
@@ -478,8 +478,9 @@ jump to the function's exit.
 | target `a, *b` | `py.unpackEx v before after`, then as above. The starred target receives a list | the compiler rejects a starred target outside a tuple or list, and two in one (§5.1) |
 | `x op= e` | read `x` once (evaluating `o` and `k` once for `o.a` and `o[k]`), apply the in-place operation (`py.iAdd` … `py.iBitXor`), write back | in place: `xs += ys` mutates `xs` |
 | `x: T = e` | as `x = e`. The annotation is not evaluated | `x: T` with no value only makes `x` local. `o.a: T` and `o[k]: T` evaluate `o` and `k`, as CPython does |
-| `del x` | `requireDefined` (raises `NameError` or `UnboundLocalError`), then `refSet` of `undef "x"` | |
-| `del o.a`, `del o[k]` | **rejected** until `py.delAttr` and `py.delItem` exist (§8) | |
+| `del x` | `requireDefined` (raises `NameError` or `UnboundLocalError`), then `refSet` of `undef "x"` | a global is not looked up in `builtins` |
+| `del o.a`, `del o[k]`, `del o[i:j:s]` | evaluate `o` and `k`, then `py.delAttr o "a"` or `py.delItem o k`, with `py.mkSlice` for a slice | |
+| `del a, (b, c)` | delete each target left to right, element by element | no unpacking |
 | `assert c` | as `assert c, m`, with `AssertionError` called on no arguments | |
 | `assert c, m` | `c` as a condition (§6.2). The true target continues; the false target evaluates `m`, then `py.call`s the `AssertionError` class on it, then raises (§7.1) | `c` is tested once; `m` is evaluated only when the assertion fails; `AssertionError` is the class itself, as CPython's `LOAD_ASSERTION_ERROR`, even if `builtins.AssertionError` is rebound |
 | `global x`, `nonlocal x` | nothing: the scope pass makes `x` `globalExplicit` or `free` | |
@@ -877,7 +878,6 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 | `forEach` | `insn forEach (iterable : Value) (&body (item : Value) : Unit) (^err (exc : Value)) : Unit`, a sketch: the body's result must carry an exception (§6.8) | comprehensions |
 | `excMatch` | `insn excMatch (exc type : Value) (^err (e : Value)) : Bool` | `except T` (the alternative is `py.call` builtins `isinstance`, then `truthy`) |
 | `toException` | `insn toException (val : Value) (^err (e : Value)) : Value` | `raise E` |
-| `delAttr`, `delItem` | as `setAttr`/`setItem` without `val` | `del o.a`, `del o[k]` |
 | `mkGenerator` | `insn mkGenerator (code : Code) (cells : Ref Value…) : Value` | generators (stage 1, opaque) |
 
 **Declarations to fix:**
@@ -991,8 +991,8 @@ a diagnostic.
 | tuple and starred targets | §6.1 | specified; implemented |
 | augmented assignment | §6.1 | specified; implemented |
 | annotated assignment | §6.1 | specified; implemented |
-| `del x`, `assert` | §6.1 | specified |
-| `del o.a`, `del o[k]` | §6.1 | unsupported |
+| `del` | §6.1 | specified; implemented |
+| `assert` | §6.1 | specified |
 | `nonlocal` | §6.6 | specified |
 | `if` / `elif` / `else` | §6.2 | specified; implemented |
 | literals, `...`, every binary and unary operator, comparisons (chained too), `and`, `or`, `x if c else y` | §6.3 | specified; implemented |
