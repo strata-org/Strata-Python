@@ -17,28 +17,40 @@ open Lambda.LTy.Syntax
 
 public section
 
+/-- Source location for intermediate sub-expressions synthesized during Python-to-Core
+    translation (e.g. operator wrappers, curried applications) that do not correspond
+    to a single Python AST node. -/
+private abbrev pySynthLoc : ExprSourceLoc := ExprSourceLoc.synthesized "python-to-core"
+
+/-- Build an `ExprSourceLoc` that carries the actual Python source position.
+    Some call sites translate with a default context that has no file path; their
+    expressions get `pySynthLoc`, so a location without a file can never be
+    preferred over a real one when locations are merged. -/
+private def pyLoc (filePath : String) (sr : SourceRange) : ExprSourceLoc :=
+  if filePath.isEmpty then pySynthLoc else ExprSourceLoc.ofUriRange (.file filePath) sr
+
 -- Some hard-coded things we'll need to fix later:
 
 def clientType : Core.Expression.Ty := .forAll [] (.tcons "Client" [])
-def dummyClient : Core.Expression.Expr := .fvar () "DUMMY_CLIENT" none
+def dummyClient : Core.Expression.Expr := .fvar pySynthLoc "DUMMY_CLIENT" none
 
 def dictStrAnyType : Core.Expression.Ty := .forAll [] (.tcons "DictStrAny" [])
-def dummyDictStrAny : Core.Expression.Expr := .fvar () "DUMMY_DICT_STR_ANY" none
+def dummyDictStrAny : Core.Expression.Expr := .fvar pySynthLoc "DUMMY_DICT_STR_ANY" none
 
 def strType : Core.Expression.Ty := .forAll [] (.tcons "string" [])
-def dummyStr : Core.Expression.Expr := .fvar () "DUMMY_STR" none
+def dummyStr : Core.Expression.Expr := .fvar pySynthLoc "DUMMY_STR" none
 
 def listStrType : Core.Expression.Ty := .forAll [] (.tcons "ListStr" [])
-def dummyListStr : Core.Expression.Expr := .fvar () "DUMMY_LIST_STR" none
+def dummyListStr : Core.Expression.Expr := .fvar pySynthLoc "DUMMY_LIST_STR" none
 
 def datetimeType : Core.Expression.Ty := .forAll [] (.tcons "Datetime" [])
-def dummyDatetime : Core.Expression.Expr := .fvar () "DUMMY_DATETIME" none
+def dummyDatetime : Core.Expression.Expr := .fvar pySynthLoc "DUMMY_DATETIME" none
 
 def dateType : Core.Expression.Ty := .forAll [] (.tcons "Date" [])
-def dummyDate : Core.Expression.Expr := .fvar () "DUMMY_DATE" none
+def dummyDate : Core.Expression.Expr := .fvar pySynthLoc "DUMMY_DATE" none
 
 def timedeltaType : Core.Expression.Ty := .forAll [] (.tcons "int" [])
-def dummyTimedelta : Core.Expression.Expr := .fvar () "DUMMY_Timedelta" none
+def dummyTimedelta : Core.Expression.Expr := .fvar pySynthLoc "DUMMY_Timedelta" none
 
 -------------------------------------------------------------------------------
 
@@ -100,114 +112,130 @@ def sourceRangeToMetaData (filePath : String) (sr : SourceRange) : Imperative.Me
 -------------------------------------------------------------------------------
 
 def strToCoreExpr (s: String) : Core.Expression.Expr :=
-  .strConst () s
+  .strConst pySynthLoc s
 
 def intToCoreExpr (i: Int) : Core.Expression.Expr :=
-  .intConst () i
+  .intConst pySynthLoc i
 
 def PyIntToInt (i : StrataPython.int SourceRange) : Int :=
   match i with
   | .IntPos _ n => n.val
   | .IntNeg _ n => -n.val
 
-def PyConstToCore (c: constant SourceRange) : Core.Expression.Expr :=
+def PyConstToCore (loc : ExprSourceLoc) (c: constant SourceRange) : Core.Expression.Expr :=
   match c with
-  | .ConString _ s => .strConst () s.val
-  | .ConPos _ i => .intConst () i.val
-  | .ConNeg _ i => .intConst () (-i.val)
-  | .ConBytes _ _b => .const () (.strConst "") -- TODO: fix
-  | .ConFloat _ f => .strConst () (f.val)
+  | .ConString _ s => .strConst loc s.val
+  | .ConPos _ i => .intConst loc i.val
+  | .ConNeg _ i => .intConst loc (-i.val)
+  | .ConBytes _ _b => .const loc (.strConst "") -- TODO: fix
+  | .ConFloat _ f => .strConst loc (f.val)
   | _ => panic! s!"Unhandled Constant: {repr c}"
 
 def PyAliasToCoreExpr (a : alias SourceRange) : Core.Expression.Expr :=
   match a with
   | .mk_alias _ n as_n =>
   assert! as_n.val.isNone
-  .strConst () n.val
+  .strConst pySynthLoc n.val
 
-def handleAdd (translation_ctx: TranslationContext) (lhs rhs: Core.Expression.Expr) : Core.Expression.Expr :=
+def handleAdd (loc : ExprSourceLoc) (translation_ctx: TranslationContext) (lhs rhs:
+    Core.Expression.Expr) : Core.Expression.Expr :=
   match lhs, rhs with
-  | .intConst () l, .intConst () r => .intConst () (l + r)
-  | .fvar () l _, .fvar () r _ =>
+  | .intConst _ l, .intConst _ r => .intConst loc (l + r)
+  | .fvar _ l _, .fvar _ r _ =>
     let l_ty := translation_ctx.variableTypes.find? (λ p => p.fst == l.name)
     let r_ty := translation_ctx.variableTypes.find? (λ p => p.fst == r.name)
     match l_ty, r_ty with
     | some (_, .tcons "int" []), some (_, .tcons "int" []) =>
-      .app () (.app () (Core.coreOpExpr (.numeric ⟨.int, .Add⟩) (some mty[int → (int → int)])) lhs) rhs
+      .app loc (.app loc (Core.coreOpExpr (.numeric ⟨.int, .Add⟩) (some mty[int → (int → int)]))
+          lhs) rhs
     | some (_, .tcons "string" []), some (_, .tcons "string" []) =>
-      .app () (.app () (.op () "Str.Concat" mty[string → (string → string)]) lhs) rhs
+      .app loc (.app loc (.op loc "Str.Concat" mty[string → (string → string)]) lhs) rhs
     | _, _ => panic! s!"Unsupported types for +. Exprs: {lhs} and {rhs}"
-  | _, _ => .app () (.app () (.op () "Str.Concat" mty[string → (string → string)]) lhs) rhs
+  | _, _ => .app loc (.app loc (.op loc "Str.Concat" mty[string → (string → string)]) lhs) rhs
 
-def handleSub (translation_ctx: TranslationContext) (lhs rhs: Core.Expression.Expr) : Core.Expression.Expr :=
+def handleSub (loc : ExprSourceLoc) (translation_ctx: TranslationContext) (lhs rhs:
+    Core.Expression.Expr) : Core.Expression.Expr :=
   match lhs, rhs with
-  | .intConst () l, .intConst () r => .intConst () (l - r)
-  | .fvar () l _, .fvar () r _ =>
+  | .intConst _ l, .intConst _ r => .intConst loc (l - r)
+  | .fvar _ l _, .fvar _ r _ =>
     let l_ty := translation_ctx.variableTypes.find? (λ p => p.fst == l.name)
     let r_ty := translation_ctx.variableTypes.find? (λ p => p.fst == r.name)
     match l_ty, r_ty with
     | some (_, .tcons "int" []), some (_, .tcons "int" []) =>
-      .app () (.app () (Core.coreOpExpr (.numeric ⟨.int, .Sub⟩) (some mty[int → (int → int)])) lhs) rhs
+      .app loc (.app loc (Core.coreOpExpr (.numeric ⟨.int, .Sub⟩) (some mty[int → (int → int)]))
+          lhs) rhs
     | some (_, .tcons "Datetime" []), some (_, .tcons "int" []) =>
-      .app () (.app () (.op () "Datetime_sub" none) lhs) rhs
+      .app loc (.app loc (.op loc "Datetime_sub" none) lhs) rhs
     | some (_, .tcons "Datetime" []), some (_, .tcons "Timedelta" []) =>
-      .app () (.app () (.op () "Datetime_sub" none) lhs) rhs
+      .app loc (.app loc (.op loc "Datetime_sub" none) lhs) rhs
     | _, _ => panic! s!"Unsupported types for -. Exprs: {lhs} and {rhs}"
   | _, _ => panic! s!"Unsupported args for -. Got: {lhs} and {rhs}"
 
-def handleMult (translation_ctx: TranslationContext) (lhs rhs: Core.Expression.Expr) : Core.Expression.Expr :=
+def handleMult (loc : ExprSourceLoc) (translation_ctx: TranslationContext) (lhs rhs:
+    Core.Expression.Expr) : Core.Expression.Expr :=
   match lhs, rhs with
-  | .strConst () s, .intConst () i => .strConst () (String.join (List.replicate i.toNat s))
-  | .intConst () l, .intConst () r => .intConst () (l * r)
-  | .fvar () l _, .fvar () r _ =>
+  | .strConst _ s, .intConst _ i => .strConst loc (String.join (List.replicate i.toNat s))
+  | .intConst _ l, .intConst _ r => .intConst loc (l * r)
+  | .fvar _ l _, .fvar _ r _ =>
     let l := translation_ctx.variableTypes.find? (λ p => p.fst == l.name)
     let r := translation_ctx.variableTypes.find? (λ p => p.fst == r.name)
     match l, r with
     | .some lty, .some rty =>
       match lty.snd, rty.snd with
-      | .tcons "int" [], .tcons "int" [] => .app () (.app () (Core.coreOpExpr (.numeric ⟨.int, .Mul⟩) (some mty[int → (int → int)])) lhs) rhs
+      | .tcons "int" [], .tcons "int" [] => .app loc (.app loc (Core.coreOpExpr (.numeric
+          ⟨.int, .Mul⟩) (some mty[int → (int → int)])) lhs) rhs
       | _, _ => panic! s!"Unsupported types for fvar *. Types: {lty} and {rty}"
     | _, _ => panic! s!"Missing needed type information for *. Exprs: {lhs} and {rhs}"
   | _ , _ => panic! s!"Unsupported args for * . Got: {lhs} and {rhs}"
 
-def handleFloorDiv (_translation_ctx: TranslationContext) (lhs rhs: Core.Expression.Expr) : Core.Expression.Expr :=
-  .app () (.app () (Core.coreOpExpr (.numeric ⟨.int, .Div⟩) (some mty[int → (int → int)])) lhs) rhs
+def handleFloorDiv (loc : ExprSourceLoc) (_translation_ctx: TranslationContext) (lhs rhs:
+    Core.Expression.Expr) : Core.Expression.Expr :=
+  .app loc (.app loc (Core.coreOpExpr (.numeric ⟨.int, .Div⟩) (some mty[int → (int → int)]))
+      lhs) rhs
 
-def handleNot (arg: Core.Expression.Expr) : Core.Expression.Expr :=
+def handleNot (loc : ExprSourceLoc) (arg: Core.Expression.Expr) : Core.Expression.Expr :=
   let ty : Lambda.LMonoTy := (.tcons "ListStr" [])
   match ty with
-  | (.tcons "ListStr" []) => .eq () arg (.op () "ListStr_nil" none)
+  | (.tcons "ListStr" []) => .eq loc arg (.op loc "ListStr_nil" none)
   | _ => panic! s!"Unimplemented not op for {arg}"
 
-def handleLt (translation_ctx: TranslationContext) (lhs rhs: Core.Expression.Expr) : Core.Expression.Expr :=
+def handleLt (loc : ExprSourceLoc) (translation_ctx: TranslationContext) (lhs rhs:
+    Core.Expression.Expr) : Core.Expression.Expr :=
   match lhs, rhs with
-  | .fvar () l _, .fvar () r _ =>
+  | .fvar _ l _, .fvar _ r _ =>
     let l_ty := translation_ctx.variableTypes.find? (λ p => p.fst == l.name)
     let r_ty := translation_ctx.variableTypes.find? (λ p => p.fst == r.name)
     match l_ty, r_ty with
     | some (_, .tcons "Datetime" []), some (_, .tcons "Datetime" []) =>
-      .app () (.app () (.op () "Datetime_lt" none) lhs) rhs
-    | _, _ => .app () (.app () (Core.coreOpExpr (.numeric ⟨.int, .Lt⟩) (some mty[int → (int → bool)])) lhs) rhs
-  | _, _ => .app () (.app () (Core.coreOpExpr (.numeric ⟨.int, .Lt⟩) (some mty[int → (int → bool)])) lhs) rhs
+      .app loc (.app loc (.op loc "Datetime_lt" none) lhs) rhs
+    | _, _ => .app loc (.app loc (Core.coreOpExpr (.numeric ⟨.int, .Lt⟩) (some
+        mty[int → (int → bool)])) lhs) rhs
+  | _, _ => .app loc (.app loc (Core.coreOpExpr (.numeric ⟨.int, .Lt⟩) (some
+      mty[int → (int → bool)])) lhs) rhs
 
-def handleLtE (translation_ctx: TranslationContext) (lhs rhs: Core.Expression.Expr) : Core.Expression.Expr :=
+def handleLtE (loc : ExprSourceLoc) (translation_ctx: TranslationContext) (lhs rhs:
+    Core.Expression.Expr) : Core.Expression.Expr :=
   match lhs, rhs with
-  | .fvar () l _, .fvar () r _ =>
+  | .fvar _ l _, .fvar _ r _ =>
     let l_ty := translation_ctx.variableTypes.find? (λ p => p.fst == l.name)
     let r_ty := translation_ctx.variableTypes.find? (λ p => p.fst == r.name)
     match l_ty, r_ty with
     | some (_, .tcons "Datetime" []), some (_, .tcons "Datetime" []) =>
-      let eq := (.eq () lhs rhs)
-      let lt := (.app () (.app () (.op () "Datetime_lt" none) lhs) rhs)
-      (.app () (.app () (Core.coreOpExpr (.bool .Or)) eq) lt)
-    | _, _ => .app () (.app () (Core.coreOpExpr (.numeric ⟨.int, .Le⟩) (some mty[int → (int → bool)])) lhs) rhs
-  | _, _ => .app () (.app () (Core.coreOpExpr (.numeric ⟨.int, .Le⟩) (some mty[int → (int → bool)])) lhs) rhs
+      let eq := (.eq loc lhs rhs)
+      let lt := (.app loc (.app loc (.op loc "Datetime_lt" none) lhs) rhs)
+      (.app loc (.app loc (Core.coreOpExpr (.bool .Or)) eq) lt)
+    | _, _ => .app loc (.app loc (Core.coreOpExpr (.numeric ⟨.int, .Le⟩) (some
+        mty[int → (int → bool)])) lhs) rhs
+  | _, _ => .app loc (.app loc (Core.coreOpExpr (.numeric ⟨.int, .Le⟩) (some
+      mty[int → (int → bool)])) lhs) rhs
 
-def handleGt (lhs rhs: Core.Expression.Expr) : Core.Expression.Expr :=
-  .app () (.app () (Core.coreOpExpr (.numeric ⟨.int, .Gt⟩) (some mty[int → (int → bool)])) lhs) rhs
+def handleGt (loc : ExprSourceLoc) (lhs rhs: Core.Expression.Expr) : Core.Expression.Expr :=
+  .app loc (.app loc (Core.coreOpExpr (.numeric ⟨.int, .Gt⟩) (some mty[int → (int → bool)]))
+      lhs) rhs
 
-def handleGtE (lhs rhs: Core.Expression.Expr) : Core.Expression.Expr :=
-  .app () (.app () (Core.coreOpExpr (.numeric ⟨.int, .Ge⟩) (some mty[int → (int → bool)])) lhs) rhs
+def handleGtE (loc : ExprSourceLoc) (lhs rhs: Core.Expression.Expr) : Core.Expression.Expr :=
+  .app loc (.app loc (Core.coreOpExpr (.numeric ⟨.int, .Ge⟩) (some mty[int → (int → bool)]))
+      lhs) rhs
 
 structure SubstitutionRecord where
   pyExpr : expr SourceRange
@@ -225,13 +253,15 @@ def PyExprIdent (e1 e2: expr SourceRange) : Bool :=
 
 -- TODO: handle rest of names
 def PyListStrToCore (names : Array (alias SourceRange)) : Core.Expression.Expr :=
-  .app () (.app () (.op () "ListStr_cons" mty[string → (ListStr → ListStr)]) (PyAliasToCoreExpr names[0]!))
-       (.op () "ListStr_nil" mty[ListStr])
+  .app pySynthLoc (.app pySynthLoc (.op pySynthLoc "ListStr_cons"
+      mty[string → (ListStr → ListStr)]) (PyAliasToCoreExpr names[0]!))
+       (.op pySynthLoc "ListStr_nil" mty[ListStr])
 
 def handleList (_elmts: Array (expr SourceRange)) (expected_type : Lambda.LMonoTy): PyExprTranslated :=
   match expected_type with
-  | (.tcons "ListStr" _) => {stmts := [], expr := (.op () "ListStr_nil" expected_type)}
-  | (.tcons "ListDictStrAny" _) => {stmts := [], expr := (.op () "ListDictStrAny_nil" expected_type)}
+  | (.tcons "ListStr" _) => {stmts := [], expr := (.op pySynthLoc "ListStr_nil" expected_type)}
+  | (.tcons "ListDictStrAny" _) =>
+      {stmts := [], expr := (.op pySynthLoc "ListDictStrAny_nil" expected_type)}
   | _ => panic! s!"Unexpected type : {expected_type}"
 
 def PyOptExprToString (e : opt_expr SourceRange) : String :=
@@ -301,15 +331,16 @@ def noneOrExpr (translation_ctx : TranslationContext) (fname n : String) (e: Cor
     if type_str.endsWith "OrNone" then
       -- Optional param. Need to wrap e.g., string into StrOrNone
       match type_str with
-      | "IntOrNone" => .app () (.op () "IntOrNone_mk_int" none) e
-      | "StrOrNone" => .app () (.op () "StrOrNone_mk_str" none) e
-      | "BytesOrStrOrNone" => .app () (.op () "BytesOrStrOrNone_mk_str" none) e
+      | "IntOrNone" => .app pySynthLoc (.op pySynthLoc "IntOrNone_mk_int" none) e
+      | "StrOrNone" => .app pySynthLoc (.op pySynthLoc "StrOrNone_mk_str" none) e
+      | "BytesOrStrOrNone" => .app pySynthLoc (.op pySynthLoc "BytesOrStrOrNone_mk_str" none) e
       | _ => panic! "Unsupported type_str: "++ type_str
     else
       e
 
 def handleCallThrow (jmp_target : String) : Core.Statement :=
-  let cond := .app () (.op () "ExceptOrNone..isExceptOrNone_mk_code" none) (.fvar () "maybe_except" none)
+  let cond := .app pySynthLoc (.op pySynthLoc "ExceptOrNone..isExceptOrNone_mk_code" none) (.fvar
+      pySynthLoc "maybe_except" none)
   .ite (.det cond) [.exit jmp_target .empty] [] .empty
 
 def deduplicateTypeAnnotations (l : List (String × Option String)) : List (String × String) := Id.run do
@@ -349,11 +380,15 @@ partial def collectVarDecls (translation_ctx : TranslationContext) (stmts: Array
     let name := p.fst
     let ty_name := p.snd
     match ty_name with
-    | "bool" => [(.init name t[bool] (.det (.boolConst () false)) .empty), (.havoc name .empty)]
-    | "str" => [(.init name t[string] (.det (.strConst () "")) .empty), (.havoc name .empty)]
-    | "int" => [(.init name t[int] (.det (.intConst () 0)) .empty), (.havoc name .empty)]
-    | "float" => [(.init name t[string] (.det (.strConst () "0.0")) .empty), (.havoc name .empty)] -- Floats as strs for now
-    | "bytes" => [(.init name t[string] (.det (.strConst () "")) .empty), (.havoc name .empty)]
+    | "bool" => [(.init name t[bool] (.det (.boolConst pySynthLoc false)) .empty),
+        (.havoc name .empty)]
+    | "str" => [(.init name t[string] (.det (.strConst pySynthLoc "")) .empty),
+        (.havoc name .empty)]
+    | "int" => [(.init name t[int] (.det (.intConst pySynthLoc 0)) .empty), (.havoc name .empty)]
+    | "float" => [(.init name t[string] (.det (.strConst pySynthLoc "0.0")) .empty),
+        (.havoc name .empty)] -- Floats as strs for now
+    | "bytes" => [(.init name t[string] (.det (.strConst pySynthLoc "")) .empty),
+        (.havoc name .empty)]
     | "Client" => [(.init name clientType (.det dummyClient) .empty), (.havoc name .empty)]
     | "Dict[str Any]" => [(.init name dictStrAnyType (.det dummyDictStrAny) .empty), (.havoc name .empty)]
     | "List[str]" => [(.init name listStrType (.det dummyListStr) .empty), (.havoc name .empty)]
@@ -365,7 +400,7 @@ partial def collectVarDecls (translation_ctx : TranslationContext) (stmts: Array
       match user_defined_class with
       | .some i =>
         let user_defined_class_ty := .forAll [] (.tcons i.name [])
-        let user_defined_class_dummy := .fvar () ("DUMMY_" ++ i.name) none
+        let user_defined_class_dummy := .fvar pySynthLoc ("DUMMY_" ++ i.name) none
         [(.init name user_defined_class_ty (.det user_defined_class_dummy) .empty), (.havoc name .empty)]
       | .none => panic! s!"Unsupported type annotation: `{ty_name}`"
   let foo := dedup.map toCore
@@ -419,11 +454,14 @@ mutual
 partial def PyExprToCoreWithSubst (translation_ctx : TranslationContext)  (substitution_records : Option (List SubstitutionRecord)) (e : expr SourceRange) : PyExprTranslated :=
   PyExprToCore translation_ctx e substitution_records
 
-partial def PyKWordsToCore (substitution_records : Option (List SubstitutionRecord)) (kw : keyword SourceRange) : (String × PyExprTranslated) :=
+partial def PyKWordsToCore (filePath : String) (substitution_records : Option (List
+    SubstitutionRecord)) (kw : keyword SourceRange) : (String × PyExprTranslated) :=
   match kw with
   | .mk_keyword _ name expr =>
     match name.val with
-    | some n => (n.val, PyExprToCoreWithSubst default substitution_records expr)
+    | some n => (n.val,
+        PyExprToCoreWithSubst ({ (default : TranslationContext) with filePath := filePath
+        }) substitution_records expr)
     | none => panic! "Keyword arg should have a name"
 
 -- TODO: we should be checking that args are right
@@ -434,9 +472,11 @@ partial def argsAndKWordsToCanonicalList (translation_ctx : TranslationContext)
                                  (substitution_records : Option (List SubstitutionRecord) := none) : List Core.Expression.Expr × List Core.Statement :=
   if translation_ctx.func_infos.any (λ e => e.name == fname) || translation_ctx.class_infos.any (λ e => e.name++"___init__" == fname) then
     if translation_ctx.func_infos.any (λ e => e.name == fname) then
-      (args.toList.map (λ a => (PyExprToCoreWithSubst default substitution_records a).expr), [])
+      (args.toList.map (λ a => (PyExprToCoreWithSubst ({ (default : TranslationContext)
+          with filePath := translation_ctx.filePath }) substitution_records a).expr), [])
     else
-      (args.toList.map (λ a => (PyExprToCoreWithSubst default substitution_records a).expr), [])
+      (args.toList.map (λ a => (PyExprToCoreWithSubst ({ (default : TranslationContext)
+          with filePath := translation_ctx.filePath }) substitution_records a).expr), [])
   else
     let required_order := translation_ctx.signatures.getFuncSigOrder fname
     match required_order with
@@ -444,7 +484,8 @@ partial def argsAndKWordsToCanonicalList (translation_ctx : TranslationContext)
     | .ok required_order =>
     assert! args.size <= required_order.length
     let remaining := required_order.drop args.size
-    let kws_and_exprs := kwords.toList.map (PyKWordsToCore substitution_records)
+    let kws_and_exprs := kwords.toList.map (PyKWordsToCore translation_ctx.filePath
+        substitution_records)
     let ordered_remaining_args := remaining.map (λ n => match kws_and_exprs.find? (λ p => p.fst == n) with
       | .some p =>
         noneOrExpr translation_ctx fname n p.snd.expr
@@ -452,7 +493,8 @@ partial def argsAndKWordsToCanonicalList (translation_ctx : TranslationContext)
         match translation_ctx.signatures.getFuncSigType fname n with
         | .error e => panic! s!"argsAndKWordsToCanonicalList called fname not found in getFuncSigType: {e}"
         | .ok arg_ty => TypeStrToCoreExpr arg_ty)
-    let args := args.map (PyExprToCoreWithSubst default substitution_records)
+    let args := args.map (PyExprToCoreWithSubst ({ (default : TranslationContext)
+        with filePath := translation_ctx.filePath }) substitution_records)
     let args := (List.range required_order.length).filterMap (λ n =>
         if n < args.size then
           let arg_name := required_order[n]! -- Guaranteed by range. Using finRange causes breaking coercions to Nat.
@@ -463,29 +505,38 @@ partial def argsAndKWordsToCanonicalList (translation_ctx : TranslationContext)
 
 partial def handleDict (translation_ctx: TranslationContext) (sr : SourceRange) (keys: Array (opt_expr SourceRange)) (values: Array (expr SourceRange)) : PyExprTranslated :=
   let md := sourceRangeToMetaData translation_ctx.filePath sr
-  let dict := .app () (.op () "DictStrAny_mk" none) (.strConst () "DefaultDict") -- TODO: need to generate unique dict arg
+  let dict := .app pySynthLoc (.op pySynthLoc "DictStrAny_mk" none) (.strConst pySynthLoc
+      "DefaultDict") -- TODO: need to generate unique dict arg
   assert! keys.size == values.size
   let zipped := Array.zip keys values
 
   let res := zipped.toList.flatMap (λ (k, v) =>
     let n := PyOptExprToString k
-    let in_dict := (.assume s!"assume_{n}_in_dict" (.app () (.app () (.op () "str_in_dict_str_any" none) (.strConst () n)) dict) md)
+    let in_dict := (.assume s!"assume_{n}_in_dict" (.app pySynthLoc (.app pySynthLoc (.op
+        pySynthLoc "str_in_dict_str_any" none) (.strConst pySynthLoc n)) dict) md)
     match v with
     | .Call _ f args _ =>
       match f with
       | .Name _ {ann := _ , val := "str"} _ =>
         assert! args.val.size == 1
-        let dt := (.app () (.op () "datetime_to_str" none) ((PyExprToCore default args.val[0]!).expr))
-        let dict_of_v_is_k := (.assume s!"assume_{n}_key" (.eq () (.app () (.app () (.op () "dict_str_any_get_str" none) dict) (.strConst () n)) dt) md)
+        let dt := (.app pySynthLoc (.op pySynthLoc "datetime_to_str" none) ((PyExprToCore ({
+            (default :
+            TranslationContext) with filePath := translation_ctx.filePath }) args.val[0]!).expr))
+        let dict_of_v_is_k := (.assume s!"assume_{n}_key" (.eq pySynthLoc (.app pySynthLoc (.app
+            pySynthLoc (.op pySynthLoc "dict_str_any_get_str"
+            none) dict) (.strConst pySynthLoc n)) dt) md)
         [in_dict, dict_of_v_is_k]
       | _ => panic! "Unsupported function when constructing map"
     | _ =>
-      let dict_of_v_is_k := (.assume s!"assume_{n}_key" (.eq () (.app () (.app () (.op () "dict_str_any_get_str" none) dict) (.strConst () n)) (.strConst () "DummyVal")) md)
+      let dict_of_v_is_k := (.assume s!"assume_{n}_key" (.eq pySynthLoc (.app pySynthLoc (.app
+          pySynthLoc (.op pySynthLoc "dict_str_any_get_str"
+          none) dict) (.strConst pySynthLoc n)) (.strConst pySynthLoc "DummyVal")) md)
       [in_dict, dict_of_v_is_k])
 
   {stmts := res , expr := dict, post_stmts := []}
 
 partial def PyExprToCore (translation_ctx : TranslationContext) (e : expr SourceRange) (substitution_records : Option (List SubstitutionRecord) := none) : PyExprTranslated :=
+  let loc := pyLoc translation_ctx.filePath e.toAst.ann
   if h : substitution_records.isSome && (substitution_records.get!.find? (λ r => PyExprIdent r.pyExpr e)).isSome then
     have hr : (List.find? (fun r => PyExprIdent r.pyExpr e) substitution_records.get!).isSome = true := by rw [Bool.and_eq_true] at h; exact h.2
     let record := (substitution_records.get!.find? (λ r => PyExprIdent r.pyExpr e)).get hr
@@ -494,33 +545,35 @@ partial def PyExprToCore (translation_ctx : TranslationContext) (e : expr Source
     match e with
     | .Call _ f args kwords =>
       panic! s!"Call should be handled at stmt level: \n(func: {repr f}) \n(Records: {repr substitution_records}) \n(AST: {repr e.toAst})"
-    | .Constant _ c _ => {stmts := [], expr :=  PyConstToCore c}
+    | .Constant _ c _ => {stmts := [], expr :=  PyConstToCore loc c}
     | .Name _ n _ =>
       match n.val with
-      | "AssertionError" | "Exception" => {stmts := [], expr := .strConst () n.val}
+      | "AssertionError" | "Exception" => {stmts := [], expr := .strConst loc n.val}
       | s =>
         match translation_ctx.variableTypes.find? (λ p => p.fst == s) with
         | .some p =>
           if translation_ctx.expectedType == some (.tcons "bool" []) && p.snd == (.tcons "DictStrAny" []) then
-            let a := .fvar () n.val none
-            let e := .app () (Core.coreOpExpr (.bool .Not)) (.eq () (.app () (.op () "dict_str_any_length" none) a) (.intConst () 0))
+            let a := .fvar loc n.val none
+            let e := .app loc (Core.coreOpExpr (.bool .Not)) (.eq loc (.app loc (.op pySynthLoc
+                "dict_str_any_length" none) a) (.intConst loc 0))
             {stmts := [], expr := e}
           else
-            {stmts := [], expr := .fvar () n.val none}
-        | .none => {stmts := [], expr := .fvar () n.val none}
+            {stmts := [], expr := .fvar loc n.val none}
+        | .none => {stmts := [], expr := .fvar loc n.val none}
     | .JoinedStr _ ss => PyExprToCore translation_ctx ss.val[0]! -- TODO: need to actually join strings
     | .BinOp _ lhs op rhs =>
       let lhs := (PyExprToCore translation_ctx lhs)
       let rhs := (PyExprToCore translation_ctx rhs)
       match op with
       | .Add _ =>
-        {stmts := lhs.stmts ++ rhs.stmts, expr := handleAdd translation_ctx lhs.expr rhs.expr}
+        {stmts := lhs.stmts ++ rhs.stmts, expr := handleAdd loc translation_ctx lhs.expr rhs.expr}
       | .Sub _ =>
-        {stmts := lhs.stmts ++ rhs.stmts, expr := handleSub translation_ctx lhs.expr rhs.expr}
+        {stmts := lhs.stmts ++ rhs.stmts, expr := handleSub loc translation_ctx lhs.expr rhs.expr}
       | .Mult _ =>
-        {stmts := lhs.stmts ++ rhs.stmts, expr := handleMult translation_ctx lhs.expr rhs.expr}
+        {stmts := lhs.stmts ++ rhs.stmts, expr := handleMult loc translation_ctx lhs.expr rhs.expr}
       | .FloorDiv _ =>
-        {stmts := lhs.stmts ++ rhs.stmts, expr := handleFloorDiv translation_ctx lhs.expr rhs.expr}
+        {stmts := lhs.stmts ++ rhs.stmts,
+            expr := handleFloorDiv loc translation_ctx lhs.expr rhs.expr}
       | _ => panic! s!"Unhandled BinOp: {repr e}"
     | .Compare _ lhs op rhs =>
       let lhs := PyExprToCore translation_ctx lhs
@@ -529,17 +582,19 @@ partial def PyExprToCore (translation_ctx : TranslationContext) (e : expr Source
       match op.val with
       | #[v] => match v with
         | cmpop.Eq _ =>
-          {stmts := lhs.stmts ++ rhs.stmts, expr := (.eq () lhs.expr rhs.expr)}
+          {stmts := lhs.stmts ++ rhs.stmts, expr := (.eq loc lhs.expr rhs.expr)}
         | cmpop.In _ =>
-          {stmts := lhs.stmts ++ rhs.stmts, expr := .app () (.app () (.op () "str_in_dict_str_any" none) lhs.expr) rhs.expr}
+          {stmts := lhs.stmts ++ rhs.stmts,
+              expr := .app loc (.app pySynthLoc (.op pySynthLoc "str_in_dict_str_any" none)
+              lhs.expr) rhs.expr}
         | cmpop.Lt _ =>
-          {stmts := lhs.stmts ++ rhs.stmts, expr := handleLt translation_ctx lhs.expr rhs.expr}
+          {stmts := lhs.stmts ++ rhs.stmts, expr := handleLt loc translation_ctx lhs.expr rhs.expr}
         | cmpop.LtE _ =>
-          {stmts := lhs.stmts ++ rhs.stmts, expr := handleLtE translation_ctx lhs.expr rhs.expr}
+          {stmts := lhs.stmts ++ rhs.stmts, expr := handleLtE loc translation_ctx lhs.expr rhs.expr}
         | cmpop.Gt _ =>
-          {stmts := lhs.stmts ++ rhs.stmts, expr := handleGt lhs.expr rhs.expr}
+          {stmts := lhs.stmts ++ rhs.stmts, expr := handleGt loc lhs.expr rhs.expr}
         | cmpop.GtE _ =>
-          {stmts := lhs.stmts ++ rhs.stmts, expr := handleGtE lhs.expr rhs.expr}
+          {stmts := lhs.stmts ++ rhs.stmts, expr := handleGtE loc lhs.expr rhs.expr}
         | _ => panic! s!"Unhandled comparison op: {repr op.val}"
       | _ => panic! s!"Unhandled comparison op: {repr op.val}"
     | .Dict sr keys values =>
@@ -547,28 +602,39 @@ partial def PyExprToCore (translation_ctx : TranslationContext) (e : expr Source
       res
     | .ListComp _ keys values => panic! "ListComp must be handled at stmt level"
     | .UnaryOp _ op arg => match op with
-      | .Not _ => {stmts := [], expr := handleNot (PyExprToCore translation_ctx arg).expr}
+      | .Not _ => {stmts := [], expr := handleNot loc (PyExprToCore translation_ctx arg).expr}
       | _ => panic! s!"Unsupported UnaryOp: {repr e}"
     | .Subscript sr_sub v slice _ =>
       let sub_md := sourceRangeToMetaData translation_ctx.filePath sr_sub
+      let sub_loc := pyLoc translation_ctx.filePath sr_sub
       let l := PyExprToCore translation_ctx v
       let k := PyExprToCore translation_ctx slice
-      -- TODO: we need to plumb the type of `v` here
-      match s!"{repr l.expr}" with
-      | "LExpr.fvar () { name := \"keys\", metadata := () } none" =>
-          -- let access_check : Core.Statement := .assert "subscript_bounds_check" (.app () (.app () (.op () "str_in_dict_str_any" none) k.expr) l.expr)
-          {stmts := l.stmts ++ k.stmts, expr := .app () (.app () (.op () "list_str_get" none) l.expr) k.expr}
-      | "LExpr.fvar () { name := \"blended_cost\", metadata := () } none" =>
-          -- let access_check : Core.Statement := .assert "subscript_bounds_check" (.app () (.app () (.op () "str_in_dict_str_any" none) k.expr) l.expr)
-          {stmts := l.stmts ++ k.stmts, expr := .app () (.app () (.op () "dict_str_any_get_str" none) l.expr) k.expr}
+      -- `keys` and `blended_cost` have dedicated element-type lowerings keyed to
+      -- the base variable's name on an unannotated subscript. Every other subscript
+      -- is bounds-checked and dispatched on its expected element type.
+      match l.expr with
+      | .fvar _ ⟨"keys", _⟩ none =>
+        {stmts := l.stmts ++ k.stmts,
+            expr := .app sub_loc (.app pySynthLoc (.op pySynthLoc "list_str_get" none)
+            l.expr) k.expr}
+      | .fvar _ ⟨"blended_cost", _⟩ none =>
+        {stmts := l.stmts ++ k.stmts,
+            expr := .app sub_loc (.app pySynthLoc (.op pySynthLoc "dict_str_any_get_str" none)
+            l.expr) k.expr}
       | _ =>
         match translation_ctx.expectedType with
         | .some (.tcons "ListStr" []) =>
-          let access_check : Core.Statement := .assert "subscript_bounds_check" (.app () (.app () (.op () "str_in_dict_str_any" none) k.expr) l.expr) sub_md
-          {stmts := l.stmts ++ k.stmts ++ [access_check], expr := .app () (.app () (.op () "dict_str_any_get_list_str" none) l.expr) k.expr}
+          let access_check : Core.Statement := .assert "subscript_bounds_check" (.app sub_loc (.app
+              pySynthLoc (.op pySynthLoc "str_in_dict_str_any" none) k.expr) l.expr) sub_md
+          {stmts := l.stmts ++ k.stmts ++ [access_check],
+              expr := .app sub_loc (.app pySynthLoc (.op pySynthLoc "dict_str_any_get_list_str"
+              none) l.expr) k.expr}
         | _ =>
-          let access_check : Core.Statement := .assert "subscript_bounds_check" (.app () (.app () (.op () "str_in_dict_str_any" none) k.expr) l.expr) sub_md
-          {stmts := l.stmts ++ k.stmts ++ [access_check], expr := .app () (.app () (.op () "dict_str_any_get" none) l.expr) k.expr}
+          let access_check : Core.Statement := .assert "subscript_bounds_check" (.app sub_loc (.app
+              pySynthLoc (.op pySynthLoc "str_in_dict_str_any" none) k.expr) l.expr) sub_md
+          {stmts := l.stmts ++ k.stmts ++ [access_check],
+              expr := .app sub_loc (.app pySynthLoc (.op pySynthLoc "dict_str_any_get" none)
+              l.expr) k.expr}
     | .List _ elmts _ =>
       match elmts.val[0]! with
       | .Constant _ expr _ => match expr with
@@ -588,11 +654,18 @@ partial def initTmpParam (translation_ctx: TranslationContext) (p: expr SourceRa
     match f with
     | .Name _ n _ =>
       match n.val with
-      | "json_dumps" => [(.init p.snd t[string] (.det (.strConst () "")) md), .call "json_dumps" ([.inArg (.app () (.op () "DictStrAny_mk" none) (.strConst () "DefaultDict")), .inArg (TypeStrToCoreExpr "IntOrNone")] ++ [.outArg p.snd, .outArg "maybe_except"]) md]
+      | "json_dumps" => [(.init p.snd t[string] (.det (.strConst pySynthLoc "")) md), .call
+          "json_dumps" ([.inArg (.app pySynthLoc (.op pySynthLoc "DictStrAny_mk" none) (.strConst
+          pySynthLoc "DefaultDict")), .inArg (TypeStrToCoreExpr "IntOrNone")] ++
+          [.outArg p.snd, .outArg "maybe_except"]) md]
       | "str" =>
         assert! args.val.size == 1
-        [(.init p.snd t[string] (.det (.strConst () "")) md), .set p.snd (.app () (.op () "datetime_to_str" none) ((PyExprToCore default args.val[0]!).expr)) md]
-      | "int" => [(.init p.snd t[int] (.det (.intConst () 0)) md), .set p.snd (.op () "datetime_to_int" none) md]
+        [(.init p.snd t[string] (.det (.strConst pySynthLoc "")) md), .set p.snd (.app pySynthLoc
+            (.op pySynthLoc "datetime_to_str" none) ((PyExprToCore ({ (default :
+            TranslationContext) with filePath :=
+            translation_ctx.filePath }) args.val[0]!).expr)) md]
+      | "int" => [(.init p.snd t[int] (.det (.intConst pySynthLoc 0)) md), .set p.snd (.op
+          pySynthLoc "datetime_to_int" none) md]
       | _ => panic! s!"Unsupported name {n.val}"
     | _ => panic! s!"Unsupported tmp param init call: {repr f}"
   | _ => panic! "Expected Call"
@@ -606,15 +679,17 @@ partial def exceptHandlersToCore (jmp_targets: List String) (translation_ctx: Tr
     | .some ex_ty =>
       let inherits_from : Core.CoreIdent := "inheritsFrom"
       let get_ex_tag : Core.CoreIdent := "ExceptOrNone..code_val!"
-      let exception_ty : Core.Expression.Expr := .app () (.op () get_ex_tag none) (.fvar () "maybe_except" none)
-      let rhs_curried : Core.Expression.Expr := .app () (.op () inherits_from none) exception_ty
+      let exception_ty : Core.Expression.Expr := .app pySynthLoc (.op pySynthLoc get_ex_tag
+          none) (.fvar pySynthLoc "maybe_except" none)
+      let rhs_curried : Core.Expression.Expr := .app pySynthLoc (.op pySynthLoc inherits_from
+          none) exception_ty
       let res := PyExprToCore translation_ctx ex_ty
-      let rhs : Core.Expression.Expr := .app () rhs_curried (res.expr)
+      let rhs : Core.Expression.Expr := .app pySynthLoc rhs_curried (res.expr)
       let call := .set "exception_ty_matches" rhs md
       res.stmts ++ [call]
     | .none =>
-      [.set "exception_ty_matches" (.boolConst () false) md]
-    let cond := .fvar () "exception_ty_matches" none
+      [.set "exception_ty_matches" (.boolConst pySynthLoc false) md]
+    let cond := .fvar pySynthLoc "exception_ty_matches" none
     let body_if_matches := body.val.toList.flatMap (λ s => (PyStmtToCore jmp_targets.tail! translation_ctx s).fst) ++ [.exit jmp_targets[1]! md]
     set_ex_ty_matches ++ [.ite (.det cond) body_if_matches [] md]
 
@@ -641,8 +716,11 @@ partial def handleFunctionCall (lhs: List Core.Expression.Ident)
     if isCall arg then some arg else none)
   let kwords_calls_to_tmps := nested_kwords_calls.map (λ a => (a, s!"call_kword_tmp_{a.toAst.ann.start}"))
 
-  let substitution_records : List SubstitutionRecord := args_calls_to_tmps.toList.map (λ p => {pyExpr := p.fst, coreExpr := .fvar () p.snd none}) ++
-                                                        kwords_calls_to_tmps.toList.map (λ p => {pyExpr := p.fst, coreExpr := .fvar () p.snd none})
+  let substitution_records : List SubstitutionRecord :=
+    args_calls_to_tmps.toList.map
+        (λ p => {pyExpr := p.fst, coreExpr := .fvar pySynthLoc p.snd none}) ++
+      kwords_calls_to_tmps.toList.map
+        (λ p => {pyExpr := p.fst, coreExpr := .fvar pySynthLoc p.snd none})
 
   let md := sourceRangeToMetaData translation_ctx.filePath s.toAst.ann
   let res := argsAndKWordsToCanonicalList translation_ctx fname args.val kwords.val substitution_records
@@ -655,10 +733,13 @@ partial def handleComprehension (translation_ctx: TranslationContext) (lhs: expr
   match gen[0]! with
   | .mk_comprehension sr _ itr _ _ =>
     let md := sourceRangeToMetaData translation_ctx.filePath sr
-    let res := PyExprToCore default itr
-    let guard := .app () (Core.coreOpExpr (.bool .Not)) (.eq () (.app () (.op () "dict_str_any_length" none) res.expr) (.intConst () 0))
+    let res := PyExprToCore ({ (default : TranslationContext)
+        with filePath := translation_ctx.filePath }) itr
+    let guard := .app pySynthLoc (Core.coreOpExpr (.bool .Not)) (.eq pySynthLoc (.app pySynthLoc
+        (.op pySynthLoc "dict_str_any_length" none) res.expr) (.intConst pySynthLoc 0))
     let then_ss: List Core.Statement := [.havoc (PyExprToString lhs) md]
-    let else_ss: List Core.Statement := [.set (PyExprToString lhs) (.op () "ListStr_nil" none) md]
+    let else_ss: List Core.Statement := [.set (PyExprToString lhs) (.op pySynthLoc "ListStr_nil"
+        none) md]
     res.stmts ++ [.ite (.det guard) then_ss else_ss md]
 
 partial def PyStmtToCore (jmp_targets: List String) (translation_ctx : TranslationContext) (s : stmt SourceRange) : List Core.Statement × TranslationContext :=
@@ -719,7 +800,10 @@ partial def PyStmtToCore (jmp_targets: List String) (translation_ctx : Translati
       | .none => ([.exit jmp_targets[0]! md], none)
     | .For _ tgt itr body _ _ =>
       -- Do one unrolling:
-      let guard := .app () (Core.coreOpExpr (.bool .Not)) (.eq () (.app () (.op () "dict_str_any_length" none) (PyExprToCore default itr).expr) (.intConst () 0))
+      let guard := .app pySynthLoc (Core.coreOpExpr (.bool .Not)) (.eq pySynthLoc (.app pySynthLoc
+          (.op pySynthLoc "dict_str_any_length" none) (PyExprToCore ({ (default :
+          TranslationContext) with filePath :=
+          translation_ctx.filePath }) itr).expr) (.intConst pySynthLoc 0))
       match tgt with
       | .Name _ n _ =>
         let assign_tgt := [(.init n.val dictStrAnyType (.det dummyDictStrAny) md)]
@@ -728,7 +812,10 @@ partial def PyStmtToCore (jmp_targets: List String) (translation_ctx : Translati
       -- TODO: missing havoc
     | .While _ test body _ =>
       -- Do one unrolling:
-      let guard := .app () (Core.coreOpExpr (.bool .Not)) (.eq () (.app () (.op () "dict_str_any_length" none) (PyExprToCore default test).expr) (.intConst () 0))
+      let guard := .app pySynthLoc (Core.coreOpExpr (.bool .Not)) (.eq pySynthLoc (.app pySynthLoc
+          (.op pySynthLoc "dict_str_any_length" none) (PyExprToCore ({ (default :
+          TranslationContext) with filePath :=
+          translation_ctx.filePath }) test).expr) (.intConst pySynthLoc 0))
       ([.ite (.det guard) (ArrPyStmtToCore translation_ctx body.val).fst [] md], none)
       -- TODO: missing havoc
     | .Assert sr a _ =>
@@ -741,7 +828,7 @@ partial def PyStmtToCore (jmp_targets: List String) (translation_ctx : Translati
         match lhs with
         | .Name _ n _ =>
           let rhs := PyExprToCore translation_ctx rhs
-          let new_lhs := (.strConst () "DUMMY_FLOAT")
+          let new_lhs := (.strConst pySynthLoc "DUMMY_FLOAT")
           (rhs.stmts ++ [.set n.val new_lhs md], none)
         | _ => panic! s!"Expected lhs to be name: {repr lhs}"
       | .FloorDiv _ =>
@@ -749,7 +836,8 @@ partial def PyStmtToCore (jmp_targets: List String) (translation_ctx : Translati
         | .Name _ n _ =>
           let lhs := PyExprToCore translation_ctx lhs
           let rhs := PyExprToCore translation_ctx rhs
-          let new_lhs := .app () (.app () (Core.coreOpExpr (.numeric ⟨.int, .Div⟩) (some mty[int → (int → int)])) lhs.expr) rhs.expr
+          let new_lhs := .app pySynthLoc (.app pySynthLoc (Core.coreOpExpr (.numeric ⟨.int, .Div⟩)
+              (some mty[int → (int → int)])) lhs.expr) rhs.expr
           (rhs.stmts ++ [.set n.val new_lhs md], none)
         | _ => panic! s!"Expected lhs to be name: {repr lhs}"
       | _ => panic! s!"Unsupported AugAssign op: {repr op}"
@@ -798,7 +886,8 @@ def pyTyStrToLMonoTy (ty_str: String) : Lambda.LMonoTy :=
 
 def pythonFuncToCore (name : String) (args: List (String × String)) (body: Array (stmt SourceRange)) (ret : Option (expr SourceRange)) (spec : Core.Procedure.Spec) (translation_ctx : TranslationContext) : Core.Procedure :=
   let inputs : List (Lambda.Identifier Unit × Lambda.LMonoTy) := args.map (λ p => (p.fst, pyTyStrToLMonoTy p.snd))
-  let varDecls := collectVarDecls translation_ctx body ++ [(.init "exception_ty_matches" t[bool] (.det (.boolConst () false)) .empty), (.havoc "exception_ty_matches" .empty)]
+  let varDecls := collectVarDecls translation_ctx body ++ [(.init "exception_ty_matches" t[bool]
+      (.det (.boolConst pySynthLoc false)) .empty), (.havoc "exception_ty_matches" .empty)]
   let stmts := (ArrPyStmtToCore translation_ctx body).fst
   let body := varDecls ++ [.block "end" stmts .empty]
   let constructor := name.endsWith "___init__"

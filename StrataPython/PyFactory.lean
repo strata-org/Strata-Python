@@ -16,6 +16,9 @@ open Strata
 
 -------------------------------------------------------------------------------
 
+/-- Metadata for Python factory synthesized expressions. -/
+private abbrev pyFactoryLoc : ExprSourceLoc := ExprSourceLoc.synthesized "python-factory"
+
 /-
 ## Python regex verification — factory functions
 
@@ -83,11 +86,12 @@ private def mkModeBoolFunc (name : String) (mode : MatchMode) :
       output := mty[bool],
       attr := #[.evalIfValue 0],
       concreteEval := some
-        (fun _ _ args => match args with
-          | [LExpr.strConst () pattern, sExpr] =>
+        (fun md _ args => match args with
+          | [LExpr.strConst _ pattern, sExpr] =>
             let (regexExpr, maybe_err) := pythonRegexToCore pattern mode
             match maybe_err with
-            | none => .some (LExpr.mkApp () (.op () "Str.InRegEx" (some mty[string → (regex → bool)])) [sExpr, regexExpr])
+            | none => .some (LExpr.mkApp md (.op md "Str.InRegEx" (some
+                mty[string → (regex → bool)])) [sExpr, regexExpr.replaceMetadata (fun _ => md)])
             | some _ => .none
           | _ => .none)
       }
@@ -110,23 +114,23 @@ private def rePatternErrorMsg? (pattern : String) : Option String :=
 -- A factory function from a pattern string to `output`; on a string constant it returns `eval` of
 -- the pattern's parse error message.
 private def mkRePatternFunc (name : String) (output : LMonoTy)
-    (eval : Option String → LExpr Core.CoreLParams.mono) : LFunc Core.CoreLParams :=
+    (eval : ExprSourceLoc → Option String → LExpr Core.CoreLParams.mono) : LFunc Core.CoreLParams :=
     { name := name,
       typeArgs := [],
       inputs := [("pattern", mty[string])],
       output := output,
       attr := #[.evalIfValue 0],
       concreteEval := some
-        (fun _ _ args => match args with
-          | [LExpr.strConst () s] => .some (eval (rePatternErrorMsg? s))
+        (fun md _ args => match args with
+          | [LExpr.strConst _ s] => .some (eval md (rePatternErrorMsg? s))
           | _ => .none)
       }
 
 def rePatternIsErrorFunc : LFunc Core.CoreLParams :=
-  mkRePatternFunc "re_pattern_is_error" mty[bool] fun msg? => .boolConst () msg?.isSome
+  mkRePatternFunc "re_pattern_is_error" mty[bool] fun loc msg? => .boolConst loc msg?.isSome
 
 def rePatternErrorMsgFunc : LFunc Core.CoreLParams :=
-  mkRePatternFunc "re_pattern_error_msg" mty[string] fun msg? => .strConst () (msg?.getD "")
+  mkRePatternFunc "re_pattern_error_msg" mty[string] fun loc msg? => .strConst loc (msg?.getD "")
 
 -- Guard for exponent-driven factory functions (`int_pow`, `int_rshift`).
 -- Lean's `Nat.pow` panics when the exponent exceeds `UInt32.max`, and even
@@ -197,7 +201,8 @@ def intRshiftFunc : LFunc Core.CoreLParams :=
 -- Positives cover every current test in the differential corpus's
 -- `binary_bitwise` section; extending to negatives is a straightforward
 -- follow-up (add more match arms here) if a test needs it.
-private def foldNonNegBinop (md : Unit) (args : List (LExpr Core.CoreLParams.mono))
+private def foldNonNegBinop (md : Core.CoreLParams.Metadata) (args : List (LExpr
+    Core.CoreLParams.mono))
     (op : Nat → Nat → Nat) : Option (LExpr Core.CoreLParams.mono) :=
   match args with
   | [x, y] => match LExpr.denoteInt x, LExpr.denoteInt y with
