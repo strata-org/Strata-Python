@@ -45,7 +45,7 @@ module e05_use_before_global {
       %21 : base.String = const str "name 'x' is not defined"
       %22 : py.Value = py.requireDefined %19 %20 %21 ^propagate.0()
       %23 : py.Value = py.mkTuple %22
-      %24 : py.Value = py.mkDict
+      %24 : py.Value = py.mkKwargs
       %25 : py.Value = py.call %15 %23 %24 ^propagate.0()
       %26 : py.Value = py.noneLit
       %27 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %26

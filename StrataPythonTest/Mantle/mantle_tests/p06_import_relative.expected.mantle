@@ -1,0 +1,68 @@
+-- unsupported: relative import is not supported at 2:0-2:21
+-- unsupported: relative import is not supported at 3:0-3:32
+-- unsupported: relative import is not supported at 4:0-4:22
+module p06_import_relative {
+  func @p06_import_relative.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "p06_import_relative"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "p06_import_relative"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Code = const @p06_import_relative.f
+      %7 : py.Value = py.mkClosure %6
+      %8 : base.String = const str "p06_import_relative"
+      %9 : base.String = const str "f"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : py.Value = py.noneLit
+      %13 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %12
+      ret %13
+    propagate.0(%14 : py.Value):
+      %15 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %14
+      ret %15
+  }
+  func @p06_import_relative.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : py.Value = py.tupleLen %0
+      %3 : base.String = const str "kwargs"
+      %4 : py.Value = py.undef %3
+      %5 : py.Value = py.dictFirstKey %1 %4
+      %6 : base.String = const str "TypeError"
+      %7 : base.String = const str "f() got an unexpected keyword argument {}"
+      %8 : base.Unit = py.requireUndefined %5 %6 %7 ^propagate.0()
+      %9 : base.Int = const int 0
+      %10 : base.String = const str "TypeError"
+      %11 : base.String = const str "f() takes 0 positional arguments but {} {was} given"
+      %12 : base.Unit = py.requireAtMost %2 %9 %10 %11 ^propagate.0()
+      %13 : base.String = const str "p06_import_relative"
+      %14 : base.String = const str "sibling"
+      %15 : base.Ref(py.Value) = py.globalCell %13 %14
+      %16 : py.Value = base.refGet[py.Value] %15
+      %17 : base.String = const str "NameError"
+      %18 : base.String = const str "name 'sibling' is not defined"
+      %19 : py.Value = py.requireDefined %16 %17 %18 ^propagate.0()
+      %20 : base.String = const str "p06_import_relative"
+      %21 : base.String = const str "t"
+      %22 : base.Ref(py.Value) = py.globalCell %20 %21
+      %23 : py.Value = base.refGet[py.Value] %22
+      %24 : base.String = const str "NameError"
+      %25 : base.String = const str "name 't' is not defined"
+      %26 : py.Value = py.requireDefined %23 %24 %25 ^propagate.0()
+      %27 : base.String = const str "p06_import_relative"
+      %28 : base.String = const str "other"
+      %29 : base.Ref(py.Value) = py.globalCell %27 %28
+      %30 : py.Value = base.refGet[py.Value] %29
+      %31 : base.String = const str "NameError"
+      %32 : base.String = const str "name 'other' is not defined"
+      %33 : py.Value = py.requireDefined %30 %31 %32 ^propagate.0()
+      %34 : py.Value = py.mkTuple %19 %26 %33
+      %35 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %34
+      ret %35
+    propagate.0(%36 : py.Value):
+      %37 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %36
+      ret %37
+  }
+}
+

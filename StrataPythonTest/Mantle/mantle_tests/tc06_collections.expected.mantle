@@ -1,0 +1,78 @@
+module tc06_collections {
+  func @tc06_collections.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "tc06_collections"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "tc06_collections"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Code = const @tc06_collections.f
+      %7 : py.Value = py.mkClosure %6
+      %8 : base.String = const str "tc06_collections"
+      %9 : base.String = const str "f"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : py.Value = py.noneLit
+      %13 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %12
+      ret %13
+    propagate.0(%14 : py.Value):
+      %15 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %14
+      ret %15
+  }
+  func @tc06_collections.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "a"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : base.String = const str "b"
+      %6 : py.Value = py.undef %5
+      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
+      %8 : base.String = const str "c"
+      %9 : py.Value = py.undef %8
+      %10 : base.Ref(py.Value) = base.refNew[py.Value] %9
+      %11 : base.String = const str "d"
+      %12 : py.Value = py.undef %11
+      %13 : base.Ref(py.Value) = base.refNew[py.Value] %12
+      %14 : py.Value = py.tupleLen %0
+      %15 : base.String = const str "kwargs"
+      %16 : py.Value = py.undef %15
+      %17 : py.Value = py.dictFirstKey %1 %16
+      %18 : base.String = const str "TypeError"
+      %19 : base.String = const str "f() got an unexpected keyword argument {}"
+      %20 : base.Unit = py.requireUndefined %17 %18 %19 ^propagate.0()
+      %21 : base.Int = const int 0
+      %22 : base.String = const str "TypeError"
+      %23 : base.String = const str "f() takes 0 positional arguments but {} {was} given"
+      %24 : base.Unit = py.requireAtMost %14 %21 %22 %23 ^propagate.0()
+      %25 : base.Int = const int 1
+      %26 : py.Value = py.intLit %25
+      %27 : base.Int = const int 2
+      %28 : py.Value = py.intLit %27
+      %29 : base.Int = const int 3
+      %30 : py.Value = py.intLit %29
+      %31 : py.Value = py.mkList %26 %28 %30
+      %32 : base.Unit = base.refSet[py.Value] %4 %31
+      %33 : py.Value = py.mkList
+      %34 : base.Unit = base.refSet[py.Value] %7 %33
+      %35 : base.String = const str "key"
+      %36 : py.Value = py.strLit %35
+      %37 : base.String = const str "val"
+      %38 : py.Value = py.strLit %37
+      %39 : py.Value = py.mkDict %36 %38 ^propagate.0()
+      %40 : base.Unit = base.refSet[py.Value] %10 %39
+      %41 : base.Int = const int 1
+      %42 : py.Value = py.intLit %41
+      %43 : base.Int = const int 2
+      %44 : py.Value = py.intLit %43
+      %45 : py.Value = py.mkTuple %42 %44
+      %46 : base.Unit = base.refSet[py.Value] %13 %45
+      %47 : py.Value = py.noneLit
+      %48 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %47
+      ret %48
+    propagate.0(%49 : py.Value):
+      %50 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %49
+      ret %50
+  }
+}
+

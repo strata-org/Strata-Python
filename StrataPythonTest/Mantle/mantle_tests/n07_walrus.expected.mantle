@@ -1,0 +1,41 @@
+-- unsupported: list comprehension is not supported at 5:11-5:48
+module n07_walrus {
+  func @n07_walrus.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "n07_walrus"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "n07_walrus"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Int = const int 1
+      %7 : py.Value = py.intLit %6
+      %8 : base.Int = const int 2
+      %9 : py.Value = py.intLit %8
+      %10 : base.Int = const int 3
+      %11 : py.Value = py.intLit %10
+      %12 : base.Int = const int 4
+      %13 : py.Value = py.intLit %12
+      %14 : base.Int = const int 5
+      %15 : py.Value = py.intLit %14
+      %16 : py.Value = py.mkList %7 %9 %11 %13 %15
+      %17 : base.String = const str "n07_walrus"
+      %18 : base.String = const str "data"
+      %19 : base.Ref(py.Value) = py.globalCell %17 %18
+      %20 : base.Unit = base.refSet[py.Value] %19 %16
+      %21 : base.String = const str "list comprehension"
+      %22 : py.Value = py.strLit %21
+      %23 : py.Value = py.unsupported %22
+      %24 : base.String = const str "n07_walrus"
+      %25 : base.String = const str "filtered"
+      %26 : base.Ref(py.Value) = py.globalCell %24 %25
+      %27 : base.Unit = base.refSet[py.Value] %26 %23
+      %28 : py.Value = py.noneLit
+      %29 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %28
+      ret %29
+    propagate.0(%30 : py.Value):
+      %31 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %30
+      ret %31
+  }
+}
+

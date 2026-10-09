@@ -1,0 +1,43 @@
+-- unsupported: generator expression is not supported at 5:11-5:32
+module n04_generator {
+  func @n04_generator.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "n04_generator"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "n04_generator"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Int = const int 1
+      %7 : py.Value = py.intLit %6
+      %8 : base.Int = const int 2
+      %9 : py.Value = py.intLit %8
+      %10 : base.Int = const int 3
+      %11 : py.Value = py.intLit %10
+      %12 : py.Value = py.mkList %7 %9 %11
+      %13 : base.String = const str "n04_generator"
+      %14 : base.String = const str "nums"
+      %15 : base.Ref(py.Value) = py.globalCell %13 %14
+      %16 : base.Unit = base.refSet[py.Value] %15 %12
+      %17 : base.String = const str "builtins"
+      %18 : base.String = const str "sum"
+      %19 : py.Value = py.qualifiedRef %17 %18 ^propagate.0()
+      %20 : base.String = const str "generator expression"
+      %21 : py.Value = py.strLit %20
+      %22 : py.Value = py.unsupported %21
+      %23 : py.Value = py.mkTuple %22
+      %24 : py.Value = py.mkKwargs
+      %25 : py.Value = py.call %19 %23 %24 ^propagate.0()
+      %26 : base.String = const str "n04_generator"
+      %27 : base.String = const str "total"
+      %28 : base.Ref(py.Value) = py.globalCell %26 %27
+      %29 : base.Unit = base.refSet[py.Value] %28 %25
+      %30 : py.Value = py.noneLit
+      %31 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %30
+      ret %31
+    propagate.0(%32 : py.Value):
+      %33 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %32
+      ret %33
+  }
+}
+

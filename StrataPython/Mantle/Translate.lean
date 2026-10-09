@@ -42,7 +42,8 @@ with a diagnostic is a failure.
   `return`, `global`, `import a.b [as c]` and `from a.b import x [as y]`.
 * Expressions: `int`, `float`, `str`, `bytes`, `bool`, `None` and `...` literals, names,
   `+ - * / // % **`, unary `-`, `not`, comparisons (chained too), `and`, `or`,
-  `x if c else y`, and calls with positional arguments.
+  `x if c else y`, tuple, list, set and dict displays with `*x` and `**d`, and calls with
+  keyword, `*` and `**` arguments.
 * Conditions: an `if` or `while` test, and the test of `x if c else y`, lower to branches by
   `transCond`, so each operand's truth is tested at most once.
 
@@ -201,9 +202,6 @@ variable {β : Type}
 
 /-- Run a `PyBuild` action. -/
 def build (x : PyM SourceRange β) : TransM β := monadLift x
-
-/-- Run a `Mantle.Build` action. -/
-def buildRaw (x : BuildM Py.env SourceRange β) : TransM β := monadLift x
 
 /-- Run `act` with `r` as the default annotation. -/
 def withRange (r : SourceRange) (act : TransM β) : TransM β := do
@@ -496,6 +494,24 @@ end
 
 /-! ## Expressions -/
 
+/-- More elements than this make CPython build a set or a dict run one element at a time
+(`STACK_USE_GUIDELINE`), hashing each as it is evaluated. -/
+def stackUseGuideline : Nat := 30
+
+/-- The pairs in one chunk of a dict display's run: CPython's `compiler_dict` cuts a run when
+the 17th pair arrives, as 16 pairs exceed `stackUseGuideline`. -/
+def dictChunk : Nat := 17
+
+/-- `xs` cut into chunks of `n` elements; the last may be shorter. -/
+def chunks {α : Type} (n : Nat) (xs : Array α) : Array (Array α) :=
+  (Array.range ((xs.size + n - 1) / n)).map fun i => xs.extract (i * n) (i * n + n)
+
+/-- The elements of a display before its first `*x`, and the rest. -/
+def splitStarred (vs : Array (expr SourceRange)) :
+    Array (expr SourceRange) × Array (expr SourceRange) :=
+  let n := (vs.findIdx? fun | .Starred .. => true | _ => false).getD vs.size
+  (vs.extract 0 n, vs.extract n vs.size)
+
 mutual
 
 /-- Lower an expression to the value it produces. -/
@@ -517,15 +533,15 @@ partial def transExpr (e : expr SourceRange) : TransM ValId := withRange e.ann d
     | .UAdd _ => unsupportedValue "unary +" sr
     | .Invert _ => unsupportedValue "operator ~" sr
   | .Compare _ l ops rs => compare l ops.val rs.val
-  | .Call sr f args kws => call sr f args.val kws.val
+  | .Call _ f args kws => call f args.val kws.val
   | .BoolOp _ op vs => boolOp (op matches .And _) vs.val
   | .NamedExpr sr .. => unsupportedValue "assignment expression" sr
   | .Lambda sr .. => unsupportedValue "lambda" sr
   | .IfExp _ c a b => ifExp c a b
-  | .Dict sr .. => unsupportedValue "dict display" sr
-  | .Set sr .. => unsupportedValue "set display" sr
-  | .List sr .. => unsupportedValue "list display" sr
-  | .Tuple sr .. => unsupportedValue "tuple display" sr
+  | .Dict _ ks vs => dictDisplay ks.val vs.val
+  | .Set _ vs => setDisplay vs.val
+  | .List _ vs _ => listDisplay vs.val
+  | .Tuple _ vs _ => tupleDisplay vs.val
   | .ListComp sr .. => unsupportedValue "list comprehension" sr
   | .SetComp sr .. => unsupportedValue "set comprehension" sr
   | .DictComp sr .. => unsupportedValue "dict comprehension" sr
@@ -628,16 +644,120 @@ partial def transCond (e : expr SourceRange) (t f : Label) : TransM Unit := with
     branch (← build (truthy last)) t f
   | _ => branch (← build (truthy (← transExpr e))) t f
 
-/-- `f(a, …)`: `py.call f (mkTuple a …) (mkDict)`. -/
-partial def call (sr : SourceRange) (f : expr SourceRange) (args : Array (expr SourceRange))
+/-- `[a, *x, b]`: `BUILD_LIST` of the elements before the first `*x`, then `LIST_EXTEND` for
+each `*x` and `LIST_APPEND` for each later element, as CPython does. -/
+partial def listDisplay (vs : Array (expr SourceRange)) : TransM ValId := do
+  let (first, rest) := splitStarred vs
+  let l ← build (emitTotal "list" Py.mkList #v[] (← first.mapM transExpr))
+  for v in rest do
+    match v with
+    | .Starred _ x _ =>
+      discard <| build (emitActing "extend" Py.listExtend #v[] #[l, ← transExpr x])
+    | v =>
+      let x ← transExpr v
+      discard <| build (emitEffect "append" Py.listAppend #v[] #[l, x])
+  return l
+
+/-- `(a, b)`: `BUILD_TUPLE`.  With a `*x`, a list display then `INTRINSIC_LIST_TO_TUPLE`, as
+CPython does. -/
+partial def tupleDisplay (vs : Array (expr SourceRange)) : TransM ValId := do
+  if (splitStarred vs).2.isEmpty then
+    build (emitTotal "tuple" Py.mkTuple #v[] (← vs.mapM transExpr))
+  else
+    build (emitTotal "tuple" Py.listToTuple #v[] #[← listDisplay vs])
+
+/-- `{a, *x, b}`: as `listDisplay`, with `BUILD_SET`, `SET_UPDATE` and `SET_ADD`.  A set of
+more than `stackUseGuideline` elements starts empty, as in CPython. -/
+partial def setDisplay (vs : Array (expr SourceRange)) : TransM ValId := do
+  let (first, rest) := if vs.size > stackUseGuideline then (#[], vs) else splitStarred vs
+  let st ← build (emitFailing "set" Py.mkSet #v[] (← first.mapM transExpr))
+  for v in rest do
+    match v with
+    | .Starred _ x _ =>
+      discard <| build (emitActing "update" Py.setUpdate #v[] #[st, ← transExpr x])
+    | v => discard <| build (emitActing "add" Py.setAdd #v[] #[st, ← transExpr v])
+  return st
+
+/-- Build a dict from `entries` in order, as CPython's `compiler_dict` does.  Each run of
+pairs is cut by `cut`, and `chunk` builds one chunk; a `**d` entry is `combine acc d`.  The
+first chunk is the dict itself; a later one is built, then combined into it. -/
+partial def dictFromEntries {γ : Type} (entries : Array γ) (star? : γ → Option (expr SourceRange))
+    (cut : Array γ → Array (Array γ)) (chunk : Array γ → TransM ValId)
+    (combine : ValId → ValId → TransM ValId) : TransM ValId := do
+  let mut acc : Option ValId := none
+  let mut pending : Array γ := #[]
+  for e in entries do
+    match star? e with
+    | none => pending := pending.push e
+    | some d =>
+      let a ← flush acc pending
+      pending := #[]
+      acc := some (← combine a (← transExpr d))
+  flush acc pending
+where
+  /-- The dict so far, with the pending run added. -/
+  flush (acc : Option ValId) (pending : Array γ) : TransM ValId := do
+    let mut acc := acc
+    for c in cut pending do
+      let d ← chunk c
+      acc := some (← match acc with | none => pure d | some a => combine a d)
+    match acc with
+    | some a => return a
+    | none => chunk #[]
+
+/-- `{k: v, **d}`, as CPython builds it: a run of pairs is cut into chunks of `dictChunk`,
+each built by `pairs`, and each later chunk and each `**d` is `DICT_UPDATE`. -/
+partial def dictDisplay (ks : Array (opt_expr SourceRange)) (vs : Array (expr SourceRange)) :
+    TransM ValId :=
+  dictFromEntries (ks.zip vs) unpacked (chunks dictChunk) pairs
+    (fun a d => build (emitFailing "update" Py.dictUpdate #v[] #[a, d]))
+where
+  /-- The `d` of a `**d` entry. -/
+  unpacked : opt_expr SourceRange × expr SourceRange → Option (expr SourceRange)
+    | (.some_expr .., _) => none
+    | (_, d) => some d
+  /-- `BUILD_MAP` of the pairs `k: v` of `c`, key before value.  More than
+  `stackUseGuideline / 2` pairs start an empty dict and add each pair (`MAP_ADD`). -/
+  pairs (c : Array (opt_expr SourceRange × expr SourceRange)) : TransM ValId := do
+    let kvs := c.filterMap fun | (.some_expr _ k, v) => some (k, v) | _ => none
+    if 2 * kvs.size > stackUseGuideline then
+      let d ← build (emitFailing "dict" Py.mkDict #v[] #[])
+      for (k, v) in kvs do
+        let kv ← transExpr k
+        let vv ← transExpr v
+        discard <| build (emitActing "set" Py.dictSet #v[] #[d, kv, vv])
+      return d
+    let mut args := #[]
+    for (k, v) in kvs do
+      args := args.push (← transExpr k)
+      args := args.push (← transExpr v)
+    build (emitFailing "dict" Py.mkDict #v[] args)
+
+/-- `f(a, *x, k=v, **m)`: `py.call f args kwargs`, evaluating the callee, the positional
+arguments, then the keyword arguments, as CPython does.  `args` is a tuple display; a lone
+`*x` is evaluated in place and made a tuple by `argsTuple` after the keyword arguments.
+`kwargs` is runs of `k=v` pairs, each a total `mkKwargs`, and `DICT_MERGE` (`dictMerge`)
+for each `**m`. -/
+partial def call (f : expr SourceRange) (args : Array (expr SourceRange))
     (kws : Array (keyword SourceRange)) : TransM ValId := do
-  if !kws.isEmpty then return ← unsupportedValue "keyword argument" sr
-  if args.any (fun | .Starred .. => true | _ => false) then
-    return ← unsupportedValue "starred argument" sr
   let fv ← transExpr f
-  let avs ← args.mapM transExpr
-  let t ← build (emitTotal "args" Py.mkTuple #v[] avs)
-  let d ← build (emitTotal "kwargs" Py.mkDict #v[] #[])
+  let lone ← match args with
+    | #[.Starred _ x _] => some <$> transExpr x
+    | _ => pure none
+  let t? ← if lone.isSome then pure none else some <$> tupleDisplay args
+  let d ← dictFromEntries kws (fun kw => if kw.nameAndValue.1.isSome then none else some kw.value)
+    (fun run => if run.isEmpty then #[] else #[run])
+    (fun run => do
+      let mut kvs := #[]
+      for kw in run do
+        kvs := kvs.push (← build (strLit (kw.nameAndValue.1.getD "")))
+        kvs := kvs.push (← transExpr kw.value)
+      build (emitTotal "kwargs" Py.mkKwargs #v[] kvs))
+    (fun a m => build (emitFailing "merge" Py.dictMerge #v[] #[fv, a, m]))
+  let t ← match t?, lone with
+    | some t, _ => pure t
+    | none, some x => build (emitFailing "args" Py.argsTuple #v[] #[fv, x])
+    | none, none => build (emitTotal "args" Py.mkTuple #v[] #[])
   build (emitFailing "call" Py.call #v[] #[fv, t, d])
 
 end
@@ -697,8 +817,8 @@ def prologue (ps : Array ParamWithDefault) (args kwargs : ValId) : TransM Unit :
     match p.default with
     | some d => transExpr d
     | none => build (emitTotal p.name Py.undef #v[] #[← build (emitConst "n" (.str p.name))])
-  let discardKey (key : ValId) : TransM Unit := discard <| buildRaw <|
-    Build.emitApply (env := Py.env) "discard" Base.Unit.ty Py.dictDiscard #v[] #[kwargs, key]
+  let discardKey (key : ValId) : TransM Unit :=
+    discard <| build (emitEffect "discard" Py.dictDiscard #v[] #[kwargs, key])
   let typeError (val : ValId) (limit : Option Int) (msg : String) : TransM Unit := do
     let lim ← limit.mapM fun l => build (emitConst "limit" (.int l))
     let e ← build (emitConst "e" (.str "TypeError"))

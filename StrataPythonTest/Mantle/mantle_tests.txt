@@ -5,11 +5,11 @@
 # is a construct's name, or the message of a scope error (the e* tests).
 # StrataPythonTestExtra/MantleTranslateTest.lean reads this file.
 t01_assign | yes |
-t02_operators | no |
+t02_operators | yes |
 t03_if_else | yes |
 t04_while | yes |
 t05_for | no |
-t06_function | no |
+t06_function | yes |
 t07_try_except | no |
 t08_try_finally | no |
 t09_nested_try | no |
@@ -32,20 +32,20 @@ t25_tuple_unpack | no |
 t26_with_as_use | no |
 t27_module_vars | no |
 t28_try_else | no |
-t29_dict_unpack | no |
+t29_dict_unpack | yes |
 t30_loop_try_nested | no |
 n01_async | yes | async def
-n02_listcomp | no | list comprehension
-n03_dictcomp | no | dict comprehension
-n04_generator | no | generator expression
+n02_listcomp | yes | list comprehension
+n03_dictcomp | yes | dict comprehension
+n04_generator | yes | generator expression
 n05_lambda | yes | lambda
 n06_yield | yes | generator function
-n07_walrus | no | list comprehension
-n08_mixed | no | async def, list comprehension
-i01_call_forms | no |
-i02_param_kinds | no |
-i03_defaults | no |
-i04_dict_unpack | no |
+n07_walrus | yes | list comprehension
+n08_mixed | yes | async def, list comprehension
+i01_call_forms | yes |
+i02_param_kinds | yes |
+i03_defaults | yes |
+i04_dict_unpack | yes |
 i05_kwargs_mutation | no |
 i06_call_errors | no |
 i07_methods | no |
@@ -55,7 +55,7 @@ tc02_arithmetic | yes |
 tc03_string_ops | yes |
 tc04_comparisons | yes |
 tc05_unary | yes |
-tc06_collections | no |
+tc06_collections | yes |
 tc07_if_else | yes |
 tc08_fstring | no |
 tc09_import | no |
@@ -75,7 +75,9 @@ c5_body_finally_vs_loop_exit | no |
 c6_body_raise | no |
 c7_with_return | no |
 m_builtins | yes |
+m_calls | yes |
 m_cond | yes |
+m_displays | yes |
 m_expressions | yes |
 m_global_decl | yes |
 m_if | yes |
@@ -105,12 +107,13 @@ e17_yield_in_genexpr | yes | generator expression, 'yield' inside generator expr
 e18_walrus_lambda_in_iterable | no | assignment expression cannot be used in a comprehension iterable expression
 e19_walrus_rebinds_outer_iteration | no | assignment expression cannot rebind comprehension iteration variable 'row'
 e20_yield_in_dictcomp | no | 'yield' inside dict comprehension
+e21_repeated_keyword | yes | keyword argument repeated: k
 p01_import_dotted | no |
 p02_import_as | no |
-p03_from_import | no |
+p03_from_import | yes |
 p04_import_in_function | no |
 p05_import_try | no |
-p06_import_relative | no | relative import
+p06_import_relative | yes | relative import
 p07_import_star | yes | import *
 p08_import_rebound | yes |
 p09_read_before_assign | yes |
@@ -122,14 +125,14 @@ p14_class_body | no |
 p15_global | yes |
 p16_closures | no |
 p17_conditional_def | no |
-p18_builtins | no |
+p18_builtins | yes |
 p19_builtin_shadowed | no |
 p20_global_mutated | yes |
 p21_closure_three_levels | no |
 p22_comprehensions | no | generator expression
 p23_walrus | no | generator expression
 p24_lambda | no |
-p25_shadow_builtin | no |
+p25_shadow_builtin | yes |
 p26_params | no |
 p27_nonlocal_chain | no |
 p28_global_nested | no |

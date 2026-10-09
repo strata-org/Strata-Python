@@ -431,6 +431,14 @@ private def syntaxError (message : String) (range : SourceRange) : CollectM Unit
 private def unsupported (message : String) (range : SourceRange) : CollectM Unit :=
   report .unsupported message range
 
+/-- Report a keyword argument named twice, as CPython's compiler does. -/
+private def checkKeywords (kws : Array (keyword SourceRange)) : CollectM Unit := do
+  let mut seen : Std.HashSet String := {}
+  for k in kws do
+    if let some n := k.nameAndValue.1 then
+      if seen.contains n then return ← syntaxError s!"keyword argument repeated: {n}" k.ann
+      seen := seen.insert n
+
 private def mangled (name : String) : CollectM String := do
   return mangle (← get).privateName name
 
@@ -642,6 +650,7 @@ private partial def visitExpr (e : expr SourceRange) : CollectM Unit := do
     visitExpr f
     args.val.forM visitExpr
     kws.val.forM fun k => visitExpr k.value
+    checkKeywords kws.val
   | .FormattedValue _ v _ spec => visitExpr v; spec.val.forM visitExpr
   | .Interpolation _ v _ _ spec => visitExpr v; spec.val.forM visitExpr
   | .JoinedStr _ vs | .TemplateStr _ vs => vs.val.forM visitExpr
@@ -724,6 +733,7 @@ private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
     addDef name { assigned := true } sr
     bases.val.forM visitExpr
     kws.val.forM fun k => visitExpr k.value
+    checkKeywords kws.val
     decorators.val.forM visitExpr
     let outerPrivate := (← get).privateName
     modify fun st => { st with privateName := some name }

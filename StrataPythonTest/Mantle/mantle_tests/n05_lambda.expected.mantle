@@ -27,7 +27,7 @@ module n05_lambda {
       %22 : base.Int = const int 2
       %23 : py.Value = py.intLit %22
       %24 : py.Value = py.mkTuple %21 %23
-      %25 : py.Value = py.mkDict
+      %25 : py.Value = py.mkKwargs
       %26 : py.Value = py.call %19 %24 %25 ^propagate.0()
       %27 : base.String = const str "n05_lambda"
       %28 : base.String = const str "result"

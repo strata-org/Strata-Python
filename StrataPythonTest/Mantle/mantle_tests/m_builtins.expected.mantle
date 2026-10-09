@@ -13,7 +13,7 @@ module m_builtins {
       %9 : base.String = const str "abc"
       %10 : py.Value = py.strLit %9
       %11 : py.Value = py.mkTuple %10
-      %12 : py.Value = py.mkDict
+      %12 : py.Value = py.mkKwargs
       %13 : py.Value = py.call %8 %11 %12 ^propagate.0()
       %14 : base.String = const str "m_builtins"
       %15 : base.String = const str "n"
@@ -27,7 +27,7 @@ module m_builtins {
       %23 : base.Int = const int 2
       %24 : py.Value = py.intLit %23
       %25 : py.Value = py.mkTuple %22 %24
-      %26 : py.Value = py.mkDict
+      %26 : py.Value = py.mkKwargs
       %27 : py.Value = py.call %20 %25 %26 ^propagate.0()
       %28 : base.String = const str "m_builtins"
       %29 : base.String = const str "m"
@@ -73,7 +73,7 @@ module m_builtins {
       %60 : base.String = const str "name 'm' is not defined"
       %61 : py.Value = py.requireDefined %58 %59 %60 ^propagate.0()
       %62 : py.Value = py.mkTuple %61
-      %63 : py.Value = py.mkDict
+      %63 : py.Value = py.mkKwargs
       %64 : py.Value = py.call %54 %62 %63 ^propagate.0()
       %65 : py.Value = py.noneLit
       %66 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %65

@@ -69,7 +69,7 @@ module e17_yield_in_genexpr {
       %44 : py.Value = py.strLit %43
       %45 : py.Value = py.unsupported %44
       %46 : py.Value = py.mkTuple %45
-      %47 : py.Value = py.mkDict
+      %47 : py.Value = py.mkKwargs
       %48 : py.Value = py.call %42 %46 %47 ^propagate.0()
       %49 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %48
       ret %49

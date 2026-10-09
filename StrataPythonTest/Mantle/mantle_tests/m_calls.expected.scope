@@ -1,0 +1,7 @@
+module
+  f: global implicit (referenced)
+  a: global implicit (referenced)
+  b: global implicit (referenced)
+  xs: global implicit (referenced)
+  m: global implicit (referenced)
+  n: global implicit (referenced)

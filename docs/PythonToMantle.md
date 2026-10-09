@@ -135,9 +135,10 @@ are in `StrataPython/Mantle/Build.lean`.
   receives the exception as a `py.Value`. The operation's result is its success value. The
   translator passes the label of the enclosing handler as `err`.
 - **Total operations** have no successors. These are the literals, `undef`, `isDefined`,
-  `is`/`isNot`, `mkTuple`/`mkList`/`mkSet`/`mkDict`, `tupleLen`, `dictLen`, `dictGet`,
+  `is`/`isNot`, `mkTuple`/`mkList`/`mkKwargs`, `listToTuple`, `tupleLen`, `dictLen`, `dictGet`,
   `dictFirstKey`, `dictDiscard`, `listAppend`, `isStopIteration`, `globalCell`, `mkClosure`
-  and `unsupported`.
+  and `unsupported`. `mkSet` and `mkDict` raise, because hashing a key runs `__hash__` and
+  `__eq__`.
 - **Cells.** A cell is a `base.Ref(py.Value)`, a mutable location. Every Python local is a
   cell: `refNew` creates it, `refSet` writes it and `refGet` reads it. A cell that has not
   been assigned holds `py.undef "x"`. A later *ref-to-reg* pass promotes cells that do not
@@ -300,7 +301,8 @@ The pass also:
 - reports CPython's compile-time scope errors (`nonlocal` with no binding, a name used before
   its `global` declaration, a duplicate parameter, the walrus restrictions in
   comprehensions, `'yield' inside list/set/dict comprehension` and `'yield' inside
-  generator expression`) as `syntaxError` diagnostics;
+  generator expression`), and the compiler's `keyword argument repeated`, as `syntaxError`
+  diagnostics;
 - rejects relative imports, `import *`, `match`, `type` statements and type parameters with
   `unsupported` diagnostics;
 - lists every import in `Table.imports`, separately from the symbols. Each `Import` holds
@@ -333,7 +335,7 @@ The reference is CPython 3.12's `symtable` (3.13 gives the same output).
 `StrataPythonTestExtra/PyScopeTest.lean` runs the pass over every program in
 `StrataPythonTest/Mantle/mantle_tests/`, the translator's tests too, and compares it with
 `NAME.symtable`, the program's `symtable` output, and `NAME.expected.scope`, a golden dump.
-`e01`–`e20` are programs with scope errors. `p38` uses `type` statements, which the pass
+`e01`–`e21` are programs with compile-time errors. `p38` uses `type` statements, which the pass
 rejects, so it has no `symtable` comparison.
 
 **Reading a name.** The lowering depends on the name's kind and on the kind of scope it is
@@ -540,8 +542,10 @@ false, as in CPython.
 | `o[i:j:s]` | `py.getSlice o i j s`, with `None` for an absent bound |
 | `o[i:j, k]` (a slice inside a tuple) | **rejected** until `py.mkSlice` exists (§8) |
 | `(a, b)`, `[a, b]`, `{a, b}` | `py.mkTuple` / `mkList` / `mkSet` over the evaluated elements |
-| `(*xs, a)` | `mkTuple`, then `tupleExtend` per starred run. For a list or set, the tuple is passed to builtins `list` or `set` through `py.call` |
-| `{k: v, **d}` | `py.mkDict k v …` (keys and values interleaved; each key is evaluated before its value), then `py.dictUpdate` for each `**d`, last one winning |
+| `[a, *xs, b]`, `{a, *xs, b}` | as CPython: `mkList` (`mkSet`) of the elements before the first `*x`, then `listExtend` (`setUpdate`) for each `*x` and `listAppend` (`setAdd`) for each later element |
+| `(a, *xs, b)` | the list display, then `listToTuple` |
+| `{k: v, **d}` | as CPython: `py.mkDict k v …` for each run of pairs (keys and values interleaved, each key before its value), and `py.dictUpdate` for each `**d`, last one winning. The first run is the dict; a later run is built, then added by `dictUpdate` |
+| a set of more than 30 elements, a long dict run | as CPython (`STACK_USE_GUIDELINE`): a set starts empty and adds each element as it is evaluated (`setAdd`). A dict run is cut into chunks of 17 pairs; a chunk of more than 15 pairs starts empty and adds each pair (`dictSet`), and each later chunk is added by `dictUpdate`. So an unhashable key raises before the next element is evaluated |
 | `f"a{x}b"` | `py.strConcat` over `strLit` parts and `py.fmtValue x`. `{x!r}` applies builtins `repr` first (`str`, `ascii` likewise). `{x:spec}` calls builtins `format(x, spec)`, where `spec` is itself a joined string |
 | `(x := e)` | evaluate `e`, `refSet` the target's cell, and use the value `e`. In a comprehension, the target is the enclosing function's local, a `cell` only if a nested scope captures it (§6.8) |
 | `lambda` | §5.3, as an expression |
@@ -562,17 +566,19 @@ parameters.
 ```
 
 **Calls.** Evaluate the callee, then the positional arguments left to right, then the
-keyword arguments. Build `args` from runs: `mkTuple` over each run of plain arguments, and
-`tupleExtend` for each `*x`. Build `kwargs` with `mkDict` over interleaved key `strLit`s and
-values, and `py.dictMerge f d other` for each `**x`. Merging rejects duplicate keys, as a
-call must. Then emit `py.call f args kwargs`. A method call `o.m(x)` is `py.attr`, then
+keyword arguments, as CPython does. `args` is the tuple display of the positional arguments.
+A lone `*x`, as in `f(*x, k=v)`, is evaluated in place, but `py.argsTuple f x` makes it a
+tuple after the keyword arguments, as `CALL_FUNCTION_EX` does: `f(*g(), k=h())` calls `h()`
+before it iterates `g()`. `kwargs` is built as a dict display is, but each run of `k=v` pairs is
+a total `py.mkKwargs`, as its keys are `strLit`s, and each `**x` is `py.dictMerge f d other`. Merging rejects duplicate keys, as a call must.
+Then emit `py.call f args kwargs`. A method call `o.m(x)` is `py.attr`, then
 `py.call`: binding the method is `attr`'s job. `kwargs` is always a fresh dict.
 
 ```
     %14 : py.Value = py.mkTuple %12
     %15 : base.String = const str "k"
     %16 : py.Value = py.strLit %15
-    %17 : py.Value = py.mkDict %16 %13
+    %17 : py.Value = py.mkKwargs %16 %13
     %18 : py.Value = py.call %11 %14 %17 ^propagate.0()   -- f(x, k=y)
 ```
 
@@ -994,9 +1000,10 @@ a diagnostic.
 | `if` / `elif` / `else` | §6.2 | specified; implemented |
 | literals, `...`, `+ - * / // % **`, `-a`, `not a`, comparisons (chained too), `and`, `or`, `x if c else y` | §6.3 | specified; implemented |
 | conditions (`transCond`) | §6.2 | specified; implemented for `if`, `while` and `x if c else y` |
-| calls with positional arguments | §6.3 | specified; implemented |
-| calls with keywords, `*` and `**`, attribute, subscript, slice | §6.3 | specified |
-| displays and unpacking in them, f-strings, walrus | §6.3 | specified |
+| calls, with keywords, `*` and `**` | §6.3 | specified; implemented |
+| displays and unpacking in them | §6.3 | specified; implemented |
+| attribute, subscript, slice | §6.3 | specified |
+| f-strings, walrus | §6.3 | specified |
 | complex literal, t-string, slice inside a tuple | §6.3 | unsupported |
 | `@ << >> & \| ^`, unary `+`, `~` | §6.3 | unsupported |
 | `while` / `else`, `break`, `continue` | §6.4–§6.5 | specified; implemented |

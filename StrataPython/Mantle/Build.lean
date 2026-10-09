@@ -138,6 +138,12 @@ def emitFailing {isig : InsnSig Py.env} (name : String) (r : InsnRef Py.env isig
     (info : Option α := none) : PyM α ValId := do
   Build.emitApply name Py.Value.ty r typeArgs args #[← handler] (info := info)
 
+/-- An operation that cannot fail and only acts: its result is `()`. -/
+def emitEffect {isig : InsnSig Py.env} (name : String) (r : InsnRef Py.env isig)
+    (typeArgs : Vector (TypeExpr Py.env 0) isig.typeArgc) (args : Array ValId)
+    (info : Option α := none) : PyM α ValId :=
+  Build.emitApply name Base.Unit.ty r typeArgs args (info := info)
+
 /-- A raising operation that only acts: its result is `()`, and its `err` successor is the
 enclosing handler. -/
 def emitActing {isig : InsnSig Py.env} (name : String) (r : InsnRef Py.env isig)

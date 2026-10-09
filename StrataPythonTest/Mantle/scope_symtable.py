@@ -144,8 +144,13 @@ def describe(path):
         return f"error: {err.msg} (line {err.lineno})\n"
     out = []
     scope_lines(table, 0, out)
+    try:
+        code = compile(source, path.name, "exec")
+    except SyntaxError as err:
+        # An error the compiler reports after the symbol table, such as a repeated keyword.
+        return f"error: {err.msg} (line {err.lineno})\n"
     names = []
-    qualnames(compile(source, path.name, "exec"), names)
+    qualnames(code, names)
     out.append("qualnames: " + ", ".join(sorted(names)))
     return "\n".join(out) + "\n"
 

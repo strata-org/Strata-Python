@@ -1,0 +1,276 @@
+module t06_function {
+  func @t06_function.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "t06_function"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "t06_function"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Code = const @t06_function.add
+      %7 : py.Value = py.mkClosure %6
+      %8 : base.String = const str "t06_function"
+      %9 : base.String = const str "add"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : base.Code = const @t06_function.greet
+      %13 : py.Value = py.mkClosure %12
+      %14 : base.String = const str "t06_function"
+      %15 : base.String = const str "greet"
+      %16 : base.Ref(py.Value) = py.globalCell %14 %15
+      %17 : base.Unit = base.refSet[py.Value] %16 %13
+      %18 : base.String = const str "t06_function"
+      %19 : base.String = const str "add"
+      %20 : base.Ref(py.Value) = py.globalCell %18 %19
+      %21 : py.Value = base.refGet[py.Value] %20
+      %22 : base.String = const str "NameError"
+      %23 : base.String = const str "name 'add' is not defined"
+      %24 : py.Value = py.requireDefined %21 %22 %23 ^propagate.0()
+      %25 : base.Int = const int 1
+      %26 : py.Value = py.intLit %25
+      %27 : base.Int = const int 2
+      %28 : py.Value = py.intLit %27
+      %29 : py.Value = py.mkTuple %26 %28
+      %30 : py.Value = py.mkKwargs
+      %31 : py.Value = py.call %24 %29 %30 ^propagate.0()
+      %32 : base.String = const str "t06_function"
+      %33 : base.String = const str "result"
+      %34 : base.Ref(py.Value) = py.globalCell %32 %33
+      %35 : base.Unit = base.refSet[py.Value] %34 %31
+      %36 : base.String = const str "t06_function"
+      %37 : base.String = const str "greet"
+      %38 : base.Ref(py.Value) = py.globalCell %36 %37
+      %39 : py.Value = base.refGet[py.Value] %38
+      %40 : base.String = const str "NameError"
+      %41 : base.String = const str "name 'greet' is not defined"
+      %42 : py.Value = py.requireDefined %39 %40 %41 ^propagate.0()
+      %43 : base.String = const str "world"
+      %44 : py.Value = py.strLit %43
+      %45 : py.Value = py.mkTuple %44
+      %46 : py.Value = py.mkKwargs
+      %47 : py.Value = py.call %42 %45 %46 ^propagate.0()
+      %48 : base.String = const str "t06_function"
+      %49 : base.String = const str "msg"
+      %50 : base.Ref(py.Value) = py.globalCell %48 %49
+      %51 : base.Unit = base.refSet[py.Value] %50 %47
+      %52 : base.String = const str "t06_function"
+      %53 : base.String = const str "greet"
+      %54 : base.Ref(py.Value) = py.globalCell %52 %53
+      %55 : py.Value = base.refGet[py.Value] %54
+      %56 : base.String = const str "NameError"
+      %57 : base.String = const str "name 'greet' is not defined"
+      %58 : py.Value = py.requireDefined %55 %56 %57 ^propagate.0()
+      %59 : base.String = const str "world"
+      %60 : py.Value = py.strLit %59
+      %61 : py.Value = py.mkTuple %60
+      %62 : base.String = const str "greeting"
+      %63 : py.Value = py.strLit %62
+      %64 : base.String = const str "Hi"
+      %65 : py.Value = py.strLit %64
+      %66 : py.Value = py.mkKwargs %63 %65
+      %67 : py.Value = py.call %58 %61 %66 ^propagate.0()
+      %68 : base.String = const str "t06_function"
+      %69 : base.String = const str "msg2"
+      %70 : base.Ref(py.Value) = py.globalCell %68 %69
+      %71 : base.Unit = base.refSet[py.Value] %70 %67
+      %72 : base.Code = const @t06_function.do_nothing
+      %73 : py.Value = py.mkClosure %72
+      %74 : base.String = const str "t06_function"
+      %75 : base.String = const str "do_nothing"
+      %76 : base.Ref(py.Value) = py.globalCell %74 %75
+      %77 : base.Unit = base.refSet[py.Value] %76 %73
+      %78 : base.String = const str "t06_function"
+      %79 : base.String = const str "do_nothing"
+      %80 : base.Ref(py.Value) = py.globalCell %78 %79
+      %81 : py.Value = base.refGet[py.Value] %80
+      %82 : base.String = const str "NameError"
+      %83 : base.String = const str "name 'do_nothing' is not defined"
+      %84 : py.Value = py.requireDefined %81 %82 %83 ^propagate.0()
+      %85 : py.Value = py.mkTuple
+      %86 : py.Value = py.mkKwargs
+      %87 : py.Value = py.call %84 %85 %86 ^propagate.0()
+      %88 : py.Value = py.noneLit
+      %89 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %88
+      ret %89
+    propagate.0(%90 : py.Value):
+      %91 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %90
+      ret %91
+  }
+  func @t06_function.add(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "a"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : base.String = const str "b"
+      %6 : py.Value = py.undef %5
+      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
+      %8 : py.Value = py.tupleLen %0
+      %9 : base.String = const str "a"
+      %10 : py.Value = py.undef %9
+      %11 : base.String = const str "b"
+      %12 : py.Value = py.undef %11
+      %13 : py.Value = py.mkTuple %10 %12
+      %14 : py.Value = py.noneLit
+      %15 : py.Value = py.getSlice %13 %8 %14 %14 ^propagate.0()
+      %16 : py.Value = py.add %0 %15 ^propagate.0()
+      %17 : base.Int = const int 0
+      %18 : py.Value = py.intLit %17
+      %19 : py.Value = py.getItem %16 %18 ^propagate.0()
+      %20 : base.String = const str "a"
+      %21 : py.Value = py.strLit %20
+      %22 : py.Value = py.dictGet %1 %21 %19
+      %23 : py.Value = py.in %21 %1 ^propagate.0()
+      %24 : base.Unit = py.dictDiscard %1 %21
+      %25 : base.Int = const int 1
+      %26 : py.Value = py.intLit %25
+      %27 : py.Value = py.getItem %16 %26 ^propagate.0()
+      %28 : base.String = const str "b"
+      %29 : py.Value = py.strLit %28
+      %30 : py.Value = py.dictGet %1 %29 %27
+      %31 : py.Value = py.in %29 %1 ^propagate.0()
+      %32 : base.Unit = py.dictDiscard %1 %29
+      %33 : py.Value = py.lt %18 %8 ^propagate.0()
+      %34 : py.Value = py.mult %23 %33 ^propagate.0()
+      %35 : base.Int = const int 0
+      %36 : base.String = const str "TypeError"
+      %37 : base.String = const str "add() got multiple values for argument 'a'"
+      %38 : base.Unit = py.requireAtMost %34 %35 %36 %37 ^propagate.0()
+      %39 : py.Value = py.lt %26 %8 ^propagate.0()
+      %40 : py.Value = py.mult %31 %39 ^propagate.0()
+      %41 : base.Int = const int 0
+      %42 : base.String = const str "TypeError"
+      %43 : base.String = const str "add() got multiple values for argument 'b'"
+      %44 : base.Unit = py.requireAtMost %40 %41 %42 %43 ^propagate.0()
+      %45 : base.String = const str "kwargs"
+      %46 : py.Value = py.undef %45
+      %47 : py.Value = py.dictFirstKey %1 %46
+      %48 : base.String = const str "TypeError"
+      %49 : base.String = const str "add() got an unexpected keyword argument {}"
+      %50 : base.Unit = py.requireUndefined %47 %48 %49 ^propagate.0()
+      %51 : base.Int = const int 2
+      %52 : base.String = const str "TypeError"
+      %53 : base.String = const str "add() takes 2 positional arguments but {} {was} given"
+      %54 : base.Unit = py.requireAtMost %8 %51 %52 %53 ^propagate.0()
+      %55 : base.String = const str "TypeError"
+      %56 : base.String = const str "add() missing 1 required positional argument: 'a'"
+      %57 : py.Value = py.requireDefined %22 %55 %56 ^propagate.0()
+      %58 : base.Unit = base.refSet[py.Value] %4 %57
+      %59 : base.String = const str "TypeError"
+      %60 : base.String = const str "add() missing 1 required positional argument: 'b'"
+      %61 : py.Value = py.requireDefined %30 %59 %60 ^propagate.0()
+      %62 : base.Unit = base.refSet[py.Value] %7 %61
+      %63 : py.Value = base.refGet[py.Value] %4
+      %64 : base.String = const str "UnboundLocalError"
+      %65 : base.String = const str "cannot access local variable 'a' where it is not associated with a value"
+      %66 : py.Value = py.requireDefined %63 %64 %65 ^propagate.0()
+      %67 : py.Value = base.refGet[py.Value] %7
+      %68 : base.String = const str "UnboundLocalError"
+      %69 : base.String = const str "cannot access local variable 'b' where it is not associated with a value"
+      %70 : py.Value = py.requireDefined %67 %68 %69 ^propagate.0()
+      %71 : py.Value = py.add %66 %70 ^propagate.0()
+      %72 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %71
+      ret %72
+    propagate.0(%73 : py.Value):
+      %74 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %73
+      ret %74
+  }
+  func @t06_function.greet(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "name"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : base.String = const str "greeting"
+      %6 : py.Value = py.undef %5
+      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
+      %8 : py.Value = py.tupleLen %0
+      %9 : base.String = const str "name"
+      %10 : py.Value = py.undef %9
+      %11 : base.String = const str "Hello"
+      %12 : py.Value = py.strLit %11
+      %13 : py.Value = py.mkTuple %10 %12
+      %14 : py.Value = py.noneLit
+      %15 : py.Value = py.getSlice %13 %8 %14 %14 ^propagate.0()
+      %16 : py.Value = py.add %0 %15 ^propagate.0()
+      %17 : base.Int = const int 0
+      %18 : py.Value = py.intLit %17
+      %19 : py.Value = py.getItem %16 %18 ^propagate.0()
+      %20 : base.String = const str "name"
+      %21 : py.Value = py.strLit %20
+      %22 : py.Value = py.dictGet %1 %21 %19
+      %23 : py.Value = py.in %21 %1 ^propagate.0()
+      %24 : base.Unit = py.dictDiscard %1 %21
+      %25 : base.Int = const int 1
+      %26 : py.Value = py.intLit %25
+      %27 : py.Value = py.getItem %16 %26 ^propagate.0()
+      %28 : base.String = const str "greeting"
+      %29 : py.Value = py.strLit %28
+      %30 : py.Value = py.dictGet %1 %29 %27
+      %31 : py.Value = py.in %29 %1 ^propagate.0()
+      %32 : base.Unit = py.dictDiscard %1 %29
+      %33 : py.Value = py.lt %18 %8 ^propagate.0()
+      %34 : py.Value = py.mult %23 %33 ^propagate.0()
+      %35 : base.Int = const int 0
+      %36 : base.String = const str "TypeError"
+      %37 : base.String = const str "greet() got multiple values for argument 'name'"
+      %38 : base.Unit = py.requireAtMost %34 %35 %36 %37 ^propagate.0()
+      %39 : py.Value = py.lt %26 %8 ^propagate.0()
+      %40 : py.Value = py.mult %31 %39 ^propagate.0()
+      %41 : base.Int = const int 0
+      %42 : base.String = const str "TypeError"
+      %43 : base.String = const str "greet() got multiple values for argument 'greeting'"
+      %44 : base.Unit = py.requireAtMost %40 %41 %42 %43 ^propagate.0()
+      %45 : base.String = const str "kwargs"
+      %46 : py.Value = py.undef %45
+      %47 : py.Value = py.dictFirstKey %1 %46
+      %48 : base.String = const str "TypeError"
+      %49 : base.String = const str "greet() got an unexpected keyword argument {}"
+      %50 : base.Unit = py.requireUndefined %47 %48 %49 ^propagate.0()
+      %51 : base.Int = const int 2
+      %52 : base.String = const str "TypeError"
+      %53 : base.String = const str "greet() takes from 1 to 2 positional arguments but {} {was} given"
+      %54 : base.Unit = py.requireAtMost %8 %51 %52 %53 ^propagate.0()
+      %55 : base.String = const str "TypeError"
+      %56 : base.String = const str "greet() missing 1 required positional argument: 'name'"
+      %57 : py.Value = py.requireDefined %22 %55 %56 ^propagate.0()
+      %58 : base.Unit = base.refSet[py.Value] %4 %57
+      %59 : base.Unit = base.refSet[py.Value] %7 %30
+      %60 : py.Value = base.refGet[py.Value] %7
+      %61 : base.String = const str "UnboundLocalError"
+      %62 : base.String = const str "cannot access local variable 'greeting' where it is not associated with a value"
+      %63 : py.Value = py.requireDefined %60 %61 %62 ^propagate.0()
+      %64 : base.String = const str " "
+      %65 : py.Value = py.strLit %64
+      %66 : py.Value = py.add %63 %65 ^propagate.0()
+      %67 : py.Value = base.refGet[py.Value] %4
+      %68 : base.String = const str "UnboundLocalError"
+      %69 : base.String = const str "cannot access local variable 'name' where it is not associated with a value"
+      %70 : py.Value = py.requireDefined %67 %68 %69 ^propagate.0()
+      %71 : py.Value = py.add %66 %70 ^propagate.0()
+      %72 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %71
+      ret %72
+    propagate.0(%73 : py.Value):
+      %74 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %73
+      ret %74
+  }
+  func @t06_function.do_nothing(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : py.Value = py.tupleLen %0
+      %3 : base.String = const str "kwargs"
+      %4 : py.Value = py.undef %3
+      %5 : py.Value = py.dictFirstKey %1 %4
+      %6 : base.String = const str "TypeError"
+      %7 : base.String = const str "do_nothing() got an unexpected keyword argument {}"
+      %8 : base.Unit = py.requireUndefined %5 %6 %7 ^propagate.0()
+      %9 : base.Int = const int 0
+      %10 : base.String = const str "TypeError"
+      %11 : base.String = const str "do_nothing() takes 0 positional arguments but {} {was} given"
+      %12 : base.Unit = py.requireAtMost %2 %9 %10 %11 ^propagate.0()
+      %13 : py.Value = py.noneLit
+      %14 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %13
+      ret %14
+    propagate.0(%15 : py.Value):
+      %16 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %15
+      ret %16
+  }
+}
+

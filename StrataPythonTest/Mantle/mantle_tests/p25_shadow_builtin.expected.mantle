@@ -1,0 +1,165 @@
+module p25_shadow_builtin {
+  func @p25_shadow_builtin.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "p25_shadow_builtin"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "p25_shadow_builtin"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Code = const @p25_shadow_builtin.len
+      %7 : py.Value = py.mkClosure %6
+      %8 : base.String = const str "p25_shadow_builtin"
+      %9 : base.String = const str "len"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : base.Code = const @p25_shadow_builtin.f
+      %13 : py.Value = py.mkClosure %12
+      %14 : base.String = const str "p25_shadow_builtin"
+      %15 : base.String = const str "f"
+      %16 : base.Ref(py.Value) = py.globalCell %14 %15
+      %17 : base.Unit = base.refSet[py.Value] %16 %13
+      %18 : py.Value = py.noneLit
+      %19 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %18
+      ret %19
+    propagate.0(%20 : py.Value):
+      %21 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %20
+      ret %21
+  }
+  func @p25_shadow_builtin.len(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "x"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : py.Value = py.tupleLen %0
+      %6 : base.String = const str "x"
+      %7 : py.Value = py.undef %6
+      %8 : py.Value = py.mkTuple %7
+      %9 : py.Value = py.noneLit
+      %10 : py.Value = py.getSlice %8 %5 %9 %9 ^propagate.0()
+      %11 : py.Value = py.add %0 %10 ^propagate.0()
+      %12 : base.Int = const int 0
+      %13 : py.Value = py.intLit %12
+      %14 : py.Value = py.getItem %11 %13 ^propagate.0()
+      %15 : base.String = const str "x"
+      %16 : py.Value = py.strLit %15
+      %17 : py.Value = py.dictGet %1 %16 %14
+      %18 : py.Value = py.in %16 %1 ^propagate.0()
+      %19 : base.Unit = py.dictDiscard %1 %16
+      %20 : py.Value = py.lt %13 %5 ^propagate.0()
+      %21 : py.Value = py.mult %18 %20 ^propagate.0()
+      %22 : base.Int = const int 0
+      %23 : base.String = const str "TypeError"
+      %24 : base.String = const str "len() got multiple values for argument 'x'"
+      %25 : base.Unit = py.requireAtMost %21 %22 %23 %24 ^propagate.0()
+      %26 : base.String = const str "kwargs"
+      %27 : py.Value = py.undef %26
+      %28 : py.Value = py.dictFirstKey %1 %27
+      %29 : base.String = const str "TypeError"
+      %30 : base.String = const str "len() got an unexpected keyword argument {}"
+      %31 : base.Unit = py.requireUndefined %28 %29 %30 ^propagate.0()
+      %32 : base.Int = const int 1
+      %33 : base.String = const str "TypeError"
+      %34 : base.String = const str "len() takes 1 positional argument but {} {was} given"
+      %35 : base.Unit = py.requireAtMost %5 %32 %33 %34 ^propagate.0()
+      %36 : base.String = const str "TypeError"
+      %37 : base.String = const str "len() missing 1 required positional argument: 'x'"
+      %38 : py.Value = py.requireDefined %17 %36 %37 ^propagate.0()
+      %39 : base.Unit = base.refSet[py.Value] %4 %38
+      %40 : base.Int = const int 0
+      %41 : py.Value = py.intLit %40
+      %42 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %41
+      ret %42
+    propagate.0(%43 : py.Value):
+      %44 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %43
+      ret %44
+  }
+  func @p25_shadow_builtin.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "xs"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : base.String = const str "list"
+      %6 : py.Value = py.undef %5
+      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
+      %8 : py.Value = py.tupleLen %0
+      %9 : base.String = const str "xs"
+      %10 : py.Value = py.undef %9
+      %11 : py.Value = py.mkTuple %10
+      %12 : py.Value = py.noneLit
+      %13 : py.Value = py.getSlice %11 %8 %12 %12 ^propagate.0()
+      %14 : py.Value = py.add %0 %13 ^propagate.0()
+      %15 : base.Int = const int 0
+      %16 : py.Value = py.intLit %15
+      %17 : py.Value = py.getItem %14 %16 ^propagate.0()
+      %18 : base.String = const str "xs"
+      %19 : py.Value = py.strLit %18
+      %20 : py.Value = py.dictGet %1 %19 %17
+      %21 : py.Value = py.in %19 %1 ^propagate.0()
+      %22 : base.Unit = py.dictDiscard %1 %19
+      %23 : py.Value = py.lt %16 %8 ^propagate.0()
+      %24 : py.Value = py.mult %21 %23 ^propagate.0()
+      %25 : base.Int = const int 0
+      %26 : base.String = const str "TypeError"
+      %27 : base.String = const str "f() got multiple values for argument 'xs'"
+      %28 : base.Unit = py.requireAtMost %24 %25 %26 %27 ^propagate.0()
+      %29 : base.String = const str "kwargs"
+      %30 : py.Value = py.undef %29
+      %31 : py.Value = py.dictFirstKey %1 %30
+      %32 : base.String = const str "TypeError"
+      %33 : base.String = const str "f() got an unexpected keyword argument {}"
+      %34 : base.Unit = py.requireUndefined %31 %32 %33 ^propagate.0()
+      %35 : base.Int = const int 1
+      %36 : base.String = const str "TypeError"
+      %37 : base.String = const str "f() takes 1 positional argument but {} {was} given"
+      %38 : base.Unit = py.requireAtMost %8 %35 %36 %37 ^propagate.0()
+      %39 : base.String = const str "TypeError"
+      %40 : base.String = const str "f() missing 1 required positional argument: 'xs'"
+      %41 : py.Value = py.requireDefined %20 %39 %40 ^propagate.0()
+      %42 : base.Unit = base.refSet[py.Value] %4 %41
+      %43 : base.Int = const int 1
+      %44 : py.Value = py.intLit %43
+      %45 : py.Value = py.mkList %44
+      %46 : base.Unit = base.refSet[py.Value] %7 %45
+      %47 : base.String = const str "p25_shadow_builtin"
+      %48 : base.String = const str "len"
+      %49 : base.Ref(py.Value) = py.globalCell %47 %48
+      %50 : py.Value = base.refGet[py.Value] %49
+      %51 : base.Bool = py.isDefined %50
+      branch %51 ^join.0(%50) ^builtin.0()
+    builtin.0():
+      %52 : base.String = const str "builtins"
+      %53 : base.String = const str "len"
+      %54 : py.Value = py.qualifiedRef %52 %53 ^propagate.0()
+      jump ^join.0(%54)
+    join.0(%55 : py.Value):
+      %56 : py.Value = base.refGet[py.Value] %4
+      %57 : base.String = const str "UnboundLocalError"
+      %58 : base.String = const str "cannot access local variable 'xs' where it is not associated with a value"
+      %59 : py.Value = py.requireDefined %56 %57 %58 ^propagate.0()
+      %60 : py.Value = py.mkTuple %59
+      %61 : py.Value = py.mkKwargs
+      %62 : py.Value = py.call %55 %60 %61 ^propagate.0()
+      %63 : py.Value = base.refGet[py.Value] %7
+      %64 : base.String = const str "UnboundLocalError"
+      %65 : base.String = const str "cannot access local variable 'list' where it is not associated with a value"
+      %66 : py.Value = py.requireDefined %63 %64 %65 ^propagate.0()
+      %67 : base.String = const str "builtins"
+      %68 : base.String = const str "max"
+      %69 : py.Value = py.qualifiedRef %67 %68 ^propagate.0()
+      %70 : py.Value = base.refGet[py.Value] %4
+      %71 : base.String = const str "UnboundLocalError"
+      %72 : base.String = const str "cannot access local variable 'xs' where it is not associated with a value"
+      %73 : py.Value = py.requireDefined %70 %71 %72 ^propagate.0()
+      %74 : py.Value = py.mkTuple %73
+      %75 : py.Value = py.mkKwargs
+      %76 : py.Value = py.call %69 %74 %75 ^propagate.0()
+      %77 : py.Value = py.mkTuple %62 %66 %76
+      %78 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %77
+      ret %78
+    propagate.0(%79 : py.Value):
+      %80 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %79
+      ret %80
+  }
+}
+

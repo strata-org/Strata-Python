@@ -204,13 +204,18 @@ public environment Py extends Base where
 
   -- Data structures.
 
-  /-- A dict from `kvs`, keys and values alternating.  The type rules do not catch an odd
-  count. -/
-  insn mkDict (*kvs : Value) : Value
+  /-- A dict from `kvs`, keys and values alternating: CPython's `BUILD_MAP`.  The type rules
+  do not catch an odd count.  Raises `TypeError` if a key is unhashable, or whatever its
+  `__hash__` or `__eq__` raises. -/
+  insn mkDict (*kvs : Value) (^err (exc : Value)) : Value
+  /-- A call's keyword dict from `kvs`, keys and values alternating, each key a `str` the
+  translator supplies.  Total, unlike `mkDict`: hashing and comparing a `str` runs no user
+  code. -/
+  insn mkKwargs (*kvs : Value) : Value
   /-- A list of `elems`. -/
   insn mkList (*elems : Value) : Value
-  /-- A set of `elems`. -/
-  insn mkSet (*elems : Value) : Value
+  /-- A set of `elems`: CPython's `BUILD_SET`.  Raises as `mkDict` does for a key. -/
+  insn mkSet (*elems : Value) (^err (exc : Value)) : Value
   /-- A tuple of `elems`. -/
   insn mkTuple (*elems : Value) : Value
   /-- `obj[key]`. -/
@@ -219,9 +224,13 @@ public environment Py extends Base where
   insn setItem (obj key val : Value) (^err (exc : Value)) : Unit
   /-- `obj[lo:hi:step]`.  An absent bound is `None`, as in Python. -/
   insn getSlice (obj lo hi step : Value) (^err (exc : Value)) : Value
-  /-- `tup + tuple(iterable)`, a fresh tuple: the lowering of a `*x` element.  CPython's
-  `LIST_EXTEND` and `INTRINSIC_LIST_TO_TUPLE` fused, raising as they do. -/
-  insn tupleExtend (tup iterable : Value) (^err (exc : Value)) : Value
+  /-- A tuple of the elements of `list`, a list the emitting code made: CPython's
+  `INTRINSIC_LIST_TO_TUPLE`, which ends a tuple display or call with a `*x`. -/
+  insn listToTuple (list : Value) : Value
+  /-- The positional arguments of `callee(*iterable)`: `tuple(iterable)`, as CPython's
+  `CALL_FUNCTION_EX` makes them when `*iterable` is the only positional argument.  Raises a
+  `TypeError` naming `callee` if `iterable` is not iterable. -/
+  insn argsTuple (callee iterable : Value) (^err (exc : Value)) : Value
   /-- The number of elements of `tup`, as a Python `int`. -/
   insn tupleLen (tup : Value) : Value
   /-- `dict` with `other` merged in, as a fresh dict: the lowering of a `**x` argument.
@@ -245,9 +254,15 @@ public environment Py extends Base where
   /-- Appends `value` to `list` in place: CPython's `LIST_APPEND`.  Total: `list` is one the
   emitting code made, such as a comprehension's accumulator. -/
   insn listAppend (list value : Value) : Unit
+  /-- Appends the elements of `iterable` to `list` in place: CPython's `LIST_EXTEND`, for a `*x`
+  element.  Raises `TypeError` if `iterable` is not iterable, or whatever iterating it raises. -/
+  insn listExtend (list iterable : Value) (^err (exc : Value)) : Unit
   /-- Adds `value` to `set` in place: CPython's `SET_ADD`.  Raises `TypeError` if `value` is
   unhashable. -/
   insn setAdd (set value : Value) (^err (exc : Value)) : Unit
+  /-- Adds the elements of `iterable` to `set` in place: CPython's `SET_UPDATE`, for a `*x`
+  element.  Raises as `listExtend` and `setAdd` do. -/
+  insn setUpdate (set iterable : Value) (^err (exc : Value)) : Unit
   /-- Stores `value` under `key` in `dict`, in place: CPython's `MAP_ADD`.  Raises `TypeError`
   if `key` is unhashable. -/
   insn dictSet (dict key value : Value) (^err (exc : Value)) : Unit

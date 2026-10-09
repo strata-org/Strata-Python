@@ -1,0 +1,121 @@
+module p18_builtins {
+  func @p18_builtins.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "p18_builtins"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "p18_builtins"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.Code = const @p18_builtins.f
+      %7 : py.Value = py.mkClosure %6
+      %8 : base.String = const str "p18_builtins"
+      %9 : base.String = const str "f"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : py.Value = py.noneLit
+      %13 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %12
+      ret %13
+    propagate.0(%14 : py.Value):
+      %15 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %14
+      ret %15
+  }
+  func @p18_builtins.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "xs"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : py.Value = py.tupleLen %0
+      %6 : base.String = const str "xs"
+      %7 : py.Value = py.undef %6
+      %8 : py.Value = py.mkTuple %7
+      %9 : py.Value = py.noneLit
+      %10 : py.Value = py.getSlice %8 %5 %9 %9 ^propagate.0()
+      %11 : py.Value = py.add %0 %10 ^propagate.0()
+      %12 : base.Int = const int 0
+      %13 : py.Value = py.intLit %12
+      %14 : py.Value = py.getItem %11 %13 ^propagate.0()
+      %15 : base.String = const str "xs"
+      %16 : py.Value = py.strLit %15
+      %17 : py.Value = py.dictGet %1 %16 %14
+      %18 : py.Value = py.in %16 %1 ^propagate.0()
+      %19 : base.Unit = py.dictDiscard %1 %16
+      %20 : py.Value = py.lt %13 %5 ^propagate.0()
+      %21 : py.Value = py.mult %18 %20 ^propagate.0()
+      %22 : base.Int = const int 0
+      %23 : base.String = const str "TypeError"
+      %24 : base.String = const str "f() got multiple values for argument 'xs'"
+      %25 : base.Unit = py.requireAtMost %21 %22 %23 %24 ^propagate.0()
+      %26 : base.String = const str "kwargs"
+      %27 : py.Value = py.undef %26
+      %28 : py.Value = py.dictFirstKey %1 %27
+      %29 : base.String = const str "TypeError"
+      %30 : base.String = const str "f() got an unexpected keyword argument {}"
+      %31 : base.Unit = py.requireUndefined %28 %29 %30 ^propagate.0()
+      %32 : base.Int = const int 1
+      %33 : base.String = const str "TypeError"
+      %34 : base.String = const str "f() takes 1 positional argument but {} {was} given"
+      %35 : base.Unit = py.requireAtMost %5 %32 %33 %34 ^propagate.0()
+      %36 : base.String = const str "TypeError"
+      %37 : base.String = const str "f() missing 1 required positional argument: 'xs'"
+      %38 : py.Value = py.requireDefined %17 %36 %37 ^propagate.0()
+      %39 : base.Unit = base.refSet[py.Value] %4 %38
+      %40 : base.String = const str "builtins"
+      %41 : base.String = const str "sorted"
+      %42 : py.Value = py.qualifiedRef %40 %41 ^propagate.0()
+      %43 : base.String = const str "builtins"
+      %44 : base.String = const str "reversed"
+      %45 : py.Value = py.qualifiedRef %43 %44 ^propagate.0()
+      %46 : py.Value = base.refGet[py.Value] %4
+      %47 : base.String = const str "UnboundLocalError"
+      %48 : base.String = const str "cannot access local variable 'xs' where it is not associated with a value"
+      %49 : py.Value = py.requireDefined %46 %47 %48 ^propagate.0()
+      %50 : py.Value = py.mkTuple %49
+      %51 : py.Value = py.mkKwargs
+      %52 : py.Value = py.call %45 %50 %51 ^propagate.0()
+      %53 : py.Value = py.mkTuple %52
+      %54 : py.Value = py.mkKwargs
+      %55 : py.Value = py.call %42 %53 %54 ^propagate.0()
+      %56 : base.String = const str "builtins"
+      %57 : base.String = const str "divmod"
+      %58 : py.Value = py.qualifiedRef %56 %57 ^propagate.0()
+      %59 : base.Int = const int 7
+      %60 : py.Value = py.intLit %59
+      %61 : base.Int = const int 2
+      %62 : py.Value = py.intLit %61
+      %63 : py.Value = py.mkTuple %60 %62
+      %64 : py.Value = py.mkKwargs
+      %65 : py.Value = py.call %58 %63 %64 ^propagate.0()
+      %66 : base.String = const str "builtins"
+      %67 : base.String = const str "frozenset"
+      %68 : py.Value = py.qualifiedRef %66 %67 ^propagate.0()
+      %69 : py.Value = base.refGet[py.Value] %4
+      %70 : base.String = const str "UnboundLocalError"
+      %71 : base.String = const str "cannot access local variable 'xs' where it is not associated with a value"
+      %72 : py.Value = py.requireDefined %69 %70 %71 ^propagate.0()
+      %73 : py.Value = py.mkTuple %72
+      %74 : py.Value = py.mkKwargs
+      %75 : py.Value = py.call %68 %73 %74 ^propagate.0()
+      %76 : base.String = const str "builtins"
+      %77 : base.String = const str "memoryview"
+      %78 : py.Value = py.qualifiedRef %76 %77 ^propagate.0()
+      %79 : base.String = const str ""
+      %80 : py.Value = py.bytesLit %79
+      %81 : py.Value = py.mkTuple %80
+      %82 : py.Value = py.mkKwargs
+      %83 : py.Value = py.call %78 %81 %82 ^propagate.0()
+      %84 : base.String = const str "builtins"
+      %85 : base.String = const str "vars"
+      %86 : py.Value = py.qualifiedRef %84 %85 ^propagate.0()
+      %87 : py.Value = py.mkTuple
+      %88 : py.Value = py.mkKwargs
+      %89 : py.Value = py.call %86 %87 %88 ^propagate.0()
+      %90 : py.Value = py.mkTuple %55 %65 %75 %83 %89
+      %91 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %90
+      ret %91
+    propagate.0(%92 : py.Value):
+      %93 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %92
+      ret %93
+  }
+}
+

@@ -27,7 +27,7 @@ module p15_global {
       %23 : base.String = const str "name 'set_x' is not defined"
       %24 : py.Value = py.requireDefined %21 %22 %23 ^propagate.0()
       %25 : py.Value = py.mkTuple
-      %26 : py.Value = py.mkDict
+      %26 : py.Value = py.mkKwargs
       %27 : py.Value = py.call %24 %25 %26 ^propagate.0()
       %28 : base.String = const str "builtins"
       %29 : base.String = const str "print"
@@ -40,7 +40,7 @@ module p15_global {
       %36 : base.String = const str "name 'x' is not defined"
       %37 : py.Value = py.requireDefined %34 %35 %36 ^propagate.0()
       %38 : py.Value = py.mkTuple %37
-      %39 : py.Value = py.mkDict
+      %39 : py.Value = py.mkKwargs
       %40 : py.Value = py.call %30 %38 %39 ^propagate.0()
       %41 : py.Value = py.noneLit
       %42 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %41

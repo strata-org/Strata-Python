@@ -1,0 +1,4 @@
+module
+  f: global implicit (referenced)
+diagnostics:
+  syntax error at 2:7-2:10: keyword argument repeated: k

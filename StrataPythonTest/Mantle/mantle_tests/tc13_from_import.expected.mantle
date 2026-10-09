@@ -63,7 +63,7 @@ module tc13_from_import {
       %26 : base.Float64 = const float "4.0"
       %27 : py.Value = py.floatLit %26
       %28 : py.Value = py.mkTuple %27
-      %29 : py.Value = py.mkDict
+      %29 : py.Value = py.mkKwargs
       %30 : py.Value = py.call %25 %28 %29 ^propagate.0()
       %31 : base.Unit = base.refSet[py.Value] %4 %30
       %32 : base.String = const str "tc13_from_import"

@@ -36,10 +36,10 @@ module p20_global_mutated {
       %32 : base.String = const str "name 'read' is not defined"
       %33 : py.Value = py.requireDefined %30 %31 %32 ^propagate.0()
       %34 : py.Value = py.mkTuple
-      %35 : py.Value = py.mkDict
+      %35 : py.Value = py.mkKwargs
       %36 : py.Value = py.call %33 %34 %35 ^propagate.0()
       %37 : py.Value = py.mkTuple %36
-      %38 : py.Value = py.mkDict
+      %38 : py.Value = py.mkKwargs
       %39 : py.Value = py.call %26 %37 %38 ^propagate.0()
       %40 : py.Value = py.noneLit
       %41 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %40

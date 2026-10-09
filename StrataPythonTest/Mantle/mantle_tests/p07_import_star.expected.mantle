@@ -20,7 +20,7 @@ module p07_import_star {
       %15 : base.String = const str "b"
       %16 : py.Value = py.strLit %15
       %17 : py.Value = py.mkTuple %14 %16
-      %18 : py.Value = py.mkDict
+      %18 : py.Value = py.mkKwargs
       %19 : py.Value = py.call %12 %17 %18 ^propagate.0()
       %20 : base.String = const str "p07_import_star"
       %21 : base.String = const str "x"

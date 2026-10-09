@@ -1,0 +1,163 @@
+-- unsupported: async def is not supported at 10:0-11:33
+-- unsupported: list comprehension is not supported at 14:10-14:32
+module n08_mixed {
+  func @n08_mixed.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "n08_mixed"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "n08_mixed"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.String = const str "asyncio"
+      %7 : py.Value = py.importModule %6 ^propagate.0()
+      %8 : base.String = const str "n08_mixed"
+      %9 : base.String = const str "asyncio"
+      %10 : base.Ref(py.Value) = py.globalCell %8 %9
+      %11 : base.Unit = base.refSet[py.Value] %10 %7
+      %12 : base.Code = const @n08_mixed.sync_add
+      %13 : py.Value = py.mkClosure %12
+      %14 : base.String = const str "n08_mixed"
+      %15 : base.String = const str "sync_add"
+      %16 : base.Ref(py.Value) = py.globalCell %14 %15
+      %17 : base.Unit = base.refSet[py.Value] %16 %13
+      %18 : base.Code = const @n08_mixed.async_fetch
+      %19 : py.Value = py.mkClosure %18
+      %20 : base.String = const str "n08_mixed"
+      %21 : base.String = const str "async_fetch"
+      %22 : base.Ref(py.Value) = py.globalCell %20 %21
+      %23 : base.Unit = base.refSet[py.Value] %22 %19
+      %24 : base.Int = const int 1
+      %25 : py.Value = py.intLit %24
+      %26 : base.Int = const int 2
+      %27 : py.Value = py.intLit %26
+      %28 : base.Int = const int 3
+      %29 : py.Value = py.intLit %28
+      %30 : py.Value = py.mkList %25 %27 %29
+      %31 : base.String = const str "n08_mixed"
+      %32 : base.String = const str "items"
+      %33 : base.Ref(py.Value) = py.globalCell %31 %32
+      %34 : base.Unit = base.refSet[py.Value] %33 %30
+      %35 : base.String = const str "list comprehension"
+      %36 : py.Value = py.strLit %35
+      %37 : py.Value = py.unsupported %36
+      %38 : base.String = const str "n08_mixed"
+      %39 : base.String = const str "doubled"
+      %40 : base.Ref(py.Value) = py.globalCell %38 %39
+      %41 : base.Unit = base.refSet[py.Value] %40 %37
+      %42 : base.String = const str "n08_mixed"
+      %43 : base.String = const str "sync_add"
+      %44 : base.Ref(py.Value) = py.globalCell %42 %43
+      %45 : py.Value = base.refGet[py.Value] %44
+      %46 : base.String = const str "NameError"
+      %47 : base.String = const str "name 'sync_add' is not defined"
+      %48 : py.Value = py.requireDefined %45 %46 %47 ^propagate.0()
+      %49 : base.Int = const int 1
+      %50 : py.Value = py.intLit %49
+      %51 : base.Int = const int 2
+      %52 : py.Value = py.intLit %51
+      %53 : py.Value = py.mkTuple %50 %52
+      %54 : py.Value = py.mkKwargs
+      %55 : py.Value = py.call %48 %53 %54 ^propagate.0()
+      %56 : base.String = const str "n08_mixed"
+      %57 : base.String = const str "result"
+      %58 : base.Ref(py.Value) = py.globalCell %56 %57
+      %59 : base.Unit = base.refSet[py.Value] %58 %55
+      %60 : py.Value = py.noneLit
+      %61 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %60
+      ret %61
+    propagate.0(%62 : py.Value):
+      %63 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %62
+      ret %63
+  }
+  func @n08_mixed.sync_add(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "a"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : base.String = const str "b"
+      %6 : py.Value = py.undef %5
+      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
+      %8 : py.Value = py.tupleLen %0
+      %9 : base.String = const str "a"
+      %10 : py.Value = py.undef %9
+      %11 : base.String = const str "b"
+      %12 : py.Value = py.undef %11
+      %13 : py.Value = py.mkTuple %10 %12
+      %14 : py.Value = py.noneLit
+      %15 : py.Value = py.getSlice %13 %8 %14 %14 ^propagate.0()
+      %16 : py.Value = py.add %0 %15 ^propagate.0()
+      %17 : base.Int = const int 0
+      %18 : py.Value = py.intLit %17
+      %19 : py.Value = py.getItem %16 %18 ^propagate.0()
+      %20 : base.String = const str "a"
+      %21 : py.Value = py.strLit %20
+      %22 : py.Value = py.dictGet %1 %21 %19
+      %23 : py.Value = py.in %21 %1 ^propagate.0()
+      %24 : base.Unit = py.dictDiscard %1 %21
+      %25 : base.Int = const int 1
+      %26 : py.Value = py.intLit %25
+      %27 : py.Value = py.getItem %16 %26 ^propagate.0()
+      %28 : base.String = const str "b"
+      %29 : py.Value = py.strLit %28
+      %30 : py.Value = py.dictGet %1 %29 %27
+      %31 : py.Value = py.in %29 %1 ^propagate.0()
+      %32 : base.Unit = py.dictDiscard %1 %29
+      %33 : py.Value = py.lt %18 %8 ^propagate.0()
+      %34 : py.Value = py.mult %23 %33 ^propagate.0()
+      %35 : base.Int = const int 0
+      %36 : base.String = const str "TypeError"
+      %37 : base.String = const str "sync_add() got multiple values for argument 'a'"
+      %38 : base.Unit = py.requireAtMost %34 %35 %36 %37 ^propagate.0()
+      %39 : py.Value = py.lt %26 %8 ^propagate.0()
+      %40 : py.Value = py.mult %31 %39 ^propagate.0()
+      %41 : base.Int = const int 0
+      %42 : base.String = const str "TypeError"
+      %43 : base.String = const str "sync_add() got multiple values for argument 'b'"
+      %44 : base.Unit = py.requireAtMost %40 %41 %42 %43 ^propagate.0()
+      %45 : base.String = const str "kwargs"
+      %46 : py.Value = py.undef %45
+      %47 : py.Value = py.dictFirstKey %1 %46
+      %48 : base.String = const str "TypeError"
+      %49 : base.String = const str "sync_add() got an unexpected keyword argument {}"
+      %50 : base.Unit = py.requireUndefined %47 %48 %49 ^propagate.0()
+      %51 : base.Int = const int 2
+      %52 : base.String = const str "TypeError"
+      %53 : base.String = const str "sync_add() takes 2 positional arguments but {} {was} given"
+      %54 : base.Unit = py.requireAtMost %8 %51 %52 %53 ^propagate.0()
+      %55 : base.String = const str "TypeError"
+      %56 : base.String = const str "sync_add() missing 1 required positional argument: 'a'"
+      %57 : py.Value = py.requireDefined %22 %55 %56 ^propagate.0()
+      %58 : base.Unit = base.refSet[py.Value] %4 %57
+      %59 : base.String = const str "TypeError"
+      %60 : base.String = const str "sync_add() missing 1 required positional argument: 'b'"
+      %61 : py.Value = py.requireDefined %30 %59 %60 ^propagate.0()
+      %62 : base.Unit = base.refSet[py.Value] %7 %61
+      %63 : py.Value = base.refGet[py.Value] %4
+      %64 : base.String = const str "UnboundLocalError"
+      %65 : base.String = const str "cannot access local variable 'a' where it is not associated with a value"
+      %66 : py.Value = py.requireDefined %63 %64 %65 ^propagate.0()
+      %67 : py.Value = base.refGet[py.Value] %7
+      %68 : base.String = const str "UnboundLocalError"
+      %69 : base.String = const str "cannot access local variable 'b' where it is not associated with a value"
+      %70 : py.Value = py.requireDefined %67 %68 %69 ^propagate.0()
+      %71 : py.Value = py.add %66 %70 ^propagate.0()
+      %72 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %71
+      ret %72
+    propagate.0(%73 : py.Value):
+      %74 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %73
+      ret %74
+  }
+  func @n08_mixed.async_fetch(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "async def"
+      %3 : py.Value = py.strLit %2
+      %4 : py.Value = py.unsupported %3
+      %5 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %4
+      ret %5
+    propagate.0(%6 : py.Value):
+      %7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %6
+      ret %7
+  }
+}
+

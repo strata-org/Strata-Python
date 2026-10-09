@@ -1,0 +1,8 @@
+module top
+  a: global implicit (referenced)
+  b: global implicit (referenced)
+  f: global implicit (referenced)
+  m: global implicit (referenced)
+  n: global implicit (referenced)
+  xs: global implicit (referenced)
+qualnames: 
