@@ -70,11 +70,7 @@ def tryReadPythonSource (ionPath : String) : IO (Option (String × String)) := d
 
 /-- Strip well-known Strata file suffixes from a path's basename. -/
 def deriveBaseName (file : String) : String :=
-  let name := System.FilePath.fileName file |>.getD file
-  let suffixes := [".python.st.ion", ".py.ion", ".st.ion", ".st"]
-  match suffixes.find? (name.endsWith ·) with
-  | some sfx => (name.dropEnd sfx.length).toString
-  | none     => name
+  Strata.Cli.deriveBaseName [".python.st.ion", ".py.ion", ".st.ion", ".st"] file
 
 /-- Format related position strings from metadata, if present. -/
 def formatRelatedPositions (md : Imperative.MetaData Core.Expression)
