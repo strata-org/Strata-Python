@@ -177,10 +177,54 @@ public environment Py extends Base where
   insn mod (lhs rhs : Value) (^err (exc : Value)) : Value
   /-- `lhs ** rhs`. -/
   insn pow (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs @ rhs`. -/
+  insn matMult (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs << rhs`. -/
+  insn lShift (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs >> rhs`. -/
+  insn rShift (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs & rhs`. -/
+  insn bitAnd (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs | rhs`. -/
+  insn bitOr (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs ^ rhs`. -/
+  insn bitXor (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs += rhs`, as CPython's in-place `BINARY_OP`: `lhs.__iadd__(rhs)`, which may update
+  `lhs` in place, or `lhs + rhs` if that is missing or returns `NotImplemented`.  The result
+  is what `lhs` is rebound to. -/
+  insn iAdd (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs -= rhs`, as `iAdd`. -/
+  insn iSub (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs *= rhs`, as `iAdd`. -/
+  insn iMult (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs @= rhs`, as `iAdd`. -/
+  insn iMatMult (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs /= rhs`, as `iAdd`. -/
+  insn iDiv (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs //= rhs`, as `iAdd`. -/
+  insn iFloorDiv (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs %= rhs`, as `iAdd`. -/
+  insn iMod (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs **= rhs`, as `iAdd`. -/
+  insn iPow (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs <<= rhs`, as `iAdd`. -/
+  insn iLShift (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs >>= rhs`, as `iAdd`. -/
+  insn iRShift (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs &= rhs`, as `iAdd`. -/
+  insn iBitAnd (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs |= rhs`, as `iAdd`. -/
+  insn iBitOr (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs ^= rhs`, as `iAdd`. -/
+  insn iBitXor (lhs rhs : Value) (^err (exc : Value)) : Value
   /-- `not operand`.  Raises, because it consults truthiness. -/
   insn not_ as "not" (operand : Value) (^err (exc : Value)) : Value
   /-- `-operand`. -/
   insn uSub (operand : Value) (^err (exc : Value)) : Value
+  /-- `+operand`. -/
+  insn uAdd (operand : Value) (^err (exc : Value)) : Value
+  /-- `~operand`. -/
+  insn invert (operand : Value) (^err (exc : Value)) : Value
   /-- `lhs == rhs`. -/
   insn eq (lhs rhs : Value) (^err (exc : Value)) : Value
   /-- `lhs != rhs`. -/

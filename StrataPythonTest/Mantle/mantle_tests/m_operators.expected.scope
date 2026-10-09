@@ -1,0 +1,12 @@
+module
+  r1: local (assigned)
+  a: global implicit (referenced)
+  b: global implicit (referenced)
+  r2: local (assigned)
+  r3: local (assigned)
+  r4: local (assigned)
+  r5: local (assigned)
+  r6: local (assigned)
+  r7: local (assigned)
+  r8: local (assigned)
+  x: local (assigned)

@@ -474,7 +474,7 @@ jump to the function's exit.
 | target `o[k]` | evaluate `o` and `k`, then `py.setItem o k v` | right-hand side first, then `o`, then `k` |
 | target `a, b` / `[a, b]` | `t = py.unpackSeq v 2` (§8), then `getItem t i` for each target, recursively | an exact length check, `ValueError: not enough / too many values to unpack` |
 | target `a, *b` | `py.unpackEx v before after` (§8) | |
-| `x op= e` | read `x` once (evaluating `o` and `k` once for `o.a` and `o[k]`), apply the in-place operation, write back | in place: `xs += ys` mutates `xs`. Until in-place operations are declared (§8), the binary operation is used and the divergence is documented |
+| `x op= e` | read `x` once (evaluating `o` and `k` once for `o.a` and `o[k]`), apply the in-place operation (`py.iAdd` … `py.iBitXor`), write back | in place: `xs += ys` mutates `xs` |
 | `x: T = e` | as `x = e`. The annotation is not evaluated | `x: T` with no value only makes `x` local |
 | `del x` | `requireDefined` (raises `NameError` or `UnboundLocalError`), then `refSet` of `undef "x"` | |
 | `del o.a`, `del o[k]` | **rejected** until `py.delAttr` and `py.delItem` exist (§8) | |
@@ -530,8 +530,8 @@ false, as in CPython.
 | `...` | `py.qualifiedRef "builtins" "Ellipsis"` |
 | complex literal, t-string | **rejected** |
 | name | §5.1 |
-| `a op b` | evaluate `a`, then `b`, then `py.add`/`sub`/`mult`/`div`/`floorDiv`/`mod`/`pow`. `@`, `<<`, `>>`, `&`, `\|`, `^` are **rejected** until declared (§8) |
-| `-a`, `not a` | `py.uSub`, `py.not`. Unary `+` and `~` are **rejected** until declared |
+| `a op b` | evaluate `a`, then `b`, then `py.add`/`sub`/`mult`/`matMult`/`div`/`floorDiv`/`mod`/`pow`/`lShift`/`rShift`/`bitAnd`/`bitOr`/`bitXor` |
+| `-a`, `+a`, `~a`, `not a` | `py.uSub`, `py.uAdd`, `py.invert`, `py.not` |
 | `a < b` (single comparison) | `py.lt`, …, `py.in`, `py.notIn`, `py.is`, `py.isNot` |
 | `a < b < c` | evaluate `a`, `b`, then `%r = py.lt`. `truthy %r`, then branch: true evaluates `c` and compares `b` with `c`; false jumps to `join(%r)`. `b` is evaluated once |
 | `a and b` / `a or b` | see the example below |
@@ -547,7 +547,7 @@ false, as in CPython.
 | `{k: v, **d}` | as CPython: `py.mkDict k v …` for each run of pairs (keys and values interleaved, each key before its value), and `py.dictUpdate` for each `**d`, last one winning. The first run is the dict; a later run is built, then added by `dictUpdate` |
 | a set of more than 30 elements, a long dict run | as CPython (`STACK_USE_GUIDELINE`): a set starts empty and adds each element as it is evaluated (`setAdd`). A dict run is cut into chunks of 17 pairs; a chunk of more than 15 pairs starts empty and adds each pair (`dictSet`), and each later chunk is added by `dictUpdate`. So an unhashable key raises before the next element is evaluated |
 | `f"a{x}b"` | as CPython's `FORMAT_VALUE` and `BUILD_STRING`: a total `py.strConcat` over `strLit` parts and fields, or the lone part itself. A field `{x!r:spec}` evaluates `x`, then `spec` (itself an f-string, `""` if absent), then applies `py.repr` (`py.str`, `py.ascii`), then `py.fmtValue x spec`. None of these looks up a builtin: CPython ignores `builtins.repr = …` here |
-| `(x := e)` | evaluate `e`, `refSet` the target's cell, and use the value `e`. In a comprehension, the target is the enclosing function's local, a `cell` only if a nested scope captures it (§6.8) |
+| `(x := e)` | evaluate `e`, write it to `x` (§5.1), and use the value `e`. In a comprehension, the target is the enclosing function's local, a `cell` only if a nested scope captures it (§6.8) |
 | `lambda` | §5.3, as an expression |
 | comprehensions | §6.8 |
 | `yield`, `await`, a generator expression, a starred expression elsewhere | **rejected** |
@@ -876,9 +876,6 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 | `excMatch` | `insn excMatch (exc type : Value) (^err (e : Value)) : Bool` | `except T` (the alternative is `py.call` builtins `isinstance`, then `truthy`) |
 | `toException` | `insn toException (val : Value) (^err (e : Value)) : Value` | `raise E` |
 | `unpackSeq`, `unpackEx` | `(val : Value) (n : Int) (^err …) : Value` (a tuple); `(val : Value) (before after : Int) (^err …) : Value` | tuple targets |
-| binary operators | `matMult`, `lShift`, `rShift`, `bitAnd`, `bitOr`, `bitXor`, as `add` | `@ << >> & \| ^` |
-| unary operators | `uAdd`, `invert`, as `uSub` | `+a`, `~a` |
-| in-place operators | `iadd` … `ipow` and the bitwise ones, as `add` | `x op= e` |
 | `delAttr`, `delItem` | as `setAttr`/`setItem` without `val` | `del o.a`, `del o[k]` |
 | `mkGenerator` | `insn mkGenerator (code : Code) (cells : Ref Value…) : Value` | generators (stage 1, opaque) |
 
@@ -991,21 +988,20 @@ a diagnostic.
 | expression statement, `pass`, assignment to a name (chained too) | §6.1 | specified; implemented |
 | assignment to an attribute or subscript | §6.1 | specified |
 | tuple and starred targets | §6.1 | specified, open question (`unpackSeq`, Q7) |
-| augmented assignment | §6.1 | specified, open question (in-place operators); implemented on names, with the binary operation |
+| augmented assignment | §6.1 | specified; implemented on names |
 | annotated assignment | §6.1 | specified; implemented on names |
 | `del x`, `assert` | §6.1 | specified |
 | `del o.a`, `del o[k]` | §6.1 | unsupported |
 | `nonlocal` | §6.6 | specified |
 | `if` / `elif` / `else` | §6.2 | specified; implemented |
-| literals, `...`, `+ - * / // % **`, `-a`, `not a`, comparisons (chained too), `and`, `or`, `x if c else y` | §6.3 | specified; implemented |
+| literals, `...`, every binary and unary operator, comparisons (chained too), `and`, `or`, `x if c else y` | §6.3 | specified; implemented |
 | conditions (`transCond`) | §6.2 | specified; implemented for `if`, `while` and `x if c else y` |
 | calls, with keywords, `*` and `**` | §6.3 | specified; implemented |
 | displays and unpacking in them | §6.3 | specified; implemented |
 | attribute, subscript, slice (inside a tuple too) | §6.3 | specified; implemented |
 | f-strings | §6.3 | specified; implemented |
-| walrus | §6.3 | specified |
+| walrus | §6.3 | specified; implemented outside comprehensions |
 | complex literal, t-string | §6.3 | unsupported |
-| `@ << >> & \| ^`, unary `+`, `~` | §6.3 | unsupported |
 | `while` / `else`, `break`, `continue` | §6.4–§6.5 | specified; implemented |
 | `for` / `else` | §6.4 | specified |
 | closures | §6.6 | specified |

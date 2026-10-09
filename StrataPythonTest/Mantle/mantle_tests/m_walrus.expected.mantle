@@ -1,0 +1,284 @@
+module m_walrus {
+  func @m_walrus.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "m_walrus"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "m_walrus"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.String = const str "m_walrus"
+      %7 : base.String = const str "f"
+      %8 : base.Ref(py.Value) = py.globalCell %6 %7
+      %9 : py.Value = base.refGet[py.Value] %8
+      %10 : base.String = const str "NameError"
+      %11 : base.String = const str "name 'f' is not defined"
+      %12 : py.Value = py.requireDefined %9 %10 %11 ^propagate.0()
+      %13 : py.Value = py.mkTuple
+      %14 : py.Value = py.mkKwargs
+      %15 : py.Value = py.call %12 %13 %14 ^propagate.0()
+      %16 : base.String = const str "m_walrus"
+      %17 : base.String = const str "x"
+      %18 : base.Ref(py.Value) = py.globalCell %16 %17
+      %19 : base.Unit = base.refSet[py.Value] %18 %15
+      %20 : base.String = const str "m_walrus"
+      %21 : base.String = const str "y"
+      %22 : base.Ref(py.Value) = py.globalCell %20 %21
+      %23 : base.Unit = base.refSet[py.Value] %22 %15
+      %24 : base.String = const str "m_walrus"
+      %25 : base.String = const str "g"
+      %26 : base.Ref(py.Value) = py.globalCell %24 %25
+      %27 : py.Value = base.refGet[py.Value] %26
+      %28 : base.String = const str "NameError"
+      %29 : base.String = const str "name 'g' is not defined"
+      %30 : py.Value = py.requireDefined %27 %28 %29 ^propagate.0()
+      %31 : py.Value = py.mkTuple
+      %32 : py.Value = py.mkKwargs
+      %33 : py.Value = py.call %30 %31 %32 ^propagate.0()
+      %34 : base.String = const str "m_walrus"
+      %35 : base.String = const str "n"
+      %36 : base.Ref(py.Value) = py.globalCell %34 %35
+      %37 : base.Unit = base.refSet[py.Value] %36 %33
+      %38 : base.Int = const int 0
+      %39 : py.Value = py.intLit %38
+      %40 : py.Value = py.gt %33 %39 ^propagate.0()
+      %41 : base.Bool = py.truthy %40 ^propagate.0()
+      branch %41 ^then.0() ^else.0()
+    then.0():
+      %42 : base.String = const str "m_walrus"
+      %43 : base.String = const str "n"
+      %44 : base.Ref(py.Value) = py.globalCell %42 %43
+      %45 : py.Value = base.refGet[py.Value] %44
+      %46 : base.String = const str "NameError"
+      %47 : base.String = const str "name 'n' is not defined"
+      %48 : py.Value = py.requireDefined %45 %46 %47 ^propagate.0()
+      %49 : base.String = const str "m_walrus"
+      %50 : base.String = const str "r"
+      %51 : base.Ref(py.Value) = py.globalCell %49 %50
+      %52 : base.Unit = base.refSet[py.Value] %51 %48
+      jump ^join.0()
+    else.0():
+      jump ^join.0()
+    join.0():
+      jump ^head.0()
+    head.0():
+      %53 : base.String = const str "m_walrus"
+      %54 : base.String = const str "h"
+      %55 : base.Ref(py.Value) = py.globalCell %53 %54
+      %56 : py.Value = base.refGet[py.Value] %55
+      %57 : base.String = const str "NameError"
+      %58 : base.String = const str "name 'h' is not defined"
+      %59 : py.Value = py.requireDefined %56 %57 %58 ^propagate.0()
+      %60 : py.Value = py.mkTuple
+      %61 : py.Value = py.mkKwargs
+      %62 : py.Value = py.call %59 %60 %61 ^propagate.0()
+      %63 : base.String = const str "m_walrus"
+      %64 : base.String = const str "m"
+      %65 : base.Ref(py.Value) = py.globalCell %63 %64
+      %66 : base.Unit = base.refSet[py.Value] %65 %62
+      %67 : base.Bool = py.truthy %62 ^propagate.0()
+      branch %67 ^body.0() ^exit.0()
+    body.0():
+      %68 : base.String = const str "m_walrus"
+      %69 : base.String = const str "m"
+      %70 : base.Ref(py.Value) = py.globalCell %68 %69
+      %71 : py.Value = base.refGet[py.Value] %70
+      %72 : base.String = const str "NameError"
+      %73 : base.String = const str "name 'm' is not defined"
+      %74 : py.Value = py.requireDefined %71 %72 %73 ^propagate.0()
+      %75 : base.String = const str "m_walrus"
+      %76 : base.String = const str "r"
+      %77 : base.Ref(py.Value) = py.globalCell %75 %76
+      %78 : base.Unit = base.refSet[py.Value] %77 %74
+      jump ^head.0()
+    exit.0():
+      %79 : base.String = const str "m_walrus"
+      %80 : base.String = const str "a"
+      %81 : base.Ref(py.Value) = py.globalCell %79 %80
+      %82 : py.Value = base.refGet[py.Value] %81
+      %83 : base.String = const str "NameError"
+      %84 : base.String = const str "name 'a' is not defined"
+      %85 : py.Value = py.requireDefined %82 %83 %84 ^propagate.0()
+      %86 : base.String = const str "m_walrus"
+      %87 : base.String = const str "w"
+      %88 : base.Ref(py.Value) = py.globalCell %86 %87
+      %89 : base.Unit = base.refSet[py.Value] %88 %85
+      %90 : base.String = const str "m_walrus"
+      %91 : base.String = const str "w"
+      %92 : base.Ref(py.Value) = py.globalCell %90 %91
+      %93 : py.Value = base.refGet[py.Value] %92
+      %94 : base.String = const str "NameError"
+      %95 : base.String = const str "name 'w' is not defined"
+      %96 : py.Value = py.requireDefined %93 %94 %95 ^propagate.0()
+      %97 : py.Value = py.mkList %85 %96
+      %98 : base.String = const str "m_walrus"
+      %99 : base.String = const str "z"
+      %100 : base.Ref(py.Value) = py.globalCell %98 %99
+      %101 : base.Unit = base.refSet[py.Value] %100 %97
+      %102 : base.Code = const @m_walrus.f
+      %103 : py.Value = py.mkClosure %102
+      %104 : base.String = const str "m_walrus"
+      %105 : base.String = const str "f"
+      %106 : base.Ref(py.Value) = py.globalCell %104 %105
+      %107 : base.Unit = base.refSet[py.Value] %106 %103
+      %108 : base.Code = const @m_walrus.h
+      %109 : py.Value = py.mkClosure %108
+      %110 : base.String = const str "m_walrus"
+      %111 : base.String = const str "h"
+      %112 : base.Ref(py.Value) = py.globalCell %110 %111
+      %113 : base.Unit = base.refSet[py.Value] %112 %109
+      %114 : py.Value = py.noneLit
+      %115 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %114
+      ret %115
+    propagate.0(%116 : py.Value):
+      %117 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %116
+      ret %117
+  }
+  func @m_walrus.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "g"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : base.String = const str "y"
+      %6 : py.Value = py.undef %5
+      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
+      %8 : base.String = const str "x"
+      %9 : py.Value = py.undef %8
+      %10 : base.Ref(py.Value) = base.refNew[py.Value] %9
+      %11 : base.String = const str "b"
+      %12 : py.Value = py.undef %11
+      %13 : base.Ref(py.Value) = base.refNew[py.Value] %12
+      %14 : base.String = const str "a"
+      %15 : py.Value = py.undef %14
+      %16 : base.Ref(py.Value) = base.refNew[py.Value] %15
+      %17 : py.Value = py.tupleLen %0
+      %18 : base.String = const str "g"
+      %19 : py.Value = py.undef %18
+      %20 : py.Value = py.mkTuple %19
+      %21 : py.Value = py.noneLit
+      %22 : py.Value = py.getSlice %20 %17 %21 %21 ^propagate.0()
+      %23 : py.Value = py.add %0 %22 ^propagate.0()
+      %24 : base.Int = const int 0
+      %25 : py.Value = py.intLit %24
+      %26 : py.Value = py.getItem %23 %25 ^propagate.0()
+      %27 : base.String = const str "g"
+      %28 : py.Value = py.strLit %27
+      %29 : py.Value = py.dictGet %1 %28 %26
+      %30 : py.Value = py.in %28 %1 ^propagate.0()
+      %31 : base.Unit = py.dictDiscard %1 %28
+      %32 : py.Value = py.lt %25 %17 ^propagate.0()
+      %33 : py.Value = py.mult %30 %32 ^propagate.0()
+      %34 : base.Int = const int 0
+      %35 : base.String = const str "TypeError"
+      %36 : base.String = const str "f() got multiple values for argument 'g'"
+      %37 : base.Unit = py.requireAtMost %33 %34 %35 %36 ^propagate.0()
+      %38 : base.String = const str "kwargs"
+      %39 : py.Value = py.undef %38
+      %40 : py.Value = py.dictFirstKey %1 %39
+      %41 : base.String = const str "TypeError"
+      %42 : base.String = const str "f() got an unexpected keyword argument {}"
+      %43 : base.Unit = py.requireUndefined %40 %41 %42 ^propagate.0()
+      %44 : base.Int = const int 1
+      %45 : base.String = const str "TypeError"
+      %46 : base.String = const str "f() takes 1 positional argument but {} {was} given"
+      %47 : base.Unit = py.requireAtMost %17 %44 %45 %46 ^propagate.0()
+      %48 : base.String = const str "TypeError"
+      %49 : base.String = const str "f() missing 1 required positional argument: 'g'"
+      %50 : py.Value = py.requireDefined %29 %48 %49 ^propagate.0()
+      %51 : base.Unit = base.refSet[py.Value] %4 %50
+      %52 : py.Value = base.refGet[py.Value] %4
+      %53 : base.String = const str "UnboundLocalError"
+      %54 : base.String = const str "cannot access local variable 'g' where it is not associated with a value"
+      %55 : py.Value = py.requireDefined %52 %53 %54 ^propagate.0()
+      %56 : py.Value = py.mkTuple
+      %57 : py.Value = py.mkKwargs
+      %58 : py.Value = py.call %55 %56 %57 ^propagate.0()
+      %59 : base.Unit = base.refSet[py.Value] %10 %58
+      %60 : base.Unit = base.refSet[py.Value] %7 %58
+      %61 : base.Int = const int 1
+      %62 : py.Value = py.intLit %61
+      %63 : base.Unit = base.refSet[py.Value] %13 %62
+      %64 : base.Unit = base.refSet[py.Value] %16 %62
+      %65 : py.Value = base.refGet[py.Value] %10
+      %66 : base.String = const str "UnboundLocalError"
+      %67 : base.String = const str "cannot access local variable 'x' where it is not associated with a value"
+      %68 : py.Value = py.requireDefined %65 %66 %67 ^propagate.0()
+      %69 : py.Value = base.refGet[py.Value] %7
+      %70 : base.String = const str "UnboundLocalError"
+      %71 : base.String = const str "cannot access local variable 'y' where it is not associated with a value"
+      %72 : py.Value = py.requireDefined %69 %70 %71 ^propagate.0()
+      %73 : py.Value = base.refGet[py.Value] %16
+      %74 : base.String = const str "UnboundLocalError"
+      %75 : base.String = const str "cannot access local variable 'a' where it is not associated with a value"
+      %76 : py.Value = py.requireDefined %73 %74 %75 ^propagate.0()
+      %77 : py.Value = base.refGet[py.Value] %13
+      %78 : base.String = const str "UnboundLocalError"
+      %79 : base.String = const str "cannot access local variable 'b' where it is not associated with a value"
+      %80 : py.Value = py.requireDefined %77 %78 %79 ^propagate.0()
+      %81 : py.Value = py.mkTuple %68 %72 %76 %80
+      %82 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %81
+      ret %82
+    propagate.0(%83 : py.Value):
+      %84 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %83
+      ret %84
+  }
+  func @m_walrus.h(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value, %1 : py.Value):
+      %2 : base.String = const str "g"
+      %3 : py.Value = py.undef %2
+      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
+      %5 : py.Value = py.tupleLen %0
+      %6 : base.String = const str "g"
+      %7 : py.Value = py.undef %6
+      %8 : py.Value = py.mkTuple %7
+      %9 : py.Value = py.noneLit
+      %10 : py.Value = py.getSlice %8 %5 %9 %9 ^propagate.0()
+      %11 : py.Value = py.add %0 %10 ^propagate.0()
+      %12 : base.Int = const int 0
+      %13 : py.Value = py.intLit %12
+      %14 : py.Value = py.getItem %11 %13 ^propagate.0()
+      %15 : base.String = const str "g"
+      %16 : py.Value = py.strLit %15
+      %17 : py.Value = py.dictGet %1 %16 %14
+      %18 : py.Value = py.in %16 %1 ^propagate.0()
+      %19 : base.Unit = py.dictDiscard %1 %16
+      %20 : py.Value = py.lt %13 %5 ^propagate.0()
+      %21 : py.Value = py.mult %18 %20 ^propagate.0()
+      %22 : base.Int = const int 0
+      %23 : base.String = const str "TypeError"
+      %24 : base.String = const str "h() got multiple values for argument 'g'"
+      %25 : base.Unit = py.requireAtMost %21 %22 %23 %24 ^propagate.0()
+      %26 : base.String = const str "kwargs"
+      %27 : py.Value = py.undef %26
+      %28 : py.Value = py.dictFirstKey %1 %27
+      %29 : base.String = const str "TypeError"
+      %30 : base.String = const str "h() got an unexpected keyword argument {}"
+      %31 : base.Unit = py.requireUndefined %28 %29 %30 ^propagate.0()
+      %32 : base.Int = const int 1
+      %33 : base.String = const str "TypeError"
+      %34 : base.String = const str "h() takes 1 positional argument but {} {was} given"
+      %35 : base.Unit = py.requireAtMost %5 %32 %33 %34 ^propagate.0()
+      %36 : base.String = const str "TypeError"
+      %37 : base.String = const str "h() missing 1 required positional argument: 'g'"
+      %38 : py.Value = py.requireDefined %17 %36 %37 ^propagate.0()
+      %39 : base.Unit = base.refSet[py.Value] %4 %38
+      %40 : py.Value = base.refGet[py.Value] %4
+      %41 : base.String = const str "UnboundLocalError"
+      %42 : base.String = const str "cannot access local variable 'g' where it is not associated with a value"
+      %43 : py.Value = py.requireDefined %40 %41 %42 ^propagate.0()
+      %44 : py.Value = py.mkTuple
+      %45 : py.Value = py.mkKwargs
+      %46 : py.Value = py.call %43 %44 %45 ^propagate.0()
+      %47 : base.String = const str "m_walrus"
+      %48 : base.String = const str "G"
+      %49 : base.Ref(py.Value) = py.globalCell %47 %48
+      %50 : base.Unit = base.refSet[py.Value] %49 %46
+      %51 : py.Value = py.noneLit
+      %52 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %51
+      ret %52
+    propagate.0(%53 : py.Value):
+      %54 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %53
+      ret %54
+  }
+}
+

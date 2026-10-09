@@ -358,7 +358,7 @@ module t02_operators {
       %354 : py.Value = py.requireDefined %351 %352 %353 ^propagate.0()
       %355 : base.Int = const int 1
       %356 : py.Value = py.intLit %355
-      %357 : py.Value = py.add %354 %356 ^propagate.0()
+      %357 : py.Value = py.iAdd %354 %356 ^propagate.0()
       %358 : base.String = const str "t02_operators"
       %359 : base.String = const str "x"
       %360 : base.Ref(py.Value) = py.globalCell %358 %359
@@ -372,7 +372,7 @@ module t02_operators {
       %368 : py.Value = py.requireDefined %365 %366 %367 ^propagate.0()
       %369 : base.Int = const int 2
       %370 : py.Value = py.intLit %369
-      %371 : py.Value = py.sub %368 %370 ^propagate.0()
+      %371 : py.Value = py.iSub %368 %370 ^propagate.0()
       %372 : base.String = const str "t02_operators"
       %373 : base.String = const str "x"
       %374 : base.Ref(py.Value) = py.globalCell %372 %373
@@ -386,7 +386,7 @@ module t02_operators {
       %382 : py.Value = py.requireDefined %379 %380 %381 ^propagate.0()
       %383 : base.Int = const int 3
       %384 : py.Value = py.intLit %383
-      %385 : py.Value = py.mult %382 %384 ^propagate.0()
+      %385 : py.Value = py.iMult %382 %384 ^propagate.0()
       %386 : base.String = const str "t02_operators"
       %387 : base.String = const str "x"
       %388 : base.Ref(py.Value) = py.globalCell %386 %387

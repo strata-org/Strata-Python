@@ -1,0 +1,24 @@
+module
+  y: local (assigned)
+  f: local (assigned, referenced)
+  x: local (assigned)
+  g: global implicit (referenced)
+  n: local (assigned, referenced)
+  r: local (assigned)
+  h: local (assigned, referenced)
+  m: local (assigned, referenced)
+  z: local (assigned)
+  a: global implicit (referenced)
+  w: local (assigned, referenced)
+  G: global explicit (declared_global)
+  function f
+    params: g
+    g: local (parameter, referenced)
+    y: local (assigned, referenced)
+    x: local (assigned, referenced)
+    b: local (assigned, referenced)
+    a: local (assigned, referenced)
+  function h
+    params: g
+    g: local (parameter, referenced)
+    G: global explicit (assigned, declared_global)

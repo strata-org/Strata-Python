@@ -77,6 +77,7 @@ c7_with_return | no |
 m_attr_mangle | yes | class
 m_builtins | yes |
 m_calls | yes |
+m_complex | yes | complex literal
 m_cond | yes |
 m_displays | yes |
 m_expressions | yes |
@@ -85,11 +86,13 @@ m_global_decl | yes |
 m_if | yes |
 m_imports | yes |
 m_local_vs_global | yes |
+m_operators | yes |
 m_params | yes |
-m_unbound_local | yes |
-m_while | yes |
 m_subscripts | yes |
-m_rejected | yes | relative import, import *, nested function, non-constant default, operator <<, for loop
+m_unbound_local | yes |
+m_walrus | yes |
+m_while | yes |
+m_rejected | yes | relative import, import *, nested function, non-constant default, for loop
 e01_nonlocal_unbound | no | no binding for nonlocal 'x' found
 e02_global_param | yes | name 'x' is parameter and global
 e03_nonlocal_module | no | nonlocal declaration not allowed at module level

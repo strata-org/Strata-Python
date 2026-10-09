@@ -37,7 +37,7 @@ module t04_while {
       %29 : py.Value = py.requireDefined %26 %27 %28 ^propagate.0()
       %30 : base.Int = const int 1
       %31 : py.Value = py.intLit %30
-      %32 : py.Value = py.add %29 %31 ^propagate.0()
+      %32 : py.Value = py.iAdd %29 %31 ^propagate.0()
       %33 : base.String = const str "t04_while"
       %34 : base.String = const str "i"
       %35 : base.Ref(py.Value) = py.globalCell %33 %34
@@ -83,7 +83,7 @@ module t04_while {
       %63 : py.Value = py.requireDefined %60 %61 %62 ^propagate.0()
       %64 : base.Int = const int 1
       %65 : py.Value = py.intLit %64
-      %66 : py.Value = py.add %63 %65 ^propagate.0()
+      %66 : py.Value = py.iAdd %63 %65 ^propagate.0()
       %67 : base.String = const str "t04_while"
       %68 : base.String = const str "j"
       %69 : base.Ref(py.Value) = py.globalCell %67 %68
@@ -126,7 +126,7 @@ module t04_while {
       %100 : py.Value = py.requireDefined %97 %98 %99 ^propagate.0()
       %101 : base.Int = const int 1
       %102 : py.Value = py.intLit %101
-      %103 : py.Value = py.add %100 %102 ^propagate.0()
+      %103 : py.Value = py.iAdd %100 %102 ^propagate.0()
       %104 : base.String = const str "t04_while"
       %105 : base.String = const str "k"
       %106 : base.Ref(py.Value) = py.globalCell %104 %105
@@ -165,7 +165,7 @@ module t04_while {
       %133 : base.String = const str "NameError"
       %134 : base.String = const str "name 'k' is not defined"
       %135 : py.Value = py.requireDefined %132 %133 %134 ^propagate.0()
-      %136 : py.Value = py.add %128 %135 ^propagate.0()
+      %136 : py.Value = py.iAdd %128 %135 ^propagate.0()
       %137 : base.String = const str "t04_while"
       %138 : base.String = const str "total"
       %139 : base.Ref(py.Value) = py.globalCell %137 %138

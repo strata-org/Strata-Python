@@ -38,13 +38,14 @@ with a diagnostic is a failure.
 * `def` at module level: positional, positional-only, keyword-only, `*args` and `**kwargs`
   parameters, and constant defaults.  The argument-binding prologue is the spec's §5.4.
 * Statements: expression statements, `pass`, assignment and annotated assignment to names,
-  augmented assignment to a name, `if`/`elif`/`else`, `while`/`else`, `break`, `continue`,
-  `return`, `global`, `import a.b [as c]` and `from a.b import x [as y]`.
+  augmented assignment to a name,
+  `if`/`elif`/`else`, `while`/`else`, `break`, `continue`, `return`, `global`,
+  `import a.b [as c]` and `from a.b import x [as y]`.
 * Expressions: `int`, `float`, `str`, `bytes`, `bool`, `None` and `...` literals, names,
-  `+ - * / // % **`, unary `-`, `not`, comparisons (chained too), `and`, `or`,
+  every binary and unary operator, comparisons (chained too), `and`, `or`,
   `x if c else y`, tuple, list, set and dict displays with `*x` and `**d`, calls with
-  keyword, `*` and `**` arguments, attributes (mangled in a class), subscripts, slices, and
-  f-strings.
+  keyword, `*` and `**` arguments, attributes (mangled in a class), subscripts, slices,
+  f-strings, and `x := e` outside a comprehension.
 * Conditions: an `if` or `while` test, and the test of `x if c else y`, lower to branches by
   `transCond`, so each operand's truth is tested at most once.
 
@@ -349,36 +350,58 @@ def writeName (name : String) (v : ValId) (range : SourceRange) : TransM Unit :=
 
 /-! ## Operators -/
 
-/-- The lowering of a supported binary operator. -/
-def binOp? : operator SourceRange → Option (ValId → ValId → TransM ValId)
-  | .Add _ => some fun a b => build (emitFailing "add" Py.add #v[] #[a, b])
-  | .Sub _ => some fun a b => build (emitFailing "sub" Py.sub #v[] #[a, b])
-  | .Mult _ => some fun a b => build (emitFailing "mult" Py.mult #v[] #[a, b])
-  | .Div _ => some fun a b => build (emitFailing "div" Py.div #v[] #[a, b])
-  | .FloorDiv _ => some fun a b => build (emitFailing "floorDiv" Py.floorDiv #v[] #[a, b])
-  | .Mod _ => some fun a b => build (emitFailing "mod" Py.mod #v[] #[a, b])
-  | .Pow _ => some fun a b => build (emitFailing "pow" Py.pow #v[] #[a, b])
-  | _ => none
+/-- The raising operation `r` on `a` and `b`. -/
+def binary {isig : InsnSig Py.env} (name : String) (r : InsnRef Py.env isig) (a b : ValId)
+    (typeArgs : Vector (TypeExpr Py.env 0) isig.typeArgc := by exact #v[]) : TransM ValId :=
+  build (emitFailing name r typeArgs #[a, b])
 
-/-- A binary operator's source text. -/
-def operatorText : operator SourceRange → String
-  | .Add _ => "+" | .Sub _ => "-" | .Mult _ => "*" | .MatMult _ => "@" | .Div _ => "/"
-  | .Mod _ => "%" | .Pow _ => "**" | .LShift _ => "<<" | .RShift _ => ">>" | .BitOr _ => "|"
-  | .BitXor _ => "^" | .BitAnd _ => "&" | .FloorDiv _ => "//"
+/-- `a op b` for a binary operator. -/
+def binOp (op : operator SourceRange) (a b : ValId) : TransM ValId :=
+  match op with
+  | .Add _ => binary "add" Py.add a b
+  | .Sub _ => binary "sub" Py.sub a b
+  | .Mult _ => binary "mult" Py.mult a b
+  | .MatMult _ => binary "matMult" Py.matMult a b
+  | .Div _ => binary "div" Py.div a b
+  | .FloorDiv _ => binary "floorDiv" Py.floorDiv a b
+  | .Mod _ => binary "mod" Py.mod a b
+  | .Pow _ => binary "pow" Py.pow a b
+  | .LShift _ => binary "lShift" Py.lShift a b
+  | .RShift _ => binary "rShift" Py.rShift a b
+  | .BitAnd _ => binary "bitAnd" Py.bitAnd a b
+  | .BitOr _ => binary "bitOr" Py.bitOr a b
+  | .BitXor _ => binary "bitXor" Py.bitXor a b
+
+/-- `a op= b`, the in-place form of `binOp`. -/
+def inPlaceOp (op : operator SourceRange) (a b : ValId) : TransM ValId :=
+  match op with
+  | .Add _ => binary "iAdd" Py.iAdd a b
+  | .Sub _ => binary "iSub" Py.iSub a b
+  | .Mult _ => binary "iMult" Py.iMult a b
+  | .MatMult _ => binary "iMatMult" Py.iMatMult a b
+  | .Div _ => binary "iDiv" Py.iDiv a b
+  | .FloorDiv _ => binary "iFloorDiv" Py.iFloorDiv a b
+  | .Mod _ => binary "iMod" Py.iMod a b
+  | .Pow _ => binary "iPow" Py.iPow a b
+  | .LShift _ => binary "iLShift" Py.iLShift a b
+  | .RShift _ => binary "iRShift" Py.iRShift a b
+  | .BitAnd _ => binary "iBitAnd" Py.iBitAnd a b
+  | .BitOr _ => binary "iBitOr" Py.iBitOr a b
+  | .BitXor _ => binary "iBitXor" Py.iBitXor a b
 
 /-- `a op b` for a comparison operator. -/
 def cmpOp (op : cmpop SourceRange) (a b : ValId) : TransM ValId :=
   match op with
-  | .Eq _ => build (emitFailing "eq" Py.eq #v[] #[a, b])
-  | .NotEq _ => build (emitFailing "notEq" Py.notEq #v[] #[a, b])
-  | .Lt _ => build (emitFailing "lt" Py.lt #v[] #[a, b])
-  | .LtE _ => build (emitFailing "ltE" Py.ltE #v[] #[a, b])
-  | .Gt _ => build (emitFailing "gt" Py.gt #v[] #[a, b])
-  | .GtE _ => build (emitFailing "gtE" Py.gtE #v[] #[a, b])
+  | .Eq _ => binary "eq" Py.eq a b
+  | .NotEq _ => binary "notEq" Py.notEq a b
+  | .Lt _ => binary "lt" Py.lt a b
+  | .LtE _ => binary "ltE" Py.ltE a b
+  | .Gt _ => binary "gt" Py.gt a b
+  | .GtE _ => binary "gtE" Py.gtE a b
   | .Is _ => build (emitTotal "is" Py.is_ #v[] #[a, b])
   | .IsNot _ => build (emitTotal "isNot" Py.isNot #v[] #[a, b])
-  | .In _ => build (emitFailing "in" Py.in_ #v[] #[a, b])
-  | .NotIn _ => build (emitFailing "notIn" Py.notIn #v[] #[a, b])
+  | .In _ => binary "in" Py.in_ a b
+  | .NotIn _ => binary "notIn" Py.notIn a b
 
 /-! ## Literals -/
 
@@ -520,22 +543,23 @@ partial def transExpr (e : expr SourceRange) : TransM ValId := withRange e.ann d
   match e with
   | .Constant sr c _ => literal c sr
   | .Name sr ⟨_, n⟩ _ => readName n sr
-  | .BinOp sr l op r =>
-    match binOp? op with
-    | some f => do
-      let a ← transExpr l
-      let b ← transExpr r
-      f a b
-    | none => unsupportedValue s!"operator {operatorText op}" sr
-  | .UnaryOp sr op x =>
+  | .BinOp _ l op r => do
+    let a ← transExpr l
+    binOp op a (← transExpr r)
+  | .UnaryOp _ op x => do
+    let v ← transExpr x
     match op with
-    | .Not _ => do build (emitFailing "not" Py.not_ #v[] #[← transExpr x])
-    | .USub _ => do build (emitFailing "neg" Py.uSub #v[] #[← transExpr x])
-    | .UAdd _ => unsupportedValue "unary +" sr
-    | .Invert _ => unsupportedValue "operator ~" sr
+    | .Not _ => build (emitFailing "not" Py.not_ #v[] #[v])
+    | .USub _ => build (emitFailing "neg" Py.uSub #v[] #[v])
+    | .UAdd _ => build (emitFailing "pos" Py.uAdd #v[] #[v])
+    | .Invert _ => build (emitFailing "invert" Py.invert #v[] #[v])
   | .Compare _ l ops rs => compare l ops.val rs.val
   | .Call _ f args kws => call f args.val kws.val
   | .BoolOp _ op vs => boolOp (op matches .And _) vs.val
+  | .NamedExpr _ (.Name nsr ⟨_, n⟩ _) v => do
+    let x ← transExpr v
+    writeName n x nsr
+    return x
   | .NamedExpr sr .. => unsupportedValue "assignment expression" sr
   | .Lambda sr .. => unsupportedValue "lambda" sr
   | .IfExp _ c a b => ifExp c a b
@@ -1013,13 +1037,12 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
     | .Name .., none => pure ()
     | t, _ => reject (targetName t) t.ann
   | .AugAssign sr target op v =>
-    match target, binOp? op with
-    | .Name nsr ⟨_, n⟩ _, some f =>
+    match target with
+    | .Name nsr ⟨_, n⟩ _ =>
       let cur ← readName n nsr
       let rhs ← transExpr v
-      writeName n (← f cur rhs) sr
-    | .Name .., none => reject s!"operator {operatorText op}=" sr
-    | t, _ => reject s!"augmented {targetName t}" t.ann
+      writeName n (← inPlaceOp op cur rhs) sr
+    | t => reject s!"augmented {targetName t}" t.ann
   | .If _ test body orelse => ifStmt test body.val orelse.val
   | .While _ test body orelse => whileStmt test body.val orelse.val
   | .Break sr => exitWalk true none sr

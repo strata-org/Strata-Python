@@ -10,6 +10,6 @@ def outer():
 def bad_default(x=[]):
     return x
 
-y = 1 << 2
+y = 1
 for i in y:
     pass

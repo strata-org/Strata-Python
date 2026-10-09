@@ -1,0 +1,23 @@
+module top
+  G: global explicit (declared_global)
+  a: global implicit (referenced)
+  f: local (assigned, referenced)
+  g: global implicit (referenced)
+  h: local (assigned, referenced)
+  m: local (assigned, referenced)
+  n: local (assigned, referenced)
+  r: local (assigned)
+  w: local (assigned, referenced)
+  x: local (assigned)
+  y: local (assigned)
+  z: local (assigned)
+  function f
+    a: local (assigned, referenced)
+    b: local (assigned, referenced)
+    g: local (parameter, referenced)
+    x: local (assigned, referenced)
+    y: local (assigned, referenced)
+  function h
+    G: global explicit (assigned, declared_global)
+    g: local (parameter, referenced)
+qualnames: f, h
