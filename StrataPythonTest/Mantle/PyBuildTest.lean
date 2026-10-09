@@ -136,6 +136,33 @@ example :
 block that declares no parameter is ill formed. -/
 example : Holds (¬ Func.WF ∅ ·) (hWith false) := by decide +kernel
 
+/-! ## `raise x` under a handler with a pre-bound argument
+
+`raiseTo e` passes `e` after the arguments the enclosing handler pre-binds, as an `err`
+successor does.  Here the handler `bb.0(c, exc)` pre-binds `c` to `None`. -/
+
+private def r : Except Errors (Func Py.env Unit) :=
+  buildFunc (Py.pn "r") #["x"] () fun args => do
+    let k ← freshLabel
+    let c ← noneLit
+    withHandlerTo (Build.goto k #[c]) do jump (← raiseTo args[0]!)
+    let pc ← freshVal "c"
+    let pe ← freshVal "exc"
+    startBlock k #[pc, pe]
+    emitReturn pe.id
+
+example : Holds (Func.WF ∅) r := by decide +kernel
+
+/-- Whether the entry block jumps with two arguments, the second its parameter `x`. -/
+private def raisesX (fn : Func Py.env Unit) : Bool :=
+  fn.blocks[0]?.any fun b =>
+    let .apply _ _ _ _ ks _ := b.term
+    let args := ks.flatMap (·.args)
+    args.size == 2 && args[1]? == (b.params.map (·.id))[0]?
+
+/-- The entry block jumps to `bb.0` with `None`, then `x`. -/
+example : Holds (raisesX · = true) r := by decide +kernel
+
 /-! ## `try` / `finally`, by completion
 
     def k(x):

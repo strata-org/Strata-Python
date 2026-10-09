@@ -21,7 +21,7 @@ enclosing handler: every raising operation passes it as its `err` successor.
 The operations:
 
 * `handler`, `withHandler`, `withHandlerTo`: read and replace the enclosing handler, as a
-  `try` does;
+  `try` does; `raiseTo`: the handler, taking an exception;
 * `withInfo`, `resolveInfo`: the default annotation;
 * `emitConst`, `emitTotal`, `emitFailing`, `emitActing`, `emitTest`, `truthy`: emit a
   constant or an operation;
@@ -89,6 +89,11 @@ instance {σ : Type} [Monad m] [MonadPy α m] : MonadPy α (StateT σ m) :=
 
 /-- Where a failing operation currently reports. -/
 def handler : PyM α BlockValue := (·.handler) <$> get
+
+/-- The enclosing handler with the exception `e` passed: where raising `e` transfers. -/
+def raiseTo (e : ValId) : PyM α BlockValue := do
+  let h ← handler
+  return { h with args := h.args.push e }
 
 /-- Emit `act` with failures going to `k`, whose arguments are pre-bound, restoring the old
 handler afterwards, so handlers nest as `try`s do. -/

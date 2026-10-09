@@ -1,0 +1,18 @@
+module
+  x: local (assigned, referenced)
+  xs: global implicit (referenced)
+  f: global implicit (referenced)
+  p: global implicit (referenced)
+  q: global implicit (referenced)
+  g: global implicit (referenced)
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  c: local (assigned, referenced)
+  o: global implicit (referenced)
+  y: local (assigned)
+  ys: global implicit (referenced)
+  first: local (assigned)
+  function first
+    params: xs
+    xs: local (parameter, referenced)
+    x: local (assigned, referenced)

@@ -41,7 +41,7 @@ with a diagnostic is a failure.
 * Statements: expression statements, `pass`, assignment, annotated assignment and augmented
   assignment to names, attributes and subscripts, assignment to tuple and list targets (with a
   starred element too),
-  `if`/`elif`/`else`, `while`/`else`, `break`, `continue`, `return`, `global`,
+  `if`/`elif`/`else`, `while`/`else`, `for`/`else`, `break`, `continue`, `return`, `global`,
   `import a.b [as c]` and `from a.b import x [as y]`.
 * Expressions: `int`, `float`, `str`, `bytes`, `bool`, `None` and `...` literals, names,
   every binary and unary operator, comparisons (chained too), `and`, `or`,
@@ -441,7 +441,6 @@ def stmtName : stmt SourceRange → String
   | .ClassDef .. => "class"
   | .Delete .. => "del"
   | .TypeAlias .. => "type alias"
-  | .For .. => "for loop"
   | .AsyncFor .. => "async for"
   | .With .. => "with"
   | .AsyncWith .. => "async with"
@@ -1119,6 +1118,7 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
     writeLhs l (← inPlaceOp op cur rhs) sr
   | .If _ test body orelse => ifStmt test body.val orelse.val
   | .While _ test body orelse => whileStmt test body.val orelse.val
+  | .For sr target iter body orelse _ => forStmt sr target iter body.val orelse.val
   | .Break sr => exitWalk true none sr
   | .Continue sr => exitWalk false none sr
   | .Return sr ⟨_, v⟩ =>
@@ -1171,6 +1171,35 @@ partial def whileStmt (test : expr SourceRange) (body orelse : Array (stmt Sourc
     transStmts orelse
     if ← isOpen then jump exit
   if ← targeted exit then build (startBlock exit)
+
+/-- `for target in iter: body else: orelse` at `sr` (§6.4).  Only `next` raises to `stop`,
+which ends the loop on `StopIteration` and passes any other exception to the enclosing
+handler. -/
+partial def forStmt (sr : SourceRange) (target iter : expr SourceRange)
+    (body orelse : Array (stmt SourceRange)) : TransM Unit := do
+  match assigner sr target with
+  | .error t => badTarget t
+  | .ok assign =>
+    let it ← build (emitFailing "iter" Py.getIter #v[] #[← transExpr iter])
+    let head ← build (freshLabel "head")
+    let stop ← build (freshLabel "stop")
+    let elseL? ← if orelse.isEmpty then pure none else some <$> build (freshLabel "else")
+    let exit ← build (freshLabel "exit")
+    jump head
+    build (startBlock head)
+    assign (← build (withHandler stop (emitFailing "item" Py.next #v[] #[it])))
+    withExit (.loop exit head) (transStmts body)
+    if ← isOpen then jump head
+    let e ← build (startBlockWith stop "exc")
+    let done ← build (emitTest "done" Py.isStopIteration #v[] #[e])
+    let finished := elseL?.getD exit
+    recordTarget finished
+    build (PyBuild.branch done (Build.goto finished) (← build (raiseTo e)))
+    if let some l := elseL? then
+      build (startBlock l)
+      transStmts orelse
+      if ← isOpen then jump exit
+    if ← targeted exit then build (startBlock exit)
 
 end
 

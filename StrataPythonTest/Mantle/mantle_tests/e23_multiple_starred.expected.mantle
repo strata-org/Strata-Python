@@ -1,6 +1,5 @@
 -- syntax error: multiple starred expressions in assignment at 2:0-2:9
 -- syntax error: multiple starred expressions in assignment at 3:4-3:12
--- unsupported: for loop is not supported at 4:0-4:24
 -- syntax error: multiple starred expressions in assignment at 4:4-4:13
 module e23_multiple_starred {
   func @e23_multiple_starred.|<module>|() -> base.Except(py.Value, py.Value) {

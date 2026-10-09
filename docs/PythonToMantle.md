@@ -1004,7 +1004,7 @@ a diagnostic.
 | walrus | §6.3 | specified; implemented outside comprehensions |
 | complex literal, t-string | §6.3 | unsupported |
 | `while` / `else`, `break`, `continue` | §6.4–§6.5 | specified; implemented |
-| `for` / `else` | §6.4 | specified |
+| `for` / `else` | §6.4 | specified; implemented |
 | closures | §6.6 | specified |
 | `class`, bases, keywords, decorators | §6.7 | specified |
 | zero-argument `super()`, `__class__` | §6.7 | unsupported (Q6); the scope pass sets `needsClassCell` |

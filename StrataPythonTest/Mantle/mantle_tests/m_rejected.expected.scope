@@ -2,8 +2,6 @@ module
   sibling: local (imported)
   outer: local (assigned)
   bad_default: local (assigned)
-  y: local (assigned, referenced)
-  i: local (assigned)
   function outer
     inner: local (assigned, referenced)
     function outer.<locals>.inner

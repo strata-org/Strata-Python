@@ -8,7 +8,7 @@ t01_assign | yes |
 t02_operators | yes |
 t03_if_else | yes |
 t04_while | yes |
-t05_for | no |
+t05_for | yes |
 t06_function | yes |
 t07_try_except | no |
 t08_try_finally | no |
@@ -25,12 +25,12 @@ t18_data_struct | yes |
 t19_attribute | no |
 t20_raise | no |
 t21_combined | no |
-t22_star_args | no |
+t22_star_args | yes |
 t23_kwargs_boto3 | yes |
 t24_assert | no |
-t25_tuple_unpack | no |
+t25_tuple_unpack | yes |
 t26_with_as_use | no |
-t27_module_vars | no |
+t27_module_vars | yes |
 t28_try_else | no |
 t29_dict_unpack | yes |
 t30_loop_try_nested | no |
@@ -81,6 +81,7 @@ m_complex | yes | complex literal
 m_cond | yes |
 m_displays | yes |
 m_expressions | yes |
+m_for | yes |
 m_fstring | yes |
 m_global_decl | yes |
 m_if | yes |
@@ -94,7 +95,7 @@ m_unpack | yes |
 m_unbound_local | yes |
 m_walrus | yes |
 m_while | yes |
-m_rejected | yes | relative import, import *, nested function, non-constant default, for loop
+m_rejected | yes | relative import, import *, nested function, non-constant default
 e01_nonlocal_unbound | no | no binding for nonlocal 'x' found
 e02_global_param | yes | name 'x' is parameter and global
 e03_nonlocal_module | no | nonlocal declaration not allowed at module level
@@ -116,8 +117,8 @@ e18_walrus_lambda_in_iterable | no | assignment expression cannot be used in a c
 e19_walrus_rebinds_outer_iteration | no | assignment expression cannot rebind comprehension iteration variable 'row'
 e20_yield_in_dictcomp | no | 'yield' inside dict comprehension
 e21_repeated_keyword | yes | keyword argument repeated: k
-e22_starred_target | yes | starred assignment target must be in a list or tuple, for loop, with, list comprehension
-e23_multiple_starred | yes | multiple starred expressions in assignment, for loop
+e22_starred_target | yes | starred assignment target must be in a list or tuple, with, list comprehension
+e23_multiple_starred | yes | multiple starred expressions in assignment
 p01_import_dotted | yes |
 p02_import_as | yes |
 p03_from_import | yes |
@@ -127,8 +128,8 @@ p06_import_relative | yes | relative import
 p07_import_star | yes | import *
 p08_import_rebound | yes |
 p09_read_before_assign | yes |
-p10_conditional_local | no |
-p11_shadow_under_control | no |
+p10_conditional_local | yes |
+p11_shadow_under_control | yes |
 p12_del | no |
 p13_except_as | no |
 p14_class_body | no |
