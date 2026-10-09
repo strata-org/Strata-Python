@@ -31,14 +31,16 @@ with a diagnostic is a failure.
   expression is `py.unsupported`, a rejected statement emits nothing, and a rejected
   function (`async def`, a generator) is a stub that returns `py.unsupported`.
 * An error the builder records is a bug in the translator: an `internal error` diagnostic at
-  the range of the function it was emitting.
+  the range of the function it was emitting.  So is a node CPython's parser never produces,
+  such as the target of "a, b += 1": an `internal error` at the node's range.
 
 ## Supported constructs
 
 * `def` at module level: positional, positional-only, keyword-only, `*args` and `**kwargs`
   parameters, and constant defaults.  The argument-binding prologue is the spec's §5.4.
 * Statements: expression statements, `pass`, assignment, annotated assignment and augmented
-  assignment to names, attributes and subscripts,
+  assignment to names, attributes and subscripts, assignment to tuple and list targets (with a
+  starred element too),
   `if`/`elif`/`else`, `while`/`else`, `break`, `continue`, `return`, `global`,
   `import a.b [as c]` and `from a.b import x [as y]`.
 * Expressions: `int`, `float`, `str`, `bytes`, `bool`, `None` and `...` literals, names,
@@ -85,7 +87,7 @@ namespace StrataPython.Mantle.PyTranslate
 open Strata.Mantle
 open StrataPython.Mantle.PyBuild
 open StrataPython.Mantle.PyScope (Table Scope ScopeId NameScope Diagnostic ParamKind mangle
-  formatRange)
+  formatRange starredIndex?)
 open StrataPython (stmt expr constant operator unaryop cmpop arguments arg keyword alias
   opt_expr excepthandler withitem match_case)
 open StrataDDM (SourceRange)
@@ -450,12 +452,6 @@ def stmtName : stmt SourceRange → String
   | .Assert .. => "assert"
   | .Nonlocal .. => "nonlocal"
   | _ => "statement"
-
-/-- The name of an assignment to a target other than a name. -/
-def targetName : expr SourceRange → String
-  | .Tuple .. | .List .. => "unpacking assignment"
-  | .Starred .. => "starred assignment"
-  | _ => "assignment target"
 
 mutual
 
@@ -867,6 +863,41 @@ def writeLhs (l : Lhs) (v : ValId) (range : SourceRange) : TransM Unit :=
     let k ← build (emitTotal "slice" Py.mkSlice #v[] bs)
     discard <| build (emitActing "store" Py.setItem #v[] #[o, k, v])
 
+/-- The assignment of a value to the target `t` at `range`, or the part of `t` the translator
+does not lower.  A tuple or list target unpacks the value, with `unpackEx` if an element is
+starred, then assigns each element in turn, evaluating its target only then. -/
+partial def assigner (range : SourceRange) (t : expr SourceRange) :
+    Except (expr SourceRange) (ValId → TransM Unit) :=
+  match t with
+  | .Tuple _ ts _ | .List _ ts _ => do
+    let ts := ts.val
+    let .ok star := starredIndex? ts | throw t
+    let elems ← ts.mapM fun | .Starred _ e _ => assigner range e | e => assigner range e
+    let unpack (v : ValId) : TransM ValId := do
+      match star with
+      | none =>
+        let n ← build (emitConst "n" (.int ts.size))
+        build (emitFailing "unpack" Py.unpackSeq #v[] #[v, n])
+      | some i =>
+        let before ← build (emitConst "before" (.int i))
+        let after ← build (emitConst "after" (.int (ts.size - i - 1)))
+        build (emitFailing "unpack" Py.unpackEx #v[] #[v, before, after])
+    return fun v => do
+      let tup ← unpack v
+      for h : i in [:elems.size] do
+        let x ← build (emitTotal "elem" Py.tupleGet #v[] #[tup, ← build (emitConst "i" (.int i))])
+        elems[i] x
+  | t => match target? t with
+    | some eval => return fun v => do writeLhs (← eval) v range
+    | none => throw t
+
+/-- Report the target `t`, which the translator does not lower and CPython rejects at compile
+time.  It reports nothing if the scope pass already reports a syntax error at `t`, and an
+internal error otherwise: the parser rejects every other such target. -/
+def badTarget (t : expr SourceRange) : TransM Unit := do
+  if (← read).table.syntaxErrors.any (·.range == t.ann) then return
+  internalError "a target CPython rejects" t.ann
+
 /-! ## Functions
 
 A `def` is bound where it runs, and its function is emitted after the current one, from a
@@ -1068,19 +1099,20 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
   | .Expr _ v => discard <| transExpr v
   | .Pass _ | .Global .. => pure ()
   | .Assign sr ⟨_, targets⟩ v _ =>
-    if let some t := targets.find? (target? · |>.isNone) then
-      return ← reject (targetName t) t.ann
-    let x ← transExpr v
-    for eval in targets.filterMap target? do writeLhs (← eval) x sr
+    match targets.mapM (assigner sr) with
+    | .error t => badTarget t
+    | .ok assigns =>
+      let x ← transExpr v
+      for assign in assigns do assign x
   | .AnnAssign sr target _ ⟨_, value⟩ _ =>
-    let some eval := target? target | reject (targetName target) target.ann
+    let some eval := target? target | badTarget target
     match value with
     | none => discard eval
     | some v =>
       let x ← transExpr v
       writeLhs (← eval) x sr
   | .AugAssign sr target op v =>
-    let some eval := target? target | reject s!"augmented {targetName target}" target.ann
+    let some eval := target? target | badTarget target
     let l ← eval
     let cur ← readLhs l
     let rhs ← transExpr v

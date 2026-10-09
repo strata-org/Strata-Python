@@ -135,7 +135,7 @@ are in `StrataPython/Mantle/Build.lean`.
   receives the exception as a `py.Value`. The operation's result is its success value. The
   translator passes the label of the enclosing handler as `err`.
 - **Total operations** have no successors. These are the literals, `undef`, `isDefined`,
-  `is`/`isNot`, `mkTuple`/`mkList`/`mkKwargs`, `listToTuple`, `mkSlice`, `tupleLen`,
+  `is`/`isNot`, `mkTuple`/`mkList`/`mkKwargs`, `listToTuple`, `mkSlice`, `tupleLen`, `tupleGet`,
   `dictLen`, `dictGet`, `dictFirstKey`, `dictDiscard`, `listAppend`, `isStopIteration`,
   `strConcat`, `globalCell`, `mkClosure` and `unsupported`. `mkSet` and `mkDict` raise, because hashing a key runs `__hash__` and
   `__eq__`.
@@ -301,8 +301,9 @@ The pass also:
 - reports CPython's compile-time scope errors (`nonlocal` with no binding, a name used before
   its `global` declaration, a duplicate parameter, the walrus restrictions in
   comprehensions, `'yield' inside list/set/dict comprehension` and `'yield' inside
-  generator expression`), and the compiler's `keyword argument repeated`, as `syntaxError`
-  diagnostics;
+  generator expression`), and the compiler's `keyword argument repeated`, `starred assignment
+  target must be in a list or tuple` and `multiple starred expressions in assignment`, as
+  `syntaxError` diagnostics;
 - rejects relative imports, `import *`, `match`, `type` statements and type parameters with
   `unsupported` diagnostics;
 - lists every import in `Table.imports`, separately from the symbols. Each `Import` holds
@@ -335,7 +336,7 @@ The reference is CPython 3.12's `symtable` (3.13 gives the same output).
 `StrataPythonTestExtra/PyScopeTest.lean` runs the pass over every program in
 `StrataPythonTest/Mantle/mantle_tests/`, the translator's tests too, and compares it with
 `NAME.symtable`, the program's `symtable` output, and `NAME.expected.scope`, a golden dump.
-`e01`–`e21` are programs with compile-time errors. `p38` uses `type` statements, which the pass
+`e01`–`e23` are programs with compile-time errors. `p38` uses `type` statements, which the pass
 rejects, so it has no `symtable` comparison.
 
 **Reading a name.** The lowering depends on the name's kind and on the kind of scope it is
@@ -473,8 +474,8 @@ jump to the function's exit.
 | target `o.a` | evaluate `o`, then `py.setAttr o "a" v` | Python evaluates the right-hand side first, then `o` |
 | target `o[k]` | evaluate `o` and `k`, then `py.setItem o k v` | right-hand side first, then `o`, then `k` |
 | target `o[i:j:s]` | evaluate `o`, `i`, `j` and `s`, then `py.setItem o (py.mkSlice i j s) v`, with `None` for an absent bound | as CPython's `STORE_SLICE`, which calls `__setitem__` with a slice |
-| target `a, b` / `[a, b]` | `t = py.unpackSeq v 2` (§8), then `getItem t i` for each target, recursively | an exact length check, `ValueError: not enough / too many values to unpack` |
-| target `a, *b` | `py.unpackEx v before after` (§8) | |
+| target `a, b` / `[a, b]` | `t = py.unpackSeq v 2`, then `py.tupleGet t i` for each target, recursively. Each target is evaluated when it is assigned | an exact length check, `ValueError: not enough / too many values to unpack` |
+| target `a, *b` | `py.unpackEx v before after`, then as above. The starred target receives a list | the compiler rejects a starred target outside a tuple or list, and two in one (§5.1) |
 | `x op= e` | read `x` once (evaluating `o` and `k` once for `o.a` and `o[k]`), apply the in-place operation (`py.iAdd` … `py.iBitXor`), write back | in place: `xs += ys` mutates `xs` |
 | `x: T = e` | as `x = e`. The annotation is not evaluated | `x: T` with no value only makes `x` local. `o.a: T` and `o[k]: T` evaluate `o` and `k`, as CPython does |
 | `del x` | `requireDefined` (raises `NameError` or `UnboundLocalError`), then `refSet` of `undef "x"` | |
@@ -876,7 +877,6 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 | `forEach` | `insn forEach (iterable : Value) (&body (item : Value) : Unit) (^err (exc : Value)) : Unit`, a sketch: the body's result must carry an exception (§6.8) | comprehensions |
 | `excMatch` | `insn excMatch (exc type : Value) (^err (e : Value)) : Bool` | `except T` (the alternative is `py.call` builtins `isinstance`, then `truthy`) |
 | `toException` | `insn toException (val : Value) (^err (e : Value)) : Value` | `raise E` |
-| `unpackSeq`, `unpackEx` | `(val : Value) (n : Int) (^err …) : Value` (a tuple); `(val : Value) (before after : Int) (^err …) : Value` | tuple targets |
 | `delAttr`, `delItem` | as `setAttr`/`setItem` without `val` | `del o.a`, `del o[k]` |
 | `mkGenerator` | `insn mkGenerator (code : Code) (cells : Ref Value…) : Value` | generators (stage 1, opaque) |
 
@@ -936,8 +936,8 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
    instruction turns a `base.Ref(py.Value)` into a `py.Value`, so the body cannot store it as
    `ns["__classcell__"]` for `__build_class__` to fill. That needs such an instruction, a body
    that returns the cell, or an operation that installs it.
-7. **Unpacking.** Should unpacking use two operations (`unpackSeq` and `unpackEx`), or one
-   with an optional star position?
+7. **Unpacking.** *Resolved.* Two operations: `unpackSeq` for a target without a starred
+   element and `unpackEx` for one with it, as CPython's `UNPACK_SEQUENCE` and `UNPACK_EX`.
 8. **Global fallback.** *Resolved.* The scope pass classifies a module global and a builtin
    alike as `globalImplicit`, and the split is made at run time: read the global cell, then
    `isDefined`, then `qualifiedRef "builtins" name` if undefined (§5.1).
@@ -988,7 +988,7 @@ a diagnostic.
 | relative import, `import *` | §6.1 | unsupported (rejected by the scope pass and the translator) |
 | expression statement, `pass`, assignment to a name (chained too) | §6.1 | specified; implemented |
 | assignment to an attribute or subscript | §6.1 | specified; implemented |
-| tuple and starred targets | §6.1 | specified, open question (`unpackSeq`, Q7) |
+| tuple and starred targets | §6.1 | specified; implemented |
 | augmented assignment | §6.1 | specified; implemented |
 | annotated assignment | §6.1 | specified; implemented |
 | `del x`, `assert` | §6.1 | specified |

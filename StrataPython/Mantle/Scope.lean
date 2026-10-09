@@ -375,6 +375,14 @@ def syntaxErrors (t : Table) : Array Diagnostic :=
 
 end Table
 
+/-- The index of the starred element of a tuple or list target, or the error CPython's
+compiler reports for more than one. -/
+def starredIndex? (ts : Array (expr SourceRange)) : Except String (Option Nat) :=
+  match ts.filter (· matches .Starred ..) with
+  | #[] => .ok none
+  | #[_] => .ok (ts.findIdx? (· matches .Starred ..))
+  | _ => .error "multiple starred expressions in assignment"
+
 end -- public section
 
 /-! ## Collecting uses
@@ -438,6 +446,18 @@ private def checkKeywords (kws : Array (keyword SourceRange)) : CollectM Unit :=
     if let some n := k.nameAndValue.1 then
       if seen.contains n then return ← syntaxError s!"keyword argument repeated: {n}" k.ann
       seen := seen.insert n
+
+/-- Report a starred target outside a tuple or list, or two starred targets in one, as
+CPython's compiler does. -/
+private partial def checkTarget : expr SourceRange → CollectM Unit
+  | .Starred sr _ _ => syntaxError "starred assignment target must be in a list or tuple" sr
+  | .Tuple sr ts _ | .List sr ts _ => do
+    if let .error msg := starredIndex? ts.val then return ← syntaxError msg sr
+    for t in ts.val do
+      match t with
+      | .Starred _ v _ => checkTarget v
+      | t => checkTarget t
+  | _ => pure ()
 
 private def mangled (name : String) : CollectM String := do
   return mangle (← get).privateName name
@@ -701,6 +721,7 @@ private partial def visitComprehension (sr : SourceRange) (kind : ScopeKind) (na
     visitExpr t
     modifyScope cur fun p => { p with inIterTarget := false }
   iterTarget target
+  checkTarget target
   ifs.val.forM visitExpr
   for g in gens[1:] do
     let .mk_comprehension _ target iter ifs _ := g
@@ -708,6 +729,7 @@ private partial def visitComprehension (sr : SourceRange) (kind : ScopeKind) (na
     modifyScope cur fun p => { p with inIterExpr := p.inIterExpr + 1 }
     visitExpr iter
     modifyScope cur fun p => { p with inIterExpr := p.inIterExpr - 1 }
+    checkTarget target
     ifs.val.forM visitExpr
   value.forM visitExpr
   visitExpr elt
@@ -743,7 +765,10 @@ private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
     modify fun st => { st with privateName := outerPrivate }
   | .Return _ v => v.val.forM visitExpr
   | .Delete _ ts => ts.val.forM visitExpr
-  | .Assign _ ts v _ => ts.val.forM visitExpr; visitExpr v
+  | .Assign _ ts v _ =>
+    ts.val.forM visitExpr
+    visitExpr v
+    ts.val.forM checkTarget
   | .TypeAlias sr n _ _ =>
     unsupported "'type' statements are not supported" sr
     visitExpr n
@@ -764,6 +789,7 @@ private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
   | .For _ t it body orelse _ | .AsyncFor _ t it body orelse _ =>
     visitExpr t
     visitExpr it
+    checkTarget t
     visitStmts body.val
     visitStmts orelse.val
   | .While _ c body orelse | .If _ c body orelse =>
@@ -773,7 +799,7 @@ private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
   | .With _ items body _ | .AsyncWith _ items body _ =>
     for .mk_withitem _ ctx vars in items.val do
       visitExpr ctx
-      vars.val.forM visitExpr
+      vars.val.forM fun t => do visitExpr t; checkTarget t
     visitStmts body.val
   | .Match sr subject cases =>
     unsupported "'match' is not supported" sr

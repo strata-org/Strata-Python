@@ -87,4 +87,14 @@ example : supported.module.funcs.map (nameText ·.name) = #["m.<module>", "m.f"]
 example : withLambda.diagnostics.map (·.message) = #["lambda is not supported"] := by
   native_decide
 
+/-- `a, b += 1`, which CPython's parser rejects, built by hand: the translator reports an
+internal error rather than dropping the statement. -/
+private def augTuple : Result := translate "m" #[.AugAssign none'
+  (.Tuple none' ⟨none', #[store "a", store "b"]⟩ (.Store none')) (.Add none') (int 1)]
+
+example : augTuple.diagnostics.map (·.message) = #["a target CPython rejects"] := by
+  native_decide
+
+example : augTuple.diagnostics.all (·.kind == .internal) := by native_decide
+
 end StrataPython.Mantle.PyTranslateTest

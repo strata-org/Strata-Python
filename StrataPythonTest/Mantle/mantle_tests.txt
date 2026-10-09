@@ -90,6 +90,7 @@ m_operators | yes |
 m_params | yes |
 m_subscripts | yes |
 m_targets | yes |
+m_unpack | yes |
 m_unbound_local | yes |
 m_walrus | yes |
 m_while | yes |
@@ -115,6 +116,8 @@ e18_walrus_lambda_in_iterable | no | assignment expression cannot be used in a c
 e19_walrus_rebinds_outer_iteration | no | assignment expression cannot rebind comprehension iteration variable 'row'
 e20_yield_in_dictcomp | no | 'yield' inside dict comprehension
 e21_repeated_keyword | yes | keyword argument repeated: k
+e22_starred_target | yes | starred assignment target must be in a list or tuple, for loop, with, list comprehension
+e23_multiple_starred | yes | multiple starred expressions in assignment, for loop
 p01_import_dotted | yes |
 p02_import_as | yes |
 p03_from_import | yes |

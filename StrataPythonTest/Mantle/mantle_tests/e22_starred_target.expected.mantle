@@ -1,0 +1,28 @@
+-- syntax error: starred assignment target must be in a list or tuple at 3:0-3:2
+-- unsupported: for loop is not supported at 4:0-4:17
+-- syntax error: starred assignment target must be in a list or tuple at 4:4-4:6
+-- unsupported: with is not supported at 5:0-5:18
+-- syntax error: starred assignment target must be in a list or tuple at 5:10-5:12
+-- unsupported: list comprehension is not supported at 6:0-6:15
+-- syntax error: starred assignment target must be in a list or tuple at 6:7-6:9
+module e22_starred_target {
+  func @e22_starred_target.|<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %0 : base.String = const str "e22_starred_target"
+      %1 : py.Value = py.strLit %0
+      %2 : base.String = const str "e22_starred_target"
+      %3 : base.String = const str "__name__"
+      %4 : base.Ref(py.Value) = py.globalCell %2 %3
+      %5 : base.Unit = base.refSet[py.Value] %4 %1
+      %6 : base.String = const str "list comprehension"
+      %7 : py.Value = py.strLit %6
+      %8 : py.Value = py.unsupported %7
+      %9 : py.Value = py.noneLit
+      %10 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %9
+      ret %10
+    propagate.0(%11 : py.Value):
+      %12 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %11
+      ret %12
+  }
+}
+

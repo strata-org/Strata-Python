@@ -271,6 +271,16 @@ public environment Py extends Base where
   insn mkSlice (lo hi step : Value) : Value
   /-- `obj[lo:hi:step]`.  An absent bound is `None`, as in Python. -/
   insn getSlice (obj lo hi step : Value) (^err (exc : Value)) : Value
+  /-- The elements of `val` as a tuple of exactly `n`: CPython's `UNPACK_SEQUENCE`.  Reads at
+  most `n + 1` elements.  Raises `ValueError` if `val` has fewer or more than `n`, `TypeError`
+  if it is not iterable, and whatever iterating `val` raises. -/
+  insn unpackSeq (val : Value) (n : Int) (^err (exc : Value)) : Value
+  /-- The elements of `val` for a target with a starred element: CPython's `UNPACK_EX`.  One
+  tuple of `before + 1 + after` items: the first `before` elements, then a list of the
+  elements between, then the last `after` elements.  Reads all of `val`.  Raises `ValueError`
+  if `val` has fewer than `before + after` elements, `TypeError` if it is not iterable, and
+  whatever iterating `val` raises. -/
+  insn unpackEx (val : Value) (before after : Int) (^err (exc : Value)) : Value
   /-- A tuple of the elements of `list`, a list the emitting code made: CPython's
   `INTRINSIC_LIST_TO_TUPLE`, which ends a tuple display or call with a `*x`. -/
   insn listToTuple (list : Value) : Value
@@ -280,6 +290,9 @@ public environment Py extends Base where
   insn argsTuple (callee iterable : Value) (^err (exc : Value)) : Value
   /-- The number of elements of `tup`, as a Python `int`. -/
   insn tupleLen (tup : Value) : Value
+  /-- `tup[i]`, for a tuple the emitting code made and an `i` in range, such as an element of
+  `unpackSeq`'s result. -/
+  insn tupleGet (tup : Value) (i : Int) : Value
   /-- `dict` with `other` merged in, as a fresh dict: the lowering of a `**x` argument.
   CPython's `DICT_MERGE`: a key already present raises a `TypeError` naming `callee`, as does
   an `other` that is not a mapping. -/

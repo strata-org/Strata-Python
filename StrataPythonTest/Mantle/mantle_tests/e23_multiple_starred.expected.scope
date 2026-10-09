@@ -1,0 +1,9 @@
+module
+  a: local (assigned)
+  b: local (assigned)
+  c: local (assigned)
+  v: global implicit (referenced)
+diagnostics:
+  syntax error at 2:0-2:9: multiple starred expressions in assignment
+  syntax error at 3:4-3:12: multiple starred expressions in assignment
+  syntax error at 4:4-4:13: multiple starred expressions in assignment

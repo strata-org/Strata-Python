@@ -1,0 +1,12 @@
+module
+  a: local (assigned)
+  v: global implicit (referenced)
+  inlined comprehension <listcomp>
+    params: .0
+    .0: local (parameter)
+    a: local (assigned, comp_iter)
+diagnostics:
+  syntax error at 3:0-3:2: starred assignment target must be in a list or tuple
+  syntax error at 4:4-4:6: starred assignment target must be in a list or tuple
+  syntax error at 5:10-5:12: starred assignment target must be in a list or tuple
+  syntax error at 6:7-6:9: starred assignment target must be in a list or tuple
