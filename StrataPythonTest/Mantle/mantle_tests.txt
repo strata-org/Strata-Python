@@ -27,7 +27,7 @@ t20_raise | no |
 t21_combined | no |
 t22_star_args | yes |
 t23_kwargs_boto3 | yes |
-t24_assert | no |
+t24_assert | yes |
 t25_tuple_unpack | yes |
 t26_with_as_use | no |
 t27_module_vars | yes |
@@ -74,6 +74,7 @@ c4_continue_finally | no |
 c5_body_finally_vs_loop_exit | no |
 c6_body_raise | no |
 c7_with_return | no |
+m_assert | yes |
 m_attr_mangle | yes | class
 m_builtins | yes |
 m_calls | yes |

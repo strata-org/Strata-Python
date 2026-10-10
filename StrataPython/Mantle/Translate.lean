@@ -41,15 +41,15 @@ with a diagnostic is a failure.
 * Statements: expression statements, `pass`, assignment, annotated assignment and augmented
   assignment to names, attributes and subscripts, assignment to tuple and list targets (with a
   starred element too),
-  `del`, `if`/`elif`/`else`, `while`/`else`, `for`/`else`, `break`, `continue`, `return`, `global`,
+  `del`, `assert`, `if`/`elif`/`else`, `while`/`else`, `for`/`else`, `break`, `continue`, `return`, `global`,
   `import a.b [as c]` and `from a.b import x [as y]`.
 * Expressions: `int`, `float`, `str`, `bytes`, `bool`, `None` and `...` literals, names,
   every binary and unary operator, comparisons (chained too), `and`, `or`,
   `x if c else y`, tuple, list, set and dict displays with `*x` and `**d`, calls with
   keyword, `*` and `**` arguments, attributes (mangled in a class), subscripts, slices,
   f-strings, and `x := e` outside a comprehension.
-* Conditions: an `if` or `while` test, and the test of `x if c else y`, lower to branches by
-  `transCond`, so each operand's truth is tested at most once.
+* Conditions: an `if`, `while` or `assert` test, and the test of `x if c else y`, lower to
+  branches by `transCond`, so each operand's truth is tested at most once.
 
 ## Adding a construct
 
@@ -463,7 +463,6 @@ def stmtName : stmt SourceRange → String
   | .Raise .. => "raise"
   | .Try .. => "try"
   | .TryStar .. => "try/except*"
-  | .Assert .. => "assert"
   | .Nonlocal .. => "nonlocal"
   | _ => "statement"
 
@@ -1169,6 +1168,7 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
     else aliases.forM importAlias
   | .FunctionDef sr ⟨_, n⟩ args body decs _ _ tps =>
     defStmt sr n args body.val decs.val (!tps.val.isEmpty) false
+  | .Assert _ test ⟨_, msg⟩ => assertStmt test msg
   | .Delete _ ⟨_, targets⟩ =>
     match targets.mapM deleter with
     | .error t => badTarget t
@@ -1210,6 +1210,21 @@ partial def whileStmt (test : expr SourceRange) (body orelse : Array (stmt Sourc
     transStmts orelse
     if ← isOpen then jump exit
   if ← targeted exit then build (startBlock exit)
+
+/-- `assert test, msg` (§6.1): `test` as a condition.  Only the failing side evaluates
+`msg`, then raises the `AssertionError` class called on it. -/
+partial def assertStmt (test : expr SourceRange) (msg : Option (expr SourceRange)) :
+    TransM Unit := do
+  let ok ← build (freshLabel "ok")
+  let fail ← build (freshLabel "fail")
+  transCond test ok fail
+  build (startBlock fail)
+  let cls ← build (emitTotal "AssertionError" Py.assertionError #v[] #[])
+  let args ← build (emitTotal "args" Py.mkTuple #v[] (← msg.toArray.mapM transExpr))
+  let kwargs ← build (emitTotal "kwargs" Py.mkKwargs #v[] #[])
+  let e ← build (emitFailing "exc" Py.call #v[] #[cls, args, kwargs])
+  build (PyBuild.jump (← build (raiseTo e)))
+  build (startBlock ok)
 
 /-- `for target in iter: body else: orelse` at `sr` (§6.4).  Only `next` raises to `stop`,
 which ends the loop on `StopIteration` and passes any other exception to the enclosing

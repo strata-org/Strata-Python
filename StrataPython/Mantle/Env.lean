@@ -134,6 +134,9 @@ public environment Py extends Base where
   insn call (func args kwargs : Value) (^err (exc : Value)) : Value
   /-- The value `moduleName.name` refers to. -/
   insn qualifiedRef (moduleName name : String) (^err (exc : Value)) : Value
+  /-- The built-in `AssertionError` class, even if `builtins.AssertionError` is rebound:
+  CPython's `LOAD_ASSERTION_ERROR`. -/
+  insn assertionError : Value
   /-- A callable: `code`, a code pointer, and the `cells` it captures.
   Late binding reads a captured cell; a module-level function captures none.  `call` is its
   `apply`. -/

@@ -1,0 +1,14 @@
+module top
+  AssertionError: local (assigned)
+  KeyError: global implicit (referenced)
+  a: global implicit (referenced)
+  b: global implicit (referenced)
+  c: global implicit (referenced)
+  f: local (assigned)
+  g: global implicit (referenced)
+  m: global implicit (referenced)
+  x: local (assigned, referenced)
+  xs: global implicit (referenced)
+  function f
+    x: local (parameter, referenced)
+qualnames: f
