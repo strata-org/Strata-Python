@@ -22,8 +22,22 @@ Mantle separates the vocabulary a language provides from the programs written in
 Environments are built in layers. The **base environment** declares what every language
 needs, and a language's environment refines the base by adding its own types and
 instructions. For example, Python's environment adds a value type and the Python
-operations. A refinement may add types and operations, and may replace an abstract type with
-a more precise definition, such as an inductive type. `t ⊑ s` means that `s` refines `t`.
+operations. We have a general notion of refinement for environments that captures extending
+environments with new operations as well as replacing abstract types with more precise
+definitions (such as inductive types).
+
+We write `t ≤ s`, or `t ⊑ s` for the class that instance search uses, when `s` refines `t`:
+
+* **Types:** every type of `t` is a type of `s`, with the same parameters. An abstract type of
+  `t` may be a datatype in `s`.
+* **Datatypes:** every datatype of `t` is the same datatype in `s`.
+* **Instructions:** every instruction of `t` is an instruction of `s` with the same signature.
+  An ordinary instruction of `t` may be a constructor or a case instruction in `s`.
+* **Annotations:** `≤` requires each annotation of `t` to equal that of its refinement in `s`.
+  `Env.LeBy R` relates them by `R` instead.
+
+`s` may declare more than `t`. Refinement ignores positions: the same declarations in another
+order refine each other.
 
 Environments and programs come with a well-formedness check. A well-formed environment is one
 whose type references all resolve to earlier declarations. A well-formed program uses only

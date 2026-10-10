@@ -203,6 +203,38 @@ end InsnKind
     DataGroup α τ' :=
   ⟨g.members.map (DatatypeDecl.mapTy f), by simpa using g.nonEmpty⟩
 
+/-! ### Erasing annotations
+
+`erase` replaces every annotation by `()`. -/
+
+/-- The type declaration without its annotation. -/
+@[expose] def TypeDecl.erase {α : Type} (d : TypeDecl α) : TypeDecl Unit := { d with ann := () }
+
+/-- The constructor without its annotation. -/
+@[expose] def Ctor.erase {α τ : Type} (c : Ctor α τ) : Ctor Unit τ := { c with ann := () }
+
+/-- The datatype without its annotations. -/
+@[expose] def DatatypeDecl.erase {α τ : Type} (m : DatatypeDecl α τ) : DatatypeDecl Unit τ :=
+  { m with ann := (), ctors := m.ctors.map Ctor.erase }
+
+/-- The group without its annotations. -/
+@[expose] def DataGroup.erase {α τ : Type} (g : DataGroup α τ) : DataGroup Unit τ :=
+  ⟨g.members.map DatatypeDecl.erase, by simpa using g.nonEmpty⟩
+
+/-- Erasing keeps the parameters. -/
+@[simp] theorem TypeDecl.params_erase {α : Type} (d : TypeDecl α) : d.erase.params = d.params :=
+  rfl
+
+/-- Declarations equal up to annotations have the same parameters. -/
+theorem TypeDecl.params_eq_of_erase_eq {α : Type} {d d' : TypeDecl α}
+    (h : d.erase = d'.erase) : d.params = d'.params :=
+  congrArg (TypeDecl.params (α := Unit)) h
+
+/-- Declarations equal up to annotations take the same number of arguments. -/
+theorem TypeDecl.arity_eq_of_erase_eq {α : Type} {d d' : TypeDecl α} (h : d.erase = d'.erase) :
+    d.arity = d'.arity :=
+  congrArg Array.size (params_eq_of_erase_eq h)
+
 end
 
 end Strata.Mantle

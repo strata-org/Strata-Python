@@ -5,8 +5,6 @@
 -/
 module
 public import StrataMantle.DSL.Syntax
-public import StrataMantle.DSL.Model
-public import StrataMantle.DSL.Check
 public import StrataMantle.DSL.Elab
 
 /-!
@@ -14,8 +12,8 @@ public import StrataMantle.DSL.Elab
 
 Declares a Mantle environment, a few lines per declaration, and generates the `Env` value, its
 references and the proofs that it is well formed.  A module that declares an environment
-imports this one, `public import StrataMantle.Env` and `import StrataMantle.Env.WF`; a module
-that only uses one imports neither this module nor `Env.WF`.
+imports this one, `public import StrataMantle.Env.Refine` and `import StrataMantle.Env.WF`;
+a module that only uses one imports neither this module nor `Env.WF`.
 
 ```lean
 /-- A demo language. -/
@@ -161,10 +159,11 @@ internal error at `environment`.
 ## Extending
 
 `extends P` builds on `P.env`, which must be declared with `environment`.  `t ⊑ s`
-(`RefinedBy`, scoped in `Strata.Mantle`) reads "`s` refines `t`"; today it is `t ⊆ s`, a
-prefix.  Each environment generates one upward rule, `toP`, so under `[E.env ⊑ e]` every
-ancestor's references resolve: `Base.refNew : InsnRef e Base.refNew.sig` in any refinement
-of `Demo`.  An environment has one parent.
+(`RefinedBy`, scoped in `Strata.Mantle`) reads "`s` refines `t`" and carries a proof of
+`t ≤ s`.  A child's stages extend its parent's environment, so the child proves
+`P.env ≤ E.env` by `Env.le_of_subset`.  Each environment generates one upward rule, `toP`, so
+under `[E.env ⊑ e]` every ancestor's references resolve: `Base.refNew : InsnRef e
+Base.refNew.sig` in any refinement of `Demo`.  An environment has one parent.
 
 A child reads its parent from the record every `environment` command leaves, which crosses
 module boundaries, not by evaluating `P.env`; the record lists the names, which `mem_env`

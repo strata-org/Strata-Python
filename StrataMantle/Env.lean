@@ -29,6 +29,19 @@ declaration that appears earlier.  The operations below are the only way to buil
 
 Each declaration is annotated with a value of an arbitrary type `α`, which well-formedness
 does not read.
+
+An environment's fields are private.  Clients read it through its lookups:
+
+* `typeOf?`, `dataOf?`: the type and the datatype a name names.
+* `DeclaresInsn`: the instruction a name names, as a checked signature and a kind.
+* `annOf?`, `ctorAddr?`: the annotation a name is declared with, and which constructor it is.
+
+Each has lemmas for `empty` and the `add*` operations.  The raw declarations they read are
+private.
+
+Checked forms and references carry to every environment that keeps their lookups
+(`KeepsTypes`, `KeepsInsns`, `carry`); `ofSubset` carries them along an extension.  Refinement,
+`t ≤ s`, is in `StrataMantle.Env.Refine`.
 -/
 
 open Strata (IndexMap)
@@ -38,7 +51,8 @@ namespace Strata.Mantle
 variable {α : Type}
 
 /-- A well-formed environment whose declarations are annotated with `α`.  The fields are
-private.  `empty` and the `add*` operations are the only way to build one. -/
+private.  `empty` and the `add*` operations are the only way to build one, and the lookups
+(`typeOf?`, `dataOf?`, `DeclaresInsn`, `annOf?`, `ctorAddr?`) the way to read one. -/
 public structure Env (α : Type) where
   private mk ::
   private raw : Env.Raw α
@@ -60,27 +74,50 @@ theorem mem_raw_of_mem {s : Env α} {n : Name} (p : n ∈ s) : n ∈ s.raw :=
 theorem not_mem_raw_of_not_mem {s : Env α} {n : Name} (p : n ∉ s) : n ∉ s.raw :=
   fun h => p (decide_eq_true h)
 
-/-- The declaration data named `name`, if any. -/
-protected def rawGet? (env : Env α) (name : Name) : Option (Decl.Raw α) := env.raw[name]?
+/-- The declaration `name` names, if any. -/
+protected def declOf? (env : Env α) (name : Name) : Option (Decl.Raw α) := env.raw[name]?
+
+/-- The type `name` names, if any: a type declaration, or a datatype as the type declaration of
+its member. -/
+public protected def typeOf? (env : Env α) (name : Name) : Option (TypeDecl α) :=
+  env.raw.typeOf? name
+
+/-- The datatype `name` names, if any: the group that declares it, and which member of the group
+it is. -/
+public protected def dataOf? (env : Env α) (name : Name) :
+    Option (DataGroup α TypeExpr.Raw × Nat) :=
+  env.raw.dataOf? name
+
+/-- The instruction `name` names, if any, of whichever kind. -/
+protected def insnOf? (env : Env α) (name : Name) : Option (InsnDecl.Raw α) :=
+  (env.declOf? name).bind Decl.Raw.asInsn
+
+/-- A name names an instruction exactly when it is declared as one. -/
+theorem insnOf?_eq_some_iff {s : Env α} {n : Name} {d : InsnDecl.Raw α} :
+    s.insnOf? n = some d ↔ s.declOf? n = some (.insn d) := by
+  unfold Env.insnOf?
+  cases s.declOf? n with
+  | none => simp
+  | some e => cases e <;> simp [Decl.Raw.asInsn]
 
 /-- The declaration data named `name`, given that there is one. -/
 protected def rawGet (env : Env α) (name : Name) (p : name ∈ env) : Decl.Raw α :=
   env.raw[name]'(mem_raw_of_mem p)
 
 /-- `name` is declared in `s` as `d`. -/
-def Resolves (s : Env α) (name : Name) (d : Decl.Raw α) : Prop := s.rawGet? name = some d
+def Resolves (s : Env α) (name : Name) (d : Decl.Raw α) : Prop := s.declOf? name = some d
 
-theorem resolves_iff_rawGet? {s : Env α} {n : Name} {d : Decl.Raw α} :
-    s.Resolves n d ↔ s.rawGet? n = some d := Iff.rfl
+theorem resolves_iff_declOf? {s : Env α} {n : Name} {d : Decl.Raw α} :
+    s.Resolves n d ↔ s.declOf? n = some d := Iff.rfl
 
 /-- A name resolves to at most one declaration. -/
 theorem Resolves.unique {s : Env α} {n : Name} {d e : Decl.Raw α}
     (hd : s.Resolves n d) (he : s.Resolves n e) : d = e := by
-  rw [resolves_iff_rawGet?] at hd he
+  rw [resolves_iff_declOf?] at hd he
   exact Option.some.inj (hd.symm.trans he)
 
-/-- `rawGet?` is the lookup of the underlying `Env.Raw`. -/
-theorem rawGet?_eq_raw (s : Env α) (n : Name) : s.rawGet? n = s.raw[n]? := rfl
+/-- `declOf?` is the lookup of the underlying `Env.Raw`. -/
+theorem declOf?_eq_raw (s : Env α) (n : Name) : s.declOf? n = s.raw[n]? := rfl
 
 theorem mem_iff_mem_raw {s : Env α} {n : Name} : n ∈ s ↔ n ∈ s.raw :=
   ⟨mem_raw_of_mem, decide_eq_true⟩
@@ -128,18 +165,19 @@ theorem raw_empty : (empty : Env α).raw = Raw.empty := rfl
 @[simp, grind .] public theorem not_mem_empty (n : Name) : n ∉ (Env.empty (α := α)) := by
   simp [mem_iff_mem_raw, raw_empty]
 
-theorem rawGet?_empty (n : Name) : (Env.empty (α := α)).rawGet? n = none := by
-  simp [rawGet?_eq_raw, raw_empty, Raw.get?_empty]
+/-- The empty environment names nothing. -/
+@[simp] theorem declOf?_empty (n : Name) : (Env.empty (α := α)).declOf? n = none := by
+  simp [declOf?_eq_raw, raw_empty, Raw.get?_empty]
 
 theorem not_resolves_empty (n : Name) (d : Decl.Raw α) :
     ¬ (Env.empty (α := α)).Resolves n d := by
-  rw [resolves_iff_rawGet?, rawGet?_empty]
+  rw [resolves_iff_declOf?, declOf?_empty]
   simp
 
 theorem mem_of_resolves {s : Env α} {n : Name} {d : Decl.Raw α}
     (h : s.Resolves n d) : n ∈ s := by
-  rw [resolves_iff_rawGet?] at h
-  rw [rawGet?_eq_raw] at h
+  rw [resolves_iff_declOf?] at h
+  rw [declOf?_eq_raw] at h
   exact mem_iff_mem_raw.mpr (IndexMap.mem_of_getElem?_eq_some h)
 
 /-! ### Extending an environment -/
@@ -163,15 +201,15 @@ theorem raw_addType :
 @[simp] public theorem size_addType : (s.addType d fresh distinct).size = s.size + 1 := by
   simp [size, raw_addType, Raw.keys_append]
 
-/-- What a name resolves to after `addType`. -/
-theorem rawGet?_addType (n : Name) :
-    (s.addType d fresh distinct).rawGet? n =
-      if d.name == n then some (.type d) else s.rawGet? n := by
-  simp [rawGet?_eq_raw, raw_addType, Raw.get?_append]
+/-- What a name names after `addType`. -/
+theorem declOf?_addType (n : Name) :
+    (s.addType d fresh distinct).declOf? n =
+      if d.name == n then some (.type d) else s.declOf? n := by
+  simp [declOf?_eq_raw, raw_addType, Raw.get?_append]
 
 /-- The added type resolves under its own name. -/
 theorem resolves_addType_self : (s.addType d fresh distinct).Resolves d.name (.type d) := by
-  rw [resolves_iff_rawGet?, rawGet?_addType]
+  rw [resolves_iff_declOf?, declOf?_addType]
   simp
 
 end
@@ -180,7 +218,7 @@ end
 theorem resolves_addType_of_ne {s : Env α} {d : TypeDecl α} {fresh : d.name ∉ s}
     {distinct : d.paramNames.Nodup} {n : Name} {e : Decl.Raw α} (hne : d.name ≠ n) :
     (s.addType d fresh distinct).Resolves n e ↔ s.Resolves n e := by
-  rw [resolves_iff_rawGet?, resolves_iff_rawGet?, rawGet?_addType, if_neg (by simpa using hne)]
+  rw [resolves_iff_declOf?, resolves_iff_declOf?, declOf?_addType, if_neg (by simpa using hne)]
 
 @[simp, grind =] public theorem mem_addType {s : Env α} {d : TypeDecl α} {fresh : d.name ∉ s}
     {distinct : d.paramNames.Nodup} {n : Name} :
@@ -211,24 +249,24 @@ theorem add?_eq_none_iff {s : Env α} {d : Decl.Raw α} :
   · simp_all
   · split <;> simp_all
 
-theorem rawGet?_of_add?_eq_some {s s' : Env α} {d : Decl.Raw α} (h : s.add? d = some s')
-    (n : Name) : s'.rawGet? n = if d.name == n then some d else s.rawGet? n := by
+theorem declOf?_of_add?_eq_some {s s' : Env α} {d : Decl.Raw α} (h : s.add? d = some s')
+    (n : Name) : s'.declOf? n = if d.name == n then some d else s.declOf? n := by
   unfold add? at h
   split at h
   · exact absurd h (by simp)
   · split at h
     · obtain rfl : s' = _ := Option.some.inj h.symm
-      simp [rawGet?_eq_raw, Raw.get?_append]
+      simp [declOf?_eq_raw, Raw.get?_append]
     · exact absurd h (by simp)
 
 theorem resolves_of_add?_eq_some {s s' : Env α} {d : Decl.Raw α} (h : s.add? d = some s') :
     s'.Resolves d.name d := by
-  rw [resolves_iff_rawGet?, rawGet?_of_add?_eq_some h]
+  rw [resolves_iff_declOf?, declOf?_of_add?_eq_some h]
   simp
 
 theorem resolves_add?_of_ne {s s' : Env α} {d : Decl.Raw α} (h : s.add? d = some s')
     {n : Name} {e : Decl.Raw α} (hne : d.name ≠ n) : s'.Resolves n e ↔ s.Resolves n e := by
-  rw [resolves_iff_rawGet?, resolves_iff_rawGet?, rawGet?_of_add?_eq_some h,
+  rw [resolves_iff_declOf?, resolves_iff_declOf?, declOf?_of_add?_eq_some h,
     if_neg (by simpa using hne)]
 
 theorem size_of_add?_eq_some {s s' : Env α} {d : Decl.Raw α} (h : s.add? d = some s') :
@@ -294,8 +332,9 @@ theorem size_of_ofArray?_eq_some {ds : Array (Decl.Raw α)} {s : Env α}
   simp [size, s.raw.declsWF, hv]
 
 /-- The `i`-th declaration is stored under its own name. -/
-theorem rawGet?_of_ofArray?_eq_some {ds : Array (Decl.Raw α)} {s : Env α}
-    (h : ofArray? ds = some s) (i : Nat) (hi : i < ds.size) : s.rawGet? (ds[i]'hi).name = some (ds[i]'hi) := by
+theorem declOf?_of_ofArray?_eq_some {ds : Array (Decl.Raw α)} {s : Env α}
+    (h : ofArray? ds = some s) (i : Nat) (hi : i < ds.size) :
+    s.declOf? (ds[i]'hi).name = some (ds[i]'hi) := by
   have hv := vals_of_ofArray?_eq_some h
   have hlt : i < s.raw.decls.vals.size := by rw [hv]; exact hi
   have heq : s.raw.decls.vals[i]'hlt = ds[i]'hi :=
@@ -307,7 +346,7 @@ theorem rawGet?_of_ofArray?_eq_some {ds : Array (Decl.Raw α)} {s : Env α}
 theorem resolves_of_ofArray?_eq_some {ds : Array (Decl.Raw α)} {s : Env α}
     (h : ofArray? ds = some s) (i : Nat) (hi : i < ds.size) :
     s.Resolves (ds[i]'hi).name (ds[i]'hi) :=
-  rawGet?_of_ofArray?_eq_some h i hi
+  declOf?_of_ofArray?_eq_some h i hi
 
 /-- A type that `s` resolves is a valid reference before the end of `s`. -/
 theorem refBefore_of_resolves {s : Env α} {n : Name} {d : TypeDecl α}
@@ -326,31 +365,31 @@ theorem refBefore_of_resolves {s : Env α} {n : Name} {d : TypeDecl α}
   exact Raw.refBefore_iff.mpr ⟨j, d, hj, hjlt, h, rfl⟩
 
 /-- A stored declaration is named by the key it is stored under. -/
-theorem name_of_rawGet? {s : Env α} {n : Name} {d : Decl.Raw α} (h : s.rawGet? n = some d) :
+theorem name_of_declOf? {s : Env α} {n : Name} {d : Decl.Raw α} (h : s.declOf? n = some d) :
     d.name = n := by
-  rw [rawGet?_eq_raw] at h
+  rw [declOf?_eq_raw] at h
   have h' : s.raw.decls[n]? = some d := h
   have hmem : n ∈ s.raw.decls := IndexMap.mem_of_getElem?_eq_some h'
   rw [IndexMap.getElem?_eq_some_getElem hmem] at h'
   rw [← Option.some.inj h']
   exact Raw.name_getElem s.raw hmem
 
-theorem isSome_rawGet? {s : Env α} {n : Name} : (s.rawGet? n).isSome ↔ n ∈ s := by
-  rw [rawGet?_eq_raw, mem_iff_mem_raw]
+theorem isSome_declOf? {s : Env α} {n : Name} : (s.declOf? n).isSome ↔ n ∈ s := by
+  rw [declOf?_eq_raw, mem_iff_mem_raw]
   show (s.raw.decls[n]?).isSome = true ↔ n ∈ s.raw.decls
   rw [IndexMap.isSome_getElem?_eq_contains]
   simp
 
-theorem rawGet?_eq_none_iff {s : Env α} {n : Name} : s.rawGet? n = none ↔ n ∉ s := by
-  rw [rawGet?_eq_raw, ← Option.not_isSome_iff_eq_none, mem_iff_mem_raw]
+theorem declOf?_eq_none_iff {s : Env α} {n : Name} : s.declOf? n = none ↔ n ∉ s := by
+  rw [declOf?_eq_raw, ← Option.not_isSome_iff_eq_none, mem_iff_mem_raw]
   show ¬ (s.raw.decls[n]?).isSome = true ↔ ¬ n ∈ s.raw.decls
   rw [IndexMap.isSome_getElem?_eq_contains]
   simp
 
 /-- Every declaration an environment stores is well formed against the whole environment. -/
-theorem declWF_of_rawGet? {s : Env α} {n : Name} {d : Decl.Raw α} (h : s.rawGet? n = some d) :
+theorem declWF_of_declOf? {s : Env α} {n : Name} {d : Decl.Raw α} (h : s.declOf? n = some d) :
     Decl.Raw.WF (s.RefBefore s.size) d := by
-  have h' : s.raw[n]? = some d := by rw [rawGet?_eq_raw] at h; exact h
+  have h' : s.raw[n]? = some d := by rw [declOf?_eq_raw] at h; exact h
   have hs : (IndexMap.idxOf? s.raw.decls n).isSome := by
     rw [IndexMap.isSome_idxOf?_eq_contains]
     simpa using IndexMap.mem_of_getElem?_eq_some h'
@@ -362,9 +401,9 @@ theorem declWF_of_rawGet? {s : Env α} {n : Name} {d : Decl.Raw α} (h : s.rawGe
 
 /-- A stored declaration sits at a position whose key is the name it was looked up
 under. -/
-theorem idx_of_rawGet? {s : Env α} {n : Name} {d : Decl.Raw α} (h : s.rawGet? n = some d) :
+theorem idx_of_declOf? {s : Env α} {n : Name} {d : Decl.Raw α} (h : s.declOf? n = some d) :
     ∃ i, i < s.size ∧ s.raw.decls.keys[i]? = some n := by
-  have h' : s.raw[n]? = some d := by rw [rawGet?_eq_raw] at h; exact h
+  have h' : s.raw[n]? = some d := by rw [declOf?_eq_raw] at h; exact h
   have hs : (IndexMap.idxOf? s.raw.decls n).isSome := by
     rw [IndexMap.isSome_idxOf?_eq_contains]
     simpa using IndexMap.mem_of_getElem?_eq_some h'
@@ -373,21 +412,158 @@ theorem idx_of_rawGet? {s : Env α} {n : Name} {d : Decl.Raw α} (h : s.rawGet? 
   exact ⟨i, (Array.getElem?_eq_some_iff.mp hkey).1, hkey⟩
 
 /-- A stored declaration passes `checkAlias` at its own position. -/
-theorem checkAlias_of_rawGet? {s : Env α} {n : Name} {d : Decl.Raw α} (h : s.rawGet? n = some d) :
+theorem checkAlias_of_declOf? {s : Env α} {n : Name} {d : Decl.Raw α} (h : s.declOf? n = some d) :
     ∃ i, s.raw.checkAlias i n d = true := by
-  obtain ⟨i, -, hkey⟩ := idx_of_rawGet? h
+  obtain ⟨i, -, hkey⟩ := idx_of_declOf? h
   exact ⟨i, s.wf.aliasWF i n d hkey h⟩
 
 /-- A name stored as a member alias denotes a type. -/
 theorem isSome_typeOf?_of_dataRest {s : Env α} {n mn hd : Name} {i : Nat}
-    (h : s.rawGet? n = some (.dataRest mn hd i)) : (s.raw.typeOf? n).isSome := by
-  obtain ⟨j, hj⟩ := checkAlias_of_rawGet? h
+    (h : s.declOf? n = some (.dataRest mn hd i)) : (s.raw.typeOf? n).isSome := by
+  obtain ⟨j, hj⟩ := checkAlias_of_declOf? h
   exact Raw.isSome_typeOf?_of_checkAlias h hj
+
+/-- A name declared as a type names it as a type. -/
+theorem typeOf?_of_type {s : Env α} {n : Name} {d : TypeDecl α}
+    (h : s.declOf? n = some (.type d)) : s.typeOf? n = some d :=
+  Option.bind_eq_some_iff.mpr ⟨_, h, rfl⟩
+
+/-- A name declared as a group's head names its first member as a type. -/
+theorem typeOf?_of_dataHead {s : Env α} {n : Name} {g : DataGroup α TypeExpr.Raw}
+    (h : s.declOf? n = some (.dataHead g)) : s.typeOf? n = some g.first.toTypeDecl :=
+  Option.bind_eq_some_iff.mpr ⟨_, h, rfl⟩
+
+/-- A name declared as an instruction names no type. -/
+theorem typeOf?_of_insn {s : Env α} {n : Name} {d : InsnDecl.Raw α}
+    (h : s.declOf? n = some (.insn d)) : s.typeOf? n = none := by
+  show (s.declOf? n).bind s.raw.typeOfDecl? = none
+  rw [h]
+  rfl
+
+/-- An undeclared name names no type. -/
+theorem typeOf?_of_none {s : Env α} {n : Name} (h : s.declOf? n = none) :
+    s.typeOf? n = none := by
+  show (s.declOf? n).bind s.raw.typeOfDecl? = none
+  rw [h]
+  rfl
+
+/-- A name declared as a group's head names the group's first member. -/
+theorem dataOf?_of_dataHead {s : Env α} {n : Name} {g : DataGroup α TypeExpr.Raw}
+    (h : s.declOf? n = some (.dataHead g)) : s.dataOf? n = some (g, 0) := by
+  unfold Env.dataOf? Raw.dataOf?
+  rw [show s.raw.decls[n]? = some (.dataHead g) from h]
+
+/-- A name declared as a type names no datatype. -/
+theorem dataOf?_of_type {s : Env α} {n : Name} {d : TypeDecl α}
+    (h : s.declOf? n = some (.type d)) : s.dataOf? n = none := by
+  unfold Env.dataOf? Raw.dataOf?
+  rw [show s.raw.decls[n]? = some (.type d) from h]
+
+/-- A name declared as an instruction names no datatype. -/
+theorem dataOf?_of_insn {s : Env α} {n : Name} {d : InsnDecl.Raw α}
+    (h : s.declOf? n = some (.insn d)) : s.dataOf? n = none := by
+  unfold Env.dataOf? Raw.dataOf?
+  rw [show s.raw.decls[n]? = some (.insn d) from h]
+
+/-- An undeclared name names no datatype. -/
+theorem dataOf?_of_none {s : Env α} {n : Name} (h : s.declOf? n = none) :
+    s.dataOf? n = none := by
+  unfold Env.dataOf? Raw.dataOf?
+  rw [show s.raw.decls[n]? = none from h]
+
+/-! ### Lookups after adding one declaration
+
+`s'` is `s` with one more declaration `e₀`, under the fresh name `a`, that neither heads nor
+joins a group: a type or an instruction. -/
+
+section
+variable {s s' : Env α} {a : Name} {e₀ : Decl.Raw α}
+  (hget : ∀ m, s'.declOf? m = if a == m then some e₀ else s.declOf? m) (ha : a ∉ s)
+  (hg : e₀.asGroup = none)
+include hget ha hg
+
+/-- A declaration resolves to the same type in `s'` as in `s`. -/
+theorem typeOfDecl?_of_declOf?_eq (e : Decl.Raw α) :
+    s'.raw.typeOfDecl? e = s.raw.typeOfDecl? e := by
+  cases e with
+  | dataRest m h i =>
+    show ((s'.raw.decls[h]?).bind _).bind _ = ((s.raw.decls[h]?).bind _).bind _
+    rw [show s'.raw.decls[h]? = _ from hget h]
+    split
+    · next hh =>
+      rw [show s.raw.decls[h]? = none from declOf?_eq_none_iff.mpr (beq_iff_eq.mp hh ▸ ha)]
+      simp [hg]
+    · rfl
+  | _ => rfl
+
+/-- `s'` names the types `s` names, and `e₀`'s. -/
+theorem typeOf?_of_declOf?_eq (n : Name) :
+    s'.typeOf? n = if a == n then s.raw.typeOfDecl? e₀ else s.typeOf? n := by
+  show ((s'.declOf? n).bind s'.raw.typeOfDecl?) = _
+  rw [hget n, funext (typeOfDecl?_of_declOf?_eq hget ha hg)]
+  split <;> rfl
+
+omit hg in
+/-- `s'` names the datatypes `s` names, and no other. -/
+theorem dataOf?_of_declOf?_eq (hg : e₀.asGroup = none)
+    (hrest : ∀ m h i, e₀ ≠ .dataRest m h i) (n : Name) :
+    s'.dataOf? n = if a == n then none else s.dataOf? n := by
+  unfold Env.dataOf? Raw.dataOf?
+  rw [show s'.raw.decls[n]? = _ from hget n]
+  by_cases hc : (a == n) = true
+  · rw [if_pos hc, if_pos hc]
+    cases e₀ with
+    | dataHead g => simp at hg
+    | dataRest m h i => exact absurd rfl (hrest m h i)
+    | _ => rfl
+  · rw [if_neg hc, if_neg hc, show s.raw.decls[n]? = s.declOf? n from rfl]
+    cases s.declOf? n with
+    | none => rfl
+    | some e =>
+      cases e with
+      | dataRest m h i =>
+        show ((s'.raw.decls[h]?).bind _).map _ = ((s.raw.decls[h]?).bind _).map _
+        rw [show s'.raw.decls[h]? = _ from hget h]
+        split
+        · next hh =>
+          rw [show s.raw.decls[h]? = none from declOf?_eq_none_iff.mpr (beq_iff_eq.mp hh ▸ ha)]
+          simp [hg]
+        · rfl
+      | _ => rfl
+
+end
+
+/-- The empty environment names no type. -/
+@[simp] public theorem typeOf?_empty (n : Name) : (Env.empty (α := α)).typeOf? n = none :=
+  typeOf?_of_none (declOf?_empty n)
+
+/-- The empty environment names no datatype. -/
+@[simp] public theorem dataOf?_empty (n : Name) : (Env.empty (α := α)).dataOf? n = none :=
+  dataOf?_of_none (declOf?_empty n)
+
+/-- What type a name names after `addType`. -/
+public theorem typeOf?_addType (s : Env α) (d : TypeDecl α) (fresh : d.name ∉ s)
+    {distinct : d.paramNames.Nodup} (n : Name) :
+    (s.addType d fresh distinct).typeOf? n = if d.name == n then some d else s.typeOf? n :=
+  typeOf?_of_declOf?_eq (declOf?_addType s d fresh) fresh rfl n
+
+/-- `addType` adds no datatype. -/
+public theorem dataOf?_addType (s : Env α) (d : TypeDecl α) (fresh : d.name ∉ s)
+    {distinct : d.paramNames.Nodup} (n : Name) :
+    (s.addType d fresh distinct).dataOf? n = if d.name == n then none else s.dataOf? n :=
+  dataOf?_of_declOf?_eq (declOf?_addType s d fresh) fresh rfl (fun _ _ _ => nofun) n
+
+/-- A name that names a type is declared. -/
+public theorem mem_of_typeOf? {s : Env α} {n : Name} {d : TypeDecl α} (h : s.typeOf? n = some d) :
+    n ∈ s := by
+  obtain ⟨_, he, -⟩ := Option.bind_eq_some_iff.mp h
+  exact mem_of_resolves he
 
 /-! ### Extension
 
 `s₁ ⊆ s₂` when `s₂` has the declarations of `s₁` at the same positions, and possibly more
-after them.  A name that resolves in `s₁` resolves the same way in `s₂`. -/
+after them.  A name that resolves in `s₁` resolves the same way in `s₂`.  Every operation that
+extends an environment proves `⊆`. -/
 
 /-- `Prefix s₁ s₂` holds when the declarations of `s₁` are a prefix of those of `s₂`.
 It is written `s₁ ⊆ s₂`. -/
@@ -447,8 +623,8 @@ theorem idxOf?_of_subset {s₁ s₂ : Env α} (h : s₁ ⊆ s₂) {n : Name} {j 
   rwa [hkey] at this
 
 /-- A name that resolves in a prefix resolves the same way in the extension. -/
-theorem rawGet?_of_subset {s₁ s₂ : Env α} (h : s₁ ⊆ s₂) {n : Name} {d : Decl.Raw α}
-    (hd : s₁.rawGet? n = some d) : s₂.rawGet? n = some d := by
+theorem declOf?_of_subset {s₁ s₂ : Env α} (h : s₁ ⊆ s₂) {n : Name} {d : Decl.Raw α}
+    (hd : s₁.declOf? n = some d) : s₂.declOf? n = some d := by
   have hmem : n ∈ s₁.raw.decls := IndexMap.mem_of_getElem?_eq_some hd
   have hs : (IndexMap.idxOf? s₁.raw.decls n).isSome := by
     rw [IndexMap.isSome_idxOf?_eq_contains]; simpa using hmem
@@ -472,35 +648,56 @@ theorem rawGet?_of_subset {s₁ s₂ : Env α} (h : s₁ ⊆ s₂) {n : Name} {d
 /-- What a prefix resolves, the extension resolves the same way. -/
 theorem Resolves.mono {s₁ s₂ : Env α} (h : s₁ ⊆ s₂) {n : Name} {d : Decl.Raw α}
     (hd : s₁.Resolves n d) : s₂.Resolves n d :=
-  rawGet?_of_subset h hd
+  declOf?_of_subset h hd
 
 public theorem mem_of_subset {s₁ s₂ : Env α} (h : s₁ ⊆ s₂) {n : Name} (hn : n ∈ s₁) :
     n ∈ s₂ :=
   mem_of_resolves
-    (rawGet?_of_subset h (IndexMap.getElem?_eq_some_getElem (mem_raw_of_mem hn)))
+    (declOf?_of_subset h (IndexMap.getElem?_eq_some_getElem (mem_raw_of_mem hn)))
 
-/-- What a name's type resolves to survives an extension. -/
-theorem typeOf?_of_subset {s₁ s₂ : Env α} (h : s₁ ⊆ s₂) {n : Name} {t : TypeDecl α}
+/-- What a name's type resolves to survives an environment that keeps every lookup. -/
+theorem typeOf?_of_declOf? {s₁ s₂ : Env α}
+    (stable : ∀ {k : Name} {e : Decl.Raw α}, s₁.declOf? k = some e → s₂.declOf? k = some e)
+    {n : Name} {t : TypeDecl α}
     (ht : s₁.raw.typeOf? n = some t) : s₂.raw.typeOf? n = some t := by
-  have stable : ∀ {k : Name} {e : Decl.Raw α}, s₁.raw.decls[k]? = some e →
-      s₂.raw.decls[k]? = some e := fun hk => rawGet?_of_subset h hk
-  unfold Env.Raw.typeOf? at ht ⊢
-  cases hx : s₁.raw.decls[n]? with
-  | none => rw [hx] at ht; simp at ht
-  | some e =>
-    rw [hx] at ht
-    rw [stable hx]
-    cases e with
-    | type tt => exact ht
-    | dataHead g => exact ht
-    | dataRest m hd i =>
-      simp only [Option.bind_some, Env.Raw.typeOfDecl?] at ht ⊢
-      cases hh : s₁.raw.decls[hd]? with
-      | none => rw [hh] at ht; simp at ht
-      | some eh => rw [hh] at ht; rw [stable hh]; exact ht
-    | insn _ =>
-      simp only [Option.bind_some, Env.Raw.typeOfDecl?] at ht
-      exact absurd ht (by simp)
+  obtain ⟨e, he, ht⟩ := Option.bind_eq_some_iff.mp ht
+  refine Option.bind_eq_some_iff.mpr ⟨e, stable he, ?_⟩
+  cases e with
+  | dataRest _ hd _ =>
+    -- A member past the head looks up its group's head.
+    obtain ⟨g, hg, hm⟩ := Option.bind_eq_some_iff.mp ht
+    obtain ⟨eh, heh, hgrp⟩ := Option.bind_eq_some_iff.mp hg
+    exact Option.bind_eq_some_iff.mpr ⟨g, Option.bind_eq_some_iff.mpr ⟨eh, stable heh, hgrp⟩, hm⟩
+  | type _ | dataHead _ | insn _ => exact ht
+
+/-- What datatype a name is survives an environment that keeps every lookup. -/
+theorem dataOf?_of_declOf? {s₁ s₂ : Env α}
+    (stable : ∀ {k : Name} {e : Decl.Raw α}, s₁.declOf? k = some e → s₂.declOf? k = some e)
+    {n : Name} {g : DataGroup α TypeExpr.Raw} {i : Nat}
+    (hd : s₁.raw.dataOf? n = some (g, i)) : s₂.raw.dataOf? n = some (g, i) := by
+  unfold Raw.dataOf? at hd ⊢
+  split at hd
+  next hx =>
+    rw [show s₂.raw.decls[n]? = _ from stable hx]
+    exact hd
+  next hx =>
+    rw [show s₂.raw.decls[n]? = _ from stable hx]
+    -- A member past the head looks up its group's head.
+    obtain ⟨g', hg', hgi⟩ := Option.map_eq_some_iff.mp hd
+    obtain ⟨eh, heh, hgrp⟩ := Option.bind_eq_some_iff.mp hg'
+    exact Option.map_eq_some_iff.mpr ⟨g', Option.bind_eq_some_iff.mpr ⟨eh, stable heh, hgrp⟩, hgi⟩
+  next => exact absurd hd (by simp)
+
+/-- What type a name names survives an extension. -/
+public theorem typeOf?_of_subset {s₁ s₂ : Env α} (h : s₁ ⊆ s₂) {n : Name} {t : TypeDecl α}
+    (ht : s₁.typeOf? n = some t) : s₂.typeOf? n = some t :=
+  typeOf?_of_declOf? (declOf?_of_subset h) ht
+
+/-- What datatype a name names survives an extension. -/
+public theorem dataOf?_of_subset {s₁ s₂ : Env α} (h : s₁ ⊆ s₂) {n : Name}
+    {g : DataGroup α TypeExpr.Raw} {i : Nat} (hd : s₁.dataOf? n = some (g, i)) :
+    s₂.dataOf? n = some (g, i) :=
+  dataOf?_of_declOf? (declOf?_of_subset h) hd
 
 /-- A reference valid in a prefix is valid in the extension. -/
 public theorem refBefore_of_subset {s₁ s₂ : Env α} (h : s₁ ⊆ s₂) {i : Nat} {n : Name}
@@ -580,15 +777,15 @@ theorem subset_appendBatch : s ⊆ s.appendBatch ds fresh h := by
   simp only [raw_appendBatch, Raw.vals_appendList, Array.toList_append]
   exact List.prefix_append _ _
 
-theorem rawGet?_appendBatch (n : Name) :
-    (s.appendBatch ds fresh h).rawGet? n = (s.rawGet? n).or (ds.find? (·.name == n)) := by
-  rw [← Array.find?_toList, rawGet?, raw_appendBatch]
+theorem declOf?_appendBatch (n : Name) :
+    (s.appendBatch ds fresh h).declOf? n = (s.declOf? n).or (ds.find? (·.name == n)) := by
+  rw [← Array.find?_toList, Env.declOf?, raw_appendBatch]
   exact Raw.get?_appendList _ fresh n
 
 theorem resolves_appendBatch {j : Nat} {d : Decl.Raw α} (hd : ds[j]? = some d) :
     (s.appendBatch ds fresh h).Resolves d.name d := by
   rw [← Array.getElem?_toList] at hd
-  rw [Resolves, rawGet?, raw_appendBatch]
+  rw [Resolves, Env.declOf?, raw_appendBatch]
   exact Raw.get?_appendList_of_getElem? hd
 
 theorem mem_appendBatch {n : Name} :
@@ -659,8 +856,8 @@ theorem raw_addTypes :
     · exact .inr ⟨_, ⟨d, hd, rfl⟩, rfl⟩
     · exact .inl h
 
-theorem rawGet?_addTypes_of_getElem? {j : Nat} {d : TypeDecl α} (hd : ds[j]? = some d) :
-    (s.addTypes ds fresh).rawGet? d.name = some (.type d) := by
+theorem declOf?_addTypes_of_getElem? {j : Nat} {d : TypeDecl α} (hd : ds[j]? = some d) :
+    (s.addTypes ds fresh).declOf? d.name = some (.type d) := by
   have : (ds.map Decl.Raw.type)[j]? = some (.type d) := by simp [hd]
   exact resolves_appendBatch this
 
@@ -668,57 +865,37 @@ end
 
 end Env
 
-
-/-! ## Refinement -/
-
-/--
-`t ⊑ s`: `s` refines `t`.
-
-Every reference in `t` is a reference in `s`, possibly elaborated or expanded.  It is
-currently defined as `t ⊆ s`, which means `t` is a prefix of `s`; that will be addressed as the
-tools mature.
--/
-public class RefinedBy (t s : Env α) : Prop where
-  /-- `t`'s declarations are a prefix of `s`'s. -/
-  subset : t ⊆ s
-
-@[inherit_doc] scoped infix:50 " ⊑ " => RefinedBy
-
-/-- `s ⊒ t`: `s` refines `t`, the same as `t ⊑ s`.  Input only; terms print with `⊑`. -/
-scoped syntax:50 term:51 " ⊒ " term:51 : term
-macro_rules | `($s ⊒ $t) => `(RefinedBy $t $s)
-
-/-- Every environment refines itself. -/
-public instance (priority := high) RefinedBy.refl {t : Env α} : t ⊑ t := ⟨Env.Prefix.refl _⟩
-
 /-! ## The type language, checked
 
 * `TypeRef`: a reference to a type declaration of an environment.
 * `TypeExpr`: a type expression whose references all resolve in an environment. -/
 
-/-- `name` is declared in `s` as a type of shape `d`.  This holds for primitive types and
-datatypes alike. -/
+/-- `name` is declared in `s` as a type of shape `d`, up to its annotation.  This holds for
+primitive types and datatypes alike. -/
 public def Env.ResolvesType (s : Env α) (name : Name) (d : TypeDecl α) : Prop :=
-  s.raw.typeOf? name = some d
+  ∃ d', s.raw.typeOf? name = some d' ∧ d'.erase = d.erase
 
 /-- Where the constructor named `name` sits, if `name` is declared in `s` as the instruction
 that is a datatype's constructor: which group, which datatype of it, and which constructor. -/
 public def Env.ctorAddr? (s : Env α) (name : Name) : Option CtorAddr := s.raw.ctorAddr? name
 
-/-- What a prefix resolves, the extension resolves the same way. -/
-public theorem Env.ResolvesType.mono {s t : Env α} (h : s ⊆ t) {n : Name} {d : TypeDecl α}
-    (hd : s.ResolvesType n d) : t.ResolvesType n d :=
-  Env.typeOf?_of_subset h hd
+namespace Env
+
+/-- A name whose stored type declaration is `d` resolves to `d`. -/
+theorem resolvesType_of_typeOf? {s : Env α} {n : Name} {d : TypeDecl α}
+    (h : s.raw.typeOf? n = some d) : s.ResolvesType n d := ⟨d, h, rfl⟩
+
+
+end Env
 
 @[simp] public theorem Env.resolvesType_addType_self (s : Env α) (d : TypeDecl α)
     (fresh : d.name ∉ s) {distinct : d.paramNames.Nodup} :
-    (s.addType d fresh distinct).ResolvesType d.name d := by
-  unfold Env.ResolvesType Env.Raw.typeOf?
-  rw [show (s.addType d fresh distinct).raw.decls[d.name]? = some (.type d) from
-    Env.resolves_iff_rawGet?.mp (Env.resolves_addType_self s d fresh)]
-  rfl
+    (s.addType d fresh distinct).ResolvesType d.name d :=
+  Env.resolvesType_of_typeOf? (Env.typeOf?_of_type (Env.resolves_addType_self s d fresh))
 
-/-- A reference to a type declaration of `env` taking `arity` arguments. -/
+/-- A reference to a type declaration of `env` taking `arity` arguments.  `decl` is the
+declaration up to its annotation: `decl.ann` need not be the stored one, and `carry` keeps it,
+so refinement ties it to neither environment.  `Env.annOf?` reads the stored annotation. -/
 public structure TypeRef (env : Env α) (arity : Nat) where
   name : Name
   decl : TypeDecl α
@@ -728,9 +905,9 @@ public structure TypeRef (env : Env α) (arity : Nat) where
 /-- A type reference is valid before the end of the environment. -/
 public theorem TypeRef.refBefore {env : Env α} {arity : Nat} (r : TypeRef env arity) :
     env.RefBefore env.size r.name arity := by
-  obtain ⟨n, d, ha, hr⟩ := r
-  cases ha
-  exact Env.refBefore_of_resolves hr
+  obtain ⟨n, d, rfl, d', hr, he⟩ := r
+  have hb := Env.refBefore_of_resolves hr
+  rwa [TypeDecl.arity_eq_of_erase_eq he] at hb
 
 /-! ## Payload types of a datatype group
 
@@ -1119,7 +1296,7 @@ public theorem size_of_admissible (h : admissible hdr ctors = true) : ctors.size
   exact h.1.1.2
 
 /-- The unchecked group that header and constructors stand for. -/
-def dataGroup (hdr : Array (TypeDecl α)) (ctors : Array (Array (Ctor α (DataTy s t))))
+public def dataGroup (hdr : Array (TypeDecl α)) (ctors : Array (Array (Ctor α (DataTy s t))))
     (h : admissible hdr ctors = true) : DataGroup α TypeExpr.Raw :=
   ⟨(members hdr ctors).map (DatatypeDecl.mapTy DataTy.toRaw), by
     rw [Array.size_map, ← Array.length_toList, toList_members,
@@ -1302,24 +1479,28 @@ theorem checkWith_dataGroup (fG : s.raw.FreshList (dataGroup hdr ctors h).decls.
         Raw.RefBefore.check (s.raw.appendList _ fG) s.raw.decls.keys.size r.name
           r.decl.params.size = true := by
     intro a r
+    obtain ⟨d, hd, he⟩ := r.resolves
+    have hp := TypeDecl.params_eq_of_erase_eq he
     have h1 : ((s.raw.appendList _ fG).types.before (s.raw.decls.keys.size + hdr.size))[r.name]? =
-        some r.decl :=
-      Raw.typesBefore_appendList (Raw.typesBefore_of_typeOf? r.resolves (by omega))
+        some d :=
+      Raw.typesBefore_appendList (Raw.typesBefore_of_typeOf? hd (by omega))
     have h2 : ((s.raw.appendList _ fG).types.before s.raw.decls.keys.size)[r.name]? =
-        some r.decl :=
-      Raw.typesBefore_appendList (Raw.typesBefore_of_typeOf? r.resolves (Nat.le_refl _))
+        some d :=
+      Raw.typesBefore_appendList (Raw.typesBefore_of_typeOf? hd (Nat.le_refl _))
     simp only [Raw.paramsBefore, Raw.RefBefore.check, h1, h2, Option.map_some]
-    simp [TypeDecl.arity]
+    simp [TypeDecl.arity, hp]
   have hnew : ∀ {a} (r : TypeRef (s.addTypes hdr fresh) a),
       (s.raw.appendList _ fG).paramsBefore (s.raw.decls.keys.size + hdr.size) r.name =
           some r.decl.params ∧
         Raw.RefBefore.check (s.raw.appendList _ fG) (s.raw.decls.keys.size + hdr.size) r.name
           r.decl.params.size = true := by
     intro a r
-    have h1 := typesBefore_dataGroup (fG := fG) r.resolves
+    obtain ⟨d, hd, he⟩ := r.resolves
+    have hp := TypeDecl.params_eq_of_erase_eq he
+    have h1 := typesBefore_dataGroup (fG := fG) hd
     simp only [size] at h1
     simp only [Raw.paramsBefore, Raw.RefBefore.check, h1, Option.map_some]
-    simp [TypeDecl.arity]
+    simp [TypeDecl.arity, hp]
   have hadm := h
   simp only [admissible, List.all_eq_true, Array.mem_toList_iff, Bool.and_eq_true] at hadm
   obtain ⟨⟨-, hadm⟩, -⟩ := hadm
@@ -1405,18 +1586,69 @@ variable {s : Env α} {hdr : Array (TypeDecl α)} {fresh : s.FreshTypes hdr}
 public theorem resolvesType_addData {n : Name} {d : TypeDecl α}
     (hd : (s.addTypes hdr fresh).ResolvesType n d) :
     (s.addData hdr fresh ctors cfresh adm).ResolvesType n d :=
+  let ⟨d', hd', he⟩ := hd
+  ⟨d', Raw.typeOf?_of_typesBefore (typesBefore_dataGroup hd'), he⟩
+
+/-- `addData` names every type that `s.addTypes hdr fresh` names, as it does. -/
+public theorem typeOf?_addData_of_addTypes {n : Name} {d : TypeDecl α}
+    (hd : (s.addTypes hdr fresh).typeOf? n = some d) :
+    (s.addData hdr fresh ctors cfresh adm).typeOf? n = some d :=
   Raw.typeOf?_of_typesBefore (typesBefore_dataGroup hd)
+
+/-- Each datatype of the group is named, as a type, by its header declaration. -/
+public theorem typeOf?_addData {j : Nat} {d : TypeDecl α} (hd : hdr[j]? = some d) :
+    (s.addData hdr fresh ctors cfresh adm).typeOf? d.name = some d :=
+  typeOf?_addData_of_addTypes (typeOf?_of_type (declOf?_addTypes_of_getElem? hd))
+
+/-- The group is named after its first datatype. -/
+theorem name_first_dataGroup :
+    (hdr[0]'(pos_of_admissible adm)).name = (dataGroup hdr ctors adm).first.name := by
+  have h := first_toTypeDecl_dataGroup (h := adm)
+  rw [Array.getElem?_eq_getElem (pos_of_admissible adm)] at h
+  exact congrArg TypeDecl.name (Option.some.inj h)
+
+/-- The group's first datatype names the group. -/
+theorem declOf?_addData_head :
+    (s.addData hdr fresh ctors cfresh adm).declOf? (hdr[0]'(pos_of_admissible adm)).name =
+      some (.dataHead (dataGroup hdr ctors adm)) := by
+  rw [name_first_dataGroup]
+  exact resolves_appendBatch (j := 0) (by
+    rw [← Array.getElem?_toList]
+    exact DataGroup.decls_getElem?_zero (dataGroup hdr ctors adm))
+
+/-- Each datatype of the group is that member of the group. -/
+public theorem dataOf?_addData {j : Nat} (hj : j < hdr.size) :
+    (s.addData hdr fresh ctors cfresh adm).dataOf? hdr[j].name =
+      some (dataGroup hdr ctors adm, j) := by
+  obtain ⟨m, hm⟩ : ∃ m, (dataGroup hdr ctors adm).members[j]? = some m :=
+    ⟨_, Array.getElem?_eq_getElem (size_dataGroup (h := adm) ▸ hj)⟩
+  have hn : hdr[j].name = m.name := by
+    have h := toTypeDecl_dataGroup_getElem? hm
+    rw [Array.getElem?_eq_getElem hj] at h
+    exact congrArg TypeDecl.name (Option.some.inj h)
+  by_cases hj₀ : j = 0
+  · subst hj₀
+    exact dataOf?_of_dataHead declOf?_addData_head
+  · have hrest : (s.addData hdr fresh ctors cfresh adm).declOf? hdr[j].name =
+        some (.dataRest hdr[j].name (dataGroup hdr ctors adm).first.name j) := by
+      rw [hn]
+      exact resolves_appendBatch
+        (by rw [← Array.getElem?_toList]; exact DataGroup.decls_getElem?_of_member _ hm hj₀)
+    have hhead := declOf?_addData_head (cfresh := cfresh) (adm := adm)
+    rw [name_first_dataGroup (ctors := ctors) (adm := adm)] at hhead
+    unfold Env.dataOf? Raw.dataOf?
+    rw [show (s.addData hdr fresh ctors cfresh adm).raw.decls[hdr[j].name]? = _ from hrest]
+    show ((Env.declOf? _ _).bind Decl.Raw.asGroup).map _ = _
+    rw [hhead]
+    rfl
 
 end
 
 /-- Each type of a batch resolves to its own declaration. -/
 public theorem resolvesType_addTypes {s : Env α} {ds : Array (TypeDecl α)}
     {fresh : s.FreshTypes ds} {j : Nat} {d : TypeDecl α}
-    (hd : ds[j]? = some d) : (s.addTypes ds fresh).ResolvesType d.name d := by
-  unfold ResolvesType Raw.typeOf?
-  rw [show (s.addTypes ds fresh).raw.decls[d.name]? = some (.type d) from
-    rawGet?_addTypes_of_getElem? hd]
-  rfl
+    (hd : ds[j]? = some d) : (s.addTypes ds fresh).ResolvesType d.name d :=
+  resolvesType_of_typeOf? (typeOf?_of_type (declOf?_addTypes_of_getElem? hd))
 
 end Env
 
@@ -1500,17 +1732,6 @@ theorem expr_of_check?_eq_some {env : Env α} {scope : Nat} {e : TypeExpr.Raw}
     rfl
   · exact absurd h (by simp)
 
-/-- Reinterpret against a larger environment. -/
-public def ofSubset {s t : Env α} (h : s ⊆ t) {scope : Nat} (e : TypeExpr s scope) :
-    TypeExpr t scope :=
-  ⟨e.expr,
-   e.wf.mono (fun _ _ hr => (Env.refBefore_of_subset h hr).mono (Env.size_le_of_subset h))
-     (Nat.le_refl scope)⟩
-
-theorem expr_ofSubset {s t : Env α} (h : s ⊆ t) {scope : Nat}
-    (e : TypeExpr s scope) : (e.ofSubset h).expr = e.expr := by
-  simp [ofSubset]
-
 /-! ### Reading the raw expression
 
 * `toRaw`: the raw type expression a checked one stands for, which `InsnSig.ext_toRaw`
@@ -1530,11 +1751,6 @@ for. -/
     (args : Vector (TypeExpr env scope) arity) :
     (app r args).toRaw = .app r.name (args.toArray.map (·.toRaw)) := by
   simp [toRaw, expr_app]
-
-/-- Reinterpreting changes nothing an expression stands for. -/
-@[simp] public theorem toRaw_ofSubset {s t : Env α} (h : s ⊆ t) {scope : Nat}
-    (e : TypeExpr s scope) : (e.ofSubset h).toRaw = e.toRaw := by
-  simp [toRaw, expr_ofSubset]
 
 /-- `toRaw` is the erasure. -/
 theorem toRaw_eq_expr {env : Env α} {scope : Nat} (e : TypeExpr env scope) :
@@ -1661,55 +1877,6 @@ public def ctorArgs? {env : Env α} (e : TypeExpr env 0) (c : Name) :
 
 end TypeExpr
 
-/-- Carry a type reference into an extension. -/
-public def TypeRef.ofSubset {s t : Env α} {arity : Nat} (h : s ⊆ t)
-    (r : TypeRef s arity) : TypeRef t arity :=
-  ⟨r.name, r.decl, r.matchArity, r.resolves.mono h⟩
-
-@[simp] public theorem name_TypeRef_ofSubset {s t : Env α} {arity : Nat} (h : s ⊆ t)
-    (r : TypeRef s arity) :
-    (r.ofSubset h).name = r.name := by
-  simp [TypeRef.ofSubset]
-
-@[simp] public theorem decl_TypeRef_ofSubset {s t : Env α} {arity : Nat} (h : s ⊆ t)
-    (r : TypeRef s arity) :
-    (r.ofSubset h).decl = r.decl := by
-  simp [TypeRef.ofSubset]
-
-/-! ### Normal forms under reinterpretation
-
-`simp` pushes `ofSubset` down to the references and compares applications by name: it proves
-two signatures built alike equal (`InsnRef.cast`). -/
-
-/-- Carrying a reference twice is carrying it once. -/
-@[simp] public theorem TypeRef.ofSubset_ofSubset {s t u : Env α} {arity : Nat} (h₁ : s ⊆ t)
-    (h₂ : t ⊆ u) (r : TypeRef s arity) :
-    (r.ofSubset h₁).ofSubset h₂ = r.ofSubset (Env.Prefix.trans h₁ h₂) := by
-  simp [TypeRef.ofSubset]
-
-namespace TypeExpr
-
-/-- Reinterpreting a type variable gives the variable. -/
-@[simp] public theorem ofSubset_var {s t : Env α} (h : s ⊆ t) {scope : Nat} (i : Nat)
-    (hi : i < scope) : (var (env := s) i hi).ofSubset h = var i hi :=
-  eq_iff_expr_eq.mpr (by simp [expr_ofSubset, expr_var])
-
-/-- Reinterpreting an application reinterprets the reference and the arguments. -/
-@[simp] public theorem ofSubset_app {s t : Env α} (h : s ⊆ t) {scope arity : Nat}
-    (r : TypeRef s arity) (args : Vector (TypeExpr s scope) arity) :
-    (app r args).ofSubset h = app (r.ofSubset h) (args.map (·.ofSubset h)) :=
-  eq_iff_expr_eq.mpr (by
-    simp [expr_ofSubset, expr_app, Array.map_map, Function.comp_def])
-
-/-- Two applications are equal when they apply the same name to equal arguments. -/
-@[simp] public theorem app_eq_app_iff {env : Env α} {scope arity : Nat}
-    {r₁ r₂ : TypeRef env arity} {a₁ a₂ : Vector (TypeExpr env scope) arity} :
-    app r₁ a₁ = app r₂ a₂ ↔ r₁.name = r₂.name ∧ a₁ = a₂ := by
-  rw [eq_iff_expr_eq, expr_app, expr_app, TypeExpr.Raw.app.injEq,
-    Array.map_inj_right (fun _ _ h => eq_iff_expr_eq.mpr h), Vector.toArray_inj]
-
-end TypeExpr
-
 /-! ## Region signatures, checked
 
 `RegionSig env scope` is a region signature well formed against `env` under `scope` type
@@ -1787,29 +1954,6 @@ def ofWF (r : RegionSig.Raw) (h : r.WF (env.RefBefore env.size) scope) : RegionS
 @[simp] theorem raw_ofWF (r : RegionSig.Raw) (h : r.WF (env.RefBefore env.size) scope) :
     (ofWF r h).raw = r := rfl
 
-/-- Reinterpret against a larger environment. -/
-public def ofSubset {s t : Env α} (h : s ⊆ t) (r : RegionSig s scope) :
-    RegionSig t scope :=
-  ⟨r.raw,
-   r.wf.mono fun _ _ hr => (Env.refBefore_of_subset h hr).mono (Env.size_le_of_subset h)⟩
-
-/-- Reinterpreting changes no data. -/
-@[simp] theorem raw_ofSubset {s t : Env α} (h : s ⊆ t) (r : RegionSig s scope) :
-    (r.ofSubset h).raw = r.raw := rfl
-
-/-- Reinterpreting reinterprets each parameter. -/
-@[simp] public theorem params_ofSubset {s t : Env α} (h : s ⊆ t) (r : RegionSig s scope) :
-    (r.ofSubset h).params = r.params.map (fun p => ⟨p.name, p.type.ofSubset h⟩) := by
-  apply Array.ext
-  · simp [RegionSig.params, ofSubset]
-  · intro i _ _
-    simp [RegionSig.params, ofSubset, TypeExpr.ofSubset]
-
-/-- Reinterpreting reinterprets the return type. -/
-@[simp] public theorem returnType_ofSubset {s t : Env α} (h : s ⊆ t) (r : RegionSig s scope) :
-    (r.ofSubset h).returnType = r.returnType.ofSubset h := by
-  simp only [RegionSig.returnType, ofSubset, TypeExpr.ofSubset]
-
 /-- Region signatures with the same raw data are equal. -/
 theorem eq_of_raw_eq {a b : RegionSig env scope} (h : a.raw = b.raw) : a = b := by
   obtain ⟨ra, wa⟩ := a
@@ -1817,16 +1961,6 @@ theorem eq_of_raw_eq {a b : RegionSig env scope} (h : a.raw = b.raw) : a = b := 
   simp only at h
   subst h
   rfl
-
-/-- Reinterpreting `of` reinterprets its parameter types and its return type. -/
-@[simp] public theorem ofSubset_of {s t : Env α} (h : s ⊆ t)
-    (params : Array (Param (TypeExpr s scope))) (returnType : TypeExpr s scope)
-    (distinct : (params.toList.map (·.name)).Nodup) :
-    (of params returnType distinct).ofSubset h =
-      of (params.map fun p => ⟨p.name, p.type.ofSubset h⟩) (returnType.ofSubset h)
-        (by simpa [Function.comp_def] using distinct) :=
-  eq_of_raw_eq (by
-    simp [of, ofSubset, Array.map_map, Function.comp_def, TypeExpr.expr_ofSubset])
 
 /-- Two region signatures built by `of` are equal when their parameters and return types
 are. -/
@@ -1848,7 +1982,9 @@ end RegionSig
 /-- An instruction declaration without its name, with every type expression checked against
 `env`. -/
 public structure InsnSig (env : Env α) where
-  /-- The declaration's annotation.  It is part of the signature an `InsnRef` resolves to. -/
+  /-- The annotation `addInsn` stores with the declaration.  Nothing else reads it: an `InsnRef`
+  resolves its signature up to it, and `carry` keeps it, so it need not be the annotation of the
+  declaration in either environment.  `Env.annOf?` reads that annotation. -/
   ann : α
   /-- The type variables the signature binds, by de Bruijn level: `.var i` is
   `typeParams[i]`. -/
@@ -1963,28 +2099,14 @@ theorem decl_ofWF_of_name {env : Env α} {d : InsnDecl.Raw α} {n : Name}
     (ofWF d h).decl n d.kind = d := by
   subst hn; exact decl_ofWF d h
 
-/-- Reinterpret against a larger environment. -/
-@[expose] public def ofSubset {s t : Env α} (h : s ⊆ t) (i : InsnSig s) : InsnSig t where
-  ann := i.ann
-  typeParams := i.typeParams
-  typeArgc := i.typeArgc
-  argTypes := i.argTypes.map (fun p => ⟨p.name, p.type.ofSubset h⟩)
-  variadic := i.variadic.map (fun p => ⟨p.name, p.type.ofSubset h⟩)
-  returnType := i.returnType.map (·.ofSubset h)
-  regions := i.regions.map (fun p => ⟨p.name, p.type.ofSubset h⟩)
-  succs := i.succs.map (fun p => ⟨p.name, p.type.map (·.ofSubset h)⟩)
-  size_typeParams := i.size_typeParams
-  distinct := by simpa [Function.comp_def] using i.distinct
-
-/-- Reinterpreting changes no data. -/
-theorem decl_ofSubset {s t : Env α} (h : s ⊆ t) (i : InsnSig s) (name : Name)
-    (kind : InsnKind := .decl) :
-    (i.ofSubset h).decl name kind = i.decl name kind := by
-  simp [decl, ofSubset, Array.map_map, Function.comp_def, TypeExpr.expr_ofSubset]
-
 /-- A declaration is named by the name it was erased under. -/
 theorem name_decl {env : Env α} (i : InsnSig env) (name : Name)
     (kind : InsnKind := .decl) : (i.decl name kind).name = name := by
+  simp [decl]
+
+/-- A declaration has the kind it was declared at. -/
+theorem kind_decl {env : Env α} (i : InsnSig env) (name : Name)
+    (kind : InsnKind := .decl) : (i.decl name kind).kind = kind := by
   simp [decl]
 
 /-- A signature is determined by the declaration it erases to. -/
@@ -2047,6 +2169,49 @@ theorem eq_of_decl_eq {env : Env α} {s₁ s₂ : InsnSig env} {n : Name} {k : I
   subst hargs' hvar' hret' hreg' hsucc'
   rfl
 
+/-- Two signatures, in any two environments, declare the same instruction up to its annotation
+and kind when everything else they declare stands for the same raw data: the same type
+parameters, argument and variadic names and types, return type (or its absence), regions and
+successors.  The conclusion is `InsnDecl.Raw.RefinedBy`'s `erase_eq`, so this is how a
+refinement's instruction is compared with the original's. -/
+theorem erase_decl_eq_of_toRaw {e₁ e₂ : Env α} {s₁ : InsnSig e₁} {s₂ : InsnSig e₂}
+    (name : Name) (k₁ k₂ : InsnKind) (htp : s₁.typeParams = s₂.typeParams)
+    (hargs : s₁.argTypes.map (fun p => (p.name, p.type.toRaw)) =
+      s₂.argTypes.map (fun p => (p.name, p.type.toRaw)))
+    (hvar : s₁.variadic.map (fun p => (p.name, p.type.toRaw)) =
+      s₂.variadic.map (fun p => (p.name, p.type.toRaw)))
+    (hret : s₁.returnType.map (·.toRaw) = s₂.returnType.map (·.toRaw))
+    (hregions : s₁.regions.map (fun p => (p.name,
+        p.type.params.map (fun q => (q.name, q.type.toRaw)), p.type.returnType.toRaw)) =
+      s₂.regions.map (fun p => (p.name,
+        p.type.params.map (fun q => (q.name, q.type.toRaw)), p.type.returnType.toRaw)))
+    (hsuccs : s₁.succs.map (fun p => (p.name, p.type.map (·.toRaw))) =
+      s₂.succs.map (fun p => (p.name, p.type.map (·.toRaw)))) :
+    (s₂.decl name k₂).erase =
+      { (s₁.decl name k₁).erase with kind := (s₂.decl name k₂).kind } := by
+  simp only [TypeExpr.toRaw_eq_expr] at hargs hvar hret hregions hsuccs
+  -- each field of the erasure is the corresponding hypothesis, re-paired
+  have hraw : ∀ {env : Env α} {scope : Nat},
+      (fun p : Param (RegionSig env scope) => (⟨p.name, p.type.raw⟩ : Param RegionSig.Raw)) =
+        fun x => ⟨x.name, ⟨x.type.params.map (fun y => ⟨y.name, y.type.expr⟩),
+          x.type.returnType.expr⟩⟩ := by
+    intro env scope
+    funext p
+    rw [RegionSig.map_params]
+    rfl
+  have hargs₁ := congrArg (Array.map (fun x => (⟨x.1, x.2⟩ : Param TypeExpr.Raw))) hargs
+  have hregions₁ := congrArg (Array.map (fun x => (⟨x.1,
+    ⟨x.2.1.map (fun y => (⟨y.1, y.2⟩ : Param TypeExpr.Raw)), x.2.2⟩⟩ : Param RegionSig.Raw)))
+    hregions
+  have hvar₁ := congrArg (Option.map (fun x => (⟨x.1, x.2⟩ : Param TypeExpr.Raw))) hvar
+  have hsuccs₁ :=
+    congrArg (Array.map (fun x => (⟨x.1, x.2⟩ : Param (Array TypeExpr.Raw)))) hsuccs
+  simp only [Array.map_map, Option.map_map, Function.comp_def] at hargs₁ hvar₁ hregions₁ hsuccs₁
+  simp only [decl, InsnDecl.Raw.erase, InsnDecl.Raw.mk.injEq, and_true, true_and]
+  refine ⟨htp.symm, hargs₁.symm, hvar₁.symm, hret.symm, ?_, hsuccs₁.symm⟩
+  rw [hraw, hraw]
+  exact hregions₁.symm
+
 /-- Two signatures are equal when everything they declare stands for the same raw data: the
 same annotation, type parameters, argument and variadic names and types, return type (or
 its absence), regions and successors.  `simp` proves these for a signature written
@@ -2108,6 +2273,339 @@ operands, or too many and no variadic. -/
 
 end InsnSig
 
+/-! ## Declared instructions, and signatures up to annotation -/
+
+/-- `name` is declared in `s` as the instruction with signature `σ` and kind `k`, its
+annotation included. -/
+public def Env.DeclaresInsn (s : Env α) (name : Name) (σ : InsnSig s) (k : InsnKind) : Prop :=
+  s.declOf? name = some (.insn (σ.decl name k))
+
+namespace InsnSig
+
+/-- `σ₁` and `σ₂`, of any two environments, declare the same instruction up to its annotation:
+the same type parameters, arguments, variadic, return type, regions and successors. -/
+public def EqUpToAnn {s t : Env α} (σ₁ : InsnSig s) (σ₂ : InsnSig t) : Prop :=
+  (σ₂.decl .base).erase = (σ₁.decl .base).erase
+
+section
+variable {s t u : Env α}
+
+/-- A signature is itself up to annotation. -/
+public theorem EqUpToAnn.refl (σ : InsnSig s) : σ.EqUpToAnn σ := by
+  unfold EqUpToAnn
+  rfl
+
+/-- Equality up to annotation composes. -/
+public theorem EqUpToAnn.trans {σ₁ : InsnSig s} {σ₂ : InsnSig t} {σ₃ : InsnSig u}
+    (h₁ : σ₁.EqUpToAnn σ₂) (h₂ : σ₂.EqUpToAnn σ₃) : σ₁.EqUpToAnn σ₃ := by
+  unfold EqUpToAnn at *
+  exact h₂.trans h₁
+
+/-- Two signatures are equal up to annotation when everything they declare stands for the same
+raw data.  `simp` proves the hypotheses for a signature written differently, such as one
+`addData` derives. -/
+public theorem EqUpToAnn.of_toRaw {σ₁ : InsnSig s} {σ₂ : InsnSig t}
+    (htp : σ₁.typeParams = σ₂.typeParams)
+    (hargs : σ₁.argTypes.map (fun p => (p.name, p.type.toRaw)) =
+      σ₂.argTypes.map (fun p => (p.name, p.type.toRaw)))
+    (hvar : σ₁.variadic.map (fun p => (p.name, p.type.toRaw)) =
+      σ₂.variadic.map (fun p => (p.name, p.type.toRaw)))
+    (hret : σ₁.returnType.map (·.toRaw) = σ₂.returnType.map (·.toRaw))
+    (hregions : σ₁.regions.map (fun p => (p.name,
+        p.type.params.map (fun q => (q.name, q.type.toRaw)), p.type.returnType.toRaw)) =
+      σ₂.regions.map (fun p => (p.name,
+        p.type.params.map (fun q => (q.name, q.type.toRaw)), p.type.returnType.toRaw)))
+    (hsuccs : σ₁.succs.map (fun p => (p.name, p.type.map (·.toRaw))) =
+      σ₂.succs.map (fun p => (p.name, p.type.map (·.toRaw)))) :
+    σ₁.EqUpToAnn σ₂ := by
+  unfold EqUpToAnn
+  exact erase_decl_eq_of_toRaw .base .decl .decl htp hargs hvar hret hregions hsuccs
+
+/-- Signatures equal up to annotation declare, under one name, the same instruction up to its
+annotation and kind. -/
+theorem eqUpToAnn_iff_decl {σ₁ : InsnSig s} {σ₂ : InsnSig t} {n : Name} {k₁ k₂ : InsnKind} :
+    σ₁.EqUpToAnn σ₂ ↔ (σ₂.decl n k₂).erase = { (σ₁.decl n k₁).erase with kind := k₂ } := by
+  unfold EqUpToAnn
+  constructor
+  · intro he
+    exact congrArg (fun d : InsnDecl.Raw Unit => { d with name := n, kind := k₂ }) he
+  · intro he
+    exact congrArg (fun d : InsnDecl.Raw Unit => { d with name := .base, kind := .decl }) he
+
+end
+
+end InsnSig
+
+namespace Env
+
+/-- A name declared as an instruction is declared as the signature it stands for. -/
+theorem declaresInsn_ofWF {s : Env α} {n : Name} {d : InsnDecl.Raw α}
+    (h : s.declOf? n = some (.insn d)) :
+    s.DeclaresInsn n (InsnSig.ofWF d (Decl.Raw.wf_insn_iff.mp (declWF_of_declOf? h))) d.kind := by
+  have hname : d.name = n := by simpa using name_of_declOf? h
+  unfold DeclaresInsn
+  rw [InsnSig.decl_ofWF_of_name _ hname]
+  exact h
+
+/-- A reference is valid at the end of an environment exactly when the name resolves to a
+type of that arity. -/
+theorem refBefore_size_iff {s : Env α} {n : Name} {a : Nat} :
+    s.RefBefore s.size n a ↔ ∃ d, s.raw.typeOf? n = some d ∧ d.arity = a := by
+  constructor
+  · intro hr
+    obtain ⟨_, d, _, _, hd, ha⟩ := Raw.refBefore_iff.mp hr
+    exact ⟨d, hd, ha⟩
+  · rintro ⟨d, hd, rfl⟩
+    exact refBefore_of_resolves hd
+
+/-- The annotation `n` is declared with, if `n` is declared: an instruction's own, or the
+annotation of the type `n` names, which for a datatype is its member's. -/
+public def annOf? (s : Env α) (n : Name) : Option α :=
+  match s.declOf? n with
+  | some (.insn d) => some d.ann
+  | _ => (s.typeOf? n).map (·.ann)
+
+/-- An instruction's annotation is its own. -/
+theorem annOf?_of_insn {s : Env α} {n : Name} {d : InsnDecl.Raw α}
+    (h : s.declOf? n = some (.insn d)) :
+    s.annOf? n = some d.ann := by
+  unfold Env.annOf?
+  rw [h]
+
+/-- A type's annotation is its declaration's. -/
+theorem annOf?_of_type {s : Env α} {n : Name} {d : TypeDecl α} (h : s.declOf? n = some (.type d)) :
+    s.annOf? n = some d.ann := by
+  unfold Env.annOf?
+  rw [h]
+  show (s.typeOf? n).map (·.ann) = _
+  rw [typeOf?_of_type h]
+  rfl
+
+end Env
+
+/-! ## Carrying checked forms
+
+A type expression, a region or instruction signature, or a reference checked against `s` is
+checked against every `t` that keeps `s`'s lookups: `KeepsTypes` for types, and `KeepsInsns`
+for instructions too.  An extension keeps both; so does a refinement
+(`StrataMantle.Env.Refine`).  `ofSubset` carries along an extension. -/
+
+namespace Env
+
+/-- `t` names every type `s` names, up to its annotation. -/
+public structure KeepsTypes (s t : Env α) : Prop where
+  type : ∀ {n : Name} {d : TypeDecl α}, s.typeOf? n = some d →
+    ∃ d', t.typeOf? n = some d' ∧ d'.erase = d.erase
+
+/-- `t` declares every instruction `s` declares, up to its annotation and kind. -/
+public structure KeepsInsns (s t : Env α) : Prop where
+  insn : ∀ {n : Name} {σ : InsnSig s} {k : InsnKind}, s.DeclaresInsn n σ k →
+    ∃ σ' k', t.DeclaresInsn n σ' k' ∧ σ.EqUpToAnn σ'
+
+/-- Keeping types composes. -/
+public theorem KeepsTypes.trans {s t u : Env α} (h₁ : s.KeepsTypes t) (h₂ : t.KeepsTypes u) :
+    s.KeepsTypes u where
+  type hd :=
+    let ⟨_, hd₂, he₁⟩ := h₁.type hd
+    let ⟨d₃, hd₃, he₂⟩ := h₂.type hd₂
+    ⟨d₃, hd₃, he₂.trans he₁⟩
+
+/-- An extension keeps every type. -/
+public theorem keepsTypes_of_subset {s t : Env α} (h : s ⊆ t) : s.KeepsTypes t :=
+  ⟨fun hd => ⟨_, typeOf?_of_subset h hd, rfl⟩⟩
+
+/-- A name that resolves to a type in `s` resolves to it in every environment that keeps
+`s`'s types. -/
+public theorem ResolvesType.carry {s t : Env α} (h : s.KeepsTypes t) {n : Name} {d : TypeDecl α}
+    (hd : s.ResolvesType n d) : t.ResolvesType n d := by
+  obtain ⟨d₁, hd₁, he₁⟩ := hd
+  obtain ⟨d₂, hd₂, he₂⟩ := h.type hd₁
+  exact ⟨d₂, hd₂, he₂.trans he₁⟩
+
+/-- A reference valid in `s` is valid in every environment that keeps `s`'s types. -/
+theorem refBefore_size_of_keepsTypes {s t : Env α} (h : s.KeepsTypes t) {n : Name} {a : Nat}
+    (hr : s.RefBefore s.size n a) : t.RefBefore t.size n a := by
+  obtain ⟨d₁, hd₁, rfl⟩ := refBefore_size_iff.mp hr
+  obtain ⟨d₂, hd₂, he⟩ := h.type hd₁
+  exact refBefore_size_iff.mpr ⟨d₂, hd₂, TypeDecl.arity_eq_of_erase_eq he⟩
+
+variable {t s : Env α}
+
+/-- A name's constructor address is that of the instruction it names. -/
+theorem ctorAddr?_of_insnOf? {n : Name} {d : InsnDecl.Raw α} (h : s.insnOf? n = some d) :
+    s.ctorAddr? n = d.kind.ctor? := by
+  unfold ctorAddr? Raw.ctorAddr?
+  rw [show s.raw.decls[n]? = some (.insn d) from insnOf?_eq_some_iff.mp h]
+
+/-- A name that is a constructor is declared as an instruction of that kind. -/
+public theorem exists_declaresInsn_of_ctorAddr? {n : Name} {a : CtorAddr}
+    (h : s.ctorAddr? n = some a) : ∃ σ k, s.DeclaresInsn n σ k ∧ k.ctor? = some a := by
+  unfold ctorAddr? Raw.ctorAddr? at h
+  split at h
+  next d hd => exact ⟨_, _, declaresInsn_ofWF hd, h⟩
+  next => exact absurd h (by simp)
+
+end Env
+
+namespace TypeExpr
+
+/-- Reinterpret in an environment that keeps the types. -/
+public def carry {s t : Env α} (h : s.KeepsTypes t) {scope : Nat} (e : TypeExpr s scope) :
+    TypeExpr t scope :=
+  ⟨e.expr, e.wf.mono (fun _ _ hr => Env.refBefore_size_of_keepsTypes h hr) (Nat.le_refl scope)⟩
+
+/-- Reinterpret in an extension. -/
+public abbrev ofSubset {s t : Env α} (h : s ⊆ t) {scope : Nat} (e : TypeExpr s scope) :
+    TypeExpr t scope :=
+  e.carry (Env.keepsTypes_of_subset h)
+
+/-- Reinterpreting keeps the raw expression. -/
+theorem expr_carry {s t : Env α} (h : s.KeepsTypes t) {scope : Nat}
+    (e : TypeExpr s scope) : (e.carry h).expr = e.expr := rfl
+
+/-- Reinterpreting changes nothing an expression stands for. -/
+@[simp] public theorem toRaw_carry {s t : Env α} (h : s.KeepsTypes t) {scope : Nat}
+    (e : TypeExpr s scope) : (e.carry h).toRaw = e.toRaw := by
+  simp [toRaw, expr_carry]
+
+end TypeExpr
+
+/-- Carry a type reference into an environment that keeps the types. -/
+public def TypeRef.carry {s t : Env α} {arity : Nat} (h : s.KeepsTypes t)
+    (r : TypeRef s arity) : TypeRef t arity :=
+  ⟨r.name, r.decl, r.matchArity, r.resolves.carry h⟩
+
+/-- Carry a type reference into an extension. -/
+public abbrev TypeRef.ofSubset {s t : Env α} {arity : Nat} (h : s ⊆ t)
+    (r : TypeRef s arity) : TypeRef t arity :=
+  r.carry (Env.keepsTypes_of_subset h)
+
+/-- Carrying a type reference keeps its name. -/
+@[simp] public theorem name_TypeRef_carry {s t : Env α} {arity : Nat} (h : s.KeepsTypes t)
+    (r : TypeRef s arity) : (r.carry h).name = r.name := by
+  simp [TypeRef.carry]
+
+/-- Carrying a type reference keeps its declaration. -/
+@[simp] public theorem decl_TypeRef_carry {s t : Env α} {arity : Nat} (h : s.KeepsTypes t)
+    (r : TypeRef s arity) : (r.carry h).decl = r.decl := by
+  simp [TypeRef.carry]
+
+/-! ### Normal forms under reinterpretation
+
+`simp` pushes `carry` (and so `ofSubset`) down to the references and compares applications by
+name: it proves two signatures built alike equal (`InsnRef.cast`). -/
+
+/-- Carrying a reference twice is carrying it once. -/
+@[simp] public theorem TypeRef.carry_carry {s t u : Env α} {arity : Nat} (h₁ : s.KeepsTypes t)
+    (h₂ : t.KeepsTypes u) (r : TypeRef s arity) :
+    (r.carry h₁).carry h₂ = r.carry (h₁.trans h₂) := by
+  simp [TypeRef.carry]
+
+namespace TypeExpr
+
+/-- Reinterpreting a type variable gives the variable. -/
+@[simp] public theorem carry_var {s t : Env α} (h : s.KeepsTypes t) {scope : Nat} (i : Nat)
+    (hi : i < scope) : (var (env := s) i hi).carry h = var i hi :=
+  eq_iff_expr_eq.mpr (by simp [expr_carry, expr_var])
+
+/-- Reinterpreting an application reinterprets the reference and the arguments. -/
+@[simp] public theorem carry_app {s t : Env α} (h : s.KeepsTypes t) {scope arity : Nat}
+    (r : TypeRef s arity) (args : Vector (TypeExpr s scope) arity) :
+    (app r args).carry h = app (r.carry h) (args.map (·.carry h)) :=
+  eq_iff_expr_eq.mpr (by
+    simp [expr_carry, expr_app, Array.map_map, Function.comp_def])
+
+/-- Two applications are equal when they apply the same name to equal arguments. -/
+@[simp] public theorem app_eq_app_iff {env : Env α} {scope arity : Nat}
+    {r₁ r₂ : TypeRef env arity} {a₁ a₂ : Vector (TypeExpr env scope) arity} :
+    app r₁ a₁ = app r₂ a₂ ↔ r₁.name = r₂.name ∧ a₁ = a₂ := by
+  rw [eq_iff_expr_eq, expr_app, expr_app, TypeExpr.Raw.app.injEq,
+    Array.map_inj_right (fun _ _ h => eq_iff_expr_eq.mpr h), Vector.toArray_inj]
+
+end TypeExpr
+
+namespace RegionSig
+
+variable {env : Env α} {scope : Nat}
+
+/-- Reinterpret in an environment that keeps the types. -/
+public def carry {s t : Env α} (h : s.KeepsTypes t) (r : RegionSig s scope) : RegionSig t scope :=
+  ⟨r.raw, r.wf.mono fun _ _ hr => Env.refBefore_size_of_keepsTypes h hr⟩
+
+/-- Reinterpret in an extension. -/
+public abbrev ofSubset {s t : Env α} (h : s ⊆ t) (r : RegionSig s scope) :
+    RegionSig t scope :=
+  r.carry (Env.keepsTypes_of_subset h)
+
+/-- Reinterpreting changes no data. -/
+@[simp] theorem raw_carry {s t : Env α} (h : s.KeepsTypes t) (r : RegionSig s scope) :
+    (r.carry h).raw = r.raw := rfl
+
+/-- Reinterpreting reinterprets each parameter. -/
+@[simp] public theorem params_carry {s t : Env α} (h : s.KeepsTypes t) (r : RegionSig s scope) :
+    (r.carry h).params = r.params.map (fun p => ⟨p.name, p.type.carry h⟩) := by
+  apply Array.ext
+  · simp [RegionSig.params, carry]
+  · intro i _ _
+    simp [RegionSig.params, carry, TypeExpr.carry]
+
+/-- Reinterpreting reinterprets the return type. -/
+@[simp] public theorem returnType_carry {s t : Env α} (h : s.KeepsTypes t) (r : RegionSig s scope) :
+    (r.carry h).returnType = r.returnType.carry h := by
+  simp only [RegionSig.returnType, carry, TypeExpr.carry]
+
+/-- Reinterpreting `of` reinterprets its parameter types and its return type. -/
+@[simp] public theorem carry_of {s t : Env α} (h : s.KeepsTypes t)
+    (params : Array (Param (TypeExpr s scope))) (returnType : TypeExpr s scope)
+    (distinct : (params.toList.map (·.name)).Nodup) :
+    (of params returnType distinct).carry h =
+      of (params.map fun p => ⟨p.name, p.type.carry h⟩) (returnType.carry h)
+        (by simpa [Function.comp_def] using distinct) :=
+  eq_of_raw_eq (by
+    simp [of, carry, Array.map_map, Function.comp_def, TypeExpr.expr_carry])
+
+end RegionSig
+
+namespace InsnSig
+
+/-- Reinterpret in an environment that keeps the types. -/
+@[expose] public def carry {s t : Env α} (h : s.KeepsTypes t) (i : InsnSig s) : InsnSig t where
+  ann := i.ann
+  typeParams := i.typeParams
+  typeArgc := i.typeArgc
+  argTypes := i.argTypes.map (fun p => ⟨p.name, p.type.carry h⟩)
+  variadic := i.variadic.map (fun p => ⟨p.name, p.type.carry h⟩)
+  returnType := i.returnType.map (·.carry h)
+  regions := i.regions.map (fun p => ⟨p.name, p.type.carry h⟩)
+  succs := i.succs.map (fun p => ⟨p.name, p.type.map (·.carry h)⟩)
+  size_typeParams := i.size_typeParams
+  distinct := by simpa [Function.comp_def] using i.distinct
+
+/-- Reinterpret in an extension. -/
+public abbrev ofSubset {s t : Env α} (h : s ⊆ t) (i : InsnSig s) : InsnSig t :=
+  i.carry (Env.keepsTypes_of_subset h)
+
+/-- Reinterpreting changes no data. -/
+theorem decl_carry {s t : Env α} (h : s.KeepsTypes t) (i : InsnSig s) (name : Name)
+    (kind : InsnKind := .decl) :
+    (i.carry h).decl name kind = i.decl name kind := by
+  simp [decl, carry, Array.map_map, Function.comp_def, TypeExpr.expr_carry]
+
+/-- A carried signature is the original, up to annotation. -/
+public theorem eqUpToAnn_carry {s t : Env α} (h : s.KeepsTypes t) (σ : InsnSig s) :
+    σ.EqUpToAnn (σ.carry h) := by
+  unfold EqUpToAnn
+  rw [decl_carry]
+
+/-- A carried signature is equal up to annotation to what the original is. -/
+@[simp] public theorem eqUpToAnn_carry_left {s t u : Env α} (h : s.KeepsTypes t)
+    (σ : InsnSig s) (σ₂ : InsnSig u) : (σ.carry h).EqUpToAnn σ₂ ↔ σ.EqUpToAnn σ₂ := by
+  unfold EqUpToAnn
+  rw [decl_carry]
+
+end InsnSig
+
+
 /-! ## Declarations, checked
 
 * `Env.ResolvesInsn`, `InsnRef`: a reference to an instruction declaration, a datatype's
@@ -2116,29 +2614,70 @@ end InsnSig
 * `InsnRef.ctorAddr?`: which constructor the instruction is, if it is one.
 * `Decl`: a declaration of a signature, as a type or instruction reference. -/
 
-/-- `name` is declared in `s` as the instruction with signature `isig`, of whichever kind. -/
+/-- `name` is declared in `s` as the instruction with signature `isig`, of whichever kind, up
+to its annotation. -/
 public def Env.ResolvesInsn (s : Env α) (name : Name) (isig : InsnSig s) : Prop :=
-  ∃ k, s.Resolves name (.insn (isig.decl name k))
+  ∃ d, s.declOf? name = some (.insn d) ∧ d.erase = (isig.decl name d.kind).erase
 
-/-- A reference to an instruction of `env` with signature `isig`: the name
-resolves, and what it resolves to is exactly that signature's declaration. -/
+/-- A name declared as a signature's declaration resolves to it. -/
+theorem Env.ResolvesInsn.of_resolves {s : Env α} {name : Name} {isig : InsnSig s}
+    {k : InsnKind} (h : s.Resolves name (.insn (isig.decl name k))) :
+    s.ResolvesInsn name isig :=
+  ⟨_, h, rfl⟩
+
+namespace Env
+
+/-- An extension declares every instruction it extends, at the carried signature. -/
+public theorem DeclaresInsn.of_subset {s s' : Env α} (hs : s ⊆ s') {n : Name} {σ : InsnSig s}
+    {k : InsnKind} (h : s.DeclaresInsn n σ k) : s'.DeclaresInsn n (σ.ofSubset hs) k := by
+  unfold DeclaresInsn at *
+  rw [show (σ.ofSubset hs).decl n k = σ.decl n k from InsnSig.decl_carry _ σ n k]
+  exact declOf?_of_subset hs h
+
+/-- An extension keeps every instruction. -/
+public theorem keepsInsns_of_subset {s t : Env α} (h : s ⊆ t) : s.KeepsInsns t :=
+  ⟨fun hσ => ⟨_, _, hσ.of_subset h, InsnSig.eqUpToAnn_carry _ _⟩⟩
+
+/-- A name that resolves to an instruction in `s` resolves to it, carried, in every environment
+that keeps `s`'s types and instructions. -/
+public theorem ResolvesInsn.carry {s t : Env α} (hT : s.KeepsTypes t) (hI : s.KeepsInsns t)
+    {name : Name} {isig : InsnSig s} (hr : s.ResolvesInsn name isig) :
+    t.ResolvesInsn name (isig.carry hT) := by
+  obtain ⟨d₁, hd₁, he⟩ := hr
+  obtain ⟨σ₂, k₂, hσ₂, heq⟩ := hI.insn (declaresInsn_ofWF hd₁)
+  refine ⟨σ₂.decl name k₂, hσ₂, ?_⟩
+  have e₁ := (InsnSig.eqUpToAnn_iff_decl (n := name) (k₁ := d₁.kind) (k₂ := k₂)).mp heq
+  rw [InsnSig.decl_ofWF_of_name _ (by simpa using name_of_declOf? hd₁)] at e₁
+  rw [e₁, InsnSig.decl_carry hT isig name (σ₂.decl name k₂).kind, he]
+  rfl
+
+end Env
+
+/-- A reference to an instruction of `env` with signature `isig`: the name resolves, and what
+it resolves to is that signature's declaration, up to its annotation. -/
 public structure InsnRef (env : Env α) (isig : InsnSig env) where
   name : Name
   resolves : env.ResolvesInsn name isig
 
-/-- Carry an instruction reference into an extension. -/
-public def InsnRef.ofSubset {s t : Env α} (h : s ⊆ t) {isig : InsnSig s} (r : InsnRef s isig) :
-    InsnRef t (isig.ofSubset h) :=
-  ⟨r.name, by
-    obtain ⟨k, hc⟩ := r.resolves
-    exact ⟨k, by rw [InsnSig.decl_ofSubset h isig r.name k]; exact hc.mono h⟩⟩
+/-- Carry an instruction reference into an environment that keeps the types and
+instructions. -/
+public def InsnRef.carry {s t : Env α} (hT : s.KeepsTypes t) (hI : s.KeepsInsns t)
+    {isig : InsnSig s} (r : InsnRef s isig) : InsnRef t (isig.carry hT) :=
+  ⟨r.name, r.resolves.carry hT hI⟩
 
-@[simp] public theorem name_InsnRef_ofSubset {s t : Env α} (h : s ⊆ t) {isig : InsnSig s}
-    (r : InsnRef s isig) : (r.ofSubset h).name = r.name := by
-  simp [InsnRef.ofSubset]
+/-- Carry an instruction reference into an extension. -/
+public abbrev InsnRef.ofSubset {s t : Env α} (h : s ⊆ t) {isig : InsnSig s}
+    (r : InsnRef s isig) : InsnRef t (isig.ofSubset h) :=
+  r.carry (Env.keepsTypes_of_subset h) (Env.keepsInsns_of_subset h)
+
+/-- Carrying an instruction reference keeps its name. -/
+@[simp] public theorem name_InsnRef_carry {s t : Env α} (hT : s.KeepsTypes t)
+    (hI : s.KeepsInsns t) {isig : InsnSig s} (r : InsnRef s isig) :
+    (r.carry hT hI).name = r.name := by
+  simp [InsnRef.carry]
 
 /-- The same reference, at an equal signature.  `simp` proves the equality when both are built
-from `TypeExpr.app`, `TypeExpr.var`, `RegionSig.of` and `ofSubset`. -/
+from `TypeExpr.app`, `TypeExpr.var`, `RegionSig.of` and `carry`. -/
 @[expose] public def InsnRef.cast {env : Env α} {s₁ s₂ : InsnSig env} (h : s₁ = s₂)
     (r : InsnRef env s₁) : InsnRef env s₂ :=
   ⟨r.name, h ▸ r.resolves⟩
@@ -2151,6 +2690,11 @@ from `TypeExpr.app`, `TypeExpr.var`, `RegionSig.of` and `ofSubset`. -/
 public def InsnRef.ctorAddr? {env : Env α} {isig : InsnSig env} (r : InsnRef env isig) :
     Option CtorAddr :=
   env.ctorAddr? r.name
+
+/-- A reference's constructor address is its name's. -/
+public theorem InsnRef.ctorAddr?_eq {env : Env α} {isig : InsnSig env} (r : InsnRef env isig) :
+    r.ctorAddr? = env.ctorAddr? r.name := by
+  simp only [InsnRef.ctorAddr?]
 
 /-- A declaration of `env`: a reference to a type, or to an instruction, a datatype's
 constructor included. -/
@@ -2167,26 +2711,27 @@ namespace Decl
 
 /-- The name of a declaration is declared. -/
 theorem mem_of_decl {env : Env α} (d : Decl env) : d.name ∈ env := by
-  -- Each case's resolution says the lookup succeeded, which is membership.
-  have key : ∀ {n : Name} {e : Decl.Raw α}, env.raw.decls[n]? = some e → n ∈ env :=
-    fun hk => Env.mem_of_resolves (Env.resolves_iff_rawGet?.mpr hk)
   cases d with
   | type r =>
-    have hres := r.resolves
-    unfold Env.ResolvesType Env.Raw.typeOf? at hres
-    cases hx : env.raw.decls[r.name]? with
-    | none => rw [hx] at hres; simp at hres
-    | some e => exact key hx
-  | insn r => obtain ⟨_, hc⟩ := r.resolves; exact Env.mem_of_resolves hc
+    obtain ⟨_, hr, -⟩ := r.resolves
+    exact Env.mem_of_typeOf? hr
+  | insn r =>
+    obtain ⟨_, hr, -⟩ := r.resolves
+    exact Env.mem_of_resolves hr
+
+/-- Carry a declaration into an environment that keeps the types and instructions. -/
+public def carry {s t : Env α} (hT : s.KeepsTypes t) (hI : s.KeepsInsns t) : Decl s → Decl t
+  | .type r => .type (r.carry hT)
+  | .insn r => .insn (r.carry hT hI)
 
 /-- Carry a declaration into an extension. -/
-public def ofSubset {s t : Env α} (h : s ⊆ t) : Decl s → Decl t
-  | .type r => .type (r.ofSubset h)
-  | .insn r => .insn (r.ofSubset h)
+public abbrev ofSubset {s t : Env α} (h : s ⊆ t) : Decl s → Decl t :=
+  carry (Env.keepsTypes_of_subset h) (Env.keepsInsns_of_subset h)
 
-@[simp] public theorem name_ofSubset {s t : Env α} (h : s ⊆ t) (d : Decl s) :
-    (d.ofSubset h).name = d.name := by
-  cases d <;> simp [ofSubset, name]
+/-- Carrying a declaration keeps its name. -/
+@[simp] public theorem name_carry {s t : Env α} (hT : s.KeepsTypes t) (hI : s.KeepsInsns t)
+    (d : Decl s) : (d.carry hT hI).name = d.name := by
+  cases d <;> rfl
 
 /-- A declaration of `env` is declared in `env`. -/
 public theorem mem {env : Env α} (d : Decl env) : d.name ∈ env :=
@@ -2202,27 +2747,26 @@ namespace Env
 
 /-- The declaration named `name`, checked. -/
 public def get? (s : Env α) (name : Name) : Option (Decl s) :=
-  match h : s.rawGet? name with
+  match h : s.declOf? name with
   | none => none
   | some (.type d) =>
-    some (.type ⟨name, d, rfl, by simp [Env.ResolvesType, Env.Raw.typeOf?, Env.Raw.typeOfDecl?, show
-      s.raw.decls[name]? = some (.type d) from h]⟩)
+    some (.type ⟨name, d, rfl, resolvesType_of_typeOf? (typeOf?_of_type h)⟩)
   -- A datatype head is a type reference, as a primitive is.
   | some (.dataHead g) =>
-    some (.type ⟨name, g.first.toTypeDecl, rfl, by
-      simp [Env.ResolvesType, Env.Raw.typeOf?, Env.Raw.typeOfDecl?, show
-        s.raw.decls[name]? = some (.dataHead g) from h]⟩)
+    some (.type ⟨name, g.first.toTypeDecl, rfl, resolvesType_of_typeOf? (typeOf?_of_dataHead h)⟩)
   -- A member past the head is a type too; `aliasWF` says its group has it.
   | some (.dataRest mn hd i) =>
     have hs : (s.raw.typeOf? name).isSome := isSome_typeOf?_of_dataRest h
-    some (.type ⟨name, (s.raw.typeOf? name).get hs, rfl, (Option.some_get hs).symm⟩)
+    some (.type ⟨name, (s.raw.typeOf? name).get hs, rfl,
+      resolvesType_of_typeOf? (Option.some_get hs).symm⟩)
   -- A constructor is an instruction like any other.
   | some (.insn d) =>
     have hwf : InsnDecl.Raw.WF (s.RefBefore s.size) d :=
-      Decl.Raw.wf_insn_iff.mp (declWF_of_rawGet? h)
-    have hname : d.name = name := by simpa using name_of_rawGet? h
+      Decl.Raw.wf_insn_iff.mp (declWF_of_declOf? h)
+    have hname : d.name = name := by simpa using name_of_declOf? h
     some (.insn (isig := InsnSig.ofWF d hwf)
-      ⟨name, ⟨d.kind, by rw [InsnSig.decl_ofWF_of_name hwf hname]; exact h⟩⟩)
+      ⟨name, ResolvesInsn.of_resolves (k := d.kind)
+        (by rw [InsnSig.decl_ofWF_of_name hwf hname]; exact h)⟩)
 
 -- Not `@[simp]`: the left-hand side, `Decl.name` of a variable, would match everywhere.
 /-- A lookup answers under the name asked for. -/
@@ -2241,7 +2785,7 @@ public theorem name_get? {s : Env α} {n : Name} {d : Decl s} (h : s.get? n = so
     rwa [name_get? hd] at this
   · intro hm
     unfold get?
-    split <;> rename_i h <;> simp_all [← isSome_rawGet?]
+    split <;> rename_i h <;> simp_all [← isSome_declOf?]
 
 /-- The declaration named `name`, checked, given that there is one. -/
 public def get (s : Env α) (name : Name) (p : name ∈ s) : Decl s :=
@@ -2267,21 +2811,22 @@ theorem raw_addInsn (s : Env α) (name : Name) (isig : InsnSig s) (fresh : name 
     (s.addInsn name isig fresh).size = s.size + 1 := by
   simp [size, raw_addInsn, Raw.keys_append]
 
-theorem rawGet?_addInsn (s : Env α) (name : Name) (isig : InsnSig s) (fresh : name ∉ s)
+/-- What a name names after `addInsn`. -/
+theorem declOf?_addInsn (s : Env α) (name : Name) (isig : InsnSig s) (fresh : name ∉ s)
     (n : Name) :
-    (s.addInsn name isig fresh).rawGet? n =
-      if name == n then some (.insn (isig.decl name)) else s.rawGet? n := by
-  simp [rawGet?_eq_raw, raw_addInsn, Raw.get?_append, InsnSig.name_decl]
+    (s.addInsn name isig fresh).declOf? n =
+      if name == n then some (.insn (isig.decl name)) else s.declOf? n := by
+  simp [declOf?_eq_raw, raw_addInsn, Raw.get?_append, InsnSig.name_decl]
 
 theorem resolves_addInsn_self (s : Env α) (name : Name) (isig : InsnSig s)
     (fresh : name ∉ s) : (s.addInsn name isig fresh).Resolves name (.insn (isig.decl name)) := by
-  rw [resolves_iff_rawGet?, rawGet?_addInsn]
+  rw [resolves_iff_declOf?, declOf?_addInsn]
   simp
 
 theorem resolves_addInsn_of_ne {s : Env α} {name : Name} {isig : InsnSig s}
     {fresh : name ∉ s} {n : Name} {e : Decl.Raw α} (hne : name ≠ n) :
     (s.addInsn name isig fresh).Resolves n e ↔ s.Resolves n e := by
-  rw [resolves_iff_rawGet?, resolves_iff_rawGet?, rawGet?_addInsn, if_neg (by simpa using hne)]
+  rw [resolves_iff_declOf?, resolves_iff_declOf?, declOf?_addInsn, if_neg (by simpa using hne)]
 
 @[simp, grind =] public theorem mem_addInsn {s : Env α} {name : Name} {isig : InsnSig s} {fresh : name ∉ s}
     {n : Name} : n ∈ s.addInsn name isig fresh ↔ name = n ∨ n ∈ s := by
@@ -2297,7 +2842,140 @@ theorem resolvesInsn_addInsn_self (s : Env α) (name : Name) (isig : InsnSig s)
     (fresh : name ∉ s) :
     (s.addInsn name isig fresh).ResolvesInsn name
       (isig.ofSubset (subset_addInsn s name isig fresh)) :=
-  ⟨.decl, by rw [InsnSig.decl_ofSubset]; exact resolves_addInsn_self s name isig fresh⟩
+  ResolvesInsn.of_resolves (k := .decl)
+    (by rw [InsnSig.decl_carry]; exact resolves_addInsn_self s name isig fresh)
+
+/-- What type a name names after `addInsn`. -/
+public theorem typeOf?_addInsn (s : Env α) (name : Name) (isig : InsnSig s) (fresh : name ∉ s)
+    (n : Name) :
+    (s.addInsn name isig fresh).typeOf? n = if name == n then none else s.typeOf? n :=
+  typeOf?_of_declOf?_eq (declOf?_addInsn s name isig fresh) fresh rfl n
+
+/-- `addInsn` adds no datatype. -/
+public theorem dataOf?_addInsn (s : Env α) (name : Name) (isig : InsnSig s) (fresh : name ∉ s)
+    (n : Name) :
+    (s.addInsn name isig fresh).dataOf? n = if name == n then none else s.dataOf? n :=
+  dataOf?_of_declOf?_eq (declOf?_addInsn s name isig fresh) fresh rfl (fun _ _ _ => nofun) n
+
+/-! ### Declared instructions
+
+`DeclaresInsn` is how a client reads an environment's instructions: as checked signatures,
+with their kinds. -/
+
+/-- A declared instruction resolves, as references do. -/
+public theorem DeclaresInsn.resolvesInsn {s : Env α} {n : Name} {σ : InsnSig s} {k : InsnKind}
+    (h : s.DeclaresInsn n σ k) : s.ResolvesInsn n σ :=
+  ⟨_, h, rfl⟩
+
+/-- A declared instruction's annotation is its signature's. -/
+public theorem annOf?_of_declaresInsn {s : Env α} {n : Name} {σ : InsnSig s} {k : InsnKind}
+    (h : s.DeclaresInsn n σ k) : s.annOf? n = some σ.ann :=
+  annOf?_of_insn h
+
+/-- A type's annotation is its declaration's. -/
+public theorem annOf?_of_typeOf? {s : Env α} {n : Name} {d : TypeDecl α}
+    (h : s.typeOf? n = some d) : s.annOf? n = some d.ann := by
+  unfold Env.annOf?
+  split
+  · next d₀ hd₀ =>
+    rw [typeOf?_of_insn hd₀] at h
+    cases h
+  · rw [h]
+    rfl
+
+/-- A name declared as an instruction is declared. -/
+public theorem DeclaresInsn.mem {s : Env α} {n : Name} {σ : InsnSig s} {k : InsnKind}
+    (h : s.DeclaresInsn n σ k) : n ∈ s :=
+  mem_of_resolves h
+
+/-- A declared name names a type or an instruction. -/
+public theorem lookup_of_mem {s : Env α} {n : Name} (hn : n ∈ s) :
+    (∃ d, s.typeOf? n = some d) ∨ ∃ σ k, s.DeclaresInsn n σ k := by
+  obtain ⟨e, he⟩ := Option.isSome_iff_exists.mp (isSome_declOf?.mpr hn)
+  cases e with
+  | type _ => exact .inl ⟨_, typeOf?_of_type he⟩
+  | dataHead _ => exact .inl ⟨_, typeOf?_of_dataHead he⟩
+  | dataRest _ _ _ => exact .inl (Option.isSome_iff_exists.mp (isSome_typeOf?_of_dataRest he))
+  | insn _ => exact .inr ⟨_, _, declaresInsn_ofWF he⟩
+
+/-- A name's annotation is that of the instruction or the type it names. -/
+public theorem annOf?_eq_some {s : Env α} {n : Name} {a : α} (h : s.annOf? n = some a) :
+    (∃ σ k, s.DeclaresInsn n σ k ∧ σ.ann = a) ∨ ∃ d, s.typeOf? n = some d ∧ d.ann = a := by
+  unfold annOf? at h
+  split at h
+  next d hd =>
+    obtain rfl := Option.some.inj h
+    exact .inl ⟨_, _, declaresInsn_ofWF hd, rfl⟩
+  next =>
+    obtain ⟨d, hd, rfl⟩ := Option.map_eq_some_iff.mp h
+    exact .inr ⟨d, hd, rfl⟩
+
+/-- A declared instruction's constructor address is its kind's. -/
+public theorem ctorAddr?_of_declaresInsn {s : Env α} {n : Name} {σ : InsnSig s} {k : InsnKind}
+    (h : s.DeclaresInsn n σ k) : s.ctorAddr? n = k.ctor? :=
+  ctorAddr?_of_insnOf? (insnOf?_eq_some_iff.mpr h)
+
+/-- The empty environment declares no instruction. -/
+public theorem not_declaresInsn_empty {n : Name} {σ : InsnSig (Env.empty (α := α))}
+    {k : InsnKind} : ¬ (Env.empty (α := α)).DeclaresInsn n σ k := by
+  unfold DeclaresInsn
+  rw [declOf?_empty]
+  nofun
+
+/-- An instruction declared in an extension `s'`, under a name `s` declares, is one of `s`'s,
+carried. -/
+theorem declaresInsn_of_subset_declOf? {s s' : Env α} (hs : s ⊆ s') {n : Name}
+    {σ : InsnSig s'} {k : InsnKind} (h : s.declOf? n = some (.insn (σ.decl n k))) :
+    ∃ σ₀ : InsnSig s, s.DeclaresInsn n σ₀ k ∧ σ = σ₀.ofSubset hs := by
+  have hwf := Decl.Raw.wf_insn_iff.mp (declWF_of_declOf? h)
+  have e : (InsnSig.ofWF _ hwf).decl n k = σ.decl n k :=
+    InsnSig.decl_ofWF_of_name hwf (InsnSig.name_decl σ n k)
+  refine ⟨InsnSig.ofWF _ hwf, ?_, ?_⟩
+  · unfold DeclaresInsn
+    rw [e]
+    exact h
+  · exact InsnSig.eq_of_decl_eq (n := n) (k := k) (by
+    rw [show ((InsnSig.ofWF _ hwf).ofSubset hs).decl n k = _ from InsnSig.decl_carry _ _ n k, e])
+
+/-- `addInsn` declares its instruction, as an ordinary one. -/
+public theorem declaresInsn_addInsn_self (s : Env α) (name : Name) (isig : InsnSig s)
+    (fresh : name ∉ s) :
+    (s.addInsn name isig fresh).DeclaresInsn name
+      (isig.ofSubset (subset_addInsn s name isig fresh)) .decl := by
+  unfold DeclaresInsn
+  rw [show (isig.ofSubset _).decl name .decl = isig.decl name from InsnSig.decl_carry _ _ _ _]
+  exact resolves_addInsn_self s name isig fresh
+
+/-- An instruction declared after `addInsn` is the added one, or one `s` declares. -/
+public theorem declaresInsn_addInsn {s : Env α} {name : Name} {isig : InsnSig s}
+    {fresh : name ∉ s} {n : Name} {σ : InsnSig (s.addInsn name isig fresh)} {k : InsnKind}
+    (h : (s.addInsn name isig fresh).DeclaresInsn n σ k) :
+    (name = n ∧ σ = isig.ofSubset (subset_addInsn s name isig fresh) ∧ k = .decl) ∨
+      ∃ σ₀ : InsnSig s, s.DeclaresInsn n σ₀ k ∧
+        σ = σ₀.ofSubset (subset_addInsn s name isig fresh) := by
+  unfold DeclaresInsn at h
+  rw [declOf?_addInsn] at h
+  split at h
+  · next hn =>
+    obtain rfl := beq_iff_eq.mp hn
+    have hd := Decl.Raw.insn.inj (Option.some.inj h)
+    have hk : k = .decl := (congrArg InsnDecl.Raw.kind hd).symm
+    subst hk
+    exact .inl ⟨rfl, InsnSig.eq_of_decl_eq (n := name) (k := .decl)
+      (by rw [show (isig.ofSubset _).decl name .decl = isig.decl name from
+        InsnSig.decl_carry _ _ _ _]; exact hd.symm), rfl⟩
+  · exact .inr (declaresInsn_of_subset_declOf? _ h)
+
+/-- An instruction declared after `addType` is one `s` declares. -/
+public theorem declaresInsn_addType {s : Env α} {d : TypeDecl α} {fresh : d.name ∉ s}
+    {distinct : d.paramNames.Nodup} {n : Name} {σ : InsnSig (s.addType d fresh distinct)}
+    {k : InsnKind} (h : (s.addType d fresh distinct).DeclaresInsn n σ k) :
+    ∃ σ₀ : InsnSig s, s.DeclaresInsn n σ₀ k ∧ σ = σ₀.ofSubset (subset_addType s d fresh) := by
+  unfold DeclaresInsn at h
+  rw [declOf?_addType] at h
+  split at h
+  · cases h
+  · exact declaresInsn_of_subset_declOf? _ h
 
 /-! ### Extending by evaluation, and by a batch
 
@@ -2360,11 +3038,9 @@ public theorem mem_addType?_eq_some {s t : Env α} {d : TypeDecl α}
 /-- What the name of a successfully added type declaration resolves to. -/
 public theorem resolvesType_of_addType?_eq_some {s t : Env α} {d : TypeDecl α}
     (h : s.addType? d = some t) : t.ResolvesType d.name d := by
-  have hr := resolves_iff_rawGet?.mp (resolves_of_add?_eq_some h)
+  have hr := resolves_iff_declOf?.mp (resolves_of_add?_eq_some h)
   simp only [Decl.Raw.name_type] at hr
-  unfold ResolvesType Env.Raw.typeOf?
-  rw [show t.raw.decls[d.name]? = some (.type d) from hr]
-  rfl
+  exact resolvesType_of_typeOf? (typeOf?_of_type hr)
 
 /-- Add a mutual group of datatypes.  `none` if one of its names is taken, or the group is
 not an admissible definition. -/
@@ -2386,13 +3062,11 @@ theorem resolvesType_of_addData?_eq_some {s t : Env α} {g : DataGroup α TypeEx
     (h : s.addData? g = some t) :
     t.ResolvesType g.first.name g.first.toTypeDecl := by
   unfold addData? at h
-  have hr := resolves_iff_rawGet?.mp
+  have hr := resolves_iff_declOf?.mp
     (resolves_of_addAll?_eq_some _ h 0 (.dataHead g)
       (by rw [← Array.getElem?_toList]; exact DataGroup.decls_getElem?_zero g))
   simp only [Decl.Raw.name_dataHead] at hr
-  unfold ResolvesType Env.Raw.typeOf?
-  rw [show t.raw.decls[g.first.name]? = some (.dataHead g) from hr]
-  rfl
+  exact resolvesType_of_typeOf? (typeOf?_of_dataHead hr)
 
 /-- Add a batch of instruction declarations.  `none` if their names are not distinct and
 fresh in `s`, or one fails the checker. -/
@@ -2414,8 +3088,6 @@ public theorem mem_addInsns?_eq_some {s t : Env α} {ops : Array (Name × InsnSi
 
 * `resolvesInsn_of_addInsns?_eq_some`: each operation of an accepted batch resolves. -/
 
--- Read off the construction: deciding it would need equality on annotations.
-
 /-- Each operation of a batch `addInsns?` accepted resolves under its own name, with its own
 signature lifted into the result. -/
 public theorem resolvesInsn_of_addInsns?_eq_some {s t : Env α}
@@ -2428,7 +3100,7 @@ public theorem resolvesInsn_of_addInsns?_eq_some {s t : Env α}
     rfl
   have := resolves_of_addAll?_eq_some _ h i _ hget
   rw [Decl.Raw.name_insn, InsnSig.name_decl] at this
-  exact ⟨.decl, by rw [InsnSig.decl_ofSubset]; exact this⟩
+  exact ResolvesInsn.of_resolves (k := .decl) (by rw [InsnSig.decl_carry]; exact this)
 
 /-! ### A batch of operations, total
 
@@ -2476,7 +3148,7 @@ public theorem resolvesInsn_addInsns (i : Nat) (hi : i < ops.size := by decide) 
     rfl
   have : (s.addInsns ops fresh).Resolves _ _ := resolves_appendBatch hget
   rw [Decl.Raw.name_insn, InsnSig.name_decl] at this
-  exact ⟨.decl, by rw [InsnSig.decl_ofSubset]; exact this⟩
+  exact ResolvesInsn.of_resolves (k := .decl) (by rw [InsnSig.decl_carry]; exact this)
 
 end
 
@@ -2560,8 +3232,8 @@ theorem ctorInsn?_dataGroup {i j : Nat} (hi : i < ctors.size) (hj : j < ctors[i]
     DatatypeDecl.mapTy, ctorInsnDecl, memberAt, Array.getElem?_eq_getElem hj]
 
 /-- `addData` stores each constructor's instruction under the constructor's name. -/
-theorem rawGet?_ctor {i j : Nat} (hi : i < ctors.size) (hj : j < ctors[i].size) :
-    (s.addData hdr fresh ctors cfresh adm).rawGet? (ctorInsnDecl adm i j hi hj).name =
+theorem declOf?_ctor {i j : Nat} (hi : i < ctors.size) (hj : j < ctors[i].size) :
+    (s.addData hdr fresh ctors cfresh adm).declOf? (ctorInsnDecl adm i j hi hj).name =
       some (.insn (ctorInsnDecl adm i j hi hj)) := by
   obtain ⟨k, hk⟩ := Array.mem_iff_getElem?.mp
     (DataGroup.mem_decls_of_ctorInsn? (ctorInsn?_dataGroup (adm := adm) hi hj))
@@ -2578,7 +3250,7 @@ public def ctorSig {s : Env α} {hdr : Array (TypeDecl α)} {fresh : s.FreshType
     {adm : admissible hdr ctors = true} (i j : Nat) (hi : i < ctors.size := by decide)
     (hj : j < ctors[i].size := by decide) : InsnSig (s.addData hdr fresh ctors cfresh adm) :=
   InsnSig.ofWF (ctorInsnDecl adm i j hi hj)
-    (Decl.Raw.wf_insn_iff.mp (declWF_of_rawGet? (rawGet?_ctor hi hj)))
+    (Decl.Raw.wf_insn_iff.mp (declWF_of_declOf? (declOf?_ctor hi hj)))
 
 section ctorSig
 
@@ -2629,6 +3301,30 @@ variable {s : Env α} {hdr : Array (TypeDecl α)} {fresh : s.FreshTypes hdr}
     (ctorSig (cfresh := cfresh) (adm := adm) i j hi hj).succs = #[] := by
   simp [ctorSig, InsnSig.ofWF, ctorInsnDecl, DataGroup.ctorDecl]
 
+/-- `addData` declares constructor `j` of member `i` as the instruction with the signature it
+derives, marked as that constructor. -/
+theorem insnOf?_addData_ctor (i j : Nat) (hi : i < ctors.size := by decide)
+    (hj : j < ctors[i].size := by decide) :
+    (s.addData hdr fresh ctors cfresh adm).insnOf? ctors[i][j].name =
+      some ((ctorSig (cfresh := cfresh) (adm := adm) i j hi hj).decl ctors[i][j].name
+        (.ctor ⟨(hdr[0]'(pos_of_admissible adm)).name, i, j⟩)) := by
+  have hn : (ctorInsnDecl adm i j hi hj).name = ctors[i][j].name := rfl
+  have hk : (ctorInsnDecl adm i j hi hj).kind =
+      .ctor ⟨(hdr[0]'(pos_of_admissible adm)).name, i, j⟩ := by
+    rw [name_first_dataGroup (ctors := ctors) (adm := adm)]
+    rfl
+  rw [← hn, ← hk, ctorSig, InsnSig.decl_ofWF]
+  exact insnOf?_eq_some_iff.mpr (declOf?_ctor hi hj)
+
+/-- `addData` declares constructor `j` of member `i` with the signature it derives, as that
+constructor. -/
+public theorem declaresInsn_addData_ctor (i j : Nat) (hi : i < ctors.size := by decide)
+    (hj : j < ctors[i].size := by decide) :
+    (s.addData hdr fresh ctors cfresh adm).DeclaresInsn ctors[i][j].name
+      (ctorSig (cfresh := cfresh) (adm := adm) i j hi hj)
+      (.ctor ⟨(hdr[0]'(pos_of_admissible adm)).name, i, j⟩) :=
+  insnOf?_eq_some_iff.mp (insnOf?_addData_ctor i j hi hj)
+
 end ctorSig
 
 end Env
@@ -2643,17 +3339,8 @@ instruction, with the signature `addData` derived for it. -/
     (hj : j < ctors[i].size := by decide) :
     InsnRef (s.addData hdr fresh ctors cfresh adm) (Env.ctorSig i j hi hj) :=
   ⟨ctors[i][j].name, by
-    refine ⟨.ctor ⟨(hdr[0]'(Env.pos_of_admissible adm)).name, i, j⟩, ?_⟩
-    have h := Env.rawGet?_ctor (cfresh := cfresh) (adm := adm) hi hj
-    have hn : (Env.ctorInsnDecl adm i j hi hj).name = ctors[i][j].name := rfl
-    have hc : (Env.ctorInsnDecl adm i j hi hj).kind =
-        .ctor ⟨(hdr[0]'(Env.pos_of_admissible adm)).name, i, j⟩ := by
-      have := Env.first_toTypeDecl_dataGroup (h := adm)
-      simp only [Array.getElem?_eq_getElem (Env.pos_of_admissible adm), Option.some.injEq]
-        at this
-      simp [Env.ctorInsnDecl, DataGroup.ctorDecl, this, DatatypeDecl.toTypeDecl]
-    rw [← hn, ← hc, Env.ctorSig, InsnSig.decl_ofWF]
-    exact h⟩
+    exact Env.ResolvesInsn.of_resolves
+      (Env.insnOf?_eq_some_iff.mp (Env.insnOf?_addData_ctor i j hi hj))⟩
 
 section
 variable {s : Env α} {hdr : Array (TypeDecl α)} {fresh : s.FreshTypes hdr}
@@ -2670,7 +3357,7 @@ variable {s : Env α} {hdr : Array (TypeDecl α)} {fresh : s.FreshTypes hdr}
 public theorem InsnRef.ctorAddr?_ofAddData :
     (InsnRef.ofAddData (cfresh := cfresh) (adm := adm) i j hi hj).ctorAddr? =
       some ⟨(hdr[0]'(Env.pos_of_admissible adm)).name, i, j⟩ := by
-  have h := Env.rawGet?_ctor (cfresh := cfresh) (adm := adm) hi hj
+  have h := Env.declOf?_ctor (cfresh := cfresh) (adm := adm) hi hj
   have hn : (Env.ctorInsnDecl adm i j hi hj).name = ctors[i][j].name := rfl
   have hc0 : (Env.ctorInsnDecl adm i j hi hj).kind =
       .ctor ⟨(hdr[0]'(Env.pos_of_admissible adm)).name, i, j⟩ := by
@@ -2726,8 +3413,8 @@ theorem caseInsn?_dataGroup {i : Nat} (hi : i < ctors.size) :
     caseInsnDecl, memberAt]
 
 /-- `addData` stores each member's case instruction under its name. -/
-theorem rawGet?_case {i : Nat} (hi : i < ctors.size) :
-    (s.addData hdr fresh ctors cfresh adm).rawGet? (caseInsnDecl adm i hi).name =
+theorem declOf?_case {i : Nat} (hi : i < ctors.size) :
+    (s.addData hdr fresh ctors cfresh adm).declOf? (caseInsnDecl adm i hi).name =
       some (.insn (caseInsnDecl adm i hi)) := by
   obtain ⟨k, hk⟩ := Array.mem_iff_getElem?.mp
     (DataGroup.mem_decls_of_caseInsn? (caseInsn?_dataGroup (adm := adm) hi))
@@ -2746,7 +3433,7 @@ public def caseSig {s : Env α} {hdr : Array (TypeDecl α)} {fresh : s.FreshType
     (hi : i < ctors.size := by decide) :
     InsnSig (s.addData hdr fresh ctors cfresh adm) :=
   InsnSig.ofWF (caseInsnDecl adm i hi)
-    (Decl.Raw.wf_insn_iff.mp (declWF_of_rawGet? (rawGet?_case hi)))
+    (Decl.Raw.wf_insn_iff.mp (declWF_of_declOf? (declOf?_case hi)))
 
 section caseSig
 
@@ -2801,6 +3488,31 @@ of the constructor's name and receiving its payload. -/
     Ctor.mapTy, Param.mapTy, Array.map_attach_eq_pmap, Array.map_pmap, Function.comp_def,
     TypeExpr.toRaw_eq_expr]
 
+/-- `addData` declares member `i`'s case instruction as the instruction with the signature it
+derives, marked as that case instruction. -/
+theorem insnOf?_addData_case (i : Nat) (hi : i < ctors.size := by decide) :
+    (s.addData hdr fresh ctors cfresh adm).insnOf?
+        (hdr[i]'(size_of_admissible adm ▸ hi)).name.caseName =
+      some ((caseSig (cfresh := cfresh) (adm := adm) i hi).decl
+        (hdr[i]'(size_of_admissible adm ▸ hi)).name.caseName
+        (.case ⟨(hdr[0]'(pos_of_admissible adm)).name, i⟩)) := by
+  have hn : (caseInsnDecl adm i hi).name =
+      (hdr[i]'(size_of_admissible adm ▸ hi)).name.caseName := rfl
+  have hk : (caseInsnDecl adm i hi).kind = .case ⟨(hdr[0]'(pos_of_admissible adm)).name, i⟩ := by
+    rw [name_first_dataGroup (ctors := ctors) (adm := adm)]
+    rfl
+  rw [← hn, ← hk, caseSig, InsnSig.decl_ofWF]
+  exact insnOf?_eq_some_iff.mpr (declOf?_case hi)
+
+/-- `addData` declares member `i`'s case instruction with the signature it derives, as that
+case instruction. -/
+public theorem declaresInsn_addData_case (i : Nat) (hi : i < ctors.size := by decide) :
+    (s.addData hdr fresh ctors cfresh adm).DeclaresInsn
+      (hdr[i]'(size_of_admissible adm ▸ hi)).name.caseName
+      (caseSig (cfresh := cfresh) (adm := adm) i hi)
+      (.case ⟨(hdr[0]'(pos_of_admissible adm)).name, i⟩) :=
+  insnOf?_eq_some_iff.mp (insnOf?_addData_case i hi)
+
 end caseSig
 
 end Env
@@ -2815,18 +3527,8 @@ signature `addData` derived for it. -/
     (hi : i < ctors.size := by decide) :
     InsnRef (s.addData hdr fresh ctors cfresh adm) (Env.caseSig i hi) :=
   ⟨(hdr[i]'(Env.size_of_admissible adm ▸ hi)).name.caseName, by
-    refine ⟨.case ⟨(hdr[0]'(Env.pos_of_admissible adm)).name, i⟩, ?_⟩
-    have h := Env.rawGet?_case (cfresh := cfresh) (adm := adm) hi
-    have hn : (Env.caseInsnDecl adm i hi).name =
-        (hdr[i]'(Env.size_of_admissible adm ▸ hi)).name.caseName := rfl
-    have hk : (Env.caseInsnDecl adm i hi).kind =
-        .case ⟨(hdr[0]'(Env.pos_of_admissible adm)).name, i⟩ := by
-      have := Env.first_toTypeDecl_dataGroup (h := adm)
-      simp only [Array.getElem?_eq_getElem (Env.pos_of_admissible adm), Option.some.injEq]
-        at this
-      simp [Env.caseInsnDecl, DataGroup.caseDecl, this, DatatypeDecl.toTypeDecl]
-    rw [← hn, ← hk, Env.caseSig, InsnSig.decl_ofWF]
-    exact h⟩
+    exact Env.ResolvesInsn.of_resolves
+      (Env.insnOf?_eq_some_iff.mp (Env.insnOf?_addData_case i hi))⟩
 
 /-- A case instruction is named `T.case`, for its datatype `T`. -/
 @[simp] public theorem InsnRef.name_ofAddDataCase {s : Env α} {hdr : Array (TypeDecl α)}

@@ -4,7 +4,7 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
-public import StrataMantle.Env
+public import StrataMantle.Env.Refine
 -- Private: building an `Env` value needs its representation at code-generation time.
 import StrataMantle.Env.WF
 import StrataMantle.DSL

@@ -44,10 +44,10 @@ def rootId (n : Name) : Ident := mkIdent (`_root_ ++ n)
 
 /-- The fixed lemmas of an instruction's `InsnRef.cast` proof. -/
 def insnCastLemmas : Array Ident := #[
-  `Strata.Mantle.InsnSig.ofSubset, `Strata.Mantle.InsnSig.mk.injEq,
-  `Strata.Mantle.TypeExpr.ofSubset_app, `Strata.Mantle.TypeExpr.ofSubset_var,
-  `Strata.Mantle.TypeExpr.app_eq_app_iff, `Strata.Mantle.TypeRef.ofSubset_ofSubset,
-  `Strata.Mantle.name_TypeRef_ofSubset, `Strata.Mantle.RegionSig.ofSubset_of,
+  `Strata.Mantle.InsnSig.ofLE, `Strata.Mantle.InsnSig.carry, `Strata.Mantle.InsnSig.mk.injEq,
+  `Strata.Mantle.TypeExpr.carry_app, `Strata.Mantle.TypeExpr.carry_var,
+  `Strata.Mantle.TypeExpr.app_eq_app_iff, `Strata.Mantle.TypeRef.carry_carry,
+  `Strata.Mantle.name_TypeRef_carry, `Strata.Mantle.RegionSig.carry_of,
   `Strata.Mantle.RegionSig.of_eq_of_iff, `Strata.Mantle.Param.mk.injEq, `Vector.map_mk,
   `Vector.mk.injEq, `List.map_toArray, `List.map_cons, `List.map_nil, `Array.mk.injEq,
   `List.cons.injEq, `Option.map_none, `Option.map_some, `Option.some.injEq, `heq_eq_eq,
@@ -147,7 +147,8 @@ def refAt (h : Name) (j : Nat) : Term :=
   | some (info, t, _) =>
     let r : Term := cx.own (`Internal ++ info.lean ++ `ref₀)
     if t == j then r
-    else Unhygienic.run `(Strata.Mantle.TypeRef.ofSubset $(cx.chain t j) $r)
+    else Unhygienic.run
+      `(Strata.Mantle.TypeRef.ofLE (Strata.Mantle.Env.le_of_subset $(cx.chain t j)) $r)
   | none =>
     match cx.inherited[h]? with
     | some info =>
@@ -160,7 +161,7 @@ partial def tyAt (j : Nat) : RTy → Term
   | .app h args =>
     let as : Array Term := args.map (tyAt j)
     -- At `stage j` itself, not the `addTypes` expression an own `ref₀` is typed against,
-    -- so that `simp` matches `TypeExpr.ofSubset_app` on it.
+    -- so that `simp` matches `TypeExpr.carry_app` on it.
     Unhygienic.run
       `(Strata.Mantle.TypeExpr.app (env := $(cx.stage j)) $(cx.refAt h j) #v[$as,*])
 
@@ -200,11 +201,12 @@ environment. -/
 def ownOrInherited (h : Name) (rel : Name) : Ident :=
   if cx.ownTypes.contains h then cx.own rel else rootId ((cx.info h).owner ++ rel)
 
-/-- A proof of `stage t ⊆ e`, under `[h : env ⊑ e]`. -/
+/-- A proof of `stage t ≤ e`, under `[h : env ⊑ e]`. -/
 def liftTo (t : Nat) : Term :=
-  if t == cx.m then Unhygienic.run `(Strata.Mantle.RefinedBy.subset (self := $(cx.hId)))
-  else Unhygienic.run `(Strata.Mantle.Env.Prefix.trans $(cx.internal s!"hsub{t}")
-    (Strata.Mantle.RefinedBy.subset (self := $(cx.hId))))
+  if t == cx.m then Unhygienic.run `(Strata.Mantle.RefinedBy.le (self := $(cx.hId)))
+  else Unhygienic.run `(Strata.Mantle.Env.Le.trans
+    (Strata.Mantle.Env.le_of_subset $(cx.internal s!"hsub{t}"))
+    (Strata.Mantle.RefinedBy.le (self := $(cx.hId))))
 
 end EmitCtx
 
@@ -407,7 +409,7 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
               (by rw [$(R "hdrNames_eq"):ident]; decide +kernel), by decide⟩)))
       let t ← `(Strata.Mantle.Env.addTypes $prev $(R "hdr") $(R "fresh"))
       -- The payloads' other types, as references built from literals.  `admissible`'s
-      -- `decide` reads each one's parameters, and cannot unfold `TypeRef.ofSubset` or an
+      -- `decide` reads each one's parameters, and cannot unfold `TypeRef.ofLE` or an
       -- ancestor's unexposed `T.ref`.
       let mut heads : Array Name := #[]
       for (_, ctors, _) in ms do
@@ -429,8 +431,8 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
           svis? false rid #[] (← `(Strata.Mantle.TypeRef $prev $(quote inf.params.size)))
           (← `(⟨$nm, $decl, rfl, by
                 have r := ($(cx.refAt hd (k - 1))).resolves
-                try simp only [Strata.Mantle.name_TypeRef_ofSubset,
-                  Strata.Mantle.decl_TypeRef_ofSubset, $[$lemmas:ident],*] at r
+                try simp only [Strata.Mantle.name_TypeRef_ofLE,
+                  Strata.Mantle.decl_TypeRef_ofLE, $[$lemmas:ident],*] at r
                 exact r⟩)))
         refs := refs.insert hd (cx.own rid.getId)
         rids := rids.push (cx.own rid.getId)
@@ -572,7 +574,8 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
         cs := cs.push (← thmCmd (mkDoc s!"Stage {k} extends the parent.") svis? false (I "hp")
           #[] (← `($(rootId (p.leanNs ++ `env)) ⊆ $stageId)) hp)
         cs := cs.push (← `(command| $[$svis?:visibility]? local instance :
-          Strata.Mantle.RefinedBy $(rootId (p.leanNs ++ `env)) $stageId := ⟨$(R "hp")⟩))
+          Strata.Mantle.RefinedBy $(rootId (p.leanNs ++ `env)) $stageId :=
+            ⟨Strata.Mantle.Env.le_of_subset $(R "hp")⟩))
     -- The types this stage declares, in this stage.
     match stages[i] with
     | .types ds =>
@@ -661,19 +664,19 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
       let refId := mkIdent (d.c.lean ++ `ref)
       cs := cs.push (← defCmd (docOr d.c.doc? s!"The type `{en}`.") vis? false refId #[]
         (← `(Strata.Mantle.TypeRef e $(quote d.params.size)))
-        (← `(Strata.Mantle.TypeRef.ofSubset $(cx.liftTo k)
+        (← `(Strata.Mantle.TypeRef.ofLE $(cx.liftTo k)
               $(cx.own (`Internal ++ d.c.lean ++ `ref₀)))))
       cs := cs.push (← thmCmd (mkDoc s!"`{d.c.lean.toString (escape := false)}.ref` refers to \
           `{en}`.") vis? true (mkIdent (d.c.lean ++ `name_ref)) #[]
         (← `(($(cx.own (d.c.lean ++ `ref)) (e := e)).name = $(cx.own (d.c.lean ++ `name))))
-        (← `(by rw [$(cx.own (d.c.lean ++ `ref)):ident, Strata.Mantle.name_TypeRef_ofSubset]
+        (← `(by rw [$(cx.own (d.c.lean ++ `ref)):ident, Strata.Mantle.name_TypeRef_ofLE]
               <;> rfl)))
       cs := cs.push (← thmCmd (mkDoc s!"`{d.c.lean.toString (escape := false)}.ref`'s \
           declaration.") vis? true (mkIdent (d.c.lean ++ `decl_ref)) #[]
         (← `(($(cx.own (d.c.lean ++ `ref)) (e := e)).decl =
               $(← typeDeclTerm (cx.own (d.c.lean ++ `name))
                   (d.params.map fun (x, _, b) => (x, b)))))
-        (← `(by rw [$(cx.own (d.c.lean ++ `ref)):ident, Strata.Mantle.decl_TypeRef_ofSubset]
+        (← `(by rw [$(cx.own (d.c.lean ++ `ref)):ident, Strata.Mantle.decl_TypeRef_ofLE]
               <;> rfl)))
       let xs := varIdents (d.params.map (·.1))
       let xts : Array Term := xs.map (fun x => (x : Term))
@@ -728,14 +731,15 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
                 -- Two passes: the derived signature's lemmas first, before the group's
                 -- literals are unfolded inside its arguments.
                 (by apply Strata.Mantle.InsnSig.ext_toRaw <;>
-                  (try simp only [Strata.Mantle.InsnSig.ofSubset, Array.map_map,
-                    Function.comp_def, Strata.Mantle.TypeExpr.toRaw_ofSubset,
+                  (try simp only [Strata.Mantle.InsnSig.ofLE, Strata.Mantle.InsnSig.carry,
+                    Array.map_map, Function.comp_def, Strata.Mantle.TypeExpr.toRaw_carry,
                     Strata.Mantle.Env.argTypes_ctorSig, Strata.Mantle.Env.returnType_ctorSig,
                     Option.map_map])
                   <;> simp [$[$unfolds:ident],*,
-                    Strata.Mantle.InsnSig.ofSubset, Strata.Mantle.TypeExpr.Raw.vars,
+                    Strata.Mantle.InsnSig.ofLE, Strata.Mantle.InsnSig.carry,
+                    Strata.Mantle.TypeExpr.Raw.vars,
                     Strata.Mantle.TypeDecl.arity, Function.comp_def])
-                (Strata.Mantle.InsnRef.ofSubset (s := $addDataTerm)
+                (Strata.Mantle.InsnRef.ofLE (s := $addDataTerm)
                   $(cx.liftTo k) $(cx.own (`Internal ++ c.d.c.lean ++ `ref₀))))))
     for (md, _, d) in ms do
       let en := showName d.d.c.envName
@@ -767,15 +771,16 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
         (← `(Strata.Mantle.InsnRef e $(cx.own sigId.getId)))
         (← `(Strata.Mantle.InsnRef.cast
               (by apply Strata.Mantle.InsnSig.ext_toRaw <;>
-                (try simp only [Strata.Mantle.InsnSig.ofSubset, Array.map_map,
-                  Function.comp_def, Strata.Mantle.TypeExpr.toRaw_ofSubset,
+                (try simp only [Strata.Mantle.InsnSig.ofLE, Strata.Mantle.InsnSig.carry,
+                  Array.map_map, Function.comp_def, Strata.Mantle.TypeExpr.toRaw_carry,
                   Strata.Mantle.Env.argTypes_caseSig, Strata.Mantle.Env.returnType_caseSig,
                   Strata.Mantle.Env.succs_caseSig])
                 <;> simp [$[$unfolds:ident],*,
-                  Strata.Mantle.InsnSig.ofSubset, Strata.Mantle.TypeExpr.Raw.vars,
+                  Strata.Mantle.InsnSig.ofLE, Strata.Mantle.InsnSig.carry,
+                  Strata.Mantle.TypeExpr.Raw.vars,
                   Strata.Mantle.TypeDecl.arity, Strata.Mantle.Name.lastString,
                   Function.comp_def])
-              (Strata.Mantle.InsnRef.ofSubset (s := $addDataTerm)
+              (Strata.Mantle.InsnRef.ofLE (s := $addDataTerm)
                 $(cx.liftTo k) $(cx.own (`Internal ++ d.d.c.lean ++ `ref₀))))))
   for h : i in [0:stages.size] do
     let k := i + 1
@@ -830,7 +835,8 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
       cs := cs.push (← defCmd (mkDoc s!"`{en}`, in stage {k}.") svis? false
         (mkIdent (`Internal ++ d.d.c.lean ++ `ref₀)) #[]
         (← `(Strata.Mantle.InsnRef $(cx.stage k)
-              (Strata.Mantle.InsnSig.ofSubset $(cx.internal s!"hst{k}")
+              (Strata.Mantle.InsnSig.ofLE
+                (Strata.Mantle.Env.le_of_subset $(cx.internal s!"hst{k}"))
                 $(cx.own (`Internal ++ d.d.c.lean ++ `sig₀)))))
         (← `(Strata.Mantle.InsnRef.ofAddInsns $(cx.internal s!"ops{k}")
               $(cx.internal s!"fresh{k}") $(quote j)
@@ -840,7 +846,7 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
         (mkIdent d.d.c.lean) #[] (← `(Strata.Mantle.InsnRef e $(cx.own sigId.getId)))
         (← `(Strata.Mantle.InsnRef.cast
               (by simp only [$[$lemmas:ident],*])
-              (Strata.Mantle.InsnRef.ofSubset $(cx.liftTo k)
+              (Strata.Mantle.InsnRef.ofLE $(cx.liftTo k)
                 $(cx.own (`Internal ++ d.d.c.lean ++ `ref₀))))))
   cs := cs.push (← `(command| end))
   return cs

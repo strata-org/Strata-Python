@@ -48,7 +48,8 @@ def env : Env Unit := Py.env.addType boxD boxFresh
 theorem hsub : Py.env ⊆ env := Env.subset_addType _ _ _
 
 /-- `Ext3`'s declared parent is `Py`. -/
-instance toPy {e : Env Unit} [h : env ⊑ e] : Py.env ⊑ e := ⟨Env.Prefix.trans hsub h.subset⟩
+instance toPy {e : Env Unit} [h : env ⊑ e] : Py.env ⊑ e :=
+  ⟨Env.Le.trans (Env.le_of_subset hsub) h.le⟩
 
 end Ext3
 
@@ -108,12 +109,62 @@ example : Py.env ⊑ base := inferInstance
 A proof of `base ⊑ Ext3.env` written by hand and the one search finds give the same
 reference, by proof irrelevance. -/
 
-private theorem byHand : base ⊆ Ext3.env :=
-  Env.Prefix.trans (Py.toBase (e := Py.env)).subset Ext3.hsub
+private theorem byHand : base ≤ Ext3.env :=
+  Env.Le.trans (Py.toBase (e := Py.env)).le (Env.le_of_subset Ext3.hsub)
 
 example : @Base.refNew Ext3.env ⟨byHand⟩ = Base.refNew := rfl
 
 example (h₁ h₂ : base ⊑ Ext3.env) : @Base.refNew.sig _ h₁ = @Base.refNew.sig _ h₂ := rfl
+
+/-! ## Order
+
+Refinement reads what names resolve to, not where they are declared: the same types, added in
+either order, refine each other. -/
+
+namespace Order
+
+private def aD : TypeDecl Unit := { ann := (), name := .str .base "A" }
+private def bD : TypeDecl Unit := { ann := (), name := .str .base "B" }
+
+private def ab : Env Unit :=
+  (Env.empty.addType aD (by simp)).addType bD (by simp [aD, bD])
+private def ba : Env Unit :=
+  (Env.empty.addType bD (by simp)).addType aD (by simp [aD, bD])
+
+/-- `ab` and `ba` name every type alike. -/
+private theorem typeOf?_ab_ba (n : Name) : ab.typeOf? n = ba.typeOf? n := by
+  simp only [ab, ba, Env.typeOf?_addType, Env.typeOf?_empty]
+  by_cases ha : aD.name = n <;> by_cases hb : bD.name = n
+  · exact absurd (ha.trans hb.symm) (by decide)
+  all_goals simp [ha, hb]
+
+/-- An environment of two types declares no datatype. -/
+private theorem dataOf?_two {d₁ d₂ : TypeDecl Unit} {f₁ : d₁.name ∉ (Env.empty : Env Unit)}
+    {g₁ : d₁.paramNames.Nodup}
+    {f₂ : d₂.name ∉ Env.empty.addType d₁ f₁ g₁} {g₂ : d₂.paramNames.Nodup} {n : Name} :
+    ((Env.empty.addType d₁ f₁ g₁).addType d₂ f₂ g₂).dataOf? n = none := by
+  simp [Env.dataOf?_addType]
+
+/-- An environment of two types declares no instruction. -/
+private theorem not_declaresInsn_two {d₁ d₂ : TypeDecl Unit} {f₁ : d₁.name ∉ (Env.empty : Env Unit)}
+    {g₁ : d₁.paramNames.Nodup}
+    {f₂ : d₂.name ∉ Env.empty.addType d₁ f₁ g₁} {g₂ : d₂.paramNames.Nodup} {n : Name}
+    {σ : InsnSig ((Env.empty.addType d₁ f₁ g₁).addType d₂ f₂ g₂)} {k : InsnKind} :
+    ¬ ((Env.empty.addType d₁ f₁ g₁).addType d₂ f₂ g₂).DeclaresInsn n σ k := fun h => by
+  obtain ⟨_, h₁, -⟩ := Env.declaresInsn_addType h
+  obtain ⟨_, h₂, -⟩ := Env.declaresInsn_addType h₁
+  exact Env.not_declaresInsn_empty h₂
+
+example : ab ≤ ba := show Env.LeBy _ ab ba from
+  { type := fun hd => ⟨_, (typeOf?_ab_ba _).symm.trans hd, rfl, rfl⟩
+    data := fun hd => by simp [ab, dataOf?_two] at hd
+    insn := fun hd => (not_declaresInsn_two hd).elim }
+example : ba ≤ ab := show Env.LeBy _ ba ab from
+  { type := fun hd => ⟨_, (typeOf?_ab_ba _).trans hd, rfl, rfl⟩
+    data := fun hd => by simp [ba, dataOf?_two] at hd
+    insn := fun hd => (not_declaresInsn_two hd).elim }
+
+end Order
 
 /-! ## `⊒`
 

@@ -128,7 +128,7 @@ private theorem divFresh : divName ∉ base := by native_decide
 
 private def sig1 : Env Unit := base.addInsn divName divSig divFresh
 private def s01 : base ⊆ sig1 := Env.subset_addInsn _ _ _ _
-local instance : base ⊑ sig1 := ⟨s01⟩
+local instance : base ⊑ sig1 := ⟨Env.le_of_subset s01⟩
 private def divR : InsnRef sig1 (divSig.ofSubset s01) :=
   InsnRef.ofAddInsn base divName divSig divFresh
 
