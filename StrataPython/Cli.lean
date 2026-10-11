@@ -426,11 +426,11 @@ def pyAnalyzeToGotoCommand : _root_.Command where
       match procedureToGotoCtx Env p sourceText (axioms := axioms) (distincts := distincts)
             with
       | .error e => exitInternalError s!"{e}"
-      | .ok (ctx, liftedFuncs) =>
+      | .ok ctx =>
         let extraSyms ← match collectExtraSymbols tcPgm with
           | .ok s => pure (Lean.toJson s)
           | .error e => exitInternalError s!"{e}"
-        let (symtab, goto) ← emitProcWithLifted Env procName ctx liftedFuncs extraSyms
+        let (symtab, goto) ← emitProc procName ctx extraSyms
               (moduleName := baseName)
         let symTabFile := s!"{baseName}.symtab.json"
         let gotoFile := s!"{baseName}.goto.json"
