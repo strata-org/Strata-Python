@@ -31,8 +31,8 @@ The operations:
   `finishBlock`, `jump`, `branch`, `unreachable`: `Mantle.Build`'s, over `Py.env`;
 * `emitFunc`, `mkClosure`, `funcValue`: code pointers and closures;
 * `cellOf?`, `declareLocal`, `readCell`, `writeCell`: locals, each a `Ref Value` cell;
-* `globalCell`, `readGlobal`, `writeGlobal`, `importModule`, `importFrom`: globals and
-  imports;
+* `globalCell`, `loadGlobal`, `requireGlobal`, `writeGlobal`, `importModule`, `importFrom`:
+  globals and imports;
 * `freshComp`, `compNormal`, `compReturn`, `compRaise`, `compBreak`, `compContinue`,
   `dispatch`, `dispatchArms`: completions, for `finally`;
 * `protect`, `tryFinally`: a protected block and `try`/`finally`, by completion;
@@ -311,8 +311,8 @@ def writeCell (cell : ValId) (v : ValId) (info : Option α := none) : PyM α Val
 /-! ## Globals and imports
 
 A global is a cell too, named by its module and its name rather than recorded in the frame.
-`readGlobal` is the checked read; a read that falls back to a builtin is `readCell` of
-`globalCell`, then `isDefined` and a branch. -/
+`loadGlobal` reads a name, falling back to the builtins; `requireGlobal` is the cell's checked
+read without that fallback, as `del` needs. -/
 
 /-- The cell of the global `name` of `module`. -/
 def globalCell (module name : String) (info : Option α := none) : PyM α ValId := do
@@ -321,12 +321,19 @@ def globalCell (module name : String) (info : Option α := none) : PyM α ValId 
   Build.emitApply (env := Py.env) (cellStem name) Py.cell.ty Py.globalCell #v[] #[m, n]
     (info := info)
 
-/-- Read the global `name` of `module`, raising `NameError` if it is not assigned. -/
-def readGlobal (module name : String) (info : Option α := none) : PyM α ValId := do
+/-- The global `name`'s value, raising `NameError` if it is unassigned, without the builtins
+fallback: the check of `DELETE_NAME` and `DELETE_GLOBAL`.  Reads use `loadGlobal`. -/
+def requireGlobal (module name : String) (info : Option α := none) : PyM α ValId := do
   let v ← readCell (← globalCell module name info) (stem name) info
   let excType ← emitConst (.str .base "e") (.str "NameError") info
   let msg ← emitConst (.str .base "msg") (.str s!"name '{name}' is not defined") info
   emitFailing (stem name) Py.requireDefined #v[] #[v, excType, msg] info
+
+/-- Read the name `name` in `module`: its global, else its builtin, else `NameError`. -/
+def loadGlobal (module name : String) (info : Option α := none) : PyM α ValId := do
+  let m ← emitConst (.str .base "m") (.str module) info
+  let n ← emitConst (.str .base "n") (.str name) info
+  emitFailing (stem name) Py.loadGlobal #v[] #[m, n] info
 
 /-- Write the global `name` of `module`. -/
 def writeGlobal (module name : String) (v : ValId) (info : Option α := none) :

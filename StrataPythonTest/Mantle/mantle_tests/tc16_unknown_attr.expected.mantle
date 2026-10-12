@@ -26,10 +26,8 @@ module tc16_unknown_attr {
       %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
       %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
       %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
-      %math.cell.0 : base.Ref(py.Value) = py.globalCell("tc16_unknown_attr", "math")
-      %math.0 : py.Value = base.refGet[py.Value](%math.cell.0)
-      %math.1 : py.Value = py.requireDefined(%math.0, "NameError", "name 'math' is not defined") ^propagate.0()
-      %nonexistent.0 : py.Value = py.attr(%math.1, "nonexistent") ^propagate.0()
+      %math.0 : py.Value = py.loadGlobal("tc16_unknown_attr", "math") ^propagate.0()
+      %nonexistent.0 : py.Value = py.attr(%math.0, "nonexistent") ^propagate.0()
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %nonexistent.0)
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)

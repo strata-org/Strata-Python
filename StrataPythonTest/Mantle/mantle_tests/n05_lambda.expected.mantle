@@ -9,14 +9,12 @@ module n05_lambda {
       %unsupported.0 : py.Value = py.unsupported(%str.1)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("n05_lambda", "f")
       %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %unsupported.0)
-      %f.cell.1 : base.Ref(py.Value) = py.globalCell("n05_lambda", "f")
-      %f.0 : py.Value = base.refGet[py.Value](%f.cell.1)
-      %f.1 : py.Value = py.requireDefined(%f.0, "NameError", "name 'f' is not defined") ^propagate.0()
+      %f.0 : py.Value = py.loadGlobal("n05_lambda", "f") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
       %tuple.0 : py.Value = py.mkTuple(%int.0, %int.1)
       %kwargs.0 : py.Value = py.mkKwargs
-      %call.0 : py.Value = py.call(%f.1, %tuple.0, %kwargs.0) ^propagate.0()
+      %call.0 : py.Value = py.call(%f.0, %tuple.0, %kwargs.0) ^propagate.0()
       %result.cell.0 : base.Ref(py.Value) = py.globalCell("n05_lambda", "result")
       %set.2 : base.Unit = base.refSet[py.Value](%result.cell.0, %call.0)
       %none.0 : py.Value = py.noneLit

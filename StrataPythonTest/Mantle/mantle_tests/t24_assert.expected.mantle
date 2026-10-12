@@ -58,10 +58,10 @@ module t24_assert {
       %exc.0 : py.Value = py.call(%AssertionError.0, %args.1, %kwargs.1) ^propagate.0()
       jump ^propagate.0(%exc.0)
     ok.0():
-      %isinstance.0 : py.Value = py.qualifiedRef("builtins", "isinstance") ^propagate.0()
+      %isinstance.0 : py.Value = py.loadGlobal("t24_assert", "isinstance") ^propagate.0()
       %x.6 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.7 : py.Value = py.requireDefined(%x.6, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
-      %int.2 : py.Value = py.qualifiedRef("builtins", "int") ^propagate.0()
+      %int.2 : py.Value = py.loadGlobal("t24_assert", "int") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%x.7, %int.2)
       %kwargs.2 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%isinstance.0, %tuple.0, %kwargs.2) ^propagate.0()

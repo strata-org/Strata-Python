@@ -27,10 +27,8 @@ module p08_import_rebound {
       %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
       %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
       %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
-      %os.cell.0 : base.Ref(py.Value) = py.globalCell("p08_import_rebound", "os")
-      %os.0 : py.Value = base.refGet[py.Value](%os.cell.0)
-      %os.1 : py.Value = py.requireDefined(%os.0, "NameError", "name 'os' is not defined") ^propagate.0()
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%os.1)
+      %os.0 : py.Value = py.loadGlobal("p08_import_rebound", "os") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%os.0)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

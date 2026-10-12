@@ -41,7 +41,7 @@ module e17_yield_in_genexpr {
       %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "f() takes 1 positional argument but {} {was} given") ^propagate.0()
       %xs.3 : py.Value = py.requireDefined(%xs.2, "TypeError", "f() missing 1 required positional argument: 'xs'") ^propagate.0()
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.3)
-      %list.0 : py.Value = py.qualifiedRef("builtins", "list") ^propagate.0()
+      %list.0 : py.Value = py.loadGlobal("e17_yield_in_genexpr", "list") ^propagate.0()
       %str.1 : py.Value = py.strLit("generator expression")
       %unsupported.0 : py.Value = py.unsupported(%str.1)
       %tuple.0 : py.Value = py.mkTuple(%unsupported.0)

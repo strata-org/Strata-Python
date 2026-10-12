@@ -24,8 +24,8 @@ with a diagnostic is a failure.
 * The module body is the function `m.<module>`, with no parameters.  A module-level `def f`
   is the function `m.f`, with parameters `args` (a tuple) and `kwargs` (a dict).
 * Names are classified by `PyScope.analyze`.  A function's locals are cells declared in its
-  entry block.  A module global is the cell `py.globalCell m x`.  A global that is also a
-  builtin falls back to `py.qualifiedRef "builtins" x` when its cell is undefined.
+  entry block.  A module global is the cell `py.globalCell m x`, and a read of it is
+  `py.loadGlobal m x`, which falls back to the builtin `x` at run time.
 * Every instruction carries the source range of the Python node it lowers.
 * A construct outside the supported subset is a diagnostic at its range.  A rejected
   expression is `py.unsupported`, a rejected statement emits nothing, and a rejected
@@ -127,36 +127,6 @@ def formatDiagnostic (fileMap : Option Lean.FileMap) (d : Diagnostic) : String :
 
 end -- public section
 
-/-! ## Builtins -/
-
-/-- The names `builtins` defines in CPython 3.12, without the module's own dunders and the
-keywords `True`, `False` and `None`. -/
-def builtinNames : Std.HashSet String := .ofList [
-  "ArithmeticError", "AssertionError", "AttributeError", "BaseException",
-  "BaseExceptionGroup", "BlockingIOError", "BrokenPipeError", "BufferError", "BytesWarning",
-  "ChildProcessError", "ConnectionAbortedError", "ConnectionError", "ConnectionRefusedError",
-  "ConnectionResetError", "DeprecationWarning", "EOFError", "Ellipsis", "EncodingWarning",
-  "EnvironmentError", "Exception", "ExceptionGroup", "FileExistsError", "FileNotFoundError",
-  "FloatingPointError", "FutureWarning", "GeneratorExit", "IOError", "ImportError",
-  "ImportWarning", "IndentationError", "IndexError", "InterruptedError", "IsADirectoryError",
-  "KeyError", "KeyboardInterrupt", "LookupError", "MemoryError", "ModuleNotFoundError",
-  "NameError", "NotADirectoryError", "NotImplemented", "NotImplementedError", "OSError",
-  "OverflowError", "PendingDeprecationWarning", "PermissionError", "ProcessLookupError",
-  "RecursionError", "ReferenceError", "ResourceWarning", "RuntimeError", "RuntimeWarning",
-  "StopAsyncIteration", "StopIteration", "SyntaxError", "SyntaxWarning", "SystemError",
-  "SystemExit", "TabError", "TimeoutError", "TypeError", "UnboundLocalError",
-  "UnicodeDecodeError", "UnicodeEncodeError", "UnicodeError", "UnicodeTranslateError",
-  "UnicodeWarning", "UserWarning", "ValueError", "Warning", "ZeroDivisionError",
-  "__build_class__", "__debug__", "__import__", "abs", "aiter", "all", "anext", "any",
-  "ascii", "bin", "bool", "breakpoint", "bytearray", "bytes", "callable", "chr",
-  "classmethod", "compile", "complex", "copyright", "credits", "delattr", "dict", "dir",
-  "divmod", "enumerate", "eval", "exec", "exit", "filter", "float", "format", "frozenset",
-  "getattr", "globals", "hasattr", "hash", "help", "hex", "id", "input", "int", "isinstance",
-  "issubclass", "iter", "len", "license", "list", "locals", "map", "max", "memoryview", "min",
-  "next", "object", "oct", "open", "ord", "pow", "print", "property", "quit", "range", "repr",
-  "reversed", "round", "set", "setattr", "slice", "sorted", "staticmethod", "str", "sum",
-  "super", "tuple", "type", "vars", "zip"]
-
 /-! ## Translator state -/
 
 /-- A construct that `break`, `continue` and `return` leave through, innermost last. -/
@@ -183,8 +153,6 @@ structure Ctx where
   module : String
   /-- The module name as a Mantle name: the prefix of every function name. -/
   moduleName : Name
-  /-- The names some scope binds as module globals. -/
-  globals : Std.HashSet String
   scope : ScopeId
   /-- `table.scopes[scope]`, the scope being translated. -/
   cur : Scope
@@ -310,25 +278,6 @@ def builtinRef (name : String) : TransM ValId := do
   let n ← build (emitConst (.str .base "n") (.str name))
   build (emitFailing (stem name) Py.qualifiedRef #v[] #[m, n])
 
-/-- Read the global `name`.  A name some scope binds as a global reads its cell; one that is
-also a builtin falls back to the builtin when the cell is undefined.  A builtin no scope binds
-is the builtin. -/
-def readGlobalName (name : String) : TransM ValId := do
-  let ctx ← read
-  let bound := ctx.globals.contains name
-  let builtin := builtinNames.contains name
-  if bound && builtin then
-    let v ← build (readCell (← build (globalCell ctx.module name)) (stem name))
-    let d ← build (emitTest (.str .base "defined") Py.isDefined #v[] #[v])
-    let fallback ← build (freshLabel "builtin")
-    let join ← build (freshLabel "join")
-    branch d join fallback #[v]
-    build (startBlock fallback)
-    jump join #[← builtinRef name]
-    build (startBlockWith join (stem name))
-  else if builtin then builtinRef name
-  else build (readGlobal ctx.module name)
-
 /-- Read the local `name`'s cell `c`, raising `UnboundLocalError` if it is unassigned. -/
 def readLocal (c : ValId) (name : String) : TransM ValId := do
   let v ← build (readCell c (stem name))
@@ -340,7 +289,7 @@ def readName (name : String) (range : SourceRange) : TransM ValId := do
   let name ← mangled name
   match ← place name with
   | .cell c => readLocal c name
-  | .global => readGlobalName name
+  | .global => build (loadGlobal (← read).module name)
   | .free => unsupportedValue "closure variable" range
   | .unresolved => unsupportedValue "unresolved local" range
 
@@ -365,7 +314,7 @@ def deleteName (name : String) (range : SourceRange) : TransM Unit := do
     discard <| build (writeCell c (← undef))
   | .global =>
     let m := (← read).module
-    discard <| build (readGlobal m name)
+    discard <| build (requireGlobal m name)
     discard <| build (writeGlobal m name (← undef))
   | .free => reject "nonlocal del" range
   | .unresolved => reject "unresolved local" range
@@ -1264,17 +1213,6 @@ end
 
 /-! ## Modules -/
 
-/-- The names some scope binds as module globals: those the module binds, those a function
-declares `global` and binds, and `__name__`. -/
-def moduleGlobals (t : Table) : Std.HashSet String := Id.run do
-  let mut out : Std.HashSet String := ({} : Std.HashSet String).insert "__name__"
-  for sym in t.module.symbols do
-    if sym.uses.bound then out := out.insert sym.name
-  for sc in t.scopes do
-    for sym in sc.symbols do
-      if sym.scope == .globalExplicit && sym.uses.bound then out := out.insert sym.name
-  return out
-
 /-- Run `act` as the body of a function, then return `None` if it falls off the end. -/
 def runBody (ctx : Ctx) (st : TState) (range : SourceRange) (act : TransM Unit) :
     PyM SourceRange TState := do
@@ -1330,8 +1268,7 @@ def translate (moduleName : String) (stmts : Array (stmt SourceRange)) : Result 
     | return { module := { name := mname, funcs := #[], info := range }
                diagnostics := #[{ kind := .internal, message := "no module scope", range }] }
   let ctx : Ctx :=
-    { table, module := moduleName, moduleName := mname, globals := moduleGlobals table
-      scope := 0, cur }
+    { table, module := moduleName, moduleName := mname, scope := 0, cur }
   let bodyName := mname.str "<module>"
   let st : TState := { funcNames := ({} : Std.HashSet Name).insert bodyName }
   let (body, st) := builtFunc range <| buildFuncTypedWith bodyName #[] range fun _ =>

@@ -10,17 +10,13 @@ module p15_global {
       %clo.1 : py.Value = py.mkClosure(@p15_global.get_x)
       %get_x.cell.0 : base.Ref(py.Value) = py.globalCell("p15_global", "get_x")
       %set.2 : base.Unit = base.refSet[py.Value](%get_x.cell.0, %clo.1)
-      %set_x.cell.1 : base.Ref(py.Value) = py.globalCell("p15_global", "set_x")
-      %set_x.0 : py.Value = base.refGet[py.Value](%set_x.cell.1)
-      %set_x.1 : py.Value = py.requireDefined(%set_x.0, "NameError", "name 'set_x' is not defined") ^propagate.0()
+      %set_x.0 : py.Value = py.loadGlobal("p15_global", "set_x") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.0 : py.Value = py.mkKwargs
-      %call.0 : py.Value = py.call(%set_x.1, %tuple.0, %kwargs.0) ^propagate.0()
-      %print.0 : py.Value = py.qualifiedRef("builtins", "print") ^propagate.0()
-      %x.cell.0 : base.Ref(py.Value) = py.globalCell("p15_global", "x")
-      %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.1 : py.Value = py.requireDefined(%x.0, "NameError", "name 'x' is not defined") ^propagate.0()
-      %tuple.1 : py.Value = py.mkTuple(%x.1)
+      %call.0 : py.Value = py.call(%set_x.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("p15_global", "print") ^propagate.0()
+      %x.0 : py.Value = py.loadGlobal("p15_global", "x") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%x.0)
       %kwargs.1 : py.Value = py.mkKwargs
       %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.1) ^propagate.0()
       %none.0 : py.Value = py.noneLit
@@ -54,10 +50,8 @@ module p15_global {
       %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
       %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "get_x() got an unexpected keyword argument {}") ^propagate.0()
       %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "get_x() takes 0 positional arguments but {} {was} given") ^propagate.0()
-      %x.cell.0 : base.Ref(py.Value) = py.globalCell("p15_global", "x")
-      %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.1 : py.Value = py.requireDefined(%x.0, "NameError", "name 'x' is not defined") ^propagate.0()
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.1)
+      %x.0 : py.Value = py.loadGlobal("p15_global", "x") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.0)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

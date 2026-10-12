@@ -24,10 +24,8 @@ module p37_global_import {
       %mod.0 : py.Value = py.importModule("json") ^propagate.0()
       %json.cell.0 : base.Ref(py.Value) = py.globalCell("p37_global_import", "json")
       %set.0 : base.Unit = base.refSet[py.Value](%json.cell.0, %mod.0)
-      %json.cell.1 : base.Ref(py.Value) = py.globalCell("p37_global_import", "json")
-      %json.0 : py.Value = base.refGet[py.Value](%json.cell.1)
-      %json.1 : py.Value = py.requireDefined(%json.0, "NameError", "name 'json' is not defined") ^propagate.0()
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%json.1)
+      %json.0 : py.Value = py.loadGlobal("p37_global_import", "json") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%json.0)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

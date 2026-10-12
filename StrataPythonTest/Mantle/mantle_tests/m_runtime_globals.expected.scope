@@ -1,0 +1,13 @@
+module
+  import builtins: module builtins
+  builtins: local (imported, referenced)
+  print: global implicit (referenced)
+  log: global implicit (referenced)
+  f: local (assigned)
+  g: local (assigned)
+  later: local (assigned)
+  function f
+    log: global implicit (referenced)
+  function g
+    later: global implicit (referenced)
+    missing: global implicit (referenced)

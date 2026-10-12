@@ -22,11 +22,9 @@ module e05_use_before_global {
       %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
       %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
       %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
-      %print.0 : py.Value = py.qualifiedRef("builtins", "print") ^propagate.0()
-      %x.cell.0 : base.Ref(py.Value) = py.globalCell("e05_use_before_global", "x")
-      %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.1 : py.Value = py.requireDefined(%x.0, "NameError", "name 'x' is not defined") ^propagate.0()
-      %tuple.0 : py.Value = py.mkTuple(%x.1)
+      %print.0 : py.Value = py.loadGlobal("e05_use_before_global", "print") ^propagate.0()
+      %x.0 : py.Value = py.loadGlobal("e05_use_before_global", "x") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%x.0)
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
       %none.0 : py.Value = py.noneLit

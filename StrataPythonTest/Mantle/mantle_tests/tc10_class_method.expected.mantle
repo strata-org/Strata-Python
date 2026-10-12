@@ -28,10 +28,8 @@ module tc10_class_method {
       %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
       %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
       %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
-      %myservice.cell.0 : base.Ref(py.Value) = py.globalCell("tc10_class_method", "myservice")
-      %myservice.0 : py.Value = base.refGet[py.Value](%myservice.cell.0)
-      %myservice.1 : py.Value = py.requireDefined(%myservice.0, "NameError", "name 'myservice' is not defined") ^propagate.0()
-      %Client.0 : py.Value = py.attr(%myservice.1, "Client") ^propagate.0()
+      %myservice.0 : py.Value = py.loadGlobal("tc10_class_method", "myservice") ^propagate.0()
+      %Client.0 : py.Value = py.attr(%myservice.0, "Client") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%Client.0, %tuple.0, %kwargs.1) ^propagate.0()

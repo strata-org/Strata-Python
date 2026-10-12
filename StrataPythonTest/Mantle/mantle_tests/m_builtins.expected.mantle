@@ -4,14 +4,14 @@ module m_builtins {
       %str.0 : py.Value = py.strLit("m_builtins")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_builtins", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
-      %len.0 : py.Value = py.qualifiedRef("builtins", "len") ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("m_builtins", "len") ^propagate.0()
       %str.1 : py.Value = py.strLit("abc")
       %tuple.0 : py.Value = py.mkTuple(%str.1)
       %kwargs.0 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%len.0, %tuple.0, %kwargs.0) ^propagate.0()
       %n.cell.0 : base.Ref(py.Value) = py.globalCell("m_builtins", "n")
       %set.1 : base.Unit = base.refSet[py.Value](%n.cell.0, %call.0)
-      %min.0 : py.Value = py.qualifiedRef("builtins", "min") ^propagate.0()
+      %min.0 : py.Value = py.loadGlobal("m_builtins", "min") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
       %tuple.1 : py.Value = py.mkTuple(%int.0, %int.1)
@@ -19,10 +19,8 @@ module m_builtins {
       %call.1 : py.Value = py.call(%min.0, %tuple.1, %kwargs.1) ^propagate.0()
       %m.cell.0 : base.Ref(py.Value) = py.globalCell("m_builtins", "m")
       %set.2 : base.Unit = base.refSet[py.Value](%m.cell.0, %call.1)
-      %n.cell.1 : base.Ref(py.Value) = py.globalCell("m_builtins", "n")
-      %n.6 : py.Value = base.refGet[py.Value](%n.cell.1)
-      %n.7 : py.Value = py.requireDefined(%n.6, "NameError", "name 'n' is not defined") ^propagate.0()
-      %cond.0 : base.Bool = py.truthy(%n.7) ^propagate.0()
+      %n.6 : py.Value = py.loadGlobal("m_builtins", "n") ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%n.6) ^propagate.0()
       branch(%cond.0) ^then.0() ^else.0()
     then.0():
       %int.2 : py.Value = py.intLit(3)
@@ -32,20 +30,11 @@ module m_builtins {
     else.0():
       jump ^join.0()
     join.0():
-      %print.cell.1 : base.Ref(py.Value) = py.globalCell("m_builtins", "print")
-      %print.0 : py.Value = base.refGet[py.Value](%print.cell.1)
-      %defined.0 : base.Bool = py.isDefined(%print.0)
-      branch(%defined.0) ^join.1(%print.0) ^builtin.0()
-    builtin.0():
-      %print.1 : py.Value = py.qualifiedRef("builtins", "print") ^propagate.0()
-      jump ^join.1(%print.1)
-    join.1(%print.2 : py.Value):
-      %m.cell.1 : base.Ref(py.Value) = py.globalCell("m_builtins", "m")
-      %m.10 : py.Value = base.refGet[py.Value](%m.cell.1)
-      %m.11 : py.Value = py.requireDefined(%m.10, "NameError", "name 'm' is not defined") ^propagate.0()
-      %tuple.2 : py.Value = py.mkTuple(%m.11)
+      %print.0 : py.Value = py.loadGlobal("m_builtins", "print") ^propagate.0()
+      %m.9 : py.Value = py.loadGlobal("m_builtins", "m") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%m.9)
       %kwargs.2 : py.Value = py.mkKwargs
-      %call.2 : py.Value = py.call(%print.2, %tuple.2, %kwargs.2) ^propagate.0()
+      %call.2 : py.Value = py.call(%print.0, %tuple.2, %kwargs.2) ^propagate.0()
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)

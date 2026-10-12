@@ -7,14 +7,12 @@ module m_params {
       %clo.0 : py.Value = py.mkClosure(@m_params.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_params", "f")
       %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
-      %f.cell.1 : base.Ref(py.Value) = py.globalCell("m_params", "f")
-      %f.0 : py.Value = base.refGet[py.Value](%f.cell.1)
-      %f.1 : py.Value = py.requireDefined(%f.0, "NameError", "name 'f' is not defined") ^propagate.0()
+      %f.0 : py.Value = py.loadGlobal("m_params", "f") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
       %tuple.0 : py.Value = py.mkTuple(%int.0, %int.1)
       %kwargs.0 : py.Value = py.mkKwargs
-      %call.0 : py.Value = py.call(%f.1, %tuple.0, %kwargs.0) ^propagate.0()
+      %call.0 : py.Value = py.call(%f.0, %tuple.0, %kwargs.0) ^propagate.0()
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)

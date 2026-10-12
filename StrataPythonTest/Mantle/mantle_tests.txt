@@ -91,6 +91,7 @@ m_imports | yes |
 m_local_vs_global | yes |
 m_operators | yes |
 m_params | yes |
+m_runtime_globals | yes |
 m_subscripts | yes |
 m_targets | yes |
 m_unpack | yes |

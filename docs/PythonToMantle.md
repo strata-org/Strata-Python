@@ -151,12 +151,14 @@ are in `StrataPython/Mantle/Build.lean`.
 - **Globals.** `py.globalCell module name` is the cell of a module global: the same cell for
   the same arguments, read and written like a local's. It holds `undef` until the first
   assignment, and `del` writes `undef` back. `module` is always fully qualified (`"a.b"`).
+  `py.loadGlobal module name` reads a name as CPython's `LOAD_GLOBAL` does: the global cell
+  if it is defined, else the builtin, else it raises `NameError`.
 - **Imports.** `py.importModule module` returns the module object, importing it and each
   package above it first if need be. `py.importFrom module name` imports `module` and reads
   its attribute `name`, falling back to the submodule `module.name` as CPython's
   `IMPORT_FROM` does. Both raise `ImportError`, or whatever the module body raises.
   `py.qualifiedRef module name` reads `module.name` at each use; the translator uses it only
-  for builtins.
+  for builtins that are not names in the source, such as `Ellipsis` and `__build_class__`.
 - **Definedness.** Only `isDefined`, `requireDefined` and `requireUndefined` may consume a
   value that could be `undef`. `requireDefined v excType msg` passes `v` through, or raises
   `excType(msg)` if `v` is undefined.
@@ -349,35 +351,26 @@ read in:
 | Kind, scope | Lowering | Exception if unassigned |
 |---|---|---|
 | `local`, `cell`, `free`, in a function | `refGet` the cell, then `requireDefined` | `UnboundLocalError: cannot access local variable 'x' where it is not associated with a value`; for `free`, `NameError: cannot access free variable 'x' …` |
-| `globalExplicit`, `globalImplicit`, or `local` at module level; not a builtin name | `readGlobal m "x"`: `refGet (globalCell m "x")`, then `requireDefined` | `NameError: name 'x' is not defined` |
-| the same, `x` a builtin name that some scope binds as a global | `refGet (globalCell m "x")`, `isDefined`, then a branch. Defined: use the value. Undefined: `py.qualifiedRef "builtins" "x"` | none |
-| the same, `x` a builtin name that no scope binds as a global | `py.qualifiedRef "builtins" "x"` | none |
+| `globalExplicit`, `globalImplicit`, or `local` at module level | `py.loadGlobal m "x"`: the cell `globalCell m "x"` if it is defined, else the entry `"x"` of the `builtins` module's dict | `NameError: name 'x' is not defined` |
 | any kind, in a class body | §6.7 | |
 
 An imported name is read as any other name of its kind: the import statement wrote its cell
-(§6.1). The builtin names are those of CPython 3.12's `builtins` module
-(`PyTranslate.builtinNames`). The names some scope binds as globals are those the module
-binds, those a function declares `global` and binds, and `__name__` (`moduleGlobals`).
+(§6.1). `loadGlobal` is CPython's `LOAD_GLOBAL`: whether `x` is a global or a builtin is
+decided at each read, so a global assigned from another module and a builtin added at run time
+(`builtins.log = print`) are both found.
 
 ```
     %12 : py.Value = base.refGet[py.Value](%3)
     %15 : py.Value = py.requireDefined(%12, "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
 ```
 
-The builtin fallback, for `len` read in a function:
+`len` read in a function:
 
 ```
-    %20 : base.Ref(py.Value) = py.globalCell("m", "len")
-    %21 : py.Value = base.refGet[py.Value](%20)
-    %22 : base.Bool = py.isDefined(%21)
-    branch(%22) ^join.0(%21) ^builtin.0()
-  builtin.0():
-    …                                                -- %25 = py.qualifiedRef "builtins" "len"
-    jump ^join.0(%25)
-  join.0(%26 : py.Value):
+    %20 : py.Value = py.loadGlobal("m", "len") ^propagate.0()
 ```
 
-`requireDefined` is emitted on every read. Removing redundant checks is a later pass.
+`requireDefined` is emitted on every read of a local. Removing redundant checks is a later pass.
 **Writing** a name is `refSet` on its cell: `writeCell` for a function's cell, `writeGlobal m
 "x"` for a global or a module-level `local`. In a class body, writing is
 `py.setItem ns "x" v` (§6.7).
@@ -938,8 +931,8 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 7. **Unpacking.** *Resolved.* Two operations: `unpackSeq` for a target without a starred
    element and `unpackEx` for one with it, as CPython's `UNPACK_SEQUENCE` and `UNPACK_EX`.
 8. **Global fallback.** *Resolved.* The scope pass classifies a module global and a builtin
-   alike as `globalImplicit`, and the split is made at run time: read the global cell, then
-   `isDefined`, then `qualifiedRef "builtins" name` if undefined (§5.1).
+   alike as `globalImplicit`, and the split is made at run time by `py.loadGlobal`, which
+   reads the global cell, then `builtins`, as CPython's `LOAD_GLOBAL` does (§5.1).
 9. **Implicit class-body stores.** CPython's class body first stores `__module__` (the
    module's `__name__`) and `__qualname__` into the namespace, and `__doc__` if the body
    starts with a docstring. §6.7 should emit these as `py.setItem`s at the top of the body.

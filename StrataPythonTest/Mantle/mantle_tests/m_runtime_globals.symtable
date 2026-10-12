@@ -1,0 +1,13 @@
+module top
+  builtins: local (imported, referenced)
+  f: local (assigned)
+  g: local (assigned)
+  later: local (assigned)
+  log: global implicit (referenced)
+  print: global implicit (referenced)
+  function f
+    log: global implicit (referenced)
+  function g
+    later: global implicit (referenced)
+    missing: global implicit (referenced)
+qualnames: f, g

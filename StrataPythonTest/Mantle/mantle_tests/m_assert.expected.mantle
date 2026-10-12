@@ -4,13 +4,11 @@ module m_assert {
       %str.0 : py.Value = py.strLit("m_assert")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
-      %KeyError.0 : py.Value = py.qualifiedRef("builtins", "KeyError") ^propagate.0()
+      %KeyError.0 : py.Value = py.loadGlobal("m_assert", "KeyError") ^propagate.0()
       %AssertionError.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "AssertionError")
       %set.1 : base.Unit = base.refSet[py.Value](%AssertionError.cell.0, %KeyError.0)
-      %c.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "c")
-      %c.1 : py.Value = base.refGet[py.Value](%c.cell.0)
-      %c.2 : py.Value = py.requireDefined(%c.1, "NameError", "name 'c' is not defined") ^propagate.0()
-      %cond.0 : base.Bool = py.truthy(%c.2) ^propagate.0()
+      %c.1 : py.Value = py.loadGlobal("m_assert", "c") ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%c.1) ^propagate.0()
       branch(%cond.0) ^ok.0() ^fail.0()
     fail.0():
       %AssertionError.0 : py.Value = py.assertionError
@@ -19,72 +17,54 @@ module m_assert {
       %exc.0 : py.Value = py.call(%AssertionError.0, %args.0, %kwargs.0) ^propagate.0()
       jump ^propagate.0(%exc.0)
     ok.0():
-      %c.cell.1 : base.Ref(py.Value) = py.globalCell("m_assert", "c")
-      %c.3 : py.Value = base.refGet[py.Value](%c.cell.1)
-      %c.4 : py.Value = py.requireDefined(%c.3, "NameError", "name 'c' is not defined") ^propagate.0()
-      %cond.1 : base.Bool = py.truthy(%c.4) ^propagate.0()
+      %c.2 : py.Value = py.loadGlobal("m_assert", "c") ^propagate.0()
+      %cond.1 : base.Bool = py.truthy(%c.2) ^propagate.0()
       branch(%cond.1) ^ok.1() ^fail.1()
     fail.1():
       %AssertionError.1 : py.Value = py.assertionError
-      %m.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "m")
-      %m.6 : py.Value = base.refGet[py.Value](%m.cell.0)
-      %m.7 : py.Value = py.requireDefined(%m.6, "NameError", "name 'm' is not defined") ^propagate.0()
-      %args.1 : py.Value = py.mkTuple(%m.7)
+      %m.6 : py.Value = py.loadGlobal("m_assert", "m") ^propagate.0()
+      %args.1 : py.Value = py.mkTuple(%m.6)
       %kwargs.1 : py.Value = py.mkKwargs
       %exc.1 : py.Value = py.call(%AssertionError.1, %args.1, %kwargs.1) ^propagate.0()
       jump ^propagate.0(%exc.1)
     ok.1():
-      %a.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "a")
-      %a.0 : py.Value = base.refGet[py.Value](%a.cell.0)
-      %a.1 : py.Value = py.requireDefined(%a.0, "NameError", "name 'a' is not defined") ^propagate.0()
-      %cond.2 : base.Bool = py.truthy(%a.1) ^propagate.0()
+      %a.0 : py.Value = py.loadGlobal("m_assert", "a") ^propagate.0()
+      %cond.2 : base.Bool = py.truthy(%a.0) ^propagate.0()
       branch(%cond.2) ^and.0() ^fail.2()
     and.0():
-      %b.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "b")
-      %b.0 : py.Value = base.refGet[py.Value](%b.cell.0)
-      %b.1 : py.Value = py.requireDefined(%b.0, "NameError", "name 'b' is not defined") ^propagate.0()
-      %cond.3 : base.Bool = py.truthy(%b.1) ^propagate.0()
+      %b.0 : py.Value = py.loadGlobal("m_assert", "b") ^propagate.0()
+      %cond.3 : base.Bool = py.truthy(%b.0) ^propagate.0()
       branch(%cond.3) ^ok.2() ^fail.2()
     fail.2():
       %AssertionError.2 : py.Value = py.assertionError
-      %a.cell.1 : base.Ref(py.Value) = py.globalCell("m_assert", "a")
-      %a.2 : py.Value = base.refGet[py.Value](%a.cell.1)
-      %a.3 : py.Value = py.requireDefined(%a.2, "NameError", "name 'a' is not defined") ^propagate.0()
+      %a.1 : py.Value = py.loadGlobal("m_assert", "a") ^propagate.0()
       %str.1 : py.Value = py.strLit("")
-      %fmt.0 : py.Value = py.fmtValue(%a.3, %str.1) ^propagate.0()
+      %fmt.0 : py.Value = py.fmtValue(%a.1, %str.1) ^propagate.0()
       %args.2 : py.Value = py.mkTuple(%fmt.0)
       %kwargs.2 : py.Value = py.mkKwargs
       %exc.2 : py.Value = py.call(%AssertionError.2, %args.2, %kwargs.2) ^propagate.0()
       jump ^propagate.0(%exc.2)
     ok.2():
-      %c.cell.2 : base.Ref(py.Value) = py.globalCell("m_assert", "c")
-      %c.6 : py.Value = base.refGet[py.Value](%c.cell.2)
-      %c.7 : py.Value = py.requireDefined(%c.6, "NameError", "name 'c' is not defined") ^propagate.0()
-      %cond.4 : base.Bool = py.truthy(%c.7) ^propagate.0()
+      %c.4 : py.Value = py.loadGlobal("m_assert", "c") ^propagate.0()
+      %cond.4 : base.Bool = py.truthy(%c.4) ^propagate.0()
       branch(%cond.4) ^fail.3() ^ok.3()
     fail.3():
       %AssertionError.3 : py.Value = py.assertionError
-      %g.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "g")
-      %g.0 : py.Value = base.refGet[py.Value](%g.cell.0)
-      %g.1 : py.Value = py.requireDefined(%g.0, "NameError", "name 'g' is not defined") ^propagate.0()
+      %g.0 : py.Value = py.loadGlobal("m_assert", "g") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.3 : py.Value = py.mkKwargs
-      %call.0 : py.Value = py.call(%g.1, %tuple.0, %kwargs.3) ^propagate.0()
+      %call.0 : py.Value = py.call(%g.0, %tuple.0, %kwargs.3) ^propagate.0()
       %args.3 : py.Value = py.mkTuple(%call.0)
       %kwargs.4 : py.Value = py.mkKwargs
       %exc.3 : py.Value = py.call(%AssertionError.3, %args.3, %kwargs.4) ^propagate.0()
       jump ^propagate.0(%exc.3)
     ok.3():
-      %a.cell.2 : base.Ref(py.Value) = py.globalCell("m_assert", "a")
-      %a.4 : py.Value = base.refGet[py.Value](%a.cell.2)
-      %a.5 : py.Value = py.requireDefined(%a.4, "NameError", "name 'a' is not defined") ^propagate.0()
-      %cond.5 : base.Bool = py.truthy(%a.5) ^propagate.0()
+      %a.2 : py.Value = py.loadGlobal("m_assert", "a") ^propagate.0()
+      %cond.5 : base.Bool = py.truthy(%a.2) ^propagate.0()
       branch(%cond.5) ^ok.4() ^or.0()
     or.0():
-      %b.cell.1 : base.Ref(py.Value) = py.globalCell("m_assert", "b")
-      %b.2 : py.Value = base.refGet[py.Value](%b.cell.1)
-      %b.3 : py.Value = py.requireDefined(%b.2, "NameError", "name 'b' is not defined") ^propagate.0()
-      %cond.6 : base.Bool = py.truthy(%b.3) ^propagate.0()
+      %b.1 : py.Value = py.loadGlobal("m_assert", "b") ^propagate.0()
+      %cond.6 : base.Bool = py.truthy(%b.1) ^propagate.0()
       branch(%cond.6) ^ok.4() ^fail.4()
     fail.4():
       %AssertionError.4 : py.Value = py.assertionError
@@ -93,26 +73,20 @@ module m_assert {
       %exc.4 : py.Value = py.call(%AssertionError.4, %args.4, %kwargs.5) ^propagate.0()
       jump ^propagate.0(%exc.4)
     ok.4():
-      %xs.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "xs")
-      %xs.0 : py.Value = base.refGet[py.Value](%xs.cell.0)
-      %xs.1 : py.Value = py.requireDefined(%xs.0, "NameError", "name 'xs' is not defined") ^propagate.0()
-      %iter.0 : py.Value = py.getIter(%xs.1) ^propagate.0()
+      %xs.0 : py.Value = py.loadGlobal("m_assert", "xs") ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%xs.0) ^propagate.0()
       jump ^head.0()
     head.0():
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %x.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "x")
       %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %item.0)
-      %x.cell.1 : base.Ref(py.Value) = py.globalCell("m_assert", "x")
-      %x.0 : py.Value = base.refGet[py.Value](%x.cell.1)
-      %x.1 : py.Value = py.requireDefined(%x.0, "NameError", "name 'x' is not defined") ^propagate.0()
-      %cond.7 : base.Bool = py.truthy(%x.1) ^propagate.0()
+      %x.0 : py.Value = py.loadGlobal("m_assert", "x") ^propagate.0()
+      %cond.7 : base.Bool = py.truthy(%x.0) ^propagate.0()
       branch(%cond.7) ^ok.5() ^fail.5()
     fail.5():
       %AssertionError.5 : py.Value = py.assertionError
-      %x.cell.2 : base.Ref(py.Value) = py.globalCell("m_assert", "x")
-      %x.2 : py.Value = base.refGet[py.Value](%x.cell.2)
-      %x.3 : py.Value = py.requireDefined(%x.2, "NameError", "name 'x' is not defined") ^propagate.0()
-      %args.5 : py.Value = py.mkTuple(%x.3)
+      %x.1 : py.Value = py.loadGlobal("m_assert", "x") ^propagate.0()
+      %args.5 : py.Value = py.mkTuple(%x.1)
       %kwargs.6 : py.Value = py.mkKwargs
       %exc.5 : py.Value = py.call(%AssertionError.5, %args.5, %kwargs.6) ^propagate.0()
       jump ^propagate.0(%exc.5)

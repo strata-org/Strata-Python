@@ -41,10 +41,8 @@ module m_global_decl {
       %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
       %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "get_counter() got an unexpected keyword argument {}") ^propagate.0()
       %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "get_counter() takes 0 positional arguments but {} {was} given") ^propagate.0()
-      %counter.cell.0 : base.Ref(py.Value) = py.globalCell("m_global_decl", "counter")
-      %counter.0 : py.Value = base.refGet[py.Value](%counter.cell.0)
-      %counter.1 : py.Value = py.requireDefined(%counter.0, "NameError", "name 'counter' is not defined") ^propagate.0()
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%counter.1)
+      %counter.0 : py.Value = py.loadGlobal("m_global_decl", "counter") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%counter.0)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

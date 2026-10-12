@@ -327,7 +327,7 @@ private def globals : Except Errors (Func Py.env Unit) :=
     let _ ← writeGlobal "m" "a" (← importModule "a")
     let _ ← writeGlobal "m" "c" (← importModule "a.b")
     let _ ← writeGlobal "m" "y" (← importFrom "a.b" "x")
-    let n ← readGlobal "m" "n"
+    let n ← loadGlobal "m" "n"
     let sum ← emitFailing (.str .base "sum") Py.add #v[] #[n, ← intLit 1]
     let _ ← writeGlobal "m" "n" sum
     emitReturnNone
@@ -347,13 +347,11 @@ example : Holds (Func.WF ∅) globals := by decide +kernel
       %x.0 : py.Value = py.importFrom("a.b", "x") ^propagate.0()
       %y.cell.0 : base.Ref(py.Value) = py.globalCell("m", "y")
       %set.2 : base.Unit = base.refSet[py.Value](%y.cell.0, %x.0)
-      %n.cell.0 : base.Ref(py.Value) = py.globalCell("m", "n")
-      %n.5 : py.Value = base.refGet[py.Value](%n.cell.0)
-      %n.6 : py.Value = py.requireDefined(%n.5, "NameError", "name 'n' is not defined") ^propagate.0()
+      %n.5 : py.Value = py.loadGlobal("m", "n") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
-      %sum.0 : py.Value = py.add(%n.6, %int.0) ^propagate.0()
-      %n.cell.1 : base.Ref(py.Value) = py.globalCell("m", "n")
-      %set.3 : base.Unit = base.refSet[py.Value](%n.cell.1, %sum.0)
+      %sum.0 : py.Value = py.add(%n.5, %int.0) ^propagate.0()
+      %n.cell.0 : base.Ref(py.Value) = py.globalCell("m", "n")
+      %set.3 : base.Unit = base.refSet[py.Value](%n.cell.0, %sum.0)
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)

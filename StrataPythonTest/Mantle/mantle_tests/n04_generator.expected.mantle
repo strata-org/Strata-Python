@@ -11,7 +11,7 @@ module n04_generator {
       %list.0 : py.Value = py.mkList(%int.0, %int.1, %int.2)
       %nums.cell.0 : base.Ref(py.Value) = py.globalCell("n04_generator", "nums")
       %set.1 : base.Unit = base.refSet[py.Value](%nums.cell.0, %list.0)
-      %sum.0 : py.Value = py.qualifiedRef("builtins", "sum") ^propagate.0()
+      %sum.0 : py.Value = py.loadGlobal("n04_generator", "sum") ^propagate.0()
       %str.1 : py.Value = py.strLit("generator expression")
       %unsupported.0 : py.Value = py.unsupported(%str.1)
       %tuple.0 : py.Value = py.mkTuple(%unsupported.0)

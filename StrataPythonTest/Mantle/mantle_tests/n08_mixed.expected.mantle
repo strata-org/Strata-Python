@@ -25,14 +25,12 @@ module n08_mixed {
       %unsupported.0 : py.Value = py.unsupported(%str.1)
       %doubled.cell.0 : base.Ref(py.Value) = py.globalCell("n08_mixed", "doubled")
       %set.5 : base.Unit = base.refSet[py.Value](%doubled.cell.0, %unsupported.0)
-      %sync_add.cell.1 : base.Ref(py.Value) = py.globalCell("n08_mixed", "sync_add")
-      %sync_add.0 : py.Value = base.refGet[py.Value](%sync_add.cell.1)
-      %sync_add.1 : py.Value = py.requireDefined(%sync_add.0, "NameError", "name 'sync_add' is not defined") ^propagate.0()
+      %sync_add.0 : py.Value = py.loadGlobal("n08_mixed", "sync_add") ^propagate.0()
       %int.3 : py.Value = py.intLit(1)
       %int.4 : py.Value = py.intLit(2)
       %tuple.0 : py.Value = py.mkTuple(%int.3, %int.4)
       %kwargs.0 : py.Value = py.mkKwargs
-      %call.0 : py.Value = py.call(%sync_add.1, %tuple.0, %kwargs.0) ^propagate.0()
+      %call.0 : py.Value = py.call(%sync_add.0, %tuple.0, %kwargs.0) ^propagate.0()
       %result.cell.0 : base.Ref(py.Value) = py.globalCell("n08_mixed", "result")
       %set.6 : base.Unit = base.refSet[py.Value](%result.cell.0, %call.0)
       %none.0 : py.Value = py.noneLit

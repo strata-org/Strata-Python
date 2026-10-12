@@ -150,11 +150,16 @@ public environment Py extends Base where
 
   -- Globals and imports.  A module name is always fully qualified, such as `"a.b"`.
 
-  /-- The cell of the global `name` of `module`: the same cell for the same arguments, read
-  with `refGet` and written with `refSet` as a local is.  It holds `undef` until its first
-  assignment, and `del` writes `undef` back.  A read checks `isDefined`; a global that may
-  shadow a builtin falls back to `qualifiedRef "builtins" name` when it is not. -/
+  /-- The cell of the global `name` of `module`: the same cell for the same arguments,
+  written with `refSet` as a local is.  It holds `undef` until its first assignment, and
+  `del` writes `undef` back.  A name read is `loadGlobal`; `del` reads the cell with `refGet`
+  and `requireDefined`. -/
   insn globalCell (module name : String) : cell
+  /-- Read the global `name` of `module`, as CPython's `LOAD_GLOBAL` does: the value of
+  `globalCell module name` if it is defined, else the entry `name` of the `builtins` module's
+  dict (a module that rebinds `__builtins__` is not modelled).  Raises
+  `NameError(f"name '{name}' is not defined")` if neither exists. -/
+  insn loadGlobal (module name : String) (^err (exc : Value)) : Value
   /-- The module object for `module`, after importing it and each package above it, unless
   already imported.  `import a.b` is `importModule "a.b"` and then `importModule "a"`,
   which binds the package; `import a.b as c` binds this result.

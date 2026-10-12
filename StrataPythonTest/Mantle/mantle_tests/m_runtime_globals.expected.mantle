@@ -1,0 +1,65 @@
+module m_runtime_globals {
+  func @|m_runtime_globals.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("m_runtime_globals")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_runtime_globals", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %mod.0 : py.Value = py.importModule("builtins") ^propagate.0()
+      %builtins.cell.0 : base.Ref(py.Value) = py.globalCell("m_runtime_globals", "builtins")
+      %set.1 : base.Unit = base.refSet[py.Value](%builtins.cell.0, %mod.0)
+      %print.0 : py.Value = py.loadGlobal("m_runtime_globals", "print") ^propagate.0()
+      %builtins.0 : py.Value = py.loadGlobal("m_runtime_globals", "builtins") ^propagate.0()
+      %log.0 : base.Unit = py.setAttr(%builtins.0, "log", %print.0) ^propagate.0()
+      %log.1 : py.Value = py.loadGlobal("m_runtime_globals", "log") ^propagate.0()
+      %str.1 : py.Value = py.strLit("hi")
+      %tuple.0 : py.Value = py.mkTuple(%str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%log.1, %tuple.0, %kwargs.0) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure(@m_runtime_globals.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_runtime_globals", "f")
+      %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure(@m_runtime_globals.g)
+      %g.cell.0 : base.Ref(py.Value) = py.globalCell("m_runtime_globals", "g")
+      %set.3 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
+      %int.0 : py.Value = py.intLit(1)
+      %later.cell.0 : base.Ref(py.Value) = py.globalCell("m_runtime_globals", "later")
+      %set.4 : base.Unit = base.refSet[py.Value](%later.cell.0, %int.0)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_runtime_globals.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %log.0 : py.Value = py.loadGlobal("m_runtime_globals", "log") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%log.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_runtime_globals.g(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "g() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "g() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %later.0 : py.Value = py.loadGlobal("m_runtime_globals", "later") ^propagate.0()
+      %missing.0 : py.Value = py.loadGlobal("m_runtime_globals", "missing") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%later.0, %missing.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+
