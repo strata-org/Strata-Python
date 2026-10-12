@@ -81,8 +81,8 @@ module m_expressions {
       %set.3 : base.Unit = base.refSet[py.Value](%s.cell.0, %str.3)
       %bytes.0 : py.Value = py.bytesLit("\x00ÿ")
       %set.4 : base.Unit = base.refSet[py.Value](%by.cell.0, %bytes.0)
-      %Ellipsis.0 : py.Value = py.qualifiedRef("builtins", "Ellipsis") ^propagate.0()
-      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.0, %Ellipsis.0)
+      %ellipsis.0 : py.Value = py.ellipsisLit
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.0, %ellipsis.0)
       %a.4 : py.Value = base.refGet[py.Value](%a.cell.0)
       %a.5 : py.Value = py.requireDefined(%a.4, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %b.4 : py.Value = base.refGet[py.Value](%b.cell.0)

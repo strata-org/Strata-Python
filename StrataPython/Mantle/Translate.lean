@@ -272,12 +272,6 @@ def requireDefined (v : ValId) (name excType msg : String) : TransM ValId := do
   let m ← build (emitConst (.str .base "msg") (.str msg))
   build (emitFailing (stem name) Py.requireDefined #v[] #[v, e, m])
 
-/-- `py.qualifiedRef "builtins" name`. -/
-def builtinRef (name : String) : TransM ValId := do
-  let m ← build (emitConst (.str .base "m") (.str "builtins"))
-  let n ← build (emitConst (.str .base "n") (.str name))
-  build (emitFailing (stem name) Py.qualifiedRef #v[] #[m, n])
-
 /-- Read the local `name`'s cell `c`, raising `UnboundLocalError` if it is unassigned. -/
 def readLocal (c : ValId) (name : String) : TransM ValId := do
   let v ← build (readCell c (stem name))
@@ -397,7 +391,7 @@ def literal (c : constant SourceRange) (range : SourceRange) : TransM ValId :=
   | .ConFalse _ => build (boolLit false)
   | .ConNone _ => build noneLit
   | .ConBytes _ ⟨_, b⟩ => build (bytesLit (bytesText b))
-  | .ConEllipsis _ => builtinRef "Ellipsis"
+  | .ConEllipsis _ => build ellipsisLit
   | .ConComplex .. => unsupportedValue "complex literal" range
 
 /-! ## Rejected constructs -/

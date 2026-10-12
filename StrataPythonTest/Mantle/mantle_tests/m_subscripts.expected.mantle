@@ -71,8 +71,20 @@ module m_subscripts {
       %item.2 : py.Value = py.getItem(%o.9, %tuple.2) ^propagate.0()
       %s6.cell.0 : base.Ref(py.Value) = py.globalCell("m_subscripts", "s6")
       %set.10 : base.Unit = base.refSet[py.Value](%s6.cell.0, %item.2)
+      %o.10 : py.Value = py.loadGlobal("m_subscripts", "o") ^propagate.0()
+      %ellipsis.0 : py.Value = py.ellipsisLit
+      %item.3 : py.Value = py.getItem(%o.10, %ellipsis.0) ^propagate.0()
+      %s7.cell.0 : base.Ref(py.Value) = py.globalCell("m_subscripts", "s7")
+      %set.11 : base.Unit = base.refSet[py.Value](%s7.cell.0, %item.3)
+      %o.11 : py.Value = py.loadGlobal("m_subscripts", "o") ^propagate.0()
+      %a.7 : py.Value = py.loadGlobal("m_subscripts", "a") ^propagate.0()
+      %ellipsis.1 : py.Value = py.ellipsisLit
       %none.7 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.7)
+      %slice.5 : py.Value = py.getSlice(%o.11, %a.7, %ellipsis.1, %none.7) ^propagate.0()
+      %s8.cell.0 : base.Ref(py.Value) = py.globalCell("m_subscripts", "s8")
+      %set.12 : base.Unit = base.refSet[py.Value](%s8.cell.0, %slice.5)
+      %none.8 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.8)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

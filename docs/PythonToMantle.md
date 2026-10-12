@@ -158,7 +158,7 @@ are in `StrataPython/Mantle/Build.lean`.
   its attribute `name`, falling back to the submodule `module.name` as CPython's
   `IMPORT_FROM` does. Both raise `ImportError`, or whatever the module body raises.
   `py.qualifiedRef module name` reads `module.name` at each use; the translator uses it only
-  for builtins that are not names in the source, such as `Ellipsis` and `__build_class__`.
+  for builtins that are not names in the source, such as `__build_class__`.
 - **Definedness.** Only `isDefined`, `requireDefined` and `requireUndefined` may consume a
   value that could be `undef`. `requireDefined v excType msg` passes `v` through, or raises
   `excType(msg)` if `v` is undefined.
@@ -524,7 +524,7 @@ false, as in CPython.
 | Expression | Lowering |
 |---|---|
 | `1`, `1.5`, `"s"`, `b"s"`, `True`, `None` | `PyBuild.intLit` etc.: a `const` and its boxing operation |
-| `...` | `py.qualifiedRef "builtins" "Ellipsis"` |
+| `...` | `py.ellipsisLit`, as CPython's `LOAD_CONST` |
 | complex literal, t-string | **rejected** |
 | name | §5.1 |
 | `a op b` | evaluate `a`, then `b`, then `py.add`/`sub`/`mult`/`matMult`/`div`/`floorDiv`/`mod`/`pow`/`lShift`/`rShift`/`bitAnd`/`bitOr`/`bitXor` |

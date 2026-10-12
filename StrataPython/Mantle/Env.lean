@@ -125,6 +125,9 @@ public environment Py extends Base where
   insn bytesLit (val : String) : Value
   /-- `None`. -/
   insn noneLit : Value
+  /-- `...`, the `Ellipsis` object, even if `builtins.Ellipsis` is rebound: CPython's
+  `LOAD_CONST`. -/
+  insn ellipsisLit : Value
 
   -- Calls and references.
 

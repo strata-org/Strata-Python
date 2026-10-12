@@ -25,7 +25,8 @@ The operations:
 * `withInfo`, `resolveInfo`: the default annotation;
 * `emitConst`, `emitTotal`, `emitFailing`, `emitActing`, `emitTest`, `truthy`: emit a
   constant or an operation;
-* `intLit`, `floatLit`, `strLit`, `boolLit`, `bytesLit`, `noneLit`: a boxed literal;
+* `intLit`, `floatLit`, `strLit`, `boolLit`, `bytesLit`, `noneLit`, `ellipsisLit`: a boxed
+  literal;
 * `getAttr`, `setAttr`, `delAttr`: `obj.name`, `obj.name = val` and `del obj.name`;
 * `freshVal`, `freshLabel`, `startBlock`, `startBlockWith`, `startFreshBlock`, `isOpen`,
   `finishBlock`, `jump`, `branch`, `unreachable`: `Mantle.Build`'s, over `Py.env`;
@@ -190,6 +191,9 @@ def bytesLit (s : String) (info : Option α := none) : PyM α ValId := do
 
 def noneLit (info : Option α := none) : PyM α ValId := emitTotal (.str .base "none") Py.noneLit #v[]
     #[] info
+
+def ellipsisLit (info : Option α := none) : PyM α ValId :=
+  emitTotal (.str .base "ellipsis") Py.ellipsisLit #v[] #[] info
 
 /-! ## Blocks and values
 

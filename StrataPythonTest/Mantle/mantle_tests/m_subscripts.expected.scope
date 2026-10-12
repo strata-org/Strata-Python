@@ -14,3 +14,5 @@ module
   s4: local (assigned)
   s5: local (assigned)
   s6: local (assigned)
+  s7: local (assigned)
+  s8: local (assigned)
