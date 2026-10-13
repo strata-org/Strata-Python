@@ -5,10 +5,13 @@ module n05_lambda {
       %str.0 : py.Value = py.strLit("n05_lambda")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("n05_lambda", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("n05_lambda", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %str.1 : py.Value = py.strLit("lambda")
       %unsupported.0 : py.Value = py.unsupported(%str.1)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("n05_lambda", "f")
-      %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %unsupported.0)
+      %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %unsupported.0)
       %f.0 : py.Value = py.loadGlobal("n05_lambda", "f") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -16,9 +19,9 @@ module n05_lambda {
       %kwargs.0 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%f.0, %tuple.0, %kwargs.0) ^propagate.0()
       %result.cell.0 : base.Ref(py.Value) = py.globalCell("n05_lambda", "result")
-      %set.2 : base.Unit = base.refSet[py.Value](%result.cell.0, %call.0)
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %set.3 : base.Unit = base.refSet[py.Value](%result.cell.0, %call.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

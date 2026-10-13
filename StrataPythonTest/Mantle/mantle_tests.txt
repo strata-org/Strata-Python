@@ -89,6 +89,8 @@ m_global_decl | yes |
 m_if | yes |
 m_imports | yes |
 m_local_vs_global | yes |
+m_module_bytes_doc | yes |
+m_module_dunders | yes | module attribute __spec__, module attribute __package__, module attribute __loader__, module attribute __file__, module attribute __cached__, module attribute __builtins__, module attribute __annotations__, module attribute __path__
 m_operators | yes |
 m_params | yes |
 m_runtime_globals | yes |

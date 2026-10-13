@@ -5,12 +5,15 @@ module m_complex {
       %str.0 : py.Value = py.strLit("m_complex")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_complex", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_complex", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %str.1 : py.Value = py.strLit("complex literal")
       %unsupported.0 : py.Value = py.unsupported(%str.1)
       %c.cell.0 : base.Ref(py.Value) = py.globalCell("m_complex", "c")
-      %set.1 : base.Unit = base.refSet[py.Value](%c.cell.0, %unsupported.0)
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %set.2 : base.Unit = base.refSet[py.Value](%c.cell.0, %unsupported.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

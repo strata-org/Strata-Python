@@ -1,0 +1,3 @@
+module
+  doc: local (assigned)
+  __doc__: global implicit (referenced)

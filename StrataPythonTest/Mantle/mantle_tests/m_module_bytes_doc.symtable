@@ -1,0 +1,4 @@
+module top
+  __doc__: global implicit (referenced)
+  doc: local (assigned)
+qualnames: 

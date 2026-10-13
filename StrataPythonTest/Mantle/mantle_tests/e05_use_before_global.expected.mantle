@@ -5,11 +5,14 @@ module e05_use_before_global {
       %str.0 : py.Value = py.strLit("e05_use_before_global")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("e05_use_before_global", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("e05_use_before_global", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %clo.0 : py.Value = py.mkClosure(@e05_use_before_global.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("e05_use_before_global", "f")
-      %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

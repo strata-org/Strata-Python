@@ -381,7 +381,11 @@ The top-level statements become `m.<module>`, with no parameters. Every name the
 binds is a global: reads and writes go through `globalCell m "x"` (§5.1), and the body
 declares no locals. Module-level `def`, `class` and `import` statements run in place and bind
 their name when control reaches them. The function falls off the end with `emitReturnNone`.
-`__name__` is a global holding `py.strLit m`.
+`__name__` is a global holding `py.strLit m`, and `__doc__` one holding the module's docstring,
+or `None` if it has none. A read or `del` of another module attribute that CPython defines
+(`__annotations__`, `__builtins__`, `__cached__`, `__file__`, `__loader__`, `__package__`,
+`__path__`, `__spec__`) is rejected, because the translation has no value for it: `loadGlobal`
+would find the `builtins` module's value or raise `NameError`. So is a write to `__builtins__`.
 
 ### 5.3 `def` and `lambda`
 

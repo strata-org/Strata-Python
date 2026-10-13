@@ -4,28 +4,31 @@ module m_walrus {
       %str.0 : py.Value = py.strLit("m_walrus")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_walrus", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_walrus", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %f.0 : py.Value = py.loadGlobal("m_walrus", "f") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.0 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%f.0, %tuple.0, %kwargs.0) ^propagate.0()
       %x.cell.0 : base.Ref(py.Value) = py.globalCell("m_walrus", "x")
-      %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %call.0)
+      %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %call.0)
       %y.cell.0 : base.Ref(py.Value) = py.globalCell("m_walrus", "y")
-      %set.2 : base.Unit = base.refSet[py.Value](%y.cell.0, %call.0)
+      %set.3 : base.Unit = base.refSet[py.Value](%y.cell.0, %call.0)
       %g.0 : py.Value = py.loadGlobal("m_walrus", "g") ^propagate.0()
       %tuple.1 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
       %call.1 : py.Value = py.call(%g.0, %tuple.1, %kwargs.1) ^propagate.0()
       %n.cell.0 : base.Ref(py.Value) = py.globalCell("m_walrus", "n")
-      %set.3 : base.Unit = base.refSet[py.Value](%n.cell.0, %call.1)
+      %set.4 : base.Unit = base.refSet[py.Value](%n.cell.0, %call.1)
       %int.0 : py.Value = py.intLit(0)
       %gt.0 : py.Value = py.gt(%call.1, %int.0) ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%gt.0) ^propagate.0()
       branch(%cond.0) ^then.0() ^else.0()
     then.0():
-      %n.7 : py.Value = py.loadGlobal("m_walrus", "n") ^propagate.0()
+      %n.8 : py.Value = py.loadGlobal("m_walrus", "n") ^propagate.0()
       %r.cell.0 : base.Ref(py.Value) = py.globalCell("m_walrus", "r")
-      %set.4 : base.Unit = base.refSet[py.Value](%r.cell.0, %n.7)
+      %set.5 : base.Unit = base.refSet[py.Value](%r.cell.0, %n.8)
       jump ^join.0()
     else.0():
       jump ^join.0()
@@ -37,30 +40,30 @@ module m_walrus {
       %kwargs.2 : py.Value = py.mkKwargs
       %call.2 : py.Value = py.call(%h.0, %tuple.2, %kwargs.2) ^propagate.0()
       %m.cell.0 : base.Ref(py.Value) = py.globalCell("m_walrus", "m")
-      %set.5 : base.Unit = base.refSet[py.Value](%m.cell.0, %call.2)
+      %set.6 : base.Unit = base.refSet[py.Value](%m.cell.0, %call.2)
       %cond.1 : base.Bool = py.truthy(%call.2) ^propagate.0()
       branch(%cond.1) ^body.0() ^exit.0()
     body.0():
-      %m.11 : py.Value = py.loadGlobal("m_walrus", "m") ^propagate.0()
+      %m.12 : py.Value = py.loadGlobal("m_walrus", "m") ^propagate.0()
       %r.cell.1 : base.Ref(py.Value) = py.globalCell("m_walrus", "r")
-      %set.6 : base.Unit = base.refSet[py.Value](%r.cell.1, %m.11)
+      %set.7 : base.Unit = base.refSet[py.Value](%r.cell.1, %m.12)
       jump ^head.0()
     exit.0():
       %a.0 : py.Value = py.loadGlobal("m_walrus", "a") ^propagate.0()
       %w.cell.0 : base.Ref(py.Value) = py.globalCell("m_walrus", "w")
-      %set.7 : base.Unit = base.refSet[py.Value](%w.cell.0, %a.0)
+      %set.8 : base.Unit = base.refSet[py.Value](%w.cell.0, %a.0)
       %w.0 : py.Value = py.loadGlobal("m_walrus", "w") ^propagate.0()
       %list.0 : py.Value = py.mkList(%a.0, %w.0)
       %z.cell.0 : base.Ref(py.Value) = py.globalCell("m_walrus", "z")
-      %set.8 : base.Unit = base.refSet[py.Value](%z.cell.0, %list.0)
+      %set.9 : base.Unit = base.refSet[py.Value](%z.cell.0, %list.0)
       %clo.0 : py.Value = py.mkClosure(@m_walrus.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_walrus", "f")
-      %set.9 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %set.10 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %clo.1 : py.Value = py.mkClosure(@m_walrus.h)
       %h.cell.0 : base.Ref(py.Value) = py.globalCell("m_walrus", "h")
-      %set.10 : base.Unit = base.refSet[py.Value](%h.cell.0, %clo.1)
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %set.11 : base.Unit = base.refSet[py.Value](%h.cell.0, %clo.1)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

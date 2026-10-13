@@ -4,6 +4,9 @@ module m_cond {
       %str.0 : py.Value = py.strLit("m_cond")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_cond", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_cond", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %a.0 : py.Value = py.loadGlobal("m_cond", "a") ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%a.0) ^propagate.0()
       branch(%cond.0) ^and.0() ^else.0()
@@ -14,7 +17,7 @@ module m_cond {
     then.0():
       %int.0 : py.Value = py.intLit(1)
       %r.cell.0 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
-      %set.1 : base.Unit = base.refSet[py.Value](%r.cell.0, %int.0)
+      %set.2 : base.Unit = base.refSet[py.Value](%r.cell.0, %int.0)
       jump ^join.0()
     else.0():
       jump ^join.0()
@@ -29,7 +32,7 @@ module m_cond {
     then.1():
       %int.1 : py.Value = py.intLit(2)
       %r.cell.1 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
-      %set.2 : base.Unit = base.refSet[py.Value](%r.cell.1, %int.1)
+      %set.3 : base.Unit = base.refSet[py.Value](%r.cell.1, %int.1)
       jump ^join.1()
     else.1():
       jump ^join.1()
@@ -40,7 +43,7 @@ module m_cond {
     then.2():
       %int.2 : py.Value = py.intLit(3)
       %r.cell.2 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
-      %set.3 : base.Unit = base.refSet[py.Value](%r.cell.2, %int.2)
+      %set.4 : base.Unit = base.refSet[py.Value](%r.cell.2, %int.2)
       jump ^join.2()
     else.2():
       jump ^join.2()
@@ -59,7 +62,7 @@ module m_cond {
     then.3():
       %int.3 : py.Value = py.intLit(4)
       %r.cell.3 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
-      %set.4 : base.Unit = base.refSet[py.Value](%r.cell.3, %int.3)
+      %set.5 : base.Unit = base.refSet[py.Value](%r.cell.3, %int.3)
       jump ^join.3()
     else.3():
       jump ^join.3()
@@ -78,7 +81,7 @@ module m_cond {
     then.4():
       %int.4 : py.Value = py.intLit(5)
       %r.cell.4 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
-      %set.5 : base.Unit = base.refSet[py.Value](%r.cell.4, %int.4)
+      %set.6 : base.Unit = base.refSet[py.Value](%r.cell.4, %int.4)
       jump ^join.4()
     else.4():
       jump ^join.4()
@@ -96,7 +99,7 @@ module m_cond {
     then.6():
       %int.5 : py.Value = py.intLit(6)
       %r.cell.5 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
-      %set.6 : base.Unit = base.refSet[py.Value](%r.cell.5, %int.5)
+      %set.7 : base.Unit = base.refSet[py.Value](%r.cell.5, %int.5)
       jump ^join.5()
     else.6():
       jump ^join.5()
@@ -119,7 +122,7 @@ module m_cond {
     then.7():
       %int.6 : py.Value = py.intLit(7)
       %r.cell.6 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
-      %set.7 : base.Unit = base.refSet[py.Value](%r.cell.6, %int.6)
+      %set.8 : base.Unit = base.refSet[py.Value](%r.cell.6, %int.6)
       jump ^join.6()
     else.7():
       jump ^join.6()
@@ -134,7 +137,7 @@ module m_cond {
     then.8():
       %int.7 : py.Value = py.intLit(8)
       %r.cell.7 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
-      %set.8 : base.Unit = base.refSet[py.Value](%r.cell.7, %int.7)
+      %set.9 : base.Unit = base.refSet[py.Value](%r.cell.7, %int.7)
       jump ^join.7()
     else.8():
       jump ^join.7()
@@ -152,7 +155,7 @@ module m_cond {
     then.9():
       %int.8 : py.Value = py.intLit(9)
       %r.cell.8 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
-      %set.9 : base.Unit = base.refSet[py.Value](%r.cell.8, %int.8)
+      %set.10 : base.Unit = base.refSet[py.Value](%r.cell.8, %int.8)
       jump ^join.8()
     else.9():
       jump ^join.8()
@@ -179,7 +182,7 @@ module m_cond {
     then.10():
       %int.9 : py.Value = py.intLit(10)
       %r.cell.9 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
-      %set.10 : base.Unit = base.refSet[py.Value](%r.cell.9, %int.9)
+      %set.11 : base.Unit = base.refSet[py.Value](%r.cell.9, %int.9)
       jump ^join.9()
     else.10():
       jump ^join.9()
@@ -196,7 +199,7 @@ module m_cond {
     body.0():
       %int.10 : py.Value = py.intLit(11)
       %r.cell.10 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
-      %set.11 : base.Unit = base.refSet[py.Value](%r.cell.10, %int.10)
+      %set.12 : base.Unit = base.refSet[py.Value](%r.cell.10, %int.10)
       jump ^head.0()
     exit.0():
       jump ^head.1()
@@ -211,12 +214,12 @@ module m_cond {
     body.1():
       %int.11 : py.Value = py.intLit(12)
       %r.cell.11 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
-      %set.12 : base.Unit = base.refSet[py.Value](%r.cell.11, %int.11)
+      %set.13 : base.Unit = base.refSet[py.Value](%r.cell.11, %int.11)
       jump ^head.1()
     else.13():
       %int.12 : py.Value = py.intLit(13)
       %r.cell.12 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
-      %set.13 : base.Unit = base.refSet[py.Value](%r.cell.12, %int.12)
+      %set.14 : base.Unit = base.refSet[py.Value](%r.cell.12, %int.12)
       jump ^exit.1()
     exit.1():
       %a.12 : py.Value = py.loadGlobal("m_cond", "a") ^propagate.0()
@@ -233,7 +236,7 @@ module m_cond {
       jump ^join.10(%c.20)
     join.10(%bool.1 : py.Value):
       %v.cell.0 : base.Ref(py.Value) = py.globalCell("m_cond", "v")
-      %set.14 : base.Unit = base.refSet[py.Value](%v.cell.0, %bool.1)
+      %set.15 : base.Unit = base.refSet[py.Value](%v.cell.0, %bool.1)
       %b.12 : py.Value = py.loadGlobal("m_cond", "b") ^propagate.0()
       %cond.31 : base.Bool = py.truthy(%b.12) ^propagate.0()
       branch(%cond.31) ^and.5() ^else.14()
@@ -249,7 +252,7 @@ module m_cond {
       jump ^join.12(%b.13)
     join.12(%ifexp.0 : py.Value):
       %w.cell.0 : base.Ref(py.Value) = py.globalCell("m_cond", "w")
-      %set.15 : base.Unit = base.refSet[py.Value](%w.cell.0, %ifexp.0)
+      %set.16 : base.Unit = base.refSet[py.Value](%w.cell.0, %ifexp.0)
       %a.14 : py.Value = py.loadGlobal("m_cond", "a") ^propagate.0()
       %cond.33 : base.Bool = py.truthy(%a.14) ^propagate.0()
       branch(%cond.33) ^join.13(%a.14) ^or.4()
@@ -262,9 +265,9 @@ module m_cond {
       jump ^join.13(%c.22)
     join.13(%bool.2 : py.Value):
       %u.cell.0 : base.Ref(py.Value) = py.globalCell("m_cond", "u")
-      %set.16 : base.Unit = base.refSet[py.Value](%u.cell.0, %bool.2)
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %set.17 : base.Unit = base.refSet[py.Value](%u.cell.0, %bool.2)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

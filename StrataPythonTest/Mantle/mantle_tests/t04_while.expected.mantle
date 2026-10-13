@@ -4,9 +4,12 @@ module t04_while {
       %str.0 : py.Value = py.strLit("t04_while")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t04_while", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("t04_while", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %int.0 : py.Value = py.intLit(0)
       %i.cell.0 : base.Ref(py.Value) = py.globalCell("t04_while", "i")
-      %set.1 : base.Unit = base.refSet[py.Value](%i.cell.0, %int.0)
+      %set.2 : base.Unit = base.refSet[py.Value](%i.cell.0, %int.0)
       jump ^head.0()
     head.0():
       %i.0 : py.Value = py.loadGlobal("t04_while", "i") ^propagate.0()
@@ -19,12 +22,12 @@ module t04_while {
       %int.2 : py.Value = py.intLit(1)
       %iAdd.0 : py.Value = py.iAdd(%i.1, %int.2) ^propagate.0()
       %i.cell.1 : base.Ref(py.Value) = py.globalCell("t04_while", "i")
-      %set.2 : base.Unit = base.refSet[py.Value](%i.cell.1, %iAdd.0)
+      %set.3 : base.Unit = base.refSet[py.Value](%i.cell.1, %iAdd.0)
       jump ^head.0()
     exit.0():
       %int.3 : py.Value = py.intLit(0)
       %j.cell.0 : base.Ref(py.Value) = py.globalCell("t04_while", "j")
-      %set.3 : base.Unit = base.refSet[py.Value](%j.cell.0, %int.3)
+      %set.4 : base.Unit = base.refSet[py.Value](%j.cell.0, %int.3)
       jump ^head.1()
     head.1():
       %bool.0 : py.Value = py.boolLit(true)
@@ -45,15 +48,15 @@ module t04_while {
       %int.5 : py.Value = py.intLit(1)
       %iAdd.1 : py.Value = py.iAdd(%j.1, %int.5) ^propagate.0()
       %j.cell.1 : base.Ref(py.Value) = py.globalCell("t04_while", "j")
-      %set.4 : base.Unit = base.refSet[py.Value](%j.cell.1, %iAdd.1)
+      %set.5 : base.Unit = base.refSet[py.Value](%j.cell.1, %iAdd.1)
       jump ^head.1()
     exit.1():
       %int.6 : py.Value = py.intLit(0)
       %k.cell.0 : base.Ref(py.Value) = py.globalCell("t04_while", "k")
-      %set.5 : base.Unit = base.refSet[py.Value](%k.cell.0, %int.6)
+      %set.6 : base.Unit = base.refSet[py.Value](%k.cell.0, %int.6)
       %int.7 : py.Value = py.intLit(0)
       %total.cell.0 : base.Ref(py.Value) = py.globalCell("t04_while", "total")
-      %set.6 : base.Unit = base.refSet[py.Value](%total.cell.0, %int.7)
+      %set.7 : base.Unit = base.refSet[py.Value](%total.cell.0, %int.7)
       jump ^head.2()
     head.2():
       %k.0 : py.Value = py.loadGlobal("t04_while", "k") ^propagate.0()
@@ -66,7 +69,7 @@ module t04_while {
       %int.9 : py.Value = py.intLit(1)
       %iAdd.2 : py.Value = py.iAdd(%k.1, %int.9) ^propagate.0()
       %k.cell.1 : base.Ref(py.Value) = py.globalCell("t04_while", "k")
-      %set.7 : base.Unit = base.refSet[py.Value](%k.cell.1, %iAdd.2)
+      %set.8 : base.Unit = base.refSet[py.Value](%k.cell.1, %iAdd.2)
       %k.2 : py.Value = py.loadGlobal("t04_while", "k") ^propagate.0()
       %int.10 : py.Value = py.intLit(2)
       %mod.0 : py.Value = py.mod(%k.2, %int.10) ^propagate.0()
@@ -83,11 +86,11 @@ module t04_while {
       %k.3 : py.Value = py.loadGlobal("t04_while", "k") ^propagate.0()
       %iAdd.3 : py.Value = py.iAdd(%total.0, %k.3) ^propagate.0()
       %total.cell.1 : base.Ref(py.Value) = py.globalCell("t04_while", "total")
-      %set.8 : base.Unit = base.refSet[py.Value](%total.cell.1, %iAdd.3)
+      %set.9 : base.Unit = base.refSet[py.Value](%total.cell.1, %iAdd.3)
       jump ^head.2()
     exit.2():
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

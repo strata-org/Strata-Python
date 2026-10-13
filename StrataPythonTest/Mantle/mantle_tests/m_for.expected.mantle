@@ -4,13 +4,16 @@ module m_for {
       %str.0 : py.Value = py.strLit("m_for")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_for", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_for", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %xs.0 : py.Value = py.loadGlobal("m_for", "xs") ^propagate.0()
       %iter.0 : py.Value = py.getIter(%xs.0) ^propagate.0()
       jump ^head.0()
     head.0():
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %x.cell.0 : base.Ref(py.Value) = py.globalCell("m_for", "x")
-      %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %item.0)
+      %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %item.0)
       %f.0 : py.Value = py.loadGlobal("m_for", "f") ^propagate.0()
       %x.0 : py.Value = py.loadGlobal("m_for", "x") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%x.0)
@@ -27,7 +30,7 @@ module m_for {
     head.1():
       %item.1 : py.Value = py.next(%iter.1) ^stop.1()
       %x.cell.1 : base.Ref(py.Value) = py.globalCell("m_for", "x")
-      %set.2 : base.Unit = base.refSet[py.Value](%x.cell.1, %item.1)
+      %set.3 : base.Unit = base.refSet[py.Value](%x.cell.1, %item.1)
       %p.0 : py.Value = py.loadGlobal("m_for", "p") ^propagate.0()
       %x.1 : py.Value = py.loadGlobal("m_for", "x") ^propagate.0()
       %tuple.1 : py.Value = py.mkTuple(%x.1)
@@ -76,15 +79,15 @@ module m_for {
       %unpack.0 : py.Value = py.unpackSeq(%item.2, 2) ^propagate.0()
       %elem.0 : py.Value = py.tupleGet(%unpack.0, 0)
       %a.cell.0 : base.Ref(py.Value) = py.globalCell("m_for", "a")
-      %set.3 : base.Unit = base.refSet[py.Value](%a.cell.0, %elem.0)
+      %set.4 : base.Unit = base.refSet[py.Value](%a.cell.0, %elem.0)
       %elem.1 : py.Value = py.tupleGet(%unpack.0, 1)
       %unpack.1 : py.Value = py.unpackEx(%elem.1, 1, 0) ^propagate.0()
       %elem.2 : py.Value = py.tupleGet(%unpack.1, 0)
       %b.cell.0 : base.Ref(py.Value) = py.globalCell("m_for", "b")
-      %set.4 : base.Unit = base.refSet[py.Value](%b.cell.0, %elem.2)
+      %set.5 : base.Unit = base.refSet[py.Value](%b.cell.0, %elem.2)
       %elem.3 : py.Value = py.tupleGet(%unpack.1, 1)
       %c.cell.0 : base.Ref(py.Value) = py.globalCell("m_for", "c")
-      %set.5 : base.Unit = base.refSet[py.Value](%c.cell.0, %elem.3)
+      %set.6 : base.Unit = base.refSet[py.Value](%c.cell.0, %elem.3)
       %f.2 : py.Value = py.loadGlobal("m_for", "f") ^propagate.0()
       %a.0 : py.Value = py.loadGlobal("m_for", "a") ^propagate.0()
       %b.0 : py.Value = py.loadGlobal("m_for", "b") ^propagate.0()
@@ -115,14 +118,14 @@ module m_for {
     head.4():
       %item.4 : py.Value = py.next(%iter.4) ^stop.4()
       %x.cell.2 : base.Ref(py.Value) = py.globalCell("m_for", "x")
-      %set.6 : base.Unit = base.refSet[py.Value](%x.cell.2, %item.4)
+      %set.7 : base.Unit = base.refSet[py.Value](%x.cell.2, %item.4)
       %ys.0 : py.Value = py.loadGlobal("m_for", "ys") ^propagate.0()
       %iter.5 : py.Value = py.getIter(%ys.0) ^propagate.0()
       jump ^head.5()
     head.5():
       %item.5 : py.Value = py.next(%iter.5) ^stop.5()
       %y.cell.0 : base.Ref(py.Value) = py.globalCell("m_for", "y")
-      %set.7 : base.Unit = base.refSet[py.Value](%y.cell.0, %item.5)
+      %set.8 : base.Unit = base.refSet[py.Value](%y.cell.0, %item.5)
       jump ^exit.5()
     stop.5(%exc.4 : py.Value):
       %done.4 : base.Bool = py.isStopIteration(%exc.4)
@@ -137,9 +140,9 @@ module m_for {
     exit.4():
       %clo.0 : py.Value = py.mkClosure(@m_for.first)
       %first.cell.0 : base.Ref(py.Value) = py.globalCell("m_for", "first")
-      %set.8 : base.Unit = base.refSet[py.Value](%first.cell.0, %clo.0)
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %set.9 : base.Unit = base.refSet[py.Value](%first.cell.0, %clo.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.6 : py.Value):
       %exc.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.6)

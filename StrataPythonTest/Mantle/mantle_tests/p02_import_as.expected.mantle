@@ -4,17 +4,20 @@ module p02_import_as {
       %str.0 : py.Value = py.strLit("p02_import_as")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p02_import_as", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p02_import_as", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %mod.0 : py.Value = py.importModule("os.path") ^propagate.0()
       %osp.cell.0 : base.Ref(py.Value) = py.globalCell("p02_import_as", "osp")
-      %set.1 : base.Unit = base.refSet[py.Value](%osp.cell.0, %mod.0)
+      %set.2 : base.Unit = base.refSet[py.Value](%osp.cell.0, %mod.0)
       %mod.1 : py.Value = py.importModule("json") ^propagate.0()
       %j.cell.0 : base.Ref(py.Value) = py.globalCell("p02_import_as", "j")
-      %set.2 : base.Unit = base.refSet[py.Value](%j.cell.0, %mod.1)
+      %set.3 : base.Unit = base.refSet[py.Value](%j.cell.0, %mod.1)
       %clo.0 : py.Value = py.mkClosure(@p02_import_as.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p02_import_as", "f")
-      %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %set.4 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

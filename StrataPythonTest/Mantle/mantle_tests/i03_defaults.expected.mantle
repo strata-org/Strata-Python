@@ -4,9 +4,12 @@ module i03_defaults {
       %str.0 : py.Value = py.strLit("i03_defaults")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("i03_defaults", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("i03_defaults", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %clo.0 : py.Value = py.mkClosure(@i03_defaults.c)
       %c.cell.0 : base.Ref(py.Value) = py.globalCell("i03_defaults", "c")
-      %set.1 : base.Unit = base.refSet[py.Value](%c.cell.0, %clo.0)
+      %set.2 : base.Unit = base.refSet[py.Value](%c.cell.0, %clo.0)
       %c.1 : py.Value = py.loadGlobal("i03_defaults", "c") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %tuple.0 : py.Value = py.mkTuple(%int.0)
@@ -34,7 +37,7 @@ module i03_defaults {
       %call.3 : py.Value = py.call(%c.10, %tuple.3, %kwargs.3) ^propagate.0()
       %clo.1 : py.Value = py.mkClosure(@i03_defaults.kwd)
       %kwd.cell.0 : base.Ref(py.Value) = py.globalCell("i03_defaults", "kwd")
-      %set.2 : base.Unit = base.refSet[py.Value](%kwd.cell.0, %clo.1)
+      %set.3 : base.Unit = base.refSet[py.Value](%kwd.cell.0, %clo.1)
       %kwd.0 : py.Value = py.loadGlobal("i03_defaults", "kwd") ^propagate.0()
       %int.6 : py.Value = py.intLit(1)
       %tuple.4 : py.Value = py.mkTuple(%int.6)
@@ -47,8 +50,8 @@ module i03_defaults {
       %int.8 : py.Value = py.intLit(2)
       %kwargs.5 : py.Value = py.mkKwargs(%str.3, %int.8)
       %call.5 : py.Value = py.call(%kwd.1, %tuple.5, %kwargs.5) ^propagate.0()
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

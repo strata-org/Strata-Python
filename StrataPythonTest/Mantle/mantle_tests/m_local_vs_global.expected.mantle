@@ -4,17 +4,20 @@ module m_local_vs_global {
       %str.0 : py.Value = py.strLit("m_local_vs_global")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_local_vs_global", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_local_vs_global", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %int.0 : py.Value = py.intLit(1)
       %x.cell.0 : base.Ref(py.Value) = py.globalCell("m_local_vs_global", "x")
-      %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
+      %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
       %clo.0 : py.Value = py.mkClosure(@m_local_vs_global.reads_global)
       %reads_global.cell.0 : base.Ref(py.Value) = py.globalCell("m_local_vs_global", "reads_global")
-      %set.2 : base.Unit = base.refSet[py.Value](%reads_global.cell.0, %clo.0)
+      %set.3 : base.Unit = base.refSet[py.Value](%reads_global.cell.0, %clo.0)
       %clo.1 : py.Value = py.mkClosure(@m_local_vs_global.shadows_global)
       %shadows_global.cell.0 : base.Ref(py.Value) = py.globalCell("m_local_vs_global", "shadows_global")
-      %set.3 : base.Unit = base.refSet[py.Value](%shadows_global.cell.0, %clo.1)
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %set.4 : base.Unit = base.refSet[py.Value](%shadows_global.cell.0, %clo.1)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

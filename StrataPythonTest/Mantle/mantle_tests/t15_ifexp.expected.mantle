@@ -4,9 +4,12 @@ module t15_ifexp {
       %str.0 : py.Value = py.strLit("t15_ifexp")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t15_ifexp", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("t15_ifexp", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %bool.0 : py.Value = py.boolLit(true)
       %cond.cell.0 : base.Ref(py.Value) = py.globalCell("t15_ifexp", "cond")
-      %set.1 : base.Unit = base.refSet[py.Value](%cond.cell.0, %bool.0)
+      %set.2 : base.Unit = base.refSet[py.Value](%cond.cell.0, %bool.0)
       %cond.0 : py.Value = py.loadGlobal("t15_ifexp", "cond") ^propagate.0()
       %cond.1 : base.Bool = py.truthy(%cond.0) ^propagate.0()
       branch(%cond.1) ^then.0() ^else.0()
@@ -18,7 +21,7 @@ module t15_ifexp {
       jump ^join.0(%int.1)
     join.0(%ifexp.0 : py.Value):
       %x.cell.0 : base.Ref(py.Value) = py.globalCell("t15_ifexp", "x")
-      %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %ifexp.0)
+      %set.3 : base.Unit = base.refSet[py.Value](%x.cell.0, %ifexp.0)
       %cond.2 : py.Value = py.loadGlobal("t15_ifexp", "cond") ^propagate.0()
       %cond.3 : base.Bool = py.truthy(%cond.2) ^propagate.0()
       branch(%cond.3) ^then.1() ^else.1()
@@ -39,7 +42,7 @@ module t15_ifexp {
       jump ^join.1(%ifexp.1)
     join.1(%ifexp.2 : py.Value):
       %y.cell.0 : base.Ref(py.Value) = py.globalCell("t15_ifexp", "y")
-      %set.3 : base.Unit = base.refSet[py.Value](%y.cell.0, %ifexp.2)
+      %set.4 : base.Unit = base.refSet[py.Value](%y.cell.0, %ifexp.2)
       %cond.6 : py.Value = py.loadGlobal("t15_ifexp", "cond") ^propagate.0()
       %cond.7 : base.Bool = py.truthy(%cond.6) ^propagate.0()
       branch(%cond.7) ^then.3() ^else.3()
@@ -51,9 +54,9 @@ module t15_ifexp {
       jump ^join.3(%int.3)
     join.3(%ifexp.3 : py.Value):
       %z.cell.0 : base.Ref(py.Value) = py.globalCell("t15_ifexp", "z")
-      %set.4 : base.Unit = base.refSet[py.Value](%z.cell.0, %ifexp.3)
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %set.5 : base.Unit = base.refSet[py.Value](%z.cell.0, %ifexp.3)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

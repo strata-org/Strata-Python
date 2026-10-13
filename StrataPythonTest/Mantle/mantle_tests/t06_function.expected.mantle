@@ -4,12 +4,15 @@ module t06_function {
       %str.0 : py.Value = py.strLit("t06_function")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t06_function", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("t06_function", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %clo.0 : py.Value = py.mkClosure(@t06_function.add)
       %add.cell.0 : base.Ref(py.Value) = py.globalCell("t06_function", "add")
-      %set.1 : base.Unit = base.refSet[py.Value](%add.cell.0, %clo.0)
+      %set.2 : base.Unit = base.refSet[py.Value](%add.cell.0, %clo.0)
       %clo.1 : py.Value = py.mkClosure(@t06_function.greet)
       %greet.cell.0 : base.Ref(py.Value) = py.globalCell("t06_function", "greet")
-      %set.2 : base.Unit = base.refSet[py.Value](%greet.cell.0, %clo.1)
+      %set.3 : base.Unit = base.refSet[py.Value](%greet.cell.0, %clo.1)
       %add.0 : py.Value = py.loadGlobal("t06_function", "add") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -17,14 +20,14 @@ module t06_function {
       %kwargs.0 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%add.0, %tuple.0, %kwargs.0) ^propagate.0()
       %result.cell.0 : base.Ref(py.Value) = py.globalCell("t06_function", "result")
-      %set.3 : base.Unit = base.refSet[py.Value](%result.cell.0, %call.0)
+      %set.4 : base.Unit = base.refSet[py.Value](%result.cell.0, %call.0)
       %greet.0 : py.Value = py.loadGlobal("t06_function", "greet") ^propagate.0()
       %str.1 : py.Value = py.strLit("world")
       %tuple.1 : py.Value = py.mkTuple(%str.1)
       %kwargs.1 : py.Value = py.mkKwargs
       %call.1 : py.Value = py.call(%greet.0, %tuple.1, %kwargs.1) ^propagate.0()
       %msg.cell.0 : base.Ref(py.Value) = py.globalCell("t06_function", "msg")
-      %set.4 : base.Unit = base.refSet[py.Value](%msg.cell.0, %call.1)
+      %set.5 : base.Unit = base.refSet[py.Value](%msg.cell.0, %call.1)
       %greet.1 : py.Value = py.loadGlobal("t06_function", "greet") ^propagate.0()
       %str.2 : py.Value = py.strLit("world")
       %tuple.2 : py.Value = py.mkTuple(%str.2)
@@ -33,16 +36,16 @@ module t06_function {
       %kwargs.2 : py.Value = py.mkKwargs(%str.3, %str.4)
       %call.2 : py.Value = py.call(%greet.1, %tuple.2, %kwargs.2) ^propagate.0()
       %msg2.cell.0 : base.Ref(py.Value) = py.globalCell("t06_function", "msg2")
-      %set.5 : base.Unit = base.refSet[py.Value](%msg2.cell.0, %call.2)
+      %set.6 : base.Unit = base.refSet[py.Value](%msg2.cell.0, %call.2)
       %clo.2 : py.Value = py.mkClosure(@t06_function.do_nothing)
       %do_nothing.cell.0 : base.Ref(py.Value) = py.globalCell("t06_function", "do_nothing")
-      %set.6 : base.Unit = base.refSet[py.Value](%do_nothing.cell.0, %clo.2)
+      %set.7 : base.Unit = base.refSet[py.Value](%do_nothing.cell.0, %clo.2)
       %do_nothing.0 : py.Value = py.loadGlobal("t06_function", "do_nothing") ^propagate.0()
       %tuple.3 : py.Value = py.mkTuple
       %kwargs.3 : py.Value = py.mkKwargs
       %call.3 : py.Value = py.call(%do_nothing.0, %tuple.3, %kwargs.3) ^propagate.0()
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

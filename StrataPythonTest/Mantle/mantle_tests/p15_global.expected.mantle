@@ -4,12 +4,15 @@ module p15_global {
       %str.0 : py.Value = py.strLit("p15_global")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p15_global", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p15_global", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %clo.0 : py.Value = py.mkClosure(@p15_global.set_x)
       %set_x.cell.0 : base.Ref(py.Value) = py.globalCell("p15_global", "set_x")
-      %set.1 : base.Unit = base.refSet[py.Value](%set_x.cell.0, %clo.0)
+      %set.2 : base.Unit = base.refSet[py.Value](%set_x.cell.0, %clo.0)
       %clo.1 : py.Value = py.mkClosure(@p15_global.get_x)
       %get_x.cell.0 : base.Ref(py.Value) = py.globalCell("p15_global", "get_x")
-      %set.2 : base.Unit = base.refSet[py.Value](%get_x.cell.0, %clo.1)
+      %set.3 : base.Unit = base.refSet[py.Value](%get_x.cell.0, %clo.1)
       %set_x.0 : py.Value = py.loadGlobal("p15_global", "set_x") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.0 : py.Value = py.mkKwargs
@@ -19,8 +22,8 @@ module p15_global {
       %tuple.1 : py.Value = py.mkTuple(%x.0)
       %kwargs.1 : py.Value = py.mkKwargs
       %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.1) ^propagate.0()
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

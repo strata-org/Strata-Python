@@ -5,17 +5,20 @@ module n01_async {
       %str.0 : py.Value = py.strLit("n01_async")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("n01_async", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("n01_async", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %mod.0 : py.Value = py.importModule("asyncio") ^propagate.0()
       %asyncio.cell.0 : base.Ref(py.Value) = py.globalCell("n01_async", "asyncio")
-      %set.1 : base.Unit = base.refSet[py.Value](%asyncio.cell.0, %mod.0)
+      %set.2 : base.Unit = base.refSet[py.Value](%asyncio.cell.0, %mod.0)
       %clo.0 : py.Value = py.mkClosure(@n01_async.fetch_data)
       %fetch_data.cell.0 : base.Ref(py.Value) = py.globalCell("n01_async", "fetch_data")
-      %set.2 : base.Unit = base.refSet[py.Value](%fetch_data.cell.0, %clo.0)
+      %set.3 : base.Unit = base.refSet[py.Value](%fetch_data.cell.0, %clo.0)
       %clo.1 : py.Value = py.mkClosure(@n01_async.sync_helper)
       %sync_helper.cell.0 : base.Ref(py.Value) = py.globalCell("n01_async", "sync_helper")
-      %set.3 : base.Unit = base.refSet[py.Value](%sync_helper.cell.0, %clo.1)
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %set.4 : base.Unit = base.refSet[py.Value](%sync_helper.cell.0, %clo.1)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

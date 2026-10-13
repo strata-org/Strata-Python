@@ -5,6 +5,9 @@ module n02_listcomp {
       %str.0 : py.Value = py.strLit("n02_listcomp")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("n02_listcomp", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("n02_listcomp", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
       %int.2 : py.Value = py.intLit(3)
@@ -12,20 +15,20 @@ module n02_listcomp {
       %int.4 : py.Value = py.intLit(5)
       %list.0 : py.Value = py.mkList(%int.0, %int.1, %int.2, %int.3, %int.4)
       %items.cell.0 : base.Ref(py.Value) = py.globalCell("n02_listcomp", "items")
-      %set.1 : base.Unit = base.refSet[py.Value](%items.cell.0, %list.0)
+      %set.2 : base.Unit = base.refSet[py.Value](%items.cell.0, %list.0)
       %str.1 : py.Value = py.strLit("list comprehension")
       %unsupported.0 : py.Value = py.unsupported(%str.1)
       %doubled.cell.0 : base.Ref(py.Value) = py.globalCell("n02_listcomp", "doubled")
-      %set.2 : base.Unit = base.refSet[py.Value](%doubled.cell.0, %unsupported.0)
+      %set.3 : base.Unit = base.refSet[py.Value](%doubled.cell.0, %unsupported.0)
       %sum.0 : py.Value = py.loadGlobal("n02_listcomp", "sum") ^propagate.0()
       %doubled.0 : py.Value = py.loadGlobal("n02_listcomp", "doubled") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%doubled.0)
       %kwargs.0 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%sum.0, %tuple.0, %kwargs.0) ^propagate.0()
       %total.cell.0 : base.Ref(py.Value) = py.globalCell("n02_listcomp", "total")
-      %set.3 : base.Unit = base.refSet[py.Value](%total.cell.0, %call.0)
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %set.4 : base.Unit = base.refSet[py.Value](%total.cell.0, %call.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

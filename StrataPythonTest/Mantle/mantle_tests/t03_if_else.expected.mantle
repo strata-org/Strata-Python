@@ -4,47 +4,50 @@ module t03_if_else {
       %str.0 : py.Value = py.strLit("t03_if_else")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t03_if_else", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("t03_if_else", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %bool.0 : py.Value = py.boolLit(true)
       %cond.cell.0 : base.Ref(py.Value) = py.globalCell("t03_if_else", "cond")
-      %set.1 : base.Unit = base.refSet[py.Value](%cond.cell.0, %bool.0)
+      %set.2 : base.Unit = base.refSet[py.Value](%cond.cell.0, %bool.0)
       %cond.0 : py.Value = py.loadGlobal("t03_if_else", "cond") ^propagate.0()
       %cond.1 : base.Bool = py.truthy(%cond.0) ^propagate.0()
       branch(%cond.1) ^then.0() ^else.0()
     then.0():
       %int.0 : py.Value = py.intLit(1)
       %x.cell.0 : base.Ref(py.Value) = py.globalCell("t03_if_else", "x")
-      %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
+      %set.3 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
       jump ^join.0()
     else.0():
       %int.1 : py.Value = py.intLit(2)
       %x.cell.1 : base.Ref(py.Value) = py.globalCell("t03_if_else", "x")
-      %set.3 : base.Unit = base.refSet[py.Value](%x.cell.1, %int.1)
+      %set.4 : base.Unit = base.refSet[py.Value](%x.cell.1, %int.1)
       jump ^join.0()
     join.0():
       %x.0 : py.Value = py.loadGlobal("t03_if_else", "x") ^propagate.0()
       %use_x.cell.0 : base.Ref(py.Value) = py.globalCell("t03_if_else", "use_x")
-      %set.4 : base.Unit = base.refSet[py.Value](%use_x.cell.0, %x.0)
+      %set.5 : base.Unit = base.refSet[py.Value](%use_x.cell.0, %x.0)
       %cond.2 : py.Value = py.loadGlobal("t03_if_else", "cond") ^propagate.0()
       %cond.3 : base.Bool = py.truthy(%cond.2) ^propagate.0()
       branch(%cond.3) ^then.1() ^else.1()
     then.1():
       %int.2 : py.Value = py.intLit(10)
       %y.cell.0 : base.Ref(py.Value) = py.globalCell("t03_if_else", "y")
-      %set.5 : base.Unit = base.refSet[py.Value](%y.cell.0, %int.2)
+      %set.6 : base.Unit = base.refSet[py.Value](%y.cell.0, %int.2)
       jump ^join.1()
     else.1():
       jump ^join.1()
     join.1():
       %y.0 : py.Value = py.loadGlobal("t03_if_else", "y") ^propagate.0()
       %use_y.cell.0 : base.Ref(py.Value) = py.globalCell("t03_if_else", "use_y")
-      %set.6 : base.Unit = base.refSet[py.Value](%use_y.cell.0, %y.0)
+      %set.7 : base.Unit = base.refSet[py.Value](%use_y.cell.0, %y.0)
       %cond.4 : py.Value = py.loadGlobal("t03_if_else", "cond") ^propagate.0()
       %cond.5 : base.Bool = py.truthy(%cond.4) ^propagate.0()
       branch(%cond.5) ^then.2() ^else.2()
     then.2():
       %str.1 : py.Value = py.strLit("a")
       %z.cell.0 : base.Ref(py.Value) = py.globalCell("t03_if_else", "z")
-      %set.7 : base.Unit = base.refSet[py.Value](%z.cell.0, %str.1)
+      %set.8 : base.Unit = base.refSet[py.Value](%z.cell.0, %str.1)
       jump ^join.2()
     else.2():
       %cond.6 : py.Value = py.loadGlobal("t03_if_else", "cond") ^propagate.0()
@@ -53,18 +56,18 @@ module t03_if_else {
     then.3():
       %str.2 : py.Value = py.strLit("b")
       %z.cell.1 : base.Ref(py.Value) = py.globalCell("t03_if_else", "z")
-      %set.8 : base.Unit = base.refSet[py.Value](%z.cell.1, %str.2)
+      %set.9 : base.Unit = base.refSet[py.Value](%z.cell.1, %str.2)
       jump ^join.3()
     else.3():
       %str.3 : py.Value = py.strLit("c")
       %z.cell.2 : base.Ref(py.Value) = py.globalCell("t03_if_else", "z")
-      %set.9 : base.Unit = base.refSet[py.Value](%z.cell.2, %str.3)
+      %set.10 : base.Unit = base.refSet[py.Value](%z.cell.2, %str.3)
       jump ^join.3()
     join.3():
       jump ^join.2()
     join.2():
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

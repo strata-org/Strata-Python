@@ -4,18 +4,21 @@ module i04_dict_unpack {
       %str.0 : py.Value = py.strLit("i04_dict_unpack")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("i04_dict_unpack", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("i04_dict_unpack", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %str.1 : py.Value = py.strLit("x")
       %int.0 : py.Value = py.intLit(1)
       %dict.0 : py.Value = py.mkDict(%str.1, %int.0) ^propagate.0()
       %a.cell.0 : base.Ref(py.Value) = py.globalCell("i04_dict_unpack", "a")
-      %set.1 : base.Unit = base.refSet[py.Value](%a.cell.0, %dict.0)
+      %set.2 : base.Unit = base.refSet[py.Value](%a.cell.0, %dict.0)
       %str.2 : py.Value = py.strLit("x")
       %int.1 : py.Value = py.intLit(2)
       %str.3 : py.Value = py.strLit("y")
       %int.2 : py.Value = py.intLit(3)
       %dict.1 : py.Value = py.mkDict(%str.2, %int.1, %str.3, %int.2) ^propagate.0()
       %b.cell.0 : base.Ref(py.Value) = py.globalCell("i04_dict_unpack", "b")
-      %set.2 : base.Unit = base.refSet[py.Value](%b.cell.0, %dict.1)
+      %set.3 : base.Unit = base.refSet[py.Value](%b.cell.0, %dict.1)
       %print.0 : py.Value = py.loadGlobal("i04_dict_unpack", "print") ^propagate.0()
       %dict.2 : py.Value = py.mkDict ^propagate.0()
       %a.0 : py.Value = py.loadGlobal("i04_dict_unpack", "a") ^propagate.0()
@@ -100,8 +103,8 @@ module i04_dict_unpack {
       %tuple.14 : py.Value = py.mkTuple(%call.11)
       %kwargs.12 : py.Value = py.mkKwargs
       %call.12 : py.Value = py.call(%print.8, %tuple.14, %kwargs.12) ^propagate.0()
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

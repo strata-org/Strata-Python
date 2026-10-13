@@ -1,0 +1,22 @@
+module m_module_bytes_doc {
+  func @|m_module_bytes_doc.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("m_module_bytes_doc")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_module_bytes_doc", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_module_bytes_doc", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %bytes.0 : py.Value = py.bytesLit("Only a str constant is a docstring, so __doc__ is None.")
+      %__doc__.0 : py.Value = py.loadGlobal("m_module_bytes_doc", "__doc__") ^propagate.0()
+      %doc.cell.0 : base.Ref(py.Value) = py.globalCell("m_module_bytes_doc", "doc")
+      %set.2 : base.Unit = base.refSet[py.Value](%doc.cell.0, %__doc__.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

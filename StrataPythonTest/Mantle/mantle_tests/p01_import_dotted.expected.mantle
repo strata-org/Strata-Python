@@ -4,19 +4,22 @@ module p01_import_dotted {
       %str.0 : py.Value = py.strLit("p01_import_dotted")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p01_import_dotted", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p01_import_dotted", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %mod.0 : py.Value = py.importModule("os.path") ^propagate.0()
       %mod.1 : py.Value = py.importModule("os") ^propagate.0()
       %os.cell.0 : base.Ref(py.Value) = py.globalCell("p01_import_dotted", "os")
-      %set.1 : base.Unit = base.refSet[py.Value](%os.cell.0, %mod.1)
+      %set.2 : base.Unit = base.refSet[py.Value](%os.cell.0, %mod.1)
       %mod.2 : py.Value = py.importModule("a.b.c") ^propagate.0()
       %mod.3 : py.Value = py.importModule("a") ^propagate.0()
       %a.cell.0 : base.Ref(py.Value) = py.globalCell("p01_import_dotted", "a")
-      %set.2 : base.Unit = base.refSet[py.Value](%a.cell.0, %mod.3)
+      %set.3 : base.Unit = base.refSet[py.Value](%a.cell.0, %mod.3)
       %clo.0 : py.Value = py.mkClosure(@p01_import_dotted.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p01_import_dotted", "f")
-      %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %set.4 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

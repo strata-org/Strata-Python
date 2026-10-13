@@ -1,0 +1,20 @@
+module top
+  __annotations__: global implicit (referenced)
+  __builtins__: local (assigned, referenced)
+  __cached__: global implicit (referenced)
+  __doc__: global implicit (referenced)
+  __file__: local (assigned, referenced)
+  __path__: global implicit (referenced)
+  doc: local (assigned)
+  f: local (assigned)
+  g: local (assigned)
+  print: global implicit (referenced)
+  function f
+    __doc__: global implicit (referenced)
+    __loader__: global implicit (referenced)
+    __name__: global implicit (referenced)
+    __package__: global implicit (referenced)
+    __spec__: global implicit (referenced)
+  function g
+    __file__: local (parameter, referenced)
+qualnames: f, g

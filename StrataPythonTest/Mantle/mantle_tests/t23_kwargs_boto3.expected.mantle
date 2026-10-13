@@ -4,18 +4,21 @@ module t23_kwargs_boto3 {
       %str.0 : py.Value = py.strLit("t23_kwargs_boto3")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t23_kwargs_boto3", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("t23_kwargs_boto3", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %mod.0 : py.Value = py.importModule("boto3") ^propagate.0()
       %boto3.cell.0 : base.Ref(py.Value) = py.globalCell("t23_kwargs_boto3", "boto3")
-      %set.1 : base.Unit = base.refSet[py.Value](%boto3.cell.0, %mod.0)
+      %set.2 : base.Unit = base.refSet[py.Value](%boto3.cell.0, %mod.0)
       %clo.0 : py.Value = py.mkClosure(@t23_kwargs_boto3.put_item)
       %put_item.cell.0 : base.Ref(py.Value) = py.globalCell("t23_kwargs_boto3", "put_item")
-      %set.2 : base.Unit = base.refSet[py.Value](%put_item.cell.0, %clo.0)
+      %set.3 : base.Unit = base.refSet[py.Value](%put_item.cell.0, %clo.0)
       %clo.1 : py.Value = py.mkClosure(@t23_kwargs_boto3.put_item_from_dict)
       %put_item_from_dict.cell.0 : base.Ref(py.Value) = py.globalCell("t23_kwargs_boto3", "put_item_from_dict")
-      %set.3 : base.Unit = base.refSet[py.Value](%put_item_from_dict.cell.0, %clo.1)
+      %set.4 : base.Unit = base.refSet[py.Value](%put_item_from_dict.cell.0, %clo.1)
       %clo.2 : py.Value = py.mkClosure(@t23_kwargs_boto3.build_and_call)
       %build_and_call.cell.0 : base.Ref(py.Value) = py.globalCell("t23_kwargs_boto3", "build_and_call")
-      %set.4 : base.Unit = base.refSet[py.Value](%build_and_call.cell.0, %clo.2)
+      %set.5 : base.Unit = base.refSet[py.Value](%build_and_call.cell.0, %clo.2)
       %boto3.0 : py.Value = py.loadGlobal("t23_kwargs_boto3", "boto3") ^propagate.0()
       %client.0 : py.Value = py.attr(%boto3.0, "client") ^propagate.0()
       %str.1 : py.Value = py.strLit("iam")
@@ -23,7 +26,7 @@ module t23_kwargs_boto3 {
       %kwargs.0 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%client.0, %tuple.0, %kwargs.0) ^propagate.0()
       %iam.cell.0 : base.Ref(py.Value) = py.globalCell("t23_kwargs_boto3", "iam")
-      %set.5 : base.Unit = base.refSet[py.Value](%iam.cell.0, %call.0)
+      %set.6 : base.Unit = base.refSet[py.Value](%iam.cell.0, %call.0)
       %iam.0 : py.Value = py.loadGlobal("t23_kwargs_boto3", "iam") ^propagate.0()
       %get_role.0 : py.Value = py.attr(%iam.0, "get_role") ^propagate.0()
       %tuple.1 : py.Value = py.mkTuple
@@ -31,8 +34,8 @@ module t23_kwargs_boto3 {
       %str.3 : py.Value = py.strLit("my-role")
       %kwargs.1 : py.Value = py.mkKwargs(%str.2, %str.3)
       %call.1 : py.Value = py.call(%get_role.0, %tuple.1, %kwargs.1) ^propagate.0()
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

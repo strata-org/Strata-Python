@@ -1,0 +1,107 @@
+-- unsupported: module attribute __spec__ is not supported at 8:30-8:38
+-- unsupported: module attribute __package__ is not supported at 8:40-8:51
+-- unsupported: module attribute __loader__ is not supported at 8:53-8:63
+-- unsupported: module attribute __file__ is not supported at 15:6-15:14
+-- unsupported: module attribute __cached__ is not supported at 15:16-15:26
+-- unsupported: module attribute __builtins__ is not supported at 15:28-15:40
+-- unsupported: module attribute __annotations__ is not supported at 15:42-15:57
+-- unsupported: module attribute __path__ is not supported at 15:59-15:67
+-- unsupported: module attribute __file__ is not supported at 16:4-16:12
+-- unsupported: module attribute __builtins__ is not supported at 17:0-17:17
+module m_module_dunders {
+  func @|m_module_dunders.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("m_module_dunders")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_module_dunders", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %str.1 : py.Value = py.strLit("The module docstring.")
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_module_dunders", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %str.1)
+      %__doc__.0 : py.Value = py.loadGlobal("m_module_dunders", "__doc__") ^propagate.0()
+      %doc.cell.0 : base.Ref(py.Value) = py.globalCell("m_module_dunders", "doc")
+      %set.2 : base.Unit = base.refSet[py.Value](%doc.cell.0, %__doc__.0)
+      %clo.0 : py.Value = py.mkClosure(@m_module_dunders.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_module_dunders", "f")
+      %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure(@m_module_dunders.g)
+      %g.cell.0 : base.Ref(py.Value) = py.globalCell("m_module_dunders", "g")
+      %set.4 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
+      %print.0 : py.Value = py.loadGlobal("m_module_dunders", "print") ^propagate.0()
+      %str.2 : py.Value = py.strLit("module attribute __file__")
+      %unsupported.0 : py.Value = py.unsupported(%str.2)
+      %str.3 : py.Value = py.strLit("module attribute __cached__")
+      %unsupported.1 : py.Value = py.unsupported(%str.3)
+      %str.4 : py.Value = py.strLit("module attribute __builtins__")
+      %unsupported.2 : py.Value = py.unsupported(%str.4)
+      %str.5 : py.Value = py.strLit("module attribute __annotations__")
+      %unsupported.3 : py.Value = py.unsupported(%str.5)
+      %str.6 : py.Value = py.strLit("module attribute __path__")
+      %unsupported.4 : py.Value = py.unsupported(%str.6)
+      %tuple.0 : py.Value = py.mkTuple(%unsupported.0, %unsupported.1, %unsupported.2, %unsupported.3, %unsupported.4)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %dict.0 : py.Value = py.mkDict ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_module_dunders.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %__name__.0 : py.Value = py.loadGlobal("m_module_dunders", "__name__") ^propagate.0()
+      %__doc__.0 : py.Value = py.loadGlobal("m_module_dunders", "__doc__") ^propagate.0()
+      %str.0 : py.Value = py.strLit("module attribute __spec__")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %str.1 : py.Value = py.strLit("module attribute __package__")
+      %unsupported.1 : py.Value = py.unsupported(%str.1)
+      %str.2 : py.Value = py.strLit("module attribute __loader__")
+      %unsupported.2 : py.Value = py.unsupported(%str.2)
+      %tuple.0 : py.Value = py.mkTuple(%__name__.0, %__doc__.0, %unsupported.0, %unsupported.1, %unsupported.2)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_module_dunders.g(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %__file__.0 : py.Value = py.undef("__file__")
+      %__file__.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%__file__.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %__file__.1 : py.Value = py.undef("__file__")
+      %fill.0 : py.Value = py.mkTuple(%__file__.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__file__")
+      %__file__.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "g() got multiple values for argument '__file__'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "g() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "g() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %__file__.3 : py.Value = py.requireDefined(%__file__.2, "TypeError", "g() missing 1 required positional argument: '__file__'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%__file__.cell.0, %__file__.3)
+      %__file__.4 : py.Value = base.refGet[py.Value](%__file__.cell.0)
+      %__file__.5 : py.Value = py.requireDefined(%__file__.4, "UnboundLocalError", "cannot access local variable '__file__' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%__file__.5)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

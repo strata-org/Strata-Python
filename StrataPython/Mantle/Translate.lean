@@ -21,8 +21,9 @@ set_option autoImplicit false
 `docs/PythonToMantle.md` specifies.  It returns the module and its diagnostics.  A result
 with a diagnostic is a failure.
 
-* The module body is the function `m.<module>`, with no parameters.  A module-level `def f`
-  is the function `m.f`, with parameters `args` (a tuple) and `kwargs` (a dict).
+* The module body is the function `m.<module>`, with no parameters.  It first writes
+  `__name__` and `__doc__`.  A module-level `def f` is the function `m.f`, with parameters
+  `args` (a tuple) and `kwargs` (a dict).
 * Names are classified by `PyScope.analyze`.  A function's locals are cells declared in its
   entry block.  A module global is the cell `py.globalCell m x`, and a read of it is
   `py.loadGlobal m x`, which falls back to the builtin `x` at run time.
@@ -278,12 +279,21 @@ def readLocal (c : ValId) (name : String) : TransM ValId := do
   requireDefined v name "UnboundLocalError"
     s!"cannot access local variable '{name}' where it is not associated with a value"
 
+/-- The module attributes CPython defines that the translation has no value for: unlike
+`__name__` and `__doc__`, the module body does not write them, so `loadGlobal` would find the
+`builtins` module's value or raise `NameError`.  A read or `del` of one is rejected. -/
+def moduleDunders : List String :=
+  ["__annotations__", "__builtins__", "__cached__", "__file__", "__loader__", "__package__",
+   "__path__", "__spec__"]
+
 /-- Read the name `name` at `range`. -/
 def readName (name : String) (range : SourceRange) : TransM ValId := do
   let name ← mangled name
   match ← place name with
   | .cell c => readLocal c name
-  | .global => build (loadGlobal (← read).module name)
+  | .global =>
+    if moduleDunders.contains name then unsupportedValue s!"module attribute {name}" range
+    else build (loadGlobal (← read).module name)
   | .free => unsupportedValue "closure variable" range
   | .unresolved => unsupportedValue "unresolved local" range
 
@@ -292,7 +302,10 @@ def writeName (name : String) (v : ValId) (range : SourceRange) : TransM Unit :=
   let name ← mangled name
   match ← place name with
   | .cell c => discard <| build (writeCell c v)
-  | .global => discard <| build (writeGlobal (← read).module name v)
+  | .global =>
+    -- Rebinding `__builtins__` changes the builtins of the functions defined after it.
+    if name == "__builtins__" then reject s!"module attribute {name}" range
+    else discard <| build (writeGlobal (← read).module name v)
   | .free => reject "nonlocal assignment" range
   | .unresolved => reject "unresolved local" range
 
@@ -307,9 +320,11 @@ def deleteName (name : String) (range : SourceRange) : TransM Unit := do
     discard <| readLocal c name
     discard <| build (writeCell c (← undef))
   | .global =>
-    let m := (← read).module
-    discard <| build (requireGlobal m name)
-    discard <| build (writeGlobal m name (← undef))
+    if moduleDunders.contains name then reject s!"module attribute {name}" range
+    else
+      let m := (← read).module
+      discard <| build (requireGlobal m name)
+      discard <| build (writeGlobal m name (← undef))
   | .free => reject "nonlocal del" range
   | .unresolved => reject "unresolved local" range
 
@@ -1207,6 +1222,12 @@ end
 
 /-! ## Modules -/
 
+/-- The module's docstring: the value of a first statement that is a string constant. -/
+def docstring? (stmts : Array (stmt SourceRange)) : Option String :=
+  match stmts[0]? with
+  | some (stmt.Expr _ (expr.Constant _ (constant.ConString _ ⟨_, s⟩) _)) => some s
+  | _ => none
+
 /-- Run `act` as the body of a function, then return `None` if it falls off the end. -/
 def runBody (ctx : Ctx) (st : TState) (range : SourceRange) (act : TransM Unit) :
     PyM SourceRange TState := do
@@ -1268,7 +1289,14 @@ def translate (moduleName : String) (stmts : Array (stmt SourceRange)) : Result 
   let (body, st) := builtFunc range <| buildFuncTypedWith bodyName #[] range fun _ =>
     runBody ctx st range do
       writeName "__name__" (← build (strLit moduleName)) .none
-      transStmts stmts
+      match docstring? stmts, stmts[0]? with
+      | some s, some d =>
+        -- As CPython's `STORE_NAME __doc__`, on the docstring's line, instead of the statement.
+        withRange d.ann do writeName "__doc__" (← build (strLit s)) .none
+        transStmts (stmts.extract 1)
+      | _, _ =>
+        writeName "__doc__" (← build noneLit) .none
+        transStmts stmts
   let mut funcs := #[body]
   let mut st := st
   let mut i := 0

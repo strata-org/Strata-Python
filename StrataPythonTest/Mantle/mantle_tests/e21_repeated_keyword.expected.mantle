@@ -5,6 +5,9 @@ module e21_repeated_keyword {
       %str.0 : py.Value = py.strLit("e21_repeated_keyword")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("e21_repeated_keyword", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("e21_repeated_keyword", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %f.0 : py.Value = py.loadGlobal("e21_repeated_keyword", "f") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %str.1 : py.Value = py.strLit("k")
@@ -13,8 +16,8 @@ module e21_repeated_keyword {
       %int.1 : py.Value = py.intLit(2)
       %kwargs.0 : py.Value = py.mkKwargs(%str.1, %int.0, %str.2, %int.1)
       %call.0 : py.Value = py.call(%f.0, %tuple.0, %kwargs.0) ^propagate.0()
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

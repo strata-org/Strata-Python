@@ -4,9 +4,12 @@ module m_assert {
       %str.0 : py.Value = py.strLit("m_assert")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %KeyError.0 : py.Value = py.loadGlobal("m_assert", "KeyError") ^propagate.0()
       %AssertionError.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "AssertionError")
-      %set.1 : base.Unit = base.refSet[py.Value](%AssertionError.cell.0, %KeyError.0)
+      %set.2 : base.Unit = base.refSet[py.Value](%AssertionError.cell.0, %KeyError.0)
       %c.1 : py.Value = py.loadGlobal("m_assert", "c") ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%c.1) ^propagate.0()
       branch(%cond.0) ^ok.0() ^fail.0()
@@ -22,8 +25,8 @@ module m_assert {
       branch(%cond.1) ^ok.1() ^fail.1()
     fail.1():
       %AssertionError.1 : py.Value = py.assertionError
-      %m.6 : py.Value = py.loadGlobal("m_assert", "m") ^propagate.0()
-      %args.1 : py.Value = py.mkTuple(%m.6)
+      %m.7 : py.Value = py.loadGlobal("m_assert", "m") ^propagate.0()
+      %args.1 : py.Value = py.mkTuple(%m.7)
       %kwargs.1 : py.Value = py.mkKwargs
       %exc.1 : py.Value = py.call(%AssertionError.1, %args.1, %kwargs.1) ^propagate.0()
       jump ^propagate.0(%exc.1)
@@ -79,7 +82,7 @@ module m_assert {
     head.0():
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %x.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "x")
-      %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %item.0)
+      %set.3 : base.Unit = base.refSet[py.Value](%x.cell.0, %item.0)
       %x.0 : py.Value = py.loadGlobal("m_assert", "x") ^propagate.0()
       %cond.7 : base.Bool = py.truthy(%x.0) ^propagate.0()
       branch(%cond.7) ^ok.5() ^fail.5()
@@ -98,9 +101,9 @@ module m_assert {
     exit.0():
       %clo.0 : py.Value = py.mkClosure(@m_assert.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "f")
-      %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %set.4 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.7 : py.Value):
       %exc.8 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.7)

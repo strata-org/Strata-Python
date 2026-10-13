@@ -4,15 +4,18 @@ module t16_chained_cmp {
       %str.0 : py.Value = py.strLit("t16_chained_cmp")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t16_chained_cmp", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("t16_chained_cmp", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %int.0 : py.Value = py.intLit(5)
       %x.cell.0 : base.Ref(py.Value) = py.globalCell("t16_chained_cmp", "x")
-      %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
+      %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
       %int.1 : py.Value = py.intLit(10)
       %y.cell.0 : base.Ref(py.Value) = py.globalCell("t16_chained_cmp", "y")
-      %set.2 : base.Unit = base.refSet[py.Value](%y.cell.0, %int.1)
+      %set.3 : base.Unit = base.refSet[py.Value](%y.cell.0, %int.1)
       %int.2 : py.Value = py.intLit(15)
       %z.cell.0 : base.Ref(py.Value) = py.globalCell("t16_chained_cmp", "z")
-      %set.3 : base.Unit = base.refSet[py.Value](%z.cell.0, %int.2)
+      %set.4 : base.Unit = base.refSet[py.Value](%z.cell.0, %int.2)
       %x.0 : py.Value = py.loadGlobal("t16_chained_cmp", "x") ^propagate.0()
       %y.0 : py.Value = py.loadGlobal("t16_chained_cmp", "y") ^propagate.0()
       %lt.0 : py.Value = py.lt(%x.0, %y.0) ^propagate.0()
@@ -24,7 +27,7 @@ module t16_chained_cmp {
       jump ^join.0(%lt.1)
     join.0(%cmp.0 : py.Value):
       %r1.cell.0 : base.Ref(py.Value) = py.globalCell("t16_chained_cmp", "r1")
-      %set.4 : base.Unit = base.refSet[py.Value](%r1.cell.0, %cmp.0)
+      %set.5 : base.Unit = base.refSet[py.Value](%r1.cell.0, %cmp.0)
       %int.3 : py.Value = py.intLit(0)
       %x.1 : py.Value = py.loadGlobal("t16_chained_cmp", "x") ^propagate.0()
       %lt.2 : py.Value = py.lt(%int.3, %x.1) ^propagate.0()
@@ -41,7 +44,7 @@ module t16_chained_cmp {
       jump ^join.1(%lt.4)
     join.1(%cmp.1 : py.Value):
       %r2.cell.0 : base.Ref(py.Value) = py.globalCell("t16_chained_cmp", "r2")
-      %set.5 : base.Unit = base.refSet[py.Value](%r2.cell.0, %cmp.1)
+      %set.6 : base.Unit = base.refSet[py.Value](%r2.cell.0, %cmp.1)
       %x.2 : py.Value = py.loadGlobal("t16_chained_cmp", "x") ^propagate.0()
       %y.2 : py.Value = py.loadGlobal("t16_chained_cmp", "y") ^propagate.0()
       %ltE.0 : py.Value = py.ltE(%x.2, %y.2) ^propagate.0()
@@ -53,7 +56,7 @@ module t16_chained_cmp {
       jump ^join.2(%lt.5)
     join.2(%cmp.2 : py.Value):
       %r3.cell.0 : base.Ref(py.Value) = py.globalCell("t16_chained_cmp", "r3")
-      %set.6 : base.Unit = base.refSet[py.Value](%r3.cell.0, %cmp.2)
+      %set.7 : base.Unit = base.refSet[py.Value](%r3.cell.0, %cmp.2)
       %x.3 : py.Value = py.loadGlobal("t16_chained_cmp", "x") ^propagate.0()
       %y.3 : py.Value = py.loadGlobal("t16_chained_cmp", "y") ^propagate.0()
       %lt.6 : py.Value = py.lt(%x.3, %y.3) ^propagate.0()
@@ -65,9 +68,9 @@ module t16_chained_cmp {
       jump ^join.3(%gtE.0)
     join.3(%cmp.3 : py.Value):
       %r4.cell.0 : base.Ref(py.Value) = py.globalCell("t16_chained_cmp", "r4")
-      %set.7 : base.Unit = base.refSet[py.Value](%r4.cell.0, %cmp.3)
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %set.8 : base.Unit = base.refSet[py.Value](%r4.cell.0, %cmp.3)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
