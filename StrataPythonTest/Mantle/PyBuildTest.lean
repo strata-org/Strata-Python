@@ -11,6 +11,7 @@ import StrataMantle.Env.WF
 -- The builder and the printer run as compiled code below.
 meta import StrataMantle.DDM
 meta import StrataPython.Mantle.Build
+meta import StrataPythonTest.Mantle.TestUtil
 meta import StrataMantle.Env.WF
 -- `decide +kernel` unfolds the checker, the environment and core's array operations.
 import all StrataMantle.WF
@@ -59,8 +60,8 @@ the caller. -/
 private def f : Except Errors (Func Py.env Unit) :=
   buildFunc (Py.pn "f") #["x"] () fun args => do
     let y ← declareLocal "y"
-    let _ ← writeCell y (← emitFailing "sum" Py.add #v[] #[args[0]!, ← intLit 1])
-    emitReturn (← readCell y "y")
+    let _ ← writeCell y (← emitFailing (.str .base "sum") Py.add #v[] #[args[0]!, ← intLit 1])
+    emitReturn (← readCell y (stem "y"))
 
 example : Holds (Func.WF ∅) f := by decide +kernel
 
@@ -68,24 +69,21 @@ example : Holds (Func.WF ∅) f := by decide +kernel
 example : Holds (errTargets · = #[lbl "propagate" 0]) f := by decide +kernel
 
 /-- info: module py.f {
-  func @py.f(%0 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value):
-      %1 : base.String = const str "y"
-      %2 : py.Value = py.undef %1
-      %3 : base.Ref(py.Value) = base.refNew[py.Value] %2
-      %4 : base.Int = const int 1
-      %5 : py.Value = py.intLit %4
-      %6 : py.Value = py.add %0 %5 ^propagate.0()
-      %7 : base.Unit = base.refSet[py.Value] %3 %6
-      %8 : py.Value = base.refGet[py.Value] %3
-      %9 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %8
-      ret %9
-    propagate.0(%10 : py.Value):
-      %11 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %10
-      ret %11
+  func @py.f(%x.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%x.0 : py.Value):
+      %y.0 : py.Value = py.undef("y")
+      %y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%y.0)
+      %int.0 : py.Value = py.intLit(1)
+      %sum.0 : py.Value = py.add(%x.0, %int.0) ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%y.cell.0, %sum.0)
+      %y.1 : py.Value = base.refGet[py.Value](%y.cell.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%y.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-}
--/
+} -/
 #guard_msgs in
 #eval do IO.println (Func.toString (← IO.ofExcept f))
 
@@ -113,7 +111,7 @@ private def hWith (takesExc : Bool) : Except Errors (Func Py.env Unit) :=
     let except ← freshLabel
     withHandler except do emitReturn (← getAttr args[0]! "foo")
     -- `except:` — the exception is bound and ignored.
-    if takesExc then discard <| startBlockWith except "exc" else startBlock except
+    if takesExc then discard <| startBlockWith except (.str .base "exc") else startBlock except
     emitReturnNone
 
 private def h : Except Errors (Func Py.env Unit) := hWith true
@@ -146,8 +144,8 @@ private def r : Except Errors (Func Py.env Unit) :=
     let k ← freshLabel
     let c ← noneLit
     withHandlerTo (Build.goto k #[c]) do jump (← raiseTo args[0]!)
-    let pc ← freshVal "c"
-    let pe ← freshVal "exc"
+    let pc ← freshVal (.str .base "c")
+    let pe ← freshVal (.str .base "exc")
     startBlock k #[pc, pe]
     emitReturn pe.id
 
@@ -207,44 +205,41 @@ dispatches itself: no `superseded` or `disp` block. -/
 example : Holds (fun k => Func.WF ∅ k ∧ k.blocks.size = 9) (kWith false) := by decide +kernel
 
 /-- info: module py.k {
-  func @py.k(%0 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value):
-      %1 : base.String = const str "foo"
-      %2 : py.Value = py.attr %0 %1 ^finRaise.0()
-      %3 : py.Completion = py.completionReturn %2
-      jump ^fin.0(%3)
-    finRaise.0(%4 : py.Value):
-      %5 : py.Completion = py.completionRaise %4
-      jump ^fin.0(%5)
-    fin.0(%6 : py.Completion):
-      %7 : base.String = const str "cleanup"
-      %8 : py.Value = py.attr %0 %7 ^superseded.0(%6)
-      jump ^disp.0(%6)
-    superseded.0(%9 : py.Completion, %10 : py.Value):
-      %11 : py.Completion = py.completionRaise %10
-      jump ^disp.0(%11)
-    disp.0(%12 : py.Completion):
-      py.Completion.case %12 ^normal.0() ^ret.0() ^raise.0() ^unreachable.0() ^unreachable.1()
+  func @py.k(%x.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%x.0 : py.Value):
+      %foo.0 : py.Value = py.attr(%x.0, "foo") ^finRaise.0()
+      %comp.0 : py.Completion = py.completionReturn(%foo.0)
+      jump ^fin.0(%comp.0)
+    finRaise.0(%exc.0 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.0)
+      jump ^fin.0(%comp.1)
+    fin.0(%pending.0 : py.Completion):
+      %cleanup.0 : py.Value = py.attr(%x.0, "cleanup") ^superseded.0(%pending.0)
+      jump ^disp.0(%pending.0)
+    superseded.0(%carried.0 : py.Completion, %exc.1 : py.Value):
+      %comp.2 : py.Completion = py.completionRaise(%exc.1)
+      jump ^disp.0(%comp.2)
+    disp.0(%comp.3 : py.Completion):
+      py.Completion.case(%comp.3) ^normal.0() ^ret.0() ^raise.0() ^unreachable.0() ^unreachable.1()
     normal.0():
-      %13 : py.Value = py.noneLit
-      %14 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %13
-      ret %14
-    ret.0(%15 : py.Value):
-      %16 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %15
-      ret %16
-    raise.0(%17 : py.Value):
-      %18 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %17
-      ret %18
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    ret.0(%val.0 : py.Value):
+      %ret.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%val.0)
+      ret(%ret.1)
+    raise.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
     unreachable.0():
       unreachable
     unreachable.1():
       unreachable
-    propagate.0(%19 : py.Value):
-      %20 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %19
-      ret %20
+    propagate.0(%exc.4 : py.Value):
+      %exc.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
+      ret(%exc.5)
   }
-}
--/
+} -/
 #guard_msgs in
 #eval do IO.println (Func.toString (← IO.ofExcept k))
 
@@ -260,8 +255,8 @@ the module defines it.  `mkClosure` pairs the code with the cell holding `x`.  T
 functions are printed as a module. -/
 
 private def inner : Except Errors (Func Py.env Unit) :=
-  buildFuncTyped (Py.pn "inner") #[("x.cell", Py.cell.ty)] () fun args => do
-    emitReturn (← readCell args[0]! "x")
+  buildFuncTyped (Py.pn "inner") #[(cellStem "x", Py.cell.ty)] () fun args => do
+    emitReturn (← readCell args[0]! (stem "x"))
 
 /-- `outer`, whose closure names `target` and captures the cell holding `x`, or `x` itself if
 `byValue`. -/
@@ -280,32 +275,32 @@ private def closures : Except Errors (Module Py.env Unit) := closuresWith (Py.pn
 
 example : Holds Module.WF closures := by decide +kernel
 
+-- No name has a `.` inside a segment: `x.cell` is two segments.
+#guard match closures with | .ok m => (TestUtil.dottedNames m).isEmpty | .error _ => false
+
 /-- info: module py.closures {
-  func @py.outer(%0 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value):
-      %1 : base.String = const str "x"
-      %2 : py.Value = py.undef %1
-      %3 : base.Ref(py.Value) = base.refNew[py.Value] %2
-      %4 : base.Unit = base.refSet[py.Value] %3 %0
-      %5 : base.Code = const @py.inner
-      %6 : py.Value = py.mkClosure %5 %3
-      %7 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %6
-      ret %7
-    propagate.0(%8 : py.Value):
-      %9 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %8
-      ret %9
+  func @py.outer(%x.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%x.0 : py.Value):
+      %x.1 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.1)
+      %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.0)
+      %clo.0 : py.Value = py.mkClosure(@py.inner, %x.cell.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%clo.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-  func @py.inner(%0 : base.Ref(py.Value)) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : base.Ref(py.Value)):
-      %1 : py.Value = base.refGet[py.Value] %0
-      %2 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %1
-      ret %2
-    propagate.0(%3 : py.Value):
-      %4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %3
-      ret %4
+  func @py.inner(%x.cell.0 : base.Ref(py.Value)) -> base.Except(py.Value, py.Value) {
+    entry.0(%x.cell.0 : base.Ref(py.Value)):
+      %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-}
--/
+} -/
 #guard_msgs in
 #eval do IO.println (toString (← IO.ofExcept closures))
 
@@ -333,59 +328,40 @@ private def globals : Except Errors (Func Py.env Unit) :=
     let _ ← writeGlobal "m" "c" (← importModule "a.b")
     let _ ← writeGlobal "m" "y" (← importFrom "a.b" "x")
     let n ← readGlobal "m" "n"
-    let sum ← emitFailing "sum" Py.add #v[] #[n, ← intLit 1]
+    let sum ← emitFailing (.str .base "sum") Py.add #v[] #[n, ← intLit 1]
     let _ ← writeGlobal "m" "n" sum
     emitReturnNone
 
 example : Holds (Func.WF ∅) globals := by decide +kernel
 
-/-- info: module py.|<module>| {
-  func @py.|<module>|() -> base.Except(py.Value, py.Value) {
+/-- info: module |py.<module>| {
+  func @|py.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
-      %0 : base.String = const str "a.b"
-      %1 : py.Value = py.importModule %0 ^propagate.0()
-      %2 : base.String = const str "a"
-      %3 : py.Value = py.importModule %2 ^propagate.0()
-      %4 : base.String = const str "m"
-      %5 : base.String = const str "a"
-      %6 : base.Ref(py.Value) = py.globalCell %4 %5
-      %7 : base.Unit = base.refSet[py.Value] %6 %3
-      %8 : base.String = const str "a.b"
-      %9 : py.Value = py.importModule %8 ^propagate.0()
-      %10 : base.String = const str "m"
-      %11 : base.String = const str "c"
-      %12 : base.Ref(py.Value) = py.globalCell %10 %11
-      %13 : base.Unit = base.refSet[py.Value] %12 %9
-      %14 : base.String = const str "a.b"
-      %15 : base.String = const str "x"
-      %16 : py.Value = py.importFrom %14 %15 ^propagate.0()
-      %17 : base.String = const str "m"
-      %18 : base.String = const str "y"
-      %19 : base.Ref(py.Value) = py.globalCell %17 %18
-      %20 : base.Unit = base.refSet[py.Value] %19 %16
-      %21 : base.String = const str "m"
-      %22 : base.String = const str "n"
-      %23 : base.Ref(py.Value) = py.globalCell %21 %22
-      %24 : py.Value = base.refGet[py.Value] %23
-      %25 : base.String = const str "NameError"
-      %26 : base.String = const str "name 'n' is not defined"
-      %27 : py.Value = py.requireDefined %24 %25 %26 ^propagate.0()
-      %28 : base.Int = const int 1
-      %29 : py.Value = py.intLit %28
-      %30 : py.Value = py.add %27 %29 ^propagate.0()
-      %31 : base.String = const str "m"
-      %32 : base.String = const str "n"
-      %33 : base.Ref(py.Value) = py.globalCell %31 %32
-      %34 : base.Unit = base.refSet[py.Value] %33 %30
-      %35 : py.Value = py.noneLit
-      %36 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %35
-      ret %36
-    propagate.0(%37 : py.Value):
-      %38 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %37
-      ret %38
+      %mod.0 : py.Value = py.importModule("a.b") ^propagate.0()
+      %mod.1 : py.Value = py.importModule("a") ^propagate.0()
+      %a.cell.0 : base.Ref(py.Value) = py.globalCell("m", "a")
+      %set.0 : base.Unit = base.refSet[py.Value](%a.cell.0, %mod.1)
+      %mod.2 : py.Value = py.importModule("a.b") ^propagate.0()
+      %c.cell.0 : base.Ref(py.Value) = py.globalCell("m", "c")
+      %set.1 : base.Unit = base.refSet[py.Value](%c.cell.0, %mod.2)
+      %x.0 : py.Value = py.importFrom("a.b", "x") ^propagate.0()
+      %y.cell.0 : base.Ref(py.Value) = py.globalCell("m", "y")
+      %set.2 : base.Unit = base.refSet[py.Value](%y.cell.0, %x.0)
+      %n.cell.0 : base.Ref(py.Value) = py.globalCell("m", "n")
+      %n.5 : py.Value = base.refGet[py.Value](%n.cell.0)
+      %n.6 : py.Value = py.requireDefined(%n.5, "NameError", "name 'n' is not defined") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %sum.0 : py.Value = py.add(%n.6, %int.0) ^propagate.0()
+      %n.cell.1 : base.Ref(py.Value) = py.globalCell("m", "n")
+      %set.3 : base.Unit = base.refSet[py.Value](%n.cell.1, %sum.0)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-}
--/
+} -/
 #guard_msgs in
 #eval do IO.println (Func.toString (← IO.ofExcept globals))
 
@@ -403,25 +379,23 @@ private def mAdd : Name := .str (.str .base "m") "add"
 private def addFn : Except Errors (Func Py.env Unit) :=
   buildFunc mAdd #["x"] () fun args => do
     let _ ← funcValue mAdd
-    emitReturn (← emitFailing "sum" Py.add #v[] #[args[0]!, args[0]!])
+    emitReturn (← emitFailing (.str .base "sum") Py.add #v[] #[args[0]!, args[0]!])
 
 example : OptHolds (NameSet.of? #[mAdd]) (fun fs => Holds (Func.WF fs) addFn) := by
   decide +kernel
 
 /-- info: module m.add {
-  func @m.add(%0 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value):
-      %1 : base.Code = const @m.add
-      %2 : py.Value = py.mkClosure %1
-      %3 : py.Value = py.add %0 %0 ^propagate.0()
-      %4 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %3
-      ret %4
-    propagate.0(%5 : py.Value):
-      %6 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %5
-      ret %6
+  func @m.add(%x.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%x.0 : py.Value):
+      %clo.0 : py.Value = py.mkClosure(@m.add)
+      %sum.0 : py.Value = py.add(%x.0, %x.0) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%sum.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-}
--/
+} -/
 #guard_msgs in
 #eval do IO.println (Func.toString (← IO.ofExcept addFn))
 
@@ -465,5 +439,7 @@ private def m : Except Errors (Module Py.env Unit) :=
   return { name := Py.pn "test", funcs := #[← f, ← g, ← h, ← k], info := () }
 
 example : Holds Module.WF m := by decide +kernel
+
+#guard match m with | .ok m => (TestUtil.dottedNames m).isEmpty | .error _ => false
 
 end StrataPython.Mantle.PyBuildTest

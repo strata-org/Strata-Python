@@ -1,90 +1,63 @@
 -- unsupported: match is not supported at 3:4-11:23
 module p34_match {
-  func @p34_match.|<module>|() -> base.Except(py.Value, py.Value) {
+  func @|p34_match.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
-      %0 : base.String = const str "p34_match"
-      %1 : py.Value = py.strLit %0
-      %2 : base.String = const str "p34_match"
-      %3 : base.String = const str "__name__"
-      %4 : base.Ref(py.Value) = py.globalCell %2 %3
-      %5 : base.Unit = base.refSet[py.Value] %4 %1
-      %6 : base.Code = const @p34_match.f
-      %7 : py.Value = py.mkClosure %6
-      %8 : base.String = const str "p34_match"
-      %9 : base.String = const str "f"
-      %10 : base.Ref(py.Value) = py.globalCell %8 %9
-      %11 : base.Unit = base.refSet[py.Value] %10 %7
-      %12 : py.Value = py.noneLit
-      %13 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %12
-      ret %13
-    propagate.0(%14 : py.Value):
-      %15 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %14
-      ret %15
+      %str.0 : py.Value = py.strLit("p34_match")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p34_match", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure(@p34_match.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("p34_match", "f")
+      %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-  func @p34_match.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value, %1 : py.Value):
-      %2 : base.String = const str "cmd"
-      %3 : py.Value = py.undef %2
-      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
-      %5 : base.String = const str "x"
-      %6 : py.Value = py.undef %5
-      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
-      %8 : base.String = const str "rest"
-      %9 : py.Value = py.undef %8
-      %10 : base.Ref(py.Value) = base.refNew[py.Value] %9
-      %11 : base.String = const str "v"
-      %12 : py.Value = py.undef %11
-      %13 : base.Ref(py.Value) = base.refNew[py.Value] %12
-      %14 : base.String = const str "others"
-      %15 : py.Value = py.undef %14
-      %16 : base.Ref(py.Value) = base.refNew[py.Value] %15
-      %17 : base.String = const str "px"
-      %18 : py.Value = py.undef %17
-      %19 : base.Ref(py.Value) = base.refNew[py.Value] %18
-      %20 : base.String = const str "whole"
-      %21 : py.Value = py.undef %20
-      %22 : base.Ref(py.Value) = base.refNew[py.Value] %21
-      %23 : py.Value = py.tupleLen %0
-      %24 : base.String = const str "cmd"
-      %25 : py.Value = py.undef %24
-      %26 : py.Value = py.mkTuple %25
-      %27 : py.Value = py.noneLit
-      %28 : py.Value = py.getSlice %26 %23 %27 %27 ^propagate.0()
-      %29 : py.Value = py.add %0 %28 ^propagate.0()
-      %30 : base.Int = const int 0
-      %31 : py.Value = py.intLit %30
-      %32 : py.Value = py.getItem %29 %31 ^propagate.0()
-      %33 : base.String = const str "cmd"
-      %34 : py.Value = py.strLit %33
-      %35 : py.Value = py.dictGet %1 %34 %32
-      %36 : py.Value = py.in %34 %1 ^propagate.0()
-      %37 : base.Unit = py.dictDiscard %1 %34
-      %38 : py.Value = py.lt %31 %23 ^propagate.0()
-      %39 : py.Value = py.mult %36 %38 ^propagate.0()
-      %40 : base.Int = const int 0
-      %41 : base.String = const str "TypeError"
-      %42 : base.String = const str "f() got multiple values for argument 'cmd'"
-      %43 : base.Unit = py.requireAtMost %39 %40 %41 %42 ^propagate.0()
-      %44 : base.String = const str "kwargs"
-      %45 : py.Value = py.undef %44
-      %46 : py.Value = py.dictFirstKey %1 %45
-      %47 : base.String = const str "TypeError"
-      %48 : base.String = const str "f() got an unexpected keyword argument {}"
-      %49 : base.Unit = py.requireUndefined %46 %47 %48 ^propagate.0()
-      %50 : base.Int = const int 1
-      %51 : base.String = const str "TypeError"
-      %52 : base.String = const str "f() takes 1 positional argument but {} {was} given"
-      %53 : base.Unit = py.requireAtMost %23 %50 %51 %52 ^propagate.0()
-      %54 : base.String = const str "TypeError"
-      %55 : base.String = const str "f() missing 1 required positional argument: 'cmd'"
-      %56 : py.Value = py.requireDefined %35 %54 %55 ^propagate.0()
-      %57 : base.Unit = base.refSet[py.Value] %4 %56
-      %58 : py.Value = py.noneLit
-      %59 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %58
-      ret %59
-    propagate.0(%60 : py.Value):
-      %61 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %60
-      ret %61
+  func @p34_match.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %cmd.0 : py.Value = py.undef("cmd")
+      %cmd.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%cmd.0)
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %rest.0 : py.Value = py.undef("rest")
+      %rest.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%rest.0)
+      %v.0 : py.Value = py.undef("v")
+      %v.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%v.0)
+      %others.0 : py.Value = py.undef("others")
+      %others.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%others.0)
+      %px.0 : py.Value = py.undef("px")
+      %px.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%px.0)
+      %whole.0 : py.Value = py.undef("whole")
+      %whole.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%whole.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %cmd.1 : py.Value = py.undef("cmd")
+      %fill.0 : py.Value = py.mkTuple(%cmd.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("cmd")
+      %cmd.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "f() got multiple values for argument 'cmd'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "f() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %cmd.3 : py.Value = py.requireDefined(%cmd.2, "TypeError", "f() missing 1 required positional argument: 'cmd'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%cmd.cell.0, %cmd.3)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
 }
 

@@ -1,137 +1,86 @@
 module t14_bool_short {
-  func @t14_bool_short.|<module>|() -> base.Except(py.Value, py.Value) {
+  func @|t14_bool_short.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
-      %0 : base.String = const str "t14_bool_short"
-      %1 : py.Value = py.strLit %0
-      %2 : base.String = const str "t14_bool_short"
-      %3 : base.String = const str "__name__"
-      %4 : base.Ref(py.Value) = py.globalCell %2 %3
-      %5 : base.Unit = base.refSet[py.Value] %4 %1
-      %6 : base.Bool = const bool (true)
-      %7 : py.Value = py.boolLit %6
-      %8 : base.String = const str "t14_bool_short"
-      %9 : base.String = const str "a"
-      %10 : base.Ref(py.Value) = py.globalCell %8 %9
-      %11 : base.Unit = base.refSet[py.Value] %10 %7
-      %12 : base.Bool = const bool (false)
-      %13 : py.Value = py.boolLit %12
-      %14 : base.String = const str "t14_bool_short"
-      %15 : base.String = const str "b"
-      %16 : base.Ref(py.Value) = py.globalCell %14 %15
-      %17 : base.Unit = base.refSet[py.Value] %16 %13
-      %18 : base.String = const str "t14_bool_short"
-      %19 : base.String = const str "a"
-      %20 : base.Ref(py.Value) = py.globalCell %18 %19
-      %21 : py.Value = base.refGet[py.Value] %20
-      %22 : base.String = const str "NameError"
-      %23 : base.String = const str "name 'a' is not defined"
-      %24 : py.Value = py.requireDefined %21 %22 %23 ^propagate.0()
-      %25 : base.Bool = py.truthy %24 ^propagate.0()
-      branch %25 ^and.0() ^join.0(%24)
+      %str.0 : py.Value = py.strLit("t14_bool_short")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %bool.0 : py.Value = py.boolLit(true)
+      %a.cell.0 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "a")
+      %set.1 : base.Unit = base.refSet[py.Value](%a.cell.0, %bool.0)
+      %bool.1 : py.Value = py.boolLit(false)
+      %b.cell.0 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "b")
+      %set.2 : base.Unit = base.refSet[py.Value](%b.cell.0, %bool.1)
+      %a.cell.1 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "a")
+      %a.0 : py.Value = base.refGet[py.Value](%a.cell.1)
+      %a.1 : py.Value = py.requireDefined(%a.0, "NameError", "name 'a' is not defined") ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%a.1) ^propagate.0()
+      branch(%cond.0) ^and.0() ^join.0(%a.1)
     and.0():
-      %26 : base.String = const str "t14_bool_short"
-      %27 : base.String = const str "b"
-      %28 : base.Ref(py.Value) = py.globalCell %26 %27
-      %29 : py.Value = base.refGet[py.Value] %28
-      %30 : base.String = const str "NameError"
-      %31 : base.String = const str "name 'b' is not defined"
-      %32 : py.Value = py.requireDefined %29 %30 %31 ^propagate.0()
-      jump ^join.0(%32)
-    join.0(%33 : py.Value):
-      %34 : base.String = const str "t14_bool_short"
-      %35 : base.String = const str "r1"
-      %36 : base.Ref(py.Value) = py.globalCell %34 %35
-      %37 : base.Unit = base.refSet[py.Value] %36 %33
-      %38 : base.String = const str "t14_bool_short"
-      %39 : base.String = const str "a"
-      %40 : base.Ref(py.Value) = py.globalCell %38 %39
-      %41 : py.Value = base.refGet[py.Value] %40
-      %42 : base.String = const str "NameError"
-      %43 : base.String = const str "name 'a' is not defined"
-      %44 : py.Value = py.requireDefined %41 %42 %43 ^propagate.0()
-      %45 : base.Bool = py.truthy %44 ^propagate.0()
-      branch %45 ^join.1(%44) ^or.0()
+      %b.cell.1 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "b")
+      %b.0 : py.Value = base.refGet[py.Value](%b.cell.1)
+      %b.1 : py.Value = py.requireDefined(%b.0, "NameError", "name 'b' is not defined") ^propagate.0()
+      jump ^join.0(%b.1)
+    join.0(%bool.2 : py.Value):
+      %r1.cell.0 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "r1")
+      %set.3 : base.Unit = base.refSet[py.Value](%r1.cell.0, %bool.2)
+      %a.cell.2 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "a")
+      %a.2 : py.Value = base.refGet[py.Value](%a.cell.2)
+      %a.3 : py.Value = py.requireDefined(%a.2, "NameError", "name 'a' is not defined") ^propagate.0()
+      %cond.1 : base.Bool = py.truthy(%a.3) ^propagate.0()
+      branch(%cond.1) ^join.1(%a.3) ^or.0()
     or.0():
-      %46 : base.String = const str "t14_bool_short"
-      %47 : base.String = const str "b"
-      %48 : base.Ref(py.Value) = py.globalCell %46 %47
-      %49 : py.Value = base.refGet[py.Value] %48
-      %50 : base.String = const str "NameError"
-      %51 : base.String = const str "name 'b' is not defined"
-      %52 : py.Value = py.requireDefined %49 %50 %51 ^propagate.0()
-      jump ^join.1(%52)
-    join.1(%53 : py.Value):
-      %54 : base.String = const str "t14_bool_short"
-      %55 : base.String = const str "r2"
-      %56 : base.Ref(py.Value) = py.globalCell %54 %55
-      %57 : base.Unit = base.refSet[py.Value] %56 %53
-      %58 : base.String = const str "t14_bool_short"
-      %59 : base.String = const str "a"
-      %60 : base.Ref(py.Value) = py.globalCell %58 %59
-      %61 : py.Value = base.refGet[py.Value] %60
-      %62 : base.String = const str "NameError"
-      %63 : base.String = const str "name 'a' is not defined"
-      %64 : py.Value = py.requireDefined %61 %62 %63 ^propagate.0()
-      %65 : base.Bool = py.truthy %64 ^propagate.0()
-      branch %65 ^and.1() ^join.3(%64)
+      %b.cell.2 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "b")
+      %b.2 : py.Value = base.refGet[py.Value](%b.cell.2)
+      %b.3 : py.Value = py.requireDefined(%b.2, "NameError", "name 'b' is not defined") ^propagate.0()
+      jump ^join.1(%b.3)
+    join.1(%bool.3 : py.Value):
+      %r2.cell.0 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "r2")
+      %set.4 : base.Unit = base.refSet[py.Value](%r2.cell.0, %bool.3)
+      %a.cell.3 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "a")
+      %a.4 : py.Value = base.refGet[py.Value](%a.cell.3)
+      %a.5 : py.Value = py.requireDefined(%a.4, "NameError", "name 'a' is not defined") ^propagate.0()
+      %cond.2 : base.Bool = py.truthy(%a.5) ^propagate.0()
+      branch(%cond.2) ^and.1() ^join.3(%a.5)
     and.1():
-      %66 : base.String = const str "t14_bool_short"
-      %67 : base.String = const str "b"
-      %68 : base.Ref(py.Value) = py.globalCell %66 %67
-      %69 : py.Value = base.refGet[py.Value] %68
-      %70 : base.String = const str "NameError"
-      %71 : base.String = const str "name 'b' is not defined"
-      %72 : py.Value = py.requireDefined %69 %70 %71 ^propagate.0()
-      jump ^join.3(%72)
-    join.3(%73 : py.Value):
-      %74 : base.Bool = py.truthy %73 ^propagate.0()
-      branch %74 ^join.2(%73) ^or.1()
+      %b.cell.3 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "b")
+      %b.4 : py.Value = base.refGet[py.Value](%b.cell.3)
+      %b.5 : py.Value = py.requireDefined(%b.4, "NameError", "name 'b' is not defined") ^propagate.0()
+      jump ^join.3(%b.5)
+    join.3(%bool.4 : py.Value):
+      %cond.3 : base.Bool = py.truthy(%bool.4) ^propagate.0()
+      branch(%cond.3) ^join.2(%bool.4) ^or.1()
     or.1():
-      %75 : base.String = const str "t14_bool_short"
-      %76 : base.String = const str "a"
-      %77 : base.Ref(py.Value) = py.globalCell %75 %76
-      %78 : py.Value = base.refGet[py.Value] %77
-      %79 : base.String = const str "NameError"
-      %80 : base.String = const str "name 'a' is not defined"
-      %81 : py.Value = py.requireDefined %78 %79 %80 ^propagate.0()
-      jump ^join.2(%81)
-    join.2(%82 : py.Value):
-      %83 : base.String = const str "t14_bool_short"
-      %84 : base.String = const str "r3"
-      %85 : base.Ref(py.Value) = py.globalCell %83 %84
-      %86 : base.Unit = base.refSet[py.Value] %85 %82
-      %87 : base.Int = const int 0
-      %88 : py.Value = py.intLit %87
-      %89 : base.Bool = py.truthy %88 ^propagate.0()
-      branch %89 ^join.4(%88) ^or.2()
+      %a.cell.4 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "a")
+      %a.6 : py.Value = base.refGet[py.Value](%a.cell.4)
+      %a.7 : py.Value = py.requireDefined(%a.6, "NameError", "name 'a' is not defined") ^propagate.0()
+      jump ^join.2(%a.7)
+    join.2(%bool.5 : py.Value):
+      %r3.cell.0 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "r3")
+      %set.5 : base.Unit = base.refSet[py.Value](%r3.cell.0, %bool.5)
+      %int.0 : py.Value = py.intLit(0)
+      %cond.4 : base.Bool = py.truthy(%int.0) ^propagate.0()
+      branch(%cond.4) ^join.4(%int.0) ^or.2()
     or.2():
-      %90 : base.Int = const int 42
-      %91 : py.Value = py.intLit %90
-      jump ^join.4(%91)
-    join.4(%92 : py.Value):
-      %93 : base.String = const str "t14_bool_short"
-      %94 : base.String = const str "x"
-      %95 : base.Ref(py.Value) = py.globalCell %93 %94
-      %96 : base.Unit = base.refSet[py.Value] %95 %92
-      %97 : base.String = const str "hello"
-      %98 : py.Value = py.strLit %97
-      %99 : base.Bool = py.truthy %98 ^propagate.0()
-      branch %99 ^and.2() ^join.5(%98)
+      %int.1 : py.Value = py.intLit(42)
+      jump ^join.4(%int.1)
+    join.4(%bool.6 : py.Value):
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "x")
+      %set.6 : base.Unit = base.refSet[py.Value](%x.cell.0, %bool.6)
+      %str.1 : py.Value = py.strLit("hello")
+      %cond.5 : base.Bool = py.truthy(%str.1) ^propagate.0()
+      branch(%cond.5) ^and.2() ^join.5(%str.1)
     and.2():
-      %100 : base.String = const str "world"
-      %101 : py.Value = py.strLit %100
-      jump ^join.5(%101)
-    join.5(%102 : py.Value):
-      %103 : base.String = const str "t14_bool_short"
-      %104 : base.String = const str "y"
-      %105 : base.Ref(py.Value) = py.globalCell %103 %104
-      %106 : base.Unit = base.refSet[py.Value] %105 %102
-      %107 : py.Value = py.noneLit
-      %108 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %107
-      ret %108
-    propagate.0(%109 : py.Value):
-      %110 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %109
-      ret %110
+      %str.2 : py.Value = py.strLit("world")
+      jump ^join.5(%str.2)
+    join.5(%bool.7 : py.Value):
+      %y.cell.0 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "y")
+      %set.7 : base.Unit = base.refSet[py.Value](%y.cell.0, %bool.7)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
 }
 

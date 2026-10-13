@@ -135,7 +135,7 @@ declared by a layered environment. It is split across two directories:
 
 | Directory | Contents | Tests |
 |---|---|---|
-| `StrataMantle/` | The core IR, builder, environment DSL and well-formedness checker (namespace `Strata.Mantle`). Imports nothing from StrataPython | `StrataMantleTest/` |
+| `StrataMantle/` | The core IR, builder, environment DSL, well-formedness checker, and the printer and reader of its text form (namespace `Strata.Mantle`). Imports nothing from StrataPython | `StrataMantleTest/`; `StrataPythonTestExtra/MantleReadTest.lean` reads every translator golden back |
 | `StrataPython/Mantle/` | Python on Mantle: the Python environment (`Env.lean`), the emission helpers (`Build.lean`), name resolution (`Scope.lean`), the translator (`Translate.lean`) and the `pymantle mantle` command (`Cli.lean`) | `StrataPythonTest/Mantle/`; `StrataPythonTestExtra/MantleTranslateTest.lean` and `PyScopeTest.lean` run the translator and the scope pass over the programs in `StrataPythonTest/Mantle/mantle_tests/`, listed in `StrataPythonTest/Mantle/mantle_tests.txt` |
 
 [`docs/Mantle.md`](./docs/Mantle.md) is the Mantle reference, and
@@ -143,8 +143,11 @@ declared by a layered environment. It is split across two directories:
 
 `lake exe pymantle mantle FILE` prints the diagnostics and the Mantle module for `FILE`, a
 `.py` file (parsed with `python -m strata_python.gen`; `PYTHON` selects the interpreter) or a
-Python Ion file. `lake exe pymantle features FILE` prints the Python features a Python Ion
-file uses; `pymantle --help` lists the subcommands.
+Python Ion file. `lake exe pymantle read FILE` reads a printed Mantle module, such as a
+translator golden, and prints it again. Both print constants folded into their uses, or
+with `--full` each on its own line. `lake exe pymantle
+features FILE` prints the Python features a Python Ion file uses; `pymantle --help` lists the
+subcommands.
 
 ## Spec quantifiers
 

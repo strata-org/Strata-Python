@@ -1,108 +1,72 @@
 module p09_read_before_assign {
-  func @p09_read_before_assign.|<module>|() -> base.Except(py.Value, py.Value) {
+  func @|p09_read_before_assign.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
-      %0 : base.String = const str "p09_read_before_assign"
-      %1 : py.Value = py.strLit %0
-      %2 : base.String = const str "p09_read_before_assign"
-      %3 : base.String = const str "__name__"
-      %4 : base.Ref(py.Value) = py.globalCell %2 %3
-      %5 : base.Unit = base.refSet[py.Value] %4 %1
-      %6 : base.Int = const int 1
-      %7 : py.Value = py.intLit %6
-      %8 : base.String = const str "p09_read_before_assign"
-      %9 : base.String = const str "x"
-      %10 : base.Ref(py.Value) = py.globalCell %8 %9
-      %11 : base.Unit = base.refSet[py.Value] %10 %7
-      %12 : base.Code = const @p09_read_before_assign.with_global
-      %13 : py.Value = py.mkClosure %12
-      %14 : base.String = const str "p09_read_before_assign"
-      %15 : base.String = const str "with_global"
-      %16 : base.Ref(py.Value) = py.globalCell %14 %15
-      %17 : base.Unit = base.refSet[py.Value] %16 %13
-      %18 : base.Code = const @p09_read_before_assign.without_global
-      %19 : py.Value = py.mkClosure %18
-      %20 : base.String = const str "p09_read_before_assign"
-      %21 : base.String = const str "without_global"
-      %22 : base.Ref(py.Value) = py.globalCell %20 %21
-      %23 : base.Unit = base.refSet[py.Value] %22 %19
-      %24 : py.Value = py.noneLit
-      %25 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %24
-      ret %25
-    propagate.0(%26 : py.Value):
-      %27 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %26
-      ret %27
+      %str.0 : py.Value = py.strLit("p09_read_before_assign")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p09_read_before_assign", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %int.0 : py.Value = py.intLit(1)
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("p09_read_before_assign", "x")
+      %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
+      %clo.0 : py.Value = py.mkClosure(@p09_read_before_assign.with_global)
+      %with_global.cell.0 : base.Ref(py.Value) = py.globalCell("p09_read_before_assign", "with_global")
+      %set.2 : base.Unit = base.refSet[py.Value](%with_global.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure(@p09_read_before_assign.without_global)
+      %without_global.cell.0 : base.Ref(py.Value) = py.globalCell("p09_read_before_assign", "without_global")
+      %set.3 : base.Unit = base.refSet[py.Value](%without_global.cell.0, %clo.1)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-  func @p09_read_before_assign.with_global(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value, %1 : py.Value):
-      %2 : base.String = const str "x"
-      %3 : py.Value = py.undef %2
-      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
-      %5 : py.Value = py.tupleLen %0
-      %6 : base.String = const str "kwargs"
-      %7 : py.Value = py.undef %6
-      %8 : py.Value = py.dictFirstKey %1 %7
-      %9 : base.String = const str "TypeError"
-      %10 : base.String = const str "with_global() got an unexpected keyword argument {}"
-      %11 : base.Unit = py.requireUndefined %8 %9 %10 ^propagate.0()
-      %12 : base.Int = const int 0
-      %13 : base.String = const str "TypeError"
-      %14 : base.String = const str "with_global() takes 0 positional arguments but {} {was} given"
-      %15 : base.Unit = py.requireAtMost %5 %12 %13 %14 ^propagate.0()
-      %16 : base.String = const str "builtins"
-      %17 : base.String = const str "print"
-      %18 : py.Value = py.qualifiedRef %16 %17 ^propagate.0()
-      %19 : py.Value = base.refGet[py.Value] %4
-      %20 : base.String = const str "UnboundLocalError"
-      %21 : base.String = const str "cannot access local variable 'x' where it is not associated with a value"
-      %22 : py.Value = py.requireDefined %19 %20 %21 ^propagate.0()
-      %23 : py.Value = py.mkTuple %22
-      %24 : py.Value = py.mkKwargs
-      %25 : py.Value = py.call %18 %23 %24 ^propagate.0()
-      %26 : base.Int = const int 2
-      %27 : py.Value = py.intLit %26
-      %28 : base.Unit = base.refSet[py.Value] %4 %27
-      %29 : py.Value = py.noneLit
-      %30 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %29
-      ret %30
-    propagate.0(%31 : py.Value):
-      %32 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %31
-      ret %32
+  func @p09_read_before_assign.with_global(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "with_global() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "with_global() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %print.0 : py.Value = py.qualifiedRef("builtins", "print") ^propagate.0()
+      %x.1 : py.Value = base.refGet[py.Value](%x.cell.0)
+      %x.2 : py.Value = py.requireDefined(%x.1, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%x.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %int.0 : py.Value = py.intLit(2)
+      %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-  func @p09_read_before_assign.without_global(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value, %1 : py.Value):
-      %2 : base.String = const str "y"
-      %3 : py.Value = py.undef %2
-      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
-      %5 : py.Value = py.tupleLen %0
-      %6 : base.String = const str "kwargs"
-      %7 : py.Value = py.undef %6
-      %8 : py.Value = py.dictFirstKey %1 %7
-      %9 : base.String = const str "TypeError"
-      %10 : base.String = const str "without_global() got an unexpected keyword argument {}"
-      %11 : base.Unit = py.requireUndefined %8 %9 %10 ^propagate.0()
-      %12 : base.Int = const int 0
-      %13 : base.String = const str "TypeError"
-      %14 : base.String = const str "without_global() takes 0 positional arguments but {} {was} given"
-      %15 : base.Unit = py.requireAtMost %5 %12 %13 %14 ^propagate.0()
-      %16 : base.String = const str "builtins"
-      %17 : base.String = const str "print"
-      %18 : py.Value = py.qualifiedRef %16 %17 ^propagate.0()
-      %19 : py.Value = base.refGet[py.Value] %4
-      %20 : base.String = const str "UnboundLocalError"
-      %21 : base.String = const str "cannot access local variable 'y' where it is not associated with a value"
-      %22 : py.Value = py.requireDefined %19 %20 %21 ^propagate.0()
-      %23 : py.Value = py.mkTuple %22
-      %24 : py.Value = py.mkKwargs
-      %25 : py.Value = py.call %18 %23 %24 ^propagate.0()
-      %26 : base.Int = const int 2
-      %27 : py.Value = py.intLit %26
-      %28 : base.Unit = base.refSet[py.Value] %4 %27
-      %29 : py.Value = py.noneLit
-      %30 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %29
-      ret %30
-    propagate.0(%31 : py.Value):
-      %32 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %31
-      ret %32
+  func @p09_read_before_assign.without_global(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %y.0 : py.Value = py.undef("y")
+      %y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%y.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "without_global() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "without_global() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %print.0 : py.Value = py.qualifiedRef("builtins", "print") ^propagate.0()
+      %y.1 : py.Value = base.refGet[py.Value](%y.cell.0)
+      %y.2 : py.Value = py.requireDefined(%y.1, "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%y.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %int.0 : py.Value = py.intLit(2)
+      %set.0 : base.Unit = base.refSet[py.Value](%y.cell.0, %int.0)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
 }
 

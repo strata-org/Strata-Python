@@ -7,11 +7,15 @@ module
 
 public import StrataMantle.IR
 public import StrataDDM.AST
+public import StrataDDM.Integration.Lean.OfAstM
 -- Private: translating a checked IR needs the environment representation at codegen time.
 import StrataMantle.Env.WF
+import StrataMantle.FloatText
 import StrataDDM.Format
 import StrataDDM.Ion
 import StrataDDM.Integration.Lean -- shake: keep
+import Std.Data.HashMap
+import Std.Data.HashSet
 
 open StrataDDM
 
@@ -21,8 +25,8 @@ set_option autoImplicit false
 # Printing the IR, through a Strata dialect
 
 The IR is printed by translating it into a DDM dialect and letting DDM's formatter lay it
-out.  The dialect below is the surface syntax, and a DDM term goes to and from Ion.  Only the
-printing direction is built here.
+out.  The dialect below is the surface syntax, and a DDM term goes to and from Ion.
+`StrataMantle/DDMRead.lean` reads the printed text back.
 
 ## What the annotations are
 
@@ -33,33 +37,45 @@ map to `SourceRange`.
 
 ```
 module py.f {
-  func @py.f(%0 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value):
-      %1 : base.String = const str "y"
-      %2 : py.Value = py.undef %1
-      %3 : base.Ref(py.Value) = base.refNew[py.Value] %2
-      %4 : py.Value = py.add %0 %3 ^propagate.0()
-      %5 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %4
-      ret %5
-    propagate.0(%6 : py.Value):
-      %7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %6
-      ret %7
+  func @py.f(%x.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%x.0 : py.Value):
+      %y.0 : py.Value = py.undef("y")
+      %y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%y.0)
+      %add.0 : py.Value = py.add(%x.0, %y.cell.0) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%add.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
 }
 ```
 
-Every value is printed with its type, at its definition site.  A function's name is marked
-`@`, as in LLVM, both where it is defined and where a constant refers to it:
-`%5 : base.Code = const @m.f`.  So a function never reads as an operation of the same
-name.  An operation's successors
-follow its operands, each marked `^` as in MLIR.  The `err` successor above binds nothing:
-the operation supplies the exception, which `propagate.0()` receives.  A constructor is
-printed as any application is, with its type arguments: `base.ok[py.Value, py.Value] %4`.
+A value is printed by its name, `Func.names` at its id: `%x.0`.  Ids are not printed, so renumbering a function changes nothing printed.  Every
+value is printed with its type, at its definition site.  An application's operands
+follow its type arguments in parentheses, and are left out with the parentheses when there
+are none: `py.noneLit`.  A function's name is marked `@`, as in LLVM, both where it is
+defined and where a constant refers to it: `py.mkClosure(@m.f)`.  So a function
+never reads as an operation of the same name.  An operation's successors follow its
+operands, each marked `^` as in MLIR.  The `err` successor above binds nothing: the
+operation supplies the exception, which `propagate.0()` receives.  A constructor is printed
+as any application is, with its type arguments: `base.ok[py.Value, py.Value](%4)`.
+
+A name is printed dotted, as one identifier, and escaped whole when a segment needs it:
+`@|m.<module>|`.  A numeric segment prints as its digits: `entry.0`.
+
+A literal carries no type tag, but its form fixes its type exactly, with no widening.  An
+integer, `5` or `-1`, is a `base.Int`; a float always has a decimal point or an exponent,
+`1.0`, `0.0025` or `1e22`, and is the shortest decimal that reads back as it, or `inf`,
+`-inf` or `nan`; it is a `base.Float64`.  A boolean is `true` or `false`, a string `"…"`, the
+unit `unit` and a function pointer `@m.f`.  A width-carrying bitvector literal would need a
+syntax of its own.
 
 A terminator is printed as the block's last line, an application without a result:
-`demo.raise %3 ^handler.0()`, or `base.Except.case[py.Value, py.Value] %4 ^ok.0() ^err.0()`.
-The base's control flow drops its namespace: `jump ^bb.1(%2)`, `branch %3 ^bb.1() ^bb.2()`
-and `unreachable`.  A jump to the exit is `ret %5`.
+`demo.raise(%3) ^handler.0()`, or
+`base.Except.case[py.Value, py.Value](%4) ^ok.0() ^err.0()`.  The base's control flow drops
+its namespace: `jump ^bb.1(%2)`, `branch(%3) ^bb.1() ^bb.2()` and `unreachable`.  A jump to
+the exit is `ret(%5)`.
 
 A block is named by its label.  The entry block's parameters are the function's, so they
 appear twice: on the signature and on the entry.
@@ -68,37 +84,54 @@ An operation's regions follow the rest of its line, each in braces and opening w
 entry block, whose parameters are the region's arguments:
 
 ```
-%4 : base.Int = demo.if[base.Int] %1 {
+%4 : base.Int = demo.if[base.Int](%1) {
   then.0():
-    ret %2
+    ret(%2)
 } {
   else.0():
-    ret %3
+    ret(%3)
 }
 ```
+
+By default each constant the function uses is written at its uses, and its own line is
+dropped: `%7 : py.Value = py.intLit(5)` rather than `%6 : base.Int = const 5` and
+`%7 : py.Value = py.intLit(%6)`.  An operand is a value or a constant, so the folded form is
+in the same dialect.  `PrintOptions.full` prints every
+constant on its own line instead.
+
+Two names do not read back as printed: one whose string segment is empty, all digits or
+contains `.`, and one that is a keyword of the dialect as a whole, such as `ret` or `unit`.
 -/
 
 namespace Strata.Mantle
 
 namespace DDM
 
+-- Public: the reader parses this dialect and reads its AST.
+public section
+
 #dialect
 dialect Mantle;
 
 /*
-  Hierarchical names, printed dotted.  One operation per `Name` constructor, so a name
-  survives the round trip: a numeric segment is not a string segment that happens to
-  look like a number.
+  A hierarchical name, printed dotted as one identifier, escaped whole when it needs to be:
+  `py.Value`, `entry.0`, `@|m.<module>|`.  The reader splits it at each `.`, and reads an
+  all-digit segment as a numeric one.
 */
 category MName;
-op nameIdent (s : Ident) : MName => s;
-op nameIdx (i : Num) : MName => i;
-op nameDotIdent (pre : MName, s : Ident) : MName => @[prec(60), leftassoc] pre "." s;
-op nameDotIdx (pre : MName, i : Num) : MName => @[prec(60), leftassoc] pre "." i;
+op name (s : Ident) : MName => s;
 
 category MInt;
 op natInt (x : Num) : MInt => x;
 op negInt (x : Num) : MInt => "-" x;
+
+/* A float always has a decimal point or an exponent, so it never reads as an integer. */
+category MFloat;
+op floatPos (d : Decimal) : MFloat => d;
+op floatNeg (d : Decimal) : MFloat => "-" d;
+op floatInf () : MFloat => "inf";
+op floatNegInf () : MFloat => "-" "inf";
+op floatNan () : MFloat => "nan";
 
 /* Type expressions.  `#i` is a type variable; a type constructor with no arguments
    prints as its bare name. */
@@ -111,34 +144,41 @@ op tyApp (n : MName, args : CommaSepBy MType) : MType => @[prec(0)] n "(" args "
 category MFuncName;
 op funcName (n : MName) : MFuncName => "@" n:0;
 
+/* A value, by its name: `%x.1`. */
 category MVal;
-op valId (i : Num) : MVal => "%" i;
+op valName (n : MName) : MVal => "%" n:0;
 
 category MValDecl;
 op valDecl (v : MVal, ty : MType) : MValDecl => @[prec(0)] v " : " ty;
 
-/* A transfer: a block label, and the arguments the site binds. */
-category MTransfer;
-op transfer (target : MName, args : CommaSepBy MVal) : MTransfer =>
-  @[prec(0)] target "(" args ")";
+/* A literal.  Its form fixes its type: an integer is a `base.Int`, never a `base.Float64`. */
+category MConst;
+op constUnit () : MConst => "unit";
+op constBool (b : Bool) : MConst => b:0;
+op constInt (i : MInt) : MConst => i:0;
+op constFloat (f : MFloat) : MConst => f:0;
+op constStr (s : Str) : MConst => s;
+op constFunc (f : MFuncName) : MConst => f;
 
-/* A successor of an operation: a transfer, marked `^` as in MLIR so that it reads apart
-   from the operands before it.  Several follow one another. */
+/* An operand: a value, or a constant written where it is used. */
+category MOperand;
+op operandVal (v : MVal) : MOperand => v;
+op operandConst (c : MConst) : MOperand => c;
+
+/* An operation's operands, in parentheses, absent rather than empty. */
+category MOperands;
+op operands (args : CommaSepBy MOperand) : MOperands => "(" args ")";
+
+/* A successor of an operation: a block label and the arguments the site binds, marked `^`
+   as in MLIR so that it reads apart from the operands before it.  Several follow one
+   another. */
 category MSucc;
-op succ (target : MName, args : CommaSepBy MVal) : MSucc =>
+op succ (target : MName, args : CommaSepBy MOperand) : MSucc =>
   @[prec(0)] " ^" target "(" args ")";
 
 /* An operation's type arguments, likewise absent rather than empty. */
 category MTypeArgs;
 op typeArgs (args : CommaSepBy MType) : MTypeArgs => "[" args "]";
-
-category MConst;
-op constUnit () : MConst => "unit";
-op constBool (b : Bool) : MConst => "bool " b;
-op constInt (i : MInt) : MConst => "int " i;
-op constFloat (s : Str) : MConst => "float " s;
-op constStr (s : Str) : MConst => "str " s;
-op constFunc (f : MFuncName) : MConst => f;
 
 /*
   Newlines *lead* a line rather than trailing it, and a line's own newline sits inside
@@ -156,15 +196,15 @@ op insnConst (result : MValDecl, c : MConst) : MInsn =>
   @[prec(0)] "\n" result " = const " c;
 /* An application: a constructor's as any other operation's. */
 op insnApply (result : MValDecl, name : MName, tyArgs : Option MTypeArgs,
-              args : SpacePrefixSepBy MVal, succs : Seq MSucc,
+              args : Option MOperands, succs : Seq MSucc,
               regions : Seq MRegion) : MInsn =>
   @[prec(0)] "\n" result " = " name tyArgs args succs regions;
 
 category MTerm;
 /* A jump to the exit of the enclosing body, passing its arguments. */
-op termRet (args : SpacePrefixSepBy MVal) : MTerm => @[prec(0)] "\n" "ret" args;
+op termRet (args : Option MOperands) : MTerm => @[prec(0)] "\n" "ret" args;
 /* A terminal operation: an application's line without a result. */
-op termApply (name : MName, tyArgs : Option MTypeArgs, args : SpacePrefixSepBy MVal,
+op termApply (name : MName, tyArgs : Option MTypeArgs, args : Option MOperands,
               succs : Seq MSucc, regions : Seq MRegion) : MTerm =>
   @[prec(0)] "\n" name tyArgs args succs regions;
 
@@ -189,7 +229,17 @@ op moduleDecl (name : MName, funcs : Seq MFunc) : Command =>
 set_option autoImplicit true in
 #strata_gen Mantle
 
+end
+
 end DDM
+
+/-- How to print. -/
+public structure PrintOptions where
+  /-- Write each constant a function uses at its uses, instead of on a line of its own. -/
+  foldConsts : Bool := true
+
+/-- Print in full: every constant on its own line, under its id. -/
+public def PrintOptions.full : PrintOptions := { foldConsts := false }
 
 /-! ## The translation
 
@@ -199,14 +249,16 @@ namespace ToDDM
 
 open Strata.Mantle.DDM
 
-/-- A name, dotted.  The root segment prints bare, so `py.Value` is two segments and not
-three. -/
-def name : Name → MName SourceRange
-  | .base => .nameIdent .none ⟨.none, "_"⟩
-  | .str .base s => .nameIdent .none ⟨.none, s⟩
-  | .num .base i => .nameIdx .none ⟨.none, i⟩
-  | .str pre s => .nameDotIdent .none (name pre) ⟨.none, s⟩
-  | .num pre i => .nameDotIdx .none (name pre) ⟨.none, i⟩
+/-- A name's text: its segments, dotted.  The root alone is `_`. -/
+public def nameText : Name → String
+  | .base => "_"
+  | .str .base s => s
+  | .num .base i => toString i
+  | .str pre s => s!"{nameText pre}.{s}"
+  | .num pre i => s!"{nameText pre}.{i}"
+
+/-- A name, as one identifier. -/
+def name (n : Name) : MName SourceRange := .name .none ⟨.none, nameText n⟩
 
 def int (i : Int) : MInt SourceRange :=
   match i with
@@ -221,17 +273,19 @@ def type {env : Env Unit} {scope : Nat} (e : TypeExpr env scope) : MType SourceR
 /-- A function's name, marked `@`. -/
 def funcName (n : Name) : MFuncName SourceRange := .funcName .none (name n)
 
-def val (v : ValId) : MVal SourceRange := .valId .none ⟨.none, v.id⟩
+/-- A value's name, as printed: `%x.1`. -/
+public def valNameText (n : Name) : String := s!"%{nameText n}"
 
-def valDecl {env : Env Unit} (d : ValDecl env) : MValDecl SourceRange :=
-  .valDecl .none (val d.id) (type d.type)
+/-- The name `v` prints as: its name, or `?id` if it has none, as only in a function that is
+not well formed. -/
+def valNameOf (names : Array Name) (v : ValId) : Name :=
+  names[v.id]?.getD (.str .base s!"?{v.id}")
 
-def transfer (k : BlockValue) : MTransfer SourceRange :=
-  .transfer .none (name k.target.name) ⟨.none, k.args.map val⟩
+def val (names : Array Name) (v : ValId) : MVal SourceRange :=
+  .valName .none (name (valNameOf names v))
 
-/-- An operation's successors, each `^target(args)`. -/
-def succs (ks : Array BlockValue) : Ann (Array (MSucc SourceRange)) SourceRange :=
-  ⟨.none, ks.map fun k => .succ .none (name k.target.name) ⟨.none, k.args.map val⟩⟩
+def valDecl {env : Env Unit} (names : Array Name) (d : ValDecl env) : MValDecl SourceRange :=
+  .valDecl .none (val names d.id) (type d.type)
 
 /-- Type arguments, absent when there are none. -/
 def typeArgs {env : Env Unit} (as : Array (TypeExpr env 0)) :
@@ -239,94 +293,163 @@ def typeArgs {env : Env Unit} (as : Array (TypeExpr env 0)) :
   if as.isEmpty then ⟨.none, none⟩
   else ⟨.none, some (.typeArgs .none ⟨.none, as.map type⟩)⟩
 
-/-- The exact decimal expansion of `f`, which every finite binary64 value has: `3.14` prints
-as `3.140000000000000124344978758017532527446746826171875`, and `1.5` as `1.5`.  The fraction
-has no trailing zeros and at least one digit.  The non-finite values print as `inf`, `-inf`
-and `nan`, as Python's `repr` does. -/
-def floatDecimal (f : Float) : String :=
-  let bits := f.toBits.toNat
-  let sign := if bits >>> 63 == 1 then "-" else ""
-  let biased := (bits >>> 52) % 2048
-  let frac := bits % 2 ^ 52
-  if biased == 2047 then
-    if frac == 0 then sign ++ "inf" else "nan"
-  else
-    -- `f` is `m * 2 ^ e`.
-    let (m, e) : Nat × Int :=
-      if biased == 0 then (frac, -1074) else (frac + 2 ^ 52, (biased : Int) - 1075)
-    if 0 ≤ e then sign ++ toString (m * 2 ^ e.toNat) ++ ".0"
-    else
-      -- `m / 2 ^ k` is `m * 5 ^ k / 10 ^ k`: `k` fraction digits.
-      let k := e.natAbs
-      let n := m * 5 ^ k
-      let rest := Nat.toDigits 10 (n % 10 ^ k)
-      let rest := List.replicate (k - rest.length) '0' ++ rest
-      let rest := (rest.reverse.dropWhile (· == '0')).reverse
-      let rest := if rest.isEmpty then "0" else String.ofList rest
-      sign ++ toString (n / 10 ^ k) ++ "." ++ rest
+/-- A float: the shortest decimal that reads back as it, or `inf`, `-inf` or `nan`.  The
+decimal always has a point or an exponent: `1.0`, `0.1`, `1e22`. -/
+def float (f : Float) : MFloat SourceRange :=
+  match FloatText.shortest f with
+  | some d =>
+    let v : StrataDDM.Decimal := { mantissa := d.mantissa, exponent := d.exponent }
+    if d.neg then .floatNeg .none ⟨.none, v⟩ else .floatPos .none ⟨.none, v⟩
+  | none =>
+    if f.isNaN then .floatNan .none
+    else if f < 0 then .floatNegInf .none else .floatInf .none
 
 def const : Const → MConst SourceRange
   | .unit => .constUnit .none
   | .bool b => .constBool .none ⟨.none, b⟩
   | .int i => .constInt .none (int i)
-  | .float f => .constFloat .none ⟨.none, floatDecimal f⟩
+  | .float f => .constFloat .none (float f)
   | .str s => .constStr .none ⟨.none, s⟩
   | .func target => .constFunc .none (funcName target)
+
+/-! ### Folding constants
+
+With `PrintOptions.foldConsts`, the default, a constant is written at each of its uses, as an
+operand, and its own line is dropped.  The constants folded are a function's that it uses at
+least once; one it never uses keeps its line, since nothing else would show it.  A constant is
+pure, so repeating it, or moving it past other instructions, changes nothing.  An
+application's result is never folded, however pure. -/
+
+/-- The constants to write in place, by value id. -/
+abbrev Folded := Std.HashMap Nat Const
+
+/-- What printing a function's body needs: the constants to fold, and the values' names. -/
+structure Cx where
+  fold : Folded
+  names : Array Name
+
+/-- An operand: the constant `v` names, if it is folded, else `v`. -/
+def operand (cx : Cx) (v : ValId) : MOperand SourceRange :=
+  match cx.fold[v.id]? with
+  | some c => .operandConst .none (const c)
+  | none => .operandVal .none (val cx.names v)
+
+def operandList (cx : Cx) (vs : Array ValId) :
+    Ann (Array (MOperand SourceRange)) SourceRange :=
+  ⟨.none, vs.map (operand cx)⟩
+
+/-- An operation's operands, in parentheses, absent when there are none. -/
+def operands (cx : Cx) (vs : Array ValId) :
+    Ann (Option (MOperands SourceRange)) SourceRange :=
+  if vs.isEmpty then ⟨.none, none⟩ else ⟨.none, some (.operands .none (operandList cx vs))⟩
+
+/-- An operation's successors, each `^target(args)`. -/
+def succs (cx : Cx) (ks : Array BlockValue) :
+    Ann (Array (MSucc SourceRange)) SourceRange :=
+  ⟨.none, ks.map fun k => .succ .none (name k.target.name) (operandList cx k.args)⟩
+
+/-- What a function's body defines as constants, by id, and the ids its operands and
+successor arguments use, regions included. -/
+structure Uses where
+  consts : Std.HashMap Nat Const := {}
+  used : Std.HashSet Nat := {}
+
+namespace Uses
+
+def use (u : Uses) (vs : Array ValId) : Uses :=
+  { u with used := vs.foldl (fun s v => s.insert v.id) u.used }
+
+def useSuccs (u : Uses) (ks : Array BlockValue) : Uses :=
+  ks.foldl (fun u k => u.use k.args) u
+
+mutual
+
+def regionList {env : Env Unit} {α : Type} (u : Uses) : List (Region env α) → Uses
+  | [] => u
+  | ⟨⟨blocks⟩⟩ :: rs => regionList (blockList u blocks) rs
+
+def blockList {env : Env Unit} {α : Type} (u : Uses) : List (Block env α) → Uses
+  | [] => u
+  | ⟨_, _, ⟨instrs⟩, .apply _ _ _ args ks ⟨regions⟩, _⟩ :: bs =>
+    blockList (regionList ((insnList u instrs).use args |>.useSuccs ks) regions) bs
+
+def insnList {env : Env Unit} {α : Type} (u : Uses) : List (Instruction env α) → Uses
+  | [] => u
+  | .const _ d c :: is => insnList { u with consts := u.consts.insert d.id.id c } is
+  | .apply _ _ _ _ args ks ⟨regions⟩ :: is =>
+    insnList (regionList (u.use args |>.useSuccs ks) regions) is
+
+end
+
+end Uses
+
+/-- The constants of `blocks` to fold: those used at least once. -/
+def folded {env : Env Unit} {α : Type} (blocks : Array (Block env α)) : Folded :=
+  let u := Uses.blockList {} blocks.toList
+  u.consts.filter fun i _ => u.used.contains i
 
 mutual
 
 /-- A terminator.  The base's control flow prints without its namespace, and a jump to the
 exit as `ret`. -/
-def term {env : Env Unit} {α : Type} : Terminator env α → MTerm SourceRange
+def term {env : Env Unit} {α : Type} (cx : Cx) : Terminator env α → MTerm SourceRange
   | .apply _ r tyArgs args ks ⟨regions⟩ =>
     let generic (n : Name) :=
-      .termApply .none (name n) (typeArgs tyArgs.toArray) ⟨.none, args.map val⟩ (succs ks)
-        ⟨.none, ⟨regionList regions⟩⟩
+      .termApply .none (name n) (typeArgs tyArgs.toArray) (operands cx args) (succs cx ks)
+        ⟨.none, ⟨regionList cx regions⟩⟩
     if r.name == bn "jump" then
       match ks with
-      | #[k] => if k.target == Label.exit then .termRet .none ⟨.none, k.args.map val⟩
+      | #[k] => if k.target == Label.exit then .termRet .none (operands cx k.args)
         else generic (.str .base "jump")
       | _ => generic (.str .base "jump")
     else if r.name == bn "branch" then generic (.str .base "branch")
     else if r.name == bn "unreachable" then generic (.str .base "unreachable")
     else generic r.name
 
-def insn {env : Env Unit} {α : Type} : Instruction env α → MInsn SourceRange
-  | .const _ d c => .insnConst .none (valDecl d) (const c)
+def insn {env : Env Unit} {α : Type} (cx : Cx) : Instruction env α → MInsn SourceRange
+  | .const _ d c => .insnConst .none (valDecl cx.names d) (const c)
   | .apply _ d r tyArgs args ks ⟨regions⟩ =>
-    .insnApply .none (valDecl d) (name r.name) (typeArgs tyArgs.toArray)
-      ⟨.none, args.map val⟩ (succs ks) ⟨.none, ⟨regionList regions⟩⟩
+    .insnApply .none (valDecl cx.names d) (name r.name) (typeArgs tyArgs.toArray)
+      (operands cx args) (succs cx ks) ⟨.none, ⟨regionList cx regions⟩⟩
 
-def insnList {env : Env Unit} {α : Type} : List (Instruction env α) → List (MInsn SourceRange)
+/-- Instructions, less the folded constants. -/
+def insnList {env : Env Unit} {α : Type} (cx : Cx) :
+    List (Instruction env α) → List (MInsn SourceRange)
   | [] => []
-  | i :: is => insn i :: insnList is
+  | i :: is =>
+    if cx.fold.contains i.result.id.id then insnList cx is
+    else insn cx i :: insnList cx is
 
 /-- A block, under its label. -/
-def block {env : Env Unit} {α : Type} : Block env α → MBlock SourceRange
+def block {env : Env Unit} {α : Type} (cx : Cx) : Block env α → MBlock SourceRange
   | ⟨label, params, ⟨instrs⟩, t, _⟩ =>
-    .block .none (name label.name) ⟨.none, params.map valDecl⟩
-      ⟨.none, ⟨insnList instrs⟩⟩ (term t)
+    .block .none (name label.name) ⟨.none, params.map (valDecl cx.names)⟩
+      ⟨.none, ⟨insnList cx instrs⟩⟩ (term cx t)
 
-def blockList {env : Env Unit} {α : Type} : List (Block env α) → List (MBlock SourceRange)
+def blockList {env : Env Unit} {α : Type} (cx : Cx) :
+    List (Block env α) → List (MBlock SourceRange)
   | [] => []
-  | b :: bs => block b :: blockList bs
+  | b :: bs => block cx b :: blockList cx bs
 
-def regionList {env : Env Unit} {α : Type} : List (Region env α) → List (MRegion SourceRange)
+def regionList {env : Env Unit} {α : Type} (cx : Cx) :
+    List (Region env α) → List (MRegion SourceRange)
   | [] => []
-  | ⟨⟨blocks⟩⟩ :: rs => .region .none ⟨.none, ⟨blockList blocks⟩⟩ :: regionList rs
+  | ⟨⟨blocks⟩⟩ :: rs => .region .none ⟨.none, ⟨blockList cx blocks⟩⟩ :: regionList cx rs
 
 end
 
 /-- A function.  Its parameters are the entry block's, so they are read from there. -/
-def func {env : Env Unit} {α : Type} (fn : Func env α) : MFunc SourceRange :=
+def func {env : Env Unit} {α : Type} (opts : PrintOptions) (fn : Func env α) :
+    MFunc SourceRange :=
+  let cx : Cx := { fold := if opts.foldConsts then folded fn.blocks else {}, names := fn.names }
   .func .none (funcName fn.name)
-    ⟨.none, (fn.blocks[0]?.map (·.params.map valDecl)).getD #[]⟩
+    ⟨.none, (fn.blocks[0]?.map (·.params.map (valDecl cx.names))).getD #[]⟩
     (type fn.retType)
-    ⟨.none, fn.blocks.map block⟩
+    ⟨.none, fn.blocks.map (block cx)⟩
 
-def module {env : Env Unit} [base ⊑ env] {α : Type} (m : Module env α) :
+def module {env : Env Unit} [base ⊑ env] {α : Type} (opts : PrintOptions) (m : Module env α) :
     DDM.Command SourceRange :=
-  .moduleDecl .none (name m.name) ⟨.none, m.funcs.map func⟩
+  .moduleDecl .none (name m.name) ⟨.none, m.funcs.map (func opts)⟩
 
 end ToDDM
 
@@ -346,15 +469,25 @@ def render (c : DDM.Command SourceRange) : String :=
 end Print
 
 /-- The module, printed. -/
+public def Module.format {env : Env Unit} [base ⊑ env] {α : Type} (opts : PrintOptions)
+    (m : Module env α) : String :=
+  Print.render (ToDDM.module opts m)
+
+/-- The module, printed with the default options: constants folded. -/
 public def Module.toString {env : Env Unit} [base ⊑ env] {α : Type} (m : Module env α) :
     String :=
-  Print.render (ToDDM.module m)
+  m.format {}
 
 public instance {env : Env Unit} [base ⊑ env] {α : Type} : ToString (Module env α) where
   toString := Module.toString
 
 /-- One function, printed: a module with just it in. -/
+public def Func.format {env : Env Unit} {α : Type} (opts : PrintOptions) (fn : Func env α) :
+    String :=
+  Print.render (.moduleDecl .none (ToDDM.name fn.name) ⟨.none, #[ToDDM.func opts fn]⟩)
+
+/-- One function, printed with the default options. -/
 public def Func.toString {env : Env Unit} {α : Type} (fn : Func env α) : String :=
-  Print.render (.moduleDecl .none (ToDDM.name fn.name) ⟨.none, #[ToDDM.func fn]⟩)
+  fn.format {}
 
 end Strata.Mantle

@@ -1,78 +1,50 @@
 module p20_global_mutated {
-  func @p20_global_mutated.|<module>|() -> base.Except(py.Value, py.Value) {
+  func @|p20_global_mutated.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
-      %0 : base.String = const str "p20_global_mutated"
-      %1 : py.Value = py.strLit %0
-      %2 : base.String = const str "p20_global_mutated"
-      %3 : base.String = const str "__name__"
-      %4 : base.Ref(py.Value) = py.globalCell %2 %3
-      %5 : base.Unit = base.refSet[py.Value] %4 %1
-      %6 : base.Int = const int 0
-      %7 : py.Value = py.intLit %6
-      %8 : base.String = const str "p20_global_mutated"
-      %9 : base.String = const str "counter"
-      %10 : base.Ref(py.Value) = py.globalCell %8 %9
-      %11 : base.Unit = base.refSet[py.Value] %10 %7
-      %12 : base.Code = const @p20_global_mutated.read
-      %13 : py.Value = py.mkClosure %12
-      %14 : base.String = const str "p20_global_mutated"
-      %15 : base.String = const str "read"
-      %16 : base.Ref(py.Value) = py.globalCell %14 %15
-      %17 : base.Unit = base.refSet[py.Value] %16 %13
-      %18 : base.Int = const int 5
-      %19 : py.Value = py.intLit %18
-      %20 : base.String = const str "p20_global_mutated"
-      %21 : base.String = const str "counter"
-      %22 : base.Ref(py.Value) = py.globalCell %20 %21
-      %23 : base.Unit = base.refSet[py.Value] %22 %19
-      %24 : base.String = const str "builtins"
-      %25 : base.String = const str "print"
-      %26 : py.Value = py.qualifiedRef %24 %25 ^propagate.0()
-      %27 : base.String = const str "p20_global_mutated"
-      %28 : base.String = const str "read"
-      %29 : base.Ref(py.Value) = py.globalCell %27 %28
-      %30 : py.Value = base.refGet[py.Value] %29
-      %31 : base.String = const str "NameError"
-      %32 : base.String = const str "name 'read' is not defined"
-      %33 : py.Value = py.requireDefined %30 %31 %32 ^propagate.0()
-      %34 : py.Value = py.mkTuple
-      %35 : py.Value = py.mkKwargs
-      %36 : py.Value = py.call %33 %34 %35 ^propagate.0()
-      %37 : py.Value = py.mkTuple %36
-      %38 : py.Value = py.mkKwargs
-      %39 : py.Value = py.call %26 %37 %38 ^propagate.0()
-      %40 : py.Value = py.noneLit
-      %41 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %40
-      ret %41
-    propagate.0(%42 : py.Value):
-      %43 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %42
-      ret %43
+      %str.0 : py.Value = py.strLit("p20_global_mutated")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p20_global_mutated", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %int.0 : py.Value = py.intLit(0)
+      %counter.cell.0 : base.Ref(py.Value) = py.globalCell("p20_global_mutated", "counter")
+      %set.1 : base.Unit = base.refSet[py.Value](%counter.cell.0, %int.0)
+      %clo.0 : py.Value = py.mkClosure(@p20_global_mutated.read)
+      %read.cell.0 : base.Ref(py.Value) = py.globalCell("p20_global_mutated", "read")
+      %set.2 : base.Unit = base.refSet[py.Value](%read.cell.0, %clo.0)
+      %int.1 : py.Value = py.intLit(5)
+      %counter.cell.1 : base.Ref(py.Value) = py.globalCell("p20_global_mutated", "counter")
+      %set.3 : base.Unit = base.refSet[py.Value](%counter.cell.1, %int.1)
+      %print.0 : py.Value = py.qualifiedRef("builtins", "print") ^propagate.0()
+      %read.cell.1 : base.Ref(py.Value) = py.globalCell("p20_global_mutated", "read")
+      %read.0 : py.Value = base.refGet[py.Value](%read.cell.1)
+      %read.1 : py.Value = py.requireDefined(%read.0, "NameError", "name 'read' is not defined") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%read.1, %tuple.0, %kwargs.0) ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%call.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-  func @p20_global_mutated.read(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value, %1 : py.Value):
-      %2 : py.Value = py.tupleLen %0
-      %3 : base.String = const str "kwargs"
-      %4 : py.Value = py.undef %3
-      %5 : py.Value = py.dictFirstKey %1 %4
-      %6 : base.String = const str "TypeError"
-      %7 : base.String = const str "read() got an unexpected keyword argument {}"
-      %8 : base.Unit = py.requireUndefined %5 %6 %7 ^propagate.0()
-      %9 : base.Int = const int 0
-      %10 : base.String = const str "TypeError"
-      %11 : base.String = const str "read() takes 0 positional arguments but {} {was} given"
-      %12 : base.Unit = py.requireAtMost %2 %9 %10 %11 ^propagate.0()
-      %13 : base.String = const str "p20_global_mutated"
-      %14 : base.String = const str "counter"
-      %15 : base.Ref(py.Value) = py.globalCell %13 %14
-      %16 : py.Value = base.refGet[py.Value] %15
-      %17 : base.String = const str "NameError"
-      %18 : base.String = const str "name 'counter' is not defined"
-      %19 : py.Value = py.requireDefined %16 %17 %18 ^propagate.0()
-      %20 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %19
-      ret %20
-    propagate.0(%21 : py.Value):
-      %22 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %21
-      ret %22
+  func @p20_global_mutated.read(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "read() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "read() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %counter.cell.0 : base.Ref(py.Value) = py.globalCell("p20_global_mutated", "counter")
+      %counter.0 : py.Value = base.refGet[py.Value](%counter.cell.0)
+      %counter.1 : py.Value = py.requireDefined(%counter.0, "NameError", "name 'counter' is not defined") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%counter.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
 }
 

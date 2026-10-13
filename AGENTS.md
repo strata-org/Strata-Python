@@ -80,6 +80,8 @@ The scope pass and the translator share their tests. To add one, put `NAME.py` i
 The translator test fails on any `.py` that is not listed, and the scope test on any `.py`
 without both scope files.
 `lake exe pymantle mantle FILE.py` prints the diagnostics and the module for one file.
+`StrataPythonTestExtra/MantleReadTest.lean` reads every golden back with `Module.read`, so a
+printer change that breaks reading fails there; `lake exe pymantle read FILE` reads one.
 
 ## Convention: `open Strata` pattern
 

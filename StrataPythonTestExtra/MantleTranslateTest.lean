@@ -8,6 +8,8 @@ module
 meta import StrataPython
 meta import StrataPython.Mantle.Translate
 meta import StrataMantle.DDM
+meta import StrataMantle.DDMRead
+meta import StrataPython.Mantle.Env
 meta import StrataMantle.Env.WF
 meta import StrataPython.ReadPython
 meta import StrataDDM.Util.IO
@@ -32,7 +34,8 @@ to give: a rejected construct's name, the message without " is not supported", o
 error's message.
 
 A test *translates* when its diagnostics are exactly the expected ones.  Every module must be
-well formed (`Module.WF`).  A supported test must translate, and its diagnostics and printed
+well formed (`Module.WF`), have no name with a `.` inside a segment, and read back from its
+full printed form with the same ids and the same names.  A supported test must translate, and its diagnostics and printed
 module must equal `NAME.expected.mantle` beside `NAME.py`.  A test not yet supported must not
 translate; one that does fails, and must be marked `yes`.
 
@@ -44,7 +47,7 @@ namespace StrataPython.MantleTranslateTest
 
 open StrataPython.Mantle.PyTranslate (translate formatDiagnostic illFormed nameText)
 open StrataPython (withPython)
-open StrataPython.Mantle.TestUtil (compilePython firstDiff)
+open StrataPython.Mantle.TestUtil (compilePython firstDiff dottedNames)
 
 private meta def root : System.FilePath := "StrataPythonTest"
 
@@ -117,6 +120,18 @@ private meta def runCase (pythonCmd tmpDir : System.FilePath) (update : Bool)
       [{", ".intercalate expected}]"
   let dump := String.join (r.diagnostics.toList.map (formatDiagnostic (some fileMap) · ++ "\n"))
     ++ toString r.module ++ "\n"
+  unless (dottedNames r.module).isEmpty do
+    return .failed s!"{e.path}: a name has a `.` inside a segment: \
+      {(dottedNames r.module).map Strata.Mantle.ToDDM.nameText}"
+  -- Reading the full form back gives the same functions: the same ids and the same names.
+  let full := r.module.format .full
+  match ← Strata.Mantle.Module.read StrataPython.Mantle.Py.env full e.path with
+  | .error err => return .failed s!"{e.path}: the full form does not read back:\n{err}"
+  | .ok ⟨m, _⟩ =>
+    let same := m.funcs.size == r.module.funcs.size && (m.funcs.zip r.module.funcs).all
+      fun (f, g) => f.names == g.names && f.defs.map (·.id.id) == g.defs.map (·.id.id)
+    unless same && m.format .full == full do
+      return .failed s!"{e.path}: the full form reads back with other ids or names"
   let golden := testDir / s!"{e.path}{goldenSuffix}"
   if update then
     IO.FS.writeFile golden dump

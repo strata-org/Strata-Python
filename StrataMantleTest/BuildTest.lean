@@ -56,19 +56,19 @@ finished, entry first. -/
 
 private def f : Except Errors (Func base Unit) :=
   build (.str .base "f") intT () do
-    let c ← freshVal "c" boolT
+    let c ← freshVal (.str .base "c") boolT
     let done ← freshLabel "done"
     let bump ← freshLabel "bump"
     let _ ← startFreshBlock #[c] "entry"
-    let zero ← emitConst "k" (.int 0)
-    let cell ← emitApply "cell" refIntT Base.refNew #v[intT] #[zero]
+    let zero ← emitConst (.str .base "k") (.int 0)
+    let cell ← emitApply (.str .base "cell") refIntT Base.refNew #v[intT] #[zero]
     finishBlock (.branch () c.id (goto bump) (goto done))
     startBlock bump
-    let one ← emitConst "k" (.int (-1))
-    let _ ← emitApply "unit" unitT Base.refSet #v[intT] #[cell, one]
+    let one ← emitConst (.str .base "k") (.int (-1))
+    let _ ← emitApply (.str .base "unit") unitT Base.refSet #v[intT] #[cell, one]
     finishBlock (.jump () (goto done))
     startBlock done
-    let r ← emitApply "r" intT Base.refGet #v[intT] #[cell]
+    let r ← emitApply (.str .base "r") intT Base.refGet #v[intT] #[cell]
     finishBlock (.ret () r)
 
 example : Holds (Func.WF ∅) f := by decide +kernel
@@ -78,7 +78,8 @@ example : Holds (·.blocks.size = 3) f := by decide +kernel
 /-- Every value is named, and two `k`s are distinguished by suffix rather than colliding. -/
 example : Holds (·.names.size = 6) f := by decide +kernel
 
-example : Holds (fun f => f.names[1]? = some ⟨"k", 0⟩ ∧ f.names[3]? = some ⟨"k", 1⟩) f := by
+example : Holds (fun f => f.names[1]? = some (.num (.str .base "k") 0) ∧
+    f.names[3]? = some (.num (.str .base "k") 1)) f := by
   decide +kernel
 
 /-- Every terminator's targets.  A `ret` is a jump to `Label.exit`. -/
@@ -93,21 +94,18 @@ example : Holds (targets · = #[lbl "bump" 0, lbl "done" 0, lbl "done" 0, Label.
   decide +kernel
 
 /-- info: module f {
-  func @f(%0 : base.Bool) -> base.Int {
-    entry.0(%0 : base.Bool):
-      %1 : base.Int = const int 0
-      %2 : base.Ref(base.Int) = base.refNew[base.Int] %1
-      branch %0 ^bump.0() ^done.0()
+  func @f(%c.0 : base.Bool) -> base.Int {
+    entry.0(%c.0 : base.Bool):
+      %cell.0 : base.Ref(base.Int) = base.refNew[base.Int](0)
+      branch(%c.0) ^bump.0() ^done.0()
     bump.0():
-      %3 : base.Int = const int (-1)
-      %4 : base.Unit = base.refSet[base.Int] %2 %3
+      %unit.0 : base.Unit = base.refSet[base.Int](%cell.0, -1)
       jump ^done.0()
     done.0():
-      %5 : base.Int = base.refGet[base.Int] %2
-      ret %5
+      %r.0 : base.Int = base.refGet[base.Int](%cell.0)
+      ret(%r.0)
   }
-}
--/
+} -/
 #guard_msgs in
 #eval do IO.println (Func.toString (← IO.ofExcept f))
 
@@ -121,14 +119,14 @@ private def h : Except Errors (Func base Unit) :=
     let okL ← freshLabel "ok"
     let errL ← freshLabel "err"
     let _ ← startFreshBlock (base := "entry")
-    let msg ← emitConst "msg" (.str "boom")
-    let e ← emitApply "e" exceptStrIntT Base.Except.error #v[strT, intT] #[msg]
+    let msg ← emitConst (.str .base "msg") (.str "boom")
+    let e ← emitApply (.str .base "e") exceptStrIntT Base.Except.error #v[strT, intT] #[msg]
     terminate Base.Except.case #v[strT, intT] #[e] #[goto okL, goto errL]
-    let _ ← startBlockWith errL "err" strT
-    let zero ← emitConst "zero" (.int 0)
-    let o ← emitApply "o" exceptStrIntT Base.Except.ok #v[strT, intT] #[zero]
+    let _ ← startBlockWith errL (.str .base "err") strT
+    let zero ← emitConst (.str .base "zero") (.int 0)
+    let o ← emitApply (.str .base "o") exceptStrIntT Base.Except.ok #v[strT, intT] #[zero]
     terminate Base.Except.case #v[strT, intT] #[o] #[goto okL, goto errL]
-    finishBlock (.ret () (← startBlockWith okL "v" intT))
+    finishBlock (.ret () (← startBlockWith okL (.str .base "v") intT))
 
 example : Holds (Func.WF ∅) h := by decide +kernel
 
@@ -160,14 +158,14 @@ private def hConsts : Except Errors (Func base Unit) :=
     let okL ← freshLabel "ok"
     let errL ← freshLabel "err"
     let _ ← startFreshBlock (base := "entry")
-    let _ ← emitConst "u" .unit
-    let _ ← emitConst "b" (.bool true)
-    let _ ← emitConst "x" (.float 1.5)
-    let msg ← emitConst "msg" (.str "boom")
-    let e ← emitApply "e" exceptStrIntT Base.Except.error #v[strT, intT] #[msg]
+    let _ ← emitConst (.str .base "u") .unit
+    let _ ← emitConst (.str .base "b") (.bool true)
+    let _ ← emitConst (.str .base "x") (.float 1.5)
+    let msg ← emitConst (.str .base "msg") (.str "boom")
+    let e ← emitApply (.str .base "e") exceptStrIntT Base.Except.error #v[strT, intT] #[msg]
     terminate Base.Except.case #v[strT, intT] #[e] #[goto okL, goto errL]
-    finishBlock (.ret () (← startBlockWith okL "v" intT))
-    let _ ← startBlockWith errL "err" strT
+    finishBlock (.ret () (← startBlockWith okL (.str .base "v") intT))
+    let _ ← startBlockWith errL (.str .base "err") strT
     finishBlock (.unreachable ())
 
 example : Holds (Func.WF ∅) hConsts := by decide +kernel
@@ -176,34 +174,30 @@ private def m : Except Errors (Module base Unit) :=
   return { name := .str .base "m", funcs := #[← f, ← hConsts], info := () }
 
 /-- info: module m {
-  func @f(%0 : base.Bool) -> base.Int {
-    entry.0(%0 : base.Bool):
-      %1 : base.Int = const int 0
-      %2 : base.Ref(base.Int) = base.refNew[base.Int] %1
-      branch %0 ^bump.0() ^done.0()
+  func @f(%c.0 : base.Bool) -> base.Int {
+    entry.0(%c.0 : base.Bool):
+      %cell.0 : base.Ref(base.Int) = base.refNew[base.Int](0)
+      branch(%c.0) ^bump.0() ^done.0()
     bump.0():
-      %3 : base.Int = const int (-1)
-      %4 : base.Unit = base.refSet[base.Int] %2 %3
+      %unit.0 : base.Unit = base.refSet[base.Int](%cell.0, -1)
       jump ^done.0()
     done.0():
-      %5 : base.Int = base.refGet[base.Int] %2
-      ret %5
+      %r.0 : base.Int = base.refGet[base.Int](%cell.0)
+      ret(%r.0)
   }
   func @h() -> base.Int {
     entry.0():
-      %0 : base.Unit = const unit
-      %1 : base.Bool = const bool (true)
-      %2 : base.Float64 = const float "1.5"
-      %3 : base.String = const str "boom"
-      %4 : base.Except(base.String, base.Int) = base.error[base.String, base.Int] %3
-      base.Except.case[base.String, base.Int] %4 ^ok.0() ^err.0()
-    ok.0(%5 : base.Int):
-      ret %5
-    err.0(%6 : base.String):
+      %u.0 : base.Unit = const unit
+      %b.0 : base.Bool = const true
+      %x.0 : base.Float64 = const 1.5
+      %e.0 : base.Except(base.String, base.Int) = base.error[base.String, base.Int]("boom")
+      base.Except.case[base.String, base.Int](%e.0) ^ok.0() ^err.0()
+    ok.0(%v.0 : base.Int):
+      ret(%v.0)
+    err.0(%err.0 : base.String):
       unreachable
   }
-}
--/
+} -/
 #guard_msgs in
 #eval do IO.println (toString (← IO.ofExcept m))
 
@@ -215,10 +209,10 @@ which `withInfo` replaces for what it emits.  An explicit one wins over both. -/
 private def annotated : Except Errors (Func base Nat) :=
   build (.str .base "a") exceptStrIntT 0 do
     let _ ← startFreshBlock
-    let a ← emitConst "a" (.int 1)
-    let _ ← withInfo 7 (emitConst "b" (.int 2))
-    let _ ← withInfo 7 (emitConst "c" (.int 3) (some 9))
-    let r ← emitApply "ret" exceptStrIntT Base.Except.ok #v[strT, intT] #[a]
+    let a ← emitConst (.str .base "a") (.int 1)
+    let _ ← withInfo 7 (emitConst (.str .base "b") (.int 2))
+    let _ ← withInfo 7 (emitConst (.str .base "c") (.int 3) (some 9))
+    let r ← emitApply (.str .base "ret") exceptStrIntT Base.Except.ok #v[strT, intT] #[a]
     withInfo 5 (finishBlock (.ret 5 r))
 
 private def instrInfos (fn : Func base Nat) : Array Nat :=
@@ -242,9 +236,9 @@ private def errors (m : BuildM base Unit Unit) : Array String :=
 /-- An instruction emitted after the block is closed. -/
 private def afterClose : BuildM base Unit Unit := do
   let _ ← startFreshBlock (base := "entry")
-  let r ← emitConst "r" (.int 0)
+  let r ← emitConst (.str .base "r") (.int 0)
   finishBlock (.ret () r)
-  let _ ← emitConst "dead" (.int 1)
+  let _ ← emitConst (.str .base "dead") (.int 1)
 
 example : (build (.str .base "f") intT () afterClose).isOk = false := by decide +kernel
 
@@ -255,7 +249,7 @@ example : (build (.str .base "f") intT () afterClose).isOk = false := by decide 
 /-- A body that never closes its entry block. -/
 private def neverClosed : BuildM base Unit Unit := do
   let _ ← startFreshBlock (base := "entry")
-  let _ ← emitConst "r" (.int 0)
+  let _ ← emitConst (.str .base "r") (.int 0)
 
 example : (build (.str .base "f") intT () neverClosed).isOk = false := by decide +kernel
 
@@ -266,7 +260,7 @@ example : (build (.str .base "f") intT () neverClosed).isOk = false := by decide
 /-- A block opened over an open one. -/
 private def overOpen : BuildM base Unit Unit := do
   let _ ← startFreshBlock (base := "entry")
-  let r ← emitConst "r" (.int 0)
+  let r ← emitConst (.str .base "r") (.int 0)
   let _ ← startFreshBlock (base := "next")
   finishBlock (.ret () r)
 
@@ -279,7 +273,7 @@ example : (build (.str .base "f") intT () overOpen).isOk = false := by decide +k
 /-- A block finished when none is open. -/
 private def noneOpen : BuildM base Unit Unit := do
   let _ ← startFreshBlock (base := "entry")
-  let r ← emitConst "r" (.int 0)
+  let r ← emitConst (.str .base "r") (.int 0)
   finishBlock (.ret () r)
   finishBlock (.ret () r)
 
@@ -292,8 +286,8 @@ example : (build (.str .base "f") intT () noneOpen).isOk = false := by decide +k
 /-- A region whose entry block is left open. -/
 private def openRegion : BuildM base Unit Unit := do
   let _ ← startFreshBlock (base := "entry")
-  let r ← emitConst "r" (.int 0)
-  let _ ← region #[] (base := "then") (discard <| emitConst "k" (.int 1))
+  let r ← emitConst (.str .base "r") (.int 0)
+  let _ ← region #[] (base := "then") (discard <| emitConst (.str .base "k") (.int 1))
   finishBlock (.ret () r)
 
 example : (build (.str .base "f") intT () openRegion).isOk = false := by decide +kernel
@@ -317,6 +311,6 @@ the function ends with block entry.1 open -/
 /-- A well-built function has no errors, and `build` succeeds. -/
 example : (build (.str .base "f") intT () do
     let _ ← startFreshBlock
-    finishBlock (.ret () (← emitConst "r" (.int 0)))).isOk = true := by decide +kernel
+    finishBlock (.ret () (← emitConst (.str .base "r") (.int 0)))).isOk = true := by decide +kernel
 
 end Strata.Mantle.BuildTest

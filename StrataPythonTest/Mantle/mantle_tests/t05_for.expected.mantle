@@ -1,176 +1,113 @@
 module t05_for {
-  func @t05_for.|<module>|() -> base.Except(py.Value, py.Value) {
+  func @|t05_for.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
-      %0 : base.String = const str "t05_for"
-      %1 : py.Value = py.strLit %0
-      %2 : base.String = const str "t05_for"
-      %3 : base.String = const str "__name__"
-      %4 : base.Ref(py.Value) = py.globalCell %2 %3
-      %5 : base.Unit = base.refSet[py.Value] %4 %1
-      %6 : base.Int = const int 1
-      %7 : py.Value = py.intLit %6
-      %8 : base.Int = const int 2
-      %9 : py.Value = py.intLit %8
-      %10 : base.Int = const int 3
-      %11 : py.Value = py.intLit %10
-      %12 : py.Value = py.mkList %7 %9 %11
-      %13 : base.String = const str "t05_for"
-      %14 : base.String = const str "items"
-      %15 : base.Ref(py.Value) = py.globalCell %13 %14
-      %16 : base.Unit = base.refSet[py.Value] %15 %12
-      %17 : base.Int = const int 0
-      %18 : py.Value = py.intLit %17
-      %19 : base.String = const str "t05_for"
-      %20 : base.String = const str "total"
-      %21 : base.Ref(py.Value) = py.globalCell %19 %20
-      %22 : base.Unit = base.refSet[py.Value] %21 %18
-      %23 : base.String = const str "t05_for"
-      %24 : base.String = const str "items"
-      %25 : base.Ref(py.Value) = py.globalCell %23 %24
-      %26 : py.Value = base.refGet[py.Value] %25
-      %27 : base.String = const str "NameError"
-      %28 : base.String = const str "name 'items' is not defined"
-      %29 : py.Value = py.requireDefined %26 %27 %28 ^propagate.0()
-      %30 : py.Value = py.getIter %29 ^propagate.0()
+      %str.0 : py.Value = py.strLit("t05_for")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t05_for", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %int.2 : py.Value = py.intLit(3)
+      %list.0 : py.Value = py.mkList(%int.0, %int.1, %int.2)
+      %items.cell.0 : base.Ref(py.Value) = py.globalCell("t05_for", "items")
+      %set.1 : base.Unit = base.refSet[py.Value](%items.cell.0, %list.0)
+      %int.3 : py.Value = py.intLit(0)
+      %total.cell.0 : base.Ref(py.Value) = py.globalCell("t05_for", "total")
+      %set.2 : base.Unit = base.refSet[py.Value](%total.cell.0, %int.3)
+      %items.cell.1 : base.Ref(py.Value) = py.globalCell("t05_for", "items")
+      %items.0 : py.Value = base.refGet[py.Value](%items.cell.1)
+      %items.1 : py.Value = py.requireDefined(%items.0, "NameError", "name 'items' is not defined") ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%items.1) ^propagate.0()
       jump ^head.0()
     head.0():
-      %31 : py.Value = py.next %30 ^stop.0()
-      %32 : base.String = const str "t05_for"
-      %33 : base.String = const str "x"
-      %34 : base.Ref(py.Value) = py.globalCell %32 %33
-      %35 : base.Unit = base.refSet[py.Value] %34 %31
-      %36 : base.String = const str "t05_for"
-      %37 : base.String = const str "total"
-      %38 : base.Ref(py.Value) = py.globalCell %36 %37
-      %39 : py.Value = base.refGet[py.Value] %38
-      %40 : base.String = const str "NameError"
-      %41 : base.String = const str "name 'total' is not defined"
-      %42 : py.Value = py.requireDefined %39 %40 %41 ^propagate.0()
-      %43 : base.String = const str "t05_for"
-      %44 : base.String = const str "x"
-      %45 : base.Ref(py.Value) = py.globalCell %43 %44
-      %46 : py.Value = base.refGet[py.Value] %45
-      %47 : base.String = const str "NameError"
-      %48 : base.String = const str "name 'x' is not defined"
-      %49 : py.Value = py.requireDefined %46 %47 %48 ^propagate.0()
-      %50 : py.Value = py.iAdd %42 %49 ^propagate.0()
-      %51 : base.String = const str "t05_for"
-      %52 : base.String = const str "total"
-      %53 : base.Ref(py.Value) = py.globalCell %51 %52
-      %54 : base.Unit = base.refSet[py.Value] %53 %50
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("t05_for", "x")
+      %set.3 : base.Unit = base.refSet[py.Value](%x.cell.0, %item.0)
+      %total.cell.1 : base.Ref(py.Value) = py.globalCell("t05_for", "total")
+      %total.0 : py.Value = base.refGet[py.Value](%total.cell.1)
+      %total.1 : py.Value = py.requireDefined(%total.0, "NameError", "name 'total' is not defined") ^propagate.0()
+      %x.cell.1 : base.Ref(py.Value) = py.globalCell("t05_for", "x")
+      %x.0 : py.Value = base.refGet[py.Value](%x.cell.1)
+      %x.1 : py.Value = py.requireDefined(%x.0, "NameError", "name 'x' is not defined") ^propagate.0()
+      %iAdd.0 : py.Value = py.iAdd(%total.1, %x.1) ^propagate.0()
+      %total.cell.2 : base.Ref(py.Value) = py.globalCell("t05_for", "total")
+      %set.4 : base.Unit = base.refSet[py.Value](%total.cell.2, %iAdd.0)
       jump ^head.0()
-    stop.0(%55 : py.Value):
-      %56 : base.Bool = py.isStopIteration %55
-      branch %56 ^exit.0() ^propagate.0(%55)
+    stop.0(%exc.0 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.0)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
     exit.0():
-      %57 : base.String = const str "t05_for"
-      %58 : base.String = const str "items"
-      %59 : base.Ref(py.Value) = py.globalCell %57 %58
-      %60 : py.Value = base.refGet[py.Value] %59
-      %61 : base.String = const str "NameError"
-      %62 : base.String = const str "name 'items' is not defined"
-      %63 : py.Value = py.requireDefined %60 %61 %62 ^propagate.0()
-      %64 : py.Value = py.getIter %63 ^propagate.0()
+      %items.cell.2 : base.Ref(py.Value) = py.globalCell("t05_for", "items")
+      %items.2 : py.Value = base.refGet[py.Value](%items.cell.2)
+      %items.3 : py.Value = py.requireDefined(%items.2, "NameError", "name 'items' is not defined") ^propagate.0()
+      %iter.1 : py.Value = py.getIter(%items.3) ^propagate.0()
       jump ^head.1()
     head.1():
-      %65 : py.Value = py.next %64 ^stop.1()
-      %66 : base.String = const str "t05_for"
-      %67 : base.String = const str "x"
-      %68 : base.Ref(py.Value) = py.globalCell %66 %67
-      %69 : base.Unit = base.refSet[py.Value] %68 %65
-      %70 : base.String = const str "t05_for"
-      %71 : base.String = const str "x"
-      %72 : base.Ref(py.Value) = py.globalCell %70 %71
-      %73 : py.Value = base.refGet[py.Value] %72
-      %74 : base.String = const str "NameError"
-      %75 : base.String = const str "name 'x' is not defined"
-      %76 : py.Value = py.requireDefined %73 %74 %75 ^propagate.0()
-      %77 : base.Int = const int 2
-      %78 : py.Value = py.intLit %77
-      %79 : py.Value = py.eq %76 %78 ^propagate.0()
-      %80 : base.Bool = py.truthy %79 ^propagate.0()
-      branch %80 ^then.0() ^else.0()
+      %item.1 : py.Value = py.next(%iter.1) ^stop.1()
+      %x.cell.2 : base.Ref(py.Value) = py.globalCell("t05_for", "x")
+      %set.5 : base.Unit = base.refSet[py.Value](%x.cell.2, %item.1)
+      %x.cell.3 : base.Ref(py.Value) = py.globalCell("t05_for", "x")
+      %x.2 : py.Value = base.refGet[py.Value](%x.cell.3)
+      %x.3 : py.Value = py.requireDefined(%x.2, "NameError", "name 'x' is not defined") ^propagate.0()
+      %int.4 : py.Value = py.intLit(2)
+      %eq.0 : py.Value = py.eq(%x.3, %int.4) ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%eq.0) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
     then.0():
       jump ^exit.1()
     else.0():
       jump ^join.0()
     join.0():
       jump ^head.1()
-    stop.1(%81 : py.Value):
-      %82 : base.Bool = py.isStopIteration %81
-      branch %82 ^exit.1() ^propagate.0(%81)
+    stop.1(%exc.1 : py.Value):
+      %done.1 : base.Bool = py.isStopIteration(%exc.1)
+      branch(%done.1) ^exit.1() ^propagate.0(%exc.1)
     exit.1():
-      %83 : base.Int = const int 0
-      %84 : py.Value = py.intLit %83
-      %85 : base.String = const str "t05_for"
-      %86 : base.String = const str "even_sum"
-      %87 : base.Ref(py.Value) = py.globalCell %85 %86
-      %88 : base.Unit = base.refSet[py.Value] %87 %84
-      %89 : base.String = const str "t05_for"
-      %90 : base.String = const str "items"
-      %91 : base.Ref(py.Value) = py.globalCell %89 %90
-      %92 : py.Value = base.refGet[py.Value] %91
-      %93 : base.String = const str "NameError"
-      %94 : base.String = const str "name 'items' is not defined"
-      %95 : py.Value = py.requireDefined %92 %93 %94 ^propagate.0()
-      %96 : py.Value = py.getIter %95 ^propagate.0()
+      %int.5 : py.Value = py.intLit(0)
+      %even_sum.cell.0 : base.Ref(py.Value) = py.globalCell("t05_for", "even_sum")
+      %set.6 : base.Unit = base.refSet[py.Value](%even_sum.cell.0, %int.5)
+      %items.cell.3 : base.Ref(py.Value) = py.globalCell("t05_for", "items")
+      %items.4 : py.Value = base.refGet[py.Value](%items.cell.3)
+      %items.5 : py.Value = py.requireDefined(%items.4, "NameError", "name 'items' is not defined") ^propagate.0()
+      %iter.2 : py.Value = py.getIter(%items.5) ^propagate.0()
       jump ^head.2()
     head.2():
-      %97 : py.Value = py.next %96 ^stop.2()
-      %98 : base.String = const str "t05_for"
-      %99 : base.String = const str "x"
-      %100 : base.Ref(py.Value) = py.globalCell %98 %99
-      %101 : base.Unit = base.refSet[py.Value] %100 %97
-      %102 : base.String = const str "t05_for"
-      %103 : base.String = const str "x"
-      %104 : base.Ref(py.Value) = py.globalCell %102 %103
-      %105 : py.Value = base.refGet[py.Value] %104
-      %106 : base.String = const str "NameError"
-      %107 : base.String = const str "name 'x' is not defined"
-      %108 : py.Value = py.requireDefined %105 %106 %107 ^propagate.0()
-      %109 : base.Int = const int 2
-      %110 : py.Value = py.intLit %109
-      %111 : py.Value = py.mod %108 %110 ^propagate.0()
-      %112 : base.Int = const int 0
-      %113 : py.Value = py.intLit %112
-      %114 : py.Value = py.notEq %111 %113 ^propagate.0()
-      %115 : base.Bool = py.truthy %114 ^propagate.0()
-      branch %115 ^then.1() ^else.1()
+      %item.2 : py.Value = py.next(%iter.2) ^stop.2()
+      %x.cell.4 : base.Ref(py.Value) = py.globalCell("t05_for", "x")
+      %set.7 : base.Unit = base.refSet[py.Value](%x.cell.4, %item.2)
+      %x.cell.5 : base.Ref(py.Value) = py.globalCell("t05_for", "x")
+      %x.4 : py.Value = base.refGet[py.Value](%x.cell.5)
+      %x.5 : py.Value = py.requireDefined(%x.4, "NameError", "name 'x' is not defined") ^propagate.0()
+      %int.6 : py.Value = py.intLit(2)
+      %mod.0 : py.Value = py.mod(%x.5, %int.6) ^propagate.0()
+      %int.7 : py.Value = py.intLit(0)
+      %notEq.0 : py.Value = py.notEq(%mod.0, %int.7) ^propagate.0()
+      %cond.1 : base.Bool = py.truthy(%notEq.0) ^propagate.0()
+      branch(%cond.1) ^then.1() ^else.1()
     then.1():
       jump ^head.2()
     else.1():
       jump ^join.1()
     join.1():
-      %116 : base.String = const str "t05_for"
-      %117 : base.String = const str "even_sum"
-      %118 : base.Ref(py.Value) = py.globalCell %116 %117
-      %119 : py.Value = base.refGet[py.Value] %118
-      %120 : base.String = const str "NameError"
-      %121 : base.String = const str "name 'even_sum' is not defined"
-      %122 : py.Value = py.requireDefined %119 %120 %121 ^propagate.0()
-      %123 : base.String = const str "t05_for"
-      %124 : base.String = const str "x"
-      %125 : base.Ref(py.Value) = py.globalCell %123 %124
-      %126 : py.Value = base.refGet[py.Value] %125
-      %127 : base.String = const str "NameError"
-      %128 : base.String = const str "name 'x' is not defined"
-      %129 : py.Value = py.requireDefined %126 %127 %128 ^propagate.0()
-      %130 : py.Value = py.iAdd %122 %129 ^propagate.0()
-      %131 : base.String = const str "t05_for"
-      %132 : base.String = const str "even_sum"
-      %133 : base.Ref(py.Value) = py.globalCell %131 %132
-      %134 : base.Unit = base.refSet[py.Value] %133 %130
+      %even_sum.cell.1 : base.Ref(py.Value) = py.globalCell("t05_for", "even_sum")
+      %even_sum.0 : py.Value = base.refGet[py.Value](%even_sum.cell.1)
+      %even_sum.1 : py.Value = py.requireDefined(%even_sum.0, "NameError", "name 'even_sum' is not defined") ^propagate.0()
+      %x.cell.6 : base.Ref(py.Value) = py.globalCell("t05_for", "x")
+      %x.6 : py.Value = base.refGet[py.Value](%x.cell.6)
+      %x.7 : py.Value = py.requireDefined(%x.6, "NameError", "name 'x' is not defined") ^propagate.0()
+      %iAdd.1 : py.Value = py.iAdd(%even_sum.1, %x.7) ^propagate.0()
+      %even_sum.cell.2 : base.Ref(py.Value) = py.globalCell("t05_for", "even_sum")
+      %set.8 : base.Unit = base.refSet[py.Value](%even_sum.cell.2, %iAdd.1)
       jump ^head.2()
-    stop.2(%135 : py.Value):
-      %136 : base.Bool = py.isStopIteration %135
-      branch %136 ^exit.2() ^propagate.0(%135)
+    stop.2(%exc.2 : py.Value):
+      %done.2 : base.Bool = py.isStopIteration(%exc.2)
+      branch(%done.2) ^exit.2() ^propagate.0(%exc.2)
     exit.2():
-      %137 : py.Value = py.noneLit
-      %138 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %137
-      ret %138
-    propagate.0(%139 : py.Value):
-      %140 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %139
-      ret %140
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.3 : py.Value):
+      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+      ret(%exc.4)
   }
 }
 

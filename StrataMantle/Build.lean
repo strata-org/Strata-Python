@@ -5,6 +5,7 @@
 -/
 module
 public import StrataMantle.IR
+public import StrataMantle.Util.NameMap
 -- Instruction values embed the signature representation, needed at code-generation time.
 import StrataMantle.Env.WF
 
@@ -19,6 +20,10 @@ allocated, in the order they were finished.
 
 A label is `base.n`, `bb.n` by default, with `n` counting per `base` across the whole
 function, regions included, so labels are unique function-wide as `Func.WF` demands.
+
+Ids count from `0` in allocation order.  `emitApply` allocates its result before it emits its
+regions, so the ids follow the printed order of definitions (`Func.Canonical`) as long as each
+block's parameters, a region's included, are allocated just before the block opens.
 
 The operations:
 
@@ -38,8 +43,8 @@ Misuse is an error, recorded in the state: an instruction emitted with no block 
 opened while another is open, a block finished when none is open, and a region or function
 body that ends with a block open.  `build` succeeds only if there is none.
 
-The builder is language-neutral.  Its maps are association lists (`StrMap`), so a function it
-builds reduces in the kernel.
+The builder is language-neutral.  Its maps are association lists (`StrMap`) and 2-3 trees
+(`NameMap`), so a function it builds reduces in the kernel.
 -/
 
 namespace Strata.Mantle
@@ -78,9 +83,9 @@ structure State (env : Env Unit) (α : Type) where
   /-- The annotation an instruction or block gets when its emitter is given none. -/
   info : α
   nextVal : Nat := 0
-  names : Array ValName := #[]
-  /-- Next suffix per readable name, so that two `x`es are `x.0` and `x.1`. -/
-  suffixes : StrMap Nat := ∅
+  names : Array Name := #[]
+  /-- Next suffix per value-name base, so that two `x`es are `x.0` and `x.1`. -/
+  suffixes : NameMap Nat := ∅
   /-- Next suffix per label base, so that two `bb`s are `bb.0` and `bb.1`. -/
   labelSuffixes : StrMap Nat := ∅
   /-- The block being built, if one is open. -/
@@ -138,14 +143,15 @@ def withInfo {β : Type} (info : α) (m : BuildM env α β) : BuildM env α β :
 
 /-! ## Values -/
 
-/-- A fresh value of type `t`, named after `base` with a disambiguating suffix. -/
-def freshVal (base : String) (t : TypeExpr env 0) : BuildM env α (ValDecl env) := do
+/-- A fresh value of type `t`, named `stem.n`, with `n` the next suffix for `stem`.  `stem` is
+structured: `x.cell` is the segments `x` and `cell`, never one segment with a `.` in it. -/
+def freshVal (stem : Name) (t : TypeExpr env 0) : BuildM env α (ValDecl env) := do
   let s ← get
-  let suffix := s.suffixes.getD base 0
+  let suffix := (s.suffixes.find? stem).getD 0
   set { s with
     nextVal := s.nextVal + 1
-    names := s.names.push ⟨base, suffix⟩
-    suffixes := s.suffixes.insert base (suffix + 1) }
+    names := s.names.push (.num stem suffix)
+    suffixes := s.suffixes.insert stem (suffix + 1) }
   return ⟨⟨s.nextVal⟩, t⟩
 
 /-! ## Instructions -/
@@ -161,7 +167,7 @@ def emit (d : ValDecl env) (instr : Instruction env α) : BuildM env α ValId :=
 
 /-- Emit a constant.  Its type is what the base gives it, so the caller supplies
 only a name to read it by. -/
-def emitConst [base ⊑ env] (name : String) (c : Const) (info : Option α := none) :
+def emitConst [base ⊑ env] (name : Name) (c : Const) (info : Option α := none) :
     BuildM env α ValId := do
   let d ← freshVal name c.typeOf
   emit d (.const (← resolveInfo info) d c)
@@ -169,19 +175,21 @@ def emitConst [base ⊑ env] (name : String) (c : Const) (info : Option α := no
 /-- Emit a code pointer to `target`, a function of the module: the constant `.func target`. -/
 def emitFunc [base ⊑ env] (target : Name) (info : Option α := none) :
     BuildM env α ValId :=
-  emitConst "code" (.func target) info
+  emitConst (.str .base "code") (.func target) info
 
 /-- Emit an application of an operation, a datatype's constructor included.  `type` is the
 result's type, the operation's return type at `typeArgs`.  `succs` are the blocks it may
-transfer to, one per declared successor, and `regions` are its nested bodies, each emitted
-with `region`. -/
-def emitApply {isig : InsnSig env} (name : String) (type : TypeExpr env 0)
+transfer to, one per declared successor, and `regions` emit its nested bodies, each a
+`region`.  They run after the result is allocated, so ids follow the printed order: the
+result, then what the regions define. -/
+def emitApply {isig : InsnSig env} (name : Name) (type : TypeExpr env 0)
     (r : InsnRef env isig) (typeArgs : Vector (TypeExpr env 0) isig.typeArgc)
     (args : Array ValId) (succs : Array BlockValue := #[])
-    (regions : Array (Region env α) := #[]) (info : Option α := none) :
+    (regions : Array (BuildM env α (Region env α)) := #[]) (info : Option α := none) :
     BuildM env α ValId := do
   let d ← freshVal name type
-  emit d (.apply (← resolveInfo info) d r typeArgs args succs regions)
+  let rs ← regions.mapM id
+  emit d (.apply (← resolveInfo info) d r typeArgs args succs rs)
 
 /-! ## Blocks -/
 
@@ -211,7 +219,7 @@ def startBlock (label : Label) (params : Array (ValDecl env) := #[]) :
 Open the block called `label`, taking one fresh value with base `name` of type type `t`, and
 return that value.
 -/
-def startBlockWith (label : Label) (name : String) (t : TypeExpr env 0) :
+def startBlockWith (label : Label) (name : Name) (t : TypeExpr env 0) :
     BuildM env α ValId := do
   let v ← freshVal name t
   startBlock label #[v]
@@ -241,10 +249,11 @@ def finishBlock (term : Terminator env α) (info : Option α := none) : BuildM e
 /-- Close the open block by applying the terminal operation `r`. -/
 def terminate {isig : InsnSig env} (r : InsnRef env isig)
     (typeArgs : Vector (TypeExpr env 0) isig.typeArgc) (args : Array ValId := #[])
-    (succs : Array BlockValue := #[]) (regions : Array (Region env α) := #[])
+    (succs : Array BlockValue := #[]) (regions : Array (BuildM env α (Region env α)) := #[])
     (info : Option α := none) : BuildM env α Unit := do
   let i ← resolveInfo info
-  finishBlock (.apply i r typeArgs args succs regions) (some i)
+  let rs ← regions.mapM id
+  finishBlock (.apply i r typeArgs args succs rs) (some i)
 
 /-- Close the open block with `jump k`. -/
 def jump [base ⊑ env] (k : BlockValue) (info : Option α := none) : BuildM env α Unit := do
@@ -271,8 +280,9 @@ def unreachable [base ⊑ env] (info : Option α := none) : BuildM env α Unit :
 
 /-- Emit a region: open its entry block, labelled `base.n` and taking `params`, run `body`,
 and take the blocks it finished, entry first.  The open block and the blocks finished so
-far are restored afterwards, so a region can be emitted in the middle of a block.  Value ids,
-readable names and labels keep counting across it.
+far are restored afterwards, so a region can be emitted in the middle of a block, as
+`emitApply` and `terminate` do.  Value ids, readable names and labels
+keep counting across it.
 
 `body` must finish every block it opens, the entry included: ending with a block open is
 an error.  `ret` leaves the region.  A transfer from the body to a block outside the region is

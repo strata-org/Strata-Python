@@ -1,116 +1,80 @@
 module m_while {
-  func @m_while.|<module>|() -> base.Except(py.Value, py.Value) {
+  func @|m_while.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
-      %0 : base.String = const str "m_while"
-      %1 : py.Value = py.strLit %0
-      %2 : base.String = const str "m_while"
-      %3 : base.String = const str "__name__"
-      %4 : base.Ref(py.Value) = py.globalCell %2 %3
-      %5 : base.Unit = base.refSet[py.Value] %4 %1
-      %6 : base.Code = const @m_while.loop
-      %7 : py.Value = py.mkClosure %6
-      %8 : base.String = const str "m_while"
-      %9 : base.String = const str "loop"
-      %10 : base.Ref(py.Value) = py.globalCell %8 %9
-      %11 : base.Unit = base.refSet[py.Value] %10 %7
-      %12 : py.Value = py.noneLit
-      %13 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %12
-      ret %13
-    propagate.0(%14 : py.Value):
-      %15 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %14
-      ret %15
+      %str.0 : py.Value = py.strLit("m_while")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_while", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure(@m_while.loop)
+      %loop.cell.0 : base.Ref(py.Value) = py.globalCell("m_while", "loop")
+      %set.1 : base.Unit = base.refSet[py.Value](%loop.cell.0, %clo.0)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-  func @m_while.loop(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value, %1 : py.Value):
-      %2 : base.String = const str "n"
-      %3 : py.Value = py.undef %2
-      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
-      %5 : base.String = const str "i"
-      %6 : py.Value = py.undef %5
-      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
-      %8 : py.Value = py.tupleLen %0
-      %9 : base.String = const str "n"
-      %10 : py.Value = py.undef %9
-      %11 : py.Value = py.mkTuple %10
-      %12 : py.Value = py.noneLit
-      %13 : py.Value = py.getSlice %11 %8 %12 %12 ^propagate.0()
-      %14 : py.Value = py.add %0 %13 ^propagate.0()
-      %15 : base.Int = const int 0
-      %16 : py.Value = py.intLit %15
-      %17 : py.Value = py.getItem %14 %16 ^propagate.0()
-      %18 : base.String = const str "n"
-      %19 : py.Value = py.strLit %18
-      %20 : py.Value = py.dictGet %1 %19 %17
-      %21 : py.Value = py.in %19 %1 ^propagate.0()
-      %22 : base.Unit = py.dictDiscard %1 %19
-      %23 : py.Value = py.lt %16 %8 ^propagate.0()
-      %24 : py.Value = py.mult %21 %23 ^propagate.0()
-      %25 : base.Int = const int 0
-      %26 : base.String = const str "TypeError"
-      %27 : base.String = const str "loop() got multiple values for argument 'n'"
-      %28 : base.Unit = py.requireAtMost %24 %25 %26 %27 ^propagate.0()
-      %29 : base.String = const str "kwargs"
-      %30 : py.Value = py.undef %29
-      %31 : py.Value = py.dictFirstKey %1 %30
-      %32 : base.String = const str "TypeError"
-      %33 : base.String = const str "loop() got an unexpected keyword argument {}"
-      %34 : base.Unit = py.requireUndefined %31 %32 %33 ^propagate.0()
-      %35 : base.Int = const int 1
-      %36 : base.String = const str "TypeError"
-      %37 : base.String = const str "loop() takes 1 positional argument but {} {was} given"
-      %38 : base.Unit = py.requireAtMost %8 %35 %36 %37 ^propagate.0()
-      %39 : base.String = const str "TypeError"
-      %40 : base.String = const str "loop() missing 1 required positional argument: 'n'"
-      %41 : py.Value = py.requireDefined %20 %39 %40 ^propagate.0()
-      %42 : base.Unit = base.refSet[py.Value] %4 %41
-      %43 : base.Int = const int 0
-      %44 : py.Value = py.intLit %43
-      %45 : base.Unit = base.refSet[py.Value] %7 %44
+  func @m_while.loop(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %n.1 : py.Value = py.undef("n")
+      %n.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%n.1)
+      %i.0 : py.Value = py.undef("i")
+      %i.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %n.4 : py.Value = py.undef("n")
+      %fill.0 : py.Value = py.mkTuple(%n.4)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("n")
+      %n.5 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "loop() got multiple values for argument 'n'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "loop() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "loop() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %n.7 : py.Value = py.requireDefined(%n.5, "TypeError", "loop() missing 1 required positional argument: 'n'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%n.cell.0, %n.7)
+      %int.1 : py.Value = py.intLit(0)
+      %set.1 : base.Unit = base.refSet[py.Value](%i.cell.0, %int.1)
       jump ^head.0()
     head.0():
-      %46 : py.Value = base.refGet[py.Value] %7
-      %47 : base.String = const str "UnboundLocalError"
-      %48 : base.String = const str "cannot access local variable 'i' where it is not associated with a value"
-      %49 : py.Value = py.requireDefined %46 %47 %48 ^propagate.0()
-      %50 : py.Value = base.refGet[py.Value] %4
-      %51 : base.String = const str "UnboundLocalError"
-      %52 : base.String = const str "cannot access local variable 'n' where it is not associated with a value"
-      %53 : py.Value = py.requireDefined %50 %51 %52 ^propagate.0()
-      %54 : py.Value = py.lt %49 %53 ^propagate.0()
-      %55 : base.Bool = py.truthy %54 ^propagate.0()
-      branch %55 ^body.0() ^else.0()
+      %i.1 : py.Value = base.refGet[py.Value](%i.cell.0)
+      %i.2 : py.Value = py.requireDefined(%i.1, "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %n.8 : py.Value = base.refGet[py.Value](%n.cell.0)
+      %n.9 : py.Value = py.requireDefined(%n.8, "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
+      %lt.0 : py.Value = py.lt(%i.2, %n.9) ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%lt.0) ^propagate.0()
+      branch(%cond.0) ^body.0() ^else.0()
     body.0():
-      %56 : py.Value = base.refGet[py.Value] %7
-      %57 : base.String = const str "UnboundLocalError"
-      %58 : base.String = const str "cannot access local variable 'i' where it is not associated with a value"
-      %59 : py.Value = py.requireDefined %56 %57 %58 ^propagate.0()
-      %60 : base.Int = const int 1
-      %61 : py.Value = py.intLit %60
-      %62 : py.Value = py.iAdd %59 %61 ^propagate.0()
-      %63 : base.Unit = base.refSet[py.Value] %7 %62
-      %64 : py.Value = base.refGet[py.Value] %7
-      %65 : base.String = const str "UnboundLocalError"
-      %66 : base.String = const str "cannot access local variable 'i' where it is not associated with a value"
-      %67 : py.Value = py.requireDefined %64 %65 %66 ^propagate.0()
-      %68 : base.Int = const int 2
-      %69 : py.Value = py.intLit %68
-      %70 : py.Value = py.eq %67 %69 ^propagate.0()
-      %71 : base.Bool = py.truthy %70 ^propagate.0()
-      branch %71 ^then.0() ^else.1()
+      %i.3 : py.Value = base.refGet[py.Value](%i.cell.0)
+      %i.4 : py.Value = py.requireDefined(%i.3, "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %int.2 : py.Value = py.intLit(1)
+      %iAdd.0 : py.Value = py.iAdd(%i.4, %int.2) ^propagate.0()
+      %set.2 : base.Unit = base.refSet[py.Value](%i.cell.0, %iAdd.0)
+      %i.5 : py.Value = base.refGet[py.Value](%i.cell.0)
+      %i.6 : py.Value = py.requireDefined(%i.5, "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %int.3 : py.Value = py.intLit(2)
+      %eq.0 : py.Value = py.eq(%i.6, %int.3) ^propagate.0()
+      %cond.1 : base.Bool = py.truthy(%eq.0) ^propagate.0()
+      branch(%cond.1) ^then.0() ^else.1()
     then.0():
       jump ^head.0()
     else.1():
       jump ^join.0()
     join.0():
-      %72 : py.Value = base.refGet[py.Value] %7
-      %73 : base.String = const str "UnboundLocalError"
-      %74 : base.String = const str "cannot access local variable 'i' where it is not associated with a value"
-      %75 : py.Value = py.requireDefined %72 %73 %74 ^propagate.0()
-      %76 : base.Int = const int 5
-      %77 : py.Value = py.intLit %76
-      %78 : py.Value = py.eq %75 %77 ^propagate.0()
-      %79 : base.Bool = py.truthy %78 ^propagate.0()
-      branch %79 ^then.1() ^else.2()
+      %i.7 : py.Value = base.refGet[py.Value](%i.cell.0)
+      %i.8 : py.Value = py.requireDefined(%i.7, "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %int.4 : py.Value = py.intLit(5)
+      %eq.1 : py.Value = py.eq(%i.8, %int.4) ^propagate.0()
+      %cond.2 : base.Bool = py.truthy(%eq.1) ^propagate.0()
+      branch(%cond.2) ^then.1() ^else.2()
     then.1():
       jump ^exit.0()
     else.2():
@@ -118,21 +82,18 @@ module m_while {
     join.1():
       jump ^head.0()
     else.0():
-      %80 : base.Int = const int 1
-      %81 : py.Value = py.intLit %80
-      %82 : py.Value = py.uSub %81 ^propagate.0()
-      %83 : base.Unit = base.refSet[py.Value] %7 %82
+      %int.5 : py.Value = py.intLit(1)
+      %neg.0 : py.Value = py.uSub(%int.5) ^propagate.0()
+      %set.3 : base.Unit = base.refSet[py.Value](%i.cell.0, %neg.0)
       jump ^exit.0()
     exit.0():
-      %84 : py.Value = base.refGet[py.Value] %7
-      %85 : base.String = const str "UnboundLocalError"
-      %86 : base.String = const str "cannot access local variable 'i' where it is not associated with a value"
-      %87 : py.Value = py.requireDefined %84 %85 %86 ^propagate.0()
-      %88 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %87
-      ret %88
-    propagate.0(%89 : py.Value):
-      %90 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %89
-      ret %90
+      %i.9 : py.Value = base.refGet[py.Value](%i.cell.0)
+      %i.10 : py.Value = py.requireDefined(%i.9, "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%i.10)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
 }
 

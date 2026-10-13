@@ -1,86 +1,57 @@
 module tc14_overload_dispatch {
-  func @tc14_overload_dispatch.|<module>|() -> base.Except(py.Value, py.Value) {
+  func @|tc14_overload_dispatch.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
-      %0 : base.String = const str "tc14_overload_dispatch"
-      %1 : py.Value = py.strLit %0
-      %2 : base.String = const str "tc14_overload_dispatch"
-      %3 : base.String = const str "__name__"
-      %4 : base.Ref(py.Value) = py.globalCell %2 %3
-      %5 : base.Unit = base.refSet[py.Value] %4 %1
-      %6 : base.String = const str "cloudkit"
-      %7 : py.Value = py.importModule %6 ^propagate.0()
-      %8 : base.String = const str "tc14_overload_dispatch"
-      %9 : base.String = const str "cloudkit"
-      %10 : base.Ref(py.Value) = py.globalCell %8 %9
-      %11 : base.Unit = base.refSet[py.Value] %10 %7
-      %12 : base.Code = const @tc14_overload_dispatch.f
-      %13 : py.Value = py.mkClosure %12
-      %14 : base.String = const str "tc14_overload_dispatch"
-      %15 : base.String = const str "f"
-      %16 : base.Ref(py.Value) = py.globalCell %14 %15
-      %17 : base.Unit = base.refSet[py.Value] %16 %13
-      %18 : py.Value = py.noneLit
-      %19 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %18
-      ret %19
-    propagate.0(%20 : py.Value):
-      %21 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %20
-      ret %21
+      %str.0 : py.Value = py.strLit("tc14_overload_dispatch")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("tc14_overload_dispatch", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %mod.0 : py.Value = py.importModule("cloudkit") ^propagate.0()
+      %cloudkit.cell.0 : base.Ref(py.Value) = py.globalCell("tc14_overload_dispatch", "cloudkit")
+      %set.1 : base.Unit = base.refSet[py.Value](%cloudkit.cell.0, %mod.0)
+      %clo.0 : py.Value = py.mkClosure(@tc14_overload_dispatch.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("tc14_overload_dispatch", "f")
+      %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-  func @tc14_overload_dispatch.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value, %1 : py.Value):
-      %2 : base.String = const str "db_client"
-      %3 : py.Value = py.undef %2
-      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
-      %5 : base.String = const str "cache_client"
-      %6 : py.Value = py.undef %5
-      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
-      %8 : py.Value = py.tupleLen %0
-      %9 : base.String = const str "kwargs"
-      %10 : py.Value = py.undef %9
-      %11 : py.Value = py.dictFirstKey %1 %10
-      %12 : base.String = const str "TypeError"
-      %13 : base.String = const str "f() got an unexpected keyword argument {}"
-      %14 : base.Unit = py.requireUndefined %11 %12 %13 ^propagate.0()
-      %15 : base.Int = const int 0
-      %16 : base.String = const str "TypeError"
-      %17 : base.String = const str "f() takes 0 positional arguments but {} {was} given"
-      %18 : base.Unit = py.requireAtMost %8 %15 %16 %17 ^propagate.0()
-      %19 : base.String = const str "tc14_overload_dispatch"
-      %20 : base.String = const str "cloudkit"
-      %21 : base.Ref(py.Value) = py.globalCell %19 %20
-      %22 : py.Value = base.refGet[py.Value] %21
-      %23 : base.String = const str "NameError"
-      %24 : base.String = const str "name 'cloudkit' is not defined"
-      %25 : py.Value = py.requireDefined %22 %23 %24 ^propagate.0()
-      %26 : base.String = const str "client"
-      %27 : py.Value = py.attr %25 %26 ^propagate.0()
-      %28 : base.String = const str "database"
-      %29 : py.Value = py.strLit %28
-      %30 : py.Value = py.mkTuple %29
-      %31 : py.Value = py.mkKwargs
-      %32 : py.Value = py.call %27 %30 %31 ^propagate.0()
-      %33 : base.Unit = base.refSet[py.Value] %4 %32
-      %34 : base.String = const str "tc14_overload_dispatch"
-      %35 : base.String = const str "cloudkit"
-      %36 : base.Ref(py.Value) = py.globalCell %34 %35
-      %37 : py.Value = base.refGet[py.Value] %36
-      %38 : base.String = const str "NameError"
-      %39 : base.String = const str "name 'cloudkit' is not defined"
-      %40 : py.Value = py.requireDefined %37 %38 %39 ^propagate.0()
-      %41 : base.String = const str "client"
-      %42 : py.Value = py.attr %40 %41 ^propagate.0()
-      %43 : base.String = const str "cache"
-      %44 : py.Value = py.strLit %43
-      %45 : py.Value = py.mkTuple %44
-      %46 : py.Value = py.mkKwargs
-      %47 : py.Value = py.call %42 %45 %46 ^propagate.0()
-      %48 : base.Unit = base.refSet[py.Value] %7 %47
-      %49 : py.Value = py.noneLit
-      %50 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %49
-      ret %50
-    propagate.0(%51 : py.Value):
-      %52 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %51
-      ret %52
+  func @tc14_overload_dispatch.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %db_client.0 : py.Value = py.undef("db_client")
+      %db_client.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%db_client.0)
+      %cache_client.0 : py.Value = py.undef("cache_client")
+      %cache_client.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%cache_client.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %cloudkit.cell.0 : base.Ref(py.Value) = py.globalCell("tc14_overload_dispatch", "cloudkit")
+      %cloudkit.0 : py.Value = base.refGet[py.Value](%cloudkit.cell.0)
+      %cloudkit.1 : py.Value = py.requireDefined(%cloudkit.0, "NameError", "name 'cloudkit' is not defined") ^propagate.0()
+      %client.0 : py.Value = py.attr(%cloudkit.1, "client") ^propagate.0()
+      %str.0 : py.Value = py.strLit("database")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%client.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%db_client.cell.0, %call.0)
+      %cloudkit.cell.1 : base.Ref(py.Value) = py.globalCell("tc14_overload_dispatch", "cloudkit")
+      %cloudkit.2 : py.Value = base.refGet[py.Value](%cloudkit.cell.1)
+      %cloudkit.3 : py.Value = py.requireDefined(%cloudkit.2, "NameError", "name 'cloudkit' is not defined") ^propagate.0()
+      %client.1 : py.Value = py.attr(%cloudkit.3, "client") ^propagate.0()
+      %str.1 : py.Value = py.strLit("cache")
+      %tuple.1 : py.Value = py.mkTuple(%str.1)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%client.1, %tuple.1, %kwargs.2) ^propagate.0()
+      %set.1 : base.Unit = base.refSet[py.Value](%cache_client.cell.0, %call.1)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
 }
 

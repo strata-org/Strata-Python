@@ -7,13 +7,17 @@ module
 
 public meta import StrataPython.PythonDialect
 public meta import StrataDDM.Ion
+public meta import StrataMantle.WF
+meta import StrataMantle.Env.WF
 
 /-! # Helpers for the Python-on-Mantle golden runners
 
 `MantleTranslateTest` and `PyScopeTest` in `StrataPythonTestExtra` share these:
 
 * `compilePython`: parse a `.py` file to a Strata Ion file through CPython;
-* `firstDiff`: the first line where an output and its golden differ.
+* `firstDiff`: the first line where an output and its golden differ;
+* `dottedNames`: the names of a module with a `.` inside a string segment, which no name may
+  have.  A stopgap until segments are a subtype that rules it out.
 -/
 
 namespace StrataPython.Mantle.TestUtil
@@ -44,6 +48,19 @@ def firstDiff (actual expected : String) : Option String := Id.run do
     if al != el then
       return some s!"line {i + 1}:\n    expected: {el}\n    actual:   {al}"
   return none
+
+open Strata.Mantle
+
+/-- Whether a string segment of `n` contains `.`. -/
+def hasDottedSegment : Name → Bool
+  | .base => false
+  | .num p _ => hasDottedSegment p
+  | .str p s => s.contains '.' || hasDottedSegment p
+
+/-- The names of `m`, of functions, labels and values, with a `.` inside a string segment. -/
+def dottedNames {env : Env Unit} [base ⊑ env] {α : Type} (m : Module env α) : Array Name :=
+  m.funcs.flatMap fun f =>
+    (#[f.name] ++ (f.allBlocks.map (·.label.name)).toArray ++ f.names).filter hasDottedSegment
 
 end
 

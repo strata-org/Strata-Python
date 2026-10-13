@@ -1,37 +1,26 @@
 -- syntax error: keyword argument repeated: k at 2:7-2:10
 module e21_repeated_keyword {
-  func @e21_repeated_keyword.|<module>|() -> base.Except(py.Value, py.Value) {
+  func @|e21_repeated_keyword.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
-      %0 : base.String = const str "e21_repeated_keyword"
-      %1 : py.Value = py.strLit %0
-      %2 : base.String = const str "e21_repeated_keyword"
-      %3 : base.String = const str "__name__"
-      %4 : base.Ref(py.Value) = py.globalCell %2 %3
-      %5 : base.Unit = base.refSet[py.Value] %4 %1
-      %6 : base.String = const str "e21_repeated_keyword"
-      %7 : base.String = const str "f"
-      %8 : base.Ref(py.Value) = py.globalCell %6 %7
-      %9 : py.Value = base.refGet[py.Value] %8
-      %10 : base.String = const str "NameError"
-      %11 : base.String = const str "name 'f' is not defined"
-      %12 : py.Value = py.requireDefined %9 %10 %11 ^propagate.0()
-      %13 : py.Value = py.mkTuple
-      %14 : base.String = const str "k"
-      %15 : py.Value = py.strLit %14
-      %16 : base.Int = const int 1
-      %17 : py.Value = py.intLit %16
-      %18 : base.String = const str "k"
-      %19 : py.Value = py.strLit %18
-      %20 : base.Int = const int 2
-      %21 : py.Value = py.intLit %20
-      %22 : py.Value = py.mkKwargs %15 %17 %19 %21
-      %23 : py.Value = py.call %12 %13 %22 ^propagate.0()
-      %24 : py.Value = py.noneLit
-      %25 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %24
-      ret %25
-    propagate.0(%26 : py.Value):
-      %27 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %26
-      ret %27
+      %str.0 : py.Value = py.strLit("e21_repeated_keyword")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("e21_repeated_keyword", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("e21_repeated_keyword", "f")
+      %f.0 : py.Value = base.refGet[py.Value](%f.cell.0)
+      %f.1 : py.Value = py.requireDefined(%f.0, "NameError", "name 'f' is not defined") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %str.1 : py.Value = py.strLit("k")
+      %int.0 : py.Value = py.intLit(1)
+      %str.2 : py.Value = py.strLit("k")
+      %int.1 : py.Value = py.intLit(2)
+      %kwargs.0 : py.Value = py.mkKwargs(%str.1, %int.0, %str.2, %int.1)
+      %call.0 : py.Value = py.call(%f.1, %tuple.0, %kwargs.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
 }
 

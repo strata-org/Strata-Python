@@ -1,105 +1,67 @@
 module p15_global {
-  func @p15_global.|<module>|() -> base.Except(py.Value, py.Value) {
+  func @|p15_global.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
-      %0 : base.String = const str "p15_global"
-      %1 : py.Value = py.strLit %0
-      %2 : base.String = const str "p15_global"
-      %3 : base.String = const str "__name__"
-      %4 : base.Ref(py.Value) = py.globalCell %2 %3
-      %5 : base.Unit = base.refSet[py.Value] %4 %1
-      %6 : base.Code = const @p15_global.set_x
-      %7 : py.Value = py.mkClosure %6
-      %8 : base.String = const str "p15_global"
-      %9 : base.String = const str "set_x"
-      %10 : base.Ref(py.Value) = py.globalCell %8 %9
-      %11 : base.Unit = base.refSet[py.Value] %10 %7
-      %12 : base.Code = const @p15_global.get_x
-      %13 : py.Value = py.mkClosure %12
-      %14 : base.String = const str "p15_global"
-      %15 : base.String = const str "get_x"
-      %16 : base.Ref(py.Value) = py.globalCell %14 %15
-      %17 : base.Unit = base.refSet[py.Value] %16 %13
-      %18 : base.String = const str "p15_global"
-      %19 : base.String = const str "set_x"
-      %20 : base.Ref(py.Value) = py.globalCell %18 %19
-      %21 : py.Value = base.refGet[py.Value] %20
-      %22 : base.String = const str "NameError"
-      %23 : base.String = const str "name 'set_x' is not defined"
-      %24 : py.Value = py.requireDefined %21 %22 %23 ^propagate.0()
-      %25 : py.Value = py.mkTuple
-      %26 : py.Value = py.mkKwargs
-      %27 : py.Value = py.call %24 %25 %26 ^propagate.0()
-      %28 : base.String = const str "builtins"
-      %29 : base.String = const str "print"
-      %30 : py.Value = py.qualifiedRef %28 %29 ^propagate.0()
-      %31 : base.String = const str "p15_global"
-      %32 : base.String = const str "x"
-      %33 : base.Ref(py.Value) = py.globalCell %31 %32
-      %34 : py.Value = base.refGet[py.Value] %33
-      %35 : base.String = const str "NameError"
-      %36 : base.String = const str "name 'x' is not defined"
-      %37 : py.Value = py.requireDefined %34 %35 %36 ^propagate.0()
-      %38 : py.Value = py.mkTuple %37
-      %39 : py.Value = py.mkKwargs
-      %40 : py.Value = py.call %30 %38 %39 ^propagate.0()
-      %41 : py.Value = py.noneLit
-      %42 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %41
-      ret %42
-    propagate.0(%43 : py.Value):
-      %44 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %43
-      ret %44
+      %str.0 : py.Value = py.strLit("p15_global")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p15_global", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure(@p15_global.set_x)
+      %set_x.cell.0 : base.Ref(py.Value) = py.globalCell("p15_global", "set_x")
+      %set.1 : base.Unit = base.refSet[py.Value](%set_x.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure(@p15_global.get_x)
+      %get_x.cell.0 : base.Ref(py.Value) = py.globalCell("p15_global", "get_x")
+      %set.2 : base.Unit = base.refSet[py.Value](%get_x.cell.0, %clo.1)
+      %set_x.cell.1 : base.Ref(py.Value) = py.globalCell("p15_global", "set_x")
+      %set_x.0 : py.Value = base.refGet[py.Value](%set_x.cell.1)
+      %set_x.1 : py.Value = py.requireDefined(%set_x.0, "NameError", "name 'set_x' is not defined") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%set_x.1, %tuple.0, %kwargs.0) ^propagate.0()
+      %print.0 : py.Value = py.qualifiedRef("builtins", "print") ^propagate.0()
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("p15_global", "x")
+      %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
+      %x.1 : py.Value = py.requireDefined(%x.0, "NameError", "name 'x' is not defined") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%x.1)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-  func @p15_global.set_x(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value, %1 : py.Value):
-      %2 : py.Value = py.tupleLen %0
-      %3 : base.String = const str "kwargs"
-      %4 : py.Value = py.undef %3
-      %5 : py.Value = py.dictFirstKey %1 %4
-      %6 : base.String = const str "TypeError"
-      %7 : base.String = const str "set_x() got an unexpected keyword argument {}"
-      %8 : base.Unit = py.requireUndefined %5 %6 %7 ^propagate.0()
-      %9 : base.Int = const int 0
-      %10 : base.String = const str "TypeError"
-      %11 : base.String = const str "set_x() takes 0 positional arguments but {} {was} given"
-      %12 : base.Unit = py.requireAtMost %2 %9 %10 %11 ^propagate.0()
-      %13 : base.Int = const int 1
-      %14 : py.Value = py.intLit %13
-      %15 : base.String = const str "p15_global"
-      %16 : base.String = const str "x"
-      %17 : base.Ref(py.Value) = py.globalCell %15 %16
-      %18 : base.Unit = base.refSet[py.Value] %17 %14
-      %19 : py.Value = py.noneLit
-      %20 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %19
-      ret %20
-    propagate.0(%21 : py.Value):
-      %22 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %21
-      ret %22
+  func @p15_global.set_x(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "set_x() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "set_x() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("p15_global", "x")
+      %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-  func @p15_global.get_x(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value, %1 : py.Value):
-      %2 : py.Value = py.tupleLen %0
-      %3 : base.String = const str "kwargs"
-      %4 : py.Value = py.undef %3
-      %5 : py.Value = py.dictFirstKey %1 %4
-      %6 : base.String = const str "TypeError"
-      %7 : base.String = const str "get_x() got an unexpected keyword argument {}"
-      %8 : base.Unit = py.requireUndefined %5 %6 %7 ^propagate.0()
-      %9 : base.Int = const int 0
-      %10 : base.String = const str "TypeError"
-      %11 : base.String = const str "get_x() takes 0 positional arguments but {} {was} given"
-      %12 : base.Unit = py.requireAtMost %2 %9 %10 %11 ^propagate.0()
-      %13 : base.String = const str "p15_global"
-      %14 : base.String = const str "x"
-      %15 : base.Ref(py.Value) = py.globalCell %13 %14
-      %16 : py.Value = base.refGet[py.Value] %15
-      %17 : base.String = const str "NameError"
-      %18 : base.String = const str "name 'x' is not defined"
-      %19 : py.Value = py.requireDefined %16 %17 %18 ^propagate.0()
-      %20 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %19
-      ret %20
-    propagate.0(%21 : py.Value):
-      %22 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %21
-      ret %22
+  func @p15_global.get_x(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "get_x() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "get_x() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("p15_global", "x")
+      %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
+      %x.1 : py.Value = py.requireDefined(%x.0, "NameError", "name 'x' is not defined") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
 }
 

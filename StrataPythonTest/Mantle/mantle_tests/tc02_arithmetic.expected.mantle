@@ -1,89 +1,62 @@
 module tc02_arithmetic {
-  func @tc02_arithmetic.|<module>|() -> base.Except(py.Value, py.Value) {
+  func @|tc02_arithmetic.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
-      %0 : base.String = const str "tc02_arithmetic"
-      %1 : py.Value = py.strLit %0
-      %2 : base.String = const str "tc02_arithmetic"
-      %3 : base.String = const str "__name__"
-      %4 : base.Ref(py.Value) = py.globalCell %2 %3
-      %5 : base.Unit = base.refSet[py.Value] %4 %1
-      %6 : base.Code = const @tc02_arithmetic.f
-      %7 : py.Value = py.mkClosure %6
-      %8 : base.String = const str "tc02_arithmetic"
-      %9 : base.String = const str "f"
-      %10 : base.Ref(py.Value) = py.globalCell %8 %9
-      %11 : base.Unit = base.refSet[py.Value] %10 %7
-      %12 : py.Value = py.noneLit
-      %13 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %12
-      ret %13
-    propagate.0(%14 : py.Value):
-      %15 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %14
-      ret %15
+      %str.0 : py.Value = py.strLit("tc02_arithmetic")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("tc02_arithmetic", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure(@tc02_arithmetic.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("tc02_arithmetic", "f")
+      %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-  func @tc02_arithmetic.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value, %1 : py.Value):
-      %2 : base.String = const str "a"
-      %3 : py.Value = py.undef %2
-      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
-      %5 : base.String = const str "b"
-      %6 : py.Value = py.undef %5
-      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
-      %8 : base.String = const str "c"
-      %9 : py.Value = py.undef %8
-      %10 : base.Ref(py.Value) = base.refNew[py.Value] %9
-      %11 : base.String = const str "d"
-      %12 : py.Value = py.undef %11
-      %13 : base.Ref(py.Value) = base.refNew[py.Value] %12
-      %14 : base.String = const str "e"
-      %15 : py.Value = py.undef %14
-      %16 : base.Ref(py.Value) = base.refNew[py.Value] %15
-      %17 : py.Value = py.tupleLen %0
-      %18 : base.String = const str "kwargs"
-      %19 : py.Value = py.undef %18
-      %20 : py.Value = py.dictFirstKey %1 %19
-      %21 : base.String = const str "TypeError"
-      %22 : base.String = const str "f() got an unexpected keyword argument {}"
-      %23 : base.Unit = py.requireUndefined %20 %21 %22 ^propagate.0()
-      %24 : base.Int = const int 0
-      %25 : base.String = const str "TypeError"
-      %26 : base.String = const str "f() takes 0 positional arguments but {} {was} given"
-      %27 : base.Unit = py.requireAtMost %17 %24 %25 %26 ^propagate.0()
-      %28 : base.Int = const int 1
-      %29 : py.Value = py.intLit %28
-      %30 : base.Int = const int 2
-      %31 : py.Value = py.intLit %30
-      %32 : py.Value = py.add %29 %31 ^propagate.0()
-      %33 : base.Unit = base.refSet[py.Value] %4 %32
-      %34 : base.Float64 = const float "1.0"
-      %35 : py.Value = py.floatLit %34
-      %36 : base.Int = const int 2
-      %37 : py.Value = py.intLit %36
-      %38 : py.Value = py.add %35 %37 ^propagate.0()
-      %39 : base.Unit = base.refSet[py.Value] %7 %38
-      %40 : base.Int = const int 1
-      %41 : py.Value = py.intLit %40
-      %42 : base.Int = const int 2
-      %43 : py.Value = py.intLit %42
-      %44 : py.Value = py.div %41 %43 ^propagate.0()
-      %45 : base.Unit = base.refSet[py.Value] %10 %44
-      %46 : base.Int = const int 1
-      %47 : py.Value = py.intLit %46
-      %48 : base.Int = const int 2
-      %49 : py.Value = py.intLit %48
-      %50 : py.Value = py.mult %47 %49 ^propagate.0()
-      %51 : base.Unit = base.refSet[py.Value] %13 %50
-      %52 : base.Float64 = const float "3.0"
-      %53 : py.Value = py.floatLit %52
-      %54 : base.Float64 = const float "2.0"
-      %55 : py.Value = py.floatLit %54
-      %56 : py.Value = py.mult %53 %55 ^propagate.0()
-      %57 : base.Unit = base.refSet[py.Value] %16 %56
-      %58 : py.Value = py.noneLit
-      %59 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %58
-      ret %59
-    propagate.0(%60 : py.Value):
-      %61 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %60
-      ret %61
+  func @tc02_arithmetic.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %a.0 : py.Value = py.undef("a")
+      %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
+      %b.0 : py.Value = py.undef("b")
+      %b.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%b.0)
+      %c.0 : py.Value = py.undef("c")
+      %c.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%c.0)
+      %d.0 : py.Value = py.undef("d")
+      %d.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%d.0)
+      %e.0 : py.Value = py.undef("e")
+      %e.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%e.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %add.0 : py.Value = py.add(%int.0, %int.1) ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%a.cell.0, %add.0)
+      %float.0 : py.Value = py.floatLit(1.0)
+      %int.2 : py.Value = py.intLit(2)
+      %add.1 : py.Value = py.add(%float.0, %int.2) ^propagate.0()
+      %set.1 : base.Unit = base.refSet[py.Value](%b.cell.0, %add.1)
+      %int.3 : py.Value = py.intLit(1)
+      %int.4 : py.Value = py.intLit(2)
+      %div.0 : py.Value = py.div(%int.3, %int.4) ^propagate.0()
+      %set.2 : base.Unit = base.refSet[py.Value](%c.cell.0, %div.0)
+      %int.5 : py.Value = py.intLit(1)
+      %int.6 : py.Value = py.intLit(2)
+      %mult.0 : py.Value = py.mult(%int.5, %int.6) ^propagate.0()
+      %set.3 : base.Unit = base.refSet[py.Value](%d.cell.0, %mult.0)
+      %float.1 : py.Value = py.floatLit(3.0)
+      %float.2 : py.Value = py.floatLit(2.0)
+      %mult.1 : py.Value = py.mult(%float.1, %float.2) ^propagate.0()
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.0, %mult.1)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
 }
 

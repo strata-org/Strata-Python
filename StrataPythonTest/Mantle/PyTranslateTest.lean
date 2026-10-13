@@ -10,6 +10,7 @@ import StrataMantle.Env.WF
 -- The translator and the checker both run as compiled code below.
 meta import StrataMantle.WF
 meta import StrataPython.Mantle.Translate
+meta import StrataPythonTest.Mantle.TestUtil
 meta import StrataMantle.Env.WF
 
 set_option autoImplicit false
@@ -74,6 +75,7 @@ private def withLambda : Result := translate "m" #[assign "x" (int 1), fDef, cal
 
 -- The translator does not reduce in the kernel: the checker runs as compiled code.
 #guard decide (Module.WF supported.module)
+#guard (StrataPython.Mantle.TestUtil.dottedNames supported.module).isEmpty
 
 example : supported.ok = true := by native_decide
 

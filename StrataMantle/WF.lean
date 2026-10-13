@@ -30,8 +30,8 @@ what the thing it names demands:
 * a `Region`'s entry block takes the declared parameters, and every block is well formed
   against the region's own blocks and its exit, `Label.exit`, which takes the region's
   result;
-* a `Func` has an entry block, uses no label twice nor `Label.exit` at all and defines no
-  value twice, counting every region, and every block is well formed in the context those
+* a `Func` has an entry block, uses no label twice nor `Label.exit` at all, defines no
+  value twice and names every value it defines, no two alike, counting every region, and every block is well formed in the context those
   definitions give, its exit taking the function's return type;
 * a `Module` names no function twice, and its functions are all well formed.
 
@@ -473,11 +473,55 @@ end
     List (Block env α) :=
   Block.withNestedList fn.blocks.toList
 
-/-- Every value the function defines, in order: each block's parameters (the entry block's
-are the function's own) and each instruction's result, regions included. -/
-@[expose] def Func.defs {env : Env Unit} {α : Type} (fn : Func env α) : Array (ValDecl env) :=
-  (fn.allBlocks.flatMap fun b =>
-    b.params.toList ++ b.instrs.toList.map Instruction.result).toArray
+mutual
+
+/-- What an instruction defines, in the order it is written: its result, then what its
+regions define. -/
+@[expose] def Instruction.defs {env : Env Unit} {α : Type} :
+    Instruction env α → List (ValDecl env)
+  | .const _ d _ => [d]
+  | .apply _ d _ _ _ _ ⟨regions⟩ => d :: Region.defsList regions
+
+/-- `Instruction.defs` of each. -/
+@[expose] def Instruction.defsList {env : Env Unit} {α : Type} :
+    List (Instruction env α) → List (ValDecl env)
+  | [] => []
+  | i :: is => i.defs ++ Instruction.defsList is
+
+/-- What a terminator's regions define. -/
+@[expose] def Terminator.defs {env : Env Unit} {α : Type} :
+    Terminator env α → List (ValDecl env)
+  | .apply _ _ _ _ _ ⟨regions⟩ => Region.defsList regions
+
+/-- What blocks define, in the order it is written: each block's parameters, then what its
+instructions and terminator define. -/
+@[expose] def Block.defsList {env : Env Unit} {α : Type} :
+    List (Block env α) → List (ValDecl env)
+  | [] => []
+  | ⟨_, params, ⟨instrs⟩, t, _⟩ :: bs =>
+    params.toList ++ Instruction.defsList instrs ++ t.defs ++ Block.defsList bs
+
+/-- What regions define, in order. -/
+@[expose] def Region.defsList {env : Env Unit} {α : Type} :
+    List (Region env α) → List (ValDecl env)
+  | [] => []
+  | ⟨⟨blocks⟩⟩ :: rs => Block.defsList blocks ++ Region.defsList rs
+
+end
+
+/-- Every value the function defines, in the order the printed form writes the definitions:
+each block's parameters (the entry block's are the function's own), then each instruction's
+result followed by what its regions define, then what the terminator's regions define. -/
+@[expose] def Func.defs {env : Env Unit} {α : Type} (fn : Func env α) : List (ValDecl env) :=
+  Block.defsList fn.blocks.toList
+
+/-- The ids are `0, 1, …` in the order `Func.defs` lists the definitions, and each value has
+one name: what reading a printed function gives. -/
+@[expose] def Func.Canonical {env : Env Unit} {α : Type} (fn : Func env α) : Prop :=
+  fn.defs.map (·.id.id) = List.range fn.defs.length ∧ fn.names.size = fn.defs.length
+
+instance {env : Env Unit} {α : Type} (fn : Func env α) : Decidable fn.Canonical :=
+  inferInstanceAs (Decidable (_ ∧ _))
 
 /-- The function's typing context, or `none` if some id is defined twice. -/
 @[expose] def Func.ctx? {env : Env Unit} {α : Type} (fn : Func env α) : Option (Ctx env) :=
@@ -492,40 +536,97 @@ are the function's own) and each instruction's result, regions included. -/
 @[expose] def Func.blockSigs {env : Env Unit} {α : Type} (fn : Func env α) : BlockSigs env :=
   BlockSigs.of fn.blocks.toList fn.retType
 
-/-- A function is well formed when it has an entry block, uses no label twice, nor
-`Label.exit`, and defines no value twice, regions included, and every top-level block is well
-formed in the context those definitions give, against the top-level blocks and the exit.
+/-- One more than the largest id of `ds`, or `0`: one bound for every id, which the kernel
+computes once where `∀ d ∈ ds, d.id.id < n` would recompute `n` per value. -/
+@[expose] def ValDecl.idBound {env : Env Unit} (ds : List (ValDecl env)) : Nat :=
+  ds.foldl (fun m d => max m (d.id.id + 1)) 0
 
-No transfer names an entry block, the function's or a region's: `BlockSigs.of` leaves
-entries out. -/
-@[expose, reducible] def Func.WF {env : Env Unit} {α : Type} [base ⊑ env]
+theorem ValDecl.foldl_le_iff {env : Env Unit} (n : Nat) :
+    ∀ (ds : List (ValDecl env)) (m : Nat),
+      ds.foldl (fun m d => max m (d.id.id + 1)) m ≤ n ↔ m ≤ n ∧ ∀ d ∈ ds, d.id.id < n
+  | [], m => by simp
+  | d :: ds, m => by
+    simp [ValDecl.foldl_le_iff n ds, Nat.max_le, Nat.succ_le_iff, and_assoc]
+
+theorem ValDecl.idBound_le_iff {env : Env Unit} (ds : List (ValDecl env)) (n : Nat) :
+    ValDecl.idBound ds ≤ n ↔ ∀ d ∈ ds, d.id.id < n := by
+  simp [ValDecl.idBound, ValDecl.foldl_le_iff]
+
+/-- No name occurs twice in `ns`, decided by building a `NameSet`, which the kernel reduces
+faster than the list's own `Nodup` check. -/
+@[expose] def Name.decNodup (ns : Array Name) : Decidable ns.toList.Nodup :=
+  decidable_of_iff _ NameSet.of?_isSome_iff
+
+/-- The rule for a function's blocks: no value is defined twice, regions included, and every
+top-level block is well formed, in the context those definitions give, against the top-level
+blocks and the exit.  No transfer names an entry block, the function's or a region's:
+`BlockSigs.of` leaves entries out. -/
+@[expose, reducible] def Func.BodyWF {env : Env Unit} {α : Type} [base ⊑ env]
     (funcs : NameSet) (fn : Func env α) : Prop :=
-  0 < fn.blocks.size ∧ Label.Distinct (Label.exit :: fn.labels) ∧
-    OptHolds fn.ctx? fun ctx =>
-      ∀ b ∈ fn.blocks, Block.WF ctx fn.blockSigs funcs b
+  OptHolds fn.ctx? fun ctx => ∀ b ∈ fn.blocks, Block.WF ctx fn.blockSigs funcs b
 
-/-- A module is well formed when it names no function twice (`Module.WF.nodup`) and every
-function in it is well formed against the set of its function names (`Module.WF.mem_funcs`). -/
-@[expose, reducible] def Module.WF {env : Env Unit} [base ⊑ env] {α : Type}
-    (m : Module env α) : Prop :=
-  -- `NameSet.of?` fails on a repeated name, so one build is both the duplicate check and the
-  -- set that function references are looked up in.
-  OptHolds (NameSet.of? (m.funcs.mapK (·.name))) fun fs => ∀ f ∈ m.funcs, Func.WF fs f
+/-- A well-formed function, with `funcs` the functions of its module. -/
+structure Func.WF {env : Env Unit} {α : Type} [base ⊑ env] (funcs : NameSet)
+    (fn : Func env α) : Prop where
+  /-- It has an entry block. -/
+  entry : 0 < fn.blocks.size
+  /-- No label occurs twice, counting every region, and none is `Label.exit`. -/
+  labelsDistinct : Label.Distinct (Label.exit :: fn.labels)
+  /-- No two values share a name. -/
+  valueNamesUnique : fn.names.toList.Nodup
+  /-- Every value it defines has a name. -/
+  valuesNamed : ValDecl.idBound fn.defs ≤ fn.names.size
+  /-- Its blocks are well formed. -/
+  body : Func.BodyWF funcs fn
+
+instance {env : Env Unit} {α : Type} [base ⊑ env] (funcs : NameSet) (fn : Func env α) :
+    Decidable (Func.WF funcs fn) :=
+  have := Name.decNodup fn.names
+  decidable_of_iff (0 < fn.blocks.size ∧ Label.Distinct (Label.exit :: fn.labels) ∧
+      fn.names.toList.Nodup ∧ ValDecl.idBound fn.defs ≤ fn.names.size ∧ Func.BodyWF funcs fn)
+    ⟨fun ⟨a, b, c, d, e⟩ => ⟨a, b, c, d, e⟩, fun ⟨a, b, c, d, e⟩ => ⟨a, b, c, d, e⟩⟩
+
+/-- Every value a well-formed function defines has a name. -/
+theorem Func.WF.mem_names {env : Env Unit} {α : Type} [base ⊑ env] {funcs : NameSet}
+    {fn : Func env α} (h : fn.WF funcs) {d : ValDecl env} (hd : d ∈ fn.defs) :
+    d.id.id < fn.names.size :=
+  (ValDecl.idBound_le_iff _ _).mp h.valuesNamed d hd
+
+/-- The names of a module's functions, in order. -/
+@[expose] def Module.funcNames {env : Env Unit} [base ⊑ env] {α : Type} (m : Module env α) :
+    Array Name :=
+  m.funcs.mapK (·.name)
+
+/-- The set of a module's function names, which function references are looked up in. -/
+@[expose] def Module.funcSet {env : Env Unit} [base ⊑ env] {α : Type} (m : Module env α) :
+    NameSet :=
+  (NameSet.of? m.funcNames).getD ∅
+
+/-- A well-formed module. -/
+structure Module.WF {env : Env Unit} [base ⊑ env] {α : Type} (m : Module env α) : Prop where
+  /-- No two functions share a name. -/
+  funcNamesUnique : m.funcNames.toList.Nodup
+  /-- Every function is well formed against the module's functions. -/
+  funcs : ∀ f ∈ m.funcs, Func.WF m.funcSet f
+
+instance {env : Env Unit} [base ⊑ env] {α : Type} (m : Module env α) : Decidable m.WF :=
+  have := Name.decNodup m.funcNames
+  decidable_of_iff (m.funcNames.toList.Nodup ∧ ∀ f ∈ m.funcs, Func.WF m.funcSet f)
+    ⟨fun ⟨a, b⟩ => ⟨a, b⟩, fun ⟨a, b⟩ => ⟨a, b⟩⟩
 
 end
 
 /-- A well-formed module names no function twice. -/
 public theorem Module.WF.nodup {env : Env Unit} [base ⊑ env] {α : Type} {m : Module env α}
     (h : m.WF) : (m.funcs.toList.map (·.name)).Nodup := by
-  obtain ⟨fs, hfs, -⟩ := h
-  have hnd := NameSet.of?_isSome_iff.mp (Option.isSome_iff_exists.mpr ⟨fs, hfs⟩)
-  rwa [Array.mapK_eq_map_fun, Array.toList_map] at hnd
+  simpa [Module.funcNames, Array.mapK_eq_map_fun] using h.funcNamesUnique
 
-/-- The set `Module.WF` checks function references against holds exactly the module's function
-names. -/
-public theorem Module.WF.mem_funcs {env : Env Unit} [base ⊑ env] {α : Type} {m : Module env α}
-    {fs : NameSet} (h : NameSet.of? (m.funcs.mapK (·.name)) = some fs) (n : Name) :
-    n ∈ fs ↔ ∃ f ∈ m.funcs, f.name = n := by
-  rw [NameSet.mem_of? h, Array.mapK_eq_map_fun, Array.mem_map]
+/-- The set a well-formed module checks function references against holds exactly the
+module's function names. -/
+public theorem Module.WF.mem_funcSet {env : Env Unit} [base ⊑ env] {α : Type}
+    {m : Module env α} (h : m.WF) (n : Name) : n ∈ m.funcSet ↔ ∃ f ∈ m.funcs, f.name = n := by
+  obtain ⟨fs, hfs⟩ := Option.isSome_iff_exists.mp (NameSet.of?_isSome_iff.mpr h.funcNamesUnique)
+  rw [Module.funcSet, hfs, Option.getD_some, NameSet.mem_of? hfs, Module.funcNames,
+    Array.mapK_eq_map_fun, Array.mem_map]
 
 end Strata.Mantle

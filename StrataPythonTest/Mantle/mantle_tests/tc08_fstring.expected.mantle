@@ -1,64 +1,45 @@
 module tc08_fstring {
-  func @tc08_fstring.|<module>|() -> base.Except(py.Value, py.Value) {
+  func @|tc08_fstring.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
-      %0 : base.String = const str "tc08_fstring"
-      %1 : py.Value = py.strLit %0
-      %2 : base.String = const str "tc08_fstring"
-      %3 : base.String = const str "__name__"
-      %4 : base.Ref(py.Value) = py.globalCell %2 %3
-      %5 : base.Unit = base.refSet[py.Value] %4 %1
-      %6 : base.Code = const @tc08_fstring.f
-      %7 : py.Value = py.mkClosure %6
-      %8 : base.String = const str "tc08_fstring"
-      %9 : base.String = const str "f"
-      %10 : base.Ref(py.Value) = py.globalCell %8 %9
-      %11 : base.Unit = base.refSet[py.Value] %10 %7
-      %12 : py.Value = py.noneLit
-      %13 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %12
-      ret %13
-    propagate.0(%14 : py.Value):
-      %15 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %14
-      ret %15
+      %str.0 : py.Value = py.strLit("tc08_fstring")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("tc08_fstring", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure(@tc08_fstring.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("tc08_fstring", "f")
+      %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-  func @tc08_fstring.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value, %1 : py.Value):
-      %2 : base.String = const str "x"
-      %3 : py.Value = py.undef %2
-      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
-      %5 : base.String = const str "s"
-      %6 : py.Value = py.undef %5
-      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
-      %8 : py.Value = py.tupleLen %0
-      %9 : base.String = const str "kwargs"
-      %10 : py.Value = py.undef %9
-      %11 : py.Value = py.dictFirstKey %1 %10
-      %12 : base.String = const str "TypeError"
-      %13 : base.String = const str "f() got an unexpected keyword argument {}"
-      %14 : base.Unit = py.requireUndefined %11 %12 %13 ^propagate.0()
-      %15 : base.Int = const int 0
-      %16 : base.String = const str "TypeError"
-      %17 : base.String = const str "f() takes 0 positional arguments but {} {was} given"
-      %18 : base.Unit = py.requireAtMost %8 %15 %16 %17 ^propagate.0()
-      %19 : base.Int = const int 42
-      %20 : py.Value = py.intLit %19
-      %21 : base.Unit = base.refSet[py.Value] %4 %20
-      %22 : base.String = const str "value is "
-      %23 : py.Value = py.strLit %22
-      %24 : py.Value = base.refGet[py.Value] %4
-      %25 : base.String = const str "UnboundLocalError"
-      %26 : base.String = const str "cannot access local variable 'x' where it is not associated with a value"
-      %27 : py.Value = py.requireDefined %24 %25 %26 ^propagate.0()
-      %28 : base.String = const str ""
-      %29 : py.Value = py.strLit %28
-      %30 : py.Value = py.fmtValue %27 %29 ^propagate.0()
-      %31 : py.Value = py.strConcat %23 %30
-      %32 : base.Unit = base.refSet[py.Value] %7 %31
-      %33 : py.Value = py.noneLit
-      %34 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %33
-      ret %34
-    propagate.0(%35 : py.Value):
-      %36 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %35
-      ret %36
+  func @tc08_fstring.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %s.0 : py.Value = py.undef("s")
+      %s.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%s.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %int.0 : py.Value = py.intLit(42)
+      %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
+      %str.0 : py.Value = py.strLit("value is ")
+      %x.1 : py.Value = base.refGet[py.Value](%x.cell.0)
+      %x.2 : py.Value = py.requireDefined(%x.1, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %str.1 : py.Value = py.strLit("")
+      %fmt.0 : py.Value = py.fmtValue(%x.2, %str.1) ^propagate.0()
+      %fstr.0 : py.Value = py.strConcat(%str.0, %fmt.0)
+      %set.1 : base.Unit = base.refSet[py.Value](%s.cell.0, %fstr.0)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
 }
 

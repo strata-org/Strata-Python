@@ -110,6 +110,28 @@ inductive Ins (β : Type) where
   | .split l k v r => some (.two l k v r)
   | .dup => none
 
+/-- `t` with the value at `x` replaced by `v`, the shape unchanged; `t` if `x` is not a key. -/
+@[expose] def replace : NatTree23 β → Nat → β → NatTree23 β
+  | .leaf, _, _ => .leaf
+  | .two l k w r, x, v =>
+    match compare x k with
+    | .lt => .two (replace l x v) k w r
+    | .eq => .two l k v r
+    | .gt => .two l k w (replace r x v)
+  | .three l k₁ w₁ m k₂ w₂ r, x, v =>
+    match compare x k₁ with
+    | .lt => .three (replace l x v) k₁ w₁ m k₂ w₂ r
+    | .eq => .three l k₁ v m k₂ w₂ r
+    | .gt =>
+      match compare x k₂ with
+      | .lt => .three l k₁ w₁ (replace m x v) k₂ w₂ r
+      | .eq => .three l k₁ w₁ m k₂ v r
+      | .gt => .three l k₁ w₁ m k₂ w₂ (replace r x v)
+
+/-- `t` with `x` mapped to `v`, whether or not `x` was a key. -/
+@[expose] def insert (t : NatTree23 β) (x : Nat) (v : β) : NatTree23 β :=
+  (t.insert? x v).getD (t.replace x v)
+
 /-- Add the entries of an array to `t` in order, or fail at the first key already present. -/
 @[expose] def insertArray? (t : NatTree23 β) : Array (Nat × β) → Option (NatTree23 β)
   -- The kernel reduces the recursion on the list; compiled code runs `insertArrayFold?`.

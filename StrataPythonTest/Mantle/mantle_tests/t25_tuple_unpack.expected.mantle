@@ -1,412 +1,274 @@
 module t25_tuple_unpack {
-  func @t25_tuple_unpack.|<module>|() -> base.Except(py.Value, py.Value) {
+  func @|t25_tuple_unpack.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
-      %0 : base.String = const str "t25_tuple_unpack"
-      %1 : py.Value = py.strLit %0
-      %2 : base.String = const str "t25_tuple_unpack"
-      %3 : base.String = const str "__name__"
-      %4 : base.Ref(py.Value) = py.globalCell %2 %3
-      %5 : base.Unit = base.refSet[py.Value] %4 %1
-      %6 : base.Code = const @t25_tuple_unpack.process_pairs
-      %7 : py.Value = py.mkClosure %6
-      %8 : base.String = const str "t25_tuple_unpack"
-      %9 : base.String = const str "process_pairs"
-      %10 : base.Ref(py.Value) = py.globalCell %8 %9
-      %11 : base.Unit = base.refSet[py.Value] %10 %7
-      %12 : base.Code = const @t25_tuple_unpack.use_enumerate
-      %13 : py.Value = py.mkClosure %12
-      %14 : base.String = const str "t25_tuple_unpack"
-      %15 : base.String = const str "use_enumerate"
-      %16 : base.Ref(py.Value) = py.globalCell %14 %15
-      %17 : base.Unit = base.refSet[py.Value] %16 %13
-      %18 : base.Code = const @t25_tuple_unpack.dict_iteration
-      %19 : py.Value = py.mkClosure %18
-      %20 : base.String = const str "t25_tuple_unpack"
-      %21 : base.String = const str "dict_iteration"
-      %22 : base.Ref(py.Value) = py.globalCell %20 %21
-      %23 : base.Unit = base.refSet[py.Value] %22 %19
-      %24 : base.Code = const @t25_tuple_unpack.tuple_assign
-      %25 : py.Value = py.mkClosure %24
-      %26 : base.String = const str "t25_tuple_unpack"
-      %27 : base.String = const str "tuple_assign"
-      %28 : base.Ref(py.Value) = py.globalCell %26 %27
-      %29 : base.Unit = base.refSet[py.Value] %28 %25
-      %30 : py.Value = py.noneLit
-      %31 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %30
-      ret %31
-    propagate.0(%32 : py.Value):
-      %33 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %32
-      ret %33
+      %str.0 : py.Value = py.strLit("t25_tuple_unpack")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t25_tuple_unpack", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure(@t25_tuple_unpack.process_pairs)
+      %process_pairs.cell.0 : base.Ref(py.Value) = py.globalCell("t25_tuple_unpack", "process_pairs")
+      %set.1 : base.Unit = base.refSet[py.Value](%process_pairs.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure(@t25_tuple_unpack.use_enumerate)
+      %use_enumerate.cell.0 : base.Ref(py.Value) = py.globalCell("t25_tuple_unpack", "use_enumerate")
+      %set.2 : base.Unit = base.refSet[py.Value](%use_enumerate.cell.0, %clo.1)
+      %clo.2 : py.Value = py.mkClosure(@t25_tuple_unpack.dict_iteration)
+      %dict_iteration.cell.0 : base.Ref(py.Value) = py.globalCell("t25_tuple_unpack", "dict_iteration")
+      %set.3 : base.Unit = base.refSet[py.Value](%dict_iteration.cell.0, %clo.2)
+      %clo.3 : py.Value = py.mkClosure(@t25_tuple_unpack.tuple_assign)
+      %tuple_assign.cell.0 : base.Ref(py.Value) = py.globalCell("t25_tuple_unpack", "tuple_assign")
+      %set.4 : base.Unit = base.refSet[py.Value](%tuple_assign.cell.0, %clo.3)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-  func @t25_tuple_unpack.process_pairs(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value, %1 : py.Value):
-      %2 : base.String = const str "items"
-      %3 : py.Value = py.undef %2
-      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
-      %5 : base.String = const str "k"
-      %6 : py.Value = py.undef %5
-      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
-      %8 : base.String = const str "v"
-      %9 : py.Value = py.undef %8
-      %10 : base.Ref(py.Value) = base.refNew[py.Value] %9
-      %11 : py.Value = py.tupleLen %0
-      %12 : base.String = const str "items"
-      %13 : py.Value = py.undef %12
-      %14 : py.Value = py.mkTuple %13
-      %15 : py.Value = py.noneLit
-      %16 : py.Value = py.getSlice %14 %11 %15 %15 ^propagate.0()
-      %17 : py.Value = py.add %0 %16 ^propagate.0()
-      %18 : base.Int = const int 0
-      %19 : py.Value = py.intLit %18
-      %20 : py.Value = py.getItem %17 %19 ^propagate.0()
-      %21 : base.String = const str "items"
-      %22 : py.Value = py.strLit %21
-      %23 : py.Value = py.dictGet %1 %22 %20
-      %24 : py.Value = py.in %22 %1 ^propagate.0()
-      %25 : base.Unit = py.dictDiscard %1 %22
-      %26 : py.Value = py.lt %19 %11 ^propagate.0()
-      %27 : py.Value = py.mult %24 %26 ^propagate.0()
-      %28 : base.Int = const int 0
-      %29 : base.String = const str "TypeError"
-      %30 : base.String = const str "process_pairs() got multiple values for argument 'items'"
-      %31 : base.Unit = py.requireAtMost %27 %28 %29 %30 ^propagate.0()
-      %32 : base.String = const str "kwargs"
-      %33 : py.Value = py.undef %32
-      %34 : py.Value = py.dictFirstKey %1 %33
-      %35 : base.String = const str "TypeError"
-      %36 : base.String = const str "process_pairs() got an unexpected keyword argument {}"
-      %37 : base.Unit = py.requireUndefined %34 %35 %36 ^propagate.0()
-      %38 : base.Int = const int 1
-      %39 : base.String = const str "TypeError"
-      %40 : base.String = const str "process_pairs() takes 1 positional argument but {} {was} given"
-      %41 : base.Unit = py.requireAtMost %11 %38 %39 %40 ^propagate.0()
-      %42 : base.String = const str "TypeError"
-      %43 : base.String = const str "process_pairs() missing 1 required positional argument: 'items'"
-      %44 : py.Value = py.requireDefined %23 %42 %43 ^propagate.0()
-      %45 : base.Unit = base.refSet[py.Value] %4 %44
-      %46 : py.Value = base.refGet[py.Value] %4
-      %47 : base.String = const str "UnboundLocalError"
-      %48 : base.String = const str "cannot access local variable 'items' where it is not associated with a value"
-      %49 : py.Value = py.requireDefined %46 %47 %48 ^propagate.0()
-      %50 : py.Value = py.getIter %49 ^propagate.0()
+  func @t25_tuple_unpack.process_pairs(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %items.0 : py.Value = py.undef("items")
+      %items.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%items.0)
+      %k.0 : py.Value = py.undef("k")
+      %k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%k.0)
+      %v.0 : py.Value = py.undef("v")
+      %v.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%v.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %items.1 : py.Value = py.undef("items")
+      %fill.0 : py.Value = py.mkTuple(%items.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("items")
+      %items.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "process_pairs() got multiple values for argument 'items'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "process_pairs() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "process_pairs() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %items.3 : py.Value = py.requireDefined(%items.2, "TypeError", "process_pairs() missing 1 required positional argument: 'items'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%items.cell.0, %items.3)
+      %items.4 : py.Value = base.refGet[py.Value](%items.cell.0)
+      %items.5 : py.Value = py.requireDefined(%items.4, "UnboundLocalError", "cannot access local variable 'items' where it is not associated with a value") ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%items.5) ^propagate.0()
       jump ^head.0()
     head.0():
-      %51 : py.Value = py.next %50 ^stop.0()
-      %52 : base.Int = const int 2
-      %53 : py.Value = py.unpackSeq %51 %52 ^propagate.0()
-      %54 : base.Int = const int 0
-      %55 : py.Value = py.tupleGet %53 %54
-      %56 : base.Unit = base.refSet[py.Value] %7 %55
-      %57 : base.Int = const int 1
-      %58 : py.Value = py.tupleGet %53 %57
-      %59 : base.Unit = base.refSet[py.Value] %10 %58
-      %60 : base.String = const str "builtins"
-      %61 : base.String = const str "print"
-      %62 : py.Value = py.qualifiedRef %60 %61 ^propagate.0()
-      %63 : py.Value = base.refGet[py.Value] %7
-      %64 : base.String = const str "UnboundLocalError"
-      %65 : base.String = const str "cannot access local variable 'k' where it is not associated with a value"
-      %66 : py.Value = py.requireDefined %63 %64 %65 ^propagate.0()
-      %67 : py.Value = base.refGet[py.Value] %10
-      %68 : base.String = const str "UnboundLocalError"
-      %69 : base.String = const str "cannot access local variable 'v' where it is not associated with a value"
-      %70 : py.Value = py.requireDefined %67 %68 %69 ^propagate.0()
-      %71 : py.Value = py.mkTuple %66 %70
-      %72 : py.Value = py.mkKwargs
-      %73 : py.Value = py.call %62 %71 %72 ^propagate.0()
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %unpack.0 : py.Value = py.unpackSeq(%item.0, 2) ^propagate.0()
+      %elem.0 : py.Value = py.tupleGet(%unpack.0, 0)
+      %set.1 : base.Unit = base.refSet[py.Value](%k.cell.0, %elem.0)
+      %elem.1 : py.Value = py.tupleGet(%unpack.0, 1)
+      %set.2 : base.Unit = base.refSet[py.Value](%v.cell.0, %elem.1)
+      %print.0 : py.Value = py.qualifiedRef("builtins", "print") ^propagate.0()
+      %k.1 : py.Value = base.refGet[py.Value](%k.cell.0)
+      %k.2 : py.Value = py.requireDefined(%k.1, "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
+      %v.1 : py.Value = base.refGet[py.Value](%v.cell.0)
+      %v.2 : py.Value = py.requireDefined(%v.1, "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%k.2, %v.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
       jump ^head.0()
-    stop.0(%74 : py.Value):
-      %75 : base.Bool = py.isStopIteration %74
-      branch %75 ^exit.0() ^propagate.0(%74)
+    stop.0(%exc.0 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.0)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
     exit.0():
-      %76 : py.Value = py.noneLit
-      %77 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %76
-      ret %77
-    propagate.0(%78 : py.Value):
-      %79 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %78
-      ret %79
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
   }
-  func @t25_tuple_unpack.use_enumerate(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value, %1 : py.Value):
-      %2 : base.String = const str "names"
-      %3 : py.Value = py.undef %2
-      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
-      %5 : base.String = const str "i"
-      %6 : py.Value = py.undef %5
-      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
-      %8 : base.String = const str "name"
-      %9 : py.Value = py.undef %8
-      %10 : base.Ref(py.Value) = base.refNew[py.Value] %9
-      %11 : py.Value = py.tupleLen %0
-      %12 : base.String = const str "names"
-      %13 : py.Value = py.undef %12
-      %14 : py.Value = py.mkTuple %13
-      %15 : py.Value = py.noneLit
-      %16 : py.Value = py.getSlice %14 %11 %15 %15 ^propagate.0()
-      %17 : py.Value = py.add %0 %16 ^propagate.0()
-      %18 : base.Int = const int 0
-      %19 : py.Value = py.intLit %18
-      %20 : py.Value = py.getItem %17 %19 ^propagate.0()
-      %21 : base.String = const str "names"
-      %22 : py.Value = py.strLit %21
-      %23 : py.Value = py.dictGet %1 %22 %20
-      %24 : py.Value = py.in %22 %1 ^propagate.0()
-      %25 : base.Unit = py.dictDiscard %1 %22
-      %26 : py.Value = py.lt %19 %11 ^propagate.0()
-      %27 : py.Value = py.mult %24 %26 ^propagate.0()
-      %28 : base.Int = const int 0
-      %29 : base.String = const str "TypeError"
-      %30 : base.String = const str "use_enumerate() got multiple values for argument 'names'"
-      %31 : base.Unit = py.requireAtMost %27 %28 %29 %30 ^propagate.0()
-      %32 : base.String = const str "kwargs"
-      %33 : py.Value = py.undef %32
-      %34 : py.Value = py.dictFirstKey %1 %33
-      %35 : base.String = const str "TypeError"
-      %36 : base.String = const str "use_enumerate() got an unexpected keyword argument {}"
-      %37 : base.Unit = py.requireUndefined %34 %35 %36 ^propagate.0()
-      %38 : base.Int = const int 1
-      %39 : base.String = const str "TypeError"
-      %40 : base.String = const str "use_enumerate() takes 1 positional argument but {} {was} given"
-      %41 : base.Unit = py.requireAtMost %11 %38 %39 %40 ^propagate.0()
-      %42 : base.String = const str "TypeError"
-      %43 : base.String = const str "use_enumerate() missing 1 required positional argument: 'names'"
-      %44 : py.Value = py.requireDefined %23 %42 %43 ^propagate.0()
-      %45 : base.Unit = base.refSet[py.Value] %4 %44
-      %46 : base.String = const str "builtins"
-      %47 : base.String = const str "enumerate"
-      %48 : py.Value = py.qualifiedRef %46 %47 ^propagate.0()
-      %49 : py.Value = base.refGet[py.Value] %4
-      %50 : base.String = const str "UnboundLocalError"
-      %51 : base.String = const str "cannot access local variable 'names' where it is not associated with a value"
-      %52 : py.Value = py.requireDefined %49 %50 %51 ^propagate.0()
-      %53 : py.Value = py.mkTuple %52
-      %54 : py.Value = py.mkKwargs
-      %55 : py.Value = py.call %48 %53 %54 ^propagate.0()
-      %56 : py.Value = py.getIter %55 ^propagate.0()
+  func @t25_tuple_unpack.use_enumerate(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %names.0 : py.Value = py.undef("names")
+      %names.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%names.0)
+      %i.0 : py.Value = py.undef("i")
+      %i.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
+      %name.0 : py.Value = py.undef("name")
+      %name.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%name.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %names.1 : py.Value = py.undef("names")
+      %fill.0 : py.Value = py.mkTuple(%names.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("names")
+      %names.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "use_enumerate() got multiple values for argument 'names'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "use_enumerate() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "use_enumerate() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %names.3 : py.Value = py.requireDefined(%names.2, "TypeError", "use_enumerate() missing 1 required positional argument: 'names'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%names.cell.0, %names.3)
+      %enumerate.0 : py.Value = py.qualifiedRef("builtins", "enumerate") ^propagate.0()
+      %names.4 : py.Value = base.refGet[py.Value](%names.cell.0)
+      %names.5 : py.Value = py.requireDefined(%names.4, "UnboundLocalError", "cannot access local variable 'names' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%names.5)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%enumerate.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%call.0) ^propagate.0()
       jump ^head.0()
     head.0():
-      %57 : py.Value = py.next %56 ^stop.0()
-      %58 : base.Int = const int 2
-      %59 : py.Value = py.unpackSeq %57 %58 ^propagate.0()
-      %60 : base.Int = const int 0
-      %61 : py.Value = py.tupleGet %59 %60
-      %62 : base.Unit = base.refSet[py.Value] %7 %61
-      %63 : base.Int = const int 1
-      %64 : py.Value = py.tupleGet %59 %63
-      %65 : base.Unit = base.refSet[py.Value] %10 %64
-      %66 : base.String = const str "builtins"
-      %67 : base.String = const str "print"
-      %68 : py.Value = py.qualifiedRef %66 %67 ^propagate.0()
-      %69 : py.Value = base.refGet[py.Value] %7
-      %70 : base.String = const str "UnboundLocalError"
-      %71 : base.String = const str "cannot access local variable 'i' where it is not associated with a value"
-      %72 : py.Value = py.requireDefined %69 %70 %71 ^propagate.0()
-      %73 : py.Value = base.refGet[py.Value] %10
-      %74 : base.String = const str "UnboundLocalError"
-      %75 : base.String = const str "cannot access local variable 'name' where it is not associated with a value"
-      %76 : py.Value = py.requireDefined %73 %74 %75 ^propagate.0()
-      %77 : py.Value = py.mkTuple %72 %76
-      %78 : py.Value = py.mkKwargs
-      %79 : py.Value = py.call %68 %77 %78 ^propagate.0()
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %unpack.0 : py.Value = py.unpackSeq(%item.0, 2) ^propagate.0()
+      %elem.0 : py.Value = py.tupleGet(%unpack.0, 0)
+      %set.1 : base.Unit = base.refSet[py.Value](%i.cell.0, %elem.0)
+      %elem.1 : py.Value = py.tupleGet(%unpack.0, 1)
+      %set.2 : base.Unit = base.refSet[py.Value](%name.cell.0, %elem.1)
+      %print.0 : py.Value = py.qualifiedRef("builtins", "print") ^propagate.0()
+      %i.3 : py.Value = base.refGet[py.Value](%i.cell.0)
+      %i.4 : py.Value = py.requireDefined(%i.3, "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %name.1 : py.Value = base.refGet[py.Value](%name.cell.0)
+      %name.2 : py.Value = py.requireDefined(%name.1, "UnboundLocalError", "cannot access local variable 'name' where it is not associated with a value") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%i.4, %name.2)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.2) ^propagate.0()
       jump ^head.0()
-    stop.0(%80 : py.Value):
-      %81 : base.Bool = py.isStopIteration %80
-      branch %81 ^exit.0() ^propagate.0(%80)
+    stop.0(%exc.0 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.0)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
     exit.0():
-      %82 : py.Value = py.noneLit
-      %83 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %82
-      ret %83
-    propagate.0(%84 : py.Value):
-      %85 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %84
-      ret %85
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
   }
-  func @t25_tuple_unpack.dict_iteration(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value, %1 : py.Value):
-      %2 : base.String = const str "d"
-      %3 : py.Value = py.undef %2
-      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
-      %5 : base.String = const str "key"
-      %6 : py.Value = py.undef %5
-      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
-      %8 : base.String = const str "value"
-      %9 : py.Value = py.undef %8
-      %10 : base.Ref(py.Value) = base.refNew[py.Value] %9
-      %11 : py.Value = py.tupleLen %0
-      %12 : base.String = const str "d"
-      %13 : py.Value = py.undef %12
-      %14 : py.Value = py.mkTuple %13
-      %15 : py.Value = py.noneLit
-      %16 : py.Value = py.getSlice %14 %11 %15 %15 ^propagate.0()
-      %17 : py.Value = py.add %0 %16 ^propagate.0()
-      %18 : base.Int = const int 0
-      %19 : py.Value = py.intLit %18
-      %20 : py.Value = py.getItem %17 %19 ^propagate.0()
-      %21 : base.String = const str "d"
-      %22 : py.Value = py.strLit %21
-      %23 : py.Value = py.dictGet %1 %22 %20
-      %24 : py.Value = py.in %22 %1 ^propagate.0()
-      %25 : base.Unit = py.dictDiscard %1 %22
-      %26 : py.Value = py.lt %19 %11 ^propagate.0()
-      %27 : py.Value = py.mult %24 %26 ^propagate.0()
-      %28 : base.Int = const int 0
-      %29 : base.String = const str "TypeError"
-      %30 : base.String = const str "dict_iteration() got multiple values for argument 'd'"
-      %31 : base.Unit = py.requireAtMost %27 %28 %29 %30 ^propagate.0()
-      %32 : base.String = const str "kwargs"
-      %33 : py.Value = py.undef %32
-      %34 : py.Value = py.dictFirstKey %1 %33
-      %35 : base.String = const str "TypeError"
-      %36 : base.String = const str "dict_iteration() got an unexpected keyword argument {}"
-      %37 : base.Unit = py.requireUndefined %34 %35 %36 ^propagate.0()
-      %38 : base.Int = const int 1
-      %39 : base.String = const str "TypeError"
-      %40 : base.String = const str "dict_iteration() takes 1 positional argument but {} {was} given"
-      %41 : base.Unit = py.requireAtMost %11 %38 %39 %40 ^propagate.0()
-      %42 : base.String = const str "TypeError"
-      %43 : base.String = const str "dict_iteration() missing 1 required positional argument: 'd'"
-      %44 : py.Value = py.requireDefined %23 %42 %43 ^propagate.0()
-      %45 : base.Unit = base.refSet[py.Value] %4 %44
-      %46 : py.Value = base.refGet[py.Value] %4
-      %47 : base.String = const str "UnboundLocalError"
-      %48 : base.String = const str "cannot access local variable 'd' where it is not associated with a value"
-      %49 : py.Value = py.requireDefined %46 %47 %48 ^propagate.0()
-      %50 : base.String = const str "items"
-      %51 : py.Value = py.attr %49 %50 ^propagate.0()
-      %52 : py.Value = py.mkTuple
-      %53 : py.Value = py.mkKwargs
-      %54 : py.Value = py.call %51 %52 %53 ^propagate.0()
-      %55 : py.Value = py.getIter %54 ^propagate.0()
+  func @t25_tuple_unpack.dict_iteration(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %d.0 : py.Value = py.undef("d")
+      %d.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%d.0)
+      %key.0 : py.Value = py.undef("key")
+      %key.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%key.0)
+      %value.0 : py.Value = py.undef("value")
+      %value.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%value.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %d.1 : py.Value = py.undef("d")
+      %fill.0 : py.Value = py.mkTuple(%d.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("d")
+      %d.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "dict_iteration() got multiple values for argument 'd'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "dict_iteration() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "dict_iteration() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %d.3 : py.Value = py.requireDefined(%d.2, "TypeError", "dict_iteration() missing 1 required positional argument: 'd'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%d.cell.0, %d.3)
+      %d.4 : py.Value = base.refGet[py.Value](%d.cell.0)
+      %d.5 : py.Value = py.requireDefined(%d.4, "UnboundLocalError", "cannot access local variable 'd' where it is not associated with a value") ^propagate.0()
+      %items.0 : py.Value = py.attr(%d.5, "items") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%items.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%call.0) ^propagate.0()
       jump ^head.0()
     head.0():
-      %56 : py.Value = py.next %55 ^stop.0()
-      %57 : base.Int = const int 2
-      %58 : py.Value = py.unpackSeq %56 %57 ^propagate.0()
-      %59 : base.Int = const int 0
-      %60 : py.Value = py.tupleGet %58 %59
-      %61 : base.Unit = base.refSet[py.Value] %7 %60
-      %62 : base.Int = const int 1
-      %63 : py.Value = py.tupleGet %58 %62
-      %64 : base.Unit = base.refSet[py.Value] %10 %63
-      %65 : base.String = const str "builtins"
-      %66 : base.String = const str "print"
-      %67 : py.Value = py.qualifiedRef %65 %66 ^propagate.0()
-      %68 : py.Value = base.refGet[py.Value] %7
-      %69 : base.String = const str "UnboundLocalError"
-      %70 : base.String = const str "cannot access local variable 'key' where it is not associated with a value"
-      %71 : py.Value = py.requireDefined %68 %69 %70 ^propagate.0()
-      %72 : py.Value = base.refGet[py.Value] %10
-      %73 : base.String = const str "UnboundLocalError"
-      %74 : base.String = const str "cannot access local variable 'value' where it is not associated with a value"
-      %75 : py.Value = py.requireDefined %72 %73 %74 ^propagate.0()
-      %76 : py.Value = py.mkTuple %71 %75
-      %77 : py.Value = py.mkKwargs
-      %78 : py.Value = py.call %67 %76 %77 ^propagate.0()
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %unpack.0 : py.Value = py.unpackSeq(%item.0, 2) ^propagate.0()
+      %elem.0 : py.Value = py.tupleGet(%unpack.0, 0)
+      %set.1 : base.Unit = base.refSet[py.Value](%key.cell.0, %elem.0)
+      %elem.1 : py.Value = py.tupleGet(%unpack.0, 1)
+      %set.2 : base.Unit = base.refSet[py.Value](%value.cell.0, %elem.1)
+      %print.0 : py.Value = py.qualifiedRef("builtins", "print") ^propagate.0()
+      %key.1 : py.Value = base.refGet[py.Value](%key.cell.0)
+      %key.2 : py.Value = py.requireDefined(%key.1, "UnboundLocalError", "cannot access local variable 'key' where it is not associated with a value") ^propagate.0()
+      %value.1 : py.Value = base.refGet[py.Value](%value.cell.0)
+      %value.2 : py.Value = py.requireDefined(%value.1, "UnboundLocalError", "cannot access local variable 'value' where it is not associated with a value") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%key.2, %value.2)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.2) ^propagate.0()
       jump ^head.0()
-    stop.0(%79 : py.Value):
-      %80 : base.Bool = py.isStopIteration %79
-      branch %80 ^exit.0() ^propagate.0(%79)
+    stop.0(%exc.0 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.0)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
     exit.0():
-      %81 : py.Value = py.noneLit
-      %82 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %81
-      ret %82
-    propagate.0(%83 : py.Value):
-      %84 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %83
-      ret %84
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
   }
-  func @t25_tuple_unpack.tuple_assign(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value, %1 : py.Value):
-      %2 : base.String = const str "a"
-      %3 : py.Value = py.undef %2
-      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
-      %5 : base.String = const str "b"
-      %6 : py.Value = py.undef %5
-      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
-      %8 : base.String = const str "x"
-      %9 : py.Value = py.undef %8
-      %10 : base.Ref(py.Value) = base.refNew[py.Value] %9
-      %11 : base.String = const str "y"
-      %12 : py.Value = py.undef %11
-      %13 : base.Ref(py.Value) = base.refNew[py.Value] %12
-      %14 : base.String = const str "z"
-      %15 : py.Value = py.undef %14
-      %16 : base.Ref(py.Value) = base.refNew[py.Value] %15
-      %17 : py.Value = py.tupleLen %0
-      %18 : base.String = const str "kwargs"
-      %19 : py.Value = py.undef %18
-      %20 : py.Value = py.dictFirstKey %1 %19
-      %21 : base.String = const str "TypeError"
-      %22 : base.String = const str "tuple_assign() got an unexpected keyword argument {}"
-      %23 : base.Unit = py.requireUndefined %20 %21 %22 ^propagate.0()
-      %24 : base.Int = const int 0
-      %25 : base.String = const str "TypeError"
-      %26 : base.String = const str "tuple_assign() takes 0 positional arguments but {} {was} given"
-      %27 : base.Unit = py.requireAtMost %17 %24 %25 %26 ^propagate.0()
-      %28 : base.Int = const int 1
-      %29 : py.Value = py.intLit %28
-      %30 : base.Int = const int 2
-      %31 : py.Value = py.intLit %30
-      %32 : py.Value = py.mkTuple %29 %31
-      %33 : base.Int = const int 2
-      %34 : py.Value = py.unpackSeq %32 %33 ^propagate.0()
-      %35 : base.Int = const int 0
-      %36 : py.Value = py.tupleGet %34 %35
-      %37 : base.Unit = base.refSet[py.Value] %4 %36
-      %38 : base.Int = const int 1
-      %39 : py.Value = py.tupleGet %34 %38
-      %40 : base.Unit = base.refSet[py.Value] %7 %39
-      %41 : py.Value = base.refGet[py.Value] %4
-      %42 : base.String = const str "UnboundLocalError"
-      %43 : base.String = const str "cannot access local variable 'a' where it is not associated with a value"
-      %44 : py.Value = py.requireDefined %41 %42 %43 ^propagate.0()
-      %45 : py.Value = base.refGet[py.Value] %7
-      %46 : base.String = const str "UnboundLocalError"
-      %47 : base.String = const str "cannot access local variable 'b' where it is not associated with a value"
-      %48 : py.Value = py.requireDefined %45 %46 %47 ^propagate.0()
-      %49 : py.Value = base.refGet[py.Value] %4
-      %50 : base.String = const str "UnboundLocalError"
-      %51 : base.String = const str "cannot access local variable 'a' where it is not associated with a value"
-      %52 : py.Value = py.requireDefined %49 %50 %51 ^propagate.0()
-      %53 : py.Value = base.refGet[py.Value] %7
-      %54 : base.String = const str "UnboundLocalError"
-      %55 : base.String = const str "cannot access local variable 'b' where it is not associated with a value"
-      %56 : py.Value = py.requireDefined %53 %54 %55 ^propagate.0()
-      %57 : py.Value = py.add %52 %56 ^propagate.0()
-      %58 : py.Value = py.mkTuple %44 %48 %57
-      %59 : base.Int = const int 3
-      %60 : py.Value = py.unpackSeq %58 %59 ^propagate.0()
-      %61 : base.Int = const int 0
-      %62 : py.Value = py.tupleGet %60 %61
-      %63 : base.Unit = base.refSet[py.Value] %10 %62
-      %64 : base.Int = const int 1
-      %65 : py.Value = py.tupleGet %60 %64
-      %66 : base.Unit = base.refSet[py.Value] %13 %65
-      %67 : base.Int = const int 2
-      %68 : py.Value = py.tupleGet %60 %67
-      %69 : base.Unit = base.refSet[py.Value] %16 %68
-      %70 : base.String = const str "builtins"
-      %71 : base.String = const str "print"
-      %72 : py.Value = py.qualifiedRef %70 %71 ^propagate.0()
-      %73 : py.Value = base.refGet[py.Value] %10
-      %74 : base.String = const str "UnboundLocalError"
-      %75 : base.String = const str "cannot access local variable 'x' where it is not associated with a value"
-      %76 : py.Value = py.requireDefined %73 %74 %75 ^propagate.0()
-      %77 : py.Value = base.refGet[py.Value] %13
-      %78 : base.String = const str "UnboundLocalError"
-      %79 : base.String = const str "cannot access local variable 'y' where it is not associated with a value"
-      %80 : py.Value = py.requireDefined %77 %78 %79 ^propagate.0()
-      %81 : py.Value = base.refGet[py.Value] %16
-      %82 : base.String = const str "UnboundLocalError"
-      %83 : base.String = const str "cannot access local variable 'z' where it is not associated with a value"
-      %84 : py.Value = py.requireDefined %81 %82 %83 ^propagate.0()
-      %85 : py.Value = py.mkTuple %76 %80 %84
-      %86 : py.Value = py.mkKwargs
-      %87 : py.Value = py.call %72 %85 %86 ^propagate.0()
-      %88 : py.Value = py.noneLit
-      %89 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %88
-      ret %89
-    propagate.0(%90 : py.Value):
-      %91 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %90
-      ret %91
+  func @t25_tuple_unpack.tuple_assign(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %a.0 : py.Value = py.undef("a")
+      %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
+      %b.0 : py.Value = py.undef("b")
+      %b.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%b.0)
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %y.0 : py.Value = py.undef("y")
+      %y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%y.0)
+      %z.0 : py.Value = py.undef("z")
+      %z.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%z.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "tuple_assign() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "tuple_assign() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %tuple.0 : py.Value = py.mkTuple(%int.0, %int.1)
+      %unpack.0 : py.Value = py.unpackSeq(%tuple.0, 2) ^propagate.0()
+      %elem.0 : py.Value = py.tupleGet(%unpack.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%a.cell.0, %elem.0)
+      %elem.1 : py.Value = py.tupleGet(%unpack.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%b.cell.0, %elem.1)
+      %a.1 : py.Value = base.refGet[py.Value](%a.cell.0)
+      %a.2 : py.Value = py.requireDefined(%a.1, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %b.1 : py.Value = base.refGet[py.Value](%b.cell.0)
+      %b.2 : py.Value = py.requireDefined(%b.1, "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
+      %a.3 : py.Value = base.refGet[py.Value](%a.cell.0)
+      %a.4 : py.Value = py.requireDefined(%a.3, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %b.3 : py.Value = base.refGet[py.Value](%b.cell.0)
+      %b.4 : py.Value = py.requireDefined(%b.3, "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
+      %add.0 : py.Value = py.add(%a.4, %b.4) ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%a.2, %b.2, %add.0)
+      %unpack.1 : py.Value = py.unpackSeq(%tuple.1, 3) ^propagate.0()
+      %elem.2 : py.Value = py.tupleGet(%unpack.1, 0)
+      %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %elem.2)
+      %elem.3 : py.Value = py.tupleGet(%unpack.1, 1)
+      %set.3 : base.Unit = base.refSet[py.Value](%y.cell.0, %elem.3)
+      %elem.4 : py.Value = py.tupleGet(%unpack.1, 2)
+      %set.4 : base.Unit = base.refSet[py.Value](%z.cell.0, %elem.4)
+      %print.0 : py.Value = py.qualifiedRef("builtins", "print") ^propagate.0()
+      %x.1 : py.Value = base.refGet[py.Value](%x.cell.0)
+      %x.2 : py.Value = py.requireDefined(%x.1, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %y.1 : py.Value = base.refGet[py.Value](%y.cell.0)
+      %y.2 : py.Value = py.requireDefined(%y.1, "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
+      %z.1 : py.Value = base.refGet[py.Value](%z.cell.0)
+      %z.2 : py.Value = py.requireDefined(%z.1, "UnboundLocalError", "cannot access local variable 'z' where it is not associated with a value") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%x.2, %y.2, %z.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.2, %kwargs.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
 }
 

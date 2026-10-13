@@ -45,15 +45,6 @@ structure ValId where
   id : Nat
 deriving Inhabited, Repr, BEq, Hashable, DecidableEq
 
-/-- A readable name for a value, for printing only. -/
-structure ValName where
-  base   : String
-  suffix : Nat
-deriving Inhabited, Repr, BEq, DecidableEq
-
-instance : ToString ValName where
-  toString n := s!"{n.base}.{n.suffix}"
-
 /-- A definition site: an id and the type of what it defines. -/
 structure ValDecl (env : Env Unit) where
   id   : ValId
@@ -193,12 +184,15 @@ operation is. -/
 
 /-- A function.  `blocks[0]` is the entry, and its parameters are the function's.  Its
 top-level blocks are a region in all but name: transfers stay among them, and a jump to
-`Label.exit` returns from the function. -/
+`Label.exit` returns from the function.
+
+`names[i]` is the name value `i` prints as, `%x.1`.  The names of the values the function
+defines are distinct. -/
 structure Func (env : Env Unit) (α : Type) where
   name    : Name
   retType : TypeExpr env 0
   blocks  : Array (Block env α)
-  names   : Array ValName
+  names   : Array Name
   info    : α
 
 /-- A module, typed against one environment that refines the base. -/

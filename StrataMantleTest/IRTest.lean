@@ -94,8 +94,7 @@ private def f : Func base Unit where
   name    := .str .base "f"
   retType := intT
   blocks  := #[fEntry, fBump, fDone]
-  names   := #[⟨"cond", 0⟩, ⟨"zero", 0⟩, ⟨"cell", 0⟩, ⟨"one", 0⟩,
-               ⟨"unit", 0⟩, ⟨"result", 0⟩]
+  names   := #["cond", "zero", "cell", "one", "unit", "result"].map fun s => Name.num (.str .base s) 0
   info    := ()
 
 /-! ## A failing operation with a handler
@@ -155,7 +154,7 @@ private def g : Func sig1 Unit where
   name    := .str .base "g"
   retType := intT1
   blocks  := #[gEntry, gHandler]
-  names   := #[]
+  names   := (Array.range 8).map (Name.num .base ·)
   info    := ()
 
 private def mg : Module sig1 Unit where
@@ -206,7 +205,7 @@ private def h : Func base Unit where
   name    := .str .base "h"
   retType := intT
   blocks  := #[hEntry, hOk, hErr]
-  names   := #[]
+  names   := (Array.range 8).map (Name.num .base ·)
   info    := ()
 
 private def m : Module base Unit where
@@ -489,7 +488,7 @@ private def refTo (target : Name) (type : TypeExpr base 0 := codeT) : Func base 
   blocks  := #[{ label := lbl "entry", params := #[], info := (),
                  instrs := #[.const () (d 0 type) (.func target), .const () (d 1 unitT) .unit],
                  term := .ret () ⟨1⟩ }]
-  names   := #[⟨"code", 0⟩, ⟨"unit", 0⟩]
+  names   := #["code", "unit"].map fun s => Name.num (.str .base s) 0
   info    := ()
 
 /-- `ref` beside `f`. -/

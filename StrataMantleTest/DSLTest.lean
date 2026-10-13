@@ -302,21 +302,24 @@ example : (Demo.Box.case.sig (e := Demo.env)).argTypes.map (·.type) =
 
 /-- A builder generic over every refinement of `Demo`. -/
 private def body {e : Env _root_.Unit} [Demo.env ⊑ e] : BuildM e _root_.Unit _root_.Unit := do
-  let x ← Build.freshVal "x" Demo.Value.ty
+  let x ← Build.freshVal (.str .base "x") Demo.Value.ty
   let _ ← Build.startFreshBlock #[x]
-  let t ← Build.emitApply "t" Demo.Value.ty Demo.mkTuple #v[] #[x.id, x.id, x.id]
-  let b ← Build.emitApply "b" (Demo.Box.ty Demo.Value.ty) Demo.Box.box #v[Demo.Value.ty] #[t]
-  let cell ← Build.emitApply "cell" (Base.Ref.ty (Demo.Box.ty Demo.Value.ty)) Base.refNew
+  let t ← Build.emitApply (.str .base "t") Demo.Value.ty Demo.mkTuple #v[] #[x.id, x.id, x.id]
+  let b ← Build.emitApply (.str .base "b") (Demo.Box.ty Demo.Value.ty) Demo.Box.box
+      #v[Demo.Value.ty] #[t]
+  let cell ← Build.emitApply (.str .base "cell") (Base.Ref.ty (Demo.Box.ty Demo.Value.ty))
+      Base.refNew
     #v[Demo.Box.ty Demo.Value.ty] #[b]
-  let got ← Build.emitApply "got" (Demo.Box.ty Demo.Value.ty) Base.refGet
+  let got ← Build.emitApply (.str .base "got") (Demo.Box.ty Demo.Value.ty) Base.refGet
     #v[Demo.Box.ty Demo.Value.ty] #[cell]
-  let v ← Build.emitApply "v" (Demo.raising.ty Demo.Value.ty) Demo.unbox #v[Demo.Value.ty] #[got]
+  let v ← Build.emitApply (.str .base "v") (Demo.raising.ty Demo.Value.ty) Demo.unbox
+      #v[Demo.Value.ty] #[got]
   let h ← Build.freshLabel "handler"
-  let _ ← Build.emitApply "s" Demo.Value.ty Demo.add #v[] #[t, x.id] #[Build.goto h]
+  let _ ← Build.emitApply (.str .base "s") Demo.Value.ty Demo.add #v[] #[t, x.id] #[Build.goto h]
   Build.finishBlock (.ret () v)
-  let exc ← Build.freshVal "exc" Demo.Value.ty
+  let exc ← Build.freshVal (.str .base "exc") Demo.Value.ty
   Build.startBlock h #[exc]
-  let r ← Build.emitApply "r" (Demo.raising.ty Demo.Value.ty) Base.Except.error
+  let r ← Build.emitApply (.str .base "r") (Demo.raising.ty Demo.Value.ty) Base.Except.error
     #v[Demo.Value.ty, Demo.Value.ty] #[exc.id]
   Build.finishBlock (.ret () r)
 

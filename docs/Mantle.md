@@ -46,12 +46,12 @@ over the item, with one cell per iteration variable per evaluation, as in CPytho
 Instructions such as `if` or `try` can take regions too:
 
 ```
-%4 : base.Int = demo.if[base.Int] %1 {
+%4 : base.Int = demo.if[base.Int](%1) {
   then.0():
-    ret %2
+    ret(%2)
 } {
   else.0():
-    ret %3
+    ret(%3)
 }
 ```
 
@@ -61,3 +61,51 @@ Mantle does not depend on annotations for its semantics.
 
 Mantle is implemented in the directory `StrataMantle`. Declarations are defined in
 the namespace `Strata.Mantle`.
+
+## 2. Printed form
+
+A module prints as text, through a Strata DDM dialect (`StrataMantle/DDM.lean`), and the
+text reads back (`StrataMantle/DDMRead.lean`):
+
+```
+module m {
+  func @m.f(%0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%0 : py.Value):
+      %2 : py.Value = py.intLit(1)
+      %3 : py.Value = py.add(%0, %2) ^propagate.0()
+      %4 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%3)
+      ret(%4)
+    propagate.0(%5 : py.Value):
+      %6 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%5)
+      ret(%6)
+  }
+}
+```
+
+* **Values** print as `%n`, with their type where they are defined. A block prints as its
+  label and parameters; the entry block's parameters are also the function's.
+* **Applications** print as the operation, its type arguments in brackets, its operands in
+  parentheses, then its successors, each `^label(args)`, then its regions, each in braces.
+  Empty brackets and parentheses are left out: `py.noneLit`, `jump ^done.0()`.
+* **Terminators** print as applications without a result. The base's control flow drops
+  `base.`: `jump`, `branch(%0) ^t.0() ^f.0()`, `unreachable`. A jump to the exit is
+  `ret(%4)`.
+* **Names** print dotted, as one identifier, escaped whole when needed: `@|m.<module>|`. A
+  function name is marked `@`.
+* **Literals** are untagged, and a literal's form fixes its type, with no widening. An
+  integer `5` or `-1` is a `base.Int`. A float always has a decimal point or an exponent
+  (`1.0`, `0.0025`, `1e22`), and is the shortest decimal that reads back as it, or `inf`,
+  `-inf` or `nan`; it is a `base.Float64`, so `1` is never one. A boolean is `true` or
+  `false`, a string `"…"`, the unit `unit`, and a function pointer `@m.f`. A bitvector, if
+  added, needs a literal syntax that carries its width.
+
+By default each constant a function uses is written at its uses and its line is dropped:
+`py.intLit(1)`. The other values keep their ids. `PrintOptions.full` prints every constant on
+its own line instead.
+
+`Module.read env text` reads either form against an environment and checks the result
+against `Module.WF`. A folded constant comes back as a `const` just before its use, with a
+fresh id. Reading and printing in the same form gives the text back. Lines that start with
+`--` are comments.
+`pymantle read FILE` reads a printed module against the Python environment and prints it
+again.

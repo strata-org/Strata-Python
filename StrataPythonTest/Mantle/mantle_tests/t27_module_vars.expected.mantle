@@ -1,461 +1,297 @@
 module t27_module_vars {
-  func @t27_module_vars.|<module>|() -> base.Except(py.Value, py.Value) {
+  func @|t27_module_vars.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
-      %0 : base.String = const str "t27_module_vars"
-      %1 : py.Value = py.strLit %0
-      %2 : base.String = const str "t27_module_vars"
-      %3 : base.String = const str "__name__"
-      %4 : base.Ref(py.Value) = py.globalCell %2 %3
-      %5 : base.Unit = base.refSet[py.Value] %4 %1
-      %6 : base.String = const str "logging"
-      %7 : py.Value = py.importModule %6 ^propagate.0()
-      %8 : base.String = const str "t27_module_vars"
-      %9 : base.String = const str "logging"
-      %10 : base.Ref(py.Value) = py.globalCell %8 %9
-      %11 : base.Unit = base.refSet[py.Value] %10 %7
-      %12 : base.Int = const int 3
-      %13 : py.Value = py.intLit %12
-      %14 : base.String = const str "t27_module_vars"
-      %15 : base.String = const str "MAX_RETRIES"
-      %16 : base.Ref(py.Value) = py.globalCell %14 %15
-      %17 : base.Unit = base.refSet[py.Value] %16 %13
-      %18 : base.String = const str "t27_module_vars"
-      %19 : base.String = const str "logging"
-      %20 : base.Ref(py.Value) = py.globalCell %18 %19
-      %21 : py.Value = base.refGet[py.Value] %20
-      %22 : base.String = const str "NameError"
-      %23 : base.String = const str "name 'logging' is not defined"
-      %24 : py.Value = py.requireDefined %21 %22 %23 ^propagate.0()
-      %25 : base.String = const str "getLogger"
-      %26 : py.Value = py.attr %24 %25 ^propagate.0()
-      %27 : base.String = const str "t27_module_vars"
-      %28 : base.String = const str "__name__"
-      %29 : base.Ref(py.Value) = py.globalCell %27 %28
-      %30 : py.Value = base.refGet[py.Value] %29
-      %31 : base.String = const str "NameError"
-      %32 : base.String = const str "name '__name__' is not defined"
-      %33 : py.Value = py.requireDefined %30 %31 %32 ^propagate.0()
-      %34 : py.Value = py.mkTuple %33
-      %35 : py.Value = py.mkKwargs
-      %36 : py.Value = py.call %26 %34 %35 ^propagate.0()
-      %37 : base.String = const str "t27_module_vars"
-      %38 : base.String = const str "logger"
-      %39 : base.Ref(py.Value) = py.globalCell %37 %38
-      %40 : base.Unit = base.refSet[py.Value] %39 %36
-      %41 : base.Float64 = const float "0.5"
-      %42 : py.Value = py.floatLit %41
-      %43 : base.String = const str "t27_module_vars"
-      %44 : base.String = const str "threshold"
-      %45 : base.Ref(py.Value) = py.globalCell %43 %44
-      %46 : base.Unit = base.refSet[py.Value] %45 %42
-      %47 : base.Code = const @t27_module_vars.use_module_vars
-      %48 : py.Value = py.mkClosure %47
-      %49 : base.String = const str "t27_module_vars"
-      %50 : base.String = const str "use_module_vars"
-      %51 : base.Ref(py.Value) = py.globalCell %49 %50
-      %52 : base.Unit = base.refSet[py.Value] %51 %48
-      %53 : base.Code = const @t27_module_vars.param_shadows_module_var
-      %54 : py.Value = py.mkClosure %53
-      %55 : base.String = const str "t27_module_vars"
-      %56 : base.String = const str "param_shadows_module_var"
-      %57 : base.Ref(py.Value) = py.globalCell %55 %56
-      %58 : base.Unit = base.refSet[py.Value] %57 %54
-      %59 : base.Code = const @t27_module_vars.local_shadows_module_var
-      %60 : py.Value = py.mkClosure %59
-      %61 : base.String = const str "t27_module_vars"
-      %62 : base.String = const str "local_shadows_module_var"
-      %63 : base.Ref(py.Value) = py.globalCell %61 %62
-      %64 : base.Unit = base.refSet[py.Value] %63 %60
-      %65 : base.Code = const @t27_module_vars.mixed_imports_and_vars
-      %66 : py.Value = py.mkClosure %65
-      %67 : base.String = const str "t27_module_vars"
-      %68 : base.String = const str "mixed_imports_and_vars"
-      %69 : base.Ref(py.Value) = py.globalCell %67 %68
-      %70 : base.Unit = base.refSet[py.Value] %69 %66
-      %71 : base.Code = const @t27_module_vars.ifexp_assignment
-      %72 : py.Value = py.mkClosure %71
-      %73 : base.String = const str "t27_module_vars"
-      %74 : base.String = const str "ifexp_assignment"
-      %75 : base.Ref(py.Value) = py.globalCell %73 %74
-      %76 : base.Unit = base.refSet[py.Value] %75 %72
-      %77 : base.Code = const @t27_module_vars.boolop_assignment
-      %78 : py.Value = py.mkClosure %77
-      %79 : base.String = const str "t27_module_vars"
-      %80 : base.String = const str "boolop_assignment"
-      %81 : base.Ref(py.Value) = py.globalCell %79 %80
-      %82 : base.Unit = base.refSet[py.Value] %81 %78
-      %83 : py.Value = py.noneLit
-      %84 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %83
-      ret %84
-    propagate.0(%85 : py.Value):
-      %86 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %85
-      ret %86
+      %str.0 : py.Value = py.strLit("t27_module_vars")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t27_module_vars", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %mod.0 : py.Value = py.importModule("logging") ^propagate.0()
+      %logging.cell.0 : base.Ref(py.Value) = py.globalCell("t27_module_vars", "logging")
+      %set.1 : base.Unit = base.refSet[py.Value](%logging.cell.0, %mod.0)
+      %int.0 : py.Value = py.intLit(3)
+      %MAX_RETRIES.cell.0 : base.Ref(py.Value) = py.globalCell("t27_module_vars", "MAX_RETRIES")
+      %set.2 : base.Unit = base.refSet[py.Value](%MAX_RETRIES.cell.0, %int.0)
+      %logging.cell.1 : base.Ref(py.Value) = py.globalCell("t27_module_vars", "logging")
+      %logging.0 : py.Value = base.refGet[py.Value](%logging.cell.1)
+      %logging.1 : py.Value = py.requireDefined(%logging.0, "NameError", "name 'logging' is not defined") ^propagate.0()
+      %getLogger.0 : py.Value = py.attr(%logging.1, "getLogger") ^propagate.0()
+      %__name__.cell.1 : base.Ref(py.Value) = py.globalCell("t27_module_vars", "__name__")
+      %__name__.0 : py.Value = base.refGet[py.Value](%__name__.cell.1)
+      %__name__.1 : py.Value = py.requireDefined(%__name__.0, "NameError", "name '__name__' is not defined") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%__name__.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%getLogger.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %logger.cell.0 : base.Ref(py.Value) = py.globalCell("t27_module_vars", "logger")
+      %set.3 : base.Unit = base.refSet[py.Value](%logger.cell.0, %call.0)
+      %float.0 : py.Value = py.floatLit(0.5)
+      %threshold.cell.0 : base.Ref(py.Value) = py.globalCell("t27_module_vars", "threshold")
+      %set.4 : base.Unit = base.refSet[py.Value](%threshold.cell.0, %float.0)
+      %clo.0 : py.Value = py.mkClosure(@t27_module_vars.use_module_vars)
+      %use_module_vars.cell.0 : base.Ref(py.Value) = py.globalCell("t27_module_vars", "use_module_vars")
+      %set.5 : base.Unit = base.refSet[py.Value](%use_module_vars.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure(@t27_module_vars.param_shadows_module_var)
+      %param_shadows_module_var.cell.0 : base.Ref(py.Value) = py.globalCell("t27_module_vars", "param_shadows_module_var")
+      %set.6 : base.Unit = base.refSet[py.Value](%param_shadows_module_var.cell.0, %clo.1)
+      %clo.2 : py.Value = py.mkClosure(@t27_module_vars.local_shadows_module_var)
+      %local_shadows_module_var.cell.0 : base.Ref(py.Value) = py.globalCell("t27_module_vars", "local_shadows_module_var")
+      %set.7 : base.Unit = base.refSet[py.Value](%local_shadows_module_var.cell.0, %clo.2)
+      %clo.3 : py.Value = py.mkClosure(@t27_module_vars.mixed_imports_and_vars)
+      %mixed_imports_and_vars.cell.0 : base.Ref(py.Value) = py.globalCell("t27_module_vars", "mixed_imports_and_vars")
+      %set.8 : base.Unit = base.refSet[py.Value](%mixed_imports_and_vars.cell.0, %clo.3)
+      %clo.4 : py.Value = py.mkClosure(@t27_module_vars.ifexp_assignment)
+      %ifexp_assignment.cell.0 : base.Ref(py.Value) = py.globalCell("t27_module_vars", "ifexp_assignment")
+      %set.9 : base.Unit = base.refSet[py.Value](%ifexp_assignment.cell.0, %clo.4)
+      %clo.5 : py.Value = py.mkClosure(@t27_module_vars.boolop_assignment)
+      %boolop_assignment.cell.0 : base.Ref(py.Value) = py.globalCell("t27_module_vars", "boolop_assignment")
+      %set.10 : base.Unit = base.refSet[py.Value](%boolop_assignment.cell.0, %clo.5)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-  func @t27_module_vars.use_module_vars(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value, %1 : py.Value):
-      %2 : base.String = const str "i"
-      %3 : py.Value = py.undef %2
-      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
-      %5 : py.Value = py.tupleLen %0
-      %6 : base.String = const str "kwargs"
-      %7 : py.Value = py.undef %6
-      %8 : py.Value = py.dictFirstKey %1 %7
-      %9 : base.String = const str "TypeError"
-      %10 : base.String = const str "use_module_vars() got an unexpected keyword argument {}"
-      %11 : base.Unit = py.requireUndefined %8 %9 %10 ^propagate.0()
-      %12 : base.Int = const int 0
-      %13 : base.String = const str "TypeError"
-      %14 : base.String = const str "use_module_vars() takes 0 positional arguments but {} {was} given"
-      %15 : base.Unit = py.requireAtMost %5 %12 %13 %14 ^propagate.0()
-      %16 : base.String = const str "Functions see module-level vars as qualifiedRef."
-      %17 : py.Value = py.strLit %16
-      %18 : base.String = const str "t27_module_vars"
-      %19 : base.String = const str "logger"
-      %20 : base.Ref(py.Value) = py.globalCell %18 %19
-      %21 : py.Value = base.refGet[py.Value] %20
-      %22 : base.String = const str "NameError"
-      %23 : base.String = const str "name 'logger' is not defined"
-      %24 : py.Value = py.requireDefined %21 %22 %23 ^propagate.0()
-      %25 : base.String = const str "info"
-      %26 : py.Value = py.attr %24 %25 ^propagate.0()
-      %27 : base.String = const str "starting"
-      %28 : py.Value = py.strLit %27
-      %29 : py.Value = py.mkTuple %28
-      %30 : py.Value = py.mkKwargs
-      %31 : py.Value = py.call %26 %29 %30 ^propagate.0()
-      %32 : base.String = const str "builtins"
-      %33 : base.String = const str "range"
-      %34 : py.Value = py.qualifiedRef %32 %33 ^propagate.0()
-      %35 : base.String = const str "t27_module_vars"
-      %36 : base.String = const str "MAX_RETRIES"
-      %37 : base.Ref(py.Value) = py.globalCell %35 %36
-      %38 : py.Value = base.refGet[py.Value] %37
-      %39 : base.String = const str "NameError"
-      %40 : base.String = const str "name 'MAX_RETRIES' is not defined"
-      %41 : py.Value = py.requireDefined %38 %39 %40 ^propagate.0()
-      %42 : py.Value = py.mkTuple %41
-      %43 : py.Value = py.mkKwargs
-      %44 : py.Value = py.call %34 %42 %43 ^propagate.0()
-      %45 : py.Value = py.getIter %44 ^propagate.0()
+  func @t27_module_vars.use_module_vars(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %i.0 : py.Value = py.undef("i")
+      %i.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "use_module_vars() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "use_module_vars() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %str.0 : py.Value = py.strLit("Functions see module-level vars as qualifiedRef.")
+      %logger.cell.0 : base.Ref(py.Value) = py.globalCell("t27_module_vars", "logger")
+      %logger.0 : py.Value = base.refGet[py.Value](%logger.cell.0)
+      %logger.1 : py.Value = py.requireDefined(%logger.0, "NameError", "name 'logger' is not defined") ^propagate.0()
+      %info.0 : py.Value = py.attr(%logger.1, "info") ^propagate.0()
+      %str.1 : py.Value = py.strLit("starting")
+      %tuple.0 : py.Value = py.mkTuple(%str.1)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%info.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %range.0 : py.Value = py.qualifiedRef("builtins", "range") ^propagate.0()
+      %MAX_RETRIES.cell.0 : base.Ref(py.Value) = py.globalCell("t27_module_vars", "MAX_RETRIES")
+      %MAX_RETRIES.0 : py.Value = base.refGet[py.Value](%MAX_RETRIES.cell.0)
+      %MAX_RETRIES.1 : py.Value = py.requireDefined(%MAX_RETRIES.0, "NameError", "name 'MAX_RETRIES' is not defined") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%MAX_RETRIES.1)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%range.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%call.1) ^propagate.0()
       jump ^head.0()
     head.0():
-      %46 : py.Value = py.next %45 ^stop.0()
-      %47 : base.Unit = base.refSet[py.Value] %4 %46
-      %48 : py.Value = base.refGet[py.Value] %4
-      %49 : base.String = const str "UnboundLocalError"
-      %50 : base.String = const str "cannot access local variable 'i' where it is not associated with a value"
-      %51 : py.Value = py.requireDefined %48 %49 %50 ^propagate.0()
-      %52 : base.String = const str "t27_module_vars"
-      %53 : base.String = const str "threshold"
-      %54 : base.Ref(py.Value) = py.globalCell %52 %53
-      %55 : py.Value = base.refGet[py.Value] %54
-      %56 : base.String = const str "NameError"
-      %57 : base.String = const str "name 'threshold' is not defined"
-      %58 : py.Value = py.requireDefined %55 %56 %57 ^propagate.0()
-      %59 : py.Value = py.gt %51 %58 ^propagate.0()
-      %60 : base.Bool = py.truthy %59 ^propagate.0()
-      branch %60 ^then.0() ^else.0()
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%i.cell.0, %item.0)
+      %i.1 : py.Value = base.refGet[py.Value](%i.cell.0)
+      %i.2 : py.Value = py.requireDefined(%i.1, "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %threshold.cell.0 : base.Ref(py.Value) = py.globalCell("t27_module_vars", "threshold")
+      %threshold.0 : py.Value = base.refGet[py.Value](%threshold.cell.0)
+      %threshold.1 : py.Value = py.requireDefined(%threshold.0, "NameError", "name 'threshold' is not defined") ^propagate.0()
+      %gt.0 : py.Value = py.gt(%i.2, %threshold.1) ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%gt.0) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
     then.0():
       jump ^exit.0()
     else.0():
       jump ^join.0()
     join.0():
       jump ^head.0()
-    stop.0(%61 : py.Value):
-      %62 : base.Bool = py.isStopIteration %61
-      branch %62 ^exit.0() ^propagate.0(%61)
+    stop.0(%exc.0 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.0)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
     exit.0():
-      %63 : py.Value = py.noneLit
-      %64 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %63
-      ret %64
-    propagate.0(%65 : py.Value):
-      %66 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %65
-      ret %66
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
   }
-  func @t27_module_vars.param_shadows_module_var(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value, %1 : py.Value):
-      %2 : base.String = const str "logger"
-      %3 : py.Value = py.undef %2
-      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
-      %5 : py.Value = py.tupleLen %0
-      %6 : base.String = const str "logger"
-      %7 : py.Value = py.undef %6
-      %8 : py.Value = py.mkTuple %7
-      %9 : py.Value = py.noneLit
-      %10 : py.Value = py.getSlice %8 %5 %9 %9 ^propagate.0()
-      %11 : py.Value = py.add %0 %10 ^propagate.0()
-      %12 : base.Int = const int 0
-      %13 : py.Value = py.intLit %12
-      %14 : py.Value = py.getItem %11 %13 ^propagate.0()
-      %15 : base.String = const str "logger"
-      %16 : py.Value = py.strLit %15
-      %17 : py.Value = py.dictGet %1 %16 %14
-      %18 : py.Value = py.in %16 %1 ^propagate.0()
-      %19 : base.Unit = py.dictDiscard %1 %16
-      %20 : py.Value = py.lt %13 %5 ^propagate.0()
-      %21 : py.Value = py.mult %18 %20 ^propagate.0()
-      %22 : base.Int = const int 0
-      %23 : base.String = const str "TypeError"
-      %24 : base.String = const str "param_shadows_module_var() got multiple values for argument 'logger'"
-      %25 : base.Unit = py.requireAtMost %21 %22 %23 %24 ^propagate.0()
-      %26 : base.String = const str "kwargs"
-      %27 : py.Value = py.undef %26
-      %28 : py.Value = py.dictFirstKey %1 %27
-      %29 : base.String = const str "TypeError"
-      %30 : base.String = const str "param_shadows_module_var() got an unexpected keyword argument {}"
-      %31 : base.Unit = py.requireUndefined %28 %29 %30 ^propagate.0()
-      %32 : base.Int = const int 1
-      %33 : base.String = const str "TypeError"
-      %34 : base.String = const str "param_shadows_module_var() takes 1 positional argument but {} {was} given"
-      %35 : base.Unit = py.requireAtMost %5 %32 %33 %34 ^propagate.0()
-      %36 : base.String = const str "TypeError"
-      %37 : base.String = const str "param_shadows_module_var() missing 1 required positional argument: 'logger'"
-      %38 : py.Value = py.requireDefined %17 %36 %37 ^propagate.0()
-      %39 : base.Unit = base.refSet[py.Value] %4 %38
-      %40 : base.String = const str "Function parameter shadows module-level var of same name."
-      %41 : py.Value = py.strLit %40
-      %42 : py.Value = base.refGet[py.Value] %4
-      %43 : base.String = const str "UnboundLocalError"
-      %44 : base.String = const str "cannot access local variable 'logger' where it is not associated with a value"
-      %45 : py.Value = py.requireDefined %42 %43 %44 ^propagate.0()
-      %46 : base.String = const str "info"
-      %47 : py.Value = py.attr %45 %46 ^propagate.0()
-      %48 : base.String = const str "param wins"
-      %49 : py.Value = py.strLit %48
-      %50 : py.Value = py.mkTuple %49
-      %51 : py.Value = py.mkKwargs
-      %52 : py.Value = py.call %47 %50 %51 ^propagate.0()
-      %53 : py.Value = py.noneLit
-      %54 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %53
-      ret %54
-    propagate.0(%55 : py.Value):
-      %56 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %55
-      ret %56
+  func @t27_module_vars.param_shadows_module_var(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %logger.0 : py.Value = py.undef("logger")
+      %logger.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%logger.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %logger.1 : py.Value = py.undef("logger")
+      %fill.0 : py.Value = py.mkTuple(%logger.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("logger")
+      %logger.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "param_shadows_module_var() got multiple values for argument 'logger'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "param_shadows_module_var() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "param_shadows_module_var() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %logger.3 : py.Value = py.requireDefined(%logger.2, "TypeError", "param_shadows_module_var() missing 1 required positional argument: 'logger'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%logger.cell.0, %logger.3)
+      %str.1 : py.Value = py.strLit("Function parameter shadows module-level var of same name.")
+      %logger.4 : py.Value = base.refGet[py.Value](%logger.cell.0)
+      %logger.5 : py.Value = py.requireDefined(%logger.4, "UnboundLocalError", "cannot access local variable 'logger' where it is not associated with a value") ^propagate.0()
+      %info.0 : py.Value = py.attr(%logger.5, "info") ^propagate.0()
+      %str.2 : py.Value = py.strLit("param wins")
+      %tuple.0 : py.Value = py.mkTuple(%str.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%info.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-  func @t27_module_vars.local_shadows_module_var(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value, %1 : py.Value):
-      %2 : base.String = const str "MAX_RETRIES"
-      %3 : py.Value = py.undef %2
-      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
-      %5 : py.Value = py.tupleLen %0
-      %6 : base.String = const str "kwargs"
-      %7 : py.Value = py.undef %6
-      %8 : py.Value = py.dictFirstKey %1 %7
-      %9 : base.String = const str "TypeError"
-      %10 : base.String = const str "local_shadows_module_var() got an unexpected keyword argument {}"
-      %11 : base.Unit = py.requireUndefined %8 %9 %10 ^propagate.0()
-      %12 : base.Int = const int 0
-      %13 : base.String = const str "TypeError"
-      %14 : base.String = const str "local_shadows_module_var() takes 0 positional arguments but {} {was} given"
-      %15 : base.Unit = py.requireAtMost %5 %12 %13 %14 ^propagate.0()
-      %16 : base.String = const str "Local assignment shadows module-level var after the assignment."
-      %17 : py.Value = py.strLit %16
-      %18 : base.Int = const int 10
-      %19 : py.Value = py.intLit %18
-      %20 : base.Unit = base.refSet[py.Value] %4 %19
-      %21 : py.Value = base.refGet[py.Value] %4
-      %22 : base.String = const str "UnboundLocalError"
-      %23 : base.String = const str "cannot access local variable 'MAX_RETRIES' where it is not associated with a value"
-      %24 : py.Value = py.requireDefined %21 %22 %23 ^propagate.0()
-      %25 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %24
-      ret %25
-    propagate.0(%26 : py.Value):
-      %27 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %26
-      ret %27
+  func @t27_module_vars.local_shadows_module_var(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %MAX_RETRIES.0 : py.Value = py.undef("MAX_RETRIES")
+      %MAX_RETRIES.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%MAX_RETRIES.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "local_shadows_module_var() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "local_shadows_module_var() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %str.0 : py.Value = py.strLit("Local assignment shadows module-level var after the assignment.")
+      %int.0 : py.Value = py.intLit(10)
+      %set.0 : base.Unit = base.refSet[py.Value](%MAX_RETRIES.cell.0, %int.0)
+      %MAX_RETRIES.1 : py.Value = base.refGet[py.Value](%MAX_RETRIES.cell.0)
+      %MAX_RETRIES.2 : py.Value = py.requireDefined(%MAX_RETRIES.1, "UnboundLocalError", "cannot access local variable 'MAX_RETRIES' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%MAX_RETRIES.2)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-  func @t27_module_vars.mixed_imports_and_vars(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value, %1 : py.Value):
-      %2 : base.String = const str "new_logger"
-      %3 : py.Value = py.undef %2
-      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
-      %5 : py.Value = py.tupleLen %0
-      %6 : base.String = const str "kwargs"
-      %7 : py.Value = py.undef %6
-      %8 : py.Value = py.dictFirstKey %1 %7
-      %9 : base.String = const str "TypeError"
-      %10 : base.String = const str "mixed_imports_and_vars() got an unexpected keyword argument {}"
-      %11 : base.Unit = py.requireUndefined %8 %9 %10 ^propagate.0()
-      %12 : base.Int = const int 0
-      %13 : base.String = const str "TypeError"
-      %14 : base.String = const str "mixed_imports_and_vars() takes 0 positional arguments but {} {was} given"
-      %15 : base.Unit = py.requireAtMost %5 %12 %13 %14 ^propagate.0()
-      %16 : base.String = const str "Function uses both imports and module-level vars."
-      %17 : py.Value = py.strLit %16
-      %18 : base.String = const str "t27_module_vars"
-      %19 : base.String = const str "logging"
-      %20 : base.Ref(py.Value) = py.globalCell %18 %19
-      %21 : py.Value = base.refGet[py.Value] %20
-      %22 : base.String = const str "NameError"
-      %23 : base.String = const str "name 'logging' is not defined"
-      %24 : py.Value = py.requireDefined %21 %22 %23 ^propagate.0()
-      %25 : base.String = const str "getLogger"
-      %26 : py.Value = py.attr %24 %25 ^propagate.0()
-      %27 : base.String = const str "other"
-      %28 : py.Value = py.strLit %27
-      %29 : py.Value = py.mkTuple %28
-      %30 : py.Value = py.mkKwargs
-      %31 : py.Value = py.call %26 %29 %30 ^propagate.0()
-      %32 : base.Unit = base.refSet[py.Value] %4 %31
-      %33 : py.Value = base.refGet[py.Value] %4
-      %34 : base.String = const str "UnboundLocalError"
-      %35 : base.String = const str "cannot access local variable 'new_logger' where it is not associated with a value"
-      %36 : py.Value = py.requireDefined %33 %34 %35 ^propagate.0()
-      %37 : base.String = const str "setLevel"
-      %38 : py.Value = py.attr %36 %37 ^propagate.0()
-      %39 : base.String = const str "t27_module_vars"
-      %40 : base.String = const str "MAX_RETRIES"
-      %41 : base.Ref(py.Value) = py.globalCell %39 %40
-      %42 : py.Value = base.refGet[py.Value] %41
-      %43 : base.String = const str "NameError"
-      %44 : base.String = const str "name 'MAX_RETRIES' is not defined"
-      %45 : py.Value = py.requireDefined %42 %43 %44 ^propagate.0()
-      %46 : py.Value = py.mkTuple %45
-      %47 : py.Value = py.mkKwargs
-      %48 : py.Value = py.call %38 %46 %47 ^propagate.0()
-      %49 : py.Value = py.noneLit
-      %50 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %49
-      ret %50
-    propagate.0(%51 : py.Value):
-      %52 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %51
-      ret %52
+  func @t27_module_vars.mixed_imports_and_vars(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %new_logger.0 : py.Value = py.undef("new_logger")
+      %new_logger.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%new_logger.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "mixed_imports_and_vars() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "mixed_imports_and_vars() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %str.0 : py.Value = py.strLit("Function uses both imports and module-level vars.")
+      %logging.cell.0 : base.Ref(py.Value) = py.globalCell("t27_module_vars", "logging")
+      %logging.0 : py.Value = base.refGet[py.Value](%logging.cell.0)
+      %logging.1 : py.Value = py.requireDefined(%logging.0, "NameError", "name 'logging' is not defined") ^propagate.0()
+      %getLogger.0 : py.Value = py.attr(%logging.1, "getLogger") ^propagate.0()
+      %str.1 : py.Value = py.strLit("other")
+      %tuple.0 : py.Value = py.mkTuple(%str.1)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%getLogger.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%new_logger.cell.0, %call.0)
+      %new_logger.1 : py.Value = base.refGet[py.Value](%new_logger.cell.0)
+      %new_logger.2 : py.Value = py.requireDefined(%new_logger.1, "UnboundLocalError", "cannot access local variable 'new_logger' where it is not associated with a value") ^propagate.0()
+      %setLevel.0 : py.Value = py.attr(%new_logger.2, "setLevel") ^propagate.0()
+      %MAX_RETRIES.cell.0 : base.Ref(py.Value) = py.globalCell("t27_module_vars", "MAX_RETRIES")
+      %MAX_RETRIES.0 : py.Value = base.refGet[py.Value](%MAX_RETRIES.cell.0)
+      %MAX_RETRIES.1 : py.Value = py.requireDefined(%MAX_RETRIES.0, "NameError", "name 'MAX_RETRIES' is not defined") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%MAX_RETRIES.1)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%setLevel.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-  func @t27_module_vars.ifexp_assignment(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value, %1 : py.Value):
-      %2 : base.String = const str "x"
-      %3 : py.Value = py.undef %2
-      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
-      %5 : base.String = const str "result"
-      %6 : py.Value = py.undef %5
-      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
-      %8 : py.Value = py.tupleLen %0
-      %9 : base.String = const str "x"
-      %10 : py.Value = py.undef %9
-      %11 : py.Value = py.mkTuple %10
-      %12 : py.Value = py.noneLit
-      %13 : py.Value = py.getSlice %11 %8 %12 %12 ^propagate.0()
-      %14 : py.Value = py.add %0 %13 ^propagate.0()
-      %15 : base.Int = const int 0
-      %16 : py.Value = py.intLit %15
-      %17 : py.Value = py.getItem %14 %16 ^propagate.0()
-      %18 : base.String = const str "x"
-      %19 : py.Value = py.strLit %18
-      %20 : py.Value = py.dictGet %1 %19 %17
-      %21 : py.Value = py.in %19 %1 ^propagate.0()
-      %22 : base.Unit = py.dictDiscard %1 %19
-      %23 : py.Value = py.lt %16 %8 ^propagate.0()
-      %24 : py.Value = py.mult %21 %23 ^propagate.0()
-      %25 : base.Int = const int 0
-      %26 : base.String = const str "TypeError"
-      %27 : base.String = const str "ifexp_assignment() got multiple values for argument 'x'"
-      %28 : base.Unit = py.requireAtMost %24 %25 %26 %27 ^propagate.0()
-      %29 : base.String = const str "kwargs"
-      %30 : py.Value = py.undef %29
-      %31 : py.Value = py.dictFirstKey %1 %30
-      %32 : base.String = const str "TypeError"
-      %33 : base.String = const str "ifexp_assignment() got an unexpected keyword argument {}"
-      %34 : base.Unit = py.requireUndefined %31 %32 %33 ^propagate.0()
-      %35 : base.Int = const int 1
-      %36 : base.String = const str "TypeError"
-      %37 : base.String = const str "ifexp_assignment() takes 1 positional argument but {} {was} given"
-      %38 : base.Unit = py.requireAtMost %8 %35 %36 %37 ^propagate.0()
-      %39 : base.String = const str "TypeError"
-      %40 : base.String = const str "ifexp_assignment() missing 1 required positional argument: 'x'"
-      %41 : py.Value = py.requireDefined %20 %39 %40 ^propagate.0()
-      %42 : base.Unit = base.refSet[py.Value] %4 %41
-      %43 : base.String = const str "Assignment target should not be demanded by IfExp sub-blocks."
-      %44 : py.Value = py.strLit %43
-      %45 : py.Value = base.refGet[py.Value] %4
-      %46 : base.String = const str "UnboundLocalError"
-      %47 : base.String = const str "cannot access local variable 'x' where it is not associated with a value"
-      %48 : py.Value = py.requireDefined %45 %46 %47 ^propagate.0()
-      %49 : base.Bool = py.truthy %48 ^propagate.0()
-      branch %49 ^then.0() ^else.0()
+  func @t27_module_vars.ifexp_assignment(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %result.0 : py.Value = py.undef("result")
+      %result.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%result.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %x.1 : py.Value = py.undef("x")
+      %fill.0 : py.Value = py.mkTuple(%x.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("x")
+      %x.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "ifexp_assignment() got multiple values for argument 'x'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "ifexp_assignment() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "ifexp_assignment() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %x.3 : py.Value = py.requireDefined(%x.2, "TypeError", "ifexp_assignment() missing 1 required positional argument: 'x'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.3)
+      %str.1 : py.Value = py.strLit("Assignment target should not be demanded by IfExp sub-blocks.")
+      %x.4 : py.Value = base.refGet[py.Value](%x.cell.0)
+      %x.5 : py.Value = py.requireDefined(%x.4, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%x.5) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
     then.0():
-      %50 : base.String = const str "yes"
-      %51 : py.Value = py.strLit %50
-      jump ^join.0(%51)
+      %str.2 : py.Value = py.strLit("yes")
+      jump ^join.0(%str.2)
     else.0():
-      %52 : base.String = const str "no"
-      %53 : py.Value = py.strLit %52
-      jump ^join.0(%53)
-    join.0(%54 : py.Value):
-      %55 : base.Unit = base.refSet[py.Value] %7 %54
-      %56 : py.Value = base.refGet[py.Value] %7
-      %57 : base.String = const str "UnboundLocalError"
-      %58 : base.String = const str "cannot access local variable 'result' where it is not associated with a value"
-      %59 : py.Value = py.requireDefined %56 %57 %58 ^propagate.0()
-      %60 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %59
-      ret %60
-    propagate.0(%61 : py.Value):
-      %62 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %61
-      ret %62
+      %str.3 : py.Value = py.strLit("no")
+      jump ^join.0(%str.3)
+    join.0(%ifexp.0 : py.Value):
+      %set.1 : base.Unit = base.refSet[py.Value](%result.cell.0, %ifexp.0)
+      %result.1 : py.Value = base.refGet[py.Value](%result.cell.0)
+      %result.2 : py.Value = py.requireDefined(%result.1, "UnboundLocalError", "cannot access local variable 'result' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%result.2)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-  func @t27_module_vars.boolop_assignment(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value, %1 : py.Value):
-      %2 : base.String = const str "x"
-      %3 : py.Value = py.undef %2
-      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
-      %5 : base.String = const str "value"
-      %6 : py.Value = py.undef %5
-      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
-      %8 : py.Value = py.tupleLen %0
-      %9 : base.String = const str "x"
-      %10 : py.Value = py.undef %9
-      %11 : py.Value = py.mkTuple %10
-      %12 : py.Value = py.noneLit
-      %13 : py.Value = py.getSlice %11 %8 %12 %12 ^propagate.0()
-      %14 : py.Value = py.add %0 %13 ^propagate.0()
-      %15 : base.Int = const int 0
-      %16 : py.Value = py.intLit %15
-      %17 : py.Value = py.getItem %14 %16 ^propagate.0()
-      %18 : base.String = const str "x"
-      %19 : py.Value = py.strLit %18
-      %20 : py.Value = py.dictGet %1 %19 %17
-      %21 : py.Value = py.in %19 %1 ^propagate.0()
-      %22 : base.Unit = py.dictDiscard %1 %19
-      %23 : py.Value = py.lt %16 %8 ^propagate.0()
-      %24 : py.Value = py.mult %21 %23 ^propagate.0()
-      %25 : base.Int = const int 0
-      %26 : base.String = const str "TypeError"
-      %27 : base.String = const str "boolop_assignment() got multiple values for argument 'x'"
-      %28 : base.Unit = py.requireAtMost %24 %25 %26 %27 ^propagate.0()
-      %29 : base.String = const str "kwargs"
-      %30 : py.Value = py.undef %29
-      %31 : py.Value = py.dictFirstKey %1 %30
-      %32 : base.String = const str "TypeError"
-      %33 : base.String = const str "boolop_assignment() got an unexpected keyword argument {}"
-      %34 : base.Unit = py.requireUndefined %31 %32 %33 ^propagate.0()
-      %35 : base.Int = const int 1
-      %36 : base.String = const str "TypeError"
-      %37 : base.String = const str "boolop_assignment() takes 1 positional argument but {} {was} given"
-      %38 : base.Unit = py.requireAtMost %8 %35 %36 %37 ^propagate.0()
-      %39 : base.String = const str "TypeError"
-      %40 : base.String = const str "boolop_assignment() missing 1 required positional argument: 'x'"
-      %41 : py.Value = py.requireDefined %20 %39 %40 ^propagate.0()
-      %42 : base.Unit = base.refSet[py.Value] %4 %41
-      %43 : base.String = const str "Assignment target should not be demanded by BoolOp sub-blocks."
-      %44 : py.Value = py.strLit %43
-      %45 : py.Value = base.refGet[py.Value] %4
-      %46 : base.String = const str "UnboundLocalError"
-      %47 : base.String = const str "cannot access local variable 'x' where it is not associated with a value"
-      %48 : py.Value = py.requireDefined %45 %46 %47 ^propagate.0()
-      %49 : base.Bool = py.truthy %48 ^propagate.0()
-      branch %49 ^join.0(%48) ^or.0()
+  func @t27_module_vars.boolop_assignment(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %value.0 : py.Value = py.undef("value")
+      %value.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%value.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %x.1 : py.Value = py.undef("x")
+      %fill.0 : py.Value = py.mkTuple(%x.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("x")
+      %x.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "boolop_assignment() got multiple values for argument 'x'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "boolop_assignment() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "boolop_assignment() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %x.3 : py.Value = py.requireDefined(%x.2, "TypeError", "boolop_assignment() missing 1 required positional argument: 'x'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.3)
+      %str.1 : py.Value = py.strLit("Assignment target should not be demanded by BoolOp sub-blocks.")
+      %x.4 : py.Value = base.refGet[py.Value](%x.cell.0)
+      %x.5 : py.Value = py.requireDefined(%x.4, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%x.5) ^propagate.0()
+      branch(%cond.0) ^join.0(%x.5) ^or.0()
     or.0():
-      %50 : base.String = const str "default"
-      %51 : py.Value = py.strLit %50
-      jump ^join.0(%51)
-    join.0(%52 : py.Value):
-      %53 : base.Unit = base.refSet[py.Value] %7 %52
-      %54 : py.Value = base.refGet[py.Value] %7
-      %55 : base.String = const str "UnboundLocalError"
-      %56 : base.String = const str "cannot access local variable 'value' where it is not associated with a value"
-      %57 : py.Value = py.requireDefined %54 %55 %56 ^propagate.0()
-      %58 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %57
-      ret %58
-    propagate.0(%59 : py.Value):
-      %60 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %59
-      ret %60
+      %str.2 : py.Value = py.strLit("default")
+      jump ^join.0(%str.2)
+    join.0(%bool.0 : py.Value):
+      %set.1 : base.Unit = base.refSet[py.Value](%value.cell.0, %bool.0)
+      %value.1 : py.Value = base.refGet[py.Value](%value.cell.0)
+      %value.2 : py.Value = py.requireDefined(%value.1, "UnboundLocalError", "cannot access local variable 'value' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%value.2)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
 }
 

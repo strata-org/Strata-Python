@@ -1,26 +1,20 @@
 -- unsupported: complex literal is not supported at 2:4-2:6
 module m_complex {
-  func @m_complex.|<module>|() -> base.Except(py.Value, py.Value) {
+  func @|m_complex.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
-      %0 : base.String = const str "m_complex"
-      %1 : py.Value = py.strLit %0
-      %2 : base.String = const str "m_complex"
-      %3 : base.String = const str "__name__"
-      %4 : base.Ref(py.Value) = py.globalCell %2 %3
-      %5 : base.Unit = base.refSet[py.Value] %4 %1
-      %6 : base.String = const str "complex literal"
-      %7 : py.Value = py.strLit %6
-      %8 : py.Value = py.unsupported %7
-      %9 : base.String = const str "m_complex"
-      %10 : base.String = const str "c"
-      %11 : base.Ref(py.Value) = py.globalCell %9 %10
-      %12 : base.Unit = base.refSet[py.Value] %11 %8
-      %13 : py.Value = py.noneLit
-      %14 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %13
-      ret %14
-    propagate.0(%15 : py.Value):
-      %16 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %15
-      ret %16
+      %str.0 : py.Value = py.strLit("m_complex")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_complex", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %str.1 : py.Value = py.strLit("complex literal")
+      %unsupported.0 : py.Value = py.unsupported(%str.1)
+      %c.cell.0 : base.Ref(py.Value) = py.globalCell("m_complex", "c")
+      %set.1 : base.Unit = base.refSet[py.Value](%c.cell.0, %unsupported.0)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
 }
 

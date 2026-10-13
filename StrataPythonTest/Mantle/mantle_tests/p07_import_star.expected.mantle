@@ -1,37 +1,26 @@
 -- unsupported: import * is not supported at 2:0-2:21
 module p07_import_star {
-  func @p07_import_star.|<module>|() -> base.Except(py.Value, py.Value) {
+  func @|p07_import_star.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
-      %0 : base.String = const str "p07_import_star"
-      %1 : py.Value = py.strLit %0
-      %2 : base.String = const str "p07_import_star"
-      %3 : base.String = const str "__name__"
-      %4 : base.Ref(py.Value) = py.globalCell %2 %3
-      %5 : base.Unit = base.refSet[py.Value] %4 %1
-      %6 : base.String = const str "p07_import_star"
-      %7 : base.String = const str "join"
-      %8 : base.Ref(py.Value) = py.globalCell %6 %7
-      %9 : py.Value = base.refGet[py.Value] %8
-      %10 : base.String = const str "NameError"
-      %11 : base.String = const str "name 'join' is not defined"
-      %12 : py.Value = py.requireDefined %9 %10 %11 ^propagate.0()
-      %13 : base.String = const str "a"
-      %14 : py.Value = py.strLit %13
-      %15 : base.String = const str "b"
-      %16 : py.Value = py.strLit %15
-      %17 : py.Value = py.mkTuple %14 %16
-      %18 : py.Value = py.mkKwargs
-      %19 : py.Value = py.call %12 %17 %18 ^propagate.0()
-      %20 : base.String = const str "p07_import_star"
-      %21 : base.String = const str "x"
-      %22 : base.Ref(py.Value) = py.globalCell %20 %21
-      %23 : base.Unit = base.refSet[py.Value] %22 %19
-      %24 : py.Value = py.noneLit
-      %25 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %24
-      ret %25
-    propagate.0(%26 : py.Value):
-      %27 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %26
-      ret %27
+      %str.0 : py.Value = py.strLit("p07_import_star")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p07_import_star", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %join.cell.0 : base.Ref(py.Value) = py.globalCell("p07_import_star", "join")
+      %join.0 : py.Value = base.refGet[py.Value](%join.cell.0)
+      %join.1 : py.Value = py.requireDefined(%join.0, "NameError", "name 'join' is not defined") ^propagate.0()
+      %str.1 : py.Value = py.strLit("a")
+      %str.2 : py.Value = py.strLit("b")
+      %tuple.0 : py.Value = py.mkTuple(%str.1, %str.2)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%join.1, %tuple.0, %kwargs.0) ^propagate.0()
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("p07_import_star", "x")
+      %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %call.0)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
 }
 

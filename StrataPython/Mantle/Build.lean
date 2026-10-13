@@ -122,7 +122,7 @@ def withInfo (info : α) (act : PyM α β) : PyM α β :=
 def resolveInfo (info : Option α) : PyM α α := Build.resolveInfo (env := Py.env) info
 
 /-- Emit the base constant `c`, named after `name`. -/
-def emitConst (name : String) (c : Const) (info : Option α := none) : PyM α ValId :=
+def emitConst (name : Name) (c : Const) (info : Option α := none) : PyM α ValId :=
   Build.emitConst (env := Py.env) name c info
 
 /-! ## Operations
@@ -131,33 +131,33 @@ One emitter per result type and failure behaviour.  Every Python operation is mo
 so `typeArgs` is always `#v[]`. -/
 
 /-- An operation that cannot fail and produces a Python value. -/
-def emitTotal {isig : InsnSig Py.env} (name : String) (r : InsnRef Py.env isig)
+def emitTotal {isig : InsnSig Py.env} (name : Name) (r : InsnRef Py.env isig)
     (typeArgs : Vector (TypeExpr Py.env 0) isig.typeArgc) (args : Array ValId)
     (info : Option α := none) : PyM α ValId :=
   Build.emitApply name Py.Value.ty r typeArgs args (info := info)
 
 /-- A raising operation producing a Python value: its `err` successor is the enclosing
 handler. -/
-def emitFailing {isig : InsnSig Py.env} (name : String) (r : InsnRef Py.env isig)
+def emitFailing {isig : InsnSig Py.env} (name : Name) (r : InsnRef Py.env isig)
     (typeArgs : Vector (TypeExpr Py.env 0) isig.typeArgc) (args : Array ValId)
     (info : Option α := none) : PyM α ValId := do
   Build.emitApply name Py.Value.ty r typeArgs args #[← handler] (info := info)
 
 /-- An operation that cannot fail and only acts: its result is `()`. -/
-def emitEffect {isig : InsnSig Py.env} (name : String) (r : InsnRef Py.env isig)
+def emitEffect {isig : InsnSig Py.env} (name : Name) (r : InsnRef Py.env isig)
     (typeArgs : Vector (TypeExpr Py.env 0) isig.typeArgc) (args : Array ValId)
     (info : Option α := none) : PyM α ValId :=
   Build.emitApply name Base.Unit.ty r typeArgs args (info := info)
 
 /-- A raising operation that only acts: its result is `()`, and its `err` successor is the
 enclosing handler. -/
-def emitActing {isig : InsnSig Py.env} (name : String) (r : InsnRef Py.env isig)
+def emitActing {isig : InsnSig Py.env} (name : Name) (r : InsnRef Py.env isig)
     (typeArgs : Vector (TypeExpr Py.env 0) isig.typeArgc) (args : Array ValId)
     (info : Option α := none) : PyM α ValId := do
   Build.emitApply name Base.Unit.ty r typeArgs args #[← handler] (info := info)
 
 /-- An operation producing a base `Bool`, which is what a `branch` takes. -/
-def emitTest {isig : InsnSig Py.env} (name : String) (r : InsnRef Py.env isig)
+def emitTest {isig : InsnSig Py.env} (name : Name) (r : InsnRef Py.env isig)
     (typeArgs : Vector (TypeExpr Py.env 0) isig.typeArgc) (args : Array ValId)
     (info : Option α := none) : PyM α ValId :=
   Build.emitApply name Base.Bool.ty r typeArgs args (info := info)
@@ -165,7 +165,7 @@ def emitTest {isig : InsnSig Py.env} (name : String) (r : InsnRef Py.env isig)
 /-- `bool(v)`: the base `Bool` a `branch` takes.  It can fail — `__bool__` and `__len__`
 are arbitrary code — so its `err` successor is the enclosing handler. -/
 def truthy (v : ValId) (info : Option α := none) : PyM α ValId := do
-  Build.emitApply (env := Py.env) "cond" Base.Bool.ty Py.truthy #v[] #[v]
+  Build.emitApply (env := Py.env) (.str .base "cond") Base.Bool.ty Py.truthy #v[] #[v]
     #[← handler] (info := info)
 
 /-! ## Literals
@@ -173,28 +173,36 @@ def truthy (v : ValId) (info : Option α := none) : PyM α ValId := do
 Each is a base constant and the operation that boxes it. -/
 
 def intLit (i : Int) (info : Option α := none) : PyM α ValId := do
-  emitTotal "int" Py.intLit #v[] #[← emitConst "c" (.int i) info] info
+  emitTotal (.str .base "int") Py.intLit #v[] #[← emitConst (.str .base "c") (.int i) info] info
 
 def floatLit (f : Float) (info : Option α := none) : PyM α ValId := do
-  emitTotal "float" Py.floatLit #v[] #[← emitConst "c" (.float f) info] info
+  emitTotal (.str .base "float") Py.floatLit #v[]
+      #[← emitConst (.str .base "c") (.float f) info] info
 
 def strLit (s : String) (info : Option α := none) : PyM α ValId := do
-  emitTotal "str" Py.strLit #v[] #[← emitConst "c" (.str s) info] info
+  emitTotal (.str .base "str") Py.strLit #v[] #[← emitConst (.str .base "c") (.str s) info] info
 
 def boolLit (b : Bool) (info : Option α := none) : PyM α ValId := do
-  emitTotal "bool" Py.boolLit #v[] #[← emitConst "c" (.bool b) info] info
+  emitTotal (.str .base "bool") Py.boolLit #v[] #[← emitConst (.str .base "c") (.bool b) info] info
 
 def bytesLit (s : String) (info : Option α := none) : PyM α ValId := do
-  emitTotal "bytes" Py.bytesLit #v[] #[← emitConst "c" (.str s) info] info
+  emitTotal (.str .base "bytes") Py.bytesLit #v[] #[← emitConst (.str .base "c") (.str s) info] info
 
-def noneLit (info : Option α := none) : PyM α ValId := emitTotal "none" Py.noneLit #v[] #[] info
+def noneLit (info : Option α := none) : PyM α ValId := emitTotal (.str .base "none") Py.noneLit #v[]
+    #[] info
 
 /-! ## Blocks and values
 
 `Mantle.Build`'s operations, at `Py.env`. -/
 
+/-- The stem of the values named after the Python name `x`: the one segment `x`. -/
+def stem (x : String) : Name := .str .base x
+
+/-- The stem of the cell holding the Python name `x`: the two segments `x` and `cell`. -/
+def cellStem (x : String) : Name := .str (stem x) "cell"
+
 /-- A fresh Python value, named after `name`. -/
-def freshVal (name : String) : PyM α (ValDecl Py.env) :=
+def freshVal (name : Name) : PyM α (ValDecl Py.env) :=
   Build.freshVal (env := Py.env) (α := α) name Py.Value.ty
 
 /-- A label for a block not yet emitted: `base.n`. -/
@@ -213,7 +221,7 @@ def startFreshBlock (params : Array (ValDecl Py.env) := #[])
 
 /-- Open the block called `label`, taking one fresh value of type `t` named after `name`, and
 hand back that value: a handler's exception, a join's result. -/
-def startBlockWith (label : Label) (name : String) (t : TypeExpr Py.env 0 := Py.Value.ty) :
+def startBlockWith (label : Label) (name : Name) (t : TypeExpr Py.env 0 := Py.Value.ty) :
     PyM α ValId :=
   Build.startBlockWith (α := α) label name t
 
@@ -240,16 +248,19 @@ def unreachable (info : Option α := none) : PyM α Unit :=
 
 /-- `obj.name`, which can raise. -/
 def getAttr (obj : ValId) (name : String) (info : Option α := none) : PyM α ValId := do
-  emitFailing name Py.attr #v[] #[obj, ← emitConst "attr" (.str name) info] info
+  emitFailing (stem name) Py.attr #v[] #[obj, ← emitConst (.str .base "attr") (.str name) info]
+    info
 
 /-- `obj.name = val`, which can raise. -/
 def setAttr (obj : ValId) (name : String) (val : ValId) (info : Option α := none) :
     PyM α ValId := do
-  emitActing name Py.setAttr #v[] #[obj, ← emitConst "attr" (.str name) info, val] info
+  emitActing (stem name) Py.setAttr #v[]
+    #[obj, ← emitConst (.str .base "attr") (.str name) info, val] info
 
 /-- `del obj.name`, which can raise. -/
 def delAttr (obj : ValId) (name : String) (info : Option α := none) : PyM α ValId := do
-  emitActing name Py.delAttr #v[] #[obj, ← emitConst "attr" (.str name) info] info
+  emitActing (stem name) Py.delAttr #v[] #[obj, ← emitConst (.str .base "attr") (.str name) info]
+    info
 
 /-! ## Closures
 
@@ -263,7 +274,7 @@ def emitFunc (target : Name) (info : Option α := none) : PyM α ValId :=
 
 /-- A callable value: the code, and the cells it captures. -/
 def mkClosure (code : ValId) (cells : Array ValId) (info : Option α := none) : PyM α ValId :=
-  emitTotal "clo" Py.mkClosure #v[] (#[code] ++ cells) info
+  emitTotal (.str .base "clo") Py.mkClosure #v[] (#[code] ++ cells) info
 
 /-- A callable value for a module-level function, which captures nothing. -/
 def funcValue (target : Name) (info : Option α := none) : PyM α ValId := do
@@ -279,21 +290,22 @@ def cellOf? (name : String) : PyM α (Option ValId) := (·.locals.find? name) <$
 
 /-- Make a cell for `name`, holding "not yet assigned", and record it. -/
 def declareLocal (name : String) (info : Option α := none) : PyM α ValId := do
-  let nameConst ← emitConst "n" (.str name) info
-  let undef ← emitTotal name Py.undef #v[] #[nameConst] info
-  let cell ← Build.emitApply (env := Py.env) (name ++ ".cell") Py.cell.ty Base.refNew
+  let nameConst ← emitConst (.str .base "n") (.str name) info
+  let undef ← emitTotal (stem name) Py.undef #v[] #[nameConst] info
+  let cell ← Build.emitApply (env := Py.env) (cellStem name) Py.cell.ty Base.refNew
     #v[Py.Value.ty] #[undef] (info := info)
   modify fun e => { e with locals := e.locals.insert name cell }
   return cell
 
 /-- Read a cell.  `name` is only what the result is called. -/
-def readCell (cell : ValId) (name : String) (info : Option α := none) : PyM α ValId :=
+def readCell (cell : ValId) (name : Name) (info : Option α := none) : PyM α ValId :=
   Build.emitApply (env := Py.env) name Py.Value.ty Base.refGet #v[Py.Value.ty] #[cell]
     (info := info)
 
 /-- Write a cell. -/
 def writeCell (cell : ValId) (v : ValId) (info : Option α := none) : PyM α ValId :=
-  Build.emitApply (env := Py.env) "set" Base.Unit.ty Base.refSet #v[Py.Value.ty] #[cell, v]
+  Build.emitApply (env := Py.env) (.str .base "set") Base.Unit.ty Base.refSet #v[Py.Value.ty]
+      #[cell, v]
     (info := info)
 
 /-! ## Globals and imports
@@ -304,17 +316,17 @@ A global is a cell too, named by its module and its name rather than recorded in
 
 /-- The cell of the global `name` of `module`. -/
 def globalCell (module name : String) (info : Option α := none) : PyM α ValId := do
-  let m ← emitConst "m" (.str module) info
-  let n ← emitConst "n" (.str name) info
-  Build.emitApply (env := Py.env) (name ++ ".cell") Py.cell.ty Py.globalCell #v[] #[m, n]
+  let m ← emitConst (.str .base "m") (.str module) info
+  let n ← emitConst (.str .base "n") (.str name) info
+  Build.emitApply (env := Py.env) (cellStem name) Py.cell.ty Py.globalCell #v[] #[m, n]
     (info := info)
 
 /-- Read the global `name` of `module`, raising `NameError` if it is not assigned. -/
 def readGlobal (module name : String) (info : Option α := none) : PyM α ValId := do
-  let v ← readCell (← globalCell module name info) name info
-  let excType ← emitConst "e" (.str "NameError") info
-  let msg ← emitConst "msg" (.str s!"name '{name}' is not defined") info
-  emitFailing name Py.requireDefined #v[] #[v, excType, msg] info
+  let v ← readCell (← globalCell module name info) (stem name) info
+  let excType ← emitConst (.str .base "e") (.str "NameError") info
+  let msg ← emitConst (.str .base "msg") (.str s!"name '{name}' is not defined") info
+  emitFailing (stem name) Py.requireDefined #v[] #[v, excType, msg] info
 
 /-- Write the global `name` of `module`. -/
 def writeGlobal (module name : String) (v : ValId) (info : Option α := none) :
@@ -323,13 +335,14 @@ def writeGlobal (module name : String) (v : ValId) (info : Option α := none) :
 
 /-- The module object for `module`, a fully qualified name, imported if need be. -/
 def importModule (module : String) (info : Option α := none) : PyM α ValId := do
-  emitFailing "mod" Py.importModule #v[] #[← emitConst "m" (.str module) info] info
+  emitFailing (.str .base "mod") Py.importModule #v[]
+      #[← emitConst (.str .base "m") (.str module) info] info
 
 /-- `from module import name`, read once. -/
 def importFrom (module name : String) (info : Option α := none) : PyM α ValId := do
-  let m ← emitConst "m" (.str module) info
-  let n ← emitConst "n" (.str name) info
-  emitFailing name Py.importFrom #v[] #[m, n] info
+  let m ← emitConst (.str .base "m") (.str module) info
+  let n ← emitConst (.str .base "n") (.str name) info
+  emitFailing (stem name) Py.importFrom #v[] #[m, n] info
 
 /-! ## Completions
 
@@ -338,7 +351,7 @@ once, takes the pending completion as its parameter, and ends by dispatching on 
 module docstring shows the shape. -/
 
 /-- A fresh completion-typed value: what a `finally` or dispatch block takes. -/
-def freshComp (name : String) : PyM α (ValDecl Py.env) :=
+def freshComp (name : Name) : PyM α (ValDecl Py.env) :=
   Build.freshVal (env := Py.env) (α := α) name Py.Completion.ty
 
 /-- Build a completion: apply one constructor of `py.Completion`, which takes no type
@@ -346,7 +359,7 @@ arguments. -/
 def emitComp {isig : InsnSig Py.env} (ctor : InsnRef Py.env isig)
     (typeArgs : Vector (TypeExpr Py.env 0) isig.typeArgc) (args : Array ValId)
     (info : Option α := none) : PyM α ValId :=
-  Build.emitApply "comp" Py.Completion.ty ctor typeArgs args (info := info)
+  Build.emitApply (.str .base "comp") Py.Completion.ty ctor typeArgs args (info := info)
 
 def compNormal (info : Option α := none) : PyM α ValId :=
   emitComp Py.Completion.completionNormal #v[] #[] info
@@ -430,8 +443,8 @@ def dispatchArms [Monad m] [MonadPy α m] (c : ValId) (arms : Arms m) : m Unit :
   let cont ← arms.continue.target
   liftPy (dispatch (α := α) c raise ret brk cont normal)
   arms.normal.emitAt (liftPy (startBlock (α := α) normal))
-  arms.return.emitAt (liftPy (startBlockWith (α := α) ret "val"))
-  arms.raise.emitAt (liftPy (startBlockWith (α := α) raise "exc"))
+  arms.return.emitAt (liftPy (startBlockWith (α := α) ret (.str .base "val")))
+  arms.raise.emitAt (liftPy (startBlockWith (α := α) raise (.str .base "exc")))
   arms.break.emitAt (liftPy (startBlock (α := α) brk))
   arms.continue.emitAt (liftPy (startBlock (α := α) cont))
 
@@ -454,8 +467,9 @@ def protect [Monad m] [MonadPy α m] (k : Label) (body : m Unit)
     let c ← normal
     liftPy (jump (α := α) (Build.goto k #[c]))
   liftPy (α := α) do
-    let carried ← carry.mapM fun d => Build.freshVal (env := Py.env) (α := α) "carried" d.type
-    let e ← freshVal "exc"
+    let carried ← carry.mapM fun d => Build.freshVal (env :=
+        Py.env) (α := α) (.str .base "carried") d.type
+    let e ← freshVal (.str .base "exc")
     startBlock caught (carried.push e)
     jump (Build.goto k #[← compRaise e.id])
 
@@ -478,12 +492,12 @@ def tryFinally [Monad m] [MonadPy α m] (body : Label → m Unit) (final : m Uni
     (arms : Arms m) (superseded : Bool := false) : m Unit := do
   let fin ← liftPy (freshLabel (α := α) "fin")
   protect fin (body fin) (handlerBase := "finRaise")
-  let pending ← liftPy (startBlockWith (α := α) fin "pending" Py.Completion.ty)
+  let pending ← liftPy (startBlockWith (α := α) fin (.str .base "pending") Py.Completion.ty)
   if superseded then
     let disp ← liftPy (freshLabel (α := α) "disp")
     protect disp final (carry := #[⟨pending, Py.Completion.ty⟩]) (normal := pure pending)
       (handlerBase := "superseded")
-    dispatchArms (← liftPy (startBlockWith (α := α) disp "comp" Py.Completion.ty)) arms
+    dispatchArms (← liftPy (startBlockWith (α := α) disp (.str .base "comp") Py.Completion.ty)) arms
   else
     final
     if ← liftPy (isOpen (α := α)) then dispatchArms pending arms
@@ -497,7 +511,7 @@ block. -/
 /-- `return v`. -/
 def emitReturn (v : ValId) (info : Option α := none) : PyM α Unit := do
   let i ← resolveInfo info
-  let r ← Build.emitApply (env := Py.env) "ret" Py.failing.ty Base.Except.ok
+  let r ← Build.emitApply (env := Py.env) (.str .base "ret") Py.failing.ty Base.Except.ok
     #v[Py.Value.ty, Py.Value.ty] #[v] (info := some i)
   Build.ret (env := Py.env) r (some i)
 
@@ -508,7 +522,7 @@ def emitReturnNone (info : Option α := none) : PyM α Unit := do
 /-- Return the failure `e` to the caller. -/
 def emitPropagate (e : ValId) (info : Option α := none) : PyM α Unit := do
   let i ← resolveInfo info
-  let r ← Build.emitApply (env := Py.env) "exc" Py.failing.ty Base.Except.error
+  let r ← Build.emitApply (env := Py.env) (.str .base "exc") Py.failing.ty Base.Except.error
     #v[Py.Value.ty, Py.Value.ty] #[e] (info := some i)
   Build.ret (env := Py.env) r (some i)
 
@@ -516,7 +530,7 @@ def emitPropagate (e : ValId) (info : Option α := none) : PyM α Unit := do
 
 /-- `buildFuncTyped` below, also returning the result of `body`, and the errors recorded
 rather than failing on them. -/
-def buildFuncTypedWith (name : Name) (params : Array (String × TypeExpr Py.env 0)) (info : α)
+def buildFuncTypedWith (name : Name) (params : Array (Name × TypeExpr Py.env 0)) (info : α)
     (body : Array ValId → PyM α β) : Build.Built (Func Py.env α × β) :=
   Build.run name Py.failing.ty info do
     let ps ← params.mapM fun (p, t) => Build.freshVal p t
@@ -524,7 +538,7 @@ def buildFuncTypedWith (name : Name) (params : Array (String × TypeExpr Py.env 
     let _ ← Build.startFreshBlock ps "entry"
     let (r, _) ← (body (ps.map (·.id))).run { handler := Build.goto propagate }
     -- The handler, emitted last: it takes the exception and hands it back.
-    let exc ← Build.freshVal "exc" Py.Value.ty
+    let exc ← Build.freshVal (.str .base "exc") Py.Value.ty
     Build.startBlock propagate #[exc]
     let _ ← (emitPropagate exc.id).run { handler := Build.goto propagate }
     return r
@@ -538,14 +552,14 @@ Before `body` runs, the handler is in place: it takes the exception and returns 
 caller.  `body` must finish every block it opens: ending with a block open is an error, and
 so is any other error `Mantle.Build` records.  It fails with the `Errors` if there is one.
 The entry block is labelled `entry.0` and the handler `propagate.0`. -/
-def buildFuncTyped (name : Name) (params : Array (String × TypeExpr Py.env 0)) (info : α)
+def buildFuncTyped (name : Name) (params : Array (Name × TypeExpr Py.env 0)) (info : α)
     (body : Array ValId → PyM α Unit) : Except Build.Errors (Func Py.env α) :=
   Prod.fst <$> (buildFuncTypedWith name params info body).toExcept
 
 /-- Emit a Python function, every parameter a Python value. -/
 def buildFunc (name : Name) (params : Array String) (info : α)
     (body : Array ValId → PyM α Unit) : Except Build.Errors (Func Py.env α) :=
-  buildFuncTyped name (params.map (·, Py.Value.ty)) info body
+  buildFuncTyped name (params.map (stem ·, Py.Value.ty)) info body
 
 end
 

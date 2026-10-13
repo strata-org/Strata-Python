@@ -1,115 +1,77 @@
 -- syntax error: duplicate argument 'a' in function definition at 1:12-1:13
 module e09_duplicate_argument {
-  func @e09_duplicate_argument.|<module>|() -> base.Except(py.Value, py.Value) {
+  func @|e09_duplicate_argument.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
-      %0 : base.String = const str "e09_duplicate_argument"
-      %1 : py.Value = py.strLit %0
-      %2 : base.String = const str "e09_duplicate_argument"
-      %3 : base.String = const str "__name__"
-      %4 : base.Ref(py.Value) = py.globalCell %2 %3
-      %5 : base.Unit = base.refSet[py.Value] %4 %1
-      %6 : base.Code = const @e09_duplicate_argument.f
-      %7 : py.Value = py.mkClosure %6
-      %8 : base.String = const str "e09_duplicate_argument"
-      %9 : base.String = const str "f"
-      %10 : base.Ref(py.Value) = py.globalCell %8 %9
-      %11 : base.Unit = base.refSet[py.Value] %10 %7
-      %12 : py.Value = py.noneLit
-      %13 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %12
-      ret %13
-    propagate.0(%14 : py.Value):
-      %15 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %14
-      ret %15
+      %str.0 : py.Value = py.strLit("e09_duplicate_argument")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("e09_duplicate_argument", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure(@e09_duplicate_argument.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("e09_duplicate_argument", "f")
+      %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
-  func @e09_duplicate_argument.f(%0 : py.Value, %1 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%0 : py.Value, %1 : py.Value):
-      %2 : base.String = const str "a"
-      %3 : py.Value = py.undef %2
-      %4 : base.Ref(py.Value) = base.refNew[py.Value] %3
-      %5 : base.String = const str "b"
-      %6 : py.Value = py.undef %5
-      %7 : base.Ref(py.Value) = base.refNew[py.Value] %6
-      %8 : py.Value = py.tupleLen %0
-      %9 : base.String = const str "a"
-      %10 : py.Value = py.undef %9
-      %11 : base.String = const str "b"
-      %12 : py.Value = py.undef %11
-      %13 : base.String = const str "a"
-      %14 : py.Value = py.undef %13
-      %15 : py.Value = py.mkTuple %10 %12 %14
-      %16 : py.Value = py.noneLit
-      %17 : py.Value = py.getSlice %15 %8 %16 %16 ^propagate.0()
-      %18 : py.Value = py.add %0 %17 ^propagate.0()
-      %19 : base.Int = const int 0
-      %20 : py.Value = py.intLit %19
-      %21 : py.Value = py.getItem %18 %20 ^propagate.0()
-      %22 : base.String = const str "a"
-      %23 : py.Value = py.strLit %22
-      %24 : py.Value = py.dictGet %1 %23 %21
-      %25 : py.Value = py.in %23 %1 ^propagate.0()
-      %26 : base.Unit = py.dictDiscard %1 %23
-      %27 : base.Int = const int 1
-      %28 : py.Value = py.intLit %27
-      %29 : py.Value = py.getItem %18 %28 ^propagate.0()
-      %30 : base.String = const str "b"
-      %31 : py.Value = py.strLit %30
-      %32 : py.Value = py.dictGet %1 %31 %29
-      %33 : py.Value = py.in %31 %1 ^propagate.0()
-      %34 : base.Unit = py.dictDiscard %1 %31
-      %35 : base.Int = const int 2
-      %36 : py.Value = py.intLit %35
-      %37 : py.Value = py.getItem %18 %36 ^propagate.0()
-      %38 : base.String = const str "a"
-      %39 : py.Value = py.strLit %38
-      %40 : py.Value = py.dictGet %1 %39 %37
-      %41 : py.Value = py.in %39 %1 ^propagate.0()
-      %42 : base.Unit = py.dictDiscard %1 %39
-      %43 : py.Value = py.lt %20 %8 ^propagate.0()
-      %44 : py.Value = py.mult %25 %43 ^propagate.0()
-      %45 : base.Int = const int 0
-      %46 : base.String = const str "TypeError"
-      %47 : base.String = const str "f() got multiple values for argument 'a'"
-      %48 : base.Unit = py.requireAtMost %44 %45 %46 %47 ^propagate.0()
-      %49 : py.Value = py.lt %28 %8 ^propagate.0()
-      %50 : py.Value = py.mult %33 %49 ^propagate.0()
-      %51 : base.Int = const int 0
-      %52 : base.String = const str "TypeError"
-      %53 : base.String = const str "f() got multiple values for argument 'b'"
-      %54 : base.Unit = py.requireAtMost %50 %51 %52 %53 ^propagate.0()
-      %55 : py.Value = py.lt %36 %8 ^propagate.0()
-      %56 : py.Value = py.mult %41 %55 ^propagate.0()
-      %57 : base.Int = const int 0
-      %58 : base.String = const str "TypeError"
-      %59 : base.String = const str "f() got multiple values for argument 'a'"
-      %60 : base.Unit = py.requireAtMost %56 %57 %58 %59 ^propagate.0()
-      %61 : base.String = const str "kwargs"
-      %62 : py.Value = py.undef %61
-      %63 : py.Value = py.dictFirstKey %1 %62
-      %64 : base.String = const str "TypeError"
-      %65 : base.String = const str "f() got an unexpected keyword argument {}"
-      %66 : base.Unit = py.requireUndefined %63 %64 %65 ^propagate.0()
-      %67 : base.Int = const int 3
-      %68 : base.String = const str "TypeError"
-      %69 : base.String = const str "f() takes 3 positional arguments but {} {was} given"
-      %70 : base.Unit = py.requireAtMost %8 %67 %68 %69 ^propagate.0()
-      %71 : base.String = const str "TypeError"
-      %72 : base.String = const str "f() missing 1 required positional argument: 'a'"
-      %73 : py.Value = py.requireDefined %24 %71 %72 ^propagate.0()
-      %74 : base.Unit = base.refSet[py.Value] %4 %73
-      %75 : base.String = const str "TypeError"
-      %76 : base.String = const str "f() missing 1 required positional argument: 'b'"
-      %77 : py.Value = py.requireDefined %32 %75 %76 ^propagate.0()
-      %78 : base.Unit = base.refSet[py.Value] %7 %77
-      %79 : base.String = const str "TypeError"
-      %80 : base.String = const str "f() missing 1 required positional argument: 'a'"
-      %81 : py.Value = py.requireDefined %40 %79 %80 ^propagate.0()
-      %82 : base.Unit = base.refSet[py.Value] %4 %81
-      %83 : py.Value = py.noneLit
-      %84 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %83
-      ret %84
-    propagate.0(%85 : py.Value):
-      %86 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %85
-      ret %86
+  func @e09_duplicate_argument.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %a.0 : py.Value = py.undef("a")
+      %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
+      %b.0 : py.Value = py.undef("b")
+      %b.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%b.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %a.1 : py.Value = py.undef("a")
+      %b.1 : py.Value = py.undef("b")
+      %a.2 : py.Value = py.undef("a")
+      %fill.0 : py.Value = py.mkTuple(%a.1, %b.1, %a.2)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("a")
+      %a.3 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %int.1 : py.Value = py.intLit(1)
+      %pos.1 : py.Value = py.getItem(%pad.0, %int.1) ^propagate.0()
+      %str.1 : py.Value = py.strLit("b")
+      %b.2 : py.Value = py.dictGet(%kwargs.0, %str.1, %pos.1)
+      %inKw.1 : py.Value = py.in(%str.1, %kwargs.0) ^propagate.0()
+      %discard.1 : base.Unit = py.dictDiscard(%kwargs.0, %str.1)
+      %int.2 : py.Value = py.intLit(2)
+      %pos.2 : py.Value = py.getItem(%pad.0, %int.2) ^propagate.0()
+      %str.2 : py.Value = py.strLit("a")
+      %a.4 : py.Value = py.dictGet(%kwargs.0, %str.2, %pos.2)
+      %inKw.2 : py.Value = py.in(%str.2, %kwargs.0) ^propagate.0()
+      %discard.2 : base.Unit = py.dictDiscard(%kwargs.0, %str.2)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "f() got multiple values for argument 'a'") ^propagate.0()
+      %filled.1 : py.Value = py.lt(%int.1, %nargs.0) ^propagate.0()
+      %both.1 : py.Value = py.mult(%inKw.1, %filled.1) ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%both.1, 0, "TypeError", "f() got multiple values for argument 'b'") ^propagate.0()
+      %filled.2 : py.Value = py.lt(%int.2, %nargs.0) ^propagate.0()
+      %both.2 : py.Value = py.mult(%inKw.2, %filled.2) ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%both.2, 0, "TypeError", "f() got multiple values for argument 'a'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.3 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
+      %check.4 : base.Unit = py.requireAtMost(%nargs.0, 3, "TypeError", "f() takes 3 positional arguments but {} {was} given") ^propagate.0()
+      %a.5 : py.Value = py.requireDefined(%a.3, "TypeError", "f() missing 1 required positional argument: 'a'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.5)
+      %b.3 : py.Value = py.requireDefined(%b.2, "TypeError", "f() missing 1 required positional argument: 'b'") ^propagate.0()
+      %set.1 : base.Unit = base.refSet[py.Value](%b.cell.0, %b.3)
+      %a.6 : py.Value = py.requireDefined(%a.4, "TypeError", "f() missing 1 required positional argument: 'a'") ^propagate.0()
+      %set.2 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.6)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
 }
 

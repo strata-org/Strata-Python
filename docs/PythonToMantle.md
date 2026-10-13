@@ -100,23 +100,27 @@ definition, a use of a value outside the region that defines it, and a handler's
 result of the operation that failed. The translator must still make every use dominated by
 its definition, because ref-to-reg will rely on it.
 
-**Printed syntax.** This is what `Func.toString` prints. Each example in this document is in
-that form. `--` comments and `…` elisions are added for the reader. Readable labels such as
-`head.0` are what the translator passes to `freshLabel`. A function name prints with an `@`
-prefix, in its definition and in a `const`. Each successor prints with a `^` prefix. A
-terminator prints as an application without a result, so a case is
-`base.Except.case[base.String, base.Int] %4 ^ok.0() ^err.0()`. The base's terminal
-instructions drop `base.`: `jump ^done.0()`, `branch %0 ^bump.0() ^done.0()` and
-`unreachable`. A jump to the exit prints as `ret %5`.
+**Printed syntax.** This is what `Func.toString` prints, constants folded into their uses,
+and what `Module.read` reads back;
+[Mantle](./Mantle.md#printed-form) describes it. Each example in this document is in that
+form. `--` comments and `…` elisions are added for the reader. Readable labels such as
+`head.0` are what the translator passes to `freshLabel`. An application's operands are in
+parentheses, left out when there are none. A constant is written where it is used:
+`py.intLit(1)`. A function name prints with an `@` prefix, in its definition and where a
+constant refers to it. Each successor prints with a `^` prefix. A terminator prints as
+an application without a result, so a case is
+`base.Except.case[base.String, base.Int](%4) ^ok.0() ^err.0()`. The base's terminal
+instructions drop `base.`: `jump ^done.0()`, `branch(%0) ^bump.0() ^done.0()` and
+`unreachable`. A jump to the exit prints as `ret(%5)`. A literal is untagged, and its form fixes
+its type: `1` is a `base.Int`, `"k"` a `base.String`.
 
 ```
 func @m.f(%0 : py.Value) -> base.Except(py.Value, py.Value) {
   entry.0(%0 : py.Value):
-    %4 : base.Int = const int 1
-    %5 : py.Value = py.intLit %4                       -- apply, no successors
-    %6 : py.Value = py.add %0 %5 ^propagate.0()        -- err successor, nothing pre-bound
-    %9 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %6
-    ret %9                                             -- jump to the exit, passing %9
+    %5 : py.Value = py.intLit(1)                        -- apply, no successors
+    %6 : py.Value = py.add(%0, %5) ^propagate.0()        -- err successor, nothing pre-bound
+    %9 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%6)
+    ret(%9)                                             -- jump to the exit, passing %9
   propagate.0(%10 : py.Value):                         -- receives the exception
     …
 }
@@ -356,19 +360,17 @@ An imported name is read as any other name of its kind: the import statement wro
 binds, those a function declares `global` and binds, and `__name__` (`moduleGlobals`).
 
 ```
-    %12 : py.Value = base.refGet[py.Value] %3
-    %13 : base.String = const str "UnboundLocalError"
-    %14 : base.String = const str "cannot access local variable 'y' where it is not associated with a value"
-    %15 : py.Value = py.requireDefined %12 %13 %14 ^propagate.0()
+    %12 : py.Value = base.refGet[py.Value](%3)
+    %15 : py.Value = py.requireDefined(%12, "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
 ```
 
 The builtin fallback, for `len` read in a function:
 
 ```
-    %20 : base.Ref(py.Value) = py.globalCell %18 %19   -- "m", "len"
-    %21 : py.Value = base.refGet[py.Value] %20
-    %22 : base.Bool = py.isDefined %21
-    branch %22 ^join.0(%21) ^builtin.0()
+    %20 : base.Ref(py.Value) = py.globalCell("m", "len")
+    %21 : py.Value = base.refGet[py.Value](%20)
+    %22 : base.Bool = py.isDefined(%21)
+    branch(%22) ^join.0(%21) ^builtin.0()
   builtin.0():
     …                                                -- %25 = py.qualifiedRef "builtins" "len"
     jump ^join.0(%25)
@@ -401,9 +403,8 @@ At the definition site, in source order:
 5. Write the result to the name's cell (a `lambda` is an expression and has no name).
 
 ```
-    %20 : base.Code = const @m.outer.inner
-    %21 : py.Value = py.mkClosure %20 %3            -- %3: outer's cell for x
-    %22 : base.Unit = base.refSet[py.Value] %4 %21  -- inner = …
+    %21 : py.Value = py.mkClosure(@m.outer.inner, %3)  -- %3: outer's cell for x
+    %22 : base.Unit = base.refSet[py.Value](%4, %21)  -- inner = …
 ```
 
 Annotations are not evaluated, as under Python 3.14's deferred annotations.
@@ -504,8 +505,8 @@ on the module value.
 ### 6.2 `if`
 
 ```
-    %9 : base.Bool = py.truthy %8 ^propagate.0()
-    branch %9 ^then.0() ^else.0()
+    %9 : base.Bool = py.truthy(%8) ^propagate.0()
+    branch(%9) ^then.0() ^else.0()
   then.0():
     …
     jump ^join.0()
@@ -560,8 +561,8 @@ parameter. Expression temporaries are the only values the translator passes thro
 parameters.
 
 ```
-    %5 : base.Bool = py.truthy %4 ^propagate.0()     -- a and b
-    branch %5 ^and.0() ^join.0(%4)
+    %5 : base.Bool = py.truthy(%4) ^propagate.0()     -- a and b
+    branch(%5) ^and.0() ^join.0(%4)
   and.0():
     …                                                -- %8 = b
     jump ^join.0(%8)
@@ -578,11 +579,10 @@ Then emit `py.call f args kwargs`. A method call `o.m(x)` is `py.attr`, then
 `py.call`: binding the method is `attr`'s job. `kwargs` is always a fresh dict.
 
 ```
-    %14 : py.Value = py.mkTuple %12
-    %15 : base.String = const str "k"
-    %16 : py.Value = py.strLit %15
-    %17 : py.Value = py.mkKwargs %16 %13
-    %18 : py.Value = py.call %11 %14 %17 ^propagate.0()   -- f(x, k=y)
+    %14 : py.Value = py.mkTuple(%12)
+    %16 : py.Value = py.strLit("k")
+    %17 : py.Value = py.mkKwargs(%16, %13)
+    %18 : py.Value = py.call(%11, %14, %17) ^propagate.0()   -- f(x, k=y)
 ```
 
 ### 6.4 Loops
@@ -593,8 +593,8 @@ Then emit `py.call f args kwargs`. A method call `o.m(x)` is `py.attr`, then
     jump ^head.0()
   head.0():
     …                                    -- %4 = c
-    %5 : base.Bool = py.truthy %4 ^propagate.0()
-    branch %5 ^body.0() ^else.0()        -- ^exit.0() without an else
+    %5 : base.Bool = py.truthy(%4) ^propagate.0()
+    branch(%5) ^body.0() ^else.0()        -- ^exit.0() without an else
   body.0():                              -- exits += loop(exit.0, head.0)
     …
     jump ^head.0()
@@ -606,16 +606,16 @@ Then emit `py.call f args kwargs`. A method call `o.m(x)` is `py.attr`, then
 **`for x in xs: B else: E`:**
 
 ```
-    %9 : py.Value = py.getIter %8 ^propagate.0()
+    %9 : py.Value = py.getIter(%8) ^propagate.0()
     jump ^head.0()
   head.0():
-    %10 : py.Value = py.next %9 ^stop.0()                -- its own successor
-    %11 : base.Unit = base.refSet[py.Value] %3 %10       -- x = …
+    %10 : py.Value = py.next(%9) ^stop.0()                -- its own successor
+    %11 : base.Unit = base.refSet[py.Value](%3, %10)       -- x = …
     …                                                    -- B, raising to ^propagate.0()
     jump ^head.0()
   stop.0(%12 : py.Value):
-    %13 : base.Bool = py.isStopIteration %12
-    branch %13 ^else.0() ^propagate.0(%12)               -- anything else propagates
+    %13 : base.Bool = py.isStopIteration(%12)
+    branch(%13) ^else.0() ^propagate.0(%12)               -- anything else propagates
   else.0():
     jump ^exit.0()
   exit.0():
@@ -827,19 +827,18 @@ Example: c1 (§10). The prologue is elided, and `cleanup` is read as a global.
 ```
   entry.0(%0 : py.Value, %1 : py.Value):
     …
-    %8 : base.Int = const int 1
-    %9 : py.Value = py.intLit %8
-    %10 : py.Completion = py.completionReturn %9        -- return 1 → exit walk
+    %9 : py.Value = py.intLit(1)
+    %10 : py.Completion = py.completionReturn(%9)        -- return 1 → exit walk
     jump ^fin.0(%10)
   finRaise.0(%11 : py.Value):                            -- the try body's handler
-    %12 : py.Completion = py.completionRaise %11
+    %12 : py.Completion = py.completionRaise(%11)
     jump ^fin.0(%12)
   fin.0(%13 : py.Completion):                            -- finally, emitted once
     …                                                    -- cleanup(), ^propagate.0()
-    py.Completion.case %13 ^join.0() ^ret.0() ^propagate.0() ^unreachable.0() ^unreachable.1()
+    py.Completion.case(%13) ^join.0() ^ret.0() ^propagate.0() ^unreachable.0() ^unreachable.1()
   ret.0(%20 : py.Value):
-    %21 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %20
-    ret %21
+    %21 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%20)
+    ret(%21)
   unreachable.0():
     unreachable
   unreachable.1():

@@ -52,6 +52,9 @@ instance : Membership Name (NameMap β) := ⟨fun m n => m.contains n = true⟩
 instance (m : NameMap β) (n : Name) : Decidable (n ∈ m) :=
   inferInstanceAs (Decidable (m.contains n = true))
 
+/-- `m` with `n` mapped to `x`, whether or not `n` was a key. -/
+@[expose] def insert (m : NameMap β) (n : Name) (x : β) : NameMap β := ⟨m.tree.insert n.key x⟩
+
 /-- `a` as a map, or `none` if a name occurs twice in it. -/
 @[expose] def ofArray? : Array (Name × β) → Option (NameMap β)
   -- The kernel reduces the map on the list; compiled code runs `ofArrayFold?`.

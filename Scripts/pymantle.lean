@@ -13,6 +13,8 @@ import StrataPython.Mantle.Cli
 
 * `mantle FILE`: the Mantle translation of a `.py` or Python Ion file, from
   `StrataPython.Mantle.Cli`.
+* `read FILE`: a printed Mantle module read back and printed again, from
+  `StrataPython.Mantle.Cli`.
 * `features FILE`: the Python features a Python Ion file uses, from
   `StrataPython.Cli`.
 
@@ -20,6 +22,7 @@ import StrataPython.Mantle.Cli
 
 def commands : List Command :=
   [ StrataPython.Mantle.Cli.mantleCommand,
+    StrataPython.Mantle.Cli.readCommand,
     StrataPython.Cli.pyFeaturesCommand ]
 
 def commandMap : Std.HashMap String Command :=

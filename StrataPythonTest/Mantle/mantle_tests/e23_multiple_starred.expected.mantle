@@ -2,20 +2,17 @@
 -- syntax error: multiple starred expressions in assignment at 3:4-3:12
 -- syntax error: multiple starred expressions in assignment at 4:4-4:13
 module e23_multiple_starred {
-  func @e23_multiple_starred.|<module>|() -> base.Except(py.Value, py.Value) {
+  func @|e23_multiple_starred.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
-      %0 : base.String = const str "e23_multiple_starred"
-      %1 : py.Value = py.strLit %0
-      %2 : base.String = const str "e23_multiple_starred"
-      %3 : base.String = const str "__name__"
-      %4 : base.Ref(py.Value) = py.globalCell %2 %3
-      %5 : base.Unit = base.refSet[py.Value] %4 %1
-      %6 : py.Value = py.noneLit
-      %7 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value] %6
-      ret %7
-    propagate.0(%8 : py.Value):
-      %9 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value] %8
-      ret %9
+      %str.0 : py.Value = py.strLit("e23_multiple_starred")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("e23_multiple_starred", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
   }
 }
 

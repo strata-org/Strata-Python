@@ -93,7 +93,7 @@ private def fWith (box op : Instruction Py.env Unit) (ok : Instruction Py.env Un
   blocks  := #[{ label := lbl "entry", params := #[d 0 Py.Value.ty]
                  instrs := #[.const () (d 1 Base.Int.ty) (.int 1), box, op, ok]
                  term := .ret () ⟨4⟩, info := () }, propagateAt 5]
-  names   := #[⟨"x", 0⟩]
+  names   := (Array.range 10).map (Name.num .base ·)
   info    := ()
 
 private def f : Func Py.env Unit := fWith box (op3 Py.add #v[] #[0, 2])
@@ -143,7 +143,7 @@ private def g : Func Py.env Unit where
   name    := Py.pn "g"
   retType := Py.failing.ty
   blocks  := #[gEntry, retInt "yes" 2 1, retInt "no" 5 2, propagateAt 8]
-  names   := #[⟨"x", 0⟩]
+  names   := (Array.range 10).map (Name.num .base ·)
   info    := ()
 
 example : Func.WF ∅ g := by decide +kernel
@@ -231,7 +231,7 @@ private def compFunc : Func Py.env Unit where
   retType := Py.failing.ty
   blocks  := #[compBlock, arm "normal" none, arm "return" (some 2), arm "raise" (some 4),
     arm "break" none, arm "continue" none]
-  names   := #[]
+  names   := (Array.range 10).map (Name.num .base ·)
   info    := ()
 
 example : Func.WF ∅ compFunc := by decide +kernel
