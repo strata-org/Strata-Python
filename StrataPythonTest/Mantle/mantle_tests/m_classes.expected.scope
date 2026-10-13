@@ -1,0 +1,53 @@
+module
+  g: global explicit (assigned, declared_global)
+  deco: local (assigned, referenced)
+  A: local (assigned)
+  outer: local (assigned)
+  Priv: local (assigned)
+  function deco
+    params: cls
+    cls: local (parameter, referenced)
+  class A
+    import os: module os
+    a: local (assigned, referenced)
+    g: global implicit (referenced)
+    b: local (assigned)
+    len: global implicit (referenced)
+    os: local (imported)
+    m: local (assigned)
+    function A.m
+      params: self
+      self: local (parameter, referenced)
+  function outer
+    params: bases, kws
+    bases: local (parameter, referenced)
+    kws: local (parameter, referenced)
+    n: cell (assigned)
+    B: local (assigned, referenced)
+    A: global implicit (referenced)
+    type: global implicit (referenced)
+    class outer.<locals>.B
+      g: global explicit (assigned, declared_global)
+      n: free (assigned, referenced, nonlocal)
+  class Priv
+    m: local (assigned)
+    g: global implicit (referenced)
+    outer: local (assigned)
+    f: local (assigned)
+    function Priv.m
+      params: self, _Priv__x, _Priv__d, *, _Priv__k
+      self: local (parameter)
+      _Priv__x: local (parameter, referenced)
+      _Priv__d: local (parameter, referenced)
+      _Priv__k: local (parameter, referenced)
+    function Priv.outer
+      params: self
+      self: local (parameter)
+      inner: local (assigned, referenced)
+      function Priv.outer.<locals>.inner
+        params: _Priv__z
+        _Priv__z: local (parameter, referenced)
+    lambda Priv.<lambda>
+      params: self, *, _Priv__y
+      self: local (parameter)
+      _Priv__y: local (parameter, referenced)

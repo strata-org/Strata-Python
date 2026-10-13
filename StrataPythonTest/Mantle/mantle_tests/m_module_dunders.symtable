@@ -1,4 +1,5 @@
 module top
+  K: local (assigned)
   __annotations__: global implicit (referenced)
   __builtins__: local (assigned, referenced)
   __cached__: global implicit (referenced)
@@ -17,4 +18,9 @@ module top
     __spec__: global implicit (referenced)
   function g
     __file__: local (parameter, referenced)
-qualnames: f, g
+  class K
+    __builtins__: local (assigned)
+    __cached__: local (assigned)
+    __file__: global implicit (referenced)
+    f: local (assigned)
+qualnames: K, f, g

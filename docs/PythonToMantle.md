@@ -199,7 +199,7 @@ segment per dotted component (`a.b`). Its functions are named under `m`, followi
 scope's `__qualname__`. Function names and instruction names are separate namespaces, and a
 function name prints with an `@` prefix: `@m.add` is a function, `py.add` an instruction. A
 segment in angle brackets cannot collide with a Python identifier; the printer quotes it, as
-in `@m.|<module>|`. The translator implements every row but the third (`allocName`).
+in `@m.|<module>|`. The translator implements every row (`allocName`).
 
 | Source | Name |
 |---|---|
@@ -249,7 +249,7 @@ emission state of the Python builder. `Ctx` is fixed while one function is trans
 | exits stack (below) | `TState.exits : Array Exit` | yes, `loop` only | `withExit`: loops; later `try`/`finally`, `with`, `except … as` |
 | the labels some emitted transfer names, for starting join blocks | `TState.targeted` | yes | `jump`, `branch` |
 | exception being handled, for bare `raise` | `currentExc : Option ValId` | **add** | `except` bodies |
-| namespace dict, inside a class body | `classNs : Option ValId` | **add** | class body functions |
+| namespace, inside a class body | `classNs : Option ValId` | **add** | class body functions |
 | default annotation | `Build.State.info` | yes | `withRange` |
 
 A `def` binds its name where it runs, and queues a `FuncJob`; `translate` emits the module
@@ -309,7 +309,8 @@ The pass also:
   its `global` declaration, a duplicate parameter, the walrus restrictions in
   comprehensions, `'yield' inside list/set/dict comprehension` and `'yield' inside
   generator expression`), and the compiler's `keyword argument repeated`, `starred assignment
-  target must be in a list or tuple` and `multiple starred expressions in assignment`, as
+  target must be in a list or tuple`, `multiple starred expressions in assignment` and
+  `'return' outside function`, as
   `syntaxError` diagnostics;
 - rejects relative imports, `import *`, `match`, `type` statements and type parameters with
   `unsupported` diagnostics;
@@ -394,8 +395,8 @@ At the definition site, in source order:
 
 1. Evaluate the decorators, top to bottom.
 2. Evaluate each non-constant default value into a fresh *default cell*.
-3. Emit `const @m.f…` and `py.mkClosure code cells…`. The cells are the callee's free
-   variables in `freeVars` order (§6.6), then its default cells. A top-level function has
+3. Emit `const @m.f…` and `py.mkClosure code cells…`. The cells are the ones the callee
+   captures, in `capturedVars` order (§6.6), then its default cells. A top-level function has
    only default cells.
 4. Apply the decorators bottom to top, each with `py.call d (mkTuple f) mkKwargs`.
 5. Write the result to the name's cell (a `lambda` is an expression and has no name).
@@ -417,7 +418,9 @@ signature is the callee's job, done by a branch-free *prologue* of ordinary inst
 the top of the entry block. Each check raises, so the prologue stays in one block.
 `PyTranslate.prologue` emits it. Each bound parameter is written to its cell, a
 non-constant default is read from its default cell, and the raising checks name
-`Frame.handler` as `err`. A constant default is evaluated in the prologue itself.
+`Frame.handler` as `err`. A constant default is evaluated in the prologue itself. In a
+class, a private parameter's name is mangled everywhere, its keyword and its error messages
+included, as in CPython: `def m(self, __x)` in class `C` takes the keyword `_C__x`.
 
 `fill` holds one slot per positional parameter: its default, or `undef` if it has none.
 `pad` is the argument tuple padded to full length, so parameter `i` is `pad[i]` with no
@@ -642,8 +645,9 @@ and the `finally` body runs before the loop exits.
 
 A nested `def` or `lambda` becomes a separate function of the module (§5.3). Its leading
 parameters are the cells it captures, then its default cells. The captured cells are in
-`Scope.freeVars` order: the free names the scope uses, in order of first use, then the
-names it only passes on to nested scopes, sorted by name. The `mkClosure` at the definition
+`capturedVars` order: `Scope.freeVars`, the free names the scope uses, in order of first use,
+then the names it only passes on to nested scopes, sorted by name. A class body also
+captures its `free_class` names (§6.7), in the same order of first use. The `mkClosure` at the definition
 site passes the same cells in the same order.
 
 Capture emits no extra instructions. The inner function reads and writes the outer
@@ -662,25 +666,28 @@ C = __build_class__(<closure of m.C.<body>>, "C", B1, B2, k=v)
 The result of `__build_class__` is applied to the decorators, then written to `C`'s cell.
 The bases and keywords are evaluated left to right after the body closure is created.
 `__build_class__` is `py.qualifiedRef "builtins" "__build_class__"`. Its model calls the
-body closure with the new namespace dict as the only positional argument.
+body closure with the namespace `__prepare__` returns as the only positional argument.
 
 `m.C.<body>` is an ordinary function. Its prologue binds `ns` from `args[0]`, and
 `classNs` (§4) holds `ns`. In the body, names are mangled (§5.1) and:
 
 | Kind of `x` | Write | Read |
 |---|---|---|
-| `local` | `py.setItem ns (strLit "x") v` | `dictGet ns "x" (undef "x")`, `isDefined`, branch; if absent, the global read of §5.1 (`LOAD_NAME`) |
+| `local` | `py.setItem ns (strLit "x") v` | `getOptionalItem ns "x" (undef "x")`, `isDefined`, branch; if absent, the global read of §5.1 (`LOAD_NAME`) |
 | `globalImplicit` | | the same as `local` |
 | `globalExplicit` | `writeGlobal` | the global read of §5.1 |
-| `free` | `writeCell` (`nonlocal`) | `dictGet ns`, then the captured cell if absent (`LOAD_FROM_DICT_OR_DEREF`) |
+| `free` | `writeCell` (`nonlocal`) | `getOptionalItem ns`, then the captured cell if absent (`LOAD_FROM_DICT_OR_DEREF`) |
 
-- Methods are closures (§6.6). They never capture class-scope names.
+- Methods are closures (§6.6). They never capture class-scope names. A name the body binds
+  that a method reads from an enclosing function is `free_class` (`Uses.freeClass`): the body
+  captures that function's cell only to pass it on.
 - The body returns `None`.
-- The body does not yet store `__module__`, `__qualname__` or `__doc__` into `ns`, as
-  CPython's class body does before the first statement (§9, Q9).
-- Reads use `dictGet`, which is total and never calls `__getitem__`, while writes use
-  `py.setItem`. They disagree when `__prepare__` returns a mapping that is not a `dict`, as
-  `enum` does; CPython calls that mapping's `__getitem__` and `__setitem__` (§9, Q10).
+- Before the first statement, the body stores `__module__` (a read of `__name__`),
+  `__qualname__`, and `__doc__` if it starts with a docstring, as CPython 3.12 does (§9, Q9).
+- The namespace is any mapping `__prepare__` returns, as `enum`'s is, so the body uses the
+  mapping protocol, as CPython does (§9, Q10). A read is `getOptionalItem`, which calls
+  `__getitem__` and treats a `KeyError` as absent. A write is `py.setItem`. `del x` is
+  `py.delItem`, and any exception it raises becomes `NameError`, as `DELETE_NAME` does.
 
 Zero-argument `super()` and `__class__` are **rejected**. The scope pass marks the class
 with `needsClassCell`. The cell must be created by the body and filled by `__build_class__`
@@ -935,12 +942,11 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 8. **Global fallback.** *Resolved.* The scope pass classifies a module global and a builtin
    alike as `globalImplicit`, and the split is made at run time by `py.loadGlobal`, which
    reads the global cell, then `builtins`, as CPython's `LOAD_GLOBAL` does (§5.1).
-9. **Implicit class-body stores.** CPython's class body first stores `__module__` (the
-   module's `__name__`) and `__qualname__` into the namespace, and `__doc__` if the body
-   starts with a docstring. §6.7 should emit these as `py.setItem`s at the top of the body.
-10. **Namespace reads.** Class-body reads use the total `dictGet` and writes use `py.setItem`.
-    A namespace from `__prepare__` that is not a `dict` needs reads through its `__getitem__`,
-    a raising operation that treats `KeyError` as absent.
+9. **Implicit class-body stores.** *Resolved.* The body first stores `__module__` (the
+   module's `__name__`) and `__qualname__` into the namespace, and `__doc__` if it starts
+   with a docstring, as CPython's class body does (§6.7).
+10. **Namespace reads.** *Resolved.* Class-body reads use `getOptionalItem`, which calls the
+    namespace's `__getitem__` (§6.7).
 
 ## 10. Acceptance tests
 
@@ -999,7 +1005,7 @@ a diagnostic.
 | `while` / `else`, `break`, `continue` | §6.4–§6.5 | specified; implemented |
 | `for` / `else` | §6.4 | specified; implemented |
 | closures | §6.6 | specified; implemented |
-| `class`, bases, keywords, decorators | §6.7 | specified |
+| `class`, bases, keywords, decorators | §6.7 | specified; implemented |
 | zero-argument `super()`, `__class__` | §6.7 | unsupported (Q6); the scope pass sets `needsClassCell` |
 | list, set and dict comprehensions | §6.8 | specified, open question (`forEach` not declared; its body's result); scoping implemented (`inlinedComprehension`) |
 | generator expressions, `yield` | §6.8 | unsupported; a generator function is a stub |

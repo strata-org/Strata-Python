@@ -277,6 +277,9 @@ public environment Py extends Base where
   insn mkTuple (*elems : Value) : Value
   /-- `obj[key]`. -/
   insn getItem (obj key : Value) (^err (exc : Value)) : Value
+  /-- `obj[key]`, or `fallback` if that raises `KeyError`, as CPython's `LOAD_NAME` reads a
+  namespace (`PyMapping_GetOptionalItem` since 3.13). -/
+  insn getOptionalItem (obj key fallback : Value) (^err (exc : Value)) : Value
   /-- `obj[key] = val`. -/
   insn setItem (obj key val : Value) (^err (exc : Value)) : Unit
   /-- `del obj[key]`. -/

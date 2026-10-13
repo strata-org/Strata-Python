@@ -1,0 +1,46 @@
+module top
+  A: local (assigned)
+  Priv: local (assigned)
+  deco: local (assigned, referenced)
+  g: global explicit (assigned, declared_global)
+  outer: local (assigned)
+  function deco
+    cls: local (parameter, referenced)
+  class A
+    a: local (assigned, referenced)
+    b: local (assigned)
+    g: global implicit (referenced)
+    len: global implicit (referenced)
+    m: local (assigned)
+    os: local (imported)
+    function m
+      self: local (parameter, referenced)
+  function outer
+    A: global implicit (referenced)
+    B: local (assigned, referenced)
+    bases: local (parameter, referenced)
+    kws: local (parameter, referenced)
+    n: cell (assigned)
+    type: global implicit (referenced)
+    class B
+      g: global explicit (assigned, declared_global)
+      n: free (assigned, referenced, nonlocal)
+  class Priv
+    f: local (assigned)
+    g: global implicit (referenced)
+    m: local (assigned)
+    outer: local (assigned)
+    function m
+      _Priv__d: local (parameter, referenced)
+      _Priv__k: local (parameter, referenced)
+      _Priv__x: local (parameter, referenced)
+      self: local (parameter)
+    function outer
+      inner: local (assigned, referenced)
+      self: local (parameter)
+      function inner
+        _Priv__z: local (parameter, referenced)
+    function lambda
+      _Priv__y: local (parameter, referenced)
+      self: local (parameter)
+qualnames: A, A.m, Priv, Priv.<lambda>, Priv.m, Priv.outer, Priv.outer.<locals>.inner, deco, outer, outer.<locals>.B

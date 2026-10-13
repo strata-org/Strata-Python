@@ -1,0 +1,268 @@
+module t19_attribute {
+  func @|t19_attribute.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("t19_attribute")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t19_attribute", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("t19_attribute", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure(@|t19_attribute.Config.<body>|)
+      %str.1 : py.Value = py.strLit("Config")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %Config.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %Config.cell.0 : base.Ref(py.Value) = py.globalCell("t19_attribute", "Config")
+      %set.2 : base.Unit = base.refSet[py.Value](%Config.cell.0, %Config.0)
+      %Config.1 : py.Value = py.loadGlobal("t19_attribute", "Config") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%Config.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %c.cell.0 : base.Ref(py.Value) = py.globalCell("t19_attribute", "c")
+      %set.3 : base.Unit = base.refSet[py.Value](%c.cell.0, %call.0)
+      %c.2 : py.Value = py.loadGlobal("t19_attribute", "c") ^propagate.0()
+      %debug.0 : py.Value = py.attr(%c.2, "debug") ^propagate.0()
+      %flag.cell.0 : base.Ref(py.Value) = py.globalCell("t19_attribute", "flag")
+      %set.4 : base.Unit = base.refSet[py.Value](%flag.cell.0, %debug.0)
+      %bool.0 : py.Value = py.boolLit(true)
+      %c.4 : py.Value = py.loadGlobal("t19_attribute", "c") ^propagate.0()
+      %debug.1 : base.Unit = py.setAttr(%c.4, "debug", %bool.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(5)
+      %c.6 : py.Value = py.loadGlobal("t19_attribute", "c") ^propagate.0()
+      %level.0 : base.Unit = py.setAttr(%c.6, "level", %int.0) ^propagate.0()
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure(@|t19_attribute.Inner.<body>|)
+      %str.2 : py.Value = py.strLit("Inner")
+      %tuple.2 : py.Value = py.mkTuple(%clo.1, %str.2)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %Inner.0 : py.Value = py.call(%__build_class__.1, %tuple.2, %kwargs.2) ^propagate.0()
+      %Inner.cell.0 : base.Ref(py.Value) = py.globalCell("t19_attribute", "Inner")
+      %set.5 : base.Unit = base.refSet[py.Value](%Inner.cell.0, %Inner.0)
+      %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure(@|t19_attribute.Outer.<body>|)
+      %str.3 : py.Value = py.strLit("Outer")
+      %tuple.3 : py.Value = py.mkTuple(%clo.2, %str.3)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %Outer.0 : py.Value = py.call(%__build_class__.2, %tuple.3, %kwargs.3) ^propagate.0()
+      %Outer.cell.0 : base.Ref(py.Value) = py.globalCell("t19_attribute", "Outer")
+      %set.6 : base.Unit = base.refSet[py.Value](%Outer.cell.0, %Outer.0)
+      %Outer.1 : py.Value = py.loadGlobal("t19_attribute", "Outer") ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%Outer.1, %tuple.4, %kwargs.4) ^propagate.0()
+      %o.cell.0 : base.Ref(py.Value) = py.globalCell("t19_attribute", "o")
+      %set.7 : base.Unit = base.refSet[py.Value](%o.cell.0, %call.1)
+      %o.0 : py.Value = py.loadGlobal("t19_attribute", "o") ^propagate.0()
+      %inner.0 : py.Value = py.attr(%o.0, "inner") ^propagate.0()
+      %value.0 : py.Value = py.attr(%inner.0, "value") ^propagate.0()
+      %v.cell.0 : base.Ref(py.Value) = py.globalCell("t19_attribute", "v")
+      %set.8 : base.Unit = base.refSet[py.Value](%v.cell.0, %value.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|t19_attribute.Config.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("t19_attribute", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Config")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure(@t19_attribute.Config.__init__)
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|t19_attribute.Inner.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("t19_attribute", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Inner")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure(@t19_attribute.Inner.__init__)
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|t19_attribute.Outer.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("t19_attribute", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Outer")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure(@t19_attribute.Outer.__init__)
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @t19_attribute.Config.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %self.1 : py.Value = py.undef("self")
+      %fill.0 : py.Value = py.mkTuple(%self.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("self")
+      %self.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "Config.__init__() got multiple values for argument 'self'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "Config.__init__() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "Config.__init__() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %self.3 : py.Value = py.requireDefined(%self.2, "TypeError", "Config.__init__() missing 1 required positional argument: 'self'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.3)
+      %bool.0 : py.Value = py.boolLit(false)
+      %self.4 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.5 : py.Value = py.requireDefined(%self.4, "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %debug.0 : base.Unit = py.setAttr(%self.5, "debug", %bool.0) ^propagate.0()
+      %int.1 : py.Value = py.intLit(0)
+      %self.6 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.7 : py.Value = py.requireDefined(%self.6, "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %level.0 : base.Unit = py.setAttr(%self.7, "level", %int.1) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @t19_attribute.Inner.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %self.1 : py.Value = py.undef("self")
+      %fill.0 : py.Value = py.mkTuple(%self.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("self")
+      %self.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "Inner.__init__() got multiple values for argument 'self'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "Inner.__init__() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "Inner.__init__() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %self.3 : py.Value = py.requireDefined(%self.2, "TypeError", "Inner.__init__() missing 1 required positional argument: 'self'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.3)
+      %int.1 : py.Value = py.intLit(42)
+      %self.4 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.5 : py.Value = py.requireDefined(%self.4, "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %value.0 : base.Unit = py.setAttr(%self.5, "value", %int.1) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @t19_attribute.Outer.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %self.1 : py.Value = py.undef("self")
+      %fill.0 : py.Value = py.mkTuple(%self.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("self")
+      %self.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "Outer.__init__() got multiple values for argument 'self'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "Outer.__init__() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "Outer.__init__() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %self.3 : py.Value = py.requireDefined(%self.2, "TypeError", "Outer.__init__() missing 1 required positional argument: 'self'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.3)
+      %Inner.0 : py.Value = py.loadGlobal("t19_attribute", "Inner") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%Inner.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %self.4 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.5 : py.Value = py.requireDefined(%self.4, "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %inner.0 : base.Unit = py.setAttr(%self.5, "inner", %call.0) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

@@ -15,14 +15,14 @@ t08_try_finally | no |
 t09_nested_try | no |
 t10_except_type | no |
 t11_with | no |
-t12_class | no |
+t12_class | yes |
 t13_fstring | yes |
 t14_bool_short | yes |
 t15_ifexp | yes |
 t16_chained_cmp | yes |
 t17_import | yes |
 t18_data_struct | yes |
-t19_attribute | no |
+t19_attribute | yes |
 t20_raise | no |
 t21_combined | no |
 t22_star_args | yes |
@@ -48,7 +48,7 @@ i03_defaults | yes |
 i04_dict_unpack | yes |
 i05_kwargs_mutation | yes |
 i06_call_errors | no |
-i07_methods | no |
+i07_methods | yes |
 i08_binding_errors | no |
 tc01_literals | yes |
 tc02_arithmetic | yes |
@@ -75,7 +75,7 @@ c5_body_finally_vs_loop_exit | no |
 c6_body_raise | no |
 c7_with_return | no |
 m_assert | yes |
-m_attr_mangle | yes | class
+m_attr_mangle | yes |
 m_builtins | yes |
 m_calls | yes |
 m_complex | yes | complex literal
@@ -100,6 +100,9 @@ m_unpack | yes |
 m_unbound_local | yes |
 m_walrus | yes |
 m_while | yes |
+m_classes | yes |
+m_class_namespace | yes |
+m_class_return | yes | 'return' outside function, 'return' outside function
 m_closures | yes |
 m_decorators | yes |
 m_lambda | yes | generator function, generator function
@@ -117,7 +120,7 @@ e10_import_star_in_function | yes | import * only allowed at module level, impor
 e11_nonlocal_param | yes | name 'x' is parameter and nonlocal
 e12_nonlocal_top_function | yes | no binding for nonlocal 'x' found
 e13_walrus_comprehension_iterable | no | assignment expression cannot be used in a comprehension iterable expression
-e14_nonlocal_class_scope | no | no binding for nonlocal 'x' found
+e14_nonlocal_class_scope | yes | no binding for nonlocal 'x' found
 e15_comprehension_inner_rebind | no | comprehension inner loop cannot rebind assignment expression target 'j'
 e16_yield_in_comprehension | no | 'yield' inside list comprehension
 e17_yield_in_genexpr | yes | generator expression, 'yield' inside generator expression
@@ -140,7 +143,7 @@ p10_conditional_local | yes |
 p11_shadow_under_control | yes |
 p12_del | yes |
 p13_except_as | no |
-p14_class_body | no |
+p14_class_body | yes |
 p15_global | yes |
 p16_closures | yes |
 p17_conditional_def | no |
@@ -153,19 +156,19 @@ p23_walrus | no | generator expression
 p24_lambda | yes |
 p25_shadow_builtin | yes |
 p26_params | yes |
-p27_nonlocal_chain | no |
+p27_nonlocal_chain | yes |
 p28_global_nested | yes |
-p29_mangling | no |
-p30_super | no |
-p31_free_class | no |
+p29_mangling | yes |
+p30_super | yes | zero-argument super() or __class__, zero-argument super() or __class__
+p31_free_class | yes |
 p32_class_comprehension | no |
 p33_with_for_targets | no |
 p34_match | yes | match
 p35_async | yes | async def
-p36_decorators | no |
+p36_decorators | yes |
 p37_global_import | yes |
 p38_type_alias | yes | type alias, type parameters
-p39_nested_sample | no |
+p39_nested_sample | yes |
 p40_comp_shadow | no |
 p41_comp_nested | no |
 p42_comp_reads_outer | no | generator expression

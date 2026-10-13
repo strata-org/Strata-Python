@@ -763,7 +763,10 @@ private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
     visitStmts body.val
     leave saved
     modify fun st => { st with privateName := outerPrivate }
-  | .Return _ v => v.val.forM visitExpr
+  | .Return sr v =>
+    if (← curScope).kind matches .module | .classBody then
+      syntaxError "'return' outside function" sr
+    v.val.forM visitExpr
   | .Delete _ ts => ts.val.forM visitExpr
   | .Assign _ ts v _ =>
     ts.val.forM visitExpr

@@ -41,6 +41,8 @@ with a diagnostic is a failure.
 * `def`, nested too, and `lambda`: positional, positional-only, keyword-only, `*args` and `**kwargs`
   parameters, defaults and decorators.  The argument-binding prologue is the spec's §5.4.
 * Closures: cell and free variables, and `nonlocal`.
+* `class`, with bases, keywords and decorators.  A class body is the function `m.C.<body>`,
+  which reads and writes the namespace `__build_class__` passes it (§6.7).
 * Statements: expression statements, `pass`, assignment, annotated assignment and augmented
   assignment to names, attributes and subscripts, assignment to tuple and list targets (with a
   starred element too), `del`, `assert`, `if`/`elif`/`else`, `while`/`else`, `for`/`else`,
@@ -120,7 +122,8 @@ structure FuncJob where
   scope : ScopeId
   /-- `table.scopes[scope]`. -/
   cur : Scope
-  args : arguments SourceRange
+  /-- The parameters; `none` for a class body, which takes the namespace as `args[0]`. -/
+  args : Option (arguments SourceRange)
   body : Array (stmt SourceRange)
   range : SourceRange
   /-- The rejected construct, for a function emitted as a stub. -/
@@ -136,6 +139,8 @@ structure Ctx where
   scope : ScopeId
   /-- `table.scopes[scope]`, the scope being translated. -/
   cur : Scope
+  /-- In a class body, its namespace (§6.7). -/
+  classNs : Option ValId := none
 
 /-- What translation accumulates.  The first three fields are module-wide; `exits` and
 `targeted` belong to the function being emitted. -/
@@ -228,6 +233,11 @@ inductive Place where
   | global
   /-- A variable of an enclosing function, held in this captured cell. -/
   | free (c : ValId)
+  /-- In a class body, a name of its namespace `ns`, else a global (`LOAD_NAME`). -/
+  | nsName (ns : ValId)
+  /-- In a class body, a name of its namespace `ns`, else the free variable in the captured
+  cell `c` (`LOAD_FROM_DICT_OR_DEREF`). -/
+  | nsFree (ns c : ValId)
   /-- A local or free variable with no cell in the frame. -/
   | unresolved
 
@@ -242,6 +252,14 @@ def mangled (name : String) : TransM String := do
 def place (name : String) : TransM Place := do
   let sc ← curScope
   if sc.kind == .module then return .global
+  if let some ns := (← read).classNs then
+    return ← match ((sc.symbol? name).map (·.scope) : Option NameScope) with
+    | some .globalExplicit => pure .global
+    | some .free => do
+      match ← build (cellOf? name) with
+      | some c => pure (.nsFree ns c)
+      | none => pure .unresolved
+    | _ => pure (.nsName ns)
   match ((sc.symbol? name).map (·.scope) : Option NameScope) with
   | some .«local» | some .cell =>
     match ← build (cellOf? name) with
@@ -279,30 +297,53 @@ def readFree (c : ValId) (name : String) : TransM ValId := do
   requireDefined v name "NameError" (s!"cannot access free variable '{name}' where it is " ++
     "not associated with a value in enclosing scope")
 
+/-- `name` in the class namespace `ns`, or `fallback` if it is absent: `ns[name]`, with a
+`KeyError` as absence, as CPython's `LOAD_NAME` reads a namespace. -/
+def readNs (ns : ValId) (name : String) (fallback : TransM ValId) : TransM ValId := do
+  let key ← build (strLit name)
+  let n ← build (emitConst (.str .base "n") (.str name))
+  let miss ← build (emitTotal (stem name) Py.undef #v[] #[n])
+  let v ← build (emitFailing (stem name) Py.getOptionalItem #v[] #[ns, key, miss])
+  let join ← build (freshLabel "join")
+  let absent ← build (freshLabel "absent")
+  branch (← build (emitTest (.str .base "found") Py.isDefined #v[] #[v])) join absent #[v]
+  build (startBlock absent)
+  jump join #[← fallback]
+  build (startBlockWith join (stem name))
+
 /-- Read the name `name` at `range`. -/
 def readName (name : String) (range : SourceRange) : TransM ValId := do
   let name ← mangled name
   match ← place name with
   | .cell c => readLocal c name
-  | .global =>
-    if moduleDunders.contains name then unsupportedValue s!"module attribute {name}" range
-    else build (loadGlobal (← read).module name)
+  | .global => globalRead name
   | .free c => readFree c name
+  | .nsName ns => readNs ns name (globalRead name)
+  | .nsFree ns c => readNs ns name (readFree c name)
   | .unresolved => unsupportedValue "unresolved local" range
+where
+  /-- The global `x`, with the module attributes the translation has no value for rejected. -/
+  globalRead (x : String) : TransM ValId := do
+    if moduleDunders.contains x then unsupportedValue s!"module attribute {x}" range
+    else build (loadGlobal (← read).module x)
 
 /-- Write `v` to the name `name` at `range`. -/
 def writeName (name : String) (v : ValId) (range : SourceRange) : TransM Unit := do
   let name ← mangled name
   match ← place name with
-  | .cell c | .free c => discard <| build (writeCell c v)
+  | .cell c | .free c | .nsFree _ c => discard <| build (writeCell c v)
   | .global =>
     -- Rebinding `__builtins__` changes the builtins of the functions defined after it.
     if name == "__builtins__" then reject s!"module attribute {name}" range
     else discard <| build (writeGlobal (← read).module name v)
+  | .nsName ns =>
+    let key ← build (strLit name)
+    discard <| build (emitActing (.str .base "store") Py.setItem #v[] #[ns, key, v])
   | .unresolved => reject "unresolved local" range
 
 /-- `del name` at `range`: raise as a read does, but without the builtins fallback, then
-unassign the name. -/
+unassign the name.  In a class body, delete it from the namespace, any failure raising
+`NameError`. -/
 def deleteName (name : String) (range : SourceRange) : TransM Unit := do
   let name ← mangled name
   let undef := do
@@ -317,9 +358,20 @@ def deleteName (name : String) (range : SourceRange) : TransM Unit := do
       let m := (← read).module
       discard <| build (requireGlobal m name)
       discard <| build (writeGlobal m name (← undef))
-  | .free c =>
+  | .free c | .nsFree _ c =>
     discard <| readFree c name
     discard <| build (writeCell c (← undef))
+  | .nsName ns =>
+    -- As CPython's `DELETE_NAME`, any failure of `del ns[name]` raises `NameError`.
+    let key ← build (strLit name)
+    let failed ← build (freshLabel "undefined")
+    let done ← build (freshLabel "deleted")
+    discard <| build (withHandler failed (emitActing (.str .base "del") Py.delItem #v[] #[ns, key]))
+    jump done
+    discard <| build (startBlockWith failed (.str .base "exc"))
+    discard <| requireDefined (← undef) name "NameError" s!"name '{name}' is not defined"
+    build unreachable
+    build (startBlock done)
   | .unresolved => reject "unresolved local" range
 
 /-! ## Operators -/
@@ -407,7 +459,6 @@ def literal (c : constant SourceRange) (range : SourceRange) : TransM ValId :=
 
 /-- The name of a statement `transStmt` rejects. -/
 def stmtName : stmt SourceRange → String
-  | .ClassDef .. => "class"
   | .TypeAlias .. => "type alias"
   | .AsyncFor .. => "async for"
   | .With .. => "with"
@@ -541,6 +592,41 @@ def allocName (qualname : String) : TransM Name := do
 at the definition into a default cell, which the closure captures (§5.3). -/
 def defaultCellParams (args : arguments SourceRange) : Array ParamWithDefault :=
   (params args).filter (·.default.any (!isConstantDefault ·))
+
+/-- The cells a scope's closure captures: its free variables, and in a class body also the
+names it binds that a method reads from an enclosing function (`free_class`), in order of
+first use. -/
+def capturedVars (s : Scope) : Array String :=
+  s.symbols.filterMap fun sym =>
+    if sym.scope == .free || sym.uses.freeClass then some sym.name else none
+
+/-- Queue the function of scope `cur` at `sr` and return its closure, capturing the cells of
+`capturedVars cur` from the frame, then `extra`.  A class body is named `m.C.<body>`. -/
+def queueFunc (sr : SourceRange) (scope : ScopeId) (cur : Scope)
+    (args : Option (arguments SourceRange)) (body : Array (stmt SourceRange))
+    (stub : Option String) (extra : Array ValId) : TransM (Option ValId) := do
+  let mut cells := #[]
+  for x in capturedVars cur do
+    match ← build (cellOf? x) with
+    | some c => cells := cells.push c
+    | none =>
+      -- An unbound `nonlocal` is free with no cell; the scope pass already reported it.
+      if (← read).table.syntaxErrors.isEmpty then
+        internalError s!"no cell for the free variable '{x}'" sr
+      return none
+  let fname ← allocName (if args.isNone then s!"{cur.qualname}.<body>" else cur.qualname)
+  let job : FuncJob := { name := fname, scope, cur, args, body, range := sr, stub }
+  modify fun s => { s with pending := s.pending.push job }
+  some <$> build (mkClosure (← build (emitFunc fname)) (cells ++ extra))
+
+/-- `f` with the decorators `decs`, already evaluated, applied bottom to top. -/
+def decorate (decs : Array ValId) (f : ValId) : TransM ValId := do
+  let mut f := f
+  for d in decs.reverse do
+    let t ← build (emitTotal (.str .base "args") Py.mkTuple #v[] #[f])
+    let kw ← build (emitTotal (.str .base "kwargs") Py.mkKwargs #v[] #[])
+    f ← build (emitFailing (.str .base "decorated") Py.call #v[] #[d, t, kw])
+  return f
 
 /-! ## Expressions -/
 
@@ -737,10 +823,12 @@ partial def transCond (e : expr SourceRange) (t f : Label) : TransM Unit := with
   | _ => branch (← build (truthy (← transExpr e))) t f
 
 /-- `[a, *x, b]`: `BUILD_LIST` of the elements before the first `*x`, then `LIST_EXTEND` for
-each `*x` and `LIST_APPEND` for each later element, as CPython does. -/
-partial def listDisplay (vs : Array (expr SourceRange)) : TransM ValId := do
+each `*x` and `LIST_APPEND` for each later element, as CPython does.  The values `pre`, already
+evaluated, come first. -/
+partial def listDisplay (vs : Array (expr SourceRange)) (pre : Array ValId := #[]) :
+    TransM ValId := do
   let (first, rest) := splitStarred vs
-  let l ← build (emitTotal (.str .base "list") Py.mkList #v[] (← first.mapM transExpr))
+  let l ← build (emitTotal (.str .base "list") Py.mkList #v[] (pre ++ (← first.mapM transExpr)))
   for v in rest do
     match v with
     | .Starred _ x _ =>
@@ -751,12 +839,13 @@ partial def listDisplay (vs : Array (expr SourceRange)) : TransM ValId := do
   return l
 
 /-- `(a, b)`: `BUILD_TUPLE`.  With a `*x`, a list display then `INTRINSIC_LIST_TO_TUPLE`, as
-CPython does. -/
-partial def tupleDisplay (vs : Array (expr SourceRange)) : TransM ValId := do
+CPython does.  The values `pre`, already evaluated, come first. -/
+partial def tupleDisplay (vs : Array (expr SourceRange)) (pre : Array ValId := #[]) :
+    TransM ValId := do
   if (splitStarred vs).2.isEmpty then
-    build (emitTotal (.str .base "tuple") Py.mkTuple #v[] (← vs.mapM transExpr))
+    build (emitTotal (.str .base "tuple") Py.mkTuple #v[] (pre ++ (← vs.mapM transExpr)))
   else
-    build (emitTotal (.str .base "tuple") Py.listToTuple #v[] #[← listDisplay vs])
+    build (emitTotal (.str .base "tuple") Py.listToTuple #v[] #[← listDisplay vs pre])
 
 /-- `{a, *x, b}`: as `listDisplay`, with `BUILD_SET`, `SET_UPDATE` and `SET_ADD`.  A set of
 more than `stackUseGuideline` elements starts empty, as in CPython. -/
@@ -837,7 +926,17 @@ partial def call (f : expr SourceRange) (args : Array (expr SourceRange))
     | #[.Starred _ x _] => some <$> transExpr x
     | _ => pure none
   let t? ← if lone.isSome then pure none else some <$> tupleDisplay args
-  let d ← dictFromEntries kws (fun kw => if kw.nameAndValue.1.isSome then none else some kw.value)
+  let d ← kwargsDict fv kws
+  let t ← match t?, lone with
+    | some t, _ => pure t
+    | none, some x => build (emitFailing (.str .base "args") Py.argsTuple #v[] #[fv, x])
+    | none, none => build (emitTotal (.str .base "args") Py.mkTuple #v[] #[])
+  build (emitFailing (.str .base "call") Py.call #v[] #[fv, t, d])
+
+/-- The keyword dict of a call to `fv` with the keyword arguments `kws`: runs of `k=v` pairs,
+each a total `mkKwargs`, and `DICT_MERGE` (`dictMerge`) for each `**m`. -/
+partial def kwargsDict (fv : ValId) (kws : Array (keyword SourceRange)) : TransM ValId :=
+  dictFromEntries kws (fun kw => if kw.nameAndValue.1.isSome then none else some kw.value)
     (fun run => if run.isEmpty then #[] else #[run])
     (fun run => do
       let mut kvs := #[]
@@ -846,11 +945,6 @@ partial def call (f : expr SourceRange) (args : Array (expr SourceRange))
         kvs := kvs.push (← transExpr kw.value)
       build (emitTotal (.str .base "kwargs") Py.mkKwargs #v[] kvs))
     (fun a m => build (emitFailing (.str .base "merge") Py.dictMerge #v[] #[fv, a, m]))
-  let t ← match t?, lone with
-    | some t, _ => pure t
-    | none, some x => build (emitFailing (.str .base "args") Py.argsTuple #v[] #[fv, x])
-    | none, none => build (emitTotal (.str .base "args") Py.mkTuple #v[] #[])
-  build (emitFailing (.str .base "call") Py.call #v[] #[fv, t, d])
 
 /-- The closure of the `def` or `lambda` at `sr`, whose function is queued, or `none` if it is
 rejected, as §5.3 builds it: the decorators are evaluated, then the non-constant defaults
@@ -870,29 +964,13 @@ partial def closure (sr : SourceRange) (args : arguments SourceRange)
     else match bodiesYield? #[body] with
       | some r => do reject "generator function" r; pure (some "generator function")
       | none => pure none
-  let mut cells := #[]
-  for x in cur.freeVars do
-    match ← build (cellOf? x) with
-    | some c => cells := cells.push c
-    | none =>
-      -- An unbound `nonlocal` is free with no cell; the scope pass already reported it.
-      if ctx.table.syntaxErrors.isEmpty then
-        internalError s!"no cell for the free variable '{x}'" sr
-      return none
   let decs ← decorators.mapM transExpr
+  let mut defaults := #[]
   for p in defaultCellParams args do
     if let some d := p.default then
-      cells := cells.push (← build (newCell (defaultStem p.name) (← transExpr d)))
-  let fname ← allocName cur.qualname
-  let job : FuncJob :=
-    { name := fname, scope, cur, args, body, range := sr, stub }
-  modify fun s => { s with pending := s.pending.push job }
-  let mut f ← build (mkClosure (← build (emitFunc fname)) cells)
-  for d in decs.reverse do
-    let t ← build (emitTotal (.str .base "args") Py.mkTuple #v[] #[f])
-    let kw ← build (emitTotal (.str .base "kwargs") Py.mkKwargs #v[] #[])
-    f ← build (emitFailing (.str .base "decorated") Py.call #v[] #[d, t, kw])
-  return some f
+      defaults := defaults.push (← build (newCell (defaultStem p.name) (← transExpr d)))
+  let some f ← queueFunc sr scope cur (some args) body stub defaults | return none
+  some <$> decorate decs f
 
 end
 
@@ -1000,6 +1078,9 @@ arguments, a missing argument. -/
 def prologue (ps : Array ParamWithDefault) (defaults : Array (String × ValId))
     (args kwargs : ValId) : TransM Unit := do
   let fn := (← read).cur.qualname
+  -- As in CPython, a private name is mangled everywhere, its keyword included.
+  let ps ← ps.mapM fun p => return { p with name := ← mangled p.name }
+  let defaults ← defaults.mapM fun (n, c) => return (← mangled n, c)
   let pos := ps.filter fun p => p.kind == .posOnly || p.kind == .positional
   let varPos := ps.find? (·.kind == .varPositional)
   let kwOnly := ps.filter (·.kind == .kwOnly)
@@ -1089,6 +1170,28 @@ def defStmt (sr : SourceRange) (name : String) (args : arguments SourceRange)
   if let some f ← closure sr args body decorators hasTypeParams isAsync then
     writeName name f sr
 
+/-- `class name(bases, kws): body` at `sr` (§6.7): `__build_class__` called on the closure
+of the body's function, the name, the bases and the keywords, then the decorators, evaluated
+first, applied to the class. -/
+def classDef (sr : SourceRange) (name : String) (bases : Array (expr SourceRange))
+    (kws : Array (keyword SourceRange)) (body : Array (stmt SourceRange))
+    (decorators : Array (expr SourceRange)) (hasTypeParams : Bool) : TransM Unit := do
+  let ctx ← read
+  if hasTypeParams then return ← reject "type parameters" sr
+  let some scope := ctx.table.childAt? ctx.scope sr | return ← reject "class without a scope" sr
+  let some cur := ctx.table.scopes[scope]?
+    | return ← internalError s!"scope {scope} is not in the table" sr
+  if cur.needsClassCell then return ← reject "zero-argument super() or __class__" sr
+  let decs ← decorators.mapM transExpr
+  let m ← build (emitConst (.str .base "m") (.str "builtins"))
+  let n ← build (emitConst (.str .base "n") (.str "__build_class__"))
+  let bc ← build (emitFailing (.str .base "__build_class__") Py.qualifiedRef #v[] #[m, n])
+  let some f ← queueFunc sr scope cur none body none #[] | return
+  let t ← tupleDisplay bases (pre := #[f, ← build (strLit name)])
+  let d ← kwargsDict bc kws
+  let cls ← build (emitFailing (stem name) Py.call #v[] #[bc, t, d])
+  writeName name (← decorate decs cls) sr
+
 /-! ## Statements -/
 
 /-- Lower an `import` or `from … import` alias, from the scope table's import record. -/
@@ -1152,7 +1255,8 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
   | .Break sr => exitWalk true none sr
   | .Continue sr => exitWalk false none sr
   | .Return sr ⟨_, v⟩ =>
-    if (← curScope).kind == .module then return ← reject "'return' outside function" sr
+    -- The scope pass reports a `return` outside a function.
+    if (← curScope).kind matches .module | .classBody then return
     let x ← match v with
       | some e => transExpr e
       | none => build noneLit
@@ -1171,6 +1275,8 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
     | .ok dels => dels.forM id
   | .AsyncFunctionDef sr ⟨_, n⟩ args body decs _ _ tps =>
     defStmt sr n args body.val decs.val (!tps.val.isEmpty) true
+  | .ClassDef sr ⟨_, n⟩ bases kws body decs tps =>
+    classDef sr n bases.val kws.val body.val decs.val (!tps.val.isEmpty)
   | other => reject (stmtName other) other.ann
 
 /-- `if test: body else: orelse` (§6.2).  `elif` is an `if` in `orelse`. -/
@@ -1279,12 +1385,16 @@ def builtFunc (range : SourceRange) (built : Build.Built (Func Py.env SourceRang
     ({ kind := .internal, message := s!"{nameText f.name}: {e}", range } : Diagnostic)
   (f, { st with diagnostics := st.diagnostics ++ ds })
 
-/-- Emit the function `job` queues.  Its parameters are the cells of its free variables,
-in `freeVars` order, then its default cells, then `args` and `kwargs`. -/
+/-- Emit the function `job` queues.  Its parameters are the cells it captures, in
+`capturedVars` order, then its default cells, then `args` and `kwargs`.  A class body reads
+its namespace from `args[0]`, stores `__module__`, `__qualname__` and its docstring, as
+CPython 3.12 does, then runs. -/
 def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) : Func Py.env SourceRange × TState :=
   let ctx := { ctx with scope := job.scope, cur := job.cur }
-  let free := job.cur.freeVars
-  let defaults := (defaultCellParams job.args).map (·.name)
+  let free := capturedVars job.cur
+  let defaults : Array String := match job.args with
+    | some a => (defaultCellParams a).map (·.name)
+    | none => #[]
   let argTypes := free.map (cellStem ·, Py.cell.ty) ++
     defaults.map (defaultStem ·, Py.cell.ty) ++
     #[(stem "args", Py.Value.ty), (stem "kwargs", Py.Value.ty)]
@@ -1296,14 +1406,26 @@ def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) : Func Py.env SourceRang
       | none =>
         let sc ← curScope
         for (x, c) in free.zip ps do build (captureCell x c)
-        for sym in sc.symbols do
-          if sym.scope == .«local» || sym.scope == .cell then
-            discard <| build (declareLocal sym.name)
         let defaultCells := defaults.zip (ps.extract free.size (free.size + defaults.size))
         let #[args, kwargs] := ps.extract (free.size + defaults.size)
           | internalError "a function without its args and kwargs parameters" job.range
-        prologue (params job.args) defaultCells args kwargs
-        transStmts job.body
+        match job.args with
+        | none =>
+          let ns ← build (emitFailing (.str .base "ns") Py.getItem #v[] #[args, ← build (intLit 0)])
+          withReader ({ · with classNs := some ns }) do
+            writeName "__module__" (← readName "__name__" job.range) job.range
+            writeName "__qualname__" (← build (strLit sc.qualname)) job.range
+            match (job.body[0]? : Option (stmt SourceRange)) with
+            | some (.Expr r (.Constant _ (.ConString _ ⟨_, doc⟩) _)) =>
+              withRange r do writeName "__doc__" (← build (strLit doc)) r
+              transStmts (job.body.extract 1)
+            | _ => transStmts job.body
+        | some a =>
+          for sym in sc.symbols do
+            if sym.scope == .«local» || sym.scope == .cell then
+              discard <| build (declareLocal sym.name)
+          prologue (params a) defaultCells args kwargs
+          transStmts job.body
 
 /-- The Mantle name of the Python module `m`: one segment per dotted component. -/
 def moduleNameOf (m : String) : Name :=

@@ -1,0 +1,34 @@
+module top
+  C: local (assigned)
+  Meta: local (assigned, referenced)
+  Ns: local (assigned)
+  dict: global implicit (referenced)
+  f: local (assigned)
+  type: global implicit (referenced)
+  x: local (assigned)
+  class Ns
+    __getitem__: local (assigned)
+    function __getitem__
+      dict: global implicit (referenced)
+      key: local (parameter, referenced)
+      self: local (parameter, referenced)
+  class Meta
+    __prepare__: local (assigned)
+    classmethod: global implicit (referenced)
+    function __prepare__
+      Ns: global implicit (referenced)
+      bases: local (parameter)
+      mcs: local (parameter)
+      name: local (parameter)
+  class C
+    x: global implicit (referenced)
+    y: local (assigned, referenced)
+    z: local (assigned)
+  function f
+    D: local (assigned, referenced)
+    Meta: global implicit (referenced)
+    v: cell (assigned)
+    class D
+      v: free (referenced)
+      w: local (assigned)
+qualnames: C, Meta, Meta.__prepare__, Ns, Ns.__getitem__, f, f.<locals>.D

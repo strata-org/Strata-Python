@@ -1,0 +1,153 @@
+module p36_decorators {
+  func @|p36_decorators.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("p36_decorators")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p36_decorators", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p36_decorators", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure(@p36_decorators.deco)
+      %deco.cell.0 : base.Ref(py.Value) = py.globalCell("p36_decorators", "deco")
+      %set.2 : base.Unit = base.refSet[py.Value](%deco.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure(@p36_decorators.outer)
+      %outer.cell.0 : base.Ref(py.Value) = py.globalCell("p36_decorators", "outer")
+      %set.3 : base.Unit = base.refSet[py.Value](%outer.cell.0, %clo.1)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @p36_decorators.deco(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %fn.0 : py.Value = py.undef("fn")
+      %fn.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%fn.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %fn.1 : py.Value = py.undef("fn")
+      %fill.0 : py.Value = py.mkTuple(%fn.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("fn")
+      %fn.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "deco() got multiple values for argument 'fn'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "deco() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "deco() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %fn.3 : py.Value = py.requireDefined(%fn.2, "TypeError", "deco() missing 1 required positional argument: 'fn'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%fn.cell.0, %fn.3)
+      %fn.4 : py.Value = base.refGet[py.Value](%fn.cell.0)
+      %fn.5 : py.Value = py.requireDefined(%fn.4, "UnboundLocalError", "cannot access local variable 'fn' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%fn.5)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @p36_decorators.outer(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %base.0 : py.Value = py.undef("base")
+      %base.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%base.0)
+      %inner.0 : py.Value = py.undef("inner")
+      %inner.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%inner.0)
+      %K.0 : py.Value = py.undef("K")
+      %K.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%K.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %base.1 : py.Value = py.undef("base")
+      %fill.0 : py.Value = py.mkTuple(%base.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("base")
+      %base.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "outer() got multiple values for argument 'base'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "outer() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "outer() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %base.3 : py.Value = py.requireDefined(%base.2, "TypeError", "outer() missing 1 required positional argument: 'base'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%base.cell.0, %base.3)
+      %deco.0 : py.Value = py.loadGlobal("p36_decorators", "deco") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure(@p36_decorators.outer.inner)
+      %args.1 : py.Value = py.mkTuple(%clo.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %decorated.0 : py.Value = py.call(%deco.0, %args.1, %kwargs.1) ^propagate.0()
+      %set.1 : base.Unit = base.refSet[py.Value](%inner.cell.0, %decorated.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure(@|p36_decorators.outer.K.<body>|)
+      %str.1 : py.Value = py.strLit("K")
+      %base.4 : py.Value = base.refGet[py.Value](%base.cell.0)
+      %base.5 : py.Value = py.requireDefined(%base.4, "UnboundLocalError", "cannot access local variable 'base' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%clo.1, %str.1, %base.5)
+      %str.2 : py.Value = py.strLit("metaclass")
+      %type.0 : py.Value = py.loadGlobal("p36_decorators", "type") ^propagate.0()
+      %kwargs.2 : py.Value = py.mkKwargs(%str.2, %type.0)
+      %K.1 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.2) ^propagate.0()
+      %set.2 : base.Unit = base.refSet[py.Value](%K.cell.0, %K.1)
+      %inner.1 : py.Value = base.refGet[py.Value](%inner.cell.0)
+      %inner.2 : py.Value = py.requireDefined(%inner.1, "UnboundLocalError", "cannot access local variable 'inner' where it is not associated with a value") ^propagate.0()
+      %K.2 : py.Value = base.refGet[py.Value](%K.cell.0)
+      %K.3 : py.Value = py.requireDefined(%K.2, "UnboundLocalError", "cannot access local variable 'K' where it is not associated with a value") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%inner.2, %K.3)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @p36_decorators.outer.inner(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "outer.<locals>.inner() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "outer.<locals>.inner() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|p36_decorators.outer.K.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("p36_decorators", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("outer.<locals>.K")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

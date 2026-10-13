@@ -9,6 +9,7 @@ module
   __builtins__: local (assigned, referenced)
   __annotations__: global implicit (referenced)
   __path__: global implicit (referenced)
+  K: local (assigned)
   function f
     __name__: global implicit (referenced)
     __doc__: global implicit (referenced)
@@ -18,3 +19,8 @@ module
   function g
     params: __file__
     __file__: local (parameter, referenced)
+  class K
+    f: local (assigned)
+    __file__: global implicit (referenced)
+    __builtins__: local (assigned)
+    __cached__: local (assigned)
