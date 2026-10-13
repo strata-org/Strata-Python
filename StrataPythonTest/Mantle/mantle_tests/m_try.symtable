@@ -5,6 +5,7 @@ module top
   clause_raises: local (assigned)
   clauses: local (assigned)
   closure: local (assigned)
+  finally_raise: local (assigned)
   in_inner_body: local (assigned)
   leave: local (assigned)
   nested: local (assigned)
@@ -60,10 +61,13 @@ module top
     g: local (assigned)
     function g
     class D
+  function finally_raise
+    KeyError: global implicit (referenced)
+    f: local (parameter, referenced)
   class C
     Exception: global implicit (referenced)
     KeyError: global implicit (referenced)
     e: local (assigned)
     err: local (assigned)
     x: local (assigned)
-qualnames: C, clause_raises, clauses, closure, closure.<locals>.g, in_inner_body, leave, nested, no_match, not_inherited, not_inherited.<locals>.D, not_inherited.<locals>.g, two_handlers
+qualnames: C, clause_raises, clauses, closure, closure.<locals>.g, finally_raise, in_inner_body, leave, nested, no_match, not_inherited, not_inherited.<locals>.D, not_inherited.<locals>.g, two_handlers

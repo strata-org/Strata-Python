@@ -783,7 +783,7 @@ Each is rejected as §3 describes.
 | `raise E` | `v = eval E`, `e = py.toException v`, then `jump ^handler(e)`. `toException` instantiates a class and raises `TypeError` for a non-exception, as CPython's `RAISE_VARARGS` does |
 | `raise E from C` | `v = eval E`, `c = eval C`, `e = py.toException v`, `py.setCause e c`, then `jump ^handler(e)`. `setCause` instantiates a class too, sets `__suppress_context__`, and raises `TypeError` for a cause that is neither an exception nor `None` |
 | bare `raise` inside an `except` body of the same function | `jump ^handler(exc)`, `exc` being the exception the innermost enclosing `except` body handles (`Ctx.handled`). Nested `try` statements in that body do not change it, because each handler restores the exception being handled when it ends |
-| bare `raise` elsewhere | **rejected** |
+| bare `raise` elsewhere | `e = py.handledExc`, then `jump ^handler(e)`. `handledExc` reads the exception being handled at run time (§7.2), which an `except` body in a caller may have set, and raises `RuntimeError` if there is none |
 
 `raise` is a `jump`. A Python function raises by transferring to `Frame.handler`, which is a
 block taking the exception. At the outermost level that block is `propagate.0`, which
@@ -955,7 +955,9 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 2. **Exception chaining in `finally`.** The `superseded` block must set `__context__`, and
    the `finally` body must see the pending exception as the one being handled
    (`sys.exc_info()`). Both need the run-time exception state, which `except` handlers
-   already maintain with `py.pushExcInfo` and `py.popExcept` (§7.2).
+   already maintain with `py.pushExcInfo` and `py.popExcept` (§7.2). A bare `raise` in a
+   `finally` body cannot use `Ctx.handled`: on the exceptional path it raises the pending
+   exception, so it must read `py.handledExc` (`m_try`'s `finally_raise`).
 3. **Definedness.** Should definedness stay as `py.undef` values in cells, or become
    `Ref (Option Value)`? Only `undef`, `isDefined`, `requireDefined` and `requireUndefined`
    would change.
@@ -1062,7 +1064,7 @@ a diagnostic.
 | list, set and dict comprehensions | §6.8 | specified; implemented |
 | generator expressions, `yield` | §6.8 | unsupported; a generator function is a stub |
 | `raise`, `raise … from` | §7.1 | specified; implemented |
-| bare `raise` | §7.1 | specified and implemented inside an `except` body; unsupported elsewhere |
+| bare `raise` | §7.1 | specified; implemented |
 | `try` / `except` / `else` | §7.2 | specified; implemented |
 | `finally` | §7.2 | specified, open question (Q2) |
 | `with`, several items | §7.3 | specified, open question (Q5) |

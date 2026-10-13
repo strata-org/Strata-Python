@@ -20,6 +20,10 @@ def in_loop(xs):
             raise KeyError(x)
     return 0
 
+flag = False
+if flag:
+    raise
+
 def both(x):
     if x:
         raise KeyError
@@ -29,6 +33,18 @@ def both(x):
 
 def reraise():
     raise
+
+def no_active():
+    try:
+        raise
+    except RuntimeError:
+        return 0
+
+def caller():
+    try:
+        1 / 0
+    except ZeroDivisionError:
+        reraise()
 
 def gen(e):
     raise e from (yield)

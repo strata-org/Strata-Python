@@ -65,6 +65,7 @@ a completion outwards instead of acting on it.
 
 As in CPython, the run-time state holds the exception being handled: `pushExcInfo` sets it on
 entering an `except` handler, and `popExcept` restores the previous one on leaving it.
+`handledExc` reads it.
 -/
 
 namespace StrataPython.Mantle
@@ -384,6 +385,10 @@ public environment Py extends Base where
   /-- Makes `prev`, which `pushExcInfo` returned, the exception being handled again: CPython's
   `POP_EXCEPT`, on every way out of an `except` handler. -/
   insn popExcept (prev : Value) : Unit
+  /-- The exception being handled, which a bare `raise` raises again: CPython's
+  `RAISE_VARARGS 0`.  Raises `RuntimeError: No active exception to reraise` if there is
+  none. -/
+  insn handledExc (^err (e : Value)) : Value
   /-- Whether the exception `exc` matches `except type`, as the `Bool` a `branch` takes:
   CPython's `CHECK_EXC_MATCH`.  `type` is an exception class or a tuple of them.  Raises
   `TypeError: catching classes that do not inherit from BaseException is not allowed`

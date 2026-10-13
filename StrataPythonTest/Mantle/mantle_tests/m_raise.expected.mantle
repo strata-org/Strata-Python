@@ -1,5 +1,4 @@
--- unsupported: bare raise is not supported at 31:4-31:9
--- unsupported: generator function is not supported at 34:18-34:23
+-- unsupported: generator function is not supported at 50:18-50:23
 module m_raise {
   func @|m_raise.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
@@ -33,21 +32,39 @@ module m_raise {
       %clo.5 : py.Value = py.mkClosure(@m_raise.in_loop)
       %in_loop.cell.0 : base.Ref(py.Value) = py.globalCell("m_raise", "in_loop")
       %set.7 : base.Unit = base.refSet[py.Value](%in_loop.cell.0, %clo.5)
+      %bool.0 : py.Value = py.boolLit(false)
+      %flag.cell.0 : base.Ref(py.Value) = py.globalCell("m_raise", "flag")
+      %set.8 : base.Unit = base.refSet[py.Value](%flag.cell.0, %bool.0)
+      %flag.0 : py.Value = py.loadGlobal("m_raise", "flag") ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%flag.0) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %exc.0 : py.Value = py.handledExc ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    else.0():
+      jump ^join.0()
+    join.0():
       %clo.6 : py.Value = py.mkClosure(@m_raise.both)
       %both.cell.0 : base.Ref(py.Value) = py.globalCell("m_raise", "both")
-      %set.8 : base.Unit = base.refSet[py.Value](%both.cell.0, %clo.6)
+      %set.9 : base.Unit = base.refSet[py.Value](%both.cell.0, %clo.6)
       %clo.7 : py.Value = py.mkClosure(@m_raise.reraise)
       %reraise.cell.0 : base.Ref(py.Value) = py.globalCell("m_raise", "reraise")
-      %set.9 : base.Unit = base.refSet[py.Value](%reraise.cell.0, %clo.7)
-      %clo.8 : py.Value = py.mkClosure(@m_raise.gen)
+      %set.10 : base.Unit = base.refSet[py.Value](%reraise.cell.0, %clo.7)
+      %clo.8 : py.Value = py.mkClosure(@m_raise.no_active)
+      %no_active.cell.0 : base.Ref(py.Value) = py.globalCell("m_raise", "no_active")
+      %set.11 : base.Unit = base.refSet[py.Value](%no_active.cell.0, %clo.8)
+      %clo.9 : py.Value = py.mkClosure(@m_raise.caller)
+      %caller.cell.0 : base.Ref(py.Value) = py.globalCell("m_raise", "caller")
+      %set.12 : base.Unit = base.refSet[py.Value](%caller.cell.0, %clo.9)
+      %clo.10 : py.Value = py.mkClosure(@m_raise.gen)
       %gen.cell.0 : base.Ref(py.Value) = py.globalCell("m_raise", "gen")
-      %set.10 : base.Unit = base.refSet[py.Value](%gen.cell.0, %clo.8)
+      %set.13 : base.Unit = base.refSet[py.Value](%gen.cell.0, %clo.10)
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
   }
   func @|m_raise.Oops.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -290,12 +307,75 @@ module m_raise {
       %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
       %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "reraise() got an unexpected keyword argument {}") ^propagate.0()
       %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "reraise() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %exc.0 : py.Value = py.handledExc ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @m_raise.no_active(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "no_active() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "no_active() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %exc.0 : py.Value = py.handledExc ^catch.0()
+      jump ^catch.0(%exc.0)
+    catch.0(%exc.1 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.1)
+      %RuntimeError.0 : py.Value = py.loadGlobal("m_raise", "RuntimeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.1, %RuntimeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %int.0 : py.Value = py.intLit(0)
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    next.0():
+      jump ^unwind.0(%exc.1)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    propagate.0(%exc.3 : py.Value):
+      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+      ret(%exc.4)
+  }
+  func @m_raise.caller(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "caller() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "caller() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(0)
+      %div.0 : py.Value = py.div(%int.0, %int.1) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %ZeroDivisionError.0 : py.Value = py.loadGlobal("m_raise", "ZeroDivisionError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %ZeroDivisionError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %reraise.0 : py.Value = py.loadGlobal("m_raise", "reraise") ^unwind.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%reraise.0, %tuple.0, %kwargs.1) ^unwind.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      jump ^join.0()
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.1 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.1)
+    join.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
   func @m_raise.gen(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):

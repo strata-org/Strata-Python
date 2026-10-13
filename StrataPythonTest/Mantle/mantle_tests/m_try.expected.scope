@@ -8,6 +8,7 @@ module
   closure: local (assigned)
   two_handlers: local (assigned)
   not_inherited: local (assigned)
+  finally_raise: local (assigned)
   C: local (assigned)
   Exception: global implicit (referenced)
   top: local (assigned)
@@ -69,6 +70,10 @@ module
     D: local (assigned)
     function not_inherited.<locals>.g
     class not_inherited.<locals>.D
+  function finally_raise
+    params: f
+    f: local (parameter, referenced)
+    KeyError: global implicit (referenced)
   class C
     Exception: global implicit (referenced)
     err: local (assigned)

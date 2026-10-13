@@ -6,8 +6,11 @@ module
   cause: local (assigned)
   no_cause: local (assigned)
   in_loop: local (assigned)
+  flag: local (assigned, referenced)
   both: local (assigned)
   reraise: local (assigned)
+  no_active: local (assigned)
+  caller: local (assigned)
   gen: local (assigned)
   class Oops
   function instance
@@ -33,6 +36,11 @@ module
     KeyError: global implicit (referenced)
     ValueError: global implicit (referenced)
   function reraise
+  function no_active
+    RuntimeError: global implicit (referenced)
+  function caller
+    ZeroDivisionError: global implicit (referenced)
+    reraise: global implicit (referenced)
   function gen
     params: e
     e: local (parameter, referenced)

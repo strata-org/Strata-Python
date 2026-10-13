@@ -2,11 +2,14 @@ module top
   Exception: global implicit (referenced)
   Oops: local (assigned)
   both: local (assigned)
+  caller: local (assigned)
   cause: local (assigned)
   cls: local (assigned)
+  flag: local (assigned, referenced)
   gen: local (assigned)
   in_loop: local (assigned)
   instance: local (assigned)
+  no_active: local (assigned)
   no_cause: local (assigned)
   reraise: local (assigned)
   class Oops
@@ -29,6 +32,11 @@ module top
     ValueError: global implicit (referenced)
     x: local (parameter, referenced)
   function reraise
+  function no_active
+    RuntimeError: global implicit (referenced)
+  function caller
+    ZeroDivisionError: global implicit (referenced)
+    reraise: global implicit (referenced)
   function gen
     e: local (parameter, referenced)
-qualnames: Oops, both, cause, cls, gen, in_loop, instance, no_cause, reraise
+qualnames: Oops, both, caller, cause, cls, gen, in_loop, instance, no_active, no_cause, reraise

@@ -79,6 +79,15 @@ def not_inherited(f):
         class D:
             raise
 
+def finally_raise(f):
+    try:
+        raise KeyError("outer")
+    except KeyError:
+        try:
+            f()
+        finally:
+            raise  # what f raised; if f returns, KeyError("outer")
+
 class C:
     try:
         pass

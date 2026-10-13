@@ -114,8 +114,8 @@ m_super_global | yes |
 m_super_hook | yes |
 m_super_named | yes |
 m_super_rebound | yes | super() with super rebound
-m_raise | yes | bare raise, generator function
-m_try | yes | bare raise, bare raise, finally, try/except*
+m_raise | yes | generator function
+m_try | yes | finally, finally, try/except*
 m_rejected | yes | relative import, import *
 e01_nonlocal_unbound | yes | no binding for nonlocal 'x' found
 e02_global_param | yes | name 'x' is parameter and global

@@ -1568,10 +1568,11 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
     defStmt sr n args body.val decs.val (!tps.val.isEmpty) false
   | .Assert _ test ⟨_, msg⟩ => assertStmt test msg
   | .Raise _ ⟨_, some e⟩ ⟨_, cause⟩ => raiseStmt e cause
-  | .Raise sr ⟨_, none⟩ _ =>
-    match (← read).handled with
-    | some exc => build (PyBuild.jump (← build (raiseTo exc)))
-    | none => reject "bare raise" sr
+  | .Raise _ ⟨_, none⟩ _ =>
+    let e ← match (← read).handled with
+      | some exc => pure exc
+      | none => build (emitFailing (.str .base "exc") Py.handledExc #v[] #[])
+    build (PyBuild.jump (← build (raiseTo e)))
   | .Try sr ⟨_, body⟩ ⟨_, handlers⟩ ⟨_, orelse⟩ ⟨_, final⟩ =>
     if !final.isEmpty then reject "finally" sr
     else tryStmt body handlers orelse
