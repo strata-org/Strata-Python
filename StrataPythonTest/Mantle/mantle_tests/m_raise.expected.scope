@@ -1,0 +1,38 @@
+module
+  Oops: local (assigned)
+  Exception: global implicit (referenced)
+  instance: local (assigned)
+  cls: local (assigned)
+  cause: local (assigned)
+  no_cause: local (assigned)
+  in_loop: local (assigned)
+  both: local (assigned)
+  reraise: local (assigned)
+  gen: local (assigned)
+  class Oops
+  function instance
+    params: msg
+    msg: local (parameter, referenced)
+    ValueError: global implicit (referenced)
+  function cls
+    Oops: global implicit (referenced)
+  function cause
+    params: e
+    e: local (parameter, referenced)
+    Oops: global implicit (referenced)
+  function no_cause
+    Oops: global implicit (referenced)
+  function in_loop
+    params: xs
+    xs: local (parameter, referenced)
+    x: local (assigned, referenced)
+    KeyError: global implicit (referenced)
+  function both
+    params: x
+    x: local (parameter, referenced)
+    KeyError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+  function reraise
+  function gen
+    params: e
+    e: local (parameter, referenced)

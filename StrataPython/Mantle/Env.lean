@@ -361,6 +361,19 @@ public environment Py extends Base where
   insn forEach (iterable : Value) (&body (item : Value) : raising Unit) (^err (exc : Value)) :
     Unit
 
+  -- Exceptions.
+
+  /-- The exception `raise val` raises, as CPython's `RAISE_VARARGS` makes it: `val` if it is
+  an exception, or `val()` if it is an exception class.  Raises `TypeError: exceptions must
+  derive from BaseException` otherwise, a `TypeError` if `val()` returns a non-exception, or
+  whatever `val()` raises. -/
+  insn toException (val : Value) (^err (e : Value)) : Value
+  /-- `raise exc from cause`, after `toException`: sets `exc.__cause__` to `cause`, or to
+  `cause()` if it is an exception class, and `exc.__suppress_context__` to `True`.  A `None`
+  cause clears `__cause__`.  Raises `TypeError: exception causes must derive from
+  BaseException` for any other `cause`, as CPython does, or whatever `cause()` raises. -/
+  insn setCause (exc cause : Value) (^err (e : Value)) : Unit
+
   -- Strings and degradation.
 
   /-- `repr(val)`, without looking up the builtin: an f-string's `!r` (`FORMAT_VALUE`). -/

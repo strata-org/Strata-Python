@@ -1,0 +1,34 @@
+module top
+  Exception: global implicit (referenced)
+  Oops: local (assigned)
+  both: local (assigned)
+  cause: local (assigned)
+  cls: local (assigned)
+  gen: local (assigned)
+  in_loop: local (assigned)
+  instance: local (assigned)
+  no_cause: local (assigned)
+  reraise: local (assigned)
+  class Oops
+  function instance
+    ValueError: global implicit (referenced)
+    msg: local (parameter, referenced)
+  function cls
+    Oops: global implicit (referenced)
+  function cause
+    Oops: global implicit (referenced)
+    e: local (parameter, referenced)
+  function no_cause
+    Oops: global implicit (referenced)
+  function in_loop
+    KeyError: global implicit (referenced)
+    x: local (assigned, referenced)
+    xs: local (parameter, referenced)
+  function both
+    KeyError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    x: local (parameter, referenced)
+  function reraise
+  function gen
+    e: local (parameter, referenced)
+qualnames: Oops, both, cause, cls, gen, in_loop, instance, no_cause, reraise

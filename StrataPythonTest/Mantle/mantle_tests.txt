@@ -72,7 +72,7 @@ c2_return_in_for_finally | no |
 c3_break_finally | no |
 c4_continue_finally | no |
 c5_body_finally_vs_loop_exit | no |
-c6_body_raise | no |
+c6_body_raise | yes |
 c7_with_return | no |
 m_assert | yes |
 m_annotations | yes | generator function
@@ -114,6 +114,7 @@ m_super_global | yes |
 m_super_hook | yes |
 m_super_named | yes |
 m_super_rebound | yes | super() with super rebound
+m_raise | yes | bare raise, generator function
 m_rejected | yes | relative import, import *
 e01_nonlocal_unbound | yes | no binding for nonlocal 'x' found
 e02_global_param | yes | name 'x' is parameter and global

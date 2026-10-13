@@ -781,8 +781,8 @@ Each is rejected as §3 describes.
 
 | Source | Lowering |
 |---|---|
-| `raise E` | `v = eval E`, `e = py.toException v` (§8: it instantiates a class and raises `TypeError` for a non-exception), then `jump ^handler(e)` |
-| `raise E from C` | as above, plus `py.setAttr e "__cause__" c`. `__suppress_context__` is not modelled |
+| `raise E` | `v = eval E`, `e = py.toException v`, then `jump ^handler(e)`. `toException` instantiates a class and raises `TypeError` for a non-exception, as CPython's `RAISE_VARARGS` does |
+| `raise E from C` | `v = eval E`, `c = eval C`, `e = py.toException v`, `py.setCause e c`, then `jump ^handler(e)`. `setCause` instantiates a class too, sets `__suppress_context__`, and raises `TypeError` for a cause that is neither an exception nor `None` |
 | bare `raise` inside `except` | `jump ^handler(currentExc)` |
 | bare `raise` elsewhere | **rejected**. Python raises at run time based on the dynamic exception state, which this translation does not model |
 
@@ -905,7 +905,6 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 | Operation | Signature (DSL) | Needed by |
 |---|---|---|
 | `excMatch` | `insn excMatch (exc type : Value) (^err (e : Value)) : Bool` | `except T` (the alternative is `py.call` builtins `isinstance`, then `truthy`) |
-| `toException` | `insn toException (val : Value) (^err (e : Value)) : Value` | `raise E` |
 | `mkGenerator` | `insn mkGenerator (code : Code) (cells : Ref Value…) : Value` | generators (stage 1, opaque) |
 
 **Declarations to fix:**
@@ -925,7 +924,7 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 - `tryFinally`, `protect` and `dispatchArms` run their bodies in any `MonadPy` monad, so the
   translator can pass `TransM` bodies. The translator does not call them yet. `forEach`
   does the same, and the translator calls it for comprehensions.
-- No `raiseTo exc` helper (`jump ^handler(exc)`). `exitWalk` handles `loop` entries only.
+- `exitWalk` handles `loop` entries only.
 
 ## 9. Open questions
 
@@ -993,7 +992,8 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 Each case is an exception edge that an earlier translator lowered wrongly while still
 passing its well-formedness check. Each becomes a golden test, plus an interpreter check that
 counts `cleanup()` calls. The repros are `c1`–`c7` and `t30_loop_try_nested` in
-`StrataPythonTest/Mantle/mantle_tests/`, listed in `mantle_tests.txt` as not yet supported.
+`StrataPythonTest/Mantle/mantle_tests/`. `mantle_tests.txt` lists `c6` as supported and the
+others as not yet supported.
 
 | Case | Python | Wrong lowering | Fixed by |
 |---|---|---|---|
@@ -1049,7 +1049,7 @@ a diagnostic.
 | zero-argument `super()`, `__class__` | §6.7 | specified; implemented (Q6) |
 | list, set and dict comprehensions | §6.8 | specified; implemented |
 | generator expressions, `yield` | §6.8 | unsupported; a generator function is a stub |
-| `raise`, `raise … from` | §7.1 | specified, open question (`toException`) |
+| `raise`, `raise … from` | §7.1 | specified; implemented |
 | bare `raise` | §7.1 | specified inside `except`; unsupported elsewhere |
 | `try` / `except` / `else` | §7.2 | specified, open question (`excMatch`) |
 | `finally` | §7.2 | specified, open question (Q2) |

@@ -533,7 +533,7 @@ def stmtName : stmt SourceRange → String
   | .With .. => "with"
   | .AsyncWith .. => "async with"
   | .Match .. => "match"
-  | .Raise .. => "raise"
+  | .Raise .. => "bare raise"
   | .Try .. => "try"
   | .TryStar .. => "try/except*"
   | _ => "statement"
@@ -570,7 +570,8 @@ partial def stmtYield? : stmt SourceRange → Option SourceRange
       kwDefaults.val.filterMap (fun | .some_expr _ d => some d | _ => none)).findSome? exprYield?
   | .ClassDef _ _ bases kws _ decs _ =>
     (bases.val ++ kws.val.map (·.value) ++ decs.val).findSome? exprYield?
-  | .Return _ v | .Raise _ v _ => v.val.bind exprYield?
+  | .Return _ v => v.val.bind exprYield?
+  | .Raise _ v c => (v.val.toArray ++ c.val.toArray).findSome? exprYield?
   | .Delete _ ts => ts.val.findSome? exprYield?
   | .Assign _ ts v _ => (ts.val.push v).findSome? exprYield?
   | .AugAssign _ t _ v => #[t, v].findSome? exprYield?
@@ -1535,6 +1536,7 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
   | .FunctionDef sr ⟨_, n⟩ args body decs _ _ tps =>
     defStmt sr n args body.val decs.val (!tps.val.isEmpty) false
   | .Assert _ test ⟨_, msg⟩ => assertStmt test msg
+  | .Raise _ ⟨_, some e⟩ ⟨_, cause⟩ => raiseStmt e cause
   | .Delete _ ⟨_, targets⟩ =>
     match targets.mapM deleter with
     | .error t => badTarget t
@@ -1593,6 +1595,17 @@ partial def assertStmt (test : expr SourceRange) (msg : Option (expr SourceRange
   let e ← build (emitFailing (.str .base "exc") Py.call #v[] #[cls, args, kwargs])
   build (PyBuild.jump (← build (raiseTo e)))
   build (startBlock ok)
+
+/-- `raise e from cause` (§7.1): evaluate `e`, then `cause`, make `e` an exception with
+`toException`, set its cause, and jump to the enclosing handler. -/
+partial def raiseStmt (e : expr SourceRange) (cause : Option (expr SourceRange)) :
+    TransM Unit := do
+  let v ← transExpr e
+  let c ← cause.mapM transExpr
+  let x ← build (emitFailing (.str .base "exc") Py.toException #v[] #[v])
+  if let some c := c then
+    discard <| build (emitActing (.str .base "cause") Py.setCause #v[] #[x, c])
+  build (PyBuild.jump (← build (raiseTo x)))
 
 /-- `for target in iter: body else: orelse` at `sr` (§6.4).  Only `next` raises to `stop`,
 which ends the loop on `StopIteration` and passes any other exception to the enclosing
