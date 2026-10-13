@@ -4,6 +4,7 @@ module
   h: local (assigned)
   gen: local (assigned)
   bad: local (assigned)
+  yields: local (assigned)
   function adder
     params: n
     n: cell (parameter)
@@ -26,3 +27,7 @@ module
   lambda <lambda>
     params: d
     d: local (parameter, referenced)
+  function yields
+    lambda yields.<locals>.<lambda>
+      params: x
+      x: local (parameter, referenced)

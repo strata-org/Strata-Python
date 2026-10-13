@@ -1,6 +1,5 @@
 -- unsupported: relative import is not supported at 2:0-2:21
 -- unsupported: import * is not supported at 3:0-3:16
--- unsupported: non-constant default is not supported at 5:18-5:20
 module m_rejected {
   func @|m_rejected.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():

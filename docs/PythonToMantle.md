@@ -397,7 +397,7 @@ At the definition site, in source order:
 3. Emit `const @m.f…` and `py.mkClosure code cells…`. The cells are the callee's free
    variables in `freeVars` order (§6.6), then its default cells. A top-level function has
    only default cells.
-4. Apply the decorators bottom to top, each with `py.call d (mkTuple f) mkDict`.
+4. Apply the decorators bottom to top, each with `py.call d (mkTuple f) mkKwargs`.
 5. Write the result to the name's cell (a `lambda` is an expression and has no name).
 
 ```
@@ -417,8 +417,7 @@ signature is the callee's job, done by a branch-free *prologue* of ordinary inst
 the top of the entry block. Each check raises, so the prologue stays in one block.
 `PyTranslate.prologue` emits it. Each bound parameter is written to its cell, a
 non-constant default is read from its default cell, and the raising checks name
-`Frame.handler` as `err`. The translator implements constant defaults; it rejects
-non-constant ones.
+`Frame.handler` as `err`. A constant default is evaluated in the prologue itself.
 
 `fill` holds one slot per positional parameter: its default, or `undef` if it has none.
 `pad` is the argument tuple padded to full length, so parameter `i` is `pad[i]` with no
@@ -886,7 +885,6 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 
 - The scope and the exits stack live in the translator's state, `TransM` (§4). `Exit` lacks
   `cleanup` and `unbind`, and the state lacks `currentExc` and `classNs`.
-- The prologue is `PyTranslate.prologue` (§5.4). It has no default cells.
 - `PyBuild.buildFuncTypedWith` builds a function and returns its body's result.
 - `Frame.handler` is a `BlockValue`, so a handler can pre-bind arguments (`withHandlerTo`).
   Under `Override` nothing needs that; a chaining policy's `superseded` block does.
@@ -974,8 +972,7 @@ a diagnostic.
 
 | Construct | Section | Status |
 |---|---|---|
-| module body; `def`, nested too, and `lambda`, with positional, positional-only, keyword-only, `*args` and `**kwargs` parameters and constant defaults; prologue; `return` | §5.2–§5.5 | specified; implemented |
-| decorators, non-constant defaults | §5.3 | specified |
+| module body; `def`, nested too, and `lambda`, with positional, positional-only, keyword-only, `*args` and `**kwargs` parameters, defaults and decorators; prologue; `return` | §5.2–§5.5 | specified; implemented |
 | name resolution (all five kinds, mangling, compile-time errors) | §5.1 | specified; implemented (`PyScope.analyze`, CPython 3.12 model) |
 | local names | §5.1 | specified; implemented |
 | cell and free names | §5.1 | specified; implemented |

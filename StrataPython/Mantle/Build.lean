@@ -31,8 +31,8 @@ The operations:
 * `freshVal`, `freshLabel`, `startBlock`, `startBlockWith`, `startFreshBlock`, `isOpen`,
   `finishBlock`, `jump`, `branch`, `unreachable`: `Mantle.Build`'s, over `Py.env`;
 * `emitFunc`, `mkClosure`, `funcValue`: code pointers and closures;
-* `cellOf?`, `declareLocal`, `captureCell`, `readCell`, `writeCell`: locals, each a
-  `Ref Value` cell;
+* `cellOf?`, `newCell`, `declareLocal`, `captureCell`, `readCell`, `writeCell`: locals,
+  each a `Ref Value` cell;
 * `globalCell`, `loadGlobal`, `requireGlobal`, `writeGlobal`, `importModule`, `importFrom`:
   globals and imports;
 * `freshComp`, `compNormal`, `compReturn`, `compRaise`, `compBreak`, `compContinue`,
@@ -206,6 +206,10 @@ def stem (x : String) : Name := .str .base x
 /-- The stem of the cell holding the Python name `x`: the two segments `x` and `cell`. -/
 def cellStem (x : String) : Name := .str (stem x) "cell"
 
+/-- The stem of the cell holding the default of the parameter `x`: the segments `x` and
+`default`. -/
+def defaultStem (x : String) : Name := .str (stem x) "default"
+
 /-- A fresh Python value, named after `name`. -/
 def freshVal (name : Name) : PyM α (ValDecl Py.env) :=
   Build.freshVal (env := Py.env) (α := α) name Py.Value.ty
@@ -293,12 +297,15 @@ its first assignment, so a read before assignment can be checked. -/
 /-- The cell of a local in scope, if it is one. -/
 def cellOf? (name : String) : PyM α (Option ValId) := (·.locals.find? name) <$> get
 
+/-- A fresh cell holding `v`, named after `name`. -/
+def newCell (name : Name) (v : ValId) (info : Option α := none) : PyM α ValId :=
+  Build.emitApply (env := Py.env) name Py.cell.ty Base.refNew #v[Py.Value.ty] #[v] (info := info)
+
 /-- Make a cell for `name`, holding "not yet assigned", and record it. -/
 def declareLocal (name : String) (info : Option α := none) : PyM α ValId := do
   let nameConst ← emitConst (.str .base "n") (.str name) info
   let undef ← emitTotal (stem name) Py.undef #v[] #[nameConst] info
-  let cell ← Build.emitApply (env := Py.env) (cellStem name) Py.cell.ty Base.refNew
-    #v[Py.Value.ty] #[undef] (info := info)
+  let cell ← newCell (cellStem name) undef info
   modify fun e => { e with locals := e.locals.insert name cell }
   return cell
 

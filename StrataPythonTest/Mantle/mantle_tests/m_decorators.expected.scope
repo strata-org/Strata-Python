@@ -1,0 +1,37 @@
+module
+  trace: local (assigned, referenced)
+  tag: local (assigned, referenced)
+  f: local (assigned)
+  len: global implicit (referenced)
+  outer: local (assigned)
+  order: local (assigned)
+  function trace
+    params: fn
+    fn: local (parameter, referenced)
+  function tag
+    params: name
+    name: local (parameter)
+    trace: global implicit (referenced)
+  function f
+    params: a, b, *, c, d
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    c: local (parameter, referenced)
+    d: local (parameter, referenced)
+  function outer
+    params: n
+    n: cell (parameter, referenced)
+    g: local (assigned, referenced)
+    function outer.<locals>.g
+      params: x
+      x: local (parameter, referenced)
+      n: free (referenced)
+  function order
+    params: log
+    log: local (parameter, referenced)
+    h: local (assigned, referenced)
+    function order.<locals>.h
+      params: a, b, *, c
+      a: local (parameter)
+      b: local (parameter)
+      c: local (parameter)

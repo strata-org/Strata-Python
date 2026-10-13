@@ -1,5 +1,5 @@
 -- unsupported: generator function is not supported at 10:15-10:20
--- unsupported: non-constant default is not supported at 11:15-11:17
+-- unsupported: generator function is not supported at 15:21-15:26
 module m_lambda {
   func @|m_lambda.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
@@ -21,10 +21,14 @@ module m_lambda {
       %clo.3 : py.Value = py.mkClosure(@|m_lambda.<lambda>.2|)
       %gen.cell.0 : base.Ref(py.Value) = py.globalCell("m_lambda", "gen")
       %set.5 : base.Unit = base.refSet[py.Value](%gen.cell.0, %clo.3)
-      %str.1 : py.Value = py.strLit("lambda")
-      %unsupported.0 : py.Value = py.unsupported(%str.1)
+      %list.0 : py.Value = py.mkList
+      %d.default.0 : base.Ref(py.Value) = base.refNew[py.Value](%list.0)
+      %clo.4 : py.Value = py.mkClosure(@|m_lambda.<lambda>.3|, %d.default.0)
       %bad.cell.0 : base.Ref(py.Value) = py.globalCell("m_lambda", "bad")
-      %set.6 : base.Unit = base.refSet[py.Value](%bad.cell.0, %unsupported.0)
+      %set.6 : base.Unit = base.refSet[py.Value](%bad.cell.0, %clo.4)
+      %clo.5 : py.Value = py.mkClosure(@m_lambda.yields)
+      %yields.cell.0 : base.Ref(py.Value) = py.globalCell("m_lambda", "yields")
+      %set.7 : base.Unit = base.refSet[py.Value](%yields.cell.0, %clo.5)
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
@@ -140,6 +144,48 @@ module m_lambda {
       ret(%exc.1)
   }
   func @|m_lambda.<lambda>.2|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %str.0 : py.Value = py.strLit("generator function")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|m_lambda.<lambda>.3|(%d.default.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%d.default.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %d.0 : py.Value = py.undef("d")
+      %d.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%d.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %d.default.1 : py.Value = base.refGet[py.Value](%d.default.0)
+      %fill.0 : py.Value = py.mkTuple(%d.default.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("d")
+      %d.1 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "<lambda>() got multiple values for argument 'd'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "<lambda>() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "<lambda>() takes from 0 to 1 positional argument but {} {was} given") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%d.cell.0, %d.1)
+      %d.2 : py.Value = base.refGet[py.Value](%d.cell.0)
+      %d.3 : py.Value = py.requireDefined(%d.2, "UnboundLocalError", "cannot access local variable 'd' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%d.3)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_lambda.yields(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %str.0 : py.Value = py.strLit("generator function")
       %unsupported.0 : py.Value = py.unsupported(%str.0)

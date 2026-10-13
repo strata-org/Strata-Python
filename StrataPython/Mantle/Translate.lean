@@ -39,7 +39,7 @@ with a diagnostic is a failure.
 ## Supported constructs
 
 * `def`, nested too, and `lambda`: positional, positional-only, keyword-only, `*args` and `**kwargs`
-  parameters, and constant defaults.  The argument-binding prologue is the spec's §5.4.
+  parameters, defaults and decorators.  The argument-binding prologue is the spec's §5.4.
 * Closures: cell and free variables, and `nonlocal`.
 * Statements: expression statements, `pass`, assignment, annotated assignment and augmented
   assignment to names, attributes and subscripts, assignment to tuple and list targets (with a
@@ -423,7 +423,10 @@ mutual
 /-- The range of the first `yield` or `yield from` an expression evaluates in its own scope. -/
 partial def exprYield? : expr SourceRange → Option SourceRange
   | .Yield sr _ | .YieldFrom sr _ => some sr
-  | .Lambda .. | .ListComp .. | .SetComp .. | .DictComp .. | .GeneratorExp .. => none
+  | .Lambda _ (.mk_arguments _ _ _ _ _ kwDefaults _ defaults) _ =>
+    (defaults.val ++
+      kwDefaults.val.filterMap (fun | .some_expr _ d => some d | _ => none)).findSome? exprYield?
+  | .ListComp .. | .SetComp .. | .DictComp .. | .GeneratorExp .. => none
   | .Constant .. | .Name .. => none
   | .BoolOp _ _ vs | .Set _ vs | .List _ vs _ | .Tuple _ vs _ | .JoinedStr _ vs
   | .TemplateStr _ vs => vs.val.findSome? exprYield?
@@ -534,39 +537,10 @@ def allocName (qualname : String) : TransM Name := do
   modify fun s => { s with funcNames := s.funcNames.insert n }
   return n
 
-/-- The closure of the `def` or `lambda` at `sr`, whose function is queued, or `none` if it is
-rejected.  The closure captures the cells of the function's free variables (§6.6).  An
-`async def` or a generator is queued as a stub. -/
-def closure (sr : SourceRange) (args : arguments SourceRange)
-    (body : Array (stmt SourceRange)) (decorators : Array (expr SourceRange))
-    (hasTypeParams isAsync : Bool) : TransM (Option ValId) := do
-  let ctx ← read
-  if let some d := decorators[0]? then reject "decorator" d.ann; return none
-  if hasTypeParams then reject "type parameters" sr; return none
-  if let some p := (params args).find? (·.default.any (!isConstantDefault ·)) then
-    reject "non-constant default" (p.default.map (·.ann) |>.getD sr); return none
-  let some scope := ctx.table.childAt? ctx.scope sr
-    | do reject "function without a scope" sr; return none
-  let some cur := ctx.table.scopes[scope]?
-    | do internalError s!"scope {scope} is not in the table" sr; return none
-  let stub ← if isAsync then do reject "async def" sr; pure (some "async def")
-    else match bodiesYield? #[body] with
-      | some r => do reject "generator function" r; pure (some "generator function")
-      | none => pure none
-  let mut cells := #[]
-  for x in cur.freeVars do
-    match ← build (cellOf? x) with
-    | some c => cells := cells.push c
-    | none =>
-      -- An unbound `nonlocal` is free with no cell; the scope pass already reported it.
-      if ctx.table.syntaxErrors.isEmpty then
-        internalError s!"no cell for the free variable '{x}'" sr
-      return none
-  let fname ← allocName cur.qualname
-  let job : FuncJob :=
-    { name := fname, scope, cur, args, body, range := sr, stub }
-  modify fun s => { s with pending := s.pending.push job }
-  some <$> build (mkClosure (← build (emitFunc fname)) cells)
+/-- The parameters whose default is not a constant, in signature order: each is evaluated
+at the definition into a default cell, which the closure captures (§5.3). -/
+def defaultCellParams (args : arguments SourceRange) : Array ParamWithDefault :=
+  (params args).filter (·.default.any (!isConstantDefault ·))
 
 /-! ## Expressions -/
 
@@ -878,6 +852,48 @@ partial def call (f : expr SourceRange) (args : Array (expr SourceRange))
     | none, none => build (emitTotal (.str .base "args") Py.mkTuple #v[] #[])
   build (emitFailing (.str .base "call") Py.call #v[] #[fv, t, d])
 
+/-- The closure of the `def` or `lambda` at `sr`, whose function is queued, or `none` if it is
+rejected, as §5.3 builds it: the decorators are evaluated, then the non-constant defaults
+into default cells.  The closure captures the cells of the function's free variables
+(§6.6), then the default cells.  The decorators are applied to it bottom to top.  An
+`async def` or a generator is queued as a stub. -/
+partial def closure (sr : SourceRange) (args : arguments SourceRange)
+    (body : Array (stmt SourceRange)) (decorators : Array (expr SourceRange))
+    (hasTypeParams isAsync : Bool) : TransM (Option ValId) := do
+  let ctx ← read
+  if hasTypeParams then reject "type parameters" sr; return none
+  let some scope := ctx.table.childAt? ctx.scope sr
+    | do reject "function without a scope" sr; return none
+  let some cur := ctx.table.scopes[scope]?
+    | do internalError s!"scope {scope} is not in the table" sr; return none
+  let stub ← if isAsync then do reject "async def" sr; pure (some "async def")
+    else match bodiesYield? #[body] with
+      | some r => do reject "generator function" r; pure (some "generator function")
+      | none => pure none
+  let mut cells := #[]
+  for x in cur.freeVars do
+    match ← build (cellOf? x) with
+    | some c => cells := cells.push c
+    | none =>
+      -- An unbound `nonlocal` is free with no cell; the scope pass already reported it.
+      if ctx.table.syntaxErrors.isEmpty then
+        internalError s!"no cell for the free variable '{x}'" sr
+      return none
+  let decs ← decorators.mapM transExpr
+  for p in defaultCellParams args do
+    if let some d := p.default then
+      cells := cells.push (← build (newCell (defaultStem p.name) (← transExpr d)))
+  let fname ← allocName cur.qualname
+  let job : FuncJob :=
+    { name := fname, scope, cur, args, body, range := sr, stub }
+  modify fun s => { s with pending := s.pending.push job }
+  let mut f ← build (mkClosure (← build (emitFunc fname)) cells)
+  for d in decs.reverse do
+    let t ← build (emitTotal (.str .base "args") Py.mkTuple #v[] #[f])
+    let kw ← build (emitTotal (.str .base "kwargs") Py.mkKwargs #v[] #[])
+    f ← build (emitFailing (.str .base "decorated") Py.call #v[] #[d, t, kw])
+  return some f
+
 end
 
 /-! ## Assignment targets -/
@@ -977,19 +993,22 @@ partial def deleter (t : expr SourceRange) : Except (expr SourceRange) (TransM U
     | some eval => return do deleteLhs (← eval)
     | none => throw t
 
-/-- Emit the argument-binding prologue (§5.4), writing each parameter's cell.  The checks
-run in CPython's order: a duplicate value, an unexpected keyword, too many positional
+/-- Emit the argument-binding prologue (§5.4), writing each parameter's cell.  A constant
+default is evaluated in place; another is read from its cell in `defaults`.  The checks run
+in CPython's order: a duplicate value, an unexpected keyword, too many positional
 arguments, a missing argument. -/
-def prologue (ps : Array ParamWithDefault) (args kwargs : ValId) : TransM Unit := do
+def prologue (ps : Array ParamWithDefault) (defaults : Array (String × ValId))
+    (args kwargs : ValId) : TransM Unit := do
   let fn := (← read).cur.qualname
   let pos := ps.filter fun p => p.kind == .posOnly || p.kind == .positional
   let varPos := ps.find? (·.kind == .varPositional)
   let kwOnly := ps.filter (·.kind == .kwOnly)
   let varKw := ps.find? (·.kind == .varKeyword)
   let fillSlot (p : ParamWithDefault) : TransM ValId := do
-    match p.default with
-    | some d => transExpr d
-    | none => build (emitTotal (stem p.name) Py.undef #v[]
+    match p.default, defaults.find? (·.1 == p.name) with
+    | some _, some (_, c) => build (readCell c (defaultStem p.name))
+    | some d, none => transExpr d
+    | none, _ => build (emitTotal (stem p.name) Py.undef #v[]
         #[← build (emitConst (.str .base "n") (.str p.name))])
   let discardKey (key : ValId) : TransM Unit :=
     discard <| build (emitEffect (.str .base "discard") Py.dictDiscard #v[] #[kwargs, key])
@@ -1261,11 +1280,13 @@ def builtFunc (range : SourceRange) (built : Build.Built (Func Py.env SourceRang
   (f, { st with diagnostics := st.diagnostics ++ ds })
 
 /-- Emit the function `job` queues.  Its parameters are the cells of its free variables,
-in `freeVars` order, then `args` and `kwargs`. -/
+in `freeVars` order, then its default cells, then `args` and `kwargs`. -/
 def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) : Func Py.env SourceRange × TState :=
   let ctx := { ctx with scope := job.scope, cur := job.cur }
   let free := job.cur.freeVars
+  let defaults := (defaultCellParams job.args).map (·.name)
   let argTypes := free.map (cellStem ·, Py.cell.ty) ++
+    defaults.map (defaultStem ·, Py.cell.ty) ++
     #[(stem "args", Py.Value.ty), (stem "kwargs", Py.Value.ty)]
   builtFunc job.range <| buildFuncTypedWith job.name argTypes job.range fun ps =>
     runBody ctx st job.range do
@@ -1278,9 +1299,10 @@ def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) : Func Py.env SourceRang
         for sym in sc.symbols do
           if sym.scope == .«local» || sym.scope == .cell then
             discard <| build (declareLocal sym.name)
-        let #[args, kwargs] := ps.extract free.size
+        let defaultCells := defaults.zip (ps.extract free.size (free.size + defaults.size))
+        let #[args, kwargs] := ps.extract (free.size + defaults.size)
           | internalError "a function without its args and kwargs parameters" job.range
-        prologue (params job.args) args kwargs
+        prologue (params job.args) defaultCells args kwargs
         transStmts job.body
 
 /-- The Mantle name of the Python module `m`: one segment per dotted component. -/

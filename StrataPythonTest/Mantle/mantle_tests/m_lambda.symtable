@@ -4,6 +4,7 @@ module top
   g: local (assigned)
   gen: local (assigned)
   h: local (assigned)
+  yields: local (assigned)
   function adder
     n: cell (parameter)
     function lambda
@@ -21,4 +22,7 @@ module top
   function lambda
   function lambda
     d: local (parameter, referenced)
-qualnames: <lambda>, <lambda>, <lambda>, <lambda>, <lambda>.<locals>.<lambda>, adder, adder.<locals>.<lambda>
+  function yields
+    function lambda
+      x: local (parameter, referenced)
+qualnames: <lambda>, <lambda>, <lambda>, <lambda>, <lambda>.<locals>.<lambda>, adder, adder.<locals>.<lambda>, yields, yields.<locals>.<lambda>

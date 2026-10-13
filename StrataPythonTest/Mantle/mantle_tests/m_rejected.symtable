@@ -1,6 +1,3 @@
 module top
-  bad_default: local (assigned)
   sibling: local (imported)
-  function bad_default
-    x: local (parameter, referenced)
-qualnames: bad_default
+qualnames: 
