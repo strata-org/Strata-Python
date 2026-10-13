@@ -1,0 +1,157 @@
+module t10_except_type {
+  func @|t10_except_type.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("t10_except_type")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t10_except_type", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("t10_except_type", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure(@t10_except_type.risky)
+      %risky.cell.0 : base.Ref(py.Value) = py.globalCell("t10_except_type", "risky")
+      %set.2 : base.Unit = base.refSet[py.Value](%risky.cell.0, %clo.0)
+      %risky.0 : py.Value = py.loadGlobal("t10_except_type", "risky") ^catch.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%risky.0, %tuple.0, %kwargs.0) ^catch.0()
+      %result.cell.0 : base.Ref(py.Value) = py.globalCell("t10_except_type", "result")
+      %set.3 : base.Unit = base.refSet[py.Value](%result.cell.0, %call.0)
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %ValueError.0 : py.Value = py.loadGlobal("t10_except_type", "ValueError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %ValueError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("t10_except_type", "e")
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %int.0 : py.Value = py.intLit(1)
+      %neg.0 : py.Value = py.uSub(%int.0) ^clear.0()
+      %result.cell.1 : base.Ref(py.Value) = py.globalCell("t10_except_type", "result")
+      %set.5 : base.Unit = base.refSet[py.Value](%result.cell.1, %neg.0)
+      %str.1 : py.Value = py.loadGlobal("t10_except_type", "str") ^clear.0()
+      %e.0 : py.Value = py.loadGlobal("t10_except_type", "e") ^clear.0()
+      %tuple.1 : py.Value = py.mkTuple(%e.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%str.1, %tuple.1, %kwargs.1) ^clear.0()
+      %msg.cell.0 : base.Ref(py.Value) = py.globalCell("t10_except_type", "msg")
+      %set.6 : base.Unit = base.refSet[py.Value](%msg.cell.0, %call.1)
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("t10_except_type", "e")
+      %set.7 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("t10_except_type", "e")
+      %set.8 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %risky.1 : py.Value = py.loadGlobal("t10_except_type", "risky") ^catch.1()
+      %tuple.2 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%risky.1, %tuple.2, %kwargs.2) ^catch.1()
+      %value.cell.0 : base.Ref(py.Value) = py.globalCell("t10_except_type", "value")
+      %set.9 : base.Unit = base.refSet[py.Value](%value.cell.0, %call.2)
+      jump ^join.1()
+    catch.1(%exc.3 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.3)
+      %ValueError.1 : py.Value = py.loadGlobal("t10_except_type", "ValueError") ^unwind.1()
+      %match.1 : base.Bool = py.excMatch(%exc.3, %ValueError.1) ^unwind.1()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %e.cell.3 : base.Ref(py.Value) = py.globalCell("t10_except_type", "e")
+      %set.10 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.3)
+      %int.1 : py.Value = py.intLit(0)
+      %value.cell.1 : base.Ref(py.Value) = py.globalCell("t10_except_type", "value")
+      %set.11 : base.Unit = base.refSet[py.Value](%value.cell.1, %int.1)
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      %e.3 : py.Value = py.undef("e")
+      %e.cell.4 : base.Ref(py.Value) = py.globalCell("t10_except_type", "e")
+      %set.12 : base.Unit = base.refSet[py.Value](%e.cell.4, %e.3)
+      jump ^join.1()
+    clear.1(%exc.4 : py.Value):
+      %e.4 : py.Value = py.undef("e")
+      %e.cell.5 : base.Ref(py.Value) = py.globalCell("t10_except_type", "e")
+      %set.13 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.4)
+      jump ^unwind.1(%exc.4)
+    next.1():
+      %KeyError.0 : py.Value = py.loadGlobal("t10_except_type", "KeyError") ^unwind.1()
+      %match.2 : base.Bool = py.excMatch(%exc.3, %KeyError.0) ^unwind.1()
+      branch(%match.2) ^except.2() ^next.2()
+    except.2():
+      %e.cell.6 : base.Ref(py.Value) = py.globalCell("t10_except_type", "e")
+      %set.14 : base.Unit = base.refSet[py.Value](%e.cell.6, %exc.3)
+      %int.2 : py.Value = py.intLit(1)
+      %neg.1 : py.Value = py.uSub(%int.2) ^clear.2()
+      %value.cell.2 : base.Ref(py.Value) = py.globalCell("t10_except_type", "value")
+      %set.15 : base.Unit = base.refSet[py.Value](%value.cell.2, %neg.1)
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      %e.5 : py.Value = py.undef("e")
+      %e.cell.7 : base.Ref(py.Value) = py.globalCell("t10_except_type", "e")
+      %set.16 : base.Unit = base.refSet[py.Value](%e.cell.7, %e.5)
+      jump ^join.1()
+    clear.2(%exc.5 : py.Value):
+      %e.6 : py.Value = py.undef("e")
+      %e.cell.8 : base.Ref(py.Value) = py.globalCell("t10_except_type", "e")
+      %set.17 : base.Unit = base.refSet[py.Value](%e.cell.8, %e.6)
+      jump ^unwind.1(%exc.5)
+    next.2():
+      %Exception.0 : py.Value = py.loadGlobal("t10_except_type", "Exception") ^unwind.1()
+      %match.3 : base.Bool = py.excMatch(%exc.3, %Exception.0) ^unwind.1()
+      branch(%match.3) ^except.3() ^next.3()
+    except.3():
+      %e.cell.9 : base.Ref(py.Value) = py.globalCell("t10_except_type", "e")
+      %set.18 : base.Unit = base.refSet[py.Value](%e.cell.9, %exc.3)
+      %int.3 : py.Value = py.intLit(2)
+      %neg.2 : py.Value = py.uSub(%int.3) ^clear.3()
+      %value.cell.3 : base.Ref(py.Value) = py.globalCell("t10_except_type", "value")
+      %set.19 : base.Unit = base.refSet[py.Value](%value.cell.3, %neg.2)
+      %pop.4 : base.Unit = py.popExcept(%prev.1)
+      %e.7 : py.Value = py.undef("e")
+      %e.cell.10 : base.Ref(py.Value) = py.globalCell("t10_except_type", "e")
+      %set.20 : base.Unit = base.refSet[py.Value](%e.cell.10, %e.7)
+      jump ^join.1()
+    clear.3(%exc.6 : py.Value):
+      %e.8 : py.Value = py.undef("e")
+      %e.cell.11 : base.Ref(py.Value) = py.globalCell("t10_except_type", "e")
+      %set.21 : base.Unit = base.refSet[py.Value](%e.cell.11, %e.8)
+      jump ^unwind.1(%exc.6)
+    next.3():
+      jump ^unwind.1(%exc.3)
+    unwind.1(%exc.7 : py.Value):
+      %pop.5 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.7)
+    join.1():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.8 : py.Value):
+      %exc.9 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.8)
+      ret(%exc.9)
+  }
+  func @t10_except_type.risky(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "risky() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "risky() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %ValueError.0 : py.Value = py.loadGlobal("t10_except_type", "ValueError") ^propagate.0()
+      %str.0 : py.Value = py.strLit("bad input")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%ValueError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+}
+

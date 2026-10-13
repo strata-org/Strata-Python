@@ -1,0 +1,233 @@
+module t20_raise {
+  func @|t20_raise.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("t20_raise")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t20_raise", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("t20_raise", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure(@t20_raise.fail_hard)
+      %fail_hard.cell.0 : base.Ref(py.Value) = py.globalCell("t20_raise", "fail_hard")
+      %set.2 : base.Unit = base.refSet[py.Value](%fail_hard.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure(@t20_raise.reraise_example)
+      %reraise_example.cell.0 : base.Ref(py.Value) = py.globalCell("t20_raise", "reraise_example")
+      %set.3 : base.Unit = base.refSet[py.Value](%reraise_example.cell.0, %clo.1)
+      %clo.2 : py.Value = py.mkClosure(@t20_raise.raise_with_msg)
+      %raise_with_msg.cell.0 : base.Ref(py.Value) = py.globalCell("t20_raise", "raise_with_msg")
+      %set.4 : base.Unit = base.refSet[py.Value](%raise_with_msg.cell.0, %clo.2)
+      %clo.3 : py.Value = py.mkClosure(@t20_raise.reraise_named)
+      %reraise_named.cell.0 : base.Ref(py.Value) = py.globalCell("t20_raise", "reraise_named")
+      %set.5 : base.Unit = base.refSet[py.Value](%reraise_named.cell.0, %clo.3)
+      %clo.4 : py.Value = py.mkClosure(@t20_raise.reraise_bare)
+      %reraise_bare.cell.0 : base.Ref(py.Value) = py.globalCell("t20_raise", "reraise_bare")
+      %set.6 : base.Unit = base.refSet[py.Value](%reraise_bare.cell.0, %clo.4)
+      %clo.5 : py.Value = py.mkClosure(@t20_raise.reraise_after_work)
+      %reraise_after_work.cell.0 : base.Ref(py.Value) = py.globalCell("t20_raise", "reraise_after_work")
+      %set.7 : base.Unit = base.refSet[py.Value](%reraise_after_work.cell.0, %clo.5)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @t20_raise.fail_hard(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "fail_hard() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "fail_hard() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %ValueError.0 : py.Value = py.loadGlobal("t20_raise", "ValueError") ^propagate.0()
+      %str.0 : py.Value = py.strLit("bad input")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%ValueError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @t20_raise.reraise_example(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "reraise_example() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "reraise_example() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %fail_hard.0 : py.Value = py.loadGlobal("t20_raise", "fail_hard") ^catch.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%fail_hard.0, %tuple.0, %kwargs.1) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %ValueError.0 : py.Value = py.loadGlobal("t20_raise", "ValueError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %ValueError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      jump ^unwind.0(%exc.0)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.1 : py.Value):
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.1)
+    join.0():
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
+  }
+  func @t20_raise.raise_with_msg(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %msg.0 : py.Value = py.undef("msg")
+      %msg.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%msg.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %msg.1 : py.Value = py.undef("msg")
+      %fill.0 : py.Value = py.mkTuple(%msg.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("msg")
+      %msg.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "raise_with_msg() got multiple values for argument 'msg'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "raise_with_msg() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "raise_with_msg() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %msg.7 : py.Value = py.requireDefined(%msg.2, "TypeError", "raise_with_msg() missing 1 required positional argument: 'msg'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%msg.cell.0, %msg.7)
+      %RuntimeError.0 : py.Value = py.loadGlobal("t20_raise", "RuntimeError") ^propagate.0()
+      %msg.8 : py.Value = base.refGet[py.Value](%msg.cell.0)
+      %msg.10 : py.Value = py.requireDefined(%msg.8, "UnboundLocalError", "cannot access local variable 'msg' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%msg.10)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%RuntimeError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @t20_raise.reraise_named(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %e.0 : py.Value = py.undef("e")
+      %e.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%e.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "reraise_named() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "reraise_named() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %fail_hard.0 : py.Value = py.loadGlobal("t20_raise", "fail_hard") ^catch.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%fail_hard.0, %tuple.0, %kwargs.1) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %ValueError.0 : py.Value = py.loadGlobal("t20_raise", "ValueError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %ValueError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %set.0 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.0 : py.Value = py.loadGlobal("t20_raise", "print") ^clear.0()
+      %e.3 : py.Value = base.refGet[py.Value](%e.cell.0)
+      %e.5 : py.Value = py.requireDefined(%e.3, "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^clear.0()
+      %tuple.1 : py.Value = py.mkTuple(%e.5)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.2) ^clear.0()
+      jump ^clear.0(%exc.0)
+    clear.0(%exc.1 : py.Value):
+      %e.6 : py.Value = py.undef("e")
+      %set.1 : base.Unit = base.refSet[py.Value](%e.cell.0, %e.6)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.3 : py.Value):
+      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+      ret(%exc.4)
+  }
+  func @t20_raise.reraise_bare(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "reraise_bare() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "reraise_bare() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %fail_hard.0 : py.Value = py.loadGlobal("t20_raise", "fail_hard") ^catch.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%fail_hard.0, %tuple.0, %kwargs.1) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.1 : py.Value):
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.1)
+    join.0():
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
+  }
+  func @t20_raise.reraise_after_work(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %y.0 : py.Value = py.undef("y")
+      %y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%y.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "reraise_after_work() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "reraise_after_work() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %fail_hard.0 : py.Value = py.loadGlobal("t20_raise", "fail_hard") ^catch.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%fail_hard.0, %tuple.0, %kwargs.1) ^catch.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %call.0)
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %ValueError.0 : py.Value = py.loadGlobal("t20_raise", "ValueError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %ValueError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %int.0 : py.Value = py.intLit(1)
+      %set.1 : base.Unit = base.refSet[py.Value](%y.cell.0, %int.0)
+      jump ^unwind.0(%exc.0)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.1 : py.Value):
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.1)
+    join.0():
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
+  }
+}
+

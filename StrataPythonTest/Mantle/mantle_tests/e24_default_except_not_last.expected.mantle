@@ -1,0 +1,28 @@
+-- syntax error: default 'except:' must be last at 4:0-5:8
+module e24_default_except_not_last {
+  func @|e24_default_except_not_last.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("e24_default_except_not_last")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("e24_default_except_not_last", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("e24_default_except_not_last", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      jump ^join.0()
+    unwind.0(%exc.1 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.1)
+    join.0():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
+  }
+}
+

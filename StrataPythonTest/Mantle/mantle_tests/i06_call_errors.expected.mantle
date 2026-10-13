@@ -1,0 +1,223 @@
+module i06_call_errors {
+  func @|i06_call_errors.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("i06_call_errors")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("i06_call_errors", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("i06_call_errors", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure(@i06_call_errors.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("i06_call_errors", "f")
+      %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %str.1 : py.Value = py.strLit("a")
+      %int.0 : py.Value = py.intLit(1)
+      %dict.0 : py.Value = py.mkDict(%str.1, %int.0) ^propagate.0()
+      %m.cell.0 : base.Ref(py.Value) = py.globalCell("i06_call_errors", "m")
+      %set.3 : base.Unit = base.refSet[py.Value](%m.cell.0, %dict.0)
+      %f.0 : py.Value = py.loadGlobal("i06_call_errors", "f") ^catch.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.0 : py.Value = py.mkKwargs
+      %m.6 : py.Value = py.loadGlobal("i06_call_errors", "m") ^catch.0()
+      %merge.0 : py.Value = py.dictMerge(%f.0, %kwargs.0, %m.6) ^catch.0()
+      %m.8 : py.Value = py.loadGlobal("i06_call_errors", "m") ^catch.0()
+      %merge.1 : py.Value = py.dictMerge(%f.0, %merge.0, %m.8) ^catch.0()
+      %call.0 : py.Value = py.call(%f.0, %tuple.0, %merge.1) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %TypeError.0 : py.Value = py.loadGlobal("i06_call_errors", "TypeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %TypeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("i06_call_errors", "e")
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.0 : py.Value = py.loadGlobal("i06_call_errors", "print") ^clear.0()
+      %str.2 : py.Value = py.strLit("dup:")
+      %e.0 : py.Value = py.loadGlobal("i06_call_errors", "e") ^clear.0()
+      %tuple.1 : py.Value = py.mkTuple(%str.2, %e.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.1) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("i06_call_errors", "e")
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("i06_call_errors", "e")
+      %set.6 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %f.1 : py.Value = py.loadGlobal("i06_call_errors", "f") ^catch.1()
+      %tuple.2 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %int.1 : py.Value = py.intLit(1)
+      %int.2 : py.Value = py.intLit(2)
+      %dict.1 : py.Value = py.mkDict(%int.1, %int.2) ^catch.1()
+      %merge.2 : py.Value = py.dictMerge(%f.1, %kwargs.2, %dict.1) ^catch.1()
+      %call.2 : py.Value = py.call(%f.1, %tuple.2, %merge.2) ^catch.1()
+      jump ^join.1()
+    catch.1(%exc.3 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.3)
+      %TypeError.1 : py.Value = py.loadGlobal("i06_call_errors", "TypeError") ^unwind.1()
+      %match.1 : base.Bool = py.excMatch(%exc.3, %TypeError.1) ^unwind.1()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %e.cell.3 : base.Ref(py.Value) = py.globalCell("i06_call_errors", "e")
+      %set.7 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.3)
+      %print.1 : py.Value = py.loadGlobal("i06_call_errors", "print") ^clear.1()
+      %str.3 : py.Value = py.strLit("nonstr:")
+      %e.3 : py.Value = py.loadGlobal("i06_call_errors", "e") ^clear.1()
+      %tuple.3 : py.Value = py.mkTuple(%str.3, %e.3)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.1, %tuple.3, %kwargs.3) ^clear.1()
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      %e.4 : py.Value = py.undef("e")
+      %e.cell.4 : base.Ref(py.Value) = py.globalCell("i06_call_errors", "e")
+      %set.8 : base.Unit = base.refSet[py.Value](%e.cell.4, %e.4)
+      jump ^join.1()
+    clear.1(%exc.4 : py.Value):
+      %e.5 : py.Value = py.undef("e")
+      %e.cell.5 : base.Ref(py.Value) = py.globalCell("i06_call_errors", "e")
+      %set.9 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.5)
+      jump ^unwind.1(%exc.4)
+    next.1():
+      jump ^unwind.1(%exc.3)
+    unwind.1(%exc.5 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.5)
+    join.1():
+      %f.2 : py.Value = py.loadGlobal("i06_call_errors", "f") ^catch.2()
+      %tuple.4 : py.Value = py.mkTuple
+      %kwargs.4 : py.Value = py.mkKwargs
+      %int.3 : py.Value = py.intLit(1)
+      %list.0 : py.Value = py.mkList(%int.3)
+      %merge.3 : py.Value = py.dictMerge(%f.2, %kwargs.4, %list.0) ^catch.2()
+      %call.4 : py.Value = py.call(%f.2, %tuple.4, %merge.3) ^catch.2()
+      jump ^join.2()
+    catch.2(%exc.6 : py.Value):
+      %prev.2 : py.Value = py.pushExcInfo(%exc.6)
+      %TypeError.2 : py.Value = py.loadGlobal("i06_call_errors", "TypeError") ^unwind.2()
+      %match.2 : base.Bool = py.excMatch(%exc.6, %TypeError.2) ^unwind.2()
+      branch(%match.2) ^except.2() ^next.2()
+    except.2():
+      %e.cell.6 : base.Ref(py.Value) = py.globalCell("i06_call_errors", "e")
+      %set.10 : base.Unit = base.refSet[py.Value](%e.cell.6, %exc.6)
+      %print.2 : py.Value = py.loadGlobal("i06_call_errors", "print") ^clear.2()
+      %str.4 : py.Value = py.strLit("nonmap:")
+      %e.6 : py.Value = py.loadGlobal("i06_call_errors", "e") ^clear.2()
+      %tuple.5 : py.Value = py.mkTuple(%str.4, %e.6)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%print.2, %tuple.5, %kwargs.5) ^clear.2()
+      %pop.4 : base.Unit = py.popExcept(%prev.2)
+      %e.7 : py.Value = py.undef("e")
+      %e.cell.7 : base.Ref(py.Value) = py.globalCell("i06_call_errors", "e")
+      %set.11 : base.Unit = base.refSet[py.Value](%e.cell.7, %e.7)
+      jump ^join.2()
+    clear.2(%exc.7 : py.Value):
+      %e.8 : py.Value = py.undef("e")
+      %e.cell.8 : base.Ref(py.Value) = py.globalCell("i06_call_errors", "e")
+      %set.12 : base.Unit = base.refSet[py.Value](%e.cell.8, %e.8)
+      jump ^unwind.2(%exc.7)
+    next.2():
+      jump ^unwind.2(%exc.6)
+    unwind.2(%exc.8 : py.Value):
+      %pop.5 : base.Unit = py.popExcept(%prev.2)
+      jump ^propagate.0(%exc.8)
+    join.2():
+      %clo.1 : py.Value = py.mkClosure(@i06_call_errors.g)
+      %g.cell.0 : base.Ref(py.Value) = py.globalCell("i06_call_errors", "g")
+      %set.13 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
+      %g.0 : py.Value = py.loadGlobal("i06_call_errors", "g") ^catch.3()
+      %int.4 : py.Value = py.intLit(5)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %args.0 : py.Value = py.argsTuple(%g.0, %int.4) ^catch.3()
+      %call.6 : py.Value = py.call(%g.0, %args.0, %kwargs.6) ^catch.3()
+      jump ^join.3()
+    catch.3(%exc.9 : py.Value):
+      %prev.3 : py.Value = py.pushExcInfo(%exc.9)
+      %TypeError.3 : py.Value = py.loadGlobal("i06_call_errors", "TypeError") ^unwind.3()
+      %match.3 : base.Bool = py.excMatch(%exc.9, %TypeError.3) ^unwind.3()
+      branch(%match.3) ^except.3() ^next.3()
+    except.3():
+      %e.cell.9 : base.Ref(py.Value) = py.globalCell("i06_call_errors", "e")
+      %set.14 : base.Unit = base.refSet[py.Value](%e.cell.9, %exc.9)
+      %print.3 : py.Value = py.loadGlobal("i06_call_errors", "print") ^clear.3()
+      %str.5 : py.Value = py.strLit("noniter:")
+      %e.9 : py.Value = py.loadGlobal("i06_call_errors", "e") ^clear.3()
+      %tuple.6 : py.Value = py.mkTuple(%str.5, %e.9)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %call.7 : py.Value = py.call(%print.3, %tuple.6, %kwargs.7) ^clear.3()
+      %pop.6 : base.Unit = py.popExcept(%prev.3)
+      %e.10 : py.Value = py.undef("e")
+      %e.cell.10 : base.Ref(py.Value) = py.globalCell("i06_call_errors", "e")
+      %set.15 : base.Unit = base.refSet[py.Value](%e.cell.10, %e.10)
+      jump ^join.3()
+    clear.3(%exc.10 : py.Value):
+      %e.11 : py.Value = py.undef("e")
+      %e.cell.11 : base.Ref(py.Value) = py.globalCell("i06_call_errors", "e")
+      %set.16 : base.Unit = base.refSet[py.Value](%e.cell.11, %e.11)
+      jump ^unwind.3(%exc.10)
+    next.3():
+      jump ^unwind.3(%exc.9)
+    unwind.3(%exc.11 : py.Value):
+      %pop.7 : base.Unit = py.popExcept(%prev.3)
+      jump ^propagate.0(%exc.11)
+    join.3():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.12 : py.Value):
+      %exc.13 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.12)
+      ret(%exc.13)
+  }
+  func @i06_call_errors.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %kwargs.1 : py.Value = py.undef("kwargs")
+      %kwargs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%kwargs.1)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %check.0 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%kwargs.cell.0, %kwargs.0)
+      %print.0 : py.Value = py.loadGlobal("i06_call_errors", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("unreachable")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @i06_call_errors.g(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %args.1 : py.Value = py.undef("args")
+      %args.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%args.1)
+      %int.0 : py.Value = py.intLit(0)
+      %none.0 : py.Value = py.noneLit
+      %args.2 : py.Value = py.getSlice(%args.0, %int.0, %none.0, %none.0) ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%args.cell.0, %args.2)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "g() got an unexpected keyword argument {}") ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("i06_call_errors", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("unreachable")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

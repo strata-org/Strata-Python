@@ -148,6 +148,13 @@ def truthy (v : ValId) (info : Option α := none) : PyM α ValId := do
   Build.emitApply (env := Py.env) (.str .base "cond") Base.Bool.ty Py.truthy #v[] #[v]
     #[← handler] (info := info)
 
+/-- Whether the exception `exc` matches `except type`: the base `Bool` a `branch` takes.  It
+fails for a `type` that is not an exception class, so its `err` successor is the enclosing
+handler. -/
+def excMatch (exc type : ValId) (info : Option α := none) : PyM α ValId := do
+  Build.emitApply (env := Py.env) (.str .base "match") Base.Bool.ty Py.excMatch #v[] #[exc, type]
+    #[← handler] (info := info)
+
 /-! ## Literals
 
 Each is a base constant and the operation that boxes it. -/

@@ -1,0 +1,77 @@
+module
+  clauses: local (assigned)
+  no_match: local (assigned)
+  leave: local (assigned)
+  nested: local (assigned)
+  in_inner_body: local (assigned)
+  clause_raises: local (assigned)
+  closure: local (assigned)
+  two_handlers: local (assigned)
+  not_inherited: local (assigned)
+  C: local (assigned)
+  Exception: global implicit (referenced)
+  top: local (assigned)
+  ValueError: global implicit (referenced)
+  function clauses
+    params: f
+    f: local (parameter, referenced)
+    KeyError: global implicit (referenced)
+    IndexError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    e: local (assigned, referenced)
+  function no_match
+    params: f
+    f: local (parameter, referenced)
+    KeyError: global implicit (referenced)
+  function leave
+    params: xs, f
+    xs: local (parameter, referenced)
+    f: local (parameter, referenced)
+    x: local (assigned, referenced)
+    KeyError: global implicit (referenced)
+    e: local (assigned)
+    ValueError: global implicit (referenced)
+  function nested
+    params: f
+    f: local (parameter, referenced)
+    KeyError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+  function in_inner_body
+    params: f
+    f: local (parameter, referenced)
+    KeyError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+  function clause_raises
+    params: f
+    f: local (parameter, referenced)
+    KeyError: global implicit (referenced)
+    e: local (assigned, referenced)
+  function closure
+    params: f
+    f: local (parameter, referenced)
+    KeyError: global implicit (referenced)
+    e: cell (assigned)
+    g: local (assigned, referenced)
+    function closure.<locals>.g
+      e: free (referenced)
+  function two_handlers
+    params: f
+    f: local (parameter, referenced)
+    KeyError: global implicit (referenced)
+    a: local (assigned, referenced)
+    ValueError: global implicit (referenced)
+    b: local (assigned, referenced)
+  function not_inherited
+    params: f
+    f: local (parameter, referenced)
+    KeyError: global implicit (referenced)
+    g: local (assigned)
+    D: local (assigned)
+    function not_inherited.<locals>.g
+    class not_inherited.<locals>.D
+  class C
+    Exception: global implicit (referenced)
+    err: local (assigned)
+    x: local (assigned)
+    KeyError: global implicit (referenced)
+    e: local (assigned)

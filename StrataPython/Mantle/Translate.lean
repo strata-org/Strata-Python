@@ -101,6 +101,10 @@ end -- public section
 inductive Exit where
   /-- A loop: `break` jumps to `brk`, `continue` to `cont`. -/
   | loop (brk cont : Label)
+  /-- The body of an `except` clause, left through `leaveHandler`: `prev` is the exception
+  handled before, `name` the name the clause binds and where, and `outer` the handler around
+  the `try`. -/
+  | handler (prev : ValId) (name : Option (String × SourceRange)) (outer : BlockValue)
 
 /-- A `def` whose function is emitted after the current one. -/
 structure FuncJob where
@@ -131,6 +135,8 @@ structure Ctx where
   moduleAnnotations : Bool := false
   /-- The class body whose namespace is `classNs` sets up `__annotations__` too. -/
   classAnnotations : Bool := false
+  /-- In an `except` body, the exception it handles: what a bare `raise` raises again. -/
+  handled : Option ValId := none
 
 /-- What translation accumulates.  The first three fields are module-wide; `exits` and
 `targeted` belong to the function being emitted. -/
@@ -533,8 +539,6 @@ def stmtName : stmt SourceRange → String
   | .With .. => "with"
   | .AsyncWith .. => "async with"
   | .Match .. => "match"
-  | .Raise .. => "bare raise"
-  | .Try .. => "try"
   | .TryStar .. => "try/except*"
   | _ => "statement"
 
@@ -1461,6 +1465,32 @@ def importAlias (a : alias SourceRange) : TransM Unit := do
     | .member m n => build (importFrom m n)
   writeName imp.name v a.ann
 
+/-- Unbind `name`, bound at `range`, as leaving `except … as name` does with `name = None`,
+then `del name`.  That leaves a cell unassigned.  In a class namespace, it stores `None`, then
+deletes the key, as CPython's `STORE_NAME` and `DELETE_NAME` do. -/
+def unbindName (name : String) (range : SourceRange) : TransM Unit := do
+  let m ← mangled name
+  match ← place m with
+  | .nsName _ =>
+    writeName name (← build noneLit) range
+    deleteName name range
+  | _ =>
+    let n ← build (emitConst (.str .base "n") (.str m))
+    writeName name (← build (emitTotal (stem m) Py.undef #v[] #[n])) range
+
+/-- Make `prev` the exception being handled again. -/
+def popExcept (prev : ValId) : TransM Unit :=
+  discard <| build (emitEffect (.str .base "pop") Py.popExcept #v[] #[prev])
+
+/-- Leave an `except` clause other than by a failure, as CPython does: under `outer`, the
+handler around the `try`, make `prev` the exception being handled again, then unbind `name`
+if the clause binds one. -/
+def leaveHandler (prev : ValId) (name : Option (String × SourceRange)) (outer : BlockValue) :
+    TransM Unit :=
+  withHandlerTo outer do
+    popExcept prev
+    if let some (n, r) := name then unbindName n r
+
 /-- Leave by `break` (`brk := true`), `continue`, or `return v` (`ret := some v`), walking the
 exits stack from the innermost entry (§4). -/
 def exitWalk (brk : Bool) (ret : Option ValId) (range : SourceRange) : TransM Unit := do
@@ -1468,6 +1498,7 @@ def exitWalk (brk : Bool) (ret : Option ValId) (range : SourceRange) : TransM Un
     match e, ret with
     | .loop b c, none => return ← jump (if brk then b else c)
     | .loop .., some _ => pure ()
+    | .handler prev name outer, _ => leaveHandler prev name outer
   match ret with
   | some v => build (emitReturn v)
   | none => reject (if brk then "'break' outside loop" else "'continue' outside loop") range
@@ -1537,6 +1568,13 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
     defStmt sr n args body.val decs.val (!tps.val.isEmpty) false
   | .Assert _ test ⟨_, msg⟩ => assertStmt test msg
   | .Raise _ ⟨_, some e⟩ ⟨_, cause⟩ => raiseStmt e cause
+  | .Raise sr ⟨_, none⟩ _ =>
+    match (← read).handled with
+    | some exc => build (PyBuild.jump (← build (raiseTo exc)))
+    | none => reject "bare raise" sr
+  | .Try sr ⟨_, body⟩ ⟨_, handlers⟩ ⟨_, orelse⟩ ⟨_, final⟩ =>
+    if !final.isEmpty then reject "finally" sr
+    else tryStmt body handlers orelse
   | .Delete _ ⟨_, targets⟩ =>
     match targets.mapM deleter with
     | .error t => badTarget t
@@ -1606,6 +1644,63 @@ partial def raiseStmt (e : expr SourceRange) (cause : Option (expr SourceRange))
   if let some c := c then
     discard <| build (emitActing (.str .base "cause") Py.setCause #v[] #[x, c])
   build (PyBuild.jump (← build (raiseTo x)))
+
+/-- `try: body except …: … else: orelse` (§7.2).  A failure in `body` goes to `catch`, which
+makes the exception the one being handled and tests the clauses in turn.  A failure in a
+clause, and an exception that no clause matches, go to `unwind`.  It makes the previous
+exception the one being handled again, then raises to the handler around the `try`.  `orelse`
+runs after `body`, under that handler. -/
+partial def tryStmt (body : Array (stmt SourceRange)) (handlers : Array (excepthandler SourceRange))
+    (orelse : Array (stmt SourceRange)) : TransM Unit := do
+  let outer ← build handler
+  let catchL ← build (freshLabel "catch")
+  let unwind ← build (freshLabel "unwind")
+  let join ← build (freshLabel "join")
+  withHandler catchL (transStmts body)
+  if ← isOpen then
+    transStmts orelse
+    if ← isOpen then jump join
+  let exc ← build (startBlockWith catchL (.str .base "exc"))
+  let prev ← build (emitTotal (.str .base "prev") Py.pushExcInfo #v[] #[exc])
+  withHandler unwind do
+    for h in handlers do
+      let .ExceptHandler hsr ⟨_, type⟩ ⟨_, name⟩ ⟨_, hbody⟩ := h
+      let name := name.map (·.val, hsr)
+      let some t := type
+        | -- A bare `except:` is last; the scope pass reports one that is not.
+          clause exc prev outer join unwind name hbody
+          break
+      let m ← build (excMatch exc (← transExpr t))
+      let bodyL ← build (freshLabel "except")
+      let next ← build (freshLabel "next")
+      branch m bodyL next
+      build (startBlock bodyL)
+      clause exc prev outer join unwind name hbody
+      build (startBlock next)
+    if ← isOpen then jump unwind #[exc]
+  let x ← build (startBlockWith unwind (.str .base "exc"))
+  popExcept prev
+  build (PyBuild.jump { outer with args := outer.args.push x })
+  if ← targeted join then build (startBlock join)
+
+/-- The body of an `except` clause handling `exc`, which binds it to `name` if there is one,
+then leaves the handler (`leaveHandler`) and jumps to `join`.  `prev` is the exception handled
+before, `outer` the handler around the `try`, and `unwind` the block that restores `prev` and
+raises again.  With a `name`, a failure first unbinds it, in `clear`. -/
+partial def clause (exc prev : ValId) (outer : BlockValue) (join unwind : Label)
+    (name : Option (String × SourceRange)) (body : Array (stmt SourceRange)) : TransM Unit :=
+  withReader ({ · with handled := some exc }) do
+    let clear? ← name.mapM fun (n, r) => do
+      writeName n exc r
+      build (freshLabel "clear")
+    withExit (.handler prev name outer) (withHandler (clear?.getD unwind) (transStmts body))
+    if ← isOpen then
+      leaveHandler prev name outer
+      jump join
+    if let (some clear, some (n, r)) := (clear?, name) then
+      let x ← build (startBlockWith clear (.str .base "exc"))
+      unbindName n r
+      jump unwind #[x]
 
 /-- `for target in iter: body else: orelse` at `sr` (§6.4).  Only `next` raises to `stop`,
 which ends the loop on `StopIteration` and passes any other exception to the enclosing

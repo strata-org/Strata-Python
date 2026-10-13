@@ -60,6 +60,11 @@ carries exists only in the successor reached when it was a `return`.
 
 The `finally` body is emitted once and reached from every exit.  Nested `finally`s forward
 a completion outwards instead of acting on it.
+
+## The exception being handled
+
+As in CPython, the run-time state holds the exception being handled: `pushExcInfo` sets it on
+entering an `except` handler, and `popExcept` restores the previous one on leaving it.
 -/
 
 namespace StrataPython.Mantle
@@ -373,6 +378,17 @@ public environment Py extends Base where
   cause clears `__cause__`.  Raises `TypeError: exception causes must derive from
   BaseException` for any other `cause`, as CPython does, or whatever `cause()` raises. -/
   insn setCause (exc cause : Value) (^err (e : Value)) : Unit
+  /-- Makes `exc` the exception being handled, and returns the one handled before, or `None`:
+  CPython's `PUSH_EXC_INFO`, on entering an `except` handler. -/
+  insn pushExcInfo (exc : Value) : Value
+  /-- Makes `prev`, which `pushExcInfo` returned, the exception being handled again: CPython's
+  `POP_EXCEPT`, on every way out of an `except` handler. -/
+  insn popExcept (prev : Value) : Unit
+  /-- Whether the exception `exc` matches `except type`, as the `Bool` a `branch` takes:
+  CPython's `CHECK_EXC_MATCH`.  `type` is an exception class or a tuple of them.  Raises
+  `TypeError: catching classes that do not inherit from BaseException is not allowed`
+  otherwise. -/
+  insn excMatch (exc type : Value) (^err (e : Value)) : Bool
 
   -- Strings and degradation.
 

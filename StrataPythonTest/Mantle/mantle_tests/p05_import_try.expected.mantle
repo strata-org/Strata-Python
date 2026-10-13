@@ -1,0 +1,96 @@
+module p05_import_try {
+  func @|p05_import_try.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("p05_import_try")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p05_import_try", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p05_import_try", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %mod.0 : py.Value = py.importModule("simplejson") ^catch.0()
+      %json.cell.0 : base.Ref(py.Value) = py.globalCell("p05_import_try", "json")
+      %set.2 : base.Unit = base.refSet[py.Value](%json.cell.0, %mod.0)
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %ImportError.0 : py.Value = py.loadGlobal("p05_import_try", "ImportError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %ImportError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %mod.1 : py.Value = py.importModule("json") ^unwind.0()
+      %json.cell.1 : base.Ref(py.Value) = py.globalCell("p05_import_try", "json")
+      %set.3 : base.Unit = base.refSet[py.Value](%json.cell.1, %mod.1)
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      jump ^join.0()
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.1 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.1)
+    join.0():
+      %json.0 : py.Value = py.loadGlobal("p05_import_try", "json") ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%json.0) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %path.0 : py.Value = py.importFrom("os", "path") ^propagate.0()
+      %path.cell.0 : base.Ref(py.Value) = py.globalCell("p05_import_try", "path")
+      %set.4 : base.Unit = base.refSet[py.Value](%path.cell.0, %path.0)
+      jump ^join.1()
+    else.0():
+      %none.1 : py.Value = py.noneLit
+      %path.cell.1 : base.Ref(py.Value) = py.globalCell("p05_import_try", "path")
+      %set.5 : base.Unit = base.refSet[py.Value](%path.cell.1, %none.1)
+      jump ^join.1()
+    join.1():
+      %clo.0 : py.Value = py.mkClosure(@p05_import_try.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("p05_import_try", "f")
+      %set.6 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %none.2 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.2)
+      ret(%ret.0)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
+  }
+  func @p05_import_try.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %x.1 : py.Value = py.undef("x")
+      %fill.0 : py.Value = py.mkTuple(%x.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("x")
+      %x.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "f() got multiple values for argument 'x'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "f() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %x.3 : py.Value = py.requireDefined(%x.2, "TypeError", "f() missing 1 required positional argument: 'x'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.3)
+      %json.0 : py.Value = py.loadGlobal("p05_import_try", "json") ^propagate.0()
+      %dumps.0 : py.Value = py.attr(%json.0, "dumps") ^propagate.0()
+      %x.4 : py.Value = base.refGet[py.Value](%x.cell.0)
+      %x.5 : py.Value = py.requireDefined(%x.4, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%x.5)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%dumps.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %path.0 : py.Value = py.loadGlobal("p05_import_try", "path") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%call.0, %path.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

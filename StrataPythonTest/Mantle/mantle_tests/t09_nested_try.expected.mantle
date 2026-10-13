@@ -1,0 +1,130 @@
+module t09_nested_try {
+  func @|t09_nested_try.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("t09_nested_try")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t09_nested_try", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("t09_nested_try", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure(@t09_nested_try.inner_risky)
+      %inner_risky.cell.0 : base.Ref(py.Value) = py.globalCell("t09_nested_try", "inner_risky")
+      %set.2 : base.Unit = base.refSet[py.Value](%inner_risky.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure(@t09_nested_try.outer_risky)
+      %outer_risky.cell.0 : base.Ref(py.Value) = py.globalCell("t09_nested_try", "outer_risky")
+      %set.3 : base.Unit = base.refSet[py.Value](%outer_risky.cell.0, %clo.1)
+      %inner_risky.0 : py.Value = py.loadGlobal("t09_nested_try", "inner_risky") ^catch.1()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%inner_risky.0, %tuple.0, %kwargs.0) ^catch.1()
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("t09_nested_try", "x")
+      %set.4 : base.Unit = base.refSet[py.Value](%x.cell.0, %call.0)
+      jump ^join.1()
+    catch.1(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %ValueError.0 : py.Value = py.loadGlobal("t09_nested_try", "ValueError") ^unwind.1()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %ValueError.0) ^unwind.1()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      jump ^unwind.1(%exc.0)
+    next.0():
+      jump ^unwind.1(%exc.0)
+    unwind.1(%exc.1 : py.Value):
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      jump ^catch.0(%exc.1)
+    join.1():
+      jump ^join.0()
+    catch.0(%exc.2 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.2)
+      %int.0 : py.Value = py.intLit(0)
+      %y.cell.0 : base.Ref(py.Value) = py.globalCell("t09_nested_try", "y")
+      %set.5 : base.Unit = base.refSet[py.Value](%y.cell.0, %int.0)
+      %pop.1 : base.Unit = py.popExcept(%prev.1)
+      jump ^join.0()
+    unwind.0(%exc.3 : py.Value):
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.3)
+    join.0():
+      %outer_risky.0 : py.Value = py.loadGlobal("t09_nested_try", "outer_risky") ^catch.2()
+      %tuple.1 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%outer_risky.0, %tuple.1, %kwargs.1) ^catch.2()
+      jump ^join.2()
+    catch.2(%exc.4 : py.Value):
+      %prev.2 : py.Value = py.pushExcInfo(%exc.4)
+      %TypeError.0 : py.Value = py.loadGlobal("t09_nested_try", "TypeError") ^unwind.2()
+      %match.1 : base.Bool = py.excMatch(%exc.4, %TypeError.0) ^unwind.2()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %inner_risky.1 : py.Value = py.loadGlobal("t09_nested_try", "inner_risky") ^catch.3()
+      %tuple.2 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%inner_risky.1, %tuple.2, %kwargs.2) ^catch.3()
+      jump ^join.3()
+    catch.3(%exc.5 : py.Value):
+      %prev.3 : py.Value = py.pushExcInfo(%exc.5)
+      %ValueError.1 : py.Value = py.loadGlobal("t09_nested_try", "ValueError") ^unwind.3()
+      %match.2 : base.Bool = py.excMatch(%exc.5, %ValueError.1) ^unwind.3()
+      branch(%match.2) ^except.2() ^next.2()
+    except.2():
+      %pop.3 : base.Unit = py.popExcept(%prev.3)
+      jump ^join.3()
+    next.2():
+      jump ^unwind.3(%exc.5)
+    unwind.3(%exc.6 : py.Value):
+      %pop.4 : base.Unit = py.popExcept(%prev.3)
+      jump ^unwind.2(%exc.6)
+    join.3():
+      %pop.5 : base.Unit = py.popExcept(%prev.2)
+      jump ^join.2()
+    next.1():
+      jump ^unwind.2(%exc.4)
+    unwind.2(%exc.7 : py.Value):
+      %pop.6 : base.Unit = py.popExcept(%prev.2)
+      jump ^propagate.0(%exc.7)
+    join.2():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.8 : py.Value):
+      %exc.9 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.8)
+      ret(%exc.9)
+  }
+  func @t09_nested_try.inner_risky(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "inner_risky() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "inner_risky() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %ValueError.0 : py.Value = py.loadGlobal("t09_nested_try", "ValueError") ^propagate.0()
+      %str.0 : py.Value = py.strLit("inner")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%ValueError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @t09_nested_try.outer_risky(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "outer_risky() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "outer_risky() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %TypeError.0 : py.Value = py.loadGlobal("t09_nested_try", "TypeError") ^propagate.0()
+      %str.0 : py.Value = py.strLit("outer")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%TypeError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+}
+

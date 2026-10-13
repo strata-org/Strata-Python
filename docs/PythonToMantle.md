@@ -247,24 +247,23 @@ emission state of the Python builder. `Ctx` is fixed while one function is trans
 | the Python module name, the Mantle module name, the names some scope binds as globals | `Ctx.module`, `Ctx.moduleName`, `Ctx.globals` | yes | `translate` |
 | diagnostics | `TState.diagnostics` | yes | `reject` |
 | functions to emit after the current one, and the names taken | `TState.pending : Array FuncJob`, `TState.funcNames` | yes | `defStmt`, `allocName` |
-| exits stack (below) | `TState.exits : Array Exit` | yes, `loop` only | `withExit`: loops; later `try`/`finally`, `with`, `except … as` |
+| exits stack (below) | `TState.exits : Array Exit` | yes, but not `cleanup` | `withExit`: loops, `except` clause bodies; later `try`/`finally`, `with` |
 | the labels some emitted transfer names, for starting join blocks | `TState.targeted` | yes | `jump`, `branch` |
-| exception being handled, for bare `raise` | `currentExc : Option ValId` | **add** | `except` bodies |
-| namespace, inside a class body | `classNs : Option ValId` | **add** | class body functions |
+| exception an `except` body handles, for bare `raise` | `Ctx.handled : Option ValId` | yes | `except` bodies |
+| namespace, inside a class body | `Ctx.classNs : Option ValId` | yes | class body functions |
 | default annotation | `Build.State.info` | yes | `withRange` |
 
 A `def` binds its name where it runs, and queues a `FuncJob`; `translate` emits the module
 body first, then each queued function, in order.
 
 The **exits stack** records every enclosing construct that a `break`, `continue` or `return`
-must pass through, innermost last. `Exit` has the `loop` constructor; `cleanup` and `unbind`
-are to add:
+must pass through, innermost last. `cleanup` is to add:
 
 ```
 inductive Exit
   | loop    (brk cont : Label)    -- break → brk, continue → cont
+  | handler (prev : ValId) …      -- an except clause body: leave the handler
   | cleanup (fin : Label)         -- try/finally or with: fin takes a py.Completion
-  | unbind  (cell : ValId)        -- except … as e: clear e when leaving
 ```
 
 **The exit walk** (`exitWalk`). An abrupt exit `k` (break, continue, or return `v`) is
@@ -274,7 +273,7 @@ emitted by walking the stack from the innermost entry outward:
 |---|---|---|---|
 | `loop brk cont` | `jump ^brk()`, stop | `jump ^cont()`, stop | skip |
 | `cleanup fin` | `%c = py.completionBreak`, `jump ^fin(%c)`, stop | `py.completionContinue`, likewise | `py.completionReturn v`, likewise |
-| `unbind cell` | write `undef` to `cell`, keep walking | same | same |
+| `handler prev` | leave the handler (§7.2), keep walking | same | same |
 | stack empty | a diagnostic | a diagnostic | `emitReturn v` |
 
 Exceptions do not use the walk. `Frame.handler` already names the right block at every
@@ -783,8 +782,8 @@ Each is rejected as §3 describes.
 |---|---|
 | `raise E` | `v = eval E`, `e = py.toException v`, then `jump ^handler(e)`. `toException` instantiates a class and raises `TypeError` for a non-exception, as CPython's `RAISE_VARARGS` does |
 | `raise E from C` | `v = eval E`, `c = eval C`, `e = py.toException v`, `py.setCause e c`, then `jump ^handler(e)`. `setCause` instantiates a class too, sets `__suppress_context__`, and raises `TypeError` for a cause that is neither an exception nor `None` |
-| bare `raise` inside `except` | `jump ^handler(currentExc)` |
-| bare `raise` elsewhere | **rejected**. Python raises at run time based on the dynamic exception state, which this translation does not model |
+| bare `raise` inside an `except` body of the same function | `jump ^handler(exc)`, `exc` being the exception the innermost enclosing `except` body handles (`Ctx.handled`). Nested `try` statements in that body do not change it, because each handler restores the exception being handled when it ends |
+| bare `raise` elsewhere | **rejected** |
 
 `raise` is a `jump`. A Python function raises by transferring to `Frame.handler`, which is a
 block taking the exception. At the outermost level that block is `propagate.0`, which
@@ -795,7 +794,8 @@ returns `base.error`.
 Write `S` for the exits stack and `H` for the handler in effect at the `try` statement.
 Labels are allocated up front:
 
-- `catch(exc)`, if there are `except` clauses;
+- `catch(exc)` and `unwind(exc)`, if there are `except` clauses, and `clear_i(exc)` for each
+  clause `i` with `as e`;
 - `fin(pending : py.Completion)` and `finRaise(exc)`, if there is a `finally`;
 - `join`.
 
@@ -805,17 +805,29 @@ Let `H'` be `finRaise` if there is a `finally`, and `H` otherwise. Let `S'` be `
 | Part | Handler | Exits stack | Normal end |
 |---|---|---|---|
 | `try` body | `catch` if there are clauses, else `H'` | `S'` | `jump ^else()` if there is an `else`; otherwise as `else` would end |
-| `catch(exc)`: the clause tests | `H'` | `S'` | see the clause chain below |
-| clause body `i` | `H'`, or `clear_i` if `as e` | `S'` + `unbind e` | write `undef` to `e`, then `fin(completionNormal)` or `join` |
+| `catch(exc)`: `prev = py.pushExcInfo exc`, then the clause tests | `unwind` | `S'` | see the clause chain below |
+| clause body `i` | `unwind`, or `clear_i` if `as e` | `S'` + `handler prev` | leave the handler, then `fin(completionNormal)` or `join` |
+| `unwind(x)` | | | `py.popExcept prev`, then `jump ^H'(x)` |
 | `else` body | `H'`. The `except` clauses do not cover it | `S'` | `fin(completionNormal)` or `join` |
 | `finRaise(exc)` | | | `%c = completionRaise exc`, `jump ^fin(%c)` |
 | `fin(pending)`: the `finally` body, emitted once | `H` | `S` | dispatch `pending` |
 
 **The clause chain** in `catch(exc)`, for each clause `except T as e`: evaluate `T`,
-`%m = py.excMatch exc T` (§8), then `branch %m ^body_i() ^next_i()`. A bare `except:` jumps
+`%m = py.excMatch exc T`, then `branch %m ^body_i() ^next_i()`. A bare `except:` jumps
 straight to its body. If the last clause does not match, the chain ends with
-`jump ^H'(exc)`. In body `i`, `currentExc` is `exc` and `e`'s cell holds `exc`. `clear_i(x)`
-writes `undef` to `e`, then `jump ^H'(x)`.
+`jump ^unwind(exc)`. In body `i`, `Ctx.handled` is `exc`, and `e` holds `exc`. `clear_i(x)`
+unbinds `e`, then `jump ^unwind(x)`.
+
+**The exception being handled** is run-time state, as in CPython. `py.pushExcInfo exc` makes
+`exc` the exception being handled and returns the previous one, `prev`, as CPython's
+`PUSH_EXC_INFO` does. Every way out of the handler restores `prev` with `py.popExcept`, as
+CPython's `POP_EXCEPT` does: `unwind`, which every failure and an unmatched exception reach,
+and *leaving the handler*, which is how a clause ends normally and how the exit walk passes its
+`handler` entry. Leaving the handler is `py.popExcept prev`, then unbinding `e` if the clause
+binds it, both under `H'`, the handler around the `try`, as in CPython.
+
+**Unbinding `e`** is CPython's `e = None; del e`. For a local, free or global name, it writes
+`undef` to the cell. In a class body, it stores `None` in the namespace, then deletes it.
 
 **Dispatch** is the end of `fin`. `PyBuild.dispatch` emits one `py.Completion.case pending`,
 with five successors: normal, return, raise, break and continue. Each successor performs,
@@ -904,7 +916,6 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 
 | Operation | Signature (DSL) | Needed by |
 |---|---|---|
-| `excMatch` | `insn excMatch (exc type : Value) (^err (e : Value)) : Bool` | `except T` (the alternative is `py.call` builtins `isinstance`, then `truthy`) |
 | `mkGenerator` | `insn mkGenerator (code : Code) (cells : Ref Value…) : Value` | generators (stage 1, opaque) |
 
 **Declarations to fix:**
@@ -915,7 +926,7 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 **Builder (`PyBuild`) and translator (`PyTranslate`):**
 
 - The scope and the exits stack live in the translator's state, `TransM` (§4). `Exit` lacks
-  `cleanup` and `unbind`, and the state lacks `currentExc` and `classNs`.
+  `cleanup`.
 - `PyBuild.buildFuncTypedWith` builds a function and returns its body's result.
 - `Frame.handler` is a `BlockValue`, so a handler can pre-bind arguments (`withHandlerTo`).
   Under `Override` nothing needs that; a chaining policy's `superseded` block does.
@@ -924,7 +935,7 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 - `tryFinally`, `protect` and `dispatchArms` run their bodies in any `MonadPy` monad, so the
   translator can pass `TransM` bodies. The translator does not call them yet. `forEach`
   does the same, and the translator calls it for comprehensions.
-- `exitWalk` handles `loop` entries only.
+- `exitWalk` handles `loop` and `handler` entries.
 
 ## 9. Open questions
 
@@ -943,7 +954,8 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
    its own handler inside: §7 moved to a region boundary.
 2. **Exception chaining in `finally`.** The `superseded` block must set `__context__`, and
    the `finally` body must see the pending exception as the one being handled
-   (`sys.exc_info()`). Both need the run-time exception state, which is not designed yet.
+   (`sys.exc_info()`). Both need the run-time exception state, which `except` handlers
+   already maintain with `py.pushExcInfo` and `py.popExcept` (§7.2).
 3. **Definedness.** Should definedness stay as `py.undef` values in cells, or become
    `Ref (Option Value)`? Only `undef`, `isDefined`, `requireDefined` and `requireUndefined`
    would change.
@@ -1050,8 +1062,8 @@ a diagnostic.
 | list, set and dict comprehensions | §6.8 | specified; implemented |
 | generator expressions, `yield` | §6.8 | unsupported; a generator function is a stub |
 | `raise`, `raise … from` | §7.1 | specified; implemented |
-| bare `raise` | §7.1 | specified inside `except`; unsupported elsewhere |
-| `try` / `except` / `else` | §7.2 | specified, open question (`excMatch`) |
+| bare `raise` | §7.1 | specified and implemented inside an `except` body; unsupported elsewhere |
+| `try` / `except` / `else` | §7.2 | specified; implemented |
 | `finally` | §7.2 | specified, open question (Q2) |
 | `with`, several items | §7.3 | specified, open question (Q5) |
 | `async`, `await`, `match`, `except*`, `type`, PEP 695 | §6.9 | unsupported; an `async def` is a stub |

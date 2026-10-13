@@ -1,0 +1,69 @@
+module top
+  C: local (assigned)
+  Exception: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  clause_raises: local (assigned)
+  clauses: local (assigned)
+  closure: local (assigned)
+  in_inner_body: local (assigned)
+  leave: local (assigned)
+  nested: local (assigned)
+  no_match: local (assigned)
+  not_inherited: local (assigned)
+  top: local (assigned)
+  two_handlers: local (assigned)
+  function clauses
+    IndexError: global implicit (referenced)
+    KeyError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    e: local (assigned, referenced)
+    f: local (parameter, referenced)
+  function no_match
+    KeyError: global implicit (referenced)
+    f: local (parameter, referenced)
+  function leave
+    KeyError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    e: local (assigned)
+    f: local (parameter, referenced)
+    x: local (assigned, referenced)
+    xs: local (parameter, referenced)
+  function nested
+    KeyError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    f: local (parameter, referenced)
+  function in_inner_body
+    KeyError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    f: local (parameter, referenced)
+  function clause_raises
+    KeyError: global implicit (referenced)
+    e: local (assigned, referenced)
+    f: local (parameter, referenced)
+  function closure
+    KeyError: global implicit (referenced)
+    e: cell (assigned)
+    f: local (parameter, referenced)
+    g: local (assigned, referenced)
+    function g
+      e: free (referenced)
+  function two_handlers
+    KeyError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    a: local (assigned, referenced)
+    b: local (assigned, referenced)
+    f: local (parameter, referenced)
+  function not_inherited
+    D: local (assigned)
+    KeyError: global implicit (referenced)
+    f: local (parameter, referenced)
+    g: local (assigned)
+    function g
+    class D
+  class C
+    Exception: global implicit (referenced)
+    KeyError: global implicit (referenced)
+    e: local (assigned)
+    err: local (assigned)
+    x: local (assigned)
+qualnames: C, clause_raises, clauses, closure, closure.<locals>.g, in_inner_body, leave, nested, no_match, not_inherited, not_inherited.<locals>.D, not_inherited.<locals>.g, two_handlers

@@ -1,0 +1,95 @@
+module p13_except_as {
+  func @|p13_except_as.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("p13_except_as")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p13_except_as", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p13_except_as", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure(@p13_except_as.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("p13_except_as", "f")
+      %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %Exception.0 : py.Value = py.loadGlobal("p13_except_as", "Exception") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %Exception.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %err.cell.0 : base.Ref(py.Value) = py.globalCell("p13_except_as", "err")
+      %set.3 : base.Unit = base.refSet[py.Value](%err.cell.0, %exc.0)
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %err.0 : py.Value = py.undef("err")
+      %err.cell.1 : base.Ref(py.Value) = py.globalCell("p13_except_as", "err")
+      %set.4 : base.Unit = base.refSet[py.Value](%err.cell.1, %err.0)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %err.1 : py.Value = py.undef("err")
+      %err.cell.2 : base.Ref(py.Value) = py.globalCell("p13_except_as", "err")
+      %set.5 : base.Unit = base.refSet[py.Value](%err.cell.2, %err.1)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.3 : py.Value):
+      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+      ret(%exc.4)
+  }
+  func @p13_except_as.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %e.0 : py.Value = py.undef("e")
+      %e.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%e.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %g.0 : py.Value = py.loadGlobal("p13_except_as", "g") ^catch.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%g.0, %tuple.0, %kwargs.1) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %ValueError.0 : py.Value = py.loadGlobal("p13_except_as", "ValueError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %ValueError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %set.0 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.0 : py.Value = py.loadGlobal("p13_except_as", "print") ^clear.0()
+      %e.3 : py.Value = base.refGet[py.Value](%e.cell.0)
+      %e.5 : py.Value = py.requireDefined(%e.3, "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^clear.0()
+      %tuple.1 : py.Value = py.mkTuple(%e.5)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.2) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.6 : py.Value = py.undef("e")
+      %set.1 : base.Unit = base.refSet[py.Value](%e.cell.0, %e.6)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.7 : py.Value = py.undef("e")
+      %set.2 : base.Unit = base.refSet[py.Value](%e.cell.0, %e.7)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %e.8 : py.Value = base.refGet[py.Value](%e.cell.0)
+      %e.10 : py.Value = py.requireDefined(%e.8, "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%e.10)
+      ret(%ret.0)
+    propagate.0(%exc.3 : py.Value):
+      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+      ret(%exc.4)
+  }
+}
+

@@ -824,6 +824,13 @@ private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
   | .Try _ body handlers orelse finalbody | .TryStar _ body handlers orelse finalbody =>
     visitStmts body.val
     visitStmts orelse.val
+    let hs := handlers.val
+    for h : i in [:hs.size] do
+      let .ExceptHandler hsr ty _ _ := hs[i]
+      if ty.val.isNone && i + 1 < hs.size then
+        -- CPython reports only the first.
+        syntaxError "default 'except:' must be last" hsr
+        break
     for .ExceptHandler hsr ty name hbody in handlers.val do
       ty.val.forM visitExpr
       if let some n := name.val then addDef n.val { assigned := true } hsr

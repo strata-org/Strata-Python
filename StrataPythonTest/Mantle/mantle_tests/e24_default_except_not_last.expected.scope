@@ -1,0 +1,4 @@
+module
+  KeyError: global implicit (referenced)
+diagnostics:
+  syntax error at 4:0-5:8: default 'except:' must be last

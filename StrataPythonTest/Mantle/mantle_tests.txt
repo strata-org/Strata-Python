@@ -10,10 +10,10 @@ t03_if_else | yes |
 t04_while | yes |
 t05_for | yes |
 t06_function | yes |
-t07_try_except | no |
+t07_try_except | yes |
 t08_try_finally | no |
-t09_nested_try | no |
-t10_except_type | no |
+t09_nested_try | yes |
+t10_except_type | yes |
 t11_with | no |
 t12_class | yes |
 t13_fstring | yes |
@@ -23,8 +23,8 @@ t16_chained_cmp | yes |
 t17_import | yes |
 t18_data_struct | yes |
 t19_attribute | yes |
-t20_raise | no |
-t21_combined | no |
+t20_raise | yes |
+t21_combined | yes |
 t22_star_args | yes |
 t23_kwargs_boto3 | yes |
 t24_assert | yes |
@@ -47,9 +47,9 @@ i02_param_kinds | yes |
 i03_defaults | yes |
 i04_dict_unpack | yes |
 i05_kwargs_mutation | yes |
-i06_call_errors | no |
+i06_call_errors | yes |
 i07_methods | yes |
-i08_binding_errors | no |
+i08_binding_errors | yes |
 tc01_literals | yes |
 tc02_arithmetic | yes |
 tc03_string_ops | yes |
@@ -115,6 +115,7 @@ m_super_hook | yes |
 m_super_named | yes |
 m_super_rebound | yes | super() with super rebound
 m_raise | yes | bare raise, generator function
+m_try | yes | bare raise, bare raise, finally, try/except*
 m_rejected | yes | relative import, import *
 e01_nonlocal_unbound | yes | no binding for nonlocal 'x' found
 e02_global_param | yes | name 'x' is parameter and global
@@ -139,11 +140,12 @@ e20_yield_in_dictcomp | no | 'yield' inside dict comprehension
 e21_repeated_keyword | yes | keyword argument repeated: k
 e22_starred_target | yes | starred assignment target must be in a list or tuple, with
 e23_multiple_starred | yes | multiple starred expressions in assignment
+e24_default_except_not_last | yes | default 'except:' must be last
 p01_import_dotted | yes |
 p02_import_as | yes |
 p03_from_import | yes |
 p04_import_in_function | yes |
-p05_import_try | no |
+p05_import_try | yes |
 p06_import_relative | yes | relative import
 p07_import_star | yes | import *
 p08_import_rebound | yes |
@@ -151,11 +153,11 @@ p09_read_before_assign | yes |
 p10_conditional_local | yes |
 p11_shadow_under_control | yes |
 p12_del | yes |
-p13_except_as | no |
+p13_except_as | yes |
 p14_class_body | yes |
 p15_global | yes |
 p16_closures | yes |
-p17_conditional_def | no |
+p17_conditional_def | yes |
 p18_builtins | yes |
 p19_builtin_shadowed | yes |
 p20_global_mutated | yes |
