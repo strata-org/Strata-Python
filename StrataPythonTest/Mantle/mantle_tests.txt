@@ -100,19 +100,20 @@ m_unpack | yes |
 m_unbound_local | yes |
 m_walrus | yes |
 m_while | yes |
-m_rejected | yes | relative import, import *, nested function, non-constant default
-e01_nonlocal_unbound | no | no binding for nonlocal 'x' found
+m_closures | yes |
+m_rejected | yes | relative import, import *, non-constant default
+e01_nonlocal_unbound | yes | no binding for nonlocal 'x' found
 e02_global_param | yes | name 'x' is parameter and global
-e03_nonlocal_module | no | nonlocal declaration not allowed at module level
+e03_nonlocal_module | yes | nonlocal declaration not allowed at module level
 e04_assign_before_global | yes | name 'x' is assigned to before global declaration
 e05_use_before_global | yes | name 'x' is used prior to global declaration
-e06_nonlocal_and_global | no | name 'x' is nonlocal and global
+e06_nonlocal_and_global | yes | name 'x' is nonlocal and global
 e07_walrus_class_comprehension | no | assignment expression within a comprehension cannot be used in a class body
 e08_walrus_rebinds_iteration | no | assignment expression cannot rebind comprehension iteration variable 'x'
 e09_duplicate_argument | yes | duplicate argument 'a' in function definition
 e10_import_star_in_function | yes | import * only allowed at module level, import *
-e11_nonlocal_param | no | name 'x' is parameter and nonlocal
-e12_nonlocal_top_function | no | no binding for nonlocal 'x' found
+e11_nonlocal_param | yes | name 'x' is parameter and nonlocal
+e12_nonlocal_top_function | yes | no binding for nonlocal 'x' found
 e13_walrus_comprehension_iterable | no | assignment expression cannot be used in a comprehension iterable expression
 e14_nonlocal_class_scope | no | no binding for nonlocal 'x' found
 e15_comprehension_inner_rebind | no | comprehension inner loop cannot rebind assignment expression target 'j'
@@ -127,7 +128,7 @@ e23_multiple_starred | yes | multiple starred expressions in assignment
 p01_import_dotted | yes |
 p02_import_as | yes |
 p03_from_import | yes |
-p04_import_in_function | no |
+p04_import_in_function | yes |
 p05_import_try | no |
 p06_import_relative | yes | relative import
 p07_import_star | yes | import *
@@ -139,19 +140,19 @@ p12_del | yes |
 p13_except_as | no |
 p14_class_body | no |
 p15_global | yes |
-p16_closures | no |
+p16_closures | yes |
 p17_conditional_def | no |
 p18_builtins | yes |
 p19_builtin_shadowed | no |
 p20_global_mutated | yes |
-p21_closure_three_levels | no |
+p21_closure_three_levels | yes |
 p22_comprehensions | no | generator expression
 p23_walrus | no | generator expression
 p24_lambda | no |
 p25_shadow_builtin | yes |
 p26_params | no |
 p27_nonlocal_chain | no |
-p28_global_nested | no |
+p28_global_nested | yes |
 p29_mangling | no |
 p30_super | no |
 p31_free_class | no |

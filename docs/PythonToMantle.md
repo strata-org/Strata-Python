@@ -887,8 +887,7 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 - The scope and the exits stack live in the translator's state, `TransM` (§4). `Exit` lacks
   `cleanup` and `unbind`, and the state lacks `currentExc` and `classNs`.
 - The prologue is `PyTranslate.prologue` (§5.4). It has no default cells.
-- `PyBuild.buildFuncTypedWith` builds a function and returns its body's result. `transFunc`
-  declares only `args` and `kwargs`; captured cells before them are to add.
+- `PyBuild.buildFuncTypedWith` builds a function and returns its body's result.
 - `Frame.handler` is a `BlockValue`, so a handler can pre-bind arguments (`withHandlerTo`).
   Under `Override` nothing needs that; a chaining policy's `superseded` block does.
 - `dispatch` and `dispatchArms` take `Label`s. Direct successors that pre-bind arguments need
@@ -975,11 +974,11 @@ a diagnostic.
 
 | Construct | Section | Status |
 |---|---|---|
-| module body; top-level `def` with positional, positional-only, keyword-only, `*args` and `**kwargs` parameters and constant defaults; prologue; `return` | §5.2–§5.5 | specified; implemented |
-| nested `def`, `lambda`, decorators, non-constant defaults | §5.3 | specified |
+| module body; `def`, nested too, with positional, positional-only, keyword-only, `*args` and `**kwargs` parameters and constant defaults; prologue; `return` | §5.2–§5.5 | specified; implemented |
+| `lambda`, decorators, non-constant defaults | §5.3 | specified |
 | name resolution (all five kinds, mangling, compile-time errors) | §5.1 | specified; implemented (`PyScope.analyze`, CPython 3.12 model) |
 | local names | §5.1 | specified; implemented |
-| cell and free names | §5.1 | specified |
+| cell and free names | §5.1 | specified; implemented |
 | global names, `global`, builtins | §5.1 | specified; implemented |
 | `import`, `from … import` | §6.1 | specified; implemented |
 | relative import, `import *` | §6.1 | unsupported (rejected by the scope pass and the translator) |
@@ -990,7 +989,7 @@ a diagnostic.
 | annotated assignment | §6.1 | specified; implemented |
 | `del` | §6.1 | specified; implemented |
 | `assert` | §6.1 | specified; implemented |
-| `nonlocal` | §6.6 | specified |
+| `nonlocal` | §6.6 | specified; implemented |
 | `if` / `elif` / `else` | §6.2 | specified; implemented |
 | literals, `...`, every binary and unary operator, comparisons (chained too), `and`, `or`, `x if c else y` | §6.3 | specified; implemented |
 | conditions (`transCond`) | §6.2 | specified; implemented for `if`, `while` and `x if c else y` |
@@ -1002,7 +1001,7 @@ a diagnostic.
 | complex literal, t-string | §6.3 | unsupported |
 | `while` / `else`, `break`, `continue` | §6.4–§6.5 | specified; implemented |
 | `for` / `else` | §6.4 | specified; implemented |
-| closures | §6.6 | specified |
+| closures | §6.6 | specified; implemented |
 | `class`, bases, keywords, decorators | §6.7 | specified |
 | zero-argument `super()`, `__class__` | §6.7 | unsupported (Q6); the scope pass sets `needsClassCell` |
 | list, set and dict comprehensions | §6.8 | specified, open question (`forEach` not declared; its body's result); scoping implemented (`inlinedComprehension`) |

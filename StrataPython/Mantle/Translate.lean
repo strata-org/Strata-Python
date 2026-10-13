@@ -22,8 +22,9 @@ set_option autoImplicit false
 with a diagnostic is a failure.
 
 * The module body is the function `m.<module>`, with no parameters.  It first writes
-  `__name__` and `__doc__`.  A module-level `def f` is the function `m.f`, with parameters
-  `args` (a tuple) and `kwargs` (a dict).
+  `__name__` and `__doc__`.  A `def` is a function named after its `__qualname__`, `m.f.g` for
+  `f.<locals>.g`.  Its parameters are the cells it captures, then `args` (a tuple) and
+  `kwargs` (a dict).
 * Names are classified by `PyScope.analyze`.  A function's locals are cells declared in its
   entry block.  A module global is the cell `py.globalCell m x`, and a read of it is
   `py.loadGlobal m x`, which falls back to the builtin `x` at run time.
@@ -37,8 +38,9 @@ with a diagnostic is a failure.
 
 ## Supported constructs
 
-* `def` at module level: positional, positional-only, keyword-only, `*args` and `**kwargs`
+* `def`, nested too: positional, positional-only, keyword-only, `*args` and `**kwargs`
   parameters, and constant defaults.  The argument-binding prologue is the spec's §5.4.
+* Closures: cell and free variables, and `nonlocal`.
 * Statements: expression statements, `pass`, assignment, annotated assignment and augmented
   assignment to names, attributes and subscripts, assignment to tuple and list targets (with a
   starred element too), `del`, `assert`, `if`/`elif`/`else`, `while`/`else`, `for`/`else`,
@@ -220,9 +222,9 @@ inductive Place where
   | cell (c : ValId)
   /-- A module global, or a builtin. -/
   | global
-  /-- A variable of an enclosing function. -/
-  | free
-  /-- A local without a declared cell. -/
+  /-- A variable of an enclosing function, held in this captured cell. -/
+  | free (c : ValId)
+  /-- A local or free variable with no cell in the frame. -/
   | unresolved
 
 /-- The current scope. -/
@@ -241,7 +243,10 @@ def place (name : String) : TransM Place := do
     match ← build (cellOf? name) with
     | some c => return .cell c
     | none => return .unresolved
-  | some .free => return .free
+  | some .free =>
+    match ← build (cellOf? name) with
+    | some c => return .free c
+    | none => return .unresolved
   | some .globalExplicit | some .globalImplicit | none => return .global
 
 /-- `py.requireDefined v excType msg`. -/
@@ -263,6 +268,13 @@ def moduleDunders : List String :=
   ["__annotations__", "__builtins__", "__cached__", "__file__", "__loader__", "__package__",
    "__path__", "__spec__"]
 
+/-- Read the free variable `name`'s captured cell `c`, raising `NameError` if it is
+unassigned. -/
+def readFree (c : ValId) (name : String) : TransM ValId := do
+  let v ← build (readCell c (stem name))
+  requireDefined v name "NameError" (s!"cannot access free variable '{name}' where it is " ++
+    "not associated with a value in enclosing scope")
+
 /-- Read the name `name` at `range`. -/
 def readName (name : String) (range : SourceRange) : TransM ValId := do
   let name ← mangled name
@@ -271,19 +283,18 @@ def readName (name : String) (range : SourceRange) : TransM ValId := do
   | .global =>
     if moduleDunders.contains name then unsupportedValue s!"module attribute {name}" range
     else build (loadGlobal (← read).module name)
-  | .free => unsupportedValue "closure variable" range
+  | .free c => readFree c name
   | .unresolved => unsupportedValue "unresolved local" range
 
 /-- Write `v` to the name `name` at `range`. -/
 def writeName (name : String) (v : ValId) (range : SourceRange) : TransM Unit := do
   let name ← mangled name
   match ← place name with
-  | .cell c => discard <| build (writeCell c v)
+  | .cell c | .free c => discard <| build (writeCell c v)
   | .global =>
     -- Rebinding `__builtins__` changes the builtins of the functions defined after it.
     if name == "__builtins__" then reject s!"module attribute {name}" range
     else discard <| build (writeGlobal (← read).module name v)
-  | .free => reject "nonlocal assignment" range
   | .unresolved => reject "unresolved local" range
 
 /-- `del name` at `range`: raise as a read does, but without the builtins fallback, then
@@ -302,7 +313,9 @@ def deleteName (name : String) (range : SourceRange) : TransM Unit := do
       let m := (← read).module
       discard <| build (requireGlobal m name)
       discard <| build (writeGlobal m name (← undef))
-  | .free => reject "nonlocal del" range
+  | .free c =>
+    discard <| readFree c name
+    discard <| build (writeCell c (← undef))
   | .unresolved => reject "unresolved local" range
 
 /-! ## Operators -/
@@ -399,7 +412,6 @@ def stmtName : stmt SourceRange → String
   | .Raise .. => "raise"
   | .Try .. => "try"
   | .TryStar .. => "try/except*"
-  | .Nonlocal .. => "nonlocal"
   | _ => "statement"
 
 mutual
@@ -996,9 +1008,11 @@ def prologue (ps : Array ParamWithDefault) (args kwargs : ValId) : TransM Unit :
       writeName p.name v .none
   if let some p := varKw then writeName p.name kwargs .none
 
-/-- A fresh function name: `m.f`, or `m.f.k` if that is taken. -/
-def allocName (name : String) : TransM Name := do
-  let first := (← read).moduleName.str name
+/-- A fresh function name for the scope whose `__qualname__` is `qualname`: `m.f.g` for
+`f.<locals>.g`, or `m.f.g.k` if that is taken. -/
+def allocName (qualname : String) : TransM Name := do
+  let parts := (qualname.splitOn ".").filter (· != "<locals>")
+  let first := parts.foldl (init := (← read).moduleName) Name.str
   let taken := (← get).funcNames
   let mut n := first
   let mut k := 1
@@ -1009,12 +1023,12 @@ def allocName (name : String) : TransM Name := do
   return n
 
 /-- `def name(args): body` at `sr`: bind `name` to the function's closure, and queue the
-function.  An `async def` or a generator is queued as a stub. -/
+function.  The closure captures the cells of the function's free variables (§6.6).  An
+`async def` or a generator is queued as a stub. -/
 def defStmt (sr : SourceRange) (name : String) (args : arguments SourceRange)
     (body : Array (stmt SourceRange)) (decorators : Array (expr SourceRange))
     (hasTypeParams isAsync : Bool) : TransM Unit := do
   let ctx ← read
-  if (← curScope).kind != .module then return ← reject "nested function" sr
   if let some d := decorators[0]? then return ← reject "decorator" d.ann
   if hasTypeParams then return ← reject "type parameters" sr
   if let some p := (params args).find? (·.default.any (!isConstantDefault ·)) then
@@ -1027,11 +1041,20 @@ def defStmt (sr : SourceRange) (name : String) (args : arguments SourceRange)
     else match bodiesYield? #[body] with
       | some r => do reject "generator function" r; pure (some "generator function")
       | none => pure none
-  let fname ← allocName name
+  let mut cells := #[]
+  for x in cur.freeVars do
+    match ← build (cellOf? x) with
+    | some c => cells := cells.push c
+    | none =>
+      -- An unbound `nonlocal` is free with no cell; the scope pass already reported it.
+      if ctx.table.syntaxErrors.isEmpty then
+        internalError s!"no cell for the free variable '{x}'" sr
+      return
+  let fname ← allocName cur.qualname
   let job : FuncJob :=
     { name := fname, scope, cur, args, body, range := sr, stub }
   modify fun s => { s with pending := s.pending.push job }
-  writeName name (← build (funcValue fname)) sr
+  writeName name (← build (mkClosure (← build (emitFunc fname)) cells)) sr
 
 /-! ## Statements -/
 
@@ -1070,7 +1093,7 @@ partial def transStmts (ss : Array (stmt SourceRange)) : TransM Unit := do
 partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
   match s with
   | .Expr _ v => discard <| transExpr v
-  | .Pass _ | .Global .. => pure ()
+  | .Pass _ | .Global .. | .Nonlocal .. => pure ()
   | .Assign sr ⟨_, targets⟩ v _ =>
     match targets.mapM (assigner sr) with
     | .error t => badTarget t
@@ -1223,10 +1246,13 @@ def builtFunc (range : SourceRange) (built : Build.Built (Func Py.env SourceRang
     ({ kind := .internal, message := s!"{nameText f.name}: {e}", range } : Diagnostic)
   (f, { st with diagnostics := st.diagnostics ++ ds })
 
-/-- Emit the function `job` queues. -/
+/-- Emit the function `job` queues.  Its parameters are the cells of its free variables,
+in `freeVars` order, then `args` and `kwargs`. -/
 def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) : Func Py.env SourceRange × TState :=
   let ctx := { ctx with scope := job.scope, cur := job.cur }
-  let argTypes := #[(stem "args", Py.Value.ty), (stem "kwargs", Py.Value.ty)]
+  let free := job.cur.freeVars
+  let argTypes := free.map (cellStem ·, Py.cell.ty) ++
+    #[(stem "args", Py.Value.ty), (stem "kwargs", Py.Value.ty)]
   builtFunc job.range <| buildFuncTypedWith job.name argTypes job.range fun ps =>
     runBody ctx st job.range do
       match job.stub with
@@ -1235,10 +1261,11 @@ def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) : Func Py.env SourceRang
         build (emitReturn (← build (emitTotal (.str .base "unsupported") Py.unsupported #v[] #[n])))
       | none =>
         let sc ← curScope
+        for (x, c) in free.zip ps do build (captureCell x c)
         for sym in sc.symbols do
           if sym.scope == .«local» || sym.scope == .cell then
             discard <| build (declareLocal sym.name)
-        let #[args, kwargs] := ps
+        let #[args, kwargs] := ps.extract free.size
           | internalError "a function without its args and kwargs parameters" job.range
         prologue (params job.args) args kwargs
         transStmts job.body

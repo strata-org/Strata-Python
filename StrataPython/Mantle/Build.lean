@@ -31,7 +31,8 @@ The operations:
 * `freshVal`, `freshLabel`, `startBlock`, `startBlockWith`, `startFreshBlock`, `isOpen`,
   `finishBlock`, `jump`, `branch`, `unreachable`: `Mantle.Build`'s, over `Py.env`;
 * `emitFunc`, `mkClosure`, `funcValue`: code pointers and closures;
-* `cellOf?`, `declareLocal`, `readCell`, `writeCell`: locals, each a `Ref Value` cell;
+* `cellOf?`, `declareLocal`, `captureCell`, `readCell`, `writeCell`: locals, each a
+  `Ref Value` cell;
 * `globalCell`, `loadGlobal`, `requireGlobal`, `writeGlobal`, `importModule`, `importFrom`:
   globals and imports;
 * `freshComp`, `compNormal`, `compReturn`, `compRaise`, `compBreak`, `compContinue`,
@@ -300,6 +301,10 @@ def declareLocal (name : String) (info : Option α := none) : PyM α ValId := do
     #v[Py.Value.ty] #[undef] (info := info)
   modify fun e => { e with locals := e.locals.insert name cell }
   return cell
+
+/-- Record `cell`, a captured cell the function takes as a parameter, as the cell of `name`. -/
+def captureCell (name : String) (cell : ValId) : PyM α Unit :=
+  modify fun e => { e with locals := e.locals.insert name cell }
 
 /-- Read a cell.  `name` is only what the result is called. -/
 def readCell (cell : ValId) (name : Name) (info : Option α := none) : PyM α ValId :=

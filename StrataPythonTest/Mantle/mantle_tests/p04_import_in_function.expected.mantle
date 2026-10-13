@@ -1,0 +1,94 @@
+module p04_import_in_function {
+  func @|p04_import_in_function.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("p04_import_in_function")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p04_import_in_function", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p04_import_in_function", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure(@p04_import_in_function.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("p04_import_in_function", "f")
+      %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure(@p04_import_in_function.g)
+      %g.cell.0 : base.Ref(py.Value) = py.globalCell("p04_import_in_function", "g")
+      %set.3 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @p04_import_in_function.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %math.0 : py.Value = py.undef("math")
+      %math.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%math.0)
+      %s.0 : py.Value = py.undef("s")
+      %s.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%s.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %mod.0 : py.Value = py.importModule("math") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%math.cell.0, %mod.0)
+      %sep.0 : py.Value = py.importFrom("os", "sep") ^propagate.0()
+      %set.1 : base.Unit = base.refSet[py.Value](%s.cell.0, %sep.0)
+      %math.1 : py.Value = base.refGet[py.Value](%math.cell.0)
+      %math.2 : py.Value = py.requireDefined(%math.1, "UnboundLocalError", "cannot access local variable 'math' where it is not associated with a value") ^propagate.0()
+      %pi.0 : py.Value = py.attr(%math.2, "pi") ^propagate.0()
+      %s.1 : py.Value = base.refGet[py.Value](%s.cell.0)
+      %s.2 : py.Value = py.requireDefined(%s.1, "UnboundLocalError", "cannot access local variable 's' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%pi.0, %s.2)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @p04_import_in_function.g(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %json.0 : py.Value = py.undef("json")
+      %json.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%json.0)
+      %h.0 : py.Value = py.undef("h")
+      %h.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%h.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "g() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "g() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %mod.0 : py.Value = py.importModule("json") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%json.cell.0, %mod.0)
+      %clo.0 : py.Value = py.mkClosure(@p04_import_in_function.g.h, %json.cell.0)
+      %set.1 : base.Unit = base.refSet[py.Value](%h.cell.0, %clo.0)
+      %h.1 : py.Value = base.refGet[py.Value](%h.cell.0)
+      %h.2 : py.Value = py.requireDefined(%h.1, "UnboundLocalError", "cannot access local variable 'h' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%h.2)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @p04_import_in_function.g.h(%json.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%json.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "g.<locals>.h() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "g.<locals>.h() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %json.0 : py.Value = base.refGet[py.Value](%json.cell.0)
+      %json.1 : py.Value = py.requireDefined(%json.0, "NameError", "cannot access free variable 'json' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %dumps.0 : py.Value = py.attr(%json.1, "dumps") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %tuple.0 : py.Value = py.mkTuple(%int.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%dumps.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

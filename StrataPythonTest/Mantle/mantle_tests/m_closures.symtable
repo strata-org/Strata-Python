@@ -1,0 +1,43 @@
+module top
+  early: local (assigned)
+  make: local (assigned)
+  outer: local (assigned)
+  pair: local (assigned)
+  twice: local (assigned)
+  function make
+    drop: local (assigned, referenced)
+    get: local (assigned, referenced)
+    p: cell (parameter)
+    function get
+      p: free (referenced)
+    function drop
+      p: free (assigned, nonlocal)
+  function outer
+    mid: local (assigned, referenced)
+    x: cell (assigned)
+    function mid
+      inner: local (assigned, referenced)
+      x: free
+      function inner
+        x: free (referenced)
+  function twice
+    flag: cell (parameter, referenced)
+    h: local (assigned, referenced)
+    function h
+      flag: free (referenced)
+    function h
+      flag: free (referenced)
+  function pair
+    a: cell (parameter)
+    b: cell (parameter)
+    g: local (assigned, referenced)
+    function g
+      a: free (referenced)
+      b: free (referenced)
+  function early
+    h: local (assigned, referenced)
+    r: local (assigned, referenced)
+    y: cell (assigned, referenced)
+    function h
+      y: free (referenced)
+qualnames: early, early.<locals>.h, make, make.<locals>.drop, make.<locals>.get, outer, outer.<locals>.mid, outer.<locals>.mid.<locals>.inner, pair, pair.<locals>.g, twice, twice.<locals>.h, twice.<locals>.h

@@ -1,0 +1,22 @@
+-- syntax error: no binding for nonlocal 'x' found at 5:4-5:14
+module e12_nonlocal_top_function {
+  func @|e12_nonlocal_top_function.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("e12_nonlocal_top_function")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("e12_nonlocal_top_function", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("e12_nonlocal_top_function", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %int.0 : py.Value = py.intLit(1)
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("e12_nonlocal_top_function", "x")
+      %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

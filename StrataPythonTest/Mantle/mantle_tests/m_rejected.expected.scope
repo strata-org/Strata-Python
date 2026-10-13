@@ -1,10 +1,6 @@
 module
   sibling: local (imported)
-  outer: local (assigned)
   bad_default: local (assigned)
-  function outer
-    inner: local (assigned, referenced)
-    function outer.<locals>.inner
   function bad_default
     params: x
     x: local (parameter, referenced)

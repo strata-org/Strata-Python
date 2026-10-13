@@ -1,0 +1,24 @@
+-- syntax error: nonlocal declaration not allowed at module level at 1:0-1:10
+module e03_nonlocal_module {
+  func @|e03_nonlocal_module.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("e03_nonlocal_module")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("e03_nonlocal_module", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("e03_nonlocal_module", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %print.0 : py.Value = py.loadGlobal("e03_nonlocal_module", "print") ^propagate.0()
+      %x.0 : py.Value = py.loadGlobal("e03_nonlocal_module", "x") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%x.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

@@ -1,0 +1,181 @@
+module p16_closures {
+  func @|p16_closures.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("p16_closures")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p16_closures", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p16_closures", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure(@p16_closures.reader)
+      %reader.cell.0 : base.Ref(py.Value) = py.globalCell("p16_closures", "reader")
+      %set.2 : base.Unit = base.refSet[py.Value](%reader.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure(@p16_closures.counter)
+      %counter.cell.0 : base.Ref(py.Value) = py.globalCell("p16_closures", "counter")
+      %set.3 : base.Unit = base.refSet[py.Value](%counter.cell.0, %clo.1)
+      %clo.2 : py.Value = py.mkClosure(@p16_closures.outer)
+      %outer.cell.0 : base.Ref(py.Value) = py.globalCell("p16_closures", "outer")
+      %set.4 : base.Unit = base.refSet[py.Value](%outer.cell.0, %clo.2)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @p16_closures.reader(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %r.0 : py.Value = py.undef("r")
+      %r.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%r.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "reader() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "reader() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
+      %clo.0 : py.Value = py.mkClosure(@p16_closures.reader.r, %x.cell.0)
+      %set.1 : base.Unit = base.refSet[py.Value](%r.cell.0, %clo.0)
+      %int.1 : py.Value = py.intLit(2)
+      %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.1)
+      %r.1 : py.Value = base.refGet[py.Value](%r.cell.0)
+      %r.2 : py.Value = py.requireDefined(%r.1, "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%r.2)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @p16_closures.counter(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %n.1 : py.Value = py.undef("n")
+      %n.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%n.1)
+      %inc.0 : py.Value = py.undef("inc")
+      %inc.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%inc.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "counter() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "counter() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %set.0 : base.Unit = base.refSet[py.Value](%n.cell.0, %int.0)
+      %clo.0 : py.Value = py.mkClosure(@p16_closures.counter.inc, %n.cell.0)
+      %set.1 : base.Unit = base.refSet[py.Value](%inc.cell.0, %clo.0)
+      %inc.1 : py.Value = base.refGet[py.Value](%inc.cell.0)
+      %inc.2 : py.Value = py.requireDefined(%inc.1, "UnboundLocalError", "cannot access local variable 'inc' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%inc.2)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @p16_closures.outer(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %p.0 : py.Value = py.undef("p")
+      %p.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%p.0)
+      %middle.0 : py.Value = py.undef("middle")
+      %middle.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%middle.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %p.1 : py.Value = py.undef("p")
+      %fill.0 : py.Value = py.mkTuple(%p.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("p")
+      %p.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "outer() got multiple values for argument 'p'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "outer() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "outer() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %p.3 : py.Value = py.requireDefined(%p.2, "TypeError", "outer() missing 1 required positional argument: 'p'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%p.cell.0, %p.3)
+      %clo.0 : py.Value = py.mkClosure(@p16_closures.outer.middle, %p.cell.0)
+      %set.1 : base.Unit = base.refSet[py.Value](%middle.cell.0, %clo.0)
+      %middle.1 : py.Value = base.refGet[py.Value](%middle.cell.0)
+      %middle.2 : py.Value = py.requireDefined(%middle.1, "UnboundLocalError", "cannot access local variable 'middle' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%middle.2)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @p16_closures.reader.r(%x.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%x.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "reader.<locals>.r() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "reader.<locals>.r() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
+      %x.1 : py.Value = py.requireDefined(%x.0, "NameError", "cannot access free variable 'x' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @p16_closures.counter.inc(%n.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%n.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "counter.<locals>.inc() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "counter.<locals>.inc() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %n.1 : py.Value = base.refGet[py.Value](%n.cell.0)
+      %n.2 : py.Value = py.requireDefined(%n.1, "NameError", "cannot access free variable 'n' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %iAdd.0 : py.Value = py.iAdd(%n.2, %int.0) ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%n.cell.0, %iAdd.0)
+      %n.3 : py.Value = base.refGet[py.Value](%n.cell.0)
+      %n.4 : py.Value = py.requireDefined(%n.3, "NameError", "cannot access free variable 'n' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%n.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @p16_closures.outer.middle(%p.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%p.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %inner.0 : py.Value = py.undef("inner")
+      %inner.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%inner.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "outer.<locals>.middle() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "outer.<locals>.middle() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure(@p16_closures.outer.middle.inner, %p.cell.0)
+      %set.0 : base.Unit = base.refSet[py.Value](%inner.cell.0, %clo.0)
+      %inner.1 : py.Value = base.refGet[py.Value](%inner.cell.0)
+      %inner.2 : py.Value = py.requireDefined(%inner.1, "UnboundLocalError", "cannot access local variable 'inner' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%inner.2)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @p16_closures.outer.middle.inner(%p.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%p.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "outer.<locals>.middle.<locals>.inner() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "outer.<locals>.middle.<locals>.inner() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %p.0 : py.Value = base.refGet[py.Value](%p.cell.0)
+      %p.1 : py.Value = py.requireDefined(%p.0, "NameError", "cannot access free variable 'p' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%p.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+
