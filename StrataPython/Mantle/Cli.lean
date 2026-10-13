@@ -37,7 +37,7 @@ public section
 
 namespace StrataPython.Mantle.Cli
 
-open StrataPython.Mantle.PyTranslate (translate formatDiagnostic illFormed nameText)
+open StrataPython.Mantle.PyTranslate (translate formatDiagnostic nameText)
 
 /-- The suffixes of a Python Ion file, longest first. -/
 private def ionSuffixes : List String := [".python.st.ion", ".py.ion", ".st.ion", ".ion"]
@@ -84,11 +84,15 @@ private def run (path : String) (opts : Strata.Mantle.PrintOptions) : IO UInt32 
   let fileMap := src.map Lean.FileMap.ofString
   let r := translate moduleName stmts
   for d in r.diagnostics do IO.println (formatDiagnostic fileMap d)
-  let bad := illFormed r.module
-  -- Folding assumes a well-formed module, so an ill-formed one prints in full.
-  IO.println (r.module.format (if bad.isEmpty then opts else .full))
-  for f in bad do IO.eprintln s!"pymantle mantle: {nameText f} is not well formed"
-  return if r.ok && bad.isEmpty then 0 else 1
+  match r.module.check with
+  | .ok m =>
+    IO.println (m.format opts)
+    return if r.ok then 0 else 1
+  | .error bad =>
+    -- Folding assumes a well-formed module, so an ill-formed one prints in full.
+    IO.println (r.module.format .full)
+    for f in bad do IO.eprintln s!"pymantle mantle: {nameText f} is not well formed"
+    return 1
 
 /-- The `mantle` subcommand. -/
 def mantleCommand : _root_.Command where
@@ -109,7 +113,7 @@ private def runRead (path : String) (opts : Strata.Mantle.PrintOptions) : IO UIn
     | .ok t => pure t
     | .error e => IO.eprintln s!"pymantle read: {e}"; return 2
   match ← Strata.Mantle.Module.read Py.env text path with
-  | .ok ⟨m, _⟩ => IO.print (m.format opts); return 0
+  | .ok m => IO.print (m.format opts); return 0
   | .error e => IO.eprintln (toString e); return 1
 
 /-- The `read` subcommand. -/

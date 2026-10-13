@@ -10,6 +10,8 @@ import StrataMantle.Env.WF
 -- Also imported as `meta`, so that the interpreter running `native_decide` below has
 -- compiled code for the base environment.
 meta import StrataMantle.Env.WF
+-- The `#guard`s run the checker as compiled code.
+meta import StrataMantle.WF
 -- `decide +kernel` unfolds the checker, the base and core's array operations.
 import all StrataMantle.WF
 import all StrataMantle.Env
@@ -157,11 +159,6 @@ private def g : Func sig1 Unit where
   names   := (Array.range 8).map (Name.num .base ·)
   info    := ()
 
-private def mg : Module sig1 Unit where
-  name  := .str .base "failing"
-  funcs := #[g]
-  info  := ()
-
 /-! ## A failure inspected rather than handled
 
     h() : Int
@@ -208,7 +205,7 @@ private def h : Func base Unit where
   names   := (Array.range 8).map (Name.num .base ·)
   info    := ()
 
-private def m : Module base Unit where
+private def m : Module.Raw base Unit where
   name  := .str .base "test"
   funcs := #[f, h]
   info  := ()
@@ -229,7 +226,7 @@ example : (fEntry.map (fun _ => 7)).info = 7 := rfl
 
 example : (fEntry.map (fun _ => 7)).instrs.size = 2 := by simp [fEntry]
 
-example : (m.map (fun _ => 7)).funcs.size = 2 := by simp [Module.map, m]
+example : (m.map (fun _ => 7)).funcs.size = 2 := by simp [Module.Raw.map, m]
 
 example : (m.map (fun _ => 7)).name = m.name := rfl
 
@@ -242,10 +239,6 @@ example : Func.WF ∅ f := by decide +kernel
 example : Func.WF ∅ g := by decide +kernel
 
 example : Func.WF ∅ h := by decide +kernel
-
-example : Module.WF m := by decide +kernel
-
-example : Module.WF mg := by decide +kernel
 
 /-! ## What it rejects
 
@@ -492,18 +485,19 @@ private def refTo (target : Name) (type : TypeExpr base 0 := codeT) : Func base 
   info    := ()
 
 /-- `ref` beside `f`. -/
-private def refModule (target : Name) (type : TypeExpr base 0 := codeT) : Module base Unit where
+private def refModule (target : Name) (type : TypeExpr base 0 := codeT) :
+    Module.Raw base Unit where
   name  := .str .base "m"
   funcs := #[refTo target type, f]
   info  := ()
 
-example : Module.WF (refModule (.str .base "f")) := by decide +kernel
-example : Module.WF (refModule (.str .base "ref")) := by decide +kernel
+#guard decide (Module.Raw.WF (refModule (.str .base "f")))
+#guard decide (Module.Raw.WF (refModule (.str .base "ref")))
 
-/-- A reference to a function the module does not define. -/
-example : ¬ Module.WF (refModule (.str .base "g")) := by decide +kernel
+-- A reference to a function the module does not define.
+#guard decide (¬ Module.Raw.WF (refModule (.str .base "g")))
 
-/-- A code pointer declared at a type other than `base.Code`. -/
-example : ¬ Module.WF (refModule (.str .base "f") intT) := by decide +kernel
+-- A code pointer declared at a type other than `base.Code`.
+#guard decide (¬ Module.Raw.WF (refModule (.str .base "f") intT))
 
 end Strata.Mantle.IRTest

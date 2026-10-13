@@ -47,15 +47,15 @@ private meta def check (path : System.FilePath) : IO (Option String) := do
   let text := moduleText golden
   match ← Module.read Py.env golden path.toString with
   | .error e => return some s!"{path}: does not read back:\n{e}"
-  | .ok ⟨m, _⟩ =>
-    unless (dottedNames m).isEmpty do
-      return some s!"{path}: a name has a `.` inside a segment: {(dottedNames m).map ToDDM.nameText}"
+  | .ok m =>
+    unless (dottedNames m.raw).isEmpty do
+      return some s!"{path}: a name has a `.` inside a segment: {(dottedNames m.raw).map ToDDM.nameText}"
     if let some d := firstDiff (toString m) text then
       return some s!"{path}: reprints differently at {d}"
     let full := m.format .full
     match ← Module.read Py.env full s!"{path} (full)" with
     | .error e => return some s!"{path}: the full form does not read back:\n{e}"
-    | .ok ⟨m', _⟩ =>
+    | .ok m' =>
       if let some d := firstDiff (m'.format .full) full then
         return some s!"{path}: the full form reprints differently at {d}"
       return none

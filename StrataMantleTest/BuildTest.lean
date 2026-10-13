@@ -27,10 +27,9 @@ set_option autoImplicit false
 
 Functions emitted with `Mantle.Build` against `base` alone, so nothing here depends on a
 language.  Each is checked by `Mantle.WF`, and most are printed by the dialect in
-`Mantle/DDM.lean`: every constant form, the cell operations with their type arguments, the
-base's control flow, and `Except.case`.  The first is the case the builder exists for: a
-forward branch names a label long before its block is finished, and the label becomes an
-index only once every block is in.
+`StrataMantle/DDM.lean`: every constant form, the cell operations with their type arguments,
+the base's control flow, and `Except.case`.  The first is the case the builder exists for: a
+forward branch names a label long before its block is finished.
 -/
 
 namespace Strata.Mantle.BuildTest
@@ -107,7 +106,7 @@ example : Holds (targets · = #[lbl "bump" 0, lbl "done" 0, lbl "done" 0, Label.
   }
 } -/
 #guard_msgs in
-#eval do IO.println (Func.toString (← IO.ofExcept f))
+#eval do IO.println ((← IO.ofExcept f).format {})
 
 /-! ## A failure built and inspected
 
@@ -170,7 +169,7 @@ private def hConsts : Except Errors (Func base Unit) :=
 
 example : Holds (Func.WF ∅) hConsts := by decide +kernel
 
-private def m : Except Errors (Module base Unit) :=
+private def m : Except Errors (Module.Raw base Unit) :=
   return { name := .str .base "m", funcs := #[← f, ← hConsts], info := () }
 
 /-- info: module m {
@@ -199,7 +198,10 @@ private def m : Except Errors (Module base Unit) :=
   }
 } -/
 #guard_msgs in
-#eval do IO.println (toString (← IO.ofExcept m))
+#eval do
+  match (← IO.ofExcept m).check with
+  | .ok m => IO.println m
+  | .error bad => IO.println s!"not well formed: {bad.map ToDDM.nameText}"
 
 /-! ## Annotations
 

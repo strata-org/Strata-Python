@@ -13,7 +13,8 @@ set_option autoImplicit false
 # An environment-driven SSA IR
 
 Control and data flow for any language whose operations and types come from an `Env`.
-`Mantle/WF.lean` states its well-formedness.
+`StrataMantle/WF.lean` states its well-formedness.  A `Module.Raw` is a module as built; a
+`Module` (`StrataMantle/WF.lean`) is one with its well-formedness proof.
 
 Every level carries an annotation type `α`, as the DDM-generated AST does: a front end
 instantiates it at `SourceRange`, a test at `Unit`, and `map` moves between them.
@@ -26,7 +27,7 @@ block: every block ends with one, a `Terminator`.  Control flow is terminal oper
 any other: the base declares `jump`, `branch` and `unreachable`, and each datatype `T` a
 `T.case` that eliminates it.  Returning is a `jump` to `Label.exit`.  A datatype's constructor
 is an operation too, applied at explicit type arguments through its `InsnRef`.
-`Instruction`, `Terminator`, `Block` and `Region` are therefore one nested inductive.  A block
+`Instruction`, `Terminator`, `Block` and `Region` are one nested inductive.  A block
 is named by its `Label`, not its position, so emitting, reordering or dropping blocks never
 rewrites a transfer.
 -/
@@ -186,8 +187,8 @@ operation is. -/
 top-level blocks are a region in all but name: transfers stay among them, and a jump to
 `Label.exit` returns from the function.
 
-`names[i]` is the name value `i` prints as, `%x.1`.  The names of the values the function
-defines are distinct. -/
+`names[i]` is the name value `i` prints as, `%x.1`.  A well-formed function names every value
+it defines, no two alike. -/
 structure Func (env : Env Unit) (α : Type) where
   name    : Name
   retType : TypeExpr env 0
@@ -195,8 +196,9 @@ structure Func (env : Env Unit) (α : Type) where
   names   : Array Name
   info    : α
 
-/-- A module, typed against one environment that refines the base. -/
-structure Module (env : Env Unit) [base ⊑ env] (α : Type) where
+/-- An unchecked module, typed against one environment that refines the base.  A `Module` is
+one with its well-formedness proof. -/
+structure Module.Raw (env : Env Unit) [base ⊑ env] (α : Type) where
   name  : Name
   funcs : Array (Func env α)
   info  : α
@@ -283,8 +285,8 @@ end
   names   := fn.names
   info    := f fn.info
 
-@[expose] def Module.map {env : Env Unit} [base ⊑ env] {α β : Type} (f : α → β)
-    (m : Module env α) : Module env β where
+@[expose] def Module.Raw.map {env : Env Unit} [base ⊑ env] {α β : Type} (f : α → β)
+    (m : Module.Raw env α) : Module.Raw env β where
   name  := m.name
   funcs := m.funcs.map (Func.map f)
   info  := f m.info

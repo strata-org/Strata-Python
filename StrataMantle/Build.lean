@@ -18,18 +18,19 @@ A builder emits a function's instructions in order.  Blocks are named by `Label`
 transfer can name a block before it is built.  A function's blocks carry the labels they were
 allocated, in the order they were finished.
 
-A label is `base.n`, `bb.n` by default, with `n` counting per `base` across the whole
-function, regions included, so labels are unique function-wide as `Func.WF` demands.
+A label is `base.n`, `bb.n` by default, with `n` counted per `base` across the whole
+function, regions included, so labels are unique, as `Func.WF` demands.
 
-Ids count from `0` in allocation order.  `emitApply` allocates its result before it emits its
-regions, so the ids follow the printed order of definitions (`Func.Canonical`) as long as each
-block's parameters, a region's included, are allocated just before the block opens.
+Ids count from `0` in allocation order.  They follow the printed order of definitions
+(`Func.Canonical`) if each block's parameters, a region's included, are allocated just before
+the block opens.
 
 The operations:
 
 * `withInfo`: set the annotation given to what is emitted;
 * `freshVal`: a fresh value;
-* `emitConst`, `emitApply`: emit an instruction;
+* `emitConst`, `emitFunc`, `emitApply`: emit an instruction;
+* `goto`: a transfer to a block;
 * `freshLabel`, `startBlock`, `startBlockWith`, `startFreshBlock`: allocate and open blocks;
 * `finishBlock`, `terminate`, `jump`, `branch`, `ret`, `unreachable`: close the open block
   with a terminator: any terminal operation, a datatype's `case` among them, or the base's
@@ -43,8 +44,7 @@ Misuse is an error, recorded in the state: an instruction emitted with no block 
 opened while another is open, a block finished when none is open, and a region or function
 body that ends with a block open.  `build` succeeds only if there is none.
 
-The builder is language-neutral.  Its maps are association lists (`StrMap`) and 2-3 trees
-(`NameMap`), so a function it builds reduces in the kernel.
+The builder is language-neutral.
 -/
 
 namespace Strata.Mantle
@@ -53,6 +53,7 @@ public section
 
 namespace Build
 
+-- The builder's maps are association lists and 2-3 trees (`NameMap`), which the kernel reduces.
 /-- A map from strings, as an association list, latest entry first. -/
 structure StrMap (β : Type) where
   entries : List (String × β) := []
@@ -165,8 +166,7 @@ def emit (d : ValDecl env) (instr : Instruction env α) : BuildM env α ValId :=
     modify fun s => { s with instrs := s.instrs.push instr }
   return d.id
 
-/-- Emit a constant.  Its type is what the base gives it, so the caller supplies
-only a name to read it by. -/
+/-- Emit a constant, named after `name`, at the type the base gives it. -/
 def emitConst [base ⊑ env] (name : Name) (c : Const) (info : Option α := none) :
     BuildM env α ValId := do
   let d ← freshVal name c.typeOf
@@ -215,10 +215,8 @@ def startBlock (label : Label) (params : Array (ValDecl env) := #[]) :
     error s!"block {nameText label.name} opened while block {nameText l.name} is open"
   modify fun s => { s with label := some label, params, instrs := #[] }
 
-/--
-Open the block called `label`, taking one fresh value with base `name` of type type `t`, and
-return that value.
--/
+/-- Open the block called `label`, taking one fresh value of type `t` named after `name`, and
+return that value. -/
 def startBlockWith (label : Label) (name : Name) (t : TypeExpr env 0) :
     BuildM env α ValId := do
   let v ← freshVal name t
@@ -232,7 +230,7 @@ def startFreshBlock (params : Array (ValDecl env) := #[]) (base : String := bloc
   startBlock l params
   return l
 
-/-- Close the open block with `term`.  Throws error is no block is open. -/
+/-- Close the open block with `term`.  With no block open, it is an error. -/
 def finishBlock (term : Terminator env α) (info : Option α := none) : BuildM env α Unit := do
   let info ← resolveInfo info
   let s ← get
@@ -302,8 +300,7 @@ def region (params : Array (ValDecl env)) (body : BuildM env α Unit)
 
 /-! ## Finishing -/
 
-/-- The function the state describes.  The first block finished is the entry, so its
-parameters are the function's. -/
+/-- The function the state describes.  The first block finished is the entry. -/
 def toFunc (s : State env α) (name : Name) (retType : TypeExpr env 0) (info : α) :
     Func env α :=
   { name, retType, blocks := s.blocks, names := s.names, info }
@@ -326,10 +323,9 @@ structure Built (β : Type) where
 def Built.toExcept {β : Type} (b : Built β) : Except Errors β :=
   if h : b.errors.size = 0 then .ok b.value else .error ⟨b.errors, h⟩
 
-/--
-Run a builder for the function `name` and take the function it emitted, what the
-builder returned, and the errors recorded, a block left open at the end among them.  `info`
-annotates the function, and is the default annotation for everything in it. -/
+/-- Run a builder for the function `name` and take the function it emitted, what the builder
+returned, and the errors recorded, a block left open at the end among them.  `info` annotates
+the function, and is the default annotation for everything in it. -/
 def run {β : Type} (name : Name) (retType : TypeExpr env 0) (info : α)
     (m : BuildM env α β) : Built (Func env α × β) :=
   let (r, s) := (do let r ← m; checkClosed "the function"; return r) (State.init info)

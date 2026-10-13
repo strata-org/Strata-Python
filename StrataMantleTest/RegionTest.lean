@@ -126,10 +126,8 @@ private def guarded : Except Errors (Func E Unit) :=
 
 example : Holds (Func.WF ∅) guarded := by decide +kernel
 
-private def m : Except Errors (Module E Unit) :=
+private def m : Except Errors (Module.Raw E Unit) :=
   return { name := .str .base "regions", funcs := #[← pick, ← guarded], info := () }
-
-example : Holds Module.WF m := by decide +kernel
 
 /-! ## Printed -/
 
@@ -170,7 +168,10 @@ example : Holds Module.WF m := by decide +kernel
   }
 } -/
 #guard_msgs in
-#eval do IO.println (toString (← IO.ofExcept m))
+#eval do
+  match (← IO.ofExcept m).check with
+  | .ok m => IO.println m
+  | .error bad => IO.println s!"not well formed: {bad.map ToDDM.nameText}"
 
 /-- The builder allocates a result before the regions `emitApply` emits, so the ids follow
 the printed order: what reading the printed function gives. -/
@@ -259,8 +260,7 @@ example : Holds (¬ Func.WF ∅ ·) (fCX fun c x entry => do
     finishBlock (.ret () r)) := by
   decide +kernel
 
-/-- Two functions under one name. -/
-example : Holds (¬ Module.WF ·) (do return { ← m with funcs := #[← pick, ← pick] }) := by
-  decide +kernel
+-- Two functions under one name.
+#guard decide (Holds (¬ Module.Raw.WF ·) (do return { ← m with funcs := #[← pick, ← pick] }))
 
 end Strata.Mantle.RegionTest

@@ -33,7 +33,7 @@ open Strata.Mantle.RegionTest
 private def roundTrip (text : String) : IO Unit := do
   match ← Module.read Reg.env text "t.mantle" with
   | .error e => IO.println e
-  | .ok ⟨m, _⟩ =>
+  | .ok m =>
     IO.println (m.format .full)
     IO.println (toString m)
 
@@ -155,8 +155,8 @@ private def nameTrip (f : String) : IO Unit := do
   let text := s!"module m \{\n  func @{f}() -> base.Code \{\n    entry.0():\n      ret(@{f})\n  }\n}\n"
   match ← Module.read Reg.env text "t.mantle" with
   | .error e => IO.println e
-  | .ok ⟨m, _⟩ =>
-    IO.println (m.funcs.map fun fn => segments fn.name).toList
+  | .ok m =>
+    IO.println (m.raw.funcs.map fun fn => segments fn.name).toList
     IO.print (toString m)
 
 /-- info: [["m", "café"]]
@@ -232,8 +232,8 @@ named, and print the module in full. -/
 private def namesTrip (text : String) : IO Unit := do
   match ← Module.read Reg.env text "t.mantle" with
   | .error e => IO.println e
-  | .ok ⟨m, _⟩ =>
-    for f in m.funcs do
+  | .ok m =>
+    for f in m.raw.funcs do
       IO.println s!"{ToDDM.nameText f.name}: canonical {decide f.Canonical}, \
         {f.names.toList.map ToDDM.valNameText}"
     IO.print (m.format .full)

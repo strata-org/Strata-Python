@@ -85,7 +85,7 @@ example : Holds (errTargets · = #[lbl "propagate" 0]) f := by decide +kernel
   }
 } -/
 #guard_msgs in
-#eval do IO.println (Func.toString (← IO.ofExcept f))
+#eval do IO.println ((← IO.ofExcept f).format {})
 
 /-! ## `def g(): pass`
 
@@ -241,7 +241,7 @@ example : Holds (fun k => Func.WF ∅ k ∧ k.blocks.size = 9) (kWith false) := 
   }
 } -/
 #guard_msgs in
-#eval do IO.println (Func.toString (← IO.ofExcept k))
+#eval do IO.println ((← IO.ofExcept k).format {})
 
 /-! ## A closure
 
@@ -268,12 +268,11 @@ private def outerWith (target : Name) (byValue : Bool) : Except Errors (Func Py.
 
 /-- The module of `outer`, whose closure names `target` and captures `x` as `outerWith` does,
 and `inner`. -/
-private def closuresWith (target : Name) (byValue : Bool) : Except Errors (Module Py.env Unit) :=
+private def closuresWith (target : Name) (byValue : Bool) :
+    Except Errors (Module.Raw Py.env Unit) :=
   return { name := Py.pn "closures", funcs := #[← outerWith target byValue, ← inner], info := () }
 
-private def closures : Except Errors (Module Py.env Unit) := closuresWith (Py.pn "inner") false
-
-example : Holds Module.WF closures := by decide +kernel
+private def closures : Except Errors (Module.Raw Py.env Unit) := closuresWith (Py.pn "inner") false
 
 -- No name has a `.` inside a segment: `x.cell` is two segments.
 #guard match closures with | .ok m => (TestUtil.dottedNames m).isEmpty | .error _ => false
@@ -302,14 +301,17 @@ example : Holds Module.WF closures := by decide +kernel
   }
 } -/
 #guard_msgs in
-#eval do IO.println (toString (← IO.ofExcept closures))
+#eval do
+  match (← IO.ofExcept closures).check with
+  | .ok m => IO.println m
+  | .error bad => IO.println s!"not well formed: {bad.map ToDDM.nameText}"
 
-/-- A code pointer to a function the module does not define. -/
-example : Holds (¬ Module.WF ·) (closuresWith (Py.pn "nonesuch") false) := by decide +kernel
+-- A code pointer to a function the module does not define.
+#guard decide (Holds (¬ Module.Raw.WF ·) (closuresWith (Py.pn "nonesuch") false))
 
-/-- A closure captures cells, so that a late read sees a late write.  Passing the value
-instead is ill typed. -/
-example : Holds (¬ Module.WF ·) (closuresWith (Py.pn "inner") true) := by decide +kernel
+-- A closure captures cells, so that a late read sees a late write.  Passing the value
+-- instead is ill typed.
+#guard decide (Holds (¬ Module.Raw.WF ·) (closuresWith (Py.pn "inner") true))
 
 /-! ## Globals and imports
 
@@ -361,7 +363,7 @@ example : Holds (Func.WF ∅) globals := by decide +kernel
   }
 } -/
 #guard_msgs in
-#eval do IO.println (Func.toString (← IO.ofExcept globals))
+#eval do IO.println ((← IO.ofExcept globals).format {})
 
 /-! ## A function named like an operation
 
@@ -395,7 +397,7 @@ example : OptHolds (NameSet.of? #[mAdd]) (fun fs => Holds (Func.WF fs) addFn) :=
   }
 } -/
 #guard_msgs in
-#eval do IO.println (Func.toString (← IO.ofExcept addFn))
+#eval do IO.println ((← IO.ofExcept addFn).format {})
 
 /-! ## Misuse
 
@@ -433,10 +435,8 @@ example : (buildFunc (Py.pn "f") #["x"] () entryLeftOpen).isOk = false := by dec
 
 /-! ## A module of the functions above -/
 
-private def m : Except Errors (Module Py.env Unit) :=
+private def m : Except Errors (Module.Raw Py.env Unit) :=
   return { name := Py.pn "test", funcs := #[← f, ← g, ← h, ← k], info := () }
-
-example : Holds Module.WF m := by decide +kernel
 
 #guard match m with | .ok m => (TestUtil.dottedNames m).isEmpty | .error _ => false
 

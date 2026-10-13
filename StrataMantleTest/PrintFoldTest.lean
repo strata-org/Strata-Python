@@ -83,10 +83,8 @@ private def pick : Except Errors (Func E Unit) :=
     let r ← emitApply (.str .base "r") intT Reg.«if» #v[intT] #[c.id] (regions := #[thn, els])
     finishBlock (.ret () r)
 
-private def m : Except Errors (Module E Unit) :=
+private def m : Except Errors (Module.Raw E Unit) :=
   return { name := .str .base "m", funcs := #[← counter, ← code, ← pick], info := () }
-
-example : Holds Module.WF m := by decide +kernel
 
 /-! ## In full -/
 
@@ -127,9 +125,9 @@ example : Holds Module.WF m := by decide +kernel
 
 /-! ## Folded
 
-Every used constant is written at each of its uses, and its line is gone; `%2`, unused,
-keeps its own.  The other values keep their ids, so the two forms can be read side by
-side. -/
+Every used constant is written at each of its uses, and its line is gone; `%unused.0`,
+unused, keeps its own.  The other values keep their names, so the two forms can be read side
+by side. -/
 
 /-- info: module m {
   func @m.counter(%c.0 : base.Bool) -> base.Int {
@@ -159,6 +157,9 @@ side. -/
   }
 } -/
 #guard_msgs in
-#eval do IO.println (toString (← IO.ofExcept m))
+#eval do
+  match (← IO.ofExcept m).check with
+  | .ok m => IO.println m
+  | .error bad => IO.println s!"not well formed: {bad.map ToDDM.nameText}"
 
 end Strata.Mantle.PrintFoldTest

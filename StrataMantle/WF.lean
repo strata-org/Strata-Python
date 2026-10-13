@@ -31,13 +31,15 @@ what the thing it names demands:
   against the region's own blocks and its exit, `Label.exit`, which takes the region's
   result;
 * a `Func` has an entry block, uses no label twice nor `Label.exit` at all, defines no
-  value twice and names every value it defines, no two alike, counting every region, and every block is well formed in the context those
-  definitions give, its exit taking the function's return type;
-* a `Module` names no function twice, and its functions are all well formed.
+  value twice and names every value it defines, no two alike, counting every region, and
+  every block is well formed in the context those definitions give, its exit taking the
+  function's return type;
+* a `Module.Raw` names no function twice, and its functions are all well formed.
 
-`Decidable` instances decide every predicate, so `decide` is the checker.  The combinators
-`OptHolds` and `Agrees` keep the rules decidable, and the checker's maps are tries and 2-3
-trees, so `decide +kernel` runs it in the kernel.
+A `Module` is a `Module.Raw` with its proof, and `Module.Raw.check` gives one by running the
+checker.
+
+`Decidable` instances decide every predicate, so `decide` is the checker.
 
 The rules do not check:
 
@@ -80,8 +82,8 @@ The checker's maps are tries and trees, so `decide +kernel` evaluates it:
 * `LabelMap`: a map from labels, on each label's counter;
 * `Label.Distinct`: no label occurs twice, decided through a `LabelMap`;
 * `NameSet` (`StrataMantle.Util.NameMap`): a set of names, as a 2-3 tree on `Name.key`.  It
-  holds a module's function names, which `Module.WF` builds once and every function reference
-  is looked up in. -/
+  holds a module's function names, which `Module.Raw.WF` builds once and every function
+  reference is looked up in. -/
 
 /-- A map from `Nat`: a trie on the key's bijective binary digits.  Key `0` is at the root,
 and `2k+1` and `2k+2` are key `k` of the left and right subtrees.  Its depth is the key's bit
@@ -536,11 +538,13 @@ instance {env : Env Unit} {α : Type} (fn : Func env α) : Decidable fn.Canonica
 @[expose] def Func.blockSigs {env : Env Unit} {α : Type} (fn : Func env α) : BlockSigs env :=
   BlockSigs.of fn.blocks.toList fn.retType
 
-/-- One more than the largest id of `ds`, or `0`: one bound for every id, which the kernel
-computes once where `∀ d ∈ ds, d.id.id < n` would recompute `n` per value. -/
+-- One bound for every id, which the kernel computes once where `∀ d ∈ ds, d.id.id < n` would
+-- recompute `n` per value.
+/-- One more than the largest id of `ds`, or `0`. -/
 @[expose] def ValDecl.idBound {env : Env Unit} (ds : List (ValDecl env)) : Nat :=
   ds.foldl (fun m d => max m (d.id.id + 1)) 0
 
+/-- The bound folded from `m` is at most `n` iff `m` is and every id of `ds` is below `n`. -/
 theorem ValDecl.foldl_le_iff {env : Env Unit} (n : Nat) :
     ∀ (ds : List (ValDecl env)) (m : Nat),
       ds.foldl (fun m d => max m (d.id.id + 1)) m ≤ n ↔ m ≤ n ∧ ∀ d ∈ ds, d.id.id < n
@@ -548,12 +552,13 @@ theorem ValDecl.foldl_le_iff {env : Env Unit} (n : Nat) :
   | d :: ds, m => by
     simp [ValDecl.foldl_le_iff n ds, Nat.max_le, Nat.succ_le_iff, and_assoc]
 
+/-- `ValDecl.idBound ds` is at most `n` iff every id of `ds` is below `n`. -/
 theorem ValDecl.idBound_le_iff {env : Env Unit} (ds : List (ValDecl env)) (n : Nat) :
     ValDecl.idBound ds ≤ n ↔ ∀ d ∈ ds, d.id.id < n := by
   simp [ValDecl.idBound, ValDecl.foldl_le_iff]
 
-/-- No name occurs twice in `ns`, decided by building a `NameSet`, which the kernel reduces
-faster than the list's own `Nodup` check. -/
+-- Through a `NameSet`, which the kernel reduces faster than the list's own `Nodup` check.
+/-- Deciding that no name occurs twice in `ns`. -/
 @[expose] def Name.decNodup (ns : Array Name) : Decidable ns.toList.Nodup :=
   decidable_of_iff _ NameSet.of?_isSome_iff
 
@@ -593,40 +598,58 @@ theorem Func.WF.mem_names {env : Env Unit} {α : Type} [base ⊑ env] {funcs : N
   (ValDecl.idBound_le_iff _ _).mp h.valuesNamed d hd
 
 /-- The names of a module's functions, in order. -/
-@[expose] def Module.funcNames {env : Env Unit} [base ⊑ env] {α : Type} (m : Module env α) :
-    Array Name :=
+@[expose] def Module.Raw.funcNames {env : Env Unit} [base ⊑ env] {α : Type}
+    (m : Module.Raw env α) : Array Name :=
   m.funcs.mapK (·.name)
 
 /-- The set of a module's function names, which function references are looked up in. -/
-@[expose] def Module.funcSet {env : Env Unit} [base ⊑ env] {α : Type} (m : Module env α) :
-    NameSet :=
+@[expose] def Module.Raw.funcSet {env : Env Unit} [base ⊑ env] {α : Type}
+    (m : Module.Raw env α) : NameSet :=
   (NameSet.of? m.funcNames).getD ∅
 
 /-- A well-formed module. -/
-structure Module.WF {env : Env Unit} [base ⊑ env] {α : Type} (m : Module env α) : Prop where
+structure Module.Raw.WF {env : Env Unit} [base ⊑ env] {α : Type} (m : Module.Raw env α) :
+    Prop where
   /-- No two functions share a name. -/
   funcNamesUnique : m.funcNames.toList.Nodup
   /-- Every function is well formed against the module's functions. -/
   funcs : ∀ f ∈ m.funcs, Func.WF m.funcSet f
 
-instance {env : Env Unit} [base ⊑ env] {α : Type} (m : Module env α) : Decidable m.WF :=
+instance {env : Env Unit} [base ⊑ env] {α : Type} (m : Module.Raw env α) : Decidable m.WF :=
   have := Name.decNodup m.funcNames
   decidable_of_iff (m.funcNames.toList.Nodup ∧ ∀ f ∈ m.funcs, Func.WF m.funcSet f)
     ⟨fun ⟨a, b⟩ => ⟨a, b⟩, fun ⟨a, b⟩ => ⟨a, b⟩⟩
 
+/-- A module with its well-formedness proof. -/
+structure Module (env : Env Unit) [base ⊑ env] (α : Type) where
+  raw : Module.Raw env α
+  wf : raw.WF
+
+/-- `m` with its well-formedness proof, or the names of its functions that are not well formed
+by `Func.WF`: all of them if `m` names a function twice. -/
+def Module.Raw.check {env : Env Unit} [base ⊑ env] {α : Type} (m : Module.Raw env α) :
+    Except (Array Name) (Module env α) :=
+  if h : m.WF then .ok ⟨m, h⟩
+  else
+    let names := m.funcNames
+    .error <| match NameSet.of? names with
+      | none => names
+      | some fs => (m.funcs.filter fun f => !decide (Func.WF fs f)).map (·.name)
+
 end
 
 /-- A well-formed module names no function twice. -/
-public theorem Module.WF.nodup {env : Env Unit} [base ⊑ env] {α : Type} {m : Module env α}
-    (h : m.WF) : (m.funcs.toList.map (·.name)).Nodup := by
-  simpa [Module.funcNames, Array.mapK_eq_map_fun] using h.funcNamesUnique
+public theorem Module.Raw.WF.nodup {env : Env Unit} [base ⊑ env] {α : Type}
+    {m : Module.Raw env α} (h : m.WF) : (m.funcs.toList.map (·.name)).Nodup := by
+  simpa [Module.Raw.funcNames, Array.mapK_eq_map_fun] using h.funcNamesUnique
 
 /-- The set a well-formed module checks function references against holds exactly the
 module's function names. -/
-public theorem Module.WF.mem_funcSet {env : Env Unit} [base ⊑ env] {α : Type}
-    {m : Module env α} (h : m.WF) (n : Name) : n ∈ m.funcSet ↔ ∃ f ∈ m.funcs, f.name = n := by
+public theorem Module.Raw.WF.mem_funcSet {env : Env Unit} [base ⊑ env] {α : Type}
+    {m : Module.Raw env α} (h : m.WF) (n : Name) :
+    n ∈ m.funcSet ↔ ∃ f ∈ m.funcs, f.name = n := by
   obtain ⟨fs, hfs⟩ := Option.isSome_iff_exists.mp (NameSet.of?_isSome_iff.mpr h.funcNamesUnique)
-  rw [Module.funcSet, hfs, Option.getD_some, NameSet.mem_of? hfs, Module.funcNames,
+  rw [Module.Raw.funcSet, hfs, Option.getD_some, NameSet.mem_of? hfs, Module.Raw.funcNames,
     Array.mapK_eq_map_fun, Array.mem_map]
 
 end Strata.Mantle

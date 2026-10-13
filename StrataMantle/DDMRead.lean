@@ -25,39 +25,19 @@ set_option autoImplicit false
 # Reading printed IR back
 
 `Module.read env text` parses `text` in the Mantle dialect of `StrataMantle/DDM.lean` and
-reads the module it denotes in `env`.  It reads both forms the printer writes, in full and
-with constants folded, and returns the module with its `Module.WF` proof, annotated with the
-source range each part was read from.  `Module.ofDDM` is the second half, from a DDM term.
+returns the well-formed `Module` it denotes in `env`, annotated with source ranges, or
+diagnostics that say what is wrong and where.  It reads both printed forms.  `Module.ofDDM`
+does the same from a DDM term.
 
-* **Comments** are lines that start with `--`, such as the diagnostics a translator golden
-  opens with.
-* **Names** are split at each `.`; an all-digit segment is a numeric one, and `_` alone is the
-  root.  So a name reads back as printed unless one of its string segments is empty, is all
-  digits or contains `.`, or the whole name is one of the dialect's keywords.
-* **Types and operations** are looked up in `env`.  `jump`, `branch` and `unreachable` are
-  the base's, and `ret(args)` is a jump to `Label.exit`.
-* **Literals** have the type their form fixes: `5` is a `base.Int`, `1.0`, `inf` and `nan`
-  are `base.Float64`s, `true` a `base.Bool`, `"s"` a `base.String`, `unit` a `base.Unit` and
-  `@m.f` a `base.Code`.  That type must equal the one where the literal sits: the declared
-  type of a `const`, the operand type the operation's signature demands, or the parameter
-  type of the block a successor names.  Nothing widens, so `5` is not a `base.Float64`.  A
-  float is the binary64 value nearest the decimal, ties to even.
-* **Values** are named in the text, `%x.1`.  The text is read in one pass: a value gets the
-  next id where it is defined, so ids follow the printed order and the function read is
-  canonical (`Func.Canonical`).  A use before the definition is checked after the pass.
-  Blocks keep their labels and order.
-* **Folded constants** each become a `const` instruction just before the instruction or
-  terminator that uses them.  Each gets its id where it is met, and after the pass the first
-  of `c.0`, `c.1`, … that the function's text does not use as its name.
-* **Well-formedness** comes with the reading.  The function names' table and each function's
-  value names' table (`NameTable`) prove their names distinct; each function's other
-  `Func.WF` conditions are decided as it is finished.  Nothing checks the whole module
-  afterwards.
+* Lines that start with `--` are comments.
+* Types and operations are looked up in `env`.  `jump`, `branch` and `unreachable` are the
+  base's, and `ret(args)` is a jump to `Label.exit`.
+* A literal has the type its form fixes, which must be the type where it is used.
+* A constant written at a use becomes a `const` instruction just before it.
+* Values get ids in printed order, so the function read is canonical (`Func.Canonical`).
 
-The diagnostics name what is wrong and where: an unknown type, operation, block or function,
-a wrong number of type arguments, operands, successors or regions, a value defined twice or
-never, a type that differs from the one a signature or block demands, and a terminal
-operation in the middle of a block or a non-terminal one at its end.
+A name reads back as printed unless one of its string segments is empty, is all digits or
+contains `.`, or the whole name is one of the dialect's keywords.
 -/
 
 namespace Strata.Mantle
@@ -167,13 +147,11 @@ def literal {env : Env Unit} [base ⊑ env] (funcs : NameTable SourceRange)
   else throw ⟨constAnn c, s!"a {typeText (k.typeOf (env := env))} literal where \
     {typeText expected} is expected"⟩
 
-/-! ## The state of reading a function
+/-! ## The state of reading a function -/
 
-The walk meets the text once, in order.  A value gets its id where it is defined, the next
-one, so ids follow the printed order of definitions and the function read is canonical.  A
-folded constant gets its id where it is met, and its name after the walk.  A use of a value
-defined further on is recorded, and resolved after the walk: so what the walk builds is
-`Late`, waiting for the id of each such name. -/
+-- One walk over the text, in order.  A value gets the next id where it is defined, and a
+-- folded constant where it is met; the constant is named after the walk.  A use before the
+-- definition is recorded and resolved after the walk, so the walk builds `Late` parts.
 
 /-- A part of the function that may name values defined further on: it is completed by the
 id of every name. -/
@@ -462,8 +440,8 @@ def headerName : MFunc SourceRange → Name
 def headerAnn : MFunc SourceRange → SourceRange
   | .func ann .. => ann
 
-/-- A function, with `funcs` the module's functions and `fset` the set of their names: well
-formed, by its value names' table and by `Func.WF`'s check of the rest. -/
+/-- A well-formed function, with `funcs` the module's functions and `fset` the set of their
+names. -/
 def func (funcs : NameTable SourceRange) (fset : NameSet) (f : MFunc SourceRange) :
     Result {fn : Func env SourceRange // fn.name = headerName f ∧ fn.WF fset} :=
   match f with
@@ -489,6 +467,7 @@ def func (funcs : NameTable SourceRange) (fset : NameSet) (f : MFunc SourceRange
       | throw ⟨ann, s!"no fresh name for a constant of @{identText n}"⟩
     let fn : Func env SourceRange :=
       { name := nameOf (identText n), retType, blocks, names, info := ann }
+    -- The value names' table proves the names distinct; the rest of `Func.WF` is decided.
     if h : 0 < fn.blocks.size ∧ Label.Distinct (Label.exit :: fn.labels) ∧
         ValDecl.idBound fn.defs ≤ fn.names.size ∧ fn.BodyWF fset then
       return ⟨fn, rfl, ⟨h.1, h.2.1, hnames, h.2.2.1, h.2.2.2⟩⟩
@@ -510,25 +489,25 @@ def funcList (funcs : NameTable SourceRange) (fset : NameSet) : (l : List (MFunc
 end Read
 
 open Read in
-/-- The module a DDM term of the Mantle dialect denotes in `env`, with the proof that it is
-well formed: the function names are distinct by their table, and each function is well formed
-as it is read. -/
+/-- The module a DDM term of the Mantle dialect denotes in `env`, or the diagnostics. -/
 public def Module.ofDDM {env : Env Unit} [base ⊑ env] (c : DDM.Command SourceRange) :
-    Except (Array ReadDiagnostic) {m : Module env SourceRange // m.WF} := do
+    Except (Array ReadDiagnostic) (Module env SourceRange) := do
   let .moduleDecl ann n ⟨_, fs⟩ := c
   let headers := fs.toList
   let ⟨funcs, hfuncs⟩ ← (NameTable.empty.insertAll? (headers.map fun f => (headerName f, headerAnn f))).mapError
     fun (f, r) => #[⟨r, s!"function @{ToDDM.nameText f} is defined twice"⟩]
   let fset := (NameSet.of? (headers.map headerName).toArray).getD ∅
   let ⟨list, hnames, hwf⟩ ← funcList (env := env) funcs fset headers
-  let m : Module env SourceRange := { name := nameOf (identText n), funcs := list.toArray, info := ann }
+  let m : Module.Raw env SourceRange := { name := nameOf (identText n), funcs := list.toArray, info := ann }
   have hm : m.funcNames = (headers.map headerName).toArray := by
-    simp [m, Module.funcNames, Array.mapK_eq_map_fun, hnames]
+    simp [m, Module.Raw.funcNames, Array.mapK_eq_map_fun, hnames]
   have hnodup : (headers.map headerName).Nodup := by
     simpa [hfuncs, Function.comp_def] using funcs.nodup
+  -- Well formed: the function names are distinct by their table, and each function is well
+  -- formed as it is read.
   return ⟨m, { funcNamesUnique := by simpa [hm] using hnodup
                funcs := fun f hf => by
-                 simpa [Module.funcSet, hm] using hwf f (by simpa [m] using hf) }⟩
+                 simpa [Module.Raw.funcSet, hm] using hwf f (by simpa [m] using hf) }⟩
 
 namespace Read
 
@@ -578,7 +557,7 @@ open Read in
 annotated with source ranges, or the diagnostics, each as `file:line:column: message`. -/
 public def Module.read (env : Env Unit) [base ⊑ env] (text : String)
     (fileName : String := "<input>") :
-    IO (Except Build.Errors {m : Module env SourceRange // m.WF}) := do
+    IO (Except Build.Errors (Module env SourceRange)) := do
   let msgs : Array String ← match ← parse text fileName with
     | .error msgs => pure msgs
     | .ok c =>

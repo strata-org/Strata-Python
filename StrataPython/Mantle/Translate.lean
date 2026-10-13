@@ -17,7 +17,7 @@ set_option autoImplicit false
 /-!
 # Python to Mantle
 
-`translate` lowers a parsed Python module to a `Mantle.Module` over `Py.env`, as
+`translate` lowers a parsed Python module to a `Mantle.Module.Raw` over `Py.env`, as
 `docs/PythonToMantle.md` specifies.  It returns the module and its diagnostics.  A result
 with a diagnostic is a failure.
 
@@ -41,9 +41,8 @@ with a diagnostic is a failure.
   parameters, and constant defaults.  The argument-binding prologue is the spec's §5.4.
 * Statements: expression statements, `pass`, assignment, annotated assignment and augmented
   assignment to names, attributes and subscripts, assignment to tuple and list targets (with a
-  starred element too),
-  `del`, `assert`, `if`/`elif`/`else`, `while`/`else`, `for`/`else`, `break`, `continue`, `return`, `global`,
-  `import a.b [as c]` and `from a.b import x [as y]`.
+  starred element too), `del`, `assert`, `if`/`elif`/`else`, `while`/`else`, `for`/`else`,
+  `break`, `continue`, `return`, `global`, `import a.b [as c]` and `from a.b import x [as y]`.
 * Expressions: `int`, `float`, `str`, `bytes`, `bool`, `None` and `...` literals, names,
   every binary and unary operator, comparisons (chained too), `and`, `or`,
   `x if c else y`, tuple, list, set and dict displays with `*x` and `**d`, calls with
@@ -66,21 +65,7 @@ with a diagnostic is a failure.
    list.  Give it a `NAME.symtable` and `NAME.expected.scope` too, as `AGENTS.md` describes.
    `lake exe pymantle mantle FILE.py` prints the diagnostics and the module for one file.
 
-`while c: B else: E` is `whileStmt`:
-
-```
-  let head ← build (freshLabel "head")       -- and `body`, `else`, `exit`
-  jump head
-  build (startBlock head)
-  transCond c bodyL (elseL?.getD exit)
-  build (startBlock bodyL)
-  withExit (.loop exit head) (transStmts B)
-  if ← isOpen then jump head
-  …                                          -- `else` runs E, then jumps to `exit`
-  if ← targeted exit then build (startBlock exit)
-```
-
-Its tests are `m_while.py` and `t04_while.py` in `mantle_tests/`.
+`whileStmt` is a short example, tested by `m_while.py` and `t04_while.py`.
 -/
 
 namespace StrataPython.Mantle.PyTranslate
@@ -100,7 +85,7 @@ public section
 /-- A translated module and its diagnostics: the scope pass's syntax errors, then each
 rejected construct, in source order. -/
 structure Result where
-  module : Module Py.env SourceRange
+  module : Module.Raw Py.env SourceRange
   diagnostics : Array Diagnostic
 
 /-- Whether the translation succeeded: no diagnostic. -/
@@ -113,14 +98,6 @@ def nameText : Name → String
   | .num .base i => toString i
   | .str p s => s!"{nameText p}.{s}"
   | .num p i => s!"{nameText p}.{i}"
-
-/-- The functions of `m` that are not well formed, by `Func.WF`.  A module that names a
-function twice fails `Module.WF` as a whole, and every function is reported. -/
-def illFormed {α : Type} (m : Module Py.env α) : Array Name :=
-  let names := m.funcs.map (·.name)
-  match NameSet.of? names with
-  | none => names
-  | some fs => (m.funcs.filter fun f => !decide (Func.WF fs f)).map (·.name)
 
 /-- A diagnostic as one comment line: `-- unsupported: lambda is not supported at 4:4-4:22`. -/
 def formatDiagnostic (fileMap : Option Lean.FileMap) (d : Diagnostic) : String :=

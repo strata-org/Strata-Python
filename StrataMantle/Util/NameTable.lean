@@ -13,12 +13,13 @@ set_option autoImplicit false
 /-!
 # Distinct names, found by hash
 
-A `NameTable` is what a reader keeps while it meets names one by one: a row of slots, each a
-name or one left for a name chosen later, and a run-time `Std.HashMap` from each name to what
-it stands for.  The map's keys are exactly the slots' names, and no name fills two slots, so
-the uniqueness `Func.WF` and `Module.WF` ask for comes with the table rather than from a check
-afterwards.
+A `NameTable` is a row of slots, each a name or one reserved for a name chosen later, and a
+`Std.HashMap` from each name to what it stands for.  No name fills two slots, so a reader
+that meets names one by one gets the uniqueness `Func.WF` and `Module.Raw.WF` ask for without
+a later check.
 
+* `empty`: no slots;
+* `get?`: what a name stands for;
 * `insert?`: fill the next slot with a name, unless the table has it;
 * `reserve`: leave the next slot for later;
 * `insertAll?`: insert each name of a list, in order;
@@ -59,6 +60,7 @@ def empty : NameTable β where
 
 instance : EmptyCollection (NameTable β) := ⟨empty⟩
 
+/-- The empty table has no names. -/
 @[simp] theorem names_empty : (empty : NameTable β).names = [] := by simp [empty]
 
 /-- The value at `n`, if the table has `n`. -/
@@ -78,6 +80,7 @@ def insert? (t : NameTable β) (n : Name) (b : β) : Option (NameTable β) :=
       rw [Array.toList_push, List.filterMap_append]
       exact nodup_append_singleton (fun hm => h ((t.mem_iff n).mpr hm)) t.nodup }
 
+/-- Inserting a name appends it to the names. -/
 theorem names_insert? {t t₁ : NameTable β} {n : Name} {b : β} (h : t.insert? n b = some t₁) :
     t₁.names = t.names ++ [n] := by
   unfold insert? at h
@@ -133,9 +136,8 @@ def fillAux (fresh : Nat → Name) (b : β) (map : Std.HashMap Name β) (out : A
           rw [Array.toList_push, List.append_assoc, List.singleton_append]
           exact List.perm_middle.nodup_iff.mpr (List.nodup_cons.mpr ⟨hf₁, nd⟩))
 
-/-- The names of every slot, each reserved one filled with the first `fresh k` that the table
-does not have, nor any name filled before it: distinct.  `none` only if the search for a fresh
-name runs out, which `map.size + 1` candidates never do. -/
+/-- The names of every slot, distinct, each reserved one filled with the first `fresh k` that
+the table does not have and no earlier slot took.  `none` only if `fresh` is not injective. -/
 def fill? (t : NameTable β) (fresh : Nat → Name) (b : β) :
     Option {ns : Array Name // ns.toList.Nodup} :=
   fillAux fresh b t.map #[] 0 t.slots.toList (by simpa using t.mem_iff) (by simpa using t.nodup)

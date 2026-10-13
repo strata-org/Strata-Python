@@ -100,9 +100,9 @@ definition, a use of a value outside the region that defines it, and a handler's
 result of the operation that failed. The translator must still make every use dominated by
 its definition, because ref-to-reg will rely on it.
 
-**Printed syntax.** This is what `Func.toString` prints, constants folded into their uses,
+**Printed syntax.** This is what `Module.format` prints, constants folded into their uses,
 and what `Module.read` reads back;
-[Mantle](./Mantle.md#printed-form) describes it. Each example in this document is in that
+[Mantle](./Mantle.md#2-printed-form) describes it. Each example in this document is in that
 form. `--` comments and `…` elisions are added for the reader. Readable labels such as
 `head.0` are what the translator passes to `freshLabel`. An application's operands are in
 parentheses, left out when there are none. A constant is written where it is used:
@@ -111,18 +111,19 @@ constant refers to it. Each successor prints with a `^` prefix. A terminator pri
 an application without a result, so a case is
 `base.Except.case[base.String, base.Int](%4) ^ok.0() ^err.0()`. The base's terminal
 instructions drop `base.`: `jump ^done.0()`, `branch(%0) ^bump.0() ^done.0()` and
-`unreachable`. A jump to the exit prints as `ret(%5)`. A literal is untagged, and its form fixes
-its type: `1` is a `base.Int`, `"k"` a `base.String`.
+`unreachable`. A jump to the exit prints as `ret(%ret.0)`. A literal is untagged, and its form
+fixes its type: `1` is a `base.Int`, `"k"` a `base.String`.
 
 ```
-func @m.f(%0 : py.Value) -> base.Except(py.Value, py.Value) {
-  entry.0(%0 : py.Value):
-    %5 : py.Value = py.intLit(1)                        -- apply, no successors
-    %6 : py.Value = py.add(%0, %5) ^propagate.0()        -- err successor, nothing pre-bound
-    %9 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%6)
-    ret(%9)                                             -- jump to the exit, passing %9
-  propagate.0(%10 : py.Value):                         -- receives the exception
-    …
+func @m.f(%x.0 : py.Value) -> base.Except(py.Value, py.Value) {
+  entry.0(%x.0 : py.Value):
+    %int.0 : py.Value = py.intLit(1)                    -- apply, no successors
+    %add.0 : py.Value = py.add(%x.0, %int.0) ^propagate.0()  -- err successor, nothing pre-bound
+    %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%add.0)
+    ret(%ret.0)                                         -- jump to the exit, passing %ret.0
+  propagate.0(%exc.0 : py.Value):                       -- receives the exception
+    %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+    ret(%exc.1)
 }
 ```
 
@@ -649,7 +650,7 @@ site passes the same cells in the same order.
 Capture emits no extra instructions. The inner function reads and writes the outer
 function's own cell, which gives `nonlocal` and late binding. `mkClosure` takes
 `base.Ref(py.Value)` operands, so capturing a value is a type error. A `const @m.f` naming a
-function the module does not define fails `Module.WF`.
+function the module does not define fails `Module.Raw.WF`.
 
 ### 6.7 Classes
 
@@ -963,7 +964,7 @@ counts `cleanup()` calls. The repros are `c1`–`c7` and `t30_loop_try_nested` i
 | t30 case 6 | `for m in xs:` / `try: raiser()` / `except StopIteration: note(9); continue` / `finally: cleanup()` | the back edge's vacuous exception edge left 21 blocks dead | §6.4 and §7.2: the clause's `continue` goes through `fin`, the back edge is a plain `jump` with no exception edge, and `raiser()`'s `StopIteration` reaches `catch`, not `stop` |
 | t30 `nested_return` | `for p in outer:` / `try:` / `for q in inner:` / `try: if check(q): return q` / `finally: note(12)` / `finally: cleanup()` / `return 0` | neither `finally` ran, and there was no normal exit | the inner `fin`'s return successor walks from its own `S`, reaching the outer `cleanup`, so `note(12)` runs, then `cleanup()`, then the return. Exhausting `outer` reaches `return 0` |
 
-These checks apply to all of them. `Module.WF` holds. Every block is reachable from the
+These checks apply to all of them. `Module.Raw.WF` holds. Every block is reachable from the
 entry, except handler blocks that no operation names. No `finally` or `__exit__` body is
 emitted more than once.
 

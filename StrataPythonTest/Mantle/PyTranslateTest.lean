@@ -74,7 +74,7 @@ private def supported : Result := translate "m" #[assign "x" (int 1), fDef, call
 private def withLambda : Result := translate "m" #[assign "x" (int 1), fDef, call, lam]
 
 -- The translator does not reduce in the kernel: the checker runs as compiled code.
-#guard decide (Module.WF supported.module)
+#guard decide (Module.Raw.WF supported.module)
 #guard (StrataPython.Mantle.TestUtil.dottedNames supported.module).isEmpty
 
 example : supported.ok = true := by native_decide
@@ -84,7 +84,7 @@ example : supported.module.funcs.map (nameText ·.name) = #["m.<module>", "m.f"]
   native_decide
 
 -- A rejected `lambda` is a diagnostic, and the module stays well formed.
-#guard decide (Module.WF withLambda.module)
+#guard decide (Module.Raw.WF withLambda.module)
 
 example : withLambda.diagnostics.map (·.message) = #["lambda is not supported"] := by
   native_decide

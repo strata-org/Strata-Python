@@ -28,9 +28,9 @@ set_option autoImplicit false
 /-!
 # Successors and terminal instructions
 
-Functions over `Demo` using its instructions with successors — `add` and its `err`, and
-`fork`, whose two successors receive two values — and its terminal ones: `raise`, `br`, and
-`loop`, which also takes a region.  Each is emitted, checked and printed; then the mistakes
+Functions over `Demo`, each emitted, checked and printed, that use its instructions with
+successors and its terminal instructions: `add` and its `err`; `fork`, whose two successors
+receive two values; `raise`; `br`; and `loop`, which also takes a region.  Then the mistakes
 the successor and terminal rules reject.
 -/
 
@@ -146,10 +146,8 @@ example : Holds (·.labels.map (·.name) =
     counter := by
   decide +kernel
 
-private def m : Except Errors (Module E Unit) :=
+private def m : Except Errors (Module.Raw E Unit) :=
   return { name := .str .base "succs", funcs := #[← sum, ← raiser, ← counter], info := () }
-
-example : Holds Module.WF m := by decide +kernel
 
 /-! ## Printed
 
@@ -196,7 +194,10 @@ block's last line, with no result. -/
   }
 } -/
 #guard_msgs in
-#eval do IO.println (toString (← IO.ofExcept m))
+#eval do
+  match (← IO.ofExcept m).check with
+  | .ok m => IO.println m
+  | .error bad => IO.println s!"not well formed: {bad.map ToDDM.nameText}"
 
 /-! ## What it rejects -/
 

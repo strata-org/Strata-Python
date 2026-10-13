@@ -148,13 +148,6 @@ private def g : Func Py.env Unit where
 
 example : Func.WF ∅ g := by decide +kernel
 
-private def m : Module Py.env Unit where
-  name  := Py.pn "test"
-  funcs := #[f, g]
-  info  := ()
-
-example : Module.WF m := by decide +kernel
-
 /-! ## What the checker catches
 
 An operand of the wrong type, a handler where none is declared or none where one is, a

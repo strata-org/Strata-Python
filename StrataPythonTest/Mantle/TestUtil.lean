@@ -17,7 +17,7 @@ meta import StrataMantle.Env.WF
 * `compilePython`: parse a `.py` file to a Strata Ion file through CPython;
 * `firstDiff`: the first line where an output and its golden differ;
 * `dottedNames`: the names of a module with a `.` inside a string segment, which no name may
-  have.  A stopgap until segments are a subtype that rules it out.
+  have.
 -/
 
 namespace StrataPython.Mantle.TestUtil
@@ -58,7 +58,7 @@ def hasDottedSegment : Name → Bool
   | .str p s => s.contains '.' || hasDottedSegment p
 
 /-- The names of `m`, of functions, labels and values, with a `.` inside a string segment. -/
-def dottedNames {env : Env Unit} [base ⊑ env] {α : Type} (m : Module env α) : Array Name :=
+def dottedNames {env : Env Unit} [base ⊑ env] {α : Type} (m : Module.Raw env α) : Array Name :=
   m.funcs.flatMap fun f =>
     (#[f.name] ++ (f.allBlocks.map (·.label.name)).toArray ++ f.names).filter hasDottedSegment
 

@@ -5,7 +5,7 @@
 -/
 module
 
-public import StrataMantle.IR
+public import StrataMantle.WF
 public import StrataDDM.AST
 public import StrataDDM.Integration.Lean.OfAstM
 -- Private: translating a checked IR needs the environment representation at codegen time.
@@ -24,25 +24,26 @@ set_option autoImplicit false
 /-!
 # Printing the IR, through a Strata dialect
 
-The IR is printed by translating it into a DDM dialect and letting DDM's formatter lay it
-out.  The dialect below is the surface syntax, and a DDM term goes to and from Ion.
-`StrataMantle/DDMRead.lean` reads the printed text back.
+The IR prints by translation into the DDM dialect `Mantle`, defined below, which DDM's
+formatter lays out.  `StrataMantle/DDMRead.lean` reads the text back.
 
-## What the annotations are
+* `Module.format`: a `Module`, printed, with constants folded by default;
+* `Module.Raw.format`, `Func.format`: an unchecked module or one function, printed with the
+  given options;
+* `PrintOptions.full`: every constant on its own line;
+* `ToDDM.nameText`, `ToDDM.valNameText`: a name, and a value's name, as printed.
 
-Every node of the generated AST is annotated `.none`: the IR's annotation type `α` has no
-map to `SourceRange`.
+`toString` prints a `Module` folded and a `Module.Raw` in full.
 
-## The shape it prints
+## The printed form
 
 ```
-module py.f {
-  func @py.f(%x.0 : py.Value) -> base.Except(py.Value, py.Value) {
+module m {
+  func @m.f(%x.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%x.0 : py.Value):
-      %y.0 : py.Value = py.undef("y")
-      %y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%y.0)
-      %add.0 : py.Value = py.add(%x.0, %y.cell.0) ^propagate.0()
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%add.0)
+      %int.0 : py.Value = py.intLit(1)
+      %sum.0 : py.Value = py.add(%x.0, %int.0) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%sum.0)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
@@ -51,53 +52,45 @@ module py.f {
 }
 ```
 
-A value is printed by its name, `Func.names` at its id: `%x.0`.  Ids are not printed, so renumbering a function changes nothing printed.  Every
-value is printed with its type, at its definition site.  An application's operands
-follow its type arguments in parentheses, and are left out with the parentheses when there
-are none: `py.noneLit`.  A function's name is marked `@`, as in LLVM, both where it is
-defined and where a constant refers to it: `py.mkClosure(@m.f)`.  So a function
-never reads as an operation of the same name.  An operation's successors follow its
-operands, each marked `^` as in MLIR.  The `err` successor above binds nothing: the
-operation supplies the exception, which `propagate.0()` receives.  A constructor is printed
-as any application is, with its type arguments: `base.ok[py.Value, py.Value](%4)`.
-
-A name is printed dotted, as one identifier, and escaped whole when a segment needs it:
-`@|m.<module>|`.  A numeric segment prints as its digits: `entry.0`.
-
-A literal carries no type tag, but its form fixes its type exactly, with no widening.  An
-integer, `5` or `-1`, is a `base.Int`; a float always has a decimal point or an exponent,
-`1.0`, `0.0025` or `1e22`, and is the shortest decimal that reads back as it, or `inf`,
-`-inf` or `nan`; it is a `base.Float64`.  A boolean is `true` or `false`, a string `"…"`, the
-unit `unit` and a function pointer `@m.f`.  A width-carrying bitvector literal would need a
-syntax of its own.
-
-A terminator is printed as the block's last line, an application without a result:
-`demo.raise(%3) ^handler.0()`, or
-`base.Except.case[py.Value, py.Value](%4) ^ok.0() ^err.0()`.  The base's control flow drops
-its namespace: `jump ^bb.1(%2)`, `branch(%3) ^bb.1() ^bb.2()` and `unreachable`.  A jump to
-the exit is `ret(%5)`.
-
-A block is named by its label.  The entry block's parameters are the function's, so they
-appear twice: on the signature and on the entry.
-
-An operation's regions follow the rest of its line, each in braces and opening with its
-entry block, whose parameters are the region's arguments:
+* A value prints as its name, `Func.names` at its id: `%x.0`.  Ids are not printed, so
+  renumbering a function changes nothing printed.  Every value is printed with its type where
+  it is defined.
+* A block prints as its label and parameters.  The entry block's parameters are the
+  function's, so they appear twice: on the signature and on the entry.
+* An application prints as its operation, then its type arguments in brackets, its operands
+  in parentheses, its successors, each `^label(args)`, and its regions, each in braces.  Empty
+  brackets and parentheses are left out: `py.noneLit`.  A constructor prints as any
+  application does: `base.ok[py.Value, py.Value](%sum.0)`.
+* A successor binds only the values the site passes.  The operation supplies the rest: above,
+  `py.add` passes the exception to `propagate.0`.
+* A terminator is a block's last line, an application without a result:
+  `base.Except.case[base.Int, base.Int](%e.0) ^ok.0() ^err.0()`.  The base's control flow
+  drops `base.`: `jump ^done.0(%v.0)`, `branch(%c.0) ^some.0() ^none.0()` and `unreachable`.
+  A jump to the exit is `ret(%ret.0)`.
+* A name prints dotted, as one identifier, escaped whole when a segment needs it:
+  `@|m.<module>|`.  A numeric segment prints as its digits: `entry.0`.  A function's name is
+  marked `@`, both where it is defined and where a constant names it: `ret(@m.counter)`.
+* A literal carries no type tag, and its form fixes its type exactly, with no widening.  An
+  integer, `5` or `-1`, is a `base.Int`.  A float always has a decimal point or an exponent,
+  `1.0`, `0.0025` or `1e22`, and is the shortest decimal that reads back as it, or `inf`,
+  `-inf` or `nan`; it is a `base.Float64`.  A boolean is `true` or `false`, a string `"…"`,
+  the unit `unit` and a function pointer `@m.f`.
+* An operation's regions follow the rest of its line, each opening with its entry block,
+  whose parameters are the region's arguments:
 
 ```
-%4 : base.Int = demo.if[base.Int](%1) {
+%r.0 : base.Int = demo.if[base.Int](%c.0) {
   then.0():
-    ret(%2)
+    ret(%x.0)
 } {
   else.0():
-    ret(%3)
+    ret(%y.0)
 }
 ```
 
-By default each constant the function uses is written at its uses, and its own line is
-dropped: `%7 : py.Value = py.intLit(5)` rather than `%6 : base.Int = const 5` and
-`%7 : py.Value = py.intLit(%6)`.  An operand is a value or a constant, so the folded form is
-in the same dialect.  `PrintOptions.full` prints every
-constant on its own line instead.
+By default each constant a function uses is written at its uses, and its own line is
+dropped: `%int.0 : py.Value = py.intLit(1)` rather than `%c.0 : base.Int = const 1` and
+`%int.0 : py.Value = py.intLit(%c.0)`.  The folded form is in the same dialect.
 
 Two names do not read back as printed: one whose string segment is empty, all digits or
 contains `.`, and one that is a keyword of the dialect as a whole, such as `ret` or `unit`.
@@ -180,12 +173,8 @@ op succ (target : MName, args : CommaSepBy MOperand) : MSucc =>
 category MTypeArgs;
 op typeArgs (args : CommaSepBy MType) : MTypeArgs => "[" args "]";
 
-/*
-  Newlines *lead* a line rather than trailing it, and a line's own newline sits inside
-  whatever `indent` encloses it.  That is what makes nesting come out right: the newline
-  that ends a header belongs to the header's level, and the ones between the items it
-  encloses belong to theirs.
-*/
+/* A line's newline leads it, inside the `indent` that encloses it, so each line indents at
+   its own level. */
 /* Declared ahead of their operations: an instruction holds regions, which hold blocks,
    which hold instructions. */
 category MBlock;
@@ -238,12 +227,14 @@ public structure PrintOptions where
   /-- Write each constant a function uses at its uses, instead of on a line of its own. -/
   foldConsts : Bool := true
 
-/-- Print in full: every constant on its own line, under its id. -/
+/-- Print in full: every constant on its own line. -/
 public def PrintOptions.full : PrintOptions := { foldConsts := false }
 
 /-! ## The translation
 
-One function per level.  The IR is already checked, so the translation cannot fail. -/
+One function per level.  It prints any IR, well formed or not. -/
+
+-- Every node is annotated `.none`: the IR's annotation type has no map to `SourceRange`.
 
 namespace ToDDM
 
@@ -276,8 +267,8 @@ def funcName (n : Name) : MFuncName SourceRange := .funcName .none (name n)
 /-- A value's name, as printed: `%x.1`. -/
 public def valNameText (n : Name) : String := s!"%{nameText n}"
 
-/-- The name `v` prints as: its name, or `?id` if it has none, as only in a function that is
-not well formed. -/
+/-- The name `v` prints as: its name, or `?id` if it has none.  Only an ill-formed function
+has an unnamed value. -/
 def valNameOf (names : Array Name) (v : ValId) : Name :=
   names[v.id]?.getD (.str .base s!"?{v.id}")
 
@@ -314,11 +305,9 @@ def const : Const → MConst SourceRange
 
 /-! ### Folding constants
 
-With `PrintOptions.foldConsts`, the default, a constant is written at each of its uses, as an
-operand, and its own line is dropped.  The constants folded are a function's that it uses at
-least once; one it never uses keeps its line, since nothing else would show it.  A constant is
-pure, so repeating it, or moving it past other instructions, changes nothing.  An
-application's result is never folded, however pure. -/
+With `PrintOptions.foldConsts`, the default, each constant a function uses is written at each
+of its uses, as an operand, and its own line is dropped.  A constant it never uses keeps its
+line.  An application's result is never folded. -/
 
 /-- The constants to write in place, by value id. -/
 abbrev Folded := Std.HashMap Nat Const
@@ -447,8 +436,8 @@ def func {env : Env Unit} {α : Type} (opts : PrintOptions) (fn : Func env α) :
     (type fn.retType)
     ⟨.none, fn.blocks.map (block cx)⟩
 
-def module {env : Env Unit} [base ⊑ env] {α : Type} (opts : PrintOptions) (m : Module env α) :
-    DDM.Command SourceRange :=
+def module {env : Env Unit} [base ⊑ env] {α : Type} (opts : PrintOptions)
+    (m : Module.Raw env α) : DDM.Command SourceRange :=
   .moduleDecl .none (name m.name) ⟨.none, m.funcs.map (func opts)⟩
 
 end ToDDM
@@ -468,26 +457,29 @@ def render (c : DDM.Command SourceRange) : String :=
 
 end Print
 
-/-- The module, printed. -/
-public def Module.format {env : Env Unit} [base ⊑ env] {α : Type} (opts : PrintOptions)
-    (m : Module env α) : String :=
+/-- The module, printed with the given options.  Folding a module that is not well formed can
+print text that reads back as a different module. -/
+public def Module.Raw.format {env : Env Unit} [base ⊑ env] {α : Type} (opts : PrintOptions)
+    (m : Module.Raw env α) : String :=
   Print.render (ToDDM.module opts m)
 
-/-- The module, printed with the default options: constants folded. -/
-public def Module.toString {env : Env Unit} [base ⊑ env] {α : Type} (m : Module env α) :
-    String :=
-  m.format {}
+/-- The module, printed in full. -/
+public instance {env : Env Unit} [base ⊑ env] {α : Type} : ToString (Module.Raw env α) where
+  toString := Module.Raw.format .full
 
+/-- The module, printed, with constants folded by default. -/
+public def Module.format {env : Env Unit} [base ⊑ env] {α : Type} (m : Module env α)
+    (opts : PrintOptions := {}) : String :=
+  m.raw.format opts
+
+/-- The module, printed with constants folded. -/
 public instance {env : Env Unit} [base ⊑ env] {α : Type} : ToString (Module env α) where
-  toString := Module.toString
+  toString m := m.format
 
-/-- One function, printed: a module with just it in. -/
+/-- One function, printed with the given options, as a module with just it in.  Folding a
+function that is not well formed can print text that reads back as a different function. -/
 public def Func.format {env : Env Unit} {α : Type} (opts : PrintOptions) (fn : Func env α) :
     String :=
   Print.render (.moduleDecl .none (ToDDM.name fn.name) ⟨.none, #[ToDDM.func opts fn]⟩)
-
-/-- One function, printed with the default options. -/
-public def Func.toString {env : Env Unit} {α : Type} (fn : Func env α) : String :=
-  fn.format {}
 
 end Strata.Mantle
