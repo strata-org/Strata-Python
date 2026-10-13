@@ -58,7 +58,8 @@ module t24_assert {
       %str.1 : py.Value = py.strLit("x must be positive")
       %args.1 : py.Value = py.mkTuple(%str.1)
       %kwargs.1 : py.Value = py.mkKwargs
-      %exc.0 : py.Value = py.call(%AssertionError.0, %args.1, %kwargs.1) ^propagate.0()
+      %call.0 : py.Value = py.call(%AssertionError.0, %args.1, %kwargs.1) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
       jump ^propagate.0(%exc.0)
     ok.0():
       %isinstance.0 : py.Value = py.loadGlobal("t24_assert", "isinstance") ^propagate.0()
@@ -67,14 +68,12 @@ module t24_assert {
       %int.2 : py.Value = py.loadGlobal("t24_assert", "int") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%x.7, %int.2)
       %kwargs.2 : py.Value = py.mkKwargs
-      %call.0 : py.Value = py.call(%isinstance.0, %tuple.0, %kwargs.2) ^propagate.0()
-      %cond.1 : base.Bool = py.truthy(%call.0) ^propagate.0()
+      %call.1 : py.Value = py.call(%isinstance.0, %tuple.0, %kwargs.2) ^propagate.0()
+      %cond.1 : base.Bool = py.truthy(%call.1) ^propagate.0()
       branch(%cond.1) ^ok.1() ^fail.1()
     fail.1():
       %AssertionError.1 : py.Value = py.assertionError
-      %args.2 : py.Value = py.mkTuple
-      %kwargs.3 : py.Value = py.mkKwargs
-      %exc.1 : py.Value = py.call(%AssertionError.1, %args.2, %kwargs.3) ^propagate.0()
+      %exc.1 : py.Value = py.toException(%AssertionError.1) ^propagate.0()
       jump ^propagate.0(%exc.1)
     ok.1():
       %x.8 : py.Value = base.refGet[py.Value](%x.cell.0)
@@ -138,9 +137,7 @@ module t24_assert {
       branch(%cond.0) ^ok.0() ^fail.0()
     fail.0():
       %AssertionError.0 : py.Value = py.assertionError
-      %args.1 : py.Value = py.mkTuple
-      %kwargs.1 : py.Value = py.mkKwargs
-      %exc.0 : py.Value = py.call(%AssertionError.0, %args.1, %kwargs.1) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%AssertionError.0) ^propagate.0()
       jump ^propagate.0(%exc.0)
     ok.0():
       %lo.6 : py.Value = base.refGet[py.Value](%lo.cell.0)
@@ -157,9 +154,10 @@ module t24_assert {
       %str.3 : py.Value = py.strLit("")
       %fmt.0 : py.Value = py.fmtValue(%lo.9, %str.3) ^propagate.0()
       %fstr.0 : py.Value = py.strConcat(%str.2, %fmt.0)
-      %args.2 : py.Value = py.mkTuple(%fstr.0)
-      %kwargs.2 : py.Value = py.mkKwargs
-      %exc.1 : py.Value = py.call(%AssertionError.1, %args.2, %kwargs.2) ^propagate.0()
+      %args.1 : py.Value = py.mkTuple(%fstr.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%AssertionError.1, %args.1, %kwargs.1) ^propagate.0()
+      %exc.1 : py.Value = py.toException(%call.0) ^propagate.0()
       jump ^propagate.0(%exc.1)
     ok.1():
       %none.1 : py.Value = py.noneLit

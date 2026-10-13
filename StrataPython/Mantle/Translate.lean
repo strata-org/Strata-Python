@@ -1621,7 +1621,8 @@ partial def whileStmt (test : expr SourceRange) (body orelse : Array (stmt Sourc
   if ← targeted exit then build (startBlock exit)
 
 /-- `assert test, msg` (§6.1): `test` as a condition.  Only the failing side evaluates
-`msg`, then raises the `AssertionError` class called on it. -/
+`msg`, then raises the `AssertionError` class called on it, or the class itself without a
+`msg`, through `toException`, as CPython's `RAISE_VARARGS` does. -/
 partial def assertStmt (test : expr SourceRange) (msg : Option (expr SourceRange)) :
     TransM Unit := do
   let ok ← build (freshLabel "ok")
@@ -1629,9 +1630,13 @@ partial def assertStmt (test : expr SourceRange) (msg : Option (expr SourceRange
   transCond test ok fail
   build (startBlock fail)
   let cls ← build (emitTotal (.str .base "AssertionError") Py.assertionError #v[] #[])
-  let args ← build (emitTotal (.str .base "args") Py.mkTuple #v[] (← msg.toArray.mapM transExpr))
-  let kwargs ← build (emitTotal (.str .base "kwargs") Py.mkKwargs #v[] #[])
-  let e ← build (emitFailing (.str .base "exc") Py.call #v[] #[cls, args, kwargs])
+  let v ← match msg with
+    | none => pure cls
+    | some m => do
+      let args ← build (emitTotal (.str .base "args") Py.mkTuple #v[] #[← transExpr m])
+      let kwargs ← build (emitTotal (.str .base "kwargs") Py.mkKwargs #v[] #[])
+      build (emitFailing (.str .base "call") Py.call #v[] #[cls, args, kwargs])
+  let e ← build (emitFailing (.str .base "exc") Py.toException #v[] #[v])
   build (PyBuild.jump (← build (raiseTo e)))
   build (startBlock ok)
 

@@ -15,9 +15,7 @@ module m_assert {
       branch(%cond.0) ^ok.0() ^fail.0()
     fail.0():
       %AssertionError.0 : py.Value = py.assertionError
-      %args.0 : py.Value = py.mkTuple
-      %kwargs.0 : py.Value = py.mkKwargs
-      %exc.0 : py.Value = py.call(%AssertionError.0, %args.0, %kwargs.0) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%AssertionError.0) ^propagate.0()
       jump ^propagate.0(%exc.0)
     ok.0():
       %c.2 : py.Value = py.loadGlobal("m_assert", "c") ^propagate.0()
@@ -26,9 +24,10 @@ module m_assert {
     fail.1():
       %AssertionError.1 : py.Value = py.assertionError
       %m.7 : py.Value = py.loadGlobal("m_assert", "m") ^propagate.0()
-      %args.1 : py.Value = py.mkTuple(%m.7)
-      %kwargs.1 : py.Value = py.mkKwargs
-      %exc.1 : py.Value = py.call(%AssertionError.1, %args.1, %kwargs.1) ^propagate.0()
+      %args.0 : py.Value = py.mkTuple(%m.7)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%AssertionError.1, %args.0, %kwargs.0) ^propagate.0()
+      %exc.1 : py.Value = py.toException(%call.0) ^propagate.0()
       jump ^propagate.0(%exc.1)
     ok.1():
       %a.0 : py.Value = py.loadGlobal("m_assert", "a") ^propagate.0()
@@ -43,9 +42,10 @@ module m_assert {
       %a.1 : py.Value = py.loadGlobal("m_assert", "a") ^propagate.0()
       %str.1 : py.Value = py.strLit("")
       %fmt.0 : py.Value = py.fmtValue(%a.1, %str.1) ^propagate.0()
-      %args.2 : py.Value = py.mkTuple(%fmt.0)
-      %kwargs.2 : py.Value = py.mkKwargs
-      %exc.2 : py.Value = py.call(%AssertionError.2, %args.2, %kwargs.2) ^propagate.0()
+      %args.1 : py.Value = py.mkTuple(%fmt.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%AssertionError.2, %args.1, %kwargs.1) ^propagate.0()
+      %exc.2 : py.Value = py.toException(%call.1) ^propagate.0()
       jump ^propagate.0(%exc.2)
     ok.2():
       %c.4 : py.Value = py.loadGlobal("m_assert", "c") ^propagate.0()
@@ -55,11 +55,12 @@ module m_assert {
       %AssertionError.3 : py.Value = py.assertionError
       %g.0 : py.Value = py.loadGlobal("m_assert", "g") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%g.0, %tuple.0, %kwargs.2) ^propagate.0()
+      %args.2 : py.Value = py.mkTuple(%call.2)
       %kwargs.3 : py.Value = py.mkKwargs
-      %call.0 : py.Value = py.call(%g.0, %tuple.0, %kwargs.3) ^propagate.0()
-      %args.3 : py.Value = py.mkTuple(%call.0)
-      %kwargs.4 : py.Value = py.mkKwargs
-      %exc.3 : py.Value = py.call(%AssertionError.3, %args.3, %kwargs.4) ^propagate.0()
+      %call.3 : py.Value = py.call(%AssertionError.3, %args.2, %kwargs.3) ^propagate.0()
+      %exc.3 : py.Value = py.toException(%call.3) ^propagate.0()
       jump ^propagate.0(%exc.3)
     ok.3():
       %a.2 : py.Value = py.loadGlobal("m_assert", "a") ^propagate.0()
@@ -71,9 +72,7 @@ module m_assert {
       branch(%cond.6) ^ok.4() ^fail.4()
     fail.4():
       %AssertionError.4 : py.Value = py.assertionError
-      %args.4 : py.Value = py.mkTuple
-      %kwargs.5 : py.Value = py.mkKwargs
-      %exc.4 : py.Value = py.call(%AssertionError.4, %args.4, %kwargs.5) ^propagate.0()
+      %exc.4 : py.Value = py.toException(%AssertionError.4) ^propagate.0()
       jump ^propagate.0(%exc.4)
     ok.4():
       %xs.0 : py.Value = py.loadGlobal("m_assert", "xs") ^propagate.0()
@@ -89,9 +88,10 @@ module m_assert {
     fail.5():
       %AssertionError.5 : py.Value = py.assertionError
       %x.1 : py.Value = py.loadGlobal("m_assert", "x") ^propagate.0()
-      %args.5 : py.Value = py.mkTuple(%x.1)
-      %kwargs.6 : py.Value = py.mkKwargs
-      %exc.5 : py.Value = py.call(%AssertionError.5, %args.5, %kwargs.6) ^propagate.0()
+      %args.3 : py.Value = py.mkTuple(%x.1)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%AssertionError.5, %args.3, %kwargs.4) ^propagate.0()
+      %exc.5 : py.Value = py.toException(%call.4) ^propagate.0()
       jump ^propagate.0(%exc.5)
     ok.5():
       jump ^head.0()
@@ -140,9 +140,7 @@ module m_assert {
       branch(%cond.0) ^ok.0() ^fail.0()
     fail.0():
       %AssertionError.0 : py.Value = py.assertionError
-      %args.1 : py.Value = py.mkTuple
-      %kwargs.1 : py.Value = py.mkKwargs
-      %exc.0 : py.Value = py.call(%AssertionError.0, %args.1, %kwargs.1) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%AssertionError.0) ^propagate.0()
       jump ^propagate.0(%exc.0)
     ok.0():
       %x.6 : py.Value = base.refGet[py.Value](%x.cell.0)

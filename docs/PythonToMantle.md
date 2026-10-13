@@ -485,8 +485,8 @@ jump to the function's exit.
 | `del x` | `requireDefined` (raises `NameError` or `UnboundLocalError`), then `refSet` of `undef "x"` | a global is not looked up in `builtins` |
 | `del o.a`, `del o[k]`, `del o[i:j:s]` | evaluate `o` and `k`, then `py.delAttr o "a"` or `py.delItem o k`, with `py.mkSlice` for a slice | |
 | `del a, (b, c)` | delete each target left to right, element by element | no unpacking |
-| `assert c` | as `assert c, m`, with `AssertionError` called on no arguments | |
-| `assert c, m` | `c` as a condition (§6.2). The true target continues; the false target loads `py.assertionError`, the `AssertionError` class, evaluates `m`, then `py.call`s the class on it and raises the result (§7.1) | `c` is tested once; `m` is evaluated only when the assertion fails; `AssertionError` is the class itself, as CPython's `LOAD_ASSERTION_ERROR`, even if `builtins.AssertionError` is rebound |
+| `assert c` | as `assert c, m`, raising the `AssertionError` class itself | |
+| `assert c, m` | `c` as a condition (§6.2). The true target continues; the false target loads `py.assertionError`, the `AssertionError` class, evaluates `m`, then `py.call`s the class on it and raises the result with `py.toException` (§7.1) | `c` is tested once; `m` is evaluated only when the assertion fails; `AssertionError` is the class itself, as CPython's `LOAD_ASSERTION_ERROR`, even if `builtins.AssertionError` is rebound |
 | `global x`, `nonlocal x` | nothing: the scope pass makes `x` `globalExplicit` or `free` | |
 | imports | below | |
 
