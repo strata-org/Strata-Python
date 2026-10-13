@@ -66,6 +66,17 @@ a completion outwards instead of acting on it.
 As in CPython, the run-time state holds the exception being handled: `pushExcInfo` sets it on
 entering an `except` handler, and `popExcept` restores the previous one on leaving it.
 `handledExc` reads it.
+
+An exception that an operation raises itself, such as the `KeyError` of `getItem`, gets the
+exception being handled as its `__context__`, as CPython's `_PyErr_SetObject` does:
+
+* If the two are the same exception, `__context__` does not change.
+* If the handled exception's `__context__` chain already reaches the raised one, that link is
+  cut, so no cycle forms.
+
+An exception that comes out of Python code the operation runs, such as a callee or a
+`__next__`, keeps its `__context__`.  `toException` sets it too, since `raise e` is
+`toException` and then a jump.  `handledExc` does not: a bare `raise` keeps the chain.
 -/
 
 namespace StrataPython.Mantle
@@ -370,14 +381,16 @@ public environment Py extends Base where
   -- Exceptions.
 
   /-- The exception `raise val` raises, as CPython's `RAISE_VARARGS` makes it: `val` if it is
-  an exception, or `val()` if it is an exception class.  Raises `TypeError: exceptions must
-  derive from BaseException` otherwise, a `TypeError` if `val()` returns a non-exception, or
-  whatever `val()` raises. -/
+  an exception, or `val()` if it is an exception class, with its `__context__` set as the
+  module docstring describes.  Raises `TypeError: exceptions must derive from BaseException`
+  otherwise, a `TypeError` if `val()` returns a non-exception, or whatever `val()` raises. -/
   insn toException (val : Value) (^err (e : Value)) : Value
   /-- `raise exc from cause`, after `toException`: sets `exc.__cause__` to `cause`, or to
   `cause()` if it is an exception class, and `exc.__suppress_context__` to `True`.  A `None`
   cause clears `__cause__`.  Raises `TypeError: exception causes must derive from
-  BaseException` for any other `cause`, as CPython does, or whatever `cause()` raises. -/
+  BaseException` for any other `cause`, as CPython does, or whatever `cause()` raises.
+  Unlike CPython, which sets the cause before the context, a failure here leaves `exc` with
+  the `__context__` that `toException` set. -/
   insn setCause (exc cause : Value) (^err (e : Value)) : Unit
   /-- Makes `exc` the exception being handled, and returns the one handled before, or `None`:
   CPython's `PUSH_EXC_INFO`, on entering an `except` handler. -/

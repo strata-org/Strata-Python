@@ -789,6 +789,12 @@ Each is rejected as §3 describes.
 block taking the exception. At the outermost level that block is `propagate.0`, which
 returns `base.error`.
 
+**`__context__`.** An exception that an operation raises itself while another is being
+handled (§7.2) gets that one as its `__context__`, unless it is that one, as in CPython.
+`py.toException` sets it too, because the `jump` of a `raise` cannot. An exception that comes
+out of a callee keeps its `__context__`, and so does one that `py.handledExc` or the direct
+jump of a bare `raise` raises again. `Py`'s module docstring gives the details.
+
 ### 7.2 `try`/`except`/`else`/`finally`
 
 Write `S` for the exits stack and `H` for the handler in effect at the `try` statement.
@@ -850,12 +856,13 @@ for a fresh block. `PyBuild.tryFinally` emits the whole lowering: the `try` body
 **When the `finally` body exits abruptly.** Its own exit replaces the pending completion,
 as in CPython; Python 3.14 (PEP 765) only adds a `SyntaxWarning` for `return`, `break` and
 `continue` there. When it raises while an exception is pending, CPython also sets the new
-exception's `__context__` to the pending one. So the target lowering protects the `finally`
+exception's `__context__` to the pending one. CPython does this through the exception being
+handled: on the exceptional path it runs the `finally` body after `PUSH_EXC_INFO`, so §7.1's
+rule sets `__context__` where the body raises. So the target lowering protects the `finally`
 body: a failure goes to a `superseded(pending, exc)` block, which `tryFinally (superseded :=
-true)` emits and `PyBuildTest`'s `k` checks, and which chains `exc` to `pending` before
-propagating it. The chaining operation belongs to the run-time exception state (§9, Q2).
-`tryFinally`'s default, which runs the `finally` body under `H` with stack `S`, has the same
-control flow without the chaining.
+true)` emits and `PyBuildTest`'s `k` checks. It restores the exception being handled before
+propagating `exc`, and does no chaining of its own (§9, Q2). `tryFinally`'s default, which
+runs the `finally` body under `H` with stack `S`, has the same control flow.
 
 **Why a completion.** CPython 3.9 and later copy the `finally` body once per exit, with no
 bound on the copies, and exponentially many when nested `finally` bodies themselves exit
@@ -952,10 +959,11 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
    A region cannot name an outer label, so `propagate.0`, a loop's `exit` and an outer `fin`
    are out of reach. Every abrupt exit from a region becomes a returned completion, with
    its own handler inside: §7 moved to a region boundary.
-2. **Exception chaining in `finally`.** The `superseded` block must set `__context__`, and
-   the `finally` body must see the pending exception as the one being handled
-   (`sys.exc_info()`). Both need the run-time exception state, which `except` handlers
-   already maintain with `py.pushExcInfo` and `py.popExcept` (§7.2). A bare `raise` in a
+2. **Exception chaining in `finally`.** On the exceptional path, the `finally` body must run
+   with the pending exception as the one being handled, as in CPython: then
+   `sys.exc_info()` sees it, and §7.1's rule sets `__context__` where the body raises, so
+   `superseded` needs no chaining step. `except` handlers already maintain that state with
+   `py.pushExcInfo` and `py.popExcept` (§7.2). A bare `raise` in a
    `finally` body cannot use `Ctx.handled`: on the exceptional path it raises the pending
    exception, so it must read `py.handledExc` (`m_try`'s `finally_raise`).
 3. **Definedness.** Should definedness stay as `py.undef` values in cells, or become
