@@ -1,0 +1,41 @@
+module top
+  Ctx: local (assigned)
+  chained: local (assigned)
+  log: local (assigned)
+  note: local (assigned)
+  order: local (assigned)
+  function note
+    log: global implicit (referenced)
+    x: local (parameter, referenced)
+  class Ctx
+    __enter__: local (assigned)
+    __exit__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      fail: local (parameter, referenced)
+      name: local (parameter, referenced)
+      note: global implicit (referenced)
+      self: local (parameter, referenced)
+      suppress: local (parameter, referenced)
+    function __enter__
+      note: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __exit__
+      ValueError: global implicit (referenced)
+      note: global implicit (referenced)
+      self: local (parameter, referenced)
+      t: local (parameter)
+      tb: local (parameter)
+      v: local (parameter, referenced)
+  function order
+    Ctx: global implicit (referenced)
+    note: global implicit (referenced)
+    x: local (assigned, referenced)
+    y: local (assigned, referenced)
+  function chained
+    Ctx: global implicit (referenced)
+    KeyError: global implicit (referenced)
+    a_suppress: local (parameter, referenced)
+    b_fail: local (parameter, referenced)
+    b_suppress: local (parameter, referenced)
+qualnames: Ctx, Ctx.__enter__, Ctx.__exit__, Ctx.__init__, chained, note, order

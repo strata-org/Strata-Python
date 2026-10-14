@@ -1,0 +1,53 @@
+module
+  log: local (assigned)
+  note: local (assigned)
+  Ctx: local (assigned)
+  other_exit: local (assigned)
+  replaced_in_body: local (assigned)
+  rebound_manager: local (assigned)
+  NoExit: local (assigned)
+  missing_exit: local (assigned)
+  function note
+    params: x
+    x: local (parameter, referenced)
+    log: global implicit (referenced)
+  class Ctx
+    __enter__: local (assigned)
+    __exit__: local (assigned)
+    function Ctx.__enter__
+      params: self
+      self: local (parameter)
+      note: global implicit (referenced)
+    function Ctx.__exit__
+      params: self, t, v, tb
+      self: local (parameter)
+      t: local (parameter)
+      v: local (parameter)
+      tb: local (parameter)
+      note: global implicit (referenced)
+  function other_exit
+    params: self, t, v, tb
+    self: local (parameter)
+    t: local (parameter)
+    v: local (parameter)
+    tb: local (parameter)
+    note: global implicit (referenced)
+  function replaced_in_body
+    Local: local (assigned, referenced)
+    Ctx: global implicit (referenced)
+    other_exit: global implicit (referenced)
+    note: global implicit (referenced)
+    class replaced_in_body.<locals>.Local
+  function rebound_manager
+    m: local (assigned, referenced)
+    Ctx: global implicit (referenced)
+    note: global implicit (referenced)
+  class NoExit
+    __enter__: local (assigned)
+    function NoExit.__enter__
+      params: self
+      self: local (parameter, referenced)
+      note: global implicit (referenced)
+  function missing_exit
+    NoExit: global implicit (referenced)
+    note: global implicit (referenced)

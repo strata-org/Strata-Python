@@ -105,8 +105,9 @@ inductive Exit where
   the exception handled before, `name` the name the clause binds and where, and `outer` the
   handler around the `try`. -/
   | handler (prev : ValId) (name : Option (String × SourceRange)) (outer : BlockValue)
-  /-- A `try` with a `finally`: a `return`, `break` or `continue` jumps to `fin` with its
-  completion, and the dispatch after the `finally` body carries it on. -/
+  /-- A `try` with a `finally`, or a `with`: a `return`, `break` or `continue` jumps to `fin`
+  with its completion, and the dispatch after the `finally` body or `__exit__` carries it
+  on. -/
   | cleanup (fin : Label)
 
 /-- A `def` whose function is emitted after the current one. -/
@@ -539,7 +540,6 @@ def literal (c : constant SourceRange) (range : SourceRange) : TransM ValId :=
 def stmtName : stmt SourceRange → String
   | .TypeAlias .. => "type alias"
   | .AsyncFor .. => "async for"
-  | .With .. => "with"
   | .AsyncWith .. => "async with"
   | .Match .. => "match"
   | .TryStar .. => "try/except*"
@@ -1514,6 +1514,29 @@ def exitWalk (brk : Bool) (ret : Option ValId) (range : SourceRange) : TransM Un
       return ← jump fin #[c]
   if let some v := ret then build (emitReturn v)
 
+/-- The arms of the dispatch after a `finally` body or a `with`'s `__exit__`, which do from
+outside the statement at `sr` what the completion would have done: `join` is the code after
+it, and `outer` the handler around it. -/
+def exitArms (join : Label) (outer : BlockValue) (sr : SourceRange) : TransM (Arms TransM) := do
+  let exits := (← get).exits
+  -- `break` or `continue` jumps straight to the loop when it is the innermost entry.
+  let loopArm (brk : Bool) : TransM (Arm TransM Unit) := do
+    if !exits.any (· matches .loop ..) then return .unreachable
+    match exits.back? with
+    | some (.loop b c) =>
+      let l := if brk then b else c
+      recordTarget l
+      return .to l
+    | _ => return .block (if brk then "brk" else "cont") fun _ => exitWalk brk none sr
+  return {
+    normal := .to join
+    «return» := if (← curScope).kind matches .module | .classBody then .unreachable
+      else .block "ret" fun v => exitWalk false (some v) sr
+    raise := if outer.args.isEmpty then .to outer.target
+      else .block "reraise" fun e => build (PyBuild.jump { outer with args := outer.args.push e })
+    «break» := ← loopArm true
+    «continue» := ← loopArm false }
+
 mutual
 
 /-- Lower a statement list, skipping what follows a statement that ends every path. -/
@@ -1584,6 +1607,7 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
       | some exc => pure exc
       | none => build (emitFailing (.str .base "exc") Py.handledExc #v[] #[])
     build (PyBuild.jump (← build (raiseTo e)))
+  | .With sr ⟨_, items⟩ ⟨_, body⟩ _ => withStmt sr items.toList body
   | .Try sr ⟨_, body⟩ ⟨_, handlers⟩ ⟨_, orelse⟩ ⟨_, final⟩ =>
     if final.isEmpty then tryStmt body handlers orelse
     else tryFinallyStmt sr body handlers orelse final
@@ -1710,31 +1734,62 @@ partial def tryFinallyStmt (sr : SourceRange) (body : Array (stmt SourceRange))
     TransM Unit := do
   let outer ← build handler
   let join ← build (freshLabel "join")
-  let exits := (← get).exits
-  -- `break` or `continue` jumps straight to the loop when it is the innermost entry.
-  let loopArm (brk : Bool) : TransM (Arm TransM Unit) := do
-    if !exits.any (· matches .loop ..) then return .unreachable
-    match exits.back? with
-    | some (.loop b c) =>
-      let l := if brk then b else c
-      recordTarget l
-      return .to l
-    | _ => return .block (if brk then "brk" else "cont") fun _ => exitWalk brk none sr
-  let arms : TransM (Arms TransM) := return {
-    normal := .to join
-    «return» := if (← curScope).kind matches .module | .classBody then .unreachable
-      else .block "ret" fun v => exitWalk false (some v) sr
-    raise := if outer.args.isEmpty then .to outer.target
-      else .block "reraise" fun e => build (PyBuild.jump { outer with args := outer.args.push e })
-    «break» := ← loopArm true
-    «continue» := ← loopArm false }
   let finished ← tryFinally
     (fun fin => withExit (.cleanup fin) do
       if handlers.isEmpty then transStmts body else tryStmt body handlers orelse)
     (fun prev => withReader ({ · with handled := none })
       (withExit (.handler prev none outer) (transStmts final)))
-    arms
+    (exitArms join outer sr)
   if finished then build (startBlock join)
+
+/-- `with item, …: body` at `sr` (§7.3), one item at a time, the first outermost. -/
+partial def withStmt (sr : SourceRange) (items : List (withitem SourceRange))
+    (body : Array (stmt SourceRange)) : TransM Unit :=
+  match items with
+  | [] => transStmts body
+  | .mk_withitem _ ctx ⟨_, target⟩ :: rest => do
+    let assign? ← match target.mapM (assigner sr) with
+      | .error t => return ← badTarget t
+      | .ok a => pure a
+    let outer ← build handler
+    let mgr ← transExpr ctx
+    let enter ← build (emitFailing (.str .base "enter") Py.enterMethod #v[] #[mgr])
+    let exit ← build (emitFailing (.str .base "exit") Py.exitMethod #v[] #[mgr])
+    let noArgs ← build (emitTotal (.str .base "args") Py.mkTuple #v[] #[])
+    let kw ← build (emitTotal (.str .base "kwargs") Py.mkKwargs #v[] #[])
+    let v ← build (emitFailing (.str .base "entered") Py.call #v[] #[enter, noArgs, kw])
+    let wexc ← build (freshLabel "wexc")
+    let fin ← build (freshLabel "fin")
+    let join ← build (freshLabel "join")
+    -- The body, and the assignment to the target, which `__exit__` covers too.
+    withExit (.cleanup fin) <| withHandler wexc do
+      if let some assign := assign? then assign v
+      withStmt sr rest body
+    if ← isOpen then jump fin #[← build compNormal]
+    -- An exception: `__exit__(type, exc, tb)` while it is the one being handled.
+    let exc ← build (startBlockWith wexc (.str .base "exc"))
+    let prev ← build (emitTotal (.str .base "prev") Py.pushExcInfo #v[] #[exc])
+    let unwind ← build (freshLabel "unwind")
+    let suppress ← build (freshLabel "suppress")
+    withHandler unwind do
+      let r ← build (emitFailing (.str .base "exited") Py.exitWithExc #v[] #[exit, exc])
+      let b ← build (truthy r)
+      branch b suppress unwind #[] #[exc]
+    build (startBlock suppress)
+    popExcept prev
+    jump join
+    let x ← build (startBlockWith unwind (.str .base "exc"))
+    popExcept prev
+    build (PyBuild.jump { outer with args := outer.args.push x })
+    -- Every other way out, if there is one: `__exit__(None, None, None)`, then the dispatch.
+    if ← targeted fin then
+      let pending ← build (startBlockWith fin (.str .base "pending") Py.Completion.ty)
+      let n ← build noneLit
+      let t ← build (emitTotal (.str .base "args") Py.mkTuple #v[] #[n, n, n])
+      let kw ← build (emitTotal (.str .base "kwargs") Py.mkKwargs #v[] #[])
+      discard <| build (emitFailing (.str .base "exited") Py.call #v[] #[exit, t, kw])
+      dispatchArms pending (← exitArms join outer sr)
+    build (startBlock join)
 
 /-- The body of an `except` clause handling `exc`, which binds it to `name` if there is one,
 then leaves the handler (`leaveHandler`) and jumps to `join`.  `prev` is the exception handled

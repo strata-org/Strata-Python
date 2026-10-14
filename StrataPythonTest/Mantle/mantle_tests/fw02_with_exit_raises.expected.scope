@@ -1,0 +1,40 @@
+module
+  log: local (assigned)
+  note: local (assigned)
+  Failing: local (assigned)
+  on_raise: local (assigned)
+  on_normal: local (assigned)
+  on_return: local (assigned)
+  in_handler: local (assigned)
+  function note
+    params: x
+    x: local (parameter, referenced)
+    log: global implicit (referenced)
+  class Failing
+    __enter__: local (assigned)
+    __exit__: local (assigned)
+    function Failing.__enter__
+      params: self
+      self: local (parameter, referenced)
+    function Failing.__exit__
+      params: self, t, v, tb
+      self: local (parameter)
+      t: local (parameter)
+      v: local (parameter, referenced)
+      tb: local (parameter)
+      note: global implicit (referenced)
+      ValueError: global implicit (referenced)
+  function on_raise
+    Failing: global implicit (referenced)
+    KeyError: global implicit (referenced)
+  function on_normal
+    Failing: global implicit (referenced)
+    note: global implicit (referenced)
+  function on_return
+    Failing: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    e: local (assigned, referenced)
+  function in_handler
+    KeyError: global implicit (referenced)
+    Failing: global implicit (referenced)
+    note: global implicit (referenced)

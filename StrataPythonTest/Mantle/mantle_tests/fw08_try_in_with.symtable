@@ -1,0 +1,37 @@
+module top
+  Ctx: local (assigned)
+  finally_raises: local (assigned)
+  finally_returns: local (assigned)
+  log: local (assigned)
+  note: local (assigned)
+  return_in_clause: local (assigned)
+  sys: local (imported)
+  function note
+    log: global implicit (referenced)
+    x: local (parameter, referenced)
+  class Ctx
+    __enter__: local (assigned)
+    __exit__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      suppress: local (parameter, referenced)
+    function __enter__
+      self: local (parameter, referenced)
+    function __exit__
+      note: global implicit (referenced)
+      self: local (parameter, referenced)
+      sys: global implicit (referenced)
+      t: local (parameter)
+      tb: local (parameter)
+      v: local (parameter, referenced)
+  function return_in_clause
+    Ctx: global implicit (referenced)
+    KeyError: global implicit (referenced)
+  function finally_returns
+    Ctx: global implicit (referenced)
+    KeyError: global implicit (referenced)
+  function finally_raises
+    Ctx: global implicit (referenced)
+    ValueError: global implicit (referenced)
+qualnames: Ctx, Ctx.__enter__, Ctx.__exit__, Ctx.__init__, finally_raises, finally_returns, note, return_in_clause

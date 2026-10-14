@@ -1,0 +1,49 @@
+module top
+  Ctx: local (assigned)
+  NoExit: local (assigned)
+  log: local (assigned)
+  missing_exit: local (assigned)
+  note: local (assigned)
+  other_exit: local (assigned)
+  rebound_manager: local (assigned)
+  replaced_in_body: local (assigned)
+  function note
+    log: global implicit (referenced)
+    x: local (parameter, referenced)
+  class Ctx
+    __enter__: local (assigned)
+    __exit__: local (assigned)
+    function __enter__
+      note: global implicit (referenced)
+      self: local (parameter)
+    function __exit__
+      note: global implicit (referenced)
+      self: local (parameter)
+      t: local (parameter)
+      tb: local (parameter)
+      v: local (parameter)
+  function other_exit
+    note: global implicit (referenced)
+    self: local (parameter)
+    t: local (parameter)
+    tb: local (parameter)
+    v: local (parameter)
+  function replaced_in_body
+    Ctx: global implicit (referenced)
+    Local: local (assigned, referenced)
+    note: global implicit (referenced)
+    other_exit: global implicit (referenced)
+    class Local
+  function rebound_manager
+    Ctx: global implicit (referenced)
+    m: local (assigned, referenced)
+    note: global implicit (referenced)
+  class NoExit
+    __enter__: local (assigned)
+    function __enter__
+      note: global implicit (referenced)
+      self: local (parameter, referenced)
+  function missing_exit
+    NoExit: global implicit (referenced)
+    note: global implicit (referenced)
+qualnames: Ctx, Ctx.__enter__, Ctx.__exit__, NoExit, NoExit.__enter__, missing_exit, note, other_exit, rebound_manager, replaced_in_body, replaced_in_body.<locals>.Local

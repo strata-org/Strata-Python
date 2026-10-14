@@ -1,0 +1,73 @@
+module
+  import sys: module sys
+  sys: local (imported)
+  note: local (assigned, referenced)
+  Ctx: local (assigned, referenced)
+  suppressed: local (assigned)
+  reraised: local (assigned)
+  loop: local (assigned)
+  two: local (assigned)
+  target_fails: local (assigned)
+  shadowed: local (assigned)
+  always_raises: local (assigned)
+  Body: local (assigned)
+  top: local (assigned, referenced)
+  function note
+    params: x
+    x: local (parameter, referenced)
+  class Ctx
+    __init__: local (assigned)
+    __enter__: local (assigned)
+    __exit__: local (assigned)
+    function Ctx.__init__
+      params: self, suppress
+      self: local (parameter, referenced)
+      suppress: local (parameter, referenced)
+    function Ctx.__enter__
+      params: self
+      self: local (parameter, referenced)
+    function Ctx.__exit__
+      params: self, t, v, tb
+      self: local (parameter, referenced)
+      t: local (parameter)
+      v: local (parameter)
+      tb: local (parameter)
+      note: global implicit (referenced)
+      sys: global implicit (referenced)
+  function suppressed
+    params: f
+    f: local (parameter, referenced)
+    Ctx: global implicit (referenced)
+  function reraised
+    params: f
+    f: local (parameter, referenced)
+    Ctx: global implicit (referenced)
+    c: local (assigned, referenced)
+  function loop
+    params: xs
+    xs: local (parameter, referenced)
+    x: local (assigned, referenced)
+    Ctx: global implicit (referenced)
+  function two
+    params: a, b
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    x: local (assigned, referenced)
+    y: local (assigned, referenced)
+  function target_fails
+    params: m, d
+    m: local (parameter, referenced)
+    d: local (parameter, referenced)
+  function shadowed
+    c: local (assigned, referenced)
+    Ctx: global implicit (referenced)
+    v: local (assigned, referenced)
+  function always_raises
+    params: m
+    m: local (parameter, referenced)
+    ValueError: global implicit (referenced)
+  class Body
+    Ctx: global implicit (referenced)
+    c: local (assigned, referenced)
+    v: local (assigned)
+    note: global implicit (referenced)

@@ -14,7 +14,7 @@ t07_try_except | yes |
 t08_try_finally | yes |
 t09_nested_try | yes |
 t10_except_type | yes |
-t11_with | no |
+t11_with | yes |
 t12_class | yes |
 t13_fstring | yes |
 t14_bool_short | yes |
@@ -29,7 +29,7 @@ t22_star_args | yes |
 t23_kwargs_boto3 | yes |
 t24_assert | yes |
 t25_tuple_unpack | yes |
-t26_with_as_use | no |
+t26_with_as_use | yes |
 t27_module_vars | yes |
 t28_try_else | yes |
 t29_dict_unpack | yes |
@@ -73,7 +73,7 @@ c3_break_finally | yes |
 c4_continue_finally | yes |
 c5_body_finally_vs_loop_exit | yes |
 c6_body_raise | yes |
-c7_with_return | no |
+c7_with_return | yes |
 m_assert | yes |
 m_annotations | yes | generator function
 m_future_annotations | yes | from __future__ import annotations
@@ -117,7 +117,17 @@ m_super_rebound | yes | super() with super rebound
 m_raise | yes | generator function
 m_try | yes | try/except*
 m_finally | yes |
+m_with | yes |
+fw01_with_exit_result | yes |
+fw02_with_exit_raises | yes |
+fw03_with_in_except | yes |
+fw04_with_two_items | yes |
+fw05_with_lookup_once | yes |
+fw06_with_in_loop | yes |
+fw07_with_in_finally | yes |
+fw08_try_in_with | yes |
 fw09_try_else_finally | yes |
+fw10_return_value_timing | yes |
 m_rejected | yes | relative import, import *
 e01_nonlocal_unbound | yes | no binding for nonlocal 'x' found
 e02_global_param | yes | name 'x' is parameter and global
@@ -140,7 +150,7 @@ e18_walrus_lambda_in_iterable | yes | assignment expression cannot be used in a 
 e19_walrus_rebinds_outer_iteration | yes | assignment expression cannot rebind comprehension iteration variable 'row'
 e20_yield_in_dictcomp | no | 'yield' inside dict comprehension
 e21_repeated_keyword | yes | keyword argument repeated: k
-e22_starred_target | yes | starred assignment target must be in a list or tuple, with
+e22_starred_target | yes | starred assignment target must be in a list or tuple
 e23_multiple_starred | yes | multiple starred expressions in assignment
 e24_default_except_not_last | yes | default 'except:' must be last
 e25_break_outside_loop | yes | 'break' outside loop
@@ -177,7 +187,7 @@ p29_mangling | yes |
 p30_super | yes |
 p31_free_class | yes |
 p32_class_comprehension | yes |
-p33_with_for_targets | no |
+p33_with_for_targets | yes |
 p34_match | yes | match
 p35_async | yes | async def
 p36_decorators | yes |

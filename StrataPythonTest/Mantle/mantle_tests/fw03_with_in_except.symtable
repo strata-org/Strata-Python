@@ -1,0 +1,42 @@
+module top
+  Ctx: local (assigned)
+  after_suppress: local (assigned)
+  bare_raise_in_with: local (assigned)
+  log: local (assigned)
+  note: local (assigned)
+  return_in_clause: local (assigned)
+  sys: local (imported)
+  function note
+    log: global implicit (referenced)
+    x: local (parameter, referenced)
+  class Ctx
+    __enter__: local (assigned)
+    __exit__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      suppress: local (parameter, referenced)
+    function __enter__
+      self: local (parameter, referenced)
+    function __exit__
+      note: global implicit (referenced)
+      self: local (parameter, referenced)
+      sys: global implicit (referenced)
+      t: local (parameter)
+      tb: local (parameter)
+      v: local (parameter, referenced)
+  function return_in_clause
+    Ctx: global implicit (referenced)
+    KeyError: global implicit (referenced)
+  function after_suppress
+    Ctx: global implicit (referenced)
+    IndexError: global implicit (referenced)
+    KeyError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    note: global implicit (referenced)
+    sys: global implicit (referenced)
+  function bare_raise_in_with
+    Ctx: global implicit (referenced)
+    KeyError: global implicit (referenced)
+    note: global implicit (referenced)
+qualnames: Ctx, Ctx.__enter__, Ctx.__exit__, Ctx.__init__, after_suppress, bare_raise_in_with, note, return_in_clause

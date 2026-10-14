@@ -1,6 +1,5 @@
 -- syntax error: starred assignment target must be in a list or tuple at 3:0-3:2
 -- syntax error: starred assignment target must be in a list or tuple at 4:4-4:6
--- unsupported: with is not supported at 5:0-5:18
 -- syntax error: starred assignment target must be in a list or tuple at 5:10-5:12
 -- syntax error: starred assignment target must be in a list or tuple at 6:7-6:9
 module e22_starred_target {

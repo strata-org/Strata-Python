@@ -1,0 +1,45 @@
+module
+  log: local (assigned)
+  note: local (assigned)
+  Ctx: local (assigned)
+  order: local (assigned)
+  chained: local (assigned)
+  function note
+    params: x
+    x: local (parameter, referenced)
+    log: global implicit (referenced)
+  class Ctx
+    __init__: local (assigned)
+    __enter__: local (assigned)
+    __exit__: local (assigned)
+    function Ctx.__init__
+      params: self, name, suppress, fail
+      self: local (parameter, referenced)
+      name: local (parameter, referenced)
+      suppress: local (parameter, referenced)
+      fail: local (parameter, referenced)
+      note: global implicit (referenced)
+    function Ctx.__enter__
+      params: self
+      self: local (parameter, referenced)
+      note: global implicit (referenced)
+    function Ctx.__exit__
+      params: self, t, v, tb
+      self: local (parameter, referenced)
+      t: local (parameter)
+      v: local (parameter, referenced)
+      tb: local (parameter)
+      note: global implicit (referenced)
+      ValueError: global implicit (referenced)
+  function order
+    Ctx: global implicit (referenced)
+    x: local (assigned, referenced)
+    y: local (assigned, referenced)
+    note: global implicit (referenced)
+  function chained
+    params: a_suppress, b_suppress, b_fail
+    a_suppress: local (parameter, referenced)
+    b_suppress: local (parameter, referenced)
+    b_fail: local (parameter, referenced)
+    Ctx: global implicit (referenced)
+    KeyError: global implicit (referenced)

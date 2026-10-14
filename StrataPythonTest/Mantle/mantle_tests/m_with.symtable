@@ -1,0 +1,63 @@
+module top
+  Body: local (assigned)
+  Ctx: local (assigned, referenced)
+  always_raises: local (assigned)
+  loop: local (assigned)
+  note: local (assigned, referenced)
+  reraised: local (assigned)
+  shadowed: local (assigned)
+  suppressed: local (assigned)
+  sys: local (imported)
+  target_fails: local (assigned)
+  top: local (assigned, referenced)
+  two: local (assigned)
+  function note
+    x: local (parameter, referenced)
+  class Ctx
+    __enter__: local (assigned)
+    __exit__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      suppress: local (parameter, referenced)
+    function __enter__
+      self: local (parameter, referenced)
+    function __exit__
+      note: global implicit (referenced)
+      self: local (parameter, referenced)
+      sys: global implicit (referenced)
+      t: local (parameter)
+      tb: local (parameter)
+      v: local (parameter)
+  function suppressed
+    Ctx: global implicit (referenced)
+    f: local (parameter, referenced)
+  function reraised
+    Ctx: global implicit (referenced)
+    c: local (assigned, referenced)
+    f: local (parameter, referenced)
+  function loop
+    Ctx: global implicit (referenced)
+    x: local (assigned, referenced)
+    xs: local (parameter, referenced)
+  function two
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    x: local (assigned, referenced)
+    y: local (assigned, referenced)
+  function target_fails
+    d: local (parameter, referenced)
+    m: local (parameter, referenced)
+  function shadowed
+    Ctx: global implicit (referenced)
+    c: local (assigned, referenced)
+    v: local (assigned, referenced)
+  function always_raises
+    ValueError: global implicit (referenced)
+    m: local (parameter, referenced)
+  class Body
+    Ctx: global implicit (referenced)
+    c: local (assigned, referenced)
+    note: global implicit (referenced)
+    v: local (assigned)
+qualnames: Body, Ctx, Ctx.__enter__, Ctx.__exit__, Ctx.__init__, always_raises, loop, note, reraised, shadowed, suppressed, target_fails, two

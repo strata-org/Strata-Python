@@ -1,0 +1,111 @@
+module c7_with_return {
+  func @|c7_with_return.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("c7_with_return")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("c7_with_return", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("c7_with_return", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure(@c7_with_return.acquire)
+      %acquire.cell.0 : base.Ref(py.Value) = py.globalCell("c7_with_return", "acquire")
+      %set.2 : base.Unit = base.refSet[py.Value](%acquire.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure(@c7_with_return.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("c7_with_return", "f")
+      %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.1)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @c7_with_return.acquire(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "acquire() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "acquire() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @c7_with_return.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %r.0 : py.Value = py.undef("r")
+      %r.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%r.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %x.1 : py.Value = py.undef("x")
+      %fill.0 : py.Value = py.mkTuple(%x.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("x")
+      %x.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "f() got multiple values for argument 'x'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "f() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %x.3 : py.Value = py.requireDefined(%x.2, "TypeError", "f() missing 1 required positional argument: 'x'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.3)
+      %acquire.0 : py.Value = py.loadGlobal("c7_with_return", "acquire") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%acquire.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %enter.0 : py.Value = py.enterMethod(%call.0) ^propagate.0()
+      %exit.0 : py.Value = py.exitMethod(%call.0) ^propagate.0()
+      %args.1 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %entered.0 : py.Value = py.call(%enter.0, %args.1, %kwargs.2) ^propagate.0()
+      %set.1 : base.Unit = base.refSet[py.Value](%r.cell.0, %entered.0)
+      %r.1 : py.Value = base.refGet[py.Value](%r.cell.0)
+      %r.2 : py.Value = py.requireDefined(%r.1, "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^wexc.0()
+      %comp.0 : py.Completion = py.completionReturn(%r.2)
+      jump ^fin.0(%comp.0)
+    wexc.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %exited.0 : py.Value = py.exitWithExc(%exit.0, %exc.0) ^unwind.0()
+      %cond.0 : base.Bool = py.truthy(%exited.0) ^unwind.0()
+      branch(%cond.0) ^suppress.0() ^unwind.0(%exc.0)
+    suppress.0():
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      jump ^join.0()
+    unwind.0(%exc.1 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.1)
+    fin.0(%pending.0 : py.Completion):
+      %none.1 : py.Value = py.noneLit
+      %args.2 : py.Value = py.mkTuple(%none.1, %none.1, %none.1)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %exited.1 : py.Value = py.call(%exit.0, %args.2, %kwargs.3) ^propagate.0()
+      py.Completion.case(%pending.0) ^join.0() ^ret.0() ^propagate.0() ^unreachable.0() ^unreachable.1()
+    ret.0(%val.0 : py.Value):
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%val.0)
+      ret(%ret.0)
+    unreachable.0():
+      unreachable
+    unreachable.1():
+      unreachable
+    join.0():
+      %none.2 : py.Value = py.noneLit
+      %ret.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.2)
+      ret(%ret.1)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
+  }
+}
+

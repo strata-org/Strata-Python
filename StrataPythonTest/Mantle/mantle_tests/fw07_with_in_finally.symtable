@@ -1,0 +1,44 @@
+module top
+  Ctx: local (assigned)
+  log: local (assigned)
+  normal_exit: local (assigned)
+  note: local (assigned)
+  reraise_pending: local (assigned)
+  return_in_with: local (assigned)
+  suppress_in_finally: local (assigned)
+  sys: local (imported)
+  function note
+    log: global implicit (referenced)
+    x: local (parameter, referenced)
+  class Ctx
+    __enter__: local (assigned)
+    __exit__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      suppress: local (parameter, referenced)
+    function __enter__
+      self: local (parameter, referenced)
+    function __exit__
+      note: global implicit (referenced)
+      self: local (parameter, referenced)
+      sys: global implicit (referenced)
+      t: local (parameter)
+      tb: local (parameter)
+      v: local (parameter, referenced)
+  function normal_exit
+    Ctx: global implicit (referenced)
+    KeyError: global implicit (referenced)
+  function suppress_in_finally
+    Ctx: global implicit (referenced)
+    KeyError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    note: global implicit (referenced)
+    sys: global implicit (referenced)
+  function reraise_pending
+    Ctx: global implicit (referenced)
+    KeyError: global implicit (referenced)
+  function return_in_with
+    Ctx: global implicit (referenced)
+    KeyError: global implicit (referenced)
+qualnames: Ctx, Ctx.__enter__, Ctx.__exit__, Ctx.__init__, normal_exit, note, reraise_pending, return_in_with, suppress_in_finally

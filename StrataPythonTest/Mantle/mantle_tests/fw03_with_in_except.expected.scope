@@ -1,0 +1,46 @@
+module
+  import sys: module sys
+  sys: local (imported)
+  log: local (assigned)
+  note: local (assigned)
+  Ctx: local (assigned)
+  return_in_clause: local (assigned)
+  after_suppress: local (assigned)
+  bare_raise_in_with: local (assigned)
+  function note
+    params: x
+    x: local (parameter, referenced)
+    log: global implicit (referenced)
+  class Ctx
+    __init__: local (assigned)
+    __enter__: local (assigned)
+    __exit__: local (assigned)
+    function Ctx.__init__
+      params: self, suppress
+      self: local (parameter, referenced)
+      suppress: local (parameter, referenced)
+    function Ctx.__enter__
+      params: self
+      self: local (parameter, referenced)
+    function Ctx.__exit__
+      params: self, t, v, tb
+      self: local (parameter, referenced)
+      t: local (parameter)
+      v: local (parameter, referenced)
+      tb: local (parameter)
+      note: global implicit (referenced)
+      sys: global implicit (referenced)
+  function return_in_clause
+    KeyError: global implicit (referenced)
+    Ctx: global implicit (referenced)
+  function after_suppress
+    KeyError: global implicit (referenced)
+    Ctx: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    note: global implicit (referenced)
+    sys: global implicit (referenced)
+    IndexError: global implicit (referenced)
+  function bare_raise_in_with
+    KeyError: global implicit (referenced)
+    Ctx: global implicit (referenced)
+    note: global implicit (referenced)

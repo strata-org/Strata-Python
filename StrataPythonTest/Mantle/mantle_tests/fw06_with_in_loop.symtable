@@ -1,0 +1,35 @@
+module top
+  Suppress: local (assigned)
+  log: local (assigned)
+  loop_in_with: local (assigned)
+  note: local (assigned)
+  with_in_loop: local (assigned)
+  function note
+    log: global implicit (referenced)
+    x: local (parameter, referenced)
+  class Suppress
+    __enter__: local (assigned)
+    __exit__: local (assigned)
+    function __enter__
+      self: local (parameter, referenced)
+    function __exit__
+      note: global implicit (referenced)
+      self: local (parameter)
+      t: local (parameter)
+      tb: local (parameter)
+      v: local (parameter, referenced)
+  function with_in_loop
+    Suppress: global implicit (referenced)
+    it: local (assigned, referenced)
+    iter: global implicit (referenced)
+    next: global implicit (referenced)
+    note: global implicit (referenced)
+    x: local (assigned, referenced)
+    xs: local (parameter, referenced)
+  function loop_in_with
+    StopIteration: global implicit (referenced)
+    Suppress: global implicit (referenced)
+    note: global implicit (referenced)
+    x: local (assigned, referenced)
+    xs: local (parameter, referenced)
+qualnames: Suppress, Suppress.__enter__, Suppress.__exit__, loop_in_with, note, with_in_loop

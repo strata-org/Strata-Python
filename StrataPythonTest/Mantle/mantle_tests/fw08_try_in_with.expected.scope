@@ -1,0 +1,41 @@
+module
+  import sys: module sys
+  sys: local (imported)
+  log: local (assigned)
+  note: local (assigned)
+  Ctx: local (assigned)
+  return_in_clause: local (assigned)
+  finally_returns: local (assigned)
+  finally_raises: local (assigned)
+  function note
+    params: x
+    x: local (parameter, referenced)
+    log: global implicit (referenced)
+  class Ctx
+    __init__: local (assigned)
+    __enter__: local (assigned)
+    __exit__: local (assigned)
+    function Ctx.__init__
+      params: self, suppress
+      self: local (parameter, referenced)
+      suppress: local (parameter, referenced)
+    function Ctx.__enter__
+      params: self
+      self: local (parameter, referenced)
+    function Ctx.__exit__
+      params: self, t, v, tb
+      self: local (parameter, referenced)
+      t: local (parameter)
+      v: local (parameter, referenced)
+      tb: local (parameter)
+      note: global implicit (referenced)
+      sys: global implicit (referenced)
+  function return_in_clause
+    Ctx: global implicit (referenced)
+    KeyError: global implicit (referenced)
+  function finally_returns
+    Ctx: global implicit (referenced)
+    KeyError: global implicit (referenced)
+  function finally_raises
+    Ctx: global implicit (referenced)
+    ValueError: global implicit (referenced)

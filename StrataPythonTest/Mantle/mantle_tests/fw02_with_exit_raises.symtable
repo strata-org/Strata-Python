@@ -1,0 +1,38 @@
+module top
+  Failing: local (assigned)
+  in_handler: local (assigned)
+  log: local (assigned)
+  note: local (assigned)
+  on_normal: local (assigned)
+  on_raise: local (assigned)
+  on_return: local (assigned)
+  function note
+    log: global implicit (referenced)
+    x: local (parameter, referenced)
+  class Failing
+    __enter__: local (assigned)
+    __exit__: local (assigned)
+    function __enter__
+      self: local (parameter, referenced)
+    function __exit__
+      ValueError: global implicit (referenced)
+      note: global implicit (referenced)
+      self: local (parameter)
+      t: local (parameter)
+      tb: local (parameter)
+      v: local (parameter, referenced)
+  function on_raise
+    Failing: global implicit (referenced)
+    KeyError: global implicit (referenced)
+  function on_normal
+    Failing: global implicit (referenced)
+    note: global implicit (referenced)
+  function on_return
+    Failing: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    e: local (assigned, referenced)
+  function in_handler
+    Failing: global implicit (referenced)
+    KeyError: global implicit (referenced)
+    note: global implicit (referenced)
+qualnames: Failing, Failing.__enter__, Failing.__exit__, in_handler, note, on_normal, on_raise, on_return

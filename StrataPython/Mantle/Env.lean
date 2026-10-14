@@ -63,8 +63,9 @@ a completion outwards instead of acting on it.
 ## The exception being handled
 
 As in CPython, the run-time state holds the exception being handled: `pushExcInfo` sets it on
-entering an `except` handler, `pushPending` on entering a `finally` body that a raise
-reached, and `popExcept` restores the previous one on leaving either.  `handledExc` reads it.
+entering an `except` handler or a `with`'s exception path, `pushPending` on entering a
+`finally` body that a raise reached, and `popExcept` restores the previous one on leaving
+them.  `handledExc` reads it.
 
 An exception that an operation raises itself, such as the `KeyError` of `getItem`, gets the
 exception being handled as its `__context__`, as CPython's `_PyErr_SetObject` does:
@@ -392,15 +393,15 @@ public environment Py extends Base where
   the `__context__` that `toException` set. -/
   insn setCause (exc cause : Value) (^err (e : Value)) : Unit
   /-- Makes `exc` the exception being handled, and returns the one handled before, or `None`:
-  CPython's `PUSH_EXC_INFO`, on entering an `except` handler. -/
+  CPython's `PUSH_EXC_INFO`, on entering an `except` handler or a `with`'s exception path. -/
   insn pushExcInfo (exc : Value) : Value
   /-- On entering a `finally` body: if `pending` is a `raise` completion, makes its exception
   the one being handled, as CPython's `PUSH_EXC_INFO` does on the exceptional path; otherwise
   leaves the exception being handled as it is.  Returns the one handled before, or `None`. -/
   insn pushPending (pending : Completion) : Value
   /-- Makes `prev`, which `pushExcInfo` or `pushPending` returned, the exception being handled
-  again: CPython's `POP_EXCEPT`, on every way out of an `except` handler or a `finally`
-  body. -/
+  again: CPython's `POP_EXCEPT`, on every way out of an `except` handler, a `finally` body or
+  a `with`'s exception path. -/
   insn popExcept (prev : Value) : Unit
   /-- The exception being handled, which a bare `raise` raises again: CPython's
   `RAISE_VARARGS 0`.  Raises `RuntimeError: No active exception to reraise` if there is
@@ -411,6 +412,18 @@ public environment Py extends Base where
   `TypeError: catching classes that do not inherit from BaseException is not allowed`
   otherwise. -/
   insn excMatch (exc type : Value) (^err (e : Value)) : Bool
+
+  -- `with`: CPython's `BEFORE_WITH`, in its order, and `WITH_EXCEPT_START`.
+  /-- `mgr`'s `__enter__`, looked up on its type and bound to it.  Raises `TypeError: 'T'
+  object does not support the context manager protocol` if there is none. -/
+  insn enterMethod (mgr : Value) (^err (exc : Value)) : Value
+  /-- `mgr`'s `__exit__`, looked up on its type and bound to it.  Raises `TypeError: 'T'
+  object does not support the context manager protocol (missed __exit__ method)` if there is
+  none. -/
+  insn exitMethod (mgr : Value) (^err (exc : Value)) : Value
+  /-- `exit(type(exc), exc, exc.__traceback__)`, with `exit` the bound `__exit__` of a `with`
+  whose body raised `exc`.  Raises whatever `__exit__` raises. -/
+  insn exitWithExc (exit exc : Value) (^err (e : Value)) : Value
 
   -- Strings and degradation.
 

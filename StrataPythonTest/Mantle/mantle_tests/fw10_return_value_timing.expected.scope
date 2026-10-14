@@ -1,0 +1,44 @@
+module
+  log: local (assigned)
+  note: local (assigned)
+  deletes: local (assigned)
+  closure: local (assigned)
+  Box: local (assigned)
+  in_with: local (assigned)
+  value_raises: local (assigned)
+  function note
+    params: x
+    x: local (parameter, referenced)
+    log: global implicit (referenced)
+  function deletes
+    x: local (assigned, referenced)
+  function closure
+    x: cell (assigned)
+    lambda closure.<locals>.<lambda>
+      x: free (referenced)
+  class Box
+    __init__: local (assigned)
+    __enter__: local (assigned)
+    __exit__: local (assigned)
+    function Box.__init__
+      params: self, value, suppress
+      self: local (parameter, referenced)
+      value: local (parameter, referenced)
+      suppress: local (parameter, referenced)
+    function Box.__enter__
+      params: self
+      self: local (parameter, referenced)
+    function Box.__exit__
+      params: self, t, v, tb
+      self: local (parameter, referenced)
+      t: local (parameter)
+      v: local (parameter, referenced)
+      tb: local (parameter)
+      note: global implicit (referenced)
+  function in_with
+    Box: global implicit (referenced)
+    b: local (assigned, referenced)
+    note: global implicit (referenced)
+  function value_raises
+    Box: global implicit (referenced)
+    b: local (assigned, referenced)

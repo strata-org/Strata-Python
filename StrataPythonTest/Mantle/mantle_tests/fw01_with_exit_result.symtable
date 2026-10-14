@@ -1,0 +1,48 @@
+module top
+  Ctx: local (assigned)
+  Flag: local (assigned)
+  falls_off: local (assigned)
+  log: local (assigned)
+  note: local (assigned)
+  raises: local (assigned)
+  returns: local (assigned)
+  function note
+    log: global implicit (referenced)
+    x: local (parameter, referenced)
+  class Flag
+    __bool__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      value: local (parameter, referenced)
+    function __bool__
+      ValueError: global implicit (referenced)
+      note: global implicit (referenced)
+      self: local (parameter, referenced)
+  class Ctx
+    __enter__: local (assigned)
+    __exit__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      result: local (parameter, referenced)
+      self: local (parameter, referenced)
+    function __enter__
+      self: local (parameter, referenced)
+    function __exit__
+      note: global implicit (referenced)
+      self: local (parameter, referenced)
+      t: local (parameter)
+      tb: local (parameter)
+      v: local (parameter)
+  function raises
+    Ctx: global implicit (referenced)
+    KeyError: global implicit (referenced)
+    result: local (parameter, referenced)
+  function falls_off
+    Ctx: global implicit (referenced)
+    note: global implicit (referenced)
+    result: local (parameter, referenced)
+  function returns
+    Ctx: global implicit (referenced)
+    result: local (parameter, referenced)
+qualnames: Ctx, Ctx.__enter__, Ctx.__exit__, Ctx.__init__, Flag, Flag.__bool__, Flag.__init__, falls_off, note, raises, returns

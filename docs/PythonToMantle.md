@@ -247,7 +247,7 @@ emission state of the Python builder. `Ctx` is fixed while one function is trans
 | the Python module name, the Mantle module name, the names some scope binds as globals | `Ctx.module`, `Ctx.moduleName`, `Ctx.globals` | yes | `translate` |
 | diagnostics | `TState.diagnostics` | yes | `reject` |
 | functions to emit after the current one, and the names taken | `TState.pending : Array FuncJob`, `TState.funcNames` | yes | `defStmt`, `allocName` |
-| exits stack (below) | `TState.exits : Array Exit` | yes | `withExit`: loops, `except` clause and `finally` bodies, `try`/`finally`; later `with` |
+| exits stack (below) | `TState.exits : Array Exit` | yes | `withExit`: loops, `except` clause and `finally` bodies, `try`/`finally`, `with` |
 | the labels some emitted transfer names, for starting join blocks | `TState.targeted` | yes | `jump`, `branch` |
 | exception an `except` body handles, for bare `raise` | `Ctx.handled : Option ValId` | yes | `except` bodies; a `finally` body resets it |
 | namespace, inside a class body | `Ctx.classNs : Option ValId` | yes | class body functions |
@@ -918,24 +918,29 @@ Example: c1 (§10). The prologue is elided, and `cleanup` is read as a global.
 
 ### 7.3 `with`
 
-`with E as t: B`, where `H` and `S` are as in §7.2:
+`with E as t: B`, where `H` and `S` are as in §7.2, follows CPython 3.12's `BEFORE_WITH`
+and `WITH_EXCEPT_START`:
 
-1. Evaluate `mgr = E`. Then `enter = py.attr mgr "__enter__"` and
-   `exit = py.attr mgr "__exit__"`, both under `H`.
+1. Evaluate `mgr = E`. Then `enter = py.enterMethod mgr` and `exit = py.exitMethod mgr`,
+   both under `H`. They look `__enter__` and `__exit__` up on the type, in that order, and
+   raise CPython's `TypeError` if one is missing.
 2. `v = py.call enter () {}`, under `H`.
 3. Protected region: handler `wexc`, stack `S` + `cleanup fin`. It assigns `t = v` (an
    assignment that raises still runs `__exit__`), then runs `B`. A normal end is
    `jump ^fin(completionNormal)`.
-4. `wexc(exc)`: `ty = py.call builtins.type (exc)`, then `r = py.call exit (ty, exc, None)`,
-   both under `H`. Then `b = py.truthy r` and `branch b ^join() ^H(exc)`. A true result suppresses the
-   exception, and a false result re-raises the original exception.
-5. `fin(pending)`: `py.call exit (None, None, None)` under `H`, then dispatch `pending` as in
-   §7.2. The raise successor cannot be reached on this path, but it must exist, so it goes to `H`.
+4. `wexc(exc)`: `prev = py.pushExcInfo exc`, then, under `unwind`,
+   `r = py.exitWithExc exit exc`, which calls `exit(type(exc), exc, exc.__traceback__)`, and
+   `b = py.truthy r`. Then `branch b ^suppress() ^unwind(exc)`. A true result suppresses the
+   exception: `suppress` is `py.popExcept prev`, then `jump ^join()`. `unwind(x)` is
+   `py.popExcept prev`, then `jump ^H(x)`, so a false result re-raises the original
+   exception.
+5. `fin(pending)`, emitted only if some exit reaches it: `py.call exit (None, None, None)`
+   under `H`, then dispatch `pending` as in §7.2. The raise successor cannot be reached on this
+   path, but it must exist, so it goes to `H`.
 
 The exception path calls `__exit__` with the exception and never builds a completion. Every
 other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
-`with a: with b: B`. Python looks `__enter__` and `__exit__` up on the type and raises
-`TypeError` if either is missing. `py.attr` looks them up on the instance (§9, Q5).
+`with a: with b: B`.
 
 ## 8. Gaps in the environment and builder
 
@@ -988,9 +993,10 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
    `py.importModule`, written to the bound name's cell. `from a import x` is
    `py.importFrom`, evaluated once at the import, so the binding is a snapshot. `a.b.f` is
    `py.attr` on the module value (§6.1).
-5. **Special-method lookup.** `with`, and implicitly `truthy`/`getIter`, look methods up on
-   the type in CPython. `py.attr` on the instance differs when an instance attribute shadows
-   the method.
+5. **Special-method lookup.** *Resolved.* CPython looks special methods up on the type, and
+   `py.attr` on the instance would differ when an instance attribute shadows the method.
+   `with` uses `py.enterMethod` and `py.exitMethod`, which look up on the type (§7.3), and
+   operations such as `truthy` and `getIter` do the lookup themselves.
 6. **`__class__` cell.** *Resolved*, with one difference from CPython. CPython's body
    creates the cell and stores it as `ns["__classcell__"]` for `type.__new__` to fill, but no
    instruction turns a `base.Ref(py.Value)` into a `py.Value`. So the class statement creates
@@ -1029,8 +1035,7 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 Each case is an exception edge that an earlier translator lowered wrongly while still
 passing its well-formedness check. Each becomes a golden test, plus an interpreter check that
 counts `cleanup()` calls. The repros are `c1`–`c7` and `t30_loop_try_nested` in
-`StrataPythonTest/Mantle/mantle_tests/`. `mantle_tests.txt` lists `c7` as not yet supported
-and the others as supported.
+`StrataPythonTest/Mantle/mantle_tests/`. `mantle_tests.txt` lists them all as supported.
 
 | Case | Python | Wrong lowering | Fixed by |
 |---|---|---|---|
@@ -1092,5 +1097,5 @@ a diagnostic.
 | bare `raise` | §7.1 | specified; implemented |
 | `try` / `except` / `else` | §7.2 | specified; implemented |
 | `finally` | §7.2 | specified; implemented |
-| `with`, several items | §7.3 | specified, open question (Q5) |
+| `with`, several items | §7.3 | specified; implemented |
 | `async`, `await`, `match`, `except*`, `type`, PEP 695 | §6.9 | unsupported; an `async def` is a stub |
