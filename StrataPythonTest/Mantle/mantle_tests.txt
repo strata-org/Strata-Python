@@ -38,7 +38,7 @@ n01_async | yes | async def
 n02_listcomp | yes | list comprehension
 n03_dictcomp | yes | dict comprehension
 n04_generator | yes | generator expression
-n05_lambda | yes | lambda
+n05_lambda | yes |
 n06_yield | yes | generator function
 n07_walrus | yes | list comprehension
 n08_mixed | yes | async def, list comprehension
@@ -101,6 +101,7 @@ m_unbound_local | yes |
 m_walrus | yes |
 m_while | yes |
 m_closures | yes |
+m_lambda | yes | generator function, non-constant default
 m_rejected | yes | relative import, import *, non-constant default
 e01_nonlocal_unbound | yes | no binding for nonlocal 'x' found
 e02_global_param | yes | name 'x' is parameter and global
@@ -143,7 +144,7 @@ p15_global | yes |
 p16_closures | yes |
 p17_conditional_def | no |
 p18_builtins | yes |
-p19_builtin_shadowed | no |
+p19_builtin_shadowed | yes |
 p20_global_mutated | yes |
 p21_closure_three_levels | yes |
 p22_comprehensions | no | generator expression

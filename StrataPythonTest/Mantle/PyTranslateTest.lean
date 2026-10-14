@@ -26,7 +26,7 @@ MantleTranslateTest.lean` checks the corpus.
             a = a + 1
         return a
     f(2)
-    g = lambda: 0
+    g = 1j
 -/
 
 namespace StrataPython.Mantle.PyTranslateTest
@@ -62,15 +62,12 @@ private def fDef : stmt SourceRange :=
 private def call : stmt SourceRange :=
   .Expr none' (.Call none' (load "f") ⟨none', #[int 2]⟩ ⟨none', #[]⟩)
 
-private def lam : stmt SourceRange :=
-  let args : StrataPython.arguments SourceRange :=
-    .mk_arguments none' ⟨none', #[]⟩ ⟨none', #[]⟩ ⟨none', none⟩ ⟨none', #[]⟩ ⟨none', #[]⟩
-      ⟨none', none⟩ ⟨none', #[]⟩
-  assign "g" (.Lambda none' args (int 0))
+private def complexLit : stmt SourceRange :=
+  assign "g" (.Constant none' (.ConComplex none' ⟨none', "0.0"⟩ ⟨none', "1.0"⟩) ⟨none', none⟩)
 
 private def supported : Result := translate "m" #[assign "x" (int 1), fDef, call]
 
-private def withLambda : Result := translate "m" #[assign "x" (int 1), fDef, call, lam]
+private def withComplex : Result := translate "m" #[assign "x" (int 1), fDef, call, complexLit]
 
 -- The translator does not reduce in the kernel: the checker runs as compiled code.
 #guard Module.Raw.WF supported.module
@@ -81,10 +78,9 @@ private def withLambda : Result := translate "m" #[assign "x" (int 1), fDef, cal
 -- The module body, then `f`.
 #guard supported.module.funcs.map (nameText ·.name) = #["m.<module>", "m.f"]
 
--- A rejected `lambda` is a diagnostic, and the module stays well formed.
-#guard Module.Raw.WF withLambda.module
-
-#guard withLambda.diagnostics.map (·.message) = #["lambda is not supported"]
+-- A rejected complex literal is a diagnostic, and the module stays well formed.
+#guard Module.Raw.WF withComplex.module
+#guard withComplex.diagnostics.map (·.message) = #["complex literal is not supported"]
 
 /-- `a, b += 1`, which CPython's parser rejects, built by hand: the translator reports an
 internal error rather than dropping the statement. -/

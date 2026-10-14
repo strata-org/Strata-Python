@@ -38,7 +38,7 @@ with a diagnostic is a failure.
 
 ## Supported constructs
 
-* `def`, nested too: positional, positional-only, keyword-only, `*args` and `**kwargs`
+* `def`, nested too, and `lambda`: positional, positional-only, keyword-only, `*args` and `**kwargs`
   parameters, and constant defaults.  The argument-binding prologue is the spec's §5.4.
 * Closures: cell and free variables, and `nonlocal`.
 * Statements: expression statements, `pass`, assignment, annotated assignment and augmented
@@ -101,7 +101,7 @@ def nameText : Name → String
   | .str p s => s!"{nameText p}.{s}"
   | .num p i => s!"{nameText p}.{i}"
 
-/-- A diagnostic as one comment line: `-- unsupported: lambda is not supported at 4:4-4:22`. -/
+/-- A diagnostic as one comment line: `-- unsupported: match is not supported at 4:4-4:22`. -/
 def formatDiagnostic (fileMap : Option Lean.FileMap) (d : Diagnostic) : String :=
   s!"-- {d.kind.text}: {d.message} at {formatRange fileMap d.range}"
 
@@ -183,11 +183,15 @@ def reject (what : String) (range : SourceRange) : TransM Unit :=
   let d : Diagnostic := { kind := .unsupported, message := s!"{what} is not supported", range }
   modify fun s => { s with diagnostics := s.diagnostics.push d }
 
+/-- `py.unsupported "what"`: the value of an expression already rejected. -/
+def standIn (what : String) : TransM ValId := do
+  let n ← build (strLit what)
+  build (emitTotal (.str .base "unsupported") Py.unsupported #v[] #[n])
+
 /-- Reject the expression `what` at `range`; its value is `py.unsupported "what"`. -/
 def unsupportedValue (what : String) (range : SourceRange) : TransM ValId := do
   reject what range
-  let n ← build (strLit what)
-  build (emitTotal (.str .base "unsupported") Py.unsupported #v[] #[n])
+  standIn what
 
 /-! ## Blocks -/
 
@@ -474,6 +478,96 @@ partial def bodiesYield? (bodies : Array (Array (stmt SourceRange))) : Option So
 
 end
 
+/-! ## Functions
+
+A `def` is bound where it runs, and its function is emitted after the current one, from a
+`FuncJob`. -/
+
+/-- A parameter, with its default. -/
+structure ParamWithDefault where
+  name : String
+  kind : ParamKind
+  default : Option (expr SourceRange)
+
+/-- The parameters of `args`, in signature order. -/
+def params (args : arguments SourceRange) : Array ParamWithDefault := Id.run do
+  let .mk_arguments _ posOnly pos varPos kwOnly kwDefaults varKw defaults := args
+  let nPos := posOnly.val.size + pos.val.size
+  let firstDefault := nPos - defaults.val.size
+  let mut out : Array ParamWithDefault := #[]
+  let positional := posOnly.val.map (·, ParamKind.posOnly) ++ pos.val.map (·, .positional)
+  for h : i in [:positional.size] do
+    let (.mk_arg _ ⟨_, name⟩ _ _, kind) := positional[i]
+    let default := if i ≥ firstDefault then defaults.val[i - firstDefault]? else none
+    out := out.push { name, kind, default }
+  if let some (.mk_arg _ ⟨_, name⟩ _ _) := varPos.val then
+    out := out.push { name, kind := .varPositional, default := none }
+  for h : j in [:kwOnly.val.size] do
+    let .mk_arg _ ⟨_, name⟩ _ _ := kwOnly.val[j]
+    let default := match kwDefaults.val[j]? with
+      | some (.some_expr _ d) => some d
+      | _ => none
+    out := out.push { name, kind := .kwOnly, default }
+  if let some (.mk_arg _ ⟨_, name⟩ _ _) := varKw.val then
+    out := out.push { name, kind := .varKeyword, default := none }
+  return out
+
+/-- Whether a default is a constant, which the prologue evaluates in place. -/
+def isConstantDefault : expr SourceRange → Bool
+  | .Constant _ (.ConComplex ..) _ => false
+  | .Constant .. => true
+  | .UnaryOp _ (.USub _) (.Constant _ (.ConPos ..) _) => true
+  | .UnaryOp _ (.USub _) (.Constant _ (.ConFloat ..) _) => true
+  | _ => false
+
+/-- A fresh function name for the scope whose `__qualname__` is `qualname`: `m.f.g` for
+`f.<locals>.g`, or `m.f.g.k` if that is taken. -/
+def allocName (qualname : String) : TransM Name := do
+  let parts := (qualname.splitOn ".").filter (· != "<locals>")
+  let first := parts.foldl (init := (← read).moduleName) Name.str
+  let taken := (← get).funcNames
+  let mut n := first
+  let mut k := 1
+  while taken.contains n do
+    n := .num first k
+    k := k + 1
+  modify fun s => { s with funcNames := s.funcNames.insert n }
+  return n
+
+/-- The closure of the `def` or `lambda` at `sr`, whose function is queued, or `none` if it is
+rejected.  The closure captures the cells of the function's free variables (§6.6).  An
+`async def` or a generator is queued as a stub. -/
+def closure (sr : SourceRange) (args : arguments SourceRange)
+    (body : Array (stmt SourceRange)) (decorators : Array (expr SourceRange))
+    (hasTypeParams isAsync : Bool) : TransM (Option ValId) := do
+  let ctx ← read
+  if let some d := decorators[0]? then reject "decorator" d.ann; return none
+  if hasTypeParams then reject "type parameters" sr; return none
+  if let some p := (params args).find? (·.default.any (!isConstantDefault ·)) then
+    reject "non-constant default" (p.default.map (·.ann) |>.getD sr); return none
+  let some scope := ctx.table.childAt? ctx.scope sr
+    | do reject "function without a scope" sr; return none
+  let some cur := ctx.table.scopes[scope]?
+    | do internalError s!"scope {scope} is not in the table" sr; return none
+  let stub ← if isAsync then do reject "async def" sr; pure (some "async def")
+    else match bodiesYield? #[body] with
+      | some r => do reject "generator function" r; pure (some "generator function")
+      | none => pure none
+  let mut cells := #[]
+  for x in cur.freeVars do
+    match ← build (cellOf? x) with
+    | some c => cells := cells.push c
+    | none =>
+      -- An unbound `nonlocal` is free with no cell; the scope pass already reported it.
+      if ctx.table.syntaxErrors.isEmpty then
+        internalError s!"no cell for the free variable '{x}'" sr
+      return none
+  let fname ← allocName cur.qualname
+  let job : FuncJob :=
+    { name := fname, scope, cur, args, body, range := sr, stub }
+  modify fun s => { s with pending := s.pending.push job }
+  some <$> build (mkClosure (← build (emitFunc fname)) cells)
+
 /-! ## Expressions -/
 
 /-- More elements than this make CPython build a set or a dict run one element at a time
@@ -519,7 +613,10 @@ partial def transExpr (e : expr SourceRange) : TransM ValId := withRange e.ann d
     writeName n x nsr
     return x
   | .NamedExpr sr .. => unsupportedValue "assignment expression" sr
-  | .Lambda sr .. => unsupportedValue "lambda" sr
+  | .Lambda sr args body => do
+    match ← closure sr args #[.Return body.ann ⟨body.ann, some body⟩] #[] false false with
+    | some f => return f
+    | none => standIn "lambda"
   | .IfExp _ c a b => ifExp c a b
   | .Dict _ ks vs => dictDisplay ks.val vs.val
   | .Set _ vs => setDisplay vs.val
@@ -880,48 +977,6 @@ partial def deleter (t : expr SourceRange) : Except (expr SourceRange) (TransM U
     | some eval => return do deleteLhs (← eval)
     | none => throw t
 
-/-! ## Functions
-
-A `def` is bound where it runs, and its function is emitted after the current one, from a
-`FuncJob`. -/
-
-/-- A parameter, with its default. -/
-structure ParamWithDefault where
-  name : String
-  kind : ParamKind
-  default : Option (expr SourceRange)
-
-/-- The parameters of `args`, in signature order. -/
-def params (args : arguments SourceRange) : Array ParamWithDefault := Id.run do
-  let .mk_arguments _ posOnly pos varPos kwOnly kwDefaults varKw defaults := args
-  let nPos := posOnly.val.size + pos.val.size
-  let firstDefault := nPos - defaults.val.size
-  let mut out : Array ParamWithDefault := #[]
-  let positional := posOnly.val.map (·, ParamKind.posOnly) ++ pos.val.map (·, .positional)
-  for h : i in [:positional.size] do
-    let (.mk_arg _ ⟨_, name⟩ _ _, kind) := positional[i]
-    let default := if i ≥ firstDefault then defaults.val[i - firstDefault]? else none
-    out := out.push { name, kind, default }
-  if let some (.mk_arg _ ⟨_, name⟩ _ _) := varPos.val then
-    out := out.push { name, kind := .varPositional, default := none }
-  for h : j in [:kwOnly.val.size] do
-    let .mk_arg _ ⟨_, name⟩ _ _ := kwOnly.val[j]
-    let default := match kwDefaults.val[j]? with
-      | some (.some_expr _ d) => some d
-      | _ => none
-    out := out.push { name, kind := .kwOnly, default }
-  if let some (.mk_arg _ ⟨_, name⟩ _ _) := varKw.val then
-    out := out.push { name, kind := .varKeyword, default := none }
-  return out
-
-/-- Whether a default is a constant, which the prologue evaluates in place. -/
-def isConstantDefault : expr SourceRange → Bool
-  | .Constant _ (.ConComplex ..) _ => false
-  | .Constant .. => true
-  | .UnaryOp _ (.USub _) (.Constant _ (.ConPos ..) _) => true
-  | .UnaryOp _ (.USub _) (.Constant _ (.ConFloat ..) _) => true
-  | _ => false
-
 /-- Emit the argument-binding prologue (§5.4), writing each parameter's cell.  The checks
 run in CPython's order: a duplicate value, an unexpected keyword, too many positional
 arguments, a missing argument. -/
@@ -1008,53 +1063,12 @@ def prologue (ps : Array ParamWithDefault) (args kwargs : ValId) : TransM Unit :
       writeName p.name v .none
   if let some p := varKw then writeName p.name kwargs .none
 
-/-- A fresh function name for the scope whose `__qualname__` is `qualname`: `m.f.g` for
-`f.<locals>.g`, or `m.f.g.k` if that is taken. -/
-def allocName (qualname : String) : TransM Name := do
-  let parts := (qualname.splitOn ".").filter (· != "<locals>")
-  let first := parts.foldl (init := (← read).moduleName) Name.str
-  let taken := (← get).funcNames
-  let mut n := first
-  let mut k := 1
-  while taken.contains n do
-    n := .num first k
-    k := k + 1
-  modify fun s => { s with funcNames := s.funcNames.insert n }
-  return n
-
-/-- `def name(args): body` at `sr`: bind `name` to the function's closure, and queue the
-function.  The closure captures the cells of the function's free variables (§6.6).  An
-`async def` or a generator is queued as a stub. -/
+/-- `def name(args): body` at `sr`: bind `name` to the function's closure. -/
 def defStmt (sr : SourceRange) (name : String) (args : arguments SourceRange)
     (body : Array (stmt SourceRange)) (decorators : Array (expr SourceRange))
     (hasTypeParams isAsync : Bool) : TransM Unit := do
-  let ctx ← read
-  if let some d := decorators[0]? then return ← reject "decorator" d.ann
-  if hasTypeParams then return ← reject "type parameters" sr
-  if let some p := (params args).find? (·.default.any (!isConstantDefault ·)) then
-    return ← reject "non-constant default" (p.default.map (·.ann) |>.getD sr)
-  let some scope := ctx.table.childAt? ctx.scope sr
-    | return ← reject "function without a scope" sr
-  let some cur := ctx.table.scopes[scope]?
-    | return ← internalError s!"scope {scope} is not in the table" sr
-  let stub ← if isAsync then do reject "async def" sr; pure (some "async def")
-    else match bodiesYield? #[body] with
-      | some r => do reject "generator function" r; pure (some "generator function")
-      | none => pure none
-  let mut cells := #[]
-  for x in cur.freeVars do
-    match ← build (cellOf? x) with
-    | some c => cells := cells.push c
-    | none =>
-      -- An unbound `nonlocal` is free with no cell; the scope pass already reported it.
-      if ctx.table.syntaxErrors.isEmpty then
-        internalError s!"no cell for the free variable '{x}'" sr
-      return
-  let fname ← allocName cur.qualname
-  let job : FuncJob :=
-    { name := fname, scope, cur, args, body, range := sr, stub }
-  modify fun s => { s with pending := s.pending.push job }
-  writeName name (← build (mkClosure (← build (emitFunc fname)) cells)) sr
+  if let some f ← closure sr args body decorators hasTypeParams isAsync then
+    writeName name f sr
 
 /-! ## Statements -/
 
@@ -1257,8 +1271,7 @@ def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) : Func Py.env SourceRang
     runBody ctx st job.range do
       match job.stub with
       | some what =>
-        let n ← build (strLit what)
-        build (emitReturn (← build (emitTotal (.str .base "unsupported") Py.unsupported #v[] #[n])))
+        build (emitReturn (← standIn what))
       | none =>
         let sc ← curScope
         for (x, c) in free.zip ps do build (captureCell x c)

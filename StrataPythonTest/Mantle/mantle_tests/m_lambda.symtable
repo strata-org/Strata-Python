@@ -1,0 +1,24 @@
+module top
+  adder: local (assigned)
+  bad: local (assigned)
+  g: local (assigned)
+  gen: local (assigned)
+  h: local (assigned)
+  function adder
+    n: cell (parameter)
+    function lambda
+      n: free (referenced)
+      x: local (parameter, referenced)
+  function lambda
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    c: local (parameter, referenced)
+    kw: local (parameter, referenced)
+    r: local (parameter, referenced)
+  function lambda
+    function lambda
+      z: local (parameter, referenced)
+  function lambda
+  function lambda
+    d: local (parameter, referenced)
+qualnames: <lambda>, <lambda>, <lambda>, <lambda>, <lambda>.<locals>.<lambda>, adder, adder.<locals>.<lambda>

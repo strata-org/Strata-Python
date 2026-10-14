@@ -199,14 +199,14 @@ segment per dotted component (`a.b`). Its functions are named under `m`, followi
 scope's `__qualname__`. Function names and instruction names are separate namespaces, and a
 function name prints with an `@` prefix: `@m.add` is a function, `py.add` an instruction. A
 segment in angle brackets cannot collide with a Python identifier; the printer quotes it, as
-in `@m.|<module>|`. The translator implements the first, second and last rows (`allocName`).
+in `@m.|<module>|`. The translator implements every row but the third (`allocName`).
 
 | Source | Name |
 |---|---|
 | module body | `m.<module>` |
 | `def f` at top level, `def g` inside `f` | `m.f`, `m.f.g` |
 | method `meth` of class `C`, body of `C` | `m.C.meth`, `m.C.<body>` |
-| `lambda` | `m.f.<lambda>.k`, where `k` counts per enclosing function |
+| `lambda` | `m.f.<lambda>`; a second one gets the last row's suffix |
 | a name the module already uses | a numeric suffix: a second `def f` is `m.f.1` |
 
 **Annotations.** The translator wraps each statement and each expression in
@@ -974,8 +974,8 @@ a diagnostic.
 
 | Construct | Section | Status |
 |---|---|---|
-| module body; `def`, nested too, with positional, positional-only, keyword-only, `*args` and `**kwargs` parameters and constant defaults; prologue; `return` | §5.2–§5.5 | specified; implemented |
-| `lambda`, decorators, non-constant defaults | §5.3 | specified |
+| module body; `def`, nested too, and `lambda`, with positional, positional-only, keyword-only, `*args` and `**kwargs` parameters and constant defaults; prologue; `return` | §5.2–§5.5 | specified; implemented |
+| decorators, non-constant defaults | §5.3 | specified |
 | name resolution (all five kinds, mangling, compile-time errors) | §5.1 | specified; implemented (`PyScope.analyze`, CPython 3.12 model) |
 | local names | §5.1 | specified; implemented |
 | cell and free names | §5.1 | specified; implemented |

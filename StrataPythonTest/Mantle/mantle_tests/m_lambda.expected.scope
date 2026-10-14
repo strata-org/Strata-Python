@@ -1,0 +1,28 @@
+module
+  adder: local (assigned)
+  g: local (assigned)
+  h: local (assigned)
+  gen: local (assigned)
+  bad: local (assigned)
+  function adder
+    params: n
+    n: cell (parameter)
+    lambda adder.<locals>.<lambda>
+      params: x
+      x: local (parameter, referenced)
+      n: free (referenced)
+  lambda <lambda>
+    params: a, /, b, *r, c, **kw
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    c: local (parameter, referenced)
+    r: local (parameter, referenced)
+    kw: local (parameter, referenced)
+  lambda <lambda>
+    lambda <lambda>.<locals>.<lambda>
+      params: z
+      z: local (parameter, referenced)
+  lambda <lambda>
+  lambda <lambda>
+    params: d
+    d: local (parameter, referenced)
