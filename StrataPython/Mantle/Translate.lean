@@ -17,9 +17,9 @@ set_option autoImplicit false
 /-!
 # Python to Mantle
 
-`translate` lowers a parsed Python module to a `Mantle.Module.Raw` over `Py.env`, as
-`docs/PythonToMantle.md` specifies.  It returns the module and its diagnostics.  A result
-with a diagnostic is a failure.
+`translate` lowers a parsed Python module to a `Mantle.Module.Raw` over `Py.env`, as the
+design doc, `docs/PythonToMantle.md`, describes.  It returns the module and its diagnostics.
+A result with a diagnostic is a failure.
 
 * The module body is the function `m.<module>`, with no parameters.  It first writes
   `__name__` and `__doc__`.  A `def` is a function named after its `__qualname__`, `m.f.g` for
@@ -38,23 +38,8 @@ with a diagnostic is a failure.
 
 ## Supported constructs
 
-* `def`, nested too, and `lambda`: positional, positional-only, keyword-only, `*args` and `**kwargs`
-  parameters, defaults and decorators.  The argument-binding prologue is the spec's §5.4.
-* Closures: cell and free variables, and `nonlocal`.
-* `class`, with bases, keywords and decorators.  A class body is the function `m.C.<body>`,
-  which reads and writes the namespace `__build_class__` passes it (§6.7).  Zero-argument
-  `super()` and `__class__` read a `__class__` cell the class statement makes and fills.
-* Statements: expression statements, `pass`, assignment, annotated assignment and augmented
-  assignment to names, attributes and subscripts, assignment to tuple and list targets (with a
-  starred element too), `del`, `assert`, `if`/`elif`/`else`, `while`/`else`, `for`/`else`,
-  `break`, `continue`, `return`, `global`, `import a.b [as c]` and `from a.b import x [as y]`.
-* Expressions: `int`, `float`, `str`, `bytes`, `bool`, `None` and `...` literals, names,
-  every binary and unary operator, comparisons (chained too), `and`, `or`,
-  `x if c else y`, tuple, list, set and dict displays with `*x` and `**d`, calls with
-  keyword, `*` and `**` arguments, attributes (mangled in a class), subscripts, slices,
-  f-strings, `x := e`, and list, set and dict comprehensions.
-* Conditions: an `if`, `while` or `assert` test, and the test of `x if c else y`, lower to
-  branches by `transCond`, so each operand's truth is tested at most once.
+The design doc's §11 lists what is lowered; `StrataPythonTest/Mantle/mantle_tests.txt` marks
+each test program as supported or not.
 
 ## Adding a construct
 

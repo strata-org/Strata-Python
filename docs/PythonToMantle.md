@@ -8,7 +8,8 @@ specified in [`Mantle.md`](./Mantle.md).
 
 The scope is the Python subset the front end analyses: functions, classes, closures,
 control flow, exceptions, `with`, and comprehensions. Generators, `async` and `match` are
-rejected (§6.9). The gaps this spec found in the environment and builder are listed in §8.
+rejected (§6.9). The gaps found in the environment and builder while writing this design
+doc are listed in §8.
 
 **The translator** is `PyTranslate.translate` in `StrataPython/Mantle/Translate.lean`. §11
 marks what it implements, and the module docstring has a recipe for adding a construct.
@@ -1034,7 +1035,7 @@ a diagnostic.
 | `nonlocal` | §6.6 | specified; implemented |
 | `if` / `elif` / `else` | §6.2 | specified; implemented |
 | literals, `...`, every binary and unary operator, comparisons (chained too), `and`, `or`, `x if c else y` | §6.3 | specified; implemented |
-| conditions (`transCond`) | §6.2 | specified; implemented for `if`, `while` and `x if c else y` |
+| conditions (`transCond`) | §6.2 | specified; implemented |
 | calls, with keywords, `*` and `**` | §6.3 | specified; implemented |
 | displays and unpacking in them | §6.3 | specified; implemented |
 | attribute, subscript, slice (inside a tuple too) | §6.3 | specified; implemented |

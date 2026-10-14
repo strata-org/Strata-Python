@@ -18,38 +18,15 @@ set_option autoImplicit false
 `PyM` emits a Python function over `Py.env`, on top of `Mantle.Build`.  It carries the
 enclosing handler: every raising operation passes it as its `err` successor.
 
-The operations:
-
-* `handler`, `withHandler`, `withHandlerTo`: read and replace the enclosing handler, as a
-  `try` does; `raiseTo`: the handler, taking an exception;
-* `withInfo`, `resolveInfo`: the default annotation;
-* `emitConst`, `emitTotal`, `emitFailing`, `emitActing`, `emitTest`, `truthy`: emit a
-  constant or an operation;
-* `intLit`, `floatLit`, `strLit`, `boolLit`, `bytesLit`, `noneLit`, `ellipsisLit`: a boxed
-  literal;
-* `getAttr`, `setAttr`, `delAttr`: `obj.name`, `obj.name = val` and `del obj.name`;
-* `freshVal`, `freshLabel`, `startBlock`, `startBlockWith`, `startFreshBlock`, `isOpen`,
-  `finishBlock`, `jump`, `branch`, `unreachable`: `Mantle.Build`'s, over `Py.env`;
-* `emitFunc`, `mkClosure`, `funcValue`: code pointers and closures;
-* `cellOf?`, `newCell`, `declareLocal`, `captureCell`, `readCell`, `writeCell`: locals,
-  each a `Ref Value` cell;
-* `globalCell`, `loadGlobal`, `requireGlobal`, `writeGlobal`, `importModule`, `importFrom`:
-  globals and imports;
-* `forEach`: a comprehension's loop, whose body is a region (`Build.regionWith`);
-* `freshComp`, `compNormal`, `compReturn`, `compRaise`, `compBreak`, `compContinue`,
-  `dispatch`, `dispatchArms`: completions, for `finally`;
-* `protect`, `tryFinally`: a protected block and `try`/`finally`, by completion;
-* `emitReturn`, `emitReturnNone`, `emitPropagate`: leave the function;
-* `buildFunc`, `buildFuncTyped`, `buildFuncTypedWith`: emit a whole function.
+The sections below group the operations.
 
 A function body is emitted inside `buildFunc`, which installs the handler that returns a
 failure to the caller before the body runs.  Misusing blocks is an error, as in
 `Mantle.Build`, and `buildFunc` fails if one was recorded.  Block parameters are not decided
 here: locals stay in cells until ref-to-reg.
 
-The emitters that take a body to emit (`withHandler`, `dispatchArms`, `protect`,
-`tryFinally`, `forEach`) run it in any `MonadPy` monad: `PyM` itself, or the translator's
-`TransM` above it.
+An emitter that takes a body to emit, such as `withHandler` or `forEach`, runs it in any
+`MonadPy` monad: `PyM` itself, or the translator's `TransM` above it.
 -/
 
 namespace StrataPython.Mantle.PyBuild
