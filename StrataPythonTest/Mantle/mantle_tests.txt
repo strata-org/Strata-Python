@@ -144,11 +144,11 @@ e12_nonlocal_top_function | yes | no binding for nonlocal 'x' found
 e13_walrus_comprehension_iterable | yes | assignment expression cannot be used in a comprehension iterable expression
 e14_nonlocal_class_scope | yes | no binding for nonlocal 'x' found
 e15_comprehension_inner_rebind | yes | comprehension inner loop cannot rebind assignment expression target 'j'
-e16_yield_in_comprehension | no | 'yield' inside list comprehension
+e16_yield_in_comprehension | yes | 'yield' inside list comprehension, yield
 e17_yield_in_genexpr | yes | generator expression, 'yield' inside generator expression
 e18_walrus_lambda_in_iterable | yes | assignment expression cannot be used in a comprehension iterable expression
 e19_walrus_rebinds_outer_iteration | yes | assignment expression cannot rebind comprehension iteration variable 'row'
-e20_yield_in_dictcomp | no | 'yield' inside dict comprehension
+e20_yield_in_dictcomp | yes | 'yield' inside dict comprehension, yield
 e21_repeated_keyword | yes | keyword argument repeated: k
 e22_starred_target | yes | starred assignment target must be in a list or tuple
 e23_multiple_starred | yes | multiple starred expressions in assignment
