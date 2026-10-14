@@ -1,0 +1,11 @@
+module
+  x: local (assigned, referenced)
+  g: local (assigned)
+  C: local (assigned)
+  function g
+  class C
+diagnostics:
+  syntax error at 5:8-5:16: 'continue' not properly in loop
+  syntax error at 7:8-7:13: 'break' outside loop
+  syntax error at 9:4-9:9: 'break' outside loop
+  syntax error at 13:4-13:12: 'continue' not properly in loop

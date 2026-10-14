@@ -423,6 +423,9 @@ private structure CollectState where
   /-- The module has `from __future__ import annotations`: annotations are not analysed, as
   CPython 3.12's symbol table puts them in a block of their own. -/
   futureAnnotations : Bool := false
+  /-- Visiting a loop body of the current function or class body: where `break` and
+  `continue` may appear. -/
+  inLoop : Bool := false
 
 private abbrev CollectM := StateM CollectState
 
@@ -630,6 +633,19 @@ private def yieldInComprehension (name : String) : String :=
   | "<dictcomp>" => "'yield' inside dict comprehension"
   | _ => "'yield' inside generator expression"
 
+/-- Run `act` with `inLoop` set to `b`, restoring it afterwards. -/
+private def withInLoop (b : Bool) (act : CollectM Unit) : CollectM Unit := do
+  let saved := (← get).inLoop
+  modify fun st => { st with inLoop := b }
+  act
+  modify fun st => { st with inLoop := saved }
+
+/-- A loop body. -/
+private def inLoopBody : CollectM Unit → CollectM Unit := withInLoop true
+
+/-- A function or class body, where an enclosing loop does not count. -/
+private def outsideLoop : CollectM Unit → CollectM Unit := withInLoop false
+
 mutual
 
 private partial def visitExpr (e : expr SourceRange) : CollectM Unit := do
@@ -752,7 +768,7 @@ private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
     decorators.val.forM visitExpr
     let saved ← enter .function name sr
     visitParams args
-    visitStmts body.val
+    outsideLoop (visitStmts body.val)
     leave saved
   | .ClassDef sr ⟨_, name⟩ bases kws body decorators typeParams =>
     if !typeParams.val.isEmpty then unsupported "type parameters are not supported" sr
@@ -764,7 +780,7 @@ private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
     let outerPrivate := (← get).privateName
     modify fun st => { st with privateName := some name }
     let saved ← enter .classBody name sr
-    visitStmts body.val
+    outsideLoop (visitStmts body.val)
     leave saved
     modify fun st => { st with privateName := outerPrivate }
   | .Return sr v =>
@@ -800,9 +816,13 @@ private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
     visitExpr t
     visitExpr it
     checkTarget t
-    visitStmts body.val
+    inLoopBody (visitStmts body.val)
     visitStmts orelse.val
-  | .While _ c body orelse | .If _ c body orelse =>
+  | .While _ c body orelse =>
+    visitExpr c
+    inLoopBody (visitStmts body.val)
+    visitStmts orelse.val
+  | .If _ c body orelse =>
     visitExpr c
     visitStmts body.val
     visitStmts orelse.val
@@ -847,7 +867,10 @@ private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
   | .Global sr names => names.val.forM fun n => declare true n.val sr
   | .Nonlocal sr names => names.val.forM fun n => declare false n.val sr
   | .Expr _ v => visitExpr v
-  | .Pass _ | .Break _ | .Continue _ => pure ()
+  -- CPython's compiler reports these; its symbol table does not.
+  | .Break sr => unless (← get).inLoop do syntaxError "'break' outside loop" sr
+  | .Continue sr => unless (← get).inLoop do syntaxError "'continue' not properly in loop" sr
+  | .Pass _ => pure ()
 
 /-- `global name` (`isGlobal`) or `nonlocal name` at `sr`. -/
 private partial def declare (isGlobal : Bool) (name : String) (sr : SourceRange) :

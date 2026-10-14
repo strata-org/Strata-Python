@@ -1494,14 +1494,17 @@ def leaveHandler (prev : ValId) (name : Option (String × SourceRange)) (outer :
 /-- Leave by `break` (`brk := true`), `continue`, or `return v` (`ret := some v`), walking the
 exits stack from the innermost entry (§4). -/
 def exitWalk (brk : Bool) (ret : Option ValId) (range : SourceRange) : TransM Unit := do
-  for e in (← get).exits.reverse do
+  let exits := (← get).exits
+  -- The scope pass reports a `break` or `continue` outside a loop.
+  if ret.isNone && !exits.any (· matches .loop ..) then
+    if (← read).table.syntaxErrors.any (·.range == range) then return
+    return ← internalError (if brk then "'break' outside loop" else "'continue' outside loop") range
+  for e in exits.reverse do
     match e, ret with
     | .loop b c, none => return ← jump (if brk then b else c)
     | .loop .., some _ => pure ()
     | .handler prev name outer, _ => leaveHandler prev name outer
-  match ret with
-  | some v => build (emitReturn v)
-  | none => reject (if brk then "'break' outside loop" else "'continue' outside loop") range
+  if let some v := ret then build (emitReturn v)
 
 mutual
 

@@ -274,7 +274,10 @@ emitted by walking the stack from the innermost entry outward:
 | `loop brk cont` | `jump ^brk()`, stop | `jump ^cont()`, stop | skip |
 | `cleanup fin` | `%c = py.completionBreak`, `jump ^fin(%c)`, stop | `py.completionContinue`, likewise | `py.completionReturn v`, likewise |
 | `handler prev` | leave the handler (§7.2), keep walking | same | same |
-| stack empty | a diagnostic | a diagnostic | `emitReturn v` |
+| stack empty | | | `emitReturn v` |
+
+A `break` or `continue` with no `loop` entry is a syntax error that the scope pass reports
+(§5.1), and is not walked.
 
 Exceptions do not use the walk. `Frame.handler` already names the right block at every
 point, because each construct that intercepts exceptions installs its own handler.
@@ -309,9 +312,9 @@ The pass also:
   its `global` declaration, a duplicate parameter, the walrus restrictions in
   comprehensions, `'yield' inside list/set/dict comprehension` and `'yield' inside
   generator expression`), and the compiler's `keyword argument repeated`, `starred assignment
-  target must be in a list or tuple`, `multiple starred expressions in assignment` and
-  `'return' outside function`, as
-  `syntaxError` diagnostics;
+  target must be in a list or tuple`, `multiple starred expressions in assignment`,
+  `'return' outside function`, `default 'except:' must be last`, `'break' outside loop` and
+  `'continue' not properly in loop`, as `syntaxError` diagnostics;
 - rejects relative imports, `import *`, `match`, `type` statements and type parameters with
   `unsupported` diagnostics;
 - lists every import in `Table.imports`, separately from the symbols. Each `Import` holds
@@ -642,7 +645,8 @@ fresh block.
 
 These perform the exit walk (§4). Inside a `try` with a `finally` (or a `with`) inside the
 loop, the walk reaches the `cleanup` entry first, so control goes to `fin(completionBreak)`
-and the `finally` body runs before the loop exits.
+and the `finally` body runs before the loop exits. The scope pass reports one outside a loop
+(§5.1); a loop does not count inside a nested `def` or `class`, or in its own `else`.
 
 ### 6.6 Closures
 

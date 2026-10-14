@@ -141,6 +141,7 @@ e21_repeated_keyword | yes | keyword argument repeated: k
 e22_starred_target | yes | starred assignment target must be in a list or tuple, with
 e23_multiple_starred | yes | multiple starred expressions in assignment
 e24_default_except_not_last | yes | default 'except:' must be last
+e26_outside_loop | yes | 'continue' not properly in loop, 'break' outside loop, 'break' outside loop, 'continue' not properly in loop
 p01_import_dotted | yes |
 p02_import_as | yes |
 p03_from_import | yes |
