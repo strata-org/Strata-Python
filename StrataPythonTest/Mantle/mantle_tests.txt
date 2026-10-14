@@ -35,13 +35,13 @@ t28_try_else | no |
 t29_dict_unpack | yes |
 t30_loop_try_nested | no |
 n01_async | yes | async def
-n02_listcomp | yes | list comprehension
-n03_dictcomp | yes | dict comprehension
+n02_listcomp | yes |
+n03_dictcomp | yes |
 n04_generator | yes | generator expression
 n05_lambda | yes |
 n06_yield | yes | generator function
-n07_walrus | yes | list comprehension
-n08_mixed | yes | async def, list comprehension
+n07_walrus | yes |
+n08_mixed | yes | async def
 i01_call_forms | yes |
 i02_param_kinds | yes |
 i03_defaults | yes |
@@ -106,6 +106,7 @@ m_classes | yes |
 m_class_namespace | yes |
 m_class_return | yes | 'return' outside function, 'return' outside function
 m_closures | yes |
+m_comprehensions | yes |
 m_decorators | yes |
 m_lambda | yes | generator function, generator function
 m_rejected | yes | relative import, import *
@@ -115,22 +116,22 @@ e03_nonlocal_module | yes | nonlocal declaration not allowed at module level
 e04_assign_before_global | yes | name 'x' is assigned to before global declaration
 e05_use_before_global | yes | name 'x' is used prior to global declaration
 e06_nonlocal_and_global | yes | name 'x' is nonlocal and global
-e07_walrus_class_comprehension | no | assignment expression within a comprehension cannot be used in a class body
-e08_walrus_rebinds_iteration | no | assignment expression cannot rebind comprehension iteration variable 'x'
+e07_walrus_class_comprehension | yes | assignment expression within a comprehension cannot be used in a class body
+e08_walrus_rebinds_iteration | yes | assignment expression cannot rebind comprehension iteration variable 'x'
 e09_duplicate_argument | yes | duplicate argument 'a' in function definition
 e10_import_star_in_function | yes | import * only allowed at module level, import *
 e11_nonlocal_param | yes | name 'x' is parameter and nonlocal
 e12_nonlocal_top_function | yes | no binding for nonlocal 'x' found
-e13_walrus_comprehension_iterable | no | assignment expression cannot be used in a comprehension iterable expression
+e13_walrus_comprehension_iterable | yes | assignment expression cannot be used in a comprehension iterable expression
 e14_nonlocal_class_scope | yes | no binding for nonlocal 'x' found
-e15_comprehension_inner_rebind | no | comprehension inner loop cannot rebind assignment expression target 'j'
+e15_comprehension_inner_rebind | yes | comprehension inner loop cannot rebind assignment expression target 'j'
 e16_yield_in_comprehension | no | 'yield' inside list comprehension
 e17_yield_in_genexpr | yes | generator expression, 'yield' inside generator expression
-e18_walrus_lambda_in_iterable | no | assignment expression cannot be used in a comprehension iterable expression
-e19_walrus_rebinds_outer_iteration | no | assignment expression cannot rebind comprehension iteration variable 'row'
+e18_walrus_lambda_in_iterable | yes | assignment expression cannot be used in a comprehension iterable expression
+e19_walrus_rebinds_outer_iteration | yes | assignment expression cannot rebind comprehension iteration variable 'row'
 e20_yield_in_dictcomp | no | 'yield' inside dict comprehension
 e21_repeated_keyword | yes | keyword argument repeated: k
-e22_starred_target | yes | starred assignment target must be in a list or tuple, with, list comprehension
+e22_starred_target | yes | starred assignment target must be in a list or tuple, with
 e23_multiple_starred | yes | multiple starred expressions in assignment
 p01_import_dotted | yes |
 p02_import_as | yes |
@@ -153,8 +154,8 @@ p18_builtins | yes |
 p19_builtin_shadowed | yes |
 p20_global_mutated | yes |
 p21_closure_three_levels | yes |
-p22_comprehensions | no | generator expression
-p23_walrus | no | generator expression
+p22_comprehensions | yes | generator expression
+p23_walrus | yes | generator expression
 p24_lambda | yes |
 p25_shadow_builtin | yes |
 p26_params | yes |
@@ -163,7 +164,7 @@ p28_global_nested | yes |
 p29_mangling | yes |
 p30_super | yes | zero-argument super() or __class__, zero-argument super() or __class__
 p31_free_class | yes |
-p32_class_comprehension | no |
+p32_class_comprehension | yes |
 p33_with_for_targets | no |
 p34_match | yes | match
 p35_async | yes | async def
@@ -171,10 +172,10 @@ p36_decorators | yes |
 p37_global_import | yes |
 p38_type_alias | yes | type alias, type parameters
 p39_nested_sample | yes |
-p40_comp_shadow | no |
-p41_comp_nested | no |
-p42_comp_reads_outer | no | generator expression
-p43_comp_class_body | no |
-p44_comp_and_genexpr | no | generator expression
-p45_comp_walrus | no |
-p46_comp_lambda | no |
+p40_comp_shadow | yes |
+p41_comp_nested | yes | generator expression
+p42_comp_reads_outer | yes | generator expression
+p43_comp_class_body | yes | zero-argument super() or __class__
+p44_comp_and_genexpr | yes | generator expression
+p45_comp_walrus | yes |
+p46_comp_lambda | yes |

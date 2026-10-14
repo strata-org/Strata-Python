@@ -433,10 +433,54 @@ example : (buildFunc (Py.pn "f") #["x"] () entryLeftOpen).isOk = false := by dec
 #guard_msgs in
 #eval errors entryLeftOpen
 
+/-! ## `def c(xs, ys): [x + y for x in xs for y in ys]`
+
+Two nested `forEach`s.  Each failure goes to the nearest handler: the outer `forEach`'s to the
+function's, the inner one's to the outer region's, and the `add`'s to the inner region's, so no
+transfer leaves its region. -/
+
+private def c : Except Errors (Func Py.env Unit) :=
+  buildFunc (Py.pn "c") #["xs", "ys"] () fun args => do
+    let acc ← emitTotal (.str .base "acc") Py.mkList #v[] #[]
+    forEach args[0]! fun x => do
+      forEach args[1]! fun y => do
+        let s ← emitFailing (.str .base "s") Py.add #v[] #[x, y]
+        let _ ← emitEffect (.str .base "append") Py.listAppend #v[] #[acc, s]
+    emitReturn acc
+
+example : Holds (Func.WF ∅) c := by decide +kernel
+
+/-- Ids follow the printed order: the `forEach` result before its region's values. -/
+example : Holds Func.Canonical c := by decide +kernel
+
+/-- The `err` successors of `bs`' instructions, regions included, in order. -/
+private partial def errTargetsDeep (bs : Array (Block Py.env Unit)) : List Label :=
+  bs.toList.flatMap fun b => b.instrs.toList.flatMap fun
+    | .apply _ _ _ _ _ ks rs =>
+      ks.toList.map (·.target) ++ rs.toList.flatMap (errTargetsDeep ·.blocks)
+    | _ => []
+
+-- The handlers `c`'s failures go to, as the docstring above says.
+#guard match c with
+  | .ok fn =>
+    errTargetsDeep fn.blocks == [lbl "propagate" 0, lbl "propagate" 1, lbl "propagate" 2]
+  | .error _ => false
+
+/-- A body that ends closed, raising to the region's handler, is well formed too. -/
+private def cClosed : Except Errors (Func Py.env Unit) :=
+  buildFunc (Py.pn "c") #["xs"] () fun args => do
+    forEach args[0]! fun x => do jump (← raiseTo x)
+    emitReturnNone
+
+example : Holds (Func.WF ∅) cClosed := by decide +kernel
+
+/-- Ids follow the printed order: the `forEach` result before its region's values. -/
+example : Holds Func.Canonical cClosed := by decide +kernel
+
 /-! ## A module of the functions above -/
 
 private def m : Except Errors (Module.Raw Py.env Unit) :=
-  return { name := Py.pn "test", funcs := #[← f, ← g, ← h, ← k], info := () }
+  return { name := Py.pn "test", funcs := #[← f, ← g, ← h, ← k, ← c], info := () }
 
 #guard match m with | .ok m => (TestUtil.dottedNames m).isEmpty | .error _ => false
 

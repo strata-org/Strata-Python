@@ -53,7 +53,9 @@ inside a region names a block of the same region or the region's exit, so contro
 region only through its exit, back to the instruction that owns it. Values defined outside a
 region are visible inside it, and values defined inside are local to it; the checker does not
 yet enforce this. Regions keep structured constructs structured, so analyses can treat them
-directly. An `if` whose branches are regions:
+directly. The first user is the comprehension, as a `py.forEach` whose body is a region
+over the item, with one cell per iteration variable per evaluation, as in CPython. An `if`
+whose branches are regions:
 
 ```
 %r.0 : base.Int = demo.if[base.Int](%c.0) {

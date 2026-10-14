@@ -91,4 +91,12 @@ private def augTuple : Result := translate "m" #[.AugAssign none'
 
 #guard augTuple.diagnostics.all (·.kind == .internal)
 
+/-- `[1 for …]` with no `for` clause, which CPython's parser never produces, built by hand: an
+internal error. -/
+private def noGenerator : Result :=
+  translate "m" #[assign "x" (.ListComp none' (int 1) ⟨none', #[]⟩)]
+
+#guard noGenerator.diagnostics.map (·.message) = #["list comprehension without a generator"]
+#guard noGenerator.diagnostics.all (·.kind == .internal)
+
 end StrataPython.Mantle.PyTranslateTest

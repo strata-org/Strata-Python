@@ -355,6 +355,11 @@ public environment Py extends Base where
   /-- Whether `exc` is a `StopIteration`, as the `Bool` a `branch` takes: the guard that
   selects a loop's exit edge. -/
   insn isStopIteration (exc : Value) : Bool
+  /-- Runs `body` once per element of `iterable`, in order, as a comprehension's `for` clause
+  does: `iter(iterable)`, then `next` until it raises `StopIteration`.  An exception from
+  `iter` or `next`, or one `body` returns as `error`, ends the loop and goes to `err`. -/
+  insn forEach (iterable : Value) (&body (item : Value) : raising Unit) (^err (exc : Value)) :
+    Unit
 
   -- Strings and degradation.
 

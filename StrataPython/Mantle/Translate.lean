@@ -51,7 +51,7 @@ with a diagnostic is a failure.
   every binary and unary operator, comparisons (chained too), `and`, `or`,
   `x if c else y`, tuple, list, set and dict displays with `*x` and `**d`, calls with
   keyword, `*` and `**` arguments, attributes (mangled in a class), subscripts, slices,
-  f-strings, and `x := e` outside a comprehension.
+  f-strings, `x := e`, and list, set and dict comprehensions.
 * Conditions: an `if`, `while` or `assert` test, and the test of `x if c else y`, lower to
   branches by `transCond`, so each operand's truth is tested at most once.
 
@@ -79,7 +79,7 @@ open StrataPython.Mantle.PyBuild
 open StrataPython.Mantle.PyScope (Table Scope ScopeId NameScope Diagnostic ParamKind mangle
   formatRange starredIndex?)
 open StrataPython (stmt expr constant operator unaryop cmpop arguments arg keyword alias
-  opt_expr excepthandler withitem match_case)
+  opt_expr excepthandler withitem match_case comprehension)
 open StrataDDM (SourceRange)
 
 public section
@@ -252,10 +252,48 @@ def curScope : TransM Scope := return (← read).cur
 def mangled (name : String) : TransM String := do
   return mangle (← curScope).privateName name
 
+/-- Classify `name`, which must be mangled, as the scope `start` encloses it, for a name
+an inlined comprehension does not bind.  An enclosing comprehension that binds it holds it in
+its cell; a function holds it in its local or captured cell.  The comprehension skips a
+class's names, so in a class body it is the cell the body captures, if it is free there or
+`free_class`, and a global otherwise. -/
+def enclosingPlace (name : String) (start : Option ScopeId) : TransM Place := do
+  let table := (← read).table
+  let mut id? := start
+  for _ in [:table.scopes.size] do
+    let some id := id? | return .global
+    let some sc := table.scopes[id]? | return .global
+    match sc.kind, ((sc.symbol? name).map (·.scope) : Option NameScope) with
+    | .module, _ => return .global
+    | .inlinedComprehension, some .free => id? := sc.parent
+    | _, some .«local» | _, some .cell =>
+      if sc.kind == .classBody then
+        if !((sc.symbol? name).any (·.uses.freeClass)) then return .global
+        return match ← build (cellOf? name) with
+          | some c => .free c
+          | none => .unresolved
+      return match ← build (cellOf? name) with
+        | some c => .cell c
+        | none => .unresolved
+    | _, some .free =>
+      return match ← build (cellOf? name) with
+        | some c => .free c
+        | none => .unresolved
+    | _, _ => return .global
+  return .global
+
 /-- Classify `name`, which must be mangled. -/
 def place (name : String) : TransM Place := do
   let sc ← curScope
   if sc.kind == .module then return .global
+  if sc.kind == .inlinedComprehension then
+    return ← match ((sc.symbol? name).map (·.scope) : Option NameScope) with
+    | some .«local» | some .cell => do
+      match ← build (cellOf? name) with
+      | some c => pure (.cell c)
+      | none => pure .unresolved
+    | some .free => enclosingPlace name sc.parent
+    | _ => pure .global
   if let some ns := (← read).classNs then
     return ← match ((sc.symbol? name).map (·.scope) : Option NameScope) with
     | some .globalExplicit => pure .global
@@ -652,6 +690,20 @@ at the definition into a default cell, which the closure captures (§5.3). -/
 def defaultCellParams (args : arguments SourceRange) : Array ParamWithDefault :=
   (params args).filter (·.default.any (!isConstantDefault ·))
 
+/-- The scope that the `def`, `class`, `lambda` or comprehension at `range` opens.  It is a
+child of the current scope, or, inside an inlined comprehension, of the scope enclosing it,
+as a `lambda` in a comprehension is. -/
+def childScope? (range : SourceRange) : TransM (Option ScopeId) := do
+  let table := (← read).table
+  let mut id? := some (← read).scope
+  for _ in [:table.scopes.size] do
+    let some id := id? | return none
+    if let some c := table.childAt? id range then return some c
+    id? := match table.scopes[id]? with
+      | some sc => if sc.kind == .inlinedComprehension then sc.parent else none
+      | none => none
+  return none
+
 /-- The cells a scope's closure captures: its free variables, and in a class body also the
 names it binds that a method reads from an enclosing function (`free_class`), in order of
 first use. -/
@@ -687,7 +739,29 @@ def decorate (decs : Array ValId) (f : ValId) : TransM ValId := do
     f ← build (emitFailing (.str .base "decorated") Py.call #v[] #[d, t, kw])
   return f
 
+/-! ## Assignment targets -/
+
+/-- Report the target `t`, which the translator does not lower and CPython rejects at compile
+time.  It reports nothing if the scope pass already reports a syntax error at `t`, and an
+internal error otherwise: the parser rejects every other such target. -/
+def badTarget (t : expr SourceRange) : TransM Unit := do
+  if (← read).table.syntaxErrors.any (·.range == t.ann) then return
+  internalError "a target CPython rejects" t.ann
+
+
+/-- An assignment target whose object and key are evaluated (§6.1). -/
+inductive Lhs where
+  | name (name : String) (range : SourceRange)
+  | attr (obj : ValId) (name : String)
+  | item (obj key : ValId)
+  /-- `obj[lo:hi:step]`, with `None` for an absent bound. -/
+  | slice (obj : ValId) (bounds : Array ValId)
+
 /-! ## Expressions -/
+
+/-- What an inlined comprehension builds. -/
+inductive CompKind where
+  | list | set | dict
 
 /-- More elements than this make CPython build a set or a dict run one element at a time
 (`STACK_USE_GUIDELINE`), hashing each as it is evaluated. -/
@@ -741,9 +815,9 @@ partial def transExpr (e : expr SourceRange) : TransM ValId := withRange e.ann d
   | .Set _ vs => setDisplay vs.val
   | .List _ vs _ => listDisplay vs.val
   | .Tuple _ vs _ => tupleDisplay vs.val
-  | .ListComp sr .. => unsupportedValue "list comprehension" sr
-  | .SetComp sr .. => unsupportedValue "set comprehension" sr
-  | .DictComp sr .. => unsupportedValue "dict comprehension" sr
+  | .ListComp sr elt gens => compExpr sr .list elt none gens.val
+  | .SetComp sr elt gens => compExpr sr .set elt none gens.val
+  | .DictComp sr k v gens => compExpr sr .dict k (some v) gens.val
   | .GeneratorExp sr .. => unsupportedValue "generator expression" sr
   | .Await sr .. => unsupportedValue "await" sr
   | .Yield sr .. => unsupportedValue "yield" sr
@@ -992,61 +1066,10 @@ partial def call (f : expr SourceRange) (args : Array (expr SourceRange))
     | none, none => build (emitTotal (.str .base "args") Py.mkTuple #v[] #[])
   build (emitFailing (.str .base "call") Py.call #v[] #[fv, t, d])
 
-/-- The keyword dict of a call to `fv` with the keyword arguments `kws`: runs of `k=v` pairs,
-each a total `mkKwargs`, and `DICT_MERGE` (`dictMerge`) for each `**m`. -/
-partial def kwargsDict (fv : ValId) (kws : Array (keyword SourceRange)) : TransM ValId :=
-  dictFromEntries kws (fun kw => if kw.nameAndValue.1.isSome then none else some kw.value)
-    (fun run => if run.isEmpty then #[] else #[run])
-    (fun run => do
-      let mut kvs := #[]
-      for kw in run do
-        kvs := kvs.push (← build (strLit (kw.nameAndValue.1.getD "")))
-        kvs := kvs.push (← transExpr kw.value)
-      build (emitTotal (.str .base "kwargs") Py.mkKwargs #v[] kvs))
-    (fun a m => build (emitFailing (.str .base "merge") Py.dictMerge #v[] #[fv, a, m]))
-
-/-- The closure of the `def` or `lambda` at `sr`, whose function is queued, or `none` if it is
-rejected, as §5.3 builds it: the decorators are evaluated, then the non-constant defaults
-into default cells.  The closure captures the cells of the function's free variables
-(§6.6), then the default cells.  The decorators are applied to it bottom to top.  An
-`async def` or a generator is queued as a stub. -/
-partial def closure (sr : SourceRange) (args : arguments SourceRange)
-    (body : Array (stmt SourceRange)) (decorators : Array (expr SourceRange))
-    (hasTypeParams isAsync : Bool) : TransM (Option ValId) := do
-  let ctx ← read
-  if hasTypeParams then reject "type parameters" sr; return none
-  let some scope := ctx.table.childAt? ctx.scope sr
-    | do reject "function without a scope" sr; return none
-  let some cur := ctx.table.scopes[scope]?
-    | do internalError s!"scope {scope} is not in the table" sr; return none
-  let stub ← if isAsync then do reject "async def" sr; pure (some "async def")
-    else match bodiesYield? #[body] with
-      | some r => do reject "generator function" r; pure (some "generator function")
-      | none => pure none
-  let decs ← decorators.mapM transExpr
-  let mut defaults := #[]
-  for p in defaultCellParams args do
-    if let some d := p.default then
-      defaults := defaults.push (← build (newCell (defaultStem p.name) (← transExpr d)))
-  let some f ← queueFunc sr scope cur (some args) body stub defaults | return none
-  some <$> decorate decs f
-
-end
-
-/-! ## Assignment targets -/
-
-/-- An assignment target whose object and key are evaluated (§6.1). -/
-inductive Lhs where
-  | name (name : String) (range : SourceRange)
-  | attr (obj : ValId) (name : String)
-  | item (obj key : ValId)
-  /-- `obj[lo:hi:step]`, with `None` for an absent bound. -/
-  | slice (obj : ValId) (bounds : Array ValId)
-
 /-- The evaluation of the target `t`, or `none` if `t` is not a name, an attribute or a
 subscript: `o` for `o.a`, then `o` and `k` for `o[k]`.  The attribute name is mangled, as in
 a read. -/
-def target? : expr SourceRange → Option (TransM Lhs)
+partial def target? : expr SourceRange → Option (TransM Lhs)
   | .Name sr ⟨_, n⟩ _ => some (pure (.name n sr))
   | .Attribute _ v ⟨_, a⟩ _ => some do return .attr (← transExpr v) (← mangled a)
   | .Subscript _ v k _ => some do
@@ -1057,7 +1080,7 @@ def target? : expr SourceRange → Option (TransM Lhs)
   | _ => none
 
 /-- Read the target `l`, as `x op= e` does. -/
-def readLhs : Lhs → TransM ValId
+partial def readLhs : Lhs → TransM ValId
   | .name n r => readName n r
   | .attr o a => build (getAttr o a)
   | .item o k => build (emitFailing (.str .base "item") Py.getItem #v[] #[o, k])
@@ -1065,7 +1088,7 @@ def readLhs : Lhs → TransM ValId
 
 /-- Write `v` to the target `l`.  A name is written at `range`, the statement's.  A slice is
 written by `setItem` of a `mkSlice`, as CPython's `STORE_SLICE` does. -/
-def writeLhs (l : Lhs) (v : ValId) (range : SourceRange) : TransM Unit :=
+partial def writeLhs (l : Lhs) (v : ValId) (range : SourceRange) : TransM Unit :=
   match l with
   | .name n _ => writeName n v range
   | .attr o a => discard <| build (setAttr o a v)
@@ -1103,12 +1126,107 @@ partial def assigner (range : SourceRange) (t : expr SourceRange) :
     | some eval => return fun v => do writeLhs (← eval) v range
     | none => throw t
 
-/-- Report the target `t`, which the translator does not lower and CPython rejects at compile
-time.  It reports nothing if the scope pass already reports a syntax error at `t`, and an
-internal error otherwise: the parser rejects every other such target. -/
-def badTarget (t : expr SourceRange) : TransM Unit := do
-  if (← read).table.syntaxErrors.any (·.range == t.ann) then return
-  internalError "a target CPython rejects" t.ann
+/-- A list, set or dict comprehension at `sr` (§6.8), inlined as PEP 709 does.  The
+outermost iterable is evaluated in the enclosing scope, then the accumulator is made, then
+the comprehension's scope takes over: each iteration variable is a fresh cell, shadowing the
+enclosing scope's name until the end, and each `for` clause is a `py.forEach` whose body
+region assigns the target, tests the `if`s, and runs the next clause or adds the element. -/
+partial def compExpr (sr : SourceRange) (kind : CompKind) (elt : expr SourceRange)
+    (value : Option (expr SourceRange)) (gens : Array (comprehension SourceRange)) :
+    TransM ValId := do
+  let what := match kind with
+    | .list => "list comprehension" | .set => "set comprehension" | .dict => "dict comprehension"
+  if gens.any fun (.mk_comprehension _ _ _ _ a) => a.value != 0 then
+    return ← unsupportedValue s!"async {what}" sr
+  let ctx ← read
+  let some (.mk_comprehension _ _ iter0 _ _) := (gens[0]? : Option (comprehension SourceRange))
+    | internalError s!"{what} without a generator" sr; standIn what
+  let some scope ← childScope? sr | return ← unsupportedValue s!"{what} without a scope" sr
+  let some cur := ctx.table.scopes[scope]?
+    | internalError s!"scope {scope} is not in the table" sr; standIn what
+  let it ← transExpr iter0
+  let acc ← match kind with
+    | .list => build (emitTotal (.str .base "acc") Py.mkList #v[] #[])
+    | .set => build (emitFailing (.str .base "acc") Py.mkSet #v[] #[])
+    | .dict => build (emitFailing (.str .base "acc") Py.mkDict #v[] #[])
+  let saved := (← build (get : PyM SourceRange PyBuild.Frame)).locals
+  withReader ({ · with scope, cur, classNs := none }) do
+    for x in cur.regionLocals do discard <| build (declareLocal x)
+    clause acc it 0
+  build (modify fun f => { f with locals := saved })
+  return acc
+where
+  /-- The `for` clause `i`, over the evaluated iterable `it`, and the clauses after it. -/
+  clause (acc it : ValId) (i : Nat) : TransM Unit := do
+    let some (.mk_comprehension _ target _ ifs _) := (gens[i]? : Option (comprehension SourceRange))
+      | return
+    let assign ← match assigner sr target with
+      | .ok a => pure a
+      | .error t => do badTarget t; pure fun _ => pure ()
+    forEach it fun item => do
+      assign item
+      let skip ← build (freshLabel "skip")
+      for c in ifs.val do
+        let next ← build (freshLabel "if")
+        transCond c next skip
+        build (startBlock next)
+      match (gens[i + 1]? : Option (comprehension SourceRange)) with
+      | some (.mk_comprehension _ _ iter _ _) => clause acc (← transExpr iter) (i + 1)
+      | none =>
+        match kind, value with
+        | .dict, some v =>
+          let k ← transExpr elt
+          let x ← transExpr v
+          discard <| build (emitActing (.str .base "set") Py.dictSet #v[] #[acc, k, x])
+        | .set, _ =>
+          discard <| build (emitActing (.str .base "add") Py.setAdd #v[] #[acc, ← transExpr elt])
+        | _, _ =>
+          let x ← transExpr elt
+          discard <| build (emitEffect (.str .base "append") Py.listAppend #v[] #[acc, x])
+      if ← targeted skip then
+        jump skip
+        build (startBlock skip)
+
+/-- The keyword dict of a call to `fv` with the keyword arguments `kws`: runs of `k=v` pairs,
+each a total `mkKwargs`, and `DICT_MERGE` (`dictMerge`) for each `**m`. -/
+partial def kwargsDict (fv : ValId) (kws : Array (keyword SourceRange)) : TransM ValId :=
+  dictFromEntries kws (fun kw => if kw.nameAndValue.1.isSome then none else some kw.value)
+    (fun run => if run.isEmpty then #[] else #[run])
+    (fun run => do
+      let mut kvs := #[]
+      for kw in run do
+        kvs := kvs.push (← build (strLit (kw.nameAndValue.1.getD "")))
+        kvs := kvs.push (← transExpr kw.value)
+      build (emitTotal (.str .base "kwargs") Py.mkKwargs #v[] kvs))
+    (fun a m => build (emitFailing (.str .base "merge") Py.dictMerge #v[] #[fv, a, m]))
+
+/-- The closure of the `def` or `lambda` at `sr`, whose function is queued, or `none` if it is
+rejected, as §5.3 builds it: the decorators are evaluated, then the non-constant defaults
+into default cells.  The closure captures the cells of the function's free variables
+(§6.6), then the default cells.  The decorators are applied to it bottom to top.  An
+`async def` or a generator is queued as a stub. -/
+partial def closure (sr : SourceRange) (args : arguments SourceRange)
+    (body : Array (stmt SourceRange)) (decorators : Array (expr SourceRange))
+    (hasTypeParams isAsync : Bool) : TransM (Option ValId) := do
+  let ctx ← read
+  if hasTypeParams then reject "type parameters" sr; return none
+  let some scope ← childScope? sr
+    | do reject "function without a scope" sr; return none
+  let some cur := ctx.table.scopes[scope]?
+    | do internalError s!"scope {scope} is not in the table" sr; return none
+  let stub ← if isAsync then do reject "async def" sr; pure (some "async def")
+    else match bodiesYield? #[body] with
+      | some r => do reject "generator function" r; pure (some "generator function")
+      | none => pure none
+  let decs ← decorators.mapM transExpr
+  let mut defaults := #[]
+  for p in defaultCellParams args do
+    if let some d := p.default then
+      defaults := defaults.push (← build (newCell (defaultStem p.name) (← transExpr d)))
+  let some f ← queueFunc sr scope cur (some args) body stub defaults | return none
+  some <$> decorate decs f
+
+end
 
 /-- Delete the target `l`. -/
 def deleteLhs : Lhs → TransM Unit
@@ -1237,7 +1355,7 @@ def classDef (sr : SourceRange) (name : String) (bases : Array (expr SourceRange
     (decorators : Array (expr SourceRange)) (hasTypeParams : Bool) : TransM Unit := do
   let ctx ← read
   if hasTypeParams then return ← reject "type parameters" sr
-  let some scope := ctx.table.childAt? ctx.scope sr | return ← reject "class without a scope" sr
+  let some scope ← childScope? sr | return ← reject "class without a scope" sr
   let some cur := ctx.table.scopes[scope]?
     | return ← internalError s!"scope {scope} is not in the table" sr
   if cur.needsClassCell then return ← reject "zero-argument super() or __class__" sr

@@ -1,0 +1,36 @@
+module top
+  f: local (assigned)
+  outer: local (assigned)
+  shadowed: local (assigned)
+  function f
+    _: local (assigned, comp_iter)
+    a: local (assigned, referenced)
+    b: local (assigned, referenced)
+    c: local (assigned, referenced)
+    d: local (assigned, referenced)
+    e: local (assigned, referenced)
+    k: local (assigned, referenced, comp_iter)
+    pairs: local (parameter, referenced)
+    v: local (assigned, referenced, comp_iter)
+    x: local (assigned, referenced, comp_iter)
+    y: cell (assigned, referenced, comp_iter, comp_cell)
+    ys: local (parameter, referenced)
+    function lambda
+      y: free (referenced)
+  function outer
+    C: local (assigned, referenced)
+    n: cell (parameter)
+    class C
+      i: local (assigned, referenced, comp_iter)
+      n: free (referenced, free_class)
+      range: global implicit (referenced)
+      xs: local (assigned)
+  function shadowed
+    D: local (assigned, referenced)
+    n: cell (assigned)
+    class D
+      _: local (assigned, comp_iter)
+      n: local (assigned, free_class)
+      range: global implicit (referenced)
+      xs: local (assigned)
+qualnames: f, f.<locals>.<lambda>, outer, outer.<locals>.C, shadowed, shadowed.<locals>.D

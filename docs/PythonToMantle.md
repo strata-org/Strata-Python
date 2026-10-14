@@ -703,17 +703,14 @@ List, set and dict comprehensions follow Python 3.12 (PEP 709): they are inlined
 enclosing function. Each `for` clause is a `py.forEach` whose body is a region of that
 function. No function is created.
 
-`py.forEach` is planned (§8). The sketch, to be finalised:
-
 ```
-insn forEach (iterable : Value) (&body (item : Value) : Unit) (^err (exc : Value)) : Unit
+insn forEach (iterable : Value) (&body (item : Value) : raising Unit) (^err (exc : Value)) : Unit
 ```
 
 It iterates `iterable`, runs `body` once per item, and falls through when the iterator is
 exhausted. An exception from `iter` or `next` goes to `err`. A region cannot name an outer
-block, so the body cannot reach `Frame.handler`. As sketched, the body has no way to raise.
-Finalising it means giving the body a result that carries an exception, such as
-`py.raising Unit`, with `error e` forwarded to `err`.
+block, so the body cannot reach `Frame.handler`. Instead the body returns `error e`, which
+`forEach` forwards to `err`, and `ok ()` to go on. `PyBuild.forEach` emits it.
 
 `[e for x in xs if c for y in ys]` lowers to:
 
@@ -724,7 +721,7 @@ Finalising it means giving the body a result that carries an exception, such as
    in `Frame.locals` afterwards. There is one cell per variable per evaluation, so closures
    created in the comprehension share it, as in CPython.
 4. `forEach xs ^body ^err(H)`, `H` the enclosing handler. The body region, with its own
-   `propagate` handler and an empty exits stack:
+   `propagate` handler:
    - writes `item` to `x`'s cell;
    - for `if c`: `c` as a condition (§6.2). Its false successor ends the region;
    - for `for y in ys`: evaluates `ys` and emits a nested `forEach` whose `err` is the
@@ -882,7 +879,6 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 
 | Operation | Signature (DSL) | Needed by |
 |---|---|---|
-| `forEach` | `insn forEach (iterable : Value) (&body (item : Value) : Unit) (^err (exc : Value)) : Unit`, a sketch: the body's result must carry an exception (§6.8) | comprehensions |
 | `excMatch` | `insn excMatch (exc type : Value) (^err (e : Value)) : Bool` | `except T` (the alternative is `py.call` builtins `isinstance`, then `truthy`) |
 | `toException` | `insn toException (val : Value) (^err (e : Value)) : Value` | `raise E` |
 | `mkGenerator` | `insn mkGenerator (code : Code) (cells : Ref Value…) : Value` | generators (stage 1, opaque) |
@@ -902,9 +898,9 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 - `dispatch` and `dispatchArms` take `Label`s. Direct successors that pre-bind arguments need
   `BlockValue`s.
 - `tryFinally`, `protect` and `dispatchArms` run their bodies in any `MonadPy` monad, so the
-  translator can pass `TransM` bodies. The translator does not call them yet.
+  translator can pass `TransM` bodies. The translator does not call them yet. `forEach`
+  does the same, and the translator calls it for comprehensions.
 - No `raiseTo exc` helper (`jump ^handler(exc)`). `exitWalk` handles `loop` entries only.
-- `PyM` has no wrapper for `Build.region`, which `forEach` needs (§6.8).
 
 ## 9. Open questions
 
@@ -1020,14 +1016,14 @@ a diagnostic.
 | displays and unpacking in them | §6.3 | specified; implemented |
 | attribute, subscript, slice (inside a tuple too) | §6.3 | specified; implemented |
 | f-strings | §6.3 | specified; implemented |
-| walrus | §6.3 | specified; implemented outside comprehensions |
+| walrus | §6.3 | specified; implemented |
 | complex literal, t-string | §6.3 | unsupported |
 | `while` / `else`, `break`, `continue` | §6.4–§6.5 | specified; implemented |
 | `for` / `else` | §6.4 | specified; implemented |
 | closures | §6.6 | specified; implemented |
 | `class`, bases, keywords, decorators | §6.7 | specified; implemented |
 | zero-argument `super()`, `__class__` | §6.7 | unsupported (Q6); the scope pass sets `needsClassCell` |
-| list, set and dict comprehensions | §6.8 | specified, open question (`forEach` not declared; its body's result); scoping implemented (`inlinedComprehension`) |
+| list, set and dict comprehensions | §6.8 | specified; implemented |
 | generator expressions, `yield` | §6.8 | unsupported; a generator function is a stub |
 | `raise`, `raise … from` | §7.1 | specified, open question (`toException`) |
 | bare `raise` | §7.1 | specified inside `except`; unsupported elsewhere |

@@ -35,6 +35,7 @@ The operations:
   each a `Ref Value` cell;
 * `globalCell`, `loadGlobal`, `requireGlobal`, `writeGlobal`, `importModule`, `importFrom`:
   globals and imports;
+* `forEach`: a comprehension's loop, whose body is a region (`Build.regionWith`);
 * `freshComp`, `compNormal`, `compReturn`, `compRaise`, `compBreak`, `compContinue`,
   `dispatch`, `dispatchArms`: completions, for `finally`;
 * `protect`, `tryFinally`: a protected block and `try`/`finally`, by completion;
@@ -47,8 +48,8 @@ failure to the caller before the body runs.  Misusing blocks is an error, as in
 here: locals stay in cells until ref-to-reg.
 
 The emitters that take a body to emit (`withHandler`, `dispatchArms`, `protect`,
-`tryFinally`) run it in any `MonadPy` monad: `PyM` itself, or the translator's `TransM` above
-it.
+`tryFinally`, `forEach`) run it in any `MonadPy` monad: `PyM` itself, or the translator's
+`TransM` above it.
 -/
 
 namespace StrataPython.Mantle.PyBuild
@@ -366,6 +367,34 @@ def importFrom (module name : String) (info : Option α := none) : PyM α ValId 
   let m ← emitConst (.str .base "m") (.str module) info
   let n ← emitConst (.str .base "n") (.str name) info
   emitFailing (stem name) Py.importFrom #v[] #[m, n] info
+
+/-! ## Regions -/
+
+/-- `py.forEach iterable`, its `err` successor the enclosing handler.  The body region takes
+the item, emitted by `body` with failures going to the region's own handler, which returns
+them as `error`.  Falling off the end of `body` returns `ok ()`. -/
+def forEach [Monad m] [MonadPy α m] (iterable : ValId) (body : ValId → m Unit)
+    (info : Option α := none) : m Unit := do
+  let _ : MonadLiftT (BuildM Py.env α) m := ⟨fun x => liftPy (α := α) (monadLift x)⟩
+  let each : m (Region Py.env α) := do
+    let item ← liftPy (freshVal (α := α) (stem "item"))
+    Prod.fst <$> Build.regionWith #[item] (base := "each") do
+      let propagate ← liftPy (freshLabel (α := α) "propagate")
+      withHandler propagate (body item.id)
+      liftPy (α := α) do
+        if ← isOpen then
+          let u ← Build.emitApply (env := Py.env) (α := α) (stem "unit") Base.Unit.ty
+            Base.Unit.unit #v[] #[]
+          let ok ← Build.emitApply (env := Py.env) (α := α) (stem "ok")
+            (Py.raising.ty Base.Unit.ty) Base.Except.ok #v[Py.Value.ty, Base.Unit.ty] #[u]
+          Build.ret (env := Py.env) (α := α) ok
+        let exc ← startBlockWith propagate (stem "exc")
+        let e ← Build.emitApply (env := Py.env) (α := α) (stem "exc")
+          (Py.raising.ty Base.Unit.ty) Base.Except.error #v[Py.Value.ty, Base.Unit.ty] #[exc]
+        Build.ret (env := Py.env) (α := α) e
+  let h ← liftPy (handler (α := α))
+  discard <| Build.emitApplyWith (stem "each") Base.Unit.ty Py.forEach #v[] #[iterable] #[h]
+    #[each] info
 
 /-! ## Completions
 

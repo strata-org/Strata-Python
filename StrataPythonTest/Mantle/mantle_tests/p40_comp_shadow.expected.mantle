@@ -1,0 +1,174 @@
+module p40_comp_shadow {
+  func @|p40_comp_shadow.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("p40_comp_shadow")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p40_comp_shadow", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p40_comp_shadow", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure(@p40_comp_shadow.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("p40_comp_shadow", "f")
+      %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure(@p40_comp_shadow.g)
+      %g.cell.0 : base.Ref(py.Value) = py.globalCell("p40_comp_shadow", "g")
+      %set.3 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
+      %str.1 : py.Value = py.strLit("module")
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("p40_comp_shadow", "x")
+      %set.4 : base.Unit = base.refSet[py.Value](%x.cell.0, %str.1)
+      %range.0 : py.Value = py.loadGlobal("p40_comp_shadow", "range") ^propagate.0()
+      %int.0 : py.Value = py.intLit(3)
+      %tuple.0 : py.Value = py.mkTuple(%int.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%range.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %acc.0 : py.Value = py.mkList
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %each.0 : base.Unit = py.forEach(%call.0) ^propagate.0() {
+        each.0(%item.0 : py.Value):
+          %set.5 : base.Unit = base.refSet[py.Value](%x.cell.1, %item.0)
+          %x.1 : py.Value = base.refGet[py.Value](%x.cell.1)
+          %x.2 : py.Value = py.requireDefined(%x.1, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.1()
+          %append.0 : base.Unit = py.listAppend(%acc.0, %x.2)
+          %unit.0 : base.Unit = base.unit
+          %ok.0 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
+          ret(%ok.0)
+        propagate.1(%exc.0 : py.Value):
+          %exc.1 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.0)
+          ret(%exc.1)
+      }
+      %c.cell.0 : base.Ref(py.Value) = py.globalCell("p40_comp_shadow", "c")
+      %set.6 : base.Unit = base.refSet[py.Value](%c.cell.0, %acc.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
+  }
+  func @p40_comp_shadow.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %xs.0 : py.Value = py.undef("xs")
+      %xs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%xs.0)
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %a.0 : py.Value = py.undef("a")
+      %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %xs.1 : py.Value = py.undef("xs")
+      %fill.0 : py.Value = py.mkTuple(%xs.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("xs")
+      %xs.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "f() got multiple values for argument 'xs'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "f() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %xs.3 : py.Value = py.requireDefined(%xs.2, "TypeError", "f() missing 1 required positional argument: 'xs'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.3)
+      %int.1 : py.Value = py.intLit(0)
+      %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.1)
+      %xs.4 : py.Value = base.refGet[py.Value](%xs.cell.0)
+      %xs.5 : py.Value = py.requireDefined(%xs.4, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %acc.0 : py.Value = py.mkList
+      %x.1 : py.Value = py.undef("x")
+      %x.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%x.1)
+      %each.0 : base.Unit = py.forEach(%xs.5) ^propagate.0() {
+        each.0(%item.0 : py.Value):
+          %set.2 : base.Unit = base.refSet[py.Value](%x.cell.1, %item.0)
+          %x.2 : py.Value = base.refGet[py.Value](%x.cell.1)
+          %x.3 : py.Value = py.requireDefined(%x.2, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.1()
+          %append.0 : base.Unit = py.listAppend(%acc.0, %x.3)
+          %unit.0 : base.Unit = base.unit
+          %ok.0 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
+          ret(%ok.0)
+        propagate.1(%exc.0 : py.Value):
+          %exc.1 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.0)
+          ret(%exc.1)
+      }
+      %set.3 : base.Unit = base.refSet[py.Value](%a.cell.0, %acc.0)
+      %a.1 : py.Value = base.refGet[py.Value](%a.cell.0)
+      %a.2 : py.Value = py.requireDefined(%a.1, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %x.4 : py.Value = base.refGet[py.Value](%x.cell.0)
+      %x.5 : py.Value = py.requireDefined(%x.4, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%a.2, %x.5)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.0)
+      ret(%ret.0)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
+  }
+  func @p40_comp_shadow.g(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %xs.0 : py.Value = py.undef("xs")
+      %xs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%xs.0)
+      %b.0 : py.Value = py.undef("b")
+      %b.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%b.0)
+      %y.0 : py.Value = py.undef("y")
+      %y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%y.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %xs.1 : py.Value = py.undef("xs")
+      %fill.0 : py.Value = py.mkTuple(%xs.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("xs")
+      %xs.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "g() got multiple values for argument 'xs'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "g() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "g() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %xs.3 : py.Value = py.requireDefined(%xs.2, "TypeError", "g() missing 1 required positional argument: 'xs'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.3)
+      %xs.4 : py.Value = base.refGet[py.Value](%xs.cell.0)
+      %xs.5 : py.Value = py.requireDefined(%xs.4, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %acc.0 : py.Value = py.mkList
+      %y.1 : py.Value = py.undef("y")
+      %y.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%y.1)
+      %each.0 : base.Unit = py.forEach(%xs.5) ^propagate.0() {
+        each.0(%item.0 : py.Value):
+          %set.1 : base.Unit = base.refSet[py.Value](%y.cell.1, %item.0)
+          %y.2 : py.Value = base.refGet[py.Value](%y.cell.1)
+          %y.3 : py.Value = py.requireDefined(%y.2, "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.1()
+          %int.1 : py.Value = py.intLit(2)
+          %mult.0 : py.Value = py.mult(%y.3, %int.1) ^propagate.1()
+          %append.0 : base.Unit = py.listAppend(%acc.0, %mult.0)
+          %unit.0 : base.Unit = base.unit
+          %ok.0 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
+          ret(%ok.0)
+        propagate.1(%exc.0 : py.Value):
+          %exc.1 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.0)
+          ret(%exc.1)
+      }
+      %set.2 : base.Unit = base.refSet[py.Value](%b.cell.0, %acc.0)
+      %int.2 : py.Value = py.intLit(1)
+      %set.3 : base.Unit = base.refSet[py.Value](%y.cell.0, %int.2)
+      %b.1 : py.Value = base.refGet[py.Value](%b.cell.0)
+      %b.2 : py.Value = py.requireDefined(%b.1, "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
+      %y.4 : py.Value = base.refGet[py.Value](%y.cell.0)
+      %y.5 : py.Value = py.requireDefined(%y.4, "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%b.2, %y.5)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.0)
+      ret(%ret.0)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
+  }
+}
+

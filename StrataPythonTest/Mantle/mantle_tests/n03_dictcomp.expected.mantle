@@ -1,4 +1,3 @@
--- unsupported: dict comprehension is not supported at 5:4-5:29
 module n03_dictcomp {
   func @|n03_dictcomp.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
@@ -14,16 +13,37 @@ module n03_dictcomp {
       %list.0 : py.Value = py.mkList(%str.1, %str.2, %str.3)
       %keys.cell.0 : base.Ref(py.Value) = py.globalCell("n03_dictcomp", "keys")
       %set.2 : base.Unit = base.refSet[py.Value](%keys.cell.0, %list.0)
-      %str.4 : py.Value = py.strLit("dict comprehension")
-      %unsupported.0 : py.Value = py.unsupported(%str.4)
+      %keys.0 : py.Value = py.loadGlobal("n03_dictcomp", "keys") ^propagate.0()
+      %acc.0 : py.Value = py.mkDict ^propagate.0()
+      %k.0 : py.Value = py.undef("k")
+      %k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%k.0)
+      %each.0 : base.Unit = py.forEach(%keys.0) ^propagate.0() {
+        each.0(%item.0 : py.Value):
+          %set.3 : base.Unit = base.refSet[py.Value](%k.cell.0, %item.0)
+          %k.1 : py.Value = base.refGet[py.Value](%k.cell.0)
+          %k.2 : py.Value = py.requireDefined(%k.1, "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.1()
+          %len.0 : py.Value = py.loadGlobal("n03_dictcomp", "len") ^propagate.1()
+          %k.3 : py.Value = base.refGet[py.Value](%k.cell.0)
+          %k.4 : py.Value = py.requireDefined(%k.3, "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.1()
+          %tuple.0 : py.Value = py.mkTuple(%k.4)
+          %kwargs.0 : py.Value = py.mkKwargs
+          %call.0 : py.Value = py.call(%len.0, %tuple.0, %kwargs.0) ^propagate.1()
+          %set.4 : base.Unit = py.dictSet(%acc.0, %k.2, %call.0) ^propagate.1()
+          %unit.0 : base.Unit = base.unit
+          %ok.0 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
+          ret(%ok.0)
+        propagate.1(%exc.0 : py.Value):
+          %exc.1 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.0)
+          ret(%exc.1)
+      }
       %d.cell.0 : base.Ref(py.Value) = py.globalCell("n03_dictcomp", "d")
-      %set.3 : base.Unit = base.refSet[py.Value](%d.cell.0, %unsupported.0)
+      %set.5 : base.Unit = base.refSet[py.Value](%d.cell.0, %acc.0)
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
   }
 }
 

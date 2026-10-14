@@ -1,0 +1,96 @@
+-- syntax error: assignment expression cannot rebind comprehension iteration variable 'row' at 2:14-2:22
+module e19_walrus_rebinds_outer_iteration {
+  func @|e19_walrus_rebinds_outer_iteration.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("e19_walrus_rebinds_outer_iteration")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("e19_walrus_rebinds_outer_iteration", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("e19_walrus_rebinds_outer_iteration", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure(@e19_walrus_rebinds_outer_iteration.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("e19_walrus_rebinds_outer_iteration", "f")
+      %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @e19_walrus_rebinds_outer_iteration.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %rows.0 : py.Value = py.undef("rows")
+      %rows.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%rows.0)
+      %row.0 : py.Value = py.undef("row")
+      %row.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%row.0)
+      %c.0 : py.Value = py.undef("c")
+      %c.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%c.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %rows.1 : py.Value = py.undef("rows")
+      %fill.0 : py.Value = py.mkTuple(%rows.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("rows")
+      %rows.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "f() got multiple values for argument 'rows'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "f() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %rows.3 : py.Value = py.requireDefined(%rows.2, "TypeError", "f() missing 1 required positional argument: 'rows'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%rows.cell.0, %rows.3)
+      %rows.4 : py.Value = base.refGet[py.Value](%rows.cell.0)
+      %rows.5 : py.Value = py.requireDefined(%rows.4, "UnboundLocalError", "cannot access local variable 'rows' where it is not associated with a value") ^propagate.0()
+      %acc.0 : py.Value = py.mkList
+      %row.1 : py.Value = py.undef("row")
+      %row.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%row.1)
+      %c.3 : py.Value = py.undef("c")
+      %c.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%c.3)
+      %each.0 : base.Unit = py.forEach(%rows.5) ^propagate.0() {
+        each.0(%item.0 : py.Value):
+          %set.1 : base.Unit = base.refSet[py.Value](%row.cell.1, %item.0)
+          %row.2 : py.Value = base.refGet[py.Value](%row.cell.1)
+          %row.3 : py.Value = py.requireDefined(%row.2, "UnboundLocalError", "cannot access local variable 'row' where it is not associated with a value") ^propagate.1()
+          %acc.1 : py.Value = py.mkList
+          %c.4 : py.Value = py.undef("c")
+          %c.cell.2 : base.Ref(py.Value) = base.refNew[py.Value](%c.4)
+          %row.4 : py.Value = py.undef("row")
+          %row.cell.2 : base.Ref(py.Value) = base.refNew[py.Value](%row.4)
+          %each.1 : base.Unit = py.forEach(%row.3) ^propagate.1() {
+            each.1(%item.1 : py.Value):
+              %set.2 : base.Unit = base.refSet[py.Value](%c.cell.2, %item.1)
+              %c.5 : py.Value = base.refGet[py.Value](%c.cell.2)
+              %c.6 : py.Value = py.requireDefined(%c.5, "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.2()
+              %set.3 : base.Unit = base.refSet[py.Value](%row.cell.2, %c.6)
+              %append.0 : base.Unit = py.listAppend(%acc.1, %c.6)
+              %unit.0 : base.Unit = base.unit
+              %ok.0 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
+              ret(%ok.0)
+            propagate.2(%exc.0 : py.Value):
+              %exc.1 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.0)
+              ret(%exc.1)
+          }
+          %append.1 : base.Unit = py.listAppend(%acc.0, %acc.1)
+          %unit.1 : base.Unit = base.unit
+          %ok.1 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.1)
+          ret(%ok.1)
+        propagate.1(%exc.2 : py.Value):
+          %exc.3 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.2)
+          ret(%exc.3)
+      }
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%acc.0)
+      ret(%ret.0)
+    propagate.0(%exc.4 : py.Value):
+      %exc.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
+      ret(%exc.5)
+  }
+}
+

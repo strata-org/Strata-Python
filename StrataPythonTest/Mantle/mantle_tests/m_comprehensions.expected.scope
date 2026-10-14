@@ -1,0 +1,72 @@
+module
+  f: local (assigned)
+  outer: local (assigned)
+  shadowed: local (assigned)
+  function f
+    params: pairs, ys
+    pairs: local (parameter, referenced)
+    ys: local (parameter, referenced)
+    a: local (assigned, referenced)
+    b: local (assigned, referenced)
+    c: local (assigned, referenced)
+    d: local (assigned, referenced)
+    e: local (assigned, referenced)
+    x: local (assigned, referenced, comp_iter)
+    y: cell (assigned, referenced, comp_iter, comp_cell)
+    _: local (assigned, comp_iter)
+    k: local (assigned, referenced, comp_iter)
+    v: local (assigned, referenced, comp_iter)
+    inlined comprehension f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+      y: local (assigned, referenced, comp_iter)
+    inlined comprehension f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+      _: local (assigned, comp_iter)
+      y: local (assigned, referenced, comp_iter)
+      ys: free (referenced)
+    inlined comprehension f.<locals>.<dictcomp>
+      params: .0
+      .0: local (parameter)
+      k: local (assigned, referenced, comp_iter)
+      v: local (assigned, referenced, comp_iter)
+    inlined comprehension f.<locals>.<setcomp>
+      params: .0
+      .0: local (parameter)
+      y: local (assigned, referenced, comp_iter)
+    inlined comprehension f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      y: cell (assigned, comp_iter)
+      lambda f.<locals>.<lambda>
+        y: free (referenced)
+  function outer
+    params: n
+    n: cell (parameter)
+    C: local (assigned, referenced)
+    class outer.<locals>.C
+      xs: local (assigned)
+      range: global implicit (referenced)
+      i: local (assigned, referenced, comp_iter)
+      n: free (referenced, free_class)
+      inlined comprehension outer.<locals>.C.<listcomp>
+        params: .0
+        .0: local (parameter)
+        i: local (assigned, referenced, comp_iter)
+        n: free (referenced)
+  function shadowed
+    n: cell (assigned)
+    D: local (assigned, referenced)
+    class shadowed.<locals>.D
+      n: local (assigned, free_class)
+      xs: local (assigned)
+      range: global implicit (referenced)
+      _: local (assigned, comp_iter)
+      inlined comprehension shadowed.<locals>.D.<listcomp>
+        params: .0
+        .0: local (parameter)
+        _: local (assigned, comp_iter)
+        n: free (referenced)
