@@ -75,6 +75,8 @@ c5_body_finally_vs_loop_exit | no |
 c6_body_raise | no |
 c7_with_return | no |
 m_assert | yes |
+m_annotations | yes | generator function
+m_future_annotations | yes | from __future__ import annotations
 m_attr_mangle | yes |
 m_builtins | yes |
 m_calls | yes |

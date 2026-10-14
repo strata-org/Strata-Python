@@ -4,66 +4,84 @@ module t14_bool_short {
       %str.0 : py.Value = py.strLit("t14_bool_short")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %__annotations__.cell.0 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "__annotations__")
+      %__annotations__.0 : py.Value = base.refGet[py.Value](%__annotations__.cell.0)
+      %found.0 : base.Bool = py.isDefined(%__annotations__.0)
+      branch(%found.0) ^annotated.0() ^annotations.0()
+    annotations.0():
+      %dict.0 : py.Value = py.mkDict ^propagate.0()
+      %__annotations__.cell.1 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "__annotations__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__annotations__.cell.1, %dict.0)
+      jump ^annotated.0()
+    annotated.0():
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "__doc__")
-      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %set.2 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %bool.0 : py.Value = py.boolLit(true)
       %a.cell.0 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "a")
-      %set.2 : base.Unit = base.refSet[py.Value](%a.cell.0, %bool.0)
-      %bool.1 : py.Value = py.boolLit(false)
+      %set.3 : base.Unit = base.refSet[py.Value](%a.cell.0, %bool.0)
+      %bool.1 : py.Value = py.loadGlobal("t14_bool_short", "bool") ^propagate.0()
+      %__annotations__.1 : py.Value = py.loadGlobal("t14_bool_short", "__annotations__") ^propagate.0()
+      %str.1 : py.Value = py.strLit("a")
+      %store.0 : base.Unit = py.setItem(%__annotations__.1, %str.1, %bool.1) ^propagate.0()
+      %bool.2 : py.Value = py.boolLit(false)
       %b.cell.0 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "b")
-      %set.3 : base.Unit = base.refSet[py.Value](%b.cell.0, %bool.1)
+      %set.4 : base.Unit = base.refSet[py.Value](%b.cell.0, %bool.2)
+      %bool.3 : py.Value = py.loadGlobal("t14_bool_short", "bool") ^propagate.0()
+      %__annotations__.2 : py.Value = py.loadGlobal("t14_bool_short", "__annotations__") ^propagate.0()
+      %str.2 : py.Value = py.strLit("b")
+      %store.1 : base.Unit = py.setItem(%__annotations__.2, %str.2, %bool.3) ^propagate.0()
       %a.0 : py.Value = py.loadGlobal("t14_bool_short", "a") ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%a.0) ^propagate.0()
       branch(%cond.0) ^and.0() ^join.0(%a.0)
     and.0():
       %b.0 : py.Value = py.loadGlobal("t14_bool_short", "b") ^propagate.0()
       jump ^join.0(%b.0)
-    join.0(%bool.2 : py.Value):
+    join.0(%bool.4 : py.Value):
       %r1.cell.0 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "r1")
-      %set.4 : base.Unit = base.refSet[py.Value](%r1.cell.0, %bool.2)
+      %set.5 : base.Unit = base.refSet[py.Value](%r1.cell.0, %bool.4)
       %a.1 : py.Value = py.loadGlobal("t14_bool_short", "a") ^propagate.0()
       %cond.1 : base.Bool = py.truthy(%a.1) ^propagate.0()
       branch(%cond.1) ^join.1(%a.1) ^or.0()
     or.0():
       %b.1 : py.Value = py.loadGlobal("t14_bool_short", "b") ^propagate.0()
       jump ^join.1(%b.1)
-    join.1(%bool.3 : py.Value):
+    join.1(%bool.5 : py.Value):
       %r2.cell.0 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "r2")
-      %set.5 : base.Unit = base.refSet[py.Value](%r2.cell.0, %bool.3)
+      %set.6 : base.Unit = base.refSet[py.Value](%r2.cell.0, %bool.5)
       %a.2 : py.Value = py.loadGlobal("t14_bool_short", "a") ^propagate.0()
       %cond.2 : base.Bool = py.truthy(%a.2) ^propagate.0()
       branch(%cond.2) ^and.1() ^join.3(%a.2)
     and.1():
       %b.2 : py.Value = py.loadGlobal("t14_bool_short", "b") ^propagate.0()
       jump ^join.3(%b.2)
-    join.3(%bool.4 : py.Value):
-      %cond.3 : base.Bool = py.truthy(%bool.4) ^propagate.0()
-      branch(%cond.3) ^join.2(%bool.4) ^or.1()
+    join.3(%bool.6 : py.Value):
+      %cond.3 : base.Bool = py.truthy(%bool.6) ^propagate.0()
+      branch(%cond.3) ^join.2(%bool.6) ^or.1()
     or.1():
       %a.3 : py.Value = py.loadGlobal("t14_bool_short", "a") ^propagate.0()
       jump ^join.2(%a.3)
-    join.2(%bool.5 : py.Value):
+    join.2(%bool.7 : py.Value):
       %r3.cell.0 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "r3")
-      %set.6 : base.Unit = base.refSet[py.Value](%r3.cell.0, %bool.5)
+      %set.7 : base.Unit = base.refSet[py.Value](%r3.cell.0, %bool.7)
       %int.0 : py.Value = py.intLit(0)
       %cond.4 : base.Bool = py.truthy(%int.0) ^propagate.0()
       branch(%cond.4) ^join.4(%int.0) ^or.2()
     or.2():
       %int.1 : py.Value = py.intLit(42)
       jump ^join.4(%int.1)
-    join.4(%bool.6 : py.Value):
+    join.4(%bool.8 : py.Value):
       %x.cell.0 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "x")
-      %set.7 : base.Unit = base.refSet[py.Value](%x.cell.0, %bool.6)
-      %str.1 : py.Value = py.strLit("hello")
-      %cond.5 : base.Bool = py.truthy(%str.1) ^propagate.0()
-      branch(%cond.5) ^and.2() ^join.5(%str.1)
+      %set.8 : base.Unit = base.refSet[py.Value](%x.cell.0, %bool.8)
+      %str.3 : py.Value = py.strLit("hello")
+      %cond.5 : base.Bool = py.truthy(%str.3) ^propagate.0()
+      branch(%cond.5) ^and.2() ^join.5(%str.3)
     and.2():
-      %str.2 : py.Value = py.strLit("world")
-      jump ^join.5(%str.2)
-    join.5(%bool.7 : py.Value):
+      %str.4 : py.Value = py.strLit("world")
+      jump ^join.5(%str.4)
+    join.5(%bool.9 : py.Value):
       %y.cell.0 : base.Ref(py.Value) = py.globalCell("t14_bool_short", "y")
-      %set.8 : base.Unit = base.refSet[py.Value](%y.cell.0, %bool.7)
+      %set.9 : base.Unit = base.refSet[py.Value](%y.cell.0, %bool.9)
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)

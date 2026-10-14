@@ -1,11 +1,16 @@
 module top
   a: local (assigned)
   b: local (assigned)
+  bool: global implicit (referenced)
+  bytes: global implicit (referenced)
   data: local (assigned, annotated)
   flag: local (assigned, annotated)
+  float: global implicit (referenced)
+  int: global implicit (referenced)
   name: local (assigned, annotated)
   nothing: local (assigned)
   pi: local (assigned, annotated)
+  str: global implicit (referenced)
   x: local (assigned)
   y: local (assigned, annotated)
 qualnames: 

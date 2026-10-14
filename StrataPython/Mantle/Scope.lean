@@ -46,8 +46,9 @@ The classification follows CPython 3.12's `Python/symtable.c`:
 At module level a bound name is `local`: the module's locals are its globals.  A class
 body's bindings are invisible to the scopes nested in it, which resolve as if the class
 were not there.  Inside a class, private names (`__x`) are mangled (`_C__x`) as CPython
-mangles them; `mangle` applies the rule.  Annotations are not evaluated, as under Python
-3.14's deferred annotations, so the names they mention are not uses.
+mangles them; `mangle` applies the rule.  An annotated assignment's annotation is a use, as
+in 3.12's symbol table, except under `from __future__ import annotations`; parameter and
+return annotations are not analysed yet.
 
 ## Comprehensions
 
@@ -419,6 +420,9 @@ private structure CollectState where
   privateName : Option String := none
   imports : Array Import := #[]
   diagnostics : Array Diagnostic := #[]
+  /-- The module has `from __future__ import annotations`: annotations are not analysed, as
+  CPython 3.12's symbol table puts them in a block of their own. -/
+  futureAnnotations : Bool := false
 
 private abbrev CollectM := StateM CollectState
 
@@ -776,7 +780,7 @@ private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
     unsupported "'type' statements are not supported" sr
     visitExpr n
   | .AugAssign _ t _ v => visitExpr t; visitExpr v
-  | .AnnAssign sr target _ value simple =>
+  | .AnnAssign sr target ann value simple =>
     match target with
     | .Name nsr ⟨_, name⟩ _ =>
       let m ← mangled name
@@ -788,6 +792,9 @@ private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
       if simple then addDef name { annotated := true, assigned := true } nsr
       else if value.val.isSome then addDef name { assigned := true } nsr
     | _ => visitExpr target
+    -- `symtable` visits the annotation, then the value; CPython 3.12 evaluates it in a module
+    -- or class body.
+    unless (← get).futureAnnotations do visitExpr ann
     value.val.forM visitExpr
   | .For _ t it body orelse _ | .AsyncFor _ t it body orelse _ =>
     visitExpr t
@@ -1040,11 +1047,19 @@ private def qualnames (scopes : Array Pending) (classes : Array (Std.HashMap Str
 
 public section
 
+/-- Whether the module has `from __future__ import annotations`. -/
+def hasFutureAnnotations (stmts : Array (stmt SourceRange)) : Bool :=
+  stmts.any fun
+    | .ImportFrom _ m aliases _ =>
+      (m.val.map (·.val)) == some "__future__" && aliases.val.any (·.name == "annotations")
+    | _ => false
+
 /-- Classify every name of the module `stmts` and resolve its imports. -/
 def analyze (stmts : Array (stmt SourceRange)) : Table := Id.run do
   let root : Pending :=
     { kind := .module, name := "<module>", parent := none, range := .none, privateName := none }
-  let ((), st) := (visitStmts stmts).run { scopes := #[root] }
+  let ((), st) := (visitStmts stmts).run
+    { scopes := #[root], futureAnnotations := hasFutureAnnotations stmts }
   let n := st.scopes.size
   let init : Analysis :=
     { pending := st.scopes, scopes := Array.replicate n {}

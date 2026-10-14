@@ -1,7 +1,7 @@
 # Classes: a docstring, the class body's own names, then globals and builtins, `del`, `+=` and
 # `import` in a class body, `global` and `nonlocal` (with `del`) in a class body, starred
-# bases and `**` keywords, a class decorator, and private parameters, whose keywords are
-# mangled too.
+# bases and `**` keywords, a class decorator, private parameters, whose keywords are mangled
+# too, and a class body reading the `__annotations__` it sets up.
 g = 1
 
 
@@ -44,3 +44,8 @@ class Priv:
         return inner(_Priv__z=1)
 
     f = lambda self, *, __y=2: __y
+
+
+class Config:
+    host: str = "localhost"
+    fields = list(__annotations__)

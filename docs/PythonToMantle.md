@@ -388,6 +388,8 @@ or `None` if it has none. A read or `del` of another module attribute that CPyth
 (`__annotations__`, `__builtins__`, `__cached__`, `__file__`, `__loader__`, `__package__`,
 `__path__`, `__spec__`) is rejected, because the translation has no value for it: `loadGlobal`
 would find the `builtins` module's value or raise `NameError`. So is a write to `__builtins__`.
+The exception is `__annotations__` in a module or class body that sets it up (§6.1), and in
+the functions of such a module.
 
 ### 5.3 `def` and `lambda`
 
@@ -406,7 +408,8 @@ At the definition site, in source order:
     %22 : base.Unit = base.refSet[py.Value](%4, %21)  -- inner = …
 ```
 
-Annotations are not evaluated, as under Python 3.14's deferred annotations.
+Parameter and return annotations are not evaluated yet; CPython 3.12 evaluates them here, in
+the enclosing scope (§9, Q11).
 
 **Python semantics to preserve:** defaults are evaluated once, at definition time, in the
 enclosing scope. Free variables are bound late: a read sees the latest write to the cell.
@@ -478,7 +481,7 @@ jump to the function's exit.
 | target `a, b` / `[a, b]` | `t = py.unpackSeq v 2`, then `py.tupleGet t i` for each target, recursively. Each target is evaluated when it is assigned | an exact length check, `ValueError: not enough / too many values to unpack` |
 | target `a, *b` | `py.unpackEx v before after`, then as above. The starred target receives a list | the compiler rejects a starred target outside a tuple or list, and two in one (§5.1) |
 | `x op= e` | read `x` once (evaluating `o` and `k` once for `o.a` and `o[k]`), apply the in-place operation (`py.iAdd` … `py.iBitXor`), write back | in place: `xs += ys` mutates `xs` |
-| `x: T = e` | as `x = e`. The annotation is not evaluated | `x: T` with no value only makes `x` local. `o.a: T` and `o[k]: T` evaluate `o` and `k`, as CPython does |
+| `x: T = e` | as `x = e`. In a module or class body, `T` is then evaluated and, for a simple name, stored as `__annotations__["x"]`, as CPython 3.12 does. The body starts with `SETUP_ANNOTATIONS` (`__annotations__ = {}` if absent) when it holds an annotated assignment anywhere outside a nested `def` or `class`. In a function, `T` is not evaluated | `x: T` with no value assigns nothing: in a function it only makes `x` local; in a module or class body it still stores `T`. `o.a: T` and `o[k]: T` evaluate `o` and `k`, then `T`, as CPython does. `@dataclass`, `NamedTuple` and `TypedDict` read `__annotations__`. `from __future__ import annotations` is rejected (§9, Q11) |
 | `del x` | `requireDefined` (raises `NameError` or `UnboundLocalError`), then `refSet` of `undef "x"` | a global is not looked up in `builtins` |
 | `del o.a`, `del o[k]`, `del o[i:j:s]` | evaluate `o` and `k`, then `py.delAttr o "a"` or `py.delItem o k`, with `py.mkSlice` for a slice | |
 | `del a, (b, c)` | delete each target left to right, element by element | no unpacking |
@@ -682,8 +685,9 @@ body closure with the namespace `__prepare__` returns as the only positional arg
   that a method reads from an enclosing function is `free_class` (`Uses.freeClass`): the body
   captures that function's cell only to pass it on.
 - The body returns `None`.
-- Before the first statement, the body stores `__module__` (a read of `__name__`),
-  `__qualname__`, and `__doc__` if it starts with a docstring, as CPython 3.12 does (§9, Q9).
+- Before the first statement, the body stores `__module__` (a read of `__name__`) and
+  `__qualname__`, sets up `__annotations__` if it holds an annotated assignment (§6.1), and
+  stores `__doc__` if it starts with a docstring, as CPython 3.12 does (§9, Q9).
 - The namespace is any mapping `__prepare__` returns, as `enum`'s is, so the body uses the
   mapping protocol, as CPython does (§9, Q10). A read is `getOptionalItem`, which calls
   `__getitem__` and treats a `KeyError` as absent. A write is `py.setItem`. `del x` is
@@ -943,10 +947,26 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
    alike as `globalImplicit`, and the split is made at run time by `py.loadGlobal`, which
    reads the global cell, then `builtins`, as CPython's `LOAD_GLOBAL` does (§5.1).
 9. **Implicit class-body stores.** *Resolved.* The body first stores `__module__` (the
-   module's `__name__`) and `__qualname__` into the namespace, and `__doc__` if it starts
-   with a docstring, as CPython's class body does (§6.7).
+   module's `__name__`) and `__qualname__` into the namespace, then `__annotations__ = {}` if
+   it holds an annotated assignment, then `__doc__` if it starts with a docstring, as
+   CPython's class body does (§6.7).
 10. **Namespace reads.** *Resolved.* Class-body reads use `getOptionalItem`, which calls the
     namespace's `__getitem__` (§6.7).
+11. **Annotations and Python 3.14.** Annotations follow 3.12: they are evaluated eagerly, in
+    module and class bodies, into `__annotations__` (§6.1). Python 3.14 (PEP 649) instead
+    compiles each module, class and function's annotations into a lazy `__annotate__`
+    function, run when `__annotations__` is first read. Moving to 3.14 changes:
+    - the translator: `setupAnnotations`, `findAnn` and the store of each annotated
+      assignment give way to one `__annotate__` closure per module and class;
+    - conditional annotations: 3.14 records which annotated assignments ran
+      (`__conditional_annotations__`), so `if c: x: int` adds `x` only if the branch ran;
+    - the scope pass and `scope_symtable.py` (which refuses 3.14 today): 3.14's annotation
+      scopes, which can see the class's names;
+    - the runtime model: 3.14's `type.__annotations__`, which calls `__annotate__`.
+
+    `from __future__ import annotations` makes 3.12 store each annotation's source text,
+    unevaluated. It is rejected for now: the translator would need that text. Parameter and
+    return annotations, which 3.12 evaluates at the `def`, are not evaluated yet (§5.3).
 
 ## 10. Acceptance tests
 

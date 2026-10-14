@@ -141,6 +141,10 @@ structure Ctx where
   cur : Scope
   /-- In a class body, its namespace (§6.7). -/
   classNs : Option ValId := none
+  /-- The module body sets up `__annotations__` (§6.1), so the name has a value. -/
+  moduleAnnotations : Bool := false
+  /-- The class body whose namespace is `classNs` sets up `__annotations__` too. -/
+  classAnnotations : Bool := false
 
 /-- What translation accumulates.  The first three fields are module-wide; `exits` and
 `targeted` belong to the function being emitted. -/
@@ -290,6 +294,13 @@ def moduleDunders : List String :=
   ["__annotations__", "__builtins__", "__cached__", "__file__", "__loader__", "__package__",
    "__path__", "__spec__"]
 
+/-- Whether `x` is a module attribute the translation has no value for: one of
+`moduleDunders`, except `__annotations__` in a module or class body that sets it up. -/
+def unmodelled (x : String) : TransM Bool := do
+  let ctx ← read
+  let annotated := ctx.moduleAnnotations || (ctx.classNs.isSome && ctx.classAnnotations)
+  return moduleDunders.contains x && !(x == "__annotations__" && annotated)
+
 /-- Read the free variable `name`'s captured cell `c`, raising `NameError` if it is
 unassigned. -/
 def readFree (c : ValId) (name : String) : TransM ValId := do
@@ -324,7 +335,7 @@ def readName (name : String) (range : SourceRange) : TransM ValId := do
 where
   /-- The global `x`, with the module attributes the translation has no value for rejected. -/
   globalRead (x : String) : TransM ValId := do
-    if moduleDunders.contains x then unsupportedValue s!"module attribute {x}" range
+    if ← unmodelled x then unsupportedValue s!"module attribute {x}" range
     else build (loadGlobal (← read).module x)
 
 /-- Write `v` to the name `name` at `range`. -/
@@ -353,7 +364,7 @@ def deleteName (name : String) (range : SourceRange) : TransM Unit := do
     discard <| readLocal c name
     discard <| build (writeCell c (← undef))
   | .global =>
-    if moduleDunders.contains name then reject s!"module attribute {name}" range
+    if ← unmodelled name then reject s!"module attribute {name}" range
     else
       let m := (← read).module
       discard <| build (requireGlobal m name)
@@ -373,6 +384,40 @@ def deleteName (name : String) (range : SourceRange) : TransM Unit := do
     build unreachable
     build (startBlock done)
   | .unresolved => reject "unresolved local" range
+
+/-- `SETUP_ANNOTATIONS`: `__annotations__ = {}`, unless the class namespace or the module's
+globals already have one.  Like CPython, it ignores how the scope binds the name. -/
+def setupAnnotations : TransM Unit := do
+  let ns? := (← read).classNs
+  let v ← match ns? with
+    | some ns => do
+      let key ← build (strLit "__annotations__")
+      let n ← build (emitConst (.str .base "n") (.str "__annotations__"))
+      let miss ← build (emitTotal (stem "__annotations__") Py.undef #v[] #[n])
+      build (emitFailing (stem "__annotations__") Py.getOptionalItem #v[] #[ns, key, miss])
+    | none => do
+      let cell ← build (globalCell (← read).module "__annotations__")
+      build (readCell cell (stem "__annotations__"))
+  let found ← build (freshLabel "annotated")
+  let make ← build (freshLabel "annotations")
+  branch (← build (emitTest (.str .base "found") Py.isDefined #v[] #[v])) found make
+  build (startBlock make)
+  let d ← build (emitFailing (.str .base "dict") Py.mkDict #v[] #[])
+  match ns? with
+  | some ns =>
+    let key ← build (strLit "__annotations__")
+    discard <| build (emitActing (.str .base "store") Py.setItem #v[] #[ns, key, d])
+  | none => discard <| build (writeGlobal (← read).module "__annotations__" d)
+  jump found
+  build (startBlock found)
+
+/-- `LOAD_NAME __annotations__`: the class namespace's, else the module's.  Like CPython, it
+ignores how the scope binds the name. -/
+def annotationsDict : TransM ValId := do
+  let load := do build (loadGlobal (← read).module "__annotations__")
+  match (← read).classNs with
+  | some ns => readNs ns "__annotations__" load
+  | none => load
 
 /-! ## Operators -/
 
@@ -505,7 +550,7 @@ partial def stmtYield? : stmt SourceRange → Option SourceRange
   | .Delete _ ts => ts.val.findSome? exprYield?
   | .Assign _ ts v _ => (ts.val.push v).findSome? exprYield?
   | .AugAssign _ t _ v => #[t, v].findSome? exprYield?
-  | .AnnAssign _ t _ v _ => (#[t] ++ v.val.toArray).findSome? exprYield?
+  | .AnnAssign _ t a v _ => (#[t, a] ++ v.val.toArray).findSome? exprYield?
   | .For _ t it b o _ | .AsyncFor _ t it b o _ =>
     (#[t, it].findSome? exprYield?).orElse fun _ => bodiesYield? #[b.val, o.val]
   | .While _ c b o | .If _ c b o =>
@@ -531,6 +576,20 @@ partial def bodiesYield? (bodies : Array (Array (stmt SourceRange))) : Option So
   bodies.findSome? fun b => b.findSome? stmtYield?
 
 end
+
+/-- Whether the statements hold an annotated assignment outside a nested function or class:
+CPython's `find_ann`, which decides `SETUP_ANNOTATIONS`. -/
+partial def findAnn (ss : Array (stmt SourceRange)) : Bool :=
+  ss.any fun
+    | .AnnAssign .. => true
+    | .For _ _ _ b o _ | .AsyncFor _ _ _ b o _ | .While _ _ b o | .If _ _ b o =>
+      findAnn b.val || findAnn o.val
+    | .With _ _ b _ | .AsyncWith _ _ b _ => findAnn b.val
+    | .Try _ b hs o f | .TryStar _ b hs o f =>
+      findAnn b.val || hs.val.any (fun (.ExceptHandler _ _ _ hb) => findAnn hb.val) ||
+        findAnn o.val || findAnn f.val
+    | .Match _ _ cases => cases.val.any fun (.mk_match_case _ _ _ b) => findAnn b.val
+    | _ => false
 
 /-! ## Functions
 
@@ -1236,13 +1295,22 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
     | .ok assigns =>
       let x ← transExpr v
       for assign in assigns do assign x
-  | .AnnAssign sr target _ ⟨_, value⟩ _ =>
+  | .AnnAssign sr target ann ⟨_, value⟩ simple =>
     let some eval := target? target | badTarget target
     match value with
     | none => discard eval
     | some v =>
       let x ← transExpr v
       writeLhs (← eval) x sr
+    -- In a module or class body the annotation is evaluated, as in CPython 3.12, and a simple
+    -- name's is stored in `__annotations__` (§6.1; §9 Q11 for Python 3.14).
+    if (← curScope).kind matches .module | .classBody then
+      let t ← transExpr ann
+      if let .Name _ ⟨_, n⟩ _ := target then
+        if simple.value != 0 then
+          let d ← annotationsDict
+          let key ← build (strLit (← mangled n))
+          discard <| build (emitActing (.str .base "store") Py.setItem #v[] #[d, key, t])
   | .AugAssign sr target op v =>
     let some eval := target? target | badTarget target
     let l ← eval
@@ -1265,6 +1333,9 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
   | .ImportFrom sr ⟨_, m⟩ ⟨_, aliases⟩ ⟨_, level⟩ =>
     if m.isNone || (level.map (·.value)).getD 0 != 0 then reject "relative import" sr
     else if aliases.any (·.name == "*") then reject "import *" sr
+    -- Its string annotations would need the annotation's source text (§9, Q11).
+    else if (m.map (·.val)) == some "__future__" && aliases.any (·.name == "annotations") then
+      reject "from __future__ import annotations" sr
     else aliases.forM importAlias
   | .FunctionDef sr ⟨_, n⟩ args body decs _ _ tps =>
     defStmt sr n args body.val decs.val (!tps.val.isEmpty) false
@@ -1412,9 +1483,11 @@ def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) : Func Py.env SourceRang
         match job.args with
         | none =>
           let ns ← build (emitFailing (.str .base "ns") Py.getItem #v[] #[args, ← build (intLit 0)])
-          withReader ({ · with classNs := some ns }) do
+          let annotated := findAnn job.body
+          withReader ({ · with classNs := some ns, classAnnotations := annotated }) do
             writeName "__module__" (← readName "__name__" job.range) job.range
             writeName "__qualname__" (← build (strLit sc.qualname)) job.range
+            if annotated then setupAnnotations
             match (job.body[0]? : Option (stmt SourceRange)) with
             | some (.Expr r (.Constant _ (.ConString _ ⟨_, doc⟩) _)) =>
               withRange r do writeName "__doc__" (← build (strLit doc)) r
@@ -1444,12 +1517,14 @@ def translate (moduleName : String) (stmts : Array (stmt SourceRange)) : Result 
     | return { module := { name := mname, funcs := #[], info := range }
                diagnostics := #[{ kind := .internal, message := "no module scope", range }] }
   let ctx : Ctx :=
-    { table, module := moduleName, moduleName := mname, scope := 0, cur }
+    { table, module := moduleName, moduleName := mname, scope := 0, cur,
+      moduleAnnotations := findAnn stmts }
   let bodyName := mname.str "<module>"
   let st : TState := { funcNames := ({} : Std.HashSet Name).insert bodyName }
   let (body, st) := builtFunc range <| buildFuncTypedWith bodyName #[] range fun _ =>
     runBody ctx st range do
       writeName "__name__" (← build (strLit moduleName)) .none
+      if findAnn stmts then setupAnnotations
       match docstring? stmts, stmts[0]? with
       | some s, some d =>
         -- As CPython's `STORE_NAME __doc__`, on the docstring's line, instead of the statement.

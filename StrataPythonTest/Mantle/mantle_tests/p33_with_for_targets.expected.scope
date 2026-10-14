@@ -13,5 +13,6 @@ module
     c: local (assigned, referenced)
     n: local (assigned, referenced)
     m: local (assigned, referenced, annotated)
+    int: global implicit (referenced)
     declared: local (assigned, annotated)
     obj: global implicit (referenced)

@@ -21,6 +21,8 @@ module top
       mcs: local (parameter)
       name: local (parameter)
   class C
+    a: local (assigned, annotated)
+    int: global implicit (referenced)
     x: global implicit (referenced)
     y: local (assigned, referenced)
     z: local (assigned)

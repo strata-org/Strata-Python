@@ -2,6 +2,7 @@ module top
   MAX_RETRIES: local (assigned)
   __name__: global implicit (referenced)
   boolop_assignment: local (assigned)
+  float: global implicit (referenced)
   ifexp_assignment: local (assigned)
   local_shadows_module_var: local (assigned)
   logger: local (assigned)

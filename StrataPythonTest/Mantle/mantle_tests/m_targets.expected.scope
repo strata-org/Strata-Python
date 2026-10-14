@@ -8,6 +8,7 @@ module
   x: local (assigned)
   i: global implicit (referenced)
   j: global implicit (referenced)
+  int: global implicit (referenced)
   f: local (assigned)
   function f
     params: p

@@ -31,6 +31,7 @@ module
     items: local (parameter, referenced)
     manager: local (parameter, referenced)
     count: local (assigned, referenced, annotated)
+    int: global implicit (referenced)
     item: local (assigned, referenced)
     key: local (assigned, referenced)
     value: local (assigned, referenced)

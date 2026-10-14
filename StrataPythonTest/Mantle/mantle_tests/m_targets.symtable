@@ -4,6 +4,7 @@ module top
   c: global implicit (referenced)
   f: local (assigned)
   i: global implicit (referenced)
+  int: global implicit (referenced)
   j: global implicit (referenced)
   k: global implicit (referenced)
   o: global implicit (referenced)

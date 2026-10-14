@@ -1,0 +1,61 @@
+module
+  import dataclass: member dataclass of dataclasses
+  dataclass: local (imported, referenced)
+  n: local (assigned, annotated)
+  int: global implicit (referenced)
+  m: local (assigned)
+  P: local (assigned)
+  R: local (assigned)
+  S: local (assigned)
+  f: local (assigned)
+  g: local (assigned)
+  gen: local (assigned)
+  ann: local (assigned)
+  __annotations__: global implicit (referenced)
+  anns: local (assigned)
+  class P
+    x: local (assigned, annotated)
+    int: global implicit (referenced)
+    y: local (assigned, annotated)
+    _P__z: local (assigned, annotated)
+    str: global implicit (referenced)
+    n: global implicit (referenced)
+    w: local (assigned, annotated)
+    float: global implicit (referenced)
+  class R
+    i: local (assigned, referenced)
+    range: global implicit (referenced)
+    a: local (assigned, annotated)
+    int: global implicit (referenced)
+  class S
+    m: local (assigned)
+    function S.m
+      params: self
+      self: local (parameter)
+      b: local (assigned, referenced, annotated)
+      int: global implicit (referenced)
+  function f
+    params: o
+    o: cell (parameter, referenced)
+    k: local (assigned, referenced, annotated)
+    int: global implicit (referenced)
+    Q: local (assigned, referenced)
+    h: local (assigned, referenced)
+    class f.<locals>.Q
+      v: local (assigned, annotated)
+      o: free (referenced)
+    function f.<locals>.h
+      j: local (assigned, referenced, annotated)
+      o: free (referenced)
+  function g
+    __annotations__: cell (assigned)
+    C: local (assigned, referenced)
+    class g.<locals>.C
+      x: local (assigned, annotated)
+      int: global implicit (referenced)
+      y: local (assigned)
+      __annotations__: free (referenced)
+  function gen
+    x: local (assigned, annotated)
+  function anns
+    __annotations__: global implicit (referenced)

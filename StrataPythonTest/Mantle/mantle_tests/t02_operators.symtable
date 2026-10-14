@@ -11,6 +11,7 @@ module top
   ge: local (assigned)
   gt: local (assigned)
   in_list: local (assigned)
+  int: global implicit (referenced)
   is_none: local (assigned)
   is_not_none: local (assigned)
   le: local (assigned)

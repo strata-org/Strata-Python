@@ -1,0 +1,59 @@
+module top
+  P: local (assigned)
+  R: local (assigned)
+  S: local (assigned)
+  __annotations__: global implicit (referenced)
+  ann: local (assigned)
+  anns: local (assigned)
+  dataclass: local (imported, referenced)
+  f: local (assigned)
+  g: local (assigned)
+  gen: local (assigned)
+  int: global implicit (referenced)
+  m: local (assigned)
+  n: local (assigned, annotated)
+  class P
+    _P__z: local (assigned, annotated)
+    float: global implicit (referenced)
+    int: global implicit (referenced)
+    n: global implicit (referenced)
+    str: global implicit (referenced)
+    w: local (assigned, annotated)
+    x: local (assigned, annotated)
+    y: local (assigned, annotated)
+  class R
+    a: local (assigned, annotated)
+    i: local (assigned, referenced)
+    int: global implicit (referenced)
+    range: global implicit (referenced)
+  class S
+    m: local (assigned)
+    function m
+      b: local (assigned, referenced, annotated)
+      int: global implicit (referenced)
+      self: local (parameter)
+  function f
+    Q: local (assigned, referenced)
+    h: local (assigned, referenced)
+    int: global implicit (referenced)
+    k: local (assigned, referenced, annotated)
+    o: cell (parameter, referenced)
+    class Q
+      o: free (referenced)
+      v: local (assigned, annotated)
+    function h
+      j: local (assigned, referenced, annotated)
+      o: free (referenced)
+  function g
+    C: local (assigned, referenced)
+    __annotations__: cell (assigned)
+    class C
+      __annotations__: free (referenced)
+      int: global implicit (referenced)
+      x: local (assigned, annotated)
+      y: local (assigned)
+  function gen
+    x: local (assigned, annotated)
+  function anns
+    __annotations__: global implicit (referenced)
+qualnames: P, R, S, S.m, anns, f, f.<locals>.Q, f.<locals>.h, g, g.<locals>.C, gen

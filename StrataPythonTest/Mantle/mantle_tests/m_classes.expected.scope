@@ -4,6 +4,7 @@ module
   A: local (assigned)
   outer: local (assigned)
   Priv: local (assigned)
+  Config: local (assigned)
   function deco
     params: cls
     cls: local (parameter, referenced)
@@ -51,3 +52,9 @@ module
       params: self, *, _Priv__y
       self: local (parameter)
       _Priv__y: local (parameter, referenced)
+  class Config
+    host: local (assigned, annotated)
+    str: global implicit (referenced)
+    fields: local (assigned)
+    list: global implicit (referenced)
+    __annotations__: global implicit (referenced)

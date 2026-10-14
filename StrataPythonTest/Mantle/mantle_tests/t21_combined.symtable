@@ -25,6 +25,7 @@ module top
     KeyError: global implicit (referenced)
     count: local (assigned, referenced, annotated)
     e: local (assigned)
+    int: global implicit (referenced)
     item: local (assigned, referenced)
     items: local (parameter, referenced)
     key: local (assigned, referenced)

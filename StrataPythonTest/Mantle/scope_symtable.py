@@ -15,9 +15,9 @@ Run it with CPython 3.12 or 3.13, which give the same output:
 dict comprehensions into the enclosing scope (PEP 709), as the scope pass does.  3.14 is
 not accepted: it gives every module, class and function an `__annotate__` scope.
 
-Annotations are replaced by `0` before the analysis.  The scope pass treats them as
-unevaluated, as Python 3.14's deferred annotations are, whereas 3.12 and 3.13 evaluate
-parameter and return annotations in the enclosing scope.  `ast.unparse` renumbers lines, so
+Parameter and return annotations are removed before the analysis: the scope pass does not
+model them yet, whereas 3.12 and 3.13 evaluate them in the enclosing scope.  The annotation
+of an annotated assignment is kept, as the scope pass visits it, as 3.12 does.  `ast.unparse` renumbers lines, so
 an error's line comes from the original program, which must raise the same error.
 
 A program that uses `type` statements or type parameters gets a file containing only
@@ -59,7 +59,7 @@ FLAG_MASK = (1 << symtable.SCOPE_OFF) - 1
 
 
 class StripAnnotations(ast.NodeTransformer):
-    """Replace every annotation by `0`, recording whether there was one."""
+    """Remove parameter and return annotations, recording whether there was one."""
 
     def __init__(self):
         self.changed = False
@@ -79,12 +79,6 @@ class StripAnnotations(ast.NodeTransformer):
 
     visit_FunctionDef = _visit_def
     visit_AsyncFunctionDef = _visit_def
-
-    def visit_AnnAssign(self, node):
-        node.annotation = ast.Constant(0)
-        self.changed = True
-        self.generic_visit(node)
-        return node
 
 
 def uses_type_params(tree):

@@ -1,5 +1,6 @@
 module
   x: local (assigned, referenced, annotated)
+  int: global implicit (referenced)
   y: local (assigned, referenced, annotated)
   a: local (assigned)
   b: local (assigned)

@@ -1,0 +1,6 @@
+module
+  import annotations: member annotations of __future__
+  annotations: local (imported)
+  Node: local (assigned)
+  class Node
+    next: local (assigned, annotated)

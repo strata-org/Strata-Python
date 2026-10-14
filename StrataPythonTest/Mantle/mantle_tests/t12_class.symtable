@@ -6,6 +6,7 @@ module top
     __init__: local (assigned)
     dimensions: local (assigned, annotated)
     distance: local (assigned)
+    int: global implicit (referenced)
     function __init__
       self: local (parameter, referenced)
       x: local (parameter, referenced)

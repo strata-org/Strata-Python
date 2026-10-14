@@ -1,5 +1,6 @@
 module
   items: local (assigned, referenced)
   total: local (assigned, annotated)
+  int: global implicit (referenced)
   x: local (assigned, referenced)
   even_sum: local (assigned, annotated)

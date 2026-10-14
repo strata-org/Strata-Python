@@ -1,4 +1,5 @@
 module top
+  bool: global implicit (referenced)
   cond: local (assigned, referenced, annotated)
   use_x: local (assigned)
   use_y: local (assigned)

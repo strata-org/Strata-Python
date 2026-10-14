@@ -2,6 +2,8 @@ module top
   age: local (assigned, referenced, annotated)
   detail: local (assigned)
   greeting: local (assigned)
+  int: global implicit (referenced)
   name: local (assigned, referenced, annotated)
   plain: local (assigned)
+  str: global implicit (referenced)
 qualnames: 

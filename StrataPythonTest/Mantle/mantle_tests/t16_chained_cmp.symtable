@@ -1,4 +1,5 @@
 module top
+  int: global implicit (referenced)
   r1: local (assigned)
   r2: local (assigned)
   r3: local (assigned)

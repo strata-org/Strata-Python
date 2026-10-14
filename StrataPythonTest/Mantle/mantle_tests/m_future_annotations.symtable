@@ -1,0 +1,6 @@
+module top
+  Node: local (assigned)
+  annotations: local (imported)
+  class Node
+    next: local (assigned, annotated)
+qualnames: Node

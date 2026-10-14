@@ -1,5 +1,7 @@
 module top
+  bool: global implicit (referenced)
   cond: local (assigned, referenced, annotated)
+  int: global implicit (referenced)
   x: local (assigned)
   y: local (assigned)
   z: local (assigned, annotated)

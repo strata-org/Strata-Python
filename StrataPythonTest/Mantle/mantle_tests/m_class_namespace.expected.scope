@@ -26,6 +26,8 @@ module
     y: local (assigned, referenced)
     x: global implicit (referenced)
     z: local (assigned)
+    a: local (assigned, annotated)
+    int: global implicit (referenced)
   function f
     v: cell (assigned)
     D: local (assigned, referenced)

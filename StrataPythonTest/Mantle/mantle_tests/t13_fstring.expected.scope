@@ -1,6 +1,8 @@
 module
   name: local (assigned, referenced, annotated)
+  str: global implicit (referenced)
   age: local (assigned, referenced, annotated)
+  int: global implicit (referenced)
   greeting: local (assigned)
   detail: local (assigned)
   plain: local (assigned)

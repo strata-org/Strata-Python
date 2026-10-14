@@ -5,6 +5,7 @@ module
   logger: local (assigned)
   __name__: global implicit (referenced)
   threshold: local (assigned, annotated)
+  float: global implicit (referenced)
   use_module_vars: local (assigned)
   param_shadows_module_var: local (assigned)
   local_shadows_module_var: local (assigned)

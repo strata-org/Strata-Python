@@ -8,6 +8,7 @@ module top
     declared: local (assigned, annotated)
     fh: local (assigned, referenced)
     g: local (assigned)
+    int: global implicit (referenced)
     m: local (assigned, referenced, annotated)
     n: local (assigned, referenced)
     obj: global implicit (referenced)

@@ -1,5 +1,6 @@
 module
   cond: local (assigned, referenced, annotated)
+  bool: global implicit (referenced)
   x: local (assigned, referenced)
   use_x: local (assigned)
   y: local (assigned, referenced)

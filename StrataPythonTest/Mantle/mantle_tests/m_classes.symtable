@@ -1,5 +1,6 @@
 module top
   A: local (assigned)
+  Config: local (assigned)
   Priv: local (assigned)
   deco: local (assigned, referenced)
   g: global explicit (assigned, declared_global)
@@ -43,4 +44,10 @@ module top
     function lambda
       _Priv__y: local (parameter, referenced)
       self: local (parameter)
-qualnames: A, A.m, Priv, Priv.<lambda>, Priv.m, Priv.outer, Priv.outer.<locals>.inner, deco, outer, outer.<locals>.B
+  class Config
+    __annotations__: global implicit (referenced)
+    fields: local (assigned)
+    host: local (assigned, annotated)
+    list: global implicit (referenced)
+    str: global implicit (referenced)
+qualnames: A, A.m, Config, Priv, Priv.<lambda>, Priv.m, Priv.outer, Priv.outer.<locals>.inner, deco, outer, outer.<locals>.B

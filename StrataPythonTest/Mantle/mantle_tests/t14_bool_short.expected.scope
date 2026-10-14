@@ -1,5 +1,6 @@
 module
   a: local (assigned, referenced, annotated)
+  bool: global implicit (referenced)
   b: local (assigned, referenced, annotated)
   r1: local (assigned)
   r2: local (assigned)

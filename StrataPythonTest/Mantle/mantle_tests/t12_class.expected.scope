@@ -4,6 +4,7 @@ module
   d: local (assigned)
   class Point
     dimensions: local (assigned, annotated)
+    int: global implicit (referenced)
     __init__: local (assigned)
     distance: local (assigned)
     function Point.__init__
