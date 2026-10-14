@@ -1,0 +1,25 @@
+module top
+  clause_raises: local (assigned)
+  else_raises: local (assigned)
+  leaves_early: local (assigned)
+  log: local (assigned)
+  note: local (assigned)
+  sys: local (imported)
+  function note
+    log: global implicit (referenced)
+    x: local (parameter, referenced)
+  function else_raises
+    KeyError: global implicit (referenced)
+    note: global implicit (referenced)
+    sys: global implicit (referenced)
+  function clause_raises
+    KeyError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    note: global implicit (referenced)
+    sys: global implicit (referenced)
+  function leaves_early
+    KeyError: global implicit (referenced)
+    note: global implicit (referenced)
+    x: local (assigned, referenced)
+    xs: local (parameter, referenced)
+qualnames: clause_raises, else_raises, leaves_early, note

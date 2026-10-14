@@ -1,0 +1,117 @@
+module t08_try_finally {
+  func @|t08_try_finally.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("t08_try_finally")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t08_try_finally", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("t08_try_finally", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure(@t08_try_finally.work)
+      %work.cell.0 : base.Ref(py.Value) = py.globalCell("t08_try_finally", "work")
+      %set.2 : base.Unit = base.refSet[py.Value](%work.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure(@t08_try_finally.cleanup)
+      %cleanup.cell.0 : base.Ref(py.Value) = py.globalCell("t08_try_finally", "cleanup")
+      %set.3 : base.Unit = base.refSet[py.Value](%cleanup.cell.0, %clo.1)
+      %work.0 : py.Value = py.loadGlobal("t08_try_finally", "work") ^finRaise.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%work.0, %tuple.0, %kwargs.0) ^finRaise.0()
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^fin.0(%comp.0)
+    finRaise.0(%exc.0 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.0)
+      jump ^fin.0(%comp.1)
+    fin.0(%pending.0 : py.Completion):
+      %prev.0 : py.Value = py.pushPending(%pending.0)
+      %cleanup.0 : py.Value = py.loadGlobal("t08_try_finally", "cleanup") ^superseded.0()
+      %tuple.1 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%cleanup.0, %tuple.1, %kwargs.1) ^superseded.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      py.Completion.case(%pending.0) ^join.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
+    superseded.0(%exc.1 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.1)
+    join.0():
+      %int.0 : py.Value = py.intLit(1)
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("t08_try_finally", "x")
+      %set.4 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
+      jump ^join.2()
+    catch.0(%exc.2 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.2)
+      %int.1 : py.Value = py.intLit(0)
+      %x.cell.1 : base.Ref(py.Value) = py.globalCell("t08_try_finally", "x")
+      %set.5 : base.Unit = base.refSet[py.Value](%x.cell.1, %int.1)
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      jump ^join.2()
+    unwind.0(%exc.3 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^finRaise.1(%exc.3)
+    join.2():
+      %comp.2 : py.Completion = py.completionNormal
+      jump ^fin.1(%comp.2)
+    finRaise.1(%exc.4 : py.Value):
+      %comp.3 : py.Completion = py.completionRaise(%exc.4)
+      jump ^fin.1(%comp.3)
+    fin.1(%pending.1 : py.Completion):
+      %prev.2 : py.Value = py.pushPending(%pending.1)
+      %cleanup.1 : py.Value = py.loadGlobal("t08_try_finally", "cleanup") ^superseded.1()
+      %tuple.2 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%cleanup.1, %tuple.2, %kwargs.2) ^superseded.1()
+      %pop.4 : base.Unit = py.popExcept(%prev.2)
+      py.Completion.case(%pending.1) ^join.1() ^unreachable.3() ^propagate.0() ^unreachable.4() ^unreachable.5()
+    unreachable.3(%val.1 : py.Value):
+      unreachable
+    unreachable.4():
+      unreachable
+    unreachable.5():
+      unreachable
+    superseded.1(%exc.5 : py.Value):
+      %pop.5 : base.Unit = py.popExcept(%prev.2)
+      jump ^propagate.0(%exc.5)
+    join.1():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.6 : py.Value):
+      %exc.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.6)
+      ret(%exc.7)
+  }
+  func @t08_try_finally.work(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "work() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "work() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @t08_try_finally.cleanup(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "cleanup() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "cleanup() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

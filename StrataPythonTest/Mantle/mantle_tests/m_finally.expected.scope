@@ -1,0 +1,82 @@
+module
+  import sys: module sys
+  sys: local (imported)
+  note: local (assigned, referenced)
+  reraise: local (assigned)
+  handled: local (assigned)
+  return_drops: local (assigned)
+  break_drops: local (assigned)
+  continue_in_finally: local (assigned)
+  superseded: local (assigned)
+  in_handler: local (assigned)
+  all_parts: local (assigned)
+  nested: local (assigned)
+  finally_in_finally: local (assigned)
+  loop_in_finally: local (assigned)
+  return_in_handler: local (assigned)
+  Body: local (assigned)
+  function note
+    params: x
+    x: local (parameter, referenced)
+  function reraise
+    params: f
+    f: local (parameter, referenced)
+  function handled
+    params: f
+    f: local (parameter, referenced)
+    note: global implicit (referenced)
+    sys: global implicit (referenced)
+  function return_drops
+    params: f
+    f: local (parameter, referenced)
+  function break_drops
+    params: f, xs
+    f: local (parameter, referenced)
+    xs: local (parameter, referenced)
+    x: local (assigned)
+  function continue_in_finally
+    params: f, xs
+    f: local (parameter, referenced)
+    xs: local (parameter, referenced)
+    x: local (assigned, referenced)
+    note: global implicit (referenced)
+  function superseded
+    params: f
+    f: local (parameter, referenced)
+    ValueError: global implicit (referenced)
+  function in_handler
+    params: f
+    f: local (parameter, referenced)
+    KeyError: global implicit (referenced)
+    e: local (assigned, referenced)
+    note: global implicit (referenced)
+  function all_parts
+    params: f
+    f: local (parameter, referenced)
+    r: local (assigned, referenced)
+    KeyError: global implicit (referenced)
+    note: global implicit (referenced)
+  function nested
+    params: f
+    f: local (parameter, referenced)
+    note: global implicit (referenced)
+  function finally_in_finally
+    params: f, g
+    f: local (parameter, referenced)
+    g: local (parameter, referenced)
+    note: global implicit (referenced)
+  function loop_in_finally
+    params: f, xs
+    f: local (parameter, referenced)
+    xs: local (parameter, referenced)
+    x: local (assigned, referenced)
+    note: global implicit (referenced)
+  function return_in_handler
+    params: f
+    f: local (parameter, referenced)
+    KeyError: global implicit (referenced)
+    e: local (assigned, referenced)
+  class Body
+    v: local (assigned)
+    note: global implicit (referenced)
+    w: local (assigned)

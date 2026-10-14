@@ -1,0 +1,5 @@
+module
+  f: local (assigned)
+  function f
+diagnostics:
+  syntax error at 4:8-4:13: 'break' outside loop

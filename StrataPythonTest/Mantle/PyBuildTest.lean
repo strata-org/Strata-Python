@@ -170,39 +170,79 @@ example : Holds (raisesX · = true) r := by decide +kernel
         x.cleanup
 
 `tryFinally` emits the `finally` body once, in `fin.0`, reached from both exits of the `try`
-with how it finished: `return` with the value, or `raise` from `finRaise.0`.  The cleanup's
-`err` successor `superseded.0` uses a partial `BlockValue`: the site pre-binds the pending
-completion and `err` supplies the exception, so a failure in the `finally` supersedes what
-was pending.  Both reach `disp.0`, one `py.Completion.case` with a successor per
-constructor, each binding its own payload, so `val` exists only on the path where the
-completion is a `return`. -/
+with how it finished: `return` with the value, or `raise` from `finRaise.0`.  The body runs
+after `pushPending`, so a raise reaching it makes its exception the one being handled.  It
+ends by restoring the exception handled before, then one `py.Completion.case` with a
+successor per constructor, each binding its own payload, so `val` exists only on the path
+where the completion is a `return`.  A failure in the cleanup goes to `superseded.0`, which
+restores the exception handled before and raises to the enclosing handler, so it supersedes
+what was pending. -/
 
-/-- `k`, with the `finally` body's failure routed through `superseded.0` if `superseded`. -/
-private def kWith (superseded : Bool) : Except Errors (Func Py.env Unit) :=
+private def k : Except Errors (Func Py.env Unit) :=
   buildFunc (Py.pn "k") #["x"] () fun args => do
-    let x := args[0]!
-    tryFinally (superseded := superseded)
+    let #[x] := args | return
+    discard <| tryFinally
       (fun fin => do jump (Build.goto fin #[← compReturn (← getAttr x "foo")]))
-      (discard <| getAttr x "cleanup")
-      { normal := .block "normal" fun _ => emitReturnNone
-        «return» := .block "ret" emitReturn
-        raise := .block "raise" emitPropagate }
-
-private def k : Except Errors (Func Py.env Unit) := kWith true
+      (fun _ => discard <| getAttr x "cleanup")
+      (pure { normal := .block "normal" fun _ => emitReturnNone
+              «return» := .block "ret" emitReturn
+              raise := .block "raise" emitPropagate })
 
 example : Holds (Func.WF ∅) k := by decide +kernel
 
-/-- The cleanup body appears once: block 2, with two instructions. -/
-example : Holds (fun k => (k.blocks.map (·.instrs.size))[2]? = some 2) k := by decide +kernel
+-- The cleanup body appears once: block 2, between `pushPending` and `popExcept`, then the
+-- dispatch.
+#guard Holds (fun k => (k.blocks.map (·.instrs.size))[2]? = some 4) k
 
-/-- Eleven blocks: the entry, `finRaise`, `fin`, `superseded` and `disp`; the five successors
-of the dispatch, `return` and `raise` taking their payload and fall-through, `break` and
-`continue` taking none; and `buildFunc`'s propagating handler. -/
-example : Holds (·.blocks.size = 11) k := by decide +kernel
+-- Ten blocks: the entry, `finRaise` and `fin`; the five successors of the dispatch,
+-- `return` and `raise` taking their payload and fall-through, `break` and `continue` taking
+-- none; `superseded`; and `buildFunc`'s propagating handler.
+#guard Holds (·.blocks.size = 10) k
 
-/-- Without `superseded`, the `finally` body fails to the enclosing handler and `fin`
-dispatches itself: no `superseded` or `disp` block. -/
-example : Holds (fun k => Func.WF ∅ k ∧ k.blocks.size = 9) (kWith false) := by decide +kernel
+/-- A `finally` body that always leaves by itself, here by returning, emits no dispatch: only
+the entry, `finRaise`, `fin`, `superseded` and the propagating handler. -/
+private def kReturns : Except Errors (Func Py.env Unit) :=
+  buildFunc (Py.pn "k") #["x"] () fun args => do
+    let #[x] := args | return
+    discard <| tryFinally
+      (fun _ => discard <| getAttr x "foo")
+      (fun prev => do
+        discard <| emitEffect (.str .base "pop") Py.popExcept #v[] #[prev]
+        emitReturnNone)
+      (pure { normal := .unreachable, «return» := .unreachable, raise := .unreachable })
+
+example : Holds (Func.WF ∅) kReturns := by decide +kernel
+
+#guard Holds (·.blocks.size = 5) kReturns
+
+/-- Under a handler `bb.0(c, exc)` that pre-binds `c`, a failure in the cleanup reaches
+`superseded.0`, which raises to `bb.0` with `c`, then the failure. -/
+private def kBound : Except Errors (Func Py.env Unit) :=
+  buildFunc (Py.pn "k") #["x"] () fun args => do
+    let #[x] := args | return
+    let h ← freshLabel
+    let c ← noneLit
+    withHandlerTo (Build.goto h #[c]) do
+      discard <| tryFinally (fun _ => pure ()) (fun _ => discard <| getAttr x "cleanup")
+        (pure { normal := .block "normal" fun _ => emitReturnNone
+                «return» := .unreachable
+                raise := .block "raise" fun e => jump (Build.goto h #[c, e]) })
+    let pc ← freshVal (.str .base "c")
+    let pe ← freshVal (.str .base "exc")
+    startBlock h #[pc, pe]
+    emitReturn pe.id
+
+/-- Whether `superseded.0` jumps to `bb.0` with two arguments, the second its parameter. -/
+private def supersededPassesExc (fn : Func Py.env Unit) : Bool :=
+  fn.blocks.any fun b =>
+    let .apply _ _ _ _ ks _ := b.term
+    let args := ks.flatMap (·.args)
+    b.label == lbl "superseded" 0 && ks.map (·.target) == #[lbl "bb" 0] &&
+      args.size == 2 && args[1]? == (b.params.map (·.id))[0]?
+
+example : Holds (Func.WF ∅) kBound := by decide +kernel
+
+#guard Holds (supersededPassesExc ·) kBound
 
 /-- info: module py.k {
   func @py.k(%x.0 : py.Value) -> base.Except(py.Value, py.Value) {
@@ -214,13 +254,10 @@ example : Holds (fun k => Func.WF ∅ k ∧ k.blocks.size = 9) (kWith false) := 
       %comp.1 : py.Completion = py.completionRaise(%exc.0)
       jump ^fin.0(%comp.1)
     fin.0(%pending.0 : py.Completion):
-      %cleanup.0 : py.Value = py.attr(%x.0, "cleanup") ^superseded.0(%pending.0)
-      jump ^disp.0(%pending.0)
-    superseded.0(%carried.0 : py.Completion, %exc.1 : py.Value):
-      %comp.2 : py.Completion = py.completionRaise(%exc.1)
-      jump ^disp.0(%comp.2)
-    disp.0(%comp.3 : py.Completion):
-      py.Completion.case(%comp.3) ^normal.0() ^ret.0() ^raise.0() ^unreachable.0() ^unreachable.1()
+      %prev.0 : py.Value = py.pushPending(%pending.0)
+      %cleanup.0 : py.Value = py.attr(%x.0, "cleanup") ^superseded.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      py.Completion.case(%pending.0) ^normal.0() ^ret.0() ^raise.0() ^unreachable.0() ^unreachable.1()
     normal.0():
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
@@ -228,13 +265,16 @@ example : Holds (fun k => Func.WF ∅ k ∧ k.blocks.size = 9) (kWith false) := 
     ret.0(%val.0 : py.Value):
       %ret.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%val.0)
       ret(%ret.1)
-    raise.0(%exc.2 : py.Value):
-      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
-      ret(%exc.3)
+    raise.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
     unreachable.0():
       unreachable
     unreachable.1():
       unreachable
+    superseded.0(%exc.3 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.3)
     propagate.0(%exc.4 : py.Value):
       %exc.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
       ret(%exc.5)

@@ -490,53 +490,56 @@ def dispatchArms [Monad m] [MonadPy α m] (c : ValId) (arms : Arms m) : m Unit :
 block that takes one.
 
 * A failure goes to a fresh block `handlerBase.n`, emitted after `body`, which makes the
-  exception a `raise` completion.  The block takes `carry`, pre-bound by the failing site,
-  before the exception, and ignores them; a policy chaining `__context__` would read them.
-* Falling off the end passes the completion `normal` gives, `normal` by default.
+  exception a `raise` completion.
+* Falling off the end passes a `normal` completion.
 * A `return`, `break` or `continue` is `body`'s own: it jumps to `k` with its completion. -/
-def protect [Monad m] [MonadPy α m] (k : Label) (body : m Unit)
-    (carry : Array (ValDecl Py.env) := #[]) (normal : m ValId := liftPy (compNormal (α := α)))
-    (handlerBase : String := "caught") : m Unit := do
+def protect [Monad m] [MonadPy α m] (k : Label) (body : m Unit) (handlerBase : String) :
+    m Unit := do
   let caught ← liftPy (freshLabel (α := α) handlerBase)
-  withHandlerTo (Build.goto caught (carry.map (·.id))) body
+  withHandler caught body
   if ← liftPy (isOpen (α := α)) then
-    let c ← normal
-    liftPy (jump (α := α) (Build.goto k #[c]))
+    liftPy (α := α) do jump (Build.goto k #[← compNormal])
   liftPy (α := α) do
-    let carried ← carry.mapM fun d => Build.freshVal (env :=
-        Py.env) (α := α) (.str .base "carried") d.type
-    let e ← freshVal (.str .base "exc")
-    startBlock caught (carried.push e)
-    jump (Build.goto k #[← compRaise e.id])
+    let e ← startBlockWith caught (.str .base "exc")
+    jump (Build.goto k #[← compRaise e])
 
 /-- Emit `try: body finally: final` by completion (§7.2 of `docs/PythonToMantle.md`), ending
 the open block.
 
 `body fin` is the protected block, under `protect fin`: a failure becomes a `raise`
 completion in `finRaise.n`, falling off the end is `normal`, and a `return`, `break` or
-`continue` jumps to `fin` with its completion.  `final` is the `finally` body, emitted once in
-`fin.n`, which takes the pending completion.  If it finishes normally, the pending completion
-is dispatched to `arms`, which do from outside the `try` what the completion would have
-done.
+`continue` jumps to `fin` with its completion.  `final prev` is the `finally` body, emitted
+once in `fin.n`, which takes the pending completion.  It runs after `pushPending`, so on the
+exceptional path the pending exception is the one being handled, as in CPython; `prev` is the
+one handled before, which every way out of `final` restores with `popExcept`.
 
-A failure in `final` supersedes the pending completion.  Without `superseded`, `final` runs
-under the enclosing handler, so the failure simply goes there.  With it, `final` is itself
-protected: a failure goes to `superseded.n`, which also takes the pending completion and
-makes the failure a `raise` completion, and both ends of `final` reach one dispatch block,
-`disp.n`, taking the completion of the whole statement. -/
-def tryFinally [Monad m] [MonadPy α m] (body : Label → m Unit) (final : m Unit)
-    (arms : Arms m) (superseded : Bool := false) : m Unit := do
+* A failure in `final` supersedes the pending completion: `superseded.n` restores `prev`,
+  then raises to the handler around the `try`.
+* A `return`, `break` or `continue` in `final` is its own, and must restore `prev` itself.
+* If `final` finishes normally, `prev` is restored and the pending completion is dispatched
+  to the arms `arms` gives, which do from outside the `try` what the completion would have
+  done.
+
+Returns whether `final` finished normally, so the dispatch was emitted. -/
+def tryFinally [Monad m] [MonadPy α m] (body : Label → m Unit) (final : ValId → m Unit)
+    (arms : m (Arms m)) : m Bool := do
+  let outer ← liftPy (handler (α := α))
   let fin ← liftPy (freshLabel (α := α) "fin")
-  protect fin (body fin) (handlerBase := "finRaise")
-  let pending ← liftPy (startBlockWith (α := α) fin (.str .base "pending") Py.Completion.ty)
-  if superseded then
-    let disp ← liftPy (freshLabel (α := α) "disp")
-    protect disp final (carry := #[⟨pending, Py.Completion.ty⟩]) (normal := pure pending)
-      (handlerBase := "superseded")
-    dispatchArms (← liftPy (startBlockWith (α := α) disp (.str .base "comp") Py.Completion.ty)) arms
-  else
-    final
-    if ← liftPy (isOpen (α := α)) then dispatchArms pending arms
+  protect fin (body fin) "finRaise"
+  let (pending, prev, superseded) ← liftPy (α := α) do
+    let pending ← startBlockWith fin (.str .base "pending") Py.Completion.ty
+    let prev ← emitTotal (.str .base "prev") Py.pushPending #v[] #[pending]
+    return (pending, prev, ← freshLabel "superseded")
+  let pop := liftPy (α := α) (discard <| emitEffect (.str .base "pop") Py.popExcept #v[] #[prev])
+  withHandler superseded (final prev)
+  let finished ← liftPy (isOpen (α := α))
+  if finished then
+    pop
+    dispatchArms pending (← arms)
+  let e ← liftPy (startBlockWith (α := α) superseded (.str .base "exc"))
+  pop
+  liftPy (jump (α := α) { outer with args := outer.args.push e })
+  return finished
 
 /-! ## Leaving a function
 

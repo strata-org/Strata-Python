@@ -1,0 +1,27 @@
+module
+  import sys: module sys
+  sys: local (imported)
+  log: local (assigned)
+  note: local (assigned)
+  else_raises: local (assigned)
+  clause_raises: local (assigned)
+  leaves_early: local (assigned)
+  function note
+    params: x
+    x: local (parameter, referenced)
+    log: global implicit (referenced)
+  function else_raises
+    note: global implicit (referenced)
+    KeyError: global implicit (referenced)
+    sys: global implicit (referenced)
+  function clause_raises
+    KeyError: global implicit (referenced)
+    note: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    sys: global implicit (referenced)
+  function leaves_early
+    params: xs
+    xs: local (parameter, referenced)
+    x: local (assigned, referenced)
+    note: global implicit (referenced)
+    KeyError: global implicit (referenced)

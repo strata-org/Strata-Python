@@ -53,9 +53,8 @@ carries exists only in the successor reached when it was a `return`.
     try:                    entry:        … ^catch()
       return f()                          %c = completionReturn %v; jump ^finally(%c)
     finally:                catch(%e):    %c = completionRaise %e;  jump ^finally(%c)
-      g()                   finally(%c):  …;                        jump ^dispatch(%c)
-                            dispatch(%c): py.Completion.case %c ^normal() ^return()
-                                            ^raise() ^break() ^continue()
+      g()                   finally(%c):  …;  py.Completion.case %c ^normal() ^return()
+                                                ^raise() ^break() ^continue()
 ```
 
 The `finally` body is emitted once and reached from every exit.  Nested `finally`s forward
@@ -64,8 +63,8 @@ a completion outwards instead of acting on it.
 ## The exception being handled
 
 As in CPython, the run-time state holds the exception being handled: `pushExcInfo` sets it on
-entering an `except` handler, and `popExcept` restores the previous one on leaving it.
-`handledExc` reads it.
+entering an `except` handler, `pushPending` on entering a `finally` body that a raise
+reached, and `popExcept` restores the previous one on leaving either.  `handledExc` reads it.
 
 An exception that an operation raises itself, such as the `KeyError` of `getItem`, gets the
 exception being handled as its `__context__`, as CPython's `_PyErr_SetObject` does:
@@ -395,8 +394,13 @@ public environment Py extends Base where
   /-- Makes `exc` the exception being handled, and returns the one handled before, or `None`:
   CPython's `PUSH_EXC_INFO`, on entering an `except` handler. -/
   insn pushExcInfo (exc : Value) : Value
-  /-- Makes `prev`, which `pushExcInfo` returned, the exception being handled again: CPython's
-  `POP_EXCEPT`, on every way out of an `except` handler. -/
+  /-- On entering a `finally` body: if `pending` is a `raise` completion, makes its exception
+  the one being handled, as CPython's `PUSH_EXC_INFO` does on the exceptional path; otherwise
+  leaves the exception being handled as it is.  Returns the one handled before, or `None`. -/
+  insn pushPending (pending : Completion) : Value
+  /-- Makes `prev`, which `pushExcInfo` or `pushPending` returned, the exception being handled
+  again: CPython's `POP_EXCEPT`, on every way out of an `except` handler or a `finally`
+  body. -/
   insn popExcept (prev : Value) : Unit
   /-- The exception being handled, which a bare `raise` raises again: CPython's
   `RAISE_VARARGS 0`.  Raises `RuntimeError: No active exception to reraise` if there is

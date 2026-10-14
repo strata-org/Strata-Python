@@ -247,9 +247,9 @@ emission state of the Python builder. `Ctx` is fixed while one function is trans
 | the Python module name, the Mantle module name, the names some scope binds as globals | `Ctx.module`, `Ctx.moduleName`, `Ctx.globals` | yes | `translate` |
 | diagnostics | `TState.diagnostics` | yes | `reject` |
 | functions to emit after the current one, and the names taken | `TState.pending : Array FuncJob`, `TState.funcNames` | yes | `defStmt`, `allocName` |
-| exits stack (below) | `TState.exits : Array Exit` | yes, but not `cleanup` | `withExit`: loops, `except` clause bodies; later `try`/`finally`, `with` |
+| exits stack (below) | `TState.exits : Array Exit` | yes | `withExit`: loops, `except` clause and `finally` bodies, `try`/`finally`; later `with` |
 | the labels some emitted transfer names, for starting join blocks | `TState.targeted` | yes | `jump`, `branch` |
-| exception an `except` body handles, for bare `raise` | `Ctx.handled : Option ValId` | yes | `except` bodies |
+| exception an `except` body handles, for bare `raise` | `Ctx.handled : Option ValId` | yes | `except` bodies; a `finally` body resets it |
 | namespace, inside a class body | `Ctx.classNs : Option ValId` | yes | class body functions |
 | default annotation | `Build.State.info` | yes | `withRange` |
 
@@ -257,12 +257,12 @@ A `def` binds its name where it runs, and queues a `FuncJob`; `translate` emits 
 body first, then each queued function, in order.
 
 The **exits stack** records every enclosing construct that a `break`, `continue` or `return`
-must pass through, innermost last. `cleanup` is to add:
+must pass through, innermost last:
 
 ```
 inductive Exit
   | loop    (brk cont : Label)    -- break → brk, continue → cont
-  | handler (prev : ValId) …      -- an except clause body: leave the handler
+  | handler (prev : ValId) …      -- an except clause or finally body: leave the handler
   | cleanup (fin : Label)         -- try/finally or with: fin takes a py.Completion
 ```
 
@@ -786,7 +786,7 @@ Each is rejected as §3 describes.
 |---|---|
 | `raise E` | `v = eval E`, `e = py.toException v`, then `jump ^handler(e)`. `toException` instantiates a class and raises `TypeError` for a non-exception, as CPython's `RAISE_VARARGS` does |
 | `raise E from C` | `v = eval E`, `c = eval C`, `e = py.toException v`, `py.setCause e c`, then `jump ^handler(e)`. `setCause` instantiates a class too, sets `__suppress_context__`, and raises `TypeError` for a cause that is neither an exception nor `None` |
-| bare `raise` inside an `except` body of the same function | `jump ^handler(exc)`, `exc` being the exception the innermost enclosing `except` body handles (`Ctx.handled`). Nested `try` statements in that body do not change it, because each handler restores the exception being handled when it ends |
+| bare `raise` inside an `except` body of the same function | `jump ^handler(exc)`, `exc` being the exception the innermost enclosing `except` body handles (`Ctx.handled`). Nested `try` statements in that body do not change it, because each handler restores the exception being handled when it ends. A `finally` body inside it is elsewhere (§7.2) |
 | bare `raise` elsewhere | `e = py.handledExc`, then `jump ^handler(e)`. `handledExc` reads the exception being handled at run time (§7.2), which an `except` body in a caller may have set, and raises `RuntimeError` if there is none |
 
 `raise` is a `jump`. A Python function raises by transferring to `Frame.handler`, which is a
@@ -806,7 +806,8 @@ Labels are allocated up front:
 
 - `catch(exc)` and `unwind(exc)`, if there are `except` clauses, and `clear_i(exc)` for each
   clause `i` with `as e`;
-- `fin(pending : py.Completion)` and `finRaise(exc)`, if there is a `finally`;
+- `fin(pending : py.Completion)`, `finRaise(exc)` and `superseded(exc)`, if there is a
+  `finally`;
 - `join`.
 
 Let `H'` be `finRaise` if there is a `finally`, and `H` otherwise. Let `S'` be `S` with
@@ -820,7 +821,8 @@ Let `H'` be `finRaise` if there is a `finally`, and `H` otherwise. Let `S'` be `
 | `unwind(x)` | | | `py.popExcept prev`, then `jump ^H'(x)` |
 | `else` body | `H'`. The `except` clauses do not cover it | `S'` | `fin(completionNormal)` or `join` |
 | `finRaise(exc)` | | | `%c = completionRaise exc`, `jump ^fin(%c)` |
-| `fin(pending)`: the `finally` body, emitted once | `H` | `S` | dispatch `pending` |
+| `fin(pending)`: `prev = py.pushPending pending`, then the `finally` body, emitted once | `superseded` | `S` + `handler prev` | `py.popExcept prev`, then dispatch `pending` |
+| `superseded(exc)` | | | `py.popExcept prev`, then `jump ^H(exc)` |
 
 **The clause chain** in `catch(exc)`, for each clause `except T as e`: evaluate `T`,
 `%m = py.excMatch exc T`, then `branch %m ^body_i() ^next_i()`. A bare `except:` jumps
@@ -835,6 +837,15 @@ CPython's `POP_EXCEPT` does: `unwind`, which every failure and an unmatched exce
 and *leaving the handler*, which is how a clause ends normally and how the exit walk passes its
 `handler` entry. Leaving the handler is `py.popExcept prev`, then unbinding `e` if the clause
 binds it, both under `H'`, the handler around the `try`, as in CPython.
+
+**In the `finally` body**, the exception being handled is the pending one on the exceptional
+path, as in CPython, which runs that path's copy of the body after `PUSH_EXC_INFO`. The body
+is emitted once, so the push depends on the path at run time: `py.pushPending pending` makes
+the exception of a `raise` completion the one being handled, and leaves the state as it is
+for the other completions. It returns `prev` like `pushExcInfo`, and every way out of the
+body restores it: the normal end before the dispatch, the exit walk through the `handler prev`
+entry, and `superseded`. A bare `raise` in the body reads `py.handledExc`, since `Ctx.handled`
+cannot tell the paths apart.
 
 **Unbinding `e`** is CPython's `e = None; del e`. For a local, free or global name, it writes
 `undef` to the cell. In a class body, it stores `None` in the namespace, then deletes it.
@@ -855,18 +866,18 @@ When a successor's action is a single transfer, the successor targets that block
 for example `propagate.0` for raise or `exit.0` for break. Otherwise it gets a fresh block.
 `PyBuild.dispatchArms` takes each successor as either: `Arm.to l`, or `Arm.block base emit`
 for a fresh block. `PyBuild.tryFinally` emits the whole lowering: the `try` body under
-`protect fin`, which makes `finRaise`, then `fin`, then the dispatch.
+`protect fin`, which makes `finRaise`, then `fin`, then the dispatch, then `superseded`. A
+`finally` body that always exits abruptly has no dispatch.
 
 **When the `finally` body exits abruptly.** Its own exit replaces the pending completion,
 as in CPython; Python 3.14 (PEP 765) only adds a `SyntaxWarning` for `return`, `break` and
 `continue` there. When it raises while an exception is pending, CPython also sets the new
 exception's `__context__` to the pending one. CPython does this through the exception being
 handled: on the exceptional path it runs the `finally` body after `PUSH_EXC_INFO`, so §7.1's
-rule sets `__context__` where the body raises. So the target lowering protects the `finally`
-body: a failure goes to a `superseded(pending, exc)` block, which `tryFinally (superseded :=
-true)` emits and `PyBuildTest`'s `k` checks. It restores the exception being handled before
-propagating `exc`, and does no chaining of its own (§9, Q2). `tryFinally`'s default, which
-runs the `finally` body under `H` with stack `S`, has the same control flow.
+rule sets `__context__` where the body raises. So a failure in the body goes to
+`superseded(exc)`, which restores the exception handled before and raises `exc` to `H`, with
+no chaining of its own. A `return`, `break` or `continue` in the body restores it too, then
+walks from `S`.
 
 **Why a completion.** CPython 3.9 and later copy the `finally` body once per exit, with no
 bound on the copies, and exponentially many when nested `finally` bodies themselves exit
@@ -878,26 +889,31 @@ verification intractable; a completion's targets are all static.
 Example: c1 (§10). The prologue is elided, and `cleanup` is read as a global.
 
 ```
-  entry.0(%0 : py.Value, %1 : py.Value):
+  entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
     …
-    %9 : py.Value = py.intLit(1)
-    %10 : py.Completion = py.completionReturn(%9)        -- return 1 → exit walk
-    jump ^fin.0(%10)
-  finRaise.0(%11 : py.Value):                            -- the try body's handler
-    %12 : py.Completion = py.completionRaise(%11)
-    jump ^fin.0(%12)
-  fin.0(%13 : py.Completion):                            -- finally, emitted once
-    …                                                    -- cleanup(), ^propagate.0()
-    py.Completion.case(%13) ^join.0() ^ret.0() ^propagate.0() ^unreachable.0() ^unreachable.1()
-  ret.0(%20 : py.Value):
-    %21 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%20)
-    ret(%21)
+    %int.1 : py.Value = py.intLit(1)
+    %comp.0 : py.Completion = py.completionReturn(%int.1)    -- return 1 → exit walk
+    jump ^fin.0(%comp.0)
+  finRaise.0(%exc.0 : py.Value):                             -- the try body's handler
+    %comp.1 : py.Completion = py.completionRaise(%exc.0)
+    jump ^fin.0(%comp.1)
+  fin.0(%pending.0 : py.Completion):                         -- finally, emitted once
+    %prev.0 : py.Value = py.pushPending(%pending.0)
+    …                                                        -- cleanup(), ^superseded.0()
+    %pop.0 : base.Unit = py.popExcept(%prev.0)
+    py.Completion.case(%pending.0) ^join.0() ^ret.0() ^propagate.0() ^unreachable.0() ^unreachable.1()
+  ret.0(%val.0 : py.Value):
+    %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%val.0)
+    ret(%ret.0)
   unreachable.0():
     unreachable
   unreachable.1():
     unreachable
+  superseded.0(%exc.1 : py.Value):                           -- cleanup() raised
+    %pop.1 : base.Unit = py.popExcept(%prev.0)
+    jump ^propagate.0(%exc.1)
   join.0():
-    …                                                    -- falls off: return None
+    …                                                        -- falls off: return None
 ```
 
 ### 7.3 `with`
@@ -936,17 +952,14 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 
 **Builder (`PyBuild`) and translator (`PyTranslate`):**
 
-- The scope and the exits stack live in the translator's state, `TransM` (§4). `Exit` lacks
-  `cleanup`.
+- The scope and the exits stack live in the translator's state, `TransM` (§4).
 - `PyBuild.buildFuncTypedWith` builds a function and returns its body's result.
 - `Frame.handler` is a `BlockValue`, so a handler can pre-bind arguments (`withHandlerTo`).
-  Under `Override` nothing needs that; a chaining policy's `superseded` block does.
 - `dispatch` and `dispatchArms` take `Label`s. Direct successors that pre-bind arguments need
   `BlockValue`s.
 - `tryFinally`, `protect` and `dispatchArms` run their bodies in any `MonadPy` monad, so the
-  translator can pass `TransM` bodies. The translator does not call them yet. `forEach`
-  does the same, and the translator calls it for comprehensions.
-- `exitWalk` handles `loop` and `handler` entries.
+  translator passes `TransM` bodies. `forEach` does the same, for comprehensions.
+- `exitWalk` handles `loop`, `handler` and `cleanup` entries.
 
 ## 9. Open questions
 
@@ -963,13 +976,11 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
    A region cannot name an outer label, so `propagate.0`, a loop's `exit` and an outer `fin`
    are out of reach. Every abrupt exit from a region becomes a returned completion, with
    its own handler inside: §7 moved to a region boundary.
-2. **Exception chaining in `finally`.** On the exceptional path, the `finally` body must run
-   with the pending exception as the one being handled, as in CPython: then
-   `sys.exc_info()` sees it, and §7.1's rule sets `__context__` where the body raises, so
-   `superseded` needs no chaining step. `except` handlers already maintain that state with
-   `py.pushExcInfo` and `py.popExcept` (§7.2). A bare `raise` in a
-   `finally` body cannot use `Ctx.handled`: on the exceptional path it raises the pending
-   exception, so it must read `py.handledExc` (`m_try`'s `finally_raise`).
+2. **Exception chaining in `finally`.** *Resolved.* On the exceptional path, the `finally`
+   body runs with the pending exception as the one being handled, as in CPython, through
+   `py.pushPending` (§7.2). `sys.exc_info()` sees it, §7.1's rule sets `__context__` where
+   the body raises, and a bare `raise` there reads `py.handledExc`. `superseded` does no
+   chaining of its own.
 3. **Definedness.** Should definedness stay as `py.undef` values in cells, or become
    `Ref (Option Value)`? Only `undef`, `isDefined`, `requireDefined` and `requireUndefined`
    would change.
@@ -1018,8 +1029,8 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 Each case is an exception edge that an earlier translator lowered wrongly while still
 passing its well-formedness check. Each becomes a golden test, plus an interpreter check that
 counts `cleanup()` calls. The repros are `c1`–`c7` and `t30_loop_try_nested` in
-`StrataPythonTest/Mantle/mantle_tests/`. `mantle_tests.txt` lists `c6` as supported and the
-others as not yet supported.
+`StrataPythonTest/Mantle/mantle_tests/`. `mantle_tests.txt` lists `c7` as not yet supported
+and the others as supported.
 
 | Case | Python | Wrong lowering | Fixed by |
 |---|---|---|---|
@@ -1034,7 +1045,8 @@ others as not yet supported.
 | t30 `nested_return` | `for p in outer:` / `try:` / `for q in inner:` / `try: if check(q): return q` / `finally: note(12)` / `finally: cleanup()` / `return 0` | neither `finally` ran, and there was no normal exit | the inner `fin`'s return successor walks from its own `S`, reaching the outer `cleanup`, so `note(12)` runs, then `cleanup()`, then the return. Exhausting `outer` reaches `return 0` |
 
 These checks apply to all of them. `Module.Raw.WF` holds. Every block is reachable from the
-entry, except handler blocks that no operation names. No `finally` or `__exit__` body is
+entry, or from a handler block that no operation names, such as the `catch` of a `try` body
+that cannot fail. No `finally` or `__exit__` body is
 emitted more than once.
 
 ## 11. Coverage
@@ -1078,6 +1090,6 @@ a diagnostic.
 | `raise`, `raise … from` | §7.1 | specified; implemented |
 | bare `raise` | §7.1 | specified; implemented |
 | `try` / `except` / `else` | §7.2 | specified; implemented |
-| `finally` | §7.2 | specified, open question (Q2) |
+| `finally` | §7.2 | specified; implemented |
 | `with`, several items | §7.3 | specified, open question (Q5) |
 | `async`, `await`, `match`, `except*`, `type`, PEP 695 | §6.9 | unsupported; an `async def` is a stub |

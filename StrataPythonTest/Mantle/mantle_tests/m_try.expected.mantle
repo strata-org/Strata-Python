@@ -1,5 +1,3 @@
--- unsupported: finally is not supported at 86:8-89:17
--- unsupported: finally is not supported at 107:0-110:8
 -- unsupported: try/except* is not supported at 112:0-115:8
 module m_try {
   func @|m_try.<module>|() -> base.Except(py.Value, py.Value) {
@@ -73,12 +71,31 @@ module m_try {
       %pop.1 : base.Unit = py.popExcept(%prev.0)
       jump ^propagate.0(%exc.2)
     join.0():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^fin.0(%comp.0)
+    finRaise.0(%exc.3 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.3)
+      jump ^fin.0(%comp.1)
+    fin.0(%pending.0 : py.Completion):
+      %prev.1 : py.Value = py.pushPending(%pending.0)
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      py.Completion.case(%pending.0) ^join.1() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
+    superseded.0(%exc.4 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.4)
+    join.1():
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.3 : py.Value):
-      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
-      ret(%exc.4)
+    propagate.0(%exc.5 : py.Value):
+      %exc.6 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.5)
+      ret(%exc.6)
   }
   func @m_try.clauses(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -782,20 +799,31 @@ module m_try {
       %match.0 : base.Bool = py.excMatch(%exc.1, %KeyError.1) ^unwind.0()
       branch(%match.0) ^except.0() ^next.0()
     except.0():
-      %pop.0 : base.Unit = py.popExcept(%prev.0)
-      jump ^join.0()
+      %f.4 : py.Value = base.refGet[py.Value](%f.cell.0)
+      %f.5 : py.Value = py.requireDefined(%f.4, "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.0()
+      %tuple.1 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%f.5, %tuple.1, %kwargs.2) ^finRaise.0()
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^fin.0(%comp.0)
+    finRaise.0(%exc.2 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.2)
+      jump ^fin.0(%comp.1)
+    fin.0(%pending.0 : py.Completion):
+      %prev.1 : py.Value = py.pushPending(%pending.0)
+      %exc.3 : py.Value = py.handledExc ^superseded.0()
+      jump ^superseded.0(%exc.3)
+    superseded.0(%exc.4 : py.Value):
+      %pop.0 : base.Unit = py.popExcept(%prev.1)
+      jump ^unwind.0(%exc.4)
     next.0():
       jump ^unwind.0(%exc.1)
-    unwind.0(%exc.2 : py.Value):
+    unwind.0(%exc.5 : py.Value):
       %pop.1 : base.Unit = py.popExcept(%prev.0)
-      jump ^propagate.0(%exc.2)
-    join.0():
-      %none.1 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
-      ret(%ret.0)
-    propagate.0(%exc.3 : py.Value):
-      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
-      ret(%exc.4)
+      jump ^propagate.0(%exc.5)
+    propagate.0(%exc.6 : py.Value):
+      %exc.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.6)
+      ret(%exc.7)
   }
   func @|m_try.C.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):

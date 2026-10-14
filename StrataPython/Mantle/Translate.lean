@@ -101,10 +101,13 @@ end -- public section
 inductive Exit where
   /-- A loop: `break` jumps to `brk`, `continue` to `cont`. -/
   | loop (brk cont : Label)
-  /-- The body of an `except` clause, left through `leaveHandler`: `prev` is the exception
-  handled before, `name` the name the clause binds and where, and `outer` the handler around
-  the `try`. -/
+  /-- The body of an `except` clause or a `finally`, left through `leaveHandler`: `prev` is
+  the exception handled before, `name` the name the clause binds and where, and `outer` the
+  handler around the `try`. -/
   | handler (prev : ValId) (name : Option (String × SourceRange)) (outer : BlockValue)
+  /-- A `try` with a `finally`: a `return`, `break` or `continue` jumps to `fin` with its
+  completion, and the dispatch after the `finally` body carries it on. -/
+  | cleanup (fin : Label)
 
 /-- A `def` whose function is emitted after the current one. -/
 structure FuncJob where
@@ -202,7 +205,7 @@ def isOpen : TransM Bool := build PyBuild.isOpen
 /-- Whether some transfer names `l`. -/
 def targeted (l : Label) : TransM Bool := return (← get).targeted.contains l
 
-private def recordTarget (l : Label) : TransM Unit :=
+def recordTarget (l : Label) : TransM Unit :=
   modify fun s => { s with targeted := s.targeted.insert l }
 
 /-- End the open block with `jump l(args)`. -/
@@ -1482,9 +1485,9 @@ def unbindName (name : String) (range : SourceRange) : TransM Unit := do
 def popExcept (prev : ValId) : TransM Unit :=
   discard <| build (emitEffect (.str .base "pop") Py.popExcept #v[] #[prev])
 
-/-- Leave an `except` clause other than by a failure, as CPython does: under `outer`, the
-handler around the `try`, make `prev` the exception being handled again, then unbind `name`
-if the clause binds one. -/
+/-- Leave an `except` clause or a `finally` body other than by a failure, as CPython does:
+under `outer`, the handler around the `try`, make `prev` the exception being handled again,
+then unbind `name` if the clause binds one. -/
 def leaveHandler (prev : ValId) (name : Option (String × SourceRange)) (outer : BlockValue) :
     TransM Unit :=
   withHandlerTo outer do
@@ -1504,6 +1507,11 @@ def exitWalk (brk : Bool) (ret : Option ValId) (range : SourceRange) : TransM Un
     | .loop b c, none => return ← jump (if brk then b else c)
     | .loop .., some _ => pure ()
     | .handler prev name outer, _ => leaveHandler prev name outer
+    | .cleanup fin, _ =>
+      let c ← build <| match ret with
+        | some v => compReturn v
+        | none => if brk then compBreak else compContinue
+      return ← jump fin #[c]
   if let some v := ret then build (emitReturn v)
 
 mutual
@@ -1577,8 +1585,8 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
       | none => build (emitFailing (.str .base "exc") Py.handledExc #v[] #[])
     build (PyBuild.jump (← build (raiseTo e)))
   | .Try sr ⟨_, body⟩ ⟨_, handlers⟩ ⟨_, orelse⟩ ⟨_, final⟩ =>
-    if !final.isEmpty then reject "finally" sr
-    else tryStmt body handlers orelse
+    if final.isEmpty then tryStmt body handlers orelse
+    else tryFinallyStmt sr body handlers orelse final
   | .Delete _ ⟨_, targets⟩ =>
     match targets.mapM deleter with
     | .error t => badTarget t
@@ -1691,6 +1699,42 @@ partial def tryStmt (body : Array (stmt SourceRange)) (handlers : Array (excepth
   popExcept prev
   build (PyBuild.jump { outer with args := outer.args.push x })
   if ← targeted join then build (startBlock join)
+
+/-- `try: … finally: final` at `sr` (§7.2), with the `except` clauses and `else` of `tryStmt`
+if there are any.  Every way out of the protected part reaches the `finally` body as a
+completion, through the `cleanup` exit for `return`, `break` and `continue`.  After the body,
+the dispatch does from outside the `try` what the completion would have done.  Inside the
+body, a `return`, `break` or `continue` first restores the exception handled before it. -/
+partial def tryFinallyStmt (sr : SourceRange) (body : Array (stmt SourceRange))
+    (handlers : Array (excepthandler SourceRange)) (orelse final : Array (stmt SourceRange)) :
+    TransM Unit := do
+  let outer ← build handler
+  let join ← build (freshLabel "join")
+  let exits := (← get).exits
+  -- `break` or `continue` jumps straight to the loop when it is the innermost entry.
+  let loopArm (brk : Bool) : TransM (Arm TransM Unit) := do
+    if !exits.any (· matches .loop ..) then return .unreachable
+    match exits.back? with
+    | some (.loop b c) =>
+      let l := if brk then b else c
+      recordTarget l
+      return .to l
+    | _ => return .block (if brk then "brk" else "cont") fun _ => exitWalk brk none sr
+  let arms : TransM (Arms TransM) := return {
+    normal := .to join
+    «return» := if (← curScope).kind matches .module | .classBody then .unreachable
+      else .block "ret" fun v => exitWalk false (some v) sr
+    raise := if outer.args.isEmpty then .to outer.target
+      else .block "reraise" fun e => build (PyBuild.jump { outer with args := outer.args.push e })
+    «break» := ← loopArm true
+    «continue» := ← loopArm false }
+  let finished ← tryFinally
+    (fun fin => withExit (.cleanup fin) do
+      if handlers.isEmpty then transStmts body else tryStmt body handlers orelse)
+    (fun prev => withReader ({ · with handled := none })
+      (withExit (.handler prev none outer) (transStmts final)))
+    arms
+  if finished then build (startBlock join)
 
 /-- The body of an `except` clause handling `exc`, which binds it to `name` if there is one,
 then leaves the handler (`leaveHandler`) and jumps to `join`.  `prev` is the exception handled

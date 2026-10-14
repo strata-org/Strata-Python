@@ -1,0 +1,957 @@
+module t30_loop_try_nested {
+  func @|t30_loop_try_nested.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("t30_loop_try_nested")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure(@t30_loop_try_nested.probe)
+      %probe.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "probe")
+      %set.2 : base.Unit = base.refSet[py.Value](%probe.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure(@t30_loop_try_nested.check)
+      %check.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "check")
+      %set.3 : base.Unit = base.refSet[py.Value](%check.cell.0, %clo.1)
+      %clo.2 : py.Value = py.mkClosure(@t30_loop_try_nested.cleanup)
+      %cleanup.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "cleanup")
+      %set.4 : base.Unit = base.refSet[py.Value](%cleanup.cell.0, %clo.2)
+      %clo.3 : py.Value = py.mkClosure(@t30_loop_try_nested.note)
+      %note.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "note")
+      %set.5 : base.Unit = base.refSet[py.Value](%note.cell.0, %clo.3)
+      %clo.4 : py.Value = py.mkClosure(@t30_loop_try_nested.raiser)
+      %raiser.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "raiser")
+      %set.6 : base.Unit = base.refSet[py.Value](%raiser.cell.0, %clo.4)
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %int.2 : py.Value = py.intLit(3)
+      %list.0 : py.Value = py.mkList(%int.0, %int.1, %int.2)
+      %outer_items.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "outer_items")
+      %set.7 : base.Unit = base.refSet[py.Value](%outer_items.cell.0, %list.0)
+      %int.3 : py.Value = py.intLit(4)
+      %int.4 : py.Value = py.intLit(5)
+      %list.1 : py.Value = py.mkList(%int.3, %int.4)
+      %inner_items.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "inner_items")
+      %set.8 : base.Unit = base.refSet[py.Value](%inner_items.cell.0, %list.1)
+      %outer_items.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "outer_items") ^catch.0()
+      %iter.0 : py.Value = py.getIter(%outer_items.0) ^catch.0()
+      jump ^head.0()
+    head.0():
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %a.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "a")
+      %set.9 : base.Unit = base.refSet[py.Value](%a.cell.0, %item.0)
+      %probe.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "probe") ^catch.0()
+      %a.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "a") ^catch.0()
+      %tuple.0 : py.Value = py.mkTuple(%a.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%probe.0, %tuple.0, %kwargs.0) ^catch.0()
+      jump ^head.0()
+    stop.0(%exc.0 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.0)
+      branch(%done.0) ^exit.0() ^catch.0(%exc.0)
+    exit.0():
+      %note.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "note") ^finRaise.0()
+      %int.5 : py.Value = py.intLit(2)
+      %tuple.1 : py.Value = py.mkTuple(%int.5)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%note.0, %tuple.1, %kwargs.1) ^finRaise.0()
+      jump ^join.1()
+    catch.0(%exc.1 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.1)
+      %KeyError.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "KeyError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.1, %KeyError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %note.1 : py.Value = py.loadGlobal("t30_loop_try_nested", "note") ^unwind.0()
+      %int.6 : py.Value = py.intLit(1)
+      %tuple.2 : py.Value = py.mkTuple(%int.6)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%note.1, %tuple.2, %kwargs.2) ^unwind.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      jump ^join.1()
+    next.0():
+      jump ^unwind.0(%exc.1)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^finRaise.0(%exc.2)
+    join.1():
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^fin.0(%comp.0)
+    finRaise.0(%exc.3 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.3)
+      jump ^fin.0(%comp.1)
+    fin.0(%pending.0 : py.Completion):
+      %prev.1 : py.Value = py.pushPending(%pending.0)
+      %cleanup.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "cleanup") ^superseded.0()
+      %tuple.3 : py.Value = py.mkTuple
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%cleanup.0, %tuple.3, %kwargs.3) ^superseded.0()
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      py.Completion.case(%pending.0) ^join.0() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
+    superseded.0(%exc.4 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.4)
+    join.0():
+      %outer_items.1 : py.Value = py.loadGlobal("t30_loop_try_nested", "outer_items") ^propagate.0()
+      %iter.1 : py.Value = py.getIter(%outer_items.1) ^propagate.0()
+      jump ^head.1()
+    head.1():
+      %item.1 : py.Value = py.next(%iter.1) ^stop.1()
+      %b.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "b")
+      %set.10 : base.Unit = base.refSet[py.Value](%b.cell.0, %item.1)
+      %probe.1 : py.Value = py.loadGlobal("t30_loop_try_nested", "probe") ^catch.1()
+      %b.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "b") ^catch.1()
+      %tuple.4 : py.Value = py.mkTuple(%b.0)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%probe.1, %tuple.4, %kwargs.4) ^catch.1()
+      %note.2 : py.Value = py.loadGlobal("t30_loop_try_nested", "note") ^finRaise.1()
+      %int.7 : py.Value = py.intLit(4)
+      %tuple.5 : py.Value = py.mkTuple(%int.7)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%note.2, %tuple.5, %kwargs.5) ^finRaise.1()
+      jump ^join.3()
+    catch.1(%exc.5 : py.Value):
+      %prev.2 : py.Value = py.pushExcInfo(%exc.5)
+      %ValueError.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "ValueError") ^unwind.1()
+      %match.1 : base.Bool = py.excMatch(%exc.5, %ValueError.0) ^unwind.1()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %note.3 : py.Value = py.loadGlobal("t30_loop_try_nested", "note") ^unwind.1()
+      %int.8 : py.Value = py.intLit(3)
+      %tuple.6 : py.Value = py.mkTuple(%int.8)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.6 : py.Value = py.call(%note.3, %tuple.6, %kwargs.6) ^unwind.1()
+      %pop.4 : base.Unit = py.popExcept(%prev.2)
+      %comp.2 : py.Completion = py.completionContinue
+      jump ^fin.1(%comp.2)
+    next.1():
+      jump ^unwind.1(%exc.5)
+    unwind.1(%exc.6 : py.Value):
+      %pop.5 : base.Unit = py.popExcept(%prev.2)
+      jump ^finRaise.1(%exc.6)
+    join.3():
+      %comp.3 : py.Completion = py.completionNormal
+      jump ^fin.1(%comp.3)
+    finRaise.1(%exc.7 : py.Value):
+      %comp.4 : py.Completion = py.completionRaise(%exc.7)
+      jump ^fin.1(%comp.4)
+    fin.1(%pending.1 : py.Completion):
+      %prev.3 : py.Value = py.pushPending(%pending.1)
+      %cleanup.1 : py.Value = py.loadGlobal("t30_loop_try_nested", "cleanup") ^superseded.1()
+      %tuple.7 : py.Value = py.mkTuple
+      %kwargs.7 : py.Value = py.mkKwargs
+      %call.7 : py.Value = py.call(%cleanup.1, %tuple.7, %kwargs.7) ^superseded.1()
+      %pop.6 : base.Unit = py.popExcept(%prev.3)
+      py.Completion.case(%pending.1) ^join.2() ^unreachable.3() ^propagate.0() ^exit.1() ^head.1()
+    unreachable.3(%val.1 : py.Value):
+      unreachable
+    superseded.1(%exc.8 : py.Value):
+      %pop.7 : base.Unit = py.popExcept(%prev.3)
+      jump ^propagate.0(%exc.8)
+    join.2():
+      jump ^head.1()
+    stop.1(%exc.9 : py.Value):
+      %done.1 : base.Bool = py.isStopIteration(%exc.9)
+      branch(%done.1) ^exit.1() ^propagate.0(%exc.9)
+    exit.1():
+      %outer_items.2 : py.Value = py.loadGlobal("t30_loop_try_nested", "outer_items") ^propagate.0()
+      %iter.2 : py.Value = py.getIter(%outer_items.2) ^propagate.0()
+      jump ^head.2()
+    head.2():
+      %item.2 : py.Value = py.next(%iter.2) ^stop.2()
+      %c.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "c")
+      %set.11 : base.Unit = base.refSet[py.Value](%c.cell.0, %item.2)
+      %check.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "check") ^finRaise.2()
+      %c.10 : py.Value = py.loadGlobal("t30_loop_try_nested", "c") ^finRaise.2()
+      %tuple.8 : py.Value = py.mkTuple(%c.10)
+      %kwargs.8 : py.Value = py.mkKwargs
+      %call.8 : py.Value = py.call(%check.0, %tuple.8, %kwargs.8) ^finRaise.2()
+      %cond.0 : base.Bool = py.truthy(%call.8) ^finRaise.2()
+      branch(%cond.0) ^then.0() ^else.1()
+    then.0():
+      %comp.5 : py.Completion = py.completionBreak
+      jump ^fin.2(%comp.5)
+    else.1():
+      jump ^join.5()
+    join.5():
+      %comp.6 : py.Completion = py.completionNormal
+      jump ^fin.2(%comp.6)
+    finRaise.2(%exc.10 : py.Value):
+      %comp.7 : py.Completion = py.completionRaise(%exc.10)
+      jump ^fin.2(%comp.7)
+    fin.2(%pending.2 : py.Completion):
+      %prev.4 : py.Value = py.pushPending(%pending.2)
+      %cleanup.2 : py.Value = py.loadGlobal("t30_loop_try_nested", "cleanup") ^superseded.2()
+      %tuple.9 : py.Value = py.mkTuple
+      %kwargs.9 : py.Value = py.mkKwargs
+      %call.9 : py.Value = py.call(%cleanup.2, %tuple.9, %kwargs.9) ^superseded.2()
+      %pop.8 : base.Unit = py.popExcept(%prev.4)
+      py.Completion.case(%pending.2) ^join.4() ^unreachable.4() ^propagate.0() ^exit.2() ^head.2()
+    unreachable.4(%val.2 : py.Value):
+      unreachable
+    superseded.2(%exc.11 : py.Value):
+      %pop.9 : base.Unit = py.popExcept(%prev.4)
+      jump ^propagate.0(%exc.11)
+    join.4():
+      jump ^head.2()
+    stop.2(%exc.12 : py.Value):
+      %done.2 : base.Bool = py.isStopIteration(%exc.12)
+      branch(%done.2) ^else.0() ^propagate.0(%exc.12)
+    else.0():
+      %note.4 : py.Value = py.loadGlobal("t30_loop_try_nested", "note") ^propagate.0()
+      %int.9 : py.Value = py.intLit(5)
+      %tuple.10 : py.Value = py.mkTuple(%int.9)
+      %kwargs.10 : py.Value = py.mkKwargs
+      %call.10 : py.Value = py.call(%note.4, %tuple.10, %kwargs.10) ^propagate.0()
+      jump ^exit.2()
+    exit.2():
+      %outer_items.3 : py.Value = py.loadGlobal("t30_loop_try_nested", "outer_items") ^propagate.0()
+      %iter.3 : py.Value = py.getIter(%outer_items.3) ^propagate.0()
+      jump ^head.3()
+    head.3():
+      %item.3 : py.Value = py.next(%iter.3) ^stop.3()
+      %d.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "d")
+      %set.12 : base.Unit = base.refSet[py.Value](%d.cell.0, %item.3)
+      %inner_items.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "inner_items") ^propagate.0()
+      %iter.4 : py.Value = py.getIter(%inner_items.0) ^propagate.0()
+      jump ^head.4()
+    head.4():
+      %item.4 : py.Value = py.next(%iter.4) ^stop.4()
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "e")
+      %set.13 : base.Unit = base.refSet[py.Value](%e.cell.0, %item.4)
+      %probe.2 : py.Value = py.loadGlobal("t30_loop_try_nested", "probe") ^catch.2()
+      %e.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "e") ^catch.2()
+      %tuple.11 : py.Value = py.mkTuple(%e.0)
+      %kwargs.11 : py.Value = py.mkKwargs
+      %call.11 : py.Value = py.call(%probe.2, %tuple.11, %kwargs.11) ^catch.2()
+      jump ^join.6()
+    catch.2(%exc.13 : py.Value):
+      %prev.5 : py.Value = py.pushExcInfo(%exc.13)
+      %IndexError.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "IndexError") ^unwind.2()
+      %match.2 : base.Bool = py.excMatch(%exc.13, %IndexError.0) ^unwind.2()
+      branch(%match.2) ^except.2() ^next.2()
+    except.2():
+      %pop.10 : base.Unit = py.popExcept(%prev.5)
+      jump ^exit.4()
+    next.2():
+      jump ^unwind.2(%exc.13)
+    unwind.2(%exc.14 : py.Value):
+      %pop.11 : base.Unit = py.popExcept(%prev.5)
+      jump ^propagate.0(%exc.14)
+    join.6():
+      jump ^head.4()
+    stop.4(%exc.15 : py.Value):
+      %done.3 : base.Bool = py.isStopIteration(%exc.15)
+      branch(%done.3) ^else.2() ^propagate.0(%exc.15)
+    else.2():
+      %note.5 : py.Value = py.loadGlobal("t30_loop_try_nested", "note") ^propagate.0()
+      %int.10 : py.Value = py.intLit(6)
+      %tuple.12 : py.Value = py.mkTuple(%int.10)
+      %kwargs.12 : py.Value = py.mkKwargs
+      %call.12 : py.Value = py.call(%note.5, %tuple.12, %kwargs.12) ^propagate.0()
+      jump ^exit.4()
+    exit.4():
+      %note.6 : py.Value = py.loadGlobal("t30_loop_try_nested", "note") ^propagate.0()
+      %int.11 : py.Value = py.intLit(7)
+      %tuple.13 : py.Value = py.mkTuple(%int.11)
+      %kwargs.13 : py.Value = py.mkKwargs
+      %call.13 : py.Value = py.call(%note.6, %tuple.13, %kwargs.13) ^propagate.0()
+      jump ^head.3()
+    stop.3(%exc.16 : py.Value):
+      %done.4 : base.Bool = py.isStopIteration(%exc.16)
+      branch(%done.4) ^exit.3() ^propagate.0(%exc.16)
+    exit.3():
+      %iter.5 : py.Value = py.loadGlobal("t30_loop_try_nested", "iter") ^propagate.0()
+      %inner_items.1 : py.Value = py.loadGlobal("t30_loop_try_nested", "inner_items") ^propagate.0()
+      %tuple.14 : py.Value = py.mkTuple(%inner_items.1)
+      %kwargs.14 : py.Value = py.mkKwargs
+      %call.14 : py.Value = py.call(%iter.5, %tuple.14, %kwargs.14) ^propagate.0()
+      %manual.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "manual")
+      %set.14 : base.Unit = base.refSet[py.Value](%manual.cell.0, %call.14)
+      %outer_items.4 : py.Value = py.loadGlobal("t30_loop_try_nested", "outer_items") ^propagate.0()
+      %iter.6 : py.Value = py.getIter(%outer_items.4) ^propagate.0()
+      jump ^head.5()
+    head.5():
+      %item.5 : py.Value = py.next(%iter.6) ^stop.5()
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "f")
+      %set.15 : base.Unit = base.refSet[py.Value](%f.cell.0, %item.5)
+      %next.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "next") ^catch.3()
+      %manual.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "manual") ^catch.3()
+      %tuple.15 : py.Value = py.mkTuple(%manual.0)
+      %kwargs.15 : py.Value = py.mkKwargs
+      %call.15 : py.Value = py.call(%next.0, %tuple.15, %kwargs.15) ^catch.3()
+      %g.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "g")
+      %set.16 : base.Unit = base.refSet[py.Value](%g.cell.0, %call.15)
+      %probe.3 : py.Value = py.loadGlobal("t30_loop_try_nested", "probe") ^propagate.0()
+      %g.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "g") ^propagate.0()
+      %tuple.16 : py.Value = py.mkTuple(%g.0)
+      %kwargs.16 : py.Value = py.mkKwargs
+      %call.16 : py.Value = py.call(%probe.3, %tuple.16, %kwargs.16) ^propagate.0()
+      jump ^join.7()
+    catch.3(%exc.17 : py.Value):
+      %prev.6 : py.Value = py.pushExcInfo(%exc.17)
+      %StopIteration.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "StopIteration") ^unwind.3()
+      %match.3 : base.Bool = py.excMatch(%exc.17, %StopIteration.0) ^unwind.3()
+      branch(%match.3) ^except.3() ^next.3()
+    except.3():
+      %note.7 : py.Value = py.loadGlobal("t30_loop_try_nested", "note") ^unwind.3()
+      %int.12 : py.Value = py.intLit(8)
+      %tuple.17 : py.Value = py.mkTuple(%int.12)
+      %kwargs.17 : py.Value = py.mkKwargs
+      %call.17 : py.Value = py.call(%note.7, %tuple.17, %kwargs.17) ^unwind.3()
+      %pop.12 : base.Unit = py.popExcept(%prev.6)
+      jump ^exit.5()
+    next.3():
+      jump ^unwind.3(%exc.17)
+    unwind.3(%exc.18 : py.Value):
+      %pop.13 : base.Unit = py.popExcept(%prev.6)
+      jump ^propagate.0(%exc.18)
+    join.7():
+      jump ^head.5()
+    stop.5(%exc.19 : py.Value):
+      %done.5 : base.Bool = py.isStopIteration(%exc.19)
+      branch(%done.5) ^exit.5() ^propagate.0(%exc.19)
+    exit.5():
+      %outer_items.5 : py.Value = py.loadGlobal("t30_loop_try_nested", "outer_items") ^propagate.0()
+      %iter.7 : py.Value = py.getIter(%outer_items.5) ^propagate.0()
+      jump ^head.6()
+    head.6():
+      %item.6 : py.Value = py.next(%iter.7) ^stop.6()
+      %m.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "m")
+      %set.17 : base.Unit = base.refSet[py.Value](%m.cell.0, %item.6)
+      %raiser.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "raiser") ^catch.4()
+      %tuple.18 : py.Value = py.mkTuple
+      %kwargs.18 : py.Value = py.mkKwargs
+      %call.18 : py.Value = py.call(%raiser.0, %tuple.18, %kwargs.18) ^catch.4()
+      jump ^join.9()
+    catch.4(%exc.20 : py.Value):
+      %prev.7 : py.Value = py.pushExcInfo(%exc.20)
+      %StopIteration.1 : py.Value = py.loadGlobal("t30_loop_try_nested", "StopIteration") ^unwind.4()
+      %match.4 : base.Bool = py.excMatch(%exc.20, %StopIteration.1) ^unwind.4()
+      branch(%match.4) ^except.4() ^next.4()
+    except.4():
+      %note.8 : py.Value = py.loadGlobal("t30_loop_try_nested", "note") ^unwind.4()
+      %int.13 : py.Value = py.intLit(9)
+      %tuple.19 : py.Value = py.mkTuple(%int.13)
+      %kwargs.19 : py.Value = py.mkKwargs
+      %call.19 : py.Value = py.call(%note.8, %tuple.19, %kwargs.19) ^unwind.4()
+      %pop.14 : base.Unit = py.popExcept(%prev.7)
+      %comp.8 : py.Completion = py.completionContinue
+      jump ^fin.3(%comp.8)
+    next.4():
+      jump ^unwind.4(%exc.20)
+    unwind.4(%exc.21 : py.Value):
+      %pop.15 : base.Unit = py.popExcept(%prev.7)
+      jump ^finRaise.3(%exc.21)
+    join.9():
+      %comp.9 : py.Completion = py.completionNormal
+      jump ^fin.3(%comp.9)
+    finRaise.3(%exc.22 : py.Value):
+      %comp.10 : py.Completion = py.completionRaise(%exc.22)
+      jump ^fin.3(%comp.10)
+    fin.3(%pending.3 : py.Completion):
+      %prev.8 : py.Value = py.pushPending(%pending.3)
+      %cleanup.3 : py.Value = py.loadGlobal("t30_loop_try_nested", "cleanup") ^superseded.3()
+      %tuple.20 : py.Value = py.mkTuple
+      %kwargs.20 : py.Value = py.mkKwargs
+      %call.20 : py.Value = py.call(%cleanup.3, %tuple.20, %kwargs.20) ^superseded.3()
+      %pop.16 : base.Unit = py.popExcept(%prev.8)
+      py.Completion.case(%pending.3) ^join.8() ^unreachable.5() ^propagate.0() ^exit.6() ^head.6()
+    unreachable.5(%val.3 : py.Value):
+      unreachable
+    superseded.3(%exc.23 : py.Value):
+      %pop.17 : base.Unit = py.popExcept(%prev.8)
+      jump ^propagate.0(%exc.23)
+    join.8():
+      jump ^head.6()
+    stop.6(%exc.24 : py.Value):
+      %done.6 : base.Bool = py.isStopIteration(%exc.24)
+      branch(%done.6) ^exit.6() ^propagate.0(%exc.24)
+    exit.6():
+      %int.14 : py.Value = py.intLit(0)
+      %k.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "k")
+      %set.18 : base.Unit = base.refSet[py.Value](%k.cell.0, %int.14)
+      jump ^head.7()
+    head.7():
+      %k.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "k") ^propagate.0()
+      %int.15 : py.Value = py.intLit(3)
+      %lt.0 : py.Value = py.lt(%k.0, %int.15) ^propagate.0()
+      %cond.1 : base.Bool = py.truthy(%lt.0) ^propagate.0()
+      branch(%cond.1) ^body.0() ^else.3()
+    body.0():
+      %probe.4 : py.Value = py.loadGlobal("t30_loop_try_nested", "probe") ^catch.5()
+      %k.1 : py.Value = py.loadGlobal("t30_loop_try_nested", "k") ^catch.5()
+      %tuple.21 : py.Value = py.mkTuple(%k.1)
+      %kwargs.21 : py.Value = py.mkKwargs
+      %call.21 : py.Value = py.call(%probe.4, %tuple.21, %kwargs.21) ^catch.5()
+      jump ^join.11()
+    catch.5(%exc.25 : py.Value):
+      %prev.9 : py.Value = py.pushExcInfo(%exc.25)
+      %TypeError.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "TypeError") ^unwind.5()
+      %match.5 : base.Bool = py.excMatch(%exc.25, %TypeError.0) ^unwind.5()
+      branch(%match.5) ^except.5() ^next.5()
+    except.5():
+      %note.9 : py.Value = py.loadGlobal("t30_loop_try_nested", "note") ^unwind.5()
+      %int.16 : py.Value = py.intLit(10)
+      %tuple.22 : py.Value = py.mkTuple(%int.16)
+      %kwargs.22 : py.Value = py.mkKwargs
+      %call.22 : py.Value = py.call(%note.9, %tuple.22, %kwargs.22) ^unwind.5()
+      %pop.18 : base.Unit = py.popExcept(%prev.9)
+      jump ^join.11()
+    next.5():
+      jump ^unwind.5(%exc.25)
+    unwind.5(%exc.26 : py.Value):
+      %pop.19 : base.Unit = py.popExcept(%prev.9)
+      jump ^finRaise.4(%exc.26)
+    join.11():
+      %comp.11 : py.Completion = py.completionNormal
+      jump ^fin.4(%comp.11)
+    finRaise.4(%exc.27 : py.Value):
+      %comp.12 : py.Completion = py.completionRaise(%exc.27)
+      jump ^fin.4(%comp.12)
+    fin.4(%pending.4 : py.Completion):
+      %prev.10 : py.Value = py.pushPending(%pending.4)
+      %k.2 : py.Value = py.loadGlobal("t30_loop_try_nested", "k") ^superseded.4()
+      %int.17 : py.Value = py.intLit(1)
+      %add.0 : py.Value = py.add(%k.2, %int.17) ^superseded.4()
+      %k.cell.1 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "k")
+      %set.19 : base.Unit = base.refSet[py.Value](%k.cell.1, %add.0)
+      %pop.20 : base.Unit = py.popExcept(%prev.10)
+      py.Completion.case(%pending.4) ^join.10() ^unreachable.6() ^propagate.0() ^exit.7() ^head.7()
+    unreachable.6(%val.4 : py.Value):
+      unreachable
+    superseded.4(%exc.28 : py.Value):
+      %pop.21 : base.Unit = py.popExcept(%prev.10)
+      jump ^propagate.0(%exc.28)
+    join.10():
+      jump ^head.7()
+    else.3():
+      %note.10 : py.Value = py.loadGlobal("t30_loop_try_nested", "note") ^propagate.0()
+      %int.18 : py.Value = py.intLit(11)
+      %tuple.23 : py.Value = py.mkTuple(%int.18)
+      %kwargs.23 : py.Value = py.mkKwargs
+      %call.23 : py.Value = py.call(%note.10, %tuple.23, %kwargs.23) ^propagate.0()
+      jump ^exit.7()
+    exit.7():
+      %outer_items.6 : py.Value = py.loadGlobal("t30_loop_try_nested", "outer_items") ^finRaise.5()
+      %iter.8 : py.Value = py.getIter(%outer_items.6) ^finRaise.5()
+      jump ^head.8()
+    head.8():
+      %item.7 : py.Value = py.next(%iter.8) ^stop.7()
+      %i.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "i")
+      %set.20 : base.Unit = base.refSet[py.Value](%i.cell.0, %item.7)
+      %inner_items.2 : py.Value = py.loadGlobal("t30_loop_try_nested", "inner_items") ^finRaise.5()
+      %iter.9 : py.Value = py.getIter(%inner_items.2) ^finRaise.5()
+      jump ^head.9()
+    head.9():
+      %item.8 : py.Value = py.next(%iter.9) ^stop.8()
+      %j.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "j")
+      %set.21 : base.Unit = base.refSet[py.Value](%j.cell.0, %item.8)
+      %check.1 : py.Value = py.loadGlobal("t30_loop_try_nested", "check") ^finRaise.5()
+      %j.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "j") ^finRaise.5()
+      %tuple.24 : py.Value = py.mkTuple(%j.0)
+      %kwargs.24 : py.Value = py.mkKwargs
+      %call.24 : py.Value = py.call(%check.1, %tuple.24, %kwargs.24) ^finRaise.5()
+      %cond.2 : base.Bool = py.truthy(%call.24) ^finRaise.5()
+      branch(%cond.2) ^then.1() ^else.5()
+    then.1():
+      jump ^exit.9()
+    else.5():
+      jump ^join.13()
+    join.13():
+      jump ^head.9()
+    stop.8(%exc.29 : py.Value):
+      %done.7 : base.Bool = py.isStopIteration(%exc.29)
+      branch(%done.7) ^else.4() ^finRaise.5(%exc.29)
+    else.4():
+      jump ^head.8()
+    exit.9():
+      jump ^exit.8()
+    stop.7(%exc.30 : py.Value):
+      %done.8 : base.Bool = py.isStopIteration(%exc.30)
+      branch(%done.8) ^exit.8() ^finRaise.5(%exc.30)
+    exit.8():
+      %comp.13 : py.Completion = py.completionNormal
+      jump ^fin.5(%comp.13)
+    finRaise.5(%exc.31 : py.Value):
+      %comp.14 : py.Completion = py.completionRaise(%exc.31)
+      jump ^fin.5(%comp.14)
+    fin.5(%pending.5 : py.Completion):
+      %prev.11 : py.Value = py.pushPending(%pending.5)
+      %cleanup.4 : py.Value = py.loadGlobal("t30_loop_try_nested", "cleanup") ^superseded.5()
+      %tuple.25 : py.Value = py.mkTuple
+      %kwargs.25 : py.Value = py.mkKwargs
+      %call.25 : py.Value = py.call(%cleanup.4, %tuple.25, %kwargs.25) ^superseded.5()
+      %pop.22 : base.Unit = py.popExcept(%prev.11)
+      py.Completion.case(%pending.5) ^join.12() ^unreachable.7() ^propagate.0() ^unreachable.8() ^unreachable.9()
+    unreachable.7(%val.5 : py.Value):
+      unreachable
+    unreachable.8():
+      unreachable
+    unreachable.9():
+      unreachable
+    superseded.5(%exc.32 : py.Value):
+      %pop.23 : base.Unit = py.popExcept(%prev.11)
+      jump ^propagate.0(%exc.32)
+    join.12():
+      %clo.5 : py.Value = py.mkClosure(@t30_loop_try_nested.drain)
+      %drain.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "drain")
+      %set.22 : base.Unit = base.refSet[py.Value](%drain.cell.0, %clo.5)
+      %clo.6 : py.Value = py.mkClosure(@t30_loop_try_nested.nested_return)
+      %nested_return.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "nested_return")
+      %set.23 : base.Unit = base.refSet[py.Value](%nested_return.cell.0, %clo.6)
+      %clo.7 : py.Value = py.mkClosure(@t30_loop_try_nested.loop_else_return)
+      %loop_else_return.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "loop_else_return")
+      %set.24 : base.Unit = base.refSet[py.Value](%loop_else_return.cell.0, %clo.7)
+      %drain.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "drain") ^propagate.0()
+      %iter.10 : py.Value = py.loadGlobal("t30_loop_try_nested", "iter") ^propagate.0()
+      %inner_items.3 : py.Value = py.loadGlobal("t30_loop_try_nested", "inner_items") ^propagate.0()
+      %tuple.26 : py.Value = py.mkTuple(%inner_items.3)
+      %kwargs.26 : py.Value = py.mkKwargs
+      %call.26 : py.Value = py.call(%iter.10, %tuple.26, %kwargs.26) ^propagate.0()
+      %tuple.27 : py.Value = py.mkTuple(%call.26)
+      %kwargs.27 : py.Value = py.mkKwargs
+      %call.27 : py.Value = py.call(%drain.0, %tuple.27, %kwargs.27) ^propagate.0()
+      %nested_return.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "nested_return") ^propagate.0()
+      %outer_items.7 : py.Value = py.loadGlobal("t30_loop_try_nested", "outer_items") ^propagate.0()
+      %inner_items.4 : py.Value = py.loadGlobal("t30_loop_try_nested", "inner_items") ^propagate.0()
+      %tuple.28 : py.Value = py.mkTuple(%outer_items.7, %inner_items.4)
+      %kwargs.28 : py.Value = py.mkKwargs
+      %call.28 : py.Value = py.call(%nested_return.0, %tuple.28, %kwargs.28) ^propagate.0()
+      %loop_else_return.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "loop_else_return") ^propagate.0()
+      %outer_items.8 : py.Value = py.loadGlobal("t30_loop_try_nested", "outer_items") ^propagate.0()
+      %tuple.29 : py.Value = py.mkTuple(%outer_items.8)
+      %kwargs.29 : py.Value = py.mkKwargs
+      %call.29 : py.Value = py.call(%loop_else_return.0, %tuple.29, %kwargs.29) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.33 : py.Value):
+      %exc.34 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.33)
+      ret(%exc.34)
+  }
+  func @t30_loop_try_nested.probe(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %x.1 : py.Value = py.undef("x")
+      %fill.0 : py.Value = py.mkTuple(%x.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("x")
+      %x.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "probe() got multiple values for argument 'x'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "probe() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "probe() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %x.3 : py.Value = py.requireDefined(%x.2, "TypeError", "probe() missing 1 required positional argument: 'x'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.3)
+      %x.4 : py.Value = base.refGet[py.Value](%x.cell.0)
+      %x.5 : py.Value = py.requireDefined(%x.4, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.5)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @t30_loop_try_nested.check(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %x.1 : py.Value = py.undef("x")
+      %fill.0 : py.Value = py.mkTuple(%x.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("x")
+      %x.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "check() got multiple values for argument 'x'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "check() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "check() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %x.3 : py.Value = py.requireDefined(%x.2, "TypeError", "check() missing 1 required positional argument: 'x'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.3)
+      %x.4 : py.Value = base.refGet[py.Value](%x.cell.0)
+      %x.5 : py.Value = py.requireDefined(%x.4, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.5)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @t30_loop_try_nested.cleanup(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "cleanup() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "cleanup() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @t30_loop_try_nested.note(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %tag.0 : py.Value = py.undef("tag")
+      %tag.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%tag.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %tag.1 : py.Value = py.undef("tag")
+      %fill.0 : py.Value = py.mkTuple(%tag.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("tag")
+      %tag.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "note() got multiple values for argument 'tag'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "note() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "note() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %tag.3 : py.Value = py.requireDefined(%tag.2, "TypeError", "note() missing 1 required positional argument: 'tag'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%tag.cell.0, %tag.3)
+      %tag.4 : py.Value = base.refGet[py.Value](%tag.cell.0)
+      %tag.5 : py.Value = py.requireDefined(%tag.4, "UnboundLocalError", "cannot access local variable 'tag' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tag.5)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @t30_loop_try_nested.raiser(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "raiser() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "raiser() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %StopIteration.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "StopIteration") ^propagate.0()
+      %exc.0 : py.Value = py.toException(%StopIteration.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @t30_loop_try_nested.drain(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %it.0 : py.Value = py.undef("it")
+      %it.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%it.0)
+      %h.0 : py.Value = py.undef("h")
+      %h.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%h.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %it.1 : py.Value = py.undef("it")
+      %fill.0 : py.Value = py.mkTuple(%it.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("it")
+      %it.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "drain() got multiple values for argument 'it'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "drain() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "drain() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %it.3 : py.Value = py.requireDefined(%it.2, "TypeError", "drain() missing 1 required positional argument: 'it'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%it.cell.0, %it.3)
+      jump ^head.0()
+    head.0():
+      %bool.0 : py.Value = py.boolLit(true)
+      %cond.0 : base.Bool = py.truthy(%bool.0) ^finRaise.0()
+      branch(%cond.0) ^body.0() ^exit.0()
+    body.0():
+      %next.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "next") ^catch.0()
+      %it.4 : py.Value = base.refGet[py.Value](%it.cell.0)
+      %it.5 : py.Value = py.requireDefined(%it.4, "UnboundLocalError", "cannot access local variable 'it' where it is not associated with a value") ^catch.0()
+      %tuple.0 : py.Value = py.mkTuple(%it.5)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%next.0, %tuple.0, %kwargs.1) ^catch.0()
+      %set.1 : base.Unit = base.refSet[py.Value](%h.cell.0, %call.0)
+      jump ^join.1()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %StopIteration.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "StopIteration") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %StopIteration.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %int.1 : py.Value = py.intLit(0)
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %comp.0 : py.Completion = py.completionReturn(%int.1)
+      jump ^fin.0(%comp.0)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.1 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^finRaise.0(%exc.1)
+    join.1():
+      %probe.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "probe") ^finRaise.0()
+      %h.1 : py.Value = base.refGet[py.Value](%h.cell.0)
+      %h.2 : py.Value = py.requireDefined(%h.1, "UnboundLocalError", "cannot access local variable 'h' where it is not associated with a value") ^finRaise.0()
+      %tuple.1 : py.Value = py.mkTuple(%h.2)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%probe.0, %tuple.1, %kwargs.2) ^finRaise.0()
+      jump ^head.0()
+    exit.0():
+      %comp.1 : py.Completion = py.completionNormal
+      jump ^fin.0(%comp.1)
+    finRaise.0(%exc.2 : py.Value):
+      %comp.2 : py.Completion = py.completionRaise(%exc.2)
+      jump ^fin.0(%comp.2)
+    fin.0(%pending.0 : py.Completion):
+      %prev.1 : py.Value = py.pushPending(%pending.0)
+      %cleanup.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "cleanup") ^superseded.0()
+      %tuple.2 : py.Value = py.mkTuple
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%cleanup.0, %tuple.2, %kwargs.3) ^superseded.0()
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      py.Completion.case(%pending.0) ^join.0() ^ret.0() ^propagate.0() ^unreachable.0() ^unreachable.1()
+    ret.0(%val.0 : py.Value):
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%val.0)
+      ret(%ret.0)
+    unreachable.0():
+      unreachable
+    unreachable.1():
+      unreachable
+    superseded.0(%exc.3 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.3)
+    join.0():
+      %none.1 : py.Value = py.noneLit
+      %ret.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.1)
+    propagate.0(%exc.4 : py.Value):
+      %exc.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
+      ret(%exc.5)
+  }
+  func @t30_loop_try_nested.nested_return(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %outer.0 : py.Value = py.undef("outer")
+      %outer.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%outer.0)
+      %inner.0 : py.Value = py.undef("inner")
+      %inner.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%inner.0)
+      %p.0 : py.Value = py.undef("p")
+      %p.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%p.0)
+      %q.0 : py.Value = py.undef("q")
+      %q.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%q.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %outer.1 : py.Value = py.undef("outer")
+      %inner.1 : py.Value = py.undef("inner")
+      %fill.0 : py.Value = py.mkTuple(%outer.1, %inner.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("outer")
+      %outer.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %int.1 : py.Value = py.intLit(1)
+      %pos.1 : py.Value = py.getItem(%pad.0, %int.1) ^propagate.0()
+      %str.1 : py.Value = py.strLit("inner")
+      %inner.2 : py.Value = py.dictGet(%kwargs.0, %str.1, %pos.1)
+      %inKw.1 : py.Value = py.in(%str.1, %kwargs.0) ^propagate.0()
+      %discard.1 : base.Unit = py.dictDiscard(%kwargs.0, %str.1)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "nested_return() got multiple values for argument 'outer'") ^propagate.0()
+      %filled.1 : py.Value = py.lt(%int.1, %nargs.0) ^propagate.0()
+      %both.1 : py.Value = py.mult(%inKw.1, %filled.1) ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%both.1, 0, "TypeError", "nested_return() got multiple values for argument 'inner'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.2 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "nested_return() got an unexpected keyword argument {}") ^propagate.0()
+      %check.3 : base.Unit = py.requireAtMost(%nargs.0, 2, "TypeError", "nested_return() takes 2 positional arguments but {} {was} given") ^propagate.0()
+      %outer.3 : py.Value = py.requireDefined(%outer.2, "TypeError", "nested_return() missing 1 required positional argument: 'outer'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%outer.cell.0, %outer.3)
+      %inner.3 : py.Value = py.requireDefined(%inner.2, "TypeError", "nested_return() missing 1 required positional argument: 'inner'") ^propagate.0()
+      %set.1 : base.Unit = base.refSet[py.Value](%inner.cell.0, %inner.3)
+      %outer.4 : py.Value = base.refGet[py.Value](%outer.cell.0)
+      %outer.5 : py.Value = py.requireDefined(%outer.4, "UnboundLocalError", "cannot access local variable 'outer' where it is not associated with a value") ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%outer.5) ^propagate.0()
+      jump ^head.0()
+    head.0():
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %set.2 : base.Unit = base.refSet[py.Value](%p.cell.0, %item.0)
+      %inner.4 : py.Value = base.refGet[py.Value](%inner.cell.0)
+      %inner.5 : py.Value = py.requireDefined(%inner.4, "UnboundLocalError", "cannot access local variable 'inner' where it is not associated with a value") ^finRaise.0()
+      %iter.1 : py.Value = py.getIter(%inner.5) ^finRaise.0()
+      jump ^head.1()
+    head.1():
+      %item.1 : py.Value = py.next(%iter.1) ^stop.1()
+      %set.3 : base.Unit = base.refSet[py.Value](%q.cell.0, %item.1)
+      %check.4 : py.Value = py.loadGlobal("t30_loop_try_nested", "check") ^finRaise.1()
+      %q.1 : py.Value = base.refGet[py.Value](%q.cell.0)
+      %q.2 : py.Value = py.requireDefined(%q.1, "UnboundLocalError", "cannot access local variable 'q' where it is not associated with a value") ^finRaise.1()
+      %tuple.0 : py.Value = py.mkTuple(%q.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%check.4, %tuple.0, %kwargs.1) ^finRaise.1()
+      %cond.0 : base.Bool = py.truthy(%call.0) ^finRaise.1()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %q.3 : py.Value = base.refGet[py.Value](%q.cell.0)
+      %q.4 : py.Value = py.requireDefined(%q.3, "UnboundLocalError", "cannot access local variable 'q' where it is not associated with a value") ^finRaise.1()
+      %comp.0 : py.Completion = py.completionReturn(%q.4)
+      jump ^fin.1(%comp.0)
+    else.0():
+      jump ^join.2()
+    join.2():
+      %comp.1 : py.Completion = py.completionNormal
+      jump ^fin.1(%comp.1)
+    finRaise.1(%exc.0 : py.Value):
+      %comp.2 : py.Completion = py.completionRaise(%exc.0)
+      jump ^fin.1(%comp.2)
+    fin.1(%pending.0 : py.Completion):
+      %prev.0 : py.Value = py.pushPending(%pending.0)
+      %note.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "note") ^superseded.0()
+      %int.2 : py.Value = py.intLit(12)
+      %tuple.1 : py.Value = py.mkTuple(%int.2)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%note.0, %tuple.1, %kwargs.2) ^superseded.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      py.Completion.case(%pending.0) ^join.1() ^ret.0() ^finRaise.0() ^exit.1() ^head.1()
+    ret.0(%val.0 : py.Value):
+      %comp.3 : py.Completion = py.completionReturn(%val.0)
+      jump ^fin.0(%comp.3)
+    superseded.0(%exc.1 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^finRaise.0(%exc.1)
+    join.1():
+      jump ^head.1()
+    stop.1(%exc.2 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.2)
+      branch(%done.0) ^exit.1() ^finRaise.0(%exc.2)
+    exit.1():
+      %comp.4 : py.Completion = py.completionNormal
+      jump ^fin.0(%comp.4)
+    finRaise.0(%exc.3 : py.Value):
+      %comp.5 : py.Completion = py.completionRaise(%exc.3)
+      jump ^fin.0(%comp.5)
+    fin.0(%pending.1 : py.Completion):
+      %prev.1 : py.Value = py.pushPending(%pending.1)
+      %cleanup.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "cleanup") ^superseded.1()
+      %tuple.2 : py.Value = py.mkTuple
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%cleanup.0, %tuple.2, %kwargs.3) ^superseded.1()
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      py.Completion.case(%pending.1) ^join.0() ^ret.1() ^propagate.0() ^exit.0() ^head.0()
+    ret.1(%val.1 : py.Value):
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%val.1)
+      ret(%ret.0)
+    superseded.1(%exc.4 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.4)
+    join.0():
+      jump ^head.0()
+    stop.0(%exc.5 : py.Value):
+      %done.1 : base.Bool = py.isStopIteration(%exc.5)
+      branch(%done.1) ^exit.0() ^propagate.0(%exc.5)
+    exit.0():
+      %int.3 : py.Value = py.intLit(0)
+      %ret.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.3)
+      ret(%ret.1)
+    propagate.0(%exc.6 : py.Value):
+      %exc.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.6)
+      ret(%exc.7)
+  }
+  func @t30_loop_try_nested.loop_else_return(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %items.0 : py.Value = py.undef("items")
+      %items.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%items.0)
+      %r.0 : py.Value = py.undef("r")
+      %r.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%r.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %items.1 : py.Value = py.undef("items")
+      %fill.0 : py.Value = py.mkTuple(%items.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("items")
+      %items.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "loop_else_return() got multiple values for argument 'items'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "loop_else_return() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "loop_else_return() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %items.3 : py.Value = py.requireDefined(%items.2, "TypeError", "loop_else_return() missing 1 required positional argument: 'items'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%items.cell.0, %items.3)
+      %items.4 : py.Value = base.refGet[py.Value](%items.cell.0)
+      %items.5 : py.Value = py.requireDefined(%items.4, "UnboundLocalError", "cannot access local variable 'items' where it is not associated with a value") ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%items.5) ^propagate.0()
+      jump ^head.0()
+    head.0():
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %set.1 : base.Unit = base.refSet[py.Value](%r.cell.0, %item.0)
+      %check.3 : py.Value = py.loadGlobal("t30_loop_try_nested", "check") ^propagate.0()
+      %r.1 : py.Value = base.refGet[py.Value](%r.cell.0)
+      %r.2 : py.Value = py.requireDefined(%r.1, "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%r.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%check.3, %tuple.0, %kwargs.1) ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%call.0) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.1()
+    then.0():
+      jump ^exit.0()
+    else.1():
+      jump ^join.0()
+    join.0():
+      jump ^head.0()
+    stop.0(%exc.0 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.0)
+      branch(%done.0) ^else.0() ^propagate.0(%exc.0)
+    else.0():
+      %int.1 : py.Value = py.intLit(1)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.1)
+      ret(%ret.0)
+    exit.0():
+      %int.2 : py.Value = py.intLit(2)
+      %ret.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.2)
+      ret(%ret.1)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+}
+
