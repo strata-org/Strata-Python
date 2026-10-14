@@ -1046,7 +1046,8 @@ and the others as supported.
 
 These checks apply to all of them. `Module.Raw.WF` holds. Every block is reachable from the
 entry, or from a handler block that no operation names, such as the `catch` of a `try` body
-that cannot fail. No `finally` or `__exit__` body is
+that cannot fail. `MantleTranslateTest` checks it, taking a block whose one parameter is a
+`py.Value` for such a handler. No `finally` or `__exit__` body is
 emitted more than once.
 
 ## 11. Coverage

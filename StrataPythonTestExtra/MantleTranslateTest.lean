@@ -34,8 +34,8 @@ to give: a rejected construct's name, the message without " is not supported", o
 error's message.
 
 A test *translates* when its diagnostics are exactly the expected ones.  Every module must be
-well formed (`Module.Raw.WF`), have no name with a `.` inside a segment, and read back from its
-full printed form with the same ids and the same names.  A supported test must translate, and
+well formed (`Module.Raw.WF`), have no name with a `.` inside a segment and no block that control
+cannot reach, and read back from its full printed form with the same ids and the same names.  A supported test must translate, and
 its diagnostics and printed module must equal `NAME.expected.mantle` beside `NAME.py`.  A test
 not yet supported must not translate; one that does fails, and must be marked `yes`.
 
@@ -47,7 +47,7 @@ namespace StrataPython.MantleTranslateTest
 
 open StrataPython.Mantle.PyTranslate (translate formatDiagnostic nameText)
 open StrataPython (withPython)
-open StrataPython.Mantle.TestUtil (compilePython firstDiff dottedNames)
+open StrataPython.Mantle.TestUtil (compilePython firstDiff dottedNames deadBlocks)
 
 private meta def root : System.FilePath := "StrataPythonTest"
 
@@ -124,6 +124,11 @@ private meta def runCase (pythonCmd tmpDir : System.FilePath) (update : Bool)
   unless (dottedNames r.module).isEmpty do
     return .failed s!"{e.path}: a name has a `.` inside a segment: \
       {(dottedNames r.module).map Strata.Mantle.ToDDM.nameText}"
+  for f in r.module.funcs do
+    let dead := deadBlocks StrataPython.Mantle.Py.Value.ty f
+    unless dead.isEmpty do
+      return .failed s!"{e.path}: {Strata.Mantle.ToDDM.nameText f.name}: unreachable blocks \
+        {dead.map (Strata.Mantle.ToDDM.nameText ·.name)}"
   -- Reading the full form back gives the same functions: the same ids and the same names.
   let full := m.format .full
   match ← Strata.Mantle.Module.read StrataPython.Mantle.Py.env full e.path with
