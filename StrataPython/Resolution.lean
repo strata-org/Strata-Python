@@ -971,7 +971,7 @@ def FuncSig.laurelDeclInputs (sig : FuncSig) : List (Identifier × PythonType) :
 
     Includes receiver slot for instance methods. Lives in Resolution
     because it accesses private `ParamList` fields and resolved defaults. -/
-def FuncSig.matchArgs [Monad m] [Inhabited (m α)] (sig : FuncSig) (posArgs : List α) (kwargs : List (String × α))
+def FuncSig.matchArgs {m : Type → Type} {α : Type} [Monad m] [Inhabited (m α)] (sig : FuncSig) (posArgs : List α) (kwargs : List (String × α))
     (translateDefault : ResolvedPythonExpr → m α) (mkKwargs : m (Option α) := pure none) : m (List α) := do
   let (receiverSlot, pl) := match sig.params with
     | .instance recv pl => ([(recv.val, (none : Option ResolvedPythonExpr))], pl)

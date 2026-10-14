@@ -92,7 +92,7 @@ theorem intersect_nearest (hI : Inv n size par) :
         · exact absurd h₁ (Nat.ne_of_lt h)
       · exact hc.trans (AncT.of_parent hr₀ _)
     · by_cases hji : j < i
-      · simp only [intersect, if_neg hij, if_pos hji] at hr
+      · simp only [intersect, ite_eq_right hij, ite_eq_left hji] at hr
         cases hr₀ : par.find? i with
         | none => simp only [hr₀, Option.bind_none, reduceCtorEq] at hr
         | some r₀ =>
@@ -102,7 +102,7 @@ theorem intersect_nearest (hI : Inv n size par) :
           · exact absurd (h₁ ▸ hcq.pos_le hI) (Nat.not_le_of_lt hji)
           · cases (hr₀.symm.trans hr₂ : some r₀ = some r₂)
             exact intersect_nearest hI f r₀ (j, l) hr₁.2.2.2 hq (by simp only; omega) r hr c hc hcq
-      · simp only [intersect, if_neg hij, if_neg hji] at hr
+      · simp only [intersect, ite_eq_right hij, ite_eq_right hji] at hr
         cases hr₀ : par.find? j with
         | none => simp only [hr₀, Option.bind_none, reduceCtorEq] at hr
         | some r₀ =>
@@ -214,7 +214,7 @@ theorem UnderD.insert (hA : DomAx n size D) (hI : Inv n size par) {lim : Nat}
   intro j r hj hr d hdv hdne hd
   rw [NatTrie.find?_insert] at hr
   by_cases hji : j = i
-  · rw [if_pos hji] at hr
+  · rw [ite_eq_left hji] at hr
     cases hr
     subst hji
     have hx₀ := hX x₀ List.mem_cons_self
@@ -227,7 +227,7 @@ theorem UnderD.insert (hA : DomAx n size D) (hI : Inv n size par) {lim : Nat}
       (fun u hu => hanc u (List.mem_cons_of_mem _ hu))
     exact hU.convex hA hI hdv hx₀.1 hx₀.2.1 (hx₀.2.2 d hdv hdne hd) hnew
       (ncaFold_spec hI hx₀.1 hxs).1
-  · rw [if_neg hji] at hr
+  · rw [ite_eq_right hji] at hr
     exact hU j r (by omega) hr d hdv hdne hd
 
 /-- The invariant for fewer blocks. -/
@@ -295,9 +295,9 @@ theorem pass_underD (hA : DomAx n size D) :
       have hnew := (ncaFold_spec hI hp₁.2.2.2 hps).1
       simp only [pass, hp]
       by_cases hne : ncaFold par p ps = p
-      · rw [if_pos hne]
+      · rw [ite_eq_left hne]
         exact pass_underD hA hI hl₁ hD₁ hU
-      · rw [if_neg hne]
+      · rw [ite_eq_right hne]
         have hX : ∀ x ∈ p :: ps, Valid n size x ∧ x.1 < n ∧
             ∀ d, Valid n size d → d ≠ (i, 0) → D d (i, 0) → D d x := fun x hx => by
           rcases List.mem_cons.mp hx with rfl | hx
@@ -318,9 +318,9 @@ theorem settle_underD (hA : DomAx n size D) {l : List (Nat × List Pos)}
     intro par hI hm hU
     rw [settle]
     by_cases h : (pass l par).1 = true
-    · rw [dif_pos h]
+    · rw [dite_eq_left h]
       exact ih _ (hm ▸ (pass_Φ hI hl).2 h) _ _ rfl (pass_underD hA hI hl hD hU)
-    · rw [dif_neg h]
+    · rw [dite_eq_right h]
       exact hU
 
 end Body

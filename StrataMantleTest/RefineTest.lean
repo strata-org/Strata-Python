@@ -164,12 +164,12 @@ private def aRef (k : Nat) : TypeRef (e k) 0 :=
 /-- Along the relation that ignores annotations, where `≤` does not hold. -/
 example : ((aRef 2).ofLE (e_leBy (R := fun _ _ => True) trivial : Env.LeBy _ (e 2) (e 1))).name =
     aN := by
-  simp [aRef, aD]
+  rw [name_TypeRef_ofLE, aRef, TypeRef.name_ofAddType]; rfl
 
 /-- Along `≤` on the annotations. -/
 example : ((aRef 1).ofLE (e_leBy (R := (· ≤ ·)) (by decide) : Env.LeBy _ (e 1) (e 2))).name =
     aN := by
-  simp [aRef, aD]
+  rw [name_TypeRef_ofLE, aRef, TypeRef.name_ofAddType]; rfl
 
 end Ann
 
@@ -192,6 +192,10 @@ private def t₀ : Env Unit := Env.empty.addType boxD (by simp)
 private def boxT : TypeExpr t₀ :=
   .app (TypeRef.ofAddType Env.empty boxD (by simp)) #v[] (TypeRef.kinds_zero _)
 private def mkSig : InsnSig t₀ := { ann := (), argTypes := #[], returnType := some boxT }
+
+/-- `BoxT`, as a raw type: `Box` applied to no arguments. -/
+private theorem toRaw_boxT : boxT.toRaw = .app boxN #[] :=
+  (TypeExpr.toRaw_app _ _ _).trans (by rw [TypeRef.name_ofAddType]; simp [boxD])
 -- `t₁` and `t` are `abbrev`s, so that `simp` and `rw` see a signature carried into them as one
 -- of theirs.
 private abbrev t₁ : Env Unit := t₀.addInsn mkN mkSig (by simp [t₀, boxD, boxN, mkN])
@@ -199,7 +203,8 @@ private def boxCaseSig : InsnSig t₁ :=
   { ann := (), argTypes := #[⟨"scrutinee", boxT.ofSubset (Env.subset_addInsn _ _ _ _)⟩],
     returnType := none, succs := #[⟨"mkBox", #[]⟩] }
 private abbrev t : Env Unit :=
-  t₁.addInsn boxN.caseName boxCaseSig (by simp [t₁, t₀, boxD, boxN, mkN, Name.caseName])
+  t₁.addInsn boxN.caseName boxCaseSig
+    (by simp only [t₁, Env.mem_addInsn]; simp [t₀, boxD, boxN, mkN, Name.caseName])
 
 /-! ### `s`, the datatype -/
 
@@ -278,8 +283,9 @@ private theorem t_le_s : t ≤ s := show Env.LeBy _ t s from
             Env.succs_caseSig, boxCaseSig, Array.map_empty, Option.map_none]) <;>
           first
           | rfl
-          | simp [boxT, boxD, boxCtors, lastString_mkN, TypeExpr.Raw.vars, TypeExpr.Raw.varsFrom,
-            TypeDecl.arity]
+          | ((try simp only [List.map_toArray, List.map_cons, List.map_nil, TypeExpr.toRaw_carry,
+              toRaw_boxT])
+             simp [boxD, boxCtors, lastString_mkN, TypeExpr.Raw.vars, TypeExpr.Raw.varsFrom])
       · refine ⟨_, _, Env.declaresInsn_addData_ctor (cfresh := ctorsFresh) (adm := boxAdm) 0 0,
           .inl rfl, ?_⟩
         rw [InsnSig.refinedBy_ofSubset_left, InsnSig.refinedBy_ofSubset_left]
@@ -290,8 +296,8 @@ private theorem t_le_s : t ≤ s := show Env.LeBy _ t s from
             Env.succs_ctorSig, mkSig, Array.map_empty, Option.map_none]) <;>
           first
           | rfl
-          | simp [boxT, boxD, boxCtors, TypeExpr.Raw.vars, TypeExpr.Raw.varsFrom,
-            TypeDecl.arity] }
+          | ((try simp only [Option.map_some, toRaw_boxT])
+             simp [boxD, boxCtors, TypeExpr.Raw.vars, TypeExpr.Raw.varsFrom]) }
 
 /-- `mkBox`, as an ordinary instruction of `t`. -/
 private def mkRef : InsnRef t ((mkSig.ofSubset (Env.subset_addInsn _ _ _ _)).ofSubset
@@ -300,7 +306,7 @@ private def mkRef : InsnRef t ((mkSig.ofSubset (Env.subset_addInsn _ _ _ _)).ofS
 
 /-- Carried into `s`, the reference is `Box`'s constructor. -/
 example : (mkRef.ofLE t_le_s).ctorAddr? = some ⟨boxN, 0, 0⟩ := by
-  rw [InsnRef.ctorAddr?_eq, name_InsnRef_ofLE, mkRef, name_InsnRef_carry,
+  rw [InsnRef.ctorAddr?_eq, name_InsnRef_ofLE t_le_s, mkRef, name_InsnRef_carry,
     InsnRef.name_ofAddInsn]
   exact Env.ctorAddr?_of_declaresInsn
     (Env.declaresInsn_addData_ctor (cfresh := ctorsFresh) (adm := boxAdm) 0 0)

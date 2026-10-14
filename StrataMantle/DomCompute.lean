@@ -205,12 +205,12 @@ theorem intersect_spec (hI : Inv n size par) :
       ∃ r, intersect par f p q = some r ∧ AncT par r p ∧ AncT par r q
   | 0, (i, k), (j, l), _, _, hf => by
     obtain ⟨rfl, rfl⟩ : i = 0 ∧ j = 0 := ⟨by simp only at hf; omega, by simp only at hf; omega⟩
-    exact ⟨(0, min k l), if_pos rfl, AncT.of_count_le 0 (Nat.min_le_left k l),
+    exact ⟨(0, min k l), ite_eq_left rfl, AncT.of_count_le 0 (Nat.min_le_left k l),
       AncT.of_count_le 0 (Nat.min_le_right k l)⟩
   | f + 1, (i, k), (j, l), hp, hq, hf => by
     by_cases hij : i = j
     · subst hij
-      exact ⟨(i, min k l), if_pos rfl, AncT.of_count_le i (Nat.min_le_left k l),
+      exact ⟨(i, min k l), ite_eq_left rfl, AncT.of_count_le i (Nat.min_le_left k l),
         AncT.of_count_le i (Nat.min_le_right k l)⟩
     · have hpi : i < n := hp.1
       have hqj : j < n := hq.1
@@ -221,13 +221,13 @@ theorem intersect_spec (hI : Inv n size par) :
         obtain ⟨s, hs, hsr, hsq⟩ := intersect_spec hI f r (j, l) hr₁.2.2.2 hq (by
           simp only; omega)
         refine ⟨s, ?_, hsr.trans (AncT.of_parent hr k), hsq⟩
-        simp only [intersect, if_neg hij, if_pos hji, hr, Option.bind_some, hs]
+        simp only [intersect, ite_eq_right hij, ite_eq_left hji, hr, Option.bind_some, hs]
       · obtain ⟨r, hr⟩ := Option.isSome_iff_exists.mp (hI.total j (by omega) hqj)
         have hr₁ := hI.parent j r hr
         obtain ⟨s, hs, hsp, hsr⟩ := intersect_spec hI f (i, k) r hp hr₁.2.2.2 (by
           simp only; omega)
         refine ⟨s, ?_, hsp, hsr.trans (AncT.of_parent hr l)⟩
-        simp only [intersect, if_neg hij, if_neg hji, hr, Option.bind_some, hs]
+        simp only [intersect, ite_eq_right hij, ite_eq_right hji, hr, Option.bind_some, hs]
 
 /-- `nca` is a common ancestor. -/
 theorem nca_spec (hI : Inv n size par) {p q : Pos} (hp : Valid n size p) (hq : Valid n size q) :
@@ -257,17 +257,17 @@ theorem Inv.insert (hI : Inv n size par) {i : Nat} {x : Pos} (hi₀ : 0 < i) (hi
   parent j r h := by
     rw [NatTrie.find?_insert] at h
     by_cases hj : j = i
-    · rw [if_pos hj] at h
+    · rw [ite_eq_left hj] at h
       cases h
       subst hj
       exact ⟨hi₀, hi, hxi, hx⟩
-    · rw [if_neg hj] at h
+    · rw [ite_eq_right hj] at h
       exact hI.parent j r h
   total j h₀ h := by
     rw [NatTrie.find?_insert]
     by_cases hj : j = i
-    · rw [if_pos hj]; rfl
-    · rw [if_neg hj]; exact hI.total j h₀ h
+    · rw [ite_eq_left hj]; rfl
+    · rw [ite_eq_right hj]; exact hI.total j h₀ h
 
 /-- The first pass keeps every parent a valid point of an earlier block. -/
 theorem firstPass_inv {flat : Pos} (hflat : Valid n size flat) (hflat₀ : flat.1 = 0) :
@@ -310,9 +310,9 @@ theorem pass_inv : ∀ {l : List (Nat × List Pos)} {par : NatTrie Pos}, Inv n s
       have hnew := (ncaFold_spec hI hp₁.2.2.2 hps).1
       simp only [pass, hp]
       by_cases hne : ncaFold par p ps = p
-      · rw [if_pos hne]
+      · rw [ite_eq_left hne]
         exact pass_inv hI hl₁
-      · rw [if_neg hne]
+      · rw [ite_eq_right hne]
         exact pass_inv (hI.insert hi₀ hi (hnew.valid hI hp₁.2.2.2)
           (Nat.lt_of_le_of_lt (hnew.pos_le hI) hp₁.2.2.1)) hl₁
 
@@ -333,13 +333,13 @@ theorem pass_fixed : ∀ {l : List (Nat × List Pos)} {par : NatTrie Pos},
       · exact h₂ j qs hm p hp
     | some p₀ =>
       by_cases heq : ncaFold par p₀ ps = p₀
-      · simp only [pass, hp₀, heq, if_true] at h ⊢
+      · simp only [pass, hp₀, heq, ite_true] at h ⊢
         obtain ⟨h₁, h₂⟩ := pass_fixed h
         refine ⟨h₁, fun j qs hm p hp => ?_⟩
         rcases List.mem_cons.mp hm with he | hm
         · cases he; rw [hp₀] at hp; cases hp; exact heq
         · exact h₂ j qs hm p hp
-      · simp only [pass, hp₀, heq, if_false] at h
+      · simp only [pass, hp₀, heq, ite_false] at h
         cases h
 
 /-! ## The measure
@@ -430,7 +430,7 @@ theorem sd_insert (hI : Inv n size par) {i : Nat} {p x : Pos} (hp : par.find? i 
       rw [sd_none h₁]
       refine ⟨Nat.zero_le _, fun hj => ?_⟩
       subst hj
-      rw [NatTrie.find?_insert, if_pos rfl] at h₁
+      rw [NatTrie.find?_insert, ite_eq_left rfl] at h₁
       cases h₁
     | some r =>
       have hr := hI₁.parent j r h₁
@@ -439,12 +439,12 @@ theorem sd_insert (hI : Inv n size par) {i : Nat} {p x : Pos} (hp : par.find? i 
       have hd : depth (par.insert i x) r ≤ depth par r := by simp only [depth]; omega
       by_cases hj : j = i
       · subst hj
-        rw [NatTrie.find?_insert, if_pos rfl] at h₁
+        rw [NatTrie.find?_insert, ite_eq_left rfl] at h₁
         cases h₁
         rw [sd_parent hI hp]
         have hlt : depth par x < depth par p := (hx.depth_lt hI).resolve_left hne
         exact ⟨by omega, fun _ => by omega⟩
-      · rw [NatTrie.find?_insert, if_neg hj] at h₁
+      · rw [NatTrie.find?_insert, ite_eq_right hj] at h₁
         rw [sd_parent hI h₁]
         exact ⟨by omega, fun h => absurd h hj⟩
 
@@ -495,9 +495,9 @@ theorem pass_Φ : ∀ {l : List (Nat × List Pos)} {par : NatTrie Pos}, Inv n si
       have hnew := (ncaFold_spec hI hp₁.2.2.2 hps).1
       simp only [pass, hp]
       by_cases hne : ncaFold par p ps = p
-      · rw [if_pos hne]
+      · rw [ite_eq_left hne]
         exact pass_Φ hI hl₁
-      · simp only [if_neg hne]
+      · simp only [ite_eq_right hne]
         have hI₁ := hI.insert hi₀ hi (hnew.valid hI hp₁.2.2.2)
           (Nat.lt_of_le_of_lt (hnew.pos_le hI) hp₁.2.2.1)
         have h₁ := Φ_insert hI hp hnew hne hI₁
@@ -626,11 +626,11 @@ theorem start_find? {bs : List (Block env α)} {flat : Pos} (i : Nat) :
     intro m j
     rw [List.foldl_cons, ih, NatTrie.find?_insert]
     by_cases hj : j ∈ l
-    · rw [if_pos hj, if_pos (List.mem_cons_of_mem _ hj)]
-    · rw [if_neg hj]
+    · rw [ite_eq_left hj, ite_eq_left (List.mem_cons_of_mem _ hj)]
+    · rw [ite_eq_right hj]
       by_cases ha : j = a
-      · rw [if_pos ha, if_pos (ha ▸ List.mem_cons_self)]
-      · rw [if_neg ha, if_neg (fun h => (List.mem_cons.mp h).elim ha hj)]
+      · rw [ite_eq_left ha, ite_eq_left (ha ▸ List.mem_cons_self)]
+      · rw [ite_eq_right ha, ite_eq_right (fun h => (List.mem_cons.mp h).elim ha hj)]
 
 /-- The starting tree gives every parent as a valid point of an earlier block. -/
 theorem start_inv {bs : List (Block env α)} {flat : Pos} (hflat : Valid bs.length (sizeAt bs) flat)
@@ -644,7 +644,7 @@ theorem start_inv {bs : List (Block env α)} {flat : Pos} (hflat : Valid bs.leng
       exact ⟨by omega, by omega, by omega, hflat⟩
     next => cases h
   total i h₀ h := by
-    rw [start_find?, if_pos (List.mem_range'_1.mpr ⟨h₀, by omega⟩)]
+    rw [start_find?, ite_eq_left (List.mem_range'_1.mpr ⟨h₀, by omega⟩)]
     rfl
 
 /-- Bucketing keeps the jumps already in the buckets, and adds those of `js`. -/
@@ -658,7 +658,7 @@ theorem mem_foldl_modify {i : Nat} {u : Pos} : ∀ {js : List (Pos × Nat)} {a :
     rw [Array.getElem?_modify, List.mem_cons]
     by_cases ht : t = i
     · subst ht
-      rw [if_pos rfl, Array.getElem?_eq_getElem hi]
+      rw [ite_eq_left rfl, Array.getElem?_eq_getElem hi]
       simp only [Option.map_some, Option.getD_some, List.mem_cons, Prod.mk.injEq, and_true]
       constructor
       · rintro ((rfl | h) | h)
@@ -670,7 +670,7 @@ theorem mem_foldl_modify {i : Nat} {u : Pos} : ∀ {js : List (Pos × Nat)} {a :
         · exact .inl (.inl rfl)
         · exact .inr h
     · have hit : i ≠ t := Ne.symm ht
-      rw [if_neg ht]
+      rw [ite_eq_right ht]
       simp only [Prod.mk.injEq, hit, and_false, false_or]
 
 /-- A point is in bucket `i` exactly when it jumps to block `i`. -/

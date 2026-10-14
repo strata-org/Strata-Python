@@ -71,7 +71,7 @@ orthogonal.
 
 -/
 
-open Core
+
 open Lambda LTy.Syntax LExpr.SyntaxMono
 
 -- Bool-valued factory.  See architecture comment above.

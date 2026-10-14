@@ -194,11 +194,11 @@ theorem jump_of_targets {b v : Block env α} {k : Nat} (hb : b ∈ bs) (hv : v �
       obtain ⟨s, hs, hst⟩ := h
       exact .instr hb hi (Array.mem_toList_iff.mp hs) hv hst.symm
   · by_cases hk : k = b.instrs.size
-    · rw [if_pos hk, List.mem_map] at h
+    · rw [ite_eq_left hk, List.mem_map] at h
       obtain ⟨s, hs, hst⟩ := h
       subst hk
       exact .term hb (Array.mem_toList_iff.mp hs) hv hst.symm
-    · simp only [if_neg hk, List.not_mem_nil] at h
+    · simp only [ite_eq_right hk, List.not_mem_nil] at h
 
 /-- Every jump is from a block whose `targets` at its count lists the target. -/
 theorem targets_of_jump {u : Point} {v : Block env α} (h : Jump bs u v) :
@@ -210,7 +210,7 @@ theorem targets_of_jump {u : Point} {v : Block env α} (h : Jump bs u v) :
     exact ⟨s, Array.mem_toList_iff.mpr hs, hl.symm⟩
   | @term b _ s hb hs _ hl =>
     refine ⟨b, hb, rfl, List.mem_append_right _ ?_⟩
-    rw [if_pos rfl, List.mem_map]
+    rw [ite_eq_left rfl, List.mem_map]
     exact ⟨s, Array.mem_toList_iff.mpr hs, hl.symm⟩
 
 /-! ## The reach of a block -/
@@ -221,13 +221,13 @@ theorem lim_eq_none {d : Point} {b : Block env α} :
   obtain ⟨l, c⟩ := d
   simp only [lim]
   by_cases hl : b.label = l
-  · rw [if_pos hl]
+  · rw [ite_eq_left hl]
     by_cases hc : c = 0
-    · rw [if_pos hc, hl, hc]
+    · rw [ite_eq_left hc, hl, hc]
       exact ⟨fun _ => rfl, fun _ => rfl⟩
-    · rw [if_neg hc]
+    · rw [ite_eq_right hc]
       exact ⟨nofun, fun h => (hc (congrArg Point.count h).symm).elim⟩
-  · rw [if_neg hl]
+  · rw [ite_eq_right hl]
     exact ⟨nofun, fun h => (hl (congrArg Point.label h)).elim⟩
 
 /-- `lim d b` is a count of `b`, and no count up to it is `d`. -/
@@ -236,17 +236,17 @@ theorem lim_spec {d : Point} {b : Block env α} {m : Nat} (h : lim d b = some m)
   obtain ⟨l, c⟩ := d
   simp only [lim] at h
   by_cases hl : b.label = l
-  · rw [if_pos hl] at h
+  · rw [ite_eq_left hl] at h
     by_cases hc : c = 0
-    · rw [if_pos hc] at h
+    · rw [ite_eq_left hc] at h
       exact absurd h nofun
-    · rw [if_neg hc] at h
+    · rw [ite_eq_right hc] at h
       cases h
       refine ⟨Nat.min_le_right _ _, fun j hj he => ?_⟩
       have := congrArg Point.count he
       dsimp only at this
       omega
-  · rw [if_neg hl] at h
+  · rw [ite_eq_right hl] at h
     cases h
     exact ⟨Nat.le_refl _, fun _ _ he => hl (congrArg Point.label he)⟩
 
@@ -354,7 +354,7 @@ theorem reached_spec {d : Point} (hbs : bs ≠ []) (hne : root bs ≠ d) :
     obtain ⟨hI, hsub, hdone⟩ := grow_spec (e :: rest).length hI₀
     have hr : reached (e :: rest) d =
         grow (e :: rest) d (e :: rest).length [(root (e :: rest)).label] :=
-      if_neg hne
+      ite_eq_right hne
     rw [hr]
     refine ⟨hI, hsub _ (List.mem_singleton_self _), hdone.resolve_right fun h => ?_⟩
     have hle := List.length_le_of_nodup_subset (m := (e :: rest).map (·.label)) hI.2 fun l hl =>
@@ -388,11 +388,11 @@ theorem reached_complete {d w : Point} (hbs : bs ≠ []) (hn : (bs.map (·.label
       unfold lim at hm
       by_cases hl : b.label = d.label
       · by_cases hc : d.count = 0
-        · simp only [if_pos hl, if_pos hc, reduceCtorEq] at hm
-        · simp only [if_pos hl, if_neg hc, Option.some.injEq] at hm
+        · simp only [ite_eq_left hl, ite_eq_left hc, reduceCtorEq] at hm
+        · simp only [ite_eq_left hl, ite_eq_right hc, Option.some.injEq] at hm
           have : k + 1 ≠ d.count := fun h => hne (by rw [hl, h])
           omega
-      · simp only [if_neg hl, Option.some.injEq] at hm
+      · simp only [ite_eq_right hl, Option.some.injEq] at hm
         omega
     | @jump _ v hj =>
       obtain ⟨b₁, hb₁, hbl₁, ht⟩ := targets_of_jump hj
@@ -422,7 +422,7 @@ public theorem reachAvoidB_iff (hbs : bs ≠ []) (hn : (bs.map (·.label)).Nodup
       have hp := List.find?_some hf
       have hbl : b.label = y.label := beq_iff_eq.mp hp
       by_cases hne : root bs = d
-      · simp only [reached, if_pos hne, List.not_mem_nil] at hS
+      · simp only [reached, ite_eq_left hne, List.not_mem_nil] at hS
       obtain ⟨hI, -, -⟩ := reached_spec hbs hne
       obtain ⟨b₁, hb₁, hbl₁, hr⟩ := hI.1 _ hS
       cases eq_of_label_eq hn hb hb₁ (hbl.trans hbl₁.symm)

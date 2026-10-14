@@ -710,18 +710,22 @@ private def idRef : InsnRef env₁ (idSig.ofSubset (Env.subset_addInsn _ _ _ _))
 
 example : idRef.name = idName := by simp [idRef]
 
-example : env₁.size = 2 := by simp [env₁, env₀]
+example : env₁.size = 2 := by simp only [env₁, Env.size_addInsn]; simp [env₀]
 
 example : idName ∈ env₁ := by simp [env₁, Env.mem_addInsn]
 
-/-- The type reference survives the extension. -/
-private def natRef₁ : TypeRef env₁ 0 := natRef.ofSubset (Env.subset_addInsn _ _ _ _)
+/-- Extending `env₀` with `addInsn` only grows it, so `env₀` is a subset of `env₁`. -/
+private theorem env₀_sub_env₁ : env₀ ⊆ env₁ := Env.subset_addInsn _ _ _ _
 
-example : natRef₁.name = natName := by simp [natRef₁, natRef]
+/-- The type reference survives the extension. -/
+private def natRef₁ : TypeRef env₁ 0 := natRef.ofSubset env₀_sub_env₁
+
+example : natRef₁.name = natName := by
+  simp only [natRef₁, Strata.Mantle.name_TypeRef_carry]; simp [natRef]
 
 /-- Looking a name up gives a checked declaration, under the name asked for. -/
 private theorem natIn₁ : natName ∈ env₁ := by
-  simp [env₁, Env.mem_addInsn, env₀, natName, idName]
+  simp only [env₁, Env.mem_addInsn]; simp [env₀, natName, idName]
 
 example : (env₁.get? natName).isSome := by simp [natIn₁]
 
@@ -730,7 +734,7 @@ example : (env₁.get natName natIn₁).name = natName :=
 
 /-- And it can be carried into a further extension. -/
 private def env₂ : Env Unit :=
-  env₁.addType { ann := (), name := .str .base "Bool" } (by simp [env₁, Env.mem_addInsn, env₀, natName, idName])
+  env₁.addType { ann := (), name := .str .base "Bool" } (by simp only [env₁, Env.mem_addInsn]; simp [env₀, natName, idName])
 
 example : (Env.subset_addType env₁ _ _ : env₁ ⊆ env₂) = (by simp [env₂] : env₁ ⊆ env₂) := rfl
 

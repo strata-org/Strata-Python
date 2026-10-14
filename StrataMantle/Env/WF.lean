@@ -436,7 +436,7 @@ theorem refBefore_iff {env : Env.Raw α} {i : Nat} {name : Name} {kinds : Array 
   · intro ⟨j, t, hj, hji, hget, ha⟩
     refine ⟨t, ?_, ha⟩
     rw [hj]
-    simp only [Option.bind_some, if_pos hji]
+    simp only [Option.bind_some, ite_eq_left hji]
     exact hget
 
 /-- Everything declared is declared before the end, so a type it denotes is in the
@@ -455,7 +455,7 @@ theorem typesBefore_of_typeOf? {env : Env.Raw α} {n : Name} {d : TypeDecl α} {
   obtain ⟨p, hp⟩ := Option.isSome_iff_exists.mp hs
   have hplt : p < env.decls.keys.size :=
     (Array.getElem?_eq_some_iff.mp (IndexMap.getElem?_keys_of_idxOf?_eq_some hp)).1
-  rw [getElem?_types_before, hp, Option.bind_some, if_pos (by omega)]
+  rw [getElem?_types_before, hp, Option.bind_some, ite_eq_left (by omega)]
   exact h
 
 /-- What the `before` view yields is what the name denotes. -/
@@ -1170,7 +1170,7 @@ theorem stable_append {env : Env.Raw α} {d : Decl.Raw α} {fresh : d.name ∉ e
   have hmem : k ∈ env := IndexMap.mem_of_getElem?_eq_some hk
   have hne : ¬ (d.name == k) = true := fun hb => fresh (by rw [eq_of_beq hb]; exact hmem)
   show ((env.append d fresh)[k]?) = some e
-  rw [get?_append, if_neg hne]
+  rw [get?_append, ite_eq_right hne]
   exact hk
 
 /-- Appending preserves what a name resolves to, an alias included. -/
@@ -1210,7 +1210,7 @@ theorem RefBefore.append {env : Env.Raw α} {d : Decl.Raw α} {fresh : d.name �
     | some d' => exact IndexMap.mem_of_getElem?_eq_some hx
   have hne : ¬ (d.name == m) = true := fun hb => fresh (by rw [eq_of_beq hb]; exact hm)
   exact refBefore_iff.mpr
-    ⟨j, t, by rw [idxOf?_append, if_neg hne]; exact hj, hji, typeOf?_append ht, ha⟩
+    ⟨j, t, by rw [idxOf?_append, ite_eq_right hne]; exact hj, hji, typeOf?_append ht, ha⟩
 
 /-- A passing `RefBefore.check` still passes after an append. -/
 theorem refBefore_check_append {env : Env.Raw α} {d : Decl.Raw α} {fresh : d.name ∉ env}
@@ -1236,7 +1236,7 @@ theorem typesBefore_append {env : Env.Raw α} {d : Decl.Raw α} {fresh : d.name 
         rw [IndexMap.mem_iff_contains, ← IndexMap.isSome_idxOf?_eq_contains, hp]
         rfl
       have hne : ¬ (d.name == m) = true := fun hb => fresh (by rw [eq_of_beq hb]; exact hm)
-      rw [idxOf?_append, if_neg hne, hp, Option.bind_some, if_pos hpj]
+      rw [idxOf?_append, ite_eq_right hne, hp, Option.bind_some, ite_eq_left hpj]
       exact typeOf?_append (m := m) h
     · simp at h
 
@@ -1256,7 +1256,7 @@ theorem checkGroup_append {env : Env.Raw α} {d : Decl.Raw α} {fresh : d.name �
     · refine .inr ⟨?_, ?_⟩
       · rw [keys_append, Array.getElem?_push]
         have hlt : i + x.2 < env.decls.keys.size := (Array.getElem?_eq_some_iff.mp hk).1
-        rw [if_neg (by omega)]
+        rw [ite_eq_right (by omega)]
         exact hk
       · cases hx' : env.decls[x.1.name]? with
         | none => rw [hx'] at hd; simp at hd
@@ -1287,7 +1287,7 @@ theorem checkAlias_append {env : Env.Raw α} {d : Decl.Raw α} {fresh : d.name �
       rw [IndexMap.mem_iff_contains, ← IndexMap.isSome_idxOf?_eq_contains, hj]
       rfl
     have hne : ¬ (d.name == h') = true := fun hb => fresh (by rw [eq_of_beq hb]; exact hmem)
-    rw [idxOf?_append, if_neg hne]; exact hj
+    rw [idxOf?_append, ite_eq_right hne]; exact hj
   cases e with
   | dataRest _ hd idx =>
     simp only [checkAlias, Bool.and_eq_true] at h ⊢
@@ -1416,12 +1416,12 @@ theorem WF.append {env : Env.Raw α} (h : env.WF) {d : Decl.Raw α} (fresh : d.n
     split at hkey
     · rename_i hi
       obtain rfl : d.name = n := Option.some.inj hkey
-      rw [get?_append, if_pos (by simp)] at he
+      rw [get?_append, ite_eq_left (by simp)] at he
       exact .inl ⟨hi, rfl, (Option.some.inj he).symm⟩
     · have hnk : n ∈ env.decls.keys.toList := List.mem_of_getElem? (by simpa using hkey)
       have hne : ¬ (d.name == n) = true :=
         fun hb => not_mem_keys_of_not_mem fresh (eq_of_beq hb ▸ hnk)
-      rw [get?_append, if_neg hne] at he
+      rw [get?_append, ite_eq_right hne] at he
       exact .inr ⟨hkey, he⟩
   refine ⟨fun i n e hkey he => ?_, fun i n g hkey he => ?_, fun i n e hkey he => ?_⟩
   · rcases split i n e hkey he with ⟨rfl, rfl, rfl⟩ | ⟨hkey', he'⟩
@@ -1745,7 +1745,7 @@ theorem checkAt_ctorDecl {env : Env.Raw α} {g : DataGroup α TypeExpr.Raw} {n p
   simp only [DataGroup.checkNames, Array.all_eq_true_iff_forall_mem, Bool.and_eq_true,
     decide_eq_true_eq] at hn
   simp only [Decl.Raw.checkAt, DataGroup.ctorDecl, InsnDecl.Raw.scope, kinds_params,
-    Bool.and_eq_true, Array.all_eq_true_iff_forall_mem, Option.all_none, decide_eq_true_eq]
+    Bool.and_eq_true, Array.all_eq_true_iff_forall_mem, Option.all_none]
   have hctors := h m hmm
   refine ⟨⟨⟨⟨⟨fun q hq => ?_, ?_⟩, ?_⟩, by simp⟩, by simp⟩, ?_⟩
   · obtain ⟨⟨hk, hpay⟩, -⟩ := hctors c hcm q hq
@@ -1777,7 +1777,7 @@ theorem checkAt_caseDecl {env : Env.Raw α} {g : DataGroup α TypeExpr.Raw} {n p
   simp only [DataGroup.checkNames, Array.all_eq_true_iff_forall_mem, Bool.and_eq_true,
     decide_eq_true_eq] at hn
   simp only [Decl.Raw.checkAt, DataGroup.caseDecl, InsnDecl.Raw.scope, kinds_params,
-    Bool.and_eq_true, Array.all_eq_true_iff_forall_mem, Option.all_none, decide_eq_true_eq]
+    Bool.and_eq_true, Array.all_eq_true_iff_forall_mem, Option.all_none]
   have hctors := h m hmm
   refine ⟨⟨⟨⟨⟨fun q hq => ?_, ?_⟩, by simp⟩, by simp⟩, fun s hs t ht => ?_⟩, ?_⟩
   · obtain rfl : q = ⟨"scrutinee", .app m.name (TypeExpr.Raw.vars (TyParam.kinds m.params))⟩ := by

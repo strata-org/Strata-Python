@@ -441,7 +441,7 @@ theorem bindVar_complete {σ : Subst} {τ : Array Raw} {i : Nat} {t : Raw} (hi :
     (ha : Agrees σ τ) (ht : τ[i]? = some t) :
     ∃ σ₂, bindVar σ i t = .ok σ₂ ∧ Extends σ σ₂ ∧ Agrees σ₂ τ := by
   unfold bindVar
-  rw [dif_pos hi]
+  rw [dite_eq_left hi]
   cases hu : σ[i] with
   | some u =>
     have hut : u = t := Option.some.inj ((ha i u (by simp [hi, hu])).symm.trans ht)
@@ -523,21 +523,21 @@ theorem elemVar_complete {ks : Array Kind} {σ : Subst} {τ : Array Raw} (hτ : 
   cases hu : σ[i] with
   | some u =>
     have hτu : τ[i]? = some u := ha i u (by simp [hσ, hu])
-    simp only [instantiateElem_var, hτu, Option.getD_some, if_true]
+    simp only [instantiateElem_var, hτu, Option.getD_some, ite_true]
     exact .inr ⟨σ, rfl, Extends.refl σ, ha⟩
   | none =>
     simp only
     cases hk : ks[i] with
     | list =>
       obtain ⟨xs, hxs⟩ := (hτ.get hi).2 hk
-      rw [if_pos (by simp [hi, hk]), instantiateElem_var, hxs, Option.getD_some, spliced_list]
+      rw [ite_eq_left (by simp [hi, hk]), instantiateElem_var, hxs, Option.getD_some, spliced_list]
       obtain ⟨σ₂, h, he, ha₂⟩ := bindVar_complete hσ ha hxs
       exact .inr ⟨σ₂, h, he, ha₂⟩
     | type =>
       obtain ⟨t, ht, hte⟩ := (hτ.get hi).1 hk
-      rw [if_neg (by simp [hi, hk]), instantiateElem_var, ht, Option.getD_some,
+      rw [ite_eq_right (by simp [hi, hk]), instantiateElem_var, ht, Option.getD_some,
         spliced_of_isElem hte]
-      simp only [hte, if_true]
+      simp only [hte, ite_true]
       obtain ⟨σ₂, h, he, ha₂⟩ := bindVar_complete hσ ha ht
       exact .inr ⟨σ₂, h, he, ha₂⟩
 
@@ -559,7 +559,7 @@ theorem match?_complete (ks : Array Kind) (τ : Array Raw) (hτ : WellKinded ks 
   | .app n ⟨ps⟩, σ, hs, ha, hv => by
     simp only [VarsLt] at hv
     rw [instantiate_app_mk]
-    simp only [match?, if_true]
+    simp only [match?, ite_true]
     exact matchArgs_complete ks τ hτ ps σ hs ha hv
   | .list ⟨es⟩, σ, hs, ha, hv => by
     simp only [VarsLt] at hv

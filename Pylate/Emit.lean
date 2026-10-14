@@ -440,7 +440,7 @@ def sortsJson (ctx : Actx) (mode : String) : Json := Id.run do
         carriers := add carriers
           s!"{l.cls.render}@{l.site}{if l.recent then "" else "*"}.nonempty"
           [Tag.tbool]
-  let mut mono := 0
+  let mut mono : Nat := 0
   let mut flavors : List (String × List String) := []
   let mut bindings : List (String × Json) := []
   -- Sorted, because a hash map has no order and this reaches the log.
@@ -473,7 +473,7 @@ def sortsJson (ctx : Actx) (mode : String) : Json := Id.run do
     ("trust", Json.str trust),
     ("summary", Json.mkObj [
       ("bindings", Json.num carriers.size),
-      ("monomorphic", Json.num mono),
+      ("monomorphic", Json.num (.fromNat mono)),
       ("flavors", Json.num flavors.length)]),
     ("flavors", Json.arr (flavors.map (fun (n, vs) => Json.mkObj
       [("name", Json.str n),

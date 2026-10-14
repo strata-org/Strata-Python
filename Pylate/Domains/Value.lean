@@ -276,7 +276,7 @@ def reduce (v : AbsVal) : AbsVal :=
 /-- T2 (reductive): `reduce v ≤ v`. Every component filters the original. -/
 theorem reduce_le (v : AbsVal) : Le (reduce v) v := by
   unfold reduce
-  by_cases h : Tag.tany ∈ v.tags <;> simp only [h, if_pos, if_neg, not_false_iff]
+  by_cases h : Tag.tany ∈ v.tags <;> simp only [h, ite_eq_left, ite_eq_right, not_false_iff]
   · exact ⟨Fset.Sub.refl _, Fset.filter_sub, Fset.Sub.refl _,
       Fset.Sub.refl _, Fset.Sub.refl _, Fset.Sub.refl _, id⟩
   · refine ⟨Fset.filter_sub, Fset.filter_sub, ?_, ?_,
@@ -301,10 +301,10 @@ theorem reduce_mono {v w : AbsVal} (h : Le v w) : Le (reduce v) (reduce w) := by
   unfold reduce
   by_cases hv : Tag.tany ∈ v.tags
   · have hw : Tag.tany ∈ w.tags := h.tags _ hv
-    simp only [hv, hw, if_pos]
+    simp only [hv, hw, ite_eq_left]
     exact ⟨h.tags, locsub, h.funcs, h.classes, h.lits, h.litsOpen, h.witness⟩
   · by_cases hw : Tag.tany ∈ w.tags
-    · simp only [hv, hw, if_pos, if_neg, not_false_iff]
+    · simp only [hv, hw, ite_eq_left, ite_eq_right, not_false_iff]
       refine ⟨?_, ?_, ?_, ?_,
         (fun l hl => h.lits l (Fset.filter_sub l hl)),
         (fun x hx => h.litsOpen x (Fset.filter_sub x hx)), h.witness⟩
@@ -316,7 +316,7 @@ theorem reduce_mono {v w : AbsVal} (h : Le v w) : Le (reduce v) (reduce w) := by
       · dsimp only; split
         · exact h.classes
         · intro a ha; cases ha
-    · simp only [hv, hw, if_neg, not_false_iff]
+    · simp only [hv, hw, ite_eq_right, not_false_iff]
       -- a tag kept in reduce v is kept in reduce w
       have tagsub : Fset.Sub
           (v.tags.filter (fun t => if t.isRef then
@@ -335,11 +335,11 @@ theorem reduce_mono {v w : AbsVal} (h : Le v w) : Le (reduce v) (reduce w) := by
         have ⟨hmem, hcond⟩ := List.mem_filter.mp ht
         refine List.mem_filter.mpr ⟨h.tags t hmem, ?_⟩
         by_cases href : t.isRef
-        · simp only [href, if_pos] at hcond ⊢
+        · simp only [href, ite_eq_left] at hcond ⊢
           have := of_decide_eq_true hcond
           have ⟨l, hl, hlt⟩ := List.mem_map.mp this
           exact decide_eq_true (List.mem_map.mpr ⟨l, locsub l hl, hlt⟩)
-        · simp only [href, if_neg, Bool.false_eq_true, not_false_iff] at hcond ⊢
+        · simp only [href, ite_eq_right, Bool.false_eq_true, not_false_iff] at hcond ⊢
           cases t with
           | tfunc =>
             simp only at hcond ⊢
@@ -379,14 +379,14 @@ theorem reduce_mono {v w : AbsVal} (h : Le v w) : Le (reduce v) (reduce w) := by
         split
         · rename_i hkept
           have hw' : Tag.tfunc ∈ _ := tagsub _ hkept
-          rw [if_pos hw']
+          rw [ite_eq_left hw']
           exact h.funcs
         · intro a ha; cases ha
       · dsimp only
         split
         · rename_i hkept
           have hw' : Tag.ttype ∈ _ := tagsub _ hkept
-          rw [if_pos hw']
+          rw [ite_eq_left hw']
           exact h.classes
         · intro a ha; cases ha
       · -- a literal kept by `reduce v` is kept by `reduce w`: its tag survives

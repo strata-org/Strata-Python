@@ -578,9 +578,9 @@ private theorem nodup_of_foldlM : ∀ (ls seen : List Label) (m : LabelMap Unit)
   | l :: ls, seen, m, hm, hn, h => by
     rw [List.foldlM_cons] at h
     by_cases hl : (m.find? l).isSome = true
-    · rw [if_pos hl] at h
+    · rw [ite_eq_left hl] at h
       simp at h
-    · rw [if_neg hl] at h
+    · rw [ite_eq_right hl] at h
       have hl₁ : l ∉ seen := fun h₁ => hl ((hm l).mpr h₁)
       have hm₁ : ∀ l₁, ((m.insert l ()).find? l₁).isSome = true ↔ l₁ ∈ seen ++ [l] := by
         intro l₁

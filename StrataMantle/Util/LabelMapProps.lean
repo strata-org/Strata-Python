@@ -51,7 +51,7 @@ theorem find?_insertAt (x : β) :
         cases t <;> by_cases hm : m % 2 = 0 <;> simp only [insertAt, find?, hm, ih, ↓reduceIte]
       · cases t <;> by_cases hn : n % 2 = 0 <;> by_cases hm : m % 2 = 0 <;>
           simp only [insertAt, find?, hn, hm, hmn, ih, ↓reduceIte, Nat.add_right_cancel_iff] <;>
-          rw [if_neg (by omega)]
+          rw [ite_eq_right (by omega)]
 
 /-- Inserting maps the key to the value and keeps the rest. -/
 theorem find?_insert (t : NatTrie β) (k : Nat) (x : β) (j : Nat) :

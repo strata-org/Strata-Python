@@ -447,7 +447,7 @@ private theorem foldlM_define_isSome : ∀ (ds : List (ValDecl env)) (ctx : Ctx 
     refine foldlM_define_isSome ds _ (List.nodup_cons.mp hnd).2 fun e he => ?_
     have hne : e.id.id ≠ d.id.id := fun h =>
       (List.nodup_cons.mp hnd).1 (List.mem_map.mpr ⟨e, he, h⟩)
-    rw [NatTrie.find?_insert, if_neg hne]
+    rw [NatTrie.find?_insert, ite_eq_right hne]
     exact hfree e (List.mem_cons_of_mem d he)
 
 /-- The number a name ends in, or `0`. -/

@@ -77,14 +77,14 @@ theorem natChars_digits (n : Nat) :
   induction n using natChars.induct with
   | case1 n h =>
     rw [natChars]
-    rw [dif_pos h]
+    rw [dite_eq_left h]
     intro c hc
     simp at hc
     subst hc
     exact digitChar_isDigit n h
   | case2 n h ih =>
     rw [natChars]
-    rw [dif_neg h]
+    rw [dite_eq_right h]
     intro c hc
     simp only [List.mem_append] at hc
     cases hc with
@@ -136,11 +136,11 @@ theorem foldl_natChars (n : Nat) : ∀ acc,
   induction n using natChars.induct with
   | case1 n h =>
     intro acc
-    rw [natChars, dif_pos h]
+    rw [natChars, dite_eq_left h]
     simp [List.foldl, readDigit_digitChar n h]
   | case2 n h ih =>
     intro acc
-    rw [natChars, dif_neg h]
+    rw [natChars, dite_eq_right h]
     rw [List.foldl_append, ih acc]
     simp only [List.foldl, readDigit_digitChar (n % 10)
       (Nat.mod_lt _ (by omega)), Option.getD_some, List.length_append,

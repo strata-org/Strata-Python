@@ -1123,15 +1123,15 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
       cs := cs.push (← thmCmd (mkDoc s!"`{d.c.lean.toString (escape := false)}.ref` refers to \
           `{en}`.") vis? true (mkIdent (d.c.lean ++ `name_ref)) #[]
         (← `(($(cx.own (d.c.lean ++ `ref)) (e := e)).name = $(cx.own (d.c.lean ++ `name))))
-        (← `(by rw [$(cx.own (d.c.lean ++ `ref)):ident, Strata.Mantle.name_TypeRef_ofLE]
-              <;> rfl)))
+        (← `(by rw [$(cx.own (d.c.lean ++ `ref)):ident,
+                Strata.Mantle.name_TypeRef_ofLE $(cx.liftTo k)] <;> rfl)))
       cs := cs.push (← thmCmd (mkDoc s!"`{d.c.lean.toString (escape := false)}.ref`'s \
           declaration.") vis? true (mkIdent (d.c.lean ++ `decl_ref)) #[]
         (← `(($(cx.own (d.c.lean ++ `ref)) (e := e)).decl =
               $(← typeDeclTerm (cx.own (d.c.lean ++ `name))
                   (d.params.map fun (x, _, b, k) => (x, b, k)))))
-        (← `(by rw [$(cx.own (d.c.lean ++ `ref)):ident, Strata.Mantle.decl_TypeRef_ofLE]
-              <;> rfl)))
+        (← `(by rw [$(cx.own (d.c.lean ++ `ref)):ident,
+                Strata.Mantle.decl_TypeRef_ofLE $(cx.liftTo k)] <;> rfl)))
       let xs := varIdents (d.params.map (·.1))
       let ks := d.params.map (·.2.2.2)
       let refT := cx.own (d.c.lean ++ `ref)

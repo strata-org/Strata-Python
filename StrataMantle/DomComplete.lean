@@ -489,11 +489,11 @@ theorem edgeB_sound {u w : Point} (h : edgeB bs u w = true) : Edge bs u w := by
         obtain ⟨s, hs, hst⟩ := ht
         exact .jump (.instr hb hi (Array.mem_toList_iff.mp hs) hv hst.symm)
     · by_cases hk : k = b.instrs.size
-      · rw [if_pos hk, List.mem_map] at ht
+      · rw [ite_eq_left hk, List.mem_map] at ht
         obtain ⟨s, hs, hst⟩ := ht
         subst hk
         exact .jump (.term hb (Array.mem_toList_iff.mp hs) hv hst.symm)
-      · simp only [if_neg hk, List.not_mem_nil] at ht
+      · simp only [ite_eq_right hk, List.not_mem_nil] at ht
 
 /-- A path `pathFrom` accepts, from a point reached avoiding `d`, reaches its end avoiding `d`. -/
 theorem pathFrom_sound {d y : Point} :

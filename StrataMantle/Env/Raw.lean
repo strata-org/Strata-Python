@@ -387,7 +387,7 @@ theorem decls_toList_eq_cons (g : DataGroup α TypeExpr.Raw) :
     · obtain ⟨⟨m, i⟩, hp, rfl⟩ := List.mem_map.mp hd
       obtain ⟨hi, hget⟩ := List.mk_mem_zipIdx_iff_le_and_getElem?_sub.mp hp
       have hi0 : i ≠ 0 := by omega
-      simp only [hi0, if_false, IsAlias, DataGroup.member?, true_and]
+      simp only [hi0, ite_false, IsAlias, DataGroup.member?, true_and]
       have : g.members.toList[i]? = some m := by
         rw [hms]; obtain ⟨k, rfl⟩ : ∃ k, i = k + 1 := ⟨i - 1, by omega⟩; simpa using hget
       simp [← Array.getElem?_toList, this]

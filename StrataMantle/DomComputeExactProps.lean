@@ -240,7 +240,7 @@ public theorem exact_computeTree {e : Block env α} {rest : List (Block env α)}
     (start_inv (flat_valid e rest) rfl) (fun i r hi h => by
       rw [Nat.lt_one_iff] at hi
       subst hi
-      rw [start_find?, if_neg (by simp)] at h
+      rw [start_find?, ite_eq_right (by simp)] at h
       cases h)
   have hU := settle_underD hA hl hPD _ _ hI₀ rfl hU₀
   rw [hct] at hL ⊢

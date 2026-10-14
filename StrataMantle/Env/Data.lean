@@ -72,8 +72,8 @@ theorem KindError.check?_eq_none_iff {expected given : Array Kind} :
     check? expected given = none ↔ given = expected := by
   unfold check?
   by_cases hs : given.size = expected.size
-  · rw [if_neg (fun h => h hs), firstKind?_eq_none_iff (by simpa using hs), Array.toList_inj]
-  · rw [if_pos hs]
+  · rw [ite_eq_right (fun h => h hs), firstKind?_eq_none_iff (by simpa using hs), Array.toList_inj]
+  · rw [ite_eq_left hs]
     exact ⟨fun h => absurd h (by simp), fun h => absurd (h ▸ rfl) hs⟩
 
 /-! ## Annotations

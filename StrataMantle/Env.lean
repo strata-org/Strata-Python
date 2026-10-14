@@ -218,7 +218,7 @@ end
 theorem resolves_addType_of_ne {s : Env α} {d : TypeDecl α} {fresh : d.name ∉ s}
     {distinct : d.paramNames.Nodup} {n : Name} {e : Decl.Raw α} (hne : d.name ≠ n) :
     (s.addType d fresh distinct).Resolves n e ↔ s.Resolves n e := by
-  rw [resolves_iff_declOf?, resolves_iff_declOf?, declOf?_addType, if_neg (by simpa using hne)]
+  rw [resolves_iff_declOf?, resolves_iff_declOf?, declOf?_addType, ite_eq_right (by simpa using hne)]
 
 @[simp, grind =] public theorem mem_addType {s : Env α} {d : TypeDecl α} {fresh : d.name ∉ s}
     {distinct : d.paramNames.Nodup} {n : Name} :
@@ -267,7 +267,7 @@ theorem resolves_of_add?_eq_some {s s' : Env α} {d : Decl.Raw α} (h : s.add? d
 theorem resolves_add?_of_ne {s s' : Env α} {d : Decl.Raw α} (h : s.add? d = some s')
     {n : Name} {e : Decl.Raw α} (hne : d.name ≠ n) : s'.Resolves n e ↔ s.Resolves n e := by
   rw [resolves_iff_declOf?, resolves_iff_declOf?, declOf?_of_add?_eq_some h,
-    if_neg (by simpa using hne)]
+    ite_eq_right (by simpa using hne)]
 
 theorem size_of_add?_eq_some {s s' : Env α} {d : Decl.Raw α} (h : s.add? d = some s') :
     s'.size = s.size + 1 := by
@@ -509,12 +509,12 @@ theorem dataOf?_of_declOf?_eq (hg : e₀.asGroup = none)
   unfold Env.dataOf? Raw.dataOf?
   rw [show s'.raw.decls[n]? = _ from hget n]
   by_cases hc : (a == n) = true
-  · rw [if_pos hc, if_pos hc]
+  · rw [ite_eq_left hc, ite_eq_left hc]
     cases e₀ with
     | dataHead g => simp at hg
     | dataRest m h i => exact absurd rfl (hrest m h i)
     | _ => rfl
-  · rw [if_neg hc, if_neg hc, show s.raw.decls[n]? = s.declOf? n from rfl]
+  · rw [ite_eq_right hc, ite_eq_right hc, show s.raw.decls[n]? = s.declOf? n from rfl]
     cases s.declOf? n with
     | none => rfl
     | some e =>
@@ -1697,7 +1697,7 @@ theorem typesBefore_dataGroup {fG : s.raw.FreshList (dataGroup hdr ctors h).decl
         · rw [← hmx]; rfl
         · simp [Raw.typeOfDecl?, hhead, DataGroup.member?, hm, hmx]
     rw [Raw.getElem?_types_before, ← hDname, Raw.idxOf?_appendList_of_getElem? hD,
-      Option.bind_some, if_pos (by simp only [size]; omega), Raw.get?_appendList_of_getElem? hD,
+      Option.bind_some, ite_eq_left (by simp only [size]; omega), Raw.get?_appendList_of_getElem? hD,
       Option.bind_some]
     exact hDty
 
@@ -4037,7 +4037,7 @@ theorem resolves_addInsn_self (s : Env α) (name : Name) (isig : InsnSig s)
 theorem resolves_addInsn_of_ne {s : Env α} {name : Name} {isig : InsnSig s}
     {fresh : name ∉ s} {n : Name} {e : Decl.Raw α} (hne : name ≠ n) :
     (s.addInsn name isig fresh).Resolves n e ↔ s.Resolves n e := by
-  rw [resolves_iff_declOf?, resolves_iff_declOf?, declOf?_addInsn, if_neg (by simpa using hne)]
+  rw [resolves_iff_declOf?, resolves_iff_declOf?, declOf?_addInsn, ite_eq_right (by simpa using hne)]
 
 @[simp, grind =] public theorem mem_addInsn {s : Env α} {name : Name} {isig : InsnSig s} {fresh : name ∉ s}
     {n : Name} : n ∈ s.addInsn name isig fresh ↔ name = n ∨ n ∈ s := by
@@ -4724,7 +4724,12 @@ of the constructor's name and receiving its payload. -/
       ctors[i].map (fun c => (c.name.lastString, c.args.map (·.type.toRaw))) := by
   simp [caseSig, InsnSig.ofWF, caseInsnDecl, DataGroup.caseDecl, memberAt, DatatypeDecl.mapTy,
     Ctor.mapTy, Param.mapTy, Array.map_attach_eq_pmap, Array.map_pmap, Function.comp_def,
-    TypeArg.toRaw_eq_expr, Array.pmap_eq_map]
+    TypeArg.toRaw_eq_expr, Array.pmap_map]
+  -- `simp` does not rewrite under `pmap`'s binders, so compare the arrays pointwise.
+  refine Array.ext (by simp) fun j _ _ => ?_
+  simp only [Array.getElem_pmap, Array.getElem_map]
+  exact Prod.ext rfl (Array.ext (by simp) fun k _ _ => by
+    simp only [Array.getElem_pmap, Array.getElem_map]; rfl)
 
 /-- `succs_caseSig`, over lists. -/
 public theorem succs_toList_caseSig :

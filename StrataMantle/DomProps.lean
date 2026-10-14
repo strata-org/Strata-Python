@@ -58,13 +58,13 @@ theorem treeOf_insert {pre : List (Block env α)} {m : LabelMap (Block env α)}
   rw [LabelMap.find?_insert]
   by_cases hl : l = b.label
   · subst hl
-    rw [if_pos rfl]
+    rw [ite_eq_left rfl]
     refine ⟨fun h => ?_, fun ⟨hmem, hlab⟩ => ?_⟩
     · cases h; simp
     · rcases List.mem_append.mp hmem with h | h
       · exact absurd ((hm _ _).mpr ⟨h, hlab⟩) (by simp [hb])
       · simp_all
-  · rw [if_neg hl, hm]
+  · rw [ite_eq_right hl, hm]
     constructor
     · exact fun ⟨h₁, h₂⟩ => ⟨List.mem_append_left _ h₁, h₂⟩
     · rintro ⟨h₁, h₂⟩
@@ -86,7 +86,7 @@ theorem foldlM_treeStep : ∀ (rest pre : List (Block env α)) (m : LabelMap (Bl
       | none => rfl
       | some _ => simp [List.foldlM_cons, treeStep, hf] at h
     simp only [List.foldlM_cons, treeStep, hb, Option.isSome_none, Bool.false_eq_true,
-      if_false] at h
+      ite_false] at h
     have hn₁ : ((pre ++ [b]).map (·.label)).Nodup := by
       rw [List.map_append, List.nodup_append]
       refine ⟨hn, by simp, fun x hx y hy hxy => ?_⟩
@@ -112,7 +112,7 @@ theorem foldlM_treeStep_isSome : ∀ (rest pre : List (Block env α)) (m : Label
         rw [List.map_append, List.nodup_append] at hn
         exact absurd rfl (hn.2.2 _ (List.mem_map.mpr ⟨b₁, hb₁, hl⟩) _ List.mem_cons_self)
     simp only [List.foldlM_cons, treeStep, hb, Option.isSome_none, Bool.false_eq_true,
-      if_false]
+      ite_false]
     exact foldlM_treeStep_isSome rest (pre ++ [b]) _ (treeOf_insert hm hb) (by simpa using hn)
 
 /-- The empty map holds exactly the blocks of the empty body. -/
@@ -496,7 +496,7 @@ theorem ancs_step {bs : List (Block env α)} (hn : (bs.map (·.label)).Nodup) {c
   rw [anc_block_iff hn hc p₁ j, ← ha p₁, Point.le_iff, LabelMap.find?_insert]
   dsimp only
   by_cases hl : p₁.label = c.label
-  · rw [if_pos hl, hl]
+  · rw [ite_eq_left hl, hl]
     cases a.find? c.label with
     | none => simp
     | some o =>
@@ -513,9 +513,9 @@ theorem addAncs_good {bs : List (Block env α)} {tm : LabelMap (Block env α)}
   | f + 1, m, b, hb, hm => by
     rw [addAncs]
     by_cases hs : (m.find? b.label).isSome
-    · rw [if_pos hs]
+    · rw [ite_eq_left hs]
       exact hm
-    rw [if_neg hs]
+    rw [ite_eq_right hs]
     cases hi : t b.label with
     | none => exact ancGood_insert hn hm hb fun p => by simp [hi]
     | some p =>

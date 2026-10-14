@@ -46,9 +46,9 @@ theorem settle_spec {l : List (Nat × List Pos)} (hl : PredsOK n size l) :
     intro par hI hm
     rw [settle]
     by_cases h : (pass l par).1 = true
-    · rw [dif_pos h]
+    · rw [dite_eq_left h]
       exact ih _ (hm ▸ (pass_Φ hI hl).2 h) _ _ rfl
-    · rw [dif_neg h]
+    · rw [dite_eq_right h]
       exact ⟨hI, Bool.eq_false_iff.mpr h⟩
 
 /-! ## Positions and labels -/
@@ -59,7 +59,7 @@ theorem positions_find?_notin {x : Label} : ∀ {k : Nat} {bs : List (Block env 
   | _, [], _, _ => rfl
   | k, b :: bs, m, h => by
     rw [positions, positions_find?_notin (fun c hc => h c (List.mem_cons_of_mem _ hc)),
-      LabelMap.find?_insert, if_neg (Ne.symm (h b List.mem_cons_self))]
+      LabelMap.find?_insert, ite_eq_right (Ne.symm (h b List.mem_cons_self))]
 
 /-- Under distinct labels, `positions` maps each block's label to its position. -/
 theorem positions_find?_of : ∀ {k : Nat} {bs : List (Block env α)} {m : LabelMap Nat}
@@ -70,7 +70,7 @@ theorem positions_find?_of : ∀ {k : Nat} {bs : List (Block env α)} {m : Label
     cases h
     have hc : ∀ d ∈ bs, d.label ≠ c.label := fun d hd he =>
       (List.nodup_cons.mp hn).1 (List.mem_map.mpr ⟨d, hd, he⟩)
-    rw [positions, positions_find?_notin hc, LabelMap.find?_insert, if_pos rfl, Nat.add_zero]
+    rw [positions, positions_find?_notin hc, LabelMap.find?_insert, ite_eq_left rfl, Nat.add_zero]
   | k, c :: bs, m, i + 1, b, hn, h => by
     rw [positions, positions_find?_of (List.nodup_cons.mp hn).2 h]
     congr 1
@@ -128,7 +128,7 @@ theorem assign_find?_notin {all : Array (Block env α)} {par : NatTrie Pos} {l :
   | k, b :: bs, m, h => by
     rw [assign, assign_find?_notin (fun c hc => h c (List.mem_cons_of_mem _ hc))]
     split
-    · rw [LabelMap.find?_insert, if_neg (Ne.symm (h b List.mem_cons_self))]
+    · rw [LabelMap.find?_insert, ite_eq_right (Ne.symm (h b List.mem_cons_self))]
     · rfl
 
 /-- Under distinct labels, `assign` gives the block at position `k + i` the point `par` gives
@@ -147,7 +147,7 @@ theorem assign_find?_of {all : Array (Block env α)} {par : NatTrie Pos} :
     cases hr : par.find? k with
     | none => rfl
     | some r =>
-      rw [LabelMap.find?_insert, if_pos rfl]
+      rw [LabelMap.find?_insert, ite_eq_left rfl]
       rfl
   | k, c :: bs, m, i + 1, b, hn, h => by
     have hb : b ∈ bs := List.mem_of_getElem? (by simpa using h)
@@ -156,7 +156,7 @@ theorem assign_find?_of {all : Array (Block env α)} {par : NatTrie Pos} :
     rw [assign, assign_find?_of (List.nodup_cons.mp hn).2 h, show k + 1 + i = k + (i + 1) by omega]
     congr 1
     split
-    · rw [LabelMap.find?_insert, if_neg hne]
+    · rw [LabelMap.find?_insert, ite_eq_right hne]
     · rfl
 
 /-- The tree `par` gives the blocks `bs`, as `computeTree` stores it. -/

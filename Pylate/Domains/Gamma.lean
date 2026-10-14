@@ -48,15 +48,15 @@ private theorem tag_isRef_of_locCls (lc : LocCls) : lc.tag.isRef = true := by
 private theorem reduce_tags_any {v : AbsVal} (h : Tag.tany ∈ v.tags) :
     (v.reduce).tags = v.tags := by
   unfold AbsVal.reduce
-  rw [if_pos h]
+  rw [ite_eq_left h]
 
 private theorem mem_reduce_locs {v : AbsVal} {l : Loc}
     (hl : l ∈ v.locs) (ht : l.cls.tag ∈ v.tags) : l ∈ (v.reduce).locs := by
   unfold AbsVal.reduce
   by_cases hany : Tag.tany ∈ v.tags
-  · rw [if_pos hany]
+  · rw [ite_eq_left hany]
     exact List.mem_filter.mpr ⟨hl, decide_eq_true ht⟩
-  · rw [if_neg hany]
+  · rw [ite_eq_right hany]
     exact List.mem_filter.mpr ⟨hl, decide_eq_true ht⟩
 
 /-- A tag with its kind's witness survives the tag filter (no-`tany`
@@ -70,31 +70,31 @@ private theorem mem_reduce_tags {v : AbsVal} {t : Tag}
     (htyp : t = Tag.ttype → v.classes ≠ []) :
     t ∈ (v.reduce).tags := by
   unfold AbsVal.reduce
-  rw [if_neg hany]
+  rw [ite_eq_right hany]
   refine List.mem_filter.mpr ⟨hmem, ?_⟩
   by_cases hr : t.isRef = true
-  · rw [if_pos hr]
+  · rw [ite_eq_left hr]
     obtain ⟨l, hl, hlive, heq⟩ := href hr
     refine decide_eq_true (List.mem_map.mpr ⟨l, ?_, heq⟩)
     exact List.mem_filter.mpr ⟨hl, decide_eq_true hlive⟩
-  · rw [if_neg hr]
+  · rw [ite_eq_right hr]
     cases t <;> simp_all [Tag.isRef]
 
 private theorem reduce_funcs_of_mem {v : AbsVal}
     (h : Tag.tfunc ∈ (v.reduce).tags) : (v.reduce).funcs = v.funcs := by
   unfold AbsVal.reduce at *
   by_cases hany : Tag.tany ∈ v.tags
-  · rw [if_pos hany]
-  · rw [if_neg hany] at h ⊢
-    simp only [if_pos h]
+  · rw [ite_eq_left hany]
+  · rw [ite_eq_right hany] at h ⊢
+    simp only [ite_eq_left h]
 
 private theorem reduce_classes_of_mem {v : AbsVal}
     (h : Tag.ttype ∈ (v.reduce).tags) : (v.reduce).classes = v.classes := by
   unfold AbsVal.reduce at *
   by_cases hany : Tag.tany ∈ v.tags
-  · rw [if_pos hany]
-  · rw [if_neg hany] at h ⊢
-    simp only [if_pos h]
+  · rw [ite_eq_left hany]
+  · rw [ite_eq_right hany] at h ⊢
+    simp only [ite_eq_left h]
 
 private theorem locTag_ne_tfunc {lc : LocCls} : lc.tag ≠ Tag.tfunc := by
   cases lc <;> intro h <;> cases h
