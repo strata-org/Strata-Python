@@ -29,13 +29,15 @@ The operations:
 
 * `withInfo`: set the annotation given to what is emitted;
 * `freshVal`: a fresh value;
-* `emitConst`, `emitFunc`, `emitApply`: emit an instruction;
+* `emitConst`, `emitFunc`, `emitApply`, `emitApplyWith`: emit an instruction, `emitApplyWith`
+  with regions built in any monad `BuildM` lifts into;
 * `goto`: a transfer to a block;
 * `freshLabel`, `startBlock`, `startBlockWith`, `startFreshBlock`: allocate and open blocks;
 * `finishBlock`, `terminate`, `jump`, `branch`, `ret`, `unreachable`: close the open block
   with a terminator: any terminal operation, a datatype's `case` among them, or the base's
   control flow;
-* `region`: emit an operation's nested body;
+* `region`, `regionWith`: emit an operation's nested body, `regionWith` from any monad
+  `BuildM` lifts into;
 * `run`: run a builder, taking the function it emitted and the errors it recorded;
 * `build`: the function, or the `Errors` if any was recorded;
 * `Holds`: a property of a build's function, false if the build failed.
@@ -76,10 +78,18 @@ instance : EmptyCollection (StrMap β) := ⟨⟨[]⟩⟩
 
 end StrMap
 
-/-- What a function under construction consists of.
+/-- The blocks being emitted: the open block, if any, and the blocks finished so far, in the
+order they were finished, so the *first block finished is the entry*.  A region swaps it for
+an empty one while its own blocks are emitted. -/
+structure Body (env : Env Unit) (α : Type) where
+  /-- The block being built, if one is open. -/
+  label : Option Label := none
+  params : Array (ValDecl env) := #[]
+  instrs : Array (Instruction env α) := #[]
+  blocks : Array (Block env α) := #[]
 
-`blocks` holds the finished blocks of the function, or of the region being emitted, in the
-order they were finished: the *first block finished is the entry*. -/
+/-- What a function under construction consists of: its `body`, and what counts across the
+function, regions included. -/
 structure State (env : Env Unit) (α : Type) where
   /-- The annotation an instruction or block gets when its emitter is given none. -/
   info : α
@@ -89,11 +99,7 @@ structure State (env : Env Unit) (α : Type) where
   suffixes : NameMap Nat := ∅
   /-- Next suffix per label base, so that two `bb`s are `bb.0` and `bb.1`. -/
   labelSuffixes : StrMap Nat := ∅
-  /-- The block being built, if one is open. -/
-  label : Option Label := none
-  params : Array (ValDecl env) := #[]
-  instrs : Array (Instruction env α) := #[]
-  blocks : Array (Block env α) := #[]
+  body : Body env α := {}
   /-- The misuses recorded so far, in order. -/
   errors : Array String := #[]
 
@@ -125,7 +131,7 @@ def nameText : Name → String
 
 /-- Record an error if a block is still open when `what` ends. -/
 def checkClosed (what : String) : BuildM env α Unit := do
-  if let some l := (← get).label then
+  if let some l := (← get).body.label then
     error s!"{what} ends with block {nameText l.name} open"
 
 /-! ## Annotations -/
@@ -160,10 +166,10 @@ def freshVal (stem : Name) (t : TypeExpr env 0) : BuildM env α (ValDecl env) :=
 /-- Emit `instr`, whose result is `d`, into the open block.  With no block open, it is
 an error, and `instr` is not emitted. -/
 def emit (d : ValDecl env) (instr : Instruction env α) : BuildM env α ValId := do
-  if (← get).label.isNone then
+  if (← get).body.label.isNone then
     error s!"instruction %{d.id.id} emitted with no block open"
   else
-    modify fun s => { s with instrs := s.instrs.push instr }
+    modify fun s => { s with body.instrs := s.body.instrs.push instr }
   return d.id
 
 /-- Emit a constant, named after `name`, at the type the base gives it. -/
@@ -177,6 +183,17 @@ def emitFunc [base ⊑ env] (target : Name) (info : Option α := none) :
     BuildM env α ValId :=
   emitConst (.str .base "code") (.func target) info
 
+/-- `emitApply`, with regions built in any monad `BuildM` lifts into, such as a front end's
+builder. -/
+def emitApplyWith {m : Type → Type} [Monad m] [MonadLiftT (BuildM env α) m] {isig : InsnSig env}
+    (name : Name) (type : TypeExpr env 0) (r : InsnRef env isig)
+    (typeArgs : Vector (TypeExpr env 0) isig.typeArgc) (args : Array ValId)
+    (succs : Array BlockValue := #[]) (regions : Array (m (Region env α)) := #[])
+    (info : Option α := none) : m ValId := do
+  let d ← (freshVal name type : BuildM env α (ValDecl env))
+  let rs ← regions.mapM id
+  (do emit d (.apply (← resolveInfo info) d r typeArgs args succs rs) : BuildM env α ValId)
+
 /-- Emit an application of an operation, a datatype's constructor included.  `type` is the
 result's type, the operation's return type at `typeArgs`.  `succs` are the blocks it may
 transfer to, one per declared successor, and `regions` emit its nested bodies, each a
@@ -187,9 +204,7 @@ def emitApply {isig : InsnSig env} (name : Name) (type : TypeExpr env 0)
     (args : Array ValId) (succs : Array BlockValue := #[])
     (regions : Array (BuildM env α (Region env α)) := #[]) (info : Option α := none) :
     BuildM env α ValId := do
-  let d ← freshVal name type
-  let rs ← regions.mapM id
-  emit d (.apply (← resolveInfo info) d r typeArgs args succs rs)
+  emitApplyWith name type r typeArgs args succs regions info
 
 /-! ## Blocks -/
 
@@ -211,9 +226,9 @@ def freshLabel (base : String := blockBase) : BuildM env α Label := do
 is an error, and the other block is lost. -/
 def startBlock (label : Label) (params : Array (ValDecl env) := #[]) :
     BuildM env α Unit := do
-  if let some l := (← get).label then
+  if let some l := (← get).body.label then
     error s!"block {nameText label.name} opened while block {nameText l.name} is open"
-  modify fun s => { s with label := some label, params, instrs := #[] }
+  modify fun s => { s with body := { s.body with label := some label, params, instrs := #[] } }
 
 /-- Open the block called `label`, taking one fresh value of type `t` named after `name`, and
 return that value. -/
@@ -234,15 +249,12 @@ def startFreshBlock (params : Array (ValDecl env) := #[]) (base : String := bloc
 def finishBlock (term : Terminator env α) (info : Option α := none) : BuildM env α Unit := do
   let info ← resolveInfo info
   let s ← get
-  match s.label with
+  match s.body.label with
   | none => error "a block finished with no block open"
   | some l =>
-    let b : Block env α := { label := l, params := s.params, instrs := s.instrs, term, info }
-    set { s with
-      blocks := s.blocks.push b
-      label := none
-      params := #[]
-      instrs := #[] }
+    let b : Block env α :=
+      { label := l, params := s.body.params, instrs := s.body.instrs, term, info }
+    set { s with body := { blocks := s.body.blocks.push b } }
 
 /-- Close the open block by applying the terminal operation `r`. -/
 def terminate {isig : InsnSig env} (r : InsnRef env isig)
@@ -276,34 +288,36 @@ def unreachable [base ⊑ env] (info : Option α := none) : BuildM env α Unit :
 
 /-! ## Regions -/
 
-/-- Emit a region: open its entry block, labelled `base.n` and taking `params`, run `body`,
-and take the blocks it finished, entry first.  The open block and the blocks finished so
-far are restored afterwards, so a region can be emitted in the middle of a block, as
-`emitApply` and `terminate` do.  Value ids, readable names and labels
-keep counting across it.
+/-- Emit a region: open its entry block, labelled `base.n` and taking `params`, run `body`, and
+take the blocks it finished, entry first, with `body`'s result.  The enclosing body is set aside
+meanwhile, and restored with the default annotation afterwards, so a region can be emitted in
+the middle of a block.
 
-`body` must finish every block it opens, the entry included: ending with a block open is
-an error.  `ret` leaves the region.  A transfer from the body to a block outside the region is
-emitted as written, and `Func.WF` rejects it. -/
+`body` runs in any monad `BuildM` lifts into, such as a front end's builder.  It must finish
+every block it opens, and must not throw out of the region. -/
+def regionWith {m : Type → Type} {β : Type} [Monad m] [MonadLiftT (BuildM env α) m]
+    (params : Array (ValDecl env)) (body : m β) (base : String := "region") :
+    m (Region env α × β) := do
+  let saved ← (modifyGet fun s => (s.body, { s with body := {} }) : BuildM env α (Body env α))
+  let info := (← (get : BuildM env α (State env α))).info
+  let _ ← (startFreshBlock params base : BuildM env α Label)
+  let r ← body
+  (checkClosed s!"region {base}" : BuildM env α Unit)
+  let inner ← (modifyGet fun s => (s.body, { s with body := saved, info }) :
+    BuildM env α (Body env α))
+  return (⟨inner.blocks⟩, r)
+
+/-- `regionWith` in `BuildM` itself, for a body with no result. -/
 def region (params : Array (ValDecl env)) (body : BuildM env α Unit)
-    (base : String := "region") : BuildM env α (Region env α) := do
-  let saved ← get
-  set ({ saved with label := none, params := #[], instrs := #[], blocks := #[] } : State env α)
-  let _ ← startFreshBlock params base
-  body
-  checkClosed s!"region {base}"
-  let inner ← get
-  set ({ inner with
-    info := saved.info, label := saved.label, params := saved.params,
-    instrs := saved.instrs, blocks := saved.blocks } : State env α)
-  return ⟨inner.blocks⟩
+    (base : String := "region") : BuildM env α (Region env α) :=
+  Prod.fst <$> regionWith params body base
 
 /-! ## Finishing -/
 
 /-- The function the state describes.  The first block finished is the entry. -/
 def toFunc (s : State env α) (name : Name) (retType : TypeExpr env 0) (info : α) :
     Func env α :=
-  { name, retType, blocks := s.blocks, names := s.names, info }
+  { name, retType, blocks := s.body.blocks, names := s.names, info }
 
 /-- The errors a failed build recorded: at least one message. -/
 structure Errors where

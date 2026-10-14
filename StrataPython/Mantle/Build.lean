@@ -235,7 +235,7 @@ def startBlockWith (label : Label) (name : Name) (t : TypeExpr Py.env 0 := Py.Va
   Build.startBlockWith (α := α) label name t
 
 /-- Whether a block is open, so that instructions can be emitted. -/
-def isOpen : PyM α Bool := do return (← getThe (Build.State Py.env α)).label.isSome
+def isOpen : PyM α Bool := do return (← getThe (Build.State Py.env α)).body.label.isSome
 
 /-- Close the open block with `term`.  With no block open, it is an error. -/
 def finishBlock (term : Terminator Py.env α) (info : Option α := none) : PyM α Unit :=

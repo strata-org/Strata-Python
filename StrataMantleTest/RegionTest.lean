@@ -95,6 +95,68 @@ example : Holds (·.labels.map (·.name) =
      .num (.str .base "else") 0]) pick := by
   decide +kernel
 
+/-! ## A region from a front end's monad
+
+`regionWith` runs its body in any monad `BuildM` lifts into: here a counter on top of it.
+The body's result and the counter come back, and the enclosing block, open with one
+instruction, is restored. -/
+
+private def counted : StateT Nat (BuildM E Unit) (Region E Unit × Nat) := do
+  let _ ← (startFreshBlock #[] "entry" : BuildM E Unit Label)
+  let _ ← (emitConst (.str .base "x") (.int 0) : BuildM E Unit ValId)
+  Build.regionWith #[] (base := "then") do
+    modify (· + 1)
+    let one ← (emitConst (.str .base "one") (.int 1) : BuildM E Unit ValId)
+    (finishBlock (.ret () one) : BuildM E Unit Unit)
+    return 7
+
+#guard
+  let (((r, v), n), s) := (counted.run 41).run (Build.State.init ())
+  r.blocks.size == 1 && v == 7 && n == 42 && s.errors.isEmpty &&
+    s.body.label == some ⟨.num (.str .base "entry") 0⟩ && s.body.instrs.size == 1 && s.body.blocks.isEmpty
+
+/-- `pick` again, its `if` emitted by `emitApplyWith` from the counter's monad, where each
+region bumps the counter. -/
+private def pickWith : Except Errors (Func E Unit) :=
+  build (.str .base "pick") intT () do
+    let c ← freshVal (.str .base "c") boolT
+    let x ← freshVal (.str .base "x") intT
+    let _ ← startFreshBlock #[c, x] "entry"
+    let thn : StateT Nat (BuildM E Unit) (Region E Unit) :=
+      Prod.fst <$> Build.regionWith #[] (base := "then") do
+        modify (· + 1)
+        let j ← (freshLabel "join" : BuildM E Unit Label)
+        let one ← (emitConst (.str .base "one") (.int 1) : BuildM E Unit ValId)
+        (finishBlock (.jump () (goto j #[one])) : BuildM E Unit Unit)
+        let v ← (startBlockWith j (.str .base "v") intT : BuildM E Unit ValId)
+        (finishBlock (.ret () v) : BuildM E Unit Unit)
+    let els : StateT Nat (BuildM E Unit) (Region E Unit) :=
+      Prod.fst <$> Build.regionWith #[] (base := "else") do
+        modify (· + 1)
+        (finishBlock (.ret () x.id) : BuildM E Unit Unit)
+    let (r, n) ← (Build.emitApplyWith (.str .base "r") intT Reg.«if» #v[intT] #[c.id]
+      (regions := #[thn, els]) : StateT Nat (BuildM E Unit) ValId).run 0
+    if n != 2 then Build.error s!"the regions ran {n} times"
+    finishBlock (.ret () r)
+
+example : Holds (Func.WF ∅) pickWith := by decide +kernel
+
+example : Holds Func.Canonical pickWith := by decide +kernel
+
+-- `pickWith` is `pick`: the same text, constants included.
+#guard match pick, pickWith with
+  | .ok a, .ok b => a.format .full == b.format .full
+  | _, _ => false
+
+-- A region restores the default annotation it found.
+#guard
+  let b : BuildM E Nat Unit := do
+    let _ ← startFreshBlock #[] "entry"
+    let _ ← region #[] do
+      modify ({ · with info := 9 })
+      finishBlock (.ret 9 (← emitConst (.str .base "one") (.int 1)))
+  (b.run (Build.State.init 5)).2.info == 5
+
 /-! ## A `try`, with an `if` nested in its body
 
 The inner `ret` leaves the `if`, not the `try` body: each region's `ret` is a jump to its own

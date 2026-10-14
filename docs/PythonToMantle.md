@@ -214,7 +214,7 @@ in `@m.|<module>|`. The translator implements every row (`allocName`).
 prologue code, carries that source range.
 
 **Reachability.** The builder has an *open block* when instructions can still be emitted
-(`Build.State.label` is some label). A statement that ends the open block is `return`,
+(`Build.State.body.label` is some label). A statement that ends the open block is `return`,
 `raise`, `break` or `continue`, or a compound statement all of whose paths do so. After it,
 the remaining statements of the same body are unreachable, and the translator skips them.
 A join block is started only if some transfer targets it.
