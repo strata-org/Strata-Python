@@ -6,9 +6,10 @@
 module
 public import StrataMantle.Env.WF
 public import StrataMantle.Env
+-- `Env.ofArray?` is private: the examples below evaluate it directly.
+import all StrataMantle.Env
 -- Also imported as `meta` so the definitions below are available to the
--- interpreter: `native_decide` needs compiled code for `checkFrom` and `addInsns?`.
-meta import StrataMantle.Env.WF
+-- interpreter: `#guard` needs compiled code for `Env.ofArray?` and `addInsns?`.
 meta import StrataMantle.Env
 
 set_option autoImplicit false
@@ -31,11 +32,15 @@ private def complName : Name := .str .base "Completion"
 private def ifName : Name := .str .base "if"
 private def tryName : Name := .str .base "try"
 
+/-- The checker accepts `ds`. -/
+private def accepts (ds : Array (Decl.Raw Unit)) : Bool := (Env.ofArray? ds).isSome
+/-- `ds` names each declaration once, and the checker rejects it. -/
+private def rejects (ds : Array (Decl.Raw Unit)) : Bool :=
+  decide (Env.Raw.DistinctDecls ds) && (Env.ofArray? ds).isNone
+
 /-! ## Unchecked -/
 
 namespace RawExample
-
-open Env.Raw
 
 private def boolDecl : Decl.Raw Unit := .type { ann := (), name := boolName }
 private def excDecl : Decl.Raw Unit := .type { ann := (), name := excName }
@@ -62,10 +67,8 @@ private def tryDecl : Decl.Raw Unit := .insn
                                returnType := .app complName #[.var 0] }⟩] }
 
 private def goodDecls : Array (Decl.Raw Unit) := #[boolDecl, excDecl, complDecl, ifDecl, tryDecl]
-private theorem goodDistinct : DistinctDecls goodDecls := by decide
 
-/-- Both are accepted. -/
-example : (ofAscArray goodDecls goodDistinct).WF := wf_ofAscArray _ _ (by native_decide)
+#guard accepts goodDecls
 
 /-- An `if` whose `then` region takes a parameter of type `b`, which it does not bind: the
 region's types are under the instruction's one type variable, so level `1` is out of scope. -/
@@ -76,25 +79,19 @@ private def illScoped (regionParam : TypeExpr.Raw) : Decl.Raw Unit := .insn
     regions := #[⟨"then", { params := #[⟨"x", regionParam⟩], returnType := .var 0 }⟩] }
 
 private def badDecls : Array (Decl.Raw Unit) := #[boolDecl, illScoped (.var 1)]
-private theorem badDistinct : DistinctDecls badDecls := by decide
 
-/-- An ill-scoped type variable in a region parameter is rejected. -/
-example : checkFrom (ofAscArray badDecls badDistinct) 0 badDecls.toList = false := by
-  native_decide
+/- An ill-scoped type variable in a region parameter is rejected. -/
+#guard rejects badDecls
 
 /-- And it is the region that is rejected: the same declaration with the variable in scope
 is accepted. -/
 private def fixedDecls : Array (Decl.Raw Unit) := #[boolDecl, illScoped (.var 0)]
-private theorem fixedDistinct : DistinctDecls fixedDecls := by decide
-example : checkFrom (ofAscArray fixedDecls fixedDistinct) 0 fixedDecls.toList = true := by
-  native_decide
+#guard accepts fixedDecls
 
 /-- A region's return type obeys declared-before-use like any other type: `try` ahead of
 `Completion` is rejected. -/
 private def forwardDecls : Array (Decl.Raw Unit) := #[boolDecl, excDecl, tryDecl, complDecl]
-private theorem forwardDistinct : DistinctDecls forwardDecls := by decide
-example : checkFrom (ofAscArray forwardDecls forwardDistinct) 0 forwardDecls.toList = false := by
-  native_decide
+#guard rejects forwardDecls
 
 /-- An argument and a region share one namespace: an `if` whose condition is named `then`
 is rejected. -/
@@ -104,11 +101,7 @@ private def argRegionClash : Array (Decl.Raw Unit) := #[boolDecl, .insn
     returnType := some (.var 0)
     regions := #[⟨"then", { params := #[], returnType := .var 0 }⟩,
                  ⟨"else", { params := #[], returnType := .var 0 }⟩] }]
-private theorem argRegionClashDistinct : DistinctDecls argRegionClash := by decide
-example :
-    checkFrom (ofAscArray argRegionClash argRegionClashDistinct) 0
-      argRegionClash.toList = false := by
-  native_decide
+#guard rejects argRegionClash
 
 /-- A region's parameters are named distinctly: a handler taking two `exc`s is rejected. -/
 private def dupRegionParam : Array (Decl.Raw Unit) := #[boolDecl, excDecl, complDecl, .insn
@@ -117,11 +110,7 @@ private def dupRegionParam : Array (Decl.Raw Unit) := #[boolDecl, excDecl, compl
     returnType := some (.app complName #[.var 0])
     regions := #[⟨"handler", { params := #[⟨"exc", .app excName #[]⟩, ⟨"exc", .app excName #[]⟩]
                                returnType := .app complName #[.var 0] }⟩] }]
-private theorem dupRegionParamDistinct : DistinctDecls dupRegionParam := by decide
-example :
-    checkFrom (ofAscArray dupRegionParam dupRegionParamDistinct) 0
-      dupRegionParam.toList = false := by
-  native_decide
+#guard rejects dupRegionParam
 
 end RawExample
 
@@ -177,8 +166,10 @@ private def trySig : InsnSig env₂ :=
 
 private def ops : Array (Name × InsnSig env₂) := #[(ifName, ifSig), (tryName, trySig)]
 
-/-- The deciding batch accepts both. -/
-private def env₃ : Env Unit := (env₂.addInsns? ops).get (by native_decide)
+/- The deciding batch accepts both. -/
+#guard (env₂.addInsns? ops).isSome
+-- The guard above shows the batch is accepted, so the fallback is never taken.
+private def env₃ : Env Unit := (env₂.addInsns? ops).getD env₂
 
 /-- The names of the regions the instruction `n` takes, read back through the checked
 lookup: the region signatures survive erasure and re-checking. -/
@@ -187,8 +178,8 @@ private def regionNames (s : Env Unit) (n : Name) : Option (Array String) :=
   | some (.insn (isig := i) _) => some (i.regions.map (·.name))
   | _ => none
 
-example : regionNames env₃ ifName = some #["then", "else"] := by native_decide
-example : regionNames env₃ tryName = some #["body", "handler"] := by native_decide
+#guard regionNames env₃ ifName = some #["then", "else"]
+#guard regionNames env₃ tryName = some #["body", "handler"]
 
 /-- How many parameters each region of `n` takes. -/
 private def regionArity (s : Env Unit) (n : Name) : Option (Array Nat) :=
@@ -196,7 +187,7 @@ private def regionArity (s : Env Unit) (n : Name) : Option (Array Nat) :=
   | some (.insn (isig := i) _) => some (i.regions.map (·.type.params.size))
   | _ => none
 
-example : regionArity env₃ tryName = some #[0, 1] := by native_decide
+#guard regionArity env₃ tryName = some #[0, 1]
 
 /-- The total batch needs only freshness, and hands back a reference per operation whose
 signature still has its regions. -/

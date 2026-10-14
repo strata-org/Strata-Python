@@ -7,9 +7,6 @@ module
 public import StrataMantle.WF
 -- Building IR values needs the environment representation at code-generation time.
 import StrataMantle.Env.WF
--- Also imported as `meta`, so that the interpreter running `native_decide` below has
--- compiled code for the base environment.
-meta import StrataMantle.Env.WF
 -- The `#guard`s run the checker as compiled code.
 meta import StrataMantle.WF
 -- `decide +kernel` unfolds the checker, the base and core's array operations.
@@ -124,7 +121,8 @@ private def divSig : InsnSig base :=
   { ann := (), argTypes := #[⟨"a", intT⟩, ⟨"b", intT⟩],
     returnType := intT, succs := #[⟨"err", #[strT]⟩] }
 
-private theorem divFresh : divName ∉ base := by native_decide
+/-- `div` is not a base name. -/
+private theorem divFresh : divName ∉ base := by rw [Base.mem_env]; decide
 
 private def sig1 : Env Unit := base.addInsn divName divSig divFresh
 private def s01 : base ⊆ sig1 := Env.subset_addInsn _ _ _ _
@@ -491,13 +489,13 @@ private def refModule (target : Name) (type : TypeExpr base 0 := codeT) :
   funcs := #[refTo target type, f]
   info  := ()
 
-#guard decide (Module.Raw.WF (refModule (.str .base "f")))
-#guard decide (Module.Raw.WF (refModule (.str .base "ref")))
+#guard Module.Raw.WF (refModule (.str .base "f"))
+#guard Module.Raw.WF (refModule (.str .base "ref"))
 
 -- A reference to a function the module does not define.
-#guard decide (¬ Module.Raw.WF (refModule (.str .base "g")))
+#guard ¬ Module.Raw.WF (refModule (.str .base "g"))
 
 -- A code pointer declared at a type other than `base.Code`.
-#guard decide (¬ Module.Raw.WF (refModule (.str .base "f") intT))
+#guard ¬ Module.Raw.WF (refModule (.str .base "f") intT)
 
 end Strata.Mantle.IRTest

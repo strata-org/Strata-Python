@@ -304,20 +304,18 @@ theorem mem_of_add?_eq_some {s s' : Env α} {d : Decl.Raw α} (h : s.add? d = so
 
 /-- Build an environment from an array of declarations, in order.  `none` if two declarations
 share a name, or a declaration is not well formed against those before it. -/
-def ofArray? : Array (Decl.Raw α) → Option (Env α)
-  | ⟨l⟩ =>
-    if p : Raw.DistinctDecls ⟨l⟩ then
-      if h : Raw.checkFrom (Raw.ofAscArray ⟨l⟩ p) 0 l = true then
-        some ⟨Raw.ofAscArray ⟨l⟩ p, Raw.wf_ofAscArray ⟨l⟩ p h⟩
-      else
-        none
+def ofArray? (ds : Array (Decl.Raw α)) : Option (Env α) :=
+  if p : Raw.DistinctDecls ds then
+    if h : (Raw.ofAscArray ds p).check = true then
+      some ⟨Raw.ofAscArray ds p, Raw.wf_ofAscArray ds p h⟩
     else
       none
+  else
+    none
 
 theorem vals_of_ofArray?_eq_some {ds : Array (Decl.Raw α)} {s : Env α}
     (h : ofArray? ds = some s) :
     s.raw.decls.vals = ds := by
-  obtain ⟨l⟩ := ds
   rw [ofArray?] at h
   split at h
   · split at h
@@ -830,7 +828,7 @@ declared in `s`, and each names its parameters distinctly. -/
 /-- Add a batch of type declarations. -/
 public def addTypes (s : Env α) (ds : Array (TypeDecl α)) (fresh : s.FreshTypes ds) : Env α :=
   s.appendBatch (ds.map .type) (freshList_of_freshNames (by rw [Array.map_map]; exact fresh.1))
-    (s.wf.appendList _ _ (Raw.checkFrom_types _ _ _ fresh.2))
+    (s.wf.appendList _ _ (Raw.checkAppend_types _ _ _ fresh.2))
 
 section
 variable {s : Env α} {ds : Array (TypeDecl α)} {fresh : s.FreshTypes ds}
@@ -1561,7 +1559,7 @@ public def addData (s : Env α) (hdr : Array (TypeDecl α)) (fresh : s.FreshType
     (adm : admissible hdr ctors = true := by decide) : Env α :=
   s.appendBatch (dataGroup hdr ctors adm).decls
     (freshList_of_freshNames (freshNames_dataGroup cfresh))
-    (s.wf.appendList _ _ (Raw.checkFrom_group _ checkNames_dataGroup (checkWith_dataGroup _)))
+    (s.wf.appendList _ _ (Raw.checkAppend_group _ checkNames_dataGroup (checkWith_dataGroup _)))
 
 section
 
@@ -2988,7 +2986,7 @@ one is not well formed in the environment that has the whole batch. -/
 def addAll? (s : Env α) : Array (Decl.Raw α) → Option (Env α)
   | ⟨l⟩ =>
     if fresh : s.raw.FreshList l then
-      if h : Raw.checkFrom (s.raw.appendList l fresh) s.size l = true then
+      if h : s.raw.checkAppend l fresh = true then
         some (s.appendBatch ⟨l⟩ fresh (s.wf.appendList l fresh h))
       else none
     else none

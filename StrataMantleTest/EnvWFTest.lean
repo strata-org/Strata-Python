@@ -6,20 +6,18 @@
 module
 public import StrataMantle.Env.WF
 public import StrataMantle.Env
--- `check?` and `addData?` are private: the examples below evaluate them directly.
+-- `check?`, `addData?` and `Env.ofArray?` are private: the examples below evaluate them directly.
 import all StrataMantle.Env
--- Also imported as `meta` so the definitions below are available to the
--- interpreter: `native_decide` needs compiled code for `checkFrom`.
-meta import StrataMantle.Env.WF
+-- Also imported as `meta`: the `#guard`s run the checker and the builders as compiled code.
 meta import StrataMantle.Env
 
 set_option autoImplicit false
 
 /-! # Worked examples for `Env.Raw.WF`
 
-`checkFrom` consults the environment's hash map, so obligations are discharged with
-`native_decide`, which needs compiled code and therefore cannot run inside the
-module that defines the environment. These live here instead.
+The checker consults the environment's hash map, so it and the `Option`-returning builders run
+under `#guard` as compiled code.  Rejections are also checked against the specification with
+`decide`, where its conjuncts reduce.
 -/
 
 namespace Strata.Mantle.EnvWFTest
@@ -27,6 +25,13 @@ namespace Strata.Mantle.EnvWFTest
 open Env.Raw
 
 public section
+
+/-- The checker accepts `ds`. -/
+private def accepts (ds : Array (Decl.Raw Unit)) : Bool := (Env.ofArray? ds).isSome
+/-- `ds` names each declaration once, and the checker rejects it. -/
+private def rejects (ds : Array (Decl.Raw Unit)) : Bool :=
+  decide (DistinctDecls ds) && (Env.ofArray? ds).isNone
+
 section Example
 
 private def natName : Name := .str .base "Nat"
@@ -48,30 +53,24 @@ private def exampleDecls : Array (Decl.Raw Unit) := #[natDecl, listDecl, consDec
 private theorem exampleDistinct : DistinctDecls exampleDecls := by decide
 private def exampleEnv : Env.Raw Unit := ofAscArray exampleDecls exampleDistinct
 
-example : exampleEnv.WF := wf_ofAscArray _ _ (by native_decide)
+/- The checker accepts `exampleEnv`, which by `wf_ofAscArray` makes it well formed. -/
+#guard exampleEnv.check
 
 /-- Forward references are rejected: moving the instruction ahead of the types it
 mentions makes the checker fail. -/
 private def badOrder : Array (Decl.Raw Unit) := #[consDecl, natDecl, listDecl]
-private theorem badOrderDistinct : DistinctDecls badOrder := by decide
-example : checkFrom (ofAscArray badOrder badOrderDistinct) 0 badOrder.toList = false := by
-  native_decide
+#guard rejects badOrder
 
 /-- Arity mismatches are rejected. -/
 private def badArity : Array (Decl.Raw Unit) := #[natDecl, listDecl,
   .insn { ann := (), name := .str .base "bad", argTypes := #[],
           returnType := some (.app listName #[]) }]
-private theorem badArityDistinct : DistinctDecls badArity := by decide
-example : checkFrom (ofAscArray badArity badArityDistinct) 0 badArity.toList = false := by
-  native_decide
+#guard rejects badArity
 
 /-- Out-of-scope de Bruijn variables are rejected (`typeParams` defaults to `#[]`). -/
 private def openVarDecls : Array (Decl.Raw Unit) :=
   #[.insn { ann := (), name := .str .base "bad", argTypes := #[], returnType := some (.var 0) }]
-private theorem openVarDistinct : DistinctDecls openVarDecls := by decide
-example :
-    checkFrom (ofAscArray openVarDecls openVarDistinct) 0 openVarDecls.toList = false := by
-  native_decide
+#guard rejects openVarDecls
 
 /-! ### Named type parameters
 
@@ -85,10 +84,8 @@ private def polyInsn (typeParams : Array String) (args : Array String) : Decl.Ra
   .insn { ann := (), name := .str .base "poly", typeParams
           argTypes := args.map (⟨·, .var 0⟩), returnType := some (.var 0) }
 
-/-- Whether the checker accepts `d` after `Nat` and `List`. -/
-private def accepts (d : Decl.Raw Unit) : Bool :=
-  let ds := #[natDecl, listDecl, d]
-  if h : DistinctDecls ds then checkFrom (ofAscArray ds h) 0 ds.toList else false
+/-- `d` after `Nat` and `List`. -/
+private def afterList (d : Decl.Raw Unit) : Array (Decl.Raw Unit) := #[natDecl, listDecl, d]
 
 /-- `poly : ∀ a, a → List a → a`: one named type parameter, in scope in every argument. -/
 private def polyDecl : Decl.Raw Unit := .insn
@@ -97,19 +94,18 @@ private def polyDecl : Decl.Raw Unit := .insn
     returnType := some (.var 0) }
 
 private def polyDecls : Array (Decl.Raw Unit) := #[natDecl, listDecl, polyDecl]
-private theorem polyDistinct : DistinctDecls polyDecls := by decide
-example : (ofAscArray polyDecls polyDistinct).WF := wf_ofAscArray _ _ (by native_decide)
+#guard accepts polyDecls
 
-example : accepts (polyInsn #["a", "b"] #["x", "y"]) = true := by native_decide
+#guard accepts (afterList (polyInsn #["a", "b"] #["x", "y"]))
 
-/-- A duplicate argument name is rejected. -/
-example : accepts (polyInsn #["a"] #["x", "x"]) = false := by native_decide
+/- A duplicate argument name is rejected. -/
+#guard rejects (afterList (polyInsn #["a"] #["x", "x"]))
 
-/-- A duplicate type-parameter name is rejected. -/
-example : accepts (polyInsn #["a", "a"] #["x"]) = false := by native_decide
+/- A duplicate type-parameter name is rejected. -/
+#guard rejects (afterList (polyInsn #["a", "a"] #["x"]))
 
-/-- A type parameter named like an argument is rejected. -/
-example : accepts (polyInsn #["x"] #["x"]) = false := by native_decide
+/- A type parameter named like an argument is rejected. -/
+#guard rejects (afterList (polyInsn #["x"] #["x"]))
 
 /-- The same three, against the specification: no resolver makes them well formed. -/
 example (R : Name → Nat → Prop) :
@@ -143,14 +139,14 @@ private def varInsnDecl (v : String) (regions succs : Array String := #[]) :
     argTypes := #[⟨"x", .var 0⟩], variadic := some ⟨v, .var 0⟩, returnType := some (.var 0)
     regions := regions.map (⟨·, ⟨#[], .var 0⟩⟩), succs := succs.map (⟨·, #[]⟩) }
 
-example : accepts (.insn (varInsnDecl "xs" #["r"] #["k"])) = true := by native_decide
+#guard accepts (afterList (.insn (varInsnDecl "xs" #["r"] #["k"])))
 
-/-- A variadic named like an argument, a region, a successor or a type parameter is
+/- A variadic named like an argument, a region, a successor or a type parameter is
 rejected. -/
-example : accepts (.insn (varInsnDecl "x")) = false := by native_decide
-example : accepts (.insn (varInsnDecl "r" #["r"])) = false := by native_decide
-example : accepts (.insn (varInsnDecl "k" #[] #["k"])) = false := by native_decide
-example : accepts (.insn (varInsnDecl "a")) = false := by native_decide
+#guard rejects (afterList (.insn (varInsnDecl "x")))
+#guard rejects (afterList (.insn (varInsnDecl "r" #["r"])))
+#guard rejects (afterList (.insn (varInsnDecl "k" #[] #["k"])))
+#guard rejects (afterList (.insn (varInsnDecl "a")))
 
 /-- …and against the specification, written as literals so that `decide` reduces. -/
 example (R : Name → Nat → Prop) :
@@ -174,12 +170,10 @@ example (R : Name → Nat → Prop) :
 
 /-! A primitive's parameters are named distinctly too. -/
 
-/-- `Pair a a` is rejected: two parameters share a name. -/
-example : accepts (.type ⟨(), .str .base "Pair", #[⟨"a", .pos⟩, ⟨"a", .pos⟩]⟩) = false := by
-  native_decide
+/- `Pair a a` is rejected: two parameters share a name. -/
+#guard rejects (afterList (.type ⟨(), .str .base "Pair", #[⟨"a", .pos⟩, ⟨"a", .pos⟩]⟩))
 
-example : accepts (.type ⟨(), .str .base "Pair", #[⟨"a", .pos⟩, ⟨"b", .pos⟩]⟩) = true := by
-  native_decide
+#guard accepts (afterList (.type ⟨(), .str .base "Pair", #[⟨"a", .pos⟩, ⟨"b", .pos⟩]⟩))
 
 /-- …and against the specification. -/
 example (R : Name → Nat → Prop) :
@@ -221,28 +215,28 @@ private def listGroup : DataGroup Unit TypeExpr.Raw :=
 
 private def listDecls : Array (Decl.Raw Unit) := #[natDecl] ++ listGroup.decls
 
-/-- `DataGroup.decls` computes the addresses and the signatures, so an environment need not
-spell them out: the head, then one instruction per constructor, each marked as that
+/- `DataGroup.decls` gives the head, then one instruction per constructor, each marked as that
 constructor, then the case instruction. -/
-example : (listGroup.decls).map (·.name) =
-    #[listName, nilName, consName, listName.caseName] := by native_decide
-example : (listGroup.decls).map (fun d => d.asInsn.bind (·.kind.ctor?)) =
-    #[none, some ⟨listName, 0, 0⟩, some ⟨listName, 0, 1⟩, none] := by native_decide
+#guard (listGroup.decls).map (·.name) =
+    #[listName, nilName, consName, listName.caseName]
+#guard (listGroup.decls).map (fun d => d.asInsn.bind (·.kind.ctor?)) =
+    #[none, some ⟨listName, 0, 0⟩, some ⟨listName, 0, 1⟩, none]
 
 /-- `cons`'s instruction: `[a] (head : a) (tail : List a) : List a`. -/
-example : listGroup.ctorInsn? 0 1 = some
-    { ann := (), name := consName, typeParams := #["a"],
-      argTypes := #[⟨"head", .var 0⟩, ⟨"tail", .app listName #[.var 0]⟩],
-      returnType := some (.app listName #[.var 0]), kind := .ctor ⟨listName, 0, 1⟩ } := by
-  native_decide
+private def consDecl' : InsnDecl.Raw Unit :=
+  { ann := (), name := consName, typeParams := #["a"],
+    argTypes := #[⟨"head", .var 0⟩, ⟨"tail", .app listName #[.var 0]⟩],
+    returnType := some (.app listName #[.var 0]), kind := .ctor ⟨listName, 0, 1⟩ }
 
-/-- `nil`'s: `[a] : List a`. -/
-example : listGroup.ctorInsn? 0 0 = some
+/- It is the one its group gives it. -/
+#guard listGroup.ctorInsn? 0 1 = some consDecl'
+
+/- `nil`'s: `[a] : List a`. -/
+#guard listGroup.ctorInsn? 0 0 = some
     { ann := (), name := nilName, typeParams := #["a"], argTypes := #[],
-      returnType := some (.app listName #[.var 0]), kind := .ctor ⟨listName, 0, 0⟩ } := by
-  native_decide
-private theorem listDistinct : DistinctDecls listDecls := by native_decide
-example : (ofAscArray listDecls listDistinct).WF := wf_ofAscArray _ _ (by native_decide)
+      returnType := some (.app listName #[.var 0]), kind := .ctor ⟨listName, 0, 0⟩ }
+
+#guard accepts listDecls
 
 /-- Mutual recursion: `Expr` mentions `Stmt` and `Stmt` mentions `Expr`, so neither can
 be declared before the other and the group is the unit of declaration.  The second member
@@ -263,19 +257,16 @@ private def exprGroup : DataGroup Unit TypeExpr.Raw :=
 
 private def exprDecls : Array (Decl.Raw Unit) := #[natDecl] ++ exprGroup.decls
 
-example : (exprGroup.decls).map (·.name) =
+#guard (exprGroup.decls).map (·.name) =
     #[exprName, stmtName, .str .base "lit", .str .base "block", .str .base "expr",
-      exprName.caseName, stmtName.caseName] := by
-  native_decide
-example : (exprGroup.decls).map (fun d => d.asInsn.bind (·.kind.ctor?)) =
+      exprName.caseName, stmtName.caseName]
+#guard (exprGroup.decls).map (fun d => d.asInsn.bind (·.kind.ctor?)) =
     #[none, none, some ⟨exprName, 0, 0⟩, some ⟨exprName, 0, 1⟩, some ⟨exprName, 1, 0⟩,
-      none, none] := by
-  native_decide
-/-- `expr`, the second member's constructor, returns that member. -/
-example : (exprGroup.ctorInsn? 1 0).map (·.returnType) = some (some (.app stmtName #[])) := by
-  native_decide
-private theorem exprDistinct : DistinctDecls exprDecls := by native_decide
-example : (ofAscArray exprDecls exprDistinct).WF := wf_ofAscArray _ _ (by native_decide)
+      none, none]
+/- `expr`, the second member's constructor, returns that member. -/
+#guard (exprGroup.ctorInsn? 1 0).map (·.returnType) = some (some (.app stmtName #[]))
+
+#guard accepts exprDecls
 
 /-- Recursion may not pass through a position nothing is known about: `Fn`'s argument is
 declared `.non`, so the group's own types do not resolve inside it. -/
@@ -286,9 +277,7 @@ private def throughFn (params : Array (Param Positivity)) : DataGroup Unit TypeE
     nonEmpty := by simp }
 
 private def badRec : Array (Decl.Raw Unit) := #[fnDecl, .dataHead (throughFn #[])]
-private theorem badRecDistinct : DistinctDecls badRec := by decide
-example : checkFrom (ofAscArray badRec badRecDistinct) 0 badRec.toList = false := by
-  native_decide
+#guard rejects badRec
 
 /-- Positivity is declared, not inferred, and the declaration is checked: a member that
 claims `.pos` in a parameter it then hands to `Fn` is rejected… -/
@@ -299,63 +288,40 @@ private def useParam (params : Array (Param Positivity)) : DataGroup Unit TypeEx
     nonEmpty := by simp }
 
 private def badPos : Array (Decl.Raw Unit) := #[fnDecl, .dataHead (useParam #[⟨"a", .pos⟩])]
-private theorem badPosDistinct : DistinctDecls badPos := by decide
-example : checkFrom (ofAscArray badPos badPosDistinct) 0 badPos.toList = false := by
-  native_decide
+#guard rejects badPos
 
 /-- …and the same group declaring the parameter `.non` is accepted, because then it claims
 nothing. -/
 private def okPos : Array (Decl.Raw Unit) :=
   #[fnDecl] ++ (useParam #[⟨"a", .non⟩]).decls
-/-- `okPos` names each declaration once. -/
-private theorem okPosDistinct : DistinctDecls okPos := by native_decide
-example : (ofAscArray okPos okPosDistinct).WF := wf_ofAscArray _ _ (by native_decide)
+#guard accepts okPos
 
 /-- A payload still has to resolve: a group declared ahead of a type it mentions is
 rejected, exactly as an operation would be. -/
 private def groupTooEarly : Array (Decl.Raw Unit) := #[.dataHead exprGroup, natDecl]
-private theorem groupTooEarlyDistinct : DistinctDecls groupTooEarly := by decide
-example :
-    checkFrom (ofAscArray groupTooEarly groupTooEarlyDistinct) 0 groupTooEarly.toList
-      = false := by
-  native_decide
+#guard rejects groupTooEarly
 
 /-- An alias has to address something that is there: no member 7 of `List`. -/
 private def badAlias : Array (Decl.Raw Unit) :=
   #[natDecl, .dataHead listGroup, .dataRest (.str .base "other") listName 7]
-private theorem badAliasDistinct : DistinctDecls badAlias := by decide
-example : checkFrom (ofAscArray badAlias badAliasDistinct) 0 badAlias.toList = false := by
-  native_decide
+#guard rejects badAlias
 
 /-- A constructor's instruction has to be the one its group gives it: `cons` claiming to be
 constructor 0 of `List`, which is `nil`, is rejected… -/
-private def consDecl' : InsnDecl.Raw Unit := (listGroup.ctorInsn? 0 1).get (by native_decide)
 private def badCtorName : Array (Decl.Raw Unit) :=
   #[natDecl, .dataHead listGroup, .insn { consDecl' with kind := .ctor ⟨listName, 0, 0⟩ }]
-/-- `badCtorName` names each declaration once. -/
-private theorem badCtorNameDistinct : DistinctDecls badCtorName := by native_decide
-example :
-    checkFrom (ofAscArray badCtorName badCtorNameDistinct) 0 badCtorName.toList = false := by
-  native_decide
+#guard rejects badCtorName
 
 /-- …and so is one whose signature disagrees with its payload: `cons` taking a `Nat` tail. -/
 private def badCtorSig : Array (Decl.Raw Unit) :=
   #[natDecl, .dataHead listGroup, .insn { consDecl' with
     argTypes := #[⟨"head", .var 0⟩, ⟨"tail", nat⟩] }]
-/-- `badCtorSig` names each declaration once. -/
-private theorem badCtorSigDistinct : DistinctDecls badCtorSig := by native_decide
-example :
-    checkFrom (ofAscArray badCtorSig badCtorSigDistinct) 0 badCtorSig.toList = false := by
-  native_decide
+#guard rejects badCtorSig
 
 /-- …and one marked as a constructor of something that is not a group. -/
 private def badCtorHead : Array (Decl.Raw Unit) :=
   #[natDecl, .insn { consDecl' with kind := .ctor ⟨natName, 0, 1⟩ }]
-/-- `badCtorHead` names each declaration once. -/
-private theorem badCtorHeadDistinct : DistinctDecls badCtorHead := by native_decide
-example :
-    checkFrom (ofAscArray badCtorHead badCtorHeadDistinct) 0 badCtorHead.toList = false := by
-  native_decide
+#guard rejects badCtorHead
 
 /-! A datatype's parameters are named distinctly, and so is everything a constructor's
 instruction binds: the parameters, then the fields. -/
@@ -367,12 +333,7 @@ private def clashParams : DataGroup Unit TypeExpr.Raw :=
                    ctors := #[{ ann := (), name := .str .base "two", args := #[] }] }]
     nonEmpty := by decide }
 private def clashParamsDecls : Array (Decl.Raw Unit) := clashParams.decls
-/-- `clashParamsDecls` names each declaration once. -/
-private theorem clashParamsDistinct : DistinctDecls clashParamsDecls := by native_decide
-example :
-    checkFrom (ofAscArray clashParamsDecls clashParamsDistinct) 0 clashParamsDecls.toList =
-      false := by
-  native_decide
+#guard rejects clashParamsDecls
 
 /-- `Box a = box (a : a)`, a field named like a parameter. -/
 private def clashField : DataGroup Unit TypeExpr.Raw :=
@@ -381,33 +342,32 @@ private def clashField : DataGroup Unit TypeExpr.Raw :=
                                 args := #[⟨"a", .var 0⟩] }] }]
     nonEmpty := by decide }
 private def clashFieldDecls : Array (Decl.Raw Unit) := clashField.decls
-/-- `clashFieldDecls` names each declaration once. -/
-private theorem clashFieldDistinct : DistinctDecls clashFieldDecls := by native_decide
-example :
-    checkFrom (ofAscArray clashFieldDecls clashFieldDistinct) 0 clashFieldDecls.toList =
-      false := by
-  native_decide
+#guard rejects clashFieldDecls
 
 /-! A group's member names are ordinary type references once the group is in an environment:
 the checked lookup resolves `Stmt` through the alias to the member the head carries. -/
 
-private def dataEnv : Env Unit :=
-  (((Env.empty.addType? { ann := (), name := natName }).bind (·.addData? exprGroup))).get
-    (by native_decide)
+private def dataEnv? : Option (Env Unit) :=
+  (Env.empty.addType? { ann := (), name := natName }).bind (·.addData? exprGroup)
+
+#guard dataEnv?.isSome
+
+-- The guard above shows `dataEnv?` is `some`, so the fallback is never taken.
+private def dataEnv : Env Unit := dataEnv?.getD Env.empty
 
 private def refOf (n : Name) : Option (Name × Nat) :=
   match dataEnv.get? n with
   | some (.type (arity := a) r) => some (r.name, a)
   | _ => none
 
-/-- The head, named directly. -/
-example : refOf exprName = some (exprName, 0) := by native_decide
+/- The head, named directly. -/
+#guard refOf exprName = some (exprName, 0)
 
-/-- A member past the head, named through its alias. -/
-example : refOf stmtName = some (stmtName, 0) := by native_decide
+/- A member past the head, named through its alias. -/
+#guard refOf stmtName = some (stmtName, 0)
 
-/-- A constructor name resolves too, but to an instruction, not a type… -/
-example : refOf (.str .base "lit") = none := by native_decide
+/- A constructor name resolves too, but to an instruction, not a type… -/
+#guard refOf (.str .base "lit") = none
 
 /-- …one marked as that constructor, with its payload as arguments. -/
 private def ctorOf? (n : Name) : Option (Option CtorAddr × Nat) :=
@@ -415,34 +375,43 @@ private def ctorOf? (n : Name) : Option (Option CtorAddr × Nat) :=
   | some (.insn (isig := i) r) => some (r.ctorAddr?, i.argTypes.size)
   | _ => none
 
-example : ctorOf? (.str .base "lit") = some (some ⟨exprName, 0, 0⟩, 1) := by native_decide
-example : ctorOf? (.str .base "expr") = some (some ⟨exprName, 1, 0⟩, 1) := by native_decide
+#guard ctorOf? (.str .base "lit") = some (some ⟨exprName, 0, 0⟩, 1)
+#guard ctorOf? (.str .base "expr") = some (some ⟨exprName, 1, 0⟩, 1)
 
-example : ((.str .base "lit") : Name) ∈ dataEnv := by native_decide
+#guard ((.str .base "lit") : Name) ∈ dataEnv
 
 /-! And the constructors read back, at whatever arguments the type supplies. -/
 
-private def listSig : Env Unit :=
-  ((Env.empty.addType? { ann := (), name := natName }).bind (·.addData? listGroup)).get (by native_decide)
+private def listSig? : Option (Env Unit) :=
+  (Env.empty.addType? { ann := (), name := natName }).bind (·.addData? listGroup)
+
+#guard listSig?.isSome
+
+-- The guard above shows `listSig?` is `some`, so the fallback is never taken.
+private def listSig : Env Unit := listSig?.getD Env.empty
 
 private def tyOf (e : TypeExpr.Raw) : Option (TypeExpr listSig 0) := TypeExpr.check? listSig 0 e
 
-private def natTy : TypeExpr listSig 0 := (tyOf (.app natName #[])).get (by native_decide)
-private def listNatTy : TypeExpr listSig 0 :=
-  (tyOf (.app listName #[.app natName #[]])).get (by native_decide)
+/-- `p` of `Nat` and `List Nat`, checked against `listSig`; false if either does not check. -/
+private def withTys (p : TypeExpr listSig 0 → TypeExpr listSig 0 → Bool) : Bool :=
+  match tyOf (.app natName #[]), tyOf (.app listName #[.app natName #[]]) with
+  | some natTy, some listNatTy => p natTy listNatTy
+  | _, _ => false
 
-/-- `nil` takes nothing and `cons` takes a `Nat` and a `List Nat`: the payloads of `List a`
+/- `nil` takes nothing and `cons` takes a `Nat` and a `List Nat`: the payloads of `List a`
 instantiated at `a := Nat`. -/
-example : listNatTy.ctorPayloads? = some #[#[], #[natTy, listNatTy]] := by native_decide
+#guard withTys fun natTy listNatTy =>
+  decide (listNatTy.ctorPayloads? = some #[#[], #[natTy, listNatTy]])
 
-example : listNatTy.ctorArgs? consName = some #[natTy, listNatTy] := by native_decide
-example : listNatTy.ctorArgs? nilName = some #[] := by native_decide
+#guard withTys fun natTy listNatTy =>
+  decide (listNatTy.ctorArgs? consName = some #[natTy, listNatTy])
+#guard withTys fun _ listNatTy => decide (listNatTy.ctorArgs? nilName = some #[])
 
-/-- A constructor of some other type is not a constructor of this one. -/
-example : listNatTy.ctorArgs? natName = none := by native_decide
+/- A constructor of some other type is not a constructor of this one. -/
+#guard withTys fun _ listNatTy => decide (listNatTy.ctorArgs? natName = none)
 
-/-- A primitive has no constructors, which is not the same as having none declared. -/
-example : natTy.ctors? = none := by native_decide
+/- A primitive has no constructors, which is not the same as having none declared. -/
+#guard withTys fun natTy _ => decide (natTy.ctors? = none)
 
 end DataExample
 
@@ -504,8 +473,8 @@ literal. -/
 example : polyIdSig.typeArgc = 1 := rfl
 example : Vector (TypeExpr env₀ 0) polyIdSig.typeArgc := #v[natTy]
 
-/-- The checked signature erases to a declaration the checker accepts as well. -/
-example : (env₀.addInsns? #[(idName, polyIdSig)]).isSome := by native_decide
+/- The checked signature erases to a declaration the checker accepts as well. -/
+#guard (env₀.addInsns? #[(idName, polyIdSig)]).isSome
 
 /-- Erasing keeps the names. -/
 example : (polyIdSig.decl idName).typeParams = #["a"] := rfl
@@ -557,15 +526,19 @@ private def idName : Name := .str .base "id"
 
 private def natD : TypeDecl String := { ann := "the integers", name := natName }
 
-private def env₀ : Env String := (Env.empty.addType? natD).get (by native_decide)
+/-- `natD`, then `id : Nat → Nat`, or `none` if a step is rejected. -/
+private def env? : Option (Env String) := do
+  let env₀ ← Env.empty.addType? natD
+  let natTy ← TypeExpr.check? env₀ 0 (.app natName #[])
+  let idSig : InsnSig env₀ :=
+    { ann := "the identity", argTypes := #[⟨"x", natTy⟩], returnType := some natTy,
+      distinct := by simp }
+  env₀.addInsns? #[(idName, idSig)]
 
-private def natTy : TypeExpr env₀ 0 :=
-  (TypeExpr.check? env₀ 0 (.app natName #[])).get (by native_decide)
+#guard env?.isSome
 
-private def idSig : InsnSig env₀ :=
-  { ann := "the identity", argTypes := #[⟨"x", natTy⟩], returnType := some natTy }
-
-private def env : Env String := (env₀.addInsns? #[(idName, idSig)]).get (by native_decide)
+-- The guard above shows `env?` is `some`, so the fallback is never taken.
+private def env : Env String := env?.getD Env.empty
 
 /-- What a name's declaration is annotated with, read through the checked lookup. -/
 private def annOf (n : Name) : Option String :=
@@ -574,11 +547,11 @@ private def annOf (n : Name) : Option String :=
   | some (.insn (isig := i) _) => some i.ann
   | none => none
 
-example : annOf natName = some "the integers" := by native_decide
+#guard annOf natName = some "the integers"
 
-example : annOf idName = some "the identity" := by native_decide
+#guard annOf idName = some "the identity"
 
-example : annOf (.str .base "nope") = none := by native_decide
+#guard annOf (.str .base "nope") = none
 
 end Annotated
 end

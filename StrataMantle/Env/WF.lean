@@ -17,10 +17,11 @@ An environment is well formed when every type reference in every declaration
 resolves to a type declaration that appears *strictly earlier* in the environment,
 so the reference graph is acyclic by construction.
 
-`checkDecl` decides the obligations of one declaration and `checkFrom` those of a
-batch, left to right.  Their soundness lemmas are `WF.appendChecked`, `WF.appendList` and
-`wf_ofAscArray`.  The checks consult the environment's hash map, so they run in compiled
-code (`native_decide`) but not in the kernel.
+`checkDecl` decides the obligations of one declaration, `Env.Raw.check` those of every
+declaration in an environment, and `Env.Raw.checkAppend` those of a batch `appendList` adds.
+Their soundness lemmas are `WF.appendChecked`, `wf_ofAscArray` and `WF.appendList`.  The
+checks consult the environment's hash map, so they run in compiled code (`#guard`) but not in
+the kernel.
 -/
 
 open Strata (IndexMap)
@@ -35,9 +36,9 @@ variable {α : Type}
 
 An `Env.Raw α` is an *ordered* map: a declaration may only mention type declarations that
 precede it.  The specification (`Env.Raw.WF`) is indexed by a position in `env.decls.keys`,
-and the checker (`Env.Raw.checkFrom`) runs over the declaration list, checking each
-declaration at the position it takes.  `Env.Raw.wf_ofAscArray` joins the two.  A checked
-`TypeExpr` carries `TypeExpr.WFRel` against `RefBefore`.
+and the checker (`Env.Raw.check`) checks each declaration at its position.
+`Env.Raw.wf_ofAscArray` joins the two.  A checked `TypeExpr` carries `TypeExpr.WFRel` against
+`RefBefore`.
 -/
 
 namespace TypeExpr
@@ -319,7 +320,7 @@ end Env.Raw
 
 A declaration is checked against the environment itself: `RefBefore` is a hash-map lookup
 plus a position comparison.  None of this reduces in the kernel, because `String.hash` is
-`opaque`; obligations are discharged by `native_decide` or by a tactic. -/
+`opaque`; obligations are checked by `#guard` or proved by a tactic. -/
 
 namespace Env.Raw
 
@@ -1053,13 +1054,13 @@ theorem WF.appendChecked {env : Env.Raw α} (h : env.WF) {d : Decl.Raw α} (fres
 
 /-- Check declarations left to right, each against its own position: the
 declaration at position `i` may only refer to type declarations before `i`. -/
-def checkFrom (env : Env.Raw α) (i : Nat) : List (Decl.Raw α) → Bool
+private def checkFrom (env : Env.Raw α) (i : Nat) : List (Decl.Raw α) → Bool
   | [] => true
   | d :: ds => checkDecl env i d.name d && checkFrom env (i + 1) ds
 
 /-- Unfolding of `checkFrom`: the declaration `j` places along was checked at
 position `i + j`. -/
-theorem checkDecl_of_checkFrom (env : Env.Raw α) :
+private theorem checkDecl_of_checkFrom (env : Env.Raw α) :
     ∀ (i : Nat) (ds : List (Decl.Raw α)), checkFrom env i ds = true →
       ∀ (j : Nat) (d : Decl.Raw α), ds[j]? = some d → checkDecl env (i + j) d.name d = true
   | _, [], _, _, _, h => by simp at h
@@ -1072,6 +1073,13 @@ theorem checkDecl_of_checkFrom (env : Env.Raw α) :
     simp only [List.getElem?_cons_succ] at h
     have := checkDecl_of_checkFrom env (i + 1) ds hc.2 j d h
     simpa [Nat.add_right_comm, Nat.add_assoc] using this
+
+/-- Every declaration of `env` is well formed at its position. -/
+def check (env : Env.Raw α) : Bool := checkFrom env 0 env.decls.vals.toList
+
+/-- Every declaration `appendList` adds is well formed, at its position, in the result. -/
+def checkAppend (env : Env.Raw α) (ds : List (Decl.Raw α)) (fresh : env.FreshList ds) : Bool :=
+  checkFrom (env.appendList ds fresh) env.decls.keys.size ds
 
 /-- In a list of distinctly-named declarations, searching by the name stored at
 index `i` finds the declaration at index `i`. -/
@@ -1088,10 +1096,11 @@ theorem find?_eq_of_getElem? : ∀ {ds : List (Decl.Raw α)},
       beq_eq_false_iff_ne.mpr ((List.pairwise_cons.mp hp).1 d (List.mem_of_getElem? h))
     simpa [hne] using find?_eq_of_getElem? (List.pairwise_cons.mp hp).2 h
 
-/-- **Soundness of the checker.**  `checkFrom` establishes the positional
-specification for an environment built by `ofAscArray`. -/
+/-- **Soundness of the checker.**  `check` establishes the positional specification for an
+environment built by `ofAscArray`. -/
 theorem wf_ofAscArray (ds : Array (Decl.Raw α)) (p : DistinctDecls ds)
-    (h : checkFrom (ofAscArray ds p) 0 ds.toList = true) : (ofAscArray ds p).WF := by
+    (h : (ofAscArray ds p).check = true) : (ofAscArray ds p).WF := by
+  rw [check, vals_ofAscArray] at h
   have hkeys : (ofAscArray ds p).decls.keys = ds.map Decl.Raw.name := keys_ofAscArray ds p
   have hget : ∀ (j : Nat) (e : Decl.Raw α), ds.toList[j]? = some e →
       (ofAscArray ds p)[e.name]? = some e := by
@@ -1158,8 +1167,7 @@ theorem typesBefore_appendList {env : Env.Raw α} {ds : List (Decl.Raw α)}
 at the position it lands in, preserves well-formedness. -/
 theorem WF.appendList {env : Env.Raw α} (h : env.WF) (ds : List (Decl.Raw α))
     (fresh : env.FreshList ds)
-    (hds : checkFrom (env.appendList ds fresh) env.decls.keys.size ds = true) :
-    (env.appendList ds fresh).WF := by
+    (hds : env.checkAppend ds fresh = true) : (env.appendList ds fresh).WF := by
   -- one case split serves all three fields: an old declaration, or the batch's `j`th
   have split : ∀ (i : Nat) (n : Name) (e : Decl.Raw α),
       (env.appendList ds fresh).decls.keys[i]? = some n → (env.appendList ds fresh)[n]? = some e →
@@ -1236,7 +1244,7 @@ theorem WF.appendList_insns {env : Env.Raw α} (h : env.WF) (is : Array (InsnDec
   exact WF.appendList_insnsList h is.toList fresh fun d hd => hwf d (Array.mem_toList_iff.mp hd)
 
 /-- The converse of `checkDecl_of_checkFrom`. -/
-theorem checkFrom_of_checkDecl (env : Env.Raw α) :
+private theorem checkFrom_of_checkDecl (env : Env.Raw α) :
     ∀ (i : Nat) (ds : List (Decl.Raw α)),
       (∀ (j : Nat) (d : Decl.Raw α), ds[j]? = some d → checkDecl env (i + j) d.name d = true) →
       checkFrom env i ds = true
@@ -1248,7 +1256,7 @@ theorem checkFrom_of_checkDecl (env : Env.Raw α) :
     simpa [Nat.add_assoc, Nat.add_comm 1 j] using this
 
 /-- Type declarations owe only distinct parameter names. -/
-theorem checkFrom_typesList (env : Env.Raw α) :
+private theorem checkFrom_typesList (env : Env.Raw α) :
     ∀ (i : Nat) (ts : List (TypeDecl α)), (∀ t ∈ ts, t.paramNames.Nodup) →
       checkFrom env i (ts.map .type) = true
   | _, [], _ => rfl
@@ -1257,12 +1265,13 @@ theorem checkFrom_typesList (env : Env.Raw α) :
     refine ⟨?_, checkFrom_typesList env (i + 1) ts fun u hu => h u (List.mem_cons_of_mem _ hu)⟩
     simp [checkDecl, Decl.Raw.checkAt, checkAlias, checkGroupOf, h t List.mem_cons_self]
 
-/-- The array form of `checkFrom_typesList`. -/
-theorem checkFrom_types (env : Env.Raw α) (i : Nat) (ts : Array (TypeDecl α))
-    (h : ∀ t ∈ ts.toList, t.paramNames.Nodup) :
-    checkFrom env i (ts.map .type).toList = true := by
-  rw [Array.toList_map]
-  exact checkFrom_typesList env i ts.toList h
+/-- A batch of type declarations owes only distinct parameter names. -/
+theorem checkAppend_types (env : Env.Raw α) (ts : Array (TypeDecl α))
+    (fresh : env.FreshList (ts.map .type).toList) (h : ∀ t ∈ ts.toList, t.paramNames.Nodup) :
+    env.checkAppend (ts.map .type).toList fresh = true := by
+  rw [checkAppend]
+  have := checkFrom_typesList (env.appendList _ fresh) env.decls.keys.size ts.toList h
+  rwa [← Array.toList_map] at this
 
 /-! #### Where a batch's declarations land -/
 
@@ -1362,13 +1371,13 @@ theorem checkAt_caseDecl {env : Env.Raw α} {g : DataGroup α TypeExpr.Raw} {n p
 
 /-- A group appended as one batch owes only its definition: that it binds no name twice,
 and `checkWith` against the extended environment at the positions the group occupies. -/
-theorem checkFrom_group {env : Env.Raw α} {g : DataGroup α TypeExpr.Raw}
+theorem checkAppend_group {env : Env.Raw α} {g : DataGroup α TypeExpr.Raw}
     (fresh : env.FreshList g.decls.toList) (hn : g.checkNames = true)
     (h : g.checkWith
       ((env.appendList _ fresh).paramsBefore (env.decls.keys.size + g.members.size))
       (RefBefore.check (env.appendList _ fresh) (env.decls.keys.size + g.members.size))
       (RefBefore.check (env.appendList _ fresh) env.decls.keys.size)) :
-    checkFrom (env.appendList _ fresh) env.decls.keys.size g.decls.toList = true := by
+    env.checkAppend g.decls.toList fresh = true := by
   have h0 := DataGroup.decls_getElem?_zero g
   have hhead : (env.appendList _ fresh).decls[g.first.name]? = some (.dataHead g) :=
     get?_appendList_of_getElem? h0
@@ -1394,6 +1403,7 @@ theorem checkFrom_group {env : Env.Raw α} {g : DataGroup α TypeExpr.Raw}
     · rw [← hDname]; exact idxOf?_appendList_of_getElem? hD
     · rw [typeOf?, ← hDname, get?_appendList_of_getElem? hD, Option.bind_some]; exact hDty
   obtain ⟨rest, hds, hrest⟩ := g.decls_toList_eq_cons
+  rw [checkAppend]
   apply checkFrom_of_checkDecl
   intro j d hd
   match j, hd with
@@ -1567,10 +1577,6 @@ theorem WF.caseInsn {env : Env.Raw α} (h : env.WF) {i : Nat} {n : Name}
       subst hgg
       exact heq
     | _ => simp [hx] at hcase
-
-/-! ### Worked examples
-
-The examples need `native_decide`, so they live in `StrataMantleTest/EnvWFTest.lean`. -/
 
 end Env.Raw
 

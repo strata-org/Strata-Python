@@ -11,7 +11,6 @@ import StrataMantle.Env.WF
 meta import StrataMantle.WF
 meta import StrataPython.Mantle.Translate
 meta import StrataPythonTest.Mantle.TestUtil
-meta import StrataMantle.Env.WF
 
 set_option autoImplicit false
 
@@ -74,29 +73,26 @@ private def supported : Result := translate "m" #[assign "x" (int 1), fDef, call
 private def withLambda : Result := translate "m" #[assign "x" (int 1), fDef, call, lam]
 
 -- The translator does not reduce in the kernel: the checker runs as compiled code.
-#guard decide (Module.Raw.WF supported.module)
+#guard Module.Raw.WF supported.module
 #guard (StrataPython.Mantle.TestUtil.dottedNames supported.module).isEmpty
 
-example : supported.ok = true := by native_decide
+#guard supported.ok
 
-/-- The module body, then `f`. -/
-example : supported.module.funcs.map (nameText ·.name) = #["m.<module>", "m.f"] := by
-  native_decide
+-- The module body, then `f`.
+#guard supported.module.funcs.map (nameText ·.name) = #["m.<module>", "m.f"]
 
 -- A rejected `lambda` is a diagnostic, and the module stays well formed.
-#guard decide (Module.Raw.WF withLambda.module)
+#guard Module.Raw.WF withLambda.module
 
-example : withLambda.diagnostics.map (·.message) = #["lambda is not supported"] := by
-  native_decide
+#guard withLambda.diagnostics.map (·.message) = #["lambda is not supported"]
 
 /-- `a, b += 1`, which CPython's parser rejects, built by hand: the translator reports an
 internal error rather than dropping the statement. -/
 private def augTuple : Result := translate "m" #[.AugAssign none'
   (.Tuple none' ⟨none', #[store "a", store "b"]⟩ (.Store none')) (.Add none') (int 1)]
 
-example : augTuple.diagnostics.map (·.message) = #["a target CPython rejects"] := by
-  native_decide
+#guard augTuple.diagnostics.map (·.message) = #["a target CPython rejects"]
 
-example : augTuple.diagnostics.all (·.kind == .internal) := by native_decide
+#guard augTuple.diagnostics.all (·.kind == .internal)
 
 end StrataPython.Mantle.PyTranslateTest
