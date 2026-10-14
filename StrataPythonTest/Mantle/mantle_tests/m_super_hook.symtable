@@ -1,0 +1,19 @@
+module top
+  A: local (assigned)
+  Base: local (assigned, referenced)
+  class Base
+    __init_subclass__: local (assigned)
+    classmethod: global implicit (referenced)
+    hook: local (assigned)
+    function __init_subclass__
+      cls: local (parameter, referenced)
+    function hook
+      cls: local (parameter, referenced)
+  class A
+    classmethod: global implicit (referenced)
+    hook: local (assigned)
+    function hook
+      __class__: free (referenced)
+      cls: local (parameter)
+      super: global implicit (referenced)
+qualnames: A, A.hook, Base, Base.__init_subclass__, Base.hook

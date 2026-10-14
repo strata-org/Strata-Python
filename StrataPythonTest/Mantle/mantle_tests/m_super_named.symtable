@@ -1,0 +1,16 @@
+module top
+  A: local (assigned, referenced)
+  B: local (assigned)
+  s: local (assigned)
+  super: global implicit (referenced)
+  class A
+    m: local (assigned)
+    function m
+      self: local (parameter)
+  class B
+    attr_del: local (assigned)
+    function attr_del
+      __class__: free (referenced)
+      self: local (parameter, assigned)
+      super: global implicit (referenced)
+qualnames: A, A.m, B, B.attr_del

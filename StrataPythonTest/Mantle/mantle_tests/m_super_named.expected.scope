@@ -1,0 +1,17 @@
+module
+  s: local (assigned)
+  super: global implicit (referenced)
+  A: local (assigned, referenced)
+  B: local (assigned)
+  class A
+    m: local (assigned)
+    function A.m
+      params: self
+      self: local (parameter)
+  class B (needs __class__ cell)
+    attr_del: local (assigned)
+    function B.attr_del
+      params: self
+      self: local (parameter, assigned)
+      super: global implicit (referenced)
+      __class__: free (referenced)

@@ -693,9 +693,33 @@ body closure with the namespace `__prepare__` returns as the only positional arg
   `__getitem__` and treats a `KeyError` as absent. A write is `py.setItem`. `del x` is
   `py.delItem`, and any exception it raises becomes `NameError`, as `DELETE_NAME` does.
 
-Zero-argument `super()` and `__class__` are **rejected**. The scope pass marks the class
-with `needsClassCell`. The cell must be created by the body and filled by `__build_class__`
-(§9, Q6). `super(C, self)` works.
+**Zero-argument `super()` and `__class__`.** The scope pass marks a class with
+`needsClassCell` when a method loads `super` or `__class__`. Then the class statement makes
+the `__class__` cell, `refNew (undef "__class__")`, before the body closure. The body
+captures it like a free variable (`capturedVars`), and the methods capture it from the body.
+After `__build_class__` returns, and before the decorators run, the statement writes the class
+to the cell, so `__class__` is the undecorated class, as in CPython. In a method, `__class__`
+reads the cell, and `super()` is `super(__class__, p)`, `p` the first positional parameter.
+`super().x` reads the cell, then `p`, as CPython's `LOAD_SUPER_ATTR` does. A bare `super()`
+is a call in CPython, which checks `p` first, then the cell, and raises `RuntimeError`
+("super(): arg[0] deleted", "super(): empty __class__ cell"); it is lowered in that order,
+with those errors. CPython also compiles `super().__class__`, and every `super().x` in a
+module whose symbol table names `super` (`s = super`, or `global super` in any function), as
+such a call, and so does the translator. Where CPython raises
+`RuntimeError` at run time, `super()` in a function with no positional parameter, in a class
+body or outside a class, it is rejected. It is rejected too if the module may rebind `super`,
+which CPython would then call with no arguments. A class nested in a method has two
+`__class__` cells: its own, which its methods capture, and the method's, which its body
+reads.
+
+This differs from CPython mainly in one way. CPython fills the cell inside `type.__new__`,
+before `__set_name__` and `__init_subclass__` run. Here it is filled after `__build_class__`
+returns, so a `super()` or `__class__` that runs while the class is created (in
+`__set_name__`, `__init_subclass__` or a metaclass) finds the cell undefined (§9, Q6;
+`m_super_hook.py`). And the cell holds whatever `__build_class__` returns: CPython's cell
+holds the class `type.__new__` makes, and stays empty if the metaclass never calls it; and
+CPython raises `RuntimeError` ("__class__ not set …") when a metaclass drops
+`__classcell__`.
 
 ### 6.8 Comprehensions
 
@@ -930,13 +954,12 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 5. **Special-method lookup.** `with`, and implicitly `truthy`/`getIter`, look methods up on
    the type in CPython. `py.attr` on the instance differs when an instance attribute shadows
    the method.
-6. **`__class__` cell.** Zero-argument `super()` needs a cell created by the class body and
-   filled by `__build_class__`. The scope pass sets `needsClassCell` on a class when one of its
-   methods loads the name `super` or `__class__`, whether or not `super` is called with no
-   arguments. `base.refNew` creates the cell and `py.mkClosure` captures it, but no
-   instruction turns a `base.Ref(py.Value)` into a `py.Value`, so the body cannot store it as
-   `ns["__classcell__"]` for `__build_class__` to fill. That needs such an instruction, a body
-   that returns the cell, or an operation that installs it.
+6. **`__class__` cell.** *Resolved*, with one difference from CPython. CPython's body
+   creates the cell and stores it as `ns["__classcell__"]` for `type.__new__` to fill, but no
+   instruction turns a `base.Ref(py.Value)` into a `py.Value`. So the class statement creates
+   the cell and fills it after `__build_class__` returns (§6.7). A `super()` that runs while
+   the class is created finds the cell undefined. Filling it in time would need an operation
+   that installs the cell in the namespace.
 7. **Unpacking.** *Resolved.* Two operations: `unpackSeq` for a target without a starred
    element and `unpackEx` for one with it, as CPython's `UNPACK_SEQUENCE` and `UNPACK_EX`.
 8. **Global fallback.** *Resolved.* The scope pass classifies a module global and a builtin
@@ -1022,7 +1045,7 @@ a diagnostic.
 | `for` / `else` | §6.4 | specified; implemented |
 | closures | §6.6 | specified; implemented |
 | `class`, bases, keywords, decorators | §6.7 | specified; implemented |
-| zero-argument `super()`, `__class__` | §6.7 | unsupported (Q6); the scope pass sets `needsClassCell` |
+| zero-argument `super()`, `__class__` | §6.7 | specified; implemented (Q6) |
 | list, set and dict comprehensions | §6.8 | specified; implemented |
 | generator expressions, `yield` | §6.8 | unsupported; a generator function is a stub |
 | `raise`, `raise … from` | §7.1 | specified, open question (`toException`) |

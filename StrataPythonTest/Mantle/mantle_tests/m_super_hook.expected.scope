@@ -1,0 +1,21 @@
+module
+  Base: local (assigned, referenced)
+  A: local (assigned)
+  class Base
+    __init_subclass__: local (assigned)
+    hook: local (assigned)
+    classmethod: global implicit (referenced)
+    function Base.__init_subclass__
+      params: cls
+      cls: local (parameter, referenced)
+    function Base.hook
+      params: cls
+      cls: local (parameter, referenced)
+  class A (needs __class__ cell)
+    hook: local (assigned)
+    classmethod: global implicit (referenced)
+    function A.hook
+      params: cls
+      cls: local (parameter)
+      super: global implicit (referenced)
+      __class__: free (referenced)

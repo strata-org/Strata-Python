@@ -1,0 +1,11 @@
+module top
+  A: local (assigned)
+  print: global implicit (referenced)
+  super: local (assigned)
+  class A
+    m: local (assigned)
+    function m
+      __class__: free (referenced)
+      self: local (parameter)
+      super: global implicit (referenced)
+qualnames: A, A.m

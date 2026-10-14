@@ -42,7 +42,8 @@ with a diagnostic is a failure.
   parameters, defaults and decorators.  The argument-binding prologue is the spec's §5.4.
 * Closures: cell and free variables, and `nonlocal`.
 * `class`, with bases, keywords and decorators.  A class body is the function `m.C.<body>`,
-  which reads and writes the namespace `__build_class__` passes it (§6.7).
+  which reads and writes the namespace `__build_class__` passes it (§6.7).  Zero-argument
+  `super()` and `__class__` read a `__class__` cell the class statement makes and fills.
 * Statements: expression statements, `pass`, assignment, annotated assignment and augmented
   assignment to names, attributes and subscripts, assignment to tuple and list targets (with a
   starred element too), `del`, `assert`, `if`/`elif`/`else`, `while`/`else`, `for`/`else`,
@@ -704,12 +705,38 @@ def childScope? (range : SourceRange) : TransM (Option ScopeId) := do
       | none => none
   return none
 
+/-- The frame's key for a class's own `__class__` cell, which its methods capture.  It is not a
+Python name: a class nested in a method also captures the method's `__class__`, which its
+body reads. -/
+def classCellKey : String := ".__class__"
+
 /-- The cells a scope's closure captures: its free variables, and in a class body also the
 names it binds that a method reads from an enclosing function (`free_class`), in order of
-first use. -/
+first use, then the class's `__class__` cell if a method needs it. -/
 def capturedVars (s : Scope) : Array String :=
-  s.symbols.filterMap fun sym =>
+  let vars := s.symbols.filterMap fun sym =>
     if sym.scope == .free || sym.uses.freeClass then some sym.name else none
+  if s.kind == .classBody && s.needsClassCell then vars.push classCellKey else vars
+
+/-- Whether some scope may rebind the global `super`: then CPython calls it with no arguments.
+A module-level comprehension variable named `super` counts too, on the safe side. -/
+def superRebound : TransM Bool := do
+  return (← read).table.scopes.any fun sc => (sc.symbol? "super").any fun sym =>
+    (sc.kind == .module && sym.scope == .«local») ||
+      (sym.scope == .globalExplicit && (sym.uses.assigned || sym.uses.imported))
+
+/-- The first positional parameter of the function the current code runs in, skipping
+inlined comprehensions: the object a zero-argument `super()` binds. -/
+def firstParam? : TransM (Option String) := do
+  let table := (← read).table
+  let mut sc := (← read).cur
+  for _ in [:table.scopes.size] do
+    if sc.kind != .inlinedComprehension then break
+    let some p := sc.parent | return none
+    let some ps := table.scopes[p]? | return none
+    sc := ps
+  if !(sc.kind matches .function | .lambda) then return none
+  return (sc.params.find? fun p => p.kind matches .posOnly | .positional).map (·.name)
 
 /-- Queue the function of scope `cur` at `sr` and return its closure, capturing the cells of
 `capturedVars cur` from the frame, then `extra`.  A class body is named `m.C.<body>`. -/
@@ -717,8 +744,12 @@ def queueFunc (sr : SourceRange) (scope : ScopeId) (cur : Scope)
     (args : Option (arguments SourceRange)) (body : Array (stmt SourceRange))
     (stub : Option String) (extra : Array ValId) : TransM (Option ValId) := do
   let mut cells := #[]
+  let here ← curScope
   for x in capturedVars cur do
-    match ← build (cellOf? x) with
+    -- A method's `__class__` is its class's own cell.
+    let key := if x == "__class__" && here.kind == .classBody && here.needsClassCell then
+      classCellKey else x
+    match ← build (cellOf? key) with
     | some c => cells := cells.push c
     | none =>
       -- An unbound `nonlocal` is free with no cell; the scope pass already reported it.
@@ -825,7 +856,17 @@ partial def transExpr (e : expr SourceRange) : TransM ValId := withRange e.ann d
   | .JoinedStr _ vs => fString vs.val
   | .FormattedValue _ v conv spec => formatted v conv spec.val
   | .Interpolation sr .. | .TemplateStr sr .. => unsupportedValue "t-string" sr
-  | .Attribute _ v ⟨_, a⟩ _ => do build (getAttr (← transExpr v) (← mangled a))
+  | .Attribute _ v ⟨_, a⟩ _ => do
+    let o ← match v with
+      | .Call _ f args kws => do
+        match ← zeroArgSuper? f args.val kws.val with
+        -- CPython's `LOAD_SUPER_ATTR`, but not for `__class__`, nor if the module names `super`.
+        | some sr =>
+          let named := ((← read).table.module.symbol? "super").isSome
+          superCall sr (a != "__class__" && !named)
+        | none => transExpr v
+      | _ => transExpr v
+    build (getAttr o (← mangled a))
   | .Subscript _ v k _ => do
     let o ← transExpr v
     match k with
@@ -1054,6 +1095,7 @@ arguments, then the keyword arguments, as CPython does.  `args` is a tuple displ
 for each `**m`. -/
 partial def call (f : expr SourceRange) (args : Array (expr SourceRange))
     (kws : Array (keyword SourceRange)) : TransM ValId := do
+  if let some sr ← zeroArgSuper? f args kws then return ← superCall sr false
   let fv ← transExpr f
   let lone ← match args with
     | #[.Starred _ x _] => some <$> transExpr x
@@ -1186,6 +1228,45 @@ where
       if ← targeted skip then
         jump skip
         build (startBlock skip)
+
+/-- The range of the name `super` in `f(args, kws)`, if it is a zero-argument `super()` of the
+builtin `super`: not a local `super`, nor one a class body binds. -/
+partial def zeroArgSuper? (f : expr SourceRange) (args : Array (expr SourceRange))
+    (kws : Array (keyword SourceRange)) : TransM (Option SourceRange) := do
+  let .Name sr ⟨_, "super"⟩ _ := f | return none
+  if !args.isEmpty || !kws.isEmpty then return none
+  match ← place "super" with
+  | .global => return some sr
+  | .nsName _ =>
+    -- A class body reads `super` from its namespace, else the builtin.
+    return if ((← curScope).symbol? "super").any (·.uses.assigned) then none else some sr
+  | _ => return none
+
+/-- `super()` at `sr` with no arguments: `super(__class__, first)`, `first` being the first
+positional parameter of the enclosing function.  `super().x` (`attr`) is CPython's
+`LOAD_SUPER_ATTR`, which reads the cell, then `first`; a bare `super()` is a call, which checks
+`first`, then the cell, raising `RuntimeError`.  CPython also uses a plain call for
+`super().__class__`, and for every `super().x` in a module whose symbol table names `super`.
+Where CPython raises `RuntimeError` at run time instead, with no `__class__` cell or no
+positional parameter, it is rejected, and so it is if the module may rebind `super`. -/
+partial def superCall (sr : SourceRange) (attr : Bool) : TransM ValId := do
+  if ← superRebound then return ← unsupportedValue "super() with super rebound" sr
+  let some first ← firstParam? | unsupportedValue "super() without a positional parameter" sr
+  let .free c ← place "__class__" | unsupportedValue "super() outside a class" sr
+  -- The current cell of the parameter's name, which a comprehension may rebind.
+  let some p ← build (cellOf? first) | unsupportedValue "super() without a positional parameter" sr
+  let fv ← build (loadGlobal (← read).module "super")
+  let (cls, self) ← if attr then do
+      let cls ← readFree c "__class__"
+      pure (cls, ← readLocal p first)
+    else do
+      let v ← build (readCell p (stem first))
+      let self ← requireDefined v first "RuntimeError" "super(): arg[0] deleted"
+      let k ← build (readCell c (stem "__class__"))
+      pure (← requireDefined k "__class__" "RuntimeError" "super(): empty __class__ cell", self)
+  let t ← build (emitTotal (.str .base "args") Py.mkTuple #v[] #[cls, self])
+  let d ← build (emitTotal (.str .base "kwargs") Py.mkKwargs #v[] #[])
+  build (emitFailing (.str .base "super") Py.call #v[] #[fv, t, d])
 
 /-- The keyword dict of a call to `fv` with the keyword arguments `kws`: runs of `k=v` pairs,
 each a total `mkKwargs`, and `DICT_MERGE` (`dictMerge`) for each `**m`. -/
@@ -1349,7 +1430,8 @@ def defStmt (sr : SourceRange) (name : String) (args : arguments SourceRange)
 
 /-- `class name(bases, kws): body` at `sr` (§6.7): `__build_class__` called on the closure
 of the body's function, the name, the bases and the keywords, then the decorators, evaluated
-first, applied to the class. -/
+first, applied to the class.  If a method needs `__class__`, its cell is made here, captured
+by the body, and set to the class before the decorators run. -/
 def classDef (sr : SourceRange) (name : String) (bases : Array (expr SourceRange))
     (kws : Array (keyword SourceRange)) (body : Array (stmt SourceRange))
     (decorators : Array (expr SourceRange)) (hasTypeParams : Bool) : TransM Unit := do
@@ -1358,15 +1440,25 @@ def classDef (sr : SourceRange) (name : String) (bases : Array (expr SourceRange
   let some scope ← childScope? sr | return ← reject "class without a scope" sr
   let some cur := ctx.table.scopes[scope]?
     | return ← internalError s!"scope {scope} is not in the table" sr
-  if cur.needsClassCell then return ← reject "zero-argument super() or __class__" sr
   let decs ← decorators.mapM transExpr
   let m ← build (emitConst (.str .base "m") (.str "builtins"))
   let n ← build (emitConst (.str .base "n") (.str "__build_class__"))
   let bc ← build (emitFailing (.str .base "__build_class__") Py.qualifiedRef #v[] #[m, n])
-  let some f ← queueFunc sr scope cur none body none #[] | return
+  let classCell ← if cur.needsClassCell then do
+      let n ← build (emitConst (.str .base "n") (.str "__class__"))
+      let undef ← build (emitTotal (stem "__class__") Py.undef #v[] #[n])
+      some <$> build (newCell (cellStem "__class__") undef)
+    else pure none
+  -- The body captures the cell under `classCellKey`, for this closure only.
+  let saved := (← build (get : PyM SourceRange PyBuild.Frame)).locals
+  if let some c := classCell then build (captureCell classCellKey c)
+  let f? ← queueFunc sr scope cur none body none #[]
+  build (modify fun fr => { fr with locals := saved })
+  let some f := f? | return
   let t ← tupleDisplay bases (pre := #[f, ← build (strLit name)])
   let d ← kwargsDict bc kws
   let cls ← build (emitFailing (stem name) Py.call #v[] #[bc, t, d])
+  if let some c := classCell then discard <| build (writeCell c cls)
   writeName name (← decorate decs cls) sr
 
 /-! ## Statements -/
@@ -1584,7 +1676,9 @@ def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) : Func Py.env SourceRang
   let defaults : Array String := match job.args with
     | some a => (defaultCellParams a).map (·.name)
     | none => #[]
-  let argTypes := free.map (cellStem ·, Py.cell.ty) ++
+  -- A class's own `__class__` cell is captured under `classCellKey`, named like any cell.
+  let argTypes := free.map (fun x => (cellStem (if x == classCellKey then "__class__" else x),
+      Py.cell.ty)) ++
     defaults.map (defaultStem ·, Py.cell.ty) ++
     #[(stem "args", Py.Value.ty), (stem "kwargs", Py.Value.ty)]
   builtFunc job.range <| buildFuncTypedWith job.name argTypes job.range fun ps =>

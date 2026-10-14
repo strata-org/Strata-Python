@@ -1,0 +1,106 @@
+module top
+  A: local (assigned, referenced)
+  B: local (assigned)
+  f: local (assigned)
+  wrap: local (assigned, referenced)
+  function wrap
+    cls: local (parameter, referenced)
+  class A
+    __class__: global implicit (referenced)
+    here: local (assigned)
+    m: local (assigned)
+    function m
+      self: local (parameter)
+      x: local (parameter, referenced)
+  class B
+    attr_del: local (assigned)
+    bare_del: local (assigned)
+    cls_del: local (assigned)
+    f: local (assigned)
+    kw: local (assigned)
+    local: local (assigned)
+    m: local (assigned)
+    names: local (assigned)
+    outer: local (assigned)
+    rebind: local (assigned)
+    s: local (assigned)
+    star: local (assigned)
+    staticmethod: global implicit (referenced)
+    store_del: local (assigned)
+    super: global implicit (referenced)
+    two: local (assigned)
+    x: local (assigned)
+    function m
+      __class__: free (referenced)
+      self: local (parameter)
+      super: global implicit (referenced)
+      x: local (parameter, referenced)
+    function names
+      __class__: free (referenced)
+      i: local (assigned, referenced, comp_iter)
+      range: global implicit (referenced)
+      self: local (parameter)
+      super: global implicit (referenced)
+    function two
+      B: global implicit (referenced)
+      __class__: free (referenced)
+      self: local (parameter, referenced)
+      super: global implicit (referenced)
+    function bare_del
+      __class__: free (referenced)
+      self: local (parameter, assigned)
+      super: global implicit (referenced)
+    function attr_del
+      __class__: free (referenced)
+      self: local (parameter, assigned)
+      super: global implicit (referenced)
+    function cls_del
+      __class__: free (referenced)
+      self: local (parameter, assigned)
+      super: global implicit (referenced)
+    function store_del
+      __class__: free (referenced)
+      self: local (parameter, assigned)
+      super: global implicit (referenced)
+    function rebind
+      __class__: free (referenced)
+      other: local (parameter, referenced)
+      range: global implicit (referenced)
+      self: local (parameter, assigned)
+      super: global implicit (referenced)
+    function lambda
+      __class__: free (referenced)
+      self: local (parameter)
+      super: global implicit (referenced)
+    function local
+      __class__: free (referenced)
+      len: global implicit (referenced)
+      self: local (parameter)
+      super: local (assigned, referenced)
+    function star
+      __class__: free (referenced)
+      args: local (parameter)
+      super: global implicit (referenced)
+    function kw
+      __class__: free (referenced)
+      self: local (parameter)
+      super: global implicit (referenced)
+    function outer
+      Inner: local (assigned, referenced)
+      __class__: free
+      self: local (parameter)
+      class Inner
+        __class__: free (referenced)
+        n: local (assigned)
+        y: local (assigned)
+        function n
+          __class__: free (referenced)
+          self: local (parameter)
+    function s
+      __class__: free (referenced)
+      super: global implicit (referenced)
+  function f
+    __class__: global implicit (referenced)
+    super: global implicit (referenced)
+    x: local (parameter)
+qualnames: A, A.m, B, B.<lambda>, B.attr_del, B.bare_del, B.cls_del, B.kw, B.local, B.m, B.names, B.outer, B.outer.<locals>.Inner, B.outer.<locals>.Inner.n, B.rebind, B.s, B.star, B.store_del, B.two, f, wrap

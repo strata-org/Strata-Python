@@ -1,0 +1,134 @@
+module
+  wrap: local (assigned, referenced)
+  A: local (assigned, referenced)
+  B: local (assigned)
+  f: local (assigned)
+  function wrap
+    params: cls
+    cls: local (parameter, referenced)
+  class A
+    here: local (assigned)
+    __class__: global implicit (referenced)
+    m: local (assigned)
+    function A.m
+      params: self, x
+      self: local (parameter)
+      x: local (parameter, referenced)
+  class B (needs __class__ cell)
+    m: local (assigned)
+    names: local (assigned)
+    two: local (assigned)
+    bare_del: local (assigned)
+    attr_del: local (assigned)
+    cls_del: local (assigned)
+    store_del: local (assigned)
+    rebind: local (assigned)
+    f: local (assigned)
+    local: local (assigned)
+    star: local (assigned)
+    kw: local (assigned)
+    x: local (assigned)
+    super: global implicit (referenced)
+    outer: local (assigned)
+    s: local (assigned)
+    staticmethod: global implicit (referenced)
+    function B.m
+      params: self, x
+      self: local (parameter)
+      x: local (parameter, referenced)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+    function B.names
+      params: self
+      self: local (parameter)
+      range: global implicit (referenced)
+      __class__: free (referenced)
+      i: local (assigned, referenced, comp_iter)
+      super: global implicit (referenced)
+      inlined comprehension B.names.<locals>.<listcomp>
+        params: .0
+        .0: local (parameter)
+        i: local (assigned, referenced, comp_iter)
+        super: global implicit (referenced)
+        __class__: free (referenced)
+    function B.two
+      params: self
+      self: local (parameter, referenced)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+      B: global implicit (referenced)
+    function B.bare_del
+      params: self
+      self: local (parameter, assigned)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+    function B.attr_del
+      params: self
+      self: local (parameter, assigned)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+    function B.cls_del
+      params: self
+      self: local (parameter, assigned)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+    function B.store_del
+      params: self
+      self: local (parameter, assigned)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+    function B.rebind
+      params: self, other
+      self: local (parameter, assigned)
+      other: local (parameter, referenced)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+      range: global implicit (referenced)
+      inlined comprehension B.rebind.<locals>.<listcomp>
+        params: .0
+        .0: local (parameter)
+        self: local (assigned, referenced, comp_iter)
+        super: global implicit (referenced)
+        __class__: free (referenced)
+    lambda B.<lambda>
+      params: self
+      self: local (parameter)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+    function B.local
+      params: self
+      self: local (parameter)
+      super: local (assigned, referenced)
+      len: global implicit (referenced)
+      __class__: free (referenced)
+    function B.star
+      params: *args
+      args: local (parameter)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+    function B.kw
+      params: *, self
+      self: local (parameter)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+    function B.outer
+      params: self
+      self: local (parameter)
+      Inner: local (assigned, referenced)
+      __class__: free
+      class B.outer.<locals>.Inner (needs __class__ cell)
+        n: local (assigned)
+        y: local (assigned)
+        __class__: free (referenced)
+        function B.outer.<locals>.Inner.n
+          params: self
+          self: local (parameter)
+          __class__: free (referenced)
+    function B.s
+      super: global implicit (referenced)
+      __class__: free (referenced)
+  function f
+    params: x
+    x: local (parameter)
+    super: global implicit (referenced)
+    __class__: global implicit (referenced)
