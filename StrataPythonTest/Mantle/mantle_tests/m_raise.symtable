@@ -40,3 +40,4 @@ module top
   function gen
     e: local (parameter, referenced)
 qualnames: Oops, both, caller, cause, cls, gen, in_loop, instance, no_active, no_cause, reraise
+generators: gen

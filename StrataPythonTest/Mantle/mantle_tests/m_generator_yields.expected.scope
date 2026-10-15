@@ -11,6 +11,7 @@ module
   dict_iterable: local (assigned)
   generator_iterable: local (assigned)
   class_decorator_first: local (assigned)
+  async_generator: local (assigned)
   function positional_annotation
     h: local (assigned)
     function positional_annotation.<locals>.h
@@ -79,3 +80,4 @@ module
   function class_decorator_first
     C: local (assigned)
     class class_decorator_first.<locals>.C
+  function async_generator

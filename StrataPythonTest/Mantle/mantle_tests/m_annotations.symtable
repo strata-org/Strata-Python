@@ -57,3 +57,4 @@ module top
   function anns
     __annotations__: global implicit (referenced)
 qualnames: P, R, S, S.m, anns, f, f.<locals>.Q, f.<locals>.h, g, g.<locals>.C, gen
+generators: gen

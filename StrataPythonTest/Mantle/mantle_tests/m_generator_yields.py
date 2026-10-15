@@ -26,7 +26,7 @@ def return_annotation():
         pass
 
 def first_annotation():
-    def h(p: (yield 1), /, a: (yield 2)):  # CPython evaluates a's annotation first
+    def h(p: (yield 1), /, a: (yield 2)):  # the diagnostic names the first in source order
         pass
 
 def list_iterable(xs):
@@ -42,6 +42,9 @@ def generator_iterable(xs):
     return (x for x in (yield xs))
 
 def class_decorator_first():
-    @(yield 1)  # CPython evaluates a class's decorators before its bases
+    @(yield 1)  # a class's decorators and bases are evaluated where the class is
     class C((yield 2)):
         pass
+
+async def async_generator():
+    yield 1  # an async generator: CPython's CO_ASYNC_GENERATOR

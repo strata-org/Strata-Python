@@ -4,12 +4,13 @@
 -- unsupported: generator function is not supported at 17:17-17:24
 -- unsupported: generator function is not supported at 21:16-21:23
 -- unsupported: generator function is not supported at 25:16-25:23
--- unsupported: generator function is not supported at 29:31-29:38
+-- unsupported: generator function is not supported at 29:14-29:21
 -- unsupported: generator function is not supported at 33:24-33:32
 -- unsupported: generator function is not supported at 36:24-36:32
 -- unsupported: generator function is not supported at 39:27-39:35
 -- unsupported: generator function is not supported at 42:24-42:32
 -- unsupported: generator function is not supported at 45:6-45:13
+-- unsupported: async def is not supported at 49:0-50:11
 module m_generator_yields {
   func @|m_generator_yields.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
@@ -55,6 +56,9 @@ module m_generator_yields {
       %clo.11 : py.Value = py.mkClosure(@m_generator_yields.class_decorator_first)
       %class_decorator_first.cell.0 : base.Ref(py.Value) = py.globalCell("m_generator_yields", "class_decorator_first")
       %set.13 : base.Unit = base.refSet[py.Value](%class_decorator_first.cell.0, %clo.11)
+      %clo.12 : py.Value = py.mkClosure(@m_generator_yields.async_generator)
+      %async_generator.cell.0 : base.Ref(py.Value) = py.globalCell("m_generator_yields", "async_generator")
+      %set.14 : base.Unit = base.refSet[py.Value](%async_generator.cell.0, %clo.12)
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
@@ -175,6 +179,16 @@ module m_generator_yields {
   func @m_generator_yields.class_decorator_first(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %str.0 : py.Value = py.strLit("generator function")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_generator_yields.async_generator(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %str.0 : py.Value = py.strLit("async def")
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
       ret(%ret.0)

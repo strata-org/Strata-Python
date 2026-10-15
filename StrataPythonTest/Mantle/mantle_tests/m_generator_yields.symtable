@@ -1,4 +1,5 @@
 module top
+  async_generator: local (assigned)
   class_decorator_first: local (assigned)
   dict_iterable: local (assigned)
   first_annotation: local (assigned)
@@ -56,4 +57,6 @@ module top
   function class_decorator_first
     C: local (assigned)
     class C
-qualnames: class_decorator_first, class_decorator_first.<locals>.C, dict_iterable, first_annotation, first_annotation.<locals>.h, generator_iterable, generator_iterable.<locals>.<genexpr>, keyword_only_annotation, keyword_only_annotation.<locals>.h, kwargs_annotation, kwargs_annotation.<locals>.h, list_iterable, positional_annotation, positional_annotation.<locals>.h, positional_only_annotation, positional_only_annotation.<locals>.h, return_annotation, return_annotation.<locals>.h, set_iterable, varargs_annotation, varargs_annotation.<locals>.h
+  function async_generator
+qualnames: async_generator, class_decorator_first, class_decorator_first.<locals>.C, dict_iterable, first_annotation, first_annotation.<locals>.h, generator_iterable, generator_iterable.<locals>.<genexpr>, keyword_only_annotation, keyword_only_annotation.<locals>.h, kwargs_annotation, kwargs_annotation.<locals>.h, list_iterable, positional_annotation, positional_annotation.<locals>.h, positional_only_annotation, positional_only_annotation.<locals>.h, return_annotation, return_annotation.<locals>.h, set_iterable, varargs_annotation, varargs_annotation.<locals>.h
+generators: async_generator, class_decorator_first, dict_iterable, first_annotation, generator_iterable, keyword_only_annotation, kwargs_annotation, list_iterable, positional_annotation, positional_only_annotation, return_annotation, set_iterable, varargs_annotation

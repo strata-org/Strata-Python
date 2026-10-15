@@ -290,8 +290,8 @@ Name resolution runs once per module, before any emission:
 `PyScope.analyze` (`StrataPython/Mantle/Scope.lean`) returns a `Table`, matching CPython
 3.12's `symtable`. The table has one `Scope` per module, function, `lambda`, class body,
 generator expression and list, set or dict comprehension, in preorder. Each scope records its kind, `__qualname__`, parameters,
-cell variables (`cellVars`), free variables (`freeVars`), and a `Symbol` per name with one of
-five kinds:
+cell variables (`cellVars`), free variables (`freeVars`), whether it is a generator (its first
+`yield`, as CPython's `CO_GENERATOR`), and a `Symbol` per name with one of five kinds:
 
 | Kind | Meaning |
 |---|---|
@@ -775,8 +775,8 @@ block, so the body cannot reach `Frame.handler`. Instead the body returns `error
   as in the scope enclosing the class. The outermost iterable is evaluated by the class
   body and sees the class's names.
 
-Generator expressions keep their own scope. They and generator functions (any `yield`) are
-**rejected**. The planned route is an opaque `py.mkGenerator` over a lifted function (§8).
+Generator expressions keep their own scope. They and generator functions (any `yield` the
+function evaluates, which the scope pass records in `Scope.generator`) are **rejected**. The planned route is an opaque `py.mkGenerator` over a lifted function (§8).
 
 ### 6.9 Rejected outright
 

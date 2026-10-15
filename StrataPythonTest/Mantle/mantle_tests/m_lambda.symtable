@@ -26,3 +26,4 @@ module top
     function lambda
       x: local (parameter, referenced)
 qualnames: <lambda>, <lambda>, <lambda>, <lambda>, <lambda>.<locals>.<lambda>, adder, adder.<locals>.<lambda>, yields, yields.<locals>.<lambda>
+generators: <lambda>, yields

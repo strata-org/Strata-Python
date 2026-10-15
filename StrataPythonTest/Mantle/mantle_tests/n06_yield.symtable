@@ -8,3 +8,4 @@ module top
   function normal_func
     x: local (parameter, referenced)
 qualnames: count_up, normal_func
+generators: count_up

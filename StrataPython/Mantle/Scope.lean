@@ -19,7 +19,8 @@ does, and resolves imports to fully qualified names.  Its result is a `Table`:
 
 * one `Scope` per module, function, `lambda`, class body, generator expression and list,
   set or dict comprehension, in preorder, the module first;
-* for each scope, its kind, name, `__qualname__`, parent, children and parameters;
+* for each scope, its kind, name, `__qualname__`, parent, children and parameters, and for a
+  function whether it is a generator;
 * for each name a scope reads, binds or declares, a `Symbol`: its `NameScope` and its
   `Uses`;
 * each import, with the module or member it binds;
@@ -27,7 +28,7 @@ does, and resolves imports to fully qualified names.  Its result is a `Table`:
   translator rejects.
 
 `Table.format` prints the table and `Table.symtableFormat` prints what CPython's `symtable`
-module records, for comparison with it.
+module records, and which code objects are generators, for comparison with them.
 
 The classification follows CPython 3.12's `Python/symtable.c`:
 
@@ -236,6 +237,9 @@ structure Scope where
   /-- For a class body: a nested function reads `__class__` or calls `super`, so the class
   needs an implicit `__class__` cell. -/
   needsClassCell : Bool
+  /-- For a function or `lambda` that is a generator: its first `yield` or `yield from` in
+  source order, as CPython 3.12 sets `CO_GENERATOR` from any `yield` the function evaluates. -/
+  generator : Option SourceRange := none
   deriving Repr, Inhabited
 
 /-- What an import binds a name to. -/
@@ -411,6 +415,8 @@ private structure Pending where
   inIterTarget : Bool := false
   /-- Visiting a comprehension's iterable, at this depth. -/
   inIterExpr : Nat := 0
+  /-- The first `yield` in source order, if this is a function. -/
+  generator : Option SourceRange := none
   deriving Inhabited
 
 private structure CollectState where
@@ -715,6 +721,11 @@ private partial def checkYield (what : String) (sr : SourceRange) : CollectM Uni
   let p ← curScope
   if p.kind.isComprehension then syntaxError (yieldInComprehension p.name) sr
   else if p.kind matches .module | .classBody then syntaxError s!"{what} outside function" sr
+  else
+    let earlier := match p.generator with
+      | some r => decide (sr.start < r.start)
+      | none => true
+    if earlier then modifyScope (← get).cur fun p => { p with generator := some sr }
 
 /-- The defaults of `args`, which the enclosing scope evaluates. -/
 private partial def visitDefaults (args : arguments SourceRange) : CollectM Unit := do
@@ -1113,7 +1124,8 @@ def analyze (stmts : Array (stmt SourceRange)) : Table := Id.run do
         uses := { uses with freeClass := a.freeClass[i]!.contains name } : Symbol }
     { kind := p.kind, name := p.name, qualname := quals[i]!, parent := p.parent
       children := p.children, params := p.params, symbols, range := p.range
-      privateName := p.privateName, needsClassCell := a.needsClassCell[i]! : Scope }
+      privateName := p.privateName, needsClassCell := a.needsClassCell[i]!
+      generator := p.generator : Scope }
   return { scopes, imports := st.imports, diagnostics := st.diagnostics ++ a.diagnostics }
 
 end -- public section
@@ -1229,9 +1241,9 @@ private def symtableLines (t : Table) : Nat → ScopeId → Nat → Array String
 
 /-- What CPython 3.12's `symtable` module records, in the format of
 `StrataPythonTest/Mantle/scope_symtable.py`: each scope with its symbols sorted by name, then
-the sorted `__qualname__`s of the code objects.  Inlined comprehensions are not scopes
-there.  If CPython rejects the program, only its first error, with the line `fileMap`
-gives. -/
+the sorted `__qualname__`s of the code objects, then of the generators if there are any.
+Inlined comprehensions are not scopes there.  If CPython rejects the program, only its first
+error, with the line `fileMap` gives. -/
 public def symtableFormat (t : Table) (fileMap : Option Lean.FileMap := none) : String :=
   match t.syntaxErrors[0]? with
   | some d =>
@@ -1242,8 +1254,11 @@ public def symtableFormat (t : Table) (fileMap : Option Lean.FileMap := none) : 
   | none =>
     let quals := (t.scopes.toList.drop 1).filter (·.kind != .inlinedComprehension)
       |>.map (·.qualname) |>.toArray.qsort (· < ·)
-    let lines := symtableLines t t.scopes.size 0 0 |>.push
-      s!"qualnames: {", ".intercalate quals.toList}"
+    let gens := (t.scopes.filter (·.generator.isSome)).map (·.qualname) |>.qsort (· < ·)
+    let lines := symtableLines t t.scopes.size 0 0
+      |>.push s!"qualnames: {", ".intercalate quals.toList}"
+    let lines := if gens.isEmpty then lines
+      else lines.push s!"generators: {", ".intercalate gens.toList}"
     "\n".intercalate lines.toList ++ "\n"
 
 end Table

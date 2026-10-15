@@ -3,7 +3,8 @@
 
 For every `NAME.py` in `DIR`, by default `mantle_tests/` beside this script, writes
 `NAME.symtable`: each scope's names, with the scope and the flags CPython's `symtable` module
-records for them, then the `__qualname__` of every code object.
+records for them, then the `__qualname__` of every code object, then of every generator
+function, if there is one (a generator expression always is one, and is left out).
 `StrataPythonTestExtra/PyScopeTest.lean` compares these files with
 `PyScope.Table.symtableFormat`.
 
@@ -22,6 +23,7 @@ no file is written for it.
 """
 
 import ast
+import inspect
 import symtable
 import sys
 from pathlib import Path
@@ -73,11 +75,16 @@ def scope_lines(table, depth, out):
         scope_lines(child, depth + 1, out)
 
 
-def qualnames(code, out):
+GENERATOR = inspect.CO_GENERATOR | inspect.CO_ASYNC_GENERATOR
+
+
+def qualnames(code, out, gens):
     for const in code.co_consts:
         if hasattr(const, "co_qualname"):
             out.append(const.co_qualname)
-            qualnames(const, out)
+            if const.co_flags & GENERATOR and const.co_name != "<genexpr>":
+                gens.append(const.co_qualname)
+            qualnames(const, out, gens)
 
 
 def describe(path):
@@ -101,8 +108,11 @@ def describe(path):
         # An error the compiler reports after the symbol table, such as a repeated keyword.
         return f"error: {err.msg} (line {err.lineno})\n"
     names = []
-    qualnames(code, names)
+    gens = []
+    qualnames(code, names, gens)
     out.append("qualnames: " + ", ".join(sorted(names)))
+    if gens:
+        out.append("generators: " + ", ".join(sorted(gens)))
     return "\n".join(out) + "\n"
 
 

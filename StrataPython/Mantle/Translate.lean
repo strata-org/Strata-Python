@@ -552,74 +552,6 @@ def paramAnnotations (args : arguments SourceRange) : Array (String × expr Sour
   (pos.val ++ posOnly.val ++ varPos.val.toArray ++ kwOnly.val ++ varKw.val.toArray).filterMap
     fun (.mk_arg _ ⟨_, n⟩ a _) => a.val.map (n, ·)
 
-mutual
-
-/-- The range of the first `yield` or `yield from` an expression evaluates in its own scope. -/
-partial def exprYield? : expr SourceRange → Option SourceRange
-  | .Yield sr _ | .YieldFrom sr _ => some sr
-  | .Lambda _ (.mk_arguments _ _ _ _ _ kwDefaults _ defaults) _ =>
-    (defaults.val ++
-      kwDefaults.val.filterMap (fun | .some_expr _ d => some d | _ => none)).findSome? exprYield?
-  -- A comprehension's outermost iterable is evaluated in the enclosing scope.
-  | .ListComp _ _ gens | .SetComp _ _ gens | .DictComp _ _ _ gens | .GeneratorExp _ _ gens =>
-    gens.val[0]?.bind fun (.mk_comprehension _ _ iter _ _) => exprYield? iter
-  | .Constant .. | .Name .. => none
-  | .BoolOp _ _ vs | .Set _ vs | .List _ vs _ | .Tuple _ vs _ | .JoinedStr _ vs
-  | .TemplateStr _ vs => vs.val.findSome? exprYield?
-  | .NamedExpr _ a b | .BinOp _ a _ b | .Subscript _ a b _ => #[a, b].findSome? exprYield?
-  | .UnaryOp _ _ x | .Await _ x | .Starred _ x _ | .Attribute _ x _ _ => exprYield? x
-  | .IfExp _ a b c => #[a, b, c].findSome? exprYield?
-  | .Dict _ ks vs =>
-    (ks.val.filterMap (fun | .some_expr _ k => some k | _ => none) ++ vs.val).findSome?
-      exprYield?
-  | .Compare _ l _ rs => (#[l] ++ rs.val).findSome? exprYield?
-  | .Call _ f as ks => (#[f] ++ as.val ++ ks.val.map (·.value)).findSome? exprYield?
-  | .FormattedValue _ v _ s | .Interpolation _ v _ _ s =>
-    (#[v] ++ s.val.toArray).findSome? exprYield?
-  | .Slice _ a b c => (a.val.toArray ++ b.val.toArray ++ c.val.toArray).findSome? exprYield?
-
-/-- The range of the first `yield` a statement evaluates in its own scope. -/
-partial def stmtYield? : stmt SourceRange → Option SourceRange
-  | .FunctionDef _ _ args _ decs ret _ _ | .AsyncFunctionDef _ _ args _ decs ret _ _ =>
-    let .mk_arguments _ _ _ _ _ kwDefaults _ defaults := args
-    let anns := (paramAnnotations args).map (·.2)
-    (decs.val ++ defaults.val ++
-      kwDefaults.val.filterMap (fun | .some_expr _ d => some d | _ => none) ++ anns ++
-      ret.val.toArray).findSome? exprYield?
-  | .ClassDef _ _ bases kws _ decs _ =>
-    (decs.val ++ bases.val ++ kws.val.map (·.value)).findSome? exprYield?
-  | .Return _ v => v.val.bind exprYield?
-  | .Raise _ v c => (v.val.toArray ++ c.val.toArray).findSome? exprYield?
-  | .Delete _ ts => ts.val.findSome? exprYield?
-  | .Assign _ ts v _ => (ts.val.push v).findSome? exprYield?
-  | .AugAssign _ t _ v => #[t, v].findSome? exprYield?
-  | .AnnAssign _ t a v _ => (#[t, a] ++ v.val.toArray).findSome? exprYield?
-  | .For _ t it b o _ | .AsyncFor _ t it b o _ =>
-    (#[t, it].findSome? exprYield?).orElse fun _ => bodiesYield? #[b.val, o.val]
-  | .While _ c b o | .If _ c b o =>
-    (exprYield? c).orElse fun _ => bodiesYield? #[b.val, o.val]
-  | .With _ items b _ | .AsyncWith _ items b _ =>
-    (items.val.findSome? fun (.mk_withitem _ c v) =>
-      (exprYield? c).orElse fun _ => v.val.bind exprYield?).orElse fun _ => bodiesYield? #[b.val]
-  | .Match _ s cases =>
-    (exprYield? s).orElse fun _ => cases.val.findSome? fun (.mk_match_case _ _ g b) =>
-      (g.val.bind exprYield?).orElse fun _ => bodiesYield? #[b.val]
-  | .Try _ b hs o f | .TryStar _ b hs o f =>
-    (bodiesYield? #[b.val]).orElse fun _ =>
-      (hs.val.findSome? fun (.ExceptHandler _ t _ hb) =>
-        (t.val.bind exprYield?).orElse fun _ => bodiesYield? #[hb.val]).orElse fun _ =>
-          bodiesYield? #[o.val, f.val]
-  | .Assert _ t m => (#[t] ++ m.val.toArray).findSome? exprYield?
-  | .Expr _ v => exprYield? v
-  | .TypeAlias .. | .Import .. | .ImportFrom .. | .Global .. | .Nonlocal .. | .Pass _
-  | .Break _ | .Continue _ => none
-
-/-- The first `yield` among statement lists. -/
-partial def bodiesYield? (bodies : Array (Array (stmt SourceRange))) : Option SourceRange :=
-  bodies.findSome? fun b => b.findSome? stmtYield?
-
-end
-
 /-- Whether the statements hold an annotated assignment outside a nested function or class:
 CPython's `find_ann`, which decides `SETUP_ANNOTATIONS`. -/
 partial def findAnn (ss : Array (stmt SourceRange)) : Bool :=
@@ -1302,7 +1234,7 @@ partial def closure (sr : SourceRange) (args : arguments SourceRange)
   let some cur := ctx.table.scopes[scope]?
     | do internalError s!"scope {scope} is not in the table" sr; return none
   let stub ← if isAsync then do reject "async def" sr; pure (some "async def")
-    else match bodiesYield? #[body] with
+    else match cur.generator with
       | some r => do reject "generator function" r; pure (some "generator function")
       | none => pure none
   let decs ← decorators.mapM transExpr
