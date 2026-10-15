@@ -78,7 +78,7 @@ private def mkModeBoolFunc (name : String) (mode : MatchMode) :
       typeArgs := [],
       inputs := [("pattern", mty[string]), ("s", mty[string])],
       output := mty[bool],
-      attr := #[.evalIfCanonical 0],
+      attr := #[.evalIfValue 0],
       concreteEval := some
         (fun _ args => match args with
           | [LExpr.strConst () pattern, sExpr] =>
@@ -101,7 +101,7 @@ def rePatternErrorFunc : LFunc Core.CoreLParams :=
       typeArgs := [],
       inputs := [("pattern", mty[string])],
       output := mty[Error],
-      attr := #[.evalIfCanonical 0],
+      attr := #[.evalIfValue 0],
       concreteEval := some
         (fun _ args => match args with
           | [LExpr.strConst () s] =>

@@ -402,21 +402,21 @@ assertion. This exercises the full pipeline with type alias resolution.
         throw <| IO.userError
           "Expected ✖️/❓ (violation not proven safe) for empty bucket violation"
 
-/-! ## evalIfCanonical regression test (Issue #812)
+/-! ## evalIfValue regression test (Issue #812)
 
-Symbolic bucket must pass the regex precondition via `evalIfCanonical`.
+Symbolic bucket must pass the regex precondition via `evalIfValue`.
 Without the attribute, the regex VC would be ❓ unknown. -/
 
 #eval withPython fun pythonCmd => do
   IO.FS.withTempDir fun tmpDir => do
     setupFixture pythonCmd tmpDir
     let result ← runAnalyzeAndVerify pythonCmd tmpDir
-      "test_regex_eval_if_canonical.py" (useRoots := true)
+      "test_regex_eval_if_value.py" (useRoots := true)
     match result with
     | .error msg => throw <| IO.userError s!"Pipeline failed: {msg}"
     | .ok vcResults =>
       -- Pin the regex obligation via its property summary: it must verify
-      -- (`✔️`, not merely non-`✖️`), which is exactly what `evalIfCanonical`
+      -- (`✔️`, not merely non-`✖️`), which is exactly what `evalIfValue`
       -- enables. An unrelated obligation may degrade to `❓ unknown` when the
       -- solver is under load on CI, but nothing may be disproven.
       let mut sawRegex := false
@@ -429,7 +429,7 @@ Without the attribute, the regex VC would be ❓ unknown. -/
           sawRegex := true
           if !r.isSuccess then
             throw <| IO.userError
-              s!"Expected the regex precondition to verify via evalIfCanonical but got: {r.formatOutcome}"
+              s!"Expected the regex precondition to verify via evalIfValue but got: {r.formatOutcome}"
       if !sawRegex then
         throw <| IO.userError "Expected a 'Bucket must match' obligation"
 

@@ -1,7 +1,7 @@
 import servicelib
 
-# Regression test for evalIfCanonical (Issue #812).
-# Symbolic bucket requires evalIfCanonical to compile the regex precondition.
+# Regression test for evalIfValue (Issue #812).
+# Symbolic bucket requires evalIfValue to compile the regex precondition.
 
 def store_with_symbolic_bucket(bucket: str) -> bool:
     if bucket == "my-bucket":
