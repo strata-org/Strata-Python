@@ -1,0 +1,68 @@
+-- syntax error: 'break' outside loop at 3:0-3:5
+-- syntax error: duplicate argument 'a' in function definition at 4:9-4:10
+-- syntax error: no binding for nonlocal 'x' found at 7:4-7:14
+module e28_symtable_error_first {
+  func @|e28_symtable_error_first.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("e28_symtable_error_first")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("e28_symtable_error_first", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("e28_symtable_error_first", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure(@e28_symtable_error_first.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("e28_symtable_error_first", "f")
+      %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @e28_symtable_error_first.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %a.0 : py.Value = py.undef("a")
+      %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %a.1 : py.Value = py.undef("a")
+      %a.2 : py.Value = py.undef("a")
+      %fill.0 : py.Value = py.mkTuple(%a.1, %a.2)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("a")
+      %a.3 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %int.1 : py.Value = py.intLit(1)
+      %pos.1 : py.Value = py.getItem(%pad.0, %int.1) ^propagate.0()
+      %str.1 : py.Value = py.strLit("a")
+      %a.4 : py.Value = py.dictGet(%kwargs.0, %str.1, %pos.1)
+      %inKw.1 : py.Value = py.in(%str.1, %kwargs.0) ^propagate.0()
+      %discard.1 : base.Unit = py.dictDiscard(%kwargs.0, %str.1)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "f() got multiple values for argument 'a'") ^propagate.0()
+      %filled.1 : py.Value = py.lt(%int.1, %nargs.0) ^propagate.0()
+      %both.1 : py.Value = py.mult(%inKw.1, %filled.1) ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%both.1, 0, "TypeError", "f() got multiple values for argument 'a'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.2 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
+      %check.3 : base.Unit = py.requireAtMost(%nargs.0, 2, "TypeError", "f() takes 2 positional arguments but {} {was} given") ^propagate.0()
+      %a.5 : py.Value = py.requireDefined(%a.3, "TypeError", "f() missing 1 required positional argument: 'a'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.5)
+      %a.6 : py.Value = py.requireDefined(%a.4, "TypeError", "f() missing 1 required positional argument: 'a'") ^propagate.0()
+      %set.1 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.6)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

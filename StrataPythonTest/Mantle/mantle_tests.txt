@@ -158,6 +158,7 @@ e24_default_except_not_last | yes | default 'except:' must be last
 e25_break_outside_loop | yes | 'break' outside loop
 e26_outside_loop | yes | 'continue' not properly in loop, 'break' outside loop, 'break' outside loop, 'continue' not properly in loop
 e27_yield_outside_function | yes | 'yield' outside function, yield, 'yield' outside function, yield, 'yield from' outside function, yield from, 'yield' outside function, yield, 'yield' outside function, yield, 'yield' outside function, yield, 'yield' outside function, yield
+e28_symtable_error_first | yes | 'break' outside loop, duplicate argument 'a' in function definition, no binding for nonlocal 'x' found
 p01_import_dotted | yes |
 p02_import_as | yes |
 p03_from_import | yes |

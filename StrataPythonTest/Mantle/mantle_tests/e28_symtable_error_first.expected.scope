@@ -1,0 +1,12 @@
+module
+  f: local (assigned)
+  g: local (assigned)
+  function f
+    params: a, a
+    a: local (parameter)
+  function g
+    x: free (nonlocal)
+diagnostics:
+  syntax error at 4:9-4:10: duplicate argument 'a' in function definition
+  syntax error at 7:4-7:14: no binding for nonlocal 'x' found
+  syntax error at 3:0-3:5: 'break' outside loop

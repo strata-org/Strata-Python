@@ -287,6 +287,9 @@ structure Diagnostic where
   kind : DiagnosticKind
   message : String
   range : SourceRange
+  /-- A syntax error that CPython's compiler raises, which it reaches only once its symbol
+  table has accepted the program. -/
+  compiler : Bool := false
   deriving Repr, Inhabited
 
 /-- How a diagnostic of this kind is labelled: `syntax error`, `unsupported` or
@@ -374,7 +377,10 @@ def childAt? (t : Table) (parent : ScopeId) (range : SourceRange) : Option Scope
 def importsIn (t : Table) (s : ScopeId) : Array Import :=
   t.imports.filter (·.scope == s)
 
-/-- The compile-time errors, without the rejections. -/
+/-- The compile-time errors, without the rejections: the symbol table's first, then the
+compiler's, as CPython reports them, each in the order the scope pass visits the program.  So
+the first is CPython's, except where two compiler errors meet in one statement that CPython
+compiles in another order, such as `class C((yield 1)): return 1`. -/
 def syntaxErrors (t : Table) : Array Diagnostic :=
   t.diagnostics.filter (·.kind == .syntaxError)
 
@@ -449,6 +455,11 @@ private def report (kind : DiagnosticKind) (message : String) (range : SourceRan
 private def syntaxError (message : String) (range : SourceRange) : CollectM Unit :=
   report .syntaxError message range
 
+/-- A syntax error that CPython's compiler, not its symbol table, raises. -/
+private def compilerError (message : String) (range : SourceRange) : CollectM Unit :=
+  let d : Diagnostic := { kind := .syntaxError, message, range, compiler := true }
+  modify fun st => { st with diagnostics := st.diagnostics.push d }
+
 private def unsupported (message : String) (range : SourceRange) : CollectM Unit :=
   report .unsupported message range
 
@@ -457,15 +468,15 @@ private def checkKeywords (kws : Array (keyword SourceRange)) : CollectM Unit :=
   let mut seen : Std.HashSet String := {}
   for k in kws do
     if let some n := k.nameAndValue.1 then
-      if seen.contains n then return ← syntaxError s!"keyword argument repeated: {n}" k.ann
+      if seen.contains n then return ← compilerError s!"keyword argument repeated: {n}" k.ann
       seen := seen.insert n
 
 /-- Report a starred target outside a tuple or list, or two starred targets in one, as
 CPython's compiler does. -/
 private partial def checkTarget : expr SourceRange → CollectM Unit
-  | .Starred sr _ _ => syntaxError "starred assignment target must be in a list or tuple" sr
+  | .Starred sr _ _ => compilerError "starred assignment target must be in a list or tuple" sr
   | .Tuple sr ts _ | .List sr ts _ => do
-    if let .error msg := starredIndex? ts.val then return ← syntaxError msg sr
+    if let .error msg := starredIndex? ts.val then return ← compilerError msg sr
     for t in ts.val do
       match t with
       | .Starred _ v _ => checkTarget v
@@ -720,7 +731,7 @@ expression.  CPython's compiler reports the first, its symbol table the second. 
 private partial def checkYield (what : String) (sr : SourceRange) : CollectM Unit := do
   let p ← curScope
   if p.kind.isComprehension then syntaxError (yieldInComprehension p.name) sr
-  else if p.kind matches .module | .classBody then syntaxError s!"{what} outside function" sr
+  else if p.kind matches .module | .classBody then compilerError s!"{what} outside function" sr
   else
     let earlier := match p.generator with
       | some r => decide (sr.start < r.start)
@@ -803,7 +814,7 @@ private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
     modify fun st => { st with privateName := outerPrivate }
   | .Return sr v =>
     if (← curScope).kind matches .module | .classBody then
-      syntaxError "'return' outside function" sr
+      compilerError "'return' outside function" sr
     v.val.forM visitExpr
   | .Delete _ ts => ts.val.forM visitExpr
   | .Assign _ ts v _ =>
@@ -867,7 +878,7 @@ private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
       let .ExceptHandler hsr ty _ _ := hs[i]
       if ty.val.isNone && i + 1 < hs.size then
         -- CPython reports only the first.
-        syntaxError "default 'except:' must be last" hsr
+        compilerError "default 'except:' must be last" hsr
         break
     for .ExceptHandler hsr ty name hbody in handlers.val do
       ty.val.forM visitExpr
@@ -886,8 +897,8 @@ private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
   | .Nonlocal sr names => names.val.forM fun n => declare false n.val sr
   | .Expr _ v => visitExpr v
   -- CPython's compiler reports these; its symbol table does not.
-  | .Break sr => unless (← get).inLoop do syntaxError "'break' outside loop" sr
-  | .Continue sr => unless (← get).inLoop do syntaxError "'continue' not properly in loop" sr
+  | .Break sr => unless (← get).inLoop do compilerError "'break' outside loop" sr
+  | .Continue sr => unless (← get).inLoop do compilerError "'continue' not properly in loop" sr
   | .Pass _ => pure ()
 
 /-- `global name` (`isGlobal`) or `nonlocal name` at `sr`. -/
@@ -1126,7 +1137,10 @@ def analyze (stmts : Array (stmt SourceRange)) : Table := Id.run do
       children := p.children, params := p.params, symbols, range := p.range
       privateName := p.privateName, needsClassCell := a.needsClassCell[i]!
       generator := p.generator : Scope }
-  return { scopes, imports := st.imports, diagnostics := st.diagnostics ++ a.diagnostics }
+  -- As in CPython, the symbol table's errors, from the walk and then the analysis, come before
+  -- the compiler's.
+  let (compiler, walk) := st.diagnostics.partition (·.compiler)
+  return { scopes, imports := st.imports, diagnostics := walk ++ a.diagnostics ++ compiler }
 
 end -- public section
 
