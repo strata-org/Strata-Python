@@ -15,11 +15,6 @@ Run it with CPython 3.12 or 3.13, which give the same output:
 dict comprehensions into the enclosing scope (PEP 709), as the scope pass does.  3.14 is
 not accepted: it gives every module, class and function an `__annotate__` scope.
 
-Parameter and return annotations are removed before the analysis: the scope pass does not
-model them yet, whereas 3.12 and 3.13 evaluate them in the enclosing scope.  The annotation
-of an annotated assignment is kept, as the scope pass visits it, as 3.12 does.  `ast.unparse` renumbers lines, so
-an error's line comes from the original program, which must raise the same error.
-
 A program that uses `type` statements or type parameters gets a file containing only
 `skip`, and is not compared: the scope pass rejects them, and does not model the annotation
 scopes CPython creates for them.  A program that this CPython cannot parse is an error, and
@@ -58,29 +53,6 @@ FLAGS = [
 FLAG_MASK = (1 << symtable.SCOPE_OFF) - 1
 
 
-class StripAnnotations(ast.NodeTransformer):
-    """Remove parameter and return annotations, recording whether there was one."""
-
-    def __init__(self):
-        self.changed = False
-
-    def visit_arg(self, node):
-        if node.annotation is not None:
-            node.annotation = None
-            self.changed = True
-        return node
-
-    def _visit_def(self, node):
-        if node.returns is not None:
-            node.returns = None
-            self.changed = True
-        self.generic_visit(node)
-        return node
-
-    visit_FunctionDef = _visit_def
-    visit_AsyncFunctionDef = _visit_def
-
-
 def uses_type_params(tree):
     """Whether the program has a `type` statement or a type parameter list."""
     return any(isinstance(node, ast.TypeAlias) or getattr(node, "type_params", None)
@@ -117,24 +89,9 @@ def describe(path):
         sys.exit(f"{path}: not valid Python {version}: {err.msg} (line {err.lineno})")
     if uses_type_params(tree):
         return "skip\n"
-    stripper = StripAnnotations()
-    tree = stripper.visit(tree)
-    if stripper.changed:
-        source = ast.unparse(ast.fix_missing_locations(tree))
     try:
         table = symtable.symtable(source, path.name, "exec")
     except SyntaxError as err:
-        if stripper.changed:
-            # Take the line from the original program, if it raises the same error.
-            try:
-                symtable.symtable(path.read_text(), path.name, "exec")
-            except SyntaxError as orig:
-                if orig.msg == err.msg:
-                    err = orig
-                else:
-                    sys.exit(f"{path}: annotations change the SyntaxError: {err}")
-            else:
-                sys.exit(f"{path}: replacing annotations causes a SyntaxError: {err}")
         return f"error: {err.msg} (line {err.lineno})\n"
     out = []
     scope_lines(table, 0, out)

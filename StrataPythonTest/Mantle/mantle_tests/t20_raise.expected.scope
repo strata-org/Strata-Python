@@ -2,6 +2,7 @@ module
   fail_hard: local (assigned)
   reraise_example: local (assigned)
   raise_with_msg: local (assigned)
+  str: global implicit (referenced)
   reraise_named: local (assigned)
   reraise_bare: local (assigned)
   reraise_after_work: local (assigned)

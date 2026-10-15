@@ -3,6 +3,7 @@ module top
   KeyError: global implicit (referenced)
   ValueError: global implicit (referenced)
   e: local (assigned, referenced)
+  int: global implicit (referenced)
   msg: local (assigned)
   result: local (assigned)
   risky: local (assigned, referenced)

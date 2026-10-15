@@ -1,5 +1,6 @@
 module
   risky: local (assigned, referenced)
+  int: global implicit (referenced)
   result: local (assigned)
   ValueError: global implicit (referenced)
   e: local (assigned, referenced)

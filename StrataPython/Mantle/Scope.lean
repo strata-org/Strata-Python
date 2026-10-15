@@ -47,8 +47,8 @@ At module level a bound name is `local`: the module's locals are its globals.  A
 body's bindings are invisible to the scopes nested in it, which resolve as if the class
 were not there.  Inside a class, private names (`__x`) are mangled (`_C__x`) as CPython
 mangles them; `mangle` applies the rule.  An annotated assignment's annotation is a use, as
-in 3.12's symbol table, except under `from __future__ import annotations`; parameter and
-return annotations are not analysed yet.
+in 3.12's symbol table, except under `from __future__ import annotations`; so are a
+function's parameter and return annotations, in the scope enclosing the function.
 
 ## Comprehensions
 
@@ -762,12 +762,17 @@ private partial def visitStmts (ss : Array (stmt SourceRange)) : CollectM Unit :
 
 private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
   match s with
-  | .FunctionDef sr ⟨_, name⟩ args body decorators _ _ typeParams
-  | .AsyncFunctionDef sr ⟨_, name⟩ args body decorators _ _ typeParams =>
+  | .FunctionDef sr ⟨_, name⟩ args body decorators returns _ typeParams
+  | .AsyncFunctionDef sr ⟨_, name⟩ args body decorators returns _ typeParams =>
     if !typeParams.val.isEmpty then unsupported "type parameters are not supported" sr
     addDef name { assigned := true } sr
+    -- In the order of 3.12's symbol table, which records the child scopes in that order.
     visitDefaults args
     decorators.val.forM visitExpr
+    unless (← get).futureAnnotations do
+      let .mk_arguments _ posOnly pos varPos kwOnly _ varKw _ := args
+      let params := posOnly.val ++ pos.val ++ varPos.val.toArray ++ varKw.val.toArray ++ kwOnly.val
+      (params.filterMap (fun (.mk_arg _ _ a _) => a.val) ++ returns.val.toArray).forM visitExpr
     let saved ← enter .function name sr
     visitParams args
     outsideLoop (visitStmts body.val)

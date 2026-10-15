@@ -401,19 +401,24 @@ At the definition site, in source order:
 
 1. Evaluate the decorators, top to bottom.
 2. Evaluate each non-constant default value into a fresh *default cell*.
-3. Emit `const @m.f…` and `py.mkClosure code cells…`. The cells are the ones the callee
+3. Evaluate the parameter annotations, in CPython 3.12's order (positional, positional-only,
+   `*args`, keyword-only, `**kwargs`), then the return annotation.
+4. Emit `const @m.f…` and `py.mkClosure code cells…`. The cells are the ones the callee
    captures, in `capturedVars` order (§6.6), then its default cells. A top-level function has
    only default cells.
-4. Apply the decorators bottom to top, each with `py.call d (mkTuple f) mkKwargs`.
-5. Write the result to the name's cell (a `lambda` is an expression and has no name).
+5. If there are annotations, store them as `f.__annotations__`: a dict from each mangled
+   parameter name, and `"return"`, to its annotation. With none, nothing is stored, and the
+   run-time model gives `{}`, as CPython does.
+6. Apply the decorators bottom to top, each with `py.call d (mkTuple f) mkKwargs`.
+7. Write the result to the name's cell (a `lambda` is an expression and has no name).
 
 ```
     %21 : py.Value = py.mkClosure(@m.outer.inner, %3)  -- %3: outer's cell for x
     %22 : base.Unit = base.refSet[py.Value](%4, %21)  -- inner = …
 ```
 
-Parameter and return annotations are not evaluated yet; CPython 3.12 evaluates them here, in
-the enclosing scope (§9, Q11).
+The annotations are evaluated in the enclosing scope, as in CPython 3.12, which Python 3.14
+changes (§9, Q11).
 
 **Python semantics to preserve:** defaults are evaluated once, at definition time, in the
 enclosing scope. Free variables are bound late: a read sees the latest write to the cell.
@@ -1019,8 +1024,9 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
     module and class bodies, into `__annotations__` (§6.1). Python 3.14 (PEP 649) instead
     compiles each module, class and function's annotations into a lazy `__annotate__`
     function, run when `__annotations__` is first read. Moving to 3.14 changes:
-    - the translator: `setupAnnotations`, `findAnn` and the store of each annotated
-      assignment give way to one `__annotate__` closure per module and class;
+    - the translator: `setupAnnotations`, `findAnn`, the store of each annotated assignment
+      and the store of a function's `__annotations__` give way to one `__annotate__` closure
+      per module, class and function;
     - conditional annotations: 3.14 records which annotated assignments ran
       (`__conditional_annotations__`), so `if c: x: int` adds `x` only if the branch ran;
     - the scope pass and `scope_symtable.py` (which refuses 3.14 today): 3.14's annotation
@@ -1029,7 +1035,8 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 
     `from __future__ import annotations` makes 3.12 store each annotation's source text,
     unevaluated. It is rejected for now: the translator would need that text. Parameter and
-    return annotations, which 3.12 evaluates at the `def`, are not evaluated yet (§5.3).
+    return annotations are evaluated at the `def`, as in 3.12 (§5.3); 3.14 makes them lazy
+    too.
 
 ## 10. Acceptance tests
 
@@ -1063,7 +1070,7 @@ a diagnostic.
 
 | Construct | Section | Status |
 |---|---|---|
-| module body; `def`, nested too, and `lambda`, with positional, positional-only, keyword-only, `*args` and `**kwargs` parameters, defaults and decorators; prologue; `return` | §5.2–§5.5 | specified; implemented |
+| module body; `def`, nested too, and `lambda`, with positional, positional-only, keyword-only, `*args` and `**kwargs` parameters, defaults, annotations and decorators; prologue; `return` | §5.2–§5.5 | specified; implemented |
 | name resolution (all five kinds, mangling, compile-time errors) | §5.1 | specified; implemented (`PyScope.analyze`, CPython 3.12 model) |
 | local names | §5.1 | specified; implemented |
 | cell and free names | §5.1 | specified; implemented |

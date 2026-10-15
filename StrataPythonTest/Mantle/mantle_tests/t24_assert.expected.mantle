@@ -7,14 +7,28 @@ module t24_assert {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("t24_assert", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %str.1 : py.Value = py.strLit("x")
+      %int.0 : py.Value = py.loadGlobal("t24_assert", "int") ^propagate.0()
+      %str.2 : py.Value = py.strLit("return")
+      %none.1 : py.Value = py.noneLit
       %clo.0 : py.Value = py.mkClosure(@t24_assert.validate)
+      %annotations.0 : py.Value = py.mkDict(%str.1, %int.0, %str.2, %none.1) ^propagate.0()
+      %__annotations__.0 : base.Unit = py.setAttr(%clo.0, "__annotations__", %annotations.0) ^propagate.0()
       %validate.cell.0 : base.Ref(py.Value) = py.globalCell("t24_assert", "validate")
       %set.2 : base.Unit = base.refSet[py.Value](%validate.cell.0, %clo.0)
+      %str.3 : py.Value = py.strLit("lo")
+      %int.1 : py.Value = py.loadGlobal("t24_assert", "int") ^propagate.0()
+      %str.4 : py.Value = py.strLit("hi")
+      %int.2 : py.Value = py.loadGlobal("t24_assert", "int") ^propagate.0()
+      %str.5 : py.Value = py.strLit("return")
+      %none.2 : py.Value = py.noneLit
       %clo.1 : py.Value = py.mkClosure(@t24_assert.check_bounds)
+      %annotations.1 : py.Value = py.mkDict(%str.3, %int.1, %str.4, %int.2, %str.5, %none.2) ^propagate.0()
+      %__annotations__.1 : base.Unit = py.setAttr(%clo.1, "__annotations__", %annotations.1) ^propagate.0()
       %check_bounds.cell.0 : base.Ref(py.Value) = py.globalCell("t24_assert", "check_bounds")
       %set.3 : base.Unit = base.refSet[py.Value](%check_bounds.cell.0, %clo.1)
-      %none.1 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      %none.3 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.3)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

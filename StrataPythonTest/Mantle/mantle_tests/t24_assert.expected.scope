@@ -1,5 +1,6 @@
 module
   validate: local (assigned)
+  int: global implicit (referenced)
   check_bounds: local (assigned)
   function validate
     params: x

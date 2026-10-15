@@ -1,5 +1,6 @@
 module top
   check_bounds: local (assigned)
+  int: global implicit (referenced)
   validate: local (assigned)
   function validate
     int: global implicit (referenced)

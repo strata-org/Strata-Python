@@ -8,3 +8,8 @@ r = [x for x in (yield 1)]  # a comprehension's outermost iterable is the module
 def f():
     class D:
         v = yield  # a class body inside a function is still not a function
+def g(x: (yield 1)):  # an annotation is evaluated where the def is
+    pass
+class E:
+    def m(self) -> (yield):
+        pass

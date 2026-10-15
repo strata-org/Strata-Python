@@ -2,7 +2,9 @@ module
   import asyncio: module asyncio
   asyncio: local (imported)
   sync_add: local (assigned, referenced)
+  int: global implicit (referenced)
   async_fetch: local (assigned)
+  str: global implicit (referenced)
   items: local (assigned, referenced)
   doubled: local (assigned)
   result: local (assigned)

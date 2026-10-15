@@ -2,7 +2,9 @@ module
   import asyncio: module asyncio
   asyncio: local (imported)
   fetch_data: local (assigned)
+  str: global implicit (referenced)
   sync_helper: local (assigned)
+  int: global implicit (referenced)
   function fetch_data
     params: url
     url: local (parameter, referenced)

@@ -1,7 +1,9 @@
 module
   log_all: local (assigned, referenced)
+  str: global implicit (referenced)
   create_config: local (assigned, referenced)
   flexible: local (assigned, referenced)
+  int: global implicit (referenced)
   items: local (assigned, referenced)
   params: local (assigned, referenced)
   extra_args: local (assigned, referenced)

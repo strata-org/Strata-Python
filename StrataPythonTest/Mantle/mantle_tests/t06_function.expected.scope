@@ -1,6 +1,8 @@
 module
   add: local (assigned, referenced)
+  int: global implicit (referenced)
   greet: local (assigned, referenced)
+  str: global implicit (referenced)
   result: local (assigned)
   msg: local (assigned)
   msg2: local (assigned)

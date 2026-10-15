@@ -545,6 +545,13 @@ def stmtName : stmt SourceRange → String
   | .TryStar .. => "try/except*"
   | _ => "statement"
 
+/-- The annotated parameters of `args`, each name with its annotation, in the order CPython
+3.12 evaluates them: positional, positional-only, `*args`, keyword-only, then `**kwargs`. -/
+def paramAnnotations (args : arguments SourceRange) : Array (String × expr SourceRange) :=
+  let .mk_arguments _ posOnly pos varPos kwOnly _ varKw _ := args
+  (pos.val ++ posOnly.val ++ varPos.val.toArray ++ kwOnly.val ++ varKw.val.toArray).filterMap
+    fun (.mk_arg _ ⟨_, n⟩ a _) => a.val.map (n, ·)
+
 mutual
 
 /-- The range of the first `yield` or `yield from` an expression evaluates in its own scope. -/
@@ -574,10 +581,8 @@ partial def exprYield? : expr SourceRange → Option SourceRange
 /-- The range of the first `yield` a statement evaluates in its own scope. -/
 partial def stmtYield? : stmt SourceRange → Option SourceRange
   | .FunctionDef _ _ args _ decs ret _ _ | .AsyncFunctionDef _ _ args _ decs ret _ _ =>
-    let .mk_arguments _ posOnly pos varPos kwOnly kwDefaults varKw defaults := args
-    -- CPython 3.12's order: the positional annotations before the positional-only ones.
-    let params := pos.val ++ posOnly.val ++ varPos.val.toArray ++ kwOnly.val ++ varKw.val.toArray
-    let anns := params.filterMap fun (.mk_arg _ _ a _) => a.val
+    let .mk_arguments _ _ _ _ _ kwDefaults _ defaults := args
+    let anns := (paramAnnotations args).map (·.2)
     (decs.val ++ defaults.val ++
       kwDefaults.val.filterMap (fun | .some_expr _ d => some d | _ => none) ++ anns ++
       ret.val.toArray).findSome? exprYield?
@@ -837,7 +842,7 @@ partial def transExpr (e : expr SourceRange) : TransM ValId := withRange e.ann d
     return x
   | .NamedExpr sr .. => unsupportedValue "assignment expression" sr
   | .Lambda sr args body => do
-    match ← closure sr args #[.Return body.ann ⟨body.ann, some body⟩] #[] false false with
+    match ← closure sr args #[.Return body.ann ⟨body.ann, some body⟩] #[] none false false with
     | some f => return f
     | none => standIn "lambda"
   | .IfExp _ c a b => ifExp c a b
@@ -1282,12 +1287,14 @@ partial def kwargsDict (fv : ValId) (kws : Array (keyword SourceRange)) : TransM
 
 /-- The closure of the `def` or `lambda` at `sr`, whose function is queued, or `none` if it is
 rejected, as §5.3 builds it: the decorators are evaluated, then the non-constant defaults
-into default cells.  The closure captures the cells of the function's free variables
-(§6.6), then the default cells.  The decorators are applied to it bottom to top.  An
-`async def` or a generator is queued as a stub. -/
+into default cells, then the annotations, `returns` last.  The closure captures the cells of
+the function's free variables (§6.6), then the default cells.  The annotations are stored in
+its `__annotations__`, then the decorators are applied to it bottom to top.  An `async def`
+or a generator is queued as a stub. -/
 partial def closure (sr : SourceRange) (args : arguments SourceRange)
     (body : Array (stmt SourceRange)) (decorators : Array (expr SourceRange))
-    (hasTypeParams isAsync : Bool) : TransM (Option ValId) := do
+    (returns : Option (expr SourceRange)) (hasTypeParams isAsync : Bool) :
+    TransM (Option ValId) := do
   let ctx ← read
   if hasTypeParams then reject "type parameters" sr; return none
   let some scope ← childScope? sr
@@ -1303,7 +1310,16 @@ partial def closure (sr : SourceRange) (args : arguments SourceRange)
   for p in defaultCellParams args do
     if let some d := p.default then
       defaults := defaults.push (← build (newCell (defaultStem p.name) (← transExpr d)))
+  -- The annotations, keyed by mangled name, as CPython 3.12 evaluates them at the `def`.
+  let mut anns := #[]
+  for (n, a) in paramAnnotations args do
+    anns := anns.push (← build (strLit (← mangled n))) |>.push (← transExpr a)
+  if let some r := returns then
+    anns := anns.push (← build (strLit "return")) |>.push (← transExpr r)
   let some f ← queueFunc sr scope cur (some args) body stub defaults | return none
+  unless anns.isEmpty do
+    let d ← build (emitFailing (.str .base "annotations") Py.mkDict #v[] anns)
+    discard <| build (setAttr f "__annotations__" d)
   some <$> decorate decs f
 
 end
@@ -1423,8 +1439,8 @@ def prologue (ps : Array ParamWithDefault) (defaults : Array (String × ValId))
 /-- `def name(args): body` at `sr`: bind `name` to the function's closure. -/
 def defStmt (sr : SourceRange) (name : String) (args : arguments SourceRange)
     (body : Array (stmt SourceRange)) (decorators : Array (expr SourceRange))
-    (hasTypeParams isAsync : Bool) : TransM Unit := do
-  if let some f ← closure sr args body decorators hasTypeParams isAsync then
+    (returns : Option (expr SourceRange)) (hasTypeParams isAsync : Bool) : TransM Unit := do
+  if let some f ← closure sr args body decorators returns hasTypeParams isAsync then
     writeName name f sr
 
 /-- `class name(bases, kws): body` at `sr` (§6.7): `__build_class__` called on the closure
@@ -1604,8 +1620,8 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
     else if (m.map (·.val)) == some "__future__" && aliases.any (·.name == "annotations") then
       reject "from __future__ import annotations" sr
     else aliases.forM importAlias
-  | .FunctionDef sr ⟨_, n⟩ args body decs _ _ tps =>
-    defStmt sr n args body.val decs.val (!tps.val.isEmpty) false
+  | .FunctionDef sr ⟨_, n⟩ args body decs ⟨_, ret⟩ _ tps =>
+    defStmt sr n args body.val decs.val ret (!tps.val.isEmpty) false
   | .Assert _ test ⟨_, msg⟩ => assertStmt test msg
   | .Raise _ ⟨_, some e⟩ ⟨_, cause⟩ => raiseStmt e cause
   | .Raise _ ⟨_, none⟩ _ =>
@@ -1621,8 +1637,8 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
     match targets.mapM deleter with
     | .error t => badTarget t
     | .ok dels => dels.forM id
-  | .AsyncFunctionDef sr ⟨_, n⟩ args body decs _ _ tps =>
-    defStmt sr n args body.val decs.val (!tps.val.isEmpty) true
+  | .AsyncFunctionDef sr ⟨_, n⟩ args body decs ⟨_, ret⟩ _ tps =>
+    defStmt sr n args body.val decs.val ret (!tps.val.isEmpty) true
   | .ClassDef sr ⟨_, n⟩ bases kws body decs tps =>
     classDef sr n bases.val kws.val body.val decs.val (!tps.val.isEmpty)
   | other => reject (stmtName other) other.ann

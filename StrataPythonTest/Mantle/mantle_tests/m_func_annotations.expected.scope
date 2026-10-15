@@ -1,0 +1,96 @@
+module
+  log: local (assigned)
+  note: local (assigned, referenced)
+  keys: local (assigned, referenced)
+  ordered: local (assigned)
+  plain: local (assigned)
+  enclosing: local (assigned)
+  K: local (assigned)
+  outer: local (assigned)
+  C: local (assigned)
+  scopes: local (assigned)
+  scopes_positional: local (assigned)
+  scopes_keyword: local (assigned)
+  function note
+    params: x
+    x: local (parameter, referenced)
+    log: global implicit (referenced)
+  function keys
+    params: f
+    f: local (parameter, referenced)
+    note: global implicit (referenced)
+    list: global implicit (referenced)
+  function ordered
+    params: p, /, a, *v, k, **kw
+    p: local (parameter)
+    a: local (parameter)
+    k: local (parameter)
+    v: local (parameter)
+    kw: local (parameter)
+  function plain
+    params: x, y
+    x: local (parameter, referenced)
+    y: local (parameter)
+  function enclosing
+    T: local (assigned, referenced)
+    int: global implicit (referenced)
+    f: local (assigned, referenced)
+    function enclosing.<locals>.f
+      params: x
+      x: local (parameter, referenced)
+  class K
+    m: local (assigned)
+    int: global implicit (referenced)
+    str: global implicit (referenced)
+    function K.m
+      params: self, _K__x, *, _K__y
+      self: local (parameter)
+      _K__x: local (parameter)
+      _K__y: local (parameter)
+  function outer
+    T: cell (assigned)
+    int: global implicit (referenced)
+    mid: local (assigned, referenced)
+    function outer.<locals>.mid
+      inner: local (assigned, referenced)
+      T: free (referenced)
+      function outer.<locals>.mid.<locals>.inner
+        params: x
+        x: local (parameter)
+  class C
+    _C__T: local (assigned, referenced)
+    int: global implicit (referenced)
+    m: local (assigned)
+    function C.m
+      params: self, x
+      self: local (parameter)
+      x: local (parameter)
+  lambda <lambda>
+    params: a
+    a: local (parameter, referenced)
+  lambda <lambda>
+    params: b
+    b: local (parameter, referenced)
+  function scopes
+    params: x
+    x: local (parameter)
+  lambda <lambda>
+    params: c
+    c: local (parameter, referenced)
+  lambda <lambda>
+    params: d
+    d: local (parameter, referenced)
+  function scopes_positional
+    params: p, /, q
+    p: local (parameter)
+    q: local (parameter)
+  lambda <lambda>
+    params: f
+    f: local (parameter, referenced)
+  lambda <lambda>
+    params: e
+    e: local (parameter, referenced)
+  function scopes_keyword
+    params: *, k, **kw
+    k: local (parameter)
+    kw: local (parameter)

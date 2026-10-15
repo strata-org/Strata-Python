@@ -1,5 +1,6 @@
 module
   count_up: local (assigned)
+  int: global implicit (referenced)
   normal_func: local (assigned)
   function count_up
     params: n

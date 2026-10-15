@@ -1,5 +1,7 @@
 module top
+  dict: global implicit (referenced)
   dict_iteration: local (assigned)
+  list: global implicit (referenced)
   process_pairs: local (assigned)
   tuple_assign: local (assigned)
   use_enumerate: local (assigned)

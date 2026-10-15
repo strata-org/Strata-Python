@@ -5,6 +5,7 @@ module top
   reraise_bare: local (assigned)
   reraise_example: local (assigned)
   reraise_named: local (assigned)
+  str: global implicit (referenced)
   function fail_hard
     ValueError: global implicit (referenced)
   function reraise_example

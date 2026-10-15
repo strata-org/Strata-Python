@@ -8,6 +8,10 @@
 -- unsupported: yield is not supported at 7:17-7:24
 -- syntax error: 'yield' outside function at 10:12-10:17
 -- unsupported: yield is not supported at 10:12-10:17
+-- syntax error: 'yield' outside function at 11:10-11:17
+-- unsupported: yield is not supported at 11:10-11:17
+-- syntax error: 'yield' outside function at 14:20-14:25
+-- unsupported: yield is not supported at 14:20-14:25
 module e27_yield_outside_function {
   func @|e27_yield_outside_function.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
@@ -52,6 +56,22 @@ module e27_yield_outside_function {
       %clo.1 : py.Value = py.mkClosure(@e27_yield_outside_function.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("e27_yield_outside_function", "f")
       %set.6 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.1)
+      %str.4 : py.Value = py.strLit("x")
+      %str.5 : py.Value = py.strLit("yield")
+      %unsupported.2 : py.Value = py.unsupported(%str.5)
+      %clo.2 : py.Value = py.mkClosure(@e27_yield_outside_function.g)
+      %annotations.0 : py.Value = py.mkDict(%str.4, %unsupported.2) ^propagate.0()
+      %__annotations__.0 : base.Unit = py.setAttr(%clo.2, "__annotations__", %annotations.0) ^propagate.0()
+      %g.cell.0 : base.Ref(py.Value) = py.globalCell("e27_yield_outside_function", "g")
+      %set.7 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.2)
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.3 : py.Value = py.mkClosure(@|e27_yield_outside_function.E.<body>|)
+      %str.6 : py.Value = py.strLit("E")
+      %tuple.1 : py.Value = py.mkTuple(%clo.3, %str.6)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %E.0 : py.Value = py.call(%__build_class__.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %E.cell.0 : base.Ref(py.Value) = py.globalCell("e27_yield_outside_function", "E")
+      %set.8 : base.Unit = base.refSet[py.Value](%E.cell.0, %E.0)
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
@@ -115,6 +135,71 @@ module e27_yield_outside_function {
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
       ret(%exc.1)
   }
+  func @e27_yield_outside_function.g(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %x.1 : py.Value = py.undef("x")
+      %fill.0 : py.Value = py.mkTuple(%x.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("x")
+      %x.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "g() got multiple values for argument 'x'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "g() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "g() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %x.3 : py.Value = py.requireDefined(%x.2, "TypeError", "g() missing 1 required positional argument: 'x'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.3)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|e27_yield_outside_function.E.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("e27_yield_outside_function", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("E")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %str.4 : py.Value = py.strLit("return")
+      %str.5 : py.Value = py.strLit("yield")
+      %unsupported.0 : py.Value = py.unsupported(%str.5)
+      %clo.0 : py.Value = py.mkClosure(@e27_yield_outside_function.E.m)
+      %annotations.0 : py.Value = py.mkDict(%str.4, %unsupported.0) ^propagate.0()
+      %__annotations__.0 : base.Unit = py.setAttr(%clo.0, "__annotations__", %annotations.0) ^propagate.0()
+      %str.6 : py.Value = py.strLit("m")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.6, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
   func @|e27_yield_outside_function.f.D.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
@@ -139,6 +224,38 @@ module e27_yield_outside_function {
       %store.2 : base.Unit = py.setItem(%ns.0, %str.5, %unsupported.0) ^propagate.0()
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @e27_yield_outside_function.E.m(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %self.1 : py.Value = py.undef("self")
+      %fill.0 : py.Value = py.mkTuple(%self.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("self")
+      %self.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "E.m() got multiple values for argument 'self'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "E.m() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "E.m() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %self.3 : py.Value = py.requireDefined(%self.2, "TypeError", "E.m() missing 1 required positional argument: 'self'") ^propagate.0()
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.3)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

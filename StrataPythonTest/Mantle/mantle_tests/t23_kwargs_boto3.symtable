@@ -1,9 +1,11 @@
 module top
   boto3: local (imported, referenced)
   build_and_call: local (assigned)
+  dict: global implicit (referenced)
   iam: local (assigned, referenced)
   put_item: local (assigned)
   put_item_from_dict: local (assigned)
+  str: global implicit (referenced)
   function put_item
     bucket: local (parameter, referenced)
     client: local (parameter, referenced)

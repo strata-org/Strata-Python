@@ -3,9 +3,11 @@ module top
   extra_args: local (assigned, referenced)
   extra_kwargs: local (assigned, referenced)
   flexible: local (assigned, referenced)
+  int: global implicit (referenced)
   items: local (assigned, referenced)
   log_all: local (assigned, referenced)
   params: local (assigned, referenced)
+  str: global implicit (referenced)
   function log_all
     args: local (parameter, referenced)
     item: local (assigned, referenced)

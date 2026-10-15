@@ -3,6 +3,8 @@ module
   C: local (assigned)
   r: local (assigned)
   f: local (assigned)
+  g: local (assigned)
+  E: local (assigned)
   class C
     y: local (assigned)
     z: local (assigned)
@@ -15,9 +17,19 @@ module
     D: local (assigned)
     class f.<locals>.D
       v: local (assigned)
+  function g
+    params: x
+    x: local (parameter)
+  class E
+    m: local (assigned)
+    function E.m
+      params: self
+      self: local (parameter)
 diagnostics:
   syntax error at 3:5-3:12: 'yield' outside function
   syntax error at 5:8-5:13: 'yield' outside function
   syntax error at 6:8-6:20: 'yield from' outside function
   syntax error at 7:17-7:24: 'yield' outside function
   syntax error at 10:12-10:17: 'yield' outside function
+  syntax error at 11:10-11:17: 'yield' outside function
+  syntax error at 14:20-14:25: 'yield' outside function

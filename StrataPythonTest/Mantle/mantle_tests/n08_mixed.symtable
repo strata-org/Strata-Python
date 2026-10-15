@@ -2,8 +2,10 @@ module top
   async_fetch: local (assigned)
   asyncio: local (imported)
   doubled: local (assigned)
+  int: global implicit (referenced)
   items: local (assigned, referenced)
   result: local (assigned)
+  str: global implicit (referenced)
   sync_add: local (assigned, referenced)
   x: local (assigned, referenced, comp_iter)
   function sync_add

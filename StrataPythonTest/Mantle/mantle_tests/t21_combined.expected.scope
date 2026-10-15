@@ -5,14 +5,19 @@ module
   Optional: local (imported)
   ResourceManager: local (assigned, referenced)
   process_items: local (assigned, referenced)
+  list: global implicit (referenced)
+  int: global implicit (referenced)
   mgr: local (assigned, referenced)
   data: local (assigned, referenced)
   total: local (assigned)
   result: local (assigned)
   class ResourceManager
     __init__: local (assigned)
+    str: global implicit (referenced)
     add_resource: local (assigned)
+    bool: global implicit (referenced)
     get_resource: local (assigned)
+    Optional: global implicit (referenced)
     function ResourceManager.__init__
       params: self, name
       self: local (parameter, referenced)

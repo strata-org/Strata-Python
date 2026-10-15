@@ -116,6 +116,7 @@ m_super_named | yes |
 m_super_rebound | yes | super() with super rebound
 m_raise | yes | generator function
 m_generator_yields | yes | generator function, generator function, generator function, generator function, generator function, generator function, generator function, generator function, generator function, generator function, generator function, generator function
+m_func_annotations | yes |
 m_try | yes | try/except*
 m_finally | yes |
 m_with | yes |
@@ -156,7 +157,7 @@ e23_multiple_starred | yes | multiple starred expressions in assignment
 e24_default_except_not_last | yes | default 'except:' must be last
 e25_break_outside_loop | yes | 'break' outside loop
 e26_outside_loop | yes | 'continue' not properly in loop, 'break' outside loop, 'break' outside loop, 'continue' not properly in loop
-e27_yield_outside_function | yes | 'yield' outside function, yield, 'yield' outside function, yield, 'yield from' outside function, yield from, 'yield' outside function, yield, 'yield' outside function, yield
+e27_yield_outside_function | yes | 'yield' outside function, yield, 'yield' outside function, yield, 'yield from' outside function, yield from, 'yield' outside function, yield, 'yield' outside function, yield, 'yield' outside function, yield, 'yield' outside function, yield
 p01_import_dotted | yes |
 p02_import_as | yes |
 p03_from_import | yes |

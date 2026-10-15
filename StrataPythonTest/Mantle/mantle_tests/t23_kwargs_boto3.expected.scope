@@ -2,7 +2,9 @@ module
   import boto3: module boto3
   boto3: local (imported, referenced)
   put_item: local (assigned)
+  str: global implicit (referenced)
   put_item_from_dict: local (assigned)
+  dict: global implicit (referenced)
   build_and_call: local (assigned)
   iam: local (assigned, referenced)
   function put_item

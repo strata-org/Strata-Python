@@ -1,0 +1,80 @@
+module top
+  C: local (assigned)
+  K: local (assigned)
+  enclosing: local (assigned)
+  keys: local (assigned, referenced)
+  log: local (assigned)
+  note: local (assigned, referenced)
+  ordered: local (assigned)
+  outer: local (assigned)
+  plain: local (assigned)
+  scopes: local (assigned)
+  scopes_keyword: local (assigned)
+  scopes_positional: local (assigned)
+  function note
+    log: global implicit (referenced)
+    x: local (parameter, referenced)
+  function keys
+    f: local (parameter, referenced)
+    list: global implicit (referenced)
+    note: global implicit (referenced)
+  function ordered
+    a: local (parameter)
+    k: local (parameter)
+    kw: local (parameter)
+    p: local (parameter)
+    v: local (parameter)
+  function plain
+    x: local (parameter, referenced)
+    y: local (parameter)
+  function enclosing
+    T: local (assigned, referenced)
+    f: local (assigned, referenced)
+    int: global implicit (referenced)
+    function f
+      x: local (parameter, referenced)
+  class K
+    int: global implicit (referenced)
+    m: local (assigned)
+    str: global implicit (referenced)
+    function m
+      _K__x: local (parameter)
+      _K__y: local (parameter)
+      self: local (parameter)
+  function outer
+    T: cell (assigned)
+    int: global implicit (referenced)
+    mid: local (assigned, referenced)
+    function mid
+      T: free (referenced)
+      inner: local (assigned, referenced)
+      function inner
+        x: local (parameter)
+  class C
+    _C__T: local (assigned, referenced)
+    int: global implicit (referenced)
+    m: local (assigned)
+    function m
+      self: local (parameter)
+      x: local (parameter)
+  function lambda
+    a: local (parameter, referenced)
+  function lambda
+    b: local (parameter, referenced)
+  function scopes
+    x: local (parameter)
+  function lambda
+    c: local (parameter, referenced)
+  function lambda
+    d: local (parameter, referenced)
+  function scopes_positional
+    p: local (parameter)
+    q: local (parameter)
+  function lambda
+    f: local (parameter, referenced)
+  function lambda
+    e: local (parameter, referenced)
+  function scopes_keyword
+    k: local (parameter)
+    kw: local (parameter)
+qualnames: <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, C, C.m, K, K.m, enclosing, enclosing.<locals>.f, keys, note, ordered, outer, outer.<locals>.mid, outer.<locals>.mid.<locals>.inner, plain, scopes, scopes_keyword, scopes_positional

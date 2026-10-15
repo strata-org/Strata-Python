@@ -1,7 +1,9 @@
 module
   process_pairs: local (assigned)
+  list: global implicit (referenced)
   use_enumerate: local (assigned)
   dict_iteration: local (assigned)
+  dict: global implicit (referenced)
   tuple_assign: local (assigned)
   function process_pairs
     params: items
