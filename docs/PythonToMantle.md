@@ -313,8 +313,9 @@ The pass also:
   comprehensions, `'yield' inside list/set/dict comprehension` and `'yield' inside
   generator expression`), and the compiler's `keyword argument repeated`, `starred assignment
   target must be in a list or tuple`, `multiple starred expressions in assignment`,
-  `'return' outside function`, `default 'except:' must be last`, `'break' outside loop` and
-  `'continue' not properly in loop`, as `syntaxError` diagnostics;
+  `'return' outside function`, `'yield' outside function` (and `'yield from'`), `default
+  'except:' must be last`, `'break' outside loop` and `'continue' not properly in loop`, as
+  `syntaxError` diagnostics;
 - rejects relative imports, `import *`, `match`, `type` statements and type parameters with
   `unsupported` diagnostics;
 - lists every import in `Table.imports`, separately from the symbols. Each `Import` holds

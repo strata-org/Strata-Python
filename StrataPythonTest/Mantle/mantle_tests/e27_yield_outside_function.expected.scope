@@ -1,0 +1,23 @@
+module
+  x: local (assigned)
+  C: local (assigned)
+  r: local (assigned)
+  f: local (assigned)
+  class C
+    y: local (assigned)
+    z: local (assigned)
+    w: global implicit (referenced)
+  inlined comprehension <listcomp>
+    params: .0
+    .0: local (parameter)
+    x: local (assigned, referenced, comp_iter)
+  function f
+    D: local (assigned)
+    class f.<locals>.D
+      v: local (assigned)
+diagnostics:
+  syntax error at 3:5-3:12: 'yield' outside function
+  syntax error at 5:8-5:13: 'yield' outside function
+  syntax error at 6:8-6:20: 'yield from' outside function
+  syntax error at 7:17-7:24: 'yield' outside function
+  syntax error at 10:12-10:17: 'yield' outside function

@@ -683,8 +683,8 @@ private partial def visitExpr (e : expr SourceRange) : CollectM Unit := do
   | .GeneratorExp sr elt gens =>
     visitComprehension sr .comprehension "<genexpr>" gens.val elt none
   | .Await _ x => visitExpr x
-  | .YieldFrom sr x => visitExpr x; checkYield sr
-  | .Yield sr x => x.val.forM visitExpr; checkYield sr
+  | .YieldFrom sr x => visitExpr x; checkYield "'yield from'" sr
+  | .Yield sr x => x.val.forM visitExpr; checkYield "'yield'" sr
   | .Compare _ l _ rs => visitExpr l; rs.val.forM visitExpr
   | .Call _ f args kws =>
     visitExpr f
@@ -709,10 +709,12 @@ private partial def visitExpr (e : expr SourceRange) : CollectM Unit := do
   | .List _ elts _ | .Tuple _ elts _ => elts.val.forM visitExpr
   | .Slice _ lo hi step => lo.val.forM visitExpr; hi.val.forM visitExpr; step.val.forM visitExpr
 
-/-- `yield` is not allowed in a comprehension or generator expression. -/
-private partial def checkYield (sr : SourceRange) : CollectM Unit := do
+/-- `yield` (`what`) is allowed only in a function, and not in a comprehension or generator
+expression.  CPython's compiler reports the first, its symbol table the second. -/
+private partial def checkYield (what : String) (sr : SourceRange) : CollectM Unit := do
   let p ← curScope
   if p.kind.isComprehension then syntaxError (yieldInComprehension p.name) sr
+  else if p.kind matches .module | .classBody then syntaxError s!"{what} outside function" sr
 
 /-- The defaults of `args`, which the enclosing scope evaluates. -/
 private partial def visitDefaults (args : arguments SourceRange) : CollectM Unit := do
