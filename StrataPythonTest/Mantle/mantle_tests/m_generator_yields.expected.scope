@@ -1,0 +1,81 @@
+module
+  positional_annotation: local (assigned)
+  positional_only_annotation: local (assigned)
+  varargs_annotation: local (assigned)
+  keyword_only_annotation: local (assigned)
+  kwargs_annotation: local (assigned)
+  return_annotation: local (assigned)
+  first_annotation: local (assigned)
+  list_iterable: local (assigned)
+  set_iterable: local (assigned)
+  dict_iterable: local (assigned)
+  generator_iterable: local (assigned)
+  class_decorator_first: local (assigned)
+  function positional_annotation
+    h: local (assigned)
+    function positional_annotation.<locals>.h
+      params: x
+      x: local (parameter)
+  function positional_only_annotation
+    h: local (assigned)
+    function positional_only_annotation.<locals>.h
+      params: x, /
+      x: local (parameter)
+  function varargs_annotation
+    h: local (assigned)
+    function varargs_annotation.<locals>.h
+      params: *a
+      a: local (parameter)
+  function keyword_only_annotation
+    h: local (assigned)
+    function keyword_only_annotation.<locals>.h
+      params: *, b
+      b: local (parameter)
+  function kwargs_annotation
+    h: local (assigned)
+    function kwargs_annotation.<locals>.h
+      params: **k
+      k: local (parameter)
+  function return_annotation
+    h: local (assigned)
+    function return_annotation.<locals>.h
+  function first_annotation
+    h: local (assigned)
+    function first_annotation.<locals>.h
+      params: p, /, a
+      p: local (parameter)
+      a: local (parameter)
+  function list_iterable
+    params: xs
+    xs: local (parameter, referenced)
+    x: local (assigned, referenced, comp_iter)
+    inlined comprehension list_iterable.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+  function set_iterable
+    params: xs
+    xs: local (parameter, referenced)
+    x: local (assigned, referenced, comp_iter)
+    inlined comprehension set_iterable.<locals>.<setcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+  function dict_iterable
+    params: xs
+    xs: local (parameter, referenced)
+    x: local (assigned, referenced, comp_iter)
+    inlined comprehension dict_iterable.<locals>.<dictcomp>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+  function generator_iterable
+    params: xs
+    xs: local (parameter, referenced)
+    generator expression generator_iterable.<locals>.<genexpr>
+      params: .0
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+  function class_decorator_first
+    C: local (assigned)
+    class class_decorator_first.<locals>.C

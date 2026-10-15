@@ -1,0 +1,186 @@
+-- unsupported: generator function is not supported at 5:14-5:21
+-- unsupported: generator function is not supported at 9:14-9:21
+-- unsupported: generator function is not supported at 13:15-13:22
+-- unsupported: generator function is not supported at 17:17-17:24
+-- unsupported: generator function is not supported at 21:16-21:23
+-- unsupported: generator function is not supported at 25:16-25:23
+-- unsupported: generator function is not supported at 29:31-29:38
+-- unsupported: generator function is not supported at 33:24-33:32
+-- unsupported: generator function is not supported at 36:24-36:32
+-- unsupported: generator function is not supported at 39:27-39:35
+-- unsupported: generator function is not supported at 42:24-42:32
+-- unsupported: generator function is not supported at 45:6-45:13
+module m_generator_yields {
+  func @|m_generator_yields.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("m_generator_yields")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_generator_yields", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_generator_yields", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure(@m_generator_yields.positional_annotation)
+      %positional_annotation.cell.0 : base.Ref(py.Value) = py.globalCell("m_generator_yields", "positional_annotation")
+      %set.2 : base.Unit = base.refSet[py.Value](%positional_annotation.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure(@m_generator_yields.positional_only_annotation)
+      %positional_only_annotation.cell.0 : base.Ref(py.Value) = py.globalCell("m_generator_yields", "positional_only_annotation")
+      %set.3 : base.Unit = base.refSet[py.Value](%positional_only_annotation.cell.0, %clo.1)
+      %clo.2 : py.Value = py.mkClosure(@m_generator_yields.varargs_annotation)
+      %varargs_annotation.cell.0 : base.Ref(py.Value) = py.globalCell("m_generator_yields", "varargs_annotation")
+      %set.4 : base.Unit = base.refSet[py.Value](%varargs_annotation.cell.0, %clo.2)
+      %clo.3 : py.Value = py.mkClosure(@m_generator_yields.keyword_only_annotation)
+      %keyword_only_annotation.cell.0 : base.Ref(py.Value) = py.globalCell("m_generator_yields", "keyword_only_annotation")
+      %set.5 : base.Unit = base.refSet[py.Value](%keyword_only_annotation.cell.0, %clo.3)
+      %clo.4 : py.Value = py.mkClosure(@m_generator_yields.kwargs_annotation)
+      %kwargs_annotation.cell.0 : base.Ref(py.Value) = py.globalCell("m_generator_yields", "kwargs_annotation")
+      %set.6 : base.Unit = base.refSet[py.Value](%kwargs_annotation.cell.0, %clo.4)
+      %clo.5 : py.Value = py.mkClosure(@m_generator_yields.return_annotation)
+      %return_annotation.cell.0 : base.Ref(py.Value) = py.globalCell("m_generator_yields", "return_annotation")
+      %set.7 : base.Unit = base.refSet[py.Value](%return_annotation.cell.0, %clo.5)
+      %clo.6 : py.Value = py.mkClosure(@m_generator_yields.first_annotation)
+      %first_annotation.cell.0 : base.Ref(py.Value) = py.globalCell("m_generator_yields", "first_annotation")
+      %set.8 : base.Unit = base.refSet[py.Value](%first_annotation.cell.0, %clo.6)
+      %clo.7 : py.Value = py.mkClosure(@m_generator_yields.list_iterable)
+      %list_iterable.cell.0 : base.Ref(py.Value) = py.globalCell("m_generator_yields", "list_iterable")
+      %set.9 : base.Unit = base.refSet[py.Value](%list_iterable.cell.0, %clo.7)
+      %clo.8 : py.Value = py.mkClosure(@m_generator_yields.set_iterable)
+      %set_iterable.cell.0 : base.Ref(py.Value) = py.globalCell("m_generator_yields", "set_iterable")
+      %set.10 : base.Unit = base.refSet[py.Value](%set_iterable.cell.0, %clo.8)
+      %clo.9 : py.Value = py.mkClosure(@m_generator_yields.dict_iterable)
+      %dict_iterable.cell.0 : base.Ref(py.Value) = py.globalCell("m_generator_yields", "dict_iterable")
+      %set.11 : base.Unit = base.refSet[py.Value](%dict_iterable.cell.0, %clo.9)
+      %clo.10 : py.Value = py.mkClosure(@m_generator_yields.generator_iterable)
+      %generator_iterable.cell.0 : base.Ref(py.Value) = py.globalCell("m_generator_yields", "generator_iterable")
+      %set.12 : base.Unit = base.refSet[py.Value](%generator_iterable.cell.0, %clo.10)
+      %clo.11 : py.Value = py.mkClosure(@m_generator_yields.class_decorator_first)
+      %class_decorator_first.cell.0 : base.Ref(py.Value) = py.globalCell("m_generator_yields", "class_decorator_first")
+      %set.13 : base.Unit = base.refSet[py.Value](%class_decorator_first.cell.0, %clo.11)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_generator_yields.positional_annotation(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %str.0 : py.Value = py.strLit("generator function")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_generator_yields.positional_only_annotation(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %str.0 : py.Value = py.strLit("generator function")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_generator_yields.varargs_annotation(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %str.0 : py.Value = py.strLit("generator function")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_generator_yields.keyword_only_annotation(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %str.0 : py.Value = py.strLit("generator function")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_generator_yields.kwargs_annotation(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %str.0 : py.Value = py.strLit("generator function")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_generator_yields.return_annotation(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %str.0 : py.Value = py.strLit("generator function")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_generator_yields.first_annotation(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %str.0 : py.Value = py.strLit("generator function")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_generator_yields.list_iterable(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %str.0 : py.Value = py.strLit("generator function")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_generator_yields.set_iterable(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %str.0 : py.Value = py.strLit("generator function")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_generator_yields.dict_iterable(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %str.0 : py.Value = py.strLit("generator function")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_generator_yields.generator_iterable(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %str.0 : py.Value = py.strLit("generator function")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_generator_yields.class_decorator_first(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %str.0 : py.Value = py.strLit("generator function")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

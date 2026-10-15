@@ -1,0 +1,59 @@
+module top
+  class_decorator_first: local (assigned)
+  dict_iterable: local (assigned)
+  first_annotation: local (assigned)
+  generator_iterable: local (assigned)
+  keyword_only_annotation: local (assigned)
+  kwargs_annotation: local (assigned)
+  list_iterable: local (assigned)
+  positional_annotation: local (assigned)
+  positional_only_annotation: local (assigned)
+  return_annotation: local (assigned)
+  set_iterable: local (assigned)
+  varargs_annotation: local (assigned)
+  function positional_annotation
+    h: local (assigned)
+    function h
+      x: local (parameter)
+  function positional_only_annotation
+    h: local (assigned)
+    function h
+      x: local (parameter)
+  function varargs_annotation
+    h: local (assigned)
+    function h
+      a: local (parameter)
+  function keyword_only_annotation
+    h: local (assigned)
+    function h
+      b: local (parameter)
+  function kwargs_annotation
+    h: local (assigned)
+    function h
+      k: local (parameter)
+  function return_annotation
+    h: local (assigned)
+    function h
+  function first_annotation
+    h: local (assigned)
+    function h
+      a: local (parameter)
+      p: local (parameter)
+  function list_iterable
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+  function set_iterable
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+  function dict_iterable
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+  function generator_iterable
+    xs: local (parameter, referenced)
+    function genexpr
+      .0: local (parameter)
+      x: local (assigned, referenced, comp_iter)
+  function class_decorator_first
+    C: local (assigned)
+    class C
+qualnames: class_decorator_first, class_decorator_first.<locals>.C, dict_iterable, first_annotation, first_annotation.<locals>.h, generator_iterable, generator_iterable.<locals>.<genexpr>, keyword_only_annotation, keyword_only_annotation.<locals>.h, kwargs_annotation, kwargs_annotation.<locals>.h, list_iterable, positional_annotation, positional_annotation.<locals>.h, positional_only_annotation, positional_only_annotation.<locals>.h, return_annotation, return_annotation.<locals>.h, set_iterable, varargs_annotation, varargs_annotation.<locals>.h

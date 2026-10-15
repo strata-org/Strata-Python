@@ -553,7 +553,9 @@ partial def exprYield? : expr SourceRange → Option SourceRange
   | .Lambda _ (.mk_arguments _ _ _ _ _ kwDefaults _ defaults) _ =>
     (defaults.val ++
       kwDefaults.val.filterMap (fun | .some_expr _ d => some d | _ => none)).findSome? exprYield?
-  | .ListComp .. | .SetComp .. | .DictComp .. | .GeneratorExp .. => none
+  -- A comprehension's outermost iterable is evaluated in the enclosing scope.
+  | .ListComp _ _ gens | .SetComp _ _ gens | .DictComp _ _ _ gens | .GeneratorExp _ _ gens =>
+    gens.val[0]?.bind fun (.mk_comprehension _ _ iter _ _) => exprYield? iter
   | .Constant .. | .Name .. => none
   | .BoolOp _ _ vs | .Set _ vs | .List _ vs _ | .Tuple _ vs _ | .JoinedStr _ vs
   | .TemplateStr _ vs => vs.val.findSome? exprYield?
@@ -571,12 +573,16 @@ partial def exprYield? : expr SourceRange → Option SourceRange
 
 /-- The range of the first `yield` a statement evaluates in its own scope. -/
 partial def stmtYield? : stmt SourceRange → Option SourceRange
-  | .FunctionDef _ _ args _ decs _ _ _ | .AsyncFunctionDef _ _ args _ decs _ _ _ =>
-    let .mk_arguments _ _ _ _ _ kwDefaults _ defaults := args
+  | .FunctionDef _ _ args _ decs ret _ _ | .AsyncFunctionDef _ _ args _ decs ret _ _ =>
+    let .mk_arguments _ posOnly pos varPos kwOnly kwDefaults varKw defaults := args
+    -- CPython 3.12's order: the positional annotations before the positional-only ones.
+    let params := pos.val ++ posOnly.val ++ varPos.val.toArray ++ kwOnly.val ++ varKw.val.toArray
+    let anns := params.filterMap fun (.mk_arg _ _ a _) => a.val
     (decs.val ++ defaults.val ++
-      kwDefaults.val.filterMap (fun | .some_expr _ d => some d | _ => none)).findSome? exprYield?
+      kwDefaults.val.filterMap (fun | .some_expr _ d => some d | _ => none) ++ anns ++
+      ret.val.toArray).findSome? exprYield?
   | .ClassDef _ _ bases kws _ decs _ =>
-    (bases.val ++ kws.val.map (·.value) ++ decs.val).findSome? exprYield?
+    (decs.val ++ bases.val ++ kws.val.map (·.value)).findSome? exprYield?
   | .Return _ v => v.val.bind exprYield?
   | .Raise _ v c => (v.val.toArray ++ c.val.toArray).findSome? exprYield?
   | .Delete _ ts => ts.val.findSome? exprYield?
