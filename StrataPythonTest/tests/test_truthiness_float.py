@@ -1,4 +1,4 @@
-# Pending: analyzer cannot resolve not/and/or with float operands
+# Resolved: the interpreter handles float not/and/or via rational equality.
 # See https://github.com/strata-org/Strata/issues/947
 
 def test_and_float():

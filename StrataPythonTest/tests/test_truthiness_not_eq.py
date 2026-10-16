@@ -1,5 +1,5 @@
-# Pending: analyzer cannot resolve (not x) == y equality assertions
-# for int, float, str, list, dict
+# Resolved: the interpreter can now resolve (not x) == y equality assertions
+# for int, float, str, list, and dict values.
 # See https://github.com/strata-org/Strata/issues/946
 
 def test_not_int():
