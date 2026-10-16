@@ -37,7 +37,7 @@ public section
 
 namespace StrataPython.Mantle.Cli
 
-open StrataPython.Mantle.PyTranslate (translate formatDiagnostic nameText)
+open StrataPython.Mantle.PyTranslate (translate formatDiagnostic)
 
 /-- The suffixes of a Python Ion file, longest first. -/
 private def ionSuffixes : List String := [".python.st.ion", ".py.ion", ".st.ion", ".ion"]
@@ -84,15 +84,8 @@ private def run (path : String) (opts : Strata.Mantle.PrintOptions) : IO UInt32 
   let fileMap := src.map Lean.FileMap.ofString
   let r := translate moduleName stmts
   for d in r.diagnostics do IO.println (formatDiagnostic fileMap d)
-  match r.module.check with
-  | .ok m =>
-    IO.println (m.format opts)
-    return if r.ok then 0 else 1
-  | .error bad =>
-    -- Folding assumes a well-formed module, so an ill-formed one prints in full.
-    IO.println (r.module.format .full)
-    for f in bad do IO.eprintln s!"pymantle mantle: {nameText f} is not well formed"
-    return 1
+  IO.println (r.module.format opts)
+  return if r.ok then 0 else 1
 
 /-- The `mantle` subcommand. -/
 def mantleCommand : _root_.Command where
@@ -100,9 +93,9 @@ def mantleCommand : _root_.Command where
   args := [ "file" ]
   flags := [fullFlag]
   help := "Translate a Python program (a .py file, or a Python Ion file) to Mantle and print \
-    its diagnostics and module. Exit status: 0 if it translated and is well formed, 1 if \
-    there are diagnostics or ill-formed functions, 2 on a parse error. PYTHON selects the \
-    interpreter that parses a .py file (default python3)."
+    its diagnostics and module. Exit status: 0 if it translated, 1 if there are diagnostics, \
+    2 on a parse error. PYTHON selects the interpreter that parses a .py file (default \
+    python3)."
   callback := fun v flags => do
     let code ← run v[0] (printOptions flags)
     unless code == 0 do IO.Process.exit code.toUInt8

@@ -5,6 +5,7 @@
 -/
 module
 public import StrataMantle.IR
+public import StrataMantle.WF
 public import StrataMantle.Util.NameMap
 public import StrataMantle.KindedTypeArgs
 -- Instruction values embed the signature representation, needed at code-generation time.
@@ -40,9 +41,9 @@ The operations:
   control flow;
 * `region`, `regionWith`: emit an operation's nested body, `regionWith` from any monad
   `BuildM` lifts into;
-* `run`: run a builder, taking the function it emitted and the errors it recorded;
-* `build`: the function, or the `Errors` if any was recorded;
-* `Holds`: a property of a build's function, false if the build failed.
+* `run`, `build`: run a builder and check the function it emitted;
+* `stub`: a checked function whose body is `unreachable`, to stand in for one whose build
+  failed.
 
 An application's type arguments, the last parameter of `emitApply`, `emitApplyWith` and
 `terminate`, are a `KindedTypeArgsFor` the instruction, so Lean checks their count and kinds at
@@ -52,7 +53,9 @@ a terminal instruction's, are written `(typeArgs := ta[…])`, as in
 
 Misuse is an error, recorded in the state: an instruction emitted with no block open, a block
 opened while another is open, a block finished when none is open, and a region or function
-body that ends with a block open.  `build` succeeds only if there is none.
+body that ends with a block open.  A build succeeds only if there is none and the function is
+well formed (`Func.WF`), so what it gives is a checked function.  A failed build gives a
+`Failure`, which carries the misuses.
 
 The builder is language-neutral.
 -/
@@ -338,52 +341,143 @@ def region (params : Array (ValDecl env)) (body : BuildM env α Unit)
 /-! ## Finishing -/
 
 /-- The function the state describes.  The first block finished is the entry. -/
-def toFunc (s : State env α) (name : Name) (retType : TypeExpr env) (info : α) :
+private def toFunc (s : State env α) (name : Name) (retType : TypeExpr env) (info : α) :
     Func env α :=
   { name, retType, blocks := s.body.blocks, names := s.names, info }
 
-/-- The errors a failed build recorded: at least one message. -/
-structure Errors where
-  /-- The messages, in the order they were recorded. -/
-  toArray : Array String
-  nonempty : toArray.size ≠ 0
-
-/-- The messages, a line each. -/
-instance : ToString Errors := ⟨fun e => "\n".intercalate e.toArray.toList⟩
-
-/-- What running a builder gives: `value`, and the errors recorded on the way. -/
-structure Built (β : Type) where
+/-- A failed build: the function's name, what the builder returned, and the misuses it
+recorded.  With no misuse, the function is not well formed. -/
+structure Failure (β : Type) where
+  name : Name
   value : β
-  errors : Array String
+  /-- The misuses, in the order they were recorded. -/
+  misuses : Array String
 
-/-- `value` if no error was recorded, and the errors otherwise. -/
-def Built.toExcept {β : Type} (b : Built β) : Except Errors β :=
-  if h : b.errors.size = 0 then .ok b.value else .error ⟨b.errors, h⟩
+/-- The misuses, a line each, or that the function is not well formed. -/
+instance {β : Type} : ToString (Failure β) :=
+  ⟨fun e => if e.misuses.isEmpty then s!"{nameText e.name} is not well formed"
+    else "\n".intercalate e.misuses.toList⟩
 
-/-- Run a builder for the function `name` and take the function it emitted, what the builder
-returned, and the errors recorded, a block left open at the end among them.  `info` annotates
+/-- Run a builder for the function `name` and check the function it emitted: the function
+with its proof and what the builder returned, or the `Failure` if a misuse was recorded, a
+block left open at the end among them, or the function is not well formed.  `info` annotates
 the function, and is the default annotation for everything in it. -/
-def run {β : Type} (name : Name) (retType : TypeExpr env) (info : α)
-    (m : BuildM env α β) : Built (Func env α × β) :=
+def run [base ⊑ env] {β : Type} (name : Name) (retType : TypeExpr env) (info : α)
+    (m : BuildM env α β) : Except (Failure β) ({fn : Func env α // fn.WF} × β) :=
   let (r, s) := (do let r ← m; checkClosed "the function"; return r) (State.init info)
-  ⟨(toFunc s name retType info, r), s.errors⟩
+  let fn := toFunc s name retType info
+  if !s.errors.isEmpty then .error ⟨name, r, s.errors⟩
+  else if h : fn.WF then .ok (⟨fn, h⟩, r)
+  else .error ⟨name, r, #[]⟩
 
-/-- Run a builder and take the function it emitted, or the errors if any was recorded. -/
-def build (name : Name) (retType : TypeExpr env) (info : α)
-    (m : BuildM env α Unit) : Except Errors (Func env α) :=
-  Prod.fst <$> (run name retType info m).toExcept
+/-- `run`, for a builder that returns nothing: the checked function, or the `Failure`. -/
+def build [base ⊑ env] (name : Name) (retType : TypeExpr env) (info : α)
+    (m : BuildM env α Unit) : Except (Failure Unit) {fn : Func env α // fn.WF} :=
+  Prod.fst <$> run name retType info m
 
-/-! ## Checking a result -/
+/-! ## Stubs
 
-/-- `p` holds of the result: false for an error, so both `Holds p` and `Holds (¬ p ·)` fail
-on a failed build.  Decidable, for `decide +kernel` over a build. -/
-@[expose] def Holds {ε β : Type} (p : β → Prop) : Except ε β → Prop
-  | .ok x => p x
-  | .error _ => False
+A front end puts a stub in place of a function whose build failed, so that its module can
+still be checked. -/
 
-instance {ε β : Type} (p : β → Prop) [DecidablePred p] : (e : Except ε β) → Decidable (Holds p e)
-  | .ok x => inferInstanceAs (Decidable (p x))
-  | .error _ => isFalse id
+/-- Inserting at `k` leaves every other key as it was. -/
+private theorem NatTrie.find?_insertAt_ne {β : Type} (x : β) :
+    ∀ (f : Nat) (t : NatTrie β) (k j : Nat), j ≠ k → (t.insertAt x f k).find? j = t.find? j
+  | 0, _, _, _, _ => rfl
+  | _ + 1, .leaf, 0, 0, h | _ + 1, .node .., 0, 0, h => absurd rfl h
+  | _ + 1, .leaf, 0, m + 1, _ | _ + 1, .node .., 0, m + 1, _ => by
+    by_cases hm : m % 2 = 0 <;> simp [NatTrie.insertAt, NatTrie.find?, hm]
+  | _ + 1, .leaf, n + 1, 0, _ | _ + 1, .node .., n + 1, 0, _ => by
+    by_cases hn : n % 2 = 0 <;> simp [NatTrie.insertAt, NatTrie.find?, hn]
+  | f + 1, .leaf, n + 1, m + 1, h => by
+    have ih := NatTrie.find?_insertAt_ne x f .leaf (n / 2) (m / 2)
+    by_cases hn : n % 2 = 0 <;> by_cases hm : m % 2 = 0
+    · simp [NatTrie.insertAt, NatTrie.find?, hn, hm, ih (by omega)]
+    · simp [NatTrie.insertAt, NatTrie.find?, hn, hm]
+    · simp [NatTrie.insertAt, NatTrie.find?, hn, hm]
+    · simp [NatTrie.insertAt, NatTrie.find?, hn, hm, ih (by omega)]
+  | f + 1, .node _ l r, n + 1, m + 1, h => by
+    have ihl := NatTrie.find?_insertAt_ne x f l (n / 2) (m / 2)
+    have ihr := NatTrie.find?_insertAt_ne x f r (n / 2) (m / 2)
+    by_cases hn : n % 2 = 0 <;> by_cases hm : m % 2 = 0
+    · simp [NatTrie.insertAt, NatTrie.find?, hn, hm, ihl (by omega)]
+    · simp [NatTrie.insertAt, NatTrie.find?, hn, hm]
+    · simp [NatTrie.insertAt, NatTrie.find?, hn, hm]
+    · simp [NatTrie.insertAt, NatTrie.find?, hn, hm, ihr (by omega)]
+
+/-- Values with distinct ids, none defined in `ctx`, can all be defined. -/
+private theorem foldlM_define_isSome : ∀ (ds : List (ValDecl env)) (ctx : Ctx env),
+    (ds.map (·.id.id)).Nodup → (∀ d ∈ ds, ctx.types.find? d.id.id = none) →
+      (ds.foldlM Ctx.define? ctx).isSome
+  | [], _, _, _ => rfl
+  | d :: ds, ctx, hnd, hfree => by
+    have hd : ctx.define? d = some ⟨ctx.types.insert d.id.id d.type⟩ := by
+      simp [Ctx.define?, hfree d List.mem_cons_self]
+    rw [List.foldlM_cons, hd]
+    refine foldlM_define_isSome ds _ (List.nodup_cons.mp hnd).2 fun e he => ?_
+    have hne : e.id.id ≠ d.id.id := fun h =>
+      (List.nodup_cons.mp hnd).1 (List.mem_map.mpr ⟨e, he, h⟩)
+    rw [NatTrie.insert, NatTrie.find?_insertAt_ne _ _ _ _ _ hne]
+    exact hfree e (List.mem_cons_of_mem d he)
+
+/-- The number a name ends in, or `0`. -/
+private def numSuffix : Name → Nat
+  | .num _ i => i
+  | _ => 0
+
+/-- A list whose keys are `0, 1, …` in order has no repeats. -/
+private theorem nodup_of_map_eq_range {β : Type} (l : List β) (k : β → Nat)
+    (h : l.map k = List.range l.length) : l.Nodup :=
+  List.Pairwise.of_map k (fun _ _ hk he => hk (congrArg k he)) (h ▸ List.nodup_range)
+
+/-- `unreachable` is well formed anywhere. -/
+private theorem unreachable_wf [base ⊑ env] (ctx : Ctx env) (bs : BlockSigs env) (i : α) :
+    Terminator.WF ctx bs (Terminator.unreachable (env := env) i) := by
+  simp [Terminator.unreachable, Terminator.WF, InsnSig.callWF, BlockValue.AllWF, Agrees,
+    OptHolds, Ctx.typesOf?, InsnSig.operandTypes?, InsnSig.succTypes, InsnSig.regionTypes,
+    Region.WFList, Base.unreachable.sig]
+
+/-- The stub's parameters: parameter `i` is value `i`. -/
+private def stubParams (params : Array (Name × TypeExpr env)) : Array (ValDecl env) :=
+  params.mapIdx fun i p => ⟨⟨i⟩, p.2⟩
+
+/-- The function `stub` gives. -/
+private def stubFunc [base ⊑ env] (name : Name) (params : Array (Name × TypeExpr env))
+    (retType : TypeExpr env) (info : α) : Func env α :=
+  { name, retType, info
+    blocks := #[{ label := ⟨.num (.str .base "entry") 0⟩, params := stubParams params,
+                  instrs := #[], term := .unreachable info, info }]
+    names := params.mapIdx fun i p => .num p.1 i }
+
+private theorem stubFunc_wf [base ⊑ env] (name : Name) (params : Array (Name × TypeExpr env))
+    (retType : TypeExpr env) (info : α) : (stubFunc name params retType info).WF := by
+  have hdefs : (stubFunc name params retType info).defs = (stubParams params).toList := by
+    simp [stubFunc, Func.defs, Block.defsList, Instruction.defsList, Terminator.defs,
+      Terminator.unreachable, Region.defsList]
+  have hids : (stubParams params).toList.map (·.id.id) = List.range params.size :=
+    List.ext_getElem (by simp [stubParams]) (by simp [stubParams])
+  refine ⟨by simp [stubFunc], ?_, ?_, ?_, ?_⟩
+  · show Label.Distinct [Label.exit, ⟨.num (.str .base "entry") 0⟩]
+    decide
+  · refine nodup_of_map_eq_range _ numSuffix (List.ext_getElem (by simp [stubFunc]) ?_)
+    simp [stubFunc, numSuffix]
+  · rw [hdefs, ValDecl.idBound_le_iff]
+    intro d hd
+    have : d.id.id ∈ List.range params.size := hids ▸ List.mem_map_of_mem hd
+    simpa [stubFunc] using this
+  · obtain ⟨ctx, hctx⟩ := Option.isSome_iff_exists.mp
+      (foldlM_define_isSome (stubParams params).toList ∅ (hids ▸ List.nodup_range)
+        fun _ _ => rfl)
+    refine ⟨ctx, by rw [Func.ctx?, hdefs]; exact hctx, fun b hb => ?_⟩
+    obtain rfl : b = _ := by simpa [stubFunc] using hb
+    exact ⟨trivial, unreachable_wf ctx _ info⟩
+
+/-- The stub of the function `name`, which takes `params` and returns `retType`: one block,
+`entry.0`, taking the parameters and ending in `unreachable`.  Parameter `i` is value `i`,
+named `x.i` for its name `x`.  A stub is always well formed. -/
+def stub [base ⊑ env] (name : Name) (params : Array (Name × TypeExpr env))
+    (retType : TypeExpr env) (info : α) : {fn : Func env α // fn.WF} :=
+  ⟨stubFunc name params retType info, stubFunc_wf name params retType info⟩
 
 end Build
 

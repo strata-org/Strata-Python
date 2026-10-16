@@ -9,18 +9,12 @@ public import StrataMantle.DDM
 public import StrataMantle.WF
 public import StrataMantleTest.RegionTest
 import StrataMantle.Env.WF
--- The builder and the printer run as compiled code below.
+-- The builder, the checker and the printer run as compiled code below.
 meta import StrataMantle.Build
 meta import StrataMantle.DDM
+meta import StrataMantle.WF
 meta import StrataMantle.Env.WF
 meta import StrataMantleTest.RegionTest
--- `decide +kernel` unfolds the checker, the environment and core's array operations.
-import all StrataMantle.WF
-import all StrataMantle.Env
-import all StrataMantle.Base
-import all StrataMantle.Build
-import all Init.Data.Array.Basic
-import all Init.Data.Array.DecidableEq
 
 set_option autoImplicit false
 
@@ -36,7 +30,7 @@ reference, and one defined outside the region that uses it.
 namespace Strata.Mantle.PrintFoldTest
 
 open Strata.Mantle.Build (freshVal freshLabel startBlock startBlockWith startFreshBlock
-  emitConst emitApply finishBlock goto build Errors Holds region)
+  emitConst emitApply finishBlock goto build Failure region)
 open Strata.Mantle.RegionTest
 
 private abbrev E := Reg.env
@@ -47,8 +41,11 @@ private def codeT : TypeExpr E := Base.Code.ty
 private def refIntT : TypeExpr E := Base.Ref.ty intT
 private def unitT : TypeExpr E := Base.Unit.ty
 
+/-- What `build` gives: a checked function, or the `Failure`. -/
+private abbrev Built := Except (Failure Unit) {fn : Func E Unit // fn.WF}
+
 /-- `zero` is used three times, `one` once, as a successor's argument, and `unused` never. -/
-private def counter : Except Errors (Func E Unit) :=
+private def counter : Built :=
   build (.str (.str .base "m") "counter") intT () do
     let c ← freshVal (.str .base "c") boolT
     let done ← freshLabel "done"
@@ -64,14 +61,14 @@ private def counter : Except Errors (Func E Unit) :=
     finishBlock (.ret () r)
 
 /-- A reference to `counter`, returned. -/
-private def code : Except Errors (Func E Unit) :=
+private def code : Built :=
   build (.str (.str .base "m") "code") codeT () do
     let _ ← startFreshBlock (base := "entry")
     let f ← emitConst (.str .base "f") (.func (.str (.str .base "m") "counter"))
     finishBlock (.ret () f)
 
 /-- `one` is defined in the entry block and used inside the `then` region. -/
-private def pick : Except Errors (Func E Unit) :=
+private def pick : Built :=
   build (.str (.str .base "m") "pick") intT () do
     let c ← freshVal (.str .base "c") boolT
     let _ ← startFreshBlock #[c] "entry"
@@ -83,8 +80,8 @@ private def pick : Except Errors (Func E Unit) :=
     let r ← emitApply (.str .base "r") intT Reg.«if» #[c.id] (regions := #[thn, els])
     finishBlock (.ret () r)
 
-private def m : Except Errors (Module.Raw E Unit) :=
-  return { name := .str .base "m", funcs := #[← counter, ← code, ← pick], info := () }
+private def m : Except (Failure Unit) (Module.Raw E Unit) :=
+  return { name := .str .base "m", funcs := #[(← counter).1, (← code).1, (← pick).1], info := () }
 
 /-! ## In full -/
 

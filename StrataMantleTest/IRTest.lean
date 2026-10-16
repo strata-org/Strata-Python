@@ -9,12 +9,6 @@ public import StrataMantle.WF
 import StrataMantle.Env.WF
 -- The `#guard`s run the checker as compiled code.
 meta import StrataMantle.WF
--- `decide +kernel` unfolds the checker, the base and core's array operations.
-import all StrataMantle.WF
-import all StrataMantle.Env
-import all StrataMantle.Base
-import all Init.Data.Array.Basic
-import all Init.Data.Array.DecidableEq
 
 set_option autoImplicit false
 
@@ -30,6 +24,11 @@ has to reject.
 -/
 
 namespace Strata.Mantle.IRTest
+
+private def wf {env : Env Unit} [base ⊑ env] (fn : Func env Unit) : Bool := decide fn.WF
+
+private def illFormed {env : Env Unit} [base ⊑ env] (fn : Func env Unit) : Bool :=
+  !decide fn.WF
 
 private def boolT : TypeExpr base := Base.Bool.ty
 private def intT  : TypeExpr base := Base.Int.ty
@@ -235,13 +234,13 @@ example : (m.map (fun _ => 7)).name = m.name := rfl
 
 /-! ## The checker
 
-Every rule the module owes, decided in the kernel. -/
+Every rule a function owes, decided by the compiled checker. -/
 
-example : Func.WF ∅ f := by decide +kernel
+#guard wf f
 
-example : Func.WF ∅ g := by decide +kernel
+#guard wf g
 
-example : Func.WF ∅ h := by decide +kernel
+#guard wf h
 
 /-! ## What it rejects
 
@@ -253,7 +252,7 @@ private def badResult : Func base Unit :=
       .const () (d 1 intT) (.int 0),
       .apply () (d 2 intT) Base.refNew tInt #[⟨1⟩] #[] #[]] }, fBump, fDone] }
 
-example : ¬ Func.WF ∅ badResult := by decide +kernel
+#guard illFormed badResult
 
 /-- An operand that is not the type the signature declares: the cell and the value
 swapped. -/
@@ -262,7 +261,7 @@ private def badOperand : Func base Unit :=
       .const () (d 3 intT) (.int 1),
       .apply () (d 4 unitT) Base.refSet tInt #[⟨3⟩, ⟨2⟩] #[] #[]] }, fDone] }
 
-example : ¬ Func.WF ∅ badOperand := by decide +kernel
+#guard illFormed badOperand
 
 /-- Too few operands for the signature. -/
 private def badArity : Func base Unit :=
@@ -270,20 +269,20 @@ private def badArity : Func base Unit :=
       .const () (d 3 intT) (.int 1),
       .apply () (d 4 unitT) Base.refSet tInt #[⟨2⟩] #[] #[]] }, fDone] }
 
-example : ¬ Func.WF ∅ badArity := by decide +kernel
+#guard illFormed badArity
 
 /-- A transfer to a block that does not exist. -/
 private def badTarget : Func base Unit :=
   { f with blocks :=
       #[{ fEntry with term := .branch () ⟨0⟩ (to "bump") (to "nowhere") }, fBump, fDone] }
 
-example : ¬ Func.WF ∅ badTarget := by decide +kernel
+#guard illFormed badTarget
 
 /-- A transfer that supplies an argument its target does not declare. -/
 private def badArgs : Func base Unit :=
   { f with blocks := #[fEntry, { fBump with term := .jump () ⟨lbl "done", #[⟨3⟩]⟩ }, fDone] }
 
-example : ¬ Func.WF ∅ badArgs := by decide +kernel
+#guard illFormed badArgs
 
 /-- Two definitions of one value id, so there is no context at all. -/
 private def badDefs : Func base Unit :=
@@ -291,7 +290,7 @@ private def badDefs : Func base Unit :=
       .const () (d 1 intT) (.int 1),
       .apply () (d 4 unitT) Base.refSet tInt #[⟨2⟩, ⟨1⟩] #[] #[]] }, fDone] }
 
-example : ¬ Func.WF ∅ badDefs := by decide +kernel
+#guard illFormed badDefs
 
 /-- A successor on an operation that declares none. -/
 private def badHandler : Func base Unit :=
@@ -299,7 +298,7 @@ private def badHandler : Func base Unit :=
       .const () (d 1 intT) (.int 0),
       .apply () (d 2 refIntT) Base.refNew tInt #[⟨1⟩] #[to "done"] #[]] }, fBump, fDone] }
 
-example : ¬ Func.WF ∅ badHandler := by decide +kernel
+#guard illFormed badHandler
 
 /-- A case successor that expects the wrong payload: `ok` carries the value, not the
 error. -/
@@ -309,27 +308,27 @@ private def badArm : Func base Unit :=
           term := .apply () Base.Except.case tStrInt #[⟨1⟩] #[to "err", to "ok"] #[] },
         hOk, hErr] }
 
-/-- Blocks are named, not numbered: reordering the non-entry blocks changes nothing. -/
-example : Func.WF ∅ { h with blocks := #[hEntry, hErr, hOk] } := by decide +kernel
+-- Blocks are named, not numbered: reordering the non-entry blocks changes nothing.
+#guard wf { h with blocks := #[hEntry, hErr, hOk] }
 
 /-- A transfer to the entry block, whose parameters are the function's. -/
 private def badToEntry : Func base Unit :=
   { f with blocks := #[fEntry, { fBump with term := .jump () ⟨lbl "entry", #[⟨0⟩]⟩ }, fDone] }
 
-example : ¬ Func.WF ∅ badToEntry := by decide +kernel
+#guard illFormed badToEntry
 
 /-- Two blocks under one label. -/
 private def badLabels : Func base Unit :=
   { f with blocks := #[fEntry, fBump, { fDone with label := lbl "bump" }] }
 
-example : ¬ Func.WF ∅ badLabels := by decide +kernel
+#guard illFormed badLabels
 
-example : ¬ Func.WF ∅ badArm := by decide +kernel
+#guard illFormed badArm
 
 /-- A function with no entry block. -/
 private def badEmpty : Func base Unit := { f with blocks := #[] }
 
-example : ¬ Func.WF ∅ badEmpty := by decide +kernel
+#guard illFormed badEmpty
 
 /-! ## Constructors are instructions
 
@@ -356,7 +355,7 @@ private def withError (e a : TypeExpr base) (arg : ValId) : Func base Unit :=
       .apply () (d 1 exceptStrIntT) Base.Except.error ⟨#[.ty e, .ty a], rfl⟩ #[arg] #[] #[]] },
       hOk, hErr] }
 
-example : Func.WF ∅ (withError strT intT ⟨0⟩) := by decide +kernel
+#guard wf (withError strT intT ⟨0⟩)
 
 /-- A wrong payload: `error` at `String, Int` takes a `String`, not an `Int`. -/
 private def badPayload : Func base Unit :=
@@ -365,11 +364,11 @@ private def badPayload : Func base Unit :=
       .apply () (d 1 exceptStrIntT) Base.Except.error tStrInt #[⟨0⟩] #[] #[]] },
     hOk, hErr] }
 
-example : ¬ Func.WF ∅ badPayload := by decide +kernel
+#guard illFormed badPayload
 
-/-- Wrong type arguments: at `Int, String` the result is `Except Int String`, which is not
-the type `%1` is declared with. -/
-example : ¬ Func.WF ∅ (withError intT strT ⟨0⟩) := by decide +kernel
+-- Wrong type arguments: at `Int, String` the result is `Except Int String`, which is not
+-- the type `%1` is declared with.
+#guard illFormed (withError intT strT ⟨0⟩)
 
 /-- A constructor with the wrong number of operands. -/
 private def badCtorArity : Func base Unit :=
@@ -378,7 +377,7 @@ private def badCtorArity : Func base Unit :=
       .apply () (d 1 exceptStrIntT) Base.Except.error tStrInt #[⟨0⟩, ⟨0⟩] #[] #[]] },
     hOk, hErr] }
 
-example : ¬ Func.WF ∅ badCtorArity := by decide +kernel
+#guard illFormed badCtorArity
 
 /-- `ok` builds the other successor's value: the case still sends `ok` its payload. -/
 private def hOkVal : Func base Unit :=
@@ -387,7 +386,7 @@ private def hOkVal : Func base Unit :=
       .apply () (d 1 exceptStrIntT) Base.Except.ok tStrInt #[⟨0⟩] #[] #[]] },
     hOk, hErr] }
 
-example : Func.WF ∅ hOkVal := by decide +kernel
+#guard wf hOkVal
 
 /-! ## Terminators
 
@@ -398,79 +397,65 @@ A terminator is a terminal operation, checked as any operation is: a case instru
 private def hWith (term : Terminator base Unit) : Func base Unit :=
   { h with blocks := #[{ hEntry with term }, hOk, hErr] }
 
-/-- A case with a successor too few. -/
-example : ¬ Func.WF ∅ (hWith (.apply () Base.Except.case tStrInt #[⟨1⟩] #[to "ok"] #[]))
-    := by decide +kernel
+-- A case with a successor too few.
+#guard illFormed (hWith (.apply () Base.Except.case tStrInt #[⟨1⟩] #[to "ok"] #[]))
 
-/-- A case with a successor too many. -/
-example : ¬ Func.WF ∅ (hWith
-    (.apply () Base.Except.case tStrInt #[⟨1⟩] #[to "ok", to "err", to "err"] #[])) := by
-  decide +kernel
+-- A case with a successor too many.
+#guard illFormed (hWith
+    (.apply () Base.Except.case tStrInt #[⟨1⟩] #[to "ok", to "err", to "err"] #[]))
 
-/-- A case at the wrong type arguments: at `Int, String` the scrutinee is `Except Int String`,
-and `ok` receives a `String`. -/
-example : ¬ Func.WF ∅ (hWith
-    (.apply () Base.Except.case tIntStr #[⟨1⟩] #[to "ok", to "err"] #[])) := by
-  decide +kernel
+-- A case at the wrong type arguments: at `Int, String` the scrutinee is `Except Int String`,
+-- and `ok` receives a `String`.
+#guard illFormed (hWith
+    (.apply () Base.Except.case tIntStr #[⟨1⟩] #[to "ok", to "err"] #[]))
 
-/-- A case on a value that is not of the datatype. -/
-example : ¬ Func.WF ∅ (hWith
-    (.apply () Base.Except.case tStrInt #[⟨0⟩] #[to "ok", to "err"] #[])) := by
-  decide +kernel
+-- A case on a value that is not of the datatype.
+#guard illFormed (hWith
+    (.apply () Base.Except.case tStrInt #[⟨0⟩] #[to "ok", to "err"] #[]))
 
-/-- A non-terminal operation as a terminator: `refGet` falls through. -/
-example : ¬ Func.WF ∅ { f with blocks := #[fEntry, fBump,
-    { fDone with term := .apply () Base.refGet tInt #[⟨2⟩] #[] #[] }] } := by
-  decide +kernel
+-- A non-terminal operation as a terminator: `refGet` falls through.
+#guard illFormed { f with blocks := #[fEntry, fBump,
+    { fDone with term := .apply () Base.refGet tInt #[⟨2⟩] #[] #[] }] }
 
 /-- `jump`, applied as an instruction. -/
 private def jumpInsn : Instruction base Unit :=
   .apply () (d 6 unitT) Base.jump ⟨#[], rfl⟩ #[] #[to "done"] #[]
 
-/-- A terminal operation as an instruction: `jump` never falls through. -/
-example : ¬ Func.WF ∅ { f with blocks := #[fEntry,
-    { fBump with instrs := fBump.instrs.push jumpInsn }, fDone] } := by
-  decide +kernel
+-- A terminal operation as an instruction: `jump` never falls through.
+#guard illFormed { f with blocks := #[fEntry,
+    { fBump with instrs := fBump.instrs.push jumpInsn }, fDone] }
 
 /-- `ret` is a jump to `Label.exit`, passing the result. -/
 example : (Terminator.ret () ⟨5⟩ : Terminator base Unit) = .jump () ⟨Label.exit, #[⟨5⟩]⟩ := rfl
 
-/-- `ret` written out as a jump to the exit is accepted as `ret` is. -/
-example : Func.WF ∅ { f with blocks := #[fEntry, fBump,
-    { fDone with term := .apply () Base.jump ⟨#[], rfl⟩ #[] #[⟨Label.exit, #[⟨5⟩]⟩] #[] }] } := by
-  decide +kernel
+-- `ret` written out as a jump to the exit is accepted as `ret` is.
+#guard wf { f with blocks := #[fEntry, fBump,
+    { fDone with term := .apply () Base.jump ⟨#[], rfl⟩ #[] #[⟨Label.exit, #[⟨5⟩]⟩] #[] }] }
 
-/-- A jump to the exit with a value of the wrong type: `%2` is the cell, not an `Int`. -/
-example : ¬ Func.WF ∅ { f with blocks := #[fEntry, fBump, { fDone with term := .ret () ⟨2⟩ }] }
-    := by decide +kernel
+-- A jump to the exit with a value of the wrong type: `%2` is the cell, not an `Int`.
+#guard illFormed { f with blocks := #[fEntry, fBump, { fDone with term := .ret () ⟨2⟩ }] }
 
-/-- A jump to the exit with no value. -/
-example : ¬ Func.WF ∅ { f with blocks := #[fEntry, fBump,
-    { fDone with term := .jump () ⟨Label.exit, #[]⟩ }] } := by
-  decide +kernel
+-- A jump to the exit with no value.
+#guard illFormed { f with blocks := #[fEntry, fBump,
+    { fDone with term := .jump () ⟨Label.exit, #[]⟩ }] }
 
 /-- A block no transfer names, under `l`. -/
 private def spare (l : Label) : Block base Unit :=
   { label := l, params := #[], instrs := #[], term := .unreachable (), info := () }
 
-example : Func.WF ∅ { f with blocks := f.blocks.push (spare (lbl "spare")) } := by
-  decide +kernel
+#guard wf { f with blocks := f.blocks.push (spare (lbl "spare")) }
 
-/-- A block labelled with the exit, even one no transfer names. -/
-example : ¬ Func.WF ∅ { f with blocks := f.blocks.push (spare Label.exit) } := by
-  decide +kernel
+-- A block labelled with the exit, even one no transfer names.
+#guard illFormed { f with blocks := f.blocks.push (spare Label.exit) }
 
-example : ¬ Func.WF ∅ { f with blocks := #[{ fEntry with label := Label.exit }, fBump, fDone] }
-    := by decide +kernel
+#guard illFormed { f with blocks := #[{ fEntry with label := Label.exit }, fBump, fDone] }
 
-/-- `unreachable` takes nothing and goes nowhere. -/
-example : Func.WF ∅ { f with blocks := #[fEntry, fBump, { fDone with term := .unreachable () }] }
-    := by decide +kernel
+-- `unreachable` takes nothing and goes nowhere.
+#guard wf { f with blocks := #[fEntry, fBump, { fDone with term := .unreachable () }] }
 
-/-- `branch` takes a `Bool`: `%2` is the cell. -/
-example : ¬ Func.WF ∅ { f with blocks :=
-    #[{ fEntry with term := .branch () ⟨2⟩ (to "bump") (to "done") }, fBump, fDone] } := by
-  decide +kernel
+-- `branch` takes a `Bool`: `%2` is the cell.
+#guard illFormed { f with blocks :=
+    #[{ fEntry with term := .branch () ⟨2⟩ (to "bump") (to "done") }, fBump, fDone] }
 
 /-! ## Function references
 

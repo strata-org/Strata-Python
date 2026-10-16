@@ -10,14 +10,7 @@ import StrataMantle.Env.WF
 -- The `#guard`s below run as compiled code.
 meta import StrataPython.Mantle.Env
 meta import StrataMantle.Env.WF
--- `decide +kernel` unfolds the checker, the environment and core's array operations.
-import all StrataMantle.WF
-import all StrataMantle.Env
-import all StrataMantle.Base
-import all StrataMantle.Build
-import all StrataPython.Mantle.Env
-import all Init.Data.Array.Basic
-import all Init.Data.Array.DecidableEq
+meta import StrataMantle.WF
 
 set_option autoImplicit false
 
@@ -33,6 +26,10 @@ and a completion dispatch.  Ill-formed variants check what the checker rejects.
 namespace StrataPython.Mantle.PyEnvTest
 
 open Strata.Mantle
+
+private def wf (fn : Func Py.env Unit) : Bool := decide fn.WF
+
+private def illFormed (fn : Func Py.env Unit) : Bool := !decide fn.WF
 
 /-- The value `%n`, of type `t`. -/
 private def d (n : Nat) (t : TypeExpr Py.env) : ValDecl Py.env := ⟨⟨n⟩, t⟩
@@ -100,7 +97,7 @@ private def fWith (box op : Instruction Py.env Unit) (ok : Instruction Py.env Un
 
 private def f : Func Py.env Unit := fWith box (op3 Py.add ⟨#[], rfl⟩ #[0, 2])
 
-example : Func.WF ∅ f := by decide +kernel
+#guard wf f
 
 /-! ## `def g(x): return 1 if x else 2`
 
@@ -148,32 +145,29 @@ private def g : Func Py.env Unit where
   names   := (Array.range 10).map (Name.num .base ·)
   info    := ()
 
-example : Func.WF ∅ g := by decide +kernel
+#guard wf g
 
 /-! ## What the checker catches
 
 An operand of the wrong type, a handler where none is declared or none where one is, a
 result of the wrong type, and the wrong number of operands. -/
 
-/-- `add` applied to the base integer rather than to the boxed Python value. -/
-example : ¬ Func.WF ∅ (fWith box (op3 Py.add ⟨#[], rfl⟩ #[0, 1])) := by decide +kernel
+-- `add` applied to the base integer rather than to the boxed Python value.
+#guard illFormed (fWith box (op3 Py.add ⟨#[], rfl⟩ #[0, 1]))
 
-/-- A handler on `intLit`, which cannot fail. -/
-example : ¬ Func.WF ∅ (fWith
+-- A handler on `intLit`, which cannot fail.
+#guard illFormed (fWith
     (.apply () (d 2 Py.Value.ty) Py.intLit ⟨#[], rfl⟩ #[⟨1⟩] #[to "propagate"] #[])
-    (op3 Py.add ⟨#[], rfl⟩ #[0, 2])) := by
-  decide +kernel
+    (op3 Py.add ⟨#[], rfl⟩ #[0, 2]))
 
-/-- `add` with no handler: it declares an `err` successor, so a use site must name one. -/
-example : ¬ Func.WF ∅ (fWith box (op3 Py.add ⟨#[], rfl⟩ #[0, 2] (ks := #[]))) := by decide +kernel
+-- `add` with no handler: it declares an `err` successor, so a use site must name one.
+#guard illFormed (fWith box (op3 Py.add ⟨#[], rfl⟩ #[0, 2] (ks := #[])))
 
-/-- `add`'s result is the success type, not `Except`. -/
-example :
-    ¬ Func.WF ∅ (fWith box (op3 Py.add ⟨#[], rfl⟩ #[0, 2] (t := Py.failing.ty)) (mkOk 4 2)) := by
-  decide +kernel
+-- `add`'s result is the success type, not `Except`.
+#guard illFormed (fWith box (op3 Py.add ⟨#[], rfl⟩ #[0, 2] (t := Py.failing.ty)) (mkOk 4 2))
 
-/-- Two operands for a unary operation. -/
-example : ¬ Func.WF ∅ (fWith box (op3 Py.uSub ⟨#[], rfl⟩ #[0, 2])) := by decide +kernel
+-- Two operands for a unary operation.
+#guard illFormed (fWith box (op3 Py.uSub ⟨#[], rfl⟩ #[0, 2]))
 
 /-! ## Variadic operations
 
@@ -184,12 +178,10 @@ example : ¬ Func.WF ∅ (fWith box (op3 Py.uSub ⟨#[], rfl⟩ #[0, 2])) := by 
 #guard ((Py.mkClosure.sig (e := Py.env)).variadic.map (·.name)) == some "cells"
 #guard ((Py.strConcat.sig (e := Py.env)).variadic.map (·.name)) == some "parts"
 
-example : Func.WF ∅ (fWith box (op3 Py.mkTuple ⟨#[], rfl⟩ #[0, 2, 0] (ks := #[]))) := by
-  decide +kernel
+#guard wf (fWith box (op3 Py.mkTuple ⟨#[], rfl⟩ #[0, 2, 0] (ks := #[])))
 
-/-- A variadic run is still typed: a base integer is not a Python value. -/
-example : ¬ Func.WF ∅ (fWith box (op3 Py.mkTuple ⟨#[], rfl⟩ #[0, 1] (ks := #[]))) := by
-  decide +kernel
+-- A variadic run is still typed: a base integer is not a Python value.
+#guard illFormed (fWith box (op3 Py.mkTuple ⟨#[], rfl⟩ #[0, 1] (ks := #[])))
 
 /-! ## `py.Completion`'s constructors
 
@@ -231,13 +223,12 @@ private def compFunc : Func Py.env Unit where
   names   := (Array.range 10).map (Name.num .base ·)
   info    := ()
 
-example : Func.WF ∅ compFunc := by decide +kernel
+#guard wf compFunc
 
-/-- `completionReturn` takes its payload: one with none is rejected. -/
-example : ¬ Func.WF ∅ { compFunc with blocks := compFunc.blocks.set! 0 { compBlock with
-    instrs := #[.apply () (d 1 Py.Completion.ty) Py.Completion.completionReturn ⟨#[], rfl⟩ #[]
-      #[] #[]] } } := by
-  decide +kernel
+-- `completionReturn` takes its payload: one with none is rejected.
+#guard illFormed { compFunc with blocks := compFunc.blocks.setIfInBounds 0 { compBlock with
+    instrs := #[.apply () (d 1 Py.Completion.ty) Py.Completion.completionReturn ⟨#[], rfl⟩ #[] #[]
+      #[]] } }
 
 /-! ## Membership
 

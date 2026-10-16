@@ -8,20 +8,12 @@ public import StrataMantle.DDM
 public import StrataMantle.WF
 public import StrataPython.Mantle.Build
 import StrataMantle.Env.WF
--- The builder and the printer run as compiled code below.
+-- The builder, the checker and the printer run as compiled code below.
 meta import StrataMantle.DDM
+meta import StrataMantle.WF
 meta import StrataPython.Mantle.Build
 meta import StrataPythonTest.Mantle.TestUtil
 meta import StrataMantle.Env.WF
--- `decide +kernel` unfolds the checker, the environment and core's array operations.
-import all StrataMantle.WF
-import all StrataMantle.Env
-import all StrataMantle.Base
-import all StrataMantle.Build
-import all StrataPython.Mantle.Env
-import all StrataPython.Mantle.Build
-import all Init.Data.Array.Basic
-import all Init.Data.Array.DecidableEq
 
 set_option autoImplicit false
 
@@ -38,9 +30,18 @@ namespace StrataPython.Mantle.PyBuildTest
 
 open Strata.Mantle
 
-open Strata.Mantle.Build (Errors Holds)
+open Strata.Mantle.Build (Failure)
 
 open StrataPython.Mantle.PyBuild
+
+/-- What `buildFunc` gives: a checked function, or the `Failure`. -/
+private abbrev Built := Except (Failure Unit) {fn : Func Py.env Unit // fn.WF}
+
+/-- The build failed because its function is not well formed, not by a misuse. -/
+private def rejected (b : Built) : Bool :=
+  match b with
+  | .error e => e.misuses.isEmpty
+  | .ok _ => false
 
 /-- The label `freshLabel base` hands out `n`-th. -/
 private def lbl (base : String) (n : Nat) : Label := ⟨.num (.str .base base) n⟩
@@ -57,16 +58,13 @@ The local `y` is a cell: the assignment is a `refSet` and the read a `refGet`.  
 raise, so it reports to the handler `buildFunc` installs, which returns the failure to
 the caller. -/
 
-private def f : Except Errors (Func Py.env Unit) :=
+private def f : Built :=
   buildFunc (Py.pn "f") #["x"] () fun args => do
     let y ← declareLocal "y"
     let _ ← writeCell y (← emitFailing (.str .base "sum") Py.add #[args[0]!, ← intLit 1])
     emitReturn (← readCell y (stem "y"))
 
-example : Holds (Func.WF ∅) f := by decide +kernel
-
-/-- `f`'s only failing operation reports to the handler `buildFunc` installs. -/
-example : Holds (errTargets · = #[lbl "propagate" 0]) f := by decide +kernel
+#guard f.isOk
 
 /-- info: module py.f {
   func @py.f(%x.0 : py.Value) -> base.Except(py.Value, py.Value) {
@@ -85,19 +83,19 @@ example : Holds (errTargets · = #[lbl "propagate" 0]) f := by decide +kernel
   }
 } -/
 #guard_msgs in
-#eval do IO.println ((← IO.ofExcept f).format {})
+#eval do IO.println ((← IO.ofExcept f).1.format {})
 
 /-! ## `def g(): pass`
 
 Falling off the end returns `None`.  The handler is emitted even though nothing reaches
 it. -/
 
-private def g : Except Errors (Func Py.env Unit) :=
+private def g : Built :=
   buildFunc (Py.pn "g") #[] () fun _ => emitReturnNone
 
-example : Holds (Func.WF ∅) g := by decide +kernel
+#guard g.isOk
 
-example : Holds (·.blocks.size = 2) g := by decide +kernel
+#guard (g.toOption.map (·.1.blocks.size)) == some 2
 
 /-! ## `def h(x):` / `try: return x.foo` / `except: return None`
 
@@ -106,7 +104,7 @@ caller.  The exception arrives as that block's parameter, supplied by the `err`
 successor. -/
 
 /-- `h`, whose `except` block declares the exception if `takesExc`. -/
-private def hWith (takesExc : Bool) : Except Errors (Func Py.env Unit) :=
+private def hWith (takesExc : Bool) : Built :=
   buildFunc (Py.pn "h") #["x"] () fun args => do
     let except ← freshLabel
     withHandler except do emitReturn (← getAttr args[0]! "foo")
@@ -114,32 +112,29 @@ private def hWith (takesExc : Bool) : Except Errors (Func Py.env Unit) :=
     if takesExc then discard <| startBlockWith except (.str .base "exc") else startBlock except
     emitReturnNone
 
-private def h : Except Errors (Func Py.env Unit) := hWith true
+private def h : Built := hWith true
 
-example : Holds (Func.WF ∅) h := by decide +kernel
+#guard h.isOk
 
-/-- Three blocks: the body, the `except` block, and the propagating handler `buildFunc`
-installs.  The last is unreachable here, because nothing outside the `try` can fail. -/
-example : Holds (·.blocks.size = 3) h := by decide +kernel
+-- The blocks in the order they were finished: the body, the `except` block, and the
+-- propagating handler `buildFunc` installs.  The last is unreachable here, because nothing
+-- outside the `try` can fail.
+#guard (h.toOption.map (·.1.blocks.map (·.label))) ==
+  some #[lbl "entry" 0, lbl "bb" 0, lbl "propagate" 0]
 
-/-- The `attr` failure goes to the `except` block, `bb.0`, not to the caller's handler. -/
-example : Holds (errTargets · = #[lbl "bb" 0]) h := by decide +kernel
+-- The `attr` failure goes to the `except` block, `bb.0`, not to the caller's handler.
+#guard (h.toOption.map (errTargets ·.1)) == some #[lbl "bb" 0]
 
-/-- The blocks in the order they were finished: the body, `except`, then `propagate`. -/
-example :
-    Holds (·.blocks.map (·.label) = #[lbl "entry" 0, lbl "bb" 0, lbl "propagate" 0]) h := by
-  decide +kernel
-
-/-- A handler must take the exception: `err` supplies it to its target, so an `except`
-block that declares no parameter is ill formed. -/
-example : Holds (¬ Func.WF ∅ ·) (hWith false) := by decide +kernel
+-- A handler must take the exception: `err` supplies it to its target, so an `except`
+-- block that declares no parameter is ill formed.
+#guard rejected (hWith false)
 
 /-! ## `raise x` under a handler with a pre-bound argument
 
 `raiseTo e` passes `e` after the arguments the enclosing handler pre-binds, as an `err`
 successor does.  Here the handler `bb.0(c, exc)` pre-binds `c` to `None`. -/
 
-private def r : Except Errors (Func Py.env Unit) :=
+private def r : Built :=
   buildFunc (Py.pn "r") #["x"] () fun args => do
     let k ← freshLabel
     let c ← noneLit
@@ -149,7 +144,7 @@ private def r : Except Errors (Func Py.env Unit) :=
     startBlock k #[pc, pe]
     emitReturn pe.id
 
-example : Holds (Func.WF ∅) r := by decide +kernel
+#guard r.isOk
 
 /-- Whether the entry block jumps with two arguments, the second its parameter `x`. -/
 private def raisesX (fn : Func Py.env Unit) : Bool :=
@@ -158,8 +153,8 @@ private def raisesX (fn : Func Py.env Unit) : Bool :=
     let args := ks.flatMap (·.args)
     args.size == 2 && args[1]? == (b.params.map (·.id))[0]?
 
-/-- The entry block jumps to `bb.0` with `None`, then `x`. -/
-example : Holds (raisesX · = true) r := by decide +kernel
+-- The entry block jumps to `bb.0` with `None`, then `x`.
+#guard r.toOption.any (raisesX ·.1)
 
 /-! ## `try` / `finally`, by completion
 
@@ -178,7 +173,7 @@ where the completion is a `return`.  A failure in the cleanup goes to `supersede
 restores the exception handled before and raises to the enclosing handler, so it supersedes
 what was pending. -/
 
-private def k : Except Errors (Func Py.env Unit) :=
+private def k : Built :=
   buildFunc (Py.pn "k") #["x"] () fun args => do
     let #[x] := args | return
     discard <| tryFinally
@@ -188,20 +183,20 @@ private def k : Except Errors (Func Py.env Unit) :=
               «return» := .block "ret" emitReturn
               raise := .block "raise" emitPropagate })
 
-example : Holds (Func.WF ∅) k := by decide +kernel
+#guard k.isOk
 
 -- The cleanup body appears once: block 2, between `pushPending` and `popExcept`, then the
 -- dispatch.
-#guard Holds (fun k => (k.blocks.map (·.instrs.size))[2]? = some 4) k
+#guard (k.toOption.map fun k => (k.1.blocks.map (·.instrs.size))[2]?) == some (some 4)
 
 -- Ten blocks: the entry, `finRaise` and `fin`; the five successors of the dispatch,
 -- `return` and `raise` taking their payload and fall-through, `break` and `continue` taking
 -- none; `superseded`; and `buildFunc`'s propagating handler.
-#guard Holds (·.blocks.size = 10) k
+#guard (k.toOption.map (·.1.blocks.size)) == some 10
 
 /-- A `finally` body that always leaves by itself, here by returning, emits no dispatch: only
 the entry, `finRaise`, `fin`, `superseded` and the propagating handler. -/
-private def kReturns : Except Errors (Func Py.env Unit) :=
+private def kReturns : Built :=
   buildFunc (Py.pn "k") #["x"] () fun args => do
     let #[x] := args | return
     discard <| tryFinally
@@ -211,13 +206,13 @@ private def kReturns : Except Errors (Func Py.env Unit) :=
         emitReturnNone)
       (pure { normal := .unreachable, «return» := .unreachable, raise := .unreachable })
 
-example : Holds (Func.WF ∅) kReturns := by decide +kernel
+#guard kReturns.isOk
 
-#guard Holds (·.blocks.size = 5) kReturns
+#guard (kReturns.toOption.map (·.1.blocks.size)) == some 5
 
 /-- Under a handler `bb.0(c, exc)` that pre-binds `c`, a failure in the cleanup reaches
 `superseded.0`, which raises to `bb.0` with `c`, then the failure. -/
-private def kBound : Except Errors (Func Py.env Unit) :=
+private def kBound : Built :=
   buildFunc (Py.pn "k") #["x"] () fun args => do
     let #[x] := args | return
     let h ← freshLabel
@@ -240,9 +235,9 @@ private def supersededPassesExc (fn : Func Py.env Unit) : Bool :=
     b.label == lbl "superseded" 0 && ks.map (·.target) == #[lbl "bb" 0] &&
       args.size == 2 && args[1]? == (b.params.map (·.id))[0]?
 
-example : Holds (Func.WF ∅) kBound := by decide +kernel
+#guard kBound.isOk
 
-#guard Holds (supersededPassesExc ·) kBound
+#guard kBound.toOption.any (supersededPassesExc ·.1)
 
 /-- info: module py.k {
   func @py.k(%x.0 : py.Value) -> base.Except(py.Value, py.Value) {
@@ -281,7 +276,7 @@ example : Holds (Func.WF ∅) kBound := by decide +kernel
   }
 } -/
 #guard_msgs in
-#eval do IO.println ((← IO.ofExcept k).format {})
+#eval do IO.println ((← IO.ofExcept k).1.format {})
 
 /-! ## A closure
 
@@ -290,17 +285,17 @@ example : Holds (Func.WF ∅) kBound := by decide +kernel
         return x          # captures `x` by cell, read late
       return inner
 
-`inner` is a function of the module: `emitFunc` names it, and the checker verifies that
-the module defines it.  `mkClosure` pairs the code with the cell holding `x`.  The two
+`inner` is a function of the module: `emitFunc` names it, and the module's check verifies
+that the module defines it.  `mkClosure` pairs the code with the cell holding `x`.  The two
 functions are printed as a module. -/
 
-private def inner : Except Errors (Func Py.env Unit) :=
+private def inner : Built :=
   buildFuncTyped (Py.pn "inner") #[(cellStem "x", Py.cell.ty)] () fun args => do
     emitReturn (← readCell args[0]! (stem "x"))
 
 /-- `outer`, whose closure names `target` and captures the cell holding `x`, or `x` itself if
 `byValue`. -/
-private def outerWith (target : Name) (byValue : Bool) : Except Errors (Func Py.env Unit) :=
+private def outerWith (target : Name) (byValue : Bool) : Built :=
   buildFunc (Py.pn "outer") #["x"] () fun args => do
     let cell ← declareLocal "x"
     let _ ← writeCell cell args[0]!
@@ -309,10 +304,12 @@ private def outerWith (target : Name) (byValue : Bool) : Except Errors (Func Py.
 /-- The module of `outer`, whose closure names `target` and captures `x` as `outerWith` does,
 and `inner`. -/
 private def closuresWith (target : Name) (byValue : Bool) :
-    Except Errors (Module.Raw Py.env Unit) :=
-  return { name := Py.pn "closures", funcs := #[← outerWith target byValue, ← inner], info := () }
+    Except (Failure Unit) (Module.Raw Py.env Unit) :=
+  return { name := Py.pn "closures", funcs := #[(← outerWith target byValue).1, (← inner).1],
+           info := () }
 
-private def closures : Except Errors (Module.Raw Py.env Unit) := closuresWith (Py.pn "inner") false
+private def closures : Except (Failure Unit) (Module.Raw Py.env Unit) :=
+  closuresWith (Py.pn "inner") false
 
 -- No name has a `.` inside a segment: `x.cell` is two segments.
 #guard match closures with | .ok m => (TestUtil.dottedNames m).isEmpty | .error _ => false
@@ -346,12 +343,26 @@ private def closures : Except Errors (Module.Raw Py.env Unit) := closuresWith (P
   | .ok m => IO.println m
   | .error bad => IO.println s!"not well formed: {bad.map ToDDM.nameText}"
 
--- A code pointer to a function the module does not define.
-#guard decide (Holds (¬ Module.Raw.WF ·) (closuresWith (Py.pn "nonesuch") false))
+/-! A code pointer to a function the module does not define: each function is well formed on
+its own, and the module names the one with the dangling reference. -/
+
+/-- info: not well formed: #[py.outer] -/
+#guard_msgs in
+#eval do
+  match (← IO.ofExcept (closuresWith (Py.pn "nonesuch") false)).check with
+  | .ok _ => IO.println "well formed"
+  | .error bad => IO.println s!"not well formed: {bad.map ToDDM.nameText}"
+
+-- Assembled from the checked functions, the module is rejected the same way.
+#guard match outerWith (Py.pn "nonesuch") false, inner with
+  | .ok o, .ok i => match Module.ofChecked (Py.pn "closures") #[o, i] () with
+    | .error bad => bad == #[Py.pn "outer"]
+    | .ok _ => false
+  | _, _ => false
 
 -- A closure captures cells, so that a late read sees a late write.  Passing the value
 -- instead is ill typed.
-#guard decide (Holds (¬ Module.Raw.WF ·) (closuresWith (Py.pn "inner") true))
+#guard rejected (outerWith (Py.pn "inner") true)
 
 /-! ## Globals and imports
 
@@ -363,7 +374,7 @@ private def closures : Except Errors (Module.Raw Py.env Unit) := closuresWith (P
 A module body, so every name is a global of module `m`.  `import a.b` imports `a.b` and binds
 the package `a`; the other two bind what they import. -/
 
-private def globals : Except Errors (Func Py.env Unit) :=
+private def globals : Built :=
   buildFunc (Py.pn "<module>") #[] () fun _ => do
     let _ ← importModule "a.b"
     let _ ← writeGlobal "m" "a" (← importModule "a")
@@ -374,7 +385,7 @@ private def globals : Except Errors (Func Py.env Unit) :=
     let _ ← writeGlobal "m" "n" sum
     emitReturnNone
 
-example : Holds (Func.WF ∅) globals := by decide +kernel
+#guard globals.isOk
 
 /-- info: module |py.<module>| {
   func @|py.<module>|() -> base.Except(py.Value, py.Value) {
@@ -403,7 +414,7 @@ example : Holds (Func.WF ∅) globals := by decide +kernel
   }
 } -/
 #guard_msgs in
-#eval do IO.println ((← IO.ofExcept globals).format {})
+#eval do IO.println ((← IO.ofExcept globals).1.format {})
 
 /-! ## A function named like an operation
 
@@ -416,13 +427,13 @@ so neither reads as the operation `py.add`. -/
 
 private def mAdd : Name := .str (.str .base "m") "add"
 
-private def addFn : Except Errors (Func Py.env Unit) :=
+private def addFn : Built :=
   buildFunc mAdd #["x"] () fun args => do
     let _ ← funcValue mAdd
     emitReturn (← emitFailing (.str .base "sum") Py.add #[args[0]!, args[0]!])
 
-example : OptHolds (NameSet.of? #[mAdd]) (fun fs => Holds (Func.WF fs) addFn) := by
-  decide +kernel
+-- It refers to itself, so it is a module on its own.
+#guard addFn.toOption.any fun f => (Module.ofChecked mAdd #[f] ()).isOk
 
 /-- info: module m.add {
   func @m.add(%x.0 : py.Value) -> base.Except(py.Value, py.Value) {
@@ -437,7 +448,7 @@ example : OptHolds (NameSet.of? #[mAdd]) (fun fs => Holds (Func.WF fs) addFn) :=
   }
 } -/
 #guard_msgs in
-#eval do IO.println ((← IO.ofExcept addFn).format {})
+#eval do IO.println ((← IO.ofExcept addFn).1.format {})
 
 /-! ## Misuse
 
@@ -448,15 +459,13 @@ fails. -/
 private def errors (body : Array ValId → PyM Unit Unit) : Array String :=
   match buildFunc (Py.pn "f") #["x"] () body with
   | .ok _ => #[]
-  | .error e => e.toArray
+  | .error e => e.misuses
 
 /-- A write after `return None`, which has closed the block. -/
 private def writeAfterReturn (args : Array ValId) : PyM Unit Unit := do
   let y ← declareLocal "y"
   emitReturnNone
   let _ ← writeCell y args[0]!
-
-example : (buildFunc (Py.pn "f") #["x"] () writeAfterReturn).isOk = false := by decide +kernel
 
 /-- info: #["instruction %6 emitted with no block open"] -/
 #guard_msgs in
@@ -466,8 +475,6 @@ example : (buildFunc (Py.pn "f") #["x"] () writeAfterReturn).isOk = false := by 
 private def entryLeftOpen (args : Array ValId) : PyM Unit Unit := do
   let y ← declareLocal "y"
   let _ ← writeCell y args[0]!
-
-example : (buildFunc (Py.pn "f") #["x"] () entryLeftOpen).isOk = false := by decide +kernel
 
 /-- info: #["block propagate.0 opened while block entry.0 is open"] -/
 #guard_msgs in
@@ -479,7 +486,7 @@ Two nested `forEach`s.  Each failure goes to the nearest handler: the outer `for
 function's, the inner one's to the outer region's, and the `add`'s to the inner region's, so no
 transfer leaves its region. -/
 
-private def c : Except Errors (Func Py.env Unit) :=
+private def c : Built :=
   buildFunc (Py.pn "c") #["xs", "ys"] () fun args => do
     let acc ← emitTotal (.str .base "acc") Py.mkList #[]
     forEach args[0]! fun x => do
@@ -488,10 +495,10 @@ private def c : Except Errors (Func Py.env Unit) :=
         let _ ← emitEffect (.str .base "append") Py.listAppend #[acc, s]
     emitReturn acc
 
-example : Holds (Func.WF ∅) c := by decide +kernel
+#guard c.isOk
 
-/-- Ids follow the printed order: the `forEach` result before its region's values. -/
-example : Holds Func.Canonical c := by decide +kernel
+-- Ids follow the printed order: the `forEach` result before its region's values.
+#guard c.toOption.any (decide ·.1.Canonical)
 
 /-- The `err` successors of `bs`' instructions, regions included, in order. -/
 private partial def errTargetsDeep (bs : Array (Block Py.env Unit)) : List Label :=
@@ -503,24 +510,25 @@ private partial def errTargetsDeep (bs : Array (Block Py.env Unit)) : List Label
 -- The handlers `c`'s failures go to, as the docstring above says.
 #guard match c with
   | .ok fn =>
-    errTargetsDeep fn.blocks == [lbl "propagate" 0, lbl "propagate" 1, lbl "propagate" 2]
+    errTargetsDeep fn.1.blocks == [lbl "propagate" 0, lbl "propagate" 1, lbl "propagate" 2]
   | .error _ => false
 
 /-- A body that ends closed, raising to the region's handler, is well formed too. -/
-private def cClosed : Except Errors (Func Py.env Unit) :=
+private def cClosed : Built :=
   buildFunc (Py.pn "c") #["xs"] () fun args => do
     forEach args[0]! fun x => do jump (← raiseTo x)
     emitReturnNone
 
-example : Holds (Func.WF ∅) cClosed := by decide +kernel
+#guard cClosed.isOk
 
-/-- Ids follow the printed order: the `forEach` result before its region's values. -/
-example : Holds Func.Canonical cClosed := by decide +kernel
+-- Ids follow the printed order: the `forEach` result before its region's values.
+#guard cClosed.toOption.any (decide ·.1.Canonical)
 
 /-! ## A module of the functions above -/
 
-private def m : Except Errors (Module.Raw Py.env Unit) :=
-  return { name := Py.pn "test", funcs := #[← f, ← g, ← h, ← k, ← c], info := () }
+private def m : Except (Failure Unit) (Module.Raw Py.env Unit) :=
+  return { name := Py.pn "test", funcs := #[(← f).1, (← g).1, (← h).1, (← k).1, (← c).1],
+           info := () }
 
 #guard match m with | .ok m => (TestUtil.dottedNames m).isEmpty | .error _ => false
 

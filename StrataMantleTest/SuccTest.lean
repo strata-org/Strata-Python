@@ -9,19 +9,12 @@ public import StrataMantle.Build
 public import StrataMantle.DDM
 public import StrataMantleTest.DSLTest
 import StrataMantle.Env.WF
--- The builder and the printer run as compiled code below.
+-- The builder, the checker and the printer run as compiled code below.
 meta import StrataMantle.Build
 meta import StrataMantle.DDM
+meta import StrataMantle.WF
 meta import StrataMantle.Env.WF
 meta import StrataMantleTest.DSLTest
--- `decide +kernel` unfolds the checker, the environment and core's array operations.
-import all StrataMantle.WF
-import all StrataMantle.Env
-import all StrataMantle.Base
-import all StrataMantle.Build
-import all StrataMantleTest.DSLTest
-import all Init.Data.Array.Basic
-import all Init.Data.Array.DecidableEq
 
 set_option autoImplicit false
 
@@ -39,9 +32,18 @@ namespace Strata.Mantle.SuccTest
 open Strata.Mantle.DSLTest
 
 open Strata.Mantle.Build (freshVal freshLabel startBlock startBlockWith startFreshBlock
-  emitConst emitApply finishBlock goto build Errors Holds region)
+  emitConst emitApply finishBlock goto build Failure region)
 
 private abbrev E := Demo.env
+
+/-- What `build` gives: a checked function, or the `Failure`. -/
+private abbrev Built := Except (Failure Unit) {fn : Func E Unit // fn.WF}
+
+/-- The build failed because its function is not well formed, not by a misuse. -/
+private def rejected (b : Built) : Bool :=
+  match b with
+  | .error e => e.misuses.isEmpty
+  | .ok _ => false
 
 private def boolT : TypeExpr E := Base.Bool.ty
 private def intT : TypeExpr E := Base.Int.ty
@@ -57,7 +59,7 @@ private def propagate (exc : ValId) : BuildM E Unit Unit := do
 /-- `f(x : Value)`, whose entry `body x h` emits, and whose handler `h` takes an exception of
 type `excT` and returns `x` as a failure. -/
 private def handled (body : ValId → Label → BuildM E Unit Unit) (excT : TypeExpr E := valT) :
-    Except Errors (Func E Unit) :=
+    Built :=
   build (.str .base "f") raisingT () do
     let x ← freshVal (.str .base "x") valT
     let _ ← startFreshBlock #[x] "entry"
@@ -71,7 +73,7 @@ private def handled (body : ValId → Label → BuildM E Unit Unit) (excT : Type
 `add` falls through with the sum, or transfers to `err` with the exception.  `fork`
 pre-binds `c` for `right`, which then also receives the two values `fork` passes. -/
 
-private def sum : Except Errors (Func E Unit) :=
+private def sum : Built :=
   build (.str .base "sum") raisingT () do
     let x ← freshVal (.str .base "x") valT
     let c ← freshVal (.str .base "c") boolT
@@ -94,14 +96,14 @@ private def sum : Except Errors (Func E Unit) :=
     startBlock r #[c', a', b']
     propagate b'.id
 
-example : Holds (Func.WF ∅) sum := by decide +kernel
+#guard sum.isOk
 
 /-! ## Terminal instructions
 
 `raise` ends its block with only an `err` successor; `br` with two, neither receiving
 anything.  A terminal instruction defines no result. -/
 
-private def raiser : Except Errors (Func E Unit) :=
+private def raiser : Built :=
   build (.str .base "raiser") raisingT () do
     let x ← freshVal (.str .base "x") valT
     let c ← freshVal (.str .base "c") boolT
@@ -117,14 +119,14 @@ private def raiser : Except Errors (Func E Unit) :=
     finishBlock (.ret () ok)
     propagate (← startBlockWith h (.str .base "exc") valT)
 
-example : Holds (Func.WF ∅) raiser := by decide +kernel
+#guard raiser.isOk
 
 /-! ## A terminal instruction with a region
 
 `loop` runs its body region from `init`, and leaves to `exit` with the last value.  The
 region's blocks are the function's, so its labels count with them. -/
 
-private def counter : Except Errors (Func E Unit) :=
+private def counter : Built :=
   build (.str .base "counter") intT () do
     let _ ← startFreshBlock #[] "entry"
     let zero ← emitConst (.str .base "zero") (.int 0)
@@ -138,16 +140,7 @@ private def counter : Except Errors (Func E Unit) :=
     startBlock done #[n]
     finishBlock (.ret () n.id)
 
-example : Holds (Func.WF ∅) counter := by decide +kernel
-
-/-- The region's blocks count among the function's. -/
-example : Holds (·.labels.map (·.name) =
-    [.num (.str .base "entry") 0, .num (.str .base "body") 0, .num (.str .base "done") 0])
-    counter := by
-  decide +kernel
-
-private def m : Except Errors (Module.Raw E Unit) :=
-  return { name := .str .base "succs", funcs := #[← sum, ← raiser, ← counter], info := () }
+#guard counter.isOk
 
 /-! ## Printed
 
@@ -195,7 +188,8 @@ block's last line, with no result. -/
 } -/
 #guard_msgs in
 #eval do
-  match (← IO.ofExcept m).check with
+  let fs := #[← IO.ofExcept sum, ← IO.ofExcept raiser, ← IO.ofExcept counter]
+  match Module.ofChecked (.str .base "succs") fs () with
   | .ok m => IO.println m
   | .error bad => IO.println s!"not well formed: {bad.map ToDDM.nameText}"
 
@@ -208,19 +202,18 @@ private def addRet (x : ValId) (ks : Array BlockValue) : BuildM E Unit Unit := d
     #[s]))
 
 /-- `add` declares one successor; here it is given none, and then two. -/
-private def wrongCount (n : Nat) : Except Errors (Func E Unit) :=
+private def wrongCount (n : Nat) : Built :=
   handled fun x h => addRet x (Array.replicate n (goto h))
 
-example : Holds (Func.WF ∅) (wrongCount 1) := by decide +kernel
-example : Holds (¬ Func.WF ∅ ·) (wrongCount 0) := by decide +kernel
-example : Holds (¬ Func.WF ∅ ·) (wrongCount 2) := by decide +kernel
+#guard (wrongCount 1).isOk
+#guard rejected (wrongCount 0)
+#guard rejected (wrongCount 2)
 
-/-- The handler takes an `Int`, but `err` passes a `Value`: `wrongCount 1` otherwise. -/
-example : Holds (¬ Func.WF ∅ ·) (handled (fun x h => addRet x #[goto h]) intT) := by
-  decide +kernel
+-- The handler takes an `Int`, but `err` passes a `Value`: `wrongCount 1` otherwise.
+#guard rejected (handled (fun x h => addRet x #[goto h]) intT)
 
 /-- A successor inside a region naming a block outside it. -/
-private def outsideRegion : Except Errors (Func E Unit) :=
+private def outsideRegion : Built :=
   build (.str .base "f") raisingT () do
     let x ← freshVal (.str .base "x") valT
     let c ← freshVal (.str .base "c") boolT
@@ -235,32 +228,30 @@ private def outsideRegion : Except Errors (Func E Unit) :=
     finishBlock (.ret () ok)
     propagate (← startBlockWith h (.str .base "exc") valT)
 
-example : Holds (¬ Func.WF ∅ ·) outsideRegion := by decide +kernel
+#guard rejected outsideRegion
 
 /-- A successor naming the entry block, even one whose parameters match the payload. -/
-private def toEntry : Except Errors (Func E Unit) :=
+private def toEntry : Built :=
   build (.str .base "f") raisingT () do
     let x ← freshVal (.str .base "x") valT
     let entry ← startFreshBlock #[x] "entry"
     addRet x.id #[goto entry]
 
-example : Holds (¬ Func.WF ∅ ·) toEntry := by decide +kernel
+#guard rejected toEntry
 
-/-- A terminal instruction in the middle of a block. -/
-example : Holds (¬ Func.WF ∅ ·) (handled fun x h => do
+-- A terminal instruction in the middle of a block.
+#guard rejected (handled fun x h => do
     let _ ← emitApply (.str .base "u") unitT Demo.raise #[x] #[goto h]
     finishBlock (.ret () (← emitApply (.str .base "ok") raisingT Base.Except.ok
-        #[x]))) := by
-  decide +kernel
+        #[x])))
 
-/-- A non-terminal instruction in terminator position: `add` would fall through, and
-there is nothing to fall through to. -/
-example : Holds (¬ Func.WF ∅ ·) (handled fun x h =>
-    finishBlock (.apply () Demo.add ⟨#[], rfl⟩ #[x, x] #[goto h] #[])) := by
-  decide +kernel
+-- A non-terminal instruction in terminator position: `add` would fall through, and
+-- there is nothing to fall through to.
+#guard rejected (handled fun x h =>
+    finishBlock (.apply () Demo.add ⟨#[], rfl⟩ #[x, x] #[goto h] #[]))
 
 /-- A terminal instruction's region is still checked: `loop`'s body must return `Bool`. -/
-private def badLoopBody : Except Errors (Func E Unit) :=
+private def badLoopBody : Built :=
   build (.str .base "f") intT () do
     let _ ← startFreshBlock #[] "entry"
     let zero ← emitConst (.str .base "zero") (.int 0)
@@ -272,6 +263,50 @@ private def badLoopBody : Except Errors (Func E Unit) :=
     startBlock done #[n]
     finishBlock (.ret () n.id)
 
-example : Holds (¬ Func.WF ∅ ·) badLoopBody := by decide +kernel
+#guard rejected badLoopBody
+
+/-! ## A function reference inside a terminator's region
+
+A module checks the references in a terminal instruction's region too: `f`'s only reference
+is to `counter`, in its `loop` body. -/
+
+/-- `counter`, named `f`, with a reference to `counter` in its `loop` body. -/
+private def refInLoop : Built :=
+  build (.str .base "f") intT () do
+    let _ ← startFreshBlock #[] "entry"
+    let zero ← emitConst (.str .base "zero") (.int 0)
+    let i ← freshVal (.str .base "i") intT
+    let body ← region #[i] (base := "body") do
+      let _ ← Build.emitFunc (.str .base "counter")
+      finishBlock (.ret () (← emitConst (.str .base "t") (.bool false)))
+    let done ← freshLabel "done"
+    finishBlock (.apply () Demo.loop ⟨#[.ty intT], rfl⟩ #[zero] #[goto done] #[body])
+    let n ← freshVal (.str .base "n") intT
+    startBlock done #[n]
+    finishBlock (.ret () n.id)
+
+/-- What a module of `fs` gives through `Module.ofChecked`, then through `Module.Raw.check`:
+`ok`, or the names. -/
+private def checkBoth (fs : Array {f : Func E Unit // f.WF}) : String × String :=
+  let text : Except (Array Name) (Module E Unit) → String
+    | .ok _ => "ok"
+    | .error bad => s!"{bad.map ToDDM.nameText}"
+  (text (Module.ofChecked (.str .base "m") fs ()),
+    text (Module.Raw.check { name := .str .base "m", funcs := fs.map (·.val), info := () }))
+
+-- With `counter` defined, the module is well formed.
+#guard match refInLoop, counter with
+  | .ok f, .ok c => checkBoth #[f, c] == ("ok", "ok")
+  | _, _ => false
+
+-- Without it, both checks name `f`, which is well formed on its own.
+/--
+info: ofChecked: #[f]
+check: #[f]
+-/
+#guard_msgs in
+#eval do
+  let (a, b) := checkBoth #[← IO.ofExcept refInLoop]
+  IO.println s!"ofChecked: {a}\ncheck: {b}"
 
 end Strata.Mantle.SuccTest

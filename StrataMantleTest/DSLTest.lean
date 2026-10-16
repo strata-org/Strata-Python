@@ -12,15 +12,9 @@ import StrataMantle.DSL
 import all StrataMantle.Env
 import all StrataMantle.Base
 -- The `#guard`s below run as compiled code.
+meta import StrataMantle.Build
+meta import StrataMantle.WF
 meta import StrataMantle.Env.WF
--- `decide +kernel` unfolds the checker, the environment and core's array operations.
-import all StrataMantle.WF
-import all StrataMantle.Build
-import all StrataMantle.Env.Raw
-import all StrataMantle.Env.Data
-import all StrataMantle.Util.IndexMap
-import all Init.Data.Array.Basic
-import all Init.Data.Array.DecidableEq
 
 set_option autoImplicit false
 
@@ -527,10 +521,11 @@ private def body {e : Env _root_.Unit} [Demo.env ⊑ e] : BuildM e _root_.Unit _
     #[exc.id]
   Build.finishBlock (.ret () r)
 
-private def f : Except Build.Errors (Func Demo.env _root_.Unit) :=
+private def f : Except (Build.Failure _root_.Unit)
+    {fn : Func Demo.env _root_.Unit // fn.WF} :=
   Build.build (.str .base "f") (Demo.raising.ty Demo.Value.ty) () body
 
-example : Build.Holds (Func.WF ∅) f := by decide +kernel
+#guard f.isOk
 
 /-! ### Keywords
 

@@ -17,7 +17,7 @@ set_option autoImplicit false
 /-!
 # Python to Mantle
 
-`translate` lowers a parsed Python module to a `Mantle.Module.Raw` over `Py.env`, as the
+`translate` lowers a parsed Python module to a checked `Mantle.Module` over `Py.env`, as the
 design doc, `docs/PythonToMantle.md`, describes.  It returns the module and its diagnostics.
 A result with a diagnostic is a failure.
 
@@ -34,7 +34,9 @@ A result with a diagnostic is a failure.
   function (`async def`, a generator) is a stub that returns `py.unsupported`.
 * An error the builder records is a bug in the translator: an `internal error` diagnostic at
   the range of the function it was emitting.  So is a node CPython's parser never produces,
-  such as the target of "a, b += 1": an `internal error` at the node's range.
+  such as the target of "a, b += 1": an `internal error` at the node's range.  So is a
+  function that is not well formed.  A function whose build failed either way is a stub
+  (`Build.stub`), so the module is still checked; it is for diagnostics only.
 
 ## Supported constructs
 
@@ -75,7 +77,9 @@ public section
 /-- A translated module and its diagnostics: the scope pass's syntax errors, then each
 rejected construct, in source order. -/
 structure Result where
-  module : Module.Raw Py.env SourceRange
+  /-- The module, checked.  A function whose build failed, or that is not well formed, is a
+  stub whose body is `unreachable`, and a diagnostic reports it. -/
+  module : Module Py.env SourceRange
   diagnostics : Array Diagnostic
 
 /-- Whether the translation succeeded: no diagnostic. -/
@@ -1812,20 +1816,27 @@ def runBody (ctx : Ctx) (st : TState) (range : SourceRange) (act : TransM Unit) 
   let ((), st') ← (body.run ctx).run { st with exits := #[], targeted := {} }
   return st'
 
-/-- `built`'s function and state, with an internal-error diagnostic at `range` for each
-builder error. -/
-def builtFunc (range : SourceRange) (built : Build.Built (Func Py.env SourceRange × TState)) :
-    Func Py.env SourceRange × TState :=
-  let (f, st) := built.value
-  let ds := built.errors.map fun e =>
-    ({ kind := .internal, message := s!"{nameText f.name}: {e}", range } : Diagnostic)
-  (f, { st with diagnostics := st.diagnostics ++ ds })
+/-- Build the function `name`, taking `params`, with `body`: the checked function and the
+translator's state.  If the build fails, the function is its stub, and the state has an
+internal-error diagnostic at `range` for each misuse, or for the function not being well
+formed. -/
+def builtFunc (name : Name) (params : Array (Name × TypeExpr Py.env)) (range : SourceRange)
+    (body : Array ValId → PyM SourceRange TState) :
+    {fn : Func Py.env SourceRange // fn.WF} × TState :=
+  match buildFuncTypedWith name params range body with
+  | .ok r => r
+  | .error e =>
+    let messages := if e.misuses.isEmpty then #[s!"{nameText name} is not well formed"]
+      else e.misuses.map (s!"{nameText name}: {·}")
+    let ds := messages.map fun message => ({ kind := .internal, message, range } : Diagnostic)
+    (stubFunc name params range, { e.value with diagnostics := e.value.diagnostics ++ ds })
 
 /-- Emit the function `job` queues.  Its parameters are the cells it captures, in
 `capturedVars` order, then its default cells, then `args` and `kwargs`.  A class body reads
 its namespace from `args[0]`, stores `__module__`, `__qualname__` and its docstring, as
 CPython 3.12 does, then runs. -/
-def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) : Func Py.env SourceRange × TState :=
+def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) :
+    {fn : Func Py.env SourceRange // fn.WF} × TState :=
   let ctx := { ctx with scope := job.scope, cur := job.cur }
   let free := capturedVars job.cur
   let defaults : Array String := match job.args with
@@ -1836,7 +1847,7 @@ def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) : Func Py.env SourceRang
       Py.cell.ty)) ++
     defaults.map (defaultStem ·, Py.cell.ty) ++
     #[(stem "args", Py.Value.ty), (stem "kwargs", Py.Value.ty)]
-  builtFunc job.range <| buildFuncTypedWith job.name argTypes job.range fun ps =>
+  builtFunc job.name argTypes job.range fun ps =>
     runBody ctx st job.range do
       match job.stub with
       | some what =>
@@ -1867,6 +1878,34 @@ def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) : Func Py.env SourceRang
           prologue (params a) defaultCells args kwargs
           transStmts job.body
 
+/-- The module `name` with no functions. -/
+def emptyModule (name : Name) (info : SourceRange) : Module Py.env SourceRange :=
+  ⟨{ name, funcs := #[], info },
+    ⟨by simp [Module.Raw.funcNames, Array.mapK_eq_map_fun], by simp, by simp⟩⟩
+
+/-- The module `name` of the checked functions `funcs`, and an internal-error diagnostic at
+`range` for each function named twice, of which the first is kept.  The translator only
+references functions it emits, so the module's check does not fail; if it did, the module
+would be empty, with a diagnostic. -/
+def assemble (name : Name) (funcs : Array {fn : Func Py.env SourceRange // fn.WF})
+    (range : SourceRange) : Module Py.env SourceRange × Array Diagnostic := Id.run do
+  let mut seen : Std.HashSet Name := {}
+  let mut distinct := #[]
+  let mut ds := #[]
+  for f in funcs do
+    if seen.contains f.val.name then
+      ds := ds.push { kind := .internal, message := s!"{nameText f.val.name} is emitted twice",
+                      range }
+    else
+      seen := seen.insert f.val.name
+      distinct := distinct.push f
+  match Module.ofChecked name distinct range with
+  | .ok m => return (m, ds)
+  | .error bad =>
+    let message := s!"{nameText name} references a function it does not define: \
+      {", ".intercalate (bad.map nameText).toList}"
+    return (emptyModule name range, ds.push { kind := .internal, message, range })
+
 /-- The Mantle name of the Python module `m`: one segment per dotted component. -/
 def moduleNameOf (m : String) : Name :=
   (m.splitOn ".").foldl (init := .base) fun n s => n.str s
@@ -1881,14 +1920,14 @@ def translate (moduleName : String) (stmts : Array (stmt SourceRange)) : Result 
     | some a, some b => ⟨a.ann.start, b.ann.stop⟩
     | _, _ => .none
   let some cur := table.scopes[0]?
-    | return { module := { name := mname, funcs := #[], info := range }
+    | return { module := emptyModule mname range
                diagnostics := #[{ kind := .internal, message := "no module scope", range }] }
   let ctx : Ctx :=
     { table, module := moduleName, moduleName := mname, scope := 0, cur,
       moduleAnnotations := findAnn stmts }
   let bodyName := mname.str "<module>"
   let st : TState := { funcNames := ({} : Std.HashSet Name).insert bodyName }
-  let (body, st) := builtFunc range <| buildFuncTypedWith bodyName #[] range fun _ =>
+  let (body, st) := builtFunc bodyName #[] range fun _ =>
     runBody ctx st range do
       writeName "__name__" (← build (strLit moduleName)) .none
       if findAnn stmts then setupAnnotations
@@ -1908,9 +1947,10 @@ def translate (moduleName : String) (stmts : Array (stmt SourceRange)) : Result 
     funcs := funcs.push f
     st := st'
     i := i + 1
-  let diagnostics := (table.syntaxErrors ++ st.diagnostics).insertionSort
+  let (module, ds) := assemble mname funcs range
+  let diagnostics := (table.syntaxErrors ++ st.diagnostics ++ ds).insertionSort
     fun a b => a.range.start.byteIdx < b.range.start.byteIdx
-  return { module := { name := mname, funcs, info := range }, diagnostics }
+  return { module, diagnostics }
 
 end -- public section
 

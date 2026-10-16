@@ -51,9 +51,11 @@ Environments and programs come with a well-formedness check. A well-formed envir
 whose type references all resolve to earlier declarations. A well-formed program uses only
 instructions its environment declares, at their declared types, and passes each block the
 arguments it expects. Lean's types guarantee that every reference to a type or instruction
-resolves; a checker decides the rest. A `Module.Raw` is a module as built, which may not be
-well formed; it still prints, in full, for diagnostics. A `Module` is one with its proof of
-well-formedness, and is the same data at run time.
+resolves; a checker decides the rest. A function is checked on its own, and a module is
+checked from its functions: their names are distinct, and every reference to a function names
+one of them. A `Module.Raw` is a module as built, which may not be well formed; it still
+prints, in full, for diagnostics. A `Module` is one with its proof of well-formedness, and is
+the same data at run time.
 
 **Regions.** An instruction may own nested bodies, called regions, as in MLIR. A region is a
 list of blocks, the first its entry, whose parameters are the region's arguments. A transfer

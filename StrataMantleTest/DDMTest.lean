@@ -34,14 +34,18 @@ builder and the reader; and the applications printed and read back.
 
 namespace Strata.Mantle.DDMTest
 
-open Strata.Mantle.Build (freshVal startFreshBlock emitApply finishBlock build Errors Holds)
+open Strata.Mantle.Build (freshVal startFreshBlock emitApply finishBlock build Failure)
 open Strata.Mantle.DSLTest
+
+/-- What `build` gives in `env`: a checked function, or the `Failure`. -/
+private abbrev Built (env : Env Unit) [base ⊑ env] :=
+  Except (Failure Unit) {fn : Func env Unit // fn.WF}
 
 private def intT : TypeExpr Fns.env := Base.Int.ty
 private def boolT : TypeExpr Fns.env := Base.Bool.ty
 private def fnT : TypeExpr Fns.env := Fns.Fn.ty (.lit #[.ty intT, .ty boolT]) intT
 
-private def f : Except Errors (Func Fns.env Unit) :=
+private def f : Built Fns.env :=
   build (.str .base "f") intT () do
     let g ← freshVal (.str .base "g") fnT
     let x ← freshVal (.str .base "x") intT
@@ -50,7 +54,7 @@ private def f : Except Errors (Func Fns.env Unit) :=
     let r ← emitApply (.str .base "r") intT Fns.apply #[g.id, x.id, y.id]
     finishBlock (.ret () r)
 
-#guard Holds (Func.WF ∅) f
+#guard f.isOk
 
 /-- Read `text` in `Fns.env`, and print the module or the diagnostics.  The golden below is
 the printed `f`, read back and printed again. -/
@@ -68,7 +72,7 @@ private def readBack (text : String) : IO Unit := do
 }
 -/
 #guard_msgs in
-#eval do readBack ((← IO.ofExcept f).format .full)
+#eval do readBack ((← IO.ofExcept f).val.format .full)
 
 /-- info: module f {
   func @f(%g.0 : fns.Fn([], base.Int)) -> base.Int {
@@ -137,18 +141,20 @@ of `as`; `callLast` splices `as` into its function's arguments and its spread, a
 returns a function of `as`.  An application passes a list for each list parameter, which
 prints as a literal among the type arguments. -/
 
-/-- The build succeeds, and its function is well formed. -/
-private def accepts (f : Except Errors (Func Fns.env Unit)) : Bool := decide (Holds (Func.WF ∅) f)
+/-- The build succeeds, so its function is well formed. -/
+private def accepts (f : Built Fns.env) : Bool := f.isOk
 
-/-- The build succeeds, and its function is not well formed. -/
-private def rejects (f : Except Errors (Func Fns.env Unit)) : Bool :=
-  f.isOk && !decide (Holds (Func.WF ∅) f)
+/-- The build failed because its function is not well formed, not by a misuse. -/
+private def rejects (f : Built Fns.env) : Bool :=
+  match f with
+  | .error e => e.misuses.isEmpty
+  | .ok _ => false
 
-/-- The errors a build fails with, or none. -/
-private def errors (f : Except Errors (Func Fns.env Unit)) : Array String :=
+/-- The misuses a build fails with, or none. -/
+private def errors (f : Built Fns.env) : Array String :=
   match f with
   | .ok _ => #[]
-  | .error e => e.toArray
+  | .error e => e.misuses
 
 /-- `[Int, Bool]`. -/
 private def intBool : TypeList Fns.env := .ofTypes #[intT, boolT]
@@ -157,7 +163,7 @@ private def intBool : TypeList Fns.env := .ofTypes #[intT, boolT]
 `callFn[targs]` of `g` and the parameters at `ops`.  `targs` are data, so they are checked when
 the builder runs, by `checkTypeArgs`. -/
 private def callF (targs : Array (TypeArg Fns.env)) (ops : Array Nat) :
-    Except Errors (Func Fns.env Unit) :=
+    Built Fns.env :=
   build (.str .base "f") intT () do
     let g ← freshVal (.str .base "g") fnT
     let x ← freshVal (.str .base "x") intT
@@ -200,7 +206,7 @@ many and an `Int` where the `Bool` belongs. -/
 /-- `bindFirst[Int, [Bool], Int](g, x)`, a `Fn [Bool] Int` declared `ret`, applied by
 `callFn[[Bool], Int]` to `y`; then `callLast[[Bool], Int]` applying `h : Fn [Bool, Int] Int` to
 `y` and `x`. -/
-private def chainF (ret : TypeExpr Fns.env) : Except Errors (Func Fns.env Unit) :=
+private def chainF (ret : TypeExpr Fns.env) : Built Fns.env :=
   build (.str .base "chain") intT () do
     let g ← freshVal (.str .base "g") fnT
     let h ← freshVal (.str .base "h") (Fns.Fn.ty (.ofTypes #[boolT, intT]) intT)
@@ -218,7 +224,7 @@ private def chainF (ret : TypeExpr Fns.env) : Except Errors (Func Fns.env Unit) 
 #guard accepts (chainF (Fns.Fn.ty (.ofTypes #[boolT]) intT))
 
 /-- `bindFirst[Int, [Bool], Int](g, x)`, declared `ret` and unused. -/
-private def bindF (ret : TypeExpr Fns.env) : Except Errors (Func Fns.env Unit) :=
+private def bindF (ret : TypeExpr Fns.env) : Built Fns.env :=
   build (.str .base "bind") intT () do
     let g ← freshVal (.str .base "g") fnT
     let x ← freshVal (.str .base "x") intT
@@ -240,7 +246,7 @@ private def bindF (ret : TypeExpr Fns.env) : Except Errors (Func Fns.env Unit) :
 }
 -/
 #guard_msgs in
-#eval do readBack ((← IO.ofExcept (callF callArgs #[1, 2])).format .full)
+#eval do readBack ((← IO.ofExcept (callF callArgs #[1, 2])).val.format .full)
 
 /-- info: module chain {
   func @chain(%g.0 : fns.Fn([base.Int, base.Bool], base.Int), %h.0 : fns.Fn([base.Bool, base.Int], base.Int), %x.0 : base.Int, %y.0 : base.Bool) -> base.Int {
@@ -253,7 +259,7 @@ private def bindF (ret : TypeExpr Fns.env) : Except Errors (Func Fns.env Unit) :
 }
 -/
 #guard_msgs in
-#eval do readBack ((← IO.ofExcept (chainF (Fns.Fn.ty (.ofTypes #[boolT]) intT))).format .full)
+#eval do readBack ((← IO.ofExcept (chainF (Fns.Fn.ty (.ofTypes #[boolT]) intT))).val.format .full)
 
 /-- `f(%g.0, %x.0, %y.0) = callFn[targs](args)`, as text. -/
 private def callText (targs args : String) : String := s!"module f \{
@@ -310,7 +316,7 @@ other. -/
 open Build (freshLabel startBlock terminate goto checkTypeArgs) in
 /-- Build a closure of `g : Fn [Int] Int` and `x`, take it apart, and call its function on its
 environment.  The case instruction's type arguments are `caseArgs`, given as data. -/
-private def closF (caseArgs : Array (TypeArg Clos.env)) : Except Errors (Func Clos.env Unit) :=
+private def closF (caseArgs : Array (TypeArg Clos.env)) : Built Clos.env :=
   build (.str .base "clos") (Base.Int.ty) () do
     let fnInt : TypeExpr Clos.env := Fns.Fn.ty (.ofTypes #[Base.Int.ty]) Base.Int.ty
     let closT : TypeExpr Clos.env := Clos.Closure.ty (.ofTypes #[Base.Int.ty]) Base.Int.ty
@@ -330,14 +336,14 @@ private def closF (caseArgs : Array (TypeArg Clos.env)) : Except Errors (Func Cl
 
 private def intList : TypeList Clos.env := .ofTypes #[Base.Int.ty]
 
-#guard Holds (Func.WF ∅) (closF #[.list intList, .ty Base.Int.ty])
+#guard (closF #[.list intList, .ty Base.Int.ty]).isOk
 
 /- A type where the list belongs is an error. -/
 /-- info: #["clos.Closure.case: type argument 1 is a type, but its parameter takes a list of types"] -/
 #guard_msgs in
 #eval match closF #[.ty Base.Int.ty, .ty Base.Int.ty] with
   | .ok _ => #[]
-  | .error e => e.toArray
+  | .error e => e.misuses
 
 /-- Read `text` in `Clos.env`, and print the module or the diagnostics. -/
 private def readBackClos (text : String) : IO Unit := do
@@ -357,7 +363,7 @@ private def readBackClos (text : String) : IO Unit := do
 }
 -/
 #guard_msgs in
-#eval do readBackClos ((← IO.ofExcept (closF #[.list intList, .ty Base.Int.ty])).format .full)
+#eval do readBackClos ((← IO.ofExcept (closF #[.list intList, .ty Base.Int.ty])).val.format .full)
 
 /-- info: t.mantle:3:19: argument 1 of type clos.Closure is a type, but its parameter takes a list of types -/
 #guard_msgs in

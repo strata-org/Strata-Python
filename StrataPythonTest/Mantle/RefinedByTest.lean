@@ -8,11 +8,14 @@ public import StrataMantle.WF
 public import StrataMantle.Build
 public import StrataPython.Mantle.Env
 import StrataMantle.Env.WF
--- `decide +kernel` unfolds the checker, the environment and core's array operations.
-import all StrataMantle.WF
+-- The builder and the checker run as compiled code below.
+meta import StrataMantle.Build
+meta import StrataMantle.WF
+meta import StrataMantle.Env.WF
+meta import StrataPython.Mantle.Env
+-- `decide +kernel` unfolds the environment for `boxFresh`.
 import all StrataMantle.Env
 import all StrataMantle.Base
-import all StrataMantle.Build
 import all StrataPython.Mantle.Env
 import all Init.Data.Array.Basic
 import all Init.Data.Array.DecidableEq
@@ -85,13 +88,8 @@ private def body {e : Env Unit} [Py.env ⊑ e] : BuildM e Unit Unit := do
   let got ← Build.emitApply (.str .base "got") Base.Int.ty Base.refGet #[cell]
   Build.finishBlock (.ret () got)
 
-private def fPy : Except Build.Errors (Func Py.env Unit) :=
-  Build.build (.str .base "f") Base.Int.ty () body
-private def fExt3 : Except Build.Errors (Func Ext3.env Unit) :=
-  Build.build (.str .base "f") Base.Int.ty () body
-
-example : Build.Holds (Func.WF ∅) fPy := by decide +kernel
-example : Build.Holds (Func.WF ∅) fExt3 := by decide +kernel
+#guard (Build.build (env := Py.env) (.str .base "f") Base.Int.ty () body).isOk
+#guard (Build.build (env := Ext3.env) (.str .base "f") Base.Int.ty () body).isOk
 
 /-! ## A failing query: the base does not refine `Py` -/
 

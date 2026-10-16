@@ -34,10 +34,15 @@ what the thing it names demands:
   value twice and names every value it defines, no two alike, counting every region, and
   every block is well formed in the context those definitions give, its exit taking the
   function's return type;
-* a `Module.Raw` names no function twice, and its functions are all well formed.
+* a `Module.Raw` names no function twice, its functions are all well formed, and every
+  function reference names one of them.
 
-A `Module` is a `Module.Raw` with its proof, and `Module.Raw.check` gives one by running the
-checker.
+A function's rules depend on the function alone, so a function can be checked before its
+module is assembled.
+
+A `Module` is a `Module.Raw` with its proof.  `Module.Raw.check` gives one by running the
+checker, and `Module.ofChecked` gives one from checked functions, deciding only the module's
+own rules.
 
 `Decidable` instances decide every predicate, so `decide` is the checker.
 
@@ -82,8 +87,8 @@ The checker's maps are tries and trees, so `decide +kernel` evaluates it:
 * `LabelMap`: a map from labels, on each label's counter;
 * `Label.Distinct`: no label occurs twice, decided through a `LabelMap`;
 * `NameSet` (`StrataMantle.Util.NameMap`): a set of names, as a 2-3 tree on `Name.key`.  It
-  holds a module's function names, which `Module.Raw.WF` builds once and every function
-  reference is looked up in. -/
+  holds a module's function names: deciding `Module.Raw.WF` builds it once and looks every
+  function reference up in it. -/
 
 /-- A map from `Nat`: a trie on the key's bijective binary digits.  Key `0` is at the root,
 and `2k+1` and `2k+2` are key `k` of the left and right subtrees.  Its depth is the key's bit
@@ -264,171 +269,159 @@ abbrev RegionType (env : Env Unit) := Array (TypeExpr env) × TypeExpr env
 
 /-! ## Instructions, terminators, blocks and regions -/
 
-/-- A constant's rule, with `funcs` the module's functions: a function reference names one of
-them. -/
-@[expose, reducible] def Const.WF (funcs : NameSet) : Const → Prop
-  | .func target => target ∈ funcs
-  | _ => True
-
-instance (funcs : NameSet) (c : Const) : Decidable (c.WF funcs) :=
-  match c with
-  | .func target => inferInstanceAs (Decidable (target ∈ funcs))
-  | .unit | .bool _ | .int _ | .float _ | .str _ => inferInstanceAs (Decidable True)
-
 mutual
 
-/-- An instruction's rule, in the context `ctx`, with `bs` the blocks its successors may name
-and `funcs` the module's functions.
+/-- An instruction's rule, in the context `ctx`, with `bs` the blocks its successors may name.
 
-* A constant defines a value of the type the base gives it.  A function-reference constant
-  names a function of the module.
+* A constant defines a value of the type the base gives it.  Whether a function reference
+  names a function of the module is `Module.Raw.WF`'s rule.
 * An application has a return type, which its result has at the type arguments, satisfies
   `InsnSig.callWF`, and supplies one region per declared region, each well formed at the
   declared types.  A constructor is applied as any operation is: its signature is the one
   `Env.addData` derived from its datatype. -/
 @[expose] def Instruction.WF {env : Env Unit} {α : Type} [base ⊑ env]
-    (ctx : Ctx env) (bs : BlockSigs env) (funcs : NameSet) : Instruction env α → Prop
-  | .const _ d c => d.type = c.typeOf ∧ c.WF funcs
+    (ctx : Ctx env) (bs : BlockSigs env) : Instruction env α → Prop
+  | .const _ d c => d.type = c.typeOf
   | @Instruction.apply _ _ _ d isig _ typeArgs args succs ⟨regions⟩ =>
     isig.returnType.map (·.instantiate typeArgs) = some d.type ∧
       isig.callWF ctx bs typeArgs args succs ∧
-      Region.WFList ctx funcs (isig.regionTypes typeArgs) regions
+      Region.WFList ctx (isig.regionTypes typeArgs) regions
 
 /-- `Instruction.WF` of each. -/
 @[expose] def Instruction.WFList {env : Env Unit} {α : Type} [base ⊑ env]
-    (ctx : Ctx env) (bs : BlockSigs env) (funcs : NameSet) :
+    (ctx : Ctx env) (bs : BlockSigs env) :
     List (Instruction env α) → Prop
   | [] => True
-  | i :: is => Instruction.WF ctx bs funcs i ∧ Instruction.WFList ctx bs funcs is
+  | i :: is => Instruction.WF ctx bs i ∧ Instruction.WFList ctx bs is
 
 /-- A terminator's rule: a terminal operation, one with no return type, satisfying
 `InsnSig.callWF`, that supplies its regions as `Instruction.apply` does.  Any successor may be
 taken and any region run. -/
 @[expose] def Terminator.WF {env : Env Unit} {α : Type} [base ⊑ env]
-    (ctx : Ctx env) (bs : BlockSigs env) (funcs : NameSet) : Terminator env α → Prop
+    (ctx : Ctx env) (bs : BlockSigs env) : Terminator env α → Prop
   | @Terminator.apply _ _ _ isig _ typeArgs args succs ⟨regions⟩ =>
     isig.returnType = none ∧ isig.callWF ctx bs typeArgs args succs ∧
-      Region.WFList ctx funcs (isig.regionTypes typeArgs) regions
+      Region.WFList ctx (isig.regionTypes typeArgs) regions
 
 /-- A block is well formed when its instructions and its terminator are, against the
 blocks `bs` of its region.  `Func.ctx?` checks its parameters. -/
 @[expose] def Block.WF {env : Env Unit} {α : Type} [base ⊑ env]
-    (ctx : Ctx env) (bs : BlockSigs env) (funcs : NameSet) : Block env α → Prop
+    (ctx : Ctx env) (bs : BlockSigs env) : Block env α → Prop
   | ⟨_, _, ⟨instrs⟩, term, _⟩ =>
-    Instruction.WFList ctx bs funcs instrs ∧ Terminator.WF ctx bs funcs term
+    Instruction.WFList ctx bs instrs ∧ Terminator.WF ctx bs term
 
 /-- `Block.WF` of each. -/
 @[expose] def Block.WFList {env : Env Unit} {α : Type} [base ⊑ env]
-    (ctx : Ctx env) (bs : BlockSigs env) (funcs : NameSet) : List (Block env α) → Prop
+    (ctx : Ctx env) (bs : BlockSigs env) : List (Block env α) → Prop
   | [] => True
-  | b :: l => Block.WF ctx bs funcs b ∧ Block.WFList ctx bs funcs l
+  | b :: l => Block.WF ctx bs b ∧ Block.WFList ctx bs l
 
 /-- A region is well formed at `sig` when its entry block takes `sig`'s parameters and
 every block is well formed against the region's own blocks and its exit, taking `sig`'s
 result.  So control leaves the region only through its exit, with a value of the declared
 type. -/
 @[expose] def Region.WF {env : Env Unit} {α : Type} [base ⊑ env]
-    (ctx : Ctx env) (funcs : NameSet) (sig : RegionType env) : Region env α → Prop
+    (ctx : Ctx env) (sig : RegionType env) : Region env α → Prop
   | ⟨⟨blocks⟩⟩ =>
-    Region.entryWF sig.1 blocks ∧ Block.WFList ctx (BlockSigs.of blocks sig.2) funcs blocks
+    Region.entryWF sig.1 blocks ∧ Block.WFList ctx (BlockSigs.of blocks sig.2) blocks
 
 /-- One region per signature, each well formed at it: the same number, in the same order. -/
 @[expose] def Region.WFList {env : Env Unit} {α : Type} [base ⊑ env]
-    (ctx : Ctx env) (funcs : NameSet) :
+    (ctx : Ctx env) :
     List (RegionType env) → List (Region env α) → Prop
   | [], [] => True
-  | s :: ss, r :: rs => Region.WF ctx funcs s r ∧ Region.WFList ctx funcs ss rs
+  | s :: ss, r :: rs => Region.WF ctx s r ∧ Region.WFList ctx ss rs
   | _, _ => False
 
 end
 
 section Decide
 
-variable {env : Env Unit} {α : Type} [base ⊑ env] (ctx : Ctx env) (funcs : NameSet)
+variable {env : Env Unit} {α : Type} [base ⊑ env] (ctx : Ctx env)
 
 mutual
 
 /-- Deciding `Instruction.WF`. -/
 def Instruction.decWF (bs : BlockSigs env) :
-    (i : Instruction env α) → Decidable (Instruction.WF ctx bs funcs i)
-  | .const _ d c => inferInstanceAs (Decidable (d.type = c.typeOf ∧ c.WF funcs))
+    (i : Instruction env α) → Decidable (Instruction.WF ctx bs i)
+  | .const _ d c => inferInstanceAs (Decidable (d.type = c.typeOf))
   | @Instruction.apply _ _ _ d isig _ typeArgs args succs ⟨regions⟩ =>
     have := Region.decWFList (isig.regionTypes typeArgs) regions
     inferInstanceAs (Decidable
       (isig.returnType.map (·.instantiate typeArgs) = some d.type ∧
         isig.callWF ctx bs typeArgs args succs ∧
-        Region.WFList ctx funcs (isig.regionTypes typeArgs) regions))
+        Region.WFList ctx (isig.regionTypes typeArgs) regions))
 
 /-- Deciding `Instruction.WFList`. -/
 def Instruction.decWFList (bs : BlockSigs env) :
-    (is : List (Instruction env α)) → Decidable (Instruction.WFList ctx bs funcs is)
+    (is : List (Instruction env α)) → Decidable (Instruction.WFList ctx bs is)
   | [] => inferInstanceAs (Decidable True)
   | i :: is =>
     have := Instruction.decWF bs i
     have := Instruction.decWFList bs is
     inferInstanceAs
-      (Decidable (Instruction.WF ctx bs funcs i ∧ Instruction.WFList ctx bs funcs is))
+      (Decidable (Instruction.WF ctx bs i ∧ Instruction.WFList ctx bs is))
 
 /-- Deciding `Terminator.WF`. -/
 def Terminator.decWF (bs : BlockSigs env) :
-    (t : Terminator env α) → Decidable (Terminator.WF ctx bs funcs t)
+    (t : Terminator env α) → Decidable (Terminator.WF ctx bs t)
   | @Terminator.apply _ _ _ isig _ typeArgs args succs ⟨regions⟩ =>
     have := Region.decWFList (isig.regionTypes typeArgs) regions
     inferInstanceAs (Decidable
       (isig.returnType = none ∧ isig.callWF ctx bs typeArgs args succs ∧
-        Region.WFList ctx funcs (isig.regionTypes typeArgs) regions))
+        Region.WFList ctx (isig.regionTypes typeArgs) regions))
 
 /-- Deciding `Block.WF`. -/
 def Block.decWF (bs : BlockSigs env) :
-    (b : Block env α) → Decidable (Block.WF ctx bs funcs b)
+    (b : Block env α) → Decidable (Block.WF ctx bs b)
   | ⟨_, _, ⟨instrs⟩, term, _⟩ =>
     have := Instruction.decWFList bs instrs
     have := Terminator.decWF bs term
-    inferInstanceAs (Decidable (Instruction.WFList ctx bs funcs instrs ∧
-      Terminator.WF ctx bs funcs term))
+    inferInstanceAs (Decidable (Instruction.WFList ctx bs instrs ∧
+      Terminator.WF ctx bs term))
 
 /-- Deciding `Block.WFList`. -/
 def Block.decWFList (bs : BlockSigs env) :
-    (l : List (Block env α)) → Decidable (Block.WFList ctx bs funcs l)
+    (l : List (Block env α)) → Decidable (Block.WFList ctx bs l)
   | [] => inferInstanceAs (Decidable True)
   | b :: l =>
     have := Block.decWF bs b
     have := Block.decWFList bs l
-    inferInstanceAs (Decidable (Block.WF ctx bs funcs b ∧ Block.WFList ctx bs funcs l))
+    inferInstanceAs (Decidable (Block.WF ctx bs b ∧ Block.WFList ctx bs l))
 
 /-- Deciding `Region.WF`. -/
 def Region.decWF (sig : RegionType env) :
-    (r : Region env α) → Decidable (Region.WF ctx funcs sig r)
+    (r : Region env α) → Decidable (Region.WF ctx sig r)
   | ⟨⟨blocks⟩⟩ =>
     have := Block.decWFList (BlockSigs.of blocks sig.2) blocks
     inferInstanceAs (Decidable (Region.entryWF sig.1 blocks ∧
-      Block.WFList ctx (BlockSigs.of blocks sig.2) funcs blocks))
+      Block.WFList ctx (BlockSigs.of blocks sig.2) blocks))
 
 /-- Deciding `Region.WFList`. -/
 def Region.decWFList :
     (sigs : List (RegionType env)) → (rs : List (Region env α)) →
-      Decidable (Region.WFList ctx funcs sigs rs)
+      Decidable (Region.WFList ctx sigs rs)
   | [], [] => inferInstanceAs (Decidable True)
   | s :: ss, r :: rs =>
     have := Region.decWF s r
     have := Region.decWFList ss rs
-    inferInstanceAs (Decidable (Region.WF ctx funcs s r ∧ Region.WFList ctx funcs ss rs))
+    inferInstanceAs (Decidable (Region.WF ctx s r ∧ Region.WFList ctx ss rs))
   | [], _ :: _ => inferInstanceAs (Decidable False)
   | _ :: _, [] => inferInstanceAs (Decidable False)
 
 end
 
 instance (bs : BlockSigs env) (i : Instruction env α) :
-    Decidable (Instruction.WF ctx bs funcs i) := Instruction.decWF ctx funcs bs i
+    Decidable (Instruction.WF ctx bs i) := Instruction.decWF ctx bs i
 
 instance (bs : BlockSigs env) (t : Terminator env α) :
-    Decidable (Terminator.WF ctx bs funcs t) := Terminator.decWF ctx funcs bs t
+    Decidable (Terminator.WF ctx bs t) := Terminator.decWF ctx bs t
 
 instance (bs : BlockSigs env) (b : Block env α) :
-    Decidable (Block.WF ctx bs funcs b) := Block.decWF ctx funcs bs b
+    Decidable (Block.WF ctx bs b) := Block.decWF ctx bs b
 
 instance (sig : RegionType env) (r : Region env α) :
-    Decidable (Region.WF ctx funcs sig r) := Region.decWF ctx funcs sig r
+    Decidable (Region.WF ctx sig r) := Region.decWF ctx sig r
 
 end Decide
 
@@ -568,12 +561,12 @@ top-level block is well formed, in the context those definitions give, against t
 blocks and the exit.  No transfer names an entry block, the function's or a region's:
 `BlockSigs.of` leaves entries out. -/
 @[expose, reducible] def Func.BodyWF {env : Env Unit} {α : Type} [base ⊑ env]
-    (funcs : NameSet) (fn : Func env α) : Prop :=
-  OptHolds fn.ctx? fun ctx => ∀ b ∈ fn.blocks, Block.WF ctx fn.blockSigs funcs b
+    (fn : Func env α) : Prop :=
+  OptHolds fn.ctx? fun ctx => ∀ b ∈ fn.blocks, Block.WF ctx fn.blockSigs b
 
-/-- A well-formed function, with `funcs` the functions of its module. -/
-structure Func.WF {env : Env Unit} {α : Type} [base ⊑ env] (funcs : NameSet)
-    (fn : Func env α) : Prop where
+/-- A well-formed function.  It depends on the function alone: that the functions it
+references exist is its module's rule, `Module.Raw.WF`. -/
+structure Func.WF {env : Env Unit} {α : Type} [base ⊑ env] (fn : Func env α) : Prop where
   /-- It has an entry block. -/
   entry : 0 < fn.blocks.size
   /-- No label occurs twice, counting every region, and none is `Label.exit`. -/
@@ -583,20 +576,25 @@ structure Func.WF {env : Env Unit} {α : Type} [base ⊑ env] (funcs : NameSet)
   /-- Every value it defines has a name. -/
   valuesNamed : ValDecl.idBound fn.defs ≤ fn.names.size
   /-- Its blocks are well formed. -/
-  body : Func.BodyWF funcs fn
+  body : Func.BodyWF fn
 
-instance {env : Env Unit} {α : Type} [base ⊑ env] (funcs : NameSet) (fn : Func env α) :
-    Decidable (Func.WF funcs fn) :=
+instance {env : Env Unit} {α : Type} [base ⊑ env] (fn : Func env α) : Decidable fn.WF :=
   have := Name.decNodup fn.names
   decidable_of_iff (0 < fn.blocks.size ∧ Label.Distinct (Label.exit :: fn.labels) ∧
-      fn.names.toList.Nodup ∧ ValDecl.idBound fn.defs ≤ fn.names.size ∧ Func.BodyWF funcs fn)
+      fn.names.toList.Nodup ∧ ValDecl.idBound fn.defs ≤ fn.names.size ∧ Func.BodyWF fn)
     ⟨fun ⟨a, b, c, d, e⟩ => ⟨a, b, c, d, e⟩, fun ⟨a, b, c, d, e⟩ => ⟨a, b, c, d, e⟩⟩
 
 /-- Every value a well-formed function defines has a name. -/
-theorem Func.WF.mem_names {env : Env Unit} {α : Type} [base ⊑ env] {funcs : NameSet}
-    {fn : Func env α} (h : fn.WF funcs) {d : ValDecl env} (hd : d ∈ fn.defs) :
-    d.id.id < fn.names.size :=
+theorem Func.WF.mem_names {env : Env Unit} {α : Type} [base ⊑ env] {fn : Func env α}
+    (h : fn.WF) {d : ValDecl env} (hd : d ∈ fn.defs) : d.id.id < fn.names.size :=
   (ValDecl.idBound_le_iff _ _).mp h.valuesNamed d hd
+
+/-- The functions `fn`'s function-reference constants name, regions included. -/
+@[expose] def Func.funcRefs {env : Env Unit} {α : Type} (fn : Func env α) : Array Name :=
+  fn.allBlocks.foldl (init := #[]) fun refs b => b.instrs.foldl (init := refs) fun refs i =>
+    match i with
+    | .const _ _ (.func n) => refs.push n
+    | _ => refs
 
 /-- The names of a module's functions, in order. -/
 @[expose] def Module.Raw.funcNames {env : Env Unit} [base ⊑ env] {α : Type}
@@ -613,29 +611,54 @@ structure Module.Raw.WF {env : Env Unit} [base ⊑ env] {α : Type} (m : Module.
     Prop where
   /-- No two functions share a name. -/
   funcNamesUnique : m.funcNames.toList.Nodup
-  /-- Every function is well formed against the module's functions. -/
-  funcs : ∀ f ∈ m.funcs, Func.WF m.funcSet f
+  /-- Every function is well formed. -/
+  funcs : ∀ f ∈ m.funcs, f.WF
+  /-- Every function reference names a function of the module. -/
+  refs : ∀ f ∈ m.funcs, ∀ n ∈ f.funcRefs, n ∈ m.funcSet
 
 instance {env : Env Unit} [base ⊑ env] {α : Type} (m : Module.Raw env α) : Decidable m.WF :=
   have := Name.decNodup m.funcNames
-  decidable_of_iff (m.funcNames.toList.Nodup ∧ ∀ f ∈ m.funcs, Func.WF m.funcSet f)
-    ⟨fun ⟨a, b⟩ => ⟨a, b⟩, fun ⟨a, b⟩ => ⟨a, b⟩⟩
+  let fs := m.funcSet
+  decidable_of_iff (m.funcNames.toList.Nodup ∧ (∀ f ∈ m.funcs, f.WF) ∧
+      ∀ f ∈ m.funcs, ∀ n ∈ f.funcRefs, n ∈ fs)
+    ⟨fun ⟨a, b, c⟩ => ⟨a, b, c⟩, fun ⟨a, b, c⟩ => ⟨a, b, c⟩⟩
 
 /-- A module with its well-formedness proof. -/
 structure Module (env : Env Unit) [base ⊑ env] (α : Type) where
   raw : Module.Raw env α
   wf : raw.WF
 
-/-- `m` with its well-formedness proof, or the names of its functions that are not well formed
-by `Func.WF`: all of them if `m` names a function twice. -/
+/-- The names `check` gives for an ill-formed `m`: all of them if two coincide, otherwise
+those of the functions `bad` flags or that reference a function `m` does not define. -/
+private def Module.Raw.faulty {env : Env Unit} [base ⊑ env] {α : Type} (m : Module.Raw env α)
+    (bad : Func env α → Bool) : Array Name :=
+  let names := m.funcNames
+  match NameSet.of? names with
+  | none => names
+  | some fs =>
+    (m.funcs.filter fun f => bad f || f.funcRefs.any fun n => !decide (n ∈ fs)).map (·.name)
+
+/-- `m` with its well-formedness proof, or the names of its functions that are not well
+formed: those that fail `Func.WF` or reference a function `m` does not define, or all of them
+if `m` names a function twice. -/
 def Module.Raw.check {env : Env Unit} [base ⊑ env] {α : Type} (m : Module.Raw env α) :
     Except (Array Name) (Module env α) :=
-  if h : m.WF then .ok ⟨m, h⟩
-  else
-    let names := m.funcNames
-    .error <| match NameSet.of? names with
-      | none => names
-      | some fs => (m.funcs.filter fun f => !decide (Func.WF fs f)).map (·.name)
+  if h : m.WF then .ok ⟨m, h⟩ else .error (m.faulty fun f => !decide f.WF)
+
+/-- The module `name` of the well-formed functions `fs`, or the names `Module.Raw.check`
+gives.  Only the module's own rules are decided: distinct names, and references that name
+its functions. -/
+def Module.ofChecked {env : Env Unit} [base ⊑ env] {α : Type} (name : Name)
+    (fs : Array {f : Func env α // f.WF}) (info : α) : Except (Array Name) (Module env α) :=
+  let m : Module.Raw env α := { name, funcs := fs.map (·.val), info }
+  have := Name.decNodup m.funcNames
+  let fs := m.funcSet
+  if h : m.funcNames.toList.Nodup ∧ ∀ f ∈ m.funcs, ∀ n ∈ f.funcRefs, n ∈ fs then
+    have hfs : ∀ f ∈ m.funcs, f.WF := fun f hf => by
+      obtain ⟨g, -, rfl⟩ := Array.mem_map.mp hf
+      exact g.property
+    .ok ⟨m, ⟨h.1, hfs, h.2⟩⟩
+  else .error (m.faulty fun _ => false)
 
 end
 
@@ -652,5 +675,11 @@ public theorem Module.Raw.WF.mem_funcSet {env : Env Unit} [base ⊑ env] {α : T
   obtain ⟨fs, hfs⟩ := Option.isSome_iff_exists.mp (NameSet.of?_isSome_iff.mpr h.funcNamesUnique)
   rw [Module.Raw.funcSet, hfs, Option.getD_some, NameSet.mem_of? hfs, Module.Raw.funcNames,
     Array.mapK_eq_map_fun, Array.mem_map]
+
+/-- In a well-formed module, every function reference names one of its functions. -/
+public theorem Module.Raw.WF.ref_mem {env : Env Unit} [base ⊑ env] {α : Type}
+    {m : Module.Raw env α} (h : m.WF) {f : Func env α} (hf : f ∈ m.funcs) {n : Name}
+    (hn : n ∈ f.funcRefs) : ∃ g ∈ m.funcs, g.name = n :=
+  (h.mem_funcSet n).mp (h.refs f hf n hn)
 
 end Strata.Mantle

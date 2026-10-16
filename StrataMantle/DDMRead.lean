@@ -482,10 +482,9 @@ def headerName : MFunc SourceRange → Name
 def headerAnn : MFunc SourceRange → SourceRange
   | .func ann .. => ann
 
-/-- A well-formed function, with `funcs` the module's functions and `fset` the set of their
-names. -/
-def func (funcs : NameTable SourceRange) (fset : NameSet) (f : MFunc SourceRange) :
-    Result {fn : Func env SourceRange // fn.name = headerName f ∧ fn.WF fset} :=
+/-- A well-formed function, with `funcs` the module's functions. -/
+def func (funcs : NameTable SourceRange) (f : MFunc SourceRange) :
+    Result {fn : Func env SourceRange // fn.name = headerName f ∧ fn.WF} :=
   match f with
   | .func ann (.funcName _ n) ⟨_, ps⟩ retTy ⟨_, ⟨blocks⟩⟩ => do
     let retType ← type retTy
@@ -511,17 +510,17 @@ def func (funcs : NameTable SourceRange) (fset : NameSet) (f : MFunc SourceRange
       { name := nameOf (identText n), retType, blocks, names, info := ann }
     -- The value names' table proves the names distinct; the rest of `Func.WF` is decided.
     if h : 0 < fn.blocks.size ∧ Label.Distinct (Label.exit :: fn.labels) ∧
-        ValDecl.idBound fn.defs ≤ fn.names.size ∧ fn.BodyWF fset then
+        ValDecl.idBound fn.defs ≤ fn.names.size ∧ fn.BodyWF then
       return ⟨fn, rfl, ⟨h.1, h.2.1, hnames, h.2.2.1, h.2.2.2⟩⟩
     else throw ⟨ann, s!"@{identText n} is not well formed"⟩
 
 /-- The functions `l` denotes, each well formed, or the diagnostics of all that are not. -/
-def funcList (funcs : NameTable SourceRange) (fset : NameSet) : (l : List (MFunc SourceRange)) →
+def funcList (funcs : NameTable SourceRange) : (l : List (MFunc SourceRange)) →
     Except (Array ReadDiagnostic) {fs : List (Func env SourceRange) //
-      fs.map (·.name) = l.map headerName ∧ ∀ f ∈ fs, f.WF fset}
+      fs.map (·.name) = l.map headerName ∧ ∀ f ∈ fs, f.WF}
   | [] => .ok ⟨[], rfl, by simp⟩
   | f :: l =>
-    match func funcs fset f, funcList funcs fset l with
+    match func funcs f, funcList funcs l with
     | .ok ⟨fn, hn, hw⟩, .ok ⟨fs, hs, hws⟩ =>
       .ok ⟨fn :: fs, by simp [hn, hs], List.forall_mem_cons.mpr ⟨hw, hws⟩⟩
     | .error e, .ok _ => .error #[e]
@@ -538,18 +537,22 @@ public def Module.ofDDM {env : Env Unit} [base ⊑ env] (c : DDM.Command SourceR
   let headers := fs.toList
   let ⟨funcs, hfuncs⟩ ← (NameTable.empty.insertAll? (headers.map fun f => (headerName f, headerAnn f))).mapError
     fun (f, r) => #[⟨r, s!"function @{ToDDM.nameText f} is defined twice"⟩]
-  let fset := (NameSet.of? (headers.map headerName).toArray).getD ∅
-  let ⟨list, hnames, hwf⟩ ← funcList (env := env) funcs fset headers
+  let ⟨list, hnames, hwf⟩ ← funcList (env := env) funcs headers
   let m : Module.Raw env SourceRange := { name := nameOf (identText n), funcs := list.toArray, info := ann }
   have hm : m.funcNames = (headers.map headerName).toArray := by
     simp [m, Module.Raw.funcNames, Array.mapK_eq_map_fun, hnames]
   have hnodup : (headers.map headerName).Nodup := by
     simpa [hfuncs, Function.comp_def] using funcs.nodup
-  -- Well formed: the function names are distinct by their table, and each function is well
-  -- formed as it is read.
-  return ⟨m, { funcNamesUnique := by simpa [hm] using hnodup
-               funcs := fun f hf => by
-                 simpa [Module.Raw.funcSet, hm] using hwf f (by simpa [m] using hf) }⟩
+  -- Reading a function reference looks its target up, so every reference resolves; this
+  -- decides it again for the proof.
+  let fs := m.funcSet
+  if hrefs : ∀ f ∈ m.funcs, ∀ n ∈ f.funcRefs, n ∈ fs then
+    -- The function names are distinct by their table, and each function is well formed as it
+    -- is read.
+    return ⟨m, { funcNamesUnique := by simpa [hm] using hnodup
+                 funcs := fun f hf => hwf f (by simpa [m] using hf)
+                 refs := hrefs }⟩
+  else throw #[⟨ann, s!"module {identText n} references a function it does not define"⟩]
 
 namespace Read
 
@@ -594,12 +597,21 @@ def parse (text fileName : String) : IO (Except (Array String) (DDM.Command Sour
 
 end Read
 
+/-- Error messages: at least one. -/
+public structure Read.Errors where
+  /-- The messages, in order. -/
+  toArray : Array String
+  nonempty : toArray.size ≠ 0
+
+/-- The messages, a line each. -/
+public instance : ToString Read.Errors := ⟨fun e => "\n".intercalate e.toArray.toList⟩
+
 open Read in
 /-- Parse `text` in the Mantle dialect and read the module it denotes in `env`: the module,
 annotated with source ranges, or the diagnostics, each as `file:line:column: message`. -/
 public def Module.read (env : Env Unit) [base ⊑ env] (text : String)
     (fileName : String := "<input>") :
-    IO (Except Build.Errors (Module env SourceRange)) := do
+    IO (Except Read.Errors (Module env SourceRange)) := do
   let msgs : Array String ← match ← parse text fileName with
     | .error msgs => pure msgs
     | .ok c =>

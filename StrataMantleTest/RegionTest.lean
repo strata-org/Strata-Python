@@ -10,18 +10,12 @@ public import StrataMantle.DDM
 public import StrataMantleTest.DSLTest
 import StrataMantle.Env.WF
 import StrataMantle.DSL
--- The builder and the printer run as compiled code below.
+-- The builder, the checker and the printer run as compiled code below.
 meta import StrataMantle.Build
 meta import StrataMantle.DDM
+meta import StrataMantle.WF
 meta import StrataMantle.Env.WF
 meta import StrataMantleTest.DSLTest
--- `decide +kernel` unfolds the checker, the environment and core's array operations.
-import all StrataMantle.WF
-import all StrataMantle.Env
-import all StrataMantle.Base
-import all StrataMantle.Build
-import all Init.Data.Array.Basic
-import all Init.Data.Array.DecidableEq
 
 set_option autoImplicit false
 
@@ -54,9 +48,18 @@ public environment Reg extends Base where
   end reg
 
 open Strata.Mantle.Build (freshVal freshLabel startBlock startBlockWith startFreshBlock
-  emitConst emitApply finishBlock goto build Errors Holds region)
+  emitConst emitApply finishBlock goto build Failure region)
 
 private abbrev E := Reg.env
+
+/-- What `build` gives: a checked function, or the `Failure`. -/
+private abbrev Built := Except (Failure Unit) {fn : Func E Unit // fn.WF}
+
+/-- The build failed because its function is not well formed, not by a misuse. -/
+private def rejected (b : Built) : Bool :=
+  match b with
+  | .error e => e.misuses.isEmpty
+  | .ok _ => false
 
 private def boolT : TypeExpr E := Base.Bool.ty
 private def intT : TypeExpr E := Base.Int.ty
@@ -69,7 +72,7 @@ The `then` region has two blocks of its own, and passes a value between them; it
 are `then.0` and `join.0`, numbered with the function's.  Both regions use values the
 function defined outside them. -/
 
-private def pick : Except Errors (Func E Unit) :=
+private def pick : Built :=
   build (.str .base "pick") intT () do
     let c ← freshVal (.str .base "c") boolT
     let x ← freshVal (.str .base "x") intT
@@ -83,17 +86,7 @@ private def pick : Except Errors (Func E Unit) :=
     let r ← emitApply (.str .base "r") intT Reg.«if» #[c.id] (regions := #[thn, els])
     finishBlock (.ret () r)
 
-example : Holds (Func.WF ∅) pick := by decide +kernel
-
-/-- The open entry block survives the regions: one top-level block, holding the `if`. -/
-example : Holds (fun f => f.blocks.size = 1 ∧ (f.blocks.map (·.instrs.size)) = #[1]) pick := by
-  decide +kernel
-
-/-- Every label, regions included. -/
-example : Holds (·.labels.map (·.name) =
-    [.num (.str .base "entry") 0, .num (.str .base "then") 0, .num (.str .base "join") 0,
-     .num (.str .base "else") 0]) pick := by
-  decide +kernel
+#guard pick.isOk
 
 /-! ## A region from a front end's monad
 
@@ -117,7 +110,7 @@ private def counted : StateT Nat (BuildM E Unit) (Region E Unit × Nat) := do
 
 /-- `pick` again, its `if` emitted by `emitApplyWith` from the counter's monad, where each
 region bumps the counter. -/
-private def pickWith : Except Errors (Func E Unit) :=
+private def pickWith : Built :=
   build (.str .base "pick") intT () do
     let c ← freshVal (.str .base "c") boolT
     let x ← freshVal (.str .base "x") intT
@@ -139,13 +132,13 @@ private def pickWith : Except Errors (Func E Unit) :=
     if n != 2 then Build.error s!"the regions ran {n} times"
     finishBlock (.ret () r)
 
-example : Holds (Func.WF ∅) pickWith := by decide +kernel
+#guard pickWith.isOk
 
-example : Holds Func.Canonical pickWith := by decide +kernel
+#guard pickWith.toOption.any (decide ·.1.Canonical)
 
 -- `pickWith` is `pick`: the same text, constants included.
 #guard match pick, pickWith with
-  | .ok a, .ok b => a.format .full == b.format .full
+  | .ok a, .ok b => a.1.format .full == b.1.format .full
   | _, _ => false
 
 -- A region restores the default annotation it found.
@@ -163,7 +156,7 @@ The inner `ret` leaves the `if`, not the `try` body: each region's `ret` is a ju
 exit, and the `if`'s regions return what it is instantiated at, which here is the completion
 the body returns. -/
 
-private def guarded : Except Errors (Func E Unit) :=
+private def guarded : Built :=
   build (.str .base "guarded") complT () do
     let c ← freshVal (.str .base "c") boolT
     let _ ← startFreshBlock #[c] "entry"
@@ -188,10 +181,7 @@ private def guarded : Except Errors (Func E Unit) :=
       (regions := #[body, handler])
     finishBlock (.ret () r)
 
-example : Holds (Func.WF ∅) guarded := by decide +kernel
-
-private def m : Except Errors (Module.Raw E Unit) :=
-  return { name := .str .base "regions", funcs := #[← pick, ← guarded], info := () }
+#guard guarded.isOk
 
 /-! ## Printed -/
 
@@ -233,21 +223,22 @@ private def m : Except Errors (Module.Raw E Unit) :=
 } -/
 #guard_msgs in
 #eval do
-  match (← IO.ofExcept m).check with
+  let fs := #[← IO.ofExcept pick, ← IO.ofExcept guarded]
+  match Module.ofChecked (.str .base "regions") fs () with
   | .ok m => IO.println m
   | .error bad => IO.println s!"not well formed: {bad.map ToDDM.nameText}"
 
-/-- The builder allocates a result before the regions `emitApply` emits, so the ids follow
-the printed order: what reading the printed function gives. -/
-example : Holds Func.Canonical pick := by decide +kernel
+-- The builder allocates a result before the regions `emitApply` emits, so the ids follow the
+-- printed order: what reading the printed function gives.
+#guard pick.toOption.any (decide ·.1.Canonical)
 
-example : Holds Func.Canonical guarded := by decide +kernel
+#guard guarded.toOption.any (decide ·.1.Canonical)
 
 /-! ## What it rejects -/
 
 /-- `f(c : Bool, x : Int) : ret`: `body c x entry` emits the entry block and what follows. -/
 private def fCX (body : ValId → ValId → Label → BuildM E Unit Unit) (ret : TypeExpr E := intT) :
-    Except Errors (Func E Unit) :=
+    Built :=
   build (.str .base "f") ret () do
     let c ← freshVal (.str .base "c") boolT
     let x ← freshVal (.str .base "x") intT
@@ -257,14 +248,13 @@ private def fCX (body : ValId → ValId → Label → BuildM E Unit Unit) (ret :
 private def retRegion (v : ValId) : BuildM E Unit (Region E Unit) :=
   region #[] (finishBlock (.ret () v))
 
-/-- An `if` with its `else` missing. -/
-example : Holds (¬ Func.WF ∅ ·) (fCX fun c x _ => do
+-- An `if` with its `else` missing.
+#guard rejected (fCX fun c x _ => do
     let r ← emitApply (.str .base "r") intT Reg.«if» #[c] (regions := #[retRegion x])
-    finishBlock (.ret () r)) := by
-  decide +kernel
+    finishBlock (.ret () r))
 
 /-- A handler region whose entry takes an `Int` rather than the exception. -/
-private def wrongEntry : Except Errors (Func E Unit) :=
+private def wrongEntry : Built :=
   build (.str .base "f") complT () do
     let _ ← startFreshBlock
     let body := region #[] do
@@ -280,17 +270,16 @@ private def wrongEntry : Except Errors (Func E Unit) :=
       (regions := #[body, handler])
     finishBlock (.ret () r)
 
-example : Holds (¬ Func.WF ∅ ·) wrongEntry := by decide +kernel
+#guard rejected wrongEntry
 
-/-- A `then` region returning the condition, not an `Int`. -/
-example : Holds (¬ Func.WF ∅ ·) (fCX fun c x _ => do
+-- A `then` region returning the condition, not an `Int`.
+#guard rejected (fCX fun c x _ => do
     let regions := #[retRegion c, retRegion x]
     finishBlock (.ret () (← emitApply (.str .base "r") intT Reg.«if»
-        #[c] (regions := regions)))) := by
-  decide +kernel
+        #[c] (regions := regions))))
 
 /-- A `then` region that jumps to a block of the function rather than returning. -/
-private def escape (escapes : Bool) : Except Errors (Func E Unit) :=
+private def escape (escapes : Bool) : Built :=
   fCX fun c x _ => do
     let done ← freshLabel "done"
     let thn := region #[] (finishBlock (if escapes then .jump () (goto done) else .ret () x))
@@ -300,34 +289,70 @@ private def escape (escapes : Bool) : Except Errors (Func E Unit) :=
     startBlock done
     finishBlock (.ret () x)
 
-example : Holds (Func.WF ∅) (escape false) := by decide +kernel
+#guard (escape false).isOk
 
-example : Holds (¬ Func.WF ∅ ·) (escape true) := by decide +kernel
+#guard rejected (escape true)
 
 /-- A region's exit is its own, and the function's is not visible inside it: `ret` in the
 `then` region leaves the `if` with an `Int`, so it cannot return the function's `Bool`. -/
-private def outerExit (fromRegion : Bool) : Except Errors (Func E Unit) :=
+private def outerExit (fromRegion : Bool) : Built :=
   fCX (ret := boolT) fun c x _ => do
     let regions := #[retRegion (if fromRegion then c else x), retRegion x]
     let _ ← emitApply (.str .base "r") intT Reg.«if» #[c] (regions := regions)
     finishBlock (.ret () c)
 
-example : Holds (Func.WF ∅) (outerExit false) := by decide +kernel
+#guard (outerExit false).isOk
 
-example : Holds (¬ Func.WF ∅ ·) (outerExit true) := by decide +kernel
+#guard rejected (outerExit true)
 
-/-- A region block reusing the function entry's label. -/
-example : Holds (¬ Func.WF ∅ ·) (fCX fun c x entry => do
+-- A region block reusing the function entry's label.
+#guard rejected (fCX fun c x entry => do
     let thn := region #[] do
       finishBlock (.jump () (goto entry))
       startBlock entry
       finishBlock (.ret () x)
-    let r ← emitApply (.str .base "r") intT Reg.«if» #[c]
-      (regions := #[thn, retRegion x])
-    finishBlock (.ret () r)) := by
-  decide +kernel
+    let r ← emitApply (.str .base "r") intT Reg.«if» #[c] (regions := #[thn, retRegion x])
+    finishBlock (.ret () r))
 
 -- Two functions under one name.
-#guard decide (Holds (¬ Module.Raw.WF ·) (do return { ← m with funcs := #[← pick, ← pick] }))
+#guard pick.toOption.any fun p => !(Module.ofChecked (.str .base "regions") #[p, p] ()).isOk
+
+/-! ## A function reference inside a region
+
+A module checks the references in its functions' regions too: `f`'s only reference is to
+`pick`, in its `then` region. -/
+
+/-- `f`, whose `then` region holds a reference to `pick`. -/
+private def refInRegion : Built :=
+  fCX fun c x _ => do
+    let thn := region #[] do
+      let _ ← Build.emitFunc (.str .base "pick")
+      finishBlock (.ret () x)
+    let r ← emitApply (.str .base "r") intT Reg.«if» #[c] (regions := #[thn, retRegion x])
+    finishBlock (.ret () r)
+
+/-- What a module of `fs` gives through `Module.ofChecked`, then through `Module.Raw.check`:
+`ok`, or the names. -/
+private def checkBoth (fs : Array {f : Func E Unit // f.WF}) : String × String :=
+  let text : Except (Array Name) (Module E Unit) → String
+    | .ok _ => "ok"
+    | .error bad => s!"{bad.map ToDDM.nameText}"
+  (text (Module.ofChecked (.str .base "m") fs ()),
+    text (Module.Raw.check { name := .str .base "m", funcs := fs.map (·.val), info := () }))
+
+-- With `pick` defined, the module is well formed.
+#guard match refInRegion, pick with
+  | .ok f, .ok p => checkBoth #[f, p] == ("ok", "ok")
+  | _, _ => false
+
+-- Without it, both checks name `f`, which is well formed on its own.
+/--
+info: ofChecked: #[f]
+check: #[f]
+-/
+#guard_msgs in
+#eval do
+  let (a, b) := checkBoth #[← IO.ofExcept refInRegion]
+  IO.println s!"ofChecked: {a}\ncheck: {b}"
 
 end Strata.Mantle.RegionTest

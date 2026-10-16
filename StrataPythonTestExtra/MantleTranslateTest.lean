@@ -45,7 +45,7 @@ belong to a supported test.  Set `MANTLE_UPDATE=1` to rewrite the goldens.
 
 namespace StrataPython.MantleTranslateTest
 
-open StrataPython.Mantle.PyTranslate (translate formatDiagnostic nameText)
+open StrataPython.Mantle.PyTranslate (translate formatDiagnostic)
 open StrataPython (withPython)
 open StrataPython.Mantle.TestUtil (compilePython firstDiff dottedNames deadBlocks)
 
@@ -103,10 +103,12 @@ private meta def runCase (pythonCmd tmpDir : System.FilePath) (update : Bool)
     | .error msg => throw <| .userError s!"Failed to read Ion: {msg}"
   let fileMap := Lean.FileMap.ofString (← IO.FS.readFile pyFile)
   let r := translate e.name stmts
-  let m ← match r.module.check with
-    | .ok m => pure m
-    | .error bad =>
-      return .failed s!"{e.path}: not well formed: {", ".intercalate (bad.map nameText).toList}"
+  let m := r.module
+  -- An internal error, such as a function that is not well formed, fails any case.
+  let internal := r.diagnostics.filter (·.kind == .internal)
+  unless internal.isEmpty do
+    return .failed s!"{e.path}: internal errors: \
+      {"; ".intercalate (internal.map (·.message)).toList}"
   let rejected := r.diagnostics.toList.map fun d =>
     ((d.message.dropSuffix? " is not supported").map (·.toString)).getD d.message
   let expected := e.rejects
@@ -121,10 +123,10 @@ private meta def runCase (pythonCmd tmpDir : System.FilePath) (update : Bool)
       [{", ".intercalate expected}]"
   let dump := String.join (r.diagnostics.toList.map (formatDiagnostic (some fileMap) · ++ "\n"))
     ++ toString m ++ "\n"
-  unless (dottedNames r.module).isEmpty do
+  unless (dottedNames m.raw).isEmpty do
     return .failed s!"{e.path}: a name has a `.` inside a segment: \
-      {(dottedNames r.module).map Strata.Mantle.ToDDM.nameText}"
-  for f in r.module.funcs do
+      {(dottedNames m.raw).map Strata.Mantle.ToDDM.nameText}"
+  for f in m.raw.funcs do
     let dead := deadBlocks StrataPython.Mantle.Py.Value.ty f
     unless dead.isEmpty do
       return .failed s!"{e.path}: {Strata.Mantle.ToDDM.nameText f.name}: unreachable blocks \
@@ -134,7 +136,7 @@ private meta def runCase (pythonCmd tmpDir : System.FilePath) (update : Bool)
   match ← Strata.Mantle.Module.read StrataPython.Mantle.Py.env full e.path with
   | .error err => return .failed s!"{e.path}: the full form does not read back:\n{err}"
   | .ok m₁ =>
-    let same := m₁.raw.funcs.size == r.module.funcs.size && (m₁.raw.funcs.zip r.module.funcs).all
+    let same := m₁.raw.funcs.size == m.raw.funcs.size && (m₁.raw.funcs.zip m.raw.funcs).all
       fun (f, g) => f.names == g.names && f.defs.map (·.id.id) == g.defs.map (·.id.id)
     unless same && m₁.format .full == full do
       return .failed s!"{e.path}: the full form reads back with other ids or names"

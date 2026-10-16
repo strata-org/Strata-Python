@@ -178,8 +178,8 @@ are in `StrataPython/Mantle/Build.lean`.
 ## 3. Conventions
 
 **Function shape.** Every function the translator emits is built by
-`PyBuild.buildFuncTypedWith`, which also returns the body's result; the translator returns its
-own state through it (§4).
+`PyBuild.buildFuncTypedWith`, which checks it and also returns the body's result; the
+translator returns its own state through it (§4).
 Its parameters are:
 
 | Function | Parameters, in order |
@@ -229,6 +229,12 @@ well formed. A rejected statement emits nothing. A rejected function (a generato
 `async def`) is emitted as a stub whose entry block returns `py.unsupported`. Consumers must
 not analyse a failed result. A compile-time error that the scope pass reports (§5.1) is
 handled the same way.
+
+**Internal errors.** A misuse of the builder, a function that is not well formed, and a
+function name emitted twice are each an internal error. A function whose build fails is
+replaced by a stub that takes the same parameters and whose entry block ends in
+`unreachable`, and of two functions of one name the first is kept, so the translator always
+returns a checked module. Such a module is for diagnostics only: the run has failed.
 
 ## 4. Translator state
 
@@ -964,7 +970,7 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 **Builder (`PyBuild`) and translator (`PyTranslate`):**
 
 - The scope and the exits stack live in the translator's state, `TransM` (§4).
-- `PyBuild.buildFuncTypedWith` builds a function and returns its body's result.
+- `PyBuild.buildFuncTypedWith` builds and checks a function and returns its body's result.
 - `Frame.handler` is a `BlockValue`, so a handler can pre-bind arguments (`withHandlerTo`).
 - `dispatch` and `dispatchArms` take `Label`s. Direct successors that pre-bind arguments need
   `BlockValue`s.

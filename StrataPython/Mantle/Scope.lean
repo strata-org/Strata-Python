@@ -278,7 +278,8 @@ inductive DiagnosticKind where
   | syntaxError
   /-- Valid Python that the translator rejects. -/
   | unsupported
-  /-- A bug in the translator: it misused the builder. -/
+  /-- A bug in the translator, such as a misuse of the builder or a function that is not well
+  formed. -/
   | internal
   deriving DecidableEq, Repr, Inhabited
 

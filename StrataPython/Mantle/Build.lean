@@ -22,8 +22,8 @@ The sections below group the operations.
 
 A function body is emitted inside `buildFunc`, which installs the handler that returns a
 failure to the caller before the body runs.  Misusing blocks is an error, as in
-`Mantle.Build`, and `buildFunc` fails if one was recorded.  Block parameters are not decided
-here: locals stay in cells until ref-to-reg.
+`Mantle.Build`, and `buildFunc` fails if one was recorded or the function is not well formed.
+Block parameters are not decided here: locals stay in cells until ref-to-reg.
 
 An emitter that takes a body to emit, such as `withHandler` or `forEach`, runs it in any
 `MonadPy` monad: `PyM` itself, or the translator's `TransM` above it.
@@ -567,10 +567,11 @@ def emitPropagate (e : ValId) (info : Option α := none) : PyM α Unit := do
 
 /-! ## A whole function -/
 
-/-- `buildFuncTyped` below, also returning the result of `body`, and the errors recorded
-rather than failing on them. -/
+/-- `buildFuncTyped` below, also returning the result of `body`, on failure too, as
+`Build.run` does. -/
 def buildFuncTypedWith (name : Name) (params : Array (Name × TypeExpr Py.env)) (info : α)
-    (body : Array ValId → PyM α β) : Build.Built (Func Py.env α × β) :=
+    (body : Array ValId → PyM α β) :
+    Except (Build.Failure β) ({fn : Func Py.env α // fn.WF} × β) :=
   Build.run name Py.failing.ty info do
     let ps ← params.mapM fun (p, t) => Build.freshVal p t
     let propagate ← Build.freshLabel "propagate"
@@ -582,23 +583,32 @@ def buildFuncTypedWith (name : Name) (params : Array (Name × TypeExpr Py.env)) 
     let _ ← (emitPropagate exc.id).run { handler := Build.goto propagate }
     return r
 
-/-- Emit a Python function whose parameters have the given types.
+/-- Emit a Python function whose parameters have the given types, and check it.
 
 `buildFunc` is the form whose parameters are all Python values.  This one also takes
 others, such as a closure's captured cells, which arrive as `Ref Value` parameters.
 
 Before `body` runs, the handler is in place: it takes the exception and returns it to the
 caller.  `body` must finish every block it opens: ending with a block open is an error, and
-so is any other error `Mantle.Build` records.  It fails with the `Errors` if there is one.
-The entry block is labelled `entry.0` and the handler `propagate.0`. -/
+so is any other error `Mantle.Build` records.  It fails with the `Build.Failure` if there is
+one or the function is not well formed.  The entry block is labelled `entry.0` and the
+handler `propagate.0`. -/
 def buildFuncTyped (name : Name) (params : Array (Name × TypeExpr Py.env)) (info : α)
-    (body : Array ValId → PyM α Unit) : Except Build.Errors (Func Py.env α) :=
-  Prod.fst <$> (buildFuncTypedWith name params info body).toExcept
+    (body : Array ValId → PyM α Unit) :
+    Except (Build.Failure Unit) {fn : Func Py.env α // fn.WF} :=
+  Prod.fst <$> buildFuncTypedWith name params info body
 
-/-- Emit a Python function, every parameter a Python value. -/
+/-- Emit a Python function, every parameter a Python value, and check it. -/
 def buildFunc (name : Name) (params : Array String) (info : α)
-    (body : Array ValId → PyM α Unit) : Except Build.Errors (Func Py.env α) :=
+    (body : Array ValId → PyM α Unit) :
+    Except (Build.Failure Unit) {fn : Func Py.env α // fn.WF} :=
   buildFuncTyped name (params.map (stem ·, Py.Value.ty)) info body
+
+/-- The stub of the function `buildFuncTyped name params` would build, `Build.stub` at its
+signature. -/
+def stubFunc (name : Name) (params : Array (Name × TypeExpr Py.env)) (info : α) :
+    {fn : Func Py.env α // fn.WF} :=
+  Build.stub name params Py.failing.ty info
 
 end
 
