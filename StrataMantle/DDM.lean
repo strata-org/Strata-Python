@@ -60,7 +60,9 @@ module m {
 * An application prints as its operation, then its type arguments in brackets, its operands
   in parentheses, its successors, each `^label(args)`, and its regions, each in braces.  Empty
   brackets and parentheses are left out: `py.noneLit`.  A constructor prints as any
-  application does: `base.ok[py.Value, py.Value](%sum.0)`.
+  application does: `base.ok[py.Value, py.Value](%sum.0)`.  A list argument prints as a
+  literal among the type arguments: `fns.callFn[[base.Int, base.Bool], base.Int](%g.0, %x.0,
+  %y.0)`.
 * A successor binds only the values the site passes.  The operation supplies the rest: above,
   `py.add` passes the exception to `propagate.0`.
 * A terminator is a block's last line, an application without a result:
@@ -127,11 +129,14 @@ op floatNegInf () : MFloat => "-" "inf";
 op floatNan () : MFloat => "nan";
 
 /* Type expressions.  `#i` is a type variable; a type constructor with no arguments
-   prints as its bare name. */
+   prints as its bare name.  `[τ, …]` is a list of types, the argument of a list parameter,
+   and `*#i` a list variable. */
 category MType;
 op tyVar (i : Num) : MType => "#" i;
 op tyPrim (n : MName) : MType => n;
 op tyApp (n : MName, args : CommaSepBy MType) : MType => @[prec(0)] n "(" args ")";
+op tyList (elems : CommaSepBy MType) : MType => "[" elems "]";
+op tyListVar (i : Num) : MType => "*#" i;
 
 /* A function of the module, marked `@` as in LLVM. */
 category MFuncName;
@@ -256,10 +261,29 @@ def int (i : Int) : MInt SourceRange :=
   | .ofNat n => .natInt .none ⟨.none, n⟩
   | .negSucc n => .negInt .none ⟨.none, n + 1⟩
 
+/-- A variable, as a type expression prints it. -/
+def tyVar : Nat → Kind → MType SourceRange
+  | i, .type => .tyVar .none ⟨.none, i⟩
+  | i, .list => .tyListVar .none ⟨.none, i⟩
+
+/-- An application, as a type expression prints it. -/
+def tyApp (n : Name) (as : Array (MType SourceRange)) : MType SourceRange :=
+  if as.isEmpty then .tyPrim .none (name n) else .tyApp .none (name n) ⟨.none, as⟩
+
+/-- A list literal, as a type expression prints it.  `[*#i]` prints as `*#i`: every list is a
+literal, and a list variable is the literal that splices it. -/
+def tyList (es : Array (MType SourceRange)) : MType SourceRange :=
+  match es with
+  | #[v@(.tyListVar ..)] => v
+  | _ => .tyList .none ⟨.none, es⟩
+
 /-- A type expression. -/
-def type {env : Env Unit} {scope : Nat} (e : TypeExpr env scope) : MType SourceRange :=
-  e.fold (fun i => .tyVar .none ⟨.none, i⟩) fun n as =>
-    if as.isEmpty then .tyPrim .none (name n) else .tyApp .none (name n) ⟨.none, as⟩
+def type {env : Env Unit} {scope : Array Kind} (e : TypeExpr env scope) : MType SourceRange :=
+  e.fold tyVar tyApp tyList
+
+/-- A type argument: a type, or a list of types. -/
+def typeArg {env : Env Unit} (a : TypeArg env) : MType SourceRange :=
+  a.fold tyVar tyApp tyList
 
 /-- A function's name, marked `@`. -/
 def funcName (n : Name) : MFuncName SourceRange := .funcName .none (name n)
@@ -279,10 +303,10 @@ def valDecl {env : Env Unit} (names : Array Name) (d : ValDecl env) : MValDecl S
   .valDecl .none (val names d.id) (type d.type)
 
 /-- Type arguments, absent when there are none. -/
-def typeArgs {env : Env Unit} (as : Array (TypeExpr env 0)) :
+def typeArgs {env : Env Unit} (as : Array (TypeArg env)) :
     Ann (Option (MTypeArgs SourceRange)) SourceRange :=
   if as.isEmpty then ⟨.none, none⟩
-  else ⟨.none, some (.typeArgs .none ⟨.none, as.map type⟩)⟩
+  else ⟨.none, some (.typeArgs .none ⟨.none, as.map typeArg⟩)⟩
 
 /-- A float: the shortest decimal that reads back as it, or `inf`, `-inf` or `nan`.  The
 decimal always has a point or an exponent: `1.0`, `0.1`, `1e22`. -/
@@ -384,7 +408,7 @@ exit as `ret`. -/
 def term {env : Env Unit} {α : Type} (cx : Cx) : Terminator env α → MTerm SourceRange
   | .apply _ r tyArgs args ks ⟨regions⟩ =>
     let generic (n : Name) :=
-      .termApply .none (name n) (typeArgs tyArgs.toArray) (operands cx args) (succs cx ks)
+      .termApply .none (name n) (typeArgs tyArgs.args) (operands cx args) (succs cx ks)
         ⟨.none, ⟨regionList cx regions⟩⟩
     if r.name == bn "jump" then
       match ks with
@@ -398,7 +422,7 @@ def term {env : Env Unit} {α : Type} (cx : Cx) : Terminator env α → MTerm So
 def insn {env : Env Unit} {α : Type} (cx : Cx) : Instruction env α → MInsn SourceRange
   | .const _ d c => .insnConst .none (valDecl cx.names d) (const c)
   | .apply _ d r tyArgs args ks ⟨regions⟩ =>
-    .insnApply .none (valDecl cx.names d) (name r.name) (typeArgs tyArgs.toArray)
+    .insnApply .none (valDecl cx.names d) (name r.name) (typeArgs tyArgs.args)
       (operands cx args) (succs cx ks) ⟨.none, ⟨regionList cx regions⟩⟩
 
 /-- Instructions, less the folded constants. -/

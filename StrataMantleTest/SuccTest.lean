@@ -43,20 +43,20 @@ open Strata.Mantle.Build (freshVal freshLabel startBlock startBlockWith startFre
 
 private abbrev E := Demo.env
 
-private def boolT : TypeExpr E 0 := Base.Bool.ty
-private def intT : TypeExpr E 0 := Base.Int.ty
-private def unitT : TypeExpr E 0 := Base.Unit.ty
-private def valT : TypeExpr E 0 := Demo.Value.ty
-private def raisingT : TypeExpr E 0 := Demo.raising.ty valT
+private def boolT : TypeExpr E := Base.Bool.ty
+private def intT : TypeExpr E := Base.Int.ty
+private def unitT : TypeExpr E := Base.Unit.ty
+private def valT : TypeExpr E := Demo.Value.ty
+private def raisingT : TypeExpr E := Demo.raising.ty valT
 
 /-- Finish the open block by returning `exc` as a failure. -/
 private def propagate (exc : ValId) : BuildM E Unit Unit := do
-  let r ← emitApply (.str .base "r") raisingT Base.Except.error #v[valT, valT] #[exc]
+  let r ← emitApply (.str .base "r") raisingT Base.Except.error #[exc]
   finishBlock (.ret () r)
 
 /-- `f(x : Value)`, whose entry `body x h` emits, and whose handler `h` takes an exception of
 type `excT` and returns `x` as a failure. -/
-private def handled (body : ValId → Label → BuildM E Unit Unit) (excT : TypeExpr E 0 := valT) :
+private def handled (body : ValId → Label → BuildM E Unit Unit) (excT : TypeExpr E := valT) :
     Except Errors (Func E Unit) :=
   build (.str .base "f") raisingT () do
     let x ← freshVal (.str .base "x") valT
@@ -79,9 +79,9 @@ private def sum : Except Errors (Func E Unit) :=
     let h ← freshLabel "handler"
     let l ← freshLabel "left"
     let r ← freshLabel "right"
-    let s ← emitApply (.str .base "s") valT Demo.add #v[] #[x.id, x.id] #[goto h]
-    let _ ← emitApply (.str .base "u") unitT Demo.fork #v[] #[] #[goto l, goto r #[c.id]]
-    let ok ← emitApply (.str .base "ok") raisingT Base.Except.ok #v[valT, valT] #[s]
+    let s ← emitApply (.str .base "s") valT Demo.add #[x.id, x.id] #[goto h]
+    let _ ← emitApply (.str .base "u") unitT Demo.fork #[] #[goto l, goto r #[c.id]]
+    let ok ← emitApply (.str .base "ok") raisingT Base.Except.ok #[s]
     finishBlock (.ret () ok)
     propagate <| ← startBlockWith h (.str .base "exc") valT
     let a ← freshVal (.str .base "a") valT
@@ -109,11 +109,11 @@ private def raiser : Except Errors (Func E Unit) :=
     let yes ← freshLabel "yes"
     let no ← freshLabel "no"
     let h ← freshLabel "handler"
-    finishBlock (.apply () Demo.br #v[] #[c.id] #[goto yes, goto no] #[])
+    finishBlock (.apply () Demo.br ⟨#[], rfl⟩ #[c.id] #[goto yes, goto no] #[])
     startBlock yes
-    finishBlock (.apply () Demo.raise #v[] #[x.id] #[goto h] #[])
+    finishBlock (.apply () Demo.raise ⟨#[], rfl⟩ #[x.id] #[goto h] #[])
     startBlock no
-    let ok ← emitApply (.str .base "ok") raisingT Base.Except.ok #v[valT, valT] #[x.id]
+    let ok ← emitApply (.str .base "ok") raisingT Base.Except.ok #[x.id]
     finishBlock (.ret () ok)
     propagate (← startBlockWith h (.str .base "exc") valT)
 
@@ -133,7 +133,7 @@ private def counter : Except Errors (Func E Unit) :=
       let t ← emitConst (.str .base "t") (.bool false)
       finishBlock (.ret () t)
     let done ← freshLabel "done"
-    finishBlock (.apply () Demo.loop #v[intT] #[zero] #[goto done] #[body])
+    finishBlock (.apply () Demo.loop ⟨#[.ty intT], rfl⟩ #[zero] #[goto done] #[body])
     let n ← freshVal (.str .base "n") intT
     startBlock done #[n]
     finishBlock (.ret () n.id)
@@ -203,8 +203,9 @@ block's last line, with no result. -/
 
 /-- `x + x`, with successors `ks`, returned as a success. -/
 private def addRet (x : ValId) (ks : Array BlockValue) : BuildM E Unit Unit := do
-  let s ← emitApply (.str .base "s") valT Demo.add #v[] #[x, x] ks
-  finishBlock (.ret () (← emitApply (.str .base "ok") raisingT Base.Except.ok #v[valT, valT] #[s]))
+  let s ← emitApply (.str .base "s") valT Demo.add #[x, x] ks
+  finishBlock (.ret () (← emitApply (.str .base "ok") raisingT Base.Except.ok
+    #[s]))
 
 /-- `add` declares one successor; here it is given none, and then two. -/
 private def wrongCount (n : Nat) : Except Errors (Func E Unit) :=
@@ -226,11 +227,11 @@ private def outsideRegion : Except Errors (Func E Unit) :=
     let _ ← startFreshBlock #[x, c] "entry"
     let h ← freshLabel "handler"
     let thn := region #[] (base := "then") do
-      let s ← emitApply (.str .base "s") valT Demo.add #v[] #[x.id, x.id] #[goto h]
+      let s ← emitApply (.str .base "s") valT Demo.add #[x.id, x.id] #[goto h]
       finishBlock (.ret () s)
     let els := region #[] (finishBlock (.ret () x.id)) "else"
-    let r ← emitApply (.str .base "r") valT Demo.«if» #v[valT] #[c.id] (regions := #[thn, els])
-    let ok ← emitApply (.str .base "ok") raisingT Base.Except.ok #v[valT, valT] #[r]
+    let r ← emitApply (.str .base "r") valT Demo.«if» #[c.id] (regions := #[thn, els])
+    let ok ← emitApply (.str .base "ok") raisingT Base.Except.ok #[r]
     finishBlock (.ret () ok)
     propagate (← startBlockWith h (.str .base "exc") valT)
 
@@ -247,15 +248,15 @@ example : Holds (¬ Func.WF ∅ ·) toEntry := by decide +kernel
 
 /-- A terminal instruction in the middle of a block. -/
 example : Holds (¬ Func.WF ∅ ·) (handled fun x h => do
-    let _ ← emitApply (.str .base "u") unitT Demo.raise #v[] #[x] #[goto h]
-    finishBlock (.ret () (← emitApply (.str .base "ok") raisingT Base.Except.ok #v[valT, valT]
+    let _ ← emitApply (.str .base "u") unitT Demo.raise #[x] #[goto h]
+    finishBlock (.ret () (← emitApply (.str .base "ok") raisingT Base.Except.ok
         #[x]))) := by
   decide +kernel
 
 /-- A non-terminal instruction in terminator position: `add` would fall through, and
 there is nothing to fall through to. -/
 example : Holds (¬ Func.WF ∅ ·) (handled fun x h =>
-    finishBlock (.apply () Demo.add #v[] #[x, x] #[goto h] #[])) := by
+    finishBlock (.apply () Demo.add ⟨#[], rfl⟩ #[x, x] #[goto h] #[])) := by
   decide +kernel
 
 /-- A terminal instruction's region is still checked: `loop`'s body must return `Bool`. -/
@@ -266,7 +267,7 @@ private def badLoopBody : Except Errors (Func E Unit) :=
     let i ← freshVal (.str .base "i") intT
     let body ← region #[i] (finishBlock (.ret () i.id)) "body"
     let done ← freshLabel "done"
-    finishBlock (.apply () Demo.loop #v[intT] #[zero] #[goto done] #[body])
+    finishBlock (.apply () Demo.loop ⟨#[.ty intT], rfl⟩ #[zero] #[goto done] #[body])
     let n ← freshVal (.str .base "n") intT
     startBlock done #[n]
     finishBlock (.ret () n.id)

@@ -37,12 +37,12 @@ namespace Strata.Mantle.BuildTest
 open Strata.Mantle.Build (freshVal freshLabel startBlock startBlockWith startFreshBlock
   emitConst emitApply finishBlock terminate goto build Errors Holds region withInfo)
 
-private def boolT : TypeExpr base 0 := Base.Bool.ty
-private def intT  : TypeExpr base 0 := Base.Int.ty
-private def strT  : TypeExpr base 0 := Base.String.ty
-private def unitT : TypeExpr base 0 := Base.Unit.ty
-private def refIntT : TypeExpr base 0 := Base.Ref.ty intT
-private def exceptStrIntT : TypeExpr base 0 := Base.Except.ty strT intT
+private def boolT : TypeExpr base := Base.Bool.ty
+private def intT  : TypeExpr base := Base.Int.ty
+private def strT  : TypeExpr base := Base.String.ty
+private def unitT : TypeExpr base := Base.Unit.ty
+private def refIntT : TypeExpr base := Base.Ref.ty intT
+private def exceptStrIntT : TypeExpr base := Base.Except.ty strT intT
 
 /-- The label `freshLabel base` hands out `n`-th. -/
 private def lbl (base : String) (n : Nat) : Label := ⟨.num (.str .base base) n⟩
@@ -60,14 +60,14 @@ private def f : Except Errors (Func base Unit) :=
     let bump ← freshLabel "bump"
     let _ ← startFreshBlock #[c] "entry"
     let zero ← emitConst (.str .base "k") (.int 0)
-    let cell ← emitApply (.str .base "cell") refIntT Base.refNew #v[intT] #[zero]
+    let cell ← emitApply (.str .base "cell") refIntT Base.refNew #[zero]
     finishBlock (.branch () c.id (goto bump) (goto done))
     startBlock bump
     let one ← emitConst (.str .base "k") (.int (-1))
-    let _ ← emitApply (.str .base "unit") unitT Base.refSet #v[intT] #[cell, one]
+    let _ ← emitApply (.str .base "unit") unitT Base.refSet (typeArgs := ta[intT]) #[cell, one]
     finishBlock (.jump () (goto done))
     startBlock done
-    let r ← emitApply (.str .base "r") intT Base.refGet #v[intT] #[cell]
+    let r ← emitApply (.str .base "r") intT Base.refGet #[cell]
     finishBlock (.ret () r)
 
 example : Holds (Func.WF ∅) f := by decide +kernel
@@ -119,12 +119,12 @@ private def h : Except Errors (Func base Unit) :=
     let errL ← freshLabel "err"
     let _ ← startFreshBlock (base := "entry")
     let msg ← emitConst (.str .base "msg") (.str "boom")
-    let e ← emitApply (.str .base "e") exceptStrIntT Base.Except.error #v[strT, intT] #[msg]
-    terminate Base.Except.case #v[strT, intT] #[e] #[goto okL, goto errL]
+    let e ← emitApply (.str .base "e") exceptStrIntT Base.Except.error #[msg]
+    terminate Base.Except.case (typeArgs := ta[strT, intT]) #[e] #[goto okL, goto errL]
     let _ ← startBlockWith errL (.str .base "err") strT
     let zero ← emitConst (.str .base "zero") (.int 0)
-    let o ← emitApply (.str .base "o") exceptStrIntT Base.Except.ok #v[strT, intT] #[zero]
-    terminate Base.Except.case #v[strT, intT] #[o] #[goto okL, goto errL]
+    let o ← emitApply (.str .base "o") exceptStrIntT Base.Except.ok #[zero]
+    terminate Base.Except.case (typeArgs := ta[strT, intT]) #[o] #[goto okL, goto errL]
     finishBlock (.ret () (← startBlockWith okL (.str .base "v") intT))
 
 example : Holds (Func.WF ∅) h := by decide +kernel
@@ -143,7 +143,7 @@ rejected. -/
 private def hSwapped : Except Errors (Func base Unit) :=
   h.map fun h => { h with blocks := h.blocks.modify 0 fun b =>
       { b with
-        term := .apply () Base.Except.case #v[strT, intT] #[⟨1⟩]
+        term := .apply () Base.Except.case ⟨#[.ty strT, .ty intT], rfl⟩ #[⟨1⟩]
           #[⟨lbl "err" 0, #[]⟩, ⟨lbl "ok" 0, #[]⟩] #[] } }
 
 example : Holds (¬ Func.WF ∅ ·) hSwapped := by decide +kernel
@@ -161,8 +161,8 @@ private def hConsts : Except Errors (Func base Unit) :=
     let _ ← emitConst (.str .base "b") (.bool true)
     let _ ← emitConst (.str .base "x") (.float 1.5)
     let msg ← emitConst (.str .base "msg") (.str "boom")
-    let e ← emitApply (.str .base "e") exceptStrIntT Base.Except.error #v[strT, intT] #[msg]
-    terminate Base.Except.case #v[strT, intT] #[e] #[goto okL, goto errL]
+    let e ← emitApply (.str .base "e") exceptStrIntT Base.Except.error #[msg]
+    terminate Base.Except.case (typeArgs := ta[strT, intT]) #[e] #[goto okL, goto errL]
     finishBlock (.ret () (← startBlockWith okL (.str .base "v") intT))
     let _ ← startBlockWith errL (.str .base "err") strT
     finishBlock (.unreachable ())
@@ -214,7 +214,7 @@ private def annotated : Except Errors (Func base Nat) :=
     let a ← emitConst (.str .base "a") (.int 1)
     let _ ← withInfo 7 (emitConst (.str .base "b") (.int 2))
     let _ ← withInfo 7 (emitConst (.str .base "c") (.int 3) (some 9))
-    let r ← emitApply (.str .base "ret") exceptStrIntT Base.Except.ok #v[strT, intT] #[a]
+    let r ← emitApply (.str .base "ret") exceptStrIntT Base.Except.ok #[a]
     withInfo 5 (finishBlock (.ret 5 r))
 
 private def instrInfos (fn : Func base Nat) : Array Nat :=

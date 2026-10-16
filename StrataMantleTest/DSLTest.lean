@@ -54,7 +54,7 @@ example : Base.Except.ok.name = bn "ok" := rfl
 example : (Base.Except.error (e := base)).name = bn "error" := rfl
 
 /-- `#v[…]` type-checks against a generated signature's `typeArgc`. -/
-example : Vector (TypeExpr Base.env 0) (Base.refNew.sig (e := Base.env)).typeArgc :=
+example : Vector (TypeExpr Base.env) (Base.refNew.sig (e := Base.env)).typeArgc :=
   #v[Base.Int.ty]
 
 /-! ## A child -/
@@ -148,8 +148,8 @@ example : base ⊑ Demo.env := inferInstance
 
 section
 variable {e : Env _root_.Unit} [Demo.env ⊑ e]
-example : TypeExpr e 0 := Base.Ref.ty Demo.Value.ty
-example : TypeExpr e 0 := Demo.raising.ty Base.Int.ty
+example : TypeExpr e := Base.Ref.ty Demo.Value.ty
+example : TypeExpr e := Demo.raising.ty Base.Int.ty
 example : InsnRef e Base.refNew.sig := Base.refNew
 example : InsnRef e Demo.add.sig := Demo.add
 example : InsnRef e Demo.Box.box.sig := Demo.Box.box
@@ -158,7 +158,7 @@ end
 
 /-! ### Parameters named as the generated binders
 
-`T.ty` and `n.ty` bind `e` and `s` themselves, so a parameter with one of those names is
+`T.ty` and `n.ty` bind `e`, `s` and `l` themselves, so a parameter with one of those names is
 renamed: primed past every other parameter.  Each argument still reaches its own parameter, in
 order.  Any other parameter keeps its name, `h` included: the instance binder is hygienic. -/
 
@@ -173,11 +173,14 @@ public environment Clash extends Base where
   end clash
 
 section
-variable {e : Env _root_.Unit} [Clash.env ⊑ e] {s : Nat} (x y z : TypeExpr e s)
-example : Clash.T.ty x y = .app Clash.T.ref #v[x, y] := rfl
-example : Clash.D.ty x y = .app Clash.D.ref #v[x, y] := rfl
+variable {e : Env _root_.Unit} [Clash.env ⊑ e] {s : Array Kind} (x y z : TypeExpr e s)
+example : Clash.T.ty x y =
+    .app Clash.T.ref #v[x, y] (by rw [TypeRef.kinds, Clash.T.decl_ref]; rfl) := rfl
+example : Clash.D.ty x y =
+    .app Clash.D.ref #v[x, y] (by rw [TypeRef.kinds, Clash.D.decl_ref]; rfl) := rfl
 example : Clash.A.ty x y = Clash.T.ty x y := rfl
-example : Clash.S.ty x y z = .app Clash.S.ref #v[x, y, z] := rfl
+example : Clash.S.ty x y z =
+    .app Clash.S.ref #v[x, y, z] (by rw [TypeRef.kinds, Clash.S.decl_ref]; rfl) := rfl
 -- The binders' names: `e` and `s` are renamed past the other parameters, and the rest keep
 -- theirs.
 example : Clash.T.ty (e'' := x) (e' := y) = Clash.T.ty x y := rfl
@@ -188,17 +191,218 @@ example : Clash.S.ty (s'' := x) (s' := y) (h := z) = Clash.S.ty x y z := rfl
 example : Clash.T.ty (e := e) (s := s) x y = Clash.T.ty x y := rfl
 example : Clash.S.ty (e := e) (s := s) x y z = Clash.S.ty x y z := rfl
 end
-example : Clash.T.ty (e := Clash.env) (s := 0) Base.Int.ty Base.Bool.ty =
-    .app Clash.T.ref #v[Base.Int.ty, Base.Bool.ty] := rfl
+example : Clash.T.ty (e := Clash.env) (s := #[]) Base.Int.ty Base.Bool.ty =
+    .app Clash.T.ref #v[Base.Int.ty, Base.Bool.ty] (by rw [TypeRef.kinds, Clash.T.decl_ref]; rfl) :=
+  rfl
 
 section
-variable {e : Env _root_.Unit} [Demo.env ⊑ e] {s : Nat} (x y : TypeExpr e s)
+variable {e : Env _root_.Unit} [Demo.env ⊑ e] {s : Array Kind} (x y : TypeExpr e s)
 -- A parameter that clashes with no other is primed once, and one that clashes with nothing
 -- keeps its name.
 example : Base.Except.ty (e' := x) (a := y) = Base.Except.ty x y := rfl
 example : Demo.Box.ty (a := x) = Demo.Box.ty x := rfl
 example : Demo.raising.ty (a := x) = Demo.raising.ty x := rfl
 end
+
+/-! ### List parameters
+
+`type Fn (args : list) (+r)` takes a list of types, then a type.  A list parameter's argument
+is a literal `[τ, …]` or a list parameter, which `Fn.ty` takes as a `TypeList`.  `Fn` is a
+test-only stand-in for `Code`.  An instruction's `(as : list)` parameter is one too, spliced
+into a literal as `*as`, and a variadic typed by a list takes one operand per element. -/
+
+/-- A test-only type of functions, a datatype that recurses through its result, and
+instructions and an abbreviation over it. -/
+public environment Fns extends Base where
+  namespace fns
+  open base
+  /-- A function from `args` to `r`. -/
+  type Fn (args : list) (+r)
+  /-- An infinite stream: its tail is a thunk. -/
+  data Stream where
+    | cons (head : Int) (tail : Fn [] Stream)
+  abbrev unary (a) := Fn [a] a
+  insn apply (f : Fn [Int, Bool] Int) (x : Int) (y : Bool) : Int
+  /-- Apply `f` to one operand per element of `as`. -/
+  insn callFn [(as : list) r] (f : Fn as r) (*args : as) : r
+  /-- `callFn`, with the spread's list in parentheses. -/
+  insn callFnParen [(as : list) r] (f : Fn as r) (*args : (as)) : r
+  /-- Apply `f`, which takes an `Int` after `as`: the spread's list splices `as` in. -/
+  insn callLast [(as : list) r] (f : Fn [*as, Int] r) (*args : [*as, Int]) : r
+  /-- Apply `f` to two operands, typed by a literal spread. -/
+  insn applyLit (f : Fn [Int, Bool] Int) (*args : [Int, Bool]) : Int
+  /-- Any number of `Int`s: a parenthesized type makes an `each` variadic. -/
+  insn sumParen (*xs : (Int)) : Int
+  /-- Fix `f`'s first argument, leaving a function of `as`. -/
+  insn bindFirst [a (as : list) r] (f : Fn [a, *as] r) (x : a) : Fn as r
+  end fns
+
+/-- A child applying the inherited `Fn`, whose kinds proof goes through `Fn.decl_ref`. -/
+public environment FnsChild extends Fns where
+  open fns base
+  insn call (f : Fn [Int] Int) (x : Int) : Int
+  data Lazy where
+    | mk (thunk : Fn [] Lazy)
+
+#guard (Fns.Fn.ref (e := Fns.env)).kinds == #[.list, .type]
+
+section
+variable {e : Env _root_.Unit} [Fns.env ⊑ e] {s : Array Kind} (x : TypeExpr e s)
+example : Fns.unary.ty x = Fns.Fn.ty (.lit #[.ty x]) x := rfl
+end
+
+/-- A list parameter is a variable of kind `list`, passed to `Fn` as a `TypeList.var` and typing
+a `spread` variadic. -/
+example : Fns.callFn.sig (e := Fns.env) =
+    { ann := (), typeParams := #[⟨"as", .list⟩, ⟨"r", .type⟩],
+      argTypes := #[⟨"f", Fns.Fn.ty (.var 0 (by decide)) (.var 1 (by decide))⟩],
+      variadic := some ⟨"args", .spread (.var 0 (by decide))⟩,
+      returnType := some (.var 1 (by decide)), distinct := by decide } := rfl
+
+/-- A parenthesized list parameter types a spread too. -/
+example : Fns.callFnParen.sig (e := Fns.env) =
+    { ann := (), typeParams := #[⟨"as", .list⟩, ⟨"r", .type⟩],
+      argTypes := #[⟨"f", Fns.Fn.ty (.var 0 (by decide)) (.var 1 (by decide))⟩],
+      variadic := some ⟨"args", .spread (.var 0 (by decide))⟩,
+      returnType := some (.var 1 (by decide)), distinct := by decide } := rfl
+
+/-- `*as` is a splice, in an argument's literal and in the spread's. -/
+example : Fns.callLast.sig (e := Fns.env) =
+    { ann := (), typeParams := #[⟨"as", .list⟩, ⟨"r", .type⟩],
+      argTypes := #[⟨"f", Fns.Fn.ty (.lit #[.splice 0 (by decide), .ty Base.Int.ty])
+        (.var 1 (by decide))⟩],
+      variadic := some ⟨"args", .spread (.lit #[.splice 0 (by decide), .ty Base.Int.ty])⟩,
+      returnType := some (.var 1 (by decide)), distinct := by decide } := rfl
+
+/-- A literal types a spread too. -/
+example : Fns.applyLit.sig (e := Fns.env) =
+    { ann := (), typeParams := #[],
+      argTypes := #[⟨"f", Fns.Fn.ty (.lit #[.ty Base.Int.ty, .ty Base.Bool.ty]) Base.Int.ty⟩],
+      variadic := some ⟨"args", .spread (.lit #[.ty Base.Int.ty, .ty Base.Bool.ty])⟩,
+      returnType := some Base.Int.ty, distinct := by decide } := rfl
+
+/-- A type, in parentheses, types an `each` variadic. -/
+example : Fns.sumParen.sig (e := Fns.env) =
+    { ann := (), typeParams := #[], argTypes := #[],
+      variadic := some ⟨"xs", .each Base.Int.ty⟩,
+      returnType := some Base.Int.ty, distinct := by decide } := rfl
+
+/-- Type and list parameters share one scope, in the order written. -/
+example : (Fns.bindFirst.sig (e := Fns.env)).scope = #[.type, .list, .type] := rfl
+
+/-! ### Abbreviations with list parameters
+
+An abbreviation's parameter may be a list, `(as : list)`, as an instruction's may.  Expanding
+it splices its argument where the body splices the parameter, so `withInt [*cs] r` is
+`Fn [*cs, Int] r`.  Its `n.ty` takes a `TypeList`, and appends it. -/
+
+/-- Abbreviations over lists of types, and instructions using them. -/
+public environment FnAbbrevs extends Fns where
+  namespace fnab
+  open fns base
+  /-- A function of `as` returning `r`. -/
+  abbrev fnOf ((as : list) r) := Fn as r
+  /-- A function taking an `Int` after `as`. -/
+  abbrev withInt ((as : list) r) := Fn [*as, Int] r
+  /-- Apply `f` to one operand per element of `as`, through `fnOf`. -/
+  insn callOf [(as : list) r] (f : fnOf as r) (*args : as) : r
+  /-- `callLast`, through `withInt`: `as` is spliced into the expansion. -/
+  insn callWith [(cs : list) r] (f : withInt [*cs] r) (*args : [*cs, Int]) : r
+  /-- `withInt` at a literal. -/
+  insn applyWith (f : withInt [Bool] Int) (x : Bool) (y : Int) : Int
+  /-- A function whose arguments splice `as` in the middle. -/
+  insn wrap [(as : list)] (x : Int) : Fn [Int, *as, Bool] Int
+  /-- `withInt` at a literal splicing `cs` first, which expands to a splice in the middle. -/
+  insn applyMid [(cs : list)] (f : withInt [Bool, *cs] Int) : Int
+  end fnab
+
+/-- Through an abbreviation, the signatures are those written out. -/
+example : FnAbbrevs.callOf.sig (e := FnAbbrevs.env) =
+    { ann := (), typeParams := #[⟨"as", .list⟩, ⟨"r", .type⟩],
+      argTypes := #[⟨"f", Fns.Fn.ty (.var 0 (by decide)) (.var 1 (by decide))⟩],
+      variadic := some ⟨"args", .spread (.var 0 (by decide))⟩,
+      returnType := some (.var 1 (by decide)), distinct := by decide } := rfl
+example : FnAbbrevs.callWith.sig (e := FnAbbrevs.env) =
+    { ann := (), typeParams := #[⟨"cs", .list⟩, ⟨"r", .type⟩],
+      argTypes := #[⟨"f", Fns.Fn.ty (.lit #[.splice 0 (by decide), .ty Base.Int.ty])
+        (.var 1 (by decide))⟩],
+      variadic := some ⟨"args", .spread (.lit #[.splice 0 (by decide), .ty Base.Int.ty])⟩,
+      returnType := some (.var 1 (by decide)), distinct := by decide } := rfl
+example : FnAbbrevs.applyWith.sig (e := FnAbbrevs.env) =
+    { ann := (), typeParams := #[],
+      argTypes := #[⟨"f", Fns.Fn.ty (.lit #[.ty Base.Bool.ty, .ty Base.Int.ty]) Base.Int.ty⟩,
+        ⟨"x", Base.Bool.ty⟩, ⟨"y", Base.Int.ty⟩],
+      returnType := some Base.Int.ty, distinct := by decide } := rfl
+
+/-- A splice may stand anywhere in a literal, as written and as an abbreviation expands. -/
+example : (FnAbbrevs.wrap.sig (e := FnAbbrevs.env)).returnType =
+    some (Fns.Fn.ty (.lit #[.ty Base.Int.ty, .splice 0 (by decide), .ty Base.Bool.ty])
+      Base.Int.ty) := rfl
+example : FnAbbrevs.applyMid.sig (e := FnAbbrevs.env) =
+    { ann := (), typeParams := #[⟨"cs", .list⟩],
+      argTypes := #[⟨"f", Fns.Fn.ty
+        (.lit #[.ty Base.Bool.ty, .splice 0 (by decide), .ty Base.Int.ty]) Base.Int.ty⟩],
+      returnType := some Base.Int.ty, distinct := by decide } := rfl
+
+section
+variable {e : Env _root_.Unit} [FnAbbrevs.env ⊑ e] {s : Array Kind} (l : TypeList e s)
+  (r : TypeExpr e s)
+example : FnAbbrevs.fnOf.ty l r = Fns.Fn.ty l r := rfl
+example : FnAbbrevs.withInt.ty l r = Fns.Fn.ty (l ++ TypeList.lit #[.ty Base.Int.ty]) r := rfl
+-- At a literal, the expansion is the literal the DSL's expansion writes.
+example (x : TypeExpr e s) :
+    FnAbbrevs.withInt.ty (.lit #[.ty x]) r = Fns.Fn.ty (.lit #[.ty x, .ty Base.Int.ty]) r := by
+  simp [FnAbbrevs.withInt.ty]
+end
+
+#guard (FnAbbrevs.withInt.ty (e := FnAbbrevs.env) (s := #[]) (.ofTypes #[Base.Bool.ty])
+    Base.Int.ty).toRaw ==
+  (Fns.Fn.ty (e := FnAbbrevs.env) (s := #[]) (.ofTypes #[Base.Bool.ty, Base.Int.ty])
+    Base.Int.ty).toRaw
+
+/-! ### Datatypes with list parameters
+
+A datatype's parameter may be a list, `(as : list)`, as a primitive type's may.  A field uses it
+wherever a list belongs: as a list argument, or spliced into a literal.  Its constructors and
+case instruction bind it as a list parameter. -/
+
+/-- Datatypes over lists of types. -/
+public environment Clos extends Fns where
+  namespace clos
+  open fns base
+  /-- A function of `as` returning `r`, with the environment it closes over. -/
+  data Closure (as : list) (+r) where
+    | mk (f : Fn as r) (env : Int)
+  /-- A function taking an `Int` before `as`. -/
+  data Curried (as : list) (+r) where
+    | curry (f : Fn [Int, *as] r)
+  /-- A tuple of `ts`, which recurses through its positive list. -/
+  type Tup (+ts : list)
+  data Nest (+ts : list) where
+    | leaf
+    | node (kids : Tup [*ts, Nest ts])
+  end clos
+
+#guard (Clos.Closure.ref (e := Clos.env)).kinds == #[.list, .type]
+example : Clos.Closure.mk.sig (e := Clos.env) =
+    { ann := (), typeParams := #[⟨"as", .list⟩, ⟨"r", .type⟩],
+      argTypes := #[⟨"f", Fns.Fn.ty (.var 0 (by decide)) (.var 1 (by decide))⟩,
+        ⟨"env", Base.Int.ty⟩],
+      returnType := some (Clos.Closure.ty (.var 0 (by decide)) (.var 1 (by decide))),
+      distinct := by decide } := rfl
+example : Clos.Curried.curry.sig (e := Clos.env) =
+    { ann := (), typeParams := #[⟨"as", .list⟩, ⟨"r", .type⟩],
+      argTypes := #[⟨"f", Fns.Fn.ty (.lit #[.ty Base.Int.ty, .splice 0 (by decide)])
+        (.var 1 (by decide))⟩],
+      returnType := some (Clos.Curried.ty (.var 0 (by decide)) (.var 1 (by decide))),
+      distinct := by decide } := rfl
+example : Clos.Closure.case.sig (e := Clos.env) =
+    { ann := (), typeParams := #[⟨"as", .list⟩, ⟨"r", .type⟩],
+      argTypes := #[⟨"scrutinee", Clos.Closure.ty (.var 0 (by decide)) (.var 1 (by decide))⟩],
+      returnType := none,
+      succs := #[⟨"mk", #[Fns.Fn.ty (.var 0 (by decide)) (.var 1 (by decide)), Base.Int.ty]⟩],
+      distinct := by decide } := rfl
+#guard (Clos.Nest.node.sig (e := Clos.env)).typeParams == #[⟨"ts", .list⟩]
 
 /-! ### Signatures that name no type
 
@@ -218,27 +422,27 @@ public environment TyVars extends Base where
   end tyvars
 
 example : TyVars.id.sig (e := TyVars.env) =
-    { ann := (), typeParams := #["a"], argTypes := #[⟨"x", .var 0 (by decide)⟩],
+    { ann := (), typeParams := #[⟨"a", .type⟩], argTypes := #[⟨"x", .var 0 (by decide)⟩],
       returnType := some (.var 0 (by decide)), distinct := by decide } := rfl
 example : TyVars.pick.sig (e := TyVars.env) =
-    { ann := (), typeParams := #["a", "b"],
+    { ann := (), typeParams := #[⟨"a", .type⟩, ⟨"b", .type⟩],
       argTypes := #[⟨"x", .var 0 (by decide)⟩, ⟨"y", .var 1 (by decide)⟩],
       returnType := some (.var 0 (by decide)), distinct := by decide } := rfl
 example : TyVars.pass.sig (e := TyVars.env) =
-    { ann := (), typeParams := #["a"], argTypes := #[⟨"x", .var 0 (by decide)⟩],
+    { ann := (), typeParams := #[⟨"a", .type⟩], argTypes := #[⟨"x", .var 0 (by decide)⟩],
       returnType := some (.var 0 (by decide)), succs := #[⟨"k", #[.var 0 (by decide)]⟩],
       distinct := by decide } := rfl
 example : TyVars.first.sig (e := TyVars.env) =
-    { ann := (), typeParams := #["a"], argTypes := #[],
-      variadic := some ⟨"xs", .var 0 (by decide)⟩, returnType := some (.var 0 (by decide)),
+    { ann := (), typeParams := #[⟨"a", .type⟩], argTypes := #[],
+      variadic := some ⟨"xs", .each (.var 0 (by decide))⟩, returnType := some (.var 0 (by decide)),
       distinct := by decide } := rfl
 example : TyVars.run.sig (e := TyVars.env) =
-    { ann := (), typeParams := #["a"], argTypes := #[],
+    { ann := (), typeParams := #[⟨"a", .type⟩], argTypes := #[],
       regions := #[⟨"body", RegionSig.of #[⟨"x", .var 0 (by decide)⟩] (.var 0 (by decide))
         (by decide)⟩],
       returnType := some (.var 0 (by decide)), distinct := by decide } := rfl
 example : TyVars.Pair.mk.sig (e := TyVars.env) =
-    { ann := (), typeParams := #["a", "b"],
+    { ann := (), typeParams := #[⟨"a", .type⟩, ⟨"b", .type⟩],
       argTypes := #[⟨"x", .var 0 (by decide)⟩, ⟨"y", .var 1 (by decide)⟩],
       returnType := some (TyVars.Pair.ty (.var 0 (by decide)) (.var 1 (by decide))),
       distinct := by decide } := rfl
@@ -259,11 +463,11 @@ example : (Demo.Box.box.sig (e := Demo.env)).typeArgc = 1 := rfl
 example : (Demo.Box.empty.sig (e := Demo.env)).typeArgc = 1 := rfl
 example : (Demo.Even.zero.sig (e := Demo.env)).typeArgc = 0 := rfl
 example : (Base.Except.ok.sig (e := Base.env)).typeArgc = 2 := rfl
-#guard (Demo.Box.box.sig (e := Demo.env)).typeParams == #["a"]
+#guard (Demo.Box.box.sig (e := Demo.env)).typeParams == #[⟨"a", .type⟩]
 #guard (Demo.Box.box.sig (e := Demo.env)).argTypes.map (·.name) == #["contents"]
 #guard (Demo.Box.empty.sig (e := Demo.env)).argTypes.isEmpty
 #guard (Demo.Tree.node.sig (e := Demo.env)).argTypes.map (·.name) == #["kids"]
-#guard (Base.Except.error.sig (e := Base.env)).typeParams == #["e", "a"]
+#guard (Base.Except.error.sig (e := Base.env)).typeParams == #[⟨"e", .type⟩, ⟨"a", .type⟩]
 #guard !(Demo.Box.box.sig (e := Demo.env)).terminal
 #guard (Demo.Box.box.sig (e := Demo.env)).succs.isEmpty &&
   (Demo.Box.box.sig (e := Demo.env)).regions.isEmpty &&
@@ -304,23 +508,23 @@ example : (Demo.Box.case.sig (e := Demo.env)).argTypes.map (·.type) =
 private def body {e : Env _root_.Unit} [Demo.env ⊑ e] : BuildM e _root_.Unit _root_.Unit := do
   let x ← Build.freshVal (.str .base "x") Demo.Value.ty
   let _ ← Build.startFreshBlock #[x]
-  let t ← Build.emitApply (.str .base "t") Demo.Value.ty Demo.mkTuple #v[] #[x.id, x.id, x.id]
+  let t ← Build.emitApply (.str .base "t") Demo.Value.ty Demo.mkTuple #[x.id, x.id, x.id]
   let b ← Build.emitApply (.str .base "b") (Demo.Box.ty Demo.Value.ty) Demo.Box.box
-      #v[Demo.Value.ty] #[t]
+      #[t]
   let cell ← Build.emitApply (.str .base "cell") (Base.Ref.ty (Demo.Box.ty Demo.Value.ty))
       Base.refNew
-    #v[Demo.Box.ty Demo.Value.ty] #[b]
+    #[b]
   let got ← Build.emitApply (.str .base "got") (Demo.Box.ty Demo.Value.ty) Base.refGet
-    #v[Demo.Box.ty Demo.Value.ty] #[cell]
+    #[cell]
   let v ← Build.emitApply (.str .base "v") (Demo.raising.ty Demo.Value.ty) Demo.unbox
-      #v[Demo.Value.ty] #[got]
+      #[got]
   let h ← Build.freshLabel "handler"
-  let _ ← Build.emitApply (.str .base "s") Demo.Value.ty Demo.add #v[] #[t, x.id] #[Build.goto h]
+  let _ ← Build.emitApply (.str .base "s") Demo.Value.ty Demo.add #[t, x.id] #[Build.goto h]
   Build.finishBlock (.ret () v)
   let exc ← Build.freshVal (.str .base "exc") Demo.Value.ty
   Build.startBlock h #[exc]
   let r ← Build.emitApply (.str .base "r") (Demo.raising.ty Demo.Value.ty) Base.Except.error
-    #v[Demo.Value.ty, Demo.Value.ty] #[exc.id]
+    #[exc.id]
   Build.finishBlock (.ret () r)
 
 private def f : Except Build.Errors (Func Demo.env _root_.Unit) :=

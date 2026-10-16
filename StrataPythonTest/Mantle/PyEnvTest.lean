@@ -35,7 +35,7 @@ namespace StrataPython.Mantle.PyEnvTest
 open Strata.Mantle
 
 /-- The value `%n`, of type `t`. -/
-private def d (n : Nat) (t : TypeExpr Py.env 0) : ValDecl Py.env := ⟨⟨n⟩, t⟩
+private def d (n : Nat) (t : TypeExpr Py.env) : ValDecl Py.env := ⟨⟨n⟩, t⟩
 
 /-- The block called `s`. -/
 private def lbl (s : String) : Label := ⟨.str .base s⟩
@@ -45,11 +45,13 @@ private def to (s : String) : BlockValue := ⟨lbl s, #[]⟩
 
 /-- `%n = ok[Value, Value] %v`: a success, which a translated function returns. -/
 private def mkOk (n v : Nat) : Instruction Py.env Unit :=
-  .apply () (d n Py.failing.ty) Base.Except.ok #v[Py.Value.ty, Py.Value.ty] #[⟨v⟩] #[] #[]
+  .apply () (d n Py.failing.ty) Base.Except.ok ⟨#[.ty Py.Value.ty, .ty Py.Value.ty], rfl⟩
+    #[⟨v⟩] #[] #[]
 
 /-- `%n = error[Value, Value] %v`: a failure, which a translated function returns. -/
 private def mkError (n v : Nat) : Instruction Py.env Unit :=
-  .apply () (d n Py.failing.ty) Base.Except.error #v[Py.Value.ty, Py.Value.ty] #[⟨v⟩] #[] #[]
+  .apply () (d n Py.failing.ty) Base.Except.error ⟨#[.ty Py.Value.ty, .ty Py.Value.ty], rfl⟩
+    #[⟨v⟩] #[] #[]
 
 /-! ## `def f(x): return x + 1`
 
@@ -70,12 +72,12 @@ propagating is `error`. -/
 
 /-- `%2 = py.intLit %1`: the constant, boxed. -/
 private def box : Instruction Py.env Unit :=
-  .apply () (d 2 Py.Value.ty) Py.intLit #v[] #[⟨1⟩] #[] #[]
+  .apply () (d 2 Py.Value.ty) Py.intLit ⟨#[], rfl⟩ #[⟨1⟩] #[] #[]
 
 /-- `%3 = r args ^ks`, of type `t`. -/
 private def op3 {isig : InsnSig Py.env} (r : InsnRef Py.env isig)
-    (typeArgs : Vector (TypeExpr Py.env 0) isig.typeArgc) (args : Array Nat)
-    (ks : Array BlockValue := #[to "propagate"]) (t : TypeExpr Py.env 0 := Py.Value.ty) :
+    (typeArgs : TypeArgs Py.env isig.scope) (args : Array Nat)
+    (ks : Array BlockValue := #[to "propagate"]) (t : TypeExpr Py.env := Py.Value.ty) :
     Instruction Py.env Unit :=
   .apply () (d 3 t) r typeArgs (args.map (⟨·⟩)) ks #[]
 
@@ -96,7 +98,7 @@ private def fWith (box op : Instruction Py.env Unit) (ok : Instruction Py.env Un
   names   := (Array.range 10).map (Name.num .base ·)
   info    := ()
 
-private def f : Func Py.env Unit := fWith box (op3 Py.add #v[] #[0, 2])
+private def f : Func Py.env Unit := fWith box (op3 Py.add ⟨#[], rfl⟩ #[0, 2])
 
 example : Func.WF ∅ f := by decide +kernel
 
@@ -128,14 +130,14 @@ private def retInt (s : String) (n : Nat) (k : Int) : Block Py.env Unit where
   label  := lbl s
   params := #[]
   instrs := #[.const () (d n Base.Int.ty) (.int k),
-    .apply () (d (n + 1) Py.Value.ty) Py.intLit #v[] #[⟨n⟩] #[] #[], mkOk (n + 2) (n + 1)]
+    .apply () (d (n + 1) Py.Value.ty) Py.intLit ⟨#[], rfl⟩ #[⟨n⟩] #[] #[], mkOk (n + 2) (n + 1)]
   term := .ret () ⟨n + 2⟩
   info := ()
 
 private def gEntry : Block Py.env Unit where
   label  := lbl "entry"
   params := #[d 0 Py.Value.ty]
-  instrs := #[.apply () (d 1 Base.Bool.ty) Py.truthy #v[] #[⟨0⟩] #[to "propagate"] #[]]
+  instrs := #[.apply () (d 1 Base.Bool.ty) Py.truthy ⟨#[], rfl⟩ #[⟨0⟩] #[to "propagate"] #[]]
   term := .branch () ⟨1⟩ (to "yes") (to "no")
   info := ()
 
@@ -154,23 +156,24 @@ An operand of the wrong type, a handler where none is declared or none where one
 result of the wrong type, and the wrong number of operands. -/
 
 /-- `add` applied to the base integer rather than to the boxed Python value. -/
-example : ¬ Func.WF ∅ (fWith box (op3 Py.add #v[] #[0, 1])) := by decide +kernel
+example : ¬ Func.WF ∅ (fWith box (op3 Py.add ⟨#[], rfl⟩ #[0, 1])) := by decide +kernel
 
 /-- A handler on `intLit`, which cannot fail. -/
 example : ¬ Func.WF ∅ (fWith
-    (.apply () (d 2 Py.Value.ty) Py.intLit #v[] #[⟨1⟩] #[to "propagate"] #[])
-    (op3 Py.add #v[] #[0, 2])) := by
+    (.apply () (d 2 Py.Value.ty) Py.intLit ⟨#[], rfl⟩ #[⟨1⟩] #[to "propagate"] #[])
+    (op3 Py.add ⟨#[], rfl⟩ #[0, 2])) := by
   decide +kernel
 
 /-- `add` with no handler: it declares an `err` successor, so a use site must name one. -/
-example : ¬ Func.WF ∅ (fWith box (op3 Py.add #v[] #[0, 2] (ks := #[]))) := by decide +kernel
+example : ¬ Func.WF ∅ (fWith box (op3 Py.add ⟨#[], rfl⟩ #[0, 2] (ks := #[]))) := by decide +kernel
 
 /-- `add`'s result is the success type, not `Except`. -/
-example : ¬ Func.WF ∅ (fWith box (op3 Py.add #v[] #[0, 2] (t := Py.failing.ty)) (mkOk 4 2)) := by
+example :
+    ¬ Func.WF ∅ (fWith box (op3 Py.add ⟨#[], rfl⟩ #[0, 2] (t := Py.failing.ty)) (mkOk 4 2)) := by
   decide +kernel
 
 /-- Two operands for a unary operation. -/
-example : ¬ Func.WF ∅ (fWith box (op3 Py.uSub #v[] #[0, 2])) := by decide +kernel
+example : ¬ Func.WF ∅ (fWith box (op3 Py.uSub ⟨#[], rfl⟩ #[0, 2])) := by decide +kernel
 
 /-! ## Variadic operations
 
@@ -181,11 +184,11 @@ example : ¬ Func.WF ∅ (fWith box (op3 Py.uSub #v[] #[0, 2])) := by decide +ke
 #guard ((Py.mkClosure.sig (e := Py.env)).variadic.map (·.name)) == some "cells"
 #guard ((Py.strConcat.sig (e := Py.env)).variadic.map (·.name)) == some "parts"
 
-example : Func.WF ∅ (fWith box (op3 Py.mkTuple #v[] #[0, 2, 0] (ks := #[]))) := by
+example : Func.WF ∅ (fWith box (op3 Py.mkTuple ⟨#[], rfl⟩ #[0, 2, 0] (ks := #[]))) := by
   decide +kernel
 
 /-- A variadic run is still typed: a base integer is not a Python value. -/
-example : ¬ Func.WF ∅ (fWith box (op3 Py.mkTuple #v[] #[0, 1] (ks := #[]))) := by
+example : ¬ Func.WF ∅ (fWith box (op3 Py.mkTuple ⟨#[], rfl⟩ #[0, 1] (ks := #[]))) := by
   decide +kernel
 
 /-! ## `py.Completion`'s constructors
@@ -204,8 +207,9 @@ example : (Py.Completion.completionReturn.sig (e := Py.env)).typeArgc = 0 := rfl
 private def compBlock : Block Py.env Unit where
   label  := lbl "entry"
   params := #[d 0 Py.Value.ty]
-  instrs := #[.apply () (d 1 Py.Completion.ty) Py.Completion.completionReturn #v[] #[⟨0⟩] #[] #[]]
-  term := .apply () Py.Completion.case #v[] #[⟨1⟩]
+  instrs := #[.apply () (d 1 Py.Completion.ty) Py.Completion.completionReturn ⟨#[], rfl⟩ #[⟨0⟩]
+    #[] #[]]
+  term := .apply () Py.Completion.case ⟨#[], rfl⟩ #[⟨1⟩]
     #[to "normal", to "return", to "raise", to "break", to "continue"] #[]
   info := ()
 
@@ -231,7 +235,8 @@ example : Func.WF ∅ compFunc := by decide +kernel
 
 /-- `completionReturn` takes its payload: one with none is rejected. -/
 example : ¬ Func.WF ∅ { compFunc with blocks := compFunc.blocks.set! 0 { compBlock with
-    instrs := #[.apply () (d 1 Py.Completion.ty) Py.Completion.completionReturn #v[] #[] #[] #[]] } } := by
+    instrs := #[.apply () (d 1 Py.Completion.ty) Py.Completion.completionReturn ⟨#[], rfl⟩ #[]
+      #[] #[]] } } := by
   decide +kernel
 
 /-! ## Membership

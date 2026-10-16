@@ -29,6 +29,15 @@ to the API, to an ancestor and to the environment's own declarations are written
 interface's `RefinedBy` instance, which no caller names (see `EmitCtx.hId`).
 -/
 
+namespace Strata.Mantle.DSL
+
+/-- `mantle_internal_error% "msg"`: what the elaborator writes where its own invariant fails,
+in place of a term it cannot build.  It does not elaborate, so the block reports an internal
+error rather than accepting a `sorry`. -/
+syntax (name := internalError) "mantle_internal_error% " str : term
+
+end Strata.Mantle.DSL
+
 public meta section
 
 namespace Strata.Mantle.DSL
@@ -36,6 +45,14 @@ namespace Strata.Mantle.DSL
 open Lean Elab Command
 
 set_option hygiene false
+
+@[term_elab internalError] def elabInternalError : Term.TermElab := fun stx _ => do
+  let `(mantle_internal_error% $msg:str) := stx | throwUnsupportedSyntax
+  throwError "internal error: {msg.getString}"
+
+/-- The term for a broken invariant, which fails to elaborate with `msg`. -/
+def internalErrorTerm (msg : String) : Term :=
+  Unhygienic.run `(mantle_internal_error% $(quote msg))
 
 /-! ## Terms -/
 
@@ -48,10 +65,20 @@ def insnCastLemmas : Array Ident := #[
   `Strata.Mantle.TypeExpr.carry_app, `Strata.Mantle.TypeExpr.carry_var,
   `Strata.Mantle.TypeExpr.app_eq_app_iff, `Strata.Mantle.TypeRef.carry_carry,
   `Strata.Mantle.name_TypeRef_carry, `Strata.Mantle.RegionSig.carry_of,
-  `Strata.Mantle.RegionSig.of_eq_of_iff, `Strata.Mantle.Param.mk.injEq, `Vector.map_mk,
+  `Strata.Mantle.RegionSig.of_eq_of_iff, `Strata.Mantle.TypeArg.carry_ty,
+  `Strata.Mantle.TypeArg.ty_inj, `Strata.Mantle.Param.mk.injEq, `Vector.map_mk,
   `Vector.mk.injEq, `List.map_toArray, `List.map_cons, `List.map_nil, `Array.mk.injEq,
   `List.cons.injEq, `Option.map_none, `Option.map_some, `Option.some.injEq, `heq_eq_eq,
   `and_self, `and_true, `true_and].map rootId
+
+/-- The lemmas an `InsnRef.cast` proof needs besides `insnCastLemmas` when a signature has a
+list. -/
+def insnCastListLemmas : Array Ident := #[
+  `Strata.Mantle.TypeExpr.carry_appK, `Strata.Mantle.TypeExpr.appK_eq_appK_iff,
+  `Strata.Mantle.TypeArg.carry_list, `Strata.Mantle.TypeArg.list_inj,
+  `Strata.Mantle.TypeList.carry_lit, `Strata.Mantle.TypeList.lit_eq_lit_iff,
+  `Strata.Mantle.TypeList.Elem.carry_ty, `Strata.Mantle.TypeList.Elem.carry_splice,
+  `Strata.Mantle.TypeList.Elem.ty.injEq].map rootId
 
 /-- A `Strata.Mantle.Name` literal for an environment name. -/
 partial def nameLit : Name → Term
@@ -61,6 +88,24 @@ partial def nameLit : Name → Term
 
 /-- `name.str s`. -/
 def sfx (n : Name) (s : String) : Name := Name.mkStr n s
+
+/-- A list, as a `TypeList`, in a scope whose variables have kinds `kinds`, its types written by
+`ty`: list variable `j` is `TypeList.var j`, and a literal's splice `*j` is `Elem.splice j`. -/
+def listTerm (kinds : Array Kind) (ty : Ty → Term) : Ty → Term
+  | .var j => Unhygienic.run `(Strata.Mantle.TypeList.var $(quote j) (by decide))
+  | .list es => Unhygienic.run `(Strata.Mantle.TypeList.lit #[$(es.map fun e =>
+      if e.kind kinds == .list then Unhygienic.run
+        `(Strata.Mantle.TypeList.Elem.splice $(quote (match e with | .var j => j | _ => 0))
+          (by decide))
+      else Unhygienic.run `(Strata.Mantle.TypeList.Elem.ty $(ty e))),*])
+  -- Checking puts only lists in a list position.  Anywhere else this is a `TypeExpr`, which
+  -- fails to elaborate as a `TypeList`.
+  | e => ty e
+
+/-- An argument of a type constructor, as a `TypeArg`: a list or a type. -/
+def argTerm (kinds : Array Kind) (ty : Ty → Term) (a : Ty) : Term :=
+  if a.kind kinds == .list then Unhygienic.run `(Strata.Mantle.TypeArg.list $(listTerm kinds ty a))
+  else Unhygienic.run `(Strata.Mantle.TypeArg.ty $(ty a))
 
 /-- What emitting reads. -/
 structure EmitCtx where
@@ -153,34 +198,117 @@ def refAt (h : Name) (j : Nat) : Term :=
     match cx.inherited[h]? with
     | some info =>
       Unhygienic.run `(($(rootId (info.owner ++ info.lean ++ `ref)) (e := $(cx.stage j))))
-    | none => Unhygienic.run `(sorry)
+    | none => internalErrorTerm s!"type `{h}` is neither declared nor inherited"
 
-/-- A type, in stage `j`. -/
-partial def tyAt (j : Nat) : RTy → Term
+/-- A proof that `refAt h j` has the kinds its declaration gives: `rfl`, once an ancestor's
+`decl_ref` has exposed the declaration. -/
+def refKinds (h : Name) (j : Nat) : Term :=
+  match cx.ownTypes[h]? with
+  | some _ => Unhygienic.run `(rfl)
+  | none =>
+    let info := cx.inherited[h]?.getD default
+    -- Unfold this reference's `kinds` alone: the arguments' own kind proofs mention other
+    -- references' `kinds`, which a bare `rw [TypeRef.kinds]` may pick instead.
+    Unhygienic.run `(by
+      rw [Strata.Mantle.TypeRef.kinds.eq_1 $(cx.refAt h j),
+        $(rootId (info.owner ++ info.lean ++ `decl_ref)):ident]; rfl)
+
+/-- The `TypeInfo` of a type this block or an ancestor declares. -/
+def info (h : Name) : TypeInfo :=
+  match cx.ownTypes[h]? with
+  | some (i, _, _) => i
+  | none => cx.inherited[h]?.getD default
+
+/-- Whether every parameter of `h` is a type, so that `TypeExpr.app` applies it. -/
+def allTypes (h : Name) : Bool := (cx.info h).params.all (·.2.2 == .type)
+
+/-- A type, in stage `j`, in a scope whose variables have kinds `kinds`. -/
+partial def tyAt (j : Nat) (kinds : Array Kind) : Ty → Term
   | .var i => Unhygienic.run `(Strata.Mantle.TypeExpr.var $(quote i) (by decide))
   | .app h args =>
-    let as : Array Term := args.map (tyAt j)
+    let h := leanName h
     -- At `stage j` itself, not the `addTypes` expression an own `ref₀` is typed against,
     -- so that `simp` matches `TypeExpr.carry_app` on it.
-    Unhygienic.run
-      `(Strata.Mantle.TypeExpr.app (env := $(cx.stage j)) $(cx.refAt h j) #v[$as,*])
+    if cx.allTypes h then
+      let as : Array Term := args.map (tyAt j kinds)
+      Unhygienic.run `(Strata.Mantle.TypeExpr.app (env := $(cx.stage j)) $(cx.refAt h j)
+        #v[$as,*] $(cx.refKinds h j))
+    else
+      let as : Array Term := args.map (argTerm kinds (tyAt j kinds))
+      Unhygienic.run `(Strata.Mantle.TypeExpr.appK (env := $(cx.stage j)) $(cx.refAt h j)
+        #v[$as,*] $(cx.refKinds h j))
+  -- Checking puts a list only in a list position, which the `app` case and `listTerm` read.
+  -- Anywhere else it is a `TypeList`, which fails to elaborate as a `TypeExpr`.
+  | l@(.list _) => listTerm kinds (tyAt j kinds) l
 
-/-- A type, over a generic `e`, with the variables named `vars`. -/
-partial def tyGen (vars : Array Term) : RTy → Term
-  | .var i => vars[i]?.getD (Unhygienic.run `(sorry))
+/-- A type, over a generic `e`, with the variables named `vars`, of kinds `kinds`: a list
+variable's is a `TypeList`.  A list is a `TypeList`, the argument a list parameter's `T.ty`
+takes. -/
+partial def tyGen (vars : Array Term) (kinds : Array Kind) : Ty → Term
+  | .var i => vars[i]?.getD (internalErrorTerm s!"type variable #{i} is out of scope")
   | .app h args =>
-    let as : Array Term := args.map (tyGen vars)
-    let info := match cx.ownTypes[h]? with
-      | some (info, _, _) => info
-      | none => cx.inherited[h]?.getD default
+    let h := leanName h
+    let as : Array Term := args.map fun a =>
+      if a.kind kinds == .list then listTerm kinds (tyGen vars kinds) a else tyGen vars kinds a
+    let info := cx.info h
     Unhygienic.run `($(rootId (info.owner ++ info.lean ++ `ty)) $as*)
+  | l@(.list _) => listTerm kinds (tyGen vars kinds) l
+
+/-- Whether `t` is the list variable `j`, spliced: its level. -/
+def spliceOf? (kinds : Array Kind) : Ty → Option Nat
+  | .var j =>
+    match kinds[j]? with
+    | some .list => some j
+    | some .type | none => none
+  | _ => none
+
+/-- A type of an abbreviation's body, over a generic `e`, with the parameters named `vars`, of
+kinds `kinds`.  A list is a `TypeList`: its types in literals, each list parameter spliced in by
+`++`, and a list parameter alone its own `TypeList`.  Appending is how `instantiate` splices
+a list argument (`TypeExpr.instantiate_append`), and on literals it is the literal of both
+(`TypeExpr.lit_append_lit`), so `n.ty` builds what checking expands the
+abbreviation to with `Raw.instantiate`. -/
+partial def abbrevTy (vars : Array Term) (kinds : Array Kind) : Ty → Term
+  | .var i => vars[i]?.getD (internalErrorTerm s!"type variable #{i} is out of scope")
+  | .app h args =>
+    let h := leanName h
+    let as : Array Term := args.map fun a =>
+      if a.kind kinds == .list then abbrevList vars kinds a else abbrevTy vars kinds a
+    let info := cx.info h
+    Unhygienic.run `($(rootId (info.owner ++ info.lean ++ `ty)) $as*)
+  | l@(.list _) => abbrevList vars kinds l
+where
+  /-- A list of the body: runs of types as literals, appended to the list parameters spliced
+  between them. -/
+  abbrevList (vars : Array Term) (kinds : Array Kind) : Ty → Term
+    | .list es => Id.run do
+      let mut parts : Array Term := #[]
+      let mut run : Array Term := #[]
+      for e in es do
+        match spliceOf? kinds e with
+        | some j =>
+          unless run.isEmpty do
+            parts := parts.push (Unhygienic.run `(Strata.Mantle.TypeList.lit #[$run,*]))
+            run := #[]
+          parts := parts.push (vars[j]?.getD
+            (internalErrorTerm s!"list variable #{j} is out of scope"))
+        | none =>
+          run := run.push (Unhygienic.run `(Strata.Mantle.TypeList.Elem.ty
+            $(abbrevTy vars kinds e)))
+      if !run.isEmpty || parts.isEmpty then
+        parts := parts.push (Unhygienic.run `(Strata.Mantle.TypeList.lit #[$run,*]))
+      match parts.toList with
+      | [] => Unhygienic.run `(Strata.Mantle.TypeList.lit #[])
+      | p :: ps => ps.foldl (fun acc q => Unhygienic.run `($acc ++ $q)) p
+    | e => abbrevTy vars kinds e
 
 /-- A payload of the group added at stage `k`, whose members are `members`.  Every other type
 is read through `refs`, the stage's literal references (`payRefs`). -/
 partial def dataTy (k : Nat) (members : Array Name) (refs : Std.HashMap Name Term) :
-    RTy → Term
+    Ty → Term
   | .var l => Unhygienic.run `(Strata.Mantle.DataTy.var $(quote l))
   | .app h args =>
+    let h := leanName h
     let as : Array Term := args.map (dataTy k members refs)
     match members.idxOf? h with
     | some j =>
@@ -189,12 +317,9 @@ partial def dataTy (k : Nat) (members : Array Name) (refs : Std.HashMap Name Ter
           $(cx.internal s!"fresh{k}") $(quote j)) #[$as,*])
     | none =>
       Unhygienic.run `(Strata.Mantle.DataTy.ext $(refs[h]?.getD (cx.refAt h (k - 1))) #[$as,*])
-
-/-- The `TypeInfo` of a type this block or an ancestor declares. -/
-def info (h : Name) : TypeInfo :=
-  match cx.ownTypes[h]? with
-  | some (i, _, _) => i
-  | none => cx.inherited[h]?.getD default
+  | .list es =>
+    let es : Array Term := es.map (dataTy k members refs)
+    Unhygienic.run `(Strata.Mantle.DataTy.list #[$es,*])
 
 /-- A constant of the environment declaring `h`, by its name relative to that
 environment. -/
@@ -213,15 +338,23 @@ end EmitCtx
 /-! ## Commands -/
 
 /-- The heads of `t` that are not in `members`, added to `acc` in order. -/
-partial def collectHeads (members : Array Name) (t : RTy) (acc : Array Name) : Array Name :=
+partial def collectHeads (members : Array Name) (t : Ty) (acc : Array Name) : Array Name :=
   match t with
   | .var _ => acc
   | .app h args =>
+    let h := leanName h
     let acc := if members.contains h || acc.contains h then acc else acc.push h
     args.foldl (fun acc a => collectHeads members a acc) acc
+  | .list es => es.foldl (fun acc a => collectHeads members a acc) acc
+
+/-- Whether `t` has a list, when `kinds` gives each variable's kind. -/
+partial def hasList (kinds : Array Kind) : Ty → Bool
+  | t@(.var _) => t.kind kinds == .list
+  | .app _ args => args.any (hasList kinds)
+  | .list _ => true
 
 /-- A return type as a term: `some τ`, or `none` for a terminal instruction. -/
-def retTerm (ty : RTy → Term) : Option RTy → CommandElabM Term
+def retTerm (ty : Ty → Term) : Option Ty → CommandElabM Term
   | some t => `(some $(ty t))
   | none => `(none)
 
@@ -283,9 +416,15 @@ def polTerm (b : Bool) : Term :=
   if b then Unhygienic.run `(Strata.Mantle.Positivity.pos)
   else Unhygienic.run `(Strata.Mantle.Positivity.non)
 
-/-- A `TypeDecl` literal, from each parameter's name and whether it is positive. -/
-def typeDeclTerm (nameId : Ident) (params : Array (String × Bool)) : CommandElabM Term := do
-  let ps ← params.mapM fun (x, b) => `(⟨$(quote x), $(polTerm b)⟩)
+/-- A kind, as a term. -/
+def kindTerm : Kind → Term
+  | .type => Unhygienic.run `(Strata.Mantle.Kind.type)
+  | .list => Unhygienic.run `(Strata.Mantle.Kind.list)
+
+/-- A `TypeDecl` literal, from each parameter's name, whether it is positive, and its kind. -/
+def typeDeclTerm (nameId : Ident) (params : Array (String × Bool × Kind)) :
+    CommandElabM Term := do
+  let ps ← params.mapM fun (x, b, k) => `(⟨$(quote x), ⟨$(polTerm b), $(kindTerm k)⟩⟩)
   `(({ ann := (), name := $nameId, params := #[$ps,*] } :
       Strata.Mantle.TypeDecl _root_.Unit))
 
@@ -364,7 +503,7 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
     match stages[i] with
     | .types ds =>
       let decls ← ds.mapM fun d =>
-        typeDeclTerm (nameId d.c.envName) (d.params.map fun (x, _, b) => (x, b))
+        typeDeclTerm (nameId d.c.envName) (d.params.map fun (x, _, b, k) => (x, b, k))
       let ns : Array Term := ds.map fun d => nameId d.c.envName
       cs := cs.push (← defCmd (mkDoc s!"Stage {k}: types.") svis? false (I "types") #[]
         (← `(Array (Strata.Mantle.TypeDecl _root_.Unit))) (← `(#[$decls,*])))
@@ -389,7 +528,7 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
     | .data ms =>
       let members := ms.map (·.1.c.envName)
       let hdr ← ms.mapM fun (d, _) =>
-        typeDeclTerm (nameId d.c.envName) (d.params.map fun (x, _, b) => (x, b))
+        typeDeclTerm (nameId d.c.envName) (d.params.map fun (x, _, b, k) => (x, b, k))
       let hns : Array Term := ms.map fun (d, _) => nameId d.c.envName
       -- The constructors' names, then the case instructions'.
       let cns : Array Term :=
@@ -483,22 +622,27 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
       let mut pairs : Array Term := #[]
       for d in ds do
         let sig0 := mkIdent (`Internal ++ d.d.c.lean ++ `sig₀)
-        let tps : Array Term := d.d.typeParams.map fun (x, _) => quote x
-        let args ← d.args.mapM fun (x, ty) => `(⟨$(quote x), $(cx.tyAt (k - 1) ty)⟩)
+        let ks := d.d.typeParams.map (·.2.2)
+        let tyK := cx.tyAt (k - 1) ks
+        let tps ← d.d.typeParams.mapM fun (x, _, kd) => `(⟨$(quote x), $(kindTerm kd)⟩)
+        let args ← d.args.mapM fun (x, ty) => `(⟨$(quote x), $(tyK ty)⟩)
         let variadic ← match d.variadic with
-          | some (x, ty) => `(some ⟨$(quote x), $(cx.tyAt (k - 1) ty)⟩)
+          | some (x, ty) =>
+            if ty.kind ks == .list then
+              `(some ⟨$(quote x), Strata.Mantle.Variadic.spread $(listTerm ks tyK ty)⟩)
+            else `(some ⟨$(quote x), Strata.Mantle.Variadic.each $(tyK ty)⟩)
           | none => `(none)
         let regs ← d.regions.mapM fun r => do
-          let ps ← r.params.mapM fun (x, ty) => `(⟨$(quote x), $(cx.tyAt (k - 1) ty)⟩)
-          `(⟨$(quote r.name), Strata.Mantle.RegionSig.of #[$ps,*] $(cx.tyAt (k - 1) r.ret)⟩)
+          let ps ← r.params.mapM fun (x, ty) => `(⟨$(quote x), $(tyK ty)⟩)
+          `(⟨$(quote r.name), Strata.Mantle.RegionSig.of #[$ps,*] $(tyK r.ret)⟩)
         let succs ← d.succs.mapM fun sc => do
-          let ts := sc.payload.map (cx.tyAt (k - 1))
+          let ts := sc.payload.map tyK
           `(⟨$(quote sc.name), #[$ts,*]⟩)
         cs := cs.push (← defCmd (mkDoc s!"The signature of `{showName d.d.c.envName}`, in \
             stage {k - 1}.") svis? false sig0 #[]
           (← `(Strata.Mantle.InsnSig $prev))
           (← `({ ann := (), typeParams := #[$tps,*], argTypes := #[$args,*],
-                 variadic := $variadic, returnType := $(← retTerm (cx.tyAt (k - 1)) d.ret),
+                 variadic := $variadic, returnType := $(← retTerm tyK d.ret),
                  regions := #[$regs,*], succs := #[$succs,*] })))
         pairs := pairs.push (← `(($(nameId d.d.c.envName), $(cx.own sig0.getId))))
       let ns : Array Term := ds.map fun d => nameId d.d.c.envName
@@ -629,8 +773,9 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
       [$(cx.hId) : Strata.Mantle.RefinedBy $(cx.own `env) e] :
       Strata.Mantle.RefinedBy $pEnv e := ⟨$pf⟩))
   -- References, in every refinement of `env`.  The interface binds three names of its own:
-  -- the refinement `{e : Env Unit}` and, in `T.ty` and `n.ty`, the scope `{s : Nat}`, which
-  -- are implicit and keep these stable names so callers can pin them (`(e := Demo.env)`); and
+  -- the refinement `{e : Env Unit}` and, in `T.ty` and `n.ty`, the scope `{s : Array Kind}`,
+  -- which are implicit and keep these stable names so callers can pin them
+  -- (`(e := Demo.env)`); and
   -- the instance `[h : RefinedBy env e]`, which instance search fills, so it is hygienic
   -- (`cx.hId`).  `T.ty` and `n.ty` bind the type's parameters beside `e` and `s` under the
   -- user's names, so a parameter named `e` or `s` would capture one of them: it is renamed
@@ -639,10 +784,14 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
   cs := cs.push (← `(command| section))
   cs := cs.push (← `(command| variable {e : Strata.Mantle.Env _root_.Unit}
     [$(cx.hId) : Strata.Mantle.RefinedBy $(cx.own `env) e]))
-  let sBinder ← `(bracketedBinder| {s : Nat})
-  let paramBinders (xs : Array Ident) : CommandElabM (Array (TSyntax
+  let sBinders ← #[`s].mapM fun n =>
+    `(bracketedBinder| {$(mkIdent n) : _root_.Array Strata.Mantle.Kind})
+  -- A list parameter binds a list, any other a type.
+  let paramBinders (xs : Array Ident) (ks : Array Kind) : CommandElabM (Array (TSyntax
       ``Lean.Parser.Term.bracketedBinder)) :=
-    xs.mapM fun x => `(bracketedBinder| ($x : Strata.Mantle.TypeExpr e s))
+    (xs.zip ks).mapM fun
+      | (x, .list) => `(bracketedBinder| ($x : Strata.Mantle.TypeList e s))
+      | (x, .type) => `(bracketedBinder| ($x : Strata.Mantle.TypeExpr e s))
   let varIdents (xs : Array String) : Array Ident := Id.run do
     let stable : Array Name := #[`e, `s]
     let mut avoid : Array Name := stable ++ xs.map Name.mkSimple
@@ -675,20 +824,32 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
           declaration.") vis? true (mkIdent (d.c.lean ++ `decl_ref)) #[]
         (← `(($(cx.own (d.c.lean ++ `ref)) (e := e)).decl =
               $(← typeDeclTerm (cx.own (d.c.lean ++ `name))
-                  (d.params.map fun (x, _, b) => (x, b)))))
+                  (d.params.map fun (x, _, b, k) => (x, b, k)))))
         (← `(by rw [$(cx.own (d.c.lean ++ `ref)):ident, Strata.Mantle.decl_TypeRef_ofLE]
               <;> rfl)))
       let xs := varIdents (d.params.map (·.1))
-      let xts : Array Term := xs.map (fun x => (x : Term))
+      let ks := d.params.map (·.2.2.2)
+      let refT := cx.own (d.c.lean ++ `ref)
+      -- `decl_ref` exposes the declaration, whose kinds `rfl` computes.
+      let kindsPf ← `(by
+        rw [Strata.Mantle.TypeRef.kinds, $(cx.own (d.c.lean ++ `decl_ref)):ident]; rfl)
+      let body ← if ks.all (· == .type) then
+          `(Strata.Mantle.TypeExpr.app $refT #v[$(xs.map fun x => (x : Term)),*] $kindsPf)
+        else
+          let as ← (xs.zip ks).mapM fun
+            | (x, .list) => `(Strata.Mantle.TypeArg.list $x)
+            | (x, .type) => `(Strata.Mantle.TypeArg.ty $x)
+          `(Strata.Mantle.TypeExpr.appK $refT #v[$as,*] $kindsPf)
       cs := cs.push (← defCmd (mkDoc s!"`{en}`, as a type expression.") vis? cx.expose
-        (mkIdent (d.c.lean ++ `ty)) (#[sBinder] ++ (← paramBinders xs))
-        (← `(Strata.Mantle.TypeExpr e s))
-        (← `(Strata.Mantle.TypeExpr.app $(cx.own (d.c.lean ++ `ref)) #v[$xts,*])))
+        (mkIdent (d.c.lean ++ `ty)) (sBinders ++ (← paramBinders xs ks))
+        (← `(Strata.Mantle.TypeExpr e s)) body)
   for (d, info) in abbrevs do
     let xs := varIdents (d.params.map (·.1))
     cs := cs.push (← defCmd (docOr d.c.doc? s!"The abbreviation `{showName d.c.envName}`.") vis?
-      cx.expose (mkIdent (d.c.lean ++ `ty)) (#[sBinder] ++ (← paramBinders xs))
-      (← `(Strata.Mantle.TypeExpr e s)) (cx.tyGen (xs.map fun x => (x : Term)) info.body))
+      cx.expose (mkIdent (d.c.lean ++ `ty))
+      (sBinders ++ (← paramBinders xs info.params))
+      (← `(Strata.Mantle.TypeExpr e s))
+      (cx.abbrevTy (xs.map fun x => (x : Term)) info.params info.body))
   -- Constructors and case instructions, as instructions: the signature written out against
   -- `e`, and the stage's reference cast to it by `simp` over `InsnSig.ext_toRaw`.
   for h : i in [0:stages.size] do
@@ -701,11 +862,14 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
       $(cx.internal s!"adm{k}"))
     for (d, ctors, _) in ms do
       let n := d.params.size
-      let vars ← (Array.range n).mapM fun l =>
-        `(Strata.Mantle.TypeExpr.var $(quote l) (by decide))
-      let ty := cx.tyGen vars
-      let tps : Array Term := d.params.map fun (x, _, _) => quote x
-      let retR : RTy := .app d.c.envName ((Array.range n).map RTy.var)
+      let ks := d.params.map (·.2.2.2)
+      let vars ← ks.zipIdx.mapM fun
+        | (.type, l) => `(Strata.Mantle.TypeExpr.var $(quote l) (by decide))
+        | (.list, l) => `(Strata.Mantle.TypeList.var $(quote l) (by decide))
+      let ty := cx.tyGen vars ks
+      let tps ← d.params.mapM fun (x, _, _, kd) => `(⟨$(quote x), $(kindTerm kd)⟩)
+      -- A list parameter is the literal that splices it.
+      let retR : Ty := .app (mantleName d.c.envName) (TypeExpr.Raw.vars ks)
       for c in ctors do
         let en := showName c.d.c.envName
         let sigId := mkIdent (c.d.c.lean ++ `sig)
@@ -737,17 +901,19 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
                     Option.map_map])
                   <;> simp [$[$unfolds:ident],*,
                     Strata.Mantle.InsnSig.ofLE, Strata.Mantle.InsnSig.carry,
-                    Strata.Mantle.TypeExpr.Raw.vars,
+                    Strata.Mantle.TypeExpr.Raw.vars, Strata.Mantle.TypeExpr.Raw.varsFrom,
                     Strata.Mantle.TypeDecl.arity, Function.comp_def])
                 (Strata.Mantle.InsnRef.ofLE (s := $addDataTerm)
                   $(cx.liftTo k) $(cx.own (`Internal ++ c.d.c.lean ++ `ref₀))))))
     for (md, _, d) in ms do
       let en := showName d.d.c.envName
       let sigId := mkIdent (d.d.c.lean ++ `sig)
-      let vars ← (Array.range d.d.typeParams.size).mapM fun l =>
-        `(Strata.Mantle.TypeExpr.var $(quote l) (by decide))
-      let ty := cx.tyGen vars
-      let tps : Array Term := d.d.typeParams.map fun (x, _) => quote x
+      let ks := d.d.typeParams.map (·.2.2)
+      let vars ← ks.zipIdx.mapM fun
+        | (.type, l) => `(Strata.Mantle.TypeExpr.var $(quote l) (by decide))
+        | (.list, l) => `(Strata.Mantle.TypeList.var $(quote l) (by decide))
+      let ty := cx.tyGen vars ks
+      let tps ← d.d.typeParams.mapM fun (x, _, kd) => `(⟨$(quote x), $(kindTerm kd)⟩)
       let args ← d.args.mapM fun (x, t) => `(⟨$(quote x), $(ty t)⟩)
       let succs ← d.succs.mapM fun sc => do
         let ts := sc.payload.map ty
@@ -777,7 +943,7 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
                   Strata.Mantle.Env.succs_caseSig])
                 <;> simp [$[$unfolds:ident],*,
                   Strata.Mantle.InsnSig.ofLE, Strata.Mantle.InsnSig.carry,
-                  Strata.Mantle.TypeExpr.Raw.vars,
+                  Strata.Mantle.TypeExpr.Raw.vars, Strata.Mantle.TypeExpr.Raw.varsFrom,
                   Strata.Mantle.TypeDecl.arity, Strata.Mantle.Name.lastString,
                   Function.comp_def])
               (Strata.Mantle.InsnRef.ofLE (s := $addDataTerm)
@@ -792,13 +958,17 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
       -- The signature, written against `e` from public pieces: the types' `ty`, `var` and
       -- `RegionSig.of`.  `decide` refuses goals over the free `e`, so `simp` proves the
       -- distinctness obligations.
-      let vars ← (Array.range d.d.typeParams.size).mapM fun l =>
-        `(Strata.Mantle.TypeExpr.var $(quote l) (by decide))
-      let ty := cx.tyGen vars
-      let tps : Array Term := d.d.typeParams.map fun (x, _) => quote x
+      let ks := d.d.typeParams.map (·.2.2)
+      let vars ← ks.zipIdx.mapM fun
+        | (.type, l) => `(Strata.Mantle.TypeExpr.var $(quote l) (by decide))
+        | (.list, l) => `(Strata.Mantle.TypeList.var $(quote l) (by decide))
+      let ty := cx.tyGen vars ks
+      let tps ← d.d.typeParams.mapM fun (x, _, kd) => `(⟨$(quote x), $(kindTerm kd)⟩)
       let args ← d.args.mapM fun (x, t) => `(⟨$(quote x), $(ty t)⟩)
       let variadic ← match d.variadic with
-        | some (x, t) => `(some ⟨$(quote x), $(ty t)⟩)
+        | some (x, t) =>
+          if t.kind ks == .list then `(some ⟨$(quote x), Strata.Mantle.Variadic.spread $(ty t)⟩)
+          else `(some ⟨$(quote x), Strata.Mantle.Variadic.each $(ty t)⟩)
         | none => `(none)
       let regs ← d.regions.mapM fun r => do
         let ps ← r.params.mapM fun (x, t) => `(⟨$(quote x), $(ty t)⟩)
@@ -823,6 +993,8 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
         heads := collectHeads #[] r.ret heads
       for sc in d.succs do
         for t in sc.payload do heads := collectHeads #[] t heads
+      let tys : Array Ty := d.args.map (·.2) ++ (d.variadic.map (·.2)).toArray ++ d.ret.toArray ++
+        d.regions.flatMap (fun r => r.params.map (·.2) |>.push r.ret) ++ d.succs.flatMap (·.payload)
       -- One splice: an empty one between fixed entries, when the signature names no type,
       -- would leave an empty entry.
       let lemmas : Array Ident :=
@@ -831,7 +1003,7 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
           let inf := cx.info hd
           #[cx.ownOrInherited hd (inf.lean ++ `ty), cx.ownOrInherited hd
             (inf.lean ++ (if cx.ownTypes.contains hd then `ref else `name_ref))]) ++
-        insnCastLemmas
+        insnCastLemmas ++ (if tys.any (hasList ks) then insnCastListLemmas else #[])
       cs := cs.push (← defCmd (mkDoc s!"`{en}`, in stage {k}.") svis? false
         (mkIdent (`Internal ++ d.d.c.lean ++ `ref₀)) #[]
         (← `(Strata.Mantle.InsnRef $(cx.stage k)
@@ -887,8 +1059,8 @@ def elabEnvironment (doc? : Option (TSyntax ``Lean.Parser.Command.docComment))
   let envNs := (← getCurrNamespace) ++ envShort
   let (res?, failed) ← (do
       let env ← getEnv
-      unless env.contains `Strata.Mantle.Env.addInsns do
-        err kw "an environment needs `public import StrataMantle.Env`"
+      unless env.contains `Strata.Mantle.RefinedBy do
+        err kw "an environment needs `public import StrataMantle.Env.Refine`"
       if (env.getModuleIdx? `StrataMantle.Env.WF).isNone then
         err kw "building an environment needs `import StrataMantle.Env.WF`"
       let parent ← match p? with

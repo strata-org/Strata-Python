@@ -41,11 +41,11 @@ open Strata.Mantle.RegionTest
 
 private abbrev E := Reg.env
 
-private def boolT : TypeExpr E 0 := Base.Bool.ty
-private def intT : TypeExpr E 0 := Base.Int.ty
-private def codeT : TypeExpr E 0 := Base.Code.ty
-private def refIntT : TypeExpr E 0 := Base.Ref.ty intT
-private def unitT : TypeExpr E 0 := Base.Unit.ty
+private def boolT : TypeExpr E := Base.Bool.ty
+private def intT : TypeExpr E := Base.Int.ty
+private def codeT : TypeExpr E := Base.Code.ty
+private def refIntT : TypeExpr E := Base.Ref.ty intT
+private def unitT : TypeExpr E := Base.Unit.ty
 
 /-- `zero` is used three times, `one` once, as a successor's argument, and `unused` never. -/
 private def counter : Except Errors (Func E Unit) :=
@@ -55,12 +55,12 @@ private def counter : Except Errors (Func E Unit) :=
     let _ ← startFreshBlock #[c] "entry"
     let zero ← emitConst (.str .base "zero") (.int 0)
     let _ ← emitConst (.str .base "unused") (.bool true)
-    let cell ← emitApply (.str .base "cell") refIntT Base.refNew #v[intT] #[zero]
-    let _ ← emitApply (.str .base "unit") unitT Base.refSet #v[intT] #[cell, zero]
+    let cell ← emitApply (.str .base "cell") refIntT Base.refNew #[zero]
+    let _ ← emitApply (.str .base "unit") unitT Base.refSet (typeArgs := ta[intT]) #[cell, zero]
     let one ← emitConst (.str .base "one") (.int (-1))
     finishBlock (.branch () c.id (goto done #[one]) (goto done #[zero]))
     let _ ← startBlockWith done (.str .base "v") intT
-    let r ← emitApply (.str .base "r") intT Base.refGet #v[intT] #[cell]
+    let r ← emitApply (.str .base "r") intT Base.refGet #[cell]
     finishBlock (.ret () r)
 
 /-- A reference to `counter`, returned. -/
@@ -80,7 +80,7 @@ private def pick : Except Errors (Func E Unit) :=
     let els := region #[] (base := "else") do
       let two ← emitConst (.str .base "two") (.int 2)
       finishBlock (.ret () two)
-    let r ← emitApply (.str .base "r") intT Reg.«if» #v[intT] #[c.id] (regions := #[thn, els])
+    let r ← emitApply (.str .base "r") intT Reg.«if» #[c.id] (regions := #[thn, els])
     finishBlock (.ret () r)
 
 private def m : Except Errors (Module.Raw E Unit) :=

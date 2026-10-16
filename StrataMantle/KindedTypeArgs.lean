@@ -1,0 +1,531 @@
+/-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+module
+public import StrataMantle.Env
+import StrataMantle.Env.WF
+public meta import Lean.Elab.Term
+public meta import Lean.Elab.Tactic.Basic
+public meta import Lean.Elab.SyntheticMVars
+public meta import Lean.Meta.Tactic.Util
+
+set_option autoImplicit false
+
+/-!
+# Type arguments checked by kind
+
+`KindedTypeArgs env scope ks` is a list of type arguments, one per kind of `ks`: a type for
+`.type` and a list of types for `.list`.  The kinds are its index, so Lean checks the count and
+each argument's kind where the arguments are written.  It is the builder's form of an
+application's type arguments; `toTypeArgs` turns it into the IR's `TypeArgs`, an array with a
+proof of its kinds, with no proof to write.
+
+`KindedTypeArgsFor r type` is the `KindedTypeArgs` an application of the instruction `r` takes,
+one per type parameter of its signature.  `type` is the application's result type, `none` for a
+terminal instruction; it does not constrain the arguments, and is there for inference.
+
+* `ta[e₁, e₂, …]` writes the arguments.  Each element is elaborated at its parameter's kind: a
+  type, or a list of types, written `[t₁, t₂, …]` or given as a `TypeList`.  A bare type name
+  `X` stands for `X.ty`.
+* `infer_type_args`, the builder's default, infers them from the result type, by matching the
+  signature's result type against `type`.  A list literal in it may splice one list parameter
+  among other elements: those match the caller's elements at either end, and the parameter
+  binds the run between them.  Parameters that do not occur in the result, those of a terminal
+  instruction, and those of a literal that splices two lists, must be written with `ta[…]`.
+* `KindedTypeArgs.check?` checks arguments given as data, an array of `TypeArg`s.
+
+`ta[…]` and `infer_type_args` are scoped to `Strata.Mantle`, so `ta[` is a token only where
+that namespace is open.  The builder's default argument is already parsed, so a caller outside
+the namespace still gets inference.
+-/
+
+namespace Strata.Mantle
+
+public section
+
+/-- Type arguments in `scope`, one per kind of `ks`, each of its kind. -/
+inductive KindedTypeArgs {α : Type} (env : Env α) (scope : Array Kind) : List Kind → Type
+  | nil : KindedTypeArgs env scope []
+  | ty {ks : List Kind} (t : TypeExpr env scope) (rest : KindedTypeArgs env scope ks) :
+      KindedTypeArgs env scope (.type :: ks)
+  | list {ks : List Kind} (l : TypeList env scope) (rest : KindedTypeArgs env scope ks) :
+      KindedTypeArgs env scope (.list :: ks)
+
+namespace KindedTypeArgs
+
+variable {α : Type} {env : Env α} {scope : Array Kind}
+
+/-- The arguments as a list, in order. -/
+@[expose] def toList {ks : List Kind} : KindedTypeArgs env scope ks → List (TypeArg env scope)
+  | .nil => []
+  | .ty t rest => .ty t :: rest.toList
+  | .list l rest => .list l :: rest.toList
+
+/-- Each argument has its position's kind. -/
+private theorem kinds_toList {ks : List Kind} :
+    (l : KindedTypeArgs env scope ks) → l.toList.map TypeArg.kind = ks
+  | .nil => rfl
+  | .ty _ rest => by simp [toList, kinds_toList rest]
+  | .list _ rest => by simp [toList, kinds_toList rest]
+
+/-- The arguments in the IR's form, for the variables of `params`. -/
+@[expose] def toTypeArgs {params : Array Kind} (l : KindedTypeArgs env scope params.toList) :
+    TypeArgs env params scope :=
+  ⟨l.toList.toArray, by simpa using kinds_toList l⟩
+
+/-- A kind as error messages name it: `a type` or `a list of types`. -/
+def kindText : Kind → String
+  | .type => "a type"
+  | .list => "a list of types"
+
+/-- A kind error, as the builder words it. -/
+def errorText : KindError → String
+  | .count given expected => s!"{given} type argument(s) given, but it takes {expected}"
+  | .kind i given expected =>
+    s!"type argument {i + 1} is {kindText given}, but its parameter takes {kindText expected}"
+
+/-- `args`, as arguments of their own kinds. -/
+@[expose] def ofList : (args : List (TypeArg env scope)) →
+    KindedTypeArgs env scope (args.map TypeArg.kind)
+  | [] => .nil
+  | ⟨.type, t⟩ :: as => .ty t (ofList as)
+  | ⟨.list, l⟩ :: as => .list l (ofList as)
+
+/-- The IR's type arguments, in the builder's form. -/
+@[expose] def ofTypeArgs {params : Array Kind} (a : TypeArgs env params scope) :
+    KindedTypeArgs env scope params.toList :=
+  a.kinds ▸ ofList a.args.toList
+
+/-- `ofList` keeps the arguments. -/
+theorem toList_ofList : ∀ args : List (TypeArg env scope), (ofList args).toList = args
+  | [] => rfl
+  | ⟨.type, _⟩ :: as => by simp [ofList, toList, toList_ofList as]
+  | ⟨.list, _⟩ :: as => by simp [ofList, toList, toList_ofList as]
+
+/-- Casting along the kinds keeps the arguments. -/
+private theorem toList_cast {ks₁ ks₂ : List Kind} (h : ks₁ = ks₂)
+    (l : KindedTypeArgs env scope ks₁) : (h ▸ l).toList = l.toList := by
+  subst h
+  rfl
+
+/-- `ofTypeArgs` keeps the arguments. -/
+@[simp] theorem toTypeArgs_ofTypeArgs {params : Array Kind} (a : TypeArgs env params scope) :
+    (ofTypeArgs a).toTypeArgs = a := by
+  obtain ⟨args, h⟩ := a
+  simp only [toTypeArgs, ofTypeArgs, toList_cast, toList_ofList, Array.toArray_toList]
+
+/-- `args` as arguments for `ks`, or why they do not fit: for arguments given as data.  The one
+check `TypeArgs.check?` decides the fit and gives the reason. -/
+def check? (ks : List Kind) (args : Array (TypeArg env scope)) :
+    Except String (KindedTypeArgs env scope ks) :=
+  match TypeArgs.check? ks.toArray args with
+  | .ok a => .ok (ofTypeArgs a)
+  | .error e => .error (errorText e)
+
+end KindedTypeArgs
+
+/-- The type arguments of an application of `r` whose result has type `type`, `none` for a
+terminal instruction.  `type` does not constrain them: it is there for `infer_type_args`. -/
+@[expose, reducible] def KindedTypeArgsFor {α : Type} {env : Env α} {isig : InsnSig env}
+    (_r : InsnRef env isig) (_type : Option (TypeExpr env)) : Type :=
+  KindedTypeArgs env #[] isig.scope.toList
+
+end
+
+/-! ## Elaboration -/
+
+/-- `ta[e₁, e₂, …]`: the type arguments `e₁, e₂, …`, each of its parameter's kind. -/
+scoped syntax (name := typeArgsLit) "ta[" withoutPosition(term,*,?) "]" : term
+
+/-- `infer_type_args`: the type arguments of an application, inferred from its result type. -/
+scoped syntax (name := inferTypeArgs) "infer_type_args" : tactic
+
+public meta section
+
+open Lean Elab Term Meta
+
+namespace TypeArgElab
+
+/-- The elements of a list literal, reducing it. -/
+partial def listElems? (l : Expr) : MetaM (Option (List Expr)) := do
+  let l ← whnf l
+  match_expr l with
+  | List.nil _ => return some []
+  | List.cons _ x rest => return (← listElems? rest).map (x :: ·)
+  | _ => return none
+
+/-- The kinds of `ks`, a `List Kind` that reduces to a literal: `true` for a list. -/
+def kindsOf? (ks : Expr) : MetaM (Option (List Bool)) := do
+  let some es ← listElems? ks | return none
+  let mut out := #[]
+  for k in es do
+    let k ← whnf k
+    if k.isConstOf ``Kind.type then out := out.push false
+    else if k.isConstOf ``Kind.list then out := out.push true
+    else return none
+  return some out.toList
+
+/-- A kind, for an error message. -/
+def kindText (isList : Bool) : String := if isList then "a list of types" else "a type"
+
+/-- The kinds, for an error message: `[a type, a list of types]`. -/
+def kindsText (ks : List Bool) : String := s!"[{", ".intercalate (ks.map kindText)}]"
+
+/-- Elaborate `stx` against `expected`, failing rather than producing `sorry`. -/
+def elabStrict (stx : Term) (expected : Expr) : TermElabM Expr :=
+  withoutErrToSorry do
+    let e ← elabTermEnsuringType stx expected
+    synthesizeSyntheticMVarsNoPostponing
+    instantiateMVars e
+
+/-- Elaborate `stx` against `expected`, a `TypeExpr`.  If it fails and `stx` is an identifier
+`X`, elaborate `X.ty`. -/
+def elabType (stx : Term) (expected : Expr) : TermElabM Expr := do
+  let s ← saveState
+  try elabStrict stx expected
+  catch ex =>
+    let `($id:ident) := stx | throw ex
+    let failed ← saveState
+    s.restore
+    try elabStrict (mkIdentFrom id (id.getId ++ `ty)) expected
+    catch _ =>
+      failed.restore
+      throw ex
+
+/-- Whether `stx` elaborates with `elab`, leaving no trace. -/
+def elaboratesAs (act : TermElabM Expr) : TermElabM Bool := do
+  let s ← saveState
+  let ok ← try discard act; pure true catch _ => pure false
+  s.restore
+  return ok
+
+/-- Who takes the arguments, for an error message. -/
+def whoText (who? : Option Expr) : MessageData :=
+  match who? with
+  | some r => m!"{r}"
+  | none => m!"the instruction"
+
+/-- The argument `stx` at position `i` (from 0), of kind `isList`, in `env` and `scope`. -/
+def elabArg (who? : Option Expr) (env scope : Expr) (i : Nat) (isList : Bool) (stx : Term) :
+    TermElabM Expr := do
+  let tyT ← mkAppM ``TypeExpr #[env, scope, mkConst ``Kind.type]
+  let listT ← mkAppM ``TypeList #[env, scope]
+  let wrong (given : Bool) : TermElabM Expr :=
+    throwErrorAt stx m!"type argument {i + 1} of {whoText who?} is {kindText given}, but its \
+      parameter takes {kindText isList}"
+  let literal? : Option (Array Term) := match stx with
+    | `([$ts,*]) => some ts.getElems
+    | _ => none
+  let s ← saveState
+  if !isList then
+    if literal?.isSome then return ← wrong true
+    try elabType stx tyT
+    catch ex =>
+      s.restore
+      if ← elaboratesAs (elabStrict stx listT) then wrong true else throw ex
+  else if let some ts := literal? then
+    let ts ← ts.mapM (elabType · tyT)
+    mkAppM ``TypeList.ofTypes #[← mkArrayLit tyT ts.toList]
+  else
+    try elabStrict stx listT
+    catch ex =>
+      s.restore
+      if ← elaboratesAs (elabType stx tyT) then wrong false else throw ex
+
+/-- The chain of arguments `as`, of kinds `ks`. -/
+def chain (env scope : Expr) : List (Bool × Expr) → MetaM Expr
+  | [] => mkAppOptM ``KindedTypeArgs.nil #[none, env, scope]
+  | (isList, a) :: rest => do
+    let r ← chain env scope rest
+    mkAppOptM (if isList then ``KindedTypeArgs.list else ``KindedTypeArgs.ty)
+      #[none, env, scope, none, a, r]
+
+/-- The expected type, unfolded to `KindedTypeArgs env scope ks`: `env`, `scope`, the kinds, and
+the instruction if the type was `KindedTypeArgsFor r _`. -/
+def expectedArgs (expected : Expr) :
+    TermElabM (Expr × Expr × Option (List Bool) × Option Expr) := do
+  let expected ← instantiateMVars expected
+  let who? := match_expr expected with
+    | KindedTypeArgsFor _ _ _ r _ => some r
+    | _ => none
+  let unfolded ← whnfR expected
+  match_expr unfolded with
+  | KindedTypeArgs _ env scope ks => return (env, scope, ← kindsOf? ks, who?)
+  | _ => throwError "ta[…] builds type arguments, but {expected} is expected"
+
+/-! ## Inference -/
+
+/-- Bind variable `i` to `t`, or check it against an earlier binding. -/
+def bindVar (i : Expr) (t : Expr) : StateT (Array (Option Expr)) MetaM Bool := do
+  let some i ← (evalNat (← whnf i)).run | return false
+  let bs ← get
+  match bs[i]? with
+  | some none => set (bs.setIfInBounds i (some t)); return true
+  | some (some t₀) => isDefEq t t₀
+  | none => return false
+
+/-- The elements of a vector or array literal. -/
+def vecElems? (v : Expr) : MetaM (Option (List Expr)) := do
+  let ty ← whnfR (← inferType v)
+  let arr ← if ty.isAppOf ``Vector then mkAppM ``Vector.toArray #[v] else pure v
+  listElems? (← mkAppM ``Array.toList #[arr])
+
+/-- `TypeList.ofTypes #[t₁, …]` as the literal it stands for, `TypeList.lit #[.ty t₁, …]`.
+Unfolding `ofTypes` gives `lit (ts.map .ty)`, whose `Array.map` does not reduce. -/
+def litOfTypes? (e : Expr) : MetaM (Option Expr) := do
+  let_expr TypeList.ofTypes α env scope ts := e | return none
+  let some xs ← vecElems? ts | return none
+  let es ← xs.mapM fun x => mkAppOptM ``TypeList.Elem.ty #[α, env, scope, some x]
+  let elemT ← mkAppOptM ``TypeList.Elem #[α, env, scope]
+  return some (← mkAppOptM ``TypeList.lit #[α, env, scope, ← mkArrayLit elemT es])
+
+/-- `e`, unfolded until its head is the constant `c`.  A `TypeList.ofTypes` unfolds to its
+literal. -/
+partial def unfoldTo (c : Lean.Name) (e : Expr) : MetaM (Option Expr) := do
+  let e ← whnfCore e
+  if e.getAppFn.isConstOf c then return some e
+  if let .fvar x := e then
+    if let some v ← x.getValue? then return ← unfoldTo c v
+  if let some l ← litOfTypes? e then return ← unfoldTo c l
+  match ← unfoldDefinition? e with
+  | some e₁ => unfoldTo c e₁
+  | none => return none
+
+/-- `e`, for an error message: each proof it names is wrapped so that it prints as `⋯`, and a
+message does not show the auxiliary lemmas a signature's proofs elaborate to. -/
+def forMessage (e : Expr) : MetaM Expr :=
+  transform e (post := fun x => do
+    if x.isConst && (← isProof x) then return .done (← mkAppM ``id #[x])
+    return .continue)
+
+/-- The list variable `l` is, if it is one: `TypeList.var j`, or the literal `[*j]`. -/
+def listVar? (l : Expr) : MetaM (Option Expr) := do
+  match_expr l with
+  | TypeList.var _ _ _ j _ => return some j
+  | TypeList.lit _ _ _ es =>
+    let some [e] ← vecElems? es | return none
+    match_expr e with
+    | TypeList.Elem.splice _ _ _ j _ => return some j
+    | _ => return none
+  | _ => return none
+
+/-- The elements of `l`, if it reduces to a literal: `TypeList.lit`, `TypeList.var`, which is
+`[*j]`, `TypeList.ofTypes`, whose elements are its types, and `l₁ ++ l₂` (`TypeExpr.append`)
+of two of them, whose elements are theirs one after the other (`TypeExpr.lit_append_lit`), as an
+abbreviation's `n.ty` builds its lists. -/
+partial def litElems? (l : Expr) : MetaM (Option (List Expr)) := do
+  let l ← whnfCore l.headBeta
+  match_expr l with
+  | TypeList.lit _ _ _ es => vecElems? es
+  | TypeList.var α env scope j h =>
+    return some [← mkAppOptM ``TypeList.Elem.splice #[α, env, scope, some j, some h]]
+  | TypeList.ofTypes α env scope ts =>
+    let some xs ← vecElems? ts | return none
+    return some (← xs.mapM fun x => mkAppOptM ``TypeList.Elem.ty #[α, env, scope, some x])
+  | TypeExpr.append _ _ _ a b => appended a b
+  | HAppend.hAppend _ _ _ _ a b => appended a b
+  | Append.append _ _ a b => appended a b
+  | _ =>
+    if let .fvar x := l then
+      if let some v ← x.getValue? then return ← litElems? v
+    match ← unfoldDefinition? l with
+    | some l₁ => litElems? l₁
+    | none => return none
+where
+  /-- The elements of `a`, then those of `b`. -/
+  appended (a b : Expr) : MetaM (Option (List Expr)) := do
+    let some xs ← litElems? a | return none
+    let some ys ← litElems? b | return none
+    return some (xs ++ ys)
+
+/-- The list of the elements `es`, in the environment and scope of the list `l`: `ofTypes` of
+their types if each is a type, as `ta[…]` writes it, and their literal otherwise. -/
+def listOf (l : Expr) (es : List Expr) : MetaM Expr := do
+  let ty ← whnfR (← inferType l)
+  let_expr TypeExpr α env scope _ := ty
+    | throwError "infer_type_args: {l} is not a list of types"
+  let types := es.filterMap fun e => match_expr e with
+    | TypeList.Elem.ty _ _ _ t => some t
+    | _ => none
+  if types.length == es.length then
+    let tyT ← mkAppOptM ``TypeExpr #[α, env, scope, mkConst ``Kind.type]
+    mkAppOptM ``TypeList.ofTypes #[α, env, scope, ← mkArrayLit tyT types]
+  else
+    let elemT ← mkAppOptM ``TypeList.Elem #[α, env, scope]
+    mkAppOptM ``TypeList.lit #[α, env, scope, ← mkArrayLit elemT es]
+
+mutual
+
+/-- Match the signature's type `pat` against the caller's `tgt`, binding the variables of
+`pat` to parts of `tgt`.  A list variable binds the whole of the caller's list.  `who` names the
+instruction, for the error a literal with two splices gives. -/
+partial def matchTy (who : MessageData) (pat tgt : Expr) :
+    StateT (Array (Option Expr)) MetaM Bool := do
+  let pat := pat.headBeta
+  let pat := (← litOfTypes? pat).getD pat
+  if let some j ← listVar? pat then return ← bindVar j tgt
+  if let some ok ← matchLit? who pat tgt then return ok
+  match_expr pat with
+  | TypeExpr.var _ _ _ i _ => bindVar i tgt
+  | _ =>
+    -- A hand-written signature carried into an extension: `carry` keeps the expression, so
+    -- what is under it matches `tgt`, which is already in the extension.  The environment is an
+    -- implicit argument of everything under it, which matching skips.
+    if pat.isAppOf ``TypeExpr.carry then
+      let some inner := pat.getAppArgs.back? | return false
+      return ← matchTy who inner tgt
+    let .const c _ := pat.getAppFn | return false
+    let some tgt ← unfoldTo c tgt | return false
+    let pargs := pat.getAppArgs
+    let targs := tgt.getAppArgs
+    if pargs.size ≠ targs.size then return false
+    let info ← getFunInfoNArgs pat.getAppFn pargs.size
+    for h : i in [:pargs.size] do
+      let explicit := (info.paramInfo[i]?.map (·.binderInfo.isExplicit)).getD true
+      let pa := pargs[i]
+      let some ta := targs[i]? | return false
+      if !explicit || (← isProof pa) then continue
+      let paTy ← whnfR (← inferType pa)
+      if paTy.isAppOf ``TypeExpr || paTy.isAppOf ``TypeList then
+        unless ← matchTy who pa ta do return false
+      else if paTy.isAppOf ``Vector || paTy.isAppOf ``Array then
+        let (some ps, some ts) := (← vecElems? pa, ← vecElems? ta) | return false
+        if ps.length ≠ ts.length then return false
+        for (p, t) in ps.zip ts do
+          unless ← matchTy who p t do return false
+      else
+        unless ← isDefEq pa ta do return false
+    return true
+
+/-- Match the literal `pat` against `tgt`, if `pat` is a literal: `none` if it is not.  The
+elements before the literal's splice match the caller's first elements one by one, those after
+it the caller's last, and the splice binds the run between them.  With no splice the literals
+match element by element; with two the match is ambiguous, and an error. -/
+partial def matchLit? (who : MessageData) (pat tgt : Expr) :
+    StateT (Array (Option Expr)) MetaM (Option Bool) := do
+  let_expr TypeList.lit _ _ _ es := pat | return none
+  let some ps ← vecElems? es | return none
+  let splices := ps.zipIdx.filterMap fun (p, i) => match_expr p with
+    | TypeList.Elem.splice _ _ _ j _ => some (i, j)
+    | _ => none
+  if splices.length > 1 then
+    throwError "cannot infer the type arguments of {who}: it is ambiguous, with more than one \
+      splice in{indentExpr (← forMessage pat)}\npass them with `(typeArgs := ta[…])`"
+  let some ts ← litElems? tgt | return some false
+  let pairs (ps ts : List Expr) : StateT (Array (Option Expr)) MetaM Bool := do
+    for (p, t) in ps.zip ts do
+      unless ← matchTy who p t do return false
+    return true
+  match splices with
+  | [] =>
+    if ps.length ≠ ts.length then return some false
+    return some (← pairs ps ts)
+  | _ :: _ :: _ => return some false
+  | [(k, j)] =>
+    let m := ps.length - k - 1
+    let n := ts.length
+    if n < k + m then return some false
+    unless ← pairs (ps.take k) (ts.take k) do return some false
+    unless ← pairs (ps.drop (k + 1)) (ts.drop (n - m)) do return some false
+    return some (← bindVar j (← listOf tgt ((ts.drop k).take (n - k - m))))
+
+end
+
+/-- The names of a signature's type parameters. -/
+def paramNames (isig : Expr) : MetaM (List String) := do
+  let some ps ← listElems? (← mkAppM ``Array.toList #[← mkAppM ``InsnSig.typeParams #[isig]])
+    | return []
+  ps.mapM fun p => do
+    match ← whnf (← mkAppM ``Param.name #[p]) with
+    | .lit (.strVal s) => return s
+    | _ => return "?"
+
+/-- Infer the type arguments the goal `KindedTypeArgsFor r type` asks for. -/
+def inferArgs (goal : Expr) : MetaM Expr := do
+  let goal ← instantiateMVars goal
+  let some (r, isig, type) := match_expr goal with
+      | KindedTypeArgsFor _ _ isig r type => some (r, isig, type)
+      | _ => none
+    | throwError "infer_type_args: the goal is not the type arguments of an application"
+  let unfolded ← whnfR goal
+  let some (env, scope, ks) ← match_expr unfolded with
+      | KindedTypeArgs _ env scope ks => pure (some (env, scope, ks))
+      | _ => pure none
+    | throwError "infer_type_args: the goal is not the type arguments of an application"
+  let some kinds ← kindsOf? ks
+    | throwError "cannot infer the type arguments of {r}: the kinds of its type parameters do \
+        not reduce to a list; pass them with `(typeArgs := ta[…])`"
+  if kinds.isEmpty then return ← chain env scope []
+  let hint := "pass them with `(typeArgs := ta[…])`"
+  let ret ← whnf (← mkAppM ``InsnSig.returnType #[isig])
+  let some pat := match_expr ret with
+      | Option.some _ p => some p
+      | _ => none
+    | throwError "cannot infer the type arguments of {r}: it is terminal, with no result type \
+        to infer them from; {hint}"
+  let some tgt := match_expr (← whnf type) with
+      | Option.some _ t => some t
+      | _ => none
+    | throwError "cannot infer the type arguments of {r}: no result type is given; {hint}"
+  let (ok, bs) ← (matchTy m!"{r}" pat tgt).run (Array.replicate kinds.length none)
+  unless ok do
+    throwError "cannot infer the type arguments of {r}: its result type\
+      {indentExpr (← forMessage pat)}\ndoes not match{indentExpr (← forMessage tgt)}\n{hint}"
+  let names ← paramNames isig
+  let missing := (names.zip bs.toList).filterMap fun (n, b) => if b.isNone then some n else none
+  unless missing.isEmpty do
+    let missing := ", ".intercalate (missing.map (s!"`{·}`"))
+    throwError "cannot infer type argument(s) {missing} of {r}: they do not occur in its result \
+      type{indentExpr (← forMessage pat)}\n{hint}"
+  chain env scope (kinds.zip (bs.toList.filterMap id))
+
+end TypeArgElab
+
+end
+
+/-! ## The entry points
+
+Public, as the attributes require; their signatures need only `Lean.Elab.Term` and
+`Lean.Elab.Tactic.Basic`, so a module that imports this one does not load the rest of the
+elaborator. -/
+
+public meta section
+
+open Lean Elab Term Meta TypeArgElab
+
+namespace TypeArgElab
+
+@[term_elab typeArgsLit] def elabTypeArgsLit : TermElab := fun stx expected? => do
+  tryPostponeIfNoneOrMVar expected?
+  let some expected := expected?
+    | throwError "ta[…]: the type arguments' kinds are not known here"
+  let `(ta[$es,*]) := stx | throwUnsupportedSyntax
+  let (env, scope, ks?, who?) ← expectedArgs expected
+  let some ks := ks? | do
+    tryPostpone
+    throwError "ta[…]: the kinds of {whoText who?}'s type parameters do not reduce to a \
+      list; build the arguments with `KindedTypeArgs.check?`"
+  let es := es.getElems
+  if es.size ≠ ks.length then
+    throwError "{whoText who?} takes {ks.length} type argument(s), {kindsText ks}, but \
+      {es.size} are given"
+  let as ← (ks.zip es.toList).zipIdx.mapM fun ((k, e), i) =>
+    return (k, ← elabArg who? env scope i k e)
+  chain env scope as
+
+@[tactic inferTypeArgs] def evalInferTypeArgs : Tactic.Tactic := fun _ =>
+  Tactic.liftMetaTactic fun g => do
+    let e ← inferArgs (← g.getType)
+    unless ← isDefEq (← inferType e) (← g.getType) do
+      throwError "infer_type_args: the inferred arguments{indentExpr e}\ndo not have the \
+        goal's type"
+    g.assign e
+    return []
+
+end TypeArgElab
+
+end
+
+end Strata.Mantle

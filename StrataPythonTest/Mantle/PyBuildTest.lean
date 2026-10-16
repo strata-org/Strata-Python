@@ -60,7 +60,7 @@ the caller. -/
 private def f : Except Errors (Func Py.env Unit) :=
   buildFunc (Py.pn "f") #["x"] () fun args => do
     let y ← declareLocal "y"
-    let _ ← writeCell y (← emitFailing (.str .base "sum") Py.add #v[] #[args[0]!, ← intLit 1])
+    let _ ← writeCell y (← emitFailing (.str .base "sum") Py.add #[args[0]!, ← intLit 1])
     emitReturn (← readCell y (stem "y"))
 
 example : Holds (Func.WF ∅) f := by decide +kernel
@@ -207,7 +207,7 @@ private def kReturns : Except Errors (Func Py.env Unit) :=
     discard <| tryFinally
       (fun _ => discard <| getAttr x "foo")
       (fun prev => do
-        discard <| emitEffect (.str .base "pop") Py.popExcept #v[] #[prev]
+        discard <| emitEffect (.str .base "pop") Py.popExcept #[prev]
         emitReturnNone)
       (pure { normal := .unreachable, «return» := .unreachable, raise := .unreachable })
 
@@ -370,7 +370,7 @@ private def globals : Except Errors (Func Py.env Unit) :=
     let _ ← writeGlobal "m" "c" (← importModule "a.b")
     let _ ← writeGlobal "m" "y" (← importFrom "a.b" "x")
     let n ← loadGlobal "m" "n"
-    let sum ← emitFailing (.str .base "sum") Py.add #v[] #[n, ← intLit 1]
+    let sum ← emitFailing (.str .base "sum") Py.add #[n, ← intLit 1]
     let _ ← writeGlobal "m" "n" sum
     emitReturnNone
 
@@ -419,7 +419,7 @@ private def mAdd : Name := .str (.str .base "m") "add"
 private def addFn : Except Errors (Func Py.env Unit) :=
   buildFunc mAdd #["x"] () fun args => do
     let _ ← funcValue mAdd
-    emitReturn (← emitFailing (.str .base "sum") Py.add #v[] #[args[0]!, args[0]!])
+    emitReturn (← emitFailing (.str .base "sum") Py.add #[args[0]!, args[0]!])
 
 example : OptHolds (NameSet.of? #[mAdd]) (fun fs => Holds (Func.WF fs) addFn) := by
   decide +kernel
@@ -481,11 +481,11 @@ transfer leaves its region. -/
 
 private def c : Except Errors (Func Py.env Unit) :=
   buildFunc (Py.pn "c") #["xs", "ys"] () fun args => do
-    let acc ← emitTotal (.str .base "acc") Py.mkList #v[] #[]
+    let acc ← emitTotal (.str .base "acc") Py.mkList #[]
     forEach args[0]! fun x => do
       forEach args[1]! fun y => do
-        let s ← emitFailing (.str .base "s") Py.add #v[] #[x, y]
-        let _ ← emitEffect (.str .base "append") Py.listAppend #v[] #[acc, s]
+        let s ← emitFailing (.str .base "s") Py.add #[x, y]
+        let _ ← emitEffect (.str .base "append") Py.listAppend #[acc, s]
     emitReturn acc
 
 example : Holds (Func.WF ∅) c := by decide +kernel

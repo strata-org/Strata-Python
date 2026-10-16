@@ -337,13 +337,13 @@ Everything checked against `t` carries over to a refinement `s`, along any `LeBy
 namespace TypeExpr
 
 /-- Reinterpret in a refinement. -/
-public abbrev ofLE {s t : Env α} {R : α → α → Prop} (h : Env.LeBy R s t) {scope : Nat}
-    (e : TypeExpr s scope) : TypeExpr t scope :=
+public abbrev ofLE {s t : Env α} {R : α → α → Prop} (h : Env.LeBy R s t) {scope : Array Kind}
+    {k : Kind} (e : TypeExpr s scope k) : TypeExpr t scope k :=
   e.carry h.keepsTypes
 
 /-- Reinterpreting changes nothing an expression stands for. -/
 @[simp] public theorem toRaw_ofLE {s t : Env α} {R : α → α → Prop} (h : Env.LeBy R s t)
-    {scope : Nat} (e : TypeExpr s scope) : (e.ofLE h).toRaw = e.toRaw :=
+    {scope : Array Kind} {k : Kind} (e : TypeExpr s scope k) : (e.ofLE h).toRaw = e.toRaw :=
   toRaw_carry _ e
 
 end TypeExpr
@@ -369,24 +369,9 @@ public abbrev TypeRef.ofLE {s t : Env α} {arity : Nat} {R : α → α → Prop}
     (r.ofLE h₁).ofLE h₂ = r.ofLE (h₁.trans_true h₂) :=
   TypeRef.carry_carry _ _ r
 
-namespace TypeExpr
-
-/-- Reinterpreting a type variable gives the variable. -/
-@[simp] public theorem ofLE_var {s t : Env α} {R : α → α → Prop} (h : Env.LeBy R s t)
-    {scope : Nat} (i : Nat) (hi : i < scope) : (var (env := s) i hi).ofLE h = var i hi :=
-  carry_var _ i hi
-
-/-- Reinterpreting an application reinterprets the reference and the arguments. -/
-@[simp] public theorem ofLE_app {s t : Env α} {R : α → α → Prop} (h : Env.LeBy R s t)
-    {scope arity : Nat} (r : TypeRef s arity) (args : Vector (TypeExpr s scope) arity) :
-    (app r args).ofLE h = app (r.ofLE h) (args.map (·.ofLE h)) :=
-  carry_app _ r args
-
-end TypeExpr
-
 namespace RegionSig
 
-variable {scope : Nat}
+variable {scope : Array Kind}
 
 /-- Reinterpret in a refinement. -/
 public abbrev ofLE {s t : Env α} {R : α → α → Prop} (h : Env.LeBy R s t)
@@ -414,6 +399,22 @@ public abbrev ofLE {s t : Env α} {R : α → α → Prop} (h : Env.LeBy R s t)
   carry_of _ params returnType distinct
 
 end RegionSig
+
+namespace TypeArg
+
+variable {scope : Array Kind}
+
+/-- Reinterpret in a refinement. -/
+public abbrev ofLE {s t : Env α} {R : α → α → Prop} (h : Env.LeBy R s t)
+    (a : TypeArg s scope) : TypeArg t scope :=
+  a.carry h.keepsTypes
+
+/-- Reinterpreting changes nothing an argument or a variadic stands for. -/
+@[simp] public theorem toRaw_ofLE {s t : Env α} {R : α → α → Prop} (h : Env.LeBy R s t)
+    (a : TypeArg s scope) : (a.ofLE h).toRaw = a.toRaw :=
+  toRaw_carry _ a
+
+end TypeArg
 
 namespace InsnSig
 

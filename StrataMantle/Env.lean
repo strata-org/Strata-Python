@@ -122,14 +122,14 @@ theorem declOf?_eq_raw (s : Env α) (n : Name) : s.declOf? n = s.raw[n]? := rfl
 theorem mem_iff_mem_raw {s : Env α} {n : Name} : n ∈ s ↔ n ∈ s.raw :=
   ⟨mem_raw_of_mem, decide_eq_true⟩
 
-/-- `name` resolves to a type declaration of arity `arity` declared before position
-`i`.  A declaration at position `i` may refer only to such types. -/
-public def RefBefore (s : Env α) (i : Nat) (name : Name) (arity : Nat) : Prop :=
-  s.raw.RefBefore i name arity
+/-- `name` resolves to a type declaration whose arguments have kinds `kinds`, declared before
+position `i`.  A declaration at position `i` may refer only to such types. -/
+public def RefBefore (s : Env α) (i : Nat) (name : Name) (kinds : Array Kind) : Prop :=
+  s.raw.RefBefore i name kinds
 
 /-- Widening the position bound keeps a reference valid. -/
-public theorem RefBefore.mono {s : Env α} {i j : Nat} {name : Name} {arity : Nat} (h : i ≤ j)
-    (hr : s.RefBefore i name arity) : s.RefBefore j name arity :=
+public theorem RefBefore.mono {s : Env α} {i j : Nat} {name : Name} {kinds : Array Kind}
+    (h : i ≤ j) (hr : s.RefBefore i name kinds) : s.RefBefore j name kinds :=
   Env.Raw.RefBefore.mono h hr
 
 /-- The number of declarations.  The next declaration added takes position `size`. -/
@@ -348,7 +348,7 @@ theorem resolves_of_ofArray?_eq_some {ds : Array (Decl.Raw α)} {s : Env α}
 
 /-- A type that `s` resolves is a valid reference before the end of `s`. -/
 theorem refBefore_of_resolves {s : Env α} {n : Name} {d : TypeDecl α}
-    (h : s.raw.typeOf? n = some d) : s.RefBefore s.size n d.arity := by
+    (h : s.raw.typeOf? n = some d) : s.RefBefore s.size n d.kinds := by
   have hm : n ∈ s.raw.decls := by
     unfold Env.Raw.typeOf? at h
     cases hx : s.raw.decls[n]? with
@@ -699,7 +699,7 @@ public theorem dataOf?_of_subset {s₁ s₂ : Env α} (h : s₁ ⊆ s₂) {n : N
 
 /-- A reference valid in a prefix is valid in the extension. -/
 public theorem refBefore_of_subset {s₁ s₂ : Env α} (h : s₁ ⊆ s₂) {i : Nat} {n : Name}
-    {a : Nat}
+    {a : Array Kind}
     (hr : s₁.RefBefore i n a) : s₂.RefBefore i n a := by
   obtain ⟨j, t, hj, hji, hget, ha⟩ := Raw.refBefore_iff.mp hr
   exact Raw.refBefore_iff.mpr
@@ -866,7 +866,12 @@ end Env
 /-! ## The type language, checked
 
 * `TypeRef`: a reference to a type declaration of an environment.
-* `TypeExpr`: a type expression whose references all resolve in an environment. -/
+* `TypeExpr`: a type expression whose references all resolve in an environment, indexed by its
+  kind: a type by default, or a list of types.  Its operations, equality, instantiation,
+  folding and reinterpretation, are written once for both kinds.
+* `TypeList`: a list of types, the argument of a list parameter: a `TypeExpr` of kind `.list`.
+* `TypeArg`: an argument of a type constructor, a `TypeExpr` of either kind with its kind.
+* `Variadic`, below: an instruction's trailing operands, typed as a `TypeArg` is. -/
 
 /-- `name` is declared in `s` as a type of shape `d`, up to its annotation.  This holds for
 primitive types and datatypes alike. -/
@@ -900,12 +905,28 @@ public structure TypeRef (env : Env α) (arity : Nat) where
   matchArity : decl.arity = arity
   resolves : env.ResolvesType name decl
 
+/-- The kind of each argument the referenced type takes. -/
+@[expose] public def TypeRef.kinds {env : Env α} {arity : Nat} (r : TypeRef env arity) :
+    Array Kind :=
+  r.decl.kinds
+
+/-- A reference has one kind per argument. -/
+public theorem TypeRef.size_kinds {env : Env α} {arity : Nat} (r : TypeRef env arity) :
+    r.kinds.size = arity := by
+  simpa [TypeRef.kinds, TypeDecl.kinds, TypeDecl.arity] using r.matchArity
+
+/-- A type with no parameters has no kinds. -/
+public theorem TypeRef.kinds_zero {env : Env α} (r : TypeRef env 0) :
+    r.kinds = .replicate 0 .type := by
+  have h : r.decl.params = #[] := Array.size_eq_zero_iff.mp r.matchArity
+  simp [TypeRef.kinds, TypeDecl.kinds, h]
+
 /-- A type reference is valid before the end of the environment. -/
 public theorem TypeRef.refBefore {env : Env α} {arity : Nat} (r : TypeRef env arity) :
-    env.RefBefore env.size r.name arity := by
+    env.RefBefore env.size r.name r.kinds := by
   obtain ⟨n, d, rfl, d', hr, he⟩ := r
   have hb := Env.refBefore_of_resolves hr
-  rwa [TypeDecl.arity_eq_of_erase_eq he] at hb
+  rwa [TypeDecl.kinds_eq_of_erase_eq he] at hb
 
 /-! ## Payload types of a datatype group
 
@@ -923,16 +944,32 @@ The operations:
 /-- A payload type of a datatype group that extends `s`, whose members are the new types of
 `t`. -/
 public inductive DataTy (s t : Env α) where
-  /-- The member's parameter at this de Bruijn level. -/
+  /-- The member's parameter at this de Bruijn level: a type variable, or a list variable for a
+  list parameter, spliced into a literal; `[*as]` is the whole list. -/
   | var (level : Nat)
   /-- A type `s` already declares, which the group cannot be. -/
   | ext {arity : Nat} (r : TypeRef s arity) (args : Array (DataTy s t))
   /-- A type of `t`, which may be one of the group's own members. -/
   | ref {arity : Nat} (r : TypeRef t arity) (args : Array (DataTy s t))
+  /-- A list literal. -/
+  | list (elems : Array (DataTy s t))
 
 namespace DataTy
 
 variable {s t : Env α}
+
+/-- Whether a payload is a type or a list, when `scope` gives the kind of each parameter.  A
+parameter out of scope counts as a type, as in `TypeExpr.Raw.kind`. -/
+@[expose] public def kind (scope : Array Kind) : DataTy s t → Kind
+  | .var l => scope[l]?.getD .type
+  | .list _ => .list
+  | _ => .type
+
+/-- Whether a payload may be an element of a list literal: anything but a literal, so a type or
+a list parameter spliced in. -/
+@[expose] public def isElem : DataTy s t → Bool
+  | .list _ => false
+  | _ => true
 
 mutual
 /-- The type expression a payload stands for. -/
@@ -940,6 +977,7 @@ mutual
   | .var l => .var l
   | .ext r ⟨as⟩ => .app r.name ⟨toRawList as⟩
   | .ref r ⟨as⟩ => .app r.name ⟨toRawList as⟩
+  | .list ⟨es⟩ => .list ⟨toRawList es⟩
 
 @[expose] public def toRawList : List (DataTy s t) → List TypeExpr.Raw
   | [] => []
@@ -966,26 +1004,52 @@ public theorem toRawList_eq_map : ∀ as : List (DataTy s t), toRawList as = as.
   obtain ⟨as⟩ := as
   simp [toRaw, toRawList_eq_map]
 
-mutual
-/-- Whether a payload is admissible in a member with parameter positivities `pol`:
+/-- A list literal stands for the literal of what its elements stand for. -/
+@[simp] public theorem toRaw_list (es : Array (DataTy s t)) :
+    (DataTy.list es).toRaw = .list (es.map toRaw) := by
+  obtain ⟨es⟩ := es
+  simp [toRaw, toRawList_eq_map]
 
-* every application has its constructor's arity;
+/-- A payload stands for an expression of its own kind. -/
+public theorem kind_toRaw (scope : Array Kind) :
+    ∀ e : DataTy s t, e.toRaw.kind scope = e.kind scope
+  | .var _ | .ext _ ⟨_⟩ | .ref _ ⟨_⟩ | .list ⟨_⟩ => rfl
+
+mutual
+/-- Whether a payload is admissible in a member with parameters `pol`:
+
+* every application has its constructor's arguments, each of the kind its parameter declares;
+* a parameter of the member outside a literal is one of its types, so a list parameter is
+  written `[*as]`;
+* every element of a list literal is a type or a parameter spliced in;
 * every variable is in scope;
 * where `rec` is false (under a parameter declared `.non`), nothing refers into `t` and no
   parameter the member declared `.pos` occurs.
 
 `ok` reduces in the kernel. -/
-@[expose] public def ok (pol : Array (Param Positivity)) (rec : Bool) : DataTy s t → Bool
-  | .var l => decide (l < pol.size) && (rec || pol[l]?.map (·.type) != some .pos)
+@[expose] public def ok (pol : Array (Param TyParam)) (rec : Bool) : DataTy s t → Bool
+  | .var l =>
+    (TyParam.kinds pol)[l]? == some .type && (rec || pol[l]?.map (·.type.polarity) != some .pos)
   | .ext r ⟨as⟩ => match r.decl.params with | ⟨ps⟩ => okArgs pol rec ps as
   | .ref r ⟨as⟩ => rec && match r.decl.params with | ⟨ps⟩ => okArgs pol rec ps as
+  | .list ⟨es⟩ => okList pol rec es
 
-@[expose] public def okArgs (pol : Array (Param Positivity)) (rec : Bool) :
-    List (Param Positivity) → List (DataTy s t) → Bool
+@[expose] public def okArgs (pol : Array (Param TyParam)) (rec : Bool) :
+    List (Param TyParam) → List (DataTy s t) → Bool
   | [], [] => true
-  | ⟨_, .pos⟩ :: ps, e :: es => ok pol rec e && okArgs pol rec ps es
-  | ⟨_, .non⟩ :: ps, e :: es => ok pol false e && okArgs pol rec ps es
+  | ⟨_, ⟨.pos, k⟩⟩ :: ps, e :: es =>
+    e.kind (TyParam.kinds pol) == k && ok pol rec e && okArgs pol rec ps es
+  | ⟨_, ⟨.non, k⟩⟩ :: ps, e :: es =>
+    e.kind (TyParam.kinds pol) == k && ok pol false e && okArgs pol rec ps es
   | _, _ => false
+
+@[expose] public def okList (pol : Array (Param TyParam)) (rec : Bool) :
+    List (DataTy s t) → Bool
+  | [] => true
+  | e :: es =>
+    (match e with
+     | .var l => decide (l < pol.size) && (rec || pol[l]?.map (·.type.polarity) != some .pos)
+     | _ => e.isElem && ok pol rec e) && okList pol rec es
 end
 
 end DataTy
@@ -1032,7 +1096,7 @@ variable {τ : Type}
 
 * there is at least one member;
 * there is one constructor list per member;
-* every payload is `ok` at its member's parameters;
+* every payload is a type, and `ok` at its member's parameters;
 * no constructor binds a name twice: its member's parameters and its fields are named
   distinctly;
 * no case instruction binds a name twice: its member's parameters, `scrutinee` and the last
@@ -1044,7 +1108,8 @@ It reduces in the kernel, so `decide` proves it when it holds. -/
   decide (0 < hdr.size) && decide (ctors.size = hdr.size) &&
     ((members hdr ctors).toList.all fun m =>
       m.ctors.toList.all fun c =>
-        c.args.toList.all (fun p => DataTy.ok m.params true p.type) &&
+        c.args.toList.all (fun p =>
+          p.type.kind (TyParam.kinds m.params) == .type && DataTy.ok m.params true p.type) &&
           decide (m.params.toList.map (·.name) ++ c.args.toList.map (·.name)).Nodup) &&
     (members hdr ctors).toList.all fun m =>
       decide (m.params.toList.map (·.name) ++ ["scrutinee"] ++
@@ -1059,36 +1124,70 @@ abstract resolvers. -/
 
 namespace DataTy
 
-variable {s t : Env α} {P : Name → Option (Array (Param Positivity))} {R N : Name → Nat → Bool}
+variable {s t : Env α} {P : Name → Option (Array (Param TyParam))}
+  {R N : Name → Array Kind → Bool}
 
 theorem length_toRawList :
     ∀ as : List (DataTy s t), (toRawList as).length = as.length
   | [] => rfl
   | _ :: as => by simp [toRawList, length_toRawList as]
 
-/-- An admissible argument list has one argument per parameter. -/
-theorem length_of_okArgs {pol : Array (Param Positivity)} {rec : Bool} :
-    ∀ {ps : List (Param Positivity)} {as : List (DataTy s t)}, okArgs pol rec ps as = true →
-      as.length = ps.length
+/-- An admissible argument list has one argument per parameter, of its kind. -/
+theorem kinds_of_okArgs {pol : Array (Param TyParam)} {rec : Bool} :
+    ∀ {ps : List (Param TyParam)} {as : List (DataTy s t)}, okArgs pol rec ps as = true →
+      as.map (kind (TyParam.kinds pol)) = ps.map (·.type.kind)
   | [], [], _ => rfl
   | [], _ :: _, h => by simp [okArgs] at h
-  | ⟨_, p⟩ :: _, [], h => by cases p <;> simp [okArgs] at h
-  | ⟨_, .pos⟩ :: _, _ :: _, h => by
-    simp only [okArgs, Bool.and_eq_true] at h
-    simp [length_of_okArgs h.2]
-  | ⟨_, .non⟩ :: _, _ :: _, h => by
-    simp only [okArgs, Bool.and_eq_true] at h
-    simp [length_of_okArgs h.2]
+  | ⟨_, ⟨p, _⟩⟩ :: _, [], h => by cases p <;> simp [okArgs] at h
+  | ⟨_, ⟨.pos, _⟩⟩ :: _, _ :: _, h => by
+    simp only [okArgs, Bool.and_eq_true, beq_iff_eq] at h
+    simp [h.1.1, kinds_of_okArgs h.2]
+  | ⟨_, ⟨.non, _⟩⟩ :: _, _ :: _, h => by
+    simp only [okArgs, Bool.and_eq_true, beq_iff_eq] at h
+    simp [h.1.1, kinds_of_okArgs h.2]
+
+/-- An admissible argument list has one argument per parameter. -/
+theorem length_of_okArgs {pol : Array (Param TyParam)} {rec : Bool} {ps : List (Param TyParam)}
+    {as : List (DataTy s t)} (h : okArgs pol rec ps as = true) : as.length = ps.length := by
+  simpa using congrArg List.length (kinds_of_okArgs h)
+
+/-- What an admissible application's arguments stand for has the kinds its head declares. -/
+theorem kinds_toRawList_of_okArgs {pol : Array (Param TyParam)} {rec : Bool} {d : TypeDecl α}
+    {as : List (DataTy s t)} (h : okArgs pol rec d.params.toList as = true) :
+    (⟨(toRawList as).map (TypeExpr.Raw.kind (TyParam.kinds pol))⟩ : Array Kind) = d.kinds := by
+  rw [toRawList_eq_map, List.map_map,
+    show TypeExpr.Raw.kind (TyParam.kinds pol) ∘ toRaw =
+        kind (s := s) (t := t) (TyParam.kinds pol) from funext (kind_toRaw _),
+    kinds_of_okArgs h]
+  rfl
+
+/-- What an element stands for may be an element of a list literal. -/
+theorem isElem_toRaw {e : DataTy s t} (h : e.isElem = true) : e.toRaw.isElem = true := by
+  cases e <;> simp_all [isElem, toRaw, TypeExpr.Raw.isElem]
+
+/-- What the elements of an admissible list literal stand for are elements. -/
+theorem isElem_of_okList {pol : Array (Param TyParam)} {rec : Bool} :
+    ∀ {es : List (DataTy s t)}, okList pol rec es = true →
+      ∀ a ∈ toRawList es, a.isElem = true
+  | [], _ => by simp [toRawList]
+  | e :: es, h => by
+    simp only [okList, Bool.and_eq_true] at h
+    intro a ha
+    rcases List.mem_cons.mp ha with rfl | ha
+    · cases e
+      case var => rfl
+      all_goals exact isElem_toRaw ((Bool.and_eq_true _ _).mp h.1).1
+    · exact isElem_of_okList h.2 a ha
 
 mutual
 /-- Under a `.non` parameter a payload is checked against `N` alone, and mentions no
 parameter its member declared `.pos`. -/
-theorem check_of_ok_false (hN : ∀ {a} (r : TypeRef s a), N r.name r.decl.params.size = true)
-    {pol : Array (Param Positivity)} : ∀ (e : DataTy s t), ok pol false e = true →
-      TypeExpr.Raw.check N pol.size (toRaw e) = true ∧
-        ∀ k, pol[k]?.map (·.type) = some .pos → TypeExpr.Raw.varOccurs k (toRaw e) = false
+theorem check_of_ok_false (hN : ∀ {a} (r : TypeRef s a), N r.name r.decl.kinds = true)
+    {pol : Array (Param TyParam)} : ∀ (e : DataTy s t), ok pol false e = true →
+      TypeExpr.Raw.check N (TyParam.kinds pol) (toRaw e) = true ∧
+        ∀ k, pol[k]?.map (·.type.polarity) = some .pos → TypeExpr.Raw.varOccurs k (toRaw e) = false
   | .var l, h => by
-    simp only [ok, Bool.and_eq_true, decide_eq_true_eq, Bool.false_or, bne_iff_ne, ne_eq] at h
+    simp only [ok, Bool.and_eq_true, Bool.false_or, bne_iff_ne, ne_eq] at h
     refine ⟨by simpa [toRaw, TypeExpr.Raw.check] using h.1, fun k hk => ?_⟩
     simp only [toRaw, TypeExpr.Raw.varOccurs, beq_eq_false_iff_ne, ne_eq]
     rintro rfl
@@ -1098,82 +1197,139 @@ theorem check_of_ok_false (hN : ∀ {a} (r : TypeRef s a), N r.name r.decl.param
     have has := checkList_of_okArgs_false hN as _ h
     simp only [toRaw, TypeExpr.Raw.check, TypeExpr.Raw.varOccurs, Bool.and_eq_true]
     refine ⟨⟨?_, has.1⟩, has.2⟩
-    rw [length_toRawList, length_of_okArgs h]
-    simpa using hN r
+    rw [kinds_toRawList_of_okArgs h]
+    exact hN r
   | .ref _ ⟨_⟩, h => by simp [ok] at h
+  | .list ⟨es⟩, h => by
+    simp only [ok] at h
+    have hes := checkElems_of_okList_false hN es h
+    simp only [toRaw, TypeExpr.Raw.check, TypeExpr.Raw.varOccurs, Bool.and_eq_true,
+      List.all_eq_true]
+    exact ⟨⟨hes.1, isElem_of_okList h⟩, hes.2⟩
 
+/-- The argument form of `check_of_ok_false`. -/
 theorem checkList_of_okArgs_false
-    (hN : ∀ {a} (r : TypeRef s a), N r.name r.decl.params.size = true)
-    {pol : Array (Param Positivity)} : ∀ (as : List (DataTy s t)) (ps : List (Param Positivity)),
+    (hN : ∀ {a} (r : TypeRef s a), N r.name r.decl.kinds = true)
+    {pol : Array (Param TyParam)} : ∀ (as : List (DataTy s t)) (ps : List (Param TyParam)),
       okArgs pol false ps as = true →
-      TypeExpr.Raw.checkList N pol.size (toRawList as) = true ∧
-        ∀ k, pol[k]?.map (·.type) = some .pos →
+      TypeExpr.Raw.checkList N (TyParam.kinds pol) (toRawList as) = true ∧
+        ∀ k, pol[k]?.map (·.type.polarity) = some .pos →
           TypeExpr.Raw.varOccursList k (toRawList as) = false
   | [], _, _ => by simp [toRawList, TypeExpr.Raw.checkList, TypeExpr.Raw.varOccursList]
   | _ :: _, [], h => by simp [okArgs] at h
-  | e :: as, ⟨_, p⟩ :: ps, h => by
+  | e :: as, ⟨_, ⟨p, _⟩⟩ :: ps, h => by
     have h' : ok pol false e = true ∧ okArgs pol false ps as = true := by
-      cases p <;> simpa [okArgs] using h
+      cases p <;> simp only [okArgs, Bool.and_eq_true] at h <;> exact ⟨h.1.2, h.2⟩
     have he := check_of_ok_false hN e h'.1
     have has := checkList_of_okArgs_false hN as ps h'.2
     simp only [toRawList, TypeExpr.Raw.checkList, TypeExpr.Raw.varOccursList,
       Bool.and_eq_true, Bool.or_eq_false_iff]
     exact ⟨⟨he.1, has.1⟩, fun k hk => ⟨he.2 k hk, has.2 k hk⟩⟩
+
+/-- The list-literal form of `check_of_ok_false`. -/
+theorem checkElems_of_okList_false
+    (hN : ∀ {a} (r : TypeRef s a), N r.name r.decl.kinds = true)
+    {pol : Array (Param TyParam)} : ∀ (es : List (DataTy s t)), okList pol false es = true →
+      TypeExpr.Raw.checkElems N (TyParam.kinds pol) (toRawList es) = true ∧
+        ∀ k, pol[k]?.map (·.type.polarity) = some .pos →
+          TypeExpr.Raw.varOccursList k (toRawList es) = false
+  | [], _ => by simp [toRawList, TypeExpr.Raw.checkElems, TypeExpr.Raw.varOccursList]
+  | e :: es, h => by
+    have he := check_of_ok_false hN (pol := pol) e
+    simp only [okList, Bool.and_eq_true] at h
+    have hes := checkElems_of_okList_false hN es h.2
+    simp only [toRawList, TypeExpr.Raw.checkElems, TypeExpr.Raw.varOccursList,
+      Bool.and_eq_true, Bool.or_eq_false_iff]
+    cases e
+    case var l =>
+      simp only [Bool.and_eq_true, decide_eq_true_eq, Bool.false_or, bne_iff_ne, ne_eq] at h
+      refine ⟨⟨by simpa [toRaw] using h.1.1, hes.1⟩, fun k hk => ⟨?_, hes.2 k hk⟩⟩
+      simp only [toRaw, TypeExpr.Raw.varOccurs, beq_eq_false_iff_ne, ne_eq]
+      rintro rfl
+      exact h.1.2 hk
+    all_goals
+      have h₁ := he ((Bool.and_eq_true _ _).mp h.1).2
+      exact ⟨⟨h₁.1, hes.1⟩, fun k hk => ⟨h₁.2 k hk, hes.2 k hk⟩⟩
 end
 
 mutual
 /-- An admissible payload passes `checkPayload`. -/
 theorem checkPayload_of_ok (hext : ∀ {a} (r : TypeRef s a), P r.name = some r.decl.params ∧
-      R r.name r.decl.params.size = true ∧ N r.name r.decl.params.size = true)
+      R r.name r.decl.kinds = true ∧ N r.name r.decl.kinds = true)
     (hnew : ∀ {a} (r : TypeRef t a), P r.name = some r.decl.params ∧
-      R r.name r.decl.params.size = true)
-    {pol : Array (Param Positivity)} : ∀ (e : DataTy s t),
-    ok pol true e = true → TypeExpr.Raw.checkPayload P R N pol.size (toRaw e) = true
+      R r.name r.decl.kinds = true)
+    {pol : Array (Param TyParam)} : ∀ (e : DataTy s t),
+    ok pol true e = true →
+      TypeExpr.Raw.checkPayload P R N (TyParam.kinds pol) (toRaw e) = true
   | .var _, h => by
-    simp only [ok, Bool.and_eq_true, decide_eq_true_eq] at h
+    simp only [ok, Bool.and_eq_true] at h
     simpa [toRaw, TypeExpr.Raw.checkPayload] using h.1
   | .ext r ⟨as⟩, h => by
     simp only [ok] at h
     obtain ⟨hp, hr, -⟩ := hext r
     simp only [toRaw, TypeExpr.Raw.checkPayload, hp, length_toRawList, length_of_okArgs h,
-      Array.length_toList, Bool.and_eq_true, beq_self_eq_true, true_and]
+      Array.length_toList, kinds_toRawList_of_okArgs h, Bool.and_eq_true, beq_self_eq_true,
+      true_and]
     exact ⟨hr, checkPayloadArgs_of_okArgs hext hnew as _ h⟩
   | .ref r ⟨as⟩, h => by
     simp only [ok, Bool.true_and] at h
     obtain ⟨hp, hr⟩ := hnew r
     simp only [toRaw, TypeExpr.Raw.checkPayload, hp, length_toRawList, length_of_okArgs h,
-      Array.length_toList, Bool.and_eq_true, beq_self_eq_true, true_and]
+      Array.length_toList, kinds_toRawList_of_okArgs h, Bool.and_eq_true, beq_self_eq_true,
+      true_and]
     exact ⟨hr, checkPayloadArgs_of_okArgs hext hnew as _ h⟩
+  | .list ⟨es⟩, h => by
+    simp only [ok] at h
+    simp only [toRaw, TypeExpr.Raw.checkPayload, Bool.and_eq_true, List.all_eq_true]
+    exact ⟨checkPayloadList_of_okList hext hnew es h, isElem_of_okList h⟩
 
+/-- The argument form of `checkPayload_of_ok`. -/
 theorem checkPayloadArgs_of_okArgs (hext : ∀ {a} (r : TypeRef s a), P r.name = some r.decl.params ∧
-      R r.name r.decl.params.size = true ∧ N r.name r.decl.params.size = true)
+      R r.name r.decl.kinds = true ∧ N r.name r.decl.kinds = true)
     (hnew : ∀ {a} (r : TypeRef t a), P r.name = some r.decl.params ∧
-      R r.name r.decl.params.size = true)
-    {pol : Array (Param Positivity)} :
-    ∀ (as : List (DataTy s t)) (ps : List (Param Positivity)), okArgs pol true ps as = true →
-      TypeExpr.Raw.checkPayloadArgs P R N pol.size ps (toRawList as) = true
+      R r.name r.decl.kinds = true)
+    {pol : Array (Param TyParam)} :
+    ∀ (as : List (DataTy s t)) (ps : List (Param TyParam)), okArgs pol true ps as = true →
+      TypeExpr.Raw.checkPayloadArgs P R N (TyParam.kinds pol) ps (toRawList as) = true
   | [], [], _ => rfl
-  | [], ⟨_, p⟩ :: _, h => by cases p <;> simp [okArgs] at h
+  | [], ⟨_, ⟨p, _⟩⟩ :: _, h => by cases p <;> simp [okArgs] at h
   | _ :: _, [], h => by simp [okArgs] at h
-  | e :: as, ⟨_, .pos⟩ :: ps, h => by
+  | e :: as, ⟨_, ⟨.pos, _⟩⟩ :: ps, h => by
     simp only [okArgs, Bool.and_eq_true] at h
     simp only [toRawList, TypeExpr.Raw.checkPayloadArgs, Bool.and_eq_true]
-    exact ⟨checkPayload_of_ok hext hnew e h.1, checkPayloadArgs_of_okArgs hext hnew as ps h.2⟩
-  | e :: as, ⟨_, .non⟩ :: ps, h => by
+    exact ⟨checkPayload_of_ok hext hnew e h.1.2, checkPayloadArgs_of_okArgs hext hnew as ps h.2⟩
+  | e :: as, ⟨_, ⟨.non, _⟩⟩ :: ps, h => by
     simp only [okArgs, Bool.and_eq_true] at h
     simp only [toRawList, TypeExpr.Raw.checkPayloadArgs, Bool.and_eq_true]
-    exact ⟨(check_of_ok_false (fun r => (hext r).2.2) e h.1).1,
+    exact ⟨(check_of_ok_false (fun r => (hext r).2.2) e h.1.2).1,
       checkPayloadArgs_of_okArgs hext hnew as ps h.2⟩
+
+/-- The list-literal form of `checkPayload_of_ok`. -/
+theorem checkPayloadList_of_okList (hext : ∀ {a} (r : TypeRef s a), P r.name = some r.decl.params ∧
+      R r.name r.decl.kinds = true ∧ N r.name r.decl.kinds = true)
+    (hnew : ∀ {a} (r : TypeRef t a), P r.name = some r.decl.params ∧
+      R r.name r.decl.kinds = true)
+    {pol : Array (Param TyParam)} : ∀ (es : List (DataTy s t)), okList pol true es = true →
+      TypeExpr.Raw.checkPayloadList P R N (TyParam.kinds pol) (toRawList es) = true
+  | [], _ => by simp [toRawList, TypeExpr.Raw.checkPayloadList]
+  | e :: es, h => by
+    have he := checkPayload_of_ok hext hnew (pol := pol) e
+    simp only [okList, Bool.and_eq_true] at h
+    simp only [toRawList, TypeExpr.Raw.checkPayloadList, Bool.and_eq_true]
+    refine ⟨?_, checkPayloadList_of_okList hext hnew es h.2⟩
+    cases e
+    case var l => simpa [toRaw] using ((Bool.and_eq_true _ _).mp h.1).1
+    all_goals exact he ((Bool.and_eq_true _ _).mp h.1).2
 end
 
 mutual
 /-- An admissible payload keeps every parameter its member declared `.pos` in positions
 declared `.pos`. -/
 theorem varPositive_of_ok (hext : ∀ {a} (r : TypeRef s a), P r.name = some r.decl.params ∧
-      R r.name r.decl.params.size = true ∧ N r.name r.decl.params.size = true)
+      R r.name r.decl.kinds = true ∧ N r.name r.decl.kinds = true)
     (hnew : ∀ {a} (r : TypeRef t a), P r.name = some r.decl.params ∧
-      R r.name r.decl.params.size = true)
-    {pol : Array (Param Positivity)} {k : Nat} (hk : pol[k]?.map (·.type) = some .pos) :
+      R r.name r.decl.kinds = true)
+    {pol : Array (Param TyParam)} {k : Nat} (hk : pol[k]?.map (·.type.polarity) = some .pos) :
     ∀ {rec : Bool} (e : DataTy s t), ok pol rec e = true →
       TypeExpr.Raw.varPositive P k (toRaw e) = true
   | _, .var _, _ => by simp [toRaw, TypeExpr.Raw.varPositive]
@@ -1188,27 +1344,51 @@ theorem varPositive_of_ok (hext : ∀ {a} (r : TypeRef s a), P r.name = some r.d
     simp only [toRaw, TypeExpr.Raw.varPositive, (hnew r).1, length_toRawList,
       length_of_okArgs h, Array.length_toList, beq_self_eq_true, Bool.true_and]
     exact varPositiveArgs_of_okArgs hext hnew hk as _ h
+  | _, .list ⟨es⟩, h => by
+    simp only [ok] at h
+    simp only [toRaw, TypeExpr.Raw.varPositive]
+    exact varPositiveList_of_okList hext hnew hk es h
 
+/-- The argument form of `varPositive_of_ok`. -/
 theorem varPositiveArgs_of_okArgs (hext : ∀ {a} (r : TypeRef s a), P r.name = some r.decl.params ∧
-      R r.name r.decl.params.size = true ∧ N r.name r.decl.params.size = true)
+      R r.name r.decl.kinds = true ∧ N r.name r.decl.kinds = true)
     (hnew : ∀ {a} (r : TypeRef t a), P r.name = some r.decl.params ∧
-      R r.name r.decl.params.size = true)
-    {pol : Array (Param Positivity)} {k : Nat} (hk : pol[k]?.map (·.type) = some .pos) :
-    ∀ {rec : Bool} (as : List (DataTy s t)) (ps : List (Param Positivity)),
+      R r.name r.decl.kinds = true)
+    {pol : Array (Param TyParam)} {k : Nat} (hk : pol[k]?.map (·.type.polarity) = some .pos) :
+    ∀ {rec : Bool} (as : List (DataTy s t)) (ps : List (Param TyParam)),
       okArgs pol rec ps as = true →
       TypeExpr.Raw.varPositiveArgs P k ps (toRawList as) = true
   | _, [], [], _ => rfl
-  | _, [], ⟨_, p⟩ :: _, h => by cases p <;> simp [okArgs] at h
+  | _, [], ⟨_, ⟨p, _⟩⟩ :: _, h => by cases p <;> simp [okArgs] at h
   | _, _ :: _, [], h => by simp [okArgs] at h
-  | _, e :: as, ⟨_, .pos⟩ :: ps, h => by
+  | _, e :: as, ⟨_, ⟨.pos, _⟩⟩ :: ps, h => by
     simp only [okArgs, Bool.and_eq_true] at h
     simp only [toRawList, TypeExpr.Raw.varPositiveArgs, Bool.and_eq_true]
-    exact ⟨varPositive_of_ok hext hnew hk e h.1, varPositiveArgs_of_okArgs hext hnew hk as ps h.2⟩
-  | _, e :: as, ⟨_, .non⟩ :: ps, h => by
+    exact ⟨varPositive_of_ok hext hnew hk e h.1.2,
+      varPositiveArgs_of_okArgs hext hnew hk as ps h.2⟩
+  | _, e :: as, ⟨_, ⟨.non, _⟩⟩ :: ps, h => by
     simp only [okArgs, Bool.and_eq_true] at h
     simp only [toRawList, TypeExpr.Raw.varPositiveArgs, Bool.and_eq_true, Bool.not_eq_true',
-      (check_of_ok_false (fun r => (hext r).2.2) e h.1).2 k hk, true_and]
+      (check_of_ok_false (fun r => (hext r).2.2) e h.1.2).2 k hk, true_and]
     exact varPositiveArgs_of_okArgs hext hnew hk as ps h.2
+
+/-- The list-literal form of `varPositive_of_ok`. -/
+theorem varPositiveList_of_okList (hext : ∀ {a} (r : TypeRef s a), P r.name = some r.decl.params ∧
+      R r.name r.decl.kinds = true ∧ N r.name r.decl.kinds = true)
+    (hnew : ∀ {a} (r : TypeRef t a), P r.name = some r.decl.params ∧
+      R r.name r.decl.kinds = true)
+    {pol : Array (Param TyParam)} {k : Nat} (hk : pol[k]?.map (·.type.polarity) = some .pos) :
+    ∀ {rec : Bool} (es : List (DataTy s t)), okList pol rec es = true →
+      TypeExpr.Raw.varPositiveList P k (toRawList es) = true
+  | _, [], _ => rfl
+  | rec, e :: es, h => by
+    have he := varPositive_of_ok hext hnew hk (rec := rec) e
+    simp only [okList, Bool.and_eq_true] at h
+    simp only [toRawList, TypeExpr.Raw.varPositiveList, Bool.and_eq_true]
+    refine ⟨?_, varPositiveList_of_okList hext hnew hk es h.2⟩
+    cases e
+    case var => simp [toRaw, TypeExpr.Raw.varPositive]
+    all_goals exact he ((Bool.and_eq_true _ _).mp h.1).2
 end
 
 end DataTy
@@ -1473,9 +1653,9 @@ theorem checkWith_dataGroup (fG : s.raw.FreshList (dataGroup hdr ctors h).decls.
       (s.raw.appendList _ fG).paramsBefore (s.raw.decls.keys.size + hdr.size) r.name =
           some r.decl.params ∧
         Raw.RefBefore.check (s.raw.appendList _ fG) (s.raw.decls.keys.size + hdr.size) r.name
-          r.decl.params.size = true ∧
+          r.decl.kinds = true ∧
         Raw.RefBefore.check (s.raw.appendList _ fG) s.raw.decls.keys.size r.name
-          r.decl.params.size = true := by
+          r.decl.kinds = true := by
     intro a r
     obtain ⟨d, hd, he⟩ := r.resolves
     have hp := TypeDecl.params_eq_of_erase_eq he
@@ -1486,23 +1666,22 @@ theorem checkWith_dataGroup (fG : s.raw.FreshList (dataGroup hdr ctors h).decls.
         some d :=
       Raw.typesBefore_appendList (Raw.typesBefore_of_typeOf? hd (Nat.le_refl _))
     simp only [Raw.paramsBefore, Raw.RefBefore.check, h1, h2, Option.map_some]
-    simp [TypeDecl.arity, hp]
+    simp [TypeDecl.kinds, hp]
   have hnew : ∀ {a} (r : TypeRef (s.addTypes hdr fresh) a),
       (s.raw.appendList _ fG).paramsBefore (s.raw.decls.keys.size + hdr.size) r.name =
           some r.decl.params ∧
         Raw.RefBefore.check (s.raw.appendList _ fG) (s.raw.decls.keys.size + hdr.size) r.name
-          r.decl.params.size = true := by
+          r.decl.kinds = true := by
     intro a r
     obtain ⟨d, hd, he⟩ := r.resolves
     have hp := TypeDecl.params_eq_of_erase_eq he
     have h1 := typesBefore_dataGroup (fG := fG) hd
     simp only [size] at h1
     simp only [Raw.paramsBefore, Raw.RefBefore.check, h1, Option.map_some]
-    simp [TypeDecl.arity, hp]
+    simp [TypeDecl.kinds, hp]
   have hadm := h
   simp only [admissible, List.all_eq_true, Array.mem_toList_iff, Bool.and_eq_true] at hadm
   obtain ⟨⟨-, hadm⟩, -⟩ := hadm
-  replace hadm := fun m hm c hc => (hadm m hm c hc).1
   simp only [DataGroup.checkWith, Array.all_eq_true_iff_forall_mem, Bool.and_eq_true]
   intro m' hm' c' hc' p' hp'
   simp only [dataGroup, Array.mem_map] at hm'
@@ -1511,9 +1690,10 @@ theorem checkWith_dataGroup (fG : s.raw.FreshList (dataGroup hdr ctors h).decls.
   obtain ⟨c, hc, rfl⟩ := hc'
   simp only [Ctor.mapTy, Array.mem_map] at hp'
   obtain ⟨p, hp, rfl⟩ := hp'
-  have hok := hadm m hm c hc p hp
-  refine ⟨DataTy.checkPayload_of_ok hext hnew p.type hok, ?_⟩
-  intro ⟨⟨x, pol⟩, k⟩ hk
+  obtain ⟨hkind, hok⟩ := (hadm m hm c hc).1 p hp
+  refine ⟨⟨by simpa [Param.mapTy, DatatypeDecl.mapTy, DataTy.kind_toRaw] using hkind,
+    DataTy.checkPayload_of_ok hext hnew p.type hok⟩, ?_⟩
+  intro ⟨⟨x, ⟨pol, _⟩⟩, k⟩ hk
   cases pol with
   | non => rfl
   | pos =>
@@ -1681,48 +1861,264 @@ end Env
     (TypeRef.ofAddData (cfresh := cfresh) (adm := adm) r).name = r.name := rfl
 
 
-/-- A type expression whose references all resolve in `env`, under `scope` type
-variables.  It is built with `var` and `app`, and read with `fold`. -/
-public structure TypeExpr (env : Env α) (scope : Nat) where
+/-- A type expression of kind `k`, a type or a list of types, whose references all resolve in
+`env`, in `scope`: the kinds of the variables in scope, by de Bruijn level.  It carries the one
+judgment `TypeExpr.WF` at `k`.  It is a type unless `k` says otherwise; a list is a `TypeList`,
+always a literal, so each list has one spelling and equality is structural.  `TypeExpr env` is a
+closed type.  A type is built with `var`, `app` and `appK`, a list with `TypeList.var`,
+`TypeList.lit` and `TypeList.ofTypes`; either is read with `fold`, a list as its literal's
+elements with `toElems`, and a closed list as types with `elems`. -/
+public structure TypeExpr (env : Env α) (scope : Array Kind := #[]) (k : Kind := .type) where
   private expr : TypeExpr.Raw
-  private wf : TypeExpr.WFRel (env.RefBefore env.size) scope expr
+  private wf : TypeExpr.WF (env.RefBefore env.size) scope k expr
+
+/-- A list of types whose references all resolve in `env`, in `scope`: a type expression of kind
+`.list`, the argument of a list parameter. -/
+public abbrev TypeList (env : Env α) (scope : Array Kind := #[]) : Type :=
+  TypeExpr env scope .list
+
+/-- An element of a list literal: a type, or a list variable spliced in. -/
+public inductive TypeList.Elem (env : Env α) (scope : Array Kind := #[]) where
+  | ty (t : TypeExpr env scope)
+  /-- `*j`: the elements of list variable `j`. -/
+  | splice (j : Nat) (h : scope[j]? = some .list)
+
+/-- An argument of a declared type constructor: a type expression of either kind, with its kind.
+It is built with `ty` and `list`, which match as constructors do. -/
+public structure TypeArg (env : Env α) (scope : Array Kind := #[]) where
+  /-- Whether the argument is a type or a list. -/
+  kind : Kind
+  val : TypeExpr env scope kind
+
+namespace TypeArg
+
+variable {env : Env α} {scope : Array Kind}
+
+/-- A type, as an argument. -/
+@[match_pattern] public abbrev ty (t : TypeExpr env scope) : TypeArg env scope := ⟨.type, t⟩
+
+/-- A list of types, as an argument. -/
+@[match_pattern] public abbrev list (l : TypeList env scope) : TypeArg env scope := ⟨.list, l⟩
+
+end TypeArg
 
 namespace TypeExpr
 
-/-- The `i`-th type variable. -/
-public def var {env : Env α} {scope : Nat} (i : Nat) (h : i < scope) : TypeExpr env scope :=
-  ⟨.var i, .var h⟩
+variable {env : Env α} {scope : Array Kind} {k : Kind}
+
+/-- The type variable `i`.  A list variable is a `TypeList.var`. -/
+public def var (i : Nat) (h : scope[i]? = some .type) : TypeExpr env scope :=
+  ⟨.var i, wfType_var_iff.mpr h⟩
 
 /-- Erasing the check of a type variable gives the variable. -/
-theorem expr_var {env : Env α} {scope : Nat} (i : Nat) (h : i < scope) :
-    (var (env := env) (scope := scope) i h).expr = .var i := by
+theorem expr_var (i : Nat) (h : scope[i]? = some .type) :
+    (var (env := env) i h).expr = .var i := by
   simp [var]
 
-/-- Apply a declared type constructor to checked arguments. -/
-public def app {env : Env α} {scope arity : Nat} (r : TypeRef env arity)
-    (args : Vector (TypeExpr env scope) arity) : TypeExpr env scope :=
+end TypeExpr
+
+namespace TypeList
+
+variable {env : Env α} {scope : Array Kind}
+
+/-- The raw form of an element: the type, or the list variable. -/
+def Elem.expr : Elem env scope → TypeExpr.Raw
+  | .ty t => t.expr
+  | .splice j _ => .var j
+
+/-- An element's raw form is a well-formed element. -/
+theorem Elem.wf : ∀ e : Elem env scope, TypeExpr.WFElem (env.RefBefore env.size) scope e.expr
+  | .ty t => .ty t.wf
+  | .splice _ h => .splice h
+
+/-- The list literal of `es`, each a type or a splice. -/
+public def lit (es : Array (Elem env scope)) : TypeList env scope :=
+  ⟨.list (es.map (·.expr)),
+   .list fun a ha => by obtain ⟨e, -, rfl⟩ := Array.mem_map.mp ha; exact e.wf⟩
+
+/-- The list variable `j`: the literal `[*j]`, which splices it in, since every list is a
+literal. -/
+public abbrev var (j : Nat) (h : scope[j]? = some .list) : TypeList env scope :=
+  lit #[.splice j h]
+
+/-- The list literal of the types `ts`. -/
+@[expose] public def ofTypes (ts : Array (TypeExpr env scope)) : TypeList env scope :=
+  lit (ts.map .ty)
+
+private def rawElems : (e : TypeExpr.Raw) →
+    TypeExpr.WFList (env.RefBefore env.size) #[] e → Array (TypeExpr env)
+  | .list es, h => es.attach.map fun (a : {x // x ∈ es}) => ⟨a.1, h.elems_closed a.1 a.2⟩
+  | _, _ => #[]
+
+end TypeList
+
+-- `append` and `toElems` are in `TypeExpr`, as `elems` is, so that dot notation finds them on a
+-- list that `instantiate` or `carry` returns.
+namespace TypeExpr
+
+variable {env : Env α} {scope : Array Kind}
+
+/-- The elements of two literals, one after the other. -/
+private def rawAppend : TypeExpr.Raw → TypeExpr.Raw → TypeExpr.Raw
+  | .list a, .list b => .list (a ++ b)
+  | a, _ => a
+
+private theorem wf_rawAppend {R : Name → Array Kind → Prop} {a b : TypeExpr.Raw}
+    (ha : TypeExpr.WFList R scope a) (hb : TypeExpr.WFList R scope b) :
+    TypeExpr.WFList R scope (rawAppend a b) := by
+  cases ha with
+  | list hes₁ =>
+    cases hb with
+    | list hes₂ =>
+      exact .list fun x hx => (Array.mem_append.mp hx).elim (hes₁ x) (hes₂ x)
+
+/-- `l₁`'s elements, then `l₂`'s: since every list is a literal, a list parameter's argument
+can be spliced among other elements. -/
+public def append (l₁ l₂ : TypeExpr env scope .list) : TypeExpr env scope .list :=
+  ⟨rawAppend l₁.expr l₂.expr, wf_rawAppend l₁.wf l₂.wf⟩
+
+public instance : Append (TypeExpr env scope .list) := ⟨append⟩
+
+/-- Appending appends the raw literals. -/
+private theorem expr_append (l₁ l₂ : TypeExpr env scope .list) :
+    (l₁ ++ l₂).expr = rawAppend l₁.expr l₂.expr :=
+  rfl
+
+/-- `append` is `++`. -/
+@[simp] public theorem append_eq (l₁ l₂ : TypeExpr env scope .list) : append l₁ l₂ = l₁ ++ l₂ :=
+  rfl
+
+end TypeExpr
+
+-- In `TypeExpr`, so that dot notation finds it on a list that `instantiate` or `carry` returns.
+/-- The elements of a closed list: with no variable in scope, every list is a literal of
+types. -/
+public def TypeExpr.elems {env : Env α} (l : TypeList env) : Array (TypeExpr env) :=
+  TypeList.rawElems l.expr l.wf
+
+namespace TypeArg
+
+variable {env : Env α} {scope : Array Kind}
+
+/-- A type argument is a type. -/
+@[simp] public theorem kind_ty (t : TypeExpr env scope) : (TypeArg.ty t).kind = .type :=
+  rfl
+
+/-- A list argument is a list. -/
+@[simp] public theorem kind_list (l : TypeList env scope) :
+    (TypeArg.list l).kind = .list := rfl
+
+/-- The raw form of an argument. -/
+def expr (a : TypeArg env scope) : TypeExpr.Raw := a.val.expr
+
+/-- An argument's raw form is well formed. -/
+theorem wfRel (a : TypeArg env scope) : TypeExpr.WFRel (env.RefBefore env.size) scope a.expr :=
+  a.val.wf.wfRel
+
+/-- An argument's raw form has the argument's kind. -/
+theorem kind_expr (a : TypeArg env scope) : a.expr.kind scope = a.kind :=
+  a.val.wf.kind_eq
+
+/-- The checked form of a well-formed raw expression, of its kind. -/
+def ofWF (e : TypeExpr.Raw) (h : TypeExpr.WFRel (env.RefBefore env.size) scope e) :
+    TypeArg env scope :=
+  ⟨e.kind scope, e, h⟩
+
+/-- `ofWF` keeps the raw expression. -/
+@[simp] theorem expr_ofWF (e : TypeExpr.Raw)
+    (h : TypeExpr.WFRel (env.RefBefore env.size) scope e) : (ofWF e h).expr = e := rfl
+
+end TypeArg
+
+/-- Arguments for the variables of `params`, in `scope`: one per variable, each of its
+variable's kind.  An application of an instruction supplies them for its signature's scope.
+Built with `⟨args, rfl⟩` when the arguments are written out, and with `check?` otherwise. -/
+public structure TypeArgs (env : Env α) (params : Array Kind) (scope : Array Kind := #[]) where
+  args : Array (TypeArg env scope)
+  -- Over lists, so that `rfl` proves it: `Array.map` does not reduce.
+  kinds : args.toList.map TypeArg.kind = params.toList
+
+namespace TypeArgs
+
+variable {env : Env α} {params scope : Array Kind}
+
+/-- `args`, if each has its variable's kind, or the first way they do not fit: the one check
+`KindError.check?` decides both. -/
+@[expose] public def check? (params : Array Kind) (args : Array (TypeArg env scope)) :
+    Except KindError (TypeArgs env params scope) :=
+  match h : KindError.check? params (args.map (·.kind)) with
+  | some e => .error e
+  | none => .ok ⟨args, by simpa using congrArg Array.toList (KindError.check?_eq_none_iff.mp h)⟩
+
+/-- Types for the variables of a scope of `n` types. -/
+public def ofTypes {n : Nat} (ts : Vector (TypeExpr env scope) n) :
+    TypeArgs env (.replicate n .type) scope :=
+  ⟨ts.toArray.map .ty, by simp [Function.comp_def, List.map_const']⟩
+
+/-- There is one argument per variable. -/
+public theorem size_args (a : TypeArgs env params scope) : a.args.size = params.size := by
+  simpa using congrArg List.length a.kinds
+
+/-- Each argument's raw form is well formed, of its variable's kind. -/
+theorem wf (a : TypeArgs env params scope) (i : Nat) (hi : i < params.size) :
+    ∃ e, (a.args.map (·.expr))[i]? = some e ∧
+      TypeExpr.WF (env.RefBefore env.size) scope params[i] e := by
+  have hi₁ : i < a.args.size := a.size_args ▸ hi
+  have hk := congrArg (·[i]?) a.kinds
+  simp only [List.getElem?_map, Array.getElem?_toList, Array.getElem?_eq_getElem hi₁,
+    Array.getElem?_eq_getElem hi, Option.map_some, Option.some.injEq] at hk
+  exact ⟨a.args[i].expr, by simp [Array.getElem?_eq_getElem hi₁],
+    TypeExpr.WF.of_wfRel a.args[i].wfRel ((TypeArg.kind_expr _).trans hk)⟩
+
+end TypeArgs
+
+namespace TypeExpr
+
+variable {env : Env α} {scope : Array Kind} {k : Kind}
+
+/-- Apply a declared type constructor to checked arguments, each of the kind its parameter
+declares.  `rfl` proves `hk` when `r`'s declaration is visible. -/
+-- `hk` is over lists, so that `rfl` proves it: `Array.map` does not reduce.
+public def appK {arity : Nat} (r : TypeRef env arity)
+    (args : Vector (TypeArg env scope) arity)
+    (hk : args.toList.map TypeArg.kind = r.kinds.toList := by rfl) : TypeExpr env scope :=
   ⟨.app r.name (args.toArray.map (·.expr)),
-   .app (by simpa using r.refBefore)
-     (by
-       intro a ha
-       obtain ⟨e, -, rfl⟩ := Array.mem_map.mp ha
-       exact e.wf)⟩
+   .app r.refBefore (by simpa using congrArg List.length hk) fun i h => by
+     have hlen : arity = r.kinds.size := by simpa using congrArg List.length hk
+     have hi : i < arity := by simpa using h
+     have hki : (args[i]'hi).kind = r.kinds[i]'(hlen ▸ hi) := by
+       simpa [hi, hlen ▸ hi] using congrArg (·[i]?) hk
+     have he : (args.toArray.map (·.expr))[i]'h = (args[i]'hi).val.expr := by
+       rw [Array.getElem_map]
+       rfl
+     rw [he]
+     exact hki ▸ (args[i]'hi).val.wf⟩
 
 /-- Erasing the check of an application applies the name to the erased arguments. -/
-theorem expr_app {env : Env α} {scope arity : Nat} (r : TypeRef env arity)
-    (args : Vector (TypeExpr env scope) arity) :
-    (app r args).expr = .app r.name (args.toArray.map (·.expr)) := by
-  simp [app]
+theorem expr_appK {arity : Nat} (r : TypeRef env arity)
+    (args : Vector (TypeArg env scope) arity)
+    (hk : args.toList.map TypeArg.kind = r.kinds.toList) :
+    (appK r args hk).expr = .app r.name (args.toArray.map (·.expr)) := by
+  simp [appK]
+
+/-- Apply a declared type constructor, all of whose parameters are types, to checked
+arguments: `appK` at the arguments as types.  `rfl` proves `hk` when `r`'s declaration is
+visible. -/
+public def app {arity : Nat} (r : TypeRef env arity)
+    (args : Vector (TypeExpr env scope) arity)
+    (hk : r.kinds = .replicate arity .type := by rfl) : TypeExpr env scope :=
+  appK r (args.map .ty) (by simp [hk, Vector.toList_map, Function.comp_def, List.map_const'])
 
 /-- Check a raw type expression against `env` by evaluation. -/
-def check? (env : Env α) (scope : Nat) (e : TypeExpr.Raw) : Option (TypeExpr env scope) :=
-  if h : TypeExpr.Raw.checkAt env.raw env.size scope e = true then
-    some ⟨e, TypeExpr.Raw.wfRel_of_checkAt e h⟩
+def check? (env : Env α) (scope : Array Kind) (e : TypeExpr.Raw) :
+    Option (TypeExpr env scope) :=
+  if h : TypeExpr.Raw.checkTypeAt env.raw env.size scope e = true then
+    some ⟨e, TypeExpr.Raw.wfType_of_checkTypeAt e h⟩
   else
     none
 
 /-- What `check?` accepts, it returns unchanged. -/
-theorem expr_of_check?_eq_some {env : Env α} {scope : Nat} {e : TypeExpr.Raw}
+theorem expr_of_check?_eq_some {env : Env α} {scope : Array Kind} {e : TypeExpr.Raw}
     {f : TypeExpr env scope} (h : check? env scope e = some f) : f.expr = e := by
   unfold check? at h
   split at h
@@ -1736,30 +2132,29 @@ theorem expr_of_check?_eq_some {env : Env α} {scope : Nat} {e : TypeExpr.Raw}
   compares. -/
 
 /-- The raw type expression `e` stands for. -/
-public def toRaw {env : Env α} {scope : Nat} (e : TypeExpr env scope) : TypeExpr.Raw := e.expr
+public def toRaw (e : TypeExpr env scope k) : TypeExpr.Raw := e.expr
 
-/-- A variable stands for the variable. -/
-@[simp] public theorem toRaw_var {env : Env α} {scope : Nat} (i : Nat) (h : i < scope) :
-    (var (env := env) (scope := scope) i h).toRaw = .var i := by
+/-- A type variable stands for the variable. -/
+@[simp] public theorem toRaw_var (i : Nat) (h : scope[i]? = some .type) :
+    (var (env := env) i h).toRaw = .var i := by
   simp [toRaw, expr_var]
 
 /-- An application stands for its constructor's name applied to what its arguments stand
 for. -/
-@[simp] public theorem toRaw_app {env : Env α} {scope arity : Nat} (r : TypeRef env arity)
-    (args : Vector (TypeExpr env scope) arity) :
-    (app r args).toRaw = .app r.name (args.toArray.map (·.toRaw)) := by
-  simp [toRaw, expr_app]
+@[simp] public theorem toRaw_app {arity : Nat} (r : TypeRef env arity)
+    (args : Vector (TypeExpr env scope) arity) (hk : r.kinds = .replicate arity .type) :
+    (app r args hk).toRaw = .app r.name (args.toArray.map (·.toRaw)) := by
+  simp [toRaw, app, expr_appK, Array.map_map, Function.comp_def, TypeArg.expr]
 
 /-- `toRaw` is the erasure. -/
-theorem toRaw_eq_expr {env : Env α} {scope : Nat} (e : TypeExpr env scope) :
-    e.toRaw = e.expr := rfl
+theorem toRaw_eq_expr (e : TypeExpr env scope k) : e.toRaw = e.expr := rfl
 
 /-! ### Equality
 
 Two type expressions are equal when their erasures are, and equality is decidable. -/
 
-theorem eq_iff_expr_eq {env : Env α} {scope : Nat} {a b : TypeExpr env scope} :
-    a = b ↔ a.expr = b.expr := by
+/-- Two type expressions are equal exactly when their raw forms are. -/
+theorem eq_iff_expr_eq {a b : TypeExpr env scope k} : a = b ↔ a.expr = b.expr := by
   constructor
   · intro h; simp [h]
   · obtain ⟨ea, wa⟩ := a
@@ -1771,57 +2166,57 @@ theorem eq_iff_expr_eq {env : Env α} {scope : Nat} {a b : TypeExpr env scope} :
 
 -- A separate definition: an instance body is exposed and cannot reach the private field.
 /-- Decide equality of type expressions. -/
-public def decEq {env : Env α} {scope : Nat} (a b : TypeExpr env scope) : Decidable (a = b) :=
+public def decEq (a b : TypeExpr env scope k) : Decidable (a = b) :=
   decidable_of_iff (a.expr = b.expr) eq_iff_expr_eq.symm
 
-public instance {env : Env α} {scope : Nat} : DecidableEq (TypeExpr env scope) := decEq
+public instance : DecidableEq (TypeExpr env scope k) := decEq
+
+/-- A hash of a type expression: its raw form's. -/
+public def hash (a : TypeExpr env scope k) : UInt64 := Hashable.hash a.expr
+
+public instance : Hashable (TypeExpr env scope k) := ⟨hash⟩
 
 /-! ### Instantiation
 
-* `instantiate`: substitute closed types for the type variables of an expression. -/
+* `instantiate`: substitute arguments for the variables of a scope. -/
 
-/-- Replace the type variables of `e` by the closed types `args`. -/
-public def instantiate {env : Env α} {n : Nat} (args : Vector (TypeExpr env 0) n)
-    (e : TypeExpr env n) : TypeExpr env 0 :=
-  ⟨e.expr.instantiate (args.toArray.map (·.expr)),
-   e.wf.instantiate
-     (fun a ha => by
-       obtain ⟨f, -, rfl⟩ := Array.mem_map.mp ha
-       exact f.wf)
-     (by simp)⟩
+/-- Replace the variables of `e`, whose scope is `scope`, by `args`: a type variable by its
+type, and a list variable, which is spliced into a literal, by the list's elements.  It is a
+full simultaneous substitution: `args` gives every variable of `scope` an argument, all at
+once, so no variable keeps its de Bruijn level.  Substituting some variables only would mean
+shifting the others. -/
+public def instantiate {scope₁ : Array Kind} (args : TypeArgs env scope scope₁)
+    (e : TypeExpr env scope k) : TypeExpr env scope₁ k :=
+  ⟨e.expr.instantiate (args.args.map (·.expr)),
+   e.wf.instantiate args.wf⟩
 
-theorem expr_instantiate {env : Env α} {n : Nat} (args : Vector (TypeExpr env 0) n)
-    (e : TypeExpr env n) :
-    (e.instantiate args).expr = e.expr.instantiate (args.toArray.map (·.expr)) := by
+/-- Instantiating instantiates the raw form with the arguments' raw forms. -/
+theorem expr_instantiate {scope₁ : Array Kind} (args : TypeArgs env scope scope₁)
+    (e : TypeExpr env scope k) :
+    (e.instantiate args).expr = e.expr.instantiate (args.args.map (·.expr)) := by
   simp [instantiate]
 
 /-- A closed expression instantiates to itself. -/
-@[simp] public theorem instantiate_empty {env : Env α} (e : TypeExpr env 0) :
-    e.instantiate #v[] = e :=
+@[simp] public theorem instantiate_empty (e : TypeExpr env #[] k) :
+    e.instantiate ⟨#[], rfl⟩ = e :=
   eq_iff_expr_eq.mpr (by simp [expr_instantiate, Raw.instantiate_empty])
 
 /-! ### Folding
 
 * `fold`: a structural fold over a type expression. -/
 
-/-- Replace every variable by `var` of its level and every application by `app` of the
-constructor's name and its folded arguments. -/
-public def fold {env : Env α} {scope : Nat} {β : Type _} (var : Nat → β)
-    (app : Name → Array β → β) (e : TypeExpr env scope) : β :=
-  e.expr.fold var app
+/-- Replace every variable by `var` of its level and its kind in the scope, every application
+by `app` of the constructor's name and its folded arguments, and every list literal by `list`
+of its folded elements. -/
+public def fold {β : Type _} (var : Nat → Kind → β) (app : Name → Array β → β)
+    (list : Array β → β) (e : TypeExpr env scope k) : β :=
+  e.expr.fold (fun i => var i (scope[i]?.getD .type)) app list
 
-/-- Folding a variable applies `var` to its level. -/
-@[simp] public theorem fold_var {env : Env α} {scope : Nat} {β : Type _} (v : Nat → β)
-    (a : Name → Array β → β) (i : Nat) (h : i < scope) :
-    (var (env := env) (scope := scope) i h).fold v a = v i := by
-  simp [fold, expr_var, Raw.fold]
-
-/-- Folding an application applies `app` to the constructor's name and the folded
-arguments. -/
-@[simp] public theorem fold_app {env : Env α} {scope arity : Nat} {β : Type _} (v : Nat → β)
-    (a : Name → Array β → β) (r : TypeRef env arity) (args : Vector (TypeExpr env scope) arity) :
-    (app r args).fold v a = a r.name (args.toArray.map (·.fold v a)) := by
-  simp [fold, expr_app, Raw.fold_app, Array.map_map, Function.comp_def]
+/-- Folding a type variable applies `var` to its level and `.type`. -/
+@[simp] public theorem fold_var {β : Type _} (v : Nat → Kind → β) (a : Name → Array β → β)
+    (l : Array β → β) (i : Nat) (h : scope[i]? = some .type) :
+    (var (env := env) i h).fold v a l = v i .type := by
+  simp [fold, expr_var, Raw.fold, h]
 
 /-! ### Reading a datatype back
 
@@ -1829,67 +2224,295 @@ arguments. -/
 * `ctorPayloads?`: the payload types of every constructor.
 * `ctorArgs?`: the payload types of one constructor. -/
 
-/-- Checked arguments from raw ones that are known to be well formed. -/
-private def ofRawArgs {env : Env α} {scope : Nat} (as : Array TypeExpr.Raw)
-    (h : ∀ a ∈ as, WFRel (env.RefBefore env.size) scope a) :
-    Array (TypeExpr env scope) :=
-  as.attach.map (fun a => ⟨a.val, h a.val a.property⟩)
-
-@[simp] private theorem size_ofRawArgs {env : Env α} {scope : Nat} {as : Array TypeExpr.Raw}
-    {h : ∀ a ∈ as, WFRel (env.RefBefore env.size) scope a} :
-    (ofRawArgs (env := env) (scope := scope) as h).size = as.size := by
-  simp [ofRawArgs]
-
 private def rawCtors? {env : Env α} :
-    (e : TypeExpr.Raw) → WFRel (env.RefBefore env.size) 0 e →
-      Option (Array (Name × Array (TypeExpr env 0)))
-  | .var _, _ => none
+    (e : TypeExpr.Raw) → WFRel (env.RefBefore env.size) #[] e →
+      Option (Array (Name × Array (TypeExpr env)))
   | .app n as, h => do
     let (g, i) ← env.raw.dataOf? n
     let m ← g.member? i
-    if ha : as.size = m.arity then
-      let args : Vector (TypeExpr env 0) m.arity := ⟨ofRawArgs as h.args, by simp [ha]⟩
-      m.ctors.mapM fun c =>
-        (c.args.mapM (fun p => check? env m.arity p.type)).map
-          (fun ps => (c.name, ps.map (·.instantiate args)))
-    else
-      none
+    let args ← (TypeArgs.check? (TyParam.kinds m.params)
+      (as.attach.map fun a => TypeArg.ofWF a.1 (h.args a.1 a.2))).toOption
+    m.ctors.mapM fun c =>
+      (c.args.mapM (fun p => check? env (TyParam.kinds m.params) p.type)).map
+        (fun ps => (c.name, ps.map (·.instantiate args)))
+  | _, _ => none
 
 /-- The constructors of the datatype `e` is: each name, with its payload types at `e`'s own
 type arguments.  `none` for a primitive type, and for a datatype whose group has a member the
 environment does not name. -/
-public def ctors? {env : Env α} (e : TypeExpr env 0) :
-    Option (Array (Name × Array (TypeExpr env 0))) :=
-  rawCtors? e.expr e.wf
+public def ctors? {env : Env α} (e : TypeExpr env) :
+    Option (Array (Name × Array (TypeExpr env))) :=
+  rawCtors? e.expr e.wf.wfRel
 
 /-- The payload types of every constructor, in declaration order. -/
-public def ctorPayloads? {env : Env α} (e : TypeExpr env 0) :
-    Option (Array (Array (TypeExpr env 0))) :=
+public def ctorPayloads? {env : Env α} (e : TypeExpr env) :
+    Option (Array (Array (TypeExpr env))) :=
   e.ctors?.map (·.map (·.2))
 
 /-- The payload types of the constructor named `c`, if `e` is a datatype with one.  A `some`
 result means `c` is a constructor of `e`. -/
-public def ctorArgs? {env : Env α} (e : TypeExpr env 0) (c : Name) :
-    Option (Array (TypeExpr env 0)) :=
+public def ctorArgs? {env : Env α} (e : TypeExpr env) (c : Name) :
+    Option (Array (TypeExpr env)) :=
   e.ctors?.bind fun cs => (cs.find? (·.1 == c)).map (·.2)
+
+end TypeExpr
+
+namespace TypeList
+
+variable {env : Env α} {scope : Array Kind}
+
+/-- The raw form of an element. -/
+public def Elem.toRaw (e : Elem env scope) : TypeExpr.Raw := e.expr
+
+/-- A type element's raw form is the type's. -/
+@[simp] public theorem Elem.toRaw_ty (t : TypeExpr env scope) :
+    (Elem.ty t).toRaw = t.toRaw := by
+  simp [Elem.toRaw, Elem.expr, TypeExpr.toRaw]
+
+/-- A splice's raw form is its list variable. -/
+@[simp] public theorem Elem.toRaw_splice (j : Nat) (h : scope[j]? = some .list) :
+    (Elem.splice (env := env) j h).toRaw = .var j := by
+  simp [Elem.toRaw, Elem.expr]
+
+/-- A literal stands for the literal of what its elements stand for. -/
+@[simp] public theorem toRaw_lit (es : Array (Elem env scope)) :
+    (lit es).toRaw = .list (es.map (·.toRaw)) := by
+  simp [TypeExpr.toRaw, lit, Elem.toRaw]
+
+/-- A type is not a list variable. -/
+private theorem expr_ne_splice (t : TypeExpr env scope) {j : Nat}
+    (hj : scope[j]? = some .list) : t.expr ≠ .var j := by
+  intro h
+  have ht : TypeExpr.WFType (env.RefBefore env.size) scope t.expr := t.wf
+  rw [h, TypeExpr.wfType_var_iff, hj] at ht
+  exact absurd (Option.some.inj ht) (by decide)
+
+/-- Elements with equal raw forms are equal. -/
+theorem Elem.expr_inj : ∀ {a b : Elem env scope}, a.expr = b.expr → a = b
+  | .ty _, .ty _, h => congrArg _ (TypeExpr.eq_iff_expr_eq.mpr h)
+  | .splice _ _, .splice _ _, h => by cases h; rfl
+  | .ty t, .splice _ hj, h => absurd h (expr_ne_splice t hj)
+  | .splice _ hj, .ty t, h => absurd h.symm (expr_ne_splice t hj)
+
+/-- Two literals are equal when their elements are. -/
+@[simp] public theorem lit_eq_lit_iff {a b : Array (Elem env scope)} :
+    lit a = lit b ↔ a = b := by
+  rw [TypeExpr.eq_iff_expr_eq]
+  simp only [lit, TypeExpr.Raw.list.injEq]
+  exact Array.map_inj_right fun _ _ => Elem.expr_inj
+
+/-- The checked element a well-formed raw element is: a list variable spliced in, or a type. -/
+private def Elem.ofWF :
+    (a : TypeExpr.Raw) → TypeExpr.WFElem (env.RefBefore env.size) scope a → Elem env scope
+  | .var j, h =>
+    if hj : scope[j]? = some .list then .splice j hj
+    else .ty ⟨.var j, h.wfType (by
+      cases hs : scope[j]? with
+      | none => simp [TypeExpr.Raw.kind, hs]
+      | some k =>
+        cases k with
+        | type => simp [TypeExpr.Raw.kind, hs]
+        | list => exact absurd hs hj)⟩
+  | .app n as, h => .ty ⟨.app n as, h.wfType rfl⟩
+  | .list _, h => absurd h.isElem (by simp [TypeExpr.Raw.isElem])
+
+/-- `Elem.ofWF` keeps the raw element. -/
+private theorem Elem.expr_ofWF : ∀ (a : TypeExpr.Raw)
+    (h : TypeExpr.WFElem (env.RefBefore env.size) scope a), (Elem.ofWF a h).expr = a
+  | .var j, h => by
+    by_cases hj : scope[j]? = some .list <;> simp [Elem.ofWF, hj, Elem.expr]
+  | .app _ _, _ => rfl
+  | .list _, h => absurd h.isElem (by simp [TypeExpr.Raw.isElem])
+
+/-- The elements of a well-formed literal, checked. -/
+private def rawToElems : (e : TypeExpr.Raw) → TypeExpr.WFList (env.RefBefore env.size) scope e →
+    Array (Elem env scope)
+  | .list es, h => es.attach.map fun a => Elem.ofWF a.1 (h.elems a.1 a.2)
+  | _, _ => #[]
+
+/-- The raw elements of `rawToElems` are the literal's. -/
+private theorem list_map_expr_rawToElems : ∀ (e : TypeExpr.Raw)
+    (h : TypeExpr.WFList (env.RefBefore env.size) scope e),
+    TypeExpr.Raw.list ((rawToElems e h).map Elem.expr) = e
+  | .list es, h => by
+    simp only [rawToElems, Array.map_map, Function.comp_def, Elem.expr_ofWF,
+      Array.attach_map_subtype_val]
+  | .var _, h => by cases h
+  | .app _ _, h => by cases h
+
+end TypeList
+
+namespace TypeExpr
+
+variable {env : Env α} {scope : Array Kind}
+
+/-- Appending two literals is the literal of their elements, one after the other. -/
+@[simp] public theorem lit_append_lit (a b : Array (TypeList.Elem env scope)) :
+    TypeList.lit a ++ TypeList.lit b = TypeList.lit (a ++ b) :=
+  eq_iff_expr_eq.mpr (by
+    simp [expr_append, TypeList.lit, rawAppend, Array.map_append])
+
+/-- The elements of a list, each a type or a list variable spliced in: every list is the
+literal of its elements (`lit_toElems`). -/
+public def toElems (l : TypeExpr env scope .list) : Array (TypeList.Elem env scope) :=
+  TypeList.rawToElems l.expr l.wf
+
+/-- A list is the literal of its elements. -/
+@[simp] public theorem lit_toElems (l : TypeExpr env scope .list) :
+    TypeList.lit l.toElems = l :=
+  eq_iff_expr_eq.mpr (TypeList.list_map_expr_rawToElems l.expr l.wf)
+
+/-- A literal's elements are the ones it was built from. -/
+@[simp] public theorem toElems_lit (es : Array (TypeList.Elem env scope)) :
+    (TypeList.lit es).toElems = es :=
+  TypeList.lit_eq_lit_iff.mp (lit_toElems (TypeList.lit es))
+
+/-- A list variable is the one splice. -/
+@[simp] public theorem toElems_var (j : Nat) (h : scope[j]? = some .list) :
+    (TypeList.var (env := env) j h).toElems = #[.splice j h] :=
+  toElems_lit _
+
+/-- The elements of `ofTypes ts` are the types `ts`. -/
+@[simp] public theorem toElems_ofTypes (ts : Array (TypeExpr env scope)) :
+    (TypeList.ofTypes ts).toElems = ts.map .ty :=
+  toElems_lit _
+
+/-- Appending lists appends their elements. -/
+@[simp] public theorem toElems_append (l₁ l₂ : TypeExpr env scope .list) :
+    (l₁ ++ l₂).toElems = l₁.toElems ++ l₂.toElems := by
+  rw [← toElems_lit (l₁.toElems ++ l₂.toElems), ← lit_append_lit, lit_toElems, lit_toElems]
+
+/-- `++` splices a list where `instantiate` splices a list variable, so the two commute, as an
+abbreviation's `n.ty`, which appends its list arguments, relies on. -/
+@[simp] public theorem instantiate_append {scope₁ : Array Kind}
+    (args : TypeArgs env scope scope₁) (l₁ l₂ : TypeExpr env scope .list) :
+    (l₁ ++ l₂).instantiate args = l₁.instantiate args ++ l₂.instantiate args := by
+  rw [eq_iff_expr_eq]
+  obtain ⟨a, ha⟩ := TypeExpr.WF.eq_list l₁.wf
+  obtain ⟨b, hb⟩ := TypeExpr.WF.eq_list l₂.wf
+  simp [expr_append, expr_instantiate, ha, hb, rawAppend, TypeExpr.Raw.instantiate_list]
+
+end TypeExpr
+
+/-- The raw form of an argument. -/
+public def TypeArg.toRaw {env : Env α} {scope : Array Kind} (a : TypeArg env scope) :
+    TypeExpr.Raw := a.expr
+
+/-- A type argument's raw form is the type's. -/
+@[simp] public theorem TypeArg.toRaw_ty {env : Env α} {scope : Array Kind}
+    (t : TypeExpr env scope) : (TypeArg.ty t).toRaw = t.toRaw := by
+  simp [TypeArg.toRaw, TypeArg.expr, TypeExpr.toRaw]
+
+/-- A list argument's raw form is the list's. -/
+@[simp] public theorem TypeArg.toRaw_list {env : Env α} {scope : Array Kind}
+    (l : TypeList env scope) : (TypeArg.list l).toRaw = l.toRaw := by
+  simp [TypeArg.toRaw, TypeArg.expr, TypeExpr.toRaw]
+
+/-- `toRaw` is the raw form. -/
+theorem TypeArg.toRaw_eq_expr {env : Env α} {scope : Array Kind} (a : TypeArg env scope) :
+    a.toRaw = a.expr := rfl
+
+/-- Fold over an argument, as `TypeExpr.fold` does. -/
+public def TypeArg.fold {env : Env α} {scope : Array Kind} {β : Type _}
+    (var : Nat → Kind → β) (app : Name → Array β → β) (list : Array β → β)
+    (a : TypeArg env scope) : β :=
+  a.val.fold var app list
+
+/-- Arguments with equal raw forms are equal: the raw form determines the kind. -/
+theorem TypeArg.expr_inj {env : Env α} {scope : Array Kind} :
+    ∀ {a b : TypeArg env scope}, a.expr = b.expr → a = b
+  | ⟨_, t₁⟩, ⟨_, t₂⟩, h => by
+    have h : t₁.expr = t₂.expr := h
+    obtain rfl := t₁.wf.kind_eq.symm.trans ((congrArg (TypeExpr.Raw.kind scope) h).trans
+      t₂.wf.kind_eq)
+    exact congrArg _ (TypeExpr.eq_iff_expr_eq.mpr h)
+
+/-- Decide equality of type arguments, by their raw forms, which determine the kinds. -/
+public def TypeArg.decEq {env : Env α} {scope : Array Kind} (a b : TypeArg env scope) :
+    Decidable (a = b) :=
+  decidable_of_iff (a.expr = b.expr) ⟨TypeArg.expr_inj, fun h => h ▸ rfl⟩
+
+public instance {env : Env α} {scope : Array Kind} : DecidableEq (TypeArg env scope) :=
+  TypeArg.decEq
+
+/-- A hash of a type argument: its raw form's. -/
+public def TypeArg.hash {env : Env α} {scope : Array Kind} (a : TypeArg env scope) : UInt64 :=
+  Hashable.hash a.expr
+
+public instance {env : Env α} {scope : Array Kind} : Hashable (TypeArg env scope) :=
+  ⟨TypeArg.hash⟩
+
+/-- Two applications' type arguments are equal when the arrays of them are. -/
+public theorem TypeArgs.eq_iff_args_eq {env : Env α} {params scope : Array Kind}
+    {a b : TypeArgs env params scope} : a = b ↔ a.args = b.args := by
+  obtain ⟨_, _⟩ := a
+  obtain ⟨_, _⟩ := b
+  simp
+
+public instance {env : Env α} {params scope : Array Kind} :
+    DecidableEq (TypeArgs env params scope) := fun a b =>
+  decidable_of_iff (a.args = b.args) TypeArgs.eq_iff_args_eq.symm
+
+public instance {env : Env α} {params scope : Array Kind} :
+    Hashable (TypeArgs env params scope) := ⟨fun a => Hashable.hash a.args⟩
+
+/-- Two type arguments are equal when their types are. -/
+@[simp] public theorem TypeArg.ty_inj {env : Env α} {scope : Array Kind}
+    {t₁ t₂ : TypeExpr env scope} : TypeArg.ty t₁ = TypeArg.ty t₂ ↔ t₁ = t₂ := by
+  simp [TypeArg.ty]
+
+/-- Two list arguments are equal when their lists are. -/
+@[simp] public theorem TypeArg.list_inj {env : Env α} {scope : Array Kind}
+    {l₁ l₂ : TypeList env scope} : TypeArg.list l₁ = TypeArg.list l₂ ↔ l₁ = l₂ := by
+  simp [TypeArg.list]
+
+namespace TypeExpr
+
+variable {env : Env α} {scope : Array Kind}
+
+/-- An application stands for its constructor's name applied to what its arguments stand
+for. -/
+@[simp] public theorem toRaw_appK {arity : Nat} (r : TypeRef env arity)
+    (args : Vector (TypeArg env scope) arity)
+    (hk : args.toList.map TypeArg.kind = r.kinds.toList) :
+    (appK r args hk).toRaw = .app r.name (args.toArray.map (·.toRaw)) := by
+  simp [toRaw, expr_appK, TypeArg.toRaw]
+
+/-- Folding an application applies `app` to the constructor's name and the folded
+arguments. -/
+@[simp] public theorem fold_appK {β : Type _} (v : Nat → Kind → β) (a : Name → Array β → β)
+    (l : Array β → β) {arity : Nat} (r : TypeRef env arity)
+    (args : Vector (TypeArg env scope) arity)
+    (hk : args.toList.map TypeArg.kind = r.kinds.toList) :
+    (appK r args hk).fold v a l = a r.name (args.toArray.map (·.fold v a l)) := by
+  simp [fold, expr_appK, Raw.fold_app, Array.map_map, Function.comp_def, TypeArg.fold,
+    TypeArg.expr]
+
+/-- Folding an all-types application applies `app` to the constructor's name and the folded
+arguments. -/
+@[simp] public theorem fold_app {β : Type _} (v : Nat → Kind → β) (a : Name → Array β → β)
+    (l : Array β → β) {arity : Nat} (r : TypeRef env arity)
+    (args : Vector (TypeExpr env scope) arity) (hk : r.kinds = .replicate arity .type) :
+    (app r args hk).fold v a l = a r.name (args.toArray.map (·.fold v a l)) := by
+  simp [app, Array.map_map, Function.comp_def, TypeArg.fold]
 
 end TypeExpr
 
 /-! ## Region signatures, checked
 
-`RegionSig env scope` is a region signature well formed against `env` under `scope` type
-variables.  A region binds no type variables of its own. -/
+`RegionSig env scope` is a region signature well formed against `env` in `scope`, the kinds of
+the variables in scope.  A region binds no variables of its own. -/
 
 /-- The checked signature of a region: the types of its entry block's parameters, and the
 type its exit takes.  It is built with `of` and read through `params` and
 `returnType`. -/
-public structure RegionSig (env : Env α) (scope : Nat) where
+public structure RegionSig (env : Env α) (scope : Array Kind) where
   private raw : RegionSig.Raw
   private wf : raw.WF (env.RefBefore env.size) scope
 
 namespace RegionSig
 
-variable {env : Env α} {scope : Nat}
+variable {env : Env α} {scope : Array Kind}
 
 /-- The region's parameters, checked. -/
 public def params (r : RegionSig env scope) : Array (Param (TypeExpr env scope)) :=
@@ -1975,7 +2598,44 @@ are. -/
 
 end RegionSig
 
+/-! ## Variadics, checked
+
+`Variadic env scope` is the type of an instruction's trailing operands, in `scope`. -/
+
+/-- The type of an instruction's trailing operands: `each`, a type that each of any number of
+operands has, or `spread`, a list whose elements the operands have, one each and in order.  It is
+a type argument, a type or a list with its kind; `each` and `spread` match as constructors do. -/
+public abbrev Variadic (env : Env α) (scope : Array Kind := #[]) : Type := TypeArg env scope
+
+namespace Variadic
+
+variable {env : Env α} {scope : Array Kind}
+
+/-- `(*xs : τ)`: any number of operands, each of type `τ`. -/
+@[match_pattern] public abbrev each (t : TypeExpr env scope) : Variadic env scope := ⟨.type, t⟩
+
+/-- `(*xs : cs)`: exactly one operand per element of `cs`, of that element's type. -/
+@[match_pattern] public abbrev spread (cs : TypeList env scope) : Variadic env scope :=
+  ⟨.list, cs⟩
+
+/-- An `each` stands for its type. -/
+@[simp] public theorem toRaw_each (t : TypeExpr env scope) : (each t).toRaw = t.toRaw := by
+  simp [TypeArg.toRaw, TypeArg.expr, TypeExpr.toRaw]
+
+/-- A `spread` stands for its list. -/
+@[simp] public theorem toRaw_spread (cs : TypeList env scope) :
+    (spread cs).toRaw = cs.toRaw := by
+  simp [TypeArg.toRaw, TypeArg.expr, TypeExpr.toRaw]
+
+end Variadic
+
 /-! ## Instruction signatures, checked -/
+
+-- A hand-written signature with no type parameters writes its types in the empty scope, which
+-- fixes `typeParams` before its default fires.
+/-- Kinds of no type parameters are the empty scope. -/
+unif_hint (ps : Array (Param Kind)) where
+  ps =?= #[] ⊢ Param.kinds ps =?= #[]
 
 /-- An instruction declaration without its name, with every type expression checked against
 `env`. -/
@@ -1984,37 +2644,41 @@ public structure InsnSig (env : Env α) where
   resolves its signature up to it, and `carry` keeps it, so it need not be the annotation of the
   declaration in either environment.  `Env.annOf?` reads that annotation. -/
   ann : α
-  /-- The type variables the signature binds, by de Bruijn level: `.var i` is
-  `typeParams[i]`. -/
-  typeParams : Array String := #[]
-  -- Stored, so that operand types at scope `0` fix it and the defaults can fire.
-  /-- How many type variables the signature binds: the scope its type expressions are
-  written in. -/
-  typeArgc : Nat := typeParams.size
-  argTypes : Array (Param (TypeExpr env typeArgc))
-  /-- The trailing variadic operands, if the instruction takes any: their name and the type
-  of each. -/
-  variadic : Option (Param (TypeExpr env typeArgc)) := none
+  /-- The variables the signature binds, each a name and a kind, by de Bruijn level: `.var i`
+  is `typeParams[i]`.  Their kinds are the scope its type expressions are written in. -/
+  typeParams : Array (Param Kind) := #[]
+  argTypes : Array (Param (TypeExpr env (Param.kinds typeParams)))
+  /-- The trailing variadic operands, if the instruction takes any: their name and their
+  type. -/
+  variadic : Option (Param (Variadic env (Param.kinds typeParams))) := none
   /-- What the instruction returns, or `none` if it ends its block: a terminal instruction
   never falls through and produces no result. -/
-  returnType : Option (TypeExpr env typeArgc)
+  returnType : Option (TypeExpr env (Param.kinds typeParams))
   /-- The regions the instruction takes, each named and with its own signature under the
-  instruction's type variables. -/
-  regions : Array (Param (RegionSig env typeArgc)) := #[]
+  instruction's variables. -/
+  regions : Array (Param (RegionSig env (Param.kinds typeParams))) := #[]
   /-- The successors the instruction may transfer to, each named and with the types of the
-  values it passes, under the instruction's type variables.  A use site supplies one block
-  per successor, in this order. -/
-  succs : Array (Param (Array (TypeExpr env typeArgc))) := #[]
-  /-- One name per type variable. -/
-  size_typeParams : typeParams.size = typeArgc := by rfl
+  values it passes, under the instruction's variables.  A use site supplies one block per
+  successor, in this order. -/
+  succs : Array (Param (Array (TypeExpr env (Param.kinds typeParams)))) := #[]
   -- Written out, not via `InsnDecl.Raw.paramNames`, so the default `decide` reduces.
   /-- No name is bound twice among the type parameters, arguments, variadic, regions and
   successors. -/
-  distinct : (typeParams.toList ++ argTypes.toList.map (·.name) ++
+  distinct : (typeParams.toList.map (·.name) ++ argTypes.toList.map (·.name) ++
     (variadic.map (·.name)).toList ++ regions.toList.map (·.name) ++
     succs.toList.map (·.name)).Nodup := by decide
 
 namespace InsnSig
+
+/-- How many type variables the signature binds: one type argument per type parameter.
+Reducible, so it computes on a literal signature. -/
+@[expose, reducible] public def typeArgc {env : Env α} (s : InsnSig env) : Nat :=
+  s.typeParams.size
+
+/-- The kinds of the variables the signature binds: the scope its type expressions are written
+in.  Reducible, as `typeArgc` is. -/
+@[expose, reducible] public def scope {env : Env α} (s : InsnSig env) : Array Kind :=
+  Param.kinds s.typeParams
 
 /-- Whether the instruction ends its block: it has no return type. -/
 @[expose, reducible] public def terminal {env : Env α} (s : InsnSig env) : Bool :=
@@ -2037,8 +2701,7 @@ def decl {env : Env α} (s : InsnSig env) (name : Name) (kind : InsnKind := .dec
 /-- The erased declaration is well formed in `env`. -/
 theorem wf {env : Env α} (s : InsnSig env) (name : Name) (kind : InsnKind := .decl) :
     InsnDecl.Raw.WF (env.RefBefore env.size) (s.decl name kind) := by
-  obtain ⟨ann, typeParams, _, argTypes, variadic, returnType, regions, succs, rfl,
-    distinct⟩ := s
+  obtain ⟨ann, typeParams, argTypes, variadic, returnType, regions, succs, distinct⟩ := s
   refine InsnDecl.Raw.wf_mk ?_ ?_ ?_ ?_ ?_ ?_
   · intro p hp
     simp only [decl, Array.mem_map] at hp
@@ -2047,7 +2710,7 @@ theorem wf {env : Env α} (s : InsnSig env) (name : Name) (kind : InsnKind := .d
   · intro v hv
     simp only [decl, Option.mem_def, Option.map_eq_some_iff] at hv
     obtain ⟨q, -, rfl⟩ := hv
-    exact q.type.wf
+    exact q.type.wfRel
   · intro t ht
     simp only [decl, Option.mem_def, Option.map_eq_some_iff] at ht
     obtain ⟨u, -, rfl⟩ := ht
@@ -2072,7 +2735,8 @@ def ofWF {env : Env α} (d : InsnDecl.Raw α)
   argTypes := d.argTypes.attach.map fun p =>
     ⟨p.val.name, ⟨p.val.type, InsnDecl.Raw.wf_argTypes h p.val p.property⟩⟩
   variadic := d.variadic.attach.map fun v =>
-    ⟨v.val.name, ⟨v.val.type, InsnDecl.Raw.wf_variadic h v.val (Option.mem_def.mpr v.property)⟩⟩
+    ⟨v.val.name,
+      .ofWF v.val.type (InsnDecl.Raw.wf_variadic h v.val (Option.mem_def.mpr v.property))⟩
   returnType := d.returnType.attach.map fun t =>
     ⟨t.val, InsnDecl.Raw.wf_returnType h t.val (Option.mem_def.mpr t.property)⟩
   regions := d.regions.attach.map fun r =>
@@ -2110,11 +2774,11 @@ theorem kind_decl {env : Env α} (i : InsnSig env) (name : Name)
 /-- A signature is determined by the declaration it erases to. -/
 theorem eq_of_decl_eq {env : Env α} {s₁ s₂ : InsnSig env} {n : Name} {k : InsnKind}
     (h : s₁.decl n k = s₂.decl n k) : s₁ = s₂ := by
-  obtain ⟨ann₁, tp₁, _, args₁, var₁, ret₁, reg₁, succ₁, rfl, d₁⟩ := s₁
-  obtain ⟨ann₂, tp₂, _, args₂, var₂, ret₂, reg₂, succ₂, rfl, d₂⟩ := s₂
+  obtain ⟨ann₁, tp₁, args₁, var₁, ret₁, reg₁, succ₁, d₁⟩ := s₁
+  obtain ⟨ann₂, tp₂, args₂, var₂, ret₂, reg₂, succ₂, d₂⟩ := s₂
   simp only [decl, InsnDecl.Raw.mk.injEq] at h
   obtain ⟨rfl, -, rfl, hargs, hvar, hret, hreg, hsucc, -⟩ := h
-  have hp : ∀ {n : Nat} {a b : Param (TypeExpr env n)}, a.name = b.name →
+  have hp : ∀ {n : Array Kind} {a b : Param (TypeExpr env n)}, a.name = b.name →
       a.type.expr = b.type.expr → a = b := by
     intro n a b h1 h2
     obtain ⟨_, _⟩ := a; obtain ⟨_, _⟩ := b
@@ -2130,7 +2794,10 @@ theorem eq_of_decl_eq {env : Env α} {s₁ s₂ : InsnSig env} {n : Name} {k : I
   have hvar' : var₁ = var₂ := by
     cases var₁ <;> cases var₂ <;> simp only [Option.map_none, Option.map_some,
       Option.some.injEq, Param.mk.injEq, reduceCtorEq] at hvar ⊢
-    exact hp hvar.1 hvar.2
+    rename_i a b
+    obtain ⟨_, _⟩ := a; obtain ⟨_, _⟩ := b
+    rw [Param.mk.injEq]
+    exact ⟨hvar.1, TypeArg.expr_inj hvar.2⟩
   have hret' : ret₁ = ret₂ := by
     cases ret₁ <;> cases ret₂ <;> simp only [Option.map_none, Option.map_some,
       Option.some.injEq, reduceCtorEq] at hret ⊢
@@ -2187,9 +2854,9 @@ theorem erase_decl_eq_of_toRaw {e₁ e₂ : Env α} {s₁ : InsnSig e₁} {s₂ 
       s₂.succs.map (fun p => (p.name, p.type.map (·.toRaw)))) :
     (s₂.decl name k₂).erase =
       { (s₁.decl name k₁).erase with kind := (s₂.decl name k₂).kind } := by
-  simp only [TypeExpr.toRaw_eq_expr] at hargs hvar hret hregions hsuccs
+  simp only [TypeExpr.toRaw_eq_expr, TypeArg.toRaw_eq_expr] at hargs hvar hret hregions hsuccs
   -- each field of the erasure is the corresponding hypothesis, re-paired
-  have hraw : ∀ {env : Env α} {scope : Nat},
+  have hraw : ∀ {env : Env α} {scope : Array Kind},
       (fun p : Param (RegionSig env scope) => (⟨p.name, p.type.raw⟩ : Param RegionSig.Raw)) =
         fun x => ⟨x.name, ⟨x.type.params.map (fun y => ⟨y.name, y.type.expr⟩),
           x.type.returnType.expr⟩⟩ := by
@@ -2227,10 +2894,10 @@ public theorem ext_toRaw {env : Env α} {s₁ s₂ : InsnSig env} (hann : s₁.a
         p.type.params.map (fun q => (q.name, q.type.toRaw)), p.type.returnType.toRaw)))
     (hsuccs : s₁.succs.map (fun p => (p.name, p.type.map (·.toRaw))) =
       s₂.succs.map (fun p => (p.name, p.type.map (·.toRaw)))) : s₁ = s₂ := by
-  simp only [TypeExpr.toRaw_eq_expr] at hargs hvar hret hregions hsuccs
+  simp only [TypeExpr.toRaw_eq_expr, TypeArg.toRaw_eq_expr] at hargs hvar hret hregions hsuccs
   apply eq_of_decl_eq (n := .base) (k := .decl)
   -- each field of the erasure is the corresponding hypothesis, re-paired
-  have hraw : ∀ {scope : Nat},
+  have hraw : ∀ {scope : Array Kind},
       (fun p : Param (RegionSig env scope) => (⟨p.name, p.type.raw⟩ : Param RegionSig.Raw)) =
         fun x => ⟨x.name, ⟨x.type.params.map (fun y => ⟨y.name, y.type.expr⟩),
           x.type.returnType.expr⟩⟩ := by
@@ -2252,22 +2919,22 @@ public theorem ext_toRaw {env : Env α} {s₁ s₂ : InsnSig env} (hann : s₁.a
   exact hregions'
 
 /-- The operand types an operation demands at these type arguments: one per declared
-parameter, then the variadic's type for each trailing operand.  `none` when there are too few
-operands, or too many and no variadic. -/
+parameter, then the variadic's.  An `each` variadic gives its type to each trailing operand; a
+`spread` one demands exactly its list's elements.  `none` when the operands are too few, or
+too many for the variadic. -/
 @[expose] public def operandTypes? {env : Env α} (isig : InsnSig env)
-    (typeArgs : Vector (TypeExpr env 0) isig.typeArgc) (argc : Nat) :
-    Option (Array (TypeExpr env 0)) :=
-  let fixed := isig.argTypes.map (fun p => p.type.instantiate typeArgs)
-  if argc = fixed.size then
-    some fixed
-  else
-    match isig.variadic with
-    | some v =>
-      if fixed.size ≤ argc then
-        some (fixed ++ Array.replicate (argc - fixed.size) (v.type.instantiate typeArgs))
-      else
-        none
-    | none => none
+    (typeArgs : TypeArgs env isig.scope) (argc : Nat) : Option (Array (TypeExpr env)) :=
+  let fixed := isig.argTypes.map (·.type.instantiate typeArgs)
+  match isig.variadic with
+  | none => if argc = fixed.size then some fixed else none
+  | some ⟨_, .each t⟩ =>
+    if fixed.size ≤ argc then
+      some (fixed ++ Array.replicate (argc - fixed.size) (t.instantiate typeArgs))
+    else
+      none
+  | some ⟨_, .spread cs⟩ =>
+    let tail := (cs.instantiate typeArgs).elems
+    if argc = fixed.size + tail.size then some (fixed ++ tail) else none
 
 end InsnSig
 
@@ -2346,9 +3013,9 @@ theorem declaresInsn_ofWF {s : Env α} {n : Name} {d : InsnDecl.Raw α}
   exact h
 
 /-- A reference is valid at the end of an environment exactly when the name resolves to a
-type of that arity. -/
-theorem refBefore_size_iff {s : Env α} {n : Name} {a : Nat} :
-    s.RefBefore s.size n a ↔ ∃ d, s.raw.typeOf? n = some d ∧ d.arity = a := by
+type of those kinds. -/
+theorem refBefore_size_iff {s : Env α} {n : Name} {a : Array Kind} :
+    s.RefBefore s.size n a ↔ ∃ d, s.raw.typeOf? n = some d ∧ d.kinds = a := by
   constructor
   · intro hr
     obtain ⟨_, d, _, _, hd, ha⟩ := Raw.refBefore_iff.mp hr
@@ -2421,11 +3088,11 @@ public theorem ResolvesType.carry {s t : Env α} (h : s.KeepsTypes t) {n : Name}
   exact ⟨d₂, hd₂, he₂.trans he₁⟩
 
 /-- A reference valid in `s` is valid in every environment that keeps `s`'s types. -/
-theorem refBefore_size_of_keepsTypes {s t : Env α} (h : s.KeepsTypes t) {n : Name} {a : Nat}
-    (hr : s.RefBefore s.size n a) : t.RefBefore t.size n a := by
+theorem refBefore_size_of_keepsTypes {s t : Env α} (h : s.KeepsTypes t) {n : Name}
+    {a : Array Kind} (hr : s.RefBefore s.size n a) : t.RefBefore t.size n a := by
   obtain ⟨d₁, hd₁, rfl⟩ := refBefore_size_iff.mp hr
   obtain ⟨d₂, hd₂, he⟩ := h.type hd₁
-  exact refBefore_size_iff.mpr ⟨d₂, hd₂, TypeDecl.arity_eq_of_erase_eq he⟩
+  exact refBefore_size_iff.mpr ⟨d₂, hd₂, TypeDecl.kinds_eq_of_erase_eq he⟩
 
 variable {t s : Env α}
 
@@ -2447,29 +3114,82 @@ end Env
 
 namespace TypeExpr
 
+variable {scope : Array Kind} {k : Kind}
+
 /-- Reinterpret in an environment that keeps the types. -/
-public def carry {s t : Env α} (h : s.KeepsTypes t) {scope : Nat} (e : TypeExpr s scope) :
-    TypeExpr t scope :=
-  ⟨e.expr, e.wf.mono (fun _ _ hr => Env.refBefore_size_of_keepsTypes h hr) (Nat.le_refl scope)⟩
+public def carry {s t : Env α} (h : s.KeepsTypes t) (e : TypeExpr s scope k) :
+    TypeExpr t scope k :=
+  ⟨e.expr, e.wf.mono fun _ _ hr => Env.refBefore_size_of_keepsTypes h hr⟩
 
 /-- Reinterpret in an extension. -/
-public abbrev ofSubset {s t : Env α} (h : s ⊆ t) {scope : Nat} (e : TypeExpr s scope) :
-    TypeExpr t scope :=
+public abbrev ofSubset {s t : Env α} (h : s ⊆ t) (e : TypeExpr s scope k) : TypeExpr t scope k :=
   e.carry (Env.keepsTypes_of_subset h)
 
 /-- Reinterpreting keeps the raw expression. -/
-theorem expr_carry {s t : Env α} (h : s.KeepsTypes t) {scope : Nat}
-    (e : TypeExpr s scope) : (e.carry h).expr = e.expr := rfl
+theorem expr_carry {s t : Env α} (h : s.KeepsTypes t) (e : TypeExpr s scope k) :
+    (e.carry h).expr = e.expr := rfl
 
 /-- Reinterpreting changes nothing an expression stands for. -/
-@[simp] public theorem toRaw_carry {s t : Env α} (h : s.KeepsTypes t) {scope : Nat}
-    (e : TypeExpr s scope) : (e.carry h).toRaw = e.toRaw := by
+@[simp] public theorem toRaw_carry {s t : Env α} (h : s.KeepsTypes t) (e : TypeExpr s scope k) :
+    (e.carry h).toRaw = e.toRaw := by
   simp [toRaw, expr_carry]
 
 end TypeExpr
 
+namespace TypeList
+
+variable {scope : Array Kind}
+
+/-- Reinterpret an element in an environment that keeps the types. -/
+public def Elem.carry {s t : Env α} (h : s.KeepsTypes t) :
+    Elem s scope → Elem t scope
+  | .ty e => .ty (e.carry h)
+  | .splice j hj => .splice j hj
+
+end TypeList
+
+namespace TypeArg
+
+variable {scope : Array Kind}
+
+/-- Reinterpret an argument in an environment that keeps the types. -/
+public def carry {s t : Env α} (h : s.KeepsTypes t) (a : TypeArg s scope) : TypeArg t scope :=
+  ⟨a.kind, a.val.carry h⟩
+
+/-- Carrying keeps an argument's kind. -/
+@[simp] public theorem kind_carry {s t : Env α} (h : s.KeepsTypes t) (a : TypeArg s scope) :
+    (a.carry h).kind = a.kind := by
+  simp [carry]
+
+/-- Reinterpreting keeps the raw form. -/
+theorem expr_carry {s t : Env α} (h : s.KeepsTypes t) (a : TypeArg s scope) :
+    (a.carry h).expr = a.expr := rfl
+
+/-- Reinterpreting changes nothing an argument stands for. -/
+@[simp] public theorem toRaw_carry {s t : Env α} (h : s.KeepsTypes t) (a : TypeArg s scope) :
+    (a.carry h).toRaw = a.toRaw := by
+  simp [TypeArg.toRaw, expr_carry]
+
+end TypeArg
+
+/-- Reinterpret an application's type arguments in an environment that keeps the types. -/
+public def TypeArgs.carry {s t : Env α} (h : s.KeepsTypes t) {params scope : Array Kind}
+    (a : TypeArgs s params scope) : TypeArgs t params scope :=
+  ⟨a.args.map (·.carry h), by simpa [Function.comp_def] using a.kinds⟩
+
+/-- Instantiating commutes with reinterpreting: a signature carried into an extension
+instantiates at carried arguments to what it instantiated to, carried. -/
+public theorem TypeExpr.instantiate_carry {s t : Env α} (h : s.KeepsTypes t)
+    {scope scope₁ : Array Kind} {k : Kind} (args : TypeArgs s scope scope₁)
+    (e : TypeExpr s scope k) :
+    (e.carry h).instantiate (args.carry h) = (e.instantiate args).carry h :=
+  TypeExpr.eq_iff_expr_eq.mpr (by
+    simp [TypeExpr.expr_instantiate, TypeExpr.expr_carry, TypeArgs.carry, Array.map_map,
+      Function.comp_def, TypeArg.expr_carry])
+
+-- Exposed: the DSL's kind proofs (`refKinds`) are `rfl` through it.
 /-- Carry a type reference into an environment that keeps the types. -/
-public def TypeRef.carry {s t : Env α} {arity : Nat} (h : s.KeepsTypes t)
+@[expose] public def TypeRef.carry {s t : Env α} {arity : Nat} (h : s.KeepsTypes t)
     (r : TypeRef s arity) : TypeRef t arity :=
   ⟨r.name, r.decl, r.matchArity, r.resolves.carry h⟩
 
@@ -2488,6 +3208,11 @@ public abbrev TypeRef.ofSubset {s t : Env α} {arity : Nat} (h : s ⊆ t)
     (r : TypeRef s arity) : (r.carry h).decl = r.decl := by
   simp [TypeRef.carry]
 
+/-- Carrying a type reference keeps its kinds. -/
+@[simp] public theorem kinds_TypeRef_carry {s t : Env α} {arity : Nat} (h : s.KeepsTypes t)
+    (r : TypeRef s arity) : (r.carry h).kinds = r.kinds := by
+  simp [TypeRef.kinds]
+
 /-! ### Normal forms under reinterpretation
 
 `simp` pushes `carry` (and so `ofSubset`) down to the references and compares applications by
@@ -2502,29 +3227,95 @@ name: it proves two signatures built alike equal (`InsnRef.cast`). -/
 namespace TypeExpr
 
 /-- Reinterpreting a type variable gives the variable. -/
-@[simp] public theorem carry_var {s t : Env α} (h : s.KeepsTypes t) {scope : Nat} (i : Nat)
-    (hi : i < scope) : (var (env := s) i hi).carry h = var i hi :=
+@[simp] public theorem carry_var {s t : Env α} (h : s.KeepsTypes t) {scope : Array Kind}
+    (i : Nat) (hi : scope[i]? = some .type) : (var (env := s) i hi).carry h = var i hi :=
   eq_iff_expr_eq.mpr (by simp [expr_carry, expr_var])
 
 /-- Reinterpreting an application reinterprets the reference and the arguments. -/
-@[simp] public theorem carry_app {s t : Env α} (h : s.KeepsTypes t) {scope arity : Nat}
-    (r : TypeRef s arity) (args : Vector (TypeExpr s scope) arity) :
-    (app r args).carry h = app (r.carry h) (args.map (·.carry h)) :=
+@[simp] public theorem carry_appK {s t : Env α} (h : s.KeepsTypes t) {scope : Array Kind}
+    {arity : Nat}
+    (r : TypeRef s arity) (args : Vector (TypeArg s scope) arity)
+    (hk : args.toList.map TypeArg.kind = r.kinds.toList) :
+    (appK r args hk).carry h =
+      appK (r.carry h) (args.map (·.carry h))
+        (by simpa [Vector.toList_map, Function.comp_def] using hk) :=
   eq_iff_expr_eq.mpr (by
-    simp [expr_carry, expr_app, Array.map_map, Function.comp_def])
+    simp only [expr_carry, expr_appK, name_TypeRef_carry, Vector.toArray_map, Array.map_map,
+      TypeExpr.Raw.app.injEq, true_and]
+    exact Array.map_congr_left fun x _ => TypeArg.expr_carry h x)
 
 /-- Two applications are equal when they apply the same name to equal arguments. -/
-@[simp] public theorem app_eq_app_iff {env : Env α} {scope arity : Nat}
-    {r₁ r₂ : TypeRef env arity} {a₁ a₂ : Vector (TypeExpr env scope) arity} :
-    app r₁ a₁ = app r₂ a₂ ↔ r₁.name = r₂.name ∧ a₁ = a₂ := by
-  rw [eq_iff_expr_eq, expr_app, expr_app, TypeExpr.Raw.app.injEq,
-    Array.map_inj_right (fun _ _ h => eq_iff_expr_eq.mpr h), Vector.toArray_inj]
+@[simp] public theorem appK_eq_appK_iff {env : Env α} {scope : Array Kind} {arity : Nat}
+    {r₁ r₂ : TypeRef env arity} {a₁ a₂ : Vector (TypeArg env scope) arity}
+    {h₁ : a₁.toList.map TypeArg.kind = r₁.kinds.toList}
+    {h₂ : a₂.toList.map TypeArg.kind = r₂.kinds.toList} :
+    appK r₁ a₁ h₁ = appK r₂ a₂ h₂ ↔ r₁.name = r₂.name ∧ a₁ = a₂ := by
+  rw [eq_iff_expr_eq, expr_appK, expr_appK, TypeExpr.Raw.app.injEq,
+    Array.map_inj_right (fun _ _ h => TypeArg.expr_inj h), Vector.toArray_inj]
+
+/-- Reinterpreting an application reinterprets the reference and the arguments. -/
+@[simp] public theorem carry_app {s t : Env α} (h : s.KeepsTypes t) {scope : Array Kind}
+    {arity : Nat}
+    (r : TypeRef s arity) (args : Vector (TypeExpr s scope) arity)
+    (hk : r.kinds = .replicate arity .type) :
+    (app r args hk).carry h =
+      app (r.carry h) (args.map (·.carry h)) ((kinds_TypeRef_carry h r).trans hk) := by
+  simp [app, carry_appK, Vector.map_map, Function.comp_def, TypeArg.carry]
+
+/-- Two applications are equal when they apply the same name to equal arguments. -/
+@[simp] public theorem app_eq_app_iff {env : Env α} {scope : Array Kind} {arity : Nat}
+    {r₁ r₂ : TypeRef env arity} {a₁ a₂ : Vector (TypeExpr env scope) arity}
+    {h₁ : r₁.kinds = .replicate arity .type} {h₂ : r₂.kinds = .replicate arity .type} :
+    app r₁ a₁ h₁ = app r₂ a₂ h₂ ↔ r₁.name = r₂.name ∧ a₁ = a₂ := by
+  rw [app, app, appK_eq_appK_iff, Vector.map_inj_right fun _ _ h => TypeArg.ty_inj.mp h]
 
 end TypeExpr
 
+/-- Reinterpreting a type argument reinterprets the type. -/
+@[simp] public theorem TypeArg.carry_ty {s t : Env α} (h : s.KeepsTypes t) {scope : Array Kind}
+    (e : TypeExpr s scope) : (TypeArg.ty e).carry h = .ty (e.carry h) := by
+  simp [TypeArg.carry]
+
+/-- Reinterpreting a list argument reinterprets the list. -/
+@[simp] public theorem TypeArg.carry_list {s t : Env α} (h : s.KeepsTypes t) {scope : Array Kind}
+    (l : TypeList s scope) : (TypeArg.list l).carry h = .list (l.carry h) := by
+  simp [TypeArg.carry]
+
+namespace TypeList
+
+/-- Reinterpreting a literal reinterprets its elements. -/
+@[simp] public theorem carry_lit {s t : Env α} (h : s.KeepsTypes t) {scope : Array Kind}
+    (es : Array (Elem s scope)) : (lit es).carry h = lit (es.map (·.carry h)) :=
+  TypeExpr.eq_iff_expr_eq.mpr (by
+    simp only [TypeExpr.carry, lit, Array.map_map, TypeExpr.Raw.list.injEq]
+    apply Array.map_congr_left
+    intro e _
+    cases e <;> simp [Elem.expr, Elem.carry, TypeExpr.expr_carry])
+
+/-- Reinterpreting a type element reinterprets the type. -/
+@[simp] public theorem Elem.carry_ty {s t : Env α} (h : s.KeepsTypes t) {scope : Array Kind}
+    (e : TypeExpr s scope) : (Elem.ty e).carry h = .ty (e.carry h) := by
+  simp [Elem.carry]
+
+/-- Reinterpreting a splice gives the splice. -/
+@[simp] public theorem Elem.carry_splice {s t : Env α} (h : s.KeepsTypes t) {scope : Array Kind}
+    (j : Nat) (hj : scope[j]? = some .list) : (Elem.splice (env := s) j hj).carry h =
+      .splice j hj := by
+  simp [Elem.carry]
+
+end TypeList
+
+/-- Reinterpreting a list reinterprets its elements. -/
+@[simp] public theorem TypeExpr.toElems_carry {s t : Env α} (h : s.KeepsTypes t)
+    {scope : Array Kind} (l : TypeExpr s scope .list) :
+    (l.carry h).toElems = l.toElems.map (·.carry h) := by
+  have hl : (l.carry h).toElems = ((TypeList.lit l.toElems).carry h).toElems := by
+    rw [TypeExpr.lit_toElems]
+  rw [hl, TypeList.carry_lit, TypeExpr.toElems_lit]
+
 namespace RegionSig
 
-variable {env : Env α} {scope : Nat}
+variable {env : Env α} {scope : Array Kind}
 
 /-- Reinterpret in an environment that keeps the types. -/
 public def carry {s t : Env α} (h : s.KeepsTypes t) (r : RegionSig s scope) : RegionSig t scope :=
@@ -2570,13 +3361,11 @@ namespace InsnSig
 @[expose] public def carry {s t : Env α} (h : s.KeepsTypes t) (i : InsnSig s) : InsnSig t where
   ann := i.ann
   typeParams := i.typeParams
-  typeArgc := i.typeArgc
   argTypes := i.argTypes.map (fun p => ⟨p.name, p.type.carry h⟩)
   variadic := i.variadic.map (fun p => ⟨p.name, p.type.carry h⟩)
   returnType := i.returnType.map (·.carry h)
   regions := i.regions.map (fun p => ⟨p.name, p.type.carry h⟩)
   succs := i.succs.map (fun p => ⟨p.name, p.type.map (·.carry h)⟩)
-  size_typeParams := i.size_typeParams
   distinct := by simpa [Function.comp_def] using i.distinct
 
 /-- Reinterpret in an extension. -/
@@ -2587,7 +3376,8 @@ public abbrev ofSubset {s t : Env α} (h : s ⊆ t) (i : InsnSig s) : InsnSig t 
 theorem decl_carry {s t : Env α} (h : s.KeepsTypes t) (i : InsnSig s) (name : Name)
     (kind : InsnKind := .decl) :
     (i.carry h).decl name kind = i.decl name kind := by
-  simp [decl, carry, Array.map_map, Function.comp_def, TypeExpr.expr_carry]
+  simp [decl, carry, Array.map_map, Function.comp_def, TypeExpr.expr_carry,
+    TypeArg.expr_carry]
 
 /-- A carried signature is the original, up to annotation. -/
 public theorem eqUpToAnn_carry {s t : Env α} (h : s.KeepsTypes t) (σ : InsnSig s) :
@@ -3262,10 +4052,10 @@ variable {s : Env α} {hdr : Array (TypeDecl α)} {fresh : s.FreshTypes hdr}
     (ctorSig (cfresh := cfresh) (adm := adm) i j hi hj).ann = ctors[i][j].ann := by
   simp [ctorSig, InsnSig.ofWF, ctorInsnDecl, DataGroup.ctorDecl, Ctor.mapTy]
 
-/-- Its type parameters are its datatype's, by name and in order. -/
+/-- Its type parameters are its datatype's, by name and in order, each of its kind. -/
 @[simp] public theorem typeParams_ctorSig :
     (ctorSig (cfresh := cfresh) (adm := adm) i j hi hj).typeParams =
-      (hdr[i]'(size_of_admissible adm ▸ hi)).params.map (·.name) := by
+      (hdr[i]'(size_of_admissible adm ▸ hi)).params.map fun p => ⟨p.name, p.type.kind⟩ := by
   simp [ctorSig, InsnSig.ofWF, ctorInsnDecl, DataGroup.ctorDecl, memberAt, DatatypeDecl.mapTy]
 
 /-- Its arguments are the constructor's payload. -/
@@ -3285,9 +4075,9 @@ variable {s : Env α} {hdr : Array (TypeDecl α)} {fresh : s.FreshTypes hdr}
 @[simp] public theorem returnType_ctorSig :
     (ctorSig (cfresh := cfresh) (adm := adm) i j hi hj).returnType.map TypeExpr.toRaw =
       some (TypeExpr.Raw.app (hdr[i]'(size_of_admissible adm ▸ hi)).name
-        (TypeExpr.Raw.vars (hdr[i]'(size_of_admissible adm ▸ hi)).arity)) := by
+        (TypeExpr.Raw.vars (TyParam.kinds (hdr[i]'(size_of_admissible adm ▸ hi)).params))) := by
   simp [ctorSig, InsnSig.ofWF, ctorInsnDecl, DataGroup.ctorDecl, memberAt, DatatypeDecl.mapTy,
-    DatatypeDecl.arity, TypeDecl.arity, TypeExpr.toRaw_eq_expr]
+    TypeExpr.toRaw_eq_expr]
 
 /-- It takes no regions. -/
 @[simp] public theorem regions_ctorSig :
@@ -3446,10 +4236,10 @@ variable {s : Env α} {hdr : Array (TypeDecl α)} {fresh : s.FreshTypes hdr}
       (hdr[i]'(size_of_admissible adm ▸ hi)).ann := by
   simp [caseSig, InsnSig.ofWF, caseInsnDecl, DataGroup.caseDecl, memberAt, DatatypeDecl.mapTy]
 
-/-- Its type parameters are its datatype's, by name and in order. -/
+/-- Its type parameters are its datatype's, by name and in order, each of its kind. -/
 @[simp] public theorem typeParams_caseSig :
     (caseSig (cfresh := cfresh) (adm := adm) i hi).typeParams =
-      (hdr[i]'(size_of_admissible adm ▸ hi)).params.map (·.name) := by
+      (hdr[i]'(size_of_admissible adm ▸ hi)).params.map fun p => ⟨p.name, p.type.kind⟩ := by
   simp [caseSig, InsnSig.ofWF, caseInsnDecl, DataGroup.caseDecl, memberAt, DatatypeDecl.mapTy]
 
 /-- Its one argument is the scrutinee: the datatype, applied to its own parameters. -/
@@ -3457,9 +4247,9 @@ variable {s : Env α} {hdr : Array (TypeDecl α)} {fresh : s.FreshTypes hdr}
     (caseSig (cfresh := cfresh) (adm := adm) i hi).argTypes.map
         (fun p => (p.name, p.type.toRaw)) =
       #[("scrutinee", .app (hdr[i]'(size_of_admissible adm ▸ hi)).name
-        (TypeExpr.Raw.vars (hdr[i]'(size_of_admissible adm ▸ hi)).arity))] := by
+        (TypeExpr.Raw.vars (TyParam.kinds (hdr[i]'(size_of_admissible adm ▸ hi)).params)))] := by
   simp [caseSig, InsnSig.ofWF, caseInsnDecl, DataGroup.caseDecl, memberAt, DatatypeDecl.mapTy,
-    DatatypeDecl.arity, TypeDecl.arity, TypeExpr.toRaw_eq_expr]
+    TypeExpr.toRaw_eq_expr]
 
 /-- It takes no variadic arguments. -/
 @[simp] public theorem variadic_caseSig :

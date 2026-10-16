@@ -165,7 +165,7 @@ visible inside it. -/
 
 /-- The type of every value a function defines, by id. -/
 structure Ctx (env : Env Unit) where
-  types : NatTrie (TypeExpr env 0)
+  types : NatTrie (TypeExpr env)
 
 namespace Ctx
 
@@ -179,12 +179,12 @@ instance {env : Env Unit} : EmptyCollection (Ctx env) := ⟨empty⟩
   if (ctx.types.find? d.id.id).isSome then none else some ⟨ctx.types.insert d.id.id d.type⟩
 
 /-- The type of a value, if it is defined. -/
-@[expose] def typeOf? {env : Env Unit} (ctx : Ctx env) (v : ValId) : Option (TypeExpr env 0) :=
+@[expose] def typeOf? {env : Env Unit} (ctx : Ctx env) (v : ValId) : Option (TypeExpr env) :=
   ctx.types.find? v.id
 
 /-- The types of an operand list, if every operand is defined. -/
 @[expose] def typesOf? {env : Env Unit} (ctx : Ctx env) (vs : Array ValId) :
-    Option (Array (TypeExpr env 0)) :=
+    Option (Array (TypeExpr env)) :=
   vs.mapM ctx.typeOf?
 
 end Ctx
@@ -197,36 +197,36 @@ values. -/
 
 /-- The parameter types of the blocks a transfer may name: those of one region, or of the
 function's top level, other than its entry, and the exit. -/
-abbrev BlockSigs (env : Env Unit) := LabelMap (Array (TypeExpr env 0))
+abbrev BlockSigs (env : Env Unit) := LabelMap (Array (TypeExpr env))
 
 /-- The transfer targets of a body: `Label.exit`, taking the body's result `result`, and
 each of `blocks` but the head, which is the entry. -/
 @[expose] def BlockSigs.of {env : Env Unit} {α : Type} (blocks : List (Block env α))
-    (result : TypeExpr env 0) : BlockSigs env :=
+    (result : TypeExpr env) : BlockSigs env :=
   (blocks.drop 1).foldl (init := (∅ : BlockSigs env).insert Label.exit #[result])
     fun m b => m.insert b.label (b.params.map (·.type))
 
 /-- The parameter types a transfer to `k` implies for its target: what it supplies,
 then what it leaves for the site. -/
 @[expose] def BlockValue.implies? {env : Env Unit} (ctx : Ctx env) (k : BlockValue)
-    (expects : Array (TypeExpr env 0)) : Option (Array (TypeExpr env 0)) :=
+    (expects : Array (TypeExpr env)) : Option (Array (TypeExpr env)) :=
   (ctx.typesOf? k.args).map (· ++ expects)
 
 /-- A transfer is well formed when its target is a block of `bs` and declares exactly
 the parameters the transfer implies. -/
 @[expose, reducible] def BlockValue.WF {env : Env Unit} (ctx : Ctx env) (bs : BlockSigs env)
-    (k : BlockValue) (expects : Array (TypeExpr env 0)) : Prop :=
+    (k : BlockValue) (expects : Array (TypeExpr env)) : Prop :=
   Agrees (bs.find? k.target) (k.implies? ctx expects)
 
 /-- Each transfer of `ks` is well formed at the corresponding entry of `expects`: one per
 entry, in order, as an operation's successors against their declared values. -/
 @[expose, reducible] def BlockValue.AllWF {env : Env Unit} (ctx : Ctx env)
     (bs : BlockSigs env) (ks : Array BlockValue)
-    (expects : Array (Array (TypeExpr env 0))) : Prop :=
+    (expects : Array (Array (TypeExpr env))) : Prop :=
   ks.size = expects.size ∧ ∀ p ∈ ks.zip expects, BlockValue.WF ctx bs p.1 p.2
 
 instance {env : Env Unit} (ctx : Ctx env) (bs : BlockSigs env) (ks : Array BlockValue)
-    (expects : Array (Array (TypeExpr env 0))) :
+    (expects : Array (Array (TypeExpr env))) :
     Decidable (BlockValue.AllWF ctx bs ks expects) :=
   inferInstanceAs (Decidable (ks.size = expects.size ∧
     ∀ p ∈ ks.zip expects, BlockValue.WF ctx bs p.1 p.2))
@@ -235,30 +235,31 @@ instance {env : Env Unit} (ctx : Ctx env) (bs : BlockSigs env) (ks : Array Block
 
 /-- What an operation's successors receive at its type arguments: per successor, in order. -/
 @[expose] def InsnSig.succTypes {env : Env Unit} (isig : InsnSig env)
-    (typeArgs : Vector (TypeExpr env 0) isig.typeArgc) : Array (Array (TypeExpr env 0)) :=
+    (typeArgs : TypeArgs env isig.scope) : Array (Array (TypeExpr env)) :=
   isig.succs.map fun p => p.type.map (·.instantiate typeArgs)
 
 /-- An operation's operands and successors, wherever it sits: its operands have the types
 its signature demands at `typeArgs`, and it names one block of `bs` per declared successor,
 each receiving that successor's declared values after what the site pre-binds. -/
 @[expose, reducible] def InsnSig.callWF {env : Env Unit} (ctx : Ctx env) (bs : BlockSigs env)
-    (isig : InsnSig env) (typeArgs : Vector (TypeExpr env 0) isig.typeArgc)
+    (isig : InsnSig env) (typeArgs : TypeArgs env isig.scope)
     (args : Array ValId) (succs : Array BlockValue) : Prop :=
   Agrees (ctx.typesOf? args) (isig.operandTypes? typeArgs args.size) ∧
     BlockValue.AllWF ctx bs succs (isig.succTypes typeArgs)
 
 /-- What a region must be: its entry block's parameter types, and the type its exit takes. -/
-abbrev RegionType (env : Env Unit) := Array (TypeExpr env 0) × TypeExpr env 0
+abbrev RegionType (env : Env Unit) := Array (TypeExpr env) × TypeExpr env
 
 /-- What each region of an operation must be, at its type arguments. -/
 @[expose] def InsnSig.regionTypes {env : Env Unit} (isig : InsnSig env)
-    (typeArgs : Vector (TypeExpr env 0) isig.typeArgc) : List (RegionType env) :=
+    (typeArgs : TypeArgs env isig.scope) : List (RegionType env) :=
   isig.regions.toList.map fun p =>
-    (p.type.params.map (·.type.instantiate typeArgs), p.type.returnType.instantiate typeArgs)
+    (p.type.params.map (·.type.instantiate typeArgs),
+      p.type.returnType.instantiate typeArgs)
 
 /-- A region's entry block exists and takes exactly `params`. -/
 @[expose, reducible] def Region.entryWF {env : Env Unit} {α : Type}
-    (params : Array (TypeExpr env 0)) (blocks : List (Block env α)) : Prop :=
+    (params : Array (TypeExpr env)) (blocks : List (Block env α)) : Prop :=
   blocks.head?.map (fun b => b.params.map (·.type)) = some params
 
 /-! ## Instructions, terminators, blocks and regions -/

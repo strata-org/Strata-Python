@@ -7,6 +7,7 @@ module
 public meta import Lean.Environment
 public meta import Lean.EnvExtension
 public meta import Std.Data.HashMap
+public meta import StrataMantle.Env.TypeExprRaw
 
 /-!
 # The `environment` command: what the elaborator records
@@ -16,7 +17,8 @@ extension that carries it across modules.  A child resolves its parent's declara
 this record, never by evaluating `P.env`.
 
 Environment names (`py.add`) are kept as Lean `Name`s with string components; the elaborator
-turns them into `Strata.Mantle.Name` literals when it emits code.
+turns them into `Strata.Mantle.Name` literals when it emits code.  A resolved type is a
+`TypeExpr.Raw`, of the core's kinds.
 -/
 
 public meta section
@@ -25,17 +27,29 @@ namespace Strata.Mantle.DSL
 
 open Lean
 
-/-- A type in a block, resolved: a type variable by de Bruijn level, or a declared type,
-by environment name, applied to types.  Abbreviations are already expanded. -/
-inductive RTy where
-  | var (level : Nat)
-  | app (head : Name) (args : Array RTy)
-  deriving Inhabited, Repr, BEq
+/-- Lean's `Name`, which environment names are kept as.  Under `Strata.Mantle.DSL` it shadows
+the core's `Strata.Mantle.Name`. -/
+abbrev Name := Lean.Name
 
-/-- Replace each variable `i` with `args[i]`. -/
-partial def RTy.subst (args : Array RTy) : RTy → RTy
-  | .var i => args.getD i (.var i)
-  | .app h as => .app h (as.map (RTy.subst args))
+/-- The core's kinds. -/
+abbrev Kind := Strata.Mantle.Kind
+
+/-- A resolved type: a `TypeExpr.Raw`, a variable by de Bruijn level, or a declared type, by
+environment name, applied to types and lists.  Abbreviations are already expanded, and every
+list is a literal. -/
+abbrev Ty := Strata.Mantle.TypeExpr.Raw
+
+/-- An environment name as a `Strata.Mantle.Name`. -/
+def mantleName : Name → Strata.Mantle.Name
+  | .anonymous => .base
+  | .str p s => .str (mantleName p) s
+  | .num p i => .num (mantleName p) i
+
+/-- A `Strata.Mantle.Name` as an environment name. -/
+def leanName : Strata.Mantle.Name → Name
+  | .base => .anonymous
+  | .str p s => .str (leanName p) s
+  | .num p i => .num (leanName p) i
 
 /-- A type or datatype an environment declares. -/
 structure TypeInfo where
@@ -45,8 +59,8 @@ structure TypeInfo where
   owner : Name
   /-- Its Lean name, relative to `owner`: `Ref`. -/
   lean : Name
-  /-- One entry per parameter: its name, and whether it is positive. -/
-  params : Array (String × Bool)
+  /-- One entry per parameter: its name, whether it is positive, and its kind. -/
+  params : Array (String × Bool × Kind)
   /-- The constructors' environment names, if it is a datatype. -/
   ctors : Array Name := #[]
   deriving Inhabited, Repr
@@ -56,9 +70,10 @@ structure AbbrevInfo where
   envName : Name
   owner : Name
   lean : Name
-  arity : Nat
-  /-- The expansion, over variables `0 … arity - 1`. -/
-  body : RTy
+  /-- Each parameter's kind. -/
+  params : Array Kind
+  /-- The expansion, over the parameters, by de Bruijn level. -/
+  body : Ty
   deriving Inhabited, Repr
 
 /-- An instruction an environment declares. -/

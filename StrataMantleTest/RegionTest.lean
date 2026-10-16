@@ -58,10 +58,10 @@ open Strata.Mantle.Build (freshVal freshLabel startBlock startBlockWith startFre
 
 private abbrev E := Reg.env
 
-private def boolT : TypeExpr E 0 := Base.Bool.ty
-private def intT : TypeExpr E 0 := Base.Int.ty
-private def excT : TypeExpr E 0 := Reg.Exc.ty
-private def complT : TypeExpr E 0 := Reg.Completion.ty intT
+private def boolT : TypeExpr E := Base.Bool.ty
+private def intT : TypeExpr E := Base.Int.ty
+private def excT : TypeExpr E := Reg.Exc.ty
+private def complT : TypeExpr E := Reg.Completion.ty intT
 
 /-! ## An `if`
 
@@ -80,7 +80,7 @@ private def pick : Except Errors (Func E Unit) :=
       finishBlock (.jump () (goto j #[one]))
       finishBlock (.ret () (← startBlockWith j (.str .base "v") intT))
     let els := region #[] (finishBlock (.ret () x.id)) "else"
-    let r ← emitApply (.str .base "r") intT Reg.«if» #v[intT] #[c.id] (regions := #[thn, els])
+    let r ← emitApply (.str .base "r") intT Reg.«if» #[c.id] (regions := #[thn, els])
     finishBlock (.ret () r)
 
 example : Holds (Func.WF ∅) pick := by decide +kernel
@@ -134,7 +134,7 @@ private def pickWith : Except Errors (Func E Unit) :=
       Prod.fst <$> Build.regionWith #[] (base := "else") do
         modify (· + 1)
         (finishBlock (.ret () x.id) : BuildM E Unit Unit)
-    let (r, n) ← (Build.emitApplyWith (.str .base "r") intT Reg.«if» #v[intT] #[c.id]
+    let (r, n) ← (Build.emitApplyWith (.str .base "r") intT Reg.«if» #[c.id]
       (regions := #[thn, els]) : StateT Nat (BuildM E Unit) ValId).run 0
     if n != 2 then Build.error s!"the regions ran {n} times"
     finishBlock (.ret () r)
@@ -170,20 +170,22 @@ private def guarded : Except Errors (Func E Unit) :=
     let body := region #[] (base := "body") do
       let ok := region #[] (base := "ok") do
         let k ← emitConst (.str .base "k") (.int 0)
-        let n ← emitApply (.str .base "n") complT Reg.Completion.normal #v[intT] #[k]
+        let n ← emitApply (.str .base "n") complT Reg.Completion.normal #[k]
         finishBlock (.ret () n)
       let bad := region #[] (base := "bad") do
         let k ← emitConst (.str .base "k") (.int 1)
-        let n ← emitApply (.str .base "n") complT Reg.Completion.normal #v[intT] #[k]
+        let n ← emitApply (.str .base "n") complT Reg.Completion.normal #[k]
         finishBlock (.ret () n)
-      let r ← emitApply (.str .base "r") complT Reg.«if» #v[complT] #[c.id] (regions := #[ok, bad])
+      let r ← emitApply (.str .base "r") complT Reg.«if» #[c.id]
+        (regions := #[ok, bad])
       finishBlock (.ret () r)
     let handler := do
       let exc ← freshVal (.str .base "exc") excT
       region #[exc] (base := "handler") do
-        let z ← emitApply (.str .base "z") complT Reg.Completion.raise #v[intT] #[exc.id]
+        let z ← emitApply (.str .base "z") complT Reg.Completion.raise #[exc.id]
         finishBlock (.ret () z)
-    let r ← emitApply (.str .base "r") complT Reg.«try» #v[intT] #[] (regions := #[body, handler])
+    let r ← emitApply (.str .base "r") complT Reg.«try» #[]
+      (regions := #[body, handler])
     finishBlock (.ret () r)
 
 example : Holds (Func.WF ∅) guarded := by decide +kernel
@@ -244,7 +246,7 @@ example : Holds Func.Canonical guarded := by decide +kernel
 /-! ## What it rejects -/
 
 /-- `f(c : Bool, x : Int) : ret`: `body c x entry` emits the entry block and what follows. -/
-private def fCX (body : ValId → ValId → Label → BuildM E Unit Unit) (ret : TypeExpr E 0 := intT) :
+private def fCX (body : ValId → ValId → Label → BuildM E Unit Unit) (ret : TypeExpr E := intT) :
     Except Errors (Func E Unit) :=
   build (.str .base "f") ret () do
     let c ← freshVal (.str .base "c") boolT
@@ -257,7 +259,7 @@ private def retRegion (v : ValId) : BuildM E Unit (Region E Unit) :=
 
 /-- An `if` with its `else` missing. -/
 example : Holds (¬ Func.WF ∅ ·) (fCX fun c x _ => do
-    let r ← emitApply (.str .base "r") intT Reg.«if» #v[intT] #[c] (regions := #[retRegion x])
+    let r ← emitApply (.str .base "r") intT Reg.«if» #[c] (regions := #[retRegion x])
     finishBlock (.ret () r)) := by
   decide +kernel
 
@@ -267,14 +269,15 @@ private def wrongEntry : Except Errors (Func E Unit) :=
     let _ ← startFreshBlock
     let body := region #[] do
       let k ← emitConst (.str .base "k") (.int 0)
-      finishBlock (.ret () (← emitApply (.str .base "n") complT Reg.Completion.normal #v[intT]
+      finishBlock (.ret () (← emitApply (.str .base "n") complT Reg.Completion.normal
           #[k]))
     let handler := do
       let i ← freshVal (.str .base "i") intT
       region #[i] do
-        finishBlock (.ret () (← emitApply (.str .base "n") complT Reg.Completion.normal #v[intT]
+        finishBlock (.ret () (← emitApply (.str .base "n") complT Reg.Completion.normal
             #[i.id]))
-    let r ← emitApply (.str .base "r") complT Reg.«try» #v[intT] #[] (regions := #[body, handler])
+    let r ← emitApply (.str .base "r") complT Reg.«try» #[]
+      (regions := #[body, handler])
     finishBlock (.ret () r)
 
 example : Holds (¬ Func.WF ∅ ·) wrongEntry := by decide +kernel
@@ -282,7 +285,7 @@ example : Holds (¬ Func.WF ∅ ·) wrongEntry := by decide +kernel
 /-- A `then` region returning the condition, not an `Int`. -/
 example : Holds (¬ Func.WF ∅ ·) (fCX fun c x _ => do
     let regions := #[retRegion c, retRegion x]
-    finishBlock (.ret () (← emitApply (.str .base "r") intT Reg.«if» #v[intT]
+    finishBlock (.ret () (← emitApply (.str .base "r") intT Reg.«if»
         #[c] (regions := regions)))) := by
   decide +kernel
 
@@ -291,7 +294,8 @@ private def escape (escapes : Bool) : Except Errors (Func E Unit) :=
   fCX fun c x _ => do
     let done ← freshLabel "done"
     let thn := region #[] (finishBlock (if escapes then .jump () (goto done) else .ret () x))
-    let _ ← emitApply (.str .base "r") intT Reg.«if» #v[intT] #[c] (regions := #[thn, retRegion x])
+    let _ ← emitApply (.str .base "r") intT Reg.«if» #[c]
+      (regions := #[thn, retRegion x])
     finishBlock (.jump () (goto done))
     startBlock done
     finishBlock (.ret () x)
@@ -305,7 +309,7 @@ example : Holds (¬ Func.WF ∅ ·) (escape true) := by decide +kernel
 private def outerExit (fromRegion : Bool) : Except Errors (Func E Unit) :=
   fCX (ret := boolT) fun c x _ => do
     let regions := #[retRegion (if fromRegion then c else x), retRegion x]
-    let _ ← emitApply (.str .base "r") intT Reg.«if» #v[intT] #[c] (regions := regions)
+    let _ ← emitApply (.str .base "r") intT Reg.«if» #[c] (regions := regions)
     finishBlock (.ret () c)
 
 example : Holds (Func.WF ∅) (outerExit false) := by decide +kernel
@@ -318,7 +322,8 @@ example : Holds (¬ Func.WF ∅ ·) (fCX fun c x entry => do
       finishBlock (.jump () (goto entry))
       startBlock entry
       finishBlock (.ret () x)
-    let r ← emitApply (.str .base "r") intT Reg.«if» #v[intT] #[c] (regions := #[thn, retRegion x])
+    let r ← emitApply (.str .base "r") intT Reg.«if» #[c]
+      (regions := #[thn, retRegion x])
     finishBlock (.ret () r)) := by
   decide +kernel
 

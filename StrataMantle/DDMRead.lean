@@ -30,8 +30,10 @@ diagnostics that say what is wrong and where.  It reads both printed forms.  `Mo
 does the same from a DDM term.
 
 * Lines that start with `--` are comments.
-* Types and operations are looked up in `env`.  `jump`, `branch` and `unreachable` are the
-  base's, and `ret(args)` is a jump to `Label.exit`.
+* Types and operations are looked up in `env`.  A list parameter's argument, of a type or of
+  an operation, is a list literal `[τ, …]` of types, and an argument of the wrong kind is
+  rejected.  `jump`, `branch` and
+  `unreachable` are the base's, and `ret(args)` is a jump to `Label.exit`.
 * A literal has the type its form fixes, which must be the type where it is used.
 * A constant written at a use becomes a `const` instruction just before it.
 * Values get ids in printed order, so the function read is canonical (`Func.Canonical`).
@@ -68,34 +70,64 @@ def identText (n : MName SourceRange) : String :=
   | .name _ ⟨_, s⟩ => s
 
 /-- A type, printed for a message. -/
-def typeText {env : Env Unit} {scope : Nat} (e : TypeExpr env scope) : String :=
-  e.fold (fun i => s!"#{i}") fun n as =>
-    if as.isEmpty then ToDDM.nameText n
-    else s!"{ToDDM.nameText n}({", ".intercalate as.toList})"
+def typeText {env : Env Unit} {scope : Array Kind} (e : TypeExpr env scope) : String :=
+  e.fold (fun | i, .type => s!"#{i}" | i, .list => s!"*#{i}")
+    (fun n as =>
+      if as.isEmpty then ToDDM.nameText n
+      else s!"{ToDDM.nameText n}({", ".intercalate as.toList})")
+    -- `[*#i]` is the list variable `*#i`, as the printer shows it.
+    (fun es => match es with
+      | #[v] => if v.startsWith "*" then v else s!"[{v}]"
+      | _ => s!"[{", ".intercalate es.toList}]")
 
 /-- Types, printed for a message. -/
-def typesText {env : Env Unit} (ts : Array (TypeExpr env 0)) : String :=
+def typesText {env : Env Unit} (ts : Array (TypeExpr env)) : String :=
   s!"({", ".intercalate (ts.map typeText).toList})"
 
 /-- What reading fails with. -/
 abbrev Result (β : Type) := Except ReadDiagnostic β
 
-/-- `n` applied to `args`, if `n` is a type of that arity. -/
+/-- `n` applied to `args`, if `n` is a type of that arity whose parameters have the
+arguments' kinds. -/
 def typeApp {env : Env Unit} (ann : SourceRange) (n : MName SourceRange)
-    (args : Array (TypeExpr env 0)) : Result (TypeExpr env 0) :=
+    (args : Array (TypeArg env)) : Result (TypeExpr env) :=
   let s := identText n
+  let wrong (e : KindError) : Result (TypeExpr env) := .error ⟨ann, match e with
+    | .count given expected => s!"type {s} takes {expected} argument(s), given {given}"
+    | .kind i given expected => s!"argument {i + 1} of type {s} is \
+      {KindedTypeArgs.kindText given}, but its parameter takes \
+      {KindedTypeArgs.kindText expected}"⟩
   match env.get? (nameOf s) with
-  | some (.type (arity := a) r) =>
-    if h : args.size = a then .ok (.app r ⟨args, h⟩)
-    else .error ⟨ann, s!"type {s} takes {a} argument(s), given {args.size}"⟩
+  | some (.type r) =>
+    match TypeArgs.check? r.kinds args with
+    | .ok targs => .ok (.appK r ⟨targs.args, targs.size_args.trans r.size_kinds⟩ targs.kinds)
+    | .error e => wrong e
   | some (.insn _) => .error ⟨ann, s!"{s} is an operation, not a type"⟩
   | none => .error ⟨ann, s!"unknown type {s}"⟩
 
-/-- A closed type. -/
-def type {env : Env Unit} : MType SourceRange → Result (TypeExpr env 0)
+/-- The source range of a type. -/
+def typeAnn : MType SourceRange → SourceRange
+  | .tyVar a _ | .tyPrim a _ | .tyApp a _ _ | .tyList a _ | .tyListVar a _ => a
+
+/-- A closed type argument: a type, or a list literal `[τ, …]` of types. -/
+def typeArg {env : Env Unit} : MType SourceRange → Result (TypeArg env)
   | .tyVar ann ⟨_, i⟩ => .error ⟨ann, s!"type variable #{i} outside a signature"⟩
-  | .tyPrim ann n => typeApp ann n #[]
-  | .tyApp ann n ⟨_, args⟩ => do typeApp ann n (← args.attach.mapM fun ⟨a, _⟩ => type a)
+  | .tyListVar ann ⟨_, i⟩ => .error ⟨ann, s!"list variable *#{i} outside a signature"⟩
+  | .tyPrim ann n => .ty <$> typeApp ann n #[]
+  | .tyApp ann n ⟨_, args⟩ => do
+    .ty <$> typeApp ann n (← args.attach.mapM fun ⟨a, _⟩ => typeArg a)
+  | .tyList _ ⟨_, es⟩ => do
+    let es ← es.attach.mapM fun ⟨e, _⟩ => do
+      match ← typeArg e with
+      | .ty t => pure (TypeList.Elem.ty t)
+      | .list _ => .error ⟨typeAnn e, "a list of types may not hold a list"⟩
+    pure (.list (.lit es))
+
+/-- A closed type. -/
+def type {env : Env Unit} (t : MType SourceRange) : Result (TypeExpr env) := do
+  match ← typeArg t with
+  | .ty e => pure e
+  | .list _ => .error ⟨typeAnn t, "a list of types where a type is expected"⟩
 
 /-- The operation `s` names, with its signature. -/
 def insnRef {env : Env Unit} (ann : SourceRange) (s : String) :
@@ -131,7 +163,7 @@ def constAnn : MConst SourceRange → SourceRange
 /-- A literal, with `funcs` the module's functions.  Its type is the one its form fixes, and
 must be `expected`. -/
 def literal {env : Env Unit} [base ⊑ env] (funcs : NameTable SourceRange)
-    (expected : TypeExpr env 0)
+    (expected : TypeExpr env)
     (c : MConst SourceRange) : Result Const := do
   let k ← match c with
     | .constUnit _ => pure .unit
@@ -161,7 +193,7 @@ abbrev Late (β : Type) := (Name → ValId) → β
 expected.  `what` says where, for the message. -/
 structure Use (env : Env Unit) where
   name : Name
-  type : TypeExpr env 0
+  type : TypeExpr env
   range : SourceRange
   what : String
 
@@ -171,7 +203,7 @@ structure State (env : Env Unit) where
   until the walk ends. -/
   values : NameTable ValId := ∅
   /-- The type of each value, by id. -/
-  types : Array (TypeExpr env 0) := #[]
+  types : Array (TypeExpr env) := #[]
   /-- The uses of values not defined where they are used. -/
   uses : Array (Use env) := #[]
   /-- Every label defined so far. -/
@@ -191,7 +223,7 @@ def valName : MVal SourceRange → Name
   | .valName _ n => nameOf (identText n)
 
 /-- Define the value named `n`, of type `t`, at `range`: the next id. -/
-def define (range : SourceRange) (n : Name) (t : TypeExpr env 0) : ReadM env ValId := do
+def define (range : SourceRange) (n : Name) (t : TypeExpr env) : ReadM env ValId := do
   let s ← get
   let id : ValId := ⟨s.types.size⟩
   let some values := s.values.insert? n id
@@ -200,14 +232,14 @@ def define (range : SourceRange) (n : Name) (t : TypeExpr env 0) : ReadM env Val
   return id
 
 /-- Define a folded constant of type `t`: the next id, named after the walk. -/
-def defineConst (t : TypeExpr env 0) : ReadM env ValId := do
+def defineConst (t : TypeExpr env) : ReadM env ValId := do
   let s ← get
   set { s with values := s.values.reserve, types := s.types.push t }
   return ⟨s.types.size⟩
 
 /-- A use of the value named `n` where the type `t` is expected, at `range`.  A value
 defined already is checked at once; one defined further on is recorded. -/
-def use (range : SourceRange) (what : String) (n : Name) (t : TypeExpr env 0) :
+def use (range : SourceRange) (what : String) (n : Name) (t : TypeExpr env) :
     ReadM env (Late ValId) := do
   let s ← get
   match s.values.get? n with
@@ -238,7 +270,7 @@ def Late.all {β : Type} (ls : Array (Late β)) : Late (Array β) := fun ids => 
 
 /-- Operands at the types `expected`, one each: the constants to emit before their user,
 and the ids.  `what` says whose operands they are. -/
-def operands (funcs : NameTable SourceRange) (what : String) (expected : Array (TypeExpr env 0))
+def operands (funcs : NameTable SourceRange) (what : String) (expected : Array (TypeExpr env))
     (ops : Array (MOperand SourceRange)) :
     ReadM env (Array (Instruction env SourceRange) × Late (Array ValId)) := do
   if ops.size ≠ expected.size then
@@ -257,12 +289,12 @@ def operands (funcs : NameTable SourceRange) (what : String) (expected : Array (
 
 /-- The parameter types of the blocks a transfer may name: the non-entry blocks of one body,
 and its exit, `_`, which takes the body's result. -/
-abbrev Scope (env : Env Unit) := Std.HashMap Name (Array (TypeExpr env 0))
+abbrev Scope (env : Env Unit) := Std.HashMap Name (Array (TypeExpr env))
 
 /-- The scope of a body with blocks `blocks` and result `result`, and its entry block's
 parameter types. -/
-def scopeOf (ann : SourceRange) (result : TypeExpr env 0) (blocks : List (MBlock SourceRange)) :
-    Result (Scope env × Array (TypeExpr env 0)) := do
+def scopeOf (ann : SourceRange) (result : TypeExpr env) (blocks : List (MBlock SourceRange)) :
+    Result (Scope env × Array (TypeExpr env)) := do
   let headers ← blocks.mapM fun
     | .block bann l ⟨_, ps⟩ _ _ => do
       return (bann, nameOf (identText l), ← ps.mapM fun | .valDecl _ _ ty => type ty)
@@ -278,7 +310,7 @@ def scopeOf (ann : SourceRange) (result : TypeExpr env 0) (blocks : List (MBlock
 
 /-- Successors, against the payloads `payloads` the operation `what` declares. -/
 def succs (funcs : NameTable SourceRange) (scope : Scope env) (ann : SourceRange) (what : String)
-    (payloads : Array (Array (TypeExpr env 0))) (ss : Array (MSucc SourceRange)) :
+    (payloads : Array (Array (TypeExpr env))) (ss : Array (MSucc SourceRange)) :
     ReadM env (Array (Instruction env SourceRange) × Late (Array BlockValue)) := do
   if ss.size ≠ payloads.size then
     fail ann s!"{what} takes {payloads.size} successor(s), given {ss.size}"
@@ -301,26 +333,36 @@ def succs (funcs : NameTable SourceRange) (scope : Scope env) (ann : SourceRange
     ks := ks.push fun r => ⟨⟨target⟩, ids r⟩
   return (pre, Late.all ks)
 
-/-- The type arguments of an application of `isig`. -/
+/-- The type arguments of an application of `isig`: one per type parameter, each of its
+kind. -/
 def typeArgs (ann : SourceRange) (what : String) (isig : InsnSig env)
-    (ta : Option (MTypeArgs SourceRange)) : ReadM env (Vector (TypeExpr env 0) isig.typeArgc) := do
+    (ta : Option (MTypeArgs SourceRange)) : ReadM env (TypeArgs env isig.scope) := do
   let ts ← match ta with
     | none => pure #[]
-    | some (.typeArgs _ ⟨_, ts⟩) => ts.mapM fun t => (type t : Result _)
-  if h : ts.size = isig.typeArgc then return ⟨ts, h⟩
-  else fail ann s!"{what} takes {isig.typeArgc} type argument(s), given {ts.size}"
+    | some (.typeArgs _ ⟨_, ts⟩) => ts.mapM fun t => (typeArg t : Result _)
+  match TypeArgs.check? isig.scope ts with
+  | .ok targs => return targs
+  | .error (.count given expected) =>
+    fail ann s!"{what} takes {expected} type argument(s), given {given}"
+  | .error (.kind i given expected) =>
+    fail ann s!"type argument {i + 1} of {what} is {KindedTypeArgs.kindText given}, but its \
+      parameter takes {KindedTypeArgs.kindText expected}"
 
 /-- The operands of an application of `isig`. -/
 def callOperands (funcs : NameTable SourceRange) (ann : SourceRange) (what : String)
-    (isig : InsnSig env) (targs : Vector (TypeExpr env 0) isig.typeArgc)
+    (isig : InsnSig env) (targs : TypeArgs env isig.scope)
     (args : Option (MOperands SourceRange)) :
     ReadM env (Array (Instruction env SourceRange) × Late (Array ValId)) := do
   let ops := match args with
     | none => #[]
     | some (.operands _ ⟨_, ops⟩) => ops
+  let n := isig.argTypes.size
   let some expected := isig.operandTypes? targs ops.size
-    | fail ann s!"{what} takes {isig.argTypes.size}{if isig.variadic.isSome then " or more"
-        else ""} operand(s), given {ops.size}"
+    | let takes := match isig.variadic with
+        | none => s!"{n}"
+        | some ⟨_, .each _⟩ => s!"{n} or more"
+        | some ⟨_, .spread cs⟩ => s!"{n + (cs.instantiate targs).elems.size}"
+      fail ann s!"{what} takes {takes} operand(s), given {ops.size}"
   operands funcs what expected ops
 
 /-! ## Instructions, blocks and regions -/

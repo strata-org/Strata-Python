@@ -55,21 +55,35 @@ public environment Demo extends Base where
   enter Lean names: `demo.add` is `Demo.add`.
 * `open n₁ n₂`: short names in these namespaces resolve, until the enclosing `end`.
 * `type T (+a) (b)`: a primitive type.  `(+a)` is a positive parameter, `(b)` a non-positive
-  one.
-* `data T (+a) where | c (x : τ) …`: a datatype.  A constructor takes only arguments, whose
-  names may not reuse the datatype's parameters.  `mutual … end` groups mutually recursive
-  datatypes, and holds only `data`.
-* `abbrev n (a b) := τ`: a type abbreviation, expanded where it is used.  It declares nothing
-  in the environment.
-* `insn o [a b] binders : τ`: an instruction with type parameters `a b`, returning `τ`.
+  one.  `(xs : list)` ranges over lists of types, and its argument is a literal `[τ, …]`:
+  `type Fn (args : list) (+r)` and `Fn [Int, Bool] Int`.
+* `data T (+a) where | c (x : τ) …`: a datatype.  Its parameters are a `type`'s, list
+  parameters included: `data Closure (as : list) (+r) where | mk (f : Fn as r) (env : Value)`.
+  A constructor takes only arguments, whose names may not reuse the datatype's parameters.
+  Each field is one value: a spread `(*xs : as)` is not a field.
+  `mutual … end` groups mutually recursive datatypes, and holds only `data`.
+* `abbrev n (a (cs : list)) := τ`: a type abbreviation, expanded where it is used: a type
+  parameter `a` and a list parameter `cs`, as an `insn` takes them.  Expanding splices a list
+  argument where the body splices `cs`: `abbrev withInt ((cs : list) r) := Fn [*cs, Int] r`
+  makes `withInt [Bool] Int` the type `Fn [Bool, Int] Int`.  It declares nothing in the
+  environment.
+* `insn o [a (cs : list)] binders : τ`: an instruction with type parameters `a`, which ranges
+  over types, and `cs`, which ranges over lists of types, returning `τ`.  They share one scope,
+  in the order written.  A list parameter is the argument of a list parameter, `Fn cs r`, or
+  is spliced into a literal, at most one in each, anywhere: `Fn [*cs, Value] r`,
+  `Fn [Int, *cs, Bool] r`.  `[*cs]` is `cs`.  Whether a type expression is a type or a list is its kind by
+  `TypeExpr.Raw.kind`, once it is resolved.
 * `terminal insn o [a b] binders`: an instruction that ends its block.  It has no result
   type, and neither has its signature.
 * `def` is reserved for defined instructions, and rejected.
 
-An `insn`'s binders come in order: arguments `(x y : τ)`, at most one variadic `(*xs : τ)`,
-regions `(&r (p : τ) : σ)` entered with `p` and left with a `σ`, then successors
-`(^k (y : τ))`.  `(^k)` passes nothing, and `(&a &b …)` or `(^a ^b …)` declares several
-alike.  A successor's payload names are documentation; only their types are kept.
+An `insn`'s binders come in order: arguments `(x y : τ)`, at most one variadic `(*xs : τ)`
+(any number of operands of type `τ`) or `(*xs : cs)` (one operand per element of the list
+`cs`, such as a list parameter or a literal), as the annotation's kind says, regions
+`(&r (p : τ) : σ)` entered with `p` and left with a `σ`, then successors `(^k (y : τ))`.  Only
+operands may be a spread: a region's parameters and a successor's payload are one value each.
+`(^k)` passes nothing, and `(&a &b …)` or `(^a ^b …)` declares several alike.  A successor's
+payload names are documentation; only their types are kept.
 
 A declared name has one component.  `as "s"` gives the environment name when it differs from
 the Lean name: `insn not_ as "not"` is `demo.not` and `Demo.not_`.  A Lean keyword in
@@ -95,7 +109,8 @@ and in every refinement of it:
   `env` without unfolding anything.
 * `toP`, the instance `P.env ⊑ e` (`Demo.toBase`).
 * For a `type` or `data` `T` with `n` parameters: `T.name`, its environment name; `T.ref`, a
-  `TypeRef e n`; `T.ty`, a `TypeExpr e s` taking `n` arguments; and the `@[simp]` theorems
+  `TypeRef e n`; `T.ty`, a `TypeExpr e s` taking `n` arguments, a `TypeList e s` for a list
+  parameter and a `TypeExpr e s` for any other; and the `@[simp]` theorems
   `T.name_ref` and `T.decl_ref`, its name and declaration, which a child's proofs use for
   the types it inherits.
 * For a `data` `T (a …)` with constructors `c₁ (x : τ) …`: the terminal instruction
@@ -107,8 +122,10 @@ and in every refinement of it:
 * For a constructor `c` of `T`: `T.c.name`; `T.c.sig : InsnSig e`, with `T`'s parameters as
   type parameters, the fields as arguments and `T a …` as the result; and
   `T.c : InsnRef e T.c.sig`.
-* For an `abbrev` `n`: `n.ty`, taking its parameters.
-* For an `insn` `o`: `o.name`, `o.sig : InsnSig e` and `o : InsnRef e o.sig`.
+* For an `abbrev` `n`: `n.ty`, taking its parameters, a `TypeList` for a list parameter, which
+  it splices in with `++`.
+* For an `insn` `o`: `o.name`, `o.sig : InsnSig e` and `o : InsnRef e o.sig`.  A list
+  parameter is a `TypeList.var` in `o.sig`, and a list-typed variadic a `Variadic.spread`.
 
 A declaration's docstring goes on `T.ref`, `T.c`, `n.ty` or `o`.  The interface's own
 implicit binders are named `e`, the refinement, and `s`, the scope of `T.ty` and `n.ty`, so a
@@ -145,12 +162,15 @@ there is one.  The checks:
   binds.  A clash is fixed by a new Lean name and `as` for the old environment name.
 * scope: an unknown or ambiguous type, an unknown `open`ed namespace, an unmatched `end`,
   anything but `data` in `mutual`;
-* types: an arity mismatch, a type parameter applied to arguments, and positivity: a member
-  of the group, or a `+` parameter, under a non-positive parameter;
+* types: an arity mismatch, a type parameter applied to arguments, a kind mismatch (a type
+  for a list parameter, or a list where a type belongs), a list inside a list, a splice of
+  anything but a list parameter, two splices in one literal, a splice outside a literal, and
+  positivity: a member of the group, or a `+` parameter, under a non-positive parameter, the
+  elements of a list literal taking its position's polarity;
 * binders: a duplicate parameter name (type parameters, arguments, the variadic, regions and
   successors share one namespace), binders out of order, two variadics, a variadic binding
-  several names, a constructor with anything but arguments, a terminal instruction with a
-  result type or another without one;
+  several names, a constructor with anything but arguments, a spread field, region parameter
+  or successor payload, a terminal instruction with a result type or another without one;
 * the block: no type, datatype or instruction; a missing `Env` or `Env.WF` import.
 
 If the generated code fails to elaborate anyway, that is an elaborator bug, reported as an
@@ -175,7 +195,8 @@ public child cannot extend a private environment, and in a `module` its file `pu
 ## Modules
 
 * `DSL/Syntax.lean`: the grammar.
-* `DSL/Model.lean`: the record an environment leaves for its children.
+* `DSL/Model.lean`: the record an environment leaves for its children.  A resolved type is a
+  `TypeExpr.Raw`, of the core's kinds.
 * `DSL/Check.lean`: collecting and resolving the block, and every check.
 * `DSL/Elab.lean`: emitting the declarations, and the command.
 -/

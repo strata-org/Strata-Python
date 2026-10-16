@@ -22,6 +22,9 @@ declaration in an environment, and `Env.Raw.checkAppend` those of a batch `appen
 Their soundness lemmas are `WF.appendChecked`, `wf_ofAscArray` and `WF.appendList`.  The
 checks consult the environment's hash map, so they run in compiled code (`#guard`) but not in
 the kernel.
+
+Key theorems about type expressions: `WF.instantiate`, `WF.weaken`, `WF.mono`, `WF.kind_eq`,
+`wfType_var_iff` and `WF.eq_list`, that every well-formed list is a literal.
 -/
 
 open Strata (IndexMap)
@@ -43,45 +46,198 @@ and the checker (`Env.Raw.check`) checks each declaration at its position.
 
 namespace TypeExpr
 
-/-- Well-formedness of a `TypeExpr.Raw` relative to an abstract *resolver*:
-`R name n` reads "`name` is a type declaration of arity `n` that this expression
-is allowed to mention".  Growing the environment or the scope is `WFRel.mono`. -/
-inductive WFRel (R : Name → Nat → Prop) (scope : Nat) : Raw → Prop
-  | var {i : Nat} (lt : i < scope) : WFRel R scope (.var i)
-  | app {name : Name} {args : Array Raw}
-      (ref : R name args.size)
-      (argsWF : ∀ a ∈ args, WFRel R scope a) : WFRel R scope (.app name args)
+mutual
+/-- Well-formedness of a `TypeExpr.Raw` at the kind `k`, relative to an abstract *resolver*:
+`R name ks` reads "`name` is a type declaration whose arguments have kinds `ks`, which this
+expression is allowed to mention", and each argument is checked at its kind.  `scope` gives the
+kind of each variable in scope, by de Bruijn level.  A variable is a type; a list is a literal,
+whose elements `WFElem` judges.  So a list variable occurs only spliced into a literal: `as` is
+written `[*as]`, and one list has one spelling.  `WF.kind_eq` relates the judgment to
+`Raw.kind`.  Growing the resolver is `WF.mono`, and growing the scope `WF.weaken`. -/
+inductive WF (R : Name → Array Kind → Prop) (scope : Array Kind) : Kind → Raw → Prop
+  | var {i : Nat} (h : scope[i]? = some .type) : WF R scope .type (.var i)
+  | app {name : Name} {args : Array Raw} {ks : Array Kind} (ref : R name ks)
+      (size : args.size = ks.size)
+      (argsWF : ∀ (i : Nat) (h : i < args.size), WF R scope (ks[i]'(size ▸ h)) args[i]) :
+      WF R scope .type (.app name args)
+  | list {elems : Array Raw} (elemsWF : ∀ a ∈ elems, WFElem R scope a) :
+      WF R scope .list (.list elems)
 
-theorem WFRel.mono {R R' : Name → Nat → Prop} {scope scope' : Nat} {e : Raw}
-    (hR : ∀ n a, R n a → R' n a) (hs : scope ≤ scope') (h : WFRel R scope e) :
-    WFRel R' scope' e := by
-  induction h with
-  | var lt => exact .var (Nat.lt_of_lt_of_le lt hs)
-  | app ref _ ih => exact .app (hR _ _ ref) ih
+/-- An element of a well-formed list literal: a type, or a list variable spliced in. -/
+inductive WFElem (R : Name → Array Kind → Prop) (scope : Array Kind) : Raw → Prop
+  | ty {e : Raw} (h : WF R scope .type e) : WFElem R scope e
+  | splice {j : Nat} (h : scope[j]? = some .list) : WFElem R scope (.var j)
+end
 
-/-- What an application's well-formedness says about its head. -/
-theorem WFRel.refBefore {R : Name → Nat → Prop} {scope : Nat} {n : Name} {as : Array Raw}
-    (h : WFRel R scope (.app n as)) : R n as.size := by
-  cases h with | app ref _ => exact ref
+/-- Well formed at its own kind, as `Raw.kind` reads it: a type or a list. -/
+abbrev WFRel (R : Name → Array Kind → Prop) (scope : Array Kind) (e : Raw) : Prop :=
+  WF R scope (e.kind scope) e
+
+/-- A well-formed type. -/
+abbrev WFType (R : Name → Array Kind → Prop) (scope : Array Kind) (e : Raw) : Prop :=
+  WF R scope .type e
+
+/-- A well-formed list of types: a list literal. -/
+abbrev WFList (R : Name → Array Kind → Prop) (scope : Array Kind) (e : Raw) : Prop :=
+  WF R scope .list e
+
+/-- The kind the judgment checks is the kind `Raw.kind` reads. -/
+theorem WF.kind_eq {R : Name → Array Kind → Prop} {scope : Array Kind} :
+    ∀ {k : Kind} {e : Raw}, WF R scope k e → e.kind scope = k
+  | _, _, .var h => by simp [Raw.kind, h]
+  | _, _, .app .. => rfl
+  | _, _, .list _ => rfl
+
+/-- Well formed at a kind is well formed at its own kind. -/
+theorem WF.wfRel {R : Name → Array Kind → Prop} {scope : Array Kind} {k : Kind} {e : Raw}
+    (h : WF R scope k e) : WFRel R scope e := by
+  rwa [WFRel, h.kind_eq]
+
+/-- Well formed at its own kind, and of kind `k`, is well formed at `k`. -/
+theorem WF.of_wfRel {R : Name → Array Kind → Prop} {scope : Array Kind} {k : Kind} {e : Raw}
+    (h : WFRel R scope e) (hk : e.kind scope = k) : WF R scope k e :=
+  hk ▸ h
+
+/-- A variable is well formed as a type exactly when it is a type variable. -/
+theorem wfType_var_iff {R : Name → Array Kind → Prop} {scope : Array Kind} {i : Nat} :
+    WFType R scope (.var i) ↔ scope[i]? = some .type :=
+  ⟨fun | .var h => h, .var⟩
+
+/-- A well-formed list is a literal. -/
+theorem WF.eq_list {R : Name → Array Kind → Prop} {scope : Array Kind} {e : Raw}
+    (h : WFList R scope e) : ∃ es, e = .list es := by
+  cases h with
+  | list _ => exact ⟨_, rfl⟩
+
+mutual
+/-- A well-formed expression stays well formed when the resolver accepts more. -/
+theorem WF.mono {R₁ R₂ : Name → Array Kind → Prop} {scope : Array Kind}
+    (hR : ∀ n ks, R₁ n ks → R₂ n ks) : ∀ {k : Kind} {e : Raw}, WF R₁ scope k e → WF R₂ scope k e
+  | _, _, .var h => .var h
+  | _, _, .app ref size argsWF => .app (hR _ _ ref) size fun i h => WF.mono hR (argsWF i h)
+  | _, _, .list elemsWF => .list fun a ha => WFElem.mono hR (elemsWF a ha)
+
+/-- The element form of `WF.mono`. -/
+theorem WFElem.mono {R₁ R₂ : Name → Array Kind → Prop} {scope : Array Kind}
+    (hR : ∀ n ks, R₁ n ks → R₂ n ks) : ∀ {e : Raw}, WFElem R₁ scope e → WFElem R₂ scope e
+  | _, .ty h => .ty (WF.mono hR h)
+  | _, .splice h => .splice h
+end
+
+mutual
+/-- Extending the scope keeps a well-formed expression well formed. -/
+theorem WF.weaken {R : Name → Array Kind → Prop} {scope : Array Kind} (ks : Array Kind) :
+    ∀ {k : Kind} {e : Raw}, WF R scope k e → WF R (scope ++ ks) k e
+  | _, _, .var h =>
+    .var (by rw [Array.getElem?_append_left (Array.getElem?_eq_some_iff.mp h).1]; exact h)
+  | _, _, .app ref size argsWF => .app ref size fun i h => WF.weaken ks (argsWF i h)
+  | _, _, .list elemsWF => .list fun a ha => WFElem.weaken ks (elemsWF a ha)
+
+/-- The element form of `WF.weaken`. -/
+theorem WFElem.weaken {R : Name → Array Kind → Prop} {scope : Array Kind} (ks : Array Kind) :
+    ∀ {e : Raw}, WFElem R scope e → WFElem R (scope ++ ks) e
+  | _, .ty h => .ty (WF.weaken ks h)
+  | _, .splice h =>
+    .splice (by rw [Array.getElem?_append_left (Array.getElem?_eq_some_iff.mp h).1]; exact h)
+end
+
+/-- What an application's well-formedness says about its head: it takes its arguments'
+kinds. -/
+theorem WF.refBefore {R : Name → Array Kind → Prop} {scope : Array Kind} {k : Kind} {n : Name}
+    {as : Array Raw} (h : WF R scope k (.app n as)) : R n (as.map (Raw.kind scope)) := by
+  cases h with
+  | @app _ _ ks ref size argsWF =>
+    have : as.map (Raw.kind scope) = ks :=
+      Array.ext (by simp [size]) fun i h₁ _ => by simpa using (argsWF i (by simpa using h₁)).kind_eq
+    exact this ▸ ref
 
 /-- What an application's well-formedness says about its arguments. -/
-theorem WFRel.args {R : Name → Nat → Prop} {scope : Nat} {n : Name} {as : Array Raw}
-    (h : WFRel R scope (.app n as)) : ∀ a ∈ as, WFRel R scope a := by
-  cases h with | app _ hargs => exact hargs
+theorem WF.args {R : Name → Array Kind → Prop} {scope : Array Kind} {k : Kind} {n : Name}
+    {as : Array Raw} (h : WF R scope k (.app n as)) : ∀ a ∈ as, WFRel R scope a := by
+  cases h with
+  | app _ _ argsWF =>
+    intro a ha
+    obtain ⟨i, hi, rfl⟩ := Array.mem_iff_getElem.mp ha
+    exact (argsWF i hi).wfRel
 
-/-- Instantiating every variable in scope by a closed type gives a closed type. -/
-theorem WFRel.instantiate {R : Name → Nat → Prop} {scope : Nat} {args : Array Raw}
-    (hargs : ∀ a ∈ args, WFRel R 0 a) (hn : scope ≤ args.size) {e : Raw}
-    (h : WFRel R scope e) : WFRel R 0 (e.instantiate args) := by
-  induction h with
-  | @var i lt =>
-    have hi : i < args.size := Nat.lt_of_lt_of_le lt hn
-    simpa [Raw.instantiate, Array.getElem?_eq_getElem hi] using hargs _ (Array.getElem_mem hi)
-  | app ref _ ih =>
+/-- What a list literal's well-formedness says about its elements. -/
+theorem WF.elems {R : Name → Array Kind → Prop} {scope : Array Kind} {k : Kind} {es : Array Raw}
+    (h : WF R scope k (.list es)) : ∀ a ∈ es, WFElem R scope a := by
+  cases h with | list hes => exact hes
+
+/-- An element of type kind is a type: a list variable is the one other element. -/
+theorem WFElem.wfType {R : Name → Array Kind → Prop} {scope : Array Kind} {a : Raw}
+    (h : WFElem R scope a) (hk : a.kind scope = .type) : WFType R scope a := by
+  cases h with
+  | ty h => exact h
+  | splice hj => simp [Raw.kind, hj] at hk
+
+/-- An element is not a literal. -/
+theorem WFElem.isElem {R : Name → Array Kind → Prop} {scope : Array Kind} {a : Raw} :
+    WFElem R scope a → a.isElem = true
+  | .ty h => by cases h <;> rfl
+  | .splice _ => rfl
+
+/-- In the empty scope, a literal's elements are types: there is no list variable to splice. -/
+theorem WF.elems_closed {R : Name → Array Kind → Prop} {k : Kind} {es : Array Raw}
+    (h : WF R #[] k (.list es)) : ∀ a ∈ es, WFType R #[] a := by
+  intro a ha
+  cases h.elems a ha with
+  | ty h => exact h
+  | splice h => simp at h
+
+/-- What an argument of kind `k` contributes to a literal it is spliced into: itself, for a
+type, and its elements, for a list. -/
+private theorem WF.spliced {R : Name → Array Kind → Prop} {scope : Array Kind} {k : Kind}
+    {a : Raw} (h : WF R scope k a) : ∀ x ∈ a.spliced, WFElem R scope x := by
+  cases h with
+  | var hi => simpa [Raw.spliced] using WFElem.ty (.var hi)
+  | app ref size argsWF => simpa [Raw.spliced] using WFElem.ty (.app ref size argsWF)
+  | @list es hes =>
+    obtain ⟨es⟩ := es
+    intro x hx
+    exact hes x (by simpa [Raw.spliced] using hx)
+
+mutual
+/-- Instantiating the variables of `scope` by expressions of `scope₁`, each well formed at its
+variable's kind, keeps an expression well formed at its kind. -/
+theorem WF.instantiate {R : Name → Array Kind → Prop} {scope scope₁ : Array Kind}
+    {args : Array Raw}
+    (hargs : ∀ (i : Nat) (hi : i < scope.size), ∃ a, args[i]? = some a ∧ WF R scope₁ scope[i] a) :
+    ∀ {k : Kind} {e : Raw}, WF R scope k e → WF R scope₁ k (e.instantiate args)
+  | _, _, @WF.var _ _ i hi => by
+    have lt : i < scope.size := (Array.getElem?_eq_some_iff.mp hi).1
+    obtain ⟨a, ha, hw⟩ := hargs i lt
+    have hk : scope[i] = .type := by simpa [Array.getElem?_eq_getElem lt] using hi
+    simpa [Raw.instantiate, ha, hk] using hw
+  | _, _, @WF.app _ _ n as ks ref size argsWF => by
     rw [Raw.instantiate_app]
-    refine .app (by simpa using ref) (fun a ha => ?_)
-    obtain ⟨b, hb, rfl⟩ := Array.mem_map.mp ha
-    exact ih b hb
+    exact .app ref (by simpa using size) fun i h =>
+      by simpa using WF.instantiate hargs (argsWF i (by simpa using h))
+  | _, _, @WF.list _ _ es hes => by
+    rw [Raw.instantiate_list]
+    refine .list fun x hx => ?_
+    obtain ⟨b, hb, hx⟩ : ∃ b ∈ es, x ∈ Raw.instantiateElem args b := by simpa using hx
+    exact WFElem.instantiate hargs (hes b hb) x hx
+
+/-- The element form of `WF.instantiate`: what an element instantiates to, spliced in. -/
+theorem WFElem.instantiate {R : Name → Array Kind → Prop} {scope scope₁ : Array Kind}
+    {args : Array Raw}
+    (hargs : ∀ (i : Nat) (hi : i < scope.size), ∃ a, args[i]? = some a ∧ WF R scope₁ scope[i] a) :
+    ∀ {e : Raw}, WFElem R scope e → ∀ x ∈ Raw.instantiateElem args e, WFElem R scope₁ x
+  | _, @WFElem.ty _ _ e h => by
+    have he := WF.instantiate hargs h
+    cases h with
+    | @var i hi =>
+      have lt : i < scope.size := (Array.getElem?_eq_some_iff.mp hi).1
+      obtain ⟨a, ha, hw⟩ := hargs i lt
+      simpa [Raw.instantiateElem, ha] using hw.spliced
+    | app _ _ _ => simpa [Raw.instantiateElem] using WFElem.ty he
+  | _, @WFElem.splice _ _ j hj => by
+    have lt : j < scope.size := (Array.getElem?_eq_some_iff.mp hj).1
+    obtain ⟨a, ha, hw⟩ := hargs j lt
+    simpa [Raw.instantiateElem, ha] using hw.spliced
+end
 
 end TypeExpr
 
@@ -91,100 +247,101 @@ end Decl.Raw
 
 namespace RegionSig.Raw
 
-/-- A region signature is well formed under `scope` type variables when its parameter types
-and its return type are, and its parameters are named distinctly.  `scope` is the enclosing
-instruction's `typeArgc`: a region binds no type variables of its own. -/
-def WF (R : Name → Nat → Prop) (scope : Nat) (r : RegionSig.Raw) : Prop :=
-  (∀ p ∈ r.params, TypeExpr.WFRel R scope p.type)
-    ∧ TypeExpr.WFRel R scope r.returnType
+/-- A region signature is well formed in `scope` when its parameter types and its return type
+are well-formed types, and its parameters are named distinctly.  `scope` is the enclosing
+instruction's: a region binds no variables of its own. -/
+def WF (R : Name → Array Kind → Prop) (scope : Array Kind) (r : RegionSig.Raw) : Prop :=
+  (∀ p ∈ r.params, TypeExpr.WFType R scope p.type)
+    ∧ TypeExpr.WFType R scope r.returnType
     ∧ r.paramNames.Nodup
 
 /-- Build well-formedness from the three component obligations. -/
-theorem wf_mk {R : Name → Nat → Prop} {scope : Nat} {r : RegionSig.Raw}
-    (hparams : ∀ p ∈ r.params, TypeExpr.WFRel R scope p.type)
-    (hret : TypeExpr.WFRel R scope r.returnType)
+theorem wf_mk {R : Name → Array Kind → Prop} {scope : Array Kind} {r : RegionSig.Raw}
+    (hparams : ∀ p ∈ r.params, TypeExpr.WFType R scope p.type)
+    (hret : TypeExpr.WFType R scope r.returnType)
     (hnames : r.paramNames.Nodup) : WF R scope r :=
   ⟨hparams, hret, hnames⟩
 
 /-- The parameter types of a well-formed region signature are well formed. -/
-theorem wf_params {R : Name → Nat → Prop} {scope : Nat} {r : RegionSig.Raw}
-    (h : WF R scope r) : ∀ p ∈ r.params, TypeExpr.WFRel R scope p.type := h.1
+theorem wf_params {R : Name → Array Kind → Prop} {scope : Array Kind} {r : RegionSig.Raw}
+    (h : WF R scope r) : ∀ p ∈ r.params, TypeExpr.WFType R scope p.type := h.1
 
 /-- The return type of a well-formed region signature is well formed. -/
-theorem wf_returnType {R : Name → Nat → Prop} {scope : Nat} {r : RegionSig.Raw}
-    (h : WF R scope r) : TypeExpr.WFRel R scope r.returnType := h.2.1
+theorem wf_returnType {R : Name → Array Kind → Prop} {scope : Array Kind} {r : RegionSig.Raw}
+    (h : WF R scope r) : TypeExpr.WFType R scope r.returnType := h.2.1
 
 /-- The parameters of a well-formed region signature are named distinctly. -/
-theorem wf_paramNames {R : Name → Nat → Prop} {scope : Nat} {r : RegionSig.Raw}
+theorem wf_paramNames {R : Name → Array Kind → Prop} {scope : Array Kind} {r : RegionSig.Raw}
     (h : WF R scope r) : r.paramNames.Nodup := h.2.2
 
 /-- A region signature stays well formed when the resolver accepts more. -/
-theorem WF.mono {R R' : Name → Nat → Prop} {scope : Nat} {r : RegionSig.Raw}
-    (hR : ∀ n a, R n a → R' n a) (h : r.WF R scope) : r.WF R' scope :=
-  ⟨fun p hp => (h.1 p hp).mono hR (Nat.le_refl _), h.2.1.mono hR (Nat.le_refl _), h.2.2⟩
+theorem WF.mono {R R' : Name → Array Kind → Prop} {scope : Array Kind} {r : RegionSig.Raw}
+    (hR : ∀ n ks, R n ks → R' n ks) (h : r.WF R scope) : r.WF R' scope :=
+  ⟨fun p hp => (h.1 p hp).mono hR,
+    h.2.1.mono hR, h.2.2⟩
 
 end RegionSig.Raw
 
 namespace InsnDecl.Raw
 
-/-- An instruction is well formed when its parameter types, its variadic's element type,
-its return type if it has one, the signature of each region it takes and the payload types of each
-successor are, each under the `typeArgc` de Bruijn variables the instruction binds; and when
-the names it binds (type parameters, arguments, the variadic, regions and successors) are
-pairwise distinct. -/
-def WF (R : Name → Nat → Prop) (d : InsnDecl.Raw α) : Prop :=
-  (∀ p ∈ d.argTypes, TypeExpr.WFRel R d.typeArgc p.type)
-    ∧ (∀ v ∈ d.variadic, TypeExpr.WFRel R d.typeArgc v.type)
-    ∧ (∀ t ∈ d.returnType, TypeExpr.WFRel R d.typeArgc t)
-    ∧ (∀ r ∈ d.regions, r.type.WF R d.typeArgc)
-    ∧ (∀ s ∈ d.succs, ∀ t ∈ s.type, TypeExpr.WFRel R d.typeArgc t)
+/-- An instruction is well formed when its parameter types, its return type if it has one, the
+signature of each region it takes and the payload types of each successor are well-formed types,
+and its variadic's type is a well-formed type or list, each in the scope of the variables the
+instruction binds; and when the names it binds (type parameters, arguments, the variadic,
+regions and successors) are pairwise distinct. -/
+def WF (R : Name → Array Kind → Prop) (d : InsnDecl.Raw α) : Prop :=
+  (∀ p ∈ d.argTypes, TypeExpr.WFType R d.scope p.type)
+    ∧ (∀ v ∈ d.variadic, TypeExpr.WFRel R d.scope v.type)
+    ∧ (∀ t ∈ d.returnType, TypeExpr.WFType R d.scope t)
+    ∧ (∀ r ∈ d.regions, r.type.WF R d.scope)
+    ∧ (∀ s ∈ d.succs, ∀ t ∈ s.type, TypeExpr.WFType R d.scope t)
     ∧ d.paramNames.Nodup
 
 /-- Build well-formedness from the six component obligations. -/
-theorem wf_mk {R : Name → Nat → Prop} {d : InsnDecl.Raw α}
-    (hargs : ∀ p ∈ d.argTypes, TypeExpr.WFRel R d.typeArgc p.type)
-    (hvar : ∀ v ∈ d.variadic, TypeExpr.WFRel R d.typeArgc v.type)
-    (hret : ∀ t ∈ d.returnType, TypeExpr.WFRel R d.typeArgc t)
-    (hregions : ∀ r ∈ d.regions, r.type.WF R d.typeArgc)
-    (hsuccs : ∀ s ∈ d.succs, ∀ t ∈ s.type, TypeExpr.WFRel R d.typeArgc t)
+theorem wf_mk {R : Name → Array Kind → Prop} {d : InsnDecl.Raw α}
+    (hargs : ∀ p ∈ d.argTypes, TypeExpr.WFType R d.scope p.type)
+    (hvar : ∀ v ∈ d.variadic, TypeExpr.WFRel R d.scope v.type)
+    (hret : ∀ t ∈ d.returnType, TypeExpr.WFType R d.scope t)
+    (hregions : ∀ r ∈ d.regions, r.type.WF R d.scope)
+    (hsuccs : ∀ s ∈ d.succs, ∀ t ∈ s.type, TypeExpr.WFType R d.scope t)
     (hnames : d.paramNames.Nodup) : WF R d :=
   ⟨hargs, hvar, hret, hregions, hsuccs, hnames⟩
 
 /-- The argument types of a well-formed instruction are well formed. -/
-theorem wf_argTypes {R : Name → Nat → Prop} {d : InsnDecl.Raw α} (h : WF R d) :
-    ∀ p ∈ d.argTypes, TypeExpr.WFRel R d.typeArgc p.type := h.1
+theorem wf_argTypes {R : Name → Array Kind → Prop} {d : InsnDecl.Raw α} (h : WF R d) :
+    ∀ p ∈ d.argTypes, TypeExpr.WFType R d.scope p.type := h.1
 
-/-- The variadic element type of a well-formed instruction, if any, is well formed. -/
-theorem wf_variadic {R : Name → Nat → Prop} {d : InsnDecl.Raw α} (h : WF R d) :
-    ∀ v ∈ d.variadic, TypeExpr.WFRel R d.typeArgc v.type := h.2.1
+/-- The variadic type of a well-formed instruction, if any, is well formed: a type or a list. -/
+theorem wf_variadic {R : Name → Array Kind → Prop} {d : InsnDecl.Raw α} (h : WF R d) :
+    ∀ v ∈ d.variadic, TypeExpr.WFRel R d.scope v.type := h.2.1
 
 /-- The return type of a well-formed instruction, if any, is well formed. -/
-theorem wf_returnType {R : Name → Nat → Prop} {d : InsnDecl.Raw α} (h : WF R d) :
-    ∀ t ∈ d.returnType, TypeExpr.WFRel R d.typeArgc t := h.2.2.1
+theorem wf_returnType {R : Name → Array Kind → Prop} {d : InsnDecl.Raw α} (h : WF R d) :
+    ∀ t ∈ d.returnType, TypeExpr.WFType R d.scope t := h.2.2.1
 
 /-- Every region signature of a well-formed instruction is well formed, under the
 instruction's type variables. -/
-theorem wf_regions {R : Name → Nat → Prop} {d : InsnDecl.Raw α} (h : WF R d) :
-    ∀ r ∈ d.regions, r.type.WF R d.typeArgc := h.2.2.2.1
+theorem wf_regions {R : Name → Array Kind → Prop} {d : InsnDecl.Raw α} (h : WF R d) :
+    ∀ r ∈ d.regions, r.type.WF R d.scope := h.2.2.2.1
 
 /-- Every payload type of every successor of a well-formed instruction is well formed, under
 the instruction's type variables. -/
-theorem wf_succs {R : Name → Nat → Prop} {d : InsnDecl.Raw α} (h : WF R d) :
-    ∀ s ∈ d.succs, ∀ t ∈ s.type, TypeExpr.WFRel R d.typeArgc t := h.2.2.2.2.1
+theorem wf_succs {R : Name → Array Kind → Prop} {d : InsnDecl.Raw α} (h : WF R d) :
+    ∀ s ∈ d.succs, ∀ t ∈ s.type, TypeExpr.WFType R d.scope t := h.2.2.2.2.1
 
 /-- No two of the type parameters, arguments, variadic, regions and successors of a
 well-formed instruction share a name. -/
-theorem wf_paramNames {R : Name → Nat → Prop} {d : InsnDecl.Raw α} (h : WF R d) :
+theorem wf_paramNames {R : Name → Array Kind → Prop} {d : InsnDecl.Raw α} (h : WF R d) :
     d.paramNames.Nodup := h.2.2.2.2.2
 
 /-- An instruction stays well formed when the resolver accepts more. -/
-theorem WF.mono {R R' : Name → Nat → Prop} {d : InsnDecl.Raw α}
-    (hR : ∀ n a, R n a → R' n a) (h : d.WF R) : d.WF R' :=
-  ⟨fun p hp => (h.1 p hp).mono hR (Nat.le_refl _),
-   fun t ht => (h.2.1 t ht).mono hR (Nat.le_refl _),
-   fun t ht => (h.2.2.1 t ht).mono hR (Nat.le_refl _),
+theorem WF.mono {R R' : Name → Array Kind → Prop} {d : InsnDecl.Raw α}
+    (hR : ∀ n ks, R n ks → R' n ks) (h : d.WF R) : d.WF R' :=
+  ⟨fun p hp => (h.1 p hp).mono hR,
+   fun t ht => (h.2.1 t ht).mono hR,
+   fun t ht => (h.2.2.1 t ht).mono hR,
    fun r hr => (h.2.2.2.1 r hr).mono hR,
-   fun s hs t ht => (h.2.2.2.2.1 s hs t ht).mono hR (Nat.le_refl _),
+   fun s hs t ht => (h.2.2.2.2.1 s hs t ht).mono hR,
    h.2.2.2.2.2⟩
 
 end InsnDecl.Raw
@@ -193,7 +350,7 @@ namespace Decl.Raw
 
 /-- A declaration is well formed when the declaration it wraps is: a primitive type names
 its parameters distinctly, and an instruction, a constructor included, is well formed. -/
-def WF (R : Name → Nat → Prop) : Decl.Raw α → Prop
+def WF (R : Name → Array Kind → Prop) : Decl.Raw α → Prop
   | .type d => d.paramNames.Nodup
   -- `R` does not know a group's own members: `Env.Raw.checkGroup` checks the group, and a
   -- member alias checks nothing.
@@ -201,8 +358,9 @@ def WF (R : Name → Nat → Prop) : Decl.Raw α → Prop
   | .dataRest .. => True
   | .insn d => InsnDecl.Raw.WF R d
 
-theorem WF.mono {R R' : Name → Nat → Prop} {d : Decl.Raw α}
-    (hR : ∀ n a, R n a → R' n a) (h : d.WF R) : d.WF R' := by
+/-- A well-formed declaration stays well formed when the resolver accepts more. -/
+theorem WF.mono {R R' : Name → Array Kind → Prop} {d : Decl.Raw α}
+    (hR : ∀ n ks, R n ks → R' n ks) (h : d.WF R) : d.WF R' := by
   cases d with
   | type t => exact h
   | dataHead g => trivial
@@ -211,28 +369,31 @@ theorem WF.mono {R R' : Name → Nat → Prop} {d : Decl.Raw α}
 
 /-- A type declaration has no body, so it is well formed under any relation once its
 parameters are named distinctly. -/
-@[simp] theorem wf_type_iff {R : Name → Nat → Prop} {d : TypeDecl α} :
+@[simp] theorem wf_type_iff {R : Name → Array Kind → Prop} {d : TypeDecl α} :
     WF R (.type d) ↔ d.paramNames.Nodup := Iff.rfl
 
-@[simp] theorem wf_dataHead {R : Name → Nat → Prop} (g : DataGroup α TypeExpr.Raw) :
+/-- A group head is always well formed. -/
+@[simp] theorem wf_dataHead {R : Name → Array Kind → Prop} (g : DataGroup α TypeExpr.Raw) :
     WF R (.dataHead g) := trivial
 
-@[simp] theorem wf_dataRest {R : Name → Nat → Prop} (n h : Name) (i : Nat) :
+/-- A group member alias is always well formed. -/
+@[simp] theorem wf_dataRest {R : Name → Array Kind → Prop} (n h : Name) (i : Nat) :
     WF R (.dataRest (α := α) n h i) := trivial
 
 /-- Well-formedness of a wrapped instruction declaration is the instruction's own. -/
-@[simp] theorem wf_insn_iff {R : Name → Nat → Prop} {d : InsnDecl.Raw α} :
+@[simp] theorem wf_insn_iff {R : Name → Array Kind → Prop} {d : InsnDecl.Raw α} :
     WF R (.insn d) ↔ InsnDecl.Raw.WF R d := Iff.rfl
 
 end Decl.Raw
 
 namespace Env.Raw
 
-/-- `name` resolves to a type declaration of arity `arity` that occurs *strictly
-before* position `i` of the environment. -/
-def RefBefore (env : Env.Raw α) (i : Nat) (name : Name) (arity : Nat) : Prop :=
+/-- `name` resolves to a type declaration whose arguments have kinds `kinds` that occurs
+*strictly before* position `i` of the environment.  A wrong number of arguments and a
+mis-kinded one fail alike. -/
+def RefBefore (env : Env.Raw α) (i : Nat) (name : Name) (kinds : Array Kind) : Prop :=
   match (env.types.before i)[name]? with
-  | some t => t.arity = arity
+  | some t => t.kinds = kinds
   | none => False
 
 /-- The `types.before` lookup in positional terms. -/
@@ -247,19 +408,19 @@ theorem getElem?_types_before {env : Env.Raw α} {i : Nat} {name : Name} :
   | none => simp
   | some j => simp only [Option.bind_some]; split <;> simp [*]
 
-/-- `RefBefore` holds exactly when the `before` view yields a type of that arity. -/
-theorem refBefore_iff_getElem? {env : Env.Raw α} {i : Nat} {name : Name} {arity : Nat} :
-    env.RefBefore i name arity ↔
-      ∃ t, (env.types.before i)[name]? = some t ∧ t.arity = arity := by
+/-- `RefBefore` holds exactly when the `before` view yields a type of those kinds. -/
+theorem refBefore_iff_getElem? {env : Env.Raw α} {i : Nat} {name : Name} {kinds : Array Kind} :
+    env.RefBefore i name kinds ↔
+      ∃ t, (env.types.before i)[name]? = some t ∧ t.kinds = kinds := by
   unfold RefBefore
   cases hv : (env.types.before i)[name]? <;> simp
 
 /-- `RefBefore` spelled out positionally: the name has a position before `i`, and what is
-declared there denotes a type of the right arity, a group member or a group head. -/
-theorem refBefore_iff {env : Env.Raw α} {i : Nat} {name : Name} {arity : Nat} :
-    env.RefBefore i name arity ↔
+declared there denotes a type of the right kinds, a group member or a group head. -/
+theorem refBefore_iff {env : Env.Raw α} {i : Nat} {name : Name} {kinds : Array Kind} :
+    env.RefBefore i name kinds ↔
       ∃ j t, IndexMap.idxOf? env.decls name = some j ∧ j < i ∧
-        env.typeOf? name = some t ∧ t.arity = arity := by
+        env.typeOf? name = some t ∧ t.kinds = kinds := by
   rw [refBefore_iff_getElem?]
   simp only [getElem?_types_before]
   constructor
@@ -309,8 +470,9 @@ theorem typeOf?_of_typesBefore {env : Env.Raw α} {n : Name} {d : TypeDecl α} {
     · exact h
     · simp at h
 
-theorem RefBefore.mono {env : Env.Raw α} {i j : Nat} (h : i ≤ j) {name : Name} {arity : Nat}
-    (hr : env.RefBefore i name arity) : env.RefBefore j name arity := by
+/-- Raising the position bound keeps a reference valid. -/
+theorem RefBefore.mono {env : Env.Raw α} {i j : Nat} (h : i ≤ j) {name : Name}
+    {kinds : Array Kind} (hr : env.RefBefore i name kinds) : env.RefBefore j name kinds := by
   obtain ⟨k, t, hk, hki, hget, ha⟩ := refBefore_iff.mp hr
   exact refBefore_iff.mpr ⟨k, t, hk, Nat.lt_of_lt_of_le hki h, hget, ha⟩
 
@@ -326,13 +488,15 @@ namespace Env.Raw
 
 /-- Decision procedure for `RefBefore`: one lookup in `types.before i`. -/
 @[expose]
-def RefBefore.check (env : Env.Raw α) (i : Nat) (name : Name) (arity : Nat) : Bool :=
+def RefBefore.check (env : Env.Raw α) (i : Nat) (name : Name) (kinds : Array Kind) : Bool :=
   match (env.types.before i)[name]? with
-  | some t => t.arity == arity
+  | some t => t.kinds == kinds
   | none => false
 
-@[simp] theorem refBefore_check_eq_true {env : Env.Raw α} {i : Nat} {name : Name} {arity : Nat} :
-    RefBefore.check env i name arity = true ↔ env.RefBefore i name arity := by
+/-- Rewrites a passing `RefBefore.check` to `RefBefore`. -/
+@[simp] theorem refBefore_check_eq_true {env : Env.Raw α} {i : Nat} {name : Name}
+    {kinds : Array Kind} :
+    RefBefore.check env i name kinds = true ↔ env.RefBefore i name kinds := by
   unfold RefBefore.check RefBefore
   cases (env.types.before i)[name]? <;> simp
 
@@ -341,34 +505,81 @@ end Env.Raw
 namespace TypeExpr.Raw
 
 mutual
-/-- Decision procedure for `WFRel`, abstracted over the resolver as `WFRel` is: `R name n`
-decides "this expression may mention `name` as a type of arity `n`".  Arguments are matched
-through `Array.mk`, which keeps both functions structurally recursive. -/
+/-- Decision procedure for `WFRel`, abstracted over the resolver as `WFRel` is: `R name ks`
+decides "this expression may mention `name` as a type whose arguments have kinds `ks`".
+Arguments are matched through `Array.mk`, which keeps both functions structurally
+recursive. -/
 @[expose]
-def check (R : Name → Nat → Bool) (scope : Nat) : Raw → Bool
-  | .var k => k < scope
-  | .app name ⟨args⟩ => R name args.length && checkList R scope args
+def check (R : Name → Array Kind → Bool) (scope : Array Kind) : Raw → Bool
+  | .var k => scope[k]? == some .type
+  | .app name ⟨args⟩ => R name ⟨args.map (kind scope)⟩ && checkList R scope args
+  | .list ⟨es⟩ => checkElems R scope es && es.all isElem
 
 @[expose]
-def checkList (R : Name → Nat → Bool) (scope : Nat) : List Raw → Bool
+def checkList (R : Name → Array Kind → Bool) (scope : Array Kind) : List Raw → Bool
   | [] => true
   | e :: es => check R scope e && checkList R scope es
+
+/-- The elements of a literal: a variable in scope, of either kind, or an expression that
+passes `check`. -/
+@[expose]
+def checkElems (R : Name → Array Kind → Bool) (scope : Array Kind) : List Raw → Bool
+  | [] => true
+  | e :: es =>
+    (match e with
+     | .var j => decide (j < scope.size)
+     | _ => check R scope e) && checkElems R scope es
 end
 
+/-- `checkElems` passes the variables in scope and checks everything else. -/
+theorem checkElems_iff {R : Name → Array Kind → Bool} {scope : Array Kind} :
+    ∀ l : List Raw, checkElems R scope l = true ↔
+      ∀ a ∈ l, (a.isVar = false → check R scope a = true) ∧ (∀ j, a = .var j → j < scope.size)
+  | [] => by simp [checkElems]
+  | .var j :: l => by simp [checkElems, isVar, checkElems_iff l]
+  | .app n as :: l => by simp [checkElems, isVar, checkElems_iff l]
+  | .list es :: l => by simp [checkElems, isVar, checkElems_iff l]
+
+/-- An element of a literal is well formed when it is a variable in scope, of either kind, or
+well formed and not a literal. -/
+theorem wfElem_of {Rel : Name → Array Kind → Prop} {scope : Array Kind} {a : Raw}
+    (hw : a.isVar = false → WFRel Rel scope a) (hv : ∀ j, a = .var j → j < scope.size)
+    (hel : a.isElem = true) : WFElem Rel scope a := by
+  cases a with
+  | var j =>
+    obtain ⟨k, hk⟩ : ∃ k, scope[j]? = some k := ⟨_, Array.getElem?_eq_getElem (hv j rfl)⟩
+    cases k with
+    | type => exact .ty (.var hk)
+    | list => exact .splice hk
+  | app _ _ => exact .ty (hw rfl)
+  | list _ => simp [isElem] at hel
+
 mutual
-theorem wfRel_of_check {R : Name → Nat → Bool} {Rel : Name → Nat → Prop}
-    (hR : ∀ n a, R n a = true → Rel n a) {scope : Nat} :
+/-- Soundness of `check`: what it accepts is well formed, at its kind, under any relation its
+resolver implies. -/
+theorem wfRel_of_check {R : Name → Array Kind → Bool} {Rel : Name → Array Kind → Prop}
+    (hR : ∀ n ks, R n ks = true → Rel n ks) {scope : Array Kind} :
     ∀ (e : Raw), check R scope e = true → WFRel Rel scope e
-  | .var _, h => .var (by simpa [check] using h)
+  | .var i, h => by
+    have h : scope[i]? = some .type := by simpa [check] using h
+    simpa [WFRel, kind, h] using WF.var (R := Rel) h
   | .app _ ⟨args⟩, h => by
     simp only [check, Bool.and_eq_true] at h
-    exact .app (hR _ _ (by simpa using h.1))
-      (fun a ha => wfRel_of_checkList hR args h.2 a (by simpa using ha))
+    have hargs := wfRel_of_checkList hR args h.2
+    exact .app (hR _ _ (by simpa using h.1)) (by simp) fun i hi => by
+      simpa using hargs _ (by simp)
+  | .list ⟨es⟩, h => by
+    simp only [check, Bool.and_eq_true, List.all_eq_true] at h
+    have hvars := (checkElems_iff es).mp h.1
+    have hw := wfRel_of_checkElems hR es h.1
+    exact .list fun a ha => wfElem_of (hw a (by simpa using ha))
+      (fun j hj => (hvars _ (by simpa using ha)).2 j hj) (h.2 a (by simpa using ha))
 termination_by e _ => sizeOf e
 decreasing_by all_goals (simp_wf; omega)
 
-theorem wfRel_of_checkList {R : Name → Nat → Bool} {Rel : Name → Nat → Prop}
-    (hR : ∀ n a, R n a = true → Rel n a) {scope : Nat} :
+/-- The list form of `wfRel_of_check`. -/
+theorem wfRel_of_checkList {R : Name → Array Kind → Bool} {Rel : Name → Array Kind → Prop}
+    (hR : ∀ n ks, R n ks = true → Rel n ks) {scope : Array Kind} :
     ∀ (es : List Raw), checkList R scope es = true → ∀ a ∈ es, WFRel Rel scope a
   | [], _ => by simp
   | e :: es, h => by
@@ -385,14 +596,35 @@ theorem wfRel_of_checkList {R : Name → Nat → Bool} {Rel : Name → Nat → P
 -- `Array.mk` wrapper, which 4.31's automatic measure does not see through.
 termination_by es _ => sizeOf es + 1
 decreasing_by all_goals (simp_wf; omega)
+
+/-- The literal form of `wfRel_of_check`: what `checkElems` accepts that is not a variable is
+well formed. -/
+theorem wfRel_of_checkElems {R : Name → Array Kind → Bool} {Rel : Name → Array Kind → Prop}
+    (hR : ∀ n ks, R n ks = true → Rel n ks) {scope : Array Kind} :
+    ∀ (es : List Raw), checkElems R scope es = true → ∀ a ∈ es, a.isVar = false →
+      WFRel Rel scope a
+  | [], _ => by simp
+  | e :: es, h => by
+    have hes : ∀ a ∈ es, a.isVar = false → WFRel Rel scope a :=
+      wfRel_of_checkElems hR es (by cases e <;> simp_all [checkElems])
+    have he : e.isVar = false → WFRel Rel scope e := fun hv =>
+      wfRel_of_check hR e (((checkElems_iff (e :: es)).mp h e List.mem_cons_self).1 hv)
+    intro a ha
+    rcases List.mem_cons.mp ha with rfl | ha
+    · exact he
+    · exact hes a ha
+termination_by es _ => sizeOf es + 1
+decreasing_by all_goals (simp_wf; omega)
 end
 
 /-! ### Datatype payloads
 
 A constructor's payload is checked against three things, none of which is an environment: a
 resolver `R` for the positions where recursion is allowed, a resolver `Rneg` for the
-positions where it is not, and a lookup `paramsOf` giving each type constructor's parameter
-polarity. -/
+positions where it is not, and a lookup `paramsOf` giving each type constructor's parameters.
+A list literal takes the polarity of its position, and each element is checked there.  A
+payload's scope is its member's parameters, so a list parameter is a list variable, spliced into a
+literal; `[*as]` is the whole list. -/
 
 mutual
 /-- Whether de Bruijn level `l` occurs in the expression at all.  Inspects only `var`
@@ -401,6 +633,7 @@ nodes. -/
 def varOccurs (l : Nat) : Raw → Bool
   | .var k => k == l
   | .app _ ⟨args⟩ => varOccursList l args
+  | .list ⟨es⟩ => varOccursList l es
 
 @[expose]
 def varOccursList (l : Nat) : List Raw → Bool
@@ -411,20 +644,27 @@ end
 mutual
 /-- Whether every occurrence of level `l` sits in a parameter declared `.pos`. -/
 @[expose]
-def varPositive (paramsOf : Name → Option (Array (Param Positivity))) (l : Nat) : Raw → Bool
+def varPositive (paramsOf : Name → Option (Array (Param TyParam))) (l : Nat) : Raw → Bool
   | .var _ => true
   | .app n ⟨args⟩ =>
     match paramsOf n with
     | none => false
     | some ⟨ps⟩ => ps.length == args.length && varPositiveArgs paramsOf l ps args
+  | .list ⟨es⟩ => varPositiveList paramsOf l es
 
 @[expose]
-def varPositiveArgs (paramsOf : Name → Option (Array (Param Positivity))) (l : Nat) :
-    List (Param Positivity) → List Raw → Bool
+def varPositiveArgs (paramsOf : Name → Option (Array (Param TyParam))) (l : Nat) :
+    List (Param TyParam) → List Raw → Bool
   | [], [] => true
-  | ⟨_, .pos⟩ :: ps, e :: es => varPositive paramsOf l e && varPositiveArgs paramsOf l ps es
-  | ⟨_, .non⟩ :: ps, e :: es => !varOccurs l e && varPositiveArgs paramsOf l ps es
+  | ⟨_, ⟨.pos, _⟩⟩ :: ps, e :: es => varPositive paramsOf l e && varPositiveArgs paramsOf l ps es
+  | ⟨_, ⟨.non, _⟩⟩ :: ps, e :: es => !varOccurs l e && varPositiveArgs paramsOf l ps es
   | _, _ => false
+
+@[expose]
+def varPositiveList (paramsOf : Name → Option (Array (Param TyParam))) (l : Nat) :
+    List Raw → Bool
+  | [] => true
+  | e :: es => varPositive paramsOf l e && varPositiveList paramsOf l es
 end
 
 mutual
@@ -433,25 +673,37 @@ mutual
 `R` applies where recursion is allowed.  Passing through a parameter declared `.non`
 switches to `Rneg`, `R` with the group's own types withheld, for the rest of the subterm. -/
 @[expose]
-def checkPayload (paramsOf : Name → Option (Array (Param Positivity)))
-    (R Rneg : Name → Nat → Bool) (scope : Nat) : Raw → Bool
-  | .var k => k < scope
+def checkPayload (paramsOf : Name → Option (Array (Param TyParam)))
+    (R Rneg : Name → Array Kind → Bool) (scope : Array Kind) : Raw → Bool
+  | .var k => scope[k]? == some .type
   | .app n ⟨args⟩ =>
-    R n args.length &&
+    R n ⟨args.map (kind scope)⟩ &&
       (match paramsOf n with
        | none => false
        | some ⟨ps⟩ =>
          ps.length == args.length && checkPayloadArgs paramsOf R Rneg scope ps args)
+  | .list ⟨es⟩ => checkPayloadList paramsOf R Rneg scope es && es.all isElem
 
 @[expose]
-def checkPayloadArgs (paramsOf : Name → Option (Array (Param Positivity)))
-    (R Rneg : Name → Nat → Bool) (scope : Nat) : List (Param Positivity) → List Raw → Bool
+def checkPayloadArgs (paramsOf : Name → Option (Array (Param TyParam)))
+    (R Rneg : Name → Array Kind → Bool) (scope : Array Kind) :
+    List (Param TyParam) → List Raw → Bool
   | [], [] => true
-  | ⟨_, .pos⟩ :: ps, e :: es =>
+  | ⟨_, ⟨.pos, _⟩⟩ :: ps, e :: es =>
     checkPayload paramsOf R Rneg scope e && checkPayloadArgs paramsOf R Rneg scope ps es
-  | ⟨_, .non⟩ :: ps, e :: es =>
+  | ⟨_, ⟨.non, _⟩⟩ :: ps, e :: es =>
     check Rneg scope e && checkPayloadArgs paramsOf R Rneg scope ps es
   | _, _ => false
+
+/-- The elements of a literal: a variable in scope, of either kind, or a payload. -/
+@[expose]
+def checkPayloadList (paramsOf : Name → Option (Array (Param TyParam)))
+    (R Rneg : Name → Array Kind → Bool) (scope : Array Kind) : List Raw → Bool
+  | [] => true
+  | e :: es =>
+    (match e with
+     | .var j => decide (j < scope.size)
+     | _ => checkPayload paramsOf R Rneg scope e) && checkPayloadList paramsOf R Rneg scope es
 end
 
 /-! ### Monotonicity
@@ -460,25 +712,45 @@ Each traversal accepts more when its resolvers accept more and its parameter loo
 answering what it answered. -/
 
 mutual
-theorem check_mono {R R' : Name → Nat → Bool} (hR : ∀ n a, R n a = true → R' n a = true)
-    {scope : Nat} : ∀ e : Raw, check R scope e = true → check R' scope e = true
-  | .var _, h => by simpa [check] using h
+/-- `check` accepts more when its resolver accepts more. -/
+theorem check_mono {R R' : Name → Array Kind → Bool}
+    (hR : ∀ n ks, R n ks = true → R' n ks = true) {scope : Array Kind} :
+    ∀ e : Raw, check R scope e = true → check R' scope e = true
+  | .var _, h => h
   | .app _ ⟨args⟩, h => by
     simp only [check, Bool.and_eq_true] at h ⊢
     exact ⟨hR _ _ h.1, checkList_mono hR args h.2⟩
+  | .list ⟨es⟩, h => by
+    simp only [check, Bool.and_eq_true] at h ⊢
+    exact ⟨checkElems_mono hR es h.1, h.2⟩
 
-theorem checkList_mono {R R' : Name → Nat → Bool} (hR : ∀ n a, R n a = true → R' n a = true)
-    {scope : Nat} : ∀ es : List Raw, checkList R scope es = true →
-      checkList R' scope es = true
+/-- The list form of `check_mono`. -/
+theorem checkList_mono {R R' : Name → Array Kind → Bool}
+    (hR : ∀ n ks, R n ks = true → R' n ks = true) {scope : Array Kind} :
+    ∀ es : List Raw, checkList R scope es = true → checkList R' scope es = true
   | [], _ => by simp [checkList]
   | e :: es, h => by
     simp only [checkList, Bool.and_eq_true] at h ⊢
     exact ⟨check_mono hR e h.1, checkList_mono hR es h.2⟩
+
+/-- The literal form of `check_mono`. -/
+theorem checkElems_mono {R₁ R₂ : Name → Array Kind → Bool}
+    (hR : ∀ n ks, R₁ n ks = true → R₂ n ks = true) {scope : Array Kind} :
+    ∀ es : List Raw, checkElems R₁ scope es = true → checkElems R₂ scope es = true
+  | [], _ => by simp [checkElems]
+  | e :: es, h => by
+    have he := check_mono hR (scope := scope) e
+    simp only [checkElems, Bool.and_eq_true] at h ⊢
+    refine ⟨?_, checkElems_mono hR es h.2⟩
+    cases e with
+    | var => exact h.1
+    | app => exact he h.1
+    | list => exact he h.1
 end
 
 mutual
 /-- `varPositive` accepts more when the parameter lookup keeps its answers. -/
-theorem varPositive_mono {P P' : Name → Option (Array (Param Positivity))}
+theorem varPositive_mono {P P' : Name → Option (Array (Param TyParam))}
     (hp : ∀ n ps, P n = some ps → P' n = some ps) {l : Nat} :
     ∀ e : Raw, varPositive P l e = true → varPositive P' l e = true
   | .var _, _ => by simp [varPositive]
@@ -492,32 +764,44 @@ theorem varPositive_mono {P P' : Name → Option (Array (Param Positivity))}
       rw [hp n _ hn]
       simp only [Bool.and_eq_true] at h ⊢
       exact ⟨h.1, varPositiveArgs_mono hp ps args h.2⟩
+  | .list ⟨es⟩, h => by
+    simp only [varPositive] at h ⊢
+    exact varPositiveList_mono hp es h
 
-/-- The list form of `varPositive_mono`. -/
-theorem varPositiveArgs_mono {P P' : Name → Option (Array (Param Positivity))}
+/-- The argument form of `varPositive_mono`. -/
+theorem varPositiveArgs_mono {P P' : Name → Option (Array (Param TyParam))}
     (hp : ∀ n ps, P n = some ps → P' n = some ps) {l : Nat} :
-    ∀ (ps : List (Param Positivity)) (es : List Raw), varPositiveArgs P l ps es = true →
+    ∀ (ps : List (Param TyParam)) (es : List Raw), varPositiveArgs P l ps es = true →
       varPositiveArgs P' l ps es = true
   | [], [], _ => by simp [varPositiveArgs]
-  | ⟨_, .pos⟩ :: ps, e :: es, h => by
+  | ⟨_, ⟨.pos, _⟩⟩ :: ps, e :: es, h => by
     simp only [varPositiveArgs, Bool.and_eq_true] at h ⊢
     exact ⟨varPositive_mono hp e h.1, varPositiveArgs_mono hp ps es h.2⟩
-  | ⟨_, .non⟩ :: ps, e :: es, h => by
+  | ⟨_, ⟨.non, _⟩⟩ :: ps, e :: es, h => by
     simp only [varPositiveArgs, Bool.and_eq_true] at h ⊢
     exact ⟨h.1, varPositiveArgs_mono hp ps es h.2⟩
   | [], _ :: _, h => by simp [varPositiveArgs] at h
   | _ :: _, [], h => by simp [varPositiveArgs] at h
+
+/-- The list-literal form of `varPositive_mono`. -/
+theorem varPositiveList_mono {P P' : Name → Option (Array (Param TyParam))}
+    (hp : ∀ n ps, P n = some ps → P' n = some ps) {l : Nat} :
+    ∀ es : List Raw, varPositiveList P l es = true → varPositiveList P' l es = true
+  | [], _ => rfl
+  | e :: es, h => by
+    simp only [varPositiveList, Bool.and_eq_true] at h ⊢
+    exact ⟨varPositive_mono hp e h.1, varPositiveList_mono hp es h.2⟩
 end
 
 mutual
 /-- `checkPayload` accepts more when its resolvers do and its lookup keeps its answers. -/
-theorem checkPayload_mono {P P' : Name → Option (Array (Param Positivity))}
-    {R R' N N' : Name → Nat → Bool}
+theorem checkPayload_mono {P P' : Name → Option (Array (Param TyParam))}
+    {R R' N N' : Name → Array Kind → Bool}
     (hp : ∀ n ps, P n = some ps → P' n = some ps)
-    (hR : ∀ n a, R n a = true → R' n a = true)
-    (hN : ∀ n a, N n a = true → N' n a = true) {scope : Nat} :
+    (hR : ∀ n ks, R n ks = true → R' n ks = true)
+    (hN : ∀ n ks, N n ks = true → N' n ks = true) {scope : Array Kind} :
     ∀ e : Raw, checkPayload P R N scope e = true → checkPayload P' R' N' scope e = true
-  | .var _, h => by simpa [checkPayload] using h
+  | .var _, h => h
   | .app n ⟨args⟩, h => by
     simp only [checkPayload, Bool.and_eq_true] at h ⊢
     obtain ⟨hr, hrest⟩ := h
@@ -530,33 +814,54 @@ theorem checkPayload_mono {P P' : Name → Option (Array (Param Positivity))}
       rw [hp n _ hn]
       simp only [Bool.and_eq_true] at hrest ⊢
       exact ⟨hrest.1, checkPayloadArgs_mono hp hR hN ps args hrest.2⟩
+  | .list ⟨es⟩, h => by
+    simp only [checkPayload, Bool.and_eq_true] at h ⊢
+    exact ⟨checkPayloadList_mono hp hR hN es h.1, h.2⟩
 
-/-- The list form of `checkPayload_mono`. -/
-theorem checkPayloadArgs_mono {P P' : Name → Option (Array (Param Positivity))}
-    {R R' N N' : Name → Nat → Bool}
+/-- The argument form of `checkPayload_mono`. -/
+theorem checkPayloadArgs_mono {P P' : Name → Option (Array (Param TyParam))}
+    {R R' N N' : Name → Array Kind → Bool}
     (hp : ∀ n ps, P n = some ps → P' n = some ps)
-    (hR : ∀ n a, R n a = true → R' n a = true)
-    (hN : ∀ n a, N n a = true → N' n a = true) {scope : Nat} :
-    ∀ (ps : List (Param Positivity)) (es : List Raw), checkPayloadArgs P R N scope ps es = true →
+    (hR : ∀ n ks, R n ks = true → R' n ks = true)
+    (hN : ∀ n ks, N n ks = true → N' n ks = true) {scope : Array Kind} :
+    ∀ (ps : List (Param TyParam)) (es : List Raw), checkPayloadArgs P R N scope ps es = true →
       checkPayloadArgs P' R' N' scope ps es = true
   | [], [], _ => by simp [checkPayloadArgs]
-  | ⟨_, .pos⟩ :: ps, e :: es, h => by
+  | ⟨_, ⟨.pos, _⟩⟩ :: ps, e :: es, h => by
     simp only [checkPayloadArgs, Bool.and_eq_true] at h ⊢
     exact ⟨checkPayload_mono hp hR hN e h.1, checkPayloadArgs_mono hp hR hN ps es h.2⟩
-  | ⟨_, .non⟩ :: ps, e :: es, h => by
+  | ⟨_, ⟨.non, _⟩⟩ :: ps, e :: es, h => by
     simp only [checkPayloadArgs, Bool.and_eq_true] at h ⊢
     exact ⟨check_mono hN e h.1, checkPayloadArgs_mono hp hR hN ps es h.2⟩
   | [], _ :: _, h => by simp [checkPayloadArgs] at h
   | _ :: _, [], h => by simp [checkPayloadArgs] at h
+
+/-- The list-literal form of `checkPayload_mono`. -/
+theorem checkPayloadList_mono {P P' : Name → Option (Array (Param TyParam))}
+    {R R' N N' : Name → Array Kind → Bool}
+    (hp : ∀ n ps, P n = some ps → P' n = some ps)
+    (hR : ∀ n ks, R n ks = true → R' n ks = true)
+    (hN : ∀ n ks, N n ks = true → N' n ks = true) {scope : Array Kind} :
+    ∀ es : List Raw, checkPayloadList P R N scope es = true →
+      checkPayloadList P' R' N' scope es = true
+  | [], _ => by simp [checkPayloadList]
+  | e :: es, h => by
+    have he := checkPayload_mono hp hR hN (scope := scope) e
+    simp only [checkPayloadList, Bool.and_eq_true] at h ⊢
+    refine ⟨?_, checkPayloadList_mono hp hR hN es h.2⟩
+    cases e with
+    | var => exact h.1
+    | app => exact he h.1
+    | list => exact he h.1
 end
 
 mutual
 /-- A payload that keeps its recursion positive is well formed against `R`, when what a
 `.non` position may refer to `R` accepts too.  So a constructor's payload is an argument type
 its instruction may declare. -/
-theorem check_of_checkPayload {P : Name → Option (Array (Param Positivity))}
-    {R N : Name → Nat → Bool} (hN : ∀ n a, N n a = true → R n a = true) {scope : Nat} :
-    ∀ e : Raw, checkPayload P R N scope e = true → check R scope e = true
+theorem check_of_checkPayload {P : Name → Option (Array (Param TyParam))}
+    {R N : Name → Array Kind → Bool} (hN : ∀ n ks, N n ks = true → R n ks = true)
+    {scope : Array Kind} : ∀ e : Raw, checkPayload P R N scope e = true → check R scope e = true
   | .var _, h => by simpa [checkPayload, check] using h
   | .app n ⟨args⟩, h => by
     simp only [checkPayload, Bool.and_eq_true] at h
@@ -570,52 +875,132 @@ theorem check_of_checkPayload {P : Name → Option (Array (Param Positivity))}
       rw [hn] at hrest
       simp only [Bool.and_eq_true] at hrest
       exact checkList_of_checkPayloadArgs hN ps args hrest.2
+  | .list ⟨es⟩, h => by
+    simp only [checkPayload, Bool.and_eq_true] at h
+    simp only [check, Bool.and_eq_true]
+    exact ⟨checkElems_of_checkPayloadList hN es h.1, h.2⟩
 
-/-- The list form of `check_of_checkPayload`. -/
-theorem checkList_of_checkPayloadArgs {P : Name → Option (Array (Param Positivity))}
-    {R N : Name → Nat → Bool} (hN : ∀ n a, N n a = true → R n a = true) {scope : Nat} :
-    ∀ (ps : List (Param Positivity)) (es : List Raw), checkPayloadArgs P R N scope ps es = true →
+/-- The argument form of `check_of_checkPayload`. -/
+theorem checkList_of_checkPayloadArgs {P : Name → Option (Array (Param TyParam))}
+    {R N : Name → Array Kind → Bool} (hN : ∀ n ks, N n ks = true → R n ks = true)
+    {scope : Array Kind} :
+    ∀ (ps : List (Param TyParam)) (es : List Raw), checkPayloadArgs P R N scope ps es = true →
       checkList R scope es = true
   | [], [], _ => rfl
-  | ⟨_, .pos⟩ :: ps, e :: es, h => by
+  | ⟨_, ⟨.pos, _⟩⟩ :: ps, e :: es, h => by
     simp only [checkPayloadArgs, Bool.and_eq_true] at h
     simp only [checkList, Bool.and_eq_true]
     exact ⟨check_of_checkPayload hN e h.1, checkList_of_checkPayloadArgs hN ps es h.2⟩
-  | ⟨_, .non⟩ :: ps, e :: es, h => by
+  | ⟨_, ⟨.non, _⟩⟩ :: ps, e :: es, h => by
     simp only [checkPayloadArgs, Bool.and_eq_true] at h
     simp only [checkList, Bool.and_eq_true]
     exact ⟨check_mono hN e h.1, checkList_of_checkPayloadArgs hN ps es h.2⟩
   | [], _ :: _, h => by simp [checkPayloadArgs] at h
   | _ :: _, [], h => by simp [checkPayloadArgs] at h
+
+/-- The list-literal form of `check_of_checkPayload`. -/
+theorem checkElems_of_checkPayloadList {P : Name → Option (Array (Param TyParam))}
+    {R N : Name → Array Kind → Bool} (hN : ∀ n ks, N n ks = true → R n ks = true)
+    {scope : Array Kind} :
+    ∀ es : List Raw, checkPayloadList P R N scope es = true → checkElems R scope es = true
+  | [], _ => by simp [checkElems]
+  | e :: es, h => by
+    have he := check_of_checkPayload (P := P) hN (scope := scope) e
+    simp only [checkPayloadList, Bool.and_eq_true] at h
+    simp only [checkElems, Bool.and_eq_true]
+    refine ⟨?_, checkElems_of_checkPayloadList hN es h.2⟩
+    cases e with
+    | var => exact h.1
+    | app => exact he h.1
+    | list => exact he h.1
 end
 
-/-- An application is well formed when its head is accepted at its argument count and every
-argument is well formed. -/
-theorem check_app {R : Name → Nat → Bool} {scope : Nat} {n : Name} {as : Array Raw} :
-    check R scope (.app n as) = true ↔ R n as.size = true ∧ ∀ a ∈ as, check R scope a = true := by
-  obtain ⟨as⟩ := as
-  have hl : ∀ l : List Raw, checkList R scope l = true ↔ ∀ a ∈ l, check R scope a = true := by
-    intro l; induction l <;> simp_all [checkList]
-  simp [check, hl]
+/-- `checkList` is `check` of every element. -/
+private theorem checkList_iff {R : Name → Array Kind → Bool} {scope : Array Kind} :
+    ∀ l : List Raw, checkList R scope l = true ↔ ∀ a ∈ l, check R scope a = true
+  | [] => by simp [checkList]
+  | a :: l => by simp [checkList, checkList_iff l]
 
+/-- An application is well formed when its head is accepted at its arguments' kinds and
+every argument is well formed. -/
+theorem check_app {R : Name → Array Kind → Bool} {scope : Array Kind} {n : Name}
+    {as : Array Raw} :
+    check R scope (.app n as) = true ↔
+      R n (as.map (kind scope)) = true ∧ ∀ a ∈ as, check R scope a = true := by
+  obtain ⟨as⟩ := as
+  simp [check, checkList_iff]
+
+/-- A list literal is well formed when its elements are types or splices: every element that
+is not a variable is well formed, and every variable is in scope. -/
+theorem check_list {R : Name → Array Kind → Bool} {scope : Array Kind} {es : Array Raw} :
+    check R scope (.list es) = true ↔
+      (∀ a ∈ es, a.isVar = false → check R scope a = true) ∧
+        (∀ j, Raw.var j ∈ es → j < scope.size) ∧ ∀ a ∈ es, a.isElem = true := by
+  obtain ⟨es⟩ := es
+  simp only [check, Bool.and_eq_true, checkElems_iff, List.all_eq_true]
+  constructor
+  · rintro ⟨h, hel⟩
+    exact ⟨fun a ha => (h a (by simpa using ha)).1, fun j hj => (h _ (by simpa using hj)).2 j rfl,
+      fun a ha => hel a (by simpa using ha)⟩
+  · rintro ⟨h, hv, hel⟩
+    exact ⟨fun a ha => ⟨h a (by simpa using ha), fun j hj => hv j (hj ▸ by simpa using ha)⟩,
+      fun a ha => hel a (by simpa using ha)⟩
+
+mutual
 /-- The converse of `wfRel_of_check`: a well-formed expression passes the check of any
 resolver that accepts what the relation does. -/
-theorem check_of_wfRel {R : Name → Nat → Bool} {Rel : Name → Nat → Prop}
-    (hR : ∀ n a, Rel n a → R n a = true) {scope : Nat} {e : Raw}
-    (h : TypeExpr.WFRel Rel scope e) : check R scope e = true := by
-  induction h with
-  | var lt => simpa [check] using lt
-  | app ref _ ih => exact check_app.mpr ⟨hR _ _ ref, ih⟩
+theorem check_of_wf {R : Name → Array Kind → Bool} {Rel : Name → Array Kind → Prop}
+    (hR : ∀ n ks, Rel n ks → R n ks = true) {scope : Array Kind} :
+    ∀ {k : Kind} {e : Raw}, TypeExpr.WF Rel scope k e → check R scope e = true
+  | _, _, .var h => by simp [check, h]
+  | _, _, h@(.app ref size argsWF) => check_app.mpr ⟨hR _ _ h.refBefore, fun a ha => by
+      obtain ⟨i, hi, rfl⟩ := Array.mem_iff_getElem.mp ha
+      exact check_of_wf hR (argsWF i hi)⟩
+  | _, _, .list elemsWF => check_list.mpr
+      ⟨fun a ha => (checkElem_of_wfElem hR (elemsWF a ha)).1,
+       fun j hj => (checkElem_of_wfElem hR (elemsWF _ hj)).2 j rfl,
+       fun a ha => (elemsWF a ha).isElem⟩
+
+/-- The element form of `check_of_wf`. -/
+theorem checkElem_of_wfElem {R : Name → Array Kind → Bool} {Rel : Name → Array Kind → Prop}
+    (hR : ∀ n ks, Rel n ks → R n ks = true) {scope : Array Kind} :
+    ∀ {a : Raw}, TypeExpr.WFElem Rel scope a →
+      (a.isVar = false → check R scope a = true) ∧ (∀ j, a = .var j → j < scope.size)
+  | _, .ty h => ⟨fun _ => check_of_wf hR h, fun j hj => by
+      subst hj
+      exact (Array.getElem?_eq_some_iff.mp (TypeExpr.wfType_var_iff.mp h)).1⟩
+  | _, .splice h => ⟨fun hv => by simp [isVar] at hv, fun j hj => by
+      cases hj
+      exact (Array.getElem?_eq_some_iff.mp h).1⟩
+end
+
+/-- `check_of_wf`, at the expression's own kind. -/
+theorem check_of_wfRel {R : Name → Array Kind → Bool} {Rel : Name → Array Kind → Prop}
+    (hR : ∀ n ks, Rel n ks → R n ks = true) {scope : Array Kind} {e : Raw}
+    (h : TypeExpr.WFRel Rel scope e) : check R scope e = true :=
+  check_of_wf hR h
 
 /-- The declared-before-use resolver, against which a declaration outside a mutual group is
 checked. -/
 @[expose]
-def checkAt (env : Env.Raw α) (i : Nat) (scope : Nat) : Raw → Bool :=
+def checkAt (env : Env.Raw α) (i : Nat) (scope : Array Kind) : Raw → Bool :=
   check (Env.Raw.RefBefore.check env i) scope
 
-theorem wfRel_of_checkAt {env : Env.Raw α} {i scope : Nat} (e : Raw)
+/-- `checkAt`, for a type: the expression is well formed, and a type rather than a list. -/
+@[expose]
+def checkTypeAt (env : Env.Raw α) (i : Nat) (scope : Array Kind) (e : Raw) : Bool :=
+  e.kind scope == .type && checkAt env i scope e
+
+/-- Soundness of `checkAt`. -/
+theorem wfRel_of_checkAt {env : Env.Raw α} {i : Nat} {scope : Array Kind} (e : Raw)
     (h : checkAt env i scope e = true) : WFRel (env.RefBefore i) scope e :=
   wfRel_of_check (fun _ _ hb => Env.Raw.refBefore_check_eq_true.mp hb) e h
+
+/-- Soundness of `checkTypeAt`. -/
+theorem wfType_of_checkTypeAt {env : Env.Raw α} {i : Nat} {scope : Array Kind} (e : Raw)
+    (h : checkTypeAt env i scope e = true) : WFType (env.RefBefore i) scope e := by
+  simp only [checkTypeAt, Bool.and_eq_true, beq_iff_eq] at h
+  exact WF.of_wfRel (wfRel_of_checkAt e h.2) h.1
 
 end TypeExpr.Raw
 
@@ -626,18 +1011,20 @@ namespace DataGroup
 A group is checked against three resolvers and nothing else: what a name's parameters are,
 what a payload position may refer to, and what a `.non` position may refer to. -/
 
-/-- Every payload of every constructor of every member resolves, keeps its recursion in
-parameters declared `.pos`, and respects what its own member declared about its parameters. -/
+/-- Every payload of every constructor of every member is a type that resolves, keeps its
+recursion in parameters declared `.pos`, and respects what its own member declared about its
+parameters.  A payload's scope is its member's parameters: `TyParam.kinds m.params`. -/
 @[expose]
 def checkWith (g : DataGroup α TypeExpr.Raw)
-    (paramsOf : Name → Option (Array (Param Positivity)))
-    (inGroup outside : Name → Nat → Bool) : Bool :=
+    (paramsOf : Name → Option (Array (Param TyParam)))
+    (inGroup outside : Name → Array Kind → Bool) : Bool :=
   g.members.all fun m =>
     m.ctors.all fun c =>
       c.args.all fun p =>
-        TypeExpr.Raw.checkPayload paramsOf inGroup outside m.arity p.type
+        p.type.kind (TyParam.kinds m.params) == .type
+          && TypeExpr.Raw.checkPayload paramsOf inGroup outside (TyParam.kinds m.params) p.type
           && m.params.zipIdx.all fun (pol, k) =>
-              match pol.type with
+              match pol.type.polarity with
               | .pos => TypeExpr.Raw.varPositive paramsOf k p.type
               | .non => true
 
@@ -652,21 +1039,21 @@ def checkNames (g : DataGroup α TypeExpr.Raw) : Bool :=
       (m.ctors.all fun c => decide (m.paramNames ++ c.args.toList.map (·.name)).Nodup) &&
       decide (m.paramNames ++ ["scrutinee"] ++ m.ctors.toList.map (·.name.lastString)).Nodup
 
+/-- `checkWith` accepts more when its resolvers accept more and its lookup keeps its answers. -/
 theorem checkWith_mono {g : DataGroup α TypeExpr.Raw}
-    {P P' : Name → Option (Array (Param Positivity))} {R R' N N' : Name → Nat → Bool}
+    {P P' : Name → Option (Array (Param TyParam))} {R R' N N' : Name → Array Kind → Bool}
     (hp : ∀ n ps, P n = some ps → P' n = some ps)
-    (hR : ∀ n a, R n a = true → R' n a = true)
-    (hN : ∀ n a, N n a = true → N' n a = true)
+    (hR : ∀ n ks, R n ks = true → R' n ks = true)
+    (hN : ∀ n ks, N n ks = true → N' n ks = true)
     (h : g.checkWith P R N = true) : g.checkWith P' R' N' = true := by
   simp only [checkWith, Array.all_eq_true_iff_forall_mem, Bool.and_eq_true] at h ⊢
   intro m hm c hc p hpm
-  obtain ⟨hpay, hpol⟩ := h m hm c hc p hpm
-  refine ⟨TypeExpr.Raw.checkPayload_mono hp hR hN _ hpay, ?_⟩
-  intro x hx
-  have := hpol x hx
+  obtain ⟨⟨hk, hpay⟩, hpol⟩ := h m hm c hc p hpm
+  refine ⟨⟨hk, TypeExpr.Raw.checkPayload_mono hp hR hN _ hpay⟩, fun x hx => ?_⟩
+  have hpx := hpol x hx
   match x with
-  | (⟨_, .pos⟩, _) => exact TypeExpr.Raw.varPositive_mono hp _ this
-  | (⟨_, .non⟩, _) => rfl
+  | (⟨_, ⟨.pos, _⟩⟩, _) => exact TypeExpr.Raw.varPositive_mono hp _ hpx
+  | (⟨_, ⟨.non, _⟩⟩, _) => rfl
 
 end DataGroup
 
@@ -678,7 +1065,7 @@ namespace Env.Raw
 position `j`. -/
 @[expose]
 def paramsBefore (env : Env.Raw α) (j : Nat) (n : Name) :
-    Option (Array (Param Positivity)) :=
+    Option (Array (Param TyParam)) :=
   ((env.types.before j)[n]?).map (·.params)
 
 /-- Whether the positions after a group head at `i` hold the group's other members, in order,
@@ -813,7 +1200,7 @@ theorem typeOf?_append {env : Env.Raw α} {d : Decl.Raw α} {fresh : d.name ∉ 
 /-- `append` only adds resolutions, so every reference stays valid.  `hi` keeps
 the new declaration's own position out of reach. -/
 theorem RefBefore.append {env : Env.Raw α} {d : Decl.Raw α} {fresh : d.name ∉ env} {i : Nat}
-    {m : Name} {a : Nat}
+    {m : Name} {a : Array Kind}
     (h : env.RefBefore i m a) : (env.append d fresh).RefBefore i m a := by
   obtain ⟨j, t, hj, hji, ht, ha⟩ := refBefore_iff.mp h
   have hm : m ∈ env := by
@@ -825,8 +1212,9 @@ theorem RefBefore.append {env : Env.Raw α} {d : Decl.Raw α} {fresh : d.name �
   exact refBefore_iff.mpr
     ⟨j, t, by rw [idxOf?_append, if_neg hne]; exact hj, hji, typeOf?_append ht, ha⟩
 
+/-- A passing `RefBefore.check` still passes after an append. -/
 theorem refBefore_check_append {env : Env.Raw α} {d : Decl.Raw α} {fresh : d.name ∉ env}
-    {i : Nat} {m : Name} {a : Nat} (h : RefBefore.check env i m a = true) :
+    {i : Nat} {m : Name} {a : Array Kind} (h : RefBefore.check env i m a = true) :
     RefBefore.check (env.append d fresh) i m a = true :=
   refBefore_check_eq_true.mpr (RefBefore.append (fresh := fresh) (refBefore_check_eq_true.mp h))
 
@@ -942,19 +1330,19 @@ namespace RegionSig.Raw
 
 /-- Decision procedure for `RegionSig.Raw.WF (env.RefBefore i) scope`. -/
 @[expose]
-def checkAt (env : Env.Raw α) (i : Nat) (scope : Nat) (r : RegionSig.Raw) : Bool :=
-  r.params.all (fun p => TypeExpr.Raw.checkAt env i scope p.type)
-    && TypeExpr.Raw.checkAt env i scope r.returnType
+def checkAt (env : Env.Raw α) (i : Nat) (scope : Array Kind) (r : RegionSig.Raw) : Bool :=
+  r.params.all (fun p => TypeExpr.Raw.checkTypeAt env i scope p.type)
+    && TypeExpr.Raw.checkTypeAt env i scope r.returnType
     && decide r.paramNames.Nodup
 
 /-- Soundness of `RegionSig.Raw.checkAt`: a region signature it accepts is well formed at
 position `i`. -/
-theorem wf_of_checkAt {env : Env.Raw α} {i scope : Nat} {r : RegionSig.Raw}
+theorem wf_of_checkAt {env : Env.Raw α} {i : Nat} {scope : Array Kind} {r : RegionSig.Raw}
     (h : r.checkAt env i scope = true) : r.WF (env.RefBefore i) scope := by
   simp only [checkAt, Bool.and_eq_true, Array.all_eq_true_iff_forall_mem] at h
   obtain ⟨⟨hparams, hret⟩, hnames⟩ := h
-  exact ⟨fun p hp => TypeExpr.Raw.wfRel_of_checkAt _ (hparams p hp),
-    TypeExpr.Raw.wfRel_of_checkAt _ hret, of_decide_eq_true hnames⟩
+  exact ⟨fun p hp => TypeExpr.Raw.wfType_of_checkTypeAt _ (hparams p hp),
+    TypeExpr.Raw.wfType_of_checkTypeAt _ hret, of_decide_eq_true hnames⟩
 
 end RegionSig.Raw
 
@@ -967,11 +1355,11 @@ def checkAt (env : Env.Raw α) (i : Nat) : Decl.Raw α → Bool
   | .dataHead _ => true
   | .dataRest .. => true
   | .insn d =>
-    d.argTypes.all (fun p => TypeExpr.Raw.checkAt env i d.typeArgc p.type)
-      && d.variadic.all (fun v => TypeExpr.Raw.checkAt env i d.typeArgc v.type)
-      && d.returnType.all (TypeExpr.Raw.checkAt env i d.typeArgc)
-      && d.regions.all (fun r => r.type.checkAt env i d.typeArgc)
-      && d.succs.all (fun s => s.type.all (TypeExpr.Raw.checkAt env i d.typeArgc))
+    d.argTypes.all (fun p => TypeExpr.Raw.checkTypeAt env i d.scope p.type)
+      && d.variadic.all (fun v => TypeExpr.Raw.checkAt env i d.scope v.type)
+      && d.returnType.all (TypeExpr.Raw.checkTypeAt env i d.scope)
+      && d.regions.all (fun r => r.type.checkAt env i d.scope)
+      && d.succs.all (fun s => s.type.all (TypeExpr.Raw.checkTypeAt env i d.scope))
       && decide d.paramNames.Nodup
 
 /-- Soundness of `Decl.Raw.checkAt`: a declaration it accepts is well formed at
@@ -986,11 +1374,11 @@ theorem wf_of_checkAt {env : Env.Raw α} {i : Nat} {d : Decl.Raw α} (h : d.chec
     simp only [checkAt, Bool.and_eq_true, Array.all_eq_true_iff_forall_mem,
       Option.all_eq_true] at h
     obtain ⟨⟨⟨⟨⟨hargs, hvar⟩, hret⟩, hregions⟩, hsuccs⟩, hnames⟩ := h
-    exact ⟨fun q hq => TypeExpr.Raw.wfRel_of_checkAt _ (hargs q hq),
+    exact ⟨fun q hq => TypeExpr.Raw.wfType_of_checkTypeAt _ (hargs q hq),
       fun v hv => TypeExpr.Raw.wfRel_of_checkAt _ (hvar v (by simpa using hv)),
-      fun t ht => TypeExpr.Raw.wfRel_of_checkAt _ (hret t (by simpa using ht)),
+      fun t ht => TypeExpr.Raw.wfType_of_checkTypeAt _ (hret t (by simpa using ht)),
       fun r hr => RegionSig.Raw.wf_of_checkAt (hregions r hr),
-      fun s hs t ht => TypeExpr.Raw.wfRel_of_checkAt _ (hsuccs s hs t ht),
+      fun s hs t ht => TypeExpr.Raw.wfType_of_checkTypeAt _ (hsuccs s hs t ht),
       of_decide_eq_true hnames⟩
 
 end Decl.Raw
@@ -1134,8 +1522,9 @@ theorem wf_ofAscArray (ds : Array (Decl.Raw α)) (p : DistinctDecls ds)
 A mutual group goes in by `appendList`, and every new declaration is checked in the *final*
 environment, as `wf_ofAscArray` does for a whole environment. -/
 
+/-- Appending a batch keeps every reference valid. -/
 theorem RefBefore.appendList {env : Env.Raw α} {ds : List (Decl.Raw α)} {fresh : env.FreshList ds}
-    {i : Nat} {m : Name} {a : Nat} (h : env.RefBefore i m a) :
+    {i : Nat} {m : Name} {a : Array Kind} (h : env.RefBefore i m a) :
     (env.appendList ds fresh).RefBefore i m a :=
   appendList_induct (P := fun s => s.RefBefore i m a) (fun _ _ _ => RefBefore.append) ds fresh h
 
@@ -1298,19 +1687,54 @@ theorem idxOf?_appendList_of_getElem? (hd : ds[j]? = some d) :
 
 end
 
+/-- A member's constructors and case instruction bind its parameters, each of its kind. -/
+private theorem kinds_params (m : DatatypeDecl α TypeExpr.Raw) :
+    Param.kinds (m.params.map fun p => (⟨p.name, p.type.kind⟩ : Param Kind)) =
+      TyParam.kinds m.params := by
+  simp [Function.comp_def]
+
+/-- The variables `i, i + 1, …` of a scope, each as an argument, pass any check. -/
+private theorem check_varsFrom {R : Name → Array Kind → Bool} (scope : Array Kind) :
+    ∀ (i : Nat) (ks : List Kind), (∀ (j : Nat) (h : j < ks.length), scope[i + j]? = some ks[j]) →
+      ∀ a ∈ TypeExpr.Raw.varsFrom i ks, TypeExpr.Raw.check R scope a = true
+  | _, [], _ => by simp [TypeExpr.Raw.varsFrom]
+  | i, k :: ks, h => by
+    have h₀ : scope[i]? = some k := h 0 (by simp)
+    have ih := check_varsFrom (R := R) scope (i + 1) ks fun j hj => by
+      rw [show i + 1 + j = i + (j + 1) by omega]
+      exact h (j + 1) (by simpa using hj)
+    have hi : i < scope.size := (Array.getElem?_eq_some_iff.mp h₀).1
+    have h₁ : scope[i] = k := by simpa [Array.getElem?_eq_getElem hi] using h₀
+    cases k <;> simpa [TypeExpr.Raw.varsFrom, TypeExpr.Raw.check, TypeExpr.Raw.checkElems,
+      TypeExpr.Raw.isElem, h₀, h₁, hi] using ih
+
+/-- The variables of a scope, each as an argument, pass any check. -/
+private theorem check_vars {R : Name → Array Kind → Bool} (scope : Array Kind) :
+    ∀ a ∈ TypeExpr.Raw.vars scope, TypeExpr.Raw.check R scope a = true := fun a ha =>
+  check_varsFrom scope 0 scope.toList (fun j hj => by simp) a
+    (by simpa [TypeExpr.Raw.vars] using ha)
+
+/-- A member applied to its own parameters is a type, when the member is declared. -/
+private theorem checkTypeAt_self {env : Env.Raw α} {p : Nat} {m : DatatypeDecl α TypeExpr.Raw}
+    (hm : env.RefBefore p m.name m.toTypeDecl.kinds) :
+    TypeExpr.Raw.checkTypeAt env p (TyParam.kinds m.params)
+      (.app m.name (TypeExpr.Raw.vars (TyParam.kinds m.params))) = true := by
+  rw [TypeExpr.Raw.checkTypeAt, Bool.and_eq_true, TypeExpr.Raw.checkAt, TypeExpr.Raw.check_app,
+    TypeExpr.Raw.map_kind_vars]
+  exact ⟨rfl, refBefore_check_eq_true.mpr hm, check_vars _⟩
+
 /-- A constructor's instruction is well formed at any position past its group's members. -/
 theorem checkAt_ctorDecl {env : Env.Raw α} {g : DataGroup α TypeExpr.Raw} {n p i j : Nat}
     {m : DatatypeDecl α TypeExpr.Raw} {c : Ctor α TypeExpr.Raw}
     (hm : g.members[i]? = some m) (hc : m.ctors[j]? = some c) (hp : n + g.members.size ≤ p)
     (hmem : ∀ {k : Nat} {m' : DatatypeDecl α TypeExpr.Raw}, g.members[k]? = some m' →
-      env.RefBefore p m'.name m'.arity)
+      env.RefBefore p m'.name m'.toTypeDecl.kinds)
     (hn : g.checkNames = true)
     (h : g.checkWith (env.paramsBefore (n + g.members.size))
       (RefBefore.check env (n + g.members.size)) (RefBefore.check env n) = true) :
     Decl.Raw.checkAt env p (.insn (g.ctorDecl i m j c)) = true := by
   have hmm : m ∈ g.members := Array.mem_of_getElem? hm
   have hcm : c ∈ m.ctors := Array.mem_of_getElem? hc
-  have hsize : (m.params.map (·.name)).size = m.arity := by simp [DatatypeDecl.arity]
   have hRR : ∀ x a, RefBefore.check env (n + g.members.size) x a = true →
       RefBefore.check env p x a = true := fun _ _ hr =>
     refBefore_check_eq_true.mpr ((refBefore_check_eq_true.mp hr).mono hp)
@@ -1320,30 +1744,29 @@ theorem checkAt_ctorDecl {env : Env.Raw α} {g : DataGroup α TypeExpr.Raw} {n p
   simp only [DataGroup.checkWith, Array.all_eq_true_iff_forall_mem, Bool.and_eq_true] at h
   simp only [DataGroup.checkNames, Array.all_eq_true_iff_forall_mem, Bool.and_eq_true,
     decide_eq_true_eq] at hn
-  simp only [Decl.Raw.checkAt, DataGroup.ctorDecl, InsnDecl.Raw.typeArgc, hsize,
+  simp only [Decl.Raw.checkAt, DataGroup.ctorDecl, InsnDecl.Raw.scope, kinds_params,
     Bool.and_eq_true, Array.all_eq_true_iff_forall_mem, Option.all_none, decide_eq_true_eq]
+  have hctors := h m hmm
   refine ⟨⟨⟨⟨⟨fun q hq => ?_, ?_⟩, ?_⟩, by simp⟩, by simp⟩, ?_⟩
-  · exact TypeExpr.Raw.check_mono hRR _
-      (TypeExpr.Raw.check_of_checkPayload hNR _ (h m hmm c hcm q hq).1)
+  · obtain ⟨⟨hk, hpay⟩, -⟩ := hctors c hcm q hq
+    exact (Bool.and_eq_true _ _).mpr
+      ⟨hk, TypeExpr.Raw.check_mono hRR _ (TypeExpr.Raw.check_of_checkPayload hNR _ hpay)⟩
   · simp
-  · rw [Option.all_some, TypeExpr.Raw.checkAt, TypeExpr.Raw.check_app]
-    refine ⟨refBefore_check_eq_true.mpr (by simpa using hmem hm), fun a ha => ?_⟩
-    obtain ⟨k, hk, rfl⟩ := TypeExpr.Raw.mem_vars.mp ha
-    simpa [TypeExpr.Raw.check] using hk
-  · simpa [InsnDecl.Raw.paramNames, DatatypeDecl.paramNames] using (hn m hmm).1.2 c hcm
+  · exact checkTypeAt_self (hmem hm)
+  · simpa [InsnDecl.Raw.paramNames, DatatypeDecl.paramNames, Function.comp_def]
+      using (hn m hmm).1.2 c hcm
 
 /-- A case instruction is well formed at any position past its group's members. -/
 theorem checkAt_caseDecl {env : Env.Raw α} {g : DataGroup α TypeExpr.Raw} {n p i : Nat}
     {m : DatatypeDecl α TypeExpr.Raw}
     (hm : g.members[i]? = some m) (hp : n + g.members.size ≤ p)
     (hmem : ∀ {k : Nat} {m' : DatatypeDecl α TypeExpr.Raw}, g.members[k]? = some m' →
-      env.RefBefore p m'.name m'.arity)
+      env.RefBefore p m'.name m'.toTypeDecl.kinds)
     (hn : g.checkNames = true)
     (h : g.checkWith (env.paramsBefore (n + g.members.size))
       (RefBefore.check env (n + g.members.size)) (RefBefore.check env n) = true) :
     Decl.Raw.checkAt env p (.insn (g.caseDecl i m)) = true := by
   have hmm : m ∈ g.members := Array.mem_of_getElem? hm
-  have hsize : (m.params.map (·.name)).size = m.arity := by simp [DatatypeDecl.arity]
   have hRR : ∀ x a, RefBefore.check env (n + g.members.size) x a = true →
       RefBefore.check env p x a = true := fun _ _ hr =>
     refBefore_check_eq_true.mpr ((refBefore_check_eq_true.mp hr).mono hp)
@@ -1353,19 +1776,19 @@ theorem checkAt_caseDecl {env : Env.Raw α} {g : DataGroup α TypeExpr.Raw} {n p
   simp only [DataGroup.checkWith, Array.all_eq_true_iff_forall_mem, Bool.and_eq_true] at h
   simp only [DataGroup.checkNames, Array.all_eq_true_iff_forall_mem, Bool.and_eq_true,
     decide_eq_true_eq] at hn
-  simp only [Decl.Raw.checkAt, DataGroup.caseDecl, InsnDecl.Raw.typeArgc, hsize,
+  simp only [Decl.Raw.checkAt, DataGroup.caseDecl, InsnDecl.Raw.scope, kinds_params,
     Bool.and_eq_true, Array.all_eq_true_iff_forall_mem, Option.all_none, decide_eq_true_eq]
+  have hctors := h m hmm
   refine ⟨⟨⟨⟨⟨fun q hq => ?_, ?_⟩, by simp⟩, by simp⟩, fun s hs t ht => ?_⟩, ?_⟩
-  · obtain rfl : q = ⟨"scrutinee", .app m.name (TypeExpr.Raw.vars m.arity)⟩ := by simpa using hq
-    rw [TypeExpr.Raw.checkAt, TypeExpr.Raw.check_app]
-    refine ⟨refBefore_check_eq_true.mpr (by simpa using hmem hm), fun a ha => ?_⟩
-    obtain ⟨k, hk, rfl⟩ := TypeExpr.Raw.mem_vars.mp ha
-    simpa [TypeExpr.Raw.check] using hk
+  · obtain rfl : q = ⟨"scrutinee", .app m.name (TypeExpr.Raw.vars (TyParam.kinds m.params))⟩ := by
+      simpa using hq
+    exact checkTypeAt_self (hmem hm)
   · simp
   · obtain ⟨c, hc, rfl⟩ := Array.mem_map.mp hs
     obtain ⟨q, hq, rfl⟩ := Array.mem_map.mp ht
-    exact TypeExpr.Raw.check_mono hRR _
-      (TypeExpr.Raw.check_of_checkPayload hNR _ (h m hmm c hc q hq).1)
+    obtain ⟨⟨hk, hpay⟩, -⟩ := hctors c hc q hq
+    exact (Bool.and_eq_true _ _).mpr
+      ⟨hk, TypeExpr.Raw.check_mono hRR _ (TypeExpr.Raw.check_of_checkPayload hNR _ hpay)⟩
   · simpa [InsnDecl.Raw.paramNames, DatatypeDecl.paramNames, Function.comp_def]
       using (hn m hmm).2
 
@@ -1387,7 +1810,7 @@ theorem checkAppend_group {env : Env.Raw α} {g : DataGroup α TypeExpr.Raw}
   -- every member is a type declared at its own position in the group
   have hmem : ∀ {p k : Nat} {m : DatatypeDecl α TypeExpr.Raw},
       env.decls.keys.size + g.members.size ≤ p → g.members[k]? = some m →
-      (env.appendList _ fresh).RefBefore p m.name m.arity := by
+      (env.appendList _ fresh).RefBefore p m.name m.toTypeDecl.kinds := by
     intro p k m hp hm
     have hk : k < g.members.size := (Array.getElem?_eq_some_iff.mp hm).1
     obtain ⟨D, hD, hDname, hDty⟩ : ∃ D, g.decls.toList[k]? = some D ∧ D.name = m.name ∧

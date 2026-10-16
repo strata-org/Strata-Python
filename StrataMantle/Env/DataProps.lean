@@ -11,7 +11,7 @@ set_option autoImplicit false
 /-!
 # Theorems about common datatypes
 
-Key theorems: `names_mapTy` and `typeOf?_mapTy`.
+Key theorems: `names_mapTy`, `typeOf?_mapTy` and `TypeDecl.kinds_eq_of_erase_eq`.
 -/
 
 namespace Strata.Mantle
@@ -46,6 +46,25 @@ group. -/
     DatatypeDecl.toTypeDecl]
 
 end DataGroup
+
+/-- Erasing keeps the parameters. -/
+@[simp] theorem TypeDecl.params_erase {α : Type} (d : TypeDecl α) : d.erase.params = d.params :=
+  rfl
+
+/-- Declarations equal up to annotations have the same parameters. -/
+theorem TypeDecl.params_eq_of_erase_eq {α : Type} {d₁ d₂ : TypeDecl α}
+    (h : d₁.erase = d₂.erase) : d₁.params = d₂.params :=
+  congrArg (TypeDecl.params (α := Unit)) h
+
+/-- Declarations equal up to annotations take arguments of the same kinds. -/
+theorem TypeDecl.kinds_eq_of_erase_eq {α : Type} {d₁ d₂ : TypeDecl α}
+    (h : d₁.erase = d₂.erase) : d₁.kinds = d₂.kinds := by
+  rw [kinds, kinds, params_eq_of_erase_eq h]
+
+/-- There is one kind per parameter. -/
+@[simp] theorem TyParam.size_kinds (ps : Array (Param TyParam)) :
+    (TyParam.kinds ps).size = ps.size := by
+  simp [TyParam.kinds]
 
 end
 

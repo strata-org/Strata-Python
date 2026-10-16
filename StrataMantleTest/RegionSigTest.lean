@@ -50,7 +50,7 @@ private def complDecl : Decl.Raw Unit :=
 
 /-- `if {a} (cond : Bool) [then : () -> a] [else : () -> a] : a`. -/
 private def ifDecl : Decl.Raw Unit := .insn
-  { ann := (), name := ifName, typeParams := #["a"]
+  { ann := (), name := ifName, typeParams := #[⟨"a", .type⟩]
     argTypes := #[⟨"cond", .app boolName #[]⟩]
     returnType := some (.var 0)
     regions := #[⟨"then", { params := #[], returnType := .var 0 }⟩,
@@ -59,7 +59,7 @@ private def ifDecl : Decl.Raw Unit := .insn
 /-- `try {a} [body : () -> Completion a] [handler : (exc : Exc) -> Completion a]
     : Completion a`. -/
 private def tryDecl : Decl.Raw Unit := .insn
-  { ann := (), name := tryName, typeParams := #["a"]
+  { ann := (), name := tryName, typeParams := #[⟨"a", .type⟩]
     argTypes := #[]
     returnType := some (.app complName #[.var 0])
     regions := #[⟨"body", { params := #[], returnType := .app complName #[.var 0] }⟩,
@@ -73,7 +73,7 @@ private def goodDecls : Array (Decl.Raw Unit) := #[boolDecl, excDecl, complDecl,
 /-- An `if` whose `then` region takes a parameter of type `b`, which it does not bind: the
 region's types are under the instruction's one type variable, so level `1` is out of scope. -/
 private def illScoped (regionParam : TypeExpr.Raw) : Decl.Raw Unit := .insn
-  { ann := (), name := ifName, typeParams := #["a"]
+  { ann := (), name := ifName, typeParams := #[⟨"a", .type⟩]
     argTypes := #[⟨"cond", .app boolName #[]⟩]
     returnType := some (.var 0)
     regions := #[⟨"then", { params := #[⟨"x", regionParam⟩], returnType := .var 0 }⟩] }
@@ -88,15 +88,27 @@ is accepted. -/
 private def fixedDecls : Array (Decl.Raw Unit) := #[boolDecl, illScoped (.var 0)]
 #guard accepts fixedDecls
 
-/-- A region's return type obeys declared-before-use like any other type: `try` ahead of
-`Completion` is rejected. -/
-private def forwardDecls : Array (Decl.Raw Unit) := #[boolDecl, excDecl, tryDecl, complDecl]
+/- A list of types as a region parameter's type is rejected. -/
+#guard rejects #[boolDecl, illScoped (.list #[])]
+
+/-- `try`, returning `a`, its body region alone mentioning `Completion`. -/
+private def tryRegionDecl : Decl.Raw Unit := .insn
+  { ann := (), name := tryName, typeParams := #[⟨"a", .type⟩]
+    argTypes := #[]
+    returnType := some (.var 0)
+    regions := #[⟨"body", { params := #[], returnType := .app complName #[.var 0] }⟩] }
+
+/-- A region's return type obeys declared-before-use like any other type: a `try` whose body
+region alone mentions `Completion` is rejected ahead of `Completion`, and accepted after. -/
+private def forwardDecls : Array (Decl.Raw Unit) :=
+  #[boolDecl, excDecl, tryRegionDecl, complDecl]
 #guard rejects forwardDecls
+#guard accepts #[boolDecl, excDecl, complDecl, tryRegionDecl]
 
 /-- An argument and a region share one namespace: an `if` whose condition is named `then`
 is rejected. -/
 private def argRegionClash : Array (Decl.Raw Unit) := #[boolDecl, .insn
-  { ann := (), name := ifName, typeParams := #["a"]
+  { ann := (), name := ifName, typeParams := #[⟨"a", .type⟩]
     argTypes := #[⟨"then", .app boolName #[]⟩]
     returnType := some (.var 0)
     regions := #[⟨"then", { params := #[], returnType := .var 0 }⟩,
@@ -105,7 +117,7 @@ private def argRegionClash : Array (Decl.Raw Unit) := #[boolDecl, .insn
 
 /-- A region's parameters are named distinctly: a handler taking two `exc`s is rejected. -/
 private def dupRegionParam : Array (Decl.Raw Unit) := #[boolDecl, excDecl, complDecl, .insn
-  { ann := (), name := tryName, typeParams := #["a"]
+  { ann := (), name := tryName, typeParams := #[⟨"a", .type⟩]
     argTypes := #[]
     returnType := some (.app complName #[.var 0])
     regions := #[⟨"handler", { params := #[⟨"exc", .app excName #[]⟩, ⟨"exc", .app excName #[]⟩]
@@ -139,12 +151,14 @@ private def excRef : TypeRef env₂ 0 :=
 private def complRef : TypeRef env₂ 1 := TypeRef.ofAddType env₁ complD _
 
 /-- The instruction's one type variable. -/
-private def a : TypeExpr env₂ 1 := .var 0 (by omega)
-private def complA : TypeExpr env₂ 1 := .app complRef #v[a]
+private def a : TypeExpr env₂ #[.type] := .var 0 (by decide)
+private def complA : TypeExpr env₂ #[.type] :=
+  .app complRef #v[a] (by simp only [TypeRef.kinds, complRef, TypeRef.decl_ofAddType]; rfl)
 
 /-- A region signature is built from checked types, through `RegionSig.of`; `decide`
 discharges the distinctness of its parameter names. -/
-private def handlerSig : RegionSig env₂ 1 := RegionSig.of #[⟨"exc", .app excRef #v[]⟩] complA
+private def handlerSig : RegionSig env₂ #[.type] :=
+  RegionSig.of #[⟨"exc", .app excRef #v[] excRef.kinds_zero⟩] complA
 
 /-- `of` hands back what it was given. -/
 example : handlerSig.params.map (·.name) = #["exc"] := by simp [handlerSig]
@@ -153,13 +167,13 @@ example : handlerSig.returnType = some complA := by simp [handlerSig]
 /-- The distinctness of argument and region names, `InsnSig`'s last field, is left to its
 default `by decide`. -/
 private def ifSig : InsnSig env₂ :=
-  { ann := (), typeParams := #["a"]
-    argTypes := #[⟨"cond", .app boolRef #v[]⟩]
+  { ann := (), typeParams := #[⟨"a", .type⟩]
+    argTypes := #[⟨"cond", .app boolRef #v[] boolRef.kinds_zero⟩]
     returnType := some a
     regions := #[⟨"then", RegionSig.of #[] a⟩, ⟨"else", RegionSig.of #[] a⟩] }
 
 private def trySig : InsnSig env₂ :=
-  { ann := (), typeParams := #["a"]
+  { ann := (), typeParams := #[⟨"a", .type⟩]
     argTypes := #[]
     returnType := some complA
     regions := #[⟨"body", RegionSig.of #[] complA⟩, ⟨"handler", handlerSig⟩] }

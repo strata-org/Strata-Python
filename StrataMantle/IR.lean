@@ -49,7 +49,7 @@ deriving Inhabited, Repr, BEq, Hashable, DecidableEq
 /-- A definition site: an id and the type of what it defines. -/
 structure ValDecl (env : Env Unit) where
   id   : ValId
-  type : TypeExpr env 0
+  type : TypeExpr env
 
 /-! ## Control transfers -/
 
@@ -90,7 +90,7 @@ inductive Const where
 deriving Inhabited, Repr
 
 /-- What a constant's type is, in an environment that refines the base. -/
-@[expose] def Const.typeOf {env : Env Unit} [base ⊑ env] : Const → TypeExpr env 0
+@[expose] def Const.typeOf {env : Env Unit} [base ⊑ env] : Const → TypeExpr env
   | .unit    => Base.Unit.ty
   | .bool _  => Base.Bool.ty
   | .int _   => Base.Int.ty
@@ -112,12 +112,15 @@ success.
 `regions` are the operation's nested bodies, one per region its signature declares and in
 that order.
 
+`typeArgs` are the operation's type arguments, one per type parameter of its signature, each of
+the parameter's kind: a type, or a list of types.
+
 A terminal operation is not an `Instruction` but a `Terminator`. -/
 inductive Instruction (env : Env Unit) (α : Type) where
   | const (info : α) (result : ValDecl env) (c : Const)
   | apply (info : α) (result : ValDecl env)
           {isig : InsnSig env} (r : InsnRef env isig)
-          (typeArgs : Vector (TypeExpr env 0) isig.typeArgc)
+          (typeArgs : TypeArgs env isig.scope)
           (args : Array ValId)
           (succs : Array BlockValue)
           (regions : Array (Region env α))
@@ -128,7 +131,7 @@ successors, each receiving that successor's declared values.  Its operands, succ
 regions are as for `Instruction.apply`. -/
 inductive Terminator (env : Env Unit) (α : Type) where
   | apply (info : α) {isig : InsnSig env} (r : InsnRef env isig)
-          (typeArgs : Vector (TypeExpr env 0) isig.typeArgc)
+          (typeArgs : TypeArgs env isig.scope)
           (args : Array ValId)
           (succs : Array BlockValue)
           (regions : Array (Region env α))
@@ -166,17 +169,17 @@ operation is. -/
 /-- `jump k`: continue at `k`. -/
 @[expose] def Terminator.jump {env : Env Unit} [base ⊑ env] {α : Type} (info : α)
     (k : BlockValue) : Terminator env α :=
-  .apply info Base.jump #v[] #[] #[k] #[]
+  .apply info Base.jump ⟨#[], rfl⟩ #[] #[k] #[]
 
 /-- `branch cond t f`: continue at `t` if `cond` holds, else at `f`. -/
 @[expose] def Terminator.branch {env : Env Unit} [base ⊑ env] {α : Type} (info : α)
     (cond : ValId) (t f : BlockValue) : Terminator env α :=
-  .apply info Base.branch #v[] #[cond] #[t, f] #[]
+  .apply info Base.branch ⟨#[], rfl⟩ #[cond] #[t, f] #[]
 
 /-- `unreachable`: control never gets here. -/
 @[expose] def Terminator.unreachable {env : Env Unit} [base ⊑ env] {α : Type} (info : α) :
     Terminator env α :=
-  .apply info Base.unreachable #v[] #[] #[] #[]
+  .apply info Base.unreachable ⟨#[], rfl⟩ #[] #[] #[]
 
 /-- `ret v`: leave the enclosing body with `v`, a jump to `Label.exit`. -/
 @[expose] def Terminator.ret {env : Env Unit} [base ⊑ env] {α : Type} (info : α) (v : ValId) :
@@ -191,7 +194,7 @@ top-level blocks are a region in all but name: transfers stay among them, and a 
 it defines, no two alike. -/
 structure Func (env : Env Unit) (α : Type) where
   name    : Name
-  retType : TypeExpr env 0
+  retType : TypeExpr env
   blocks  : Array (Block env α)
   names   : Array Name
   info    : α

@@ -191,7 +191,7 @@ def reject (what : String) (range : SourceRange) : TransM Unit :=
 /-- `py.unsupported "what"`: the value of an expression already rejected. -/
 def standIn (what : String) : TransM ValId := do
   let n ← build (strLit what)
-  build (emitTotal (.str .base "unsupported") Py.unsupported #v[] #[n])
+  build (emitTotal (.str .base "unsupported") Py.unsupported #[n])
 
 /-- Reject the expression `what` at `range`; its value is `py.unsupported "what"`. -/
 def unsupportedValue (what : String) (range : SourceRange) : TransM ValId := do
@@ -313,7 +313,7 @@ def place (name : String) : TransM Place := do
 def requireDefined (v : ValId) (name excType msg : String) : TransM ValId := do
   let e ← build (emitConst (.str .base "e") (.str excType))
   let m ← build (emitConst (.str .base "msg") (.str msg))
-  build (emitFailing (stem name) Py.requireDefined #v[] #[v, e, m])
+  build (emitFailing (stem name) Py.requireDefined #[v, e, m])
 
 /-- Read the local `name`'s cell `c`, raising `UnboundLocalError` if it is unassigned. -/
 def readLocal (c : ValId) (name : String) : TransM ValId := do
@@ -347,11 +347,11 @@ def readFree (c : ValId) (name : String) : TransM ValId := do
 def readNs (ns : ValId) (name : String) (fallback : TransM ValId) : TransM ValId := do
   let key ← build (strLit name)
   let n ← build (emitConst (.str .base "n") (.str name))
-  let miss ← build (emitTotal (stem name) Py.undef #v[] #[n])
-  let v ← build (emitFailing (stem name) Py.getOptionalItem #v[] #[ns, key, miss])
+  let miss ← build (emitTotal (stem name) Py.undef #[n])
+  let v ← build (emitFailing (stem name) Py.getOptionalItem #[ns, key, miss])
   let join ← build (freshLabel "join")
   let absent ← build (freshLabel "absent")
-  branch (← build (emitTest (.str .base "found") Py.isDefined #v[] #[v])) join absent #[v]
+  branch (← build (emitTest (.str .base "found") Py.isDefined #[v])) join absent #[v]
   build (startBlock absent)
   jump join #[← fallback]
   build (startBlockWith join (stem name))
@@ -383,7 +383,7 @@ def writeName (name : String) (v : ValId) (range : SourceRange) : TransM Unit :=
     else discard <| build (writeGlobal (← read).module name v)
   | .nsName ns =>
     let key ← build (strLit name)
-    discard <| build (emitActing (.str .base "store") Py.setItem #v[] #[ns, key, v])
+    discard <| build (emitActing (.str .base "store") Py.setItem #[ns, key, v])
   | .unresolved => reject "unresolved local" range
 
 /-- `del name` at `range`: raise as a read does, but without the builtins fallback, then
@@ -392,7 +392,7 @@ unassign the name.  In a class body, delete it from the namespace, any failure r
 def deleteName (name : String) (range : SourceRange) : TransM Unit := do
   let name ← mangled name
   let undef := do
-    build (emitTotal (stem name) Py.undef #v[] #[← build (emitConst (.str .base "n") (.str name))])
+    build (emitTotal (stem name) Py.undef #[← build (emitConst (.str .base "n") (.str name))])
   match ← place name with
   | .cell c =>
     discard <| readLocal c name
@@ -411,7 +411,7 @@ def deleteName (name : String) (range : SourceRange) : TransM Unit := do
     let key ← build (strLit name)
     let failed ← build (freshLabel "undefined")
     let done ← build (freshLabel "deleted")
-    discard <| build (withHandler failed (emitActing (.str .base "del") Py.delItem #v[] #[ns, key]))
+    discard <| build (withHandler failed (emitActing (.str .base "del") Py.delItem #[ns, key]))
     jump done
     discard <| build (startBlockWith failed (.str .base "exc"))
     discard <| requireDefined (← undef) name "NameError" s!"name '{name}' is not defined"
@@ -427,20 +427,20 @@ def setupAnnotations : TransM Unit := do
     | some ns => do
       let key ← build (strLit "__annotations__")
       let n ← build (emitConst (.str .base "n") (.str "__annotations__"))
-      let miss ← build (emitTotal (stem "__annotations__") Py.undef #v[] #[n])
-      build (emitFailing (stem "__annotations__") Py.getOptionalItem #v[] #[ns, key, miss])
+      let miss ← build (emitTotal (stem "__annotations__") Py.undef #[n])
+      build (emitFailing (stem "__annotations__") Py.getOptionalItem #[ns, key, miss])
     | none => do
       let cell ← build (globalCell (← read).module "__annotations__")
       build (readCell cell (stem "__annotations__"))
   let found ← build (freshLabel "annotated")
   let make ← build (freshLabel "annotations")
-  branch (← build (emitTest (.str .base "found") Py.isDefined #v[] #[v])) found make
+  branch (← build (emitTest (.str .base "found") Py.isDefined #[v])) found make
   build (startBlock make)
-  let d ← build (emitFailing (.str .base "dict") Py.mkDict #v[] #[])
+  let d ← build (emitFailing (.str .base "dict") Py.mkDict #[])
   match ns? with
   | some ns =>
     let key ← build (strLit "__annotations__")
-    discard <| build (emitActing (.str .base "store") Py.setItem #v[] #[ns, key, d])
+    discard <| build (emitActing (.str .base "store") Py.setItem #[ns, key, d])
   | none => discard <| build (writeGlobal (← read).module "__annotations__" d)
   jump found
   build (startBlock found)
@@ -457,8 +457,8 @@ def annotationsDict : TransM ValId := do
 
 /-- The raising operation `r` on `a` and `b`. -/
 def binary {isig : InsnSig Py.env} (name : String) (r : InsnRef Py.env isig) (a b : ValId)
-    (typeArgs : Vector (TypeExpr Py.env 0) isig.typeArgc := by exact #v[]) : TransM ValId :=
-  build (emitFailing (stem name) r typeArgs #[a, b])
+    (typeArgs : KindedTypeArgsFor r (some Py.Value.ty) := by infer_type_args) : TransM ValId :=
+  build (emitFailing (stem name) r #[a, b] (typeArgs := typeArgs))
 
 /-- `a op b` for a binary operator. -/
 def binOp (op : operator SourceRange) (a b : ValId) : TransM ValId :=
@@ -503,8 +503,8 @@ def cmpOp (op : cmpop SourceRange) (a b : ValId) : TransM ValId :=
   | .LtE _ => binary "ltE" Py.ltE a b
   | .Gt _ => binary "gt" Py.gt a b
   | .GtE _ => binary "gtE" Py.gtE a b
-  | .Is _ => build (emitTotal (.str .base "is") Py.is_ #v[] #[a, b])
-  | .IsNot _ => build (emitTotal (.str .base "isNot") Py.isNot #v[] #[a, b])
+  | .Is _ => build (emitTotal (.str .base "is") Py.is_ #[a, b])
+  | .IsNot _ => build (emitTotal (.str .base "isNot") Py.isNot #[a, b])
   | .In _ => binary "in" Py.in_ a b
   | .NotIn _ => binary "notIn" Py.notIn a b
 
@@ -701,9 +701,9 @@ def queueFunc (sr : SourceRange) (scope : ScopeId) (cur : Scope)
 def decorate (decs : Array ValId) (f : ValId) : TransM ValId := do
   let mut f := f
   for d in decs.reverse do
-    let t ← build (emitTotal (.str .base "args") Py.mkTuple #v[] #[f])
-    let kw ← build (emitTotal (.str .base "kwargs") Py.mkKwargs #v[] #[])
-    f ← build (emitFailing (.str .base "decorated") Py.call #v[] #[d, t, kw])
+    let t ← build (emitTotal (.str .base "args") Py.mkTuple #[f])
+    let kw ← build (emitTotal (.str .base "kwargs") Py.mkKwargs #[])
+    f ← build (emitFailing (.str .base "decorated") Py.call #[d, t, kw])
   return f
 
 /-! ## Assignment targets -/
@@ -761,10 +761,10 @@ partial def transExpr (e : expr SourceRange) : TransM ValId := withRange e.ann d
   | .UnaryOp _ op x => do
     let v ← transExpr x
     match op with
-    | .Not _ => build (emitFailing (.str .base "not") Py.not_ #v[] #[v])
-    | .USub _ => build (emitFailing (.str .base "neg") Py.uSub #v[] #[v])
-    | .UAdd _ => build (emitFailing (.str .base "pos") Py.uAdd #v[] #[v])
-    | .Invert _ => build (emitFailing (.str .base "invert") Py.invert #v[] #[v])
+    | .Not _ => build (emitFailing (.str .base "not") Py.not_ #[v])
+    | .USub _ => build (emitFailing (.str .base "neg") Py.uSub #[v])
+    | .UAdd _ => build (emitFailing (.str .base "pos") Py.uAdd #[v])
+    | .Invert _ => build (emitFailing (.str .base "invert") Py.invert #[v])
   | .Compare _ l ops rs => compare l ops.val rs.val
   | .Call _ f args kws => call f args.val kws.val
   | .BoolOp _ op vs => boolOp (op matches .And _) vs.val
@@ -808,11 +808,11 @@ partial def transExpr (e : expr SourceRange) : TransM ValId := withRange e.ann d
     match k with
     | .Slice _ lo hi st =>
       let bs ← bounds #[lo.val, hi.val, st.val]
-      build (emitFailing (.str .base "slice") Py.getSlice #v[] (#[o] ++ bs))
-    | k => build (emitFailing (.str .base "item") Py.getItem #v[] #[o, ← transExpr k])
+      build (emitFailing (.str .base "slice") Py.getSlice (#[o] ++ bs))
+    | k => build (emitFailing (.str .base "item") Py.getItem #[o, ← transExpr k])
   | .Starred sr .. => unsupportedValue "starred expression" sr
   | .Slice _ lo hi st => do
-    build (emitTotal (.str .base "slice") Py.mkSlice #v[] (← bounds #[lo.val, hi.val, st.val]))
+    build (emitTotal (.str .base "slice") Py.mkSlice (← bounds #[lo.val, hi.val, st.val]))
 
 /-- `l op₀ r₀ op₁ r₁ …`.  A chain evaluates each operand once and stops at the first false
 comparison; its value is the last comparison's. -/
@@ -850,7 +850,7 @@ partial def chainLinks (a : ValId) (links : Array (cmpop SourceRange × expr Sou
 `str`: a literal, or a formatted field.  A lone part is itself, as in CPython. -/
 partial def fString (vs : Array (expr SourceRange)) : TransM ValId := do
   if h : vs.size = 1 then transExpr vs[0]
-  else build (emitTotal (.str .base "fstr") Py.strConcat #v[] (← vs.mapM transExpr))
+  else build (emitTotal (.str .base "fstr") Py.strConcat (← vs.mapM transExpr))
 
 /-- An f-string field `{v!c:spec}`, as CPython's `FORMAT_VALUE`: `v`, then `spec` (`""` if
 absent), then the conversion `!s`, `!r` or `!a`, then `fmtValue`. -/
@@ -864,11 +864,11 @@ partial def formatted (v : expr SourceRange) (conv : StrataPython.int SourceRang
     | .IntNeg .. => pure x
     | .IntPos sr ⟨_, c⟩ =>
       match Char.ofNat c with
-      | 's' => build (emitFailing (.str .base "str") Py.toStr #v[] #[x])
-      | 'r' => build (emitFailing (.str .base "repr") Py.repr #v[] #[x])
-      | 'a' => build (emitFailing (.str .base "ascii") Py.ascii #v[] #[x])
+      | 's' => build (emitFailing (.str .base "str") Py.toStr #[x])
+      | 'r' => build (emitFailing (.str .base "repr") Py.repr #[x])
+      | 'a' => build (emitFailing (.str .base "ascii") Py.ascii #[x])
       | _ => unsupportedValue "f-string conversion" sr  -- the parser gives no other
-  build (emitFailing (.str .base "fmt") Py.fmtValue #v[] #[x, sp])
+  build (emitFailing (.str .base "fmt") Py.fmtValue #[x, sp])
 
 /-- The bounds of a slice, in order, `None` for an absent one. -/
 partial def bounds (bs : Array (Option (expr SourceRange))) : TransM (Array ValId) :=
@@ -938,14 +938,14 @@ evaluated, come first. -/
 partial def listDisplay (vs : Array (expr SourceRange)) (pre : Array ValId := #[]) :
     TransM ValId := do
   let (first, rest) := splitStarred vs
-  let l ← build (emitTotal (.str .base "list") Py.mkList #v[] (pre ++ (← first.mapM transExpr)))
+  let l ← build (emitTotal (.str .base "list") Py.mkList (pre ++ (← first.mapM transExpr)))
   for v in rest do
     match v with
     | .Starred _ x _ =>
-      discard <| build (emitActing (.str .base "extend") Py.listExtend #v[] #[l, ← transExpr x])
+      discard <| build (emitActing (.str .base "extend") Py.listExtend #[l, ← transExpr x])
     | v =>
       let x ← transExpr v
-      discard <| build (emitEffect (.str .base "append") Py.listAppend #v[] #[l, x])
+      discard <| build (emitEffect (.str .base "append") Py.listAppend #[l, x])
   return l
 
 /-- `(a, b)`: `BUILD_TUPLE`.  With a `*x`, a list display then `INTRINSIC_LIST_TO_TUPLE`, as
@@ -953,20 +953,20 @@ CPython does.  The values `pre`, already evaluated, come first. -/
 partial def tupleDisplay (vs : Array (expr SourceRange)) (pre : Array ValId := #[]) :
     TransM ValId := do
   if (splitStarred vs).2.isEmpty then
-    build (emitTotal (.str .base "tuple") Py.mkTuple #v[] (pre ++ (← vs.mapM transExpr)))
+    build (emitTotal (.str .base "tuple") Py.mkTuple (pre ++ (← vs.mapM transExpr)))
   else
-    build (emitTotal (.str .base "tuple") Py.listToTuple #v[] #[← listDisplay vs pre])
+    build (emitTotal (.str .base "tuple") Py.listToTuple #[← listDisplay vs pre])
 
 /-- `{a, *x, b}`: as `listDisplay`, with `BUILD_SET`, `SET_UPDATE` and `SET_ADD`.  A set of
 more than `stackUseGuideline` elements starts empty, as in CPython. -/
 partial def setDisplay (vs : Array (expr SourceRange)) : TransM ValId := do
   let (first, rest) := if vs.size > stackUseGuideline then (#[], vs) else splitStarred vs
-  let st ← build (emitFailing (.str .base "set") Py.mkSet #v[] (← first.mapM transExpr))
+  let st ← build (emitFailing (.str .base "set") Py.mkSet (← first.mapM transExpr))
   for v in rest do
     match v with
     | .Starred _ x _ =>
-      discard <| build (emitActing (.str .base "update") Py.setUpdate #v[] #[st, ← transExpr x])
-    | v => discard <| build (emitActing (.str .base "add") Py.setAdd #v[] #[st, ← transExpr v])
+      discard <| build (emitActing (.str .base "update") Py.setUpdate #[st, ← transExpr x])
+    | v => discard <| build (emitActing (.str .base "add") Py.setAdd #[st, ← transExpr v])
   return st
 
 /-- Build a dict from `entries` in order, as CPython's `compiler_dict` does.  Each run of
@@ -1001,7 +1001,7 @@ each built by `pairs`, and each later chunk and each `**d` is `DICT_UPDATE`. -/
 partial def dictDisplay (ks : Array (opt_expr SourceRange)) (vs : Array (expr SourceRange)) :
     TransM ValId :=
   dictFromEntries (ks.zip vs) unpacked (chunks dictChunk) pairs
-    (fun a d => build (emitFailing (.str .base "update") Py.dictUpdate #v[] #[a, d]))
+    (fun a d => build (emitFailing (.str .base "update") Py.dictUpdate #[a, d]))
 where
   /-- The `d` of a `**d` entry. -/
   unpacked : opt_expr SourceRange × expr SourceRange → Option (expr SourceRange)
@@ -1012,17 +1012,17 @@ where
   pairs (c : Array (opt_expr SourceRange × expr SourceRange)) : TransM ValId := do
     let kvs := c.filterMap fun | (.some_expr _ k, v) => some (k, v) | _ => none
     if 2 * kvs.size > stackUseGuideline then
-      let d ← build (emitFailing (.str .base "dict") Py.mkDict #v[] #[])
+      let d ← build (emitFailing (.str .base "dict") Py.mkDict #[])
       for (k, v) in kvs do
         let kv ← transExpr k
         let vv ← transExpr v
-        discard <| build (emitActing (.str .base "set") Py.dictSet #v[] #[d, kv, vv])
+        discard <| build (emitActing (.str .base "set") Py.dictSet #[d, kv, vv])
       return d
     let mut args := #[]
     for (k, v) in kvs do
       args := args.push (← transExpr k)
       args := args.push (← transExpr v)
-    build (emitFailing (.str .base "dict") Py.mkDict #v[] args)
+    build (emitFailing (.str .base "dict") Py.mkDict args)
 
 /-- `f(a, *x, k=v, **m)`: `py.call f args kwargs`, evaluating the callee, the positional
 arguments, then the keyword arguments, as CPython does.  `args` is a tuple display; a lone
@@ -1040,9 +1040,9 @@ partial def call (f : expr SourceRange) (args : Array (expr SourceRange))
   let d ← kwargsDict fv kws
   let t ← match t?, lone with
     | some t, _ => pure t
-    | none, some x => build (emitFailing (.str .base "args") Py.argsTuple #v[] #[fv, x])
-    | none, none => build (emitTotal (.str .base "args") Py.mkTuple #v[] #[])
-  build (emitFailing (.str .base "call") Py.call #v[] #[fv, t, d])
+    | none, some x => build (emitFailing (.str .base "args") Py.argsTuple #[fv, x])
+    | none, none => build (emitTotal (.str .base "args") Py.mkTuple #[])
+  build (emitFailing (.str .base "call") Py.call #[fv, t, d])
 
 /-- The evaluation of the target `t`, or `none` if `t` is not a name, an attribute or a
 subscript: `o` for `o.a`, then `o` and `k` for `o[k]`.  The attribute name is mangled, as in
@@ -1061,8 +1061,8 @@ partial def target? : expr SourceRange → Option (TransM Lhs)
 partial def readLhs : Lhs → TransM ValId
   | .name n r => readName n r
   | .attr o a => build (getAttr o a)
-  | .item o k => build (emitFailing (.str .base "item") Py.getItem #v[] #[o, k])
-  | .slice o bs => build (emitFailing (.str .base "slice") Py.getSlice #v[] (#[o] ++ bs))
+  | .item o k => build (emitFailing (.str .base "item") Py.getItem #[o, k])
+  | .slice o bs => build (emitFailing (.str .base "slice") Py.getSlice (#[o] ++ bs))
 
 /-- Write `v` to the target `l`.  A name is written at `range`, the statement's.  A slice is
 written by `setItem` of a `mkSlice`, as CPython's `STORE_SLICE` does. -/
@@ -1070,10 +1070,10 @@ partial def writeLhs (l : Lhs) (v : ValId) (range : SourceRange) : TransM Unit :
   match l with
   | .name n _ => writeName n v range
   | .attr o a => discard <| build (setAttr o a v)
-  | .item o k => discard <| build (emitActing (.str .base "store") Py.setItem #v[] #[o, k, v])
+  | .item o k => discard <| build (emitActing (.str .base "store") Py.setItem #[o, k, v])
   | .slice o bs => do
-    let k ← build (emitTotal (.str .base "slice") Py.mkSlice #v[] bs)
-    discard <| build (emitActing (.str .base "store") Py.setItem #v[] #[o, k, v])
+    let k ← build (emitTotal (.str .base "slice") Py.mkSlice bs)
+    discard <| build (emitActing (.str .base "store") Py.setItem #[o, k, v])
 
 /-- The assignment of a value to the target `t` at `range`, or the part of `t` the translator
 does not lower.  A tuple or list target unpacks the value, with `unpackEx` if an element is
@@ -1089,15 +1089,15 @@ partial def assigner (range : SourceRange) (t : expr SourceRange) :
       match star with
       | none =>
         let n ← build (emitConst (.str .base "n") (.int ts.size))
-        build (emitFailing (.str .base "unpack") Py.unpackSeq #v[] #[v, n])
+        build (emitFailing (.str .base "unpack") Py.unpackSeq #[v, n])
       | some i =>
         let before ← build (emitConst (.str .base "before") (.int i))
         let after ← build (emitConst (.str .base "after") (.int (ts.size - i - 1)))
-        build (emitFailing (.str .base "unpack") Py.unpackEx #v[] #[v, before, after])
+        build (emitFailing (.str .base "unpack") Py.unpackEx #[v, before, after])
     return fun v => do
       let tup ← unpack v
       for h : i in [:elems.size] do
-        let x ← build (emitTotal (.str .base "elem") Py.tupleGet #v[]
+        let x ← build (emitTotal (.str .base "elem") Py.tupleGet
           #[tup, ← build (emitConst (.str .base "i") (.int i))])
         elems[i] x
   | t => match target? t with
@@ -1124,9 +1124,9 @@ partial def compExpr (sr : SourceRange) (kind : CompKind) (elt : expr SourceRang
     | internalError s!"scope {scope} is not in the table" sr; standIn what
   let it ← transExpr iter0
   let acc ← match kind with
-    | .list => build (emitTotal (.str .base "acc") Py.mkList #v[] #[])
-    | .set => build (emitFailing (.str .base "acc") Py.mkSet #v[] #[])
-    | .dict => build (emitFailing (.str .base "acc") Py.mkDict #v[] #[])
+    | .list => build (emitTotal (.str .base "acc") Py.mkList #[])
+    | .set => build (emitFailing (.str .base "acc") Py.mkSet #[])
+    | .dict => build (emitFailing (.str .base "acc") Py.mkDict #[])
   let saved := (← build (get : PyM SourceRange PyBuild.Frame)).locals
   withReader ({ · with scope, cur, classNs := none }) do
     for x in cur.regionLocals do discard <| build (declareLocal x)
@@ -1155,12 +1155,12 @@ where
         | .dict, some v =>
           let k ← transExpr elt
           let x ← transExpr v
-          discard <| build (emitActing (.str .base "set") Py.dictSet #v[] #[acc, k, x])
+          discard <| build (emitActing (.str .base "set") Py.dictSet #[acc, k, x])
         | .set, _ =>
-          discard <| build (emitActing (.str .base "add") Py.setAdd #v[] #[acc, ← transExpr elt])
+          discard <| build (emitActing (.str .base "add") Py.setAdd #[acc, ← transExpr elt])
         | _, _ =>
           let x ← transExpr elt
-          discard <| build (emitEffect (.str .base "append") Py.listAppend #v[] #[acc, x])
+          discard <| build (emitEffect (.str .base "append") Py.listAppend #[acc, x])
       if ← targeted skip then
         jump skip
         build (startBlock skip)
@@ -1200,9 +1200,9 @@ partial def superCall (sr : SourceRange) (attr : Bool) : TransM ValId := do
       let self ← requireDefined v first "RuntimeError" "super(): arg[0] deleted"
       let k ← build (readCell c (stem "__class__"))
       pure (← requireDefined k "__class__" "RuntimeError" "super(): empty __class__ cell", self)
-  let t ← build (emitTotal (.str .base "args") Py.mkTuple #v[] #[cls, self])
-  let d ← build (emitTotal (.str .base "kwargs") Py.mkKwargs #v[] #[])
-  build (emitFailing (.str .base "super") Py.call #v[] #[fv, t, d])
+  let t ← build (emitTotal (.str .base "args") Py.mkTuple #[cls, self])
+  let d ← build (emitTotal (.str .base "kwargs") Py.mkKwargs #[])
+  build (emitFailing (.str .base "super") Py.call #[fv, t, d])
 
 /-- The keyword dict of a call to `fv` with the keyword arguments `kws`: runs of `k=v` pairs,
 each a total `mkKwargs`, and `DICT_MERGE` (`dictMerge`) for each `**m`. -/
@@ -1214,8 +1214,8 @@ partial def kwargsDict (fv : ValId) (kws : Array (keyword SourceRange)) : TransM
       for kw in run do
         kvs := kvs.push (← build (strLit (kw.nameAndValue.1.getD "")))
         kvs := kvs.push (← transExpr kw.value)
-      build (emitTotal (.str .base "kwargs") Py.mkKwargs #v[] kvs))
-    (fun a m => build (emitFailing (.str .base "merge") Py.dictMerge #v[] #[fv, a, m]))
+      build (emitTotal (.str .base "kwargs") Py.mkKwargs kvs))
+    (fun a m => build (emitFailing (.str .base "merge") Py.dictMerge #[fv, a, m]))
 
 /-- The closure of the `def` or `lambda` at `sr`, whose function is queued, or `none` if it is
 rejected, as §5.3 builds it: the decorators are evaluated, then the non-constant defaults
@@ -1250,7 +1250,7 @@ partial def closure (sr : SourceRange) (args : arguments SourceRange)
     anns := anns.push (← build (strLit "return")) |>.push (← transExpr r)
   let some f ← queueFunc sr scope cur (some args) body stub defaults | return none
   unless anns.isEmpty do
-    let d ← build (emitFailing (.str .base "annotations") Py.mkDict #v[] anns)
+    let d ← build (emitFailing (.str .base "annotations") Py.mkDict anns)
     discard <| build (setAttr f "__annotations__" d)
   some <$> decorate decs f
 
@@ -1260,10 +1260,10 @@ end
 def deleteLhs : Lhs → TransM Unit
   | .name n r => deleteName n r
   | .attr o a => discard <| build (delAttr o a)
-  | .item o k => discard <| build (emitActing (.str .base "del") Py.delItem #v[] #[o, k])
+  | .item o k => discard <| build (emitActing (.str .base "del") Py.delItem #[o, k])
   | .slice o bs => do
-    let k ← build (emitTotal (.str .base "slice") Py.mkSlice #v[] bs)
-    discard <| build (emitActing (.str .base "del") Py.delItem #v[] #[o, k])
+    let k ← build (emitTotal (.str .base "slice") Py.mkSlice bs)
+    discard <| build (emitActing (.str .base "del") Py.delItem #[o, k])
 
 /-- The deletion of the target `t`, or the part of `t` the translator does not lower.  A
 tuple or list deletes its elements left to right. -/
@@ -1294,63 +1294,63 @@ def prologue (ps : Array ParamWithDefault) (defaults : Array (String × ValId))
     match p.default, defaults.find? (·.1 == p.name) with
     | some _, some (_, c) => build (readCell c (defaultStem p.name))
     | some d, none => transExpr d
-    | none, _ => build (emitTotal (stem p.name) Py.undef #v[]
+    | none, _ => build (emitTotal (stem p.name) Py.undef
         #[← build (emitConst (.str .base "n") (.str p.name))])
   let discardKey (key : ValId) : TransM Unit :=
-    discard <| build (emitEffect (.str .base "discard") Py.dictDiscard #v[] #[kwargs, key])
+    discard <| build (emitEffect (.str .base "discard") Py.dictDiscard #[kwargs, key])
   let typeError (val : ValId) (limit : Option Int) (msg : String) : TransM Unit := do
     let lim ← limit.mapM fun l => build (emitConst (.str .base "limit") (.int l))
     let e ← build (emitConst (.str .base "e") (.str "TypeError"))
     let m ← build (emitConst (.str .base "msg") (.str msg))
     match lim with
-    | some l => discard <| build (emitActing (.str .base "check") Py.requireAtMost #v[]
+    | some l => discard <| build (emitActing (.str .base "check") Py.requireAtMost
         #[val, l, e, m])
-    | none => discard <| build (emitActing (.str .base "check") Py.requireUndefined #v[]
+    | none => discard <| build (emitActing (.str .base "check") Py.requireUndefined
         #[val, e, m])
   let nargs ← if !pos.isEmpty || varPos.isNone then
-      some <$> build (emitTotal (.str .base "nargs") Py.tupleLen #v[] #[args])
+      some <$> build (emitTotal (.str .base "nargs") Py.tupleLen #[args])
     else pure none
   let mut bound : Array (ParamWithDefault × ValId) := #[]
   let mut dups : Array (ParamWithDefault × ValId × ValId) := #[]
   if let some n := nargs then
     if !pos.isEmpty then
-      let fill ← build (emitTotal (.str .base "fill") Py.mkTuple #v[] (← pos.mapM fillSlot))
+      let fill ← build (emitTotal (.str .base "fill") Py.mkTuple (← pos.mapM fillSlot))
       let none₁ ← build noneLit
-      let tail ← build (emitFailing (.str .base "tail") Py.getSlice #v[] #[fill, n, none₁, none₁])
-      let pad ← build (emitFailing (.str .base "pad") Py.add #v[] #[args, tail])
+      let tail ← build (emitFailing (.str .base "tail") Py.getSlice #[fill, n, none₁, none₁])
+      let pad ← build (emitFailing (.str .base "pad") Py.add #[args, tail])
       for h : i in [:pos.size] do
         let p := pos[i]
         let idx ← build (intLit i)
-        let fromPos ← build (emitFailing (.str .base "pos") Py.getItem #v[] #[pad, idx])
+        let fromPos ← build (emitFailing (.str .base "pos") Py.getItem #[pad, idx])
         if p.kind == .posOnly then
           bound := bound.push (p, fromPos)
         else
           let key ← build (strLit p.name)
-          let got ← build (emitTotal (stem p.name) Py.dictGet #v[] #[kwargs, key, fromPos])
-          let inKw ← build (emitFailing (.str .base "inKw") Py.in_ #v[] #[key, kwargs])
+          let got ← build (emitTotal (stem p.name) Py.dictGet #[kwargs, key, fromPos])
+          let inKw ← build (emitFailing (.str .base "inKw") Py.in_ #[key, kwargs])
           discardKey key
           bound := bound.push (p, got)
           dups := dups.push (p, idx, inKw)
   if let some p := varPos then
     let idx ← build (intLit pos.size)
     let none₁ ← build noneLit
-    let rest ← build (emitFailing (stem p.name) Py.getSlice #v[] #[args, idx, none₁, none₁])
+    let rest ← build (emitFailing (stem p.name) Py.getSlice #[args, idx, none₁, none₁])
     writeName p.name rest .none
   for p in kwOnly do
     let key ← build (strLit p.name)
     let miss ← fillSlot p
-    let got ← build (emitTotal (stem p.name) Py.dictGet #v[] #[kwargs, key, miss])
+    let got ← build (emitTotal (stem p.name) Py.dictGet #[kwargs, key, miss])
     discardKey key
     bound := bound.push (p, got)
   if let some n := nargs then
     for (p, idx, inKw) in dups do
-      let filled ← build (emitFailing (.str .base "filled") Py.lt #v[] #[idx, n])
-      let both ← build (emitFailing (.str .base "both") Py.mult #v[] #[inKw, filled])
+      let filled ← build (emitFailing (.str .base "filled") Py.lt #[idx, n])
+      let both ← build (emitFailing (.str .base "both") Py.mult #[inKw, filled])
       typeError both (some 0) s!"{fn}() got multiple values for argument '{p.name}'"
   if varKw.isNone then
     let kwName ← build (emitConst (.str .base "n") (.str "kwargs"))
-    let miss ← build (emitTotal (.str .base "kw") Py.undef #v[] #[kwName])
-    let left ← build (emitTotal (.str .base "kw") Py.dictFirstKey #v[] #[kwargs, miss])
+    let miss ← build (emitTotal (.str .base "kw") Py.undef #[kwName])
+    let left ← build (emitTotal (.str .base "kw") Py.dictFirstKey #[kwargs, miss])
     typeError left none s!"{fn}() got an unexpected keyword argument \{}"
   if varPos.isNone then
     if let some n := nargs then
@@ -1390,10 +1390,10 @@ def classDef (sr : SourceRange) (name : String) (bases : Array (expr SourceRange
   let decs ← decorators.mapM transExpr
   let m ← build (emitConst (.str .base "m") (.str "builtins"))
   let n ← build (emitConst (.str .base "n") (.str "__build_class__"))
-  let bc ← build (emitFailing (.str .base "__build_class__") Py.qualifiedRef #v[] #[m, n])
+  let bc ← build (emitFailing (.str .base "__build_class__") Py.qualifiedRef #[m, n])
   let classCell ← if cur.needsClassCell then do
       let n ← build (emitConst (.str .base "n") (.str "__class__"))
-      let undef ← build (emitTotal (stem "__class__") Py.undef #v[] #[n])
+      let undef ← build (emitTotal (stem "__class__") Py.undef #[n])
       some <$> build (newCell (cellStem "__class__") undef)
     else pure none
   -- The body captures the cell under `classCellKey`, for this closure only.
@@ -1404,7 +1404,7 @@ def classDef (sr : SourceRange) (name : String) (bases : Array (expr SourceRange
   let some f := f? | return
   let t ← tupleDisplay bases (pre := #[f, ← build (strLit name)])
   let d ← kwargsDict bc kws
-  let cls ← build (emitFailing (stem name) Py.call #v[] #[bc, t, d])
+  let cls ← build (emitFailing (stem name) Py.call #[bc, t, d])
   if let some c := classCell then discard <| build (writeCell c cls)
   writeName name (← decorate decs cls) sr
 
@@ -1433,11 +1433,11 @@ def unbindName (name : String) (range : SourceRange) : TransM Unit := do
     deleteName name range
   | _ =>
     let n ← build (emitConst (.str .base "n") (.str m))
-    writeName name (← build (emitTotal (stem m) Py.undef #v[] #[n])) range
+    writeName name (← build (emitTotal (stem m) Py.undef #[n])) range
 
 /-- Make `prev` the exception being handled again. -/
 def popExcept (prev : ValId) : TransM Unit :=
-  discard <| build (emitEffect (.str .base "pop") Py.popExcept #v[] #[prev])
+  discard <| build (emitEffect (.str .base "pop") Py.popExcept #[prev])
 
 /-- Leave an `except` clause or a `finally` body other than by a failure, as CPython does:
 under `outer`, the handler around the `try`, make `prev` the exception being handled again,
@@ -1525,7 +1525,7 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
         if simple.value != 0 then
           let d ← annotationsDict
           let key ← build (strLit (← mangled n))
-          discard <| build (emitActing (.str .base "store") Py.setItem #v[] #[d, key, t])
+          discard <| build (emitActing (.str .base "store") Py.setItem #[d, key, t])
   | .AugAssign sr target op v =>
     let some eval := target? target | badTarget target
     let l ← eval
@@ -1559,7 +1559,7 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
   | .Raise _ ⟨_, none⟩ _ =>
     let e ← match (← read).handled with
       | some exc => pure exc
-      | none => build (emitFailing (.str .base "exc") Py.handledExc #v[] #[])
+      | none => build (emitFailing (.str .base "exc") Py.handledExc #[])
     build (PyBuild.jump (← build (raiseTo e)))
   | .With sr ⟨_, items⟩ ⟨_, body⟩ _ => withStmt sr items.toList body
   | .Try sr ⟨_, body⟩ ⟨_, handlers⟩ ⟨_, orelse⟩ ⟨_, final⟩ =>
@@ -1618,14 +1618,14 @@ partial def assertStmt (test : expr SourceRange) (msg : Option (expr SourceRange
   let fail ← build (freshLabel "fail")
   transCond test ok fail
   build (startBlock fail)
-  let cls ← build (emitTotal (.str .base "AssertionError") Py.assertionError #v[] #[])
+  let cls ← build (emitTotal (.str .base "AssertionError") Py.assertionError #[])
   let v ← match msg with
     | none => pure cls
     | some m => do
-      let args ← build (emitTotal (.str .base "args") Py.mkTuple #v[] #[← transExpr m])
-      let kwargs ← build (emitTotal (.str .base "kwargs") Py.mkKwargs #v[] #[])
-      build (emitFailing (.str .base "call") Py.call #v[] #[cls, args, kwargs])
-  let e ← build (emitFailing (.str .base "exc") Py.toException #v[] #[v])
+      let args ← build (emitTotal (.str .base "args") Py.mkTuple #[← transExpr m])
+      let kwargs ← build (emitTotal (.str .base "kwargs") Py.mkKwargs #[])
+      build (emitFailing (.str .base "call") Py.call #[cls, args, kwargs])
+  let e ← build (emitFailing (.str .base "exc") Py.toException #[v])
   build (PyBuild.jump (← build (raiseTo e)))
   build (startBlock ok)
 
@@ -1635,9 +1635,9 @@ partial def raiseStmt (e : expr SourceRange) (cause : Option (expr SourceRange))
     TransM Unit := do
   let v ← transExpr e
   let c ← cause.mapM transExpr
-  let x ← build (emitFailing (.str .base "exc") Py.toException #v[] #[v])
+  let x ← build (emitFailing (.str .base "exc") Py.toException #[v])
   if let some c := c then
-    discard <| build (emitActing (.str .base "cause") Py.setCause #v[] #[x, c])
+    discard <| build (emitActing (.str .base "cause") Py.setCause #[x, c])
   build (PyBuild.jump (← build (raiseTo x)))
 
 /-- `try: body except …: … else: orelse` (§7.2).  A failure in `body` goes to `catch`, which
@@ -1656,7 +1656,7 @@ partial def tryStmt (body : Array (stmt SourceRange)) (handlers : Array (excepth
     transStmts orelse
     if ← isOpen then jump join
   let exc ← build (startBlockWith catchL (.str .base "exc"))
-  let prev ← build (emitTotal (.str .base "prev") Py.pushExcInfo #v[] #[exc])
+  let prev ← build (emitTotal (.str .base "prev") Py.pushExcInfo #[exc])
   withHandler unwind do
     for h in handlers do
       let .ExceptHandler hsr ⟨_, type⟩ ⟨_, name⟩ ⟨_, hbody⟩ := h
@@ -1707,11 +1707,11 @@ partial def withStmt (sr : SourceRange) (items : List (withitem SourceRange))
       | .ok a => pure a
     let outer ← build handler
     let mgr ← transExpr ctx
-    let enter ← build (emitFailing (.str .base "enter") Py.enterMethod #v[] #[mgr])
-    let exit ← build (emitFailing (.str .base "exit") Py.exitMethod #v[] #[mgr])
-    let noArgs ← build (emitTotal (.str .base "args") Py.mkTuple #v[] #[])
-    let kw ← build (emitTotal (.str .base "kwargs") Py.mkKwargs #v[] #[])
-    let v ← build (emitFailing (.str .base "entered") Py.call #v[] #[enter, noArgs, kw])
+    let enter ← build (emitFailing (.str .base "enter") Py.enterMethod #[mgr])
+    let exit ← build (emitFailing (.str .base "exit") Py.exitMethod #[mgr])
+    let noArgs ← build (emitTotal (.str .base "args") Py.mkTuple #[])
+    let kw ← build (emitTotal (.str .base "kwargs") Py.mkKwargs #[])
+    let v ← build (emitFailing (.str .base "entered") Py.call #[enter, noArgs, kw])
     let wexc ← build (freshLabel "wexc")
     let fin ← build (freshLabel "fin")
     let join ← build (freshLabel "join")
@@ -1722,11 +1722,11 @@ partial def withStmt (sr : SourceRange) (items : List (withitem SourceRange))
     if ← isOpen then jump fin #[← build compNormal]
     -- An exception: `__exit__(type, exc, tb)` while it is the one being handled.
     let exc ← build (startBlockWith wexc (.str .base "exc"))
-    let prev ← build (emitTotal (.str .base "prev") Py.pushExcInfo #v[] #[exc])
+    let prev ← build (emitTotal (.str .base "prev") Py.pushExcInfo #[exc])
     let unwind ← build (freshLabel "unwind")
     let suppress ← build (freshLabel "suppress")
     withHandler unwind do
-      let r ← build (emitFailing (.str .base "exited") Py.exitWithExc #v[] #[exit, exc])
+      let r ← build (emitFailing (.str .base "exited") Py.exitWithExc #[exit, exc])
       let b ← build (truthy r)
       branch b suppress unwind #[] #[exc]
     build (startBlock suppress)
@@ -1739,9 +1739,9 @@ partial def withStmt (sr : SourceRange) (items : List (withitem SourceRange))
     if ← targeted fin then
       let pending ← build (startBlockWith fin (.str .base "pending") Py.Completion.ty)
       let n ← build noneLit
-      let t ← build (emitTotal (.str .base "args") Py.mkTuple #v[] #[n, n, n])
-      let kw ← build (emitTotal (.str .base "kwargs") Py.mkKwargs #v[] #[])
-      discard <| build (emitFailing (.str .base "exited") Py.call #v[] #[exit, t, kw])
+      let t ← build (emitTotal (.str .base "args") Py.mkTuple #[n, n, n])
+      let kw ← build (emitTotal (.str .base "kwargs") Py.mkKwargs #[])
+      discard <| build (emitFailing (.str .base "exited") Py.call #[exit, t, kw])
       dispatchArms pending (← exitArms join outer sr)
     build (startBlock join)
 
@@ -1772,18 +1772,18 @@ partial def forStmt (sr : SourceRange) (target iter : expr SourceRange)
   match assigner sr target with
   | .error t => badTarget t
   | .ok assign =>
-    let it ← build (emitFailing (.str .base "iter") Py.getIter #v[] #[← transExpr iter])
+    let it ← build (emitFailing (.str .base "iter") Py.getIter #[← transExpr iter])
     let head ← build (freshLabel "head")
     let stop ← build (freshLabel "stop")
     let elseL? ← if orelse.isEmpty then pure none else some <$> build (freshLabel "else")
     let exit ← build (freshLabel "exit")
     jump head
     build (startBlock head)
-    assign (← build (withHandler stop (emitFailing (.str .base "item") Py.next #v[] #[it])))
+    assign (← build (withHandler stop (emitFailing (.str .base "item") Py.next #[it])))
     withExit (.loop exit head) (transStmts body)
     if ← isOpen then jump head
     let e ← build (startBlockWith stop (.str .base "exc"))
-    let done ← build (emitTest (.str .base "done") Py.isStopIteration #v[] #[e])
+    let done ← build (emitTest (.str .base "done") Py.isStopIteration #[e])
     let finished := elseL?.getD exit
     recordTarget finished
     build (PyBuild.branch done (Build.goto finished) (← build (raiseTo e)))
@@ -1849,7 +1849,7 @@ def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) : Func Py.env SourceRang
           | internalError "a function without its args and kwargs parameters" job.range
         match job.args with
         | none =>
-          let ns ← build (emitFailing (.str .base "ns") Py.getItem #v[] #[args, ← build (intLit 0)])
+          let ns ← build (emitFailing (.str .base "ns") Py.getItem #[args, ← build (intLit 0)])
           let annotated := findAnn job.body
           withReader ({ · with classNs := some ns, classAnnotations := annotated }) do
             writeName "__module__" (← readName "__name__" job.range) job.range

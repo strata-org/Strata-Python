@@ -6,6 +6,7 @@
 module
 public import StrataMantle.IR
 public import StrataMantle.Util.NameMap
+public import StrataMantle.KindedTypeArgs
 -- Instruction values embed the signature representation, needed at code-generation time.
 import StrataMantle.Env.WF
 
@@ -31,6 +32,7 @@ The operations:
 * `freshVal`: a fresh value;
 * `emitConst`, `emitFunc`, `emitApply`, `emitApplyWith`: emit an instruction, `emitApplyWith`
   with regions built in any monad `BuildM` lifts into;
+* `checkTypeArgs`: type arguments given as data, checked against an instruction's kinds;
 * `goto`: a transfer to a block;
 * `freshLabel`, `startBlock`, `startBlockWith`, `startFreshBlock`: allocate and open blocks;
 * `finishBlock`, `terminate`, `jump`, `branch`, `ret`, `unreachable`: close the open block
@@ -41,6 +43,12 @@ The operations:
 * `run`: run a builder, taking the function it emitted and the errors it recorded;
 * `build`: the function, or the `Errors` if any was recorded;
 * `Holds`: a property of a build's function, false if the build failed.
+
+An application's type arguments, the last parameter of `emitApply`, `emitApplyWith` and
+`terminate`, are a `KindedTypeArgsFor` the instruction, so Lean checks their count and kinds at
+the call.  Left out, they are inferred from the result type; those that do not occur in it, and
+a terminal instruction's, are written `(typeArgs := ta[…])`, as in
+`emitApply n Base.Unit.ty Base.refSet #[cell, v] (typeArgs := ta[Py.Value])`.
 
 Misuse is an error, recorded in the state: an instruction emitted with no block open, a block
 opened while another is open, a block finished when none is open, and a region or function
@@ -152,7 +160,7 @@ def withInfo {β : Type} (info : α) (m : BuildM env α β) : BuildM env α β :
 
 /-- A fresh value of type `t`, named `stem.n`, with `n` the next suffix for `stem`.  `stem` is
 structured: `x.cell` is the segments `x` and `cell`, never one segment with a `.` in it. -/
-def freshVal (stem : Name) (t : TypeExpr env 0) : BuildM env α (ValDecl env) := do
+def freshVal (stem : Name) (t : TypeExpr env) : BuildM env α (ValDecl env) := do
   let s ← get
   let suffix := (s.suffixes.find? stem).getD 0
   set { s with
@@ -183,28 +191,41 @@ def emitFunc [base ⊑ env] (target : Name) (info : Option α := none) :
     BuildM env α ValId :=
   emitConst (.str .base "code") (.func target) info
 
+/-- The type arguments `typeArgs` of an application of `r`, checked against its kinds, or
+`none` with an error recorded if their count or a kind is wrong.  It is for a caller that has
+them as data rather than writing `ta[…]`. -/
+def checkTypeArgs {isig : InsnSig env} (r : InsnRef env isig) {type : Option (TypeExpr env)}
+    (typeArgs : Array (TypeArg env)) : BuildM env α (Option (KindedTypeArgsFor r type)) := do
+  match KindedTypeArgs.check? isig.scope.toList typeArgs with
+  | .ok ta => return some ta
+  | .error msg => error s!"{nameText r.name}: {msg}"; return none
+
 /-- `emitApply`, with regions built in any monad `BuildM` lifts into, such as a front end's
-builder. -/
+builder.  Its type arguments are `emitApply`'s. -/
 def emitApplyWith {m : Type → Type} [Monad m] [MonadLiftT (BuildM env α) m] {isig : InsnSig env}
-    (name : Name) (type : TypeExpr env 0) (r : InsnRef env isig)
-    (typeArgs : Vector (TypeExpr env 0) isig.typeArgc) (args : Array ValId)
+    (name : Name) (type : TypeExpr env) (r : InsnRef env isig) (args : Array ValId)
     (succs : Array BlockValue := #[]) (regions : Array (m (Region env α)) := #[])
-    (info : Option α := none) : m ValId := do
+    (info : Option α := none) (typeArgs : KindedTypeArgsFor r (some type) := by infer_type_args) :
+    m ValId := do
   let d ← (freshVal name type : BuildM env α (ValDecl env))
   let rs ← regions.mapM id
-  (do emit d (.apply (← resolveInfo info) d r typeArgs args succs rs) : BuildM env α ValId)
+  (do emit d (.apply (← resolveInfo info) d r typeArgs.toTypeArgs args succs rs) :
+    BuildM env α ValId)
 
 /-- Emit an application of an operation, a datatype's constructor included.  `type` is the
 result's type, the operation's return type at `typeArgs`.  `succs` are the blocks it may
 transfer to, one per declared successor, and `regions` emit its nested bodies, each a
 `region`.  They run after the result is allocated, so ids follow the printed order: the
-result, then what the regions define. -/
-def emitApply {isig : InsnSig env} (name : Name) (type : TypeExpr env 0)
-    (r : InsnRef env isig) (typeArgs : Vector (TypeExpr env 0) isig.typeArgc)
-    (args : Array ValId) (succs : Array BlockValue := #[])
-    (regions : Array (BuildM env α (Region env α)) := #[]) (info : Option α := none) :
+result, then what the regions define.
+
+`typeArgs`, written `ta[…]`, has one argument per type parameter, each of its kind, checked by
+Lean.  Left out, it is inferred from `type` by `infer_type_args`. -/
+def emitApply {isig : InsnSig env} (name : Name) (type : TypeExpr env)
+    (r : InsnRef env isig) (args : Array ValId) (succs : Array BlockValue := #[])
+    (regions : Array (BuildM env α (Region env α)) := #[]) (info : Option α := none)
+    (typeArgs : KindedTypeArgsFor r (some type) := by infer_type_args) :
     BuildM env α ValId := do
-  emitApplyWith name type r typeArgs args succs regions info
+  emitApplyWith name type r args succs regions info typeArgs
 
 /-! ## Blocks -/
 
@@ -232,7 +253,7 @@ def startBlock (label : Label) (params : Array (ValDecl env) := #[]) :
 
 /-- Open the block called `label`, taking one fresh value of type `t` named after `name`, and
 return that value. -/
-def startBlockWith (label : Label) (name : Name) (t : TypeExpr env 0) :
+def startBlockWith (label : Label) (name : Name) (t : TypeExpr env) :
     BuildM env α ValId := do
   let v ← freshVal name t
   startBlock label #[v]
@@ -256,14 +277,16 @@ def finishBlock (term : Terminator env α) (info : Option α := none) : BuildM e
       { label := l, params := s.body.params, instrs := s.body.instrs, term, info }
     set { s with body := { blocks := s.body.blocks.push b } }
 
-/-- Close the open block by applying the terminal operation `r`. -/
-def terminate {isig : InsnSig env} (r : InsnRef env isig)
-    (typeArgs : Vector (TypeExpr env 0) isig.typeArgc) (args : Array ValId := #[])
+/-- Close the open block by applying the terminal operation `r`.  Its type arguments are
+`emitApply`'s; with no result to infer them from, they are written out unless there are
+none. -/
+def terminate {isig : InsnSig env} (r : InsnRef env isig) (args : Array ValId := #[])
     (succs : Array BlockValue := #[]) (regions : Array (BuildM env α (Region env α)) := #[])
-    (info : Option α := none) : BuildM env α Unit := do
+    (info : Option α := none) (typeArgs : KindedTypeArgsFor r none := by infer_type_args) :
+    BuildM env α Unit := do
   let i ← resolveInfo info
   let rs ← regions.mapM id
-  finishBlock (.apply i r typeArgs args succs rs) (some i)
+  finishBlock (.apply i r typeArgs.toTypeArgs args succs rs) (some i)
 
 /-- Close the open block with `jump k`. -/
 def jump [base ⊑ env] (k : BlockValue) (info : Option α := none) : BuildM env α Unit := do
@@ -315,7 +338,7 @@ def region (params : Array (ValDecl env)) (body : BuildM env α Unit)
 /-! ## Finishing -/
 
 /-- The function the state describes.  The first block finished is the entry. -/
-def toFunc (s : State env α) (name : Name) (retType : TypeExpr env 0) (info : α) :
+def toFunc (s : State env α) (name : Name) (retType : TypeExpr env) (info : α) :
     Func env α :=
   { name, retType, blocks := s.body.blocks, names := s.names, info }
 
@@ -340,13 +363,13 @@ def Built.toExcept {β : Type} (b : Built β) : Except Errors β :=
 /-- Run a builder for the function `name` and take the function it emitted, what the builder
 returned, and the errors recorded, a block left open at the end among them.  `info` annotates
 the function, and is the default annotation for everything in it. -/
-def run {β : Type} (name : Name) (retType : TypeExpr env 0) (info : α)
+def run {β : Type} (name : Name) (retType : TypeExpr env) (info : α)
     (m : BuildM env α β) : Built (Func env α × β) :=
   let (r, s) := (do let r ← m; checkClosed "the function"; return r) (State.init info)
   ⟨(toFunc s name retType info, r), s.errors⟩
 
 /-- Run a builder and take the function it emitted, or the errors if any was recorded. -/
-def build (name : Name) (retType : TypeExpr env 0) (info : α)
+def build (name : Name) (retType : TypeExpr env) (info : α)
     (m : BuildM env α Unit) : Except Errors (Func env α) :=
   Prod.fst <$> (run name retType info m).toExcept
 

@@ -37,7 +37,7 @@ example : Demo.env ⊑ Grand.env := inferInstance
 example : TypeRef Grand.env 1 := Demo.Box.ref
 example : InsnRef Grand.env Base.refNew.sig := Base.refNew
 example : (Grand.peek.sig (e := Grand.env)).typeArgc = 0 := rfl
-example : Vector (TypeExpr Grand.env 0) (Demo.unbox.sig (e := Grand.env)).typeArgc :=
+example : Vector (TypeExpr Grand.env) (Demo.unbox.sig (e := Grand.env)).typeArgc :=
   #v[Grand.Cell.ty]
 
 /-! ## What crosses the module boundary
@@ -45,7 +45,7 @@ example : Vector (TypeExpr Grand.env 0) (Demo.unbox.sig (e := Grand.env)).typeAr
 The interface does; the stages are private to `DSLTest`. -/
 
 example : (Demo.unbox.sig (e := Demo.env)).typeArgc = 1 := rfl
-example : Vector (TypeExpr Demo.env 0) (Base.refNew.sig (e := Demo.env)).typeArgc :=
+example : Vector (TypeExpr Demo.env) (Base.refNew.sig (e := Demo.env)).typeArgc :=
   #v[Demo.Value.ty]
 
 /-- error: Unknown identifier `Demo.Internal.s1` -/
@@ -237,6 +237,198 @@ public environment ErrPos extends Base where
     | node (kids : Map Expr Int)
   data Wrap (+a) where
     | wrap (m : Map a Int)
+
+/-- error: argument 1 of `F` is a type, but its parameter takes a list of types
+---
+error: argument 2 of `F` is a list of types, but its parameter takes a type
+---
+error: a list of types may not hold a list
+---
+error: a list of types may not hold a list
+---
+error: a list of types where a type is expected
+-/
+#guard_msgs in
+public environment ErrKind extends Base where
+  open base
+  type F (args : list) (+r)
+  insn f (x : F Int Int) : Int
+  insn g (x : F [Int] [Int]) : Int
+  insn h (x : F [[Int]] Int) : Int
+  insn j (x : F [([Int])] Int) : Int
+  insn i (x : [Int]) : Int
+
+/-- error: list parameter `cs` where a type is expected; splice it into a list with `*cs`
+---
+error: argument 1 of `F` is a type, but its parameter takes a list of types
+---
+error: a splice `*cs` is allowed only inside `[…]`
+---
+error: `a` is not a list parameter: only a list parameter may be spliced
+---
+error: a list may splice at most one list parameter
+-/
+#guard_msgs in
+public environment ErrListParam extends Base where
+  open base
+  type F (args : list) (+r)
+  insn asType [(cs : list)] (x : cs) : Int
+  insn typeAsList [a] (f : F a Int) : Int
+  insn bareSplice [(cs : list)] (x : *cs) : Int
+  insn spliceType [a] (f : F [*a] Int) : Int
+  insn twoSplices [(cs ds : list)] (f : F [*cs, *ds] Int) : Int
+
+/-- The same instructions, each with its mistake fixed, are accepted. -/
+public environment OkListParam extends Base where
+  open base
+  type F (args : list) (+r)
+  insn asType [(cs : list)] (x : F cs Int) : Int
+  insn typeAsList [a] (f : F [a] Int) : Int
+  insn bareSplice [(cs : list)] (x : F [*cs] Int) : Int
+  insn spliceType [(a : list)] (f : F [*a] Int) : Int
+  insn twoSplices [(cs ds : list)] (f : F [*cs, Int] Int) (g : F [Int, *ds] Int) : Int
+
+/-- error: a list of types where a type is expected -/
+#guard_msgs in
+public environment ErrSplicedAsType extends Base where
+  open base
+  type F (args : list) (+r)
+  insn asType [(cs : list)] (x : [*cs]) : Int
+
+/-- The same instruction, with the list passed to a type, is accepted. -/
+public environment OkSplicedAsType extends Base where
+  open base
+  type F (args : list) (+r)
+  insn asType [(cs : list)] (x : F [*cs] Int) : Int
+
+/-- error: a splice `*cs` is allowed only inside `[…]`
+---
+error: a list of types may not hold a list
+---
+error: `a` is not a list parameter: only a list parameter may be spliced
+---
+error: list parameter `cs` where a type is expected; splice it into a list with `*cs`
+-/
+#guard_msgs in
+public environment ErrVariadic extends Base where
+  open base
+  insn bareSplice [(cs : list)] (*xs : *cs) : Int
+  insn nested (*xs : [[Int]]) : Int
+  insn spliceType [a] (*xs : [*a]) : Int
+  insn unspliced [(cs : list)] (*xs : [cs, Int]) : Int
+
+/-- The same variadics, each with its mistake fixed, are accepted: each annotation is a list,
+so each variadic is a spread. -/
+public environment OkVariadic extends Base where
+  open base
+  insn bareSplice [(cs : list)] (*xs : [*cs]) : Int
+  insn nested (*xs : [Int]) : Int
+  insn spliceType [(a : list)] (*xs : [*a]) : Int
+  insn unspliced [(cs : list)] (*xs : [*cs, Int]) : Int
+
+/-- error: a constructor takes no spread `(*xs : τ)`: each field is one value
+---
+error: list parameter `as` where a type is expected; splice it into a list with `*as`
+---
+error: a region parameter cannot be a spread `(*xs : τ)`: each is one value
+---
+error: a successor's payload cannot be a spread `(*xs : τ)`: each is one value
+-/
+#guard_msgs in
+public environment ErrListSpread extends Base where
+  open base
+  type F (args : list) (+r)
+  data D (as : list) where
+    | spread (*xs : as)
+    | whole (x : as)
+  insn lambda [(as : list) r] (&body (*ps : as) : r) : F as r
+  terminal insn untuple [(ts : list)] (^k (*xs : ts))
+
+/-- The same declarations, each field, region parameter and successor payload taking one value,
+are accepted; a spread belongs in an instruction's variadic. -/
+public environment OkListSpread extends Base where
+  open base
+  type F (args : list) (+r)
+  data D (as : list) where
+    | spread (x : F as Int)
+    | whole (x : F as Int)
+  insn lambda [(as : list) r] (&body (p : F as r) : r) : F as r
+  terminal insn untuple [(ts : list)] (^k (x : F ts Int))
+  insn apply [(as : list) r] (f : F as r) (*xs : as) : r
+
+/-- error: positive parameter `as` occurs under non-positive parameter 1 of `F`
+---
+error: positive parameter `as` occurs under non-positive parameter 1 of `F`
+---
+error: argument 1 of `D` is a type, but its parameter takes a list of types
+-/
+#guard_msgs in
+public environment ErrListData extends Base where
+  open base
+  type F (args : list) (+r)
+  data P (+as : list) where
+    | mkP (f : F as Int)
+  data Q (+as : list) where
+    | mkQ (f : F [*as, Int] Int)
+  data D (as : list) where
+    | mkD (f : F as Int)
+  insn useD (d : D Int) : Int
+
+/-- The same datatypes, each with its mistake fixed, are accepted. -/
+public environment OkListData extends Base where
+  open base
+  type F (args : list) (+r)
+  data P (as : list) where
+    | mkP (f : F as Int)
+  data Q (as : list) where
+    | mkQ (f : F [*as, Int] Int)
+  data D (as : list) where
+    | mkD (f : F as Int)
+  insn useD (d : D [Int]) : Int
+
+/-- error: `Bad` recurses through non-positive parameter 1 of `F`
+---
+error: positive parameter `a` occurs under non-positive parameter 1 of `F`
+-/
+#guard_msgs in
+public environment ErrListPos extends Base where
+  open base
+  type F (args : list) (+r)
+  data Bad where
+    | mk (f : F [Bad] Int)
+  data U (+a) where
+    | mkU (f : F [a] Int)
+
+/-- Through a `+` list, a datatype may recurse; and `U` is accepted once `a` is declared
+non-positive. -/
+public environment OkListPos extends Base where
+  open base
+  type F (args : list) (+r)
+  type Tup (+ts : list)
+  data T where
+    | mk (t : Tup [T])
+  data U (a) where
+    | mkU (f : F [a] Int)
+
+/-- error: argument 1 of `fnOf` is a type, but its parameter takes a list of types
+---
+error: argument 1 of `wrap` is a list of types, but its parameter takes a type
+-/
+#guard_msgs in
+public environment ErrAbbrevKind extends DSLTest.Fns where
+  open fns base
+  abbrev fnOf ((as : list) r) := Fn as r
+  abbrev wrap (a) := Fn [a] a
+  insn f (g : fnOf Int Int) : Int
+  insn h (g : wrap [Int]) : Int
+
+/-- The same abbreviations, each at arguments of its parameters' kinds, are accepted. -/
+public environment OkAbbrevKind extends DSLTest.Fns where
+  open fns base
+  abbrev fnOf ((as : list) r) := Fn as r
+  abbrev wrap (a) := Fn [a] a
+  insn f (g : fnOf [Int] Int) : Int
+  insn h (g : wrap Int) : Int
 
 /-- error: defined instructions are not supported yet
 -/

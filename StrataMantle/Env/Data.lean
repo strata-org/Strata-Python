@@ -26,6 +26,56 @@ inductive Positivity where
   | non
 deriving DecidableEq, Repr
 
+/-! ## Kinds -/
+
+/-- What a type parameter ranges over: types, or lists of types. -/
+inductive Kind where
+  | type
+  | list
+deriving DecidableEq, Repr
+
+/-- Why arguments do not fit the parameters they are passed to: the wrong number of them, or
+argument `i`, counted from 0, of the wrong kind.  Each caller words it for its own messages. -/
+inductive KindError where
+  | count (given expected : Nat)
+  | kind (i : Nat) (given expected : Kind)
+deriving DecidableEq, Repr
+
+/-- The first argument of `given`, counted from `i`, whose kind is not its parameter's in
+`expected`. -/
+private def KindError.firstKind? (i : Nat) : List Kind → List Kind → Option KindError
+  | g :: gs, e :: es => if g = e then firstKind? (i + 1) gs es else some (.kind i g e)
+  | _, _ => none
+
+/-- The first way arguments of kinds `given` fail to fit parameters of kinds `expected`: a count
+that differs, else the first argument of the wrong kind.  `none` exactly when they fit
+(`check?_eq_none_iff`), so a caller decides the fit and words the failure with this one check. -/
+def KindError.check? (expected given : Array Kind) : Option KindError :=
+  if given.size ≠ expected.size then some (.count given.size expected.size)
+  else firstKind? 0 given.toList expected.toList
+
+/-- Kinds of the same length have no argument of the wrong kind exactly when they are equal. -/
+private theorem KindError.firstKind?_eq_none_iff :
+    ∀ {i : Nat} {gs es : List Kind}, gs.length = es.length →
+      (firstKind? i gs es = none ↔ gs = es)
+  | _, [], [], _ => by simp [firstKind?]
+  | _, [], _ :: _, h => absurd h (by simp)
+  | _, _ :: _, [], h => absurd h (by simp)
+  | i, g :: gs, e :: es, h => by
+    have ih := firstKind?_eq_none_iff (i := i + 1) (gs := gs) (es := es) (by simpa using h)
+    by_cases hge : g = e
+    · simp [firstKind?, hge, ih]
+    · simp [firstKind?, hge]
+
+/-- The arguments fit exactly when their kinds are the parameters'. -/
+theorem KindError.check?_eq_none_iff {expected given : Array Kind} :
+    check? expected given = none ↔ given = expected := by
+  unfold check?
+  by_cases hs : given.size = expected.size
+  · rw [if_neg (fun h => h hs), firstKind?_eq_none_iff (by simpa using hs), Array.toList_inj]
+  · rw [if_pos hs]
+    exact ⟨fun h => absurd h (by simp), fun h => absurd (h ▸ rfl) hs⟩
+
 /-! ## Annotations
 
 Every declaration carries an annotation `α` that could be any type.  The
@@ -56,18 +106,48 @@ structure Param (τ : Type) where
   type : τ
 deriving DecidableEq
 
+-- Through `List.map`, so that `decide` and `rfl` evaluate it: `Array.map` does not reduce.
+/-- The kinds of an instruction's type parameters, each a name and a kind, in order: the scope
+the instruction's type expressions are written in. -/
+@[reducible] def Param.kinds (ps : Array (Param Kind)) : Array Kind :=
+  ⟨ps.toList.map (·.type)⟩
+
+/-- A type parameter of a `type` or `data`: its positivity and its kind.  A list parameter's
+positivity is its elements'. -/
+structure TyParam where
+  polarity : Positivity
+  kind : Kind := .type
+deriving DecidableEq
+
+/-- A positive type parameter. -/
+abbrev TyParam.pos : TyParam := ⟨.pos, .type⟩
+
+/-- A non-positive type parameter. -/
+abbrev TyParam.non : TyParam := ⟨.non, .type⟩
+
+-- Through `List.map`, so that `decide` and `rfl` evaluate it: `Array.map` does not reduce.
+/-- The kinds of a `type` or `data`'s parameters, in order: the scope a datatype's payloads are
+written in. -/
+@[reducible] def TyParam.kinds (ps : Array (Param TyParam)) : Array Kind :=
+  ⟨ps.toList.map (·.type.kind)⟩
+
 end
 
 /-- A type declaration. -/
 structure TypeDecl (α : Type) where
   ann : α
   name : Name
-  /-- Type parameters with their names and positivity. -/
-  params : Array (Param Positivity) := #[]
+  /-- Type parameters with their names, positivity and kinds. -/
+  params : Array (Param TyParam) := #[]
 deriving DecidableEq
 
 /-- How many arguments the type constructor takes. -/
 @[expose] def TypeDecl.arity {α : Type} (d : TypeDecl α) : Nat := d.params.size
+
+-- Through `List.map`, so that `decide` and `rfl` evaluate it: `Array.map` does not reduce.
+/-- The kind of each argument the type constructor takes. -/
+@[expose] def TypeDecl.kinds {α : Type} (d : TypeDecl α) : Array Kind :=
+  TyParam.kinds d.params
 
 -- A `List`, so that `decide` can prove the names distinct.
 /-- The names of the type's parameters, in order. -/
@@ -85,8 +165,8 @@ deriving DecidableEq
 structure DatatypeDecl (α : Type) (τ : Type) where
   ann : α
   name : Name
-  /-- Type parameters with their names and positivity. -/
-  params : Array (Param Positivity) := #[]
+  /-- Type parameters with their names, positivity and kinds. -/
+  params : Array (Param TyParam) := #[]
   /-- The constructors for the datatype. -/
   ctors : Array (Ctor α τ)
 deriving DecidableEq
@@ -220,20 +300,6 @@ end InsnKind
 /-- The group without its annotations. -/
 @[expose] def DataGroup.erase {α τ : Type} (g : DataGroup α τ) : DataGroup Unit τ :=
   ⟨g.members.map DatatypeDecl.erase, by simpa using g.nonEmpty⟩
-
-/-- Erasing keeps the parameters. -/
-@[simp] theorem TypeDecl.params_erase {α : Type} (d : TypeDecl α) : d.erase.params = d.params :=
-  rfl
-
-/-- Declarations equal up to annotations have the same parameters. -/
-theorem TypeDecl.params_eq_of_erase_eq {α : Type} {d d' : TypeDecl α}
-    (h : d.erase = d'.erase) : d.params = d'.params :=
-  congrArg (TypeDecl.params (α := Unit)) h
-
-/-- Declarations equal up to annotations take the same number of arguments. -/
-theorem TypeDecl.arity_eq_of_erase_eq {α : Type} {d d' : TypeDecl α} (h : d.erase = d'.erase) :
-    d.arity = d'.arity :=
-  congrArg Array.size (params_eq_of_erase_eq h)
 
 end
 

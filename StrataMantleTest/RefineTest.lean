@@ -189,7 +189,8 @@ private def boxD : TypeDecl Unit := { ann := (), name := boxN }
 /-! ### `t`, abstract -/
 
 private def t₀ : Env Unit := Env.empty.addType boxD (by simp)
-private def boxT : TypeExpr t₀ 0 := .app (TypeRef.ofAddType Env.empty boxD (by simp)) #v[]
+private def boxT : TypeExpr t₀ :=
+  .app (TypeRef.ofAddType Env.empty boxD (by simp)) #v[] (TypeRef.kinds_zero _)
 private def mkSig : InsnSig t₀ := { ann := (), argTypes := #[], returnType := some boxT }
 -- `t₁` and `t` are `abbrev`s, so that `simp` and `rw` see a signature carried into them as one
 -- of theirs.
@@ -277,7 +278,7 @@ private theorem t_le_s : t ≤ s := show Env.LeBy _ t s from
             Env.succs_caseSig, boxCaseSig, Array.map_empty, Option.map_none]) <;>
           first
           | rfl
-          | simp [boxT, boxD, boxCtors, lastString_mkN, TypeExpr.Raw.vars,
+          | simp [boxT, boxD, boxCtors, lastString_mkN, TypeExpr.Raw.vars, TypeExpr.Raw.varsFrom,
             TypeDecl.arity]
       · refine ⟨_, _, Env.declaresInsn_addData_ctor (cfresh := ctorsFresh) (adm := boxAdm) 0 0,
           .inl rfl, ?_⟩
@@ -289,7 +290,8 @@ private theorem t_le_s : t ≤ s := show Env.LeBy _ t s from
             Env.succs_ctorSig, mkSig, Array.map_empty, Option.map_none]) <;>
           first
           | rfl
-          | simp [boxT, boxD, boxCtors, TypeExpr.Raw.vars, TypeDecl.arity] }
+          | simp [boxT, boxD, boxCtors, TypeExpr.Raw.vars, TypeExpr.Raw.varsFrom,
+            TypeDecl.arity] }
 
 /-- `mkBox`, as an ordinary instruction of `t`. -/
 private def mkRef : InsnRef t ((mkSig.ofSubset (Env.subset_addInsn _ _ _ _)).ofSubset

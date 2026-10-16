@@ -48,8 +48,10 @@ An instruction declaration has a name, a list of type parameters, a list of requ
 arguments, an optional variadic parameter naming and typing any additional arguments beyond
 the required arguments, and a return type, unless it is terminal.
 
-The type parameters are named, but type expressions refer to them by de Bruijn level:
-`.var i` is `typeParams[i]`.  The names are for printing and diagnostics.
+Each type parameter has a name and a kind: it ranges over types or over lists of types.  Type
+expressions refer to them by de Bruijn level: `.var i` is `typeParams[i]`.  The names are for
+printing and diagnostics.  A variadic whose type is a type takes any number of operands of that
+type; one whose type is a list takes exactly that list's elements, in order.
 
 It may also take named regions, each with its own signature, and named successors: blocks
 it may transfer to, each receiving values of the declared types after whatever the use site
@@ -68,7 +70,7 @@ derives for it.
 structure InsnDecl.Raw (α : Type) where
   ann : α
   name : Name
-  typeParams : Array String := #[]
+  typeParams : Array (Param Kind) := #[]
   argTypes : Array (Param TypeExpr.Raw)
   variadic : Option (Param TypeExpr.Raw) := none
   /-- What it returns, or `none` if it is terminal. -/
@@ -86,9 +88,14 @@ deriving DecidableEq
 @[expose] def InsnDecl.Raw.erase {α : Type} (d : InsnDecl.Raw α) : InsnDecl.Raw Unit :=
   { d with ann := () }
 
-/-- How many type variables the instruction binds: the scope its type expressions are
-checked in.  Reducible, so it computes on a literal declaration. -/
+/-- How many type variables the instruction binds.  Reducible, so it computes on a literal
+declaration. -/
 @[expose, reducible] def InsnDecl.Raw.typeArgc (d : InsnDecl.Raw α) : Nat := d.typeParams.size
+
+/-- The kinds of the variables the instruction binds, the scope its type expressions are
+checked in: its type parameters' kinds.  Reducible, as `typeArgc` is. -/
+@[expose, reducible] def InsnDecl.Raw.scope (d : InsnDecl.Raw α) : Array Kind :=
+  Param.kinds d.typeParams
 
 /-! Parameter names, as lists: `List.Nodup` of a literal reduces in the kernel, so `decide`
 proves distinctness for an environment written in Lean. -/
@@ -100,8 +107,9 @@ proves distinctness for an environment written in Lean. -/
 /-- Every name an instruction binds: its type parameters', its arguments', its variadic's,
 its regions', then its successors'.  They share one namespace. -/
 @[expose] def InsnDecl.Raw.paramNames {α : Type} (d : InsnDecl.Raw α) : List String :=
-  d.typeParams.toList ++ d.argTypes.toList.map (·.name) ++ (d.variadic.map (·.name)).toList ++
-    d.regions.toList.map (·.name) ++ d.succs.toList.map (·.name)
+  d.typeParams.toList.map (·.name) ++ d.argTypes.toList.map (·.name) ++
+    (d.variadic.map (·.name)).toList ++ d.regions.toList.map (·.name) ++
+    d.succs.toList.map (·.name)
 
 /-- A declaration, annotated with a value of type `α`. -/
 inductive Decl.Raw (α : Type) where
@@ -202,17 +210,17 @@ end Decl.Raw
 namespace DataGroup
 
 /-- The instruction that is constructor `c`, the `j`th of `m`, the group's `i`th member.  Its
-type parameters are `m`'s, by name and in order; its arguments are `c`'s payload; it returns
-`m` applied to its parameters; and it is marked as that constructor.  No variadic, regions or
-successors, and not terminal. -/
+type parameters are `m`'s, by name and in order, each of its kind; its arguments are `c`'s
+payload; it returns `m` applied to its parameters; and it is marked as that constructor.  No
+variadic, regions or successors, and not terminal. -/
 @[expose]
 def ctorDecl (g : DataGroup α TypeExpr.Raw) (i : Nat) (m : DatatypeDecl α TypeExpr.Raw) (j : Nat)
     (c : Ctor α TypeExpr.Raw) : InsnDecl.Raw α where
   ann := c.ann
   name := c.name
-  typeParams := m.params.map (·.name)
+  typeParams := m.params.map fun p => ⟨p.name, p.type.kind⟩
   argTypes := c.args
-  returnType := some (.app m.name (TypeExpr.Raw.vars m.arity))
+  returnType := some (.app m.name (TypeExpr.Raw.vars (TyParam.kinds m.params)))
   kind := .ctor ⟨g.first.name, i, j⟩
 
 /-- A constructor's instruction is named as the constructor is. -/
@@ -228,16 +236,16 @@ def ctorInsn? (g : DataGroup α TypeExpr.Raw) (i j : Nat) : Option (InsnDecl.Raw
   pure (g.ctorDecl i m j c)
 
 /-- The case instruction of `m`, the group's `i`th member: terminal; `m`'s type parameters,
-by name and in order; one argument `scrutinee`, of `m` applied to its parameters; and one
-successor per constructor, in declaration order, named by the last component of the
-constructor's name and receiving its payload.  It is marked as `m`'s case. -/
+by name and in order, each of its kind; one argument `scrutinee`, of `m` applied to its
+parameters; and one successor per constructor, in declaration order, named by the last
+component of the constructor's name and receiving its payload.  It is marked as `m`'s case. -/
 @[expose]
 def caseDecl (g : DataGroup α TypeExpr.Raw) (i : Nat) (m : DatatypeDecl α TypeExpr.Raw) :
     InsnDecl.Raw α where
   ann := m.ann
   name := m.name.caseName
-  typeParams := m.params.map (·.name)
-  argTypes := #[⟨"scrutinee", .app m.name (TypeExpr.Raw.vars m.arity)⟩]
+  typeParams := m.params.map fun p => ⟨p.name, p.type.kind⟩
+  argTypes := #[⟨"scrutinee", .app m.name (TypeExpr.Raw.vars (TyParam.kinds m.params))⟩]
   returnType := none
   succs := m.ctors.map fun c => ⟨c.name.lastString, c.args.map (·.type)⟩
   kind := .case ⟨g.first.name, i⟩

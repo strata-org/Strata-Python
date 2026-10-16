@@ -36,7 +36,7 @@ example : #[1, 2, 3].allK (· > 0) = #[1, 2, 3].all (· > 0) := Array.allK_eq_al
 /-! Parameter names of declarations. -/
 
 example : (⟨"x", 0⟩ : Param Nat) ≠ ⟨"y", 0⟩ := by decide
-example : (⟨"x", .pos⟩ : Param Positivity) = ⟨"x", .pos⟩ := by decide
+example : (⟨"x", .pos⟩ : Param TyParam) = ⟨"x", .pos⟩ := by decide
 
 example : ({ ann := (), name := py "dict", params := #[⟨"k", .non⟩, ⟨"v", .pos⟩] } :
     TypeDecl Unit).paramNames.Nodup := by decide
@@ -54,6 +54,7 @@ example : list (.var 0) ≠ list int := by decide
 example : list int = list int := by decide
 example : (list (.var 0)).instantiate #[int] = list int := by decide
 example : (list (.var 1)).instantiate #[int] = list (.var 1) := by decide
-example : (list int).fold (fun _ => 0) (fun _ as => as.foldl (· + ·) 1) = 2 := by decide
+example : (list int).fold (fun _ => 0) (fun _ as => as.foldl (· + ·) 1)
+    (fun es => es.foldl (· + ·) 0) = 2 := by decide
 
 end Strata.Mantle.DataTest

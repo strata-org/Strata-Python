@@ -13,7 +13,15 @@ Mantle separates the vocabulary a language provides from the programs written in
   primitive, such as `Int`, or a datatype with constructors, such as `Except`. An
   instruction declaration gives an operation's name and signature, such as an `add` that
   takes two values and returns a value. Apart from constants, every instruction a program
-  uses is declared in its environment.
+  uses is declared in its environment. Primitive types, datatypes and instructions may have
+  type parameters, each ranging over types or over lists of types, such as the argument types
+  of a function type `Fn [Int, Bool] Int`. A list may splice in list parameters' elements:
+  `[*as, Int]`. The DSL that writes environments accepts at most one splice in a literal, at any
+  position, as in `[Int, *as, Bool]`, so that inference from a result type has one answer. An
+  instruction's variadic operands are any
+  number of one type, or one per element of a list; a constructor's fields, a region's
+  parameters and a block's parameters are one value each. An application passes an argument
+  of its parameter's kind for each type parameter.
 * A **program** is a module of functions written against one environment. A function is a
   set of blocks. A block takes parameters, runs a sequence of instructions, and ends with a
   terminal instruction, such as a jump to another block or a return. Each value is defined
@@ -99,7 +107,9 @@ module m {
   also the function's.
 * **Applications** print as the operation, its type arguments in brackets, its operands in
   parentheses, then its successors, each `^label(args)`, then its regions, each in braces.
-  Empty brackets and parentheses are left out: `py.noneLit`, `unreachable`.
+  Empty brackets and parentheses are left out: `py.noneLit`, `unreachable`. A list of types
+  prints as a literal, as a type argument or inside a type:
+  `fns.callFn[[base.Int, base.Bool], base.Int](%g.0, %x.0, %y.0)`.
 * **Terminators** print as applications without a result. The base's control flow drops
   `base.`: `jump ^done.0(%v.0)`, `branch(%c.0) ^some.0() ^none.0()`, `unreachable`. A jump
   to the exit is `ret(%ret.0)`.

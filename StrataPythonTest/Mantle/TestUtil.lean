@@ -75,7 +75,7 @@ def blockTargets {env : Env Unit} {α : Type} (b : Block env α) : Array Label :
 the entry nor from a handler that no operation names, which is a block taking just one value
 of type `value` (§10 of `docs/PythonToMantle.md`).  A dead block of that shape that is not a
 handler counts as a root too, so it is not reported. -/
-def deadBlocks {env : Env Unit} {α : Type} (value : TypeExpr env 0) (f : Func env α) :
+def deadBlocks {env : Env Unit} {α : Type} (value : TypeExpr env) (f : Func env α) :
     Array Label := Id.run do
   let named := f.blocks.flatMap blockTargets
   let roots := f.blocks.toList.zipIdx.filterMap fun (b, i) =>
