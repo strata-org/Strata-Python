@@ -34,8 +34,9 @@ anywhere else. -/
 syntax:max "*" ident : mantleTy
 syntax:10 ident (colGt mantleTy:max)+ : mantleTy
 
-/-- `(x y : τ)`: entry parameters of a region, or a successor's payload.  `(*xs : τ)` parses, and
-the elaborator rejects it: each parameter is one value. -/
+/-- `(x y : τ)`: entry parameters of a region, or a successor's payload.  `(*xs : ts)` is a
+spread: a payload takes one value per element of the list `ts`.  It parses for a region too,
+and the elaborator rejects it there: each region parameter is one value. -/
 syntax mantleParams := "(" ("*")? ident+ " : " mantleTy ")"
 
 /-- A binder of an `insn`: arguments `(x y : τ)`, the variadic `(*xs : τ)` or `(*xs : cs)`,

@@ -461,7 +461,7 @@ def annotationsDict : TransM ValId := do
 
 /-- The raising operation `r` on `a` and `b`. -/
 def binary {isig : InsnSig Py.env} (name : String) (r : InsnRef Py.env isig) (a b : ValId)
-    (typeArgs : KindedTypeArgsFor r (some Py.Value.ty) := by infer_type_args) : TransM ValId :=
+    (typeArgs : TypeArgsOf r (some Py.Value.ty) := by infer_type_args) : TransM ValId :=
   build (emitFailing (stem name) r #[a, b] (typeArgs := typeArgs))
 
 /-- `a op b` for a binary operator. -/

@@ -35,7 +35,8 @@ what the thing it names demands:
   every block is well formed in the context those definitions give, its exit taking the
   function's return type;
 * a `Module.Raw` names no function twice, its functions are all well formed, and every
-  function reference names one of them.
+  function reference names one of them, at that function's code type or at the untyped
+  `base.Code`.
 
 A function's rules depend on the function alone, so a function can be checked before its
 module is assembled.
@@ -86,9 +87,9 @@ The checker's maps are tries and trees, so `decide +kernel` evaluates it:
 * `NatTrie`: a map from `Nat`, on the key's binary digits;
 * `LabelMap`: a map from labels, on each label's counter;
 * `Label.Distinct`: no label occurs twice, decided through a `LabelMap`;
-* `NameSet` (`StrataMantle.Util.NameMap`): a set of names, as a 2-3 tree on `Name.key`.  It
-  holds a module's function names: deciding `Module.Raw.WF` builds it once and looks every
-  function reference up in it. -/
+* `NameMap` and `NameSet` (`StrataMantle.Util.NameMap`): a map and a set of names, as a 2-3
+  tree on `Name.key`.  A `NameMap` holds a module's functions' code types: deciding
+  `Module.Raw.WF` builds it once and looks every function reference up in it. -/
 
 /-- A map from `Nat`: a trie on the key's bijective binary digits.  Key `0` is at the root,
 and `2k+1` and `2k+2` are key `k` of the left and right subtrees.  Its depth is the key's bit
@@ -238,10 +239,11 @@ instance {env : Env Unit} (ctx : Ctx env) (bs : BlockSigs env) (ks : Array Block
 
 /-! ## Operations -/
 
-/-- What an operation's successors receive at its type arguments: per successor, in order. -/
+/-- What an operation's successors receive at its type arguments: per successor, in order, the
+types its payload entries stand for, a spread's list one per element. -/
 @[expose] def InsnSig.succTypes {env : Env Unit} (isig : InsnSig env)
     (typeArgs : TypeArgs env isig.scope) : Array (Array (TypeExpr env)) :=
-  isig.succs.map fun p => p.type.map (·.instantiate typeArgs)
+  isig.succs.map fun p => p.type.flatMap (·.typesAt typeArgs)
 
 /-- An operation's operands and successors, wherever it sits: its operands have the types
 its signature demands at `typeArgs`, and it names one block of `bs` per declared successor,
@@ -269,19 +271,30 @@ abbrev RegionType (env : Env Unit) := Array (TypeExpr env) × TypeExpr env
 
 /-! ## Instructions, terminators, blocks and regions -/
 
+/-- A constant's rule, at the type `t` of the value it defines: a literal has the type the
+base gives it.  A function reference may have any type here: which types its target allows is
+the module's rule, `Module.Raw.WF`. -/
+@[expose] def Const.WF {env : Env Unit} [base ⊑ env] (t : TypeExpr env) : Const → Prop
+  | .func _ => True
+  | c => t = c.typeOf
+
+instance {env : Env Unit} [base ⊑ env] (t : TypeExpr env) : (c : Const) → Decidable (c.WF t)
+  | .func _ => inferInstanceAs (Decidable True)
+  | .unit | .bool _ | .int _ | .float _ | .str _ => inferInstanceAs (Decidable (t = _))
+
 mutual
 
 /-- An instruction's rule, in the context `ctx`, with `bs` the blocks its successors may name.
 
-* A constant defines a value of the type the base gives it.  Whether a function reference
-  names a function of the module is `Module.Raw.WF`'s rule.
+* A constant satisfies `Const.WF` at the type of the value it defines.  Whether a function
+  reference names a function of the module, and at which type, is `Module.Raw.WF`'s rule.
 * An application has a return type, which its result has at the type arguments, satisfies
   `InsnSig.callWF`, and supplies one region per declared region, each well formed at the
   declared types.  A constructor is applied as any operation is: its signature is the one
   `Env.addData` derived from its datatype. -/
 @[expose] def Instruction.WF {env : Env Unit} {α : Type} [base ⊑ env]
     (ctx : Ctx env) (bs : BlockSigs env) : Instruction env α → Prop
-  | .const _ d c => d.type = c.typeOf
+  | .const _ d c => c.WF d.type
   | @Instruction.apply _ _ _ d isig _ typeArgs args succs ⟨regions⟩ =>
     isig.returnType.map (·.instantiate typeArgs) = some d.type ∧
       isig.callWF ctx bs typeArgs args succs ∧
@@ -344,7 +357,7 @@ mutual
 /-- Deciding `Instruction.WF`. -/
 def Instruction.decWF (bs : BlockSigs env) :
     (i : Instruction env α) → Decidable (Instruction.WF ctx bs i)
-  | .const _ d c => inferInstanceAs (Decidable (d.type = c.typeOf))
+  | .const _ d c => inferInstanceAs (Decidable (c.WF d.type))
   | @Instruction.apply _ _ _ d isig _ typeArgs args succs ⟨regions⟩ =>
     have := Region.decWFList (isig.regionTypes typeArgs) regions
     inferInstanceAs (Decidable
@@ -589,11 +602,28 @@ theorem Func.WF.mem_names {env : Env Unit} {α : Type} [base ⊑ env] {fn : Func
     (h : fn.WF) {d : ValDecl env} (hd : d ∈ fn.defs) : d.id.id < fn.names.size :=
   (ValDecl.idBound_le_iff _ _).mp h.valuesNamed d hd
 
-/-- The functions `fn`'s function-reference constants name, regions included. -/
-@[expose] def Func.funcRefs {env : Env Unit} {α : Type} (fn : Func env α) : Array Name :=
+/-- A function reference: the function it names, and the type of the value it defines. -/
+structure FuncUse (env : Env Unit) where
+  target : Name
+  type : TypeExpr env
+
+/-- Whether a reference fits its target's code type `ct`: it has that type, or the untyped
+`base.Code`. -/
+-- `base.Code` is accepted until Python's lowering emits typed references.
+@[expose] def FuncUse.Fits {env : Env Unit} [base ⊑ env] (u : FuncUse env)
+    (ct : TypeExpr env) : Prop :=
+  u.type = ct ∨ u.type = Base.Code.ty
+
+instance {env : Env Unit} [base ⊑ env] (u : FuncUse env) (ct : TypeExpr env) :
+    Decidable (u.Fits ct) :=
+  inferInstanceAs (Decidable (_ ∨ _))
+
+/-- The function references of `fn`'s constants, regions included. -/
+@[expose] def Func.funcRefs {env : Env Unit} {α : Type} (fn : Func env α) :
+    Array (FuncUse env) :=
   fn.allBlocks.foldl (init := #[]) fun refs b => b.instrs.foldl (init := refs) fun refs i =>
     match i with
-    | .const _ _ (.func n) => refs.push n
+    | .const _ d (.func n) => refs.push ⟨n, d.type⟩
     | _ => refs
 
 /-- The names of a module's functions, in order. -/
@@ -601,10 +631,16 @@ theorem Func.WF.mem_names {env : Env Unit} {α : Type} [base ⊑ env] {fn : Func
     (m : Module.Raw env α) : Array Name :=
   m.funcs.mapK (·.name)
 
-/-- The set of a module's function names, which function references are looked up in. -/
-@[expose] def Module.Raw.funcSet {env : Env Unit} [base ⊑ env] {α : Type}
-    (m : Module.Raw env α) : NameSet :=
-  (NameSet.of? m.funcNames).getD ∅
+/-- Each function's name with its code type, in order. -/
+@[expose] def Module.Raw.funcSigs {env : Env Unit} [base ⊑ env] {α : Type}
+    (m : Module.Raw env α) : Array (Name × TypeExpr env) :=
+  m.funcs.mapK fun f => (f.name, f.codeType)
+
+/-- Each function's code type, by name, which function references are checked against: empty
+if two functions share a name. -/
+@[expose] def Module.Raw.codeTypes {env : Env Unit} [base ⊑ env] {α : Type}
+    (m : Module.Raw env α) : NameMap (TypeExpr env) :=
+  (NameMap.ofArray? m.funcSigs).getD ∅
 
 /-- A well-formed module. -/
 structure Module.Raw.WF {env : Env Unit} [base ⊑ env] {α : Type} (m : Module.Raw env α) :
@@ -613,14 +649,14 @@ structure Module.Raw.WF {env : Env Unit} [base ⊑ env] {α : Type} (m : Module.
   funcNamesUnique : m.funcNames.toList.Nodup
   /-- Every function is well formed. -/
   funcs : ∀ f ∈ m.funcs, f.WF
-  /-- Every function reference names a function of the module. -/
-  refs : ∀ f ∈ m.funcs, ∀ n ∈ f.funcRefs, n ∈ m.funcSet
+  /-- Every function reference names a function of the module, and fits its code type. -/
+  refs : ∀ f ∈ m.funcs, ∀ u ∈ f.funcRefs, OptHolds (m.codeTypes.find? u.target) u.Fits
 
 instance {env : Env Unit} [base ⊑ env] {α : Type} (m : Module.Raw env α) : Decidable m.WF :=
   have := Name.decNodup m.funcNames
-  let fs := m.funcSet
+  let cts := m.codeTypes
   decidable_of_iff (m.funcNames.toList.Nodup ∧ (∀ f ∈ m.funcs, f.WF) ∧
-      ∀ f ∈ m.funcs, ∀ n ∈ f.funcRefs, n ∈ fs)
+      ∀ f ∈ m.funcs, ∀ u ∈ f.funcRefs, OptHolds (cts.find? u.target) u.Fits)
     ⟨fun ⟨a, b, c⟩ => ⟨a, b, c⟩, fun ⟨a, b, c⟩ => ⟨a, b, c⟩⟩
 
 /-- A module with its well-formedness proof. -/
@@ -629,31 +665,34 @@ structure Module (env : Env Unit) [base ⊑ env] (α : Type) where
   wf : raw.WF
 
 /-- The names `check` gives for an ill-formed `m`: all of them if two coincide, otherwise
-those of the functions `bad` flags or that reference a function `m` does not define. -/
+those of the functions `bad` flags or that reference a function `m` does not define, or one
+at a type that does not fit its code type. -/
 private def Module.Raw.faulty {env : Env Unit} [base ⊑ env] {α : Type} (m : Module.Raw env α)
     (bad : Func env α → Bool) : Array Name :=
-  let names := m.funcNames
-  match NameSet.of? names with
-  | none => names
-  | some fs =>
-    (m.funcs.filter fun f => bad f || f.funcRefs.any fun n => !decide (n ∈ fs)).map (·.name)
+  match NameMap.ofArray? m.funcSigs with
+  | none => m.funcNames
+  | some cts =>
+    (m.funcs.filter fun f =>
+      bad f || f.funcRefs.any fun u => !decide (OptHolds (cts.find? u.target) u.Fits)).map
+      (·.name)
 
 /-- `m` with its well-formedness proof, or the names of its functions that are not well
-formed: those that fail `Func.WF` or reference a function `m` does not define, or all of them
-if `m` names a function twice. -/
+formed: those that fail `Func.WF` or have a reference that names no function of `m` or does
+not fit its target's code type, or all of them if `m` names a function twice. -/
 def Module.Raw.check {env : Env Unit} [base ⊑ env] {α : Type} (m : Module.Raw env α) :
     Except (Array Name) (Module env α) :=
   if h : m.WF then .ok ⟨m, h⟩ else .error (m.faulty fun f => !decide f.WF)
 
 /-- The module `name` of the well-formed functions `fs`, or the names `Module.Raw.check`
-gives.  Only the module's own rules are decided: distinct names, and references that name
-its functions. -/
+gives.  Only the module's own rules are decided: distinct names, and references that name its
+functions at types that fit. -/
 def Module.ofChecked {env : Env Unit} [base ⊑ env] {α : Type} (name : Name)
     (fs : Array {f : Func env α // f.WF}) (info : α) : Except (Array Name) (Module env α) :=
   let m : Module.Raw env α := { name, funcs := fs.map (·.val), info }
   have := Name.decNodup m.funcNames
-  let fs := m.funcSet
-  if h : m.funcNames.toList.Nodup ∧ ∀ f ∈ m.funcs, ∀ n ∈ f.funcRefs, n ∈ fs then
+  let cts := m.codeTypes
+  if h : m.funcNames.toList.Nodup ∧
+      ∀ f ∈ m.funcs, ∀ u ∈ f.funcRefs, OptHolds (cts.find? u.target) u.Fits then
     have hfs : ∀ f ∈ m.funcs, f.WF := fun f hf => by
       obtain ⟨g, -, rfl⟩ := Array.mem_map.mp hf
       exact g.property
@@ -667,19 +706,26 @@ public theorem Module.Raw.WF.nodup {env : Env Unit} [base ⊑ env] {α : Type}
     {m : Module.Raw env α} (h : m.WF) : (m.funcs.toList.map (·.name)).Nodup := by
   simpa [Module.Raw.funcNames, Array.mapK_eq_map_fun] using h.funcNamesUnique
 
-/-- The set a well-formed module checks function references against holds exactly the
-module's function names. -/
-public theorem Module.Raw.WF.mem_funcSet {env : Env Unit} [base ⊑ env] {α : Type}
-    {m : Module.Raw env α} (h : m.WF) (n : Name) :
-    n ∈ m.funcSet ↔ ∃ f ∈ m.funcs, f.name = n := by
-  obtain ⟨fs, hfs⟩ := Option.isSome_iff_exists.mp (NameSet.of?_isSome_iff.mpr h.funcNamesUnique)
-  rw [Module.Raw.funcSet, hfs, Option.getD_some, NameSet.mem_of? hfs, Module.Raw.funcNames,
-    Array.mapK_eq_map_fun, Array.mem_map]
+/-- The map a well-formed module checks function references against gives each function's
+code type, and nothing else. -/
+public theorem Module.Raw.WF.find?_codeTypes {env : Env Unit} [base ⊑ env] {α : Type}
+    {m : Module.Raw env α} (h : m.WF) (n : Name) (t : TypeExpr env) :
+    m.codeTypes.find? n = some t ↔ ∃ f ∈ m.funcs, f.name = n ∧ f.codeType = t := by
+  have hnd : (m.funcSigs.toList.map Prod.fst).Nodup := by
+    simpa [Module.Raw.funcSigs, Module.Raw.funcNames, Array.mapK_eq_map_fun,
+      Function.comp_def] using h.funcNamesUnique
+  obtain ⟨cts, hcts⟩ := Option.isSome_iff_exists.mp (NameMap.ofArray?_isSome_iff.mpr hnd)
+  rw [Module.Raw.codeTypes, hcts, Option.getD_some, NameMap.find?_ofArray? hcts,
+    Module.Raw.funcSigs, Array.mapK_eq_map_fun, Array.mem_map]
+  simp only [Prod.mk.injEq]
 
-/-- In a well-formed module, every function reference names one of its functions. -/
-public theorem Module.Raw.WF.ref_mem {env : Env Unit} [base ⊑ env] {α : Type}
-    {m : Module.Raw env α} (h : m.WF) {f : Func env α} (hf : f ∈ m.funcs) {n : Name}
-    (hn : n ∈ f.funcRefs) : ∃ g ∈ m.funcs, g.name = n :=
-  (h.mem_funcSet n).mp (h.refs f hf n hn)
+/-- In a well-formed module, every function reference names one of its functions, and fits
+that function's code type. -/
+public theorem Module.Raw.WF.ref_fits {env : Env Unit} [base ⊑ env] {α : Type}
+    {m : Module.Raw env α} (h : m.WF) {f : Func env α} (hf : f ∈ m.funcs) {u : FuncUse env}
+    (hu : u ∈ f.funcRefs) : ∃ g ∈ m.funcs, g.name = u.target ∧ u.Fits g.codeType := by
+  obtain ⟨t, ht, hfit⟩ := h.refs f hf u hu
+  obtain ⟨g, hg, hn, rfl⟩ := (h.find?_codeTypes u.target t).mp ht
+  exact ⟨g, hg, hn, hfit⟩
 
 end Strata.Mantle

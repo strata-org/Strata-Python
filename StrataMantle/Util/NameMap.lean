@@ -17,11 +17,13 @@ set_option autoImplicit false
 `NameSet` is a `NameMap Unit`.  A lookup computes one key and then compares `Nat` literals.
 
 * `NameMap.ofArray?`, `NameSet.of?`: build one, failing if a name occurs twice.
+* `NameSet.insertAll?`: add names to a set, failing at one already there.
 * `NameMap.find?`, `NameMap.contains`, `n ∈ m`: look a name up.
 
 `NameSet.of?_isSome_iff` is the duplicate check (`List.Nodup`) and `NameSet.mem_of?` says
 what the set holds; `NameMap.ofArray?_isSome_iff`, `find?_ofArray?` and `mem_ofArray?` are the
-map versions.
+map versions.  `insertAll?`'s lemmas, `insertAll?_isSome_iff` and `insertAll?_spec`, need the
+set `Ordered`, which `∅` is and `insertAll?` keeps.
 -/
 
 namespace Strata.Mantle
@@ -154,6 +156,61 @@ theorem mem_of? {ns : Array Name} {s : NameSet} (h : of? ns = some s) (n : Name)
   rw [NameMap.mem_ofArray? h n]
   simp only [List.map_toArray, List.map_map, Function.comp_def, List.map_id_fun', id_eq,
     List.mem_toArray]
+
+/-! ## Adding to a set -/
+
+/-- The search invariant of the tree: `insertAll?` keeps it, and `∅` has it. -/
+@[expose] def Ordered (s : NameSet) : Prop := s.tree.Ordered
+
+/-- `s` with each name of `ns` added, or `none` if one is already in `s` or occurs twice in
+`ns`. -/
+@[expose] def insertAll? (s : NameSet) : Array Name → Option NameSet
+  -- The kernel reduces the map on the list.
+  | ⟨l⟩ => (s.tree.insertArray? ⟨l.map fun n => (n.key, ())⟩).map NameMap.mk
+
+/-- The empty set is ordered. -/
+theorem ordered_empty : (∅ : NameSet).Ordered := List.Pairwise.nil
+
+/-- The empty set holds no name. -/
+theorem not_mem_empty (n : Name) : n ∉ (∅ : NameSet) := Bool.false_ne_true
+
+/-- In an ordered set, membership is a key of the tree. -/
+private theorem mem_iff_mem_keys {s : NameSet} (ho : s.Ordered) (n : Name) :
+    n ∈ s ↔ n.key ∈ s.tree.keys := NatTree23.isSome_find?_iff ho n.key
+
+/-- The keys `insertAll?` adds are those of `l`. -/
+private theorem mem_keys_map {l : List Name} {n : Name} :
+    n.key ∈ (l.map fun n => (n.key, ())).map Prod.fst ↔ n ∈ l := by
+  simp only [List.map_map, Function.comp_def, List.mem_map, Name.key_eq_key, exists_eq_right]
+
+/-- The duplicate check: `insertAll?` succeeds exactly when no name of `ns` occurs twice or is
+already in `s`. -/
+theorem insertAll?_isSome_iff {s : NameSet} {ns : Array Name} (ho : s.Ordered) :
+    (s.insertAll? ns).isSome = true ↔ ns.toList.Nodup ∧ ∀ n ∈ ns, n ∉ s := by
+  rcases ns with ⟨l⟩
+  rw [insertAll?, Option.isSome_map, NatTree23.insertArray?_isSome_iff ho, List.toList_toArray,
+    List.toList_toArray, List.map_map]
+  simp only [Function.comp_def, NameMap.nodup_map_key, List.mem_toArray, List.forall_mem_map,
+    mem_iff_mem_keys ho]
+
+/-- Where `insertAll?` succeeds, the result is ordered and holds the names of `ns` and of
+`s`. -/
+theorem insertAll?_spec {s t : NameSet} {ns : Array Name} (ho : s.Ordered)
+    (h : s.insertAll? ns = some t) : t.Ordered ∧ ∀ n, n ∈ t ↔ n ∈ ns ∨ n ∈ s := by
+  rcases ns with ⟨l⟩
+  rw [insertAll?, Option.map_eq_some_iff] at h
+  obtain ⟨u, hu, rfl⟩ := h
+  have hou := (NatTree23.insertArray?_spec ho hu).1
+  refine ⟨hou, fun n => ?_⟩
+  rw [mem_iff_mem_keys hou, mem_iff_mem_keys ho, NatTree23.mem_keys_insertArray? ho hu,
+    List.map_toArray, List.mem_toArray, mem_keys_map, List.mem_toArray]
+
+/-- Membership after a batch, in the set after it: the batch's names `ns`, spelled `ms`, were
+added to `s`, which holds what `p` says. -/
+theorem mem_of_insertAll? {s t : NameSet} {ns ms : Array Name} {p : Prop} {n : Name}
+    (ho : s.Ordered) (h : s.insertAll? ms = some t) (hm : ns = ms) (hp : p ↔ n ∈ s) :
+    n ∈ ns ∨ p ↔ n ∈ t := by
+  rw [(insertAll?_spec ho h).2 n, hm, hp]
 
 end NameSet
 

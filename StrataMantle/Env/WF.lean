@@ -284,17 +284,17 @@ end RegionSig.Raw
 
 namespace InsnDecl.Raw
 
-/-- An instruction is well formed when its parameter types, its return type if it has one, the
-signature of each region it takes and the payload types of each successor are well-formed types,
-and its variadic's type is a well-formed type or list, each in the scope of the variables the
-instruction binds; and when the names it binds (type parameters, arguments, the variadic,
-regions and successors) are pairwise distinct. -/
+/-- An instruction is well formed when its parameter types, its return type if it has one and
+the signature of each region it takes are well-formed types, and its variadic's type and each
+entry of each successor's payload are well-formed types or lists, each in the scope of the
+variables the instruction binds; and when the names it binds (type parameters, arguments, the
+variadic, regions and successors) are pairwise distinct. -/
 def WF (R : Name → Array Kind → Prop) (d : InsnDecl.Raw α) : Prop :=
   (∀ p ∈ d.argTypes, TypeExpr.WFType R d.scope p.type)
     ∧ (∀ v ∈ d.variadic, TypeExpr.WFRel R d.scope v.type)
     ∧ (∀ t ∈ d.returnType, TypeExpr.WFType R d.scope t)
     ∧ (∀ r ∈ d.regions, r.type.WF R d.scope)
-    ∧ (∀ s ∈ d.succs, ∀ t ∈ s.type, TypeExpr.WFType R d.scope t)
+    ∧ (∀ s ∈ d.succs, ∀ t ∈ s.type, TypeExpr.WFRel R d.scope t)
     ∧ d.paramNames.Nodup
 
 /-- Build well-formedness from the six component obligations. -/
@@ -303,7 +303,7 @@ theorem wf_mk {R : Name → Array Kind → Prop} {d : InsnDecl.Raw α}
     (hvar : ∀ v ∈ d.variadic, TypeExpr.WFRel R d.scope v.type)
     (hret : ∀ t ∈ d.returnType, TypeExpr.WFType R d.scope t)
     (hregions : ∀ r ∈ d.regions, r.type.WF R d.scope)
-    (hsuccs : ∀ s ∈ d.succs, ∀ t ∈ s.type, TypeExpr.WFType R d.scope t)
+    (hsuccs : ∀ s ∈ d.succs, ∀ t ∈ s.type, TypeExpr.WFRel R d.scope t)
     (hnames : d.paramNames.Nodup) : WF R d :=
   ⟨hargs, hvar, hret, hregions, hsuccs, hnames⟩
 
@@ -324,10 +324,10 @@ instruction's type variables. -/
 theorem wf_regions {R : Name → Array Kind → Prop} {d : InsnDecl.Raw α} (h : WF R d) :
     ∀ r ∈ d.regions, r.type.WF R d.scope := h.2.2.2.1
 
-/-- Every payload type of every successor of a well-formed instruction is well formed, under
-the instruction's type variables. -/
+/-- Every payload entry of every successor of a well-formed instruction is well formed, a
+type or a list, under the instruction's type variables. -/
 theorem wf_succs {R : Name → Array Kind → Prop} {d : InsnDecl.Raw α} (h : WF R d) :
-    ∀ s ∈ d.succs, ∀ t ∈ s.type, TypeExpr.WFType R d.scope t := h.2.2.2.2.1
+    ∀ s ∈ d.succs, ∀ t ∈ s.type, TypeExpr.WFRel R d.scope t := h.2.2.2.2.1
 
 /-- No two of the type parameters, arguments, variadic, regions and successors of a
 well-formed instruction share a name. -/
@@ -1359,7 +1359,7 @@ def checkAt (env : Env.Raw α) (i : Nat) : Decl.Raw α → Bool
       && d.variadic.all (fun v => TypeExpr.Raw.checkAt env i d.scope v.type)
       && d.returnType.all (TypeExpr.Raw.checkTypeAt env i d.scope)
       && d.regions.all (fun r => r.type.checkAt env i d.scope)
-      && d.succs.all (fun s => s.type.all (TypeExpr.Raw.checkTypeAt env i d.scope))
+      && d.succs.all (fun s => s.type.all (TypeExpr.Raw.checkAt env i d.scope))
       && decide d.paramNames.Nodup
 
 /-- Soundness of `Decl.Raw.checkAt`: a declaration it accepts is well formed at
@@ -1378,7 +1378,7 @@ theorem wf_of_checkAt {env : Env.Raw α} {i : Nat} {d : Decl.Raw α} (h : d.chec
       fun v hv => TypeExpr.Raw.wfRel_of_checkAt _ (hvar v (by simpa using hv)),
       fun t ht => TypeExpr.Raw.wfType_of_checkTypeAt _ (hret t (by simpa using ht)),
       fun r hr => RegionSig.Raw.wf_of_checkAt (hregions r hr),
-      fun s hs t ht => TypeExpr.Raw.wfType_of_checkTypeAt _ (hsuccs s hs t ht),
+      fun s hs t ht => TypeExpr.Raw.wfRel_of_checkAt _ (hsuccs s hs t ht),
       of_decide_eq_true hnames⟩
 
 end Decl.Raw
@@ -1786,9 +1786,8 @@ theorem checkAt_caseDecl {env : Env.Raw α} {g : DataGroup α TypeExpr.Raw} {n p
   · simp
   · obtain ⟨c, hc, rfl⟩ := Array.mem_map.mp hs
     obtain ⟨q, hq, rfl⟩ := Array.mem_map.mp ht
-    obtain ⟨⟨hk, hpay⟩, -⟩ := hctors c hc q hq
-    exact (Bool.and_eq_true _ _).mpr
-      ⟨hk, TypeExpr.Raw.check_mono hRR _ (TypeExpr.Raw.check_of_checkPayload hNR _ hpay)⟩
+    obtain ⟨⟨-, hpay⟩, -⟩ := hctors c hc q hq
+    exact TypeExpr.Raw.check_mono hRR _ (TypeExpr.Raw.check_of_checkPayload hNR _ hpay)
   · simpa [InsnDecl.Raw.paramNames, DatatypeDecl.paramNames, Function.comp_def]
       using (hn m hmm).2
 

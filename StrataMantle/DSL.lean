@@ -80,8 +80,9 @@ public environment Demo extends Base where
 An `insn`'s binders come in order: arguments `(x y : τ)`, at most one variadic `(*xs : τ)`
 (any number of operands of type `τ`) or `(*xs : cs)` (one operand per element of the list
 `cs`, such as a list parameter or a literal), as the annotation's kind says, regions
-`(&r (p : τ) : σ)` entered with `p` and left with a `σ`, then successors `(^k (y : τ))`.  Only
-operands may be a spread: a region's parameters and a successor's payload are one value each.
+`(&r (p : τ) : σ)` entered with `p` and left with a `σ`, then successors `(^k (y : τ))`.  A
+successor's payload may spread a list too, `(^k (*ys : cs))`, one value per element of `cs`;
+a region's parameters and a constructor's fields are one value each.
 `(^k)` passes nothing, and `(&a &b …)` or `(^a ^b …)` declares several alike.  A successor's
 payload names are documentation; only their types are kept.
 
@@ -107,12 +108,16 @@ and in every refinement of it:
 * `@[simp] mem_env : n ∈ env ↔ n ∈ [ℓ₁, ℓ₂, …]`, the same names in the same order, each a
   `Name` literal such as `.str (.str .base "base") "Unit"`, so `simp` decides membership in
   `env` without unfolding anything.
+* `nameSet : NameSet`, the same names as a literal 2-3 tree, with `nameSet_ordered` and
+  `mem_nameSet : n ∈ env ↔ n ∈ nameSet`.  Each stage's freshness check adds that stage's
+  names to the set before it, from the parent's `nameSet`, so the kernel adds each name once,
+  in the stage that declares it.
 * `toP`, the instance `P.env ⊑ e` (`Demo.toBase`).
 * For a `type` or `data` `T` with `n` parameters: `T.name`, its environment name; `T.ref`, a
   `TypeRef e n`; `T.ty`, a `TypeExpr e s` taking `n` arguments, a `TypeList e s` for a list
-  parameter and a `TypeExpr e s` for any other; and the `@[simp]` theorems
-  `T.name_ref` and `T.decl_ref`, its name and declaration, which a child's proofs use for
-  the types it inherits.
+  parameter and a `TypeExpr e s` for any other; the `@[simp]` theorems
+  `T.name_ref` and `T.decl_ref`, its name and declaration; and `T.toRaw_ty`, the raw form of
+  `T.ty` applied.  A child's proofs use the theorems for the types it inherits.
 * For a `data` `T (a …)` with constructors `c₁ (x : τ) …`: the terminal instruction
   `T.case [a …] (scrutinee : T a …) (^c₁ (x : τ)) …`, environment name `T`'s followed by
   `case` (`demo.Box.case`), with one successor per constructor, in declaration order,
@@ -137,16 +142,19 @@ binder is anonymous.
 The interface has the command's visibility.  Everything else, the stages that build `env`
 and their lemmas, is `private`, in `E.Internal`.  In a public environment in a `module`:
 
-* the names (`abbrev`s), `names`, `T.ty`, `n.ty`, `o.sig`, `T.c.sig` and `T.case.sig` are
-  `@[expose]`, so `rfl`, `decide` and `decide +kernel` unfold them downstream, and `#v[…]`
+* the names (`abbrev`s), `names`, `nameSet`, `T.ty`, `n.ty`, `o.sig`, `T.c.sig` and
+  `T.case.sig` are `@[expose]`, so `rfl`, `decide` and `decide +kernel` unfold them downstream, and `#v[…]`
   checks against `o.sig.typeArgc`;
 * `env`, `T.ref`, `T.c`, `T.case`, `o` and the theorems are not.  `T.name_ref` and
   `T.decl_ref` stand in for unfolding `T.ref`.  A `decide +kernel` that evaluates `env`
   itself, such as `Func.WF`, needs `import all` of the declaring module and of Mantle's
   modules it reduces through.
 
-The emitted proofs are by `decide`, `decide +kernel` and `simp`, never `native_decide`, so the
-kernel checks every environment.
+The emitted proofs are by `decide`, `decide +kernel`, `simp`, lemma applications and
+`mantle_kernel_rfl`, an `Eq.refl` that only the kernel checks, never `native_decide`, so the
+kernel checks every environment.  A reference's cast to its interface signature is a term
+with one lemma application per node of each type (`InsnSig.carry_eq_of_toRaw`), so a type
+nested forty deep elaborates as a flat one does.
 
 ## Checks
 
@@ -156,10 +164,11 @@ there is one.  The checks:
 * names: an environment name declared twice, here or in an ancestor; a dotted declared name;
   two declarations with one Lean name, or one taking a name another generates (a type `T`
   and an instruction `T` would both define `T.name`); the reserved Lean names `env`, `names`,
-  `mem_env`, `Internal` and `toP`, and the constructor names `ref`, `ty`, `name`, `name_ref`,
-  `decl_ref` and `case`; a case instruction's environment name declared otherwise; a
-  constructor named as its datatype's parameter or `scrutinee`, which its case instruction
-  binds.  A clash is fixed by a new Lean name and `as` for the old environment name.
+  `mem_env`, `nameSet`, `nameSet_ordered`, `mem_nameSet`, `Internal` and `toP`, and the
+  constructor names `ref`, `ty`, `name`, `name_ref`, `decl_ref`, `toRaw_ty` and `case`; a case
+  instruction's environment name declared otherwise; a constructor named as its datatype's
+  parameter or `scrutinee`, which its case instruction binds.  A clash is fixed by a new Lean
+  name and `as` for the old environment name.
 * scope: an unknown or ambiguous type, an unknown `open`ed namespace, an unmatched `end`,
   anything but `data` in `mutual`;
 * types: an arity mismatch, a type parameter applied to arguments, a kind mismatch (a type
@@ -169,8 +178,9 @@ there is one.  The checks:
   elements of a list literal taking its position's polarity;
 * binders: a duplicate parameter name (type parameters, arguments, the variadic, regions and
   successors share one namespace), binders out of order, two variadics, a variadic binding
-  several names, a constructor with anything but arguments, a spread field, region parameter
-  or successor payload, a terminal instruction with a result type or another without one;
+  several names, a constructor with anything but arguments, a spread field or region
+  parameter, a spread over a type in a successor's payload, a terminal instruction with a
+  result type or another without one;
 * the block: no type, datatype or instruction; a missing `Env` or `Env.WF` import.
 
 If the generated code fails to elaborate anyway, that is an elaborator bug, reported as an
@@ -187,10 +197,10 @@ Base.refNew.sig` in any refinement of `Demo`.  An environment has one parent.
 
 A child reads its parent from the record every `environment` command leaves, which crosses
 module boundaries, not by evaluating `P.env`; the record lists the names, which `mem_env`
-spells out.  It also uses the parent's `names` and `mem_env`, and its types' `ref`, `ty`,
-`name`, `name_ref` and `decl_ref`, so the parent must be at least as visible as the child: a
-public child cannot extend a private environment, and in a `module` its file `public import`s
-`P`'s module.  A private child needs only `import`.  Each mistake is reported at the `extends` argument.
+spells out.  It also uses the parent's `names`, `mem_env`, `nameSet`, `nameSet_ordered` and
+`mem_nameSet`, and its types' `ref`, `ty`, `name`, `name_ref`, `decl_ref` and `toRaw_ty`, so
+the parent must be at least as visible as the child: a public child cannot extend a private
+environment, and in a `module` its file `public import`s `P`'s module.  A private child needs only `import`.  Each mistake is reported at the `extends` argument.
 
 ## Modules
 

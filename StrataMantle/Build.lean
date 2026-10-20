@@ -46,10 +46,12 @@ The operations:
   failed.
 
 An application's type arguments, the last parameter of `emitApply`, `emitApplyWith` and
-`terminate`, are a `KindedTypeArgsFor` the instruction, so Lean checks their count and kinds at
-the call.  Left out, they are inferred from the result type; those that do not occur in it, and
-a terminal instruction's, are written `(typeArgs := ta[…])`, as in
-`emitApply n Base.Unit.ty Base.refSet #[cell, v] (typeArgs := ta[Py.Value])`.
+`terminate`, are a `TypeArgsOf` the instruction.  Written `(typeArgs := ta[…])`, as in
+`emitApply n Base.Unit.ty Base.refSet #[cell, v] (typeArgs := ta[Py.Value])`, Lean checks their
+count and kinds at the call.  Left out, they are inferred from the result type when the code is
+compiled, or, if it does not fix them all, when the builder runs, from the operands' types and
+the result type: the builder keeps each value's type for this.  Arguments that neither fixes,
+or that a list splicing two parameters leaves ambiguous, are an error that says to write them.
 
 Misuse is an error, recorded in the state: an instruction emitted with no block open, a block
 opened while another is open, a block finished when none is open, and a region or function
@@ -106,6 +108,8 @@ structure State (env : Env Unit) (α : Type) where
   info : α
   nextVal : Nat := 0
   names : Array Name := #[]
+  /-- The type of each value, by id. -/
+  types : Array (TypeExpr env) := #[]
   /-- Next suffix per value-name base, so that two `x`es are `x.0` and `x.1`. -/
   suffixes : NameMap Nat := ∅
   /-- Next suffix per label base, so that two `bb`s are `bb.0` and `bb.1`. -/
@@ -169,6 +173,7 @@ def freshVal (stem : Name) (t : TypeExpr env) : BuildM env α (ValDecl env) := d
   set { s with
     nextVal := s.nextVal + 1
     names := s.names.push (.num stem suffix)
+    types := s.types.push t
     suffixes := s.suffixes.insert stem (suffix + 1) }
   return ⟨⟨s.nextVal⟩, t⟩
 
@@ -189,10 +194,13 @@ def emitConst [base ⊑ env] (name : Name) (c : Const) (info : Option α := none
   let d ← freshVal name c.typeOf
   emit d (.const (← resolveInfo info) d c)
 
-/-- Emit a code pointer to `target`, a function of the module: the constant `.func target`. -/
-def emitFunc [base ⊑ env] (target : Name) (info : Option α := none) :
-    BuildM env α ValId :=
-  emitConst (.str .base "code") (.func target) info
+/-- Emit a code pointer to `target`, a function of the module, at `ty`: the target's code
+type, or the untyped `base.Code`.  The module checks it, so the target may be built after the
+reference. -/
+def emitFunc [base ⊑ env] (target : Name) (ty : TypeExpr env) (info : Option α := none) :
+    BuildM env α ValId := do
+  let d ← freshVal (.str .base "code") ty
+  emit d (.const (← resolveInfo info) d (.func target))
 
 /-- The type arguments `typeArgs` of an application of `r`, checked against its kinds, or
 `none` with an error recorded if their count or a kind is wrong.  It is for a caller that has
@@ -203,17 +211,32 @@ def checkTypeArgs {isig : InsnSig env} (r : InsnRef env isig) {type : Option (Ty
   | .ok ta => return some ta
   | .error msg => error s!"{nameText r.name}: {msg}"; return none
 
+/-- The type arguments of an application of `r` to `args`, whose result has type `type`, `none`
+for a terminal instruction: as given, or inferred from the operands' types and `type`.  If they
+cannot be inferred, `none`, with an error recorded. -/
+def resolveTypeArgs {isig : InsnSig env} (r : InsnRef env isig) {type : Option (TypeExpr env)}
+    (args : Array ValId) : TypeArgsOf r type → BuildM env α (Option (TypeArgs env isig.scope))
+  | .given k => return some k.toTypeArgs
+  | .infer => do
+    let types := (← get).types
+    let some ops := args.mapM (types[·.id]?)
+      | error s!"{nameText r.name}: an operand is not a value of this function"; return none
+    match isig.inferTypeArgs? type ops with
+    | .ok a => return some a
+    | .error e => error (e.text (nameText r.name)); return none
+
 /-- `emitApply`, with regions built in any monad `BuildM` lifts into, such as a front end's
 builder.  Its type arguments are `emitApply`'s. -/
 def emitApplyWith {m : Type → Type} [Monad m] [MonadLiftT (BuildM env α) m] {isig : InsnSig env}
     (name : Name) (type : TypeExpr env) (r : InsnRef env isig) (args : Array ValId)
     (succs : Array BlockValue := #[]) (regions : Array (m (Region env α)) := #[])
-    (info : Option α := none) (typeArgs : KindedTypeArgsFor r (some type) := by infer_type_args) :
+    (info : Option α := none) (typeArgs : TypeArgsOf r (some type) := by infer_type_args) :
     m ValId := do
   let d ← (freshVal name type : BuildM env α (ValDecl env))
   let rs ← regions.mapM id
-  (do emit d (.apply (← resolveInfo info) d r typeArgs.toTypeArgs args succs rs) :
-    BuildM env α ValId)
+  (do
+    let some ta ← resolveTypeArgs r args typeArgs | return d.id
+    emit d (.apply (← resolveInfo info) d r ta args succs rs) : BuildM env α ValId)
 
 /-- Emit an application of an operation, a datatype's constructor included.  `type` is the
 result's type, the operation's return type at `typeArgs`.  `succs` are the blocks it may
@@ -222,11 +245,13 @@ transfer to, one per declared successor, and `regions` emit its nested bodies, e
 result, then what the regions define.
 
 `typeArgs`, written `ta[…]`, has one argument per type parameter, each of its kind, checked by
-Lean.  Left out, it is inferred from `type` by `infer_type_args`. -/
+Lean.  Left out, it is inferred from `type` by `infer_type_args`, or else from the operands'
+types and `type` when the builder runs.  If that fails, nothing is emitted, and the error is
+recorded. -/
 def emitApply {isig : InsnSig env} (name : Name) (type : TypeExpr env)
     (r : InsnRef env isig) (args : Array ValId) (succs : Array BlockValue := #[])
     (regions : Array (BuildM env α (Region env α)) := #[]) (info : Option α := none)
-    (typeArgs : KindedTypeArgsFor r (some type) := by infer_type_args) :
+    (typeArgs : TypeArgsOf r (some type) := by infer_type_args) :
     BuildM env α ValId := do
   emitApplyWith name type r args succs regions info typeArgs
 
@@ -281,15 +306,17 @@ def finishBlock (term : Terminator env α) (info : Option α := none) : BuildM e
     set { s with body := { blocks := s.body.blocks.push b } }
 
 /-- Close the open block by applying the terminal operation `r`.  Its type arguments are
-`emitApply`'s; with no result to infer them from, they are written out unless there are
-none. -/
+`emitApply`'s; with no result, they are inferred from the operands' types.  If that fails, the
+block is dropped, and the error is recorded. -/
 def terminate {isig : InsnSig env} (r : InsnRef env isig) (args : Array ValId := #[])
     (succs : Array BlockValue := #[]) (regions : Array (BuildM env α (Region env α)) := #[])
-    (info : Option α := none) (typeArgs : KindedTypeArgsFor r none := by infer_type_args) :
+    (info : Option α := none) (typeArgs : TypeArgsOf r none := by infer_type_args) :
     BuildM env α Unit := do
   let i ← resolveInfo info
   let rs ← regions.mapM id
-  finishBlock (.apply i r typeArgs.toTypeArgs args succs rs) (some i)
+  match ← resolveTypeArgs r args typeArgs with
+  | some ta => finishBlock (.apply i r ta args succs rs) (some i)
+  | none => modify fun s => { s with body := { s.body with label := none } }
 
 /-- Close the open block with `jump k`. -/
 def jump [base ⊑ env] (k : BlockValue) (info : Option α := none) : BuildM env α Unit := do

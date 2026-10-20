@@ -277,7 +277,7 @@ private def refInLoop : Built :=
     let zero ← emitConst (.str .base "zero") (.int 0)
     let i ← freshVal (.str .base "i") intT
     let body ← region #[i] (base := "body") do
-      let _ ← Build.emitFunc (.str .base "counter")
+      let _ ← Build.emitFunc (.str .base "counter") Base.Code.ty
       finishBlock (.ret () (← emitConst (.str .base "t") (.bool false)))
     let done ← freshLabel "done"
     finishBlock (.apply () Demo.loop ⟨#[.ty intT], rfl⟩ #[zero] #[goto done] #[body])

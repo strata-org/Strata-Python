@@ -19,8 +19,9 @@ Mantle separates the vocabulary a language provides from the programs written in
   `[*as, Int]`. The DSL that writes environments accepts at most one splice in a literal, at any
   position, as in `[Int, *as, Bool]`, so that inference from a result type has one answer. An
   instruction's variadic operands are any
-  number of one type, or one per element of a list; a constructor's fields, a region's
-  parameters and a block's parameters are one value each. An application passes an argument
+  number of one type, or one per element of a list, and a successor's payload may likewise
+  pass one value per element of a list; a constructor's fields, a region's parameters and a
+  block's parameters are one value each. An application passes an argument
   of its parameter's kind for each type parameter.
 * A **program** is a module of functions written against one environment. A function is a
   set of blocks. A block takes parameters, runs a sequence of instructions, and ends with a
@@ -53,7 +54,9 @@ instructions its environment declares, at their declared types, and passes each 
 arguments it expects. Lean's types guarantee that every reference to a type or instruction
 resolves; a checker decides the rest. A function is checked on its own, and a module is
 checked from its functions: their names are distinct, and every reference to a function names
-one of them. A `Module.Raw` is a module as built, which may not be well formed; it still
+one of them, at its code type. A function's code type is `base.Fn as r`, with `as` its
+parameters' types and `r` its return type, and `base.callCode` calls through a value of that
+type. A reference may instead have the untyped `base.Code`, which cannot be called. A `Module.Raw` is a module as built, which may not be well formed; it still
 prints, in full, for diagnostics. A `Module` is one with its proof of well-formedness, and is
 the same data at run time.
 

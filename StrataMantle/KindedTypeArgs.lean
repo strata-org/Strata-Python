@@ -5,6 +5,7 @@
 -/
 module
 public import StrataMantle.Env
+public import StrataMantle.Env.TypeExprMatch
 import StrataMantle.Env.WF
 public meta import Lean.Elab.Term
 public meta import Lean.Elab.Tactic.Basic
@@ -32,9 +33,18 @@ terminal instruction; it does not constrain the arguments, and is there for infe
 * `infer_type_args`, the builder's default, infers them from the result type, by matching the
   signature's result type against `type`.  A list literal in it may splice one list parameter
   among other elements: those match the caller's elements at either end, and the parameter
-  binds the run between them.  Parameters that do not occur in the result, those of a terminal
-  instruction, and those of a literal that splices two lists, must be written with `ta[…]`.
+  binds the run between them.  For a `KindedTypeArgsFor` goal, parameters that do not occur in
+  the result, those of a terminal instruction, and those of a literal that splices two lists,
+  must be written with `ta[…]`; for the builder's `TypeArgsOf`, the first two are left to the
+  builder (below).
 * `KindedTypeArgs.check?` checks arguments given as data, an array of `TypeArg`s.
+
+The builder takes an application's type arguments as a `TypeArgsOf r type`: `given`, written
+or inferred from the result type when the code is compiled, or `infer`, which `infer_type_args`
+gives when the result type does not fix them all.  The builder then infers them when it runs,
+with `InsnSig.inferTypeArgs?`, from the operands' types and the result type, by the matcher of
+`Env/TypeExprMatch.lean`.  So `callCode`, whose argument list occurs only in its operands' types,
+needs no `ta[…]`.
 
 `ta[…]` and `infer_type_args` are scoped to `Strata.Mantle`, so `ta[` is a token only where
 that namespace is open.  The builder's default argument is already parsed, so a caller outside
@@ -131,6 +141,90 @@ terminal instruction.  `type` does not constrain them: it is there for `infer_ty
 @[expose, reducible] def KindedTypeArgsFor {α : Type} {env : Env α} {isig : InsnSig env}
     (_r : InsnRef env isig) (_type : Option (TypeExpr env)) : Type :=
   KindedTypeArgs env #[] isig.scope.toList
+
+/-- An application's type arguments as the builder takes them: `given`, or `infer`, left for
+the builder to infer from the operands' types and the result type when it runs. -/
+inductive TypeArgsOf {α : Type} {env : Env α} {isig : InsnSig env} (r : InsnRef env isig)
+    (type : Option (TypeExpr env)) where
+  /-- Written with `ta[…]`, or inferred from the result type when the code is compiled. -/
+  | given (args : KindedTypeArgsFor r type)
+  /-- To infer when the builder runs. -/
+  | infer
+
+/-! ## Inference from the operands -/
+
+/-- Why an application's type arguments could not be inferred. -/
+inductive InferError where
+  /-- The operands' or the result's types do not fit the signature at any arguments. -/
+  | mismatch
+  /-- A list in the signature splices these parameters, two or more, whose lengths nothing
+  fixes. -/
+  | ambiguous (params : List String)
+  /-- These parameters occur in no operand's type and not in the result type. -/
+  | missing (params : List String)
+deriving DecidableEq, Repr
+
+/-- `ps`, each in backquotes, separated by commas. -/
+private def quoted (ps : List String) : String := ", ".intercalate (ps.map (s!"`{·}`"))
+
+/-- The error, for an application of the instruction `who`. -/
+def InferError.text (who : String) : InferError → String
+  | .mismatch => s!"cannot infer the type arguments of {who}: the types of its operands and \
+      result do not fit its signature"
+  | .ambiguous ps => s!"cannot infer the type arguments of {who}: a list in its signature \
+      splices {quoted ps}, whose lengths nothing fixes; pass them with `(typeArgs := ta[…])`"
+  | .missing ps => s!"cannot infer type argument(s) {quoted ps} of {who}: they occur in no \
+      operand's type and not in its result type; pass them with `(typeArgs := ta[…])`"
+
+namespace InsnSig
+
+variable {α : Type} {env : Env α}
+
+/-- Each type of `isig` that the operands' types and the result type fix, with that type, in
+the order inference solves them: the result type, then the operands', a spread's as one list.
+`none` if there are too few or too many operands. -/
+def inferPairs (isig : InsnSig env) (result? : Option (TypeExpr env))
+    (operands : Array (TypeExpr env)) : Option (List (TypeExpr.Raw × TypeExpr.Raw)) :=
+  let res := match isig.returnType, result? with
+    | some p, some t => [(p.toRaw, t.toRaw)]
+    | _, _ => []
+  let fixed := isig.argTypes.size
+  if operands.size < fixed then none
+  else
+    let args := (isig.argTypes.toList.zip operands.toList).map fun (p, t) =>
+      (p.type.toRaw, t.toRaw)
+    let rest := operands.toList.drop fixed
+    match isig.variadic with
+    | none => if rest.isEmpty then some (res ++ args) else none
+    | some v =>
+      match v.type.kind with
+      | .type => some (res ++ args ++ rest.map fun t => (v.type.toRaw, t.toRaw))
+      | .list => some (res ++ args ++ [(v.type.toRaw, .list ⟨rest.map (·.toRaw)⟩)])
+
+/-- The type arguments that give an application of `isig` the operands' types `operands` and,
+if given, the result type `result?`, or why there are none or several.  The arguments are
+found by matching (`TypeExpr.Raw.matchAll`), so they are the only ones on the parameters they
+fix (`matchAll_complete`); each is then checked. -/
+def inferTypeArgs? (isig : InsnSig env) (result? : Option (TypeExpr env))
+    (operands : Array (TypeExpr env)) : Except InferError (TypeArgs env isig.scope) := do
+  let some pts := isig.inferPairs result? operands | throw .mismatch
+  let name (i : Nat) : String := (isig.typeParams[i]?.map (·.name)).getD "?"
+  let σ ← (TypeExpr.Raw.matchAll isig.scope pts (.replicate isig.scope.size none)).mapError
+    fun
+    | .mismatch => .mismatch
+    | .ambiguous vs => .ambiguous (vs.eraseDups.map name)
+  let missing := (List.range σ.size).filter fun i => (σ[i]?.join).isNone
+  unless missing.isEmpty do throw (.missing (missing.map name))
+  let args ← σ.mapM fun
+    | some x => match TypeArg.check? env #[] x with
+      | some a => .ok a
+      | none => .error .mismatch
+    | none => .error .mismatch
+  match TypeArgs.check? isig.scope args with
+  | .ok a => pure a
+  | .error _ => throw .mismatch
+
+end InsnSig
 
 end
 
@@ -442,8 +536,10 @@ def paramNames (isig : Expr) : MetaM (List String) := do
     | .lit (.strVal s) => return s
     | _ => return "?"
 
-/-- Infer the type arguments the goal `KindedTypeArgsFor r type` asks for. -/
-def inferArgs (goal : Expr) : MetaM Expr := do
+/-- Infer the type arguments the goal `KindedTypeArgsFor r type` asks for: `.ok` the
+arguments, or `.error` why the result type does not fix them all.  A result type that does not
+match, or is ambiguous, is an exception. -/
+def inferArgsCore (goal : Expr) : MetaM (Except MessageData Expr) := do
   let goal ← instantiateMVars goal
   let some (r, isig, type) := match_expr goal with
       | KindedTypeArgsFor _ _ isig r type => some (r, isig, type)
@@ -455,20 +551,20 @@ def inferArgs (goal : Expr) : MetaM Expr := do
       | _ => pure none
     | throwError "infer_type_args: the goal is not the type arguments of an application"
   let some kinds ← kindsOf? ks
-    | throwError "cannot infer the type arguments of {r}: the kinds of its type parameters do \
-        not reduce to a list; pass them with `(typeArgs := ta[…])`"
-  if kinds.isEmpty then return ← chain env scope []
+    | return .error m!"cannot infer the type arguments of {r}: the kinds of its type parameters \
+        do not reduce to a list; pass them with `(typeArgs := ta[…])`"
+  if kinds.isEmpty then return .ok (← chain env scope [])
   let hint := "pass them with `(typeArgs := ta[…])`"
   let ret ← whnf (← mkAppM ``InsnSig.returnType #[isig])
   let some pat := match_expr ret with
       | Option.some _ p => some p
       | _ => none
-    | throwError "cannot infer the type arguments of {r}: it is terminal, with no result type \
-        to infer them from; {hint}"
+    | return .error m!"cannot infer the type arguments of {r}: it is terminal, with no result \
+        type to infer them from; {hint}"
   let some tgt := match_expr (← whnf type) with
       | Option.some _ t => some t
       | _ => none
-    | throwError "cannot infer the type arguments of {r}: no result type is given; {hint}"
+    | return .error m!"cannot infer the type arguments of {r}: no result type is given; {hint}"
   let (ok, bs) ← (matchTy m!"{r}" pat tgt).run (Array.replicate kinds.length none)
   unless ok do
     throwError "cannot infer the type arguments of {r}: its result type\
@@ -477,9 +573,27 @@ def inferArgs (goal : Expr) : MetaM Expr := do
   let missing := (names.zip bs.toList).filterMap fun (n, b) => if b.isNone then some n else none
   unless missing.isEmpty do
     let missing := ", ".intercalate (missing.map (s!"`{·}`"))
-    throwError "cannot infer type argument(s) {missing} of {r}: they do not occur in its result \
-      type{indentExpr (← forMessage pat)}\n{hint}"
-  chain env scope (kinds.zip (bs.toList.filterMap id))
+    return .error m!"cannot infer type argument(s) {missing} of {r}: they do not occur in its \
+      result type{indentExpr (← forMessage pat)}\n{hint}"
+  return .ok (← chain env scope (kinds.zip (bs.toList.filterMap id)))
+
+/-- `inferArgsCore`, failing where the result type does not fix the arguments. -/
+def inferArgs (goal : Expr) : MetaM Expr := do
+  match ← inferArgsCore goal with
+  | .ok e => return e
+  | .error msg => throwError msg
+
+/-- The type arguments a goal asks for: inferred from the result type for
+`KindedTypeArgsFor r type`; for `TypeArgsOf r type`, `given` those, or `infer` where the result
+type does not fix them all. -/
+def inferGoal (goal : Expr) : MetaM Expr := do
+  let goal ← instantiateMVars goal
+  match_expr goal with
+  | TypeArgsOf α env isig r type =>
+    match ← inferArgsCore (← mkAppOptM ``KindedTypeArgsFor #[α, env, isig, r, type]) with
+    | .ok e => mkAppOptM ``TypeArgsOf.given #[α, env, isig, r, type, e]
+    | .error _ => mkAppOptM ``TypeArgsOf.infer #[α, env, isig, r, type]
+  | _ => inferArgs goal
 
 end TypeArgElab
 
@@ -497,10 +611,8 @@ open Lean Elab Term Meta TypeArgElab
 
 namespace TypeArgElab
 
-@[term_elab typeArgsLit] def elabTypeArgsLit : TermElab := fun stx expected? => do
-  tryPostponeIfNoneOrMVar expected?
-  let some expected := expected?
-    | throwError "ta[…]: the type arguments' kinds are not known here"
+/-- `ta[…]` at the expected type `expected`, a `KindedTypeArgs`. -/
+def elabKinded (stx : Syntax) (expected : Expr) : TermElabM Expr := do
   let `(ta[$es,*]) := stx | throwUnsupportedSyntax
   let (env, scope, ks?, who?) ← expectedArgs expected
   let some ks := ks? | do
@@ -515,9 +627,21 @@ namespace TypeArgElab
     return (k, ← elabArg who? env scope i k e)
   chain env scope as
 
+@[term_elab typeArgsLit] def elabTypeArgsLit : TermElab := fun stx expected? => do
+  tryPostponeIfNoneOrMVar expected?
+  let some expected := expected?
+    | throwError "ta[…]: the type arguments' kinds are not known here"
+  let expected ← instantiateMVars expected
+  -- The builder's form: the arguments, given.
+  match_expr expected with
+  | TypeArgsOf α env isig r type =>
+    let k ← elabKinded stx (← mkAppOptM ``KindedTypeArgsFor #[α, env, isig, r, type])
+    mkAppOptM ``TypeArgsOf.given #[α, env, isig, r, type, k]
+  | _ => elabKinded stx expected
+
 @[tactic inferTypeArgs] def evalInferTypeArgs : Tactic.Tactic := fun _ =>
   Tactic.liftMetaTactic fun g => do
-    let e ← inferArgs (← g.getType)
+    let e ← inferGoal (← g.getType)
     unless ← isDefEq (← inferType e) (← g.getType) do
       throwError "infer_type_args: the inferred arguments{indentExpr e}\ndo not have the \
         goal's type"

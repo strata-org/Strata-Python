@@ -123,7 +123,7 @@ private def divName : Name := .str .base "div"
 /-- `div (a b : Int) (^err (msg : String)) : Int`. -/
 private def divSig : InsnSig base :=
   { ann := (), argTypes := #[⟨"a", intT⟩, ⟨"b", intT⟩],
-    returnType := intT, succs := #[⟨"err", #[strT]⟩] }
+    returnType := intT, succs := #[⟨"err", #[.ty strT]⟩] }
 
 /-- `div` is not a base name. -/
 private theorem divFresh : divName ∉ base := by rw [Base.mem_env]; decide
@@ -459,7 +459,9 @@ private def spare (l : Label) : Block base Unit :=
 
 /-! ## Function references
 
-A function-reference constant has type `base.Code` and names a function of the module. -/
+A function-reference constant names a function of the module, and has that function's code
+type, `base.Fn` of its parameter types and its return type, or the untyped `base.Code`.  The
+module decides both: a function is well formed with a reference at any type. -/
 
 private def codeT : TypeExpr base := Base.Code.ty
 
@@ -486,7 +488,22 @@ private def refModule (target : Name) (type : TypeExpr base := codeT) :
 -- A reference to a function the module does not define.
 #guard ¬ Module.Raw.WF (refModule (.str .base "g"))
 
--- A code pointer declared at a type other than `base.Code`.
+/-- `f`'s code type: it takes a `Bool` and returns an `Int`. -/
+private def fnBoolIntT : TypeExpr base := Base.Fn.ty (.lit #[.ty boolT]) intT
+
+#guard f.codeType == fnBoolIntT
+#guard (refTo (.str .base "f")).codeType == Base.Fn.ty (.lit #[]) unitT
+
+-- A reference at its target's code type, to another function and to itself.
+#guard Module.Raw.WF (refModule (.str .base "f") fnBoolIntT)
+#guard Module.Raw.WF (refModule (.str .base "ref") (Base.Fn.ty (.lit #[]) unitT))
+
+-- At any other type the function is well formed, but its module is not: `base.Int`, and
+-- `base.Fn` with another parameter list or another result.
+#guard wf (refTo (.str .base "f") intT)
 #guard ¬ Module.Raw.WF (refModule (.str .base "f") intT)
+#guard ¬ Module.Raw.WF (refModule (.str .base "f") (Base.Fn.ty (.lit #[.ty intT]) intT))
+#guard ¬ Module.Raw.WF (refModule (.str .base "f") (Base.Fn.ty (.lit #[.ty boolT]) boolT))
+#guard ¬ Module.Raw.WF (refModule (.str .base "ref") fnBoolIntT)
 
 end Strata.Mantle.IRTest

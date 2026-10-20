@@ -89,7 +89,9 @@ inductive Const where
   | func  (target : Name)
 deriving Inhabited, Repr
 
-/-- What a constant's type is, in an environment that refines the base. -/
+/-- The type the base gives a constant, in an environment that refines the base: a literal's
+type, and for a function reference the untyped `base.Code`.  A function reference may instead
+have its target's `Func.codeType`, which the module decides (`Module.Raw.WF`). -/
 @[expose] def Const.typeOf {env : Env Unit} [base ⊑ env] : Const → TypeExpr env
   | .unit    => Base.Unit.ty
   | .bool _  => Base.Bool.ty
@@ -198,6 +200,12 @@ structure Func (env : Env Unit) (α : Type) where
   blocks  : Array (Block env α)
   names   : Array Name
   info    : α
+
+/-- The type of a code pointer to `fn`: `base.Fn` of its entry block's parameter types and
+its return type.  A function with no entry block takes nothing. -/
+@[expose] def Func.codeType {env : Env Unit} [base ⊑ env] {α : Type} (fn : Func env α) :
+    TypeExpr env :=
+  Base.Fn.ty (.ofTypes ((fn.blocks[0]?.map (·.params.map (·.type))).getD #[])) fn.retType
 
 /-- An unchecked module, typed against one environment that refines the base.  A `Module` is
 one with its well-formedness proof. -/

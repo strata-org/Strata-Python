@@ -34,7 +34,9 @@ does the same from a DDM term.
   an operation, is a list literal `[τ, …]` of types, and an argument of the wrong kind is
   rejected.  `jump`, `branch` and
   `unreachable` are the base's, and `ret(args)` is a jump to `Label.exit`.
-* A literal has the type its form fixes, which must be the type where it is used.
+* A literal has the type its form fixes, which must be the type where it is used.  A function
+  reference `@m.f` has the type where it is used, which must be `m.f`'s code type, read from
+  its header, or the untyped `base.Code`.
 * A constant written at a use becomes a `const` instruction just before it.
 * Values get ids in printed order, so the function read is canonical (`Func.Canonical`).
 
@@ -160,12 +162,16 @@ def constAnn : MConst SourceRange → SourceRange
   | .constUnit a | .constBool a _ | .constInt a _ | .constFloat a _ | .constStr a _
   | .constFunc a _ => a
 
-/-- A literal, with `funcs` the module's functions.  Its type is the one its form fixes, and
-must be `expected`. -/
-def literal {env : Env Unit} [base ⊑ env] (funcs : NameTable SourceRange)
-    (expected : TypeExpr env)
+/-- A module's functions, by name: where each is, and its code type, from its header, unless
+the header's types do not read. -/
+abbrev Funcs (env : Env Unit) := NameTable (SourceRange × Option (TypeExpr env))
+
+/-- A literal, at `expected`, with `funcs` the module's functions.  A literal's type is the one
+its form fixes, and must be `expected`.  A function reference has type `expected`, which must
+be its target's code type or the untyped `base.Code`. -/
+def literal {env : Env Unit} [base ⊑ env] (funcs : Funcs env) (expected : TypeExpr env)
     (c : MConst SourceRange) : Result Const := do
-  let k ← match c with
+  let k : Const ← match c with
     | .constUnit _ => pure .unit
     | .constBool _ ⟨_, b⟩ => pure (.bool b)
     | .constInt _ i => pure (.int (int i))
@@ -173,8 +179,12 @@ def literal {env : Env Unit} [base ⊑ env] (funcs : NameTable SourceRange)
     | .constStr _ ⟨_, s⟩ => pure (.str s)
     | .constFunc ann (.funcName _ n) =>
       let f := nameOf (identText n)
-      if (funcs.get? f).isSome then pure (.func f)
-      else throw ⟨ann, s!"no function @{identText n} in this module"⟩
+      let some (_, ct?) := funcs.get? f
+        | throw ⟨ann, s!"no function @{identText n} in this module"⟩
+      if expected = Base.Code.ty ∨ ct? = some expected then return .func f
+      let ct := (ct?.map typeText).getD "?"
+      throw ⟨ann, s!"@{identText n} has type {ct}, or base.Code, where {typeText expected} \
+        is expected"⟩
   if k.typeOf = expected then pure k
   else throw ⟨constAnn c, s!"a {typeText (k.typeOf (env := env))} literal where \
     {typeText expected} is expected"⟩
@@ -270,7 +280,7 @@ def Late.all {β : Type} (ls : Array (Late β)) : Late (Array β) := fun ids => 
 
 /-- Operands at the types `expected`, one each: the constants to emit before their user,
 and the ids.  `what` says whose operands they are. -/
-def operands (funcs : NameTable SourceRange) (what : String) (expected : Array (TypeExpr env))
+def operands (funcs : Funcs env) (what : String) (expected : Array (TypeExpr env))
     (ops : Array (MOperand SourceRange)) :
     ReadM env (Array (Instruction env SourceRange) × Late (Array ValId)) := do
   if ops.size ≠ expected.size then
@@ -283,7 +293,7 @@ def operands (funcs : NameTable SourceRange) (what : String) (expected : Array (
     | .operandConst ann c =>
       let k ← literal funcs t c
       let id ← defineConst t
-      pre := pre.push (.const ann ⟨id, k.typeOf⟩ k)
+      pre := pre.push (.const ann ⟨id, t⟩ k)
       ids := ids.push fun _ => id
   return (pre, Late.all ids)
 
@@ -309,7 +319,7 @@ def scopeOf (ann : SourceRange) (result : TypeExpr env) (blocks : List (MBlock S
   return (scope, entry)
 
 /-- Successors, against the payloads `payloads` the operation `what` declares. -/
-def succs (funcs : NameTable SourceRange) (scope : Scope env) (ann : SourceRange) (what : String)
+def succs (funcs : Funcs env) (scope : Scope env) (ann : SourceRange) (what : String)
     (payloads : Array (Array (TypeExpr env))) (ss : Array (MSucc SourceRange)) :
     ReadM env (Array (Instruction env SourceRange) × Late (Array BlockValue)) := do
   if ss.size ≠ payloads.size then
@@ -349,7 +359,7 @@ def typeArgs (ann : SourceRange) (what : String) (isig : InsnSig env)
       parameter takes {KindedTypeArgs.kindText expected}"
 
 /-- The operands of an application of `isig`. -/
-def callOperands (funcs : NameTable SourceRange) (ann : SourceRange) (what : String)
+def callOperands (funcs : Funcs env) (ann : SourceRange) (what : String)
     (isig : InsnSig env) (targs : TypeArgs env isig.scope)
     (args : Option (MOperands SourceRange)) :
     ReadM env (Array (Instruction env SourceRange) × Late (Array ValId)) := do
@@ -368,13 +378,13 @@ def callOperands (funcs : NameTable SourceRange) (ann : SourceRange) (what : Str
 /-! ## Instructions, blocks and regions -/
 
 /-- What a function's body may refer to: the module's functions. -/
-structure FnCtx where
-  funcs : NameTable SourceRange
+structure FnCtx (env : Env Unit) where
+  funcs : Funcs env
 
 mutual
 
 /-- Instructions, each preceded by the constants folded into it. -/
-def insnList (fx : FnCtx) (scope : Scope env) :
+def insnList (fx : FnCtx env) (scope : Scope env) :
     List (MInsn SourceRange) → ReadM env (Late (Array (Instruction env SourceRange)))
   | [] => return fun _ => #[]
   | .insnConst ann d c :: is => do
@@ -405,7 +415,7 @@ def insnList (fx : FnCtx) (scope : Scope env) :
     return fun r => pre ++ pre₁ ++ #[.apply ann ⟨id, t⟩ op targs (ids r) (ks r) (rs r)] ++ rest r
 
 /-- A terminator, preceded by the constants folded into it. -/
-def term (fx : FnCtx) (scope : Scope env) : MTerm SourceRange →
+def term (fx : FnCtx env) (scope : Scope env) : MTerm SourceRange →
     ReadM env (Array (Instruction env SourceRange) × Late (Terminator env SourceRange))
   | .termRet ann ⟨_, args⟩ => do
     let args := match args with
@@ -430,7 +440,7 @@ def term (fx : FnCtx) (scope : Scope env) : MTerm SourceRange →
     return (pre ++ pre₁, fun r => .apply ann op targs (ids r) (ks r) (rs r))
 
 /-- Blocks, against the scope of their body. -/
-def blockList (fx : FnCtx) (scope : Scope env) :
+def blockList (fx : FnCtx env) (scope : Scope env) :
     List (MBlock SourceRange) → ReadM env (Late (Array (Block env SourceRange)))
   | [] => return fun _ => #[]
   | .block ann l ⟨_, ps⟩ ⟨_, ⟨instrs⟩⟩ t :: bs => do
@@ -443,7 +453,7 @@ def blockList (fx : FnCtx) (scope : Scope env) :
     return fun r => #[⟨⟨label⟩, params, is r ++ pre, t r, ann⟩] ++ rest r
 
 /-- Regions, against their signatures, one each. -/
-def regionList (fx : FnCtx) : List (RegionType env) → List (MRegion SourceRange) →
+def regionList (fx : FnCtx env) : List (RegionType env) → List (MRegion SourceRange) →
     ReadM env (Late (Array (Region env SourceRange)))
   | sig :: sigs, .region ann ⟨_, ⟨blocks⟩⟩ :: rs => do
     let (scope, entry) ← (scopeOf ann sig.2 blocks : Result _)
@@ -482,8 +492,16 @@ def headerName : MFunc SourceRange → Name
 def headerAnn : MFunc SourceRange → SourceRange
   | .func ann .. => ann
 
+/-- The code type a function's header gives: `base.Fn` of its parameters' types and its
+return type, unless they do not read.  Reading the function checks it against its body. -/
+def headerCodeType? : MFunc SourceRange → Option (TypeExpr env)
+  | .func _ _ ⟨_, ps⟩ retTy _ => do
+    let ts ← ps.mapM fun | .valDecl _ _ ty => (type ty).toOption
+    let r ← (type retTy).toOption
+    pure (Base.Fn.ty (.ofTypes ts) r)
+
 /-- A well-formed function, with `funcs` the module's functions. -/
-def func (funcs : NameTable SourceRange) (f : MFunc SourceRange) :
+def func (funcs : Funcs env) (f : MFunc SourceRange) :
     Result {fn : Func env SourceRange // fn.name = headerName f ∧ fn.WF} :=
   match f with
   | .func ann (.funcName _ n) ⟨_, ps⟩ retTy ⟨_, ⟨blocks⟩⟩ => do
@@ -515,7 +533,7 @@ def func (funcs : NameTable SourceRange) (f : MFunc SourceRange) :
     else throw ⟨ann, s!"@{identText n} is not well formed"⟩
 
 /-- The functions `l` denotes, each well formed, or the diagnostics of all that are not. -/
-def funcList (funcs : NameTable SourceRange) : (l : List (MFunc SourceRange)) →
+def funcList (funcs : Funcs env) : (l : List (MFunc SourceRange)) →
     Except (Array ReadDiagnostic) {fs : List (Func env SourceRange) //
       fs.map (·.name) = l.map headerName ∧ ∀ f ∈ fs, f.WF}
   | [] => .ok ⟨[], rfl, by simp⟩
@@ -535,24 +553,26 @@ public def Module.ofDDM {env : Env Unit} [base ⊑ env] (c : DDM.Command SourceR
     Except (Array ReadDiagnostic) (Module env SourceRange) := do
   let .moduleDecl ann n ⟨_, fs⟩ := c
   let headers := fs.toList
-  let ⟨funcs, hfuncs⟩ ← (NameTable.empty.insertAll? (headers.map fun f => (headerName f, headerAnn f))).mapError
-    fun (f, r) => #[⟨r, s!"function @{ToDDM.nameText f} is defined twice"⟩]
+  let ⟨funcs, hfuncs⟩ ← (NameTable.empty.insertAll? (headers.map fun f =>
+      (headerName f, (headerAnn f, headerCodeType? (env := env) f)))).mapError
+    fun (f, r, _) => #[⟨r, s!"function @{ToDDM.nameText f} is defined twice"⟩]
   let ⟨list, hnames, hwf⟩ ← funcList (env := env) funcs headers
   let m : Module.Raw env SourceRange := { name := nameOf (identText n), funcs := list.toArray, info := ann }
   have hm : m.funcNames = (headers.map headerName).toArray := by
     simp [m, Module.Raw.funcNames, Array.mapK_eq_map_fun, hnames]
   have hnodup : (headers.map headerName).Nodup := by
     simpa [hfuncs, Function.comp_def] using funcs.nodup
-  -- Reading a function reference looks its target up, so every reference resolves; this
-  -- decides it again for the proof.
-  let fs := m.funcSet
-  if hrefs : ∀ f ∈ m.funcs, ∀ n ∈ f.funcRefs, n ∈ fs then
+  -- Reading a function reference looks its target up and checks its type, so every
+  -- reference fits; this decides it again for the proof.
+  let cts := m.codeTypes
+  if hrefs : ∀ f ∈ m.funcs, ∀ u ∈ f.funcRefs, OptHolds (cts.find? u.target) u.Fits then
     -- The function names are distinct by their table, and each function is well formed as it
     -- is read.
     return ⟨m, { funcNamesUnique := by simpa [hm] using hnodup
                  funcs := fun f hf => hwf f (by simpa [m] using hf)
                  refs := hrefs }⟩
-  else throw #[⟨ann, s!"module {identText n} references a function it does not define"⟩]
+  else throw #[⟨ann, s!"module {identText n} references a function it does not define, or \
+    at a type that does not fit"⟩]
 
 namespace Read
 

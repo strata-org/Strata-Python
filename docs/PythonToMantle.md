@@ -31,9 +31,10 @@ comprehension scoping follow CPython 3.12.
 *program* is a module of functions written against one environment. The *base*
 environment declares the datatype `base.Unit` with the one constructor `base.unit`,
 `base.Bool`, `base.Int`, `base.Float64`, `base.String`, `base.Sequence a`, `base.Ref a` (a
-mutable cell), `base.Code` (an opaque code pointer) and the datatype `base.Except e a` with
-constructors `base.ok` and `base.error`. It also declares
-the cell instructions `base.refNew`, `base.refGet` and `base.refSet`. Python's environment
+mutable cell), `base.Code` (an opaque code pointer), `base.Fn as r` (a typed one) and the
+datatype `base.Except e a` with constructors `base.ok` and `base.error`. It also declares
+the cell instructions `base.refNew`, `base.refGet` and `base.refSet`, and `base.callCode`,
+a call through a `base.Fn`. The Python lowering uses only `base.Code`. Python's environment
 extends the base (§2).
 
 **Signatures.** An instruction's signature is written in the environment DSL:

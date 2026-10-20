@@ -113,33 +113,33 @@ so `typeArgs` is always `ta[]`, which `infer_type_args` fills in. -/
 /-- An operation that cannot fail and produces a Python value. -/
 def emitTotal {isig : InsnSig Py.env} (name : Name) (r : InsnRef Py.env isig)
     (args : Array ValId) (info : Option α := none)
-    (typeArgs : KindedTypeArgsFor r (some Py.Value.ty) := by infer_type_args) : PyM α ValId :=
+    (typeArgs : TypeArgsOf r (some Py.Value.ty) := by infer_type_args) : PyM α ValId :=
   Build.emitApply name Py.Value.ty r args (info := info) (typeArgs := typeArgs)
 
 /-- A raising operation producing a Python value: its `err` successor is the enclosing
 handler. -/
 def emitFailing {isig : InsnSig Py.env} (name : Name) (r : InsnRef Py.env isig)
     (args : Array ValId) (info : Option α := none)
-    (typeArgs : KindedTypeArgsFor r (some Py.Value.ty) := by infer_type_args) : PyM α ValId := do
+    (typeArgs : TypeArgsOf r (some Py.Value.ty) := by infer_type_args) : PyM α ValId := do
   Build.emitApply name Py.Value.ty r args #[← handler] (info := info) (typeArgs := typeArgs)
 
 /-- An operation that cannot fail and only acts: its result is `()`. -/
 def emitEffect {isig : InsnSig Py.env} (name : Name) (r : InsnRef Py.env isig)
     (args : Array ValId) (info : Option α := none)
-    (typeArgs : KindedTypeArgsFor r (some Base.Unit.ty) := by infer_type_args) : PyM α ValId :=
+    (typeArgs : TypeArgsOf r (some Base.Unit.ty) := by infer_type_args) : PyM α ValId :=
   Build.emitApply name Base.Unit.ty r args (info := info) (typeArgs := typeArgs)
 
 /-- A raising operation that only acts: its result is `()`, and its `err` successor is the
 enclosing handler. -/
 def emitActing {isig : InsnSig Py.env} (name : Name) (r : InsnRef Py.env isig)
     (args : Array ValId) (info : Option α := none)
-    (typeArgs : KindedTypeArgsFor r (some Base.Unit.ty) := by infer_type_args) : PyM α ValId := do
+    (typeArgs : TypeArgsOf r (some Base.Unit.ty) := by infer_type_args) : PyM α ValId := do
   Build.emitApply name Base.Unit.ty r args #[← handler] (info := info) (typeArgs := typeArgs)
 
 /-- An operation producing a base `Bool`, which is what a `branch` takes. -/
 def emitTest {isig : InsnSig Py.env} (name : Name) (r : InsnRef Py.env isig)
     (args : Array ValId) (info : Option α := none)
-    (typeArgs : KindedTypeArgsFor r (some Base.Bool.ty) := by infer_type_args) : PyM α ValId :=
+    (typeArgs : TypeArgsOf r (some Base.Bool.ty) := by infer_type_args) : PyM α ValId :=
   Build.emitApply name Base.Bool.ty r args (info := info) (typeArgs := typeArgs)
 
 /-- `bool(v)`: the base `Bool` a `branch` takes.  It can fail — `__bool__` and `__len__`
@@ -262,9 +262,9 @@ A code pointer is a constant naming a function of the *module*; a closure pairs 
 cells it captures.  A module-level function is the case with no cells. -/
 
 /-- Emit a code pointer to `target`, a function the module defines: the constant
-`.func target`. -/
+`.func target`, at the untyped `base.Code`, which `py.mkClosure` takes. -/
 def emitFunc (target : Name) (info : Option α := none) : PyM α ValId :=
-  Build.emitFunc (env := Py.env) target info
+  Build.emitFunc (env := Py.env) target Base.Code.ty info
 
 /-- A callable value: the code, and the cells it captures. -/
 def mkClosure (code : ValId) (cells : Array ValId) (info : Option α := none) : PyM α ValId :=
@@ -392,7 +392,7 @@ def freshComp (name : Name) : PyM α (ValDecl Py.env) :=
 arguments. -/
 def emitComp {isig : InsnSig Py.env} (ctor : InsnRef Py.env isig) (args : Array ValId)
     (info : Option α := none)
-    (typeArgs : KindedTypeArgsFor ctor (some Py.Completion.ty) := by infer_type_args) :
+    (typeArgs : TypeArgsOf ctor (some Py.Completion.ty) := by infer_type_args) :
     PyM α ValId :=
   Build.emitApply (.str .base "comp") Py.Completion.ty ctor args (info := info)
     (typeArgs := typeArgs)

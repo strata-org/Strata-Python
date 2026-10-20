@@ -638,6 +638,14 @@ theorem insertArray?_spec {a : Array (Nat × β)} {t t' : NatTree23 β} (ho : t.
   rcases a with ⟨l⟩
   simpa only [List.mem_toArray] using go_spec l t t' ho h
 
+/-- Where `insertArray?` succeeds, the result has the keys of `a` and of `t`. -/
+theorem mem_keys_insertArray? {a : Array (Nat × β)} {t u : NatTree23 β} (ho : t.Ordered)
+    (h : t.insertArray? a = some u) (x : Nat) :
+    x ∈ u.keys ↔ x ∈ a.map Prod.fst ∨ x ∈ t.keys := by
+  have hk := mem_keys_iff_of_entries (t := t) (t' := u) (l := a.toList)
+    (fun p => by rw [(insertArray?_spec ho h).2 p, Array.mem_toList_iff (xs := a)]) x
+  rwa [← Array.toList_map, Array.mem_toList_iff (xs := a.map Prod.fst)] at hk
+
 /-- `insertArray?` succeeds exactly when no key is repeated and none is already there. -/
 theorem insertArray?_isSome_iff {a : Array (Nat × β)} {t : NatTree23 β} (ho : t.Ordered) :
     (t.insertArray? a).isSome = true ↔

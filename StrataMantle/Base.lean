@@ -15,15 +15,16 @@ set_option autoImplicit false
 # The base environment
 
 The declarations every language environment extends: `Unit`, the scalar types a constant can
-have, a sequence, a mutable cell, a code pointer, `Except`, and the terminal operations of
-control flow.  `Unit` and `Except` are datatypes; the rest of the types are primitive.
+have, a sequence, a mutable cell, an untyped and a typed code pointer and a call through the
+typed one, `Except`, and the terminal operations of control flow.  `Unit` and `Except` are
+datatypes; the rest of the types are primitive.
 
 `Base` is an `environment` block, so a language environment declares it as its parent with
 `extends Base`.  In every `e` with `Base.env ⊑ e`:
 
 * `Base.T.ref : TypeRef e n` and `Base.T.ty`, its application to arguments;
-* `Base.o.sig : InsnSig e` and `Base.o : InsnRef e Base.o.sig`, for `refNew`, `refGet` and
-  `refSet`;
+* `Base.o.sig : InsnSig e` and `Base.o : InsnRef e Base.o.sig`, for `refNew`, `refGet`,
+  `refSet` and `callCode`;
 * `Base.Except.ok` and `Base.Except.error`, `Except`'s constructors, as instructions in the
   same way: `Base.Except.ok.sig` is `[e a] (value : a) : Except e a`;
 * `Base.Except.case`, the terminal operation that eliminates an `Except`:
@@ -78,12 +79,17 @@ public environment Base where
   /-- `base.unreachable`: control never gets here. -/
   terminal insn unreachable
 
-  /-- `base.Code`, a code pointer: what `Const.func` denotes and a closure holds.
-  The base fixes no calling convention.
-
-  To be revisited: a code pointer should carry its argument and result types, which needs
-  function types in `TypeExpr`. -/
+  /-- `base.Code`, an untyped code pointer, which a function reference may have instead of
+  its target's `base.Fn`.  The base fixes no calling convention for it. -/
+  -- Python's lowering uses it until it moves to `base.Fn`.
   type Code
+  /-- `base.Fn as r`, a typed code pointer: to a function that takes arguments of the types
+  `as`, in order, and returns an `r`.  A function reference has its target's `Fn` type,
+  `Func.codeType`.  A datatype may recurse through `r`. -/
+  type Fn (as : list) (+r)
+  /-- `base.callCode`, a call of the function `f` points to: one argument per element of
+  `as`, of that element's type. -/
+  insn callCode [(as : list) r] (f : Fn as r) (*args : as) : r
   end base
 
 public section

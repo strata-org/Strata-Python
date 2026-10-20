@@ -127,7 +127,7 @@ private def wrongResult : PyBuild.PyM SourceRange Unit := do
 
 /-- A body that refers to `m.g` and returns `None`. -/
 private def callsG : PyBuild.PyM SourceRange Unit := do
-  let _ ← (Build.emitFunc gName : BuildM Py.env SourceRange ValId)
+  let _ ← (Build.emitFunc gName Base.Code.ty : BuildM Py.env SourceRange ValId)
   PyBuild.emitReturnNone
 
 private def printed (r : {fn : Func Py.env SourceRange // fn.WF} × Array String) : IO Unit := do

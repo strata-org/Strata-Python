@@ -133,7 +133,8 @@ def CollectState.push (s : CollectState) (i : Item) : CollectState :=
 
 /-- Lean names the elaborator generates for the environment itself. -/
 def reservedLean (parentShort : Option Name) : List Name :=
-  [`env, `names, `mem_env, `Internal] ++ (parentShort.map (fun p => [p]) |>.getD [])
+  [`env, `names, `mem_env, `nameSet, `nameSet_ordered, `mem_nameSet, `Internal] ++
+    (parentShort.map (fun p => [p]) |>.getD [])
 
 section
 variable (envShort : Name) (ancestorNames : Std.HashSet Name) (reserved : List Name)
@@ -183,11 +184,12 @@ def declare (s : CollectState) (id : Ident) (as? : Option String)
   return { ref := id, envName, lean, doc?, ctx }
 
 /-- The Lean names a type `T` generates besides its own: `T.ref`, `T.ty`, `T.name`,
-`T.name_ref` and `T.decl_ref`, and a datatype's case instruction `T.case`, with its `sig` and
-`name`.  A constructor `c` of `T` is `T.c`, so `declare` rejects each of these as a
-constructor name. -/
+`T.name_ref`, `T.decl_ref` and `T.toRaw_ty`, and a datatype's case instruction `T.case`, with
+its `sig` and `name`.  A constructor `c` of `T` is `T.c`, so `declare` rejects each of these as
+a constructor name. -/
 def typeGenerated (lean : Name) (data : Bool := false) : List Name :=
-  [lean ++ `ref, lean ++ `ty, lean ++ `name, lean ++ `name_ref, lean ++ `decl_ref] ++
+  [lean ++ `ref, lean ++ `ty, lean ++ `name, lean ++ `name_ref, lean ++ `decl_ref,
+    lean ++ `toRaw_ty] ++
     if data then [lean ++ `case, lean ++ `case ++ `sig, lean ++ `case ++ `name] else []
 
 /-- The environment name of a datatype's case instruction: `case` under the datatype's. -/
@@ -345,7 +347,8 @@ structure RRegion where
   ret : Ty
   deriving Inhabited
 
-/-- A successor, resolved: its name and the types of the values it receives. -/
+/-- A successor, resolved: its name and the types of the values it receives, a list for a
+spread, which receives one value per element. -/
 structure RSucc where
   name : String
   payload : Array Ty
@@ -363,7 +366,14 @@ structure ROp where
   ret : Option Ty
   deriving Inhabited
 
-/-- One `addTypes`, `addData` or `addInsns` of the chain. -/
+/-- The most types or instructions one stage holds.  A reference to the `j`th declaration of a
+stage, and each proof about the stage's literal, reduces the literal in the elaborator, so a
+bound keeps each of them small whatever the block's size.  A datatype group is one stage,
+however many constructors it has. -/
+def stageMax : Nat := 64
+
+/-- One `addTypes`, `addData` or `addInsns` of the chain.  A run of types, or of
+instructions, is split into stages of at most `stageMax`, which the interface does not show. -/
 inductive Stage where
   | types (ds : Array TypeD)
   | data (members : Array (TypeD × Array RCtor × ROp))
@@ -638,10 +648,16 @@ def resolveOp (rc : ResolveCtx) (known : Std.HashMap Name Known) (d : OpD) :
       let mut payload := #[]
       let mut pseen := #[]
       for p in ps do
-        if isSpread p then
-          err p "a successor's payload cannot be a spread `(*xs : τ)`: each is one value"
-          continue
         match p with
+        | `(mantleParams| ( * $xs:ident* : $pt )) =>
+          -- A spread passes one value per element of its list.
+          if h : 1 < xs.size then err xs[1] "a spread binds one name"
+          pseen ← checkDistinct pseen
+            ((xs.extract 0 1).map fun x => (x.getId.toString (escape := false), x.raw))
+          if let some ty ← resolveExpr rc ctx known vars pt then
+            if ty.kind (vars.map (·.2)) == .list then payload := payload.push ty
+            else err pt "a spread `(*xs : τ)` in a successor's payload takes a list of types: \
+              one value per element"
         | `(mantleParams| ( $xs:ident* : $pt )) =>
           pseen ← checkDistinct pseen
             (xs.map fun x => (x.getId.toString (escape := false), x.raw))
@@ -744,7 +760,10 @@ def resolve (rc : ResolveCtx) (ancestors : Array EnvEntry) (items : Array Item) 
   for item in items do
     match item with
     | .type d =>
-      if run != 1 then
+      let full := match stages.back? with
+        | some (.types ds) => ds.size ≥ stageMax
+        | _ => true
+      if run != 1 || full then
         stages := stages.push (.types #[])
         run := 1
       let k := stages.size
@@ -794,7 +813,10 @@ def resolve (rc : ResolveCtx) (ancestors : Array EnvEntry) (items : Array Item) 
         abbrevs := abbrevs.push (d, info)
         known := known.insert d.c.envName (.abbrev info)
     | .op d =>
-      if run != 2 then
+      let full := match stages.back? with
+        | some (.ops rs) => rs.size ≥ stageMax
+        | _ => true
+      if run != 2 || full then
         stages := stages.push (.ops #[])
         run := 2
       if let some r ← resolveOp rc known d then

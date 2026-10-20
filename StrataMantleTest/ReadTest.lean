@@ -458,7 +458,7 @@ private def withBody (body : String) : String :=
 #guard_msgs in
 #eval roundTrip (withBody "      ret(@m.g)")
 
-/-- info: t.mantle:4:10: a base.Code literal where base.Int is expected -/
+/-- info: t.mantle:4:10: @m.f has type base.Fn([], base.Int), or base.Code, where base.Int is expected -/
 #guard_msgs in
 #eval roundTrip (withBody "      ret(@m.f)")
 

@@ -40,6 +40,31 @@ example : (Grand.peek.sig (e := Grand.env)).typeArgc = 0 := rfl
 example : Vector (TypeExpr Grand.env) (Demo.unbox.sig (e := Grand.env)).typeArgc :=
   #v[Grand.Cell.ty]
 
+/-! ## A grandchild's names
+
+`Demo` is a child of `Base`, so a child of `Demo` starts its freshness checks from
+`Demo.nameSet`, which holds `Base`'s names too.  `Twin` declares one fresh type; `ErrTwin`,
+the same block in `Base`'s namespace, names a type of its grandparent. -/
+
+/-- A grandchild of `Base` with one type. -/
+public environment Twin extends Demo where
+  namespace twin
+  type Int
+
+/-- `Twin`'s set is its parent's with `Twin`'s one name added, which was not there. -/
+example : Demo.nameSet.insertAll? #[Twin.Int.name] = some Twin.nameSet := by mantle_kernel_rfl
+
+-- It holds its own name and its grandparent's.
+#guard Twin.nameSet.contains Twin.Int.name &&
+  Twin.nameSet.contains (.str (.str .base "base") "Int")
+
+/-- error: `base.Int` is already declared
+-/
+#guard_msgs in
+public environment ErrTwin extends Demo where
+  namespace base
+  type Int
+
 /-! ## What crosses the module boundary
 
 The interface does; the stages are private to `DSLTest`. -/
@@ -332,7 +357,7 @@ error: list parameter `as` where a type is expected; splice it into a list with 
 ---
 error: a region parameter cannot be a spread `(*xs : τ)`: each is one value
 ---
-error: a successor's payload cannot be a spread `(*xs : τ)`: each is one value
+error: a spread `(*xs : τ)` in a successor's payload takes a list of types: one value per element
 -/
 #guard_msgs in
 public environment ErrListSpread extends Base where
@@ -342,10 +367,11 @@ public environment ErrListSpread extends Base where
     | spread (*xs : as)
     | whole (x : as)
   insn lambda [(as : list) r] (&body (*ps : as) : r) : F as r
-  terminal insn untuple [(ts : list)] (^k (*xs : ts))
+  terminal insn untuple [t] (^k (*xs : t))
 
-/-- The same declarations, each field, region parameter and successor payload taking one value,
-are accepted; a spread belongs in an instruction's variadic. -/
+/-- The same declarations, each field and region parameter taking one value, and the spread
+over a list, are accepted: a spread belongs in an instruction's variadic or a successor's
+payload. -/
 public environment OkListSpread extends Base where
   open base
   type F (args : list) (+r)
@@ -353,7 +379,7 @@ public environment OkListSpread extends Base where
     | spread (x : F as Int)
     | whole (x : F as Int)
   insn lambda [(as : list) r] (&body (p : F as r) : r) : F as r
-  terminal insn untuple [(ts : list)] (^k (x : F ts Int))
+  terminal insn untuple [(t : list)] (^k (*xs : t))
   insn apply [(as : list) r] (f : F as r) (*xs : as) : r
 
 /-- error: positive parameter `as` occurs under non-positive parameter 1 of `F`
@@ -409,6 +435,19 @@ public environment OkListPos extends Base where
     | mk (t : Tup [T])
   data U (a) where
     | mkU (f : F [a] Int)
+
+/-- error: argument 1 of `Fn` is a type, but its parameter takes a list of types
+-/
+#guard_msgs in
+public environment ErrNestedKind extends DSLTest.Fns where
+  open fns base
+  insn d (f : Fn [Fn [Fn Int Int] Int] Int) : Int
+
+/-- The same instruction, the innermost `Fn` given a list, is accepted: an inherited type nests
+in its own argument. -/
+public environment OkNestedKind extends DSLTest.Fns where
+  open fns base
+  insn d (f : Fn [Fn [Fn [Int] Int] Int] Int) : Int
 
 /-- error: argument 1 of `fnOf` is a type, but its parameter takes a list of types
 ---
@@ -470,6 +509,8 @@ public environment ErrReserved extends Base where
 ---
 error: `ErrCase.T.ref` is already generated for `x.T`; rename one with `as`
 ---
+error: `ErrCase.T.toRaw_ty` is already generated for `x.T`; rename one with `as`
+---
 error: `x.U.case` is already declared
 -/
 #guard_msgs in
@@ -478,6 +519,7 @@ public environment ErrCase extends Base where
   data T where
     | «case»
     | ref
+    | toRaw_ty
   data U where
     | u
   end x

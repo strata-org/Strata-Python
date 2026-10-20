@@ -98,6 +98,8 @@ structure EnvEntry where
   /-- Every environment name the environment declares itself: types, constructors and
   instructions, in `names` order. -/
   names : Array Name
+  /-- The same names, in the order the stages add them to `nameSet`. -/
+  order : Array Name
   deriving Inhabited, Repr
 
 /-- Every `environment` command's record, in this module and every module it imports. -/
