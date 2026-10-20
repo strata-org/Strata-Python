@@ -1,1 +1,1 @@
-Core type checking failed: \[call Resource@__exit__\(arg\$10, out LaurelResult\$11, out maybe_except\$12\);\]: Arity mismatch in this call's arguments!Here is the expected signature: \(py\$in_self, Composite\) \(py\$in_args, Any\)
+Core type checking failed: \[call Resource@__exit__\(arg\$10, out LaurelResult\$11, out maybe_except\$12\);\]: Ill-formed call: the call to Resource@__exit__ passes 1 input argument, but Resource@__exit__ has 2 input parameters

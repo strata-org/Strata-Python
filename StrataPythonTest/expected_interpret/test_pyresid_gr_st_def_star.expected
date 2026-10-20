@@ -1,1 +1,1 @@
-Core type checking failed: \[call f\(out LaurelResult\$1, out maybe_except\$2\);\]: Arity mismatch in this call's arguments!Here is the expected signature: \(py\$in_args, Any\)
+Core type checking failed: \[call f\(out LaurelResult\$1, out maybe_except\$2\);\]: Ill-formed call: the call to f passes 0 input arguments, but f has 1 input parameter
