@@ -1,6 +1,6 @@
 
 # How to read expected outputs
-`StrataPython/StrataPythonTest/expected_non_laurel/test_precondition_verification.expected` looks like this:
+`StrataPythonTest/expected_non_laurel/test_precondition_verification.expected` looks like this:
 
 ```
 datetime_now_ensures_0: ✅ pass

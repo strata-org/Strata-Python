@@ -113,7 +113,7 @@ The pipeline orchestration framework (`PipelineM`, `MessageKind`,
 1. Add parsing in `Regex/ReParser.lean` (extends `ReToken` / `ReAST`).
 2. Add Core SMT translation in `Regex/ReToCore.lean`.
 3. Add test cases to `StrataPythonTest/Regex/ReToCoreTests.lean` and corpus
-   entries in `StrataPythonTest/Regex/diff_test.py`.
+   entries in `StrataPythonTest/Regex/corpus.tsv`.
 
 ## DDM-generated types
 

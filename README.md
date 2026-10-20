@@ -224,9 +224,12 @@ pip install ./Python/strata-python
 
 ### Regex differential tests
 
+`StrataPythonTestExtra/RegexDiffTest.lean` compares Strata's SMT regex backend
+against Python's `re` on the corpus in `StrataPythonTest/Regex/corpus.tsv`. It is
+one of the runtime tests above and has the same requirements. To run only it:
+
 ```bash
-cd StrataPythonTest/Regex
-python diff_test.py
+PYTHON=python lake test -- RegexDiffTest
 ```
 
 ## Key Namespaces
