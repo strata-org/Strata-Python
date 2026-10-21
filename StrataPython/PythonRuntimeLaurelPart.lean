@@ -166,8 +166,17 @@ procedure re_Match_lastindex  (self : re_Match) : int;
 procedure re_Match_lastgroup  (self : re_Match) : string;
 procedure re_Match_groups     (self : re_Match) : ListStr;
 
-procedure re_pattern_error(pattern : string) : Error
+procedure re_pattern_is_error(pattern : string) : bool
   external;
+procedure re_pattern_error_msg(pattern : string) : string
+  external;
+
+// `RePatternError(msg)` for a malformed pattern, `NoError()` otherwise.
+// Transparent so that it is inlined and the factory functions fold on constants.
+procedure re_pattern_error(pattern : string) : Error
+  return if re_pattern_is_error(pattern)
+    then RePatternError(re_pattern_error_msg(pattern))
+    else NoError();
 
 // The _bool variants are also factory functions (not inlined here) so that
 // unsupported patterns leave an uninterpreted Bool UF rather than an

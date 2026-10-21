@@ -39,21 +39,24 @@ require knowing the eventual match mode, which is not available.
 ### Factory functions
 
 Each call to `re.fullmatch(pattern, s)` (and similarly `re.match`/`re.search`)
-causes `pythonRegexToCore` to be called (at most) twice via `concreteEval`:
+causes the following factory functions to call `pythonRegexToCore` via
+`concreteEval`:
 
-1. **`re_pattern_error(pattern)`** — Parses the pattern and returns
-   `NoError()` on success or `RePatternError(msg)` for a genuinely malformed
-   pattern.  Unimplemented features return `NoError()` because Python would
-   succeed at runtime; the mode-specific factory staying uninterpreted provides
-   a sound over-approximation for those cases.  The prelude checks this first
-   and returns `exception(err)` for pattern errors, modeling Python's
+1. **`re_pattern_is_error(pattern)`** and **`re_pattern_error_msg(pattern)`**
+   — Parse the pattern; the first returns `true` for a malformed
+   pattern, and the second returns its error message (`""` when there is none).
+   Unimplemented features count as no error because Python would succeed at
+   runtime; the mode-specific factory staying uninterpreted provides a sound
+   over-approximation for those cases.  Both have built-in types only; the
+   prelude combines them into `re_pattern_error(pattern) : Error`, checks it
+   first, and returns `exception(err)` for pattern errors, modeling Python's
    `re.error`.
 
 2. **`re_fullmatch_bool(pattern, s)`** (or `re_match_bool`/`re_search_bool`) —
    Compiles the pattern with the correct `MatchMode` and returns
    `Str.InRegEx(s, compiled_regex)` on success, or `.none` on failure (leaving
    the function uninterpreted as a `Bool` UF).  Since pattern errors are already
-   caught by `re_pattern_error`, the `.none` case here only fires for
+   caught by `re_pattern_is_error`, the `.none` case here only fires for
    unimplemented features (e.g. `\S`, `\d`), producing `unknown` VCs — a sound
    over-approximation.
 
@@ -62,7 +65,7 @@ causes `pythonRegexToCore` to be called (at most) twice via `concreteEval`:
    uninterpreted fallback, but cvc5 rejects uninterpreted `RegLan` UFs with
    "Regular expression terms are not supported in theory combination".
 
-The double parse is defensible because `pythonRegexToCore` is fast enough -- it
+The repeated parse is defensible because `pythonRegexToCore` is fast enough -- it
 runs at translation time, not solver time, and keeps the factory functions
 orthogonal.
 
@@ -96,26 +99,34 @@ def reMatchBoolFunc     : LFunc Core.CoreLParams :=
 def reSearchBoolFunc    : LFunc Core.CoreLParams :=
   mkModeBoolFunc "re_search_bool"    .search
 
-def rePatternErrorFunc : LFunc Core.CoreLParams :=
-    { name := "re_pattern_error",
+-- The parse error message of a malformed pattern; `none` when the pattern
+-- parses or only uses unimplemented features.
+private def rePatternErrorMsg? (pattern : String) : Option String :=
+  -- mode irrelevant: errors come from parseTop before mode-specific compilation
+  match (pythonRegexToCore pattern .fullmatch).2 with
+  | some (ParseError.patternError msg ..) => some (toString msg)
+  | _ => none
+
+-- A factory function from a pattern string to `output`; on a string constant it returns `eval` of
+-- the pattern's parse error message.
+private def mkRePatternFunc (name : String) (output : LMonoTy)
+    (eval : Option String → LExpr Core.CoreLParams.mono) : LFunc Core.CoreLParams :=
+    { name := name,
       typeArgs := [],
       inputs := [("pattern", mty[string])],
-      output := mty[Error],
+      output := output,
       attr := #[.evalIfValue 0],
       concreteEval := some
         (fun _ args => match args with
-          | [LExpr.strConst () s] =>
-            let (_, maybe_err) := pythonRegexToCore s .fullmatch -- mode irrelevant: errors come from parseTop before mode-specific compilation
-            match maybe_err with
-            | none =>
-              .some (LExpr.mkApp () (.op () "NoError" (some mty[Error])) [])
-            | some (ParseError.unimplemented ..) =>
-              .some (LExpr.mkApp () (.op () "NoError" (some mty[Error])) [])
-            | some (ParseError.patternError msg ..) =>
-              .some (LExpr.mkApp () (.op () "RePatternError" (some mty[string → Error]))
-                  [.strConst () (toString msg)])
+          | [LExpr.strConst () s] => .some (eval (rePatternErrorMsg? s))
           | _ => .none)
       }
+
+def rePatternIsErrorFunc : LFunc Core.CoreLParams :=
+  mkRePatternFunc "re_pattern_is_error" mty[bool] fun msg? => .boolConst () msg?.isSome
+
+def rePatternErrorMsgFunc : LFunc Core.CoreLParams :=
+  mkRePatternFunc "re_pattern_error_msg" mty[string] fun msg? => .strConst () (msg?.getD "")
 
 -- Guard for exponent-driven factory functions (`int_pow`, `int_rshift`).
 -- Lean's `Nat.pow` panics when the exponent exceeds `UInt32.max`, and even
@@ -226,7 +237,8 @@ def RuntimeFactory : Factory Core.CoreLParams := .ofArray
       reFullmatchBoolFunc,
       reMatchBoolFunc,
       reSearchBoolFunc,
-      rePatternErrorFunc,
+      rePatternIsErrorFunc,
+      rePatternErrorMsgFunc,
       intPowFunc,
       floatPowFunc,
       intRshiftFunc,
