@@ -38,13 +38,21 @@ public section
 
 /-! ## Values -/
 
--- Exposed, so that the kernel decides equality of ids and labels in other modules.
+-- Exposed, so that the kernel decides equality of ids, labels and points in other modules.
 @[expose] section
 
 /-- An SSA value reference.  Ids are unique within a function. -/
 structure ValId where
   id : Nat
 deriving Inhabited, Repr, BEq, Hashable, DecidableEq
+
+/-- `ValId`'s derived `==` is equality. -/
+instance : LawfulBEq ValId where
+  eq_of_beq {a b} h := by
+    cases a; cases b
+    simp only [BEq.beq, instBEqValId.beq, decide_eq_true_eq] at h
+    rw [h]
+  rfl {a} := by cases a; simp [BEq.beq, instBEqValId.beq]
 
 /-- A definition site: an id and the type of what it defines. -/
 structure ValDecl (env : Env Unit) where
@@ -58,6 +66,14 @@ renumbered. -/
 structure Label where
   name : Name
 deriving DecidableEq, Hashable
+
+/-- A point of a body: the block `label` after its first `count` instructions.
+`⟨l, 0⟩` is where the block starts, and its instruction `k` runs at `⟨l, k⟩`, its terminator at
+`⟨l, n⟩` for `n` instructions. -/
+structure Point where
+  label : Label
+  count : Nat
+deriving DecidableEq
 
 end
 
@@ -150,8 +166,8 @@ structure Block (env : Env Unit) (α : Type) where
 region's arguments.
 
 Control stays inside: a transfer names a block of the same region, or the region's own
-`Label.exit`, which leaves it with the value passed.  Values defined outside are visible
-inside, and value ids are unique across the whole function. -/
+`Label.exit`, which leaves it with the value passed.  Values in scope at the owning
+instruction are visible inside, and value ids are unique across the whole function. -/
 structure Region (env : Env Unit) (α : Type) where
   blocks : Array (Block env α)
 
@@ -162,6 +178,37 @@ define are not included. -/
 @[expose] def Instruction.result {env : Env Unit} {α : Type} : Instruction env α → ValDecl env
   | .const _ d _ => d
   | .apply _ d .. => d
+
+/-- An instruction's operands. -/
+@[expose] def Instruction.args {env : Env Unit} {α : Type} : Instruction env α → Array ValId
+  | .const .. => #[]
+  | .apply _ _ _ _ args _ _ => args
+
+/-- Where an instruction may transfer instead of falling through. -/
+@[expose] def Instruction.succs {env : Env Unit} {α : Type} :
+    Instruction env α → Array BlockValue
+  | .const .. => #[]
+  | .apply _ _ _ _ _ succs _ => succs
+
+/-- An instruction's regions. -/
+@[expose] def Instruction.regions {env : Env Unit} {α : Type} :
+    Instruction env α → Array (Region env α)
+  | .const .. => #[]
+  | .apply _ _ _ _ _ _ regions => regions
+
+/-- A terminator's operands. -/
+@[expose] def Terminator.args {env : Env Unit} {α : Type} : Terminator env α → Array ValId
+  | .apply _ _ _ args _ _ => args
+
+/-- Where a terminator may transfer. -/
+@[expose] def Terminator.succs {env : Env Unit} {α : Type} :
+    Terminator env α → Array BlockValue
+  | .apply _ _ _ _ succs _ => succs
+
+/-- A terminator's regions. -/
+@[expose] def Terminator.regions {env : Env Unit} {α : Type} :
+    Terminator env α → Array (Region env α)
+  | .apply _ _ _ _ _ regions => regions
 
 /-! ## Control flow
 

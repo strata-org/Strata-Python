@@ -44,22 +44,9 @@ module t08_try_finally {
       %x.cell.0 : base.Ref(py.Value) = py.globalCell("t08_try_finally", "x")
       %set.4 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
       jump ^join.2()
-    catch.0(%exc.2 : py.Value):
-      %prev.1 : py.Value = py.pushExcInfo(%exc.2)
-      %int.1 : py.Value = py.intLit(0)
-      %x.cell.1 : base.Ref(py.Value) = py.globalCell("t08_try_finally", "x")
-      %set.5 : base.Unit = base.refSet[py.Value](%x.cell.1, %int.1)
-      %pop.2 : base.Unit = py.popExcept(%prev.1)
-      jump ^join.2()
-    unwind.0(%exc.3 : py.Value):
-      %pop.3 : base.Unit = py.popExcept(%prev.1)
-      jump ^finRaise.1(%exc.3)
     join.2():
       %comp.2 : py.Completion = py.completionNormal
       jump ^fin.1(%comp.2)
-    finRaise.1(%exc.4 : py.Value):
-      %comp.3 : py.Completion = py.completionRaise(%exc.4)
-      jump ^fin.1(%comp.3)
     fin.1(%pending.1 : py.Completion):
       %prev.2 : py.Value = py.pushPending(%pending.1)
       %cleanup.1 : py.Value = py.loadGlobal("t08_try_finally", "cleanup") ^superseded.1()

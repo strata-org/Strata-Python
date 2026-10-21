@@ -30,12 +30,12 @@ namespace StrataPython.Mantle.PyBuildTest
 
 open Strata.Mantle
 
-open Strata.Mantle.Build (Failure)
+open Strata.Mantle.Build (FailedFunc)
 
 open StrataPython.Mantle.PyBuild
 
-/-- What `buildFunc` gives: a checked function, or the `Failure`. -/
-private abbrev Built := Except (Failure Unit) {fn : Func Py.env Unit // fn.WF}
+/-- What `buildFunc` gives: a checked function, or the `FailedFunc`. -/
+private abbrev Built := Except (FailedFunc Py.env Unit Unit) {fn : Func Py.env Unit // fn.WF}
 
 /-- The build failed because its function is not well formed, not by a misuse. -/
 private def rejected (b : Built) : Bool :=
@@ -87,15 +87,15 @@ private def f : Built :=
 
 /-! ## `def g(): pass`
 
-Falling off the end returns `None`.  The handler is emitted even though nothing reaches
-it. -/
+Falling off the end returns `None`.  Nothing can fail, so nothing reaches the handler, and the
+builder drops it: one block is left. -/
 
 private def g : Built :=
   buildFunc (Py.pn "g") #[] () fun _ => emitReturnNone
 
 #guard g.isOk
 
-#guard (g.toOption.map (·.1.blocks.size)) == some 2
+#guard (g.toOption.map (·.1.blocks.size)) == some 1
 
 /-! ## `def h(x):` / `try: return x.foo` / `except: return None`
 
@@ -116,11 +116,10 @@ private def h : Built := hWith true
 
 #guard h.isOk
 
--- The blocks in the order they were finished: the body, the `except` block, and the
--- propagating handler `buildFunc` installs.  The last is unreachable here, because nothing
--- outside the `try` can fail.
-#guard (h.toOption.map (·.1.blocks.map (·.label))) ==
-  some #[lbl "entry" 0, lbl "bb" 0, lbl "propagate" 0]
+-- The blocks in the order they were finished: the body and the `except` block.  The builder
+-- drops the propagating handler `buildFunc` installs: nothing outside the `try` can fail, so
+-- nothing reaches it.
+#guard (h.toOption.map (·.1.blocks.map (·.label))) == some #[lbl "entry" 0, lbl "bb" 0]
 
 -- The `attr` failure goes to the `except` block, `bb.0`, not to the caller's handler.
 #guard (h.toOption.map (errTargets ·.1)) == some #[lbl "bb" 0]
@@ -195,7 +194,8 @@ private def k : Built :=
 #guard (k.toOption.map (·.1.blocks.size)) == some 10
 
 /-- A `finally` body that always leaves by itself, here by returning, emits no dispatch: only
-the entry, `finRaise`, `fin`, `superseded` and the propagating handler. -/
+the entry, `finRaise` and `fin`.  Nothing in it can fail, so nothing reaches `superseded` or the
+propagating handler, and the builder drops them. -/
 private def kReturns : Built :=
   buildFunc (Py.pn "k") #["x"] () fun args => do
     let #[x] := args | return
@@ -208,7 +208,7 @@ private def kReturns : Built :=
 
 #guard kReturns.isOk
 
-#guard (kReturns.toOption.map (·.1.blocks.size)) == some 5
+#guard (kReturns.toOption.map (·.1.blocks.size)) == some 3
 
 /-- Under a handler `bb.0(c, exc)` that pre-binds `c`, a failure in the cleanup reaches
 `superseded.0`, which raises to `bb.0` with `c`, then the failure. -/
@@ -304,11 +304,11 @@ private def outerWith (target : Name) (byValue : Bool) : Built :=
 /-- The module of `outer`, whose closure names `target` and captures `x` as `outerWith` does,
 and `inner`. -/
 private def closuresWith (target : Name) (byValue : Bool) :
-    Except (Failure Unit) (Module.Raw Py.env Unit) :=
+    Except (FailedFunc Py.env Unit Unit) (Module.Raw Py.env Unit) :=
   return { name := Py.pn "closures", funcs := #[(← outerWith target byValue).1, (← inner).1],
            info := () }
 
-private def closures : Except (Failure Unit) (Module.Raw Py.env Unit) :=
+private def closures : Except (FailedFunc Py.env Unit Unit) (Module.Raw Py.env Unit) :=
   closuresWith (Py.pn "inner") false
 
 -- No name has a `.` inside a segment: `x.cell` is two segments.
@@ -323,18 +323,12 @@ private def closures : Except (Failure Unit) (Module.Raw Py.env Unit) :=
       %clo.0 : py.Value = py.mkClosure(@py.inner, %x.cell.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%clo.0)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
   }
   func @py.inner(%x.cell.0 : base.Ref(py.Value)) -> base.Except(py.Value, py.Value) {
     entry.0(%x.cell.0 : base.Ref(py.Value)):
       %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.0)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
   }
 } -/
 #guard_msgs in
@@ -526,10 +520,103 @@ private def cClosed : Built :=
 
 /-! ## A module of the functions above -/
 
-private def m : Except (Failure Unit) (Module.Raw Py.env Unit) :=
+private def m : Except (FailedFunc Py.env Unit Unit) (Module.Raw Py.env Unit) :=
   return { name := Py.pn "test", funcs := #[(← f).1, (← g).1, (← h).1, (← k).1, (← c).1],
            info := () }
 
 #guard match m with | .ok m => (TestUtil.dottedNames m).isEmpty | .error _ => false
+
+/-! ## Blocks the entry does not reach
+
+The builder drops them.  Two shapes the translator's `try` lowering emits: a clause's `clear`
+block that nothing enters, jumping to the `unwind` block a reachable clause test also fails to;
+and a `catch` block that nothing enters, using a value the entry defines after its first failing
+instruction.  Under the flat parent the first would pull `unwind` above `catch`, where `%prev.0`
+is defined, and the second would not see `%ns.0`. -/
+
+/-- `except KeyError as e: continue` in a function: `clear.0` has no predecessor. -/
+private def leave : Except (FailedFunc Py.env Unit Unit) {fn : Func Py.env Unit // fn.WF} :=
+  buildFuncTyped (Py.pn "leave") #[(stem "f", Py.Value.ty)] () fun ps => do
+    let some f := ps[0]? | return
+    let catchL ← freshLabel "catch"
+    let clearL ← freshLabel "clear"
+    let unwindL ← freshLabel "unwind"
+    let join ← freshLabel "join"
+    let outer ← handler
+    withHandler catchL do
+      let _ ← emitFailing (.str .base "call") Py.getItem #[f, f]
+    jump (Build.goto join)
+    let exc ← startBlockWith catchL (.str .base "exc")
+    let prev ← emitTotal (.str .base "prev") Py.mkTuple #[exc]
+    withHandler unwindL do
+      let _ ← emitFailing (.str .base "match") Py.getItem #[exc, exc]
+    jump (Build.goto join)
+    let x ← startBlockWith clearL (.str .base "exc")
+    jump { Build.goto unwindL with args := #[x] }
+    let y ← startBlockWith unwindL (.str .base "exc")
+    let _ ← emitTotal (.str .base "pop") Py.mkTuple #[prev]
+    jump { outer with args := outer.args.push y }
+    startBlock join
+    emitReturnNone
+
+/-- info: module py.leave {
+  func @py.leave(%f.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%f.0 : py.Value):
+      %call.0 : py.Value = py.getItem(%f.0, %f.0) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.mkTuple(%exc.0)
+      %match.0 : py.Value = py.getItem(%exc.0, %exc.0) ^unwind.0()
+      jump ^join.0()
+    unwind.0(%exc.2 : py.Value):
+      %pop.0 : py.Value = py.mkTuple(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.3 : py.Value):
+      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+      ret(%exc.4)
+  }
+} -/
+#guard_msgs in
+#eval match leave with
+  | .ok f => IO.println (f.1.format {})
+  | .error e => IO.println (toString e)
+
+/-- `try: pass` / `except Exception: ...` in a class body: `catch.0` has no predecessor. -/
+private def classBody : Except (FailedFunc Py.env Unit Unit) {fn : Func Py.env Unit // fn.WF} :=
+  buildFuncTyped (Py.pn "C_body") #[(stem "args", Py.Value.ty)] () fun ps => do
+    let some args := ps[0]? | return
+    let ns ← emitFailing (.str .base "ns") Py.getItem #[args, ← intLit 0]
+    let catchL ← freshLabel "catch"
+    let join ← freshLabel "join"
+    jump (Build.goto join)
+    let exc ← startBlockWith catchL (.str .base "exc")
+    let _ ← emitFailing (.str .base "Exception") Py.getItem #[ns, exc]
+    jump (Build.goto join)
+    startBlock join
+    emitReturnNone
+
+/-- info: module py.C_body {
+  func @py.C_body(%args.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      jump ^join.0()
+    join.0():
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+} -/
+#guard_msgs in
+#eval match classBody with
+  | .ok f => IO.println (f.1.format {})
+  | .error e => IO.println (toString e)
 
 end StrataPython.Mantle.PyBuildTest

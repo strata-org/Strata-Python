@@ -24,9 +24,6 @@ module t07_try_except {
       %set.4 : base.Unit = base.refSet[py.Value](%x.cell.1, %int.0)
       %pop.0 : base.Unit = py.popExcept(%prev.0)
       jump ^join.0()
-    unwind.0(%exc.1 : py.Value):
-      %pop.1 : base.Unit = py.popExcept(%prev.0)
-      jump ^propagate.0(%exc.1)
     join.0():
       %risky.1 : py.Value = py.loadGlobal("t07_try_except", "risky") ^catch.1()
       %tuple.1 : py.Value = py.mkTuple
@@ -45,9 +42,6 @@ module t07_try_except {
       %prev.1 : py.Value = py.pushExcInfo(%exc.2)
       %pop.2 : base.Unit = py.popExcept(%prev.1)
       jump ^join.1()
-    unwind.1(%exc.3 : py.Value):
-      %pop.3 : base.Unit = py.popExcept(%prev.1)
-      jump ^propagate.0(%exc.3)
     join.1():
       %risky.3 : py.Value = py.loadGlobal("t07_try_except", "risky") ^catch.2()
       %tuple.3 : py.Value = py.mkTuple

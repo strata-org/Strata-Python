@@ -229,17 +229,6 @@ module fw02_with_exit_raises {
       %str.0 : py.Value = py.strLit("body")
       %comp.0 : py.Completion = py.completionReturn(%str.0)
       jump ^fin.0(%comp.0)
-    wexc.0(%exc.0 : py.Value):
-      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
-      %exited.0 : py.Value = py.exitWithExc(%exit.0, %exc.0) ^unwind.1()
-      %cond.0 : base.Bool = py.truthy(%exited.0) ^unwind.1()
-      branch(%cond.0) ^suppress.0() ^unwind.1(%exc.0)
-    suppress.0():
-      %pop.0 : base.Unit = py.popExcept(%prev.0)
-      jump ^join.1()
-    unwind.1(%exc.1 : py.Value):
-      %pop.1 : base.Unit = py.popExcept(%prev.0)
-      jump ^catch.0(%exc.1)
     fin.0(%pending.0 : py.Completion):
       %none.0 : py.Value = py.noneLit
       %args.2 : py.Value = py.mkTuple(%none.0, %none.0, %none.0)

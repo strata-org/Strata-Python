@@ -443,7 +443,11 @@ example : (Terminator.ret () ⟨5⟩ : Terminator base Unit) = .jump () ⟨Label
 private def spare (l : Label) : Block base Unit :=
   { label := l, params := #[], instrs := #[], term := .unreachable (), info := () }
 
-#guard wf { f with blocks := f.blocks.push (spare (lbl "spare")) }
+-- A block no transfer names is unreachable, which `Func.Reachable` rules out.  Named by a
+-- transfer, the same block is reachable.
+#guard illFormed { f with blocks := f.blocks.push (spare (lbl "spare")) }
+#guard wf { f with blocks := #[fEntry, fBump, { fDone with term := .jump () ⟨lbl "spare", #[]⟩ },
+  spare (lbl "spare")] }
 
 -- A block labelled with the exit, even one no transfer names.
 #guard illFormed { f with blocks := f.blocks.push (spare Label.exit) }

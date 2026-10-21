@@ -34,12 +34,12 @@ builder and the reader; and the applications printed and read back.
 
 namespace Strata.Mantle.DDMTest
 
-open Strata.Mantle.Build (freshVal startFreshBlock emitApply finishBlock build Failure)
+open Strata.Mantle.Build (freshVal startFreshBlock emitApply finishBlock build FailedFunc)
 open Strata.Mantle.DSLTest
 
-/-- What `build` gives in `env`: a checked function, or the `Failure`. -/
+/-- What `build` gives in `env`: a checked function, or the `FailedFunc`. -/
 private abbrev Built (env : Env Unit) [base ⊑ env] :=
-  Except (Failure Unit) {fn : Func env Unit // fn.WF}
+  Except (FailedFunc env Unit Unit) {fn : Func env Unit // fn.WF}
 
 private def intT : TypeExpr Fns.env := Base.Int.ty
 private def boolT : TypeExpr Fns.env := Base.Bool.ty

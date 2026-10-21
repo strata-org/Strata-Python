@@ -32,10 +32,10 @@ code type, and the reader reads `@m.pos` at the type where it is used.
 namespace Strata.Mantle.CodePtrTest
 
 open Strata.Mantle.Build (freshVal startFreshBlock emitConst emitFunc emitApply finishBlock build
-  Failure)
+  FailedFunc)
 
-/-- What `build` gives: a checked function, or the `Failure`. -/
-private abbrev Built := Except (Failure Unit) {fn : Func base Unit // fn.WF}
+/-- What `build` gives: a checked function, or the `FailedFunc`. -/
+private abbrev Built := Except (FailedFunc base Unit Unit) {fn : Func base Unit // fn.WF}
 
 private def intT : TypeExpr base := Base.Int.ty
 private def boolT : TypeExpr base := Base.Bool.ty

@@ -9,6 +9,7 @@ public import StrataMantle.DDM
 public import StrataMantle.Build
 public import StrataMantle.WF
 public import StrataMantle.Util.NameTable
+public import StrataMantle.DomDiag
 -- Private: reading builds checked IR, which needs the environment representation at codegen.
 import StrataMantle.Env.WF
 import StrataMantle.FloatText
@@ -39,6 +40,8 @@ does the same from a DDM term.
   its header, or the untyped `base.Code`.
 * A constant written at a use becomes a `const` instruction just before it.
 * Values get ids in printed order, so the function read is canonical (`Func.Canonical`).
+* The reader checks each function against `Func.WF` as it finishes it, and explains one that is
+  not reachable and scoped with `Func.scopeDiagnostics`.
 
 A name reads back as printed unless one of its string segments is empty, is all digits or
 contains `.`, or the whole name is one of the dialect's keywords.
@@ -528,9 +531,12 @@ def func (funcs : Funcs env) (f : MFunc SourceRange) :
       { name := nameOf (identText n), retType, blocks, names, info := ann }
     -- The value names' table proves the names distinct; the rest of `Func.WF` is decided.
     if h : 0 < fn.blocks.size ∧ Label.Distinct (Label.exit :: fn.labels) ∧
-        ValDecl.idBound fn.defs ≤ fn.names.size ∧ fn.BodyWF then
-      return ⟨fn, rfl, ⟨h.1, h.2.1, hnames, h.2.2.1, h.2.2.2⟩⟩
-    else throw ⟨ann, s!"@{identText n} is not well formed"⟩
+        ValDecl.idBound fn.defs ≤ fn.names.size ∧ fn.BodyWF ∧ (fn.Reachable ∧ fn.Scopable) then
+      return ⟨fn, rfl, ⟨h.1, h.2.1, hnames, h.2.2.1, h.2.2.2.1, h.2.2.2.2.1, h.2.2.2.2.2⟩⟩
+    else
+      let why := if fn.Reachable ∧ fn.Scopable then #[] else fn.scopeDiagnostics
+      throw ⟨ann, s!"@{identText n} is not well formed" ++
+        String.join (why.toList.map ("\n  " ++ ·))⟩
 
 /-- The functions `l` denotes, each well formed, or the diagnostics of all that are not. -/
 def funcList (funcs : Funcs env) : (l : List (MFunc SourceRange)) →

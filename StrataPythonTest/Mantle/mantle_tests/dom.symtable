@@ -1,0 +1,7 @@
+module top
+  dom: local (assigned, referenced)
+  dom2: local (assigned, referenced)
+  print: global implicit (referenced)
+  function dom2
+    dom: local (parameter, referenced)
+qualnames: dom2

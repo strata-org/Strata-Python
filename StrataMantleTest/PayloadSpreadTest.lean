@@ -55,13 +55,13 @@ example : (Tup.split.sig (e := Tup.env)).succs =
     #[⟨"k", #[.ty Base.Int.ty, .list (.var 0 (by decide))]⟩] := rfl
 
 open Build (freshVal startFreshBlock emitApply emitConst terminate finishBlock build goto
-  freshLabel startBlock Failure)
+  freshLabel startBlock FailedFunc)
 
 private def intT : TypeExpr Tup.env := Base.Int.ty
 private def boolT : TypeExpr Tup.env := Base.Bool.ty
 
-/-- What `build` gives: a checked function, or the `Failure`. -/
-private abbrev Built := Except (Failure Unit) {fn : Func Tup.env Unit // fn.WF}
+/-- What `build` gives: a checked function, or the `FailedFunc`. -/
+private abbrev Built := Except (FailedFunc Tup.env Unit Unit) {fn : Func Tup.env Unit // fn.WF}
 
 /-- The build failed because its function is not well formed, not by a misuse. -/
 private def rejects (f : Built) : Bool :=

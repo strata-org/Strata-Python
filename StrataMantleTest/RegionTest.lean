@@ -48,12 +48,12 @@ public environment Reg extends Base where
   end reg
 
 open Strata.Mantle.Build (freshVal freshLabel startBlock startBlockWith startFreshBlock
-  emitConst emitApply finishBlock goto build Failure region)
+  emitConst emitApply finishBlock goto build FailedFunc region)
 
 private abbrev E := Reg.env
 
-/-- What `build` gives: a checked function, or the `Failure`. -/
-private abbrev Built := Except (Failure Unit) {fn : Func E Unit // fn.WF}
+/-- What `build` gives: a checked function, or the `FailedFunc`. -/
+private abbrev Built := Except (FailedFunc E Unit Unit) {fn : Func E Unit // fn.WF}
 
 /-- The build failed because its function is not well formed, not by a misuse. -/
 private def rejected (b : Built) : Bool :=
@@ -305,14 +305,18 @@ private def outerExit (fromRegion : Bool) : Built :=
 
 #guard rejected (outerExit true)
 
--- A region block reusing the function entry's label.
-#guard rejected (fCX fun c x entry => do
+-- A region block reusing the function entry's label: a misuse, and the function emitted is not
+-- well formed, as labels are distinct across regions.
+#guard match fCX fun c x entry => do
     let thn := region #[] do
       finishBlock (.jump () (goto entry))
       startBlock entry
       finishBlock (.ret () x)
     let r ← emitApply (.str .base "r") intT Reg.«if» #[c] (regions := #[thn, retRegion x])
-    finishBlock (.ret () r))
+    finishBlock (.ret () r) with
+  | .error e => e.misuses == #["block bb.0 opened twice: its label is already used"] &&
+      !decide e.func.WF
+  | .ok _ => false
 
 -- Two functions under one name.
 #guard pick.toOption.any fun p => !(Module.ofChecked (.str .base "regions") #[p, p] ()).isOk

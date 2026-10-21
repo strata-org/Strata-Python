@@ -571,7 +571,7 @@ def emitPropagate (e : ValId) (info : Option α := none) : PyM α Unit := do
 `Build.run` does. -/
 def buildFuncTypedWith (name : Name) (params : Array (Name × TypeExpr Py.env)) (info : α)
     (body : Array ValId → PyM α β) :
-    Except (Build.Failure β) ({fn : Func Py.env α // fn.WF} × β) :=
+    Except (Build.FailedFunc Py.env α β) ({fn : Func Py.env α // fn.WF} × β) :=
   Build.run name Py.failing.ty info do
     let ps ← params.mapM fun (p, t) => Build.freshVal p t
     let propagate ← Build.freshLabel "propagate"
@@ -590,18 +590,18 @@ others, such as a closure's captured cells, which arrive as `Ref Value` paramete
 
 Before `body` runs, the handler is in place: it takes the exception and returns it to the
 caller.  `body` must finish every block it opens: ending with a block open is an error, and
-so is any other error `Mantle.Build` records.  It fails with the `Build.Failure` if there is
+so is any other error `Mantle.Build` records.  It fails with the `Build.FailedFunc` if there is
 one or the function is not well formed.  The entry block is labelled `entry.0` and the
 handler `propagate.0`. -/
 def buildFuncTyped (name : Name) (params : Array (Name × TypeExpr Py.env)) (info : α)
     (body : Array ValId → PyM α Unit) :
-    Except (Build.Failure Unit) {fn : Func Py.env α // fn.WF} :=
+    Except (Build.FailedFunc Py.env α Unit) {fn : Func Py.env α // fn.WF} :=
   Prod.fst <$> buildFuncTypedWith name params info body
 
 /-- Emit a Python function, every parameter a Python value, and check it. -/
 def buildFunc (name : Name) (params : Array String) (info : α)
     (body : Array ValId → PyM α Unit) :
-    Except (Build.Failure Unit) {fn : Func Py.env α // fn.WF} :=
+    Except (Build.FailedFunc Py.env α Unit) {fn : Func Py.env α // fn.WF} :=
   buildFuncTyped name (params.map (stem ·, Py.Value.ty)) info body
 
 /-- The stub of the function `buildFuncTyped name params` would build, `Build.stub` at its

@@ -129,9 +129,6 @@ module n08_mixed {
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
   }
 }
 

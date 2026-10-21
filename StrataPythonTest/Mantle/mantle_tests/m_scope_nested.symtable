@@ -1,0 +1,34 @@
+module top
+  a: local (assigned)
+  b: local (assigned)
+  c: local (assigned)
+  d: local (assigned)
+  f: local (assigned)
+  g: local (assigned)
+  h: local (assigned)
+  k: local (assigned)
+  w: local (assigned)
+  function f
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    c: local (parameter, referenced)
+    d: local (parameter, referenced)
+  function g
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    c: local (parameter, referenced)
+    d: local (parameter, referenced)
+  function h
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    c: local (parameter, referenced)
+    d: local (parameter, referenced)
+  function w
+    a: local (parameter, assigned, referenced)
+    b: local (parameter, referenced)
+    c: local (parameter, referenced)
+  function k
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    c: local (parameter, referenced)
+qualnames: f, g, h, k, w

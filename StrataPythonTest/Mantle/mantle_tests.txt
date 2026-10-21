@@ -205,3 +205,8 @@ p43_comp_class_body | yes |
 p44_comp_and_genexpr | yes | generator expression
 p45_comp_walrus | yes |
 p46_comp_lambda | yes |
+m_scope_boolop | yes |
+m_scope_ifexp | yes |
+m_scope_chain | yes |
+m_scope_nested | yes |
+dom | yes |

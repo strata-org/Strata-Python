@@ -147,17 +147,6 @@ module fw03_with_in_except {
       %int.0 : py.Value = py.intLit(1)
       %comp.0 : py.Completion = py.completionReturn(%int.0)
       jump ^fin.0(%comp.0)
-    wexc.0(%exc.2 : py.Value):
-      %prev.1 : py.Value = py.pushExcInfo(%exc.2)
-      %exited.0 : py.Value = py.exitWithExc(%exit.0, %exc.2) ^unwind.1()
-      %cond.0 : base.Bool = py.truthy(%exited.0) ^unwind.1()
-      branch(%cond.0) ^suppress.0() ^unwind.1(%exc.2)
-    suppress.0():
-      %pop.0 : base.Unit = py.popExcept(%prev.1)
-      jump ^join.1()
-    unwind.1(%exc.3 : py.Value):
-      %pop.1 : base.Unit = py.popExcept(%prev.1)
-      jump ^unwind.0(%exc.3)
     fin.0(%pending.0 : py.Completion):
       %none.0 : py.Value = py.noneLit
       %args.2 : py.Value = py.mkTuple(%none.0, %none.0, %none.0)

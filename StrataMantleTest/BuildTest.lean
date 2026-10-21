@@ -29,7 +29,7 @@ forward branch names a label long before its block is finished.
 namespace Strata.Mantle.BuildTest
 
 open Strata.Mantle.Build (freshVal freshLabel startBlock startBlockWith startFreshBlock
-  emitConst emitApply finishBlock terminate goto build Failure region withInfo)
+  emitConst emitApply finishBlock terminate goto build FailedFunc region withInfo)
 
 private def boolT : TypeExpr base := Base.Bool.ty
 private def intT  : TypeExpr base := Base.Int.ty
@@ -38,8 +38,8 @@ private def unitT : TypeExpr base := Base.Unit.ty
 private def refIntT : TypeExpr base := Base.Ref.ty intT
 private def exceptStrIntT : TypeExpr base := Base.Except.ty strT intT
 
-/-- What `build` gives: a checked function, or the `Failure`. -/
-private abbrev Built (α : Type) := Except (Failure Unit) {fn : Func base α // fn.WF}
+/-- What `build` gives: a checked function, or the `FailedFunc`. -/
+private abbrev Built (α : Type) := Except (FailedFunc base α Unit) {fn : Func base α // fn.WF}
 
 private def illFormed (fn : Func base Unit) : Bool := !decide fn.WF
 
@@ -248,6 +248,31 @@ private def overOpen : BuildM base Unit Unit := do
 /-- info: #["block next.0 opened while block entry.0 is open"] -/
 #guard_msgs in
 #eval errors overOpen
+
+/-- A function whose entry jumps to `j`, which returns the parameter, and then a third block,
+labelled `again`. -/
+private def thirdBlock (again : Label → BuildM base Unit Label) : BuildM base Unit Unit := do
+  let x ← freshVal (.str .base "x") intT
+  let entry ← startFreshBlock #[x] (base := "entry")
+  let j ← freshLabel "j"
+  finishBlock (.jump () (goto j))
+  startBlock j
+  finishBlock (.ret () x.id)
+  startBlock (← again entry)
+  finishBlock (.ret () x.id)
+
+-- A third block with a fresh label: nothing reaches it, so the builder drops it, and the
+-- function builds.
+#guard match build (.str .base "f") intT () (thirdBlock fun _ => freshLabel "late") with
+  | .ok fn => fn.1.blocks.map (Build.nameText ·.label.name) == #["entry.0", "j.0"]
+  | .error _ => false
+
+/-- A third block labelled like the entry. -/
+private def reusedEntry : BuildM base Unit Unit := thirdBlock pure
+
+/-- info: #["block entry.0 opened twice: its label is already used"] -/
+#guard_msgs in
+#eval errors reusedEntry
 
 /-- A block finished when none is open. -/
 private def noneOpen : BuildM base Unit Unit := do

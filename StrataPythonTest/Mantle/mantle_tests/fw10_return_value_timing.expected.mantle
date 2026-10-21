@@ -138,9 +138,6 @@ module fw10_return_value_timing {
       %clo.0 : py.Value = py.mkClosure(@|fw10_return_value_timing.closure.<lambda>|, %x.cell.0)
       %comp.0 : py.Completion = py.completionReturn(%clo.0)
       jump ^fin.0(%comp.0)
-    finRaise.0(%exc.0 : py.Value):
-      %comp.1 : py.Completion = py.completionRaise(%exc.0)
-      jump ^fin.0(%comp.1)
     fin.0(%pending.0 : py.Completion):
       %prev.0 : py.Value = py.pushPending(%pending.0)
       %str.1 : py.Value = py.strLit("finally")
@@ -154,9 +151,6 @@ module fw10_return_value_timing {
       unreachable
     unreachable.1():
       unreachable
-    superseded.0(%exc.1 : py.Value):
-      %pop.1 : base.Unit = py.popExcept(%prev.0)
-      jump ^propagate.0(%exc.1)
     join.0():
       %none.0 : py.Value = py.noneLit
       %ret.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)

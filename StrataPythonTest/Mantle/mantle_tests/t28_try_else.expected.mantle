@@ -57,9 +57,6 @@ module t28_try_else {
       %set.9 : base.Unit = base.refSet[py.Value](%a.cell.1, %int.1)
       %pop.2 : base.Unit = py.popExcept(%prev.1)
       jump ^join.2()
-    unwind.1(%exc.3 : py.Value):
-      %pop.3 : base.Unit = py.popExcept(%prev.1)
-      jump ^finRaise.0(%exc.3)
     join.2():
       %comp.0 : py.Completion = py.completionNormal
       jump ^fin.0(%comp.0)

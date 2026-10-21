@@ -11,36 +11,10 @@ module p13_except_as {
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p13_except_as", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       jump ^join.0()
-    catch.0(%exc.0 : py.Value):
-      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
-      %Exception.0 : py.Value = py.loadGlobal("p13_except_as", "Exception") ^unwind.0()
-      %match.0 : base.Bool = py.excMatch(%exc.0, %Exception.0) ^unwind.0()
-      branch(%match.0) ^except.0() ^next.0()
-    except.0():
-      %err.cell.0 : base.Ref(py.Value) = py.globalCell("p13_except_as", "err")
-      %set.3 : base.Unit = base.refSet[py.Value](%err.cell.0, %exc.0)
-      %pop.0 : base.Unit = py.popExcept(%prev.0)
-      %err.0 : py.Value = py.undef("err")
-      %err.cell.1 : base.Ref(py.Value) = py.globalCell("p13_except_as", "err")
-      %set.4 : base.Unit = base.refSet[py.Value](%err.cell.1, %err.0)
-      jump ^join.0()
-    clear.0(%exc.1 : py.Value):
-      %err.1 : py.Value = py.undef("err")
-      %err.cell.2 : base.Ref(py.Value) = py.globalCell("p13_except_as", "err")
-      %set.5 : base.Unit = base.refSet[py.Value](%err.cell.2, %err.1)
-      jump ^unwind.0(%exc.1)
-    next.0():
-      jump ^unwind.0(%exc.0)
-    unwind.0(%exc.2 : py.Value):
-      %pop.1 : base.Unit = py.popExcept(%prev.0)
-      jump ^propagate.0(%exc.2)
     join.0():
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.3 : py.Value):
-      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
-      ret(%exc.4)
   }
   func @p13_except_as.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):

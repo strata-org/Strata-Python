@@ -31,22 +31,6 @@ module p17_conditional_def {
       %g.cell.0 : base.Ref(py.Value) = py.globalCell("p17_conditional_def", "g")
       %set.5 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.2)
       jump ^join.1()
-    catch.0(%exc.0 : py.Value):
-      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
-      %Exception.0 : py.Value = py.loadGlobal("p17_conditional_def", "Exception") ^unwind.0()
-      %match.0 : base.Bool = py.excMatch(%exc.0, %Exception.0) ^unwind.0()
-      branch(%match.0) ^except.0() ^next.0()
-    except.0():
-      %none.1 : py.Value = py.noneLit
-      %g.cell.1 : base.Ref(py.Value) = py.globalCell("p17_conditional_def", "g")
-      %set.6 : base.Unit = base.refSet[py.Value](%g.cell.1, %none.1)
-      %pop.0 : base.Unit = py.popExcept(%prev.0)
-      jump ^join.1()
-    next.0():
-      jump ^unwind.0(%exc.0)
-    unwind.0(%exc.1 : py.Value):
-      %pop.1 : base.Unit = py.popExcept(%prev.0)
-      jump ^propagate.0(%exc.1)
     join.1():
       %none.2 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.2)

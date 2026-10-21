@@ -220,8 +220,9 @@ module m {
 /-! ## Value names
 
 A value is named in the text, and gets its id where it is defined, so the function read is
-canonical.  A name may be quoted and may be used before its definition.  A folded constant is
-named `c.k`, skipping names the text uses: here `%c.0`. -/
+canonical.  A name may be quoted, and may be used before the line that defines it, in a block
+that only that line's block enters.  A folded constant is named `c.k`, skipping names the text
+uses: here `%c.0`. -/
 
 /-- A function `@m.f` of signature `() -> base.Int` whose entry block runs `body`. -/
 private def withBody' (body : String) : String :=
@@ -242,7 +243,7 @@ private def namesTrip (text : String) : IO Unit := do
 module m {
   func @m.f(%c.0 : base.Bool) -> base.Int {
     entry.0(%c.0 : base.Bool):
-      branch(%c.0) ^a.0() ^b.0()
+      branch(%c.0) ^a.0() ^a.0()
     b.0():
       ret(%|café.0|)
     a.0():
@@ -251,14 +252,14 @@ module m {
       %|café.0| : base.Int = base.refGet[base.Int](%r.0)
       %c.1 : base.Int = const 2
       %y.0 : base.Unit = base.refSet[base.Int](%r.0, %c.1)
-      ret(%|café.0|)
+      jump ^b.0()
   }
 } -/
 #guard_msgs in
 #eval namesTrip "module m {
   func @m.f(%c.0 : base.Bool) -> base.Int {
     entry.0(%c.0 : base.Bool):
-      branch(%c.0) ^a.0() ^b.0()
+      branch(%c.0) ^a.0() ^a.0()
     b.0():
       ret(%|café.0|)
     a.0():
@@ -266,7 +267,7 @@ module m {
       %r.0 : base.Ref(base.Int) = base.refNew[base.Int](%x)
       %|café.0| : base.Int = base.refGet[base.Int](%r.0)
       %y.0 : base.Unit = base.refSet[base.Int](%r.0, 2)
-      ret(%|café.0|)
+      jump ^b.0()
   }
 }
 "
@@ -438,6 +439,109 @@ private def withBody (body : String) : String :=
 /-- info: t.mantle:4:11: block done.0 takes 1 argument(s), given 0 here and 0 by base.jump -/
 #guard_msgs in
 #eval roundTrip (withBody "      jump ^done.0()\n    done.0(%v.1 : base.Int):\n      ret(%v.1)")
+
+/-! ## Scoping
+
+Every block must be reachable from its body's entry, and every use in scope under some legal
+tree of its body.  The text names no tree. -/
+
+-- `b.0` is entered from the end of the entry only, so it sees what the entry defines.
+/-- info: module m {
+  func @m.f() -> base.Int {
+    entry.0():
+      %v.1 : base.Int = const 1
+      jump ^b.0()
+    b.0():
+      ret(%v.1)
+  }
+}
+
+module m {
+  func @m.f() -> base.Int {
+    entry.0():
+      jump ^b.0()
+    b.0():
+      ret(1)
+  }
+} -/
+#guard_msgs in
+#eval roundTrip (withBody "      %v.1 : base.Int = const 1
+      jump ^b.0()\n    b.0():\n      ret(%v.1)")
+
+-- No transfer names `b.0`, so its body's entry does not reach it.
+/-- info: t.mantle:2:2: @m.f is not well formed
+  block `b.0` is unreachable from the entry -/
+#guard_msgs in
+#eval roundTrip (withBody "      %v.1 : base.Int = const 1
+      ret(%v.1)\n    b.0():\n      ret(%v.1)")
+
+/-! `%v.2` is defined in `l.0` only.  It is in scope in `l.0`, and not in `j.0`, which is also
+entered from `r.0`. -/
+
+/-- info: module m {
+  func @m.f() -> base.Int {
+    entry.0():
+      %v.1 : base.Bool = const true
+      branch(%v.1) ^l.0() ^r.0()
+    l.0():
+      %v.2 : base.Int = const 1
+      ret(%v.2)
+    r.0():
+      jump ^j.0()
+    j.0():
+      %c.0 : base.Int = const 2
+      ret(%c.0)
+  }
+}
+
+module m {
+  func @m.f() -> base.Int {
+    entry.0():
+      branch(true) ^l.0() ^r.0()
+    l.0():
+      ret(1)
+    r.0():
+      jump ^j.0()
+    j.0():
+      ret(2)
+  }
+} -/
+#guard_msgs in
+#eval roundTrip (withBody "      %v.1 : base.Bool = const true
+      branch(%v.1) ^l.0() ^r.0()\n    l.0():\n      %v.2 : base.Int = const 1
+      ret(%v.2)\n    r.0():\n      jump ^j.0()\n    j.0():\n      ret(2)")
+
+/-- info: t.mantle:2:2: @m.f is not well formed
+  `%v.2` (defined in `l.0`) is used in `j.0`, reachable via `entry.0 → r.0 → j.0` without it -/
+#guard_msgs in
+#eval roundTrip (withBody "      %v.1 : base.Bool = const true
+      branch(%v.1) ^l.0() ^r.0()\n    l.0():\n      %v.2 : base.Int = const 1
+      jump ^j.0()\n    r.0():\n      jump ^j.0()\n    j.0():\n      ret(%v.2)")
+
+/-! A module, a function, a block and a value may each be named `dom`, as a module is when it
+translates `dom.py`.  The text reads back as printed. -/
+
+/-- info: module dom {
+  func @dom() -> base.Int {
+    dom():
+      %dom : base.Int = const 1
+      jump ^b.0()
+    b.0():
+      ret(%dom)
+  }
+}
+
+module dom {
+  func @dom() -> base.Int {
+    dom():
+      jump ^b.0()
+    b.0():
+      ret(1)
+  }
+} -/
+#guard_msgs in
+#eval roundTrip "module dom {\n  func @dom() -> base.Int {\n    dom():
+      %dom : base.Int = const 1\n      jump ^b.0()\n    b.0():\n      ret(%dom)\n  }\n}\n"
 
 /-- info: t.mantle:4:6: base.refGet returns a value, so it cannot end a block -/
 #guard_msgs in

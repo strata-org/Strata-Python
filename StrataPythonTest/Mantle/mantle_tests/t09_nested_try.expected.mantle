@@ -41,9 +41,6 @@ module t09_nested_try {
       %set.5 : base.Unit = base.refSet[py.Value](%y.cell.0, %int.0)
       %pop.1 : base.Unit = py.popExcept(%prev.1)
       jump ^join.0()
-    unwind.0(%exc.3 : py.Value):
-      %pop.2 : base.Unit = py.popExcept(%prev.1)
-      jump ^propagate.0(%exc.3)
     join.0():
       %outer_risky.0 : py.Value = py.loadGlobal("t09_nested_try", "outer_risky") ^catch.2()
       %tuple.1 : py.Value = py.mkTuple

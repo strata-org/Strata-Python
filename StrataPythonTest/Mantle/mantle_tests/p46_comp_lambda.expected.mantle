@@ -35,9 +35,6 @@ module p46_comp_lambda {
           %unit.0 : base.Unit = base.unit
           %ok.0 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
           ret(%ok.0)
-        propagate.1(%exc.0 : py.Value):
-          %exc.1 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.0)
-          ret(%exc.1)
       }
       %fs.cell.0 : base.Ref(py.Value) = py.globalCell("p46_comp_lambda", "fs")
       %set.7 : base.Unit = base.refSet[py.Value](%fs.cell.0, %acc.0)
@@ -88,9 +85,6 @@ module p46_comp_lambda {
           %unit.0 : base.Unit = base.unit
           %ok.0 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
           ret(%ok.0)
-        propagate.1(%exc.0 : py.Value):
-          %exc.1 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.0)
-          ret(%exc.1)
       }
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%acc.0)
       ret(%ret.0)
@@ -142,9 +136,6 @@ module p46_comp_lambda {
           %unit.0 : base.Unit = base.unit
           %ok.0 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
           ret(%ok.0)
-        propagate.1(%exc.0 : py.Value):
-          %exc.1 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.0)
-          ret(%exc.1)
       }
       %set.3 : base.Unit = base.refSet[py.Value](%fs.cell.0, %acc.0)
       %fs.1 : py.Value = base.refGet[py.Value](%fs.cell.0)
@@ -221,9 +212,6 @@ module p46_comp_lambda {
               %unit.0 : base.Unit = base.unit
               %ok.0 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
               ret(%ok.0)
-            propagate.2(%exc.0 : py.Value):
-              %exc.1 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.0)
-              ret(%exc.1)
           }
           %unit.1 : base.Unit = base.unit
           %ok.1 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.1)

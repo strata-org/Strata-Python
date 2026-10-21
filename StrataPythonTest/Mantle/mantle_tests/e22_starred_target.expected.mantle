@@ -22,9 +22,6 @@ module e22_starred_target {
           %unit.0 : base.Unit = base.unit
           %ok.0 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
           ret(%ok.0)
-        propagate.1(%exc.0 : py.Value):
-          %exc.1 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.0)
-          ret(%exc.1)
       }
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)

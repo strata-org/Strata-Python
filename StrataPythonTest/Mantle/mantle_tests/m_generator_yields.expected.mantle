@@ -62,9 +62,6 @@ module m_generator_yields {
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
   }
   func @m_generator_yields.positional_annotation(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -72,9 +69,6 @@ module m_generator_yields {
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
   }
   func @m_generator_yields.positional_only_annotation(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -82,9 +76,6 @@ module m_generator_yields {
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
   }
   func @m_generator_yields.varargs_annotation(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -92,9 +83,6 @@ module m_generator_yields {
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
   }
   func @m_generator_yields.keyword_only_annotation(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -102,9 +90,6 @@ module m_generator_yields {
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
   }
   func @m_generator_yields.kwargs_annotation(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -112,9 +97,6 @@ module m_generator_yields {
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
   }
   func @m_generator_yields.return_annotation(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -122,9 +104,6 @@ module m_generator_yields {
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
   }
   func @m_generator_yields.first_annotation(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -132,9 +111,6 @@ module m_generator_yields {
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
   }
   func @m_generator_yields.list_iterable(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -142,9 +118,6 @@ module m_generator_yields {
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
   }
   func @m_generator_yields.set_iterable(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -152,9 +125,6 @@ module m_generator_yields {
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
   }
   func @m_generator_yields.dict_iterable(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -162,9 +132,6 @@ module m_generator_yields {
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
   }
   func @m_generator_yields.generator_iterable(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -172,9 +139,6 @@ module m_generator_yields {
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
   }
   func @m_generator_yields.class_decorator_first(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -182,9 +146,6 @@ module m_generator_yields {
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
   }
   func @m_generator_yields.async_generator(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
@@ -192,9 +153,6 @@ module m_generator_yields {
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
       ret(%ret.0)
-    propagate.0(%exc.0 : py.Value):
-      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
-      ret(%exc.1)
   }
 }
 

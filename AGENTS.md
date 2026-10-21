@@ -63,7 +63,8 @@ so a mismatch is a test failure, not a build error.
 - New Mantle core work goes in `StrataMantle/`, which must not import `StrataPython*`.
 - Python on Mantle goes in `StrataPython/Mantle/`.
 - Tests (`StrataMantleTest/`, `StrataPythonTest/Mantle/`) are `module` files; `import all` is
-  allowed. Prove well-formedness with `decide +kernel`, not `native_decide`.
+  allowed. Check behaviour, well-formedness included, with `#guard` and `#guard_msgs`. Use
+  `decide +kernel` only where a later proof uses the result, and never `native_decide`.
 
 The scope pass and the translator share their tests. To add one, put `NAME.py` in
 `StrataPythonTest/Mantle/mantle_tests/` and:

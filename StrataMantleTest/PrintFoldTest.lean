@@ -30,7 +30,7 @@ reference, and one defined outside the region that uses it.
 namespace Strata.Mantle.PrintFoldTest
 
 open Strata.Mantle.Build (freshVal freshLabel startBlock startBlockWith startFreshBlock
-  emitConst emitApply finishBlock goto build Failure region)
+  emitConst emitApply finishBlock goto build FailedFunc region)
 open Strata.Mantle.RegionTest
 
 private abbrev E := Reg.env
@@ -41,8 +41,8 @@ private def codeT : TypeExpr E := Base.Code.ty
 private def refIntT : TypeExpr E := Base.Ref.ty intT
 private def unitT : TypeExpr E := Base.Unit.ty
 
-/-- What `build` gives: a checked function, or the `Failure`. -/
-private abbrev Built := Except (Failure Unit) {fn : Func E Unit // fn.WF}
+/-- What `build` gives: a checked function, or the `FailedFunc`. -/
+private abbrev Built := Except (FailedFunc E Unit Unit) {fn : Func E Unit // fn.WF}
 
 /-- `zero` is used three times, `one` once, as a successor's argument, and `unused` never. -/
 private def counter : Built :=
@@ -80,7 +80,7 @@ private def pick : Built :=
     let r ← emitApply (.str .base "r") intT Reg.«if» #[c.id] (regions := #[thn, els])
     finishBlock (.ret () r)
 
-private def m : Except (Failure Unit) (Module.Raw E Unit) :=
+private def m : Except (FailedFunc E Unit Unit) (Module.Raw E Unit) :=
   return { name := .str .base "m", funcs := #[(← counter).1, (← code).1, (← pick).1], info := () }
 
 /-! ## In full -/

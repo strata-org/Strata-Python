@@ -47,35 +47,9 @@ module m_try {
       %C.cell.0 : base.Ref(py.Value) = py.globalCell("m_try", "C")
       %set.12 : base.Unit = base.refSet[py.Value](%C.cell.0, %C.0)
       jump ^join.0()
-    catch.0(%exc.0 : py.Value):
-      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
-      %Exception.0 : py.Value = py.loadGlobal("m_try", "Exception") ^unwind.0()
-      %match.0 : base.Bool = py.excMatch(%exc.0, %Exception.0) ^unwind.0()
-      branch(%match.0) ^except.0() ^next.0()
-    except.0():
-      %top.cell.0 : base.Ref(py.Value) = py.globalCell("m_try", "top")
-      %set.13 : base.Unit = base.refSet[py.Value](%top.cell.0, %exc.0)
-      %pop.0 : base.Unit = py.popExcept(%prev.0)
-      %top.0 : py.Value = py.undef("top")
-      %top.cell.1 : base.Ref(py.Value) = py.globalCell("m_try", "top")
-      %set.14 : base.Unit = base.refSet[py.Value](%top.cell.1, %top.0)
-      jump ^join.0()
-    clear.0(%exc.1 : py.Value):
-      %top.1 : py.Value = py.undef("top")
-      %top.cell.2 : base.Ref(py.Value) = py.globalCell("m_try", "top")
-      %set.15 : base.Unit = base.refSet[py.Value](%top.cell.2, %top.1)
-      jump ^unwind.0(%exc.1)
-    next.0():
-      jump ^unwind.0(%exc.0)
-    unwind.0(%exc.2 : py.Value):
-      %pop.1 : base.Unit = py.popExcept(%prev.0)
-      jump ^propagate.0(%exc.2)
     join.0():
       %comp.0 : py.Completion = py.completionNormal
       jump ^fin.0(%comp.0)
-    finRaise.0(%exc.3 : py.Value):
-      %comp.1 : py.Completion = py.completionRaise(%exc.3)
-      jump ^fin.0(%comp.1)
     fin.0(%pending.0 : py.Completion):
       %prev.1 : py.Value = py.pushPending(%pending.0)
       %pop.2 : base.Unit = py.popExcept(%prev.1)
@@ -86,9 +60,6 @@ module m_try {
       unreachable
     unreachable.2():
       unreachable
-    superseded.0(%exc.4 : py.Value):
-      %pop.3 : base.Unit = py.popExcept(%prev.1)
-      jump ^propagate.0(%exc.4)
     join.1():
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
@@ -294,10 +265,6 @@ module m_try {
       %e.10 : py.Value = py.undef("e")
       %set.4 : base.Unit = base.refSet[py.Value](%e.cell.0, %e.10)
       jump ^head.0()
-    clear.0(%exc.1 : py.Value):
-      %e.11 : py.Value = py.undef("e")
-      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.0, %e.11)
-      jump ^unwind.0(%exc.1)
     next.0():
       %ValueError.0 : py.Value = py.loadGlobal("m_try", "ValueError") ^unwind.0()
       %match.1 : base.Bool = py.excMatch(%exc.0, %ValueError.0) ^unwind.0()
@@ -844,53 +811,6 @@ module m_try {
       %str.3 : py.Value = py.strLit("__qualname__")
       %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
       jump ^join.1()
-    catch.0(%exc.0 : py.Value):
-      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
-      %str.4 : py.Value = py.strLit("Exception")
-      %Exception.0 : py.Value = py.undef("Exception")
-      %Exception.1 : py.Value = py.getOptionalItem(%ns.0, %str.4, %Exception.0) ^unwind.0()
-      %found.1 : base.Bool = py.isDefined(%Exception.1)
-      branch(%found.1) ^join.2(%Exception.1) ^absent.1()
-    absent.1():
-      %Exception.2 : py.Value = py.loadGlobal("m_try", "Exception") ^unwind.0()
-      jump ^join.2(%Exception.2)
-    join.2(%Exception.3 : py.Value):
-      %match.0 : base.Bool = py.excMatch(%exc.0, %Exception.3) ^unwind.0()
-      branch(%match.0) ^except.0() ^next.0()
-    except.0():
-      %str.5 : py.Value = py.strLit("err")
-      %store.2 : base.Unit = py.setItem(%ns.0, %str.5, %exc.0) ^unwind.0()
-      %pop.0 : base.Unit = py.popExcept(%prev.0)
-      %none.0 : py.Value = py.noneLit
-      %str.6 : py.Value = py.strLit("err")
-      %store.3 : base.Unit = py.setItem(%ns.0, %str.6, %none.0) ^propagate.0()
-      %str.7 : py.Value = py.strLit("err")
-      %del.0 : base.Unit = py.delItem(%ns.0, %str.7) ^undefined.0()
-      jump ^deleted.0()
-    undefined.0(%exc.1 : py.Value):
-      %err.0 : py.Value = py.undef("err")
-      %err.1 : py.Value = py.requireDefined(%err.0, "NameError", "name 'err' is not defined") ^propagate.0()
-      unreachable
-    deleted.0():
-      jump ^join.1()
-    clear.0(%exc.2 : py.Value):
-      %none.1 : py.Value = py.noneLit
-      %str.8 : py.Value = py.strLit("err")
-      %store.4 : base.Unit = py.setItem(%ns.0, %str.8, %none.1) ^unwind.0()
-      %str.9 : py.Value = py.strLit("err")
-      %del.1 : base.Unit = py.delItem(%ns.0, %str.9) ^undefined.1()
-      jump ^deleted.1()
-    undefined.1(%exc.3 : py.Value):
-      %err.2 : py.Value = py.undef("err")
-      %err.3 : py.Value = py.requireDefined(%err.2, "NameError", "name 'err' is not defined") ^unwind.0()
-      unreachable
-    deleted.1():
-      jump ^unwind.0(%exc.2)
-    next.0():
-      jump ^unwind.0(%exc.0)
-    unwind.0(%exc.4 : py.Value):
-      %pop.1 : base.Unit = py.popExcept(%prev.0)
-      jump ^propagate.0(%exc.4)
     join.1():
       %int.1 : py.Value = py.intLit(1)
       %int.2 : py.Value = py.intLit(2)
@@ -941,19 +861,6 @@ module m_try {
       unreachable
     deleted.2():
       jump ^exit.0()
-    clear.1(%exc.8 : py.Value):
-      %none.3 : py.Value = py.noneLit
-      %str.16 : py.Value = py.strLit("e")
-      %store.8 : base.Unit = py.setItem(%ns.0, %str.16, %none.3) ^unwind.1()
-      %str.17 : py.Value = py.strLit("e")
-      %del.3 : base.Unit = py.delItem(%ns.0, %str.17) ^undefined.3()
-      jump ^deleted.3()
-    undefined.3(%exc.9 : py.Value):
-      %e.5 : py.Value = py.undef("e")
-      %e.7 : py.Value = py.requireDefined(%e.5, "NameError", "name 'e' is not defined") ^unwind.1()
-      unreachable
-    deleted.3():
-      jump ^unwind.1(%exc.8)
     next.1():
       jump ^unwind.1(%exc.6)
     unwind.1(%exc.10 : py.Value):

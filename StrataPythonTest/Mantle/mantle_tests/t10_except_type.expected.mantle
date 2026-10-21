@@ -79,11 +79,6 @@ module t10_except_type {
       %e.cell.4 : base.Ref(py.Value) = py.globalCell("t10_except_type", "e")
       %set.12 : base.Unit = base.refSet[py.Value](%e.cell.4, %e.3)
       jump ^join.1()
-    clear.1(%exc.4 : py.Value):
-      %e.4 : py.Value = py.undef("e")
-      %e.cell.5 : base.Ref(py.Value) = py.globalCell("t10_except_type", "e")
-      %set.13 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.4)
-      jump ^unwind.1(%exc.4)
     next.1():
       %KeyError.0 : py.Value = py.loadGlobal("t10_except_type", "KeyError") ^unwind.1()
       %match.2 : base.Bool = py.excMatch(%exc.3, %KeyError.0) ^unwind.1()

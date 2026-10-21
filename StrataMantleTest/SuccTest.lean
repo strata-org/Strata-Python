@@ -32,12 +32,12 @@ namespace Strata.Mantle.SuccTest
 open Strata.Mantle.DSLTest
 
 open Strata.Mantle.Build (freshVal freshLabel startBlock startBlockWith startFreshBlock
-  emitConst emitApply finishBlock goto build Failure region)
+  emitConst emitApply finishBlock goto build FailedFunc region)
 
 private abbrev E := Demo.env
 
-/-- What `build` gives: a checked function, or the `Failure`. -/
-private abbrev Built := Except (Failure Unit) {fn : Func E Unit // fn.WF}
+/-- What `build` gives: a checked function, or the `FailedFunc`. -/
+private abbrev Built := Except (FailedFunc E Unit Unit) {fn : Func E Unit // fn.WF}
 
 /-- The build failed because its function is not well formed, not by a misuse. -/
 private def rejected (b : Built) : Bool :=

@@ -611,7 +611,7 @@ private def body {e : Env _root_.Unit} [Demo.env ⊑ e] : BuildM e _root_.Unit _
     #[exc.id]
   Build.finishBlock (.ret () r)
 
-private def f : Except (Build.Failure _root_.Unit)
+private def f : Except (Build.FailedFunc Demo.env _root_.Unit _root_.Unit)
     {fn : Func Demo.env _root_.Unit // fn.WF} :=
   Build.build (.str .base "f") (Demo.raising.ty Demo.Value.ty) () body
 

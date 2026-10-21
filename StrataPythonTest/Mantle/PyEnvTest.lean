@@ -178,7 +178,15 @@ result of the wrong type, and the wrong number of operands. -/
 #guard ((Py.mkClosure.sig (e := Py.env)).variadic.map (·.name)) == some "cells"
 #guard ((Py.strConcat.sig (e := Py.env)).variadic.map (·.name)) == some "parts"
 
-#guard wf (fWith box (op3 Py.mkTuple ⟨#[], rfl⟩ #[0, 2, 0] (ks := #[])))
+/-- `fn` without its last block, the handler, which nothing reaches if no operation fails to
+it. -/
+private def dropHandler (fn : Func Py.env Unit) : Func Py.env Unit :=
+  { fn with blocks := fn.blocks.pop }
+
+-- With no successor, the handler is unreachable, which `Func.Reachable` rules out; without the
+-- handler, the function is well formed.
+#guard illFormed (fWith box (op3 Py.mkTuple ⟨#[], rfl⟩ #[0, 2, 0] (ks := #[])))
+#guard wf (dropHandler (fWith box (op3 Py.mkTuple ⟨#[], rfl⟩ #[0, 2, 0] (ks := #[]))))
 
 -- A variadic run is still typed: a base integer is not a Python value.
 #guard illFormed (fWith box (op3 Py.mkTuple ⟨#[], rfl⟩ #[0, 1] (ks := #[])))

@@ -154,9 +154,35 @@ module m.g {
 #guard_msgs in
 #eval printed (built gName wrongResult)
 
+/-- A body that branches on `True` to `l` and `r`, both of which jump to `j`.  `l` defines a
+`None`, and `j` returns it if `outside`, where it is out of scope, as `r` also enters `j`;
+otherwise `j` returns a `None` of its own. -/
+private def joins (outside : Bool) : PyBuild.PyM SourceRange Unit := do
+  let c ← (Build.emitConst (.str .base "c") (.bool true) : BuildM Py.env SourceRange ValId)
+  let l ← (Build.freshLabel "l" : BuildM Py.env SourceRange Label)
+  let r ← (Build.freshLabel "r" : BuildM Py.env SourceRange Label)
+  let j ← (Build.freshLabel "j" : BuildM Py.env SourceRange Label)
+  (Build.finishBlock (.branch none' c (Build.goto l) (Build.goto r)) :
+    BuildM Py.env SourceRange Unit)
+  (Build.startBlock l : BuildM Py.env SourceRange Unit)
+  let v ← PyBuild.noneLit
+  (Build.finishBlock (.jump none' (Build.goto j)) : BuildM Py.env SourceRange Unit)
+  (Build.startBlock r : BuildM Py.env SourceRange Unit)
+  (Build.finishBlock (.jump none' (Build.goto j)) : BuildM Py.env SourceRange Unit)
+  (Build.startBlock j : BuildM Py.env SourceRange Unit)
+  if outside then PyBuild.emitReturn v else PyBuild.emitReturnNone
+
+-- A use out of scope is an internal error that says why.
+/-- info: internal error: m.g is not well formed: `%none.0` (defined in `l.0`) is used in `j.0`, reachable via `entry.0 → r.0 → j.0` without it -/
+#guard_msgs in
+#eval show IO Unit from for d in (built gName (joins true)).2 do IO.println d
+
+-- Its twin builds.
+#guard (built gName (joins false)).2.isEmpty
+
 -- A body without a failure is kept as built.
 #guard (built gName PyBuild.emitReturnNone).2.isEmpty
-#guard (built gName PyBuild.emitReturnNone).1.val.blocks.size == 2
+#guard (built gName PyBuild.emitReturnNone).1.val.blocks.size == 1
 
 -- A caller of a stub gives a checked module, with no further diagnostic.
 #guard (assemble (.str .base "m") #[(built fName callsG).1, (built gName wrongResult).1]
@@ -168,7 +194,7 @@ module m.g {
 #guard (assemble (.str .base "m") #[(built gName PyBuild.emitReturnNone).1,
   (built gName wrongResult).1] none').2.map (·.message) = #["m.g is emitted twice"]
 #guard (assemble (.str .base "m") #[(built gName PyBuild.emitReturnNone).1,
-  (built gName wrongResult).1] none').1.raw.funcs.map (·.blocks.size) = #[2]
+  (built gName wrongResult).1] none').1.raw.funcs.map (·.blocks.size) = #[1]
 
 -- A reference to a function the module lacks is an internal error, and the module is empty.
 #guard (assemble (.str .base "m") #[(built fName callsG).1] none').2.map (·.message) =

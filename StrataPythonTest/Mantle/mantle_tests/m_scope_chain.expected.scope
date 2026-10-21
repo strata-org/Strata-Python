@@ -1,0 +1,30 @@
+module
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  c: local (assigned, referenced)
+  d: local (assigned, referenced)
+  e: local (assigned, referenced)
+  r: local (assigned)
+  s: local (assigned)
+  t: local (assigned)
+  f: local (assigned)
+  g: local (assigned)
+  h: local (assigned)
+  function f
+    params: a, b, c, d, e
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    c: local (parameter, referenced)
+    d: local (parameter, referenced)
+    e: local (parameter, referenced)
+  function g
+    params: a, b, c, d
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    c: local (parameter, referenced)
+    d: local (parameter, referenced)
+  function h
+    params: a, b, c
+    a: local (parameter, referenced)
+    b: local (parameter, referenced)
+    c: local (parameter, referenced)

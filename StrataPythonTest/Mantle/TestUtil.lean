@@ -17,8 +17,7 @@ meta import StrataMantle.Env.WF
 * `compilePython`: parse a `.py` file to a Strata Ion file through CPython;
 * `firstDiff`: the first line where an output and its golden differ;
 * `dottedNames`: the names of a module with a `.` inside a string segment, which no name may
-  have;
-* `deadBlocks`: the blocks of a function that control cannot reach.
+  have.
 -/
 
 namespace StrataPython.Mantle.TestUtil
@@ -62,36 +61,6 @@ def hasDottedSegment : Name → Bool
 def dottedNames {env : Env Unit} [base ⊑ env] {α : Type} (m : Module.Raw env α) : Array Name :=
   m.funcs.flatMap fun f =>
     (#[f.name] ++ (f.allBlocks.map (·.label.name)).toArray ++ f.names).filter hasDottedSegment
-
-/-- The labels a block may transfer to: its instructions' successors and its terminator's. -/
-def blockTargets {env : Env Unit} {α : Type} (b : Block env α) : Array Label :=
-  let succs := b.instrs.flatMap fun
-    | .apply _ _ _ _ _ ks _ => ks
-    | .const .. => #[]
-  let .apply _ _ _ _ ks _ := b.term
-  (succs ++ ks).map (·.target)
-
-/-- The labels of the blocks of `f`, outside regions, that control cannot reach: neither from
-the entry nor from a handler that no operation names, which is a block taking just one value
-of type `value` (§10 of `docs/PythonToMantle.md`).  A dead block of that shape that is not a
-handler counts as a root too, so it is not reported. -/
-def deadBlocks {env : Env Unit} {α : Type} (value : TypeExpr env) (f : Func env α) :
-    Array Label := Id.run do
-  let named := f.blocks.flatMap blockTargets
-  let roots := f.blocks.toList.zipIdx.filterMap fun (b, i) =>
-    if i == 0 || (!named.contains b.label && (b.params.map (·.type)) == #[value]) then
-      some b.label else none
-  let mut seen : Std.HashSet Label := {}
-  let mut todo := roots
-  while true do
-    match todo with
-    | [] => break
-    | l :: rest =>
-      todo := rest
-      if seen.contains l then continue
-      seen := seen.insert l
-      if let some b := f.blocks.find? (·.label == l) then todo := (blockTargets b).toList ++ todo
-  return (f.blocks.filter (!seen.contains ·.label)).map (·.label)
 
 end
 

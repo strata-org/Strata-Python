@@ -281,9 +281,6 @@ module m_finally {
       %pop.0 : base.Unit = py.popExcept(%prev.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.1)
       ret(%ret.0)
-    superseded.0(%exc.1 : py.Value):
-      %pop.1 : base.Unit = py.popExcept(%prev.0)
-      jump ^propagate.0(%exc.1)
     propagate.0(%exc.2 : py.Value):
       %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
       ret(%exc.3)
@@ -350,9 +347,6 @@ module m_finally {
       %prev.0 : py.Value = py.pushPending(%pending.0)
       %pop.0 : base.Unit = py.popExcept(%prev.0)
       jump ^exit.0()
-    superseded.0(%exc.1 : py.Value):
-      %pop.1 : base.Unit = py.popExcept(%prev.0)
-      jump ^propagate.0(%exc.1)
     stop.0(%exc.2 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.2)
       branch(%done.0) ^exit.0() ^propagate.0(%exc.2)

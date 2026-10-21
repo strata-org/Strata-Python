@@ -60,15 +60,37 @@ type. A reference may instead have the untyped `base.Code`, which cannot be call
 prints, in full, for diagnostics. A `Module` is one with its proof of well-formedness, and is
 the same data at run time.
 
+**Scoping.** In an SSA function, block A *dominates* block B when every path from the entry
+to B passes through A. The *immediate dominator* of B is the closest block that dominates
+it, and the immediate dominators form the *dominator tree*. A value may be used only where
+its definition dominates the use. Mantle refines dominance to points within a block: a
+block's parameters are in scope from its start, and an instruction's result is in scope
+after that instruction. A transfer to one of an instruction's successors, such as an
+exception edge, leaves from just before the instruction, so a handler cannot see the result
+of the instruction that raised.
+
+The IR stores no dominance information. A well-formed function has every block reachable from
+its body's entry, and for each body *some* legal tree puts every use in scope. A tree gives
+each block other than the entry a parent, a point of the body: another block after some of its
+instructions. It is legal when every chain of parents reaches the entry and every transfer into
+a block leaves from the block's parent or a point below it in the tree. The rule names no
+algorithm. The checker computes the immediate-dominator tree and checks the uses against it.
+That tree is proved legal and, when every block is reachable, exact: a point's ancestors in it
+are exactly its dominators. So the check accepts exactly the functions that some legal tree
+scopes, and these are exactly the dominance-correct ones. The builder drops the blocks the
+entry cannot reach, so a producer leaves dominance to the checker. When a function it reads is
+not well formed for these reasons, the reader names each unreachable block, and each use out of
+scope with a path from the entry that reaches it without passing its definition.
+
 **Regions.** An instruction may own nested bodies, called regions, as in MLIR. A region is a
 list of blocks, the first its entry, whose parameters are the region's arguments. A transfer
 inside a region names a block of the same region or the region's exit, so control leaves a
-region only through its exit, back to the instruction that owns it. Values defined outside a
-region are visible inside it, and values defined inside are local to it; the checker does not
-yet enforce this. Regions keep structured constructs structured, so analyses can treat them
-directly. The first user is the comprehension, as a `py.forEach` whose body is a region
-over the item, with one cell per iteration variable per evaluation, as in CPython. An `if`
-whose branches are regions:
+region only through its exit, back to the instruction that owns it. A region's blocks have
+trees of their own, rooted at its entry. Values in scope at the owning instruction
+are visible inside the region, and values defined inside are local to it. Regions keep
+structured constructs structured, so analyses can treat them directly. The first user is the
+comprehension, as a `py.forEach` whose body is a region over the item, with one cell per
+iteration variable per evaluation, as in CPython. An `if` whose branches are regions:
 
 ```
 %r.0 : base.Int = demo.if[base.Int](%c.0) {
@@ -97,8 +119,8 @@ module m {
   func @m.f(%x.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%x.0 : py.Value):
       %int.0 : py.Value = py.intLit(1)
-      %sum.0 : py.Value = py.add(%x.0, %int.0) ^propagate.0()
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%sum.0)
+      %add.0 : py.Value = py.add(%x.0, %int.0) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%add.0)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
@@ -107,9 +129,9 @@ module m {
 }
 ```
 
-* **Values** print as their names, `%x.0`, with their type where they are defined. Ids are
-  not printed. A block prints as its label and parameters; the entry block's parameters are
-  also the function's.
+* **Values** print by name, `%x.0`, with their type where they are defined.
+* **Blocks** print as their label and parameters; the entry block's parameters are also the
+  function's.
 * **Applications** print as the operation, its type arguments in brackets, its operands in
   parentheses, then its successors, each `^label(args)`, then its regions, each in braces.
   Empty brackets and parentheses are left out: `py.noneLit`, `unreachable`. A list of types

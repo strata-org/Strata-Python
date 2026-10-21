@@ -6,9 +6,13 @@
 module
 public import StrataMantle.IR
 public import StrataMantle.Util.NameMap
+public import StrataMantle.Util.LabelMap
+public import StrataMantle.DomProps
+public import StrataMantle.DomDecide
 public import StrataMantle.Util.Array
 -- The instances evaluate the environment representation at code-generation time.
 import StrataMantle.Env.WF
+import all StrataMantle.Util.LabelMapProps
 
 set_option autoImplicit false
 
@@ -33,7 +37,8 @@ what the thing it names demands:
 * a `Func` has an entry block, uses no label twice nor `Label.exit` at all, defines no
   value twice and names every value it defines, no two alike, counting every region, and
   every block is well formed in the context those definitions give, its exit taking the
-  function's return type;
+  function's return type; every block of every body is reachable from the body's entry, and
+  some legal tree of each body puts every use in scope;
 * a `Module.Raw` names no function twice, its functions are all well formed, and every
   function reference names one of them, at that function's code type or at the untyped
   `base.Code`.
@@ -47,11 +52,16 @@ own rules.
 
 `Decidable` instances decide every predicate, so `decide` is the checker.
 
+An operand has the type its definition gives it, wherever in the function that is.  Where a
+value may be used is the separate rule `Func.Scopable` (`StrataMantle/Dom.lean`): for each body
+some legal dominator tree puts every use in scope, defined above it in that tree or in scope
+where the enclosing region's owner runs.  The IR stores no tree; the checker computes one
+(`StrataMantle/DomDecide.lean`).  So the rules reject a use before its definition, a use of a
+value outside the region that defines it, and a handler's use of the result of the operation
+that failed.  Every block must also be reachable from its body's entry (`Func.Reachable`).
+
 The rules do not check:
 
-* **Scoping.** An operand is typed by its definition anywhere in the function, so a use
-  before its definition, a use of a value outside the region that defines it, and a
-  handler's use of the result of the operation that failed are all accepted.
 * **Effects.** `Ref` makes instruction order observable, and these rules say nothing about
   reordering instructions.
 
@@ -84,78 +94,11 @@ instance {α : Type} [DecidableEq α] (a b : Option α) : Decidable (Agrees a b)
 
 The checker's maps are tries and trees, so `decide +kernel` evaluates it:
 
-* `NatTrie`: a map from `Nat`, on the key's binary digits;
-* `LabelMap`: a map from labels, on each label's counter;
+* `NatTrie` and `LabelMap` (`StrataMantle.Util.LabelMap`): maps from `Nat` and from labels;
 * `Label.Distinct`: no label occurs twice, decided through a `LabelMap`;
 * `NameMap` and `NameSet` (`StrataMantle.Util.NameMap`): a map and a set of names, as a 2-3
   tree on `Name.key`.  A `NameMap` holds a module's functions' code types: deciding
   `Module.Raw.WF` builds it once and looks every function reference up in it. -/
-
-/-- A map from `Nat`: a trie on the key's bijective binary digits.  Key `0` is at the root,
-and `2k+1` and `2k+2` are key `k` of the left and right subtrees.  Its depth is the key's bit
-length, so it suits small keys such as value ids and label counters. -/
-inductive NatTrie (β : Type) where
-  | leaf
-  | node (v : Option β) (l r : NatTrie β)
-
-namespace NatTrie
-
-variable {β : Type}
-
-/-- The value at `k`, if any. -/
-@[expose] def find? : NatTrie β → Nat → Option β
-  | .leaf, _ => none
-  | .node v _ _, 0 => v
-  | .node _ l r, n + 1 => if n % 2 = 0 then l.find? (n / 2) else r.find? (n / 2)
-
-/-- Map `k` to `x` at most `fuel` levels down. -/
-@[expose] def insertAt (x : β) : (fuel : Nat) → NatTrie β → Nat → NatTrie β
-  | 0, t, _ => t
-  | _ + 1, .leaf, 0 => .node (some x) .leaf .leaf
-  | _ + 1, .node _ l r, 0 => .node (some x) l r
-  | f + 1, .leaf, n + 1 =>
-    if n % 2 = 0 then .node none (insertAt x f .leaf (n / 2)) .leaf
-    else .node none .leaf (insertAt x f .leaf (n / 2))
-  | f + 1, .node v l r, n + 1 =>
-    if n % 2 = 0 then .node v (insertAt x f l (n / 2)) r else .node v l (insertAt x f r (n / 2))
-
-/-- `t` with `k` mapped to `x`.  Key `k` is at most `k` levels down. -/
-@[expose] def insert (t : NatTrie β) (k : Nat) (x : β) : NatTrie β := insertAt x (k + 1) t k
-
-end NatTrie
-
-/-- The key of a label in a `LabelMap`: its counter, or `0` if it has none. -/
-@[expose] def Label.key : Label → Nat
-  | ⟨.num _ i⟩ => i
-  | _ => 0
-
-/-- A map from labels: per key, the labels with that key and their values, latest first. -/
-structure LabelMap (β : Type) where
-  trie : NatTrie (List (Label × β)) := .leaf
-
-namespace LabelMap
-
-variable {β : Type}
-
-instance : EmptyCollection (LabelMap β) := ⟨⟨.leaf⟩⟩
-
-/-- The labels with `l`'s key, and their values. -/
-@[expose] def bucket (m : LabelMap β) (l : Label) : List (Label × β) :=
-  (m.trie.find? l.key).getD []
-
-/-- The value at `l`, if any. -/
-@[expose] def find? (m : LabelMap β) (l : Label) : Option β :=
-  ((m.bucket l).find? fun p => decide (p.1 = l)).map (·.2)
-
-/-- `m` with `l` mapped to `x`. -/
-@[expose] def insert (m : LabelMap β) (l : Label) (x : β) : LabelMap β :=
-  ⟨m.trie.insert l.key ((l, x) :: m.bucket l)⟩
-
-/-- The labels `ls`, as a set, or `none` if one occurs twice. -/
-@[expose] def ofDistinct? (ls : List Label) : Option (LabelMap Unit) :=
-  ls.foldlM (init := ∅) fun m l => if (m.find? l).isSome then none else some (m.insert l ())
-
-end LabelMap
 
 /-- No label occurs twice in `ls`. -/
 @[expose] def Label.Distinct (ls : List Label) : Prop := (LabelMap.ofDistinct? ls).isSome
@@ -590,17 +533,173 @@ structure Func.WF {env : Env Unit} {α : Type} [base ⊑ env] (fn : Func env α)
   valuesNamed : ValDecl.idBound fn.defs ≤ fn.names.size
   /-- Its blocks are well formed. -/
   body : Func.BodyWF fn
+  /-- Every block of every body, region bodies included, is reachable from that body's
+  entry. -/
+  reachable : fn.Reachable
+  /-- Some legal tree of each body puts every use in scope. -/
+  scoping : fn.Scopable
 
+/-- Decide `Func.WF`, its last two fields together, as `Func.checkDom` decides them
+(`StrataMantle/DomDecide.lean`). -/
 instance {env : Env Unit} {α : Type} [base ⊑ env] (fn : Func env α) : Decidable fn.WF :=
   have := Name.decNodup fn.names
   decidable_of_iff (0 < fn.blocks.size ∧ Label.Distinct (Label.exit :: fn.labels) ∧
-      fn.names.toList.Nodup ∧ ValDecl.idBound fn.defs ≤ fn.names.size ∧ Func.BodyWF fn)
-    ⟨fun ⟨a, b, c, d, e⟩ => ⟨a, b, c, d, e⟩, fun ⟨a, b, c, d, e⟩ => ⟨a, b, c, d, e⟩⟩
+      fn.names.toList.Nodup ∧ ValDecl.idBound fn.defs ≤ fn.names.size ∧ Func.BodyWF fn ∧
+      (fn.Reachable ∧ fn.Scopable))
+    ⟨fun ⟨a, b, c, d, e, f, g⟩ => ⟨a, b, c, d, e, f, g⟩,
+      fun ⟨a, b, c, d, e, f, g⟩ => ⟨a, b, c, d, e, f, g⟩⟩
 
 /-- Every value a well-formed function defines has a name. -/
 theorem Func.WF.mem_names {env : Env Unit} {α : Type} [base ⊑ env] {fn : Func env α}
     (h : fn.WF) {d : ValDecl env} (hd : d ∈ fn.defs) : d.id.id < fn.names.size :=
   (ValDecl.idBound_le_iff _ _).mp h.valuesNamed d hd
+
+/-- A well-formed function is dominance-correct: every use is defined at a point that every
+path from its body's entry to the use passes through. -/
+theorem Func.WF.domCorrect {env : Env Unit} {α : Type} [base ⊑ env] {fn : Func env α}
+    (h : fn.WF) : fn.DomCorrect :=
+  h.scoping.domCorrect
+
+/-! ## Scopability is dominance-correctness
+
+For a function whose blocks are all reachable, and whose labels are distinct as `Func.WF` asks,
+some tree per body scopes it exactly when it is dominance-correct
+(`Func.Reachable.scopable_iff`).  `Func.scopable_iff_domCorrect`
+(`StrataMantle/DomComplete.lean`) proves it for distinct labels per body, which the distinct
+labels of the whole function give. -/
+
+/-- Folding `ofDistinct?`'s step from a map of the labels `seen` gives distinct labels. -/
+private theorem nodup_of_foldlM : ∀ (ls seen : List Label) (m : LabelMap Unit),
+    (∀ l, (m.find? l).isSome = true ↔ l ∈ seen) → seen.Nodup →
+    (ls.foldlM (fun (m : LabelMap Unit) l =>
+      if (m.find? l).isSome then none else some (m.insert l ())) m).isSome = true →
+        (seen ++ ls).Nodup
+  | [], seen, _, _, hn, _ => by simpa using hn
+  | l :: ls, seen, m, hm, hn, h => by
+    rw [List.foldlM_cons] at h
+    by_cases hl : (m.find? l).isSome = true
+    · rw [if_pos hl] at h
+      simp at h
+    · rw [if_neg hl] at h
+      have hl₁ : l ∉ seen := fun h₁ => hl ((hm l).mpr h₁)
+      have hm₁ : ∀ l₁, ((m.insert l ()).find? l₁).isSome = true ↔ l₁ ∈ seen ++ [l] := by
+        intro l₁
+        rw [LabelMap.find?_insert]
+        by_cases h₂ : l₁ = l
+        · simp [h₂]
+        · simp [h₂, hm l₁]
+      have hn₁ : (seen ++ [l]).Nodup :=
+        List.nodup_append.mpr ⟨hn, List.pairwise_singleton _ l, fun a ha b hb hab => by
+          rw [List.mem_singleton] at hb
+          exact hl₁ (hb ▸ hab ▸ ha)⟩
+      simpa using nodup_of_foldlM ls (seen ++ [l]) _ hm₁ hn₁ (by simpa using h)
+
+/-- Labels that `Label.Distinct` accepts are distinct. -/
+theorem Label.Distinct.nodup {ls : List Label} (h : Label.Distinct ls) : ls.Nodup := by
+  simpa using nodup_of_foldlM ls [] ∅ (fun l => by simp [LabelMap.find?_empty]) List.nodup_nil h
+
+section nested
+
+variable {env : Env Unit} {α : Type}
+
+/-- A region's blocks, with what is nested in them, are part of `blocksList` of a list holding
+it. -/
+private theorem infix_blocksList {r : Region env α} :
+    ∀ {rs : List (Region env α)}, r ∈ rs →
+      Block.withNestedList r.blocks.toList <:+: Region.blocksList rs
+  | ⟨⟨blocks⟩⟩ :: rs, h => by
+    rw [Region.blocksList]
+    rcases List.mem_cons.mp h with rfl | h
+    · exact List.prefix_append _ _ |>.isInfix
+    · exact (infix_blocksList h).trans (List.suffix_append _ _).isInfix
+
+/-- A region's blocks, with what is nested in them, are part of its instruction's nested blocks. -/
+private theorem infix_instr {r : Region env α} {i : Instruction env α} (h : r ∈ i.regions) :
+    Block.withNestedList r.blocks.toList <:+: i.nestedBlocks := by
+  cases i with
+  | const => simp [Instruction.regions] at h
+  | apply _ _ _ _ _ _ regions =>
+    obtain ⟨regions⟩ := regions
+    exact infix_blocksList (Array.mem_def.mp h)
+
+/-- A region's blocks, with what is nested in them, are part of its terminator's nested blocks. -/
+private theorem infix_term {r : Region env α} {t : Terminator env α} (h : r ∈ t.regions) :
+    Block.withNestedList r.blocks.toList <:+: t.nestedBlocks := by
+  obtain ⟨_, _, _, _, _, ⟨regions⟩⟩ := t
+  exact infix_blocksList (Array.mem_def.mp h)
+
+/-- An instruction's nested blocks are part of `nestedBlocksList` of a list holding it. -/
+private theorem infix_nestedBlocksList {i : Instruction env α} :
+    ∀ {is : List (Instruction env α)} {k : Nat}, is[k]? = some i →
+      i.nestedBlocks <:+: Instruction.nestedBlocksList is
+  | i₁ :: is, 0, h => by
+    cases h
+    exact (List.prefix_append _ _).isInfix
+  | i₁ :: is, k + 1, h => by
+    rw [Instruction.nestedBlocksList]
+    exact (infix_nestedBlocksList (is := is) (k := k) h).trans (List.suffix_append _ _).isInfix
+
+/-- A block of the list, then what is nested in it, is part of `withNestedList`. -/
+private theorem infix_withNested {b : Block env α} :
+    ∀ {bs : List (Block env α)}, b ∈ bs →
+      b :: (Instruction.nestedBlocksList b.instrs.toList ++ b.term.nestedBlocks) <:+:
+        Block.withNestedList bs
+  | c :: bs, h => by
+    obtain ⟨l, ps, ⟨instrs⟩, t, i⟩ := c
+    rw [Block.withNestedList]
+    rcases List.mem_cons.mp h with rfl | h
+    · have := (List.prefix_append (⟨l, ps, ⟨instrs⟩, t, i⟩ ::
+        (Instruction.nestedBlocksList instrs ++ t.nestedBlocks)) (Block.withNestedList bs)).isInfix
+      rw [List.cons_append] at this
+      exact this
+    · exact (infix_withNested h).trans (List.infix_cons (List.suffix_append _ _).isInfix)
+
+/-- A body's labels are a sublist of the labels of its blocks with what is nested in them. -/
+private theorem sublist_labels :
+    ∀ (bs : List (Block env α)),
+      (bs.map (·.label)).Sublist ((Block.withNestedList bs).map (·.label))
+  | [] => List.Sublist.slnil
+  | ⟨l, ps, ⟨instrs⟩, t, i⟩ :: bs => by
+    rw [Block.withNestedList, List.map_cons, List.map_cons]
+    exact (sublist_labels bs).trans (List.sublist_append_right _ _ |>.map _) |>.cons_cons _
+
+/-- A region's blocks, with what is nested in them, are a shorter part of its owner's. -/
+private theorem regionAt_infix {bs : List (Block env α)} {y : Point} {r : Region env α}
+    (h : Body.RegionAt bs y r) :
+    (Block.withNestedList r.blocks.toList).length < (Block.withNestedList bs).length ∧
+      (Block.withNestedList r.blocks.toList) <:+: Block.withNestedList bs := by
+  obtain ⟨b, hb, hr⟩ : ∃ b ∈ bs, Block.withNestedList r.blocks.toList <:+:
+      Instruction.nestedBlocksList b.instrs.toList ++ b.term.nestedBlocks := by
+    cases h with
+    | @instr b i k _ hb hk hr =>
+      exact ⟨b, hb, (infix_instr hr).trans ((infix_nestedBlocksList
+        (by rwa [Array.getElem?_toList])).trans (List.prefix_append _ _).isInfix)⟩
+    | @term b _ hb hr =>
+      exact ⟨b, hb, (infix_term hr).trans (List.suffix_append _ _).isInfix⟩
+  have hw := infix_withNested hb
+  refine ⟨Nat.lt_of_lt_of_le ?_ hw.length_le, hr.trans ((List.suffix_cons _ _).isInfix.trans hw)⟩
+  rw [List.length_cons]
+  exact Nat.lt_succ_of_le hr.length_le
+
+/-- A body whose blocks, with what is nested in them, have distinct labels has distinct labels at
+every depth. -/
+private theorem distinct_of_nodup : ∀ (n : Nat) (bs : List (Block env α)),
+    (Block.withNestedList bs).length < n → ((Block.withNestedList bs).map (·.label)).Nodup →
+      Body.Distinct bs
+  | 0, _, hl, _ => absurd hl (Nat.not_lt_zero _)
+  | n + 1, bs, hl, hn => .mk (hn.sublist (sublist_labels bs)) fun _ r hr =>
+    have ⟨hlt, hi⟩ := regionAt_infix hr
+    distinct_of_nodup n _ (by omega) (hn.sublist (hi.sublist.map _))
+
+end nested
+
+/-- Under reachability, and the distinct labels `Func.WF` asks for, some tree per body scopes the
+function exactly when it is dominance-correct. -/
+theorem Func.Reachable.scopable_iff {env : Env Unit} {α : Type} {fn : Func env α}
+    (hr : fn.Reachable) (hd : Label.Distinct (Label.exit :: fn.labels)) :
+    fn.Scopable ↔ fn.DomCorrect :=
+  Func.scopable_iff_domCorrect hr (distinct_of_nodup _ _ (Nat.lt_succ_self _)
+    (List.nodup_cons.mp hd.nodup).2)
 
 /-- A function reference: the function it names, and the type of the value it defines. -/
 structure FuncUse (env : Env Unit) where

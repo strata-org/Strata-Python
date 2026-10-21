@@ -15,6 +15,7 @@ meta import StrataPython.ReadPython
 meta import StrataDDM.Util.IO
 meta import StrataPythonTest.Util.Python
 meta import StrataPythonTest.Mantle.TestUtil
+meta import StrataMantleTest.DomRef
 
 /-! # Python-to-Mantle translator tests
 
@@ -34,10 +35,17 @@ to give: a rejected construct's name, the message without " is not supported", o
 error's message.
 
 A test *translates* when its diagnostics are exactly the expected ones.  Every module must be
-well formed (`Module.Raw.WF`), have no name with a `.` inside a segment and no block that control
-cannot reach, and read back from its full printed form with the same ids and the same names.  A supported test must translate, and
-its diagnostics and printed module must equal `NAME.expected.mantle` beside `NAME.py`.  A test
-not yet supported must not translate; one that does fails, and must be marked `yes`.
+well formed (`Module.Raw.WF`), have no name with a `.` inside a segment, and read back from its
+full printed form with the same values, defined in the same order with the same names.  A
+supported test must translate, and its diagnostics and printed module must equal
+`NAME.expected.mantle` beside `NAME.py`.  A test not yet supported must not translate; one that
+does fails, and must be marked `yes`.
+
+The tree the check computes for every body must give every block the parent an independent
+computation gives: the iterative set-intersection algorithm (`DomRef.expectedIdoms`, in
+`StrataMantleTest/DomRef.lean`), where the check uses Cooper, Harvey and Kennedy's
+(`Body.domTree?`).  The builder drops every block the entry does not reach, so a block that
+remains unreached fails the test.
 
 Every `.py` file in `mantle_tests/` must be listed, and every `.expected.mantle` file there must
 belong to a supported test.  Set `MANTLE_UPDATE=1` to rewrite the goldens.
@@ -47,7 +55,7 @@ namespace StrataPython.MantleTranslateTest
 
 open StrataPython.Mantle.PyTranslate (translate formatDiagnostic)
 open StrataPython (withPython)
-open StrataPython.Mantle.TestUtil (compilePython firstDiff dottedNames deadBlocks)
+open StrataPython.Mantle.TestUtil (compilePython firstDiff dottedNames)
 
 private meta def root : System.FilePath := "StrataPythonTest"
 
@@ -109,6 +117,11 @@ private meta def runCase (pythonCmd tmpDir : System.FilePath) (update : Bool)
   unless internal.isEmpty do
     return .failed s!"{e.path}: internal errors: \
       {"; ".intercalate (internal.map (·.message)).toList}"
+  for f in m.raw.funcs do
+    let bad := Strata.Mantle.DomRef.idomMismatches f.blocks
+    unless bad.isEmpty do
+      return .failed s!"{e.path}: {Strata.Mantle.ToDDM.nameText f.name}: computed dominators \
+        differ: {bad}"
   let rejected := r.diagnostics.toList.map fun d =>
     ((d.message.dropSuffix? " is not supported").map (·.toString)).getD d.message
   let expected := e.rejects
@@ -126,20 +139,17 @@ private meta def runCase (pythonCmd tmpDir : System.FilePath) (update : Bool)
   unless (dottedNames m.raw).isEmpty do
     return .failed s!"{e.path}: a name has a `.` inside a segment: \
       {(dottedNames m.raw).map Strata.Mantle.ToDDM.nameText}"
-  for f in m.raw.funcs do
-    let dead := deadBlocks StrataPython.Mantle.Py.Value.ty f
-    unless dead.isEmpty do
-      return .failed s!"{e.path}: {Strata.Mantle.ToDDM.nameText f.name}: unreachable blocks \
-        {dead.map (Strata.Mantle.ToDDM.nameText ·.name)}"
-  -- Reading the full form back gives the same functions: the same ids and the same names.
+  -- Reading the full form back gives the same functions: the same values, defined in the same
+  -- order with the same names.  The ids may differ: the builder drops the blocks the entry does
+  -- not reach, which leaves their values' ids unused, and the reader numbers what it reads.
   let full := m.format .full
   match ← Strata.Mantle.Module.read StrataPython.Mantle.Py.env full e.path with
   | .error err => return .failed s!"{e.path}: the full form does not read back:\n{err}"
   | .ok m₁ =>
     let same := m₁.raw.funcs.size == m.raw.funcs.size && (m₁.raw.funcs.zip m.raw.funcs).all
-      fun (f, g) => f.names == g.names && f.defs.map (·.id.id) == g.defs.map (·.id.id)
+      fun (f, g) => f.defs.map (f.names[·.id.id]?) == g.defs.map (g.names[·.id.id]?)
     unless same && m₁.format .full == full do
-      return .failed s!"{e.path}: the full form reads back with other ids or names"
+      return .failed s!"{e.path}: the full form reads back with other values or names"
   let golden := testDir / s!"{e.path}{goldenSuffix}"
   if update then
     IO.FS.writeFile golden dump

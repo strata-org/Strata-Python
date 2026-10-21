@@ -11,6 +11,7 @@ public import Lean.Data.Position
 -- Emitting instructions over `Py.env` needs the signature representation at
 -- code-generation time.
 import StrataMantle.Env.WF
+import StrataMantle.DomDiag
 
 set_option autoImplicit false
 
@@ -1817,17 +1818,21 @@ def runBody (ctx : Ctx) (st : TState) (range : SourceRange) (act : TransM Unit) 
   return st'
 
 /-- Build the function `name`, taking `params`, with `body`: the checked function and the
-translator's state.  If the build fails, the function is its stub, and the state has an
-internal-error diagnostic at `range` for each misuse, or for the function not being well
-formed. -/
+translator's state.  If the build fails, the function is its stub, and the state gains an
+internal-error diagnostic at `range` for each misuse, or else one saying that the function is
+not well formed.  That one names each unreachable block and each use out of scope
+(`Func.scopeDiagnostics`). -/
 def builtFunc (name : Name) (params : Array (Name × TypeExpr Py.env)) (range : SourceRange)
     (body : Array ValId → PyM SourceRange TState) :
     {fn : Func Py.env SourceRange // fn.WF} × TState :=
   match buildFuncTypedWith name params range body with
   | .ok r => r
   | .error e =>
-    let messages := if e.misuses.isEmpty then #[s!"{nameText name} is not well formed"]
-      else e.misuses.map (s!"{nameText name}: {·}")
+    let messages :=
+      if !e.misuses.isEmpty then e.misuses.map (s!"{nameText name}: {·}")
+      else if e.func.Reachable ∧ e.func.Scopable then #[s!"{nameText name} is not well formed"]
+      else #[s!"{nameText name} is not well formed: \
+        {"; ".intercalate e.func.scopeDiagnostics.toList}"]
     let ds := messages.map fun message => ({ kind := .internal, message, range } : Diagnostic)
     (stubFunc name params range, { e.value with diagnostics := e.value.diagnostics ++ ds })
 

@@ -31,17 +31,6 @@ module t11_with {
       %set.4 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
       %comp.0 : py.Completion = py.completionNormal
       jump ^fin.0(%comp.0)
-    wexc.0(%exc.0 : py.Value):
-      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
-      %exited.0 : py.Value = py.exitWithExc(%exit.0, %exc.0) ^unwind.0()
-      %cond.0 : base.Bool = py.truthy(%exited.0) ^unwind.0()
-      branch(%cond.0) ^suppress.0() ^unwind.0(%exc.0)
-    suppress.0():
-      %pop.0 : base.Unit = py.popExcept(%prev.0)
-      jump ^join.0()
-    unwind.0(%exc.1 : py.Value):
-      %pop.1 : base.Unit = py.popExcept(%prev.0)
-      jump ^propagate.0(%exc.1)
     fin.0(%pending.0 : py.Completion):
       %none.1 : py.Value = py.noneLit
       %args.1 : py.Value = py.mkTuple(%none.1, %none.1, %none.1)

@@ -90,17 +90,14 @@ labelled with the exit.
 
 **Regions.** An instruction may own *regions*: nested lists of blocks, like MLIR's. A transfer
 may name only a block of its own region, or that region's exit. An inner region's exit is its
-own, so `ret` inside a region leaves the region with a value. Values defined outside are
-visible inside.
+own, so `ret` inside a region leaves the region with a value.
 
 **Well-formedness**, as `StrataMantle/WF.lean` checks it. These rules constrain the translator:
 labels are unique function-wide; no transfer targets an entry block; every operand is
 defined, with the type its use demands; every successor supplies exactly what its target's
 parameters declare; a terminator applies a terminal instruction, and no other instruction
-does. The checker does not yet check where a value is used: it accepts a use before its
-definition, a use of a value outside the region that defines it, and a handler's use of the
-result of the operation that failed. The translator must still make every use dominated by
-its definition, because ref-to-reg will rely on it.
+does. Every use must be in scope, as [Mantle](./Mantle.md#1-overview) describes under
+*Scoping*.
 
 **Printed syntax.** This is what `Module.format` prints, constants folded into their uses,
 and what `Module.read` reads back;
@@ -189,12 +186,22 @@ Its parameters are:
 | the module body | none |
 
 `buildFuncTypedWith` installs `propagate.0(exc)`, which returns `base.error exc`. It is the
-handler wherever no `try` or `with` encloses the code.
+handler wherever no `try` or `with` encloses the code. In a function where nothing can raise
+to it, nothing reaches it, and the builder drops it, as it drops every block the entry cannot
+reach.
 
 **Entry block.** In order: one `declareLocal` per local and cell variable of the scope
 (§5.1), then the argument-binding prologue (§5.4), then the body. Every cell is declared in
 the entry, so it dominates every use. A comprehension's iteration variables are the
 exception (§6.8).
+
+**Scoping.** The well-formedness check computes each body's dominator tree, so the translator
+leaves dominance to it. A use out of scope makes the function not well formed, an internal
+error (§3) that names the use and a path to it that avoids its definition. A value is used
+directly outside the block that defines it only where that block dominates the use; otherwise
+it travels in a cell, a block parameter or a successor argument. Every local's cell is
+declared at the top of the entry, before the argument-binding prologue (§5.4), and a global's
+cell is fetched where it is used, so each cell dominates its uses.
 
 **Function names.** A Mantle module holds one Python module `m`, and is named `m`, one
 segment per dotted component (`a.b`). Its functions are named under `m`, following the
@@ -1065,10 +1072,8 @@ counts `cleanup()` calls. The repros are `c1`–`c7` and `t30_loop_try_nested` i
 | t30 `nested_return` | `for p in outer:` / `try:` / `for q in inner:` / `try: if check(q): return q` / `finally: note(12)` / `finally: cleanup()` / `return 0` | neither `finally` ran, and there was no normal exit | the inner `fin`'s return successor walks from its own `S`, reaching the outer `cleanup`, so `note(12)` runs, then `cleanup()`, then the return. Exhausting `outer` reaches `return 0` |
 
 These checks apply to all of them. `Module.Raw.WF` holds. Every block is reachable from the
-entry, or from a handler block that no operation names, such as the `catch` of a `try` body
-that cannot fail. `MantleTranslateTest` checks it, taking a block whose one parameter is a
-`py.Value` for such a handler. No `finally` or `__exit__` body is
-emitted more than once.
+entry: the builder drops the others, such as the `catch` of a `try` body that cannot fail. No
+`finally` or `__exit__` body is emitted more than once.
 
 ## 11. Coverage
 

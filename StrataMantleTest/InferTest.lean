@@ -148,10 +148,10 @@ With no `ta[…]`, the builder infers what the result type does not fix when it 
 cannot infer is a misuse, which names the instruction and says to write the arguments. -/
 
 open Build (freshVal startFreshBlock emitApply terminate finishBlock build goto freshLabel
-  startBlock Failure)
+  startBlock FailedFunc)
 
-/-- What `build` gives: a checked function, or the `Failure`. -/
-private abbrev Built := Except (Failure Unit) {fn : Func Ops.env Unit // fn.WF}
+/-- What `build` gives: a checked function, or the `FailedFunc`. -/
+private abbrev Built := Except (FailedFunc Ops.env Unit Unit) {fn : Func Ops.env Unit // fn.WF}
 
 /-- The misuses a build fails with, or none. -/
 private def misuses (f : Built) : Array String :=

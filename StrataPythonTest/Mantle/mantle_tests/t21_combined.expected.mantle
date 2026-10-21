@@ -292,10 +292,6 @@ module t21_combined {
       %e.15 : py.Value = py.undef("e")
       %set.9 : base.Unit = base.refSet[py.Value](%e.cell.0, %e.15)
       jump ^head.0()
-    clear.0(%exc.1 : py.Value):
-      %e.16 : py.Value = py.undef("e")
-      %set.10 : base.Unit = base.refSet[py.Value](%e.cell.0, %e.16)
-      jump ^unwind.0(%exc.1)
     next.0():
       jump ^unwind.0(%exc.0)
     unwind.0(%exc.2 : py.Value):

@@ -148,17 +148,6 @@ module fw07_with_in_finally {
       %entered.0 : py.Value = py.call(%enter.0, %args.1, %kwargs.3) ^superseded.0()
       %comp.1 : py.Completion = py.completionNormal
       jump ^fin.1(%comp.1)
-    wexc.0(%exc.2 : py.Value):
-      %prev.1 : py.Value = py.pushExcInfo(%exc.2)
-      %exited.0 : py.Value = py.exitWithExc(%exit.0, %exc.2) ^unwind.0()
-      %cond.0 : base.Bool = py.truthy(%exited.0) ^unwind.0()
-      branch(%cond.0) ^suppress.0() ^unwind.0(%exc.2)
-    suppress.0():
-      %pop.0 : base.Unit = py.popExcept(%prev.1)
-      jump ^join.1()
-    unwind.0(%exc.3 : py.Value):
-      %pop.1 : base.Unit = py.popExcept(%prev.1)
-      jump ^superseded.0(%exc.3)
     fin.1(%pending.1 : py.Completion):
       %none.0 : py.Value = py.noneLit
       %args.2 : py.Value = py.mkTuple(%none.0, %none.0, %none.0)
@@ -368,17 +357,6 @@ module fw07_with_in_finally {
       %str.1 : py.Value = py.strLit("finally")
       %comp.1 : py.Completion = py.completionReturn(%str.1)
       jump ^fin.1(%comp.1)
-    wexc.0(%exc.2 : py.Value):
-      %prev.1 : py.Value = py.pushExcInfo(%exc.2)
-      %exited.0 : py.Value = py.exitWithExc(%exit.0, %exc.2) ^unwind.0()
-      %cond.0 : base.Bool = py.truthy(%exited.0) ^unwind.0()
-      branch(%cond.0) ^suppress.0() ^unwind.0(%exc.2)
-    suppress.0():
-      %pop.0 : base.Unit = py.popExcept(%prev.1)
-      jump ^join.1()
-    unwind.0(%exc.3 : py.Value):
-      %pop.1 : base.Unit = py.popExcept(%prev.1)
-      jump ^superseded.0(%exc.3)
     fin.1(%pending.1 : py.Completion):
       %none.0 : py.Value = py.noneLit
       %args.2 : py.Value = py.mkTuple(%none.0, %none.0, %none.0)

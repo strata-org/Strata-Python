@@ -218,20 +218,6 @@ module fw08_try_in_with {
       %pop.0 : base.Unit = py.popExcept(%prev.0)
       %comp.1 : py.Completion = py.completionReturn(%str.1)
       jump ^fin.0(%comp.1)
-    superseded.0(%exc.2 : py.Value):
-      %pop.1 : base.Unit = py.popExcept(%prev.0)
-      jump ^wexc.0(%exc.2)
-    wexc.0(%exc.3 : py.Value):
-      %prev.1 : py.Value = py.pushExcInfo(%exc.3)
-      %exited.0 : py.Value = py.exitWithExc(%exit.0, %exc.3) ^unwind.0()
-      %cond.0 : base.Bool = py.truthy(%exited.0) ^unwind.0()
-      branch(%cond.0) ^suppress.0() ^unwind.0(%exc.3)
-    suppress.0():
-      %pop.2 : base.Unit = py.popExcept(%prev.1)
-      jump ^join.0()
-    unwind.0(%exc.4 : py.Value):
-      %pop.3 : base.Unit = py.popExcept(%prev.1)
-      jump ^propagate.0(%exc.4)
     fin.0(%pending.1 : py.Completion):
       %none.0 : py.Value = py.noneLit
       %args.2 : py.Value = py.mkTuple(%none.0, %none.0, %none.0)
@@ -273,9 +259,6 @@ module fw08_try_in_with {
       %str.0 : py.Value = py.strLit("body")
       %comp.0 : py.Completion = py.completionReturn(%str.0)
       jump ^fin.1(%comp.0)
-    finRaise.0(%exc.0 : py.Value):
-      %comp.1 : py.Completion = py.completionRaise(%exc.0)
-      jump ^fin.1(%comp.1)
     fin.1(%pending.0 : py.Completion):
       %prev.0 : py.Value = py.pushPending(%pending.0)
       %ValueError.0 : py.Value = py.loadGlobal("fw08_try_in_with", "ValueError") ^superseded.0()

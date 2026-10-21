@@ -6,10 +6,12 @@
 module
 public import StrataMantle.IR
 public import StrataMantle.WF
+public import StrataMantle.DomCompute
 public import StrataMantle.Util.NameMap
 public import StrataMantle.KindedTypeArgs
 -- Instruction values embed the signature representation, needed at code-generation time.
 import StrataMantle.Env.WF
+import all StrataMantle.Util.LabelMapProps
 
 set_option autoImplicit false
 
@@ -19,6 +21,12 @@ set_option autoImplicit false
 A builder emits a function's instructions in order.  Blocks are named by `Label`, so a
 transfer can name a block before it is built.  A function's blocks carry the labels they were
 allocated, in the order they were finished.
+
+When the builder finishes a body, the function's or a region's, it drops the blocks the
+body's entry does not reach (`Body.dropUnreached`, `StrataMantle/DomCompute.lean`), as
+`Func.WF` asks every block to be reachable.  `Func.WF` also asks that some tree of each body put
+every use in scope, and its check computes that tree, whatever order the blocks were finished
+in.  So a producer leaves dominance to the check.
 
 A label is `base.n`, `bb.n` by default, with `n` counted per `base` across the whole
 function, regions included, so labels are unique, as `Func.WF` demands.
@@ -53,11 +61,12 @@ compiled, or, if it does not fix them all, when the builder runs, from the opera
 the result type: the builder keeps each value's type for this.  Arguments that neither fixes,
 or that a list splicing two parameters leaves ambiguous, are an error that says to write them.
 
-Misuse is an error, recorded in the state: an instruction emitted with no block open, a block
-opened while another is open, a block finished when none is open, and a region or function
-body that ends with a block open.  A build succeeds only if there is none and the function is
-well formed (`Func.WF`), so what it gives is a checked function.  A failed build gives a
-`Failure`, which carries the misuses.
+The builder records each misuse as an error: an instruction emitted with no block open, a
+block opened while another is open or under a label already used, a block finished when none
+is open, and a region or function body that ends with a block open.  A build succeeds when it
+records no misuse and the function is well formed (`Func.WF`), and then gives the checked
+function.  Otherwise it gives a `FailedFunc`, which holds the misuses and the function as
+emitted.
 
 The builder is language-neutral.
 -/
@@ -114,6 +123,8 @@ structure State (env : Env Unit) (α : Type) where
   suffixes : NameMap Nat := ∅
   /-- Next suffix per label base, so that two `bb`s are `bb.0` and `bb.1`. -/
   labelSuffixes : StrMap Nat := ∅
+  /-- The labels of the blocks opened so far, regions included. -/
+  labels : NameSet := ∅
   body : Body env α := {}
   /-- The misuses recorded so far, in order. -/
   errors : Array String := #[]
@@ -271,13 +282,20 @@ def freshLabel (base : String := blockBase) : BuildM env α Label := do
   set { s with labelSuffixes := s.labelSuffixes.insert base (suffix + 1) }
   return ⟨.num (.str .base base) suffix⟩
 
-/-- Open the block called `label`, taking `params`.  Opening a block while another is open
-is an error, and the other block is lost. -/
+/-- Open the block called `label`, taking `params`.  It is an error to open a block while
+another is open, which loses the other block, or under a label already used in the function or
+any region of it. -/
 def startBlock (label : Label) (params : Array (ValDecl env) := #[]) :
     BuildM env α Unit := do
-  if let some l := (← get).body.label then
+  let s ← get
+  if let some l := s.body.label then
     error s!"block {nameText label.name} opened while block {nameText l.name} is open"
-  modify fun s => { s with body := { s.body with label := some label, params, instrs := #[] } }
+  if label.name ∈ s.labels then
+    error s!"block {nameText label.name} opened twice: its label is already used"
+  modify fun s =>
+    { s with
+      labels := s.labels.insert label.name ()
+      body := { s.body with label := some label, params, instrs := #[] } }
 
 /-- Open the block called `label`, taking one fresh value of type `t` named after `name`, and
 return that value. -/
@@ -342,9 +360,10 @@ def unreachable [base ⊑ env] (info : Option α := none) : BuildM env α Unit :
 /-! ## Regions -/
 
 /-- Emit a region: open its entry block, labelled `base.n` and taking `params`, run `body`, and
-take the blocks it finished, entry first, with `body`'s result.  The enclosing body is set aside
-meanwhile, and restored with the default annotation afterwards, so a region can be emitted in
-the middle of a block.
+take the blocks it finished that its entry reaches, entry first, and `body`'s result.  The
+builder sets the enclosing body aside meanwhile, and restores it with the default annotation
+afterwards, so a region can be emitted in the middle of a block.  Ids and labels keep counting
+across the region.
 
 `body` runs in any monad `BuildM` lifts into, such as a front end's builder.  It must finish
 every block it opens, and must not throw out of the region. -/
@@ -358,7 +377,7 @@ def regionWith {m : Type → Type} {β : Type} [Monad m] [MonadLiftT (BuildM env
   (checkClosed s!"region {base}" : BuildM env α Unit)
   let inner ← (modifyGet fun s => (s.body, { s with body := saved, info }) :
     BuildM env α (Body env α))
-  return (⟨inner.blocks⟩, r)
+  return (⟨(Body.dropUnreached inner.blocks.toList).toArray⟩, r)
 
 /-- `regionWith` in `BuildM` itself, for a body with no result. -/
 def region (params : Array (ValDecl env)) (body : BuildM env α Unit)
@@ -367,70 +386,54 @@ def region (params : Array (ValDecl env)) (body : BuildM env α Unit)
 
 /-! ## Finishing -/
 
-/-- The function the state describes.  The first block finished is the entry. -/
+/-- The function the state describes, less the blocks its entry does not reach.  The first
+block finished is the entry. -/
 private def toFunc (s : State env α) (name : Name) (retType : TypeExpr env) (info : α) :
     Func env α :=
-  { name, retType, blocks := s.body.blocks, names := s.names, info }
+  { name, retType, blocks := (Body.dropUnreached s.body.blocks.toList).toArray, names := s.names,
+    info }
 
-/-- A failed build: the function's name, what the builder returned, and the misuses it
-recorded.  With no misuse, the function is not well formed. -/
-structure Failure (β : Type) where
-  name : Name
+/-- A function the builder could not finish as a well-formed function. -/
+structure FailedFunc (env : Env Unit) (α β : Type) where
+  /-- What the builder returned. -/
   value : β
-  /-- The misuses, in the order they were recorded. -/
+  /-- The misuses, in order; empty when the only fault is that `func` is not well formed. -/
   misuses : Array String
+  /-- The function as emitted. -/
+  func : Func env α
 
 /-- The misuses, a line each, or that the function is not well formed. -/
-instance {β : Type} : ToString (Failure β) :=
-  ⟨fun e => if e.misuses.isEmpty then s!"{nameText e.name} is not well formed"
+instance {β : Type} : ToString (FailedFunc env α β) :=
+  ⟨fun e => if e.misuses.isEmpty then s!"{nameText e.func.name} is not well formed"
     else "\n".intercalate e.misuses.toList⟩
 
-/-- Run a builder for the function `name` and check the function it emitted: the function
-with its proof and what the builder returned, or the `Failure` if a misuse was recorded, a
-block left open at the end among them, or the function is not well formed.  `info` annotates
-the function, and is the default annotation for everything in it. -/
+/-- Decide `Func.WF` of the function `toFunc` gives. -/
+private def decWF [base ⊑ env] (s : State env α) (name : Name) (retType : TypeExpr env)
+    (info : α) : Decidable (toFunc s name retType info).WF :=
+  inferInstance
+
+/-- Run a builder for the function `name` and check the function it emitted.  The result is
+the checked function and what the builder returned, or a `FailedFunc` when the builder recorded
+a misuse, such as a block left open at the end, or the function is not well formed.  `info`
+annotates the function, and is the default annotation for everything in it. -/
 def run [base ⊑ env] {β : Type} (name : Name) (retType : TypeExpr env) (info : α)
-    (m : BuildM env α β) : Except (Failure β) ({fn : Func env α // fn.WF} × β) :=
+    (m : BuildM env α β) : Except (FailedFunc env α β) ({fn : Func env α // fn.WF} × β) :=
   let (r, s) := (do let r ← m; checkClosed "the function"; return r) (State.init info)
   let fn := toFunc s name retType info
-  if !s.errors.isEmpty then .error ⟨name, r, s.errors⟩
-  else if h : fn.WF then .ok (⟨fn, h⟩, r)
-  else .error ⟨name, r, #[]⟩
+  if !s.errors.isEmpty then .error ⟨r, s.errors, fn⟩
+  else match decWF s name retType info with
+    | isTrue h => .ok (⟨fn, h⟩, r)
+    | isFalse _ => .error ⟨r, #[], fn⟩
 
-/-- `run`, for a builder that returns nothing: the checked function, or the `Failure`. -/
+/-- `run`, for a builder that returns nothing: the checked function, or a `FailedFunc`. -/
 def build [base ⊑ env] (name : Name) (retType : TypeExpr env) (info : α)
-    (m : BuildM env α Unit) : Except (Failure Unit) {fn : Func env α // fn.WF} :=
+    (m : BuildM env α Unit) : Except (FailedFunc env α Unit) {fn : Func env α // fn.WF} :=
   Prod.fst <$> run name retType info m
 
 /-! ## Stubs
 
 A front end puts a stub in place of a function whose build failed, so that its module can
 still be checked. -/
-
-/-- Inserting at `k` leaves every other key as it was. -/
-private theorem NatTrie.find?_insertAt_ne {β : Type} (x : β) :
-    ∀ (f : Nat) (t : NatTrie β) (k j : Nat), j ≠ k → (t.insertAt x f k).find? j = t.find? j
-  | 0, _, _, _, _ => rfl
-  | _ + 1, .leaf, 0, 0, h | _ + 1, .node .., 0, 0, h => absurd rfl h
-  | _ + 1, .leaf, 0, m + 1, _ | _ + 1, .node .., 0, m + 1, _ => by
-    by_cases hm : m % 2 = 0 <;> simp [NatTrie.insertAt, NatTrie.find?, hm]
-  | _ + 1, .leaf, n + 1, 0, _ | _ + 1, .node .., n + 1, 0, _ => by
-    by_cases hn : n % 2 = 0 <;> simp [NatTrie.insertAt, NatTrie.find?, hn]
-  | f + 1, .leaf, n + 1, m + 1, h => by
-    have ih := NatTrie.find?_insertAt_ne x f .leaf (n / 2) (m / 2)
-    by_cases hn : n % 2 = 0 <;> by_cases hm : m % 2 = 0
-    · simp [NatTrie.insertAt, NatTrie.find?, hn, hm, ih (by omega)]
-    · simp [NatTrie.insertAt, NatTrie.find?, hn, hm]
-    · simp [NatTrie.insertAt, NatTrie.find?, hn, hm]
-    · simp [NatTrie.insertAt, NatTrie.find?, hn, hm, ih (by omega)]
-  | f + 1, .node _ l r, n + 1, m + 1, h => by
-    have ihl := NatTrie.find?_insertAt_ne x f l (n / 2) (m / 2)
-    have ihr := NatTrie.find?_insertAt_ne x f r (n / 2) (m / 2)
-    by_cases hn : n % 2 = 0 <;> by_cases hm : m % 2 = 0
-    · simp [NatTrie.insertAt, NatTrie.find?, hn, hm, ihl (by omega)]
-    · simp [NatTrie.insertAt, NatTrie.find?, hn, hm]
-    · simp [NatTrie.insertAt, NatTrie.find?, hn, hm]
-    · simp [NatTrie.insertAt, NatTrie.find?, hn, hm, ihr (by omega)]
 
 /-- Values with distinct ids, none defined in `ctx`, can all be defined. -/
 private theorem foldlM_define_isSome : ∀ (ds : List (ValDecl env)) (ctx : Ctx env),
@@ -444,7 +447,7 @@ private theorem foldlM_define_isSome : ∀ (ds : List (ValDecl env)) (ctx : Ctx 
     refine foldlM_define_isSome ds _ (List.nodup_cons.mp hnd).2 fun e he => ?_
     have hne : e.id.id ≠ d.id.id := fun h =>
       (List.nodup_cons.mp hnd).1 (List.mem_map.mpr ⟨e, he, h⟩)
-    rw [NatTrie.insert, NatTrie.find?_insertAt_ne _ _ _ _ _ hne]
+    rw [NatTrie.find?_insert, if_neg hne]
     exact hfree e (List.mem_cons_of_mem d he)
 
 /-- The number a name ends in, or `0`. -/
@@ -476,6 +479,56 @@ private def stubFunc [base ⊑ env] (name : Name) (params : Array (Name × TypeE
                   instrs := #[], term := .unreachable info, info }]
     names := params.mapIdx fun i p => .num p.1 i }
 
+/-- A body of one block, with no instruction and a terminator with no region, is reachable. -/
+private theorem reachable_single (b : Block env α) (hi : b.instrs = #[])
+    (hr : b.term.regions = #[]) : Body.Reachable [b] := by
+  refine .mk (fun c hc => ?_) (fun y r h => ?_)
+  · rw [List.mem_singleton.mp hc]
+    exact .root
+  · cases h with
+    | instr hc h _ =>
+      rw [List.mem_singleton.mp hc, hi] at h
+      simp at h
+    | term hc h =>
+      rw [List.mem_singleton.mp hc, hr] at h
+      simp at h
+
+/-- A body of one block, with no instruction, ending in a terminator with no operand,
+successor or region, is scopable, by the tree that gives no block a parent. -/
+private theorem scopable_single {Λ : ValId → Prop} (b : Block env α) (hi : b.instrs = #[])
+    (ha : b.term.args = #[]) (hs : b.term.succs = #[]) (hr : b.term.regions = #[]) :
+    Body.Scopable Λ [b] := by
+  have hmem : ∀ {c}, c ∈ [b] → c = b := List.mem_singleton.mp
+  have hk : ∀ {c : Block env α} {k : Nat} {i : Instruction env α}, c ∈ [b] →
+      c.instrs[k]? ≠ some i := by
+    intro c k i hc h
+    rw [hmem hc, hi] at h
+    simp at h
+  refine .mk (fun _ => none) ⟨⟨List.pairwise_singleton _ _, fun _ _ => rfl, ?_, ?_, ?_⟩, ?_⟩ ?_
+  · intro c hc
+    simp at hc
+  · intro c hc
+    rw [hmem hc]
+    exact .refl _
+  · intro u v p hj
+    cases hj with
+    | instr hc h => exact absurd h (hk hc)
+    | term hc h =>
+      rw [hmem hc, hs] at h
+      simp at h
+  · intro x y hu
+    cases hu with
+    | instr hc h => exact absurd h (hk hc)
+    | term hc h =>
+      rw [hmem hc] at h
+      rcases h with h | ⟨s, h, -⟩ <;> simp [ha, hs] at h
+  · intro y r hy
+    cases hy with
+    | instr hc h => exact absurd h (hk hc)
+    | term hc h =>
+      rw [hmem hc, hr] at h
+      simp at h
+
 private theorem stubFunc_wf [base ⊑ env] (name : Name) (params : Array (Name × TypeExpr env))
     (retType : TypeExpr env) (info : α) : (stubFunc name params retType info).WF := by
   have hdefs : (stubFunc name params retType info).defs = (stubParams params).toList := by
@@ -483,7 +536,8 @@ private theorem stubFunc_wf [base ⊑ env] (name : Name) (params : Array (Name �
       Terminator.unreachable, Region.defsList]
   have hids : (stubParams params).toList.map (·.id.id) = List.range params.size :=
     List.ext_getElem (by simp [stubParams]) (by simp [stubParams])
-  refine ⟨by simp [stubFunc], ?_, ?_, ?_, ?_⟩
+  refine ⟨by simp [stubFunc], ?_, ?_, ?_, ?_, reachable_single _ rfl rfl,
+    scopable_single _ rfl rfl rfl rfl⟩
   · show Label.Distinct [Label.exit, ⟨.num (.str .base "entry") 0⟩]
     decide
   · refine nodup_of_map_eq_range _ numSuffix (List.ext_getElem (by simp [stubFunc]) ?_)
