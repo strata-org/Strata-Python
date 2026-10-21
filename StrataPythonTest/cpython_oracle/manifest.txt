@@ -27,7 +27,7 @@ test_subclassinit.py
 test_genericclass.py
 test_property.py
 test_decorators.py
-test_call.py
+# test_call.py is left out: CPython 3.12 cannot load it without _testcapi.
 test_funcattrs.py
 test_keywordonlyarg.py
 test_positional_only_arg.py

@@ -186,7 +186,7 @@ hook on `set`, coroutine origin tracking, `sys.excepthook`, and a missing `libff
 
 ## Runtime
 
-About **130 seconds** for the whole language-level corpus (66 files, ~1,340 methods) at
+About **130 seconds** for the whole language-level corpus (65 files, ~1,340 methods) at
 4 workers; `runner.py` parallelises per method.
 
 `pyInterpret` is listed in the package's `defaultTargets`, which matters for more than
@@ -229,19 +229,19 @@ reach past every emitted base — `super().setUp()` has nothing to resolve to on
 
 ## Coverage
 
-The manifest's 66 files hold **2,260 test methods** in TestCase classes. The selector
-takes **1,443**; generation skips 45 more, so **1,398 methods and 5,525 assertions** are
-attempted, of which **410 agree** with CPython. The 817 it declines break down as:
+The manifest's 65 files hold **2,171 test methods** in TestCase classes. The selector
+takes **1,398**; generation skips 42 more, so **1,356 methods and 5,483 assertions** are
+attempted, of which **410 agree** with CPython. The 773 it declines break down as:
 
 | count | reason | tractable? |
 |---|---|---|
-| 168 | the method uses `exec`/`eval`/`compile`/`globals`/`locals`/`vars` | no — out of scope: the assertion lives in a string the interpreter never evaluates, so a pass is vacuous |
+| 166 | the method uses `exec`/`eval`/`compile`/`globals`/`locals`/`vars` | no — out of scope: the assertion lives in a string the interpreter never evaluates, so a pass is vacuous |
 | 143 | a helper the method calls is itself rejected | no — 99 use `compile`, 31 `eval`, 13 assert on source positions |
-| 130 | a free name with no module-level definition to emit | **a gap, not scope**. Measured: removing this rule gains 23 agreements and 40 invalid comparisons |
+| 94 | a free name with no module-level definition to emit | **a gap, not scope**. Measured: removing this rule gains 23 agreements and 40 invalid comparisons |
 | 128 | reaches something through `self` that is not on the emitted class | no — a `test.support` mixin helper; the suite deliberately does not emit the unittest framework |
-| 98 | an assertion that does not lower exactly | **a gap, not scope** — `assertFloatsAreIdentical` and `assertExceptionIsLike` are `test.support` helpers (so out of scope), but the `assertXEqual` family is not: it also checks operand *types*, so `a == b` would be strictly weaker |
+| 93 | an assertion that does not lower exactly | **a gap, not scope** — `assertFloatsAreIdentical` and `assertExceptionIsLike` are `test.support` helpers (so out of scope), but the `assertXEqual` family is not: it also checks operand *types*, so `a == b` would be strictly weaker |
 | 81 | `self` passed to an external callable that uses the unittest API | no — same framework dependency |
-| 29 | `super()` reaches past every emitted base | no — `super().setUp()` resolves into `unittest.TestCase`, which is not emitted |
+| 28 | `super()` reaches past every emitted base | no — `super().setUp()` resolves into `unittest.TestCase`, which is not emitted |
 | 26 | asserts on line numbers or code positions | no — the generated file has its own line numbers |
 | 14 | a decorator that changes what the test means, not whether it runs | no |
 
@@ -253,7 +253,7 @@ block. Any other attribute of `cm` is refused rather than approximated. `assertW
 callable, since that is what unittest does with them. Zero-argument `super()` and
 `__qualname__` are not rejected at all — keeping the class made both work.
 
-45 methods are still refused at generation: 35 use an assertion as a *value* rather than
+42 methods are still refused at generation: 32 use an assertion as a *value* rather than
 as a statement, so the lowering has no statement to rewrite, and 9 carry an assertion form
 that does not lower.
 

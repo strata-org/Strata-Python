@@ -247,7 +247,7 @@ def normalise_source(source: str) -> str:
     less error-prone than threading the receiver's name through every match.
 
     The source is returned UNCHANGED unless some method actually needs the rename, so
-    the other 53 files in the manifest are not reformatted by the round trip.
+    the other 52 files in the manifest are not reformatted by the round trip.
     """
     tree = ast.parse(source)
     touched = False

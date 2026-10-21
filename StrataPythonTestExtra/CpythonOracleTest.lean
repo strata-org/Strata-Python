@@ -34,7 +34,7 @@ corpus it cannot locate is reported as a skip rather than a failure.
   at that concurrency, so this suite bounds its own fan-out.
 - `CPYTHON_ORACLE_ARGS` — extra flags, space separated (e.g. `--filter test_dict`).
 
-Runtime is about 130 seconds for the whole language-level corpus (66 files, ~1,330
+Runtime is about 130 seconds for the whole language-level corpus (65 files, ~1,330
 methods) at 4 workers.
 
 This suite regenerates `cpython_oracle/build/`, which no other test touches, so it
