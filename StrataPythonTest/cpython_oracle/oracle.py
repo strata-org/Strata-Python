@@ -44,7 +44,16 @@ def run_file(relpath: str, source: str, methods: list[dict],
         warnings.simplefilter("ignore")
         code = compile(source, filename, "exec")
         sys.modules[mod.__name__] = mod
-        exec(code, mod.__dict__)
+        try:
+            exec(code, mod.__dict__)
+        except unittest.SkipTest as e:
+            # A module can skip itself while it loads: test_bytes.py imports _testcapi
+            # in a class body, and some CPython builds leave _testcapi out. CPython's
+            # test runner then skips the whole module, so every method is skipped here.
+            why = f"module skipped: {e}"[:200]
+            return {"file": relpath,
+                    "outcomes": {m["stem"]: "skipped" for m in methods},
+                    "detail": {m["stem"]: why for m in methods}}
 
     outcomes: dict[str, str] = {}
     detail: dict[str, str] = {}

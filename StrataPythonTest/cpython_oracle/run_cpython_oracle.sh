@@ -100,6 +100,10 @@ find_tarball()
   exit 3
 fi
 
+echo "=== oracle.py unit tests ==="
+( cd "$HERE" && "$PY" -m unittest -q test_oracle ) || exit 1
+
+echo
 echo "=== plan ==="
 # --filter is applied at SELECTION time, so every later stage sees exactly the
 # methods that were generated. Filtering later would leave the rest in
