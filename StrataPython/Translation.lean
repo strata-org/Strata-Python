@@ -697,16 +697,16 @@ partial def translateStmt (s : StrataPython.stmt ResolvedAnn) : TransM Unit := d
 
   | .If _ test body orelse => do
       let cond ← translateExpr test
-      let thn ← mkExpr sr (.Block (← execWriter body.val.toList) none)
+      let thn ← mkExpr sr (.Block (← execWriter body.val.toList) none [] none)
       let els ← if orelse.val.isEmpty then pure none
-        else pure (some (← mkExpr sr (.Block (← execWriter orelse.val.toList) none)))
+        else pure (some (← mkExpr sr (.Block (← execWriter orelse.val.toList) none [] none)))
       tell [← mkExpr sr (.IfThenElse cond thn els)]
 
   | .While _ test body _ => do
       let (bk, ct) ← pushLoopLabel "loop"
       let cond ← translateExpr test
-      let inner ← mkExpr sr (.Block (← execWriter body.val.toList) (some ct.text))
-      let outer ← mkExpr sr (.Block [← mkExpr sr (.While cond [] none inner false)] (some bk.text))
+      let inner ← mkExpr sr (.Block (← execWriter body.val.toList) (some ct.text) [] none)
+      let outer ← mkExpr sr (.Block [← mkExpr sr (.While cond [] none inner false)] (some bk.text) [] none)
       popLoopLabel; tell [outer]
 
   | .For _ target iter body _ _ => do
@@ -726,16 +726,16 @@ partial def translateStmt (s : StrataPython.stmt ResolvedAnn) : TransM Unit := d
           let havoc ← mkExpr sr (.Assign [toVarTarget tgt] (← mkExpr sr (.Hole (deterministic := false))))
           pure ([havoc], tgt)
       let assume ← mkExpr sr (.Assume (← mkExpr sr (.StaticCall rtPIn [assumeTarget, iterExpr] [])))
-      let inner ← mkExpr sr (.Block (havocStmts ++ [assume] ++ bodyStmts) (some ct.text))
-      let outer ← mkExpr sr (.Block [inner] (some bk.text))
+      let inner ← mkExpr sr (.Block (havocStmts ++ [assume] ++ bodyStmts) (some ct.text) [] none)
+      let outer ← mkExpr sr (.Block [inner] (some bk.text) [] none)
       popLoopLabel; tell [outer]
 
   | .Return _ value => do
       match value.val with
       | some expr => do
         let e ← translateExpr expr
-        tell [← mkExpr sr (.Assign [{ val := .Local rtLaurelResult, source := sourceRangeToMd (← get).filePath sr }] e), ← mkExpr sr (.Exit bodyLabel)]
-      | none => tell [← mkExpr sr (.Exit bodyLabel)]
+        tell [← mkExpr sr (.Assign [{ val := .Local rtLaurelResult, source := sourceRangeToMd (← get).filePath sr }] e), ← mkExpr sr (.Goto bodyLabel .blockEnd)]
+      | none => tell [← mkExpr sr (.Goto bodyLabel .blockEnd)]
 
   | .Assert _ test _ => tell [← mkExpr sr (.Assert (← translateExpr test) none)]
   | .Expr _ (.Constant _ (.ConString _ _) _) => pure ()
@@ -749,8 +749,8 @@ partial def translateStmt (s : StrataPython.stmt ResolvedAnn) : TransM Unit := d
       | .Var _ => pure ()
       | _ => tell [v]
   | .Pass _ => pure ()
-  | .Break _ => tell [← mkExpr sr (.Exit ((← currentBreakLabel).map (·.text) |>.getD "break"))]
-  | .Continue _ => tell [← mkExpr sr (.Exit ((← currentContinueLabel).map (·.text) |>.getD "continue"))]
+  | .Break _ => tell [← mkExpr sr (.Goto ((← currentBreakLabel).map (·.text) |>.getD "break") .blockEnd)]
+  | .Continue _ => tell [← mkExpr sr (.Goto ((← currentContinueLabel).map (·.text) |>.getD "continue") .blockEnd)]
 
   -- `else:`/`finally:` are not yet modeled. Dropping them would verify a SMALLER program than the
   -- real Python (`finally` always runs; `else` runs on the success path) — a potential false pass.
@@ -812,7 +812,7 @@ partial def translateStmt (s : StrataPython.stmt ResolvedAnn) : TransM Unit := d
       | some excExpr => do
         let errorExpr ← translateExpr excExpr
         tell [← mkExpr sr (.Assign [{ val := .Local rtMaybeExcept, source := sourceRangeToMd (← get).filePath sr }] errorExpr),
-              ← mkExpr sr (.Exit bodyLabel)]
+              ← mkExpr sr (.Goto bodyLabel .blockEnd)]
       | none =>
         throw (.unsupportedConstruct
           "bare `raise` (re-raise) is not supported; raise a new exception instance instead")
@@ -898,7 +898,7 @@ private partial def wrapBodyWithErrorChecks (sr : SourceRange) (catchersLabel : 
   bodyStmts.foldlM (fun acc stmt => do
     let ref ← mkExpr sr (.Var (.Local rtMaybeExcept))
     let check ← mkExpr sr (.StaticCall rtIsError [ref] [])
-    let ifCheck ← mkExpr sr (.IfThenElse check (← mkExpr sr (.Exit catchersLabel)) none)
+    let ifCheck ← mkExpr sr (.IfThenElse check (← mkExpr sr (.Goto catchersLabel .blockEnd)) none)
     pure (acc ++ [stmt, ifCheck])) []
 
 /-- Translate exception handlers to their statement lists. -/
@@ -915,10 +915,10 @@ partial def translateTryExcept (sr : SourceRange)
   let catchersLabel := s!"exception_handlers_{sr.start.byteIdx}"
   let bodyStmts   ← execWriter body.val.toList
   let withChecks  ← wrapBodyWithErrorChecks sr catchersLabel bodyStmts
-  let exitTry     ← mkExpr sr (.Exit tryLabel)
-  let catchers    ← mkExpr sr (.Block (withChecks ++ [exitTry]) (some catchersLabel))
+  let exitTry     ← mkExpr sr (.Goto tryLabel .blockEnd)
+  let catchers    ← mkExpr sr (.Block (withChecks ++ [exitTry]) (some catchersLabel) [] none)
   let handlerStmts ← translateHandlers handlers.val.toList
-  tell [← mkExpr sr (.Block ([catchers] ++ handlerStmts) (some tryLabel))]
+  tell [← mkExpr sr (.Block ([catchers] ++ handlerStmts) (some tryLabel) [] none)]
 
 -- ═══════════════════════════════════════════════════════════════════════════════
 -- Function / Class / Module — reads NodeInfo directly
@@ -941,7 +941,7 @@ partial def renameParamsToInputs (paramNames : List String) (e : StmtExprMd) : S
   let val := match e.val with
     | .Var v => .Var (rwVar { val := v, source := e.source }).val
     | .IfThenElse c t el => .IfThenElse (rw c) (rw t) (rwOpt el)
-    | .Block ss l => .Block (rwList ss) l
+    | .Block ss l invs dec => .Block (rwList ss) l (rwList invs) (rwOpt dec)
     | .Assign ts v => .Assign (rwVarList ts) (rw v)
     | .PureFieldUpdate t fn nv => .PureFieldUpdate (rw t) fn (rw nv)
     -- `typeArgs` preserved: they are a resolution output on the Laurel side, and this
@@ -1121,7 +1121,7 @@ partial def translateFunction (sig : FuncSig) (body : Array (StrataPython.stmt R
     | .Assert _ test _ => do pure ({ condition := renameParamsToInputs paramNames (← translateExpr test) } : Condition)
     | _ => throw (.internalError "non-Assert statement in precondition prefix")
   let bodyStmts ← execWriter restBody
-  let bodyBlock ← mkExpr sr (.Block (paramCopies ++ localDecls ++ bodyStmts) (some bodyLabel))
+  let bodyBlock ← mkExpr sr (.Block (paramCopies ++ localDecls ++ bodyStmts) (some bodyLabel) [] none)
   -- There is no Procedure metadata field: the source range lives on the proc name's
   -- `.source`. The pass that separates user procs from prelude reads it; without it every
   -- user proc looks like prelude and nothing is verified.
@@ -1196,7 +1196,7 @@ partial def translateClass (name : PythonIdentifier) (attributes : List (PythonI
                   { name := rtMaybeExcept, type := mkTypeDefault (.UserDefined { text := "Error" }) }]
       preconditions := []
       decreases := none
-      body := .Opaque [] (some (mkExprDefault (.Block [] none))) (ModifiesGroup.wildcard .unknown) }
+      body := .Opaque [] (some (mkExprDefault (.Block [] none [] none))) (ModifiesGroup.wildcard .unknown) }
     procs ++ [defaultInit]
   let ct : CompositeType := { name := name.toLaurel, extending := [], fields := laurelFields, instanceProcedures := [] }
   pure (.Composite ct, procs)
@@ -1256,7 +1256,7 @@ partial def translateModule (program : ResolvedPythonProgram) : TransM Strata.La
       let localDecls := program.moduleLocals.map fun (lId, lTy) =>
         mkLocalDeclDefault lId.toLaurel (mkTypeDefault (pythonTypeToHighType aliases lTy)) none
       let bodyStmts ← execWriter otherStmts
-      let bodyBlock ← mkExpr sr (.Block ([nameDecl] ++ localDecls ++ bodyStmts) (some bodyLabel))
+      let bodyBlock ← mkExpr sr (.Block ([nameDecl] ++ localDecls ++ bodyStmts) (some bodyLabel) [] none)
       let mainOutputs : List Parameter :=
         [{ name := rtLaurelResult, type := mkTypeDefault (.UserDefined { text := "Any" }) },
          { name := rtMaybeExcept, type := mkTypeDefault (.UserDefined { text := "Error" }) }]

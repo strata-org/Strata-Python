@@ -132,7 +132,7 @@ private def havocsValueFromUnmodeledCall
         { val := #[], ann := sr }
         { val := #[keyword], ann := sr }
   match translateExpr globalCtx call with
-  | .ok { val := .Block stmts _, .. } => isValueGlobalHavoc stmts
+  | .ok { val := .Block stmts _ _ _, .. } => isValueGlobalHavoc stmts
   | _ => false
 
 #guard
@@ -184,7 +184,7 @@ private def isValueAugAssign : StmtExprMd → Bool
 #guard
   match translateExpr globalCtx (loadName "value") with
   | .ok { val := .Block [{ val := .Assert { val := .Var (.Local bound), .. } _, .. },
-                          { val := .Var (.Local value), .. }] _, .. } =>
+                          { val := .Var (.Local value), .. }] _ _ _, .. } =>
     bound.text == "$static.__strata_python_global_bound_value" && value.text == "value"
   | _ => false
 
@@ -193,7 +193,7 @@ private def isValueAugAssign : StmtExprMd → Bool
   match translateExpr implicitModuleCtx (loadName "value") with
   | .ok { val := .Block [
       { val := .Assert { val := .Var (.Local bound), .. } _, .. },
-      { val := .Var (.Local value), .. }] _, .. } =>
+      { val := .Var (.Local value), .. }] _ _ _, .. } =>
     bound.text == "$static.__strata_python_global_bound_value" && value.text == "value"
   | _ => false
 
@@ -266,7 +266,7 @@ private def isValueAugAssign : StmtExprMd → Bool
   match translateExpr explicitGlobalCtx (loadName "value") with
   | .ok { val := .Block [
       { val := .Assert { val := .Var (.Local bound), .. } _, .. },
-      { val := .Var (.Local value), .. }] _, .. } =>
+      { val := .Var (.Local value), .. }] _ _ _, .. } =>
     bound.text == "$static.__strata_python_global_bound_value" && value.text == "value"
   | _ => false
 
@@ -359,7 +359,7 @@ private def isValueAugAssign : StmtExprMd → Bool
           { val := .StaticCall maybeExceptInit [] _, .. }, .. },
       { val := .Assign [{ val := .Declare localValue, .. }]
           { val := .Hole, .. }, .. },
-      valueAugAssign] _, .. }, ctx) =>
+      valueAugAssign] _ _ _, .. }, ctx) =>
     nullcall.name.text == "nullcall_ret" &&
     nullcallInit.text == "from_None" &&
     result.text == "LaurelResult" &&
@@ -430,7 +430,7 @@ private def isValueAugAssign : StmtExprMd → Bool
   match translateExpr globalCtx call with
   | .ok { val := .Block [
       { val := .Assert { val := .Var (.Local bound), .. } (some message), .. },
-      { val := .Hole true none, .. }] _, .. } =>
+      { val := .Hole true none, .. }] _ _ _, .. } =>
     bound.text == "$static.__strata_python_global_bound_value" &&
     message == "global 'value' is bound"
   | _ => false

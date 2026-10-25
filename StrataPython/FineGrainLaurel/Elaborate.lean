@@ -775,10 +775,10 @@ partial def checkProducerWhile (md : Md) (cond loopBody : StmtExprMd)
   -- reassignment in an outer unlabelled block so `Exit lbl` still reaches it.
   let reassign : StmtExprMd := mkLaurel md (.Assign [⟨.Local { text := x_c }, md.getD .unknown⟩] cond)
   let loopBody' : StmtExprMd := match loopBody.val with
-    | .Block stmts (some lbl) =>
-      mkLaurel md (.Block [mkLaurel md (.Block stmts (some lbl)), reassign] none)
-    | .Block stmts none => mkLaurel md (.Block (stmts ++ [reassign]) none)
-    | _ => mkLaurel md (.Block [loopBody, reassign] none)
+    | .Block stmts (some lbl) invs dec =>
+      mkLaurel md (.Block [mkLaurel md (.Block stmts (some lbl) invs dec), reassign] none [] none)
+    | .Block stmts none [] none => mkLaurel md (.Block (stmts ++ [reassign]) none [] none)
+    | _ => mkLaurel md (.Block [loopBody, reassign] none [] none)
   let body ← extendEnv x_c .TBool do
     let M_b ← checkProducer loopBody' [] retTy grade
     let M_k ← checkProducers rest retTy grade
@@ -949,7 +949,8 @@ partial def checkProducer (stmt : StmtExprMd) (rest : List StmtExprMd) (retTy : 
   match stmt.val with
   | .IfThenElse cond thn els => checkProducerIf md cond thn els rest retTy grade
   | .While cond _invs _dec loopBody _postTest => checkProducerWhile md cond loopBody rest retTy grade
-  | .Exit target => pure (.exit md target)
+  | .Goto target .blockEnd => pure (.exit md target)
+  | .Goto _ .blockStart => throw "checkProducer: a backward goto is unsupported"
   | .Var (.Declare ⟨nameId, typeMd⟩) => checkProducerVarDecl md nameId (typeMd.getD default) none rest retTy grade
   | .Assert cond _summary => checkProducerAssert md cond rest retTy grade
   | .Assume cond => checkProducerAssume md cond rest retTy grade
@@ -957,7 +958,7 @@ partial def checkProducer (stmt : StmtExprMd) (rest : List StmtExprMd) (retTy : 
     | [target] => checkAssign target value rest retTy grade
     | _ => throw "checkProducer: multi-target Assign unsupported"
   | .StaticCall callee args _ => checkProducerStaticCall md callee args rest retTy grade
-  | .Block stmts label => checkProducerBlock md stmts label rest retTy grade
+  | .Block stmts label _ _ => checkProducerBlock md stmts label rest retTy grade
   | .New classId =>
     -- A constructor `.New` in PRODUCER position (e.g. the then-branch of a ternary
     -- assigned to a field). Emit the bare `.new` value (heapParameterizationPass allocates
@@ -1401,18 +1402,18 @@ partial def projIfThenElse (dest : Option VariableMd) (md : Md) (cond : FGLValue
   -- empty THEN, flip the condition so only the else runs.
   let ite : StmtExprMd :=
     match thnStmts.isEmpty, elsStmts.isEmpty with
-    | true, true => mkLaurel md (.Block [] none)
-    | false, true => mkLaurel md (.IfThenElse (projectValue cond) (mkLaurel md (.Block thnStmts none)) none)
+    | true, true => mkLaurel md (.Block [] none [] none)
+    | false, true => mkLaurel md (.IfThenElse (projectValue cond) (mkLaurel md (.Block thnStmts none [] none)) none)
     | true, false =>
       -- Empty THEN: emit only the else under the negated condition. `cond` was checked
       -- at `.TBool`, so it projects to a bool — negate with the boolean `$not` wrapper
       -- (NOT `Any_to_bool(PNot ·)`, which assumes an Any-typed cond and yields an
       -- arrow-type mismatch when cond is already bool, e.g. `if x > 10: pass`).
       let negCond := mkLaurel md (.StaticCall "$not" [projectValue cond] [])
-      mkLaurel md (.IfThenElse negCond (mkLaurel md (.Block elsStmts none)) none)
+      mkLaurel md (.IfThenElse negCond (mkLaurel md (.Block elsStmts none [] none)) none)
     | false, false =>
-      mkLaurel md (.IfThenElse (projectValue cond) (mkLaurel md (.Block thnStmts none))
-        (some (mkLaurel md (.Block elsStmts none))))
+      mkLaurel md (.IfThenElse (projectValue cond) (mkLaurel md (.Block thnStmts none [] none))
+        (some (mkLaurel md (.Block elsStmts none [] none))))
   let afterStmts ← proj dest after
   pure ([ite] ++ afterStmts)
 
@@ -1434,7 +1435,7 @@ D :: ⟦Γ⟧ ⊢ whileLoop V M K ⇐ ⟦A⟧ & d
 partial def projWhileLoop (dest : Option VariableMd) (md : Md) (cond : FGLValue)
     (body after : FGLProducer) : ProjM (List StmtExprMd) := do
   let bodyStmts ← proj dest body
-  let bodyBlock := mkLaurel md (.Block bodyStmts none)
+  let bodyBlock := mkLaurel md (.Block bodyStmts none [] none)
   let loop := mkLaurel md (.While (projectValue cond) [] none bodyBlock false)
   let afterStmts ← proj dest after
   pure ([loop] ++ afterStmts)
@@ -1513,7 +1514,7 @@ D :: ⟦Γ⟧ ⊢ labeledBlock l M K ⇐ ⟦A⟧ & d
 partial def projLabeledBlock (dest : Option VariableMd) (md : Md) (label : String)
     (body after : FGLProducer) : ProjM (List StmtExprMd) := do
   let bodyStmts ← proj dest body
-  let bodyBlock := mkLaurel md (.Block bodyStmts (some label))
+  let bodyBlock := mkLaurel md (.Block bodyStmts (some label) [] none)
   let afterStmts ← proj dest after
   pure ([bodyBlock] ++ afterStmts)
 
@@ -1528,7 +1529,7 @@ D :: ⟦Γ⟧ ⊢ exit l ⇐ ⟦A⟧ & d
 ```
 -/
 partial def projExit (md : Md) (label : String) : ProjM (List StmtExprMd) :=
-  pure [mkLaurel md (.Exit label)]
+  pure [mkLaurel md (.Goto label .blockEnd)]
 
 /-- projSkip:
 ```
@@ -1549,7 +1550,7 @@ def projectProducer (prod : FGLProducer) : List StmtExprMd :=
 
 /-- Run projection, return as a block. -/
 def projectBody (md : Md) (prod : FGLProducer) : StmtExprMd :=
-  mkLaurel md (.Block (projectProducer prod) none)
+  mkLaurel md (.Block (projectProducer prod) none [] none)
 
 /-! ## Entry Point
 
@@ -1562,7 +1563,7 @@ Box) and hole procedure declarations needed by the output program. -/
 private def stmtKindName (e : StmtExpr) : String :=
   match e with
   | .IfThenElse .. => "IfThenElse" | .Block .. => "Block" | .While .. => "While"
-  | .Exit .. => "Exit" | .Return .. => "Return" | .Assign .. => "Assign"
+  | .Goto .. => "Goto" | .Return .. => "Return" | .Assign .. => "Assign"
   | .IncrDecr .. => "IncrDecr" | .Var .. => "Var" | .StaticCall .. => "StaticCall"
   | .InstanceCall .. => "InstanceCall" | .New .. => "New" | .Assert .. => "Assert"
   | .Assume .. => "Assume" | .Hole .. => "Hole"
@@ -1575,7 +1576,7 @@ private def stmtKindName (e : StmtExpr) : String :=
 private partial def firstFailingStmt (procEnv : ElabEnv) (st : ElabState) (bodyExpr : StmtExprMd)
     (retTy : HighType) (g : Grade) (depth : Nat := 0) : String :=
   match bodyExpr.val with
-  | .Block stmts _ =>
+  | .Block stmts _ _ _ =>
     let n := stmts.length
     let prefixOk (k : Nat) : Bool :=
       (match (checkProducers (stmts.take k) retTy g).run procEnv |>.run st with | .ok _ => true | .error _ => false)
@@ -1597,7 +1598,7 @@ private partial def firstFailingStmt (procEnv : ElabEnv) (st : ElabState) (bodyE
           -- the same env/state (an approximation), so it pinpoints the construct kind even though
           -- nested env extensions are not re-threaded.
           match s.val with
-          | .Block _ _ =>
+          | .Block .. =>
             if depth < 6 then s!"{here} -> {firstFailingStmt procEnv st s retTy g (depth+1)}"
             else here
           | .While _ _ _ lb _ =>
@@ -1615,7 +1616,7 @@ private partial def firstFailingStmt (procEnv : ElabEnv) (st : ElabState) (bodyE
               let rhsKind := stmtKindName value.val
               match value.val with
               | .IfThenElse _ rthn _ => s!"{here} (RHS={rhsKind} then) -> {firstFailingStmt procEnv st rthn retTy g (depth+1)}"
-              | .Block _ _ => s!"{here} (RHS Block) -> {firstFailingStmt procEnv st value retTy g (depth+1)}"
+              | .Block .. => s!"{here} (RHS Block) -> {firstFailingStmt procEnv st value retTy g (depth+1)}"
               | _ => s!"{here} (RHS={rhsKind})"
             else here
           | _ => here

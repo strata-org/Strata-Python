@@ -246,7 +246,7 @@ def mkVariableMd (v : Variable) : VariableMd :=
 def stmtExprToVar (e : StmtExprMd) : Except TranslationError VariableMd :=
   match e.val with
   | .Var v => .ok { val := v, source := e.source }
-  | .Block stmts _ =>
+  | .Block stmts _ _ _ =>
     match stmts.getLast? with
     | some last =>
       match last.val with
@@ -718,7 +718,7 @@ partial def translateExpr (ctx : TranslationContext) (e : expr SourceRange)
         (StmtExpr.Var (.Local (moduleGlobalBoundRefName name.val))) md
       let check := mkStmtExprMdWithLoc
         (StmtExpr.Assert isBound (some s!"global '{name.val}' is bound")) md
-      return mkStmtExprMdWithLoc (StmtExpr.Block [check, value] none) md
+      return mkStmtExprMdWithLoc (StmtExpr.Block [check, value] none [] none) md
     return value
 
   -- Binary operations
@@ -860,7 +860,7 @@ partial def translateExpr (ctx : TranslationContext) (e : expr SourceRange)
       if tempDecls.isEmpty then
         return { result with source := md }
       else
-        return mkStmtExprMdWithLoc (StmtExpr.Block (tempDecls.toList ++ [result]) none) md
+        return mkStmtExprMdWithLoc (StmtExpr.Block (tempDecls.toList ++ [result]) none [] none) md
 
   -- Boolean operations
   | .BoolOp _ op values => do
@@ -1448,7 +1448,7 @@ partial def translateCall (ctx : TranslationContext)
     if preamble.isEmpty then
       return mkStmtExprMd .Hole
     else
-      return mkStmtExprMd (.Block (preamble ++ [mkStmtExprMd .Hole]) none)
+      return mkStmtExprMd (.Block (preamble ++ [mkStmtExprMd .Hole]) none [] none)
   -- Step 3: translate the resolved call
   let methodName := match f with
     | .Attribute _ _ attr _ => attr.val
@@ -1548,7 +1548,7 @@ partial def translateCall (ctx : TranslationContext)
     if typeAssertsOrdered.isEmpty then
       return call
     else
-      return mkStmtExprMd (.Block (typeAsserts.toList ++ [call]) none)
+      return mkStmtExprMd (.Block (typeAsserts.toList ++ [call]) none [] none)
   else
   let (args, kwords, funcdecl_hasKwargs) ←
     combinePositionalAndKeywordArgs args kwords funcDecl methodName callRange
@@ -1642,12 +1642,12 @@ def extractMultiOutputCalls (ctx : TranslationContext) (e : StmtExprMd)
       if preThen.isEmpty then
         then'
       else
-        mkStmtExprMdWithLoc (.Block (preThen ++ [then']) none) thenBr.source
+        mkStmtExprMdWithLoc (.Block (preThen ++ [then']) none [] none) thenBr.source
     let elseExpr := preElse.map fun (pre, else') =>
       if pre.isEmpty then
         else'
       else
-        mkStmtExprMdWithLoc (.Block (pre ++ [else']) none) else'.source
+        mkStmtExprMdWithLoc (.Block (pre ++ [else']) none [] none) else'.source
     let anyRewrite := !preCond.isEmpty || !preThen.isEmpty ||
       preElse.any (fun (pre, _) => !pre.isEmpty)
     if anyRewrite then
@@ -2127,13 +2127,13 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
   | .If _ test body orelse => do
     let condExpr ← translateExpr ctx test
     let (bodyCtx, bodyStmts) ← translateStmtList ctx body.val.toList
-    let bodyBlock := mkStmtExprMd (StmtExpr.Block bodyStmts none)
+    let bodyBlock := mkStmtExprMd (StmtExpr.Block bodyStmts none [] none)
     -- Translate else branch if present
     let elseBlock ← if orelse.val.isEmpty then
       .ok none
     else do
       let (_, elseStmts) ← translateStmtList bodyCtx orelse.val.toList
-      .ok (some (mkStmtExprMd (StmtExpr.Block elseStmts none)))
+      .ok (some (mkStmtExprMd (StmtExpr.Block elseStmts none [] none)))
     let (preamble, condRef) := getExceptionCheckPreamble ctx condExpr s!"{pythonGeneratedPrefix}if_cond_{test.toAst.ann.start.byteIdx}"
     let ifStmt := mkStmtExprMdWithLoc (StmtExpr.IfThenElse (Any_to_bool condRef) bodyBlock elseBlock) md
 
@@ -2170,18 +2170,18 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
       let reEval := mkStmtExprMdWithLoc
         (StmtExpr.Assign [mkVariableMd (.Local condVar)] condExpr) md
       let continueBlock := mkStmtExprMdWithLoc
-        (StmtExpr.Block bodyStmts (some continueLabel)) md
+        (StmtExpr.Block bodyStmts (some continueLabel) [] none) md
       let whileBody := mkStmtExprMd
-        (StmtExpr.Block ([continueBlock, reEval] ++ exceptionChecks) none)
+        (StmtExpr.Block ([continueBlock, reEval] ++ exceptionChecks) none [] none)
       let whileStmt := mkStmtExprMdWithLoc
         (StmtExpr.While (Any_to_bool condRef) [] none whileBody false) md
       let whileWrapped := mkStmtExprMdWithLoc
-        (StmtExpr.Block [whileStmt] (some breakLabel)) md
+        (StmtExpr.Block [whileStmt] (some breakLabel) [] none) md
       return (loopCtx, [condDecl] ++ exceptionChecks ++ [whileWrapped])
-    let bodyBlock := mkStmtExprMdWithLoc (StmtExpr.Block bodyStmts (some continueLabel)) md
+    let bodyBlock := mkStmtExprMdWithLoc (StmtExpr.Block bodyStmts (some continueLabel) [] none) md
     let (preamble, condRef) := getExceptionCheckPreamble ctx condExpr s!"{pythonGeneratedPrefix}while_cond_{test.toAst.ann.start.byteIdx}"
     let whileStmt := mkStmtExprMdWithLoc (StmtExpr.While (Any_to_bool condRef) [] none bodyBlock false) md
-    let whileWrapped := mkStmtExprMdWithLoc (StmtExpr.Block [whileStmt] (some breakLabel)) md
+    let whileWrapped := mkStmtExprMdWithLoc (StmtExpr.Block [whileStmt] (some breakLabel) [] none) md
     return (loopCtx, preamble ++ [whileWrapped])
 
   -- Return statement: assign to the LaurelResult output parameter, then emit a
@@ -2226,7 +2226,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
     let result := if condStmts.isEmpty then
       assertStmt
     else
-      mkStmtExprMdWithLoc (StmtExpr.Block (condStmts ++ [assertStmt]) none) md
+      mkStmtExprMdWithLoc (StmtExpr.Block (condStmts ++ [assertStmt]) none [] none) md
 
     let (preamble, _) := getExceptionCheckPreamble ctx condExpr s!"{pythonGeneratedPrefix}assert_exc_{test.toAst.ann.start.byteIdx}"
 
@@ -2262,7 +2262,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
     -- but havoc maybe_except since the call could throw.
     -- Unmodeled call: havoc is now handled in translateCall via Block.
     | .Hole => return (ctx, [expr] ++ holeExceptHavoc)
-    | .Block _ _ => return (ctx, [expr] ++ holeExceptHavoc)
+    | .Block .. => return (ctx, [expr] ++ holeExceptHavoc)
     | _ => return (ctx, exceptionCheck ++ [expr])
 
   | .Import _ _ | .ImportFrom _ _ _ _ =>
@@ -2313,7 +2313,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
     let rec modifiesMaybeExceptVal (e : StmtExpr) : Bool :=
       match e with
       | .Assign targets _ => targets.any targetIsMaybeExcept
-      | .Block stmts _ => stmts.any fun s => modifiesMaybeExceptVal s.val
+      | .Block stmts _ _ _ => stmts.any fun s => modifiesMaybeExceptVal s.val
       | .IfThenElse _ t e => modifiesMaybeExceptVal t.val ||
           (e.map (modifiesMaybeExceptVal ·.val)).getD false
       | .While _ _ _ body postTest => modifiesMaybeExceptVal body.val
@@ -2323,7 +2323,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
     let isException := mkStmtExprMd (StmtExpr.StaticCall "isError"
       [mkStmtExprMd (StmtExpr.Var (.Local "maybe_except"))] [])
     let exitToHandler := mkStmtExprMd (StmtExpr.IfThenElse isException
-      (mkStmtExprMd (StmtExpr.Exit catchersLabel)) none)
+      (mkStmtExprMd (StmtExpr.Goto catchersLabel .blockEnd)) none)
     let bodyStmtsWithChecks := bodyStmts.flatMap fun stmt =>
       if modifiesMaybeExcept stmt then
         [stmt, exitToHandler]
@@ -2331,7 +2331,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
         [stmt]
 
     -- Normal completion: exit the try block, skipping handlers
-    let exitTry := mkStmtExprMd (StmtExpr.Exit tryLabel)
+    let exitTry := mkStmtExprMd (StmtExpr.Goto tryLabel .blockEnd)
 
     -- `else` runs only if the body completed without an exception (tracked by
     -- a flag set as the body's last action). It is emitted after the handlers
@@ -2345,11 +2345,11 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
 
     -- catchers block: body + completion mark + exit try (normal path)
     let catchersBlock := mkStmtExprMd (StmtExpr.Block
-      (bodyStmtsWithChecks ++ markCompleted ++ [exitTry]) (some catchersLabel))
+      (bodyStmtsWithChecks ++ markCompleted ++ [exitTry]) (some catchersLabel) [] none)
 
     -- try block: catchers block + handler code
     let tryBlock := mkStmtExprMdWithLoc (StmtExpr.Block
-      ([catchersBlock] ++ handlerStmts) (some tryLabel)) md
+      ([catchersBlock] ++ handlerStmts) (some tryLabel) [] none) md
     let (completedDecl, elseCtx, elseStmts) ←
       if orelse.val.isEmpty then
         pure ([], bodyCtx, [])
@@ -2359,7 +2359,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
         let (elseCtx, elseBody) ← translateStmtList bodyCtx orelse.val.toList
         let guardedElse := mkStmtExprMdWithLoc (StmtExpr.IfThenElse
           (mkStmtExprMd (StmtExpr.Var (.Local completedVar)))
-          (mkStmtExprMd (StmtExpr.Block elseBody none)) none) md
+          (mkStmtExprMd (StmtExpr.Block elseBody none [] none)) none) md
         pure ([decl], elseCtx, [guardedElse])
     -- `finally` runs after the try on every fall-through path: normal
     -- completion, handled exceptions, and re-raised exceptions.
@@ -2414,7 +2414,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
           setupStmts := setupStmts ++ [mgrDecl, enterCall]
         cleanupStmts := cleanupStmts ++ [exitCall]
     let (bodyCtx, bodyStmts) ← translateStmtList currentCtx body.val.toList
-    let block := mkStmtExprMdWithLoc (StmtExpr.Block (setupStmts ++ bodyStmts ++ cleanupStmts) none) md
+    let block := mkStmtExprMdWithLoc (StmtExpr.Block (setupStmts ++ bodyStmts ++ cleanupStmts) none [] none) md
     return (bodyCtx, [block])
 
   -- For loop is translated into a while loop:
@@ -2443,7 +2443,7 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
     -- This mirrors Python semantics where the iterator is evaluated once.
     let iterRaw ← translateExpr ctx iter
     let (iterPreamble, iterExpr) := match iterRaw.val with
-      | .Block (_ :: _ :: _) _ =>
+      | .Block (_ :: _ :: _) _ _ _ =>
         let varName := s!"{pythonGeneratedPrefix}for_iter_{iter.toAst.ann.start.byteIdx}"
         let varDecl := mkVarDeclInit varName AnyTy iterRaw
         let varRef  := mkStmtExprMd (StmtExpr.Var (.Local varName))
@@ -2520,21 +2520,21 @@ partial def translateStmt (ctx : TranslationContext) (s : stmt SourceRange)
     -- "dead code after 'exit'" diagnostics from `break`/`continue` followed
     -- by `counterIncrease` in the same block.
     let bodyInner := targetDecls ++ assumeStmts ++ bodyStmts
-    let continueBlock := mkStmtExprMd (StmtExpr.Block bodyInner (some continueLabel))
+    let continueBlock := mkStmtExprMd (StmtExpr.Block bodyInner (some continueLabel) [] none)
     let bodyStmts := [continueBlock, counterIncrease]
-    let whileBody := mkStmtExprMd (StmtExpr.Block bodyStmts none)
+    let whileBody := mkStmtExprMd (StmtExpr.Block bodyStmts none [] none)
     let loopStmt := mkStmtExprMdWithLoc (StmtExpr.While counterLtLen [] none whileBody false) md
-    let loopBlock := mkStmtExprMdWithLoc (StmtExpr.Block [loopStmt] (some breakLabel)) md
+    let loopBlock := mkStmtExprMdWithLoc (StmtExpr.Block [loopStmt] (some breakLabel) [] none) md
     let (preamble, _) := getExceptionCheckPreamble ctx iterExpr s!"{pythonGeneratedPrefix}for_iter_{iter.toAst.ann.start.byteIdx}"
     return (finalCtx, iterPreamble ++ preamble ++ [counterDecl] ++ [loopBlock])
 
   | .Break _ =>
     match ctx.loopBreakLabel with
-    | some lbl => return (ctx, [mkStmtExprMdWithLoc (StmtExpr.Exit lbl) md])
+    | some lbl => return (ctx, [mkStmtExprMdWithLoc (StmtExpr.Goto lbl .blockEnd) md])
     | none => return (ctx, [mkStmtExprMdWithLoc (StmtExpr.Assert (mkStmtExprMd .Hole) none) md])
   | .Continue _ =>
     match ctx.loopContinueLabel with
-    | some lbl => return (ctx, [mkStmtExprMdWithLoc (StmtExpr.Exit lbl) md])
+    | some lbl => return (ctx, [mkStmtExprMdWithLoc (StmtExpr.Goto lbl .blockEnd) md])
     | none => return (ctx, [mkStmtExprMdWithLoc (StmtExpr.Assert (mkStmtExprMd .Hole) none) md])
 
   -- Register globals as scope variables so assignments resolve to static fields.
@@ -2851,7 +2851,7 @@ def translateFunctionBody (ctx : TranslationContext)
     let noneReturn := mkStmtExprMd (.Assign [mkVariableMd (.Local PyLauFuncReturnVar)] AnyNone)
     let bodyStmts := noneReturn::paramCopies ++ bodyStmts
     let bodyStmts := (mkStmtExprMd (.Assign [mkVariableMd $ .Declare ⟨ "nullcall_ret", AnyTy⟩] AnyNone)) :: bodyStmts
-    return (mkStmtExprMd (StmtExpr.Block bodyStmts none), newctx)
+    return (mkStmtExprMd (StmtExpr.Block bodyStmts none [] none), newctx)
 
 /-- Translate Python function to Laurel Procedure -/
 def translateFunction (ctx : TranslationContext) (sourceRange: SourceRange) (funcDecl : PythonFunctionDecl)
