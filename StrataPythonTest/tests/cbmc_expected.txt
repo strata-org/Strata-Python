@@ -4,7 +4,17 @@
 # FAIL = VERIFICATION FAILED expected (known limitations)
 # SKIP = pipeline error expected (test not yet supported)
 
-test_arithmetic.py.ion          FAIL
+# test_arithmetic: CBMC 6.8.0 (the version CI pins) aborts on this test with
+# an invariant violation in smt2_convt::convert_mod. Strata lowers Core integer
+# modulo to a truncating `mod_exprt` over mathematical integers, which is
+# CBMC's documented semantics, but CBMC <= 6.10.0 has no SMT2 encoding for
+# `mod` on integers (and encodes integer `/` as real division). The test only
+# reaches this since program-defined functions such as `$mod` get GOTO bodies.
+# Fixed upstream in diffblue/cbmc d5353b2d0b ("SMT2: encode mathematical
+# integer and real types and operators"), first released in cbmc-6.11.0.
+# Restore FAIL when CI moves to cbmc >= 6.11.0; with that fix applied to 6.8.0,
+# CBMC no longer aborts but the solver did not finish within 25 minutes.
+test_arithmetic.py.ion          SKIP
 test_comparisons.py.ion         FAIL
 test_control_flow.py.ion        FAIL
 test_missing_models.py.ion      SKIP

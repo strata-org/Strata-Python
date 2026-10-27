@@ -4,7 +4,13 @@
 # Usage: ./py_ion_to_cbmc.sh <file.py.ion>
 #
 # Environment variables:
-#   CBMC   - path to cbmc binary (default: cbmc)
+#   CBMC      - path to cbmc binary (default: cbmc)
+#   CBMC_ARGS - extra whitespace-separated arguments appended to the cbmc
+#               invocation (e.g. "--unwind 10 --unwinding-assertions"). No
+#               quoting support: a single value cannot contain whitespace.
+#               Recursive top-level Core functions (e.g. the list prelude)
+#               stay uninterpreted on this path, so no bound is needed for
+#               them; `--unwind` here bounds loops only.
 
 if [ -z "$1" ]; then
   echo "Usage: $0 <file.py.ion>" >&2
@@ -50,4 +56,6 @@ run "symtab2gb" symtab2gb "$STRATA_PYTHON_DIR/$BN.symtab.json" \
   --out "$WORK_DIR/$BN.gb"
 
 CBMC=${CBMC:-cbmc}
-run "cbmc verification" "$CBMC" "$WORK_DIR/$BN.gb" --function main --z3 --verbosity 9
+read -r -a cbmc_extra_args <<< "${CBMC_ARGS:-}"
+run "cbmc verification" "$CBMC" "$WORK_DIR/$BN.gb" --function main --z3 --verbosity 9 \
+  "${cbmc_extra_args[@]}"
