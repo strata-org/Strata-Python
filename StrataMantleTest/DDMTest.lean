@@ -41,13 +41,12 @@ open Strata.Mantle.DSLTest
 private abbrev Built (env : Env Unit) [base ⊑ env] :=
   Except (FailedFunc env Unit Unit) {fn : Func env Unit // fn.WF}
 
-private def intT : TypeExpr Fns.env := Base.Int.ty
-private def boolT : TypeExpr Fns.env := Base.Bool.ty
-private def fnT : TypeExpr Fns.env := Base.Fn.ty (.lit #[.ty intT, .ty boolT]) intT
+private def intT : TypeExpr Fns.env := Base.Int
+private def boolT : TypeExpr Fns.env := Base.Bool
 
 private def f : Built Fns.env :=
   build (.str .base "f") intT () do
-    let g ← freshVal (.str .base "g") fnT
+    let g ← freshVal (.str .base "g") (Base.Fn [intT, boolT] intT)
     let x ← freshVal (.str .base "x") intT
     let y ← freshVal (.str .base "y") boolT
     let _ ← startFreshBlock #[g, x, y] "entry"
@@ -165,7 +164,7 @@ the builder runs, by `checkTypeArgs`. -/
 private def callF (targs : Array (TypeArg Fns.env)) (ops : Array Nat) :
     Built Fns.env :=
   build (.str .base "f") intT () do
-    let g ← freshVal (.str .base "g") fnT
+    let g ← freshVal (.str .base "g") (Base.Fn [intT, boolT] intT)
     let x ← freshVal (.str .base "x") intT
     let y ← freshVal (.str .base "y") boolT
     let _ ← startFreshBlock #[g, x, y] "entry"
@@ -208,8 +207,8 @@ many and an `Int` where the `Bool` belongs. -/
 `y` and `x`. -/
 private def chainF (ret : TypeExpr Fns.env) : Built Fns.env :=
   build (.str .base "chain") intT () do
-    let g ← freshVal (.str .base "g") fnT
-    let h ← freshVal (.str .base "h") (Base.Fn.ty (.ofTypes #[boolT, intT]) intT)
+    let g ← freshVal (.str .base "g") (Base.Fn [intT, boolT] intT)
+    let h ← freshVal (.str .base "h") (Base.Fn [boolT, intT] intT)
     let x ← freshVal (.str .base "x") intT
     let y ← freshVal (.str .base "y") boolT
     let _ ← startFreshBlock #[g, h, x, y] "entry"
@@ -221,12 +220,12 @@ private def chainF (ret : TypeExpr Fns.env) : Built Fns.env :=
       #[h.id, y.id, x.id]
     finishBlock (.ret () r)
 
-#guard accepts (chainF (Base.Fn.ty (.ofTypes #[boolT]) intT))
+#guard accepts (chainF (Base.Fn [boolT] intT))
 
 /-- `bindFirst[Int, [Bool], Int](g, x)`, declared `ret` and unused. -/
 private def bindF (ret : TypeExpr Fns.env) : Built Fns.env :=
   build (.str .base "bind") intT () do
-    let g ← freshVal (.str .base "g") fnT
+    let g ← freshVal (.str .base "g") (Base.Fn [intT, boolT] intT)
     let x ← freshVal (.str .base "x") intT
     let _ ← startFreshBlock #[g, x] "entry"
     let _ ← emitApply (.str .base "b") ret Fns.bindFirst
@@ -234,8 +233,8 @@ private def bindF (ret : TypeExpr Fns.env) : Built Fns.env :=
     finishBlock (.ret () x.id)
 
 /- `bindFirst` returns `Fn as r` at its arguments: `Fn [Bool] Int`, not `f`'s own type. -/
-#guard accepts (bindF (Base.Fn.ty (.ofTypes #[boolT]) intT))
-#guard rejects (bindF fnT)
+#guard accepts (bindF (Base.Fn [boolT] intT))
+#guard rejects (bindF (Base.Fn [intT, boolT] intT))
 
 /-- info: module f {
   func @f(%g.0 : base.Fn([base.Int, base.Bool], base.Int), %x.0 : base.Int, %y.0 : base.Bool) -> base.Int {
@@ -259,7 +258,7 @@ private def bindF (ret : TypeExpr Fns.env) : Built Fns.env :=
 }
 -/
 #guard_msgs in
-#eval do readBack ((← IO.ofExcept (chainF (Base.Fn.ty (.ofTypes #[boolT]) intT))).val.format .full)
+#eval do readBack ((← IO.ofExcept (chainF (Base.Fn [boolT] intT))).val.format .full)
 
 /-- `f(%g.0, %x.0, %y.0) = callFn[targs](args)`, as text. -/
 private def callText (targs args : String) : String := s!"module f \{
@@ -317,31 +316,31 @@ open Build (freshLabel startBlock terminate goto checkTypeArgs) in
 /-- Build a closure of `g : Fn [Int] Int` and `x`, take it apart, and call its function on its
 environment.  The case instruction's type arguments are `caseArgs`, given as data. -/
 private def closF (caseArgs : Array (TypeArg Clos.env)) : Built Clos.env :=
-  build (.str .base "clos") (Base.Int.ty) () do
-    let fnInt : TypeExpr Clos.env := Base.Fn.ty (.ofTypes #[Base.Int.ty]) Base.Int.ty
-    let closT : TypeExpr Clos.env := Clos.Closure.ty (.ofTypes #[Base.Int.ty]) Base.Int.ty
+  build (.str .base "clos") Base.Int () do
+    let fnInt : TypeExpr Clos.env := Base.Fn [Base.Int] Base.Int
+    let closT : TypeExpr Clos.env := Clos.Closure [Base.Int] Base.Int
     let g ← freshVal (.str .base "g") fnInt
-    let x ← freshVal (.str .base "x") Base.Int.ty
+    let x ← freshVal (.str .base "x") Base.Int
     let _ ← startFreshBlock #[g, x] "entry"
     let k ← freshLabel "mk"
     let c ← emitApply (.str .base "c") closT Clos.Closure.mk #[g.id, x.id]
     let some ta ← checkTypeArgs Clos.Closure.case caseArgs | finishBlock (.ret () x.id)
     terminate Clos.Closure.case #[c] #[goto k] (typeArgs := .given ta)
     let f ← freshVal (.str .base "f") fnInt
-    let v ← freshVal (.str .base "v") Base.Int.ty
+    let v ← freshVal (.str .base "v") Base.Int
     startBlock k #[f, v]
-    let r ← emitApply (.str .base "r") Base.Int.ty Fns.callFn (typeArgs := ta[[Base.Int], Base.Int])
+    let r ← emitApply (.str .base "r") Base.Int Fns.callFn (typeArgs := ta[[Base.Int], Base.Int])
       #[f.id, v.id]
     finishBlock (.ret () r)
 
-private def intList : TypeList Clos.env := .ofTypes #[Base.Int.ty]
+private def intList : TypeList Clos.env := .ofTypes #[Base.Int]
 
-#guard (closF #[.list intList, .ty Base.Int.ty]).isOk
+#guard (closF #[.list intList, .ty Base.Int]).isOk
 
 /- A type where the list belongs is an error. -/
 /-- info: #["clos.Closure.case: type argument 1 is a type, but its parameter takes a list of types"] -/
 #guard_msgs in
-#eval match closF #[.ty Base.Int.ty, .ty Base.Int.ty] with
+#eval match closF #[.ty Base.Int, .ty Base.Int] with
   | .ok _ => #[]
   | .error e => e.misuses
 
@@ -363,7 +362,7 @@ private def readBackClos (text : String) : IO Unit := do
 }
 -/
 #guard_msgs in
-#eval do readBackClos ((← IO.ofExcept (closF #[.list intList, .ty Base.Int.ty])).val.format .full)
+#eval do readBackClos ((← IO.ofExcept (closF #[.list intList, .ty Base.Int])).val.format .full)
 
 /-- info: t.mantle:3:19: argument 1 of type clos.Closure is a type, but its parameter takes a list of types -/
 #guard_msgs in
@@ -381,11 +380,11 @@ parameter is spliced, the variable is spliced in its place. -/
 
 /-- `Fn [*as, Int] r`, in `callLast`'s scope. -/
 private def lastArg : TypeExpr Fns.env #[.list, .type] :=
-  Base.Fn.ty (.lit #[.splice 0 (by decide), .ty Base.Int.ty]) (.var 1 (by decide))
+  Base.Fn (TypeList.lit #[.splice 0 (by decide), .ty Base.Int]) (.var 1 (by decide))
 
 /-- `as` as the list variable `0` of a scope of one list. -/
 private def throughVar : TypeArgs Fns.env #[.list, .type] #[.list] :=
-  ⟨#[.list (.var 0 (by decide)), .ty Base.Int.ty], rfl⟩
+  ⟨#[.list (.var 0 (by decide)), .ty Base.Int], rfl⟩
 
 /-- `as` as the literal `[Bool]`. -/
 private def throughLit : TypeArgs Fns.env #[.list, .type] :=
@@ -400,7 +399,7 @@ private def fnName : Name := bn "Fn"
 
 /-- `Fn as r`, whose list parameter is the whole argument. -/
 private def callArg : TypeExpr Fns.env #[.list, .type] :=
-  Base.Fn.ty (.var 0 (by decide)) (.var 1 (by decide))
+  Base.Fn (TypeList.var 0 (by decide)) (.var 1 (by decide))
 
 #guard (callArg.instantiate throughVar).toRaw == .app fnName #[.list #[.var 0], intT.toRaw]
 #guard (callArg.instantiate throughLit).toRaw == .app fnName #[.list #[boolT.toRaw], intT.toRaw]
@@ -411,7 +410,7 @@ private def callArg : TypeExpr Fns.env #[.list, .type] :=
 
 /-- `[*as, Int]`, in `callLast`'s scope. -/
 private def lastList : TypeList Fns.env #[.list, .type] :=
-  .lit #[.splice 0 (by decide), .ty Base.Int.ty]
+  .lit #[.splice 0 (by decide), .ty Base.Int]
 
 #guard lastList.toElems.map (·.toRaw) == #[.var 0, intT.toRaw]
 #guard (lastList.instantiate throughLit).toElems.map (·.toRaw) ==
@@ -442,9 +441,9 @@ instantiating at `bs` gives the type built directly with `bs`. -/
 example (h : (#[.list] : Array Kind)[0]? = some .list) :
     TypeList.var (env := Fns.env) 0 h = .lit #[.splice 0 h] := rfl
 #guard callArg.instantiate throughVar ==
-  Base.Fn.ty (e := Fns.env) (s := #[.list]) (.var 0 (by decide)) Base.Int.ty
+  (Base.Fn (TypeList.var 0 (by decide)) Base.Int : TypeExpr Fns.env #[.list])
 #guard lastArg.instantiate throughVar ==
-  Base.Fn.ty (e := Fns.env) (s := #[.list]) (.lit #[.splice 0 (by decide), .ty Base.Int.ty])
-    Base.Int.ty
+  (Base.Fn (TypeList.lit #[.splice 0 (by decide), .ty Base.Int]) Base.Int :
+    TypeExpr Fns.env #[.list])
 
 end Strata.Mantle.DDMTest

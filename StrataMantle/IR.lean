@@ -109,12 +109,12 @@ deriving Inhabited, Repr
 type, and for a function reference the untyped `base.Code`.  A function reference may instead
 have its target's `Func.codeType`, which the module decides (`Module.Raw.WF`). -/
 @[expose] def Const.typeOf {env : Env Unit} [base ⊑ env] : Const → TypeExpr env
-  | .unit    => Base.Unit.ty
-  | .bool _  => Base.Bool.ty
-  | .int _   => Base.Int.ty
-  | .float _ => Base.Float64.ty
-  | .str _   => Base.String.ty
-  | .func _  => Base.Code.ty
+  | .unit    => Base.Unit
+  | .bool _  => Base.Bool
+  | .int _   => Base.Int
+  | .float _ => Base.Float64
+  | .str _   => Base.String
+  | .func _  => Base.Code
 
 mutual
 
@@ -252,7 +252,7 @@ structure Func (env : Env Unit) (α : Type) where
 its return type.  A function with no entry block takes nothing. -/
 @[expose] def Func.codeType {env : Env Unit} [base ⊑ env] {α : Type} (fn : Func env α) :
     TypeExpr env :=
-  Base.Fn.ty (.ofTypes ((fn.blocks[0]?.map (·.params.map (·.type))).getD #[])) fn.retType
+  Base.Fn (TypeList.ofTypes ((fn.blocks[0]?.map (·.params.map (·.type))).getD #[])) fn.retType
 
 /-- An unchecked module, typed against one environment that refines the base.  A `Module` is
 one with its well-formedness proof. -/

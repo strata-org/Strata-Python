@@ -184,7 +184,7 @@ def literal {env : Env Unit} [base ⊑ env] (funcs : Funcs env) (expected : Type
       let f := nameOf (identText n)
       let some (_, ct?) := funcs.get? f
         | throw ⟨ann, s!"no function @{identText n} in this module"⟩
-      if expected = Base.Code.ty ∨ ct? = some expected then return .func f
+      if expected = Base.Code ∨ ct? = some expected then return .func f
       let ct := (ct?.map typeText).getD "?"
       throw ⟨ann, s!"@{identText n} has type {ct}, or base.Code, where {typeText expected} \
         is expected"⟩
@@ -501,7 +501,7 @@ def headerCodeType? : MFunc SourceRange → Option (TypeExpr env)
   | .func _ _ ⟨_, ps⟩ retTy _ => do
     let ts ← ps.mapM fun | .valDecl _ _ ty => (type ty).toOption
     let r ← (type retTy).toOption
-    pure (Base.Fn.ty (.ofTypes ts) r)
+    pure (Base.Fn (TypeList.ofTypes ts) r)
 
 /-- A well-formed function, with `funcs` the module's functions. -/
 def func (funcs : Funcs env) (f : MFunc SourceRange) :

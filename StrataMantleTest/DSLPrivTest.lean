@@ -4,7 +4,7 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
-public import StrataMantle.Env.Refine
+public import StrataMantle.Env.Handle
 import StrataMantle.Env.WF
 import StrataMantle.DSL
 -- Imported privately on purpose: a public child of `Demo` cannot be declared here.

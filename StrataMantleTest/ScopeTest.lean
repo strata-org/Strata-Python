@@ -40,9 +40,8 @@ open Strata.Mantle.Build (freshVal freshLabel startBlock startBlockWith startFre
 
 private abbrev E := Demo.env
 
-private def valT : TypeExpr E := Demo.Value.ty
 
-private def d (n : Nat) : ValDecl E := ⟨⟨n⟩, valT⟩
+private def d (n : Nat) : ValDecl E := ⟨⟨n⟩, Demo.Value⟩
 
 private def lbl (s : String) : Label := ⟨.str .base s⟩
 
@@ -70,7 +69,7 @@ private def scopedBy (fn : Func E Unit) (t : Body.Tree) : Bool :=
 private def rule {env : Env Unit} (fn : Func env Unit) : Bool := decide (fn.Reachable ∧ fn.Scopable)
 
 private def fn (bs : Array (Block E Unit)) : Func E Unit :=
-  { name := .str .base "f", retType := valT, blocks := bs, names := #[], info := () }
+  { name := .str .base "f", retType := Demo.Value, blocks := bs, names := #[], info := () }
 
 /-- `ret %x`. -/
 private def ret (x : Nat) : Terminator E Unit := .ret () ⟨x⟩
@@ -277,23 +276,21 @@ section Regions
 
 open Strata.Mantle.RegionTest
 
-private def intT : TypeExpr Reg.env := Base.Int.ty
-private def boolT : TypeExpr Reg.env := Base.Bool.ty
 
 /-- `%r = reg.if[Int] %c { then } { else }`, with `%c` id 0. -/
 private def ifI (r : Nat) (thn els : Array (Block Reg.env Unit)) : Instruction Reg.env Unit :=
-  .apply () ⟨⟨r⟩, intT⟩ Reg.«if» ⟨#[.ty intT], rfl⟩ #[⟨0⟩] #[] #[⟨thn⟩, ⟨els⟩]
+  .apply () ⟨⟨r⟩, Base.Int⟩ Reg.«if» ⟨#[.ty Base.Int], rfl⟩ #[⟨0⟩] #[] #[⟨thn⟩, ⟨els⟩]
 
 /-- A region body returning `%x`, after defining `%y` as `1`. -/
 private def body (s : String) (x y : Nat) : Array (Block Reg.env Unit) :=
-  #[{ label := lbl s, params := #[], instrs := #[.const () ⟨⟨y⟩, intT⟩ (.int 1)],
+  #[{ label := lbl s, params := #[], instrs := #[.const () ⟨⟨y⟩, Base.Int⟩ (.int 1)],
       term := .ret () ⟨x⟩, info := () }]
 
 /-- `f(%0 : Bool, %1 : Int)` whose entry runs `is` and returns `%x`. -/
 private def rfn (is : Array (Instruction Reg.env Unit)) (x : Nat) : Func Reg.env Unit :=
-  { name := .str .base "f", retType := intT, names := #[], info := ()
-    blocks := #[{ label := lbl "entry", params := #[⟨⟨0⟩, boolT⟩, ⟨⟨1⟩, intT⟩], instrs := is,
-                  term := .ret () ⟨x⟩, info := () }] }
+  { name := .str .base "f", retType := Base.Int, names := #[], info := ()
+    blocks := #[{ label := lbl "entry", params := #[⟨⟨0⟩, Base.Bool⟩, ⟨⟨1⟩, Base.Int⟩],
+                  instrs := is, term := .ret () ⟨x⟩, info := () }] }
 
 -- A region sees the function's values, and its own.
 #guard rule (rfn #[ifI 2 (body "t" 1 3) (body "e" 4 4)] 2)
@@ -305,7 +302,7 @@ private def rfn (is : Array (Instruction Reg.env Unit)) (x : Nat) : Func Reg.env
 -- A nested region sees what its enclosing one defines before it.
 #guard rule (rfn #[ifI 2
     #[{ label := lbl "t", params := #[], info := ()
-        instrs := #[.const () ⟨⟨3⟩, intT⟩ (.int 1), ifI 4 (body "tt" 3 5) (body "te" 1 6)]
+        instrs := #[.const () ⟨⟨3⟩, Base.Int⟩ (.int 1), ifI 4 (body "tt" 3 5) (body "te" 1 6)]
         term := .ret () ⟨4⟩ }]
     (body "e" 1 7)] 2)
 
@@ -332,23 +329,23 @@ immediate dominator: `b` is under the entry's jump, `c` under `b`'s, and `h` und
 before `%a`, where the first `add` leaves to it.  So `c` sees both. -/
 
 private def builtBody (useS : Bool) : BuildM E Unit Unit := do
-  let x ← freshVal (.str .base "x") valT
+  let x ← freshVal (.str .base "x") Demo.Value
   let _ ← startFreshBlock #[x] "entry"
   let h ← freshLabel "h"
-  let a ← emitApply (.str .base "a") valT Demo.add #[x.id, x.id] #[goto h]
+  let a ← emitApply (.str .base "a") Demo.Value Demo.add #[x.id, x.id] #[goto h]
   let b ← freshLabel "b"
   let c ← freshLabel "c"
   finishBlock (.jump () (goto b))
   startBlock b
-  let s ← emitApply (.str .base "s") valT Demo.add #[a, a] #[goto h]
+  let s ← emitApply (.str .base "s") Demo.Value Demo.add #[a, a] #[goto h]
   finishBlock (.jump () (goto c))
   startBlock c
   finishBlock (.ret () (if useS then s else a))
-  let e ← startBlockWith h (.str .base "e") valT
+  let e ← startBlockWith h (.str .base "e") Demo.Value
   finishBlock (.ret () e)
 
 private def built (useS : Bool) : Except (FailedFunc E Unit Unit) {fn : Func E Unit // fn.WF} :=
-  build (.str .base "f") valT () (builtBody useS)
+  build (.str .base "f") Demo.Value () (builtBody useS)
 
 /-- Block `s.0` after `k` instructions, as the builder names it. -/
 private def bpt (s : String) (k : Nat) : Point := ⟨⟨.num (.str .base s) 0⟩, k⟩
@@ -367,8 +364,8 @@ private def bpt (s : String) (k : Nat) : Point := ⟨⟨.num (.str .base s) 0⟩
 returns `%x` instead. -/
 
 private def joinBody (useT : Bool) : BuildM E Unit Unit := do
-  let x ← freshVal (.str .base "x") valT
-  let c ← freshVal (.str .base "c") Base.Bool.ty
+  let x ← freshVal (.str .base "x") Demo.Value
+  let c ← freshVal (.str .base "c") Base.Bool
   let _ ← startFreshBlock #[x, c] "entry"
   let l ← freshLabel "l"
   let r ← freshLabel "r"
@@ -376,17 +373,17 @@ private def joinBody (useT : Bool) : BuildM E Unit Unit := do
   let h ← freshLabel "h"
   terminate Demo.br #[c.id] #[goto l, goto r]
   startBlock l
-  let t ← emitApply (.str .base "t") valT Demo.add #[x.id, x.id] #[goto h]
+  let t ← emitApply (.str .base "t") Demo.Value Demo.add #[x.id, x.id] #[goto h]
   finishBlock (.jump () (goto j))
   startBlock r
   finishBlock (.jump () (goto j))
   startBlock j
   finishBlock (.ret () (if useT then t else x.id))
-  let e ← startBlockWith h (.str .base "e") valT
+  let e ← startBlockWith h (.str .base "e") Demo.Value
   finishBlock (.ret () e)
 
 private def broken : Except (FailedFunc E Unit Unit) {fn : Func E Unit // fn.WF} :=
-  build (.str .base "f") valT () (joinBody true)
+  build (.str .base "f") Demo.Value () (joinBody true)
 
 -- The build fails with no misuse: the function is not well formed.
 #guard match broken with
@@ -407,7 +404,7 @@ private def broken : Except (FailedFunc E Unit Unit) {fn : Func E Unit // fn.WF}
   | .error e => for m in e.func.scopeDiagnostics do IO.println m
 
 -- The twin builds, and its function has no diagnostics.
-#guard match build (.str .base "f") valT () (joinBody false) with
+#guard match build (.str .base "f") Demo.Value () (joinBody false) with
   | .ok f => f.1.scopeDiagnostics.isEmpty
   | .error _ => false
 

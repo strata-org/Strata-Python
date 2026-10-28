@@ -8,7 +8,7 @@ public import StrataMantle.WF
 public import StrataMantle.Build
 public import StrataMantle.DDM
 public import StrataMantle.DDMRead
-public import StrataMantle.Env.Refine
+public import StrataMantle.Env.Handle
 import StrataMantle.Env.WF
 import StrataMantle.DSL
 -- The builder, the checker, the printer and the reader run as compiled code below.
@@ -46,19 +46,19 @@ public environment Tup extends Base where
 /-- A spread payload entry is a list: `ts`, the literal `[*ts]`. -/
 example : Tup.untuple.sig (e := Tup.env) =
     { ann := (), typeParams := #[⟨"ts", .list⟩],
-      argTypes := #[⟨"t", Tup.Tuple.ty (.var 0 (by decide))⟩],
+      argTypes := #[⟨"t", Tup.Tuple (TypeList.var 0 (by decide))⟩],
       returnType := none, succs := #[⟨"k", #[.list (.var 0 (by decide))]⟩],
       distinct := by decide } := rfl
 
 /-- A fixed entry before it is a type. -/
 example : (Tup.split.sig (e := Tup.env)).succs =
-    #[⟨"k", #[.ty Base.Int.ty, .list (.var 0 (by decide))]⟩] := rfl
+    #[⟨"k", #[.ty Base.Int, .list (.var 0 (by decide))]⟩] := rfl
 
 open Build (freshVal startFreshBlock emitApply emitConst terminate finishBlock build goto
   freshLabel startBlock FailedFunc)
 
-private def intT : TypeExpr Tup.env := Base.Int.ty
-private def boolT : TypeExpr Tup.env := Base.Bool.ty
+private def intT : TypeExpr Tup.env := Base.Int
+private def boolT : TypeExpr Tup.env := Base.Bool
 
 /-- What `build` gives: a checked function, or the `FailedFunc`. -/
 private abbrev Built := Except (FailedFunc Tup.env Unit Unit) {fn : Func Tup.env Unit // fn.WF}
@@ -76,7 +76,7 @@ private def roundTrip (params : Array (TypeExpr Tup.env)) : Built :=
     let a ← freshVal (.str .base "a") intT
     let b ← freshVal (.str .base "b") boolT
     let _ ← startFreshBlock #[a, b] "entry"
-    let t ← emitApply (.str .base "t") (Tup.Tuple.ty (.ofTypes #[intT, boolT])) Tup.tuple
+    let t ← emitApply (.str .base "t") (Tup.Tuple [intT, boolT]) Tup.tuple
       #[a.id, b.id]
     let k ← freshLabel "k"
     terminate Tup.untuple #[t] #[goto k]
@@ -97,7 +97,7 @@ private def splitInto (params : Array (TypeExpr Tup.env)) : Built :=
     let a ← freshVal (.str .base "a") intT
     let b ← freshVal (.str .base "b") boolT
     let _ ← startFreshBlock #[a, b] "entry"
-    let t ← emitApply (.str .base "t") (Tup.Tuple.ty (.ofTypes #[intT, boolT])) Tup.tuple
+    let t ← emitApply (.str .base "t") (Tup.Tuple [intT, boolT]) Tup.tuple
       #[a.id, b.id]
     let n ← emitConst (.str .base "n") (.int 0)
     let k ← freshLabel "k"

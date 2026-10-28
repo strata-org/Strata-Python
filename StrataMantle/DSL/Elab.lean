@@ -20,7 +20,7 @@ hand-written code does, so the kernel checks everything the elaborator emits.
 
 The stages are `private`, in `E.Internal`.  The interface is written against a generic
 refinement `e` from public pieces only, so nothing downstream reduces through a stage: `o.sig`
-from the types' `ty`, and `o` as the stage's reference cast to it by `InsnRef.cast`.  A
+from the types' `Internal.T.ty`, and `o` as the stage's reference cast to it by `InsnRef.cast`.  A
 constructor `T.c` is an instruction the same way: `T.c.sig` is written out, and `T.c` is the
 reference `InsnRef.ofAddData` gives, cast to it.  A datatype's case instruction `T.case` is one
 too: `addData` declares it with the group, and `T.case` is the reference
@@ -205,6 +205,8 @@ structure EmitCtx where
   inherited : Std.HashMap Name TypeInfo
   /-- Every name the ancestors declare, nearest first: the parent's `names`. -/
   parentNames : Array Name
+  /-- The Lean namespaces of this environment and its ancestors, nearest first. -/
+  lineage : Array Name
   /-- Every name `env` declares, in `names` order. -/
   allNames : Array Name
   /-- The keys of the names the parent's `nameSet` holds, in the order its stages add them. -/
@@ -342,20 +344,21 @@ partial def tyAt (j : Nat) (kinds : Array Kind) : Ty → Term
     let as : Array Term := args.map fun a =>
       if a.kind kinds == .list then listTerm kinds (tyAt j kinds) a else tyAt j kinds a
     -- As the interface writes types, one application per node: an own type's `tyAt` at the
-    -- inclusion of its stage in stage `j`, an inherited type's `ty` at stage `j`.
+    -- inclusion of its stage in stage `j`, an inherited type's `Internal.T.ty` at stage `j`.
     match cx.ownTypes[h]? with
     | some (info, t, _) =>
       Unhygienic.run `($(cx.own (`Internal ++ info.lean ++ `tyAt)) $(cx.leTerm t j) $as*)
     | none =>
       let info := cx.info h
-      Unhygienic.run `(($(rootId (info.owner ++ info.lean ++ `ty)) (e := $(cx.stage j))) $as*)
+      let tyT := rootId (info.owner ++ `Internal ++ info.lean ++ `ty)
+      Unhygienic.run `(($tyT (e := $(cx.stage j))) $as*)
   -- Checking puts a list only in a list position, which the `app` case and `listTerm` read.
   -- Anywhere else it is a `TypeList`, which fails to elaborate as a `TypeExpr`.
   | l@(.list _) => listTerm kinds (tyAt j kinds) l
 
 /-- A type, over a generic `e`, with the variables named `vars`, of kinds `kinds`: a list
-variable's is a `TypeList`.  A list is a `TypeList`, the argument a list parameter's `T.ty`
-takes. -/
+variable's is a `TypeList`.  A list is a `TypeList`, the argument a list parameter's
+`Internal.T.ty` takes. -/
 partial def tyGen (vars : Array Term) (kinds : Array Kind) : Ty → Term
   | .var i => vars[i]?.getD (internalErrorTerm s!"type variable #{i} is out of scope")
   | .app h args =>
@@ -363,7 +366,7 @@ partial def tyGen (vars : Array Term) (kinds : Array Kind) : Ty → Term
     let as : Array Term := args.map fun a =>
       if a.kind kinds == .list then listTerm kinds (tyGen vars kinds) a else tyGen vars kinds a
     let info := cx.info h
-    Unhygienic.run `($(rootId (info.owner ++ info.lean ++ `ty)) $as*)
+    Unhygienic.run `($(rootId (info.owner ++ `Internal ++ info.lean ++ `ty)) $as*)
   | l@(.list _) => listTerm kinds (tyGen vars kinds) l
 
 /-- Whether `t` is the list variable `j`, spliced: its level. -/
@@ -373,46 +376,6 @@ def spliceOf? (kinds : Array Kind) : Ty → Option Nat
     | some .list => some j
     | some .type | none => none
   | _ => none
-
-/-- A type of an abbreviation's body, over a generic `e`, with the parameters named `vars`, of
-kinds `kinds`.  A list is a `TypeList`: its types in literals, each list parameter spliced in by
-`++`, and a list parameter alone its own `TypeList`.  Appending is how `instantiate` splices
-a list argument (`TypeExpr.instantiate_append`), and on literals it is the literal of both
-(`TypeExpr.lit_append_lit`), so `n.ty` builds what checking expands the
-abbreviation to with `Raw.instantiate`. -/
-partial def abbrevTy (vars : Array Term) (kinds : Array Kind) : Ty → Term
-  | .var i => vars[i]?.getD (internalErrorTerm s!"type variable #{i} is out of scope")
-  | .app h args =>
-    let h := leanName h
-    let as : Array Term := args.map fun a =>
-      if a.kind kinds == .list then abbrevList vars kinds a else abbrevTy vars kinds a
-    let info := cx.info h
-    Unhygienic.run `($(rootId (info.owner ++ info.lean ++ `ty)) $as*)
-  | l@(.list _) => abbrevList vars kinds l
-where
-  /-- A list of the body: runs of types as literals, appended to the list parameters spliced
-  between them. -/
-  abbrevList (vars : Array Term) (kinds : Array Kind) : Ty → Term
-    | .list es => Id.run do
-      let mut parts : Array Term := #[]
-      let mut run : Array Term := #[]
-      for e in es do
-        match spliceOf? kinds e with
-        | some j =>
-          unless run.isEmpty do
-            parts := parts.push (Unhygienic.run `(Strata.Mantle.TypeList.lit #[$run,*]))
-            run := #[]
-          parts := parts.push (vars[j]?.getD
-            (internalErrorTerm s!"list variable #{j} is out of scope"))
-        | none =>
-          run := run.push (Unhygienic.run `(Strata.Mantle.TypeList.Elem.ty
-            $(abbrevTy vars kinds e)))
-      if !run.isEmpty || parts.isEmpty then
-        parts := parts.push (Unhygienic.run `(Strata.Mantle.TypeList.lit #[$run,*]))
-      match parts.toList with
-      | [] => Unhygienic.run `(Strata.Mantle.TypeList.lit #[])
-      | p :: ps => ps.foldl (fun acc q => Unhygienic.run `($acc ++ $q)) p
-    | e => abbrevTy vars kinds e
 
 /-- A payload of the group added at stage `k`, whose members are `members`.  Every other type
 is read through `refs`, the stage's literal references (`payRefs`). -/
@@ -451,12 +414,12 @@ partial def rawAt (j : Nat) (kinds : Array Kind) : Ty → Term
           `($(cx.own (`Internal ++ info.lean ++ `toRaw_tyAt)) $(cx.leTerm t j) $holes*)
       | none =>
         let info := cx.info h
-        Unhygienic.run `(($(rootId (info.owner ++ info.lean ++ `toRaw_ty)) (e := $(cx.stage j)))
-          $holes*)
+        Unhygienic.run `(($(rootId (info.owner ++ `Internal ++ info.lean ++ `toRaw_ty))
+          (e := $(cx.stage j))) $holes*)
     Unhygienic.run `(Eq.trans $lem (Strata.Mantle.TypeExpr.Raw.app_eq_of $(consChain pfs)))
   | l@(.list _) => listRaw kinds (rawAt j kinds) l
 
-/-- The raw form of `tyGen vars kinds t`, by each type's `toRaw_ty`. -/
+/-- The raw form of `tyGen vars kinds t`, by each type's `Internal.T.toRaw_ty`. -/
 partial def rawGen (kinds : Array Kind) : Ty → Term
   | .var i => Unhygienic.run `(Strata.Mantle.TypeExpr.toRaw_var $(quote i) rfl)
   | .app h args =>
@@ -464,7 +427,8 @@ partial def rawGen (kinds : Array Kind) : Ty → Term
     let holes : Array Term := args.map fun _ => Unhygienic.run `(_)
     let pfs := args.map fun a =>
       if a.kind kinds == .list then listRaw kinds (rawGen kinds) a else rawGen kinds a
-    Unhygienic.run `(Eq.trans ($(rootId (info.owner ++ info.lean ++ `toRaw_ty)) $holes*)
+    let lem := rootId (info.owner ++ `Internal ++ info.lean ++ `toRaw_ty)
+    Unhygienic.run `(Eq.trans ($lem $holes*)
       (Strata.Mantle.TypeExpr.Raw.app_eq_of $(consChain pfs)))
   | l@(.list _) => listRaw kinds (rawGen kinds) l
 
@@ -569,7 +533,7 @@ def kindTerm : Kind → Term
   | .list => Unhygienic.run `(Strata.Mantle.Kind.list)
 
 /-- A `TypeDecl` literal, from each parameter's name, whether it is positive, and its kind. -/
-def typeDeclTerm (nameId : Ident) (params : Array (String × Bool × Kind)) :
+def typeDeclTerm (nameId : Term) (params : Array (String × Bool × Kind)) :
     CommandElabM Term := do
   let ps ← params.mapM fun (x, b, k) => `(⟨$(quote x), ⟨$(polTerm b), $(kindTerm k)⟩⟩)
   `(({ ann := (), name := $nameId, params := #[$ps,*] } :
@@ -588,7 +552,8 @@ def primeAvoiding (avoid : Array Name) (n : Name) : Name := Id.run do
 
 /-- The private `Internal.T.tyAt`, an own type `T` applied in any environment its stage, the
 term `stage`, is included in, and its raw-form lemma `Internal.T.toRaw_tyAt`.  The stage's
-signatures write `T` with it, one application per node, as the interface writes `T.ty`. -/
+signatures write `T` with it, one application per node, as the interface writes
+`Internal.T.ty`. -/
 def tyAtCmds (cx : EmitCtx) (stage : Term) (lean : Name) (params : Array (String × Kind)) :
     CommandElabM (Array Command) := do
   let svis? := EmitCtx.stageVis?
@@ -757,6 +722,214 @@ def EmitCtx.memCmds (cx : EmitCtx) (st : Stage) (k : Nat) (listParts : Array Ter
   else
     cs := cs.push (← thmCmd (mkDoc s!"Every name stage {k} declares, as a set.") svis? false
       (I "smem") #[nBinder] smemStmt smemProof)
+  return cs
+
+/-! ## Handles
+
+A handle is the one Lean term for a Mantle type, and it works wherever a type is expected.
+Applied to type expressions, it is a type expression in any environment that refines its own, so
+a builder writes `Base.Except Base.Int Py.Value` (`Env/Handle.lean` defines handles and the
+coercions).  The command generates one for each type and abbreviation, named after it, once the
+references exist, since a type's handle is built from its `Internal.T.ty` and `T.name`.
+
+Each shape generates the following.  The declarations here are abbreviated:
+
+```lean
+environment E where
+  type Int
+  type Ref (+a)
+  type Fn (as : list) (+r)
+  abbrev IntRef := Ref Int
+  abbrev RefRef (a) := Ref (Ref a)
+  abbrev withInt ((cs : list) r) := Fn [*cs, Int] r
+
+-- A type without parameters: its type expression, and its declaration as a handle.
+def E.Int {e} [h : E.env ⊑ e] {s} : TypeExpr e s := @E.Internal.Int.ty e h s
+def E.Int.con : TypeCon [] := ⟨Int's declaration, rfl, E.env, fun {e} [h] {s} =>
+  @E.Internal.Int.ty e h s⟩
+-- A type with parameters: its declaration, its environment, and its `Internal.T.ty`.  A list
+-- parameter takes a list of type expressions or a `TypeList`, as `a0` says.
+def E.Ref : TypeCon [.type] := ⟨…, E.env, fun {e} [h] {s} x0 => @E.Internal.Ref.ty e h s x0⟩
+def E.Fn : TypeCon [.list, .type] := ⟨…, E.env, fun {e} [h] {s} {a0} x0 x1 =>
+  @E.Internal.Fn.ty e h s (a0.toTypeList x0) x1⟩
+-- An abbreviation: its body's handles applied, in the most refined environment that declares
+-- a name of the body.  A list parameter spliced among other elements is spliced by `splice`.
+def E.IntRef {e} [E.env ⊑ e] {s} : TypeExpr e s := (E.Ref E.Int : TypeExpr e s)
+def E.IntRef.con : TypeCon [] := ⟨…, E.env, fun {e} [_] {s} => (E.Ref E.Int : TypeExpr e s)⟩
+def E.RefRef : TypeCon [.type] := ⟨…, E.env, fun {e} [h] {s} x0 =>
+  (E.Ref (E.Ref x0) : TypeExpr e s)⟩
+def E.withInt : TypeCon [.list, .type] := ⟨…, E.env, fun {e} [_] {s} {a0} x0 x1 =>
+  (E.Fn (a0.splice [] x0 [E.Int]) x1 : TypeExpr e s)⟩
+```
+
+Each is `@[reducible]`, so instance search and `rfl` unfold a handle to its fields and an
+applied handle is definitionally its type's `Internal.T.ty`.  A public environment in a module
+exposes them with `@[expose]`, so downstream modules unfold them too.
+
+An abbreviation's environment is the most refined among its names' owners, which the command
+reads from the parent chain; one without names has its own environment.  Its body is elaborated
+under that environment's instance, and instance search finds each name's owner from it by the
+parent rules.  An abbreviation's declaration names its parameters and kinds; it has no
+polarities, so each is `non`.
+
+A handle takes the type's own name, so a datatype constructor `T.c` would shadow a field of
+`T`'s handle.  `typeShadowed` therefore reserves `T.decl`, `T.kinds`, `T.env` and `T.apply`,
+and `typeGenerated` reserves `T.con` for a type without parameters.
+
+Handles are types only.  The command generates no Lean type of a Mantle type's values and no
+code for them here. -/
+
+/-- `@[reducible] def`, exposed if `expose`: a handle, which instance search and `rfl` unfold. -/
+def handleCmd (doc : TSyntax ``Lean.Parser.Command.docComment)
+    (vis? : Option (TSyntax ``Lean.Parser.Command.visibility)) (expose : Bool) (id : Ident)
+    (ty val : Term) : CommandElabM Command :=
+  if expose then
+    `($doc:docComment @[reducible, expose] $[$vis?:visibility]? def $id:ident : $ty := $val)
+  else
+    `($doc:docComment @[reducible] $[$vis?:visibility]? def $id:ident : $ty := $val)
+
+/-- `TypeExpr e s`, the type of an applied handle in the generated `fun {e} [h] {s}`. -/
+def handleExprTy : Term := Unhygienic.run `(Strata.Mantle.TypeExpr e s)
+
+/-- The parameters of a handle of kinds `ks`: `x{i}`, and for a list parameter `a{i}`, the form
+its argument takes. -/
+def handleParams (ks : Array Kind) : Array (Ident × Option Ident) :=
+  ks.mapIdx fun i k =>
+    (mkIdent s!"x{i}".toName, if k == .list then some (mkIdent s!"a{i}".toName) else none)
+
+/-- The type expression of `t`, an abbreviation's body, over the parameters `xs`, of kinds
+`kinds`: the names' handles applied.  A list without a splice is a `List (TypeExpr e s)`, a
+list parameter alone is itself, and one spliced among other elements is spliced by
+`TypeCon.ListArg.splice`, which a literal with one splice needs. -/
+partial def EmitCtx.handleOf (cx : EmitCtx) (xs : Array (Ident × Option Ident))
+    (kinds : Array Kind) : Ty → Term
+  | .var i => (xs[i]?.map (fun x => (x.1 : Term))).getD
+      (internalErrorTerm s!"type variable #{i} is out of scope")
+  | .app h args =>
+    let info := cx.info (leanName h)
+    let hd := rootId (info.owner ++ info.lean)
+    if args.isEmpty then Unhygienic.run `(($hd : $handleExprTy))
+    else Syntax.mkApp hd (args.map (cx.handleOf xs kinds))
+  | .list es =>
+    let listTy : Term := Unhygienic.run `(_root_.List $handleExprTy)
+    let lit (ts : Array Ty) : Term :=
+      Unhygienic.run `(([$(ts.map (cx.handleOf xs kinds)),*] : $listTy))
+    match es.zipIdx.findSome? fun (t, i) => (EmitCtx.spliceOf? kinds t).map (i, ·) with
+    | none => lit es
+    | some (i, j) =>
+      if (es.extract (i + 1)).any (EmitCtx.spliceOf? kinds · |>.isSome) then
+        internalErrorTerm "a literal splices two lists"
+      else match xs[j]? with
+        | some (x, some a) =>
+          if es.size == 1 then x
+          else Unhygienic.run `(Strata.Mantle.TypeCon.ListArg.splice $a
+            $(lit (es.extract 0 i)) $x $(lit (es.extract (i + 1))))
+        | _ => internalErrorTerm s!"list variable #{j} is out of scope"
+
+/-- The most refined environment that declares a name of `t`, as its position in
+`cx.lineage`. -/
+partial def EmitCtx.rankOf (cx : EmitCtx) : Ty → Option Nat
+  | .var _ => none
+  | .app h args =>
+    let own := cx.lineage.idxOf? (cx.info (leanName h)).owner
+    args.foldl (fun r a => minRank r (cx.rankOf a)) own
+  | .list es => es.foldl (fun r a => minRank r (cx.rankOf a)) none
+where
+  minRank : Option Nat → Option Nat → Option Nat
+    | some i, some j => some (min i j)
+    | r, none | none, r => r
+
+/-- A handle: `⟨decl, rfl, env, fun {e} [h : env ⊑ e] {s} xs => body⟩`, at kinds `ks`, where a
+list parameter `x{i}` is preceded by `{a{i} : TypeCon.ListArg}`. -/
+def handleVal (decl env : Term) (xs : Array (Ident × Option Ident)) (body : Term) (named : Bool) :
+    CommandElabM Term := do
+  let fn ← xs.foldrM (init := body) fun
+    | (x, some a), acc => `(fun {$a : Strata.Mantle.TypeCon.ListArg} $x => $acc)
+    | (x, none), acc => `(fun $x => $acc)
+  if named then
+    `(⟨$decl, rfl, $env, fun {e : Strata.Mantle.Env _root_.Unit}
+        [h : Strata.Mantle.RefinedBy $env e] {s : _root_.Array Strata.Mantle.Kind} => $fn⟩)
+  else
+    `(⟨$decl, rfl, $env, fun {e : Strata.Mantle.Env _root_.Unit}
+        [Strata.Mantle.RefinedBy $env e] {s : _root_.Array Strata.Mantle.Kind} => $fn⟩)
+
+/-- A handle without parameters: `T`, its type expression in every refinement of `env`,
+`fun {e} [h : env ⊑ e] {s} => body`, documented by `doc`, and `T.con : TypeCon []`, its
+declaration. -/
+def nullaryCmds (cx : EmitCtx) (id : Name) (what : String)
+    (doc : TSyntax ``Lean.Parser.Command.docComment) (decl env body : Term) (named : Bool) :
+    CommandElabM (Array Command) := do
+  let ty ← `(∀ {e : Strata.Mantle.Env _root_.Unit} [Strata.Mantle.RefinedBy $env e]
+      {s : _root_.Array Strata.Mantle.Kind}, Strata.Mantle.TypeExpr e s)
+  let val ← if named then
+      `(fun {e : Strata.Mantle.Env _root_.Unit} [h : Strata.Mantle.RefinedBy $env e]
+        {s : _root_.Array Strata.Mantle.Kind} => $body)
+    else
+      `(fun {e : Strata.Mantle.Env _root_.Unit} [Strata.Mantle.RefinedBy $env e]
+        {s : _root_.Array Strata.Mantle.Kind} => $body)
+  return #[← handleCmd doc cx.vis? cx.expose (mkIdent id) ty val,
+    ← handleCmd (mkDoc s!"`{what}`, as a handle: its declaration.") cx.vis? cx.expose
+      (mkIdent (id ++ `con)) (← `(Strata.Mantle.TypeCon [])) (← handleVal decl env #[] body named)]
+
+/-- The handle `T : TypeCon ks` of a type whose parameters have the kinds `ks`: its
+`Internal.T.ty`, a list parameter's argument as a `TypeList`.  A type without parameters is its
+type expression, with `T.con` its handle. -/
+def EmitCtx.typeHandleCmd (cx : EmitCtx) (d : TypeD) (decl : Term) (ks : Array Kind) :
+    CommandElabM (Array Command) := do
+  let own : Term := cx.own `env
+  let tyT := cx.own (`Internal ++ d.c.lean ++ `ty)
+  let xs := handleParams ks
+  let args : Array Term ← xs.mapM fun
+    | (x, none) => pure x
+    | (x, some a) => `(Strata.Mantle.TypeCon.ListArg.toTypeList $a $x)
+  let body ← `(@$tyT e h s $args*)
+  let en := showName d.c.envName
+  if ks.isEmpty then
+    return ← nullaryCmds cx d.c.lean en (docOr d.c.doc? s!"The type `{en}`, as a type \
+      expression in every refinement of its environment.") decl own body true
+  return #[← handleCmd (docOr d.c.doc? s!"The type `{en}`, as a handle: its declaration, and \
+      its type expression at its arguments'.") cx.vis? cx.expose (mkIdent d.c.lean)
+    (← `(Strata.Mantle.TypeCon [$(ks.map kindTerm),*])) (← handleVal decl own xs body true)]
+
+/-- An abbreviation's handle: its body's handles applied, in the most refined environment that
+declares a name of the body. -/
+def EmitCtx.abbrevHandleCmd (cx : EmitCtx) (d : AbbrevD) (info : AbbrevInfo) :
+    CommandElabM (Array Command) := do
+  let en := showName d.c.envName
+  let doc := docOr d.c.doc? s!"The abbreviation `{en}`, as a handle: its expansion's."
+  let xs := handleParams info.params
+  if info.body.kind info.params == .list then
+    return #[← handleCmd doc cx.vis? cx.expose (mkIdent d.c.lean) (← `(_root_.Unit))
+      (internalErrorTerm s!"the abbreviation `{en}` is a list, which has no handle")]
+  let env : Term := match (cx.rankOf info.body).bind (cx.lineage[·]?) with
+    | some ns => rootId (ns ++ `env)
+    | none => cx.own `env
+  let decl ← typeDeclTerm (nameLit d.c.envName)
+    ((d.params.zip info.params).map fun ((x, _, _), k) => (x, false, k))
+  let body ← `(($(cx.handleOf xs info.params info.body) : $handleExprTy))
+  if info.params.isEmpty then
+    return ← nullaryCmds cx d.c.lean en (docOr d.c.doc? s!"The abbreviation `{en}`, as a type \
+      expression in every refinement of its environment.") decl env body false
+  return #[← handleCmd doc cx.vis? cx.expose (mkIdent d.c.lean)
+    (← `(Strata.Mantle.TypeCon [$(info.params.map kindTerm),*])) (← handleVal decl env xs body false)]
+
+/-- The handles, after the references: one per type and one per abbreviation, under its own
+name. -/
+def emitHandles (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD × AbbrevInfo)) :
+    CommandElabM (Array Command) := do
+  let mut cs : Array Command := #[]
+  for s in stages do
+    let tys : Array TypeD := match s with
+      | .types ds => ds
+      | .data ms => ms.map (·.1)
+      | .ops _ => #[]
+    for d in tys do
+      let ks := d.params.map (·.2.2.2)
+      let decl ← typeDeclTerm (cx.own (d.c.lean ++ `name))
+        (d.params.map fun (x, _, b, k) => (x, b, k))
+      cs := cs ++ (← cx.typeHandleCmd d decl ks)
+  for (d, info) in abbrevs do
+    cs := cs ++ (← cx.abbrevHandleCmd d info)
   return cs
 
 /-- Every command the block generates. -/
@@ -1078,11 +1251,11 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
       [$(cx.hId) : Strata.Mantle.RefinedBy $(cx.own `env) e] :
       Strata.Mantle.RefinedBy $pEnv e := ⟨$pf⟩))
   -- References, in every refinement of `env`.  The interface binds three names of its own:
-  -- the refinement `{e : Env Unit}` and, in `T.ty` and `n.ty`, the scope `{s : Array Kind}`,
+  -- the refinement `{e : Env Unit}` and, in `Internal.T.ty`, the scope `{s : Array Kind}`,
   -- which are implicit and keep these stable names so callers can pin them
   -- (`(e := Demo.env)`); and
   -- the instance `[h : RefinedBy env e]`, which instance search fills, so it is hygienic
-  -- (`cx.hId`).  `T.ty` and `n.ty` bind the type's parameters beside `e` and `s` under the
+  -- (`cx.hId`).  `Internal.T.ty` binds the type's parameters beside `e` and `s` under the
   -- user's names, so a parameter named `e` or `s` would capture one of them: it is renamed
   -- by `primeAvoiding`, away from `e`, `s`, every parameter and every earlier renaming
   -- (`type T (e) (e')` binds `e''` and `e'`).  Every other parameter keeps its name.
@@ -1144,11 +1317,13 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
             | (x, .list) => `(Strata.Mantle.TypeArg.list $x)
             | (x, .type) => `(Strata.Mantle.TypeArg.ty $x)
           `(Strata.Mantle.TypeExpr.appK $refT #v[$as,*] $kindsPf)
-      cs := cs.push (← defCmd (mkDoc s!"`{en}`, as a type expression.") vis? cx.expose
-        (mkIdent (d.c.lean ++ `ty)) (sBinders ++ (← paramBinders xs ks))
+      cs := cs.push (← defCmd (mkDoc s!"`{en}`, as a type expression: what its handle \
+          applies.") vis? cx.expose
+        (mkIdent (`Internal ++ d.c.lean ++ `ty)) (sBinders ++ (← paramBinders xs ks))
         (← `(Strata.Mantle.TypeExpr e s)) body)
       -- Its raw form, for the casts' proofs: one application of `toRaw_app_of`.
-      let tyApp ← `($(cx.own (d.c.lean ++ `ty)) (e := e) (s := s) $(xs.map fun x => (x : Term))*)
+      let tyApp ← `($(cx.own (`Internal ++ d.c.lean ++ `ty)) (e := e) (s := s)
+        $(xs.map fun x => (x : Term))*)
       let raws ← xs.mapM fun x => `(Strata.Mantle.TypeExpr.toRaw $x)
       let rawPf ← if ks.all (· == .type) then
           `(Strata.Mantle.TypeExpr.toRaw_app_of (hk := $kindsPf)
@@ -1161,17 +1336,10 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
                 | .list => Unhygienic.run `(Strata.Mantle.TypeArg.toRaw_list_of rfl)
                 | .type => Unhygienic.run `(Strata.Mantle.TypeArg.toRaw_ty_of rfl))))
       cs := cs.push (← thmCmd (mkDoc s!"The raw form of `{en}` applied.") vis? false
-        (mkIdent (d.c.lean ++ `toRaw_ty)) (sBinders ++ (← paramBinders xs ks))
+        (mkIdent (`Internal ++ d.c.lean ++ `toRaw_ty)) (sBinders ++ (← paramBinders xs ks))
         (← `(Strata.Mantle.TypeExpr.toRaw $tyApp =
               Strata.Mantle.TypeExpr.Raw.app $(cx.own (d.c.lean ++ `name)) ⟨[$raws,*]⟩))
         rawPf)
-  for (d, info) in abbrevs do
-    let xs := varIdents (d.params.map (·.1))
-    cs := cs.push (← defCmd (docOr d.c.doc? s!"The abbreviation `{showName d.c.envName}`.") vis?
-      cx.expose (mkIdent (d.c.lean ++ `ty))
-      (sBinders ++ (← paramBinders xs info.params))
-      (← `(Strata.Mantle.TypeExpr e s))
-      (cx.abbrevTy (xs.map fun x => (x : Term)) info.params info.body))
   -- Constructors and case instructions, as instructions: the signature written out against
   -- `e`, and the stage's reference cast to it by `InsnSig.carry_eq_of_toRaw`, node by node.
   for h : i in [0:stages.size] do
@@ -1274,8 +1442,8 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
       let d := ds[j]
       let en := showName d.d.c.envName
       let sigId := mkIdent (d.d.c.lean ++ `sig)
-      -- The signature, written against `e` from public pieces: the types' `ty`, `var` and
-      -- `RegionSig.of`.  `decide` refuses goals over the free `e`, so `simp` proves the
+      -- The signature, written against `e` from public pieces: the types' `Internal.T.ty`,
+      -- `var` and `RegionSig.of`.  `decide` refuses goals over the free `e`, so `simp` proves the
       -- distinctness obligations.
       let ks := d.d.typeParams.map (·.2.2)
       let vars ← ks.zipIdx.mapM fun
@@ -1342,9 +1510,15 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
               (Strata.Mantle.InsnRef.ofLE $(cx.liftTo k)
                 $(cx.own (`Internal ++ d.d.c.lean ++ `ref₀))))))
   cs := cs.push (← `(command| end))
-  return cs
+  return cs ++ (← emitHandles cx stages abbrevs)
 
 /-! ## The command -/
+
+/-- The record of a failed environment `p`, written in namespace `ns` or one enclosing it. -/
+def findFailed? (env : Environment) (p : Name) : Name → Option EnvEntry
+  | .anonymous => (findEntry? env p).filter (·.failed)
+  | ns@(.str pre _) | ns@(.num pre _) =>
+    ((findEntry? env (ns ++ p)).filter (·.failed)).orElse fun _ => findFailed? env p pre
 
 /-- Resolve `extends P` to the parent's record, and check that `P` is visible enough. -/
 def resolveParent (envShort : Name) (p : Ident) (isPublic isModule : Bool) :
@@ -1354,10 +1528,19 @@ def resolveParent (envShort : Name) (p : Ident) (isPublic isModule : Bool) :
       some <$> resolveGlobalConstNoOverload (mkIdentFrom p (p.getId ++ `env))
     catch _ => pure none
   let pStr := showName p.getId
-  let some full := full? | err p s!"unknown environment `{pStr}`"; return none
+  let failedMsg := s!"`{pStr}` did not elaborate, so `{showName envShort}` cannot extend it; \
+    fix `{pStr}`'s errors first"
+  -- A parent whose names were taken declared no `env`, but left a failed record.
+  let some full := full? |
+    if (findFailed? env p.getId (← getCurrNamespace)).isSome then err p failedMsg
+    else err p s!"unknown environment `{pStr}`"
+    return none
   let full := privateToUserName full
   let some e := findEntry? env full.getPrefix |
     err p s!"`{pStr}` is not declared with `environment`"; return none
+  if e.failed then
+    err p failedMsg
+    return none
   if isPublic && !e.isPublic then
     err p s!"public environment `{showName envShort}` cannot extend private environment \
       `{pStr}`"
@@ -1380,13 +1563,16 @@ def elabEnvironment (doc? : Option (TSyntax ``Lean.Parser.Command.docComment))
   let envNs := (← getCurrNamespace) ++ envShort
   let (res?, failed) ← (do
       let env ← getEnv
-      unless env.contains `Strata.Mantle.RefinedBy do
-        err kw "an environment needs `public import StrataMantle.Env.Refine`"
+      unless env.contains `Strata.Mantle.TypeCon do
+        err kw "an environment needs `public import StrataMantle.Env.Handle`"
       if (env.getModuleIdx? `StrataMantle.Env.WF).isNone then
         err kw "building an environment needs `import StrataMantle.Env.WF`"
-      let parent ← match p? with
-        | some p => resolveParent envShort p isPublic isModule
-        | none => pure none
+      -- Without its parent, the block's names would not resolve, so its errors would only
+      -- repeat the parent's.
+      let mut parent := none
+      if let some p := p? then
+        let some pe ← resolveParent envShort p isPublic isModule | return none
+        parent := some pe
       let ancestors := (parent.map fun pe => ancestry env pe.leanNs).getD #[]
       let mut ancestorNames : Std.HashSet Name := {}
       for a in ancestors do
@@ -1394,15 +1580,16 @@ def elabEnvironment (doc? : Option (TSyntax ``Lean.Parser.Command.docComment))
         for ab in a.abbrevs do ancestorNames := ancestorNames.insert ab.envName
       let parentShort := parent.map fun pe =>
         Name.mkSimple ("to" ++ (pe.leanNs.componentsRev.head?.getD `P).toString (escape := false))
-      let col ← collect envShort ancestorNames (reservedLean parentShort) ds
+      let reserved := reservedLean parentShort
+      let col ← collect envShort ancestorNames reserved ds
       let namespaces := namespacesOf (ancestorNames.toArray ++ col.declared.keys.toArray)
       let opens ← resolveOpens namespaces col.opens
       let res ← resolve { envNs, opens } ancestors col.items
       if res.stages.isEmpty then
         err kw "an environment declares at least one type, datatype or instruction"
-      return some (parent, ancestors, res) : CheckM _).run false
+      return some (parent, ancestors, res, reserved, col) : CheckM _).run false
   if failed then return
-  let some (parent, ancestors, res) := res? | return
+  let some (parent, ancestors, res, reserved, col) := res? | return
   let mut inherited : Std.HashMap Name TypeInfo := {}
   for a in ancestors do
     for t in a.types do inherited := inherited.insert t.envName t
@@ -1416,19 +1603,10 @@ def elabEnvironment (doc? : Option (TSyntax ``Lean.Parser.Command.docComment))
   let cx : EmitCtx :=
     { envNs, envShort, parent, vis?, expose := isPublic && isModule, m := res.stages.size,
       ownTypes := res.own, inherited, parentNames, allNames := names ++ parentNames,
+      lineage := #[envNs] ++ ancestors.map (·.leanNs),
       parentKeys, hId }
-  let cmds ← emitCommands cx res.stages res.abbrevs doc?
-  let errorsBefore := (← get).messages.toList.filter (·.severity == .error) |>.length
-  withRef kw do
-    elabCommand (← `(command| namespace $(mkIdent envShort)))
-    for c in cmds do elabCommand c
-    elabCommand (← `(command| end $(mkIdent envShort)))
-  let errorsAfter := (← get).messages.toList.filter (·.severity == .error) |>.length
-  if errorsAfter > errorsBefore then
-    logErrorAt kw "internal error: the declarations `environment` generated do not \
-      elaborate; this is a bug in the elaborator, not in the block"
-    return
-  -- Record the environment for its children.
+  -- Record the environment for its children.  If
+  -- the generated declarations fail, the record is marked failed below.
   let mut types : Array TypeInfo := #[]
   let mut ops : Array OpInfo := #[]
   for s in res.stages do
@@ -1448,7 +1626,25 @@ def elabEnvironment (doc? : Option (TSyntax ``Lean.Parser.Command.docComment))
   let entry : EnvEntry :=
     { leanNs := envNs, isPublic, parent := parent.map (·.leanNs), types,
       abbrevs := res.abbrevs.map (·.2), ops, names, order := res.stages.flatMap stageNames }
+  -- A name the block declares that Lean already has is the block's mistake: it generates
+  -- nothing, and its children report it.
+  let ((), clash) ← (checkFree envNs envShort e reserved col).run false
+  if clash then
+    modifyEnv (envEntries.addEntry · { entry with failed := true })
+    return
   modifyEnv (envEntries.addEntry · entry)
+  let cmds ← emitCommands cx res.stages res.abbrevs doc?
+  let errorsBefore := (← get).messages.toList.filter (·.severity == .error) |>.length
+  withRef kw do
+    elabCommand (← `(command| namespace $(mkIdent envShort)))
+    for c in cmds do elabCommand c
+    elabCommand (← `(command| end $(mkIdent envShort)))
+  let errorsAfter := (← get).messages.toList.filter (·.severity == .error) |>.length
+  if errorsAfter > errorsBefore then
+    -- A child reports this environment's failure, not what it lacks.
+    modifyEnv (envEntries.addEntry · { entry with failed := true })
+    logErrorAt kw "internal error: the declarations `environment` generated do not \
+      elaborate; this is a bug in the elaborator, not in the block"
 
 elab_rules : command
   | `($[$doc?:docComment]? $[$vis?:visibility]? environment%$kw $e:ident $[extends $p?:ident]?

@@ -19,8 +19,8 @@ set_option autoImplicit false
 protected block finished; and one instruction per Python operation.  In every `e` with
 `Py.env ⊑ e`:
 
-* `Py.Value.ty`, `Py.Completion.ty`, and the abbreviations `Py.raising.ty a`, `Py.failing.ty`
-  and `Py.cell.ty`;
+* the handles `Py.Value`, `Py.Completion`, and the abbreviations `Py.raising a`, `Py.failing`
+  and `Py.cell`, its types, so the builder writes `Py.raising Base.Unit`;
 * `Py.o.sig : InsnSig e` and `Py.o : InsnRef e Py.o.sig`, for each operation `o`;
 * `Py.Completion.c.sig` and `Py.Completion.c`, for each constructor `c`, and
   `Py.Completion.case`, the terminal operation a dispatch applies;

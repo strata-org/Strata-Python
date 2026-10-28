@@ -28,15 +28,15 @@ one per type parameter of its signature.  `type` is the application's result typ
 terminal instruction; it does not constrain the arguments, and is there for inference.
 
 * `ta[e₁, e₂, …]` writes the arguments.  Each element is elaborated at its parameter's kind: a
-  type, or a list of types, written `[t₁, t₂, …]` or given as a `TypeList`.  A bare type name
-  `X` stands for `X.ty`.
+  type, or a list of types, written `[t₁, t₂, …]` or given as a `TypeList`.
 * `infer_type_args`, the builder's default, infers them from the result type, by matching the
   signature's result type against `type`.  A list literal in it may splice one list parameter
   among other elements: those match the caller's elements at either end, and the parameter
   binds the run between them.  For a `KindedTypeArgsFor` goal, parameters that do not occur in
   the result, those of a terminal instruction, and those of a literal that splices two lists,
   must be written with `ta[…]`; for the builder's `TypeArgsOf`, the first two are left to the
-  builder (below).
+  builder (below), unless a parameter occurs in no operand's type either, which is an error
+  when the code is compiled.
 * `KindedTypeArgs.check?` checks arguments given as data, an array of `TypeArg`s.
 
 The builder takes an application's type arguments as a `TypeArgsOf r type`: `given`, written
@@ -203,8 +203,11 @@ def inferPairs (isig : InsnSig env) (result? : Option (TypeExpr env))
 
 /-- The type arguments that give an application of `isig` the operands' types `operands` and,
 if given, the result type `result?`, or why there are none or several.  The arguments are
-found by matching (`TypeExpr.Raw.matchAll`), so they are the only ones on the parameters they
-fix (`matchAll_complete`); each is then checked. -/
+found by matching (`TypeExpr.Raw.matchAll`).  For any signature, arguments it finds are the
+only ones on the parameters they fix, and otherwise it reports an ambiguity or that none exist
+(`matchAll_complete`).  For a signature that splices at most one list per literal, as every
+one the `environment` command declares does, it never reports an ambiguity
+(`matchAll_complete_oneSplice`).  Each argument is then checked. -/
 def inferTypeArgs? (isig : InsnSig env) (result? : Option (TypeExpr env))
     (operands : Array (TypeExpr env)) : Except InferError (TypeArgs env isig.scope) := do
   let some pts := isig.inferPairs result? operands | throw .mismatch
@@ -274,20 +277,6 @@ def elabStrict (stx : Term) (expected : Expr) : TermElabM Expr :=
     synthesizeSyntheticMVarsNoPostponing
     instantiateMVars e
 
-/-- Elaborate `stx` against `expected`, a `TypeExpr`.  If it fails and `stx` is an identifier
-`X`, elaborate `X.ty`. -/
-def elabType (stx : Term) (expected : Expr) : TermElabM Expr := do
-  let s ← saveState
-  try elabStrict stx expected
-  catch ex =>
-    let `($id:ident) := stx | throw ex
-    let failed ← saveState
-    s.restore
-    try elabStrict (mkIdentFrom id (id.getId ++ `ty)) expected
-    catch _ =>
-      failed.restore
-      throw ex
-
 /-- Whether `stx` elaborates with `elab`, leaving no trace. -/
 def elaboratesAs (act : TermElabM Expr) : TermElabM Bool := do
   let s ← saveState
@@ -315,18 +304,21 @@ def elabArg (who? : Option Expr) (env scope : Expr) (i : Nat) (isList : Bool) (s
   let s ← saveState
   if !isList then
     if literal?.isSome then return ← wrong true
-    try elabType stx tyT
+    try elabStrict stx tyT
     catch ex =>
       s.restore
       if ← elaboratesAs (elabStrict stx listT) then wrong true else throw ex
   else if let some ts := literal? then
-    let ts ← ts.mapM (elabType · tyT)
-    mkAppM ``TypeList.ofTypes #[← mkArrayLit tyT ts.toList]
+    -- The literal of the types, as a handle and a generated signature write it.
+    let ts ← ts.mapM (elabStrict · tyT)
+    let elemT ← mkAppOptM ``TypeList.Elem #[none, env, scope]
+    let es ← ts.mapM fun t => mkAppOptM ``TypeList.Elem.ty #[none, env, scope, some t]
+    mkAppOptM ``TypeList.lit #[none, env, scope, ← mkArrayLit elemT es.toList]
   else
     try elabStrict stx listT
     catch ex =>
       s.restore
-      if ← elaboratesAs (elabType stx tyT) then wrong false else throw ex
+      if ← elaboratesAs (elabStrict stx tyT) then wrong false else throw ex
 
 /-- The chain of arguments `as`, of kinds `ks`. -/
 def chain (env scope : Expr) : List (Bool × Expr) → MetaM Expr
@@ -408,7 +400,7 @@ def listVar? (l : Expr) : MetaM (Option Expr) := do
 /-- The elements of `l`, if it reduces to a literal: `TypeList.lit`, `TypeList.var`, which is
 `[*j]`, `TypeList.ofTypes`, whose elements are its types, and `l₁ ++ l₂` (`TypeExpr.append`)
 of two of them, whose elements are theirs one after the other (`TypeExpr.lit_append_lit`), as an
-abbreviation's `n.ty` builds its lists. -/
+abbreviation's handle builds its lists from a `TypeList` argument. -/
 partial def litElems? (l : Expr) : MetaM (Option (List Expr)) := do
   let l ← whnfCore l.headBeta
   match_expr l with
@@ -434,21 +426,14 @@ where
     let some ys ← litElems? b | return none
     return some (xs ++ ys)
 
-/-- The list of the elements `es`, in the environment and scope of the list `l`: `ofTypes` of
-their types if each is a type, as `ta[…]` writes it, and their literal otherwise. -/
+/-- The list of the elements `es`, in the environment and scope of the list `l`: their literal,
+as `ta[…]` and a handle write it. -/
 def listOf (l : Expr) (es : List Expr) : MetaM Expr := do
   let ty ← whnfR (← inferType l)
   let_expr TypeExpr α env scope _ := ty
     | throwError "infer_type_args: {l} is not a list of types"
-  let types := es.filterMap fun e => match_expr e with
-    | TypeList.Elem.ty _ _ _ t => some t
-    | _ => none
-  if types.length == es.length then
-    let tyT ← mkAppOptM ``TypeExpr #[α, env, scope, mkConst ``Kind.type]
-    mkAppOptM ``TypeList.ofTypes #[α, env, scope, ← mkArrayLit tyT types]
-  else
-    let elemT ← mkAppOptM ``TypeList.Elem #[α, env, scope]
-    mkAppOptM ``TypeList.lit #[α, env, scope, ← mkArrayLit elemT es]
+  let elemT ← mkAppOptM ``TypeList.Elem #[α, env, scope]
+  mkAppOptM ``TypeList.lit #[α, env, scope, ← mkArrayLit elemT es]
 
 mutual
 
@@ -457,7 +442,9 @@ mutual
 instruction, for the error a literal with two splices gives. -/
 partial def matchTy (who : MessageData) (pat tgt : Expr) :
     StateT (Array (Option Expr)) MetaM Bool := do
-  let pat := pat.headBeta
+  -- A handle in a hand-written signature unfolds, as abbreviations do, to its type's
+  -- `Internal.T.ty`, which a generated signature writes.
+  let pat ← whnfR pat
   let pat := (← litOfTypes? pat).getD pat
   if let some j ← listVar? pat then return ← bindVar j tgt
   if let some ok ← matchLit? who pat tgt then return ok
@@ -536,63 +523,153 @@ def paramNames (isig : Expr) : MetaM (List String) := do
     | .lit (.strVal s) => return s
     | _ => return "?"
 
-/-- Infer the type arguments the goal `KindedTypeArgsFor r type` asks for: `.ok` the
-arguments, or `.error` why the result type does not fix them all.  A result type that does not
-match, or is ambiguous, is an exception. -/
-def inferArgsCore (goal : Expr) : MetaM (Except MessageData Expr) := do
-  let goal ← instantiateMVars goal
-  let some (r, isig, type) := match_expr goal with
+/-- What a signature's result type fixes of its type arguments. -/
+private inductive ResultInfo where
+  /-- The kinds of its type parameters do not reduce to a list. -/
+  | unknownKinds
+  /-- It fixes them all, as the arguments `args`. -/
+  | fixes (args : Expr)
+  /-- There is no result type to infer its `n` arguments from: the signature is `terminal`, or
+  the goal gives none. -/
+  | noResult (n : Nat) (terminal : Bool)
+  /-- The result type `pat` leaves the parameters `unfixed` unfixed. -/
+  | leaves (pat : Expr) (unfixed : List Nat)
+
+/-- The application `r`, signature `isig` and result type `type` of the goal
+`KindedTypeArgsFor r type`. -/
+private def argsGoal (goal : Expr) : MetaM (Expr × Expr × Expr) := do
+  let some parts := match_expr goal with
       | KindedTypeArgsFor _ _ isig r type => some (r, isig, type)
       | _ => none
     | throwError "infer_type_args: the goal is not the type arguments of an application"
+  return parts
+
+/-- What the result type fixes of the type arguments the goal `KindedTypeArgsFor r type` asks
+for.  A result type that does not match, or is ambiguous, is an exception. -/
+private def resultInfo (goal : Expr) : MetaM ResultInfo := do
+  let goal ← instantiateMVars goal
+  let (r, isig, type) ← argsGoal goal
   let unfolded ← whnfR goal
   let some (env, scope, ks) ← match_expr unfolded with
       | KindedTypeArgs _ env scope ks => pure (some (env, scope, ks))
       | _ => pure none
     | throwError "infer_type_args: the goal is not the type arguments of an application"
-  let some kinds ← kindsOf? ks
-    | return .error m!"cannot infer the type arguments of {r}: the kinds of its type parameters \
-        do not reduce to a list; pass them with `(typeArgs := ta[…])`"
-  if kinds.isEmpty then return .ok (← chain env scope [])
-  let hint := "pass them with `(typeArgs := ta[…])`"
+  let some kinds ← kindsOf? ks | return .unknownKinds
+  if kinds.isEmpty then return .fixes (← chain env scope [])
   let ret ← whnf (← mkAppM ``InsnSig.returnType #[isig])
   let some pat := match_expr ret with
       | Option.some _ p => some p
       | _ => none
-    | return .error m!"cannot infer the type arguments of {r}: it is terminal, with no result \
-        type to infer them from; {hint}"
+    | return .noResult kinds.length true
   let some tgt := match_expr (← whnf type) with
       | Option.some _ t => some t
       | _ => none
-    | return .error m!"cannot infer the type arguments of {r}: no result type is given; {hint}"
+    | return .noResult kinds.length false
   let (ok, bs) ← (matchTy m!"{r}" pat tgt).run (Array.replicate kinds.length none)
   unless ok do
     throwError "cannot infer the type arguments of {r}: its result type\
-      {indentExpr (← forMessage pat)}\ndoes not match{indentExpr (← forMessage tgt)}\n{hint}"
-  let names ← paramNames isig
-  let missing := (names.zip bs.toList).filterMap fun (n, b) => if b.isNone then some n else none
-  unless missing.isEmpty do
-    let missing := ", ".intercalate (missing.map (s!"`{·}`"))
-    return .error m!"cannot infer type argument(s) {missing} of {r}: they do not occur in its \
-      result type{indentExpr (← forMessage pat)}\n{hint}"
-  return .ok (← chain env scope (kinds.zip (bs.toList.filterMap id)))
+      {indentExpr (← forMessage pat)}\ndoes not match{indentExpr (← forMessage tgt)}\n\
+      pass them with `(typeArgs := ta[…])`"
+  let unfixed := (List.range bs.size).filter fun i => (bs[i]?.join).isNone
+  unless unfixed.isEmpty do return .leaves pat unfixed
+  return .fixes (← chain env scope (kinds.zip (bs.toList.filterMap id)))
 
-/-- `inferArgsCore`, failing where the result type does not fix the arguments. -/
+/-- The parameters the result type leaves unfixed: none if their kinds are unknown. -/
+private def ResultInfo.unfixed : ResultInfo → List Nat
+  | .unknownKinds | .fixes _ => []
+  | .noResult n _ => List.range n
+  | .leaves _ unfixed => unfixed
+
+/-- Why the result type does not fix the type arguments of `r`, of the signature `isig`. -/
+private def ResultInfo.explain (r isig : Expr) : ResultInfo → MetaM MessageData
+  | .unknownKinds => return m!"cannot infer the type arguments of {r}: the kinds of its type \
+      parameters do not reduce to a list; pass them with `(typeArgs := ta[…])`"
+  | .fixes _ => return m!"the result type fixes the type arguments of {r}"
+  | .noResult _ true => return m!"cannot infer the type arguments of {r}: it is terminal, with \
+      no result type to infer them from; pass them with `(typeArgs := ta[…])`"
+  | .noResult _ false => return m!"cannot infer the type arguments of {r}: no result type is \
+      given; pass them with `(typeArgs := ta[…])`"
+  | .leaves pat unfixed => do
+    let names ← paramNames isig
+    let missing := ", ".intercalate (unfixed.map fun i => s!"`{names.getD i "?"}`")
+    return m!"cannot infer type argument(s) {missing} of {r}: they do not occur in its result \
+      type{indentExpr (← forMessage pat)}\npass them with `(typeArgs := ta[…])`"
+
+/-- Infer the type arguments the goal `KindedTypeArgsFor r type` asks for from the result type,
+failing where it does not fix them all. -/
 def inferArgs (goal : Expr) : MetaM Expr := do
-  match ← inferArgsCore goal with
-  | .ok e => return e
-  | .error msg => throwError msg
+  let (r, isig, _) ← argsGoal (← instantiateMVars goal)
+  match ← resultInfo goal with
+  | .fixes e => return e
+  | info => throwError (← info.explain r isig)
+
+/-- The variables the type expression or argument `e` mentions, if it reduces to variables,
+applications and list literals: `none` if a part does not, such as a definition whose body is
+not exposed. -/
+partial def varsOf? (e : Expr) : MetaM (Option (List Nat)) := do
+  let e ← whnfR e.headBeta
+  let all (es : List Expr) : MetaM (Option (List Nat)) := do
+    let mut out := []
+    for x in es do
+      let some vs ← varsOf? x | return none
+      out := out ++ vs
+    return some out
+  match_expr e with
+  | TypeExpr.var _ _ _ i _ => return (← (evalNat (← whnf i)).run).map ([·])
+  | TypeList.Elem.splice _ _ _ j _ => return (← (evalNat (← whnf j)).run).map ([·])
+  | TypeList.Elem.ty _ _ _ t => varsOf? t
+  | TypeArg.mk _ _ _ _ v => varsOf? v
+  | TypeExpr.app _ _ _ _ _ args _ =>
+    let some xs ← vecElems? args | return none
+    all xs
+  | TypeExpr.appK _ _ _ _ _ args _ =>
+    let some xs ← vecElems? args | return none
+    all xs
+  | _ =>
+    if e.isAppOf ``TypeExpr.carry then
+      let some inner := e.getAppArgs.back? | return none
+      return ← varsOf? inner
+    if let some es ← litElems? e then return ← all es
+    match ← unfoldDefinition? e with
+    | some e₁ => varsOf? e₁
+    | none => return none
+
+/-- The variables the operands' types of the signature `isig` mention, its variadic's
+included, if each reduces (`varsOf?`). -/
+def operandVars? (isig : Expr) : MetaM (Option (List Nat)) := do
+  let some ps ← listElems? (← mkAppM ``Array.toList #[← mkAppM ``InsnSig.argTypes #[isig]])
+    | return none
+  let mut out := []
+  for p in ps do
+    let some vs ← varsOf? (← mkAppM ``Param.type #[p]) | return none
+    out := out ++ vs
+  match_expr ← whnf (← mkAppM ``InsnSig.variadic #[isig]) with
+  | Option.none _ => return some out
+  | Option.some _ p =>
+    let some vs ← varsOf? (← mkAppM ``Param.type #[p]) | return none
+    return some (out ++ vs)
+  | _ => return none
 
 /-- The type arguments a goal asks for: inferred from the result type for
 `KindedTypeArgsFor r type`; for `TypeArgsOf r type`, `given` those, or `infer` where the result
-type does not fix them all. -/
+type does not fix them all and the operands' types may.  A parameter that occurs in no
+operand's type either, when those types reduce, is an error here, as the builder would report
+it when it runs. -/
 def inferGoal (goal : Expr) : MetaM Expr := do
   let goal ← instantiateMVars goal
   match_expr goal with
   | TypeArgsOf α env isig r type =>
-    match ← inferArgsCore (← mkAppOptM ``KindedTypeArgsFor #[α, env, isig, r, type]) with
-    | .ok e => mkAppOptM ``TypeArgsOf.given #[α, env, isig, r, type, e]
-    | .error _ => mkAppOptM ``TypeArgsOf.infer #[α, env, isig, r, type]
+    match ← resultInfo (← mkAppOptM ``KindedTypeArgsFor #[α, env, isig, r, type]) with
+    | .fixes e => mkAppOptM ``TypeArgsOf.given #[α, env, isig, r, type, e]
+    | info =>
+      if let some ops ← operandVars? isig then
+        let nowhere := info.unfixed.filter (!ops.contains ·)
+        unless nowhere.isEmpty do
+          let names ← paramNames isig
+          let ps := ", ".intercalate (nowhere.map fun i => s!"`{names.getD i "?"}`")
+          throwError "cannot infer type argument(s) {ps} of {r}: they occur in no operand's \
+            type and not in its result type; pass them with `(typeArgs := ta[…])`"
+      mkAppOptM ``TypeArgsOf.infer #[α, env, isig, r, type]
   | _ => inferArgs goal
 
 end TypeArgElab

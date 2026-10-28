@@ -6,10 +6,12 @@
 module
 public import StrataMantle.WF
 public import StrataMantle.Build
-public import StrataMantle.Env.Refine
+public import StrataMantle.Env.Handle
 public import StrataMantleTest.DSLTest
 import StrataMantle.Env.WF
 import StrataMantle.DSL
+-- `Env.add?` is private: a test below adds a declaration that the DSL would reject.
+import all StrataMantle.Env
 -- The matcher, inference and the builder run as compiled code below.
 meta import StrataMantle.Build
 meta import StrataMantle.Env.WF
@@ -70,6 +72,12 @@ private def failure (r : Except MatchError Subst) : Option MatchError :=
 #guard found (solve #[.list, .type] [(fnR #[.var 0, .var 1] intR, fnR #[intR, boolR] intR)]) ==
   some #[some (.list #[intR]), some boolR]
 
+-- One splice in each literal: a `OneSplice` pattern, which matching always solves or rejects
+-- (`matchAll_complete_oneSplice`).  Two splices are not.
+#guard oneSplice #[.type, .list] (fnR #[.var 0, .var 1] intR)
+#guard oneSplice #[.list, .list] (fnR #[.var 0] (fnR #[.var 1] intR))
+#guard !oneSplice #[.list, .list] (fnR #[.var 0, .var 1] intR)
+
 -- Two splices are ambiguous, unless an earlier pair fixes one of them.
 #guard failure (solve #[.list, .list] [(fnR #[.var 0, .var 1] intR, fnR #[intR, boolR] intR)]) ==
   some (.ambiguous [0, 1])
@@ -77,6 +85,16 @@ private def failure (r : Except MatchError Subst) : Option MatchError :=
     [(fnR #[.var 0] intR, fnR #[intR] intR),
      (fnR #[.var 0, .var 1] intR, fnR #[intR, boolR] intR)]) ==
   some #[some (.list #[intR]), some (.list #[boolR])]
+
+-- Environment well-formedness does not ask for one splice per literal: `Base.env` accepts
+-- `insn two [as : list, bs : list] (f : Fn [*as, *bs] Int) : Int`.  Matching its operand's
+-- type against `Fn [] Int` reports an ambiguity, as `matchAll_complete` allows for any pattern.
+private def twoDecl : InsnDecl.Raw Unit :=
+  { ann := (), name := bn "two", typeParams := #[⟨"as", .list⟩, ⟨"bs", .list⟩]
+    argTypes := #[⟨"f", fnR #[.var 0, .var 1] intR⟩], returnType := some intR }
+#guard (Base.env.add? (.insn twoDecl)).isSome
+#guard failure (solve #[.list, .list] [(fnR #[.var 0, .var 1] intR, fnR #[] intR)]) ==
+  some (.ambiguous [0, 1])
 
 -- A variable used twice binds once and must agree.
 #guard found (solve #[.type] [(fnR #[.var 0] (.var 0), fnR #[intR] intR)]) ==
@@ -104,10 +122,10 @@ private environment Ops extends Fns where
   insn phantom [a] (x : Int) : Int
   end ops
 
-private def intT : TypeExpr Ops.env := Base.Int.ty
-private def boolT : TypeExpr Ops.env := Base.Bool.ty
+private def intT : TypeExpr Ops.env := Base.Int
+private def boolT : TypeExpr Ops.env := Base.Bool
 private def fnT (as : Array (TypeExpr Ops.env)) (r : TypeExpr Ops.env) : TypeExpr Ops.env :=
-  Base.Fn.ty (.ofTypes as) r
+  Base.Fn (TypeList.ofTypes as) r
 
 /-- The arguments `inferTypeArgs?` gives an application of `isig`, if any. -/
 private def inferred {isig : InsnSig Ops.env} (_r : InsnRef Ops.env isig)
@@ -135,8 +153,8 @@ private def notInferred {isig : InsnSig Ops.env} (_r : InsnRef Ops.env isig)
   some "cannot infer the type arguments of it: the types of its operands and result do not fit its signature"
 
 -- `refSet`'s cell type gives `a`, and `Except.case`'s scrutinee gives `e` and `a`.
-#guard inferred Base.refSet (some Base.Unit.ty) #[Base.Ref.ty intT, intT] == some #[.ty intT]
-#guard inferred Base.Except.case none #[Base.Except.ty boolT intT] == some #[.ty boolT, .ty intT]
+#guard inferred Base.refSet (some Base.Unit) #[Base.Ref intT, intT] == some #[.ty intT]
+#guard inferred Base.Except.case none #[Base.Except boolT intT] == some #[.ty boolT, .ty intT]
 
 -- What nothing fixes is reported by name.
 #guard notInferred Ops.phantom (some intT) #[intT] ==
@@ -186,11 +204,24 @@ private def phantom (ta : TypeArgsOf (Ops.phantom (e := Ops.env)) (some intT)) :
 #guard misuses (phantom .infer) ==
   #["cannot infer type argument(s) `a` of ops.phantom: they occur in no operand's type and not in its result type; pass them with `(typeArgs := ta[…])`"]
 
+-- With no `ta[…]`, the same call does not compile: `a` occurs in no operand's type of the
+-- signature, so the compiler can tell, beside the call with `ta[…]`, which compiles.
+/--
+error: could not synthesize default value for parameter 'typeArgs' using tactics
+---
+error: cannot infer type argument(s) `a` of Ops.phantom: they occur in no operand's type and not in its result type; pass them with `(typeArgs := ta[…])`
+-/
+#guard_msgs in
+example (x : ValId) : BuildM Ops.env Unit ValId :=
+  emitApply (.str .base "r") intT Ops.phantom #[x]
+example (x : ValId) : BuildM Ops.env Unit ValId :=
+  emitApply (.str .base "r") intT Ops.phantom #[x] (typeArgs := ta[Base.Bool])
+
 /-- `f(%e : Except Bool Int) : Int`: `Except.case` of `%e`, with no `ta[…]`, its `ok` value
 returned and its `error` replaced by `0`. -/
 private def caseOf : Built :=
   build (.str .base "f") intT () do
-    let e ← freshVal (.str .base "e") (Base.Except.ty boolT intT)
+    let e ← freshVal (.str .base "e") (Base.Except boolT intT)
     let _ ← startFreshBlock #[e] "entry"
     let ok ← freshLabel "ok"
     let err ← freshLabel "err"

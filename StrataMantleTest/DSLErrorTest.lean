@@ -38,7 +38,7 @@ example : TypeRef Grand.env 1 := Demo.Box.ref
 example : InsnRef Grand.env Base.refNew.sig := Base.refNew
 example : (Grand.peek.sig (e := Grand.env)).typeArgc = 0 := rfl
 example : Vector (TypeExpr Grand.env) (Demo.unbox.sig (e := Grand.env)).typeArgc :=
-  #v[Grand.Cell.ty]
+  #v[Grand.Cell]
 
 /-! ## A grandchild's names
 
@@ -71,7 +71,7 @@ The interface does; the stages are private to `DSLTest`. -/
 
 example : (Demo.unbox.sig (e := Demo.env)).typeArgc = 1 := rfl
 example : Vector (TypeExpr Demo.env) (Base.refNew.sig (e := Demo.env)).typeArgc :=
-  #v[Demo.Value.ty]
+  #v[Demo.Value]
 
 /-- error: Unknown identifier `Demo.Internal.s1` -/
 #guard_msgs in
@@ -492,6 +492,145 @@ public environment ErrVis extends PrivEnv where
 public environment ErrParent extends Nope where
   type B
 
+/-! ## Names Lean already has
+
+A block may not generate a Lean name that is already declared.  The error is at the
+declaration that generates it, and the block is recorded as failed: its child reports that
+once, and nothing it lacks.  Each block is beside its twin, which renames with `as` or moves
+the existing declaration. -/
+
+-- A private declaration takes a type's handle.
+def Bad.Leaf : Nat := 1
+
+/-- error: `Bad.Leaf` is already declared; rename `Leaf` with `as`, or rename the existing declaration
+-/
+#guard_msgs in
+public environment Bad extends Base where
+  namespace bad
+  type Leaf
+  end bad
+
+def OkAs.Leaf : Nat := 1
+
+/-- `Bad`, with the type's Lean name renamed and its environment name kept. -/
+public environment OkAs extends Base where
+  namespace bad
+  type LeafTy as "Leaf"
+  end bad
+
+example : OkAs.LeafTy.name = .str (.str .base "bad") "Leaf" := rfl
+
+/-- error: `Bad` did not elaborate, so `BadKid` cannot extend it; fix `Bad`'s errors first
+-/
+#guard_msgs in
+public environment BadKid extends Bad where
+  namespace badkid
+  open base bad
+  type K
+  abbrev KL := Ref Leaf
+  end badkid
+
+public environment Good extends Base where
+  namespace good
+  type Leaf
+  end good
+
+public environment GoodKid extends Good where
+  namespace goodkid
+  open base good
+  type K
+  abbrev KL := Ref Leaf
+  end goodkid
+
+example : (GoodKid.KL : TypeExpr GoodKid.env) = Base.Ref Good.Leaf := rfl
+
+-- A public declaration takes the type constructor of a type with parameters.
+public def ClashCon.Box : Nat := 1
+
+/-- error: `ClashCon.Box` is already declared; rename `Box` with `as`, or rename the existing declaration
+-/
+#guard_msgs in
+public environment ClashCon extends Base where
+  type Box (+a)
+
+public def OkCon.Box.extra : Nat := 1
+
+/-- `ClashCon`, with the existing declaration moved under the type constructor's name. -/
+public environment OkCon extends Base where
+  type Box (+a)
+
+example : OkCon.Box.extra = 1 := rfl
+
+-- A private declaration takes an instruction's signature.
+def ClashOp.peek.sig : Nat := 1
+
+/-- error: `ClashOp.peek.sig` is already declared; rename `peek` with `as`, or rename the existing declaration
+-/
+#guard_msgs in
+public environment ClashOp extends Base where
+  open base
+  insn peek (x : Int) : Int
+
+def OkOp.peek.sig : Nat := 1
+
+/-- `ClashOp`, with the instruction's Lean name renamed and its environment name kept. -/
+public environment OkOp extends Base where
+  open base
+  insn look as "peek" (x : Int) : Int
+
+example : OkOp.look.name = .str .base "peek" := rfl
+
+-- A private declaration takes the handle of an abbreviation without parameters.
+def ClashAb.IntRef.con : Nat := 1
+
+/-- error: `ClashAb.IntRef.con` is already declared; rename `IntRef` with `as`, or rename the existing declaration
+-/
+#guard_msgs in
+public environment ClashAb extends Base where
+  open base
+  type A
+  abbrev IntRef := Ref A
+
+def OkAb.IntRef.old : Nat := 1
+
+/-- `ClashAb`, with the existing declaration moved. -/
+public environment OkAb extends Base where
+  open base
+  type A
+  abbrev IntRef := Ref A
+
+example : (OkAb.IntRef : TypeExpr OkAb.env) = Base.Ref OkAb.A := rfl
+
+-- A public declaration takes a name of the environment itself.
+public def ClashEnv.nameSet : Nat := 1
+
+/-- error: `ClashEnv.nameSet` is already declared; rename the environment, or rename the existing declaration
+-/
+#guard_msgs in
+public environment ClashEnv extends Base where
+  type A
+
+public def OkEnv.nameSetOld : Nat := 1
+
+/-- `ClashEnv`, with the existing declaration moved. -/
+public environment OkEnv extends Base where
+  type A
+
+-- A private declaration takes the namespace of the environment's internals.
+def ClashNs.Internal.x : Nat := 1
+
+/-- error: `ClashNs.Internal` is already declared; rename the environment, or rename the existing declaration
+-/
+#guard_msgs in
+public environment ClashNs extends Base where
+  type A
+
+def OkNs.Internals.x : Nat := 1
+
+/-- `ClashNs`, with the existing declaration moved. -/
+public environment OkNs extends Base where
+  type A
+
 /-- error: `ErrReserved.env` is reserved for the environment; rename one with `as`
 ---
 error: `ErrReserved.names` is reserved for the environment; rename one with `as`
@@ -509,8 +648,6 @@ public environment ErrReserved extends Base where
 ---
 error: `ErrCase.T.ref` is already generated for `x.T`; rename one with `as`
 ---
-error: `ErrCase.T.toRaw_ty` is already generated for `x.T`; rename one with `as`
----
 error: `x.U.case` is already declared
 -/
 #guard_msgs in
@@ -519,7 +656,6 @@ public environment ErrCase extends Base where
   data T where
     | «case»
     | ref
-    | toRaw_ty
   data U where
     | u
   end x
@@ -548,14 +684,19 @@ public environment ErrResult extends Base where
   terminal insn f : base.Unit
   insn g
 
-/-- A constructor may be named `dataSig` or `dataRef`. -/
+/-- A constructor may be named `dataSig` or `dataRef`, or `ty` or `toRaw_ty`, which the type's
+`Internal.T.ty` and `Internal.T.toRaw_ty` do not take. -/
 public environment OkCtorNames extends Base where
   namespace x
   data T where
     | dataSig
     | dataRef
+    | ty
+    | toRaw_ty
 
 example : OkCtorNames.T.dataSig.name = .str (.str .base "x") "dataSig" := rfl
-example : (OkCtorNames.T.case.sig (e := OkCtorNames.env)).succs.size = 2 := rfl
+example : OkCtorNames.T.ty.name = .str (.str .base "x") "ty" := rfl
+example : OkCtorNames.T.toRaw_ty.name = .str (.str .base "x") "toRaw_ty" := rfl
+example : (OkCtorNames.T.case.sig (e := OkCtorNames.env)).succs.size = 4 := rfl
 
 end Strata.Mantle.DSLErrorTest

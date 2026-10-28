@@ -12,7 +12,7 @@ public import StrataMantle.DSL.Elab
 
 Declares a Mantle environment, a few lines per declaration, and generates the `Env` value, its
 references and the proofs that it is well formed.  A module that declares an environment
-imports this one, `public import StrataMantle.Env.Refine` and `import StrataMantle.Env.WF`;
+imports this one, `public import StrataMantle.Env.Handle` and `import StrataMantle.Env.WF`;
 a module that only uses one imports neither this module nor `Env.WF`.
 
 ```lean
@@ -114,10 +114,12 @@ and in every refinement of it:
   in the stage that declares it.
 * `toP`, the instance `P.env ⊑ e` (`Demo.toBase`).
 * For a `type` or `data` `T` with `n` parameters: `T.name`, its environment name; `T.ref`, a
-  `TypeRef e n`; `T.ty`, a `TypeExpr e s` taking `n` arguments, a `TypeList e s` for a list
-  parameter and a `TypeExpr e s` for any other; the `@[simp]` theorems
-  `T.name_ref` and `T.decl_ref`, its name and declaration; and `T.toRaw_ty`, the raw form of
-  `T.ty` applied.  A child's proofs use the theorems for the types it inherits.
+  `TypeRef e n`; and the `@[simp]` theorems `T.name_ref` and `T.decl_ref`, its name and
+  declaration.  What its handle applies, `Internal.T.ty`, a `TypeExpr e s` taking `n`
+  arguments, a `TypeList e s` for a list parameter and a `TypeExpr e s` for any other, and its
+  raw form `Internal.T.toRaw_ty`, are public, since generated signatures, children and handles
+  are written with them, but are not for users.  A child's proofs use the theorems for the
+  types it inherits.
 * For a `data` `T (a …)` with constructors `c₁ (x : τ) …`: the terminal instruction
   `T.case [a …] (scrutinee : T a …) (^c₁ (x : τ)) …`, environment name `T`'s followed by
   `case` (`demo.Box.case`), with one successor per constructor, in declaration order,
@@ -127,24 +129,30 @@ and in every refinement of it:
 * For a constructor `c` of `T`: `T.c.name`; `T.c.sig : InsnSig e`, with `T`'s parameters as
   type parameters, the fields as arguments and `T a …` as the result; and
   `T.c : InsnRef e T.c.sig`.
-* For an `abbrev` `n`: `n.ty`, taking its parameters, a `TypeList` for a list parameter, which
-  it splices in with `++`.
+* Handles, after everything else (`StrataMantle.Env.Handle`), the one way to write a type: for
+  a type `T` without parameters, `T : TypeExpr e s`, its type expression in every `e` that
+  refines its environment, and `T.con : TypeCon []`, its declaration; for one whose parameters
+  have kinds `ks`, `T : TypeCon ks`, which applies to type expressions, a `List (TypeExpr e s)`
+  or a `TypeList e s` for a list parameter; for an `abbrev` `n`, the same, applying its body's
+  handles.  So `Base.Except Base.Int Py.Value` is a `TypeExpr e` in every `e` that refines
+  `Py.env`.
 * For an `insn` `o`: `o.name`, `o.sig : InsnSig e` and `o : InsnRef e o.sig`.  A list
   parameter is a `TypeList.var` in `o.sig`, and a list-typed variadic a `Variadic.spread`.
 
-A declaration's docstring goes on `T.ref`, `T.c`, `n.ty` or `o`.  The interface's own
-implicit binders are named `e`, the refinement, and `s`, the scope of `T.ty` and `n.ty`, so a
-caller can pin them: `(Demo.unbox.sig (e := Demo.env))`.  A parameter of `T.ty` or `n.ty`
-named `e` or `s` is renamed to a fresh name, primed past the other parameters
-(`Base.Except.ty e' a`; `type T (e) (e')` gives `T.ty e'' e'`).  The `RefinedBy` instance
-binder is anonymous.
+A declaration's docstring goes on `T.ref` and `T`'s handle, `T.c`, `n`'s handle or `o`.  The
+interface's own implicit binders are named `e`, the refinement, and `s`, the scope of
+`Internal.T.ty`, so a caller can pin them: `(Demo.unbox.sig (e := Demo.env))`.  A parameter of
+`Internal.T.ty` named `e` or `s` is renamed to a fresh name, primed past the other parameters
+(`Base.Internal.Except.ty e' a`; `type T (e) (e')` gives `Internal.T.ty e'' e'`).  The
+`RefinedBy` instance binder is anonymous.
 
 The interface has the command's visibility.  Everything else, the stages that build `env`
-and their lemmas, is `private`, in `E.Internal`.  In a public environment in a `module`:
+and their lemmas, is `private`, in `E.Internal`, beside the public `Internal.T.ty` and
+`Internal.T.toRaw_ty`.  In a public environment in a `module`:
 
-* the names (`abbrev`s), `names`, `nameSet`, `T.ty`, `n.ty`, `o.sig`, `T.c.sig` and
-  `T.case.sig` are `@[expose]`, so `rfl`, `decide` and `decide +kernel` unfold them downstream, and `#v[…]`
-  checks against `o.sig.typeArgc`;
+* the names (`abbrev`s), `names`, `nameSet`, `Internal.T.ty`, `o.sig`, `T.c.sig`,
+  `T.case.sig` and the handles are `@[expose]`, so `rfl`, `decide` and `decide +kernel`
+  unfold them downstream, and `#v[…]` checks against `o.sig.typeArgc`;
 * `env`, `T.ref`, `T.c`, `T.case`, `o` and the theorems are not.  `T.name_ref` and
   `T.decl_ref` stand in for unfolding `T.ref`.  A `decide +kernel` that evaluates `env`
   itself, such as `Func.WF`, needs `import all` of the declaring module and of Mantle's
@@ -158,30 +166,43 @@ nested forty deep elaborates as a flat one does.
 
 ## Checks
 
-Every mistake is reported at its syntax, all of them in one pass, and nothing is emitted if
-there is one.  The checks:
+The environment the command builds is well formed, in the sense of "What well-formedness
+requires" in `Env/WF.lean`: every name is declared once, types are declared before they are
+used, applications have their parameters' arity and kinds, binders have distinct names, and
+datatypes recurse positively.  The command checks these conditions before it emits anything,
+so that each mistake is reported at its syntax, with a message that names the declaration and
+the parameter involved.  It reports every mistake in one pass, and emits nothing if there is
+one.
 
-* names: an environment name declared twice, here or in an ancestor; a dotted declared name;
-  two declarations with one Lean name, or one taking a name another generates (a type `T`
-  and an instruction `T` would both define `T.name`); the reserved Lean names `env`, `names`,
-  `mem_env`, `nameSet`, `nameSet_ordered`, `mem_nameSet`, `Internal` and `toP`, and the
-  constructor names `ref`, `ty`, `name`, `name_ref`, `decl_ref`, `toRaw_ty` and `case`; a case
-  instruction's environment name declared otherwise; a constructor named as its datatype's
-  parameter or `scrutinee`, which its case instruction binds.  A clash is fixed by a new Lean
-  name and `as` for the old environment name.
-* scope: an unknown or ambiguous type, an unknown `open`ed namespace, an unmatched `end`,
-  anything but `data` in `mutual`;
-* types: an arity mismatch, a type parameter applied to arguments, a kind mismatch (a type
-  for a list parameter, or a list where a type belongs), a list inside a list, a splice of
-  anything but a list parameter, two splices in one literal, a splice outside a literal, and
-  positivity: a member of the group, or a `+` parameter, under a non-positive parameter, the
-  elements of a list literal taking its position's polarity;
-* binders: a duplicate parameter name (type parameters, arguments, the variadic, regions and
-  successors share one namespace), binders out of order, two variadics, a variadic binding
-  several names, a constructor with anything but arguments, a spread field or region
-  parameter, a spread over a type in a successor's payload, a terminal instruction with a
-  result type or another without one;
-* the block: no type, datatype or instruction; a missing `Env` or `Env.WF` import.
+A block also satisfies conditions of its own, which come from its syntax and from the Lean
+names it generates:
+
+* Lean names are distinct.  A declared name has one component.  No two declarations have one
+  Lean name, and none takes a name another generates: a type `T` and an instruction `T` would
+  both define `T.name`.  No declaration is named `env`, `names`, `mem_env`, `nameSet`,
+  `nameSet_ordered`, `mem_nameSet`, `Internal` or `toP`, which the environment defines.  No
+  constructor of `T` is named `ref`, `name`, `name_ref`, `decl_ref`, `case` or, if `T` has no
+  parameters, `con`, which `T` defines, or as a field of `T`'s handle:
+  `decl`, `kinds`, `env` or `apply`.  A new Lean name, with `as` to keep the environment name,
+  resolves a clash.
+* Names resolve.  Every name in a type resolves, by the rules above, to one type or
+  abbreviation, every `open`ed namespace exists, and every `end` closes the innermost
+  namespace, by name.  `mutual` holds only `data`.
+* Types are written as Mantle represents them.  A type parameter takes no arguments.  A splice
+  `*cs` occurs only inside a literal, and a literal holds at most one, so that matching an
+  instruction's result type finds its type arguments (`OneSplice`, in
+  `Env/TypeExprMatch.lean`).  An abbreviation's parameters have distinct names, and its body
+  satisfies the conditions on type expressions, though it declares nothing.
+* Binders fit their declaration.  An `insn`'s binders come in order: arguments, the variadic,
+  regions, then successors.  It has at most one variadic, binding one name.  A spread in a
+  successor's payload ranges over a list and binds one name, and the payload's names are
+  distinct.  A constructor takes only arguments, and neither a field nor a region parameter
+  is a spread.  An instruction has a result type exactly when it is not `terminal`.
+* The block declares at least one type, datatype or instruction, and its module imports
+  `StrataMantle.Env.Handle` publicly and `StrataMantle.Env.WF`.
+* Lean names are free.  No Lean name the block generates, `E.env` and the environment's
+  other names included, is already declared, publicly or privately.  The error is at the
+  declaration that generates the name, and a child of the block reports that it failed.
 
 If the generated code fails to elaborate anyway, that is an elaborator bug, reported as an
 internal error at `environment`.
@@ -198,9 +219,10 @@ Base.refNew.sig` in any refinement of `Demo`.  An environment has one parent.
 A child reads its parent from the record every `environment` command leaves, which crosses
 module boundaries, not by evaluating `P.env`; the record lists the names, which `mem_env`
 spells out.  It also uses the parent's `names`, `mem_env`, `nameSet`, `nameSet_ordered` and
-`mem_nameSet`, and its types' `ref`, `ty`, `name`, `name_ref`, `decl_ref` and `toRaw_ty`, so
-the parent must be at least as visible as the child: a public child cannot extend a private
-environment, and in a `module` its file `public import`s `P`'s module.  A private child needs only `import`.  Each mistake is reported at the `extends` argument.
+`mem_nameSet`, and its types' `ref`, `name`, `name_ref`, `decl_ref`, `Internal.T.ty` and
+`Internal.T.toRaw_ty`, so the parent must be at least as visible as the child: a public child
+cannot extend a private environment, and in a `module` its file `public import`s `P`'s module.
+A private child needs only `import`.  Each mistake is reported at the `extends` argument.
 
 ## Modules
 

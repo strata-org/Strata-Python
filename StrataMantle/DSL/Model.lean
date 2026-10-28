@@ -100,6 +100,9 @@ structure EnvEntry where
   names : Array Name
   /-- The same names, in the order the stages add them to `nameSet`. -/
   order : Array Name
+  /-- Whether the declarations the command generated failed to elaborate.  A child may not
+  extend such an environment. -/
+  failed : Bool := false
   deriving Inhabited, Repr
 
 /-- Every `environment` command's record, in this module and every module it imports. -/

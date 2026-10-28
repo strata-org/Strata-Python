@@ -290,7 +290,7 @@ that the module defines it.  `mkClosure` pairs the code with the cell holding `x
 functions are printed as a module. -/
 
 private def inner : Built :=
-  buildFuncTyped (Py.pn "inner") #[(cellStem "x", Py.cell.ty)] () fun args => do
+  buildFuncTyped (Py.pn "inner") #[(cellStem "x", Py.cell)] () fun args => do
     emitReturn (← readCell args[0]! (stem "x"))
 
 /-- `outer`, whose closure names `target` and captures the cell holding `x`, or `x` itself if
@@ -536,7 +536,7 @@ is defined, and the second would not see `%ns.0`. -/
 
 /-- `except KeyError as e: continue` in a function: `clear.0` has no predecessor. -/
 private def leave : Except (FailedFunc Py.env Unit Unit) {fn : Func Py.env Unit // fn.WF} :=
-  buildFuncTyped (Py.pn "leave") #[(stem "f", Py.Value.ty)] () fun ps => do
+  buildFuncTyped (Py.pn "leave") #[(stem "f", Py.Value)] () fun ps => do
     let some f := ps[0]? | return
     let catchL ← freshLabel "catch"
     let clearL ← freshLabel "clear"
@@ -587,7 +587,7 @@ private def leave : Except (FailedFunc Py.env Unit Unit) {fn : Func Py.env Unit 
 
 /-- `try: pass` / `except Exception: ...` in a class body: `catch.0` has no predecessor. -/
 private def classBody : Except (FailedFunc Py.env Unit Unit) {fn : Func Py.env Unit // fn.WF} :=
-  buildFuncTyped (Py.pn "C_body") #[(stem "args", Py.Value.ty)] () fun ps => do
+  buildFuncTyped (Py.pn "C_body") #[(stem "args", Py.Value)] () fun ps => do
     let some args := ps[0]? | return
     let ns ← emitFailing (.str .base "ns") Py.getItem #[args, ← intLit 0]
     let catchL ← freshLabel "catch"

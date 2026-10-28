@@ -13,9 +13,55 @@ set_option autoImplicit false
 /-!
 # Well-formedness of declarations and environments
 
-An environment is well formed when every type reference in every declaration
-resolves to a type declaration that appears *strictly earlier* in the environment,
-so the reference graph is acyclic by construction.
+An environment is well formed when every type reference in every declaration resolves to a
+type declaration that appears *strictly earlier* in the environment, or, in a datatype's
+payload, to a member of its group, so the reference graph is acyclic outside mutual groups.
+
+## What well-formedness requires
+
+An environment declares each name once: it is an ordered map, and every extension takes a
+proof that the names it adds are new (`Env.Raw.FreshList`).  It is well formed, `Env.Raw.WF`,
+when its declarations satisfy the conditions below; every `Env` carries a proof of them.
+
+Each type expression is well formed, `TypeExpr.WF`, against the types declared before the
+declaration that mentions it (`Env.Raw.RefBefore`):
+
+* every type it mentions is declared before it;
+* every application gives its type one argument per parameter, each of the parameter's kind:
+  a type for a type parameter, a list of types for a list parameter;
+* every variable is a parameter in scope, and a variable where a type belongs is a type
+  parameter;
+* every list is a literal, whose elements are types and list parameters spliced in, so no list
+  holds a list and only list parameters are spliced.
+
+Each declaration is well formed, `Decl.Raw.WF`:
+
+* a type's parameters have distinct names;
+* an instruction's argument types, return type and region signatures are types, and its
+  variadic's type and each entry of each successor's payload are types or lists
+  (`InsnDecl.Raw.WF`, `RegionSig.Raw.WF`);
+* the names an instruction binds, its type parameters, arguments, variadic, regions and
+  successors, are distinct, and so are each region's parameters.
+
+Each datatype group is well formed, `Env.Raw.checkGroup`:
+
+* each field of each constructor is a type, which mentions only types declared before the
+  group and the group's members (`DataGroup.checkWith`);
+* recursion is positive: under a non-positive parameter, a field's type mentions only types
+  declared before the group, and each parameter its member declares positive occurs only in
+  positive positions;
+* each member's parameters have distinct names; each constructor's fields have names distinct
+  from each other and from its member's parameters; and no constructor is named `scrutinee`
+  or as a parameter of its member, the names its member's case instruction binds
+  (`DataGroup.checkNames`);
+* each member `T` has its case instruction `T.case`, and each constructor's instruction and
+  each case instruction is the one the group derives (`Env.Raw.groupCases`,
+  `Env.Raw.checkAlias`).
+
+The typed operations of `StrataMantle.Env` state the same conditions on their inputs: a
+datatype group's, for instance, as `Env.admissible`.
+
+## Checking
 
 `checkDecl` decides the obligations of one declaration, `Env.Raw.check` those of every
 declaration in an environment, and `Env.Raw.checkAppend` those of a batch `appendList` adds.

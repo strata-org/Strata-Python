@@ -15,8 +15,11 @@ The first two passes of the elaborator.  `collect` reads the block into a model,
 environment names and rejecting duplicates; `resolve` resolves every type, checks arities,
 kinds, parameter order and positivity, derives each datatype's case instruction, and splits
 the block into stages.  A type expression is resolved first, and its kind is then
-`TypeExpr.Raw.kind`'s.  Every mistake is logged at its syntax node and the passes go on, so all of them are reported; the caller emits
-nothing if any was.
+`TypeExpr.Raw.kind`'s.  Every mistake is logged at its syntax node and the passes go on, so
+all of them are reported; the caller emits nothing if any was.
+
+The passes check the conditions of well-formedness, which `Env/WF.lean` states, and the DSL's
+own, which `DSL.lean` lists.
 -/
 
 public meta section
@@ -111,6 +114,8 @@ structure Collected where
   declared : Std.HashMap Name Syntax := {}
   /-- Lean name → environment name, for the clash check. -/
   leanNames : Std.HashMap Name Name := {}
+  /-- Each declaration's identifier and the Lean names it declares, for `checkFree`. -/
+  leanDecls : Array (Ident × List Name) := #[]
   deriving Inhabited
 
 /-! ## Pass 1: collect -/
@@ -148,10 +153,13 @@ def CollectState.ctx (s : CollectState) : Ctx :=
 def readAs (as? : Option (TSyntax `Strata.Mantle.DSL.mantleAs)) : Option String :=
   as?.map fun a => a.raw[1].isStrLit?.getD ""
 
-/-- Name a declaration: check its identifier, its environment name and its Lean name. -/
+/-- Name a declaration: check its identifier, its environment name and its Lean name.  It
+declares `generated` besides its own Lean name, and `shadowed` are names it reserves without
+declaring them. -/
 def declare (s : CollectState) (id : Ident) (as? : Option String)
     (doc? : Option (TSyntax ``Lean.Parser.Command.docComment)) (leanPrefix : Name := .anonymous)
-    (generated : List Name := []) : StateT CollectState CheckM Common := do
+    (generated : List Name := []) (shadowed : List Name := []) :
+    StateT CollectState CheckM Common := do
   let ctx := s.ctx
   let short := id.getId
   unless short.isAtomic do
@@ -171,7 +179,7 @@ def declare (s : CollectState) (id : Ident) (as? : Option String)
       rename one with `as`"
   else
     let mut clash := false
-    for g in lean :: generated do
+    for g in lean :: generated ++ shadowed do
       if let some other := st.out.leanNames[g]? then
         unless clash do
           err id s!"`{showName (envShort ++ g)}` is already generated for \
@@ -179,23 +187,32 @@ def declare (s : CollectState) (id : Ident) (as? : Option String)
         clash := true
     unless clash do
       modify fun st =>
-        let ln := (lean :: generated).foldl (fun m g => m.insert g envName) st.out.leanNames
-        { st with out := { st.out with leanNames := ln } }
+        let ln := (lean :: generated ++ shadowed).foldl (fun m g => m.insert g envName)
+          st.out.leanNames
+        let ds := st.out.leanDecls.push (id, lean :: generated)
+        { st with out := { st.out with leanNames := ln, leanDecls := ds } }
   return { ref := id, envName, lean, doc?, ctx }
 
-/-- The Lean names a type `T` generates besides its own: `T.ref`, `T.ty`, `T.name`,
-`T.name_ref`, `T.decl_ref` and `T.toRaw_ty`, and a datatype's case instruction `T.case`, with
-its `sig` and `name`.  A constructor `c` of `T` is `T.c`, so `declare` rejects each of these as
-a constructor name. -/
-def typeGenerated (lean : Name) (data : Bool := false) : List Name :=
-  [lean ++ `ref, lean ++ `ty, lean ++ `name, lean ++ `name_ref, lean ++ `decl_ref,
-    lean ++ `toRaw_ty] ++
+/-- The Lean names a type `T` declares besides its own: `T.ref`, `T.name`, `T.name_ref` and
+`T.decl_ref`, `T.con` for a type without parameters, and a datatype's case instruction `T.case`,
+with its `sig` and `name`.  A constructor `c` of `T` is `T.c`, so `declare` rejects each of
+these as a constructor name.  `Internal.T.ty` and `Internal.T.toRaw_ty` are under `Internal`,
+which the environment reserves. -/
+def typeGenerated (lean : Name) (nullary : Bool) (data : Bool := false) : List Name :=
+  [lean ++ `ref, lean ++ `name, lean ++ `name_ref, lean ++ `decl_ref] ++
+    (if nullary then [lean ++ `con] else []) ++
     if data then [lean ++ `case, lean ++ `case ++ `sig, lean ++ `case ++ `name] else []
 
-/-- The environment name of a datatype's case instruction: `case` under the datatype's. -/
-def caseName (envName : Name) : Name := Name.mkStr envName "case"
+/-- The names `T.c` would shadow on `T`'s handle, which `declare` rejects as constructor names
+too: the fields `decl`, `kinds`, `env` and `apply`. -/
+def typeShadowed (lean : Name) : List Name :=
+  [lean ++ `decl, lean ++ `kinds, lean ++ `env, lean ++ `apply]
 
-/-- The Lean names an instruction generates besides its own. -/
+/-- The environment name of a datatype's case instruction, `Strata.Mantle.Name.caseName`'s:
+`case` under the datatype's. -/
+def caseName (envName : Name) : Name := leanName (mantleName envName).caseName
+
+/-- The Lean names an instruction or a constructor generates besides its own. -/
 def opGenerated (lean : Name) : List Name := [lean ++ `sig, lean ++ `name]
 
 /-- Read the type parameters of a `type` or `data`. -/
@@ -225,7 +242,7 @@ def readCtors (ty : Common) (cs : Array (TSyntax `Strata.Mantle.DSL.mantleCtor))
     match c with
     | `(mantleCtor| | $[$doc?:docComment]? $n:ident $[$as?:mantleAs]? $bs:mantleBinder*) =>
       let cm ← declare envShort ancestorNames reserved (← get) n (readAs as?) doc?
-        (leanPrefix := ty.lean)
+        (leanPrefix := ty.lean) (generated := opGenerated (ty.lean ++ n.getId))
       out := out.push { c := cm, binders := bs }
     | _ => err c "unexpected constructor syntax"
   return out
@@ -242,12 +259,14 @@ partial def collectDecl (d : TSyntax `mantleDecl) (group? : Option (IO.Ref (Arra
   match d with
   | `(mantleDecl| $[$doc?:docComment]? type $n:ident $[$as?:mantleAs]? $ps:mantleTyParam*) =>
     let c ← declare envShort ancestorNames reserved s n (readAs as?) doc?
-      (generated := typeGenerated n.getId)
+      (generated := typeGenerated n.getId ps.isEmpty)
+      (shadowed := typeShadowed n.getId)
     modify (·.push (.type { c, params := readTyParams ps, ctors := none }))
   | `(mantleDecl| $[$doc?:docComment]? data $n:ident $[$as?:mantleAs]? $ps:mantleTyParam*
         where $cs:mantleCtor*) =>
     let c ← declare envShort ancestorNames reserved s n (readAs as?) doc?
-      (generated := typeGenerated n.getId (data := true))
+      (generated := typeGenerated n.getId ps.isEmpty (data := true))
+      (shadowed := typeShadowed n.getId)
     -- The case instruction's environment name.
     let cn := caseName c.envName
     let st ← get
@@ -263,9 +282,10 @@ partial def collectDecl (d : TSyntax `mantleDecl) (group? : Option (IO.Ref (Arra
     | none => modify (·.push (.group #[t]))
   | `(mantleDecl| $[$doc?:docComment]? abbrev $n:ident $[$as?:mantleAs]? $[( $ps* )]?
         := $body) =>
-    let c ← declare envShort ancestorNames reserved s n (readAs as?) doc?
-      (generated := [n.getId ++ `ty])
     let params := readKindedParams ((ps.getD #[]).map (·.raw))
+    -- Without parameters, the abbreviation is its type expression, and `n.con` its handle.
+    let c ← declare envShort ancestorNames reserved s n (readAs as?) doc?
+      (generated := if params.isEmpty then [n.getId ++ `con] else [])
     modify (·.push (.abbrev { c, params, body }))
   | `(mantleDecl| $[$doc?:docComment]? $[$term?:mantleTerminal]? insn $n:ident
         $[$as?:mantleAs]? $[$tps?:mantleInsnParams]? $bs:mantleBinder* $[: $ret?]?) =>
@@ -324,6 +344,25 @@ def collect (envShort : Name) (ancestorNames : Std.HashSet Name) (reserved : Lis
     (ds : Array (TSyntax `mantleDecl)) : CheckM Collected := do
   let ((), s) ← (ds.forM fun d => collectDecl envShort ancestorNames reserved d none).run {}
   return s.out
+
+/-- Check that the Lean names the block declares, under `envNs`, are free in the Lean
+environment, privately and publicly: the environment's own `reserved` names, at its
+identifier `envId`, and each declaration's, at the declaration. -/
+def checkFree (envNs envShort : Name) (envId : Ident) (reserved : List Name) (col : Collected) :
+    CheckM Unit := do
+  let env ← getEnv
+  let taken (n : Name) : Bool :=
+    env.contains (envNs ++ n) || env.contains (mkPrivateName env (envNs ++ n))
+  -- `Internal` is a namespace, which any declaration in it takes.
+  for r in reserved do
+    let used := if r == `Internal then env.isNamespace (envNs ++ r) else taken r
+    if used then
+      err envId s!"`{showName (envShort ++ r)}` is already declared; rename the environment, \
+        or rename the existing declaration"
+  for (id, names) in col.leanDecls do
+    if let some g := names.find? taken then
+      err id s!"`{showName (envShort ++ g)}` is already declared; rename \
+        `{showName id.getId}` with `as`, or rename the existing declaration"
 
 /-! ## Pass 2: resolve -/
 
@@ -677,8 +716,9 @@ def resolveOp (rc : ResolveCtx) (known : Std.HashMap Name Known) (d : OpD) :
   let some ret := ret | return none
   return some { d, args, variadic, regions, succs, ret }
 
-/-- Check a payload type of a group: a member, or a parameter declared positive, may not
-occur under a non-positive parameter.  This is what `DataTy.ok` decides. -/
+/-- Check that a payload type of a group recurses positively: under a non-positive
+parameter, it mentions no member of the group and no parameter declared positive.  This is
+what `DataTy.ok` and `DataGroup.checkWith` decide. -/
 partial def checkPositive (known : Std.HashMap Name Known) (members : Array Name)
     (pol : Array (String × Syntax × Bool × Kind)) (ref : Syntax) (t : Ty)
     (under : Option (Name × Nat)) :
@@ -710,7 +750,8 @@ partial def checkPositive (known : Std.HashMap Name Known) (members : Array Name
 /-- The case instruction of the datatype `d`, whose constructors are `rcs`:
 `terminal insn T.case [a …] (scrutinee : T a …) (^c₁ (x : τ)) …`, one successor per
 constructor, in declaration order, receiving its fields.  A successor is named by its
-constructor, so no constructor may be named as a parameter of `T` or as `scrutinee`. -/
+constructor, so no constructor is named as a parameter of `T` or as `scrutinee`, as
+`DataGroup.checkNames` and `Env.admissible` require. -/
 def caseOp (d : TypeD) (rcs : Array RCtor) :
     CheckM (Option ROp) := do
   let params := d.params.map (·.1)

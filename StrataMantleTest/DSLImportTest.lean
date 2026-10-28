@@ -9,13 +9,13 @@ import StrataMantle.Env.WF
 
 set_option autoImplicit false
 
-/-! # An `environment` in a module that does not import the refinement module
+/-! # An `environment` in a module that does not import the handle module
 
 The command reports the missing import instead of failing on the code it would generate. -/
 
 namespace Strata.Mantle.DSLImportTest
 
-/-- error: an environment needs `public import StrataMantle.Env.Refine` -/
+/-- error: an environment needs `public import StrataMantle.Env.Handle` -/
 #guard_msgs in
 environment Lone where
   type T

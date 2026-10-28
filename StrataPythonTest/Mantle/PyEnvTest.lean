@@ -42,12 +42,12 @@ private def to (s : String) : BlockValue := ⟨lbl s, #[]⟩
 
 /-- `%n = ok[Value, Value] %v`: a success, which a translated function returns. -/
 private def mkOk (n v : Nat) : Instruction Py.env Unit :=
-  .apply () (d n Py.failing.ty) Base.Except.ok ⟨#[.ty Py.Value.ty, .ty Py.Value.ty], rfl⟩
+  .apply () (d n Py.failing) Base.Except.ok ⟨#[.ty Py.Value, .ty Py.Value], rfl⟩
     #[⟨v⟩] #[] #[]
 
 /-- `%n = error[Value, Value] %v`: a failure, which a translated function returns. -/
 private def mkError (n v : Nat) : Instruction Py.env Unit :=
-  .apply () (d n Py.failing.ty) Base.Except.error ⟨#[.ty Py.Value.ty, .ty Py.Value.ty], rfl⟩
+  .apply () (d n Py.failing) Base.Except.error ⟨#[.ty Py.Value, .ty Py.Value], rfl⟩
     #[⟨v⟩] #[] #[]
 
 /-! ## `def f(x): return x + 1`
@@ -69,18 +69,18 @@ propagating is `error`. -/
 
 /-- `%2 = py.intLit %1`: the constant, boxed. -/
 private def box : Instruction Py.env Unit :=
-  .apply () (d 2 Py.Value.ty) Py.intLit ⟨#[], rfl⟩ #[⟨1⟩] #[] #[]
+  .apply () (d 2 Py.Value) Py.intLit ⟨#[], rfl⟩ #[⟨1⟩] #[] #[]
 
 /-- `%3 = r args ^ks`, of type `t`. -/
 private def op3 {isig : InsnSig Py.env} (r : InsnRef Py.env isig)
     (typeArgs : TypeArgs Py.env isig.scope) (args : Array Nat)
-    (ks : Array BlockValue := #[to "propagate"]) (t : TypeExpr Py.env := Py.Value.ty) :
+    (ks : Array BlockValue := #[to "propagate"]) (t : TypeExpr Py.env := Py.Value) :
     Instruction Py.env Unit :=
   .apply () (d 3 t) r typeArgs (args.map (⟨·⟩)) ks #[]
 
 /-- The handler at `%n`: it takes the exception and returns it as a failure. -/
 private def propagateAt (n : Nat) : Block Py.env Unit :=
-  { label := lbl "propagate", params := #[d n Py.Value.ty], instrs := #[mkError (n + 1) n]
+  { label := lbl "propagate", params := #[d n Py.Value], instrs := #[mkError (n + 1) n]
     term := .ret () ⟨n + 1⟩, info := () }
 
 /-- `f`, with `%1 = const int 1`, then `box` and `op` given, then `ok`: each variant below
@@ -88,9 +88,9 @@ changes one of them. -/
 private def fWith (box op : Instruction Py.env Unit) (ok : Instruction Py.env Unit := mkOk 4 3) :
     Func Py.env Unit where
   name    := Py.pn "f"
-  retType := Py.failing.ty
-  blocks  := #[{ label := lbl "entry", params := #[d 0 Py.Value.ty]
-                 instrs := #[.const () (d 1 Base.Int.ty) (.int 1), box, op, ok]
+  retType := Py.failing
+  blocks  := #[{ label := lbl "entry", params := #[d 0 Py.Value]
+                 instrs := #[.const () (d 1 Base.Int) (.int 1), box, op, ok]
                  term := .ret () ⟨4⟩, info := () }, propagateAt 5]
   names   := (Array.range 10).map (Name.num .base ·)
   info    := ()
@@ -126,21 +126,21 @@ arbitrary code. -/
 private def retInt (s : String) (n : Nat) (k : Int) : Block Py.env Unit where
   label  := lbl s
   params := #[]
-  instrs := #[.const () (d n Base.Int.ty) (.int k),
-    .apply () (d (n + 1) Py.Value.ty) Py.intLit ⟨#[], rfl⟩ #[⟨n⟩] #[] #[], mkOk (n + 2) (n + 1)]
+  instrs := #[.const () (d n Base.Int) (.int k),
+    .apply () (d (n + 1) Py.Value) Py.intLit ⟨#[], rfl⟩ #[⟨n⟩] #[] #[], mkOk (n + 2) (n + 1)]
   term := .ret () ⟨n + 2⟩
   info := ()
 
 private def gEntry : Block Py.env Unit where
   label  := lbl "entry"
-  params := #[d 0 Py.Value.ty]
-  instrs := #[.apply () (d 1 Base.Bool.ty) Py.truthy ⟨#[], rfl⟩ #[⟨0⟩] #[to "propagate"] #[]]
+  params := #[d 0 Py.Value]
+  instrs := #[.apply () (d 1 Base.Bool) Py.truthy ⟨#[], rfl⟩ #[⟨0⟩] #[to "propagate"] #[]]
   term := .branch () ⟨1⟩ (to "yes") (to "no")
   info := ()
 
 private def g : Func Py.env Unit where
   name    := Py.pn "g"
-  retType := Py.failing.ty
+  retType := Py.failing
   blocks  := #[gEntry, retInt "yes" 2 1, retInt "no" 5 2, propagateAt 8]
   names   := (Array.range 10).map (Name.num .base ·)
   info    := ()
@@ -157,14 +157,14 @@ result of the wrong type, and the wrong number of operands. -/
 
 -- A handler on `intLit`, which cannot fail.
 #guard illFormed (fWith
-    (.apply () (d 2 Py.Value.ty) Py.intLit ⟨#[], rfl⟩ #[⟨1⟩] #[to "propagate"] #[])
+    (.apply () (d 2 Py.Value) Py.intLit ⟨#[], rfl⟩ #[⟨1⟩] #[to "propagate"] #[])
     (op3 Py.add ⟨#[], rfl⟩ #[0, 2]))
 
 -- `add` with no handler: it declares an `err` successor, so a use site must name one.
 #guard illFormed (fWith box (op3 Py.add ⟨#[], rfl⟩ #[0, 2] (ks := #[])))
 
 -- `add`'s result is the success type, not `Except`.
-#guard illFormed (fWith box (op3 Py.add ⟨#[], rfl⟩ #[0, 2] (t := Py.failing.ty)) (mkOk 4 2))
+#guard illFormed (fWith box (op3 Py.add ⟨#[], rfl⟩ #[0, 2] (t := Py.failing)) (mkOk 4 2))
 
 -- Two operands for a unary operation.
 #guard illFormed (fWith box (op3 Py.uSub ⟨#[], rfl⟩ #[0, 2]))
@@ -206,8 +206,8 @@ example : (Py.Completion.completionReturn.sig (e := Py.env)).typeArgc = 0 := rfl
 /-- `return x` as a completion, then dispatched: only the `return` successor is reached. -/
 private def compBlock : Block Py.env Unit where
   label  := lbl "entry"
-  params := #[d 0 Py.Value.ty]
-  instrs := #[.apply () (d 1 Py.Completion.ty) Py.Completion.completionReturn ⟨#[], rfl⟩ #[⟨0⟩]
+  params := #[d 0 Py.Value]
+  instrs := #[.apply () (d 1 Py.Completion) Py.Completion.completionReturn ⟨#[], rfl⟩ #[⟨0⟩]
     #[] #[]]
   term := .apply () Py.Completion.case ⟨#[], rfl⟩ #[⟨1⟩]
     #[to "normal", to "return", to "raise", to "break", to "continue"] #[]
@@ -218,14 +218,14 @@ unreachable. -/
 private def arm (s : String) (payload : Option Nat) : Block Py.env Unit :=
   match payload with
   | some n =>
-    { label := lbl s, params := #[d n Py.Value.ty]
+    { label := lbl s, params := #[d n Py.Value]
       instrs := #[mkOk (n + 1) n]
       term := .ret () ⟨n + 1⟩, info := () }
   | none => { label := lbl s, params := #[], instrs := #[], term := .unreachable (), info := () }
 
 private def compFunc : Func Py.env Unit where
   name    := .str .base "comp"
-  retType := Py.failing.ty
+  retType := Py.failing
   blocks  := #[compBlock, arm "normal" none, arm "return" (some 2), arm "raise" (some 4),
     arm "break" none, arm "continue" none]
   names   := (Array.range 10).map (Name.num .base ·)
@@ -235,7 +235,7 @@ private def compFunc : Func Py.env Unit where
 
 -- `completionReturn` takes its payload: one with none is rejected.
 #guard illFormed { compFunc with blocks := compFunc.blocks.setIfInBounds 0 { compBlock with
-    instrs := #[.apply () (d 1 Py.Completion.ty) Py.Completion.completionReturn ⟨#[], rfl⟩ #[] #[]
+    instrs := #[.apply () (d 1 Py.Completion) Py.Completion.completionReturn ⟨#[], rfl⟩ #[] #[]
       #[]] } }
 
 /-! ## Membership

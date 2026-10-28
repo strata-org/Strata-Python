@@ -110,7 +110,7 @@ private def gName : Name := .str (.str .base "m") "g"
 /-- Build `name`, taking one value, with `body`. -/
 private def built (name : Name) (body : PyBuild.PyM SourceRange Unit) :
     {fn : Func Py.env SourceRange // fn.WF} × Array String :=
-  let (f, st) := builtFunc name #[(.str .base "a", Py.Value.ty)] none' fun _ => do
+  let (f, st) := builtFunc name #[(.str .base "a", Py.Value)] none' fun _ => do
     body
     return ({} : TState)
   (f, st.diagnostics.map fun d => s!"{d.kind.text}: {d.message}")
@@ -127,7 +127,7 @@ private def wrongResult : PyBuild.PyM SourceRange Unit := do
 
 /-- A body that refers to `m.g` and returns `None`. -/
 private def callsG : PyBuild.PyM SourceRange Unit := do
-  let _ ← (Build.emitFunc gName Base.Code.ty : BuildM Py.env SourceRange ValId)
+  let _ ← (Build.emitFunc gName Base.Code : BuildM Py.env SourceRange ValId)
   PyBuild.emitReturnNone
 
 private def printed (r : {fn : Func Py.env SourceRange // fn.WF} × Array String) : IO Unit := do

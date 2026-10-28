@@ -30,17 +30,11 @@ private def wf {env : Env Unit} [base ⊑ env] (fn : Func env Unit) : Bool := de
 private def illFormed {env : Env Unit} [base ⊑ env] (fn : Func env Unit) : Bool :=
   !decide fn.WF
 
-private def boolT : TypeExpr base := Base.Bool.ty
-private def intT  : TypeExpr base := Base.Int.ty
-private def strT  : TypeExpr base := Base.String.ty
-private def unitT : TypeExpr base := Base.Unit.ty
-private def refIntT : TypeExpr base := Base.Ref.ty intT
-private def exceptStrIntT : TypeExpr base := Base.Except.ty strT intT
 
 /-- The type arguments `Int`, `String, Int` and `Int, String`. -/
-private def tInt : TypeArgs base #[.type] := ⟨#[.ty intT], rfl⟩
-private def tStrInt : TypeArgs base #[.type, .type] := ⟨#[.ty strT, .ty intT], rfl⟩
-private def tIntStr : TypeArgs base #[.type, .type] := ⟨#[.ty intT, .ty strT], rfl⟩
+private def tInt : TypeArgs base #[.type] := ⟨#[.ty Base.Int], rfl⟩
+private def tStrInt : TypeArgs base #[.type, .type] := ⟨#[.ty Base.String, .ty Base.Int], rfl⟩
+private def tIntStr : TypeArgs base #[.type, .type] := ⟨#[.ty Base.Int, .ty Base.String], rfl⟩
 
 private def d (n : Nat) (t : TypeExpr base) : ValDecl base := ⟨⟨n⟩, t⟩
 
@@ -70,10 +64,10 @@ well-formedness layer will check, and which nothing here relies on. -/
 
 private def fEntry : Block base Unit where
   label  := lbl "entry"
-  params := #[d 0 boolT]
+  params := #[d 0 Base.Bool]
   instrs := #[
-    .const () (d 1 intT) (.int 0),
-    .apply () (d 2 refIntT) Base.refNew tInt #[⟨1⟩] #[] #[]]
+    .const () (d 1 Base.Int) (.int 0),
+    .apply () (d 2 (Base.Ref Base.Int)) Base.refNew tInt #[⟨1⟩] #[] #[]]
   term := .branch () ⟨0⟩ (to "bump") (to "done")
   info := ()
 
@@ -81,21 +75,21 @@ private def fBump : Block base Unit where
   label  := lbl "bump"
   params := #[]
   instrs := #[
-    .const () (d 3 intT) (.int 1),
-    .apply () (d 4 unitT) Base.refSet tInt #[⟨2⟩, ⟨3⟩] #[] #[]]
+    .const () (d 3 Base.Int) (.int 1),
+    .apply () (d 4 Base.Unit) Base.refSet tInt #[⟨2⟩, ⟨3⟩] #[] #[]]
   term := .jump () (to "done")
   info := ()
 
 private def fDone : Block base Unit where
   label  := lbl "done"
   params := #[]
-  instrs := #[.apply () (d 5 intT) Base.refGet tInt #[⟨2⟩] #[] #[]]
+  instrs := #[.apply () (d 5 Base.Int) Base.refGet tInt #[⟨2⟩] #[] #[]]
   term := .ret () ⟨5⟩
   info := ()
 
 private def f : Func base Unit where
   name    := .str .base "f"
-  retType := intT
+  retType := Base.Int
   blocks  := #[fEntry, fBump, fDone]
   names   := #["cond", "zero", "cell", "one", "unit", "result"].map fun s => Name.num (.str .base s) 0
   info    := ()
@@ -122,8 +116,8 @@ private def divName : Name := .str .base "div"
 
 /-- `div (a b : Int) (^err (msg : String)) : Int`. -/
 private def divSig : InsnSig base :=
-  { ann := (), argTypes := #[⟨"a", intT⟩, ⟨"b", intT⟩],
-    returnType := intT, succs := #[⟨"err", #[.ty strT]⟩] }
+  { ann := (), argTypes := #[⟨"a", Base.Int⟩, ⟨"b", Base.Int⟩],
+    returnType := some Base.Int, succs := #[⟨"err", #[.ty Base.String]⟩] }
 
 /-- `div` is not a base name. -/
 private theorem divFresh : divName ∉ base := by rw [Base.mem_env]; decide
@@ -134,8 +128,8 @@ local instance : base ⊑ sig1 := ⟨Env.le_of_subset s01⟩
 private def divR : InsnRef sig1 (divSig.ofSubset s01) :=
   InsnRef.ofAddInsn base divName divSig divFresh
 
-private def intT1 : TypeExpr sig1 := intT.ofSubset s01
-private def strT1 : TypeExpr sig1 := strT.ofSubset s01
+private def intT1 : TypeExpr sig1 := (Base.Int : TypeExpr base).ofSubset s01
+private def strT1 : TypeExpr sig1 := (Base.String : TypeExpr base).ofSubset s01
 private def d1 (n : Nat) (t : TypeExpr sig1) : ValDecl sig1 := ⟨⟨n⟩, t⟩
 
 private def gEntry : Block sig1 Unit where
@@ -181,28 +175,28 @@ private def hEntry : Block base Unit where
   label  := lbl "entry"
   params := #[]
   instrs := #[
-    .const () (d 0 strT) (.str "boom"),
-    .apply () (d 1 exceptStrIntT) Base.Except.error tStrInt #[⟨0⟩] #[] #[]]
+    .const () (d 0 Base.String) (.str "boom"),
+    .apply () (d 1 (Base.Except Base.String Base.Int)) Base.Except.error tStrInt #[⟨0⟩] #[] #[]]
   term := .apply () Base.Except.case tStrInt #[⟨1⟩] #[to "ok", to "err"] #[]
   info := ()
 
 private def hOk : Block base Unit where
   label  := lbl "ok"
-  params := #[d 2 intT]
+  params := #[d 2 Base.Int]
   instrs := #[]
   term := .ret () ⟨2⟩
   info := ()
 
 private def hErr : Block base Unit where
   label  := lbl "err"
-  params := #[d 3 strT]
-  instrs := #[.const () (d 4 intT) (.int 0)]
+  params := #[d 3 Base.String]
+  instrs := #[.const () (d 4 Base.Int) (.int 0)]
   term := .ret () ⟨4⟩
   info := ()
 
 private def h : Func base Unit where
   name    := .str .base "h"
-  retType := intT
+  retType := Base.Int
   blocks  := #[hEntry, hOk, hErr]
   names   := (Array.range 8).map (Name.num .base ·)
   info    := ()
@@ -219,9 +213,9 @@ example : f.blocks.size = 3 := rfl
 example : fEntry.instrs.size = 2 := rfl
 
 /-- A constant's type comes from the base, not from a declaration. -/
-example : Const.typeOf (.int 0) = intT := rfl
+example : Const.typeOf (env := base) (.int 0) = Base.Int := rfl
 
-example : Const.typeOf .unit = unitT := rfl
+example : Const.typeOf (env := base) .unit = Base.Unit := rfl
 
 /-- Annotations map at every level, and nothing else moves. -/
 example : (fEntry.map (fun _ => 7)).info = 7 := rfl
@@ -249,8 +243,8 @@ One mistake per function, each of a kind a translator actually makes. -/
 /-- A result typed as the cell's contents rather than as the cell. -/
 private def badResult : Func base Unit :=
   { f with blocks := #[{ fEntry with instrs := #[
-      .const () (d 1 intT) (.int 0),
-      .apply () (d 2 intT) Base.refNew tInt #[⟨1⟩] #[] #[]] }, fBump, fDone] }
+      .const () (d 1 Base.Int) (.int 0),
+      .apply () (d 2 Base.Int) Base.refNew tInt #[⟨1⟩] #[] #[]] }, fBump, fDone] }
 
 #guard illFormed badResult
 
@@ -258,16 +252,16 @@ private def badResult : Func base Unit :=
 swapped. -/
 private def badOperand : Func base Unit :=
   { f with blocks := #[fEntry, { fBump with instrs := #[
-      .const () (d 3 intT) (.int 1),
-      .apply () (d 4 unitT) Base.refSet tInt #[⟨3⟩, ⟨2⟩] #[] #[]] }, fDone] }
+      .const () (d 3 Base.Int) (.int 1),
+      .apply () (d 4 Base.Unit) Base.refSet tInt #[⟨3⟩, ⟨2⟩] #[] #[]] }, fDone] }
 
 #guard illFormed badOperand
 
 /-- Too few operands for the signature. -/
 private def badArity : Func base Unit :=
   { f with blocks := #[fEntry, { fBump with instrs := #[
-      .const () (d 3 intT) (.int 1),
-      .apply () (d 4 unitT) Base.refSet tInt #[⟨2⟩] #[] #[]] }, fDone] }
+      .const () (d 3 Base.Int) (.int 1),
+      .apply () (d 4 Base.Unit) Base.refSet tInt #[⟨2⟩] #[] #[]] }, fDone] }
 
 #guard illFormed badArity
 
@@ -287,16 +281,17 @@ private def badArgs : Func base Unit :=
 /-- Two definitions of one value id, so there is no context at all. -/
 private def badDefs : Func base Unit :=
   { f with blocks := #[fEntry, { fBump with instrs := #[
-      .const () (d 1 intT) (.int 1),
-      .apply () (d 4 unitT) Base.refSet tInt #[⟨2⟩, ⟨1⟩] #[] #[]] }, fDone] }
+      .const () (d 1 Base.Int) (.int 1),
+      .apply () (d 4 Base.Unit) Base.refSet tInt #[⟨2⟩, ⟨1⟩] #[] #[]] }, fDone] }
 
 #guard illFormed badDefs
 
 /-- A successor on an operation that declares none. -/
 private def badHandler : Func base Unit :=
   { f with blocks := #[{ fEntry with instrs := #[
-      .const () (d 1 intT) (.int 0),
-      .apply () (d 2 refIntT) Base.refNew tInt #[⟨1⟩] #[to "done"] #[]] }, fBump, fDone] }
+      .const () (d 1 Base.Int) (.int 0),
+      .apply () (d 2 (Base.Ref Base.Int)) Base.refNew tInt #[⟨1⟩] #[to "done"] #[]] },
+    fBump, fDone] }
 
 #guard illFormed badHandler
 
@@ -351,30 +346,33 @@ example : (Base.Except.error.sig (e := base)).typeArgc = 2 := rfl
 /-- `h`'s constructor, with its operands and type arguments replaced. -/
 private def withError (e a : TypeExpr base) (arg : ValId) : Func base Unit :=
   { h with blocks := #[{ hEntry with instrs := #[
-      .const () (d 0 strT) (.str "boom"),
-      .apply () (d 1 exceptStrIntT) Base.Except.error ⟨#[.ty e, .ty a], rfl⟩ #[arg] #[] #[]] },
+      .const () (d 0 Base.String) (.str "boom"),
+      .apply () (d 1 (Base.Except Base.String Base.Int)) Base.Except.error ⟨#[.ty e, .ty a], rfl⟩
+        #[arg] #[] #[]] },
       hOk, hErr] }
 
-#guard wf (withError strT intT ⟨0⟩)
+#guard wf (withError Base.String Base.Int ⟨0⟩)
 
 /-- A wrong payload: `error` at `String, Int` takes a `String`, not an `Int`. -/
 private def badPayload : Func base Unit :=
   { h with blocks := #[{ hEntry with instrs := #[
-      .const () (d 0 intT) (.int 0),
-      .apply () (d 1 exceptStrIntT) Base.Except.error tStrInt #[⟨0⟩] #[] #[]] },
+      .const () (d 0 Base.Int) (.int 0),
+      .apply () (d 1 (Base.Except Base.String Base.Int)) Base.Except.error tStrInt #[⟨0⟩] #[]
+        #[]] },
     hOk, hErr] }
 
 #guard illFormed badPayload
 
 -- Wrong type arguments: at `Int, String` the result is `Except Int String`, which is not
 -- the type `%1` is declared with.
-#guard illFormed (withError intT strT ⟨0⟩)
+#guard illFormed (withError Base.Int Base.String ⟨0⟩)
 
 /-- A constructor with the wrong number of operands. -/
 private def badCtorArity : Func base Unit :=
   { h with blocks := #[{ hEntry with instrs := #[
-      .const () (d 0 strT) (.str "boom"),
-      .apply () (d 1 exceptStrIntT) Base.Except.error tStrInt #[⟨0⟩, ⟨0⟩] #[] #[]] },
+      .const () (d 0 Base.String) (.str "boom"),
+      .apply () (d 1 (Base.Except Base.String Base.Int)) Base.Except.error tStrInt #[⟨0⟩, ⟨0⟩]
+        #[] #[]] },
     hOk, hErr] }
 
 #guard illFormed badCtorArity
@@ -382,8 +380,8 @@ private def badCtorArity : Func base Unit :=
 /-- `ok` builds the other successor's value: the case still sends `ok` its payload. -/
 private def hOkVal : Func base Unit :=
   { h with blocks := #[{ hEntry with instrs := #[
-      .const () (d 0 intT) (.int 3),
-      .apply () (d 1 exceptStrIntT) Base.Except.ok tStrInt #[⟨0⟩] #[] #[]] },
+      .const () (d 0 Base.Int) (.int 3),
+      .apply () (d 1 (Base.Except Base.String Base.Int)) Base.Except.ok tStrInt #[⟨0⟩] #[] #[]] },
     hOk, hErr] }
 
 #guard wf hOkVal
@@ -419,7 +417,7 @@ private def hWith (term : Terminator base Unit) : Func base Unit :=
 
 /-- `jump`, applied as an instruction. -/
 private def jumpInsn : Instruction base Unit :=
-  .apply () (d 6 unitT) Base.jump ⟨#[], rfl⟩ #[] #[to "done"] #[]
+  .apply () (d 6 Base.Unit) Base.jump ⟨#[], rfl⟩ #[] #[to "done"] #[]
 
 -- A terminal operation as an instruction: `jump` never falls through.
 #guard illFormed { f with blocks := #[fEntry,
@@ -467,20 +465,19 @@ A function-reference constant names a function of the module, and has that funct
 type, `base.Fn` of its parameter types and its return type, or the untyped `base.Code`.  The
 module decides both: a function is well formed with a reference at any type. -/
 
-private def codeT : TypeExpr base := Base.Code.ty
 
 /-- `ref() : Unit`, which takes a code pointer to `target` and returns unit. -/
-private def refTo (target : Name) (type : TypeExpr base := codeT) : Func base Unit where
+private def refTo (target : Name) (type : TypeExpr base := Base.Code) : Func base Unit where
   name    := .str .base "ref"
-  retType := unitT
+  retType := Base.Unit
   blocks  := #[{ label := lbl "entry", params := #[], info := (),
-                 instrs := #[.const () (d 0 type) (.func target), .const () (d 1 unitT) .unit],
+                 instrs := #[.const () (d 0 type) (.func target), .const () (d 1 Base.Unit) .unit],
                  term := .ret () ⟨1⟩ }]
   names   := #["code", "unit"].map fun s => Name.num (.str .base s) 0
   info    := ()
 
 /-- `ref` beside `f`. -/
-private def refModule (target : Name) (type : TypeExpr base := codeT) :
+private def refModule (target : Name) (type : TypeExpr base := Base.Code) :
     Module.Raw base Unit where
   name  := .str .base "m"
   funcs := #[refTo target type, f]
@@ -493,21 +490,25 @@ private def refModule (target : Name) (type : TypeExpr base := codeT) :
 #guard ¬ Module.Raw.WF (refModule (.str .base "g"))
 
 /-- `f`'s code type: it takes a `Bool` and returns an `Int`. -/
-private def fnBoolIntT : TypeExpr base := Base.Fn.ty (.lit #[.ty boolT]) intT
+private def fnBoolIntT : TypeExpr base := Base.Fn [Base.Bool] Base.Int
 
 #guard f.codeType == fnBoolIntT
-#guard (refTo (.str .base "f")).codeType == Base.Fn.ty (.lit #[]) unitT
+#guard (refTo (.str .base "f")).codeType == Base.Fn [] Base.Unit
 
 -- A reference at its target's code type, to another function and to itself.
 #guard Module.Raw.WF (refModule (.str .base "f") fnBoolIntT)
-#guard Module.Raw.WF (refModule (.str .base "ref") (Base.Fn.ty (.lit #[]) unitT))
+#guard Module.Raw.WF (refModule (.str .base "ref") (Base.Fn [] Base.Unit))
 
--- At any other type the function is well formed, but its module is not: `base.Int`, and
--- `base.Fn` with another parameter list or another result.
-#guard wf (refTo (.str .base "f") intT)
-#guard ¬ Module.Raw.WF (refModule (.str .base "f") intT)
-#guard ¬ Module.Raw.WF (refModule (.str .base "f") (Base.Fn.ty (.lit #[.ty intT]) intT))
-#guard ¬ Module.Raw.WF (refModule (.str .base "f") (Base.Fn.ty (.lit #[.ty boolT]) boolT))
+-- A reference is a code pointer: at `base.Int` the function itself is not well formed, beside
+-- the same function at `base.Code` and at a `base.Fn`.
+#guard ¬ wf (refTo (.str .base "f") Base.Int)
+#guard wf (refTo (.str .base "f") Base.Code)
+#guard wf (refTo (.str .base "f") (Base.Fn [Base.Int] Base.Int))
+#guard ¬ Module.Raw.WF (refModule (.str .base "f") Base.Int)
+-- At a `base.Fn` with another parameter list or another result the function is well formed,
+-- but its module is not.
+#guard ¬ Module.Raw.WF (refModule (.str .base "f") (Base.Fn [Base.Int] Base.Int))
+#guard ¬ Module.Raw.WF (refModule (.str .base "f") (Base.Fn [Base.Bool] Base.Bool))
 #guard ¬ Module.Raw.WF (refModule (.str .base "ref") fnBoolIntT)
 
 end Strata.Mantle.IRTest

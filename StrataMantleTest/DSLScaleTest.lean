@@ -4,7 +4,7 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
-public import StrataMantle.Env.Refine
+public import StrataMantle.Env.Handle
 import StrataMantle.Env.WF
 import StrataMantle.DSL
 public import StrataMantle.Base
@@ -18,13 +18,12 @@ set_option autoImplicit false
 # A large `environment` block
 
 `Scale` declares 240 instructions in one batch: Python's 61 operations, then most of them
-again three times with a suffix, nearly four times Python's 64.  Each generated proof that
-reduced a long literal in the elaborator, rather than the kernel, failed with "maximum
-recursion depth" under the default `maxRecDepth`, at its own size: a reference's bound
-`j < ops.size` at 123 instructions, the names as one list at 131, the stage's names at 165,
-`mem_env` at 217.  This block is past all four.  A run of instructions is now split into
-stages of 64, so a reference to instruction `j` reduces a short literal; `Wide` below is past
-the 500 instructions that used to stop a block.
+again three times with a suffix, nearly four times Python's 64.  A generated proof that reduced
+a long literal in the elaborator, rather than the kernel, would exceed the default `maxRecDepth`
+at its own size: a reference's bound `j < ops.size` at 123 instructions, the names as one list
+at 131, the stage's names at 165, `mem_env` at 217.  This block is past all four, so it checks
+that none does.  A run of instructions is split into stages of 64, so a reference to
+instruction `j` reduces a short literal; `Wide` below has 520 instructions.
 
 The block takes about 20 s, most of it the DSL's elaboration and the kernel's.  `Wide` takes
 about 40 s, most of it its instructions' signatures and references.  Its freshness checks

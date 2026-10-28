@@ -4,7 +4,7 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
-public import StrataMantle.Env.Refine
+public import StrataMantle.Env.Handle
 -- Private: building an `Env` value needs its representation at code-generation time.
 import StrataMantle.Env.WF
 import StrataMantle.DSL
@@ -22,7 +22,8 @@ datatypes; the rest of the types are primitive.
 `Base` is an `environment` block, so a language environment declares it as its parent with
 `extends Base`.  In every `e` with `Base.env ⊑ e`:
 
-* `Base.T.ref : TypeRef e n` and `Base.T.ty`, its application to arguments;
+* `Base.T.ref : TypeRef e n`, and the handle `Base.T`, its type expression, applied to its
+  arguments if it has parameters;
 * `Base.o.sig : InsnSig e` and `Base.o : InsnRef e Base.o.sig`, for `refNew`, `refGet`,
   `refSet` and `callCode`;
 * `Base.Except.ok` and `Base.Except.error`, `Except`'s constructors, as instructions in the

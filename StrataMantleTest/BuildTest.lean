@@ -31,12 +31,6 @@ namespace Strata.Mantle.BuildTest
 open Strata.Mantle.Build (freshVal freshLabel startBlock startBlockWith startFreshBlock
   emitConst emitApply finishBlock terminate goto build FailedFunc region withInfo)
 
-private def boolT : TypeExpr base := Base.Bool.ty
-private def intT  : TypeExpr base := Base.Int.ty
-private def strT  : TypeExpr base := Base.String.ty
-private def unitT : TypeExpr base := Base.Unit.ty
-private def refIntT : TypeExpr base := Base.Ref.ty intT
-private def exceptStrIntT : TypeExpr base := Base.Except.ty strT intT
 
 /-- What `build` gives: a checked function, or the `FailedFunc`. -/
 private abbrev Built (α : Type) := Except (FailedFunc base α Unit) {fn : Func base α // fn.WF}
@@ -53,20 +47,21 @@ needs no fixing up once it is finished; the blocks appear in the order they were
 finished, entry first. -/
 
 private def f : Built Unit :=
-  build (.str .base "f") intT () do
-    let c ← freshVal (.str .base "c") boolT
+  build (.str .base "f") Base.Int () do
+    let c ← freshVal (.str .base "c") Base.Bool
     let done ← freshLabel "done"
     let bump ← freshLabel "bump"
     let _ ← startFreshBlock #[c] "entry"
     let zero ← emitConst (.str .base "k") (.int 0)
-    let cell ← emitApply (.str .base "cell") refIntT Base.refNew #[zero]
+    let cell ← emitApply (.str .base "cell") (Base.Ref Base.Int) Base.refNew #[zero]
     finishBlock (.branch () c.id (goto bump) (goto done))
     startBlock bump
     let one ← emitConst (.str .base "k") (.int (-1))
-    let _ ← emitApply (.str .base "unit") unitT Base.refSet (typeArgs := ta[intT]) #[cell, one]
+    let _ ← emitApply (.str .base "unit") Base.Unit Base.refSet (typeArgs := ta[Base.Int])
+      #[cell, one]
     finishBlock (.jump () (goto done))
     startBlock done
-    let r ← emitApply (.str .base "r") intT Base.refGet #[cell]
+    let r ← emitApply (.str .base "r") Base.Int Base.refGet #[cell]
     finishBlock (.ret () r)
 
 #guard f.isOk
@@ -102,18 +97,18 @@ Both `Except` constructors, and `Except.case`, whose successors are labels alloc
 the blocks they name. -/
 
 private def h : Built Unit :=
-  build (.str .base "h") intT () do
+  build (.str .base "h") Base.Int () do
     let okL ← freshLabel "ok"
     let errL ← freshLabel "err"
     let _ ← startFreshBlock (base := "entry")
     let msg ← emitConst (.str .base "msg") (.str "boom")
-    let e ← emitApply (.str .base "e") exceptStrIntT Base.Except.error #[msg]
-    terminate Base.Except.case (typeArgs := ta[strT, intT]) #[e] #[goto okL, goto errL]
-    let _ ← startBlockWith errL (.str .base "err") strT
+    let e ← emitApply (.str .base "e") (Base.Except Base.String Base.Int) Base.Except.error #[msg]
+    terminate Base.Except.case (typeArgs := ta[Base.String, Base.Int]) #[e] #[goto okL, goto errL]
+    let _ ← startBlockWith errL (.str .base "err") Base.String
     let zero ← emitConst (.str .base "zero") (.int 0)
-    let o ← emitApply (.str .base "o") exceptStrIntT Base.Except.ok #[zero]
-    terminate Base.Except.case (typeArgs := ta[strT, intT]) #[o] #[goto okL, goto errL]
-    finishBlock (.ret () (← startBlockWith okL (.str .base "v") intT))
+    let o ← emitApply (.str .base "o") (Base.Except Base.String Base.Int) Base.Except.ok #[zero]
+    terminate Base.Except.case (typeArgs := ta[Base.String, Base.Int]) #[o] #[goto okL, goto errL]
+    finishBlock (.ret () (← startBlockWith okL (.str .base "v") Base.Int))
 
 #guard h.isOk
 
@@ -129,7 +124,7 @@ rejected. -/
 private def hSwapped : Option (Func base Unit) :=
   h.toOption.map fun ⟨h, _⟩ => { h with blocks := h.blocks.modify 0 fun b =>
       { b with
-        term := .apply () Base.Except.case ⟨#[.ty strT, .ty intT], rfl⟩ #[⟨1⟩]
+        term := .apply () Base.Except.case ⟨#[.ty Base.String, .ty Base.Int], rfl⟩ #[⟨1⟩]
           #[⟨lbl "err" 0, #[]⟩, ⟨lbl "ok" 0, #[]⟩] #[] } }
 
 #guard hSwapped.map illFormed == some true
@@ -139,7 +134,7 @@ private def hSwapped : Option (Func base Unit) :=
 `Except.case` ending in `unreachable`, and every constant form `f` and `h` do not use. -/
 
 private def hConsts : Built Unit :=
-  build (.str .base "h") intT () do
+  build (.str .base "h") Base.Int () do
     let okL ← freshLabel "ok"
     let errL ← freshLabel "err"
     let _ ← startFreshBlock (base := "entry")
@@ -147,10 +142,10 @@ private def hConsts : Built Unit :=
     let _ ← emitConst (.str .base "b") (.bool true)
     let _ ← emitConst (.str .base "x") (.float 1.5)
     let msg ← emitConst (.str .base "msg") (.str "boom")
-    let e ← emitApply (.str .base "e") exceptStrIntT Base.Except.error #[msg]
-    terminate Base.Except.case (typeArgs := ta[strT, intT]) #[e] #[goto okL, goto errL]
-    finishBlock (.ret () (← startBlockWith okL (.str .base "v") intT))
-    let _ ← startBlockWith errL (.str .base "err") strT
+    let e ← emitApply (.str .base "e") (Base.Except Base.String Base.Int) Base.Except.error #[msg]
+    terminate Base.Except.case (typeArgs := ta[Base.String, Base.Int]) #[e] #[goto okL, goto errL]
+    finishBlock (.ret () (← startBlockWith okL (.str .base "v") Base.Int))
+    let _ ← startBlockWith errL (.str .base "err") Base.String
     finishBlock (.unreachable ())
 
 #guard hConsts.isOk
@@ -192,12 +187,12 @@ An emitter given no annotation uses the default, which starts as the function's 
 which `withInfo` replaces for what it emits.  An explicit one wins over both. -/
 
 private def annotated : Built Nat :=
-  build (.str .base "a") exceptStrIntT 0 do
+  build (.str .base "a") (Base.Except Base.String Base.Int) 0 do
     let _ ← startFreshBlock
     let a ← emitConst (.str .base "a") (.int 1)
     let _ ← withInfo 7 (emitConst (.str .base "b") (.int 2))
     let _ ← withInfo 7 (emitConst (.str .base "c") (.int 3) (some 9))
-    let r ← emitApply (.str .base "ret") exceptStrIntT Base.Except.ok #[a]
+    let r ← emitApply (.str .base "ret") (Base.Except Base.String Base.Int) Base.Except.ok #[a]
     withInfo 5 (finishBlock (.ret 5 r))
 
 private def instrInfos (fn : Func base Nat) : Array Nat :=
@@ -214,7 +209,7 @@ Each is an error, and `build` fails.  `errors` shows the misuses it fails with. 
 
 /-- The misuses `build` fails with for `m`, a function returning `Int`, or none. -/
 private def errors (m : BuildM base Unit Unit) : Array String :=
-  match build (.str .base "f") intT () m with
+  match build (.str .base "f") Base.Int () m with
   | .ok _ => #[]
   | .error e => e.misuses
 
@@ -252,7 +247,7 @@ private def overOpen : BuildM base Unit Unit := do
 /-- A function whose entry jumps to `j`, which returns the parameter, and then a third block,
 labelled `again`. -/
 private def thirdBlock (again : Label → BuildM base Unit Label) : BuildM base Unit Unit := do
-  let x ← freshVal (.str .base "x") intT
+  let x ← freshVal (.str .base "x") Base.Int
   let entry ← startFreshBlock #[x] (base := "entry")
   let j ← freshLabel "j"
   finishBlock (.jump () (goto j))
@@ -263,7 +258,7 @@ private def thirdBlock (again : Label → BuildM base Unit Label) : BuildM base 
 
 -- A third block with a fresh label: nothing reaches it, so the builder drops it, and the
 -- function builds.
-#guard match build (.str .base "f") intT () (thirdBlock fun _ => freshLabel "late") with
+#guard match build (.str .base "f") Base.Int () (thirdBlock fun _ => freshLabel "late") with
   | .ok fn => fn.1.blocks.map (Build.nameText ·.label.name) == #["entry.0", "j.0"]
   | .error _ => false
 
@@ -304,7 +299,7 @@ private def twoErrors : BuildM base Unit Unit := do
 /-- info: instruction %1 emitted with no block open
 the function ends with block entry.1 open -/
 #guard_msgs in
-#eval match build (.str .base "f") intT () twoErrors with
+#eval match build (.str .base "f") Base.Int () twoErrors with
   | .ok _ => IO.println "built"
   | .error e => IO.println (toString e)
 
@@ -320,7 +315,7 @@ private def wrongResult : BuildM base Unit Unit := do
 /-- info: misuses: #[]
 f is not well formed -/
 #guard_msgs in
-#eval match build (.str .base "f") intT () wrongResult with
+#eval match build (.str .base "f") Base.Int () wrongResult with
   | .ok _ => IO.println "built"
   | .error e => IO.println s!"misuses: {e.misuses}\n{e}"
 
@@ -336,7 +331,7 @@ name stay apart. -/
   }
 } -/
 #guard_msgs in
-#eval IO.println ((Build.stub (.str .base "f") #[(.str .base "x", intT), (.str .base "x", boolT)]
-  intT ()).val.format .full)
+#eval IO.println ((Build.stub (env := base) (.str .base "f")
+  #[(.str .base "x", Base.Int), (.str .base "x", Base.Bool)] Base.Int ()).val.format .full)
 
 end Strata.Mantle.BuildTest

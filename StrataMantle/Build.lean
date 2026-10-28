@@ -55,11 +55,16 @@ The operations:
 
 An application's type arguments, the last parameter of `emitApply`, `emitApplyWith` and
 `terminate`, are a `TypeArgsOf` the instruction.  Written `(typeArgs := ta[…])`, as in
-`emitApply n Base.Unit.ty Base.refSet #[cell, v] (typeArgs := ta[Py.Value])`, Lean checks their
+`emitApply n Base.Unit Base.refSet #[cell, v] (typeArgs := ta[Py.Value])`, Lean checks their
 count and kinds at the call.  Left out, they are inferred from the result type when the code is
 compiled, or, if it does not fix them all, when the builder runs, from the operands' types and
 the result type: the builder keeps each value's type for this.  Arguments that neither fixes,
-or that a list splicing two parameters leaves ambiguous, are an error that says to write them.
+or that a list splicing two parameters leaves ambiguous, are an error that says to write them,
+when the code is compiled if the signature alone shows it.
+
+Types are written as handles (`StrataMantle.Env.Handle`): `Base.Int`, `Py.Value`,
+`Base.Except Base.Int Base.Bool`, `Base.Fn [Base.Int] Base.Bool`, each coerced to the
+`TypeExpr` or `TypeArg` the builder takes.
 
 The builder records each misuse as an error: an instruction emitted with no block open, a
 block opened while another is open or under a label already used, a block finished when none

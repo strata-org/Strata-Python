@@ -41,13 +41,10 @@ open Strata.Mantle.Build (freshVal freshLabel startBlock startFreshBlock emitApp
 
 private abbrev E := Demo.env
 
-private def valT : TypeExpr E := Demo.Value.ty
 
-private def boolT : TypeExpr E := Base.Bool.ty
 
-private def intT : TypeExpr E := Base.Int.ty
 
-private def d (n : Nat) : ValDecl E := ⟨⟨n⟩, valT⟩
+private def d (n : Nat) : ValDecl E := ⟨⟨n⟩, Demo.Value⟩
 
 private def lbl (s : String) : Label := ⟨.str .base s⟩
 
@@ -86,7 +83,7 @@ private def agrees (bs : List (Block E Unit)) : Bool :=
 
 /-- The function of the blocks the entry reaches. -/
 private def fn (bs : List (Block E Unit)) : Func E Unit :=
-  { name := .str .base "f", retType := valT, blocks := (Body.dropUnreached bs).toArray,
+  { name := .str .base "f", retType := Demo.Value, blocks := (Body.dropUnreached bs).toArray,
     names := #[], info := () }
 
 /-- Whether the function is reachable and scopable, as `Func.WF` asks. -/
@@ -217,8 +214,8 @@ private def joinFirst : List (Block E Unit) :=
 defines. -/
 private def joinBuilt (first : Bool) :
     Except (FailedFunc E Unit Unit) {fn : Func E Unit // fn.WF} :=
-  build (.str .base "f") intT () do
-    let c ← freshVal (.str .base "c") boolT
+  build (.str .base "f") Base.Int () do
+    let c ← freshVal (.str .base "c") Base.Bool
     let d ← freshLabel "d"
     let q1 ← freshLabel "q1"
     let q2 ← freshLabel "q2"
@@ -251,20 +248,20 @@ Each region's blocks get a tree of their own, rooted at the region's entry: `t2`
 `t` before and after its `add`, so it is under `t` before it. -/
 
 private def withRegion : Except (FailedFunc E Unit Unit) {fn : Func E Unit // fn.WF} :=
-  build (.str .base "f") valT () do
-    let x ← freshVal (.str .base "x") valT
-    let c ← freshVal (.str .base "c") boolT
+  build (.str .base "f") Demo.Value () do
+    let x ← freshVal (.str .base "x") Demo.Value
+    let c ← freshVal (.str .base "c") Base.Bool
     let _ ← startFreshBlock #[x, c] "entry"
     let thn := region #[] (base := "t") do
       let t2 ← freshLabel "t2"
       -- `add` fails to `t2` with the exception; the jump passes `%x`.
-      let _ ← emitApply (.str .base "s") valT Demo.add #[x.id, x.id] #[goto t2]
+      let _ ← emitApply (.str .base "s") Demo.Value Demo.add #[x.id, x.id] #[goto t2]
       finishBlock (.jump () (goto t2 #[x.id]))
-      let v ← freshVal (.str .base "v") valT
+      let v ← freshVal (.str .base "v") Demo.Value
       startBlock t2 #[v]
       finishBlock (.ret () v.id)
     let els := region #[] (finishBlock (.ret () x.id)) "e"
-    let r ← emitApply (.str .base "r") valT Demo.«if» #[c.id] (regions := #[thn, els])
+    let r ← emitApply (.str .base "r") Demo.Value Demo.«if» #[c.id] (regions := #[thn, els])
     finishBlock (.ret () r)
 
 /-- Block `s.0` after `k` instructions, as the builder names it. -/
@@ -287,22 +284,22 @@ private def regionIdoms (bs : List (Block E Unit)) : List (Option Point) :=
 `t2.0`, so `t2.0` is still under `t.0` before its `add`. -/
 
 private def withDeadRegion : Except (FailedFunc E Unit Unit) {fn : Func E Unit // fn.WF} :=
-  build (.str .base "f") valT () do
-    let x ← freshVal (.str .base "x") valT
-    let c ← freshVal (.str .base "c") boolT
+  build (.str .base "f") Demo.Value () do
+    let x ← freshVal (.str .base "x") Demo.Value
+    let c ← freshVal (.str .base "c") Base.Bool
     let _ ← startFreshBlock #[x, c] "entry"
     let thn := region #[] (base := "t") do
       let t2 ← freshLabel "t2"
-      let _ ← emitApply (.str .base "s") valT Demo.add #[x.id, x.id] #[goto t2]
+      let _ ← emitApply (.str .base "s") Demo.Value Demo.add #[x.id, x.id] #[goto t2]
       finishBlock (.jump () (goto t2 #[x.id]))
-      let d ← freshVal (.str .base "d") valT
+      let d ← freshVal (.str .base "d") Demo.Value
       startBlock (← freshLabel "dead") #[d]
       finishBlock (.jump () (goto t2 #[d.id]))
-      let v ← freshVal (.str .base "v") valT
+      let v ← freshVal (.str .base "v") Demo.Value
       startBlock t2 #[v]
       finishBlock (.ret () v.id)
     let els := region #[] (finishBlock (.ret () x.id)) "e"
-    let r ← emitApply (.str .base "r") valT Demo.«if» #[c.id] (regions := #[thn, els])
+    let r ← emitApply (.str .base "r") Demo.Value Demo.«if» #[c.id] (regions := #[thn, els])
     finishBlock (.ret () r)
 
 #guard match withDeadRegion with
@@ -333,7 +330,7 @@ private def diamonds (c : ValId) (joinFirst : Bool) :
       finishBlock (if k = 0 then .ret () w else .branch () c (goto l₁ #[w]) (goto r₁))
       pure w₁
     let arms : BuildM E Unit Unit := do
-      startBlock l #[← freshVal (.str .base "p") intT]
+      startBlock l #[← freshVal (.str .base "p") Base.Int]
       finishBlock (.jump () (goto j))
       startBlock r
       finishBlock (.jump () (goto j))
@@ -343,8 +340,8 @@ private def diamonds (c : ValId) (joinFirst : Bool) :
 /-- A chain of `n` diamonds after the entry. -/
 private def chain (n : Nat) (joinFirst : Bool) :
     Except (FailedFunc E Unit Unit) {fn : Func E Unit // fn.WF} :=
-  build (.str .base "f") intT () do
-    let c ← freshVal (.str .base "c") boolT
+  build (.str .base "f") Base.Int () do
+    let c ← freshVal (.str .base "c") Base.Bool
     let l ← freshLabel "l"
     let r ← freshLabel "r"
     let _ ← startFreshBlock #[c] "entry"

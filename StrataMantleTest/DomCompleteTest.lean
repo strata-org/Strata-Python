@@ -58,11 +58,9 @@ open Strata.Mantle.Build (freshVal freshLabel startBlock startFreshBlock emitApp
 
 private abbrev E := Demo.env
 
-private def valT : TypeExpr E := Demo.Value.ty
 
-private def boolT : TypeExpr E := Base.Bool.ty
 
-private def d (n : Nat) : ValDecl E := ⟨⟨n⟩, valT⟩
+private def d (n : Nat) : ValDecl E := ⟨⟨n⟩, Demo.Value⟩
 
 private def lbl (s : String) : Label := ⟨.str .base s⟩
 
@@ -90,7 +88,7 @@ private def blk (s : String) (ps : Array Nat) (is : Array (Instruction E Unit))
 
 /-- The function of the blocks. -/
 private def fnOf (bs : List (Block E Unit)) : Func E Unit :=
-  { name := .str .base "f", retType := valT, blocks := bs.toArray, names := #[], info := () }
+  { name := .str .base "f", retType := Demo.Value, blocks := bs.toArray, names := #[], info := () }
 
 /-- Whether the function is reachable and scopable, as `Func.WF` asks. -/
 private def rule (fn : Func E Unit) : Bool := decide (fn.Reachable ∧ fn.Scopable)
@@ -211,19 +209,19 @@ private def joinFirst : List (Block E Unit) :=
 /-! ## Regions, through the builder -/
 
 private def withRegion : Except (FailedFunc E Unit Unit) {fn : Func E Unit // fn.WF} :=
-  build (.str .base "f") valT () do
-    let x ← freshVal (.str .base "x") valT
-    let c ← freshVal (.str .base "c") boolT
+  build (.str .base "f") Demo.Value () do
+    let x ← freshVal (.str .base "x") Demo.Value
+    let c ← freshVal (.str .base "c") Base.Bool
     let _ ← startFreshBlock #[x, c] "entry"
     let thn := region #[] (base := "t") do
       let t2 ← freshLabel "t2"
-      let _ ← emitApply (.str .base "s") valT Demo.add #[x.id, x.id] #[goto t2]
+      let _ ← emitApply (.str .base "s") Demo.Value Demo.add #[x.id, x.id] #[goto t2]
       finishBlock (.jump () (goto t2 #[x.id]))
-      let v ← freshVal (.str .base "v") valT
+      let v ← freshVal (.str .base "v") Demo.Value
       startBlock t2 #[v]
       finishBlock (.ret () v.id)
     let els := region #[] (finishBlock (.ret () x.id)) "e"
-    let r ← emitApply (.str .base "r") valT Demo.«if» #[c.id] (regions := #[thn, els])
+    let r ← emitApply (.str .base "r") Demo.Value Demo.«if» #[c.id] (regions := #[thn, els])
     finishBlock (.ret () r)
 
 #guard match withRegion with

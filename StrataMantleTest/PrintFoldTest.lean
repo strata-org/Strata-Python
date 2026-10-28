@@ -35,49 +35,45 @@ open Strata.Mantle.RegionTest
 
 private abbrev E := Reg.env
 
-private def boolT : TypeExpr E := Base.Bool.ty
-private def intT : TypeExpr E := Base.Int.ty
-private def codeT : TypeExpr E := Base.Code.ty
-private def refIntT : TypeExpr E := Base.Ref.ty intT
-private def unitT : TypeExpr E := Base.Unit.ty
 
 /-- What `build` gives: a checked function, or the `FailedFunc`. -/
 private abbrev Built := Except (FailedFunc E Unit Unit) {fn : Func E Unit // fn.WF}
 
 /-- `zero` is used three times, `one` once, as a successor's argument, and `unused` never. -/
 private def counter : Built :=
-  build (.str (.str .base "m") "counter") intT () do
-    let c ← freshVal (.str .base "c") boolT
+  build (.str (.str .base "m") "counter") Base.Int () do
+    let c ← freshVal (.str .base "c") Base.Bool
     let done ← freshLabel "done"
     let _ ← startFreshBlock #[c] "entry"
     let zero ← emitConst (.str .base "zero") (.int 0)
     let _ ← emitConst (.str .base "unused") (.bool true)
-    let cell ← emitApply (.str .base "cell") refIntT Base.refNew #[zero]
-    let _ ← emitApply (.str .base "unit") unitT Base.refSet (typeArgs := ta[intT]) #[cell, zero]
+    let cell ← emitApply (.str .base "cell") (Base.Ref Base.Int) Base.refNew #[zero]
+    let _ ← emitApply (.str .base "unit") Base.Unit Base.refSet (typeArgs := ta[Base.Int])
+      #[cell, zero]
     let one ← emitConst (.str .base "one") (.int (-1))
     finishBlock (.branch () c.id (goto done #[one]) (goto done #[zero]))
-    let _ ← startBlockWith done (.str .base "v") intT
-    let r ← emitApply (.str .base "r") intT Base.refGet #[cell]
+    let _ ← startBlockWith done (.str .base "v") Base.Int
+    let r ← emitApply (.str .base "r") Base.Int Base.refGet #[cell]
     finishBlock (.ret () r)
 
 /-- A reference to `counter`, returned. -/
 private def code : Built :=
-  build (.str (.str .base "m") "code") codeT () do
+  build (.str (.str .base "m") "code") Base.Code () do
     let _ ← startFreshBlock (base := "entry")
     let f ← emitConst (.str .base "f") (.func (.str (.str .base "m") "counter"))
     finishBlock (.ret () f)
 
 /-- `one` is defined in the entry block and used inside the `then` region. -/
 private def pick : Built :=
-  build (.str (.str .base "m") "pick") intT () do
-    let c ← freshVal (.str .base "c") boolT
+  build (.str (.str .base "m") "pick") Base.Int () do
+    let c ← freshVal (.str .base "c") Base.Bool
     let _ ← startFreshBlock #[c] "entry"
     let one ← emitConst (.str .base "one") (.int 1)
     let thn := region #[] (finishBlock (.ret () one)) "then"
     let els := region #[] (base := "else") do
       let two ← emitConst (.str .base "two") (.int 2)
       finishBlock (.ret () two)
-    let r ← emitApply (.str .base "r") intT Reg.«if» #[c.id] (regions := #[thn, els])
+    let r ← emitApply (.str .base "r") Base.Int Reg.«if» #[c.id] (regions := #[thn, els])
     finishBlock (.ret () r)
 
 private def m : Except (FailedFunc E Unit Unit) (Module.Raw E Unit) :=

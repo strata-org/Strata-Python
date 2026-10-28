@@ -462,7 +462,7 @@ def annotationsDict : TransM ValId := do
 
 /-- The raising operation `r` on `a` and `b`. -/
 def binary {isig : InsnSig Py.env} (name : String) (r : InsnRef Py.env isig) (a b : ValId)
-    (typeArgs : TypeArgsOf r (some Py.Value.ty) := by infer_type_args) : TransM ValId :=
+    (typeArgs : TypeArgsOf r (some Py.Value) := by infer_type_args) : TransM ValId :=
   build (emitFailing (stem name) r #[a, b] (typeArgs := typeArgs))
 
 /-- `a op b` for a binary operator. -/
@@ -1742,7 +1742,7 @@ partial def withStmt (sr : SourceRange) (items : List (withitem SourceRange))
     build (PyBuild.jump { outer with args := outer.args.push x })
     -- Every other way out, if there is one: `__exit__(None, None, None)`, then the dispatch.
     if ← targeted fin then
-      let pending ← build (startBlockWith fin (.str .base "pending") Py.Completion.ty)
+      let pending ← build (startBlockWith fin (.str .base "pending") Py.Completion)
       let n ← build noneLit
       let t ← build (emitTotal (.str .base "args") Py.mkTuple #[n, n, n])
       let kw ← build (emitTotal (.str .base "kwargs") Py.mkKwargs #[])
@@ -1849,9 +1849,9 @@ def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) :
     | none => #[]
   -- A class's own `__class__` cell is captured under `classCellKey`, named like any cell.
   let argTypes := free.map (fun x => (cellStem (if x == classCellKey then "__class__" else x),
-      Py.cell.ty)) ++
-    defaults.map (defaultStem ·, Py.cell.ty) ++
-    #[(stem "args", Py.Value.ty), (stem "kwargs", Py.Value.ty)]
+      Py.cell)) ++
+    defaults.map (defaultStem ·, Py.cell) ++
+    #[(stem "args", Py.Value), (stem "kwargs", Py.Value)]
   builtFunc job.name argTypes job.range fun ps =>
     runBody ctx st job.range do
       match job.stub with

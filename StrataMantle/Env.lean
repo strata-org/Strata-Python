@@ -2446,7 +2446,7 @@ public def toElems (l : TypeExpr env scope .list) : Array (TypeList.Elem env sco
   rw [← toElems_lit (l₁.toElems ++ l₂.toElems), ← lit_append_lit, lit_toElems, lit_toElems]
 
 /-- `++` splices a list where `instantiate` splices a list variable, so the two commute, as an
-abbreviation's `n.ty`, which appends its list arguments, relies on. -/
+abbreviation's handle, which appends a `TypeList` argument, relies on. -/
 @[simp] public theorem instantiate_append {scope₁ : Array Kind}
     (args : TypeArgs env scope scope₁) (l₁ l₂ : TypeExpr env scope .list) :
     (l₁ ++ l₂).instantiate args = l₁.instantiate args ++ l₂.instantiate args := by
@@ -2470,6 +2470,7 @@ private def TypeArg.asList {env : Env α} {scope : Array Kind} :
   | ⟨.list, l⟩, _ => l
   | ⟨.type, _⟩, h => Kind.noConfusion h
 
+/-- An argument read as a list keeps its raw form. -/
 private theorem TypeArg.expr_asList {env : Env α} {scope : Array Kind} :
     ∀ (a : TypeArg env scope) (h : a.kind = .list), (a.asList h).expr = a.expr
   | ⟨.list, _⟩, _ => rfl

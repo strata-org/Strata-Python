@@ -74,22 +74,22 @@ example : TypeRef Ext3.env 1 := Base.Ref.ref
 Over `[Py.env ⊑ e]`, the base is reached through `Py`'s declared parent, so no second
 hypothesis is needed. -/
 
-private def cellOfInt {e : Env Unit} [Py.env ⊑ e] : TypeExpr e := Base.Ref.ty Base.Int.ty
+private def cellOfInt {e : Env Unit} [Py.env ⊑ e] : TypeExpr e := Base.Ref Base.Int
 
 example : TypeExpr Ext3.env := cellOfInt
 
 /-- A builder generic over every refinement of `Py`: the same code emits into `Py.env` and
 `Ext3.env`. -/
 private def body {e : Env Unit} [Py.env ⊑ e] : BuildM e Unit Unit := do
-  let x ← Build.freshVal (.str .base "x") Base.Int.ty
+  let x ← Build.freshVal (.str .base "x") Base.Int
   let _ ← Build.startFreshBlock #[x]
-  let cell ← Build.emitApply (.str .base "cell") (Base.Ref.ty Base.Int.ty) Base.refNew
+  let cell ← Build.emitApply (.str .base "cell") (Base.Ref Base.Int) Base.refNew
       #[x.id]
-  let got ← Build.emitApply (.str .base "got") Base.Int.ty Base.refGet #[cell]
+  let got ← Build.emitApply (.str .base "got") Base.Int Base.refGet #[cell]
   Build.finishBlock (.ret () got)
 
-#guard (Build.build (env := Py.env) (.str .base "f") Base.Int.ty () body).isOk
-#guard (Build.build (env := Ext3.env) (.str .base "f") Base.Int.ty () body).isOk
+#guard (Build.build (env := Py.env) (.str .base "f") Base.Int () body).isOk
+#guard (Build.build (env := Ext3.env) (.str .base "f") Base.Int () body).isOk
 
 /-! ## A failing query: the base does not refine `Py` -/
 
@@ -171,7 +171,7 @@ prints with `⊑`. -/
 
 example : Ext3.env ⊒ base := inferInstance
 
-example {e : Env _root_.Unit} [e ⊒ Py.env] : TypeExpr e := Base.Ref.ty Base.Int.ty
+example {e : Env _root_.Unit} [e ⊒ Py.env] : TypeExpr e := Base.Ref Base.Int
 
 /-- info: Py.env ⊑ Ext3.env : Prop -/
 #guard_msgs in
