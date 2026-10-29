@@ -1,4 +1,4 @@
-# Name binding for `pymantle features`.  Every name read here is bound except those marked
+# Name binding for `pydyn features`.  Every name read here is bound except those marked
 # UNBOUND, which `FeatureUsageTest.lean` expects to be exactly the unresolved names.
 import os.path
 import a.b.c as abc

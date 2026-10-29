@@ -10,9 +10,9 @@ meta import StrataPython.FeatureUsage
 meta import StrataPython.ReadPython
 meta import StrataDDM.Util.IO
 meta import StrataPythonTest.Util.Python
-meta import StrataPythonTest.Mantle.TestUtil
+meta import StrataPythonTest.Dyn.TestUtil
 
-/-! # Tests for the unresolved names `pymantle features` reports
+/-! # Tests for the unresolved names `pydyn features` reports
 
 Parses `feature_usage/names.py` through CPython, runs `analyzeFeatures`, and checks that its
 unresolved names are exactly the program's unbound reads, each with its number of reads.
@@ -21,7 +21,7 @@ unresolved names are exactly the program's unbound reads, each with its number o
 namespace StrataPython.FeatureUsageTest
 
 open StrataPython (withPython)
-open StrataPython.Mantle.TestUtil (compilePython)
+open StrataPython.Dyn.TestUtil (compilePython)
 
 private meta def pyFile : System.FilePath := "StrataPythonTestExtra/feature_usage/names.py"
 

@@ -110,43 +110,43 @@ The package is the repository root:
 │   ├── Regex/
 │   │   ├── ReParser.lean          # Python regex parser
 │   │   └── ReToCore.lean          # Regex → Core SMT translation
-│   ├── Mantle/                    # Python on Mantle: environment, builder, scopes, translator
+│   ├── Dyn/                       # Python on Dyn: environment, builder, scopes, translator
 │   └── Pipeline/
 │       └── PyAnalyzeLaurel.lean   # Full analysis pipeline (Python → Laurel → Core → SMT)
-├── StrataMantle/                  # Mantle, a typed SSA IR (independent of StrataPython)
-├── StrataMantleTest/              # Mantle core tests
+├── StrataDyn/                     # Dyn, a typed SSA IR (independent of StrataPython)
+├── StrataDynTest/                 # Dyn core tests
 ├── Scripts/                       # Executable entry points (pyInterpret, pyAnalyzeLaurel, etc.)
 ├── Python/
 │   └── strata-python/             # Python tooling package (Ion reader, dialect generator)
 ├── StrataPythonTest/              # Compile-time tests (built with lake build)
 ├── StrataPythonTestExtra/         # Runtime tests (run with lake test, require Python)
 ├── StrataPythonFrontEndTestMain.lean # Test driver (`lake test`) for StrataPythonTestExtra
-├── docs/                          # Mantle reference and Python-to-Mantle spec
+├── docs/                          # Dyn reference and Python-to-Dyn spec
 ├── AGENTS.md                      # Guide for AI agents working in this package
 ├── lakefile.toml
 ├── lean-toolchain
 └── lake-manifest.json
 ```
 
-## Mantle
+## Dyn
 
-Mantle is a typed SSA intermediate representation in Lean, whose types and instructions are
+Dyn is a typed SSA intermediate representation in Lean, whose types and instructions are
 declared by a layered environment. It is split across two directories:
 
 | Directory | Contents | Tests |
 |---|---|---|
-| `StrataMantle/` | The core IR, builder, environment DSL, well-formedness checker, and the printer and reader of its text form (namespace `Strata.Mantle`). Imports nothing from StrataPython | `StrataMantleTest/`; `StrataPythonTestExtra/MantleReadTest.lean` reads every translator golden back |
-| `StrataPython/Mantle/` | Python on Mantle: the Python environment (`Env.lean`), the emission helpers (`Build.lean`), name resolution (`Scope.lean`), the translator (`Translate.lean`) and the `pymantle mantle` command (`Cli.lean`) | `StrataPythonTest/Mantle/`; `StrataPythonTestExtra/MantleTranslateTest.lean` and `PyScopeTest.lean` run the translator and the scope pass over the programs in `StrataPythonTest/Mantle/mantle_tests/`, listed in `StrataPythonTest/Mantle/mantle_tests.txt` |
+| `StrataDyn/` | The core IR, builder, environment DSL, well-formedness checker, and the printer and reader of its text form (namespace `Strata.Dyn`). Imports nothing from StrataPython | `StrataDynTest/`; `StrataPythonTestExtra/DynReadTest.lean` reads every translator golden back |
+| `StrataPython/Dyn/` | Python on Dyn: the Python environment (`Env.lean`), the emission helpers (`Build.lean`), name resolution (`Scope.lean`), the translator (`Translate.lean`) and the `pydyn dyn` command (`Cli.lean`) | `StrataPythonTest/Dyn/`; `StrataPythonTestExtra/DynTranslateTest.lean` and `PyScopeTest.lean` run the translator and the scope pass over the programs in `StrataPythonTest/Dyn/dyn_tests/`, listed in `StrataPythonTest/Dyn/dyn_tests.txt` |
 
-[`docs/Mantle.md`](./docs/Mantle.md) is the Mantle reference, and
-[`docs/PythonToMantle.md`](./docs/PythonToMantle.md) specifies how Python lowers to it.
+[`docs/Dyn.md`](./docs/Dyn.md) is the Dyn reference, and
+[`docs/PythonToDyn.md`](./docs/PythonToDyn.md) specifies how Python lowers to it.
 
-`lake exe pymantle mantle FILE` prints the diagnostics and the Mantle module for `FILE`, a
+`lake exe pydyn dyn FILE` prints the diagnostics and the Dyn module for `FILE`, a
 `.py` file (parsed with `python -m strata_python.gen`; `PYTHON` selects the interpreter) or a
-Python Ion file. `lake exe pymantle read FILE` reads a printed Mantle module, such as a
+Python Ion file. `lake exe pydyn read FILE` reads a printed Dyn module, such as a
 translator golden, and prints it again. Both print constants folded into their uses, or
-with `--full` each on its own line. `lake exe pymantle
-features FILE` prints the Python features a Python Ion file uses; `pymantle --help` lists the
+with `--full` each on its own line. `lake exe pydyn
+features FILE` prints the Python features a Python Ion file uses; `pydyn --help` lists the
 subcommands.
 
 ## Spec quantifiers
@@ -243,5 +243,5 @@ PYTHON=python lake test -- RegexDiffTest
 | `StrataPython.Specs.IdentifyOverloads` | Overload resolution AST walker |
 | `StrataPython.Laurel` | Type-tagged Laurel expression builders |
 | `StrataPython.Pipeline` | Full pyAnalyzeLaurel pipeline |
-| `Strata.Mantle` | The Mantle IR (`StrataMantle/`) |
-| `StrataPython.Mantle` | Python on Mantle (`PyScope`, `PyBuild`, `PyTranslate`) |
+| `Strata.Dyn` | The Dyn IR (`StrataDyn/`) |
+| `StrataPython.Dyn` | Python on Dyn (`PyScope`, `PyBuild`, `PyTranslate`) |

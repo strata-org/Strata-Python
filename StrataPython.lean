@@ -20,8 +20,8 @@ import StrataPython.ReadPython
 import StrataPython.Specs
 import StrataPython.Specs.DDM
 public import StrataPython.FeatureUsage
-public import StrataPython.Mantle.Scope
-public import StrataPython.Mantle.Translate
+public import StrataPython.Dyn.Scope
+public import StrataPython.Dyn.Translate
 
 open StrataDDM (SourceRange)
 open StrataPython (ModuleName)

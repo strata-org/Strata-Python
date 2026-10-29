@@ -56,33 +56,33 @@ for why the paths are that way round and what currently differs between them.
 Neither suite runs at Lean elaboration time: both shell out to the compiled binary,
 so a mismatch is a test failure, not a build error.
 
-## Mantle layout
+## Dyn layout
 
-[`README.md`](./README.md#mantle) lists the directories. The rules:
+[`README.md`](./README.md#dyn) lists the directories. The rules:
 
-- New Mantle core work goes in `StrataMantle/`, which must not import `StrataPython*`.
-- Python on Mantle goes in `StrataPython/Mantle/`.
-- Tests (`StrataMantleTest/`, `StrataPythonTest/Mantle/`) are `module` files; `import all` is
+- New Dyn core work goes in `StrataDyn/`, which must not import `StrataPython*`.
+- Python on Dyn goes in `StrataPython/Dyn/`.
+- Tests (`StrataDynTest/`, `StrataPythonTest/Dyn/`) are `module` files; `import all` is
   allowed. Check behaviour, well-formedness included, with `#guard` and `#guard_msgs`. Use
   `decide +kernel` only where a later proof uses the result, and never `native_decide`.
 
 The scope pass and the translator share their tests. To add one, put `NAME.py` in
-`StrataPythonTest/Mantle/mantle_tests/` and:
+`StrataPythonTest/Dyn/dyn_tests/` and:
 
-- add the line `NAME | yes | REJECTS` to `StrataPythonTest/Mantle/mantle_tests.txt` (`no` if
+- add the line `NAME | yes | REJECTS` to `StrataPythonTest/Dyn/dyn_tests.txt` (`no` if
   the translator should not handle it yet; `REJECTS` lists the constructs it must reject and
   the messages of its scope errors, often empty), and write its translator golden
-  `NAME.expected.mantle` by running `StrataPythonTestExtra/MantleTranslateTest.lean` with
-  `MANTLE_UPDATE=1`;
-- write `NAME.symtable` by running `StrataPythonTest/Mantle/scope_symtable.py` with CPython
+  `NAME.expected.dyn` by running `StrataPythonTestExtra/DynTranslateTest.lean` with
+  `DYN_UPDATE=1`;
+- write `NAME.symtable` by running `StrataPythonTest/Dyn/scope_symtable.py` with CPython
   3.12, and its scope golden `NAME.expected.scope` by running
   `StrataPythonTestExtra/PyScopeTest.lean` with `PYSCOPE_UPDATE=1`.
 
 The translator test fails on any `.py` that is not listed, and the scope test on any `.py`
 without both scope files.
-`lake exe pymantle mantle FILE.py` prints the diagnostics and the module for one file.
-`StrataPythonTestExtra/MantleReadTest.lean` reads every golden back with `Module.read`, so a
-printer change that breaks reading fails there; `lake exe pymantle read FILE` reads one.
+`lake exe pydyn dyn FILE.py` prints the diagnostics and the module for one file.
+`StrataPythonTestExtra/DynReadTest.lean` reads every golden back with `Module.read`, so a
+printer change that breaks reading fails there; `lake exe pydyn read FILE` reads one.
 
 ## Convention: `open Strata` pattern
 

@@ -1,0 +1,454 @@
+/-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+module
+public import StrataDyn.IR
+public import StrataDyn.Base
+-- Constructing an `Env` value needs its representation at code-generation time.
+import StrataDyn.Env.WF
+import StrataDyn.DSL
+
+set_option autoImplicit false
+
+/-!
+# Python's environment
+
+`Py` extends `Base` with `py.Value`, the type of every Python value; `py.Completion`, how a
+protected block finished; and one instruction per Python operation.  In every `e` with
+`Py.env ⊑ e`:
+
+* the handles `Py.Value`, `Py.Completion`, and the abbreviations `Py.raising a`, `Py.failing`
+  and `Py.cell`, its types, so the builder writes `Py.raising Base.Unit`;
+* `Py.o.sig : InsnSig e` and `Py.o : InsnRef e Py.o.sig`, for each operation `o`;
+* `Py.Completion.c.sig` and `Py.Completion.c`, for each constructor `c`, and
+  `Py.Completion.case`, the terminal operation a dispatch applies;
+* `Base`'s declarations, through `Py.toBase`.
+
+`Py.pn` names a declaration in the `py` namespace.
+
+This environment does not model Python's type system: `isinstance`, subtyping and the rest
+belong to a predicate layer above the IR.  A base type appears only where a value is not a
+Python value:
+
+* `String`, `Int`, `Bool` and `Float64` for what is fixed at translation time, such as an
+  attribute name, a literal or a bound.  The translator supplies them as constants.
+* `Bool` for what a `branch` inspects, such as the result of `truthy`.
+* `Unit` for an operation that only acts.
+
+An operation that can raise declares an `err` successor receiving the exception, and returns
+what it produces on success; one without `err` never raises.  A translated Python function
+returns `Py.failing`, `Except py.Value py.Value`, so the handler that propagates a failure
+returns it as `error`.
+
+## Completions
+
+A `finally` runs however its protected block finished, and then that finishing continues.
+So "how it finished" is a value: `py.Completion`, with one constructor per way out.  A
+dispatch is one `py.Completion.case`, one successor per constructor, and the value a `return`
+carries exists only in the successor reached when it was a `return`.
+
+```
+    try:                    entry:        … ^catch()
+      return f()                          %c = completionReturn %v; jump ^finally(%c)
+    finally:                catch(%e):    %c = completionRaise %e;  jump ^finally(%c)
+      g()                   finally(%c):  …;  py.Completion.case %c ^normal() ^return()
+                                                ^raise() ^break() ^continue()
+```
+
+The `finally` body is emitted once and reached from every exit.  Nested `finally`s forward
+a completion outwards instead of acting on it.
+
+## The exception being handled
+
+As in CPython, the run-time state holds the exception being handled: `pushExcInfo` sets it on
+entering an `except` handler or a `with`'s exception path, `pushPending` on entering a
+`finally` body that a raise reached, and `popExcept` restores the previous one on leaving
+them.  `handledExc` reads it.
+
+An exception that an operation raises itself, such as the `KeyError` of `getItem`, gets the
+exception being handled as its `__context__`, as CPython's `_PyErr_SetObject` does:
+
+* If the two are the same exception, `__context__` does not change.
+* If the handled exception's `__context__` chain already reaches the raised one, that link is
+  cut, so no cycle forms.
+
+An exception that comes out of Python code the operation runs, such as a callee or a
+`__next__`, keeps its `__context__`.  `toException` sets it too, since `raise e` is
+`toException` and then a jump.  `handledExc` does not: a bare `raise` keeps the chain.
+-/
+
+namespace StrataPython.Dyn
+
+open Strata.Dyn
+
+/-- Python's environment: the base, `py.Value`, `py.Completion`, and the operations. -/
+public environment Py extends Base where
+  namespace py
+  open base
+  /-- Every Python value. -/
+  type Value
+
+  /-- How a block a `finally` protects finished.  The constructors are in dispatch order.  Neither
+  `completionBreak` nor `completionContinue` carries a target: both bind to the innermost
+  enclosing loop, which the dispatch site resolves lexically. -/
+  data Completion where
+    | /-- Ran to its end: nothing pending. -/ completionNormal
+    | /-- Left by `return value`. -/ completionReturn (value : Value)
+    | /-- Left by raising `exc`. -/ completionRaise (exc : Value)
+    | /-- Left by `break`. -/ completionBreak
+    | /-- Left by `continue`. -/ completionContinue
+
+  /-- What an operation that can fail returns: a raised Python exception, or an `a`. -/
+  abbrev raising (a) := Except Value a
+  /-- Raise, or produce a Python value: what a translated Python function returns. -/
+  abbrev failing := raising Value
+  /-- A cell holding a Python value: what a local is, and what a closure captures.  It is
+  written with `refSet` and read with `refGet`. -/
+  abbrev cell := Ref Value
+
+  -- Definedness and checks.
+
+  /-- A value not yet assigned.  `name` is diagnostic only. -/
+  insn undef (name : String) : Value
+  /-- Whether `val` is assigned, as the `Bool` a `branch` takes. -/
+  insn isDefined (val : Value) : Bool
+  /-- `bool(val)`, as the `Bool` a `branch` takes.  Raises, because `__bool__` and `__len__`
+  are arbitrary code. -/
+  insn truthy (val : Value) (^err (exc : Value)) : Bool
+  /-- `val`, or a raised `excType(msg)` if it is unassigned: a check without a branch.  A
+  `{}` in `msg` is replaced by `repr` of `val`. -/
+  insn requireDefined (val : Value) (excType msg : String) (^err (exc : Value)) : Value
+  /-- Raises `excType(msg)` if `val` is assigned: the mirror of `requireDefined`.  A `{}` in
+  `msg` is replaced by `repr` of `val`. -/
+  insn requireUndefined (val : Value) (excType msg : String) (^err (exc : Value)) : Unit
+  /-- Raises `excType(msg)` if the integer `val` exceeds `limit`.  A `{}` in `msg` is
+  replaced by `repr` of `val`, and a `{was}` by `was` if `val` is 1 and `were` otherwise. -/
+  insn requireAtMost (val : Value) (limit : Int) (excType msg : String)
+    (^err (exc : Value)) : Unit
+
+  -- Literals: a base constant, boxed into a Python value.
+
+  /-- The Python `int` for `val`. -/
+  insn intLit (val : Int) : Value
+  /-- The Python `float` for `val`. -/
+  insn floatLit (val : Float64) : Value
+  /-- The Python `str` for `val`. -/
+  insn strLit (val : String) : Value
+  /-- `True` or `False`. -/
+  insn boolLit (val : Bool) : Value
+  /-- The Python `bytes` whose octets are the code units of `val`. -/
+  insn bytesLit (val : String) : Value
+  /-- `None`. -/
+  insn noneLit : Value
+  /-- `...`, the `Ellipsis` object, even if `builtins.Ellipsis` is rebound: CPython's
+  `LOAD_CONST`. -/
+  insn ellipsisLit : Value
+
+  -- Calls and references.
+
+  /-- `func(*args, **kwargs)`, with `args` a tuple and `kwargs` a dict.  Argument binding is
+  the callee's prologue, not this operation.  Raises `TypeError` if a key of `kwargs` is not
+  a string, as CPython's `_PyStack_UnpackDict` does. -/
+  insn call (func args kwargs : Value) (^err (exc : Value)) : Value
+  /-- The value `moduleName.name` refers to. -/
+  insn qualifiedRef (moduleName name : String) (^err (exc : Value)) : Value
+  /-- The built-in `AssertionError` class, even if `builtins.AssertionError` is rebound:
+  CPython's `LOAD_ASSERTION_ERROR`. -/
+  insn assertionError : Value
+  /-- A callable: `code`, a code pointer, and the `cells` it captures.
+  Late binding reads a captured cell; a module-level function captures none.  `call` is its
+  `apply`. -/
+  insn mkClosure (code : Code) (*cells : Ref Value) : Value
+  /-- `obj.name`. -/
+  insn attr (obj : Value) (name : String) (^err (exc : Value)) : Value
+  /-- `obj.name = val`. -/
+  insn setAttr (obj : Value) (name : String) (val : Value) (^err (exc : Value)) : Unit
+  /-- `del obj.name`. -/
+  insn delAttr (obj : Value) (name : String) (^err (exc : Value)) : Unit
+
+  -- Globals and imports.  A module name is always fully qualified, such as `"a.b"`.
+
+  /-- The cell of the global `name` of `module`: the same cell for the same arguments,
+  written with `refSet` as a local is.  It holds `undef` until its first assignment, and
+  `del` writes `undef` back.  A name read is `loadGlobal`; `del` reads the cell with `refGet`
+  and `requireDefined`. -/
+  insn globalCell (module name : String) : cell
+  /-- Read the global `name` of `module`, as CPython's `LOAD_GLOBAL` does: the value of
+  `globalCell module name` if it is defined, else the entry `name` of the `builtins` module's
+  dict (a module that rebinds `__builtins__` is not modelled).  Raises
+  `NameError(f"name '{name}' is not defined")` if neither exists. -/
+  insn loadGlobal (module name : String) (^err (exc : Value)) : Value
+  /-- The module object for `module`, after importing it and each package above it, unless
+  already imported.  `import a.b` is `importModule "a.b"` and then `importModule "a"`,
+  which binds the package; `import a.b as c` binds this result.
+  Raises `ImportError`, or whatever the module's body raises. -/
+  insn importModule (module : String) (^err (exc : Value)) : Value
+  /-- `from module import name`: imports `module`, then reads its attribute `name`, falling
+  back to the submodule `module.name`, as CPython's `IMPORT_FROM` does.  Unlike
+  `qualifiedRef`, it runs once, at the import, and its result is a snapshot.  Raises
+  `ImportError` if neither exists. -/
+  insn importFrom (module name : String) (^err (exc : Value)) : Value
+
+  -- Operators.
+
+  /-- `lhs + rhs`. -/
+  insn add (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs - rhs`. -/
+  insn sub (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs * rhs`. -/
+  insn mult (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs / rhs`. -/
+  insn div (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs // rhs`. -/
+  insn floorDiv (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs % rhs`. -/
+  insn mod (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs ** rhs`. -/
+  insn pow (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs @ rhs`. -/
+  insn matMult (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs << rhs`. -/
+  insn lShift (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs >> rhs`. -/
+  insn rShift (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs & rhs`. -/
+  insn bitAnd (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs | rhs`. -/
+  insn bitOr (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs ^ rhs`. -/
+  insn bitXor (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs += rhs`, as CPython's in-place `BINARY_OP`: `lhs.__iadd__(rhs)`, which may update
+  `lhs` in place, or `lhs + rhs` if that is missing or returns `NotImplemented`.  The result
+  is what `lhs` is rebound to. -/
+  insn iAdd (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs -= rhs`, as `iAdd`. -/
+  insn iSub (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs *= rhs`, as `iAdd`. -/
+  insn iMult (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs @= rhs`, as `iAdd`. -/
+  insn iMatMult (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs /= rhs`, as `iAdd`. -/
+  insn iDiv (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs //= rhs`, as `iAdd`. -/
+  insn iFloorDiv (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs %= rhs`, as `iAdd`. -/
+  insn iMod (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs **= rhs`, as `iAdd`. -/
+  insn iPow (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs <<= rhs`, as `iAdd`. -/
+  insn iLShift (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs >>= rhs`, as `iAdd`. -/
+  insn iRShift (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs &= rhs`, as `iAdd`. -/
+  insn iBitAnd (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs |= rhs`, as `iAdd`. -/
+  insn iBitOr (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs ^= rhs`, as `iAdd`. -/
+  insn iBitXor (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `not operand`.  Raises, because it consults truthiness. -/
+  insn not_ as "not" (operand : Value) (^err (exc : Value)) : Value
+  /-- `-operand`. -/
+  insn uSub (operand : Value) (^err (exc : Value)) : Value
+  /-- `+operand`. -/
+  insn uAdd (operand : Value) (^err (exc : Value)) : Value
+  /-- `~operand`. -/
+  insn invert (operand : Value) (^err (exc : Value)) : Value
+  /-- `lhs == rhs`. -/
+  insn eq (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs != rhs`. -/
+  insn notEq (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs < rhs`. -/
+  insn lt (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs <= rhs`. -/
+  insn ltE (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs > rhs`. -/
+  insn gt (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs >= rhs`. -/
+  insn gtE (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs is rhs`, which compares identity. -/
+  insn is_ as "is" (lhs rhs : Value) : Value
+  /-- `lhs is not rhs`. -/
+  insn isNot (lhs rhs : Value) : Value
+  /-- `lhs in rhs`. -/
+  insn in_ as "in" (lhs rhs : Value) (^err (exc : Value)) : Value
+  /-- `lhs not in rhs`. -/
+  insn notIn (lhs rhs : Value) (^err (exc : Value)) : Value
+
+  -- Data structures.
+
+  /-- A dict from `kvs`, keys and values alternating: CPython's `BUILD_MAP`.  The type rules
+  do not catch an odd count.  Raises `TypeError` if a key is unhashable, or whatever its
+  `__hash__` or `__eq__` raises. -/
+  insn mkDict (*kvs : Value) (^err (exc : Value)) : Value
+  /-- A call's keyword dict from `kvs`, keys and values alternating, each key a `str` the
+  translator supplies.  Total, unlike `mkDict`: hashing and comparing a `str` runs no user
+  code. -/
+  insn mkKwargs (*kvs : Value) : Value
+  /-- A list of `elems`. -/
+  insn mkList (*elems : Value) : Value
+  /-- A set of `elems`: CPython's `BUILD_SET`.  Raises as `mkDict` does for a key. -/
+  insn mkSet (*elems : Value) (^err (exc : Value)) : Value
+  /-- A tuple of `elems`. -/
+  insn mkTuple (*elems : Value) : Value
+  /-- `obj[key]`. -/
+  insn getItem (obj key : Value) (^err (exc : Value)) : Value
+  /-- `obj[key]`, or `fallback` if that raises `KeyError`, as CPython's `LOAD_NAME` reads a
+  namespace (`PyMapping_GetOptionalItem` since 3.13). -/
+  insn getOptionalItem (obj key fallback : Value) (^err (exc : Value)) : Value
+  /-- `obj[key] = val`. -/
+  insn setItem (obj key val : Value) (^err (exc : Value)) : Unit
+  /-- `del obj[key]`. -/
+  insn delItem (obj key : Value) (^err (exc : Value)) : Unit
+  /-- `slice(lo, hi, step)`: CPython's `BUILD_SLICE`, for a slice that is not the whole
+  subscript, as in `obj[lo:hi, k]`.  An absent bound is `None`. -/
+  insn mkSlice (lo hi step : Value) : Value
+  /-- `obj[lo:hi:step]`.  An absent bound is `None`, as in Python. -/
+  insn getSlice (obj lo hi step : Value) (^err (exc : Value)) : Value
+  /-- The elements of `val` as a tuple of exactly `n`: CPython's `UNPACK_SEQUENCE`.  Reads at
+  most `n + 1` elements.  Raises `ValueError` if `val` has fewer or more than `n`, `TypeError`
+  if it is not iterable, and whatever iterating `val` raises. -/
+  insn unpackSeq (val : Value) (n : Int) (^err (exc : Value)) : Value
+  /-- The elements of `val` for a target with a starred element: CPython's `UNPACK_EX`.  One
+  tuple of `before + 1 + after` items: the first `before` elements, then a list of the
+  elements between, then the last `after` elements.  Reads all of `val`.  Raises `ValueError`
+  if `val` has fewer than `before + after` elements, `TypeError` if it is not iterable, and
+  whatever iterating `val` raises. -/
+  insn unpackEx (val : Value) (before after : Int) (^err (exc : Value)) : Value
+  /-- A tuple of the elements of `list`, a list the emitting code made: CPython's
+  `INTRINSIC_LIST_TO_TUPLE`, which ends a tuple display or call with a `*x`. -/
+  insn listToTuple (list : Value) : Value
+  /-- The positional arguments of `callee(*iterable)`: `tuple(iterable)`, as CPython's
+  `CALL_FUNCTION_EX` makes them when `*iterable` is the only positional argument.  Raises a
+  `TypeError` naming `callee` if `iterable` is not iterable. -/
+  insn argsTuple (callee iterable : Value) (^err (exc : Value)) : Value
+  /-- The number of elements of `tup`, as a Python `int`. -/
+  insn tupleLen (tup : Value) : Value
+  /-- `tup[i]`, for a tuple the emitting code made and an `i` in range, such as an element of
+  `unpackSeq`'s result. -/
+  insn tupleGet (tup : Value) (i : Int) : Value
+  /-- `dict` with `other` merged in, as a fresh dict: the lowering of a `**x` argument.
+  CPython's `DICT_MERGE`: a key already present raises a `TypeError` naming `callee`, as does
+  an `other` that is not a mapping. -/
+  insn dictMerge (callee dict other : Value) (^err (exc : Value)) : Value
+  /-- `dict` with `other` merged in, as a fresh dict: the lowering of a `**x` entry in a dict
+  display.  CPython's `DICT_UPDATE`: a key already present is overwritten. -/
+  insn dictUpdate (dict other : Value) (^err (exc : Value)) : Value
+  /-- The number of entries of `dict`, as a Python `int`. -/
+  insn dictLen (dict : Value) : Value
+  /-- `dict[key]` if present, else `fallback`. -/
+  insn dictGet (dict key fallback : Value) : Value
+  /-- The first key of `dict` in insertion order, or `fallback` if it is empty. -/
+  insn dictFirstKey (dict fallback : Value) : Value
+  /-- Removes `key` from `dict`, if it is there. -/
+  insn dictDiscard (dict key : Value) : Unit
+
+  -- Accumulating into a container the emitting code made.
+
+  /-- Appends `value` to `list` in place: CPython's `LIST_APPEND`.  Total: `list` is one the
+  emitting code made, such as a comprehension's accumulator. -/
+  insn listAppend (list value : Value) : Unit
+  /-- Appends the elements of `iterable` to `list` in place: CPython's `LIST_EXTEND`, for a `*x`
+  element.  Raises `TypeError` if `iterable` is not iterable, or whatever iterating it raises. -/
+  insn listExtend (list iterable : Value) (^err (exc : Value)) : Unit
+  /-- Adds `value` to `set` in place: CPython's `SET_ADD`.  Raises `TypeError` if `value` is
+  unhashable. -/
+  insn setAdd (set value : Value) (^err (exc : Value)) : Unit
+  /-- Adds the elements of `iterable` to `set` in place: CPython's `SET_UPDATE`, for a `*x`
+  element.  Raises as `listExtend` and `setAdd` do. -/
+  insn setUpdate (set iterable : Value) (^err (exc : Value)) : Unit
+  /-- Stores `value` under `key` in `dict`, in place: CPython's `MAP_ADD`.  Raises `TypeError`
+  if `key` is unhashable. -/
+  insn dictSet (dict key value : Value) (^err (exc : Value)) : Unit
+
+  -- Iteration.
+
+  /-- `iter(obj)`. -/
+  insn getIter (obj : Value) (^err (exc : Value)) : Value
+  /-- The next element of `iter`.  Exhaustion raises `StopIteration`, so a `for` loop's exit
+  edge is `next`'s `err` successor, to a block that tests it with `isStopIteration`. -/
+  insn next (iter : Value) (^err (exc : Value)) : Value
+  /-- Whether `exc` is a `StopIteration`, as the `Bool` a `branch` takes: the guard that
+  selects a loop's exit edge. -/
+  insn isStopIteration (exc : Value) : Bool
+  /-- Runs `body` once per element of `iterable`, in order, as a comprehension's `for` clause
+  does: `iter(iterable)`, then `next` until it raises `StopIteration`.  An exception from
+  `iter` or `next`, or one `body` returns as `error`, ends the loop and goes to `err`. -/
+  insn forEach (iterable : Value) (&body (item : Value) : raising Unit) (^err (exc : Value)) :
+    Unit
+
+  -- Exceptions.
+
+  /-- The exception `raise val` raises, as CPython's `RAISE_VARARGS` makes it: `val` if it is
+  an exception, or `val()` if it is an exception class, with its `__context__` set as the
+  module docstring describes.  Raises `TypeError: exceptions must derive from BaseException`
+  otherwise, a `TypeError` if `val()` returns a non-exception, or whatever `val()` raises. -/
+  insn toException (val : Value) (^err (e : Value)) : Value
+  /-- `raise exc from cause`, after `toException`: sets `exc.__cause__` to `cause`, or to
+  `cause()` if it is an exception class, and `exc.__suppress_context__` to `True`.  A `None`
+  cause clears `__cause__`.  Raises `TypeError: exception causes must derive from
+  BaseException` for any other `cause`, as CPython does, or whatever `cause()` raises.
+  Unlike CPython, which sets the cause before the context, a failure here leaves `exc` with
+  the `__context__` that `toException` set. -/
+  insn setCause (exc cause : Value) (^err (e : Value)) : Unit
+  /-- Makes `exc` the exception being handled, and returns the one handled before, or `None`:
+  CPython's `PUSH_EXC_INFO`, on entering an `except` handler or a `with`'s exception path. -/
+  insn pushExcInfo (exc : Value) : Value
+  /-- On entering a `finally` body: if `pending` is a `raise` completion, makes its exception
+  the one being handled, as CPython's `PUSH_EXC_INFO` does on the exceptional path; otherwise
+  leaves the exception being handled as it is.  Returns the one handled before, or `None`. -/
+  insn pushPending (pending : Completion) : Value
+  /-- Makes `prev`, which `pushExcInfo` or `pushPending` returned, the exception being handled
+  again: CPython's `POP_EXCEPT`, on every way out of an `except` handler, a `finally` body or
+  a `with`'s exception path. -/
+  insn popExcept (prev : Value) : Unit
+  /-- The exception being handled, which a bare `raise` raises again: CPython's
+  `RAISE_VARARGS 0`.  Raises `RuntimeError: No active exception to reraise` if there is
+  none. -/
+  insn handledExc (^err (e : Value)) : Value
+  /-- Whether the exception `exc` matches `except type`, as the `Bool` a `branch` takes:
+  CPython's `CHECK_EXC_MATCH`.  `type` is an exception class or a tuple of them.  Raises
+  `TypeError: catching classes that do not inherit from BaseException is not allowed`
+  otherwise. -/
+  insn excMatch (exc type : Value) (^err (e : Value)) : Bool
+
+  -- `with`: CPython's `BEFORE_WITH`, in its order, and `WITH_EXCEPT_START`.
+  /-- `mgr`'s `__enter__`, looked up on its type and bound to it.  Raises `TypeError: 'T'
+  object does not support the context manager protocol` if there is none. -/
+  insn enterMethod (mgr : Value) (^err (exc : Value)) : Value
+  /-- `mgr`'s `__exit__`, looked up on its type and bound to it.  Raises `TypeError: 'T'
+  object does not support the context manager protocol (missed __exit__ method)` if there is
+  none. -/
+  insn exitMethod (mgr : Value) (^err (exc : Value)) : Value
+  /-- `exit(type(exc), exc, exc.__traceback__)`, with `exit` the bound `__exit__` of a `with`
+  whose body raised `exc`.  Raises whatever `__exit__` raises. -/
+  insn exitWithExc (exit exc : Value) (^err (e : Value)) : Value
+
+  -- Strings and degradation.
+
+  /-- `repr(val)`, without looking up the builtin: an f-string's `!r` (`FORMAT_VALUE`). -/
+  insn repr (val : Value) (^err (exc : Value)) : Value
+  /-- `str(val)`, without looking up the builtin: an f-string's `!s`. -/
+  insn toStr as "str" (val : Value) (^err (exc : Value)) : Value
+  /-- `ascii(val)`, without looking up the builtin: an f-string's `!a`. -/
+  insn ascii (val : Value) (^err (exc : Value)) : Value
+  /-- `format(val, spec)`, without looking up the builtin: an f-string field after its
+  conversion (`FORMAT_VALUE`).  Raises what `__format__` raises, or `TypeError` if it does
+  not return a `str`. -/
+  insn fmtValue (val spec : Value) (^err (exc : Value)) : Value
+  /-- The concatenation of `parts`, each a `str`: CPython's `BUILD_STRING`.  Total: joining
+  `str`s runs no user code. -/
+  insn strConcat (*parts : Value) : Value
+  /-- A stand-in for a construct the translator does not handle. -/
+  insn unsupported (name : Value) : Value
+  end py
+
+namespace Py
+
+/-- `py.<s>`, the name of a declaration in Python's namespace. -/
+public abbrev pn (s : String) : Name := .str (.str .base "py") s
+
+end Py
+
+end StrataPython.Dyn

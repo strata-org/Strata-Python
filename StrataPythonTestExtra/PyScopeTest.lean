@@ -6,20 +6,20 @@
 module
 
 meta import StrataPython
-meta import StrataPython.Mantle.Scope
+meta import StrataPython.Dyn.Scope
 meta import StrataPython.ReadPython
 meta import StrataDDM.Util.IO
 meta import StrataPythonTest.Util.Python
-meta import StrataPythonTest.Mantle.TestUtil
+meta import StrataPythonTest.Dyn.TestUtil
 
 /-! # Tests for the Python scope pass
 
-For each `NAME.py` in `StrataPythonTest/Mantle/mantle_tests/`, parses it through CPython, runs
+For each `NAME.py` in `StrataPythonTest/Dyn/dyn_tests/`, parses it through CPython, runs
 `PyScope.analyze`, and checks two files beside it:
 
 * `NAME.expected.scope`: `Table.format`, a golden.  Set `PYSCOPE_UPDATE=1` to rewrite it.
 * `NAME.symtable`: what CPython's `symtable` module records, written by
-  `StrataPythonTest/Mantle/scope_symtable.py`.  `Table.symtableFormat` must match it exactly.
+  `StrataPythonTest/Dyn/scope_symtable.py`.  `Table.symtableFormat` must match it exactly.
   A file containing `skip` is a program with `type` statements or type parameters.
 
 Every program must have both files, and each of them must belong to a program.
@@ -27,11 +27,11 @@ Every program must have both files, and each of them must belong to a program.
 
 namespace StrataPython.PyScopeTest
 
-open StrataPython.Mantle.PyScope (analyze)
+open StrataPython.Dyn.PyScope (analyze)
 open StrataPython (withPython)
-open StrataPython.Mantle.TestUtil (compilePython firstDiff)
+open StrataPython.Dyn.TestUtil (compilePython firstDiff)
 
-private meta def testDir : System.FilePath := "StrataPythonTest/Mantle/mantle_tests"
+private meta def testDir : System.FilePath := "StrataPythonTest/Dyn/dyn_tests"
 
 /-- The suffixes of the files `runCase` checks beside `NAME.py`. -/
 private meta def suffixes : List String := [".expected.scope", ".symtable"]
