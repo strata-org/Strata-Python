@@ -1,0 +1,104 @@
+module top
+  between: local (assigned)
+  blocks: local (assigned)
+  folds: local (assigned)
+  in_try: local (assigned)
+  later: local (assigned)
+  later_if: local (assigned)
+  later_unbound: local (assigned)
+  nested: local (assigned)
+  show: local (assigned, referenced)
+  targets: local (assigned)
+  unhashable: local (assigned)
+  walrus_filter: local (assigned)
+  walrus_filter_only: local (assigned)
+  walrus_key: local (assigned)
+  walrus_key_only: local (assigned)
+  function between
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+    y: local (assigned, referenced, comp_iter)
+    ys: local (parameter)
+  function later_if
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+    y: local (assigned, referenced, comp_iter)
+    ys: local (parameter)
+  function later
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+    y: local (assigned, referenced, comp_iter)
+    ys: local (parameter)
+  function later_unbound
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+    y: local (assigned, referenced, comp_iter)
+    ys: local (parameter)
+  function walrus_filter
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+    y: local (assigned, referenced)
+  function walrus_key
+    k: local (assigned, referenced)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+  function walrus_filter_only
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+    y: local (assigned)
+  function walrus_key_only
+    k: local (assigned)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+  function targets
+    a: local (assigned, referenced)
+    b: local (assigned, referenced)
+    d: local (parameter)
+    o: local (parameter)
+    xs: local (parameter, referenced)
+  function unhashable
+    s: local (assigned, referenced)
+    t: local (assigned, referenced)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+  function blocks
+    a: local (assigned, referenced)
+    b: local (assigned, referenced)
+    d: local (parameter)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+  function nested
+    a: local (assigned, referenced)
+    b: local (assigned, referenced)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (assigned, referenced, comp_iter)
+    xss: local (parameter, referenced)
+    y: local (assigned, referenced, comp_iter)
+  function in_try
+    ZeroDivisionError: global implicit (referenced)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+  function folds
+    f: local (parameter)
+    len: global implicit (referenced)
+    sum: global implicit (referenced)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+  function show
+    Exception: global implicit (referenced)
+    e: local (assigned, referenced)
+    f: local (parameter, referenced)
+    label: local (parameter, referenced)
+    print: global implicit (referenced)
+    type: global implicit (referenced)
+  function lambda
+    walrus_filter: global implicit (referenced)
+  function lambda
+    walrus_filter: global implicit (referenced)
+  function lambda
+    walrus_filter: global implicit (referenced)
+  function lambda
+    walrus_key: global implicit (referenced)
+  function lambda
+    walrus_key: global implicit (referenced)
+qualnames: <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, between, blocks, folds, in_try, later, later_if, later_unbound, nested, show, targets, unhashable, walrus_filter, walrus_filter_only, walrus_key, walrus_key_only
