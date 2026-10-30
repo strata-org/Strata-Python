@@ -38,6 +38,10 @@ cubic search.  This module computes the same lists faster, and proves them equal
   the blocks found are kept in a label map, so the search visits each block and each transfer at
   most once.  If the labels are not distinct, it falls back to `Body.loopBlocks`.
   `Body.loopsOfFast` builds the predecessor map once for all the loops it searches.
+* `Body.searchFrom` runs the same search forwards from a block, over `Body.succMap`, a map from
+  each block to the blocks it transfers to, and never into a given block.  It is meant for the
+  check of loop exits, which builds the map once per body and searches once from each block that
+  a loop leaves for.
 
 The `@[csimp]` lemmas replace the simple versions only in modules that import this one, so code
 that runs loop finding imports `StrataDyn.LoopsFast`.  The fast definitions and their
@@ -48,6 +52,9 @@ versions also brings the lemmas that make them run.
 
 * `Body.transfers_eq_fast`, `Body.backEdges_eq_fast`, `Body.loopBlocks_eq_fast`,
   `Body.loopsOf_eq_fast`: the equalities, all `@[csimp]`.
+* `Body.found_searchFrom_iff`: `Body.searchFrom` finds exactly the blocks reached from a block.
+* `Body.search_spec`: the search keeps an invariant `Q` of its found labels that passes along
+  the map it searches, and ends with the found labels closed under that map.
 -/
 
 namespace Strata.Dyn
@@ -134,12 +141,19 @@ or else as the search decides. -/
   let info := domInfo bs
   ((transfers bs).filter fun (u, l) => domWith bs info u l).eraseDups
 
-/-- For each block, by label, the labels of the blocks that transfer to it. -/
-@[expose] def predMap : LabelMap (List Label) :=
-  (transfers bs).foldl (init := ∅) fun m p => m.insert p.2 (p.1.label :: (m.find? p.2).getD [])
+/-- For each transfer `t` of the body, `val t` under the label `key t`: a map from labels to the
+labels of their neighbours. -/
+@[expose] def edgeMap (key val : Point × Label → Label) : LabelMap (List Label) :=
+  (transfers bs).foldl (init := ∅) fun m p => m.insert (key p) (val p :: (m.find? (key p)).getD [])
 
-/-- The labels of the blocks that transfer to `l`, as the predecessor map `pm` has them. -/
-@[expose] def predsIn (pm : LabelMap (List Label)) (l : Label) : List Label :=
+/-- For each block, by label, the labels of the blocks that transfer to it. -/
+@[expose] def predMap : LabelMap (List Label) := edgeMap bs (·.2) (·.1.label)
+
+/-- For each block, by label, the labels of the blocks it transfers to. -/
+@[expose] def succMap : LabelMap (List Label) := edgeMap bs (·.1.label) (·.2)
+
+/-- The labels that the map `pm` lists for `l`. -/
+@[expose] def adjIn (pm : LabelMap (List Label)) (l : Label) : List Label :=
   (pm.find? l).getD []
 
 /-- The state of the search for a loop: the labels still to visit, and the labels found, as a
@@ -154,14 +168,15 @@ structure Search where
   if p == h || (s.seen.find? p).isSome then s
   else ⟨p :: s.todo, s.seen.insert p (), p :: s.found⟩
 
-/-- The search, at most `fuel` steps: each takes a label to visit and adds its predecessors. -/
+/-- The search, at most `fuel` steps: each takes a label to visit and adds the labels that `pm`
+lists for it. -/
 @[expose] def search (pm : LabelMap (List Label)) (h : Label) :
     (fuel : Nat) → Search → Search
   | 0, s => s
   | f + 1, s =>
     match s.todo with
     | [] => s
-    | l :: todo => search pm h f ((predsIn pm l).foldl (Search.add h) { s with todo })
+    | l :: todo => search pm h f ((adjIn pm l).foldl (Search.add h) { s with todo })
 
 /-- Where the loop of the back edge from `u` to `h` grows from: `u`'s block, unless it is `h` or
 `u` is not a point of the body. -/
@@ -176,6 +191,13 @@ structure Search where
   let start : Search := ⟨seed, seed.foldl (fun m l => m.insert l ()) ∅, seed⟩
   let s := search pm h bs.length start
   (bs.filter fun b => b.label == h || (s.seen.find? b.label).isSome).map (·.label)
+
+/-- The search forwards from the block `x` with the successor map `sm`, never into `d`: with
+`sm` the body's `succMap`, it finds the labels of the blocks whose start a path from the start of
+`x` reaches without passing the start of `d`. -/
+@[expose] def searchFrom (sm : LabelMap (List Label)) (d x : Label) : Search :=
+  if x == d then ⟨[], ∅, []⟩
+  else search sm d bs.length ⟨[x], [x].foldl (fun m l => m.insert l ()) ∅, [x]⟩
 
 /-- `loopBlocks`, by `searchLoop`. -/
 @[expose] def loopBlocksFast (u : Point) (h : Label) : List Label :=
@@ -226,6 +248,33 @@ theorem domWith_eq {u : Point} {l : Label} (h : (u, l) ∈ transfers bs) :
         reachAvoidB_iff hne hn]
       rfl
 
+/-- At the start of a block, `domWith` with `domInfo` decides as the search does: whether
+every path from the entry to the start of `l'` passes through the start of `l`. -/
+public theorem domWith_start (l' l : Label) :
+    domWith bs (domInfo bs) ⟨l', 0⟩ l = !reachAvoidB bs ⟨l, 0⟩ ⟨l', 0⟩ := by
+  unfold domInfo
+  cases htm : tree? bs with
+  | none => rfl
+  | some tm =>
+    cases ht : domTree? bs with
+    | none => rfl
+    | some t =>
+      dsimp only [domWith]
+      obtain ⟨hn, htr⟩ := tree?_eq_some htm
+      obtain ⟨hL, hex, hre⟩ := domTree?_spec ht
+      cases hf : tm.find? l' with
+      | none => rfl
+      | some b =>
+        obtain ⟨hb, hbl⟩ := (htr _ _).mp hf
+        have hne : bs ≠ [] := List.ne_nil_of_mem hb
+        have hreach : Reach bs ⟨l', 0⟩ := hbl ▸ hre b hb
+        have hanc := ancAt_iff hL htr (ancs_good hn htr) hb 0 ⟨l, 0⟩
+        rw [hbl] at hanc
+        apply Bool.eq_iff_iff.mpr
+        rw [hanc, (hex _ _ hreach), Bool.not_eq_true', ← Bool.not_eq_true,
+          reachAvoidB_iff hne hn]
+        rfl
+
 /-- `backEdgesFast` is `backEdges`. -/
 @[csimp] public theorem backEdges_eq_fast : @backEdges = @backEdgesFast := by
   funext env α bs
@@ -257,13 +306,13 @@ theorem loopSeed_inv (u : Point) (h : Label) : LoopInv (bs := bs) u h (loopSeed 
     rwa [hbl] at this
   next => exact ⟨List.nodup_nil, fun _ h => absurd h List.not_mem_nil⟩
 
-/-- `predMap` lists, for each label, the labels of the blocks with a transfer to it. -/
-theorem mem_predsIn_predMap {l x : Label} :
-    x ∈ predsIn (predMap bs) l ↔ ∃ u, (u, l) ∈ transfers bs ∧ u.label = x := by
-  unfold predsIn predMap
+/-- `edgeMap key val` lists for `l` the labels `val t` of the transfers `t` with `key t = l`. -/
+theorem mem_adjIn_edgeMap {key val : Point × Label → Label} {l x : Label} :
+    x ∈ adjIn (edgeMap bs key val) l ↔ ∃ t ∈ transfers bs, key t = l ∧ val t = x := by
+  unfold adjIn edgeMap
   suffices ∀ (ts : List (Point × Label)) (m : LabelMap (List Label)),
-      x ∈ ((ts.foldl (fun m p => m.insert p.2 (p.1.label :: (m.find? p.2).getD [])) m).find?
-        l).getD [] ↔ x ∈ (m.find? l).getD [] ∨ ∃ u, (u, l) ∈ ts ∧ u.label = x by
+      x ∈ ((ts.foldl (fun m p => m.insert (key p) (val p :: (m.find? (key p)).getD [])) m).find?
+        l).getD [] ↔ x ∈ (m.find? l).getD [] ∨ ∃ t ∈ ts, key t = l ∧ val t = x by
     rw [this]
     simp
   intro ts
@@ -272,59 +321,116 @@ theorem mem_predsIn_predMap {l x : Label} :
   | cons t ts ih =>
     intro m
     rw [List.foldl_cons, ih, LabelMap.find?_insert]
-    obtain ⟨u, l'⟩ := t
-    by_cases hl : l = l'
+    by_cases hl : l = key t
     · subst hl
-      simp only [↓reduceIte, Option.getD_some, List.mem_cons, Prod.mk.injEq, and_true]
+      simp only [↓reduceIte, Option.getD_some, List.mem_cons]
       constructor
-      · rintro ((rfl | hx) | ⟨w, hw, rfl⟩)
-        · exact .inr ⟨u, .inl rfl, rfl⟩
+      · rintro ((rfl | hx) | ⟨w, hw, hk, rfl⟩)
+        · exact .inr ⟨t, .inl rfl, rfl, rfl⟩
         · exact .inl hx
-        · exact .inr ⟨w, .inr hw, rfl⟩
-      · rintro (hx | ⟨w, (rfl | hw), rfl⟩)
+        · exact .inr ⟨w, .inr hw, hk, rfl⟩
+      · rintro (hx | ⟨w, (rfl | hw), hk, rfl⟩)
         · exact .inl (.inr hx)
         · exact .inl (.inl rfl)
-        · exact .inr ⟨w, hw, rfl⟩
-    · simp only [hl, ↓reduceIte, List.mem_cons, Prod.mk.injEq, and_false, false_or]
+        · exact .inr ⟨w, hw, hk, rfl⟩
+    · simp only [hl, ↓reduceIte, List.mem_cons]
+      constructor
+      · rintro (hx | ⟨w, hw, hk, rfl⟩)
+        · exact .inl hx
+        · exact .inr ⟨w, .inr hw, hk, rfl⟩
+      · rintro (hx | ⟨w, (rfl | hw), hk, rfl⟩)
+        · exact .inl hx
+        · exact absurd hk.symm hl
+        · exact .inr ⟨w, hw, hk, rfl⟩
 
-/-- What the search keeps true, with `F` its remaining fuel: the set and the list of found labels
-agree, the found labels satisfy `LoopInv`, the labels to visit are found, a found label that is
-not to visit has all its predecessors other than `h` (in `predMap bs`) found, except perhaps `l`,
-and there is fuel for every label left to visit. -/
-structure SearchInv (u : Point) (h : Label) (l : Option Label) (F : Nat) (s : Search) : Prop where
+/-- `predMap` lists, for each label, the labels of the blocks with a transfer to it. -/
+theorem mem_adjIn_predMap {l x : Label} :
+    x ∈ adjIn (predMap bs) l ↔ ∃ u, (u, l) ∈ transfers bs ∧ u.label = x := by
+  rw [predMap, mem_adjIn_edgeMap]
+  constructor
+  · rintro ⟨⟨u, l'⟩, ht, rfl, rfl⟩
+    exact ⟨u, ht, rfl⟩
+  · rintro ⟨u, ht, rfl⟩
+    exact ⟨(u, l), ht, rfl, rfl⟩
+
+/-- `succMap` lists, for each label, the labels of the blocks that a transfer from it goes to. -/
+theorem mem_adjIn_succMap {l x : Label} :
+    x ∈ adjIn (succMap bs) l ↔ ∃ u, (u, x) ∈ transfers bs ∧ u.label = l := by
+  rw [succMap, mem_adjIn_edgeMap]
+  constructor
+  · rintro ⟨⟨u, x'⟩, ht, rfl, rfl⟩
+    exact ⟨u, ht, rfl⟩
+  · rintro ⟨u, ht, rfl⟩
+    exact ⟨(u, x), ht, rfl, rfl⟩
+
+/-- What the search with the map `pm` keeps true, with `F` its remaining fuel:
+* the set and the list of found labels agree;
+* the found labels are distinct, and each satisfies `Q`;
+* the labels to visit are found;
+* for each found label other than `l` that is not to visit, every label that `pm` lists for it,
+  other than `h`, is found;
+* there is fuel for every label left to visit. -/
+structure SearchInv (pm : LabelMap (List Label)) (h : Label) (Q : Label → Prop)
+    (l : Option Label) (F : Nat) (s : Search) : Prop where
   seen : ∀ x, (s.seen.find? x).isSome ↔ x ∈ s.found
-  inv : LoopInv (bs := bs) u h s.found
+  nodup : s.found.Nodup
+  inv : ∀ x ∈ s.found, Q x
   todo : s.todo ⊆ s.found
-  closed : ∀ x ∈ s.found, x ∉ s.todo → some x ≠ l →
-    ∀ p ∈ predsIn (predMap bs) x, p ≠ h → p ∈ s.found
+  closed : ∀ x ∈ s.found, x ∉ s.todo → some x ≠ l → ∀ p ∈ adjIn pm x, p ≠ h → p ∈ s.found
   count : s.todo.length + bs.length ≤ F + s.found.length
 
-/-- A label other than `h` with a transfer to a found label can be found: it is the label of a
-block of the body, whose start reaches `u` avoiding `h`'s start. -/
-theorem LoopInv.pred {u : Point} {h : Label} {S : List Label} (hI : LoopInv (bs := bs) u h S)
-    {l p : Label} (hl : l ∈ S) (hp : p ∈ predsIn (predMap bs) l) (hph : p ≠ h) (hpS : p ∉ S) :
-    LoopInv (bs := bs) u h (p :: S) := by
-  refine ⟨List.nodup_cons.mpr ⟨hpS, hI.1⟩, fun x hx => ?_⟩
-  rcases List.mem_cons.mp hx with rfl | hx
-  · obtain ⟨w, hw, rfl⟩ := mem_predsIn_predMap.mp hp
-    obtain ⟨b, hb, hbl, hk, ht, v, hv, hvl⟩ := mem_transfers.mp hw
-    obtain ⟨-, -, -, hlh, hpath⟩ := hI.2 l hl
-    refine ⟨b, hb, hbl, hph, ?_⟩
-    have hj : Jump bs ⟨b.label, w.count⟩ v := jump_of_targets hb hv (hvl ▸ ht)
-    have hvd : (⟨v.label, 0⟩ : Point) ≠ ⟨h, 0⟩ := fun he =>
-      hlh (by rw [← hvl]; exact congrArg Point.label he)
-    have hbh : b.label ≠ h := by rw [hbl]; exact hph
-    have hstep := PathAvoid.step (PathAvoid.fall (d := ⟨h, 0⟩) hb hbh hk) (.jump hj) hvd
-    rw [hbl] at hstep
-    exact hstep.trans (hvl ▸ hpath)
-  · exact hI.2 x hx
+/-- A label other than `h` with a transfer to a label of the loop's growth can join it: it is the
+label of a block of the body, whose start reaches `u` avoiding `h`'s start. -/
+theorem loopInv_pred {u : Point} {h l p : Label}
+    (hl : ∃ c ∈ bs, c.label = l ∧ l ≠ h ∧ PathAvoid bs ⟨h, 0⟩ ⟨l, 0⟩ u)
+    (hp : p ∈ adjIn (predMap bs) l) (hph : p ≠ h) :
+    ∃ c ∈ bs, c.label = p ∧ p ≠ h ∧ PathAvoid bs ⟨h, 0⟩ ⟨p, 0⟩ u := by
+  obtain ⟨w, hw, rfl⟩ := mem_adjIn_predMap.mp hp
+  obtain ⟨b, hb, hbl, hk, ht, v, hv, hvl⟩ := mem_transfers.mp hw
+  obtain ⟨-, -, -, hlh, hpath⟩ := hl
+  refine ⟨b, hb, hbl, hph, ?_⟩
+  have hj : Jump bs ⟨b.label, w.count⟩ v := jump_of_targets hb hv (hvl ▸ ht)
+  have hvd : (⟨v.label, 0⟩ : Point) ≠ ⟨h, 0⟩ := fun he =>
+    hlh (by rw [← hvl]; exact congrArg Point.label he)
+  have hbh : b.label ≠ h := by rw [hbl]; exact hph
+  have hstep := PathAvoid.step (PathAvoid.fall (d := ⟨h, 0⟩) hb hbh hk) (.jump hj) hvd
+  rw [hbl] at hstep
+  exact hstep.trans (hvl ▸ hpath)
 
-/-- Adding the predecessors `ps` of the found label `l`, which is not to visit, keeps the
-invariant, finds every one of them other than `h`, and keeps what was found. -/
-theorem foldl_add {u : Point} {h l : Label} {F : Nat} :
-    ∀ (ps : List Label) (s : Search), (∀ p ∈ ps, p ∈ predsIn (predMap bs) l) → l ∈ s.found →
-      SearchInv (bs := bs) u h (some l) F s →
-      SearchInv (bs := bs) u h (some l) F (ps.foldl (Search.add h) s) ∧
+/-- A path that avoids `d` ends somewhere other than `d`. -/
+theorem PathAvoid.end_ne {d x y : Point} (hp : PathAvoid bs d x y) : y ≠ d := by
+  cases hp with
+  | refl hx => exact hx
+  | step _ _ hw => exact hw
+
+/-- A label other than `d` that a transfer goes to, from a block whose start a path from `x`
+reaches avoiding `d`'s start, is the label of a block whose start such a path reaches too. -/
+theorem succ_of_pathAvoid {d l p : Label} {x : Point}
+    (hl : ∃ c ∈ bs, c.label = l ∧ PathAvoid bs ⟨d, 0⟩ x ⟨l, 0⟩)
+    (hp : p ∈ adjIn (succMap bs) l) (hpd : p ≠ d) :
+    ∃ c ∈ bs, c.label = p ∧ PathAvoid bs ⟨d, 0⟩ x ⟨p, 0⟩ := by
+  obtain ⟨w, hw, rfl⟩ := mem_adjIn_succMap.mp hp
+  obtain ⟨b, hb, hbl, hk, ht, v, hv, hvl⟩ := mem_transfers.mp hw
+  obtain ⟨-, -, -, hpath⟩ := hl
+  refine ⟨v, hv, hvl, ?_⟩
+  have hbd : b.label ≠ (⟨d, 0⟩ : Point).label := fun he =>
+    hpath.end_ne (by rw [← hbl, he])
+  have hj : Jump bs ⟨b.label, w.count⟩ v := jump_of_targets hb hv (hvl ▸ ht)
+  have hvd : (⟨v.label, 0⟩ : Point) ≠ ⟨d, 0⟩ := fun he =>
+    hpd (by rw [← hvl]; exact congrArg Point.label he)
+  have hstep := PathAvoid.step (PathAvoid.fall hb hbd hk) (.jump hj) hvd
+  rw [hbl] at hstep
+  rw [← hvl]
+  exact hpath.trans hstep
+
+/-- Adding the labels `ps` that `pm` lists for the found label `l`, which is not to visit, keeps
+the invariant, finds every one of them other than `h`, and keeps what was found, if `Q` passes
+from a label to those that `pm` lists for it. -/
+theorem foldl_add {pm : LabelMap (List Label)} {h l : Label} {Q : Label → Prop} {F : Nat}
+    (hstep : ∀ x p, Q x → p ∈ adjIn pm x → p ≠ h → Q p) :
+    ∀ (ps : List Label) (s : Search), (∀ p ∈ ps, p ∈ adjIn pm l) → l ∈ s.found →
+      SearchInv (bs := bs) pm h Q (some l) F s →
+      SearchInv (bs := bs) pm h Q (some l) F (ps.foldl (Search.add h) s) ∧
         (∀ p ∈ ps, p ≠ h → p ∈ (ps.foldl (Search.add h) s).found) ∧
         (∀ x ∈ s.found, x ∈ (ps.foldl (Search.add h) s).found)
   | [], s, _, _, hI => ⟨hI, nofun, fun _ h => h⟩
@@ -332,7 +438,7 @@ theorem foldl_add {u : Point} {h l : Label} {F : Nat} :
     rw [List.foldl_cons]
     have hp := hps p List.mem_cons_self
     -- One step, then the rest.
-    have step : SearchInv (bs := bs) u h (some l) F (Search.add h s p) ∧
+    have step : SearchInv (bs := bs) pm h Q (some l) F (Search.add h s p) ∧
         (p ≠ h → p ∈ (Search.add h s p).found) ∧
         (∀ x ∈ s.found, x ∈ (Search.add h s p).found) := by
       unfold Search.add
@@ -346,12 +452,16 @@ theorem foldl_add {u : Point} {h l : Label} {F : Nat} :
         simp only [Bool.or_eq_true, beq_iff_eq, not_or] at hc
         obtain ⟨hph, hns⟩ := hc
         have hpS : p ∉ s.found := fun hm => hns ((hI.seen p).mpr hm)
-        refine ⟨⟨fun x => ?_, hI.inv.pred hl hp hph hpS, ?_, ?_, ?_⟩,
+        refine ⟨⟨fun x => ?_, List.nodup_cons.mpr ⟨hpS, hI.nodup⟩, ?_, ?_, ?_, ?_⟩,
           fun _ => List.mem_cons_self, fun x hx => List.mem_cons_of_mem _ hx⟩
         · rw [LabelMap.find?_insert]
           by_cases hx : x = p
           · subst hx; simp
           · simp [hx, hI.seen x]
+        · intro x hx
+          rcases List.mem_cons.mp hx with rfl | hx
+          · exact hstep l x (hI.inv l hl) hp hph
+          · exact hI.inv x hx
         · intro x hx
           rcases List.mem_cons.mp hx with rfl | hx
           · exact List.mem_cons_self
@@ -365,7 +475,7 @@ theorem foldl_add {u : Point} {h l : Label} {F : Nat} :
           simp only [List.length_cons]
           omega
     obtain ⟨hI₁, hp₁, hsub₁⟩ := step
-    obtain ⟨hI₂, hps₂, hsub₂⟩ := foldl_add ps (Search.add h s p)
+    obtain ⟨hI₂, hps₂, hsub₂⟩ := foldl_add hstep ps (Search.add h s p)
       (fun q hq => hps q (List.mem_cons_of_mem _ hq)) (hsub₁ l hl) hI₁
     refine ⟨hI₂, fun q hq hqh => ?_, fun x hx => hsub₂ x (hsub₁ x hx)⟩
     rcases List.mem_cons.mp hq with rfl | hq
@@ -373,20 +483,20 @@ theorem foldl_add {u : Point} {h l : Label} {F : Nat} :
     · exact hps₂ q hq hqh
 
 /-- The search keeps the invariant, with some fuel, keeps what it has found, and ends with nothing
-left to visit: the fuel the invariant counts is enough. -/
-theorem search_spec {u : Point} {h : Label} :
-    ∀ (F : Nat) (s : Search), SearchInv (bs := bs) u h none F s →
-      (∃ F', SearchInv (bs := bs) u h none F' (search (predMap bs) h F s)) ∧
-        (search (predMap bs) h F s).todo = [] ∧
-        ∀ x ∈ s.found, x ∈ (search (predMap bs) h F s).found
+left to visit: the fuel the invariant counts is enough, since every label that satisfies `Q` is a
+label of the body. -/
+theorem search_spec {pm : LabelMap (List Label)} {h : Label} {Q : Label → Prop}
+    (hstep : ∀ x p, Q x → p ∈ adjIn pm x → p ≠ h → Q p)
+    (hQ : ∀ x, Q x → x ∈ bs.map (·.label)) :
+    ∀ (F : Nat) (s : Search), SearchInv (bs := bs) pm h Q none F s →
+      (∃ F', SearchInv (bs := bs) pm h Q none F' (search pm h F s)) ∧
+        (search pm h F s).todo = [] ∧
+        ∀ x ∈ s.found, x ∈ (search pm h F s).found
   | 0, s, hI => by
     refine ⟨⟨0, hI⟩, ?_, fun _ h => h⟩
     -- No fuel is left, so nothing is left to visit.
     have hc := hI.count
-    have hsub : s.found ⊆ bs.map (·.label) := fun x hx => by
-      obtain ⟨c, hc, hcl, -, -⟩ := hI.inv.2 x hx
-      exact List.mem_map.mpr ⟨c, hc, hcl⟩
-    have hle := List.length_le_of_nodup_subset hI.inv.1 hsub
+    have hle := List.length_le_of_nodup_subset hI.nodup fun x hx => hQ x (hI.inv x hx)
     rw [List.length_map] at hle
     exact List.eq_nil_of_length_eq_zero (by simp only [search]; omega)
   | F + 1, s, hI => by
@@ -396,8 +506,8 @@ theorem search_spec {u : Point} {h : Label} :
     next l todo ht =>
       have hl : l ∈ s.found := hI.todo (ht ▸ List.mem_cons_self)
       let s₀ : Search := { s with todo }
-      have hI₀ : SearchInv (bs := bs) u h (some l) F s₀ := by
-        refine ⟨hI.seen, hI.inv, fun x hx => hI.todo (ht ▸ List.mem_cons_of_mem _ hx),
+      have hI₀ : SearchInv (bs := bs) pm h Q (some l) F s₀ := by
+        refine ⟨hI.seen, hI.nodup, hI.inv, fun x hx => hI.todo (ht ▸ List.mem_cons_of_mem _ hx),
           fun x hx hxt hxl => ?_, ?_⟩
         · refine hI.closed x hx (fun hm => ?_) (by simp)
           rw [ht] at hm
@@ -409,22 +519,21 @@ theorem search_spec {u : Point} {h : Label} :
           simp only [List.length_cons] at hc
           show todo.length + bs.length ≤ F + s.found.length
           omega
-      obtain ⟨hI₁, hall, hsub⟩ := foldl_add (predsIn (predMap bs) l) s₀
-        (fun _ h => h) hl hI₀
-      have hI₂ : SearchInv (bs := bs) u h none F (List.foldl (Search.add h) s₀
-          (predsIn (predMap bs) l)) := by
-        refine ⟨hI₁.seen, hI₁.inv, hI₁.todo, fun x hx hxt _ => ?_, hI₁.count⟩
+      obtain ⟨hI₁, hall, hsub⟩ := foldl_add hstep (adjIn pm l) s₀ (fun _ h => h) hl hI₀
+      have hI₂ : SearchInv (bs := bs) pm h Q none F (List.foldl (Search.add h) s₀
+          (adjIn pm l)) := by
+        refine ⟨hI₁.seen, hI₁.nodup, hI₁.inv, hI₁.todo, fun x hx hxt _ => ?_, hI₁.count⟩
         by_cases hxl : x = l
         · subst hxl
           exact hall
         · exact hI₁.closed x hx hxt (by simp [hxl])
-      obtain ⟨hI₃, hdone, hsub₃⟩ := search_spec F _ hI₂
+      obtain ⟨hI₃, hdone, hsub₃⟩ := search_spec hstep hQ F _ hI₂
       exact ⟨hI₃, hdone, fun x hx => hsub₃ x (hsub x hx)⟩
 
 /-- If no found label has a predecessor other than `h` outside the found labels, then a path that
 starts outside `h`, avoids `h`'s start and ends in a found label, starts in one. -/
 theorem PathAvoid.mem_of_closed {h : Label} {S : List Label}
-    (hcl : ∀ x ∈ S, ∀ p ∈ predsIn (predMap bs) x, p ≠ h → p ∈ S)
+    (hcl : ∀ x ∈ S, ∀ p ∈ adjIn (predMap bs) x, p ≠ h → p ∈ S)
     {x y : Point} (hp : PathAvoid bs ⟨h, 0⟩ x y) (hx : x.label ≠ h) (hy : y.label ∈ S) :
     x.label ∈ S := by
   induction hp with
@@ -435,14 +544,32 @@ theorem PathAvoid.mem_of_closed {h : Label} {S : List Label}
     | fall => exact hy
     | @jump u' v hj =>
       obtain ⟨c, hc, hcl', ht⟩ := targets_of_jump hj
-      exact hcl _ hy _ (mem_predsIn_predMap.mpr ⟨_, mem_transfers.mpr
+      exact hcl _ hy _ (mem_adjIn_predMap.mpr ⟨_, mem_transfers.mpr
           ⟨c, hc, hcl', le_of_mem_targets ht, ht, v, hj.mem, rfl⟩, rfl⟩) (hp₁.label_ne hx)
 
-/-- The search's start, from the seed `S`, satisfies the invariant. -/
-theorem searchStart_inv {u : Point} {h : Label} {S : List Label}
-    (hI : LoopInv (bs := bs) u h S) :
-    SearchInv (bs := bs) u h none bs.length ⟨S, S.foldl (fun m l => m.insert l ()) ∅, S⟩ := by
-  refine ⟨fun x => ?_, hI, fun _ h => h, fun x hx hxt => absurd hx hxt, by simp only; omega⟩
+/-- If no found label has a successor other than `d` outside the found labels, then a path that
+starts in a found label and avoids `d`'s start ends in one. -/
+theorem PathAvoid.mem_of_succ_closed {d : Label} {S : List Label}
+    (hcl : ∀ x ∈ S, ∀ p ∈ adjIn (succMap bs) x, p ≠ d → p ∈ S)
+    {x y : Point} (hp : PathAvoid bs ⟨d, 0⟩ x y) (hx : x.label ∈ S) : y.label ∈ S := by
+  induction hp with
+  | refl => exact hx
+  | step _ he hw ih =>
+    cases he with
+    | fall => exact ih
+    | @jump _ v hj =>
+      obtain ⟨c, hc, hcl', ht⟩ := targets_of_jump hj
+      exact hcl _ ih _ (mem_adjIn_succMap.mpr ⟨_, mem_transfers.mpr
+          ⟨c, hc, hcl', le_of_mem_targets ht, ht, v, hj.mem, rfl⟩, rfl⟩)
+        (fun he => hw (congrArg (fun l => (⟨l, 0⟩ : Point)) he))
+
+/-- The search's start, from the distinct seeds `S`, each of which satisfies `Q`, satisfies the
+invariant. -/
+theorem searchStart_inv {pm : LabelMap (List Label)} {h : Label} {Q : Label → Prop}
+    {S : List Label} (hS : S.Nodup) (hQ : ∀ x ∈ S, Q x) :
+    SearchInv (bs := bs) pm h Q none bs.length
+      ⟨S, S.foldl (fun m l => m.insert l ()) ∅, S⟩ := by
+  refine ⟨fun x => ?_, hS, hQ, fun _ h => h, fun x hx hxt => absurd hx hxt, by simp only; omega⟩
   suffices ∀ (T : List Label) (m : LabelMap Unit), ((T.foldl (fun m l => m.insert l ()) m).find?
       x).isSome ↔ x ∈ T ∨ (m.find? x).isSome by
     rw [this]; simp
@@ -466,11 +593,14 @@ theorem searchStart_inv {u : Point} {h : Label} {S : List Label}
     have hn := (tree?_eq_some htm).1
     unfold searchLoop
     dsimp only
-    obtain ⟨⟨_, hI⟩, hdone, hseed⟩ := search_spec (bs := bs) (u := u) (h := h) bs.length _
-      (searchStart_inv (loopSeed_inv u h))
+    obtain ⟨⟨_, hI⟩, hdone, hseed⟩ := search_spec (bs := bs)
+      (Q := fun x => ∃ c ∈ bs, c.label = x ∧ x ≠ h ∧ PathAvoid bs ⟨h, 0⟩ ⟨x, 0⟩ u)
+      (fun _ _ hx hp hph => loopInv_pred hx hp hph)
+      (fun _ ⟨c, hc, hcl, _⟩ => List.mem_map.mpr ⟨c, hc, hcl⟩) bs.length _
+      (searchStart_inv (loopSeed_inv u h).1 (loopSeed_inv u h).2)
     generalize search (predMap bs) h bs.length ⟨loopSeed bs u h,
       (loopSeed bs u h).foldl (fun m l => m.insert l ()) ∅, loopSeed bs u h⟩ = s at hI hdone hseed ⊢
-    have hcl : ∀ x ∈ s.found, ∀ p ∈ predsIn (predMap bs) x, p ≠ h → p ∈ s.found :=
+    have hcl : ∀ x ∈ s.found, ∀ p ∈ adjIn (predMap bs) x, p ≠ h → p ∈ s.found :=
       fun x hx => hI.closed x hx (by rw [hdone]; exact List.not_mem_nil) (by simp)
     unfold loopBlocks
     congr 1
@@ -495,7 +625,7 @@ theorem searchStart_inv {u : Point} {h : Label} {S : List Label}
             exact ⟨hp.label_ne hbh, c, hc, hcl', hk⟩
         exact hp.mem_of_closed hcl hbh hu
       · intro hS
-        obtain ⟨c, -, -, -, hp⟩ := hI.inv.2 _ hS
+        obtain ⟨c, -, -, -, hp⟩ := hI.inv _ hS
         exact hp
   next => rfl
 
@@ -512,6 +642,40 @@ theorem searchStart_inv {u : Point} {h : Label} {S : List Label}
     unfold loopBlocksFast
     rw [ite_eq_left ht]
   next => rfl
+
+/-- A path that avoids `d` starts somewhere other than `d`. -/
+theorem PathAvoid.start_ne {d x y : Point} (hp : PathAvoid bs d x y) : x ≠ d := by
+  induction hp with
+  | refl hx => exact hx
+  | step _ _ _ ih => exact ih
+
+/-- The search from the block `x` with the body's successor map finds exactly the labels of the
+blocks whose start a path from the start of `x` reaches without passing the start of `d`. -/
+public theorem found_searchFrom_iff {d x l : Label} (hx : ∃ b ∈ bs, b.label = x) :
+    ((searchFrom bs (succMap bs) d x).seen.find? l).isSome ↔
+      ∃ c ∈ bs, c.label = l ∧ PathAvoid bs ⟨d, 0⟩ ⟨x, 0⟩ ⟨l, 0⟩ := by
+  unfold searchFrom
+  by_cases hxd : x = d
+  · rw [ite_eq_left (beq_iff_eq.mpr hxd)]
+    simp only [LabelMap.find?_empty, Option.isSome_none, Bool.false_eq_true, false_iff,
+      not_exists, not_and]
+    exact fun _ _ _ hp => hp.start_ne (by rw [hxd])
+  · rw [ite_eq_right (by simpa using hxd)]
+    obtain ⟨b, hb, hbl⟩ := hx
+    have hxne : (⟨x, 0⟩ : Point) ≠ ⟨d, 0⟩ := fun he => hxd (congrArg Point.label he)
+    obtain ⟨⟨_, hI⟩, hdone, hseed⟩ := search_spec (bs := bs)
+      (Q := fun y => ∃ c ∈ bs, c.label = y ∧ PathAvoid bs ⟨d, 0⟩ ⟨x, 0⟩ ⟨y, 0⟩)
+      (fun _ _ hy hp hpd => succ_of_pathAvoid hy hp hpd)
+      (fun _ ⟨c, hc, hcl, _⟩ => List.mem_map.mpr ⟨c, hc, hcl⟩) bs.length _
+      (searchStart_inv (List.nodup_cons.mpr ⟨List.not_mem_nil, List.nodup_nil⟩) fun y hy => by
+        rw [List.mem_singleton.mp hy]
+        exact ⟨b, hb, hbl, .refl hxne⟩)
+    generalize search (succMap bs) d bs.length
+      ⟨[x], [x].foldl (fun m l => m.insert l ()) ∅, [x]⟩ = s at hI hdone hseed ⊢
+    have hcl : ∀ y ∈ s.found, ∀ p ∈ adjIn (succMap bs) y, p ≠ d → p ∈ s.found :=
+      fun y hy => hI.closed y hy (by rw [hdone]; exact List.not_mem_nil) (by simp)
+    rw [hI.seen]
+    exact ⟨hI.inv l, fun ⟨_, _, _, hp⟩ => hp.mem_of_succ_closed hcl (hseed _ List.mem_cons_self)⟩
 
 end Body
 

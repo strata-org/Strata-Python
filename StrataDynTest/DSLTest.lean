@@ -74,6 +74,20 @@ public environment Demo extends Base where
     data Odd where
       | succO (pred : Even)
   end
+  /-- How a construct finished, for the loop-exit tests. -/
+  data Completion where
+    | normal
+    | returned (value : Value)
+    | raised (exc : Value)
+    | broke
+    | continued
+  /-- `Completion`, with the label of the loop on `break` and `continue`. -/
+  data LCompletion where
+    | lnormal
+    | lreturned (value : Value)
+    | lraised (exc : Value)
+    | lbroke (label : Int)
+    | lcontinued (label : Int)
   /-- An operation that raises a `Value` or produces an `a`. -/
   abbrev raising (a) := Except Value a
   abbrev failing := raising Value
@@ -98,6 +112,8 @@ public environment Demo extends Base where
   /-- Run `body` from `init` until it returns `false`, then leave to `exit` with the last
   value. -/
   terminal insn loop [a] (init : a) (&body (x : a) : Bool) (^exit (x : a))
+  /-- To `yes` if `label` is `n`, else to `no`. -/
+  terminal insn labelIs (label n : Int) (^yes ^no)
   /-- Two successors receiving the same two values. -/
   insn fork (^left ^right (x y : Value)) : Unit
   end demo

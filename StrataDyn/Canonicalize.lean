@@ -5,6 +5,7 @@
 -/
 module
 public import StrataDyn.CanonicalProps
+public import StrataDyn.LoopExitsProps
 public import StrataDyn.DDM
 -- Instruction values embed the signature representation, needed at code-generation time.
 import StrataDyn.Env.WF
@@ -42,6 +43,12 @@ with proofs that it is well formed, canonical, and that every loop has one entry
 (`Func.Reducible`), or a failure that says which does not hold.  For the last, a depth-first
 order suggests a rank of the labels, and a proved check confirms that every transfer that is not
 a back edge goes up in it.
+
+A front end whose loops end with a completion also passes a `CanonicalSpec`: its completion shape, how to
+read the loop records from a function's annotation, and whether the preamble is asked for
+(`StrataDyn/LoopExits.lean`).  `run` then also gives a preheader to every recorded loop that
+the CFG does not see, and its result carries proofs of P4, P7 and F1 (`CanonicalSpec.Holds`).  The pass
+does not build `done`: only the front end knows why a loop was left.
 
 ## Main definitions
 
@@ -347,7 +354,81 @@ end
   let (r, st) := Region.mapBodies simplifyBody st ⟨bs.toArray⟩
   { fn with blocks := r.blocks, names := st.names }
 
-/-- Why `run` gives no function. -/
+/-- A preheader for each block of `hs` that no back edge enters and that lacks one: a forwarding
+block that takes every transfer to it.  The body's entry block gets none: nothing may enter it,
+so the check reports that it has no preheader. -/
+@[expose] def recordPreheaders [base ≼ env] (hs : List Label) (st : Fresh)
+    (bs : List (Block env α)) : List (Block env α) × Fresh :=
+  let lh := Body.heads bs
+  hs.foldl (init := (bs, st)) fun (bs, st) h =>
+    -- The body's first block is its entry, which no transfer may enter.
+    if lh.contains h || bs.head?.any (·.label == h) then (bs, st)
+    else match Body.blockAt? bs h with
+      | none => (bs, st)
+      | some hb =>
+        if Body.preheaderB bs (Body.loopOf bs h) h then (bs, st)
+        else
+          let (pb, st) := st.forward "pre" hb
+          (redirect bs (fun _ s => s.label == h) pb.label ++ [pb], st)
+
+/-- `canonicalize`, then a preheader for every head of `hs` that the CFG does not see as a loop's:
+the heads of the front end's loop records. -/
+@[expose] def canonicalizeWith [base ≼ env] (hs : List Label) (fn : Func env α) : Func env α :=
+  let g := canonicalize fn
+  if hs.isEmpty then g
+  else
+    let (r, st) := Region.mapBodies (recordPreheaders hs) ⟨g.labels, g.names⟩ ⟨g.blocks⟩
+    { g with blocks := r.blocks, names := st.names }
+
+/-- Why `spec.check` fails, for a message: the first record or rule that does not hold. -/
+@[expose] def whyNot (spec : CanonicalSpec env α) (g : Func env α) : String :=
+  let bs := g.blocks.toList
+  let recs := spec.records g.info
+  let name (l : Label) := ToDDM.nameText l.name
+  let tr := Body.transfers bs
+  let ep := Body.exitPoints bs
+  let be := Body.backEdges bs
+  let tbl := Body.tableOf be (Body.loopsOf bs be)
+  let hs := tbl.map (·.1)
+  let lo := Body.lookupLoop tbl
+  let info := Body.domInfo bs
+  let sm := Body.succMap bs
+  let loopWhy : Option String := spec.shape.bind fun s =>
+    match s.roles? with
+    | none => some "the completion shape does not match its datatype's constructors"
+    | some ro =>
+      match hs.find? (fun h => !recs.any (·.head == h)) with
+      | some h => some s!"the loop at {name h} has no record"
+      | none =>
+        if !(recs.map (·.head)).Nodup then some "two records name the same loop"
+        else if !(recs.filterMap (·.done)).Nodup then some "two records name the same done block"
+        else recs.findSome? fun r =>
+          if !g.labels.contains r.head then some s!"the record's loop {name r.head} is no block"
+          else if !bs.any (·.label == r.head) then none
+          else if !Body.preheaderB bs (lo r.head) r.head then
+            some s!"the loop at {name r.head} has no preheader"
+          else if !Body.headDominatesB bs tr hs lo info r then
+            some s!"{name r.head} does not dominate its loop's done and exits"
+          else match r.done with
+            | none =>
+              if (Body.exitsIn tr (Body.scopeIn lo r.head)).all (Body.unreachableB bs) then none
+              else some s!"control leaves the loop at {name r.head}, but its record names no done"
+            | some d =>
+              let Rs := Body.regionsOf bs sm d (Body.exitsIn tr (Body.scopeIn lo r.head))
+              if !Body.doneB bs tr ep hs lo s r.head d Rs then
+                some s!"the exits of the loop at {name r.head} do not all meet at {name d}"
+              else if !Body.absorbsB bs lo s ro recs r d Rs then
+                some s!"{name d} does not absorb the break and continue of the loop at \
+                  {name r.head}"
+              else none
+  match loopWhy with
+  | some w => w
+  | none =>
+    if spec.preamble && !g.checkPreamble then
+      "the entry block does not end in a plain jump to a block that nothing else enters"
+    else "a loop inside a region does not hold its record"
+
+/-- Why `run` or `check` gives no function. -/
 inductive Failure where
   /-- The function has a cycle that no back edge closes: a loop with two entries. -/
   | irreducible (name : Name)
@@ -359,6 +440,10 @@ inductive Failure where
   | notCanonical (name : Name)
   /-- The canonicalized functions do not form a module: a bug in the pass. -/
   | notModule (names : Array Name)
+  /-- The function, canonicalized or given to `check`, does not hold what the front end's
+  `CanonicalSpec` asks, for the reason
+  `why`: the front end's loops or entry block are not as stated. -/
+  | notAsSpecified (name : Name) (why : String)
   /-- The function given to `check` is well formed but not canonical. -/
   | notCanonicalGiven (name : Name)
 
@@ -368,37 +453,52 @@ instance : ToString Failure where
     | .notWF n => s!"{ToDDM.nameText n}: not well formed after canonicalization"
     | .notCanonical n => s!"{ToDDM.nameText n}: not canonical after canonicalization"
     | .notModule ns => s!"{ns.map ToDDM.nameText}: do not form a module after canonicalization"
+    | .notAsSpecified n w => s!"{ToDDM.nameText n}: {w}"
     | .notCanonicalGiven n => s!"{ToDDM.nameText n}: not canonical"
 
-/-- The well-formed function `fn` itself, with proofs that it is canonical and that every loop in
-it has one entry, or why it is not.  Unlike `run`, it never changes `fn`: it rejects a function
-that the pass would repair.  So a stage after a pass that should keep the form can confirm that the
-form still holds, without hiding a break that the pass would repair. -/
-@[expose] def check [base ≼ env] (fn : {f : Func env α // f.WF}) :
-    Except Failure {g : Func env α // g.WF ∧ g.CanonicalCFG ∧ g.Reducible} :=
+/-- The heads of the loop records of `fn` that `spec` reads, if it asks for P4 and P7. -/
+@[expose] def recordHeads (spec : CanonicalSpec env α) (fn : Func env α) : List Label :=
+  if spec.shape.isSome then (spec.records fn.info).map (·.head) else []
+
+/-- The well-formed function `fn` itself, with proofs that it is canonical, that every loop in it
+has one entry, and that it holds what `spec` asks, or why it is not.  Unlike `run`, it never
+changes `fn`: it rejects a function that the pass would repair.  So a stage after a pass that
+should keep the form can confirm that the form still holds, without hiding a break that the pass
+would repair. -/
+@[expose] def check [base ≼ env] (fn : {f : Func env α // f.WF})
+    (spec : CanonicalSpec env α := {}) :
+    Except Failure
+      {g : Func env α // g.WF ∧ g.CanonicalCFG ∧ g.Reducible ∧ spec.Holds g} :=
   if hc : Body.everyB Body.loopsCheckB fn.val.blocks.toList = true ∧
       Body.oneExitB fn.val.blocks.toList = true then
-    .ok ⟨fn.val, fn.property, Func.of_loopsCheck fn.property.distinct hc.1 hc.2⟩
+    if hs : spec.check fn.val = true then
+      .ok ⟨fn.val, fn.property, Func.of_loopsCheck fn.property.distinct hc.1 hc.2 |>.1,
+        Func.of_loopsCheck fn.property.distinct hc.1 hc.2 |>.2,
+        CanonicalSpec.holds_of_check fn.property.distinct hs⟩
+    else .error (.notAsSpecified fn.val.name (whyNot spec fn.val))
   else if Body.everyB Body.reducibleB fn.val.blocks.toList then
     .error (.notCanonicalGiven fn.val.name)
   else .error (.irreducible fn.val.name)
 
 /-- The well-formed function `fn` in canonical form, with proofs that it is well formed,
-canonical, and that every loop in it has one entry, or why it is not: the pass, then `check`.  A
-loop with two entries has no head, so no contract could be placed on it. -/
-@[expose] def run [base ≼ env] (fn : {f : Func env α // f.WF}) :
-    Except Failure {g : Func env α // g.WF ∧ g.CanonicalCFG ∧ g.Reducible} :=
-  let g := canonicalize fn.val
+canonical, that every loop in it has one entry, and that it holds what `spec` asks, or why it is
+not: the pass, then `check`.  A loop with two entries has no head, so no contract could be placed
+on it. -/
+@[expose] def run [base ≼ env] (fn : {f : Func env α // f.WF}) (spec : CanonicalSpec env α := {}) :
+    Except Failure
+      {g : Func env α // g.WF ∧ g.CanonicalCFG ∧ g.Reducible ∧ spec.Holds g} :=
+  let g := canonicalizeWith (recordHeads spec fn.val) fn.val
   if h : g.WF then
-    match check ⟨g, h⟩ with
+    match check ⟨g, h⟩ spec with
     | .error (.notCanonicalGiven n) => .error (.notCanonical n)
     | r => r
   else .error (.notWF g.name)
 
-/-- A module whose every function is in canonical form, with one entry per loop. -/
-structure CanonicalModule (env : Env Unit) [base ≼ env] (α : Type) where
+/-- A module whose every function is in canonical form, with one entry per loop, and holds what
+`spec` asks. -/
+structure CanonicalModule (env : Env Unit) [base ≼ env] (α : Type) (spec : CanonicalSpec env α := {}) where
   module : Module env α
-  canonical : ∀ f ∈ module.raw.funcs, f.CanonicalCFG ∧ f.Reducible
+  canonical : ∀ f ∈ module.raw.funcs, f.CanonicalCFG ∧ f.Reducible ∧ spec.Holds f
 
 /-- The errors of `rs`, in order. -/
 @[expose] def errorsOf {β γ : Type} (rs : List (Except β γ)) : List β :=
@@ -410,10 +510,10 @@ structure CanonicalModule (env : Env Unit) [base ≼ env] (α : Type) where
 
 /-- The module `m` with `step` applied to every function, and its ghosts as they are, with the
 proofs, or the failure of each function that `step` rejects. -/
-@[expose] def moduleWith [base ≼ env]
+@[expose] def moduleWith [base ≼ env] {spec : CanonicalSpec env α}
     (step : {f : Func env α // f.WF} →
-      Except Failure {g : Func env α // g.WF ∧ g.CanonicalCFG ∧ g.Reducible})
-    (m : Module env α) : Except (Array Failure) (CanonicalModule env α) :=
+      Except Failure {g : Func env α // g.WF ∧ g.CanonicalCFG ∧ g.Reducible ∧ spec.Holds g})
+    (m : Module env α) : Except (Array Failure) (CanonicalModule env α spec) :=
   let rs := m.raw.funcs.toList.attach.map fun ⟨f, hf⟩ =>
     step ⟨f, m.wf.funcs f (Array.mem_toList_iff.mp hf)⟩
   let errs := errorsOf rs
@@ -431,19 +531,19 @@ proofs, or the failure of each function that `step` rejects. -/
         exact g.property.2⟩
     | .error ns => .error #[.notModule ns]
 
-/-- The module `m` with every function put in canonical form by `run`, with the proofs, or the
-failure of each function that `run` rejects.  A `notModule` failure can only come from a bug in
-the pass, since the pass keeps the module's name, ghosts and annotation, and every function's name,
-signature and constants. -/
-@[expose] def runModule [base ≼ env] (m : Module env α) :
-    Except (Array Failure) (CanonicalModule env α) :=
-  moduleWith run m
+/-- The module `m` with every function put in canonical form by `run spec`, with the proofs, or
+the failure of each function that `run` rejects.  A `notModule` failure can only come from a bug
+in the pass, since the pass keeps the module's name, ghosts and annotation, and every function's
+name, signature and constants. -/
+@[expose] def runModule [base ≼ env] (m : Module env α) (spec : CanonicalSpec env α := {}) :
+    Except (Array Failure) (CanonicalModule env α spec) :=
+  moduleWith (run · spec) m
 
-/-- The module `m` itself, with the proofs that `check` gives for each function, or the failure of
-each function that `check` rejects. -/
-@[expose] def checkModule [base ≼ env] (m : Module env α) :
-    Except (Array Failure) (CanonicalModule env α) :=
-  moduleWith check m
+/-- The module `m` itself, with the proofs that `check spec` gives for each function, or the
+failure of each function that `check` rejects. -/
+@[expose] def checkModule [base ≼ env] (m : Module env α) (spec : CanonicalSpec env α := {}) :
+    Except (Array Failure) (CanonicalModule env α spec) :=
+  moduleWith (check · spec) m
 
 end Canonicalize
 

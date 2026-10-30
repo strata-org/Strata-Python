@@ -20,7 +20,8 @@ set_option autoImplicit false
   unchanged, so running the pass again changes nothing;
 * `Canonicalize.canonicalize_of_canonical`: the same, for a well-formed canonical function;
 * `Canonicalize.runModule_funcs`: when `runModule` succeeds, function `i` of its module is
-  function `i` of the input, put in canonical form;
+  function `i` of the input, put in canonical form.  With no loop records, the pass is
+  `canonicalize` (`canonicalizeWith_nil`);
 * `Canonicalize.check_ok_val`, `Canonicalize.checkModule_module`: `check` and `checkModule` never
   change what they are given;
 * `Canonicalize.runModule_ghosts`: `runModule` keeps the module's ghosts as they are.
@@ -33,7 +34,8 @@ set_option autoImplicit false
 * `canonicalize_canonical`: the result of a well-formed function is canonical, if every loop has
   one entry (`Func.Reducible`) and no loop inside a region leaves its region;
 * that `canonicalize` keeps `Func.Reducible`.  With these three, `run` would need to check only
-  its input;
+  its input for the loop and return blocks; what a front end's `CanonicalSpec` asks is checked on
+  the result in any case;
 * that `reducibleB` accepts every body whose loops have one entry and whose blocks are all
   reachable, so that `run` never rejects such a function;
 * when Dyn has a semantics, that `canonicalize` keeps a function's outcomes: every run of the
@@ -251,20 +253,28 @@ public theorem canonicalize_of_canonical [base ≼ env] {fn : Func env α} (hw :
     canonicalize fn = fn :=
   canonicalize_of_check ((fn.checkCanonicalCFG_iff hw.distinct).mpr hc)
 
+/-- With no record heads, `canonicalizeWith` is `canonicalize`. -/
+theorem canonicalizeWith_nil [base ≼ env] (fn : Func env α) :
+    canonicalizeWith [] fn = canonicalize fn := rfl
+
 /-- When `check` succeeds, its result is the function it was given. -/
 public theorem check_ok_val [base ≼ env] {fn : {f : Func env α // f.WF}}
-    {g : {g : Func env α // g.WF ∧ g.CanonicalCFG ∧ g.Reducible}} (h : check fn = .ok g) :
-    g.val = fn.val := by
+    {spec : CanonicalSpec env α}
+    {g : {g : Func env α // g.WF ∧ g.CanonicalCFG ∧ g.Reducible ∧ spec.Holds g}}
+    (h : check fn spec = .ok g) : g.val = fn.val := by
   unfold check at h
   split at h
-  · cases h
-    rfl
+  · split at h
+    · cases h
+      rfl
+    · cases h
   · split at h <;> cases h
 
-/-- When `run` succeeds, its result is the function put in canonical form by `canonicalize`. -/
-theorem run_ok_val [base ≼ env] {fn : {f : Func env α // f.WF}}
-    {g : {g : Func env α // g.WF ∧ g.CanonicalCFG ∧ g.Reducible}} (h : run fn = .ok g) :
-    g.val = canonicalize fn.val := by
+/-- When `run` succeeds, its function is the canonicalized input. -/
+theorem run_ok_val [base ≼ env] {fn : {f : Func env α // f.WF}} {spec : CanonicalSpec env α}
+    {g : {g : Func env α // g.WF ∧ g.CanonicalCFG ∧ g.Reducible ∧ spec.Holds g}}
+    (h : run fn spec = .ok g) :
+    g.val = canonicalizeWith (recordHeads spec fn.val) fn.val := by
   unfold run at h
   dsimp only at h
   split at h
@@ -290,11 +300,11 @@ theorem resultsOf_map {X β γ δ : Type} (R : X → Except β γ) (val : γ →
 
 /-- When `moduleWith step` succeeds, and every result of `step` is `F` of the function it was
 given, function `i` of its module is `F` of function `i` of the input. -/
-theorem moduleWith_funcs [base ≼ env]
+theorem moduleWith_funcs [base ≼ env] {spec : CanonicalSpec env α}
     {step : {f : Func env α // f.WF} →
-      Except Failure {g : Func env α // g.WF ∧ g.CanonicalCFG ∧ g.Reducible}}
+      Except Failure {g : Func env α // g.WF ∧ g.CanonicalCFG ∧ g.Reducible ∧ spec.Holds g}}
     {F : Func env α → Func env α} (hF : ∀ fn g, step fn = .ok g → g.val = F fn.val)
-    {m : Module env α} {cm : CanonicalModule env α} (h : moduleWith step m = .ok cm) :
+    {m : Module env α} {cm : CanonicalModule env α spec} (h : moduleWith step m = .ok cm) :
     cm.module.raw.funcs = m.raw.funcs.map F := by
   unfold moduleWith at h
   dsimp only at h
@@ -320,10 +330,10 @@ theorem moduleWith_funcs [base ≼ env]
 
 /-- When `moduleWith step` succeeds, its module is the input with its functions replaced: the same
 name, ghosts and annotation. -/
-theorem moduleWith_raw [base ≼ env]
+theorem moduleWith_raw [base ≼ env] {spec : CanonicalSpec env α}
     {step : {f : Func env α // f.WF} →
-      Except Failure {g : Func env α // g.WF ∧ g.CanonicalCFG ∧ g.Reducible}}
-    {m : Module env α} {cm : CanonicalModule env α} (h : moduleWith step m = .ok cm) :
+      Except Failure {g : Func env α // g.WF ∧ g.CanonicalCFG ∧ g.Reducible ∧ spec.Holds g}}
+    {m : Module env α} {cm : CanonicalModule env α spec} (h : moduleWith step m = .ok cm) :
     cm.module.raw = { m.raw with funcs := cm.module.raw.funcs } := by
   unfold moduleWith at h
   dsimp only at h
@@ -339,25 +349,27 @@ theorem moduleWith_raw [base ≼ env]
     · cases h
 
 /-- When `runModule` succeeds, its module has the ghosts of the input, unchanged. -/
-public theorem runModule_ghosts [base ≼ env] {m : Module env α}
-    {cm : CanonicalModule env α} (h : runModule m = .ok cm) :
+public theorem runModule_ghosts [base ≼ env] {m : Module env α} {spec : CanonicalSpec env α}
+    {cm : CanonicalModule env α spec} (h : runModule m spec = .ok cm) :
     cm.module.raw.ghosts = m.raw.ghosts := by
   rw [moduleWith_raw h]
 
 /-- When `runModule` succeeds, function `i` of its module is function `i` of the input, put in
-canonical form by `canonicalize`. -/
-public theorem runModule_funcs [base ≼ env] {m : Module env α} {cm : CanonicalModule env α}
-    (h : runModule m = .ok cm) : cm.module.raw.funcs = m.raw.funcs.map canonicalize :=
+canonical form by `canonicalizeWith`, with the heads of its loop records. -/
+public theorem runModule_funcs [base ≼ env] {m : Module env α} {spec : CanonicalSpec env α}
+    {cm : CanonicalModule env α spec} (h : runModule m spec = .ok cm) :
+    cm.module.raw.funcs = m.raw.funcs.map fun f => canonicalizeWith (recordHeads spec f) f :=
   moduleWith_funcs (fun _ _ hx => run_ok_val hx) h
 
 /-- When `checkModule` succeeds, its module has the functions of the input, unchanged. -/
-public theorem checkModule_funcs [base ≼ env] {m : Module env α} {cm : CanonicalModule env α}
-    (h : checkModule m = .ok cm) : cm.module.raw.funcs = m.raw.funcs := by
+public theorem checkModule_funcs [base ≼ env] {m : Module env α} {spec : CanonicalSpec env α}
+    {cm : CanonicalModule env α spec} (h : checkModule m spec = .ok cm) :
+    cm.module.raw.funcs = m.raw.funcs := by
   rw [moduleWith_funcs (F := id) (fun _ _ hx => check_ok_val hx) h, Array.map_id]
 
 /-- When `checkModule` succeeds, its module is the module it was given. -/
-public theorem checkModule_module [base ≼ env] {m : Module env α}
-    {cm : CanonicalModule env α} (h : checkModule m = .ok cm) : cm.module = m := by
+public theorem checkModule_module [base ≼ env] {m : Module env α} {spec : CanonicalSpec env α}
+    {cm : CanonicalModule env α spec} (h : checkModule m spec = .ok cm) : cm.module = m := by
   have hr : cm.module.raw = m.raw := by
     rw [moduleWith_raw h, checkModule_funcs h]
   revert hr

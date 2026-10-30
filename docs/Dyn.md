@@ -515,10 +515,46 @@ accepts every function, the result is the module with every function in canonica
 ghosts as they are, with the three proofs for each function.
 Otherwise, the result lists the failure of each function that `run` rejects.
 
+A front end whose loops end with a *completion*, a value that says how a construct finished
+(normal, `break`, `continue`, `return`, `raise`), asks `run` to check three more properties,
+which it states in a `CanonicalSpec` (`StrataDyn/LoopExits.lean`):
+
+- each loop has one block `done(k)` where every way out of the loop meets, with the
+  completion `k` as its first parameter, so that what holds when the loop ends with `k` can be
+  asserted there (P4);
+- `done` absorbs its own loop's `break` and `continue`, and sends every other completion out
+  of the loop (P7);
+- the entry block ends in a plain `jump` to a block that nothing else enters, so that the
+  precondition can be assumed at the start of that block (F1).
+
+The front end names its completion datatype and the constructor of each role in a `CompletionShape`,
+which the check reads against the datatype's declaration, and states each loop's head and `done` in
+a `LoopRecord`, which `run` reads from the function's annotation. The records are needed because an
+enclosing loop's `done` also meets every exit of an inner loop, so the control-flow graph alone does
+not say which `done` is whose. The check verifies every record, so a wrong record is rejected, not
+trusted, within the limits that `StrataDyn/LoopExits.lean` lists. Every loop has a record. A loop
+with no exit has a record without a `done`, and the check verifies that it has no exit. A front end
+should give each `unreachable` target its own block. When code outside the loop also enters such a
+block, the pass puts a forwarding block in front of it, and the check then rejects the loop, since
+that forwarding block is not `unreachable`. A record of a loop with no back edge must name a head
+that dominates the loop's code. One such limit: the check cannot tell that head from a block before
+the loop that also dominates the loop's code. A loop that the control-flow graph does not see, such
+as `while c: return x`, still gets a preheader from `run`. The pass never builds `done`: only the
+front end knows why a loop was left. `run`'s result then also carries the proofs of P4, P7 and F1.
+The check cannot see whether a completion carries the right reason, such as a `break` built as a
+normal end.
+
+The form is built by a separate pass, after the front end, for three reasons. The pass and its
+proofs serve every front end, and need no language's semantics: it only adds blocks that
+forward (a fact that the tests check and no theorem states yet). Every producer of Dyn, a front end, a module read back from text or a later pass,
+goes through the same check. And the pass can run again after a later pass that may change the
+loops.
+
 `Canonicalize.check` checks a well-formed function without the pass. It gives back the function
 unchanged with the same proofs, or says why the function is not canonical. A stage after a pass
-that should keep the form uses it, so that a break is reported, not repaired. `run` is the pass
-followed by `check`, and `Canonicalize.checkModule` runs `check` on every function of a module.
+that should keep the form uses it, so that a break is reported, not repaired. `check` takes the
+same `CanonicalSpec` as `run`, `run` is the pass followed by `check`, and
+`Canonicalize.checkModule` runs `check` on every function of a module.
 `Body.loopRoles` names each loop's head, preheader and latch. In every body of a canonical
 function, every loop has its entry and the names are right (`Func.loopRoles_spec`), so a stage
 that places obligations reads each of these blocks by its role.
