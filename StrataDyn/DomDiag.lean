@@ -5,6 +5,10 @@
 -/
 module
 public import StrataDyn.IR
+import StrataDyn.IRProps
+import all StrataDyn.Util.List
+import Std.Data.HashMap.Lemmas
+import Std.Data.HashSet.Lemmas
 import StrataDyn.DDM
 public import Std.Data.HashMap
 import Std.Data.HashSet
@@ -26,8 +30,8 @@ avoids the definition:
     `entry.0 → rhs.0 → join.0` without it
 
 In a reachable body a use is in scope under some tree exactly when no such path exists, so the
-messages name no tree.  The module only explains, and carries no proof: `Func.WF`'s instance
-makes the decision.
+messages name no tree.  The module only explains, and proves nothing about its messages:
+`Func.WF`'s instance makes the decision.
 -/
 
 namespace Strata.Dyn
@@ -60,39 +64,101 @@ public def edges (b : Block env α) : Array (Nat × Label) := Id.run do
   for s in b.term.succs do out := out.push (b.instrs.size, s.label)
   return out
 
+/-- The number of keys of `bs` that are not in `seen`: how many blocks a search over `bs` has
+left to see. -/
+def unseenKeys (bs : HashMap Label (Block env α)) (seen : HashSet Label) : Nat :=
+  bs.keys.countP (!seen.contains ·)
+
+/-- Adding to `seen` a key of `bs` that is not in `seen` yet lowers the number of unseen keys. -/
+private theorem unseenKeys_insert_lt {bs : HashMap Label (Block env α)} {seen : HashSet Label}
+    {t : Label} (ht : bs.contains t = true) (hs : seen.contains t = false) :
+    unseenKeys bs (seen.insert t) < unseenKeys bs seen := by
+  unfold unseenKeys
+  refine List.countP_lt_countP (fun x _ hx => ?_) t ?_ ?_ ?_
+  · simp only [Bool.not_eq_true', HashSet.contains_insert, Bool.or_eq_false_iff] at hx ⊢
+    exact hx.2
+  · exact HashMap.mem_keys.mpr (by simpa using ht)
+  · simp
+  · simpa using hs
+
+/-- Go through the labels of `ts` in order.  Keep each one that `ok` accepts, that is a key of
+`bs`, and that is not in `seen` yet, so a repeated label is kept once.  Each kept label goes into
+`seen`, and `mk` of it goes at the end of `queue`. -/
+def enqueue {β : Type} (bs : HashMap Label (Block env α)) (ok : Label → Bool) (mk : Label → β) :
+    List Label → HashSet Label → Array β → HashSet Label × Array β
+  | [], seen, queue => (seen, queue)
+  | t :: ts, seen, queue =>
+    if ok t && !seen.contains t && bs.contains t then
+      enqueue bs ok mk ts (seen.insert t) (queue.push (mk t))
+    else enqueue bs ok mk ts seen queue
+
+/-- `enqueue` only grows the queue, and each label it adds uses up one unseen key of `bs`. -/
+private theorem enqueue_le {β : Type} (bs : HashMap Label (Block env α)) (ok : Label → Bool)
+    (mk : Label → β) : ∀ (ts : List Label) (seen : HashSet Label) (queue : Array β),
+      queue.size ≤ (enqueue bs ok mk ts seen queue).2.size ∧
+      unseenKeys bs (enqueue bs ok mk ts seen queue).1 + (enqueue bs ok mk ts seen queue).2.size ≤
+        unseenKeys bs seen + queue.size
+  | [], _, _ => by simp [enqueue]
+  | t :: ts, seen, queue => by
+    simp only [enqueue]
+    split
+    · rename_i hc
+      simp only [Bool.and_eq_true, Bool.not_eq_true'] at hc
+      have hlt := unseenKeys_insert_lt hc.2 hc.1.2
+      have ih := enqueue_le bs ok mk ts (seen.insert t) (queue.push (mk t))
+      simp only [Array.size_push] at ih
+      omega
+    · exact enqueue_le bs ok mk ts seen queue
+
+/-- The last count of block `l` that a path entering `l` at its start reaches without passing
+the point `d`, where `n` is the last count of `l`.  It is `none` if `d` is the start of `l`. -/
+def limitAt (d : Point) (l : Label) (n : Nat) : Option Nat :=
+  if l = d.label then (if d.count = 0 then none else some (d.count - 1)) else some n
+
+/-- The targets of the transfers out of block `b`, in order. -/
+def targets (b : Block env α) : List Label := (edges b).toList.map (·.2)
+
+/-- The targets of the transfers out of block `b` that leave from count `lim` or before, in
+order. -/
+def targetsWithin (b : Block env α) (lim : Nat) : List Label :=
+  ((edges b).toList.filter (·.1 ≤ lim)).map (·.2)
+
+/-- The labels from the search's start to entry `j` of `queue`, followed by `acc`.  Each entry's
+parent is the index of the entry it was queued from, which comes before it, and the start is its
+own parent. -/
+def pathTo (queue : Array (Label × Nat)) (j : Nat) (acc : List Label := []) : List Label :=
+  if h : j < queue.size then
+    if queue[j].2 < j then pathTo queue queue[j].2 (queue[j].1 :: acc) else queue[j].1 :: acc
+  else acc
+termination_by j
+
 /-- A path from the entry `e` to the point `y` that avoids the point `d`, as the blocks it
 passes, if there is one.  A path through block `d.label` avoids `d` only by leaving before
-it. -/
+it.  A breadth-first search: each queue entry is a label and its parent's index. -/
 public def avoidingPath (bs : HashMap Label (Block env α)) (e : Label) (d y : Point) :
-    Option (List Label) := Id.run do
-  -- The last count of a block a path entering it at its start reaches without passing `d`.
-  let limit (l : Label) (n : Nat) : Option Nat :=
-    if l = d.label then (if d.count = 0 then none else some (d.count - 1)) else some n
-  let some _ := limit e 0 | return none
-  let mut prev : HashMap Label Label := {}
-  let mut seen : HashSet Label := ({} : HashSet Label).insert e
-  let mut queue := #[e]
-  let mut i := 0
-  for _ in [:bs.size + 1] do
+    Option (List Label) :=
+  match limitAt d e 0 with
+  | none => none
+  | some _ => go (({} : HashSet Label).insert e) #[(e, 0)] 0
+where
+  /-- The search from entry `i` of `queue` on. -/
+  go (seen : HashSet Label) (queue : Array (Label × Nat)) (i : Nat) : Option (List Label) :=
     if h : i < queue.size then
-      let l := queue[i]
-      i := i + 1
-      let some b := bs[l]? | continue
-      let some lim := limit l b.instrs.size | continue
-      if l = y.label && y.count ≤ lim then
-        let mut path := [l]
-        let mut cur := l
-        for _ in [:bs.size] do
-          match prev[cur]? with
-          | some p => path := p :: path; cur := p
-          | none => break
-        return some path
-      for (k, t) in edges b do
-        if k ≤ lim && !seen.contains t && bs.contains t && (limit t 0).isSome then
-          seen := seen.insert t
-          prev := prev.insert t l
-          queue := queue.push t
-  return none
+      let l := queue[i].1
+      match bs[l]? with
+      | none => go seen queue (i + 1)
+      | some b =>
+        match limitAt d l b.instrs.size with
+        | none => go seen queue (i + 1)
+        | some lim =>
+          if l = y.label && y.count ≤ lim then some (pathTo queue i)
+          else
+            let r := enqueue bs (limitAt d · 0 |>.isSome) (·, i) (targetsWithin b lim) seen queue
+            have hr := enqueue_le bs (limitAt d · 0 |>.isSome) (·, i) (targetsWithin b lim) seen queue
+            go r.1 r.2 (i + 1)
+    else none
+  termination_by unseenKeys bs seen + (queue.size - i)
+  decreasing_by all_goals omega
 
 /-- The points after the entry of a path through the blocks `path` to `y` that avoids `d`:
 each block up to its first transfer to the next, which leaves before `d` in `d`'s block. -/
@@ -113,24 +179,25 @@ public def avoidingPoints (bs : HashMap Label (Block env α)) (e : Label) (d y :
     Option (List Point) :=
   (avoidingPath bs e d y).bind (pathPoints bs d y)
 
-/-- The labels of the blocks a path from the entry `e` reaches. -/
-def reachedFrom (bs : HashMap Label (Block env α)) (e : Label) : HashSet Label := Id.run do
-  let mut seen : HashSet Label := ({} : HashSet Label).insert e
-  let mut queue := #[e]
-  let mut i := 0
-  for _ in [:bs.size + 1] do
+/-- The labels of the blocks a path from the entry `e` reaches, by a breadth-first search. -/
+def reachedFrom (bs : HashMap Label (Block env α)) (e : Label) : HashSet Label :=
+  go (({} : HashSet Label).insert e) #[e] 0
+where
+  /-- The search from entry `i` of `queue` on. -/
+  go (seen : HashSet Label) (queue : Array Label) (i : Nat) : HashSet Label :=
     if h : i < queue.size then
-      let l := queue[i]
-      i := i + 1
-      let some b := bs[l]? | continue
-      for (_, t) in edges b do
-        if !seen.contains t && bs.contains t then
-          seen := seen.insert t
-          queue := queue.push t
-  return seen
+      match bs[queue[i]]? with
+      | none => go seen queue (i + 1)
+      | some b =>
+        let r := enqueue bs (fun _ => true) id (targets b) seen queue
+        have hr := enqueue_le bs (fun _ => true) id (targets b) seen queue
+        go r.1 r.2 (i + 1)
+    else seen
+  termination_by unseenKeys bs seen + (queue.size - i)
+  decreasing_by all_goals omega
 
 /-- The problems of a body entered where `vis` is visible, appended to `out`. -/
-partial def body (names : Array Name) (vis : HashSet ValId) (blocks : Array (Block env α))
+def body (names : Array Name) (vis : HashSet ValId) (blocks : Array (Block env α))
     (out : Array String) : Array String := Id.run do
   let mut out := out
   let some e := blocks[0]? | return out
@@ -159,7 +226,8 @@ partial def body (names : Array Name) (vis : HashSet ValId) (blocks : Array (Blo
       | some path => s!"{use} (defined in {labelText d.label}) is used in {labelText l}, \
           reachable via `{" → ".intercalate (path.map (ToDDM.nameText ·.name))}` without it"
       | none => s!"{use} (defined in {labelText d.label}) is used in {labelText l}"
-  for b in blocks do
+  for hb : b in blocks do
+    have hbLt := Array.sizeOf_lt_of_mem hb
     let n := b.instrs.size
     let regionVis (k : Nat) : HashSet ValId := Id.run do
       let mut v := vis
@@ -168,17 +236,28 @@ partial def body (names : Array Name) (vis : HashSet ValId) (blocks : Array (Blo
       return v
     for h : k in [:n] do
       let i := b.instrs[k]
+      have hiLt : sizeOf i < sizeOf b.instrs := Array.sizeOf_getElem b.instrs k (by get_elem_tactic)
       for x in uses i.args i.succs do
         unless inScopeAt x b.label k do out := out.push (report x b.label k)
       unless i.regions.isEmpty do
         let v := regionVis k
-        for r in i.regions do out := body names v r.blocks out
+        for hr : r in i.regions do
+          have hrLt := Instruction.sizeOf_lt_of_mem_regions hr
+          have hbsLt := Region.sizeOf_blocks_lt r
+          have hinsLt := Block.sizeOf_instrs_lt b
+          out := body names v r.blocks out
     for x in uses b.term.args b.term.succs do
       unless inScopeAt x b.label n do out := out.push (report x b.label n)
     unless b.term.regions.isEmpty do
       let v := regionVis n
-      for r in b.term.regions do out := body names v r.blocks out
+      for hr : r in b.term.regions do
+        have hrLt := Terminator.sizeOf_lt_of_mem_regions hr
+        have hbsLt := Region.sizeOf_blocks_lt r
+        have htLt := Block.sizeOf_term_lt b
+        out := body names v r.blocks out
   return out
+termination_by sizeOf blocks
+decreasing_by all_goals omega
 
 end DomDiag
 

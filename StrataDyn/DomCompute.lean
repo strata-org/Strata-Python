@@ -712,28 +712,77 @@ function, so that it is computed once. -/
       (firstPass_inv (flat_valid e rest) rfl (start_inv (flat_valid e rest) rfl) (predLists_ok bs))
     assign bs.toArray par 0 bs ∅
 
+/-- The work left on the stack: for each frame, the number of its successors not yet passed,
+plus one for finishing it. -/
+private def left (succs : Array (Array Nat)) (stack : Array (Nat × Nat)) : Nat :=
+  (stack.toList.map fun (i, k) => (succs[i]?.getD #[]).size - k + 1).sum
+
+/-- The number of blocks not yet seen. -/
+private def unseen (seen : Array Bool) : Nat := seen.count false
+
+/-- When the top frame `(i, k)` still has a successor to pass, replacing it by `(i, k + 1)`
+lowers `left` by one. -/
+private theorem left_pop_push (succs : Array (Array Nat)) (stack : Array (Nat × Nat)) (i k : Nat)
+    (hb : stack.back? = some (i, k)) (hk : k < (succs[i]?.getD #[]).size) :
+    left succs (stack.pop.push (i, k + 1)) + 1 = left succs stack := by
+  obtain ⟨ys, rfl⟩ := Array.back?_eq_some_iff.mp hb
+  simp [left, Array.toList_push, List.sum_append]
+  omega
+
+/-- Popping the top frame of a nonempty stack lowers `left`. -/
+private theorem left_pop (succs : Array (Array Nat)) (stack : Array (Nat × Nat)) (i k : Nat)
+    (hb : stack.back? = some (i, k)) : left succs stack.pop < left succs stack := by
+  obtain ⟨ys, rfl⟩ := Array.back?_eq_some_iff.mp hb
+  simp [left, Array.toList_push, List.sum_append]
+
+/-- Marking a block seen that was not seen lowers the number of unseen blocks. -/
+private theorem unseen_set (seen : Array Bool) (t : Nat) (h : seen.getD t true = false) :
+    unseen (seen.setIfInBounds t true) < unseen seen := by
+  have ht : t < seen.size := by
+    rcases Nat.lt_or_ge t seen.size with h' | h'
+    · exact h'
+    · simp [Array.getD, Nat.not_lt.mpr h'] at h
+  have hf : seen[t] = false := by simpa [Array.getD, ht] using h
+  simp only [unseen, Array.setIfInBounds, ht, ↓reduceDIte]
+  rw [Array.count_set]
+  simp [hf]
+  have hpos : 0 < seen.count false := Array.count_pos_iff.mpr (hf ▸ Array.getElem_mem ht)
+  omega
+
+/-- The depth-first search behind `search`, with an explicit stack.  Each frame of `stack` is a
+block and the number of its successors already passed.  The result is the final `seen` and
+`post`, which lists the finished blocks in postorder.  The search ends because each recursive
+call either marks one more block seen, or keeps `seen` and lowers `left`. -/
+private def dfs (succs : Array (Array Nat)) (seen : Array Bool) (post : Array Nat)
+    (stack : Array (Nat × Nat)) : Array Bool × Array Nat :=
+  match _hb : stack.back? with
+  | none => (seen, post)
+  | some (i, k) =>
+    match hk : (succs[i]?.getD #[])[k]? with
+    | none => dfs succs seen (post.push i) stack.pop
+    | some t =>
+      let stack' := stack.pop.push (i, k + 1)
+      if _hs : seen.getD t true = false then
+        dfs succs (seen.setIfInBounds t true) post (stack'.push (t, 0))
+      else dfs succs seen post stack'
+termination_by (unseen seen, left succs stack)
+decreasing_by
+  · exact Prod.Lex.right _ (left_pop succs stack i k _hb)
+  · exact Prod.Lex.left _ _ (unseen_set seen t _hs)
+  · have hk' : k < (succs[i]?.getD #[]).size := by
+      rcases Nat.lt_or_ge k (succs[i]?.getD #[]).size with h | h
+      · exact h
+      · simp [Array.getElem?_eq_none h] at hk
+    have hleft := left_pop_push succs stack i k _hb hk'
+    exact Prod.Lex.right _ (by omega)
+
 /-- The blocks of `bs` the entry, the first, reaches, in their order, and their positions in
 that list in reverse postorder from the entry, by a depth-first search. -/
 private def search (bs : Array (Block env α)) : Array (Block env α) × Array Nat := Id.run do
   if bs.isEmpty then return (#[], #[])
   let pos : Std.HashMap Label Nat := bs.zipIdx.foldl (fun m (b, i) => m.insert b.label i) {}
   let succs : Array (Array Nat) := bs.map fun b => ((edges b).filterMap (pos.get? ·.2)).toArray
-  let mut seen := (Array.replicate bs.size false).setIfInBounds 0 true
-  let mut post : Array Nat := #[]
-  -- Each frame is a block and how many of its successors it has passed.  A round finishes a
-  -- block or passes a successor, so `bs.size` rounds and one per transfer suffice.
-  let mut stack : Array (Nat × Nat) := #[(0, 0)]
-  for _ in [0:succs.foldl (· + ·.size) (bs.size + 1)] do
-    let some (i, k) := stack.back? | break
-    match (succs[i]?.getD #[])[k]? with
-    | none =>
-      post := post.push i
-      stack := stack.pop
-    | some t =>
-      stack := stack.pop.push (i, k + 1)
-      if seen[t]? == some false then
-        seen := seen.setIfInBounds t true
-        stack := stack.push (t, 0)
+  let (seen, post) := dfs succs ((Array.replicate bs.size false).setIfInBounds 0 true) #[] #[(0, 0)]
   -- A block is kept when the block its label names is reached.
   let mut kept : Array (Block env α) := #[]
   let mut slot : Array Nat := Array.replicate bs.size 0

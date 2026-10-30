@@ -203,10 +203,9 @@ info: 0:
 #partial_defs_in StrataPython.Dyn.Translate StrataPython.Dyn.PyTranslate
 
 /--
-info: 10:
+info: 9:
   Lean.Syntax.decodeScientificLitVal?.decode
   Std.Internal.idOpaque
-  Strata.Dyn.DomDiag.body
   String.Internal.append
   String.Internal.get
   String.Internal.length
@@ -219,13 +218,12 @@ info: 10:
 #opaque_reach StrataPython.Dyn.Translate StrataPython.Dyn.PyTranslate.translate
 
 /--
-info: 9:
+info: 8:
   Strata.Dyn.Body.addAncs (proved: Strata.Dyn.Body.addAncs_good)
   Strata.Dyn.Body.chain (proved: Strata.Dyn.Body.above_iff)
   Strata.Dyn.Body.grow (proved: Strata.Dyn.Body.reached_spec)
   Strata.Dyn.Body.intersect (proved: Strata.Dyn.Body.intersect_spec)
   Strata.Dyn.Body.sdF (proved: Strata.Dyn.Body.sdF_fuel)
-  Strata.Dyn.Body.search (unproved)
   Strata.Dyn.Name.keyNatAux (proved: Strata.Dyn.Name.natVal_natDigits)
   Strata.Dyn.NatTrie.insertAt (proved: Strata.Dyn.NatTrie.find?_insertAt)
   StrataPython.Dyn.PyTranslate.freshName (proved: StrataPython.Dyn.PyTranslate.freshName_not_mem)

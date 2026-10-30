@@ -518,6 +518,15 @@ module m {
       branch(%v.1) ^l.0() ^r.0()\n    l.0():\n      %v.2 : base.Int = const 1
       jump ^j.0()\n    r.0():\n      jump ^j.0()\n    j.0():\n      ret(%v.2)")
 
+-- Two paths avoid `%v.2`: the message names the first by the order of the transfers.
+/-- info: t.dyn:2:2: @m.f is not well formed
+  `%v.2` (defined in `l.0`) is used in `j.0`, reachable via `entry.0 → r.0 → a.0 → j.0` without it -/
+#guard_msgs in
+#eval roundTrip (withBody "      %v.1 : base.Bool = const true
+      branch(%v.1) ^l.0() ^r.0()\n    l.0():\n      %v.2 : base.Int = const 1
+      branch(%v.1) ^a.0() ^b.0()\n    r.0():\n      branch(%v.1) ^a.0() ^b.0()
+      a.0():\n      jump ^j.0()\n    b.0():\n      jump ^j.0()\n    j.0():\n      ret(%v.2)")
+
 /-! A module, a function, a block and a value may each be named `dom`, as a module is when it
 translates `dom.py`.  The text reads back as printed. -/
 

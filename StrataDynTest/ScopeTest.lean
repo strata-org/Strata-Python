@@ -28,8 +28,9 @@ Functions written as blocks, whose cases check that the rule says what it should
 `Body.checkScopedBy` checks a given tree against `Body.ScopedBy`: what a block sees through its
 parent, which trees are legal, and the block-local rule.  Then the rule itself, `Func.WF`'s
 `reachable` and `scoping`, which asks only that some tree exist: siblings, a long chain, and
-regions.  Each of these rejections has an accepted twin.  Then the tree the check computes for
-a built function, and a build with a use out of scope, which fails with an explanation.
+regions, and what the diagnostics say about uses inside regions.  Each of these rejections has
+an accepted twin.  Then the tree the check computes for a built function, and a build with a use
+out of scope, which fails with an explanation.
 -/
 
 namespace Strata.Dyn.ScopeTest
@@ -319,7 +320,37 @@ private def twoBlocks : List (Block Reg.env Unit) :=
 #guard rule (rfn #[ifI 2 twoBlocks.toArray (body "e" 1 7)] 2)
 #guard !rule (rfn #[ifI 2 twoBlocks.reverse.toArray (body "e" 1 7)] 2)
 
+/-- The message for `%?x` used in the block `l` with no definition in scope. -/
+private def notInScope (x : Nat) (l : String) : String :=
+  s!"`%?{x}` is used in `{l}` but is not in scope there: it is not defined in this body, nor \
+    visible where the body is entered"
+
+-- The diagnostics explain uses inside an instruction's regions, after the instruction's own
+-- operands: `%9` is undefined, `t`'s `%5` is in scope, and `e`'s `%2` is its owner's result.
+#guard (rfn #[.const () ⟨⟨5⟩, Base.Int⟩ (.int 7),
+    .apply () ⟨⟨2⟩, Base.Int⟩ Reg.«if».ref ⟨#[.ty Base.Int], rfl⟩ #[⟨9⟩] #[] #[⟨body "t" 5 3⟩, ⟨body "e" 2 4⟩]]
+    2).scopeDiagnostics = #[notInScope 9 "entry", notInScope 2 "e"]
+
 end Regions
+
+/-- `entry(%0)`: `%1 = mkTuple %0`, then `loop %9 { lb(%2): %4 = mkTuple %1; ret %8 } ^done`,
+and `done(%3)` returns `%0`.  `%9` and `%8` are undefined; the loop body's `%1` is in scope. -/
+private def termRegion : Func E Unit :=
+  { name := .str .base "g", retType := Demo.Value, names := #[], info := ()
+    blocks := #[
+      { label := lbl "entry", params := #[⟨⟨0⟩, Demo.Value⟩], info := ()
+        instrs := #[.apply () ⟨⟨1⟩, Demo.Value⟩ Demo.mkTuple.ref ⟨#[], rfl⟩ #[⟨0⟩] #[] #[]]
+        term := .apply () Demo.loop.ref ⟨#[.ty Demo.Value], rfl⟩ #[⟨9⟩] #[⟨lbl "done", #[]⟩]
+          #[⟨#[{ label := lbl "lb", params := #[⟨⟨2⟩, Demo.Value⟩], info := ()
+                 instrs := #[.apply () ⟨⟨4⟩, Demo.Value⟩ Demo.mkTuple.ref ⟨#[], rfl⟩ #[⟨1⟩] #[]
+                   #[]]
+                 term := .ret () ⟨8⟩ }]⟩] },
+      { label := lbl "done", params := #[⟨⟨3⟩, Demo.Value⟩], instrs := #[], term := .ret () ⟨0⟩,
+        info := () }] }
+
+-- The diagnostics also explain uses inside a terminator's regions, after the terminator's own
+-- operands.
+#guard termRegion.scopeDiagnostics = #[notInScope 9 "entry", notInScope 8 "lb"]
 
 /-! ## The computed tree
 
