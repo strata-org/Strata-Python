@@ -20,10 +20,10 @@ refs of the datatypes `Slot`, `Clo`, `Box`, `Two`, `Chain` and `Thunk`.  Among t
 make, read, write and update cells, at `Int`, at a type argument and through `Box`, that run
 regions on a cell, that call and bind closures, and that loop with a state.
 
-`ex.retype` gives a ref another contents' type, and is not certified (`retype_not_certified`):
-the ref it returns is not valid at `Bool` in a typing where its cell holds an `Int`.  Beside it,
-`ex.cellGet`, which returns its cell's contents, is.  `dyn_cert` fails on `ex.retype` and shows
-the ref it could not show valid.
+A rule may not give a ref another contents' type (`Ref.mk` is banned in rules), so `retypeImpl`
+builds such an operation by hand, as a table would build it from the rule `⟨c.raw⟩`.  It is not
+certified (`retype_not_certified`): the ref it returns is not valid at `Bool` in a typing where
+its cell holds an `Int`.  `dyn_cert` fails on it and shows the ref it could not show valid.
 
 `dyn_cert` does not prove the certificate of a rule that builds a closure over a list of cells,
 such as `ex.mkClo`, which has the shape of Python's `mkClosure` (its failure is pinned below);
@@ -135,10 +135,18 @@ example : ExSem.model.OpCertified accounts 0 ExSem.impl.ex.tick := by dyn_cert [
 example : ExSem.model.OpCertified accounts 0 ExSem.impl.ex.two := by dyn_cert [accounts, acct, caps]
 example : ExSem.model.OpCertified accounts 0 ExSem.impl.ex.withCell := by dyn_cert [accounts, acct, caps]
 
-/-- **`ex.retype` is not certified**: in a typing where location `0` holds an `Int`, a ref to it
-at `Int` is valid, and the same ref at `Bool`, which the rule returns, is not. -/
+/-- An operation that returns its ref argument at `Bool`, as a table would build it from the rule
+`⟨c.raw⟩`, which a table rejects. -/
+def retypeImpl : OpImpl ExSem.interp ExSem.W where
+  typeArgc := 0
+  shape _ := { args := [ExSem.T.base.Ref ExSem.T.base.Int],
+               ret := some (ExSem.T.base.Ref ExSem.T.base.Bool) }
+  fn σ _ _ := Impl.pure fun (c : Ref σ Int) => (⟨c.raw⟩ : Ref σ Bool)
+
+/-- **`retypeImpl` is not certified**: in a typing where location `0` holds an `Int`, a ref to it
+at `Int` is valid, and the same ref at `Bool`, which the operation returns, is not. -/
 theorem retype_not_certified (k : Nat) :
-    ¬ ExSem.model.OpCertified accounts k ExSem.impl.ex.retype := by
+    ¬ ExSem.model.OpCertified accounts k retypeImpl := by
   intro h
   let S : Typing := { cell := fun l => if l = 0 then some (.app 4 []) else none }
   have hx := h #v[] S ⟨⟨0, trivial⟩⟩ (by
@@ -147,20 +155,20 @@ theorem retype_not_certified (k : Nat) :
   have hv : S.Valid 0 (.app 3 []) := Typing.allValid_singleton.mp hx
   exact nomatch (show (some (Ty.app 4 []) : Option Ty) = some (.app 3 []) from hv)
 
--- `dyn_cert` fails on `ex.retype`, and shows the result that it could not show valid.
+-- `dyn_cert` fails on `retypeImpl`, and shows the result that it could not show valid.
 /--
 error: dyn_cert: 1 goal(s) left proving
-  ExSem.model.OpCertified accounts 0 ExSem.impl.ex.retype
+  ExSem.model.OpCertified accounts 0 retypeImpl
 each a request, result, exit or world that the recipe could not show valid:
   targs✝ : Vector Ty 0
   S✝ : Typing
-  x✝ : ExSem.interp Run (Ty.app 0 [Ty.app 4 []])
-  a✝ : S✝.Valid (Ref.loc x✝) (Ty.app 4 [])
+  x✝ : ExSem.interp Run (ExSem.T.base.Ref ExSem.T.base.Int)
+  a✝ : S✝.Valid (Ref.loc x✝) ExSem.T.base.Int
   ⊢ S✝.Valid { raw := x✝.raw }.loc (Ty.app 3 [])
 -/
 #guard_msgs in
-example : ExSem.model.OpCertified accounts 0 ExSem.impl.ex.retype := by
-  dyn_cert [accounts, acct, caps]
+example : ExSem.model.OpCertified accounts 0 retypeImpl := by
+  dyn_cert [accounts, acct, caps, retypeImpl]
 
 -- `dyn_cert` fails on `ex.mkClo`: it cannot show valid the closure that `bindAll` makes over the
 -- list of cells.  The pin keeps the message down to the hypotheses, because the goal after them

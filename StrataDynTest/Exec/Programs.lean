@@ -611,12 +611,10 @@ def pickI : Func E Unit := fn "pickI" intT [
 def pick2 : Func E Unit := fn "pick2" intT [
   blk "entry" [] [cst 0 intT (.int 2), app 1 intT Ex.pick.ref ⟨#[], rfl⟩ [0]] (ret 1)]
 
-/-! ## Cells updated in place, retyped, and of their own type
+/-! ## Cells updated in place, and of their own type
 
 `cellAdds(x) = x + 1 + 2`, by two updates of one cell.  `pushes(n)` pushes `0, …, n - 1` onto a
-sequence in a cell and packs it.  `retyped(x)` reads, at `Bool`, a cell holding `x`, through a
-ref that `ex.retype` gave another contents' type; `retypedTwin(x)` reads the cell through its
-own ref.  `links` makes a chain of two links, each in a cell, and follows it: `1`.  `thunks(x)`
+sequence in a cell and packs it.  `links` makes a chain of two links, each in a cell, and follows it: `1`.  `thunks(x)`
 stores, in a cell, a thunk whose closure returns a thunk, and calls through it twice: `x`. -/
 
 def chainT : TypeExpr E := Ex.Chain
@@ -635,16 +633,6 @@ def pushes : Func E Unit := fn "pushes" intT [
     app 8 intT Ex.add.ref ⟨#[], rfl⟩ [4, 7]] (goto (to "head" [8])),
   blk "done" [] [app 9 seqT Base.refGet.ref ⟨#[.ty seqT], rfl⟩ [3], app 10 intT Ex.pack.ref ⟨#[], rfl⟩ [9]]
     (ret 10)]
-
-def retyped : Func E Unit := fn "retyped" boolT [
-  blk "entry" [d 0 intT] [app 1 refT Ex.cellNew.ref ⟨#[], rfl⟩ [0],
-    app 2 (Base.Ref boolT) Ex.retype.ref ⟨#[], rfl⟩ [1],
-    app 3 boolT Base.refGet.ref ⟨#[.ty boolT], rfl⟩ [2]] (ret 3)]
-
-def retypedTwin : Func E Unit := fn "retypedTwin" intT [
-  blk "entry" [d 0 intT] [app 1 refT Ex.cellNew.ref ⟨#[], rfl⟩ [0],
-    app 2 (Base.Ref boolT) Ex.retype.ref ⟨#[], rfl⟩ [1],
-    app 3 intT Base.refGet.ref ⟨#[.ty intT], rfl⟩ [1]] (ret 3)]
 
 def links : Func E Unit := fn "links" intT [
   blk "entry" [] [app 0 chainT Ex.Chain.done.ref ⟨#[], rfl⟩ [],

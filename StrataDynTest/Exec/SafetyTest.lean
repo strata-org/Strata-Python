@@ -134,19 +134,6 @@ def outcome (i : Nat) (as : List (Dyn M.interp)) : Option (Fault ⊕ Int) :=
 -- The twin on its start: `bump` on a ref to cell `0` of the empty heap faults at its write.
 #guard outcome 0 FrameTest.args == some (.inl (.badCell 0))
 
-/-- How `Ex`'s `retyped` on `5` ended: its fault, if it faulted. -/
-def retypedFault : Option Fault :=
-  match Programs.mod [Programs.retyped] with
-  | .error _ => none
-  | .ok md =>
-    match (runModule ExSem.model md (Programs.nm "retyped") #[ExSem.model.arg (5 : Int)]
-        1000).result with
-    | .fault f => some f
-    | .ok _ => none
-
--- The twin with an uncertified rule: `ex.retype`'s ref fails the machine's check at the read.
-#guard retypedFault == some (.badCell 0)
-
 /--
 info: 'Strata.Dyn.Exec.never_badCell' depends on axioms: [propext, Classical.choice, Quot.sound]
 -/

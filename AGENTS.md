@@ -64,7 +64,10 @@ so a mismatch is a test failure, not a build error.
 - Python on Dyn goes in `StrataPython/Dyn/`.
 - Tests (`StrataDynTest/`, `StrataPythonTest/Dyn/`) are `module` files; `import all` is
   allowed. Check behaviour, well-formedness included, with `#guard` and `#guard_msgs`. Use
-  `decide +kernel` only where a later proof uses the result, and never `native_decide`.
+  `decide +kernel` only where a later proof uses the result, and never `native_decide`. The one
+  exception is a rule or helper in `StrataDynTest/Exec/RuleErrorTest.lean`,
+  `TableCheckTest.lean` or `RuleHelpers.lean` that a test expects the "runs as proved" check to
+  reject: there `native_decide` (like `sorry` and false axioms) is the test's input.
 
 The scope pass and the translator share their tests. To add one, put `NAME.py` in
 `StrataPythonTest/Dyn/dyn_tests/` and:

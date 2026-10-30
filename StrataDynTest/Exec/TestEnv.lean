@@ -21,7 +21,7 @@ over two regions, two comprehensions and a fold, each with a state of its rule's
 closures, their partial application and a closure over a list of cells, three terminators of
 its own, and an instruction with no rule.  For the heap it has rules that make, read and write
 cells, one that hands a cell it made to a region,
-updates a cell in place, generic rules at any type, a rule that retypes a ref, and datatypes
+updates a cell in place, generic rules at any type, and datatypes
 that hold a ref, a closure, refs of a type parameter, a ref of themselves and a closure that
 returns themselves.  Its rules and its table, `ExSem`, are here; `RunTest.lean`
 and `HeapTest.lean` run modules against them.
@@ -103,8 +103,6 @@ public environment Ex extends Base where
   insn cellAdd (c : Ref Int) (d : Int) : Unit
   /-- Push `x` onto the sequence in `c`, as a rule, in one request. -/
   insn cellPush (c : Ref (Sequence Int)) (x : Int) : Unit
-  /-- `c`, as a ref of `Bool`: a rule that retypes a ref, which no rule should do. -/
-  insn retype (c : Ref Int) : Ref Bool
   /-- Make a cell holding `v`, run `body` on it, and add the body's result to the cell's final
   contents. -/
   insn withCell (v : Int) (&body (c : Ref Int) : Int) : Int
@@ -321,9 +319,6 @@ section
 
 @[dyn_sem Ex.cellPush] def cellPush (c : Ref σ (Array Int)) (x : Int) : Sem ε E Unit :=
   modifyRef c (·.push x)
-
-/-- A ref at another contents' type, which the machine's check at the access catches. -/
-@[dyn_sem Ex.retype] def retype (c : Ref σ Int) : Ref σ Bool := ⟨c.raw⟩
 
 @[dyn_sem Ex.withCell]
 def withCell (v : Int) (body : Region ε [Ref σ Int] Int) : Sem ε E Int := do

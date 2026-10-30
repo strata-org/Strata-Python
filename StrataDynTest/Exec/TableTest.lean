@@ -209,9 +209,12 @@ info: @[expose]
 public def ops : Array (Strata.Dyn.Name × OpImpl interp W) :=
   #[(Strata.Dyn.Name.str (Strata.Dyn.Name.str Strata.Dyn.Name.base "tiny") "pred", impl.tiny.pred)]
 ---
+info: @[expose]
+public def w0 : (σ : Type) → [Store σ] → W σ := fun (σ : Type) [Store σ] => default
+---
 info: @[expose, reducible]
 public def table : Table :=
-  { typeNames := typeNames, interp := interp, W := W, w0 := fun (σ : Type) [Store σ] => default, ops := ops }
+  { typeNames := typeNames, interp := interp, W := W, w0 := w0, ops := ops }
 -/
 #guard_msgs in
 #dyn_sem_table TinySem for Tiny (trace := true)

@@ -29,7 +29,11 @@ set_option autoImplicit false
     at each token;
   * `S.T.n`, the tag of the type `n`, a function of its parameters' tags: `S.T.base.Int`.
     Types with one Lean type have one tag: under `@[dyn_type Hd.Meters] Int`,
-    `S.T.hd.Meters` is `S.T.base.Int`;
+    `S.T.hd.Meters` is `S.T.base.Int`.  Each type rule must unfold to an inductive or structure type
+    with no index, a constructor and no axiom but Lean's three, or an opaque type, in `Type`,
+    applied to exactly its type parameters, and two type rules to two such types, neither `Ref` nor
+    `FnRef`: then no two tags of the table's types decode to Lean types that are equal by definition or by proof
+    (docs/Dyn.md says what this trusts).  Nor may a type rule's values hold a `Fault`;
   * `S.decode`, the decoding, not reducible, and at `Decode.mk (S.decode σ)` the tag of each
     Lean type as an instance: a `TagOf σ` of a type, a `TagCon σ` or `TagCon₂ σ` of a type
     constructor of one or two parameters, such as `Except`, the `TagCon σ` of `Ref σ`, and a
@@ -665,6 +669,28 @@ def emitTagInstances (cx : TableCtx) (trace : Bool) (headRules : Array (Nat × T
     if let some (cls, v) := inst? then
       emitInstance trace n' (← binders cls F) (← lamσ v)
 
+/-- Whether a value of the inductive type `c` may hold a `Fault`: whether a constructor's type of
+`c` names `Fault`, transitively through the inductive types, constructors and definitions it
+names, so that a field whose type is a `def`, an `abbrev` or an instance's field of `Fault` counts
+too.  Lean's library can't name `Fault`, so the walk doesn't enter it. -/
+def holdsFault (env : Environment) (c : Lean.Name) : Bool := Id.run do
+  let mut todo := #[c]
+  let mut seen : Lean.NameSet := {}
+  while h : todo.size > 0 do
+    let n := todo[todo.size - 1]
+    todo := todo.pop
+    if n == ``Strata.Dyn.Exec.Fault then return true
+    if seen.contains n || isLeanLibrary env n then continue
+    seen := seen.insert n
+    match env.find? n with
+    | some (.inductInfo i) =>
+      for k in i.ctors do
+        if let some ci := env.find? k then todo := todo ++ ci.type.getUsedConstants
+    | some (.ctorInfo ci) => todo := todo.push ci.induct
+    | some (.defnInfo d) => todo := todo ++ d.value.getUsedConstants
+    | _ => pure ()
+  return false
+
 /-- Emit the table.  See the module doc. -/
 def elabSemTable (s e : Ident) (world? : Option Term) (trace : Bool) : CommandElabM Unit := do
   let trace := trace || dyn.semTable.trace.get (← getOptions)
@@ -674,6 +700,9 @@ def elabSemTable (s e : Ident) (world? : Option Term) (trace : Bool) : CommandEl
   let entry ← resolveEnv e
   withRef e <| liftCoreM (checkNoDuplicates entry.leanNs)
   let env ← getEnv
+  -- The environment before the command: a declaration added after it, under the table's
+  -- namespace, is one the command emitted.
+  let before := env
   let ns := entry.leanNs
   let types := allTypes env ns
   -- Every type's rule, with every field of a datatype checked.
@@ -730,6 +759,68 @@ def elabSemTable (s e : Ident) (world? : Option Term) (trace : Bool) : CommandEl
         headRules := headRules.push (k, r, t.params.size)
         typeNames := typeNames.push t.envName
         typeHead := typeHead.insert t.envName k
+  -- Each head's Lean type, applied to its parameters (types, or the token's `Store`) and
+  -- unfolded, must be an inductive or structure type in `Type`, with no index, a constructor
+  -- and no axiom, or an opaque type, applied to exactly those parameters, and two heads must
+  -- give two such type constructors, neither the engine's `Ref` or `FnRef`.  Then no two tags
+  -- decode to Lean types that are equal, by definition or by proof: otherwise a rule could read
+  -- a cell made at one tag through the other, with a `cast` and no constructor, and the machine
+  -- would stop with `badCell`.  Nor may a head's values hold a `Fault`, so that a rule can't stop
+  -- with a machine's fault that it was given.
+  let mut formers : Std.HashMap Lean.Name (Lean.Name × Lean.Name) :=
+    ({} : Std.HashMap Lean.Name (Lean.Name × Lean.Name))
+      |>.insert ``Strata.Dyn.Exec.Ref (``Strata.Dyn.Exec.Ref, `base.Ref)
+      |>.insert ``Strata.Dyn.Exec.FnRef (``Strata.Dyn.Exec.FnRef, `base.Fn)
+  for (k, r, _) in headRules do
+    let n := typeNames[k]!
+    let found ← liftTermElabM do
+      let a ← mkConstWithLevelParams r.decl
+      forallTelescopeReducing (← inferType a) fun xs body => withTransparency .all do
+        let inType := match ← whnf body with
+          | .sort u => u.isNeverZero
+          | _ => false
+        -- Each parameter is a type, or the token's `Store`: a term argument, such as an index
+        -- or a predicate, could be rewritten by a theorem.
+        let mut typesOnly := true
+        for x in xs do
+          let ty ← whnf (← inferType x)
+          unless ty.isSort || ty.isAppOf ``Strata.Dyn.Exec.Store do typesOnly := false
+        let t ← whnf (mkAppN a xs)
+        let env ← getEnv
+        let former ← match t.getAppFn with
+          | .const c _ => match env.find? c with
+            | some (.inductInfo i) =>
+              -- No index, a constructor, and no axiom but Lean's three in its declaration.  The
+              -- one type with no constructor allowed is the engine's `NoLoc`.
+              pure (if i.numIndices == 0 && (!i.ctors.isEmpty || c == `Strata.Dyn.Exec.NoLoc)
+                then some c else none)
+            | some (.opaqueInfo _) => pure (some c)
+            | _ => pure none
+          | _ => pure none
+        let former ← former.filterM fun c => return (← collectAxioms c).all allowedAxioms.contains
+        return (inType && typesOnly, former.filter fun _ => t.getAppArgs == xs, t)
+    match found with
+    | (false, _, _) =>
+      throwErrorAt e m!"the type rule {.ofConstName r.decl} for {showEnvName n} is not a type in \
+        `Type` whose parameters are types: a proof could equate two propositions, or rewrite a \
+        term parameter, and so equate the Lean types of two tags"
+    | (_, none, _) =>
+      throwErrorAt e m!"the type rule {.ofConstName r.decl} for {showEnvName n} isn't, once \
+        unfolded, an inductive, structure or opaque type with no index, a constructor and no \
+        axiom but propext, Classical.choice and Quot.sound, applied to exactly its parameters: \
+        it could give a Lean type that another tag \
+        has, by definition or by proof, so a rule could read a cell at the wrong tag; make it a \
+        structure"
+    | (_, some c, _) =>
+      if let some (d, m) := formers[c]? then
+        throwErrorAt e m!"the type rules {.ofConstName d} for {showEnvName m} and \
+          {.ofConstName r.decl} for {showEnvName n} are both the type {.ofConstName c}, so one \
+          Lean type would get two tags: give them one type rule, or distinct Lean types"
+      if holdsFault (← getEnv) c then
+        throwErrorAt e m!"the type rule {.ofConstName r.decl} for {showEnvName n} is the type \
+          {.ofConstName c}, whose values may hold a Fault: a rule given one could stop with a \
+          fault that only the machine reports"
+      formers := formers.insert c (r.decl, n)
   let tns := (← getCurrNamespace) ++ s.getId
   let worldAt : Term ← `($(rootId (tns ++ `W)) σ)
   let cx : TableCtx := { ns := tns, rules, heads, world := worldAt }
@@ -793,9 +884,59 @@ def elabSemTable (s e : Ident) (world? : Option Term) (trace : Bool) : CommandEl
         index := index.push (o.envName, ← `($(execId "LinkOp.impl") $(quote entries.size)))
         entries := entries.push (← `(($(nameLit o.envName), $(cx.own iname))))
     emitDef trace `ops (← `(Array (Strata.Dyn.Name × $implTy))) (← `(#[$entries,*]))
+    -- The wrappers, checked as rules are: they supply the world parts' instances, by instance
+    -- search, and those could run other code or forge a ref.
+    let opsName ← liftCoreM <| withoutExporting <| resolveGlobalConstNoOverload (mkIdent `ops)
+    let tableNs ← getCurrNamespace
+    let emitted ← liftCoreM <| emittedSince before tableNs
+    -- A wrapper that failed to elaborate holds `sorry`; its own error says why, so the table
+    -- stops there, and is neither checked nor registered.
+    if (← get).messages.hasErrors then throwAbortCommand
+    -- Each rule of the table, so that a finding names its rule, and the other declarations its
+    -- wrappers name, which an axiom is traced back to after the rules.
+    let envNow ← getEnv
+    let emittedSet : Lean.NameSet := emitted.foldl (·.insert ·) {}
+    let mut ruleOf : Std.HashMap Lean.Name MessageData := {}
+    let mut rulesOf : Array Lean.Name := #[]
+    for o in allOps envNow ns do
+      if let some r := findSemRule? envNow o.fullName then
+        unless ruleOf.contains r.decl do
+          let msg := m!"the table {s.getId}: rule {.ofConstName r.decl} for {showEnvName o.envName}"
+          ruleOf := ruleOf.insert r.decl msg
+          -- The rule's wrappers, which reach the world parts' instances the rule takes.
+          for w in [`rule, `again, `impl] do
+            ruleOf := ruleOf.insert (privateToUserName tableNs ++ w ++ o.envName) msg
+          rulesOf := rulesOf.push r.decl
+    -- Found only for an axiom finding: the declarations the wrappers name, after the rules.
+    let suspects (_ : Unit) : Array Lean.Name := Id.run do
+      let mut seen : Lean.NameSet := rulesOf.foldl (·.insert ·) {}
+      let mut out := rulesOf
+      -- Then the rules' wrappers, which also reach the instances that the table supplies.
+      for e in emitted do
+        if (ruleOf[privateToUserName e]?).isSome && !seen.contains e then
+          seen := seen.insert e
+          out := out.push e
+      for e in emitted do
+        let some ci := envNow.find? e | continue
+        for c in (ci.value?.map (·.getUsedConstants)).getD #[] do
+          unless emittedSet.contains c || seen.contains c || isLeanLibrary envNow c do
+            seen := seen.insert c
+            out := out.push c
+      return out
+    if let some why ← liftTermElabM <| notAsProved opsName
+        m!"the table {s.getId}, through {.ofConstName opsName}," (emittedSet.contains ·)
+        (fun n => ruleOf[n]? <|> ruleOf[privateToUserName n]?) suspects then
+      throwError why
+    -- The initial world, checked as a rule is: its `Inhabited` instance could hold a forged ref.
+    emitDef trace `w0 (← `((σ : Type) → [$(execId "Store") σ] → $(cx.own `W) σ))
+      (← `(fun (σ : Type) [$(execId "Store") σ] => default))
+    let w0Name ← liftCoreM <| withoutExporting <| resolveGlobalConstNoOverload (mkIdent `w0)
+    if let some why ← liftTermElabM <| notAsProved w0Name
+        m!"the initial world of {s.getId}, {.ofConstName w0Name}," then
+      throwError why
     emitDef trace `table (← `($(execId "Table")))
       (← `({ typeNames := $(cx.own `typeNames), interp := $(cx.own `interp), W := $(cx.own `W),
-             w0 := fun (σ : Type) [$(execId "Store") σ] => default, ops := $(cx.own `ops) }))
+             w0 := $(cx.own `w0), ops := $(cx.own `ops) }))
       (reducible := true)
     -- What the engine needs of the base, if `E` extends it.
     if let [some cUnit, some cBool, some cInt, some cFloat, some cStr] :=

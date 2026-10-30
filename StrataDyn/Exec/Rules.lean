@@ -6,6 +6,16 @@
 module
 public meta import Lean.Elab.Command
 public meta import StrataDyn.DSL.Model
+public meta import Lean.Compiler.Old
+public meta import Lean.Compiler.ImplementedByAttr
+public meta import Lean.Compiler.ExternAttr
+public meta import Lean.Compiler.InitAttr
+public meta import Lean.Compiler.CSimpAttr
+public meta import Lean.Elab.PreDefinition.WF.Eqns
+public meta import Lean.Elab.PreDefinition.Structural.Eqns
+public meta import Lean.Elab.PreDefinition.PartialFixpoint.Eqns
+public meta import Lean.Util.CollectAxioms
+public meta import Lean.Compiler.IR
 public import StrataDyn.Exec.Sem
 
 set_option autoImplicit false
@@ -82,9 +92,9 @@ module that imports both keeps the first and records the second (`Registry`), an
       tagInt : TagOf σ Int
     variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [Lang σ ε]
     ```
-  * Rules are trusted: a rule is what its instruction means, and registration checks its shape
-    and types, not its meaning.  `implemented_by` and `@[extern]` in a rule are flags for
-    review, as in Lean.
+  * A rule's meaning is part of what the IR trusts, but the code that runs must be that meaning
+    ("Running as proved" below).  Registration checks a rule's shape only; `#dyn_sem_table`
+    checks that its rules run as they are written, and `#dyn_check_rule` checks one rule.
 
   An instruction without regions or successors may also take a pure rule,
   `{σ : Type} → [Store σ] → {α₁ … αₘ : Type} → ⟦a₁⟧ → … → ⟦R⟧`, with `σ` only if its types
@@ -623,6 +633,701 @@ def noRuleReason (o : OpInfo) : Option String :=
   | .decl =>
     if machineOps.contains o.fullName then some "implemented by the machine" else none
 
+/-- `e` with each optional or automatic argument's default dropped: `optParam τ d` and
+`autoParam τ stx` become `τ`. -/
+def dropDefaults (e : Expr) : Expr :=
+  e.replace fun
+    | .app (.app (.const n _) τ) _ => if n == ``optParam || n == ``autoParam then some τ else none
+    | _ => none
+
+/-- Whether `e` never runs: a proof, a proposition, or a predicate (a function to
+propositions).  The walk puts the variables that `e` mentions in the local context, so `e` may
+come from inside a binder. -/
+def neverRuns (e : Expr) : MetaM Bool := do
+  try
+    if ← isProof e then return true
+    let ty ← whnfD (← inferType e)
+    if ty.isProp then return true
+    isPropFormerType ty
+  catch _ => return false
+
+/-- The constants `e` mentions outside its proofs, propositions and predicates, and outside its
+arguments' defaults: what can run.  It opens each binder, so that a proof inside a body is
+seen as one. -/
+partial def usedOutsideProofs (e : Expr) : MetaM (Array Lean.Name) := do
+  let found ← IO.mkRef (#[] : Array Lean.Name)
+  let seen ← IO.mkRef (∅ : Std.HashSet Expr)
+  let rec visit (t : Expr) : MetaM Unit := do
+    if (← seen.get).contains t then return
+    seen.modify (·.insert t)
+    if ← neverRuns t then return
+    match t with
+    | .const n _ => found.modify (·.push n)
+    -- A primitive projection, such as `c.1`, reads a field as `Ref.loc` does.
+    | .proj s i b =>
+      if let some f := (getStructureFields (← getEnv) s)[i]? then found.modify (·.push (s ++ f))
+      visit b
+    | .app .. => t.withApp fun f args => do visit f; args.forM visit
+    | .lam .. => lambdaTelescope t fun xs b => do
+        for x in xs do visit (← inferType x)
+        visit b
+    | .forallE .. => forallTelescope t fun xs b => do
+        for x in xs do visit (← inferType x)
+        visit b
+    | .letE n ty v b _ => do
+        visit ty; visit v
+        withLetDecl n ty v fun x => visit (b.instantiate1 x)
+    | .mdata _ b => visit b
+    | _ => pure ()
+  visit (dropDefaults e)
+  found.get
+
+/-! ## Running as proved
+
+A rule's meaning is its definition, so the code that runs must be that definition: otherwise a
+run, and a comparison of runs with a reference implementation, would test other code than the
+proofs see.  A ref's validity is a proof, but at the machine's own token it is `True`, so a rule
+that built a raw ref could point it at any cell without `sorry` or an axiom.  So a rule may reach:
+
+* no axiom other than `propext`, `Classical.choice` and `Quot.sound`, even inside proofs, nor in the
+  lemma of a `@[csimp]` swap it is compiled with;
+* outside proofs, propositions and predicates, which never run, nothing that tells where a
+  ref's cell or a closure's function is (`Ref.loc`, `FnRef.idx`, a match on a ref), except
+  equality of refs; no code that builds a raw ref or closure (`Ref.Raw.mk`, `FnRef.Raw.mk`), nor a
+  ref or closure from a raw one (`Ref.mk`, `FnRef.mk`), which could give it another type; no code that builds or takes apart a machine request (`MReq`), which holds
+  locations, except `MReq.Out`, which computes only a type, and `MReq.writesCell`, whose one bit
+  depends only on the constructor; and
+  not the machine's region, heap or call capability, which only the declarations a table command
+  emitted may build: a pass may move cells, and a rule must not see it.  A name trusted this way
+  must still run its definition, so a `@[csimp]` swap of it is a finding.  So is a swap of a
+  request's or a ref's constructor, field or eliminator: it doesn't change the trusted names' code,
+  which `Sem.lean` compiled before, but code compiled later might name one;
+* outside proofs, propositions and predicates, no definition outside Lean's `Init`, `Std` and
+  `Lean` that runs other code
+  than its body (`@[implemented_by]`, `@[extern]`, `@[init]`, a hand-written `_unsafe_rec`), keeps its body
+  from proofs (`opaque`, or `partial`, whose loop proofs see as an opaque constant, so a run that
+  never ends would look like one that ends), or whose module does not expose its body (a `module` file sees it as an
+  axiom, so nothing behind it can be checked).
+
+A `noncomputable` or `unsafe` definition has no code that a table could run, so the compiler or
+the kernel refuses a table whose rule reaches one.
+
+Lean's own library is trusted to run as it is defined, except for its loops that may never end,
+where proofs see a value: a rule may not reach `Lean.Loop.forIn` and `repeatM` (a `while` loop),
+`Lean.Order.fix` (a `partial_fixpoint` definition), the fixed points `WellFounded.extrinsicFix`
+(which a `for` loop over `0...n` runs), nor any `partial` definition of the library, or one that
+runs a `partial` definition, unless `endingPartials` lists it, nor run `ST` code (`runST`,
+`runEST`, `Void.mk`, `ST.Prim.mkRef`), where a cell that holds a closure can make a loop. A
+`module` file sees most of the library's definitions only as axioms, so a table sees such a loop
+only where the loop is visible, and finds a range loop (`for i in a...b`) by its instance's
+type; the recheck sees them all. The library is told by its modules' names, so a directory of
+the search path, other than Lean's own, with a module named `Init`, `Std` or `Lean` fails every
+check. The walk follows each definition's body, the code that a `@[csimp]` lemma swaps in, and
+the body that a recursive definition runs. A `local` `@[csimp]` lemma leaves the csimp state
+when its scope ends, but stays a constant: so every constant `@f = @g` of a definition `f` that
+the walk reaches, which Lean would take as a lemma, must be a theorem with the axioms above, not
+a definition or an `unsafe` constant; and so must the lemmas of `g`, of their targets, and so on
+along the chain, since Lean applies swaps one after another. Then the compiled code of each of
+our own definitions of this module may call only what its own definition reaches, so a swap that
+a `local` `@[csimp]` lemma made here shows too. The check also sees a swap that another module
+made, when the rule's compiled code inlines the swapped code and that code calls one of our
+definitions that the rule's definition doesn't reach; and it follows a `local` swap that another
+module made with a public lemma, through the lemma. But a swap whose lemma is private to another
+module, or in a module that is imported only privately, is not visible to the check when the
+rule's own code doesn't show it, and nor is another module's `@[init]` attribute.
+
+The check reads Lean's compiler data, and checks that a `@[csimp]` entry's lemma states its swap
+(`statesSwap`) and that an `_unsafe_rec` comes from a recursive definition (`recursiveByLean`).
+Meta code in a rule's module or its imports could write such data directly; the check trusts that
+none does, and a review of those modules looks for it (`run_cmd`, `run_elab`, `run_meta`, an
+`#eval` of an elaboration or meta action, and our own elaborators).
+
+`#dyn_sem_table` runs the check on its `ops`, which reach every rule through its wrapper, and
+names in each finding the first rule on the path.  The check covers the tables it makes; a
+`Table` or `Model` built by hand must run it too. -/
+
+/-- The axioms a rule may reach. -/
+def allowedAxioms : List Lean.Name := [``propext, ``Classical.choice, ``Quot.sound]
+
+/-- What tells where a ref's cell, or a closure's function and captures, is, or builds a raw ref
+or closure: the fields, the constructors, and the eliminators that take them apart.  Only the
+machine may know a location: a pass that removes or renumbers cells, such as ref-to-reg's
+promotion of cells to values, would otherwise change what a rule returns.  Only the machine may
+build a raw ref or closure: at the machine's own token a ref's validity is `True`, so a rule could
+point a ref at any cell, or give a closure another closure's captures. -/
+def locationConsts : List Lean.Name :=
+  [``Ref.loc, ``FnRef.idx, ``FnRef.captured,
+   ``Ref.Raw.loc, ``Ref.Raw.valid, ``Ref.Raw.mk, ``Ref.Raw.rec, ``Ref.Raw.casesOn, ``Ref.Raw.recOn,
+   ``FnRef.Raw.idx, ``FnRef.Raw.captured, ``FnRef.Raw.valid, ``FnRef.Raw.mk, ``FnRef.Raw.rec,
+   ``FnRef.Raw.casesOn, ``FnRef.Raw.recOn]
+
+/-- Equality of refs and of closures: it reads locations, and shows a rule nothing of them. -/
+def locationEqualities : List Lean.Name := [``instDecidableEqRef, ``instDecidableEqFnRef]
+
+/-- The machine's request's constructors and its eliminators, read from `env`, so that a new
+constructor is banned too: a request holds locations, so code that builds one could ask for a
+cell that nobody passed, and code that takes one apart could read where a cell is.  Every matcher
+on a request reaches `MReq.rec`. -/
+def requestConsts (env : Environment) : List Lean.Name :=
+  let ctors := match env.find? ``MReq with
+    | some (.inductInfo i) => i.ctors
+    | _ => [``MReq.region, ``MReq.call, ``MReq.new, ``MReq.get, ``MReq.set, ``MReq.modify, ``MReq.bind]
+  ctors ++ [``MReq.rec, ``MReq.casesOn, ``MReq.recOn]
+
+/-- Lean's library loops that are no `partial` definition themselves, or that a `module` file sees
+only as an axiom: a `while` loop runs `Lean.Loop.forIn`, which runs `repeatM`, and a
+`partial_fixpoint` definition is a fixed point by `Lean.Order.fix`, and `WellFounded.extrinsicFix`
+needs no proof that its relation is well-founded.  Proofs see a value, while a run may loop
+forever. -/
+def loopConsts : List Lean.Name :=
+  [``Lean.Loop.forIn, ``repeatM, ``Lean.Order.fix, ``WellFounded.extrinsicFix,
+   ``WellFounded.extrinsicFix₂, ``WellFounded.extrinsicFix₃]
+
+/-- The range types of `for i in a...b` and its variants.  Their `ForIn` instances run a loop
+through `WellFounded.extrinsicFix`, which a `module` file doesn't see, since the instances' bodies
+aren't exposed; so the check finds such an instance by its type. -/
+def rangeTypes : List Lean.Name :=
+  [``Std.Rcc, ``Std.Rco, ``Std.Rci, ``Std.Roc, ``Std.Roo, ``Std.Roi, ``Std.Ric, ``Std.Rio,
+   ``Std.Rii]
+
+/-- Whether `c` is a `ForIn` or `ForIn'` instance over one of the `rangeTypes`. -/
+def isRangeLoop (c : Lean.Name) : MetaM Bool := do
+  let some ci := (← getEnv).find? c | return false
+  forallTelescopeReducing ci.type fun _ b => do
+    let b ← whnfR b
+    unless (b.isAppOf ``ForIn' || b.isAppOf ``ForIn) && b.getAppNumArgs ≥ 2 do return false
+    return (b.getArg! 1).getAppFn.constName?.any rangeTypes.contains
+
+/-- Lean's library definitions that run a loop the check would reject, and that a rule may reach
+anyway, because the loop ends on every argument: it runs over finite data that the definition
+receives, here a slice's characters, through a finite iterator that the definition builds itself,
+never over an iterator, a stream or a pattern that its caller supplies.  A function that the
+caller passes, such as `foldl`'s, runs once on each character, and is in the rule's body, so the
+check walks it.  The check trusts each entry without entering it, and rejects a swap of it as it
+does for every name it trusts.  The recheck prints the first loop that each entry reaches, which
+its test pins, and reports an entry that reaches none.
+* `String.Slice.foldl`: once over the slice's characters, calling its function once on each;
+* `String.Slice.isNat`: once over the slice's characters;
+* `String.Slice.toNat?`, `String.Slice.toInt?`: `isNat`, then `foldl`, over the slice. -/
+def endingPartials : List Lean.Name :=
+  [``String.Slice.foldl, ``String.Slice.toNat?, ``String.Slice.toInt?, ``String.Slice.isNat]
+
+/-- What starts `ST` code: a cell can hold a closure that reads the cell and calls what it holds,
+a loop without recursion that may never end, and the cells' operations are `@[extern]` constants
+that proofs see only as values.  `runST` and `runEST` apply the code to `Void.mk ()`, which a rule
+could also do itself, and `ST.Prim.mkRef` makes every cell. -/
+def stRunners : List Lean.Name := [``runST, ``runEST, ``Void.mk, ``ST.Prim.mkRef]
+
+/-- The machine's region, heap and call capabilities.  Their requests name cells, closures or an
+operation's regions, which only the machine may choose, so only a wrapper that the table
+generates may use them: a rule that built one itself could ask for a region it wasn't passed, or
+take a location out of the request. -/
+def engineCapabilities : List Lean.Name := [``Region.slot, ``HasHeap.mreq, ``HasCall.mreq]
+
+/-- The constructors of a ref and of a closure from a raw one.  A rule that used one could give a
+ref or a closure another type than the one the machine made it at (`⟨r.raw⟩`), so only a wrapper
+that the table generates may use them. -/
+def refConstructors : List Lean.Name := [``Ref.mk, ``FnRef.mk]
+
+/-- The faults that only the machine reports: a bad access or call, running out of fuel, and the
+checks before the first step.  A rule that stopped with one would make its own case look like the
+machine's.  No code that a table generates uses them either, so the walk rejects them
+everywhere.  A rule stops with `semanticGap`, `semanticFailure` or `assume`. -/
+def machineFaults : List Lean.Name :=
+  [``Fault.badCall, ``Fault.badCell, ``Fault.outOfFuel, ``Fault.missingRules, ``Fault.invalid,
+   ``Fault.noFunction]
+
+/-- Names the walk doesn't enter, though they take a request apart: `MReq.Out` computes only a
+type from a request, which a run erases, and `MReq.writesCell` gives one bit that depends only on
+the request's constructor, never on a location (its value on each constructor is pinned by
+`rfl`). -/
+def trustedRequestConsts : List Lean.Name := [``MReq.Out, ``MReq.writesCell]
+
+/-- The directories of `paths`, other than Lean's own library `sysLib`, that hold a module named
+`Init`, `Std` or `Lean`, as `has` tells whether a file or directory exists.  The check trusts
+those modules by name, so such a directory would be trusted as Lean's library. -/
+def strayLibraryDirs (sysLib : System.FilePath) (paths : List System.FilePath)
+    (has : System.FilePath → Bool) : List System.FilePath :=
+  paths.filter fun p => p.normalize != sysLib.normalize &&
+    ["Init", "Std", "Lean"].any fun r => has (p / r) || has (p / s!"{r}.olean")
+
+/-- The stray library directories of this process's search path, found once. -/
+initialize strayLibraryFound : IO.Ref (Option (List System.FilePath)) ← IO.mkRef none
+
+/-- The directories of the search path that `strayLibraryDirs` reports, found once per process,
+each path as `realPath` gives it.  It reads the search path only: a module whose files Lake passes
+to Lean directly is not seen here. -/
+def strayLibrary : IO (List System.FilePath) := do
+  if let some r ← strayLibraryFound.get then return r
+  let real (p : System.FilePath) : IO System.FilePath := do
+    try IO.FS.realPath p catch _ => pure p
+  let sysLib ← real ((← Lean.findSysroot) / "lib" / "lean")
+  let paths ← (← Lean.searchPathRef.get).mapM real
+  let mut present : List System.FilePath := []
+  for p in paths do
+    for r in ["Init", "Std", "Lean"] do
+      for f in [p / r, p / s!"{r}.olean"] do
+        if ← f.pathExists then present := f :: present
+  let r := strayLibraryDirs sysLib paths present.contains
+  strayLibraryFound.set (some r)
+  return r
+
+/-- Whether `n` comes from Lean's own library, `Init`, `Std` or `Lean`.  A name the compiler made,
+such as `f._lambda_1` or `f._redArg`, belongs where the constant it extends does. -/
+partial def isLeanLibrary (env : Environment) (n : Lean.Name) : Bool :=
+  match env.getModuleIdxFor? n with
+  | some i => match env.header.moduleNames[i.toNat]? with
+    | some m => [`Init, `Std, `Lean].any (·.isPrefixOf m)
+    | none => false
+  | none => if env.contains n || n.isAnonymous then false else isLeanLibrary env n.getPrefix
+
+/-- Swap lemmas, by the definition they swap: lemma and target. -/
+abbrev Swaps := Std.HashMap Lean.Name (Array (Lean.Name × Lean.Name))
+
+/-- Add `n` to `m` if its type is `@f = @g`: it may be a `local` `@[csimp]` lemma, which swapped
+`f` for `g` where it was in scope and leaves no trace in the csimp state after.  Lean takes any
+constant of that type as a lemma, a definition or an axiom too. -/
+def addSwap (m : Swaps) (n : Lean.Name) (ci : ConstantInfo) : Swaps :=
+  match ci.type.eq? with
+  | some (_, .const f _, .const g _) =>
+    if f == g then m else m.insert f ((m.getD f #[]).push (n, g))
+  | _ => m
+
+/-- Whether `thm` states `@f = @g`, as Lean requires of a `@[csimp]` lemma for its entry from `f`
+to `g`: meta code could add an entry with another lemma. -/
+def statesSwap (env : Environment) (thm f g : Lean.Name) : Bool :=
+  match (env.find? thm).bind (·.type.eq?) with
+  | some (_, Expr.const f' _, Expr.const g' _) => f' == f && g' == g
+  | _ => false
+
+/-- Whether Lean compiled `n` from a recursive definition, as its equation info records: only then
+did Lean make `n._unsafe_rec`, which the compiled code of `n` runs; meta code could add one. -/
+def recursiveByLean (env : Environment) (n : Lean.Name) : Bool :=
+  (Lean.Elab.Structural.eqnInfoExt.find? env n).isSome ||
+    (Lean.Elab.WF.eqnInfoExt.find? env n).isSome ||
+    (Lean.Elab.PartialFixpoint.eqnInfoExt.find? env n).isSome
+
+/-- The imported swap lemmas, for the module being elaborated: they don't change within it. -/
+initialize importedSwaps : IO.Ref (Lean.Name × Array Lean.Name × Swaps) ←
+  IO.mkRef (.anonymous, #[], {})
+
+/-- The swap lemmas of `env`, imported and of the current module. -/
+def swapLemmas (env : Environment) : IO Swaps := do
+  let key := (env.mainModule, env.header.moduleNames)
+  let (m, k, cached) ← importedSwaps.get
+  let imported ← if (m, k) == key then pure cached else do
+    let s := env.constants.map₁.fold (init := {}) addSwap
+    importedSwaps.set (key.1, key.2, s)
+    pure s
+  return env.constants.map₂.foldl (init := imported) addSwap
+
+/-- Record `n` as the parent of each of `cs` the walk has not met yet, for the path in an
+error. -/
+def recordParents (parent : Lean.NameMap Lean.Name) (visited : Lean.NameSet) (n : Lean.Name)
+    (cs : Array Lean.Name) : Lean.NameMap Lean.Name :=
+  cs.foldl (init := parent) fun p c =>
+    if c == n || visited.contains c || p.contains c then p else p.insert c n
+
+/-- The constants on the walk's path from `decl` to `n`, from `decl` on. -/
+def pathTo (parent : Lean.NameMap Lean.Name) (decl n : Lean.Name) : Array Lean.Name := Id.run do
+  let mut path := #[n]
+  let mut cur := n
+  for _ in [0:parent.size] do
+    if cur == decl then break
+    match parent.find? cur with
+    | some p =>
+      path := path.push p
+      cur := p
+    | none => break
+  return path.reverse
+
+/-- `n`, with the path to it from `decl` when it is another definition: `slow (fast → slow)`. -/
+def pathMsg (parent : Lean.NameMap Lean.Name) (decl n : Lean.Name) : MessageData :=
+  if n == decl then .ofConstName n
+  else m!"{.ofConstName n} ({MessageData.joinSep ((pathTo parent decl n).toList.map .ofConstName) " → "})"
+
+/-- What a finding of the check is about. -/
+inductive FindingKind where
+  /-- `sorry` or an axiom other than Lean's three. -/
+  | axiom
+  /-- A directory of the search path that the check would trust as Lean's library. -/
+  | searchPath
+  /-- A `@[csimp]` swap or a swap lemma that isn't a theorem with the allowed axioms. -/
+  | swap
+  /-- A swap of, or an attribute on, a name that the check trusts. -/
+  | trustedSwap
+  /-- The machine's capability, outside the table's own declarations. -/
+  | capability
+  /-- A ref or a closure built from a raw one, outside the table's own declarations. -/
+  | refConstructor
+  /-- A fault that only the machine reports. -/
+  | machineFault
+  /-- What tells where a ref's cell or a closure's function is, or builds a raw one. -/
+  | location
+  /-- Code that builds or takes apart a machine request. -/
+  | request
+  /-- A loop that may never end: a `partial` definition, a loop of Lean's library, `ST` code. -/
+  | loop
+  /-- Code that runs other code than its definition. -/
+  | replacedCode
+  /-- A definition whose module doesn't expose it. -/
+  | unexposed
+  /-- An `opaque` constant of ours. -/
+  | opaque
+  /-- Compiled code that calls what its definition doesn't reach. -/
+  | compiledCode
+  deriving DecidableEq, Repr
+
+/-- A finding of the check: its kind, the constant it reached, the path to that constant from
+the checked declaration, and the message. -/
+structure Finding where
+  kind : FindingKind
+  /-- The constant found; for an axiom found in the whole of the checked declaration, that
+  declaration. -/
+  reached : Lean.Name
+  path : Array Lean.Name
+  msg : MessageData
+
+/-- Why a run of `decl` would not run its definition, if it would not, as a finding.  `what` names
+`decl` in the message.  A table passes `ruleOf`, which names each of its rules, so that a finding on a
+path through a rule names that rule, and `suspects`, its rules first, which an axiom found in
+the whole of `decl` is traced back to.  `ending` lists the library loops that the walk trusts. -/
+def findNotAsProved (decl : Lean.Name) (what : MessageData)
+    (generated : Lean.Name → Bool := fun _ => false)
+    (ruleOf : Lean.Name → Option MessageData := fun _ => none)
+    (suspects : Unit → Array Lean.Name := fun _ => #[])
+    (ending : List Lean.Name := endingPartials) : MetaM (Option Finding) := do
+  let mkFinding (parent : Lean.NameMap Lean.Name) (kind : FindingKind) (n : Lean.Name)
+      (msg : MessageData) : Finding :=
+    { kind, reached := n, path := pathTo parent decl n, msg }
+  -- The private view: this module's own bodies are visible, exposed or not, and another
+  -- module's unexposed ones still are not.
+  let env := (← getEnv).setExporting false
+  let axiomMsg (who : MessageData) (a : Lean.Name) : MessageData :=
+    m!"{who} reaches the axiom {.ofConstName a}; a rule may reach only propext, \
+      Classical.choice and Quot.sound"
+  let badAxiom := axiomMsg what
+  for a in ← collectAxioms decl do
+    unless allowedAxioms.contains a do
+      -- The first suspect that reaches the axiom names it; a declaration that the table emitted
+      -- may reach it alone, and then the message names the whole.
+      for c in suspects () do
+        if (← collectAxioms c).contains a then
+          return some <| mkFinding {} .axiom decl <| (axiomMsg ((ruleOf c).getD m!"{what} through {.ofConstName c},") a)
+      return some <| mkFinding {} .axiom decl <| (badAxiom a)
+  if let p :: _ ← strayLibrary then
+    return some <| mkFinding {} .searchPath decl <| m!"{what} can't be checked: the search path holds {p}, outside Lean's own \
+      library, with a module named Init, Std or Lean, which the check would trust as Lean's"
+  let csimp := (Lean.Compiler.CSimp.ext.getState env).map
+  -- Who reaches `n`: the first rule on the path, if a table named its rules, or `what`.
+  let subject (parent : Lean.NameMap Lean.Name) (n : Lean.Name) : MessageData :=
+    ((pathTo parent decl n).findSome? ruleOf).getD what
+  let runs (parent : Lean.NameMap Lean.Name) (n : Lean.Name) (code : MessageData) (attr : String) :
+      MessageData :=
+    m!"{subject parent n} reaches {pathMsg parent decl n}, which runs {code} instead of its definition \
+      ({attr}); a run would not run the definition that proofs see"
+  -- A definition whose compiled code is other code.
+  let replaced (parent : Lean.NameMap Lean.Name) (n : Lean.Name) (attr : MessageData) :
+      MessageData :=
+    m!"{subject parent n} reaches {pathMsg parent decl n}, which carries {attr}: a run executes other code \
+      than the definition proofs read; give the compiled code with a @[csimp] theorem instead"
+  let swaps ← swapLemmas env
+  let requests := requestConsts env
+  -- What the trusted names' code uses of requests and refs.  A later swap of one of these doesn't
+  -- change that code, which `Sem.lean` compiled before, but a swap is rejected anyway, in case
+  -- code compiled later names one of them (defense in depth).
+  let trustedUses := requests ++ locationConsts ++
+    [``Ref.raw, ``Ref.mk, ``Ref.rec, ``Ref.casesOn, ``FnRef.raw, ``FnRef.mk, ``FnRef.rec,
+     ``FnRef.casesOn]
+  let mut visited : Lean.NameSet := {}
+  -- What each definition reaches directly, so that its compiled code is compared with what its
+  -- own definition reaches.
+  let mut succ : Lean.NameMap (Array Lean.Name) := {}
+  -- Each definition's parent in the walk, for the path in an error.
+  let mut parent : Lean.NameMap Lean.Name := {}
+  -- Each name with whether a definition that `generated` selects, a table's wrapper, uses it.
+  let mut todo : Array (Lean.Name × Bool) := #[(decl, false)]
+  -- Our definitions with compiled code, which the second pass compares with their definitions.
+  let mut compiled := #[]
+  while h : todo.size > 0 do
+    let (n, byWrapper) := todo[todo.size - 1]
+    todo := todo.pop
+    -- A name the walk trusts, or lets the table's wrappers use, must still run its definition:
+    -- a swap or an attribute on it would run other code that the walk doesn't enter.
+    let trusted := engineCapabilities.contains n || locationEqualities.contains n ||
+      trustedRequestConsts.contains n || refConstructors.contains n ||
+      (ending.contains n && isLeanLibrary env n)
+    if trusted && !visited.contains n then
+      if let some e := csimp.find? n then
+        return (some <| mkFinding parent .trustedSwap n <| m!"{subject parent n} reaches {pathMsg parent decl n}, which the check trusts, but the \
+          @[csimp] lemma {.ofConstName e.thmName} swaps in {.ofConstName e.toDeclName}, which a run \
+          would execute instead")
+      if let some (lem, g) := (swaps.getD n #[])[0]? then
+        return (some <| mkFinding parent .trustedSwap n <| m!"{subject parent n} reaches {pathMsg parent decl n}, which the check trusts, but \
+          {.ofConstName lem} equates it with {.ofConstName g}, so a @[csimp] swap may run \
+          {.ofConstName g} instead")
+      -- Lean refuses these attributes on another module's declaration, so only a trusted name of
+      -- this package's core could carry one.
+      if (Lean.Compiler.getImplementedBy? env n).isSome || Lean.isExtern env n ||
+          (Lean.getInitFnNameFor? env n).isSome then
+        return (some <| mkFinding parent .trustedSwap n <| m!"{subject parent n} reaches {pathMsg parent decl n}, which the check trusts, but its \
+          compiled code is other code than its definition")
+      -- The machine's trusted names build and read requests and refs; a library loop doesn't.
+      let machine := engineCapabilities.contains n || locationEqualities.contains n ||
+        trustedRequestConsts.contains n
+      for c in if machine then trustedUses else [] do
+        let swapped := (csimp.find? c).map (fun e => (e.thmName, e.toDeclName)) <|>
+          (swaps.getD c #[])[0]?
+        if let some (lem, g) := swapped then
+          return (some <| mkFinding parent .trustedSwap n <| m!"{subject parent n} reaches {pathMsg parent decl n}, which the check trusts, and \
+            {.ofConstName lem} equates {.ofConstName c}, which the trusted names' code uses, with \
+            {.ofConstName g}: no swap of it is allowed, so that code compiled later that names it \
+            runs it as defined")
+    if engineCapabilities.contains n then
+      if byWrapper then continue
+      return (some <| mkFinding parent .capability n <| m!"{subject parent n} reaches {pathMsg parent decl n}, the machine's own capability, which only \
+        the declarations a table command emits may build: its requests name cells, closures or \
+        regions that only the machine may choose")
+    if refConstructors.contains n then
+      if byWrapper then continue
+      return (some <| mkFinding parent .refConstructor n <| m!"{subject parent n} reaches {pathMsg parent decl n}, which builds a ref or a closure from \
+        a raw one: it could give it another type than the machine made it at, so only the \
+        declarations that a table command emits may build one")
+    if machineFaults.contains n then
+      return (some <| mkFinding parent .machineFault n <| m!"{subject parent n} reaches {pathMsg parent decl n}, a fault that only the machine \
+        reports. A case that the rules don't model stops with semanticGap. semanticFailure is only \
+        for a case the rule's author holds impossible.")
+    if visited.contains n then continue
+    visited := visited.insert n
+    if locationEqualities.contains n || trustedRequestConsts.contains n then continue
+    if ending.contains n && isLeanLibrary env n then continue
+    let gen := generated n
+    let push (todo : Array (Lean.Name × Bool)) (ns : Array Lean.Name) :=
+      todo ++ ns.map (·, gen)
+    if n == ``Ref.Raw.mk || n == ``FnRef.Raw.mk then
+      return (some <| mkFinding parent .location n <| m!"{subject parent n} reaches {pathMsg parent decl n}, which builds or takes apart a raw \
+        ref or closure; only the machine may, since a rule could point a ref at any cell, or read \
+        where it is")
+    if locationConsts.contains n then
+      return (some <| mkFinding parent .location n <| m!"{subject parent n} reaches {pathMsg parent decl n}, which tells where a ref's cell or a \
+        closure's function is; only the machine may know it, since a pass may move cells")
+    if requests.contains n then
+      return (some <| mkFinding parent .request n <| m!"{subject parent n} reaches {pathMsg parent decl n}, which builds or takes apart a \
+        machine request: a request holds locations, so only the handles that a table passes to a rule \
+        may build one, and only the machine reads it")
+    -- A swap lemma must be a theorem with the allowed axioms, so that `n` and the code it may
+    -- run are equal.  A `module` sees another module's theorem as an axiom, which the axiom
+    -- check then decides; a definition or an `unsafe` constant is no proof.
+    let isProof (lem : Lean.Name) : Bool := match env.find? lem with
+      | some (.thmInfo _) => true
+      | some (.axiomInfo a) => !a.isUnsafe
+      | _ => false
+    let notTheorem (lem src g : Lean.Name) : MessageData :=
+      m!"{subject parent n} reaches {pathMsg parent decl n}, and {.ofConstName lem} equates {.ofConstName src} \
+        with {.ofConstName g}, so a @[csimp] swap may run {.ofConstName g} instead, but \
+        {.ofConstName lem} is not a theorem"
+    if let some e := csimp.find? n then
+      unless statesSwap env e.thmName n e.toDeclName do
+        return (some <| mkFinding parent .swap n <| m!"{subject parent n} reaches {pathMsg parent decl n}, whose @[csimp] entry swaps in \
+          {.ofConstName e.toDeclName} by {.ofConstName e.thmName}, which doesn't state that the two \
+          are equal")
+      unless isProof e.thmName do
+        return (some <| mkFinding parent .swap n <| (notTheorem e.thmName n e.toDeclName))
+      for a in ← collectAxioms e.thmName do
+        unless allowedAxioms.contains a do
+          return some <| mkFinding parent .swap n <| (axiomMsg m!"{subject parent n} reaches {pathMsg parent decl n}, whose \
+            @[csimp] lemma {.ofConstName e.thmName}" a)
+      todo := push todo #[e.toDeclName]
+      parent := recordParents parent visited n #[e.toDeclName]
+      succ := succ.insert n ((succ.getD n #[]).push e.toDeclName)
+    -- A lemma that may have been a local swap must be proved, so that `n` and the code it may
+    -- run are equal.  That code is walked too, as a live swap's is: it may itself run other code.
+    -- Lean applies swaps one after another, so the lemmas of each target count too.
+    let mut swapSeen : Lean.NameSet := {}
+    let mut swapTodo := #[n]
+    while hs : swapTodo.size > 0 do
+      let src := swapTodo[swapTodo.size - 1]
+      swapTodo := swapTodo.pop
+      if swapSeen.contains src then continue
+      swapSeen := swapSeen.insert src
+      for (lem, g) in swaps.getD src #[] do
+        swapTodo := swapTodo.push g
+        todo := push todo #[g]
+        parent := recordParents parent visited n #[g]
+        succ := succ.insert n ((succ.getD n #[]).push g)
+        unless isProof lem do
+          return (some <| mkFinding parent .swap n <| (notTheorem lem src g))
+        for a in ← collectAxioms lem do
+          unless allowedAxioms.contains a do
+            return (some <| mkFinding parent .swap n <| m!"{subject parent n} reaches {pathMsg parent decl n}, and the lemma {.ofConstName lem} \
+              equates {.ofConstName src} with {.ofConstName g}, so a local @[csimp] swap may run \
+              {.ofConstName g} instead; {.ofConstName lem} reaches the axiom {.ofConstName a}, but \
+              a rule may reach only propext, Classical.choice and Quot.sound")
+    let ours := !isLeanLibrary env n
+    let unsafeRec := Lean.Compiler.mkUnsafeRecName n
+    -- Lean derives some instances as `partial`: for a nested or mutual type, and `Ord` for any
+    -- recursive one.  Their definitions are named after the instance, `inst…`.
+    let derivedHint (c : Lean.Name) : MessageData :=
+      if c.components.any (·.toString.startsWith "inst") then
+        m!" (Lean derives this instance as partial for a nested, mutual or, for Ord, recursive type: \
+          write it by hand)"
+      else m!""
+    -- A `partial` definition is an opaque constant whose code runs its `_unsafe_rec`; Lean's library
+    -- writes some with `@[implemented_by]` of one.  Proofs see some value, while a run may loop
+    -- forever.
+    let isPartial (c : Lean.Name) : Bool :=
+      (env.find? c matches some (.opaqueInfo _)) && env.contains (Lean.Compiler.mkUnsafeRecName c)
+    if stRunners.contains n then
+      return (some <| mkFinding parent .loop n <| m!"{subject parent n} reaches {pathMsg parent decl n}, which runs `ST` code: a cell \
+        that holds a closure can make a loop that never ends, while proofs see a value")
+    if !ours then
+      if loopConsts.contains n || isPartial n ||
+          (Lean.Compiler.getImplementedBy? env n).any isPartial ||
+          (rangeTypes.contains n.getPrefix && (← isRangeLoop n)) then
+        return (some <| mkFinding parent .loop n <| m!"{subject parent n} reaches {pathMsg parent decl n}, a loop of Lean's library that \
+          may never end, while proofs see a value; a loop that may not end goes through `again`, \
+          which the machine runs step by step")
+    -- The compiled code of `x` is the code of `x._unsafe_rec`, which the walk may reach alone, as
+    -- a mutual sibling; so `x`'s compiled code is compared too.
+    if let .str x "_unsafe_rec" := n then
+      if ours && (Lean.IR.findEnvDecl env x).isSome then
+        compiled := compiled.push x
+        parent := recordParents parent visited n #[x]
+    if ours then
+      if let some impl := Lean.Compiler.getImplementedBy? env n then
+        unless impl == unsafeRec do
+          return (some <| mkFinding parent .replacedCode n <| (replaced parent n m!"@[implemented_by {.ofConstName impl}]"))
+      if Lean.isExtern env n then
+        return (some <| mkFinding parent .replacedCode n <| (replaced parent n m!"@[extern]"))
+      -- An `@[init]` definition's value at run time is what its initializer computes.
+      if let some i := Lean.getInitFnNameFor? env n then
+        return (some <| mkFinding parent .replacedCode n <| m!"{subject parent n} reaches {pathMsg parent decl n}, which carries \
+          @[init {.ofConstName i}]: a run uses the value that {.ofConstName i} computes, not the \
+          definition proofs read")
+      -- Our own `partial` definition.
+      if let some (.opaqueInfo _) := env.find? n then
+        if env.contains unsafeRec then
+          return (some <| mkFinding parent .loop n <| m!"{subject parent n} reaches {pathMsg parent decl n}, which is partial: proofs see \
+            an opaque constant, while a run executes a loop that may never end; use structural or \
+            well-founded recursion, or a loop through `again`, which the machine runs step by step\
+            {derivedHint n}")
+      -- The body a recursive definition runs is its `_unsafe_rec`, which Lean makes `partial`.
+      match env.find? unsafeRec with
+      | some (.defnInfo d) =>
+        unless d.safety == .partial && recursiveByLean env n do
+          return (some <| mkFinding parent .replacedCode n <| (runs parent n m!"{.ofConstName unsafeRec}" "a hand-written _unsafe_rec"))
+        todo := push todo #[unsafeRec]
+        parent := recordParents parent visited n #[unsafeRec]
+        succ := succ.insert n ((succ.getD n #[]).push unsafeRec)
+      | some (.axiomInfo _) =>
+        return (some <| mkFinding parent .unexposed n <| m!"{subject parent n} reaches {pathMsg parent decl n}, whose definition its module does not \
+          expose, so the check cannot see it: mark it @[expose], or, for a derived \
+          instance, derive it in an @[expose] section or write it by hand")
+      | some _ => return (some <| mkFinding parent .replacedCode n <| (runs parent n m!"{.ofConstName unsafeRec}" "a hand-written _unsafe_rec"))
+      | none => pure ()
+      if (Lean.IR.findEnvDecl env n).isSome then compiled := compiled.push n
+    match env.find? n with
+    | some (.axiomInfo _) =>
+      if ours then
+        return (some <| mkFinding parent .unexposed n <| m!"{subject parent n} reaches {pathMsg parent decl n}, whose definition its module does not \
+          expose, so the check cannot see it: mark it @[expose], or, for a derived \
+          instance, derive it in an @[expose] section or write it by hand")
+    | some (.opaqueInfo _) =>
+      if ours then
+        return (some <| mkFinding parent .opaque n <| m!"{subject parent n} reaches {pathMsg parent decl n}, which is opaque: its definition is hidden \
+          from proofs")
+    | some (.defnInfo d) =>
+      let used := (← usedOutsideProofs d.value) ++ (← usedOutsideProofs d.type)
+      todo := push todo used
+      parent := recordParents parent visited n used
+      succ := succ.insert n ((succ.getD n #[]) ++ used)
+    | _ => pure ()
+  -- The compiled code of each of our definitions may call only what its own definition reaches,
+  -- or Lean's library.  A call to anything else shows a swap that the check did not see.
+  -- The compiler names the code of `x._unsafe_rec` `x` again (mutual recursion), so reaching the
+  -- one explains the other.
+  -- A search of what `owner`'s definition reaches, breadth first: its queue, its position in it,
+  -- and what it has met.  Each owner's search goes on from where it stopped, so it explores the
+  -- owner's reach at most once, and it stops at the callee, so a callee that the compiler inlined
+  -- from a nearby definition is found after a few steps.
+  let resume (st : Array Lean.Name × Nat × Lean.NameSet) (c : Lean.Name) :
+      Bool × (Array Lean.Name × Nat × Lean.NameSet) := Id.run do
+    let uc := Lean.Compiler.mkUnsafeRecName c
+    let (queue0, i0, seen0) := st
+    let mut queue := queue0
+    let mut i := i0
+    let mut seen := seen0
+    if seen.contains c || seen.contains uc then return (true, (queue, i, seen))
+    while h : i < queue.size do
+      let x := queue[i]
+      i := i + 1
+      if seen.contains x then continue
+      seen := seen.insert x
+      queue := queue ++ succ.getD x #[]
+      if x == c || x == uc then return (true, (queue, i, seen))
+    return (false, (queue, i, seen))
+  let mut searches : Lean.NameMap (Array Lean.Name × Nat × Lean.NameSet) := {}
+  -- What each owner reaches directly, as a set.
+  let mut directOf : Lean.NameMap Lean.NameSet := {}
+  -- A name the compiler made (`f._lambda_1`, `g._closed_0`, `List.map._at_.f._spec_1`) is code
+  -- too, whatever name it extends: its own calls are checked the same way.
+  let mut checked : Lean.NameSet := {}
+  let mut work := compiled.map fun n => (n, n)
+  while h : work.size > 0 do
+    let (n, owner) := work[work.size - 1]
+    work := work.pop
+    if checked.contains n then continue
+    checked := checked.insert n
+    let some d := Lean.IR.findEnvDecl env n | continue
+    for c0 in Lean.IR.collectUsedDecls env [d] do
+      -- `f._redArg` (`f` without its unused parameters) and `f._boxed` are `f`'s own code, so a
+      -- call of one is judged as a call of `f`; and that code itself is read too, against what `f`
+      -- reaches, since it holds `f`'s body.
+      let c := match c0 with
+        | .str f s => if (s == "_redArg" || s == "_boxed") && env.contains f then f else c0
+        | _ => c0
+      if c != c0 then work := work.push (c0, c)
+      if env.contains c && isLeanLibrary env c then continue
+      let uc := Lean.Compiler.mkUnsafeRecName c
+      -- Not reached at all, then not by `owner`: the check below fails.  `owner` itself and its
+      -- direct successors are reached by it.  Otherwise, search from `owner`.
+      let ds ← match directOf.find? owner with
+        | some ds => pure ds
+        | none => do
+          let ds := ((succ.getD owner #[]) ++ succ.getD (Lean.Compiler.mkUnsafeRecName owner) #[]).foldl
+            (·.insert ·) ({} : Lean.NameSet)
+          directOf := directOf.insert owner ds
+          pure ds
+      let direct := c == owner || ds.contains c
+      if (visited.contains c || visited.contains uc) && !direct then
+        let st := (searches.find? owner).getD (#[owner, Lean.Compiler.mkUnsafeRecName owner], 0, {})
+        let (found, st) := resume st c
+        searches := searches.insert owner st
+        if found then continue
+      else if direct then continue
+      if env.contains c then
+        return (some <| mkFinding parent .compiledCode owner <| m!"{subject parent owner} reaches {pathMsg parent decl owner}, whose compiled code calls {c}, which \
+          its definition does not reach: it was compiled with a swap that the check cannot \
+          see, such as a local @[csimp] lemma")
+      work := work.push (c, owner)
+  return none
+
+/-- Why a run of `decl` would not run its definition, if it would not, as a message
+(`findNotAsProved`). -/
+def notAsProved (decl : Lean.Name) (what : MessageData)
+    (generated : Lean.Name → Bool := fun _ => false)
+    (ruleOf : Lean.Name → Option MessageData := fun _ => none)
+    (suspects : Unit → Array Lean.Name := fun _ => #[])
+    (ending : List Lean.Name := endingPartials) : MetaM (Option MessageData) :=
+  return (← findNotAsProved decl what generated ruleOf suspects ending).map (·.msg)
+
+/-- The declarations of namespace `ns` that the current module added since `before`: what a
+table command emitted, but not a declaration that a user put into the namespace earlier. -/
+def emittedSince (before : Environment) (ns : Lean.Name) : CoreM (Array Lean.Name) := do
+  let env ← getEnv
+  return env.constants.map₂.foldl (init := #[]) fun acc n _ =>
+    if ns.isPrefixOf (privateToUserName n) && !before.contains n then acc.push n else acc
+
 /-- The capabilities a rule may take, as a message. -/
 def capsMsg : MessageData :=
   m!"parts of the world, HasPart ε.W P, the machine's cells, HasHeap σ ε, its calls, \
@@ -942,6 +1647,22 @@ initialize registerBuiltinAttribute {
     let r ← (checkSemRule o decl).run'
     modifyEnv (semExt.addEntry · r)
 }
+
+/-- `#dyn_check_rule E.o`: the check that a table runs on its rules, run now on the rule of the
+instruction `E.o`.  It judges the rule in this module's view, which sees this module's
+unexposed bodies and compiled code; a table in another module sees neither, so only a table's
+check decides.  An error names what the rule reaches that does not run as it is written. -/
+syntax (name := dynCheckRule) "#dyn_check_rule " ident : command
+
+elab_rules : command
+  | `(#dyn_check_rule $k) => do
+    let (key, d) ← Elab.Command.liftCoreM <| resolveKey k
+    let .op _ o := d | throwErrorAt k "`{k.getId}` is a type, not an instruction"
+    let some r := findSemRule? (← getEnv) key
+      | throwErrorAt k "{showEnvName o.envName} has no rule"
+    if let some why ← Elab.Command.liftTermElabM <|
+        notAsProved r.decl m!"rule {.ofConstName r.decl} for {showEnvName o.envName}" then
+      throwErrorAt k why
 
 end Strata.Dyn.Exec
 

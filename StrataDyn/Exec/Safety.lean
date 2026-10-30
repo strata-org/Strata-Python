@@ -18,8 +18,8 @@ holds is valid in a typing of the heap, so it names a cell of its tag.
 * `access_ok`: at every configuration of a run from a state where the run invariant holds, the
   access the next step makes, a `refGet` or `refSet` of the top frame or a rule's request to
   read, write or update a cell (`State.Accesses`), finds a cell of its tag.
-* A rule may still stop with `Fault.badCell` itself: a certificate says nothing of faults.
-  `Sem.Avoids bad t` says that a tree never stops with a fault in `bad`, and `LModule.Avoids`
+* A certificate says nothing of faults. A table rejects a rule that stops with `Fault.badCell`
+  itself, but a module linked by hand has no such check. `Sem.Avoids bad t` says that a tree never stops with a fault in `bad`, and `LModule.Avoids`
   that no rule of a module's instructions and terminators does.  `State.Avoids` carries it along
   a run, with the run invariant (`step_avoids`, `avoids_always`).
 * **Heap safety**, `never_badCell`: no run of a module whose rules are certified and stop with no

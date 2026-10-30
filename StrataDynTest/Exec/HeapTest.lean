@@ -99,11 +99,6 @@ example {σ : Type} [Store σ] :
 -- A thunk whose closure returns a thunk, stored in a cell and called through twice.
 #guard run [self, thunks] "thunks" #[9] = "9"
 
--- A rule that retypes a ref: the machine's check at the access catches it, beside a read
--- through the cell's own ref.
-#guard run [retyped] "retyped" #[5] = "fault Strata.Dyn.Exec.Fault.badCell 0"
-#guard run [retypedTwin] "retypedTwin" #[5] = "5"
-
 /-! ## Generic rules
 
 A generic rule takes a type argument's tag only if it reaches a cell at it. -/

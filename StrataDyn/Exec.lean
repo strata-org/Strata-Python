@@ -138,6 +138,7 @@ def loop (cond : Region ε [] Bool) (body : Region ε [] Unit) (_st : Option Uni
   one key, `@[dyn_sem]`, `#dyn_coverage` and `#dyn_sem_table` report both, for the
   key's environment and those that extend it.
 * **Trust.**  Rules are trusted: a rule is what its instruction means.  Registration checks
-  its shape and types, listed in `Exec/Rules.lean`, and `implemented_by` and `@[extern]` in a
-  rule are flags for review, as in Lean.
+  its shape and types, listed in `Exec/Rules.lean`.  `#dyn_sem_table` checks that its rules run
+  as they are written: the code that runs is the definition that proofs read ("Running as
+  proved" in `Exec/Rules.lean`).
 -/

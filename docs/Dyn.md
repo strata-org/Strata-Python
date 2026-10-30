@@ -698,8 +698,9 @@ variable {ε : Eff} {E : Type}
 `semanticGap msg` stops the run with `Fault.gap`, for a case the semantics leaves out, and
 `semanticFailure msg` with `Fault.failure`, for one the author holds impossible. `assume b msg`
 continues if `b` holds and otherwise stops with `Fault.blocked`: the path is infeasible, which
-stands for no behaviour rather than an error, and a run reports it as its outcome. `chooseNat`
-asks the run's oracle for a number, `choose n` for one from `0` to `n`, which is the oracle's
+stands for no behaviour rather than an error, and a run reports it as its outcome. The other
+faults are the machine's, and a table rejects a rule that stops with one ("Running as proved",
+below). `chooseNat` asks the run's oracle for a number, `choose n` for one from `0` to `n`, which is the oracle's
 answer reduced, and `chooseInt` for an integer, which numbers the integers `0, -1, 1, -2, …` by
 the oracle's answer. A choice is internal nondeterminism, which a translation may resolve (§5,
 "Trace refinement"); input from the environment is a world request. A rule takes no fuel: the
@@ -707,8 +708,9 @@ machine runs its requests as steps.
 
 Rules are trusted: a rule is what its instruction means. Registration checks a rule's type
 against its instruction's signature and the capabilities it takes, and that no instruction has
-two rules, and each table checks every rule again at its own type rules. `implemented_by` and
-`@[extern]` in a rule are flags for review, as in Lean.
+two rules, and each table checks every rule again at its own type rules. Each table also
+checks that its rules run as they are written: the code that runs is the definition that
+proofs read ("Running as proved" below).
 
 ### Types and rules: `@[dyn_type]` and `@[dyn_sem]`
 
@@ -733,7 +735,25 @@ reference `While.add.ref`.
 The engine gives `base.Ref` and `base.Fn` their meaning, the constructors and case instructions
 of a datatype are derived, and the machine implements `base.refNew`, `refGet`, `refSet` and
 `callCode`: none of these takes a rule. Dyn types that share a Lean type share a tag, so a
-semantics that must tell two types apart gives them distinct Lean types.
+semantics that must tell two types apart gives them distinct Lean types. Each type rule must unfold
+to an inductive or structure type with no index, a constructor and no axiom but Lean's three, or to
+an opaque type of Lean's library (an opaque constant of ours fails the check of what a table runs),
+in `Type`, applied to exactly its parameters, which are types; and two type rules must unfold to two
+such types, neither `Ref` nor `FnRef`. The engine's `NoLoc` is the one type with no constructor
+allowed. So a `def` of `Int` beside `Int`, a `def` of `Array Int`, `def K (_ : Type) := Nat`, a
+`Subtype` or `Fin 3` is rejected, and a rule wraps such a type in a structure. Otherwise a rule
+could read a cell made at one tag through another whose Lean type is equal by definition or by
+proof, with a `cast`. The check trusts that Lean, with `propext`, `Quot.sound` and
+`Classical.choice`, proves no equality between two types built from different type constructors, or
+from one at different type arguments. No such proof is known; the belief rests on a model of Lean in
+which each type carries its constructor, a variant of the set-theoretic model in M. Carneiro, "The
+Type Theory of Lean" (2019), that has no published proof; for types with no value, such as a
+structure with a field of type `False`, only that type-level form of the model keeps them apart. The
+check rejects types without constructors, except `NoLoc`, only as a cheap guard: a type whose
+constructors can't be filled passes, and rests on the same assumption, that distinct type
+constructors are never provably equal. Nor may a type rule's values hold a `Fault`, in a field or
+behind a definition in a field's type, so that a rule can't stop with a fault that only the
+machine reports and that it was given.
 
 ### Operands, regions, targets and `Again`
 
@@ -980,6 +1000,99 @@ uses its ancestors' rules.
 | `{cs : Type}` for `[(cs : list)]` | type parameter cs of errCall.spread is a list, so spreadType's cs must be a List Type |
 | `… : Sem ε E (FnRef σ cs Int)` | the result of errCall.spreadOut: a list type variable may occur only in the arguments of a closure operand, as a splice, and as the spread |
 
+### Running as proved
+
+`#dyn_sem_table` checks the code that its rules, its wrappers, the world parts' instances and
+its initial world reach, and fails at the first finding, which names the rule. Examples, from
+`StrataDynTest/Exec/RuleErrorTest.lean` and `TableCheckTest.lean`:
+
+| Rule | Error |
+|---|---|
+| `xs[i.toNat]'sorry` | rule sorried for err.sorried reaches the axiom sorryAx; a rule may reach only propext, Classical.choice and Quot.sound |
+| `pure (viaSlow x)`, with `@[implemented_by spin] def slow` | rule fast for err.fast reaches slow (fast → viaSlow → slow), which carries @[implemented_by spin]: a run executes other code than the definition proofs read; give the compiled code with a @[csimp] theorem instead |
+| `Helpers.hiddenLie x`, from another module that does not expose it | the table HiddenSem: rule hidden for tcHidden.f reaches Helpers.hiddenLie (HiddenSem.ops → … → hidden → Helpers.hiddenLie), whose definition its module does not expose, so the check cannot see it: mark it @[expose], or, for a derived instance, derive it in an @[expose] section or write it by hand |
+
+`#dyn_check_rule E.o` runs the same check on the rule of `E.o` alone, in its own module's view.
+That view sees the module's unexposed bodies and compiled code, which a table in another module
+doesn't, so only the table's check decides. Registration itself checks a rule's shape only.
+
+A rule's meaning is its definition, so the code that runs must be that definition; otherwise a run,
+or a comparison of runs with another implementation, tests other code than proofs see. So a rule may
+reach no axiom other than `propext`, `Classical.choice` and `Quot.sound`, even inside a proof: such
+an axiom proves anything, so a theorem about the rule would say nothing. Nor may it reach, outside proofs, propositions and predicates, which
+never run, a definition outside Lean's `Init`, `Std` and `Lean` that runs other code than its body
+(`@[implemented_by]`, `@[extern]`, `@[init]`), keeps its body from proofs (`opaque`, or `partial`,
+whose loop proofs see as an opaque constant, so a run that never ends would look like one that ends;
+a loop that may not end goes through `again`, which the machine runs step by step), or whose
+module does not expose its body to the rule's module. A `noncomputable` or `unsafe` rule has no
+code, so no table can compile it (`NcSem`, `UnsSem` in `RuleErrorTest.lean`). Lean's library is
+trusted. A fast version of a definition is swapped in with a `@[csimp]` lemma, which proves it
+equal; the check looks at the lemma's axioms and the code it swaps in. A `local` `@[csimp]` lemma
+leaves no trace once its scope ends, so every constant `@f = @g` of a definition `f` that a rule
+reaches must be a theorem proved with those axioms, as must the lemmas of `g`, of their targets, and
+so on along the chain (Lean applies swaps one after another), and the compiled code of each of our
+definitions may call only what its own definition reaches. The table checks its initial world and
+the world parts' instances the same way. Outside proofs, propositions and predicates, which never
+run, a rule may also not see where a ref's cell or a closure's function is (`Ref.loc`, `FnRef.idx`,
+`FnRef.captured`, the fields of `Ref.Raw` and `FnRef.Raw`, a match on them, or a request taken from
+a heap or call capability that the rule built itself): a pass that removes or renumbers cells must
+not change a rule's result. Nor may it build a `Ref.Raw` or `FnRef.Raw` itself: a ref's validity is
+a proof, but at the machine's own token it is `True`, so a rule could point a ref at any cell, or
+rebuild a closure with another closure's captures. Nor may it build or take apart a machine request
+(`MReq`), which holds locations: only the handles that a table passes to it build requests, only the
+machine reads them, and only the
+declarations that a table emits may name `Region.slot`, `HasHeap.mreq` or `HasCall.mreq`. Every
+error names the rule, or the initial world, and, except for an axiom found inside a proof, the path
+to what it reaches. Equality of refs and of closures stays allowed, since it shows nothing of where
+they are, and so do `MReq.Out`, which computes only a type, and `MReq.writesCell`, whose one bit
+depends only on a request's constructor. A name that the check trusts this way must still run its
+definition: a `@[csimp]` swap of it, or of a request's or a ref's constructor, field or eliminator,
+which its code uses, is rejected. Nor may a rule build a ref or a closure from a raw one
+(`Ref.mk`, `FnRef.mk`): wrapping a ref's raw cell at another type (`⟨r.raw⟩`) would give it
+another type than the machine made it at; only the declarations that a table emits use them. Nor
+may a rule stop with a fault that only the machine reports (`badCall`, `badCell`, `outOfFuel`,
+`missingRules`, `invalid`, `noFunction`): a case that the rules don't model stops with
+`semanticGap`, and `semanticFailure` is only for a case the rule's author holds impossible. Lean's library is trusted by its modules' names, so a directory
+of the search path, other than Lean's own, that holds a module named `Init`, `Std` or `Lean` makes
+every check fail. A recursive definition is checked through the body it runs, and a hand-written
+`_unsafe_rec` is rejected. Lean's library is trusted except for its loops that may never end: a `while` loop, a
+`partial_fixpoint` definition, a fixed point of `WellFounded.extrinsicFix` (which a `for` loop over
+`0...n` and many `String` functions run; `for i in [0:n]` loops without it), any `partial`
+definition of the library, and `ST` code (`runST`, `runEST`, `Void.mk`, `ST.Prim.mkRef`), where a
+cell that holds a closure can make a loop, are rejected too. `endingPartials` lists the library
+loops that a rule may reach anyway, each with its reason: a name is eligible only if its loop ends
+on every argument, because it runs over finite data that it receives, such as a string, never over
+an iterator, a stream or a pattern that its caller supplies. A function that the caller passes, such
+as `foldl`'s, runs once on each character and is checked as part of the rule. Today the list holds
+`String.Slice.foldl`, `toNat?`, `toInt?` and `isNat`; `String.any`, `contains`, `find`, `replace`
+and `split` search with a searcher that the caller's pattern chooses, and are rejected. A swap of a
+listed name is rejected, as for every name the check trusts. A `module` file sees most of the
+library only as axioms, so a table sees such a loop only where it is visible (it finds a range loop
+by its instance's type); the recheck below sees them all, prints the first loop that each listed
+name reaches, which its test pins, and reports a listed name that reaches none. Lean derives some
+instances as `partial` (for a nested or mutual type, and `Ord` for a recursive one), so a rule that
+needs one writes it by hand.
+
+The check reads Lean's compiler data: the `@[csimp]` entries, each definition's `_unsafe_rec`, the
+compiled code and the attributes. It checks that a `@[csimp]` entry's lemma states that its two
+functions are equal, and that an `_unsafe_rec` comes from a recursive definition, as Lean's
+equation info records (`ForgedEntryTest.lean`). Meta code in a rule's module, or in a module it
+imports, could still write any of this data directly, and no check of the environment can rule
+that out, as Lean itself trusts its environment. So the check trusts that these modules run no
+meta code that writes compiled code or compiler data. A review of a module with rules, and of every
+module of ours that it imports, looks for such meta code: `run_cmd`, `run_elab`, `run_meta`, an
+`#eval` of a `CommandElabM`, `TermElabM`, `MetaM` or `CoreM` action, and our own elaborators.
+
+The check sees a `local` swap that another module made with a public lemma: it follows the
+lemma. It may also see a swap whose code the rule's compiled code inlines: it does when that
+code calls one of our definitions that the rule's definition doesn't reach. But in a `module` file, a table can't
+see another module's private declarations, so a swap whose lemma is private there, or in a
+module imported only privately, is not visible to it otherwise, and nor is another module's
+`@[init]` attribute.
+
+The check covers the tables that `#dyn_sem_table` makes. A `Table` or `Model` built by hand,
+or any other consumer that runs registered rules, must run the same check (`notAsProved`).
+
 A module that imports two modules that both register one type or instruction gets an error
 naming both, at `@[dyn_sem]`, `#dyn_coverage`, `#dyn_types` and `#dyn_sem_table`
 (`StrataDynTest/Exec/DupTest.lean`). Two modules that register the same declaration give one
@@ -1055,8 +1168,9 @@ theorem certified : WhileSem.model.Certified accounts :=
   Model.certified_of_ops cert.ops
 ```
 
-A rule that gives a ref another contents' type, as the test environment's `ex.retype` does, has
-no certificate (`StrataDynTest/Exec/CertTest.lean`). `dyn_cert` does not prove the certificate
+A table rejects a rule that gives a ref another contents' type (`Ref.mk` is banned in rules), so
+no certified table has one. `CertTest` builds such an operation by hand, as a table would build it
+from the rule `⟨c.raw⟩`, and shows that it is not certified (`retype_not_certified`). `dyn_cert` does not prove the certificate
 of a rule that builds a closure over a list of cells, such as `ex.mkClo`, which has the shape of
 Python's `mkClosure`: such a rule needs a hand-written certificate, with a lemma for `bindAll` by
 induction on the list; this package has none yet.
@@ -1218,16 +1332,17 @@ and `link`.
 
 A run of a module whose rules are certified uses only the cells it may
 (`StrataDyn/Exec/Safety.lean`). Every ref the run holds is valid in a typing of the heap, so
-every access that the machine checks finds a cell of its tag (`access_ok`). A rule may still stop
-with `Fault.badCell` itself, since a certificate says nothing of faults. `LModule.Avoids` says
-that no rule of a linked module does. With it, `never_badCell` says that no run from a state
+every access that the machine checks finds a cell of its tag (`access_ok`). A certificate says
+nothing of faults. A table rejects a rule that stops with `Fault.badCell` itself, but a module
+linked by hand has no such check, so the theorem takes `LModule.Avoids`, which says that no rule
+of a linked module does. With it, `never_badCell` says that no run from a state
 where the run invariant holds faults with a bad cell at any configuration or ends with one.
 `never_badCell_startCore` starts it from a function's entry, on arguments that hold no
 ref, from the engine's start or from the snapshot where another run ended. A typing does not
 record the function a closure names, so `Fault.badCall` is not covered.
 `StrataDynTest/Exec/SafetyTest.lean` proves it for a module linked by hand at While's run
 model, in which no rule's tree runs: its instructions are the machine's own and its terminators
-are returns. Beside it, a run of `ex.retype` faults with a bad cell. Nothing yet proves
+are returns. Nothing yet proves
 `LModule.Avoids` for a module that `link` makes from a table.
 
 ## 6. Dyn types in Core

@@ -136,9 +136,10 @@ and the token's proof that it is the module's.  A ref and a closure are raw ones
 types as a phantom.  A rule is generic in the token, and `no_forge` and `no_forge_fn` state that
 no term generic in it is a raw ref or a raw closure.
 
-The proofs name no Lean type, so a datatype may hold a ref or a closure of itself, and a rule
-could give a raw ref another contents' type; the machine's tag check at every access catches
-that.  A loop that skips the check cannot cast through a ref's proof, so its certificate has
+The proofs name no Lean type, so a datatype may hold a ref or a closure of itself.  Lean's types
+let a rule give a raw ref another contents' type, but a table rejects such a rule (`Ref.mk`); the
+machine's tag check at every access still catches a ref that no rule made, such as one from a
+hand-made snapshot.  A loop that skips the check cannot cast through a ref's proof, so its certificate has
 to type the heap instead: every location holds a value of the type it was made at. -/
 
 /-- What the token `σ` says: which locations are cells, and which functions are the module's.
@@ -705,6 +706,14 @@ variable {I} in
   | .get t _ => I t
   | .set .. | .modify .. => Unit
   | .bind _ _ sig .. => FnRef σ (sig.1.map I) (I sig.2)
+
+variable {I} in
+/-- Whether a request writes a cell: `set` and `modify`.  It reads only the request's constructor,
+never a location, so the check trusts it.  It names every constructor, so that a new one must be
+given its value. -/
+@[reducible] def MReq.writesCell {rs : List (List Ty × Ty)} : MReq I rs → Bool
+  | .set .. | .modify .. => true
+  | .region .. | .call .. | .new .. | .get .. | .bind .. => false
 
 /-- The machine's requests for an operation with regions `rs`, at the token `σ`, over the world
 `W`. -/
