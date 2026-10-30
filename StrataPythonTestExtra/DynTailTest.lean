@@ -146,7 +146,7 @@ private meta def check (pythonCmd tmpDir : System.FilePath) (c : Case) : IO (Arr
   let cm ← match PyCanonical.runModule r.module with
     | .ok cm => pure cm
     | .error fs => return #[s!"{c.name}: not canonical: {fs.map toString}"]
-  let some f := cm.module.raw.funcs.find? (ToDDM.nameText ·.name == s!"{c.name}.e")
+  let some f := cm.canonical.module.raw.funcs.find? (ToDDM.nameText ·.name == s!"{c.name}.e")
     | return #[s!"{c.name}: no function {c.name}.e"]
   let bs := f.blocks.toList
   let fm := Lean.FileMap.ofString c.program

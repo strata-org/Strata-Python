@@ -1,0 +1,79 @@
+module m_finally_returns {
+  func @|m_finally_returns.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      jump ^start.0()
+    start.0():
+      %str.0 : py.Value = py.strLit("m_finally_returns")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_finally_returns", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_finally_returns", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_finally_returns.f, "f", "m_finally_returns")
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_finally_returns", "f")
+      %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+  }
+  func @m_finally_returns.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %c.0 : py.Value = py.undef("c")
+      %c.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%c.0)
+      %a.0 : py.Value = py.undef("a")
+      %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
+      %b.0 : py.Value = py.undef("b")
+      %b.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%b.0)
+      %c.1 : py.Value = py.undef("c")
+      %a.1 : py.Value = py.undef("a")
+      %b.1 : py.Value = py.undef("b")
+      %defaults.0 : py.Value = py.mkTuple(%c.1, %a.1, %b.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 3, false, false, "c", "a", "b") ^propagate.0()
+      %c.11 : py.Value = py.tupleGet(%bound.0, 0)
+      %a.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %b.2 : py.Value = py.tupleGet(%bound.0, 2)
+      jump ^start.0()
+    start.0():
+      %c.15 : py.Value = py.requireDefined(%c.11, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%c.15) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^finRaise.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%a.4, %tuple.0, %kwargs.1) ^finRaise.0()
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^fin.0(%comp.0)
+    finRaise.0(%exc.0 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.0)
+      jump ^fin.0(%comp.1)
+    fin.0(%pending.0 : py.Completion):
+      %prev.0 : py.Value = py.pushPending(%pending.0)
+      %int.0 : py.Value = py.intLit(1)
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    else.0():
+      jump ^join.0()
+    join.0():
+      %b.4 : py.Value = py.requireDefined(%b.2, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^finRaise.1()
+      %tuple.1 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%b.4, %tuple.1, %kwargs.2) ^finRaise.1()
+      %comp.2 : py.Completion = py.completionNormal
+      jump ^fin.1(%comp.2)
+    finRaise.1(%exc.2 : py.Value):
+      %comp.3 : py.Completion = py.completionRaise(%exc.2)
+      jump ^fin.1(%comp.3)
+    fin.1(%pending.1 : py.Completion):
+      %prev.1 : py.Value = py.pushPending(%pending.1)
+      %int.1 : py.Value = py.intLit(2)
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      %ret.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.1)
+      ret(%ret.1)
+    propagate.0(%exc.4 : py.Value):
+      %exc.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
+      ret(%exc.5)
+  }
+}
+

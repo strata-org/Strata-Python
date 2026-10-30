@@ -1184,6 +1184,24 @@ linear dispatch on the completion. V8 and Kotlin's coroutines dispatch on a toke
 way. The JVM's `jsr`/`ret` was abandoned because its targets were dynamic, which made
 verification intractable; a completion's targets are all static.
 
+Emitting each `finally` body once, as one group of blocks entered with the pending completion,
+is P6 of the canonical form.
+`PyCanonical.runModule` checks one part of it: every block that starts with `py.pushPending`
+pushes its own first parameter, a `py.Completion`, and `py.pushPending` occurs nowhere else. So a
+`finally` body pushes the completion it was entered with. The check does not verify that a
+`finally` body is emitted once: a copy would be a second block of the same form. Nor does it look
+at which completion the dispatch at the end of the body cases on, or at which completion a jump to
+`fin` passes. It also does not see a `finally` body whose first block does not start with
+`py.pushPending`. The goldens of
+the corpus programs with a `finally` pin that the translator emits each body once. A `with`
+statement's `fin` block does not start with `py.pushPending`, so the check does not cover it.
+
+The check leaves out a stricter clause: that no two such blocks end in the same successors. That
+clause rejects valid Python: in `m_finally_returns.py`, two `try`
+statements whose `finally` bodies both `return` give two `fin` blocks that both end in `ret`.
+And it cannot tell a copy from two different bodies: a copy whose body ends in a dispatch gets
+fresh arm blocks, and two different bodies that both return look alike.
+
 Example: c1 (§10). The prologue is elided, and `cleanup` is read as a global.
 
 ```

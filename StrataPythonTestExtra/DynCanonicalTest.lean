@@ -46,9 +46,9 @@ private meta def canonical (name : String) : IO (Except String String) := do
     match PyCanonical.runModule m with
     | .error fs => return .error s!"{path}: not put in canonical form: {fs.map toString}"
     | .ok cm =>
-      match PyCanonical.checkModule cm.module with
+      match PyCanonical.checkModule cm.canonical.module with
       | .error fs => return .error s!"{path}: its canonical form fails the check: {fs.map toString}"
-      | .ok cm' => return .ok (toString cm'.module)
+      | .ok cm' => return .ok (toString cm'.canonical.module)
 
 #eval show IO Unit from do
   let update := (← IO.getEnv "CANON_UPDATE") == some "1"

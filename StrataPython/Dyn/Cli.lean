@@ -209,7 +209,7 @@ private def runCanonical (path : String) (opts : Strata.Dyn.PrintOptions) : IO U
   for d in r.diagnostics do IO.println (formatDiagnostic fileMap d)
   match PyCanonical.runModule r.module with
   | .ok cm =>
-    IO.println (cm.module.format opts)
+    IO.println (cm.canonical.module.format opts)
     return if r.ok then 0 else 1
   | .error fs =>
     for f in fs do IO.println s!"-- not canonical: {f}"

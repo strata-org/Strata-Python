@@ -136,7 +136,7 @@ private def headRanges (fn : Func Py.env Info) : List SourceRange :=
   some [rangeAt 20 40, rangeAt 41 60]
 -- The canonicalization pass keeps them.
 #guard (match PyCanonical.runModule loops.module with
-  | .ok cm => (cm.module.raw.funcs.find? (nameText ·.name == "m.f")).map headRanges
+  | .ok cm => (cm.canonical.module.raw.funcs.find? (nameText ·.name == "m.f")).map headRanges
   | .error _ => none) == some [rangeAt 20 40, rangeAt 41 60]
 
 -- A rejected complex literal is a diagnostic.

@@ -165,6 +165,7 @@ m_del | agree
 m_displays | agree
 m_expressions | agree
 m_finally | gap | import of module sys is not modelled yet
+m_finally_returns | agree
 m_for | agree
 m_fstring | agree
 m_func_annotations | agree

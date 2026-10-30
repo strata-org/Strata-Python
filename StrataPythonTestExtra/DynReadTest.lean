@@ -67,7 +67,7 @@ private meta def check (path : System.FilePath) : IO (Option String) := do
       match StrataPython.Dyn.PyCanonical.runModule m with
       | .error fs => return some s!"{path}: not put in canonical form: {fs.map toString}"
       | .ok cm =>
-        unless Unforward.moduleUndoesTo m.raw cm.module.raw full do
+        unless Unforward.moduleUndoesTo m.raw cm.canonical.module.raw full do
           return some s!"{path}: in canonical form, does not undo to the module read"
         return none
 
