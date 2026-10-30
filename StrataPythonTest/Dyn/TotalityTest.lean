@@ -193,7 +193,7 @@ info: 0:
 #partial_defs_in StrataPython.Dyn.Scope StrataPython.Dyn.PyScope
 
 /--
-info: 33:
+info: 32:
   assigner
   boolOp
   bounds
@@ -207,7 +207,6 @@ info: 33:
   deleter
   dictDisplay
   dictDisplay.pairs
-  dictFromEntries
   fString
   findAnn
   forStmt

@@ -754,6 +754,34 @@ def splitStarred (vs : Array (expr SourceRange)) :
   let n := (vs.findIdx? fun | .Starred .. => true | _ => false).getD vs.size
   (vs.extract 0 n, vs.extract n vs.size)
 
+/-- Build a dict from `entries` in order, as CPython's `compiler_dict` does.  Each run of
+pairs is cut by `cut`, and `chunk` builds one chunk.  For a `**d` entry `e`, `star? e` is the
+action that evaluates `d`, and `combine acc d` adds it.  The first chunk is the dict itself; a
+later one is built, then combined into it. -/
+def dictFromEntries {γ : Type} (entries : Array γ) (star? : γ → Option (TransM ValId))
+    (cut : Array γ → Array (Array γ)) (chunk : Array γ → TransM ValId)
+    (combine : ValId → ValId → TransM ValId) : TransM ValId := do
+  let mut acc : Option ValId := none
+  let mut pending : Array γ := #[]
+  for e in entries do
+    match star? e with
+    | none => pending := pending.push e
+    | some d =>
+      let a ← flush acc pending
+      pending := #[]
+      acc := some (← combine a (← d))
+  flush acc pending
+where
+  /-- The dict so far, with the pending run added. -/
+  flush (acc : Option ValId) (pending : Array γ) : TransM ValId := do
+    let mut acc := acc
+    for c in cut pending do
+      let d ← chunk c
+      acc := some (← match acc with | none => pure d | some a => combine a d)
+    match acc with
+    | some a => return a
+    | none => chunk #[]
+
 mutual
 
 /-- Lower an expression to the value it produces. -/
@@ -975,44 +1003,14 @@ partial def setDisplay (vs : Array (expr SourceRange)) : TransM ValId := do
     | v => discard <| build (emitActing (.str .base "add") Py.setAdd.ref #[st, ← transExpr v])
   return st
 
-/-- Build a dict from `entries` in order, as CPython's `compiler_dict` does.  Each run of
-pairs is cut by `cut`, and `chunk` builds one chunk; a `**d` entry is `combine acc d`.  The
-first chunk is the dict itself; a later one is built, then combined into it. -/
-partial def dictFromEntries {γ : Type} (entries : Array γ) (star? : γ → Option (expr SourceRange))
-    (cut : Array γ → Array (Array γ)) (chunk : Array γ → TransM ValId)
-    (combine : ValId → ValId → TransM ValId) : TransM ValId := do
-  let mut acc : Option ValId := none
-  let mut pending : Array γ := #[]
-  for e in entries do
-    match star? e with
-    | none => pending := pending.push e
-    | some d =>
-      let a ← flush acc pending
-      pending := #[]
-      acc := some (← combine a (← transExpr d))
-  flush acc pending
-where
-  /-- The dict so far, with the pending run added. -/
-  flush (acc : Option ValId) (pending : Array γ) : TransM ValId := do
-    let mut acc := acc
-    for c in cut pending do
-      let d ← chunk c
-      acc := some (← match acc with | none => pure d | some a => combine a d)
-    match acc with
-    | some a => return a
-    | none => chunk #[]
-
 /-- `{k: v, **d}`, as CPython builds it: a run of pairs is cut into chunks of `dictChunk`,
 each built by `pairs`, and each later chunk and each `**d` is `DICT_UPDATE`. -/
 partial def dictDisplay (ks : Array (opt_expr SourceRange)) (vs : Array (expr SourceRange)) :
     TransM ValId :=
-  dictFromEntries (ks.zip vs) unpacked (chunks dictChunk) pairs
+  dictFromEntries (ks.zip vs) (fun | (.some_expr .., _) => none | (_, d) => some (transExpr d))
+    (chunks dictChunk) pairs
     (fun a d => build (emitFailing (.str .base "update") Py.dictUpdate.ref #[a, d]))
 where
-  /-- The `d` of a `**d` entry. -/
-  unpacked : opt_expr SourceRange × expr SourceRange → Option (expr SourceRange)
-    | (.some_expr .., _) => none
-    | (_, d) => some d
   /-- `BUILD_MAP` of the pairs `k: v` of `c`, key before value.  More than
   `stackUseGuideline / 2` pairs start an empty dict and add each pair (`MAP_ADD`). -/
   pairs (c : Array (opt_expr SourceRange × expr SourceRange)) : TransM ValId := do
@@ -1213,7 +1211,8 @@ partial def superCall (sr : SourceRange) (attr : Bool) : TransM ValId := do
 /-- The keyword dict of a call to `fv` with the keyword arguments `kws`: runs of `k=v` pairs,
 each a total `mkKwargs`, and `DICT_MERGE` (`dictMerge`) for each `**m`. -/
 partial def kwargsDict (fv : ValId) (kws : Array (keyword SourceRange)) : TransM ValId :=
-  dictFromEntries kws (fun kw => if kw.nameAndValue.1.isSome then none else some kw.value)
+  dictFromEntries kws
+    (fun kw => if kw.nameAndValue.1.isSome then none else some (transExpr kw.value))
     (fun run => if run.isEmpty then #[] else #[run])
     (fun run => do
       let mut kvs := #[]
