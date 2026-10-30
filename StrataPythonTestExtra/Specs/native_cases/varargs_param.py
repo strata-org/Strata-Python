@@ -1,0 +1,3 @@
+# `*args` is not supported: the model is rejected.
+def f(*args: int) -> None:
+    ...

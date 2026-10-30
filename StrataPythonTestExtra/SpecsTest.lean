@@ -539,6 +539,126 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
 #guard_msgs in
 #eval expectNativeCaseError "icontract_decline" "Unknown identifier icontract.requires"
 
+-- `len` of a `str` is `stringLen`; `len` of a list or of an `Any` is the generic `len`.
+#guard_msgs in
+#eval runNativeCase "len_by_type" fun sigs warnings => do
+  expect warnings.isEmpty s!"expected no warnings, got {warnings}"
+  let f ← findFn sigs "f"
+  expect (f.preconditions.size == 3) s!"expected 3 preconditions, got {f.preconditions.size}"
+  expect (f.preconditions[0]!.formula.softBEq
+      (.intGe (.len (.var "xs" .none) .none) (.intLit 1 .none) .none))
+    s!"`len(xs) >= 1` on a list: got {f.preconditions[0]!.formula}"
+  expect (f.preconditions[1]!.formula.softBEq
+      (.intGe (.stringLen (.var "s" .none) .none) (.intLit 1 .none) .none))
+    s!"`len(s) >= 1` on a str: got {f.preconditions[1]!.formula}"
+  expect (f.preconditions[2]!.formula.softBEq
+      (.intLe (.len (.var "a" .none) .none) (.intLit 3 .none) .none))
+    s!"`len(a) <= 3` on an Any: got {f.preconditions[2]!.formula}"
+
+-- `"@" in email` on a `str` is `containsKey`, whose meaning is CPython's `in` for any
+-- container.
+#guard_msgs in
+#eval runNativeCase "in_any_container" fun sigs warnings => do
+  expect warnings.isEmpty s!"expected no warnings, got {warnings}"
+  let f ← findFn sigs "f"
+  expect (f.preconditions.size == 1) s!"expected 1 precondition, got {f.preconditions.size}"
+  expect (f.preconditions[0]!.formula.softBEq (.containsKey (.var "email" .none) "@" .none))
+    s!"`\"@\" in email`: got {f.preconditions[0]!.formula}"
+
+-- Signatures that PySpec does not support are errors that reject the model.
+
+#guard_msgs in
+#eval expectNativeCaseError "varargs_param" "f: *args is not supported"
+
+#guard_msgs in
+#eval expectNativeCaseError "method_type_params" "get: type parameters are not supported"
+
+-- `Optional[T]` reads as `Union[T, None]`, also as `typing.Optional[T]`, and `typing.X[...]`
+-- reads as `X[...]`.
+#guard_msgs in
+#eval runNativeCase "optional_types" fun sigs warnings => do
+  expect warnings.isEmpty s!"expected no warnings, got {warnings}"
+  let f ← findFn sigs "f"
+  let tps := f.args.args.map (·.type)
+  expect (tps.size == 4 && tps[0]! == tps[2]! && tps[1]! == tps[3]! && f.returnType == tps[0]!)
+    s!"types: {tps.map toString}, returns {f.returnType}"
+  expect (toString tps[0]! != toString tps[1]!) s!"types: {tps.map toString}"
+  expect (toString tps[0]! == "Union[_types.NoneType, builtins.str]") s!"Optional[str]: {tps[0]!}"
+  let g ← findFn sigs "g"
+  expect ((g.args.args.map (toString ·.type)) == #["typing.List[builtins.str]", "typing.Dict[builtins.str, builtins.int]"])
+    s!"g: {g.args.args.map (toString ·.type)}"
+
+-- `Optional` with two arguments is an error, as in CPython.
+#guard_msgs in
+#eval expectNativeCaseError "optional_two_args" "Optional expects one argument."
+
+-- After `import typing as t`, `t.Optional[int]` reads as `Optional[int]`.
+#guard_msgs in
+#eval runNativeCase "typing_alias_prefix" fun sigs warnings => do
+  expect warnings.isEmpty s!"expected no warnings, got {warnings}"
+  let f ← findFn sigs "f"
+  let tps := f.args.args.map (·.type)
+  expect (tps.size == 2 && tps[0]! == tps[1]!) s!"types: {tps.map toString}"
+
+-- A model that binds a typing name a second time, in the module or in a class body, is
+-- rejected: PySpec would read the name as the typing import, and CPython as the other binding.
+#guard_msgs in
+#eval expectNativeCaseError "rebind_typing_module" "'typing' has another binding than its typing import"
+#guard_msgs in
+#eval expectNativeCaseError "rebind_typing_class" "'typing' has another binding than its typing import"
+#guard_msgs in
+#eval expectNativeCaseError "rebind_typing_name" "'List' has another binding than its typing import"
+#guard_msgs in
+#eval expectNativeCaseError "rebind_typing_class_body" "'List' is bound in a class body"
+#guard_msgs in
+#eval expectNativeCaseError "rebind_typing_walrus" "'List' has another binding than its typing import"
+#guard_msgs in
+#eval expectNativeCaseError "rebind_typing_annassign" "'List' has another binding than its typing import"
+#guard_msgs in
+#eval expectNativeCaseError "rebind_typing_target" "'List' has another binding than its typing import"
+#guard_msgs in
+#eval expectNativeCaseError "rebind_typing_one_import" "'List' has another binding than its typing import"
+#guard_msgs in
+#eval expectNativeCaseError "rebind_typing_nested_class" "'Dict' is bound in a class body"
+#guard_msgs in
+#eval expectNativeCaseError "rebind_typing_alias_import" "'t' has another binding than its typing import"
+
+-- A subscript through a module name that `import typing` didn't bind is an error.
+#guard_msgs in
+#eval expectNativeCaseError "prefix_other_module" "Could not interpret"
+
+-- A pin of a result that is wrong today: after `m = 0`, PySpec still reads `m.ServiceClass`
+-- through the import. The typing check covers typing names only.
+#guard_msgs in
+#eval runNativeCase "rebound_module_attr" fun sigs _ => do
+  let f ← findFn sigs "f"
+  expect ((f.args.args.map (toString ·.type)) == #["import_test.service.module.ServiceClass"])
+    s!"f: {f.args.args.map (toString ·.type)}"
+
+-- The same typing import twice, and a field without a value, are not other bindings.
+#guard_msgs in
+#eval runNativeCase "typing_import_kept" fun sigs warnings => do
+  expect warnings.isEmpty s!"expected no warnings, got {warnings}"
+  let m ← findMethod (← findClass sigs "C") "m"
+  expect ((m.args.args.map (toString ·.type)) == #["native_cases.typing_import_kept.C", "typing.List[builtins.int]"])
+    s!"m: {m.args.args.map (toString ·.type)}"
+
+-- A pin of a result that is wrong today: a method named `dict` shadows the builtin in the
+-- class body, but PySpec still reads `-> dict` as the builtin. The check above covers typing
+-- names only.
+#guard_msgs in
+#eval runNativeCase "method_named_dict" fun sigs _ => do
+  let m ← findMethod (← findClass sigs "C") "m"
+  expect (toString m.returnType == "builtins.dict") s!"m returns {m.returnType}"
+
+-- A `u` prefix changes nothing: `Literal[u"a"]` is `Literal["a"]`.
+#guard_msgs in
+#eval runNativeCase "literal_u_prefix" fun sigs warnings => do
+  expect warnings.isEmpty s!"expected no warnings, got {warnings}"
+  let f ← findFn sigs "f"
+  expect (f.args.args[0]!.type.asStringLiteral == some "a")
+    s!"expected Literal[\"a\"], got {f.args.args[0]!.type}"
+
 -- Duplicate `@ghost(name="g")` on one declaration is a hard error.
 #guard_msgs in
 #eval expectNativeCaseError "ghost_dup" "duplicate"
@@ -921,6 +1041,12 @@ warnings: #[]
 #guard_msgs in
 #eval printMethodsAndProcedures "overload_method_requires"
 
+-- A stub whose body is not `...` gets a warning, once per such stub.
+#guard_msgs in
+#eval runNativeCase "overload_body_pass" fun _ warnings => do
+  let n := (warnings.filter (·.contains "overload body is not `...`")).size
+  expect (n == 1) s!"warnings: {warnings}"
+
 -- The parser does not read the body of an `@overload` stub, so an assert in it is a
 -- hard error.
 #guard_msgs in
@@ -951,7 +1077,7 @@ info: [in_while, in_while_else, in_with, in_try, in_handler, in_try_else, in_fin
 -- the field `h` once.
 /--
 info: fields: [h = _H()]
-warnings: #[overload body is not `...`, overload body is not `...`]
+warnings: #[]
 -/
 #guard_msgs in
 #eval runNativeCase "overload_init_fields" fun sigs warnings => do
@@ -1368,6 +1494,7 @@ def specExprSamples : List (String × SpecExpr) :=
     ("getIndex",     .getIndex x "f" rtLoc),
     ("isInstanceOf", .isInstanceOf x "str" rtLoc),
     ("stringLen",    .stringLen x rtLoc),
+    ("len",          .len x rtLoc),
     ("intLit",       i1),
     ("boolLit",      bt),
     ("noneLit",      .noneLit rtLoc),
@@ -1619,14 +1746,17 @@ meta def findModuleGhost (sigs : Array Signature) (name : String) : IO Specs.Gho
 #guard_msgs in
 #eval expectNativeCaseError "module_ghost_alias_after_ghost" "Unknown identifier MyInt"
 
--- An import rebinding an alias before the ghost wins over the earlier assign.
+-- A name that a typing import binds is bound by an assignment too, so the model is rejected.
 #guard_msgs in
-#eval runNativeCase "module_ghost_import_shadows_alias" fun sigs _ => do
+#eval expectNativeCaseError "module_ghost_import_shadows_alias" "'MyType' has another binding than its typing import"
+
+-- A from-import of a model module rebinds an earlier assignment before the ghost reads it.
+#guard_msgs in
+#eval runNativeCase "module_ghost_from_import_shadows_alias" fun sigs _ => do
   let g ← findModuleGhost sigs "g"
   let some tp := g.type
     | throw <| IO.userError "module ghost 'g' lost its type"
-  expect (compare tp (SpecType.ident .none .typingAny) == .eq)
-    "ghost type did not resolve to the import binding `Any`"
+  expect (toString tp == "import_test.service.module.ServiceClass") s!"ghost type: {tp}"
 
 -- A rebind after the ghost does not change the binding the ghost resolved.
 #guard_msgs in

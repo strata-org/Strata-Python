@@ -27,6 +27,11 @@ def overloadParamNameDisagreement : MessageKind :=
 def overloadArgNotStringLiteral : MessageKind :=
   { category := "overloadArgNotStringLiteral", impact := .internalError }
 
+/-- An `@overload` stub has preconditions, which the Laurel lowering ignores: it generates no
+    procedure for a dispatch-only stub. -/
+def overloadPreconditionIgnored : MessageKind :=
+  { category := "overloadPreconditionIgnored", impact := .knownLimitation }
+
 -- Overload resolution phase
 def overloadResolveWarning : MessageKind :=
   { category := "resolveWarning", impact := .internalWarning }

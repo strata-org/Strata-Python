@@ -705,7 +705,7 @@ every obligation holds: false
 /-! ## A `@requires` on a top-level `@overload` stub
 
 This test pins a result that is wrong today. The Laurel translation drops the
-`@requires` of a top-level `@overload` stub without a message, so the call
+`@requires` of a top-level `@overload` stub with a warning that is not fatal, so the call
 `connect("s")`, which breaks `len(service_name) > 100`, creates no obligation. -/
 
 /--

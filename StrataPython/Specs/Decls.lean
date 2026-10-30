@@ -38,6 +38,7 @@ def typingOverload := ofComponent "typing" "overload"
 def typingSequence := ofComponent "typing" "Sequence"
 def typingTypedDict := ofComponent "typing" "TypedDict"
 def typingUnion := ofComponent "typing" "Union"
+def typingOptional := ofComponent "typing" "Optional"
 def typingRequired := ofComponent "typing" "Required"
 def typingNotRequired := ofComponent "typing" "NotRequired"
 def typingUnpack := ofComponent "typing" "Unpack"
@@ -60,6 +61,7 @@ inductive MetadataType where
 | typingMapping
 | typingSequence
 | typingUnion
+| typingOptional
 deriving Repr
 
 def MetadataType.ident : MetadataType -> PythonIdent
@@ -70,6 +72,7 @@ def MetadataType.ident : MetadataType -> PythonIdent
 | .typingMapping => .typingMapping
 | .typingSequence => .typingSequence
 | .typingUnion => .typingUnion
+| .typingOptional => .typingOptional
 
 instance : ToString MetadataType where
   toString tp := toString tp.ident
@@ -654,6 +657,9 @@ inductive SpecExpr where
 /-- `stringLen subject` represents `len(subject)` where `subject` is a string.
     Used in preconditions like `assert len(name) >= 1`. -/
 | stringLen (subject : SpecExpr) (loc : SourceRange)
+/-- `len subject` represents `len(subject)` where `subject` is not known to be a
+    string, such as a list or an `Any`. -/
+| len (subject : SpecExpr) (loc : SourceRange)
 | intLit (value : Int) (loc : SourceRange)
 | boolLit (value : Bool) (loc : SourceRange)
 | noneLit (loc : SourceRange)
@@ -684,8 +690,9 @@ inductive SpecExpr where
     expression `pattern`. Corresponds to `compile(pattern).search(subject) is not None`
     in the Python source. -/
 | regexMatch (subject : SpecExpr) (pattern : String) (loc : SourceRange)
-/-- `containsKey container key` asserts that `key` is present in `container`.
-    Corresponds to `"key" in container` in the Python source. -/
+/-- `containsKey container key` is `"key" in container`, with CPython's meaning of
+    `in` for any `container`: key presence for a dict, a substring test for a `str`,
+    membership for a list. -/
 | containsKey (container : SpecExpr) (key : String) (loc : SourceRange)
 /-- `implies condition body` asserts that if `condition` holds then `body` holds.
     Used to represent conditional assertions like `if "field" in kwargs: assert ...`. -/
@@ -708,7 +715,7 @@ deriving Inhabited
 def SpecExpr.loc : SpecExpr → SourceRange
   | .placeholder l | .noneLit l
   | .var _ l | .intLit _ l | .boolLit _ l | .floatLit _ l
-  | .stringLen _ l | .neg _ l | .not _ l | .old _ l
+  | .stringLen _ l | .len _ l | .neg _ l | .not _ l | .old _ l
   | .getIndex _ _ l | .getItem _ _ l | .isInstanceOf _ _ l
   | .intGe _ _ l | .intLe _ _ l | .floatGe _ _ l | .floatLe _ _ l
   | .add _ _ l | .sub _ _ l | .mul _ _ l | .floorDiv _ _ l
@@ -729,7 +736,7 @@ def SpecExpr.ghostInitializerType? (e : SpecExpr) : Option SpecType :=
   | .floatGe .. | .floatLe .. | .enumMember .. | .regexMatch ..
   | .containsKey .. | .implies .. | .not .. | .quantifier .. =>
       some (ident .builtinsBool)
-  | .stringLen .. => some (ident .builtinsInt)
+  | .stringLen .. | .len .. => some (ident .builtinsInt)
   | .placeholder .. | .var .. | .old .. | .getIndex .. | .getItem ..
   | .isInstanceOf .. | .add .. | .sub .. | .mul .. | .floorDiv ..
   | .mod .. | .pow .. | .neg .. | .and .. | .or .. =>
@@ -751,6 +758,7 @@ def SpecExpr.containsPlaceholder : SpecExpr → Bool
   | .getItem s k _ => s.containsPlaceholder || k.containsPlaceholder
   | .isInstanceOf s _ _ => s.containsPlaceholder
   | .stringLen s _ => s.containsPlaceholder
+  | .len s _ => s.containsPlaceholder
   | .intGe s b _ => s.containsPlaceholder || b.containsPlaceholder
   | .intLe s b _ => s.containsPlaceholder || b.containsPlaceholder
   | .add l r _ => l.containsPlaceholder || r.containsPlaceholder
@@ -790,6 +798,7 @@ def SpecExpr.containsPlaceholder : SpecExpr → Bool
   | .getItem s k _ => s.mentionsVar name || k.mentionsVar name
   | .isInstanceOf s _ _ => s.mentionsVar name
   | .stringLen s _ => s.mentionsVar name
+  | .len s _ => s.mentionsVar name
   | .intGe s b _ => s.mentionsVar name || b.mentionsVar name
   | .intLe s b _ => s.mentionsVar name || b.mentionsVar name
   | .add l r _ => l.mentionsVar name || r.mentionsVar name
@@ -826,6 +835,7 @@ def SpecExpr.containsPlaceholder : SpecExpr → Bool
   | .getItem s k _ => s.hasFreeVar name || k.hasFreeVar name
   | .isInstanceOf s _ _ => s.hasFreeVar name
   | .stringLen s _ => s.hasFreeVar name
+  | .len s _ => s.hasFreeVar name
   | .intGe s b _ => s.hasFreeVar name || b.hasFreeVar name
   | .intLe s b _ => s.hasFreeVar name || b.hasFreeVar name
   | .add l r _ => l.hasFreeVar name || r.hasFreeVar name
@@ -854,7 +864,7 @@ def SpecExpr.oldReadsVar (e : SpecExpr) (name : String) : Bool :=
   match e with
   | .old inner _ => inner.hasFreeVar name
   | .placeholder _ | .var .. | .intLit .. | .boolLit .. | .noneLit .. | .floatLit .. => false
-  | .stringLen s _ | .neg s _ | .not s _ | .getIndex s _ _ | .isInstanceOf s _ _
+  | .stringLen s _ | .len s _ | .neg s _ | .not s _ | .getIndex s _ _ | .isInstanceOf s _ _
   | .enumMember s _ _ | .regexMatch s _ _ | .containsKey s _ _ => s.oldReadsVar name
   | .intGe a b _ | .intLe a b _ | .floatGe a b _ | .floatLe a b _
   | .add a b _ | .sub a b _ | .mul a b _ | .floorDiv a b _ | .mod a b _ | .pow a b _
@@ -872,6 +882,7 @@ def SpecExpr.softBEq : SpecExpr → SpecExpr → Bool
   | .getItem s₁ k₁ _, .getItem s₂ k₂ _ => s₁.softBEq s₂ && k₁.softBEq k₂
   | .isInstanceOf s₁ t₁ _, .isInstanceOf s₂ t₂ _ => s₁.softBEq s₂ && t₁ == t₂
   | .stringLen s₁ _, .stringLen s₂ _ => s₁.softBEq s₂
+  | .len s₁ _, .len s₂ _ => s₁.softBEq s₂
   | .intLit v₁ _, .intLit v₂ _ => v₁ == v₂
   | .intGe s₁ b₁ _, .intGe s₂ b₂ _ => s₁.softBEq s₂ && b₁.softBEq b₂
   | .intLe s₁ b₁ _, .intLe s₂ b₂ _ => s₁.softBEq s₂ && b₁.softBEq b₂

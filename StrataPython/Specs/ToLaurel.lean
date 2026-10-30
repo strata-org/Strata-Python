@@ -188,9 +188,12 @@ def rejectOverloadMethodContract (name : String) (func : FunctionDecl) : ToLaure
 /-- Extract an overload dispatch entry from an `@overload` function declaration.
     Contracts are rejected first: no procedure is generated for a dispatch-only
     stub, so an `@ensures` or `@admit` on it would otherwise be silently
-    dropped. -/
+    dropped. Its preconditions are ignored, with a warning. -/
 def extractOverloadEntry (func : FunctionDecl) : ToLaurelM Unit := do
   reportOverloadPostconditions func.name func
+  unless func.preconditions.isEmpty do
+    reportError .overloadPreconditionIgnored func.loc
+      s!"the preconditions of @overload stub '{func.name}' are ignored by the Laurel lowering"
   let args := func.args.args
   let .isTrue _ := decideProp (args.size > 0)
     | reportError .overloadNoArgs func.loc
@@ -572,7 +575,8 @@ def specExprToLaurel (e : SpecExpr) (source : FileRange)
   | .isInstanceOf _ typeName loc => do
     reportError .isinstanceUnsupported loc s!"isinstance check for '{typeName}' not yet supported in preconditions"
     return default
-  | .stringLen subject loc => do
+  -- ToLaurel reads every `len`, a list's included, as the length of a string.
+  | .stringLen subject loc | .len subject loc => do
     let src ← nodeSource loc
     let s ← asAny loc <| specExprToLaurel subject src
     return .mkSome <| .fromInt (.strLength (.anyAsString s))

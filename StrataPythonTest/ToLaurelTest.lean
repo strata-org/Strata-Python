@@ -1335,6 +1335,18 @@ private def precondPins (args : Array Arg)
   errs == 0 &&
     userLines == [s!"requires {expectedFormula} summary \"precondition 0\""]
 
+-- `len` of a subject that isn't a string lowers exactly as `stringLen`: as the length of a
+-- string.
+#guard
+  let pre (f : SpecExpr) := translatePrecond
+    #[{ message := #[], formula := .intGe f (.intLit 1 loc) loc }] (args := #[arg "xs" (listOf str)])
+  pre (.len (.var "xs" loc) loc) == pre (.stringLen (.var "xs" loc) loc)
+
+#guard precondPins #[arg "xs" (listOf str)]
+  { message := #[], formula := .intGe (.len (.var "xs" loc) loc) (.intLit 1 loc) loc }
+  "Any_to_bool(PGe(from_int(Str.Length(Any..as_string!(xs))), from_int(1)))"
+
+
 -- Canonical ∀-over-list shape: `all(len(x) >= 1 for x in xs)`. The binder is
 -- Any-typed, the List_contains membership guard doubles as the trigger, and
 -- the guard is combined with the body by implication.
@@ -1847,15 +1859,15 @@ No procedure is generated for a dispatch-only stub, so `@ensures` and `@admit`
 on one are rejected loudly instead of silently dropped. -/
 
 private def translateOverloadResult (postconditions : Array SpecExpr := #[])
-    (admittedPostconditions : Array SpecExpr := #[]) : TranslationResult :=
+    (admittedPostconditions : Array SpecExpr := #[])
+    (preconditions : Array Assertion := #[]) : TranslationResult :=
   signaturesToLaurel "<test>" #[
     .functionDecl {
       loc := loc, nameLoc := loc, name := "make"
       args := { args := #[arg "kind" (SpecType.stringLiteral loc "a")], kwonly := #[] }
       returnType := pyClass "Alpha"
       isOverload := true
-      preconditions := #[]
-      postconditions, admittedPostconditions
+      preconditions, postconditions, admittedPostconditions
     }] testModule
 
 -- @ensures on an @overload stub is fatal; the dispatch entry is still registered.
@@ -1890,6 +1902,21 @@ private def t_overloadAdmitRejected : Bool :=
     && result.overloads.contains "make"
 
 #guard t_overloadAdmitRejected
+
+-- A precondition on an @overload stub is ignored, with a warning that isn't fatal: the stub
+-- only registers its dispatch entry.
+private def stubPrecondition : Assertion :=
+  { message := #[], formula := .intGe (.stringLen (.var "kind" loc) loc) (.intLit 1 loc) loc }
+
+#guard
+  let result := translateOverloadResult (preconditions := #[stubPrecondition])
+  (match result.errors.toList with
+    | [warning] =>
+        warning.kind == .overloadPreconditionIgnored && !warning.kind.impact.isFatal
+          && warning.message.message ==
+            "the preconditions of @overload stub 'make' are ignored by the Laurel lowering"
+    | _ => false)
+    && result.overloads.contains "make" && result.program.staticProcedures.isEmpty
 
 /-! ## The modifies clause is one unguarded wildcard group
 

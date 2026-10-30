@@ -356,6 +356,7 @@ protected def SpecExpr.toDDM (e : SpecExpr) : DDM.SpecExprDecl SourceRange :=
   | .getItem subj key loc => .getItemExpr loc subj.toDDM key.toDDM
   | .isInstanceOf subj tn loc => .isInstanceOfExpr loc subj.toDDM ⟨loc, tn⟩
   | .stringLen subj loc => .stringLenExpr loc subj.toDDM
+  | .len subj loc => .lenExpr loc subj.toDDM
   | .intLit v loc => .intExpr loc (toDDMInt loc v)
   | .intGe subj bound loc => .intGeExpr loc subj.toDDM bound.toDDM
   | .intLe subj bound loc => .intLeExpr loc subj.toDDM bound.toDDM
@@ -567,7 +568,7 @@ def DDM.SpecExprDecl.fromDDM (d : DDM.SpecExprDecl SourceRange) : Specs.SpecExpr
   | .getIndexExpr loc subj ⟨_, field⟩ => .getIndex subj.fromDDM field loc
   | .getItemExpr loc subj key => .getItem subj.fromDDM key.fromDDM loc
   | .isInstanceOfExpr loc subj ⟨_, tn⟩ => .isInstanceOf subj.fromDDM tn loc
-  | .lenExpr loc subj => .stringLen subj.fromDDM loc
+  | .lenExpr loc subj => .len subj.fromDDM loc
   | .stringLenExpr loc subj => .stringLen subj.fromDDM loc
   | .intExpr loc i => .intLit i.ofDDM loc
   | .intGeExpr loc subj bound => .intGe subj.fromDDM bound.fromDDM loc

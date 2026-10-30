@@ -181,6 +181,7 @@ def preludeSig :=
     .mk .typingSequence (.metaType .typingSequence),
     .mk .typingTypedDict .typingTypedDict,
     .mk .typingUnion (.metaType .typingUnion),
+    .mk .typingOptional (.metaType .typingOptional),
     .mk .typingRequired .typingRequired,
     .mk .typingNotRequired .typingNotRequired,
     .mk .typingUnpack .typingUnpack,
@@ -258,6 +259,8 @@ structure PySpecState where
     preludeAtoms.foldl (init := {}) fun m (nm, pyIdent) =>
       m.insert nm (.typeValue (.ident default pyIdent))
   typeReferences : Std.HashMap String ClassRef := {}
+  /-- The names that `import typing` binds: `typing`, or its alias. -/
+  typingModules : Std.HashSet String := {}
   /--
   Signatures being generated (declarations, functions, classes, etc).
   -/
@@ -393,6 +396,13 @@ def unionTranslator : TypeTranslator where
     args.foldlM (start := 1) (init := tp) fun tp v => do
       return SpecType.union loc tp (← valueAsType loc v)
 
+/-- `Optional[T]`, which is `Union[T, None]`. -/
+def optionalTranslator : TypeTranslator where
+  callback := fun loc arg => do
+    if let .tuple _ := arg then
+      specError loc s!"Optional expects one argument."; return default
+    return SpecType.union loc (← valueAsType loc arg) (.noneType loc)
+
 def literalTranslator : TypeTranslator where
   callback := fun loc arg => do
     let args :=
@@ -420,6 +430,7 @@ def metadataProcessor : MetadataType → TypeTranslator
 | .typingMapping => fixedTranslator .typingMapping 2
 | .typingSequence => fixedTranslator .typingSequence 1
 | .typingUnion => unionTranslator
+| .typingOptional => optionalTranslator
 
 def translateCall (loc : SourceRange) (func : SpecValue)
     (args : Array SpecValue) (kwargs : Array (Option String × SpecValue))
@@ -554,8 +565,8 @@ def pySpecValue (expr : expr SourceRange) : PySpecM SpecValue := do
       translateCall loc func args kwargs
     else
       return default
-  | .Constant constLoc value ⟨_, kind⟩ =>
-    assert! kind.isNone
+  -- `kind` is the string prefix `u`, which changes nothing in Python 3.
+  | .Constant constLoc value _ =>
     translateConstant constLoc value
   | .Dict loc ⟨_, keys⟩ ⟨_, values⟩ =>
     let .isTrue size_eq := decideProp (keys.size = values.size)
@@ -580,6 +591,17 @@ def pySpecValue (expr : expr SourceRange) : PySpecM SpecValue := do
       translateSubscript paramLoc paramType sargs
     else
       pure default
+  | .Subscript _ (.Attribute paramLoc (.Name _ ⟨_, modName⟩ (.Load _)) ⟨_, attrName⟩ (.Load _))
+      subscriptArgs _ =>
+    -- `typing.Optional[int]` reads as `Optional[int]`, through the qualified name that
+    -- `import typing` binds. The typing rebinding check makes that name keep its meaning.
+    unless (← get).typingModules.contains modName do
+      specError expr.ann s!"Could not interpret {expr}"; return default
+    let (success, sargs) ← runChecked <| pySpecValue subscriptArgs
+    if success then
+      translateSubscript paramLoc s!"{modName}.{attrName}" sargs
+    else
+      pure default
   | .Tuple ann ⟨_, pyElts⟩ _ctx =>
     let elts ← pyElts.attach.mapM fun ⟨e, em⟩ => pySpecValue e
     return .tuple elts
@@ -588,6 +610,7 @@ def pySpecValue (expr : expr SourceRange) : PySpecM SpecValue := do
     return default
 termination_by 2 * sizeOf expr
 decreasing_by
+  · decreasing_tactic
   · decreasing_tactic
   · decreasing_tactic
   · decreasing_tactic
@@ -808,7 +831,7 @@ private def transCompare (loc : SourceRange)
     | return none
   match lhsExpr with
   -- len(subject) >= N / len(subject) <= N
-  | .stringLen _ _ =>
+  | .stringLen _ _ | .len _ _ =>
     let (clean, (boundExpr, _)) ← runNoWarn (transExpr comparators[0])
     if clean then
       match boundExpr with
@@ -1156,8 +1179,10 @@ partial def transExpr (e : expr SourceRange)
         return placeholder
     if funcName == "len" then
       if h : args.size = 1 then
-        let (subjExpr, _subjTp) ← transExpr args[0]
-        return (.stringLen subjExpr (loc := loc), intType)
+        let (subjExpr, subjTp) ← transExpr args[0]
+        if subjTp.isStringLikeType then
+          return (.stringLen subjExpr (loc := loc), intType)
+        return (.len subjExpr (loc := loc), intType)
       else
         specWarning loc s!"len expected 1 argument, got {args.size}"
         return placeholder
@@ -1633,9 +1658,10 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
           | none => funName
         specError fnLoc s!"{qualName}: an @overload stub cannot have assert, if or for \
           statements"
-      -- Overload stubs should have `...` as their only body statement.
-      unless body.size = 1 &&
-             body[0]! matches .Expr _ (.Constant _ (.ConEllipsis _) _) do
+      -- Overload stubs should have `...` as their only body statement. The body of an
+      -- `__init__` stub that only assigns fields comes without them, and so is empty.
+      unless body.isEmpty || (body.size = 1 &&
+             body[0]! matches .Expr _ (.Constant _ (.ConEllipsis _) _)) do
         specWarning fnLoc "overload body is not `...`"
     else
       body.forM blockStmt
@@ -1750,7 +1776,8 @@ partial def pySpecClassBody (loc : SourceRange) (className : String)
       if type_comment.isSome then
         specWarning loc "FunctionDef: type_comment not supported"
       if type_params.size > 0 then
-        specWarning loc "FunctionDef: type_params not supported"
+        specError loc s!"{name}: type parameters are not supported"
+        continue
       let isInit := name == "__init__"
       if isInit then
         -- Each `self.f = self._C()` in `__init__` declares the field `f` of type `_C`.
@@ -1921,6 +1948,146 @@ private def importDelta (before : Std.HashMap String SpecValue)
       if let some v := after[n]? then
         caps := caps.push (n, v)
   return caps
+
+/-- Names bound by an assignment target, including nested patterns. -/
+private partial def collectBoundNames (t : expr StrataDDM.SourceRange)
+    (acc : Std.HashSet String) : Std.HashSet String :=
+  match t with
+  | .Name _ ⟨_, n⟩ _ => acc.insert n
+  | .Tuple _ ⟨_, elts⟩ _ | .List _ ⟨_, elts⟩ _ =>
+    elts.foldl (init := acc) fun a e => collectBoundNames e a
+  | .Starred _ inner _ => collectBoundNames inner acc
+  | _ => acc
+
+/-- Names bound in the enclosing scope by walrus targets (PEP 572);
+    lambda bodies are not descended. -/
+private partial def collectWalrusNames (e : expr StrataDDM.SourceRange)
+    (acc : Std.HashSet String) : Std.HashSet String :=
+  let comps (gens : Array (comprehension StrataDDM.SourceRange))
+      (acc : Std.HashSet String) : Std.HashSet String :=
+    gens.foldl (init := acc) fun a g =>
+      match g with
+      | .mk_comprehension _ _ iter ⟨_, ifs⟩ _ =>
+        ifs.foldl (init := collectWalrusNames iter a) fun a e => collectWalrusNames e a
+  match e with
+  | .NamedExpr _ target value =>
+    collectWalrusNames value (collectBoundNames target acc)
+  | .Lambda .. | .Name .. | .Constant .. => acc
+  | .BinOp _ l _ r => collectWalrusNames r (collectWalrusNames l acc)
+  | .BoolOp _ _ ⟨_, values⟩ =>
+    values.foldl (init := acc) fun a e => collectWalrusNames e a
+  | .UnaryOp _ _ operand => collectWalrusNames operand acc
+  | .IfExp _ test body orelse =>
+    collectWalrusNames orelse (collectWalrusNames body (collectWalrusNames test acc))
+  | .Compare _ left _ ⟨_, comparators⟩ =>
+    comparators.foldl (init := collectWalrusNames left acc) fun a e => collectWalrusNames e a
+  | .Call _ func ⟨_, args⟩ ⟨_, kwargs⟩ =>
+    let a := collectWalrusNames func acc
+    let a := args.foldl (init := a) fun a e => collectWalrusNames e a
+    kwargs.foldl (init := a) fun a kw => collectWalrusNames kw.value a
+  | .Dict _ ⟨_, keys⟩ ⟨_, values⟩ =>
+    let a := keys.foldl (init := acc) fun a k =>
+      match k with
+      | .some_expr _ e => collectWalrusNames e a
+      | .missing_expr _ => a
+    values.foldl (init := a) fun a e => collectWalrusNames e a
+  | .Set _ ⟨_, elts⟩ | .Tuple _ ⟨_, elts⟩ _ | .List _ ⟨_, elts⟩ _ =>
+    elts.foldl (init := acc) fun a e => collectWalrusNames e a
+  | .ListComp _ elt ⟨_, gens⟩ | .SetComp _ elt ⟨_, gens⟩ | .GeneratorExp _ elt ⟨_, gens⟩ =>
+    comps gens (collectWalrusNames elt acc)
+  | .DictComp _ key value ⟨_, gens⟩ =>
+    comps gens (collectWalrusNames value (collectWalrusNames key acc))
+  | .Await _ inner | .YieldFrom _ inner => collectWalrusNames inner acc
+  | .Yield _ ⟨_, value⟩ =>
+    value.elim acc (collectWalrusNames · acc)
+  | .FormattedValue _ value _ ⟨_, fmtSpec⟩ =>
+    let a := collectWalrusNames value acc
+    fmtSpec.elim a (collectWalrusNames · a)
+  | .Interpolation _ value _ _ ⟨_, fmtSpec⟩ =>
+    let a := collectWalrusNames value acc
+    fmtSpec.elim a (collectWalrusNames · a)
+  | .JoinedStr _ ⟨_, values⟩ | .TemplateStr _ ⟨_, values⟩ =>
+    values.foldl (init := acc) fun a e => collectWalrusNames e a
+  | .Subscript _ obj slice _ =>
+    collectWalrusNames slice (collectWalrusNames obj acc)
+  | .Attribute _ obj _ _ => collectWalrusNames obj acc
+  | .Starred _ inner _ => collectWalrusNames inner acc
+  | .Slice _ ⟨_, lower⟩ ⟨_, upper⟩ ⟨_, step⟩ =>
+    let a := lower.elim acc (collectWalrusNames · acc)
+    let a := upper.elim a (collectWalrusNames · a)
+    step.elim a (collectWalrusNames · a)
+
+/-- The names that the statement `s` binds in its scope: its imports' names, a `def` or
+`class` name, assignment targets, walrus targets, and the target of an annotated assignment
+with a value. A field without a value, `x: int`, binds nothing. -/
+private def stmtBoundNames (s : stmt StrataDDM.SourceRange) : Std.HashSet String :=
+  match s with
+  | .Import _ ⟨_, names⟩ => names.foldl (init := {}) fun acc a =>
+    acc.insert (a.asname.getD (a.name.takeWhile (· != '.')).toString)
+  | .ImportFrom _ _ ⟨_, names⟩ _ => names.foldl (init := {}) fun acc a =>
+    acc.insert (a.asname.getD a.name)
+  | .ClassDef _ ⟨_, n⟩ .. | .FunctionDef _ ⟨_, n⟩ .. => ({} : Std.HashSet String).insert n
+  | .Assign _ ⟨_, targets⟩ value _ =>
+    collectWalrusNames value (targets.foldl (init := {}) fun acc t => collectBoundNames t acc)
+  | .AnnAssign _ target _ ⟨_, some value⟩ _ => collectWalrusNames value (collectBoundNames target {})
+  | .Expr _ value => collectWalrusNames value {}
+  | _ => {}
+
+/-- What a typing import binds each name to: `typing` itself, or `typing.X`. -/
+private def typingImports (s : stmt StrataDDM.SourceRange) : Array (String × String) :=
+  match s with
+  | .Import _ ⟨_, names⟩ =>
+    names.filterMap fun a => if a.name == "typing" then some (a.asname.getD "typing", "typing") else none
+  | .ImportFrom _ ⟨_, some ⟨_, "typing"⟩⟩ ⟨_, names⟩ ⟨_, level⟩ =>
+    if (level.map (·.value)).getD 0 == 0 then
+      names.map fun a => (a.asname.getD a.name, s!"typing.{a.name}")
+    else #[]
+  | _ => #[]
+
+/-- PySpec reads each name that `import typing` or `from typing import ...` binds as that
+import's meaning, wherever the name appears. So any other binding of such a name, before or
+after the import, at the module's top level or in a class body, rejects the model: CPython would
+see the other binding. Repeating the same typing import is not another binding, and neither is a
+field without a value. Bindings inside function bodies don't count. -/
+private partial def checkTypingRebinds (body : Array (stmt StrataDDM.SourceRange)) :
+    PySpecM Unit := do
+  let mut typingNames : Std.HashMap String String := {}
+  for s in body do
+    for (n, target) in typingImports s do
+      unless typingNames.contains n do typingNames := typingNames.insert n target
+  modify fun st => { st with
+    typingModules := typingNames.fold (init := {}) fun acc n tgt =>
+      if tgt == "typing" then acc.insert n else acc }
+  if typingNames.isEmpty then return
+  let other (s : stmt StrataDDM.SourceRange) (n : String) : PySpecM Unit :=
+    specError s.ann s!"'{n}' has another binding than its typing import; PySpec reads it only as the import"
+  for s in body do
+    match s with
+    | .Import _ ⟨_, names⟩ =>
+      -- Each alias on its own: `import typing as t, os as t` binds `t` twice.
+      for a in names do
+        let n := a.asname.getD (a.name.takeWhile (· != '.')).toString
+        if let some target := typingNames[n]? then
+          unless a.name == "typing" && target == "typing" do other s n
+    | .ImportFrom _ ⟨_, pyModule⟩ ⟨_, names⟩ ⟨_, level⟩ =>
+      let fromTyping := pyModule.map (·.val) == some "typing" && (level.map (·.value)).getD 0 == 0
+      for a in names do
+        let n := a.asname.getD a.name
+        if let some target := typingNames[n]? then
+          unless fromTyping && target == s!"typing.{a.name}" do other s n
+    | _ =>
+      for n in stmtBoundNames s do
+        if typingNames.contains n then other s n
+  -- A class body's bindings shadow a typing name in the annotations of that body.
+  let rec classBodies (stmts : Array (stmt StrataDDM.SourceRange)) : PySpecM Unit := do
+    for s in stmts do
+      if let .ClassDef _ _ _ _ ⟨_, inner⟩ _ _ := s then
+        for c in inner do
+          for n in stmtBoundNames c do
+            if typingNames.contains n then
+              specError c.ann s!"'{n}' is bound in a class body; PySpec reads it only as the typing import"
+        classBodies inner
+  classBodies body
 
 mutual
 
@@ -2110,74 +2277,6 @@ private partial def translateModuleGhost (form : Decorators.DecoratorForm) : PyS
     loc := raw.loc
   })
 
-/-- Names bound by an assignment target, including nested patterns. -/
-private partial def collectBoundNames (t : expr StrataDDM.SourceRange)
-    (acc : Std.HashSet String) : Std.HashSet String :=
-  match t with
-  | .Name _ ⟨_, n⟩ _ => acc.insert n
-  | .Tuple _ ⟨_, elts⟩ _ | .List _ ⟨_, elts⟩ _ =>
-    elts.foldl (init := acc) fun a e => collectBoundNames e a
-  | .Starred _ inner _ => collectBoundNames inner acc
-  | _ => acc
-
-/-- Names bound in the enclosing scope by walrus targets (PEP 572);
-    lambda bodies are not descended. -/
-private partial def collectWalrusNames (e : expr StrataDDM.SourceRange)
-    (acc : Std.HashSet String) : Std.HashSet String :=
-  let comps (gens : Array (comprehension StrataDDM.SourceRange))
-      (acc : Std.HashSet String) : Std.HashSet String :=
-    gens.foldl (init := acc) fun a g =>
-      match g with
-      | .mk_comprehension _ _ iter ⟨_, ifs⟩ _ =>
-        ifs.foldl (init := collectWalrusNames iter a) fun a e => collectWalrusNames e a
-  match e with
-  | .NamedExpr _ target value =>
-    collectWalrusNames value (collectBoundNames target acc)
-  | .Lambda .. | .Name .. | .Constant .. => acc
-  | .BinOp _ l _ r => collectWalrusNames r (collectWalrusNames l acc)
-  | .BoolOp _ _ ⟨_, values⟩ =>
-    values.foldl (init := acc) fun a e => collectWalrusNames e a
-  | .UnaryOp _ _ operand => collectWalrusNames operand acc
-  | .IfExp _ test body orelse =>
-    collectWalrusNames orelse (collectWalrusNames body (collectWalrusNames test acc))
-  | .Compare _ left _ ⟨_, comparators⟩ =>
-    comparators.foldl (init := collectWalrusNames left acc) fun a e => collectWalrusNames e a
-  | .Call _ func ⟨_, args⟩ ⟨_, kwargs⟩ =>
-    let a := collectWalrusNames func acc
-    let a := args.foldl (init := a) fun a e => collectWalrusNames e a
-    kwargs.foldl (init := a) fun a kw => collectWalrusNames kw.value a
-  | .Dict _ ⟨_, keys⟩ ⟨_, values⟩ =>
-    let a := keys.foldl (init := acc) fun a k =>
-      match k with
-      | .some_expr _ e => collectWalrusNames e a
-      | .missing_expr _ => a
-    values.foldl (init := a) fun a e => collectWalrusNames e a
-  | .Set _ ⟨_, elts⟩ | .Tuple _ ⟨_, elts⟩ _ | .List _ ⟨_, elts⟩ _ =>
-    elts.foldl (init := acc) fun a e => collectWalrusNames e a
-  | .ListComp _ elt ⟨_, gens⟩ | .SetComp _ elt ⟨_, gens⟩ | .GeneratorExp _ elt ⟨_, gens⟩ =>
-    comps gens (collectWalrusNames elt acc)
-  | .DictComp _ key value ⟨_, gens⟩ =>
-    comps gens (collectWalrusNames value (collectWalrusNames key acc))
-  | .Await _ inner | .YieldFrom _ inner => collectWalrusNames inner acc
-  | .Yield _ ⟨_, value⟩ =>
-    value.elim acc (collectWalrusNames · acc)
-  | .FormattedValue _ value _ ⟨_, fmtSpec⟩ =>
-    let a := collectWalrusNames value acc
-    fmtSpec.elim a (collectWalrusNames · a)
-  | .Interpolation _ value _ _ ⟨_, fmtSpec⟩ =>
-    let a := collectWalrusNames value acc
-    fmtSpec.elim a (collectWalrusNames · a)
-  | .JoinedStr _ ⟨_, values⟩ | .TemplateStr _ ⟨_, values⟩ =>
-    values.foldl (init := acc) fun a e => collectWalrusNames e a
-  | .Subscript _ obj slice _ =>
-    collectWalrusNames slice (collectWalrusNames obj acc)
-  | .Attribute _ obj _ _ => collectWalrusNames obj acc
-  | .Starred _ inner _ => collectWalrusNames inner acc
-  | .Slice _ ⟨_, lower⟩ ⟨_, upper⟩ ⟨_, step⟩ =>
-    let a := lower.elim acc (collectWalrusNames · acc)
-    let a := upper.elim a (collectWalrusNames · a)
-    step.elim a (collectWalrusNames · a)
-
 /-- Source-ordered pre-pass registering imports and module ghosts, so
     contracts can forward-reference a ghost declared later.
 
@@ -2269,6 +2368,7 @@ partial def translate (body : Array (stmt StrataDDM.SourceRange)) : PySpecM Unit
   -- Ghosts are the exception: see the invariant documented on `preScanModule` above.
   let namesBefore := (←get).nameMap
   let sigsBefore := (←get).elements.size
+  checkTypingRebinds body
   let (importBinds, importSigs, shadowedGhosts) ← preScanModule body
   modify fun s => { s with
     nameMap := namesBefore
