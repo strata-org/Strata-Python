@@ -8,6 +8,7 @@ public import StrataPython.Dyn.Build
 public import StrataPython.Dyn.Scope
 public import StrataDyn.WF
 public import Lean.Data.Position
+import StrataPython.Dyn.Termination
 -- Emitting instructions over `Py.env` needs the signature representation at
 -- code-generation time.
 import StrataDyn.Env.WF
@@ -60,6 +61,11 @@ each test program as supported or not.
    `lake exe pydyn dyn FILE.py` prints the diagnostics and the module for one file.
 
 `whileStmt` is a short example, tested by `m_while.py` and `t04_while.py`.
+
+## Size lemmas
+
+The size lemmas next to some helpers, such as `sizeOf_params_default_lt`, are in this file,
+not in a `TranslateProps.lean`, because the translator's termination proofs need them.
 -/
 
 namespace StrataPython.Dyn.PyTranslate
@@ -558,6 +564,27 @@ def paramAnnotations (args : arguments SourceRange) : Array (String × expr Sour
   (pos.val ++ posOnly.val ++ varPos.val.toArray ++ kwOnly.val ++ varKw.val.toArray).filterMap
     fun (.mk_arg _ ⟨_, n⟩ a _) => a.val.map (n, ·)
 
+/-- An annotation that `paramAnnotations args` returns is smaller than `args`. -/
+private theorem sizeOf_paramAnnotations_lt {args : arguments SourceRange}
+    {x : String × expr SourceRange} (hx : x ∈ paramAnnotations args) :
+    sizeOf x.2 < sizeOf args := by
+  cases args with
+  | mk_arguments _ posOnly pos varPos kwOnly _ varKw _ =>
+  simp only [paramAnnotations, Array.mem_filterMap, Array.mem_append, Option.mem_toArray] at hx
+  obtain ⟨⟨r, ⟨r₁, n⟩, ⟨r₂, a⟩, tc⟩, ha, hx⟩ := hx
+  cases a with
+  | none => simp at hx
+  | some a =>
+    simp only [Option.map_some, Option.some.injEq] at hx
+    subst hx
+    have hArg : sizeOf a < sizeOf (arg.mk_arg r ⟨r₁, n⟩ ⟨r₂, some a⟩ tc) := by simp; omega
+    rcases ha with (((h | h) | h) | h) | h
+    · have hMem := Array.sizeOf_lt_of_mem h; simp [sizeOf_ann]; omega
+    · have hMem := Array.sizeOf_lt_of_mem h; simp [sizeOf_ann]; omega
+    · obtain ⟨_, v⟩ := varPos; subst h; simp [sizeOf_ann]; omega
+    · have hMem := Array.sizeOf_lt_of_mem h; simp [sizeOf_ann]; omega
+    · obtain ⟨_, v⟩ := varKw; subst h; simp [sizeOf_ann]; omega
+
 /-- Whether the statements hold an annotated assignment outside a nested function or class:
 CPython's `find_ann`, which decides `SETUP_ANNOTATIONS`. -/
 partial def findAnn (ss : Array (stmt SourceRange)) : Bool :=
@@ -584,27 +611,46 @@ structure ParamWithDefault where
   default : Option (expr SourceRange)
 
 /-- The parameters of `args`, in signature order. -/
-def params (args : arguments SourceRange) : Array ParamWithDefault := Id.run do
+def params (args : arguments SourceRange) : Array ParamWithDefault :=
   let .mk_arguments _ posOnly pos varPos kwOnly kwDefaults varKw defaults := args
-  let nPos := posOnly.val.size + pos.val.size
-  let firstDefault := nPos - defaults.val.size
-  let mut out : Array ParamWithDefault := #[]
+  let name : arg SourceRange → String := fun (.mk_arg _ ⟨_, n⟩ _ _) => n
   let positional := posOnly.val.map (·, ParamKind.posOnly) ++ pos.val.map (·, .positional)
-  for h : i in [:positional.size] do
-    let (.mk_arg _ ⟨_, name⟩ _ _, kind) := positional[i]
-    let default := if i ≥ firstDefault then defaults.val[i - firstDefault]? else none
-    out := out.push { name, kind, default }
-  if let some (.mk_arg _ ⟨_, name⟩ _ _) := varPos.val then
-    out := out.push { name, kind := .varPositional, default := none }
-  for h : j in [:kwOnly.val.size] do
-    let .mk_arg _ ⟨_, name⟩ _ _ := kwOnly.val[j]
-    let default := match kwDefaults.val[j]? with
-      | some (.some_expr _ d) => some d
-      | _ => none
-    out := out.push { name, kind := .kwOnly, default }
-  if let some (.mk_arg _ ⟨_, name⟩ _ _) := varKw.val then
-    out := out.push { name, kind := .varKeyword, default := none }
-  return out
+  let firstDefault := positional.size - defaults.val.size
+  positional.mapIdx (fun i (a, kind) =>
+      { name := name a, kind
+        default := if i ≥ firstDefault then defaults.val[i - firstDefault]? else none }) ++
+    (varPos.val.map fun a => { name := name a, kind := .varPositional, default := none }).toArray ++
+    kwOnly.val.mapIdx (fun j a =>
+      { name := name a, kind := .kwOnly
+        default := match kwDefaults.val[j]? with
+          | some (.some_expr _ d) => some d
+          | _ => none }) ++
+    (varKw.val.map fun a => { name := name a, kind := .varKeyword, default := none }).toArray
+
+/-- The default of a parameter of `args` is smaller than `args`. -/
+private theorem sizeOf_params_default_lt {args : arguments SourceRange} {p : ParamWithDefault}
+    (hp : p ∈ params args) {d : expr SourceRange} (hd : p.default = some d) :
+    sizeOf d < sizeOf args := by
+  cases args with
+  | mk_arguments _ posOnly pos varPos kwOnly kwDefaults varKw defaults =>
+  simp only [params, Array.mem_append, Array.mem_mapIdx] at hp
+  rcases hp with ((⟨i, _, rfl⟩ | hv) | ⟨j, _, rfl⟩) | hk
+  · simp only at hd
+    split at hd
+    · have hlt := Array.sizeOf_lt_of_mem (Array.mem_of_getElem? hd)
+      simp only [arguments.mk_arguments.sizeOf_spec, sizeOf_ann] at hlt ⊢; omega
+    · simp at hd
+  · cases h : varPos.val <;> simp [h] at hv; subst hv; simp at hd
+  · simp only at hd
+    split at hd
+    · rename_i h
+      have hlt := Array.sizeOf_lt_of_mem (Array.mem_of_getElem? h)
+      simp at hd; subst hd
+      simp only [arguments.mk_arguments.sizeOf_spec, sizeOf_ann, opt_expr.some_expr.sizeOf_spec]
+        at hlt ⊢
+      omega
+    · simp at hd
+  · cases h : varKw.val <;> simp [h] at hk; subst hk; simp at hd
 
 /-- Whether a default is a constant, which the prologue evaluates in place. -/
 def isConstantDefault : expr SourceRange → Bool
@@ -753,6 +799,18 @@ def splitStarred (vs : Array (expr SourceRange)) :
     Array (expr SourceRange) × Array (expr SourceRange) :=
   let n := (vs.findIdx? fun | .Starred .. => true | _ => false).getD vs.size
   (vs.extract 0 n, vs.extract n vs.size)
+
+/-- The elements of a display before its first `*x`, then the rest, are the display. -/
+private theorem splitStarred_append (vs : Array (expr SourceRange)) :
+    (splitStarred vs).1 ++ (splitStarred vs).2 = vs := by
+  simp only [splitStarred, Array.extract_append_extract, Nat.zero_min]
+  apply Array.extract_eq_self_of_le
+  omega
+
+/-- The elements of a display before and after its first `*x` are elements of the display. -/
+private theorem mem_of_mem_splitStarred {vs : Array (expr SourceRange)} {x : expr SourceRange}
+    (h : x ∈ (splitStarred vs).1 ∨ x ∈ (splitStarred vs).2) : x ∈ vs := by
+  rw [← splitStarred_append vs, Array.mem_append]; exact h
 
 /-- Build a dict from `entries` in order, as CPython's `compiler_dict` does.  Each run of
 pairs is cut by `cut`, and `chunk` builds one chunk.  For a `**d` entry `e`, `star? e` is the
