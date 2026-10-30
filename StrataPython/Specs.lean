@@ -861,6 +861,12 @@ private def transCompare (loc : SourceRange)
       -- Stop here on failure: falling through re-translates `comparators[0]`
       -- below, emitting the same "unsupported expression" warning twice.
       return none
+  -- subject != "A": not (subject == "A").
+  | .NotEq _ =>
+    match comparators[0] with
+    | .Constant _ (.ConString _ ⟨_, strVal⟩) _ =>
+      return some (.not (.enumMember lhsExpr #[strVal] (loc := loc)) (loc := loc))
+    | _ => pure ()
   | _ => pure ()
 
   -- `x is None` / `x is not None` -> eq/ne against None.
@@ -1263,6 +1269,15 @@ partial def transExpr (e : expr SourceRange)
           let (clean, (containerExpr, _)) ← runNoWarn (transExpr comparators[0])
           if clean then
             return (.containsKey containerExpr key (loc := loc), boolType)
+          -- Stop here: `transCompare` would translate the container again, and warn twice.
+          specWarning loc s!"unsupported comparison: {eformat e.toAst}"
+          return placeholder
+        | .NotIn _, .Constant _ (.ConString _ ⟨_, key⟩) _ =>
+          let (clean, (containerExpr, _)) ← runNoWarn (transExpr comparators[0])
+          if clean then
+            return (.not (.containsKey containerExpr key (loc := loc)) (loc := loc), boolType)
+          specWarning loc s!"unsupported comparison: {eformat e.toAst}"
+          return placeholder
         | _, _ => pure ()
     let (clean, (lhsExpr, lhsType)) ← runNoWarn (transExpr lhs)
     if clean then
@@ -1288,16 +1303,13 @@ partial def transExpr (e : expr SourceRange)
     let (clean, branches) ← runNoWarn <|
       values.attach.mapM fun ⟨v, _⟩ => transExpr v
     if clean then
-      let merged := branches.foldl (init := none) fun acc (branch, _) =>
-        match branch with
-        | .enumMember subj vals _ =>
-          match acc with
-          | none => some (subj, vals)
-          | some (prevSubj, prevVals) =>
-            if prevSubj.softBEq subj then
-              some (prevSubj, prevVals ++ vals)
-            else
-              none
+      -- Merge only when every branch is an `enumMember` on one subject.
+      let merged : Option (SpecExpr × Array String) := match branches.toList with
+        | (SpecExpr.enumMember subj vals _, _) :: rest =>
+          rest.foldlM (init := (subj, vals)) fun (s, vs) (b, _) =>
+            match b with
+            | SpecExpr.enumMember s' vs' _ => if s.softBEq s' then some (s, vs ++ vs') else none
+            | _ => none
         | _ => none
       if let some (subj, vals) := merged then
         return (.enumMember subj vals (loc := loc), boolType)

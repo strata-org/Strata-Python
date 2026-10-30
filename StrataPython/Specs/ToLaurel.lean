@@ -674,6 +674,18 @@ def specExprToLaurel (e : SpecExpr) (source : FileRange)
     let s ← asAny loc <| specExprToLaurel subject src
     let b ← asAny loc <| specExprToLaurel bound src
     return .mkSome <| .realLeq (.anyAsFloat s) (.anyAsFloat b)
+  | .not (.enumMember subject values _) loc => do
+    -- `x != "A"`: Python's `!=`, which holds for a value that isn't a string, such as `None`.
+    let src ← nodeSource loc
+    let s ← asAny loc <| specExprToLaurel subject src
+    let ne (v : String) : TypedStmtExpr .TBool :=
+      let lit := TypedStmtExpr.fromStr (.literalString v src) src
+      let cmp : StmtExprMd :=
+        { val := .StaticCall (mkId (pcmpPreludeName .ne)) [s.stmt, lit.stmt] [], source := src }
+      ⟨{ val := .StaticCall (mkId "Any_to_bool") [cmp] [], source := src }⟩
+    return .mkSome <| match values.toList with
+      | [] => .literalBool true
+      | v :: vs => vs.foldl (fun acc w => .and acc (ne w)) (ne v)
   | .not inner loc => do
     let src ← nodeSource loc
     let i ← asBool loc <| specExprToLaurel inner src

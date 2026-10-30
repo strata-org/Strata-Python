@@ -76,7 +76,7 @@ meta def setupFixture (pythonCmd : System.FilePath)
           "servicelib.Admitted", "servicelib.Ghost", "servicelib.GhostProbe",
           "servicelib.GhostOld", "servicelib.GhostOldNoFrame",
           "servicelib.ParamType", "servicelib.Ctor", "servicelib.CtorError",
-          "servicelib.Overloaded"])
+          "servicelib.Overloaded", "servicelib.NotLocal"])
         (warningOutput := .none)
         (pythonCmd := toString pythonCmd) |>.toBaseIO with
     | .ok () => pure ()
@@ -613,6 +613,34 @@ must discharge a caller assertion that the return type alone cannot. -/
       unless foundAdmittedAssertion do
         throw <| IO.userError
           "Expected the @admit assumption to discharge the caller assertion"
+/-! ## A string-literal comparison on a non-string value
+
+`assert region != "local"` holds for `region = None`, as in CPython, and fails for
+`region = "local"`. The last case pins a result that is wrong today: ToLaurel reads
+`region == "local"` through the unchecked string content of `region`, so for `region = None`
+it can't prove the assert under `if region == "local":`, which CPython never reaches. -/
+
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    for (script, message, holds) in [
+        ("test_not_equal_none.py", "region must not be local", true),
+        ("test_not_equal_violation.py", "region must not be local", false),
+        ("test_equal_if_none.py", "n must be positive when local", false)] do
+      let result ← runAnalyzeAndVerify pythonCmd tmpDir script (useRoots := true)
+        (pyspecModules := #["servicelib.NotLocal"])
+      match result with
+      | .error msg => throw <| IO.userError s!"{script}: pipeline failed: {msg}"
+      | .ok vcResults =>
+        let pre := vcResults.filter fun r =>
+          (r.obligation.metadata.getPropertySummary.getD "").contains message
+        match pre.toList with
+        | [r] =>
+          unless r.isSuccess == holds do
+            throw <| IO.userError s!"{script}: expected holds = {holds}, got {r.formatOutcome}"
+        | _ =>
+          throw <| IO.userError s!"{script}: expected one obligation for the precondition, got {pre.size}"
+
 /-! ## Constructor contracts of a model
 
 These tests pin results that are wrong today. The Laurel front ends check the contract

@@ -685,6 +685,10 @@ inductive SpecExpr where
 | floatLit (value : String) (loc : SourceRange)
 | floatGe (subject : SpecExpr) (bound : SpecExpr) (loc : SourceRange)
 | floatLe (subject : SpecExpr) (bound : SpecExpr) (loc : SourceRange)
+/-- `enumMember subject values` is `subject == v₁ or … or subject == vₙ`. PySpec also reads
+    `x != "A"` as `not (enumMember x #["A"])`, though CPython computes `!=` with `__ne__`.
+    So `not (enumMember x #["A"])` means either `not (x == "A")` or `x != "A"`, and a
+    consumer must be sound for both. -/
 | enumMember (subject : SpecExpr) (values : Array String) (loc : SourceRange)
 /-- `regexMatch subject pattern` asserts that `subject` matches the regular
     expression `pattern`. Corresponds to `compile(pattern).search(subject) is not None`
@@ -697,7 +701,7 @@ inductive SpecExpr where
 /-- `implies condition body` asserts that if `condition` holds then `body` holds.
     Used to represent conditional assertions like `if "field" in kwargs: assert ...`. -/
 | implies (condition : SpecExpr) (body : SpecExpr) (loc : SourceRange)
-/-- Logical negation. Used for else-branch conditions. -/
+/-- Logical negation. -/
 | not (e : SpecExpr) (loc : SourceRange)
 /-- `quantifier quant domain collection body` asserts that `body` holds for the
     `quant` (∀/∃) of the elements of `collection`, with `domain`'s binders in

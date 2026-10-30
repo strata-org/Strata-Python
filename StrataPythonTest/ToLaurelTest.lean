@@ -1347,6 +1347,20 @@ private def precondPins (args : Array Arg)
   "Any_to_bool(PGe(from_int(Str.Length(Any..as_string!(xs))), from_int(1)))"
 
 
+-- PySpec's reading of `x != "A"` and of `"k" not in d`.
+#guard precondPins #[arg "x" str]
+  { message := #[], formula := .not (.enumMember (.var "x" loc) #["A"] loc) loc }
+  "Any_to_bool(PNEq(x, from_str(\"A\")))"
+
+-- `not (x == "A" or x == "B")`: each value's `!=`, joined by "and".
+#guard precondPins #[arg "x" str]
+  { message := #[], formula := .not (.enumMember (.var "x" loc) #["A", "B"] loc) loc }
+  "Any_to_bool(PNEq(x, from_str(\"A\"))) & Any_to_bool(PNEq(x, from_str(\"B\")))"
+
+#guard precondPins #[arg "d" (SpecType.ident loc .typingDict #[str, str])]
+  { message := #[], formula := .not (.containsKey (.var "d" loc) "k" loc) loc }
+  "!PySpecDictValue..isPresent(select(PySpecDict_modelOf(Any..as_Dict!(d)), \"k\"))"
+
 -- Canonical ∀-over-list shape: `all(len(x) >= 1 for x in xs)`. The binder is
 -- Any-typed, the List_contains membership guard doubles as the trigger, and
 -- the guard is combined with the body by implication.

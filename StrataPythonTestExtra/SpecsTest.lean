@@ -650,6 +650,75 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
 #eval runNativeCase "method_named_dict" fun sigs _ => do
   let m ← findMethod (← findClass sigs "C") "m"
   expect (toString m.returnType == "builtins.dict") s!"m returns {m.returnType}"
+-- PySpec reads `x != "A"` as `not (x == "A")`, and `"k" not in d` as `not ("k" in d)`, also
+-- inside a quantifier and as the condition of an `if`.
+#guard_msgs in
+#eval runNativeCase "negated_string_patterns" fun sigs warnings => do
+  expect warnings.isEmpty s!"expected no warnings, got {warnings}"
+  let f ← findFn sigs "f"
+  expect (f.preconditions.size == 4) s!"expected 4 preconditions, got {f.preconditions.size}"
+  let notLocal : SpecExpr := .not (.enumMember (.var "region" .none) #["local"] .none) .none
+  expect (f.preconditions[0]!.formula.softBEq notLocal)
+    s!"`region != \"local\"`: got {f.preconditions[0]!.formula}"
+  expect (f.preconditions[1]!.formula.softBEq
+      (.not (.containsKey (.var "tags" .none) "secret" .none) .none))
+    s!"`\"secret\" not in tags`: got {f.preconditions[1]!.formula}"
+  expect (f.preconditions[2]!.formula.softBEq
+      (.quantifier .forall (.overList "t") (.var "names" .none)
+        (.not (.enumMember (.var "t" .none) #[""] .none) .none) .none))
+    s!"`all(t != \"\" for t in names)`: got {f.preconditions[2]!.formula}"
+  expect (f.preconditions[3]!.formula.softBEq
+      (.implies notLocal (.intGe (.var "n" .none) (.intLit 1 .none) .none) .none))
+    s!"`if region != \"local\": assert n >= 1`: got {f.preconditions[3]!.formula}"
+  -- ToLaurel reads each negated literal as Python's `!=`, which holds for a non-string value,
+  -- and not as a comparison of the value's unchecked string content.
+  let r := Specs.ToLaurel.signaturesToLaurel "negated_string_patterns.py" sigs
+    (StrataPython.ModuleName.ofString! "native_cases.negated_string_patterns")
+  let some proc := r.program.staticProcedures.find? (·.name.text.endsWith "_f")
+    | throw <| IO.userError s!"no procedure f: {r.program.staticProcedures.map (·.name.text)}"
+  let text := toString (Strata.Laurel.formatProcedure proc)
+  expect ((text.splitOn "PNEq(").length - 1 == 3 && (text.splitOn "as_string!").length == 1)
+    s!"lowered: {text}"
+
+-- Any other comparison with a string literal is still dropped, with exactly one warning.
+#guard_msgs in
+#eval runNativeCase "string_literal_other" fun sigs warnings => do
+  let f ← findFn sigs "f"
+  expect (f.preconditions.size == 0) s!"expected 0 preconditions, got {f.preconditions.size}"
+  expect (warnings.size == 1 && warnings[0]!.contains "unsupported expression in assert; dropped")
+    s!"expected only the dropped-assertion warning, got {warnings}"
+
+-- `"k" not in c` and `"k" in c` with a container that doesn't translate: for each, one
+-- warning for the call, one for the comparison, and the dropped-assertion warning.
+#guard_msgs in
+#eval runNativeCase "in_untranslatable_container" fun sigs warnings => do
+  let f ← findFn sigs "f"
+  expect (f.preconditions.size == 0) s!"expected 0 preconditions, got {f.preconditions.size}"
+  expect (warnings.size == 6) s!"expected 6 warnings, got {warnings}"
+  for i in [0, 3] do
+    expect (warnings[i]!.contains "unsupported call: g(...)") s!"warning {i}: {warnings[i]!}"
+    expect (warnings[i+1]!.contains "unsupported comparison") s!"warning {i+1}: {warnings[i+1]!}"
+    expect (warnings[i+2]!.contains "unsupported expression in assert; dropped")
+      s!"warning {i+2}: {warnings[i+2]!}"
+
+-- An `or` merges into one `enumMember` only when every branch is an `enumMember` on one
+-- subject; otherwise every branch is kept.
+#guard_msgs in
+#eval runNativeCase "or_with_enum" fun sigs warnings => do
+  expect warnings.isEmpty s!"expected no warnings, got {warnings}"
+  let f ← findFn sigs "f"
+  let x : SpecExpr := .var "x" .none
+  let expected : Array SpecExpr := #[
+    .enumMember x #["a", "b"] .none,
+    .or (.pcmp .eq x (.noneLit .none) .none) (.enumMember x #["ok"] .none) .none,
+    .or (.not (.enumMember x #["A"] .none) .none) (.enumMember x #["B"] .none) .none,
+    .or (.or (.enumMember x #["A"] .none) (.enumMember (.var "y" .none) #["B"] .none) .none)
+      (.enumMember x #["C"] .none) .none ]
+  expect (f.preconditions.size == expected.size)
+    s!"expected {expected.size} preconditions, got {f.preconditions.size}"
+  for i in [:expected.size] do
+    expect (f.preconditions[i]!.formula.softBEq expected[i]!)
+      s!"precondition {i}: got {f.preconditions[i]!.formula}"
 
 -- A `u` prefix changes nothing: `Literal[u"a"]` is `Literal["a"]`.
 #guard_msgs in
