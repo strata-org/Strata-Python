@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 The rule-database validator as a gate.
 
 `RuleValidate` reported its conditions to nobody: no module imported it, so it

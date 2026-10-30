@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 The compiled contract prelude of a builtin rule: a failing argument contract
 must suppress the rule body, including its mutation, and a mixed argument must
 retain both outcomes from the same input state.

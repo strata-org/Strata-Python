@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 The the dict and TypedDict method service.
 
 The direct analyzer remains the differential oracle. This module deliberately

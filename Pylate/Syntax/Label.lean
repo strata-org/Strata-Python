@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Relabel the Strata Python AST from `SourceRange` to Pylate's `Pos`.
 
 `Check.lean` needs a `Pos` -- an id plus a line and column -- at every node it

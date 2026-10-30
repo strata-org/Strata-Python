@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 The abort policy: which machine-raise categories become aborts (an
 obligation, no exceptional continuation) versus modeled raises, with
 presets strict/eafp/audit and per-category overrides. Explicit user

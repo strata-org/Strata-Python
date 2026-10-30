@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Static class table: C3 linearization, layouts (annotated fields plus every
 `self.f` store along the MRO), method resolution, exception hierarchy.
 -/

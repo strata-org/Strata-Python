@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Dispatch adapter from compiled rules to the plan executor.
 -/
 import Pylate.RuleLang.Compile

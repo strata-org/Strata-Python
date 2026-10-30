@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Explicit flow domains for the rule interpreter.
 
 Unlike Flow and AMulti, absence of normal completion is represented directly,

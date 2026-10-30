@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 The cell layer: association-list environment and heap keyed by
 (location, field), collection emptiness keyed by location, reads with the
 unbound/bottom defaults, strong writes versus weak joins, state join/order,

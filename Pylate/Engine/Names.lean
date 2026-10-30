@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Verified name generation. Decorated names (qualified names, invocation
 frames, per-key edges, flavor names) are inductive values, not strings;
 `render` produces the encoded spelling and the theorems make collisions

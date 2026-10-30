@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Static validation of a compiled rule set. The conditions and what each one
 buys are in ENGINE.md section 3, "What is a table, and what a table buys".
 

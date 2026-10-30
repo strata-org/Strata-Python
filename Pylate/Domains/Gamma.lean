@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Concretization (LEAN_SPEC.md section 4) and T1. Constants enter gamma by
 tag alone, so payloads are omitted without loss; a reference value needs
 its tag and a location witness; `tany` concretizes to everything. With

@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Reusable runtime contracts for the rule interpreter.
 
 Contracts are closed, first-order data. Their executor owns tag splitting,

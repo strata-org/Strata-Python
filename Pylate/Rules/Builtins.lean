@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 rules for the builtin leaf surface.
 
 Protocol-sensitive operations remain behind Services; these plans own the

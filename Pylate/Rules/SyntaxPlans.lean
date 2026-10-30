@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Structural plans for syntax nodes, ENGINE.md section 3.
 
 Each plan states one node's semantics as data: which children it evaluates, in

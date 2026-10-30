@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Emptiness-driven routing of the removal rules, and the reduced product a fresh
 collection must satisfy.
 -/

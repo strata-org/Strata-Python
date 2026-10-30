@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Pure rules over cells: element reads across container tags, the
 allocation rule (recency fold, fresh recent block, uninitialized
 layout), heap reachability, and merging an exceptional flow into a

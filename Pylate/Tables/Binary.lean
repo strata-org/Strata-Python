@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 CPython-ordered binary dispatch shared by both executable analyzers.
 
 The planner identifies builtin numeric slots separately from the sequence

@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Finite sets, held as duplicate-free lists and computed through hash sets.
 
 Strata carries no mathlib, so the `Finset` and `→₀` types of LEAN_SPEC.md

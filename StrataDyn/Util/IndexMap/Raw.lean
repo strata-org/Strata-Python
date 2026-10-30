@@ -1,3 +1,9 @@
+/-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
 module
 public import Std.Data.HashMap
 import all Init.Data.Array.Basic

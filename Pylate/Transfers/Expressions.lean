@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Operation-level expression transfers for the rule interpreter.
 
 Operands have already been evaluated, so these APIs only model Python

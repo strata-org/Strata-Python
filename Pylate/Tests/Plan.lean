@@ -1,3 +1,9 @@
+/-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
 import Pylate.Rules.Builtins
 import Pylate.Transfers.Iteration
 

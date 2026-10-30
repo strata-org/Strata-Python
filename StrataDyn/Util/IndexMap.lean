@@ -1,3 +1,9 @@
+/-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
 module
 public import StrataDyn.Util.IndexMap.Raw
 import all StrataDyn.Util.IndexMap.Raw

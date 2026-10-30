@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Statement and five-completion routing for the rule interpreter.
 
 This module owns every non-loop statement.  The service boundary supplies

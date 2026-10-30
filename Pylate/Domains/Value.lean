@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 The value domain and its reduced product (LEAN_SPEC.md sections 3 and 5):
 tags, allocation-site locations, abstract values, join/order, and the
 reduction operator with theorems T2 (reductive) and T3 (monotone).

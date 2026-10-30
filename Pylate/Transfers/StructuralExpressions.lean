@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Source-ordered structural expressions for the rule interpreter.
 
 This module handles expression forms whose semantics are primarily evaluation

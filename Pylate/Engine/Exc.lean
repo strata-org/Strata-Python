@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Exceptional flow values: the (state, class set) pair a transfer
 threads, and the (value, state, exc) result triple.
 -/

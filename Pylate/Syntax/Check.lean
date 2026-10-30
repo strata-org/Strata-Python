@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Subset checking and lowering, fused into one Validation-applicative pass.
 
 `Va A` is `Except (Array Violation) A` with an applicative that

@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Log emission: serialize an analysis run (or a rejection) into the JSON
 format of RENDER_SPEC.md. The renderer and the instrumenter consume this
 file and nothing else; status derivation lives here so every consumer

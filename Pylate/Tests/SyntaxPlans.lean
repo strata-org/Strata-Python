@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 The section 1.4 plan primitives, exercised on the section 1.5 worked examples.
 
 These test the primitive, not a routed rule: `evalChild` must thread state left

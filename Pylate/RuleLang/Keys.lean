@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 What the heap knows about a mapping key, shared by the subscript rules and
 the dict-method rules.
 

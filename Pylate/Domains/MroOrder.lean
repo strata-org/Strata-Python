@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 The MRO abstract domain of `../../MRO_DOMAIN.md`, with its core properties
 proved.
 

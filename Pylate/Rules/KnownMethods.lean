@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Precise transfers for the portion of OpaqueBuiltinMethod representable by
 the current abstract domains. Returning none is an explicit request to retain
 the opaque fallback; in particular, this module does not fabricate bytes,

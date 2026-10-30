@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Checked loop and comprehension fixpoints for the rule interpreter.
 
 The only recursion below is an ascending lattice iteration.  There is no

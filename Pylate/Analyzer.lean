@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 The rule-driven interpreter. Its structural semantics are synchronized
 with the direct interpreter, which remains the differential oracle. Migrated
 families enter ordered plans at one compatibility boundary; all other

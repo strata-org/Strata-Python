@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Transfers for the builtin protocol functions.
 
 Protocol selection and abstract effects live here.  The service boundary is

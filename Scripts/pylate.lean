@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 CLI: pylate INPUT [--src FILE.py] [-o LOG.json]
              [--policy strict|eafp|audit] [--abort CATS] [--model CATS]
              [--sorts checked|residual] [--check-only]

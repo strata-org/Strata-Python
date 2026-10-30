@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 TypedDict mutation policy. A TypedDict is a plain dict at runtime, so CPython
 cannot witness these outcomes: the shape rules are verifier obligations and are
 pinned here instead.

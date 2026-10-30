@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Transfers for attributes and subscripts.
 
 The receiver, index, and stored value have already been evaluated when these

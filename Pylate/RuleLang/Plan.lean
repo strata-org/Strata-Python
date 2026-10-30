@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Ordered, first-order plans for the rule interpreter.
 
 Plans are data. Only the executor and its explicit Services boundary contain

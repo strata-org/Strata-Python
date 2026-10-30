@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Closed Transfer for admitted builtin methods whose detailed protocol is
 not yet modeled. The imprecision is explicit in rule metadata and in the
 obligation log; reachable heap cells are widened to their contracts.

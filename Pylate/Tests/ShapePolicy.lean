@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 The TypedDict shape policy table.
 
 Two things are worth asserting and one is worth demonstrating.

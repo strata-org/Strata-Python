@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Every focused Lean suite as one Lake target: `lake exe pylateTests`.
 -/
 import Pylate.Tests.Emptiness

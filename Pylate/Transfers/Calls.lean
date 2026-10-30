@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Typed transfers for user calls and construction.
 
 The service boundary contains only recursive body execution. Argument binding,

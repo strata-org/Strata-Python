@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Core syntax (LEAN_SPEC.md 2.1). Every node carries a `Pos`: the path-based
 `NodeId` assigned by `Syntax/Label.lean`, which keys the residual table and the
 abstract states, plus the line and column that key obligations and per-line

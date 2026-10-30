@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 The TypedDict shape policy as one table.
 
 Every mutating operation on a TypedDict asks the same question in a different

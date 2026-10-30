@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 The analysis machine: the write-only logs (residual table,
 obligations, per-line snapshots, 4c handler tables), the analysis
 context and its state monad, the policy-aware machine-raise helper,

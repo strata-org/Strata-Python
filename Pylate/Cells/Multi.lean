@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Statement outcomes: the five-mode record (normal, break, continue,
 return, exception with a class set), the fixed continuation-token
 treatment of Astree applied to the fragment.

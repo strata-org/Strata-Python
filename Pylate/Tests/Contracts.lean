@@ -1,3 +1,9 @@
+/-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
 import Pylate.RuleLang.Contracts
 
 namespace Pylate.Tests.Contracts

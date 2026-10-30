@@ -1,4 +1,10 @@
 /-
+  Copyright Strata Contributors
+
+  SPDX-License-Identifier: Apache-2.0 OR MIT
+-/
+
+/-
 Keys for the admitted syntax constructors, ENGINE.md section 3.
 
 The `kindOf` functions below match every constructor of `Syntax.lean`
