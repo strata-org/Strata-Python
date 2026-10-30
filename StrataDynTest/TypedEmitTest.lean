@@ -232,6 +232,52 @@ private def gRaw : Built :=
 
 #guard showMod gRaw == showMod g
 
+/-- `fl value` calls `fn(1)`.  If the call fails, it goes to the failure block of
+`Emit.withFailureBlock`, which returns `value`, or is `unreachable` when `value` is `none`. -/
+private def fl (value : Option Bool) : Built :=
+  Emit.func (n "fl") [(n "fn", Base.Fn [Base.Int] Base.Int)] Base.Bool ()
+      fun (.cons fv .nil) exit => Emit.withFailureBlock [Te.Value] value fun fail => do
+    let% r ← Te.invoke fv vals[← int (n "a") 1] fail
+    let _ ← Base.refNew r
+    ret exit (← bool (n "t") true)
+
+/-- info: module m {
+  func @fl(%fn.0 : base.Fn([base.Int], base.Int)) -> base.Bool {
+    entry.0(%fn.0 : base.Fn([base.Int], base.Int)):
+      %r.0 : base.Int = te.invoke[[base.Int], base.Int](%fn.0, 1) ^fail.0()
+      %refNew.0 : base.Ref(base.Int) = base.refNew[base.Int](%r.0)
+      ret(true)
+    fail.0(%e.0 : te.Value):
+      ret(false)
+  }
+} -/
+#guard_msgs in
+#eval IO.println (showMod (fl (some false)))
+
+/-- info: module m {
+  func @fl(%fn.0 : base.Fn([base.Int], base.Int)) -> base.Bool {
+    entry.0(%fn.0 : base.Fn([base.Int], base.Int)):
+      %r.0 : base.Int = te.invoke[[base.Int], base.Int](%fn.0, 1) ^fail.0()
+      %refNew.0 : base.Ref(base.Int) = base.refNew[base.Int](%r.0)
+      ret(true)
+    fail.0(%e.0 : te.Value):
+      unreachable
+  }
+} -/
+#guard_msgs in
+#eval IO.println (showMod (fl none))
+
+-- A failure block that nothing transfers to is not emitted.
+/-- info: module m {
+  func @nf() -> base.Bool {
+    entry.0():
+      ret(true)
+  }
+} -/
+#guard_msgs in
+#eval IO.println (showMod (Emit.func (n "nf") [] Base.Bool () fun _ exit =>
+  Emit.withFailureBlock [Te.Value] (some false) fun _ => do ret exit (← bool (n "t") true) : Built))
+
 /-- Regions: an `if` whose branches leave by their exit with the result, and a `forEach` whose
 body leaves with `ok ()`, and a `guard`, which ends the block. -/
 private def h : Built :=

@@ -1,0 +1,2 @@
+[dropped-clause] isinstance_shadowed: PySpec dropped the requires clause 'isinstance(x, T)' of 'f'
+[isinstance-shadowed] isinstance_shadowed: isinstance of 'f' names 'T', which is a parameter or a binder

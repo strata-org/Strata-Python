@@ -1,0 +1,7 @@
+[dropped-clause] native_cases.skipped_statements: PySpec dropped the assert clause 'len(s) >= 1' of 'assign'
+[dropped-clause] native_cases.skipped_statements: PySpec dropped the assert clause 'n >= 1' of 'assign'
+[dropped-clause] native_cases.skipped_statements: PySpec dropped the assert clause 'len(xs) > 5' of 'call'
+[dropped-clause] native_cases.skipped_statements: PySpec dropped the assert clause 'n >= 1' of 'annotated_walrus'
+[dropped-clause] native_cases.skipped_statements: PySpec dropped the assert clause 'n >= 1' of 'condition_walrus'
+[dropped-clause] native_cases.skipped_statements: PySpec dropped the assert clause 'isinstance(s, str)' of 'rebound_builtin'
+[dropped-clause] native_cases.skipped_statements: PySpec dropped the assert clause 'len(xs) > 5' of 'untranslated_if'

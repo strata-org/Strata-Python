@@ -1,0 +1,1 @@
+[dropped-clause] native_cases.requires_self_method: PySpec dropped the requires clause 'self.x >= 0' of 'C.m'

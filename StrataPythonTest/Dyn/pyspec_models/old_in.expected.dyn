@@ -1,0 +1,171 @@
+module old_in {
+  func @|old_in.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("old_in")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("old_in", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@old_in.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("old_in", "f")
+      %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@old_in.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("old_in", "__getattr__")
+      %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @old_in.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'f'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 2, false, "xs", "x")
+        ret(%binds.0)
+    }
+    requires "'xs' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("xs")
+        %xs.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%xs.0)
+        ret(%defined.0)
+    }
+    requires "'x' is required" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("x")
+        %x.0 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "x", %undef.1)
+        %defined.1 : base.Bool = py.isDefined(%x.0)
+        ret(%defined.1)
+    }
+    requires "declared type of parameter 'xs'" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("xs")
+        %xs.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.2)
+        %cls.0 : py.Value = py.stdClass("builtins", "list")
+        %sub.0 : base.Bool = py.typeIsSubclass(%xs.1, %cls.0) ^fail.3()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%xs.1, %cls.0) ^fail.3()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.3(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "declared type of parameter 'x'" {
+      pre.4():
+        %undef.3 : py.Value = py.undef("x")
+        %x.1 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "x", %undef.3)
+        %cls.1 : py.Value = py.stdClass("builtins", "int")
+        %sub.1 : base.Bool = py.typeIsSubclass(%x.1, %cls.1) ^fail.4()
+        branch(%sub.1) ^then.1() ^else.1()
+      then.1():
+        %inst.1 : base.Bool = py.isInstance(%x.1, %cls.1) ^fail.4()
+        jump ^join.1(%inst.1)
+      else.1():
+        jump ^join.1(false)
+      join.1(%b.4 : base.Bool):
+        ret(%b.4)
+      fail.4(%e.1 : py.Value):
+        ret(false)
+    }
+    requires "schema of parameter 'xs'" {
+      pre.5():
+        %undef.4 : py.Value = py.undef("xs")
+        %xs.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.4)
+        %all.0 : base.Bool = py.allIn(%xs.2) ^fail.5() {
+          body.0(%item.0.0 : py.Value):
+            %cls.2 : py.Value = py.stdClass("builtins", "int")
+            %sub.2 : base.Bool = py.typeIsSubclass(%item.0.0, %cls.2) ^propagate.0()
+            branch(%sub.2) ^then.2() ^else.2()
+          then.2():
+            %inst.2 : base.Bool = py.isInstance(%item.0.0, %cls.2) ^propagate.0()
+            jump ^join.2(%inst.2)
+          else.2():
+            jump ^join.2(false)
+          join.2(%b.6 : base.Bool):
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.6)
+            ret(%res.0)
+          propagate.0(%exc.0 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+            ret(%err.0)
+        }
+        ret(%all.0)
+      fail.5(%e.2 : py.Value):
+        ret(false)
+    }
+    free ensures "admitted postcondition of 'f'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %old.0 : py.Value = base.old[py.Value, py.Value] ^fail.6() {
+          body.1():
+            %undef.5 : py.Value = py.undef("x")
+            %x.2 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "x", %undef.5)
+            %res.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.2)
+            ret(%res.1)
+        }
+        %old.1 : py.Value = base.old[py.Value, py.Value] ^fail.6() {
+          body.2():
+            %undef.6 : py.Value = py.undef("xs")
+            %xs.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.6)
+            %res.2 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%xs.3)
+            ret(%res.2)
+        }
+        %in_.0 : py.Value = py.in(%old.0, %old.1) ^fail.6()
+        %cond.0 : base.Bool = py.truthy(%in_.0) ^fail.6()
+        branch(%cond.0) ^then.3() ^else.3()
+      then.3():
+        %old.2 : py.Value = base.old[py.Value, py.Value] ^fail.6() {
+          old.0():
+            %undef.7 : py.Value = py.undef("x")
+            %x.3 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "x", %undef.7)
+            %undef.8 : py.Value = py.undef("xs")
+            %xs.4 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.8)
+            %in_.1 : py.Value = py.in(%x.3, %xs.4) ^propagate.3()
+            %cond.1 : base.Bool = py.truthy(%in_.1) ^propagate.3()
+            branch(%cond.1) ^then.4() ^else.4()
+          then.4():
+            jump ^join.4(false)
+          else.4():
+            jump ^join.4(true)
+          join.4(%b.9 : base.Bool):
+            %bool.0 : py.Value = py.boolLit(%b.9)
+            %scalar.0 : base.Bool = py.isImmutableScalar(%bool.0)
+            branch(%scalar.0) ^scalar.0() ^mutable.0()
+          scalar.0():
+            %res.3 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%bool.0)
+            ret(%res.3)
+          mutable.0():
+            %res.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%bool.0)
+            ret(%res.4)
+          propagate.3(%exc.3 : py.Value):
+            %err.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+            ret(%err.3)
+        }
+        %cond.2 : base.Bool = py.truthy(%old.2) ^fail.6()
+        jump ^join.3(%cond.2)
+      else.3():
+        jump ^join.3(false)
+      join.3(%b.11 : base.Bool):
+        ret(%b.11)
+      raised.0(%exc.4 : py.Value):
+        ret(true)
+      fail.6(%e.3 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @old_in.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

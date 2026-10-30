@@ -1,0 +1,1 @@
+[ensures] servicelib.Counter: 'modeled_value' has an @ensures, which a model can't verify; use @admit

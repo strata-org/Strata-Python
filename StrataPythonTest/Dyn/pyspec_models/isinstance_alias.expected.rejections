@@ -1,0 +1,1 @@
+[isinstance-alias] isinstance_alias: isinstance of 'f' names the alias 'TD', which is not a class or a union of classes

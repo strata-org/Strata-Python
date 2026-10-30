@@ -20,8 +20,9 @@
 --
 -- The module body binds no name of `typing`: the module's `__getattr__` makes it an unknown value.
 -- Compared with ToLaurel:
--- * A ghost's declared type is its invariant, which holds in every state. ToLaurel assumes the
---   same test after each call that reads or writes the ghost.
+-- * A ghost's invariant says that it is defined, and that it has its declared type; it holds in
+--   every state. ToLaurel assumes the same type test after each call that reads or writes the
+--   ghost.
 -- * The binding and the presence of `name` are requires clauses. ToLaurel binds a call
 --   statically, and so does V1.
 -- * In `allocated == OLD(allocated) + 1`, `base.old` covers `allocated + 1`, the largest part
@@ -37,9 +38,14 @@
 module servicelib.GhostOld {
   ghost @|servicelib.GhostOld.<ghost>.resources| : py.Value invariant {
     inv.0(%v.0 : py.Value):
+      %defined.0 : base.Bool = py.isDefined(%v.0)
+      branch(%defined.0) ^test.0() ^undefined.0()
+    test.0():
       %cls.0 : py.Value = py.stdClass("builtins", "dict")
       %ok.0 : base.Bool = py.isInstance(%v.0, %cls.0) ^fail.0()
       ret(%ok.0)
+    undefined.0():
+      ret(false)
     fail.0(%e.0 : py.Value):
       unreachable
   }
@@ -49,9 +55,14 @@ module servicelib.GhostOld {
       ret(%int.0)
   } invariant {
     inv.0(%v.0 : py.Value):
+      %defined.0 : base.Bool = py.isDefined(%v.0)
+      branch(%defined.0) ^test.0() ^undefined.0()
+    test.0():
       %cls.0 : py.Value = py.stdClass("builtins", "int")
       %ok.0 : base.Bool = py.isInstance(%v.0, %cls.0) ^fail.0()
       ret(%ok.0)
+    undefined.0():
+      ret(false)
     fail.0(%e.0 : py.Value):
       unreachable
   }
@@ -61,8 +72,6 @@ module servicelib.GhostOld {
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.GhostOld", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
       %none.0 : py.Value = py.noneLit
-      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.GhostOld", "__doc__")
-      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %clo.0 : py.Value = py.mkClosure[[]](@servicelib.GhostOld.acquire)
       %acquire.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.GhostOld", "acquire")
       %set.2 : base.Unit = base.refSet[py.Value](%acquire.cell.0, %clo.0)

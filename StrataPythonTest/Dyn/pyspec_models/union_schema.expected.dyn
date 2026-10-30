@@ -1,0 +1,277 @@
+module union_schema {
+  func @|union_schema.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("union_schema")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("union_schema", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@union_schema.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("union_schema", "f")
+      %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@union_schema.g)
+      %g.cell.0 : base.Ref(py.Value) = py.globalCell("union_schema", "g")
+      %set.2 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
+      %clo.2 : py.Value = py.mkClosure[[]](@union_schema.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("union_schema", "__getattr__")
+      %set.3 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.2)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @union_schema.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'f'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "xs")
+        ret(%binds.0)
+    }
+    requires "declared type of parameter 'xs'" {
+      pre.1():
+        %none.0 : py.Value = py.noneLit
+        %xs.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %none.0)
+        %none.1 : py.Value = py.noneLit
+        %is.0 : py.Value = py.is(%xs.0, %none.1)
+        %cond.0 : base.Bool = py.truthy(%is.0) ^fail.1()
+        branch(%cond.0) ^then.0() ^else.0()
+      then.0():
+        jump ^join.0(true)
+      else.0():
+        %none.2 : py.Value = py.noneLit
+        %xs.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %none.2)
+        %cls.0 : py.Value = py.stdClass("builtins", "list")
+        %sub.0 : base.Bool = py.typeIsSubclass(%xs.1, %cls.0) ^fail.1()
+        branch(%sub.0) ^then.1() ^else.1()
+      then.1():
+        %inst.0 : base.Bool = py.isInstance(%xs.1, %cls.0) ^fail.1()
+        jump ^join.1(%inst.0)
+      else.1():
+        jump ^join.1(false)
+      join.1(%b.3 : base.Bool):
+        branch(%b.3) ^then.2() ^else.2()
+      then.2():
+        jump ^join.2(true)
+      else.2():
+        %none.3 : py.Value = py.noneLit
+        %xs.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %none.3)
+        %none.4 : py.Value = py.noneLit
+        %is.1 : py.Value = py.is(%xs.2, %none.4)
+        %cond.1 : base.Bool = py.truthy(%is.1) ^fail.1()
+        jump ^join.2(%cond.1)
+      join.2(%b.5 : base.Bool):
+        jump ^join.0(%b.5)
+      join.0(%b.6 : base.Bool):
+        ret(%b.6)
+      fail.1(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "schema of parameter 'xs'" {
+      pre.2():
+        %none.5 : py.Value = py.noneLit
+        %xs.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %none.5)
+        %none.6 : py.Value = py.noneLit
+        %is.2 : py.Value = py.is(%xs.3, %none.6)
+        %cond.2 : base.Bool = py.truthy(%is.2) ^fail.2()
+        branch(%cond.2) ^then.3() ^else.3()
+      then.3():
+        jump ^join.3(true)
+      else.3():
+        %none.7 : py.Value = py.noneLit
+        %xs.4 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %none.7)
+        %cls.1 : py.Value = py.stdClass("builtins", "list")
+        %sub.1 : base.Bool = py.typeIsSubclass(%xs.4, %cls.1) ^fail.2()
+        branch(%sub.1) ^then.4() ^else.4()
+      then.4():
+        %inst.1 : base.Bool = py.isInstance(%xs.4, %cls.1) ^fail.2()
+        jump ^join.4(%inst.1)
+      else.4():
+        jump ^join.4(false)
+      join.4(%b.9 : base.Bool):
+        branch(%b.9) ^then.5() ^else.5()
+      then.5():
+        %none.8 : py.Value = py.noneLit
+        %xs.5 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %none.8)
+        %all.0 : base.Bool = py.allIn(%xs.5) ^fail.2() {
+          body.0(%item.0.0 : py.Value):
+            %cls.2 : py.Value = py.stdClass("builtins", "str")
+            %sub.2 : base.Bool = py.typeIsSubclass(%item.0.0, %cls.2) ^propagate.0()
+            branch(%sub.2) ^then.6() ^else.6()
+          then.6():
+            %inst.2 : base.Bool = py.isInstance(%item.0.0, %cls.2) ^propagate.0()
+            jump ^join.6(%inst.2)
+          else.6():
+            jump ^join.6(false)
+          join.6(%b.11 : base.Bool):
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.11)
+            ret(%res.0)
+          propagate.0(%exc.0 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+            ret(%err.0)
+        }
+        jump ^join.5(%all.0)
+      else.5():
+        jump ^join.5(true)
+      join.5(%b.13 : base.Bool):
+        jump ^join.3(%b.13)
+      join.3(%b.14 : base.Bool):
+        ret(%b.14)
+      fail.2(%e.1 : py.Value):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @union_schema.g(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'g'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "xs")
+        ret(%binds.0)
+    }
+    requires "'xs' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("xs")
+        %xs.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%xs.0)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 'xs'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("xs")
+        %xs.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "dict")
+        %cls.1 : py.Value = py.stdClass("builtins", "list")
+        %tuple.0 : py.Value = py.mkTuple(%cls.0, %cls.1)
+        %sub.0 : base.Bool = py.typeIsSubclass(%xs.1, %tuple.0) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%xs.1, %tuple.0) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "schema of parameter 'xs'" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("xs")
+        %xs.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.2)
+        %cls.2 : py.Value = py.stdClass("builtins", "dict")
+        %sub.1 : base.Bool = py.typeIsSubclass(%xs.2, %cls.2) ^fail.3()
+        branch(%sub.1) ^then.1() ^else.1()
+      then.1():
+        %inst.1 : base.Bool = py.isInstance(%xs.2, %cls.2) ^fail.3()
+        jump ^join.1(%inst.1)
+      else.1():
+        jump ^join.1(false)
+      join.1(%b.4 : base.Bool):
+        branch(%b.4) ^then.2() ^else.2()
+      then.2():
+        %undef.3 : py.Value = py.undef("xs")
+        %xs.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.3)
+        %all.0 : base.Bool = py.allItems(%xs.3) ^fail.3() {
+          body.0(%key.0.0 : py.Value, %value.0.0 : py.Value):
+            %cls.3 : py.Value = py.stdClass("builtins", "str")
+            %sub.2 : base.Bool = py.typeIsSubclass(%key.0.0, %cls.3) ^propagate.0()
+            branch(%sub.2) ^then.3() ^else.3()
+          then.3():
+            %inst.2 : base.Bool = py.isInstance(%key.0.0, %cls.3) ^propagate.0()
+            jump ^join.3(%inst.2)
+          else.3():
+            jump ^join.3(false)
+          join.3(%b.6 : base.Bool):
+            branch(%b.6) ^then.4() ^else.4()
+          then.4():
+            %cls.4 : py.Value = py.stdClass("builtins", "int")
+            %sub.3 : base.Bool = py.typeIsSubclass(%value.0.0, %cls.4) ^propagate.0()
+            branch(%sub.3) ^then.5() ^else.5()
+          then.5():
+            %inst.3 : base.Bool = py.isInstance(%value.0.0, %cls.4) ^propagate.0()
+            jump ^join.5(%inst.3)
+          else.5():
+            jump ^join.5(false)
+          join.5(%b.8 : base.Bool):
+            jump ^join.4(%b.8)
+          else.4():
+            jump ^join.4(false)
+          join.4(%b.10 : base.Bool):
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.10)
+            ret(%res.0)
+          propagate.0(%exc.0 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+            ret(%err.0)
+        }
+        jump ^join.2(%all.0)
+      else.2():
+        jump ^join.2(true)
+      join.2(%b.12 : base.Bool):
+        branch(%b.12) ^then.6() ^else.6()
+      then.6():
+        %undef.4 : py.Value = py.undef("xs")
+        %xs.4 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.4)
+        %cls.5 : py.Value = py.stdClass("builtins", "list")
+        %sub.4 : base.Bool = py.typeIsSubclass(%xs.4, %cls.5) ^fail.3()
+        branch(%sub.4) ^then.7() ^else.7()
+      then.7():
+        %inst.4 : base.Bool = py.isInstance(%xs.4, %cls.5) ^fail.3()
+        jump ^join.7(%inst.4)
+      else.7():
+        jump ^join.7(false)
+      join.7(%b.14 : base.Bool):
+        branch(%b.14) ^then.8() ^else.8()
+      then.8():
+        %undef.5 : py.Value = py.undef("xs")
+        %xs.5 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.5)
+        %all.1 : base.Bool = py.allIn(%xs.5) ^fail.3() {
+          body.1(%item.0.0 : py.Value):
+            %cls.6 : py.Value = py.stdClass("builtins", "str")
+            %sub.5 : base.Bool = py.typeIsSubclass(%item.0.0, %cls.6) ^propagate.1()
+            branch(%sub.5) ^then.9() ^else.9()
+          then.9():
+            %inst.5 : base.Bool = py.isInstance(%item.0.0, %cls.6) ^propagate.1()
+            jump ^join.9(%inst.5)
+          else.9():
+            jump ^join.9(false)
+          join.9(%b.16 : base.Bool):
+            %res.1 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.16)
+            ret(%res.1)
+          propagate.1(%exc.1 : py.Value):
+            %err.1 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.1)
+            ret(%err.1)
+        }
+        jump ^join.8(%all.1)
+      else.8():
+        jump ^join.8(true)
+      join.8(%b.18 : base.Bool):
+        jump ^join.6(%b.18)
+      else.6():
+        jump ^join.6(false)
+      join.6(%b.20 : base.Bool):
+        ret(%b.20)
+      fail.3(%e.1 : py.Value):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @union_schema.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

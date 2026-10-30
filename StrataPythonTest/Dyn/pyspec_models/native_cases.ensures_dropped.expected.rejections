@@ -1,0 +1,1 @@
+[dropped-clause] native_cases.ensures_dropped: PySpec dropped the ensures clause 'result.bit_length() > 0' of 'f'

@@ -6,20 +6,26 @@
 --   ghost(name="either", type=Union[int, BinaryIO])
 --
 -- `typing.BinaryIO` has no runtime test: in CPython 3.12, `isinstance(io.BytesIO(),
--- typing.BinaryIO)` is false. A ghost's invariant is absent when an atom of its declared type
--- has no test (§12.1), so neither ghost has an invariant. Neither has an initializer, so each
--- starts with an unknown value.
+-- typing.BinaryIO)` is false. A declared type adds nothing to a ghost's invariant when an atom
+-- of it has no test (§12.1), so each ghost's invariant only says that it is defined. Neither
+-- has an initializer, so each starts with an unknown value that is defined.
 module m {
-  ghost @|m.<ghost>.stream| : py.Value
-  ghost @|m.<ghost>.either| : py.Value
+  ghost @|m.<ghost>.stream| : py.Value invariant {
+    inv.0(%v.0 : py.Value):
+      %defined.0 : base.Bool = py.isDefined(%v.0)
+      ret(%defined.0)
+  }
+  ghost @|m.<ghost>.either| : py.Value invariant {
+    inv.0(%v.0 : py.Value):
+      %defined.0 : base.Bool = py.isDefined(%v.0)
+      ret(%defined.0)
+  }
   func @|m.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
       %str.0 : py.Value = py.strLit("m")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
       %none.0 : py.Value = py.noneLit
-      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m", "__doc__")
-      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %clo.0 : py.Value = py.mkClosure[[]](@m.__getattr__)
       %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("m", "__getattr__")
       %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.0)

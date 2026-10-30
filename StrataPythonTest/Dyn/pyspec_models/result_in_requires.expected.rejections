@@ -1,0 +1,1 @@
+[result-outside-post] result_in_requires: 'f' reads result outside @ensures or @admit

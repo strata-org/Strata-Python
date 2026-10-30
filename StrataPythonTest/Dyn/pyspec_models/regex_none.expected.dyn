@@ -1,0 +1,274 @@
+module regex_none {
+  func @|regex_none.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("regex_none")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("regex_none", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@regex_none.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("regex_none", "f")
+      %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@regex_none.g)
+      %g.cell.0 : base.Ref(py.Value) = py.globalCell("regex_none", "g")
+      %set.2 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
+      %clo.2 : py.Value = py.mkClosure[[]](@regex_none.h)
+      %h.cell.0 : base.Ref(py.Value) = py.globalCell("regex_none", "h")
+      %set.3 : base.Unit = base.refSet[py.Value](%h.cell.0, %clo.2)
+      %clo.3 : py.Value = py.mkClosure[[]](@regex_none.k)
+      %k.cell.0 : base.Ref(py.Value) = py.globalCell("regex_none", "k")
+      %set.4 : base.Unit = base.refSet[py.Value](%k.cell.0, %clo.3)
+      %clo.4 : py.Value = py.mkClosure[[]](@regex_none.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("regex_none", "__getattr__")
+      %set.5 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.4)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @regex_none.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'f'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "s")
+        ret(%binds.0)
+    }
+    requires "'s' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("s")
+        %s.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "s", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%s.3)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 's'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("s")
+        %s.6 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "s", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "str")
+        %sub.0 : base.Bool = py.typeIsSubclass(%s.6, %cls.0) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%s.6, %cls.0) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "precondition 0" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("s")
+        %s.12 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "s", %undef.2)
+        %match.0 : base.Bool = py.reSearch("a+", %s.12) ^fail.3()
+        branch(%match.0) ^then.1() ^else.1()
+      then.1():
+        jump ^join.1(false)
+      else.1():
+        jump ^join.1(true)
+      join.1(%b.5 : base.Bool):
+        ret(%b.5)
+      fail.3(%e.1 : py.Value):
+        ret(false)
+    }
+    free ensures "return type of 'f'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %cls.1 : py.Value = py.stdClass("builtins", "str")
+        %inst.1 : base.Bool = py.isInstance(%result.0, %cls.1) ^fail.4()
+        ret(%inst.1)
+      raised.0(%exc.0 : py.Value):
+        ret(true)
+      fail.4(%e.2 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @regex_none.g(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'g'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "s")
+        ret(%binds.0)
+    }
+    requires "'s' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("s")
+        %s.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "s", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%s.3)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 's'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("s")
+        %s.6 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "s", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "str")
+        %sub.0 : base.Bool = py.typeIsSubclass(%s.6, %cls.0) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%s.6, %cls.0) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    free ensures "return type of 'g'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %cls.1 : py.Value = py.stdClass("builtins", "str")
+        %inst.1 : base.Bool = py.isInstance(%result.0, %cls.1) ^fail.3()
+        ret(%inst.1)
+      raised.0(%exc.0 : py.Value):
+        ret(true)
+      fail.3(%e.1 : py.Value):
+        ret(true)
+    }
+    free ensures "admitted postcondition of 'g'" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %match.0 : base.Bool = py.reSearch("b+", %result.1) ^fail.4()
+        branch(%match.0) ^then.1() ^else.1()
+      then.1():
+        jump ^join.1(false)
+      else.1():
+        jump ^join.1(true)
+      join.1(%b.6 : base.Bool):
+        ret(%b.6)
+      raised.1(%exc.1 : py.Value):
+        ret(true)
+      fail.4(%e.2 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @regex_none.h(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'h'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "s")
+        ret(%binds.0)
+    }
+    requires "'s' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("s")
+        %s.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "s", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%s.3)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 's'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("s")
+        %s.6 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "s", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "str")
+        %sub.0 : base.Bool = py.typeIsSubclass(%s.6, %cls.0) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%s.6, %cls.0) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "precondition 0" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("s")
+        %s.12 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "s", %undef.2)
+        %match.0 : base.Bool = py.reSearch("a+", %s.12) ^fail.3()
+        ret(%match.0)
+      fail.3(%e.1 : py.Value):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @regex_none.k(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'k'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "s")
+        ret(%binds.0)
+    }
+    requires "'s' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("s")
+        %s.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "s", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%s.3)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 's'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("s")
+        %s.6 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "s", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "str")
+        %sub.0 : base.Bool = py.typeIsSubclass(%s.6, %cls.0) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%s.6, %cls.0) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "precondition 0" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("s")
+        %s.12 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "s", %undef.2)
+        %match.0 : base.Bool = py.reSearch("a+", %s.12) ^fail.3()
+        ret(%match.0)
+      fail.3(%e.1 : py.Value):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @regex_none.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

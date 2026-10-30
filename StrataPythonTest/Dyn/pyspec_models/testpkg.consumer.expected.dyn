@@ -1,0 +1,76 @@
+module testpkg.consumer {
+  func @|testpkg.consumer.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("testpkg.consumer")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("testpkg.consumer", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@testpkg.consumer.use_helper)
+      %use_helper.cell.0 : base.Ref(py.Value) = py.globalCell("testpkg.consumer", "use_helper")
+      %set.1 : base.Unit = base.refSet[py.Value](%use_helper.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@testpkg.consumer.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("testpkg.consumer", "__getattr__")
+      %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @testpkg.consumer.use_helper(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'use_helper'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "h")
+        ret(%binds.0)
+    }
+    requires "'h' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("h")
+        %h.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "h", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%h.0)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 'h'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("h")
+        %h.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "h", %undef.1)
+        %HelperClass.cell.0 : base.Ref(py.Value) = py.globalCell("testpkg.helper", "HelperClass")
+        %HelperClass.0 : py.Value = base.refGet[py.Value](%HelperClass.cell.0)
+        %HelperClass.1 : py.Value = py.requireDefined(%HelperClass.0, "NameError", "name 'HelperClass' is not defined") ^fail.2()
+        %sub.0 : base.Bool = py.typeIsSubclass(%h.1, %HelperClass.1) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%h.1, %HelperClass.1) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.1 : py.Value):
+        ret(false)
+    }
+    free ensures "return type of 'use_helper'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %cls.0 : py.Value = py.stdClass("builtins", "str")
+        %inst.1 : base.Bool = py.isInstance(%result.0, %cls.0) ^fail.3()
+        ret(%inst.1)
+      raised.0(%exc.0 : py.Value):
+        ret(true)
+      fail.3(%e.2 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @testpkg.consumer.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

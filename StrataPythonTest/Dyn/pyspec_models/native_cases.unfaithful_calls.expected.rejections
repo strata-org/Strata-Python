@@ -1,0 +1,12 @@
+[dropped-clause] native_cases.unfaithful_calls: PySpec dropped the assert clause 'len(s, x=1) >= 1' of 'len_kw'
+[dropped-clause] native_cases.unfaithful_calls: PySpec dropped the assert clause 'isinstance(x, int, y=2)' of 'isinstance_kw'
+[dropped-clause] native_cases.unfaithful_calls: PySpec dropped the assert clause 'not (compile("a", flags=2).search(s) is not None)' of 'regex_flags'
+[dropped-clause] native_cases.unfaithful_calls: PySpec dropped the assert clause 'len(s) >= 5' of 'regex_pos'
+[dropped-clause] native_cases.unfaithful_calls: PySpec dropped the assert clause 'all((x > 0 for x in xs), y=1)' of 'all_kw'
+[dropped-clause] native_cases.unfaithful_calls: PySpec dropped the assert clause 'len(s) >= 1' of 'param_len'
+[dropped-clause] native_cases.unfaithful_calls: PySpec dropped the assert clause 'isinstance(x, int)' of 'param_isinstance'
+[dropped-clause] native_cases.unfaithful_calls: PySpec dropped the assert clause 'all(x > 0 for x in xs)' of 'param_all'
+[dropped-clause] native_cases.unfaithful_calls: PySpec dropped the assert clause 'isinstance(x, str)' of 'param_type'
+[isinstance-shadowed] native_cases.unfaithful_calls: isinstance of 'param_type' names 'str', which is a parameter or a binder
+[dropped-clause] native_cases.unfaithful_calls: PySpec dropped the assert clause 'all(k != "" for k in d.keys(x=1))' of 'view_kw'
+[dropped-clause] native_cases.unfaithful_calls: PySpec dropped the assert clause 'k != ""' of 'loop_view_kw'

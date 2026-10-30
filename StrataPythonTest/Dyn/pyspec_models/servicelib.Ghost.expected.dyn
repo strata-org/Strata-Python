@@ -1,0 +1,129 @@
+module servicelib.Ghost {
+  ghost @|servicelib.Ghost.<ghost>.floor| : py.Value = {
+    init.0():
+      %int.0 : py.Value = py.intLit(0)
+      ret(%int.0)
+  } invariant {
+    inv.0(%v.0 : py.Value):
+      %defined.0 : base.Bool = py.isDefined(%v.0)
+      branch(%defined.0) ^then.0() ^else.0()
+    then.0():
+      %cls.0 : py.Value = py.stdClass("builtins", "int")
+      %inst.0 : base.Bool = py.isInstance(%v.0, %cls.0) ^fail.0()
+      jump ^join.0(%inst.0)
+    else.0():
+      jump ^join.0(false)
+    join.0(%b.1 : base.Bool):
+      ret(%b.1)
+    fail.0(%e.0 : py.Value):
+      unreachable
+  }
+  func @|servicelib.Ghost.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("servicelib.Ghost")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Ghost", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@servicelib.Ghost.bounded_value)
+      %bounded_value.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Ghost", "bounded_value")
+      %set.1 : base.Unit = base.refSet[py.Value](%bounded_value.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@servicelib.Ghost.floor_value)
+      %floor_value.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Ghost", "floor_value")
+      %set.2 : base.Unit = base.refSet[py.Value](%floor_value.cell.0, %clo.1)
+      %clo.2 : py.Value = py.mkClosure[[]](@servicelib.Ghost.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Ghost", "__getattr__")
+      %set.3 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.2)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @servicelib.Ghost.bounded_value(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'bounded_value'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 0, false)
+        ret(%binds.0)
+    }
+    free ensures "return type of 'bounded_value'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %cls.0 : py.Value = py.stdClass("builtins", "int")
+        %inst.0 : base.Bool = py.isInstance(%result.0, %cls.0) ^fail.1()
+        ret(%inst.0)
+      raised.0(%exc.0 : py.Value):
+        ret(true)
+      fail.1(%e.0 : py.Value):
+        ret(true)
+    }
+    free ensures "admitted postcondition of 'bounded_value'" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %floor.0 : py.Value = base.refGet[py.Value](ghost @|servicelib.Ghost.<ghost>.floor|)
+        %gtE.0 : py.Value = py.gtE(%result.1, %floor.0) ^fail.2()
+        %cond.0 : base.Bool = py.truthy(%gtE.0) ^fail.2()
+        ret(%cond.0)
+      raised.1(%exc.1 : py.Value):
+        ret(true)
+      fail.2(%e.1 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @servicelib.Ghost.floor_value(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'floor_value'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 0, false)
+        ret(%binds.0)
+    }
+    free ensures "return type of 'floor_value'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %cls.0 : py.Value = py.stdClass("builtins", "int")
+        %inst.0 : base.Bool = py.isInstance(%result.0, %cls.0) ^fail.1()
+        ret(%inst.0)
+      raised.0(%exc.0 : py.Value):
+        ret(true)
+      fail.1(%e.0 : py.Value):
+        ret(true)
+    }
+    free ensures "admitted postcondition of 'floor_value'" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %floor.0 : py.Value = base.refGet[py.Value](ghost @|servicelib.Ghost.<ghost>.floor|)
+        %eq.0 : py.Value = py.eq(%result.1, %floor.0) ^fail.2()
+        %cond.0 : base.Bool = py.truthy(%eq.0) ^fail.2()
+        ret(%cond.0)
+      raised.1(%exc.1 : py.Value):
+        ret(true)
+      fail.2(%e.1 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @servicelib.Ghost.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

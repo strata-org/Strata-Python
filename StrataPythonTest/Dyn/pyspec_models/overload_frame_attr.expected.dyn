@@ -1,0 +1,270 @@
+module overload_frame_attr {
+  func @|overload_frame_attr.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("overload_frame_attr")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("overload_frame_attr", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|overload_frame_attr.Conn.<body>|)
+      %str.1 : py.Value = py.strLit("Conn")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %Conn.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %Conn.cell.0 : base.Ref(py.Value) = py.globalCell("overload_frame_attr", "Conn")
+      %set.1 : base.Unit = base.refSet[py.Value](%Conn.cell.0, %Conn.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@overload_frame_attr.use)
+      %use.cell.0 : base.Ref(py.Value) = py.globalCell("overload_frame_attr", "use")
+      %set.2 : base.Unit = base.refSet[py.Value](%use.cell.0, %clo.1)
+      %clo.2 : py.Value = py.mkClosure[[]](@overload_frame_attr.use)
+      %use.cell.1 : base.Ref(py.Value) = py.globalCell("overload_frame_attr", "use")
+      %set.3 : base.Unit = base.refSet[py.Value](%use.cell.1, %clo.2)
+      %clo.3 : py.Value = py.mkClosure[[]](@overload_frame_attr.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("overload_frame_attr", "__getattr__")
+      %set.4 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.3)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  extern func @overload_frame_attr.Conn.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "'self' is required" {
+      pre.0():
+        %undef.0 : py.Value = py.undef("self")
+        %self.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "self", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%self.0)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 'self'" {
+      pre.1():
+        %undef.1 : py.Value = py.undef("self")
+        %self.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "self", %undef.1)
+        %Conn.cell.0 : base.Ref(py.Value) = py.globalCell("overload_frame_attr", "Conn")
+        %Conn.0 : py.Value = base.refGet[py.Value](%Conn.cell.0)
+        %Conn.1 : py.Value = py.requireDefined(%Conn.0, "NameError", "name 'Conn' is not defined") ^fail.1()
+        %sub.0 : base.Bool = py.typeIsSubclass(%self.1, %Conn.1) ^fail.1()
+        ret(%sub.0)
+      fail.1(%e.1 : py.Value):
+        ret(false)
+    }
+    free ensures "synthesized __init__ of 'Conn'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %none.0 : py.Value = py.noneLit
+        %is.0 : py.Value = py.is(%result.0, %none.0)
+        %cond.0 : base.Bool = py.truthy(%is.0) ^fail.2()
+        ret(%cond.0)
+      raised.0(%exc.0 : py.Value):
+        ret(true)
+      fail.2(%e.2 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @overload_frame_attr.Conn.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+  func @|overload_frame_attr.Conn.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = [{name = "state", trustedType = "builtins.int"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %__name__.0 : py.Value = py.loadGlobal("overload_frame_attr", "__name__") ^propagate.0()
+      %str.0 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %str.1 : py.Value = py.strLit("Conn")
+      %str.2 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.2, %str.1) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@overload_frame_attr.Conn.__init__)
+      %str.3 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.3, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@overload_frame_attr.Conn.__getattr__)
+      %str.4 : py.Value = py.strLit("__getattr__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.4, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  extern func @overload_frame_attr.use(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "'kind' is required" {
+      pre.0():
+        %undef.0 : py.Value = py.undef("kind")
+        %kind.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "kind", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%kind.0)
+        ret(%defined.0)
+    }
+    requires "'use' called with unknown string" {
+      pre.1():
+        %undef.1 : py.Value = py.undef("kind")
+        %kind.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "kind", %undef.1)
+        %oneOf.0 : base.Bool = py.strIsOneOf(%kind.1, "a", "b")
+        ret(%oneOf.0)
+    }
+    requires "arguments bind to 'use' for 'a'" {
+      pre.2():
+        %undef.2 : py.Value = py.undef("kind")
+        %kind.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "kind", %undef.2)
+        %str.0 : py.Value = py.strLit("a")
+        %eq.0 : py.Value = py.eq(%kind.2, %str.0) ^fail.2()
+        %cond.0 : base.Bool = py.truthy(%eq.0) ^fail.2()
+        branch(%cond.0) ^then.0() ^else.0()
+      then.0():
+        jump ^join.0(true)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        branch(%b.2) ^then.1() ^else.1()
+      then.1():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 2, false, "kind", "conn")
+        jump ^join.1(%binds.0)
+      else.1():
+        jump ^join.1(true)
+      join.1(%b.5 : base.Bool):
+        ret(%b.5)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "'conn' is required for 'a'" {
+      pre.3():
+        %undef.3 : py.Value = py.undef("kind")
+        %kind.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "kind", %undef.3)
+        %str.1 : py.Value = py.strLit("a")
+        %eq.1 : py.Value = py.eq(%kind.3, %str.1) ^fail.3()
+        %cond.1 : base.Bool = py.truthy(%eq.1) ^fail.3()
+        branch(%cond.1) ^then.2() ^else.2()
+      then.2():
+        jump ^join.2(true)
+      else.2():
+        jump ^join.2(false)
+      join.2(%b.8 : base.Bool):
+        branch(%b.8) ^then.3() ^else.3()
+      then.3():
+        %undef.4 : py.Value = py.undef("conn")
+        %conn.0 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "conn", %undef.4)
+        %defined.1 : base.Bool = py.isDefined(%conn.0)
+        jump ^join.3(%defined.1)
+      else.3():
+        jump ^join.3(true)
+      join.3(%b.10 : base.Bool):
+        ret(%b.10)
+      fail.3(%e.1 : py.Value):
+        ret(false)
+    }
+    requires "declared type of parameter 'conn' for 'a'" {
+      pre.4():
+        %undef.5 : py.Value = py.undef("kind")
+        %kind.4 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "kind", %undef.5)
+        %str.2 : py.Value = py.strLit("a")
+        %eq.2 : py.Value = py.eq(%kind.4, %str.2) ^fail.4()
+        %cond.2 : base.Bool = py.truthy(%eq.2) ^fail.4()
+        branch(%cond.2) ^then.4() ^else.4()
+      then.4():
+        jump ^join.4(true)
+      else.4():
+        jump ^join.4(false)
+      join.4(%b.13 : base.Bool):
+        branch(%b.13) ^then.5() ^else.5()
+      then.5():
+        %undef.6 : py.Value = py.undef("conn")
+        %conn.1 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "conn", %undef.6)
+        %Conn.cell.0 : base.Ref(py.Value) = py.globalCell("overload_frame_attr", "Conn")
+        %Conn.0 : py.Value = base.refGet[py.Value](%Conn.cell.0)
+        %Conn.1 : py.Value = py.requireDefined(%Conn.0, "NameError", "name 'Conn' is not defined") ^fail.4()
+        %sub.0 : base.Bool = py.typeIsSubclass(%conn.1, %Conn.1) ^fail.4()
+        branch(%sub.0) ^then.6() ^else.6()
+      then.6():
+        %inst.0 : base.Bool = py.isInstance(%conn.1, %Conn.1) ^fail.4()
+        jump ^join.6(%inst.0)
+      else.6():
+        jump ^join.6(false)
+      join.6(%b.15 : base.Bool):
+        jump ^join.5(%b.15)
+      else.5():
+        jump ^join.5(true)
+      join.5(%b.17 : base.Bool):
+        ret(%b.17)
+      fail.4(%e.3 : py.Value):
+        ret(false)
+    }
+    requires "arguments bind to 'use' for 'b'" {
+      pre.5():
+        %undef.7 : py.Value = py.undef("kind")
+        %kind.5 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "kind", %undef.7)
+        %str.3 : py.Value = py.strLit("b")
+        %eq.3 : py.Value = py.eq(%kind.5, %str.3) ^fail.5()
+        %cond.3 : base.Bool = py.truthy(%eq.3) ^fail.5()
+        branch(%cond.3) ^then.7() ^else.7()
+      then.7():
+        jump ^join.7(true)
+      else.7():
+        jump ^join.7(false)
+      join.7(%b.20 : base.Bool):
+        branch(%b.20) ^then.8() ^else.8()
+      then.8():
+        %binds.1 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "kind")
+        jump ^join.8(%binds.1)
+      else.8():
+        jump ^join.8(true)
+      join.8(%b.23 : base.Bool):
+        ret(%b.23)
+      fail.5(%e.4 : py.Value):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    }, {
+      loc.3():
+        %undef.8 : py.Value = py.undef("kind")
+        %kind.6 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "kind", %undef.8)
+        %str.4 : py.Value = py.strLit("a")
+        %eq.4 : py.Value = py.eq(%kind.6, %str.4) ^fail.9()
+        %cond.4 : base.Bool = py.truthy(%eq.4) ^fail.9()
+        branch(%cond.4) ^then.9() ^else.9()
+      then.9():
+        jump ^join.9(true)
+      else.9():
+        jump ^join.9(false)
+      join.9(%b.26 : base.Bool):
+        branch(%b.26) ^then.10() ^else.10()
+      then.10():
+        %undef.9 : py.Value = py.undef("conn")
+        %conn.2 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "conn", %undef.9)
+        %l.3 : base.Loc = py.attrLoc(%conn.2, "state")
+        jump ^join.10(%l.3)
+      else.10():
+        %l.4 : base.Loc = py.instanceState
+        jump ^join.10(%l.4)
+      join.10(%l.5 : base.Loc):
+        ret(%l.5)
+      fail.9(%e.5 : py.Value):
+        unreachable
+    })
+  extern func @overload_frame_attr.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

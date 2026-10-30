@@ -1,0 +1,3 @@
+[dropped-clause] native_cases.module_rebinds_builtin: PySpec dropped the assert clause 'all(x > 0 for x in xs)' of 'uses_all'
+[dropped-clause] native_cases.module_rebinds_builtin: PySpec dropped the assert clause 'len(s) >= 1' of 'uses_len'
+[dropped-clause] native_cases.module_rebinds_builtin: PySpec dropped the assert clause 'compile("a").search(s) is not None' of 'uses_compile'

@@ -1,0 +1,2 @@
+[duplicate-binder] duplicate_binder: a quantifier of 'dup_binder' binds 'k' twice
+[duplicate-binder] duplicate_binder: a quantifier of 'dup_binder_all' binds 'k' twice

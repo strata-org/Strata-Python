@@ -1,0 +1,1 @@
+[init-field-class] init_field_method: the field 'f' of 'D' is 'self._C()', which names no class of the model, or another class than its type 'init_field_method._C'

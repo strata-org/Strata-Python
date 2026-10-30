@@ -1,0 +1,238 @@
+module native_cases.admit_dict_dynamic_ge {
+  func @|native_cases.admit_dict_dynamic_ge.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("native_cases.admit_dict_dynamic_ge")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.admit_dict_dynamic_ge", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@native_cases.admit_dict_dynamic_ge.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.admit_dict_dynamic_ge", "f")
+      %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@native_cases.admit_dict_dynamic_ge.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.admit_dict_dynamic_ge", "__getattr__")
+      %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @native_cases.admit_dict_dynamic_ge.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'f'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 4, false, "d1", "d2", "k1", "k2")
+        ret(%binds.0)
+    }
+    requires "'d1' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("d1")
+        %d1.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "d1", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%d1.0)
+        ret(%defined.0)
+    }
+    requires "'d2' is required" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("d2")
+        %d2.0 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "d2", %undef.1)
+        %defined.1 : base.Bool = py.isDefined(%d2.0)
+        ret(%defined.1)
+    }
+    requires "'k1' is required" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("k1")
+        %k1.0 : py.Value = py.argOf(%args.0, %kwargs.0, 2, "k1", %undef.2)
+        %defined.2 : base.Bool = py.isDefined(%k1.0)
+        ret(%defined.2)
+    }
+    requires "'k2' is required" {
+      pre.4():
+        %undef.3 : py.Value = py.undef("k2")
+        %k2.0 : py.Value = py.argOf(%args.0, %kwargs.0, 3, "k2", %undef.3)
+        %defined.3 : base.Bool = py.isDefined(%k2.0)
+        ret(%defined.3)
+    }
+    requires "declared type of parameter 'd1'" {
+      pre.5():
+        %undef.4 : py.Value = py.undef("d1")
+        %d1.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "d1", %undef.4)
+        %cls.0 : py.Value = py.stdClass("builtins", "dict")
+        %sub.0 : base.Bool = py.typeIsSubclass(%d1.1, %cls.0) ^fail.5()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%d1.1, %cls.0) ^fail.5()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.5(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "declared type of parameter 'd2'" {
+      pre.6():
+        %undef.5 : py.Value = py.undef("d2")
+        %d2.1 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "d2", %undef.5)
+        %cls.1 : py.Value = py.stdClass("builtins", "dict")
+        %sub.1 : base.Bool = py.typeIsSubclass(%d2.1, %cls.1) ^fail.6()
+        branch(%sub.1) ^then.1() ^else.1()
+      then.1():
+        %inst.1 : base.Bool = py.isInstance(%d2.1, %cls.1) ^fail.6()
+        jump ^join.1(%inst.1)
+      else.1():
+        jump ^join.1(false)
+      join.1(%b.4 : base.Bool):
+        ret(%b.4)
+      fail.6(%e.1 : py.Value):
+        ret(false)
+    }
+    requires "declared type of parameter 'k1'" {
+      pre.7():
+        %undef.6 : py.Value = py.undef("k1")
+        %k1.1 : py.Value = py.argOf(%args.0, %kwargs.0, 2, "k1", %undef.6)
+        %cls.2 : py.Value = py.stdClass("builtins", "str")
+        %sub.2 : base.Bool = py.typeIsSubclass(%k1.1, %cls.2) ^fail.7()
+        branch(%sub.2) ^then.2() ^else.2()
+      then.2():
+        %inst.2 : base.Bool = py.isInstance(%k1.1, %cls.2) ^fail.7()
+        jump ^join.2(%inst.2)
+      else.2():
+        jump ^join.2(false)
+      join.2(%b.6 : base.Bool):
+        ret(%b.6)
+      fail.7(%e.2 : py.Value):
+        ret(false)
+    }
+    requires "declared type of parameter 'k2'" {
+      pre.8():
+        %undef.7 : py.Value = py.undef("k2")
+        %k2.1 : py.Value = py.argOf(%args.0, %kwargs.0, 3, "k2", %undef.7)
+        %cls.3 : py.Value = py.stdClass("builtins", "str")
+        %sub.3 : base.Bool = py.typeIsSubclass(%k2.1, %cls.3) ^fail.8()
+        branch(%sub.3) ^then.3() ^else.3()
+      then.3():
+        %inst.3 : base.Bool = py.isInstance(%k2.1, %cls.3) ^fail.8()
+        jump ^join.3(%inst.3)
+      else.3():
+        jump ^join.3(false)
+      join.3(%b.8 : base.Bool):
+        ret(%b.8)
+      fail.8(%e.3 : py.Value):
+        ret(false)
+    }
+    requires "schema of parameter 'd1'" {
+      pre.9():
+        %undef.8 : py.Value = py.undef("d1")
+        %d1.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "d1", %undef.8)
+        %all.0 : base.Bool = py.allItems(%d1.2) ^fail.9() {
+          body.0(%key.0.0 : py.Value, %value.4 : py.Value):
+            %cls.4 : py.Value = py.stdClass("builtins", "str")
+            %sub.4 : base.Bool = py.typeIsSubclass(%key.0.0, %cls.4) ^propagate.0()
+            branch(%sub.4) ^then.4() ^else.4()
+          then.4():
+            %inst.4 : base.Bool = py.isInstance(%key.0.0, %cls.4) ^propagate.0()
+            jump ^join.4(%inst.4)
+          else.4():
+            jump ^join.4(false)
+          join.4(%b.10 : base.Bool):
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.10)
+            ret(%res.0)
+          propagate.0(%exc.0 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+            ret(%err.0)
+        }
+        ret(%all.0)
+      fail.9(%e.4 : py.Value):
+        ret(false)
+    }
+    requires "schema of parameter 'd2'" {
+      pre.10():
+        %undef.9 : py.Value = py.undef("d2")
+        %d2.2 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "d2", %undef.9)
+        %all.1 : base.Bool = py.allItems(%d2.2) ^fail.10() {
+          body.1(%key.0.1 : py.Value, %value.6 : py.Value):
+            %cls.5 : py.Value = py.stdClass("builtins", "str")
+            %sub.5 : base.Bool = py.typeIsSubclass(%key.0.1, %cls.5) ^propagate.1()
+            branch(%sub.5) ^then.5() ^else.5()
+          then.5():
+            %inst.5 : base.Bool = py.isInstance(%key.0.1, %cls.5) ^propagate.1()
+            jump ^join.5(%inst.5)
+          else.5():
+            jump ^join.5(false)
+          join.5(%b.12 : base.Bool):
+            %res.1 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.12)
+            ret(%res.1)
+          propagate.1(%exc.1 : py.Value):
+            %err.1 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.1)
+            ret(%err.1)
+        }
+        ret(%all.1)
+      fail.10(%e.5 : py.Value):
+        ret(false)
+    }
+    free ensures "return type of 'f'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %cls.6 : py.Value = py.stdClass("builtins", "int")
+        %inst.6 : base.Bool = py.isInstance(%result.0, %cls.6) ^fail.11()
+        ret(%inst.6)
+      raised.0(%exc.2 : py.Value):
+        ret(true)
+      fail.11(%e.6 : py.Value):
+        ret(true)
+    }
+    free ensures "admitted postcondition of 'f'" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %old.0 : py.Value = base.old[py.Value, py.Value] ^fail.12() {
+          body.2():
+            %undef.10 : py.Value = py.undef("d1")
+            %d1.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "d1", %undef.10)
+            %res.2 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%d1.3)
+            ret(%res.2)
+        }
+        %old.1 : py.Value = base.old[py.Value, py.Value] ^fail.12() {
+          body.3():
+            %undef.11 : py.Value = py.undef("k1")
+            %k1.2 : py.Value = py.argOf(%args.0, %kwargs.0, 2, "k1", %undef.11)
+            %res.3 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%k1.2)
+            ret(%res.3)
+        }
+        %item.0 : py.Value = py.getItem(%old.0, %old.1) ^fail.12()
+        %old.2 : py.Value = base.old[py.Value, py.Value] ^fail.12() {
+          body.4():
+            %undef.12 : py.Value = py.undef("d2")
+            %d2.3 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "d2", %undef.12)
+            %res.4 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%d2.3)
+            ret(%res.4)
+        }
+        %old.3 : py.Value = base.old[py.Value, py.Value] ^fail.12() {
+          body.5():
+            %undef.13 : py.Value = py.undef("k2")
+            %k2.2 : py.Value = py.argOf(%args.0, %kwargs.0, 3, "k2", %undef.13)
+            %res.5 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%k2.2)
+            ret(%res.5)
+        }
+        %item.1 : py.Value = py.getItem(%old.2, %old.3) ^fail.12()
+        %gtE.0 : py.Value = py.gtE(%item.0, %item.1) ^fail.12()
+        %cond.0 : base.Bool = py.truthy(%gtE.0) ^fail.12()
+        ret(%cond.0)
+      raised.1(%exc.7 : py.Value):
+        ret(true)
+      fail.12(%e.7 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @native_cases.admit_dict_dynamic_ge.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

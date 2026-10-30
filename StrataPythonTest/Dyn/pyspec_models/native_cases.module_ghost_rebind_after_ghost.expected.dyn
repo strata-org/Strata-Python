@@ -1,0 +1,35 @@
+module native_cases.module_ghost_rebind_after_ghost {
+  ghost @|native_cases.module_ghost_rebind_after_ghost.<ghost>.counter| : py.Value = {
+    init.0():
+      %int.0 : py.Value = py.intLit(0)
+      ret(%int.0)
+  } invariant {
+    inv.0(%v.0 : py.Value):
+      %defined.0 : base.Bool = py.isDefined(%v.0)
+      branch(%defined.0) ^then.0() ^else.0()
+    then.0():
+      %cls.0 : py.Value = py.stdClass("builtins", "int")
+      %inst.0 : base.Bool = py.isInstance(%v.0, %cls.0) ^fail.0()
+      jump ^join.0(%inst.0)
+    else.0():
+      jump ^join.0(false)
+    join.0(%b.1 : base.Bool):
+      ret(%b.1)
+    fail.0(%e.0 : py.Value):
+      unreachable
+  }
+  func @|native_cases.module_ghost_rebind_after_ghost.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("native_cases.module_ghost_rebind_after_ghost")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.module_ghost_rebind_after_ghost", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@native_cases.module_ghost_rebind_after_ghost.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.module_ghost_rebind_after_ghost", "__getattr__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.0)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @native_cases.module_ghost_rebind_after_ghost.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

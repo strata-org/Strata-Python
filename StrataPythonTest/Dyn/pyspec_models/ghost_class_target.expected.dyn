@@ -1,0 +1,167 @@
+module ghost_class_target {
+  ghost @|ghost_class_target.<ghost>.g| : py.Value = {
+    init.0():
+      %none.0 : py.Value = py.noneLit
+      ret(%none.0)
+  } invariant {
+    inv.0(%v.0 : py.Value):
+      %defined.0 : base.Bool = py.isDefined(%v.0)
+      ret(%defined.0)
+  }
+  func @|ghost_class_target.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("ghost_class_target")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("ghost_class_target", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|ghost_class_target.Box.<body>|)
+      %str.1 : py.Value = py.strLit("Box")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %Box.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %Box.cell.0 : base.Ref(py.Value) = py.globalCell("ghost_class_target", "Box")
+      %set.1 : base.Unit = base.refSet[py.Value](%Box.cell.0, %Box.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@ghost_class_target.bump)
+      %bump.cell.0 : base.Ref(py.Value) = py.globalCell("ghost_class_target", "bump")
+      %set.2 : base.Unit = base.refSet[py.Value](%bump.cell.0, %clo.1)
+      %clo.2 : py.Value = py.mkClosure[[]](@ghost_class_target.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("ghost_class_target", "__getattr__")
+      %set.3 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.2)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  extern func @ghost_class_target.Box.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "'self' is required" {
+      pre.0():
+        %undef.0 : py.Value = py.undef("self")
+        %self.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "self", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%self.0)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 'self'" {
+      pre.1():
+        %undef.1 : py.Value = py.undef("self")
+        %self.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "self", %undef.1)
+        %Box.cell.0 : base.Ref(py.Value) = py.globalCell("ghost_class_target", "Box")
+        %Box.0 : py.Value = base.refGet[py.Value](%Box.cell.0)
+        %Box.1 : py.Value = py.requireDefined(%Box.0, "NameError", "name 'Box' is not defined") ^fail.1()
+        %sub.0 : base.Bool = py.typeIsSubclass(%self.1, %Box.1) ^fail.1()
+        ret(%sub.0)
+      fail.1(%e.1 : py.Value):
+        ret(false)
+    }
+    free ensures "synthesized __init__ of 'Box'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %none.0 : py.Value = py.noneLit
+        %is.0 : py.Value = py.is(%result.0, %none.0)
+        %cond.0 : base.Bool = py.truthy(%is.0) ^fail.2()
+        ret(%cond.0)
+      raised.0(%exc.0 : py.Value):
+        ret(true)
+      fail.2(%e.2 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @ghost_class_target.Box.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+  func @|ghost_class_target.Box.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = [{name = "n", trustedType = "builtins.int"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %__name__.0 : py.Value = py.loadGlobal("ghost_class_target", "__name__") ^propagate.0()
+      %str.0 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %str.1 : py.Value = py.strLit("Box")
+      %str.2 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.2, %str.1) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@ghost_class_target.Box.__init__)
+      %str.3 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.3, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@ghost_class_target.Box.__getattr__)
+      %str.4 : py.Value = py.strLit("__getattr__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.4, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  extern func @ghost_class_target.bump(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'bump'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 0, false)
+        ret(%binds.0)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    }, {
+      loc.3():
+        %l.3 : base.Loc = base.cellLoc[py.Value](ghost @|ghost_class_target.<ghost>.g|)
+        ret(%l.3)
+    }, {
+      loc.4():
+        %g.0 : py.Value = base.refGet[py.Value](ghost @|ghost_class_target.<ghost>.g|)
+        %l.4 : base.Loc = py.reachLoc(%g.0)
+        ret(%l.4)
+    }, {
+      loc.5():
+        %g.1 : py.Value = base.refGet[py.Value](ghost @|ghost_class_target.<ghost>.g|)
+        %l.5 : base.Loc = py.attrLoc(%g.1, "n")
+        ret(%l.5)
+    }, {
+      loc.6():
+        %g.2 : py.Value = base.refGet[py.Value](ghost @|ghost_class_target.<ghost>.g|)
+        %l.6 : base.Loc = py.itemLoc(%g.2, "n")
+        ret(%l.6)
+    }, {
+      loc.7():
+        %g.3 : py.Value = base.refGet[py.Value](ghost @|ghost_class_target.<ghost>.g|)
+        %n.0 : py.Value = py.attr(%g.3, "n") ^fail.8()
+        %l.7 : base.Loc = py.reachLoc(%n.0)
+        ret(%l.7)
+      fail.8(%e.0 : py.Value):
+        unreachable
+    }, {
+      loc.8():
+        %g.4 : py.Value = base.refGet[py.Value](ghost @|ghost_class_target.<ghost>.g|)
+        %str.0 : py.Value = py.strLit("n")
+        %item.0 : py.Value = py.getItem(%g.4, %str.0) ^fail.9()
+        %l.8 : base.Loc = py.reachLoc(%item.0)
+        ret(%l.8)
+      fail.9(%e.1 : py.Value):
+        unreachable
+    })
+  extern func @ghost_class_target.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

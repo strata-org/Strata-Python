@@ -1,0 +1,199 @@
+module servicelib {
+  func @|servicelib.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("servicelib")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %Messaging.0 : py.Value = py.importFrom("servicelib.Messaging", "Messaging") ^propagate.0()
+      %Messaging.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib", "Messaging")
+      %set.1 : base.Unit = base.refSet[py.Value](%Messaging.cell.0, %Messaging.0)
+      %Storage.0 : py.Value = py.importFrom("servicelib.Storage", "Storage") ^propagate.0()
+      %Storage.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib", "Storage")
+      %set.2 : base.Unit = base.refSet[py.Value](%Storage.cell.0, %Storage.0)
+      %Database.0 : py.Value = py.importFrom("servicelib.Database", "Database") ^propagate.0()
+      %Database.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib", "Database")
+      %set.3 : base.Unit = base.refSet[py.Value](%Database.cell.0, %Database.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@servicelib.connect)
+      %connect.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib", "connect")
+      %set.4 : base.Unit = base.refSet[py.Value](%connect.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@servicelib.connect)
+      %connect.cell.1 : base.Ref(py.Value) = py.globalCell("servicelib", "connect")
+      %set.5 : base.Unit = base.refSet[py.Value](%connect.cell.1, %clo.1)
+      %clo.2 : py.Value = py.mkClosure[[]](@servicelib.connect)
+      %connect.cell.2 : base.Ref(py.Value) = py.globalCell("servicelib", "connect")
+      %set.6 : base.Unit = base.refSet[py.Value](%connect.cell.2, %clo.2)
+      %clo.3 : py.Value = py.mkClosure[[]](@servicelib.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib", "__getattr__")
+      %set.7 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.3)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  extern func @servicelib.connect(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'connect'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "service_name")
+        ret(%binds.0)
+    }
+    requires "'service_name' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("service_name")
+        %service_name.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "service_name", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%service_name.0)
+        ret(%defined.0)
+    }
+    requires "'connect' called with unknown string" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("service_name")
+        %service_name.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "service_name", %undef.1)
+        %oneOf.0 : base.Bool = py.strIsOneOf(%service_name.1, "storage", "messaging", "database")
+        ret(%oneOf.0)
+    }
+    free ensures "overload of 'connect' for 'storage'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %old.0 : py.Value = base.old[py.Value, py.Value] ^fail.3() {
+          body.0():
+            %undef.2 : py.Value = py.undef("service_name")
+            %service_name.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "service_name", %undef.2)
+            %res.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%service_name.2)
+            ret(%res.0)
+        }
+        %str.0 : py.Value = py.strLit("storage")
+        %eq.0 : py.Value = py.eq(%old.0, %str.0) ^fail.3()
+        %cond.0 : base.Bool = py.truthy(%eq.0) ^fail.3()
+        branch(%cond.0) ^then.0() ^else.0()
+      then.0():
+        jump ^join.0(true)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.3 : base.Bool):
+        branch(%b.3) ^then.1() ^else.1()
+      then.1():
+        %Storage.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Storage", "Storage")
+        %Storage.0 : py.Value = base.refGet[py.Value](%Storage.cell.0)
+        %Storage.1 : py.Value = py.requireDefined(%Storage.0, "NameError", "name 'Storage' is not defined") ^fail.3()
+        %sub.0 : base.Bool = py.typeIsSubclass(%result.0, %Storage.1) ^fail.3()
+        branch(%sub.0) ^then.2() ^else.2()
+      then.2():
+        %inst.0 : base.Bool = py.isInstance(%result.0, %Storage.1) ^fail.3()
+        jump ^join.2(%inst.0)
+      else.2():
+        jump ^join.2(false)
+      join.2(%b.5 : base.Bool):
+        jump ^join.1(%b.5)
+      else.1():
+        jump ^join.1(true)
+      join.1(%b.7 : base.Bool):
+        ret(%b.7)
+      raised.0(%exc.1 : py.Value):
+        ret(true)
+      fail.3(%e.1 : py.Value):
+        ret(true)
+    }
+    free ensures "overload of 'connect' for 'messaging'" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %old.1 : py.Value = base.old[py.Value, py.Value] ^fail.4() {
+          body.1():
+            %undef.3 : py.Value = py.undef("service_name")
+            %service_name.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "service_name", %undef.3)
+            %res.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%service_name.3)
+            ret(%res.1)
+        }
+        %str.1 : py.Value = py.strLit("messaging")
+        %eq.1 : py.Value = py.eq(%old.1, %str.1) ^fail.4()
+        %cond.1 : base.Bool = py.truthy(%eq.1) ^fail.4()
+        branch(%cond.1) ^then.3() ^else.3()
+      then.3():
+        jump ^join.3(true)
+      else.3():
+        jump ^join.3(false)
+      join.3(%b.11 : base.Bool):
+        branch(%b.11) ^then.4() ^else.4()
+      then.4():
+        %Messaging.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Messaging", "Messaging")
+        %Messaging.0 : py.Value = base.refGet[py.Value](%Messaging.cell.0)
+        %Messaging.1 : py.Value = py.requireDefined(%Messaging.0, "NameError", "name 'Messaging' is not defined") ^fail.4()
+        %sub.1 : base.Bool = py.typeIsSubclass(%result.1, %Messaging.1) ^fail.4()
+        branch(%sub.1) ^then.5() ^else.5()
+      then.5():
+        %inst.1 : base.Bool = py.isInstance(%result.1, %Messaging.1) ^fail.4()
+        jump ^join.5(%inst.1)
+      else.5():
+        jump ^join.5(false)
+      join.5(%b.13 : base.Bool):
+        jump ^join.4(%b.13)
+      else.4():
+        jump ^join.4(true)
+      join.4(%b.15 : base.Bool):
+        ret(%b.15)
+      raised.1(%exc.3 : py.Value):
+        ret(true)
+      fail.4(%e.3 : py.Value):
+        ret(true)
+    }
+    free ensures "overload of 'connect' for 'database'" {
+      post.2(%r.2 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.2) ^ok.2() ^raised.2()
+      ok.2(%result.2 : py.Value):
+        %old.2 : py.Value = base.old[py.Value, py.Value] ^fail.5() {
+          body.2():
+            %undef.4 : py.Value = py.undef("service_name")
+            %service_name.4 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "service_name", %undef.4)
+            %res.2 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%service_name.4)
+            ret(%res.2)
+        }
+        %str.2 : py.Value = py.strLit("database")
+        %eq.2 : py.Value = py.eq(%old.2, %str.2) ^fail.5()
+        %cond.2 : base.Bool = py.truthy(%eq.2) ^fail.5()
+        branch(%cond.2) ^then.6() ^else.6()
+      then.6():
+        jump ^join.6(true)
+      else.6():
+        jump ^join.6(false)
+      join.6(%b.19 : base.Bool):
+        branch(%b.19) ^then.7() ^else.7()
+      then.7():
+        %Database.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Database", "Database")
+        %Database.0 : py.Value = base.refGet[py.Value](%Database.cell.0)
+        %Database.1 : py.Value = py.requireDefined(%Database.0, "NameError", "name 'Database' is not defined") ^fail.5()
+        %sub.2 : base.Bool = py.typeIsSubclass(%result.2, %Database.1) ^fail.5()
+        branch(%sub.2) ^then.8() ^else.8()
+      then.8():
+        %inst.2 : base.Bool = py.isInstance(%result.2, %Database.1) ^fail.5()
+        jump ^join.8(%inst.2)
+      else.8():
+        jump ^join.8(false)
+      join.8(%b.21 : base.Bool):
+        jump ^join.7(%b.21)
+      else.7():
+        jump ^join.7(true)
+      join.7(%b.23 : base.Bool):
+        ret(%b.23)
+      raised.2(%exc.5 : py.Value):
+        ret(true)
+      fail.5(%e.5 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @servicelib.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

@@ -23,6 +23,8 @@ public import StrataPython.FeatureUsage
 public import StrataPython.Dyn.Scope
 public import StrataPython.Dyn.Translate
 public import StrataPython.Dyn.TranslateProps
+public import StrataPython.Dyn.PySpec.ClauseProps
+public import StrataPython.Dyn.PySpec.Load
 
 open StrataDDM (SourceRange)
 open StrataPython (ModuleName)

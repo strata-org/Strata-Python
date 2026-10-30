@@ -1,0 +1,301 @@
+module overload_messages {
+  func @|overload_messages.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("overload_messages")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("overload_messages", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@overload_messages.connect)
+      %connect.cell.0 : base.Ref(py.Value) = py.globalCell("overload_messages", "connect")
+      %set.1 : base.Unit = base.refSet[py.Value](%connect.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@overload_messages.connect)
+      %connect.cell.1 : base.Ref(py.Value) = py.globalCell("overload_messages", "connect")
+      %set.2 : base.Unit = base.refSet[py.Value](%connect.cell.1, %clo.1)
+      %clo.2 : py.Value = py.mkClosure[[]](@overload_messages.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("overload_messages", "__getattr__")
+      %set.3 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.2)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @overload_messages.connect(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'connect'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 2, false, "name", "region")
+        ret(%binds.0)
+    }
+    requires "'name' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("name")
+        %name.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%name.0)
+        ret(%defined.0)
+    }
+    requires "'connect' called with unknown string" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("name")
+        %name.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.1)
+        %oneOf.0 : base.Bool = py.strIsOneOf(%name.1, "a", "b")
+        ret(%oneOf.0)
+    }
+    requires "'region' is required for 'a'" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("name")
+        %name.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.2)
+        %str.0 : py.Value = py.strLit("a")
+        %eq.0 : py.Value = py.eq(%name.2, %str.0) ^fail.3()
+        %cond.0 : base.Bool = py.truthy(%eq.0) ^fail.3()
+        branch(%cond.0) ^then.0() ^else.0()
+      then.0():
+        jump ^join.0(true)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.3 : base.Bool):
+        branch(%b.3) ^then.1() ^else.1()
+      then.1():
+        %undef.3 : py.Value = py.undef("region")
+        %region.0 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "region", %undef.3)
+        %defined.1 : base.Bool = py.isDefined(%region.0)
+        jump ^join.1(%defined.1)
+      else.1():
+        jump ^join.1(true)
+      join.1(%b.5 : base.Bool):
+        ret(%b.5)
+      fail.3(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "declared type of parameter 'region' for 'a'" {
+      pre.4():
+        %undef.4 : py.Value = py.undef("name")
+        %name.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.4)
+        %str.1 : py.Value = py.strLit("a")
+        %eq.1 : py.Value = py.eq(%name.3, %str.1) ^fail.4()
+        %cond.1 : base.Bool = py.truthy(%eq.1) ^fail.4()
+        branch(%cond.1) ^then.2() ^else.2()
+      then.2():
+        jump ^join.2(true)
+      else.2():
+        jump ^join.2(false)
+      join.2(%b.8 : base.Bool):
+        branch(%b.8) ^then.3() ^else.3()
+      then.3():
+        %undef.5 : py.Value = py.undef("region")
+        %region.1 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "region", %undef.5)
+        %cls.0 : py.Value = py.stdClass("builtins", "str")
+        %sub.0 : base.Bool = py.typeIsSubclass(%region.1, %cls.0) ^fail.4()
+        branch(%sub.0) ^then.4() ^else.4()
+      then.4():
+        %inst.0 : base.Bool = py.isInstance(%region.1, %cls.0) ^fail.4()
+        jump ^join.4(%inst.0)
+      else.4():
+        jump ^join.4(false)
+      join.4(%b.10 : base.Bool):
+        jump ^join.3(%b.10)
+      else.3():
+        jump ^join.3(true)
+      join.3(%b.12 : base.Bool):
+        ret(%b.12)
+      fail.4(%e.1 : py.Value):
+        ret(false)
+    }
+    requires "precondition 0 for 'a'" {
+      pre.5():
+        %undef.6 : py.Value = py.undef("name")
+        %name.4 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.6)
+        %str.2 : py.Value = py.strLit("a")
+        %eq.2 : py.Value = py.eq(%name.4, %str.2) ^fail.5()
+        %cond.2 : base.Bool = py.truthy(%eq.2) ^fail.5()
+        branch(%cond.2) ^then.5() ^else.5()
+      then.5():
+        jump ^join.5(true)
+      else.5():
+        jump ^join.5(false)
+      join.5(%b.15 : base.Bool):
+        branch(%b.15) ^then.6() ^else.6()
+      then.6():
+        %undef.7 : py.Value = py.undef("region")
+        %region.2 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "region", %undef.7)
+        %len.0 : py.Value = py.len(%region.2) ^fail.5()
+        %int.0 : py.Value = py.intLit(3)
+        %gtE.0 : py.Value = py.gtE(%len.0, %int.0) ^fail.5()
+        %cond.3 : base.Bool = py.truthy(%gtE.0) ^fail.5()
+        jump ^join.6(%cond.3)
+      else.6():
+        jump ^join.6(true)
+      join.6(%b.17 : base.Bool):
+        ret(%b.17)
+      fail.5(%e.2 : py.Value):
+        ret(false)
+    }
+    requires "'region' is required for 'b'" {
+      pre.6():
+        %undef.8 : py.Value = py.undef("name")
+        %name.5 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.8)
+        %str.3 : py.Value = py.strLit("b")
+        %eq.3 : py.Value = py.eq(%name.5, %str.3) ^fail.6()
+        %cond.4 : base.Bool = py.truthy(%eq.3) ^fail.6()
+        branch(%cond.4) ^then.7() ^else.7()
+      then.7():
+        jump ^join.7(true)
+      else.7():
+        jump ^join.7(false)
+      join.7(%b.20 : base.Bool):
+        branch(%b.20) ^then.8() ^else.8()
+      then.8():
+        %undef.9 : py.Value = py.undef("region")
+        %region.3 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "region", %undef.9)
+        %defined.2 : base.Bool = py.isDefined(%region.3)
+        jump ^join.8(%defined.2)
+      else.8():
+        jump ^join.8(true)
+      join.8(%b.22 : base.Bool):
+        ret(%b.22)
+      fail.6(%e.3 : py.Value):
+        ret(false)
+    }
+    requires "declared type of parameter 'region' for 'b'" {
+      pre.7():
+        %undef.10 : py.Value = py.undef("name")
+        %name.6 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.10)
+        %str.4 : py.Value = py.strLit("b")
+        %eq.4 : py.Value = py.eq(%name.6, %str.4) ^fail.7()
+        %cond.5 : base.Bool = py.truthy(%eq.4) ^fail.7()
+        branch(%cond.5) ^then.9() ^else.9()
+      then.9():
+        jump ^join.9(true)
+      else.9():
+        jump ^join.9(false)
+      join.9(%b.25 : base.Bool):
+        branch(%b.25) ^then.10() ^else.10()
+      then.10():
+        %undef.11 : py.Value = py.undef("region")
+        %region.4 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "region", %undef.11)
+        %cls.1 : py.Value = py.stdClass("builtins", "str")
+        %sub.1 : base.Bool = py.typeIsSubclass(%region.4, %cls.1) ^fail.7()
+        branch(%sub.1) ^then.11() ^else.11()
+      then.11():
+        %inst.1 : base.Bool = py.isInstance(%region.4, %cls.1) ^fail.7()
+        jump ^join.11(%inst.1)
+      else.11():
+        jump ^join.11(false)
+      join.11(%b.27 : base.Bool):
+        jump ^join.10(%b.27)
+      else.10():
+        jump ^join.10(true)
+      join.10(%b.29 : base.Bool):
+        ret(%b.29)
+      fail.7(%e.4 : py.Value):
+        ret(false)
+    }
+    requires "precondition 0 for 'b'" {
+      pre.8():
+        %undef.12 : py.Value = py.undef("name")
+        %name.7 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.12)
+        %str.5 : py.Value = py.strLit("b")
+        %eq.5 : py.Value = py.eq(%name.7, %str.5) ^fail.8()
+        %cond.6 : base.Bool = py.truthy(%eq.5) ^fail.8()
+        branch(%cond.6) ^then.12() ^else.12()
+      then.12():
+        jump ^join.12(true)
+      else.12():
+        jump ^join.12(false)
+      join.12(%b.32 : base.Bool):
+        branch(%b.32) ^then.13() ^else.13()
+      then.13():
+        %undef.13 : py.Value = py.undef("region")
+        %region.5 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "region", %undef.13)
+        %len.1 : py.Value = py.len(%region.5) ^fail.8()
+        %int.1 : py.Value = py.intLit(5)
+        %gtE.1 : py.Value = py.gtE(%len.1, %int.1) ^fail.8()
+        %cond.7 : base.Bool = py.truthy(%gtE.1) ^fail.8()
+        jump ^join.13(%cond.7)
+      else.13():
+        jump ^join.13(true)
+      join.13(%b.34 : base.Bool):
+        ret(%b.34)
+      fail.8(%e.5 : py.Value):
+        ret(false)
+    }
+    free ensures "overload of 'connect' for 'a'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %old.0 : py.Value = base.old[py.Value, py.Value] ^fail.9() {
+          body.0():
+            %undef.14 : py.Value = py.undef("name")
+            %name.8 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.14)
+            %res.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%name.8)
+            ret(%res.0)
+        }
+        %str.6 : py.Value = py.strLit("a")
+        %eq.6 : py.Value = py.eq(%old.0, %str.6) ^fail.9()
+        %cond.8 : base.Bool = py.truthy(%eq.6) ^fail.9()
+        branch(%cond.8) ^then.14() ^else.14()
+      then.14():
+        jump ^join.14(true)
+      else.14():
+        jump ^join.14(false)
+      join.14(%b.37 : base.Bool):
+        branch(%b.37) ^then.15() ^else.15()
+      then.15():
+        %cls.2 : py.Value = py.stdClass("builtins", "int")
+        %inst.2 : base.Bool = py.isInstance(%result.0, %cls.2) ^fail.9()
+        jump ^join.15(%inst.2)
+      else.15():
+        jump ^join.15(true)
+      join.15(%b.39 : base.Bool):
+        ret(%b.39)
+      raised.0(%exc.1 : py.Value):
+        ret(true)
+      fail.9(%e.6 : py.Value):
+        ret(true)
+    }
+    free ensures "overload of 'connect' for 'b'" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %old.1 : py.Value = base.old[py.Value, py.Value] ^fail.10() {
+          body.1():
+            %undef.15 : py.Value = py.undef("name")
+            %name.9 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.15)
+            %res.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%name.9)
+            ret(%res.1)
+        }
+        %str.7 : py.Value = py.strLit("b")
+        %eq.7 : py.Value = py.eq(%old.1, %str.7) ^fail.10()
+        %cond.9 : base.Bool = py.truthy(%eq.7) ^fail.10()
+        branch(%cond.9) ^then.16() ^else.16()
+      then.16():
+        jump ^join.16(true)
+      else.16():
+        jump ^join.16(false)
+      join.16(%b.43 : base.Bool):
+        branch(%b.43) ^then.17() ^else.17()
+      then.17():
+        %cls.3 : py.Value = py.stdClass("builtins", "str")
+        %inst.3 : base.Bool = py.isInstance(%result.1, %cls.3) ^fail.10()
+        jump ^join.17(%inst.3)
+      else.17():
+        jump ^join.17(true)
+      join.17(%b.45 : base.Bool):
+        ret(%b.45)
+      raised.1(%exc.3 : py.Value):
+        ret(true)
+      fail.10(%e.7 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @overload_messages.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

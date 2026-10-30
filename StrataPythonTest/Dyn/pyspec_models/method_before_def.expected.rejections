@@ -1,0 +1,1 @@
+[unresolved-name] method_before_def: the class variable 'y' of 'C' reads 'm', which neither the class body nor the module has bound when the class body reads it

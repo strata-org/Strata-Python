@@ -1,0 +1,3 @@
+class C:
+    def __getattr__(self, name: str) -> int:
+        ...

@@ -1,0 +1,113 @@
+module ghost_any_modified {
+  ghost @|ghost_any_modified.<ghost>.limit| : py.Value = {
+    init.0():
+      %int.0 : py.Value = py.intLit(0)
+      ret(%int.0)
+  } invariant {
+    inv.0(%v.0 : py.Value):
+      %defined.0 : base.Bool = py.isDefined(%v.0)
+      ret(%defined.0)
+  }
+  func @|ghost_any_modified.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("ghost_any_modified")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("ghost_any_modified", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@ghost_any_modified.reset)
+      %reset.cell.0 : base.Ref(py.Value) = py.globalCell("ghost_any_modified", "reset")
+      %set.1 : base.Unit = base.refSet[py.Value](%reset.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@ghost_any_modified.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("ghost_any_modified", "f")
+      %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.1)
+      %clo.2 : py.Value = py.mkClosure[[]](@ghost_any_modified.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("ghost_any_modified", "__getattr__")
+      %set.3 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.2)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @ghost_any_modified.reset(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'reset'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 0, false)
+        ret(%binds.0)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    }, {
+      loc.3():
+        %l.3 : base.Loc = base.cellLoc[py.Value](ghost @|ghost_any_modified.<ghost>.limit|)
+        ret(%l.3)
+    }, {
+      loc.4():
+        %limit.0 : py.Value = base.refGet[py.Value](ghost @|ghost_any_modified.<ghost>.limit|)
+        %l.4 : base.Loc = py.reachLoc(%limit.0)
+        ret(%l.4)
+    })
+  extern func @ghost_any_modified.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'f'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "x")
+        ret(%binds.0)
+    }
+    requires "'x' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("x")
+        %x.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "x", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%x.0)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 'x'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("x")
+        %x.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "x", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "int")
+        %sub.0 : base.Bool = py.typeIsSubclass(%x.1, %cls.0) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%x.1, %cls.0) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "precondition 0" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("x")
+        %x.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "x", %undef.2)
+        %limit.0 : py.Value = base.refGet[py.Value](ghost @|ghost_any_modified.<ghost>.limit|)
+        %ltE.0 : py.Value = py.ltE(%x.2, %limit.0) ^fail.3()
+        %cond.0 : base.Bool = py.truthy(%ltE.0) ^fail.3()
+        ret(%cond.0)
+      fail.3(%e.1 : py.Value):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @ghost_any_modified.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

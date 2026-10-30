@@ -1,0 +1,3 @@
+[dropped-clause] native_cases.if_untranslatable: PySpec dropped the assert clause 'x >= 0' of 'f'
+[dropped-clause] native_cases.if_untranslatable: PySpec dropped the assert clause 'n >= 1' of 'f'
+[placeholder] native_cases.if_untranslatable: a clause of 'f' holds a part that PySpec couldn't read

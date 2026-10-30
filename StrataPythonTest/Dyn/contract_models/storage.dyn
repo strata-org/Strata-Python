@@ -82,8 +82,6 @@ module servicelib.Storage {
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Storage", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
       %none.0 : py.Value = py.noneLit
-      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Storage", "__doc__")
-      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|servicelib.Storage.Storage.<body>|)
       %str.1 : py.Value = py.strLit("Storage")

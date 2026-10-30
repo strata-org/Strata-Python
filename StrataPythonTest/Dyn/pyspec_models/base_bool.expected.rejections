@@ -1,0 +1,1 @@
+[class-base] base_bool: the base 'builtins.bool' of 'B' is not a standard-library class known to accept subclasses

@@ -1,0 +1,3 @@
+@admit(lambda result: result <= 1e400)
+def f() -> float:
+    ...

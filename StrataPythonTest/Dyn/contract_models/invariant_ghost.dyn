@@ -16,9 +16,14 @@ module m {
       ret(%int.0)
   } invariant {
     inv.0(%v.0 : py.Value):
+      %defined.0 : base.Bool = py.isDefined(%v.0)
+      branch(%defined.0) ^test.0() ^undefined.0()
+    test.0():
       %cls.0 : py.Value = py.stdClass("builtins", "int")
       %ok.0 : base.Bool = py.isInstance(%v.0, %cls.0) ^fail.0()
       ret(%ok.0)
+    undefined.0():
+      ret(false)
     fail.0(%e.0 : py.Value):
       unreachable
   }
@@ -28,8 +33,6 @@ module m {
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
       %none.0 : py.Value = py.noneLit
-      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m", "__doc__")
-      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|m.Counter.<body>|)
       %str.1 : py.Value = py.strLit("Counter")
@@ -49,7 +52,7 @@ module m {
       ret(%exc.1)
   }
   func @|m.Counter.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
-    #[py.fields = [{name = "count", type = "builtins.int"}]]
+    #[py.fields = [{name = "count", trustedType = "builtins.int"}]]
     #[py.invariants = [{fn = @|m.Counter.<invariant>.0|, ghosts = [ghost @|m.<ghost>.limit|]}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):

@@ -1,0 +1,166 @@
+module old_eq_list {
+  func @|old_eq_list.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("old_eq_list")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("old_eq_list", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@old_eq_list.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("old_eq_list", "f")
+      %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@old_eq_list.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("old_eq_list", "__getattr__")
+      %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @old_eq_list.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'f'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 2, false, "xs", "ys")
+        ret(%binds.0)
+    }
+    requires "'xs' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("xs")
+        %xs.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%xs.0)
+        ret(%defined.0)
+    }
+    requires "'ys' is required" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("ys")
+        %ys.0 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "ys", %undef.1)
+        %defined.1 : base.Bool = py.isDefined(%ys.0)
+        ret(%defined.1)
+    }
+    requires "declared type of parameter 'xs'" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("xs")
+        %xs.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.2)
+        %cls.0 : py.Value = py.stdClass("builtins", "list")
+        %sub.0 : base.Bool = py.typeIsSubclass(%xs.1, %cls.0) ^fail.3()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%xs.1, %cls.0) ^fail.3()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.3(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "declared type of parameter 'ys'" {
+      pre.4():
+        %undef.3 : py.Value = py.undef("ys")
+        %ys.1 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "ys", %undef.3)
+        %cls.1 : py.Value = py.stdClass("builtins", "list")
+        %sub.1 : base.Bool = py.typeIsSubclass(%ys.1, %cls.1) ^fail.4()
+        branch(%sub.1) ^then.1() ^else.1()
+      then.1():
+        %inst.1 : base.Bool = py.isInstance(%ys.1, %cls.1) ^fail.4()
+        jump ^join.1(%inst.1)
+      else.1():
+        jump ^join.1(false)
+      join.1(%b.4 : base.Bool):
+        ret(%b.4)
+      fail.4(%e.1 : py.Value):
+        ret(false)
+    }
+    requires "schema of parameter 'xs'" {
+      pre.5():
+        %undef.4 : py.Value = py.undef("xs")
+        %xs.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.4)
+        %all.0 : base.Bool = py.allIn(%xs.2) ^fail.5() {
+          body.0(%item.0.0 : py.Value):
+            %cls.2 : py.Value = py.stdClass("builtins", "int")
+            %sub.2 : base.Bool = py.typeIsSubclass(%item.0.0, %cls.2) ^propagate.0()
+            branch(%sub.2) ^then.2() ^else.2()
+          then.2():
+            %inst.2 : base.Bool = py.isInstance(%item.0.0, %cls.2) ^propagate.0()
+            jump ^join.2(%inst.2)
+          else.2():
+            jump ^join.2(false)
+          join.2(%b.6 : base.Bool):
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.6)
+            ret(%res.0)
+          propagate.0(%exc.0 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+            ret(%err.0)
+        }
+        ret(%all.0)
+      fail.5(%e.2 : py.Value):
+        ret(false)
+    }
+    requires "schema of parameter 'ys'" {
+      pre.6():
+        %undef.5 : py.Value = py.undef("ys")
+        %ys.2 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "ys", %undef.5)
+        %all.1 : base.Bool = py.allIn(%ys.2) ^fail.6() {
+          body.1(%item.0.1 : py.Value):
+            %cls.3 : py.Value = py.stdClass("builtins", "int")
+            %sub.3 : base.Bool = py.typeIsSubclass(%item.0.1, %cls.3) ^propagate.1()
+            branch(%sub.3) ^then.3() ^else.3()
+          then.3():
+            %inst.3 : base.Bool = py.isInstance(%item.0.1, %cls.3) ^propagate.1()
+            jump ^join.3(%inst.3)
+          else.3():
+            jump ^join.3(false)
+          join.3(%b.8 : base.Bool):
+            %res.1 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.8)
+            ret(%res.1)
+          propagate.1(%exc.1 : py.Value):
+            %err.1 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.1)
+            ret(%err.1)
+        }
+        ret(%all.1)
+      fail.6(%e.3 : py.Value):
+        ret(false)
+    }
+    free ensures "admitted postcondition of 'f'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %old.0 : py.Value = base.old[py.Value, py.Value] ^fail.7() {
+          old.0():
+            %undef.6 : py.Value = py.undef("xs")
+            %xs.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.6)
+            %undef.7 : py.Value = py.undef("ys")
+            %ys.3 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "ys", %undef.7)
+            %eq.0 : py.Value = py.eq(%xs.3, %ys.3) ^propagate.2()
+            %scalar.0 : base.Bool = py.isImmutableScalar(%eq.0)
+            branch(%scalar.0) ^scalar.0() ^mutable.0()
+          scalar.0():
+            %res.2 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%eq.0)
+            ret(%res.2)
+          mutable.0():
+            %res.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%eq.0)
+            ret(%res.3)
+          propagate.2(%exc.2 : py.Value):
+            %err.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+            ret(%err.2)
+        }
+        %cond.0 : base.Bool = py.truthy(%old.0) ^fail.7()
+        ret(%cond.0)
+      raised.0(%exc.3 : py.Value):
+        ret(true)
+      fail.7(%e.4 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @old_eq_list.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

@@ -1,0 +1,140 @@
+module frame_nested_item {
+  func @|frame_nested_item.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("frame_nested_item")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("frame_nested_item", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@frame_nested_item.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("frame_nested_item", "f")
+      %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@frame_nested_item.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("frame_nested_item", "__getattr__")
+      %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @frame_nested_item.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'f'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "d")
+        ret(%binds.0)
+    }
+    requires "'d' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("d")
+        %d.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "d", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%d.0)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 'd'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("d")
+        %d.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "d", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "dict")
+        %sub.0 : base.Bool = py.typeIsSubclass(%d.1, %cls.0) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%d.1, %cls.0) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "schema of parameter 'd'" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("d")
+        %d.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "d", %undef.2)
+        %all.1 : base.Bool = py.allItems(%d.2) ^fail.3() {
+          body.0(%key.0.0 : py.Value, %value.0.0 : py.Value):
+            %cls.1 : py.Value = py.stdClass("builtins", "str")
+            %sub.1 : base.Bool = py.typeIsSubclass(%key.0.0, %cls.1) ^propagate.0()
+            branch(%sub.1) ^then.1() ^else.1()
+          then.1():
+            %inst.1 : base.Bool = py.isInstance(%key.0.0, %cls.1) ^propagate.0()
+            jump ^join.1(%inst.1)
+          else.1():
+            jump ^join.1(false)
+          join.1(%b.4 : base.Bool):
+            branch(%b.4) ^then.2() ^else.2()
+          then.2():
+            %cls.2 : py.Value = py.stdClass("builtins", "dict")
+            %sub.2 : base.Bool = py.typeIsSubclass(%value.0.0, %cls.2) ^propagate.0()
+            branch(%sub.2) ^then.3() ^else.3()
+          then.3():
+            %inst.2 : base.Bool = py.isInstance(%value.0.0, %cls.2) ^propagate.0()
+            jump ^join.3(%inst.2)
+          else.3():
+            jump ^join.3(false)
+          join.3(%b.6 : base.Bool):
+            branch(%b.6) ^then.4() ^else.4()
+          then.4():
+            %all.0 : base.Bool = py.allItems(%value.0.0) ^propagate.0() {
+              body.1(%key.1.0 : py.Value, %value.1.0 : py.Value):
+                %cls.3 : py.Value = py.stdClass("builtins", "str")
+                %sub.3 : base.Bool = py.typeIsSubclass(%key.1.0, %cls.3) ^propagate.1()
+                branch(%sub.3) ^then.5() ^else.5()
+              then.5():
+                %inst.3 : base.Bool = py.isInstance(%key.1.0, %cls.3) ^propagate.1()
+                jump ^join.5(%inst.3)
+              else.5():
+                jump ^join.5(false)
+              join.5(%b.8 : base.Bool):
+                branch(%b.8) ^then.6() ^else.6()
+              then.6():
+                %cls.4 : py.Value = py.stdClass("builtins", "int")
+                %sub.4 : base.Bool = py.typeIsSubclass(%value.1.0, %cls.4) ^propagate.1()
+                branch(%sub.4) ^then.7() ^else.7()
+              then.7():
+                %inst.4 : base.Bool = py.isInstance(%value.1.0, %cls.4) ^propagate.1()
+                jump ^join.7(%inst.4)
+              else.7():
+                jump ^join.7(false)
+              join.7(%b.10 : base.Bool):
+                jump ^join.6(%b.10)
+              else.6():
+                jump ^join.6(false)
+              join.6(%b.12 : base.Bool):
+                %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.12)
+                ret(%res.0)
+              propagate.1(%exc.0 : py.Value):
+                %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+                ret(%err.0)
+            }
+            jump ^join.4(%all.0)
+          else.4():
+            jump ^join.4(false)
+          join.4(%b.14 : base.Bool):
+            jump ^join.2(%b.14)
+          else.2():
+            jump ^join.2(false)
+          join.2(%b.16 : base.Bool):
+            %res.1 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.16)
+            ret(%res.1)
+          propagate.0(%exc.1 : py.Value):
+            %err.1 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.1)
+            ret(%err.1)
+        }
+        ret(%all.1)
+      fail.3(%e.1 : py.Value):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @frame_nested_item.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

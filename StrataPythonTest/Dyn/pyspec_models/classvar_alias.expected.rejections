@@ -1,0 +1,1 @@
+[unresolved-name] classvar_alias: the class variable 'K' of 'A' reads 'MyD', which neither the class body nor the module has bound when the class body reads it

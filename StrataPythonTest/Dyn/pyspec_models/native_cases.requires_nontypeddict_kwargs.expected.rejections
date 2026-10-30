@@ -1,0 +1,1 @@
+[kwargs-type] native_cases.requires_nontypeddict_kwargs: the **kw of 'h' is not Unpack of a TypedDict, so the model can't say what each keyword is

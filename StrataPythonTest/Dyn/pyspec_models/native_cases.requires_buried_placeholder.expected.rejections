@@ -1,0 +1,1 @@
+[dropped-clause] native_cases.requires_buried_placeholder: PySpec dropped the requires clause 'len("foo") >= 1' of 'f'

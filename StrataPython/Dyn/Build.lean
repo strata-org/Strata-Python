@@ -92,7 +92,7 @@ def handler : PyM α (PyTarget [Py.Value]) := (·.handler) <$> get
 
 /-- The enclosing handler, as a raising operation's `err` successor, with a misuse recorded if
 it is an exit that does not leave the innermost open body. -/
-private def checkedHandler : PyM α Target.Raw := do Build.checkedTarget (α := α) (← handler)
+def checkedHandler : PyM α Target.Raw := do Build.checkedTarget (α := α) (← handler)
 
 /-- The enclosing handler with the exception `e` passed: where raising `e` transfers. -/
 def raiseTo (e : ValId) : PyM α (PyTarget []) := do

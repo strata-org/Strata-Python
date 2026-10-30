@@ -1,0 +1,114 @@
+module native_cases.requires_literal_dict_quant {
+  func @|native_cases.requires_literal_dict_quant.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("native_cases.requires_literal_dict_quant")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.requires_literal_dict_quant", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@native_cases.requires_literal_dict_quant.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.requires_literal_dict_quant", "f")
+      %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@native_cases.requires_literal_dict_quant.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.requires_literal_dict_quant", "__getattr__")
+      %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @native_cases.requires_literal_dict_quant.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'f'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "D")
+        ret(%binds.0)
+    }
+    requires "'D' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("D")
+        %D.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "D", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%D.0)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 'D'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("D")
+        %D.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "D", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "dict")
+        %sub.0 : base.Bool = py.typeIsSubclass(%D.1, %cls.0) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%D.1, %cls.0) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "schema of parameter 'D'" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("D")
+        %D.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "D", %undef.2)
+        %all.0 : base.Bool = py.allItems(%D.2) ^fail.3() {
+          body.0(%key.0.0 : py.Value, %value.0.0 : py.Value):
+            %oneOf.0 : base.Bool = py.strIsOneOf(%key.0.0, "JPEGQuality")
+            branch(%oneOf.0) ^then.1() ^else.1()
+          then.1():
+            %cls.1 : py.Value = py.stdClass("builtins", "str")
+            %sub.1 : base.Bool = py.typeIsSubclass(%value.0.0, %cls.1) ^propagate.0()
+            branch(%sub.1) ^then.2() ^else.2()
+          then.2():
+            %inst.1 : base.Bool = py.isInstance(%value.0.0, %cls.1) ^propagate.0()
+            jump ^join.2(%inst.1)
+          else.2():
+            jump ^join.2(false)
+          join.2(%b.4 : base.Bool):
+            jump ^join.1(%b.4)
+          else.1():
+            jump ^join.1(false)
+          join.1(%b.6 : base.Bool):
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.6)
+            ret(%res.0)
+          propagate.0(%exc.0 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+            ret(%err.0)
+        }
+        ret(%all.0)
+      fail.3(%e.1 : py.Value):
+        ret(false)
+    }
+    requires "precondition 0" {
+      pre.4():
+        %undef.3 : py.Value = py.undef("D")
+        %D.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "D", %undef.3)
+        %all.1 : base.Bool = py.allItems(%D.3) ^fail.4() {
+          body.1(%k.0 : py.Value, %v.0 : py.Value):
+            %len.0 : py.Value = py.len(%v.0) ^propagate.1()
+            %int.0 : py.Value = py.intLit(1)
+            %gtE.0 : py.Value = py.gtE(%len.0, %int.0) ^propagate.1()
+            %cond.0 : base.Bool = py.truthy(%gtE.0) ^propagate.1()
+            %res.1 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%cond.0)
+            ret(%res.1)
+          propagate.1(%exc.1 : py.Value):
+            %err.1 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.1)
+            ret(%err.1)
+        }
+        ret(%all.1)
+      fail.4(%e.2 : py.Value):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @native_cases.requires_literal_dict_quant.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

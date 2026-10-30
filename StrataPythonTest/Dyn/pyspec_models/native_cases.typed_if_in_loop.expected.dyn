@@ -1,0 +1,177 @@
+module native_cases.typed_if_in_loop {
+  func @|native_cases.typed_if_in_loop.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("native_cases.typed_if_in_loop")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.typed_if_in_loop", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@native_cases.typed_if_in_loop.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.typed_if_in_loop", "f")
+      %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@native_cases.typed_if_in_loop.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.typed_if_in_loop", "__getattr__")
+      %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @native_cases.typed_if_in_loop.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'f'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "entries")
+        ret(%binds.0)
+    }
+    requires "'entries' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("entries")
+        %entries.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "entries", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%entries.0)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 'entries'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("entries")
+        %entries.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "entries", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "list")
+        %sub.0 : base.Bool = py.typeIsSubclass(%entries.1, %cls.0) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%entries.1, %cls.0) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "schema of parameter 'entries'" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("entries")
+        %entries.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "entries", %undef.2)
+        %all.0 : base.Bool = py.allIn(%entries.2) ^fail.3() {
+          body.0(%item.0.0 : py.Value):
+            %cls.1 : py.Value = py.stdClass("builtins", "dict")
+            %sub.1 : base.Bool = py.typeIsSubclass(%item.0.0, %cls.1) ^propagate.0()
+            branch(%sub.1) ^then.1() ^else.1()
+          then.1():
+            %inst.1 : base.Bool = py.isInstance(%item.0.0, %cls.1) ^propagate.0()
+            jump ^join.1(%inst.1)
+          else.1():
+            jump ^join.1(false)
+          join.1(%b.4 : base.Bool):
+            branch(%b.4) ^then.2() ^else.2()
+          then.2():
+            %str.0 : py.Value = py.strLit("Kind")
+            %in.0 : py.Value = py.in(%str.0, %item.0.0) ^propagate.0()
+            %cond.0 : base.Bool = py.truthy(%in.0) ^propagate.0()
+            branch(%cond.0) ^then.3() ^else.3()
+          then.3():
+            %str.1 : py.Value = py.strLit("Kind")
+            %item.0 : py.Value = py.getItem(%item.0.0, %str.1) ^propagate.0()
+            %cls.2 : py.Value = py.stdClass("builtins", "str")
+            %sub.2 : base.Bool = py.typeIsSubclass(%item.0, %cls.2) ^propagate.0()
+            branch(%sub.2) ^then.4() ^else.4()
+          then.4():
+            %inst.2 : base.Bool = py.isInstance(%item.0, %cls.2) ^propagate.0()
+            jump ^join.4(%inst.2)
+          else.4():
+            jump ^join.4(false)
+          join.4(%b.6 : base.Bool):
+            jump ^join.3(%b.6)
+          else.3():
+            jump ^join.3(false)
+          join.3(%b.8 : base.Bool):
+            branch(%b.8) ^then.5() ^else.5()
+          then.5():
+            %str.2 : py.Value = py.strLit("Size")
+            %in.1 : py.Value = py.in(%str.2, %item.0.0) ^propagate.0()
+            %cond.1 : base.Bool = py.truthy(%in.1) ^propagate.0()
+            branch(%cond.1) ^then.6() ^else.6()
+          then.6():
+            %str.3 : py.Value = py.strLit("Size")
+            %item.1 : py.Value = py.getItem(%item.0.0, %str.3) ^propagate.0()
+            %cls.3 : py.Value = py.stdClass("builtins", "int")
+            %sub.3 : base.Bool = py.typeIsSubclass(%item.1, %cls.3) ^propagate.0()
+            branch(%sub.3) ^then.7() ^else.7()
+          then.7():
+            %inst.3 : base.Bool = py.isInstance(%item.1, %cls.3) ^propagate.0()
+            jump ^join.7(%inst.3)
+          else.7():
+            jump ^join.7(false)
+          join.7(%b.10 : base.Bool):
+            jump ^join.6(%b.10)
+          else.6():
+            jump ^join.6(false)
+          join.6(%b.12 : base.Bool):
+            jump ^join.5(%b.12)
+          else.5():
+            jump ^join.5(false)
+          join.5(%b.14 : base.Bool):
+            jump ^join.2(%b.14)
+          else.2():
+            jump ^join.2(false)
+          join.2(%b.16 : base.Bool):
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.16)
+            ret(%res.0)
+          propagate.0(%exc.0 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+            ret(%err.0)
+        }
+        ret(%all.0)
+      fail.3(%e.1 : py.Value):
+        ret(false)
+    }
+    requires "a big entry is at least 10" {
+      pre.4():
+        %undef.3 : py.Value = py.undef("entries")
+        %entries.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "entries", %undef.3)
+        %all.1 : base.Bool = py.allIn(%entries.3) ^fail.4() {
+          body.1(%e.2 : py.Value):
+            %str.4 : py.Value = py.strLit("Kind")
+            %item.2 : py.Value = py.getItem(%e.2, %str.4) ^propagate.1()
+            %str.5 : py.Value = py.strLit("big")
+            %eq.0 : py.Value = py.eq(%item.2, %str.5) ^propagate.1()
+            %cond.2 : base.Bool = py.truthy(%eq.0) ^propagate.1()
+            branch(%cond.2) ^then.8() ^else.8()
+          then.8():
+            jump ^join.8(true)
+          else.8():
+            jump ^join.8(false)
+          join.8(%b.19 : base.Bool):
+            branch(%b.19) ^then.9() ^else.9()
+          then.9():
+            %str.6 : py.Value = py.strLit("Size")
+            %item.3 : py.Value = py.getItem(%e.2, %str.6) ^propagate.1()
+            %int.0 : py.Value = py.intLit(10)
+            %gtE.0 : py.Value = py.gtE(%item.3, %int.0) ^propagate.1()
+            %cond.3 : base.Bool = py.truthy(%gtE.0) ^propagate.1()
+            jump ^join.9(%cond.3)
+          else.9():
+            jump ^join.9(true)
+          join.9(%b.21 : base.Bool):
+            %res.1 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.21)
+            ret(%res.1)
+          propagate.1(%exc.1 : py.Value):
+            %err.1 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.1)
+            ret(%err.1)
+        }
+        ret(%all.1)
+      fail.4(%e.3 : py.Value):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @native_cases.typed_if_in_loop.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

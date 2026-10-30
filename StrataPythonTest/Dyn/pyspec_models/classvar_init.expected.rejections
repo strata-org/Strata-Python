@@ -1,0 +1,2 @@
+[special-binding] classvar_init: the class body of 'C' binds '__init__' other than with a def
+[special-binding] classvar_init: the class body of 'C' binds '__getattr__' other than with a def

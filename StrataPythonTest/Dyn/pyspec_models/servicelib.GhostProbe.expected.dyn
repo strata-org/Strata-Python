@@ -1,0 +1,185 @@
+module servicelib.GhostProbe {
+  ghost @|servicelib.GhostProbe.<ghost>.resources| : py.Value invariant {
+    inv.0(%v.0 : py.Value):
+      %defined.0 : base.Bool = py.isDefined(%v.0)
+      branch(%defined.0) ^then.0() ^else.0()
+    then.0():
+      %cls.0 : py.Value = py.stdClass("builtins", "dict")
+      %inst.0 : base.Bool = py.isInstance(%v.0, %cls.0) ^fail.0()
+      jump ^join.0(%inst.0)
+    else.0():
+      jump ^join.0(false)
+    join.0(%b.1 : base.Bool):
+      ret(%b.1)
+    fail.0(%e.0 : py.Value):
+      unreachable
+  }
+  func @|servicelib.GhostProbe.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("servicelib.GhostProbe")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.GhostProbe", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@servicelib.GhostProbe.acquire)
+      %acquire.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.GhostProbe", "acquire")
+      %set.1 : base.Unit = base.refSet[py.Value](%acquire.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@servicelib.GhostProbe.exists)
+      %exists.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.GhostProbe", "exists")
+      %set.2 : base.Unit = base.refSet[py.Value](%exists.cell.0, %clo.1)
+      %clo.2 : py.Value = py.mkClosure[[]](@servicelib.GhostProbe.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.GhostProbe", "__getattr__")
+      %set.3 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.2)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @servicelib.GhostProbe.acquire(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'acquire'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "name")
+        ret(%binds.0)
+    }
+    requires "'name' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("name")
+        %name.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%name.0)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 'name'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("name")
+        %name.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "str")
+        %sub.0 : base.Bool = py.typeIsSubclass(%name.1, %cls.0) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%name.1, %cls.0) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    free ensures "admitted postcondition of 'acquire'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %old.0 : py.Value = base.old[py.Value, py.Value] ^fail.3() {
+          body.0():
+            %undef.2 : py.Value = py.undef("name")
+            %name.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.2)
+            %res.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%name.2)
+            ret(%res.0)
+        }
+        %resources.0 : py.Value = base.refGet[py.Value](ghost @|servicelib.GhostProbe.<ghost>.resources|)
+        %in_.0 : py.Value = py.in(%old.0, %resources.0) ^fail.3()
+        %cond.0 : base.Bool = py.truthy(%in_.0) ^fail.3()
+        ret(%cond.0)
+      raised.0(%exc.1 : py.Value):
+        ret(true)
+      fail.3(%e.1 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    }, {
+      loc.3():
+        %l.3 : base.Loc = base.cellLoc[py.Value](ghost @|servicelib.GhostProbe.<ghost>.resources|)
+        ret(%l.3)
+    }, {
+      loc.4():
+        %resources.1 : py.Value = base.refGet[py.Value](ghost @|servicelib.GhostProbe.<ghost>.resources|)
+        %l.4 : base.Loc = py.reachLoc(%resources.1)
+        ret(%l.4)
+    })
+  extern func @servicelib.GhostProbe.exists(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'exists'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "name")
+        ret(%binds.0)
+    }
+    requires "'name' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("name")
+        %name.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%name.0)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 'name'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("name")
+        %name.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "str")
+        %sub.0 : base.Bool = py.typeIsSubclass(%name.1, %cls.0) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%name.1, %cls.0) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    free ensures "return type of 'exists'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %cls.1 : py.Value = py.stdClass("builtins", "bool")
+        %inst.1 : base.Bool = py.isInstance(%result.0, %cls.1) ^fail.3()
+        ret(%inst.1)
+      raised.0(%exc.0 : py.Value):
+        ret(true)
+      fail.3(%e.1 : py.Value):
+        ret(true)
+    }
+    free ensures "admitted postcondition of 'exists'" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %old.0 : py.Value = base.old[py.Value, py.Value] ^fail.4() {
+          body.0():
+            %undef.2 : py.Value = py.undef("name")
+            %name.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.2)
+            %res.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%name.2)
+            ret(%res.0)
+        }
+        %resources.0 : py.Value = base.refGet[py.Value](ghost @|servicelib.GhostProbe.<ghost>.resources|)
+        %in_.0 : py.Value = py.in(%old.0, %resources.0) ^fail.4()
+        %eq.0 : py.Value = py.eq(%result.1, %in_.0) ^fail.4()
+        %cond.0 : base.Bool = py.truthy(%eq.0) ^fail.4()
+        ret(%cond.0)
+      raised.1(%exc.2 : py.Value):
+        ret(true)
+      fail.4(%e.2 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @servicelib.GhostProbe.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

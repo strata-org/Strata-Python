@@ -1,0 +1,2 @@
+[old-uncovered] old_binder_attr: an OLD of 'f' reads a value whose contents an operator may read, which isn't covered state, so the clause would assume false
+[old-uncovered] old_binder_attr: an OLD of 'f' reads an attribute that is not a declared field of an argument or a target, which isn't covered state, so the clause would assume false

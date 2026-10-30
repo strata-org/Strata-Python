@@ -1,0 +1,2 @@
+[name-clash] clash.Storage: the modules 'clash' and 'clash.Storage' both give the name 'clash.Storage.put_item'
+[name-clash] clash.Storage: the modules 'clash' and 'clash.Storage' both give the name 'clash.Storage.__getattr__'

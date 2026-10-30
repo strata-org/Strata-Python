@@ -1,0 +1,1 @@
+[old-uncovered] native_cases.old_result_shadowed: an OLD of 'f' reads a value whose contents an operator may read, which isn't covered state, so the clause would assume false

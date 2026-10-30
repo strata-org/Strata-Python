@@ -1,0 +1,1 @@
+[ghost-shadowed-by-param] native_cases.module_ghost_shadowed: a parameter of 'takes_counter' has the name of the ghost 'counter', which its contract names

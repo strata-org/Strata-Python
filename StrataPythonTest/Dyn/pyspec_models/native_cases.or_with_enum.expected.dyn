@@ -1,0 +1,190 @@
+module native_cases.or_with_enum {
+  func @|native_cases.or_with_enum.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("native_cases.or_with_enum")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.or_with_enum", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@native_cases.or_with_enum.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.or_with_enum", "f")
+      %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@native_cases.or_with_enum.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.or_with_enum", "__getattr__")
+      %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @native_cases.or_with_enum.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'f'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 3, false, "x", "y", "n")
+        ret(%binds.0)
+    }
+    requires "'x' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("x")
+        %x.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "x", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%x.0)
+        ret(%defined.0)
+    }
+    requires "'y' is required" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("y")
+        %y.0 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "y", %undef.1)
+        %defined.1 : base.Bool = py.isDefined(%y.0)
+        ret(%defined.1)
+    }
+    requires "'n' is required" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("n")
+        %n.0 : py.Value = py.argOf(%args.0, %kwargs.0, 2, "n", %undef.2)
+        %defined.2 : base.Bool = py.isDefined(%n.0)
+        ret(%defined.2)
+    }
+    requires "declared type of parameter 'x'" {
+      pre.4():
+        %undef.3 : py.Value = py.undef("x")
+        %x.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "x", %undef.3)
+        %cls.0 : py.Value = py.stdClass("builtins", "str")
+        %sub.0 : base.Bool = py.typeIsSubclass(%x.1, %cls.0) ^fail.4()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%x.1, %cls.0) ^fail.4()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.4(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "declared type of parameter 'y'" {
+      pre.5():
+        %undef.4 : py.Value = py.undef("y")
+        %y.1 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "y", %undef.4)
+        %cls.1 : py.Value = py.stdClass("builtins", "str")
+        %sub.1 : base.Bool = py.typeIsSubclass(%y.1, %cls.1) ^fail.5()
+        branch(%sub.1) ^then.1() ^else.1()
+      then.1():
+        %inst.1 : base.Bool = py.isInstance(%y.1, %cls.1) ^fail.5()
+        jump ^join.1(%inst.1)
+      else.1():
+        jump ^join.1(false)
+      join.1(%b.4 : base.Bool):
+        ret(%b.4)
+      fail.5(%e.1 : py.Value):
+        ret(false)
+    }
+    requires "declared type of parameter 'n'" {
+      pre.6():
+        %undef.5 : py.Value = py.undef("n")
+        %n.1 : py.Value = py.argOf(%args.0, %kwargs.0, 2, "n", %undef.5)
+        %cls.2 : py.Value = py.stdClass("builtins", "int")
+        %sub.2 : base.Bool = py.typeIsSubclass(%n.1, %cls.2) ^fail.6()
+        branch(%sub.2) ^then.2() ^else.2()
+      then.2():
+        %inst.2 : base.Bool = py.isInstance(%n.1, %cls.2) ^fail.6()
+        jump ^join.2(%inst.2)
+      else.2():
+        jump ^join.2(false)
+      join.2(%b.6 : base.Bool):
+        ret(%b.6)
+      fail.6(%e.2 : py.Value):
+        ret(false)
+    }
+    requires "merged" {
+      pre.7():
+        %undef.6 : py.Value = py.undef("x")
+        %x.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "x", %undef.6)
+        %oneOf.0 : base.Bool = py.strIsOneOf(%x.2, "a", "b")
+        ret(%oneOf.0)
+    }
+    requires "None or ok" {
+      pre.8():
+        %undef.7 : py.Value = py.undef("x")
+        %x.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "x", %undef.7)
+        %none.0 : py.Value = py.noneLit
+        %is.0 : py.Value = py.is(%x.3, %none.0)
+        %cond.0 : base.Bool = py.truthy(%is.0) ^fail.8()
+        branch(%cond.0) ^then.3() ^else.3()
+      then.3():
+        jump ^join.3(true)
+      else.3():
+        %undef.8 : py.Value = py.undef("x")
+        %x.4 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "x", %undef.8)
+        %oneOf.1 : base.Bool = py.strIsOneOf(%x.4, "ok")
+        jump ^join.3(%oneOf.1)
+      join.3(%b.8 : base.Bool):
+        ret(%b.8)
+      fail.8(%e.3 : py.Value):
+        ret(false)
+    }
+    requires "not A or B" {
+      pre.9():
+        %undef.9 : py.Value = py.undef("x")
+        %x.5 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "x", %undef.9)
+        %str.0 : py.Value = py.strLit("A")
+        %eq.0 : py.Value = py.eq(%x.5, %str.0) ^fail.9()
+        %notEq.0 : py.Value = py.notEq(%x.5, %str.0) ^fail.9()
+        %cond.1 : base.Bool = py.truthy(%eq.0) ^fail.9()
+        %cond.2 : base.Bool = py.truthy(%notEq.0) ^fail.9()
+        branch(%cond.1) ^then.4() ^else.4()
+      then.4():
+        jump ^join.4(false)
+      else.4():
+        jump ^join.4(%cond.2)
+      join.4(%b.10 : base.Bool):
+        branch(%b.10) ^then.5() ^else.5()
+      then.5():
+        jump ^join.5(true)
+      else.5():
+        %undef.10 : py.Value = py.undef("x")
+        %x.6 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "x", %undef.10)
+        %oneOf.2 : base.Bool = py.strIsOneOf(%x.6, "B")
+        jump ^join.5(%oneOf.2)
+      join.5(%b.12 : base.Bool):
+        ret(%b.12)
+      fail.9(%e.4 : py.Value):
+        ret(false)
+    }
+    requires "two subjects" {
+      pre.10():
+        %undef.11 : py.Value = py.undef("x")
+        %x.7 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "x", %undef.11)
+        %oneOf.3 : base.Bool = py.strIsOneOf(%x.7, "A")
+        branch(%oneOf.3) ^then.6() ^else.6()
+      then.6():
+        jump ^join.6(true)
+      else.6():
+        %undef.12 : py.Value = py.undef("y")
+        %y.2 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "y", %undef.12)
+        %oneOf.4 : base.Bool = py.strIsOneOf(%y.2, "B")
+        jump ^join.6(%oneOf.4)
+      join.6(%b.14 : base.Bool):
+        branch(%b.14) ^then.7() ^else.7()
+      then.7():
+        jump ^join.7(true)
+      else.7():
+        %undef.13 : py.Value = py.undef("x")
+        %x.8 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "x", %undef.13)
+        %oneOf.5 : base.Bool = py.strIsOneOf(%x.8, "C")
+        jump ^join.7(%oneOf.5)
+      join.7(%b.16 : base.Bool):
+        ret(%b.16)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @native_cases.or_with_enum.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

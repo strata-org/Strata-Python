@@ -1,0 +1,1 @@
+[init-subclass] init_subclass_var: 'B' declares __init_subclass__, which runs library code when a subclass is defined

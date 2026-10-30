@@ -18,8 +18,6 @@ module servicelib.Admitted {
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Admitted", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
       %none.0 : py.Value = py.noneLit
-      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Admitted", "__doc__")
-      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %clo.0 : py.Value = py.mkClosure[[]](@servicelib.Admitted.admitted_value)
       %admitted_value.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Admitted", "admitted_value")
       %set.2 : base.Unit = base.refSet[py.Value](%admitted_value.cell.0, %clo.0)

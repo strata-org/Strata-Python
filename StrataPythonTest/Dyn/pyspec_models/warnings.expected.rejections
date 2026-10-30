@@ -1,0 +1,6 @@
+[dropped-clause] warnings: PySpec dropped the assert clause 'x >= 1' of 'skipped_assign'
+[kwargs-type] warnings: the **kw of 'skipped_assign' is not Unpack of a TypedDict, so the model can't say what each keyword is
+[unknown-name] warnings: a clause of 'skipped_assign' names 'x', which is neither a parameter, a binder nor a ghost
+[kwargs-type] warnings: the **kw of 'skipped_expr' is not Unpack of a TypedDict, so the model can't say what each keyword is
+[dropped-clause] warnings: PySpec dropped the assert clause 'kw["a"] == kw["a"].bit_length()' of 'eq_bad_rhs'
+[kwargs-type] warnings: the **kw of 'eq_bad_rhs' is not Unpack of a TypedDict, so the model can't say what each keyword is

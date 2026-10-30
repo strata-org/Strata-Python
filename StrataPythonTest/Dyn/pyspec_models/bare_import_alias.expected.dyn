@@ -1,0 +1,76 @@
+module bare_import_alias {
+  func @|bare_import_alias.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("bare_import_alias")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("bare_import_alias", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@bare_import_alias.use_alias)
+      %use_alias.cell.0 : base.Ref(py.Value) = py.globalCell("bare_import_alias", "use_alias")
+      %set.1 : base.Unit = base.refSet[py.Value](%use_alias.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@bare_import_alias.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("bare_import_alias", "__getattr__")
+      %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @bare_import_alias.use_alias(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'use_alias'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "s")
+        ret(%binds.0)
+    }
+    requires "'s' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("s")
+        %s.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "s", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%s.3)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 's'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("s")
+        %s.6 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "s", %undef.1)
+        %SiblingClass.cell.0 : base.Ref(py.Value) = py.globalCell("SiblingModule", "SiblingClass")
+        %SiblingClass.0 : py.Value = base.refGet[py.Value](%SiblingClass.cell.0)
+        %SiblingClass.1 : py.Value = py.requireDefined(%SiblingClass.0, "NameError", "name 'SiblingClass' is not defined") ^fail.2()
+        %sub.0 : base.Bool = py.typeIsSubclass(%s.6, %SiblingClass.1) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%s.6, %SiblingClass.1) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.1 : py.Value):
+        ret(false)
+    }
+    free ensures "return type of 'use_alias'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %cls.0 : py.Value = py.stdClass("builtins", "str")
+        %inst.1 : base.Bool = py.isInstance(%result.0, %cls.0) ^fail.3()
+        ret(%inst.1)
+      raised.0(%exc.0 : py.Value):
+        ret(true)
+      fail.3(%e.2 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @bare_import_alias.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

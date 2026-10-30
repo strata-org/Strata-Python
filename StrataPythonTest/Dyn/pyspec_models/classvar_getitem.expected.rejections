@@ -1,0 +1,1 @@
+[attr-or-item] classvar_getitem: 'f' reads '.k' of 'C', which declares __getitem__

@@ -22,8 +22,8 @@
 -- have no other parameter and no `@requires`, so they add no clause of their own. Each stub
 -- gives one free ensures clause. Its return type is a model class, so the clause tests the
 -- result with `py.typeIsSubclass` and then `py.isInstance`, as a trusted assumption allows
--- (§12.3, §12.9). The stubs have no `@modifies`, so the frame holds only what the arguments
--- reach (§12.5).
+-- (§12.3, §12.9). The stubs have no `@modifies`, so the frame is the model frame: the instance
+-- state and what the arguments reach (§12.5).
 -- Compared with ToLaurel and V1: they dispatch at the call, on position 0 or the keyword
 -- `service_name`, and give the result the stub's class. They check neither the other arguments
 -- nor the binding, so the model's requires clauses are stronger. The model says that the call
@@ -35,8 +35,6 @@ module servicelib {
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
       %none.0 : py.Value = py.noneLit
-      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib", "__doc__")
-      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %Messaging.0 : py.Value = py.importFrom("servicelib.Messaging", "Messaging") ^propagate.0()
       %Messaging.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib", "Messaging")
       %set.2 : base.Unit = base.refSet[py.Value](%Messaging.cell.0, %Messaging.0)
@@ -180,12 +178,16 @@ module servicelib {
     }
     writes({
       loc.0():
-        %l.0 : base.Loc = py.reachLoc(%args.0)
+        %l.0 : base.Loc = py.instanceState
         ret(%l.0)
     }, {
       loc.1():
-        %l.1 : base.Loc = py.reachLoc(%kwargs.0)
+        %l.1 : base.Loc = py.reachLoc(%args.0)
         ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
     })
   extern func @servicelib.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
     writes()

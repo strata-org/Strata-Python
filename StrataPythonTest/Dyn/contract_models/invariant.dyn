@@ -26,8 +26,6 @@ module class_invariant_with_method_contract {
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("class_invariant_with_method_contract", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
       %none.0 : py.Value = py.noneLit
-      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("class_invariant_with_method_contract", "__doc__")
-      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|class_invariant_with_method_contract.C.<body>|)
       %str.1 : py.Value = py.strLit("C")
@@ -47,7 +45,7 @@ module class_invariant_with_method_contract {
       ret(%exc.1)
   }
   func @|class_invariant_with_method_contract.C.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
-    #[py.fields = [{name = "x", type = "builtins.int"}]]
+    #[py.fields = [{name = "x", trustedType = "builtins.int"}]]
     #[py.invariants = [{fn = @|class_invariant_with_method_contract.C.<invariant>.0|}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):

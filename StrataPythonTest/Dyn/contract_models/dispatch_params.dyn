@@ -24,8 +24,6 @@ module m {
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
       %none.0 : py.Value = py.noneLit
-      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m", "__doc__")
-      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %Storage.0 : py.Value = py.importFrom("servicelib.Storage", "Storage") ^propagate.0()
       %Storage.cell.0 : base.Ref(py.Value) = py.globalCell("m", "Storage")
       %set.2 : base.Unit = base.refSet[py.Value](%Storage.cell.0, %Storage.0)

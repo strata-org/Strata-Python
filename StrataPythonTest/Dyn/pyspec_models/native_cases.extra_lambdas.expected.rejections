@@ -1,0 +1,2 @@
+[dropped-clause] native_cases.extra_lambdas: PySpec dropped the requires clause 'x < 10' of 'f'
+[dropped-clause] native_cases.extra_lambdas: PySpec dropped the modifies clause 'x' of 'f'

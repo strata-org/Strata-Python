@@ -1,0 +1,1 @@
+[unresolved-name] classvar_function_after: the class variable 'K' of 'A' reads 'f', which neither the class body nor the module has bound when the class body reads it

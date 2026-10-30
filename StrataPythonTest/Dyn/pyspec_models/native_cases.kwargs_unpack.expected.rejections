@@ -1,0 +1,1 @@
+[kwargs-type] native_cases.kwargs_unpack: the **kw of 'g' is not Unpack of a TypedDict, so the model can't say what each keyword is

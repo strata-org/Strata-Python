@@ -1,0 +1,6 @@
+from typing import Literal, overload
+
+@overload
+def get(kind: Literal["a"]) -> int: ...
+@overload
+def get(kind: Literal["a"]) -> str: ...

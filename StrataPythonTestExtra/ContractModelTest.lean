@@ -231,7 +231,7 @@ parameter, and its entry lists the ghost. -/
 /-! ## `ghost_untestable.dyn`: written for this test
 
 Ghosts whose declared types have no runtime test, `BinaryIO` and `Union[int, BinaryIO]`, so
-neither has an invariant. -/
+each invariant only says that the ghost is defined. -/
 
 #guard_msgs in
 #eval check "ghost_untestable.dyn"
@@ -239,7 +239,7 @@ neither has an invariant. -/
 -- Two ghosts have one name (G1).
 /-- info: ghost @m.<ghost>.stream is declared twice -/
 #guard_msgs in
-#eval mutate "ghost_untestable.dyn" "ghost @|m.<ghost>.stream| : py.Value\n"
+#eval mutate "ghost_untestable.dyn" "ghost @|m.<ghost>.stream| : py.Value invariant {\n"
   "<ghost>.either|" "<ghost>.stream|"
 
 /-! ## `dispatch_params.dyn`: written for this test

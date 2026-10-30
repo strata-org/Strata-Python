@@ -1,0 +1,107 @@
+module service.mixed_imports {
+  func @|service.mixed_imports.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("service.mixed_imports")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("service.mixed_imports", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %ServiceClass.0 : py.Value = py.importFrom("service.module", "ServiceClass") ^propagate.0()
+      %ServiceClass.cell.0 : base.Ref(py.Value) = py.globalCell("service.mixed_imports", "ServiceClass")
+      %set.1 : base.Unit = base.refSet[py.Value](%ServiceClass.cell.0, %ServiceClass.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@service.mixed_imports.mixed)
+      %mixed.cell.0 : base.Ref(py.Value) = py.globalCell("service.mixed_imports", "mixed")
+      %set.2 : base.Unit = base.refSet[py.Value](%mixed.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@service.mixed_imports.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("service.mixed_imports", "__getattr__")
+      %set.3 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  extern func @service.mixed_imports.mixed(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'mixed'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "items")
+        ret(%binds.0)
+    }
+    requires "'items' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("items")
+        %items.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "items", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%items.0)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 'items'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("items")
+        %items.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "items", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "list")
+        %sub.0 : base.Bool = py.typeIsSubclass(%items.1, %cls.0) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%items.1, %cls.0) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "schema of parameter 'items'" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("items")
+        %items.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "items", %undef.2)
+        %all.0 : base.Bool = py.allIn(%items.2) ^fail.3() {
+          body.0(%item.0.0 : py.Value):
+            %ServiceClass.cell.0 : base.Ref(py.Value) = py.globalCell("service.module", "ServiceClass")
+            %ServiceClass.0 : py.Value = base.refGet[py.Value](%ServiceClass.cell.0)
+            %ServiceClass.1 : py.Value = py.requireDefined(%ServiceClass.0, "NameError", "name 'ServiceClass' is not defined") ^propagate.0()
+            %sub.1 : base.Bool = py.typeIsSubclass(%item.0.0, %ServiceClass.1) ^propagate.0()
+            branch(%sub.1) ^then.1() ^else.1()
+          then.1():
+            %inst.1 : base.Bool = py.isInstance(%item.0.0, %ServiceClass.1) ^propagate.0()
+            jump ^join.1(%inst.1)
+          else.1():
+            jump ^join.1(false)
+          join.1(%b.4 : base.Bool):
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.4)
+            ret(%res.0)
+          propagate.0(%exc.0 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+            ret(%err.0)
+        }
+        ret(%all.0)
+      fail.3(%e.2 : py.Value):
+        ret(false)
+    }
+    free ensures "return type of 'mixed'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %cls.1 : py.Value = py.stdClass("builtins", "str")
+        %inst.2 : base.Bool = py.isInstance(%result.0, %cls.1) ^fail.4()
+        ret(%inst.2)
+      raised.0(%exc.1 : py.Value):
+        ret(true)
+      fail.4(%e.3 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @service.mixed_imports.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

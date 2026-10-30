@@ -1,0 +1,1 @@
+[init-field-class] init_field_unresolved: the field 'helper' of 'C' is 'self._Helper()', which names no class of the model, or another class than its type 'init_field_unresolved._Helper'

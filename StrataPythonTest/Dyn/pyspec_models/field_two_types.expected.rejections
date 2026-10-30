@@ -1,0 +1,1 @@
+[field-two-types] field_two_types: the class body of 'C' declares the field 'helper' as 'builtins.int', but its __init__ assigns it 'self._Helper()'

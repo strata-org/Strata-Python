@@ -1,0 +1,1 @@
+[unbound-base] nested_outer_base: the base 'nested_outer_base.Outer' of 'Outer.In' isn't bound when the class statement runs

@@ -1,0 +1,1353 @@
+module operators {
+  func @|operators.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("operators")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("operators", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@operators.arithmetic)
+      %arithmetic.cell.0 : base.Ref(py.Value) = py.globalCell("operators", "arithmetic")
+      %set.1 : base.Unit = base.refSet[py.Value](%arithmetic.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@operators.comparisons)
+      %comparisons.cell.0 : base.Ref(py.Value) = py.globalCell("operators", "comparisons")
+      %set.2 : base.Unit = base.refSet[py.Value](%comparisons.cell.0, %clo.1)
+      %clo.2 : py.Value = py.mkClosure[[]](@operators.identity)
+      %identity.cell.0 : base.Ref(py.Value) = py.globalCell("operators", "identity")
+      %set.3 : base.Unit = base.refSet[py.Value](%identity.cell.0, %clo.2)
+      %clo.3 : py.Value = py.mkClosure[[]](@operators.boolean)
+      %boolean.cell.0 : base.Ref(py.Value) = py.globalCell("operators", "boolean")
+      %set.4 : base.Unit = base.refSet[py.Value](%boolean.cell.0, %clo.3)
+      %clo.4 : py.Value = py.mkClosure[[]](@operators.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("operators", "__getattr__")
+      %set.5 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.4)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @operators.arithmetic(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'arithmetic'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 0, true)
+        ret(%binds.0)
+    }
+    requires "schema of parameter 'kw'" {
+      pre.1():
+        %str.0 : py.Value = py.strLit("a")
+        %kw.0 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.0 : py.Value = py.in(%str.0, %kw.0) ^fail.1()
+        %cond.0 : base.Bool = py.truthy(%in.0) ^fail.1()
+        branch(%cond.0) ^then.0() ^else.0()
+      then.0():
+        %kw.1 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.1 : py.Value = py.strLit("a")
+        %item.0 : py.Value = py.getItem(%kw.1, %str.1) ^fail.1()
+        %cls.0 : py.Value = py.stdClass("builtins", "int")
+        %sub.0 : base.Bool = py.typeIsSubclass(%item.0, %cls.0) ^fail.1()
+        branch(%sub.0) ^then.1() ^else.1()
+      then.1():
+        %inst.0 : base.Bool = py.isInstance(%item.0, %cls.0) ^fail.1()
+        jump ^join.1(%inst.0)
+      else.1():
+        jump ^join.1(false)
+      join.1(%b.2 : base.Bool):
+        jump ^join.0(%b.2)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.4 : base.Bool):
+        branch(%b.4) ^then.2() ^else.2()
+      then.2():
+        %str.2 : py.Value = py.strLit("b")
+        %kw.2 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.1 : py.Value = py.in(%str.2, %kw.2) ^fail.1()
+        %cond.1 : base.Bool = py.truthy(%in.1) ^fail.1()
+        branch(%cond.1) ^then.3() ^else.3()
+      then.3():
+        %kw.3 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.3 : py.Value = py.strLit("b")
+        %item.1 : py.Value = py.getItem(%kw.3, %str.3) ^fail.1()
+        %cls.1 : py.Value = py.stdClass("builtins", "int")
+        %sub.1 : base.Bool = py.typeIsSubclass(%item.1, %cls.1) ^fail.1()
+        branch(%sub.1) ^then.4() ^else.4()
+      then.4():
+        %inst.1 : base.Bool = py.isInstance(%item.1, %cls.1) ^fail.1()
+        jump ^join.4(%inst.1)
+      else.4():
+        jump ^join.4(false)
+      join.4(%b.6 : base.Bool):
+        jump ^join.3(%b.6)
+      else.3():
+        jump ^join.3(false)
+      join.3(%b.8 : base.Bool):
+        jump ^join.2(%b.8)
+      else.2():
+        jump ^join.2(false)
+      join.2(%b.10 : base.Bool):
+        branch(%b.10) ^then.5() ^else.5()
+      then.5():
+        %str.4 : py.Value = py.strLit("c")
+        %kw.4 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.2 : py.Value = py.in(%str.4, %kw.4) ^fail.1()
+        %cond.2 : base.Bool = py.truthy(%in.2) ^fail.1()
+        branch(%cond.2) ^then.6() ^else.6()
+      then.6():
+        %kw.5 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.5 : py.Value = py.strLit("c")
+        %item.2 : py.Value = py.getItem(%kw.5, %str.5) ^fail.1()
+        %cls.2 : py.Value = py.stdClass("builtins", "int")
+        %sub.2 : base.Bool = py.typeIsSubclass(%item.2, %cls.2) ^fail.1()
+        branch(%sub.2) ^then.7() ^else.7()
+      then.7():
+        %inst.2 : base.Bool = py.isInstance(%item.2, %cls.2) ^fail.1()
+        jump ^join.7(%inst.2)
+      else.7():
+        jump ^join.7(false)
+      join.7(%b.12 : base.Bool):
+        jump ^join.6(%b.12)
+      else.6():
+        jump ^join.6(false)
+      join.6(%b.14 : base.Bool):
+        jump ^join.5(%b.14)
+      else.5():
+        jump ^join.5(false)
+      join.5(%b.16 : base.Bool):
+        branch(%b.16) ^then.8() ^else.8()
+      then.8():
+        %str.6 : py.Value = py.strLit("score")
+        %kw.6 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.3 : py.Value = py.in(%str.6, %kw.6) ^fail.1()
+        %cond.3 : base.Bool = py.truthy(%in.3) ^fail.1()
+        branch(%cond.3) ^then.9() ^else.9()
+      then.9():
+        %kw.7 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.7 : py.Value = py.strLit("score")
+        %item.3 : py.Value = py.getItem(%kw.7, %str.7) ^fail.1()
+        %cls.3 : py.Value = py.stdClass("builtins", "float")
+        %cls.4 : py.Value = py.stdClass("builtins", "int")
+        %tuple.0 : py.Value = py.mkTuple(%cls.3, %cls.4)
+        %sub.3 : base.Bool = py.typeIsSubclass(%item.3, %tuple.0) ^fail.1()
+        branch(%sub.3) ^then.10() ^else.10()
+      then.10():
+        %inst.3 : base.Bool = py.isInstance(%item.3, %tuple.0) ^fail.1()
+        jump ^join.10(%inst.3)
+      else.10():
+        jump ^join.10(false)
+      join.10(%b.18 : base.Bool):
+        jump ^join.9(%b.18)
+      else.9():
+        jump ^join.9(false)
+      join.9(%b.20 : base.Bool):
+        jump ^join.8(%b.20)
+      else.8():
+        jump ^join.8(false)
+      join.8(%b.22 : base.Bool):
+        branch(%b.22) ^then.11() ^else.11()
+      then.11():
+        %str.8 : py.Value = py.strLit("items")
+        %kw.8 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.4 : py.Value = py.in(%str.8, %kw.8) ^fail.1()
+        %cond.4 : base.Bool = py.truthy(%in.4) ^fail.1()
+        branch(%cond.4) ^then.12() ^else.12()
+      then.12():
+        %kw.9 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.9 : py.Value = py.strLit("items")
+        %item.4 : py.Value = py.getItem(%kw.9, %str.9) ^fail.1()
+        %cls.5 : py.Value = py.stdClass("builtins", "list")
+        %sub.4 : base.Bool = py.typeIsSubclass(%item.4, %cls.5) ^fail.1()
+        branch(%sub.4) ^then.13() ^else.13()
+      then.13():
+        %inst.4 : base.Bool = py.isInstance(%item.4, %cls.5) ^fail.1()
+        jump ^join.13(%inst.4)
+      else.13():
+        jump ^join.13(false)
+      join.13(%b.24 : base.Bool):
+        branch(%b.24) ^then.14() ^else.14()
+      then.14():
+        %kw.10 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.10 : py.Value = py.strLit("items")
+        %item.5 : py.Value = py.getItem(%kw.10, %str.10) ^fail.1()
+        %all.0 : base.Bool = py.allIn(%item.5) ^fail.1() {
+          body.0(%item.1.0 : py.Value):
+            %cls.6 : py.Value = py.stdClass("builtins", "int")
+            %sub.5 : base.Bool = py.typeIsSubclass(%item.1.0, %cls.6) ^propagate.0()
+            branch(%sub.5) ^then.15() ^else.15()
+          then.15():
+            %inst.5 : base.Bool = py.isInstance(%item.1.0, %cls.6) ^propagate.0()
+            jump ^join.15(%inst.5)
+          else.15():
+            jump ^join.15(false)
+          join.15(%b.26 : base.Bool):
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.26)
+            ret(%res.0)
+          propagate.0(%exc.0 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+            ret(%err.0)
+        }
+        jump ^join.14(%all.0)
+      else.14():
+        jump ^join.14(false)
+      join.14(%b.28 : base.Bool):
+        jump ^join.12(%b.28)
+      else.12():
+        jump ^join.12(false)
+      join.12(%b.30 : base.Bool):
+        jump ^join.11(%b.30)
+      else.11():
+        jump ^join.11(false)
+      join.11(%b.32 : base.Bool):
+        branch(%b.32) ^then.16() ^else.16()
+      then.16():
+        %str.11 : py.Value = py.strLit("flag1")
+        %kw.11 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.5 : py.Value = py.in(%str.11, %kw.11) ^fail.1()
+        %cond.5 : base.Bool = py.truthy(%in.5) ^fail.1()
+        branch(%cond.5) ^then.17() ^else.17()
+      then.17():
+        %kw.12 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.12 : py.Value = py.strLit("flag1")
+        %item.6 : py.Value = py.getItem(%kw.12, %str.12) ^fail.1()
+        %cls.7 : py.Value = py.stdClass("builtins", "bool")
+        %sub.6 : base.Bool = py.typeIsSubclass(%item.6, %cls.7) ^fail.1()
+        branch(%sub.6) ^then.18() ^else.18()
+      then.18():
+        %inst.6 : base.Bool = py.isInstance(%item.6, %cls.7) ^fail.1()
+        jump ^join.18(%inst.6)
+      else.18():
+        jump ^join.18(false)
+      join.18(%b.34 : base.Bool):
+        jump ^join.17(%b.34)
+      else.17():
+        jump ^join.17(false)
+      join.17(%b.36 : base.Bool):
+        jump ^join.16(%b.36)
+      else.16():
+        jump ^join.16(false)
+      join.16(%b.38 : base.Bool):
+        branch(%b.38) ^then.19() ^else.19()
+      then.19():
+        %str.13 : py.Value = py.strLit("flag2")
+        %kw.13 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.6 : py.Value = py.in(%str.13, %kw.13) ^fail.1()
+        %cond.6 : base.Bool = py.truthy(%in.6) ^fail.1()
+        branch(%cond.6) ^then.20() ^else.20()
+      then.20():
+        %kw.14 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.14 : py.Value = py.strLit("flag2")
+        %item.7 : py.Value = py.getItem(%kw.14, %str.14) ^fail.1()
+        %cls.8 : py.Value = py.stdClass("builtins", "bool")
+        %sub.7 : base.Bool = py.typeIsSubclass(%item.7, %cls.8) ^fail.1()
+        branch(%sub.7) ^then.21() ^else.21()
+      then.21():
+        %inst.7 : base.Bool = py.isInstance(%item.7, %cls.8) ^fail.1()
+        jump ^join.21(%inst.7)
+      else.21():
+        jump ^join.21(false)
+      join.21(%b.40 : base.Bool):
+        jump ^join.20(%b.40)
+      else.20():
+        jump ^join.20(false)
+      join.20(%b.42 : base.Bool):
+        jump ^join.19(%b.42)
+      else.19():
+        jump ^join.19(false)
+      join.19(%b.44 : base.Bool):
+        ret(%b.44)
+      fail.1(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "keywords of 'arithmetic' are declared" {
+      pre.2():
+        %within.0 : base.Bool = py.dictKeysWithin(%kwargs.0, "a", "b", "c", "score", "items", "flag1", "flag2")
+        ret(%within.0)
+    }
+    requires "add in ge" {
+      pre.3():
+        %kw.15 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.15 : py.Value = py.strLit("a")
+        %item.8 : py.Value = py.getItem(%kw.15, %str.15) ^fail.3()
+        %kw.16 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.16 : py.Value = py.strLit("b")
+        %item.9 : py.Value = py.getItem(%kw.16, %str.16) ^fail.3()
+        %add.0 : py.Value = py.add(%item.8, %item.9) ^fail.3()
+        %kw.17 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.17 : py.Value = py.strLit("c")
+        %item.10 : py.Value = py.getItem(%kw.17, %str.17) ^fail.3()
+        %gtE.0 : py.Value = py.gtE(%add.0, %item.10) ^fail.3()
+        %cond.7 : base.Bool = py.truthy(%gtE.0) ^fail.3()
+        ret(%cond.7)
+      fail.3(%e.1 : py.Value):
+        ret(false)
+    }
+    requires "sub in ge" {
+      pre.4():
+        %kw.18 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.18 : py.Value = py.strLit("a")
+        %item.11 : py.Value = py.getItem(%kw.18, %str.18) ^fail.4()
+        %kw.19 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.19 : py.Value = py.strLit("b")
+        %item.12 : py.Value = py.getItem(%kw.19, %str.19) ^fail.4()
+        %sub.8 : py.Value = py.sub(%item.11, %item.12) ^fail.4()
+        %kw.20 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.20 : py.Value = py.strLit("c")
+        %item.13 : py.Value = py.getItem(%kw.20, %str.20) ^fail.4()
+        %gtE.1 : py.Value = py.gtE(%sub.8, %item.13) ^fail.4()
+        %cond.8 : base.Bool = py.truthy(%gtE.1) ^fail.4()
+        ret(%cond.8)
+      fail.4(%e.2 : py.Value):
+        ret(false)
+    }
+    requires "mul in ge" {
+      pre.5():
+        %kw.21 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.21 : py.Value = py.strLit("a")
+        %item.14 : py.Value = py.getItem(%kw.21, %str.21) ^fail.5()
+        %kw.22 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.22 : py.Value = py.strLit("b")
+        %item.15 : py.Value = py.getItem(%kw.22, %str.22) ^fail.5()
+        %mult.0 : py.Value = py.mult(%item.14, %item.15) ^fail.5()
+        %kw.23 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.23 : py.Value = py.strLit("c")
+        %item.16 : py.Value = py.getItem(%kw.23, %str.23) ^fail.5()
+        %gtE.2 : py.Value = py.gtE(%mult.0, %item.16) ^fail.5()
+        %cond.9 : base.Bool = py.truthy(%gtE.2) ^fail.5()
+        ret(%cond.9)
+      fail.5(%e.3 : py.Value):
+        ret(false)
+    }
+    requires "floordiv in ge" {
+      pre.6():
+        %kw.24 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.24 : py.Value = py.strLit("a")
+        %item.17 : py.Value = py.getItem(%kw.24, %str.24) ^fail.6()
+        %kw.25 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.25 : py.Value = py.strLit("b")
+        %item.18 : py.Value = py.getItem(%kw.25, %str.25) ^fail.6()
+        %floorDiv.0 : py.Value = py.floorDiv(%item.17, %item.18) ^fail.6()
+        %kw.26 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.26 : py.Value = py.strLit("c")
+        %item.19 : py.Value = py.getItem(%kw.26, %str.26) ^fail.6()
+        %gtE.3 : py.Value = py.gtE(%floorDiv.0, %item.19) ^fail.6()
+        %cond.10 : base.Bool = py.truthy(%gtE.3) ^fail.6()
+        ret(%cond.10)
+      fail.6(%e.4 : py.Value):
+        ret(false)
+    }
+    requires "mod in ge" {
+      pre.7():
+        %kw.27 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.27 : py.Value = py.strLit("a")
+        %item.20 : py.Value = py.getItem(%kw.27, %str.27) ^fail.7()
+        %kw.28 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.28 : py.Value = py.strLit("b")
+        %item.21 : py.Value = py.getItem(%kw.28, %str.28) ^fail.7()
+        %mod.0 : py.Value = py.mod(%item.20, %item.21) ^fail.7()
+        %kw.29 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.29 : py.Value = py.strLit("c")
+        %item.22 : py.Value = py.getItem(%kw.29, %str.29) ^fail.7()
+        %gtE.4 : py.Value = py.gtE(%mod.0, %item.22) ^fail.7()
+        %cond.11 : base.Bool = py.truthy(%gtE.4) ^fail.7()
+        ret(%cond.11)
+      fail.7(%e.5 : py.Value):
+        ret(false)
+    }
+    requires "pow in ge" {
+      pre.8():
+        %kw.30 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.30 : py.Value = py.strLit("a")
+        %item.23 : py.Value = py.getItem(%kw.30, %str.30) ^fail.8()
+        %kw.31 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.31 : py.Value = py.strLit("b")
+        %item.24 : py.Value = py.getItem(%kw.31, %str.31) ^fail.8()
+        %pow.0 : py.Value = py.pow(%item.23, %item.24) ^fail.8()
+        %kw.32 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.32 : py.Value = py.strLit("c")
+        %item.25 : py.Value = py.getItem(%kw.32, %str.32) ^fail.8()
+        %gtE.5 : py.Value = py.gtE(%pow.0, %item.25) ^fail.8()
+        %cond.12 : base.Bool = py.truthy(%gtE.5) ^fail.8()
+        ret(%cond.12)
+      fail.8(%e.6 : py.Value):
+        ret(false)
+    }
+    requires "neg in ge" {
+      pre.9():
+        %kw.33 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.33 : py.Value = py.strLit("a")
+        %item.26 : py.Value = py.getItem(%kw.33, %str.33) ^fail.9()
+        %neg.0 : py.Value = py.uSub(%item.26) ^fail.9()
+        %kw.34 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.34 : py.Value = py.strLit("c")
+        %item.27 : py.Value = py.getItem(%kw.34, %str.34) ^fail.9()
+        %gtE.6 : py.Value = py.gtE(%neg.0, %item.27) ^fail.9()
+        %cond.13 : base.Bool = py.truthy(%gtE.6) ^fail.9()
+        ret(%cond.13)
+      fail.9(%e.7 : py.Value):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @operators.comparisons(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'comparisons'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 0, true)
+        ret(%binds.0)
+    }
+    requires "schema of parameter 'kw'" {
+      pre.1():
+        %str.0 : py.Value = py.strLit("a")
+        %kw.0 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.0 : py.Value = py.in(%str.0, %kw.0) ^fail.1()
+        %cond.0 : base.Bool = py.truthy(%in.0) ^fail.1()
+        branch(%cond.0) ^then.0() ^else.0()
+      then.0():
+        %kw.1 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.1 : py.Value = py.strLit("a")
+        %item.0 : py.Value = py.getItem(%kw.1, %str.1) ^fail.1()
+        %cls.0 : py.Value = py.stdClass("builtins", "int")
+        %sub.0 : base.Bool = py.typeIsSubclass(%item.0, %cls.0) ^fail.1()
+        branch(%sub.0) ^then.1() ^else.1()
+      then.1():
+        %inst.0 : base.Bool = py.isInstance(%item.0, %cls.0) ^fail.1()
+        jump ^join.1(%inst.0)
+      else.1():
+        jump ^join.1(false)
+      join.1(%b.2 : base.Bool):
+        jump ^join.0(%b.2)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.4 : base.Bool):
+        branch(%b.4) ^then.2() ^else.2()
+      then.2():
+        %str.2 : py.Value = py.strLit("b")
+        %kw.2 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.1 : py.Value = py.in(%str.2, %kw.2) ^fail.1()
+        %cond.1 : base.Bool = py.truthy(%in.1) ^fail.1()
+        branch(%cond.1) ^then.3() ^else.3()
+      then.3():
+        %kw.3 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.3 : py.Value = py.strLit("b")
+        %item.1 : py.Value = py.getItem(%kw.3, %str.3) ^fail.1()
+        %cls.1 : py.Value = py.stdClass("builtins", "int")
+        %sub.1 : base.Bool = py.typeIsSubclass(%item.1, %cls.1) ^fail.1()
+        branch(%sub.1) ^then.4() ^else.4()
+      then.4():
+        %inst.1 : base.Bool = py.isInstance(%item.1, %cls.1) ^fail.1()
+        jump ^join.4(%inst.1)
+      else.4():
+        jump ^join.4(false)
+      join.4(%b.6 : base.Bool):
+        jump ^join.3(%b.6)
+      else.3():
+        jump ^join.3(false)
+      join.3(%b.8 : base.Bool):
+        jump ^join.2(%b.8)
+      else.2():
+        jump ^join.2(false)
+      join.2(%b.10 : base.Bool):
+        branch(%b.10) ^then.5() ^else.5()
+      then.5():
+        %str.4 : py.Value = py.strLit("c")
+        %kw.4 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.2 : py.Value = py.in(%str.4, %kw.4) ^fail.1()
+        %cond.2 : base.Bool = py.truthy(%in.2) ^fail.1()
+        branch(%cond.2) ^then.6() ^else.6()
+      then.6():
+        %kw.5 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.5 : py.Value = py.strLit("c")
+        %item.2 : py.Value = py.getItem(%kw.5, %str.5) ^fail.1()
+        %cls.2 : py.Value = py.stdClass("builtins", "int")
+        %sub.2 : base.Bool = py.typeIsSubclass(%item.2, %cls.2) ^fail.1()
+        branch(%sub.2) ^then.7() ^else.7()
+      then.7():
+        %inst.2 : base.Bool = py.isInstance(%item.2, %cls.2) ^fail.1()
+        jump ^join.7(%inst.2)
+      else.7():
+        jump ^join.7(false)
+      join.7(%b.12 : base.Bool):
+        jump ^join.6(%b.12)
+      else.6():
+        jump ^join.6(false)
+      join.6(%b.14 : base.Bool):
+        jump ^join.5(%b.14)
+      else.5():
+        jump ^join.5(false)
+      join.5(%b.16 : base.Bool):
+        branch(%b.16) ^then.8() ^else.8()
+      then.8():
+        %str.6 : py.Value = py.strLit("score")
+        %kw.6 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.3 : py.Value = py.in(%str.6, %kw.6) ^fail.1()
+        %cond.3 : base.Bool = py.truthy(%in.3) ^fail.1()
+        branch(%cond.3) ^then.9() ^else.9()
+      then.9():
+        %kw.7 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.7 : py.Value = py.strLit("score")
+        %item.3 : py.Value = py.getItem(%kw.7, %str.7) ^fail.1()
+        %cls.3 : py.Value = py.stdClass("builtins", "float")
+        %cls.4 : py.Value = py.stdClass("builtins", "int")
+        %tuple.0 : py.Value = py.mkTuple(%cls.3, %cls.4)
+        %sub.3 : base.Bool = py.typeIsSubclass(%item.3, %tuple.0) ^fail.1()
+        branch(%sub.3) ^then.10() ^else.10()
+      then.10():
+        %inst.3 : base.Bool = py.isInstance(%item.3, %tuple.0) ^fail.1()
+        jump ^join.10(%inst.3)
+      else.10():
+        jump ^join.10(false)
+      join.10(%b.18 : base.Bool):
+        jump ^join.9(%b.18)
+      else.9():
+        jump ^join.9(false)
+      join.9(%b.20 : base.Bool):
+        jump ^join.8(%b.20)
+      else.8():
+        jump ^join.8(false)
+      join.8(%b.22 : base.Bool):
+        branch(%b.22) ^then.11() ^else.11()
+      then.11():
+        %str.8 : py.Value = py.strLit("items")
+        %kw.8 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.4 : py.Value = py.in(%str.8, %kw.8) ^fail.1()
+        %cond.4 : base.Bool = py.truthy(%in.4) ^fail.1()
+        branch(%cond.4) ^then.12() ^else.12()
+      then.12():
+        %kw.9 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.9 : py.Value = py.strLit("items")
+        %item.4 : py.Value = py.getItem(%kw.9, %str.9) ^fail.1()
+        %cls.5 : py.Value = py.stdClass("builtins", "list")
+        %sub.4 : base.Bool = py.typeIsSubclass(%item.4, %cls.5) ^fail.1()
+        branch(%sub.4) ^then.13() ^else.13()
+      then.13():
+        %inst.4 : base.Bool = py.isInstance(%item.4, %cls.5) ^fail.1()
+        jump ^join.13(%inst.4)
+      else.13():
+        jump ^join.13(false)
+      join.13(%b.24 : base.Bool):
+        branch(%b.24) ^then.14() ^else.14()
+      then.14():
+        %kw.10 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.10 : py.Value = py.strLit("items")
+        %item.5 : py.Value = py.getItem(%kw.10, %str.10) ^fail.1()
+        %all.0 : base.Bool = py.allIn(%item.5) ^fail.1() {
+          body.0(%item.1.0 : py.Value):
+            %cls.6 : py.Value = py.stdClass("builtins", "int")
+            %sub.5 : base.Bool = py.typeIsSubclass(%item.1.0, %cls.6) ^propagate.0()
+            branch(%sub.5) ^then.15() ^else.15()
+          then.15():
+            %inst.5 : base.Bool = py.isInstance(%item.1.0, %cls.6) ^propagate.0()
+            jump ^join.15(%inst.5)
+          else.15():
+            jump ^join.15(false)
+          join.15(%b.26 : base.Bool):
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.26)
+            ret(%res.0)
+          propagate.0(%exc.0 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+            ret(%err.0)
+        }
+        jump ^join.14(%all.0)
+      else.14():
+        jump ^join.14(false)
+      join.14(%b.28 : base.Bool):
+        jump ^join.12(%b.28)
+      else.12():
+        jump ^join.12(false)
+      join.12(%b.30 : base.Bool):
+        jump ^join.11(%b.30)
+      else.11():
+        jump ^join.11(false)
+      join.11(%b.32 : base.Bool):
+        branch(%b.32) ^then.16() ^else.16()
+      then.16():
+        %str.11 : py.Value = py.strLit("flag1")
+        %kw.11 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.5 : py.Value = py.in(%str.11, %kw.11) ^fail.1()
+        %cond.5 : base.Bool = py.truthy(%in.5) ^fail.1()
+        branch(%cond.5) ^then.17() ^else.17()
+      then.17():
+        %kw.12 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.12 : py.Value = py.strLit("flag1")
+        %item.6 : py.Value = py.getItem(%kw.12, %str.12) ^fail.1()
+        %cls.7 : py.Value = py.stdClass("builtins", "bool")
+        %sub.6 : base.Bool = py.typeIsSubclass(%item.6, %cls.7) ^fail.1()
+        branch(%sub.6) ^then.18() ^else.18()
+      then.18():
+        %inst.6 : base.Bool = py.isInstance(%item.6, %cls.7) ^fail.1()
+        jump ^join.18(%inst.6)
+      else.18():
+        jump ^join.18(false)
+      join.18(%b.34 : base.Bool):
+        jump ^join.17(%b.34)
+      else.17():
+        jump ^join.17(false)
+      join.17(%b.36 : base.Bool):
+        jump ^join.16(%b.36)
+      else.16():
+        jump ^join.16(false)
+      join.16(%b.38 : base.Bool):
+        branch(%b.38) ^then.19() ^else.19()
+      then.19():
+        %str.13 : py.Value = py.strLit("flag2")
+        %kw.13 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.6 : py.Value = py.in(%str.13, %kw.13) ^fail.1()
+        %cond.6 : base.Bool = py.truthy(%in.6) ^fail.1()
+        branch(%cond.6) ^then.20() ^else.20()
+      then.20():
+        %kw.14 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.14 : py.Value = py.strLit("flag2")
+        %item.7 : py.Value = py.getItem(%kw.14, %str.14) ^fail.1()
+        %cls.8 : py.Value = py.stdClass("builtins", "bool")
+        %sub.7 : base.Bool = py.typeIsSubclass(%item.7, %cls.8) ^fail.1()
+        branch(%sub.7) ^then.21() ^else.21()
+      then.21():
+        %inst.7 : base.Bool = py.isInstance(%item.7, %cls.8) ^fail.1()
+        jump ^join.21(%inst.7)
+      else.21():
+        jump ^join.21(false)
+      join.21(%b.40 : base.Bool):
+        jump ^join.20(%b.40)
+      else.20():
+        jump ^join.20(false)
+      join.20(%b.42 : base.Bool):
+        jump ^join.19(%b.42)
+      else.19():
+        jump ^join.19(false)
+      join.19(%b.44 : base.Bool):
+        ret(%b.44)
+      fail.1(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "keywords of 'comparisons' are declared" {
+      pre.2():
+        %within.0 : base.Bool = py.dictKeysWithin(%kwargs.0, "a", "b", "c", "score", "items", "flag1", "flag2")
+        ret(%within.0)
+    }
+    requires "gt" {
+      pre.3():
+        %kw.15 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.15 : py.Value = py.strLit("a")
+        %item.8 : py.Value = py.getItem(%kw.15, %str.15) ^fail.3()
+        %kw.16 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.16 : py.Value = py.strLit("b")
+        %item.9 : py.Value = py.getItem(%kw.16, %str.16) ^fail.3()
+        %gt.0 : py.Value = py.gt(%item.8, %item.9) ^fail.3()
+        %cond.7 : base.Bool = py.truthy(%gt.0) ^fail.3()
+        ret(%cond.7)
+      fail.3(%e.1 : py.Value):
+        ret(false)
+    }
+    requires "lt" {
+      pre.4():
+        %kw.17 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.17 : py.Value = py.strLit("a")
+        %item.10 : py.Value = py.getItem(%kw.17, %str.17) ^fail.4()
+        %kw.18 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.18 : py.Value = py.strLit("b")
+        %item.11 : py.Value = py.getItem(%kw.18, %str.18) ^fail.4()
+        %lt.0 : py.Value = py.lt(%item.10, %item.11) ^fail.4()
+        %cond.8 : base.Bool = py.truthy(%lt.0) ^fail.4()
+        ret(%cond.8)
+      fail.4(%e.2 : py.Value):
+        ret(false)
+    }
+    requires "ne" {
+      pre.5():
+        %kw.19 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.19 : py.Value = py.strLit("a")
+        %item.12 : py.Value = py.getItem(%kw.19, %str.19) ^fail.5()
+        %kw.20 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.20 : py.Value = py.strLit("b")
+        %item.13 : py.Value = py.getItem(%kw.20, %str.20) ^fail.5()
+        %notEq.0 : py.Value = py.notEq(%item.12, %item.13) ^fail.5()
+        %cond.9 : base.Bool = py.truthy(%notEq.0) ^fail.5()
+        ret(%cond.9)
+      fail.5(%e.3 : py.Value):
+        ret(false)
+    }
+    requires "eq int" {
+      pre.6():
+        %kw.21 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.21 : py.Value = py.strLit("a")
+        %item.14 : py.Value = py.getItem(%kw.21, %str.21) ^fail.6()
+        %int.0 : py.Value = py.intLit(5)
+        %eq.0 : py.Value = py.eq(%item.14, %int.0) ^fail.6()
+        %cond.10 : base.Bool = py.truthy(%eq.0) ^fail.6()
+        ret(%cond.10)
+      fail.6(%e.4 : py.Value):
+        ret(false)
+    }
+    requires "isin" {
+      pre.7():
+        %kw.22 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.22 : py.Value = py.strLit("a")
+        %item.15 : py.Value = py.getItem(%kw.22, %str.22) ^fail.7()
+        %kw.23 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.23 : py.Value = py.strLit("items")
+        %item.16 : py.Value = py.getItem(%kw.23, %str.23) ^fail.7()
+        %in_.0 : py.Value = py.in(%item.15, %item.16) ^fail.7()
+        %cond.11 : base.Bool = py.truthy(%in_.0) ^fail.7()
+        ret(%cond.11)
+      fail.7(%e.5 : py.Value):
+        ret(false)
+    }
+    requires "notin" {
+      pre.8():
+        %kw.24 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.24 : py.Value = py.strLit("a")
+        %item.17 : py.Value = py.getItem(%kw.24, %str.24) ^fail.8()
+        %kw.25 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.25 : py.Value = py.strLit("items")
+        %item.18 : py.Value = py.getItem(%kw.25, %str.25) ^fail.8()
+        %notIn.0 : py.Value = py.notIn(%item.17, %item.18) ^fail.8()
+        %cond.12 : base.Bool = py.truthy(%notIn.0) ^fail.8()
+        ret(%cond.12)
+      fail.8(%e.6 : py.Value):
+        ret(false)
+    }
+    requires "int ge" {
+      pre.9():
+        %kw.26 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.26 : py.Value = py.strLit("a")
+        %item.19 : py.Value = py.getItem(%kw.26, %str.26) ^fail.9()
+        %int.1 : py.Value = py.intLit(1)
+        %gtE.0 : py.Value = py.gtE(%item.19, %int.1) ^fail.9()
+        %cond.13 : base.Bool = py.truthy(%gtE.0) ^fail.9()
+        ret(%cond.13)
+      fail.9(%e.7 : py.Value):
+        ret(false)
+    }
+    requires "int le" {
+      pre.10():
+        %kw.27 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.27 : py.Value = py.strLit("a")
+        %item.20 : py.Value = py.getItem(%kw.27, %str.27) ^fail.10()
+        %int.2 : py.Value = py.intLit(10)
+        %ltE.0 : py.Value = py.ltE(%item.20, %int.2) ^fail.10()
+        %cond.14 : base.Bool = py.truthy(%ltE.0) ^fail.10()
+        ret(%cond.14)
+      fail.10(%e.8 : py.Value):
+        ret(false)
+    }
+    requires "float ge" {
+      pre.11():
+        %kw.28 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.28 : py.Value = py.strLit("score")
+        %item.21 : py.Value = py.getItem(%kw.28, %str.28) ^fail.11()
+        %float.0 : py.Value = py.floatLit(0.0)
+        %gtE.1 : py.Value = py.gtE(%item.21, %float.0) ^fail.11()
+        %cond.15 : base.Bool = py.truthy(%gtE.1) ^fail.11()
+        ret(%cond.15)
+      fail.11(%e.9 : py.Value):
+        ret(false)
+    }
+    requires "float le" {
+      pre.12():
+        %kw.29 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.29 : py.Value = py.strLit("score")
+        %item.22 : py.Value = py.getItem(%kw.29, %str.29) ^fail.12()
+        %float.1 : py.Value = py.floatLit(1.0)
+        %ltE.1 : py.Value = py.ltE(%item.22, %float.1) ^fail.12()
+        %cond.16 : base.Bool = py.truthy(%ltE.1) ^fail.12()
+        ret(%cond.16)
+      fail.12(%e.10 : py.Value):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @operators.identity(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'identity'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 0, true)
+        ret(%binds.0)
+    }
+    requires "schema of parameter 'kw'" {
+      pre.1():
+        %str.0 : py.Value = py.strLit("a")
+        %kw.0 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.0 : py.Value = py.in(%str.0, %kw.0) ^fail.1()
+        %cond.0 : base.Bool = py.truthy(%in.0) ^fail.1()
+        branch(%cond.0) ^then.0() ^else.0()
+      then.0():
+        %kw.1 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.1 : py.Value = py.strLit("a")
+        %item.0 : py.Value = py.getItem(%kw.1, %str.1) ^fail.1()
+        %cls.0 : py.Value = py.stdClass("builtins", "int")
+        %sub.0 : base.Bool = py.typeIsSubclass(%item.0, %cls.0) ^fail.1()
+        branch(%sub.0) ^then.1() ^else.1()
+      then.1():
+        %inst.0 : base.Bool = py.isInstance(%item.0, %cls.0) ^fail.1()
+        jump ^join.1(%inst.0)
+      else.1():
+        jump ^join.1(false)
+      join.1(%b.2 : base.Bool):
+        jump ^join.0(%b.2)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.4 : base.Bool):
+        branch(%b.4) ^then.2() ^else.2()
+      then.2():
+        %str.2 : py.Value = py.strLit("b")
+        %kw.2 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.1 : py.Value = py.in(%str.2, %kw.2) ^fail.1()
+        %cond.1 : base.Bool = py.truthy(%in.1) ^fail.1()
+        branch(%cond.1) ^then.3() ^else.3()
+      then.3():
+        %kw.3 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.3 : py.Value = py.strLit("b")
+        %item.1 : py.Value = py.getItem(%kw.3, %str.3) ^fail.1()
+        %cls.1 : py.Value = py.stdClass("builtins", "int")
+        %sub.1 : base.Bool = py.typeIsSubclass(%item.1, %cls.1) ^fail.1()
+        branch(%sub.1) ^then.4() ^else.4()
+      then.4():
+        %inst.1 : base.Bool = py.isInstance(%item.1, %cls.1) ^fail.1()
+        jump ^join.4(%inst.1)
+      else.4():
+        jump ^join.4(false)
+      join.4(%b.6 : base.Bool):
+        jump ^join.3(%b.6)
+      else.3():
+        jump ^join.3(false)
+      join.3(%b.8 : base.Bool):
+        jump ^join.2(%b.8)
+      else.2():
+        jump ^join.2(false)
+      join.2(%b.10 : base.Bool):
+        branch(%b.10) ^then.5() ^else.5()
+      then.5():
+        %str.4 : py.Value = py.strLit("c")
+        %kw.4 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.2 : py.Value = py.in(%str.4, %kw.4) ^fail.1()
+        %cond.2 : base.Bool = py.truthy(%in.2) ^fail.1()
+        branch(%cond.2) ^then.6() ^else.6()
+      then.6():
+        %kw.5 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.5 : py.Value = py.strLit("c")
+        %item.2 : py.Value = py.getItem(%kw.5, %str.5) ^fail.1()
+        %cls.2 : py.Value = py.stdClass("builtins", "int")
+        %sub.2 : base.Bool = py.typeIsSubclass(%item.2, %cls.2) ^fail.1()
+        branch(%sub.2) ^then.7() ^else.7()
+      then.7():
+        %inst.2 : base.Bool = py.isInstance(%item.2, %cls.2) ^fail.1()
+        jump ^join.7(%inst.2)
+      else.7():
+        jump ^join.7(false)
+      join.7(%b.12 : base.Bool):
+        jump ^join.6(%b.12)
+      else.6():
+        jump ^join.6(false)
+      join.6(%b.14 : base.Bool):
+        jump ^join.5(%b.14)
+      else.5():
+        jump ^join.5(false)
+      join.5(%b.16 : base.Bool):
+        branch(%b.16) ^then.8() ^else.8()
+      then.8():
+        %str.6 : py.Value = py.strLit("score")
+        %kw.6 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.3 : py.Value = py.in(%str.6, %kw.6) ^fail.1()
+        %cond.3 : base.Bool = py.truthy(%in.3) ^fail.1()
+        branch(%cond.3) ^then.9() ^else.9()
+      then.9():
+        %kw.7 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.7 : py.Value = py.strLit("score")
+        %item.3 : py.Value = py.getItem(%kw.7, %str.7) ^fail.1()
+        %cls.3 : py.Value = py.stdClass("builtins", "float")
+        %cls.4 : py.Value = py.stdClass("builtins", "int")
+        %tuple.0 : py.Value = py.mkTuple(%cls.3, %cls.4)
+        %sub.3 : base.Bool = py.typeIsSubclass(%item.3, %tuple.0) ^fail.1()
+        branch(%sub.3) ^then.10() ^else.10()
+      then.10():
+        %inst.3 : base.Bool = py.isInstance(%item.3, %tuple.0) ^fail.1()
+        jump ^join.10(%inst.3)
+      else.10():
+        jump ^join.10(false)
+      join.10(%b.18 : base.Bool):
+        jump ^join.9(%b.18)
+      else.9():
+        jump ^join.9(false)
+      join.9(%b.20 : base.Bool):
+        jump ^join.8(%b.20)
+      else.8():
+        jump ^join.8(false)
+      join.8(%b.22 : base.Bool):
+        branch(%b.22) ^then.11() ^else.11()
+      then.11():
+        %str.8 : py.Value = py.strLit("items")
+        %kw.8 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.4 : py.Value = py.in(%str.8, %kw.8) ^fail.1()
+        %cond.4 : base.Bool = py.truthy(%in.4) ^fail.1()
+        branch(%cond.4) ^then.12() ^else.12()
+      then.12():
+        %kw.9 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.9 : py.Value = py.strLit("items")
+        %item.4 : py.Value = py.getItem(%kw.9, %str.9) ^fail.1()
+        %cls.5 : py.Value = py.stdClass("builtins", "list")
+        %sub.4 : base.Bool = py.typeIsSubclass(%item.4, %cls.5) ^fail.1()
+        branch(%sub.4) ^then.13() ^else.13()
+      then.13():
+        %inst.4 : base.Bool = py.isInstance(%item.4, %cls.5) ^fail.1()
+        jump ^join.13(%inst.4)
+      else.13():
+        jump ^join.13(false)
+      join.13(%b.24 : base.Bool):
+        branch(%b.24) ^then.14() ^else.14()
+      then.14():
+        %kw.10 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.10 : py.Value = py.strLit("items")
+        %item.5 : py.Value = py.getItem(%kw.10, %str.10) ^fail.1()
+        %all.0 : base.Bool = py.allIn(%item.5) ^fail.1() {
+          body.0(%item.1.0 : py.Value):
+            %cls.6 : py.Value = py.stdClass("builtins", "int")
+            %sub.5 : base.Bool = py.typeIsSubclass(%item.1.0, %cls.6) ^propagate.0()
+            branch(%sub.5) ^then.15() ^else.15()
+          then.15():
+            %inst.5 : base.Bool = py.isInstance(%item.1.0, %cls.6) ^propagate.0()
+            jump ^join.15(%inst.5)
+          else.15():
+            jump ^join.15(false)
+          join.15(%b.26 : base.Bool):
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.26)
+            ret(%res.0)
+          propagate.0(%exc.0 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+            ret(%err.0)
+        }
+        jump ^join.14(%all.0)
+      else.14():
+        jump ^join.14(false)
+      join.14(%b.28 : base.Bool):
+        jump ^join.12(%b.28)
+      else.12():
+        jump ^join.12(false)
+      join.12(%b.30 : base.Bool):
+        jump ^join.11(%b.30)
+      else.11():
+        jump ^join.11(false)
+      join.11(%b.32 : base.Bool):
+        branch(%b.32) ^then.16() ^else.16()
+      then.16():
+        %str.11 : py.Value = py.strLit("flag1")
+        %kw.11 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.5 : py.Value = py.in(%str.11, %kw.11) ^fail.1()
+        %cond.5 : base.Bool = py.truthy(%in.5) ^fail.1()
+        branch(%cond.5) ^then.17() ^else.17()
+      then.17():
+        %kw.12 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.12 : py.Value = py.strLit("flag1")
+        %item.6 : py.Value = py.getItem(%kw.12, %str.12) ^fail.1()
+        %cls.7 : py.Value = py.stdClass("builtins", "bool")
+        %sub.6 : base.Bool = py.typeIsSubclass(%item.6, %cls.7) ^fail.1()
+        branch(%sub.6) ^then.18() ^else.18()
+      then.18():
+        %inst.6 : base.Bool = py.isInstance(%item.6, %cls.7) ^fail.1()
+        jump ^join.18(%inst.6)
+      else.18():
+        jump ^join.18(false)
+      join.18(%b.34 : base.Bool):
+        jump ^join.17(%b.34)
+      else.17():
+        jump ^join.17(false)
+      join.17(%b.36 : base.Bool):
+        jump ^join.16(%b.36)
+      else.16():
+        jump ^join.16(false)
+      join.16(%b.38 : base.Bool):
+        branch(%b.38) ^then.19() ^else.19()
+      then.19():
+        %str.13 : py.Value = py.strLit("flag2")
+        %kw.13 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.6 : py.Value = py.in(%str.13, %kw.13) ^fail.1()
+        %cond.6 : base.Bool = py.truthy(%in.6) ^fail.1()
+        branch(%cond.6) ^then.20() ^else.20()
+      then.20():
+        %kw.14 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.14 : py.Value = py.strLit("flag2")
+        %item.7 : py.Value = py.getItem(%kw.14, %str.14) ^fail.1()
+        %cls.8 : py.Value = py.stdClass("builtins", "bool")
+        %sub.7 : base.Bool = py.typeIsSubclass(%item.7, %cls.8) ^fail.1()
+        branch(%sub.7) ^then.21() ^else.21()
+      then.21():
+        %inst.7 : base.Bool = py.isInstance(%item.7, %cls.8) ^fail.1()
+        jump ^join.21(%inst.7)
+      else.21():
+        jump ^join.21(false)
+      join.21(%b.40 : base.Bool):
+        jump ^join.20(%b.40)
+      else.20():
+        jump ^join.20(false)
+      join.20(%b.42 : base.Bool):
+        jump ^join.19(%b.42)
+      else.19():
+        jump ^join.19(false)
+      join.19(%b.44 : base.Bool):
+        ret(%b.44)
+      fail.1(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "keywords of 'identity' are declared" {
+      pre.2():
+        %within.0 : base.Bool = py.dictKeysWithin(%kwargs.0, "a", "b", "c", "score", "items", "flag1", "flag2")
+        ret(%within.0)
+    }
+    requires "is none" {
+      pre.3():
+        %kw.15 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.15 : py.Value = py.strLit("a")
+        %item.8 : py.Value = py.getItem(%kw.15, %str.15) ^fail.3()
+        %none.0 : py.Value = py.noneLit
+        %is.0 : py.Value = py.is(%item.8, %none.0)
+        %cond.7 : base.Bool = py.truthy(%is.0) ^fail.3()
+        ret(%cond.7)
+      fail.3(%e.1 : py.Value):
+        ret(false)
+    }
+    requires "is not none" {
+      pre.4():
+        %kw.16 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.16 : py.Value = py.strLit("a")
+        %item.9 : py.Value = py.getItem(%kw.16, %str.16) ^fail.4()
+        %none.1 : py.Value = py.noneLit
+        %isNot.0 : py.Value = py.isNot(%item.9, %none.1)
+        %cond.8 : base.Bool = py.truthy(%isNot.0) ^fail.4()
+        ret(%cond.8)
+      fail.4(%e.2 : py.Value):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @operators.boolean(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'boolean'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 0, true)
+        ret(%binds.0)
+    }
+    requires "schema of parameter 'kw'" {
+      pre.1():
+        %str.0 : py.Value = py.strLit("a")
+        %kw.0 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.0 : py.Value = py.in(%str.0, %kw.0) ^fail.1()
+        %cond.0 : base.Bool = py.truthy(%in.0) ^fail.1()
+        branch(%cond.0) ^then.0() ^else.0()
+      then.0():
+        %kw.1 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.1 : py.Value = py.strLit("a")
+        %item.0 : py.Value = py.getItem(%kw.1, %str.1) ^fail.1()
+        %cls.0 : py.Value = py.stdClass("builtins", "int")
+        %sub.0 : base.Bool = py.typeIsSubclass(%item.0, %cls.0) ^fail.1()
+        branch(%sub.0) ^then.1() ^else.1()
+      then.1():
+        %inst.0 : base.Bool = py.isInstance(%item.0, %cls.0) ^fail.1()
+        jump ^join.1(%inst.0)
+      else.1():
+        jump ^join.1(false)
+      join.1(%b.2 : base.Bool):
+        jump ^join.0(%b.2)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.4 : base.Bool):
+        branch(%b.4) ^then.2() ^else.2()
+      then.2():
+        %str.2 : py.Value = py.strLit("b")
+        %kw.2 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.1 : py.Value = py.in(%str.2, %kw.2) ^fail.1()
+        %cond.1 : base.Bool = py.truthy(%in.1) ^fail.1()
+        branch(%cond.1) ^then.3() ^else.3()
+      then.3():
+        %kw.3 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.3 : py.Value = py.strLit("b")
+        %item.1 : py.Value = py.getItem(%kw.3, %str.3) ^fail.1()
+        %cls.1 : py.Value = py.stdClass("builtins", "int")
+        %sub.1 : base.Bool = py.typeIsSubclass(%item.1, %cls.1) ^fail.1()
+        branch(%sub.1) ^then.4() ^else.4()
+      then.4():
+        %inst.1 : base.Bool = py.isInstance(%item.1, %cls.1) ^fail.1()
+        jump ^join.4(%inst.1)
+      else.4():
+        jump ^join.4(false)
+      join.4(%b.6 : base.Bool):
+        jump ^join.3(%b.6)
+      else.3():
+        jump ^join.3(false)
+      join.3(%b.8 : base.Bool):
+        jump ^join.2(%b.8)
+      else.2():
+        jump ^join.2(false)
+      join.2(%b.10 : base.Bool):
+        branch(%b.10) ^then.5() ^else.5()
+      then.5():
+        %str.4 : py.Value = py.strLit("c")
+        %kw.4 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.2 : py.Value = py.in(%str.4, %kw.4) ^fail.1()
+        %cond.2 : base.Bool = py.truthy(%in.2) ^fail.1()
+        branch(%cond.2) ^then.6() ^else.6()
+      then.6():
+        %kw.5 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.5 : py.Value = py.strLit("c")
+        %item.2 : py.Value = py.getItem(%kw.5, %str.5) ^fail.1()
+        %cls.2 : py.Value = py.stdClass("builtins", "int")
+        %sub.2 : base.Bool = py.typeIsSubclass(%item.2, %cls.2) ^fail.1()
+        branch(%sub.2) ^then.7() ^else.7()
+      then.7():
+        %inst.2 : base.Bool = py.isInstance(%item.2, %cls.2) ^fail.1()
+        jump ^join.7(%inst.2)
+      else.7():
+        jump ^join.7(false)
+      join.7(%b.12 : base.Bool):
+        jump ^join.6(%b.12)
+      else.6():
+        jump ^join.6(false)
+      join.6(%b.14 : base.Bool):
+        jump ^join.5(%b.14)
+      else.5():
+        jump ^join.5(false)
+      join.5(%b.16 : base.Bool):
+        branch(%b.16) ^then.8() ^else.8()
+      then.8():
+        %str.6 : py.Value = py.strLit("score")
+        %kw.6 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.3 : py.Value = py.in(%str.6, %kw.6) ^fail.1()
+        %cond.3 : base.Bool = py.truthy(%in.3) ^fail.1()
+        branch(%cond.3) ^then.9() ^else.9()
+      then.9():
+        %kw.7 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.7 : py.Value = py.strLit("score")
+        %item.3 : py.Value = py.getItem(%kw.7, %str.7) ^fail.1()
+        %cls.3 : py.Value = py.stdClass("builtins", "float")
+        %cls.4 : py.Value = py.stdClass("builtins", "int")
+        %tuple.0 : py.Value = py.mkTuple(%cls.3, %cls.4)
+        %sub.3 : base.Bool = py.typeIsSubclass(%item.3, %tuple.0) ^fail.1()
+        branch(%sub.3) ^then.10() ^else.10()
+      then.10():
+        %inst.3 : base.Bool = py.isInstance(%item.3, %tuple.0) ^fail.1()
+        jump ^join.10(%inst.3)
+      else.10():
+        jump ^join.10(false)
+      join.10(%b.18 : base.Bool):
+        jump ^join.9(%b.18)
+      else.9():
+        jump ^join.9(false)
+      join.9(%b.20 : base.Bool):
+        jump ^join.8(%b.20)
+      else.8():
+        jump ^join.8(false)
+      join.8(%b.22 : base.Bool):
+        branch(%b.22) ^then.11() ^else.11()
+      then.11():
+        %str.8 : py.Value = py.strLit("items")
+        %kw.8 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.4 : py.Value = py.in(%str.8, %kw.8) ^fail.1()
+        %cond.4 : base.Bool = py.truthy(%in.4) ^fail.1()
+        branch(%cond.4) ^then.12() ^else.12()
+      then.12():
+        %kw.9 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.9 : py.Value = py.strLit("items")
+        %item.4 : py.Value = py.getItem(%kw.9, %str.9) ^fail.1()
+        %cls.5 : py.Value = py.stdClass("builtins", "list")
+        %sub.4 : base.Bool = py.typeIsSubclass(%item.4, %cls.5) ^fail.1()
+        branch(%sub.4) ^then.13() ^else.13()
+      then.13():
+        %inst.4 : base.Bool = py.isInstance(%item.4, %cls.5) ^fail.1()
+        jump ^join.13(%inst.4)
+      else.13():
+        jump ^join.13(false)
+      join.13(%b.24 : base.Bool):
+        branch(%b.24) ^then.14() ^else.14()
+      then.14():
+        %kw.10 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.10 : py.Value = py.strLit("items")
+        %item.5 : py.Value = py.getItem(%kw.10, %str.10) ^fail.1()
+        %all.0 : base.Bool = py.allIn(%item.5) ^fail.1() {
+          body.0(%item.1.0 : py.Value):
+            %cls.6 : py.Value = py.stdClass("builtins", "int")
+            %sub.5 : base.Bool = py.typeIsSubclass(%item.1.0, %cls.6) ^propagate.0()
+            branch(%sub.5) ^then.15() ^else.15()
+          then.15():
+            %inst.5 : base.Bool = py.isInstance(%item.1.0, %cls.6) ^propagate.0()
+            jump ^join.15(%inst.5)
+          else.15():
+            jump ^join.15(false)
+          join.15(%b.26 : base.Bool):
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.26)
+            ret(%res.0)
+          propagate.0(%exc.0 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+            ret(%err.0)
+        }
+        jump ^join.14(%all.0)
+      else.14():
+        jump ^join.14(false)
+      join.14(%b.28 : base.Bool):
+        jump ^join.12(%b.28)
+      else.12():
+        jump ^join.12(false)
+      join.12(%b.30 : base.Bool):
+        jump ^join.11(%b.30)
+      else.11():
+        jump ^join.11(false)
+      join.11(%b.32 : base.Bool):
+        branch(%b.32) ^then.16() ^else.16()
+      then.16():
+        %str.11 : py.Value = py.strLit("flag1")
+        %kw.11 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.5 : py.Value = py.in(%str.11, %kw.11) ^fail.1()
+        %cond.5 : base.Bool = py.truthy(%in.5) ^fail.1()
+        branch(%cond.5) ^then.17() ^else.17()
+      then.17():
+        %kw.12 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.12 : py.Value = py.strLit("flag1")
+        %item.6 : py.Value = py.getItem(%kw.12, %str.12) ^fail.1()
+        %cls.7 : py.Value = py.stdClass("builtins", "bool")
+        %sub.6 : base.Bool = py.typeIsSubclass(%item.6, %cls.7) ^fail.1()
+        branch(%sub.6) ^then.18() ^else.18()
+      then.18():
+        %inst.6 : base.Bool = py.isInstance(%item.6, %cls.7) ^fail.1()
+        jump ^join.18(%inst.6)
+      else.18():
+        jump ^join.18(false)
+      join.18(%b.34 : base.Bool):
+        jump ^join.17(%b.34)
+      else.17():
+        jump ^join.17(false)
+      join.17(%b.36 : base.Bool):
+        jump ^join.16(%b.36)
+      else.16():
+        jump ^join.16(false)
+      join.16(%b.38 : base.Bool):
+        branch(%b.38) ^then.19() ^else.19()
+      then.19():
+        %str.13 : py.Value = py.strLit("flag2")
+        %kw.13 : py.Value = py.extraKwargs(%kwargs.0)
+        %in.6 : py.Value = py.in(%str.13, %kw.13) ^fail.1()
+        %cond.6 : base.Bool = py.truthy(%in.6) ^fail.1()
+        branch(%cond.6) ^then.20() ^else.20()
+      then.20():
+        %kw.14 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.14 : py.Value = py.strLit("flag2")
+        %item.7 : py.Value = py.getItem(%kw.14, %str.14) ^fail.1()
+        %cls.8 : py.Value = py.stdClass("builtins", "bool")
+        %sub.7 : base.Bool = py.typeIsSubclass(%item.7, %cls.8) ^fail.1()
+        branch(%sub.7) ^then.21() ^else.21()
+      then.21():
+        %inst.7 : base.Bool = py.isInstance(%item.7, %cls.8) ^fail.1()
+        jump ^join.21(%inst.7)
+      else.21():
+        jump ^join.21(false)
+      join.21(%b.40 : base.Bool):
+        jump ^join.20(%b.40)
+      else.20():
+        jump ^join.20(false)
+      join.20(%b.42 : base.Bool):
+        jump ^join.19(%b.42)
+      else.19():
+        jump ^join.19(false)
+      join.19(%b.44 : base.Bool):
+        ret(%b.44)
+      fail.1(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "keywords of 'boolean' are declared" {
+      pre.2():
+        %within.0 : base.Bool = py.dictKeysWithin(%kwargs.0, "a", "b", "c", "score", "items", "flag1", "flag2")
+        ret(%within.0)
+    }
+    requires "and" {
+      pre.3():
+        %kw.15 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.15 : py.Value = py.strLit("flag1")
+        %item.8 : py.Value = py.getItem(%kw.15, %str.15) ^fail.3()
+        %cond.7 : base.Bool = py.truthy(%item.8) ^fail.3()
+        branch(%cond.7) ^then.22() ^else.22()
+      then.22():
+        %kw.16 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.16 : py.Value = py.strLit("flag2")
+        %item.9 : py.Value = py.getItem(%kw.16, %str.16) ^fail.3()
+        %cond.8 : base.Bool = py.truthy(%item.9) ^fail.3()
+        jump ^join.22(%cond.8)
+      else.22():
+        jump ^join.22(false)
+      join.22(%b.46 : base.Bool):
+        ret(%b.46)
+      fail.3(%e.1 : py.Value):
+        ret(false)
+    }
+    requires "or" {
+      pre.4():
+        %kw.17 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.17 : py.Value = py.strLit("flag1")
+        %item.10 : py.Value = py.getItem(%kw.17, %str.17) ^fail.4()
+        %cond.9 : base.Bool = py.truthy(%item.10) ^fail.4()
+        branch(%cond.9) ^then.23() ^else.23()
+      then.23():
+        jump ^join.23(true)
+      else.23():
+        %kw.18 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.18 : py.Value = py.strLit("flag2")
+        %item.11 : py.Value = py.getItem(%kw.18, %str.18) ^fail.4()
+        %cond.10 : base.Bool = py.truthy(%item.11) ^fail.4()
+        jump ^join.23(%cond.10)
+      join.23(%b.48 : base.Bool):
+        ret(%b.48)
+      fail.4(%e.2 : py.Value):
+        ret(false)
+    }
+    requires "not" {
+      pre.5():
+        %kw.19 : py.Value = py.extraKwargs(%kwargs.0)
+        %str.19 : py.Value = py.strLit("flag1")
+        %item.12 : py.Value = py.getItem(%kw.19, %str.19) ^fail.5()
+        %cond.11 : base.Bool = py.truthy(%item.12) ^fail.5()
+        branch(%cond.11) ^then.24() ^else.24()
+      then.24():
+        jump ^join.24(false)
+      else.24():
+        jump ^join.24(true)
+      join.24(%b.51 : base.Bool):
+        ret(%b.51)
+      fail.5(%e.3 : py.Value):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @operators.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

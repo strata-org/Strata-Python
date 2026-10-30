@@ -1,0 +1,1 @@
+[unresolved-name] classvar_unknown: the class variable 'X' of 'C' reads 'Missing', which neither the class body nor the module has bound when the class body reads it

@@ -1,0 +1,86 @@
+module servicelib.Contract {
+  func @|servicelib.Contract.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("servicelib.Contract")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Contract", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@servicelib.Contract.modeled_text)
+      %modeled_text.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Contract", "modeled_text")
+      %set.1 : base.Unit = base.refSet[py.Value](%modeled_text.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@servicelib.Contract.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Contract", "__getattr__")
+      %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @servicelib.Contract.modeled_text(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'modeled_text'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "name")
+        ret(%binds.0)
+    }
+    requires "'name' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("name")
+        %name.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%name.0)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 'name'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("name")
+        %name.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "str")
+        %sub.0 : base.Bool = py.typeIsSubclass(%name.1, %cls.0) ^fail.2()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%name.1, %cls.0) ^fail.2()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "precondition 0" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("name")
+        %name.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.2)
+        %len.0 : py.Value = py.len(%name.2) ^fail.3()
+        %int.0 : py.Value = py.intLit(1)
+        %gtE.0 : py.Value = py.gtE(%len.0, %int.0) ^fail.3()
+        %cond.0 : base.Bool = py.truthy(%gtE.0) ^fail.3()
+        ret(%cond.0)
+      fail.3(%e.1 : py.Value):
+        ret(false)
+    }
+    free ensures "return type of 'modeled_text'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %cls.1 : py.Value = py.stdClass("builtins", "str")
+        %inst.1 : base.Bool = py.isInstance(%result.0, %cls.1) ^fail.4()
+        ret(%inst.1)
+      raised.0(%exc.0 : py.Value):
+        ret(true)
+      fail.4(%e.2 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @servicelib.Contract.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

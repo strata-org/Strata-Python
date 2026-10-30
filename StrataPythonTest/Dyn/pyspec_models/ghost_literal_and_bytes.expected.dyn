@@ -1,0 +1,81 @@
+module ghost_literal_and_bytes {
+  ghost @|ghost_literal_and_bytes.<ghost>.mode| : py.Value invariant {
+    inv.0(%v.0 : py.Value):
+      %defined.0 : base.Bool = py.isDefined(%v.0)
+      branch(%defined.0) ^then.0() ^else.0()
+    then.0():
+      %cls.0 : py.Value = py.stdClass("builtins", "str")
+      %inst.0 : base.Bool = py.isInstance(%v.0, %cls.0) ^fail.0()
+      jump ^join.0(%inst.0)
+    else.0():
+      jump ^join.0(false)
+    join.0(%b.1 : base.Bool):
+      ret(%b.1)
+    fail.0(%e.0 : py.Value):
+      unreachable
+  }
+  func @|ghost_literal_and_bytes.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("ghost_literal_and_bytes")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("ghost_literal_and_bytes", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@ghost_literal_and_bytes.read)
+      %read.cell.0 : base.Ref(py.Value) = py.globalCell("ghost_literal_and_bytes", "read")
+      %set.1 : base.Unit = base.refSet[py.Value](%read.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@ghost_literal_and_bytes.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("ghost_literal_and_bytes", "__getattr__")
+      %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @ghost_literal_and_bytes.read(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'read'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 0, false)
+        ret(%binds.0)
+    }
+    free ensures "return type of 'read'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %cls.0 : py.Value = py.stdClass("builtins", "bytes")
+        %inst.0 : base.Bool = py.isInstance(%result.0, %cls.0) ^fail.1()
+        branch(%inst.0) ^then.0() ^else.0()
+      then.0():
+        jump ^join.0(true)
+      else.0():
+        %cls.1 : py.Value = py.stdClass("builtins", "bytearray")
+        %inst.1 : base.Bool = py.isInstance(%result.0, %cls.1) ^fail.1()
+        jump ^join.0(%inst.1)
+      join.0(%b.2 : base.Bool):
+        branch(%b.2) ^then.1() ^else.1()
+      then.1():
+        jump ^join.1(true)
+      else.1():
+        %cls.2 : py.Value = py.stdClass("builtins", "memoryview")
+        %inst.2 : base.Bool = py.isInstance(%result.0, %cls.2) ^fail.1()
+        jump ^join.1(%inst.2)
+      join.1(%b.4 : base.Bool):
+        ret(%b.4)
+      raised.0(%exc.0 : py.Value):
+        ret(true)
+      fail.1(%e.0 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @ghost_literal_and_bytes.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

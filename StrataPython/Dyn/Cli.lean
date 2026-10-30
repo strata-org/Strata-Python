@@ -12,8 +12,9 @@ import StrataPython.Dyn.Translate
 import StrataDyn.DDM
 import StrataDyn.DDMRead
 import StrataDyn.Env.WF
+import StrataPython.Dyn.PySpec.Load
 
-/-! # The `dyn` and `read` commands
+/-! # The `dyn`, `pyspec` and `read` commands
 
 `dyn FILE` translates a Python program with `PyTranslate.translate` and prints its
 diagnostics, then its module, with constants folded into their uses, or with `--full` each
@@ -28,6 +29,12 @@ on its own line.
 Exit status: 0 if the translation succeeded and the module is well formed, 1 if there are
 diagnostics or ill-formed functions, 2 if `FILE` cannot be parsed or read.  A wrong argument
 count is a usage error of the CLI framework, status 1.
+
+`pyspec SEARCH_PATH MODULE` translates the PySpec model module `MODULE`, found under
+`SEARCH_PATH`, and every model module it imports, to IR modules (`docs/PythonToDyn.md` §12),
+and prints them; with `--out DIR`, it writes each to `DIR/<module>.dyn` instead. It prints
+each rejection with its rule ID. `PYTHON` selects the interpreter that runs PySpec's parser.
+Exit status: 0 if the set translated, 1 if it is rejected, 2 if PySpec fails.
 
 `read FILE` reads a printed Dyn module, such as a translator golden, against the Python
 environment with `Module.read`, and prints it again: folded, or with `--full` in full.  Exit
@@ -98,6 +105,49 @@ def dynCommand : _root_.Command where
     python3)."
   callback := fun v flags => do
     let code ← run v[0] (printOptions flags)
+    unless code == 0 do IO.Process.exit code.toUInt8
+
+private def outFlag : Flag :=
+  { name := "out", help := "Write each module to DIR/<module>.dyn.", takesArg := .arg "DIR" }
+
+/-- Translate the model set of `module` under `searchPath`, returning the exit status. -/
+private def runPySpec (searchPath module : String) (out : Option String)
+    (opts : Strata.Dyn.PrintOptions) : IO UInt32 := do
+  let pythonCmd := (← IO.getEnv "PYTHON").getD "python3"
+  let some mod := ModuleName.ofString? module
+    | IO.eprintln s!"pydyn pyspec: '{module}' is not a module name"; return 2
+  let file ← match ← (mod.findInPath searchPath).toBaseIO with
+    | .ok (f, _) => pure f
+    | .error e => IO.eprintln s!"pydyn pyspec: {e}"; return 2
+  let set ← match ← (PySpec.loadModels pythonCmd searchPath file module).toBaseIO with
+    | .ok (set, warnings) =>
+      for w in warnings do IO.eprintln s!"pydyn pyspec: warning: {w}"
+      pure set
+    | .error e => IO.eprintln s!"pydyn pyspec: {e}"; return 2
+  match PySpec.translateModels set with
+  | .error rs =>
+    for r in rs do IO.println s!"rejected [{r.rule}] {r.module}: {r.message}"
+    return 1
+  | .ok mods =>
+    for m in mods do
+      match out with
+      | some dir =>
+        IO.FS.createDirAll dir
+        IO.FS.writeFile (System.FilePath.mk dir / s!"{Strata.Dyn.Build.nameText m.raw.name}.dyn")
+          (m.format opts)
+      | none => IO.print (m.format opts)
+    return 0
+
+/-- The `pyspec` subcommand. -/
+def pyspecCommand : _root_.Command where
+  name := "pyspec"
+  args := [ "search-path", "module" ]
+  flags := [fullFlag, outFlag]
+  help := "Translate a PySpec model module and the model modules it imports to the IR, and \
+    print them, or write them to --out DIR. Exit status: 0 if they translated, 1 if they are \
+    rejected, 2 if PySpec fails. PYTHON selects the interpreter that runs PySpec's parser."
+  callback := fun v flags => do
+    let code ← runPySpec v[0] v[1] (flags.getString "out") (printOptions flags)
     unless code == 0 do IO.Process.exit code.toUInt8
 
 /-- Read and print the module in `path` with `opts`, returning the exit status. -/

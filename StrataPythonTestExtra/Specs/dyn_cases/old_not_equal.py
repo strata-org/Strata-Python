@@ -1,0 +1,3 @@
+# In a free ensures, either reading of x != "A" suffices, under OLD too.
+@admit(lambda x, result: OLD(x) != "A")
+def f(x: str) -> None: ...

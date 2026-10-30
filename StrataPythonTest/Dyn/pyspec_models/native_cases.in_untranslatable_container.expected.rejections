@@ -1,0 +1,2 @@
+[dropped-clause] native_cases.in_untranslatable_container: PySpec dropped the assert clause '"k" not in g(x)' of 'f'
+[dropped-clause] native_cases.in_untranslatable_container: PySpec dropped the assert clause '"k" in g(x)' of 'f'

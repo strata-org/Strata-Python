@@ -21,7 +21,7 @@
 -- asserts and then the `@requires`, in PySpec's order, and the assert under `if n > 0` applies
 -- only when `n > 0` (§12.2). Its frame names the attribute `count` of the receiver, and needs no
 -- region for what that attribute holds (§12.5). The top-level `self.helper = self._Helper()`
--- declares the field `helper`, marked with `__init__` (§12.10). PySpec gives the field the
+-- declares the field `helper` in `py.initFields`, marked with `__init__` (§12.10). PySpec gives the field the
 -- flattened type `init_contract._Helper`, and the translation writes the real path
 -- `init_contract.C._Helper`. The assignment under the `if` declares no field. The nested class
 -- `_Helper` is built in the body of `C`, and its `__qualname__` is `"C._Helper"`. It gets a
@@ -37,8 +37,6 @@ module init_contract {
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("init_contract", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
       %none.0 : py.Value = py.noneLit
-      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("init_contract", "__doc__")
-      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|init_contract.C.<body>|)
       %str.1 : py.Value = py.strLit("C")
@@ -58,7 +56,8 @@ module init_contract {
       ret(%exc.1)
   }
   func @|init_contract.C.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
-    #[py.fields = [{name = "count", type = "builtins.int"}, {name = "helper", type = "init_contract.C._Helper", in = @init_contract.C.__init__}]]
+    #[py.fields = [{name = "count", trustedType = "builtins.int"}]]
+    #[py.initFields = [{name = "helper", trustedType = "init_contract.C._Helper", in = @init_contract.C.__init__}]]
 
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)

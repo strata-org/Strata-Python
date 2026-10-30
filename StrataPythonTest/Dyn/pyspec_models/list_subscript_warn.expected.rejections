@@ -1,0 +1,1 @@
+[dropped-clause] list_subscript_warn: PySpec dropped the assert clause 'len(Keys[I]) >= 1' of 'index_into_list'

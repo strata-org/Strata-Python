@@ -1,0 +1,1 @@
+[dropped-clause] native_cases.init_assign_taints: PySpec dropped the assert clause 'len(xs) >= 1' of 'C.__init__'

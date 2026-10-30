@@ -1,0 +1,52 @@
+module native_cases.literal_u_prefix {
+  func @|native_cases.literal_u_prefix.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("native_cases.literal_u_prefix")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.literal_u_prefix", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@native_cases.literal_u_prefix.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.literal_u_prefix", "f")
+      %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@native_cases.literal_u_prefix.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.literal_u_prefix", "__getattr__")
+      %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @native_cases.literal_u_prefix.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'f'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "x")
+        ret(%binds.0)
+    }
+    requires "'x' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("x")
+        %x.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "x", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%x.0)
+        ret(%defined.0)
+    }
+    requires "declared type of parameter 'x'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("x")
+        %x.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "x", %undef.1)
+        %oneOf.0 : base.Bool = py.strIsOneOf(%x.1, "a")
+        ret(%oneOf.0)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @native_cases.literal_u_prefix.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

@@ -1,0 +1,1 @@
+[ensures] native_cases.ensures_basic: 'f' has an @ensures, which a model can't verify; use @admit

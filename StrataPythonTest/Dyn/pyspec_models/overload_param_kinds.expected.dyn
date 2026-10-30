@@ -1,0 +1,278 @@
+module overload_param_kinds {
+  func @|overload_param_kinds.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("overload_param_kinds")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("overload_param_kinds", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@overload_param_kinds.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("overload_param_kinds", "f")
+      %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@overload_param_kinds.f)
+      %f.cell.1 : base.Ref(py.Value) = py.globalCell("overload_param_kinds", "f")
+      %set.2 : base.Unit = base.refSet[py.Value](%f.cell.1, %clo.1)
+      %clo.2 : py.Value = py.mkClosure[[]](@overload_param_kinds.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("overload_param_kinds", "__getattr__")
+      %set.3 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.2)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @overload_param_kinds.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "'k' is required" {
+      pre.0():
+        %undef.0 : py.Value = py.undef("k")
+        %k.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "k", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%k.0)
+        ret(%defined.0)
+    }
+    requires "'f' called with unknown string" {
+      pre.1():
+        %undef.1 : py.Value = py.undef("k")
+        %k.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "k", %undef.1)
+        %oneOf.0 : base.Bool = py.strIsOneOf(%k.1, "a", "b")
+        ret(%oneOf.0)
+    }
+    requires "arguments bind to 'f' for 'a'" {
+      pre.2():
+        %undef.2 : py.Value = py.undef("k")
+        %k.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "k", %undef.2)
+        %str.0 : py.Value = py.strLit("a")
+        %eq.0 : py.Value = py.eq(%k.2, %str.0) ^fail.2()
+        %cond.0 : base.Bool = py.truthy(%eq.0) ^fail.2()
+        branch(%cond.0) ^then.0() ^else.0()
+      then.0():
+        jump ^join.0(true)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        branch(%b.2) ^then.1() ^else.1()
+      then.1():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 2, false, "k", "x")
+        jump ^join.1(%binds.0)
+      else.1():
+        jump ^join.1(true)
+      join.1(%b.5 : base.Bool):
+        ret(%b.5)
+      fail.2(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "declared type of parameter 'x' for 'a'" {
+      pre.3():
+        %undef.3 : py.Value = py.undef("k")
+        %k.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "k", %undef.3)
+        %str.1 : py.Value = py.strLit("a")
+        %eq.1 : py.Value = py.eq(%k.3, %str.1) ^fail.3()
+        %cond.1 : base.Bool = py.truthy(%eq.1) ^fail.3()
+        branch(%cond.1) ^then.2() ^else.2()
+      then.2():
+        jump ^join.2(true)
+      else.2():
+        jump ^join.2(false)
+      join.2(%b.8 : base.Bool):
+        branch(%b.8) ^then.3() ^else.3()
+      then.3():
+        %none.0 : py.Value = py.noneLit
+        %x.0 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "x", %none.0)
+        %none.1 : py.Value = py.noneLit
+        %is.0 : py.Value = py.is(%x.0, %none.1)
+        %cond.2 : base.Bool = py.truthy(%is.0) ^fail.3()
+        branch(%cond.2) ^then.4() ^else.4()
+      then.4():
+        jump ^join.4(true)
+      else.4():
+        %none.2 : py.Value = py.noneLit
+        %x.1 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "x", %none.2)
+        %cls.0 : py.Value = py.stdClass("builtins", "int")
+        %sub.0 : base.Bool = py.typeIsSubclass(%x.1, %cls.0) ^fail.3()
+        branch(%sub.0) ^then.5() ^else.5()
+      then.5():
+        %inst.0 : base.Bool = py.isInstance(%x.1, %cls.0) ^fail.3()
+        jump ^join.5(%inst.0)
+      else.5():
+        jump ^join.5(false)
+      join.5(%b.11 : base.Bool):
+        branch(%b.11) ^then.6() ^else.6()
+      then.6():
+        jump ^join.6(true)
+      else.6():
+        %none.3 : py.Value = py.noneLit
+        %x.2 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "x", %none.3)
+        %none.4 : py.Value = py.noneLit
+        %is.1 : py.Value = py.is(%x.2, %none.4)
+        %cond.3 : base.Bool = py.truthy(%is.1) ^fail.3()
+        jump ^join.6(%cond.3)
+      join.6(%b.13 : base.Bool):
+        jump ^join.4(%b.13)
+      join.4(%b.14 : base.Bool):
+        jump ^join.3(%b.14)
+      else.3():
+        jump ^join.3(true)
+      join.3(%b.16 : base.Bool):
+        ret(%b.16)
+      fail.3(%e.1 : py.Value):
+        ret(false)
+    }
+    requires "arguments bind to 'f' for 'b'" {
+      pre.4():
+        %undef.4 : py.Value = py.undef("k")
+        %k.4 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "k", %undef.4)
+        %str.2 : py.Value = py.strLit("b")
+        %eq.2 : py.Value = py.eq(%k.4, %str.2) ^fail.4()
+        %cond.4 : base.Bool = py.truthy(%eq.2) ^fail.4()
+        branch(%cond.4) ^then.7() ^else.7()
+      then.7():
+        jump ^join.7(true)
+      else.7():
+        jump ^join.7(false)
+      join.7(%b.19 : base.Bool):
+        branch(%b.19) ^then.8() ^else.8()
+      then.8():
+        %binds.1 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "k", "x")
+        jump ^join.8(%binds.1)
+      else.8():
+        jump ^join.8(true)
+      join.8(%b.22 : base.Bool):
+        ret(%b.22)
+      fail.4(%e.2 : py.Value):
+        ret(false)
+    }
+    requires "declared type of parameter 'x' for 'b'" {
+      pre.5():
+        %undef.5 : py.Value = py.undef("k")
+        %k.5 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "k", %undef.5)
+        %str.3 : py.Value = py.strLit("b")
+        %eq.3 : py.Value = py.eq(%k.5, %str.3) ^fail.5()
+        %cond.5 : base.Bool = py.truthy(%eq.3) ^fail.5()
+        branch(%cond.5) ^then.9() ^else.9()
+      then.9():
+        jump ^join.9(true)
+      else.9():
+        jump ^join.9(false)
+      join.9(%b.25 : base.Bool):
+        branch(%b.25) ^then.10() ^else.10()
+      then.10():
+        %none.5 : py.Value = py.noneLit
+        %x.3 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "x", %none.5)
+        %none.6 : py.Value = py.noneLit
+        %is.2 : py.Value = py.is(%x.3, %none.6)
+        %cond.6 : base.Bool = py.truthy(%is.2) ^fail.5()
+        branch(%cond.6) ^then.11() ^else.11()
+      then.11():
+        jump ^join.11(true)
+      else.11():
+        %none.7 : py.Value = py.noneLit
+        %x.4 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "x", %none.7)
+        %cls.1 : py.Value = py.stdClass("builtins", "int")
+        %sub.1 : base.Bool = py.typeIsSubclass(%x.4, %cls.1) ^fail.5()
+        branch(%sub.1) ^then.12() ^else.12()
+      then.12():
+        %inst.1 : base.Bool = py.isInstance(%x.4, %cls.1) ^fail.5()
+        jump ^join.12(%inst.1)
+      else.12():
+        jump ^join.12(false)
+      join.12(%b.28 : base.Bool):
+        branch(%b.28) ^then.13() ^else.13()
+      then.13():
+        jump ^join.13(true)
+      else.13():
+        %none.8 : py.Value = py.noneLit
+        %x.5 : py.Value = py.argOf(%args.0, %kwargs.0, -1, "x", %none.8)
+        %none.9 : py.Value = py.noneLit
+        %is.3 : py.Value = py.is(%x.5, %none.9)
+        %cond.7 : base.Bool = py.truthy(%is.3) ^fail.5()
+        jump ^join.13(%cond.7)
+      join.13(%b.30 : base.Bool):
+        jump ^join.11(%b.30)
+      join.11(%b.31 : base.Bool):
+        jump ^join.10(%b.31)
+      else.10():
+        jump ^join.10(true)
+      join.10(%b.33 : base.Bool):
+        ret(%b.33)
+      fail.5(%e.3 : py.Value):
+        ret(false)
+    }
+    free ensures "overload of 'f' for 'a'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %old.0 : py.Value = base.old[py.Value, py.Value] ^fail.6() {
+          body.0():
+            %undef.6 : py.Value = py.undef("k")
+            %k.6 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "k", %undef.6)
+            %res.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%k.6)
+            ret(%res.0)
+        }
+        %str.4 : py.Value = py.strLit("a")
+        %eq.4 : py.Value = py.eq(%old.0, %str.4) ^fail.6()
+        %cond.8 : base.Bool = py.truthy(%eq.4) ^fail.6()
+        branch(%cond.8) ^then.14() ^else.14()
+      then.14():
+        jump ^join.14(true)
+      else.14():
+        jump ^join.14(false)
+      join.14(%b.36 : base.Bool):
+        branch(%b.36) ^then.15() ^else.15()
+      then.15():
+        %cls.2 : py.Value = py.stdClass("builtins", "int")
+        %inst.2 : base.Bool = py.isInstance(%result.0, %cls.2) ^fail.6()
+        jump ^join.15(%inst.2)
+      else.15():
+        jump ^join.15(true)
+      join.15(%b.38 : base.Bool):
+        ret(%b.38)
+      raised.0(%exc.1 : py.Value):
+        ret(true)
+      fail.6(%e.4 : py.Value):
+        ret(true)
+    }
+    free ensures "overload of 'f' for 'b'" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %old.1 : py.Value = base.old[py.Value, py.Value] ^fail.7() {
+          body.1():
+            %undef.7 : py.Value = py.undef("k")
+            %k.7 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "k", %undef.7)
+            %res.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%k.7)
+            ret(%res.1)
+        }
+        %str.5 : py.Value = py.strLit("b")
+        %eq.5 : py.Value = py.eq(%old.1, %str.5) ^fail.7()
+        %cond.9 : base.Bool = py.truthy(%eq.5) ^fail.7()
+        branch(%cond.9) ^then.16() ^else.16()
+      then.16():
+        jump ^join.16(true)
+      else.16():
+        jump ^join.16(false)
+      join.16(%b.42 : base.Bool):
+        branch(%b.42) ^then.17() ^else.17()
+      then.17():
+        %cls.3 : py.Value = py.stdClass("builtins", "str")
+        %inst.3 : base.Bool = py.isInstance(%result.1, %cls.3) ^fail.7()
+        jump ^join.17(%inst.3)
+      else.17():
+        jump ^join.17(true)
+      join.17(%b.44 : base.Bool):
+        ret(%b.44)
+      raised.1(%exc.3 : py.Value):
+        ret(true)
+      fail.7(%e.5 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @overload_param_kinds.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

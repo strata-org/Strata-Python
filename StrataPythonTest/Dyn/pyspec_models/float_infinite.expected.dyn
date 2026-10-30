@@ -1,0 +1,71 @@
+module float_infinite {
+  func @|float_infinite.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("float_infinite")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("float_infinite", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@float_infinite.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("float_infinite", "f")
+      %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@float_infinite.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("float_infinite", "__getattr__")
+      %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @float_infinite.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'f'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 0, false)
+        ret(%binds.0)
+    }
+    free ensures "return type of 'f'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %cls.0 : py.Value = py.stdClass("builtins", "float")
+        %inst.0 : base.Bool = py.isInstance(%result.0, %cls.0) ^fail.1()
+        branch(%inst.0) ^then.0() ^else.0()
+      then.0():
+        jump ^join.0(true)
+      else.0():
+        %cls.1 : py.Value = py.stdClass("builtins", "int")
+        %inst.1 : base.Bool = py.isInstance(%result.0, %cls.1) ^fail.1()
+        jump ^join.0(%inst.1)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      raised.0(%exc.0 : py.Value):
+        ret(true)
+      fail.1(%e.0 : py.Value):
+        ret(true)
+    }
+    free ensures "admitted postcondition of 'f'" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %float.0 : py.Value = py.floatLit(inf)
+        %ltE.0 : py.Value = py.ltE(%result.1, %float.0) ^fail.2()
+        %cond.0 : base.Bool = py.truthy(%ltE.0) ^fail.2()
+        ret(%cond.0)
+      raised.1(%exc.1 : py.Value):
+        ret(true)
+      fail.2(%e.1 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @float_infinite.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

@@ -1,0 +1,12 @@
+[dropped-clause] shadowed_builtin: PySpec dropped the assert clause 'len(s) >= 1' of 'module_alias_len'
+[shadowed-builtin] shadowed_builtin: a clause of 'module_alias_len' calls 'len', which the module binds to something else
+[dropped-clause] shadowed_builtin: PySpec dropped the assert clause 'compile("a+").search(s) is None' of 'regex_none'
+[shadowed-builtin] shadowed_builtin: a clause of 'regex_none' calls 'compile', which the module binds to something else
+[dropped-clause] shadowed_builtin: PySpec dropped the assert clause 'compile("a+").search(s) is not None' of 'regex_some'
+[shadowed-builtin] shadowed_builtin: a clause of 'regex_some' calls 'compile', which the module binds to something else
+[dropped-clause] shadowed_builtin: PySpec dropped the assert clause 'isinstance(x, int)' of 'uses_isinstance'
+[shadowed-builtin] shadowed_builtin: a clause of 'uses_isinstance' calls 'isinstance', which the module binds to something else
+[dropped-clause] shadowed_builtin: PySpec dropped the assert clause 'all(x > 0 for x in xs)' of 'uses_all'
+[shadowed-builtin] shadowed_builtin: a clause of 'uses_all' calls 'all', which the module binds to something else
+[dropped-clause] shadowed_builtin: PySpec dropped the assert clause 'any(x > 0 for x in xs)' of 'uses_any'
+[shadowed-builtin] shadowed_builtin: a clause of 'uses_any' calls 'any', which the module binds to something else

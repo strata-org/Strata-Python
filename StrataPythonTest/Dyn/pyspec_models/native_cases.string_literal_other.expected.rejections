@@ -1,0 +1,1 @@
+[dropped-clause] native_cases.string_literal_other: PySpec dropped the assert clause 'x > "a"' of 'f'

@@ -90,6 +90,13 @@ The translator test fails on any `.py` that is not listed, the scope test on any
 without both scope files, and the ref-to-reg test on any translator golden without its
 `.expected.ssa.dyn` golden.
 `lake exe pydyn dyn FILE.py` prints the diagnostics and the module for one file.
+
+A PySpec model translates to IR modules (`docs/PythonToDyn.md` §12.13). To add a test, put the
+model under a search path such as `StrataPythonTestExtra/Specs/`, add the line `SEARCH_PATH |
+MODULE | ok` (or the rule IDs of its rejections) to `StrataPythonTest/Dyn/pyspec_models.txt`,
+and write its goldens by running `StrataPythonTestExtra/PySpecDynTest.lean` with
+`PYSPEC_DYN_UPDATE=1`. `lake exe pydyn pyspec SEARCH_PATH MODULE` prints one set.
+
 `StrataPythonTestExtra/DynReadTest.lean` reads every golden back with `Module.read`, so a
 printer change that breaks reading fails there; `lake exe pydyn read FILE` reads one.
 

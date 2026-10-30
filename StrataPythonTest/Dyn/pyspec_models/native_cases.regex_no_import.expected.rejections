@@ -1,0 +1,1 @@
+[dropped-clause] native_cases.regex_no_import: PySpec dropped the assert clause 'compile("a").search(s) is not None' of 'f'

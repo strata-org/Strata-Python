@@ -1,0 +1,1 @@
+[old-uncovered] servicelib.GhostOldNoFrame: an OLD of 'bump' reads the ghost 'c', which isn't covered state, so the clause would assume false

@@ -1,0 +1,6 @@
+from typing import Literal, overload, Union
+
+@overload
+def f(k: Literal["a"], x: Union[int, None] = None) -> int: ...
+@overload
+def f(k: Literal["b"], *, x: Union[int, None] = None) -> str: ...

@@ -1,0 +1,154 @@
+module native_cases.len_by_type {
+  func @|native_cases.len_by_type.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("native_cases.len_by_type")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.len_by_type", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@native_cases.len_by_type.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.len_by_type", "f")
+      %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@native_cases.len_by_type.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.len_by_type", "__getattr__")
+      %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+  }
+  extern func @native_cases.len_by_type.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'f'" {
+      pre.0():
+        %binds.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 3, false, "xs", "s", "a")
+        ret(%binds.0)
+    }
+    requires "'xs' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("xs")
+        %xs.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.0)
+        %defined.0 : base.Bool = py.isDefined(%xs.0)
+        ret(%defined.0)
+    }
+    requires "'s' is required" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("s")
+        %s.7 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "s", %undef.1)
+        %defined.1 : base.Bool = py.isDefined(%s.7)
+        ret(%defined.1)
+    }
+    requires "'a' is required" {
+      pre.3():
+        %undef.2 : py.Value = py.undef("a")
+        %a.0 : py.Value = py.argOf(%args.0, %kwargs.0, 2, "a", %undef.2)
+        %defined.2 : base.Bool = py.isDefined(%a.0)
+        ret(%defined.2)
+    }
+    requires "declared type of parameter 'xs'" {
+      pre.4():
+        %undef.3 : py.Value = py.undef("xs")
+        %xs.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.3)
+        %cls.0 : py.Value = py.stdClass("builtins", "list")
+        %sub.0 : base.Bool = py.typeIsSubclass(%xs.1, %cls.0) ^fail.4()
+        branch(%sub.0) ^then.0() ^else.0()
+      then.0():
+        %inst.0 : base.Bool = py.isInstance(%xs.1, %cls.0) ^fail.4()
+        jump ^join.0(%inst.0)
+      else.0():
+        jump ^join.0(false)
+      join.0(%b.2 : base.Bool):
+        ret(%b.2)
+      fail.4(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "declared type of parameter 's'" {
+      pre.5():
+        %undef.4 : py.Value = py.undef("s")
+        %s.16 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "s", %undef.4)
+        %cls.1 : py.Value = py.stdClass("builtins", "str")
+        %sub.1 : base.Bool = py.typeIsSubclass(%s.16, %cls.1) ^fail.5()
+        branch(%sub.1) ^then.1() ^else.1()
+      then.1():
+        %inst.1 : base.Bool = py.isInstance(%s.16, %cls.1) ^fail.5()
+        jump ^join.1(%inst.1)
+      else.1():
+        jump ^join.1(false)
+      join.1(%b.4 : base.Bool):
+        ret(%b.4)
+      fail.5(%e.1 : py.Value):
+        ret(false)
+    }
+    requires "schema of parameter 'xs'" {
+      pre.6():
+        %undef.5 : py.Value = py.undef("xs")
+        %xs.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.5)
+        %all.0 : base.Bool = py.allIn(%xs.2) ^fail.6() {
+          body.0(%item.0.0 : py.Value):
+            %cls.2 : py.Value = py.stdClass("builtins", "str")
+            %sub.2 : base.Bool = py.typeIsSubclass(%item.0.0, %cls.2) ^propagate.0()
+            branch(%sub.2) ^then.2() ^else.2()
+          then.2():
+            %inst.2 : base.Bool = py.isInstance(%item.0.0, %cls.2) ^propagate.0()
+            jump ^join.2(%inst.2)
+          else.2():
+            jump ^join.2(false)
+          join.2(%b.6 : base.Bool):
+            %res.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](%b.6)
+            ret(%res.0)
+          propagate.0(%exc.0 : py.Value):
+            %err.0 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+            ret(%err.0)
+        }
+        ret(%all.0)
+      fail.6(%e.2 : py.Value):
+        ret(false)
+    }
+    requires "xs must not be empty" {
+      pre.7():
+        %undef.6 : py.Value = py.undef("xs")
+        %xs.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "xs", %undef.6)
+        %len.0 : py.Value = py.len(%xs.3) ^fail.7()
+        %int.0 : py.Value = py.intLit(1)
+        %gtE.0 : py.Value = py.gtE(%len.0, %int.0) ^fail.7()
+        %cond.0 : base.Bool = py.truthy(%gtE.0) ^fail.7()
+        ret(%cond.0)
+      fail.7(%e.3 : py.Value):
+        ret(false)
+    }
+    requires "s must not be empty" {
+      pre.8():
+        %undef.7 : py.Value = py.undef("s")
+        %s.27 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "s", %undef.7)
+        %len.1 : py.Value = py.len(%s.27) ^fail.8()
+        %int.1 : py.Value = py.intLit(1)
+        %gtE.1 : py.Value = py.gtE(%len.1, %int.1) ^fail.8()
+        %cond.1 : base.Bool = py.truthy(%gtE.1) ^fail.8()
+        ret(%cond.1)
+      fail.8(%e.4 : py.Value):
+        ret(false)
+    }
+    requires "a has at most three elements" {
+      pre.9():
+        %undef.8 : py.Value = py.undef("a")
+        %a.1 : py.Value = py.argOf(%args.0, %kwargs.0, 2, "a", %undef.8)
+        %len.2 : py.Value = py.len(%a.1) ^fail.9()
+        %int.2 : py.Value = py.intLit(3)
+        %ltE.0 : py.Value = py.ltE(%len.2, %int.2) ^fail.9()
+        %cond.2 : base.Bool = py.truthy(%ltE.0) ^fail.9()
+        ret(%cond.2)
+      fail.9(%e.5 : py.Value):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @native_cases.len_by_type.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}
