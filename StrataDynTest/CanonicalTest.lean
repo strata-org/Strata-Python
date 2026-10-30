@@ -27,7 +27,8 @@ bodies that each break one property:
   successor.
 
 Then a `break` with its own exit block, nested loops, a loop inside a region, and a loop with two
-entries, which the form does not cover.
+entries, which the form does not cover but the check of one entry per loop rejects, with edge
+cases of that check.
 -/
 
 namespace Strata.Dyn.CanonicalTest
@@ -188,11 +189,13 @@ The block after a `break` is outside the loop, so `brk` is an exit of its own.
 
 /-! ## Nested loops, each canonical -/
 
-#guard canon
+private def nestedLoops : List (Block E Unit) :=
   [blk "entry" #[] (jump "opre"), blk "opre" #[] (jump "oh"),
    blk "oh" #[] (branch "ipre" "exit"), blk "ipre" #[] (jump "ih"),
    blk "ih" #[] (branch "ilatch" "iexit"), blk "ilatch" #[] (jump "ih"),
    blk "iexit" #[] (jump "olatch"), blk "olatch" #[] (jump "oh"), blk "exit" #[] ret]
+
+#guard canon nestedLoops
 
 -- The inner loop's head entered straight from the outer head: no preheader.
 #guard !canon
@@ -218,9 +221,33 @@ private def ifLoop (twoBack : Bool) : Instruction E Unit :=
 
 /-! ## A loop with two entries
 
-`a` and `b` form a cycle with no back edge, so the form says nothing about it. -/
+`a` and `b` form a cycle with no back edge, so the form says nothing about it.  `Body.reducibleB`,
+the check of one entry per loop, rejects it, and accepts the canonical `while` loop and the
+nested loops above. -/
 
-#guard canon
+private def twoEntries : List (Block E Unit) :=
   [blk "entry" #[] (branch "a" "b"), blk "a" #[] (jump "b"), blk "b" #[] (jump "a")]
+
+#guard canon twoEntries
+#guard !Body.reducibleB twoEntries
+#guard Body.reducibleB whileLoop
+#guard Body.reducibleB nestedLoops
+
+-- A second entry into a cycle can be an exception edge from inside a block.
+#guard !Body.reducibleB
+  [blk "entry" #[add 1 "b"] (jump "a"), blk "a" #[] (jump "b"), blk "b" #[] (branch "a" "x"),
+   blk "x" #[] ret]
+
+-- A self-loop from inside a block, and one from its terminator, are back edges.
+#guard Body.reducibleB
+  [blk "entry" #[] (jump "h"), blk "h" #[add 1 "h"] (branch "h" "x"), blk "x" #[] ret]
+
+-- A loop with two entries inside a region is found through `Body.everyB`.
+#guard !Body.everyB Body.reducibleB
+  [blk "entry" #[] (loopT ⟨#[blk "r" #[] (branch "a" "b"), blk "a" #[] (jump "b"),
+     blk "b" #[] (branch "a" "rx"), blk "rx" #[] ret]⟩ "x"), blk "x" #[] ret]
+
+-- The check depends on the order it is given: the canonical loop in reverse order fails.
+#guard !Body.reducibleWithB whileLoop (lbls ["exit", "latch", "body", "head", "pre", "entry"])
 
 end Strata.Dyn.CanonicalTest

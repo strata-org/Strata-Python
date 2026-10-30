@@ -35,7 +35,7 @@ lemmas replace these in compiled code, so code that runs loop finding imports it
 * `Body.PathAvoid`: a path between two points that avoids a third;
 * `Body.IsBackEdge`, `Body.InLoop`: back edges and natural loops;
 * `Body.transfers`: the transfers of a body, which `Body.backEdges` filters;
-* `Body.backEdges`, `Body.loopBlocks`: the computations.
+* `Body.backEdges`, `Body.loopBlocks`, `Body.loopsOf`: the computations.
 -/
 
 namespace Strata.Dyn
@@ -81,6 +81,10 @@ target. -/
 /-- The labels of the natural loop of the back edge from `u` to `h`, in the body's order. -/
 @[expose] def loopBlocks (u : Point) (h : Label) : List Label :=
   (bs.filter fun b => b.label == h || reachAvoidB (enteredAt bs b) ⟨h, 0⟩ u).map (·.label)
+
+/-- The natural loop of each back edge of `es`, in order. -/
+@[expose] def loopsOf (es : List (Point × Label)) : List (List Label) :=
+  es.map fun e => loopBlocks bs e.1 e.2
 
 end Body
 

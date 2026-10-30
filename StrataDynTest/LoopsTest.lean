@@ -20,7 +20,7 @@ Bodies written as blocks, each with the back edges and natural loops that `Body.
 The bodies are a `while` loop, a `continue`, a branch that names its target twice, a `break`, an
 exception edge, nested loops, a tail that cannot repeat the loop, a self-loop, a loop with two
 entries, which has no back edge, a loop inside a region, which is not a loop of the body around
-it, and a body with an unreachable block, which has no dominator tree.
+it, a body with an unreachable block, which has no dominator tree, and two large bodies.
 -/
 
 namespace Strata.Dyn.LoopsTest
@@ -195,5 +195,35 @@ private def unreachable : List (Block E Unit) :=
 
 #guard (Body.domTree? unreachable).isNone
 #guard loopsOf unreachable == [(pt "dead" 0, lbls ["a", "dead"])]
+
+/-! ## Scale
+
+One loop of 1002 blocks, and 300 loops in a row.  The fast versions find them in well under a
+second; the simple ones take minutes, so a fast version that stops running makes this file slow
+to build.  Labels carry counters, as the translator's do (`head.3`). -/
+
+private def lblN (s : String) (i : Nat) : Label := ⟨.num (.str .base s) i⟩
+
+private def blkN (l : Label) (t : Terminator E Unit) : Block E Unit :=
+  { label := l, params := #[], instrs := #[], term := t, info := () }
+
+/-- `h: branch ^c0 ^exit; cI: branch ^tI ^cI+1; tI: jump ^cI+1; cN: jump ^h`. -/
+private def bigLoop (n : Nat) : List (Block E Unit) :=
+  [blkN (lblN "entry" 0) (.jump () ⟨lblN "h" 0, #[]⟩),
+   blkN (lblN "h" 0) (.branch () ⟨0⟩ ⟨lblN "c" 0, #[]⟩ ⟨lblN "exit" 0, #[]⟩)] ++
+  (List.range n).flatMap (fun i =>
+    [blkN (lblN "c" i) (.branch () ⟨0⟩ ⟨lblN "t" i, #[]⟩ ⟨lblN "c" (i + 1), #[]⟩),
+     blkN (lblN "t" i) (.jump () ⟨lblN "c" (i + 1), #[]⟩)]) ++
+  [blkN (lblN "c" n) (.jump () ⟨lblN "h" 0, #[]⟩), blkN (lblN "exit" 0) ret]
+
+/-- `n` loops in a row: `hI: branch ^bI ^hI+1; bI: jump ^hI`. -/
+private def chain (n : Nat) : List (Block E Unit) :=
+  [blkN (lblN "entry" 0) (.jump () ⟨lblN "h" 0, #[]⟩)] ++ (List.range n).flatMap (fun i =>
+    [blkN (lblN "h" i) (.branch () ⟨0⟩ ⟨lblN "b" i, #[]⟩ ⟨lblN "h" (i + 1), #[]⟩),
+     blkN (lblN "b" i) (.jump () ⟨lblN "h" i, #[]⟩)]) ++
+  [blkN (lblN "h" n) ret]
+
+#guard (Body.loopsOf (bigLoop 500) (Body.backEdges (bigLoop 500))).map (·.length) == [1002]
+#guard ((Body.loopsOf (chain 300) (Body.backEdges (chain 300))).map (·.length)).sum == 600
 
 end Strata.Dyn.LoopsTest

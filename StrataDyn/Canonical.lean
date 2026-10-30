@@ -32,10 +32,11 @@ And for the function:
 The loop of a head `h` is the union of the natural loops of its back edges
 (`StrataDyn/Loops.lean`), as in LLVM.  Its code that cannot repeat the loop, such as the code
 after a `break`, is not in it.  The loop properties hold in every body of the function, its own
-and each region's (`Body.Every`); F2 holds in its own body.  Nothing here asks for the loops to
-be reducible: a cycle with no back edge has no head, so no loop property mentions it.  Nor does
-it say anything about an operation that runs a region again and again: such a loop has no back
-edge either.
+and each region's (`Body.Every`); F2 holds in its own body.  The form does not ask for the loops
+to be reducible: a cycle with no back edge has no head, so no loop property mentions it.
+`Body.Reducible` asks it separately: every cycle passes through a back edge, so every cycle lies
+in the loop of some head.  Neither says anything about an operation that runs a region again and
+again: such a loop has no back edge.
 
 The preheader, the latch and the exit block end in the base's plain `jump`, so that an obligation
 placed before that jump holds where control arrives.
@@ -48,7 +49,17 @@ bodies have distinct labels, as `Func.WF` asks; `StrataDyn/CanonicalProps.lean` 
 * `Body.Preheader`, `Body.Latch`, `Body.DedicatedExits`, `Body.LoopsSimplified`, `Body.OneExit`:
   the properties;
 * `Func.CanonicalCFG`: the form;
-* `Func.checkCanonicalCFG`: its decision.
+* `Func.checkCanonicalCFG`: its decision;
+* `Body.Reducible`, `Func.Reducible`: one entry per loop, and `Body.reducibleB`, its check
+  against a depth-first order;
+* `Body.FwdStep`: a transfer between blocks that is not a back edge;
+* `Body.loopsCheckB`: the per-body check that `Canonicalize.run` makes, of both;
+* `Body.loopRoles`: each loop's head, preheader and latch, by name.
+
+`Body.loopsSimplifiedFastB` and `Body.loopsCheckFastB` compute each body's loops, transfers and
+back edges once.  `Body.loopsSimplifiedB_eq_fast` and `Body.loopsCheckB_eq_fast`, proved here so
+that the code below and `Canonicalize.run` use them, make them run in place of
+`Body.loopsSimplifiedB` and `Body.loopsCheckB`.
 -/
 
 namespace Strata.Dyn
@@ -60,6 +71,14 @@ variable {env : Env Unit} {α : Type}
 /-- The name of the terminal operation the terminator applies. -/
 @[expose] def Terminator.name : Terminator env α → Name
   | .apply _ r .. => r.name
+
+/-- A loop's blocks by their role in the canonical form: its head, its preheader and its
+latch. -/
+structure LoopRoles where
+  head : Label
+  preheader : Label
+  latch : Label
+deriving DecidableEq
 
 namespace Body
 
@@ -202,11 +221,183 @@ structure ExitBlock (post : Block env α) : Prop where
     let L := loopOf bs h
     preheaderB bs L h && latchB bs h && exitsB bs L
 
+/-- Each head of the back edges `es` with the labels of its loop, given `ls`, the natural loop of
+each back edge of `es`. -/
+@[expose] def tableOf (es : List (Point × Label)) (ls : List (List Label)) :
+    List (Label × List Label) :=
+  (es.map (·.2)).eraseDups.map fun h => (h, ((es.zip ls).filter (·.1.2 == h)).flatMap (·.2))
+
+/-- `loopsSimplifiedB`, given the body's back edges `be`, transfers `tr` and exit points `ep`. -/
+@[expose] def loopsSimplifiedWith (be : List (Point × Label)) (tr : List (Point × Label))
+    (ep : List Point) : Bool :=
+  (tableOf be (loopsOf bs be)).all fun (h, L) =>
+    theOneB ((tr.filter fun (u, l) => l == h && !L.contains u.label).map (·.1))
+        (endsAtB bs · h) &&
+      theOneB ((be.filter (·.2 == h)).map (·.1)) (endsAtB bs · h) &&
+      (let exits := (tr.filter fun (u, l) => L.contains u.label && !L.contains l).map (·.2)
+       (tr.all fun (w, l) => !exits.contains l || L.contains w.label) &&
+         ep.all fun u => !L.contains u.label)
+
+/-- `loopsSimplifiedB`, with the back edges, the transfers, the exit points and every loop
+computed once for the body. -/
+@[expose] def loopsSimplifiedFastB : Bool :=
+  loopsSimplifiedWith bs (backEdges bs) (transfers bs) (exitPoints bs)
+
+/-- `tableOf` of a list `es` and of `f` of each of its elements pairs each second component `h`
+with the union of `f e` over the elements `e` whose second component is `h`. -/
+private theorem tableOf_map (es : List (Point × Label)) (f : Point × Label → List Label) :
+    tableOf es (es.map f) =
+      (es.map (·.2)).eraseDups.map fun h => (h, (es.filter (·.2 == h)).flatMap f) := by
+  unfold tableOf
+  congr 1
+  funext h
+  congr 1
+  induction es with
+  | nil => rfl
+  | cons e es ih =>
+    by_cases he : (e.2 == h) = true
+    · simp [List.zip_cons_cons, he, ih]
+    · simp [List.zip_cons_cons, he, ih]
+
+/-- Two functions that agree on a list's elements give the same `flatMap`. -/
+private theorem flatMap_congr {β γ : Type} {l : List β} {f g : β → List γ}
+    (h : ∀ x ∈ l, f x = g x) : l.flatMap f = l.flatMap g := by
+  induction l with
+  | nil => rfl
+  | cons x l ih =>
+    simp only [List.flatMap_cons, h x List.mem_cons_self,
+      ih fun y hy => h y (List.mem_cons_of_mem _ hy)]
+
+/-- Each back edge's loop, collected by head, is the loop of that head. -/
+theorem tableOf_loopsOf (bs : List (Block env α)) :
+    tableOf (backEdges bs) (loopsOf bs (backEdges bs)) =
+      (heads bs).map fun h => (h, loopOf bs h) := by
+  simp only [loopsOf, tableOf_map, heads]
+  congr 1
+  funext h
+  congr 1
+  unfold loopOf
+  apply flatMap_congr
+  intro e he
+  rw [(beq_iff_eq.mp (List.mem_filter.mp he).2)]
+
+/-- The fast check gives the same answer as `loopsSimplifiedB` on every body.  It is proved here,
+before `Func.checkCanonicalCFG` uses the check, because a `@[csimp]` lemma replaces a definition
+only in code compiled after it. -/
+@[csimp] theorem loopsSimplifiedB_eq_fast :
+    @loopsSimplifiedB = @loopsSimplifiedFastB := by
+  funext env α bs
+  unfold loopsSimplifiedB loopsSimplifiedFastB loopsSimplifiedWith
+  simp only [tableOf_loopsOf, List.all_map]
+  rfl
+
 /-- Whether the body never leaves through its exit, or has an exit block. -/
 @[expose] def oneExitB : Bool :=
   (exitPoints bs).isEmpty || theOneB (exitPoints bs) (endsAtB bs · Label.exit)
 
+/-! ## Each loop's blocks by role -/
+
+/-- The one point of `E`, if `E` holds a single point, perhaps several times. -/
+@[expose] def theOne? (E : List Point) : Option Point :=
+  match E with
+  | [] => none
+  | u :: us => if us.all (· == u) then some u else none
+
+/-- Each loop of the body, with its preheader and its latch, in the order of `heads`: the block of
+the one point outside the loop that transfers to the head, and the block of the one point that a
+back edge to it leaves from.  A loop without such single points is left out.  In a body whose
+loops have a preheader and a latch, every loop has its entry, and each entry names them
+(`Body.mem_loopRoles`, `Body.loopRoles_complete`), so a stage that places obligations reads each
+block by its role. -/
+@[expose] def loopRoles : List LoopRoles :=
+  (heads bs).filterMap fun h =>
+    match theOne? (entriesFrom bs (loopOf bs h) h), theOne? (backFrom bs h) with
+    | some pre, some latch => some ⟨h, pre.label, latch.label⟩
+    | _, _ => none
+
+/-- `loopRoles`, given the body's back edges `be` and transfers `tr`, with every loop computed
+once from them. -/
+@[expose] def loopRolesWith (be tr : List (Point × Label)) : List LoopRoles :=
+  (tableOf be (loopsOf bs be)).filterMap fun (h, L) =>
+    match theOne? ((tr.filter fun (u, l) => l == h && !L.contains u.label).map (·.1)),
+        theOne? ((be.filter (·.2 == h)).map (·.1)) with
+    | some pre, some latch => some ⟨h, pre.label, latch.label⟩
+    | _, _ => none
+
+/-- `loopRoles`, with the back edges, the transfers and every loop computed once for the body. -/
+@[expose] def loopRolesFastB : List LoopRoles :=
+  loopRolesWith bs (backEdges bs) (transfers bs)
+
+/-- The fast version gives the same list as `loopRoles` on every body, so that it runs in its
+place. -/
+@[csimp] theorem loopRoles_eq_fast : @loopRoles = @loopRolesFastB := by
+  funext env α bs
+  unfold loopRoles loopRolesFastB loopRolesWith
+  simp only [tableOf_loopsOf, List.filterMap_map]
+  rfl
+
+/-! ## One entry per loop -/
+
+/-- Every loop of the body has one entry: some rank of the labels goes up along every transfer
+that is not a back edge.  So every cycle of the body passes through a back edge, and a loop is
+entered only through its head. -/
+@[expose] def Reducible : Prop :=
+  ∃ rank : Label → Nat, ∀ u l, Transfer bs u l → ¬ IsBackEdge bs u l → rank u.label < rank l
+
+/-- The position of each label of `ord`. -/
+@[expose] def rankIn (ord : List Label) : LabelMap Nat :=
+  ord.zipIdx.foldl (init := ∅) fun m p => m.insert p.1 p.2
+
+/-- The points that back edges leave from, by the label of their target. -/
+@[expose] def backBy (be : List (Point × Label)) : LabelMap (List Point) :=
+  be.foldl (init := ∅) fun m e => m.insert e.2 (e.1 :: (m.find? e.2).getD [])
+
+/-- Whether every transfer of `tr` that is not one of the back edges `be` goes up in the order
+`ord`. -/
+@[expose] def reducibleIn (be tr : List (Point × Label)) (ord : List Label) : Bool :=
+  let rank := rankIn ord
+  let back := backBy be
+  tr.all fun (u, l) =>
+    ((back.find? l).getD []).contains u ||
+      decide ((rank.find? u.label).getD 0 < (rank.find? l).getD 0)
+
+/-- Whether every transfer that is not a back edge goes up in the order `ord`. -/
+@[expose] def reducibleWithB (ord : List Label) : Bool :=
+  reducibleIn (backEdges bs) (transfers bs) ord
+
+/-- Whether every loop of the body has one entry, checked against the order of the depth-first
+search, which is not trusted: the check confirms it. -/
+@[expose] def reducibleB : Bool :=
+  reducibleWithB bs (rpoLabels bs)
+
+/-- A transfer from block `a` to block `b` that is not a back edge. -/
+@[expose] def FwdStep (a b : Label) : Prop :=
+  ∃ u : Point, u.label = a ∧ Transfer bs u b ∧ ¬ IsBackEdge bs u b
+
+/-- Whether every loop of the body has a preheader, a latch and dedicated exits, and one entry:
+the per-body check of `Canonicalize.run`. -/
+@[expose] def loopsCheckB : Bool :=
+  loopsSimplifiedB bs && reducibleB bs
+
+/-- `loopsCheckB`, with the back edges and the transfers computed once for both checks. -/
+@[expose] def loopsCheckFastB : Bool :=
+  let be := backEdges bs
+  let tr := transfers bs
+  loopsSimplifiedWith bs be tr (exitPoints bs) && reducibleIn be tr (rpoLabels bs)
+
+/-- The fast check gives the same answer as `loopsCheckB` on every body.  It is proved here, before
+any code uses the check, because a `@[csimp]` lemma replaces a definition only in code compiled
+after it. -/
+@[csimp] theorem loopsCheckB_eq_fast : @loopsCheckB = @loopsCheckFastB := by
+  funext env α bs
+  simp only [loopsCheckB, loopsCheckFastB, loopsSimplifiedB_eq_fast, loopsSimplifiedFastB,
+    reducibleB, reducibleWithB]
+
 end Body
+
+/-- Every loop in every body of the function has one entry. -/
+@[expose] def Func.Reducible (fn : Func env α) : Prop :=
+  Body.Every Body.Reducible fn.blocks.toList
 
 /-- The function is canonical: in each of its bodies every loop has a preheader, a latch and
 dedicated exits, and its own body leaves through its exit from at most one block. -/

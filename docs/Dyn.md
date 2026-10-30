@@ -471,6 +471,58 @@ module m {
 }
 ```
 
+**Canonical form.** A contract obligation must sit where every path that should meet it
+passes. A function is in canonical form when each class of obligation has one such block:
+
+- (P1) each loop has a *preheader*, a block outside the loop through whose end every entry into
+  the loop passes, for the invariant's base case and the havoc of the loop's writes;
+- (P2) each loop has one *latch*, from whose end every back edge leaves, for the invariant's step
+  case and the variant's decrease;
+- (P3) each loop has *dedicated exits*: every block that a transfer leaves the loop for is entered
+  only from the loop, and no point of the loop leaves the body, for what holds when the loop
+  ends;
+- (F2) the function returns from one block, for its postcondition.
+
+A loop is found in the control-flow graph, as the natural loops of the back edges to its head:
+a block is in it when control can go from the block around the loop again. Code that cannot,
+such as the code after a `break`, is not. The preheader, the latch and the return block end in
+a plain `jump`. `Func.CanonicalCFG` states the form, and `Func.checkCanonicalCFG` decides it.
+
+The form does not state P5, that each block of a loop statement either comes around to the latch
+or lies after an exit, because the way a loop is found makes it hold: a block that cannot come
+around to the latch is not in the loop, and a transfer to it leaves the loop through a dedicated
+exit. So the writes to havoc for a loop are those of its blocks, the part that repeats. Nor does
+it state F3, that every path reaches the return block or runs forever. Only the return block
+leaves the body, so every other path runs forever or stops with a fault, such as `unreachable`
+(`Fault.failure`). A fault is a failure, not an assumption, so it never makes a postcondition
+hold for free.
+
+`Canonicalize.canonicalize` puts a function in canonical form, as LLVM's LoopSimplify does. It adds
+only forwarding blocks, which take a block's parameters and jump to it with them, and sends
+some transfers through them. That it changes nothing else is tested, not proved: an oracle in the
+tests (`StrataDynTest/Unforward.lean`) removes the forwarding blocks from the result and compares
+what is left with the input. `Canonicalize.run` takes a well-formed function, runs the pass, and
+checks that the result is well formed and canonical, and that every loop has one entry
+(`Func.Reducible`): every cycle passes through a back edge. Its result carries the three proofs.
+It rejects a function with a loop that has two entries, since such a loop has no head to place a
+contract on. It does not fix a loop inside a region that leaves the region, since a region's
+exit is not a block; such a function is reported as not canonical. A function in canonical form
+comes back unchanged. The result need not have its value ids in the printed order
+(`Func.Canonical`): a forwarding block's parameters get new ids.
+
+`Canonicalize.runModule` runs `Canonicalize.run` on every function of a module. If `run`
+accepts every function, the result is the module with every function in canonical form, and its
+ghosts as they are, with the three proofs for each function.
+Otherwise, the result lists the failure of each function that `run` rejects.
+
+`Canonicalize.check` checks a well-formed function without the pass. It gives back the function
+unchanged with the same proofs, or says why the function is not canonical. A stage after a pass
+that should keep the form uses it, so that a break is reported, not repaired. `run` is the pass
+followed by `check`, and `Canonicalize.checkModule` runs `check` on every function of a module.
+`Body.loopRoles` names each loop's head, preheader and latch. In every body of a canonical
+function, every loop has its entry and the names are right (`Func.loopRoles_spec`), so a stage
+that places obligations reads each of these blocks by its role.
+
 **Annotations.** Every part of a program carries an annotation of a type the front end chooses,
 such as a source position, so that results can be reported against the original source.
 Dyn does not depend on annotations for its semantics. A front end can also state facts

@@ -1460,6 +1460,26 @@ public theorem Module.Raw.raw_of_check {env : Env Unit} [base ≼ env] {α : Typ
   · cases h; rfl
   · cases h
 
+/-- The module `Module.ofChecked` gives is the one it was given: its name, its ghosts, its
+functions and its annotation. -/
+public theorem Module.ofChecked_raw {env : Env Unit} [base ≼ env] {α : Type} {name : Name}
+    {fs : Array {f : Func env α // f.WF}} {info : α} {gs : Array {g : Ghost env α // g.WF}}
+    {m : Module env α} (h : Module.ofChecked name fs info gs = .ok m) :
+    m.raw = { name, ghosts := gs.map (·.val), funcs := fs.map (·.val), info } := by
+  unfold Module.ofChecked at h
+  dsimp only at h
+  split at h
+  · cases h
+    rfl
+  · cases h
+
+/-- The module `Module.ofChecked` gives has exactly the functions it was given. -/
+public theorem Module.ofChecked_funcs {env : Env Unit} [base ≼ env] {α : Type} {name : Name}
+    {fs : Array {f : Func env α // f.WF}} {info : α} {gs : Array {g : Ghost env α // g.WF}}
+    {m : Module env α} (h : Module.ofChecked name fs info gs = .ok m) :
+    m.raw.funcs = fs.map (·.val) := by
+  rw [Module.ofChecked_raw h]
+
 /-- A well-formed module names no function twice. -/
 public theorem Module.Raw.WF.nodup {env : Env Unit} [base ≼ env] {α : Type}
     {m : Module.Raw env α} (h : m.WF) : (m.funcs.toList.map (·.name)).Nodup := by

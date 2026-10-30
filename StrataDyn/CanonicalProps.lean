@@ -25,7 +25,14 @@ every well-formed function's do.
 
 ## Main theorems
 
-* `Func.checkCanonicalCFG_iff`: `Func.checkCanonicalCFG` decides `Func.CanonicalCFG`.
+* `Func.checkCanonicalCFG_iff`: `Func.checkCanonicalCFG` decides `Func.CanonicalCFG`;
+* `Body.reducible_of_reducibleB`, `Func.reducible_of_everyB`: the check of one entry per loop,
+  against a depth-first order, establishes `Body.Reducible` and `Func.Reducible` when it holds;
+* `Body.Reducible.no_forward_cycle`: then no cycle of blocks avoids the back edges;
+* `Func.of_loopsCheck`: `Canonicalize.run`'s check establishes the form and one entry per loop;
+* `Body.mem_loopRoles`, `Body.loopRoles_complete`, `Func.loopRoles_spec`: in a body whose loops
+  have preheaders and latches, and so in a canonical function, `Body.loopRoles` names each loop's
+  head, preheader and latch.
 
 ## Main definitions
 
@@ -274,6 +281,67 @@ theorem loopsSimplifiedB_iff (hn : (bs.map (·.label)).Nodup) :
     obtain ⟨hp, hl, he⟩ := hall h hh'
     exact ⟨⟨(preheaderB_iff hn).mpr hp, (latchB_iff hn hh').mpr hl⟩, (exitsB_iff hn).mpr he⟩
 
+/-- `theOne? E` is `u` exactly when `u` is in `E` and every point of `E` is `u`. -/
+public theorem theOne?_eq_some {E : List Point} {u : Point} :
+    theOne? E = some u ↔ u ∈ E ∧ ∀ w ∈ E, w = u := by
+  unfold theOne?
+  cases E with
+  | nil => simp
+  | cons v vs =>
+    simp only [List.mem_cons, forall_eq_or_imp]
+    split
+    · rename_i hall
+      simp only [List.all_eq_true, beq_iff_eq] at hall
+      constructor
+      · rintro ⟨⟩
+        exact ⟨.inl rfl, rfl, hall⟩
+      · rintro ⟨-, rfl, -⟩
+        rfl
+    · rename_i hall
+      simp only [List.all_eq_true, beq_iff_eq] at hall
+      simp only [reduceCtorEq, false_iff, not_and]
+      rintro - rfl hrest
+      exact hall hrest
+
+/-- In a body with distinct labels whose loops have preheaders and latches, each entry of
+`loopRoles` names the head of a loop, its preheader and its latch. -/
+public theorem mem_loopRoles (hn : (bs.map (·.label)).Nodup) (hs : LoopsSimplified bs) {r : LoopRoles}
+    (hr : r ∈ loopRoles bs) :
+    IsHead bs r.head ∧ (∃ pre, pre.label = r.preheader ∧ Preheader bs r.head pre) ∧
+      ∃ latch, latch.label = r.latch ∧ Latch bs r.head latch := by
+  obtain ⟨h, hh, hm⟩ := List.mem_filterMap.mp hr
+  split at hm
+  · rename_i u v hu hv
+    cases hm
+    have hhead := (mem_heads_iff hn).mp hh
+    obtain ⟨⟨pre, hpre⟩, ⟨latch, hlat⟩, -⟩ := hs h hhead
+    obtain ⟨-, hu⟩ := theOne?_eq_some.mp hu
+    obtain ⟨-, hv⟩ := theOne?_eq_some.mp hv
+    have hpu : endOf pre = u := hu _ ((mem_entriesFrom hn).mpr ⟨hpre.enters, fun hat =>
+      hpre.outside ((atLoop_endOf_iff hn hpre.mem).mp hat)⟩)
+    obtain ⟨w, hw⟩ := hhead
+    have hlv : endOf latch = v := hv _ (hlat.back w hw ▸ (mem_backFrom hn).mpr hw)
+    exact ⟨⟨w, hw⟩, ⟨pre, by rw [← hpu]; rfl, hpre⟩, ⟨latch, by rw [← hlv]; rfl, hlat⟩⟩
+  · cases hm
+
+/-- In a body with distinct labels whose loops have preheaders and latches, every loop has an
+entry in `loopRoles`. -/
+public theorem loopRoles_complete (hn : (bs.map (·.label)).Nodup) (hs : LoopsSimplified bs) {h : Label}
+    (hh : IsHead bs h) : ∃ r ∈ loopRoles bs, r.head = h := by
+  obtain ⟨⟨pre, hpre⟩, ⟨latch, hlat⟩, -⟩ := hs h hh
+  have hp : theOne? (entriesFrom bs (loopOf bs h) h) = some (endOf pre) := by
+    refine theOne?_eq_some.mpr ⟨(mem_entriesFrom hn).mpr ⟨hpre.enters, fun hat =>
+      hpre.outside ((atLoop_endOf_iff hn hpre.mem).mp hat)⟩, fun w hw => ?_⟩
+    obtain ⟨htr, hout⟩ := (mem_entriesFrom hn).mp hw
+    exact hpre.entries w htr hout
+  have hl : theOne? (backFrom bs h) = some (endOf latch) := by
+    obtain ⟨u, hu⟩ := hh
+    exact theOne?_eq_some.mpr ⟨hlat.back u hu ▸ (mem_backFrom hn).mpr hu,
+      fun w hw => hlat.back w ((mem_backFrom hn).mp hw)⟩
+  refine ⟨⟨h, (endOf pre).label, (endOf latch).label⟩, List.mem_filterMap.mpr
+    ⟨h, (mem_heads_iff hn).mpr hh, ?_⟩, rfl⟩
+  simp only [hp, hl]
+
 /-- In a body with distinct labels, `oneExitB` decides `OneExit`. -/
 theorem oneExitB_iff (hn : (bs.map (·.label)).Nodup) : oneExitB bs = true ↔ OneExit bs := by
   rw [oneExitB, Bool.or_eq_true, theOneB_iff, List.isEmpty_iff, OneExit]
@@ -297,6 +365,73 @@ theorem oneExitB_iff (hn : (bs.map (·.label)).Nodup) : oneExitB bs = true ↔ O
         exact ⟨endOf post, hend, fun w hw => hpost.exits w (mem_exitPoints.mp hw),
           (endsAtB_iff hn).mpr ⟨post, hpost.mem, rfl, hpost.endsIn⟩⟩
 
+/-! ## One entry per loop -/
+
+/-- `backBy` lists, for each label, the points that the back edges `be` to it leave from. -/
+theorem mem_backBy {be : List (Point × Label)} {u : Point} {l : Label} :
+    u ∈ ((backBy be).find? l).getD [] ↔ (u, l) ∈ be := by
+  unfold backBy
+  suffices ∀ (es : List (Point × Label)) (m : LabelMap (List Point)),
+      u ∈ ((es.foldl (fun m e => m.insert e.2 (e.1 :: (m.find? e.2).getD [])) m).find?
+        l).getD [] ↔ u ∈ (m.find? l).getD [] ∨ (u, l) ∈ es by
+    rw [this]
+    simp
+  intro es
+  induction es with
+  | nil => intro m; simp
+  | cons e es ih =>
+    intro m
+    rw [List.foldl_cons, ih, LabelMap.find?_insert]
+    obtain ⟨w, l'⟩ := e
+    by_cases hl : l = l'
+    · subst hl
+      simp only [↓reduceIte, Option.getD_some, List.mem_cons, Prod.mk.injEq, and_true]
+      constructor
+      · rintro ((rfl | hu) | hu)
+        · exact .inr (.inl rfl)
+        · exact .inl hu
+        · exact .inr (.inr hu)
+      · rintro (hu | (rfl | hu))
+        · exact .inl (.inr hu)
+        · exact .inl (.inl rfl)
+        · exact .inr hu
+    · simp only [hl, ↓reduceIte, List.mem_cons, Prod.mk.injEq, and_false, false_or]
+
+/-- In a body with distinct labels, if every transfer that is not a back edge goes up in the
+order `ord`, every loop has one entry. -/
+public theorem reducible_of_reducibleWithB (hn : (bs.map (·.label)).Nodup) {ord : List Label}
+    (h : reducibleWithB bs ord = true) : Reducible bs := by
+  refine ⟨fun x => ((rankIn ord).find? x).getD 0, fun u l ht hb => ?_⟩
+  simp only [reducibleWithB, reducibleIn, List.all_eq_true, Bool.or_eq_true,
+    List.contains_iff_mem, decide_eq_true_eq] at h
+  rcases h (u, l) (transfer_iff.mp ht) with hback | hlt
+  · exact absurd ((mem_backEdges_iff hn).mp (mem_backBy.mp hback)) hb
+  · exact hlt
+
+/-- In a body with distinct labels, if the check against the depth-first order (`reducibleB`)
+holds, every loop has one entry. -/
+public theorem reducible_of_reducibleB (hn : (bs.map (·.label)).Nodup)
+    (h : reducibleB bs = true) : Reducible bs :=
+  reducible_of_reducibleWithB hn h
+
+/-- In a body where every loop has one entry, no cycle of blocks avoids the back edges: there is
+no chain of transfers that are not back edges from a block back to itself. -/
+public theorem Reducible.no_forward_cycle (h : Reducible bs) (l : Label) :
+    ¬ Relation.TransGen (FwdStep bs) l l := by
+  obtain ⟨rank, hr⟩ := h
+  have hlt : ∀ a b, Relation.TransGen (FwdStep bs) a b → rank a < rank b := by
+    intro a b hab
+    induction hab with
+    | single hs =>
+      obtain ⟨u, rfl, ht, hb⟩ := hs
+      exact hr u _ ht hb
+    | tail _ hs ih =>
+      obtain ⟨u, hu, ht, hb⟩ := hs
+      have h1 := hr u _ ht hb
+      rw [hu] at h1
+      omega
+  exact fun hc => Nat.lt_irrefl _ (hlt l l hc)
+
 end Body
 
 /-! ## The function -/
@@ -317,6 +452,45 @@ public theorem Func.checkCanonicalCFG_iff (fn : Func env α)
       (fun _ hn => Body.loopsSimplifiedB_iff hn) ((Body.distinct_iff_every _).mp hd),
     Body.oneExitB_iff hn]
   rfl
+
+/-- If the check against the depth-first order (`reducibleB`) holds of every body of a function
+whose bodies have distinct labels, every loop in it has one entry. -/
+public theorem Func.reducible_of_everyB {fn : Func env α} (hd : Body.Distinct fn.blocks.toList)
+    (h : Body.everyB Body.reducibleB fn.blocks.toList = true) : fn.Reducible := by
+  have hd' := (Body.distinct_iff_every _).mp hd
+  have he := (Body.everyB_iff (P := (Body.reducibleB · = true)) (fun _ => Iff.rfl) _).mp h
+  exact Body.Every.imp (fun _ hn hr => Body.reducible_of_reducibleB hn hr) hd' he
+
+/-- In a canonical function whose bodies have distinct labels, in its own body and in every
+region's body, each entry of `loopRoles` names the head of a loop, its preheader and its latch,
+and every loop has an entry. -/
+public theorem Func.loopRoles_spec {fn : Func env α} (hd : Body.Distinct fn.blocks.toList)
+    (hc : fn.CanonicalCFG) :
+    Body.Every (fun bs =>
+      (∀ r ∈ Body.loopRoles bs, Body.IsHead bs r.head ∧
+        (∃ pre, pre.label = r.preheader ∧ Body.Preheader bs r.head pre) ∧
+        ∃ latch, latch.label = r.latch ∧ Body.Latch bs r.head latch) ∧
+      ∀ h, Body.IsHead bs h → ∃ r ∈ Body.loopRoles bs, r.head = h) fn.blocks.toList :=
+  Body.Every.imp (fun _ hn hs => ⟨fun _ hr => Body.mem_loopRoles hn hs hr,
+    fun _ hh => Body.loopRoles_complete hn hs hh⟩) ((Body.distinct_iff_every _).mp hd) hc.1
+
+/-- If `Canonicalize.run`'s per-body check holds of every body of a function whose bodies have
+distinct labels, and its own body leaves through at most one block, the function is canonical
+and every loop in it has one entry. -/
+public theorem Func.of_loopsCheck {fn : Func env α} (hd : Body.Distinct fn.blocks.toList)
+    (h : Body.everyB Body.loopsCheckB fn.blocks.toList = true)
+    (ho : Body.oneExitB fn.blocks.toList = true) : fn.CanonicalCFG ∧ fn.Reducible := by
+  have hd' := (Body.distinct_iff_every _).mp hd
+  have he := (Body.everyB_iff (P := (Body.loopsCheckB · = true)) (fun _ => Iff.rfl) _).mp h
+  have hn : (fn.blocks.toList.map (·.label)).Nodup := by
+    cases hd with
+    | mk hn _ => exact hn
+  refine ⟨⟨Body.Every.imp (fun _ hn hc => ?_) hd' he, (Body.oneExitB_iff hn).mp ho⟩,
+    Body.Every.imp (fun _ hn hc => ?_) hd' he⟩
+  · simp only [Body.loopsCheckB, Bool.and_eq_true] at hc
+    exact (Body.loopsSimplifiedB_iff hn).mp hc.1
+  · simp only [Body.loopsCheckB, Bool.and_eq_true] at hc
+    exact Body.reducible_of_reducibleB hn hc.2
 
 /-- Whether a well-formed function is canonical is decided, by `Func.checkCanonicalCFG`. -/
 public def Func.decCanonicalCFG [base ≼ env] (fn : Func env α) (h : fn.WF) :
