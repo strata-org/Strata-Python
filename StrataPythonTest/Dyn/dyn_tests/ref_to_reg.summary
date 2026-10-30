@@ -1,0 +1,8 @@
+promoted cells: 872
+functions with a removed read: 343
+candidates left as cells:
+  p23_walrus.expected.dyn: p23_walrus.f: last.cell.0
+  p23_walrus.expected.dyn: p23_walrus.g: deep.cell.0
+  p45_comp_walrus.expected.dyn: p45_comp_walrus.f: last.cell.0
+  p45_comp_walrus.expected.dyn: p45_comp_walrus.g: cell.cell.0
+spoiled promotions not caught:

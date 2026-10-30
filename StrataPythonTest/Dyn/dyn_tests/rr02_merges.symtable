@@ -1,0 +1,16 @@
+module top
+  f: local (assigned)
+  g: local (assigned)
+  function f
+    count: local (assigned, referenced)
+    total: local (assigned, referenced)
+    x: local (assigned, referenced)
+    xs: local (parameter, referenced)
+    y: local (assigned, referenced)
+    ys: local (parameter, referenced)
+  function g
+    h: global implicit (referenced)
+    i: local (assigned, referenced)
+    n: local (parameter, referenced)
+    s: local (assigned, referenced)
+qualnames: f, g

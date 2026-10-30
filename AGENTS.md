@@ -76,10 +76,16 @@ The scope pass and the translator share their tests. To add one, put `NAME.py` i
   `DYN_UPDATE=1`;
 - write `NAME.symtable` by running `StrataPythonTest/Dyn/scope_symtable.py` with CPython
   3.12, and its scope golden `NAME.expected.scope` by running
-  `StrataPythonTestExtra/PyScopeTest.lean` with `PYSCOPE_UPDATE=1`.
+  `StrataPythonTestExtra/PyScopeTest.lean` with `PYSCOPE_UPDATE=1`;
+- write its ref-to-reg golden `NAME.expected.ssa.dyn` by running
+  `StrataPythonTestExtra/DynRefToRegTest.lean` with `DYN_UPDATE=1`, as its own command
+  after the translator goldens are written; it also rewrites the summary
+  `ref_to_reg.summary`. Do the same whenever a change to the translator changes an existing
+  golden.
 
-The translator test fails on any `.py` that is not listed, and the scope test on any `.py`
-without both scope files.
+The translator test fails on any `.py` that is not listed, the scope test on any `.py`
+without both scope files, and the ref-to-reg test on any translator golden without its
+`.expected.ssa.dyn` golden.
 `lake exe pydyn dyn FILE.py` prints the diagnostics and the module for one file.
 `StrataPythonTestExtra/DynReadTest.lean` reads every golden back with `Module.read`, so a
 printer change that breaks reading fails there; `lake exe pydyn read FILE` reads one.

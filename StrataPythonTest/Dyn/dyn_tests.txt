@@ -210,3 +210,6 @@ m_scope_ifexp | yes |
 m_scope_chain | yes |
 m_scope_nested | yes |
 dom | yes |
+rr01_handler_param | yes |
+rr02_merges | yes |
+rr03_frame_lambda | yes |

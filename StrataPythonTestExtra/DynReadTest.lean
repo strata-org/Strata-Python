@@ -13,7 +13,8 @@ meta import StrataPythonTest.Dyn.TestUtil
 
 /-! # Reading the translator goldens back
 
-Reads every `NAME.expected.dyn` in `StrataPythonTest/Dyn/dyn_tests/` against `Py.env`,
+Reads every `NAME.expected.dyn`, and every ref-to-reg golden `NAME.expected.ssa.dyn`, in
+`StrataPythonTest/Dyn/dyn_tests/` against `Py.env`,
 the diagnostic lines before its module read as comments, and checks both printed forms:
 
 * folded, as the goldens are, reprinting the module gives the golden's module text, byte for
@@ -33,8 +34,8 @@ open StrataPython.Dyn.TestUtil (firstDiff dottedNames)
 /-- The directory holding the goldens. -/
 private meta def testDir : System.FilePath := "StrataPythonTest" / "Dyn" / "dyn_tests"
 
-/-- The suffix of a translator golden. -/
-private meta def goldenSuffix : String := ".expected.dyn"
+/-- The suffixes of a translator golden and of a ref-to-reg golden. -/
+private meta def goldenSuffixes : List String := [".expected.dyn", ".expected.ssa.dyn"]
 
 /-- The module part of a golden: from its `module` line on. -/
 private meta def moduleText (golden : String) : String :=
@@ -61,7 +62,7 @@ private meta def check (path : System.FilePath) : IO (Option String) := do
       return none
 
 #eval show IO Unit from do
-  let goldens := (← testDir.readDir).filter (·.fileName.endsWith goldenSuffix)
+  let goldens := (← testDir.readDir).filter fun f => goldenSuffixes.any (f.fileName.endsWith ·)
   let goldens := goldens.qsort (·.fileName < ·.fileName)
   let mut failures := #[]
   for g in goldens do

@@ -55,7 +55,8 @@ each test program as supported or not.
 5. Add a program to `StrataPythonTest/Dyn/dyn_tests/`, list it in
    `StrataPythonTest/Dyn/dyn_tests.txt`, and write its golden `NAME.expected.dyn`
    beside it with `DYN_UPDATE=1`.  Mark the other tests it now translates `yes` in that
-   list.  Give it a `NAME.symtable` and `NAME.expected.scope` too, as `AGENTS.md` describes.
+   list.  Give it a `NAME.symtable` and `NAME.expected.scope` too, as `AGENTS.md` describes,
+   and regenerate the ref-to-reg goldens of every changed golden.
    `lake exe pydyn dyn FILE.py` prints the diagnostics and the module for one file.
 
 `whileStmt` is a short example, tested by `m_while.py` and `t04_while.py`.

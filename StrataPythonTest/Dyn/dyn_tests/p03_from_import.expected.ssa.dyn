@@ -1,0 +1,83 @@
+module p03_from_import {
+  func @|p03_from_import.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("p03_from_import")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p03_from_import", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p03_from_import", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %join.0 : py.Value = py.importFrom("os.path", "join") ^propagate.0()
+      %join.cell.0 : base.Ref(py.Value) = py.globalCell("p03_from_import", "join")
+      %set.2 : base.Unit = base.refSet[py.Value](%join.cell.0, %join.0)
+      %basename.0 : py.Value = py.importFrom("os.path", "basename") ^propagate.0()
+      %base.cell.0 : base.Ref(py.Value) = py.globalCell("p03_from_import", "base")
+      %set.3 : base.Unit = base.refSet[py.Value](%base.cell.0, %basename.0)
+      %OrderedDict.0 : py.Value = py.importFrom("collections", "OrderedDict") ^propagate.0()
+      %OrderedDict.cell.0 : base.Ref(py.Value) = py.globalCell("p03_from_import", "OrderedDict")
+      %set.4 : base.Unit = base.refSet[py.Value](%OrderedDict.cell.0, %OrderedDict.0)
+      %defaultdict.0 : py.Value = py.importFrom("collections", "defaultdict") ^propagate.0()
+      %dd.cell.0 : base.Ref(py.Value) = py.globalCell("p03_from_import", "dd")
+      %set.5 : base.Unit = base.refSet[py.Value](%dd.cell.0, %defaultdict.0)
+      %clo.0 : py.Value = py.mkClosure(@p03_from_import.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("p03_from_import", "f")
+      %set.6 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @p03_from_import.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %p.0 : py.Value = py.undef("p")
+      %p.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%p.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %p.1 : py.Value = py.undef("p")
+      %fill.0 : py.Value = py.mkTuple(%p.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("p")
+      %p.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "f() got multiple values for argument 'p'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "f() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %p.3 : py.Value = py.requireDefined(%p.2, "TypeError", "f() missing 1 required positional argument: 'p'") ^propagate.0()
+      %join.0 : py.Value = py.loadGlobal("p03_from_import", "join") ^propagate.0()
+      %p.5 : py.Value = py.requireDefined(%p.3, "UnboundLocalError", "cannot access local variable 'p' where it is not associated with a value") ^propagate.0()
+      %base.0 : py.Value = py.loadGlobal("p03_from_import", "base") ^propagate.0()
+      %p.7 : py.Value = py.requireDefined(%p.3, "UnboundLocalError", "cannot access local variable 'p' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%p.7)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%base.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%p.5, %call.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%join.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %OrderedDict.0 : py.Value = py.loadGlobal("p03_from_import", "OrderedDict") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%OrderedDict.0, %tuple.2, %kwargs.3) ^propagate.0()
+      %dd.0 : py.Value = py.loadGlobal("p03_from_import", "dd") ^propagate.0()
+      %list.0 : py.Value = py.loadGlobal("p03_from_import", "list") ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple(%list.0)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%dd.0, %tuple.3, %kwargs.4) ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple(%call.1, %call.2, %call.3)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

@@ -1,0 +1,120 @@
+module i05_kwargs_mutation {
+  func @|i05_kwargs_mutation.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("i05_kwargs_mutation")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("i05_kwargs_mutation", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("i05_kwargs_mutation", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure(@i05_kwargs_mutation.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("i05_kwargs_mutation", "f")
+      %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %str.1 : py.Value = py.strLit("a")
+      %int.0 : py.Value = py.intLit(1)
+      %dict.0 : py.Value = py.mkDict(%str.1, %int.0) ^propagate.0()
+      %m.cell.0 : base.Ref(py.Value) = py.globalCell("i05_kwargs_mutation", "m")
+      %set.3 : base.Unit = base.refSet[py.Value](%m.cell.0, %dict.0)
+      %f.0 : py.Value = py.loadGlobal("i05_kwargs_mutation", "f") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.0 : py.Value = py.mkKwargs
+      %m.6 : py.Value = py.loadGlobal("i05_kwargs_mutation", "m") ^propagate.0()
+      %merge.0 : py.Value = py.dictMerge(%f.0, %kwargs.0, %m.6) ^propagate.0()
+      %call.0 : py.Value = py.call(%f.0, %tuple.0, %merge.0) ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("i05_kwargs_mutation", "print") ^propagate.0()
+      %m.9 : py.Value = py.loadGlobal("i05_kwargs_mutation", "m") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%m.9)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.1) ^propagate.0()
+      %f.1 : py.Value = py.loadGlobal("i05_kwargs_mutation", "f") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %m.12 : py.Value = py.loadGlobal("i05_kwargs_mutation", "m") ^propagate.0()
+      %merge.1 : py.Value = py.dictMerge(%f.1, %kwargs.2, %m.12) ^propagate.0()
+      %call.2 : py.Value = py.call(%f.1, %tuple.2, %merge.1) ^propagate.0()
+      %print.1 : py.Value = py.loadGlobal("i05_kwargs_mutation", "print") ^propagate.0()
+      %m.15 : py.Value = py.loadGlobal("i05_kwargs_mutation", "m") ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple(%m.15)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.1, %tuple.3, %kwargs.3) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure(@i05_kwargs_mutation.g)
+      %g.cell.0 : base.Ref(py.Value) = py.globalCell("i05_kwargs_mutation", "g")
+      %set.4 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
+      %int.1 : py.Value = py.intLit(1)
+      %int.2 : py.Value = py.intLit(2)
+      %list.0 : py.Value = py.mkList(%int.1, %int.2)
+      %xs.cell.0 : base.Ref(py.Value) = py.globalCell("i05_kwargs_mutation", "xs")
+      %set.5 : base.Unit = base.refSet[py.Value](%xs.cell.0, %list.0)
+      %g.0 : py.Value = py.loadGlobal("i05_kwargs_mutation", "g") ^propagate.0()
+      %xs.0 : py.Value = py.loadGlobal("i05_kwargs_mutation", "xs") ^propagate.0()
+      %kwargs.4 : py.Value = py.mkKwargs
+      %args.0 : py.Value = py.argsTuple(%g.0, %xs.0) ^propagate.0()
+      %call.4 : py.Value = py.call(%g.0, %args.0, %kwargs.4) ^propagate.0()
+      %xs.1 : py.Value = py.loadGlobal("i05_kwargs_mutation", "xs") ^propagate.0()
+      %append.0 : py.Value = py.attr(%xs.1, "append") ^propagate.0()
+      %int.3 : py.Value = py.intLit(3)
+      %tuple.4 : py.Value = py.mkTuple(%int.3)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%append.0, %tuple.4, %kwargs.5) ^propagate.0()
+      %g.1 : py.Value = py.loadGlobal("i05_kwargs_mutation", "g") ^propagate.0()
+      %xs.2 : py.Value = py.loadGlobal("i05_kwargs_mutation", "xs") ^propagate.0()
+      %kwargs.6 : py.Value = py.mkKwargs
+      %args.1 : py.Value = py.argsTuple(%g.1, %xs.2) ^propagate.0()
+      %call.6 : py.Value = py.call(%g.1, %args.1, %kwargs.6) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @i05_kwargs_mutation.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %kwargs.1 : py.Value = py.undef("kwargs")
+      %kwargs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%kwargs.1)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %check.0 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %kwargs.3 : py.Value = py.requireDefined(%kwargs.0, "UnboundLocalError", "cannot access local variable 'kwargs' where it is not associated with a value") ^propagate.0()
+      %str.0 : py.Value = py.strLit("added")
+      %store.0 : base.Unit = py.setItem(%kwargs.3, %str.0, %int.0) ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("i05_kwargs_mutation", "print") ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("i05_kwargs_mutation", "len") ^propagate.0()
+      %kwargs.5 : py.Value = py.requireDefined(%kwargs.0, "UnboundLocalError", "cannot access local variable 'kwargs' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%kwargs.5)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%len.0, %tuple.0, %kwargs.6) ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%call.0)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.7) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @i05_kwargs_mutation.g(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %args.1 : py.Value = py.undef("args")
+      %args.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%args.1)
+      %int.0 : py.Value = py.intLit(0)
+      %none.0 : py.Value = py.noneLit
+      %args.2 : py.Value = py.getSlice(%args.0, %int.0, %none.0, %none.0) ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "g() got an unexpected keyword argument {}") ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("i05_kwargs_mutation", "print") ^propagate.0()
+      %args.4 : py.Value = py.requireDefined(%args.2, "UnboundLocalError", "cannot access local variable 'args' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%args.4)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

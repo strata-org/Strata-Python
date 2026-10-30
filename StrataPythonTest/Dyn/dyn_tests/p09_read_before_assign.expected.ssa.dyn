@@ -1,0 +1,68 @@
+module p09_read_before_assign {
+  func @|p09_read_before_assign.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("p09_read_before_assign")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("p09_read_before_assign", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p09_read_before_assign", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %int.0 : py.Value = py.intLit(1)
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("p09_read_before_assign", "x")
+      %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
+      %clo.0 : py.Value = py.mkClosure(@p09_read_before_assign.with_global)
+      %with_global.cell.0 : base.Ref(py.Value) = py.globalCell("p09_read_before_assign", "with_global")
+      %set.3 : base.Unit = base.refSet[py.Value](%with_global.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure(@p09_read_before_assign.without_global)
+      %without_global.cell.0 : base.Ref(py.Value) = py.globalCell("p09_read_before_assign", "without_global")
+      %set.4 : base.Unit = base.refSet[py.Value](%without_global.cell.0, %clo.1)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+  }
+  func @p09_read_before_assign.with_global(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "with_global() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "with_global() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("p09_read_before_assign", "print") ^propagate.0()
+      %x.2 : py.Value = py.requireDefined(%x.0, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%x.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %int.0 : py.Value = py.intLit(2)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @p09_read_before_assign.without_global(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %y.0 : py.Value = py.undef("y")
+      %y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%y.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "without_global() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "without_global() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("p09_read_before_assign", "print") ^propagate.0()
+      %y.2 : py.Value = py.requireDefined(%y.0, "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%y.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %int.0 : py.Value = py.intLit(2)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

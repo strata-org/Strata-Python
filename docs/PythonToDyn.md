@@ -146,9 +146,19 @@ are in `StrataPython/Dyn/Build.lean`.
   `__eq__`.
 - **Cells.** A cell is a `base.Ref(py.Value)`, a mutable location. Every Python local is a
   cell: `refNew` creates it, `refSet` writes it and `refGet` reads it. A cell that has not
-  been assigned holds `py.undef "x"`. A later *ref-to-reg* pass promotes cells that do not
-  escape into SSA values and block parameters. The translator never decides block
-  parameters for locals.
+  been assigned holds `py.undef "x"`. The *ref-to-reg* pass (`docs/Dyn.md` §3) promotes
+  most cells that no closure captures to SSA values and block parameters. A cell that a
+  comprehension reads before writing it, or that a comprehension writes and the code after it
+  reads before assigning it again, stays a cell. A promoted local that is read before it is
+  assigned then reads its `py.undef` value, and `py.requireDefined` still raises. The
+  translator never decides block parameters for locals. The translator lowers frame
+  introspection as ordinary calls that are given no cells: `locals()`, `vars()`, `dir()`,
+  `eval`, `exec`, `breakpoint()`, and any frame object (from `sys._getframe`, `inspect`, a trace
+  function, a traceback or a generator). These read or write a frame's locals, so the
+  translation does not keep their meaning, and ref-to-reg may promote cells they observe. A
+  planned admission pass must reject the programs that use them before ref-to-reg runs. Until it
+  exists, ref-to-reg is wrong on such programs (the corpus test pins the golden functions that
+  call them).
 - **Globals.** `py.globalCell module name` is the cell of a module global: the same cell for
   the same arguments, read and written like a local's. It holds `undef` until the first
   assignment, and `del` writes `undef` back. `module` is always fully qualified (`"a.b"`).

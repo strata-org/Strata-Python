@@ -1,0 +1,152 @@
+module m_assert {
+  func @|m_assert.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("m_assert")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %KeyError.0 : py.Value = py.loadGlobal("m_assert", "KeyError") ^propagate.0()
+      %AssertionError.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "AssertionError")
+      %set.2 : base.Unit = base.refSet[py.Value](%AssertionError.cell.0, %KeyError.0)
+      %c.1 : py.Value = py.loadGlobal("m_assert", "c") ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%c.1) ^propagate.0()
+      branch(%cond.0) ^ok.0() ^fail.0()
+    fail.0():
+      %AssertionError.0 : py.Value = py.assertionError
+      %exc.0 : py.Value = py.toException(%AssertionError.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    ok.0():
+      %c.2 : py.Value = py.loadGlobal("m_assert", "c") ^propagate.0()
+      %cond.1 : base.Bool = py.truthy(%c.2) ^propagate.0()
+      branch(%cond.1) ^ok.1() ^fail.1()
+    fail.1():
+      %AssertionError.1 : py.Value = py.assertionError
+      %m.7 : py.Value = py.loadGlobal("m_assert", "m") ^propagate.0()
+      %args.0 : py.Value = py.mkTuple(%m.7)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%AssertionError.1, %args.0, %kwargs.0) ^propagate.0()
+      %exc.1 : py.Value = py.toException(%call.0) ^propagate.0()
+      jump ^propagate.0(%exc.1)
+    ok.1():
+      %a.0 : py.Value = py.loadGlobal("m_assert", "a") ^propagate.0()
+      %cond.2 : base.Bool = py.truthy(%a.0) ^propagate.0()
+      branch(%cond.2) ^and.0() ^fail.2()
+    and.0():
+      %b.0 : py.Value = py.loadGlobal("m_assert", "b") ^propagate.0()
+      %cond.3 : base.Bool = py.truthy(%b.0) ^propagate.0()
+      branch(%cond.3) ^ok.2() ^fail.2()
+    fail.2():
+      %AssertionError.2 : py.Value = py.assertionError
+      %a.1 : py.Value = py.loadGlobal("m_assert", "a") ^propagate.0()
+      %str.1 : py.Value = py.strLit("")
+      %fmt.0 : py.Value = py.fmtValue(%a.1, %str.1) ^propagate.0()
+      %args.1 : py.Value = py.mkTuple(%fmt.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%AssertionError.2, %args.1, %kwargs.1) ^propagate.0()
+      %exc.2 : py.Value = py.toException(%call.1) ^propagate.0()
+      jump ^propagate.0(%exc.2)
+    ok.2():
+      %c.4 : py.Value = py.loadGlobal("m_assert", "c") ^propagate.0()
+      %cond.4 : base.Bool = py.truthy(%c.4) ^propagate.0()
+      branch(%cond.4) ^fail.3() ^ok.3()
+    fail.3():
+      %AssertionError.3 : py.Value = py.assertionError
+      %g.0 : py.Value = py.loadGlobal("m_assert", "g") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%g.0, %tuple.0, %kwargs.2) ^propagate.0()
+      %args.2 : py.Value = py.mkTuple(%call.2)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%AssertionError.3, %args.2, %kwargs.3) ^propagate.0()
+      %exc.3 : py.Value = py.toException(%call.3) ^propagate.0()
+      jump ^propagate.0(%exc.3)
+    ok.3():
+      %a.2 : py.Value = py.loadGlobal("m_assert", "a") ^propagate.0()
+      %cond.5 : base.Bool = py.truthy(%a.2) ^propagate.0()
+      branch(%cond.5) ^ok.4() ^or.0()
+    or.0():
+      %b.1 : py.Value = py.loadGlobal("m_assert", "b") ^propagate.0()
+      %cond.6 : base.Bool = py.truthy(%b.1) ^propagate.0()
+      branch(%cond.6) ^ok.4() ^fail.4()
+    fail.4():
+      %AssertionError.4 : py.Value = py.assertionError
+      %exc.4 : py.Value = py.toException(%AssertionError.4) ^propagate.0()
+      jump ^propagate.0(%exc.4)
+    ok.4():
+      %xs.0 : py.Value = py.loadGlobal("m_assert", "xs") ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%xs.0) ^propagate.0()
+      jump ^head.0()
+    head.0():
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "x")
+      %set.3 : base.Unit = base.refSet[py.Value](%x.cell.0, %item.0)
+      %x.0 : py.Value = py.loadGlobal("m_assert", "x") ^propagate.0()
+      %cond.7 : base.Bool = py.truthy(%x.0) ^propagate.0()
+      branch(%cond.7) ^ok.5() ^fail.5()
+    fail.5():
+      %AssertionError.5 : py.Value = py.assertionError
+      %x.1 : py.Value = py.loadGlobal("m_assert", "x") ^propagate.0()
+      %args.3 : py.Value = py.mkTuple(%x.1)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%AssertionError.5, %args.3, %kwargs.4) ^propagate.0()
+      %exc.5 : py.Value = py.toException(%call.4) ^propagate.0()
+      jump ^propagate.0(%exc.5)
+    ok.5():
+      jump ^head.0()
+    stop.0(%exc.6 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.6)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.6)
+    exit.0():
+      %clo.0 : py.Value = py.mkClosure(@m_assert.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "f")
+      %set.4 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.7 : py.Value):
+      %exc.8 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.7)
+      ret(%exc.8)
+  }
+  func @m_assert.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %x.1 : py.Value = py.undef("x")
+      %fill.0 : py.Value = py.mkTuple(%x.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("x")
+      %x.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "f() got multiple values for argument 'x'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "f() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %x.3 : py.Value = py.requireDefined(%x.2, "TypeError", "f() missing 1 required positional argument: 'x'") ^propagate.0()
+      %x.5 : py.Value = py.requireDefined(%x.3, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%x.5) ^propagate.0()
+      branch(%cond.0) ^ok.0() ^fail.0()
+    fail.0():
+      %AssertionError.0 : py.Value = py.assertionError
+      %exc.0 : py.Value = py.toException(%AssertionError.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    ok.0():
+      %x.7 : py.Value = py.requireDefined(%x.3, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.7)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+}
+

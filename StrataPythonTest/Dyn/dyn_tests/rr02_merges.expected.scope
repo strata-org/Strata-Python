@@ -1,0 +1,17 @@
+module
+  f: local (assigned)
+  g: local (assigned)
+  function f
+    params: xs, ys
+    xs: local (parameter, referenced)
+    ys: local (parameter, referenced)
+    total: local (assigned, referenced)
+    count: local (assigned, referenced)
+    x: local (assigned, referenced)
+    y: local (assigned, referenced)
+  function g
+    params: n
+    n: local (parameter, referenced)
+    i: local (assigned, referenced)
+    s: local (assigned, referenced)
+    h: global implicit (referenced)

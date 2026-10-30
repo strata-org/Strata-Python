@@ -1,0 +1,52 @@
+module n02_listcomp {
+  func @|n02_listcomp.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("n02_listcomp")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("n02_listcomp", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("n02_listcomp", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %int.2 : py.Value = py.intLit(3)
+      %int.3 : py.Value = py.intLit(4)
+      %int.4 : py.Value = py.intLit(5)
+      %list.0 : py.Value = py.mkList(%int.0, %int.1, %int.2, %int.3, %int.4)
+      %items.cell.0 : base.Ref(py.Value) = py.globalCell("n02_listcomp", "items")
+      %set.2 : base.Unit = base.refSet[py.Value](%items.cell.0, %list.0)
+      %items.0 : py.Value = py.loadGlobal("n02_listcomp", "items") ^propagate.0()
+      %acc.0 : py.Value = py.mkList
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %each.0 : base.Unit = py.forEach(%items.0) ^propagate.0() {
+        each.0(%item.0 : py.Value):
+          %x.2 : py.Value = py.requireDefined(%item.0, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.1()
+          %int.5 : py.Value = py.intLit(2)
+          %mult.0 : py.Value = py.mult(%x.2, %int.5) ^propagate.1()
+          %append.0 : base.Unit = py.listAppend(%acc.0, %mult.0)
+          %unit.0 : base.Unit = base.unit
+          %ok.0 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
+          ret(%ok.0)
+        propagate.1(%exc.0 : py.Value):
+          %exc.1 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.0)
+          ret(%exc.1)
+      }
+      %doubled.cell.0 : base.Ref(py.Value) = py.globalCell("n02_listcomp", "doubled")
+      %set.4 : base.Unit = base.refSet[py.Value](%doubled.cell.0, %acc.0)
+      %sum.0 : py.Value = py.loadGlobal("n02_listcomp", "sum") ^propagate.0()
+      %doubled.0 : py.Value = py.loadGlobal("n02_listcomp", "doubled") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%doubled.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%sum.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %total.cell.0 : base.Ref(py.Value) = py.globalCell("n02_listcomp", "total")
+      %set.5 : base.Unit = base.refSet[py.Value](%total.cell.0, %call.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
+  }
+}
+

@@ -1,0 +1,79 @@
+module n01_async {
+  func @|n01_async.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("n01_async")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("n01_async", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("n01_async", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %mod.0 : py.Value = py.importModule("asyncio") ^propagate.0()
+      %asyncio.cell.0 : base.Ref(py.Value) = py.globalCell("n01_async", "asyncio")
+      %set.2 : base.Unit = base.refSet[py.Value](%asyncio.cell.0, %mod.0)
+      %str.1 : py.Value = py.strLit("url")
+      %str.2 : py.Value = py.loadGlobal("n01_async", "str") ^propagate.0()
+      %str.3 : py.Value = py.strLit("return")
+      %str.4 : py.Value = py.loadGlobal("n01_async", "str") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure(@n01_async.fetch_data)
+      %annotations.0 : py.Value = py.mkDict(%str.1, %str.2, %str.3, %str.4) ^propagate.0()
+      %__annotations__.0 : base.Unit = py.setAttr(%clo.0, "__annotations__", %annotations.0) ^propagate.0()
+      %fetch_data.cell.0 : base.Ref(py.Value) = py.globalCell("n01_async", "fetch_data")
+      %set.3 : base.Unit = base.refSet[py.Value](%fetch_data.cell.0, %clo.0)
+      %str.5 : py.Value = py.strLit("x")
+      %int.0 : py.Value = py.loadGlobal("n01_async", "int") ^propagate.0()
+      %str.6 : py.Value = py.strLit("return")
+      %int.1 : py.Value = py.loadGlobal("n01_async", "int") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure(@n01_async.sync_helper)
+      %annotations.1 : py.Value = py.mkDict(%str.5, %int.0, %str.6, %int.1) ^propagate.0()
+      %__annotations__.1 : base.Unit = py.setAttr(%clo.1, "__annotations__", %annotations.1) ^propagate.0()
+      %sync_helper.cell.0 : base.Ref(py.Value) = py.globalCell("n01_async", "sync_helper")
+      %set.4 : base.Unit = base.refSet[py.Value](%sync_helper.cell.0, %clo.1)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @n01_async.fetch_data(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %str.0 : py.Value = py.strLit("async def")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%unsupported.0)
+      ret(%ret.0)
+  }
+  func @n01_async.sync_helper(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %x.1 : py.Value = py.undef("x")
+      %fill.0 : py.Value = py.mkTuple(%x.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("x")
+      %x.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "sync_helper() got multiple values for argument 'x'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "sync_helper() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "sync_helper() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %x.3 : py.Value = py.requireDefined(%x.2, "TypeError", "sync_helper() missing 1 required positional argument: 'x'") ^propagate.0()
+      %x.5 : py.Value = py.requireDefined(%x.3, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %int.1 : py.Value = py.intLit(1)
+      %add.0 : py.Value = py.add(%x.5, %int.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%add.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

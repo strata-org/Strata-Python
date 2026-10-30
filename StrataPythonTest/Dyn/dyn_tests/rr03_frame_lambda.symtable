@@ -1,0 +1,6 @@
+module top
+  g: local (assigned)
+  function lambda
+    locals: global implicit (referenced)
+    x: local (parameter)
+qualnames: <lambda>

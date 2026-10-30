@@ -1,0 +1,161 @@
+module i01_call_forms {
+  func @|i01_call_forms.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("i01_call_forms")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("i01_call_forms", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("i01_call_forms", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure(@i01_call_forms.show)
+      %show.cell.0 : base.Ref(py.Value) = py.globalCell("i01_call_forms", "show")
+      %set.2 : base.Unit = base.refSet[py.Value](%show.cell.0, %clo.0)
+      %show.0 : py.Value = py.loadGlobal("i01_call_forms", "show") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%show.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %show.1 : py.Value = py.loadGlobal("i01_call_forms", "show") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %tuple.1 : py.Value = py.mkTuple(%int.0, %int.1)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%show.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %show.2 : py.Value = py.loadGlobal("i01_call_forms", "show") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple
+      %str.1 : py.Value = py.strLit("k")
+      %int.2 : py.Value = py.intLit(1)
+      %str.2 : py.Value = py.strLit("j")
+      %int.3 : py.Value = py.intLit(2)
+      %kwargs.2 : py.Value = py.mkKwargs(%str.1, %int.2, %str.2, %int.3)
+      %call.2 : py.Value = py.call(%show.2, %tuple.2, %kwargs.2) ^propagate.0()
+      %show.3 : py.Value = py.loadGlobal("i01_call_forms", "show") ^propagate.0()
+      %int.4 : py.Value = py.intLit(1)
+      %tuple.3 : py.Value = py.mkTuple(%int.4)
+      %str.3 : py.Value = py.strLit("k")
+      %int.5 : py.Value = py.intLit(2)
+      %kwargs.3 : py.Value = py.mkKwargs(%str.3, %int.5)
+      %call.3 : py.Value = py.call(%show.3, %tuple.3, %kwargs.3) ^propagate.0()
+      %int.6 : py.Value = py.intLit(1)
+      %int.7 : py.Value = py.intLit(2)
+      %int.8 : py.Value = py.intLit(3)
+      %list.0 : py.Value = py.mkList(%int.6, %int.7, %int.8)
+      %xs.cell.0 : base.Ref(py.Value) = py.globalCell("i01_call_forms", "xs")
+      %set.3 : base.Unit = base.refSet[py.Value](%xs.cell.0, %list.0)
+      %show.4 : py.Value = py.loadGlobal("i01_call_forms", "show") ^propagate.0()
+      %xs.0 : py.Value = py.loadGlobal("i01_call_forms", "xs") ^propagate.0()
+      %kwargs.4 : py.Value = py.mkKwargs
+      %args.0 : py.Value = py.argsTuple(%show.4, %xs.0) ^propagate.0()
+      %call.4 : py.Value = py.call(%show.4, %args.0, %kwargs.4) ^propagate.0()
+      %show.5 : py.Value = py.loadGlobal("i01_call_forms", "show") ^propagate.0()
+      %list.1 : py.Value = py.mkList
+      %xs.1 : py.Value = py.loadGlobal("i01_call_forms", "xs") ^propagate.0()
+      %extend.0 : base.Unit = py.listExtend(%list.1, %xs.1) ^propagate.0()
+      %xs.2 : py.Value = py.loadGlobal("i01_call_forms", "xs") ^propagate.0()
+      %extend.1 : base.Unit = py.listExtend(%list.1, %xs.2) ^propagate.0()
+      %tuple.4 : py.Value = py.listToTuple(%list.1)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%show.5, %tuple.4, %kwargs.5) ^propagate.0()
+      %show.6 : py.Value = py.loadGlobal("i01_call_forms", "show") ^propagate.0()
+      %int.9 : py.Value = py.intLit(0)
+      %list.2 : py.Value = py.mkList(%int.9)
+      %xs.3 : py.Value = py.loadGlobal("i01_call_forms", "xs") ^propagate.0()
+      %extend.2 : base.Unit = py.listExtend(%list.2, %xs.3) ^propagate.0()
+      %int.10 : py.Value = py.intLit(4)
+      %append.0 : base.Unit = py.listAppend(%list.2, %int.10)
+      %tuple.5 : py.Value = py.listToTuple(%list.2)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.6 : py.Value = py.call(%show.6, %tuple.5, %kwargs.6) ^propagate.0()
+      %str.4 : py.Value = py.strLit("a")
+      %int.11 : py.Value = py.intLit(1)
+      %str.5 : py.Value = py.strLit("b")
+      %int.12 : py.Value = py.intLit(2)
+      %dict.0 : py.Value = py.mkDict(%str.4, %int.11, %str.5, %int.12) ^propagate.0()
+      %m.cell.0 : base.Ref(py.Value) = py.globalCell("i01_call_forms", "m")
+      %set.4 : base.Unit = base.refSet[py.Value](%m.cell.0, %dict.0)
+      %show.7 : py.Value = py.loadGlobal("i01_call_forms", "show") ^propagate.0()
+      %tuple.6 : py.Value = py.mkTuple
+      %kwargs.7 : py.Value = py.mkKwargs
+      %m.18 : py.Value = py.loadGlobal("i01_call_forms", "m") ^propagate.0()
+      %merge.0 : py.Value = py.dictMerge(%show.7, %kwargs.7, %m.18) ^propagate.0()
+      %call.7 : py.Value = py.call(%show.7, %tuple.6, %merge.0) ^propagate.0()
+      %show.8 : py.Value = py.loadGlobal("i01_call_forms", "show") ^propagate.0()
+      %tuple.7 : py.Value = py.mkTuple
+      %str.6 : py.Value = py.strLit("x")
+      %int.13 : py.Value = py.intLit(0)
+      %kwargs.8 : py.Value = py.mkKwargs(%str.6, %int.13)
+      %m.21 : py.Value = py.loadGlobal("i01_call_forms", "m") ^propagate.0()
+      %merge.1 : py.Value = py.dictMerge(%show.8, %kwargs.8, %m.21) ^propagate.0()
+      %call.8 : py.Value = py.call(%show.8, %tuple.7, %merge.1) ^propagate.0()
+      %show.9 : py.Value = py.loadGlobal("i01_call_forms", "show") ^propagate.0()
+      %tuple.8 : py.Value = py.mkTuple
+      %kwargs.9 : py.Value = py.mkKwargs
+      %m.24 : py.Value = py.loadGlobal("i01_call_forms", "m") ^propagate.0()
+      %merge.2 : py.Value = py.dictMerge(%show.9, %kwargs.9, %m.24) ^propagate.0()
+      %str.7 : py.Value = py.strLit("c")
+      %int.14 : py.Value = py.intLit(3)
+      %dict.1 : py.Value = py.mkDict(%str.7, %int.14) ^propagate.0()
+      %merge.3 : py.Value = py.dictMerge(%show.9, %merge.2, %dict.1) ^propagate.0()
+      %call.9 : py.Value = py.call(%show.9, %tuple.8, %merge.3) ^propagate.0()
+      %show.10 : py.Value = py.loadGlobal("i01_call_forms", "show") ^propagate.0()
+      %int.15 : py.Value = py.intLit(1)
+      %list.3 : py.Value = py.mkList(%int.15)
+      %xs.4 : py.Value = py.loadGlobal("i01_call_forms", "xs") ^propagate.0()
+      %extend.3 : base.Unit = py.listExtend(%list.3, %xs.4) ^propagate.0()
+      %int.16 : py.Value = py.intLit(9)
+      %append.1 : base.Unit = py.listAppend(%list.3, %int.16)
+      %tuple.9 : py.Value = py.listToTuple(%list.3)
+      %str.8 : py.Value = py.strLit("k")
+      %int.17 : py.Value = py.intLit(0)
+      %kwargs.10 : py.Value = py.mkKwargs(%str.8, %int.17)
+      %m.28 : py.Value = py.loadGlobal("i01_call_forms", "m") ^propagate.0()
+      %merge.4 : py.Value = py.dictMerge(%show.10, %kwargs.10, %m.28) ^propagate.0()
+      %str.9 : py.Value = py.strLit("d")
+      %int.18 : py.Value = py.intLit(4)
+      %dict.2 : py.Value = py.mkDict(%str.9, %int.18) ^propagate.0()
+      %merge.5 : py.Value = py.dictMerge(%show.10, %merge.4, %dict.2) ^propagate.0()
+      %call.10 : py.Value = py.call(%show.10, %tuple.9, %merge.5) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @i01_call_forms.show(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %args.1 : py.Value = py.undef("args")
+      %args.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%args.1)
+      %kwargs.1 : py.Value = py.undef("kwargs")
+      %kwargs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%kwargs.1)
+      %int.0 : py.Value = py.intLit(0)
+      %none.0 : py.Value = py.noneLit
+      %args.2 : py.Value = py.getSlice(%args.0, %int.0, %none.0, %none.0) ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("i01_call_forms", "print") ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("i01_call_forms", "len") ^propagate.0()
+      %args.4 : py.Value = py.requireDefined(%args.2, "UnboundLocalError", "cannot access local variable 'args' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%args.4)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%len.0, %tuple.0, %kwargs.2) ^propagate.0()
+      %args.6 : py.Value = py.requireDefined(%args.2, "UnboundLocalError", "cannot access local variable 'args' where it is not associated with a value") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%call.0, %args.6)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.3) ^propagate.0()
+      %print.1 : py.Value = py.loadGlobal("i01_call_forms", "print") ^propagate.0()
+      %len.1 : py.Value = py.loadGlobal("i01_call_forms", "len") ^propagate.0()
+      %kwargs.5 : py.Value = py.requireDefined(%kwargs.0, "UnboundLocalError", "cannot access local variable 'kwargs' where it is not associated with a value") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%kwargs.5)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%len.1, %tuple.2, %kwargs.6) ^propagate.0()
+      %kwargs.8 : py.Value = py.requireDefined(%kwargs.0, "UnboundLocalError", "cannot access local variable 'kwargs' where it is not associated with a value") ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple(%call.2, %kwargs.8)
+      %kwargs.9 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.1, %tuple.3, %kwargs.9) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

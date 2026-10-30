@@ -1,0 +1,57 @@
+module m_imports {
+  func @|m_imports.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("m_imports")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_imports", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_imports", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %mod.0 : py.Value = py.importModule("os") ^propagate.0()
+      %os.cell.0 : base.Ref(py.Value) = py.globalCell("m_imports", "os")
+      %set.2 : base.Unit = base.refSet[py.Value](%os.cell.0, %mod.0)
+      %mod.1 : py.Value = py.importModule("os.path") ^propagate.0()
+      %mod.2 : py.Value = py.importModule("os") ^propagate.0()
+      %os.cell.1 : base.Ref(py.Value) = py.globalCell("m_imports", "os")
+      %set.3 : base.Unit = base.refSet[py.Value](%os.cell.1, %mod.2)
+      %mod.3 : py.Value = py.importModule("xml.etree.ElementTree") ^propagate.0()
+      %ET.cell.0 : base.Ref(py.Value) = py.globalCell("m_imports", "ET")
+      %set.4 : base.Unit = base.refSet[py.Value](%ET.cell.0, %mod.3)
+      %mod.4 : py.Value = py.importModule("json") ^propagate.0()
+      %j.cell.0 : base.Ref(py.Value) = py.globalCell("m_imports", "j")
+      %set.5 : base.Unit = base.refSet[py.Value](%j.cell.0, %mod.4)
+      %Mapping.0 : py.Value = py.importFrom("collections.abc", "Mapping") ^propagate.0()
+      %M.cell.0 : base.Ref(py.Value) = py.globalCell("m_imports", "M")
+      %set.6 : base.Unit = base.refSet[py.Value](%M.cell.0, %Mapping.0)
+      %pi.0 : py.Value = py.importFrom("math", "pi") ^propagate.0()
+      %pi.cell.0 : base.Ref(py.Value) = py.globalCell("m_imports", "pi")
+      %set.7 : base.Unit = base.refSet[py.Value](%pi.cell.0, %pi.0)
+      %clo.0 : py.Value = py.mkClosure(@m_imports.local_import)
+      %local_import.cell.0 : base.Ref(py.Value) = py.globalCell("m_imports", "local_import")
+      %set.8 : base.Unit = base.refSet[py.Value](%local_import.cell.0, %clo.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_imports.local_import(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %sys.0 : py.Value = py.undef("sys")
+      %sys.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%sys.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "local_import() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "local_import() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %mod.0 : py.Value = py.importModule("sys") ^propagate.0()
+      %sys.2 : py.Value = py.requireDefined(%mod.0, "UnboundLocalError", "cannot access local variable 'sys' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%sys.2)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

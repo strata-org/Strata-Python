@@ -1,0 +1,6 @@
+module
+  g: local (assigned)
+  lambda <lambda>
+    params: x
+    x: local (parameter)
+    locals: global implicit (referenced)

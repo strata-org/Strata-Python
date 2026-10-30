@@ -1,0 +1,277 @@
+module m_cond {
+  func @|m_cond.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("m_cond")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_cond", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_cond", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %a.0 : py.Value = py.loadGlobal("m_cond", "a") ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%a.0) ^propagate.0()
+      branch(%cond.0) ^and.0() ^else.0()
+    and.0():
+      %b.0 : py.Value = py.loadGlobal("m_cond", "b") ^propagate.0()
+      %cond.1 : base.Bool = py.truthy(%b.0) ^propagate.0()
+      branch(%cond.1) ^then.0() ^else.0()
+    then.0():
+      %int.0 : py.Value = py.intLit(1)
+      %r.cell.0 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
+      %set.2 : base.Unit = base.refSet[py.Value](%r.cell.0, %int.0)
+      jump ^join.0()
+    else.0():
+      jump ^join.0()
+    join.0():
+      %a.1 : py.Value = py.loadGlobal("m_cond", "a") ^propagate.0()
+      %cond.2 : base.Bool = py.truthy(%a.1) ^propagate.0()
+      branch(%cond.2) ^then.1() ^or.0()
+    or.0():
+      %b.1 : py.Value = py.loadGlobal("m_cond", "b") ^propagate.0()
+      %cond.3 : base.Bool = py.truthy(%b.1) ^propagate.0()
+      branch(%cond.3) ^then.1() ^else.1()
+    then.1():
+      %int.1 : py.Value = py.intLit(2)
+      %r.cell.1 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
+      %set.3 : base.Unit = base.refSet[py.Value](%r.cell.1, %int.1)
+      jump ^join.1()
+    else.1():
+      jump ^join.1()
+    join.1():
+      %a.2 : py.Value = py.loadGlobal("m_cond", "a") ^propagate.0()
+      %cond.4 : base.Bool = py.truthy(%a.2) ^propagate.0()
+      branch(%cond.4) ^else.2() ^then.2()
+    then.2():
+      %int.2 : py.Value = py.intLit(3)
+      %r.cell.2 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
+      %set.4 : base.Unit = base.refSet[py.Value](%r.cell.2, %int.2)
+      jump ^join.2()
+    else.2():
+      jump ^join.2()
+    join.2():
+      %a.3 : py.Value = py.loadGlobal("m_cond", "a") ^propagate.0()
+      %cond.5 : base.Bool = py.truthy(%a.3) ^propagate.0()
+      branch(%cond.5) ^and.1() ^or.1()
+    and.1():
+      %b.2 : py.Value = py.loadGlobal("m_cond", "b") ^propagate.0()
+      %cond.6 : base.Bool = py.truthy(%b.2) ^propagate.0()
+      branch(%cond.6) ^then.3() ^or.1()
+    or.1():
+      %c.4 : py.Value = py.loadGlobal("m_cond", "c") ^propagate.0()
+      %cond.7 : base.Bool = py.truthy(%c.4) ^propagate.0()
+      branch(%cond.7) ^then.3() ^else.3()
+    then.3():
+      %int.3 : py.Value = py.intLit(4)
+      %r.cell.3 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
+      %set.5 : base.Unit = base.refSet[py.Value](%r.cell.3, %int.3)
+      jump ^join.3()
+    else.3():
+      jump ^join.3()
+    join.3():
+      %b.3 : py.Value = py.loadGlobal("m_cond", "b") ^propagate.0()
+      %cond.8 : base.Bool = py.truthy(%b.3) ^propagate.0()
+      branch(%cond.8) ^then.5() ^else.5()
+    then.5():
+      %a.4 : py.Value = py.loadGlobal("m_cond", "a") ^propagate.0()
+      %cond.9 : base.Bool = py.truthy(%a.4) ^propagate.0()
+      branch(%cond.9) ^then.4() ^else.4()
+    else.5():
+      %c.6 : py.Value = py.loadGlobal("m_cond", "c") ^propagate.0()
+      %cond.10 : base.Bool = py.truthy(%c.6) ^propagate.0()
+      branch(%cond.10) ^then.4() ^else.4()
+    then.4():
+      %int.4 : py.Value = py.intLit(5)
+      %r.cell.4 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
+      %set.6 : base.Unit = base.refSet[py.Value](%r.cell.4, %int.4)
+      jump ^join.4()
+    else.4():
+      jump ^join.4()
+    join.4():
+      %a.5 : py.Value = py.loadGlobal("m_cond", "a") ^propagate.0()
+      %b.4 : py.Value = py.loadGlobal("m_cond", "b") ^propagate.0()
+      %lt.0 : py.Value = py.lt(%a.5, %b.4) ^propagate.0()
+      %cond.11 : base.Bool = py.truthy(%lt.0) ^propagate.0()
+      branch(%cond.11) ^cmp.0() ^else.6()
+    cmp.0():
+      %c.8 : py.Value = py.loadGlobal("m_cond", "c") ^propagate.0()
+      %lt.1 : py.Value = py.lt(%b.4, %c.8) ^propagate.0()
+      %cond.12 : base.Bool = py.truthy(%lt.1) ^propagate.0()
+      branch(%cond.12) ^then.6() ^else.6()
+    then.6():
+      %int.5 : py.Value = py.intLit(6)
+      %r.cell.5 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
+      %set.7 : base.Unit = base.refSet[py.Value](%r.cell.5, %int.5)
+      jump ^join.5()
+    else.6():
+      jump ^join.5()
+    join.5():
+      %a.6 : py.Value = py.loadGlobal("m_cond", "a") ^propagate.0()
+      %b.5 : py.Value = py.loadGlobal("m_cond", "b") ^propagate.0()
+      %lt.2 : py.Value = py.lt(%a.6, %b.5) ^propagate.0()
+      %cond.13 : base.Bool = py.truthy(%lt.2) ^propagate.0()
+      branch(%cond.13) ^cmp.1() ^else.7()
+    cmp.1():
+      %c.10 : py.Value = py.loadGlobal("m_cond", "c") ^propagate.0()
+      %lt.3 : py.Value = py.lt(%b.5, %c.10) ^propagate.0()
+      %cond.14 : base.Bool = py.truthy(%lt.3) ^propagate.0()
+      branch(%cond.14) ^cmp.2() ^else.7()
+    cmp.2():
+      %d.0 : py.Value = py.loadGlobal("m_cond", "d") ^propagate.0()
+      %lt.4 : py.Value = py.lt(%c.10, %d.0) ^propagate.0()
+      %cond.15 : base.Bool = py.truthy(%lt.4) ^propagate.0()
+      branch(%cond.15) ^then.7() ^else.7()
+    then.7():
+      %int.6 : py.Value = py.intLit(7)
+      %r.cell.6 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
+      %set.8 : base.Unit = base.refSet[py.Value](%r.cell.6, %int.6)
+      jump ^join.6()
+    else.7():
+      jump ^join.6()
+    join.6():
+      %a.7 : py.Value = py.loadGlobal("m_cond", "a") ^propagate.0()
+      %cond.16 : base.Bool = py.truthy(%a.7) ^propagate.0()
+      branch(%cond.16) ^and.2() ^then.8()
+    and.2():
+      %b.6 : py.Value = py.loadGlobal("m_cond", "b") ^propagate.0()
+      %cond.17 : base.Bool = py.truthy(%b.6) ^propagate.0()
+      branch(%cond.17) ^else.8() ^then.8()
+    then.8():
+      %int.7 : py.Value = py.intLit(8)
+      %r.cell.7 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
+      %set.9 : base.Unit = base.refSet[py.Value](%r.cell.7, %int.7)
+      jump ^join.7()
+    else.8():
+      jump ^join.7()
+    join.7():
+      %a.8 : py.Value = py.loadGlobal("m_cond", "a") ^propagate.0()
+      %b.7 : py.Value = py.loadGlobal("m_cond", "b") ^propagate.0()
+      %lt.5 : py.Value = py.lt(%a.8, %b.7) ^propagate.0()
+      %cond.18 : base.Bool = py.truthy(%lt.5) ^propagate.0()
+      branch(%cond.18) ^cmp.3() ^then.9()
+    cmp.3():
+      %c.13 : py.Value = py.loadGlobal("m_cond", "c") ^propagate.0()
+      %lt.6 : py.Value = py.lt(%b.7, %c.13) ^propagate.0()
+      %cond.19 : base.Bool = py.truthy(%lt.6) ^propagate.0()
+      branch(%cond.19) ^else.9() ^then.9()
+    then.9():
+      %int.8 : py.Value = py.intLit(9)
+      %r.cell.8 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
+      %set.10 : base.Unit = base.refSet[py.Value](%r.cell.8, %int.8)
+      jump ^join.8()
+    else.9():
+      jump ^join.8()
+    join.8():
+      %d.1 : py.Value = py.loadGlobal("m_cond", "d") ^propagate.0()
+      %cond.20 : base.Bool = py.truthy(%d.1) ^propagate.0()
+      branch(%cond.20) ^then.11() ^else.11()
+    then.11():
+      %b.8 : py.Value = py.loadGlobal("m_cond", "b") ^propagate.0()
+      %cond.21 : base.Bool = py.truthy(%b.8) ^propagate.0()
+      branch(%cond.21) ^then.12() ^else.12()
+    then.12():
+      %a.9 : py.Value = py.loadGlobal("m_cond", "a") ^propagate.0()
+      %cond.22 : base.Bool = py.truthy(%a.9) ^propagate.0()
+      branch(%cond.22) ^then.10() ^else.10()
+    else.12():
+      %c.15 : py.Value = py.loadGlobal("m_cond", "c") ^propagate.0()
+      %cond.23 : base.Bool = py.truthy(%c.15) ^propagate.0()
+      branch(%cond.23) ^then.10() ^else.10()
+    else.11():
+      %e.0 : py.Value = py.loadGlobal("m_cond", "e") ^propagate.0()
+      %cond.24 : base.Bool = py.truthy(%e.0) ^propagate.0()
+      branch(%cond.24) ^then.10() ^else.10()
+    then.10():
+      %int.9 : py.Value = py.intLit(10)
+      %r.cell.9 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
+      %set.11 : base.Unit = base.refSet[py.Value](%r.cell.9, %int.9)
+      jump ^join.9()
+    else.10():
+      jump ^join.9()
+    join.9():
+      jump ^head.0()
+    head.0():
+      %a.10 : py.Value = py.loadGlobal("m_cond", "a") ^propagate.0()
+      %cond.25 : base.Bool = py.truthy(%a.10) ^propagate.0()
+      branch(%cond.25) ^and.3() ^exit.0()
+    and.3():
+      %b.9 : py.Value = py.loadGlobal("m_cond", "b") ^propagate.0()
+      %cond.26 : base.Bool = py.truthy(%b.9) ^propagate.0()
+      branch(%cond.26) ^exit.0() ^body.0()
+    body.0():
+      %int.10 : py.Value = py.intLit(11)
+      %r.cell.10 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
+      %set.12 : base.Unit = base.refSet[py.Value](%r.cell.10, %int.10)
+      jump ^head.0()
+    exit.0():
+      jump ^head.1()
+    head.1():
+      %a.11 : py.Value = py.loadGlobal("m_cond", "a") ^propagate.0()
+      %cond.27 : base.Bool = py.truthy(%a.11) ^propagate.0()
+      branch(%cond.27) ^body.1() ^or.2()
+    or.2():
+      %b.10 : py.Value = py.loadGlobal("m_cond", "b") ^propagate.0()
+      %cond.28 : base.Bool = py.truthy(%b.10) ^propagate.0()
+      branch(%cond.28) ^body.1() ^else.13()
+    body.1():
+      %int.11 : py.Value = py.intLit(12)
+      %r.cell.11 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
+      %set.13 : base.Unit = base.refSet[py.Value](%r.cell.11, %int.11)
+      jump ^head.1()
+    else.13():
+      %int.12 : py.Value = py.intLit(13)
+      %r.cell.12 : base.Ref(py.Value) = py.globalCell("m_cond", "r")
+      %set.14 : base.Unit = base.refSet[py.Value](%r.cell.12, %int.12)
+      jump ^exit.1()
+    exit.1():
+      %a.12 : py.Value = py.loadGlobal("m_cond", "a") ^propagate.0()
+      %cond.29 : base.Bool = py.truthy(%a.12) ^propagate.0()
+      branch(%cond.29) ^and.4() ^join.11(%a.12)
+    and.4():
+      %b.11 : py.Value = py.loadGlobal("m_cond", "b") ^propagate.0()
+      jump ^join.11(%b.11)
+    join.11(%bool.0 : py.Value):
+      %cond.30 : base.Bool = py.truthy(%bool.0) ^propagate.0()
+      branch(%cond.30) ^join.10(%bool.0) ^or.3()
+    or.3():
+      %c.20 : py.Value = py.loadGlobal("m_cond", "c") ^propagate.0()
+      jump ^join.10(%c.20)
+    join.10(%bool.1 : py.Value):
+      %v.cell.0 : base.Ref(py.Value) = py.globalCell("m_cond", "v")
+      %set.15 : base.Unit = base.refSet[py.Value](%v.cell.0, %bool.1)
+      %b.12 : py.Value = py.loadGlobal("m_cond", "b") ^propagate.0()
+      %cond.31 : base.Bool = py.truthy(%b.12) ^propagate.0()
+      branch(%cond.31) ^and.5() ^else.14()
+    and.5():
+      %c.21 : py.Value = py.loadGlobal("m_cond", "c") ^propagate.0()
+      %cond.32 : base.Bool = py.truthy(%c.21) ^propagate.0()
+      branch(%cond.32) ^then.13() ^else.14()
+    then.13():
+      %a.13 : py.Value = py.loadGlobal("m_cond", "a") ^propagate.0()
+      jump ^join.12(%a.13)
+    else.14():
+      %b.13 : py.Value = py.loadGlobal("m_cond", "b") ^propagate.0()
+      jump ^join.12(%b.13)
+    join.12(%ifexp.0 : py.Value):
+      %w.cell.0 : base.Ref(py.Value) = py.globalCell("m_cond", "w")
+      %set.16 : base.Unit = base.refSet[py.Value](%w.cell.0, %ifexp.0)
+      %a.14 : py.Value = py.loadGlobal("m_cond", "a") ^propagate.0()
+      %cond.33 : base.Bool = py.truthy(%a.14) ^propagate.0()
+      branch(%cond.33) ^join.13(%a.14) ^or.4()
+    or.4():
+      %b.14 : py.Value = py.loadGlobal("m_cond", "b") ^propagate.0()
+      %cond.34 : base.Bool = py.truthy(%b.14) ^propagate.0()
+      branch(%cond.34) ^join.13(%b.14) ^or.5()
+    or.5():
+      %c.22 : py.Value = py.loadGlobal("m_cond", "c") ^propagate.0()
+      jump ^join.13(%c.22)
+    join.13(%bool.2 : py.Value):
+      %u.cell.0 : base.Ref(py.Value) = py.globalCell("m_cond", "u")
+      %set.17 : base.Unit = base.refSet[py.Value](%u.cell.0, %bool.2)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

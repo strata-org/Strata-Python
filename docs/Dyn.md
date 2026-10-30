@@ -89,10 +89,8 @@ list of blocks, the first its entry, whose parameters are the region's arguments
 inside a region names a block of the same region or the region's exit, so control leaves a
 region only through its exit, back to the instruction that owns it. A region's blocks have
 trees of their own, rooted at its entry. Values in scope at the owning instruction
-are visible inside the region, and values defined inside are local to it. Regions keep
-structured constructs structured, so analyses can treat them directly. The first user is the
-comprehension, as a `py.forEach` whose body is a region over the item, with one cell per
-iteration variable per evaluation, as in CPython. An `if` whose branches are regions:
+are visible inside the region, and values defined inside are local to it. An `if` whose
+branches are regions:
 
 ```
 %r.0 : base.Int = demo.if[base.Int](%c.0) {
@@ -172,3 +170,59 @@ module m {
 against an environment and returns a `Module`, or the diagnostics. Reading and printing in
 the same form gives the text back. Lines that start with `--` are comments. `pydyn read
 FILE` reads a printed module against the Python environment and prints it again.
+
+## 3. Ref-to-reg
+
+`refToReg` (`StrataDyn/RefToReg.lean`) promotes cells to SSA values. A cell is a mutable
+location, a `base.Ref a`: `base.refNew` makes one, `base.refGet` reads it and `base.refSet`
+writes it. A cell made by `base.refNew` is promoted when the value that names it is used only
+as the cell operand of `base.refGet` and `base.refSet`, the results of its `base.refSet`s are
+unused, and its content is known at every read (as defined below). Each read is removed, and
+its uses use the value that holds the content there. Each write is removed. Where edges with
+different contents meet, the block takes the content as a new parameter, and each edge passes
+it, an instruction's error edge included. The `refNew` stays, unused: when the module runs, a
+cell is a location in a heap, numbered in the order the cells are made, and an operation given
+a cell may keep its number, so removing a `refNew` could renumber the cells made after it.
+
+```
+entry.0(%c.0 : base.Bool, %a.0 : base.Int, %b.0 : base.Int):     -- before
+  %x.0 : base.Ref(base.Int) = base.refNew[base.Int](%a.0)
+  branch(%c.0) ^yes.0() ^join.0()
+yes.0():
+  %u.0 : base.Unit = base.refSet[base.Int](%x.0, %b.0)
+  jump ^join.0()
+join.0():
+  %r.0 : base.Int = base.refGet[base.Int](%x.0)
+  ret(%r.0)
+
+entry.0(%c.0 : base.Bool, %a.0 : base.Int, %b.0 : base.Int):     -- after
+  %x.0 : base.Ref(base.Int) = base.refNew[base.Int](%a.0)
+  branch(%c.0) ^yes.0() ^join.0(%a.0)
+yes.0():
+  jump ^join.0(%b.0)
+join.0(%a.1 : base.Int):
+  ret(%a.1)
+```
+
+A cell's content is known at a point unless, on some path to it, an instruction whose regions
+write the cell (at any depth) comes after the cell's last write. Such an instruction makes the
+cell unknown on its edges, after it, and at the start of each of its regions. So a read of such
+a cell after the instruction, or in one of its regions before that region writes the cell,
+keeps the cell as it is: none of its reads or writes is removed.
+
+The pass relies on two more rules, which every environment and its front end must keep:
+
+* A region runs only while the instruction that owns it runs. The instruction may run each of
+  its regions any number of times, in any order.
+* An operation reaches only the cells it is given, as operands or inside values it can read. So
+  a front end passes a cell to every operation that may read or write it.
+
+A block takes each cell's content from its parent in the dominator tree, a point that may be in
+the middle of another block (§1), unless the content may change on some path from there into the
+block: then the block takes a new parameter, or one value that
+every edge into it passes. The check computes where contents may change from the dominator tree
+and the function itself, so it doesn't rely on the plan for that.
+
+The pass computes a plan, checks it (`Plan.check`), applies it, and checks the module's
+well-formedness again. If planning or either check fails, it returns no module, and names each
+function concerned with the reason.
