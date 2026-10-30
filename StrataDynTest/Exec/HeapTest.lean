@@ -31,6 +31,9 @@ the checks.
 * a world part that keeps refs, in an environment whose world takes the token;
 * a module's top level, then functions run, one after another, each from the snapshot of the
   heap and the world where the one before it ended;
+* `runPreparedFrom`: a function run from where another run ended, which finds the cells the
+  first one kept, makes new cells after them, takes arguments, draws after the first run's
+  choices, and doesn't continue a run that faulted or ran out of fuel;
 * the checks, on a ref given at the machine's token, which no rule and no start argument can
   make: on the bound and on the tag, through the machine and through a rule, each beside its
   valid twin.
@@ -129,6 +132,12 @@ public environment Hp extends Base where
   open base
   /-- The one global cell, made on first use. -/
   insn globalCell : Ref Int
+  /-- `a + b`. -/
+  insn add (a b : Int) : Int
+  /-- `a * b`. -/
+  insn mul (a b : Int) : Int
+  /-- A number the oracle chooses. -/
+  insn pick : Int
   end hp
 
 #dyn_types Hp
@@ -155,6 +164,13 @@ public def globalCell {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type}
   modifyThe (Globals σ) fun _ => { cell := some c }
   return c
 
+@[dyn_sem Hp.add, expose] public def add (a b : Int) : Int := a + b
+
+@[dyn_sem Hp.mul, expose] public def mul (a b : Int) : Int := a * b
+
+@[dyn_sem Hp.pick, expose] public def pick {ε : Eff} {E : Type} : Sem ε E Int :=
+  return Int.ofNat (← chooseNat)
+
 public section
 #dyn_sem_table HpSem for Hp (world := HpWorld)
 end
@@ -162,6 +178,12 @@ end
 section
 abbrev H := Hp.env
 def hd (n : Nat) (t : TypeExpr H) : ValDecl H := ⟨⟨n⟩, t⟩
+
+/-- A function named `n` that returns `r`, with the blocks `bs`; its parameters are its entry
+block's. -/
+def mkF (n : Name) (r : TypeExpr H) (bs : Array (Block H Unit)) : Func H Unit :=
+  { name := n, params := (bs[0]?.map (·.params)).getD #[], retType := r, blocks := bs,
+    names := #[], info := () }
 
 /-- `twice()`: write `5` to the global cell, then read the global cell, the same one. -/
 def twice : Func H Unit :=
@@ -249,6 +271,102 @@ end
 -- Each run starts from the snapshot the one before it ended with: `twice` overwrites `main`'s
 -- `7` with `5` in the same cell, and `fetch` then reads the `5`.
 #guard chain ["main", "twice", "fetch"] = some [(some 0, 1), (some 5, 1), (some 5, 1)]
+
+/-! ## `runPreparedFrom` -/
+
+section
+
+/-- `mix()`: make a new cell holding `42`, then read the global cell. -/
+def mix : Func H Unit :=
+  let f : Func H Unit := mkF (nm "mix") Base.Int #[
+    ⟨⟨nm "entry"⟩, #[], #[
+      .const () (hd 0 Base.Int) (.int 42),
+      .apply () (hd 1 (Base.Ref Base.Int)) Base.refNew.ref ⟨#[.ty Base.Int], rfl⟩ #[⟨0⟩] #[] #[],
+      .apply () (hd 2 (Base.Ref Base.Int)) Hp.globalCell.ref ⟨#[], rfl⟩ #[] #[] #[],
+      .apply () (hd 3 Base.Int) Base.refGet.ref ⟨#[.ty Base.Int], rfl⟩ #[⟨2⟩] #[] #[]],
+      .ret () ⟨3⟩, ()⟩]
+  { f with names := (Array.range (ValDecl.idBound f.defs)).map (.num (.str .base "v")) }
+
+/-- `addTo(x)`: the global cell's value plus `x`. -/
+def addTo : Func H Unit :=
+  let f : Func H Unit := mkF (nm "addTo") Base.Int #[
+    ⟨⟨nm "entry"⟩, #[hd 0 Base.Int], #[
+      .apply () (hd 1 (Base.Ref Base.Int)) Hp.globalCell.ref ⟨#[], rfl⟩ #[] #[] #[],
+      .apply () (hd 2 Base.Int) Base.refGet.ref ⟨#[.ty Base.Int], rfl⟩ #[⟨1⟩] #[] #[],
+      .apply () (hd 3 Base.Int) Hp.add.ref ⟨#[], rfl⟩ #[⟨2⟩, ⟨0⟩] #[] #[]],
+      .ret () ⟨3⟩, ()⟩]
+  { f with names := (Array.range (ValDecl.idBound f.defs)).map (.num (.str .base "v")) }
+
+/-- `pickTwo()`: `10 * a + b`, for the oracle's next two numbers `a` and `b`. -/
+def pickTwo : Func H Unit :=
+  let f : Func H Unit := mkF (nm "pickTwo") Base.Int #[
+    ⟨⟨nm "entry"⟩, #[], #[
+      .apply () (hd 0 Base.Int) Hp.pick.ref ⟨#[], rfl⟩ #[] #[] #[],
+      .apply () (hd 1 Base.Int) Hp.pick.ref ⟨#[], rfl⟩ #[] #[] #[],
+      .const () (hd 2 Base.Int) (.int 10),
+      .apply () (hd 3 Base.Int) Hp.mul.ref ⟨#[], rfl⟩ #[⟨2⟩, ⟨0⟩] #[] #[],
+      .apply () (hd 4 Base.Int) Hp.add.ref ⟨#[], rfl⟩ #[⟨3⟩, ⟨1⟩] #[] #[]],
+      .ret () ⟨4⟩, ()⟩]
+  { f with names := (Array.range (ValDecl.idBound f.defs)).map (.num (.str .base "v")) }
+
+/-- Run `first` for `fuel` steps, then `g` on `args` from where it ended, both with the oracle
+`tape`: both runs' outcomes, the second as `runPreparedFrom` gives it. -/
+def runThen (first g : String) (args : Array HpSem.model.Arg)
+    (fuel : Nat := 100) (tape : List Nat := []) :
+    Option (Outcome HpSem.model × Except (Outcome HpSem.model) (Outcome HpSem.model)) :=
+  match Module.Raw.check
+      { name := nm "hp", funcs := #[main, fetch, mix, addTo, pickTwo], info := () } with
+  | .error _ => none
+  | .ok m => match prepare HpSem.model m (nm first) with
+    | .error _ => none
+    | .ok ⟨lm, hw, i⟩ => (lm.funcIndex (nm g)).map fun j =>
+      let o₁ := runPrepared hw i #[] fuel (tapeOracle tape)
+      (o₁, runPreparedFrom hw j o₁ args 100 (tapeOracle tape))
+
+/-- The second run's result as an integer, and the cells its heap ends with. -/
+def second (first g : String) (args : Array HpSem.model.Arg) :
+    Option (Option Int × Nat) :=
+  (runThen first g args).bind fun (_, o) => o.toOption.map fun o =>
+    (o.read? Int, o.snapshot.heap.cells.size)
+
+end
+
+-- After `main`, `fetch` reads the `7` in the cell that `main` made, and makes no cell.
+#guard second "main" "fetch" #[] = some (some 7, 1)
+
+-- The second run's new cell comes after the kept one, so `mix` reads `7`, not its own `42`.
+#guard second "main" "mix" #[] = some (some 7, 2)
+
+-- The second run takes arguments.
+#guard second "main" "addTo" #[HpSem.model.arg (3 : Int)] = some (some 10, 1)
+
+-- The second run draws the oracle's next answers, after the two the first one drew, and the
+-- result's `drawn` counts the choices of both runs.
+#guard (runThen "pickTwo" "pickTwo" #[] (tape := [3, 8, 5, 6])).map (fun (o₁, o) =>
+  (o₁.read? Int, o.toOption.map fun o => (o.read? Int, o.drawn))) = some (some 38, some (some 56, 4))
+
+-- The result's steps are only the second run's: `main` takes 5 steps, and `fetch` after it 3.
+#guard (runThen "main" "fetch" #[]).map (fun (o₁, o) =>
+  (o₁.steps, o.toOption.map fun (x : Outcome HpSem.model) => x.steps)) = some (5, some 3)
+
+/-- The first run and the second's error, as their steps and whether each ran out of fuel. -/
+def errorOf (r : Outcome HpSem.model × Except (Outcome HpSem.model) (Outcome HpSem.model)) :
+    Option ((Nat × Bool) × (Nat × Bool)) :=
+  let outOfFuel (o : Outcome HpSem.model) := match o.result with
+    | .fault .outOfFuel => true
+    | _ => false
+  match r.2 with
+  | .error o => some ((r.1.steps, outOfFuel r.1), (o.steps, outOfFuel o))
+  | .ok _ => none
+
+-- After a `main` that ran out of fuel after its 1 step, nothing runs: the error is that run.
+#guard (runThen "main" "fetch" #[] (fuel := 1)).bind errorOf = some ((1, true), (1, true))
+
+-- After a first run that faulted otherwise, here `addTo` without its argument, nothing runs.
+#guard (runThen "addTo" "fetch" #[]).bind errorOf = some ((0, false), (0, false))
+
+-- A second run that can't start, here on an argument `fetch` doesn't take, keeps the heap.
+#guard second "main" "fetch" #[HpSem.model.arg (3 : Int)] = some (none, 1)
 
 /-! ## The checks
 

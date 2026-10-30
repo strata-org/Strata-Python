@@ -1138,6 +1138,15 @@ module then from `o.snapshot`, the heap and the world where the top level ended
 (`StrataDynTest/Exec/HeapTest.lean`). One value holds both, so a run cannot start from one
 run's heap and another run's world.
 
+`runPreparedFrom hw j o args fuel oracle` runs function `j` of a prepared module from `o.snapshot`,
+where an earlier run `o` of that module ended (`HeapTest.lean`). It takes `oracle`, the oracle that
+`o` ran with, and uses its answers after the ones that `o` drew. Its result counts the choices
+of both runs, and the steps of the new run. If `o` ended with any fault, a lack of fuel or a
+blocked path included, nothing runs, and the result is `.error o` (`runPreparedFrom_of_fault`).
+`o` must come unchanged from a run of the same prepared module: a snapshot from elsewhere
+may hold a ref or a closure that names another cell or function of the same type, and the run
+then reads or calls that one.
+
 A run ignores contracts and ghosts, and a module with an extern function does not run yet:
 `runModule` rejects it with `Fault.invalid` (`StrataDynTest/Exec/BaseTest.lean`).
 

@@ -20,6 +20,8 @@ set_option autoImplicit false
   An argument is a Lean value at its tag, `M.arg x`, and `M.read? r α`, or `o.read? α` on an
   outcome, reads a result as an `α`.  Both find `α`'s tag as a rule does, as a `TagOf σ α`, at
   the model's decoding.
+* `runPreparedFrom`: run a function of a prepared module from where an earlier run of that
+  module ended, if it returned a value: from its snapshot, with its oracle's next answers.
 * `debugRun`: a debugger's loop over `runHooked`, which resumes each time its hook stops the
   run.
 * `tapeOracle`: the oracle that answers from a recorded list of choices.
@@ -171,11 +173,14 @@ theorem link_of_prepare {M : Model} {env : Env Unit} [base ≼ env] {α : Type} 
         exact hl
 
 /-- Run function `i` of the validated module `lm` on `args` for at most `fuel` fused steps,
-with the oracle `oracle`. -/
+with the oracle `oracle`, from the snapshot `snap`.  Pass `Snapshot.initial`, or a snapshot that
+a run of `lm` returned, unchanged: a world made by hand may hold a ref or a closure that names
+another cell or function. -/
 def runPrepared {M : RunModel} {lm : LModule M} (hw : WF lm) (i : Nat)
-    (args : Array (Dyn M.interp)) (fuel : Nat) (oracle : Nat → Nat) : Ran M :=
-  match startCore hw i args.toList with
-  | .error e => ⟨.fault e, .initial, 0, 0⟩
+    (args : Array (Dyn M.interp)) (fuel : Nat) (oracle : Nat → Nat)
+    (snap : Snapshot M := .initial) : Ran M :=
+  match startCore hw i args.toList snap with
+  | .error e => ⟨.fault e, snap, 0, 0⟩
   | .ok ⟨_, c, h⟩ => (runFused hw oracle fuel ⟨c, .exec, 0, ()⟩ h).outcome fuel
 
 /-- Run function `f` of `prog` on `args` for at most `fuel` fused steps, with the oracle
@@ -187,6 +192,33 @@ def runModule (M : Model) {env : Env Unit} [base ≼ env] {α : Type} (prog : Mo
   match prepare M prog f with
   | .error e => .failed M e
   | .ok ⟨_, hw, i⟩ => runPrepared hw i (args.map (· Run)) fuel oracle
+
+/-- Run function `i` of the validated module `lm` from where the run `prev` of the same module
+ended, if `prev` returned a value: from its snapshot.  So the run finds the cells that `prev` made
+and kept in its world, and its new cells come after them.  The run takes the oracle's answers from
+`prev.drawn` on.  The result's `drawn` is `prev.drawn` plus the number of choices of the new run,
+and its `steps` are only the new run's.  The arguments are values at every token, so none holds a
+ref or a closure.  If `prev` ended with any fault, a lack of fuel or a blocked path included,
+nothing runs, and the result is `.error prev`.  Pass the oracle that `prev` ran with, so that the
+run takes the answers that `prev` didn't use.  Pass `prev` as a run of `lm` returned it: a snapshot
+from another module's run, or one changed between the runs, may hold a ref or a closure that names
+another cell or function of the same type, and the run then reads or calls that one. -/
+def runPreparedFrom {M : Model} {lm : LModule M.at} (hw : WF lm) (i : Nat) (prev : Outcome M)
+    (args : Array M.Arg) (fuel : Nat) (oracle : Nat → Nat := fun _ => 0) :
+    Except (Outcome M) (Outcome M) :=
+  match prev.result with
+  | .fault _ => .error prev
+  | .ok _ =>
+    let o := runPrepared hw i (args.map (· Run)) fuel (fun k => oracle (prev.drawn + k)) prev.snapshot
+    .ok { o with drawn := prev.drawn + o.drawn }
+
+/-- After a run `prev` that ended with a fault, `runPreparedFrom` runs nothing and gives `prev`
+back, as an error. -/
+theorem runPreparedFrom_of_fault {M : Model} {lm : LModule M.at} (hw : WF lm) (i : Nat)
+    {prev : Outcome M} {f : Fault} (h : prev.result = .fault f) (args : Array M.Arg)
+    (fuel : Nat) (oracle : Nat → Nat) :
+    runPreparedFrom hw i prev args fuel oracle = .error prev := by
+  simp [runPreparedFrom, h]
 
 /-- What a debugging run saw: where its hook stopped it, in order, the outcome, or `none` if
 the fuel ran out, and the hook's final state. -/
