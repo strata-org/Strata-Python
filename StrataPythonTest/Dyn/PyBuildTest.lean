@@ -5,11 +5,13 @@
 -/
 module
 public import StrataDyn.DDM
+public import StrataDyn.DDMRead
 public import StrataDyn.WF
 public import StrataPython.Dyn.Build
 import StrataDyn.Env.WF
 -- The builder, the checker and the printer run as compiled code below.
 meta import StrataDyn.DDM
+meta import StrataDyn.DDMRead
 meta import StrataDyn.WF
 meta import StrataPython.Dyn.Build
 meta import StrataPythonTest.Dyn.TestUtil
@@ -537,6 +539,198 @@ private def cClosed : Built :=
 
 -- Ids follow the printed order: the `forEach` result before its region's values.
 #guard cClosed.toOption.any (decide ·.1.Canonical)
+
+/-! ## `def p(xs): return [x * 2 for x in xs if x]`
+
+A list comprehension: `listComp` runs the `for` clause, `compIf` the filter, and `compAppend`
+adds the element.  `x` is the item itself here; the translator keeps it in a cell. -/
+
+private def p : Built :=
+  buildFunc (Py.pn "p") #["xs"] () fun args => do
+    let r ← listComp args[0] fun out x => do
+      compIf (fun t f => do branch (← truthy x) t f)
+        (compAppend out do emitFailing (.str .base "mult") Py.mult.ref #[x, ← intLit 2])
+    emitReturn r
+
+#guard p.isOk
+
+-- Ids follow the printed order: each operation's result before its regions' values.
+#guard p.toOption.any (decide ·.1.Canonical)
+
+/-- info: module py.p {
+  func @py.p(%xs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%xs.0 : py.Value):
+      %list.0 : py.Value = py.listComp(%xs.0) ^propagate.0() {
+        each.0(%out.0 : py.ListAcc, %item.0 : py.Value):
+          %if.0 : base.Unit = py.compIf ^propagate.1() {
+            cond.0():
+              %cond.0 : base.Bool = py.truthy(%item.0) ^propagate.2()
+              branch(%cond.0) ^true.0() ^false.0()
+            true.0():
+              %ok.0 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](true)
+              ret(%ok.0)
+            false.0():
+              %ok.1 : base.Except(py.Value, base.Bool) = base.ok[py.Value, base.Bool](false)
+              ret(%ok.1)
+            propagate.2(%exc.0 : py.Value):
+              %exc.1 : base.Except(py.Value, base.Bool) = base.error[py.Value, base.Bool](%exc.0)
+              ret(%exc.1)
+          } {
+            then.0():
+              %append.0 : base.Unit = py.compAppend(%out.0) ^propagate.3() {
+                elt.0():
+                  %int.0 : py.Value = py.intLit(2)
+                  %mult.0 : py.Value = py.mult(%item.0, %int.0) ^propagate.4()
+                  %ok.2 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%mult.0)
+                  ret(%ok.2)
+                propagate.4(%exc.2 : py.Value):
+                  %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+                  ret(%exc.3)
+              }
+              %unit.0 : base.Unit = base.unit
+              %ok.3 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
+              ret(%ok.3)
+            propagate.3(%exc.4 : py.Value):
+              %exc.5 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.4)
+              ret(%exc.5)
+          }
+          %unit.1 : base.Unit = base.unit
+          %ok.4 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.1)
+          ret(%ok.4)
+        propagate.1(%exc.6 : py.Value):
+          %exc.7 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.6)
+          ret(%exc.7)
+      }
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%list.0)
+      ret(%ret.0)
+    propagate.0(%exc.8 : py.Value):
+      %exc.9 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.8)
+      ret(%exc.9)
+  }
+} -/
+#guard_msgs in
+#eval do IO.println ((← IO.ofExcept p).1.format {})
+
+-- Each failure goes to the nearest handler: the `listComp`'s to the function's, the
+-- `compIf`'s and `compAppend`'s to their enclosing region's, `truthy`'s and `mult`'s to theirs.
+#guard match p with
+  | .ok fn => errTargetsDeep fn.1.blocks ==
+    [lbl "propagate" 0, lbl "propagate" 1, lbl "propagate" 2, lbl "propagate" 3,
+      lbl "propagate" 4]
+  | .error _ => false
+
+/-! ## `def q(xs, ys): return {x: y for x in xs for y in ys}`
+
+A dict comprehension with two `for` clauses: the second is a `compFor` in the first's region,
+and `compStore` runs the key region, then the value region. -/
+
+private def q : Built :=
+  buildFunc (Py.pn "q") #["xs", "ys"] () fun args => do
+    let r ← dictComp args[0] fun out x => do
+      compFor args[1] fun y => compStore out (pure x) (pure y)
+    emitReturn r
+
+#guard q.isOk
+
+#guard q.toOption.any (decide ·.1.Canonical)
+
+/-- info: module py.q {
+  func @py.q(%xs.0 : py.Value, %ys.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%xs.0 : py.Value, %ys.0 : py.Value):
+      %dict.0 : py.Value = py.dictComp(%xs.0) ^propagate.0() {
+        each.0(%out.0 : py.DictAcc, %item.0 : py.Value):
+          %for.0 : base.Unit = py.compFor(%ys.0) ^propagate.1() {
+            each.1(%item.1 : py.Value):
+              %store.0 : base.Unit = py.compStore(%out.0) ^propagate.2() {
+                key.0():
+                  %ok.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%item.0)
+                  ret(%ok.0)
+              } {
+                value.0():
+                  %ok.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%item.1)
+                  ret(%ok.1)
+              }
+              %unit.0 : base.Unit = base.unit
+              %ok.2 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
+              ret(%ok.2)
+            propagate.2(%exc.0 : py.Value):
+              %exc.1 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.0)
+              ret(%exc.1)
+          }
+          %unit.1 : base.Unit = base.unit
+          %ok.3 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.1)
+          ret(%ok.3)
+        propagate.1(%exc.2 : py.Value):
+          %exc.3 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.2)
+          ret(%exc.3)
+      }
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%dict.0)
+      ret(%ret.0)
+    propagate.0(%exc.4 : py.Value):
+      %exc.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
+      ret(%exc.5)
+  }
+} -/
+#guard_msgs in
+#eval do IO.println ((← IO.ofExcept q).1.format {})
+
+/-! ## `def s(xs): return {x for x in xs}`
+
+A set comprehension: `compAdd` adds the element, and can raise, so its `err` successor is its
+region's handler. -/
+
+private def s : Built :=
+  buildFunc (Py.pn "s") #["xs"] () fun args => do
+    let r ← setComp args[0] fun out x => compAdd out (pure x)
+    emitReturn r
+
+#guard s.isOk
+
+#guard s.toOption.any (decide ·.1.Canonical)
+
+/-- info: module py.s {
+  func @py.s(%xs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%xs.0 : py.Value):
+      %set.0 : py.Value = py.setComp(%xs.0) ^propagate.0() {
+        each.0(%out.0 : py.SetAcc, %item.0 : py.Value):
+          %add.0 : base.Unit = py.compAdd(%out.0) ^propagate.1() {
+            elt.0():
+              %ok.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%item.0)
+              ret(%ok.0)
+          }
+          %unit.0 : base.Unit = base.unit
+          %ok.1 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
+          ret(%ok.1)
+        propagate.1(%exc.0 : py.Value):
+          %exc.1 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.0)
+          ret(%exc.1)
+      }
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%set.0)
+      ret(%ret.0)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
+  }
+} -/
+#guard_msgs in
+#eval do IO.println ((← IO.ofExcept s).1.format {})
+
+#guard match s with
+  | .ok fn => errTargetsDeep fn.1.blocks == [lbl "propagate" 0, lbl "propagate" 1]
+  | .error _ => false
+
+/-- The printed module `m`, read back in `Py.env` and printed again, or the reader's
+diagnostics. -/
+private def readBack (m : Module.Raw Py.env Unit) : IO Unit := do
+  match ← Module.read Py.env (m.format .full) "t.dyn" with
+  | .error e => IO.println e
+  | .ok m' => IO.println (if m'.format .full == m.format .full then "same" else "different")
+
+/-- info: same -/
+#guard_msgs in
+#eval do
+  readBack { name := Py.pn "comps", funcs := #[(← IO.ofExcept p).1, (← IO.ofExcept q).1,
+    (← IO.ofExcept s).1], info := () }
 
 /-! ## A module of the functions above -/
 

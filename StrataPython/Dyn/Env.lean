@@ -161,6 +161,14 @@ public environment Py extends Base where
   /-- Every Python value. -/
   type Value
 
+  /-- The list a list comprehension builds, while it builds it: `listComp`'s `each` region
+  receives it, and `compAppend` adds to it.  `CompShape.check` keeps it from any other use. -/
+  type ListAcc
+  /-- The set a set comprehension builds: as `ListAcc`, for `setComp` and `compAdd`. -/
+  type SetAcc
+  /-- The dict a dict comprehension builds: as `ListAcc`, for `dictComp` and `compStore`. -/
+  type DictAcc
+
   /-- How a block a `finally` protects finished.  The constructors are in dispatch order.  Neither
   `completionBreak` nor `completionContinue` carries a target: both bind to the innermost
   enclosing loop, which the dispatch site resolves lexically. -/
@@ -464,6 +472,53 @@ public environment Py extends Base where
   `iter` or `next`, or one `body` returns as `error`, ends the loop and goes to `err`. -/
   insn forEach (iterable : Value) (&body (item : Value) : raising Unit) (^err (exc : Value)) :
     Unit
+
+  -- Comprehensions.  A list, set or dict comprehension is one `listComp`, `setComp` or
+  -- `dictComp`, which runs its first `for` clause.  Inside, a later `for` clause is a
+  -- `compFor`, the `if`s after a `for` are one `compIf`, and the element is added by one
+  -- `compAppend`, `compAdd` or `compStore`.  `CompShape.check` checks this nesting.  The
+  -- regions of one operation run in order, each in the state the one before it left.
+  -- All eight are `writes`, so no contract applies them, and `CompShape.check` walks only
+  -- function bodies.
+
+  /-- A list comprehension, `[… for item in iterable …]`, as CPython 3.12 runs it:
+  `iter(iterable)`, then a new empty list, then `each` once per element `next` returns, in
+  order, with `out` the list and `item` the element, until `next` raises `StopIteration`.
+  Returns the list.  An exception from `iter` goes to `err`.  So does one from `next`, other
+  than `StopIteration`, and any exception `each` returns as `error`, even a `StopIteration`.  The
+  list is then dropped. -/
+  insn listComp (iterable : Value) (&each (out : ListAcc) (item : Value) : raising Unit)
+    (^err (exc : Value)) : Value
+  /-- A set comprehension: as `listComp`, building a set. -/
+  insn setComp (iterable : Value) (&each (out : SetAcc) (item : Value) : raising Unit)
+    (^err (exc : Value)) : Value
+  /-- A dict comprehension: as `listComp`, building a dict. -/
+  insn dictComp (iterable : Value) (&each (out : DictAcc) (item : Value) : raising Unit)
+    (^err (exc : Value)) : Value
+  /-- A comprehension's `for` clause after the first, its iterable evaluated by the enclosing
+  region: as `listComp`, but with no list, so `each` takes only the element. -/
+  insn compFor (iterable : Value) (&each (item : Value) : raising Unit) (^err (exc : Value)) :
+    Unit
+  /-- The `if` clauses after one `for` clause: runs `cond`, which tests them in order, and
+  runs `then` if it returns `true`.  An exception either region returns goes to `err`. -/
+  insn compIf (&cond : raising Bool) (&«then» : raising Unit) (^err (exc : Value)) : Unit
+  /-- Runs `elt`, then appends its value to `out`: CPython's `LIST_APPEND`.  An exception
+  `elt` returns goes to `err`. -/
+  insn compAppend (out : ListAcc) (&elt : raising Value) (^err (exc : Value)) : Unit
+  /-- Runs `elt`, then adds its value to `out`: CPython's `SET_ADD`.  An element identical or
+  equal to one already in the set leaves the set as it is.  Raises `TypeError` if the value is
+  unhashable, what the value's `__hash__` raises, or what `__eq__` raises when the value is
+  compared with an element of the same hash that is not identical to it.  These, and an
+  exception `elt` returns, go to `err`. -/
+  insn compAdd (out : SetAcc) (&elt : raising Value) (^err (exc : Value)) : Unit
+  /-- Runs `key`, then `value`, then stores the value under the key in `out`: CPython's
+  `MAP_ADD`.  For a key identical or equal to one already there, the dict keeps the first key
+  object and its position, and takes the new value.  Raises `TypeError` if the key is
+  unhashable, what the key's `__hash__` raises, or what `__eq__` raises when the key is compared
+  with a key of the same hash that is not identical to it.  These, and an exception `key` or
+  `value` returns, go to `err`. -/
+  insn compStore (out : DictAcc) (&key : raising Value) (&value : raising Value)
+    (^err (exc : Value)) : Unit
 
   -- Exceptions.
 

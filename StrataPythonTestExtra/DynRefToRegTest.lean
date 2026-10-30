@@ -6,6 +6,7 @@
 module
 
 meta import StrataPython.Dyn.Env
+meta import StrataPython.Dyn.CompShape
 meta import StrataDyn.DDM
 meta import StrataDyn.DDMRead
 meta import StrataDyn.Env.WF
@@ -20,6 +21,9 @@ promotes its cells with `refToReg`, and checks:
 
 * the pass succeeds, and its output is `NAME.expected.ssa.dyn`, byte for byte;
 * the output reads back, and reprints the same;
+* the golden and the output both keep the shape rules of a comprehension (`CompShape.check`), so
+  the pass keeps them on every golden, and a stage that reads a comprehension as a comprehension
+  relies on them;
 * promoting the output again changes nothing;
 * the number of promoted cells, the candidates left as cells, and the spoiled promotions that
   are not caught (see below), as `ref_to_reg.summary` lists them;
@@ -122,10 +126,14 @@ private meta def check (update : Bool) (path : System.FilePath) :
           promoting := promoting ++ [fnName]
         left := left ++ (P.left f).map fun c =>
           s!"{fnName}: {ToDDM.nameText (f.names[c.id]?.getD .base)}"
+    if let .error msg := CompShape.check m then
+      return .error s!"{path}: breaks a comprehension's shape: {msg}"
     match refToReg m with
     | .error es =>
       return .error s!"{path}: {es.toList.map fun (n, e) => s!"{ToDDM.nameText n}: {e}"}"
     | .ok m₁ =>
+      if let .error msg := CompShape.check m₁ then
+        return .error s!"{path}: promoting it breaks a comprehension's shape: {msg}"
       let out := toString m₁ ++ "\n"
       let ssa := path.toString.dropEnd goldenSuffix.length |>.toString |>.append ssaSuffix
       if update then IO.FS.writeFile ssa out

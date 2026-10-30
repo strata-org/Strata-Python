@@ -51,6 +51,7 @@ The operations:
   instruction, `emitApplyWith` with regions built in any monad `BuildM` lifts into, and
   `emitApplyNamed` named after the instruction unless given a name;
 * `checkTypeArgs`: type arguments given as data, checked against an instruction's kinds;
+* `Body.targets`: whether the body being built transfers to a given block;
 * `renameLabel`: a new base for a fresh label;
 * `finishBlock`, `terminate`, `unreachable`: close the open block with a terminator, any
   terminal operation, a datatype's `case` among them;
@@ -140,6 +141,14 @@ structure Body (env : Env Unit) (α : Type) where
   params : Array (ValDecl env) := #[]
   instrs : Array (Instruction env α) := #[]
   blocks : Array (Block env α) := #[]
+
+/-- Whether a transfer in `b` names `l`: a successor of an instruction of the open block, or of
+an instruction or the terminator of a finished block.  Regions are not looked into: a transfer
+inside a region names only that region's blocks. -/
+def Body.targets {env : Env Unit} {α : Type} (b : Body env α) (l : Label) : Bool :=
+  let inInstrs (is : Array (Instruction env α)) := is.any (·.succs.any (·.label == l))
+  inInstrs b.instrs || b.blocks.any fun blk =>
+    inInstrs blk.instrs || blk.term.succs.any (·.label == l)
 
 /-- A label `Raw.freshLabel` allocated. -/
 structure FreshLabel where

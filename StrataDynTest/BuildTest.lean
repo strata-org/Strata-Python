@@ -340,4 +340,31 @@ name stay apart. -/
 #eval IO.println ((Build.stub (env := base) (.str .base "f")
   #[(.str .base "x", Base.Int), (.str .base "x", Base.Bool)] Base.Int ()).val.format .full)
 
+/-! ## `Body.targets`
+
+Whether a body names a label: through an instruction's successor in the open block, through an
+instruction's successor or the terminator of a finished block, or not at all. -/
+
+private def lA : Label := ⟨.num (.str .base "a") 0⟩
+private def lB : Label := ⟨.num (.str .base "b") 0⟩
+private def lC : Label := ⟨.num (.str .base "c") 0⟩
+
+/-- A finished block `a.0` that jumps to `b.0`. -/
+private def jumpsToB : Block base Unit :=
+  { label := lA, params := #[], instrs := #[], term := .jump () (goto lB), info := () }
+
+/-- An instruction with a successor to `c.0`.  It is not well formed (`base.unit` has no
+successor), which does not matter here: `targets` reads only successors. -/
+private def failsToC : Instruction base Unit :=
+  .apply () ⟨⟨0⟩, Base.Unit⟩ Base.Unit.unit.ref ⟨#[], rfl⟩ #[] #[goto lC] #[]
+
+#guard (({ blocks := #[jumpsToB] } : Build.Body base Unit).targets lB)
+#guard !(({ blocks := #[jumpsToB] } : Build.Body base Unit).targets lC)
+#guard (({ instrs := #[failsToC] } : Build.Body base Unit).targets lC)
+#guard (({ blocks := #[{ jumpsToB with instrs := #[failsToC] }] } : Build.Body base Unit).targets lC)
+#guard !(({} : Build.Body base Unit).targets lA)
+-- A transfer inside an instruction's region names that region's block, not the body's.
+#guard !(({ instrs := #[.apply () ⟨⟨0⟩, Base.Unit⟩ Base.Unit.unit.ref ⟨#[], rfl⟩ #[] #[]
+  #[⟨#[jumpsToB]⟩]] } : Build.Body base Unit).targets lB)
+
 end Strata.Dyn.BuildTest

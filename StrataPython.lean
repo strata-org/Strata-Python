@@ -20,6 +20,7 @@ import StrataPython.ReadPython
 import StrataPython.Specs
 import StrataPython.Specs.DDM
 public import StrataPython.FeatureUsage
+public import StrataPython.Dyn.CompShape
 public import StrataPython.Dyn.Scope
 public import StrataPython.Dyn.Translate
 public import StrataPython.Dyn.TranslateProps

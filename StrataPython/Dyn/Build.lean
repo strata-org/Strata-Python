@@ -400,6 +400,136 @@ def forEach [Monad m] [MonadPy α m] [MonadBuild Py.env α m] (iterable : ValId)
 
 end
 
+/-! ## Comprehensions
+
+A comprehension is one `py.listComp`, `py.setComp` or `py.dictComp`, nesting `py.compFor`,
+`py.compIf` and one addition (`py.compAppend`, `py.compAdd`, `py.compStore`), as
+`CompShape.check` requires.  Every region below is `raising`: failures inside go to the
+region's own handler, which returns them as `error`, and the operation that owns the region
+sends them to the enclosing handler. -/
+
+section
+-- `let%`.
+open Strata.Dyn.Emit
+
+/-- The body of a `raising res` region that leaves by `exit`.  `body` emits it, with failures
+going to the region's own handler, which returns them as `error` and is emitted only if
+something fails to it.  If `body` leaves a block open, `close` ends it with what `body`
+gave. -/
+private def raisingBody [Monad m] [MonadPy α m] [MonadBuild Py.env α m] {res : TypeExpr Py.env}
+    {β : Type} (exit : PyTarget [Py.raising res]) (body : m β) (close : β → m Unit) :
+    m Unit := do
+  let propagate ← Emit.freshLabel [Py.Value] "propagate"
+  let b ← withHandler propagate body
+  if ← liftPy (isOpen (α := α)) then close b
+  if Build.Body.targets (← liftPy (getThe (Build.State Py.env α) : PyM α _)).body
+      propagate.label then
+    let raised ← Emit.startBlock₁ propagate (stem "exc")
+    let% exc ← Base.Except.error raised
+    Emit.ret exit exc
+
+/-- Leave a `raising res` region by `exit` with `ok v`. -/
+private def retOk [Monad m] [MonadBuild Py.env α m] {res : TypeExpr Py.env}
+    (exit : PyTarget [Py.raising res]) (v : PyVal res) : m Unit := do
+  let% ok ← Base.Except.ok v
+  Emit.ret exit ok
+
+/-- Leave a `raising Unit` region by `exit` with `ok ()`. -/
+private def retUnit [Monad m] [MonadBuild Py.env α m]
+    (exit : PyTarget [Py.raising Base.Unit]) : m Unit := do
+  let% unit ← Base.Unit.unit
+  retOk exit unit
+
+/-- A `raising Unit` region that leaves by `exit`: `body` emits it, and if `body` leaves a
+block open, the region returns `ok ()` from it. -/
+private def unitBody [Monad m] [MonadPy α m] [MonadBuild Py.env α m]
+    (exit : PyTarget [Py.raising Base.Unit]) (body : m Unit) : m Unit :=
+  raisingBody exit body fun () => retUnit exit
+
+/-- `py.listComp iterable`: `each` emits the region for one item, given the accumulator and
+the item.  The operation's `err` successor is the enclosing handler.  Returns the list. -/
+def listComp [Monad m] [MonadPy α m] [MonadBuild Py.env α m] (iterable : ValId)
+    (each : ValId → ValId → m Unit) (info : Option α := none) : m ValId := do
+  let h ← liftPy (handler (α := α))
+  let r ← Py.listComp (value iterable)
+    (fun out item exit => unitBody exit (each out.id item.id))
+    h info (result := stem "list")
+  return r.id
+
+/-- `py.setComp iterable`, as `listComp`. -/
+def setComp [Monad m] [MonadPy α m] [MonadBuild Py.env α m] (iterable : ValId)
+    (each : ValId → ValId → m Unit) (info : Option α := none) : m ValId := do
+  let h ← liftPy (handler (α := α))
+  let r ← Py.setComp (value iterable)
+    (fun out item exit => unitBody exit (each out.id item.id))
+    h info (result := stem "set")
+  return r.id
+
+/-- `py.dictComp iterable`, as `listComp`. -/
+def dictComp [Monad m] [MonadPy α m] [MonadBuild Py.env α m] (iterable : ValId)
+    (each : ValId → ValId → m Unit) (info : Option α := none) : m ValId := do
+  let h ← liftPy (handler (α := α))
+  let r ← Py.dictComp (value iterable)
+    (fun out item exit => unitBody exit (each out.id item.id))
+    h info (result := stem "dict")
+  return r.id
+
+/-- `py.compFor iterable`: a `for` clause after the first.  `each` emits the region for one
+item. -/
+def compFor [Monad m] [MonadPy α m] [MonadBuild Py.env α m] (iterable : ValId)
+    (each : ValId → m Unit) (info : Option α := none) : m Unit := do
+  let h ← liftPy (handler (α := α))
+  discard <| Py.compFor (value iterable)
+    (fun item exit => unitBody exit (each item.id))
+    h info (result := stem "for")
+
+/-- `py.compIf`: `cond t f` emits the tests, ending every path by a transfer to `t` (all
+passed) or `f` (one failed); the `cond` region then returns `true` from `t` and `false` from
+`f`.  `rest` emits the `then` region: the rest of the comprehension. -/
+def compIf [Monad m] [MonadPy α m] [MonadBuild Py.env α m]
+    (cond : PyTarget [] → PyTarget [] → m Unit) (rest : m Unit) (info : Option α := none) :
+    m Unit := do
+  let h ← liftPy (handler (α := α))
+  let c (exit : PyTarget [Py.raising Base.Bool]) : m Unit := raisingBody exit (do
+      let t ← Emit.freshLabel [] "true"
+      let f ← Emit.freshLabel [] "false"
+      cond t.goto f.goto
+      for (l, b) in [(t, true), (f, false)] do
+        liftPy (startBlock (α := α) l)
+        let v ← liftPy (emitConst (α := α) (stem (toString b)) (.bool b))
+        retOk exit (Val.ofId Base.Bool v)) fun () => pure ()
+  discard <| Py.compIf c (unitBody · rest) h info
+    (result := stem "if")
+
+/-- An `elt`, `key` or `value` region that leaves by `exit`: `body` emits the expression and
+gives its value. -/
+private def valueBody [Monad m] [MonadPy α m] [MonadBuild Py.env α m]
+    (exit : PyTarget [Py.raising Py.Value]) (body : m ValId) : m Unit :=
+  raisingBody exit body fun v => retOk exit (value v)
+
+/-- `py.compAppend out`, with `elt` emitting the element. -/
+def compAppend [Monad m] [MonadPy α m] [MonadBuild Py.env α m] (out : ValId) (elt : m ValId)
+    (info : Option α := none) : m Unit := do
+  let h ← liftPy (handler (α := α))
+  discard <| Py.compAppend (Val.ofId Py.ListAcc out) (valueBody · elt) h info
+    (result := stem "append")
+
+/-- `py.compAdd out`, with `elt` emitting the element. -/
+def compAdd [Monad m] [MonadPy α m] [MonadBuild Py.env α m] (out : ValId) (elt : m ValId)
+    (info : Option α := none) : m Unit := do
+  let h ← liftPy (handler (α := α))
+  discard <| Py.compAdd (Val.ofId Py.SetAcc out) (valueBody · elt) h info
+    (result := stem "add")
+
+/-- `py.compStore out`, with `key` and `value` emitting the key and the value. -/
+def compStore [Monad m] [MonadPy α m] [MonadBuild Py.env α m] (out : ValId)
+    (key value : m ValId) (info : Option α := none) : m Unit := do
+  let h ← liftPy (handler (α := α))
+  discard <| Py.compStore (Val.ofId Py.DictAcc out) (valueBody · key) (valueBody · value) h
+    info (result := stem "store")
+
+end
+
 /-! ## Completions
 
 How a block that a `finally` protects finished, as a value.  A `finally` body is emitted
