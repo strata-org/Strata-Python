@@ -1,0 +1,58 @@
+module
+  TryBody: local (assigned)
+  TryHandler: local (assigned)
+  TryElse: local (assigned)
+  TryFinally: local (assigned)
+  MatchCase: local (assigned)
+  WithBody: local (assigned)
+  WhileElse: local (assigned)
+  ForElse: local (assigned)
+  IfElse: local (assigned)
+  InMethod: local (assigned)
+  TryStar: local (assigned)
+  class TryBody
+    a: local (assigned, annotated)
+    int: global implicit (referenced)
+    KeyError: global implicit (referenced)
+  class TryHandler
+    KeyError: global implicit (referenced)
+    a: local (assigned, annotated)
+    int: global implicit (referenced)
+  class TryElse
+    a: local (assigned, annotated)
+    int: global implicit (referenced)
+    KeyError: global implicit (referenced)
+  class TryFinally
+    a: local (assigned, annotated)
+    int: global implicit (referenced)
+  class MatchCase
+    a: local (assigned, annotated)
+    int: global implicit (referenced)
+  class WithBody
+    open: global implicit (referenced)
+    fh: local (assigned)
+    a: local (assigned, annotated)
+    int: global implicit (referenced)
+  class WhileElse
+    a: local (assigned, annotated)
+    int: global implicit (referenced)
+  class ForElse
+    i: local (assigned)
+    a: local (assigned, annotated)
+    int: global implicit (referenced)
+  class IfElse
+    a: local (assigned, annotated)
+    int: global implicit (referenced)
+  class InMethod
+    m: local (assigned)
+    function InMethod.m
+      params: self
+      self: local (parameter)
+      a: local (assigned, annotated)
+      int: global implicit (referenced)
+  class TryStar
+    KeyError: global implicit (referenced)
+    a: local (assigned, annotated)
+    int: global implicit (referenced)
+diagnostics:
+  unsupported at 33:4-35:22: 'match' is not supported

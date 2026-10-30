@@ -9,6 +9,8 @@ public import StrataPython.Dyn.Scope
 public import StrataDyn.WF
 public import Lean.Data.Position
 import StrataPython.Dyn.Termination
+import Strata.Util.ListUtilsProps
+import Std.Data.HashSet.Lemmas
 -- Emitting instructions over `Py.env` needs the signature representation at
 -- code-generation time.
 import StrataDyn.Env.WF
@@ -585,19 +587,38 @@ private theorem sizeOf_paramAnnotations_lt {args : arguments SourceRange}
     · have hMem := Array.sizeOf_lt_of_mem h; simp [sizeOf_ann]; omega
     · obtain ⟨_, v⟩ := varKw; subst h; simp [sizeOf_ann]; omega
 
+mutual
+
 /-- Whether the statements hold an annotated assignment outside a nested function or class:
 CPython's `find_ann`, which decides `SETUP_ANNOTATIONS`. -/
-partial def findAnn (ss : Array (stmt SourceRange)) : Bool :=
-  ss.any fun
-    | .AnnAssign .. => true
-    | .For _ _ _ b o _ | .AsyncFor _ _ _ b o _ | .While _ _ b o | .If _ _ b o =>
-      findAnn b.val || findAnn o.val
-    | .With _ _ b _ | .AsyncWith _ _ b _ => findAnn b.val
-    | .Try _ b hs o f | .TryStar _ b hs o f =>
-      findAnn b.val || hs.val.any (fun (.ExceptHandler _ _ _ hb) => findAnn hb.val) ||
-        findAnn o.val || findAnn f.val
-    | .Match _ _ cases => cases.val.any fun (.mk_match_case _ _ _ b) => findAnn b.val
-    | _ => false
+def findAnn (ss : Array (stmt SourceRange)) : Bool :=
+  ss.attach.any fun ⟨s, h⟩ =>
+    have _hmem := Array.sizeOf_lt_of_mem h
+    findAnnIn s
+termination_by sizeOf ss
+
+/-- Whether the statement `s` holds an annotated assignment outside a nested function or
+class, as `findAnn`. -/
+def findAnnIn (s : stmt SourceRange) : Bool :=
+  match s with
+  | .AnnAssign .. => true
+  | .For _ _ _ b o _ | .AsyncFor _ _ _ b o _ | .While _ _ b o | .If _ _ b o =>
+    findAnn b.val || findAnn o.val
+  | .With _ _ b _ | .AsyncWith _ _ b _ => findAnn b.val
+  | .Try _ b hs o f | .TryStar _ b hs o f =>
+    findAnn b.val ||
+      hs.val.attach.any (fun ⟨.ExceptHandler _ _ _ hb, h⟩ =>
+        have _hmem := Array.sizeOf_lt_of_mem h
+        findAnn hb.val) ||
+      findAnn o.val || findAnn f.val
+  | .Match _ _ cases =>
+    cases.val.attach.any fun ⟨.mk_match_case _ _ _ b, h⟩ =>
+      have _hmem := Array.sizeOf_lt_of_mem h
+      findAnn b.val
+  | _ => false
+termination_by sizeOf s
+
+end
 
 /-! ## Functions
 
@@ -660,17 +681,64 @@ def isConstantDefault : expr SourceRange → Bool
   | .UnaryOp _ (.USub _) (.Constant _ (.ConFloat ..) _) => true
   | _ => false
 
+public section
+
+/-- The `k`-th candidate for a fresh name made from `first`: `first`, then `first.1`,
+`first.2`, … -/
+@[expose] def candidate (first : Name) : Nat → Name
+  | 0 => first
+  | k + 1 => .num first (k + 1)
+
+/-- The first candidate made from `first` that `taken` does not contain.  One of the first
+`taken.size + 1` candidates is free (`freshName_not_mem`), so the last case does not
+happen. -/
+@[expose] def freshName (taken : Std.HashSet Name) (first : Name) : Name :=
+  match (List.range (taken.size + 1)).find? (fun k => !taken.contains (candidate first k)) with
+  | some k => candidate first k
+  | none => candidate first taken.size
+
+/-- `freshName`, with a search that stops at the first free candidate. -/
+@[expose] def freshNameFast (taken : Std.HashSet Name) (first : Name) : Name :=
+  go 0 (taken.size + 1)
+where
+  /-- The first free candidate among the `n` candidates from the `k`-th one, or
+  `candidate first taken.size` if none is free. -/
+  go (k : Nat) : (n : Nat) → Name
+    | 0 => candidate first taken.size
+    | n + 1 => if taken.contains (candidate first k) then go (k + 1) n else candidate first k
+
+/-- The search of `freshNameFast` over the `n` candidates from the `k`-th one gives the first
+free one, as `find?` over the same candidates does, or `candidate first taken.size` if none is
+free. -/
+private theorem freshNameFast_go (taken : Std.HashSet Name) (first : Name) (n k : Nat) :
+    freshNameFast.go taken first k n =
+      match (List.range' k n).find? (fun j => !taken.contains (candidate first j)) with
+      | some j => candidate first j
+      | none => candidate first taken.size := by
+  induction n generalizing k with
+  | zero => rfl
+  | succ n ih =>
+    rw [freshNameFast.go, ih, List.range'_succ, List.find?_cons]
+    cases taken.contains (candidate first k) <;> rfl
+
+/-- `freshName` and `freshNameFast` are the same function, so the compiled code can run
+`freshNameFast`, which stops at the first free candidate. -/
+@[csimp] theorem freshName_eq_fast : @freshName = @freshNameFast := by
+  funext taken first
+  -- The two sides may use different copies of the same `match`.
+  simp only [freshName, freshNameFast, freshNameFast_go, List.range_eq_range'] <;>
+    (generalize (List.range' 0 (taken.size + 1)).find?
+        (fun k => !taken.contains (candidate first k)) = o
+     cases o <;> rfl)
+
+end -- public section
+
 /-- A fresh function name for the scope whose `__qualname__` is `qualname`: `m.f.g` for
 `f.<locals>.g`, or `m.f.g.k` if that is taken. -/
 def allocName (qualname : String) : TransM Name := do
   let parts := (qualname.splitOn ".").filter (· != "<locals>")
   let first := parts.foldl (init := (← read).moduleName) Name.str
-  let taken := (← get).funcNames
-  let mut n := first
-  let mut k := 1
-  while taken.contains n do
-    n := .num first k
-    k := k + 1
+  let n := freshName (← get).funcNames first
   modify fun s => { s with funcNames := s.funcNames.insert n }
   return n
 
@@ -727,7 +795,9 @@ def firstParam? : TransM (Option String) := do
   return (sc.params.find? fun p => p.kind matches .posOnly | .positional).map (·.name)
 
 /-- Queue the function of scope `cur` at `sr` and return its closure, capturing the cells of
-`capturedVars cur` from the frame, then `extra`.  A class body is named `m.C.<body>`. -/
+`capturedVars cur` from the frame, then `extra`.  A class body is named `m.C.<body>`.  Each
+scope is queued once, as each AST node is lowered once and has its own range; `emitQueued`
+reports a scope queued twice as an internal error. -/
 def queueFunc (sr : SourceRange) (scope : ScopeId) (cur : Scope)
     (args : Option (arguments SourceRange)) (body : Array (stmt SourceRange))
     (stub : Option String) (extra : Array ValId) : TransM (Option ValId) := do
@@ -1631,13 +1701,14 @@ def exitArms (join : Label) (outer : Target.Raw) (sr : SourceRange) : TransM (Ar
 mutual
 
 /-- Lower a statement list, skipping what follows a statement that ends every path. -/
-partial def transStmts (ss : Array (stmt SourceRange)) : TransM Unit := do
+def transStmts (ss : Array (stmt SourceRange)) : TransM Unit := do
   for s in ss do
     if !(← isOpen) then return
     transStmt s
+termination_by sizeOf ss
 
 /-- Lower a statement. -/
-partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
+def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
   match s with
   | .Expr _ v => discard <| transExpr v
   | .Pass _ | .Global .. | .Nonlocal .. => pure ()
@@ -1698,7 +1769,9 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
       | some exc => pure exc
       | none => build (emitFailing (.str .base "exc") Py.handledExc.ref #[])
     build (PyBuild.jump (← build (raiseTo e)))
-  | .With sr ⟨_, items⟩ ⟨_, body⟩ _ => withStmt sr items.toList body
+  | .With sr ⟨_, items⟩ ⟨_, body⟩ _ =>
+    have hlist := sizeOf_toList_lt items
+    withStmt sr items.toList body
   | .Try sr ⟨_, body⟩ ⟨_, handlers⟩ ⟨_, orelse⟩ ⟨_, final⟩ =>
     if final.isEmpty then tryStmt body handlers orelse
     else tryFinallyStmt sr body handlers orelse final
@@ -1711,9 +1784,10 @@ partial def transStmt (s : stmt SourceRange) : TransM Unit := withRange s.ann do
   | .ClassDef sr ⟨_, n⟩ bases kws body decs tps =>
     classDef sr n bases.val kws.val body.val decs.val (!tps.val.isEmpty)
   | other => reject (stmtName other) other.ann
+termination_by sizeOf s
 
 /-- `if test: body else: orelse` (§6.2).  `elif` is an `if` in `orelse`. -/
-partial def ifStmt (test : expr SourceRange) (body orelse : Array (stmt SourceRange)) :
+def ifStmt (test : expr SourceRange) (body orelse : Array (stmt SourceRange)) :
     TransM Unit := do
   let thenL ← build (freshLabel "then")
   let elseL ← build (freshLabel "else")
@@ -1726,9 +1800,10 @@ partial def ifStmt (test : expr SourceRange) (body orelse : Array (stmt SourceRa
   transStmts orelse
   if ← isOpen then jump join
   if ← targeted join then build (startBlock join)
+termination_by sizeOf test + sizeOf body + sizeOf orelse + 1
 
 /-- `while test: body else: orelse` (§6.4). -/
-partial def whileStmt (test : expr SourceRange) (body orelse : Array (stmt SourceRange)) :
+def whileStmt (test : expr SourceRange) (body orelse : Array (stmt SourceRange)) :
     TransM Unit := do
   let head ← build (freshLabel "head")
   let bodyL ← build (freshLabel "body")
@@ -1745,11 +1820,12 @@ partial def whileStmt (test : expr SourceRange) (body orelse : Array (stmt Sourc
     transStmts orelse
     if ← isOpen then jump exit
   if ← targeted exit then build (startBlock exit)
+termination_by sizeOf test + sizeOf body + sizeOf orelse + 1
 
 /-- `assert test, msg` (§6.1): `test` as a condition.  Only the failing side evaluates
 `msg`, then raises the `AssertionError` class called on it, or the class itself without a
 `msg`, through `toException`, as CPython's `RAISE_VARARGS` does. -/
-partial def assertStmt (test : expr SourceRange) (msg : Option (expr SourceRange)) :
+def assertStmt (test : expr SourceRange) (msg : Option (expr SourceRange)) :
     TransM Unit := do
   let ok ← build (freshLabel "ok")
   let fail ← build (freshLabel "fail")
@@ -1768,7 +1844,7 @@ partial def assertStmt (test : expr SourceRange) (msg : Option (expr SourceRange
 
 /-- `raise e from cause` (§7.1): evaluate `e`, then `cause`, make `e` an exception with
 `toException`, set its cause, and jump to the enclosing handler. -/
-partial def raiseStmt (e : expr SourceRange) (cause : Option (expr SourceRange)) :
+def raiseStmt (e : expr SourceRange) (cause : Option (expr SourceRange)) :
     TransM Unit := do
   let v ← transExpr e
   let c ← cause.mapM transExpr
@@ -1782,7 +1858,7 @@ makes the exception the one being handled and tests the clauses in turn.  A fail
 clause, and an exception that no clause matches, go to `unwind`.  It makes the previous
 exception the one being handled again, then raises to the handler around the `try`.  `orelse`
 runs after `body`, under that handler. -/
-partial def tryStmt (body : Array (stmt SourceRange)) (handlers : Array (excepthandler SourceRange))
+def tryStmt (body : Array (stmt SourceRange)) (handlers : Array (excepthandler SourceRange))
     (orelse : Array (stmt SourceRange)) : TransM Unit := do
   let outer ← build handler
   let catchL ← build (freshLabel "catch")
@@ -1795,32 +1871,36 @@ partial def tryStmt (body : Array (stmt SourceRange)) (handlers : Array (excepth
   let exc ← build (startBlockWith catchL (.str .base "exc"))
   let prev ← build (emitTotal (.str .base "prev") Py.pushExcInfo.ref #[exc])
   withHandler unwind do
-    for h in handlers do
-      let .ExceptHandler hsr ⟨_, type⟩ ⟨_, name⟩ ⟨_, hbody⟩ := h
-      let name := name.map (·.val, hsr)
-      let some t := type
-        | -- A bare `except:` is last; the scope pass reports one that is not.
-          clause exc prev outer join unwind name hbody
-          break
-      let m ← build (excMatch exc (← transExpr t))
-      let bodyL ← build (freshLabel "except")
-      let next ← build (freshLabel "next")
-      branch m bodyL next
-      build (startBlock bodyL)
-      clause exc prev outer join unwind name hbody
-      build (startBlock next)
+    for hm : h in handlers do
+      have hlt := Array.sizeOf_lt_of_mem hm
+      match hh : h with
+      | .ExceptHandler hsr ⟨_, type⟩ ⟨_, name⟩ ⟨_, hbody⟩ =>
+        have hbodyLt : sizeOf hbody < sizeOf handlers := by subst hh; simp at hlt; omega
+        let name := name.map (·.val, hsr)
+        let some t := type
+          | -- A bare `except:` is last; the scope pass reports one that is not.
+            clause exc prev outer join unwind name hbody
+            break
+        let m ← build (excMatch exc (← transExpr t))
+        let bodyL ← build (freshLabel "except")
+        let next ← build (freshLabel "next")
+        branch m bodyL next
+        build (startBlock bodyL)
+        clause exc prev outer join unwind name hbody
+        build (startBlock next)
     if ← isOpen then jump unwind #[exc]
   let x ← build (startBlockWith unwind (.str .base "exc"))
   popExcept prev
   build (PyBuild.jump { outer with args := outer.args.push x })
   if ← targeted join then build (startBlock join)
+termination_by sizeOf body + sizeOf handlers + sizeOf orelse + 1
 
 /-- `try: … finally: final` at `sr` (§7.2), with the `except` clauses and `else` of `tryStmt`
 if there are any.  Every way out of the protected part reaches the `finally` body as a
 completion, through the `cleanup` exit for `return`, `break` and `continue`.  After the body,
 the dispatch does from outside the `try` what the completion would have done.  Inside the
 body, a `return`, `break` or `continue` first restores the exception handled before it. -/
-partial def tryFinallyStmt (sr : SourceRange) (body : Array (stmt SourceRange))
+def tryFinallyStmt (sr : SourceRange) (body : Array (stmt SourceRange))
     (handlers : Array (excepthandler SourceRange)) (orelse final : Array (stmt SourceRange)) :
     TransM Unit := do
   let outer ← build handler
@@ -1832,9 +1912,10 @@ partial def tryFinallyStmt (sr : SourceRange) (body : Array (stmt SourceRange))
       (withExit (.handler prev none outer) (transStmts final)))
     (exitArms join outer sr)
   if finished then build (startBlock join)
+termination_by sizeOf body + sizeOf handlers + sizeOf orelse + sizeOf final + 2
 
 /-- `with item, …: body` at `sr` (§7.3), one item at a time, the first outermost. -/
-partial def withStmt (sr : SourceRange) (items : List (withitem SourceRange))
+def withStmt (sr : SourceRange) (items : List (withitem SourceRange))
     (body : Array (stmt SourceRange)) : TransM Unit :=
   match items with
   | [] => transStmts body
@@ -1881,12 +1962,13 @@ partial def withStmt (sr : SourceRange) (items : List (withitem SourceRange))
       discard <| build (emitFailing (.str .base "exited") Py.call.ref #[exit, t, kw])
       dispatchArms pending (← exitArms join outer sr)
     build (startBlock join)
+termination_by sizeOf items + sizeOf body + 1
 
 /-- The body of an `except` clause handling `exc`, which binds it to `name` if there is one,
 then leaves the handler (`leaveHandler`) and jumps to `join`.  `prev` is the exception handled
 before, `outer` the handler around the `try`, and `unwind` the block that restores `prev` and
 raises again.  With a `name`, a failure first unbinds it, in `clear`. -/
-partial def clause (exc prev : ValId) (outer : Target.Raw) (join unwind : Label)
+def clause (exc prev : ValId) (outer : Target.Raw) (join unwind : Label)
     (name : Option (String × SourceRange)) (body : Array (stmt SourceRange)) : TransM Unit :=
   withReader ({ · with handled := some exc }) do
     let clear? ← name.mapM fun (n, r) => do
@@ -1900,11 +1982,12 @@ partial def clause (exc prev : ValId) (outer : Target.Raw) (join unwind : Label)
       let x ← build (startBlockWith clear (.str .base "exc"))
       unbindName n r
       jump unwind #[x]
+termination_by sizeOf body + 1
 
 /-- `for target in iter: body else: orelse` at `sr` (§6.4).  Only `next` raises to `stop`,
 which ends the loop on `StopIteration` and passes any other exception to the enclosing
 handler. -/
-partial def forStmt (sr : SourceRange) (target iter : expr SourceRange)
+def forStmt (sr : SourceRange) (target iter : expr SourceRange)
     (body orelse : Array (stmt SourceRange)) : TransM Unit := do
   match assigner sr target with
   | .error t => badTarget t
@@ -1929,6 +2012,7 @@ partial def forStmt (sr : SourceRange) (target iter : expr SourceRange)
       transStmts orelse
       if ← isOpen then jump exit
     if ← targeted exit then build (startBlock exit)
+termination_by sizeOf target + sizeOf iter + sizeOf body + sizeOf orelse + 1
 
 end
 
@@ -2015,6 +2099,49 @@ def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) :
           prologue (params a) defaultCells args kwargs
           transStmts job.body
 
+/-- A set of scope ids below `n` has at most `n` elements. -/
+private theorem size_le_of_lt {done : Std.HashSet ScopeId} {n : Nat}
+    (h : ∀ x ∈ done, x < n) : done.size ≤ n := by
+  have hsub : done.toList ⊆ List.range n := fun x hx =>
+    List.mem_range.mpr (h x (Std.HashSet.mem_toList.mp hx))
+  have hnd : done.toList.Nodup := Std.HashSet.distinct_toList.imp fun hab => by simpa using hab
+  have hlen := List.subset_nodup_length hnd hsub
+  simpa [Std.HashSet.length_toList] using hlen
+
+/-- Emit the functions queued in `st` from position `i` on, after `funcs`, in queue order;
+an emitted function may queue more.  `done` holds the scopes already emitted, all in the
+scope table (`hdone`).  A job whose scope was emitted already, or is not in the table, is an
+internal error, and is skipped: each scope is queued once.  Return the functions and the
+state after the last. -/
+def emitQueued (ctx : Ctx) (done : Std.HashSet ScopeId)
+    (hdone : ∀ x ∈ done, x < ctx.table.scopes.size) (st : TState) (i : Nat)
+    (funcs : Array {fn : Func Py.env SourceRange // fn.WF}) :
+    Array {fn : Func Py.env SourceRange // fn.WF} × TState :=
+  if h : i < st.pending.size then
+    let job := st.pending[i]
+    if hj : job.scope < ctx.table.scopes.size ∧ job.scope ∉ done then
+      let (f, st') := transFunc ctx st job
+      have hdone' : ∀ x ∈ done.insert job.scope, x < ctx.table.scopes.size := by
+        intro x hx
+        rcases Std.HashSet.mem_insert.mp hx with heq | hx
+        · simp at heq; exact heq ▸ hj.1
+        · exact hdone x hx
+      emitQueued ctx (done.insert job.scope) hdone' st' (i + 1) (funcs.push f)
+    else
+      let what := if job.scope < ctx.table.scopes.size then "is queued twice"
+        else "has no scope in the table"
+      let d : Diagnostic :=
+        { kind := .internal, range := job.range, message := s!"{nameText job.name} {what}" }
+      emitQueued ctx done hdone { st with diagnostics := st.diagnostics.push d } (i + 1) funcs
+  else (funcs, st)
+termination_by (ctx.table.scopes.size - done.size, st.pending.size - i)
+decreasing_by
+  · have hle := size_le_of_lt hdone'
+    have hins : (done.insert job.scope).size = done.size + 1 := by
+      rw [Std.HashSet.size_insert]; simp [hj.2]
+    apply Prod.Lex.left; rw [hins]; omega
+  · apply Prod.Lex.right; omega
+
 /-- The module `name` with no functions. -/
 def emptyModule (name : Name) (info : SourceRange) : Module Py.env SourceRange :=
   ⟨{ name, funcs := #[], info },
@@ -2076,14 +2203,7 @@ def translate (moduleName : String) (stmts : Array (stmt SourceRange)) : Result 
       | _, _ =>
         writeName "__doc__" (← build noneLit) .none
         transStmts stmts
-  let mut funcs := #[body]
-  let mut st := st
-  let mut i := 0
-  while h : i < st.pending.size do
-    let (f, st') := transFunc ctx st st.pending[i]
-    funcs := funcs.push f
-    st := st'
-    i := i + 1
+  let (funcs, st) := emitQueued ctx {} (by simp) st 0 #[body]
   let (module, ds) := assemble mname funcs range
   let diagnostics := (table.syntaxErrors ++ st.diagnostics ++ ds).insertionSort
     fun a b => a.range.start.byteIdx < b.range.start.byteIdx

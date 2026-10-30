@@ -1,0 +1,56 @@
+module top
+  ForElse: local (assigned)
+  IfElse: local (assigned)
+  InMethod: local (assigned)
+  MatchCase: local (assigned)
+  TryBody: local (assigned)
+  TryElse: local (assigned)
+  TryFinally: local (assigned)
+  TryHandler: local (assigned)
+  TryStar: local (assigned)
+  WhileElse: local (assigned)
+  WithBody: local (assigned)
+  class TryBody
+    KeyError: global implicit (referenced)
+    a: local (assigned, annotated)
+    int: global implicit (referenced)
+  class TryHandler
+    KeyError: global implicit (referenced)
+    a: local (assigned, annotated)
+    int: global implicit (referenced)
+  class TryElse
+    KeyError: global implicit (referenced)
+    a: local (assigned, annotated)
+    int: global implicit (referenced)
+  class TryFinally
+    a: local (assigned, annotated)
+    int: global implicit (referenced)
+  class MatchCase
+    a: local (assigned, annotated)
+    int: global implicit (referenced)
+  class WithBody
+    a: local (assigned, annotated)
+    fh: local (assigned)
+    int: global implicit (referenced)
+    open: global implicit (referenced)
+  class WhileElse
+    a: local (assigned, annotated)
+    int: global implicit (referenced)
+  class ForElse
+    a: local (assigned, annotated)
+    i: local (assigned)
+    int: global implicit (referenced)
+  class IfElse
+    a: local (assigned, annotated)
+    int: global implicit (referenced)
+  class InMethod
+    m: local (assigned)
+    function m
+      a: local (assigned, annotated)
+      int: global implicit (referenced)
+      self: local (parameter)
+  class TryStar
+    KeyError: global implicit (referenced)
+    a: local (assigned, annotated)
+    int: global implicit (referenced)
+qualnames: ForElse, IfElse, InMethod, InMethod.m, MatchCase, TryBody, TryElse, TryFinally, TryHandler, TryStar, WhileElse, WithBody

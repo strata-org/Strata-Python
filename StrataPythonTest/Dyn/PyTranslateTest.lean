@@ -201,4 +201,50 @@ private def joins (outside : Bool) : PyBuild.PyM SourceRange Unit := do
   #["m references a function it does not define: m.f"]
 #guard (assemble (.str .base "m") #[(built fName callsG).1] none').1.raw.funcs.isEmpty
 
+/-- The context of a module made of `fDef`, and the job that emits `f`. -/
+private def fCtx : Ctx :=
+  let table := PyScope.analyze #[fDef]
+  { table, module := "m", moduleName := .str .base "m", scope := 0, cur := table.scopes[0]! }
+
+private def fJob : FuncJob :=
+  match fDef with
+  | .FunctionDef _ _ args ⟨_, body⟩ .. =>
+    { name := (Name.base.str "m").str "f", scope := 1, cur := fCtx.table.scopes[1]!,
+      args := some args, body, range := none', stub := none }
+  | _ => { name := .base, scope := 1, cur := fCtx.table.scopes[1]!, args := none, body := #[],
+           range := none', stub := none }
+
+/-- `f` queued twice: emitted once, and the second job is an internal error. -/
+private def queuedTwice :=
+  emitQueued fCtx {} (by simp) { pending := #[fJob, fJob] } 0 #[]
+
+#guard queuedTwice.1.map (nameText ·.val.name) = #["m.f"]
+#guard queuedTwice.2.diagnostics.map (·.message) = #["m.f is queued twice"]
+
+/-- A job for a scope the table lacks is an internal error, and is skipped. -/
+private def noScope :=
+  emitQueued fCtx {} (by simp) { pending := #[{ fJob with scope := 99 }] } 0 #[]
+
+#guard noScope.1.isEmpty
+#guard noScope.2.diagnostics.map (·.message) = #["m.f has no scope in the table"]
+
+private def noArgs : StrataPython.arguments SourceRange :=
+  .mk_arguments none' ⟨none', #[]⟩ ⟨none', #[]⟩ ⟨none', none⟩ ⟨none', #[]⟩ ⟨none', #[]⟩
+    ⟨none', none⟩ ⟨none', #[]⟩
+
+private def mkDef (n : String) (body : Array (stmt SourceRange)) : stmt SourceRange :=
+  .FunctionDef none' ⟨none', n⟩ noArgs ⟨none', body⟩ ⟨none', #[]⟩ ⟨none', none⟩ ⟨none', none⟩
+    ⟨none', #[]⟩
+
+/-- Two `def`s at the same range share one scope (`childScope?` finds a child by its range),
+which no parsed program has.  The second is queued twice, so the translation fails visibly:
+it is not `g` translated with `f`'s scope. -/
+private def sameRange : Result := translate "m" #[
+  mkDef "f" #[assign "x" (load "y"), .Return none' ⟨none', some (load "x")⟩],
+  mkDef "g" #[.Return none' ⟨none', some (load "x")⟩]]
+
+#guard sameRange.diagnostics.map (·.message) =
+  #["m.f.1 is queued twice", "m references a function it does not define: m.<module>"]
+#guard sameRange.module.raw.funcs.isEmpty
+
 end StrataPython.Dyn.PyTranslateTest

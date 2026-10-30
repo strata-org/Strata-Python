@@ -6,6 +6,8 @@
 module
 import all StrataPython.Dyn.Scope
 import all StrataPython.Dyn.Translate
+-- So that Lake builds it before this test: `#fuel_loops` needs its theorems.
+import StrataPython.Dyn.TranslateProps
 public meta import Lean.Elab.Command
 
 set_option autoImplicit false
@@ -132,10 +134,12 @@ private meta def provedFuel : List (Name × Name) :=
    (`Strata.Dyn.Body.intersect, `Strata.Dyn.Body.intersect_spec),
    (`Strata.Dyn.Body.sdF, `Strata.Dyn.Body.sdF_fuel),
    (`Strata.Dyn.Name.keyNatAux, `Strata.Dyn.Name.natVal_natDigits),
-   (`Strata.Dyn.NatTrie.insertAt, `Strata.Dyn.NatTrie.find?_insertAt)]
+   (`Strata.Dyn.NatTrie.insertAt, `Strata.Dyn.NatTrie.find?_insertAt),
+   (`StrataPython.Dyn.PyTranslate.freshName, `StrataPython.Dyn.PyTranslate.freshName_not_mem)]
 
-/-- The definitions that use fuel in a shape `usesFuel` does not find. -/
-private meta def otherFuel : List Name := []
+/-- The definitions that use fuel in a shape `usesFuel` does not find: `freshName` searches
+`List.range (taken.size + 1)`. -/
+private meta def otherFuel : List Name := [`StrataPython.Dyn.PyTranslate.freshName]
 
 /-- The definitions named `Strata…` that `root`'s definition reaches and that use fuel, with
 those of `otherFuel` that it reaches. -/
@@ -153,7 +157,7 @@ private meta def fullEnv (ms : Array Name) : CommandElabM Environment :=
   liftM (m := IO) <| importModules (ms.map fun m => { module := m }) {} (level := .private)
 
 /-- The modules with the theorems of `provedFuel` that `translate`'s module does not import. -/
-private meta def fuelProofModules : Array Name := #[]
+private meta def fuelProofModules : Array Name := #[`StrataPython.Dyn.TranslateProps]
 
 elab "#partial_defs_in " m:ident ns:ident : command => do
   logInfo (listNames ns.getId (partialDefsIn (← fullEnv #[m.getId]) m.getId))
@@ -193,28 +197,16 @@ info: 0:
 #partial_defs_in StrataPython.Dyn.Scope StrataPython.Dyn.PyScope
 
 /--
-info: 10:
-  clause
-  findAnn
-  forStmt
-  ifStmt
-  transStmt
-  transStmts
-  tryFinallyStmt
-  tryStmt
-  whileStmt
-  withStmt
+info: 0:
 -/
 #guard_msgs in
 #partial_defs_in StrataPython.Dyn.Translate StrataPython.Dyn.PyTranslate
 
 /--
-info: 13:
+info: 10:
   Lean.Syntax.decodeScientificLitVal?.decode
   Std.Internal.idOpaque
   Strata.Dyn.DomDiag.body
-  StrataPython.Dyn.PyTranslate.findAnn
-  StrataPython.Dyn.PyTranslate.transStmts
   String.Internal.append
   String.Internal.get
   String.Internal.length
@@ -222,13 +214,12 @@ info: 13:
   System.Platform.getNumBits
   WellFounded.opaqueFix
   mixHash
-  repeatM.impl
 -/
 #guard_msgs in
 #opaque_reach StrataPython.Dyn.Translate StrataPython.Dyn.PyTranslate.translate
 
 /--
-info: 14:
+info: 15:
   Strata.Dyn.Body.addAncs (proved: Strata.Dyn.Body.addAncs_good)
   Strata.Dyn.Body.chain (proved: Strata.Dyn.Body.above_iff)
   Strata.Dyn.Body.grow (proved: Strata.Dyn.Body.reached_spec)
@@ -243,6 +234,7 @@ info: 14:
   StrataPython.Dyn.PyTranslate.childScope? (unproved)
   StrataPython.Dyn.PyTranslate.enclosingPlace (unproved)
   StrataPython.Dyn.PyTranslate.firstParam? (unproved)
+  StrataPython.Dyn.PyTranslate.freshName (proved: StrataPython.Dyn.PyTranslate.freshName_not_mem)
 -/
 #guard_msgs in
 #fuel_loops StrataPython.Dyn.Translate StrataPython.Dyn.PyTranslate.translate
@@ -320,5 +312,19 @@ example (l r : expr SourceRange) (op : cmpop SourceRange) :
     PyTranslate.compare l #[op] #[r] =
       (do let a ← transExpr l; cmpOp op a (← transExpr r)) := by
   simp [PyTranslate.compare]
+
+open StrataPython.Dyn.PyTranslate in
+/-- An empty statement list emits nothing. -/
+example : transStmts #[] = pure () := by
+  simp [transStmts]
+
+open StrataPython.Dyn.PyTranslate in
+open StrataPython (stmt expr) in
+open StrataDDM (SourceRange Ann) in
+/-- An annotated assignment in an `if` body counts. -/
+example (sr : SourceRange) (t a : expr SourceRange)
+    (v : Ann (Option (expr SourceRange)) SourceRange) (simple : StrataPython.int SourceRange) :
+    findAnn #[.If sr t ⟨sr, #[.AnnAssign sr a t v simple]⟩ ⟨sr, #[]⟩] = true := by
+  simp [findAnn, findAnnIn]
 
 end StrataPython.Dyn.TotalityTest

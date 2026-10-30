@@ -76,6 +76,7 @@ c6_body_raise | yes |
 c7_with_return | yes |
 m_assert | yes |
 m_annotations | yes | generator function
+m_annotations_nested | yes | match, try/except*
 m_future_annotations | yes | from __future__ import annotations
 m_attr_mangle | yes |
 m_builtins | yes |
