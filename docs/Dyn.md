@@ -119,11 +119,11 @@ itself may do, its regions aside. From the least to the most:
   object is not a change of state. So `pure` doesn't make an unused result removable: removing a
   `base.refNew` could renumber the cells made after it (§3).
 * `reads`: it may read mutable state, as `base.refGet` does.
-* `calls`: it may run code that the IR does not show, such as a user-defined method (a Python
+* `calls`: it may call code that the IR does not show, such as a user-defined method (a Python
   `__eq__` or a JavaScript getter), and that code may read or change any state it can reach. The
-  methods that the operation looks up on an operand, or on an object that an operand holds, count
-  as such code, built-in methods included, such as the `__next__` of a Python built-in iterator.
-  The operation's own fixed computation does not.
+  operation changes state only inside its calls; its own updates change none. Which functions it
+  calls is part of its rule's meaning, checked by conformance (the verdict files of §5), not
+  bounded by its effect.
 * `writes`: the operation itself may change state, as `base.refSet` does.
 
 The DSL writes the effect before `insn`, and before `terminal`: `pure insn mkTuple …`,
@@ -1330,6 +1330,23 @@ valid. `link_rulesOK` carries it to every instruction and terminator of a linked
 `LModule.RulesOK`. It is an instance of `link_inv` (`StrataDyn/Exec/LinkInv.lean`), which carries
 any property of linked instructions that the table's wrappers give, and that the instructions
 linking makes with no wrapper have, to every function and region of a linked module.
+
+### Effects and verdicts
+
+`StrataDyn/Exec/Effects.lean` states the four effects of §1 formally. `Within sp s e post N t`
+says that a rule's tree `t` stays within the effect `e`, relative to the operation's start `s`. A
+language describes its world with a `WorldSpec`: `same s w w'` says that `w'` changes no state of
+`w` that an operation must leave alone (it may add new objects and memo entries, and change
+bookkeeping parts), and `immEq s w₁ w₂` says that a `pure` operation can't tell `w₁` and `w₂`
+apart. `Within.lift` raises a tree to a higher effect, and `Within.bind` composes two trees.
+`pure_reads_alike` gives `pure` its meaning: two readings of a `pure` tree from the same heap and
+from worlds that `immEq` relates give the same result, when the answers of its regions can't tell
+such worlds apart (`EnvImm`). A `pure` tree also makes no oracle choice.
+
+A front end checks its rules against the source language's own implementation with differential
+runs: `StrataDyn/Exec/Diff.lean` pins one verdict per corpus program (agree, gap, known difference
+or syntax error), and a test fails on any change. A known difference holds only for the run's trace
+that is pinned with it.
 
 ### The frame theorem
 
