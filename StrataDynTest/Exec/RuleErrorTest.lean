@@ -1803,7 +1803,8 @@ instance {σ : Type} [Store σ] : Inhabited (CellsWorld σ) := ⟨{}⟩
 set_option warn.sorry false in
 /-- A part instance that forges a ref on every read. -/
 instance {σ : Type} [Store σ] : HasPart (CellsWorld σ) (Cells σ) :=
-  ⟨fun _ => ⟨#[⟨0, sorry⟩]⟩, fun _ c => { cells := c }⟩
+  { get := fun _ => ⟨#[⟨0, sorry⟩]⟩
+    set := fun _ c => { cells := c } }
 
 /-- How many refs the part holds. -/
 @[dyn_sem PartErr.firstLoc]
@@ -1836,7 +1837,8 @@ def heapLoc {σ : Type} [Store σ] (c : Ref σ Int) : Int :=
 
 /-- A part instance that reads the first cell's location. -/
 instance {σ : Type} [Store σ] : HasPart (PeekWorld σ) Num :=
-  ⟨fun w => ⟨(w.cells.cells[0]?.map heapLoc).getD (-1)⟩, fun w _ => w⟩
+  { get := fun w => ⟨(w.cells.cells[0]?.map heapLoc).getD (-1)⟩
+    set := fun w _ => w }
 
 /-- An instruction that reads the number part. -/
 environment PeekErr extends Base where
@@ -1875,7 +1877,8 @@ def NsSem.readWrites {σ : Type} [Store σ] (c : Ref σ Int) : Int :=
 /-- A part instance that tells, through `NsSem.readWrites`, whether a read of the first cell writes
 a cell. -/
 instance {σ : Type} [Store σ] : HasPart (NsWorld σ) Num :=
-  ⟨fun w => ⟨(w.cells.cells[0]?.map NsSem.readWrites).getD (-1)⟩, fun w _ => w⟩
+  { get := fun w => ⟨(w.cells.cells[0]?.map NsSem.readWrites).getD (-1)⟩
+    set := fun w _ => w }
 
 /-- error: the table NsSem: rule num for peekErr.num reaches HasHeap.mreq (NsSem.ops → NsSem.impl.peekErr.num → NsSem.rule.peekErr.num → instHasPartNsWorldNum → NsSem.readWrites → HasHeap.mreq), the machine's own capability, which only the declarations a table command emits may build: its requests name cells, closures or regions that only the machine may choose -/
 #guard_msgs in

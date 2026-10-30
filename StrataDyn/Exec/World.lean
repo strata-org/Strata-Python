@@ -16,7 +16,8 @@ set_option autoImplicit false
 (`HasPart W P`).  `W` may take parameters, such as the run token of a world that holds refs,
 `(σ : Type) [Store σ]`.  For each field of type `P`, the command emits:
 
-* the part instance `HasPart W P`, which reads and writes the field;
+* the part instance `HasPart W P`, which reads and writes the field, and updates it in place
+  (`modifyGet`);
 * its laws, `LawfulHasPart W P`, each by `rfl`;
 
 and, for each ordered pair of parts of types `P` and `Q`, the theorem
@@ -29,6 +30,9 @@ world.  The parts' types must be pairwise distinct, since a rule names a part by
 field inherited from a structure that `W` extends is that structure as one part, unless that
 structure is a world.  `W` may take explicit and instance parameters, but no universe parameter
 and no implicit one, and no field's type may depend on another field.
+
+A `HasPart` instance written by hand must name its fields, `{ get := …, set := … }`, and needs
+its own `modifyGet` to update in place when a rule isn't specialized to the world.
 -/
 
 namespace Strata.Dyn.Exec
@@ -165,6 +169,7 @@ syntax (name := dynWorld) "#dyn_world " ident : command
   for (p, ty) in parts do
     let get ← liftMacroM <| partGet (← `(w)) p.path
     let set ← liftMacroM <| partSet (← `(w)) (← `(x)) p.path
+    let setP ← liftMacroM <| partSet (← `(w)) (← `(p)) p.path
     let inst := mkIdent (`_root_ ++ declName s!"instHasPart_{partName p}")
     let laws := mkIdent (`_root_ ++ declName s!"instLawfulHasPart_{partName p}")
     let field := partPath p
@@ -172,10 +177,11 @@ syntax (name := dynWorld) "#dyn_world " ident : command
     let lawsDoc := docOf s!"The laws of part `{field}` of the world `{wName}`."
     elabCommand (← `($instDoc:docComment
       @[expose] $[$vis?:visibility]? instance $inst:ident $binders* : HasPart $wTerm $ty :=
-        ⟨fun w => $get, fun w x => $set⟩))
+        { get := fun w => $get, set := fun w x => $set,
+          modifyGet := fun f w => match f $get with | (a, p) => (a, $setP) }))
     elabCommand (← `($lawsDoc:docComment
       $[$vis?:visibility]? instance $laws:ident $binders* : LawfulHasPart $wTerm $ty :=
-        ⟨fun _ _ => rfl, fun _ => rfl, fun _ _ _ => rfl⟩))
+        ⟨fun _ _ => rfl, fun _ => rfl, fun _ _ _ => rfl, fun _ _ => rfl⟩))
   for (p, pty) in parts do
     for (q, qty) in parts do
       if p.path == q.path then continue

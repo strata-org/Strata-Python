@@ -527,23 +527,35 @@ end
 /-! ## The world, in parts
 
 An environment's world is a Lean type of its own, which the machine threads through a run.  A
-rule names the parts it touches by `HasPart W P`, a getter and a setter of part `P`, and reads
-and writes them with `getThe P`, `modifyThe P` and `modifyGetThe P`.  `HasPart` states no laws.
-An environment that extends another builds a world with its parent's parts as fields, so its
-parent's rules run on it unchanged. -/
+rule names the parts it touches by `HasPart W P`, which reads, writes and updates part `P`.  The
+rule reads and writes them with `getThe P`, `modifyThe P` and `modifyGetThe P`.  `LawfulHasPart`
+states the laws of a part.  An environment that extends
+another builds a world with its parent's parts as fields, so its parent's rules run on it
+unchanged. -/
 
 /-- The world `W` has a part `P`. -/
 class HasPart (W : Type) (P : Type) where
   get : W → P
   set : W → P → W
+  /-- Apply `f` to the part, which gives a result and the new part; `modifyThe` and
+  `modifyGetThe` go through it.  `#dyn_world`'s instances take the part out of the world before
+  `f` runs, so `f` can change it in place.  The default reads the part while the world still
+  holds it, so it copies the part when a rule isn't specialized to the world. -/
+  modifyGet : {α : Type} → (P → α × P) → W → α × W := fun f w =>
+    let (a, p) := f (get w)
+    (a, set w p)
 
-/-- The laws of a part: reading after writing gives what was written, writing what was read changes
-nothing, and the second of two writes wins.  `#dyn_world` proves them for each field of a world.
-A table doesn't require them: a proof about a rule takes them as hypotheses. -/
+/-- The laws of a part: reading after writing gives what was written, writing what was read
+changes nothing, the second of two writes wins, and an update writes the part that `f` gives
+for what it reads.
+`#dyn_world` proves them for each field of a world.  A table doesn't require them: a proof about
+a rule takes them as hypotheses. -/
 class LawfulHasPart (W : Type) (P : Type) [HasPart W P] : Prop where
   get_set : ∀ (w : W) (p : P), HasPart.get (HasPart.set w p) = p
   set_get : ∀ (w : W), HasPart.set w (HasPart.get w : P) = w
   set_set : ∀ (w : W) (p q : P), HasPart.set (HasPart.set w p) q = HasPart.set w q
+  modifyGet_eq : ∀ {α : Type} (f : P → α × P) (w : W),
+    HasPart.modifyGet f w = (let (a, p) := f (HasPart.get w); (a, HasPart.set w p))
 
 /-- Writing part `P` leaves part `Q` as it is. -/
 def HasPart.Indep (W P Q : Type) [HasPart W P] [HasPart W Q] : Prop :=
@@ -551,14 +563,31 @@ def HasPart.Indep (W P Q : Type) [HasPart W P] [HasPart W Q] : Prop :=
 
 set_option synthInstance.checkSynthOrder false in
 /-- A part is state: `getThe P`, `modifyThe P`.  A rule names the part, so the instance is
-chosen by `P`. -/
+chosen by `P`.  Each is one `update`, which the machine hands the world with nothing else holding
+it, and `modifyThe` and `modifyGetThe` go through `HasPart.modifyGet`.  So they update the part
+in place when the instance's `modifyGet` does, as `#dyn_world`'s do, also in a rule that gets
+the part's instance only when it runs. -/
 instance Sem.instMonadStateOf {ε : Eff} {E P : Type} [HasPart ε.W P] :
     MonadStateOf P (Sem ε E) where
   get := .update fun w => (w, .ret (HasPart.get w))
   set p := .update fun w => (HasPart.set w p, .ret ())
   modifyGet f := .update fun w =>
-    let (a, p) := f (HasPart.get w)
-    (HasPart.set w p, .ret a)
+    let (a, w₁) := HasPart.modifyGet f w
+    (w₁, .ret a)
+
+/-- Under a part's laws, `modifyGetThe P f` is one update that applies `f` to the part's current
+value, sets the part to the new value that `f` gives, and returns `f`'s result. -/
+theorem modifyGetThe_eq {ε : Eff} {E P α : Type} [HasPart ε.W P] [LawfulHasPart ε.W P]
+    (f : P → α × P) : (modifyGetThe P f : Sem ε E α) =
+      .update fun w => (HasPart.set w (f (HasPart.get w)).2, .ret (f (HasPart.get w)).1) := by
+  simp [modifyGetThe, MonadStateOf.modifyGet, LawfulHasPart.modifyGet_eq]
+
+/-- Under a part's laws, `modifyThe P f` is one update that sets the part to `f` of its current
+value. -/
+theorem modifyThe_eq {ε : Eff} {E P : Type} [HasPart ε.W P] [LawfulHasPart ε.W P] (f : P → P) :
+    (modifyThe P f : Sem ε E Unit) =
+      .update fun w => (HasPart.set w (f (HasPart.get w)), .ret ()) := by
+  simp [modifyThe, MonadStateOf.modifyGet, LawfulHasPart.modifyGet_eq]
 
 /-! ## Handles -/
 

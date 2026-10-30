@@ -830,17 +830,21 @@ def mapList (xs : Array Int) (body : Region ε [Int] (Except Int Int)) (err : Ta
 
 ### The world and `HasPart`
 
-The world is the state a run threads through its rules, such as output. `#dyn_sem_table`
-takes it as `(world := W)`, and it defaults to `Unit`. A rule reaches the parts it names
-through `[HasPart ε.W P]`, with `getThe P`, `modifyThe P` and `modifyGetThe P`. The world's
-type is abstract in a rule, so a rule reads only the parts it names. It can still put back a
-world it read earlier, whole. Each of the three is one `update` request: the machine takes the world
-out of its state and hands it to the request, which returns the new world, so a part that
-`modifyThe` updates is held by nothing else. A part's laws are `LawfulHasPart`, which a proof about
-a rule takes as hypotheses; a table doesn't require them. Reading after writing gives what was
-written, writing what was read changes nothing, and the second of two writes wins. `#dyn_world W`
-derives each field's part and its laws, and, for each ordered pair of parts, that writing the first
-leaves the second as it is (`HasPart.Indep`):
+The world is the state a run threads through its rules, such as output. `#dyn_sem_table` takes it as
+`(world := W)`, and it defaults to `Unit`. A rule reaches the parts it names through `[HasPart ε.W
+P]`, with `getThe P`, `modifyThe P` and `modifyGetThe P`. The world's type is abstract in a rule, so
+a rule reads only the parts it names. It can still put back a world it read earlier, whole. Each of
+the three is one `update` request: the machine takes the world out of its state and hands it to the
+request, which returns the new world. `modifyThe` and `modifyGetThe` go through the instance's
+`HasPart.modifyGet`, which `#dyn_world`'s instances define in place, so the part is held by nothing
+else when the update runs, also in a rule that gets the part's instance only when it runs
+(`InPlaceTest.lean`). A hand-written instance without its own `modifyGet` reads the part while the
+world still holds it, so it copies the part when a rule isn't specialized to the world. A part's
+laws are `LawfulHasPart`, which a proof about a rule takes as hypotheses; a table doesn't require
+them. Reading after writing gives what was written, writing what was read changes nothing, the
+second of two writes wins, and an update (`HasPart.modifyGet`) writes the part that `f` gives for
+what it reads (`modifyThe_eq`). `#dyn_world W` derives each field's part and its laws, and, for each
+ordered pair of parts, that writing the first leaves the second as it is (`HasPart.Indep`):
 
 ```lean
 structure World where

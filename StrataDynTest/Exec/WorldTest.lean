@@ -169,7 +169,7 @@ structure Lawless where
   deriving Inhabited
 
 /-- A part instance written by hand, without its laws. -/
-instance : HasPart Lawless Count := ⟨(·.count), fun _ c => { count := c }⟩
+instance : HasPart Lawless Count := { get := (·.count), set := fun _ c => { count := c } }
 
 #guard_msgs in
 #dyn_sem_table LawlessSem for Wt (world := Lawless)
