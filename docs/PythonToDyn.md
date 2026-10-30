@@ -227,8 +227,9 @@ are in `StrataPython/Dyn/Build.lean`.
   cell: `refNew` creates it, `refSet` writes it and `refGet` reads it. A cell that has not
   been assigned holds `py.undef "x"`. The *ref-to-reg* pass (`docs/Dyn.md` §3) promotes
   most cells that no closure captures to SSA values and block parameters. A cell that a
-  comprehension reads before writing it, or that a comprehension writes and the code after it
-  reads before assigning it again, stays a cell. A promoted local that is read before it is
+  comprehension reads before writing it, that a comprehension writes and the code after it
+  reads before assigning it again, or that one region of a comprehension writes and a later
+  region reads, such as a walrus in a filter that the element reads, stays a cell. A promoted local that is read before it is
   assigned then reads its `py.undef` value, and `py.requireDefined` still raises. The
   translator never decides block parameters for locals. The translator lowers frame
   introspection as ordinary calls that are given no cells: `locals()`, `vars()`, `dir()`,
@@ -334,8 +335,9 @@ well formed. A rejected statement emits nothing. A rejected function (a generato
 not analyse a failed result. A compile-time error that the scope pass reports (§5.1) is
 handled the same way.
 
-**Internal errors.** A misuse of the builder, a function that is not well formed, and a
-function name emitted twice are each an internal error. A function whose build fails is
+**Internal errors.** A misuse of the builder, a function that is not well formed, a function
+whose comprehensions break a shape rule (§6.8), and a function name emitted twice are each an
+internal error. A function whose build fails, or whose comprehensions break a shape rule, is
 replaced by a stub that takes the same parameters and whose entry block ends in
 `unreachable`, and of two functions of one name the first is kept, so the translator always
 returns a checked module. Such a module is for diagnostics only: the run has failed.
@@ -889,36 +891,106 @@ boolean, an integer, a float, `unit` for `None`, `{str = "s"}`, `{ellipsis = uni
 ### 6.8 Comprehensions
 
 List, set and dict comprehensions follow Python 3.12 (PEP 709): they are inlined into the
-enclosing function. Each `for` clause is a `py.forEach` whose body is a region of that
-function. No function is created.
+enclosing function. No function is created. A comprehension is one operation, so that a later
+stage reads it as a comprehension, not as a loop:
 
 ```
-insn forEach (iterable : Value) (&body (item : Value) : raising Unit) (^err (exc : Value)) : Unit
+insn listComp (iterable : Value) (&each (out : ListAcc) (item : Value) : raising Unit) (^err (exc : Value)) : Value
+insn compFor (iterable : Value) (&each (item : Value) : raising Unit) (^err (exc : Value)) : Unit
+insn compIf (&cond : raising Bool) (&«then» : raising Unit) (^err (exc : Value)) : Unit
+insn compAppend (out : ListAcc) (&elt : raising Value) (^err (exc : Value)) : Unit
 ```
 
-It iterates `iterable`, runs `body` once per item, and falls through when the iterator is
-exhausted. An exception from `iter` or `next` goes to `err`. A region cannot name an outer
-block, so the body cannot reach `Frame.handler`. Instead the body returns `error e`, which
-`forEach` forwards to `err`, and `ok ()` to go on. `PyBuild.forEach` emits it.
+`setComp` and `dictComp` are as `listComp`, with `SetAcc` and `DictAcc`; `compAdd` is as
+`compAppend`, for a set; `compStore` takes a `key` and a `value` region, run in that order.
+
+- `listComp` runs the first `for` clause: `iter(iterable)`, a new empty list, then `each` once
+  per element. `out` is the list being built, and the operation returns it.
+- `compFor` is a later `for` clause, its iterable evaluated by the enclosing region.
+- `compIf` holds the `if`s after one `for` clause: `cond` tests them in order and returns
+  whether all passed; `then` runs only if they did.
+- `compAppend`, `compAdd` and `compStore` add the element their regions compute: CPython's
+  `LIST_APPEND`, `SET_ADD` and `MAP_ADD`.
+- The regions of one operation run in order, each in the state the one before it left, so the
+  element sees a walrus in a filter, and the value a walrus in the key.
+- A region cannot name an outer block, so it cannot reach `Frame.handler`. It returns
+  `error e` instead, which its operation sends to its `err`. When it returns `ok`, its
+  operation goes on.
+
+`CompShape.check` checks the shape a reader relies on: each addition adds to the accumulator
+of the nearest comprehension, once per element that passes the filters, and nothing else
+touches an accumulator (rules S1 to S5 in `StrataPython/Dyn/CompShape.lean`). The
+translator checks every function it builds. A function that breaks a rule is an internal
+error, and becomes its stub (§3).
+
+The translator is the only place that checks. A stage that reads a comprehension as a
+comprehension, rather than as a loop, relies on rules S1 to S5, so it must run the check again on
+the module it reads: no pass is proved to keep them. They currently hold after ref-to-reg, on
+every golden of the corpus, which `StrataPythonTestExtra/DynRefToRegTest.lean` checks.
+
+Whether these operations become a loop is the choice of each pipeline, not of the operations. A
+pipeline that runs the program, such as execution, may run them as a loop. On the pipeline that
+reaches the verifier, they are meant to reach Core as they are: the source of a comprehension
+often has a length the verifier does not know, so a loop would run an unknown number of times,
+and the verifier would need a loop invariant for it or a bound to unroll it to. A verifier is to
+run the body once instead, on one arbitrary choice (below). That needs what this construct
+gives: the source as an operand, the filters of each clause as a region of their own, and the
+element as a region of its own.
+
+The single run runs the body on one choice. With one `for` clause, a choice is an element of its
+source. With several, a choice gives each iteration variable in turn a value from its clause's
+source, evaluated at the values chosen before it. The single run gives facts about one choice
+only. Each element of a `listComp` or `setComp` result is the element region's value for some
+choice that passes the filters. For a `dictComp`, each key is the key region's value for some
+such choice, but its value may come from a later choice whose key is only equal to it:
+`{k: v for k, v in [(1, 'a'), (1.0, 'b')]}` is `{1: 'b'}`. The single run says nothing about the
+result as a whole: its length, its order, or which duplicates a `setComp` or `dictComp` drops.
+An encoding that assumes such a fact must justify it separately.
+
+The comprehension may raise wherever a region raises for some choice, and wherever evaluating a
+source raises: its `iter()` and each `__next__`, including the source of an inner clause, which
+is evaluated once for each choice of the clauses before it. This over-approximates: CPython
+raises the exception of the first choice that raises, in source order. A `setComp` or `dictComp`
+may also raise when `__eq__` compares an element with an earlier one of the same hash, which no
+single run sees. So the encoding must let each addition raise, unless hashing and equality are
+known to be total and free of effects for the elements: for keys whose type is exactly `int`,
+`str`, `bool`, `float` or `NoneType` (not a subclass), and for keys of type exactly `tuple` whose
+parts are such keys, nested to a small known depth, such as a depth fixed by a declared type
+that the pipeline checks, like `tuple[int, tuple[str, bool]]`. Comparing two equal tuples nested very deeply raises
+`RecursionError`, so for any other tuple key the encoding must let each addition raise.
+
+The single run is sound only while rules S1 to S5 hold, and only for a comprehension that writes
+no state that outlives one choice. Rules S1 to S5 constrain only the accumulator and how the
+operations nest, so currently nothing checks the second condition. A walrus writes a variable of
+the enclosing scope, as in `[y for x in xs if (y := x * 10)]`, and so do an attribute or
+subscript target, as in `[o.a for o.a in xs]`, and a call with an effect, in a region or in the
+source's iterator. Consuming a source that is an iterator, such as the
+result of `iter()`, `zip()` or a generator, is a write outside too: after `ys = [x for x in it]`,
+`it` is exhausted. The cells of the iteration variables count as well, unless, in every choice,
+each read of an iteration variable follows that choice's own write of it, and no closure captures
+it. A filter that reads a later clause's variable sees the value that an earlier choice left,
+as in `[x for x in xs if x == 0 or y for y in ys]`, and a closure that captures an iteration
+variable sees its last value, as in `[(x, lambda: x) for x in xs]`. The stage that lowers these
+operations to Core must not use the single run for such a comprehension.
 
 `[e for x in xs if c for y in ys]` lowers to:
 
 1. Evaluate `xs` in the enclosing scope, under the enclosing handler.
-2. `acc = mkList` (`mkSet`, `mkDict`).
-3. One cell per iteration variable (`x`, `y`): `refNew (undef "x")`. These cells belong to
+2. One cell per iteration variable (`x`, `y`): `refNew (undef "x")`. These cells belong to
    the comprehension. Inside it they shadow the enclosing scope's names, and they are not
    in `Frame.locals` afterwards. There is one cell per variable per evaluation, so closures
-   created in the comprehension share it, as in CPython.
-4. `forEach xs ^body ^err(H)`, `H` the enclosing handler. The body region, with its own
+   created in the comprehension share it, as in CPython, and a filter that reads the variable
+   of a later clause sees the value that clause left, or raises `UnboundLocalError` before it
+   first runs.
+3. `listComp xs ^err(H)`, `H` the enclosing handler. Its `each(out, item)` region, with its own
    `propagate` handler:
-   - writes `item` to `x`'s cell;
-   - for `if c`: `c` as a condition (§6.2). Its false successor ends the region;
-   - for `for y in ys`: evaluates `ys` and emits a nested `forEach` whose `err` is the
-     region's handler;
-   - innermost: `py.listAppend acc e` (`setAdd`; `dictSet` with the key evaluated before the
-     value), then ends the region. `setAdd` and `dictSet` raise `TypeError` on an unhashable
-     element or key, to the region's handler.
-5. The expression's value is `acc`.
+   - writes `item` to `x`'s cell (or assigns a tuple, attribute or subscript target);
+   - for `if c`: a `compIf` whose `cond` region lowers `c` as a condition (§6.2), returning
+     `true` or `false`, and whose `then` region holds the rest;
+   - for `for y in ys`: evaluates `ys`, then a `compFor` whose region does the same for `y`;
+   - innermost: `compAppend out` with `e` in its `elt` region (`compAdd`; `compStore` with the
+     key, then the value).
+4. The expression's value is `listComp`'s result.
 
 - No completion crosses a region boundary: a comprehension contains no `return`, `break` or
   `continue`.
@@ -1125,7 +1197,8 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
   pre-bind arguments of its block before it (`withHandlerTo`).
 - `dispatch` and `dispatchArms` take `Target`s, in `py.Completion.case`'s successor order.
 - `tryFinally`, `protect` and `dispatchArms` run their bodies in any `MonadPy` monad, so the
-  translator passes `TransM` bodies. `forEach` does the same, for comprehensions.
+  translator passes `TransM` bodies. The comprehension builders (`listComp`, `compFor`, …) do
+  the same, in a monad that also has `MonadBuild`.
 - `exitWalk` handles `loop`, `handler` and `cleanup` entries.
 
 ## 9. Open questions
@@ -1138,7 +1211,7 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
    | `if`, `and`/`or`, `x if c else y` | blocks | none |
    | `while`, `for` | blocks | a terminal `py.loop` op with a body region, shaped like `demo.loop` in `SuccTest` |
    | `try`, `with` | blocks plus completions | `py.try` with body and handler regions returning `py.Completion`, shaped like `reg.try` in `RegionTest`. The outside dispatches the completion |
-   | comprehensions | `forEach` regions (§6.8) | decided |
+   | comprehensions | comprehension operations with regions (§6.8) | decided |
 
    A region cannot name an outer label, so `propagate.0`, a loop's `exit` and an outer `fin`
    are out of reach. Every abrupt exit from a region becomes a returned completion, with

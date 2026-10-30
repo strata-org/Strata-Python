@@ -5,6 +5,7 @@
 -/
 module
 public import StrataPython.Dyn.Build
+import StrataPython.Dyn.CompShape
 public import StrataPython.Dyn.Scope
 public import StrataDyn.WF
 public import StrataDyn.Attr
@@ -91,8 +92,9 @@ public section
 /-- A translated module and its diagnostics: the scope pass's syntax errors, then each
 rejected construct, in source order. -/
 structure Result where
-  /-- The module, checked.  A function whose build failed, or that is not well formed, is a
-  stub whose body is `unreachable`, and a diagnostic reports it. -/
+  /-- The module, checked.  A function whose build failed, that is not well formed, or whose
+  comprehensions break a rule of `CompShape.check`, is a stub whose body is `unreachable`, and a
+  diagnostic reports it. -/
   module : Module Py.env Info
   diagnostics : Array Diagnostic
 
@@ -1346,10 +1348,12 @@ def assigner (range : SourceRange) (t : expr SourceRange) :
 termination_by sizeOf t + 1
 
 /-- A list, set or dict comprehension at `sr` (§6.8), inlined as PEP 709 does.  The
-outermost iterable is evaluated in the enclosing scope, then the accumulator is made, then
-the comprehension's scope takes over: each iteration variable is a fresh cell, shadowing the
-enclosing scope's name until the end, and each `for` clause is a `py.forEach` whose body
-region assigns the target, tests the `if`s, and runs the next clause or adds the element. -/
+outermost iterable is evaluated in the enclosing scope, then the comprehension's scope takes
+over: each iteration variable is a fresh cell, shadowing the enclosing scope's name until the
+end.  The comprehension is a `py.listComp`, `py.setComp` or `py.dictComp` running the first
+`for` clause.  The `each` region of each `for` clause assigns the clause's target, tests the
+clause's `if`s in one `py.compIf`, and runs the next clause, a `py.compFor`, or adds the
+element. -/
 def compExpr (sr : SourceRange) (kind : CompKind) (elt : expr SourceRange)
     (value : Option (expr SourceRange)) (gens : Array (comprehension SourceRange)) :
     TransM ValId := do
@@ -1366,52 +1370,51 @@ def compExpr (sr : SourceRange) (kind : CompKind) (elt : expr SourceRange)
   let some cur := ctx.table.scopes[scope]?
     | internalError s!"scope {scope} is not in the table" sr; standIn what
   let it ← transExpr iter0
-  let acc ← match kind with
-    | .list => build (emitTotal (.str .base "acc") Py.mkList.ref #[])
-    | .set => build (emitFailing (.str .base "acc") Py.mkSet.ref #[])
-    | .dict => build (emitFailing (.str .base "acc") Py.mkDict.ref #[])
   let saved := (← build (get : PyM Info PyBuild.Frame)).locals
-  withReader ({ · with scope, cur, classNs := none }) do
+  let r ← withReader ({ · with scope, cur, classNs := none }) do
     for x in cur.regionLocals do discard <| build (declareLocal x)
     have hlist := sizeOf_toList_lt gens
-    clause acc it gens.toList
+    let comp := match kind with
+      | .list => listComp | .set => setComp | .dict => dictComp
+    comp it fun out item => clause out item gens.toList
   build (modify fun f => { f with locals := saved })
-  return acc
+  return r
 termination_by sizeOf elt + sizeOf value + sizeOf gens
 where
-  /-- The first `for` clause of `gs`, over the evaluated iterable `it`, and the clauses after
-  it. -/
-  clause (acc it : ValId) (gs : List (comprehension SourceRange)) : TransM Unit := do
+  /-- The region of the first `for` clause of `gs` for the item `item`, adding to `out`: the
+  target, then the clause's `if`s, if any, in one `compIf` around the rest. -/
+  clause (out item : ValId) (gs : List (comprehension SourceRange)) : TransM Unit := do
     match gs with
     | [] => return
     | .mk_comprehension _ target _ ifs _ :: later =>
     let assign ← match assigner sr target with
       | .ok a => pure a
       | .error t => do badTarget t; pure fun _ => pure ()
-    forEach it fun item => do
-      assign item
-      let skip ← build (freshLabel [] "skip")
-      for c in ifs.val do
-        let next ← build (freshLabel [] "if")
-        transCond c next.goto skip.goto
-        build (startBlock next)
-      match later with
-      | c@(.mk_comprehension _ _ iter _ _) :: rest => clause acc (← transExpr iter) (c :: rest)
-      | [] =>
-        match kind, value with
-        | .dict, some v =>
-          let k ← transExpr elt
-          let x ← transExpr v
-          discard <| build (emitActing (.str .base "set") Py.dictSet.ref #[acc, k, x])
-        | .set, _ =>
-          discard <| build (emitActing (.str .base "add") Py.setAdd.ref #[acc, ← transExpr elt])
-        | _, _ =>
-          let x ← transExpr elt
-          discard <| build (emitEffect (.str .base "append") Py.listAppend.ref #[acc, x])
-      if ← targeted skip then
-        jump skip.goto
-        build (startBlock skip)
+    assign item
+    have hifs := sizeOf_ann ifs
+    if ifs.val.isEmpty then rest out later
+    else
+      compIf (rest := rest out later) fun t f => do
+        for h : k in [:ifs.val.size] do
+          have hget := Array.sizeOf_getElem ifs.val k (by get_elem_tactic)
+          if k + 1 == ifs.val.size then transCond ifs.val[k] t f
+          else
+            let next ← build (freshLabel [] "if")
+            transCond ifs.val[k] next.goto f
+            build (startBlock next)
   termination_by sizeOf gs + sizeOf elt + sizeOf value
+  /-- What follows a `for` clause and its `if`s: the next clause, the first of `gs`, or the
+  element's addition. -/
+  rest (out : ValId) (gs : List (comprehension SourceRange)) : TransM Unit := do
+    match gs with
+    | c@(.mk_comprehension _ _ iter _ _) :: later =>
+      compFor (← transExpr iter) fun item => clause out item (c :: later)
+    | [] =>
+      match kind, value with
+      | .dict, some v => compStore out (transExpr elt) (transExpr v)
+      | .set, _ => compAdd out (transExpr elt)
+      | _, _ => compAppend out (transExpr elt)
+  termination_by sizeOf gs + sizeOf elt + sizeOf value + 1
 
 /-- The range of the name `super` in `f(args, kws)`, if it is a zero-argument `super()` of the
 builtin `super`: not a local `super`, nor one a class body binds. -/
@@ -2046,12 +2049,18 @@ def runBody (ctx : Ctx) (st : TState) (range : SourceRange) (act : TransM Unit) 
 translator's state.  If the build fails, the function is its stub, and the state gains an
 internal-error diagnostic at `range` for each misuse, or else one saying that the function is
 not well formed.  That one names each unreachable block and each use out of scope
-(`Func.scopeDiagnostics`). -/
+(`Func.scopeDiagnostics`).  A well-formed function whose comprehensions break a rule of
+`CompShape.check` is its stub too, with that rule's message as the diagnostic. -/
 def builtFunc (name : Name) (params : Array (Name × TypeExpr Py.env)) (range : SourceRange)
     (body : Array ValId → PyM Info TState) :
     {fn : Func Py.env Info // fn.WF} × TState :=
   match buildFuncTypedWith name params { range } (fun ps => body ps.toArray) with
-  | .ok r => r
+  | .ok r =>
+    match CompShape.checkFunc r.1 with
+    | .ok () => r
+    | .error message =>
+      (stubFunc name params { range },
+        { r.2 with diagnostics := r.2.diagnostics.push { kind := .internal, message, range } })
   | .error e =>
     let messages :=
       if !e.misuses.isEmpty then e.misuses.map (s!"{nameText name}: {·}")

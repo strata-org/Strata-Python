@@ -14,33 +14,46 @@ module n03_dictcomp {
       %keys.cell.0 : base.Ref(py.Value) = py.globalCell("n03_dictcomp", "keys")
       %set.2 : base.Unit = base.refSet[py.Value](%keys.cell.0, %list.0)
       %keys.0 : py.Value = py.loadGlobal("n03_dictcomp", "keys") ^propagate.0()
-      %acc.0 : py.Value = py.mkDict ^propagate.0()
       %k.0 : py.Value = py.undef("k")
       %k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%k.0)
-      %each.0 : base.Unit = py.forEach(%keys.0) ^propagate.0() {
-        each.0(%item.0 : py.Value):
-          %k.2 : py.Value = py.requireDefined(%item.0, "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.1()
-          %len.0 : py.Value = py.loadGlobal("n03_dictcomp", "len") ^propagate.1()
-          %k.4 : py.Value = py.requireDefined(%item.0, "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.1()
-          %tuple.0 : py.Value = py.mkTuple(%k.4)
-          %kwargs.0 : py.Value = py.mkKwargs
-          %call.0 : py.Value = py.call(%len.0, %tuple.0, %kwargs.0) ^propagate.1()
-          %set.4 : base.Unit = py.dictSet(%acc.0, %k.2, %call.0) ^propagate.1()
+      %dict.0 : py.Value = py.dictComp(%keys.0) ^propagate.0() {
+        each.0(%out.0 : py.DictAcc, %item.0 : py.Value):
+          %store.0 : base.Unit = py.compStore(%out.0) ^propagate.1() {
+            key.0():
+              %k.2 : py.Value = py.requireDefined(%item.0, "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.2()
+              %ok.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%k.2)
+              ret(%ok.0)
+            propagate.2(%exc.0 : py.Value):
+              %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+              ret(%exc.1)
+          } {
+            value.0():
+              %len.0 : py.Value = py.loadGlobal("n03_dictcomp", "len") ^propagate.3()
+              %k.4 : py.Value = py.requireDefined(%item.0, "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.3()
+              %tuple.0 : py.Value = py.mkTuple(%k.4)
+              %kwargs.0 : py.Value = py.mkKwargs
+              %call.0 : py.Value = py.call(%len.0, %tuple.0, %kwargs.0) ^propagate.3()
+              %ok.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+              ret(%ok.1)
+            propagate.3(%exc.2 : py.Value):
+              %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+              ret(%exc.3)
+          }
           %unit.0 : base.Unit = base.unit
-          %ok.0 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
-          ret(%ok.0)
-        propagate.1(%exc.0 : py.Value):
-          %exc.1 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.0)
-          ret(%exc.1)
+          %ok.2 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
+          ret(%ok.2)
+        propagate.1(%exc.4 : py.Value):
+          %exc.5 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.4)
+          ret(%exc.5)
       }
       %d.cell.0 : base.Ref(py.Value) = py.globalCell("n03_dictcomp", "d")
-      %set.5 : base.Unit = base.refSet[py.Value](%d.cell.0, %acc.0)
+      %set.4 : base.Unit = base.refSet[py.Value](%d.cell.0, %dict.0)
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.2 : py.Value):
-      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
-      ret(%exc.3)
+    propagate.0(%exc.6 : py.Value):
+      %exc.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.6)
+      ret(%exc.7)
   }
 }
 

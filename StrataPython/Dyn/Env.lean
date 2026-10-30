@@ -441,7 +441,7 @@ public environment Py extends Base where
   -- Accumulating into a container the emitting code made.
 
   /-- Appends `value` to `list` in place: CPython's `LIST_APPEND`.  Total: `list` is one the
-  emitting code made, such as a comprehension's accumulator. -/
+  emitting code made, such as a list display's. -/
   insn listAppend (list value : Value) : Unit
   /-- Appends the elements of `iterable` to the list `list` in place: CPython's `LIST_EXTEND`, for
   a `*x` element.  Raises `TypeError` if `iterable` is not iterable, or whatever iterating it

@@ -426,4 +426,23 @@ private def orphanTable : Table :=
 #guard enclosingHold orphanTable "x" (some 1) matches .missing
 #guard enclosingHold orphanTable "x" (some 0) matches .missing
 
+/-- A comprehension whose inner comprehension adds to the outer one's accumulator: well
+formed, but it breaks rule S1 of `CompShape.check`. -/
+private def outerAcc : PyBuild.PyM Info Unit := do
+  let xs ← PyBuild.emitTotal (.str .base "xs") Py.mkList.ref #[]
+  let r ← PyBuild.listComp xs fun out _ =>
+    PyBuild.compAppend out (PyBuild.listComp xs fun _ y => PyBuild.compAppend out (pure y))
+  PyBuild.emitReturn r
+
+-- It is an internal error, and the function is its stub.
+/-- info: internal error: in m.g: py.compAppend adds to an accumulator that is not its comprehension's (S1)
+module m.g {
+  func @m.g(%a.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%a.0 : py.Value):
+      unreachable
+  }
+} -/
+#guard_msgs in
+#eval printed (built gName outerAcc)
+
 end StrataPython.Dyn.PyTranslateTest

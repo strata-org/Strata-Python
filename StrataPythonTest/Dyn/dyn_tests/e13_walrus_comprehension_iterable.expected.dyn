@@ -27,27 +27,33 @@ module e13_walrus_comprehension_iterable {
       %int.1 : py.Value = py.intLit(2)
       %list.0 : py.Value = py.mkList(%int.0, %int.1)
       %set.0 : base.Unit = base.refSet[py.Value](%y.cell.0, %list.0)
-      %acc.0 : py.Value = py.mkList
       %x.1 : py.Value = py.undef("x")
       %x.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%x.1)
-      %each.0 : base.Unit = py.forEach(%list.0) ^propagate.0() {
-        each.0(%item.0 : py.Value):
+      %list.1 : py.Value = py.listComp(%list.0) ^propagate.0() {
+        each.0(%out.0 : py.ListAcc, %item.0 : py.Value):
           %set.1 : base.Unit = base.refSet[py.Value](%x.cell.1, %item.0)
-          %x.2 : py.Value = base.refGet[py.Value](%x.cell.1)
-          %x.3 : py.Value = py.requireDefined(%x.2, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.1()
-          %append.0 : base.Unit = py.listAppend(%acc.0, %x.3)
+          %append.0 : base.Unit = py.compAppend(%out.0) ^propagate.1() {
+            elt.0():
+              %x.2 : py.Value = base.refGet[py.Value](%x.cell.1)
+              %x.3 : py.Value = py.requireDefined(%x.2, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.2()
+              %ok.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.3)
+              ret(%ok.0)
+            propagate.2(%exc.0 : py.Value):
+              %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+              ret(%exc.1)
+          }
           %unit.0 : base.Unit = base.unit
-          %ok.0 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
-          ret(%ok.0)
-        propagate.1(%exc.0 : py.Value):
-          %exc.1 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.0)
-          ret(%exc.1)
+          %ok.1 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
+          ret(%ok.1)
+        propagate.1(%exc.2 : py.Value):
+          %exc.3 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.2)
+          ret(%exc.3)
       }
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%acc.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%list.1)
       ret(%ret.0)
-    propagate.0(%exc.2 : py.Value):
-      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
-      ret(%exc.3)
+    propagate.0(%exc.4 : py.Value):
+      %exc.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
+      ret(%exc.5)
   }
 }
 

@@ -35,24 +35,30 @@ module e27_yield_outside_function {
       %set.3 : base.Unit = base.refSet[py.Value](%C.cell.0, %C.0)
       %str.3 : py.Value = py.strLit("yield")
       %unsupported.1 : py.Value = py.unsupported(%str.3)
-      %acc.0 : py.Value = py.mkList
       %x.0 : py.Value = py.undef("x")
       %x.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
-      %each.0 : base.Unit = py.forEach(%unsupported.1) ^propagate.0() {
-        each.0(%item.0 : py.Value):
+      %list.0 : py.Value = py.listComp(%unsupported.1) ^propagate.0() {
+        each.0(%out.0 : py.ListAcc, %item.0 : py.Value):
           %set.4 : base.Unit = base.refSet[py.Value](%x.cell.1, %item.0)
-          %x.1 : py.Value = base.refGet[py.Value](%x.cell.1)
-          %x.2 : py.Value = py.requireDefined(%x.1, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.1()
-          %append.0 : base.Unit = py.listAppend(%acc.0, %x.2)
+          %append.0 : base.Unit = py.compAppend(%out.0) ^propagate.1() {
+            elt.0():
+              %x.1 : py.Value = base.refGet[py.Value](%x.cell.1)
+              %x.2 : py.Value = py.requireDefined(%x.1, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.2()
+              %ok.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.2)
+              ret(%ok.0)
+            propagate.2(%exc.0 : py.Value):
+              %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+              ret(%exc.1)
+          }
           %unit.0 : base.Unit = base.unit
-          %ok.0 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
-          ret(%ok.0)
-        propagate.1(%exc.0 : py.Value):
-          %exc.1 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.0)
-          ret(%exc.1)
+          %ok.1 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.0)
+          ret(%ok.1)
+        propagate.1(%exc.2 : py.Value):
+          %exc.3 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.2)
+          ret(%exc.3)
       }
       %r.cell.0 : base.Ref(py.Value) = py.globalCell("e27_yield_outside_function", "r")
-      %set.5 : base.Unit = base.refSet[py.Value](%r.cell.0, %acc.0)
+      %set.5 : base.Unit = base.refSet[py.Value](%r.cell.0, %list.0)
       %clo.1 : py.Value = py.mkClosure[[]](@e27_yield_outside_function.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("e27_yield_outside_function", "f")
       %set.6 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.1)
@@ -75,9 +81,9 @@ module e27_yield_outside_function {
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)
-    propagate.0(%exc.2 : py.Value):
-      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
-      ret(%exc.3)
+    propagate.0(%exc.4 : py.Value):
+      %exc.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
+      ret(%exc.5)
   }
   func @|e27_yield_outside_function.C.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     #[py.fields = []]
