@@ -133,20 +133,20 @@ function "fstring_and_regex"{
   ]
   kwonly: [
   ]
-  kwargs: params : dict(
+  kwargs: params : Unpack[dict(
     Name : ident("builtins.str") [required=true]
     Items : ident("typing.List", ident("builtins.str")) [required=false]
     Tags : ident("typing.Mapping", ident("builtins.str"), ident("builtins.str")) [required=false]
-  )
+  )]
   return: ident("_types.NoneType")
   overload: false
   preconditions: [
-    ensure(stringLen(params[Name]) >=_int 1, "Expected len(params[\"Name\"]) >= 1, got "{stringLen(params[Name])})
-    ensure(stringLen(params[Name]) <=_int 100, "Expected len(params[\"Name\"]) <= 100, got "{stringLen(params[Name])})
+    ensure(stringLen(params[Name]) >=_int 1, "Expected len(params[\"Name\"]) >= 1, got "{stringLen(params[Name]) from "len(params[\"Name\"])"})
+    ensure(stringLen(params[Name]) <=_int 100, "Expected len(params[\"Name\"]) <= 100, got "{stringLen(params[Name]) from "len(params[\"Name\"])"})
     ensure(regex(params[Name], "^[a-zA-Z]+$"), "params[\"Name\"] did not match pattern")
-    ensure(Items in params => forall(params[Items], item, stringLen(item) >=_int 1), "Expected len(item) >= 1, got "{stringLen(item)})
-    ensure(Items in params => forall(params[Items], item, stringLen(item) <=_int 50), "Expected len(item) <= 50, got "{stringLen(item)})
-    ensure(Tags in params => forallDict(params[Tags], tag_key, tag_val, stringLen(tag_key) >=_int 1), "Expected len(tag_key) >= 1, got "{stringLen(tag_key)})
+    ensure(Items in params => forall(params[Items], item, stringLen(item) >=_int 1), "Expected len(item) >= 1, got "{stringLen(item) from "len(item)"})
+    ensure(Items in params => forall(params[Items], item, stringLen(item) <=_int 50), "Expected len(item) <= 50, got "{stringLen(item) from "len(item)"})
+    ensure(Tags in params => forallDict(params[Tags], tag_key, tag_val, stringLen(tag_key) >=_int 1), "Expected len(tag_key) >= 1, got "{stringLen(tag_key) from "len(tag_key)"})
   ]
   postconditions: [
   ]
@@ -161,11 +161,11 @@ function "float_and_negative_bounds"{
   ]
   kwonly: [
   ]
-  kwargs: fp : dict(
+  kwargs: fp : Unpack[dict(
     SampleSize : ident("builtins.float") [required=false]
     Score : ident("builtins.float") [required=false]
     Count : ident("builtins.int") [required=false]
-  )
+  )]
   return: ident("_types.NoneType")
   overload: false
   preconditions: [
@@ -444,7 +444,7 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
   expect (c.invariants.size == 1) s!"expected 1 invariant, got {c.invariants.size}"
   let expected : SpecExpr :=
     .intGe (.getIndex (.var "self" .none) "x" .none) (.intLit 0 .none) .none
-  expect (c.invariants[0]!.softBEq expected)
+  expect ((c.invariants[0]!.formula.map (·.softBEq expected)).getD false)
     "invariant was not translated to `self.x >= 0` (placeholder or mismatch)"
 
 -- Field-to-field ordering uses generic comparisons in every role that permits
@@ -456,17 +456,17 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
   let le ← findClass sigs "CLe"
   expect (ge.invariants.size == 1) s!"expected 1 >= invariant, got {ge.invariants.size}"
   expect (le.invariants.size == 1) s!"expected 1 <= invariant, got {le.invariants.size}"
-  expect (ge.invariants[0]!.softBEq
+  expect ((ge.invariants[0]!.formula.map (·.softBEq
             (.pcmp .ge
               (.getIndex (.var "self" .none) "a" .none)
               (.getIndex (.var "self" .none) "b" .none)
-              .none))
+              .none))).getD false)
     "field-to-field >= invariant was not preserved"
-  expect (le.invariants[0]!.softBEq
+  expect ((le.invariants[0]!.formula.map (·.softBEq
             (.pcmp .le
               (.getIndex (.var "self" .none) "a" .none)
               (.getIndex (.var "self" .none) "b" .none)
-              .none))
+              .none))).getD false)
     "field-to-field <= invariant was not preserved"
 
 -- Multiple `@requires` on one function accumulate (order-independent).
@@ -771,23 +771,260 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
 #guard_msgs in
 #eval expectNativeCaseError "ghost_positional" "takes no positional arguments"
 
--- `@invariant(lambda s: …)` (binder not `self`) is warned and the invariant is
--- skipped (not recognized).
+-- `@invariant(lambda s: …)`: the one parameter, whatever its name, stands for the instance.
 #guard_msgs in
 #eval runNativeCase "invariant_wrong_binder" fun sigs warnings => do
+  expect warnings.isEmpty s!"expected no warnings, got {warnings}"
   let c ← findClass sigs "C"
-  expect (c.invariants.size == 0) s!"expected the invariant to be skipped (0 invariants), got {c.invariants.size}"
-  expect (warnings.any (·.contains "must be 'self'"))
-    "expected a warning that the `@invariant` binder must be `self`"
+  expect (c.invariants.size == 1) s!"expected 1 invariant, got {c.invariants.size}"
+  let inv := c.invariants[0]!
+  expect (inv.binder == "s" && inv.source == "lambda s: s.x >= 0")
+    s!"binder and source: got {inv.binder}, {inv.source}"
+  expect ((inv.formula.map (·.softBEq
+      (.intGe (.getIndex (.var "s" .none) "x" .none) (.intLit 0 .none) .none))).getD false)
+    "the invariant was not translated to `s.x >= 0`"
 
--- `@invariant(lambda self, y: …)` (two binders) is warned and the invariant is
--- skipped.
+-- An `@invariant` with two lambdas is an error.
 #guard_msgs in
-#eval runNativeCase "invariant_two_binders" fun sigs warnings => do
+#eval expectNativeCaseError "invariant_two_lambdas"
+  "@invariant: takes one lambda; write one decorator per invariant"
+
+-- An `@invariant` lambda with two parameters, or with none, is an error.
+#guard_msgs in
+#eval expectNativeCaseError "invariant_two_binders"
+  "@invariant: the lambda must take exactly one parameter, the instance; it takes 2"
+
+#guard_msgs in
+#eval expectNativeCaseError "invariant_no_binder"
+  "@invariant: the lambda must take exactly one parameter, the instance; it takes 0"
+
+-- An invariant that doesn't translate keeps its source text, with no formula. A source text
+-- keeps its non-ASCII characters.
+#guard_msgs in
+#eval runNativeCase "invariant_untranslated" fun sigs _ => do
   let c ← findClass sigs "C"
-  expect (c.invariants.size == 0) s!"expected the invariant to be skipped (0 invariants), got {c.invariants.size}"
-  expect (warnings.any (·.contains "exactly one"))
-    "expected a warning that the `@invariant` lambda must take exactly one parameter"
+  expect (c.invariants.size == 2) s!"expected 2 invariants, got {c.invariants.size}"
+  expect (c.invariants[0]!.formula.isNone
+      && c.invariants[0]!.source == "lambda self: self.x.bit_length() > 0")
+    s!"invariant 0: {c.invariants[0]!.source}"
+  expect ((c.invariants[1]!.formula.map (·.softBEq
+      (.not (.enumMember (.getIndex (.var "self" .none) "name" .none) #["é"] .none) .none))).getD false
+      && c.invariants[1]!.source == "lambda self: self.name != \"é\"")
+    s!"invariant 1: {c.invariants[1]!.source}"
+
+-- A nested class's `@exhaustive` and `@invariant` are read.
+#guard_msgs in
+#eval runNativeCase "nested_class_decorators" fun sigs warnings => do
+  expect warnings.isEmpty s!"expected no warnings, got {warnings}"
+  let outer ← findClass sigs "Outer"
+  let some inner := outer.subclasses[0]? | throw <| IO.userError "no nested class"
+  expect inner.exhaustive "expected the nested class to be exhaustive"
+  expect (inner.invariants.size == 1 && (inner.invariants[0]!.formula.map (·.softBEq
+      (.intGe (.getIndex (.var "self" .none) "x" .none) (.intLit 0 .none) .none))).getD false)
+    s!"expected the invariant `self.x >= 0`, got {inner.invariants.size}"
+
+-- PySpec records each clause that it drops, with its kind and source text.
+#guard_msgs in
+#eval runNativeCase "drop_records" fun sigs _ => do
+  let f ← findFn sigs "f"
+  let got := f.dropped.map fun c => (c.kind.tag, c.source)
+  expect (got == #[("assert", "x.bit_length() < 9"), ("requires", "x.bit_length() > 3"),
+      ("admit", "result.bit_length() > 0"), ("modifies", "x.bit_length()")])
+    s!"dropped clauses: {got}"
+
+-- A call that PySpec reads as `len`, `isinstance`, `all`, `any` or `compile(...).search`, but
+-- that has keyword arguments or calls a parameter of that name, means something else in
+-- CPython: the assert is recorded as dropped, and stays a precondition for ToLaurel.
+#guard_msgs in
+#eval runNativeCase "unfaithful_calls" fun sigs warnings => do
+  let cases : List (String × Array String) := [
+    ("len_kw", #["len(s, x=1) >= 1"]), ("isinstance_kw", #["isinstance(x, int, y=2)"]),
+    ("regex_flags", #["not (compile(\"a\", flags=2).search(s) is not None)"]),
+    ("regex_pos", #["len(s) >= 5"]), ("all_kw", #["all((x > 0 for x in xs), y=1)"]),
+    ("param_len", #["len(s) >= 1"]), ("param_isinstance", #["isinstance(x, int)"]),
+    ("param_all", #["all(x > 0 for x in xs)"]), ("param_type", #["isinstance(x, str)"]),
+    ("view_kw", #["all(k != \"\" for k in d.keys(x=1))"]), ("loop_view_kw", #["k != \"\""]),
+    ("admit_kw", #["len(s, x=1) >= 1"]), ("admit_param_len", #["len(s) >= 1"])]
+  for (name, expected) in cases do
+    let f ← findFn sigs name
+    expect (f.dropped.map (·.source) == expected) s!"{name}: dropped {f.dropped.map (·.source)}"
+  -- ToLaurel still reads the call as the builtin: its precondition is wrong there.
+  expect ((← findFn sigs "param_len").preconditions.size == 1) "param_len: expected 1 precondition"
+  -- An `@admit` is assumed after each call, so it is not kept: it is only recorded.
+  for name in ["admit_kw", "admit_param_len"] do
+    let a ← findFn sigs name
+    expect (a.dropped.map (·.kind.tag) == #["admit"] && a.admittedPostconditions.isEmpty)
+      s!"{name}: {a.dropped.map (·.kind.tag)}, {a.admittedPostconditions.size} admitted"
+  -- Each `@admit` left out gets a warning.
+  let admitWarnings := warnings.filter (·.contains "@admit dropped")
+  expect (admitWarnings.size == 2) s!"warnings: {warnings}"
+  -- ToLaurel assumes nothing for it.
+  let r := Specs.ToLaurel.signaturesToLaurel "unfaithful_calls.py" sigs
+    (StrataPython.ModuleName.ofString! "native_cases.unfaithful_calls")
+  let procs := r.program.staticProcedures.filter fun p =>
+    p.name.text.endsWith "admit_kw" || p.name.text.endsWith "admit_param_len"
+  expect (procs.length == 2) s!"expected 2 procedures, got {procs.map (·.name.text)}"
+  for proc in procs do
+    let text := toString (Strata.Laurel.formatProcedure proc)
+    expect ((text.splitOn "admitted postcondition").length == 1) s!"{proc.name.text}: {text}"
+  -- An invariant whose meaning differs is recorded as its source text alone.
+  let box ← findClass sigs "Box"
+  expect (box.invariants.map (·.formula.isNone) == #[true]) "Box: expected an untranslated invariant"
+
+-- Without `from re import compile`, `compile` is the builtin, so the assert is recorded.
+#guard_msgs in
+#eval runNativeCase "regex_no_import" fun sigs _ => do
+  let f ← findFn sigs "f"
+  expect (f.dropped.map (·.source) == #["compile(\"a\").search(s) is not None"])
+    s!"dropped: {f.dropped.map (·.source)}"
+
+-- A module binding of a builtin's name, even one that gives no signature, such as `all = None`,
+-- makes each assert that calls it recorded.
+#guard_msgs in
+#eval runNativeCase "module_rebinds_builtin" fun sigs _ => do
+  for (name, expected) in [("uses_all", "all(x > 0 for x in xs)"), ("uses_len", "len(s) >= 1"),
+      ("uses_compile", "compile(\"a\").search(s) is not None")] do
+    let f ← findFn sigs name
+    expect (f.dropped.map (·.source) == #[expected]) s!"{name}: dropped {f.dropped.map (·.source)}"
+
+-- A later class, or an import of another name as compile, also replaces re.compile.
+#guard_msgs in
+#eval runNativeCase "compile_rebound_class" fun sigs _ => do
+  let f ← findFn sigs "f"
+  expect (f.dropped.map (·.source) == #["compile(\"a\").search(s) is not None"])
+    s!"dropped: {f.dropped.map (·.source)}"
+
+#guard_msgs in
+#eval runNativeCase "compile_rebound_import" fun sigs _ => do
+  let f ← findFn sigs "f"
+  expect (f.dropped.map (·.source) == #["compile(\"a\").search(s) is not None"])
+    s!"dropped: {f.dropped.map (·.source)}"
+
+-- A top-level assignment of `__init__`, which the class body reads as a field or warns on, can
+-- still change what a later assert reads, so the assert is recorded as dropped.
+#guard_msgs in
+#eval runNativeCase "init_assign_taints" fun sigs warnings => do
+  let m ← findMethod (← findClass sigs "C") "__init__"
+  expect (m.dropped.map (·.source) == #["len(xs) >= 1"]) s!"dropped: {m.dropped.map (·.source)}"
+  expect (m.preconditions.size == 1) s!"expected 1 precondition, got {m.preconditions.size}"
+  -- The assignment warns once, as an unsupported field, and taints quietly.
+  expect (warnings.size == 1 && warnings[0]!.contains "unsupported __init__ assignment target")
+    s!"warnings: {warnings}"
+
+-- An assert under an `if` whose condition doesn't translate, or holds a placeholder, is
+-- recorded as dropped, and stays a precondition for ToLaurel.
+#guard_msgs in
+#eval runNativeCase "if_untranslatable" fun sigs _ => do
+  let f ← findFn sigs "f"
+  expect (f.dropped.map (·.source) == #["x >= 0", "n >= 1"]) s!"dropped: {f.dropped.map (·.source)}"
+  expect (f.preconditions.size == 2) s!"expected 2 preconditions, got {f.preconditions.size}"
+  -- As before this record existed: the first assert without its condition, the second under
+  -- a condition that holds a placeholder.
+  expect (f.preconditions[0]!.formula.softBEq (.intGe (.var "x" .none) (.intLit 0 .none) .none))
+    s!"precondition 0: {f.preconditions[0]!.formula}"
+  expect (f.preconditions[1]!.formula.softBEq (.implies
+      (.pcmp .gt (.var "x" .none) (.placeholder .none) .none)
+      (.intGe (.var "n" .none) (.intLit 1 .none) .none) .none))
+    s!"precondition 1: {f.preconditions[1]!.formula}"
+
+-- After a statement that PySpec skips and that can change what a later assert means, every
+-- later assert is recorded as dropped, and stays a precondition.
+#guard_msgs in
+#eval runNativeCase "skipped_statements" fun sigs _ => do
+  -- Each function: its recorded asserts, and the preconditions it keeps, as before.
+  let cases : List (String × Array String × Array String) := [
+    ("assign", #["len(s) >= 1", "n >= 1"], #["stringLen(s) >=_int 1", "n >=_int 1"]),
+    ("call", #["len(xs) > 5"], #["pcmp(\"gt\", len(xs), 5)"]),
+    ("annotated_walrus", #["n >= 1"], #["n >=_int 1"]),
+    ("condition_walrus", #["n >= 1"], #["n >=_int 1"]),
+    ("rebound_builtin", #["isinstance(s, str)"], #["isinstance(s, \"str\")"]),
+    ("untouched", #[], #["n >=_int 1"]),
+    ("untranslated_if", #["len(xs) > 5"], #["pcmp(\"gt\", len(xs), 5)"])]
+  for (name, expected, kept) in cases do
+    let f ← findFn sigs name
+    expect (f.dropped.map (·.source) == expected) s!"{name}: dropped {f.dropped.map (·.source)}"
+    expect (f.preconditions.map (toString ·.formula) == kept)
+      s!"{name}: preconditions {f.preconditions.map (toString ·.formula)}"
+
+-- A loop's target counts as rebound only after the loop; a loop whose body has a statement
+-- that PySpec skips has every assert recorded.
+#guard_msgs in
+#eval runNativeCase "loop_targets" fun sigs _ => do
+  let cases : List (String × Array String) := [
+    ("after_loop", #["x >= 1"]), ("if_in_for", #[]), ("nested_for", #[]),
+    ("inner_shadow", #["x > 0"]), ("loop_carried", #["n > 0"]), ("loop_var_rebound", #["x > 0"]),
+    ("untranslated_if_in_loop", #["x > 0"]), ("nested_taint", #["n > 0"]),
+    ("sibling_loops", #[]), ("unicode_name", #["ｘ > 0"]),
+    ("builtin_target", #["len(s) >= 1"]), ("type_target", #["isinstance(s, str)"]),
+    ("inner_rebinds_before", #["y > 0"]), ("if_rebinds_before", #["y > 0"]),
+    ("iterable_rebound_later", #["y > 0"]), ("condition_rebound_later", #["x > 0"])]
+  for (name, expected) in cases do
+    let f ← findFn sigs name
+    expect (f.dropped.map (·.source) == expected) s!"{name}: dropped {f.dropped.map (·.source)}"
+
+-- A nest of 24 loops reads its innermost body 25 times, not about 2^24 times, and its assert
+-- becomes one precondition under 24 quantifiers. An assignment two loops below an assert still
+-- gets the assert recorded as dropped, although the scratch read reads those loops only once.
+#guard_msgs in
+#eval runNativeCase "deep_loops" fun sigs _ => do
+  let f ← findFn sigs "deep"
+  let expected := (List.range 24).reverse.foldl (fun acc i => s!"forall(xs, v{i}, {acc})")
+    "pcmp(\"gt\", v0, 0)"
+  expect f.dropped.isEmpty s!"dropped: {f.dropped.map (·.source)}"
+  expect (f.preconditions.map (toString ·.formula) == #[expected])
+    s!"preconditions: {f.preconditions.map (toString ·.formula)}"
+  let g ← findFn sigs "deep_taint"
+  expect (g.dropped.map (·.source) == #["a > 0"]) s!"deep_taint: dropped {g.dropped.map (·.source)}"
+
+-- An `if` over a TypedDict element's field, in a loop, records nothing: the body is read in
+-- the loop's context.
+#guard_msgs in
+#eval runNativeCase "typed_if_in_loop" fun sigs _ => do
+  let f ← findFn sigs "f"
+  expect f.dropped.isEmpty s!"dropped: {f.dropped.map (·.source)}"
+  expect (f.preconditions.map (toString ·.formula) ==
+      #["forall(entries, e, enum(e[Kind], [\"big\"]) => e[Size] >=_int 10)"])
+    s!"preconditions: {f.preconditions.map (toString ·.formula)}"
+
+-- The lambdas after a decorator's first are recorded as dropped clauses of its kind.
+#guard_msgs in
+#eval runNativeCase "extra_lambdas" fun sigs _ => do
+  let f ← findFn sigs "f"
+  let got := f.dropped.map fun c => (c.kind.tag, c.source)
+  expect (got == #[("requires", "x < 10"), ("modifies", "x")])
+    s!"dropped clauses: {got}"
+
+-- An @ensures that doesn't translate is recorded as dropped.
+#guard_msgs in
+#eval runNativeCase "ensures_dropped" fun sigs _ => do
+  let f ← findFn sigs "f"
+  expect (f.dropped.map (fun c => (c.kind.tag, c.source)) == #[("ensures", "result.bit_length() > 0")])
+    s!"dropped clauses: {f.dropped.map (·.source)}"
+
+-- An f-string message keeps each part's source text; a part that doesn't translate keeps
+-- only its source text.
+#guard_msgs in
+#eval runNativeCase "fstring_source" fun sigs _ => do
+  let f ← findFn sigs "f"
+  let parts := f.preconditions[0]!.message.map fun
+    | .str s => s!"str {s}"
+    | .expr _ src => s!"expr {src}"
+    | .untranslated src => s!"untranslated {src}"
+  expect (parts == #["str got ", "expr len(s)", "str  for ", "untranslated s.upper()"])
+    s!"message parts: {parts}"
+
+-- `**kw: Unpack[TD]` is recorded as unpacked; `**kw: TD` is not.
+#guard_msgs in
+#eval runNativeCase "kwargs_unpack" fun sigs _ => do
+  let form (name : String) : IO String := do
+    match (← findFn sigs name).args.kwargs with
+    | some (kn, .unpacked tp) => return s!"{kn}: unpacked {tp}"
+    | some (kn, .each tp) => return s!"{kn}: each {tp}"
+    | none => return "none"
+  let forms ← ["f", "g", "h", "k"].mapM form
+  let td := "TypedDict(a : builtins.int)"
+  expect (forms == [s!"kw: unpacked {td}", s!"kw: each {td}", s!"kw: unpacked {td}", s!"kw: unpacked {td}"])
+    s!"**kw forms: {forms}"
 
 -- Integration: all five native method decorators on one function each populate
 -- their own field, with no cross-wiring between the per-kind stores.
@@ -820,7 +1057,8 @@ meta def warningText (w : String) : String :=
 -- preconditions, the `@admit` and the `@modifies` target. The top-level
 -- `self.helper = self._Helper()` declares the field `helper`. The assignment nested in
 -- the `if` declares no field: it is skipped with a warning, and the assert next to it
--- applies only when `n > 0`.
+-- applies only when `n > 0`. Since that skipped assignment runs before the assert, the assert
+-- is also recorded as dropped.
 /--
 info: program PythonSpecs;
 class "C" {
@@ -861,6 +1099,7 @@ class "C" {
     ]
     postconditions: [
       admitted stringLen(region) >=_int 2
+      dropped "assert" "n <= 3"
     ]
     modifies: [
       (self[count])
@@ -933,7 +1172,7 @@ errors: #[]
 #guard_msgs in
 #eval expectNativeCaseError "class_type_params" "C: type parameters are not supported"
 
--- The same holds for a nested class, and decorators on a nested class are a hard error too.
+-- The same holds for a nested class.
 #guard_msgs in
 #eval expectNativeCaseError "nested_class_keywords"
   "Inner: class keywords, such as metaclass=, are not supported"
@@ -944,10 +1183,6 @@ errors: #[]
 
 #guard_msgs in
 #eval expectNativeCaseError "nested_class_type_params" "Inner: type parameters are not supported"
-
-#guard_msgs in
-#eval expectNativeCaseError "nested_class_decorator"
-  "Inner: decorators on a nested class are not supported"
 
 -- The translation goes on after a class that it rejects: the function after the class is read,
 -- and its own error is reported too.
@@ -1291,6 +1526,8 @@ warnings: #[]
     (StrataPython.ModuleName.ofString! "native_cases.old_field")
   expect lowered.errors.isEmpty
     s!"receiver rejection should prevent Laurel errors, got {lowered.errors.size}"
+  expect (m.dropped.map (fun c => (c.kind.tag, c.source)) == #[("admit", "self.x >= OLD(self.x)")])
+    s!"expected the dropped @admit to be recorded, got {m.dropped.map (·.source)}"
 
 -- Exercise the symmetric receiver rejection for <=.
 #guard_msgs in
@@ -1399,6 +1636,9 @@ def warningTestCase : IO Unit := withPython fun pythonCmd => do
           throw <| IO.userError
             s!"Expected the legacy loop with a docstring to retain 1 precondition, got \
                {loopWithDocstring.preconditions.size}"
+        -- A constant in a loop's body changes nothing, so nothing is recorded as dropped.
+        unless loopWithDocstring.dropped.isEmpty do
+          throw <| IO.userError s!"Expected no dropped clause for the loop with a docstring"
         let expectedWarnings := #[
           "unsupported __init__ assignment",
           "skipped Assign in function body",
@@ -1679,13 +1919,19 @@ meta def serdeRoundTripTest : IO Unit := do
     loc := .none
     name := "C"
     methods := #[fd]
-    invariants := #[.var "inv" .none]
+    invariants := #[{ source := "lambda self: inv", binder := "self", formula := some (.var "inv" .none) },
+      { source := "lambda s: s.f()", binder := "s", formula := none }]
   }
   let cd' ← match DDM.ClassDecl.fromDDM (ClassDef.toDDMDecl cd) with
     | .ok r => pure r
     | .error (_, msg) => throw <| IO.userError s!"ClassDecl.fromDDM failed: {msg}"
-  expect (cd'.invariants.size == 1) s!"round-trip dropped invariants: got {cd'.invariants.size}"
-  expect (cd'.invariants[0]!.softBEq (.var "inv" .none)) "round-trip corrupted invariant expression"
+  expect (cd'.invariants.size == 2) s!"round-trip dropped invariants: got {cd'.invariants.size}"
+  expect ((cd'.invariants[0]!.formula.map (·.softBEq (.var "inv" .none))).getD false
+      && cd'.invariants[0]!.source == "lambda self: inv" && cd'.invariants[0]!.binder == "self")
+    "round-trip corrupted the translated invariant"
+  expect (cd'.invariants[1]!.formula.isNone && cd'.invariants[1]!.source == "lambda s: s.f()"
+      && cd'.invariants[1]!.binder == "s")
+    "round-trip corrupted the untranslated invariant"
   expect (cd'.methods.size == 1) s!"round-trip dropped class method: got {cd'.methods.size}"
   expect (cd'.methods[0]!.admittedPostconditions.size == 1
           && cd'.methods[0]!.modifies.size == 1

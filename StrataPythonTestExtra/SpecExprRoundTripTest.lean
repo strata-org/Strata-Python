@@ -165,9 +165,9 @@ private def funcDeclAdmittedRoundTripTest : IO Unit := do
 
 /-- An `admitted` entry is only meaningful in the postconditions sequence.
     If foreign or hand-authored DDM places one in `modifies` or `invariants`,
-    `fromDDM` preserves the invalid shape as a placeholder instead of silently
-    reinterpreting its expression as an ordinary frame target or invariant. -/
-private def admittedEntryOutsidePostconditionsFallbackTest : IO Unit := do
+    `fromDDM` fails, instead of reinterpreting its expression as an ordinary frame
+    target or invariant. -/
+private def misplacedEntryReadErrorTest : IO Unit := do
   let expr := SpecExpr.var "x" rtLoc
   let admittedEntry : DDM.PostconditionEntry SourceRange :=
     .mkAdmittedPostconditionEntry rtLoc expr.toDDM
@@ -186,10 +186,10 @@ private def admittedEntryOutsidePostconditionsFallbackTest : IO Unit := do
         .mkModifiesClause rtLoc ⟨rtLoc, #[admittedEntry]⟩⟩)
       (ghosts := ⟨rtLoc, none⟩)
   match malformedFun.fromDDM with
-  | .error (_, msg) => throw <| IO.userError s!"malformed FunctionDecl read failed: {msg}"
-  | .ok d =>
-    unless d.modifies.size == 1 && d.modifies[0]!.softBEq (.placeholder rtLoc) do
-      throw <| IO.userError "admitted modifies entry must map to a placeholder"
+  | .error (_, msg) =>
+    unless msg == "A modifies target of 'f' that is not a plain entry" do
+      throw <| IO.userError s!"unexpected read error: {msg}"
+  | .ok _ => throw <| IO.userError "an admitted modifies entry must be a read error"
   let malformedClass : DDM.ClassDecl SourceRange :=
     .mkClassDecl rtLoc
       (name := ⟨rtLoc, "C"⟩)
@@ -202,17 +202,131 @@ private def admittedEntryOutsidePostconditionsFallbackTest : IO Unit := do
       (invariants := ⟨rtLoc, some <|
         .mkInvariantsClause rtLoc ⟨rtLoc, #[admittedEntry]⟩⟩)
   match malformedClass.fromDDM with
-  | .error (_, msg) => throw <| IO.userError s!"malformed ClassDecl read failed: {msg}"
-  | .ok d =>
-    unless d.invariants.size == 1 && d.invariants[0]!.softBEq (.placeholder rtLoc) do
-      throw <| IO.userError "admitted invariant entry must map to a placeholder"
+  | .error (_, msg) =>
+    unless msg == "An invariant of 'C' that is not an invariant entry" do
+      throw <| IO.userError s!"unexpected read error: {msg}"
+  | .ok _ => throw <| IO.userError "an admitted invariant entry must be a read error"
+
+/-- Every `DroppedKind`, a dropped entry's source text, and both `**kwargs` forms survive the
+    round trip; an invariant entry among the postconditions is a read error. -/
+private def droppedAndKwargsRoundTripTest : IO Unit := do
+  let kinds : Array DroppedKind := #[.assert, .requires, .ensures, .admit, .modifies]
+  let any := SpecType.ident rtLoc .typingAny
+  for unpacked in [false, true] do
+    let kwargs := some ("kw", if unpacked then KwargsType.unpacked any else .each any)
+    let d : FunctionDecl := {
+      loc := rtLoc, nameLoc := rtLoc, name := "f"
+      args := { args := #[], kwonly := #[], kwargs }
+      returnType := SpecType.ident rtLoc .typingAny, isOverload := false
+      preconditions := #[{ message := #[.str "a ", .expr (.var "x" rtLoc) "x", .untranslated "y.z()"],
+                           formula := .var "x" rtLoc }]
+      postconditions := #[]
+      dropped := kinds.map fun kind => { kind, source := s!"src {kind.tag} é" } }
+    match d.toDDM.fromDDM with
+    | .error (_, msg) => throw <| IO.userError s!"FunctionDecl round trip failed: {msg}"
+    | .ok d' =>
+      unless d'.dropped.map (fun c => (c.kind.tag, c.source)) ==
+          kinds.map (fun k => (k.tag, s!"src {k.tag} é")) do
+        throw <| IO.userError "dropped clauses changed in the round trip"
+      let kept : Bool := match d'.args.kwargs with
+        | some ("kw", .unpacked t) => unpacked && t.asIdent == some .typingAny
+        | some ("kw", .each t) => !unpacked && t.asIdent == some .typingAny
+        | _ => false
+      unless kept do
+        throw <| IO.userError "the **kwargs form changed in the round trip"
+      let parts := d'.preconditions[0]!.message.map fun
+        | .str s => s!"str {s}" | .expr _ src => s!"expr {src}" | .untranslated src => s!"untranslated {src}"
+      unless parts == #["str a ", "expr x", "untranslated y.z()"] do
+        throw <| IO.userError s!"message parts changed in the round trip: {parts}"
+  let misplaced : DDM.FunDecl SourceRange :=
+    .mkFunDecl rtLoc
+      (name := ⟨rtLoc, "f"⟩) (args := ⟨rtLoc, #[]⟩) (kwonly := ⟨rtLoc, #[]⟩)
+      (kwargs := ⟨rtLoc, none⟩) (returnType := (SpecType.ident rtLoc .typingAny).toDDM)
+      (isOverload := ⟨rtLoc, false⟩) (preconditions := ⟨rtLoc, #[]⟩)
+      (postconditions := ⟨rtLoc, #[.mkInvariantEntry rtLoc ⟨rtLoc, "lambda self: P"⟩
+        ⟨rtLoc, "self"⟩ ⟨rtLoc, none⟩]⟩)
+      (snapshots := ⟨rtLoc, none⟩) (modifiesClause := ⟨rtLoc, none⟩) (ghosts := ⟨rtLoc, none⟩)
+  match misplaced.fromDDM with
+  | .error (_, msg) =>
+    unless msg == "An invariant among the postconditions of 'f'" do
+      throw <| IO.userError s!"unexpected read error: {msg}"
+  | .ok _ => throw <| IO.userError "an invariant entry among the postconditions must be a read error"
+
+/-- Through Ion bytes: `writeDDM` states the format version, and `readDDMVersioned` reads it
+    with the signatures; a file without the format command reads with no version; an invariant
+    entry of an old file reads with the binder `self` and no source text. -/
+private def ionFileTest : IO Unit := do
+  let d : FunctionDecl := {
+    loc := rtLoc, nameLoc := rtLoc, name := "f", args := { args := #[], kwonly := #[] }
+    returnType := SpecType.ident rtLoc .typingAny, isOverload := false
+    preconditions := #[], postconditions := #[]
+    dropped := #[{ kind := .modifies, source := "x.y()" }] }
+  let c : ClassDef := { loc := rtLoc, name := "C", methods := #[], invariants :=
+    #[{ source := "lambda s: s.x", binder := "s", formula := none }] }
+  IO.FS.withTempDir fun dir => do
+    let file := dir / "m.pyspec.st.ion"
+    writeDDM file #[.functionDecl d, .classDef c]
+    let (version, sigs) ← IO.ofExcept (← (readDDMVersioned file).toBaseIO)
+    unless version == some formatVersion && sigs.size == 2 do
+      throw <| IO.userError s!"expected version {formatVersion} and 2 signatures, got {version}, {sigs.size}"
+    match sigs[0]!, sigs[1]! with
+    | .functionDecl d', .classDef c' =>
+      unless d'.dropped.map (·.source) == #["x.y()"] && c'.invariants.map (·.binder) == #["s"] do
+        throw <| IO.userError "the dropped clause or the invariant changed through Ion"
+    | _, _ => throw <| IO.userError "the signatures changed kind through Ion"
+    -- A file without the format command, as an older PySpec wrote it.
+    let old := dir / "old.pyspec.st.ion"
+    let legacyInv : DDM.ClassDecl SourceRange :=
+      .mkClassDecl rtLoc ⟨rtLoc, "C"⟩ ⟨rtLoc, #[]⟩ ⟨rtLoc, #[]⟩ ⟨rtLoc, #[]⟩ ⟨rtLoc, #[]⟩
+        ⟨rtLoc, #[]⟩ ⟨rtLoc, false⟩ ⟨rtLoc, some (.mkInvariantsClause rtLoc
+          ⟨rtLoc, #[.mkPostconditionEntry rtLoc (SpecExpr.var "inv" rtLoc).toDDM]⟩)⟩
+    let pgm : StrataDDM.Program := .create DDM.PythonSpecs_map DDM.PythonSpecs.name
+      #[(DDM.Command.classDef rtLoc legacyInv).toAst]
+    IO.FS.writeBinFile old pgm.toIon
+    let (version, sigs) ← IO.ofExcept (← (readDDMVersioned old).toBaseIO)
+    unless version == none do throw <| IO.userError "a file without a format command has no version"
+    match (sigs[0]? : Option Signature) with
+    | some (Signature.classDef c') =>
+      unless c'.invariants.map (fun i => (i.binder, i.source, i.formula.isSome)) ==
+          #[("self", "", true)] do
+        throw <| IO.userError "an old invariant entry must read with binder self and no source"
+    | _ => throw <| IO.userError "expected the old class"
+
+/-- A dropped entry with an unknown kind, or in the invariants or modifies clause, is a read
+    error. -/
+private def droppedEntryReadErrorTest : IO Unit := do
+  let mkFun (posts : Array (DDM.PostconditionEntry SourceRange))
+      (mods : Array (DDM.PostconditionEntry SourceRange)) : DDM.FunDecl SourceRange :=
+    .mkFunDecl rtLoc (name := ⟨rtLoc, "f"⟩) (args := ⟨rtLoc, #[]⟩) (kwonly := ⟨rtLoc, #[]⟩)
+      (kwargs := ⟨rtLoc, none⟩) (returnType := (SpecType.ident rtLoc .typingAny).toDDM)
+      (isOverload := ⟨rtLoc, false⟩) (preconditions := ⟨rtLoc, #[]⟩)
+      (postconditions := ⟨rtLoc, posts⟩) (snapshots := ⟨rtLoc, none⟩)
+      (modifiesClause := ⟨rtLoc, if mods.isEmpty then none else some (.mkModifiesClause rtLoc ⟨rtLoc, mods⟩)⟩)
+      (ghosts := ⟨rtLoc, none⟩)
+  let dropped (tag : String) : DDM.PostconditionEntry SourceRange :=
+    .mkDroppedEntry rtLoc ⟨rtLoc, tag⟩ ⟨rtLoc, "src"⟩
+  let expectError {α : Type} (what : String) (r : FromDDM α) (msg : String) : IO Unit :=
+    match r with
+    | .error (_, m) => unless m == msg do throw <| IO.userError s!"{what}: unexpected error {m}"
+    | .ok _ => throw <| IO.userError s!"{what}: expected a read error"
+  expectError "unknown kind" (mkFun #[dropped "nope"] #[]).fromDDM
+    "Unknown kind of dropped clause: 'nope'"
+  expectError "dropped in modifies" (mkFun #[] #[dropped "assert"]).fromDDM
+    "A modifies target of 'f' that is not a plain entry"
+  let cls : DDM.ClassDecl SourceRange :=
+    .mkClassDecl rtLoc ⟨rtLoc, "C"⟩ ⟨rtLoc, #[]⟩ ⟨rtLoc, #[]⟩ ⟨rtLoc, #[]⟩ ⟨rtLoc, #[]⟩
+      ⟨rtLoc, #[]⟩ ⟨rtLoc, false⟩ ⟨rtLoc, some (.mkInvariantsClause rtLoc ⟨rtLoc, #[dropped "assert"]⟩)⟩
+  expectError "dropped in invariants" cls.fromDDM "An invariant of 'C' that is not an invariant entry"
 
 def specExprRoundTripExtraTest : IO Unit := do
   pcmpOpRoundTripTest
   nestedRoundTripTest
   unknownPcmpTagFallbackTest
   funcDeclAdmittedRoundTripTest
-  admittedEntryOutsidePostconditionsFallbackTest
+  misplacedEntryReadErrorTest
+  droppedAndKwargsRoundTripTest
+  ionFileTest
+  droppedEntryReadErrorTest
 
 #guard_msgs in
 #eval specExprRoundTripExtraTest

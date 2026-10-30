@@ -401,7 +401,7 @@ private def func (name : String) (ret : SpecType) (args : Array Arg := #[])
     (kwonly : Array Arg := #[])
     (preconditions : Array Assertion := #[])
     (postconditions : Array SpecExpr := #[])
-    (kwargs : Option (String × SpecType) := none) : Signature :=
+    (kwargs : Option (String × KwargsType) := none) : Signature :=
   .functionDecl {
     loc, nameLoc := loc, name
     args := { args, kwonly, kwargs }
@@ -668,7 +668,7 @@ info: errors: 1
   let result := signaturesToLaurel "<test>" #[
     func "f" str
       (args := #[arg "x" str])
-      (kwargs := some ("kwargs", kwargsTy))
+      (kwargs := some ("kwargs", .unpacked kwargsTy))
       (preconditions := #[{
         message := #[.str "nested dict"]
         formula := .intGe
@@ -826,7 +826,7 @@ info: pySpecToLaurel.kwargsExpansionError: **kw must use Unpack[TypedDict], got 
   #[.functionDecl {
     loc := loc, nameLoc := loc, name := "f"
     args := { args := #[], kwonly := #[],
-              kwargs := some ("kw", str) }
+              kwargs := some ("kw", .each str) }
     returnType := str
     isOverload := false
     preconditions := #[], postconditions := #[]
@@ -1017,7 +1017,7 @@ private def translatePrecond (preconditions : Array Assertion)
     .functionDecl {
       loc := loc, nameLoc := loc, name := "f"
       args := { args := #[], kwonly := #[],
-                kwargs := some ("kw", kwargsTy) }
+                kwargs := some ("kw", .unpacked kwargsTy) }
       returnType := str, isOverload := false
       preconditions := #[{
         message := #[], formula :=
@@ -1151,7 +1151,7 @@ private def translatePrecond (preconditions : Array Assertion)
   let innerTy := SpecType.typedDict loc #["name"] #[str] #[true]
   let kwargsTy := SpecType.typedDict loc #["item"] #[innerTy] #[true]
   let result := signaturesToLaurel "<test>" #[
-    func "f" str (kwargs := some ("kw", kwargsTy))] testModule
+    func "f" str (kwargs := some ("kw", .unpacked kwargsTy))] testModule
   let pre := getPreconditions result
   assertEq result.errors.size 0
   assertEq pre (
@@ -1297,7 +1297,7 @@ private def expectSchemaWarningOnly (containerTy : SpecType) : IO Unit := do
     .functionDecl {
       loc := loc, nameLoc := loc, name := "f"
       args := { args := #[arg "x" int], kwonly := #[],
-                kwargs := some ("kw", str) }
+                kwargs := some ("kw", .each str) }
       returnType := str, isOverload := false
       preconditions := #[], postconditions := #[] }] testModule
   match result.errors.toList with

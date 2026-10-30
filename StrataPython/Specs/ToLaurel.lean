@@ -834,7 +834,8 @@ def specExprToLaurel (e : SpecExpr) (source : FileRange)
 private def formatAssertionMessage (msg : Array MessagePart) : String :=
   let parts := msg.map fun
     | .str s => s
-    | .expr e => toString e
+    | .expr e _ => toString e
+    | .untranslated _ => ""
   String.join parts.toList
 
 /-- Structured PySpec assertion messages. Rendered to string before storing
@@ -1224,7 +1225,7 @@ def funcDeclToLaurel (procName : String) (func : FunctionDecl)
       s!"Method '{func.name}' has no arguments (expected 'self' as first parameter)"
   let posArgs := if isMethod then func.args.args.extract 1 func.args.args.size
                  else func.args.args
-  let kwargs ← match func.args.kwargs with
+  let kwargs ← match func.args.kwargs.map fun (n, k) => (n, k.type) with
     | some (name, tp) =>
       if tp.isTypedDict then
         pure (some (name, tp))

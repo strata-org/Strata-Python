@@ -265,6 +265,10 @@ structure PySpecState where
   Signatures being generated (declarations, functions, classes, etc).
   -/
   elements : Array Signature := #[]
+  /-- The names that the module's top-level statements bind, wherever they are and whether or
+      not they give a signature, except `compile` when only `from re import compile` binds it.
+      A clause that calls a builtin of such a name means something else in CPython. -/
+  moduleBound : Std.HashSet String := {}
 
 abbrev PySpecM := ReaderT PySpecContext (StateT PySpecState BaseIO)
 
@@ -705,6 +709,133 @@ def SpecExprRole.description : SpecExprRole → String
   | .invariant => "invariants"
   | .initializer => "initializers"
 
+/-- Names bound by an assignment target, including nested patterns. -/
+partial def collectBoundNames (t : expr StrataDDM.SourceRange)
+    (acc : Std.HashSet String) : Std.HashSet String :=
+  match t with
+  | .Name _ ⟨_, n⟩ _ => acc.insert n
+  | .Tuple _ ⟨_, elts⟩ _ | .List _ ⟨_, elts⟩ _ =>
+    elts.foldl (init := acc) fun a e => collectBoundNames e a
+  | .Starred _ inner _ => collectBoundNames inner acc
+  | _ => acc
+
+/-- Names bound in the enclosing scope by walrus targets (PEP 572);
+    lambda bodies are not descended. -/
+partial def collectWalrusNames (e : expr StrataDDM.SourceRange)
+    (acc : Std.HashSet String) : Std.HashSet String :=
+  let comps (gens : Array (comprehension StrataDDM.SourceRange))
+      (acc : Std.HashSet String) : Std.HashSet String :=
+    gens.foldl (init := acc) fun a g =>
+      match g with
+      | .mk_comprehension _ _ iter ⟨_, ifs⟩ _ =>
+        ifs.foldl (init := collectWalrusNames iter a) fun a e => collectWalrusNames e a
+  match e with
+  | .NamedExpr _ target value =>
+    collectWalrusNames value (collectBoundNames target acc)
+  | .Lambda .. | .Name .. | .Constant .. => acc
+  | .BinOp _ l _ r => collectWalrusNames r (collectWalrusNames l acc)
+  | .BoolOp _ _ ⟨_, values⟩ =>
+    values.foldl (init := acc) fun a e => collectWalrusNames e a
+  | .UnaryOp _ _ operand => collectWalrusNames operand acc
+  | .IfExp _ test body orelse =>
+    collectWalrusNames orelse (collectWalrusNames body (collectWalrusNames test acc))
+  | .Compare _ left _ ⟨_, comparators⟩ =>
+    comparators.foldl (init := collectWalrusNames left acc) fun a e => collectWalrusNames e a
+  | .Call _ func ⟨_, args⟩ ⟨_, kwargs⟩ =>
+    let a := collectWalrusNames func acc
+    let a := args.foldl (init := a) fun a e => collectWalrusNames e a
+    kwargs.foldl (init := a) fun a kw => collectWalrusNames kw.value a
+  | .Dict _ ⟨_, keys⟩ ⟨_, values⟩ =>
+    let a := keys.foldl (init := acc) fun a k =>
+      match k with
+      | .some_expr _ e => collectWalrusNames e a
+      | .missing_expr _ => a
+    values.foldl (init := a) fun a e => collectWalrusNames e a
+  | .Set _ ⟨_, elts⟩ | .Tuple _ ⟨_, elts⟩ _ | .List _ ⟨_, elts⟩ _ =>
+    elts.foldl (init := acc) fun a e => collectWalrusNames e a
+  | .ListComp _ elt ⟨_, gens⟩ | .SetComp _ elt ⟨_, gens⟩ | .GeneratorExp _ elt ⟨_, gens⟩ =>
+    comps gens (collectWalrusNames elt acc)
+  | .DictComp _ key value ⟨_, gens⟩ =>
+    comps gens (collectWalrusNames value (collectWalrusNames key acc))
+  | .Await _ inner | .YieldFrom _ inner => collectWalrusNames inner acc
+  | .Yield _ ⟨_, value⟩ =>
+    value.elim acc (collectWalrusNames · acc)
+  | .FormattedValue _ value _ ⟨_, fmtSpec⟩ =>
+    let a := collectWalrusNames value acc
+    fmtSpec.elim a (collectWalrusNames · a)
+  | .Interpolation _ value _ _ ⟨_, fmtSpec⟩ =>
+    let a := collectWalrusNames value acc
+    fmtSpec.elim a (collectWalrusNames · a)
+  | .JoinedStr _ ⟨_, values⟩ | .TemplateStr _ ⟨_, values⟩ =>
+    values.foldl (init := acc) fun a e => collectWalrusNames e a
+  | .Subscript _ obj slice _ =>
+    collectWalrusNames slice (collectWalrusNames obj acc)
+  | .Attribute _ obj _ _ => collectWalrusNames obj acc
+  | .Starred _ inner _ => collectWalrusNames inner acc
+  | .Slice _ ⟨_, lower⟩ ⟨_, upper⟩ ⟨_, step⟩ =>
+    let a := lower.elim acc (collectWalrusNames · acc)
+    let a := upper.elim a (collectWalrusNames · a)
+    step.elim a (collectWalrusNames · a)
+
+/-- The names that the expression `e` reads, outside lambda bodies, as the parser gives them. -/
+partial def collectNames (e : expr StrataDDM.SourceRange)
+    (acc : Std.HashSet String) : Std.HashSet String :=
+  let comps (gens : Array (comprehension StrataDDM.SourceRange))
+      (acc : Std.HashSet String) : Std.HashSet String :=
+    gens.foldl (init := acc) fun a g =>
+      match g with
+      | .mk_comprehension _ _ iter ⟨_, ifs⟩ _ =>
+        ifs.foldl (init := collectNames iter a) fun a e => collectNames e a
+  match e with
+  | .NamedExpr _ target value =>
+    collectNames value (collectBoundNames target acc)
+  | .Name _ ⟨_, name⟩ _ => acc.insert name
+  | .Lambda .. | .Constant .. => acc
+  | .BinOp _ l _ r => collectNames r (collectNames l acc)
+  | .BoolOp _ _ ⟨_, values⟩ =>
+    values.foldl (init := acc) fun a e => collectNames e a
+  | .UnaryOp _ _ operand => collectNames operand acc
+  | .IfExp _ test body orelse =>
+    collectNames orelse (collectNames body (collectNames test acc))
+  | .Compare _ left _ ⟨_, comparators⟩ =>
+    comparators.foldl (init := collectNames left acc) fun a e => collectNames e a
+  | .Call _ func ⟨_, args⟩ ⟨_, kwargs⟩ =>
+    let a := collectNames func acc
+    let a := args.foldl (init := a) fun a e => collectNames e a
+    kwargs.foldl (init := a) fun a kw => collectNames kw.value a
+  | .Dict _ ⟨_, keys⟩ ⟨_, values⟩ =>
+    let a := keys.foldl (init := acc) fun a k =>
+      match k with
+      | .some_expr _ e => collectNames e a
+      | .missing_expr _ => a
+    values.foldl (init := a) fun a e => collectNames e a
+  | .Set _ ⟨_, elts⟩ | .Tuple _ ⟨_, elts⟩ _ | .List _ ⟨_, elts⟩ _ =>
+    elts.foldl (init := acc) fun a e => collectNames e a
+  | .ListComp _ elt ⟨_, gens⟩ | .SetComp _ elt ⟨_, gens⟩ | .GeneratorExp _ elt ⟨_, gens⟩ =>
+    comps gens (collectNames elt acc)
+  | .DictComp _ key value ⟨_, gens⟩ =>
+    comps gens (collectNames value (collectNames key acc))
+  | .Await _ inner | .YieldFrom _ inner => collectNames inner acc
+  | .Yield _ ⟨_, value⟩ =>
+    value.elim acc (collectNames · acc)
+  | .FormattedValue _ value _ ⟨_, fmtSpec⟩ =>
+    let a := collectNames value acc
+    fmtSpec.elim a (collectNames · a)
+  | .Interpolation _ value _ _ ⟨_, fmtSpec⟩ =>
+    let a := collectNames value acc
+    fmtSpec.elim a (collectNames · a)
+  | .JoinedStr _ ⟨_, values⟩ | .TemplateStr _ ⟨_, values⟩ =>
+    values.foldl (init := acc) fun a e => collectNames e a
+  | .Subscript _ obj slice _ =>
+    collectNames slice (collectNames obj acc)
+  | .Attribute _ obj _ _ => collectNames obj acc
+  | .Starred _ inner _ => collectNames inner acc
+  | .Slice _ ⟨_, lower⟩ ⟨_, upper⟩ ⟨_, step⟩ =>
+    let a := lower.elim acc (collectNames · acc)
+    let a := upper.elim a (collectNames · a)
+    step.elim a (collectNames · a)
+
+
 structure SpecAssertionContext where
   filePath : System.FilePath
   kwargs : Option (String × SpecType) := none
@@ -715,6 +846,19 @@ structure SpecAssertionContext where
   /-- A method receiver removed from generated Laurel procedure inputs. -/
   unloweredReceiver : Option String := none
   role : SpecExprRole := .preState
+  /-- The text of the file being read, from which source ranges are cut. -/
+  fileText : String := ""
+  /-- Whether each assert met here is also recorded as dropped, as inside an `if` whose
+      condition doesn't translate. -/
+  dropAsserts : Bool := false
+  /-- Whether the statements are read in a scratch state, only to find out what they taint and
+      rebind. -/
+  scratch : Bool := false
+  /-- Whether the module binds `compile` to `re.compile`, and only to it. -/
+  compileIsRe : Bool := false
+  /-- The names that the module's top-level statements bind, as `moduleBound` of
+      `PySpecState` gives them. -/
+  moduleBound : Std.HashSet String := {}
 
 private def SpecAssertionContext.bindQuantifier
     (ctx : SpecAssertionContext) (name : String) (tp : SpecType) : SpecAssertionContext :=
@@ -733,6 +877,21 @@ structure SpecAssertionState where
   /-- Spec-only ghost variables from `@ghost`, with their (optional) initializer
       expressions translated to `SpecExpr`. -/
   ghosts : Array Ghost := #[]
+  /-- The clauses dropped so far, in source order. -/
+  dropped : Array DroppedClause := #[]
+  /-- Class invariants, top to bottom. -/
+  invariants : Array ClassInvariant := #[]
+  /-- The loop targets bound so far: a `for` target outlives its loop. -/
+  rebound : Std.HashSet String := {}
+  /-- Whether a statement that PySpec skipped can have changed what a later assert means: an
+      assignment, an expression other than a constant, or an `if` condition that doesn't
+      translate (a walrus never translates). Then every later assert of the function is recorded, in source order,
+      outside the enclosing block too. -/
+  tainted : Bool := false
+  /-- Whether the expression just read calls a builtin that PySpec interprets, such as `len`,
+      in a way that means something else in CPython: with keyword arguments, or through a
+      parameter or binder of the same name. -/
+  unfaithful : Bool := false
   errors : Array PipelineMessage := #[]
   warnings : Array PipelineMessage := #[]
 
@@ -1183,6 +1342,13 @@ partial def transExpr (e : expr SourceRange)
         return (.old innerExpr (loc := loc), innerTp)
       else
         return placeholder
+    -- PySpec reads these calls as the builtins' meaning, which a keyword argument, or a
+    -- parameter or module binding of the same name, changes.
+    if ["len", "isinstance", "any", "all"].contains funcName then
+      let ctx ← read
+      if !kwargs.isEmpty || ctx.localTypes.contains funcName ||
+          ctx.quantifierBindings.contains funcName || ctx.moduleBound.contains funcName then
+        modify ({ · with unfaithful := true })
     if funcName == "len" then
       if h : args.size = 1 then
         let (subjExpr, subjTp) ← transExpr args[0]
@@ -1198,6 +1364,10 @@ partial def transExpr (e : expr SourceRange)
         if clean then
           match args[1] with
           | .Name _ ⟨_, typeName⟩ (.Load _) =>
+            -- A parameter or a binder of that name is the class that CPython tests.
+            let ctx ← read
+            if ctx.localTypes.contains typeName || ctx.quantifierBindings.contains typeName then
+              modify ({ · with unfaithful := true })
             return (.isInstanceOf subjExpr typeName (loc := loc), boolType)
           | _ =>
             specWarning loc s!"isinstance: unsupported type argument"
@@ -1217,9 +1387,14 @@ partial def transExpr (e : expr SourceRange)
   -- compile("pattern").search(subject) — translate to regexMatch. Matched before
   -- the generic method-view arm below: its attribute object is a nested `.Call`,
   -- which the view arm's bare-`dictExpr` object also matches, so order matters.
-  | .Call _ (.Attribute _ (.Call _ (.Name _ ⟨_, compileName⟩ (.Load _)) ⟨_, compileArgs⟩ _)
-      ⟨_, searchAttr⟩ (.Load _)) ⟨_, searchArgs⟩ _ =>
+  | .Call _ (.Attribute _ (.Call _ (.Name _ ⟨_, compileName⟩ (.Load _)) ⟨_, compileArgs⟩
+      ⟨_, compileKw⟩) ⟨_, searchAttr⟩ (.Load _)) ⟨_, searchArgs⟩ ⟨_, searchKw⟩ =>
     if compileName == "compile" && searchAttr == "search" then
+      -- Without `from re import compile`, the name is the builtin `compile`.
+      let ctx ← read
+      if !compileKw.isEmpty || !searchKw.isEmpty || !ctx.compileIsRe ||
+          ctx.localTypes.contains compileName || ctx.quantifierBindings.contains compileName then
+        modify ({ · with unfaithful := true })
       if h₃ : compileArgs.size = 1 then
         if h₄ : searchArgs.size = 1 then
           match compileArgs[0] with
@@ -1234,7 +1409,8 @@ partial def transExpr (e : expr SourceRange)
   -- subject expression, retyped as `ItemsView`/`KeysView`/`ValuesView` so that
   -- quantifier-domain selection is driven by the type rather than by matching
   -- the view method syntactically downstream.
-  | .Call _ (.Attribute _ dictExpr ⟨_, viewName⟩ (.Load _)) ⟨_, viewArgs⟩ _ =>
+  | .Call _ (.Attribute _ dictExpr ⟨_, viewName⟩ (.Load _)) ⟨_, viewArgs⟩ ⟨_, viewKw⟩ =>
+    unless viewKw.isEmpty do modify ({ · with unfaithful := true })
     let mkView (loc : SourceRange) (kTp vTp : SpecType) : Option SpecType :=
       match viewName with
       | "items"  => some (SpecType.itemsView loc kTp vTp)
@@ -1336,24 +1512,57 @@ partial def transExpr (e : expr SourceRange)
     kind rather than on this text. -/
 def droppedAssertionWarning := "unsupported expression in assert; dropped"
 
+/-- The names a quantifier domain binds. -/
+def domainBinders : SpecQuantDomain → List String
+  | .overList x | .overDictKeys x | .overDictValues x => [x]
+  | .overDictItems k v => [k, v]
+
+/-- The text of the file at `loc`, as written. -/
+def sourceText (loc : SourceRange) : SpecAssertionM String :=
+  return String.Pos.Raw.extract (← read).fileText loc.start loc.stop
+
+/-- Record that the clause of kind `kind` at `loc` was dropped. -/
+def recordDropped (kind : DroppedKind) (loc : SourceRange) : SpecAssertionM Unit := do
+  let source ← sourceText loc
+  modify fun s => { s with dropped := s.dropped.push { kind, source, loc } }
+
+/-- Record that the names `names` are rebound from here on. -/
+def recordRebound (names : Std.HashSet String) : SpecAssertionM Unit :=
+  modify fun s => { s with rebound := names.fold (init := s.rebound) fun r n => r.insert n }
+
+/-- Whether `e` reads a loop target bound before it, in any position: a variable, a function
+or a type, as `for len in ns: …` makes `len(s)` read the loop target. -/
+def readsRebound (e : expr SourceRange) : SpecAssertionM Bool := do
+  let names := collectNames e {}
+  return (← get).rebound.toList.any names.contains
+
 mutual
 
 def blockStmt (s : stmt SourceRange) : SpecAssertionM Unit := do
   match s with
-  | .Assign _ _targets _value _typeAnn =>
+  | .Assign .. =>
     specWarning s.ann "skipped Assign in function body"
+    modify ({ · with tainted := true })
   | .AnnAssign .. =>
     specWarning s.ann "skipped AnnAssign in function body"
-  | .Expr _ (.Constant _ (.ConEllipsis _) _) =>
-    pure () -- `...` stub body, equivalent to pass
+    modify ({ · with tainted := true })
+  | .Expr _ (.Constant ..) =>
+    pure () -- a constant, such as `...` or a docstring, changes nothing
   | .Expr .. =>
     specWarning s.ann "skipped Expr in function body"
+    modify ({ · with tainted := true })
   | .Assert _ test msg =>
+    modify ({ · with unfaithful := false })
     let (clean, (formula, _)) ← runNoWarn (transExpr test)
     if !clean || formula.containsPlaceholder then
       specWarningOfKind .pySpecDroppedAssertion test.ann droppedAssertionWarning
+      recordDropped .assert test.ann
       return
     else
+    -- The assert's meaning in the source depends on what PySpec didn't read. It stays a
+    -- precondition, so that ToLaurel's input doesn't change.
+    if (← read).dropAsserts || (← get).tainted || (← readsRebound test) || (← get).unfaithful then
+      recordDropped .assert test.ann
     let message ← match msg with
       | ⟨_, some (.Constant _ (.ConString _ ⟨_, str⟩) _)⟩ => pure #[MessagePart.str str]
       | ⟨_, some (.JoinedStr _ ⟨_, values⟩)⟩ =>
@@ -1362,8 +1571,9 @@ def blockStmt (s : stmt SourceRange) : SpecAssertionM Unit := do
           | .Constant _ (.ConString _ ⟨_, str⟩) _ => pure (MessagePart.str str)
           | .FormattedValue _ value _ _ => do
             let (clean, (expr, _)) ← runNoWarn (transExpr value)
-            if clean then return MessagePart.expr expr
-            else return MessagePart.str ""
+            let source ← sourceText value.ann
+            if clean then return MessagePart.expr expr source
+            else return MessagePart.untranslated source
           | other => do
             specWarning other.ann "unsupported f-string part"
             pure (MessagePart.str "")
@@ -1389,10 +1599,15 @@ def blockStmt (s : stmt SourceRange) : SpecAssertionM Unit := do
       return
     -- Preserve the legacy generated-spec form while all()/any() adoption rolls
     -- out. Domain choice is type-directed; target syntax is validated afterward.
+    modify ({ · with unfaithful := false })
     let (clean, (iterExpr, iterTp)) ← runNoWarn (transExpr iter)
     if not clean || iterExpr.containsPlaceholder then
       specError s.ann "For: iterable could not be translated"
       return
+    -- An iterable that names a rebound loop target, that PySpec reads unfaithfully, or a
+    -- statement before the loop that can change what an assert means, changes what the
+    -- loop's asserts mean.
+    let iterRebound := (← get).tainted || (← readsRebound iter) || (← get).unfaithful
     let some domainInfo := iterTp.selectQuantDomain
       | specError s.ann "For: iterable type is not a supported collection"
         return
@@ -1406,10 +1621,37 @@ def blockStmt (s : stmt SourceRange) : SpecAssertionM Unit := do
     -- preconditions, matching the legacy generated PySpec behavior.
     let quantifyBody (seed : SpecAssertionContext → SpecAssertionContext)
         (domain : SpecQuantDomain) : SpecAssertionM Unit := do
+      -- The loop's own targets are fresh in its body.
+      let outerRebound := (← get).rebound
+      modify fun st => { st with
+        rebound := (domainBinders domain).foldl (·.erase ·) st.rebound }
+      -- A body with a statement that can change what an assert means changes what every
+      -- assert of the body means: each iteration after the first runs after that statement.
+      -- The body is read once in a scratch state, in the same context, to find out. A scratch
+      -- read needs only what the body taints and rebinds, and that doesn't depend on which
+      -- asserts are recorded as dropped. So a loop met during a scratch read skips its own
+      -- scratch read.
+      let (bodyTaints, bodyRebound) ← if (← read).scratch then pure (false, {}) else do
+        let saved ← get
+        let _ ← runChecked <| withReader (fun ctx => { seed ctx with scratch := true })
+          (blockStmts body)
+        let found := ((← get).tainted, (← get).rebound)
+        set saved
+        pure found
+      -- A name that the body rebinds, such as an inner loop's target, has its last value in the
+      -- next iteration, so the body's asserts read it rebound.
+      modify fun st => { st with
+        rebound := bodyRebound.fold (init := st.rebound) fun r n =>
+          if (domainBinders domain).contains n then r else r.insert n }
       let prevAssertions := (←get).assertions
       let warningStart := (←get).warnings.size
       modify fun st => { st with assertions := #[] }
-      let (errorFree, ()) ← runChecked <| withReader seed (blockStmts body)
+      let (errorFree, ()) ← runChecked <| withReader
+        (fun ctx => let ctx := seed ctx
+                    if iterRebound || bodyTaints then { ctx with dropAsserts := true } else ctx)
+        (blockStmts body)
+      modify fun st => { st with
+        rebound := outerRebound.fold (init := st.rebound) fun r n => r.insert n }
       let bodyState ← get
       let newWarnings := bodyState.warnings.extract warningStart bodyState.warnings.size
       let droppedAssertion := newWarnings.any fun w => w.kind == .pySpecDroppedAssertion
@@ -1454,22 +1696,40 @@ def blockStmt (s : stmt SourceRange) : SpecAssertionM Unit := do
           (.overDictValues valVar)
       | _ => specError s.ann "For: dict values quantifier expects a single loop variable"
   | .If _ pred ⟨_, t⟩ ⟨_, f⟩ =>
+    modify ({ · with unfaithful := false })
     let (clean, (cond, _)) ← runNoWarn (transExpr pred)
-    if clean then
-      assumeCondition cond pred.ann <| blockStmts t
-      if f.size > 0 then
-        assumeCondition (.not cond pred.ann) pred.ann <| blockStmts f
-    else
-      blockStmts t
-      if f.size > 0 then
-        blockStmts f
+    -- An assert under a condition that doesn't translate is recorded as dropped: if the
+    -- condition raises, the call fails before the assert runs, so the assert without its
+    -- condition is too weak.
+    let condRebound := (← readsRebound pred) || (← get).tainted || (← get).unfaithful
+    let dropping := (fun ctx : SpecAssertionContext =>
+      if clean && !cond.containsPlaceholder && !condRebound then ctx
+      else { ctx with dropAsserts := true })
+    withReader dropping do
+      if clean then
+        assumeCondition cond pred.ann <| blockStmts t
+        if f.size > 0 then
+          assumeCondition (.not cond pred.ann) pred.ann <| blockStmts f
+      else
+        blockStmts t
+        if f.size > 0 then
+          blockStmts f
+    -- A condition that doesn't translate runs code that PySpec doesn't see, and that code
+    -- can change what a later assert reads, as `if xs.pop() > 3: …` does.
+    if !clean || cond.containsPlaceholder then
+      modify ({ · with tainted := true })
   | .Pass _ =>
     pure ()
   | _ => specError s.ann s!"Unsupported statement: {eformat s.toAst}"
 termination_by sizeOf s
 
 def blockStmts (as : Array (stmt SourceRange)) : SpecAssertionM Unit := do
-  as.attach.forM fun ⟨b, _⟩ => blockStmt b
+  as.attach.forM fun ⟨b, _⟩ => do
+    blockStmt b
+    -- A loop's target outlives it, and so does what its body may have changed: an assert
+    -- after the loop reads the target's last value.
+    if let .For _ target _ _ _ _ := b then
+      recordRebound (collectBoundNames target {})
 termination_by sizeOf as
 decreasing_by decreasing_tactic
 
@@ -1494,10 +1754,20 @@ def collectAssertions (decls : ArgDecls) (_returnType : SpecType)
   let localTypes : Std.HashMap String SpecType :=
     (decls.args ++ decls.kwonly).foldl (init := ghostTypes) fun acc a =>
       acc.insert a.name a.type
+  let fileText := ((← (←read).fileMapsRef.get)[filePath]?.map (·.source)).getD ""
+  let moduleBound := (← get).moduleBound
+  let compileIsRe :=
+    ((← get).nameMap["compile"]? matches some .reCompile) && !moduleBound.contains "compile"
   let ctx : SpecAssertionContext :=
     { filePath
-      kwargs := decls.kwargs
-      localTypes }
+      -- The clause reader takes `kw["f"]` as field `f` of the annotation's type, for either
+      -- form. This is right only for `Unpack[T]`: for `**kw: T`, each `kw["f"]` is a whole `T`.
+      -- The IR translation's `checkKwargs` rejects `**kw: T` unless `T` is `Any`.
+      kwargs := decls.kwargs.map fun (n, k) => (n, k.type)
+      localTypes
+      fileText
+      compileIsRe
+      moduleBound }
   let ((), as) := action ctx { errors, warnings }
   modify fun s => { s with errors := as.errors, warnings := as.warnings }
   pure as
@@ -1518,12 +1788,24 @@ def translateContractValue? (role : SpecExprRole) (e : expr SourceRange)
     specWarningOfKind .pySpecDroppedAssertion e.ann "unsupported expression in contract; dropped"
   return if clean && !formula.containsPlaceholder then some formula else none
 
-/-- Translate a contract body and, when it translated, pass the result to
-    `store`; otherwise drop it (`transExpr` already emitted a diagnostic). -/
-def translateContractBody (role : SpecExprRole) (e : expr SourceRange)
+/-- Translate a contract body. When it translates faithfully, pass the result to `store`.
+    Otherwise record it as a dropped clause of kind `kind`. An unfaithful clause is still
+    stored, except an `@admit`, which is left out with a warning; for a clause that doesn't
+    translate, `transExpr` already emitted a diagnostic. -/
+def translateContractBody (role : SpecExprRole) (kind : DroppedKind) (e : expr SourceRange)
     (store : SpecExpr → SpecAssertionM Unit) : SpecAssertionM Unit := do
+  modify ({ · with unfaithful := false })
   if let some formula ← translateContractValue? role e then
-    store formula
+    -- A clause whose meaning differs from the source is recorded. It is still passed on, so
+    -- that ToLaurel's input doesn't change, unless it is an `@admit`: an admit is assumed
+    -- after each call, and leaving it out only weakens the model.
+    if (← get).unfaithful && kind == .admit then
+      specWarningOfKind .pySpecDroppedAssertion e.ann
+        "@admit dropped: PySpec can't read it faithfully, and leaving it out is sound"
+    else store formula
+    if (← get).unfaithful then recordDropped kind e.ann
+  else
+    recordDropped kind e.ann
 
 /-- Whether `s` is an `assert`, an `if` or a `for` statement, or nests one at any depth: in a
     block of a compound statement, an `except` handler or a `match` case, or in the body of a
@@ -1566,7 +1848,8 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
                        (arguments : arguments SourceRange)
                        (body : Array (stmt SourceRange))
                        (decorators : Array (expr SourceRange))
-                       (returns : Option (expr SourceRange)) : PySpecM FunctionDecl := do
+                       (returns : Option (expr SourceRange))
+                       (fieldAssigns : Bool := false) : PySpecM FunctionDecl := do
   let scheme := Native.methodScheme (Decorators.functionParamNames arguments)
   let mut overload : Bool := false
   let mut nativeBundle : Native.MethodBundle := scheme.init
@@ -1637,7 +1920,7 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
     usedNames := usedNames.insert ba.name
     kwSpecArgs := kwSpecArgs.push ba
   -- Handle **kwargs: store parameter name and type
-  let mut kwargsOpt : Option (String × SpecType) := none
+  let mut kwargsOpt : Option (String × KwargsType) := none
   match kwarg with
   | none => pure ()
   | some kwargArg =>
@@ -1645,9 +1928,21 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
     match kwargType with
     | some typeExpr =>
       let tp ← pySpecType typeExpr
-      kwargsOpt := some (kwargParamName, tp)
+      kwargsOpt := some (kwargParamName, .each tp)
+      -- `pySpecType` erases `Unpack`, so read it from the annotation itself: `Unpack[TD]`, or
+      -- `typing.Unpack[TD]` through a name that `import typing` binds.
+      let unpackName? : PySpecM (Option String) := do
+        match typeExpr with
+        | .Subscript _ (.Name _ ⟨_, n⟩ (.Load _)) _ _ => return some n
+        | .Subscript _ (.Attribute _ (.Name _ ⟨_, m⟩ (.Load _)) ⟨_, a⟩ (.Load _)) _ _ =>
+          return if (← get).typingModules.contains m then some s!"{m}.{a}" else none
+        | _ => return none
+      if let some n ← unpackName? then
+        if let some .typingUnpack ← getNameValue? n then
+          kwargsOpt := some (kwargParamName, .unpacked tp)
     | none => specError kwargLoc s!"**kwargs requires type annotation"
-  let argDecls : ArgDecls := { args := specArgs, kwonly := kwSpecArgs, kwargs := kwargsOpt }
+  let argDecls : ArgDecls :=
+    { args := specArgs, kwonly := kwSpecArgs, kwargs := kwargsOpt }
   let returnType : SpecType ←
         match returns with
         | none => pure <| .ident fnLoc .typingAny
@@ -1670,29 +1965,37 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
           | none => funName
         specError fnLoc s!"{qualName}: an @overload stub cannot have assert, if or for \
           statements"
-      -- Overload stubs should have `...` as their only body statement. The body of an
-      -- `__init__` stub that only assigns fields comes without them, and so is empty.
-      unless body.isEmpty || (body.size = 1 &&
-             body[0]! matches .Expr _ (.Constant _ (.ConEllipsis _) _)) do
+      -- Overload stubs should have `...` as their only body statement, besides the field
+      -- assignments of an `__init__` stub.
+      let stubBody := if fieldAssigns then body.filter (!· matches .Assign ..) else body
+      unless (fieldAssigns && stubBody.isEmpty) || (stubBody.size = 1 &&
+             stubBody[0]! matches .Expr _ (.Constant _ (.ConEllipsis _) _)) do
         specWarning fnLoc "overload body is not `...`"
-    else
-      body.forM blockStmt
-    let pushBodies (role : SpecExprRole) (bodies : Array (expr SourceRange))
+    -- With `fieldAssigns`, the caller reads the top-level assignments as fields and warns on
+    -- the others; each can still change what a later assert means, so it taints the function.
+    else if fieldAssigns then
+      for s in body do
+        if s matches .Assign .. then modify ({ · with tainted := true })
+        else blockStmts #[s]
+    else blockStmts body
+    let pushBodies (role : SpecExprRole) (kind : DroppedKind) (bodies : Array (expr SourceRange))
         (store : SpecExpr → SpecAssertionState → SpecAssertionState) : SpecAssertionM Unit :=
       bodies.forM fun body =>
-        translateContractBody role body fun f => modify (store f)
-    pushBodies .preState nativeBundle.requires fun f s =>
+        translateContractBody role kind body fun f => modify (store f)
+    pushBodies .preState .requires nativeBundle.requires fun f s =>
       { s with assertions := s.assertions.push { message := #[], formula := f } }
     -- Both post-state forms bind `result` and admit generic `OLD(expr)` reads,
     -- so they share one wrapper that binds `result` in scope.
     withReader (fun ctx => { ctx with
         localTypes := ctx.localTypes.insert Native.resultBinder returnType }) <| do
-      pushBodies .postState nativeBundle.ensures fun f s =>
+      pushBodies .postState .ensures nativeBundle.ensures fun f s =>
         { s with postconditions := s.postconditions.push f }
-      pushBodies .postState nativeBundle.admitted fun f s =>
+      pushBodies .postState .admit nativeBundle.admitted fun f s =>
         { s with admittedPostconditions := s.admittedPostconditions.push f }
-    pushBodies .frame nativeBundle.modifies fun f s =>
+    pushBodies .frame .modifies nativeBundle.modifies fun f s =>
       { s with modifies := s.modifies.push f }
+    for (kind, loc) in nativeBundle.extra do
+      recordDropped kind loc
     for (g, gtype) in ghostsWithTypes do
       let ginit : Option SpecExpr ←
         match g.init with
@@ -1713,6 +2016,7 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
     admittedPostconditions := as.admittedPostconditions
     modifies := as.modifies
     ghosts := as.ghosts
+    dropped := as.dropped
   }
 
 /-- Resolve an array of base class expressions into PythonIdents. -/
@@ -1737,10 +2041,30 @@ private def resolveBaseClasses (bases : Array (expr SourceRange))
     | _ => specError base.ann s!"Unsupported base class expression"
   return result
 
+/-- A class's decorators: whether `@exhaustive` is among them, and its `@invariant`s.
+    `@exhaustive` is a bare structural marker; `@invariant(lambda b: …)` goes to the native
+    class scheme. Everything else is an error. -/
+def classDecorators (decorators : Array (expr SourceRange)) :
+    PySpecM (Bool × Native.ClassBundle) := do
+  let classScheme := Native.classScheme
+  let mut isExhaustive := false
+  let mut classBundle : Native.ClassBundle := classScheme.init
+  for cd in decorators do
+    match Decorators.DecoratorForm.ofExpr? cd with
+    | none => specError cd.ann "Unsupported class decorator expression."
+    | some form =>
+      if !form.isCall && form.name == "exhaustive" && form.qualifier == none then
+        isExhaustive := true
+      else
+        match ← classScheme.absorb form classBundle with
+        | some b => classBundle := b
+        | none => specError cd.ann s!"Class decorator @{form.display} not supported."
+  return (isExhaustive, classBundle)
+
 partial def pySpecClassBody (loc : SourceRange) (className : String)
     (bases : Array PythonIdent)
     (body : Array (stmt StrataDDM.SourceRange))
-    (classInvariants : Array (expr SourceRange) := #[]) : PySpecM ClassDef := do
+    (classInvariants : Array Native.RawInvariant := #[]) : PySpecM ClassDef := do
   let mut usedNames : Std.HashSet String := {}
   let mut fields : Array ClassField := #[]
   -- The class of each field that an `__init__` assignment declares.
@@ -1766,14 +2090,11 @@ partial def pySpecClassBody (loc : SourceRange) (className : String)
       if innerTypeParams.size > 0 then
         specError innerLoc s!"{innerClassName}: type parameters are not supported"
         continue
-      -- A nested class gets none of the class decorators, `@exhaustive` and `@invariant`
-      -- included, so each one would be dropped.
-      if innerDecorators.size > 0 then
-        specError innerLoc s!"{innerClassName}: decorators on a nested class are not supported"
-        continue
+      let (innerExhaustive, innerBundle) ← classDecorators innerDecorators
       let innerBaseIdents ← resolveBaseClasses innerBases
       let innerDef ← pySpecClassBody innerLoc innerClassName innerBaseIdents innerStmts
-      subclasses := subclasses.push innerDef
+        innerBundle.invariants
+      subclasses := subclasses.push { innerDef with exhaustive := innerExhaustive }
     | .Assign _ ⟨_, targets⟩ value _typeAnn =>
       if h : targets.size = 1 then
         match targets[0], value with
@@ -1828,9 +2149,8 @@ partial def pySpecClassBody (loc : SourceRange) (className : String)
           | _ => pure ()
       -- `__init__` is read like any other method, except for its top-level assignments:
       -- the loop above reads each `self.f = self._C()` as a field and warns on the others.
-      let contractBody := if isInit then body.filter (!· matches .Assign ..) else body
       let d ← pySpecFunctionArgs (className := some className) loc name args
-                                 contractBody decorators returns
+                                 body decorators returns (fieldAssigns := isInit)
       -- A class defines each method name at most once without `@overload`; it may
       -- have any number of `@overload` stubs of that name.
       unless d.isOverload do
@@ -1844,11 +2164,15 @@ partial def pySpecClassBody (loc : SourceRange) (className : String)
   -- field access on, so `self.<field>` becomes a `getIndex` read.
   let invSt ← collectAssertions { args := #[], kwonly := #[] }
       (.ident loc .typingAny) <| do
-    for invBody in classInvariants do
-      translateContractBody .invariant invBody fun formula =>
-        modify fun s => { s with
-          assertions := s.assertions.push { message := #[], formula } }
-  let invariants := invSt.assertions.map (·.formula)
+    for inv in classInvariants do
+      modify ({ · with unfaithful := false })
+      let formula ← translateContractValue? .invariant inv.body
+      -- An invariant that PySpec reads unfaithfully is kept as its source text alone.
+      let formula := if (← get).unfaithful then none else formula
+      let source ← sourceText inv.lambdaLoc
+      let entry : ClassInvariant := { source, binder := inv.binder, formula, loc := inv.lambdaLoc }
+      modify fun s => { s with invariants := s.invariants.push entry }
+  let invariants := invSt.invariants
   return {
     loc := loc
     name := className
@@ -1960,74 +2284,6 @@ private def importDelta (before : Std.HashMap String SpecValue)
       if let some v := after[n]? then
         caps := caps.push (n, v)
   return caps
-
-/-- Names bound by an assignment target, including nested patterns. -/
-private partial def collectBoundNames (t : expr StrataDDM.SourceRange)
-    (acc : Std.HashSet String) : Std.HashSet String :=
-  match t with
-  | .Name _ ⟨_, n⟩ _ => acc.insert n
-  | .Tuple _ ⟨_, elts⟩ _ | .List _ ⟨_, elts⟩ _ =>
-    elts.foldl (init := acc) fun a e => collectBoundNames e a
-  | .Starred _ inner _ => collectBoundNames inner acc
-  | _ => acc
-
-/-- Names bound in the enclosing scope by walrus targets (PEP 572);
-    lambda bodies are not descended. -/
-private partial def collectWalrusNames (e : expr StrataDDM.SourceRange)
-    (acc : Std.HashSet String) : Std.HashSet String :=
-  let comps (gens : Array (comprehension StrataDDM.SourceRange))
-      (acc : Std.HashSet String) : Std.HashSet String :=
-    gens.foldl (init := acc) fun a g =>
-      match g with
-      | .mk_comprehension _ _ iter ⟨_, ifs⟩ _ =>
-        ifs.foldl (init := collectWalrusNames iter a) fun a e => collectWalrusNames e a
-  match e with
-  | .NamedExpr _ target value =>
-    collectWalrusNames value (collectBoundNames target acc)
-  | .Lambda .. | .Name .. | .Constant .. => acc
-  | .BinOp _ l _ r => collectWalrusNames r (collectWalrusNames l acc)
-  | .BoolOp _ _ ⟨_, values⟩ =>
-    values.foldl (init := acc) fun a e => collectWalrusNames e a
-  | .UnaryOp _ _ operand => collectWalrusNames operand acc
-  | .IfExp _ test body orelse =>
-    collectWalrusNames orelse (collectWalrusNames body (collectWalrusNames test acc))
-  | .Compare _ left _ ⟨_, comparators⟩ =>
-    comparators.foldl (init := collectWalrusNames left acc) fun a e => collectWalrusNames e a
-  | .Call _ func ⟨_, args⟩ ⟨_, kwargs⟩ =>
-    let a := collectWalrusNames func acc
-    let a := args.foldl (init := a) fun a e => collectWalrusNames e a
-    kwargs.foldl (init := a) fun a kw => collectWalrusNames kw.value a
-  | .Dict _ ⟨_, keys⟩ ⟨_, values⟩ =>
-    let a := keys.foldl (init := acc) fun a k =>
-      match k with
-      | .some_expr _ e => collectWalrusNames e a
-      | .missing_expr _ => a
-    values.foldl (init := a) fun a e => collectWalrusNames e a
-  | .Set _ ⟨_, elts⟩ | .Tuple _ ⟨_, elts⟩ _ | .List _ ⟨_, elts⟩ _ =>
-    elts.foldl (init := acc) fun a e => collectWalrusNames e a
-  | .ListComp _ elt ⟨_, gens⟩ | .SetComp _ elt ⟨_, gens⟩ | .GeneratorExp _ elt ⟨_, gens⟩ =>
-    comps gens (collectWalrusNames elt acc)
-  | .DictComp _ key value ⟨_, gens⟩ =>
-    comps gens (collectWalrusNames value (collectWalrusNames key acc))
-  | .Await _ inner | .YieldFrom _ inner => collectWalrusNames inner acc
-  | .Yield _ ⟨_, value⟩ =>
-    value.elim acc (collectWalrusNames · acc)
-  | .FormattedValue _ value _ ⟨_, fmtSpec⟩ =>
-    let a := collectWalrusNames value acc
-    fmtSpec.elim a (collectWalrusNames · a)
-  | .Interpolation _ value _ _ ⟨_, fmtSpec⟩ =>
-    let a := collectWalrusNames value acc
-    fmtSpec.elim a (collectWalrusNames · a)
-  | .JoinedStr _ ⟨_, values⟩ | .TemplateStr _ ⟨_, values⟩ =>
-    values.foldl (init := acc) fun a e => collectWalrusNames e a
-  | .Subscript _ obj slice _ =>
-    collectWalrusNames slice (collectWalrusNames obj acc)
-  | .Attribute _ obj _ _ => collectWalrusNames obj acc
-  | .Starred _ inner _ => collectWalrusNames inner acc
-  | .Slice _ ⟨_, lower⟩ ⟨_, upper⟩ ⟨_, step⟩ =>
-    let a := lower.elim acc (collectWalrusNames · acc)
-    let a := upper.elim a (collectWalrusNames · a)
-    step.elim a (collectWalrusNames · a)
 
 /-- The names that the statement `s` binds in its scope: its imports' names, a `def` or
 `class` name, assignment targets, walrus targets, and the target of an annotated assignment
@@ -2304,6 +2560,8 @@ private partial def preScanModule (body : Array (stmt StrataDDM.SourceRange)) :
   let mut importBinds : Std.HashMap Nat (Array (String × SpecValue)) := {}
   let mut importSigs : Std.HashMap Nat (Array Signature) := {}
   let mut shadowedGhosts : Std.HashSet Nat := {}
+  -- Whether a statement other than `from re import compile` binds `compile`.
+  let mut compileOther := false
   for h : i in [0:body.size] do
     let stmt := body[i]
     match stmt with
@@ -2321,6 +2579,7 @@ private partial def preScanModule (body : Array (stmt StrataDDM.SourceRange)) :
       for bare in explicit do
         boundNames := boundNames.insert bare
         ghostScope := ghostScope.erase bare
+      if explicit.contains "compile" then compileOther := true
     | .ImportFrom loc ⟨_, pyModule⟩ ⟨_, names⟩ ⟨_, level⟩ =>
       let before := (←get).nameMap
       let sigsBefore := (←get).elements.size
@@ -2331,20 +2590,27 @@ private partial def preScanModule (body : Array (stmt StrataDDM.SourceRange)) :
       for a in names do
         boundNames := boundNames.insert (a.asname.getD a.name)
         ghostScope := ghostScope.erase (a.asname.getD a.name)
+        if a.asname.getD a.name == "compile" &&
+            !(pyModule.map (·.val) == some "re" && a.name == "compile" &&
+              (level.map (·.value)).getD 0 == 0) then
+          compileOther := true
     | .ClassDef loc ⟨_, className⟩ _ _ _ _ _ =>
       boundNames := boundNames.insert className
+      if className == "compile" then compileOther := true
       ghostScope := ghostScope.erase className
       unless ← shouldSkip className do
         ghostScope := ghostScope.insert className
           (.typeValue (.ident loc ((← read).currentModule.mkIdent className) #[]))
     | .FunctionDef _ ⟨_, funName⟩ .. =>
       boundNames := boundNames.insert funName
+      if funName == "compile" then compileOther := true
       ghostScope := ghostScope.erase funName
     | .Assign _ ⟨_, targets⟩ value _ =>
       let assignBound := targets.foldl (init := (∅ : Std.HashSet String)) fun acc t =>
         collectBoundNames t acc
       let assignBound := collectWalrusNames value assignBound
       boundNames := assignBound.fold (init := boundNames) fun s n => s.insert n
+      if assignBound.contains "compile" then compileOther := true
       -- Rebinding drops the scratch binding first.
       ghostScope := assignBound.fold (init := ghostScope) fun m n => m.erase n
       if let #[.Name _ ⟨_, name⟩ _] := targets then
@@ -2368,8 +2634,11 @@ private partial def preScanModule (body : Array (stmt StrataDDM.SourceRange)) :
       -- A walrus target binds at module scope.
       let walrusBound := collectWalrusNames value {}
       boundNames := walrusBound.fold (init := boundNames) fun s n => s.insert n
+      if walrusBound.contains "compile" then compileOther := true
       ghostScope := walrusBound.fold (init := ghostScope) fun m n => m.erase n
     | _ => pure ()
+  modify fun s => { s with
+    moduleBound := if compileOther then boundNames else boundNames.erase "compile" }
   return (importBinds, importSigs, shadowedGhosts)
 
 partial def translate (body : Array (stmt StrataDDM.SourceRange)) : PySpecM Unit := do
@@ -2460,21 +2729,7 @@ partial def translate (body : Array (stmt StrataDDM.SourceRange)) : PySpecM Unit
       if typeParams.size > 0 then
         specError loc s!"{className}: type parameters are not supported"
         continue
-      -- `@exhaustive` is a bare structural marker; `@invariant(lambda self: …)`
-      -- goes to the native class scheme. Everything else is unsupported.
-      let classScheme := Native.classScheme
-      let mut isExhaustive := false
-      let mut classBundle : Native.ClassBundle := classScheme.init
-      for cd in decorators do
-        match Decorators.DecoratorForm.ofExpr? cd with
-        | none => specError cd.ann "Unsupported class decorator expression."
-        | some form =>
-          if !form.isCall && form.name == "exhaustive" && form.qualifier == none then
-            isExhaustive := true
-          else
-            match ← classScheme.absorb form classBundle with
-            | some b => classBundle := b
-            | none => specError cd.ann s!"Class decorator @{form.display} not supported."
+      let (isExhaustive, classBundle) ← classDecorators decorators
       let baseIdents ← resolveBaseClasses bases
       let (success, _) ← runChecked <| recordTypeDef loc className
       -- Add the class to nameMap so it can be used in forward references

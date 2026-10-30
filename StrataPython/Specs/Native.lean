@@ -53,6 +53,9 @@ public structure MethodBundle where
   modifies : Array (expr SourceRange) := #[]
   /-- `@ghost(name="g", …)` declarations. -/
   ghosts : Array RawGhost := #[]
+  /-- The lambdas after a decorator's first, which PySpec doesn't read, with the kind of
+      clause each would be. -/
+  extra : Array (DroppedKind × SourceRange) := #[]
 deriving Inhabited
 
 /-! ## Recognition scheme -/
@@ -65,7 +68,7 @@ public def resultBinder : String := StrataPython.Specs.resultBinder
     lambda binder outside `allowed`, then hand the body to `push`. Common shape of
     `@requires`/`@ensures`/`@modifies`. -/
 private def absorbLambda {m : Type → Type} [Monad m] [PySpecMClass m]
-    (label : String) (allowed : Array String) (form : DecoratorForm)
+    (label : String) (kind : DroppedKind) (allowed : Array String) (form : DecoratorForm)
     (args : Array (expr SourceRange)) (bundle : MethodBundle)
     (push : expr SourceRange → MethodBundle) : m (Option MethodBundle) := do
   let some (body, binders) ← expectLambda? specError label form.loc args
@@ -73,7 +76,12 @@ private def absorbLambda {m : Type → Type} [Monad m] [PySpecMClass m]
   reportUnexpectedKeywords specError label #[] form.kwargs
   warnUnknownBinders form.loc binders allowed fun n =>
     s!"{label}: lambda parameter '{n}' is unbound at the use site"
-  return some (push body)
+  let b := push body
+  -- Each extra lambda is recorded by its body, as an untranslated clause is.
+  let extra := (args.extract 1).map fun a => match a with
+    | .Lambda _ _ body => (kind, body.ann)
+    | _ => (kind, a.ann)
+  return some { b with extra := b.extra ++ extra }
 
 /-- Read a required string-literal `name=` and check it against `existing`. Returns
     `none` (declining to add anything) on an absent name or a duplicate; the
@@ -118,16 +126,16 @@ public def methodScheme {m : Type → Type} [Monad m] [PySpecMClass m]
     let args := form.args.getD #[]
     match form.name with
     | "requires" =>
-      absorbLambda "@requires" validParams form args bundle fun body =>
+      absorbLambda "@requires" .requires validParams form args bundle fun body =>
         { bundle with requires := bundle.requires.push body }
     | "ensures" =>
-      absorbLambda "@ensures" (validParams.push resultBinder) form args bundle fun body =>
+      absorbLambda "@ensures" .ensures (validParams.push resultBinder) form args bundle fun body =>
         { bundle with ensures := bundle.ensures.push body }
     | "admit" =>
-      absorbLambda "@admit" (validParams.push resultBinder) form args bundle fun body =>
+      absorbLambda "@admit" .admit (validParams.push resultBinder) form args bundle fun body =>
         { bundle with admitted := bundle.admitted.push body }
     | "modifies" =>
-      absorbLambda "@modifies" validParams form args bundle fun body =>
+      absorbLambda "@modifies" .modifies validParams form args bundle fun body =>
         { bundle with modifies := bundle.modifies.push body }
     | "ghost" =>
       let some raw ← parseGhostForm? "@ghost" form (bundle.ghosts.map (·.name))
@@ -140,36 +148,43 @@ public def methodScheme {m : Type → Type} [Monad m] [PySpecMClass m]
     | _ =>
       return none
 
-/-- The sole binder permitted on an `@invariant` lambda. -/
-public def selfBinder : String := "self"
+/-- An `@invariant(lambda b: pred)` before `pred` is translated: the lambda's body, its one
+    parameter `b`, which stands for the instance, and the lambda's source range. -/
+public structure RawInvariant where
+  body : expr SourceRange
+  binder : String
+  lambdaLoc : SourceRange
+deriving Inhabited
 
 /-- Native contract decorators recognized on a class (currently invariants),
     with predicate lambda bodies still as raw Python expressions. -/
 public structure ClassBundle where
-  /-- `@invariant(lambda self: pred)` lambda bodies. -/
-  invariants : Array (expr SourceRange) := #[]
+  /-- `@invariant(lambda b: pred)` lambdas, top to bottom. -/
+  invariants : Array RawInvariant := #[]
 deriving Inhabited
 
-/-- The `DecoratorScheme` for `@invariant(lambda self: …)` on a class. The lambda
-    must take exactly one `self` binder. Declines anything else (e.g.
-    `@exhaustive`) so the caller's existing handling applies. -/
+/-- The `DecoratorScheme` for `@invariant(lambda b: …)` on a class. The lambda must take
+    exactly one parameter, whatever its name; any other lambda is an error. Declines
+    anything else (e.g. `@exhaustive`) so the caller's existing handling applies. -/
 public def classScheme {m : Type → Type} [Monad m] [PySpecMClass m]
     : DecoratorScheme m ClassBundle where
   init := {}
   absorb form bundle := do
     unless form.qualifier == none && form.isCall && form.name == "invariant" do
       return none
-    let some (body, binders) ← expectLambda? specError "@invariant" form.loc (form.args.getD #[])
+    let args := form.args.getD #[]
+    if args.size > 1 then
+      specError form.loc "@invariant: takes one lambda; write one decorator per invariant"
+      return some bundle
+    let some (body, binders) ← expectLambda? specError "@invariant" form.loc args
       | return some bundle
     reportUnexpectedKeywords specError "@invariant" #[] form.kwargs
     match binders with
     | #[b] =>
-      if b == selfBinder then
-        return some { bundle with invariants := bundle.invariants.push body }
-      specWarning form.loc s!"@invariant: lambda binder must be '{selfBinder}', got '{b}'; invariant skipped"
-      return some bundle
+      let lambdaLoc := (args[0]?.map (·.ann)).getD form.loc
+      return some { bundle with invariants := bundle.invariants.push { body, binder := b, lambdaLoc } }
     | _ =>
-      specWarning form.loc s!"@invariant: lambda must take exactly one '{selfBinder}' parameter; invariant skipped"
+      specError form.loc s!"@invariant: the lambda must take exactly one parameter, the instance; it takes {binders.size}"
       return some bundle
 
 end StrataPython.Specs.Native

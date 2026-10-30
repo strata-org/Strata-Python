@@ -122,7 +122,7 @@ private def funcDeclToFunctionDecl (name : String) (args : Specs.ArgDecls)
     : Except String PythonFunctionDecl := do
   let kwargsName := match args.kwargs with
     | some (kwargsName, kwargsType) =>
-      if kwargsType.isTypedDict then some kwargsName else none
+      if kwargsType.type.isTypedDict then some kwargsName else none
     | none => none
   let allArgs := args.args ++ args.kwonly
   pure {

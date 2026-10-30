@@ -13,6 +13,7 @@
 # dict items/keys/values, a guarded (`if`) quantifier, and existentials over a
 # list and over dict items.
 from typing import Any, TypedDict, Required, NotRequired, Unpack, List, Dict
+from re import compile
 
 PutItemRequest = TypedDict('PutItemRequest', {
     'Bucket': Required[str],

@@ -575,7 +575,7 @@ private def ghostShadowedByParamTest : IO Unit := do
     mention of its name in a contract reads the same-named module ghost, and
     only the kwargs dict name itself shadows. -/
 private def ghostKwargsFieldReadsGhostTest : IO Unit := do
-  let kwargs := some ("kw",
+  let kwargs := some ("kw", KwargsType.unpacked <|
     SpecType.typedDict loc #["g"] #[SpecType.ident loc .builtinsInt] #[true])
   let fn (pre : SpecExpr) : Signature :=
     .functionDecl {

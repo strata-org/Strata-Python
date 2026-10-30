@@ -510,10 +510,26 @@ structure Arg where
   default : Option SpecDefault := none
 deriving Inhabited
 
+/-- The annotation of a `**kwargs` parameter. -/
+inductive KwargsType where
+  /-- `**kw: T`: `T` is the type of each keyword argument's value. -/
+  | each (type : SpecType)
+  /-- `**kw: Unpack[T]`: `T` describes the keyword arguments together. -/
+  | unpacked (type : SpecType)
+deriving Inhabited
+
+namespace KwargsType
+
+/-- The annotation's type, without telling the two readings apart. -/
+def type : KwargsType → SpecType
+  | .each t | .unpacked t => t
+
+end KwargsType
+
 structure ArgDecls where
   args : Array Arg
   kwonly : Array Arg
-  kwargs : Option (String × SpecType) := none
+  kwargs : Option (String × KwargsType) := none
 deriving Inhabited
 
 namespace ArgDecls
@@ -916,7 +932,10 @@ def SpecExpr.softBEq : SpecExpr → SpecExpr → Bool
 
 inductive MessagePart where
 | str (s : String)
-| expr (e : SpecExpr)
+/-- An f-string part `{e}`, with `source` its text as written. -/
+| expr (e : SpecExpr) (source : String := "")
+/-- An f-string part whose expression doesn't translate, with its text as written. -/
+| untranslated (source : String)
 deriving Inhabited
 
 structure Assertion where
@@ -933,6 +952,56 @@ structure Ghost where
   type : Option SpecType := none
   init : Option SpecExpr := none
   loc : SourceRange
+deriving Inhabited
+
+/-- The kind of a clause that PySpec could not read faithfully. -/
+inductive DroppedKind where
+  /-- An `assert` in the function's body. -/
+  | «assert»
+  | requires
+  | ensures
+  | admit
+  | modifies
+deriving Inhabited, Repr, DecidableEq, BEq
+
+/-- Stable serialization tag for `DroppedKind`. -/
+@[expose] def DroppedKind.tag : DroppedKind → String
+  | .assert => "assert"
+  | .requires => "requires"
+  | .ensures => "ensures"
+  | .admit => "admit"
+  | .modifies => "modifies"
+
+/-- Parse a `DroppedKind.tag` back into a `DroppedKind`. -/
+@[expose] def DroppedKind.ofTag? : String → Option DroppedKind
+  | "assert" => some .assert
+  | "requires" => some .requires
+  | "ensures" => some .ensures
+  | "admit" => some .admit
+  | "modifies" => some .modifies
+  | _ => none
+
+/-- A clause that PySpec could not read faithfully, with its source text as written: one that
+    it couldn't translate, which it drops; an `assert` whose meaning depends on something
+    PySpec doesn't read, such as an `if` condition that doesn't translate or a statement
+    before it that PySpec skips; or a clause that calls a builtin in a way that means something
+    else in CPython, such as `len(s, x=1)` or `len(s)` where `len` is a parameter. A clause of
+    the last two kinds, other than an `@admit`, is also kept where it belongs (a precondition,
+    a postcondition or a `@modifies` target), where its meaning differs from the source's. -/
+structure DroppedClause where
+  kind : DroppedKind
+  source : String
+  loc : SourceRange := .none
+deriving Inhabited
+
+/-- A class invariant from `@invariant(lambda b: P)`: the lambda's source text as written, its
+    parameter `b`, which stands for the instance, and `P` translated, if it translates and
+    PySpec reads it faithfully. -/
+structure ClassInvariant where
+  source : String
+  binder : String
+  formula : Option SpecExpr
+  loc : SourceRange := .none
 deriving Inhabited
 
 /-- Contract lambdas' return binder; reserved. -/
@@ -958,6 +1027,12 @@ structure FunctionDecl where
   /-- Spec-only ghost variables declared by `@ghost`. Recognized +
       round-tripped; lowering is deferred. -/
   ghosts : Array Ghost := #[]
+  /-- The clauses that PySpec could not read faithfully: the body's asserts, in source order,
+      then the decorators' clauses: `@requires`, `@ensures`, `@admit`, `@modifies`, and then
+      the extra lambdas. A clause's source text is its
+      expression, a lambda's body. A clause recorded here may also be kept in its own clause, but
+      there its meaning differs from the source's. -/
+  dropped : Array DroppedClause := #[]
 deriving Inhabited
 
 structure ClassField where
@@ -984,11 +1059,9 @@ structure ClassDef where
       Calls to unlisted methods are flagged as "Unknown method".
       Set via `@exhaustive` decorator on the pyspec class body. -/
   exhaustive : Bool := false
-  /-- Class invariants from `@invariant(lambda self: …)` decorators, translated
-      to `SpecExpr` via the assertion translator (`self.<field>` reads become
-      `getIndex`). Recognized and round-tripped; enforcement lowering (asserting
-      each invariant on method entry/exit) is deferred. -/
-  invariants : Array SpecExpr := #[]
+  /-- Class invariants from `@invariant` decorators, top to bottom. The translated
+      condition reads `b.<field>` as `getIndex`, with `b` the lambda's parameter. -/
+  invariants : Array ClassInvariant := #[]
 deriving Inhabited
 
 structure TypeDef where

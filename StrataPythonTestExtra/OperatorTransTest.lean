@@ -35,14 +35,14 @@ function "arithmetic"{
   ]
   kwonly: [
   ]
-  kwargs: kw : dict(
+  kwargs: kw : Unpack[dict(
     a : ident("builtins.int") [required=true]
     b : ident("builtins.int") [required=true]
     c : ident("builtins.int") [required=true]
     score : ident("builtins.float") [required=true]
     items : ident("typing.List", ident("builtins.int")) [required=true]
     flag1 : ident("builtins.bool") [required=true]
-    flag2 : ident("builtins.bool") [required=true])
+    flag2 : ident("builtins.bool") [required=true])]
   return: ident("_types.NoneType")
   overload: false
   preconditions: [
@@ -62,14 +62,14 @@ function "comparisons"{
   ]
   kwonly: [
   ]
-  kwargs: kw : dict(
+  kwargs: kw : Unpack[dict(
     a : ident("builtins.int") [required=true]
     b : ident("builtins.int") [required=true]
     c : ident("builtins.int") [required=true]
     score : ident("builtins.float") [required=true]
     items : ident("typing.List", ident("builtins.int")) [required=true]
     flag1 : ident("builtins.bool") [required=true]
-    flag2 : ident("builtins.bool") [required=true])
+    flag2 : ident("builtins.bool") [required=true])]
   return: ident("_types.NoneType")
   overload: false
   preconditions: [
@@ -92,14 +92,14 @@ function "identity"{
   ]
   kwonly: [
   ]
-  kwargs: kw : dict(
+  kwargs: kw : Unpack[dict(
     a : ident("builtins.int") [required=true]
     b : ident("builtins.int") [required=true]
     c : ident("builtins.int") [required=true]
     score : ident("builtins.float") [required=true]
     items : ident("typing.List", ident("builtins.int")) [required=true]
     flag1 : ident("builtins.bool") [required=true]
-    flag2 : ident("builtins.bool") [required=true])
+    flag2 : ident("builtins.bool") [required=true])]
   return: ident("_types.NoneType")
   overload: false
   preconditions: [
@@ -114,14 +114,14 @@ function "boolean"{
   ]
   kwonly: [
   ]
-  kwargs: kw : dict(
+  kwargs: kw : Unpack[dict(
     a : ident("builtins.int") [required=true]
     b : ident("builtins.int") [required=true]
     c : ident("builtins.int") [required=true]
     score : ident("builtins.float") [required=true]
     items : ident("typing.List", ident("builtins.int")) [required=true]
     flag1 : ident("builtins.bool") [required=true]
-    flag2 : ident("builtins.bool") [required=true])
+    flag2 : ident("builtins.bool") [required=true])]
   return: ident("_types.NoneType")
   overload: false
   preconditions: [

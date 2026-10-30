@@ -1,5 +1,5 @@
-# @invariant lambda binder must be `self`; a differently-named binder is warned
-# and the invariant is skipped.
+# An @invariant lambda with one parameter not named `self` is accepted; the parameter
+# stands for the instance.
 @invariant(lambda s: s.x >= 0)
 class C:
     x: int

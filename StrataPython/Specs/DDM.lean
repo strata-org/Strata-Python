@@ -67,6 +67,8 @@ op mkArgDecl (name : Ident, argType : SpecType, argDefault : Option SpecDefault)
 category KwargsDecl;
 op mkKwargsDecl(name : Ident, kwargsType : SpecType) : KwargsDecl =>
   "kwargs" ": " name " : " kwargsType "\n";
+op mkUnpackKwargsDecl(name : Ident, kwargsType : SpecType) : KwargsDecl =>
+  "kwargs" ": " name " : " "Unpack" "[" kwargsType "]" "\n";
 
 category SpecExprDecl;
 op placeholderExpr() : SpecExprDecl => "placeholder";
@@ -147,6 +149,9 @@ op existsDictExpr(dict : SpecExprDecl, keyVar : Ident,
 category MessagePart;
 op strMessagePart(s : Str) : MessagePart => s;
 op exprMessagePart(e : SpecExprDecl) : MessagePart => "{" e "}";
+op exprSourceMessagePart(e : SpecExprDecl, source : Str) : MessagePart =>
+  "{" e " from " source "}";
+op sourceMessagePart(source : Str) : MessagePart => "{" "untranslated " source "}";
 
 category Assertion;
 op mkAssertion(formula : SpecExprDecl, message : Seq MessagePart) : Assertion =>
@@ -157,6 +162,11 @@ op mkPostconditionEntry(expr : SpecExprDecl) : PostconditionEntry =>
   expr "\n";
 op mkAdmittedPostconditionEntry(expr : SpecExprDecl) : PostconditionEntry =>
   "admitted " expr "\n";
+op mkDroppedEntry(kind : Str, source : Str) : PostconditionEntry =>
+  "dropped " kind " " source "\n";
+op mkInvariantEntry(source : Str, binder : Str, formula : Option SpecExprDecl) :
+    PostconditionEntry =>
+  "invariant " binder " " source " " formula "\n";
 
 category SnapshotDecl;
 op mkSnapshotDecl(name : Str, capture : SpecExprDecl) : SnapshotDecl =>
@@ -249,6 +259,7 @@ op functionDecl (decl : FunDecl) : Command => decl;
 op typeDef (name : Str, definition : SpecType) : Command =>
   "type " name " = " definition "\n";
 op moduleGhostDecl (decl : GhostDecl) : Command => decl;
+op pyspecFormat (version : Num) : Command => "format " version ";\n";
 #end
 
 #strata_gen PythonSpecs
@@ -417,7 +428,8 @@ end SpecExpr
 def MessagePart.toDDM (p : MessagePart) : DDM.MessagePart SourceRange :=
   match p with
   | .str s => .strMessagePart .none ⟨.none, s⟩
-  | .expr e => .exprMessagePart .none e.toDDM
+  | .expr e source => .exprSourceMessagePart .none e.toDDM ⟨.none, source⟩
+  | .untranslated source => .sourceMessagePart .none ⟨.none, source⟩
 
 def Assertion.toDDM (a : Assertion) : DDM.Assertion SourceRange :=
   .mkAssertion .none a.formula.toDDM ⟨.none, a.message.map (·.toDDM)⟩
@@ -440,16 +452,18 @@ def FunctionDecl.toDDM (d : FunctionDecl) : DDM.FunDecl SourceRange :=
     (kwonly := ⟨.none, d.args.kwonly.map (·.toDDM)⟩)
     (kwargs := ⟨.none, match d.args.kwargs with
       | none => none
-      | some (name, tp) =>
-        some (.mkKwargsDecl .none ⟨.none, name⟩ tp.toDDM)⟩)
+      | some (name, .unpacked tp) => some (.mkUnpackKwargsDecl .none ⟨.none, name⟩ tp.toDDM)
+      | some (name, .each tp) => some (.mkKwargsDecl .none ⟨.none, name⟩ tp.toDDM)⟩)
     (returnType := d.returnType.toDDM)
     (isOverload := ⟨.none, d.isOverload⟩)
     (preconditions := ⟨.none, d.preconditions.map (·.toDDM)⟩)
     (postconditions := ⟨.none,
       (d.postconditions.map fun e =>
         (.mkPostconditionEntry .none e.toDDM : DDM.PostconditionEntry SourceRange))
-      ++ d.admittedPostconditions.map fun e =>
-        .mkAdmittedPostconditionEntry .none e.toDDM⟩)
+      ++ d.admittedPostconditions.map (fun e =>
+        .mkAdmittedPostconditionEntry .none e.toDDM)
+      ++ d.dropped.map fun c =>
+        .mkDroppedEntry c.loc ⟨.none, c.kind.tag⟩ ⟨.none, c.source⟩⟩)
     (snapshots := ⟨.none, none⟩)
     (modifiesClause := ⟨.none,
       if d.modifies.isEmpty then none
@@ -473,7 +487,9 @@ partial def ClassDef.toDDMDecl (d : ClassDef) : DDM.ClassDecl SourceRange :=
     ⟨.none, d.exhaustive⟩
     ⟨.none,
       if d.invariants.isEmpty then none
-      else some (.mkInvariantsClause .none ⟨.none, specExprsToEntries d.invariants⟩)⟩
+      else some (.mkInvariantsClause .none ⟨.none, d.invariants.map fun inv =>
+        .mkInvariantEntry inv.loc ⟨.none, inv.source⟩ ⟨.none, inv.binder⟩
+          ⟨.none, inv.formula.map (·.toDDM)⟩⟩)⟩
 
 def Signature.toDDM (sig : Signature) : DDM.Signature SourceRange :=
   match sig with
@@ -608,6 +624,8 @@ def DDM.MessagePart.fromDDM (d : DDM.MessagePart SourceRange) : Specs.MessagePar
   match d with
   | .strMessagePart _ ⟨_, s⟩ => .str s
   | .exprMessagePart _ e => .expr e.fromDDM
+  | .exprSourceMessagePart _ e ⟨_, source⟩ => .expr e.fromDDM source
+  | .sourceMessagePart _ ⟨_, source⟩ => .untranslated source
 
 def DDM.Assertion.fromDDM (d : DDM.Assertion SourceRange) : Specs.Assertion :=
   let .mkAssertion _ formula ⟨_, message⟩ := d
@@ -620,31 +638,40 @@ def DDM.FunDecl.fromDDM (d : DDM.FunDecl SourceRange) : FromDDM Specs.FunctionDe
                  ⟨_, kwargs⟩ returnType ⟨_, isOverload⟩
                  ⟨_, preconditions⟩ ⟨_, postconditions⟩
                  ⟨_, _legacySnapshots⟩ ⟨_, modifiesClause⟩ ⟨_, ghostsClause⟩ := d
-  let kwargsOpt : Option (String × Specs.SpecType) ←
+  let kwargsOpt : Option (String × Specs.KwargsType) ←
     match kwargs with
     | some (.mkKwargsDecl _ ⟨_, kn⟩ tp) =>
-      pure <| some (kn, ← tp.fromDDM)
+      pure (some (kn, .each (← tp.fromDDM)))
+    | some (.mkUnpackKwargsDecl _ ⟨_, kn⟩ tp) =>
+      pure (some (kn, .unpacked (← tp.fromDDM)))
     | none =>
       pure none
   -- Split the postconditions sequence by entry op: verified `@ensures` entries
   -- vs `@admit` entries. Encoding admitted entries as a PostconditionEntry
   -- variant (instead of a new FunDecl clause) keeps `mkFunDecl`'s shape — and
   -- therefore previously serialized spec Ion — parseable by this frontend.
-  let verifiedPostconditions : Array Specs.SpecExpr :=
-    postconditions.filterMap fun
-      | .mkPostconditionEntry _ e => some e.fromDDM
-      | .mkAdmittedPostconditionEntry _ _ => none
-  let admittedPostconditions : Array Specs.SpecExpr :=
-    postconditions.filterMap fun
-      | .mkAdmittedPostconditionEntry _ e => some e.fromDDM
-      | .mkPostconditionEntry _ _ => none
-  let modifies : Array Specs.SpecExpr :=
+  -- Dropped clauses are entries of the same sequence. An entry that belongs to another
+  -- clause, such as an invariant, is a read error.
+  let mut verifiedPostconditions : Array Specs.SpecExpr := #[]
+  let mut admittedPostconditions : Array Specs.SpecExpr := #[]
+  let mut dropped : Array Specs.DroppedClause := #[]
+  for entry in postconditions do
+    match entry with
+    | .mkPostconditionEntry _ e => verifiedPostconditions := verifiedPostconditions.push e.fromDDM
+    | .mkAdmittedPostconditionEntry _ e =>
+      admittedPostconditions := admittedPostconditions.push e.fromDDM
+    | .mkDroppedEntry dLoc ⟨_, tag⟩ ⟨_, source⟩ =>
+      let some kind := Specs.DroppedKind.ofTag? tag
+        | FromDDM.throw dLoc s!"Unknown kind of dropped clause: '{tag}'"
+      dropped := dropped.push { kind, source, loc := dLoc }
+    | .mkInvariantEntry iLoc .. => FromDDM.throw iLoc s!"An invariant among the postconditions of '{name}'"
+  let modifies : Array Specs.SpecExpr ←
     match modifiesClause with
     | some (.mkModifiesClause _ ⟨_, ms⟩) =>
-      ms.map fun
-        | .mkPostconditionEntry _ e => e.fromDDM
-        | .mkAdmittedPostconditionEntry _ _ => .placeholder .none
-    | none => #[]
+      ms.mapM fun
+        | .mkPostconditionEntry _ e => pure e.fromDDM
+        | _ => FromDDM.throw loc s!"A modifies target of '{name}' that is not a plain entry"
+    | none => pure #[]
 
   let ghosts : Array Specs.Ghost ←
     match ghostsClause with
@@ -669,19 +696,24 @@ def DDM.FunDecl.fromDDM (d : DDM.FunDecl SourceRange) : FromDDM Specs.FunctionDe
     admittedPostconditions := admittedPostconditions
     modifies := modifies
     ghosts := ghosts
+    dropped := dropped
   }
 
 def DDM.ClassDecl.fromDDM (d : DDM.ClassDecl SourceRange) : FromDDM Specs.ClassDef := do
   let .mkClassDecl ann ⟨_, name⟩ ⟨_, bases⟩ ⟨_, fields⟩
     ⟨_, classVars⟩ ⟨_, subclasses⟩ ⟨_, methods⟩ ⟨_, exhaustive⟩
     ⟨_, invariantsClause⟩ := d
-  let invariants : Array Specs.SpecExpr :=
+  -- An old file's invariant is a plain entry: its binder is `self`, and it has no source text.
+  let invariants : Array Specs.ClassInvariant ←
     match invariantsClause with
     | some (.mkInvariantsClause _ ⟨_, inv⟩) =>
-      inv.map fun
-        | .mkPostconditionEntry _ e => e.fromDDM
-        | .mkAdmittedPostconditionEntry _ _ => .placeholder .none
-    | none => #[]
+      inv.mapM fun
+        | .mkPostconditionEntry iLoc e =>
+          pure { source := "", binder := "self", formula := some e.fromDDM, loc := iLoc }
+        | .mkInvariantEntry iLoc ⟨_, source⟩ ⟨_, binder⟩ ⟨_, formula⟩ =>
+          pure { source, binder, formula := formula.map (·.fromDDM), loc := iLoc }
+        | _ => FromDDM.throw ann s!"An invariant of '{name}' that is not an invariant entry"
+    | none => pure #[]
   pure {
     loc := ann
     name := name
@@ -725,25 +757,41 @@ def DDM.Command.fromDDM (cmd : DDM.Command SourceRange) : FromDDM Specs.Signatur
       loc := loc
     }
     pure <| .ghostDecl g
+  | .pyspecFormat loc _ => .throw loc "The format command is not a signature"
 
-/-- Reads Python spec signatures from a DDM Ion file. -/
-public def readDDM (path : System.FilePath) : EIO String (Array Signature) := do
+/-- The version of what PySpec records in its Ion files. It goes up whenever PySpec changes
+    what it records, not only when the Ion shape changes, so that a consumer can refuse a file
+    that an older PySpec wrote. Version 1 records the clauses that PySpec could not read
+    faithfully, invariant sources, the source text of f-string parts, and `Unpack`. -/
+public def formatVersion : Nat := 1
+
+/-- Reads Python spec signatures from a DDM Ion file, with the format version that the file
+    states, if any. -/
+public def readDDMVersioned (path : System.FilePath) :
+    EIO String (Option Nat × Array Signature) := do
   let contents ←
         match ← IO.FS.readBinFile path |>.toBaseIO with
         | .ok r => pure r
         | .error msg => throw s!"Error reading {path}: {msg}"
   match Program.fromIon DDM.PythonSpecs_map DDM.PythonSpecs.name contents with
   | .ok pgm =>
-    let r :=
-          pgm.commands.mapM fun cmd => do
+    let r : Except String (Option Nat × Array Signature) :=
+          pgm.commands.foldlM (init := (none, #[])) fun (version, sigs) cmd => do
             let pySig ← DDM.Command.ofAst cmd
-            match pySig.fromDDM with
-            | .ok sig => pure sig
-            | .error (_, msg) => .error msg
+            match pySig with
+            | .pyspecFormat _ ⟨_, v⟩ => pure (some v, sigs)
+            | _ =>
+              match pySig.fromDDM with
+              | .ok sig => pure (version, sigs.push sig)
+              | .error (_, msg) => .error msg
     match r with
     | .ok r => pure r
     | .error msg => throw msg
   | .error msg => throw msg
+
+/-- Reads Python spec signatures from a DDM Ion file. -/
+public def readDDM (path : System.FilePath) : EIO String (Array Signature) :=
+  Prod.snd <$> readDDMVersioned path
 
 /-- Converts Python spec signatures to a DDM program for serialization. -/
 def toDDMProgram (sigs : Array Signature) : StrataDDM.Program :=
@@ -751,7 +799,9 @@ def toDDMProgram (sigs : Array Signature) : StrataDDM.Program :=
 
 /-- Writes Python spec signatures to a DDM Ion file. -/
 public def writeDDM (path : System.FilePath) (sigs : Array Signature) : IO Unit := do
+  let version : DDM.Command SourceRange := .pyspecFormat .none ⟨.none, formatVersion⟩
   let pgm := toDDMProgram sigs
+  let pgm := { pgm with commands := #[version.toAst] ++ pgm.commands }
   IO.FS.writeBinFile path <| pgm.toIon
 
 end StrataPython.Specs
