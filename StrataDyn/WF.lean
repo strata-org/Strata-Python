@@ -15,6 +15,7 @@ public import StrataDyn.ContractRegionProps
 -- The instances evaluate the environment representation at code-generation time.
 import StrataDyn.Env.WF
 import all StrataDyn.Util.LabelMapProps
+import all StrataDyn.DomComplete
 
 set_option autoImplicit false
 
@@ -914,6 +915,11 @@ path from its body's entry to the use passes through. -/
 theorem Func.WF.domCorrect {env : Env Unit} {α : Type} [base ≼ env] {fn : Func env α}
     (h : fn.WF) : fn.DomCorrect :=
   h.scoping.domCorrect
+
+/-- A well-formed function's bodies have distinct labels. -/
+theorem Func.WF.distinct {env : Env Unit} {α : Type} [base ≼ env] {fn : Func env α}
+    (h : fn.WF) : Body.Distinct fn.blocks.toList :=
+  h.scoping.distinct
 
 /-! ## Scopability is dominance-correctness
 

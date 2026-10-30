@@ -5,10 +5,10 @@
 -/
 module
 public import StrataDyn.LoopsFast
-public import StrataDynTest.DSLTest
+public import StrataDynTest.Blocks
 import StrataDyn.Env.WF
 meta import StrataDyn.LoopsFast
-meta import StrataDynTest.DSLTest
+meta import StrataDynTest.Blocks
 
 set_option autoImplicit false
 
@@ -25,40 +25,10 @@ it, and a body with an unreachable block, which has no dominator tree.
 
 namespace Strata.Dyn.LoopsTest
 
-open Strata.Dyn.DSLTest
-
-private abbrev E := Demo.env
-
-private def valT : TypeExpr E := Demo.Value
-
-private def lbl (s : String) : Label := ⟨.str .base s⟩
-
-/-- Block `s` after `k` instructions. -/
-private def pt (s : String) (k : Nat) : Point := ⟨lbl s, k⟩
-
-/-- `%r = add %0 %0 ^h()`: an instruction whose failure goes to `h`. -/
-private def add (r : Nat) (h : String) : Instruction E Unit :=
-  .apply () ⟨⟨r⟩, valT⟩ Demo.add.ref ⟨#[], rfl⟩ #[⟨0⟩, ⟨0⟩] #[⟨lbl h, #[]⟩] #[]
-
-/-- Block `s` with instructions `is` and terminator `t`. -/
-private def blk (s : String) (is : Array (Instruction E Unit)) (t : Terminator E Unit) :
-    Block E Unit :=
-  { label := lbl s, params := #[], instrs := is, term := t, info := () }
-
-/-- `jump ^s()`. -/
-private def jump (s : String) : Terminator E Unit := .jump () ⟨lbl s, #[]⟩
-
-/-- `branch %0 ^t() ^f()`. -/
-private def branch (t f : String) : Terminator E Unit :=
-  .branch () ⟨0⟩ ⟨lbl t, #[]⟩ ⟨lbl f, #[]⟩
-
-/-- `ret %0`. -/
-private def ret : Terminator E Unit := .ret () ⟨0⟩
+open Strata.Dyn.DSLTest Strata.Dyn.Blocks
 
 private def loopsOf (bs : List (Block E Unit)) : List (Point × List Label) :=
   (Body.backEdges bs).map fun (u, h) => (u, Body.loopBlocks bs u h)
-
-private def lbls (ss : List String) : List Label := ss.map lbl
 
 /-! ## A `while` loop
 
@@ -201,9 +171,7 @@ private def loopRegion : Region E Unit :=
   ⟨#[blk "rentry" #[] (jump "rh"), blk "rh" #[] (branch "rh" "rexit"), blk "rexit" #[] ret]⟩
 
 /-- `%9 = if %0 { loopRegion } { e: ret }`. -/
-private def ifLoop : Instruction E Unit :=
-  .apply () ⟨⟨9⟩, valT⟩ Demo.«if».ref ⟨#[.ty valT], rfl⟩ #[⟨0⟩] #[]
-    #[loopRegion, ⟨#[blk "e" #[] ret]⟩]
+private def ifLoop : Instruction E Unit := ifI 9 loopRegion ⟨#[blk "e" #[] ret]⟩
 
 private def withRegion : List (Block E Unit) :=
   [blk "entry" #[ifLoop] (jump "exit"), blk "exit" #[] ret]
