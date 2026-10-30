@@ -193,37 +193,15 @@ info: 0:
 #partial_defs_in StrataPython.Dyn.Scope StrataPython.Dyn.PyScope
 
 /--
-info: 32:
-  assigner
-  boolOp
-  bounds
-  call
-  chainLinks
+info: 10:
   clause
-  closure
-  compExpr
-  compExpr.clause
-  compare
-  deleter
-  dictDisplay
-  dictDisplay.pairs
-  fString
   findAnn
   forStmt
-  formatted
-  ifExp
   ifStmt
-  kwargsDict
-  listDisplay
-  setDisplay
-  target?
-  transCond
-  transExpr
   transStmt
   transStmts
   tryFinallyStmt
   tryStmt
-  tupleDisplay
   whileStmt
   withStmt
 -/
@@ -231,13 +209,15 @@ info: 32:
 #partial_defs_in StrataPython.Dyn.Translate StrataPython.Dyn.PyTranslate
 
 /--
-info: 11:
+info: 13:
+  Lean.Syntax.decodeScientificLitVal?.decode
   Std.Internal.idOpaque
   Strata.Dyn.DomDiag.body
   StrataPython.Dyn.PyTranslate.findAnn
-  StrataPython.Dyn.PyTranslate.transExpr
   StrataPython.Dyn.PyTranslate.transStmts
   String.Internal.append
+  String.Internal.get
+  String.Internal.length
   String.hash
   System.Platform.getNumBits
   WellFounded.opaqueFix
@@ -248,7 +228,7 @@ info: 11:
 #opaque_reach StrataPython.Dyn.Translate StrataPython.Dyn.PyTranslate.translate
 
 /--
-info: 12:
+info: 14:
   Strata.Dyn.Body.addAncs (proved: Strata.Dyn.Body.addAncs_good)
   Strata.Dyn.Body.chain (proved: Strata.Dyn.Body.above_iff)
   Strata.Dyn.Body.grow (proved: Strata.Dyn.Body.reached_spec)
@@ -260,7 +240,9 @@ info: 12:
   StrataPython.Dyn.PyScope.analyzeBlock (unproved)
   StrataPython.Dyn.PyScope.extendNamedExprScope (unproved)
   StrataPython.Dyn.PyScope.splicedChildren (unproved)
+  StrataPython.Dyn.PyTranslate.childScope? (unproved)
   StrataPython.Dyn.PyTranslate.enclosingPlace (unproved)
+  StrataPython.Dyn.PyTranslate.firstParam? (unproved)
 -/
 #guard_msgs in
 #fuel_loops StrataPython.Dyn.Translate StrataPython.Dyn.PyTranslate.translate
@@ -329,5 +311,14 @@ open StrataPython.Dyn.PyScope in
 /-- An empty statement list records nothing. -/
 example : visitStmts #[] = pure () := by
   simp [visitStmts]
+
+open StrataPython.Dyn.PyTranslate in
+open StrataPython (expr cmpop) in
+open StrataDDM (SourceRange) in
+/-- A comparison with one operator evaluates its operands, then compares them. -/
+example (l r : expr SourceRange) (op : cmpop SourceRange) :
+    PyTranslate.compare l #[op] #[r] =
+      (do let a ← transExpr l; cmpOp op a (← transExpr r)) := by
+  simp [PyTranslate.compare]
 
 end StrataPython.Dyn.TotalityTest

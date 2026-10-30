@@ -843,7 +843,7 @@ where
 mutual
 
 /-- Lower an expression to the value it produces. -/
-partial def transExpr (e : expr SourceRange) : TransM ValId := withRange e.ann do
+def transExpr (e : expr SourceRange) : TransM ValId := withRange e.ann do
   match e with
   | .Constant sr c _ => literal c sr
   | .Name sr ⟨_, n⟩ _ => readName n sr
@@ -886,50 +886,54 @@ partial def transExpr (e : expr SourceRange) : TransM ValId := withRange e.ann d
   | .Interpolation sr .. | .TemplateStr sr .. => unsupportedValue "t-string" sr
   | .Attribute _ v ⟨_, a⟩ _ => do
     let o ← match v with
-      | .Call _ f args kws => do
+      | c@(.Call _ f args kws) => do
         match ← zeroArgSuper? f args.val kws.val with
         -- CPython's `LOAD_SUPER_ATTR`, but not for `__class__`, nor if the module names `super`.
         | some sr =>
           let named := ((← read).table.module.symbol? "super").isSome
           superCall sr (a != "__class__" && !named)
-        | none => transExpr v
-      | _ => transExpr v
+        | none => transExpr c
+      | other => transExpr other
     build (getAttr o (← mangled a))
   | .Subscript _ v k _ => do
     let o ← transExpr v
     match k with
     | .Slice _ lo hi st =>
-      let bs ← bounds #[lo.val, hi.val, st.val]
+      let bs ← bounds lo.val hi.val st.val
       build (emitFailing (.str .base "slice") Py.getSlice.ref (#[o] ++ bs))
     | k => build (emitFailing (.str .base "item") Py.getItem.ref #[o, ← transExpr k])
   | .Starred sr .. => unsupportedValue "starred expression" sr
   | .Slice _ lo hi st => do
-    build (emitTotal (.str .base "slice") Py.mkSlice.ref (← bounds #[lo.val, hi.val, st.val]))
+    build (emitTotal (.str .base "slice") Py.mkSlice.ref (← bounds lo.val hi.val st.val))
+termination_by sizeOf e
 
 /-- `l op₀ r₀ op₁ r₁ …`.  A chain evaluates each operand once and stops at the first false
 comparison; its value is the last comparison's. -/
-partial def compare (l : expr SourceRange) (ops : Array (cmpop SourceRange))
+def compare (l : expr SourceRange) (ops : Array (cmpop SourceRange))
     (rs : Array (expr SourceRange)) : TransM ValId := do
   let a ← transExpr l
-  let links := ops.zip rs
-  if h : links.size = 1 then
-    let (op, r) := links[0]
-    return ← cmpOp op a (← transExpr r)
+  have hzip := sizeOf_zip_le ops rs
+  if h : (ops.zip rs).size = 1 then
+    have hget := Array.sizeOf_getElem (ops.zip rs) 0 (by omega)
+    have hsnd := sizeOf_snd_lt (ops.zip rs)[0]
+    return ← cmpOp (ops.zip rs)[0].1 a (← transExpr (ops.zip rs)[0].2)
   let join ← build (freshLabel "join")
-  jump join #[← chainLinks a links join (#[·])]
+  jump join #[← chainLinks a (ops.zip rs) join (#[·])]
   build (startBlockWith join (.str .base "cmp"))
+termination_by sizeOf l + sizeOf ops + sizeOf rs + 1
 
 /-- The links `op₀ r₀ op₁ r₁ …` of a comparison chain whose left operand `a` is evaluated,
 in CPython's order: each operand is evaluated once.  Every link but the last is tested, and
 a false one jumps to `exit` with `args` of its result.  Returns the last link's result. -/
-partial def chainLinks (a : ValId) (links : Array (cmpop SourceRange × expr SourceRange))
+def chainLinks (a : ValId) (links : Array (cmpop SourceRange × expr SourceRange))
     (exit : Label) (args : ValId → Array ValId) : TransM ValId := do
   let mut lhs := a
   let mut last := a
   for h : i in [:links.size] do
-    let (op, r) := links[i]
-    let b ← transExpr r
-    last ← cmpOp op lhs b
+    have hget := Array.sizeOf_getElem links i (by get_elem_tactic)
+    have hsnd := sizeOf_snd_lt links[i]
+    let b ← transExpr links[i].2
+    last ← cmpOp links[i].1 lhs b
     if i + 1 < links.size then
       let t ← build (truthy last)
       let next ← build (freshLabel "cmp")
@@ -937,16 +941,18 @@ partial def chainLinks (a : ValId) (links : Array (cmpop SourceRange × expr Sou
       build (startBlock next)
     lhs := b
   return last
+termination_by sizeOf links
 
 /-- `f"a{x}b"`: `strConcat` of the parts, as CPython's `BUILD_STRING`.  Every part is a
 `str`: a literal, or a formatted field.  A lone part is itself, as in CPython. -/
-partial def fString (vs : Array (expr SourceRange)) : TransM ValId := do
+def fString (vs : Array (expr SourceRange)) : TransM ValId := do
   if h : vs.size = 1 then transExpr vs[0]
   else build (emitTotal (.str .base "fstr") Py.strConcat.ref (← vs.mapM transExpr))
+termination_by sizeOf vs
 
 /-- An f-string field `{v!c:spec}`, as CPython's `FORMAT_VALUE`: `v`, then `spec` (`""` if
 absent), then the conversion `!s`, `!r` or `!a`, then `fmtValue`. -/
-partial def formatted (v : expr SourceRange) (conv : StrataPython.int SourceRange)
+def formatted (v : expr SourceRange) (conv : StrataPython.int SourceRange)
     (spec : Option (expr SourceRange)) : TransM ValId := do
   let x ← transExpr v
   let sp ← match spec with
@@ -961,16 +967,22 @@ partial def formatted (v : expr SourceRange) (conv : StrataPython.int SourceRang
       | 'a' => build (emitFailing (.str .base "ascii") Py.ascii.ref #[x])
       | _ => unsupportedValue "f-string conversion" sr  -- the parser gives no other
   build (emitFailing (.str .base "fmt") Py.fmtValue.ref #[x, sp])
+termination_by sizeOf v + sizeOf spec + 1
 
-/-- The bounds of a slice, in order, `None` for an absent one. -/
-partial def bounds (bs : Array (Option (expr SourceRange))) : TransM (Array ValId) :=
-  bs.mapM fun
-    | some b => transExpr b
-    | none => build noneLit
+/-- The bounds `lo`, `hi` and `st` of a slice, in order, `None` for an absent one. -/
+def bounds (lo hi st : Option (expr SourceRange)) : TransM (Array ValId) :=
+  return #[← bound lo, ← bound hi, ← bound st]
+termination_by sizeOf lo + sizeOf hi + sizeOf st + 1
+
+/-- A bound of a slice, `None` if it is absent. -/
+def bound : Option (expr SourceRange) → TransM ValId
+  | some b => transExpr b
+  | none => build noneLit
+termination_by b => sizeOf b
 
 /-- `a and b …` (`isAnd`) or `a or b …`, as a value: each operand but the last is tested, and
 the first that decides the result is the result. -/
-partial def boolOp (isAnd : Bool) (vs : Array (expr SourceRange)) : TransM ValId := do
+def boolOp (isAnd : Bool) (vs : Array (expr SourceRange)) : TransM ValId := do
   let join ← build (freshLabel "join")
   for h : i in [:vs.size] do
     let v ← transExpr vs[i]
@@ -982,9 +994,10 @@ partial def boolOp (isAnd : Bool) (vs : Array (expr SourceRange)) : TransM ValId
     else
       jump join #[v]
   build (startBlockWith join (.str .base "bool"))
+termination_by sizeOf vs
 
 /-- `a if c else b`, as a value.  `c` is a condition. -/
-partial def ifExp (c a b : expr SourceRange) : TransM ValId := do
+def ifExp (c a b : expr SourceRange) : TransM ValId := do
   let thenL ← build (freshLabel "then")
   let elseL ← build (freshLabel "else")
   let join ← build (freshLabel "join")
@@ -994,16 +1007,16 @@ partial def ifExp (c a b : expr SourceRange) : TransM ValId := do
   build (startBlock elseL)
   jump join #[← transExpr b]
   build (startBlockWith join (.str .base "ifexp"))
+termination_by sizeOf c + sizeOf a + sizeOf b + 2
 
 /-- Lower `e` as a condition: end the open block with a jump to `t` if `e` is true and to `f`
 otherwise, as CPython's `compiler_jump_if` does.  `not`, `and`, `or`, `x if c else y` and a
 chained comparison become branches, so each operand's truth is tested at most once. -/
-partial def transCond (e : expr SourceRange) (t f : Label) : TransM Unit := withRange e.ann do
+def transCond (e : expr SourceRange) (t f : Label) : TransM Unit := withRange e.ann do
   match e with
   | .UnaryOp _ (.Not _) x => transCond x f t
-  | .BoolOp _ op vs =>
+  | .BoolOp _ op ⟨_, vs⟩ =>
     let isAnd := op matches .And _
-    let vs := vs.val
     for h : i in [:vs.size] do
       if i + 1 < vs.size then
         let next ← build (freshLabel (if isAnd then "and" else "or"))
@@ -1020,84 +1033,120 @@ partial def transCond (e : expr SourceRange) (t f : Label) : TransM Unit := with
     build (startBlock elseL)
     transCond b t f
   | .Compare _ l ops rs =>
+    have hzip := sizeOf_zip_le ops.val rs.val
     let last ← chainLinks (← transExpr l) (ops.val.zip rs.val) f fun _ => #[]
     branch (← build (truthy last)) t f
-  | _ => branch (← build (truthy (← transExpr e))) t f
+  | other => branch (← build (truthy (← transExpr other))) t f
+termination_by sizeOf e + 1
 
 /-- `[a, *x, b]`: `BUILD_LIST` of the elements before the first `*x`, then `LIST_EXTEND` for
 each `*x` and `LIST_APPEND` for each later element, as CPython does.  The values `pre`, already
 evaluated, come first. -/
-partial def listDisplay (vs : Array (expr SourceRange)) (pre : Array ValId := #[]) :
+def listDisplay (vs : Array (expr SourceRange)) (pre : Array ValId := #[]) :
     TransM ValId := do
-  let (first, rest) := splitStarred vs
-  let l ← build (emitTotal (.str .base "list") Py.mkList.ref (pre ++ (← first.mapM transExpr)))
-  for v in rest do
-    match v with
-    | .Starred _ x _ =>
+  let first ← (splitStarred vs).1.attach.mapM fun ⟨x, hx⟩ =>
+    have hmem := Array.sizeOf_lt_of_mem (mem_of_mem_splitStarred (.inl hx))
+    transExpr x
+  let l ← build (emitTotal (.str .base "list") Py.mkList.ref (pre ++ first))
+  for hv : v in (splitStarred vs).2 do
+    have hmem := Array.sizeOf_lt_of_mem (mem_of_mem_splitStarred (.inr hv))
+    match v, hmem with
+    | .Starred _ x _, hmem =>
       discard <| build (emitActing (.str .base "extend") Py.listExtend.ref #[l, ← transExpr x])
-    | v =>
+    | v, hmem =>
       let x ← transExpr v
       discard <| build (emitEffect (.str .base "append") Py.listAppend.ref #[l, x])
   return l
+termination_by sizeOf vs
 
 /-- `(a, b)`: `BUILD_TUPLE`.  With a `*x`, a list display then `INTRINSIC_LIST_TO_TUPLE`, as
 CPython does.  The values `pre`, already evaluated, come first. -/
-partial def tupleDisplay (vs : Array (expr SourceRange)) (pre : Array ValId := #[]) :
+def tupleDisplay (vs : Array (expr SourceRange)) (pre : Array ValId := #[]) :
     TransM ValId := do
   if (splitStarred vs).2.isEmpty then
     build (emitTotal (.str .base "tuple") Py.mkTuple.ref (pre ++ (← vs.mapM transExpr)))
   else
     build (emitTotal (.str .base "tuple") Py.listToTuple.ref #[← listDisplay vs pre])
+termination_by sizeOf vs + 1
 
 /-- `{a, *x, b}`: as `listDisplay`, with `BUILD_SET`, `SET_UPDATE` and `SET_ADD`.  A set of
 more than `stackUseGuideline` elements starts empty, as in CPython. -/
-partial def setDisplay (vs : Array (expr SourceRange)) : TransM ValId := do
-  let (first, rest) := if vs.size > stackUseGuideline then (#[], vs) else splitStarred vs
-  let st ← build (emitFailing (.str .base "set") Py.mkSet.ref (← first.mapM transExpr))
-  for v in rest do
-    match v with
-    | .Starred _ x _ =>
+def setDisplay (vs : Array (expr SourceRange)) : TransM ValId := do
+  let parts := if vs.size > stackUseGuideline then (#[], vs) else splitStarred vs
+  have hparts : ∀ x, x ∈ parts.1 ∨ x ∈ parts.2 → x ∈ vs := by
+    intro x hx; simp only [parts] at hx; split at hx
+    · simpa using hx
+    · exact mem_of_mem_splitStarred hx
+  let first ← parts.1.attach.mapM fun ⟨x, hx⟩ =>
+    have hmem := Array.sizeOf_lt_of_mem (hparts x (.inl hx))
+    transExpr x
+  let st ← build (emitFailing (.str .base "set") Py.mkSet.ref first)
+  for hv : v in parts.2 do
+    have hmem := Array.sizeOf_lt_of_mem (hparts v (.inr hv))
+    match v, hmem with
+    | .Starred _ x _, hmem =>
       discard <| build (emitActing (.str .base "update") Py.setUpdate.ref #[st, ← transExpr x])
-    | v => discard <| build (emitActing (.str .base "add") Py.setAdd.ref #[st, ← transExpr v])
+    | v, hmem => discard <| build (emitActing (.str .base "add") Py.setAdd.ref #[st, ← transExpr v])
   return st
+termination_by sizeOf vs
 
 /-- `{k: v, **d}`, as CPython builds it: a run of pairs is cut into chunks of `dictChunk`,
 each built by `pairs`, and each later chunk and each `**d` is `DICT_UPDATE`. -/
-partial def dictDisplay (ks : Array (opt_expr SourceRange)) (vs : Array (expr SourceRange)) :
+def dictDisplay (ks : Array (opt_expr SourceRange)) (vs : Array (expr SourceRange)) :
     TransM ValId :=
-  dictFromEntries (ks.zip vs) (fun | (.some_expr .., _) => none | (_, d) => some (transExpr d))
+  dictFromEntries (ks.zip vs).attach
+    (fun ⟨(k, d), h⟩ => match k with
+      | .some_expr .. => none
+      | .missing_expr .. =>
+        have hmem := Array.sizeOf_lt_of_mem (Array.of_mem_zip h).2
+        some (transExpr d))
     (chunks dictChunk) pairs
     (fun a d => build (emitFailing (.str .base "update") Py.dictUpdate.ref #[a, d]))
+termination_by sizeOf ks + sizeOf vs + 2
 where
   /-- `BUILD_MAP` of the pairs `k: v` of `c`, key before value.  More than
   `stackUseGuideline / 2` pairs start an empty dict and add each pair (`MAP_ADD`). -/
-  pairs (c : Array (opt_expr SourceRange × expr SourceRange)) : TransM ValId := do
-    let kvs := c.filterMap fun | (.some_expr _ k, v) => some (k, v) | _ => none
+  pairs (c : Array {e // e ∈ ks.zip vs}) : TransM ValId := do
+    let kvs : Array ({k : expr SourceRange // sizeOf k < sizeOf ks} ×
+        {v : expr SourceRange // sizeOf v < sizeOf vs}) := c.filterMap fun ⟨(k, v), h⟩ =>
+      match hk : k with
+      | .some_expr _ k =>
+        some (⟨k, by
+                have hmem := Array.sizeOf_lt_of_mem (Array.of_mem_zip h).1
+                subst hk; simp at hmem; omega⟩,
+              ⟨v, Array.sizeOf_lt_of_mem (Array.of_mem_zip h).2⟩)
+      | .missing_expr .. => none
     if 2 * kvs.size > stackUseGuideline then
       let d ← build (emitFailing (.str .base "dict") Py.mkDict.ref #[])
-      for (k, v) in kvs do
+      for (⟨k, hk⟩, ⟨v, hv⟩) in kvs do
         let kv ← transExpr k
         let vv ← transExpr v
         discard <| build (emitActing (.str .base "set") Py.dictSet.ref #[d, kv, vv])
       return d
     let mut args := #[]
-    for (k, v) in kvs do
+    for (⟨k, hk⟩, ⟨v, hv⟩) in kvs do
       args := args.push (← transExpr k)
       args := args.push (← transExpr v)
     build (emitFailing (.str .base "dict") Py.mkDict.ref args)
+  termination_by sizeOf ks + sizeOf vs + 1
 
 /-- `f(a, *x, k=v, **m)`: `py.call f args kwargs`, evaluating the callee, the positional
 arguments, then the keyword arguments, as CPython does.  `args` is a tuple display; a lone
 `*x` is evaluated in place and made a tuple by `argsTuple` after the keyword arguments.
 `kwargs` is runs of `k=v` pairs, each a total `mkKwargs`, and `DICT_MERGE` (`dictMerge`)
 for each `**m`. -/
-partial def call (f : expr SourceRange) (args : Array (expr SourceRange))
+def call (f : expr SourceRange) (args : Array (expr SourceRange))
     (kws : Array (keyword SourceRange)) : TransM ValId := do
   if let some sr ← zeroArgSuper? f args kws then return ← superCall sr false
   let fv ← transExpr f
-  let lone ← match args with
-    | #[.Starred _ x _] => some <$> transExpr x
-    | _ => pure none
+  let lone ← if h : args.size = 1 then
+      match hx : args[0] with
+      | .Starred _ x _ =>
+        have hsize : sizeOf x < sizeOf args := by
+          have hget := Array.sizeOf_getElem args 0 (by omega); rw [hx] at hget; simp at hget; omega
+        some <$> transExpr x
+      | _ => pure none
+    else pure none
   let t? ← if lone.isSome then pure none else some <$> tupleDisplay args
   let d ← kwargsDict fv kws
   let t ← match t?, lone with
@@ -1105,22 +1154,24 @@ partial def call (f : expr SourceRange) (args : Array (expr SourceRange))
     | none, some x => build (emitFailing (.str .base "args") Py.argsTuple.ref #[fv, x])
     | none, none => build (emitTotal (.str .base "args") Py.mkTuple.ref #[])
   build (emitFailing (.str .base "call") Py.call.ref #[fv, t, d])
+termination_by sizeOf f + sizeOf args + sizeOf kws + 2
 
 /-- The evaluation of the target `t`, or `none` if `t` is not a name, an attribute or a
 subscript: `o` for `o.a`, then `o` and `k` for `o[k]`.  The attribute name is mangled, as in
 a read. -/
-partial def target? : expr SourceRange → Option (TransM Lhs)
+def target? : expr SourceRange → Option (TransM Lhs)
   | .Name sr ⟨_, n⟩ _ => some (pure (.name n sr))
   | .Attribute _ v ⟨_, a⟩ _ => some do return .attr (← transExpr v) (← mangled a)
   | .Subscript _ v k _ => some do
     let o ← transExpr v
     match k with
-    | .Slice _ lo hi st => return .slice o (← bounds #[lo.val, hi.val, st.val])
+    | .Slice _ lo hi st => return .slice o (← bounds lo.val hi.val st.val)
     | k => return .item o (← transExpr k)
   | _ => none
+termination_by t => sizeOf t
 
 /-- Read the target `l`, as `x op= e` does. -/
-partial def readLhs : Lhs → TransM ValId
+def readLhs : Lhs → TransM ValId
   | .name n r => readName n r
   | .attr o a => build (getAttr o a)
   | .item o k => build (emitFailing (.str .base "item") Py.getItem.ref #[o, k])
@@ -1128,7 +1179,7 @@ partial def readLhs : Lhs → TransM ValId
 
 /-- Write `v` to the target `l`.  A name is written at `range`, the statement's.  A slice is
 written by `setItem` of a `mkSlice`, as CPython's `STORE_SLICE` does. -/
-partial def writeLhs (l : Lhs) (v : ValId) (range : SourceRange) : TransM Unit :=
+def writeLhs (l : Lhs) (v : ValId) (range : SourceRange) : TransM Unit :=
   match l with
   | .name n _ => writeName n v range
   | .attr o a => discard <| build (setAttr o a v)
@@ -1140,13 +1191,14 @@ partial def writeLhs (l : Lhs) (v : ValId) (range : SourceRange) : TransM Unit :
 /-- The assignment of a value to the target `t` at `range`, or the part of `t` the translator
 does not lower.  A tuple or list target unpacks the value, with `unpackEx` if an element is
 starred, then assigns each element in turn, evaluating its target only then. -/
-partial def assigner (range : SourceRange) (t : expr SourceRange) :
+def assigner (range : SourceRange) (t : expr SourceRange) :
     Except (expr SourceRange) (ValId → TransM Unit) :=
   match t with
-  | .Tuple _ ts _ | .List _ ts _ => do
-    let ts := ts.val
+  | .Tuple _ ⟨_, ts⟩ _ | .List _ ⟨_, ts⟩ _ => do
     let .ok star := starredIndex? ts | throw t
-    let elems ← ts.mapM fun | .Starred _ e _ => assigner range e | e => assigner range e
+    let elems ← ts.attach.mapM fun ⟨t, h⟩ =>
+      have hmem := Array.sizeOf_lt_of_mem h
+      match t with | .Starred _ e _ => assigner range e | e => assigner range e
     let unpack (v : ValId) : TransM ValId := do
       match star with
       | none =>
@@ -1165,13 +1217,14 @@ partial def assigner (range : SourceRange) (t : expr SourceRange) :
   | t => match target? t with
     | some eval => return fun v => do writeLhs (← eval) v range
     | none => throw t
+termination_by sizeOf t + 1
 
 /-- A list, set or dict comprehension at `sr` (§6.8), inlined as PEP 709 does.  The
 outermost iterable is evaluated in the enclosing scope, then the accumulator is made, then
 the comprehension's scope takes over: each iteration variable is a fresh cell, shadowing the
 enclosing scope's name until the end, and each `for` clause is a `py.forEach` whose body
 region assigns the target, tests the `if`s, and runs the next clause or adds the element. -/
-partial def compExpr (sr : SourceRange) (kind : CompKind) (elt : expr SourceRange)
+def compExpr (sr : SourceRange) (kind : CompKind) (elt : expr SourceRange)
     (value : Option (expr SourceRange)) (gens : Array (comprehension SourceRange)) :
     TransM ValId := do
   let what := match kind with
@@ -1179,8 +1232,10 @@ partial def compExpr (sr : SourceRange) (kind : CompKind) (elt : expr SourceRang
   if gens.any fun (.mk_comprehension _ _ _ _ a) => a.value != 0 then
     return ← unsupportedValue s!"async {what}" sr
   let ctx ← read
-  let some (.mk_comprehension _ _ iter0 _ _) := (gens[0]? : Option (comprehension SourceRange))
-    | internalError s!"{what} without a generator" sr; standIn what
+  match hg : (gens[0]? : Option (comprehension SourceRange)) with
+  | none => internalError s!"{what} without a generator" sr; standIn what
+  | some (.mk_comprehension _ _ iter0 _ _) =>
+  have hmem := Array.sizeOf_lt_of_mem (Array.mem_of_getElem? hg)
   let some scope ← childScope? sr | return ← unsupportedValue s!"{what} without a scope" sr
   let some cur := ctx.table.scopes[scope]?
     | internalError s!"scope {scope} is not in the table" sr; standIn what
@@ -1192,14 +1247,18 @@ partial def compExpr (sr : SourceRange) (kind : CompKind) (elt : expr SourceRang
   let saved := (← build (get : PyM SourceRange PyBuild.Frame)).locals
   withReader ({ · with scope, cur, classNs := none }) do
     for x in cur.regionLocals do discard <| build (declareLocal x)
-    clause acc it 0
+    have hlist := sizeOf_toList_lt gens
+    clause acc it gens.toList
   build (modify fun f => { f with locals := saved })
   return acc
+termination_by sizeOf elt + sizeOf value + sizeOf gens
 where
-  /-- The `for` clause `i`, over the evaluated iterable `it`, and the clauses after it. -/
-  clause (acc it : ValId) (i : Nat) : TransM Unit := do
-    let some (.mk_comprehension _ target _ ifs _) := (gens[i]? : Option (comprehension SourceRange))
-      | return
+  /-- The first `for` clause of `gs`, over the evaluated iterable `it`, and the clauses after
+  it. -/
+  clause (acc it : ValId) (gs : List (comprehension SourceRange)) : TransM Unit := do
+    match gs with
+    | [] => return
+    | .mk_comprehension _ target _ ifs _ :: later =>
     let assign ← match assigner sr target with
       | .ok a => pure a
       | .error t => do badTarget t; pure fun _ => pure ()
@@ -1210,9 +1269,9 @@ where
         let next ← build (freshLabel "if")
         transCond c next skip
         build (startBlock next)
-      match (gens[i + 1]? : Option (comprehension SourceRange)) with
-      | some (.mk_comprehension _ _ iter _ _) => clause acc (← transExpr iter) (i + 1)
-      | none =>
+      match later with
+      | c@(.mk_comprehension _ _ iter _ _) :: rest => clause acc (← transExpr iter) (c :: rest)
+      | [] =>
         match kind, value with
         | .dict, some v =>
           let k ← transExpr elt
@@ -1226,10 +1285,11 @@ where
       if ← targeted skip then
         jump skip
         build (startBlock skip)
+  termination_by sizeOf gs + sizeOf elt + sizeOf value
 
 /-- The range of the name `super` in `f(args, kws)`, if it is a zero-argument `super()` of the
 builtin `super`: not a local `super`, nor one a class body binds. -/
-partial def zeroArgSuper? (f : expr SourceRange) (args : Array (expr SourceRange))
+def zeroArgSuper? (f : expr SourceRange) (args : Array (expr SourceRange))
     (kws : Array (keyword SourceRange)) : TransM (Option SourceRange) := do
   let .Name sr ⟨_, "super"⟩ _ := f | return none
   if !args.isEmpty || !kws.isEmpty then return none
@@ -1247,7 +1307,7 @@ positional parameter of the enclosing function.  `super().x` (`attr`) is CPython
 `super().__class__`, and for every `super().x` in a module whose symbol table names `super`.
 Where CPython raises `RuntimeError` at run time instead, with no `__class__` cell or no
 positional parameter, it is rejected, and so it is if the module may rebind `super`. -/
-partial def superCall (sr : SourceRange) (attr : Bool) : TransM ValId := do
+def superCall (sr : SourceRange) (attr : Bool) : TransM ValId := do
   if ← superRebound then return ← unsupportedValue "super() with super rebound" sr
   let some first ← firstParam? | unsupportedValue "super() without a positional parameter" sr
   let .free c ← place "__class__" | unsupportedValue "super() outside a class" sr
@@ -1268,17 +1328,25 @@ partial def superCall (sr : SourceRange) (attr : Bool) : TransM ValId := do
 
 /-- The keyword dict of a call to `fv` with the keyword arguments `kws`: runs of `k=v` pairs,
 each a total `mkKwargs`, and `DICT_MERGE` (`dictMerge`) for each `**m`. -/
-partial def kwargsDict (fv : ValId) (kws : Array (keyword SourceRange)) : TransM ValId :=
-  dictFromEntries kws
-    (fun kw => if kw.nameAndValue.1.isSome then none else some (transExpr kw.value))
+def kwargsDict (fv : ValId) (kws : Array (keyword SourceRange)) : TransM ValId :=
+  dictFromEntries kws.attach
+    (fun ⟨kw, h⟩ =>
+      have hmem := Array.sizeOf_lt_of_mem h
+      match kw, hmem with
+      | .mk_keyword _ _ v, hmem =>
+        if kw.nameAndValue.1.isSome then none else some (transExpr v))
     (fun run => if run.isEmpty then #[] else #[run])
     (fun run => do
       let mut kvs := #[]
-      for kw in run do
-        kvs := kvs.push (← build (strLit (kw.nameAndValue.1.getD "")))
-        kvs := kvs.push (← transExpr kw.value)
+      for ⟨kw, h⟩ in run do
+        have hmem := Array.sizeOf_lt_of_mem h
+        match kw, hmem with
+        | .mk_keyword _ _ v, hmem =>
+          kvs := kvs.push (← build (strLit (kw.nameAndValue.1.getD "")))
+          kvs := kvs.push (← transExpr v)
       build (emitTotal (.str .base "kwargs") Py.mkKwargs.ref kvs))
     (fun a m => build (emitFailing (.str .base "merge") Py.dictMerge.ref #[fv, a, m]))
+termination_by sizeOf kws + 1
 
 /-- The closure of the `def` or `lambda` at `sr`, whose function is queued, or `none` if it is
 rejected, as §5.3 builds it: the decorators are evaluated, then the non-constant defaults
@@ -1286,7 +1354,7 @@ into default cells, then the annotations, `returns` last.  The closure captures 
 the function's free variables (§6.6), then the default cells.  The annotations are stored in
 its `__annotations__`, then the decorators are applied to it bottom to top.  An `async def`
 or a generator is queued as a stub. -/
-partial def closure (sr : SourceRange) (args : arguments SourceRange)
+def closure (sr : SourceRange) (args : arguments SourceRange)
     (body : Array (stmt SourceRange)) (decorators : Array (expr SourceRange))
     (returns : Option (expr SourceRange)) (hasTypeParams isAsync : Bool) :
     TransM (Option ValId) := do
@@ -1302,13 +1370,17 @@ partial def closure (sr : SourceRange) (args : arguments SourceRange)
       | none => pure none
   let decs ← decorators.mapM transExpr
   let mut defaults := #[]
-  for p in defaultCellParams args do
-    if let some d := p.default then
+  for hp : p in defaultCellParams args do
+    match hd : p.default with
+    | some d =>
+      have hdef := sizeOf_params_default_lt (Array.mem_of_mem_filter hp) hd
       defaults := defaults.push (← build (newCell (defaultStem p.name) (← transExpr d)))
+    | none => pure ()
   -- The annotations, keyed by mangled name, as CPython 3.12 evaluates them at the `def`.
   let mut anns := #[]
-  for (n, a) in paramAnnotations args do
-    anns := anns.push (← build (strLit (← mangled n))) |>.push (← transExpr a)
+  for ha : a in paramAnnotations args do
+    have hann := sizeOf_paramAnnotations_lt ha
+    anns := anns.push (← build (strLit (← mangled a.1))) |>.push (← transExpr a.2)
   if let some r := returns then
     anns := anns.push (← build (strLit "return")) |>.push (← transExpr r)
   let some f ← queueFunc sr scope cur (some args) body stub defaults | return none
@@ -1316,6 +1388,7 @@ partial def closure (sr : SourceRange) (args : arguments SourceRange)
     let d ← build (emitFailing (.str .base "annotations") Py.mkDict.ref anns)
     discard <| build (setAttr f "__annotations__" d)
   some <$> decorate decs f
+termination_by sizeOf args + sizeOf decorators + sizeOf returns
 
 end
 
@@ -1330,7 +1403,7 @@ def deleteLhs : Lhs → TransM Unit
 
 /-- The deletion of the target `t`, or the part of `t` the translator does not lower.  A
 tuple or list deletes its elements left to right. -/
-partial def deleter (t : expr SourceRange) : Except (expr SourceRange) (TransM Unit) :=
+def deleter (t : expr SourceRange) : Except (expr SourceRange) (TransM Unit) :=
   match t with
   | .Tuple _ ts _ | .List _ ts _ => do
     let dels ← ts.val.mapM deleter
@@ -1338,6 +1411,7 @@ partial def deleter (t : expr SourceRange) : Except (expr SourceRange) (TransM U
   | t => match target? t with
     | some eval => return do deleteLhs (← eval)
     | none => throw t
+termination_by sizeOf t
 
 /-- Emit the argument-binding prologue (§5.4), writing each parameter's cell.  A constant
 default is evaluated in place; another is read from its cell in `defaults`.  The checks run
