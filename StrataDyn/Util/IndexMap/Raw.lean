@@ -322,11 +322,6 @@ protected def getD (m : IndexMap.Raw α β) (key : α) (d : β) : β :=
   | some idx => m.valsV[idx]
   | none => d
 
-/-- Look up `key`, panicking if absent. Prefer `get?` or `m[key]` (with a
-    membership proof); this is the `m[key]!` fallback. -/
-def get! [Inhabited β] (m : IndexMap.Raw α β) (key : α) : β :=
-  m.getD key default
-
 def setIndex (m : IndexMap.Raw α β) (idx : Fin m.size) (val : β) : IndexMap.Raw α β :=
   let ⟨i, ilt⟩ := idx
   have ivb : i < m.vals.size := by rw [m.array_eq]; exact ilt
@@ -418,7 +413,6 @@ def get (m : IndexMap.Raw α β) (key : α) (mem : key ∈ m) : β := m.valsV[m.
 instance : GetElem? (IndexMap.Raw α β) α β (fun m key => key ∈ m) where
   getElem := IndexMap.Raw.get
   getElem? := IndexMap.Raw.get?
-  getElem! := IndexMap.Raw.get!
 
 /-- The coherence invariant for `push`. Extracted from `push` itself so a change
     in a `simp` set breaks a theorem rather than a definition. -/

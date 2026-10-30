@@ -97,25 +97,20 @@ def checkFits (ps : Ctx) : Check :=
   forAll (fun p => require (p.1 < fn.slots)
     s!"{valName p.1} is beyond the {fn.slots} slots of {nameStr fn.name}") ps
 
-/-- What a transfer to `t` supplies, and the scope it needs: a block's parameters and scope,
-or the body's result. -/
-def targetSig : LTarget → Option (List Ty × Ctx)
-  | .block i => fn.blocks[i]?.map fun b => (b.paramTys, b.scope)
-  | .exit => some ([fn.ret], [])
-
-/-- The values a transfer to `t` binds: a block's parameters. -/
-def targetParams : LTarget → Ctx
-  | .block i => (fn.blocks[i]?.map (·.params)).getD []
-  | .exit => []
+/-- What a transfer to `t` supplies, the scope it needs and the values it binds: a block's
+parameters' tags, scope and parameters, or the body's result. -/
+def targetSig : LTarget → Option (List Ty × Ctx × Ctx)
+  | .block i => fn.blocks[i]?.map fun b => (b.paramTys, b.scope, b.params)
+  | .exit => some ([fn.ret], [], [])
 
 /-- An edge along `s`, with a payload of tags `payload`. -/
 def checkSite (Γ : Ctx) (s : LSite) (payload : List Ty) : Check :=
   match targetSig fn s.target with
   | none => .error "a transfer to no block"
-  | some (ps, sc) => do
+  | some (ps, sc, qs) => do
     checkArgs M Γ s.args ps payload
     checkScope M Γ sc
-    checkFits fn (targetParams fn s.target)
+    checkFits fn qs
 
 /-- Edges along `ss`, with the payloads `ps`. -/
 def checkSites (Γ : Ctx) : List LSite → List (List Ty) → Check
@@ -319,17 +314,18 @@ theorem checkFits_eq_ok {ps : Ctx} : checkFits fn ps = .ok () ↔ ∀ p ∈ ps, 
 tags of the target's parameters with `p` the rest, `Γ` covers the target's scope, and the target's
 parameters fit `fn`'s slots. -/
 theorem checkSite_eq_ok {s : LSite} {p : List Ty} :
-    checkSite fn Γ s p = .ok () ↔ ∃ ps sc, targetSig fn s.target = some (ps, sc) ∧
+    checkSite fn Γ s p = .ok () ↔ ∃ ps sc qs, targetSig fn s.target = some (ps, sc, qs) ∧
       checkArgs M Γ s.args ps p = .ok () ∧ checkScope M Γ sc = .ok () ∧
-      ∀ q ∈ targetParams fn s.target, q.1 < fn.slots := by
+      ∀ q ∈ qs, q.1 < fn.slots := by
   unfold checkSite
   split
   · rename_i h
     rw [h]
-    exact ⟨fun h₀ => (nomatch h₀), fun ⟨_, _, h₀, _⟩ => nomatch h₀⟩
-  · rename_i ps sc h
+    exact ⟨fun h₀ => (nomatch h₀), fun ⟨_, _, _, h₀, _⟩ => nomatch h₀⟩
+  · rename_i ps sc qs h
     rw [seq_eq_ok, seq_eq_ok, checkFits_eq_ok, h]
-    refine ⟨fun ⟨h₁, h₂, h₃⟩ => ⟨ps, sc, rfl, h₁, h₂, h₃⟩, fun ⟨_, _, he, h₁, h₂, h₃⟩ => ?_⟩
+    refine ⟨fun ⟨h₁, h₂, h₃⟩ => ⟨ps, sc, qs, rfl, h₁, h₂, h₃⟩,
+      fun ⟨_, _, _, he, h₁, h₂, h₃⟩ => ?_⟩
     cases he
     exact ⟨h₁, h₂, h₃⟩
 

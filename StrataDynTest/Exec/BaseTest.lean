@@ -186,7 +186,7 @@ Linking reads only function bodies, so a run ignores contracts and ghosts.  `@m.
 and `ensures` clauses both return `false`, its `ensures` clause applies `base.old`, its `requires`
 clause reads the ghost `@m.count` and its `writes` frame is that ghost's cell.  `@m.main` still
 calls `@m.f` and gets its result, `7`.  A module with an extern function does not run yet: the
-extern has no blocks, so its code pointer has a signature other than its declared one. -/
+extern has no blocks, so linking rejects it. -/
 
 /-- A module of a ghost, a function whose contract names it, and a caller of that function. -/
 private def contractText : String := "module m {
@@ -260,7 +260,7 @@ private def runMain (text : String) : IO Unit := do
 #guard_msgs in
 #eval runMain contractText
 
-/-- info: invalid: m.e: a code pointer at another signature than its function's -/
+/-- info: invalid: m.e: an extern function does not run yet -/
 #guard_msgs in
 #eval runMain externText
 

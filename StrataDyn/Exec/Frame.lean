@@ -1073,7 +1073,7 @@ theorem serve_inv {T : Typing} {c : Core M} {i : Inst M} (t : i.Tree)
       obtain ⟨hl, htl, -⟩ := hC.heap.cellOK hsat.1.1
       have hh : c.heap.Holds l ty := ⟨hl, htl⟩
       simp only [serve]
-      rw [Heap.cell_pos hh]
+      rw [Heap.cell_pos hh, Heap.modifyAt_eq]
       exact settle_inv hwf hR (c := { c with heap := c.heap.modify l ty g }) _ _
         (hC.heapStep hP (.refl _) (hC.heap.modify hsat.1.2) hC.avoid
           (HeapFrame.modify hsat.1.1 _))

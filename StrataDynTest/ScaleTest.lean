@@ -215,9 +215,9 @@ private def constsModule (n : Nat) : DDM.Command SR :=
 /-- What the reader's walk over the instructions or blocks of a body gives: one completion per
 element, and the ids that the completions take, once the walk has defined every value. -/
 private def walked {β : Type} (m : Read.ReadM base (List (Read.Late β))) :
-    Except String (List (Read.Late β) × (Name → ValId)) := do
+    Except String (List (Read.Late β) × (Name → Option ValId)) := do
   let (l, s) ← (m.run {}).mapError (·.message)
-  return (l, fun n => (s.values.get? n).getD ⟨0⟩)
+  return (l, s.values.get?)
 
 /-- The scope of a body whose exit takes a `base.Int`, with no block to transfer to. -/
 private def exitScope : Read.Scope base := ({} : Read.Scope base).insert .base #[Base.Int]
@@ -228,15 +228,15 @@ private def exitScope : Read.Scope base := ({} : Read.Scope base).insert .base #
 #guard_msgs in
 #eval scalesLinearly "reading the instructions of a block" 24000 (twice constInsns) fun is =>
   match walked (Read.insnList { funcs := NameTable.empty } exitScope is.toList) with
-  | .ok (l, ids) => (Read.Late.list l ids).size == is.size
+  | .ok (l, ids) => (Read.Late.list l ids).toOption.map (·.size) == some is.size
   | .error _ => false
 
 /-- A walk of size `2 * m`, and its first `m` completions with the same ids, each with its size.
 One walk gives both inputs, since walking takes much longer than completing. -/
 private def halves {β : Type} (m : Nat)
-    (w : Except String (List (Read.Late β) × (Name → ValId))) :
-    (Nat × Except String (List (Read.Late β) × (Name → ValId))) ×
-      (Nat × Except String (List (Read.Late β) × (Name → ValId))) :=
+    (w : Except String (List (Read.Late β) × (Name → Option ValId))) :
+    (Nat × Except String (List (Read.Late β) × (Name → Option ValId))) ×
+      (Nat × Except String (List (Read.Late β) × (Name → Option ValId))) :=
   ((m, w.map fun (l, ids) => (l.take m, ids)), (2 * m, w))
 
 /-- The blocks `b.0` to `b.(n-1)`, each ending in `unreachable`, as the parser gives them. -/
@@ -247,7 +247,8 @@ private def unreachableBlocks (n : Nat) : List (DDM.MBlock SR) :=
 
 /-- The walk over the blocks `b.0` to `b.(n-1)`, as `walked` gives it. -/
 private def walkedBlocks (n : Nat) :
-    Except String (List (Read.Late (Block base StrataDDM.SourceRange)) × (Name → ValId)) := do
+    Except String
+      (List (Read.Late (Block base StrataDDM.SourceRange)) × (Name → Option ValId)) := do
   let bs := unreachableBlocks n
   let (scope, _) ← (Read.scopeOf (env := base) .none Base.Int bs).mapError (·.message)
   walked (Read.blockList { funcs := NameTable.empty } scope bs)
@@ -256,7 +257,7 @@ private def walkedBlocks (n : Nat) :
 #guard_msgs in
 #eval scalesLinearly "completing the blocks of a body" 32000
   (fun m => halves m (walkedBlocks (2 * m))) fun
-  | (n, .ok (l, ids)) => (Read.Late.list l ids).size == n
+  | (n, .ok (l, ids)) => (Read.Late.list l ids).toOption.map (·.size) == some n
   | (_, .error _) => false
 
 /-- The module `m` of `n` functions, each with an unknown return type, so that reading each one

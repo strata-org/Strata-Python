@@ -173,4 +173,15 @@ def mkUse : Program := #while
 #guard (run mkUse "use" #[5]).toOption.map showOutcome = some "ok 5"
 #guard (run mkUse "use" #[0]).toOption.map showOutcome = some "raised 1"
 
+-- `mk`'s own result: its cell in the `ok`, or what it raised.
+#guard (run mkUse "mk" #[5]).toOption.map showOutcome = some "ok <cell>"
+#guard (run mkUse "mk" #[0]).toOption.map showOutcome = some "raised 1"
+
+/-- A function that returns a cell and cannot raise. -/
+def plainRef : Program := #while
+  fun mk(x : Int) : Ref { return ref x; }
+#end
+
+#guard (run plainRef "mk" #[5]).toOption.map showOutcome = some "ok <cell>"
+
 end Strata.Dyn.While.RunTest

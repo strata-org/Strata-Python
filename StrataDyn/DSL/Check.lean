@@ -758,8 +758,15 @@ def caseOp (d : TypeD) (rcs : Array RCtor) :
     CheckM (Option ROp) := do
   let params := d.params.map (·.1)
   let mut ok := true
+  let mut snames : Array String := #[]
   for c in rcs do
-    let sname := c.d.c.envName.getString!
+    -- `declare` requires a constructor's name to be one component, so it ends in a string.
+    let .str _ sname := c.d.c.envName
+      | do
+          err c.d.c.ref s!"constructor `{showName c.d.c.envName}` has no name for its successor"
+          ok := false
+          continue
+    snames := snames.push sname
     if params.contains sname || sname == "scrutinee" then
       let what := if sname == "scrutinee" then "the scrutinee" else "a parameter"
       err c.d.c.ref s!"constructor `{sname}` clashes with {what} of \
@@ -777,8 +784,8 @@ def caseOp (d : TypeD) (rcs : Array RCtor) :
       binders := #[],
       ret := none }
   let self : Ty := .app (dynName d.c.envName) (TypeExpr.Raw.vars (d.params.map (·.2.2.2)))
-  let succs : Array RSucc := rcs.map fun c =>
-    { name := c.d.c.envName.getString!, payload := c.args.map (·.2) }
+  let succs : Array RSucc := (rcs.zip snames).map fun (c, sname) =>
+    { name := sname, payload := c.args.map (·.2) }
   let r : ROp :=
     { d := opd
       args := #[("scrutinee", self)]
@@ -804,19 +811,17 @@ def resolve (rc : ResolveCtx) (ancestors : Array EnvEntry) (items : Array Item) 
   for item in items do
     match item with
     | .type d =>
-      let full := match stages.back? with
-        | some (.types ds) => ds.size ≥ stageMax
-        | _ => true
-      if run != 1 || full then
-        stages := stages.push (.types #[])
-        run := 1
-      let k := stages.size
-      let some (.types ds) := stages.back? | unreachable!
+      -- The stage of types still open, if any, and the stages before it.
+      let (ds, before) := match run, stages.back? with
+        | 1, some (.types ds) => if ds.size < stageMax then (ds, stages.pop) else (#[], stages)
+        | _, _ => (#[], stages)
+      run := 1
+      let k := before.size + 1
       discard <| checkDistinct #[] (d.params.map fun (x, r, _) => (x, r))
       let info : TypeInfo :=
         { envName := d.c.envName, owner := rc.envNs, lean := d.c.lean,
           params := d.params.map fun (x, _, b, k) => (x, b, k) }
-      stages := stages.pop.push (.types (ds.push d))
+      stages := before.push (.types (ds.push d))
       own := own.insert d.c.envName (info, k, ds.size)
       known := known.insert d.c.envName (.type info (some (k, ds.size)))
     | .group ds =>
@@ -857,15 +862,15 @@ def resolve (rc : ResolveCtx) (ancestors : Array EnvEntry) (items : Array Item) 
         abbrevs := abbrevs.push (d, info)
         known := known.insert d.c.envName (.abbrev info)
     | .op d =>
-      let full := match stages.back? with
-        | some (.ops rs) => rs.size ≥ stageMax
-        | _ => true
-      if run != 2 || full then
-        stages := stages.push (.ops #[])
-        run := 2
-      if let some r ← resolveOp rc known d then
-        let some (.ops rs) := stages.back? | unreachable!
-        stages := stages.pop.push (.ops (rs.push r))
+      -- The stage of instructions still open, if any, and the stages before it.
+      let (rs, before) := match run, stages.back? with
+        | 2, some (.ops rs) => if rs.size < stageMax then (rs, stages.pop) else (#[], stages)
+        | _, _ => (#[], stages)
+      run := 2
+      let rs := match ← resolveOp rc known d with
+        | some r => rs.push r
+        | none => rs
+      stages := before.push (.ops rs)
   return { stages, abbrevs, own }
 
 /-- Every prefix of every name: the namespaces that exist. -/

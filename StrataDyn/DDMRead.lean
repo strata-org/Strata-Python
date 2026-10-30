@@ -259,8 +259,9 @@ def literal {env : Env Unit} [base ≼ env] (funcs : Funcs env) (ghosts : Ghosts
 -- definition is recorded and resolved after the walk, so the walk builds `Late` parts.
 
 /-- A part of the function that may name values defined further on: it is completed by the
-id of every name. -/
-abbrev Late (β : Type) := (Name → ValId) → β
+id of every name.  A name with no id is an internal error, since `checkUses` has found every
+use defined before the part is completed. -/
+abbrev Late (β : Type) := (Name → Option ValId) → Result β
 
 /-- A use of the value `name` before its definition, at `range`, where the type `type` is
 expected.  `what` says where, for the message. -/
@@ -346,10 +347,12 @@ def use (range : SourceRange) (what : String) (n : Name) (t : TypeExpr env) :
     let some t₁ := s.types[id.id]? | fail range s!"{ToDDM.valNameText n} has no type"
     if t₁ ≠ t then
       fail range s!"{ToDDM.valNameText n} has type {typeText t₁}, but {what} takes {typeText t}"
-    return fun _ => id
+    return fun _ => pure id
   | none =>
     set { s with uses := s.uses.push ⟨n, t, range, what⟩ }
-    return fun ids => ids n
+    return fun ids => match ids n with
+      | some id => pure id
+      | none => throw ⟨range, s!"internal error: {ToDDM.valNameText n} has no id"⟩
 
 /-- Record the label `l`, at `range`. -/
 def defineLabel (range : SourceRange) (l : Name) : ReadM env Unit := do
@@ -365,11 +368,11 @@ def valDecl : MValDecl SourceRange → ReadM env (ValDecl env)
     return ⟨← define ann (valName v) t, t⟩
 
 /-- Each of `ls`, completed. -/
-def Late.all {β : Type} (ls : Array (Late β)) : Late (Array β) := fun ids => ls.map (· ids)
+def Late.all {β : Type} (ls : Array (Late β)) : Late (Array β) := fun ids => ls.mapM (· ids)
 
 /-- Each of `ls`, completed, as an array. -/
 def Late.list {β : Type} (ls : List (Late β)) : Late (Array β) :=
-  fun ids => (ls.map (· ids)).toArray
+  fun ids => ls.foldlM (init := #[]) fun out l => return out.push (← l ids)
 
 /-- What the reader needs while it reads a function or a ghost.  `funcs` and `ghosts` are the
 module's functions and ghosts.  `fn` is the name of the function, for a message.  `initOf` is set
@@ -430,7 +433,7 @@ def operands (fx : FnCtx env) (what : String) (expected : Array (TypeExpr env))
       let k ← constant fx t c
       let id ← defineConst t
       pre := pre.push (.const ann ⟨id, t⟩ k)
-      ids := ids.push fun _ => id
+      ids := ids.push fun _ => pure id
   return (pre, Late.all ids)
 
 /-- The parameter types of the blocks a transfer may name: the non-entry blocks of one body,
@@ -476,7 +479,7 @@ def succs (fx : FnCtx env) (scope : Scope env) (ann : SourceRange) (what : Strin
     let (p, ids) ← operands fx s!"{what}, successor ^{identText l}" (params.extract 0 args.size)
       args
     pre := pre ++ p
-    ks := ks.push fun r => ⟨⟨target⟩, ids r⟩
+    ks := ks.push fun r => return ⟨⟨target⟩, ← ids r⟩
   return (pre, Late.all ks)
 
 /-- The type arguments of an application of `isig`: one per type parameter, each of its
@@ -549,7 +552,7 @@ def insnList (fx : FnCtx env) (scope : Scope env) :
     let k ← constant fx t c
     let id ← define ann (valName v) t
     let rest ← insnList fx scope is
-    return (fun _ => .const ann ⟨id, t⟩ k) :: rest
+    return (fun _ => pure (.const ann ⟨id, t⟩ k)) :: rest
   | .insnApply ann d n ⟨_, ta⟩ ⟨_, args⟩ ⟨_, ss⟩ ⟨_, ⟨regions⟩⟩ :: is => do
     let s := baseControl (identText n)
     let ⟨isig, op⟩ ← (insnRef ann s : Result _)
@@ -569,8 +572,8 @@ def insnList (fx : FnCtx env) (scope : Scope env) :
       fail ann s!"{s} takes {sigs.length} region(s), given {regions.length}"
     let rs ← regionList fx sigs regions
     let rest ← insnList fx scope is
-    return (pre ++ pre₁).toList.map (fun i _ => i) ++
-      (fun r => .apply ann ⟨id, t⟩ op targs (ids r) (ks r) (Late.list rs r)) :: rest
+    return (pre ++ pre₁).toList.map (fun i _ => pure i) ++
+      (fun r => return .apply ann ⟨id, t⟩ op targs (← ids r) (← ks r) (← Late.list rs r)) :: rest
 
 /-- A terminator, preceded by the constants folded into it. -/
 def term (fx : FnCtx env) (scope : Scope env) : MTerm SourceRange →
@@ -585,11 +588,13 @@ def term (fx : FnCtx env) (scope : Scope env) : MTerm SourceRange →
     if let (some (want, msg), #[op]) := (fx.ownRet, args) then
       if let some t ← operandType? fx op then
         if t ≠ want then fail ann (msg (typeText t))
-    let result := (scope[Name.base]?).getD #[]
+    -- `scopeOf` binds `_` to the body's result.
+    let some result := scope[Name.base]?
+      | fail ann "internal error: the scope has no result"
     if args.size ≠ result.size then
       fail ann s!"ret takes {result.size} operand(s), given {args.size}"
     let (pre, ids) ← operands fx "ret" result args
-    return (pre, fun r => .jump ann ⟨Label.exit, ids r⟩)
+    return (pre, fun r => return .jump ann ⟨Label.exit, ← ids r⟩)
   | .termApply ann n ⟨_, ta⟩ ⟨_, args⟩ ⟨_, ss⟩ ⟨_, ⟨regions⟩⟩ => do
     let s := baseControl (identText n)
     let ⟨isig, op⟩ ← (insnRef ann s : Result _)
@@ -602,7 +607,7 @@ def term (fx : FnCtx env) (scope : Scope env) : MTerm SourceRange →
     if sigs.length ≠ regions.length then
       fail ann s!"{s} takes {sigs.length} region(s), given {regions.length}"
     let rs ← regionList fx sigs regions
-    return (pre ++ pre₁, fun r => .apply ann op targs (ids r) (ks r) (Late.list rs r))
+    return (pre ++ pre₁, fun r => return .apply ann op targs (← ids r) (← ks r) (← Late.list rs r))
 
 /-- Blocks, against the scope of their body. -/
 def blockList (fx : FnCtx env) (scope : Scope env) :
@@ -615,7 +620,7 @@ def blockList (fx : FnCtx env) (scope : Scope env) :
     let is ← insnList fx scope instrs
     let (pre, t) ← term fx scope t
     let rest ← blockList fx scope bs
-    return (fun r => ⟨⟨label⟩, params, Late.list is r ++ pre, t r, ann⟩) :: rest
+    return (fun r => return ⟨⟨label⟩, params, (← Late.list is r) ++ pre, ← t r, ann⟩) :: rest
 
 /-- Regions, against their signatures, one each. -/
 def regionList (fx : FnCtx env) : List (RegionType env) → List (MRegion SourceRange) →
@@ -627,7 +632,7 @@ def regionList (fx : FnCtx env) : List (RegionType env) → List (MRegion Source
         is expected"
     let bs ← blockList { fx with ownRet := none } scope blocks
     let rest ← regionList fx sigs rs
-    return (fun r => ⟨Late.list bs r⟩) :: rest
+    return (fun r => return ⟨← Late.list bs r⟩) :: rest
   | _, _ => return []
 
 end
@@ -725,7 +730,7 @@ def frameRegion (fx : FnCtx env) (fn : String) (params : Nat) (ann : SourceRange
     let msg (t : String) :=
       s!"a frame region of @{fn} returns {t}, but a frame region returns a base.Loc"
     let bs ← blockList { fx with ownRet := some (Base.Loc, msg) } scope blocks
-    return fun r => ⟨Late.list bs r⟩
+    return fun r => return ⟨← Late.list bs r⟩
 
 /-- A frame of the function `fn`, whose parameters are the ids below `params`.  Each cell it names
 is a parameter of type `base.Ref`, and none is named twice; each region is a frame region.  `what`
@@ -750,10 +755,10 @@ def frame (fx : FnCtx env) (fn what : String) (params : Nat)
           but a frame names only cells, of type base.Ref"
       if cells.contains id.id then fail ann s!"{what} names {ToDDM.valNameText n} twice"
       cells := cells.insert id.id
-      out := out.push fun _ => .cell id
+      out := out.push fun _ => pure (.cell id)
     | .frameRegion ann ⟨_, ⟨blocks⟩⟩ =>
       let r ← frameRegion fx fn params ann blocks
-      out := out.push fun ids => .region (r ids)
+      out := out.push fun ids => return .region (← r ids)
   return Late.all out
 
 /-- The contract of the function `fn`, whose parameters are the ids below `params`.  The
@@ -781,7 +786,8 @@ def clauseList (fx : FnCtx env) (fn : String) (extern : Bool) (params : Nat)
       let rs ← clauseRegion fx fn params (#[], Base.Bool) r
       let message := messageOf msg
       parts := { parts with
-        requires := parts.requires.push fun ids => (rs ids).map fun region => { region, message } }
+        requires := parts.requires.push fun ids =>
+          return (← rs ids).map fun region => { region, message } }
     | .clauseEnsures _ ⟨_, free⟩ ⟨_, msg⟩ r =>
       let free := free.isSome
       if extern && !free then fail ann s!"@{fn} is extern, so its ensures clauses must be free"
@@ -791,7 +797,7 @@ def clauseList (fx : FnCtx env) (fn : String) (extern : Bool) (params : Nat)
       let message := messageOf msg
       parts := { parts with
         ensures := parts.ensures.push fun ids =>
-          (rs ids).map fun region => { region, free, message } }
+          return (← rs ids).map fun region => { region, free, message } }
   return parts
 
 /-! ## Failures and cycles in contract regions
@@ -1105,12 +1111,14 @@ def func (funcs : Funcs env) (ghosts : Ghosts env) (f : MFunc SourceRange) :
       checkUses
       return (params, bs, parts)
     let ((params, bs, parts), s) ← run.run {}
-    let ids : Name → ValId := fun n => (s.values.get? n).getD ⟨0⟩
-    let blocks := (bs ids).map (Block.map fun range => ({ range } : Info))
+    let ids := s.values.get?
+    let blocks := (← bs ids).map (Block.map fun range => ({ range } : Info))
     -- A defined function's signature repeats its entry block's parameters.
     let params ← if extern then pure params else do
       let sig ← ps.mapM fun | .valDecl _ v ty => return (valName v, ← type ty)
-      let entry := (blocks[0]?.map (·.params)).getD #[]
+      -- `scopeOf` has rejected a defined function with no blocks.
+      let some b₀ := blocks[0]? | throw ⟨ann, s!"internal error: @{identText n} has no blocks"⟩
+      let entry := b₀.params
       let named ← entry.mapM fun d =>
         match s.values.slots[d.id.id]? with
         | some (some v) => pure (v, d.type)
@@ -1121,13 +1129,17 @@ def func (funcs : Funcs env) (ghosts : Ghosts env) (f : MFunc SourceRange) :
     let some ⟨names, hnames⟩ := s.values.fill? constName ⟨0⟩
       | throw ⟨ann, s!"no fresh name for a constant of @{identText n}"⟩
     let toInfo (c : Clause env SourceRange) : Clause env Info := c.map fun range => { range }
-    let frameInfo (l : Late (Array (FrameEntry env SourceRange))) : Array (FrameEntry env Info) :=
-      (l ids).map (FrameEntry.map fun range => { range })
+    let frameInfo (l : Late (Array (FrameEntry env SourceRange))) :
+        Result (Array (FrameEntry env Info)) :=
+      return (← l ids).map (FrameEntry.map fun range => { range })
+    let requires ← parts.requires.flatMapM (· ids)
+    let ensures ← parts.ensures.flatMapM (· ids)
+    let reads ← parts.reads.mapM frameInfo
+    let writes ← parts.writes.mapM frameInfo
     let fn : Func env Info :=
       { name := nameOf (identText n), params, retType, extern, blocks,
-        contract := { requires := (parts.requires.flatMap (· ids)).map toInfo
-                      ensures := (parts.ensures.flatMap (· ids)).map toInfo
-                      reads := parts.reads.map frameInfo, writes := parts.writes.map frameInfo }
+        contract := { requires := requires.map toInfo, ensures := ensures.map toInfo, reads,
+                      writes }
         names, info := { range := ann, attrs } }
     -- The value names' table proves the names distinct; the rest of `Func.WF` is decided.
     if h : fn.extern = fn.blocks.isEmpty ∧
@@ -1212,7 +1224,7 @@ def ghostRegion (fx : FnCtx env) (g place : String) (sig : RegionType env)
       let (scope, entry) ← (scopeOf ann sig.2 blocks : Result _)
       if entry ≠ sig.1 then fail ann (entryMsg (typesText entry))
       let bs ← blockList { fx with ownRet := some (sig.2, retMsg) } scope blocks
-      return fun r => ⟨Late.list bs r⟩
+      return fun r => return ⟨← Late.list bs r⟩
 
 /-- Why the ghost `g` breaks `Ghost.WF`, if one of these explains it: the first problem with the
 failures, the blocks or the transfers of its regions, as `regionsDiagnostic?` finds it, then the
@@ -1255,13 +1267,15 @@ def ghost (funcs : Funcs env) (ghosts : Ghosts env) (idx : Nat) (g : MGhost Sour
     checkUses
     return (init, inv)
   let ((init, inv), s) ← run.run {}
-  let ids : Name → ValId := fun n => (s.values.get? n).getD ⟨0⟩
+  let ids := s.values.get?
   let some ⟨names, hnames⟩ := s.values.fill? constName ⟨0⟩
     | throw ⟨h.ann, s!"no fresh name for a constant of ghost @{gn}"⟩
-  let toInfo (l : Late (Region env SourceRange)) : Region env Info :=
-    (l ids).map fun range => { range }
+  let toInfo (l : Late (Region env SourceRange)) : Result (Region env Info) :=
+    return (← l ids).map fun range => { range }
+  let init ← init.mapM toInfo
+  let inv ← inv.mapM toInfo
   let gh : Ghost env Info :=
-    { name := nameOf gn, type := t, init := init.map toInfo, invariant := inv.map toInfo, names,
+    { name := nameOf gn, type := t, init, invariant := inv, names,
       info := { range := h.ann } }
   -- The value names' table proves the names distinct; the rest of `Ghost.WF` is decided.
   if hw : Label.Distinct (Label.exit :: gh.labels) ∧ ValDecl.idBound gh.defs ≤ gh.names.size ∧

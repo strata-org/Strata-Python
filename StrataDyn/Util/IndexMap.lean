@@ -200,14 +200,10 @@ protected def getD [Inhabited β] (m : IndexMap α β) (key : α) (d : β) : β 
     simp [r]
     grind
 
-protected def get! [Inhabited β] (m : IndexMap α β) (key : α) : β :=
-  m.getD key default
-
 /-- `m[key]?` is `get?`; `m[key]` is the total `get`. -/
 instance : GetElem? (IndexMap α β) α β (fun m key => key ∈ m) where
   getElem := IndexMap.get
   getElem? := IndexMap.get?
-  getElem! := IndexMap.get!
 
 /-! ### Lookup lemmas
 

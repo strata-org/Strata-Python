@@ -128,7 +128,7 @@ def fsettleLoop (c : Core M) (i : Inst M) (hi : InstOK m c.top i)
       (fun _ => .final (.fault (.badCell l)) c.heap c.world drawn)
   | .vis (.modify t l g) k =>
     c.heap.cell l t
-      (fun _ _ => fsettleLoop { c with heap := c.heap.modify l t g } i hi hK drawn (k ()))
+      (fun hl ht => fsettleLoop { c with heap := c.heap.modifyAt l t g hl ht } i hi hK drawn (k ()))
       (fun _ => .final (.fault (.badCell l)) c.heap c.world drawn)
   | .vis (.bind t v sig idx captured) k =>
     let l := c.heap.caps.size + 1
@@ -442,7 +442,7 @@ private theorem settleLoop_sim (i : Inst M) (t : i.Tree) :
     | modify t l g =>
       intro c hi hK drawn _
       by_cases hh : c.heap.Holds l t
-      · obtain ⟨n, hn⟩ := ih () { c with heap := c.heap.modify l t g } hi hK drawn
+      · obtain ⟨n, hn⟩ := ih () { c with heap := c.heap.modifyAt l t g hh.lt hh.code } hi hK drawn
           (.answer (.cell .modify l))
         refine ⟨n + 1, fun j => ?_⟩
         rw [← Nat.add_assoc]

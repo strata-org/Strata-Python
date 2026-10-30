@@ -1036,7 +1036,7 @@ theorem serve_lock {P : List Nat} {Fs : List (List Fact)} {F : List Fact} {c c�
       have hh : c.heap.Holds l ty := ⟨hl, htl⟩
       have hh₁ : c₁.heap.Holds l ty := (hC.heap.holds_iff hlP ty).mpr hh
       simp only [serve]
-      rw [Heap.cell_pos hh, Heap.cell_pos hh₁]
+      rw [Heap.cell_pos hh, Heap.cell_pos hh₁, Heap.modifyAt_eq, Heap.modifyAt_eq]
       have e : typOff (c.heap.modify l ty g) P = typOff c.heap P := typOff_modify
       have hst : HeapStep P P c.heap (c.heap.modify l ty g) (fun _ => False) :=
         .of_frame hC.heap.bound (by rw [e]; exact Typing.Extends.refl _)

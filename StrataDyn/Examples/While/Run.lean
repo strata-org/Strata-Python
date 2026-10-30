@@ -62,13 +62,19 @@ def showExcept (d : Val σ) (α : Type) [@TagOf σ _ (WhileSem.model.decode σ) 
     | .ok v => s!"ok {shw v}"
     | .error e => s!"raised {e}"
 
-/-- A function's result: `ok v`, or `raised e` from a function that may raise. -/
+/-- A function's result: `ok v`, or `raised e` from a function that may raise.  A ref is
+`ok <cell>`, also in the `ok` of a function that may raise, and a value of another tag the
+language has no printer for is `ok <unprintable t>`, with `t` the tag. -/
 def showResult (d : Val σ) : String :=
   match (showPlain d).map (s!"ok {·}") with
   | some s => s
-  | none => ((showExcept d Int toString) <|> (showExcept d Bool toString) <|>
-      (showExcept d Unit fun () => "unit") <|> (showExcept d While.IntList.Val showList)).getD
-      "ok <cell>"
+  | none =>
+    match (showExcept d Int toString) <|> (showExcept d Bool toString) <|>
+        (showExcept d Unit fun () => "unit") <|> (showExcept d While.IntList.Val showList) <|>
+        (showExcept d (Ref σ Int) fun _ => "<cell>") <|>
+        (showExcept d (Ref σ While.IntList.Val) fun _ => "<cell>") with
+    | some s => s
+    | none => if d.1 matches .app 0 _ then "ok <cell>" else s!"ok <unprintable {reprStr d.1}>"
 
 end
 

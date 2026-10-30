@@ -154,6 +154,26 @@ value out of the array before it applies `f`, so `f` gets it unshared when the h
   { heap with cells := heap.cells.modify l fun d =>
       if h : d.1 = t then ⟨t, f (cast (congrArg M.interp h) d.2)⟩ else d }
 
+/-- `heap.modify l t f`, at a location `l` whose bound and tag `t` the cell check has proved, so
+the tag is not compared again.  The value is swapped out of the array before `f` is applied, so
+`f` gets it unshared when the heap is. -/
+@[inline] def Heap.modifyAt (heap : Heap M) (l : Nat) (t : Ty) (f : M.interp t → M.interp t)
+    (hl : l < heap.cells.size) (ht : (heap.cells[l]'hl).1 = t) : Heap M :=
+  let r := heap.cells.swapAt l ⟨M.unit, M.unitVal⟩ hl
+  { heap with cells := r.2.set l ⟨t, f (cast (congrArg M.interp ht) r.1.2)⟩ (by simp [r, hl]) }
+
+/-- The update at a checked cell is the update `Heap.modify`. -/
+theorem Heap.modifyAt_eq (heap : Heap M) (l : Nat) (t : Ty) (f : M.interp t → M.interp t)
+    (hl : l < heap.cells.size) (ht : (heap.cells[l]'hl).1 = t) :
+    heap.modifyAt l t f hl ht = heap.modify l t f := by
+  simp only [Heap.modifyAt, Heap.modify, Array.swapAt, Array.set_set]
+  congr 1
+  refine Array.ext (by simp) fun i h₁ _ => ?_
+  by_cases e : l = i
+  · subst e; simp [Array.getElem_modify_self, ht]
+  · simp only [Array.getElem_modify_of_ne e]
+    exact Array.getElem_set_ne hl _ e
+
 /-- `heap` with a new captures cell holding `ds`. -/
 @[inline] def Heap.capture (heap : Heap M) (ds : List (Dyn M.interp)) : Heap M :=
   { heap with caps := heap.caps.push ds }
@@ -871,14 +891,14 @@ def NextOK (f : Frame M) : Next M → Prop
 /-- A frame whose store agrees with `Γ` may take any edge that checks in `Γ`. -/
 theorem Agree.canTake {Γ : Ctx} {f : Frame M} {s : LSite} {p : List Ty}
     (hA : Agree Γ f.env) (hs : checkSite f.func Γ s p = .ok ()) : CanTake f s p := by
-  obtain ⟨ps, sc, ht, ha, _, hfit⟩ := checkSite_eq_ok.mp hs
+  obtain ⟨ps, sc, qs, ht, ha, _, hfit⟩ := checkSite_eq_ok.mp hs
   obtain ⟨target, args⟩ := s
   refine ⟨hA.allBound ha, ?_⟩
   cases target with
   | block i =>
-    obtain ⟨b, hb, -⟩ := Option.map_eq_some_iff.mp ht
+    obtain ⟨b, hb, hbe⟩ := Option.map_eq_some_iff.mp ht
+    cases hbe
     obtain ⟨hi, rfl⟩ := Array.getElem?_eq_some_iff.mp hb
-    rw [targetParams, hb, Option.map_some, Option.getD_some] at hfit
     exact ⟨hi, fun _ => hfit⟩
   | exit =>
     obtain ⟨rfl, -⟩ := Prod.mk.inj (Option.some.inj ht).symm
@@ -890,12 +910,12 @@ theorem take_ok (hwf : WF m) {Γ : Ctx} {f : Frame M} {s : LSite} {ts : List Ty}
     {xs : Args M.interp ts} (hm : InM m f.func) (hA : Agree Γ f.env)
     (hs : checkSite f.func Γ s ts = .ok ()) (h : CanTake f s ts) :
     NextOK m f (take f s xs h) := by
-  obtain ⟨ps, sc, ht, ha, hsc, -⟩ := checkSite_eq_ok.mp hs
+  obtain ⟨ps, sc, qs, ht, ha, hsc, -⟩ := checkSite_eq_ok.mp hs
   obtain ⟨target, args⟩ := s
   cases target with
   | block i =>
     obtain ⟨b, hb, hbe⟩ := Option.map_eq_some_iff.mp ht
-    obtain ⟨rfl, rfl⟩ := Prod.mk.inj hbe
+    cases hbe
     obtain rfl : f.func.blocks[i]'h.2.1 = b := (Array.getElem?_eq_some_iff.mp hb).2
     refine ⟨⟨hm, entryCtx (f.func.blocks[i]'h.2.1), ?_, ?_⟩, rfl⟩
     · exact Agree.bindSite _ _ xs _ (hA.ofScope Agree.nil (checkScope_eq_ok.mp hsc))
@@ -1563,7 +1583,7 @@ pause at a world request.  `ev` is the step's event. -/
       (fun _ => faultStep c (.badCell l) drawn)
   | .vis (.modify t l g) k =>
     c.heap.cell l t
-      (fun _ _ => settle hwf { c with heap := c.heap.modify l t g } i h.1 h.2 drawn
+      (fun hl ht => settle hwf { c with heap := c.heap.modifyAt l t g hl ht } i h.1 h.2 drawn
         (.answer (.cell .modify l)) (k ()))
       (fun _ => faultStep c (.badCell l) drawn)
   | .vis (.bind t v sig idx captured) k =>

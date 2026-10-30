@@ -327,14 +327,18 @@ def declKinds (owner lean : Name) (e : Term) (allTypes : Bool) : Term :=
   if allTypes then Unhygienic.run `(Strata.Dyn.TypeRef.kinds_of_decl $hd rfl)
   else Unhygienic.run `(Strata.Dyn.TypeRef.kinds_toList_of_decl $hd rfl)
 
-/-- The `TypeInfo` of a type this block or an ancestor declares. -/
-def info (h : Name) : TypeInfo :=
+/-- The `TypeInfo` of a type this block or an ancestor declares, or `none` for another name. -/
+def info? (h : Name) : Option TypeInfo :=
   match cx.ownTypes[h]? with
-  | some (i, _, _) => i
-  | none => cx.inherited[h]?.getD default
+  | some (i, _, _) => some i
+  | none => cx.inherited[h]?
 
-/-- Whether every parameter of `h` is a type, so that `TypeExpr.app` applies it. -/
-def allTypes (h : Name) : Bool := (cx.info h).params.all (·.2.2 == .type)
+/-- `k` of the `TypeInfo` of `h`, a type this block or an ancestor declares.  Checking resolves
+every type name to one of them, so another name is an internal error. -/
+def withTypeInfo (h : Name) (k : TypeInfo → Term) : Term :=
+  match cx.info? h with
+  | some i => k i
+  | none => internalErrorTerm s!"type `{h}` is neither declared nor inherited"
 
 /-- A proof of `stage t ≤ stage j`, for `t ≤ j`. -/
 def leTerm (t j : Nat) : Term :=
@@ -353,8 +357,7 @@ partial def tyAt (j : Nat) (kinds : Array Kind) : Ty → Term
     match cx.ownTypes[h]? with
     | some (info, t, _) =>
       Unhygienic.run `($(cx.own (`Internal ++ info.lean ++ `tyAt)) $(cx.leTerm t j) $as*)
-    | none =>
-      let info := cx.info h
+    | none => cx.withTypeInfo h fun info =>
       let tyT := rootId (info.owner ++ `Internal ++ info.lean ++ `ty)
       Unhygienic.run `(($tyT (e := $(cx.stage j))) $as*)
   -- Checking puts a list only in a list position, which the `app` case and `listTerm` read.
@@ -370,8 +373,8 @@ partial def tyGen (vars : Array Term) (kinds : Array Kind) : Ty → Term
     let h := leanName h
     let as : Array Term := args.map fun a =>
       if a.kind kinds == .list then listTerm kinds (tyGen vars kinds) a else tyGen vars kinds a
-    let info := cx.info h
-    Unhygienic.run `($(rootId (info.owner ++ `Internal ++ info.lean ++ `ty)) $as*)
+    cx.withTypeInfo h fun info =>
+      Unhygienic.run `($(rootId (info.owner ++ `Internal ++ info.lean ++ `ty)) $as*)
   | l@(.list _) => listTerm kinds (tyGen vars kinds) l
 
 /-- Whether `t` is the list variable `j`, spliced: its level. -/
@@ -401,10 +404,10 @@ partial def dataTy (k : Nat) (members : Array Name) (refs : Std.HashMap Name Ter
     let es : Array Term := es.map (dataTy k members refs)
     Unhygienic.run `(Strata.Dyn.DataTy.list #[$es,*])
 
-/-- A constant of the environment declaring `h`, by its name relative to that
-environment. -/
-def ownOrInherited (h : Name) (rel : Name) : Ident :=
-  if cx.ownTypes.contains h then cx.own rel else rootId ((cx.info h).owner ++ rel)
+/-- A constant of the environment declaring `h`, whose `TypeInfo` is `info`, by its name
+relative to that environment. -/
+def ownOrInherited (h : Name) (info : TypeInfo) (rel : Name) : Ident :=
+  if cx.ownTypes.contains h then cx.own rel else rootId (info.owner ++ rel)
 
 /-- The raw form of `tyAt j kinds t`. -/
 partial def rawAt (j : Nat) (kinds : Array Kind) : Ty → Term
@@ -417,8 +420,7 @@ partial def rawAt (j : Nat) (kinds : Array Kind) : Ty → Term
     let lem := match cx.ownTypes[h]? with
       | some (info, t, _) => Unhygienic.run
           `($(cx.own (`Internal ++ info.lean ++ `toRaw_tyAt)) $(cx.leTerm t j) $holes*)
-      | none =>
-        let info := cx.info h
+      | none => cx.withTypeInfo h fun info =>
         Unhygienic.run `(($(rootId (info.owner ++ `Internal ++ info.lean ++ `toRaw_ty))
           (e := $(cx.stage j))) $holes*)
     Unhygienic.run `(Eq.trans $lem (Strata.Dyn.TypeExpr.Raw.app_eq_of $(consChain pfs)))
@@ -427,8 +429,7 @@ partial def rawAt (j : Nat) (kinds : Array Kind) : Ty → Term
 /-- The raw form of `tyGen vars kinds t`, by each type's `Internal.T.toRaw_ty`. -/
 partial def rawGen (kinds : Array Kind) : Ty → Term
   | .var i => Unhygienic.run `(Strata.Dyn.TypeExpr.toRaw_var $(quote i) rfl)
-  | .app h args =>
-    let info := cx.info (leanName h)
+  | .app h args => cx.withTypeInfo (leanName h) fun info =>
     let holes : Array Term := args.map fun _ => Unhygienic.run `(_)
     let pfs := args.map fun a =>
       if a.kind kinds == .list then listRaw kinds (rawGen kinds) a else rawGen kinds a
@@ -835,8 +836,7 @@ partial def EmitCtx.handleOf (cx : EmitCtx) (xs : Array (Ident × Option Ident))
     (kinds : Array Kind) : Ty → Term
   | .var i => (xs[i]?.map (fun x => (x.1 : Term))).getD
       (internalErrorTerm s!"type variable #{i} is out of scope")
-  | .app h args =>
-    let info := cx.info (leanName h)
+  | .app h args => cx.withTypeInfo (leanName h) fun info =>
     let hd := rootId (info.owner ++ info.lean)
     if args.isEmpty then Unhygienic.run `(($hd : $handleExprTy))
     else Syntax.mkApp hd (args.map (cx.handleOf xs kinds))
@@ -861,7 +861,8 @@ partial def EmitCtx.handleOf (cx : EmitCtx) (xs : Array (Ident × Option Ident))
 partial def EmitCtx.rankOf (cx : EmitCtx) : Ty → Option Nat
   | .var _ => none
   | .app h args =>
-    let own := cx.lineage.idxOf? (cx.info (leanName h)).owner
+    -- A name with no `TypeInfo` has no rank; `handleOf` reports it.
+    let own := (cx.info? (leanName h)).bind (cx.lineage.idxOf? ·.owner)
     args.foldl (fun r a => minRank r (cx.rankOf a)) own
   | .list es => es.foldl (fun r a => minRank r (cx.rankOf a)) none
 where
@@ -1091,14 +1092,15 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
       let mut rids : Array Ident := #[]
       for h : hi in [0:heads.size] do
         let hd := heads[hi]
-        let inf := cx.info hd
+        let some inf := cx.info? hd
+          | throwError "internal error: type `{hd}` is neither declared nor inherited"
         let rid := mkIdent (sfx `Internal s!"payRef{k}_{hi}")
-        let nm := cx.ownOrInherited hd (inf.lean ++ `name)
+        let nm := cx.ownOrInherited hd inf (inf.lean ++ `name)
         let decl ← typeDeclTerm nm inf.params
         let lemmas : Array Ident :=
           if cx.ownTypes.contains hd then #[]
-          else #[cx.ownOrInherited hd (inf.lean ++ `name_ref),
-            cx.ownOrInherited hd (inf.lean ++ `decl_ref)]
+          else #[cx.ownOrInherited hd inf (inf.lean ++ `name_ref),
+            cx.ownOrInherited hd inf (inf.lean ++ `decl_ref)]
         cs := cs.push (← defCmd (mkDoc s!"`{showName hd}` in stage {k - 1}, from literals.")
           svis? false rid #[] (← `(Strata.Dyn.TypeRef $prev $(quote inf.params.size)))
           (← `(⟨$nm, $decl, rfl, by

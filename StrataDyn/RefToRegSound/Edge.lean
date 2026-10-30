@@ -68,7 +68,7 @@ payload. -/
 private theorem checkSite_length {fn : LBody M} {Γ : Exec.Ctx} {j : Nat} {args : List Nat}
     {ts : List Ty} (h : checkSite fn Γ ⟨.block j, args⟩ ts = .ok ()) :
     args.length + ts.length = (paramsOf fn j).length := by
-  obtain ⟨ps, sc, ht, ha, -, -⟩ := checkSite_eq_ok.mp h
+  obtain ⟨ps, sc, qs, ht, ha, -, -⟩ := checkSite_eq_ok.mp h
   have hl := checkArgs_length ha
   simp only [targetSig] at ht
   obtain ⟨b, hb, he⟩ := Option.map_eq_some_iff.mp ht

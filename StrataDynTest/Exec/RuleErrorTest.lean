@@ -634,7 +634,7 @@ environment ErrTag extends Base where
 def tagged {σ : Type} [Store σ] [Decode σ] [TagOf σ Mut.A.Val] (x : Int) : Sem ε E Int := pure x
 
 /--
-error: a capability names Mut.A.Val, the Lean type of no type of this table
+error: #dyn_sem_table: a capability names Mut.A.Val, the Lean type of no type of this table
 -/
 #guard_msgs in
 #dyn_sem_table ErrTagSem for ErrTag

@@ -52,7 +52,7 @@ into its block.
 TODO: prove `link_wf`, that linking a module without extern functions that `Module.WF` accepts
 gives one that `WF` accepts.  Nothing proves it yet; a run validates the linked module and
 rejects it otherwise.  A module with an extern function does not run yet: an extern has no
-blocks, so linking or validation rejects it.
+blocks, so linking rejects it.
 -/
 
 namespace Strata.Dyn.Exec
@@ -400,32 +400,47 @@ def blockUses (labels : LabelMap Nat) (b : Block env α) : List Nat × List Nat 
   | .apply _ _ _ args succs ⟨rs⟩ =>
     (args.toList.map (·.id) ++ siteIds succs ++ regionIds rs ++ rd, targets succs ++ ts)
 
+/-- `s` after rounds of `round` until a round changes nothing, which takes at most `rounds`
+rounds.  A fault names the pass `what` if the last round still changes something. -/
+def fixpoint {σ : Type} (rounds : Nat) (what : String) (round : σ → Except Fault (σ × Bool))
+    (s : σ) : Except Fault σ := do
+  let mut s := s
+  for _ in [0:rounds] do
+    let (s₁, changed) ← round s
+    s := s₁
+    if !changed then return s
+  throw (.invalid s!"{what}: no fixpoint after {rounds} rounds")
+
 /-- The values live at the entry of each of a body's blocks, whose labels are `labels`: those
 that some path from the entry reads before the path defines them.  A region's free ids count as
 read at its instruction.  A backward dataflow: each round adds to each block what its
 successors read and it does not define, and it stops after a round that adds nothing.  A fact
-travels one block per round at least, so `blocks.length + 1` rounds suffice. -/
-def liveIns (labels : LabelMap Nat) (blocks : List (Block env α)) : Array (Std.HashSet Nat) :=
-  Id.run do
-  let info := blocks.toArray.map fun b =>
+travels one block per round at least, so `n + 1` rounds suffice; a fault reports a last round
+that still adds something, and a successor whose index is beyond the blocks. -/
+def liveIns {n : Nat} (labels : LabelMap Nat) (blocks : Vector (Block env α) n) :
+    Except Fault (Vector (Std.HashSet Nat) n) := do
+  let info ← blocks.mapM fun b => do
     let defs : Std.HashSet Nat := b.instrs.foldl (fun s i => s.insert i.result.id.id)
       (b.params.foldl (·.insert ·.id.id) {})
     let (reads, succs) := blockUses labels b
-    (defs, reads, succs)
-  let mut live : Array (Std.HashSet Nat) := info.map fun (defs, reads, _) =>
+    let succs ← succs.mapM fun k =>
+      if h : k < n then pure (⟨k, h⟩ : Fin n)
+      else throw (.invalid s!"liveness: a successor {k} beyond the {n} blocks")
+    return (defs, reads, succs)
+  let live : Vector (Std.HashSet Nat) n := info.map fun (defs, reads, _) =>
     reads.foldl (fun s v => if defs.contains v then s else s.insert v) {}
-  for _ in [0:blocks.length + 1] do
+  fixpoint (n + 1) s!"liveness over {n} blocks" (s := live) fun live => do
+    let mut live := live
     let mut changed := false
-    for j in (List.range info.size).reverse do
-      let some (defs, _, succs) := info[j]? | continue
-      let some cur := live[j]? | continue
+    for j in (List.finRange n).reverse do
+      let (defs, _, succs) := info[j]
+      let cur := live[j]
       let next := succs.foldl (init := cur) fun s k =>
-        (live[k]?.getD {}).fold (init := s) fun s v => if defs.contains v then s else s.insert v
+        live[k].fold (init := s) fun s v => if defs.contains v then s else s.insert v
       if next.size != cur.size then
-        live := live.setIfInBounds j next
+        live := live.set j next
         changed := true
-    if !changed then break
-  return live
+    return (live, changed)
 
 /-- One more than the largest id that `blocks` define, at any depth. -/
 def slotsOf (blocks : List (Block env α)) : Nat :=
@@ -458,36 +473,46 @@ def blockDefs (b : Block env α) : LinkM M Ctx := do
 the entry, and at another block what is in scope at its parent point `⟨l, k⟩`, the scope of
 `l`, its parameters and its first `k` results.  `none` for a block whose chain of parents does
 not reach the entry.  A parent may come after its block, so each round fills in the blocks
-whose parents are known, until a round fills in none. -/
-def treeScopes (labels : LabelMap Nat) (parents : Array (Option Point))
-    (defs : Array (Nat × Ctx)) (outer : Ctx) : Array (Option Ctx) := Id.run do
-  let n := parents.size
-  let mut known : Array (Option Ctx) := (Array.replicate n none).setIfInBounds 0 (some outer)
-  for _ in [0:n] do
+whose parents are known, until a round fills in none.  Each round but the last fills in a
+block, so `n + 1` rounds suffice; a fault reports a last round that still fills one in, and a
+parent that is not one of the blocks. -/
+def treeScopes {n : Nat} (labels : LabelMap Nat) (parents : Vector (Option Point) n)
+    (defs : Vector (Nat × Ctx) n) (outer : Ctx) : Except Fault (Vector (Option Ctx) n) := do
+  let known : Vector (Option Ctx) n := Vector.ofFn fun j => if j.1 = 0 then some outer else none
+  fixpoint (n + 1) s!"scopes over {n} blocks" (s := known) fun known => do
+    let mut known := known
     let mut changed := false
-    for j in [1:n] do
-      if (known[j]?.join).isSome then continue
-      let some ⟨l, k⟩ := parents[j]?.join | continue
-      let some i := labels.find? l | continue
-      let some c := known[i]?.join | continue
-      let some (np, ds) := defs[i]? | continue
-      known := known.setIfInBounds j (some (ctxOf c (ds.take (np + k))))
-      changed := true
-    if !changed then break
-  return known
+    for j in List.finRange n do
+      if j.1 = 0 || known[j].isSome then continue
+      let some ⟨l, k⟩ := parents[j] | continue
+      let some i := labels.find? l
+        | throw (.invalid s!"scopes: a parent {nameStr l.name} that is not one of the blocks")
+      if h : i < n then
+        -- The parent's scope may not be known yet in this round.
+        let some c := known[i] | continue
+        let (np, ds) := defs[i]
+        known := known.set j (some (ctxOf c (ds.take (np + k))))
+        changed := true
+      else throw (.invalid s!"scopes: a parent {i} beyond the {n} blocks")
+    return (known, changed)
 
 /-- The scope of each of a body's blocks, whose labels are `labels`: what is in scope at its
 entry under the body's computed dominator tree, its entry seeing `outer`, and live there
 (`liveIns`).  A block whose parents do not reach the entry sees nothing. -/
 def bodyScopes (labels : LabelMap Nat) (blocks : List (Block env α)) (outer : Ctx) :
-    LinkM M (Array Ctx) := do
-  let defs ← blocks.toArray.mapM fun b => return (b.params.size, ← blockDefs b)
+    LinkM M (Vector Ctx blocks.length) := do
+  let bs : Vector (Block env α) blocks.length := ⟨blocks.toArray, by simp⟩
+  let defs ← bs.mapM fun b => return (b.params.size, ← blockDefs b)
   let t := (Body.domTree? blocks).getD (Body.computeTree blocks).find?
-  let scopes := treeScopes labels (blocks.toArray.map (t ·.label)) defs outer
-  let live := liveIns labels blocks
-  return scopes.mapIdx fun j sc =>
-    let lv := live[j]?.getD {}
-    (sc.getD []).filter fun p => lv.contains p.1
+  let scopes ← (treeScopes labels (bs.map (t ·.label)) defs outer : Except Fault _)
+  let live ← (liveIns labels bs : Except Fault _)
+  return Vector.zipWith (fun sc lv => (sc.getD []).filter fun p => lv.contains p.1) scopes live
+
+/-- The parameters' tags of the entry block of the function `name`, whose linked blocks are
+`lbs`.  `Func.WF.externIff` gives a defined function blocks. -/
+def entryParams (name : Name) : List (LBlock M.at) → LinkM M (List Ty)
+  | b :: _ => pure b.paramTys
+  | [] => linkError s!"{nameStr name}: no entry block"
 
 mutual
 
@@ -496,7 +521,8 @@ def linkRegion (fname : Name) (scope : Ctx) (retTy : Ty) :
     Dyn.Region env α → LinkM M Nat
   | ⟨⟨blocks⟩⟩ => do
     let labels := labelsOf blocks
-    let lbs ← linkBlocks labels (← bodyScopes labels blocks scope) 0 blocks
+    let scopes ← bodyScopes labels blocks scope
+    let lbs ← linkBlocks labels blocks scopes.toList (by simp)
     let st ← get
     let k := st.regions.size
     let body : LBody M.at :=
@@ -515,17 +541,19 @@ def linkRegions (fname : Name) (Γ : Ctx) :
     return k :: (← linkRegions fname Γ rs sigs)
   | _, _ => linkError s!"{nameStr fname}: the wrong number of regions"
 
-/-- Link a body's blocks from block `i` on, block `j` with the scope `scopes[j]`. -/
-def linkBlocks (labels : LabelMap Nat) (scopes : Array Ctx) (i : Nat) :
-    List (Block env α) → LinkM M (List (LBlock M.at))
-  | [] => pure []
-  | ⟨label, params, ⟨instrs⟩, term, _⟩ :: bs => do
-    let sc := scopes[i]?.getD []
+/-- Link a body's blocks, each with its scope in `scopes`, one per block, as `bodyScopes` gives
+them. -/
+def linkBlocks (labels : LabelMap Nat) :
+    (bs : List (Block env α)) → (scopes : List Ctx) → bs.length = scopes.length →
+      LinkM M (List (LBlock M.at))
+  | [], _, _ => pure []
+  | ⟨label, params, ⟨instrs⟩, term, _⟩ :: bs, sc :: scopes, h => do
     let params ← linkParams params.toList
     let (insns, Γ) ← linkInsns labels (ctxOf sc params) instrs
     let term ← linkTerm labels Γ term
     let lb : LBlock M.at := { label, params, scope := sc, insns, term }
-    return lb :: (← linkBlocks labels scopes (i + 1) bs)
+    return lb :: (← linkBlocks labels bs scopes (by simpa using h))
+  | _ :: _, [], h => absurd h (by simp)
 
 /-- Link instructions in context `Γ`, and the context after them. -/
 def linkInsns (labels : LabelMap Nat) (Γ : Ctx) :
@@ -597,20 +625,24 @@ def linkTerm (labels : LabelMap Nat) (Γ : Ctx) :
 end
 
 /-- Link a function. -/
-def linkFunc (f : Func env α) : LinkM M (LBody M.at) := do
-  let blocks := f.blocks.toList
-  let slots := slotsOf blocks
-  let labels := labelsOf blocks
-  let lbs ← withReader ({ · with slots }) do
-    linkBlocks labels (← bodyScopes labels blocks []) 0 blocks
-  let params := (lbs.head?.map (·.paramTys)).getD []
-  return { name := f.name, ret := ← tyCode f.retType, blocks := ⟨lbs⟩, slots, params }
+def linkFunc (f : Func env α) : LinkM M (LBody M.at) :=
+  if f.extern then linkError s!"{nameStr f.name}: an extern function does not run yet"
+  else do
+    let blocks := f.blocks.toList
+    let slots := slotsOf blocks
+    let labels := labelsOf blocks
+    let lbs ← withReader ({ · with slots }) do
+      let scopes ← bodyScopes labels blocks []
+      linkBlocks labels blocks scopes.toList (by simp)
+    let params ← entryParams f.name lbs
+    return { name := f.name, ret := ← tyCode f.retType, blocks := ⟨lbs⟩, slots, params }
 
 end
 
-/-- The signature of `f`: its entry block's parameters' tags, and its result's tag. -/
+/-- The signature of `f`: its parameters' tags, and its result's tag.  A defined function's
+entry block takes exactly its parameters (`Func.WF.entryParams`). -/
 def sigOf (M : Model) {env : Env Unit} {α : Type} (f : Func env α) : Except Fault (List Ty × Ty) := do
-  let ps := (f.blocks[0]?.map (·.params.toList)).getD []
+  let ps := f.params.toList
   let some ts := ps.mapM fun d => codeOf M d.type |
     .error (.invalid s!"{nameStr f.name}: a parameter type with no tag in the model")
   let some r := codeOf M f.retType |

@@ -45,7 +45,6 @@ private def m₂ : IndexMap String Nat := (m₁.insert "c" 3).insert "b" 10
 #guard m₂.idxOf? "z" == none
 #guard m₂.contains "c" && !m₂.contains "z"
 #guard m₂.getD "z" 7 == 7
-#guard m₂.get! "a" == 2
 
 /-! ## `ofArray`: the last value for a key wins, at the key's first position -/
 

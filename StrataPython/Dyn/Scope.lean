@@ -329,10 +329,22 @@ structure Table where
   diagnostics : Array Diagnostic
   /-- The proof that a walk from any scope, up through parents or down through children, ends. -/
   ordered : Ordered Scope.parent Scope.children scopes
+  /-- There is a scope 0, which `analyze` makes the module scope. -/
+  scopes_ne : 0 < scopes.size
   deriving Repr
 
+/-- A module scope with no names. -/
+def Scope.emptyModule : Scope :=
+  { kind := .module, name := "<module>", qualname := "", parent := none, children := #[]
+    params := #[], symbols := #[], range := .none, privateName := none, needsClassCell := false }
+
 instance : Inhabited Table :=
-  ⟨{ scopes := #[], imports := #[], diagnostics := #[], ordered := by simp [Ordered] }⟩
+  ⟨{ scopes := #[Scope.emptyModule], imports := #[], diagnostics := #[]
+     ordered := by
+       intro i hi
+       obtain rfl : i = 0 := by simpa using hi
+       simp [Scope.emptyModule]
+     scopes_ne := by decide }⟩
 
 /-- A scope's parent comes before it in the table. -/
 theorem Table.parent_lt (t : Table) {i : Nat} (h : i < t.scopes.size) {q : Nat}
@@ -380,7 +392,7 @@ end Scope
 namespace Table
 
 /-- The module scope. -/
-def module (t : Table) : Scope := t.scopes[0]!
+def module (t : Table) : Scope := t.scopes[0]'t.scopes_ne
 
 /-- The symbol for `name` in scope `s`; `name` must be mangled already. -/
 def symbol? (t : Table) (s : ScopeId) (name : String) : Option Symbol :=
@@ -464,7 +476,23 @@ private abbrev CollectM := StateM CollectState
 
 private def curScope : CollectM Pending := do
   let st ← get
-  return st.scopes[st.cur]!
+  return st.scopes[st.cur]'st.hcur
+
+/-- The module scope. -/
+private def moduleScope : CollectM Pending := do
+  let st ← get
+  return st.scopes[0]'(Nat.lt_of_le_of_lt (Nat.zero_le _) st.hcur)
+
+/-- Scope `s`.  Every id the walk holds names a scope it opened, so a missing one is an
+internal error, reported, with an empty module scope in its place. -/
+private def scopeAt (s : ScopeId) : CollectM Pending := do
+  match (← get).scopes[s]? with
+  | some p => return p
+  | none =>
+    let d : Diagnostic :=
+      { kind := .internal, message := s!"scope {s} is not in the table", range := .none }
+    modify fun st => { st with diagnostics := st.diagnostics.push d }
+    return { kind := .module, name := "", parent := none, range := .none, privateName := none }
 
 /-- Changing scope `s` with a function `f` that keeps each scope's parent and children keeps
 `Ordered`. -/
@@ -530,12 +558,12 @@ private def mangled (name : String) : CollectM String := do
 
 /-- The flags of an already-mangled name in scope `s`. -/
 private def usesIn (s : ScopeId) (name : String) : CollectM Uses := do
-  return ((← get).scopes[s]!.uses[name]?).getD {}
+  return ((← scopeAt s).uses[name]?).getD {}
 
 /-- Add `flag` to an already-mangled name in scope `s`: `symtable_add_def_helper`. -/
 private def addDefIn (s : ScopeId) (name : String) (flag : Uses) (range : SourceRange) :
     CollectM Unit := do
-  let p := (← get).scopes[s]!
+  let p ← scopeAt s
   let old := p.uses[name]?
   let mut val := (old.getD {}).union flag
   if flag.param && (old.map (·.param)).getD false then
@@ -550,7 +578,7 @@ private def addDefIn (s : ScopeId) (name : String) (flag : Uses) (range : Source
              names := if old.isSome then p.names else p.names.push name }
   -- A `global` declaration also lands in the module's table.
   if flag.declaredGlobal && s != 0 then
-    let m := (← get).scopes[0]!
+    let m ← moduleScope
     let mOld := m.uses[name]?
     modifyScope 0 fun m =>
       { m with uses := m.uses.insert name ((mOld.getD {}).union { declaredGlobal := true })
@@ -607,7 +635,7 @@ private def enter (kind : ScopeKind) (name : String) (range : SourceRange) : Col
   have hid : id = st.scopes.size := rfl
   let child : Pending :=
     { kind, name, parent := some st.cur, range, privateName := st.privateName
-      inIterExpr := st.scopes[st.cur]!.inIterExpr }
+      inIterExpr := (st.scopes[st.cur]'st.hcur).inIterExpr }
   set ({ st with
     scopes := (st.scopes.modify st.cur fun p =>
       { p with children := p.children.push id }).push child
@@ -1100,26 +1128,34 @@ functions bind, and passing up the free names nested scopes use.  After classify
 inlined comprehension, it merges the comprehension's names into the enclosing scope:
 `inline_comprehension`. -/
 
-private structure Analysis where
+/-- The state of the analysis of `n` scopes, each indexed by scope. -/
+private structure Analysis (n : Nat) where
   /-- The scopes' names and flags, extended with those of inlined comprehensions. -/
-  pending : Array Pending
-  scopes : Array (Std.HashMap String NameScope)
+  pending : Vector Pending n
+  scopes : Vector (Std.HashMap String NameScope) n
   /-- Free names a scope gets only to pass a cell on to a nested scope. -/
-  passThrough : Array (Array String)
-  freeClass : Array (Std.HashSet String)
-  needsClassCell : Array Bool
+  passThrough : Vector (Array String) n
+  freeClass : Vector (Std.HashSet String) n
+  needsClassCell : Vector Bool n
   diagnostics : Array Diagnostic := #[]
 
-private abbrev AnalyzeM := StateM Analysis
+private abbrev AnalyzeM (n : Nat) := StateM (Analysis n)
+
+/-- `v` with its `i`th element replaced by `f` of it.  `f` gets the element unshared when `v`
+is unshared. -/
+private def modifyAt {α : Type} {n : Nat} (v : Vector α n) (i : Fin n) (f : α → α) :
+    Vector α n :=
+  ⟨v.toArray.modify i f, by simp⟩
 
 /-- The children of `s`, with each inlined comprehension replaced by its own children,
 recursively: CPython's `ste_children` after splicing. -/
 private def splicedChildren (tree : Array Pending)
-    (h : Ordered Pending.parent Pending.children tree) (s : ScopeId) : Array ScopeId :=
+    (h : Ordered Pending.parent Pending.children tree) (s : ScopeId) : Array (Fin tree.size) :=
   if hs : s < tree.size then
     tree[s].children.attach.flatMap fun ⟨c, hc⟩ =>
       have hlt := (h s hs).2 c hc
-      if tree[c].kind == ScopeKind.inlinedComprehension then splicedChildren tree h c else #[c]
+      if tree[c].kind == ScopeKind.inlinedComprehension then splicedChildren tree h c
+      else #[⟨c, hlt.2⟩]
   else #[]
 termination_by tree.size - s
 
@@ -1131,20 +1167,21 @@ A name new to `s` is added with the comprehension's flags and classification.  A
 name that `s` binds is no longer free, unless a scope nested in `c` uses it or `s` is a
 class body. -/
 private def inlineComprehension (tree : Array Pending)
-    (htree : Ordered Pending.parent Pending.children tree) (s c : ScopeId)
+    (htree : Ordered Pending.parent Pending.children tree) (s c : Fin tree.size)
     (scopes : Std.HashMap String NameScope)
     (compFree cells : Std.HashSet String) :
-    AnalyzeM (Std.HashMap String NameScope × Std.HashSet String × Std.HashSet String) := do
+    AnalyzeM tree.size
+      (Std.HashMap String NameScope × Std.HashSet String × Std.HashSet String) := do
   let a ← get
-  let comp := a.pending[c]!
-  let compScopes := a.scopes[c]!
-  let parentKind := a.pending[s]!.kind
+  let comp := a.pending[c]
+  let compScopes := a.scopes[c]
+  let parentKind := a.pending[s].kind
   let nested := splicedChildren tree htree c
   let mut scopes := scopes
   let mut compFree := compFree
   let mut cells := cells
   let mut dropClass := false
-  for k in comp.names ++ a.passThrough[c]! do
+  for k in comp.names ++ a.passThrough[c] do
     let flags := (comp.uses[k]?).getD {}
     if flags.param then continue
     let mut scope := (compScopes[k]?).getD .globalImplicit
@@ -1154,21 +1191,21 @@ private def inlineComprehension (tree : Array Pending)
       scope := .globalImplicit
       compFree := compFree.erase k
       dropClass := true
-    match (← get).pending[s]!.uses[k]? with
+    match (← get).pending[s].uses[k]? with
     | none =>
-      modify fun a => { a with pending := a.pending.modify s fun p =>
+      modify fun a => { a with pending := modifyAt a.pending s fun p =>
         { p with uses := p.uses.insert k flags, names := p.names.push k } }
       scopes := scopes.insert k scope
     | some existing =>
-      let freeInNested := nested.any fun n => a.scopes[n]![k]? == some .free
+      let freeInNested := nested.any fun m => a.scopes[m][k]? == some .free
       if existing.bound && !freeInNested && parentKind != .classBody then
         compFree := compFree.erase k
   if dropClass then
     modify fun a => { a with
-      pending := a.pending.modify c fun p =>
+      pending := modifyAt a.pending c fun p =>
         { p with names := p.names.erase "__class__", uses := p.uses.erase "__class__" }
-      scopes := a.scopes.modify c (·.erase "__class__")
-      passThrough := a.passThrough.modify c (·.erase "__class__") }
+      scopes := modifyAt a.scopes c (·.erase "__class__")
+      passThrough := modifyAt a.passThrough c (·.erase "__class__") }
   return (scopes, compFree, cells)
 
 /-- Classify the names of scope `s` and its descendants.  `bound` is the set of names the
@@ -1176,10 +1213,10 @@ enclosing functions bind, `none` for the module.  Return the free names of `s` a
 descendants that `s` does not bind. -/
 private def analyzeBlock (tree : Array Pending)
     (htree : Ordered Pending.parent Pending.children tree) (s : ScopeId)
-    (bound : Option (Std.HashSet String)) : AnalyzeM (Std.HashSet String) := do
+    (bound : Option (Std.HashSet String)) : AnalyzeM tree.size (Std.HashSet String) := do
   if hs : s < tree.size then
-    let p := (← get).pending[s]!
-    let err (msg : String) (name : String) : AnalyzeM Unit :=
+    let p := (← get).pending[s]
+    let err (msg : String) (name : String) : AnalyzeM tree.size Unit :=
       let range := (p.directives[name]?).getD p.range
       let d : Diagnostic := { kind := .syntaxError, message := msg, range }
       modify fun a => { a with diagnostics := a.diagnostics.push d }
@@ -1222,13 +1259,13 @@ private def analyzeBlock (tree : Array Pending)
       have hlt := (htree s hs).2 c hc
       let mut f ← analyzeBlock tree htree c (some newBound)
       if tree[c].kind == ScopeKind.inlinedComprehension then
-        let r ← inlineComprehension tree htree s c result f cells
+        let r ← inlineComprehension tree htree ⟨s, hs⟩ ⟨c, hlt.2⟩ result f cells
         result := r.1
         f := r.2.1
         cells := r.2.2
       childFree := f.fold (·.insert ·) childFree
     -- The names of inlined comprehensions are now names of `s`.
-    let p := (← get).pending[s]!
+    let p := (← get).pending[s]
     if p.kind.isFunctionLike then
       for name in p.names do
         if result[name]? == some .local && (childFree.contains name || cells.contains name)
@@ -1237,11 +1274,11 @@ private def analyzeBlock (tree : Array Pending)
           childFree := childFree.erase name
     else if p.kind == .classBody && childFree.contains "__class__" then
       childFree := childFree.erase "__class__"
-      modify fun a => { a with needsClassCell := a.needsClassCell.set! s true }
+      modify fun a => { a with needsClassCell := a.needsClassCell.set s true }
     let markCell (us : Std.HashMap String Uses) (n : String) :=
       us.modify n fun u => { u with compCell := true }
     let p := { p with uses := cells.fold markCell p.uses }
-    modify fun a => { a with pending := a.pending.set! s p }
+    modify fun a => { a with pending := a.pending.set s p }
     -- Free names of nested scopes: a class using the name marks it; a scope between the
     -- binding and the use passes the cell on.
     let mut extra : Array String := #[]
@@ -1255,37 +1292,40 @@ private def analyzeBlock (tree : Array Pending)
       extra := extra.push name
       result := result.insert name .free
     let resultFinal := result
-    modify fun a => { a with scopes := a.scopes.set! s resultFinal
-                             passThrough := a.passThrough.set! s extra
-                             freeClass := a.freeClass.set! s freeClass }
+    modify fun a => { a with scopes := a.scopes.set s resultFinal
+                             passThrough := a.passThrough.set s extra
+                             freeClass := a.freeClass.set s freeClass }
     return childFree.fold (·.insert ·) free
   else return {}
 termination_by tree.size - s
 
-/-- CPython's `__qualname__` for each scope, given the parents' classifications.  A scope
-in an inlined comprehension is named after the scope the comprehension is inlined into. -/
-private def qualnames (scopes : Array Pending) (classes : Array (Std.HashMap String NameScope)) :
-    Array String := Id.run do
-  let mut out : Array String := #[]
+/-- CPython's `__qualname__` for each scope of `tree`, given the scopes' classifications.  A
+scope in an inlined comprehension is named after the scope the comprehension is inlined into. -/
+private def qualnames (tree : Array Pending) (htree : Ordered Pending.parent Pending.children tree)
+    (classes : Vector (Std.HashMap String NameScope) tree.size) : Vector String tree.size :=
+    Id.run do
+  let mut out : Vector String tree.size := Vector.replicate tree.size ""
   -- For each scope, the nearest scope that is not an inlined comprehension.
-  let mut frame : Array ScopeId := #[]
-  for i in [0:scopes.size] do
-    let p := scopes[i]!
-    match p.parent with
-    | none => out := out.push ""; frame := frame.push i
+  let mut frame : Vector (Fin tree.size) tree.size := Vector.ofFn id
+  for h : i in [0:tree.size] do
+    have hi : i < tree.size := h.upper
+    let p := tree[i]
+    match hq : p.parent with
+    | none => pure ()
     | some q =>
-      let q := if p.kind == .inlinedComprehension then q else frame[q]!
-      frame := frame.push (if p.kind == .inlinedComprehension then frame[q]! else i)
-      let parent := scopes[q]!
+      have hqi : q < tree.size := Nat.lt_trans ((htree i hi).1 q hq) hi
+      let q : Fin tree.size := if p.kind == .inlinedComprehension then ⟨q, hqi⟩ else frame[q]
+      if p.kind == .inlinedComprehension then frame := frame.set i frame[q]
+      let parent := tree[q]
       -- A `def` or `class` whose name the parent declares `global` is top level.
       let forceGlobal := (p.kind == .function || p.kind == .classBody) &&
-        classes[q]!.get? (mangle parent.privateName p.name) == some .globalExplicit
-      if parent.kind == .module || forceGlobal then out := out.push p.name
+        classes[q].get? (mangle parent.privateName p.name) == some .globalExplicit
+      if parent.kind == .module || forceGlobal then out := out.set i p.name
       else
-        let base := out[q]!
+        let base := out[q]
         let base := if parent.kind == .function || parent.kind == .lambda then
           s!"{base}.<locals>" else base
-        out := out.push s!"{base}.{p.name}"
+        out := out.set i s!"{base}.{p.name}"
   return out
 
 public section
@@ -1305,24 +1345,25 @@ def analyze (stmts : Array (stmt SourceRange)) : Table := Id.run do
     { scopes := #[root], futureAnnotations := hasFutureAnnotations stmts, hcur := by simp
       hord := by intro i hi; simp at hi; subst hi; simp [root] }
   let n := st.scopes.size
-  let init : Analysis :=
-    { pending := st.scopes, scopes := Array.replicate n {}
-      passThrough := Array.replicate n #[], freeClass := Array.replicate n {}
-      needsClassCell := Array.replicate n false }
+  let init : Analysis n :=
+    { pending := ⟨st.scopes, rfl⟩, scopes := Vector.replicate n {}
+      passThrough := Vector.replicate n #[], freeClass := Vector.replicate n {}
+      needsClassCell := Vector.replicate n false }
   let (_, a) := (analyzeBlock st.scopes st.hord 0 none).run init
-  let quals := qualnames a.pending a.scopes
+  -- Phase 2 does not change the `kind`, `name`, `privateName` or `parent` that `qualnames` reads.
+  let quals := qualnames st.scopes st.hord a.scopes
   -- The links come from phase 1's tree, which phase 2 does not change; the rest from phase 2.
-  let scopes := st.scopes.mapIdx fun i t =>
-    let p := a.pending[i]!
-    let names := p.names ++ a.passThrough[i]!
+  let scopes := st.scopes.mapFinIdx fun i t hi =>
+    let p := a.pending[i]
+    let names := p.names ++ a.passThrough[i]
     let symbols := names.map fun name =>
       let uses := (p.uses[name]?).getD {}
       { name
-        scope := (a.scopes[i]![name]?).getD .globalImplicit
-        uses := { uses with freeClass := a.freeClass[i]!.contains name } : Symbol }
-    { kind := p.kind, name := p.name, qualname := quals[i]!, parent := t.parent
+        scope := (a.scopes[i][name]?).getD .globalImplicit
+        uses := { uses with freeClass := a.freeClass[i].contains name } : Symbol }
+    { kind := p.kind, name := p.name, qualname := quals[i], parent := t.parent
       children := t.children, params := p.params, symbols, range := p.range
-      privateName := p.privateName, needsClassCell := a.needsClassCell[i]!
+      privateName := p.privateName, needsClassCell := a.needsClassCell[i]
       generator := p.generator : Scope }
   -- As in CPython, the symbol table's errors, from the walk and then the analysis, come before
   -- the compiler's.
@@ -1331,8 +1372,10 @@ def analyze (stmts : Array (stmt SourceRange)) : Table := Id.run do
     intro i hi
     have hi' : i < st.scopes.size := by simpa [scopes] using hi
     simpa [scopes] using st.hord i hi'
+  have scopes_ne : 0 < scopes.size := by
+    simpa [scopes] using Nat.lt_of_le_of_lt (Nat.zero_le _) st.hcur
   return { scopes, imports := st.imports, diagnostics := walk ++ a.diagnostics ++ compiler,
-           ordered }
+           ordered, scopes_ne }
 
 end -- public section
 
@@ -1369,8 +1412,8 @@ private def ScopeKind.text : ScopeKind → String
 private def signature (ps : Array Param) : String := Id.run do
   let mut out : Array String := #[]
   let mut starred := false
-  for i in [0:ps.size] do
-    let p := ps[i]!
+  for h : i in [0:ps.size] do
+    let p := ps[i]
     match p.kind with
     | .posOnly =>
       out := out.push p.name
@@ -1393,27 +1436,30 @@ private def Import.line (i : Import) : String :=
 
 namespace Table
 
-/-- The lines for scope `s` and its descendants; `fuel` bounds the depth. -/
-private def scopeLines (t : Table) : Nat → ScopeId → String → Array String
-  | 0, _, _ => #[]
-  | fuel + 1, s, indent => Id.run do
-    let some sc := t.scopes[s]? | return #[]
-    let title := if sc.kind == .module then "module" else s!"{sc.kind.text} {sc.qualname}"
-    let cell := if sc.needsClassCell then " (needs __class__ cell)" else ""
-    let mut out := #[indent ++ title ++ cell]
-    let inner := indent ++ "  "
-    if !sc.params.isEmpty then
-      out := out.push s!"{inner}params: {signature sc.params}"
-    for i in t.importsIn s do out := out.push (inner ++ i.line)
-    for sym in sc.symbols do out := out.push (inner ++ sym.line)
-    for c in sc.children do out := out ++ scopeLines t fuel c inner
-    return out
+/-- The lines for scope `s` and its descendants, by recursion on the scope id: each child
+comes after its scope. -/
+private def scopeLines (t : Table) (s : ScopeId) (hs : s < t.scopes.size) (indent : String) :
+    Array String := Id.run do
+  let sc := t.scopes[s]
+  let title := if sc.kind == .module then "module" else s!"{sc.kind.text} {sc.qualname}"
+  let cell := if sc.needsClassCell then " (needs __class__ cell)" else ""
+  let mut out := #[indent ++ title ++ cell]
+  let inner := indent ++ "  "
+  if !sc.params.isEmpty then
+    out := out.push s!"{inner}params: {signature sc.params}"
+  for i in t.importsIn s do out := out.push (inner ++ i.line)
+  for sym in sc.symbols do out := out.push (inner ++ sym.line)
+  for hc : c in t.scopes[s].children do
+    have hlt := (t.ordered s hs).2 c hc
+    out := out ++ scopeLines t c hlt.2 inner
+  return out
+termination_by t.scopes.size - s
 
 /-- The table as text, for golden tests: each scope with its parameters, imports and
 symbols in order of first use, nested scopes indented, then the diagnostics.  Positions
 are `line:column` given `fileMap`, byte offsets otherwise. -/
 public def format (t : Table) (fileMap : Option Lean.FileMap := none) : String :=
-  let lines := scopeLines t t.scopes.size 0 ""
+  let lines := scopeLines t 0 t.scopes_ne ""
   let diags := t.diagnostics.map fun d =>
     s!"{d.kind.text} at {formatRange fileMap d.range}: {d.message}"
   let all := if diags.isEmpty then lines else lines.push "diagnostics:" ++ diags.map ("  " ++ ·)
@@ -1426,24 +1472,29 @@ private def symtableName (name : String) : String :=
     ((name.drop 1).dropEnd 1).toString
   else name
 
-/-- The `symtable` lines for scope `s` and its descendants; `fuel` bounds the depth.  An
-inlined comprehension has no lines; its children are listed in its place. -/
-private def symtableLines (t : Table) : Nat → ScopeId → Nat → Array String
-  | 0, _, _ => #[]
-  | fuel + 1, s, depth => Id.run do
-    let some sc := t.scopes[s]? | return #[]
-    if sc.kind == .inlinedComprehension then
-      return sc.children.flatMap (symtableLines t fuel · depth)
-    let pad (d : Nat) := "".pushn ' ' (2 * d)
-    let header := match sc.kind with
-      | .module => "module top"
-      | .classBody => s!"class {sc.name}"
-      | _ => s!"function {symtableName sc.name}"
-    let mut out := #[pad depth ++ header]
-    for sym in sc.symbols.qsort (·.name < ·.name) do
-      out := out.push (pad (depth + 1) ++ sym.line)
-    for c in sc.children do out := out ++ symtableLines t fuel c (depth + 1)
-    return out
+/-- The `symtable` lines for scope `s` and its descendants, by recursion on the scope id: each
+child comes after its scope.  An inlined comprehension has no lines; its children are listed in
+its place. -/
+private def symtableLines (t : Table) (s : ScopeId) (hs : s < t.scopes.size) (depth : Nat) :
+    Array String := Id.run do
+  let sc := t.scopes[s]
+  if sc.kind == .inlinedComprehension then
+    return t.scopes[s].children.attach.flatMap fun ⟨c, hc⟩ =>
+      have hlt := (t.ordered s hs).2 c hc
+      symtableLines t c hlt.2 depth
+  let pad (d : Nat) := "".pushn ' ' (2 * d)
+  let header := match sc.kind with
+    | .module => "module top"
+    | .classBody => s!"class {sc.name}"
+    | _ => s!"function {symtableName sc.name}"
+  let mut out := #[pad depth ++ header]
+  for sym in sc.symbols.qsort (·.name < ·.name) do
+    out := out.push (pad (depth + 1) ++ sym.line)
+  for hc : c in t.scopes[s].children do
+    have hlt := (t.ordered s hs).2 c hc
+    out := out ++ symtableLines t c hlt.2 (depth + 1)
+  return out
+termination_by t.scopes.size - s
 
 /-- What CPython 3.12's `symtable` module records, in the format of
 `StrataPythonTest/Dyn/scope_symtable.py`: each scope with its symbols sorted by name, then
@@ -1461,7 +1512,7 @@ public def symtableFormat (t : Table) (fileMap : Option Lean.FileMap := none) : 
     let quals := (t.scopes.toList.drop 1).filter (·.kind != .inlinedComprehension)
       |>.map (·.qualname) |>.toArray.qsort (· < ·)
     let gens := (t.scopes.filter (·.generator.isSome)).map (·.qualname) |>.qsort (· < ·)
-    let lines := symtableLines t t.scopes.size 0 0
+    let lines := symtableLines t 0 t.scopes_ne 0
       |>.push s!"qualnames: {", ".intercalate quals.toList}"
     let lines := if gens.isEmpty then lines
       else lines.push s!"generators: {", ".intercalate gens.toList}"

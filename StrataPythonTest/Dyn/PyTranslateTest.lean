@@ -417,7 +417,8 @@ private def orphanScope : Scope where
 /-- A table whose only scope is `orphanScope`. -/
 private def orphanTable : Table :=
   { scopes := #[orphanScope], imports := #[], diagnostics := #[], ordered := by
-      simp [PyScope.Ordered, orphanScope] }
+      simp [PyScope.Ordered, orphanScope]
+    scopes_ne := by decide }
 
 -- A missing start scope, a scope id out of range, and a comprehension without a parent: each
 -- is a bug, and gives `.missing`, not `.global`.

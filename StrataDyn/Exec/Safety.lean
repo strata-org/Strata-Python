@@ -389,7 +389,7 @@ theorem serve_avoids {T : Typing} {c : Core M} {i : Inst M} (t : i.Tree)
       obtain ⟨hl, htl, -⟩ := hC.heap.cellOK hsat.1.1
       have hh : c.heap.Holds l ty := ⟨hl, htl⟩
       simp only [serve]
-      rw [Heap.cell_pos hh]
+      rw [Heap.cell_pos hh, Heap.modifyAt_eq]
       exact settle_avoids hwf hN hbad (c := { c with heap := c.heap.modify l ty g }) _ _ hcs hf
         hag _ (hk _)
     | bind ty v sig idx captured =>

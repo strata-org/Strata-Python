@@ -176,6 +176,30 @@ private theorem arrayMapM_true {f : β → LinkM M γ} (hf : ∀ a, LinkM.Ok R (
   rw [Array.mapM_eq_mapM_toList]
   exact map (mapM_true hf xs.toList)
 
+/-- What satisfies `P` after a map by `g` satisfies `P ∘ g` before it. -/
+private theorem of_map {x : LinkM M β} {g : β → γ} {P : γ → Prop}
+    (h : LinkM.Ok R (g <$> x) P) : LinkM.Ok R x fun b => P (g b) := by
+  intro ctx st b st₁ hx hm
+  exact h ctx st (g b) st₁ (by simp [Functor.map, StateT.map, Except.map, hx]) hm
+
+/-- A vector `mapM` whose every step satisfies `True` does. -/
+private theorem vectorMapM_true {n : Nat} {f : β → LinkM M γ}
+    (hf : ∀ a, LinkM.Ok R (f a) fun _ => True) (xs : Vector β n) :
+    LinkM.Ok R (xs.mapM f) fun _ => True :=
+  of_map (g := Vector.toArray) (by rw [Vector.toArray_mapM]; exact arrayMapM_true hf xs.toArray)
+
+/-- A computation of `Except Fault`, lifted, collects no region. -/
+private theorem liftExcept_true (e : Except Fault β) :
+    LinkM.Ok R (liftM e : LinkM M β) fun _ => True := by
+  intro ctx st b st₁ hx hm
+  cases e with
+  | error =>
+    simp [liftM, monadLift, MonadLift.monadLift, StateT.lift, Functor.map, Except.map] at hx
+  | ok a =>
+    simp [liftM, monadLift, MonadLift.monadLift, StateT.lift] at hx
+    obtain ⟨-, rfl⟩ := hx
+    exact ⟨hm, id, trivial⟩
+
 end LinkM.Ok
 
 /-! ## Steps that collect no region -/
@@ -223,7 +247,10 @@ private theorem bodyScopes_ok {env : Env Unit} {α : Type} (labels : LabelMap Na
     (blocks : List (Block env α)) (outer : Ctx) :
     LinkM.Ok R (bodyScopes (M := M) labels blocks outer) fun _ => True := by
   unfold bodyScopes blockDefs
-  refine LinkM.Ok.bind_true (LinkM.Ok.arrayMapM_true (fun b => ?_) _) fun _ => LinkM.Ok.pure trivial
+  refine LinkM.Ok.bind_true (LinkM.Ok.vectorMapM_true (fun b => ?_) _) fun _ => ?_
+  case refine_2 =>
+    exact LinkM.Ok.bind_true (LinkM.Ok.liftExcept_true _) fun _ =>
+      LinkM.Ok.bind_true (LinkM.Ok.liftExcept_true _) fun _ => LinkM.Ok.pure trivial
   refine LinkM.Ok.bind_true (LinkM.Ok.bind_true (linkParams_ok _) fun _ => ?_) fun _ =>
     LinkM.Ok.pure trivial
   exact LinkM.Ok.bind_true (LinkM.Ok.mapM_true (fun i => LinkM.Ok.bind_true (tyCode_ok _) fun _ =>
@@ -433,7 +460,7 @@ private theorem linkRegion_inv (fname : Name) (scope : Ctx) (retTy : Ty) :
   | ⟨⟨blocks⟩⟩ => by
     rw [linkRegion]
     refine LinkM.Ok.bind_true (bodyScopes_ok _ _ _) fun sc =>
-      LinkM.Ok.bind_dep (linkBlocks_inv _ _ 0 blocks) fun lbs ctx st b st₁ h hm => ?_
+      LinkM.Ok.bind_dep (linkBlocks_inv _ blocks sc.toList _) fun lbs ctx st b st₁ h hm => ?_
     cases h
     refine ⟨hm, fun hl hr g hg => ?_, trivial⟩
     rcases Array.mem_push.mp hg with hg | rfl
@@ -456,19 +483,21 @@ private theorem linkRegions_inv (fname : Name) (Γ : Ctx) :
     exact LinkM.Ok.linkError
 
 /-- Linked blocks satisfy the invariant. -/
-private theorem linkBlocks_inv (labels : LabelMap Nat) (scopes : Array Ctx) (i : Nat) :
-    ∀ bs : List (Block env α), LinkM.Ok (·.All P.insn P.term) (linkBlocks labels scopes i bs)
-      fun lbs => ∀ b ∈ lbs, b.All P.insn P.term
-  | [] => by
+private theorem linkBlocks_inv (labels : LabelMap Nat) :
+    ∀ (bs : List (Block env α)) (scopes : List Ctx) (h : bs.length = scopes.length),
+      LinkM.Ok (·.All P.insn P.term) (linkBlocks labels bs scopes h)
+        fun lbs => ∀ b ∈ lbs, b.All P.insn P.term
+  | [], _, _ => by
     rw [linkBlocks]
     exact LinkM.Ok.pure (by simp)
-  | ⟨label, params, ⟨instrs⟩, term, _⟩ :: bs => by
+  | _ :: _, [], h => by simp at h
+  | ⟨label, params, ⟨instrs⟩, term, _⟩ :: bs, sc :: scopes, h => by
     rw [linkBlocks]
     refine LinkM.Ok.bind_true (linkParams_ok _) fun ps =>
       LinkM.Ok.bind (linkInsns_inv _ _ instrs) fun p => ?_
     obtain ⟨insns, Γ⟩ := p
     refine LinkM.Ok.bind (linkTerm_inv _ _ term) fun t =>
-      LinkM.Ok.bind (linkBlocks_inv _ _ _ bs) fun lbs => LinkM.Ok.pure ?_
+      LinkM.Ok.bind (linkBlocks_inv _ bs scopes _) fun lbs => LinkM.Ok.pure ?_
     intro hl ht hi b hb
     rcases List.mem_cons.mp hb with rfl | hb
     · exact ⟨hi, ht⟩
@@ -545,9 +574,15 @@ end
 private theorem linkFunc_inv (f : Func env α) :
     LinkM.Ok (·.All P.insn P.term) (linkFunc f) (·.All P.insn P.term) := by
   unfold linkFunc
+  split
+  · exact LinkM.Ok.linkError
   refine LinkM.Ok.bind (LinkM.Ok.withReader (LinkM.Ok.bind_true (bodyScopes_ok _ _ _) fun _ =>
-    linkBlocks_inv P _ _ 0 _)) fun lbs => LinkM.Ok.bind_true (tyCode_ok _) fun _ =>
-      LinkM.Ok.pure ?_
+    linkBlocks_inv P _ _ _ _)) fun lbs => LinkM.Ok.bind_true ?_ fun _ =>
+      LinkM.Ok.bind_true (tyCode_ok _) fun _ => LinkM.Ok.pure ?_
+  · unfold entryParams
+    split
+    · exact LinkM.Ok.pure trivial
+    · exact LinkM.Ok.linkError
   intro hl blk hblk
   exact hl blk (Array.mem_def.mp hblk)
 

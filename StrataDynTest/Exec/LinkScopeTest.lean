@@ -81,4 +81,31 @@ def runInt (fs : List (Func E Unit)) (f : String) (x : Int) : Option Int :=
 #guard scopes [join] "join" ==
   some [("entry", []), ("neg", [2, 0]), ("pos", [2, 0]), ("meet", [2, 0])]
 
+/-- One block, `loop`, that transfers to itself. -/
+private def selfLoop : Vector (Block E Unit) 1 := ⟨#[blk "loop" [] [] (goto (to "loop"))], rfl⟩
+
+-- With `loop` at its own index, liveness reaches its fixpoint, where `loop` reads nothing; with
+-- `loop` at an index beyond the one block, it is a fault.
+#guard (liveIns ((∅ : LabelMap Nat).insert (lbl "loop") 0) selfLoop).toOption.map
+  (·.toList.map (·.toList)) == some [[]]
+#guard match liveIns ((∅ : LabelMap Nat).insert (lbl "loop") 1) selfLoop with
+  | .error (.invalid m) => m == "liveness: a successor 1 beyond the 1 blocks"
+  | _ => false
+
+/-- `treeScopes` over two blocks, with `labels` and the second block's parent at the start of the
+block labelled `l`; the first block sees nothing. -/
+private def twoScopes (labels : LabelMap Nat) (l : String) : Except Fault (List (Option Exec.Ctx)) :=
+  (treeScopes labels ⟨#[none, some ⟨lbl l, 0⟩], rfl⟩ ⟨#[(0, []), (0, [])], rfl⟩ []).map
+    (·.toList)
+
+-- With the parent `a` at index 0, both blocks see nothing; a parent label that is not one of
+-- the blocks, or that names an index beyond them, is a fault.
+#guard (twoScopes ((∅ : LabelMap Nat).insert (lbl "a") 0) "a").toOption == some [some [], some []]
+#guard match twoScopes ((∅ : LabelMap Nat).insert (lbl "a") 0) "x" with
+  | .error (.invalid m) => m == "scopes: a parent x that is not one of the blocks"
+  | _ => false
+#guard match twoScopes ((∅ : LabelMap Nat).insert (lbl "a") 5) "a" with
+  | .error (.invalid m) => m == "scopes: a parent 5 beyond the 2 blocks"
+  | _ => false
+
 end Strata.Dyn.ExecTest.LinkScopeTest

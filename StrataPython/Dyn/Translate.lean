@@ -940,26 +940,26 @@ private theorem mem_of_mem_splitStarred {vs : Array (expr SourceRange)} {x : exp
     (h : x ∈ (splitStarred vs).1 ∨ x ∈ (splitStarred vs).2) : x ∈ vs := by
   rw [← splitStarred_append vs, Array.mem_append]; exact h
 
-/-- Build a dict from `entries` in order, as CPython's `compiler_dict` does.  Each run of
-pairs is cut by `cut`, and `chunk` builds one chunk.  For a `**d` entry `e`, `star? e` is the
-action that evaluates `d`, and `combine acc d` adds it.  The first chunk is the dict itself; a
-later one is built, then combined into it. -/
-def dictFromEntries {γ : Type} (entries : Array γ) (star? : γ → Option (TransM ValId))
-    (cut : Array γ → Array (Array γ)) (chunk : Array γ → TransM ValId)
+/-- Build a dict from `entries` in order, as CPython's `compiler_dict` does.  `classify` makes
+each entry a pair, or, for a `**d` entry, the action that evaluates `d`.  Each run of pairs is
+cut by `cut`, and `chunk` builds one chunk; `combine acc d` adds a `**d`.  The first chunk is
+the dict itself; a later one is built, then combined into it. -/
+def dictFromEntries {γ δ : Type} (entries : Array γ) (classify : γ → δ ⊕ TransM ValId)
+    (cut : Array δ → Array (Array δ)) (chunk : Array δ → TransM ValId)
     (combine : ValId → ValId → TransM ValId) : TransM ValId := do
   let mut acc : Option ValId := none
-  let mut pending : Array γ := #[]
+  let mut pending : Array δ := #[]
   for e in entries do
-    match star? e with
-    | none => pending := pending.push e
-    | some d =>
+    match classify e with
+    | .inl p => pending := pending.push p
+    | .inr d =>
       let a ← flush acc pending
       pending := #[]
       acc := some (← combine a (← d))
   flush acc pending
 where
   /-- The dict so far, with the pending run added. -/
-  flush (acc : Option ValId) (pending : Array γ) : TransM ValId := do
+  flush (acc : Option ValId) (pending : Array δ) : TransM ValId := do
     let mut acc := acc
     for c in cut pending do
       let d ← chunk c
@@ -1225,27 +1225,23 @@ each built by `pairs`, and each later chunk and each `**d` is `DICT_UPDATE`. -/
 def dictDisplay (ks : Array (opt_expr SourceRange)) (vs : Array (expr SourceRange)) :
     TransM ValId :=
   dictFromEntries (ks.zip vs).attach
-    (fun ⟨(k, d), h⟩ => match k with
-      | .some_expr .. => none
+    (fun ⟨(k, d), h⟩ => match hk : k with
+      | .some_expr _ k =>
+        .inl (⟨k, by
+                have hmem := Array.sizeOf_lt_of_mem (Array.of_mem_zip h).1
+                subst hk; simp at hmem; omega⟩,
+              ⟨d, Array.sizeOf_lt_of_mem (Array.of_mem_zip h).2⟩)
       | .missing_expr .. =>
         have hmem := Array.sizeOf_lt_of_mem (Array.of_mem_zip h).2
-        some (transExpr d))
+        .inr (transExpr d))
     (chunks dictChunk) pairs
     (fun a d => build (emitFailing (.str .base "update") Py.dictUpdate.ref #[a, d]))
 termination_by sizeOf ks + sizeOf vs + 2
 where
-  /-- `BUILD_MAP` of the pairs `k: v` of `c`, key before value.  More than
+  /-- `BUILD_MAP` of the pairs `k: v` of `kvs`, key before value.  More than
   `stackUseGuideline / 2` pairs start an empty dict and add each pair (`MAP_ADD`). -/
-  pairs (c : Array {e // e ∈ ks.zip vs}) : TransM ValId := do
-    let kvs : Array ({k : expr SourceRange // sizeOf k < sizeOf ks} ×
-        {v : expr SourceRange // sizeOf v < sizeOf vs}) := c.filterMap fun ⟨(k, v), h⟩ =>
-      match hk : k with
-      | .some_expr _ k =>
-        some (⟨k, by
-                have hmem := Array.sizeOf_lt_of_mem (Array.of_mem_zip h).1
-                subst hk; simp at hmem; omega⟩,
-              ⟨v, Array.sizeOf_lt_of_mem (Array.of_mem_zip h).2⟩)
-      | .missing_expr .. => none
+  pairs (kvs : Array ({k : expr SourceRange // sizeOf k < sizeOf ks} ×
+      {v : expr SourceRange // sizeOf v < sizeOf vs})) : TransM ValId := do
     if 2 * kvs.size > stackUseGuideline then
       let d ← build (emitFailing (.str .base "dict") Py.mkDict.ref #[])
       for (⟨k, hk⟩, ⟨v, hv⟩) in kvs do
@@ -1459,21 +1455,18 @@ def superCall (sr : SourceRange) (attr : Bool) : TransM ValId := do
 /-- The keyword dict of a call to `fv` with the keyword arguments `kws`: runs of `k=v` pairs,
 each a total `mkKwargs`, and `DICT_MERGE` (`dictMerge`) for each `**m`. -/
 def kwargsDict (fv : ValId) (kws : Array (keyword SourceRange)) : TransM ValId :=
-  dictFromEntries kws.attach
+  dictFromEntries (δ := String × {v : expr SourceRange // sizeOf v < sizeOf kws}) kws.attach
     (fun ⟨kw, h⟩ =>
       have hmem := Array.sizeOf_lt_of_mem h
       match kw, hmem with
-      | .mk_keyword _ _ v, hmem =>
-        if kw.nameAndValue.1.isSome then none else some (transExpr v))
+      | .mk_keyword _ ⟨_, some ⟨_, k⟩⟩ v, hmem => .inl (k, ⟨v, by grind [keyword.mk_keyword.sizeOf_spec]⟩)
+      | .mk_keyword _ ⟨_, none⟩ v, hmem => .inr (transExpr v))
     (fun run => if run.isEmpty then #[] else #[run])
     (fun run => do
       let mut kvs := #[]
-      for ⟨kw, h⟩ in run do
-        have hmem := Array.sizeOf_lt_of_mem h
-        match kw, hmem with
-        | .mk_keyword _ _ v, hmem =>
-          kvs := kvs.push (← build (strLit (kw.nameAndValue.1.getD "")))
-          kvs := kvs.push (← transExpr v)
+      for (k, ⟨v, hv⟩) in run do
+        kvs := kvs.push (← build (strLit k))
+        kvs := kvs.push (← transExpr v)
       build (emitTotal (.str .base "kwargs") Py.mkKwargs.ref kvs))
     (fun a m => build (emitFailing (.str .base "merge") Py.dictMerge.ref #[fv, a, m]))
 termination_by sizeOf kws + 1
@@ -2200,9 +2193,7 @@ def translate (moduleName : String) (stmts : Array (stmt SourceRange)) : Result 
   let range : SourceRange := match stmts[0]?, stmts.back? with
     | some a, some b => ⟨a.ann.start, b.ann.stop⟩
     | _, _ => .none
-  let some cur := table.scopes[0]?
-    | return { module := emptyModule mname { range }
-               diagnostics := #[{ kind := .internal, message := "no module scope", range }] }
+  let cur := table.module
   let ctx : Ctx :=
     { table, module := moduleName, moduleName := mname, scope := 0, cur,
       moduleAnnotations := findAnn stmts }

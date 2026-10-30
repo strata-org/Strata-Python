@@ -372,7 +372,7 @@ partial def tagTerm (cx : TableCtx) (vars holes : Array Term) : LTy → CommandE
     `($(execId "Ty.app") 1 [$(execId "Ty.list") [$as,*], $(← tagTerm cx vars holes r)])
   | .con d args => do
     let some (k, _) := cx.heads[d]? |
-      throwError "a capability names {.ofConstName d}, the Lean type of no type of this table"
+      throwError "#dyn_sem_table: a capability names {.ofConstName d}, the Lean type of no type of this table"
     let as ← args.toArray.mapM (tagTerm cx vars holes)
     `($(execId "Ty.app") $(quote k) [$as,*])
 
@@ -391,7 +391,8 @@ partial def ltyTerm (cx : TableCtx) (vars holes : Array Term) : LTy → CommandE
     `($(execId "FnRef") σ [$as,*] $(← ltyTerm cx vars holes r))
   | .con d args => do
     let as ← args.toArray.mapM (ltyTerm cx vars holes)
-    let σ? := ((cx.heads[d]?).map (·.2)).getD false
+    let some (_, σ?) := cx.heads[d]?
+      | throwError "#dyn_sem_table: a capability names {.ofConstName d}, the Lean type of no type of this table"
     if σ? then `(@$(rootId d) σ _ $as*) else pure (Syntax.mkApp (rootId d) as)
 
 /-- A capability, as a value: a part of the world by instance search, the machine's cells and
@@ -531,12 +532,11 @@ def wrapper (cx : TableCtx) (o : OpInfo) : CommandElabM (Option Wrapper) := do
     let args : Array Term := leadArgs ++ ruleOps
     if r.pure then
       return some { val := ← lamOps tids (Syntax.mkApp fn args), type := some (← fnTy pureOut) }
-    let regions ← (Array.range o.regions.size).mapM fun j => do
-      let n := (o.regions[j]?.map (·.params.size)).getD 0
+    let regions ← o.regions.mapIdxM fun j reg => do
+      let n := reg.params.size
       `($(execId "Region.slot") (σ := σ) (I := $interp) (W := $(cx.world)) (rs := $rs)
           ⟨$(quote j), Nat.le_of_ble_eq_true rfl⟩ $(← payloadFun n argsOf))
-    let targets ← (Array.range o.succs.size).mapM fun i => do
-      targetOf i (o.succs[i]?.map (·.payload.size) |>.getD 0)
+    let targets ← o.succs.mapIdxM fun i s => targetOf i s.payload.size
     let againH ← `($(execId "Again.mk") $(execId "Out.again"))
     -- The rule applied to everything, its state `stArg` and its `Again` last if it loops.
     let appWith (stArg : Option Term) : CommandElabM Term := do
