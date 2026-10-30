@@ -29,6 +29,9 @@ module p14_class_body {
       ret(%exc.1)
   }
   func @|p14_class_body.C.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "a", value = 1}, {name = "b", value = {op = "+", args = ["a", "g"]}}, {name = "c", value = "len"}, {name = "m", binding = "def"}, {name = "n", binding = "def"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -186,6 +189,9 @@ module p14_class_body {
       ret(%exc.1)
   }
   func @|p14_class_body.outer.D.<body>|(%v.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "w", value = "v"}, {name = "m", binding = "def"}]]
+
     entry.0(%v.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()

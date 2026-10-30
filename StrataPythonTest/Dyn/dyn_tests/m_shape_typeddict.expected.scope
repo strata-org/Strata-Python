@@ -1,0 +1,41 @@
+module
+  import typing: module typing
+  import Callable: member Callable of typing
+  import Literal: member Literal of typing
+  import NotRequired: member NotRequired of typing
+  import Required: member Required of typing
+  import TD: member TypedDict of typing
+  import ReadOnly: member ReadOnly of typing_extensions
+  typing: local (imported)
+  Callable: local (imported)
+  Literal: local (imported)
+  NotRequired: local (imported)
+  Required: local (imported)
+  TD: local (imported, referenced)
+  ReadOnly: local (imported)
+  Movie: local (assigned, referenced)
+  Draft: local (assigned)
+  Sequel: local (assigned)
+  class Movie
+    title: local (assigned, annotated)
+    str: global implicit (referenced)
+    year: local (assigned, annotated)
+    int: global implicit (referenced)
+    tags: local (assigned, annotated)
+    typing: global implicit (referenced)
+    rating: local (assigned, annotated)
+    Literal: global implicit (referenced)
+    sequel: local (assigned, annotated)
+    pick: local (assigned, annotated)
+    Callable: global implicit (referenced)
+  class Draft
+    title: local (assigned, annotated)
+    Required: global implicit (referenced)
+    str: global implicit (referenced)
+    notes: local (assigned, annotated)
+    owner: local (assigned, annotated)
+    ReadOnly: global implicit (referenced)
+    NotRequired: global implicit (referenced)
+  class Sequel
+    prequel: local (assigned, annotated)
+    Movie: global implicit (referenced)

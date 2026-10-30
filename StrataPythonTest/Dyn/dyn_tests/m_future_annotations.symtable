@@ -3,4 +3,5 @@ module top
   annotations: local (imported)
   class Node
     next: local (assigned, annotated)
+    prev: local (assigned, annotated)
 qualnames: Node

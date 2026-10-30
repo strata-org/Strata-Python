@@ -160,6 +160,9 @@ module fw10_return_value_timing {
       ret(%exc.3)
   }
   func @|fw10_return_value_timing.Box.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__enter__", binding = "def"}, {name = "__exit__", binding = "def"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()

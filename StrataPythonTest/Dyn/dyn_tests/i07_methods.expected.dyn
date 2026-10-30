@@ -109,6 +109,9 @@ module i07_methods {
       ret(%exc.1)
   }
   func @|i07_methods.K.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}, {name = "show", binding = "def"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -140,6 +143,9 @@ module i07_methods {
       ret(%exc.1)
   }
   func @|i07_methods.Base.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "greet", binding = "def"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -168,6 +174,9 @@ module i07_methods {
       ret(%exc.1)
   }
   func @|i07_methods.Child.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["Base"]]
+    #[py.fields = []]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()

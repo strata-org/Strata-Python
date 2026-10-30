@@ -4,3 +4,4 @@ module
   Node: local (assigned)
   class Node
     next: local (assigned, annotated)
+    prev: local (assigned, annotated)

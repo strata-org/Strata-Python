@@ -279,6 +279,7 @@ emission state of the Python builder. `Ctx` is fixed while one function is trans
 | functions to emit after the current one, and the names taken | `TState.pending : Array FuncJob`, `TState.funcNames` | yes | `defStmt`, `allocName` |
 | exits stack (below) | `TState.exits : Array Exit` | yes | `withExit`: loops, `except` clause and `finally` bodies, `try`/`finally`, `with` |
 | the labels some emitted transfer names, for starting join blocks | `TState.targeted` | yes | `jump`, `branch` |
+| the `__init__`s of the class body being emitted, for its declared fields | `TState.inits` | yes | closure |
 | exception an `except` body handles, for bare `raise` | `Ctx.handled : Option ValId` | yes | `except` bodies; a `finally` body resets it |
 | namespace, inside a class body | `Ctx.classNs : Option ValId` | yes | class body functions |
 | default annotation | `Build.State.info` | yes | `withRange` |
@@ -763,6 +764,48 @@ returns, so a `super()` or `__class__` that runs while the class is created (in
 holds the class `type.__new__` makes, and stays empty if the metaclass never calls it; and
 CPython raises `RuntimeError` ("__class__ not set …") when a metaclass drops
 `__classcell__`.
+
+**Declared shapes.** Each class body's function states the class's declarations as
+attributes (`docs/Dyn.md` §2), which `StrataPython/Dyn/Shape.lean` computes, for Pylate to
+check the class's declared shape (`Pylate/doc/POMAD.md` §4.9) against what its code does.
+They state what the source declares, before any decorator or metaclass runs, written as it
+is written: no name is resolved, so a consumer such as Pylate must decide what `TypedDict`,
+`ClassVar` or `int` denote, from the bindings it follows. Private names are
+mangled, as the compiler does. All of a class's facts are on one function, its body's
+`m.C.<body>`:
+
+| Key | Value |
+|---|---|
+| `py.bases`, `py.keywords`, `py.decorators` | the bases, the class keywords (`[{name = "metaclass", value = E}, …]`, `**kw` with the name `unit`) and the decorators, top to bottom, if any |
+| `py.fields` | always present, possibly empty, so that a function with `py.fields` is a class body: every declared field, in source order, `{name = "x", type = E}`. A field is an annotated simple name of the body, outside nested `def`s and `class`es, with `default = E` if it has a value; or a `self.x: T` of an `__init__` of the body that is not a stub, has no decorator and does not bind its first parameter again, outside its nested `def`s and `class`es, with or without a value, marked with that function, `in = @m.C.__init__`, so that a field belongs to one `__init__` when a class has several. One under a compound statement has `conditional = true`; this is syntactic, so a field of an `__init__` without it may still be unset when the `__init__` returns or raises before reaching it. A name annotated twice is listed twice; in `__annotations__`, the last annotation wins |
+| `py.slots` | each assignment statement to `__slots__` (`=`, `+=` or annotated), in source order, `{value = E}`, with `augmented = true` for `+=`, `unpacked = true` if it is one name of a tuple or list target, and `conditional = true` under a compound statement, if any; any other binding of `__slots__` is in `py.bindings` |
+| `py.bindings` | every other binding of a name in the body, outside nested `def`s and `class`es, statement by statement in source order, if any; within a statement, its assignment expressions come first; those in a handler's exception type come just before its `except` binding. An assignment `x = E` is `{name = "x", value = E}`, with `augmented = true` for `x += E`, where `value` is the right operand, and `unpacked = true` for one name of a tuple or list target, where `value` is the whole right-hand side. Any other binding is `{name = "x", binding = K}`, `K` one of `"def"`, `"class"`, `"import"`, `"for"`, `"with"`, `"except"`, `"del"` and `":="`; `except … as x` is followed by a `"del"` of `x` after its handler, as CPython unbinds it there. `conditional = true` marks a binding that may not run: one under a compound statement, a `for` target, one in a handler's exception type, and an assignment expression in an operand of `and` or `or` after the first, in a branch of `a if c else b`, in a comparison of a chain after the first, or in an `assert` message. A field and an assignment statement to `__slots__` are in `py.fields` and `py.slots` instead. Names that the class statement binds itself (`__module__`, `__qualname__`, `__doc__` for a docstring, `__annotations__`, `__classcell__`) are not listed. An Enum's members, a `ctypes.Structure`'s `_fields_` and a Pydantic `model_config` are found here. The captures of a `match` and the name of a `type` alias are not listed. The translator rejects both statements, so the translation fails anyway |
+
+A name the body declares `global` or `nonlocal` is bound outside the class, so no key states
+it: not its bindings, its `__slots__` assignments or its `__init__`'s fields.
+The keys do not record their order relative to each other. So when a class body binds a
+name under two keys, such as `x: int = 1` (a field) followed by `x = "s"` (a binding), the
+attributes don't say which binding comes last.
+
+An annotation is stated as an expression that the class body evaluates, so a private name
+in it is mangled. Under `from __future__ import annotations`, CPython instead stores each
+annotation's source text unmangled: `x: __T` in `class C` gives `'__T'`, but the attribute
+states `"_C__T"`. The translator rejects that import, so the translation fails anyway.
+
+An `__init__` binds its first parameter again with a binding in its body, such as an
+assignment or an import, or with a nested function or class body whose `nonlocal` reaches
+it. A bare annotation of the parameter, such as `self: T`, counts too. A decorated `__init__`
+declares no fields, because a decorator such as `@classmethod` can make its first parameter
+something other than the instance. What an `__init__` stores to `self` is not stated: it is
+in the function's code, to be checked against `py.fields`.
+
+An expression `E` is a name or attribute chain as a string (`"typing.Optional"`),
+`{name = E, args = [E, …]}` for a subscript, `{union = […]}` for `A | B | …` (the `|`
+operator, also in a value), a list `[E, …]`, `{tuple = [E, …]}`,
+`{call = E, args = [E, …], keywords = […]}`, `{op = "*", args = [E, E]}`
+for another binary operator and `{op = "-", args = [E]}` for a unary one, a constant (a
+boolean, an integer, a float, `unit` for `None`, `{str = "s"}`, `{ellipsis = unit}`), or
+`{expr = "Lambda"}` for any other expression, by its `ast` class name.
 
 ### 6.8 Comprehensions
 

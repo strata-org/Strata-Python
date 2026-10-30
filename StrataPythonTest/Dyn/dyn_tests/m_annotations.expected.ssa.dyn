@@ -82,6 +82,9 @@ module m_annotations {
       ret(%exc.1)
   }
   func @|m_annotations.P.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.decorators = ["dataclass"]]
+    #[py.fields = [{name = "x", type = "int"}, {name = "y", type = "int", default = 0}, {name = "_P__z", type = "str", default = {str = ""}}, {name = "w", type = "float", default = 0.0, conditional = true}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -223,6 +226,9 @@ module m_annotations {
       ret(%exc.1)
   }
   func @|m_annotations.R.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = [{name = "a", type = "int", default = "i", conditional = true}]]
+    #[py.bindings = [{name = "i", binding = "for", conditional = true}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -317,6 +323,9 @@ module m_annotations {
       ret(%exc.2)
   }
   func @|m_annotations.S.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "m", binding = "def"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -479,6 +488,8 @@ module m_annotations {
       ret(%exc.1)
   }
   func @|m_annotations.f.Q.<body>|(%o.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = [{name = "v", type = "o"}]]
+
     entry.0(%o.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -553,6 +564,9 @@ module m_annotations {
       ret(%exc.1)
   }
   func @|m_annotations.g.C.<body>|(%__annotations__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = [{name = "x", type = "int"}]]
+    #[py.bindings = [{name = "y", value = "__annotations__"}]]
+
     entry.0(%__annotations__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()

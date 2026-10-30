@@ -1,4 +1,4 @@
--- unsupported: from __future__ import annotations is not supported at 3:0-3:34
+-- unsupported: from __future__ import annotations is not supported at 4:0-4:34
 module m_future_annotations {
   func @|m_future_annotations.<module>|() -> base.Except(py.Value, py.Value) {
     entry.0():
@@ -24,6 +24,8 @@ module m_future_annotations {
       ret(%exc.1)
   }
   func @|m_future_annotations.Node.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = [{name = "next", type = "Node"}, {name = "prev", type = "_Node__T"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -72,6 +74,26 @@ module m_future_annotations {
     join.2(%__annotations__.5 : py.Value):
       %str.8 : py.Value = py.strLit("next")
       %store.3 : base.Unit = py.setItem(%__annotations__.5, %str.8, %Node.3) ^propagate.0()
+      %str.9 : py.Value = py.strLit("_Node__T")
+      %_Node__T.0 : py.Value = py.undef("_Node__T")
+      %_Node__T.1 : py.Value = py.getOptionalItem(%ns.0, %str.9, %_Node__T.0) ^propagate.0()
+      %found.4 : base.Bool = py.isDefined(%_Node__T.1)
+      branch(%found.4) ^join.3(%_Node__T.1) ^absent.3()
+    absent.3():
+      %_Node__T.2 : py.Value = py.loadGlobal("m_future_annotations", "_Node__T") ^propagate.0()
+      jump ^join.3(%_Node__T.2)
+    join.3(%_Node__T.3 : py.Value):
+      %str.10 : py.Value = py.strLit("__annotations__")
+      %__annotations__.6 : py.Value = py.undef("__annotations__")
+      %__annotations__.7 : py.Value = py.getOptionalItem(%ns.0, %str.10, %__annotations__.6) ^propagate.0()
+      %found.5 : base.Bool = py.isDefined(%__annotations__.7)
+      branch(%found.5) ^join.4(%__annotations__.7) ^absent.4()
+    absent.4():
+      %__annotations__.8 : py.Value = py.loadGlobal("m_future_annotations", "__annotations__") ^propagate.0()
+      jump ^join.4(%__annotations__.8)
+    join.4(%__annotations__.9 : py.Value):
+      %str.11 : py.Value = py.strLit("prev")
+      %store.4 : base.Unit = py.setItem(%__annotations__.9, %str.11, %_Node__T.3) ^propagate.0()
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)

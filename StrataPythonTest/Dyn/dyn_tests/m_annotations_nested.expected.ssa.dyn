@@ -103,6 +103,8 @@ module m_annotations_nested {
       ret(%exc.1)
   }
   func @|m_annotations_nested.TryBody.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = [{name = "a", type = "int", default = 1, conditional = true}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -185,6 +187,8 @@ module m_annotations_nested {
       ret(%exc.3)
   }
   func @|m_annotations_nested.TryHandler.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = [{name = "a", type = "int", default = 1, conditional = true}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -223,6 +227,8 @@ module m_annotations_nested {
       ret(%exc.3)
   }
   func @|m_annotations_nested.TryElse.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = [{name = "a", type = "int", default = 1, conditional = true}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -284,6 +290,8 @@ module m_annotations_nested {
       ret(%exc.3)
   }
   func @|m_annotations_nested.TryFinally.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = [{name = "a", type = "int", default = 1, conditional = true}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -359,6 +367,8 @@ module m_annotations_nested {
       ret(%exc.3)
   }
   func @|m_annotations_nested.MatchCase.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = [{name = "a", type = "int", default = 1, conditional = true}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -395,6 +405,9 @@ module m_annotations_nested {
       ret(%exc.1)
   }
   func @|m_annotations_nested.WithBody.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = [{name = "a", type = "int", default = 1, conditional = true}]]
+    #[py.bindings = [{name = "fh", binding = "with"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -500,6 +513,8 @@ module m_annotations_nested {
       ret(%exc.3)
   }
   func @|m_annotations_nested.WhileElse.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = [{name = "a", type = "int", default = 1, conditional = true}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -569,6 +584,9 @@ module m_annotations_nested {
       ret(%exc.1)
   }
   func @|m_annotations_nested.ForElse.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = [{name = "a", type = "int", default = 1, conditional = true}]]
+    #[py.bindings = [{name = "i", binding = "for", conditional = true}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -642,6 +660,8 @@ module m_annotations_nested {
       ret(%exc.2)
   }
   func @|m_annotations_nested.IfElse.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = [{name = "a", type = "int", default = 1, conditional = true}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -709,6 +729,9 @@ module m_annotations_nested {
       ret(%exc.1)
   }
   func @|m_annotations_nested.InMethod.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "m", binding = "def"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -737,6 +760,8 @@ module m_annotations_nested {
       ret(%exc.1)
   }
   func @|m_annotations_nested.TryStar.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = [{name = "a", type = "int", default = 1, conditional = true}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()

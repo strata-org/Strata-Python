@@ -1,0 +1,315 @@
+module top
+  Account: local (assigned)
+  Annotated: local (imported)
+  CM: local (assigned)
+  Chain: local (assigned)
+  ClassVar: local (imported)
+  CompVar: local (assigned)
+  CompWalrus: local (assigned)
+  Deep: local (assigned)
+  DeepInFunc: local (assigned)
+  Early: local (assigned)
+  Forms: local (assigned)
+  Gen: local (assigned)
+  GlobalInit: local (assigned)
+  GlobalSlots: local (assigned)
+  InFunc: local (assigned)
+  M: local (assigned)
+  Meta: local (assigned, referenced)
+  NamedTuple: local (imported, referenced)
+  Odd: local (assigned)
+  Outer: local (assigned)
+  Over: local (assigned)
+  P: local (assigned)
+  R1: local (assigned)
+  R2: local (assigned)
+  R3: local (assigned)
+  R4: local (assigned)
+  R5: local (assigned)
+  R6: local (assigned)
+  R7: local (assigned)
+  S1: local (assigned)
+  S2: local (assigned)
+  S3: local (assigned)
+  S4: local (assigned)
+  Spread: local (assigned)
+  Star: local (assigned)
+  Two: local (assigned)
+  TypedDict: local (imported, referenced)
+  ViaClass: local (assigned)
+  ViaClassBody: local (assigned)
+  __init__: global explicit (assigned, declared_global)
+  __slots__: global explicit (declared_global)
+  a: local (assigned)
+  b: local (assigned)
+  deco: local (assigned, referenced)
+  flag: local (assigned)
+  g: local (assigned)
+  int: global implicit (referenced)
+  make_base: local (assigned, referenced)
+  opts: local (assigned, referenced)
+  overload: local (imported)
+  type: global implicit (referenced)
+  class Account
+    Annotated: global implicit (referenced)
+    ClassVar: global implicit (referenced)
+    __init__: local (assigned)
+    bytes: global implicit (referenced)
+    currency: local (assigned, annotated)
+    flag: global implicit (referenced)
+    float: global implicit (referenced)
+    int: global implicit (referenced)
+    n: local (assigned, annotated)
+    pair: local (assigned, annotated)
+    rate: local (assigned, annotated)
+    str: global implicit (referenced)
+    tuple: global implicit (referenced)
+    x: local (assigned, annotated)
+    function __init__
+      int: global implicit (referenced)
+      self: local (parameter, referenced)
+  class Outer
+    Inner: local (assigned)
+    _Outer__Base: local (assigned, referenced)
+    _Outer__T: local (assigned, referenced)
+    int: global implicit (referenced)
+    z: local (assigned, annotated)
+    class __Base
+    class Inner
+  function make_base
+    object: global implicit (referenced)
+  class Meta
+  function deco
+    c: local (parameter, referenced)
+  class Odd
+  class Spread
+    __slots__: local (assigned, annotated)
+    tuple: global implicit (referenced)
+  class S1
+    __slots__: local (assigned)
+    a: global implicit (referenced)
+    b: global implicit (referenced)
+  class S2
+    __slots__: local (assigned)
+  class S3
+    __slots__: local (assigned)
+    flag: global implicit (referenced)
+    s: local (assigned)
+    t: local (assigned)
+  class R1
+    __init__: local (assigned)
+    function __init__
+      int: global implicit (referenced)
+      other: local (parameter, referenced)
+      self: local (parameter, assigned, referenced)
+  class R2
+    __init__: local (assigned)
+    function __init__
+      int: global implicit (referenced)
+      self: local (parameter, imported, referenced)
+  class R3
+    __init__: local (assigned)
+    function __init__
+      f: local (assigned, referenced)
+      int: global implicit (referenced)
+      other: cell (parameter)
+      self: cell (parameter, referenced)
+      function f
+        other: free (referenced)
+        self: free (assigned, nonlocal)
+  class R4
+    __init__: local (assigned)
+    function __init__
+      _R4__s: local (parameter, assigned, referenced)
+      int: global implicit (referenced)
+      other: local (parameter, referenced)
+  class Gen
+    __init__: local (assigned)
+    function __init__
+      int: global implicit (referenced)
+      self: local (parameter, referenced)
+  function __init__
+    int: global implicit (referenced)
+    self: local (parameter, referenced)
+  function g
+    __init__: local (assigned, referenced)
+    function __init__
+      int: global implicit (referenced)
+      self: local (parameter, referenced)
+  class Forms
+    int: global implicit (referenced)
+    make_base: global implicit (referenced)
+    str: global implicit (referenced)
+    u: local (assigned, annotated)
+    v: local (assigned, annotated)
+    x: local (assigned)
+  class Star
+    __init__: local (assigned)
+    function __init__
+      args: local (parameter)
+  class S4
+    __slots__: local (assigned)
+    t: local (assigned)
+  class R5
+    __init__: local (assigned)
+    function __init__
+      Helper: local (assigned)
+      int: global implicit (referenced)
+      self: local (parameter, referenced)
+      class Helper
+        R1: global implicit (referenced)
+        self: local (assigned, referenced)
+  class R6
+    __init__: local (assigned)
+    function __init__
+      f: local (assigned, referenced)
+      int: global implicit (referenced)
+      self: local (parameter, referenced)
+      function f
+        g: local (assigned, referenced)
+        self: cell (assigned)
+        function g
+          self: free (assigned, nonlocal)
+  class R7
+    __init__: local (assigned)
+    function __init__
+      int: global implicit (referenced)
+      self: local (parameter, assigned, referenced, annotated)
+  class Over
+    __init__: local (assigned)
+    int: global implicit (referenced)
+    overload: global implicit (referenced)
+    str: global implicit (referenced)
+    function __init__
+      self: local (parameter)
+      x: local (parameter)
+    function __init__
+      self: local (parameter)
+      x: local (parameter)
+    function __init__
+      int: global implicit (referenced)
+      self: local (parameter, referenced)
+      x: local (parameter, referenced)
+  class Two
+    __init__: local (assigned)
+    function __init__
+      f: local (assigned, referenced)
+      int: global implicit (referenced)
+      other: cell (parameter)
+      self: cell (parameter, referenced)
+      function f
+        g: local (assigned, referenced)
+        other: free
+        self: free
+        function g
+          other: free (referenced)
+          self: free (assigned, nonlocal)
+  class Chain
+    __init__: local (assigned)
+    function __init__
+      f: local (assigned, referenced)
+      int: global implicit (referenced)
+      other: cell (parameter)
+      self: cell (parameter, referenced)
+      function f
+        g: local (assigned, referenced)
+        other: free
+        self: free (nonlocal)
+        function g
+          other: free (referenced)
+          self: free (assigned, nonlocal)
+  class ViaClass
+    __init__: local (assigned)
+    function __init__
+      K: local (assigned, referenced)
+      int: global implicit (referenced)
+      other: cell (parameter)
+      self: cell (parameter, referenced)
+      class K
+        m: local (assigned)
+        other: free
+        self: free
+        function m
+          _: local (parameter)
+          other: free (referenced)
+          self: free (assigned, nonlocal)
+  class ViaClassBody
+    __init__: local (assigned)
+    function __init__
+      f: local (assigned, referenced)
+      int: global implicit (referenced)
+      other: cell (parameter)
+      self: cell (parameter, referenced)
+      function f
+        K: local (assigned)
+        other: free
+        self: free
+        class K
+          other: free (referenced)
+          self: free (assigned, nonlocal)
+  class InFunc
+    __init__: local (assigned)
+    function __init__
+      f: local (assigned, referenced)
+      int: global implicit (referenced)
+      self: local (parameter, referenced)
+      function f
+        H: local (assigned)
+        class H
+          self: local (assigned)
+  class Deep
+    __init__: local (assigned)
+    function __init__
+      A: local (assigned)
+      int: global implicit (referenced)
+      self: local (parameter, referenced)
+      class A
+        B: local (assigned)
+        class B
+          self: local (assigned)
+  class DeepInFunc
+    __init__: local (assigned)
+    function __init__
+      f: local (assigned, referenced)
+      int: global implicit (referenced)
+      self: local (parameter, referenced)
+      function f
+        A: local (assigned)
+        class A
+          B: local (assigned)
+          class B
+            self: local (assigned)
+  class Early
+    __init__: local (assigned)
+    function __init__
+      int: global implicit (referenced)
+      ok: local (parameter, referenced)
+      self: local (parameter, referenced)
+  class CM
+    __init__: local (assigned)
+    classmethod: global implicit (referenced)
+    function __init__
+      cls: local (parameter, referenced)
+      int: global implicit (referenced)
+  class CompVar
+    __init__: local (assigned)
+    function __init__
+      int: global implicit (referenced)
+      self: local (parameter, referenced)
+      xs: local (assigned)
+  class CompWalrus
+    __init__: local (assigned)
+    function __init__
+      _: local (assigned, comp_iter)
+      int: global implicit (referenced)
+      self: local (parameter, assigned, referenced)
+      xs: local (assigned)
+  class GlobalSlots
+    __slots__: global explicit (assigned, declared_global)
+  class GlobalInit
+    __init__: global explicit (assigned, declared_global)
+    function __init__
+      int: global implicit (referenced)
+      self: local (parameter, referenced)
+qualnames: Account, Account.__init__, CM, CM.__init__, Chain, Chain.__init__, Chain.__init__.<locals>.f, Chain.__init__.<locals>.f.<locals>.g, CompVar, CompVar.__init__, CompWalrus, CompWalrus.__init__, Deep, Deep.__init__, Deep.__init__.<locals>.A, Deep.__init__.<locals>.A.B, DeepInFunc, DeepInFunc.__init__, DeepInFunc.__init__.<locals>.f, DeepInFunc.__init__.<locals>.f.<locals>.A, DeepInFunc.__init__.<locals>.f.<locals>.A.B, Early, Early.__init__, Forms, Gen, Gen.__init__, GlobalInit, GlobalSlots, InFunc, InFunc.__init__, InFunc.__init__.<locals>.f, InFunc.__init__.<locals>.f.<locals>.H, Meta, Odd, Outer, Outer.Inner, Outer.__Base, Over, Over.__init__, Over.__init__, Over.__init__, R1, R1.__init__, R2, R2.__init__, R3, R3.__init__, R3.__init__.<locals>.f, R4, R4.__init__, R5, R5.__init__, R5.__init__.<locals>.Helper, R6, R6.__init__, R6.__init__.<locals>.f, R6.__init__.<locals>.f.<locals>.g, R7, R7.__init__, S1, S2, S3, S4, Spread, Star, Star.__init__, Two, Two.__init__, Two.__init__.<locals>.f, Two.__init__.<locals>.f.<locals>.g, ViaClass, ViaClass.__init__, ViaClass.__init__.<locals>.K, ViaClass.__init__.<locals>.K.m, ViaClassBody, ViaClassBody.__init__, ViaClassBody.__init__.<locals>.f, ViaClassBody.__init__.<locals>.f.<locals>.K, __init__, __init__, deco, g, g.<locals>.__init__, make_base
+generators: Gen.__init__

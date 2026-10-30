@@ -1,0 +1,90 @@
+module
+  import ClassVar: member ClassVar of typing
+  import Opt: member Optional of typing
+  ClassVar: local (imported)
+  Opt: local (imported)
+  Point: local (assigned)
+  Slotted: local (assigned)
+  Bare: local (assigned)
+  Box: local (assigned)
+  flag: local (assigned)
+  More: local (assigned)
+  GenInit: local (assigned)
+  Conn: local (assigned)
+  Rb: local (assigned)
+  class Point
+    dims: local (assigned, referenced, annotated)
+    ClassVar: global implicit (referenced)
+    int: global implicit (referenced)
+    x: local (assigned, annotated)
+    y: local (assigned, annotated)
+    parent: local (assigned, annotated)
+    Opt: global implicit (referenced)
+    _Point__tag: local (assigned, annotated)
+    str: global implicit (referenced)
+    z: local (assigned, annotated)
+    float: global implicit (referenced)
+    __init__: local (assigned)
+    function Point.__init__
+      params: self, x, y
+      self: cell (parameter, referenced)
+      x: local (parameter, referenced)
+      y: local (parameter, referenced)
+      later: local (assigned, referenced)
+      function Point.__init__.<locals>.later
+        self: free (referenced)
+  class Slotted
+    __slots__: local (assigned)
+    __init__: local (assigned)
+    function Slotted.__init__
+      params: this, a
+      this: local (parameter, referenced)
+      a: local (parameter, referenced)
+  class Bare
+  class Box
+    size: local (assigned, annotated)
+    int: global implicit (referenced)
+    __init__: local (assigned)
+    function Box.__init__
+      params: self, items
+      self: local (parameter, referenced)
+      items: local (parameter, referenced)
+      list: global implicit (referenced)
+      str: global implicit (referenced)
+      int: global implicit (referenced)
+  class More
+    flag: global implicit (referenced)
+    __init__: local (assigned)
+    function More.__init__
+      params: self
+      self: cell (parameter, referenced)
+      int: global implicit (referenced)
+      later: local (assigned, referenced)
+      function More.__init__.<locals>.later
+        self: free (referenced)
+        int: global implicit (referenced)
+  class GenInit
+    __init__: local (assigned)
+    function GenInit.__init__
+      params: self
+      self: local (parameter, referenced)
+      int: global implicit (referenced)
+  class Conn
+    flag: global implicit (referenced)
+    __init__: local (assigned)
+    function Conn.__init__
+      params: self
+      self: local (parameter, referenced)
+      bytes: global implicit (referenced)
+    function Conn.__init__
+      params: self
+      self: local (parameter, referenced)
+      list: global implicit (referenced)
+      str: global implicit (referenced)
+  class Rb
+    __init__: local (assigned)
+    function Rb.__init__
+      params: self, other
+      self: local (parameter, assigned, referenced)
+      other: local (parameter, referenced)
+      int: global implicit (referenced)

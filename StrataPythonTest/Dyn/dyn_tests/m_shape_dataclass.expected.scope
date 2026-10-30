@@ -1,0 +1,27 @@
+module
+  import dataclasses: module dataclasses
+  import InitVar: member InitVar of dataclasses
+  import KW_ONLY: member KW_ONLY of dataclasses
+  import dataclass: member dataclass of dataclasses
+  import ClassVar: member ClassVar of typing
+  dataclasses: local (imported, referenced)
+  InitVar: local (imported)
+  KW_ONLY: local (imported)
+  dataclass: local (imported, referenced)
+  ClassVar: local (imported)
+  P: local (assigned)
+  Q: local (assigned)
+  class P
+    x: local (assigned, annotated)
+    int: global implicit (referenced)
+    y: local (assigned, annotated)
+  class Q
+    count: local (assigned, annotated)
+    ClassVar: global implicit (referenced)
+    int: global implicit (referenced)
+    seed: local (assigned, annotated)
+    InitVar: global implicit (referenced)
+    _: local (assigned, annotated)
+    KW_ONLY: global implicit (referenced)
+    name: local (assigned, annotated)
+    str: global implicit (referenced)

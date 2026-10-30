@@ -78,6 +78,9 @@ module p39_nested_sample {
       ret(%exc.1)
   }
   func @|p39_nested_sample.make.Box.<body>|(%prefix.cell.0 : base.Ref(py.Value), %count.cell.0 : base.Ref(py.Value), %json.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "label", value = "prefix"}, {name = "show", binding = "def"}]]
+
     entry.0(%prefix.cell.0 : base.Ref(py.Value), %count.cell.0 : base.Ref(py.Value), %json.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()

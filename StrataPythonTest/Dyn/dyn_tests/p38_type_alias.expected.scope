@@ -1,9 +1,13 @@
 module
   Alias: local (assigned)
   f: local (assigned)
+  C: local (assigned)
   function f
     params: x
     x: local (parameter, referenced)
+  class C
+    T: local (assigned)
 diagnostics:
-  unsupported at 2:0-2:16: 'type' statements are not supported
-  unsupported at 5:0-6:12: type parameters are not supported
+  unsupported at 3:0-3:16: 'type' statements are not supported
+  unsupported at 6:0-7:12: type parameters are not supported
+  unsupported at 11:4-11:16: 'type' statements are not supported

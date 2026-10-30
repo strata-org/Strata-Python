@@ -1,0 +1,28 @@
+module top
+  Account: local (assigned, referenced)
+  Movie: local (assigned, referenced)
+  TypedDict: local (imported, referenced)
+  a: local (assigned)
+  coin: local (assigned, referenced)
+  m: local (assigned, referenced)
+  random: local (imported)
+  function coin
+    random: global implicit (referenced)
+  class Account
+    __init__: local (assigned)
+    balance: local (assigned, annotated)
+    bool: global implicit (referenced)
+    int: global implicit (referenced)
+    limit: local (assigned, annotated)
+    owner: local (assigned, annotated)
+    str: global implicit (referenced)
+    function __init__
+      owner: local (parameter, referenced)
+      self: local (parameter, referenced)
+      vip: local (parameter, referenced)
+  class Movie
+    int: global implicit (referenced)
+    str: global implicit (referenced)
+    title: local (assigned, annotated)
+    year: local (assigned, annotated)
+qualnames: Account, Account.__init__, Movie, coin

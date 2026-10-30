@@ -793,6 +793,9 @@ module m_try {
       ret(%exc.7)
   }
   func @|m_try.C.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "err", binding = "except", conditional = true}, {name = "err", binding = "del", conditional = true}, {name = "x", binding = "for", conditional = true}, {name = "e", binding = "except", conditional = true}, {name = "e", binding = "del", conditional = true}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -906,6 +909,8 @@ module m_try {
       ret(%exc.2)
   }
   func @|m_try.not_inherited.D.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()

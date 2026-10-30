@@ -62,6 +62,9 @@ module p43_comp_class_body {
       ret(%exc.1)
   }
   func @|p43_comp_class_body.outer.C.<body>|(%rows.cell.0 : base.Ref(py.Value), %scale.cell.0 : base.Ref(py.Value), %__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "k", value = 1}, {name = "a", value = {expr = "ListComp"}}, {name = "fs", value = {expr = "ListComp"}}, {name = "own", value = {expr = "ListComp"}}, {name = "m", binding = "def"}]]
+
     entry.0(%rows.cell.0 : base.Ref(py.Value), %scale.cell.0 : base.Ref(py.Value), %__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()

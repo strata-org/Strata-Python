@@ -104,6 +104,12 @@ m_unbound_local | yes |
 m_walrus | yes |
 m_while | yes |
 m_classes | yes |
+m_shape_bindings | yes | match
+m_shape_cases | yes | generator function
+m_shape_class | yes | generator function
+m_shape_dataclass | yes |
+m_shape_typeddict | yes |
+m_shape_rigid | yes |
 m_class_namespace | yes |
 m_class_return | yes | 'return' outside function, 'return' outside function
 m_closures | yes |

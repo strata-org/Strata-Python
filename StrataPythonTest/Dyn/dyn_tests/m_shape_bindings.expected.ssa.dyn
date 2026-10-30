@@ -1,0 +1,1443 @@
+module m_shape_bindings {
+  func @|m_shape_bindings.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("m_shape_bindings")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %mod.0 : py.Value = py.importModule("ctypes") ^propagate.0()
+      %ctypes.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "ctypes")
+      %set.2 : base.Unit = base.refSet[py.Value](%ctypes.cell.0, %mod.0)
+      %Enum.0 : py.Value = py.importFrom("enum", "Enum") ^propagate.0()
+      %Enum.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "Enum")
+      %set.3 : base.Unit = base.refSet[py.Value](%Enum.cell.0, %Enum.0)
+      %BaseModel.0 : py.Value = py.importFrom("pydantic", "BaseModel") ^propagate.0()
+      %BaseModel.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "BaseModel")
+      %set.4 : base.Unit = base.refSet[py.Value](%BaseModel.cell.0, %BaseModel.0)
+      %ConfigDict.0 : py.Value = py.importFrom("pydantic", "ConfigDict") ^propagate.0()
+      %ConfigDict.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "ConfigDict")
+      %set.5 : base.Unit = base.refSet[py.Value](%ConfigDict.cell.0, %ConfigDict.0)
+      %bool.0 : py.Value = py.boolLit(true)
+      %flag.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "flag")
+      %set.6 : base.Unit = base.refSet[py.Value](%flag.cell.0, %bool.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Status.<body>|)
+      %str.1 : py.Value = py.strLit("Status")
+      %Enum.1 : py.Value = py.loadGlobal("m_shape_bindings", "Enum") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1, %Enum.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %Status.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %Status.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "Status")
+      %set.7 : base.Unit = base.refSet[py.Value](%Status.cell.0, %Status.0)
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Registers.<body>|)
+      %str.2 : py.Value = py.strLit("Registers")
+      %ctypes.0 : py.Value = py.loadGlobal("m_shape_bindings", "ctypes") ^propagate.0()
+      %Structure.0 : py.Value = py.attr(%ctypes.0, "Structure") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%clo.1, %str.2, %Structure.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %Registers.0 : py.Value = py.call(%__build_class__.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %Registers.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "Registers")
+      %set.8 : base.Unit = base.refSet[py.Value](%Registers.cell.0, %Registers.0)
+      %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Product.<body>|)
+      %str.3 : py.Value = py.strLit("Product")
+      %BaseModel.1 : py.Value = py.loadGlobal("m_shape_bindings", "BaseModel") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%clo.2, %str.3, %BaseModel.1)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %Product.0 : py.Value = py.call(%__build_class__.2, %tuple.2, %kwargs.2) ^propagate.0()
+      %Product.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "Product")
+      %set.9 : base.Unit = base.refSet[py.Value](%Product.cell.0, %Product.0)
+      %__build_class__.3 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.3 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Kinds.<body>|)
+      %str.4 : py.Value = py.strLit("Kinds")
+      %tuple.3 : py.Value = py.mkTuple(%clo.3, %str.4)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %Kinds.0 : py.Value = py.call(%__build_class__.3, %tuple.3, %kwargs.3) ^propagate.0()
+      %Kinds.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "Kinds")
+      %set.10 : base.Unit = base.refSet[py.Value](%Kinds.cell.0, %Kinds.0)
+      %clo.4 : py.Value = py.mkClosure[[]](@m_shape_bindings.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "f")
+      %set.11 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.4)
+      %__build_class__.4 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.5 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Walrus.<body>|)
+      %str.5 : py.Value = py.strLit("Walrus")
+      %tuple.4 : py.Value = py.mkTuple(%clo.5, %str.5)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %Walrus.0 : py.Value = py.call(%__build_class__.4, %tuple.4, %kwargs.4) ^propagate.0()
+      %Walrus.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "Walrus")
+      %set.12 : base.Unit = base.refSet[py.Value](%Walrus.cell.0, %Walrus.0)
+      %__build_class__.5 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.6 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Handlers.<body>|)
+      %str.6 : py.Value = py.strLit("Handlers")
+      %tuple.5 : py.Value = py.mkTuple(%clo.6, %str.6)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %Handlers.0 : py.Value = py.call(%__build_class__.5, %tuple.5, %kwargs.5) ^propagate.0()
+      %Handlers.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "Handlers")
+      %set.13 : base.Unit = base.refSet[py.Value](%Handlers.cell.0, %Handlers.0)
+      %__build_class__.6 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.7 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Flags.<body>|)
+      %str.7 : py.Value = py.strLit("Flags")
+      %tuple.6 : py.Value = py.mkTuple(%clo.7, %str.7)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %Flags.0 : py.Value = py.call(%__build_class__.6, %tuple.6, %kwargs.6) ^propagate.0()
+      %Flags.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "Flags")
+      %set.14 : base.Unit = base.refSet[py.Value](%Flags.cell.0, %Flags.0)
+      %clo.8 : py.Value = py.mkClosure[[]](@m_shape_bindings.outer)
+      %outer.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "outer")
+      %set.15 : base.Unit = base.refSet[py.Value](%outer.cell.0, %clo.8)
+      %__build_class__.7 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.9 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Rejected.<body>|)
+      %str.8 : py.Value = py.strLit("Rejected")
+      %tuple.7 : py.Value = py.mkTuple(%clo.9, %str.8)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %Rejected.0 : py.Value = py.call(%__build_class__.7, %tuple.7, %kwargs.7) ^propagate.0()
+      %Rejected.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "Rejected")
+      %set.16 : base.Unit = base.refSet[py.Value](%Rejected.cell.0, %Rejected.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|m_shape_bindings.Status.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["Enum"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "PENDING", value = 1}, {name = "RUNNING", value = -2}, {name = "DONE", value = {tuple = [3, {str = "done"}]}}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("m_shape_bindings", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Status")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %int.1 : py.Value = py.intLit(1)
+      %str.4 : py.Value = py.strLit("PENDING")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %int.1) ^propagate.0()
+      %int.2 : py.Value = py.intLit(2)
+      %neg.0 : py.Value = py.uSub(%int.2) ^propagate.0()
+      %str.5 : py.Value = py.strLit("RUNNING")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %neg.0) ^propagate.0()
+      %int.3 : py.Value = py.intLit(3)
+      %str.6 : py.Value = py.strLit("done")
+      %tuple.0 : py.Value = py.mkTuple(%int.3, %str.6)
+      %str.7 : py.Value = py.strLit("DONE")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.7, %tuple.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|m_shape_bindings.Registers.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["ctypes.Structure"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "_fields_", value = [{tuple = [{str = "status"}, "ctypes.c_int"]}, {tuple = [{str = "buffer"}, {op = "*", args = ["ctypes.c_char", 10]}]}]}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("m_shape_bindings", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Registers")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %str.4 : py.Value = py.strLit("status")
+      %str.5 : py.Value = py.strLit("ctypes")
+      %ctypes.0 : py.Value = py.undef("ctypes")
+      %ctypes.1 : py.Value = py.getOptionalItem(%ns.0, %str.5, %ctypes.0) ^propagate.0()
+      %found.1 : base.Bool = py.isDefined(%ctypes.1)
+      branch(%found.1) ^join.1(%ctypes.1) ^absent.1()
+    absent.1():
+      %ctypes.2 : py.Value = py.loadGlobal("m_shape_bindings", "ctypes") ^propagate.0()
+      jump ^join.1(%ctypes.2)
+    join.1(%ctypes.3 : py.Value):
+      %c_int.0 : py.Value = py.attr(%ctypes.3, "c_int") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%str.4, %c_int.0)
+      %str.6 : py.Value = py.strLit("buffer")
+      %str.7 : py.Value = py.strLit("ctypes")
+      %ctypes.4 : py.Value = py.undef("ctypes")
+      %ctypes.5 : py.Value = py.getOptionalItem(%ns.0, %str.7, %ctypes.4) ^propagate.0()
+      %found.2 : base.Bool = py.isDefined(%ctypes.5)
+      branch(%found.2) ^join.2(%ctypes.5) ^absent.2()
+    absent.2():
+      %ctypes.6 : py.Value = py.loadGlobal("m_shape_bindings", "ctypes") ^propagate.0()
+      jump ^join.2(%ctypes.6)
+    join.2(%ctypes.7 : py.Value):
+      %c_char.0 : py.Value = py.attr(%ctypes.7, "c_char") ^propagate.0()
+      %int.1 : py.Value = py.intLit(10)
+      %mult.0 : py.Value = py.mult(%c_char.0, %int.1) ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%str.6, %mult.0)
+      %list.0 : py.Value = py.mkList(%tuple.0, %tuple.1)
+      %str.8 : py.Value = py.strLit("_fields_")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.8, %list.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|m_shape_bindings.Product.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["BaseModel"]]
+    #[py.fields = [{name = "sku", type = "str"}]]
+    #[py.bindings = [{name = "model_config", value = {call = "ConfigDict", args = [], keywords = [{name = "frozen", value = true}]}}, {name = "total", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("m_shape_bindings", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Product")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %str.4 : py.Value = py.strLit("__annotations__")
+      %__annotations__.0 : py.Value = py.undef("__annotations__")
+      %__annotations__.1 : py.Value = py.getOptionalItem(%ns.0, %str.4, %__annotations__.0) ^propagate.0()
+      %found.1 : base.Bool = py.isDefined(%__annotations__.1)
+      branch(%found.1) ^annotated.0() ^annotations.0()
+    annotations.0():
+      %dict.0 : py.Value = py.mkDict ^propagate.0()
+      %str.5 : py.Value = py.strLit("__annotations__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.5, %dict.0) ^propagate.0()
+      jump ^annotated.0()
+    annotated.0():
+      %str.6 : py.Value = py.strLit("ConfigDict")
+      %ConfigDict.0 : py.Value = py.undef("ConfigDict")
+      %ConfigDict.1 : py.Value = py.getOptionalItem(%ns.0, %str.6, %ConfigDict.0) ^propagate.0()
+      %found.2 : base.Bool = py.isDefined(%ConfigDict.1)
+      branch(%found.2) ^join.1(%ConfigDict.1) ^absent.1()
+    absent.1():
+      %ConfigDict.2 : py.Value = py.loadGlobal("m_shape_bindings", "ConfigDict") ^propagate.0()
+      jump ^join.1(%ConfigDict.2)
+    join.1(%ConfigDict.3 : py.Value):
+      %tuple.0 : py.Value = py.mkTuple
+      %str.7 : py.Value = py.strLit("frozen")
+      %bool.0 : py.Value = py.boolLit(true)
+      %kwargs.1 : py.Value = py.mkKwargs(%str.7, %bool.0)
+      %call.0 : py.Value = py.call(%ConfigDict.3, %tuple.0, %kwargs.1) ^propagate.0()
+      %str.8 : py.Value = py.strLit("model_config")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.8, %call.0) ^propagate.0()
+      %str.9 : py.Value = py.strLit("str")
+      %str.10 : py.Value = py.undef("str")
+      %str.11 : py.Value = py.getOptionalItem(%ns.0, %str.9, %str.10) ^propagate.0()
+      %found.3 : base.Bool = py.isDefined(%str.11)
+      branch(%found.3) ^join.2(%str.11) ^absent.2()
+    absent.2():
+      %str.12 : py.Value = py.loadGlobal("m_shape_bindings", "str") ^propagate.0()
+      jump ^join.2(%str.12)
+    join.2(%str.13 : py.Value):
+      %str.14 : py.Value = py.strLit("__annotations__")
+      %__annotations__.2 : py.Value = py.undef("__annotations__")
+      %__annotations__.3 : py.Value = py.getOptionalItem(%ns.0, %str.14, %__annotations__.2) ^propagate.0()
+      %found.4 : base.Bool = py.isDefined(%__annotations__.3)
+      branch(%found.4) ^join.3(%__annotations__.3) ^absent.3()
+    absent.3():
+      %__annotations__.4 : py.Value = py.loadGlobal("m_shape_bindings", "__annotations__") ^propagate.0()
+      jump ^join.3(%__annotations__.4)
+    join.3(%__annotations__.5 : py.Value):
+      %str.15 : py.Value = py.strLit("sku")
+      %store.4 : base.Unit = py.setItem(%__annotations__.5, %str.15, %str.13) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@m_shape_bindings.Product.total)
+      %str.16 : py.Value = py.strLit("total")
+      %store.5 : base.Unit = py.setItem(%ns.0, %str.16, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|m_shape_bindings.Kinds.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.slots = [{value = {tuple = [{str = "x"}]}}]]
+    #[py.bindings = [{name = "a", value = 1}, {name = "b", value = 1}, {name = "c", value = {tuple = [1, {tuple = [2, 3]}]}, unpacked = true}, {name = "d", value = {tuple = [1, {tuple = [2, 3]}]}, unpacked = true}, {name = "e", value = {tuple = [1, {tuple = [2, 3]}]}, unpacked = true}, {name = "a", value = 1, augmented = true}, {name = "s", value = {tuple = [{str = "x"}]}}, {name = "f", value = 2}, {name = "os", binding = "import"}, {name = "separator", binding = "import"}, {name = "i", binding = "for", conditional = true}, {name = "j", value = "i", conditional = true}, {name = "fh", binding = "with"}, {name = "k", value = 1, conditional = true}, {name = "err", binding = "except", conditional = true}, {name = "err", binding = "del", conditional = true}, {name = "k", binding = "del"}, {name = "n", binding = ":="}, {name = "m", value = {op = "+", args = [{expr = "NamedExpr"}, 1]}}, {name = "w", value = 5, conditional = true}, {name = "_Kinds__p", value = 6}, {name = "q", value = {op = "-", args = [{op = "+", args = [{op = "-", args = ["a"]}, {op = "~", args = ["b"]}]}, {op = "*", args = [{op = "not", args = ["c"]}, {op = "**", args = ["d", 2]}]}]}}, {name = "Inner", binding = "class"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("m_shape_bindings", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Kinds")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %str.4 : py.Value = py.strLit("__annotations__")
+      %__annotations__.0 : py.Value = py.undef("__annotations__")
+      %__annotations__.1 : py.Value = py.getOptionalItem(%ns.0, %str.4, %__annotations__.0) ^propagate.0()
+      %found.1 : base.Bool = py.isDefined(%__annotations__.1)
+      branch(%found.1) ^annotated.0() ^annotations.0()
+    annotations.0():
+      %dict.0 : py.Value = py.mkDict ^propagate.0()
+      %str.5 : py.Value = py.strLit("__annotations__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.5, %dict.0) ^propagate.0()
+      jump ^annotated.0()
+    annotated.0():
+      %int.1 : py.Value = py.intLit(1)
+      %str.6 : py.Value = py.strLit("a")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.6, %int.1) ^propagate.0()
+      %str.7 : py.Value = py.strLit("b")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.7, %int.1) ^propagate.0()
+      %int.2 : py.Value = py.intLit(1)
+      %int.3 : py.Value = py.intLit(2)
+      %int.4 : py.Value = py.intLit(3)
+      %tuple.0 : py.Value = py.mkTuple(%int.3, %int.4)
+      %tuple.1 : py.Value = py.mkTuple(%int.2, %tuple.0)
+      %unpack.0 : py.Value = py.unpackSeq(%tuple.1, 2) ^propagate.0()
+      %elem.0 : py.Value = py.tupleGet(%unpack.0, 0)
+      %str.8 : py.Value = py.strLit("c")
+      %store.5 : base.Unit = py.setItem(%ns.0, %str.8, %elem.0) ^propagate.0()
+      %elem.1 : py.Value = py.tupleGet(%unpack.0, 1)
+      %unpack.1 : py.Value = py.unpackEx(%elem.1, 1, 0) ^propagate.0()
+      %elem.2 : py.Value = py.tupleGet(%unpack.1, 0)
+      %str.9 : py.Value = py.strLit("d")
+      %store.6 : base.Unit = py.setItem(%ns.0, %str.9, %elem.2) ^propagate.0()
+      %elem.3 : py.Value = py.tupleGet(%unpack.1, 1)
+      %str.10 : py.Value = py.strLit("e")
+      %store.7 : base.Unit = py.setItem(%ns.0, %str.10, %elem.3) ^propagate.0()
+      %str.11 : py.Value = py.strLit("a")
+      %a.0 : py.Value = py.undef("a")
+      %a.1 : py.Value = py.getOptionalItem(%ns.0, %str.11, %a.0) ^propagate.0()
+      %found.2 : base.Bool = py.isDefined(%a.1)
+      branch(%found.2) ^join.1(%a.1) ^absent.1()
+    absent.1():
+      %a.2 : py.Value = py.loadGlobal("m_shape_bindings", "a") ^propagate.0()
+      jump ^join.1(%a.2)
+    join.1(%a.3 : py.Value):
+      %int.5 : py.Value = py.intLit(1)
+      %iAdd.0 : py.Value = py.iAdd(%a.3, %int.5) ^propagate.0()
+      %str.12 : py.Value = py.strLit("a")
+      %store.8 : base.Unit = py.setItem(%ns.0, %str.12, %iAdd.0) ^propagate.0()
+      %str.13 : py.Value = py.strLit("x")
+      %tuple.2 : py.Value = py.mkTuple(%str.13)
+      %str.14 : py.Value = py.strLit("__slots__")
+      %store.9 : base.Unit = py.setItem(%ns.0, %str.14, %tuple.2) ^propagate.0()
+      %str.15 : py.Value = py.strLit("s")
+      %store.10 : base.Unit = py.setItem(%ns.0, %str.15, %tuple.2) ^propagate.0()
+      %int.6 : py.Value = py.intLit(2)
+      %str.16 : py.Value = py.strLit("f")
+      %store.11 : base.Unit = py.setItem(%ns.0, %str.16, %int.6) ^propagate.0()
+      %str.17 : py.Value = py.strLit("int")
+      %int.7 : py.Value = py.undef("int")
+      %int.8 : py.Value = py.getOptionalItem(%ns.0, %str.17, %int.7) ^propagate.0()
+      %found.3 : base.Bool = py.isDefined(%int.8)
+      branch(%found.3) ^join.2(%int.8) ^absent.2()
+    absent.2():
+      %int.9 : py.Value = py.loadGlobal("m_shape_bindings", "int") ^propagate.0()
+      jump ^join.2(%int.9)
+    join.2(%int.10 : py.Value):
+      %mod.0 : py.Value = py.importModule("os.path") ^propagate.0()
+      %mod.1 : py.Value = py.importModule("os") ^propagate.0()
+      %str.18 : py.Value = py.strLit("os")
+      %store.12 : base.Unit = py.setItem(%ns.0, %str.18, %mod.1) ^propagate.0()
+      %sep.0 : py.Value = py.importFrom("os", "sep") ^propagate.0()
+      %str.19 : py.Value = py.strLit("separator")
+      %store.13 : base.Unit = py.setItem(%ns.0, %str.19, %sep.0) ^propagate.0()
+      %str.20 : py.Value = py.strLit("range")
+      %range.0 : py.Value = py.undef("range")
+      %range.1 : py.Value = py.getOptionalItem(%ns.0, %str.20, %range.0) ^propagate.0()
+      %found.4 : base.Bool = py.isDefined(%range.1)
+      branch(%found.4) ^join.3(%range.1) ^absent.3()
+    absent.3():
+      %range.2 : py.Value = py.loadGlobal("m_shape_bindings", "range") ^propagate.0()
+      jump ^join.3(%range.2)
+    join.3(%range.3 : py.Value):
+      %int.11 : py.Value = py.intLit(2)
+      %tuple.3 : py.Value = py.mkTuple(%int.11)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%range.3, %tuple.3, %kwargs.1) ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%call.0) ^propagate.0()
+      jump ^head.0()
+    head.0():
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %str.21 : py.Value = py.strLit("i")
+      %store.14 : base.Unit = py.setItem(%ns.0, %str.21, %item.0) ^propagate.0()
+      %str.22 : py.Value = py.strLit("i")
+      %i.4 : py.Value = py.undef("i")
+      %i.5 : py.Value = py.getOptionalItem(%ns.0, %str.22, %i.4) ^propagate.0()
+      %found.5 : base.Bool = py.isDefined(%i.5)
+      branch(%found.5) ^join.4(%i.5) ^absent.4()
+    absent.4():
+      %i.6 : py.Value = py.loadGlobal("m_shape_bindings", "i") ^propagate.0()
+      jump ^join.4(%i.6)
+    join.4(%i.7 : py.Value):
+      %str.23 : py.Value = py.strLit("j")
+      %store.15 : base.Unit = py.setItem(%ns.0, %str.23, %i.7) ^propagate.0()
+      jump ^head.0()
+    stop.0(%exc.0 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.0)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+    exit.0():
+      %str.24 : py.Value = py.strLit("open")
+      %open.0 : py.Value = py.undef("open")
+      %open.1 : py.Value = py.getOptionalItem(%ns.0, %str.24, %open.0) ^propagate.0()
+      %found.6 : base.Bool = py.isDefined(%open.1)
+      branch(%found.6) ^join.5(%open.1) ^absent.5()
+    absent.5():
+      %open.2 : py.Value = py.loadGlobal("m_shape_bindings", "open") ^propagate.0()
+      jump ^join.5(%open.2)
+    join.5(%open.3 : py.Value):
+      %str.25 : py.Value = py.strLit("f")
+      %tuple.4 : py.Value = py.mkTuple(%str.25)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%open.3, %tuple.4, %kwargs.2) ^propagate.0()
+      %enter.0 : py.Value = py.enterMethod(%call.1) ^propagate.0()
+      %exit.0 : py.Value = py.exitMethod(%call.1) ^propagate.0()
+      %args.1 : py.Value = py.mkTuple
+      %kwargs.3 : py.Value = py.mkKwargs
+      %entered.0 : py.Value = py.call(%enter.0, %args.1, %kwargs.3) ^propagate.0()
+      %str.26 : py.Value = py.strLit("fh")
+      %store.16 : base.Unit = py.setItem(%ns.0, %str.26, %entered.0) ^wexc.0()
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^fin.0(%comp.0)
+    wexc.0(%exc.1 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.1)
+      %exited.0 : py.Value = py.exitWithExc(%exit.0, %exc.1) ^unwind.0()
+      %cond.0 : base.Bool = py.truthy(%exited.0) ^unwind.0()
+      branch(%cond.0) ^suppress.0() ^unwind.0(%exc.1)
+    suppress.0():
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      jump ^join.6()
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    fin.0(%pending.0 : py.Completion):
+      %none.0 : py.Value = py.noneLit
+      %args.2 : py.Value = py.mkTuple(%none.0, %none.0, %none.0)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %exited.1 : py.Value = py.call(%exit.0, %args.2, %kwargs.4) ^propagate.0()
+      py.Completion.case(%pending.0) ^join.6() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
+    join.6():
+      %int.12 : py.Value = py.intLit(1)
+      %str.27 : py.Value = py.strLit("k")
+      %store.17 : base.Unit = py.setItem(%ns.0, %str.27, %int.12) ^catch.0()
+      jump ^join.7()
+    catch.0(%exc.3 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.3)
+      %str.28 : py.Value = py.strLit("ValueError")
+      %ValueError.0 : py.Value = py.undef("ValueError")
+      %ValueError.1 : py.Value = py.getOptionalItem(%ns.0, %str.28, %ValueError.0) ^unwind.1()
+      %found.7 : base.Bool = py.isDefined(%ValueError.1)
+      branch(%found.7) ^join.8(%ValueError.1) ^absent.6()
+    absent.6():
+      %ValueError.2 : py.Value = py.loadGlobal("m_shape_bindings", "ValueError") ^unwind.1()
+      jump ^join.8(%ValueError.2)
+    join.8(%ValueError.3 : py.Value):
+      %match.0 : base.Bool = py.excMatch(%exc.3, %ValueError.3) ^unwind.1()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %str.29 : py.Value = py.strLit("err")
+      %store.18 : base.Unit = py.setItem(%ns.0, %str.29, %exc.3) ^unwind.1()
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      %none.1 : py.Value = py.noneLit
+      %str.30 : py.Value = py.strLit("err")
+      %store.19 : base.Unit = py.setItem(%ns.0, %str.30, %none.1) ^propagate.0()
+      %str.31 : py.Value = py.strLit("err")
+      %del.0 : base.Unit = py.delItem(%ns.0, %str.31) ^undefined.0()
+      jump ^deleted.0()
+    undefined.0(%exc.4 : py.Value):
+      %err.0 : py.Value = py.undef("err")
+      %err.1 : py.Value = py.requireDefined(%err.0, "NameError", "name 'err' is not defined") ^propagate.0()
+      unreachable
+    deleted.0():
+      jump ^join.7()
+    next.0():
+      jump ^unwind.1(%exc.3)
+    unwind.1(%exc.7 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.7)
+    join.7():
+      %str.34 : py.Value = py.strLit("k")
+      %del.2 : base.Unit = py.delItem(%ns.0, %str.34) ^undefined.2()
+      jump ^deleted.2()
+    undefined.2(%exc.8 : py.Value):
+      %k.0 : py.Value = py.undef("k")
+      %k.1 : py.Value = py.requireDefined(%k.0, "NameError", "name 'k' is not defined") ^propagate.0()
+      unreachable
+    deleted.2():
+      %int.13 : py.Value = py.intLit(4)
+      %str.35 : py.Value = py.strLit("n")
+      %store.21 : base.Unit = py.setItem(%ns.0, %str.35, %int.13) ^propagate.0()
+      %int.14 : py.Value = py.intLit(1)
+      %add.0 : py.Value = py.add(%int.13, %int.14) ^propagate.0()
+      %str.36 : py.Value = py.strLit("m")
+      %store.22 : base.Unit = py.setItem(%ns.0, %str.36, %add.0) ^propagate.0()
+      %str.37 : py.Value = py.strLit("flag")
+      %flag.0 : py.Value = py.undef("flag")
+      %flag.1 : py.Value = py.getOptionalItem(%ns.0, %str.37, %flag.0) ^propagate.0()
+      %found.8 : base.Bool = py.isDefined(%flag.1)
+      branch(%found.8) ^join.10(%flag.1) ^absent.7()
+    absent.7():
+      %flag.2 : py.Value = py.loadGlobal("m_shape_bindings", "flag") ^propagate.0()
+      jump ^join.10(%flag.2)
+    join.10(%flag.3 : py.Value):
+      %cond.1 : base.Bool = py.truthy(%flag.3) ^propagate.0()
+      branch(%cond.1) ^then.0() ^else.0()
+    then.0():
+      %int.15 : py.Value = py.intLit(5)
+      %str.38 : py.Value = py.strLit("w")
+      %store.23 : base.Unit = py.setItem(%ns.0, %str.38, %int.15) ^propagate.0()
+      jump ^join.9()
+    else.0():
+      jump ^join.9()
+    join.9():
+      %int.16 : py.Value = py.intLit(6)
+      %str.39 : py.Value = py.strLit("_Kinds__p")
+      %store.24 : base.Unit = py.setItem(%ns.0, %str.39, %int.16) ^propagate.0()
+      %str.40 : py.Value = py.strLit("a")
+      %a.4 : py.Value = py.undef("a")
+      %a.5 : py.Value = py.getOptionalItem(%ns.0, %str.40, %a.4) ^propagate.0()
+      %found.9 : base.Bool = py.isDefined(%a.5)
+      branch(%found.9) ^join.11(%a.5) ^absent.8()
+    absent.8():
+      %a.6 : py.Value = py.loadGlobal("m_shape_bindings", "a") ^propagate.0()
+      jump ^join.11(%a.6)
+    join.11(%a.7 : py.Value):
+      %neg.0 : py.Value = py.uSub(%a.7) ^propagate.0()
+      %str.41 : py.Value = py.strLit("b")
+      %b.0 : py.Value = py.undef("b")
+      %b.1 : py.Value = py.getOptionalItem(%ns.0, %str.41, %b.0) ^propagate.0()
+      %found.10 : base.Bool = py.isDefined(%b.1)
+      branch(%found.10) ^join.12(%b.1) ^absent.9()
+    absent.9():
+      %b.2 : py.Value = py.loadGlobal("m_shape_bindings", "b") ^propagate.0()
+      jump ^join.12(%b.2)
+    join.12(%b.3 : py.Value):
+      %invert.0 : py.Value = py.invert(%b.3) ^propagate.0()
+      %add.1 : py.Value = py.add(%neg.0, %invert.0) ^propagate.0()
+      %str.42 : py.Value = py.strLit("c")
+      %c.56 : py.Value = py.undef("c")
+      %c.57 : py.Value = py.getOptionalItem(%ns.0, %str.42, %c.56) ^propagate.0()
+      %found.11 : base.Bool = py.isDefined(%c.57)
+      branch(%found.11) ^join.13(%c.57) ^absent.10()
+    absent.10():
+      %c.58 : py.Value = py.loadGlobal("m_shape_bindings", "c") ^propagate.0()
+      jump ^join.13(%c.58)
+    join.13(%c.59 : py.Value):
+      %not.0 : py.Value = py.not(%c.59) ^propagate.0()
+      %str.43 : py.Value = py.strLit("d")
+      %d.0 : py.Value = py.undef("d")
+      %d.1 : py.Value = py.getOptionalItem(%ns.0, %str.43, %d.0) ^propagate.0()
+      %found.12 : base.Bool = py.isDefined(%d.1)
+      branch(%found.12) ^join.14(%d.1) ^absent.11()
+    absent.11():
+      %d.2 : py.Value = py.loadGlobal("m_shape_bindings", "d") ^propagate.0()
+      jump ^join.14(%d.2)
+    join.14(%d.3 : py.Value):
+      %int.17 : py.Value = py.intLit(2)
+      %pow.0 : py.Value = py.pow(%d.3, %int.17) ^propagate.0()
+      %mult.0 : py.Value = py.mult(%not.0, %pow.0) ^propagate.0()
+      %sub.0 : py.Value = py.sub(%add.1, %mult.0) ^propagate.0()
+      %str.44 : py.Value = py.strLit("q")
+      %store.25 : base.Unit = py.setItem(%ns.0, %str.44, %sub.0) ^propagate.0()
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Kinds.Inner.<body>|)
+      %str.45 : py.Value = py.strLit("Inner")
+      %tuple.5 : py.Value = py.mkTuple(%clo.0, %str.45)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %Inner.0 : py.Value = py.call(%__build_class__.0, %tuple.5, %kwargs.5) ^propagate.0()
+      %str.46 : py.Value = py.strLit("Inner")
+      %store.26 : base.Unit = py.setItem(%ns.0, %str.46, %Inner.0) ^propagate.0()
+      %none.3 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.3)
+      ret(%ret.0)
+    propagate.0(%exc.9 : py.Value):
+      %exc.10 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.9)
+      ret(%exc.10)
+  }
+  func @m_shape_bindings.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %a.0 : py.Value = py.undef("a")
+      %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
+      %k.0 : py.Value = py.undef("k")
+      %k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%k.0)
+      %int.0 : py.Value = py.intLit(0)
+      %none.0 : py.Value = py.noneLit
+      %a.1 : py.Value = py.getSlice(%args.0, %int.0, %none.0, %none.0) ^propagate.0()
+      %int.1 : py.Value = py.intLit(0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|m_shape_bindings.Walrus.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "a", binding = ":="}, {name = "b", binding = ":="}, {name = "c", binding = ":="}, {name = "dd", binding = ":="}, {name = "d", value = {expr = "Dict"}}, {name = "p1", binding = ":="}, {name = "k1", binding = ":="}, {name = "x", value = {call = "f", args = [{expr = "Starred"}], keywords = [{name = "k", value = {expr = "NamedExpr"}}]}}, {name = "q", binding = ":="}, {name = "p", binding = ":=", conditional = true}, {name = "r", binding = ":=", conditional = true}, {name = "y", value = {expr = "IfExp"}}, {name = "lo", binding = ":="}, {name = "hi", binding = ":="}, {name = "st", binding = ":="}, {name = "s", value = {name = [1, 2], args = [{expr = "Slice"}]}}, {name = "fv", binding = ":="}, {name = "spec", binding = ":="}, {name = "fs", value = {expr = "JoinedStr"}}, {name = "ld", binding = ":="}, {name = "lk", binding = ":="}, {name = "lam", value = {expr = "Lambda"}}, {name = "c1", binding = ":="}, {name = "c2", binding = ":="}, {name = "c3", binding = ":=", conditional = true}, {name = "cmp", value = {expr = "Compare"}}, {name = "t1", binding = ":="}, {name = "t2", binding = ":="}, {name = "t", value = {tuple = [{expr = "NamedExpr"}, {expr = "Starred"}]}}, {name = "s1", binding = ":="}, {name = "st2", value = {expr = "Set"}}, {name = "o", binding = ":="}, {name = "at", value = {expr = "Attribute"}}, {name = "sv", binding = ":="}, {name = "si", binding = ":="}, {name = "sub", value = {name = {expr = "NamedExpr"}, args = [{expr = "NamedExpr"}]}}, {name = "u", binding = ":="}, {name = "un", value = {op = "-", args = [{expr = "NamedExpr"}]}}, {name = "as1", binding = ":="}, {name = "as2", binding = ":=", conditional = true}, {name = "dl", binding = ":="}, {name = "sc1", binding = ":=", conditional = true}, {name = "sc2", binding = ":=", conditional = true}, {name = "sc", value = {expr = "BoolOp"}}, {name = "dec", binding = ":="}, {name = "dv", binding = ":="}, {name = "ra", binding = ":="}, {name = "m", binding = "def"}, {name = "base", binding = ":="}, {name = "mt", binding = ":="}, {name = "Inner", binding = "class"}, {name = "wv", binding = ":="}, {name = "it", binding = ":="}, {name = "fv2", binding = "for", conditional = true}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("m_shape_bindings", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Walrus")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %int.1 : py.Value = py.intLit(1)
+      %str.4 : py.Value = py.strLit("a")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %int.1) ^propagate.0()
+      %int.2 : py.Value = py.intLit(2)
+      %str.5 : py.Value = py.strLit("b")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %int.2) ^propagate.0()
+      %dict.0 : py.Value = py.mkDict(%int.1, %int.2) ^propagate.0()
+      %dict.1 : py.Value = py.mkDict ^propagate.0()
+      %str.6 : py.Value = py.strLit("c")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.6, %dict.1) ^propagate.0()
+      %update.0 : py.Value = py.dictUpdate(%dict.0, %dict.1) ^propagate.0()
+      %int.3 : py.Value = py.intLit(3)
+      %str.7 : py.Value = py.strLit("dd")
+      %store.5 : base.Unit = py.setItem(%ns.0, %str.7, %int.3) ^propagate.0()
+      %int.4 : py.Value = py.intLit(4)
+      %dict.2 : py.Value = py.mkDict(%int.3, %int.4) ^propagate.0()
+      %update.1 : py.Value = py.dictUpdate(%update.0, %dict.2) ^propagate.0()
+      %str.8 : py.Value = py.strLit("d")
+      %store.6 : base.Unit = py.setItem(%ns.0, %str.8, %update.1) ^propagate.0()
+      %str.9 : py.Value = py.strLit("f")
+      %f.0 : py.Value = py.undef("f")
+      %f.1 : py.Value = py.getOptionalItem(%ns.0, %str.9, %f.0) ^propagate.0()
+      %found.1 : base.Bool = py.isDefined(%f.1)
+      branch(%found.1) ^join.1(%f.1) ^absent.1()
+    absent.1():
+      %f.2 : py.Value = py.loadGlobal("m_shape_bindings", "f") ^propagate.0()
+      jump ^join.1(%f.2)
+    join.1(%f.3 : py.Value):
+      %int.5 : py.Value = py.intLit(2)
+      %str.10 : py.Value = py.strLit("p1")
+      %store.7 : base.Unit = py.setItem(%ns.0, %str.10, %int.5) ^propagate.0()
+      %list.0 : py.Value = py.mkList(%int.5)
+      %str.11 : py.Value = py.strLit("k")
+      %int.6 : py.Value = py.intLit(1)
+      %str.12 : py.Value = py.strLit("k1")
+      %store.8 : base.Unit = py.setItem(%ns.0, %str.12, %int.6) ^propagate.0()
+      %kwargs.1 : py.Value = py.mkKwargs(%str.11, %int.6)
+      %args.1 : py.Value = py.argsTuple(%f.3, %list.0) ^propagate.0()
+      %call.0 : py.Value = py.call(%f.3, %args.1, %kwargs.1) ^propagate.0()
+      %str.13 : py.Value = py.strLit("x")
+      %store.9 : base.Unit = py.setItem(%ns.0, %str.13, %call.0) ^propagate.0()
+      %int.7 : py.Value = py.intLit(0)
+      %str.14 : py.Value = py.strLit("q")
+      %store.10 : base.Unit = py.setItem(%ns.0, %str.14, %int.7) ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%int.7) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %int.8 : py.Value = py.intLit(1)
+      %str.15 : py.Value = py.strLit("p")
+      %store.11 : base.Unit = py.setItem(%ns.0, %str.15, %int.8) ^propagate.0()
+      jump ^join.2(%int.8)
+    else.0():
+      %int.9 : py.Value = py.intLit(2)
+      %str.16 : py.Value = py.strLit("r")
+      %store.12 : base.Unit = py.setItem(%ns.0, %str.16, %int.9) ^propagate.0()
+      jump ^join.2(%int.9)
+    join.2(%ifexp.0 : py.Value):
+      %str.17 : py.Value = py.strLit("y")
+      %store.13 : base.Unit = py.setItem(%ns.0, %str.17, %ifexp.0) ^propagate.0()
+      %int.10 : py.Value = py.intLit(1)
+      %int.11 : py.Value = py.intLit(2)
+      %list.1 : py.Value = py.mkList(%int.10, %int.11)
+      %int.12 : py.Value = py.intLit(0)
+      %str.18 : py.Value = py.strLit("lo")
+      %store.14 : base.Unit = py.setItem(%ns.0, %str.18, %int.12) ^propagate.0()
+      %int.13 : py.Value = py.intLit(1)
+      %str.19 : py.Value = py.strLit("hi")
+      %store.15 : base.Unit = py.setItem(%ns.0, %str.19, %int.13) ^propagate.0()
+      %int.14 : py.Value = py.intLit(1)
+      %str.20 : py.Value = py.strLit("st")
+      %store.16 : base.Unit = py.setItem(%ns.0, %str.20, %int.14) ^propagate.0()
+      %slice.0 : py.Value = py.getSlice(%list.1, %int.12, %int.13, %int.14) ^propagate.0()
+      %str.21 : py.Value = py.strLit("s")
+      %store.17 : base.Unit = py.setItem(%ns.0, %str.21, %slice.0) ^propagate.0()
+      %int.15 : py.Value = py.intLit(1)
+      %str.22 : py.Value = py.strLit("fv")
+      %store.18 : base.Unit = py.setItem(%ns.0, %str.22, %int.15) ^propagate.0()
+      %str.23 : py.Value = py.strLit("")
+      %fmt.0 : py.Value = py.fmtValue(%int.15, %str.23) ^propagate.0()
+      %int.16 : py.Value = py.intLit(2)
+      %str.24 : py.Value = py.strLit("")
+      %str.25 : py.Value = py.strLit("spec")
+      %store.19 : base.Unit = py.setItem(%ns.0, %str.25, %str.24) ^propagate.0()
+      %str.26 : py.Value = py.strLit("")
+      %fmt.1 : py.Value = py.fmtValue(%str.24, %str.26) ^propagate.0()
+      %fmt.2 : py.Value = py.fmtValue(%int.16, %fmt.1) ^propagate.0()
+      %fstr.0 : py.Value = py.strConcat(%fmt.0, %fmt.2)
+      %str.27 : py.Value = py.strLit("fs")
+      %store.20 : base.Unit = py.setItem(%ns.0, %str.27, %fstr.0) ^propagate.0()
+      %int.17 : py.Value = py.intLit(1)
+      %str.28 : py.Value = py.strLit("ld")
+      %store.21 : base.Unit = py.setItem(%ns.0, %str.28, %int.17) ^propagate.0()
+      %a.default.0 : base.Ref(py.Value) = base.refNew[py.Value](%int.17)
+      %int.18 : py.Value = py.intLit(2)
+      %str.29 : py.Value = py.strLit("lk")
+      %store.22 : base.Unit = py.setItem(%ns.0, %str.29, %int.18) ^propagate.0()
+      %b.default.0 : base.Ref(py.Value) = base.refNew[py.Value](%int.18)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@|m_shape_bindings.Walrus.<lambda>|, %a.default.0, %b.default.0)
+      %str.30 : py.Value = py.strLit("lam")
+      %store.23 : base.Unit = py.setItem(%ns.0, %str.30, %clo.0) ^propagate.0()
+      %int.19 : py.Value = py.intLit(1)
+      %str.31 : py.Value = py.strLit("c1")
+      %store.24 : base.Unit = py.setItem(%ns.0, %str.31, %int.19) ^propagate.0()
+      %int.20 : py.Value = py.intLit(2)
+      %str.32 : py.Value = py.strLit("c2")
+      %store.25 : base.Unit = py.setItem(%ns.0, %str.32, %int.20) ^propagate.0()
+      %lt.0 : py.Value = py.lt(%int.19, %int.20) ^propagate.0()
+      %cond.1 : base.Bool = py.truthy(%lt.0) ^propagate.0()
+      branch(%cond.1) ^cmp.0() ^join.3(%lt.0)
+    cmp.0():
+      %int.21 : py.Value = py.intLit(3)
+      %str.33 : py.Value = py.strLit("c3")
+      %store.26 : base.Unit = py.setItem(%ns.0, %str.33, %int.21) ^propagate.0()
+      %lt.1 : py.Value = py.lt(%int.20, %int.21) ^propagate.0()
+      jump ^join.3(%lt.1)
+    join.3(%cmp.0 : py.Value):
+      %str.34 : py.Value = py.strLit("cmp")
+      %store.27 : base.Unit = py.setItem(%ns.0, %str.34, %cmp.0) ^propagate.0()
+      %int.22 : py.Value = py.intLit(1)
+      %str.35 : py.Value = py.strLit("t1")
+      %store.28 : base.Unit = py.setItem(%ns.0, %str.35, %int.22) ^propagate.0()
+      %list.2 : py.Value = py.mkList(%int.22)
+      %int.23 : py.Value = py.intLit(2)
+      %str.36 : py.Value = py.strLit("t2")
+      %store.29 : base.Unit = py.setItem(%ns.0, %str.36, %int.23) ^propagate.0()
+      %list.3 : py.Value = py.mkList(%int.23)
+      %extend.0 : base.Unit = py.listExtend(%list.2, %list.3) ^propagate.0()
+      %tuple.0 : py.Value = py.listToTuple(%list.2)
+      %str.37 : py.Value = py.strLit("t")
+      %store.30 : base.Unit = py.setItem(%ns.0, %str.37, %tuple.0) ^propagate.0()
+      %int.24 : py.Value = py.intLit(1)
+      %str.38 : py.Value = py.strLit("s1")
+      %store.31 : base.Unit = py.setItem(%ns.0, %str.38, %int.24) ^propagate.0()
+      %set.0 : py.Value = py.mkSet(%int.24) ^propagate.0()
+      %str.39 : py.Value = py.strLit("st2")
+      %store.32 : base.Unit = py.setItem(%ns.0, %str.39, %set.0) ^propagate.0()
+      %str.40 : py.Value = py.strLit("f")
+      %f.4 : py.Value = py.undef("f")
+      %f.5 : py.Value = py.getOptionalItem(%ns.0, %str.40, %f.4) ^propagate.0()
+      %found.2 : base.Bool = py.isDefined(%f.5)
+      branch(%found.2) ^join.4(%f.5) ^absent.2()
+    absent.2():
+      %f.6 : py.Value = py.loadGlobal("m_shape_bindings", "f") ^propagate.0()
+      jump ^join.4(%f.6)
+    join.4(%f.7 : py.Value):
+      %str.41 : py.Value = py.strLit("o")
+      %store.33 : base.Unit = py.setItem(%ns.0, %str.41, %f.7) ^propagate.0()
+      %__name__.4 : py.Value = py.attr(%f.7, "__name__") ^propagate.0()
+      %str.42 : py.Value = py.strLit("at")
+      %store.34 : base.Unit = py.setItem(%ns.0, %str.42, %__name__.4) ^propagate.0()
+      %int.25 : py.Value = py.intLit(1)
+      %list.4 : py.Value = py.mkList(%int.25)
+      %str.43 : py.Value = py.strLit("sv")
+      %store.35 : base.Unit = py.setItem(%ns.0, %str.43, %list.4) ^propagate.0()
+      %int.26 : py.Value = py.intLit(0)
+      %str.44 : py.Value = py.strLit("si")
+      %store.36 : base.Unit = py.setItem(%ns.0, %str.44, %int.26) ^propagate.0()
+      %item.0 : py.Value = py.getItem(%list.4, %int.26) ^propagate.0()
+      %str.45 : py.Value = py.strLit("sub")
+      %store.37 : base.Unit = py.setItem(%ns.0, %str.45, %item.0) ^propagate.0()
+      %int.27 : py.Value = py.intLit(1)
+      %str.46 : py.Value = py.strLit("u")
+      %store.38 : base.Unit = py.setItem(%ns.0, %str.46, %int.27) ^propagate.0()
+      %neg.0 : py.Value = py.uSub(%int.27) ^propagate.0()
+      %str.47 : py.Value = py.strLit("un")
+      %store.39 : base.Unit = py.setItem(%ns.0, %str.47, %neg.0) ^propagate.0()
+      %int.28 : py.Value = py.intLit(1)
+      %str.48 : py.Value = py.strLit("as1")
+      %store.40 : base.Unit = py.setItem(%ns.0, %str.48, %int.28) ^propagate.0()
+      %cond.2 : base.Bool = py.truthy(%int.28) ^propagate.0()
+      branch(%cond.2) ^ok.0() ^fail.0()
+    fail.0():
+      %AssertionError.0 : py.Value = py.assertionError
+      %str.49 : py.Value = py.strLit("m")
+      %str.50 : py.Value = py.strLit("as2")
+      %store.41 : base.Unit = py.setItem(%ns.0, %str.50, %str.49) ^propagate.0()
+      %args.2 : py.Value = py.mkTuple(%str.49)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%AssertionError.0, %args.2, %kwargs.2) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%call.1) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    ok.0():
+      %int.29 : py.Value = py.intLit(1)
+      %list.5 : py.Value = py.mkList(%int.29)
+      %str.51 : py.Value = py.strLit("dl")
+      %store.42 : base.Unit = py.setItem(%ns.0, %str.51, %list.5) ^propagate.0()
+      %int.30 : py.Value = py.intLit(0)
+      %del.0 : base.Unit = py.delItem(%list.5, %int.30) ^propagate.0()
+      %int.31 : py.Value = py.intLit(0)
+      %cond.3 : base.Bool = py.truthy(%int.31) ^propagate.0()
+      branch(%cond.3) ^join.5(%int.31) ^or.0()
+    or.0():
+      %int.32 : py.Value = py.intLit(1)
+      %str.52 : py.Value = py.strLit("sc1")
+      %store.43 : base.Unit = py.setItem(%ns.0, %str.52, %int.32) ^propagate.0()
+      %cond.4 : base.Bool = py.truthy(%int.32) ^propagate.0()
+      branch(%cond.4) ^and.0() ^join.6(%int.32)
+    and.0():
+      %int.33 : py.Value = py.intLit(2)
+      %str.53 : py.Value = py.strLit("sc2")
+      %store.44 : base.Unit = py.setItem(%ns.0, %str.53, %int.33) ^propagate.0()
+      jump ^join.6(%int.33)
+    join.6(%bool.0 : py.Value):
+      jump ^join.5(%bool.0)
+    join.5(%bool.1 : py.Value):
+      %str.54 : py.Value = py.strLit("sc")
+      %store.45 : base.Unit = py.setItem(%ns.0, %str.54, %bool.1) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Walrus.<lambda>.1|)
+      %str.55 : py.Value = py.strLit("dec")
+      %store.46 : base.Unit = py.setItem(%ns.0, %str.55, %clo.1) ^propagate.0()
+      %int.34 : py.Value = py.intLit(1)
+      %str.56 : py.Value = py.strLit("dv")
+      %store.47 : base.Unit = py.setItem(%ns.0, %str.56, %int.34) ^propagate.0()
+      %v.default.0 : base.Ref(py.Value) = base.refNew[py.Value](%int.34)
+      %str.57 : py.Value = py.strLit("return")
+      %str.58 : py.Value = py.strLit("int")
+      %int.35 : py.Value = py.undef("int")
+      %int.36 : py.Value = py.getOptionalItem(%ns.0, %str.58, %int.35) ^propagate.0()
+      %found.3 : base.Bool = py.isDefined(%int.36)
+      branch(%found.3) ^join.7(%int.36) ^absent.3()
+    absent.3():
+      %int.37 : py.Value = py.loadGlobal("m_shape_bindings", "int") ^propagate.0()
+      jump ^join.7(%int.37)
+    join.7(%int.38 : py.Value):
+      %str.59 : py.Value = py.strLit("ra")
+      %store.48 : base.Unit = py.setItem(%ns.0, %str.59, %int.38) ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_shape_bindings.Walrus.m, %v.default.0)
+      %annotations.0 : py.Value = py.mkDict(%str.57, %int.38) ^propagate.0()
+      %__annotations__.0 : base.Unit = py.setAttr(%clo.2, "__annotations__", %annotations.0) ^propagate.0()
+      %args.3 : py.Value = py.mkTuple(%clo.2)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %decorated.0 : py.Value = py.call(%clo.1, %args.3, %kwargs.3) ^propagate.0()
+      %str.60 : py.Value = py.strLit("m")
+      %store.49 : base.Unit = py.setItem(%ns.0, %str.60, %decorated.0) ^propagate.0()
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.3 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Walrus.Inner.<body>|)
+      %str.61 : py.Value = py.strLit("Inner")
+      %str.62 : py.Value = py.strLit("object")
+      %object.0 : py.Value = py.undef("object")
+      %object.1 : py.Value = py.getOptionalItem(%ns.0, %str.62, %object.0) ^propagate.0()
+      %found.4 : base.Bool = py.isDefined(%object.1)
+      branch(%found.4) ^join.8(%object.1) ^absent.4()
+    absent.4():
+      %object.2 : py.Value = py.loadGlobal("m_shape_bindings", "object") ^propagate.0()
+      jump ^join.8(%object.2)
+    join.8(%object.3 : py.Value):
+      %str.63 : py.Value = py.strLit("base")
+      %store.50 : base.Unit = py.setItem(%ns.0, %str.63, %object.3) ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%clo.3, %str.61, %object.3)
+      %str.64 : py.Value = py.strLit("metaclass")
+      %str.65 : py.Value = py.strLit("type")
+      %type.0 : py.Value = py.undef("type")
+      %type.1 : py.Value = py.getOptionalItem(%ns.0, %str.65, %type.0) ^propagate.0()
+      %found.5 : base.Bool = py.isDefined(%type.1)
+      branch(%found.5) ^join.9(%type.1) ^absent.5()
+    absent.5():
+      %type.2 : py.Value = py.loadGlobal("m_shape_bindings", "type") ^propagate.0()
+      jump ^join.9(%type.2)
+    join.9(%type.3 : py.Value):
+      %str.66 : py.Value = py.strLit("mt")
+      %store.51 : base.Unit = py.setItem(%ns.0, %str.66, %type.3) ^propagate.0()
+      %kwargs.4 : py.Value = py.mkKwargs(%str.64, %type.3)
+      %Inner.0 : py.Value = py.call(%__build_class__.0, %tuple.1, %kwargs.4) ^propagate.0()
+      %str.67 : py.Value = py.strLit("Inner")
+      %store.52 : base.Unit = py.setItem(%ns.0, %str.67, %Inner.0) ^propagate.0()
+      %str.68 : py.Value = py.strLit("open")
+      %open.0 : py.Value = py.undef("open")
+      %open.1 : py.Value = py.getOptionalItem(%ns.0, %str.68, %open.0) ^propagate.0()
+      %found.6 : base.Bool = py.isDefined(%open.1)
+      branch(%found.6) ^join.10(%open.1) ^absent.6()
+    absent.6():
+      %open.2 : py.Value = py.loadGlobal("m_shape_bindings", "open") ^propagate.0()
+      jump ^join.10(%open.2)
+    join.10(%open.3 : py.Value):
+      %str.69 : py.Value = py.strLit("f")
+      %tuple.2 : py.Value = py.mkTuple(%str.69)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%open.3, %tuple.2, %kwargs.5) ^propagate.0()
+      %enter.0 : py.Value = py.enterMethod(%call.2) ^propagate.0()
+      %exit.0 : py.Value = py.exitMethod(%call.2) ^propagate.0()
+      %args.4 : py.Value = py.mkTuple
+      %kwargs.6 : py.Value = py.mkKwargs
+      %entered.0 : py.Value = py.call(%enter.0, %args.4, %kwargs.6) ^propagate.0()
+      %int.39 : py.Value = py.intLit(0)
+      %list.6 : py.Value = py.mkList(%int.39)
+      %str.70 : py.Value = py.strLit("wv")
+      %store.53 : base.Unit = py.setItem(%ns.0, %str.70, %list.6) ^wexc.0()
+      %int.40 : py.Value = py.intLit(0)
+      %store.54 : base.Unit = py.setItem(%list.6, %int.40, %entered.0) ^wexc.0()
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^fin.0(%comp.0)
+    wexc.0(%exc.1 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.1)
+      %exited.0 : py.Value = py.exitWithExc(%exit.0, %exc.1) ^unwind.0()
+      %cond.5 : base.Bool = py.truthy(%exited.0) ^unwind.0()
+      branch(%cond.5) ^suppress.0() ^unwind.0(%exc.1)
+    suppress.0():
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      jump ^join.11()
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    fin.0(%pending.0 : py.Completion):
+      %none.0 : py.Value = py.noneLit
+      %args.5 : py.Value = py.mkTuple(%none.0, %none.0, %none.0)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %exited.1 : py.Value = py.call(%exit.0, %args.5, %kwargs.7) ^propagate.0()
+      py.Completion.case(%pending.0) ^join.11() ^unreachable.0() ^propagate.0() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
+    join.11():
+      %list.7 : py.Value = py.mkList
+      %str.71 : py.Value = py.strLit("it")
+      %store.55 : base.Unit = py.setItem(%ns.0, %str.71, %list.7) ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%list.7) ^propagate.0()
+      jump ^head.0()
+    head.0():
+      %item.1 : py.Value = py.next(%iter.0) ^stop.0()
+      %str.72 : py.Value = py.strLit("fv2")
+      %store.56 : base.Unit = py.setItem(%ns.0, %str.72, %item.1) ^propagate.0()
+      jump ^head.0()
+    stop.0(%exc.3 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.3)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.3)
+    exit.0():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.4 : py.Value):
+      %exc.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
+      ret(%exc.5)
+  }
+  func @|m_shape_bindings.Handlers.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "E", binding = ":=", conditional = true}, {name = "err", binding = "except", conditional = true}, {name = "err", value = 5, conditional = true}, {name = "err", binding = "del", conditional = true}, {name = "k", binding = "for", conditional = true}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("m_shape_bindings", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Handlers")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %str.4 : py.Value = py.strLit("ValueError")
+      %ValueError.0 : py.Value = py.undef("ValueError")
+      %ValueError.1 : py.Value = py.getOptionalItem(%ns.0, %str.4, %ValueError.0) ^catch.0()
+      %found.1 : base.Bool = py.isDefined(%ValueError.1)
+      branch(%found.1) ^join.2(%ValueError.1) ^absent.1()
+    absent.1():
+      %ValueError.2 : py.Value = py.loadGlobal("m_shape_bindings", "ValueError") ^catch.0()
+      jump ^join.2(%ValueError.2)
+    join.2(%ValueError.3 : py.Value):
+      %exc.0 : py.Value = py.toException(%ValueError.3) ^catch.0()
+      jump ^catch.0(%exc.0)
+    catch.0(%exc.1 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.1)
+      %str.5 : py.Value = py.strLit("ValueError")
+      %ValueError.4 : py.Value = py.undef("ValueError")
+      %ValueError.5 : py.Value = py.getOptionalItem(%ns.0, %str.5, %ValueError.4) ^unwind.0()
+      %found.2 : base.Bool = py.isDefined(%ValueError.5)
+      branch(%found.2) ^join.3(%ValueError.5) ^absent.2()
+    absent.2():
+      %ValueError.6 : py.Value = py.loadGlobal("m_shape_bindings", "ValueError") ^unwind.0()
+      jump ^join.3(%ValueError.6)
+    join.3(%ValueError.7 : py.Value):
+      %str.6 : py.Value = py.strLit("E")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.6, %ValueError.7) ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.1, %ValueError.7) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %str.7 : py.Value = py.strLit("err")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.7, %exc.1) ^unwind.0()
+      %int.1 : py.Value = py.intLit(5)
+      %str.8 : py.Value = py.strLit("err")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.8, %int.1) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %none.0 : py.Value = py.noneLit
+      %str.9 : py.Value = py.strLit("err")
+      %store.5 : base.Unit = py.setItem(%ns.0, %str.9, %none.0) ^propagate.0()
+      %str.10 : py.Value = py.strLit("err")
+      %del.0 : base.Unit = py.delItem(%ns.0, %str.10) ^undefined.0()
+      jump ^deleted.0()
+    undefined.0(%exc.2 : py.Value):
+      %err.0 : py.Value = py.undef("err")
+      %err.1 : py.Value = py.requireDefined(%err.0, "NameError", "name 'err' is not defined") ^propagate.0()
+      unreachable
+    deleted.0():
+      jump ^join.1()
+    clear.0(%exc.3 : py.Value):
+      %none.1 : py.Value = py.noneLit
+      %str.11 : py.Value = py.strLit("err")
+      %store.6 : base.Unit = py.setItem(%ns.0, %str.11, %none.1) ^unwind.0()
+      %str.12 : py.Value = py.strLit("err")
+      %del.1 : base.Unit = py.delItem(%ns.0, %str.12) ^undefined.1()
+      jump ^deleted.1()
+    undefined.1(%exc.4 : py.Value):
+      %err.2 : py.Value = py.undef("err")
+      %err.3 : py.Value = py.requireDefined(%err.2, "NameError", "name 'err' is not defined") ^unwind.0()
+      unreachable
+    deleted.1():
+      jump ^unwind.0(%exc.3)
+    next.0():
+      jump ^unwind.0(%exc.1)
+    unwind.0(%exc.5 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.5)
+    join.1():
+      %list.0 : py.Value = py.mkList
+      %iter.0 : py.Value = py.getIter(%list.0) ^propagate.0()
+      jump ^head.0()
+    head.0():
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %str.13 : py.Value = py.strLit("k")
+      %store.7 : base.Unit = py.setItem(%ns.0, %str.13, %item.0) ^propagate.0()
+      jump ^head.0()
+    stop.0(%exc.6 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.6)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.6)
+    exit.0():
+      %none.2 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.2)
+      ret(%ret.0)
+    propagate.0(%exc.7 : py.Value):
+      %exc.8 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.7)
+      ret(%exc.8)
+  }
+  func @|m_shape_bindings.Flags.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "R", value = 1}, {name = "W", value = 2}, {name = "RW", value = {union = ["R", "W"]}}, {name = "RWX", value = {union = ["R", {union = ["W", 4]}]}}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("m_shape_bindings", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Flags")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %int.1 : py.Value = py.intLit(1)
+      %str.4 : py.Value = py.strLit("R")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %int.1) ^propagate.0()
+      %int.2 : py.Value = py.intLit(2)
+      %str.5 : py.Value = py.strLit("W")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %int.2) ^propagate.0()
+      %str.6 : py.Value = py.strLit("R")
+      %R.0 : py.Value = py.undef("R")
+      %R.1 : py.Value = py.getOptionalItem(%ns.0, %str.6, %R.0) ^propagate.0()
+      %found.1 : base.Bool = py.isDefined(%R.1)
+      branch(%found.1) ^join.1(%R.1) ^absent.1()
+    absent.1():
+      %R.2 : py.Value = py.loadGlobal("m_shape_bindings", "R") ^propagate.0()
+      jump ^join.1(%R.2)
+    join.1(%R.3 : py.Value):
+      %str.7 : py.Value = py.strLit("W")
+      %W.0 : py.Value = py.undef("W")
+      %W.1 : py.Value = py.getOptionalItem(%ns.0, %str.7, %W.0) ^propagate.0()
+      %found.2 : base.Bool = py.isDefined(%W.1)
+      branch(%found.2) ^join.2(%W.1) ^absent.2()
+    absent.2():
+      %W.2 : py.Value = py.loadGlobal("m_shape_bindings", "W") ^propagate.0()
+      jump ^join.2(%W.2)
+    join.2(%W.3 : py.Value):
+      %bitOr.0 : py.Value = py.bitOr(%R.3, %W.3) ^propagate.0()
+      %str.8 : py.Value = py.strLit("RW")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.8, %bitOr.0) ^propagate.0()
+      %str.9 : py.Value = py.strLit("R")
+      %R.4 : py.Value = py.undef("R")
+      %R.5 : py.Value = py.getOptionalItem(%ns.0, %str.9, %R.4) ^propagate.0()
+      %found.3 : base.Bool = py.isDefined(%R.5)
+      branch(%found.3) ^join.3(%R.5) ^absent.3()
+    absent.3():
+      %R.6 : py.Value = py.loadGlobal("m_shape_bindings", "R") ^propagate.0()
+      jump ^join.3(%R.6)
+    join.3(%R.7 : py.Value):
+      %str.10 : py.Value = py.strLit("W")
+      %W.4 : py.Value = py.undef("W")
+      %W.5 : py.Value = py.getOptionalItem(%ns.0, %str.10, %W.4) ^propagate.0()
+      %found.4 : base.Bool = py.isDefined(%W.5)
+      branch(%found.4) ^join.4(%W.5) ^absent.4()
+    absent.4():
+      %W.6 : py.Value = py.loadGlobal("m_shape_bindings", "W") ^propagate.0()
+      jump ^join.4(%W.6)
+    join.4(%W.7 : py.Value):
+      %int.3 : py.Value = py.intLit(4)
+      %bitOr.1 : py.Value = py.bitOr(%W.7, %int.3) ^propagate.0()
+      %bitOr.2 : py.Value = py.bitOr(%R.7, %bitOr.1) ^propagate.0()
+      %str.11 : py.Value = py.strLit("RWX")
+      %store.5 : base.Unit = py.setItem(%ns.0, %str.11, %bitOr.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_shape_bindings.outer(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %v.0 : py.Value = py.undef("v")
+      %v.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%v.0)
+      %Uses.0 : py.Value = py.undef("Uses")
+      %Uses.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%Uses.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "outer() got an unexpected keyword argument {}") ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "outer() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %set.0 : base.Unit = base.refSet[py.Value](%v.cell.0, %int.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|m_shape_bindings.outer.Uses.<body>|, %v.cell.0)
+      %str.0 : py.Value = py.strLit("Uses")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %Uses.1 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %Uses.3 : py.Value = py.requireDefined(%Uses.1, "UnboundLocalError", "cannot access local variable 'Uses' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%Uses.3)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|m_shape_bindings.Rejected.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("m_shape_bindings", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Rejected")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_shape_bindings.Product.total(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %self.1 : py.Value = py.undef("self")
+      %fill.0 : py.Value = py.mkTuple(%self.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("self")
+      %self.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "Product.total() got multiple values for argument 'self'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "Product.total() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "Product.total() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %self.3 : py.Value = py.requireDefined(%self.2, "TypeError", "Product.total() missing 1 required positional argument: 'self'") ^propagate.0()
+      %int.1 : py.Value = py.intLit(0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|m_shape_bindings.Kinds.Inner.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "z", value = 7}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("m_shape_bindings", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Kinds.Inner")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %int.1 : py.Value = py.intLit(7)
+      %str.4 : py.Value = py.strLit("z")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %int.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|m_shape_bindings.Walrus.<lambda>|(%a.default.0 : base.Ref(py.Value), %b.default.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%a.default.0 : base.Ref(py.Value), %b.default.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %a.0 : py.Value = py.undef("a")
+      %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
+      %b.0 : py.Value = py.undef("b")
+      %b.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%b.0)
+      %lb.0 : py.Value = py.undef("lb")
+      %lb.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%lb.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %a.default.1 : py.Value = base.refGet[py.Value](%a.default.0)
+      %fill.0 : py.Value = py.mkTuple(%a.default.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("a")
+      %a.1 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %str.1 : py.Value = py.strLit("b")
+      %b.default.1 : py.Value = base.refGet[py.Value](%b.default.0)
+      %b.1 : py.Value = py.dictGet(%kwargs.0, %str.1, %b.default.1)
+      %discard.1 : base.Unit = py.dictDiscard(%kwargs.0, %str.1)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "Walrus.<lambda>() got multiple values for argument 'a'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "Walrus.<lambda>() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "Walrus.<lambda>() takes from 0 to 1 positional argument but {} {was} given") ^propagate.0()
+      %int.1 : py.Value = py.intLit(3)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|m_shape_bindings.Walrus.<lambda>.1|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %g.0 : py.Value = py.undef("g")
+      %g.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%g.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %g.1 : py.Value = py.undef("g")
+      %fill.0 : py.Value = py.mkTuple(%g.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("g")
+      %g.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "Walrus.<lambda>() got multiple values for argument 'g'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "Walrus.<lambda>() got an unexpected keyword argument {}") ^propagate.0()
+      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "Walrus.<lambda>() takes 1 positional argument but {} {was} given") ^propagate.0()
+      %g.3 : py.Value = py.requireDefined(%g.2, "TypeError", "Walrus.<lambda>() missing 1 required positional argument: 'g'") ^propagate.0()
+      %g.5 : py.Value = py.requireDefined(%g.3, "UnboundLocalError", "cannot access local variable 'g' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%g.5)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @m_shape_bindings.Walrus.m(%v.default.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%v.default.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %v.0 : py.Value = py.undef("v")
+      %v.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%v.0)
+      %nargs.0 : py.Value = py.tupleLen(%args.0)
+      %self.1 : py.Value = py.undef("self")
+      %v.default.1 : py.Value = base.refGet[py.Value](%v.default.0)
+      %fill.0 : py.Value = py.mkTuple(%self.1, %v.default.1)
+      %none.0 : py.Value = py.noneLit
+      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
+      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("self")
+      %self.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
+      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
+      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
+      %int.1 : py.Value = py.intLit(1)
+      %pos.1 : py.Value = py.getItem(%pad.0, %int.1) ^propagate.0()
+      %str.1 : py.Value = py.strLit("v")
+      %v.1 : py.Value = py.dictGet(%kwargs.0, %str.1, %pos.1)
+      %inKw.1 : py.Value = py.in(%str.1, %kwargs.0) ^propagate.0()
+      %discard.1 : base.Unit = py.dictDiscard(%kwargs.0, %str.1)
+      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
+      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
+      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "Walrus.m() got multiple values for argument 'self'") ^propagate.0()
+      %filled.1 : py.Value = py.lt(%int.1, %nargs.0) ^propagate.0()
+      %both.1 : py.Value = py.mult(%inKw.1, %filled.1) ^propagate.0()
+      %check.1 : base.Unit = py.requireAtMost(%both.1, 0, "TypeError", "Walrus.m() got multiple values for argument 'v'") ^propagate.0()
+      %kw.0 : py.Value = py.undef("kwargs")
+      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
+      %check.2 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "Walrus.m() got an unexpected keyword argument {}") ^propagate.0()
+      %check.3 : base.Unit = py.requireAtMost(%nargs.0, 2, "TypeError", "Walrus.m() takes from 1 to 2 positional arguments but {} {was} given") ^propagate.0()
+      %self.3 : py.Value = py.requireDefined(%self.2, "TypeError", "Walrus.m() missing 1 required positional argument: 'self'") ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|m_shape_bindings.Walrus.Inner.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = [{expr = "NamedExpr"}]]
+    #[py.keywords = [{name = "metaclass", value = {expr = "NamedExpr"}}]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("m_shape_bindings", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Walrus.Inner")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|m_shape_bindings.outer.Uses.<body>|(%v.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "u", value = 2}]]
+
+    entry.0(%v.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("m_shape_bindings", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("outer.<locals>.Uses")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %bool.0 : py.Value = py.boolLit(false)
+      %flag.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "flag")
+      %set.0 : base.Unit = base.refSet[py.Value](%flag.cell.0, %bool.0)
+      %int.1 : py.Value = py.intLit(1)
+      %set.1 : base.Unit = base.refSet[py.Value](%v.cell.0, %int.1)
+      %int.2 : py.Value = py.intLit(2)
+      %str.4 : py.Value = py.strLit("u")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %int.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

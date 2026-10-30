@@ -38,6 +38,9 @@ module t12_class {
       ret(%exc.1)
   }
   func @|t12_class.Point.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = [{name = "dimensions", type = "int", default = 2}]]
+    #[py.bindings = [{name = "__init__", binding = "def"}, {name = "distance", binding = "def"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()

@@ -1,0 +1,23 @@
+module top
+  ClassVar: local (imported)
+  InitVar: local (imported)
+  KW_ONLY: local (imported)
+  P: local (assigned)
+  Q: local (assigned)
+  dataclass: local (imported, referenced)
+  dataclasses: local (imported, referenced)
+  class P
+    int: global implicit (referenced)
+    x: local (assigned, annotated)
+    y: local (assigned, annotated)
+  class Q
+    ClassVar: global implicit (referenced)
+    InitVar: global implicit (referenced)
+    KW_ONLY: global implicit (referenced)
+    _: local (assigned, annotated)
+    count: local (assigned, annotated)
+    int: global implicit (referenced)
+    name: local (assigned, annotated)
+    seed: local (assigned, annotated)
+    str: global implicit (referenced)
+qualnames: P, Q

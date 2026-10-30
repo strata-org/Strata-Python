@@ -1,0 +1,449 @@
+module m_shape_typeddict {
+  func @|m_shape_typeddict.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("m_shape_typeddict")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_typeddict", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_typeddict", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %mod.0 : py.Value = py.importModule("typing") ^propagate.0()
+      %typing.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_typeddict", "typing")
+      %set.2 : base.Unit = base.refSet[py.Value](%typing.cell.0, %mod.0)
+      %Callable.0 : py.Value = py.importFrom("typing", "Callable") ^propagate.0()
+      %Callable.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_typeddict", "Callable")
+      %set.3 : base.Unit = base.refSet[py.Value](%Callable.cell.0, %Callable.0)
+      %Literal.0 : py.Value = py.importFrom("typing", "Literal") ^propagate.0()
+      %Literal.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_typeddict", "Literal")
+      %set.4 : base.Unit = base.refSet[py.Value](%Literal.cell.0, %Literal.0)
+      %NotRequired.0 : py.Value = py.importFrom("typing", "NotRequired") ^propagate.0()
+      %NotRequired.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_typeddict", "NotRequired")
+      %set.5 : base.Unit = base.refSet[py.Value](%NotRequired.cell.0, %NotRequired.0)
+      %Required.0 : py.Value = py.importFrom("typing", "Required") ^propagate.0()
+      %Required.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_typeddict", "Required")
+      %set.6 : base.Unit = base.refSet[py.Value](%Required.cell.0, %Required.0)
+      %TypedDict.0 : py.Value = py.importFrom("typing", "TypedDict") ^propagate.0()
+      %TD.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_typeddict", "TD")
+      %set.7 : base.Unit = base.refSet[py.Value](%TD.cell.0, %TypedDict.0)
+      %ReadOnly.0 : py.Value = py.importFrom("typing_extensions", "ReadOnly") ^propagate.0()
+      %ReadOnly.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_typeddict", "ReadOnly")
+      %set.8 : base.Unit = base.refSet[py.Value](%ReadOnly.cell.0, %ReadOnly.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_typeddict.Movie.<body>|)
+      %str.1 : py.Value = py.strLit("Movie")
+      %TD.0 : py.Value = py.loadGlobal("m_shape_typeddict", "TD") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1, %TD.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %Movie.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %Movie.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_typeddict", "Movie")
+      %set.9 : base.Unit = base.refSet[py.Value](%Movie.cell.0, %Movie.0)
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|m_shape_typeddict.Draft.<body>|)
+      %str.2 : py.Value = py.strLit("Draft")
+      %TD.1 : py.Value = py.loadGlobal("m_shape_typeddict", "TD") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%clo.1, %str.2, %TD.1)
+      %str.3 : py.Value = py.strLit("total")
+      %bool.0 : py.Value = py.boolLit(false)
+      %kwargs.1 : py.Value = py.mkKwargs(%str.3, %bool.0)
+      %Draft.0 : py.Value = py.call(%__build_class__.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %Draft.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_typeddict", "Draft")
+      %set.10 : base.Unit = base.refSet[py.Value](%Draft.cell.0, %Draft.0)
+      %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@|m_shape_typeddict.Sequel.<body>|)
+      %str.4 : py.Value = py.strLit("Sequel")
+      %Movie.1 : py.Value = py.loadGlobal("m_shape_typeddict", "Movie") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%clo.2, %str.4, %Movie.1)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %Sequel.0 : py.Value = py.call(%__build_class__.2, %tuple.2, %kwargs.2) ^propagate.0()
+      %Sequel.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_typeddict", "Sequel")
+      %set.11 : base.Unit = base.refSet[py.Value](%Sequel.cell.0, %Sequel.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|m_shape_typeddict.Movie.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["TD"]]
+    #[py.fields = [{name = "title", type = "str"}, {name = "year", type = {union = ["int", unit]}}, {name = "tags", type = {name = "typing.List", args = ["str"]}}, {name = "rating", type = {name = "Literal", args = [1, -2, {str = "three"}, unit]}}, {name = "sequel", type = {str = "Movie"}}, {name = "pick", type = {name = "Callable", args = [["int"], "str"]}}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("m_shape_typeddict", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Movie")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %str.4 : py.Value = py.strLit("__annotations__")
+      %__annotations__.0 : py.Value = py.undef("__annotations__")
+      %__annotations__.1 : py.Value = py.getOptionalItem(%ns.0, %str.4, %__annotations__.0) ^propagate.0()
+      %found.1 : base.Bool = py.isDefined(%__annotations__.1)
+      branch(%found.1) ^annotated.0() ^annotations.0()
+    annotations.0():
+      %dict.0 : py.Value = py.mkDict ^propagate.0()
+      %str.5 : py.Value = py.strLit("__annotations__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.5, %dict.0) ^propagate.0()
+      jump ^annotated.0()
+    annotated.0():
+      %str.6 : py.Value = py.strLit("str")
+      %str.7 : py.Value = py.undef("str")
+      %str.8 : py.Value = py.getOptionalItem(%ns.0, %str.6, %str.7) ^propagate.0()
+      %found.2 : base.Bool = py.isDefined(%str.8)
+      branch(%found.2) ^join.1(%str.8) ^absent.1()
+    absent.1():
+      %str.9 : py.Value = py.loadGlobal("m_shape_typeddict", "str") ^propagate.0()
+      jump ^join.1(%str.9)
+    join.1(%str.10 : py.Value):
+      %str.11 : py.Value = py.strLit("__annotations__")
+      %__annotations__.2 : py.Value = py.undef("__annotations__")
+      %__annotations__.3 : py.Value = py.getOptionalItem(%ns.0, %str.11, %__annotations__.2) ^propagate.0()
+      %found.3 : base.Bool = py.isDefined(%__annotations__.3)
+      branch(%found.3) ^join.2(%__annotations__.3) ^absent.2()
+    absent.2():
+      %__annotations__.4 : py.Value = py.loadGlobal("m_shape_typeddict", "__annotations__") ^propagate.0()
+      jump ^join.2(%__annotations__.4)
+    join.2(%__annotations__.5 : py.Value):
+      %str.12 : py.Value = py.strLit("title")
+      %store.3 : base.Unit = py.setItem(%__annotations__.5, %str.12, %str.10) ^propagate.0()
+      %str.13 : py.Value = py.strLit("int")
+      %int.1 : py.Value = py.undef("int")
+      %int.2 : py.Value = py.getOptionalItem(%ns.0, %str.13, %int.1) ^propagate.0()
+      %found.4 : base.Bool = py.isDefined(%int.2)
+      branch(%found.4) ^join.3(%int.2) ^absent.3()
+    absent.3():
+      %int.3 : py.Value = py.loadGlobal("m_shape_typeddict", "int") ^propagate.0()
+      jump ^join.3(%int.3)
+    join.3(%int.4 : py.Value):
+      %none.0 : py.Value = py.noneLit
+      %bitOr.0 : py.Value = py.bitOr(%int.4, %none.0) ^propagate.0()
+      %str.14 : py.Value = py.strLit("__annotations__")
+      %__annotations__.6 : py.Value = py.undef("__annotations__")
+      %__annotations__.7 : py.Value = py.getOptionalItem(%ns.0, %str.14, %__annotations__.6) ^propagate.0()
+      %found.5 : base.Bool = py.isDefined(%__annotations__.7)
+      branch(%found.5) ^join.4(%__annotations__.7) ^absent.4()
+    absent.4():
+      %__annotations__.8 : py.Value = py.loadGlobal("m_shape_typeddict", "__annotations__") ^propagate.0()
+      jump ^join.4(%__annotations__.8)
+    join.4(%__annotations__.9 : py.Value):
+      %str.15 : py.Value = py.strLit("year")
+      %store.4 : base.Unit = py.setItem(%__annotations__.9, %str.15, %bitOr.0) ^propagate.0()
+      %str.16 : py.Value = py.strLit("typing")
+      %typing.0 : py.Value = py.undef("typing")
+      %typing.1 : py.Value = py.getOptionalItem(%ns.0, %str.16, %typing.0) ^propagate.0()
+      %found.6 : base.Bool = py.isDefined(%typing.1)
+      branch(%found.6) ^join.5(%typing.1) ^absent.5()
+    absent.5():
+      %typing.2 : py.Value = py.loadGlobal("m_shape_typeddict", "typing") ^propagate.0()
+      jump ^join.5(%typing.2)
+    join.5(%typing.3 : py.Value):
+      %List.0 : py.Value = py.attr(%typing.3, "List") ^propagate.0()
+      %str.17 : py.Value = py.strLit("str")
+      %str.18 : py.Value = py.undef("str")
+      %str.19 : py.Value = py.getOptionalItem(%ns.0, %str.17, %str.18) ^propagate.0()
+      %found.7 : base.Bool = py.isDefined(%str.19)
+      branch(%found.7) ^join.6(%str.19) ^absent.6()
+    absent.6():
+      %str.20 : py.Value = py.loadGlobal("m_shape_typeddict", "str") ^propagate.0()
+      jump ^join.6(%str.20)
+    join.6(%str.21 : py.Value):
+      %item.0 : py.Value = py.getItem(%List.0, %str.21) ^propagate.0()
+      %str.22 : py.Value = py.strLit("__annotations__")
+      %__annotations__.10 : py.Value = py.undef("__annotations__")
+      %__annotations__.11 : py.Value = py.getOptionalItem(%ns.0, %str.22, %__annotations__.10) ^propagate.0()
+      %found.8 : base.Bool = py.isDefined(%__annotations__.11)
+      branch(%found.8) ^join.7(%__annotations__.11) ^absent.7()
+    absent.7():
+      %__annotations__.12 : py.Value = py.loadGlobal("m_shape_typeddict", "__annotations__") ^propagate.0()
+      jump ^join.7(%__annotations__.12)
+    join.7(%__annotations__.13 : py.Value):
+      %str.23 : py.Value = py.strLit("tags")
+      %store.5 : base.Unit = py.setItem(%__annotations__.13, %str.23, %item.0) ^propagate.0()
+      %str.24 : py.Value = py.strLit("Literal")
+      %Literal.0 : py.Value = py.undef("Literal")
+      %Literal.1 : py.Value = py.getOptionalItem(%ns.0, %str.24, %Literal.0) ^propagate.0()
+      %found.9 : base.Bool = py.isDefined(%Literal.1)
+      branch(%found.9) ^join.8(%Literal.1) ^absent.8()
+    absent.8():
+      %Literal.2 : py.Value = py.loadGlobal("m_shape_typeddict", "Literal") ^propagate.0()
+      jump ^join.8(%Literal.2)
+    join.8(%Literal.3 : py.Value):
+      %int.5 : py.Value = py.intLit(1)
+      %int.6 : py.Value = py.intLit(2)
+      %neg.0 : py.Value = py.uSub(%int.6) ^propagate.0()
+      %str.25 : py.Value = py.strLit("three")
+      %none.1 : py.Value = py.noneLit
+      %tuple.0 : py.Value = py.mkTuple(%int.5, %neg.0, %str.25, %none.1)
+      %item.1 : py.Value = py.getItem(%Literal.3, %tuple.0) ^propagate.0()
+      %str.26 : py.Value = py.strLit("__annotations__")
+      %__annotations__.14 : py.Value = py.undef("__annotations__")
+      %__annotations__.15 : py.Value = py.getOptionalItem(%ns.0, %str.26, %__annotations__.14) ^propagate.0()
+      %found.10 : base.Bool = py.isDefined(%__annotations__.15)
+      branch(%found.10) ^join.9(%__annotations__.15) ^absent.9()
+    absent.9():
+      %__annotations__.16 : py.Value = py.loadGlobal("m_shape_typeddict", "__annotations__") ^propagate.0()
+      jump ^join.9(%__annotations__.16)
+    join.9(%__annotations__.17 : py.Value):
+      %str.27 : py.Value = py.strLit("rating")
+      %store.6 : base.Unit = py.setItem(%__annotations__.17, %str.27, %item.1) ^propagate.0()
+      %str.28 : py.Value = py.strLit("Movie")
+      %str.29 : py.Value = py.strLit("__annotations__")
+      %__annotations__.18 : py.Value = py.undef("__annotations__")
+      %__annotations__.19 : py.Value = py.getOptionalItem(%ns.0, %str.29, %__annotations__.18) ^propagate.0()
+      %found.11 : base.Bool = py.isDefined(%__annotations__.19)
+      branch(%found.11) ^join.10(%__annotations__.19) ^absent.10()
+    absent.10():
+      %__annotations__.20 : py.Value = py.loadGlobal("m_shape_typeddict", "__annotations__") ^propagate.0()
+      jump ^join.10(%__annotations__.20)
+    join.10(%__annotations__.21 : py.Value):
+      %str.30 : py.Value = py.strLit("sequel")
+      %store.7 : base.Unit = py.setItem(%__annotations__.21, %str.30, %str.28) ^propagate.0()
+      %str.31 : py.Value = py.strLit("Callable")
+      %Callable.0 : py.Value = py.undef("Callable")
+      %Callable.1 : py.Value = py.getOptionalItem(%ns.0, %str.31, %Callable.0) ^propagate.0()
+      %found.12 : base.Bool = py.isDefined(%Callable.1)
+      branch(%found.12) ^join.11(%Callable.1) ^absent.11()
+    absent.11():
+      %Callable.2 : py.Value = py.loadGlobal("m_shape_typeddict", "Callable") ^propagate.0()
+      jump ^join.11(%Callable.2)
+    join.11(%Callable.3 : py.Value):
+      %str.32 : py.Value = py.strLit("int")
+      %int.7 : py.Value = py.undef("int")
+      %int.8 : py.Value = py.getOptionalItem(%ns.0, %str.32, %int.7) ^propagate.0()
+      %found.13 : base.Bool = py.isDefined(%int.8)
+      branch(%found.13) ^join.12(%int.8) ^absent.12()
+    absent.12():
+      %int.9 : py.Value = py.loadGlobal("m_shape_typeddict", "int") ^propagate.0()
+      jump ^join.12(%int.9)
+    join.12(%int.10 : py.Value):
+      %list.0 : py.Value = py.mkList(%int.10)
+      %str.33 : py.Value = py.strLit("str")
+      %str.34 : py.Value = py.undef("str")
+      %str.35 : py.Value = py.getOptionalItem(%ns.0, %str.33, %str.34) ^propagate.0()
+      %found.14 : base.Bool = py.isDefined(%str.35)
+      branch(%found.14) ^join.13(%str.35) ^absent.13()
+    absent.13():
+      %str.36 : py.Value = py.loadGlobal("m_shape_typeddict", "str") ^propagate.0()
+      jump ^join.13(%str.36)
+    join.13(%str.37 : py.Value):
+      %tuple.1 : py.Value = py.mkTuple(%list.0, %str.37)
+      %item.2 : py.Value = py.getItem(%Callable.3, %tuple.1) ^propagate.0()
+      %str.38 : py.Value = py.strLit("__annotations__")
+      %__annotations__.22 : py.Value = py.undef("__annotations__")
+      %__annotations__.23 : py.Value = py.getOptionalItem(%ns.0, %str.38, %__annotations__.22) ^propagate.0()
+      %found.15 : base.Bool = py.isDefined(%__annotations__.23)
+      branch(%found.15) ^join.14(%__annotations__.23) ^absent.14()
+    absent.14():
+      %__annotations__.24 : py.Value = py.loadGlobal("m_shape_typeddict", "__annotations__") ^propagate.0()
+      jump ^join.14(%__annotations__.24)
+    join.14(%__annotations__.25 : py.Value):
+      %str.39 : py.Value = py.strLit("pick")
+      %store.8 : base.Unit = py.setItem(%__annotations__.25, %str.39, %item.2) ^propagate.0()
+      %none.2 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.2)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|m_shape_typeddict.Draft.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["TD"]]
+    #[py.keywords = [{name = "total", value = false}]]
+    #[py.fields = [{name = "title", type = {name = "Required", args = ["str"]}}, {name = "notes", type = "str"}, {name = "owner", type = {name = "ReadOnly", args = [{name = "NotRequired", args = ["str"]}]}}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("m_shape_typeddict", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Draft")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %str.4 : py.Value = py.strLit("__annotations__")
+      %__annotations__.0 : py.Value = py.undef("__annotations__")
+      %__annotations__.1 : py.Value = py.getOptionalItem(%ns.0, %str.4, %__annotations__.0) ^propagate.0()
+      %found.1 : base.Bool = py.isDefined(%__annotations__.1)
+      branch(%found.1) ^annotated.0() ^annotations.0()
+    annotations.0():
+      %dict.0 : py.Value = py.mkDict ^propagate.0()
+      %str.5 : py.Value = py.strLit("__annotations__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.5, %dict.0) ^propagate.0()
+      jump ^annotated.0()
+    annotated.0():
+      %str.6 : py.Value = py.strLit("Required")
+      %Required.0 : py.Value = py.undef("Required")
+      %Required.1 : py.Value = py.getOptionalItem(%ns.0, %str.6, %Required.0) ^propagate.0()
+      %found.2 : base.Bool = py.isDefined(%Required.1)
+      branch(%found.2) ^join.1(%Required.1) ^absent.1()
+    absent.1():
+      %Required.2 : py.Value = py.loadGlobal("m_shape_typeddict", "Required") ^propagate.0()
+      jump ^join.1(%Required.2)
+    join.1(%Required.3 : py.Value):
+      %str.7 : py.Value = py.strLit("str")
+      %str.8 : py.Value = py.undef("str")
+      %str.9 : py.Value = py.getOptionalItem(%ns.0, %str.7, %str.8) ^propagate.0()
+      %found.3 : base.Bool = py.isDefined(%str.9)
+      branch(%found.3) ^join.2(%str.9) ^absent.2()
+    absent.2():
+      %str.10 : py.Value = py.loadGlobal("m_shape_typeddict", "str") ^propagate.0()
+      jump ^join.2(%str.10)
+    join.2(%str.11 : py.Value):
+      %item.0 : py.Value = py.getItem(%Required.3, %str.11) ^propagate.0()
+      %str.12 : py.Value = py.strLit("__annotations__")
+      %__annotations__.2 : py.Value = py.undef("__annotations__")
+      %__annotations__.3 : py.Value = py.getOptionalItem(%ns.0, %str.12, %__annotations__.2) ^propagate.0()
+      %found.4 : base.Bool = py.isDefined(%__annotations__.3)
+      branch(%found.4) ^join.3(%__annotations__.3) ^absent.3()
+    absent.3():
+      %__annotations__.4 : py.Value = py.loadGlobal("m_shape_typeddict", "__annotations__") ^propagate.0()
+      jump ^join.3(%__annotations__.4)
+    join.3(%__annotations__.5 : py.Value):
+      %str.13 : py.Value = py.strLit("title")
+      %store.3 : base.Unit = py.setItem(%__annotations__.5, %str.13, %item.0) ^propagate.0()
+      %str.14 : py.Value = py.strLit("str")
+      %str.15 : py.Value = py.undef("str")
+      %str.16 : py.Value = py.getOptionalItem(%ns.0, %str.14, %str.15) ^propagate.0()
+      %found.5 : base.Bool = py.isDefined(%str.16)
+      branch(%found.5) ^join.4(%str.16) ^absent.4()
+    absent.4():
+      %str.17 : py.Value = py.loadGlobal("m_shape_typeddict", "str") ^propagate.0()
+      jump ^join.4(%str.17)
+    join.4(%str.18 : py.Value):
+      %str.19 : py.Value = py.strLit("__annotations__")
+      %__annotations__.6 : py.Value = py.undef("__annotations__")
+      %__annotations__.7 : py.Value = py.getOptionalItem(%ns.0, %str.19, %__annotations__.6) ^propagate.0()
+      %found.6 : base.Bool = py.isDefined(%__annotations__.7)
+      branch(%found.6) ^join.5(%__annotations__.7) ^absent.5()
+    absent.5():
+      %__annotations__.8 : py.Value = py.loadGlobal("m_shape_typeddict", "__annotations__") ^propagate.0()
+      jump ^join.5(%__annotations__.8)
+    join.5(%__annotations__.9 : py.Value):
+      %str.20 : py.Value = py.strLit("notes")
+      %store.4 : base.Unit = py.setItem(%__annotations__.9, %str.20, %str.18) ^propagate.0()
+      %str.21 : py.Value = py.strLit("ReadOnly")
+      %ReadOnly.0 : py.Value = py.undef("ReadOnly")
+      %ReadOnly.1 : py.Value = py.getOptionalItem(%ns.0, %str.21, %ReadOnly.0) ^propagate.0()
+      %found.7 : base.Bool = py.isDefined(%ReadOnly.1)
+      branch(%found.7) ^join.6(%ReadOnly.1) ^absent.6()
+    absent.6():
+      %ReadOnly.2 : py.Value = py.loadGlobal("m_shape_typeddict", "ReadOnly") ^propagate.0()
+      jump ^join.6(%ReadOnly.2)
+    join.6(%ReadOnly.3 : py.Value):
+      %str.22 : py.Value = py.strLit("NotRequired")
+      %NotRequired.0 : py.Value = py.undef("NotRequired")
+      %NotRequired.1 : py.Value = py.getOptionalItem(%ns.0, %str.22, %NotRequired.0) ^propagate.0()
+      %found.8 : base.Bool = py.isDefined(%NotRequired.1)
+      branch(%found.8) ^join.7(%NotRequired.1) ^absent.7()
+    absent.7():
+      %NotRequired.2 : py.Value = py.loadGlobal("m_shape_typeddict", "NotRequired") ^propagate.0()
+      jump ^join.7(%NotRequired.2)
+    join.7(%NotRequired.3 : py.Value):
+      %str.23 : py.Value = py.strLit("str")
+      %str.24 : py.Value = py.undef("str")
+      %str.25 : py.Value = py.getOptionalItem(%ns.0, %str.23, %str.24) ^propagate.0()
+      %found.9 : base.Bool = py.isDefined(%str.25)
+      branch(%found.9) ^join.8(%str.25) ^absent.8()
+    absent.8():
+      %str.26 : py.Value = py.loadGlobal("m_shape_typeddict", "str") ^propagate.0()
+      jump ^join.8(%str.26)
+    join.8(%str.27 : py.Value):
+      %item.1 : py.Value = py.getItem(%NotRequired.3, %str.27) ^propagate.0()
+      %item.2 : py.Value = py.getItem(%ReadOnly.3, %item.1) ^propagate.0()
+      %str.28 : py.Value = py.strLit("__annotations__")
+      %__annotations__.10 : py.Value = py.undef("__annotations__")
+      %__annotations__.11 : py.Value = py.getOptionalItem(%ns.0, %str.28, %__annotations__.10) ^propagate.0()
+      %found.10 : base.Bool = py.isDefined(%__annotations__.11)
+      branch(%found.10) ^join.9(%__annotations__.11) ^absent.9()
+    absent.9():
+      %__annotations__.12 : py.Value = py.loadGlobal("m_shape_typeddict", "__annotations__") ^propagate.0()
+      jump ^join.9(%__annotations__.12)
+    join.9(%__annotations__.13 : py.Value):
+      %str.29 : py.Value = py.strLit("owner")
+      %store.5 : base.Unit = py.setItem(%__annotations__.13, %str.29, %item.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|m_shape_typeddict.Sequel.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["Movie"]]
+    #[py.fields = [{name = "prequel", type = "Movie"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("m_shape_typeddict", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Sequel")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %str.4 : py.Value = py.strLit("__annotations__")
+      %__annotations__.0 : py.Value = py.undef("__annotations__")
+      %__annotations__.1 : py.Value = py.getOptionalItem(%ns.0, %str.4, %__annotations__.0) ^propagate.0()
+      %found.1 : base.Bool = py.isDefined(%__annotations__.1)
+      branch(%found.1) ^annotated.0() ^annotations.0()
+    annotations.0():
+      %dict.0 : py.Value = py.mkDict ^propagate.0()
+      %str.5 : py.Value = py.strLit("__annotations__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.5, %dict.0) ^propagate.0()
+      jump ^annotated.0()
+    annotated.0():
+      %str.6 : py.Value = py.strLit("Movie")
+      %Movie.0 : py.Value = py.undef("Movie")
+      %Movie.1 : py.Value = py.getOptionalItem(%ns.0, %str.6, %Movie.0) ^propagate.0()
+      %found.2 : base.Bool = py.isDefined(%Movie.1)
+      branch(%found.2) ^join.1(%Movie.1) ^absent.1()
+    absent.1():
+      %Movie.2 : py.Value = py.loadGlobal("m_shape_typeddict", "Movie") ^propagate.0()
+      jump ^join.1(%Movie.2)
+    join.1(%Movie.3 : py.Value):
+      %str.7 : py.Value = py.strLit("__annotations__")
+      %__annotations__.2 : py.Value = py.undef("__annotations__")
+      %__annotations__.3 : py.Value = py.getOptionalItem(%ns.0, %str.7, %__annotations__.2) ^propagate.0()
+      %found.3 : base.Bool = py.isDefined(%__annotations__.3)
+      branch(%found.3) ^join.2(%__annotations__.3) ^absent.2()
+    absent.2():
+      %__annotations__.4 : py.Value = py.loadGlobal("m_shape_typeddict", "__annotations__") ^propagate.0()
+      jump ^join.2(%__annotations__.4)
+    join.2(%__annotations__.5 : py.Value):
+      %str.8 : py.Value = py.strLit("prequel")
+      %store.3 : base.Unit = py.setItem(%__annotations__.5, %str.8, %Movie.3) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

@@ -76,6 +76,9 @@ module m_super {
       ret(%exc.1)
   }
   func @|m_super.A.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "here", value = "__class__"}, {name = "m", binding = "def"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -115,6 +118,11 @@ module m_super {
       ret(%exc.1)
   }
   func @|m_super.B.<body>|(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["A"]]
+    #[py.decorators = ["wrap"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "m", binding = "def"}, {name = "names", binding = "def"}, {name = "two", binding = "def"}, {name = "bare_del", binding = "def"}, {name = "attr_del", binding = "def"}, {name = "cls_del", binding = "def"}, {name = "store_del", binding = "def"}, {name = "rebind", binding = "def"}, {name = "f", value = {expr = "Lambda"}}, {name = "local", binding = "def"}, {name = "star", binding = "def"}, {name = "kw", binding = "def"}, {name = "x", value = {call = "super", args = [], keywords = []}}, {name = "outer", binding = "def"}, {name = "s", binding = "def"}]]
+
     entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -873,6 +881,9 @@ module m_super {
       ret(%exc.1)
   }
   func @|m_super.B.outer.Inner.<body>|(%__class__.cell.0 : base.Ref(py.Value), %__class__.cell.1 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "n", binding = "def"}, {name = "y", value = "__class__"}]]
+
     entry.0(%__class__.cell.0 : base.Ref(py.Value), %__class__.cell.1 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()

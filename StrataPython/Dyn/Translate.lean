@@ -8,6 +8,7 @@ public import StrataPython.Dyn.Build
 public import StrataPython.Dyn.Scope
 public import StrataDyn.WF
 public import StrataDyn.Attr
+public import StrataPython.Dyn.Shape
 public import Lean.Data.Position
 import StrataPython.Dyn.Termination
 import Strata.Util.ListUtilsProps
@@ -126,6 +127,14 @@ inductive Exit where
   on. -/
   | cleanup (fin : Label)
 
+/-- The parts of a class statement that a class body's declared shape needs besides the body:
+the private name where the class statement runs, and its bases, keywords and decorators. -/
+structure ClassParts where
+  outerPrivate : Option String
+  bases : Array (expr SourceRange)
+  keywords : Array (keyword SourceRange)
+  decorators : Array (expr SourceRange)
+
 /-- A `def` whose function is emitted after the current one. -/
 structure FuncJob where
   name : Name
@@ -138,6 +147,8 @@ structure FuncJob where
   range : SourceRange
   /-- The rejected construct, for a function emitted as a stub. -/
   stub : Option String
+  /-- For a class body, what its declared shape needs besides the body. -/
+  classParts : Option ClassParts := none
 
 /-- What is fixed while one function is translated. -/
 structure Ctx where
@@ -158,8 +169,8 @@ structure Ctx where
   /-- In an `except` body, the exception it handles: what a bare `raise` raises again. -/
   handled : Option ValId := none
 
-/-- What translation accumulates.  The first three fields are module-wide; `exits` and
-`targeted` belong to the function being emitted. -/
+/-- What translation accumulates.  The first three fields are module-wide; `exits`,
+`targeted` and `inits` belong to the function being emitted. -/
 structure TState where
   diagnostics : Array Diagnostic := #[]
   pending : Array FuncJob := #[]
@@ -167,6 +178,10 @@ structure TState where
   exits : Array Exit := #[]
   /-- The labels some emitted transfer names. -/
   targeted : Std.HashSet Label := {}
+  /-- The `__init__`s of the class body being emitted: each `def`'s range, its function, and
+  whether it keeps its first parameter, so that its `self.x: T` declare fields of the
+  instance. -/
+  inits : Array (SourceRange × Name × Bool) := #[]
 
 /-- Translating one Python function. -/
 abbrev TransM := ReaderT Ctx (StateT TState (PyM Info))
@@ -545,65 +560,6 @@ def cmpOp (op : cmpop SourceRange) (a b : ValId) : TransM ValId :=
 
 /-! ## Literals -/
 
-/-- The decimal literal `s` as `(m, neg, x)`, which denotes `m * 10^-x` if `neg`, else
-`m * 10^x`: for example, `1.5e-3` gives `(15, true, 4)`.  It recurses on the characters, and
-it is meant to read what Lean's `Syntax.decodeScientificLitVal?` reads: the tests compare the
-two on every string of up to 5 characters.  It needs a `.` or an exponent, so `15` gives
-`none`.  It is looser than Python: `_` may appear anywhere after the first digit, and `1.` and
-`1e+` are read too. -/
-def decodeScientific (s : String) : Option (Nat × Bool × Nat) :=
-  match s.toList with
-  | c :: cs => if c.isDigit then intPart (c :: cs) 0 else none
-  | [] => none
-where
-  /-- The value of a digit. -/
-  digit? (c : Char) : Option Nat :=
-    if '0' ≤ c && c ≤ '9' then some (c.toNat - '0'.toNat) else none
-  /-- The digits before the `.` or the `e`, read into `val`. -/
-  intPart : List Char → Nat → Option (Nat × Bool × Nat)
-    | [], _ => none
-    | c :: cs, val =>
-      match digit? c with
-      | some d => intPart cs (10 * val + d)
-      | none =>
-        if c == '_' then intPart cs val
-        else if c == '.' then fracPart cs val 0
-        else if c == 'e' || c == 'E' then expSign cs val 0
-        else none
-  /-- The digits after the `.`, read into `val`; `e` counts them. -/
-  fracPart : List Char → Nat → Nat → Option (Nat × Bool × Nat)
-    | [], val, e => some (val, true, e)
-    | c :: cs, val, e =>
-      match digit? c with
-      | some d => fracPart cs (10 * val + d) (e + 1)
-      | none =>
-        if c == '_' then fracPart cs val e
-        else if c == 'e' || c == 'E' then expSign cs val e
-        else none
-  /-- The sign of the exponent, if there is one. -/
-  expSign : List Char → Nat → Nat → Option (Nat × Bool × Nat)
-    | [], _, _ => none
-    | c :: cs, val, e =>
-      if c == '-' then expDigits cs val e true 0
-      else if c == '+' then expDigits cs val e false 0
-      else expDigits (c :: cs) val e false 0
-  /-- The digits of the exponent, read into `exp`.  The result's exponent is `±exp - e`,
-  because `val` also holds the `e` digits after the `.`. -/
-  expDigits : List Char → Nat → Nat → Bool → Nat → Option (Nat × Bool × Nat)
-    | [], val, e, neg, exp =>
-      if neg then some (val, neg, exp + e)
-      else if exp ≥ e then some (val, neg, exp - e)
-      else some (val, true, e - exp)
-    | c :: cs, val, e, neg, exp =>
-      match digit? c with
-      | some d => expDigits cs val e neg (10 * exp + d)
-      | none => if c == '_' then expDigits cs val e neg exp else none
-
-/-- The `Float` a Python float literal denotes: the nearest binary64 value, ties to even. -/
-def parseFloat? (s : String) : Option Float :=
-  (decodeScientific s).map fun (m, neg, x) =>
-    FloatText.ofDecimal ⟨false, m, if neg then -(x : Int) else x⟩
-
 /-- The string whose code units are the octets of `b`, as `py.bytesLit` takes. -/
 def bytesText (b : ByteArray) : String := String.ofList (b.toList.map (Char.ofNat ·.toNat))
 
@@ -634,13 +590,6 @@ def stmtName : stmt SourceRange → String
   | .Match .. => "match"
   | .TryStar .. => "try/except*"
   | _ => "statement"
-
-/-- The annotated parameters of `args`, each name with its annotation, in the order CPython
-3.12 evaluates them: positional, positional-only, `*args`, keyword-only, then `**kwargs`. -/
-def paramAnnotations (args : arguments SourceRange) : Array (String × expr SourceRange) :=
-  let .mk_arguments _ posOnly pos varPos kwOnly _ varKw _ := args
-  (pos.val ++ posOnly.val ++ varPos.val.toArray ++ kwOnly.val ++ varKw.val.toArray).filterMap
-    fun (.mk_arg _ ⟨_, n⟩ a _) => a.val.map (n, ·)
 
 /-- An annotation that `paramAnnotations args` returns is smaller than `args`. -/
 private theorem sizeOf_paramAnnotations_lt {args : arguments SourceRange}
@@ -902,7 +851,9 @@ scope is queued once, as each AST node is lowered once and has its own range; `e
 reports a scope queued twice as an internal error. -/
 def queueFunc (sr : SourceRange) (scope : ScopeId) (cur : Scope)
     (args : Option (arguments SourceRange)) (body : Array (stmt SourceRange))
-    (stub : Option String) (extra : Array ValId) : TransM (Option ValId) := do
+    (stub : Option String) (extra : Array ValId)
+    (classParts : Option ClassParts := none) :
+    TransM (Option ValId) := do
   let mut cells := #[]
   let here ← curScope
   for x in capturedVars cur do
@@ -917,7 +868,7 @@ def queueFunc (sr : SourceRange) (scope : ScopeId) (cur : Scope)
         internalError s!"no cell for the free variable '{x}'" sr
       return none
   let fname ← allocName (if args.isNone then s!"{cur.qualname}.<body>" else cur.qualname)
-  let job : FuncJob := { name := fname, scope, cur, args, body, range := sr, stub }
+  let job : FuncJob := { name := fname, scope, cur, args, body, range := sr, stub, classParts }
   modify fun s => { s with pending := s.pending.push job }
   let params := (funcParams cur args).map (·.2)
   let cellTypes := (funcCells cur args).map (·.2)
@@ -1558,6 +1509,13 @@ def closure (sr : SourceRange) (args : arguments SourceRange)
   if let some r := returns then
     anns := anns.push (← build (strLit "return")) |>.push (← transExpr r)
   let some f ← queueFunc sr scope cur (some args) body stub defaults | return none
+  -- The `self.x: T` of a class body's `__init__` declare fields of the instance (§6.7), unless
+  -- a decorator may make its first parameter something else, as `@classmethod` does, or the
+  -- body binds that parameter again (`Shape.keepsSelf`).
+  if ctx.cur.kind == .classBody && cur.name == "__init__" && stub.isNone then
+    if let some job := (← get).pending.back? then
+      let keeps := decorators.isEmpty && Shape.keepsSelf ctx.table scope args
+      modify fun s => { s with inits := s.inits.push (sr, job.name, keeps) }
   unless anns.isEmpty do
     let d ← build (emitFailing (.str .base "annotations") Py.mkDict.ref anns)
     discard <| build (setAttr f "__annotations__" d)
@@ -1710,7 +1668,9 @@ def classDef (sr : SourceRange) (name : String) (bases : Array (expr SourceRange
   -- The body captures the cell under `classCellKey`, for this closure only.
   let saved := (← build (get : PyM Info PyBuild.Frame)).locals
   if let some c := classCell then build (captureCell classCellKey c)
+  -- The body's function states the class's declared shape (§6.7).
   let f? ← queueFunc sr scope cur none body none #[]
+    (some { outerPrivate := ctx.cur.privateName, bases, keywords := kws, decorators })
   build (modify fun fr => { fr with locals := saved })
   let some f := f? | return
   let t ← tupleDisplay bases (pre := #[f, ← build (strLit name)])
@@ -2165,7 +2125,7 @@ def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) :
   let ctx := { ctx with scope := job.scope, cur := job.cur }
   let free := capturedVars job.cur
   let defaults := funcDefaults job.args
-  builtFunc job.name (funcParams job.cur job.args) job.range fun ps =>
+  let (fn, st) := builtFunc job.name (funcParams job.cur job.args) job.range fun ps =>
     runBody ctx st job.range do
       match job.stub with
       | some what =>
@@ -2195,6 +2155,12 @@ def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) :
               discard <| build (declareLocal sym.name)
           prologue (params a) defaultCells args kwargs
           transStmts job.body
+  let attrs := match job.classParts with
+    | some c =>
+      Shape.classAttrs ctx.table c.outerPrivate job.scope c.bases c.keywords c.decorators job.body
+        st.inits
+    | none => #[]
+  (Func.setInfo fn { fn.val.info with attrs }, { st with inits := #[] })
 
 /-- A set of scope ids below `n` has at most `n` elements. -/
 private theorem size_le_of_lt {done : Std.HashSet ScopeId} {n : Nat}

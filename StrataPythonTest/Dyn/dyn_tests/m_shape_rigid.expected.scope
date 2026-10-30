@@ -1,0 +1,30 @@
+module
+  import random: module random
+  import TypedDict: member TypedDict of typing
+  random: local (imported)
+  TypedDict: local (imported, referenced)
+  coin: local (assigned, referenced)
+  Account: local (assigned, referenced)
+  a: local (assigned)
+  Movie: local (assigned, referenced)
+  m: local (assigned, referenced)
+  function coin
+    random: global implicit (referenced)
+  class Account
+    owner: local (assigned, annotated)
+    str: global implicit (referenced)
+    balance: local (assigned, annotated)
+    int: global implicit (referenced)
+    limit: local (assigned, annotated)
+    __init__: local (assigned)
+    bool: global implicit (referenced)
+    function Account.__init__
+      params: self, owner, vip
+      self: local (parameter, referenced)
+      owner: local (parameter, referenced)
+      vip: local (parameter, referenced)
+  class Movie
+    title: local (assigned, annotated)
+    str: global implicit (referenced)
+    year: local (assigned, annotated)
+    int: global implicit (referenced)

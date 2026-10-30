@@ -89,6 +89,9 @@ module fw05_with_lookup_once {
       ret(%exc.1)
   }
   func @|fw05_with_lookup_once.Ctx.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__enter__", binding = "def"}, {name = "__exit__", binding = "def"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -369,6 +372,9 @@ module fw05_with_lookup_once {
       ret(%exc.3)
   }
   func @|fw05_with_lookup_once.NoExit.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__enter__", binding = "def"}]]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
@@ -568,6 +574,9 @@ module fw05_with_lookup_once {
       ret(%exc.1)
   }
   func @|fw05_with_lookup_once.replaced_in_body.Local.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["Ctx"]]
+    #[py.fields = []]
+
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %int.0 : py.Value = py.intLit(0)
       %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
