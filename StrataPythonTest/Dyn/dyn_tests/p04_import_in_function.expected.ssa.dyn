@@ -23,11 +23,8 @@ module p04_import_in_function {
       %math.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%math.0)
       %s.0 : py.Value = py.undef("s")
       %s.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%s.0)
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %mod.0 : py.Value = py.importModule("math") ^propagate.0()
       %sep.0 : py.Value = py.importFrom("os", "sep") ^propagate.0()
       %math.2 : py.Value = py.requireDefined(%mod.0, "UnboundLocalError", "cannot access local variable 'math' where it is not associated with a value") ^propagate.0()
@@ -46,11 +43,8 @@ module p04_import_in_function {
       %json.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%json.0)
       %h.0 : py.Value = py.undef("h")
       %h.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%h.0)
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "g() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "g() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %mod.0 : py.Value = py.importModule("json") ^propagate.0()
       %set.0 : base.Unit = base.refSet[py.Value](%json.cell.0, %mod.0)
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@p04_import_in_function.g.h, %json.cell.0)
@@ -63,11 +57,8 @@ module p04_import_in_function {
   }
   func @p04_import_in_function.g.h(%json.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%json.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "g.<locals>.h() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "g.<locals>.h() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %json.0 : py.Value = base.refGet[py.Value](%json.cell.0)
       %json.1 : py.Value = py.requireDefined(%json.0, "NameError", "cannot access free variable 'json' where it is not associated with a value in enclosing scope") ^propagate.0()
       %dumps.0 : py.Value = py.attr(%json.1, "dumps") ^propagate.0()

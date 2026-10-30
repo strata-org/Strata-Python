@@ -120,17 +120,39 @@ theorem nca_nearest (hI : Inv n size par) {p q c : Pos} (hp : Valid n size p)
   simp only [nca, hr, Option.getD_some]
   exact intersect_nearest hI _ p q hp hq (Nat.le_refl _) r hr c hcp hcq
 
+/-- Every common ancestor of valid points is above each point that meeting them in pairs
+gives. -/
+private theorem pairUp_nearest (hI : Inv n size par) : ∀ {l : List Pos},
+    (∀ u ∈ l, Valid n size u) → ∀ {c : Pos}, (∀ u ∈ l, AncT par c u) →
+      ∀ v ∈ pairUp par l, AncT par c v
+  | [], _, _, _ => fun _ h => absurd h List.not_mem_nil
+  | [_], _, _, hc => hc
+  | u :: w :: rest, hl, c, hc => by
+    have hrest : ∀ x ∈ rest, x ∈ u :: w :: rest := fun x hx =>
+      List.mem_cons_of_mem _ (List.mem_cons_of_mem _ hx)
+    have ih := pairUp_nearest hI (l := rest) (fun x hx => hl x (hrest x hx))
+      (fun x hx => hc x (hrest x hx))
+    simp only [pairUp, List.mem_cons, forall_eq_or_imp]
+    exact ⟨nca_nearest hI (hl u List.mem_cons_self)
+      (hl w (List.mem_cons_of_mem _ List.mem_cons_self)) (hc u List.mem_cons_self)
+      (hc w (List.mem_cons_of_mem _ List.mem_cons_self)), ih⟩
+
 /-- `ncaFold` is the nearest common ancestor of the point and the list. -/
 theorem ncaFold_nearest (hI : Inv n size par) :
     ∀ {p : Pos} {ps : List Pos}, Valid n size p → (∀ u ∈ ps, Valid n size u) →
       ∀ {c : Pos}, AncT par c p → (∀ u ∈ ps, AncT par c u) → AncT par c (ncaFold par p ps)
-  | _, [], _, _, _, hc, _ => hc
-  | p, u :: us, hp, hus, c, hc, hcs => by
-    have hu := hus u List.mem_cons_self
-    exact ncaFold_nearest (p := nca par p u) (ps := us) hI ((nca_spec hI hp hu).1.valid hI hp)
-      (fun v hv => hus v (List.mem_cons_of_mem _ hv))
-      (nca_nearest hI hp hu hc (hcs u List.mem_cons_self))
-      (fun v hv => hcs v (List.mem_cons_of_mem _ hv))
+  | _, [], _, _, _, hc, _ => by
+    rw [ncaFold]
+    exact hc
+  | p, [u], hp, hus, c, hc, hcs => by
+    rw [ncaFold]
+    exact nca_nearest hI (hus u List.mem_cons_self) hp (hcs u List.mem_cons_self) hc
+  | p, u :: v :: rest, hp, hus, c, hc, hcs => by
+    rw [ncaFold]
+    exact ncaFold_nearest hI (ps := pairUp par (u :: v :: rest)) hp (pairUp_spec hI hus).1 hc
+      (pairUp_nearest hI hus hcs)
+termination_by _ ps => ps.length
+decreasing_by exact length_pairUp_lt par u v rest
 
 /-! ## The invariant, over an abstract dominance relation
 

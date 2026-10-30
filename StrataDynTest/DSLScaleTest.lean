@@ -26,9 +26,9 @@ at 131, the stage's names at 165, `mem_env` at 217.  This block is past all four
 that none does.  A run of instructions is split into stages of 64, so a reference to
 instruction `j` reduces a short literal; `Wide` below has 520 instructions.
 
-The block takes about 20 s, most of it the DSL's elaboration and the kernel's.  `Wide` takes
-about 40 s, most of it its instructions' signatures and references.  Its freshness checks
-grow with each stage only: a stage adds its own names to the set of every name before it.
+Most of the block's time is the DSL's elaboration and the kernel's.  Most of `Wide`'s is its
+instructions' signatures and references.  Its freshness checks grow with each stage only: a
+stage adds its own names to the set of every name before it.
 -/
 
 namespace Strata.Dyn.DSLScaleTest
@@ -294,6 +294,20 @@ public environment Scale extends Base where
 -- once per element.
 example {n : Name} : n ∈ Scale.env ↔ n ∈ Scale.names :=
   Scale.mem_env.trans (Iff.of_eq (congrArg (n ∈ ·) (by decide +kernel)))
+
+-- So `simp` cannot decide membership in `Scale` from `mem_env`.  Lean raises this error as a
+-- runtime exception, which `fail_if_success` does not catch, so the test pins its message.
+/-- error: Tactic `simp` failed with a nested error:
+maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information -/
+#guard_msgs in
+example : .str (.str .base "scale") "add" ∈ Scale.env := by simp
+
+-- The tree of `mem_nameSet` decides it, with a depth that grows with the logarithm of the number
+-- of names.
+example : .str (.str .base "scale") "add" ∈ Scale.env := by rw [Scale.mem_nameSet]; decide
+example : .str (.str .base "scale") "nope" ∉ Scale.env := by rw [Scale.mem_nameSet]; decide
 #guard (Scale.strConcat2.sig (e := Scale.env)).variadic.map (·.name) == some "parts"
 #guard (Scale.next_2.sig (e := Scale.env)).succs.map (·.name) == #["err"]
 #guard (Scale.strConcat4.sig (e := Scale.env)).variadic.map (·.name) == some "parts"
@@ -1109,5 +1123,10 @@ example : TypeRef e 0 := Wide.T259.ref
 example : InsnRef e Wide.w0.sig := Wide.w0.ref
 example : InsnRef e Wide.w519.sig := Wide.w519.ref
 end
+
+-- The tree of `mem_nameSet` decides membership in `Wide`, a name of the base's included.
+example : .str (.str .base "wide") "w519" ∈ Wide.env := by rw [Wide.mem_nameSet]; decide
+example : .str (.str .base "base") "Unit" ∈ Wide.env := by rw [Wide.mem_nameSet]; decide
+example : .str (.str .base "wide") "nope" ∉ Wide.env := by rw [Wide.mem_nameSet]; decide
 
 end Strata.Dyn.DSLScaleTest

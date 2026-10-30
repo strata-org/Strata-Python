@@ -263,7 +263,55 @@ namespace InsnKind
   | .ctor a => some a
   | _ => none
 
+/-- Which datatype a case instruction eliminates, if the instruction is one. -/
+@[expose] def case? : InsnKind → Option CaseAddr
+  | .case a => some a
+  | _ => none
+
 end InsnKind
+
+/-! ### Effects -/
+
+-- Exposed, so that `decide` compares effects in other modules.
+@[expose] section
+
+/-- An upper bound on what an operation may do, from the least to the most.  Allocating a new
+object is not a change of state, so a `pure` operation may allocate. -/
+inductive Effect where
+  /-- It reads no mutable state, as a constructor does. -/
+  | pure
+  /-- It may read mutable state, as `base.refGet` does. -/
+  | reads
+  /-- It may run code that the IR does not show, such as a user-defined method (a Python
+  `__eq__` or a JavaScript getter), and that code may read or change any state it can reach. -/
+  | calls
+  /-- The operation itself may change state, as `base.refSet` does. -/
+  | writes
+deriving DecidableEq, Repr
+
+/-- `writes`, the bound every operation meets: what a declaration says without an effect. -/
+instance : Inhabited Effect := ⟨.writes⟩
+
+namespace Effect
+
+/-- An effect's place in the order `pure < reads < calls < writes`. -/
+def rank : Effect → Nat
+  | .pure => 0
+  | .reads => 1
+  | .calls => 2
+  | .writes => 3
+
+instance : LE Effect := ⟨fun a b => a.rank ≤ b.rank⟩
+
+instance : LT Effect := ⟨fun a b => a.rank < b.rank⟩
+
+instance (a b : Effect) : Decidable (a ≤ b) := inferInstanceAs (Decidable (a.rank ≤ b.rank))
+
+instance (a b : Effect) : Decidable (a < b) := inferInstanceAs (Decidable (a.rank < b.rank))
+
+end Effect
+
+end
 
 /-! ### Changing the type representation
 

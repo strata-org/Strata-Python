@@ -23,6 +23,9 @@ different contents meet, the target block takes the content as a new parameter, 
 passes it.  The `refNew` stays, with its result unused, so the heap's cells keep their
 numbering.
 
+The pass reads and rewrites only a function's body (`bodyBlocks`).  The function's parameters,
+its contract and its extern flag stay, so an extern function, which has no body, stays as it is.
+
 The *content map* says, at a point of a body, which value holds each promoted cell's content.
 `Plan.step` advances it over one instruction.  An operation with regions forgets every cell
 that one of its regions writes, at any depth, on its successor edges and after it, and its
@@ -91,6 +94,11 @@ its operands escape. -/
     else none
   | .const .. => none
 
+/-- Every block of `fn`'s body: its top-level blocks and those of their regions, at any depth.
+The pass reads and rewrites only these: a contract's regions stay as they are. -/
+@[expose] def bodyBlocks (fn : Func env α) : List (Block env α) :=
+  Block.withNestedList fn.blocks.toList
+
 /-- Every value `i` uses: its operands and the arguments its edges pass. -/
 @[expose] def instrUses (i : Instruction env α) : List ValId :=
   i.args.toList ++ i.succs.toList.flatMap (·.args.toList)
@@ -122,10 +130,10 @@ its operands escape. -/
 @[expose] def termWrites (t : Terminator env α) : List ValId :=
   writesIn t.nestedBlocks
 
-/-- The cells of `fn` that may be promoted: results of `refNew` used only as the cell
+/-- The cells of `fn`'s body that may be promoted: results of `refNew` used only as the cell
 operand of `refGet` and `refSet`, whose `refSet`s' results have no use. -/
 @[expose] def candidates (fn : Func env α) : List ValId :=
-  let bs := fn.allBlocks
+  let bs := bodyBlocks fn
   let instrs := bs.flatMap (·.instrs.toList)
   let esc : Std.HashSet ValId :=
     (instrs.flatMap escapingUses ++ bs.flatMap (termUses ·.term)).foldl (·.insert ·) {}
@@ -285,9 +293,10 @@ contents. -/
 
 open Std (HashMap)
 
-/-- The bodies of `fn`: its top-level blocks, and each region's blocks, at any depth. -/
+/-- The bodies of `fn`: its top-level blocks, and the blocks of each region in them, at any
+depth. -/
 @[expose] def bodies (fn : Func env α) : List (List (Block env α)) :=
-  fn.blocks.toList :: fn.allBlocks.flatMap fun b =>
+  fn.blocks.toList :: (bodyBlocks fn).flatMap fun b =>
     (b.instrs.toList.flatMap (·.regions.toList) ++ b.term.regions.toList).map (·.blocks.toList)
 
 /-- The edges of the blocks `bs`, each from the point it leaves: instruction `j`'s from
@@ -353,7 +362,7 @@ write it. -/
     HashMap ValId (List (Label × Nat)) :=
   let add (m : HashMap ValId (List (Label × Nat))) (c : ValId) (at_ : Label × Nat) :=
     if isCand c then m.insert c (at_ :: m.getD c []) else m
-  fn.allBlocks.foldl (init := {}) fun m b =>
+  (bodyBlocks fn).foldl (init := {}) fun m b =>
     let m := b.instrs.toList.zipIdx.foldl (init := m) fun m (i, j) =>
       let m := match cellOp? i with
         | some (.new c _) | some (.set _ c _) => add m c (b.label, j)
@@ -421,7 +430,7 @@ isn't, or if the worklist runs out of fuel. -/
           else (addChanged ch r.target c, (r.target, c) :: work)
   let ranges := inv.fold (init := 0) fun n _ rs => n + rs.length
   let some ch := spread inv (work.length + (ranges + 1) * (ch.size + 1) *
-      (fn.allBlocks.length * ((changes isCand fn).size + 1) + 1)) work ch
+      ((bodyBlocks fn).length * ((changes isCand fn).size + 1) + 1)) work ch
     | throw "the changed cells did not settle"
   let closed := inv.toList.all fun (x, rs) => rs.all fun r =>
     let into := ch.getD r.target {}
@@ -504,7 +513,8 @@ namespace Plan
     (changed : HashMap Label (Std.HashSet ValId)) (fn : Func env α) : Except String Starts := do
   let needed : Std.HashSet (Label × Nat) :=
     parents.fold (init := {}) fun s _ p => s.insert (p.label, p.count)
-  let fuel := fn.allBlocks.foldl (init := fn.allBlocks.length + 1) fun n b => n + b.instrs.size
+  let bs := bodyBlocks fn
+  let fuel := bs.foldl (init := bs.length + 1) fun n b => n + b.instrs.size
   match startsBody (P.view {}) P.block changed parents needed fuel {} fn.blocks.toList {} with
   | some g => return { changed, maps := g.starts }
   | none => throw "a block's tree parent has no content map"
@@ -521,9 +531,9 @@ end Plan
 
 /-! ## The check -/
 
-/-- The parameters of every block of `fn`, regions included, by label. -/
+/-- The parameters of every block of `fn`'s body, regions included, by label. -/
 @[expose] def blockParams (fn : Func env α) : Std.HashMap Label (Array (ValDecl env)) :=
-  fn.allBlocks.foldl (init := {}) fun m b => m.insert b.label b.params
+  (bodyBlocks fn).foldl (init := {}) fun m b => m.insert b.label b.params
 
 /-- Whether the values `vs` are distinct. -/
 @[expose] def distinct (vs : List ValId) : Bool :=
@@ -696,20 +706,20 @@ open Std (HashMap)
 
 /-- The block labels of every body's entry: the function's and each region's. -/
 @[expose] def entryLabels (fn : Func env α) : List Label :=
-  (fn.blocks[0]?.map (·.label)).toList ++ fn.allBlocks.flatMap fun b =>
+  (fn.blocks[0]?.map (·.label)).toList ++ (bodyBlocks fn).flatMap fun b =>
     b.instrs.toList.flatMap (regionEntries ·.regions) ++ regionEntries b.term.regions
 
 /-- Every edge of the blocks `bs`, instructions' then terminator's, block by block. -/
 @[expose] def edgesOf (bs : List (Block env α)) : List Target.Raw :=
   bs.flatMap fun b => b.instrs.toList.flatMap (·.succs.toList) ++ b.term.succs.toList
 
-/-- Every edge of `fn`, regions included. -/
-@[expose] def allEdges (fn : Func env α) : List Target.Raw := edgesOf fn.allBlocks
+/-- Every edge of `fn`'s body, regions included. -/
+@[expose] def allEdges (fn : Func env α) : List Target.Raw := edgesOf (bodyBlocks fn)
 
-/-- The content type of each cell that `fn` reads: the type of its `refGet`'s result.  The
-planner keeps a parameter only if a read uses it, so the parameter's cell has one. -/
+/-- The content type of each cell that `fn`'s body reads: the type of its `refGet`'s result.
+The planner keeps a parameter only if a read uses it, so the parameter's cell has one. -/
 @[expose] def contentTypes (fn : Func env α) : HashMap ValId (TypeExpr env) :=
-  fn.allBlocks.foldl (init := {}) fun m b => b.instrs.foldl (init := m) fun m i =>
+  (bodyBlocks fn).foldl (init := {}) fun m b => b.instrs.foldl (init := m) fun m i =>
     match cellOp? i with
     | some (.get _ c) => m.insert c i.result.type
     | _ => m
@@ -789,7 +799,7 @@ it. -/
 fresh suffix. -/
 @[expose] def Plan.finish (fn : Func env α) (order : List Label) (P : Plan env) : Plan env :=
   let next := max (ValDecl.idBound fn.defs) fn.names.size
-  let inits : HashMap ValId ValId := fn.allBlocks.foldl (init := {}) fun m b =>
+  let inits : HashMap ValId ValId := (bodyBlocks fn).foldl (init := {}) fun m b =>
     b.instrs.foldl (init := m) fun m i =>
       match cellOp? i with
       | some (.new c v) => m.insert c v
@@ -850,7 +860,7 @@ blocks' fixed contents; every value of the plan is followed through the aliases.
     (changed : HashMap Label (Std.HashSet ValId)) (cands : List ValId) :
     Except String (Plan env × List ValId) := do
   let candSet : Std.HashSet ValId := cands.foldl (·.insert ·) {}
-  let bs := fn.allBlocks
+  let bs := bodyBlocks fn
   let fewest : HashMap Label Nat := (allEdges fn).foldl (init := {}) fun m k =>
     m.insert k.label (min (m.getD k.label k.args.size) k.args.size)
   let types := contentTypes fn

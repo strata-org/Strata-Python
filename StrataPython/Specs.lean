@@ -623,11 +623,13 @@ def pySpecArg (usedNames : Std.HashSet String)
               (selfType : Option String)
               (arg : arg StrataDDM.SourceRange)
               (de : Option (expr SourceRange)) : PySpecM Arg := do
-  let .mk_arg loc ⟨_, name⟩ ⟨_typeLoc, type⟩ ⟨_, comment⟩ := arg
+  let .mk_arg loc ⟨_, name⟩ ⟨typeLoc, type⟩ ⟨_, comment⟩ := arg
   if name ∈ usedNames then
     specError loc s!"Argument {name} already declared."
-  assert! !loc.isNone
-  assert! _typeLoc.isNone
+  if loc.isNone then
+    specError loc s!"internal: argument {name} has no source location"
+  if !typeLoc.isNone then
+    specError loc s!"internal: the annotation of argument {name} has a source location"
   let tp ←
     match selfType with
     | none =>
@@ -640,7 +642,8 @@ def pySpecArg (usedNames : Std.HashSet String)
       if type.isSome then
         specError loc s!"Unexpected argument to {name}"
       pure <| .ident loc ((← read).currentModule.mkIdent cl) #[]
-  assert! comment.isNone
+  if comment.isSome then
+    specError loc s!"{name}: type comments are not supported"
   let argDefault ←
     match de with
     | none => pure none
@@ -1485,6 +1488,41 @@ def translateContractBody (role : SpecExprRole) (e : expr SourceRange)
   if let some formula ← translateContractValue? role e then
     store formula
 
+/-- Whether `s` is an `assert`, an `if` or a `for` statement, or nests one at any depth: in a
+    block of a compound statement, an `except` handler or a `match` case, or in the body of a
+    `def` or a `class`. -/
+def hasAssertIfOrFor (s : stmt SourceRange) : Bool :=
+  match s with
+  | .Assert .. | .If .. | .For .. => true
+  | .FunctionDef _ _ _ ⟨_, b⟩ .. | .AsyncFunctionDef _ _ _ ⟨_, b⟩ .. | .ClassDef _ _ _ _ ⟨_, b⟩ ..
+  | .With _ _ ⟨_, b⟩ _ | .AsyncWith _ _ ⟨_, b⟩ _ =>
+    b.attach.any fun ⟨c, _hc⟩ => hasAssertIfOrFor c
+  | .While _ _ ⟨_, b⟩ ⟨_, o⟩ | .AsyncFor _ _ _ ⟨_, b⟩ ⟨_, o⟩ _ =>
+    b.attach.any (fun ⟨c, _hc⟩ => hasAssertIfOrFor c) ||
+      o.attach.any (fun ⟨c, _hc⟩ => hasAssertIfOrFor c)
+  | .Try _ ⟨_, b⟩ ⟨_, hs⟩ ⟨_, o⟩ ⟨_, f⟩ | .TryStar _ ⟨_, b⟩ ⟨_, hs⟩ ⟨_, o⟩ ⟨_, f⟩ =>
+    b.attach.any (fun ⟨c, _hc⟩ => hasAssertIfOrFor c) ||
+      hs.attach.any (fun ⟨h, _hh⟩ => match h, _hh with
+        | .ExceptHandler _ _ _ ⟨_, hb⟩, _hh => hb.attach.any fun ⟨c, _hc⟩ => hasAssertIfOrFor c) ||
+      o.attach.any (fun ⟨c, _hc⟩ => hasAssertIfOrFor c) ||
+      f.attach.any (fun ⟨c, _hc⟩ => hasAssertIfOrFor c)
+  | .Match _ _ ⟨_, cs⟩ =>
+    cs.attach.any fun ⟨m, _hm⟩ => match m, _hm with
+      | .mk_match_case _ _ _ ⟨_, mb⟩, _hm => mb.attach.any fun ⟨c, _hc⟩ => hasAssertIfOrFor c
+  | _ => false
+termination_by sizeOf s
+decreasing_by
+  all_goals
+    have := Array.sizeOf_lt_of_mem _hc
+    (try have := Array.sizeOf_lt_of_mem _hh)
+    (try have := Array.sizeOf_lt_of_mem _hm)
+    simp only [stmt.FunctionDef.sizeOf_spec, stmt.AsyncFunctionDef.sizeOf_spec,
+      stmt.ClassDef.sizeOf_spec, stmt.With.sizeOf_spec, stmt.AsyncWith.sizeOf_spec,
+      stmt.While.sizeOf_spec, stmt.AsyncFor.sizeOf_spec, stmt.Try.sizeOf_spec,
+      stmt.TryStar.sizeOf_spec, stmt.Match.sizeOf_spec, excepthandler.ExceptHandler.sizeOf_spec,
+      match_case.mk_match_case.sizeOf_spec, StrataDDM.Ann.mk.sizeOf_spec] at *
+    omega
+
 def pySpecFunctionArgs (fnLoc : SourceRange)
                        (className : Option String)
                        (funName : String)
@@ -1513,7 +1551,12 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
         | _ => specError pyd.ann s!"Decorator {repr d} not supported."
 
   let .mk_arguments _ ⟨_, posonly⟩ ⟨_, posArgs⟩ ⟨_, vararg⟩ ⟨_, kwonly⟩ ⟨_, kw_defaults⟩ ⟨_, kwarg⟩ ⟨_, defaults⟩ := arguments
-  assert! posonly.size = 0
+  if posonly.size > 0 then
+    specError fnLoc s!"{funName}: positional-only parameters are not supported"
+    return default
+  if vararg.isSome then
+    specError fnLoc s!"{funName}: *args is not supported"
+    return default
   let argc := posArgs.size
 
   let .up defaults_bnd ←
@@ -1524,7 +1567,6 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
 
   let .isTrue kw_bnd := decideProp (kwonly.size = kw_defaults.size)
     | specError fnLoc s!"Keyword only arguments must have defaults."; return default
-  assert! vararg.isNone
   let min_default := argc - defaults.size
   let isMethod := className.isSome
   if isMethod ∧ argc = 0 then
@@ -1583,6 +1625,14 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
   let as ← collectAssertions argDecls returnType <|
       withReader (fun ctx => { ctx with unloweredReceiver }) <| do
     if overload then
+      -- The body of an `@overload` stub is not read, so an assert in it, at any depth, would
+      -- be dropped.
+      if body.any hasAssertIfOrFor then
+        let qualName := match className with
+          | some cl => s!"{cl}.{funName}"
+          | none => funName
+        specError fnLoc s!"{qualName}: an @overload stub cannot have assert, if or for \
+          statements"
       -- Overload stubs should have `...` as their only body statement.
       unless body.size = 1 &&
              body[0]! matches .Expr _ (.Constant _ (.ConEllipsis _) _) do
@@ -1655,6 +1705,8 @@ partial def pySpecClassBody (loc : SourceRange) (className : String)
     (classInvariants : Array (expr SourceRange) := #[]) : PySpecM ClassDef := do
   let mut usedNames : Std.HashSet String := {}
   let mut fields : Array ClassField := #[]
+  -- The class of each field that an `__init__` assignment declares.
+  let mut initFieldClasses : Std.HashMap String String := {}
   let mut classVars : Array ClassVariable := #[]
   let mut subclasses : Array ClassDef := #[]
   let mut methods : Array FunctionDecl := #[]
@@ -1668,8 +1720,19 @@ partial def pySpecClassBody (loc : SourceRange) (className : String)
         let fieldType ← pySpecType annotation
         fields := fields.push { name := fieldName, type := fieldType }
       | _ => specError stmt.ann s!"Unsupported field target"
-    | .ClassDef innerLoc ⟨_, innerClassName⟩ ⟨_, innerBases⟩ _keywords ⟨_, innerStmts⟩
-                _decorators _typeParams =>
+    | .ClassDef innerLoc ⟨_, innerClassName⟩ ⟨_, innerBases⟩ ⟨_, innerKeywords⟩ ⟨_, innerStmts⟩
+                ⟨_, innerDecorators⟩ ⟨_, innerTypeParams⟩ =>
+      if innerKeywords.size > 0 then
+        specError innerLoc s!"{innerClassName}: class keywords, such as metaclass=, are not supported"
+        continue
+      if innerTypeParams.size > 0 then
+        specError innerLoc s!"{innerClassName}: type parameters are not supported"
+        continue
+      -- A nested class gets none of the class decorators, `@exhaustive` and `@invariant`
+      -- included, so each one would be dropped.
+      if innerDecorators.size > 0 then
+        specError innerLoc s!"{innerClassName}: decorators on a nested class are not supported"
+        continue
       let innerBaseIdents ← resolveBaseClasses innerBases
       let innerDef ← pySpecClassBody innerLoc innerClassName innerBaseIdents innerStmts
       subclasses := subclasses.push innerDef
@@ -1688,8 +1751,9 @@ partial def pySpecClassBody (loc : SourceRange) (className : String)
         specWarning loc "FunctionDef: type_comment not supported"
       if type_params.size > 0 then
         specWarning loc "FunctionDef: type_params not supported"
-      if name == "__init__" then
-        -- Extract self.field = expr assignments as class fields
+      let isInit := name == "__init__"
+      if isInit then
+        -- Each `self.f = self._C()` in `__init__` declares the field `f` of type `_C`.
         for initStmt in body do
           match initStmt with
           | .Assign _ ⟨_, targets⟩ value _ =>
@@ -1705,22 +1769,36 @@ partial def pySpecClassBody (loc : SourceRange) (className : String)
                     name := fieldName,
                     type := .ident loc pyIdent #[],
                     constValue := some s!"{innerClsName}()" }
-                  fields := fields.push f
+                  -- Several `__init__` stubs (`@overload`) may assign the field: it is
+                  -- declared once, and the assignments must agree on its class.
+                  match initFieldClasses[fieldName]? with
+                  | none =>
+                    fields := fields.push f
+                    initFieldClasses := initFieldClasses.insert fieldName innerClsName
+                  | some prev =>
+                    if prev != innerClsName then
+                      specError initStmt.ann
+                        s!"{className}.__init__ assigns self.{fieldName} both \
+                          {prev}() and {innerClsName}()"
                 | _ =>
                   specWarning initStmt.ann
                     s!"unsupported __init__ assignment value for self.{fieldName}"
               | _ => specWarning initStmt.ann "unsupported __init__ assignment target"
             else
               specWarning initStmt.ann "unsupported __init__ multi-target assignment"
-          | .Expr _ (.Constant _ (.ConEllipsis _) _) => pure ()
-          | .Pass .. => pure ()
-          | _ => specWarning initStmt.ann s!"unsupported statement in __init__"
-      else
+          | _ => pure ()
+      -- `__init__` is read like any other method, except for its top-level assignments:
+      -- the loop above reads each `self.f = self._C()` as a field and warns on the others.
+      let contractBody := if isInit then body.filter (!· matches .Assign ..) else body
+      let d ← pySpecFunctionArgs (className := some className) loc name args
+                                 contractBody decorators returns
+      -- A class defines each method name at most once without `@overload`; it may
+      -- have any number of `@overload` stubs of that name.
+      unless d.isOverload do
         if name ∈ usedNames then
-          specError loc s!"{name} already defined."
-        let d ← pySpecFunctionArgs (className := some className) loc name args
-                                   body decorators returns
-        methods := methods.push d
+          specError loc s!"{className}.{name} is already defined"
+        usedNames := usedNames.insert name
+      methods := methods.push d
     | _ =>
       specError stmt.ann s!"Unknown class statement {stmt}"
   -- Translate `@invariant` predicate bodies via the assertion translator with
@@ -2230,22 +2308,25 @@ partial def translate (body : Array (stmt StrataDDM.SourceRange)) : PySpecM Unit
     | .FunctionDef loc
                    ⟨_funNameLoc, funName⟩
                    args
-                   ⟨_bodyLoc, body⟩
-                   ⟨_decoratorsLoc, decorators⟩
-                   ⟨_returnsLoc, returns⟩
-                   ⟨_typeCommentLoc, typeComment⟩
-                   ⟨_typeParamsLoc, typeParams⟩ =>
+                   ⟨bodyLoc, body⟩
+                   ⟨decoratorsLoc, decorators⟩
+                   ⟨returnsLoc, returns⟩
+                   ⟨typeCommentLoc, typeComment⟩
+                   ⟨typeParamsLoc, typeParams⟩ =>
       if hasOverloadDecorator decorators = false ∧ (←shouldSkip funName) then
         logEvent "skip" s!"Skipping function {funName}"
         continue
-      assert! _bodyLoc.isNone
-      -- Flag indicating this is an overload
-      assert! _decoratorsLoc.isNone
-      assert! _returnsLoc.isNone
-      assert! _typeCommentLoc.isNone
-      assert! typeComment.isNone
-      assert! _typeParamsLoc.isNone
-      assert! typeParams.size = 0
+      for (field, fieldLoc) in [("body", bodyLoc), ("decorator list", decoratorsLoc),
+          ("return annotation", returnsLoc), ("type comment", typeCommentLoc),
+          ("type parameter list", typeParamsLoc)] do
+        if !fieldLoc.isNone then
+          specError loc s!"internal: the {field} of function {funName} has a source location"
+      if typeComment.isSome then
+        specError loc s!"{funName}: type comments are not supported"
+        continue
+      if typeParams.size > 0 then
+        specError loc s!"{funName}: type parameters are not supported"
+        continue
       let d ← pySpecFunctionArgs (className := none) loc funName args body decorators returns
       pushSignature (.functionDecl d)
     | .Import .. | .ImportFrom .. =>
@@ -2255,12 +2336,18 @@ partial def translate (body : Array (stmt StrataDDM.SourceRange)) : PySpecM Unit
       for sig in importSigs.getD i #[] do
         if !(sig matches .ghostDecl _) then
           pushSignature sig
-    | .ClassDef loc ⟨_classNameLoc, className⟩ ⟨_, bases⟩ ⟨_, keywords⟩ ⟨_, stmts⟩ ⟨_, decorators⟩ ⟨_, typeParams⟩ =>
+    | .ClassDef loc ⟨classNameLoc, className⟩ ⟨_, bases⟩ ⟨_, keywords⟩ ⟨_, stmts⟩ ⟨_, decorators⟩ ⟨_, typeParams⟩ =>
       if ←shouldSkip className then
         logEvent "skip" s!"Skipping class {className}"
         continue
-      assert! _classNameLoc.isNone
-      assert! keywords.size = 0
+      if !classNameLoc.isNone then
+        specError loc s!"internal: the name of class {className} has a source location"
+      if keywords.size > 0 then
+        specError loc s!"{className}: class keywords, such as metaclass=, are not supported"
+        continue
+      if typeParams.size > 0 then
+        specError loc s!"{className}: type parameters are not supported"
+        continue
       -- `@exhaustive` is a bare structural marker; `@invariant(lambda self: …)`
       -- goes to the native class scheme. Everything else is unsupported.
       let classScheme := Native.classScheme
@@ -2276,7 +2363,6 @@ partial def translate (body : Array (stmt StrataDDM.SourceRange)) : PySpecM Unit
             match ← classScheme.absorb form classBundle with
             | some b => classBundle := b
             | none => specError cd.ann s!"Class decorator @{form.display} not supported."
-      assert! typeParams.size = 0
       let baseIdents ← resolveBaseClasses bases
       let (success, _) ← runChecked <| recordTypeDef loc className
       -- Add the class to nameMap so it can be used in forward references

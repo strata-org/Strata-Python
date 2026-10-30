@@ -147,7 +147,8 @@ private def extractFunctionSignatures (sigs : Array Specs.Signature)
         result := result.push (← funcDeclToFunctionDecl (funcPrefix ++ func.name) func.args)
     | .classDef cls =>
       let clsName := funcPrefix ++ cls.name
-      for method in cls.methods do
+      -- As in `classDefToLaurel`, an `@overload` stub of a method has no signature.
+      for method in cls.methods.filter (!·.isOverload) do
         if method.args.args.size == 0 then
           throw s!"Method '{cls.name}.{method.name}' has no arguments (expected 'self' as first parameter)"
         let posArgs := method.args.args.extract 1 method.args.args.size  -- strip self

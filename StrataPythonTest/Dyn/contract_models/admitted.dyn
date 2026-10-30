@@ -1,0 +1,79 @@
+-- The model of the PySpec fixture StrataPythonTestExtra/Specs/dispatch_test/servicelib/Admitted.py,
+-- written by hand by the rules of docs/PythonToDyn.md §12:
+--
+--   @admit(lambda result: result >= 0)
+--   def admitted_value() -> int:
+--       ...
+--
+-- The return type's clause comes before the `@admit` clause, which may rely on it (§12.3).
+-- ToLaurel assumes both facts at every return, the return type last. Here both free ensures
+-- clauses hold when the call raises, so a call may raise (§12.3). ToLaurel's frame lets the call
+-- change any object field; here it may change only `py.instanceState` (the attributes of every
+-- object that is neither a class nor a module, and what they reach) and what its arguments
+-- reach (§12.5).
+module servicelib.Admitted {
+  func @|servicelib.Admitted.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("servicelib.Admitted")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Admitted", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Admitted", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@servicelib.Admitted.admitted_value)
+      %admitted_value.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Admitted", "admitted_value")
+      %set.2 : base.Unit = base.refSet[py.Value](%admitted_value.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@servicelib.Admitted.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Admitted", "__getattr__")
+      %set.3 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+  }
+  extern func @servicelib.Admitted.admitted_value(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'admitted_value'" {
+      pre.0():
+        %ok.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 0, false)
+        ret(%ok.0)
+    }
+    free ensures "return type of 'admitted_value'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %cls.0 : py.Value = py.stdClass("builtins", "int")
+        %ok.1 : base.Bool = py.isInstance(%result.0, %cls.0) ^fail.0()
+        ret(%ok.1)
+      raised.0(%exc.0 : py.Value):
+        ret(true)
+      fail.0(%e.0 : py.Value):
+        ret(true)
+    }
+    free ensures "admitted postcondition of 'admitted_value'" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %int.0 : py.Value = py.intLit(0)
+        %ge.0 : py.Value = py.gtE(%result.1, %int.0) ^fail.1()
+        %ok.2 : base.Bool = py.truthy(%ge.0) ^fail.1()
+        ret(%ok.2)
+      raised.1(%exc.1 : py.Value):
+        ret(true)
+      fail.1(%e.1 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @servicelib.Admitted.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

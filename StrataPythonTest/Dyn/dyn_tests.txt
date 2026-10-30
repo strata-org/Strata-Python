@@ -50,6 +50,9 @@ i05_kwargs_mutation | yes |
 i06_call_errors | yes |
 i07_methods | yes |
 i08_binding_errors | yes |
+i09_assigned_defaults | yes |
+i10_keyword_subclass | yes |
+i11_constant_default | yes |
 tc01_literals | yes |
 tc02_arithmetic | yes |
 tc03_string_ops | yes |

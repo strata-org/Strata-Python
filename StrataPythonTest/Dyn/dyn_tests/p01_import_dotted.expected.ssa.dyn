@@ -27,11 +27,8 @@ module p01_import_dotted {
   }
   func @p01_import_dotted.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %os.0 : py.Value = py.loadGlobal("p01_import_dotted", "os") ^propagate.0()
       %path.0 : py.Value = py.attr(%os.0, "path") ^propagate.0()
       %join.0 : py.Value = py.attr(%path.0, "join") ^propagate.0()
@@ -42,8 +39,8 @@ module p01_import_dotted {
       %call.0 : py.Value = py.call(%join.0, %tuple.0, %kwargs.1) ^propagate.0()
       %a.0 : py.Value = py.loadGlobal("p01_import_dotted", "a") ^propagate.0()
       %b.0 : py.Value = py.attr(%a.0, "b") ^propagate.0()
-      %c.2 : py.Value = py.attr(%b.0, "c") ^propagate.0()
-      %g.0 : py.Value = py.attr(%c.2, "g") ^propagate.0()
+      %c.6 : py.Value = py.attr(%b.0, "c") ^propagate.0()
+      %g.0 : py.Value = py.attr(%c.6, "g") ^propagate.0()
       %tuple.1 : py.Value = py.mkTuple
       %kwargs.2 : py.Value = py.mkKwargs
       %call.1 : py.Value = py.call(%g.0, %tuple.1, %kwargs.2) ^propagate.0()

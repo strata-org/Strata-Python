@@ -176,9 +176,9 @@ end Ann
 /-! ## Specialization
 
 `t` declares an abstract type `Box`, an ordinary instruction `mkBox : Box` and an ordinary
-instruction `Box.case` with the signature of `Box`'s case instruction.  `s` declares `Box` as the
-datatype with the one constructor `mkBox`.  `s` refines `t`: `Box` becomes a datatype, `mkBox`
-its constructor and `Box.case` its case instruction. -/
+instruction `Box.case` with the signature of `Box`'s case instruction, both `pure`.  `s` declares
+`Box` as the datatype with the one constructor `mkBox`.  `s` refines `t`: `Box` becomes a
+datatype, `mkBox` its constructor and `Box.case` its case instruction. -/
 
 namespace Spec
 
@@ -191,7 +191,9 @@ private def boxD : TypeDecl Unit := { ann := (), name := boxN }
 private def t₀ : Env Unit := Env.empty.addType boxD (by simp)
 private def boxT : TypeExpr t₀ :=
   .app (TypeRef.ofAddType Env.empty boxD (by simp)) #v[] (TypeRef.kinds_zero _)
-private def mkSig : InsnSig t₀ := { ann := (), argTypes := #[], returnType := some boxT }
+-- `pure`, as a constructor is, so that `s` may refine it into one.
+private def mkSig : InsnSig t₀ :=
+  { ann := (), argTypes := #[], returnType := some boxT, effect := .pure }
 
 /-- `BoxT`, as a raw type: `Box` applied to no arguments. -/
 private theorem toRaw_boxT : boxT.toRaw = .app boxN #[] :=
@@ -201,7 +203,7 @@ private theorem toRaw_boxT : boxT.toRaw = .app boxN #[] :=
 private abbrev t₁ : Env Unit := t₀.addInsn mkN mkSig (by simp [t₀, boxD, boxN, mkN])
 private def boxCaseSig : InsnSig t₁ :=
   { ann := (), argTypes := #[⟨"scrutinee", boxT.ofSubset (Env.subset_addInsn _ _ _ _)⟩],
-    returnType := none, succs := #[⟨"mkBox", #[]⟩] }
+    returnType := none, succs := #[⟨"mkBox", #[]⟩], effect := .pure }
 private abbrev t : Env Unit :=
   t₁.addInsn boxN.caseName boxCaseSig
     (by simp only [t₁, Env.mem_addInsn]; simp [t₀, boxD, boxN, mkN, Name.caseName])
@@ -280,7 +282,8 @@ private theorem t_le_s : t ≤ s := show Env.LeBy _ t s from
         apply InsnSig.EqUpToAnn.of_toRaw <;>
           (try simp only [Env.typeParams_caseSig, Env.argTypes_caseSig,
             Env.variadic_caseSig, Env.returnType_caseSig, Env.regions_caseSig,
-            Env.succs_caseSig, boxCaseSig, Array.map_empty, Option.map_none]) <;>
+            Env.succs_caseSig, Env.effect_caseSig, boxCaseSig, Array.map_empty,
+            Option.map_none]) <;>
           first
           | rfl
           | ((try simp only [List.map_toArray, List.map_cons, List.map_nil, TypeExpr.toRaw_carry,
@@ -293,7 +296,8 @@ private theorem t_le_s : t ≤ s := show Env.LeBy _ t s from
         apply InsnSig.EqUpToAnn.of_toRaw <;>
           (try simp only [Env.typeParams_ctorSig, Env.argTypes_ctorSig,
             Env.variadic_ctorSig, Env.returnType_ctorSig, Env.regions_ctorSig,
-            Env.succs_ctorSig, mkSig, Array.map_empty, Option.map_none]) <;>
+            Env.succs_ctorSig, Env.effect_ctorSig, mkSig, Array.map_empty,
+            Option.map_none]) <;>
           first
           | rfl
           | ((try simp only [Option.map_some, toRaw_boxT])

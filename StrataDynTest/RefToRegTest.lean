@@ -37,9 +37,9 @@ public environment R2R extends Base where
   namespace r2r
   open base
   /-- `a + b`. -/
-  insn add (a b : Int) : Int
+  pure insn add (a b : Int) : Int
   /-- `a < b`. -/
-  insn lt (a b : Int) : Bool
+  pure insn lt (a b : Int) : Bool
   /-- `x`, or a raised `e` to `err`. -/
   insn may (x : Int) (^err (e : Int)) : Int
   /-- An operation that a cell escapes through. -/
@@ -1300,7 +1300,7 @@ read rule, or an edge that should pass the cell fails the edge rule. -/
 /-- The plan without the block plans of the blocks named `ls`. -/
 private def without (ls : List String) (f : Func R2R.env Info)
     (P : Plan R2R.env) : Plan R2R.env :=
-  { P with blocks := f.allBlocks.foldl (init := P.blocks) fun m b =>
+  { P with blocks := (bodyBlocks f).foldl (init := P.blocks) fun m b =>
       if ls.contains (nameText b.label.name) then m.erase b.label else m }
 
 /-- info: m.f: the plan breaks a rule: each removed read is replaced by its cell's content -/
@@ -1551,5 +1551,258 @@ private def handlerOnly : String := "module m {
 /-- info: m.f: the same -/
 #guard_msgs in
 #eval sideBySide (diamonds 10 8)
+
+/-! ## Contracts and extern functions
+
+The pass changes only a function's body.  Its parameters, its contract and its extern flag stay
+as they are, and so does a cell that a contract region makes: it is no candidate.  `refToReg`
+checks the well-formedness of its output (`Module.Raw.check`), so each printed output below is a
+well-formed module. -/
+
+/-- Read `text`, and print, per function, the cells its plan promotes. -/
+private def promotedIn (text : String) : IO Unit := do
+  match ← Module.read R2R.env text "t.dyn" with
+  | .error e => IO.println e
+  | .ok m =>
+    for f in m.raw.funcs do
+      match planOf f with
+      | .ok P =>
+        let names := ((candidates f).filter P.promoted.contains).map fun v =>
+          nameText (f.names[v.id]?.getD .base)
+        IO.println s!"{nameText f.name}: {names}"
+      | .error e => IO.println s!"{nameText f.name}: {e}"
+
+/-- A function with a contract: a `requires` clause that makes and reads its own cell `y`, an
+`ensures` clause that reads the parameter cell `c` at the call with `old`, a `reads` frame of
+`c` and a `writes` frame region.  Its body writes the local cell `x`, reads it back, and writes
+`c`. -/
+private def withContract : String := "module m {
+  func @m.f(%a.0 : base.Int, %c.0 : base.Ref(base.Int)) -> base.Int
+    requires {
+      pre.0():
+        %y.0 : base.Ref(base.Int) = base.refNew[base.Int](%a.0)
+        %v.0 : base.Int = base.refGet[base.Int](%y.0)
+        %ok.0 : base.Bool = r2r.lt(%v.0, 10)
+        ret(%ok.0)
+    }
+    ensures {
+      post.0(%r.0 : base.Int):
+        %o.0 : base.Int = base.old[base.Int, base.Int] ^fail.0() {
+          old.0():
+            %v.1 : base.Int = base.refGet[base.Int](%c.0)
+            %e.0 : base.Except(base.Int, base.Int) = base.ok[base.Int, base.Int](%v.1)
+            ret(%e.0)
+        }
+        %ok.1 : base.Bool = r2r.lt(%o.0, %r.0)
+        ret(%ok.1)
+      fail.0(%e.1 : base.Int):
+        ret(false)
+    }
+    reads(%c.0)
+    writes({
+      loc.0():
+        %l.0 : base.Loc = base.cellLoc[base.Int](%c.0)
+        ret(%l.0)
+    })
+  {
+    entry.0(%a.0 : base.Int, %c.0 : base.Ref(base.Int)):
+      %x.0 : base.Ref(base.Int) = base.refNew[base.Int](0)
+      %u.0 : base.Unit = base.refSet[base.Int](%x.0, %a.0)
+      %g.0 : base.Int = base.refGet[base.Int](%x.0)
+      %u.1 : base.Unit = base.refSet[base.Int](%c.0, %g.0)
+      %s.0 : base.Int = r2r.add(%g.0, %a.0)
+      ret(%s.0)
+  }
+}
+"
+
+-- `x` is promoted, and the contract prints as it was, its cell `y` included.
+/-- info: module m {
+  func @m.f(%a.0 : base.Int, %c.0 : base.Ref(base.Int)) -> base.Int
+    requires {
+      pre.0():
+        %y.0 : base.Ref(base.Int) = base.refNew[base.Int](%a.0)
+        %v.0 : base.Int = base.refGet[base.Int](%y.0)
+        %ok.0 : base.Bool = r2r.lt(%v.0, 10)
+        ret(%ok.0)
+    }
+    ensures {
+      post.0(%r.0 : base.Int):
+        %o.0 : base.Int = base.old[base.Int, base.Int] ^fail.0() {
+          old.0():
+            %v.1 : base.Int = base.refGet[base.Int](%c.0)
+            %e.0 : base.Except(base.Int, base.Int) = base.ok[base.Int, base.Int](%v.1)
+            ret(%e.0)
+        }
+        %ok.1 : base.Bool = r2r.lt(%o.0, %r.0)
+        ret(%ok.1)
+      fail.0(%e.1 : base.Int):
+        ret(false)
+    }
+    reads(%c.0)
+    writes({
+      loc.0():
+        %l.0 : base.Loc = base.cellLoc[base.Int](%c.0)
+        ret(%l.0)
+    })
+  {
+    entry.0(%a.0 : base.Int, %c.0 : base.Ref(base.Int)):
+      %x.0 : base.Ref(base.Int) = base.refNew[base.Int](0)
+      %u.1 : base.Unit = base.refSet[base.Int](%c.0, %a.0)
+      %s.0 : base.Int = r2r.add(%a.0, %a.0)
+      ret(%s.0)
+  }
+} -/
+#guard_msgs in
+#eval promote withContract
+
+-- Only the body's cell is promoted: the contract's cell `y` is no candidate.
+/-- info: m.f: [x.0] -/
+#guard_msgs in
+#eval promotedIn withContract
+
+/-- info: m.f: the same -/
+#guard_msgs in
+#eval sideBySide withContract
+
+/-- An extern function with a contract over the ghost `count`, beside a defined function. -/
+private def withExtern : String := "module m {
+  ghost @m.count : base.Int = {
+    init.0():
+      ret(0)
+  }
+  extern func @m.tick(%x.0 : base.Int) -> base.Int
+    requires {
+      pre.0():
+        %n.0 : base.Int = base.refGet[base.Int](ghost @m.count)
+        %ok.0 : base.Bool = r2r.lt(%n.0, %x.0)
+        ret(%ok.0)
+    }
+    free ensures {
+      post.0(%r.0 : base.Int):
+        %ok.1 : base.Bool = r2r.lt(%x.0, %r.0)
+        ret(%ok.1)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = base.cellLoc[base.Int](ghost @m.count)
+        ret(%l.0)
+    })
+  func @m.f(%a.0 : base.Int) -> base.Int {
+    entry.0(%a.0 : base.Int):
+      %x.0 : base.Ref(base.Int) = base.refNew[base.Int](%a.0)
+      %g.0 : base.Int = base.refGet[base.Int](%x.0)
+      ret(%g.0)
+  }
+}
+"
+
+-- The ghost and the extern function stay as they are.
+/-- info: module m {
+  ghost @m.count : base.Int = {
+    init.0():
+      ret(0)
+  }
+  extern func @m.tick(%x.0 : base.Int) -> base.Int
+    requires {
+      pre.0():
+        %n.0 : base.Int = base.refGet[base.Int](ghost @m.count)
+        %ok.0 : base.Bool = r2r.lt(%n.0, %x.0)
+        ret(%ok.0)
+    }
+    free ensures {
+      post.0(%r.0 : base.Int):
+        %ok.1 : base.Bool = r2r.lt(%x.0, %r.0)
+        ret(%ok.1)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = base.cellLoc[base.Int](ghost @m.count)
+        ret(%l.0)
+    })
+  func @m.f(%a.0 : base.Int) -> base.Int {
+    entry.0(%a.0 : base.Int):
+      %x.0 : base.Ref(base.Int) = base.refNew[base.Int](%a.0)
+      ret(%a.0)
+  }
+} -/
+#guard_msgs in
+#eval promote withExtern
+
+/-- info: m.tick: []
+m.f: [x.0] -/
+#guard_msgs in
+#eval promotedIn withExtern
+
+/-- A join that takes `x`'s content as a new parameter, in a function whose contract defines
+values after the body's, among them one named `%a.1`. -/
+private def joinContract : String := "module m {
+  func @m.f(%c.0 : base.Bool, %a.0 : base.Int, %b.0 : base.Int) -> base.Int
+    requires {
+      pre.0():
+        %ok.0 : base.Bool = r2r.lt(%a.0, %b.0)
+        %a.1 : base.Bool = r2r.lt(%b.0, %a.0)
+        ret(%ok.0)
+    }
+    ensures {
+      post.0(%r.0 : base.Int):
+        %ok.2 : base.Bool = r2r.lt(%a.0, %r.0)
+        ret(%ok.2)
+    }
+  {
+    entry.0(%c.0 : base.Bool, %a.0 : base.Int, %b.0 : base.Int):
+      %x.0 : base.Ref(base.Int) = base.refNew[base.Int](%a.0)
+      branch(%c.0) ^yes.0() ^join.0()
+    yes.0():
+      %u.0 : base.Unit = base.refSet[base.Int](%x.0, %b.0)
+      jump ^join.0()
+    join.0():
+      %r.1 : base.Int = base.refGet[base.Int](%x.0)
+      ret(%r.1)
+  }
+}
+"
+
+-- The new parameter is named `%a.2`, since the contract's `%a.1` takes `a.1`.
+/-- info: module m {
+  func @m.f(%c.0 : base.Bool, %a.0 : base.Int, %b.0 : base.Int) -> base.Int
+    requires {
+      pre.0():
+        %ok.0 : base.Bool = r2r.lt(%a.0, %b.0)
+        %a.1 : base.Bool = r2r.lt(%b.0, %a.0)
+        ret(%ok.0)
+    }
+    ensures {
+      post.0(%r.0 : base.Int):
+        %ok.2 : base.Bool = r2r.lt(%a.0, %r.0)
+        ret(%ok.2)
+    }
+  {
+    entry.0(%c.0 : base.Bool, %a.0 : base.Int, %b.0 : base.Int):
+      %x.0 : base.Ref(base.Int) = base.refNew[base.Int](%a.0)
+      branch(%c.0) ^yes.0() ^join.0(%a.0)
+    yes.0():
+      jump ^join.0(%b.0)
+    join.0(%a.2 : base.Int):
+      ret(%a.2)
+  }
+} -/
+#guard_msgs in
+#eval promote joinContract
+
+-- The ids that the function defines, before and after: the new parameter's id, `10`, comes after
+-- the contract's values, `6` to `9`.
+/-- info: before: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+after: [0, 1, 2, 3, 10, 6, 7, 8, 9] -/
+#guard_msgs in
+#eval show IO Unit from do
+  match ← Module.read R2R.env joinContract "t.dyn" with
+  | .error e => IO.println e
+  | .ok m =>
+    for f in m.raw.funcs do
+      IO.println s!"before: {f.defs.map (·.id.id)}"
+      match do (← planOf f).applyFor f with
+      | .ok f' => IO.println s!"after: {f'.defs.map (·.id.id)}"
+      | .error e => IO.println e
 
 end Strata.Dyn.RefToRegTest

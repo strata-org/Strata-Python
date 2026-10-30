@@ -77,15 +77,18 @@ def blk (s : String) (params : List (ValDecl E)) (instrs : List (Instruction E U
 /-- A region of blocks. -/
 def region (bs : List (Block E Unit)) : Dyn.Region E Unit := ⟨bs.toArray⟩
 
-/-- A function of the blocks `bs`, its values named `%v.0`, `%v.1`, …. -/
+/-- A function of the blocks `bs`, its parameters its entry block's, its values named `%v.0`,
+`%v.1`, …. -/
 def fn (s : String) (ret : TypeExpr E) (bs : List (Block E Unit)) : Func E Unit :=
-  let f : Func E Unit := ⟨.str .base s, ret, bs.toArray, #[], ()⟩
+  let f : Func E Unit :=
+    { name := .str .base s, params := (bs.head?.map (·.params)).getD #[], retType := ret,
+      blocks := bs.toArray, names := #[], info := () }
   { f with names := (Array.range (ValDecl.idBound f.defs)).map (.num (.str .base "v")) }
 
 /-- The module of `fs`, checked, or a fault that names the functions that are not well
 formed. -/
 def mod (fs : List (Func E Unit)) : Except Exec.Fault (Module E Unit) :=
-  (Module.Raw.check ⟨.str .base "m", fs.toArray, ()⟩).mapError fun ns =>
+  (Module.Raw.check { name := .str .base "m", funcs := fs.toArray, info := () }).mapError fun ns =>
     .invalid s!"not well formed: {ns.toList.map Exec.nameStr}"
 
 /-- A function's name. -/

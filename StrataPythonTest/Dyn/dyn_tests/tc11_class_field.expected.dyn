@@ -26,11 +26,8 @@ module tc11_class_field {
       %client.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%client.0)
       %name.0 : py.Value = py.undef("name")
       %name.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%name.0)
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %myservice.0 : py.Value = py.loadGlobal("tc11_class_field", "myservice") ^propagate.0()
       %Client.0 : py.Value = py.attr(%myservice.0, "Client") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple

@@ -55,6 +55,10 @@ syntax (name := binderSuccs) "(" ("^" ident)+ dynParams* ")" : dynBinder
 /-- `terminal`: the instruction ends its block. -/
 syntax dynTerminal := &"terminal"
 
+/-- The instruction's effect, an upper bound on what it may do: `pure`, `reads`, `calls` or
+`writes`.  Without one, it is `writes`. -/
+syntax dynEffect := &"pure" <|> &"reads" <|> &"calls" <|> &"writes"
+
 /-- A type parameter of a `type` or `data`: `(+a)` is positive, `(a)` is not.  `(a : list)`
 ranges over lists of types. -/
 syntax dynTyParam := "(" ("+")? ident (" : " &"list")? ")"
@@ -85,9 +89,10 @@ types. -/
 syntax dynInsnParams := "[" (ident <|> dynListParams)+ "]"
 /-- `insn n [a (cs : list)] (x : τ) (*xs : τ) (&r (p : τ) : σ) (^k (y : τ)) : τ`: a
 primitive instruction.  A `terminal insn` has no result type.  The grammar makes it optional
-for both; the elaborator demands it of exactly the non-terminal ones. -/
-syntax (name := declInsn) (docComment)? (dynTerminal)? &"insn" ident (dynAs)?
-  (dynInsnParams)? dynBinder* (" : " dynTy)? : dynDecl
+for both; the elaborator demands it of exactly the non-terminal ones.  An effect comes first:
+`pure insn`, `pure terminal insn`. -/
+syntax (name := declInsn) (docComment)? (dynEffect)? (dynTerminal)? &"insn" ident
+  (dynAs)? (dynInsnParams)? dynBinder* (" : " dynTy)? : dynDecl
 /-- `def`: a defined instruction.  Reserved: it parses, and the elaborator rejects it. -/
 syntax (name := declDef) (docComment)? "def " ident (dynAs)? (dynInsnParams)?
   dynBinder* " : " dynTy (" := " term)? : dynDecl

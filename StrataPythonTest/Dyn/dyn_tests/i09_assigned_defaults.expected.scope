@@ -1,0 +1,6 @@
+module
+  h: local (assigned, referenced)
+  print: global implicit (referenced)
+  function h
+    params: a
+    a: local (parameter, referenced)

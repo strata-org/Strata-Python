@@ -124,6 +124,97 @@ private def noGenerator : Result :=
 #guard noGenerator.diagnostics.map (·.message) = #["list comprehension without a generator"]
 #guard noGenerator.diagnostics.all (·.kind == .internal)
 
+/-! ## The argument-binding prologue
+
+    def f(a, b=2, /, x=3, *rest, y, z=5, **kw):
+        return a
+
+The prologue builds a tuple of the defaults, one per named parameter, with `undef` for a
+parameter that has none.  `bindArgs` binds `args` and `kwargs` to the parameters, as CPython
+does, and each parameter, `rest` and `kw` is taken from its result with `tupleGet`. -/
+
+/-- The parameter `s`, without an annotation. -/
+private def param (s : String) : StrataPython.arg SourceRange :=
+  .mk_arg none' ⟨none', s⟩ ⟨none', none⟩ ⟨none', none⟩
+
+private def bindingDef : stmt SourceRange :=
+  let args : StrataPython.arguments SourceRange :=
+    .mk_arguments none' ⟨none', #[param "a", param "b"]⟩ ⟨none', #[param "x"]⟩
+      ⟨none', some (param "rest")⟩ ⟨none', #[param "y", param "z"]⟩
+      ⟨none', #[.missing_expr none', .some_expr none' (int 5)]⟩ ⟨none', some (param "kw")⟩
+      ⟨none', #[int 2, int 3]⟩
+  .FunctionDef none' ⟨none', "f"⟩ args ⟨none', #[.Return none' ⟨none', some (load "a")⟩]⟩
+    ⟨none', #[]⟩ ⟨none', none⟩ ⟨none', none⟩ ⟨none', #[]⟩
+
+private def binding : Result := translate "m" #[bindingDef]
+
+#guard binding.ok
+
+/-- info: module m {
+  func @|m.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("m")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@m.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("m", "f")
+      %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+  }
+  func @m.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %a.0 : py.Value = py.undef("a")
+      %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
+      %b.0 : py.Value = py.undef("b")
+      %b.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%b.0)
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %y.0 : py.Value = py.undef("y")
+      %y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%y.0)
+      %z.0 : py.Value = py.undef("z")
+      %z.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%z.0)
+      %rest.0 : py.Value = py.undef("rest")
+      %rest.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%rest.0)
+      %kw.0 : py.Value = py.undef("kw")
+      %kw.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%kw.0)
+      %a.1 : py.Value = py.undef("a")
+      %int.0 : py.Value = py.intLit(2)
+      %int.1 : py.Value = py.intLit(3)
+      %y.1 : py.Value = py.undef("y")
+      %int.2 : py.Value = py.intLit(5)
+      %defaults.0 : py.Value = py.mkTuple(%a.1, %int.0, %int.1, %y.1, %int.2)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 2, 3, true, true, "a", "b", "x", "y", "z") ^propagate.0()
+      %a.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.2)
+      %b.1 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%b.cell.0, %b.1)
+      %x.1 : py.Value = py.tupleGet(%bound.0, 2)
+      %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.1)
+      %y.2 : py.Value = py.tupleGet(%bound.0, 3)
+      %set.3 : base.Unit = base.refSet[py.Value](%y.cell.0, %y.2)
+      %z.1 : py.Value = py.tupleGet(%bound.0, 4)
+      %set.4 : base.Unit = base.refSet[py.Value](%z.cell.0, %z.1)
+      %rest.1 : py.Value = py.tupleGet(%bound.0, 5)
+      %set.5 : base.Unit = base.refSet[py.Value](%rest.cell.0, %rest.1)
+      %kw.1 : py.Value = py.tupleGet(%bound.0, 6)
+      %set.6 : base.Unit = base.refSet[py.Value](%kw.cell.0, %kw.1)
+      %a.3 : py.Value = base.refGet[py.Value](%a.cell.0)
+      %a.4 : py.Value = py.requireDefined(%a.3, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%a.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+} -/
+#guard_msgs in
+#eval IO.println (toString binding.module)
+
 /-! ## A function whose build fails is a stub
 
 Each failure is an internal error, and the function is replaced by its stub, so the module

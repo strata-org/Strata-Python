@@ -38,9 +38,10 @@ A value is named after a stem, `x.n`, with `n` counted per stem when the functio
 so that two `x`es are `x.0` and `x.1`.  A value whose stem its emitter chose itself, a typed
 emitter's default, can be renamed (`rename`), and the numbering leaves no gaps.
 
-Ids count from `0` in allocation order.  They follow the printed order of definitions
+Ids count from `0` in allocation order.  They follow the order of `Func.defs`
 (`Func.Canonical`) if each block's parameters, a region's included, are allocated just before
-the block opens.
+the block opens, and the contract is emitted after the body, its clauses in the order they
+print.
 
 The operations:
 
@@ -58,7 +59,17 @@ The operations:
   control flow;
 * `region`, `regionWith`: emit an operation's nested body, `regionWith` from any monad
   `BuildM` lifts into;
+* `requires`, `ensures`, `reads`, `writes`: emit a clause of the function's contract, a frame's
+  regions included;
+* `withFailureBlock`, `withPropagatingBlock`: run a body with the label of a block for its
+  failure successors, and emit that block after the body's blocks;
+* `old`: emit an application of `base.old`, which an `ensures` clause applies to read the state
+  at the call;
+* `emitGhost`: emit the cell of a ghost of the module, which only a contract may name;
+* `ghost`: emit a ghost of the module, its initializer and its invariant, and check it;
 * `run`, `build`: run a builder and check the function it emitted;
+* `buildExtern`: emit an extern function, a signature and a contract with no blocks, and check
+  it;
 * `stub`: a checked function whose body is `unreachable`, to stand in for one whose build
   failed.
 
@@ -162,6 +173,8 @@ structure State (env : Env Unit) (α : Type) where
   /-- The labels of the blocks opened so far, regions included. -/
   labels : NameSet := ∅
   body : Body env α := {}
+  /-- The contract's clauses emitted so far. -/
+  contract : Contract env α := {}
   /-- The entry labels of the regions being emitted, innermost last. -/
   regions : Array Label := #[]
   /-- The misuses recorded so far, in order, each a message whose labels are given their final
@@ -258,7 +271,8 @@ def emit (d : ValDecl env) (instr : Instruction env α) : BuildM env α ValId :=
   return d.id
 
 /-- Emit a literal, named after `name`, at the type the base gives it.  A function reference
-takes its type from `emitFunc`; given one, it is an error, and nothing is emitted. -/
+takes its type from `emitFunc`, and a ghost reference from `emitGhost`; given either, it is an
+error, and nothing is emitted. -/
 def emitConst [base ≼ env] (name : Name) (c : Const) (info : Option α := none) :
     BuildM env α ValId := do
   match c.typeOf? (env := env) with
@@ -267,7 +281,10 @@ def emitConst [base ≼ env] (name : Name) (c : Const) (info : Option α := none
     emit d (.const (← resolveInfo info) d c)
   | none =>
     let d ← freshVal name Base.Unit
-    error s!"%{d.id.id}: a function reference emitted as a literal, with no type; use emitFunc"
+    let (what, emitter) := match c with
+      | .ghost _ => ("a ghost", "emitGhost")
+      | _ => ("a function", "emitFunc")
+    error s!"%{d.id.id}: {what} reference emitted as a literal, with no type; use {emitter}"
     return d.id
 
 /-- Emit a code pointer to `target`, a function of the module, at `ty`, the target's code
@@ -277,6 +294,14 @@ def emitFunc [base ≼ env] (target : Name) (ty : TypeExpr env) (info : Option �
     BuildM env α ValId := do
   let d ← freshVal (.str .base "code") ty
   emit d (.const (← resolveInfo info) d (.func target))
+
+/-- Emit the cell of the ghost `target` of the module, which holds a `type`: a value of type
+`base.Ref(type)`.  The module checks it, so the ghost may be built after the reference.  Only a
+contract may name a ghost. -/
+def emitGhost [base ≼ env] (target : Name) (type : TypeExpr env) (info : Option α := none) :
+    BuildM env α ValId := do
+  let d ← freshVal (.str .base "ghost") (Base.Ref type)
+  emit d (.const (← resolveInfo info) d (.ghost target))
 
 /-- The type arguments `typeArgs` of an application of `r`, checked against its kinds, or
 `none` with an error recorded if their count or a kind is wrong.  It is for a caller that has
@@ -460,7 +485,8 @@ across the region.
 
 `body` runs in any monad `BuildM` lifts into, such as a front end's builder.  It must finish
 every block it opens.  While it runs, the region is the innermost open one, named by its entry
-label.  A body that throws leaves the region open, which `run` records as a misuse. -/
+label.  A body that throws leaves the region open, which `run`, `buildExtern` and `ghost` record
+as a misuse. -/
 def regionWith {m : Type → Type} {β : Type} [Monad m] [MonadLiftT (BuildM env α) m]
     (params : Array (ValDecl env)) (body : m β) (base : String := "region") :
     m (Region env α × β) := do
@@ -479,6 +505,131 @@ def regionWith {m : Type → Type} {β : Type} [Monad m] [MonadLiftT (BuildM env
 def region (params : Array (ValDecl env)) (body : BuildM env α Unit)
     (base : String := "region") : BuildM env α (Region env α) :=
   Prod.fst <$> regionWith params body base
+
+/-! ## Contracts -/
+
+/-- Whether the contract emitted so far has a frame. -/
+private def hasFrame : BuildM env α Bool := do
+  let c := (← get).contract
+  return c.reads.isSome || c.writes.isSome
+
+/-- Emit a `requires` clause of the function's contract: a region with no arguments, labelled
+`pre.n`, whose `body` returns a `base.Bool`, named in diagnostics by `message`.  One after an
+`ensures` clause or a frame is a misuse, since the `requires` clauses come first. -/
+def requires (body : BuildM env α Unit) (message : Option String := none) :
+    BuildM env α Unit := do
+  if !(← get).contract.ensures.isEmpty then error "a requires clause after an ensures clause"
+  else if ← hasFrame then error "a requires clause after a frame"
+  let r ← region #[] body "pre"
+  modify fun s => { s with contract.requires := s.contract.requires.push { region := r, message } }
+
+/-- Emit an `ensures` clause of the function's contract: a region labelled `post.n`, taking a
+fresh value of type `t`, the function's result, named after `name`.  `body`, given that value,
+returns a `base.Bool`.  The clause is `free`, assumed and never checked, if `free` is set: an
+extern's `ensures` clauses are free, and a defined function's are not.  `message` names it in
+diagnostics.  One after a frame is a misuse, since the frames come last. -/
+def ensures (name : Name) (t : TypeExpr env) (body : ValId → BuildM env α Unit)
+    (free : Bool := false) (message : Option String := none) : BuildM env α Unit := do
+  if ← hasFrame then error "an ensures clause after a frame"
+  let result ← freshVal name t
+  let r ← region #[result] (body result.id) "post"
+  modify fun s =>
+    { s with contract.ensures := s.contract.ensures.push { region := r, free, message } }
+
+/-- An entry of a frame, as `reads` and `writes` take it: a cell among the function's parameters,
+or the `body` of a frame region, which returns a `base.Loc`, the set of locations it names. -/
+inductive FrameItem (env : Env Unit) (α : Type) where
+  | cell (v : ValId)
+  | region (body : BuildM env α Unit)
+
+/-- The entries of a frame, in order: each cell as it is, and each region emitted by running its
+body, as a region with no arguments labelled `loc.n`.  A failure in a frame region must go to a
+block that ends in `unreachable`: `withFailureBlock` with no value gives the block. -/
+private def frameEntries (items : Array (FrameItem env α)) :
+    BuildM env α (Array (FrameEntry env α)) :=
+  items.mapM fun
+    | .cell v => pure (.cell v)
+    | .region body => FrameEntry.region <$> region #[] body "loc"
+
+/-- Emit the function's `reads` clause: the locations it may read.  It runs the body of each
+frame region itself, in the order of the entries, so a frame region cannot be emitted out of
+order or left unused.  A second one, or one after the `writes` clause, is a misuse, and then
+no region is emitted. -/
+def reads (items : Array (FrameItem env α)) : BuildM env α Unit := do
+  let c := (← get).contract
+  if c.reads.isSome then error "a second reads clause"
+  else if c.writes.isSome then error "a reads clause after the writes clause"
+  else
+    let entries ← frameEntries items
+    modify fun s => { s with contract.reads := some entries }
+
+/-- Emit the function's `writes` clause: the locations it may change.  It runs the body of each
+frame region itself, as `reads` does.  A second one is a misuse, and then no region is
+emitted. -/
+def writes (items : Array (FrameItem env α)) : BuildM env α Unit := do
+  if (← get).contract.writes.isSome then error "a second writes clause"
+  else
+    let entries ← frameEntries items
+    modify fun s => { s with contract.writes := some entries }
+
+/-! ## Failure blocks
+
+A failure successor of a contract region names a failure block or a propagating block of its
+region.  These builders give the body its label first, and emit the block after the body,
+when no block is open, and only if a block of the body transfers to it.  So its values get ids
+after the body's, in the order of `Func.defs`, and a block that nothing uses takes no id. -/
+
+/-- Whether a block finished in the open body transfers to `l`. -/
+private def targeted (l : Label) : BuildM env α Bool :=
+  return (← get).body.blocks.any fun b => (Body.edges b).any (·.2 == l)
+
+/-- Run `body` with the label of a *failure block*, `fail.n`, and then emit the block after the
+blocks `body` finished, if one of them transfers to it.  The block takes one parameter `%e.n` per
+type of `payload`, so that a failure successor whose payload is `payload` can name it.  It
+returns the constant `c` when `value` is `some c`, and is `unreachable` when `value` is `none`.
+A failure in a `requires` clause or a checked `ensures` clause gives `false`, and one in a `free
+ensures` clause gives `true`.  `body` must finish every block it opens. -/
+def withFailureBlock [base ≼ env] {β : Type} (payload : Array (TypeExpr env))
+    (value : Option Bool) (body : Label → BuildM env α β) (info : Option α := none) :
+    BuildM env α β := do
+  let l ← freshLabel "fail"
+  let i ← resolveInfo info
+  let r ← body l
+  if ← targeted l then
+    startBlock l (← payload.mapM (freshVal (.str .base "e")))
+    match value with
+    | some c => ret (← emitConst (.str .base "value") (.bool c) (some i)) (some i)
+    | none => unreachable (some i)
+  return r
+
+/-- Run `body` with the label of a *propagating block*, `propagate.n`, and then emit the block
+after the blocks `body` finished, if one of them transfers to it.  The block takes the failure
+`%exc.n : e`, and returns it as `base.error[e, a](%exc.n)`, so that a nested region whose result
+is a `base.Except(e, a)` passes the failure on to the operation that owns it.  `body` must finish
+every block it opens. -/
+def withPropagatingBlock [base ≼ env] {β : Type} (e a : TypeExpr env)
+    (body : Label → BuildM env α β) (info : Option α := none) : BuildM env α β := do
+  let l ← freshLabel "propagate"
+  let i ← resolveInfo info
+  let r ← body l
+  if ← targeted l then
+    let exc ← startBlockWith l (.str .base "exc") e
+    ret (← emitApply (.str .base "err") (Base.Except e a) Base.Except.error.ref #[exc]
+      (info := some i) (typeArgs := ta[e, a])) (some i)
+  return r
+
+/-! ## `old` -/
+
+/-- Emit `base.old[e, a]`, named after `name`, whose failure goes to `err`: its region, labelled
+`old.n`, runs `body` in the state at the call.  `body` gets the label of a propagating block for
+the failure successors in the region, which is emitted, after its blocks, only if one of them
+transfers to it.  `body` finishes every block it opens, each returning a `base.Except(e, a)`.
+Only an `ensures` clause may apply `base.old`. -/
+def old [base ≼ env] (name : Name) (e a : TypeExpr env) (err : Label)
+    (body : Label → BuildM env α Unit) (info : Option α := none) : BuildM env α ValId :=
+  emitApply name a Base.old.ref #[] (succs := #[goto err])
+    (regions := #[region #[] (withPropagatingBlock e a body info) "old"]) (info := info)
+    (typeArgs := ta[e, a])
 
 /-! ## Finishing -/
 
@@ -525,13 +676,43 @@ private def labelRenames (s : State env α) : Option (NameMap Name) :=
   if moved.isEmpty then none
   else some (moved.foldl (init := ∅) fun r (a, b) => r.insert a b)
 
+/-- `r`, with the labels of its blocks renamed by `f`. -/
+private def relabelRegion (f : Label → Label) (r : Region env α) : Region env α :=
+  ⟨(relabelBlocks f r.blocks.toList).toArray⟩
+
+/-- `c`, with the labels of its regions' blocks renamed by `f`. -/
+private def relabelContract (f : Label → Label) (c : Contract env α) : Contract env α :=
+  let entry : FrameEntry env α → FrameEntry env α := fun
+    | .cell v => .cell v
+    | .region r => .region (relabelRegion f r)
+  { requires := c.requires.map fun cl => { cl with region := relabelRegion f cl.region }
+    ensures := c.ensures.map fun cl => { cl with region := relabelRegion f cl.region }
+    reads := c.reads.map (·.map entry)
+    writes := c.writes.map (·.map entry) }
+
+/-- The renaming that gives each fresh label of `s` its final name, or `none` if every fresh
+label keeps the name it was allocated. -/
+private def finalLabel? (s : State env α) : Option (Label → Label) :=
+  (labelRenames s).map fun renames l => ⟨(renames.find? l.name).getD l.name⟩
+
 /-- `blocks`, with each fresh label of `s` given its final name. -/
 private def numberLabels (s : State env α) (blocks : Array (Block env α)) :
     Array (Block env α) :=
-  match labelRenames s with
+  match finalLabel? s with
   | none => blocks
-  | some renames =>
-    (relabelBlocks (fun l => ⟨(renames.find? l.name).getD l.name⟩) blocks.toList).toArray
+  | some f => (relabelBlocks f blocks.toList).toArray
+
+/-- `c`, with each fresh label of `s` given its final name. -/
+private def numberContractLabels (s : State env α) (c : Contract env α) : Contract env α :=
+  match finalLabel? s with
+  | none => c
+  | some f => relabelContract f c
+
+/-- `r`, with each fresh label of `s` given its final name. -/
+private def numberRegionLabels (s : State env α) (r : Region env α) : Region env α :=
+  match finalLabel? s with
+  | none => r
+  | some f => relabelRegion f r
 
 /-- The misuses `s` recorded, each label given the name it has in the function `s` describes. -/
 def State.misuses (s : State env α) : Array String :=
@@ -542,12 +723,14 @@ def State.misuses (s : State env α) : Array String :=
     | .text t => acc ++ t
     | .label l => acc ++ nameText (final l)
 
-/-- The function the state describes, less the blocks its entry does not reach.  The first
-block finished is the entry. -/
+/-- The defined function the state describes, less the blocks its entry does not reach.  The
+first block finished is the entry, and its parameters are the function's. -/
 private def toFunc (s : State env α) (name : Name) (retType : TypeExpr env) (info : α) :
     Func env α :=
-  { name, retType, blocks := numberLabels s (Body.dropUnreached s.body.blocks.toList).toArray,
-    names := numberStems (s.stems.map (·.1)), info }
+  let blocks := numberLabels s (Body.dropUnreached s.body.blocks.toList).toArray
+  { name, params := (blocks[0]?.map (·.params)).getD #[], retType, blocks,
+    contract := numberContractLabels s s.contract, names := numberStems (s.stems.map (·.1)),
+    info }
 
 /-- A function the builder could not finish as a well-formed function. -/
 structure FailedFunc (env : Env Unit) (α β : Type) where
@@ -563,16 +746,24 @@ instance {β : Type} : ToString (FailedFunc env α β) :=
   ⟨fun e => if e.misuses.isEmpty then s!"{nameText e.func.name} is not well formed"
     else "\n".intercalate e.misuses.toList⟩
 
-/-- Decide `Func.WF` of the function `toFunc` gives. -/
-private def decWF [base ≼ env] (s : State env α) (name : Name) (retType : TypeExpr env)
-    (info : α) : Decidable (toFunc s name retType info).WF :=
+/-- Decide `Func.WF` of a function the builder emitted. -/
+private def decWF [base ≼ env] (fn : Func env α) : Decidable fn.WF :=
   inferInstance
 
-/-- Record an error for each region still being emitted when the function ends. -/
-def checkRegionsClosed : BuildM env α Unit := do
+/-- `fn`, checked, with `r`, what the builder returned; or a `FailedFunc` if the builder
+recorded the misuses `errors` or `fn` is not well formed. -/
+private def finish [base ≼ env] {β : Type} (r : β) (errors : Array String) (fn : Func env α) :
+    Except (FailedFunc env α β) ({fn : Func env α // fn.WF} × β) :=
+  if !errors.isEmpty then .error ⟨r, errors, fn⟩
+  else match decWF fn with
+    | isTrue h => .ok (⟨fn, h⟩, r)
+    | isFalse _ => .error ⟨r, #[], fn⟩
+
+/-- Record an error for each region still being emitted when `what` ends. -/
+def checkRegionsClosed (what : String) : BuildM env α Unit := do
   for l in (← get).regions do
     errorParts #[.text "region ", .label l,
-      .text " is still open when the function ends: its body did not return"]
+      .text s!" is still open when {what} ends: its body did not return"]
 
 /-- Run a builder for the function `name` and check the function it emitted.  The result is
 the checked function and what the builder returned, or a `FailedFunc` when the builder recorded
@@ -582,19 +773,74 @@ def run [base ≼ env] {β : Type} (name : Name) (retType : TypeExpr env) (info 
     (m : BuildM env α β) : Except (FailedFunc env α β) ({fn : Func env α // fn.WF} × β) :=
   let (r, s) := (do
     let r ← m
-    checkRegionsClosed
+    checkRegionsClosed "the function"
     checkClosed "the function"
     return r) (State.init info)
-  let fn := toFunc s name retType info
-  if !s.errors.isEmpty then .error ⟨r, s.misuses, fn⟩
-  else match decWF s name retType info with
-    | isTrue h => .ok (⟨fn, h⟩, r)
-    | isFalse _ => .error ⟨r, #[], fn⟩
+  finish r s.misuses (toFunc s name retType info)
 
 /-- `run`, for a builder that returns nothing: the checked function, or a `FailedFunc`. -/
 def build [base ≼ env] (name : Name) (retType : TypeExpr env) (info : α)
     (m : BuildM env α Unit) : Except (FailedFunc env α Unit) {fn : Func env α // fn.WF} :=
   Prod.fst <$> run name retType info m
+
+/-- Emit the extern function `name`, which takes `params` and returns `retType`, and check it:
+the checked function, or a `FailedFunc`.  Its parameters get the first ids, in order, and
+`contract`, given those ids, emits its clauses.  An extern has no blocks, so a block that
+`contract` opens outside a clause makes it ill formed.  `info` annotates the function, and is the default
+annotation for everything in it. -/
+def buildExtern [base ≼ env] (name : Name) (params : Array (Name × TypeExpr env))
+    (retType : TypeExpr env) (info : α) (contract : Array ValId → BuildM env α Unit) :
+    Except (FailedFunc env α Unit) {fn : Func env α // fn.WF} :=
+  let emit : BuildM env α (Array (ValDecl env)) := do
+    let ps ← params.mapM fun (n, t) => freshVal n t
+    contract (ps.map (·.id))
+    checkRegionsClosed "the function"
+    checkClosed "the function"
+    return ps
+  let (ps, s) := emit (State.init info)
+  Prod.fst <$> finish () s.misuses
+    { toFunc s name retType info with params := ps, extern := true }
+
+/-! ## Ghosts -/
+
+/-- A ghost the builder could not finish as a well-formed ghost. -/
+structure FailedGhost (env : Env Unit) (α : Type) where
+  /-- The misuses, in order; empty when the only fault is that `ghost` is not well formed. -/
+  misuses : Array String
+  /-- The ghost as emitted. -/
+  ghost : Ghost env α
+
+/-- The misuses, a line each, or that the ghost is not well formed. -/
+instance : ToString (FailedGhost env α) :=
+  ⟨fun e => if e.misuses.isEmpty then s!"ghost {nameText e.ghost.name} is not well formed"
+    else "\n".intercalate e.misuses.toList⟩
+
+/-- Emit the ghost `name`, which holds a `type`, and check it: the checked ghost, or a
+`FailedGhost`.  `init` emits the body of its initializer, a region with no arguments labelled
+`init.n` that returns the first contents, and `invariant`, given the contents `%v.n`, the body of
+its invariant, a region labelled `inv.n` that returns a `base.Bool`.  The values are numbered
+from `0`, the initializer's first, as `Ghost.defs` lists them.  A failure in either region must
+go to a block that ends in `unreachable`: `withFailureBlock` with no value gives the block.
+`info` annotates the ghost, and is the default annotation for everything in it.  That the ghosts
+and functions it names exist is checked with its module. -/
+def ghost [base ≼ env] (name : Name) (type : TypeExpr env) (init : Option (BuildM env α Unit))
+    (invariant : Option (ValId → BuildM env α Unit)) (info : α) :
+    Except (FailedGhost env α) {g : Ghost env α // g.WF} :=
+  let emit : BuildM env α (Option (Region env α) × Option (Region env α)) := do
+    let i ← init.mapM fun body => region #[] body "init"
+    let v ← invariant.mapM fun body => do
+      let v ← freshVal (.str .base "v") type
+      region #[v] (body v.id) "inv"
+    checkRegionsClosed "the ghost"
+    checkClosed "the ghost"
+    return (i, v)
+  let ((i, v), s) := emit (State.init info)
+  let g : Ghost env α :=
+    { name, type, init := i.map (numberRegionLabels s), invariant := v.map (numberRegionLabels s),
+      names := numberStems (s.stems.map (·.1)), info }
+  if !s.errors.isEmpty then .error ⟨s.misuses, g⟩
+  else if h : g.WF then .ok ⟨g, h⟩
+  else .error ⟨#[], g⟩
 
 /-! ## Stubs
 
@@ -640,7 +886,7 @@ private def stubParams (params : Array (Name × TypeExpr env)) : Array (ValDecl 
 /-- The function `stub` gives. -/
 private def stubFunc [base ≼ env] (name : Name) (params : Array (Name × TypeExpr env))
     (retType : TypeExpr env) (info : α) : Func env α :=
-  { name, retType, info
+  { name, params := stubParams params, retType, info
     blocks := #[{ label := ⟨.num (.str .base "entry") 0⟩, params := stubParams params,
                   instrs := #[], term := .unreachable info, info }]
     names := params.mapIdx fun i p => .num p.1 i }
@@ -699,11 +945,19 @@ private theorem stubFunc_wf [base ≼ env] (name : Name) (params : Array (Name �
     (retType : TypeExpr env) (info : α) : (stubFunc name params retType info).WF := by
   have hdefs : (stubFunc name params retType info).defs = (stubParams params).toList := by
     simp [stubFunc, Func.defs, Block.defsList, Instruction.defsList, Terminator.defs,
-      Terminator.unreachable, Region.defsList]
+      Terminator.unreachable, Region.defsList, Contract.regions, Contract.frameRegions,
+      FrameEntry.regionsOf]
   have hids : (stubParams params).toList.map (·.id.id) = List.range params.size :=
     List.ext_getElem (by simp [stubParams]) (by simp [stubParams])
-  refine ⟨by simp [stubFunc], ?_, ?_, ?_, ?_, reachable_single _ rfl rfl,
-    scopable_single _ rfl rfl rfl rfl⟩
+  obtain ⟨ctx, hctx⟩ := Option.isSome_iff_exists.mp
+    (foldlM_define_isSome (stubParams params).toList ∅ (hids ▸ List.nodup_range) fun _ _ => rfl)
+  have hctx' : (stubFunc name params retType info).ctx? = some ctx := by
+    rw [Func.ctx?, hdefs]; exact hctx
+  refine ⟨by simp [stubFunc], by simp [stubFunc], ?_, ?_, ?_, ?_, reachable_single _ rfl rfl,
+    scopable_single _ rfl rfl rfl rfl,
+    ⟨ctx, hctx', by
+      simp [Func.ContractWFIn, Func.FrameWF, FrameEntry.cellsOf, FrameEntry.regionsOf, stubFunc]⟩,
+    by simp [Func.ClauseModesWF, stubFunc], ?_, ?_, ?_⟩
   · show Label.Distinct [Label.exit, ⟨.num (.str .base "entry") 0⟩]
     decide
   · refine nodup_of_map_eq_range _ numSuffix (List.ext_getElem (by simp [stubFunc]) ?_)
@@ -712,12 +966,18 @@ private theorem stubFunc_wf [base ≼ env] (name : Name) (params : Array (Name �
     intro d hd
     have : d.id.id ∈ List.range params.size := hids ▸ List.mem_map_of_mem hd
     simpa [stubFunc] using this
-  · obtain ⟨ctx, hctx⟩ := Option.isSome_iff_exists.mp
-      (foldlM_define_isSome (stubParams params).toList ∅ (hids ▸ List.nodup_range)
-        fun _ _ => rfl)
-    refine ⟨ctx, by rw [Func.ctx?, hdefs]; exact hctx, fun b hb => ?_⟩
+  · refine ⟨ctx, hctx', fun b hb => ?_⟩
     obtain rfl : b = _ := by simpa [stubFunc] using hb
     exact ⟨trivial, unreachable_wf ctx _ info⟩
+  · simp [Func.ContractRegionsWF, Func.ClauseFailuresWF, Region.Propagates, Region.nestedList,
+      Region.EndsInControl, Region.Acyclic, Region.allList, Region.withNestedList,
+      Contract.regions, Contract.frameRegions, FrameEntry.regionsOf, stubFunc]
+  · simp [Func.OldWF, Func.OldPlaced, Func.OldScoped, Region.NoOld, Region.allList,
+      Region.withNestedList, Block.nestedRegionsList, Instruction.regionsWithNestedList,
+      Terminator.regionsWithNested, Terminator.unreachable, Contract.frameRegions,
+      FrameEntry.regionsOf, stubFunc]
+  · simp [Func.GhostsInContract, Block.withNestedList, Instruction.nestedBlocksList,
+      Terminator.nestedBlocks, Terminator.unreachable, Region.blocksList, stubFunc]
 
 /-- The stub of the function `name`, which takes `params` and returns `retType`: one block,
 `entry.0`, taking the parameters and ending in `unreachable`.  Parameter `i` is value `i`,

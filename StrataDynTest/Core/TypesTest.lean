@@ -121,7 +121,8 @@ private def exceptDecl : LDatatype Unit := {
   .con { name := typeName (bn "String"), params := [] },
   .con { name := typeName (bn "Sequence"), params := ["a"] },
   .con { name := typeName (bn "Ref"), params := ["a"] },
-  .data [exceptDecl]]
+  .data [exceptDecl],
+  .con { name := typeName (bn "Loc"), params := [] }]
 
 -- The base is supported in Core's default context; the final context knows the declarations.
 #guard accepts base basePrimitives
@@ -222,9 +223,9 @@ private def sn (s : String) : Name := .str (.str .base "shapes") s
 
 -- Signatures stay generic, in order, with constructor-qualified fields; a mutual group is one
 -- Core block.
-#guard match ((compile Shapes.env basePrimitives)[6]? : Option Core.TypeDecl),
-    ((compile Shapes.env basePrimitives)[7]? : Option Core.TypeDecl),
-    ((compile Shapes.env basePrimitives)[9]? : Option Core.TypeDecl) with
+#guard match ((compile Shapes.env basePrimitives)[7]? : Option Core.TypeDecl),
+    ((compile Shapes.env basePrimitives)[8]? : Option Core.TypeDecl),
+    ((compile Shapes.env basePrimitives)[10]? : Option Core.TypeDecl) with
   | some (.data [pair]), some (.data [choice]), some (.data [even, odd]) =>
     pair.typeArgs == [datatypeBinder 0, datatypeBinder 1] &&
     pair.constrs.map (·.args.map Prod.snd) == [[pv 0, pv 1, unitTy]] &&

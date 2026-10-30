@@ -127,13 +127,15 @@ private meta def usesFuel (v : Expr) : Bool :=
 
 /-- The definitions that use fuel, each with the theorem that proves its fuel enough.  For
 `addAncs`, the theorem says instead that every entry it adds is right for any fuel, because
-`ancAt` falls back to `chain` for a missing entry.  `sdF` appears only in the termination
-measure of `settle`, so it never runs. -/
+`ancAt` falls back to `chain` for a missing entry.  For `peel`, the theorem says that
+`Body.acyclicB`, which gives it as many rounds as there are blocks, decides acyclicity exactly.
+`sdF` appears only in the termination measure of `settle`, so it never runs. -/
 private meta def provedFuel : List (Name × Name) :=
   [(`Strata.Dyn.Body.addAncs, `Strata.Dyn.Body.addAncs_good),
    (`Strata.Dyn.Body.chain, `Strata.Dyn.Body.above_iff),
    (`Strata.Dyn.Body.grow, `Strata.Dyn.Body.reached_spec),
    (`Strata.Dyn.Body.intersect, `Strata.Dyn.Body.intersect_spec),
+   (`Strata.Dyn.Body.peel, `Strata.Dyn.Body.acyclicB_iff),
    (`Strata.Dyn.Body.sdF, `Strata.Dyn.Body.sdF_fuel),
    (`Strata.Dyn.Name.keyNatAux, `Strata.Dyn.Name.natVal_natDigits),
    (`Strata.Dyn.NatTrie.insertAt, `Strata.Dyn.NatTrie.find?_insertAt),
@@ -217,11 +219,12 @@ info: 6:
 #opaque_reach StrataPython.Dyn.Translate StrataPython.Dyn.PyTranslate.translate
 
 /--
-info: 8:
+info: 9:
   Strata.Dyn.Body.addAncs (proved: Strata.Dyn.Body.addAncs_good)
   Strata.Dyn.Body.chain (proved: Strata.Dyn.Body.above_iff)
   Strata.Dyn.Body.grow (proved: Strata.Dyn.Body.reached_spec)
   Strata.Dyn.Body.intersect (proved: Strata.Dyn.Body.intersect_spec)
+  Strata.Dyn.Body.peel (proved: Strata.Dyn.Body.acyclicB_iff)
   Strata.Dyn.Body.sdF (proved: Strata.Dyn.Body.sdF_fuel)
   Strata.Dyn.Name.keyNatAux (proved: Strata.Dyn.Name.natVal_natDigits)
   Strata.Dyn.NatTrie.insertAt (proved: Strata.Dyn.NatTrie.find?_insertAt)

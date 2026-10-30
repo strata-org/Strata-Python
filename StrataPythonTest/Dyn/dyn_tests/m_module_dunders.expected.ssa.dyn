@@ -48,11 +48,8 @@ module m_module_dunders {
   }
   func @m_module_dunders.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %__name__.0 : py.Value = py.loadGlobal("m_module_dunders", "__name__") ^propagate.0()
       %__doc__.0 : py.Value = py.loadGlobal("m_module_dunders", "__doc__") ^propagate.0()
       %str.0 : py.Value = py.strLit("module attribute __spec__")
@@ -72,28 +69,12 @@ module m_module_dunders {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %__file__.0 : py.Value = py.undef("__file__")
       %__file__.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%__file__.0)
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
       %__file__.1 : py.Value = py.undef("__file__")
-      %fill.0 : py.Value = py.mkTuple(%__file__.1)
-      %none.0 : py.Value = py.noneLit
-      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
-      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
-      %int.0 : py.Value = py.intLit(0)
-      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
-      %str.0 : py.Value = py.strLit("__file__")
-      %__file__.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
-      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
-      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
-      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
-      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
-      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "g() got multiple values for argument '__file__'") ^propagate.0()
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "g() got an unexpected keyword argument {}") ^propagate.0()
-      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "g() takes 1 positional argument but {} {was} given") ^propagate.0()
-      %__file__.3 : py.Value = py.requireDefined(%__file__.2, "TypeError", "g() missing 1 required positional argument: '__file__'") ^propagate.0()
-      %__file__.5 : py.Value = py.requireDefined(%__file__.3, "UnboundLocalError", "cannot access local variable '__file__' where it is not associated with a value") ^propagate.0()
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%__file__.5)
+      %defaults.0 : py.Value = py.mkTuple(%__file__.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "__file__") ^propagate.0()
+      %__file__.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %__file__.4 : py.Value = py.requireDefined(%__file__.2, "UnboundLocalError", "cannot access local variable '__file__' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%__file__.4)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

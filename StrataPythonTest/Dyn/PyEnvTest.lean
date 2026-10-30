@@ -88,6 +88,7 @@ changes one of them. -/
 private def fWith (box op : Instruction Py.env Unit) (ok : Instruction Py.env Unit := mkOk 4 3) :
     Func Py.env Unit where
   name    := Py.pn "f"
+  params  := #[d 0 Py.Value]
   retType := Py.failing
   blocks  := #[{ label := lbl "entry", params := #[d 0 Py.Value]
                  instrs := #[.const () (d 1 Base.Int) (.int 1), box, op, ok]
@@ -140,6 +141,7 @@ private def gEntry : Block Py.env Unit where
 
 private def g : Func Py.env Unit where
   name    := Py.pn "g"
+  params  := gEntry.params
   retType := Py.failing
   blocks  := #[gEntry, retInt "yes" 2 1, retInt "no" 5 2, propagateAt 8]
   names   := (Array.range 10).map (Name.num .base ·)
@@ -225,6 +227,7 @@ private def arm (s : String) (payload : Option Nat) : Block Py.env Unit :=
 
 private def compFunc : Func Py.env Unit where
   name    := .str .base "comp"
+  params  := compBlock.params
   retType := Py.failing
   blocks  := #[compBlock, arm "normal" none, arm "return" (some 2), arm "raise" (some 4),
     arm "break" none, arm "continue" none]
@@ -240,13 +243,14 @@ private def compFunc : Func Py.env Unit where
 
 /-! ## Membership
 
-`simp` decides membership in `Py.env` from `Py.mem_env` alone, for a base name and a `py`
-name. -/
+Membership and non-membership in `Py.env`, for a base name and a `py` name, are decided from the
+tree of names of `Py.mem_nameSet`, so their depth grows with the logarithm of the number of
+names. -/
 
-example : bn "Unit" ∈ Py.env := by simp
-example : .str (.str .base "py") "Value" ∈ Py.env := by simp
-example : .str (.str .base "py") "add" ∈ Py.env := by simp
-example : .str (.str .base "py") "nope" ∉ Py.env := by simp
-example : bn "Nope" ∉ Py.env := by simp
+example : bn "Unit" ∈ Py.env := by rw [Py.mem_nameSet]; decide
+example : .str (.str .base "py") "Value" ∈ Py.env := by rw [Py.mem_nameSet]; decide
+example : .str (.str .base "py") "add" ∈ Py.env := by rw [Py.mem_nameSet]; decide
+example : .str (.str .base "py") "nope" ∉ Py.env := by rw [Py.mem_nameSet]; decide
+example : bn "Nope" ∉ Py.env := by rw [Py.mem_nameSet]; decide
 
 end StrataPython.Dyn.PyEnvTest

@@ -1,12 +1,8 @@
-# The four call-shape checks the prologue emits, each reported by raising rather
-# than branching so the prologue stays a single straight-line block.
-#
-# KNOWN DIVERGENCES from CPython, both in wording only:
-#  1. Several missing parameters are reported one at a time; CPython aggregates
-#     them as "missing 2 required positional arguments: 'x' and 'y'".
-#  2. A keyword naming a positional-only parameter is reported as an unexpected
-#     keyword; CPython says "got some positional-only arguments passed as keyword
-#     arguments". Absorbing it into **kw when one exists already matches.
+# The call-shape errors of argument binding.  Each function's prologue applies py.bindArgs,
+# which binds the arguments as CPython 3.12 does and raises the TypeError that CPython raises:
+# a missing argument, too many positional arguments, an unexpected keyword, and a parameter
+# given twice, in CPython's order when a call is wrong in several ways.  The text of the
+# message is not specified.
 def h(x):
     print("h", x)
 def g(x, y):
@@ -29,7 +25,7 @@ def t(label, fn, *a, **kw):
 # missing required
 t("missing", h)
 t("missing_second", g, 1)
-# Divergence 1 above: CPython reports both at once here.
+# CPython reports both missing arguments at once.
 t("missing_both", g)
 t("missing_kwonly", k, 1)
 

@@ -23,8 +23,8 @@ writes the attributes of `Func.info` through `HasAttrs`, which gives none for `U
 built function's own `Info`.  Its blocks and instructions keep theirs.
 
 What reads back: keys are unique at each level, a function pointer names a function of the
-module, and a key is not a keyword of the dialect, such as `unit` or `module`.  Source names
-belong in string values: `{name = "module"}`.
+module, and a ghost constant `ghost @m.g` names a ghost of the module.  Source names belong in
+string values: `{name = "module"}`.
 -/
 
 namespace Strata.Dyn

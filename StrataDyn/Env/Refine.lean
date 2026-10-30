@@ -17,8 +17,9 @@ set_option autoImplicit false
 
 * every type of `t` is a type of `s`, with the same parameters;
 * every datatype of `t` is a datatype of `s`: the same member of the same group;
-* every instruction of `t` is an instruction of `s` with the same signature.  An ordinary
-  instruction may become a constructor or a case instruction; any other keeps its kind.
+* every instruction of `t` is an instruction of `s` with the same signature, its effect
+  included.  An ordinary instruction may become a constructor or a case instruction; any other
+  keeps its kind.
 
 and every annotation of `t` is the annotation of its refinement in `s`.  So `s` may declare
 more, and an abstract type of `t` may be a datatype in `s`.

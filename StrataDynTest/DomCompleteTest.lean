@@ -88,7 +88,8 @@ private def blk (s : String) (ps : Array Nat) (is : Array (Instruction E Unit))
 
 /-- The function of the blocks. -/
 private def fnOf (bs : List (Block E Unit)) : Func E Unit :=
-  { name := .str .base "f", retType := Demo.Value, blocks := bs.toArray, names := #[], info := () }
+  { name := .str .base "f", params := (bs.head?.map (·.params)).getD #[], retType := Demo.Value,
+    blocks := bs.toArray, names := #[], info := () }
 
 /-- Whether the function is reachable and scopable, as `Func.WF` asks. -/
 private def rule (fn : Func E Unit) : Bool := decide (fn.Reachable ∧ fn.Scopable)

@@ -24,11 +24,8 @@ module tc16_unknown_attr {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %x.0 : py.Value = py.undef("x")
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %math.0 : py.Value = py.loadGlobal("tc16_unknown_attr", "math") ^propagate.0()
       %nonexistent.0 : py.Value = py.attr(%math.0, "nonexistent") ^propagate.0()
       %none.0 : py.Value = py.noneLit

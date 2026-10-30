@@ -141,8 +141,8 @@ module m {
 /-! ## Names that need quoting
 
 A function named `f`, as printed, takes a pointer to itself, so its name is read both where
-it is defined and as an operand.  Each test prints the segments read, then the module
-printed again. -/
+it is defined and as an operand.  Each `nameTrip` test prints the segments read, then the
+module printed again. -/
 
 /-- A name's segments, root first. -/
 private def segments : Name → List String
@@ -222,6 +222,36 @@ module m {
 -/
 #guard_msgs in
 #eval nameTrip "|m.a.b|"
+
+-- A name spelled like a keyword reads and prints pipe-delimited, wherever it is: a module,
+-- function, value or block name, a keyword of Dyn (`ret`, `unit`) or of the Init dialect
+-- (`true`).
+#guard_msgs in
+#eval do
+  let text := "module |true| {
+  func @|unit|(%|ret| : base.Int) -> base.Int {
+    entry.0(%|ret| : base.Int):
+      jump ^|ret|()
+    |ret|():
+      ret(%|ret|)
+  }
+}
+"
+  match ← Module.read Reg.env text with
+  | .error e => IO.println e
+  | .ok m => unless toString m == text do IO.println m
+
+/-- info: [["unit"]]
+module m {
+  func @|unit|() -> base.Unit {
+    entry.0():
+      %p.0 : base.Fn([], base.Unit) = const @|unit|
+      ret(unit)
+  }
+}
+-/
+#guard_msgs in
+#eval nameTrip "|unit|"
 
 /-! ## Value names
 

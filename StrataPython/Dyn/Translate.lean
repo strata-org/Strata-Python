@@ -1545,19 +1545,19 @@ def deleter (t : expr SourceRange) : Except (expr SourceRange) (TransM Unit) :=
     | none => throw t
 termination_by sizeOf t
 
-/-- Emit the argument-binding prologue (§5.4), writing each parameter's cell.  A constant
-default is evaluated in place; another is read from its cell in `defaults`.  The checks run
-in CPython's order: a duplicate value, an unexpected keyword, too many positional
-arguments, a missing argument. -/
+/-- Emit the argument-binding prologue (§5.4), writing each parameter's cell.  The defaults are a
+tuple with one entry per named parameter: a constant default is evaluated in place, another is
+read from its cell in `defaults`, and a parameter without one gets `undef`.  `bindArgs` binds
+`args` and `kwargs` to the parameters as CPython does, and each parameter, `*args` and `**kw`
+is taken from its result with `tupleGet`. -/
 def prologue (ps : Array ParamWithDefault) (defaults : Array (String × ValId))
     (args kwargs : ValId) : TransM Unit := do
-  let fn := (← read).cur.qualname
   -- As in CPython, a private name is mangled everywhere, its keyword included.
   let ps ← ps.mapM fun p => return { p with name := ← mangled p.name }
   let defaults ← defaults.mapM fun (n, c) => return (← mangled n, c)
-  let pos := ps.filter fun p => p.kind == .posOnly || p.kind == .positional
+  let isPos (p : ParamWithDefault) := p.kind == .posOnly || p.kind == .positional
+  let named := ps.filter fun p => isPos p || p.kind == .kwOnly
   let varPos := ps.find? (·.kind == .varPositional)
-  let kwOnly := ps.filter (·.kind == .kwOnly)
   let varKw := ps.find? (·.kind == .varKeyword)
   let fillSlot (p : ParamWithDefault) : TransM ValId := do
     match p.default, defaults.find? (·.1 == p.name) with
@@ -1565,77 +1565,21 @@ def prologue (ps : Array ParamWithDefault) (defaults : Array (String × ValId))
     | some d, none => transExpr d
     | none, _ => build (emitTotal (stem p.name) Py.undef.ref
         #[← build (emitConst (.str .base "n") (.str p.name))])
-  let discardKey (key : ValId) : TransM Unit :=
-    discard <| build (emitEffect (.str .base "discard") Py.dictDiscard.ref #[kwargs, key])
-  let typeError (val : ValId) (limit : Option Int) (msg : String) : TransM Unit := do
-    let lim ← limit.mapM fun l => build (emitConst (.str .base "limit") (.int l))
-    let e ← build (emitConst (.str .base "e") (.str "TypeError"))
-    let m ← build (emitConst (.str .base "msg") (.str msg))
-    match lim with
-    | some l => discard <| build (emitActing (.str .base "check") Py.requireAtMost.ref
-        #[val, l, e, m])
-    | none => discard <| build (emitActing (.str .base "check") Py.requireUndefined.ref
-        #[val, e, m])
-  let nargs ← if !pos.isEmpty || varPos.isNone then
-      some <$> build (emitTotal (.str .base "nargs") Py.tupleLen.ref #[args])
-    else pure none
-  let mut bound : Array (ParamWithDefault × ValId) := #[]
-  let mut dups : Array (ParamWithDefault × ValId × ValId) := #[]
-  if let some n := nargs then
-    if !pos.isEmpty then
-      let fill ← build (emitTotal (.str .base "fill") Py.mkTuple.ref (← pos.mapM fillSlot))
-      let none₁ ← build noneLit
-      let tail ← build (emitFailing (.str .base "tail") Py.getSlice.ref #[fill, n, none₁, none₁])
-      let pad ← build (emitFailing (.str .base "pad") Py.add.ref #[args, tail])
-      for h : i in [:pos.size] do
-        let p := pos[i]
-        let idx ← build (intLit i)
-        let fromPos ← build (emitFailing (.str .base "pos") Py.getItem.ref #[pad, idx])
-        if p.kind == .posOnly then
-          bound := bound.push (p, fromPos)
-        else
-          let key ← build (strLit p.name)
-          let got ← build (emitTotal (stem p.name) Py.dictGet.ref #[kwargs, key, fromPos])
-          let inKw ← build (emitFailing (.str .base "inKw") Py.in_.ref #[key, kwargs])
-          discardKey key
-          bound := bound.push (p, got)
-          dups := dups.push (p, idx, inKw)
-  if let some p := varPos then
-    let idx ← build (intLit pos.size)
-    let none₁ ← build noneLit
-    let rest ← build (emitFailing (stem p.name) Py.getSlice.ref #[args, idx, none₁, none₁])
-    writeName p.name rest .none
-  for p in kwOnly do
-    let key ← build (strLit p.name)
-    let miss ← fillSlot p
-    let got ← build (emitTotal (stem p.name) Py.dictGet.ref #[kwargs, key, miss])
-    discardKey key
-    bound := bound.push (p, got)
-  if let some n := nargs then
-    for (p, idx, inKw) in dups do
-      let filled ← build (emitFailing (.str .base "filled") Py.lt.ref #[idx, n])
-      let both ← build (emitFailing (.str .base "both") Py.mult.ref #[inKw, filled])
-      typeError both (some 0) s!"{fn}() got multiple values for argument '{p.name}'"
-  if varKw.isNone then
-    let kwName ← build (emitConst (.str .base "n") (.str "kwargs"))
-    let miss ← build (emitTotal (.str .base "kw") Py.undef.ref #[kwName])
-    let left ← build (emitTotal (.str .base "kw") Py.dictFirstKey.ref #[kwargs, miss])
-    typeError left none s!"{fn}() got an unexpected keyword argument \{}"
-  if varPos.isNone then
-    if let some n := nargs then
-      let required := (pos.filter (·.default.isNone)).size
-      let plural := if pos.size == 1 then "argument" else "arguments"
-      let takes := if required == pos.size then s!"{pos.size} positional {plural}"
-        else s!"from {required} to {pos.size} positional {plural}"
-      typeError n (some pos.size) s!"{fn}() takes {takes} but \{} \{was} given"
-  for (p, got) in bound do
-    if p.default.isSome then writeName p.name got .none
-    else
-      let kind := if p.kind == .kwOnly then "keyword-only" else "positional"
-      let v ← requireDefined got p.name "TypeError"
-        s!"{fn}() missing 1 required {kind} argument: '{p.name}'"
-      writeName p.name v .none
-  if let some p := varKw then writeName p.name kwargs .none
+  let fill ← build (emitTotal (.str .base "defaults") Py.mkTuple.ref (← named.mapM fillSlot))
+  let const (c : Const) : TransM ValId := build (emitConst (.str .base "c") c)
+  let nPosOnly ← const (.int (ps.filter (·.kind == .posOnly)).size)
+  let nPos ← const (.int (ps.filter isPos).size)
+  let hasVarPos ← const (.bool varPos.isSome)
+  let hasVarKw ← const (.bool varKw.isSome)
+  let names ← named.mapM fun p => const (.str p.name)
+  let bound ← build (emitFailing (.str .base "bound") Py.bindArgs.ref
+    (#[args, kwargs, fill, nPosOnly, nPos, hasVarPos, hasVarKw] ++ names))
+  let take (i : Nat) (name : String) : TransM Unit := do
+    let v ← build (emitTotal (stem name) Py.tupleGet.ref #[bound, ← const (.int i)])
+    writeName name v .none
+  for h : i in [:named.size] do take i named[i].name
+  if let some p := varPos then take named.size p.name
+  if let some p := varKw then take (named.size + if varPos.isSome then 1 else 0) p.name
 
 /-- `def name(args): body` at `sr`: bind `name` to the function's closure. -/
 def defStmt (sr : SourceRange) (name : String) (args : arguments SourceRange)
@@ -2205,10 +2149,12 @@ decreasing_by
     apply Prod.Lex.left; rw [hins]; omega
   · apply Prod.Lex.right; omega
 
-/-- The module `name` with no functions. -/
+/-- The module `name` with no functions and no ghosts. -/
 def emptyModule (name : Name) (info : Info) : Module Py.env Info :=
   ⟨{ name, funcs := #[], info },
-    ⟨by simp [Module.Raw.funcNames, Array.mapK_eq_map_fun], by simp, by simp⟩⟩
+    ⟨by simp [Module.Raw.funcNames, Array.mapK_eq_map_fun], by simp, by simp,
+      by simp [Module.Raw.ghostNames, Module.Raw.funcNames, Array.mapK_eq_map_fun], by simp,
+      by simp [Module.Raw.GhostRefsIn], by simp [Module.Raw.GhostOrderIn]⟩⟩
 
 /-- The module `name` of the checked functions `funcs`, and an internal-error diagnostic at
 `range` for each function named twice, of which the first is kept.  The translator only

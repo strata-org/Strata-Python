@@ -181,14 +181,15 @@ module i06_call_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %kwargs.1 : py.Value = py.undef("kwargs")
       %kwargs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%kwargs.1)
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %check.0 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
-      %set.0 : base.Unit = base.refSet[py.Value](%kwargs.cell.0, %kwargs.0)
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, true) ^propagate.0()
+      %kwargs.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%kwargs.cell.0, %kwargs.2)
       %print.0 : py.Value = py.loadGlobal("i06_call_errors", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("unreachable")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
-      %kwargs.2 : py.Value = py.mkKwargs
-      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.2) ^propagate.0()
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.3) ^propagate.0()
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
@@ -200,20 +201,17 @@ module i06_call_errors {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %args.1 : py.Value = py.undef("args")
       %args.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%args.1)
-      %int.0 : py.Value = py.intLit(0)
-      %none.0 : py.Value = py.noneLit
-      %args.2 : py.Value = py.getSlice(%args.0, %int.0, %none.0, %none.0) ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, true, false) ^propagate.0()
+      %args.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%args.cell.0, %args.2)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "g() got an unexpected keyword argument {}") ^propagate.0()
       %print.0 : py.Value = py.loadGlobal("i06_call_errors", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("unreachable")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
-      %none.1 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
       %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)

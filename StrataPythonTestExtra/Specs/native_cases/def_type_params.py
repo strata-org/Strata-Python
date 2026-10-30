@@ -1,0 +1,3 @@
+# Type parameters on a function are not supported: the model is rejected.
+def f[T](x: int) -> None:
+    ...

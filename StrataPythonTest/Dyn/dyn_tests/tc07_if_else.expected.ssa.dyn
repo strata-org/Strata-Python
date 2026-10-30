@@ -20,11 +20,8 @@ module tc07_if_else {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %y.0 : py.Value = py.undef("y")
       %y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%y.0)
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %bool.0 : py.Value = py.boolLit(true)
       %cond.0 : base.Bool = py.truthy(%bool.0) ^propagate.0()
       branch(%cond.0) ^then.0() ^else.0()

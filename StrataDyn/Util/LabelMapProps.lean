@@ -18,7 +18,9 @@ the scoping checker (`StrataDyn/DomProps.lean`) and the dominator computation
 ## Main theorems
 
 * `NatTrie.find?_insert`, `LabelMap.find?_insert`: `insert` maps its key to its value and keeps
-  every other key.
+  every other key;
+* `LabelMap.isSome_find?_foldl_insert`: inserting a key for each element of a list maps exactly
+  those keys and the keys the map had.
 
 Everything here is private: a module that uses it imports it with `import all`.
 -/
@@ -78,6 +80,27 @@ theorem find?_insert (m : LabelMap β) (l : Label) (x : β) (l₁ : Label) :
     · simp [hk, hl, Ne.symm hl]
   · have hl : l₁ ≠ l := fun h => hk (h ▸ rfl)
     simp [hk, hl]
+
+/-- Inserting the key `key x` of each element `x` of `xs` into `m`, whatever the values, maps
+exactly the labels that `m` maps and the keys of `xs`. -/
+theorem isSome_find?_foldl_insert {γ : Type} (key : γ → Label) (val : γ → β) :
+    ∀ (xs : List γ) (m : LabelMap β) (l : Label),
+      ((xs.foldl (fun m x => m.insert (key x) (val x)) m).find? l).isSome = true ↔
+        (m.find? l).isSome = true ∨ ∃ x ∈ xs, key x = l
+  | [], _, _ => by simp
+  | x :: xs, m, l => by
+    rw [List.foldl_cons, isSome_find?_foldl_insert key val xs, find?_insert]
+    by_cases hl : l = key x
+    · simp [hl]
+    · simp only [hl, ite_false, List.mem_cons, exists_eq_or_imp]
+      constructor
+      · rintro (h | h)
+        · exact .inl h
+        · exact .inr (.inr h)
+      · rintro (h | h | h)
+        · exact .inl h
+        · exact absurd h.symm hl
+        · exact .inr h
 
 end LabelMap
 

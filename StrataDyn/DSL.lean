@@ -39,7 +39,7 @@ public environment Demo extends Base where
   insn add (lhs rhs : Value) (^err (exc : Value)) : Value
   insn not_ as "not" (operand : Value) : Value
   insn unbox [a] (b : Box a) : raising a
-  insn mkTuple (*elems : Value) : Value
+  pure insn mkTuple (*elems : Value) : Value
   insn «if» [a] (cond : Bool) (&«then» &«else» : a) : a
   insn «try» [a] (&body : raising a) (&handler (exc : Value) : a) : a
   terminal insn br (cond : Bool) (^yes ^no)
@@ -77,6 +77,8 @@ public environment Demo extends Base where
   `TypeExpr.Raw.kind`, once it is resolved.
 * `terminal insn o [a b] binders`: an instruction that ends its block.  It has no result
   type, and neither has its signature.
+* `pure insn`, `reads insn`, `calls insn` or `writes insn`, and `pure terminal insn` and so on:
+  the instruction's effect, an upper bound on what it may do.  Without one, it is `writes`.
 * `def` is reserved for defined instructions, and rejected.
 
 An `insn`'s binders come in order: arguments `(x y : τ)`, at most one variadic `(*xs : τ)`
@@ -108,12 +110,14 @@ and in every refinement of it:
 * `names : List Name`, every environment name `env` declares, the parent's included, latest
   first.
 * `@[simp] mem_env : n ∈ env ↔ n ∈ [ℓ₁, ℓ₂, …]`, the same names in the same order, each a
-  `Name` literal such as `.str (.str .base "base") "Unit"`, so `simp` decides membership in
-  `env` without unfolding anything.
+  `Name` literal such as `.str (.str .base "base") "Unit"`, so `simp` decides membership in a
+  small `env` without unfolding anything.  `simp` recurses once per name of the list, so on a
+  large environment, such as one of 240 instructions, it fails with "maximum recursion depth".
 * `nameSet : NameSet`, the same names as a literal 2-3 tree, with `nameSet_ordered` and
-  `mem_nameSet : n ∈ env ↔ n ∈ nameSet`.  Each stage's freshness check adds that stage's
-  names to the set before it, from the parent's `nameSet`, so the kernel adds each name once,
-  in the stage that declares it.
+  `mem_nameSet : n ∈ env ↔ n ∈ nameSet`.  `rw [mem_nameSet]; decide` decides membership in an
+  environment of any size, since its depth grows with the logarithm of the number of names.
+  Each stage's freshness check adds that stage's names to the set before it, from the parent's
+  `nameSet`, so the kernel adds each name once, in the stage that declares it.
 * `toP`, the instance `P.env ≼ e` (`Demo.toBase`).
 * For a `type` or `data` `T` with `n` parameters: `T.name`, its environment name; `T.ref`, a
   `TypeRef e n`; and the `@[simp]` theorems `T.name_ref` and `T.decl_ref`, its name and
@@ -126,10 +130,10 @@ and in every refinement of it:
   `T.case [a …] (scrutinee : T a …) (^c₁ (x : τ)) …`, environment name `T`'s followed by
   `case` (`demo.Box.case`), with one successor per constructor, in declaration order,
   receiving its fields.  It is an instruction like any other: `T.case.name`, `T.case.sig` and
-  `T.case.ref`.  `Env.addData` declares it with the group, after the group's constructors, and
-  `T.case.ref` is the reference `InsnRef.ofAddDataCase` gives.
-* For a constructor `c` of `T`: `T.c.name`; `T.c.sig : InsnSig e`, with `T`'s parameters as
-  type parameters, the fields as arguments and `T a …` as the result; and
+  `T.case.ref`, and it is `pure`.  `Env.addData` declares it with the group, after the group's
+  constructors, and `T.case.ref` is the reference `InsnRef.ofAddDataCase` gives.
+* For a constructor `c` of `T`: `T.c.name`; `T.c.sig : InsnSig e`, `pure`, with `T`'s
+  parameters as type parameters, the fields as arguments and `T a …` as the result; and
   `T.c.ref : InsnRef e T.c.sig`.
 * Handles, after everything else (`StrataDyn.Env.Handle`), the one way to write a type: for
   a type `T` without parameters, `T : TypeExpr e s`, its type expression in every `e` that
@@ -138,8 +142,9 @@ and in every refinement of it:
   or a `TypeList e s` for a list parameter; for an `abbrev` `n`, the same, applying its body's
   handles.  So `Base.Except Base.Int Py.Value` is a `TypeExpr e` in every `e` that refines
   `Py.env`.
-* For an `insn` `o`: `o.name`, `o.sig : InsnSig e` and `o.ref : InsnRef e o.sig`.  A list
-  parameter is a `TypeList.var` in `o.sig`, and a list-typed variadic a `Variadic.spread`.
+* For an `insn` `o`: `o.name`, `o.sig : InsnSig e`, with its effect, and
+  `o.ref : InsnRef e o.sig`.  A list parameter is a `TypeList.var` in `o.sig`, and a list-typed
+  variadic a `Variadic.spread`.
 * Typed emitters: for each instruction, constructor and case instruction `o`, its emitter `o`,
   under the instruction's own name, which emits `o` in any `MonadBuild env α m` and whose Lean
   type is `o`'s signature over type expressions, so Lean infers its type arguments from its

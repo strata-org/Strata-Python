@@ -468,20 +468,20 @@ example : Clos.Closure.mk.sig (e := Clos.env) =
       argTypes := #[⟨"f", Base.Fn (TypeList.var 0 (by decide)) (.var 1 (by decide))⟩,
         ⟨"env", Base.Int⟩],
       returnType := some (Clos.Closure (TypeList.var 0 (by decide)) (.var 1 (by decide))),
-      distinct := by decide } := rfl
+      effect := .pure, distinct := by decide } := rfl
 example : Clos.Curried.curry.sig (e := Clos.env) =
     { ann := (), typeParams := #[⟨"as", .list⟩, ⟨"r", .type⟩],
       argTypes := #[⟨"f", Base.Fn (TypeList.lit #[.ty Base.Int, .splice 0 (by decide)])
         (.var 1 (by decide))⟩],
       returnType := some (Clos.Curried (TypeList.var 0 (by decide)) (.var 1 (by decide))),
-      distinct := by decide } := rfl
+      effect := .pure, distinct := by decide } := rfl
 example : Clos.Closure.case.sig (e := Clos.env) =
     { ann := (), typeParams := #[⟨"as", .list⟩, ⟨"r", .type⟩],
       argTypes := #[⟨"scrutinee", Clos.Closure (TypeList.var 0 (by decide)) (.var 1 (by decide))⟩],
       returnType := none,
       succs := #[⟨"mk", #[.ty (Base.Fn (TypeList.var 0 (by decide)) (.var 1 (by decide))),
         .ty Base.Int]⟩],
-      distinct := by decide } := rfl
+      effect := .pure, distinct := by decide } := rfl
 #guard (Clos.Nest.node.sig (e := Clos.env)).typeParams == #[⟨"ts", .list⟩]
 
 /-! ### Signatures that name no type
@@ -525,7 +525,7 @@ example : TyVars.Pair.mk.sig (e := TyVars.env) =
     { ann := (), typeParams := #[⟨"a", .type⟩, ⟨"b", .type⟩],
       argTypes := #[⟨"x", .var 0 (by decide)⟩, ⟨"y", .var 1 (by decide)⟩],
       returnType := some (TyVars.Pair (.var 0 (by decide)) (.var 1 (by decide))),
-      distinct := by decide } := rfl
+      effect := .pure, distinct := by decide } := rfl
 
 section
 variable {e : Env _root_.Unit} [TyVars.env ≼ e]

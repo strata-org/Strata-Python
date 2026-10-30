@@ -25,12 +25,14 @@ Dyn separates the vocabulary a language provides from the programs written in it
   pass one value per element of a list; a constructor's fields, a region's parameters and a
   block's parameters are one value each. An application passes an argument
   of its parameter's kind for each type parameter.
-* A **program** is a module of functions written against one environment. A function is a
-  set of blocks. A block takes parameters, runs a sequence of instructions, and ends with a
-  terminal instruction, such as a jump to another block or a return. Each value is defined
-  once and has a type from the environment. An instruction's signature may declare
-  *successors*, each with a payload. An application fills each with a *target*: a block and a
-  prefix of its arguments, to which the instruction passes the payload after them.
+* A **program** is a module of functions written against one environment. A module may also
+  have ghosts, cells that only contracts can name (**Ghost state**, below). A function is a
+  set of blocks, or, if it is extern, a signature and a contract only. A block takes
+  parameters, runs a sequence of instructions, and ends with a terminal instruction, such as a
+  jump to another block or a return. Each value is defined once and has a type from the
+  environment. An instruction's signature may declare *successors*, each with a payload. An
+  application fills each with a *target*: a block and a prefix of its arguments, to which the
+  instruction passes the payload after them.
 
 Environments are built in layers. The **base environment** declares what every language
 needs, and a language's environment refines the base by adding its own types and
@@ -45,8 +47,9 @@ We write `t ≤ s`, or `t ≼ s` for the class that instance search uses, when `
 * **Types:** every type of `t` is a type of `s`, with the same parameters. An abstract type of
   `t` may be a datatype in `s`.
 * **Datatypes:** every datatype of `t` is the same datatype in `s`.
-* **Instructions:** every instruction of `t` is an instruction of `s` with the same signature.
-  An ordinary instruction of `t` may be a constructor or a case instruction in `s`.
+* **Instructions:** every instruction of `t` is an instruction of `s` with the same signature,
+  its effect included. An ordinary instruction of `t` may be a constructor or a case
+  instruction in `s`.
 * **Annotations:** `≤` requires each annotation of `t` to equal that of its refinement in `s`.
   `Env.LeBy R` relates them by `R` instead.
 
@@ -57,9 +60,10 @@ Environments and programs come with a well-formedness check. A well-formed envir
 whose type references all resolve to earlier declarations. A well-formed program uses only
 instructions its environment declares, at their declared types, and passes each block the
 arguments it expects. Lean's types guarantee that every reference to a type or instruction
-resolves; a checker decides the rest. A function is checked on its own, and a module is
-checked from its functions: their names are distinct, and every reference to a function names
-one of them, at its code type. A function's code type is `base.Fn as r`, with `as` its
+resolves; a checker decides the rest. A function and a ghost are each checked on their own, and
+a module is checked from them: their names are distinct, every reference to a function names one
+of them, at its code type, and every reference to a ghost names one of them, at the type of its
+cell. A function's code type is `base.Fn as r`, with `as` its
 parameters' types and `r` its return type, and `base.callCode` calls through a value of that
 type. A `Module.Raw` is a module as built, which may not be well formed; it still
 prints, in full, for diagnostics. A `Module` is one with its proof of well-formedness, and is
@@ -85,7 +89,8 @@ are exactly its dominators. So the check accepts exactly the functions that some
 scopes, and these are exactly the dominance-correct ones. The builder drops the blocks the
 entry cannot reach, so a producer leaves dominance to the checker. When a function it reads is
 not well formed for these reasons, the reader names each unreachable block, and each use out of
-scope with a path from the entry that reaches it without passing its definition.
+scope with a path from the entry that reaches it without passing its definition. It does the same
+for each contract region (**Contracts**, below), which is scoped as a body of its own.
 
 **Regions.** An instruction may own nested bodies, called regions, as in MLIR. A region is a
 list of blocks, the first its entry, whose parameters are the region's arguments. A transfer
@@ -102,6 +107,364 @@ branches are regions:
 } {
   else.0():
     ret(%y.0)
+}
+```
+
+**Effects.** Every instruction declaration has an effect, an upper bound on what the operation
+itself may do, its regions aside. From the least to the most:
+
+* `pure`: it reads no mutable state. It may allocate, as `py.mkTuple` does: allocating a new
+  object is not a change of state. So `pure` doesn't make an unused result removable: removing a
+  `base.refNew` could renumber the cells made after it (§3).
+* `reads`: it may read mutable state, as `base.refGet` does.
+* `calls`: it may run code that the IR does not show, such as a user-defined method (a Python
+  `__eq__` or a JavaScript getter), and that code may read or change any state it can reach. The
+  methods that the operation looks up on an operand, or on an object that an operand holds, count
+  as such code, built-in methods included, such as the `__next__` of a Python built-in iterator.
+  The operation's own fixed computation does not.
+* `writes`: the operation itself may change state, as `base.refSet` does.
+
+The DSL writes the effect before `insn`, and before `terminal`: `pure insn mkTuple …`,
+`reads insn refGet …`, `pure terminal insn jump`. Without one, an instruction is `writes`, so an
+operation that nobody marked is never accepted in a contract. A datatype's constructors and its
+case instruction are `pure`. Environment refinement compares effects, so an ordinary instruction
+that an environment refinement turns into a constructor must be declared `pure`.
+
+**Failures.** An operation that may fail, such as a division, declares a successor for the
+failure, such as an `err` successor. A *failure successor* is a successor of an instruction, as
+opposed to a terminator. A region *may propagate* when its owner is an instruction that declares
+a failure successor, and that declares the region's result type as a `base.Except`, before its
+type arguments are put in. The checker trusts every environment to follow this rule for each
+operation that is not declared `writes`, since only those may appear in a contract: the
+operation reports a failure only through a failure successor, never as an `error` value that it
+returns. When a region that may propagate returns `error`, its owner transfers to one of its
+failure successors; it never uses the error as a value, and never passes it to another region.
+
+**Contracts.** A function may have a contract: what a caller must establish before a call,
+and what the function establishes when it returns. A `requires` or `ensures` clause is a
+region that returns a `base.Bool`. A `requires` clause takes no arguments, and an `ensures`
+clause takes the function's result. Such a clause sees only the function's parameters and its
+own values, and the body sees none of the clause's. A `requires` clause is evaluated in the
+state at the call, and an `ensures` clause in the state at return, where `base.old` reads the
+state at the call (**`old` in `ensures` clauses**, below):
+
+* A `requires` clause is a condition that the caller establishes at each call.
+* An `ensures` clause is a promise that holds at every exit of a defined function.
+* A `free ensures` clause is assumed after every call and never checked: it is trusted.
+
+A clause may carry a message, which names it in diagnostics:
+`requires "x is non-negative" {`. For a `free` clause, the message also says where the trust
+comes from, such as "admitted postcondition of 'f'". A clause must not change state. The
+checker rejects every instruction or terminator in a contract region (a clause, a frame region,
+or a region nested in one at any depth) that applies an operation declared `writes`. So a clause
+cannot call a function: `base.callCode` is `writes`. A `reads` or `writes` clause is a frame: a
+set of locations that the function may read or change (**Frames**, below). A function without a
+contract has no clauses, and its body's brace stays on the signature's line.
+
+```
+func @m.inc(%x.0 : base.Int) -> base.Int
+  requires {
+    pre.0():
+      %ok.0 : base.Bool = demo.ge(%x.0, 0)
+      ret(%ok.0)
+  }
+  ensures {
+    post.0(%r.0 : base.Int):
+      %ok.1 : base.Bool = demo.ge(%r.0, %x.0)
+      ret(%ok.1)
+  }
+  reads()
+  writes()
+{
+  entry.0(%x.0 : base.Int):
+    %s.0 : base.Int = demo.add(%x.0, 1)
+    ret(%s.0)
+}
+```
+
+**Extern functions.** An extern function has a signature and a contract, and no body, such as a
+library function whose code is not available. Its parameters get the first ids, 0, 1, …, in the
+order they are declared. Its `requires` clauses are checked at calls, its `ensures` clauses must
+all be `free`, and its frames are trusted. A defined function's `ensures` clauses are all
+checked, and no `requires` clause is ever `free`. A `requires` clause is known to hold only at
+the calls that the verified program makes. An extern may call a function value that it received
+(a callback), and Dyn has no way to state what an extern calls, so nothing checks those
+calls: a defined function whose code pointer reaches an extern may be entered without its
+`requires` clauses holding. An extern's attributes are not printed, so facts belong to defined
+functions. An extern prints as `extern func`, on one line when it has no contract:
+
+```
+extern func @m.f(%x.0 : base.Int) -> base.Int
+  requires "x is non-negative" {
+    pre.0():
+      %ok.0 : base.Bool = demo.ge(%x.0, 0)
+      ret(%ok.0)
+  }
+  free ensures "admitted postcondition of 'f'" {
+    post.0(%r.0 : base.Int):
+      %ok.1 : base.Bool = demo.ge(%r.0, 0)
+      ret(%ok.1)
+  }
+```
+
+**The trust base.** A module's trusted assumptions are its externs' signatures, `free ensures`
+clauses and frames, and its ghosts' invariants and first values (**Ghost state**, below): nothing
+checks that a value an extern returns has its return type, nor that a ghost's first value
+satisfies its invariant. A `free ensures` clause can give the program a ghost's cell or the
+object it holds; the program can then change them, and the ghost's invariant must still hold. A
+consumer can list the trusted assumptions from the IR. The declarations of the module's
+environment are trusted too: each operation's effect, and the rule in **Failures**, above. Like
+any trusted assumption, a `free ensures` clause that is false makes every proof that relies on it
+vacuous.
+
+**What clauses mean.** A clause denotes the `base.Bool` that its region returns.
+
+* The `requires` clauses are evaluated in order, in the state at the call. The call satisfies
+  them when each returns true. A later clause is evaluated only when the earlier ones returned
+  true, so it may rely on them.
+* The `ensures` clauses are evaluated in order at an exit, with the result. Clause *k* is
+  evaluated only when every `requires` clause returned true at the call, and `ensures` clauses 0
+  to *k*−1 returned true at this exit. An `ensures` clause relies on the `requires` clauses as
+  facts about the state at the call, not after it. For example, `requires len(xs) > 0` does not
+  make `ensures xs[0] >= 0` well defined, since the call may empty `xs`.
+* An `ensures` clause takes the function's result, of its return type. The core fixes no
+  convention for exceptions. For Python, the result is a `base.Except(py.Value, py.Value)`, so a
+  clause may state what holds when the function raises.
+* A contract does not state whether a function terminates. An `ensures` clause holds at every
+  exit, and a call may also not return.
+* A region is *well defined* in a state when, run there, it reaches no `unreachable`, terminates,
+  returns, on every run, the same value, up to the identity of the objects that the run
+  allocates, and every `calls` operation in it changes no state. An operation's meaning may
+  assume something of its operands, such as that an index is in range. Where the assumption
+  fails, the result is not defined, and a region that applies the operation there is not well
+  defined. A consumer, such as a verifier, relies on nothing from a region that it cannot show
+  well defined: it assumes nothing from it, and a check of it fails. This holds for every kind of
+  contract region, so an ill-defined region can only lose information.
+
+**Failures in contracts.** An operation that fails transfers to its failure successor. In
+a `requires` clause or a checked `ensures` clause, a failure gives `false`. In a `free ensures`
+clause, a failure gives `true`. So a failure never makes a checked clause hold, and never makes a
+free clause assume anything. The value applies to the whole clause, never to a part of it, so a
+negation cannot turn it around. For example, `requires not (len(x) > 5)` with `x = 3` is
+`false`, not `true`: `x` is an int, so `len` raises. The checker makes the IR state these values:
+
+* In a clause's own blocks, every failure successor goes to a *failure block* of the clause: a
+  block whose instructions are only constants, and that ends in `unreachable` or in `ret` of the
+  constant `false`, or `true` in a `free ensures` clause.
+* In a frame region's own blocks (**Frames**, below), every failure successor goes to a block
+  whose instructions are only constants and that ends in `unreachable`. A frame region has no
+  failure value.
+* In a region nested in a clause or a frame region, at any depth, every failure successor goes to
+  a block whose instructions are only constants and that ends in `unreachable`, or, if the region
+  may propagate, to a *propagating block*. The only instruction of a propagating block applies
+  `base.error` to the block's last parameter, the failure received, and the block ends in `ret`
+  of that instruction's result. So a nested region never turns a failure into a value, and the
+  failure successor of the operation that owns the region carries the failure on to the clause.
+  A generic `if [a] (&then &else : a)` used at an `Except` type returns the `error` as its
+  value, and an operation whose region returns a `base.Except` but that declares no failure
+  successor has nowhere to pass the failure on. So their regions may not propagate.
+* Every block of a contract region, at any depth, ends in control flow: `ret`, `jump`,
+  `branch`, `unreachable`, or a datatype's case instruction. So no terminal operation's
+  successor carries a failure.
+* The blocks of every contract region, at any depth, form an acyclic graph of transfers. A
+  clause then terminates unless an operation in it does not.
+
+A failure block is an ordinary block. Here, `demo.div` fails when its divisor is zero, and
+`demo.attempt` runs its region and fails with the error that the region returns:
+
+```
+func @m.f(%x.0 : base.Int, %y.0 : base.Int) -> base.Int
+  requires {
+    pre.0():
+      %ok.0 : base.Bool = demo.attempt ^fail.0() {
+        body.0():
+          %q.0 : base.Int = demo.div(%x.0, %y.0) ^propagate.0()
+          %b.0 : base.Bool = demo.ge(%q.0, 0)
+          %v.0 : base.Except(base.Int, base.Bool) = base.ok[base.Int, base.Bool](%b.0)
+          ret(%v.0)
+        propagate.0(%exc.0 : base.Int):
+          %err.0 : base.Except(base.Int, base.Bool) = base.error[base.Int, base.Bool](%exc.0)
+          ret(%err.0)
+      }
+      ret(%ok.0)
+    fail.0(%e.0 : base.Int):
+      ret(false)
+  }
+{
+  entry.0(%x.0 : base.Int, %y.0 : base.Int):
+    ret(%x.0)
+}
+```
+
+**`old` in `ensures` clauses.** An `ensures` clause reads the state at the call with the base's
+`reads insn old [e a] (&body : Except e a) (^err (exc : e)) : a`. `base.old` runs its region in
+the state at the call. If the region returns `ok(v)`, the operation returns `v`. If it returns
+`error(x)`, the operation transfers to `err` with `x`, so a failure in the region gives the
+clause's failure value. An object that it returns is the same object, and reading it afterwards
+reads the state at the exit. A read, in the state at the call, of an object allocated during the
+call is not well defined. An `old` nested in an `old` also runs in the state at the call. A
+parameter of an enclosing region, such as a quantifier's binder, may hold a value of the state at
+the exit, such as an object that the call allocated; an `old` that reads that object is then not
+well defined. A value that the region uses from outside it keeps its value, so the result of
+`base.old` is a value of the state at the call only when its region uses no such parameter. An
+object that the region allocates is new at the exit too: it is none of the objects of the state at
+the exit, and it holds there what the region gave it. The checker asks two things of `base.old`:
+
+* It appears only in an `ensures` clause, at any depth. The body, the `requires` clauses and the
+  frame regions never apply it.
+* Its region sees, from outside it, only the function's parameters, constants, and the parameters
+  of the regions that enclose it in the clause, such as a quantifier's binder. It never sees the
+  parameter of the clause's own region, which is the result, nor any other value that the clause
+  defines outside the `old` region. An `old` nested in an `old` may also use the values of the
+  enclosing `old` region, which that region computes in the state at the call. So only the
+  outermost `old` regions are checked.
+
+The rules for contract regions apply to the region of `base.old`: it applies no operation declared
+`writes`, and, since the region may propagate, a failure in it may go to a propagating block,
+which passes it on to the `err` successor of `base.old`. Here, the result is at least the contents
+of the cell `%c.0` at the call:
+
+```
+  ensures {
+    post.0(%r.0 : base.Int):
+      %o.0 : base.Int = base.old[base.Int, base.Int] ^fail.0() {
+        old.0():
+          %v.0 : base.Int = base.refGet[base.Int](%c.0)
+          %w.0 : base.Except(base.Int, base.Int) = base.ok[base.Int, base.Int](%v.0)
+          ret(%w.0)
+      }
+      %ok.0 : base.Bool = demo.ge(%r.0, %o.0)
+      ret(%ok.0)
+    fail.0(%e.0 : base.Int):
+      ret(false)
+  }
+```
+
+**Frames.** A `reads` or `writes` clause is a frame. It names a set of *locations*, the mutable
+parts of the program state. The base declares `base.Loc`, the type of a set of locations, and
+`pure insn cellLoc [a] (cell : Ref a) : Loc`, the contents of a cell. A language adds operations
+that give its own locations, such as an object's attribute. A frame lists entries, and names the
+union of their sets:
+
+* A cell entry, such as `%c.0`, names a parameter of type `base.Ref`. It stands for the contents
+  of that cell.
+* A *frame region* takes no arguments and returns a `base.Loc`. Like a clause, it sees only the
+  function's parameters and its own values.
+
+Each frame region runs in the state at the call, after the `requires` clauses returned true, so
+it may rely on them. Its set is fixed at the call. A frame means this:
+
+* `writes W`: at every exit, each location that existed at the call and is outside `W` holds the
+  value that it held at the call. For Python, raising is an exit too, since it returns an `error`.
+  The function may write a location outside `W` and restore it. `writes()` changes nothing.
+  Without a `writes` frame, the function may change any location.
+* `reads R`: every read that the call makes of a location that existed at the call is a read of a
+  location in `R`. A caller learns nothing from it. `reads()` reads nothing. Without a `reads`
+  frame, the function may read any location.
+* A frame never constrains the state that the call allocates.
+* An extern's frames are trusted. A defined function's frames are claims about its body.
+* A frame region is a contract region, so a consumer relies on nothing from one that it cannot
+  show well defined (**What clauses mean**, above). At such a call, the frame states nothing: the
+  call may read or change any location.
+
+The checker asks these things of a frame:
+
+* A cell entry names a parameter of type `base.Ref`, and no two cell entries name the same cell.
+* A frame region takes no arguments and returns a `base.Loc`.
+* A frame region sees only the function's parameters and its own values, and the body sees none
+  of its values.
+* The rules for contract regions apply to a frame region: it applies no operation declared
+  `writes`, each failure in it goes to a block that ends in `unreachable` (**Failures in
+  contracts**, above), its blocks end in control flow and form an acyclic graph, and it does not
+  apply `base.old`.
+
+A frame region prints in braces among the frame's entries. Here, `demo.nth` gives the cell at
+position `%i.0` of `%cs.0`, and fails when `%i.0` is out of range. The function may change the
+contents of `%c.0` and of that cell, and no other location that existed at the call. At a call
+where `%i.0` is out of range, the frame region is not well defined, so that call may change any
+location:
+
+```
+func @m.f(%c.0 : base.Ref(base.Int), %cs.0 : base.Sequence(base.Ref(base.Int)), %i.0 : base.Int) -> base.Int
+  writes(%c.0, {
+    loc.0():
+      %n.0 : base.Ref(base.Int) = demo.nth(%cs.0, %i.0) ^fail.0()
+      %l.0 : base.Loc = base.cellLoc[base.Int](%n.0)
+      ret(%l.0)
+    fail.0(%e.0 : base.Int):
+      unreachable
+  })
+{
+  entry.0(%c.0 : base.Ref(base.Int), %cs.0 : base.Sequence(base.Ref(base.Int)), %i.0 : base.Int):
+    ret(%i.0)
+}
+```
+
+**Ghost state.** A *ghost* is a cell of the module that only contracts can name. A ghost has a
+name, the type of its contents, and, each if it has one, an *initializer* and an *invariant*. The
+constant `ghost @m.g` is the ghost's cell, a `base.Ref` of its type, and a contract reads its
+contents with `base.refGet`. A ghost means this:
+
+* The initializers run once, before any function, in the order the ghosts are declared. An
+  initializer takes no arguments and returns the ghost's first contents. A ghost without one
+  starts with some value that satisfies its invariant.
+* The invariant takes the ghost's contents and returns a `base.Bool`. It is trusted (**The trust
+  base**, above). The invariant holds in every state. An invariant that reads state other than
+  the ghost's contents, such as the entries of a mutable object that the ghost holds, is a trusted
+  claim about every call that may change that state. The first value must satisfy the invariant;
+  if it does not, the trust base contradicts itself.
+* A ghost changes only at a call whose `writes` frame covers its cell, or that has no `writes`
+  frame.
+* A ghost may hold a mutable object, such as a Python dict. Its cell is then one location, and
+  the object's entries are others: a frame names them separately.
+* An initializer and an invariant are contract regions, so a consumer relies on nothing from one
+  that it cannot show well defined (**What clauses mean**, above). The first value of a ghost
+  whose initializer is not well defined is unknown, and an invariant that is not well defined in a
+  state states nothing there.
+
+The checker asks these things of ghosts:
+
+* No two ghosts share a name, and no ghost has the name of a function of the module.
+* Each `const ghost @m.g` names a ghost of the module, and the value it defines has type
+  `base.Ref(T)`, with `T` that ghost's type.
+* Only contract regions name ghosts: a function's body never does, at any depth. The regions of
+  a ghost are contract regions.
+* An initializer takes no arguments and returns the ghost's type. An invariant takes one argument
+  of the ghost's type and returns a `base.Bool`. Each sees only its own values.
+* An initializer names only the ghosts declared before its own. An invariant names no ghost: it
+  receives the ghost's contents as its argument.
+* The regions of a ghost refer to no function of the module, at any depth.
+* The rules for contract regions apply to an initializer and an invariant: it applies no operation
+  declared `writes`, each failure in it goes to a block that ends in `unreachable`, its blocks end
+  in control flow and form an acyclic graph, and it does not apply `base.old`.
+
+A function's attribute may name a ghost of the module, as `ghost @m.g`. Naming a ghost in an
+attribute is not a use of the ghost by the function. Ghosts print first in a module, before the
+functions. Here, `@m.tick` requires that the contents of `@m.count` are at least `%x.0`, and may
+change only those contents:
+
+```
+module m {
+  ghost @m.count : base.Int = {
+    init.0():
+      ret(0)
+  } invariant {
+    inv.0(%v.0 : base.Int):
+      %ok.0 : base.Bool = demo.ge(%v.0, 0)
+      ret(%ok.0)
+  }
+  extern func @m.tick(%x.0 : base.Int) -> base.Int
+    requires {
+      pre.0():
+        %n.0 : base.Int = base.refGet[base.Int](ghost @m.count)
+        %ok.0 : base.Bool = demo.ge(%n.0, %x.0)
+        ret(%ok.0)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = base.cellLoc[base.Int](ghost @m.count)
+        ret(%l.0)
+    })
 }
 ```
 
@@ -166,10 +529,19 @@ module m {
   integer `5` or `-1` is a `base.Int`. A float always has a decimal point or an exponent
   (`1.0`, `0.0025`, `1e22`), and is the shortest decimal that reads back as it, or `inf`,
   `-inf` or `nan`; it is a `base.Float64`, so `1` is never one. A boolean is `true` or
-  `false`, a string `"…"`, the unit `unit`, and a function pointer `@m.f`.
+  `false`, a string `"…"`, the unit `unit`, a function pointer `@m.f`, and a ghost's cell
+  `ghost @m.g`.
 * **Attributes** of a function print below its signature, one `#[key = value]` line each,
   then a blank line. A value is a literal, a list `[v, …]` or a record `{k = v, …}`, and a
   key is prefixed by the front end that gives it its meaning, such as `py.` for Python.
+* **Contracts** print between the signature and the body: `requires` clauses, `ensures`
+  clauses, then the frames. A frame lists its entries: cells, and regions in braces, as in
+  `writes(%c.0, { … })`. The body's brace then opens a line of its own. A clause's message
+  follows its keyword, and a free clause is written `free ensures`. An **extern** prints as
+  `extern func`, its signature and its contract, with no body.
+* **Ghosts** print before the functions: `ghost`, the ghost's name and type, then its
+  initializer after `=` and its invariant after `invariant`, each a region in braces:
+  `ghost @m.count : base.Int = { … } invariant { … }`.
 * **Constants** are written at their uses by default, as in `py.intLit(1)`.
   `PrintOptions.full` prints each on its own line instead: `%c.0 : base.Int = const 1`, then
   `py.intLit(%c.0)`.
@@ -234,6 +606,10 @@ and the function itself, so it doesn't rely on the plan for that.
 The pass computes a plan, checks it (`Plan.check`), applies it, and checks the module's
 well-formedness again. If planning or either check fails, it returns no module, and names each
 function concerned with the reason.
+
+The pass changes only a function's body. The function's parameters, its contract and whether it
+is extern stay as they are, and a cell that a contract region makes is not promoted. So an
+extern function, which has no body, stays as it is.
 
 ## 4. Giving a language its semantics
 
@@ -585,6 +961,9 @@ an empty heap and the initial world. A module's top level can run first, and a f
 module then from `o.snapshot`, the heap and the world where the top level ended
 (`StrataDynTest/Exec/HeapTest.lean`). One value holds both, so a run cannot start from one
 run's heap and another run's world.
+
+A run ignores contracts and ghosts, and a module with an extern function does not run yet:
+`runModule` rejects it with `Fault.invalid` (`StrataDynTest/Exec/BaseTest.lean`).
 
 ## 5. Reasoning about runs
 

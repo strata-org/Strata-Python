@@ -47,9 +47,10 @@ jumps to it, the block may keep a parent above its immediate dominator.  Reverse
 neither.
 
 `intersect` walks up from the point in the later block, as Cooper, Harvey and Kennedy's does,
-recursing on the sum of the two positions.  A pass that moves a parent shortens that block's
-chain to the entry and the chains below it, so the passes terminate by the total length of the
-chains, `Body.Φ`, which only the proof uses.
+recursing on the sum of the two positions.  `ncaFold` meets the points that jump to a block in
+pairs, round after round, and then the block's parent.  A pass that moves a parent shortens that
+block's chain to the entry and the chains below it, so the passes terminate by the total length
+of the chains, `Body.Φ`, which only the proof uses.
 
 ## Main theorems
 
@@ -110,9 +111,42 @@ is enough. -/
 @[expose] def nca (par : NatTrie Pos) (p q : Pos) : Pos :=
   (intersect par (p.1 + q.1) p q).getD p
 
-/-- The nearest common ancestor of `p` and the points `ps`. -/
-@[expose] def ncaFold (par : NatTrie Pos) (p : Pos) (ps : List Pos) : Pos :=
-  ps.foldl (nca par) p
+/-- The points met in pairs: the first with the second, the third with the fourth, and so on.  A
+last point without a partner stays as it is. -/
+@[expose] def pairUp (par : NatTrie Pos) : List Pos → List Pos
+  | [] => []
+  | [u] => [u]
+  | u :: v :: rest => nca par u v :: pairUp par rest
+
+/-- Meeting points in pairs gives no more points than there are. -/
+private theorem length_pairUp_le (par : NatTrie Pos) :
+    ∀ l : List Pos, (pairUp par l).length ≤ l.length
+  | [] => Nat.le_refl _
+  | [_] => Nat.le_refl _
+  | _ :: _ :: rest => by
+    have := length_pairUp_le par rest
+    simp only [pairUp, List.length_cons]
+    omega
+
+/-- Meeting two or more points in pairs gives fewer points. -/
+theorem length_pairUp_lt (par : NatTrie Pos) (u v : Pos) (rest : List Pos) :
+    (pairUp par (u :: v :: rest)).length < (u :: v :: rest).length := by
+  have := length_pairUp_le par rest
+  simp only [pairUp, List.length_cons]
+  omega
+
+/-- The nearest common ancestor of `p` and the points `ps`.  It meets the points in rounds.  Each
+round meets the first point with the second, the third with the fourth, and so on, and keeps a
+last point that has no partner.  The rounds go on until one point is left, and that point meets
+`p`.  Meeting the points one after another instead walks each later point all the way up to the
+result so far.  When that result is already near the root, as it is for the block that every
+failure of a long loop body goes to, that takes time quadratic in the number of points. -/
+@[expose] def ncaFold (par : NatTrie Pos) (p : Pos) : List Pos → Pos
+  | [] => p
+  | [u] => nca par u p
+  | u :: v :: rest => ncaFold par p (pairUp par (u :: v :: rest))
+termination_by ps => ps.length
+decreasing_by exact length_pairUp_lt par u v rest
 
 /-- The first pass over the blocks `l`, each with the points that jump to it: a block gets the
 nearest common ancestor of the points of earlier blocks, or `flat` if there are none. -/
@@ -236,20 +270,41 @@ theorem nca_spec (hI : Inv n size par) {p q : Pos} (hp : Valid n size p) (hq : V
   simp only [nca, hr, Option.getD_some]
   exact ⟨hrp, hrq⟩
 
+/-- Meeting valid points in pairs gives valid points, and each of the points is below one of
+them. -/
+theorem pairUp_spec (hI : Inv n size par) : ∀ {l : List Pos}, (∀ u ∈ l, Valid n size u) →
+    (∀ v ∈ pairUp par l, Valid n size v) ∧ ∀ u ∈ l, ∃ v ∈ pairUp par l, AncT par v u
+  | [], _ => ⟨fun _ h => absurd h List.not_mem_nil, fun _ h => absurd h List.not_mem_nil⟩
+  | [u], hl => ⟨hl, fun w hw => ⟨w, hw, .refl w⟩⟩
+  | u :: w :: rest, hl => by
+    have hu := hl u List.mem_cons_self
+    have hw := hl w (List.mem_cons_of_mem _ List.mem_cons_self)
+    obtain ⟨h₁, h₂⟩ := nca_spec hI hu hw
+    obtain ⟨ih₁, ih₂⟩ := pairUp_spec hI (l := rest) fun x hx =>
+      hl x (List.mem_cons_of_mem _ (List.mem_cons_of_mem _ hx))
+    simp only [pairUp, List.mem_cons, forall_eq_or_imp, exists_eq_or_imp]
+    refine ⟨⟨h₁.valid hI hu, ih₁⟩, .inl h₁, .inl h₂, fun x hx => .inr (ih₂ x hx)⟩
+
 /-- `ncaFold` is a common ancestor of the point and of the list. -/
 theorem ncaFold_spec (hI : Inv n size par) :
     ∀ {p : Pos} {ps : List Pos}, Valid n size p → (∀ u ∈ ps, Valid n size u) →
       AncT par (ncaFold par p ps) p ∧ ∀ u ∈ ps, AncT par (ncaFold par p ps) u
-  | p, [], _, _ => ⟨.refl p, fun _ h => absurd h List.not_mem_nil⟩
-  | p, u :: us, hp, hus => by
-    have hu := hus u List.mem_cons_self
-    obtain ⟨h₁, h₂⟩ := nca_spec hI hp hu
-    obtain ⟨ih₁, ih₂⟩ := ncaFold_spec (p := nca par p u) (ps := us) hI
-      (h₁.valid hI hp) (fun v hv => hus v (List.mem_cons_of_mem _ hv))
-    refine ⟨ih₁.trans h₁, fun v hv => ?_⟩
-    rcases List.mem_cons.mp hv with rfl | hv
-    · exact ih₁.trans h₂
-    · exact ih₂ v hv
+  | p, [], _, _ => by
+    rw [ncaFold]
+    exact ⟨.refl p, fun _ h => absurd h List.not_mem_nil⟩
+  | p, [u], hp, hus => by
+    obtain ⟨h₁, h₂⟩ := nca_spec hI (hus u List.mem_cons_self) hp
+    rw [ncaFold]
+    exact ⟨h₂, fun v hv => List.mem_singleton.mp hv ▸ h₁⟩
+  | p, u :: v :: rest, hp, hus => by
+    obtain ⟨hval, hbelow⟩ := pairUp_spec hI hus
+    obtain ⟨ih₁, ih₂⟩ := ncaFold_spec hI (p := p) (ps := pairUp par (u :: v :: rest)) hp hval
+    rw [ncaFold]
+    refine ⟨ih₁, fun w hw => ?_⟩
+    obtain ⟨x, hx, hxw⟩ := hbelow w hw
+    exact (ih₂ x hx).trans hxw
+termination_by _ ps => ps.length
+decreasing_by exact length_pairUp_lt par u v rest
 
 /-- Giving block `i` a valid parent in an earlier block keeps the invariant. -/
 theorem Inv.insert (hI : Inv n size par) {i : Nat} {x : Pos} (hi₀ : 0 < i) (hi : i < n)

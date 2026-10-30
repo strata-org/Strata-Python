@@ -533,6 +533,13 @@ def kindTerm : Kind → Term
   | .type => Unhygienic.run `(Strata.Dyn.Kind.type)
   | .list => Unhygienic.run `(Strata.Dyn.Kind.list)
 
+/-- An effect, as a term. -/
+def effectTerm : Strata.Dyn.Effect → Term
+  | .pure => Unhygienic.run `(Strata.Dyn.Effect.pure)
+  | .reads => Unhygienic.run `(Strata.Dyn.Effect.reads)
+  | .calls => Unhygienic.run `(Strata.Dyn.Effect.calls)
+  | .writes => Unhygienic.run `(Strata.Dyn.Effect.writes)
+
 /-- A `TypeDecl` literal, from each parameter's name, whether it is positive, and its kind. -/
 def typeDeclTerm (nameId : Term) (params : Array (String × Bool × Kind)) :
     CommandElabM Term := do
@@ -1151,7 +1158,8 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
           (← `(Strata.Dyn.InsnSig $prev))
           (← `({ ann := (), typeParams := #[$tps,*], argTypes := #[$args,*],
                  variadic := $variadic, returnType := $(← retTerm tyK d.ret),
-                 regions := #[$regs,*], succs := #[$succs,*] })))
+                 regions := #[$regs,*], succs := #[$succs,*],
+                 effect := $(effectTerm d.d.effect) })))
         pairs := pairs.push (← `(($(nameId d.d.c.envName), $(cx.own sig0.getId))))
       let ns : Array Term := ds.map fun d => nameId d.d.c.envName
       cs := cs.push (← defCmd (mkDoc s!"Stage {k}: instructions.") svis? false (I "ops") #[]
@@ -1369,7 +1377,8 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
             `{showName d.c.envName}`.") vis? cx.expose sigId #[]
           (← `(Strata.Dyn.InsnSig e))
           (← `({ ann := (), typeParams := #[$tps,*], argTypes := #[$args,*],
-                 returnType := some $(ty retR), distinct := by simp })))
+                 returnType := some $(ty retR), effect := Strata.Dyn.Effect.pure,
+                 distinct := by simp })))
         -- `T.c.ref` casts the stage's reference to `T.c.sig`: the derived signature's raw data,
         -- read from the group's literal, is `T.c.sig`'s.  The proof is under `exact`, so that
         -- the reference, elaborated first, fixes the signature it starts from.
@@ -1391,7 +1400,7 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
                   (congrArg (fun a => List.map _ (Array.toList a))
                     Strata.Dyn.Env.regions_ctorSig)
                   (congrArg (fun a => List.map _ (Array.toList a))
-                    Strata.Dyn.Env.succs_ctorSig)))
+                    Strata.Dyn.Env.succs_ctorSig) Strata.Dyn.Env.effect_ctorSig))
                 (Strata.Dyn.InsnRef.ofLE (s := $addDataTerm)
                   $(cx.liftTo k) $(cx.own (`Internal ++ c.d.c.lean ++ `ref₀))))))
     for (md, _, d) in ms do
@@ -1410,7 +1419,8 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
       cs := cs.push (← defCmd (mkDoc s!"The signature of `{en}`.") vis? cx.expose sigId #[]
         (← `(Strata.Dyn.InsnSig e))
         (← `({ ann := (), typeParams := #[$tps,*], argTypes := #[$args,*],
-               returnType := none, succs := #[$succs,*], distinct := by simp })))
+               returnType := none, succs := #[$succs,*], effect := Strata.Dyn.Effect.pure,
+               distinct := by simp })))
       -- `T.case.ref` casts the stage's reference to `T.case.sig`, as a constructor does.
       let members := ms.map (·.1.c.envName)
       let gen := cx.rawGen ks
@@ -1433,7 +1443,7 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
                 (congrArg (Option.map _) Strata.Dyn.Env.variadic_caseSig)
                 (congrArg (Option.map _) Strata.Dyn.Env.returnType_caseSig)
                 (congrArg (fun a => List.map _ (Array.toList a))
-                  Strata.Dyn.Env.regions_caseSig) $hsuccs))
+                  Strata.Dyn.Env.regions_caseSig) $hsuccs Strata.Dyn.Env.effect_caseSig))
               (Strata.Dyn.InsnRef.ofLE (s := $addDataTerm)
                 $(cx.liftTo k) $(cx.own (`Internal ++ d.d.c.lean ++ `ref₀))))))
   for h : i in [0:stages.size] do
@@ -1468,7 +1478,7 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
         (← `(Strata.Dyn.InsnSig e))
         (← `({ ann := (), typeParams := #[$tps,*], argTypes := #[$args,*],
                variadic := $variadic, returnType := $(← retTerm ty d.ret), regions := #[$regs,*],
-               succs := #[$succs,*], distinct := by simp })))
+               succs := #[$succs,*], effect := $(effectTerm d.d.effect), distinct := by simp })))
       -- `o.ref` casts the stage's reference to `o.sig`: `sig₀`, carried twice, stands for the
       -- same raw data as `o.sig`, node by node.
       let at₀ := cx.rawAt (k - 1) ks
@@ -1507,7 +1517,7 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
         (← `(Strata.Dyn.InsnRef.cast
               (by exact (Eq.trans (Strata.Dyn.InsnSig.carry_carry _ _ _)
                 (Strata.Dyn.InsnSig.carry_eq_of_toRaw _ rfl rfl $(bothRaw a₀ a₁)
-                  $(bothRaw v₀ v₁) $(bothRaw r₀ r₁) $(bothRaw g₀ g₁) $(bothRaw s₀ s₁))))
+                  $(bothRaw v₀ v₁) $(bothRaw r₀ r₁) $(bothRaw g₀ g₁) $(bothRaw s₀ s₁) rfl)))
               (Strata.Dyn.InsnRef.ofLE $(cx.liftTo k)
                 $(cx.own (`Internal ++ d.d.c.lean ++ `ref₀))))))
   cs := cs.push (← `(command| end))

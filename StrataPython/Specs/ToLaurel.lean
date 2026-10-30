@@ -160,17 +160,37 @@ def pushOverloadEntry (funcName : String) (paramName : String)
           { existing with entries := existing.entries.insert literalValue returnType }
       }
 
+/-- Report the `@ensures` and `@admit` clauses of the `@overload` stub `func`, shown as
+    `name`: no procedure is generated for the stub, so they would be dropped. -/
+def reportOverloadPostconditions (name : String) (func : FunctionDecl) : ToLaurelM Unit := do
+  for postExpr in func.postconditions do
+    reportError .unsupportedPostcondition postExpr.loc
+      s!"Modeled @ensures cannot be verified for '{name}': {postExpr}. An @overload stub is a dispatch-only declaration; no procedure is generated for it, so the postcondition would be silently dropped. Attach the contract to a non-overload declaration instead."
+  for admittedExpr in func.admittedPostconditions do
+    reportError .unsupportedAdmit admittedExpr.loc
+      s!"@admit is not supported on @overload stub '{name}': {admittedExpr}. No procedure is generated for a dispatch-only declaration, so there is nothing to carry the assumed postcondition. Attach the @admit to a non-overload declaration instead."
+
+/-- Reject every contract of the `@overload` method stub `func`, shown as `name`: its
+    preconditions (`@requires` and body asserts), postconditions, frame and ghosts. The
+    stub gets no procedure, so a contract would be dropped. -/
+def rejectOverloadMethodContract (name : String) (func : FunctionDecl) : ToLaurelM Unit := do
+  for assertion in func.preconditions do
+    reportError .unsupportedOverloadContract assertion.formula.loc
+      s!"A precondition (@requires or assert) is not supported on @overload stub '{name}': {assertion.formula}. No procedure is generated for it, so the precondition would be silently dropped. Attach the contract to a non-overload declaration instead."
+  reportOverloadPostconditions name func
+  for target in func.modifies do
+    reportError .unsupportedOverloadContract target.loc
+      s!"@modifies is not supported on @overload stub '{name}': {target}. No procedure is generated for it, so the frame would be silently dropped. Attach the contract to a non-overload declaration instead."
+  for ghost in func.ghosts do
+    reportError .unsupportedOverloadContract ghost.loc
+      s!"@ghost is not supported on @overload stub '{name}': {ghost.name}. No procedure is generated for it, so the ghost would be silently dropped. Attach it to a non-overload declaration instead."
+
 /-- Extract an overload dispatch entry from an `@overload` function declaration.
     Contracts are rejected first: no procedure is generated for a dispatch-only
     stub, so an `@ensures` or `@admit` on it would otherwise be silently
     dropped. -/
 def extractOverloadEntry (func : FunctionDecl) : ToLaurelM Unit := do
-  for postExpr in func.postconditions do
-    reportError .unsupportedPostcondition postExpr.loc
-      s!"Modeled @ensures cannot be verified for '{func.name}': {postExpr}. An @overload stub is a dispatch-only declaration; no procedure is generated for it, so the postcondition would be silently dropped. Attach the contract to a non-overload declaration instead."
-  for admittedExpr in func.admittedPostconditions do
-    reportError .unsupportedAdmit admittedExpr.loc
-      s!"@admit is not supported on @overload stub '{func.name}': {admittedExpr}. No procedure is generated for a dispatch-only declaration, so there is nothing to carry the assumed postcondition. Attach the @admit to a non-overload declaration instead."
+  reportOverloadPostconditions func.name func
   let args := func.args.args
   let .isTrue _ := decideProp (args.size > 0)
     | reportError .overloadNoArgs func.loc
@@ -1288,9 +1308,14 @@ def classDefToLaurel (cls : ClassDef) : ToLaurelM Unit := do
     fields := laurelFields
     instanceProcedures := []
   })
+  -- An `@overload` stub of a method gets no procedure, as a top-level stub gets none,
+  -- so a contract on it is rejected.
   for method in cls.methods do
-    let proc ← funcDeclToLaurel (prefixedName ++ "@" ++ method.name) method (isMethod := true)
-    pushProcedure proc
+    if method.isOverload then
+      rejectOverloadMethodContract s!"{cls.name}.{method.name}" method
+    else
+      let proc ← funcDeclToLaurel (prefixedName ++ "@" ++ method.name) method (isMethod := true)
+      pushProcedure proc
   for sub in cls.subclasses do
     classDefToLaurel sub
 decreasing_by

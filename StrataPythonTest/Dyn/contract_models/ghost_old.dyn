@@ -1,0 +1,311 @@
+-- The model of the PySpec fixture StrataPythonTestExtra/Specs/dispatch_test/servicelib/GhostOld.py,
+-- written by hand by the rules of docs/PythonToDyn.md §12:
+--
+--   from typing import Dict
+--
+--   ghost(name="resources", type=Dict[str, int])
+--   ghost(name="allocated", type=int, init=0)
+--
+--   @modifies(lambda: resources)
+--   @modifies(lambda: allocated)
+--   @admit(lambda name, result: name in resources)
+--   @admit(lambda name, result: allocated == OLD(allocated) + 1)
+--   def acquire(name: str) -> None: ...
+--
+--   @admit(lambda result: result == allocated)
+--   def alloc_count() -> int: ...
+--
+--   @admit(lambda name, result: result == (name in resources))
+--   def exists(name: str) -> bool: ...
+--
+-- The module body binds no name of `typing`: the module's `__getattr__` makes it an unknown value.
+-- Compared with ToLaurel:
+-- * A ghost's declared type is its invariant, which holds in every state. ToLaurel assumes the
+--   same test after each call that reads or writes the ghost.
+-- * The binding and the presence of `name` are requires clauses. ToLaurel binds a call
+--   statically, and so does V1.
+-- * In `allocated == OLD(allocated) + 1`, `base.old` covers `allocated + 1`, the largest part
+--   around `OLD` that reads nothing after the call, and its region checks that the sum is an
+--   immutable scalar (§12.4). ToLaurel adds the old value and 1 as integers.
+-- * Each frame names the cell of each ghost in `@modifies`, and what the object that the ghost
+--   holds reaches (`py.reachLoc`). ToLaurel's frame names the ghosts and lets the call change any
+--   object field; here the call may change only `py.instanceState` (the attributes of every
+--   object that is neither a class nor a module, and what they reach), what the arguments reach,
+--   and those ghosts (§12.5).
+-- * A return type's clause comes before the `@admit` clauses, which may rely on it (§12.3).
+--   ToLaurel puts it last.
+module servicelib.GhostOld {
+  ghost @|servicelib.GhostOld.<ghost>.resources| : py.Value invariant {
+    inv.0(%v.0 : py.Value):
+      %cls.0 : py.Value = py.stdClass("builtins", "dict")
+      %ok.0 : base.Bool = py.isInstance(%v.0, %cls.0) ^fail.0()
+      ret(%ok.0)
+    fail.0(%e.0 : py.Value):
+      unreachable
+  }
+  ghost @|servicelib.GhostOld.<ghost>.allocated| : py.Value = {
+    init.0():
+      %int.0 : py.Value = py.intLit(0)
+      ret(%int.0)
+  } invariant {
+    inv.0(%v.0 : py.Value):
+      %cls.0 : py.Value = py.stdClass("builtins", "int")
+      %ok.0 : base.Bool = py.isInstance(%v.0, %cls.0) ^fail.0()
+      ret(%ok.0)
+    fail.0(%e.0 : py.Value):
+      unreachable
+  }
+  func @|servicelib.GhostOld.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("servicelib.GhostOld")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.GhostOld", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.GhostOld", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@servicelib.GhostOld.acquire)
+      %acquire.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.GhostOld", "acquire")
+      %set.2 : base.Unit = base.refSet[py.Value](%acquire.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@servicelib.GhostOld.alloc_count)
+      %alloc_count.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.GhostOld", "alloc_count")
+      %set.3 : base.Unit = base.refSet[py.Value](%alloc_count.cell.0, %clo.1)
+      %clo.2 : py.Value = py.mkClosure[[]](@servicelib.GhostOld.exists)
+      %exists.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.GhostOld", "exists")
+      %set.4 : base.Unit = base.refSet[py.Value](%exists.cell.0, %clo.2)
+      %clo.3 : py.Value = py.mkClosure[[]](@servicelib.GhostOld.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.GhostOld", "__getattr__")
+      %set.5 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.3)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+  }
+  extern func @servicelib.GhostOld.acquire(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'acquire'" {
+      pre.0():
+        %ok.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "name")
+        ret(%ok.0)
+    }
+    requires "'name' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("name")
+        %name.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.0)
+        %ok.1 : base.Bool = py.isDefined(%name.0)
+        ret(%ok.1)
+    }
+    requires "declared type of parameter 'name'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("name")
+        %name.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "str")
+        %sub.0 : base.Bool = py.typeIsSubclass(%name.1, %cls.0) ^fail.0()
+        branch(%sub.0) ^isSub.0() ^no.0()
+      isSub.0():
+        %ok.2 : base.Bool = py.isInstance(%name.1, %cls.0) ^fail.0()
+        ret(%ok.2)
+      no.0():
+        ret(false)
+      fail.0(%e.0 : py.Value):
+        ret(false)
+    }
+    free ensures "admitted postcondition of 'acquire'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %name.2 : py.Value = base.old[py.Value, py.Value] ^fail.1() {
+          old.0():
+            %undef.2 : py.Value = py.undef("name")
+            %name.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.2)
+            %res.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%name.3)
+            ret(%res.0)
+        }
+        %resources.0 : py.Value = base.refGet[py.Value](ghost @|servicelib.GhostOld.<ghost>.resources|)
+        %in.0 : py.Value = py.in(%name.2, %resources.0) ^fail.1()
+        %ok.3 : base.Bool = py.truthy(%in.0) ^fail.1()
+        ret(%ok.3)
+      raised.0(%exc.0 : py.Value):
+        ret(true)
+      fail.1(%e.1 : py.Value):
+        ret(true)
+    }
+    free ensures "admitted postcondition of 'acquire'" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %allocated.0 : py.Value = base.refGet[py.Value](ghost @|servicelib.GhostOld.<ghost>.allocated|)
+        %old.0 : py.Value = base.old[py.Value, py.Value] ^fail.2() {
+          old.1():
+            %allocated.1 : py.Value = base.refGet[py.Value](ghost @|servicelib.GhostOld.<ghost>.allocated|)
+            %int.0 : py.Value = py.intLit(1)
+            %add.0 : py.Value = py.add(%allocated.1, %int.0) ^propagate.0()
+            %scalar.0 : base.Bool = py.isImmutableScalar(%add.0)
+            branch(%scalar.0) ^scalar.0() ^mutable.0()
+          scalar.0():
+            %res.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%add.0)
+            ret(%res.1)
+          mutable.0():
+            %res.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%add.0)
+            ret(%res.2)
+          propagate.0(%exc.1 : py.Value):
+            %err.0 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+            ret(%err.0)
+        }
+        %eq.0 : py.Value = py.eq(%allocated.0, %old.0) ^fail.2()
+        %ok.4 : base.Bool = py.truthy(%eq.0) ^fail.2()
+        ret(%ok.4)
+      raised.1(%exc.2 : py.Value):
+        ret(true)
+      fail.2(%e.2 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    }, {
+      loc.3():
+        %l.3 : base.Loc = base.cellLoc[py.Value](ghost @|servicelib.GhostOld.<ghost>.resources|)
+        ret(%l.3)
+    }, {
+      loc.4():
+        %resources.1 : py.Value = base.refGet[py.Value](ghost @|servicelib.GhostOld.<ghost>.resources|)
+        %l.4 : base.Loc = py.reachLoc(%resources.1)
+        ret(%l.4)
+    }, {
+      loc.5():
+        %l.5 : base.Loc = base.cellLoc[py.Value](ghost @|servicelib.GhostOld.<ghost>.allocated|)
+        ret(%l.5)
+    }, {
+      loc.6():
+        %allocated.2 : py.Value = base.refGet[py.Value](ghost @|servicelib.GhostOld.<ghost>.allocated|)
+        %l.6 : base.Loc = py.reachLoc(%allocated.2)
+        ret(%l.6)
+    })
+  extern func @servicelib.GhostOld.alloc_count(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'alloc_count'" {
+      pre.0():
+        %ok.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 0, false)
+        ret(%ok.0)
+    }
+    free ensures "return type of 'alloc_count'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %cls.0 : py.Value = py.stdClass("builtins", "int")
+        %ok.1 : base.Bool = py.isInstance(%result.0, %cls.0) ^fail.0()
+        ret(%ok.1)
+      raised.0(%exc.0 : py.Value):
+        ret(true)
+      fail.0(%e.0 : py.Value):
+        ret(true)
+    }
+    free ensures "admitted postcondition of 'alloc_count'" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %allocated.0 : py.Value = base.refGet[py.Value](ghost @|servicelib.GhostOld.<ghost>.allocated|)
+        %eq.0 : py.Value = py.eq(%result.1, %allocated.0) ^fail.1()
+        %ok.2 : base.Bool = py.truthy(%eq.0) ^fail.1()
+        ret(%ok.2)
+      raised.1(%exc.1 : py.Value):
+        ret(true)
+      fail.1(%e.1 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @servicelib.GhostOld.exists(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'exists'" {
+      pre.0():
+        %ok.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "name")
+        ret(%ok.0)
+    }
+    requires "'name' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("name")
+        %name.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.0)
+        %ok.1 : base.Bool = py.isDefined(%name.0)
+        ret(%ok.1)
+    }
+    requires "declared type of parameter 'name'" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("name")
+        %name.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.1)
+        %cls.0 : py.Value = py.stdClass("builtins", "str")
+        %sub.0 : base.Bool = py.typeIsSubclass(%name.1, %cls.0) ^fail.0()
+        branch(%sub.0) ^isSub.0() ^no.0()
+      isSub.0():
+        %ok.2 : base.Bool = py.isInstance(%name.1, %cls.0) ^fail.0()
+        ret(%ok.2)
+      no.0():
+        ret(false)
+      fail.0(%e.0 : py.Value):
+        ret(false)
+    }
+    free ensures "return type of 'exists'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %cls.1 : py.Value = py.stdClass("builtins", "bool")
+        %ok.3 : base.Bool = py.isInstance(%result.0, %cls.1) ^fail.1()
+        ret(%ok.3)
+      raised.0(%exc.0 : py.Value):
+        ret(true)
+      fail.1(%e.1 : py.Value):
+        ret(true)
+    }
+    free ensures "admitted postcondition of 'exists'" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %name.2 : py.Value = base.old[py.Value, py.Value] ^fail.2() {
+          old.0():
+            %undef.2 : py.Value = py.undef("name")
+            %name.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "name", %undef.2)
+            %res.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%name.3)
+            ret(%res.0)
+        }
+        %resources.0 : py.Value = base.refGet[py.Value](ghost @|servicelib.GhostOld.<ghost>.resources|)
+        %in.0 : py.Value = py.in(%name.2, %resources.0) ^fail.2()
+        %eq.0 : py.Value = py.eq(%result.1, %in.0) ^fail.2()
+        %ok.4 : base.Bool = py.truthy(%eq.0) ^fail.2()
+        ret(%ok.4)
+      raised.1(%exc.1 : py.Value):
+        ret(true)
+      fail.2(%e.2 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    })
+  extern func @servicelib.GhostOld.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

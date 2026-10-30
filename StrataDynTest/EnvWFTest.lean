@@ -287,11 +287,12 @@ constructor, then the case instruction. -/
 #guard (listGroup.decls).map (fun d => d.asInsn.bind (·.kind.ctor?)) =
     #[none, some ⟨listName, 0, 0⟩, some ⟨listName, 0, 1⟩, none]
 
-/-- `cons`'s instruction: `[a] (head : a) (tail : List a) : List a`. -/
+/-- `cons`'s instruction: `[a] (head : a) (tail : List a) : List a`, `pure`. -/
 private def consDecl' : InsnDecl.Raw Unit :=
   { ann := (), name := consName, typeParams := #[⟨"a", .type⟩],
     argTypes := #[⟨"head", .var 0⟩, ⟨"tail", .app listName #[.var 0]⟩],
-    returnType := some (.app listName #[.var 0]), kind := .ctor ⟨listName, 0, 1⟩ }
+    returnType := some (.app listName #[.var 0]), effect := .pure,
+    kind := .ctor ⟨listName, 0, 1⟩ }
 
 /- It is the one its group gives it. -/
 #guard listGroup.ctorInsn? 0 1 = some consDecl'
@@ -299,7 +300,8 @@ private def consDecl' : InsnDecl.Raw Unit :=
 /- `nil`'s: `[a] : List a`. -/
 #guard listGroup.ctorInsn? 0 0 = some
     { ann := (), name := nilName, typeParams := #[⟨"a", .type⟩], argTypes := #[],
-      returnType := some (.app listName #[.var 0]), kind := .ctor ⟨listName, 0, 0⟩ }
+      returnType := some (.app listName #[.var 0]), effect := .pure,
+      kind := .ctor ⟨listName, 0, 0⟩ }
 
 #guard accepts listDecls
 
@@ -509,6 +511,9 @@ private def badCtorSig : Array (Decl.Raw Unit) :=
   replaceDecl listDecls consName (.insn { consDecl' with
     argTypes := #[⟨"head", .var 0⟩, ⟨"tail", nat⟩] })
 #guard rejects badCtorSig
+
+-- …and one with another effect than `pure`.
+#guard rejects (replaceDecl listDecls consName (.insn { consDecl' with effect := .reads }))
 
 /-- …and one marked as a constructor of something that is not a group: `cons` over the
 primitive `List`, marked as a constructor of `Nat`, is rejected, and as an ordinary instruction

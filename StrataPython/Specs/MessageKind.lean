@@ -72,6 +72,11 @@ def unsupportedPostcondition : MessageKind :=
 def unsupportedAdmit : MessageKind :=
   { category := "unsupportedAdmit", impact := .userCodeError }
 
+/-- A precondition, frame or ghost on an `@overload` method stub. The stub gets no
+    procedure, so the contract would be dropped. -/
+def unsupportedOverloadContract : MessageKind :=
+  { category := "unsupportedOverloadContract", impact := .userCodeError }
+
 -- Precondition warnings
 def placeholderExpr : MessageKind :=
   { category := "placeholderExpr", impact := .knownLimitation }

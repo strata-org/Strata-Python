@@ -1,0 +1,25 @@
+module top
+  OtherHash: local (assigned, referenced)
+  RaisingEq: local (assigned, referenced)
+  RuntimeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  f: local (assigned, referenced)
+  print: global implicit (referenced)
+  str: global implicit (referenced)
+  class RaisingEq
+    __eq__: local (assigned)
+    __hash__: local (assigned)
+    str: global implicit (referenced)
+    function __eq__
+      RuntimeError: global implicit (referenced)
+      other: local (parameter)
+      self: local (parameter)
+  class OtherHash
+    __eq__: local (assigned)
+    __hash__: local (assigned)
+    str: global implicit (referenced)
+    function __hash__
+      self: local (parameter)
+  function f
+    p: local (parameter, referenced)
+qualnames: OtherHash, OtherHash.__hash__, RaisingEq, RaisingEq.__eq__, f

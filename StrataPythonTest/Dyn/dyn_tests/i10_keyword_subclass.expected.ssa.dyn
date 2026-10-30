@@ -1,0 +1,243 @@
+module i10_keyword_subclass {
+  func @|i10_keyword_subclass.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("i10_keyword_subclass")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("i10_keyword_subclass", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("i10_keyword_subclass", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|i10_keyword_subclass.RaisingEq.<body>|)
+      %str.1 : py.Value = py.strLit("RaisingEq")
+      %str.2 : py.Value = py.loadGlobal("i10_keyword_subclass", "str") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1, %str.2)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %RaisingEq.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %RaisingEq.cell.0 : base.Ref(py.Value) = py.globalCell("i10_keyword_subclass", "RaisingEq")
+      %set.2 : base.Unit = base.refSet[py.Value](%RaisingEq.cell.0, %RaisingEq.0)
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|i10_keyword_subclass.OtherHash.<body>|)
+      %str.3 : py.Value = py.strLit("OtherHash")
+      %str.4 : py.Value = py.loadGlobal("i10_keyword_subclass", "str") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%clo.1, %str.3, %str.4)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %OtherHash.0 : py.Value = py.call(%__build_class__.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %OtherHash.cell.0 : base.Ref(py.Value) = py.globalCell("i10_keyword_subclass", "OtherHash")
+      %set.3 : base.Unit = base.refSet[py.Value](%OtherHash.cell.0, %OtherHash.0)
+      %clo.2 : py.Value = py.mkClosure[[]](@i10_keyword_subclass.f)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("i10_keyword_subclass", "f")
+      %set.4 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.2)
+      %print.0 : py.Value = py.loadGlobal("i10_keyword_subclass", "print") ^catch.0()
+      %f.0 : py.Value = py.loadGlobal("i10_keyword_subclass", "f") ^catch.0()
+      %tuple.2 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %RaisingEq.1 : py.Value = py.loadGlobal("i10_keyword_subclass", "RaisingEq") ^catch.0()
+      %str.5 : py.Value = py.strLit("p")
+      %tuple.3 : py.Value = py.mkTuple(%str.5)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%RaisingEq.1, %tuple.3, %kwargs.3) ^catch.0()
+      %int.0 : py.Value = py.intLit(1)
+      %dict.0 : py.Value = py.mkDict(%call.0, %int.0) ^catch.0()
+      %merge.0 : py.Value = py.dictMerge(%f.0, %kwargs.2, %dict.0) ^catch.0()
+      %call.1 : py.Value = py.call(%f.0, %tuple.2, %merge.0) ^catch.0()
+      %tuple.4 : py.Value = py.mkTuple(%call.1)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.0, %tuple.4, %kwargs.4) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %RuntimeError.0 : py.Value = py.loadGlobal("i10_keyword_subclass", "RuntimeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %RuntimeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("i10_keyword_subclass", "e")
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.1 : py.Value = py.loadGlobal("i10_keyword_subclass", "print") ^clear.0()
+      %str.6 : py.Value = py.strLit("caught:")
+      %e.0 : py.Value = py.loadGlobal("i10_keyword_subclass", "e") ^clear.0()
+      %tuple.5 : py.Value = py.mkTuple(%str.6, %e.0)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.1, %tuple.5, %kwargs.5) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("i10_keyword_subclass", "e")
+      %set.6 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("i10_keyword_subclass", "e")
+      %set.7 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %print.2 : py.Value = py.loadGlobal("i10_keyword_subclass", "print") ^propagate.0()
+      %f.1 : py.Value = py.loadGlobal("i10_keyword_subclass", "f") ^propagate.0()
+      %tuple.6 : py.Value = py.mkTuple
+      %kwargs.6 : py.Value = py.mkKwargs
+      %OtherHash.1 : py.Value = py.loadGlobal("i10_keyword_subclass", "OtherHash") ^propagate.0()
+      %str.7 : py.Value = py.strLit("p")
+      %tuple.7 : py.Value = py.mkTuple(%str.7)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%OtherHash.1, %tuple.7, %kwargs.7) ^propagate.0()
+      %int.1 : py.Value = py.intLit(1)
+      %dict.1 : py.Value = py.mkDict(%call.4, %int.1) ^propagate.0()
+      %merge.1 : py.Value = py.dictMerge(%f.1, %kwargs.6, %dict.1) ^propagate.0()
+      %call.5 : py.Value = py.call(%f.1, %tuple.6, %merge.1) ^propagate.0()
+      %tuple.8 : py.Value = py.mkTuple(%call.5)
+      %kwargs.8 : py.Value = py.mkKwargs
+      %call.6 : py.Value = py.call(%print.2, %tuple.8, %kwargs.8) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.3 : py.Value):
+      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+      ret(%exc.4)
+  }
+  func @|i10_keyword_subclass.RaisingEq.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["str"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "__hash__", value = "str.__hash__"}, {name = "__eq__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("i10_keyword_subclass", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("RaisingEq")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %str.4 : py.Value = py.strLit("str")
+      %str.5 : py.Value = py.undef("str")
+      %str.6 : py.Value = py.getOptionalItem(%ns.0, %str.4, %str.5) ^propagate.0()
+      %found.1 : base.Bool = py.isDefined(%str.6)
+      branch(%found.1) ^join.1(%str.6) ^absent.1()
+    absent.1():
+      %str.7 : py.Value = py.loadGlobal("i10_keyword_subclass", "str") ^propagate.0()
+      jump ^join.1(%str.7)
+    join.1(%str.8 : py.Value):
+      %__hash__.0 : py.Value = py.attr(%str.8, "__hash__") ^propagate.0()
+      %str.9 : py.Value = py.strLit("__hash__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.9, %__hash__.0) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@i10_keyword_subclass.RaisingEq.__eq__)
+      %str.10 : py.Value = py.strLit("__eq__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.10, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|i10_keyword_subclass.OtherHash.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["str"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "__hash__", binding = "def"}, {name = "__eq__", value = "str.__eq__"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("i10_keyword_subclass", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("OtherHash")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@i10_keyword_subclass.OtherHash.__hash__)
+      %str.4 : py.Value = py.strLit("__hash__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %str.5 : py.Value = py.strLit("str")
+      %str.6 : py.Value = py.undef("str")
+      %str.7 : py.Value = py.getOptionalItem(%ns.0, %str.5, %str.6) ^propagate.0()
+      %found.1 : base.Bool = py.isDefined(%str.7)
+      branch(%found.1) ^join.1(%str.7) ^absent.1()
+    absent.1():
+      %str.8 : py.Value = py.loadGlobal("i10_keyword_subclass", "str") ^propagate.0()
+      jump ^join.1(%str.8)
+    join.1(%str.9 : py.Value):
+      %__eq__.0 : py.Value = py.attr(%str.9, "__eq__") ^propagate.0()
+      %str.10 : py.Value = py.strLit("__eq__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.10, %__eq__.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @i10_keyword_subclass.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %p.0 : py.Value = py.undef("p")
+      %p.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%p.0)
+      %p.1 : py.Value = py.undef("p")
+      %defaults.0 : py.Value = py.mkTuple(%p.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "p") ^propagate.0()
+      %p.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %p.4 : py.Value = py.requireDefined(%p.2, "UnboundLocalError", "cannot access local variable 'p' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%p.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @i10_keyword_subclass.RaisingEq.__eq__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %other.0 : py.Value = py.undef("other")
+      %other.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%other.0)
+      %self.1 : py.Value = py.undef("self")
+      %other.1 : py.Value = py.undef("other")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %other.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "self", "other") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %other.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %RuntimeError.0 : py.Value = py.loadGlobal("i10_keyword_subclass", "RuntimeError") ^propagate.0()
+      %str.0 : py.Value = py.strLit("raised by __eq__ during argument binding")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%RuntimeError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @i10_keyword_subclass.OtherHash.__hash__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(12345)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

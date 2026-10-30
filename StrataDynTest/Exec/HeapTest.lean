@@ -171,19 +171,21 @@ def hd (n : Nat) (t : TypeExpr H) : ValDecl H := ⟨⟨n⟩, t⟩
 
 /-- `twice()`: write `5` to the global cell, then read the global cell, the same one. -/
 def twice : Func H Unit :=
-  let f : Func H Unit := ⟨nm "twice", Base.Int, #[
-    ⟨⟨nm "entry"⟩, #[], #[
-      .apply () (hd 0 (Base.Ref Base.Int)) Hp.globalCell.ref ⟨#[], rfl⟩ #[] #[] #[],
-      .const () (hd 1 Base.Int) (.int 5),
-      .apply () (hd 2 Base.Unit) Base.refSet.ref ⟨#[.ty Base.Int], rfl⟩ #[⟨0⟩, ⟨1⟩] #[] #[],
-      .apply () (hd 3 (Base.Ref Base.Int)) Hp.globalCell.ref ⟨#[], rfl⟩ #[] #[] #[],
-      .apply () (hd 4 Base.Int) Base.refGet.ref ⟨#[.ty Base.Int], rfl⟩ #[⟨3⟩] #[] #[]],
-      .ret () ⟨4⟩, ()⟩], #[], ()⟩
+  let f : Func H Unit :=
+    { name := nm "twice", params := #[], retType := Base.Int, names := #[], info := (),
+      blocks := #[
+        ⟨⟨nm "entry"⟩, #[], #[
+          .apply () (hd 0 (Base.Ref Base.Int)) Hp.globalCell.ref ⟨#[], rfl⟩ #[] #[] #[],
+          .const () (hd 1 Base.Int) (.int 5),
+          .apply () (hd 2 Base.Unit) Base.refSet.ref ⟨#[.ty Base.Int], rfl⟩ #[⟨0⟩, ⟨1⟩] #[] #[],
+          .apply () (hd 3 (Base.Ref Base.Int)) Hp.globalCell.ref ⟨#[], rfl⟩ #[] #[] #[],
+          .apply () (hd 4 Base.Int) Base.refGet.ref ⟨#[.ty Base.Int], rfl⟩ #[⟨3⟩] #[] #[]],
+          .ret () ⟨4⟩, ()⟩] }
   { f with names := (Array.range (ValDecl.idBound f.defs)).map (.num (.str .base "v")) }
 
 /-- The run of `twice`: its result, and whether the world keeps a cell. -/
 def runTwice : Option (Option Int × Bool) :=
-  match Module.Raw.check ⟨nm "hp", #[twice], ()⟩ with
+  match Module.Raw.check { name := nm "hp", funcs := #[twice], info := () } with
   | .ok m =>
     let o := runModule HpSem.model m (nm "twice") #[] 100
     some (o.read? Int, o.snapshot.world.globals.cell.isSome)
@@ -201,29 +203,33 @@ section
 
 /-- `main()`, the top level: write `7` to the global cell, and return `0`. -/
 def main : Func H Unit :=
-  let f : Func H Unit := ⟨nm "main", Base.Int, #[
-    ⟨⟨nm "entry"⟩, #[], #[
-      .apply () (hd 0 (Base.Ref Base.Int)) Hp.globalCell.ref ⟨#[], rfl⟩ #[] #[] #[],
-      .const () (hd 1 Base.Int) (.int 7),
-      .apply () (hd 2 Base.Unit) Base.refSet.ref ⟨#[.ty Base.Int], rfl⟩ #[⟨0⟩, ⟨1⟩] #[] #[],
-      .const () (hd 3 Base.Int) (.int 0)],
-      .ret () ⟨3⟩, ()⟩], #[], ()⟩
+  let f : Func H Unit :=
+    { name := nm "main", params := #[], retType := Base.Int, names := #[], info := (),
+      blocks := #[
+        ⟨⟨nm "entry"⟩, #[], #[
+          .apply () (hd 0 (Base.Ref Base.Int)) Hp.globalCell.ref ⟨#[], rfl⟩ #[] #[] #[],
+          .const () (hd 1 Base.Int) (.int 7),
+          .apply () (hd 2 Base.Unit) Base.refSet.ref ⟨#[.ty Base.Int], rfl⟩ #[⟨0⟩, ⟨1⟩] #[] #[],
+          .const () (hd 3 Base.Int) (.int 0)],
+          .ret () ⟨3⟩, ()⟩] }
   { f with names := (Array.range (ValDecl.idBound f.defs)).map (.num (.str .base "v")) }
 
 /-- `fetch()`: the global cell's value. -/
 def fetch : Func H Unit :=
-  let f : Func H Unit := ⟨nm "fetch", Base.Int, #[
-    ⟨⟨nm "entry"⟩, #[], #[
-      .apply () (hd 0 (Base.Ref Base.Int)) Hp.globalCell.ref ⟨#[], rfl⟩ #[] #[] #[],
-      .apply () (hd 1 Base.Int) Base.refGet.ref ⟨#[.ty Base.Int], rfl⟩ #[⟨0⟩] #[] #[]],
-      .ret () ⟨1⟩, ()⟩], #[], ()⟩
+  let f : Func H Unit :=
+    { name := nm "fetch", params := #[], retType := Base.Int, names := #[], info := (),
+      blocks := #[
+        ⟨⟨nm "entry"⟩, #[], #[
+          .apply () (hd 0 (Base.Ref Base.Int)) Hp.globalCell.ref ⟨#[], rfl⟩ #[] #[] #[],
+          .apply () (hd 1 Base.Int) Base.refGet.ref ⟨#[.ty Base.Int], rfl⟩ #[⟨0⟩] #[] #[]],
+          .ret () ⟨1⟩, ()⟩] }
   { f with names := (Array.range (ValDecl.idBound f.defs)).map (.num (.str .base "v")) }
 
 /-- Run the functions named `fs` of the module of `main`, `twice` and `fetch` one after the
 other, each from the snapshot where the one before it ended, the first from the initial
 snapshot: each run's result and the number of cells its heap ends with. -/
 def chain (fs : List String) : Option (List (Option Int × Nat)) :=
-  match Module.Raw.check ⟨nm "hp", #[main, twice, fetch], ()⟩ with
+  match Module.Raw.check { name := nm "hp", funcs := #[main, twice, fetch], info := () } with
   | .error _ => none
   | .ok m => match prepare HpSem.model m (nm "main") with
     | .error _ => none

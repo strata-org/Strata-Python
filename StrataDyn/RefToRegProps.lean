@@ -14,10 +14,10 @@ set_option autoImplicit false
 /-!
 # Ref-to-reg keeps the control-flow graph, and what its check gives
 
-* `refToRegWith_ok`: each function of `refToRegWith`'s output (so of `refToReg`'s) is
-  `P.apply S.maps f` for a function `f` of its input and a plan `P` that passes `Plan.check`
-  with `S`, the start maps that `Plan.starts` computes from `f`'s dominator trees and `P`.  The
-  facts below are about such a function.
+* `refToRegWith_ok`: `refToRegWith`'s output (so `refToReg`'s) keeps the module's name and
+  ghosts, and each of its functions is `P.apply S.maps f` for a function `f` of its input and a
+  plan `P` that passes `Plan.check` with `S`, the start maps that `Plan.starts` computes from
+  `f`'s dominator trees and `P`.  The facts below are about such a function.
 * `Func.edgeShape_apply`: `Plan.apply` keeps every block's label and every edge's target, in
   every body, regions included, in order (`edgeShape`, `StrataDyn/RewriteProps.lean`).  In a
   well-formed function each body's blocks are those its edges reach, so this keeps each body's
@@ -27,8 +27,13 @@ set_option autoImplicit false
   passes what its target's plan expects, and a body's entry takes nothing new.
 * `Plan.edges_apply_ok`: every edge of the rewritten blocks is `P.edge m k` for an edge `k` of
   the walk, leaving where the content map is `m`, that passes the check.
-* `Plan.entryParams_apply`: a checked plan keeps the function's parameters; the name, the
-  return type and the annotation are kept by definition.
+* `Plan.params_apply`, `Plan.extern_apply`, `Plan.contract_apply`: the rewrite keeps the
+  function's parameters (its `params`), its extern flag and its contract, by definition, as it
+  keeps its name, its return type and its annotation.
+* `Plan.entryBlockParams_apply`: a checked plan keeps the parameters of the entry block.
+* `Plan.entryParams_apply`: the rewrite's entry block still takes exactly the function's `params`.
+* `Plan.apply_noBlocks`: a checked plan leaves a function with no blocks, such as an extern
+  function, as it is.
 * `cellOp?_plain`, `drops_plain`: the instructions the rewrite removes have no edges and no
   regions.
 * `walkInstrs_snd`: the walk's map after a block's instructions is `View.step` folded over them;
@@ -37,9 +42,13 @@ set_option autoImplicit false
 TODO: prove that ref-to-reg keeps each function's behaviour, against a semantics of the IR,
 once one is on mainline.  The statement: for modules `m` and `m₁` with `refToReg m = .ok m₁`,
 every run of a function of `m` (its result, world and choices drawn) is a run of the same
-function of `m₁`, and the converse.  It needs that an operation reads and writes only the
-cells it is given or makes (`docs/Dyn.md`, §3), that a region runs only while its owner
-runs, and that each run of a region starts from a copy of its owner's frame.  It also needs a
+function of `m₁`, and the converse.  It should also say that each contract's verdict (its
+`requires` and `ensures` clauses and its frames) is the same.  That follows from the runs: the
+contract is unchanged, it sees only the parameters, the result and the state at the call and at
+the exit, and the promoted cells are allocated during the call.  It needs that an operation
+reads and writes only the cells it is given or makes (`docs/Dyn.md`, §3), that a region runs
+only while its owner runs, and that each run of a region starts from a copy of its owner's
+frame.  It also needs a
 static lemma about the start maps: for each edge of the walk into a block that is not a body's
 entry, every entry of the block's start map, except its carried cells, is in the edge's map with
 the same value, and no such entry's value is one of the block's parameters.  Until then, the
@@ -383,12 +392,14 @@ end
 private theorem insertAt_nil {β : Type} (a : Array β) (i : Nat) : insertAt a i [] = a := by
   simp [insertAt]
 
-/-- A checked plan keeps the function's parameters: those of its entry block. -/
-theorem Plan.entryParams_apply (P : Plan env) (S : Starts) (fn : Func env α)
+/-- A checked plan keeps the parameters of the function's entry block: the first block of
+`P.apply S.maps fn` takes the same parameters as the first block of `fn`, since a body's entry
+takes no new parameter. -/
+theorem Plan.entryBlockParams_apply (P : Plan env) (S : Starts) (fn : Func env α)
     (h : P.check S fn = true) :
     (P.apply S.maps fn).blocks.toList.head?.map (·.params) =
       fn.blocks.toList.head?.map (·.params) := by
-  rcases hfn : fn with ⟨name, ret, ⟨bs⟩, names, info⟩
+  rcases hfn : fn with ⟨name, params, ret, ext, ⟨bs⟩, contract, names, info⟩
   cases bs with
   | nil => simp [Plan.apply, applyBody, Func.mapUses, Block.mapUsesList]
   | cons b bs =>
@@ -399,6 +410,69 @@ theorem Plan.entryParams_apply (P : Plan env) (S : Starts) (fn : Func env α)
     subst hfn
     simp [Plan.apply, applyBody, Func.mapUses, Block.mapUsesList, Block.mapUses, hce.1,
       insertAt_nil]
+
+/-- The rewrite keeps the function's parameters. -/
+@[simp] theorem Plan.params_apply (P : Plan env) (S : Std.HashMap Label CMap)
+    (fn : Func env α) : (P.apply S fn).params = fn.params := rfl
+
+/-- The rewrite keeps whether the function is extern. -/
+@[simp] theorem Plan.extern_apply (P : Plan env) (S : Std.HashMap Label CMap)
+    (fn : Func env α) : (P.apply S fn).extern = fn.extern := rfl
+
+/-- The rewrite keeps the function's contract: its clauses and its frames. -/
+@[simp] theorem Plan.contract_apply (P : Plan env) (S : Std.HashMap Label CMap)
+    (fn : Func env α) : (P.apply S fn).contract = fn.contract := rfl
+
+/-- A checked plan keeps the rule that a defined function's entry block takes exactly the
+function's parameters (`Func.WF.entryParams`): if `fn`'s entry block does, so does the entry
+block of its rewrite.  The parameters stay (`Plan.params_apply`), and the entry block takes no
+new one. -/
+theorem Plan.entryParams_apply (P : Plan env) (S : Starts) (fn : Func env α)
+    (h : P.check S fn = true)
+    (hfn : fn.extern = false → ∀ b ∈ fn.blocks[0]?, b.params = fn.params) :
+    (P.apply S.maps fn).extern = false →
+      ∀ b ∈ (P.apply S.maps fn).blocks[0]?, b.params = (P.apply S.maps fn).params := by
+  intro hext b hb
+  have hkeep := Plan.entryBlockParams_apply P S fn h
+  rw [← Array.getElem?_toList, ← List.head?_eq_getElem?] at hb
+  rw [Option.mem_def] at hb
+  rw [hb] at hkeep
+  obtain ⟨b₀, hb₀, hps⟩ := Option.map_eq_some_iff.mp hkeep.symm
+  have hb₀' : b₀ ∈ fn.blocks[0]? := by
+    rw [← Array.getElem?_toList, ← List.head?_eq_getElem?]; exact hb₀
+  simp only at hps
+  rw [Plan.params_apply, ← hps]
+  exact hfn hext b₀ hb₀'
+
+/-- A checked plan has no plan for a block that is not in `fn`'s body. -/
+private theorem blocks_of_check {P : Plan env} {S : Starts} {fn : Func env α}
+    (h : P.check S fn = true) :
+    (P.blocks.toList.all fun (l, bp) =>
+      match (blockParams fn).get? l with
+      | some ps => P.blockOk ps bp
+      | none => false) = true := by
+  simp only [Plan.check, Plan.rules, List.all_cons, List.all_nil, Bool.and_true,
+    Bool.and_eq_true] at h
+  exact h.2.1
+
+/-- A checked plan leaves a function with no blocks as it is.  A well-formed extern function has
+none (`Func.WF.externIff`). -/
+theorem Plan.apply_noBlocks (P : Plan env) (S : Starts) (fn : Func env α)
+    (h : P.check S fn = true) (hb : fn.blocks = #[]) : P.apply S.maps fn = fn := by
+  have hbody : bodyBlocks fn = [] := by simp [bodyBlocks, hb, Block.withNestedList]
+  have hplans : P.blocks.toList = [] := by
+    have hall := blocks_of_check h
+    simp only [blockParams, hbody, List.foldl_nil, Std.HashMap.get?_eq_getElem?,
+      Std.HashMap.getElem?_empty, List.all_eq_true] at hall
+    exact List.eq_nil_iff_forall_not_mem.mpr fun x hx => by simpa using hall x hx
+  have hnone : ∀ l : List (ValId × Name), l.filter (fun _ => false) = [] := fun _ =>
+    List.filter_eq_nil_iff.mpr (by simp)
+  have hnames : P.newNames fn = fn.names := by
+    simp [Plan.newNames, Std.HashMap.fold_eq_foldl_toList, hplans, hnone]
+  obtain ⟨name, params, ret, ext, blocks, contract, names, info⟩ := fn
+  simp only at hb hnames
+  subst hb
+  simp [Plan.apply, Func.mapUses, applyBody, Block.mapUsesList, hnames]
 
 /-- In a checked plan, every edge of the rewritten blocks (before uses are replaced) is
 `P.edge m k` for an edge `k` of the walk that leaves where the content map is `m` and passes
@@ -435,13 +509,14 @@ theorem promoteWith_ok
           generalize List.find? _ _ = o at h
           rcases o with _ | ⟨_, _⟩ <;> simp only [Bool.false_eq_true, ite_false] at h <;> cases h
 
-/-- **`refToRegWith`'s output is checked rewrites.**  The output keeps the module's name, and each
-of its functions is `P.apply S.maps f` for a function `f` of the input and a plan `P` that passes
-`Plan.check` with `S`, the start maps that the check computes from `f`'s tree parents and `P`. -/
+/-- **`refToRegWith`'s output is checked rewrites.**  The output keeps the module's name and its
+ghosts, and each of its functions is `P.apply S.maps f` for a function `f` of the input and a
+plan `P` that passes `Plan.check` with `S`, the start maps that the check computes from `f`'s
+tree parents and `P`. -/
 theorem refToRegWith_ok
     {planner : Std.HashMap Label Point → Func env α → Except String (Plan env)}
     {m m₁ : Module env α} (h : refToRegWith planner m = .ok m₁) :
-    m₁.raw.name = m.raw.name ∧
+    m₁.raw.name = m.raw.name ∧ m₁.raw.ghosts = m.raw.ghosts ∧
     ∀ f₁ ∈ m₁.raw.funcs, ∃ f ∈ m.raw.funcs, ∃ (parents : Std.HashMap Label Point)
       (P : Plan env) (S : Starts), trees f = .ok parents ∧ P.starts parents f = .ok S ∧
         P.check S f = true ∧ f₁ = P.apply S.maps f := by
@@ -458,7 +533,7 @@ theorem refToRegWith_ok
       split at hck
       · simp only [Except.ok.injEq] at hck
         subst hck
-        refine ⟨rfl, ?_⟩
+        refine ⟨rfl, rfl, ?_⟩
         intro f₁ hf₁
         simp only [Array.mem_filterMap, Array.mem_map] at hf₁
         obtain ⟨⟨n, r⟩, ⟨f, hf, hfr⟩, hr⟩ := hf₁

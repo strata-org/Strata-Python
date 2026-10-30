@@ -90,6 +90,8 @@ structure AbbrevD where
 /-- An `insn`, as written.  `ret` is `none` for a terminal one. -/
 structure OpD where
   c : Common
+  /-- Its effect: the keyword's, or `writes` without one. -/
+  effect : Strata.Dyn.Effect
   terminal : Bool
   /-- Name, syntax, kind. -/
   typeParams : Array (String × Syntax × Kind)
@@ -232,6 +234,15 @@ def readKindedParams (ps : Array Syntax) : Array (String × Syntax × Kind) :=
   let read (p : Syntax) (k : Kind) := (p.getId.toString (escape := false), p, k)
   ps.flatMap fun p => if p.isIdent then #[read p .type] else p[1].getArgs.map (read · .list)
 
+/-- Read an `insn`'s effect keyword: `writes` without one.  The keyword is the effect's one
+atom. -/
+def readEffect (eff? : Option (TSyntax `Strata.Dyn.DSL.dynEffect)) : Strata.Dyn.Effect :=
+  match (eff?.bind (·.raw.find? Syntax.isAtom)).map Syntax.getAtomVal with
+  | some "pure" => .pure
+  | some "reads" => .reads
+  | some "calls" => .calls
+  | _ => .writes
+
 /-- Read an `insn`'s type parameters. -/
 def readInsnParams (tps? : Option (TSyntax `Strata.Dyn.DSL.dynInsnParams)) :
     Array (String × Syntax × Kind) :=
@@ -290,8 +301,8 @@ partial def collectDecl (d : TSyntax `dynDecl) (group? : Option (IO.Ref (Array T
     let c ← declare envShort ancestorNames reserved s n (readAs as?) doc?
       (generated := if params.isEmpty then [n.getId ++ `con] else [])
     modify (·.push (.abbrev { c, params, body }))
-  | `(dynDecl| $[$doc?:docComment]? $[$term?:dynTerminal]? insn $n:ident
-        $[$as?:dynAs]? $[$tps?:dynInsnParams]? $bs:dynBinder* $[: $ret?]?) =>
+  | `(dynDecl| $[$doc?:docComment]? $[$eff?:dynEffect]? $[$term?:dynTerminal]? insn
+        $n:ident $[$as?:dynAs]? $[$tps?:dynInsnParams]? $bs:dynBinder* $[: $ret?]?) =>
     let c ← declare envShort ancestorNames reserved s n (readAs as?) doc?
       (generated := opGenerated n.getId)
     let typeParams := readInsnParams tps?
@@ -299,7 +310,9 @@ partial def collectDecl (d : TSyntax `dynDecl) (group? : Option (IO.Ref (Array T
     | some _, some r => err r "a terminal instruction has no result type"
     | none, none => err n s!"`{showName n.getId}` needs a result type `: τ`"
     | _, _ => pure ()
-    modify (·.push (.op { c, terminal := term?.isSome, typeParams, binders := bs, ret := ret? }))
+    let effect := readEffect eff?
+    modify (·.push (.op { c, effect, terminal := term?.isSome, typeParams, binders := bs,
+                          ret := ret? }))
   | `(dynDecl| namespace $n:ident) =>
     modify fun st =>
       { st with frames := st.frames.push { name := n.getId, ref := n, opens := #[] } }
@@ -737,7 +750,7 @@ partial def checkPositive (known : Std.HashMap Name Known) (members : Array Name
     for e in es do checkPositive known members pol ref e under
 
 /-- The case instruction of the datatype `d`, whose constructors are `rcs`:
-`terminal insn T.case [a …] (scrutinee : T a …) (^c₁ (x : τ)) …`, one successor per
+`pure terminal insn T.case [a …] (scrutinee : T a …) (^c₁ (x : τ)) …`, one successor per
 constructor, in declaration order, receiving its fields.  A successor is named by its
 constructor, so no constructor is named as a parameter of `T` or as `scrutinee`, as
 `DataGroup.checkNames` and `Env.admissible` require. -/
@@ -759,7 +772,8 @@ def caseOp (d : TypeD) (rcs : Array RCtor) :
              doc? := some (mkDoc s!"Eliminate a `{en}`: one successor per constructor, in \
                declaration order, each receiving its constructor's fields."),
              ctx := d.c.ctx }
-      terminal := true, typeParams := d.params.map (fun (x, r, _, k) => (x, r, k)),
+      effect := .pure, terminal := true,
+      typeParams := d.params.map (fun (x, r, _, k) => (x, r, k)),
       binders := #[],
       ret := none }
   let self : Ty := .app (dynName d.c.envName) (TypeExpr.Raw.vars (d.params.map (·.2.2.2)))

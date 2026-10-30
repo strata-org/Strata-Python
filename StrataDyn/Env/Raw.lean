@@ -62,6 +62,9 @@ A terminal instruction, one with no return type, ends its block: it never falls 
 it leaves only by a successor, and it produces no result.  One with a return type falls
 through to the next instruction, and may also transfer to any successor.
 
+Its effect bounds what the operation itself may do, its regions aside; `writes` unless it says
+otherwise.
+
 A constructor of a datatype is an instruction like any other, and so is a datatype's case
 instruction; `kind` says which, and where it sits in its group.  Only adding the group
 declares either: well-formedness checks such a declaration against the declaration the group
@@ -77,6 +80,7 @@ structure InsnDecl.Raw (α : Type) where
   returnType : Option TypeExpr.Raw
   regions : Array (Param RegionSig.Raw) := #[]
   succs : Array (Param (Array TypeExpr.Raw)) := #[]
+  effect : Effect := .writes
   kind : InsnKind := .decl
 deriving DecidableEq
 
@@ -211,8 +215,8 @@ namespace DataGroup
 
 /-- The instruction that is constructor `c`, the `j`th of `m`, the group's `i`th member.  Its
 type parameters are `m`'s, by name and in order, each of its kind; its arguments are `c`'s
-payload; it returns `m` applied to its parameters; and it is marked as that constructor.  No
-variadic, regions or successors, and not terminal. -/
+payload; it returns `m` applied to its parameters; it is `pure`; and it is marked as that
+constructor.  No variadic, regions or successors, and not terminal. -/
 @[expose]
 def ctorDecl (g : DataGroup α TypeExpr.Raw) (i : Nat) (m : DatatypeDecl α TypeExpr.Raw) (j : Nat)
     (c : Ctor α TypeExpr.Raw) : InsnDecl.Raw α where
@@ -221,6 +225,7 @@ def ctorDecl (g : DataGroup α TypeExpr.Raw) (i : Nat) (m : DatatypeDecl α Type
   typeParams := m.params.map fun p => ⟨p.name, p.type.kind⟩
   argTypes := c.args
   returnType := some (.app m.name (TypeExpr.Raw.vars (TyParam.kinds m.params)))
+  effect := .pure
   kind := .ctor ⟨g.first.name, i, j⟩
 
 /-- A constructor's instruction is named as the constructor is. -/
@@ -238,7 +243,8 @@ def ctorInsn? (g : DataGroup α TypeExpr.Raw) (i j : Nat) : Option (InsnDecl.Raw
 /-- The case instruction of `m`, the group's `i`th member: terminal; `m`'s type parameters,
 by name and in order, each of its kind; one argument `scrutinee`, of `m` applied to its
 parameters; and one successor per constructor, in declaration order, named by the last
-component of the constructor's name and receiving its payload.  It is marked as `m`'s case. -/
+component of the constructor's name and receiving its payload.  It is `pure`, and marked as
+`m`'s case. -/
 @[expose]
 def caseDecl (g : DataGroup α TypeExpr.Raw) (i : Nat) (m : DatatypeDecl α TypeExpr.Raw) :
     InsnDecl.Raw α where
@@ -248,6 +254,7 @@ def caseDecl (g : DataGroup α TypeExpr.Raw) (i : Nat) (m : DatatypeDecl α Type
   argTypes := #[⟨"scrutinee", .app m.name (TypeExpr.Raw.vars (TyParam.kinds m.params))⟩]
   returnType := none
   succs := m.ctors.map fun c => ⟨c.name.lastString, c.args.map (·.type)⟩
+  effect := .pure
   kind := .case ⟨g.first.name, i⟩
 
 /-- A member's case instruction is named after the member. -/
@@ -912,6 +919,14 @@ that group, and which constructor of that datatype. -/
 def ctorAddr? (env : Env.Raw α) (n : Name) : Option CtorAddr :=
   match env.decls[n]? with
   | some (.insn d) => d.kind.ctor?
+  | _ => none
+
+/-- Which datatype the name `n` eliminates, if it names a case instruction: its group's head,
+and which datatype of that group. -/
+@[expose]
+def caseAddr? (env : Env.Raw α) (n : Name) : Option CaseAddr :=
+  match env.decls[n]? with
+  | some (.insn d) => d.kind.case?
   | _ => none
 
 @[expose]

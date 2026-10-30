@@ -70,9 +70,10 @@ module m {
   `base.Except.case[base.Int, base.Int](%e.0) ^ok.0() ^err.0()`.  The base's control flow
   drops `base.`: `jump ^done.0(%v.0)`, `branch(%c.0) ^some.0() ^none.0()` and `unreachable`.
   A jump to the exit is `ret(%ret.0)`.
-* A name prints dotted, as one identifier, escaped whole when a segment needs it:
-  `@|m.<module>|`.  A numeric segment prints as its digits: `entry.0`.  A function's name is
-  marked `@`, both where it is defined and where a constant names it: `ret(@m.counter)`.
+* A name prints dotted, as one identifier, escaped whole when a segment needs it or the name is
+  a keyword: `@|m.<module>|`, `module |ret| {`.  A numeric segment prints as its digits:
+  `entry.0`.  A function's name is marked `@`, both where it is defined and where a constant
+  names it: `ret(@m.counter)`.
 * A literal carries no type tag, and its form fixes its type exactly, with no widening.  An
   integer, `5` or `-1`, is a `base.Int`.  A float always has a decimal point or an exponent,
   `1.0`, `0.0025` or `1e22`, and is the shortest decimal that reads back as it, or `inf`,
@@ -93,12 +94,77 @@ module m {
 }
 ```
 
-By default each constant a function uses is written at its uses, and its own line is
+* A function's contract prints between its signature and its body: `requires` clauses,
+  then `ensures` clauses, each a region, then the frames, `reads(…)` and `writes(…)`.  A frame's
+  entries are cells, `writes(%c.0)`, and regions, each in braces: `writes(%c.0, { … })`.  The
+  body's brace then opens a line of its own:
+
+```
+func @m.inc(%x.0 : base.Int) -> base.Int
+  requires {
+    pre.0():
+      %ok.0 : base.Bool = demo.ge(%x.0, 0)
+      ret(%ok.0)
+  }
+{
+  entry.0(%x.0 : base.Int):
+    ret(%x.0)
+}
+```
+
+* A clause's message follows its keyword, and a free `ensures` clause is marked `free`.  An
+  extern function prints as `extern func`, its signature and its contract, with no body and no
+  attributes; without a contract it is one line:
+
+```
+extern func @m.f(%x.0 : base.Int) -> base.Int
+  requires "x is non-negative" {
+    pre.0():
+      %ok.0 : base.Bool = demo.ge(%x.0, 0)
+      ret(%ok.0)
+  }
+  free ensures "admitted postcondition of 'f'" {
+    post.0(%r.0 : base.Int):
+      %ok.1 : base.Bool = demo.ge(%r.0, 0)
+      ret(%ok.1)
+  }
+```
+
+* A module's ghosts print before its functions, each `ghost`, its name, the type of its
+  contents, then its initializer after `=` and its invariant after `invariant`, each if it has
+  one.  A ghost's cell is the constant `ghost @m.count`, a `base.Ref` of the ghost's type:
+
+```
+module m {
+  ghost @m.count : base.Int = {
+    init.0():
+      ret(0)
+  } invariant {
+    inv.0(%v.0 : base.Int):
+      %ok.0 : base.Bool = demo.ge(%v.0, 0)
+      ret(%ok.0)
+  }
+  func @m.f() -> base.Int
+    requires {
+      pre.0():
+        %n.0 : base.Int = base.refGet[base.Int](ghost @m.count)
+        %ok.0 : base.Bool = demo.ge(%n.0, 1)
+        ret(%ok.0)
+    }
+  {
+    entry.0():
+      ret(0)
+  }
+}
+```
+
+By default each constant a function or a ghost uses is written at its uses, and its own line is
 dropped: `%int.0 : py.Value = py.intLit(1)` rather than `%c.0 : base.Int = const 1` and
 `%int.0 : py.Value = py.intLit(%c.0)`.  The folded form is in the same dialect.
 
-Two names do not read back as printed: one whose string segment is empty, all digits or
-contains `.`, and one that is a keyword of the dialect as a whole, such as `ret` or `unit`.
+A name whose string segment is empty, all digits or contains `.` does not read back as printed.
+A name spelled like a keyword of the dialect, such as `ret` or `unit`, prints pipe-delimited:
+`module |ret| {`.
 -/
 
 namespace Strata.Dyn
@@ -160,6 +226,8 @@ op constInt (i : MInt) : MConst => i:0;
 op constFloat (f : MFloat) : MConst => f:0;
 op constStr (s : Str) : MConst => s;
 op constFunc (f : MFuncName) : MConst => f;
+/* The cell of a ghost of the module. */
+op constGhost (g : MFuncName) : MConst => "ghost " g:0;
 
 /* An operand: a value, or a constant written where it is used. */
 category MOperand;
@@ -226,13 +294,63 @@ op attr (key : MName, value : MAttrValue) : MAttr => @[prec(0)] "\n" "#[" key " 
 category MAttrs;
 op attrs (as : Seq MAttr) : MAttrs => @[prec(0)] as "\n";
 
+/* A clause's message, which names it in diagnostics. */
+category MMessage;
+op message (s : Str) : MMessage => " " s;
+
+/* An `ensures` clause that is assumed and never checked. */
+category MFree;
+op free () : MFree => "free ";
+
+/* An entry of a frame: a cell among the parameters, or a frame region in braces, which returns a
+   `base.Loc`.  Commas separate the entries. */
+category MFrameEntry;
+op frameCell (v : MVal) : MFrameEntry => v;
+op frameRegion (blocks : Seq MBlock) : MFrameEntry => @[prec(0)] "{" indent(2, blocks) "\n" "}";
+
+/* A clause of a function's contract: a region returning a `base.Bool`, or a frame, the locations
+   the function may read or change.  Only an `ensures` clause may be `free`. */
+category MClause;
+op clauseRequires (msg : Option MMessage, r : MRegion) : MClause =>
+  @[prec(0)] "\n" "requires" msg r;
+op clauseEnsures (free : Option MFree, msg : Option MMessage, r : MRegion) : MClause =>
+  @[prec(0)] "\n" free "ensures" msg r;
+op clauseReads (entries : CommaSepBy MFrameEntry) : MClause =>
+  @[prec(0)] "\n" "reads" "(" entries ")";
+op clauseWrites (entries : CommaSepBy MFrameEntry) : MClause =>
+  @[prec(0)] "\n" "writes" "(" entries ")";
+
 category MFunc;
 op func (name : MFuncName, params : CommaSepBy MValDecl, retType : MType,
          attrs : Option MAttrs, blocks : Seq MBlock) : MFunc =>
   @[prec(0)] "\n" "func " name "(" params ") -> " retType " {" indent(2, attrs blocks) "\n" "}";
+/* A function with a contract: its clauses, at least one, follow the signature, and the body's
+   brace opens a line of its own. */
+op funcContract (name : MFuncName, params : CommaSepBy MValDecl, retType : MType,
+                 clause : MClause, clauses : Seq MClause, attrs : Option MAttrs,
+                 blocks : Seq MBlock) : MFunc =>
+  @[prec(0)] "\n" "func " name "(" params ") -> " retType indent(2, clause clauses) "\n" "{"
+    indent(2, attrs blocks) "\n" "}";
+/* An extern function: its signature and its contract's clauses, and no body. */
+op funcExtern (name : MFuncName, params : CommaSepBy MValDecl, retType : MType,
+               clauses : Seq MClause) : MFunc =>
+  @[prec(0)] "\n" "extern" " func " name "(" params ") -> " retType indent(2, clauses);
 
-op moduleDecl (name : MName, funcs : Seq MFunc) : Command =>
-  @[prec(0)] "module " name " {" indent(2, funcs) "\n" "}\n";
+/* A ghost of the module: a cell that only contracts can name, with the type of its contents,
+   then its initializer, a region after `=`, and its invariant, a region after `invariant`, each
+   if it has one. */
+category MGhostInit;
+op ghostInit (r : MRegion) : MGhostInit => " =" r:0;
+category MGhostInvariant;
+op ghostInvariant (r : MRegion) : MGhostInvariant => " invariant" r:0;
+category MGhost;
+op ghost (name : MFuncName, ty : MType, init : Option MGhostInit,
+          inv : Option MGhostInvariant) : MGhost =>
+  @[prec(0)] "\n" "ghost " name " : " ty init inv;
+
+/* A module: its ghosts, then its functions. */
+op moduleDecl (name : MName, ghosts : Seq MGhost, funcs : Seq MFunc) : Command =>
+  @[prec(0)] "module " name " {" indent(2, ghosts funcs) "\n" "}\n";
 #end
 
 -- The generated AST binds its annotation type implicitly, so this command needs
@@ -343,6 +461,7 @@ def const : Const → MConst SourceRange
   | .float f => .constFloat .none (float f)
   | .str s => .constStr .none ⟨.none, s⟩
   | .func target => .constFunc .none (funcName target)
+  | .ghost g => .constGhost .none (funcName g)
 
 /-! ### Folding constants
 
@@ -413,10 +532,13 @@ end
 
 end Uses
 
-/-- The constants of `blocks` to fold: those used at least once. -/
-def folded {env : Env Unit} {α : Type} (blocks : Array (Block env α)) : Folded :=
-  let u := Uses.blockList {} blocks.toList
+/-- The constants to fold, of what `u` gathered: those used at least once. -/
+def Uses.folded (u : Uses) : Folded :=
   u.consts.filter fun i _ => u.used.contains i
+
+/-- The constants of `fn`'s body and contract to fold. -/
+def folded {env : Env Unit} {α : Type} (fn : Func env α) : Folded :=
+  (Uses.regionList (Uses.blockList {} fn.blocks.toList) fn.contract.regions).folded
 
 mutual
 
@@ -485,19 +607,71 @@ def attrs (as : Array Attr) : Ann (Option (MAttrs SourceRange)) SourceRange :=
   if as.isEmpty then ⟨.none, none⟩
   else ⟨.none, some (.attrs .none ⟨.none, as.map fun (k, v) => .attr .none (name k) (attrValue v)⟩)⟩
 
-/-- A function.  Its parameters are the entry block's, so they are read from there. -/
+/-- A clause's message, absent when it has none. -/
+def message (m : Option String) : Ann (Option (MMessage SourceRange)) SourceRange :=
+  ⟨.none, m.map fun s => .message .none ⟨.none, s⟩⟩
+
+/-- A clause's region. -/
+def clauseRegion {env : Env Unit} {α : Type} (cx : Cx) (r : Region env α) : MRegion SourceRange :=
+  .region .none ⟨.none, ⟨blockList cx r.blocks.toList⟩⟩
+
+/-- A `requires` clause. -/
+def requiresClause {env : Env Unit} {α : Type} (cx : Cx) (c : Clause env α) :
+    MClause SourceRange :=
+  .clauseRequires .none (message c.message) (clauseRegion cx c.region)
+
+/-- An `ensures` clause, marked `free` if it is. -/
+def ensuresClause {env : Env Unit} {α : Type} (cx : Cx) (c : Clause env α) :
+    MClause SourceRange :=
+  .clauseEnsures .none ⟨.none, if c.free then some (.free .none) else none⟩ (message c.message)
+    (clauseRegion cx c.region)
+
+/-- An entry of a frame: a cell, or a region in braces. -/
+def frameEntry {env : Env Unit} {α : Type} (cx : Cx) : FrameEntry env α → MFrameEntry SourceRange
+  | .cell v => .frameCell .none (val cx.names v)
+  | .region r => .frameRegion .none ⟨.none, ⟨blockList cx r.blocks.toList⟩⟩
+
+/-- A frame, `kw` its kind: absent, or its entries. -/
+def frame {env : Env Unit} {α : Type} (cx : Cx)
+    (kw : SourceRange → Ann (Array (MFrameEntry SourceRange)) SourceRange → MClause SourceRange) :
+    Option (Array (FrameEntry env α)) → Array (MClause SourceRange)
+  | none => #[]
+  | some es => #[kw .none ⟨.none, es.map (frameEntry cx)⟩]
+
+/-- A function.  A function with a contract prints it after the signature: `requires` clauses,
+`ensures` clauses, then the frames.  An extern prints no body, and its attributes are not
+printed. -/
 def func {env : Env Unit} {α : Type} [HasAttrs α] (opts : PrintOptions) (fn : Func env α) :
     MFunc SourceRange :=
-  let cx : Cx := { fold := if opts.foldConsts then folded fn.blocks else {}, names := fn.names }
-  .func .none (funcName fn.name)
-    ⟨.none, (fn.blocks[0]?.map (·.params.map (valDecl cx.names))).getD #[]⟩
-    (type fn.retType)
-    (attrs (HasAttrs.attrs fn.info))
-    ⟨.none, fn.blocks.map (block cx)⟩
+  let cx : Cx := { fold := if opts.foldConsts then folded fn else {}, names := fn.names }
+  let params := ⟨.none, fn.params.map (valDecl cx.names)⟩
+  let clauses := fn.contract.requires.map (requiresClause cx) ++
+    fn.contract.ensures.map (ensuresClause cx) ++
+    frame cx .clauseReads fn.contract.reads ++ frame cx .clauseWrites fn.contract.writes
+  if fn.extern then .funcExtern .none (funcName fn.name) params (type fn.retType) ⟨.none, clauses⟩
+  else
+    let blocks := ⟨.none, fn.blocks.map (block cx)⟩
+    let as := attrs (HasAttrs.attrs fn.info)
+    match clauses[0]? with
+    | none => .func .none (funcName fn.name) params (type fn.retType) as blocks
+    | some c =>
+      .funcContract .none (funcName fn.name) params (type fn.retType) c
+        ⟨.none, clauses.extract 1⟩ as blocks
+
+/-- A ghost: its name, its type, and its initializer and invariant, each if it has one.  A ghost's
+annotation's attributes are not printed. -/
+def ghost {env : Env Unit} {α : Type} (opts : PrintOptions) (g : Ghost env α) :
+    MGhost SourceRange :=
+  let cx : Cx := { fold := if opts.foldConsts then (Uses.regionList {} g.regions).folded else {},
+                   names := g.names }
+  .ghost .none (funcName g.name) (type g.type)
+    ⟨.none, g.init.map fun r => .ghostInit .none (clauseRegion cx r)⟩
+    ⟨.none, g.invariant.map fun r => .ghostInvariant .none (clauseRegion cx r)⟩
 
 def module {env : Env Unit} [base ≼ env] {α : Type} [HasAttrs α] (opts : PrintOptions)
     (m : Module.Raw env α) : DDM.Command SourceRange :=
-  .moduleDecl .none (name m.name) ⟨.none, m.funcs.map (func opts)⟩
+  .moduleDecl .none (name m.name) ⟨.none, m.ghosts.map (ghost opts)⟩
+    ⟨.none, m.funcs.map (func opts)⟩
 
 end ToDDM
 
@@ -505,7 +679,8 @@ end ToDDM
 
 namespace Print
 
-def context : FormatContext := .ofDialects DDM.Dyn_map
+-- A name spelled like a keyword prints pipe-delimited, so that it reads back.
+def context : FormatContext := .ofDialects DDM.Dyn_map (opts := { quoteKeywords := true })
 
 def state : FormatState where
   openDialects := DDM.Dyn_map.toList.foldl (init := {}) fun s d => s.insert d.name
@@ -543,6 +718,6 @@ public instance {env : Env Unit} [base ≼ env] {α : Type} [HasAttrs α] :
 function that is not well formed can print text that reads back as a different function. -/
 public def Func.format {env : Env Unit} {α : Type} [HasAttrs α] (opts : PrintOptions) (fn : Func env α) :
     String :=
-  Print.render (.moduleDecl .none (ToDDM.name fn.name) ⟨.none, #[ToDDM.func opts fn]⟩)
+  Print.render (.moduleDecl .none (ToDDM.name fn.name) ⟨.none, #[]⟩ ⟨.none, #[ToDDM.func opts fn]⟩)
 
 end Strata.Dyn

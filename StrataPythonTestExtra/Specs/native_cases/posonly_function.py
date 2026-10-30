@@ -1,0 +1,3 @@
+# A positional-only parameter is rejected: PySpec has no form for it.
+def f(x: int, /) -> None:
+    ...

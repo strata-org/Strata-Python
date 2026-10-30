@@ -83,4 +83,43 @@ open StrataPython.V2TestUtil
     unless caller.contains "m: Marker" && caller.contains "m#kind" do
       throw <| IO.userError s!"Methodless modeled class did not bind:\n{caller}"
 
+-- Wrong today: `K("").m()` breaks the assert `len(region) >= 1` of `K.__init__`, but
+-- V2 checks the contract of a model's `__init__` at no call yet (card "Laurel front
+-- ends: Check model constructor contracts"), so the analysis succeeds.
+/-- info: obligations: 0 -/
+#guard_msgs in
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupPySpecs pythonCmd tmpDir #["servicelib.Ctor"]
+    let results ← runAndVerify pythonCmd tmpDir "test_ctor_contract_method.py"
+      #["servicelib.Ctor"]
+    IO.println s!"obligations: {results.size}"
+
+-- The `@overload` stubs of `__init__` get no procedure, so the model loads, and a
+-- program that does not construct the class verifies.
+/-- info: obligations: 0 -/
+#guard_msgs in
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupPySpecs pythonCmd tmpDir #["servicelib.Overloaded"]
+    let results ← runAndVerify pythonCmd tmpDir "test_overloaded_init.py"
+      #["servicelib.Overloaded"]
+    IO.println s!"obligations: {results.size}"
+
+-- A call of an overloaded method with no contract creates no obligation, and it
+-- assumes nothing about its result, so the assert after it is not proved.
+/--
+info: obligations: 1
+❓ unknown
+-/
+#guard_msgs in
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupPySpecs pythonCmd tmpDir #["servicelib.Overloaded"]
+    let results ← runAndVerify pythonCmd tmpDir "test_overloaded_method_call.py"
+      #["servicelib.Overloaded"]
+    IO.println s!"obligations: {results.size}"
+    for r in results do
+      IO.println r.formatOutcome
+
 end StrataPython.AnalyzeV2PySpecClassTest

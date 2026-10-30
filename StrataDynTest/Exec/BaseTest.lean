@@ -7,11 +7,13 @@ module
 public import StrataDyn.Exec.Base
 public import StrataDyn.Exec.Run
 public import StrataDyn.DomCompute
+import StrataDyn.DDMRead
 import StrataDyn.Env.WF
 import StrataDynTest.Exec.Demo
--- `#guard` runs the engine and the programs as compiled code.
+-- `#guard` runs the engine and the programs as compiled code, and `#eval` the reader too.
 meta import StrataDyn.Exec.Base
 meta import StrataDyn.Exec.Run
+meta import StrataDyn.DDMRead
 meta import StrataDyn.Env.WF
 meta import StrataDyn.DomCompute
 
@@ -23,7 +25,9 @@ set_option autoImplicit false
 `#dyn_coverage (complete)` holds of the base and fails on an environment with missing
 rules.  The base's own table, `BaseSem`, runs programs that use nothing but the base: its
 control flow through `Terminator.ret`, `.jump`, `.branch` and `.unreachable`, `Except` and
-`Unit` and their case instructions, cells, and calls through typed code pointers.
+`Unit` and their case instructions, cells, and calls through typed code pointers.  `base.cellLoc`
+stops with a gap.  A run ignores a function's contract and the module's ghosts, and rejects a
+module with an extern function.
 -/
 
 namespace Strata.Dyn.ExecTest.BaseTest
@@ -61,9 +65,11 @@ def blk (s : String) (params : List (ValDecl E)) (instrs : List (Instruction E U
     (t : Terminator E Unit) : Block E Unit :=
   ⟨⟨nm s⟩, params.toArray, instrs.toArray, t, ()⟩
 
-/-- A function, its values named. -/
+/-- A function, its parameters its entry block's, its values named. -/
 def fn (s : String) (ret : TypeExpr E) (bs : List (Block E Unit)) : Func E Unit :=
-  let f : Func E Unit := ⟨nm s, ret, bs.toArray, #[], ()⟩
+  let f : Func E Unit :=
+    { name := nm s, params := (bs.head?.map (·.params)).getD #[], retType := ret,
+      blocks := bs.toArray, names := #[], info := () }
   { f with names := (Array.range (ValDecl.idBound f.defs)).map (.num (.str .base "v")) }
 
 def cst (n : Nat) (t : TypeExpr E) (c : Const) : Instruction E Unit := .const () (d n t) c
@@ -119,9 +125,16 @@ def twice : Func E Unit := fn "twice" intT [
 /-- `never()`: control reaches `unreachable`. -/
 def never : Func E Unit := fn "never" intT [blk "entry" [] [] (.unreachable ())]
 
+/-- `loc()`: the location of a new cell, by `base.cellLoc`, then `0`. -/
+def loc : Func E Unit := fn "loc" intT [
+  blk "entry" [] [cst 0 intT (.int 0), app 1 (Base.Ref intT) Base.refNew.ref ⟨#[.ty intT], rfl⟩ [0],
+    app 2 Base.Loc Base.cellLoc.ref ⟨#[.ty intT], rfl⟩ [1]]
+  (ret 0)]
+
 /-- The module of every function above, checked. -/
 def all : Except (Array Name) (Module E Unit) :=
-  Module.Raw.check ⟨nm "base", #[pick, unwrap, wrap, flip, idI, twice, never], ()⟩
+  Module.Raw.check
+    { name := nm "base", funcs := #[pick, unwrap, wrap, flip, idI, twice, never, loc], info := () }
 
 /-- `n` as an argument. -/
 def int (n : Int) : BaseSem.model.Arg := BaseSem.model.arg n
@@ -161,5 +174,94 @@ end
 #guard match (run "never" #[]).result with
   | .fault (.failure _) => true
   | _ => false
+
+-- `cellLoc` stops with a gap: frames have no meaning at run time.
+#guard match (run "loc" #[]).result with
+  | .fault (.gap m) => m == "base.cellLoc: frames have no meaning at run time"
+  | _ => false
+
+/-! ## What a run ignores
+
+Linking reads only function bodies, so a run ignores contracts and ghosts.  `@m.f`'s `requires`
+and `ensures` clauses both return `false`, its `ensures` clause applies `base.old`, its `requires`
+clause reads the ghost `@m.count` and its `writes` frame is that ghost's cell.  `@m.main` still
+calls `@m.f` and gets its result, `7`.  A module with an extern function does not run yet: the
+extern has no blocks, so its code pointer has a signature other than its declared one. -/
+
+/-- A module of a ghost, a function whose contract names it, and a caller of that function. -/
+private def contractText : String := "module m {
+  ghost @m.count : base.Int = {
+    init.0():
+      ret(0)
+  }
+  func @m.f(%c.0 : base.Ref(base.Int)) -> base.Int
+    requires {
+      pre.0():
+        %n.0 : base.Int = base.refGet[base.Int](ghost @m.count)
+        ret(false)
+    }
+    ensures {
+      post.0(%r.0 : base.Int):
+        %o.0 : base.Int = base.old[base.Int, base.Int] ^fail.0() {
+          old.0():
+            %v.0 : base.Int = base.refGet[base.Int](%c.0)
+            %w.0 : base.Except(base.Int, base.Int) = base.ok[base.Int, base.Int](%v.0)
+            ret(%w.0)
+        }
+        ret(false)
+      fail.0(%e.0 : base.Int):
+        ret(false)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = base.cellLoc[base.Int](ghost @m.count)
+        ret(%l.0)
+    })
+  {
+    entry.0(%c.0 : base.Ref(base.Int)):
+      %v.1 : base.Int = base.refGet[base.Int](%c.0)
+      ret(%v.1)
+  }
+  func @m.main() -> base.Int {
+    entry.0():
+      %c.1 : base.Ref(base.Int) = base.refNew[base.Int](7)
+      %p.0 : base.Fn([base.Ref(base.Int)], base.Int) = const @m.f
+      %r.1 : base.Int = base.callCode[[base.Ref(base.Int)], base.Int](%p.0, %c.1)
+      ret(%r.1)
+  }
+}
+"
+
+/-- A module of an extern function and a caller of it. -/
+private def externText : String := "module m {
+  extern func @m.e(%x.0 : base.Int) -> base.Int
+  func @m.main() -> base.Int {
+    entry.0():
+      %p.0 : base.Fn([base.Int], base.Int) = const @m.e
+      %r.0 : base.Int = base.callCode[[base.Int], base.Int](%p.0, 1)
+      ret(%r.0)
+  }
+}
+"
+
+/-- Read `text`, run its `@m.main`, and print the result as an `Int`, or the fault, or the
+reader's diagnostics. -/
+private def runMain (text : String) : IO Unit := do
+  match ← Module.read E text "t.dyn" with
+  | .error e => IO.println e
+  | .ok m =>
+    let o := runModule BaseSem.model m (.str (nm "m") "main") #[] 1000
+    match o.result with
+    | .fault (.invalid msg) => IO.println s!"invalid: {msg}"
+    | .fault f => IO.println (repr f)
+    | _ => IO.println (repr (o.read? Int))
+
+/-- info: some 7 -/
+#guard_msgs in
+#eval runMain contractText
+
+/-- info: invalid: m.e: a code pointer at another signature than its function's -/
+#guard_msgs in
+#eval runMain externText
 
 end Strata.Dyn.ExecTest.BaseTest

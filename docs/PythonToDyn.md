@@ -9,7 +9,8 @@ specified in [`Dyn.md`](./Dyn.md).
 The scope is the Python subset the front end analyses: functions, classes, closures,
 control flow, exceptions, `with`, and comprehensions. Generators, `async` and `match` are
 rejected (§6.9). The gaps found in the environment and builder while writing this design
-doc are listed in §8.
+doc are listed in §8. §12 gives the rules by which a PySpec model, a description of a library
+without its code, is represented in Dyn.
 
 **The translator** is `PyTranslate.translate` in `StrataPython/Dyn/Translate.lean`. §11
 marks what it implements, and the module docstring has a recipe for adding a construct.
@@ -140,10 +141,88 @@ are in `StrataPython/Dyn/Build.lean`.
   receives the exception as a `py.Value`. The operation's result is its success value. The
   translator passes the label of the enclosing handler as `err`.
 - **Total operations** have no successors. These are the literals, `undef`, `isDefined`,
-  `is`/`isNot`, `mkTuple`/`mkList`/`mkKwargs`, `listToTuple`, `mkSlice`, `tupleLen`, `tupleGet`,
-  `dictLen`, `dictGet`, `dictFirstKey`, `dictDiscard`, `listAppend`, `isStopIteration`,
-  `strConcat`, `globalCell`, `mkClosure`, `assertionError` and `unsupported`. `mkSet` and `mkDict` raise, because hashing a key runs `__hash__` and
-  `__eq__`.
+  `is`/`isNot`, `mkTuple`/`mkList`/`mkKwargs`, `listToTuple`, `mkSlice`, `tupleGet`,
+  `listAppend`, `isStopIteration`, `strConcat`, `globalCell`, `mkClosure`, `assertionError`,
+  `pushExcInfo`, `pushPending`, `popExcept`, the `Completion` constructors and `unsupported`.
+  `mkSet` and `mkDict` raise, because hashing a key and comparing it with a stored key may run
+  `__hash__` and `__eq__`. Of the operations for contracts (below), all are total except
+  `isInstance`, `typeIsSubclass`, `len`, `reSearch` and the quantifiers. Some operations assume
+  something of their operands, such as that the index of a `tupleGet` is in range, and
+  `Env.lean` lists them. Where the assumption fails, the result is not defined, so a contract
+  region that applies the operation there is not well defined.
+- **Effects.** Each operation declares its effect, an upper bound on what it may do
+  ([Dyn](./Dyn.md#1-overview), *Effects*): `pure`, such as `is` or a literal; `reads`,
+  such as `listToTuple`; `calls`, which may run code that the IR does not show, such as a dunder
+  method in `add` or `truthy`, or a built-in iterator's `__next__` in `in`; or `writes`, such as
+  `call` or `setItem`. A contract applies no `writes` operation. An operation that raises an
+  exception of its own reads the exception being handled, which becomes the new exception's
+  `__context__` (§7.1), so it is never `pure`. Three operations stand for a Python check that
+  uses a cache, and none of them fills it: `py.isInstance` gives what `isinstance` gives in the
+  current state, the caches of `ABCMeta`'s checks included, but does not fill them;
+  `py.typeIsSubclass` neither reads nor fills them; and `py.reSearch` does not use the cache of
+  compiled patterns of `re`.
+- **Operations for contracts.** A contract of a Python function, such as one of a PySpec model,
+  uses operations that the translator does not emit. Their docstrings in `Env.lean` state what
+  each one means.
+  - *Arguments.* A function receives `args` and `kwargs`. `py.argOf(args, kwargs, pos, name,
+    default)` is the value that the call binds to a parameter, with `pos` being -1 for a
+    keyword-only one. `py.extraKwargs(kwargs, names…)` is the dict that a `**kw` parameter
+    receives. `py.bindsTo(args, kwargs, nPos, varKw, names…)` says whether binding raises no
+    `TypeError` for a parameter given twice, an unexpected keyword or too many positional
+    arguments.
+  - *Tests.* `py.stdClass(module, name)` is a class of the standard library, whatever the program
+    rebinds. `py.isInstance` is `isinstance`, and `py.typeIsSubclass(v, cls)` tests `type(v)`
+    against `cls` by its MRO and by the standard library's registrations and hooks only.
+    `py.len` is `len`, and `py.reSearch(pattern, s)` is whether `re.search` finds a match.
+    `py.strIsOneOf(v, lits…)` and `py.intIsOneOf(v, lits…)` test for one of a few literals, and
+    `py.dictKeysWithin(d, keys…)` tests that a dict has only the given keys.
+    `py.isImmutableScalar(v)` tests that the type of `v` is exactly one of the built-in types
+    `int`, `float`, `complex`, `bool`, `str`, `bytes` and `NoneType`, whose objects hold no
+    mutable state.
+  - *Quantifiers.* `py.allIn`, `py.anyIn`, `py.allItems` and `py.anyItems` run a body over the
+    elements of a list, tuple, set or frozenset, the keys of a dict, or the entries of a dict.
+    The body returns `base.Except(py.Value, base.Bool)`. A failure in it goes to a propagating
+    block, so the quantifier raises and the clause takes its failure value. The quantifier raises
+    if the body fails for any member, whatever the others give. CPython's `all(...)` may stop
+    at a false member before reaching the one that raises, but then a `requires` clause is
+    `false` and a `free ensures` clause `true`, so this errs only toward the failure value.
+  - *Locations*, of type `base.Loc`, which a frame computes at the call: `py.attrLoc(obj, name)`,
+    an attribute, wherever `obj` stores it; `py.itemLoc(obj, key)`, an entry of a dict;
+    `py.objLoc(obj)`, every location of `obj`; `py.reachLoc(obj)`, every location other than a
+    `__class__` of `obj` and of every object that `obj` reaches through what objects store (the
+    values of their attributes that are locations, and their elements, keys, values and internal
+    state), never holding or following an attribute of a class or a module; and
+    `py.instanceState`, every attribute other than `__class__` of every object that is neither a
+    class nor a module, and `py.reachLoc` of each such attribute's value. Neither holds a closure
+    cell's contents. A model's frame names `py.instanceState` (§12.5), so a call of a library
+    function may change the attributes of these objects and what they reach.
+
+  Three rules make these tests stricter than the Python they stand for. So such a test may stand
+  for the Python test only at a positive position of a `requires` clause. Everywhere else, such
+  as under `not` or in the condition of an implication or an `if`, and in every `free ensures`
+  clause, the Python test is used: the chain of `py.eq`, or `py.isInstance`.
+  - `py.bindsTo` holds only if every key of `kwargs` is exactly a `str`, not an instance of a
+    subclass, and `py.argOf`, `py.extraKwargs` and `py.dictKeysWithin` compare a key's
+    characters. A subclass may override `__eq__`: CPython 3.12 binds such a keyword with that
+    `__eq__` in a Python function, and by its characters in a built-in one.
+  - `py.strIsOneOf` and `py.intIsOneOf` hold only for an exact `str` or `int`. For those, `==`
+    compares characters or values, so `strIsOneOf(x, "A", "B")` implies `x == "A" or x ==
+    "B"`. `bool` is not an `int` here.
+  - A declared type's test is `py.typeIsSubclass(v, C)` and then, only if it holds,
+    `py.isInstance(v, C)`. The pair is stricter than `isinstance(v, C)`, but `typeIsSubclass`
+    alone is not. It reads `type(v)`, not `v.__class__`, and counts no registration or hook that
+    the program makes, so `typeIsSubclass(Mock(spec=int), int)` is false while
+    `isinstance(Mock(spec=int), int)` is true. It evaluates the MRO that CPython stores for the
+    type, and the standard library's hooks over that MRO, and it never runs a metaclass's
+    `__mro__` property. But a metaclass's `__instancecheck__` or `__mro__` property, a program's
+    `__subclasshook__`, a `__class__` that raises, or an ABC's cache can make `isinstance` false
+    or make it raise where `typeIsSubclass` holds.
+
+  One choice is a trusted modeling assumption: a quantifier ranges over what the container
+  stores. A subclass that changes how it iterates or reads its members, such as by overriding
+  `__iter__`, `items` or `__getitem__`, is quantified over its storage. With `class
+  D(dict): __iter__ = lambda s: iter(["zzz"])`, CPython 3.12 gives `True` for `all(k == "zzz"
+  for k in D(a=1))`, and `py.allIn` gives `false`.
 - **Cells.** A cell is a `base.Ref(py.Value)`, a mutable location. Every Python local is a
   cell: `refNew` creates it, `refSet` writes it and `refGet` reads it. A cell that has not
   been assigned holds `py.undef "x"`. The *ref-to-reg* pass (`docs/Dyn.md` §3) promotes
@@ -170,9 +249,10 @@ are in `StrataPython/Dyn/Build.lean`.
   `IMPORT_FROM` does. Both raise `ImportError`, or whatever the module body raises.
   `py.qualifiedRef module name` reads `module.name` at each use; the translator uses it only
   for builtins that are not names in the source, such as `__build_class__`.
-- **Definedness.** Only `isDefined`, `requireDefined` and `requireUndefined` may consume a
-  value that could be `undef`. `requireDefined v excType msg` passes `v` through, or raises
-  `excType(msg)` if `v` is undefined.
+- **Definedness.** Only `isDefined` and `requireDefined` may consume a value that could be
+  `undef`. `requireDefined v excType msg` passes `v` through, or raises `excType(msg)` if `v` is
+  undefined. One exception is a prologue's defaults tuple (§5.4): it holds `undef` for a
+  parameter without a default, `py.mkTuple` builds it, and `py.bindArgs` reads it.
 - **Completions.** `py.Completion` records how a protected block finished. It is a datatype
   whose five constructors are instructions:
   `completionNormal`, `completionReturn (value)`, `completionRaise (exc)`, `completionBreak`
@@ -182,7 +262,7 @@ are in `StrataPython/Dyn/Build.lean`.
   `m.f`'s parameter types: its cells, then `args` and `kwargs`. `py.mkClosure[cs] code cells…`
   pairs it with the cells it captures, one operand per element of `cs`, the cells' types, to
   make a callable `py.Value`:
-  `insn mkClosure [(cs : list)] (code : Fn [*cs, Value, Value] failing) (*cells : cs) : Value`.
+  `reads insn mkClosure [(cs : list)] (code : Fn [*cs, Value, Value] failing) (*cells : cs) : Value`.
   `py.call f args kwargs` calls any callable.
 - **Function results.** A translated function returns `base.Except(py.Value, py.Value)`.
   `base.ok v` is a normal return and `base.error e` propagates an exception to the caller.
@@ -459,47 +539,39 @@ enclosing scope. Free variables are bound late: a read sees the latest write to 
 ### 5.4 The argument-binding prologue
 
 A call passes one positional tuple and one keyword dict. Binding them to the source
-signature is the callee's job, done by a branch-free *prologue* of ordinary instructions at
-the top of the entry block. Each check raises, so the prologue stays in one block.
-`PyTranslate.prologue` emits it. Each bound parameter is written to its cell, a
-non-constant default is read from its default cell, and the raising checks name
-`Frame.handler` as `err`. A constant default is evaluated in the prologue itself. In a
-class, a private parameter's name is mangled everywhere, its keyword and its error messages
-included, as in CPython: `def m(self, __x)` in class `C` takes the keyword `_C__x`.
+signature is the callee's job, done by a branch-free *prologue* at the top of the entry block.
+`PyTranslate.prologue` emits it. In a class, a private parameter's name is mangled everywhere,
+its keyword included, as in CPython: `def m(self, __x)` in class `C` takes the keyword `_C__x`.
 
-`fill` holds one slot per positional parameter: its default, or `undef` if it has none.
-`pad` is the argument tuple padded to full length, so parameter `i` is `pad[i]` with no
-bounds test. A parameter may arrive by keyword instead, so its value is
-`kwargs.get(name, pad[i])`, one instruction and no branch; a positional-only parameter skips
-that lookup, which excludes it from keyword matching. `*rest` and `**kw` are fresh, as in
-CPython: `**kw` is `kwargs` with every named parameter discarded, leaving exactly the
-unmatched keywords.
+A function's prologue builds its defaults with `py.mkTuple`, applies `py.bindArgs` to its `args` and
+`kwargs`, and takes each parameter, `*args` and `**kw` from the result with `py.tupleGet`. The
+prologue binds as CPython 3.12 does, with one difference in the defaults: a constant default is
+rebuilt at each call, while CPython evaluates it once, at the `def`. So for `def f(a=1000)`,
+CPython's `f() is f()` is `True`, but the translation builds a new `1000` at each call. The corpus
+program `i11_constant_default` pins this. When binding fails, the prologue raises the `TypeError`
+that CPython raises, in CPython's order, but the text of the message is not specified. CPython's
+text names the function's current `__qualname__`, which a program may change, as `functools.wraps`
+does.
+
+A program that reads, assigns or deletes a function's `__defaults__`, `__kwdefaults__` or
+`__code__` is not admitted (an admission rule), since the translated function keeps the defaults
+and the code of its `def`. Reading counts, since reading `__kwdefaults__` hands out the dict
+that a later call reads. The corpus program `i09_assigned_defaults` pins today's translation
+of one.
+
+The defaults tuple has one entry per named parameter, positional ones first, then keyword-only ones:
+a constant default, evaluated in the prologue itself at each call; a non-constant default, read from
+its default cell, which the `def` filled (§5.3); or `undef` for a parameter without a default.
+`py.bindArgs` names `Frame.handler` as `err`, and each value it gives is written to its parameter's
+cell.
 
 | Step | Lowering |
 |---|---|
-| fill | `fill = mkTuple [default or undef "p", …]`, one slot per positional parameter |
-| pad | `pad = py.add args (getSlice fill (tupleLen args) None None)` |
-| positional `p` at index `i` | `getItem pad i`, then `dictGet kwargs "p" ⟨that⟩`, then `dictDiscard kwargs "p"`. A positional-only parameter skips the keyword lookup |
-| `*rest` | `getSlice args maxPos None None` |
-| keyword-only `p` | `dictGet kwargs "p" (default or undef)`, then `dictDiscard` |
-| `**kw` | `kwargs` after all the discards |
-| check 1 | given both positionally and by keyword: `py.in`, `py.lt`, `py.mult`, then `requireAtMost … 0` |
-| check 2 | an unexpected keyword (only without `**kw`): `dictFirstKey kwargs (undef)`, then `requireUndefined` |
-| check 3 | too many positional arguments (only without `*rest`): `requireAtMost (tupleLen args) n` |
-| check 4 | a required parameter is missing: `requireDefined` |
-
-The checks run in CPython's error-precedence order, 1 to 4, after every value has been
-computed, so a call wrong in several ways reports what CPython reports. Check 1 tests keyword
-membership before the `dictDiscard` that consumes the name. `dictDiscard` mutates `kwargs` in
-place. That is safe because every call site builds a fresh dict (§6.3).
-
-The prologue differs from CPython only in error wording:
-
-- several missing parameters are reported one at a time, where CPython reports them together
-  ("missing 2 required positional arguments: 'x' and 'y'");
-- a keyword naming a positional-only parameter is reported as an unexpected keyword, where
-  CPython says "got some positional-only arguments passed as keyword arguments". With `**kw`
-  it is absorbed into `**kw`, as in CPython.
+| defaults | `d = mkTuple [default or undef "p", …]`, one entry per named parameter |
+| binding | `b = bindArgs args kwargs d nPosOnly nPos varPos varKw "p" …` |
+| named `p` at index `i` | `tupleGet b i` |
+| `*rest` | `tupleGet b n`, with `n` the number of named parameters |
+| `**kw` | `tupleGet b n`, or `tupleGet b (n + 1)` after a `*rest` |
 
 ### 5.5 `return`
 
@@ -1069,8 +1141,7 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
    the body raises, and a bare `raise` there reads `py.handledExc`. `superseded` does no
    chaining of its own.
 3. **Definedness.** Should definedness stay as `py.undef` values in cells, or become
-   `Ref (Option Value)`? Only `undef`, `isDefined`, `requireDefined` and `requireUndefined`
-   would change.
+   `Ref (Option Value)`? Only `undef`, `isDefined` and `requireDefined` would change.
 4. **Module objects and imports.** *Resolved.* A module value is the result of
    `py.importModule`, written to the bound name's cell. `from a import x` is
    `py.importFrom`, evaluated once at the import, so the binding is a snapshot. `a.b.f` is
@@ -1181,3 +1252,770 @@ a diagnostic.
 | `finally` | §7.2 | specified; implemented |
 | `with`, several items | §7.3 | specified; implemented |
 | `async`, `await`, `match`, `except*`, `type`, PEP 695 | §6.9 | unsupported; an `async def` is a stub |
+
+## 12. Contracts and PySpec models
+
+PySpec (`StrataPython/Specs/`) describes a library without its code. A PySpec model is a
+Python module whose functions have no body. A function's contract is made of `assert`
+statements and the decorators `@requires`, `@admit`, `@ensures` and `@modifies`. A class may
+have the decorators `@invariant` and `@exhaustive`. A module may declare ghosts with
+`ghost(...)`. `Specs.lean` reads a model into an array of `Signature`s. This section gives the
+rules by which a translation from PySpec represents each construct of that array in Dyn. It
+builds on Dyn's contracts ([Dyn](./Dyn.md#1-overview): *Contracts*, *Extern functions*,
+*Frames*, *Ghost state*) and on Python's operations for contracts (§2). It does not lower
+anything to Strata Core.
+
+The translation from PySpec is the work of the card "PySpec to Dyn contracts". That card also
+makes the changes to PySpec that `py.invariants` needs (§12.6), and makes what `Specs.lean`
+drops visible to the translation (§12.7). This section leaves two questions to it:
+
+* What the translation does when names from two model modules clash. For example, a function
+  `put_item` of the module `servicelib.Storage` and a method `put_item` of a class `Storage` of
+  the module `servicelib` would both be `@servicelib.Storage.put_item` (§12.1).
+* Whether an `@admit` on an overload stub rejects the model, as ToLaurel's `unsupportedAdmit`
+  does, or becomes a `free ensures` clause that applies only when the dispatch argument is the
+  stub's literal.
+
+*PySpec's meaning* of a clause is the CPython 3.12 meaning of the Python source that it came
+from, except where `Specs.lean` already fixed another meaning. For example, `Specs.lean` turns
+both `x == None` and `x is None` into one form, and that form means identity. A declared type
+means what PEP 484 says: the values that a type checker accepts for it. For example, `x: float`
+accepts an `int`.
+
+**The direction rule.** Nothing checks a model's clauses against code, so they are trusted.
+Each rule below therefore errs in one direction only:
+
+* A `requires` clause may be stronger than PySpec's meaning, never weaker. A weaker one would
+  make the model's `free ensures` clauses trusted at calls that the modeler never covered.
+* A `free ensures` clause may be weaker than PySpec's meaning, never stronger.
+* A frame may be larger than PySpec's meaning, never smaller. A smaller one would let a consumer
+  assume that a location keeps its value where the library may change it.
+
+The exceptions are the trusted modeling assumptions of §12.9.
+
+### 12.1 The model module
+
+* **Module.** A model module, such as `servicelib.Storage`, is a Dyn module of the same name.
+  It holds an extern for each function and method, its ghosts, and its module body
+  `@|servicelib.Storage.<module>|`, a defined function. A verifier takes the model's modules
+  together with the program's, and the program's `py.importModule("servicelib.Storage")` runs
+  the module body. The model stands for the library, as PySpec already assumes.
+* **Module body.** It is a module body as §5.2 describes. It sets `__name__` and `__doc__`. It
+  binds each function's global cell to `py.mkClosure[[]](@servicelib.Storage.f)`. It builds each
+  class with `__build_class__` (§6.7). It binds the module's `__getattr__` (below). It binds
+  each name that the source imports from another model module, such as `from .Storage import
+  Storage`, with `py.importFrom`. It binds no name that the source imports from the standard
+  library, such as `Dict` from `typing`: the module's `__getattr__` makes such a name an
+  unknown value.
+* **The module body never raises.** An exception there would make all code after `import
+  servicelib` unreachable to a verifier. So the body uses only the names that the model
+  defines, the builtins and other model modules. The translation rejects a model whose body
+  would need anything else, such as an unresolved base or class variable. An import cycle
+  between model modules rejects the model too: a `py.importFrom` of a name that the other
+  module has not bound yet would raise `ImportError`.
+* **Function or method.** It is an extern that takes `(%args.0 : py.Value, %kwargs.0 :
+  py.Value)` and returns `base.Except(py.Value, py.Value)`, as a translated function does (§3).
+  The method `put_item` of the class `Storage` of the module `servicelib.Storage` is
+  `@servicelib.Storage.Storage.put_item`. A method's receiver is position 0 of `%args`.
+* **Class.** It is a class body function, such as `@|servicelib.Storage.Storage.<body>|`, which
+  binds `ns` from its first argument, as a translated class body does (§6.7). Like a translated
+  class body, it first stores `__module__`, a read of `__name__`, and `__qualname__`, such as
+  `"Storage"`. Then it stores in `ns` its methods' closures, the synthesized `__init__` and
+  `__getattr__` (below), its class variables and its nested classes. A class variable `X = Y`
+  reads `Y` as CPython's class body does: from the namespace, then the module's globals, then
+  the builtins. The class body carries the class's facts (§12.10).
+* **Nested class.** A class nested in a class, such as `_Exceptions` in the class `Database` of
+  the module `servicelib.Database`, is built in the outer class's body, as CPython builds it,
+  and stored in the outer class's namespace. Its `__qualname__` is `"Database._Exceptions"`. Its
+  name is its real path, such as `servicelib.Database.Database._Exceptions`, in its functions'
+  names and in facts. Generated code reads it through its outer class: `base.refGet` of the
+  outer class's global cell, and then `py.attr(outer, "_Exceptions")`.
+* **Overloaded methods.** An `@overload` method inside a class, `__init__` included, is not a
+  dispatch, and PySpec gives it no procedure. The class body binds its name to a synthesized
+  extern, such as `@servicelib.Storage.Storage.m`, with no clause and no frame. So a call of it
+  accepts any arguments, returns an unknown value and may change any location. That is weaker
+  than the stubs' contracts, so it is sound. Binding nothing would be unsound: `obj.m` would
+  then find a model base's method `m`, and a consumer would trust that method's contract. Under
+  `@exhaustive`, the class's `__getattr__` accepts the name too (below). A contract on such a
+  stub, or an `assert`, `if` or `for` in its body, rejects the model, since nothing would carry
+  it.
+* **A name defined twice.** Two plain definitions of one method name in a class reject the
+  model: `Specs.lean` reports "C.m is already defined".
+* **A stub's `__init__`.** It is a method like any other: `Specs.lean` reads its parameters, its
+  asserts and its decorators. Its `self.f = self._C()` assignments declare fields (§12.10), and
+  they are not part of its contract. ToLaurel gives it its own procedure too, but neither Laurel
+  front end checks that procedure's contract at any call yet. The card "Laurel front ends: Check
+  model constructor contracts" tracks this.
+* **Synthesized `__init__`.** When neither the class's stub nor a model base's stub defines
+  `__init__`, plainly or as overloads, the class gets a synthesized extern `__init__`. When a model
+  base's stub defines one, the class inherits it, as CPython does, and gets none. An overloaded
+  `__init__` is bound as *Overloaded methods* says, not to a synthesized `__init__`, whose frame
+  would leave out the stubs' `@modifies` targets. The synthesized `__init__` accepts any arguments
+  after its receiver. Like every method, it has its receiver's presence clause, `requires "'self' is
+  required"` (§12.2), and its receiver's declared type (§12.3). Its clause `free ensures
+  "synthesized __init__ of 'C'"` says that it returns `None` when it returns, and its frame is the
+  model frame (§12.5). Without it, `Storage("x")` would raise `TypeError`, since `object.__init__`
+  takes no arguments, and make the code after it unreachable.
+* **Unmodeled names.** The module body binds a module `__getattr__` (PEP 562), and each class
+  body stores a class `__getattr__`. Each is a synthesized extern with no `ensures` clause and
+  the frame `writes()`. They cover a module's names and an instance's names: a name that the
+  model does not define, such as `servicelib.extra` or `obj.extra`, is an unknown value, as
+  PySpec makes it. Without them, `servicelib.extra()` or `obj.extra()` would raise
+  `AttributeError` in the model, even where the real library has the name.
+* **Names that `__getattr__` does not cover.** A class's own names, such as `C.extra`, and names
+  read through `super()`, such as `super().extra`, are not covered. CPython looks a missing class
+  attribute up only on the metaclass, and `super()` looks a name up only in the class
+  dictionaries along the MRO, so neither calls the class's `__getattr__`. So in the model, both
+  raise `AttributeError`, even where the real library has the name. By §12.9, the library has
+  such a name only through a class without a model or through the metaclass. A synthesized metaclass
+  with a `__getattr__` would cover `C.extra`, but it is unsound: a model class with an ABC base
+  would get a metaclass conflict, and `type(C) is type` would be false. A program that reads
+  such a name is not admitted (§12.11). Until the admission rule exists, the model raises
+  `AttributeError` there, as `ContractModelTest` pins.
+* **`@exhaustive`.** It is not a decorator that the class statement applies. It gives the
+  class's `__getattr__` the clause `requires "Unknown method of 'C'"`. It holds when the name
+  is defined and is one of the fields that the class or one of its model base classes declares,
+  or the name of an overloaded method of one of them: `py.isDefined(name)`, and then
+  `py.strIsOneOf(name, names…)`. So an unlisted name is an obligation of the caller, as V1's
+  static error is, never a trusted `AttributeError`.
+* **Overloads.** The overloads of a module function `connect` become one synthesized extern
+  `@servicelib.connect`. Overloads of a method are not dispatched (*Overloaded methods*,
+  above). PySpec doesn't read an `@overload` stub's body, so an `assert`, `if` or `for` in it,
+  at any depth, rejects the model. Let `v` be the dispatch argument,
+  `py.argOf(%args.0, %kwargs.0, 0, paramName, py.undef(paramName))`. When the module has no
+  non-overload `connect`, the extern has, in this order:
+  1. the binding clause of §12.2, once and with no condition, when all the stubs have the same
+     parameters;
+  2. the presence clause of §12.2 for the dispatch parameter, so that the next clause tests a
+     value that is defined;
+  3. the dispatch clause, `requires "'connect' called with unknown string"`, which is
+     `py.strIsOneOf(v, lit₁, …)`;
+  4. for each stub `i`, its clauses for its own parameters, each as a `requires` clause that
+     applies only when `v == litᵢ`: its binding clause, unless it came first, then its presence
+     clauses, its declared types, its schemas and its preconditions, as §12.2 orders them. The
+     dispatch parameter's presence and type are steps 2 and 3, so they are not repeated. Each
+     clause reads a parameter with `py.argOf` at the stub's own position and name, and its
+     message is the stub's message with " for 'litᵢ'" added, such as `"'region' is required for
+     'storage'"`. These clauses rely on the dispatch clause, which made `v` an exact `str`.
+     ToLaurel drops a stub's preconditions; keeping them is stronger, so it is sound;
+  5. for each stub, `free ensures "overload of 'connect' for 'litᵢ'"`: on `ok r`, if `v ==
+     litᵢ`, then `r` passes the test of a return type for `Cᵢ` (§12.3), with `Cᵢ` read as
+     *Class identity* says;
+  6. the frame: `py.reachLoc(%args.0)` and `py.reachLoc(%kwargs.0)`, as in the model frame
+     (§12.5), plus every stub's `@modifies` targets. ToLaurel drops these targets; dropping them
+     would make the frame too small, which is unsound.
+
+  When the module also has a non-overload `connect`, that function is the base, and its contract
+  comes first. The extern then has the base's `requires` clauses, in the order of §12.2 and with
+  no condition; then steps 2 to 4, where a stub's binding clause is left out when the stub's
+  parameters are the base's; then the base's `free ensures` clauses, with no condition; then
+  step 5. Its frame is the base's frame (§12.5) plus every stub's `@modifies` targets.
+
+  Nothing says whether the result is a new object.
+* **Type alias or imported name.** It has no declaration. It resolves names in declared types
+  (§12.3) and in `isinstance` (§12.4).
+* **Module ghost.** A ghost `g` is a ghost `@|servicelib.Storage.<ghost>.g|` that holds a
+  `py.Value`. The `<ghost>` segment keeps its name apart from every function's name.
+  * A literal initializer is a region that returns the literal. A float literal is the double
+    nearest to its decimal, as Python's `float(s)` gives.
+  * The declared type gives the invariant, by the rule for a return type (§12.3). The ghost has
+    an invariant only when every atom of its declared type gives `py.isInstance(v,
+    py.stdClass(m, n))` or `py.is(v, None)`. Any other atom gives the ghost no invariant at all.
+    Such an atom has no test, such as `Any` or `BinaryIO`, or it is a model class. The program
+    may rebind a model class's global cell, but an invariant must hold in every state. For
+    example, `type=BinaryIO` and `type=Union[int, BinaryIO]` give no invariant. A ghost without
+    `type=` has no invariant.
+  * A model whose initializer the declared type does not accept is rejected, as ToLaurel's
+    `ghostInitializerError` does. Otherwise the invariant would contradict the initial value.
+* **Function-level `@ghost`.** It is not represented: no contract can name it.
+
+### 12.2 Parameters and the order of the `requires` clauses
+
+* **Parameter.** A parameter `x` at position `i` is `py.argOf(%args.0, %kwargs.0, i, "x", d)`.
+  `i` is -1 for a keyword-only parameter. `d` is `py.noneLit` for `= None`, and `py.undef("x")`
+  for no default. In an `ensures` clause, the parameter is read inside `base.old`, so that it is
+  the argument as given, even if a frame covers `%kwargs`.
+* **Parameters that reject the model.** A stub with a `*args` parameter, a positional-only
+  parameter, or a type comment on a parameter rejects the model: `Specs.lean` reports an error
+  for each. This includes a stub `__init__(self, *args, **kwargs)`.
+* **`**kw: Unpack[TD]`.** Used as a value, it is `py.extraKwargs(%kwargs.0, names…)`, with
+  `names` the named parameters, and it is read inside `base.old` in an `ensures` clause. So
+  `kw["F"]` is `py.getItem` of that dict. Its closed keys are `py.dictKeysWithin(%kwargs.0,
+  names…, fields…)`, with `fields` those of `TD`. It gets no test of its declared type, since
+  `py.extraKwargs` gives a dict.
+* **Any other `**kw`.** A `**kw` without a type rejects the model: PySpec reports "**kwargs
+  requires type annotation". A `**kw: Any` is accepted, and gets no test. A `**kw` of any other
+  type that is not a TypedDict rejects the model, as ToLaurel's `kwargsExpansionError` does.
+* **The order of the `requires` clauses.**
+  1. `requires "arguments bind to 'f'"`, which is `py.bindsTo(%args.0, %kwargs.0, nPos, varKw,
+     names…)`. A method's name is qualified by its class, as in `'Storage.put_item'`.
+  2. For each parameter without a default, the receiver included, `requires "'x' is
+     required"`, which applies `py.isDefined` to `py.argOf(…, "x", py.undef("x"))`.
+  3. For each parameter, the receiver included, its declared type (§12.3), as `requires
+     "declared type of parameter 'x'"`.
+  4. For each parameter, its schema (§12.3), as `requires "schema of parameter 'x'"`. For a
+     `**kw` with a TypedDict, its closed keys follow, as `requires "keywords of 'f' are
+     declared"`.
+  5. The preconditions: the body's `assert`s, then the `@requires` lambdas, in PySpec's order.
+
+  Each later clause relies on the earlier ones. `py.argOf` and `py.extraKwargs` give CPython's
+  binding only once `py.bindsTo` holds, and an `ensures` clause relies on all the `requires`
+  clauses. Until clause 2 has held, a value that may be `undef` is used only by `py.isDefined`.
+* **Precondition.** A body `assert` or a `@requires` is `requires "<message>" { … }`, with the
+  assert's message as the message, and an f-string's expression parts written as their source
+  text. A precondition without a message, such as a `@requires`, is named `"precondition i"`,
+  with `i` its position among the preconditions, counted from 0, as ToLaurel names it.
+* **`if c:` and `else:` around asserts.** Each assert's clause is `implies c P` or `implies (not
+  c) P`, written with branches (§12.4).
+* **`for` around asserts.** Each assert gives one quantifier (§12.4).
+
+### 12.3 Postconditions and types
+
+* **`@admit`.** It is `free ensures "admitted postcondition of 'f'"`. It cases on the result: on
+  `error`, the clause is `true`, so the model may raise. This differs from ToLaurel, where a
+  model never raises.
+* **`@ensures` on a model.** It is rejected, as ToLaurel does.
+* **Return type.** It is `free ensures "return type of 'f'"`, before the `@admit` clauses, so that
+  they may rely on it. ToLaurel puts it after them. On `ok`, it is the coarse test of the declared
+  type (below), never its schema. There is no clause for `-> None`. An atom without a test makes the
+  whole union `true`, which is weaker, so it is sound. A Literal atom is tested as its class:
+  `py.isInstance(v, py.stdClass("builtins", "str"))`, or `"int"`. A `bytes` atom accepts `bytes`,
+  `bytearray` or `memoryview`, as PEP 484 promotes them, which is weaker than the parameter's test,
+  so it is sound. A class atom is tested with `py.isInstance` alone, except for a model class `C`:
+  it gives the pair, `py.typeIsSubclass(result, C)` and then, only if it holds,
+  `py.isInstance(result, C)`. This is a trusted assumption (§12.9). It is what lets a call of a
+  method on the result meet that method's receiver test (below).
+* **Declared parameter type.** Each atom gives a test:
+
+  | Atom | Test |
+  |---|---|
+  | `int` | the class `int`; a `bool` passes too |
+  | `float` | `float` or `int` |
+  | `complex` | `complex`, `float` or `int`, PEP 484's numeric tower |
+  | `bytes` | `bytes` only: in Python 3.12, PEP 688 ends the promotion of `bytearray` and `memoryview`, so accepting them would be weaker than the declared type |
+  | `str`, `bool`, `bytearray`, `dict`, `Exception` | its class |
+  | a model class, or a class of another model module | that class, read from its module's global cell when the clause runs (*Class identity*, below) |
+  | `None` | `py.is(v, None)` |
+  | a Literal | `py.strIsOneOf` or `py.intIsOneOf` |
+  | a TypedDict | `dict`, and the TypedDict's schema |
+  | `List`, `Sequence`, `MutableSequence` | `list`, `collections.abc.Sequence`, `collections.abc.MutableSequence` |
+  | `Dict`, `Mapping`, `MutableMapping` | `dict`, `collections.abc.Mapping`, `collections.abc.MutableMapping` |
+  | `Generator` | `collections.abc.Generator`, with no element test, since iterating would consume it |
+
+  * A test against a class `C` is `py.typeIsSubclass(v, C)` and then, only if it holds,
+    `py.isInstance(v, C)`. The pair is stricter than `isinstance` (§2). A union of classes is
+    one such test on a tuple of classes. This form is used for a parameter's declared type and
+    its schema, and for a model class in a return type (above) or in an overload's clause
+    (§12.1). Any other atom of a return type, a ghost's invariant and `isinstance` use
+    `py.isInstance` alone.
+  * `Any` anywhere in the union means no test.
+  * A parameter with a `None` default passes when it is `None` or passes the test.
+  * The receiver's declared type is its class `C`: `py.typeIsSubclass(self, C)`, with `C` read
+    as *Class identity* says. It holds at a call `obj.m(…)` when `type(obj)` is `C` or a
+    subclass of `C`. It has no `py.isInstance`, since a method is looked up on `type(obj)`, not
+    on `obj.__class__`.
+  * An atom without a test, such as `BinaryIO` or an imported name that resolves to no class,
+    is dropped from its union, which is stronger, so it is sound. A type made only of such atoms
+    gives `false`, and the clause's message says that the declared type has no runtime test, as
+    in "declared type of parameter 'f' (BinaryIO) has no runtime test".
+* **Schema.**
+  * `List[T]`, `Sequence[T]` and `MutableSequence[T]`: `py.allIn(v)`, whose body tests `T` on
+    the element.
+  * `Dict[K, V]`, `Mapping[K, V]` and `MutableMapping[K, V]`: `py.allItems(v)`, whose body
+    tests `K` on the key and then `V` on the value. `Any` has no test, so the schema of
+    `Dict[str, Any]` tests only that each key is a `str`.
+  * A TypedDict: each required key is in it, and the value of each key that is present passes
+    its type.
+  * Element types nest: `Dict[str, List[str]]` tests each value as a list of `str`s.
+  * For a `str`, a `range` or a mapping that is not a dict, the quantifier raises, so the clause
+    is `false`, which is stronger, so it is sound.
+* **Class identity.** A clause reads a model class from its module's global cell when it runs,
+  with `base.refGet` of `py.globalCell(module, name)` and then `py.requireDefined`. A nested
+  class is read through its outer class, as §12.1 says. A program that rebinds
+  `servicelib.Storage.Storage` changes what the clauses test, as it would for a library that
+  looks its classes up at call time.
+
+### 12.4 Expressions
+
+* **Names.** A name is a quantifier's binder, else a parameter, else a module ghost. A
+  parameter with the name of a ghost that the contract mentions rejects the model, as ToLaurel's
+  `ghostShadowedByParam` does. A parameter is read as §12.2 says, a ghost is `base.refGet` of
+  its cell `ghost @|m.<ghost>.g|`, and a binder is its region's parameter.
+* **Literals.** They are `py.intLit`, `py.boolLit`, `py.noneLit` and `py.floatLit`.
+* **Operators.**
+  * `d[k]` is `py.getItem`, and `"k" in c` is `py.in(py.strLit("k"), c)`.
+  * `len(x)` is `py.len`.
+  * A comparison or `in` is the matching `py.*` comparison, except for `None` (below).
+  * The arithmetic is `py.add` to `py.pow`, and `py.uSub`.
+  * `compile(p).search(s) is not None` is `py.reSearch(p, s)`.
+  * `and`, `or`, `not` and `implies` test each operand with `py.truthy`, and combine the
+    results with branches, in Python's order.
+  * Each raising operation's failure goes to the clause's failure block.
+* **Quantifiers.**
+  * `all(… for x in xs)` is `py.allIn(xs)`, and `any(…)` is `py.anyIn(xs)`.
+  * `for k in d` and `for k in d.keys()` are `py.allItems(d)`, which ignores the value.
+  * `for v in d.values()` is `py.allItems(d)`, which ignores the key.
+  * `for k, v in d.items()` is `py.allItems(d)`, and `any` is `py.anyItems(d)`.
+  * A guard `if G` is a branch in the body. Under `all`, the body gives `true` when `G` does not
+    hold.
+  * A binder that shadows its collection, as in `all(len(Keys) >= 1 for Keys in Keys)`, needs
+    nothing: the collection is evaluated outside the body.
+* **`result`.** It is the `ok` value of the clause's argument. The translation rejects a model
+  that uses `result` in any clause other than an `@ensures` or an `@admit`.
+* **`OLD(e)`.** `base.old` covers the old part: the largest subexpression around `OLD(e)` that
+  uses neither `result` nor a value that the clause reads after the call, outside `OLD`. A
+  quantifier's binder may be used in the old part ([Dyn](./Dyn.md#1-overview), *`old` in
+  `ensures` clauses*). For example:
+  * `len(OLD(xs)) == len(xs) + 1` compares `old { len(xs) }` with `len(xs) + 1`;
+  * `allocated == OLD(allocated) + 1` compares `allocated` with `old { allocated + 1 }`;
+  * `len(OLD(d)["k"])` is `old { len(d["k"]) }`.
+
+  The operation that combines the old part with a value read after the call runs after the
+  call, on the object that the old part gave. So the old region ends with `py.isImmutableScalar`
+  of its value. When that holds, the region returns `ok` of the value. Otherwise, it returns
+  `error` of the value, so `base.old` fails and the clause takes its failure value, which is
+  `true` in a `free ensures` clause: the clause assumes nothing. For example, for a list `xs`,
+  `OLD(xs) == xs` is represented, and it assumes nothing. The check applies only to PySpec's
+  `OLD`, not to a parameter that a clause reads inside `base.old` (§12.2).
+
+  An `OLD`'s old part may read only *covered state*, which the frame covers at every call
+  (§12.5). Covered state is:
+  * what a `@modifies` target names, and what is rooted at it, such as a ghost's contents when
+    `@modifies` lists the ghost;
+  * what an argument reaches, the receiver included, along a path of items and declared fields
+    (§12.10), when declared types show that every object on the path is neither a class nor a
+    module. For example, `len(OLD(xs))` reads covered state for a list parameter `xs`, and so
+    does `OLD(self.count)` for a declared field `count`.
+
+  A class variable is not covered, nor is any other attribute of a class or a module, such as a
+  module global, nor the contents of a ghost that `@modifies` does not list. A model is rejected
+  when an `OLD`'s old part reads any state outside covered state. Reading a parameter itself
+  (§12.2) is not a read of state. For example, `allocated == OLD(allocated) + 1` in
+  `GhostOld.py` is accepted, since `@modifies(lambda: allocated)` lists the ghost. For a ghost,
+  ToLaurel's `ghostOldWithoutModifies` rejects the model too. The frame keeps other state
+  unchanged, so a clause such as `self.total == OLD(self.total) + 1`, where `total` is a class
+  variable that `@modifies` does not list, would assume `false` at every call.
+* **`isinstance(x, T)`, with `T` a bare name.** `T` is resolved in the model's scope, as CPython
+  resolves it when the lambda runs, and the test is `py.isInstance`:
+  * a parameter or a binder named `T` rejects the model;
+  * a class that the module defines at its top level is that class (*Class identity*, §12.3);
+  * a name of a class that is nested only inside another class is unresolved, which rejects the
+    model: a lambda's body does not see a class's scope, so CPython 3.12 raises `NameError`;
+  * an imported name is `py.stdClass(module, name)` for a class of the standard library, and
+    that model's class for another model module; anything else rejects the model;
+  * a type alias is its definition if that is a class or a union of classes. A TypedDict, a
+    Literal or a generic rejects the model, since CPython raises `TypeError` for them;
+  * a name of `builtins` is `py.stdClass("builtins", T)`;
+  * anything else rejects the model.
+* **`x is None` and `x == None`.** PySpec has one form for both, and it is `py.is(x, None)`; `x is
+  not None` and `x != None` are `py.isNot(x, None)`. `compile(p).search(s) is None` is the
+  negation of `py.reSearch(p, s)`. This differs from CPython only for a class whose `__eq__` says
+  that an object equals `None`.
+* **`s.f`, `s["f"]` and `kw["f"]`.** PySpec has one form for all three, which is an item or an
+  attribute:
+  1. `s` is the `**kw` parameter: an item of the `**kw` dict.
+  2. In a `requires` clause: an item, since `Specs.lean` allows no attribute read there.
+  3. `s` is declared as a TypedDict or a `Dict` or `Mapping` with `str` keys: an item. If `f` is
+     an attribute of `dict`, such as `keys` or `get`, the model is rejected.
+  4. `s` is declared as a model class, or is the parameter of an invariant, whatever its name:
+     an attribute, `py.attr(s, "f")`. If the class or one of its bases lists `__getitem__`, the
+     model is rejected.
+  5. Otherwise, such as for `Any`, a union, or a type that cannot be computed, the model is
+     rejected.
+
+  The subject's type is computed as ToLaurel's `specTypeOf?` computes it. In cases 1 to 4, the
+  other reading would raise in CPython, except for one case: a model class that is not
+  exhaustive and has an unlisted `__getitem__`, subscripted with a string literal in an
+  `@admit` or in a `@modifies` target.
+* **`x == "A" or x == "B"`.** PySpec has one form for it, `enumMember`. In a `requires` clause,
+  at a positive position, it is `py.strIsOneOf(x, "A", "B")`, which is stronger than `==` for a
+  class with its own `__eq__`, so it is sound. Elsewhere, such as under `not` or in the condition
+  of an implication or an `if`, and in every `free ensures` clause, it is the chain of `py.eq`
+  in Python's order, which is the source's meaning. The other stricter tests of §2 follow the
+  same rule: `py.intIsOneOf`, and `py.typeIsSubclass` followed by `py.isInstance`. The one
+  exception is a model class in a return type, whose pair a trusted assumption covers (§12.3,
+  §12.9).
+
+### 12.5 Frames
+
+* **The model frame.** Every function and method that the model declares has `writes`, with
+  these locations, each as one frame region: `py.instanceState` first, then
+  `py.reachLoc(%args.0)` and `py.reachLoc(%kwargs.0)`, then the locations of its `@modifies`
+  targets.
+  * `py.instanceState` holds every attribute, other than `__class__` and a closure cell's
+    `cell_contents`, of every object that is neither a class nor a module, and `py.reachLoc` of
+    the value of each such attribute, at the call.
+  * `py.reachLoc(obj)` holds every location, other than a `__class__`, of `obj` and of every
+    object that `obj` reaches at the call through what objects store, but no attribute of a
+    class or a module (§2).
+  * So the two argument regions hold everything that an argument reaches, the receiver
+    included, such as the position of a file or of an iterator that the call receives. An
+    `int`, a `str` or another immutable scalar reaches nothing, so it adds nothing.
+
+  A synthesized `__getattr__` has `writes()`, since looking a name up changes nothing (§12.9).
+  An overloaded method's extern has no frame, and an overload's extern has the frame of §12.1.
+  No model has a `reads` frame.
+* **Targets.** A target adds the locations that the model frame may not hold already. A target
+  names an object or a slot. A slot is a place that holds a value, such as an attribute, an
+  entry or a ghost's cell. The *containers* of a target are the objects that its path reads a
+  slot from: for `self.backend.registry`, they are `self` and `self.backend`.
+  * A parameter `x` names an object. It gives `py.objLoc(x)`, every location of `x`. This adds
+    the attributes of `x` when `x` is a class or a module, which `py.reachLoc` does not hold.
+  * Every other target names a slot. When declared types show that every container is neither
+    a class nor a module, the argument regions already hold the slot and what its value
+    reaches. The target then gives its own location only if computing it needs no raising read,
+    and nothing otherwise. For example, `@modifies(lambda self: self.items)` gives
+    `py.attrLoc(self, "items")`, and the frame covers `self.items.append(x)` anyway.
+    `@modifies(lambda d: d["a"]["k"])`, for a parameter `d: Dict[str, Dict[str, int]]`, gives
+    nothing, since its own location would need a raising read of `d["a"]`. The declared types
+    are those of the parameters, which their clauses test, of the fields (§12.10), and of the
+    ghosts, which their invariants state.
+  * Otherwise, the target gives its own location, and `py.reachLoc` of the value that the slot
+    holds at the call. That region reads the value with raising reads, whose failures go to a
+    block that ends in `unreachable`, and it fails where the slot is empty at the call, so that
+    the whole frame states nothing. For example, `@modifies(lambda self: self.backend.registry)`,
+    where the field `backend` has no declared type, gives both regions: `self.backend` may be a
+    class, whose attributes no argument region holds.
+  * The own location of `p.f` is `py.attrLoc(p, "f")` or `py.itemLoc(p, "f")`, by the rule for
+    `s.f` in §12.4. Where that rule cannot decide, the target gives both: a larger frame is
+    sound, while a clause would be rejected there.
+  * The own location of `d[k]`, with a key that is not a literal, is `py.objLoc(d)`, which is
+    larger, so it is sound.
+  * A ghost `g` gives `base.cellLoc` of the ghost's cell, and `py.reachLoc` of the object that
+    the ghost holds, a read that cannot fail. A target rooted at a ghost, such as `g["k"]` or
+    `g.f`, gives these two too. Its containers start at the ghost's object, and it gives its own
+    location and its value's region by the two bullets above, with the ghost's region in place
+    of the argument regions.
+  * The own location of any other target, such as `x["a"]["k"]` for a parameter `x: Any`, is a
+    region that computes it with raising reads, whose failures go to `unreachable`.
+  * A consumer that cannot show that a region's raising reads succeed at a call treats the call
+    as one that may change any location ([Dyn](./Dyn.md#1-overview), *Frames*).
+  * A bare name that is neither a parameter nor a ghost rejects the model.
+* **Abstract containers.** A target may be rooted at a parameter that is declared with an
+  abstract container type, such as `Mapping`, `MutableMapping`, `Sequence` or `MutableSequence`.
+  Then that parameter's declared type is tested as the matching built-in class, `dict` or
+  `list`, so that `py.itemLoc` and `py.objLoc` name the parameter's own storage. A region that
+  applies `py.itemLoc` to an object that may not be a dict is not well defined, so the call may
+  change any location unless the consumer shows that the object is a dict.
+
+### 12.6 Class invariants
+
+`@invariant(lambda self: P)` is recorded, never enforced. The class body carries the fact
+`py.invariants`, a list with one entry per `@invariant` decorator, from top to bottom. An entry
+has one of two forms.
+
+* **A predicate**, `{fn = @|m.C.<invariant>.i|}`, with `i` the entry's position in the list.
+  The invariant is a small defined function of the model module, `(%self.0 : py.Value) ->
+  base.Bool`, whose body is `P` as written. The invariant's parameter, whatever its name, is
+  `%self.0`.
+  * If `P` names module ghosts, the function's parameters after `%self.0` are the contents of
+    those ghosts, in their declaration order, and the entry is `{fn = @…, ghosts = [ghost
+    @|m.<ghost>.g|, …]}`, in the same order.
+  * `P` uses the forms of a `free ensures` clause (§12.4), so the predicate means what the source
+    states, up to the modeling assumptions of §12.9.
+  * A failure in `P` goes to `unreachable`.
+  * The translation emits only operations whose effect is not `writes`. The checker does not
+    check this, since the function is an ordinary function.
+* **An untranslated text**, `{source = "lambda self: self.x >= 0", untranslated = true}`: the
+  whole lambda as it is written, recorded when the translation cannot turn `P` into Dyn. Each
+  rule of §12.4 that would reject the model records the invariant as its source text instead.
+
+**Meaning.** An entry `{fn = @f, ghosts = [g₁, …, gₙ]}` is a predicate only when `@f` takes
+`1 + n` parameters of type `py.Value` and returns a `base.Bool`. Its parameter at position `k`
+after `%self.0` receives the contents of `gₖ`, and the translation lists the ghosts in their
+declaration order. Any other entry states nothing: a consumer assumes nothing from it, and a
+check of it fails, as for a region that the consumer cannot show well defined. From a predicate,
+a consumer likewise relies on nothing that it cannot show well defined. This representation does
+not say where a class invariant holds, and a program may change an instance's attributes. So a
+consumer assumes a class invariant nowhere. Nothing calls these functions. A predicate that
+receives a ghost's contents as a parameter does not use the ghost, which only contracts may do.
+
+Here, from `StrataPythonTest/Dyn/contract_models/invariant_untranslated.dyn`, the class `C`
+has a predicate entry and an untranslated entry, whose source text has a line break and a string
+literal:
+
+```
+func @|m.C.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+  #[py.bases = ["m.Base"]]
+  #[py.fields = [{name = "kind", type = "builtins.str"}, {name = "request", type = {expr = "TypedDict"}}]]
+  #[py.invariants = [{fn = @|m.C.<invariant>.0|}, {source = "lambda self: (self.kind\n  != \"x\")", untranslated = true}]]
+  …
+}
+func @|m.C.<invariant>.0|(%self.0 : py.Value) -> base.Bool {
+  entry.0(%self.0 : py.Value):
+    %count.0 : py.Value = py.attr(%self.0, "count") ^fail.0()
+    %int.0 : py.Value = py.intLit(0)
+    %ge.0 : py.Value = py.gtE(%count.0, %int.0) ^fail.0()
+    %ok.0 : base.Bool = py.truthy(%ge.0) ^fail.0()
+    ret(%ok.0)
+  fail.0(%e.0 : py.Value):
+    unreachable
+}
+```
+
+**Changes to PySpec.** `py.invariants` holds every invariant that a model's author wrote only once
+PySpec makes three changes. A lambda whose one parameter is not named `self` is accepted, with that
+parameter as `self`. A lambda with no parameter, or with two or more, rejects the model. And PySpec
+keeps each invariant's source text, in `ClassDef` and in its Ion form, so that a condition that it
+cannot translate can be recorded as text. The card "PySpec to Dyn contracts" makes these changes.
+
+### 12.7 What PySpec dropped, and what cannot be represented
+
+* **A dropped precondition or `@modifies` target.** `Specs.lean` drops an `assert` that it
+  cannot translate (`pySpecDroppedAssertion`), and a `@requires` or `@modifies` lambda that it
+  cannot translate. Either rejects the model. A dropped precondition would make the model's
+  `requires` clauses weaker than its source, and a dropped target would make its frame too
+  small. Either would make the `free ensures` clauses trusted at calls that the modeler
+  excluded. For example, `Specs.lean` has no form for a string literal outside `==`, so it drops
+  `assert x != "A"`, and the model is rejected. The card "PySpec to Dyn contracts" makes the
+  dropped clauses visible to the translation, with a list of them in `FunctionDecl`. Until then,
+  the translation sees a drop by its `pySpecDroppedAssertion` warning.
+* **A dropped `@admit`.** It only weakens the model, so the model is not rejected.
+* **A clause that the translation cannot represent.** It rejects the model. The translation
+  never drops a clause, as ToLaurel does not drop an `@admit`. An invariant that the translation
+  cannot represent is recorded as its source text instead (§12.6).
+
+### 12.8 An example
+
+`acquire` of `StrataPythonTestExtra/Specs/dispatch_test/servicelib/GhostOld.py`, abridged:
+
+```python
+ghost(name="resources", type=Dict[str, int])
+ghost(name="allocated", type=int, init=0)
+
+@modifies(lambda: resources)
+@modifies(lambda: allocated)
+@admit(lambda name, result: name in resources)
+@admit(lambda name, result: allocated == OLD(allocated) + 1)
+def acquire(name: str) -> None: ...
+```
+
+Its second `@admit` clause and its frame are:
+
+```
+    free ensures "admitted postcondition of 'acquire'" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %allocated.0 : py.Value = base.refGet[py.Value](ghost @|servicelib.GhostOld.<ghost>.allocated|)
+        %old.0 : py.Value = base.old[py.Value, py.Value] ^fail.2() {
+          old.1():
+            %allocated.1 : py.Value = base.refGet[py.Value](ghost @|servicelib.GhostOld.<ghost>.allocated|)
+            %int.0 : py.Value = py.intLit(1)
+            %add.0 : py.Value = py.add(%allocated.1, %int.0) ^propagate.0()
+            %scalar.0 : base.Bool = py.isImmutableScalar(%add.0)
+            branch(%scalar.0) ^scalar.0() ^mutable.0()
+          scalar.0():
+            %res.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%add.0)
+            ret(%res.1)
+          mutable.0():
+            %res.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%add.0)
+            ret(%res.2)
+          propagate.0(%exc.1 : py.Value):
+            %err.0 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+            ret(%err.0)
+        }
+        %eq.0 : py.Value = py.eq(%allocated.0, %old.0) ^fail.2()
+        %ok.4 : base.Bool = py.truthy(%eq.0) ^fail.2()
+        ret(%ok.4)
+      raised.1(%exc.2 : py.Value):
+        ret(true)
+      fail.2(%e.2 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.instanceState
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.1)
+    }, {
+      loc.2():
+        %l.2 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.2)
+    }, {
+      loc.3():
+        %l.3 : base.Loc = base.cellLoc[py.Value](ghost @|servicelib.GhostOld.<ghost>.resources|)
+        ret(%l.3)
+    }, {
+      loc.4():
+        %resources.1 : py.Value = base.refGet[py.Value](ghost @|servicelib.GhostOld.<ghost>.resources|)
+        %l.4 : base.Loc = py.reachLoc(%resources.1)
+        ret(%l.4)
+    }, {
+      loc.5():
+        %l.5 : base.Loc = base.cellLoc[py.Value](ghost @|servicelib.GhostOld.<ghost>.allocated|)
+        ret(%l.5)
+    }, {
+      loc.6():
+        %allocated.2 : py.Value = base.refGet[py.Value](ghost @|servicelib.GhostOld.<ghost>.allocated|)
+        %l.6 : base.Loc = py.reachLoc(%allocated.2)
+        ret(%l.6)
+    })
+```
+
+The frame's regions give, in order, `py.instanceState`, what the arguments reach, the cell of the
+ghost `resources`, what the dict that it holds reaches, the cell of the ghost `allocated`, and what
+the object that it holds reaches. The whole model is
+`StrataPythonTest/Dyn/contract_models/ghost_old.dyn`.
+
+### 12.9 Trusted modeling assumptions
+
+Besides the trust base ([Dyn](./Dyn.md#1-overview), *The trust base*), a model trusts
+these assumptions:
+
+* The model module stands for the library: its body, its classes and their facts (§12.1).
+* A model class's stub, with the stubs of its model bases, lists every method and class attribute
+  that the library's class has, including those that it inherits from library bases that the
+  model leaves out, such as the `__getattribute__` of such a base. So a model base answers for a
+  name that a subclass's stub doesn't define, as CPython's lookup along the MRO does (§12.1,
+  §12.11). For example, when `C`'s stub omits `close` and `B`'s stub defines it, the model trusts
+  that the library's `C` doesn't override `close`, so `C().close()` gets `B.close`'s contract.
+  A base that the model leaves out counts as a library base, whether or not it comes from the
+  standard library, so the stub must list what the class inherits from it. For example, when the
+  library has `class C(io.IOBase, B)` and the model has `class C(B)`, CPython's `C().close` is
+  `_io._IOBase.close`, so `C`'s stub must list `close`. This doesn't cover the standard-library
+  classes that the model's own MRO has, such as `object` or a `dict` base that the stub names:
+  the admission rules count their names as not defined (§12.11).
+* When neither the class's stub nor a model base's stub defines `__init__`, the library's
+  `__init__` accepts any arguments after its receiver, returns `None`, and changes only what the
+  model frame allows, as the synthesized one says. An unmodeled name is an unknown value whose
+  lookup changes nothing, as the synthesized `__getattr__` says (§12.1).
+* Instantiating a model class goes through the `__new__` that the model's bases give.
+* `isinstance` and `issubclass` on model classes, and reading `obj.__class__` on model
+  instances, behave as for `type` and `object`.
+* Defining a program subclass of a model class runs no library code.
+* A library's code calls no method of `self` that a program subclass overrides.
+* A generator argument's element type is not tested (§12.3).
+* A clause reads a model class when it runs (*Class identity*, §12.3).
+* A quantifier over a container subclass that overrides iteration ranges over the container's
+  storage, not over what its iteration yields (§2).
+* `x == None` is read as identity (§12.4).
+* A model function or method whose declared return type is a model class `C` returns an
+  instance of `C` or of a subclass, by its own type (PEP 484's meaning of the annotation). The
+  same holds for each model class of a union return type, such as `Optional[C]`. So the clause of
+  a return type, and the clause of an overload, test the result with `py.typeIsSubclass` too
+  (§12.1, §12.3).
+* In an `@admit` or a `@modifies` target, `s["f"]` on an instance of a model class that is not
+  exhaustive is the attribute `f`, even if the class has an unlisted `__getitem__` (§12.4).
+* The model frame. A model call changes only `py.instanceState`, what its arguments reach, as
+  `py.reachLoc` of `%args.0` and of `%kwargs.0` says, and the locations of its `@modifies`
+  targets. `py.instanceState` holds every attribute, other than `__class__` and a closure cell's
+  `cell_contents`, of every object that is neither a class nor a module, and everything that
+  such an attribute reaches at the call, as `py.reachLoc` says. So a model call changes none of
+  the following, unless `@modifies` lists it:
+  * an attribute of a class or a module (a module global), however it is reached;
+  * an object's `__class__`;
+  * a ghost;
+  * a local variable, or a variable that a closure captures. The model frame holds no closure
+    cell's contents, so no argument and no attribute reaches such a variable, not even through a
+    function's `__closure__`;
+  * an element, a key or a value that an object stores, unless an argument, or an attribute of
+    an object that is neither a class nor a module, reaches that object at the call.
+
+  For example, a list that only a local variable holds keeps its elements, unless the call
+  receives the list, as an argument or inside one. So does an instance of `class L(list)` that
+  no attribute and no argument reaches.
+* A library calls back no callable that the program gave it, and changes no state through a
+  weak reference, a memoryview or a function's `__closure__` cells. A bound method such as
+  `results.append` is such a callable. Through `__closure__`, a library can change the variables
+  that a closure captures without calling the closure. The model frame holds no closure cell's
+  contents, so it doesn't allow this change.
+* A library changes no program function's `__defaults__`, `__kwdefaults__` or `__code__`, which
+  the translated function does not read (§5.4).
+* When a module has no non-overload `connect`, the overloads' extern changes nothing but the
+  stubs' `@modifies` targets and what its arguments reach (§12.1).
+
+### 12.10 Facts in a model
+
+A model has no code to check its facts against, so a consumer that uses them trusts them. A
+class body's facts are those of §6.7, with these differences:
+
+* `py.fields` is always present, `py.bases` is present when the class has bases, and
+  `py.invariants` (§12.6) is present when it has invariants. A model states no other key.
+* A field is `{name = "x", type = E}`. A field from `self.f = self._C()` in a stub's `__init__`
+  is marked with that `__init__`. PySpec gives it the type `m._C`, with `m` the module, whatever
+  class `_C` belongs to. The translation resolves `_C` as `self._C` resolves it: in the
+  namespace of the class, then in those of its model bases in MRO order, where it is a nested
+  class or a class variable bound to a class. The field's type is that class's real path. A
+  model in which `_C` resolves to no class is rejected. For example, `self.exceptions =
+  self._Exceptions()` in the class `Database` of `servicelib.Database` has PySpec's type
+  `servicelib.Database._Exceptions`, and gives `{name = "exceptions", type =
+  "servicelib.Database.Database._Exceptions", in = @servicelib.Database.Database.__init__}`.
+* Names are fully qualified, such as `"builtins.int"`, since PySpec has resolved them. A nested
+  class's name is its real path (§12.1). A translated class's facts are written as the source
+  writes them (§6.7).
+* A TypedDict atom, which the notation of §6.7 cannot write, is `{expr = "TypedDict"}`, which
+  states nothing.
+
+Every other part of a fact follows §6.7, including its rule that a flag appears only when it is
+true.
+
+### 12.11 Programs that admission rejects
+
+For some programs, the model may answer differently from the library, so the admission pass
+rejects them. The admission work provides each whole rule: the facts that it needs from the
+model, such as the names and the special methods that each model class defines, and the check
+of the programs. For a model class `C`, a program is rejected when it does one of these:
+
+* It reads a name that the model does not define from `C`, such as `C.extra`, or through
+  `super()` in a subclass of `C`, such as `super().extra` (§12.1).
+* It applies, to an instance of `C`, an operation that CPython performs through a special method
+  of the instance's type, unless a model class or a program class defines exactly the special
+  method that CPython looks up first for that operation, as below. CPython looks such a method up
+  on the type, so the synthesized `__getattr__` never runs. These are the exact conditions:
+  * The special method is the one that CPython looks up first. For example, `bool(C())` needs
+    `__bool__`, even when `C` defines `__len__`, and `1 + C()` needs `__radd__`.
+  * CPython walks the instance's MRO, and the first class whose own dict holds the method's name
+    answers. It must be a model class or a program class. A model class answers for each of its
+    subclasses whose stub doesn't define the method (§12.9). A class that is neither a model
+    class nor a program class, such as `object`, `dict` or a library class without a model,
+    stops the walk. For example, for `class M(dict, Base)`, `len(M())` uses `dict.__len__`, so
+    `Base.__len__` doesn't count.
+  * Some names are in a class's dict without being defined in the model: an overloaded method,
+    and `__hash__ = None`, which CPython stores in every class that defines `__eq__` without
+    `__hash__`. Such a name also stops the walk, and the method counts as not defined.
+  * Where CPython uses several methods, each one is defined as above. For example, `with` uses
+    `__enter__` and `__exit__`.
+
+  The rule covers every operator and comparison, `len`, `iter` and `for`, `next`, `in`,
+  subscripting, a call, `with`, truth tests (`if`, `not`, `and`, `or`, `bool`), `hash` and use as
+  a dict key or a set element, `str`, `repr`, `format` and f-strings, numeric conversions,
+  attribute assignment and deletion, and `await`. It also covers the descriptor protocol: an
+  instance of `C` stored as a class attribute of a program class, for which CPython calls
+  `__set_name__`, `__get__`, `__set__` or `__delete__`. For example, when `C` defines none of
+  `__len__`, `__iter__`, `__getitem__` and `__bool__`, `len(C())` and `iter(C())` raise
+  `TypeError` in the model, and `bool(C())` is `True`.
+* It reads `vars(obj)` or `obj.__dict__`, where `obj` is an instance of `C`.
+* It subscripts `C`, as in `C[int]`, or gives class keywords to a subclass of `C`, as in `class
+  Mine(C, flag=1)`.
+* It defines a subclass of `C` that overrides, with a descriptor such as a property, a field
+  that the model declares or an attribute that the model's clauses read. It also defines a
+  subclass of `C` that defines `__getattribute__`, `__getattr__`, `__setattr__` or
+  `__delattr__`. Such a class reads or stores attributes elsewhere than `py.instanceState` and
+  `py.attrLoc` say, so the frames and the check of `OLD` (§12.4) would be wrong.
+* It defines a class that derives from `C` and from `type` or `types.ModuleType`. Such a class
+  makes classes or modules that are instances of `C`, and the frames do not hold their
+  attributes (§12.5).
+
+Each rule holds however the program reaches the operation or the read, including inside the
+builtins and the standard library. For example, `sorted` compares with `<`, `print` calls `str`,
+`[a] == [b]` compares `a` with `b`, `getattr(C, "x", None)` reads `C.x`, and `copy.copy` reads
+special methods of the instance's type.
+
+### 12.12 The hand-written models
+
+`StrataPythonTest/Dyn/contract_models/` holds models written by hand by these rules: one for
+each of seven PySpec fixtures, and four written for the test.
+`StrataPythonTestExtra/ContractModelTest.lean` reads each one against `Py.env`, which checks it,
+and compares the printed module with the file without its comment lines. It also checks that one
+change to each file is rejected with its rule's message, and that every predicate entry of
+`py.invariants` has its predicate's parameters, and that ref-to-reg accepts every model and
+changes none. With CPython 3.12, it checks that the names that
+a model class defines leave `C.extra` and `super().extra` raising `AttributeError`, `len(C())`
+and `iter(C())` raising `TypeError`, and `bool(C())` true (§12.11).
+Each file's first comment names its fixture, or says that the file was written for the test.
+For a fixture, it also says where the model is stronger or weaker than ToLaurel's translation of
+the same fixture.

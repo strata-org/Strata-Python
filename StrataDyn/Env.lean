@@ -895,6 +895,10 @@ public def Env.ResolvesType (s : Env α) (name : Name) (d : TypeDecl α) : Prop 
 that is a datatype's constructor: which group, which datatype of it, and which constructor. -/
 public def Env.ctorAddr? (s : Env α) (name : Name) : Option CtorAddr := s.raw.ctorAddr? name
 
+/-- Which datatype the case instruction named `name` eliminates, if `name` is declared in `s` as
+a datatype's case instruction. -/
+public def Env.caseAddr? (s : Env α) (name : Name) : Option CaseAddr := s.raw.caseAddr? name
+
 namespace Env
 
 /-- A name whose stored type declaration is `d` resolves to `d`. -/
@@ -3025,6 +3029,8 @@ public structure InsnSig (env : Env α) where
   list, one value per element, a spread.  A use site supplies one block per successor, in this
   order. -/
   succs : Array (Param (Array (TypeArg env (Param.kinds typeParams)))) := #[]
+  /-- What the operation itself may do, its regions aside: `writes` unless it says otherwise. -/
+  effect : Effect := .writes
   -- Written out, not via `InsnDecl.Raw.paramNames`, so the default `decide` reduces.
   /-- No name is bound twice among the type parameters, arguments, variadic, regions and
   successors. -/
@@ -3060,12 +3066,13 @@ def decl {env : Env α} (s : InsnSig env) (name : Name) (kind : InsnKind := .dec
   returnType := s.returnType.map (·.expr)
   regions := s.regions.map (fun p => ⟨p.name, p.type.raw⟩)
   succs := s.succs.map (fun p => ⟨p.name, p.type.map (·.expr)⟩)
+  effect := s.effect
   kind := kind
 
 /-- The erased declaration is well formed in `env`. -/
 theorem wf {env : Env α} (s : InsnSig env) (name : Name) (kind : InsnKind := .decl) :
     InsnDecl.Raw.WF (env.RefBefore env.size) (s.decl name kind) := by
-  obtain ⟨ann, typeParams, argTypes, variadic, returnType, regions, succs, distinct⟩ := s
+  obtain ⟨ann, typeParams, argTypes, variadic, returnType, regions, succs, effect, distinct⟩ := s
   refine InsnDecl.Raw.wf_mk ?_ ?_ ?_ ?_ ?_ ?_
   · intro p hp
     simp only [decl, Array.mem_map] at hp
@@ -3108,6 +3115,7 @@ def ofWF {env : Env α} (d : InsnDecl.Raw α)
   succs := d.succs.attach.map fun s =>
     ⟨s.val.name, s.val.type.attach.map fun t =>
       .ofWF t.val (InsnDecl.Raw.wf_succs h s.val s.property t.val t.property)⟩
+  effect := d.effect
   distinct := by
     simpa [InsnDecl.Raw.paramNames, Function.comp_def, Array.map_attach_eq_pmap,
       List.map_pmap, List.pmap_eq_map]
@@ -3138,10 +3146,10 @@ theorem kind_decl {env : Env α} (i : InsnSig env) (name : Name)
 /-- A signature is determined by the declaration it erases to. -/
 theorem eq_of_decl_eq {env : Env α} {s₁ s₂ : InsnSig env} {n : Name} {k : InsnKind}
     (h : s₁.decl n k = s₂.decl n k) : s₁ = s₂ := by
-  obtain ⟨ann₁, tp₁, args₁, var₁, ret₁, reg₁, succ₁, d₁⟩ := s₁
-  obtain ⟨ann₂, tp₂, args₂, var₂, ret₂, reg₂, succ₂, d₂⟩ := s₂
+  obtain ⟨ann₁, tp₁, args₁, var₁, ret₁, reg₁, succ₁, eff₁, d₁⟩ := s₁
+  obtain ⟨ann₂, tp₂, args₂, var₂, ret₂, reg₂, succ₂, eff₂, d₂⟩ := s₂
   simp only [decl, InsnDecl.Raw.mk.injEq] at h
-  obtain ⟨rfl, -, rfl, hargs, hvar, hret, hreg, hsucc, -⟩ := h
+  obtain ⟨rfl, -, rfl, hargs, hvar, hret, hreg, hsucc, rfl, -⟩ := h
   have hp : ∀ {n : Array Kind} {a b : Param (TypeExpr env n)}, a.name = b.name →
       a.type.expr = b.type.expr → a = b := by
     intro n a b h1 h2
@@ -3201,8 +3209,8 @@ theorem eq_of_decl_eq {env : Env α} {s₁ s₂ : InsnSig env} {n : Name} {k : I
 /-- Two signatures, in any two environments, declare the same instruction up to its annotation
 and kind when everything else they declare stands for the same raw data: the same type
 parameters, argument and variadic names and types, return type (or its absence), regions and
-successors.  The conclusion is `InsnDecl.Raw.RefinedBy`'s `erase_eq`, so this is how a
-refinement's instruction is compared with the original's. -/
+successors, and the same effect.  The conclusion is `InsnDecl.Raw.RefinedBy`'s `erase_eq`, so
+this is how a refinement's instruction is compared with the original's. -/
 theorem erase_decl_eq_of_toRaw {e₁ e₂ : Env α} {s₁ : InsnSig e₁} {s₂ : InsnSig e₂}
     (name : Name) (k₁ k₂ : InsnKind) (htp : s₁.typeParams = s₂.typeParams)
     (hargs : s₁.argTypes.map (fun p => (p.name, p.type.toRaw)) =
@@ -3215,7 +3223,8 @@ theorem erase_decl_eq_of_toRaw {e₁ e₂ : Env α} {s₁ : InsnSig e₁} {s₂ 
       s₂.regions.map (fun p => (p.name,
         p.type.params.map (fun q => (q.name, q.type.toRaw)), p.type.returnType.toRaw)))
     (hsuccs : s₁.succs.map (fun p => (p.name, p.type.map (·.toRaw))) =
-      s₂.succs.map (fun p => (p.name, p.type.map (·.toRaw)))) :
+      s₂.succs.map (fun p => (p.name, p.type.map (·.toRaw))))
+    (heff : s₁.effect = s₂.effect) :
     (s₂.decl name k₂).erase =
       { (s₁.decl name k₁).erase with kind := (s₂.decl name k₂).kind } := by
   simp only [TypeExpr.toRaw_eq_expr, TypeArg.toRaw_eq_expr] at hargs hvar hret hregions hsuccs
@@ -3237,14 +3246,14 @@ theorem erase_decl_eq_of_toRaw {e₁ e₂ : Env α} {s₁ : InsnSig e₁} {s₂ 
     congrArg (Array.map (fun x => (⟨x.1, x.2⟩ : Param (Array TypeExpr.Raw)))) hsuccs
   simp only [Array.map_map, Option.map_map, Function.comp_def] at hargs₁ hvar₁ hregions₁ hsuccs₁
   simp only [decl, InsnDecl.Raw.erase, InsnDecl.Raw.mk.injEq, and_true, true_and]
-  refine ⟨htp.symm, hargs₁.symm, hvar₁.symm, hret.symm, ?_, hsuccs₁.symm⟩
+  refine ⟨htp.symm, hargs₁.symm, hvar₁.symm, hret.symm, ?_, hsuccs₁.symm, heff.symm⟩
   rw [hraw, hraw]
   exact hregions₁.symm
 
 /-- Two signatures are equal when everything they declare stands for the same raw data: the
 same annotation, type parameters, argument and variadic names and types, return type (or
-its absence), regions and successors.  `simp` proves these for a signature written
-differently, such as one `addData` derives. -/
+its absence), regions and successors, and the same effect.  `simp` proves these for a
+signature written differently, such as one `addData` derives. -/
 public theorem ext_toRaw {env : Env α} {s₁ s₂ : InsnSig env} (hann : s₁.ann = s₂.ann)
     (htp : s₁.typeParams = s₂.typeParams)
     (hargs : s₁.argTypes.map (fun p => (p.name, p.type.toRaw)) =
@@ -3257,7 +3266,8 @@ public theorem ext_toRaw {env : Env α} {s₁ s₂ : InsnSig env} (hann : s₁.a
       s₂.regions.map (fun p => (p.name,
         p.type.params.map (fun q => (q.name, q.type.toRaw)), p.type.returnType.toRaw)))
     (hsuccs : s₁.succs.map (fun p => (p.name, p.type.map (·.toRaw))) =
-      s₂.succs.map (fun p => (p.name, p.type.map (·.toRaw)))) : s₁ = s₂ := by
+      s₂.succs.map (fun p => (p.name, p.type.map (·.toRaw))))
+    (heff : s₁.effect = s₂.effect) : s₁ = s₂ := by
   simp only [TypeExpr.toRaw_eq_expr, TypeArg.toRaw_eq_expr] at hargs hvar hret hregions hsuccs
   apply eq_of_decl_eq (n := .base) (k := .decl)
   -- each field of the erasure is the corresponding hypothesis, re-paired
@@ -3278,7 +3288,7 @@ public theorem ext_toRaw {env : Env α} {s₁ s₂ : InsnSig env} (hann : s₁.a
     congrArg (Array.map (fun x => (⟨x.1, x.2⟩ : Param (Array TypeExpr.Raw)))) hsuccs
   simp only [Array.map_map, Option.map_map, Function.comp_def] at hargs' hvar' hregions' hsuccs'
   simp only [decl, InsnDecl.Raw.mk.injEq, and_true, true_and]
-  refine ⟨hann, htp, hargs', hvar', hret, ?_, hsuccs'⟩
+  refine ⟨hann, htp, hargs', hvar', hret, ?_, hsuccs', heff⟩
   rw [hraw, hraw]
   exact hregions'
 
@@ -3364,7 +3374,7 @@ public def Env.DeclaresInsn (s : Env α) (name : Name) (σ : InsnSig s) (k : Ins
 namespace InsnSig
 
 /-- `σ₁` and `σ₂`, of any two environments, declare the same instruction up to its annotation:
-the same type parameters, arguments, variadic, return type, regions and successors. -/
+the same type parameters, arguments, variadic, return type, regions, successors and effect. -/
 public def EqUpToAnn {s t : Env α} (σ₁ : InsnSig s) (σ₂ : InsnSig t) : Prop :=
   (σ₂.decl .base).erase = (σ₁.decl .base).erase
 
@@ -3397,10 +3407,16 @@ public theorem EqUpToAnn.of_toRaw {σ₁ : InsnSig s} {σ₂ : InsnSig t}
       σ₂.regions.map (fun p => (p.name,
         p.type.params.map (fun q => (q.name, q.type.toRaw)), p.type.returnType.toRaw)))
     (hsuccs : σ₁.succs.map (fun p => (p.name, p.type.map (·.toRaw))) =
-      σ₂.succs.map (fun p => (p.name, p.type.map (·.toRaw)))) :
+      σ₂.succs.map (fun p => (p.name, p.type.map (·.toRaw))))
+    (heff : σ₁.effect = σ₂.effect) :
     σ₁.EqUpToAnn σ₂ := by
   unfold EqUpToAnn
-  exact erase_decl_eq_of_toRaw .base .decl .decl htp hargs hvar hret hregions hsuccs
+  exact erase_decl_eq_of_toRaw .base .decl .decl htp hargs hvar hret hregions hsuccs heff
+
+/-- Signatures equal up to annotation have the same effect. -/
+public theorem EqUpToAnn.effect_eq {σ₁ : InsnSig s} {σ₂ : InsnSig t} (h : σ₁.EqUpToAnn σ₂) :
+    σ₁.effect = σ₂.effect :=
+  (congrArg InsnDecl.Raw.effect h).symm
 
 /-- Signatures equal up to annotation declare, under one name, the same instruction up to its
 annotation and kind. -/
@@ -3771,6 +3787,7 @@ namespace InsnSig
   returnType := i.returnType.map (·.carry h)
   regions := i.regions.map (fun p => ⟨p.name, p.type.carry h⟩)
   succs := i.succs.map (fun p => ⟨p.name, p.type.map (·.carry h)⟩)
+  effect := i.effect
   distinct := by simpa [Function.comp_def] using i.distinct
 
 /-- Reinterpret in an extension. -/
@@ -3809,8 +3826,8 @@ private theorem toArray_map_toList {β γ : Type _} (f : β → γ) (a : Array �
   simp
 
 /-- A signature carried into `t` is `τ` when everything it declares stands for the same raw
-data.  The data is compared over lists, which reduce on a literal signature, so each
-hypothesis is proved node by node, as the DSL does. -/
+data, and its effect is `τ`'s.  The data is compared over lists, which reduce on a literal
+signature, so each hypothesis is proved node by node, as the DSL does. -/
 public theorem carry_eq_of_toRaw {s t : Env α} (h : s.KeepsTypes t) {σ : InsnSig s}
     {τ : InsnSig t} (hann : σ.ann = τ.ann) (htp : σ.typeParams.toList = τ.typeParams.toList)
     (hargs : σ.argTypes.toList.map (fun p => (p.name, p.type.toRaw)) =
@@ -3823,7 +3840,8 @@ public theorem carry_eq_of_toRaw {s t : Env α} (h : s.KeepsTypes t) {σ : InsnS
       τ.regions.toList.map (fun p => (p.name,
         p.type.params.toList.map (fun q => (q.name, q.type.toRaw)), p.type.returnType.toRaw)))
     (hsuccs : σ.succs.toList.map (fun p => (p.name, p.type.toList.map (·.toRaw))) =
-      τ.succs.toList.map (fun p => (p.name, p.type.toList.map (·.toRaw)))) :
+      τ.succs.toList.map (fun p => (p.name, p.type.toList.map (·.toRaw))))
+    (heff : σ.effect = τ.effect) :
     σ.carry h = τ := by
   apply ext_toRaw
   · exact hann
@@ -3839,6 +3857,7 @@ public theorem carry_eq_of_toRaw {s t : Env α} (h : s.KeepsTypes t) {σ : InsnS
   · have h₁ := congrArg (List.map fun (x : String × List TypeExpr.Raw) => (x.1, x.2.toArray)) hsuccs
     apply Array.toList_inj.mp
     simpa [carry, Function.comp_def, toArray_map_toList] using h₁
+  · exact heff
 
 end InsnSig
 
@@ -3927,6 +3946,11 @@ from `TypeExpr.app`, `TypeExpr.var`, `RegionSig.of` and `carry`. -/
 public def InsnRef.ctorAddr? {env : Env α} {isig : InsnSig env} (r : InsnRef env isig) :
     Option CtorAddr :=
   env.ctorAddr? r.name
+
+/-- Which datatype the instruction eliminates, if it is a datatype's case instruction. -/
+public def InsnRef.caseAddr? {env : Env α} {isig : InsnSig env} (r : InsnRef env isig) :
+    Option CaseAddr :=
+  env.caseAddr? r.name
 
 /-- A reference's constructor address is its name's. -/
 public theorem InsnRef.ctorAddr?_eq {env : Env α} {isig : InsnSig env} (r : InsnRef env isig) :
@@ -4528,6 +4552,7 @@ public def InsnRef.ofAddInsn (s : Env α) (name : Name) (isig : InsnSig s) (fres
 
 * `Env.ctorSig`: constructor `j` of member `i`'s signature.  Its type parameters are the
   datatype's, its arguments the payload, and it returns the datatype at its own parameters.
+  It is `pure`.
 * `InsnRef.ofAddData`: the reference to it.
 
 The lemmas describe the signature through `TypeExpr.toRaw`: with `InsnSig.ext_toRaw`, `simp`
@@ -4580,7 +4605,7 @@ end ctor
 
 /-- The signature `addData` derives for constructor `j` of member `i`: the member's type
 parameters, by name; the constructor's payload as its arguments; and the member applied to its
-own parameters as its result.  No variadic, regions or successors, and not terminal. -/
+own parameters as its result.  No variadic, regions or successors, not terminal, and `pure`. -/
 public def ctorSig {s : Env α} {hdr : Array (TypeDecl α)} {fresh : s.FreshTypes hdr}
     {ctors : Array (Array (Ctor α (DataTy s (s.addTypes hdr fresh))))}
     {cfresh : (s.addTypes hdr fresh).FreshNames (ctorNames ctors ++ caseNames hdr)}
@@ -4649,6 +4674,12 @@ public theorem argTypes_toList_ctorSig :
 /-- It has no successors. -/
 @[simp] public theorem succs_ctorSig :
     (ctorSig (cfresh := cfresh) (adm := adm) i j hi hj).succs = #[] := by
+  simp [ctorSig, InsnSig.ofWF, ctorInsnDecl, DataGroup.ctorDecl]
+
+/-- The signature of a datatype's constructor, as the environment derives it, declares the
+effect `pure`: a constructor reads no mutable state. -/
+@[simp] public theorem effect_ctorSig :
+    (ctorSig (cfresh := cfresh) (adm := adm) i j hi hj).effect = .pure := by
   simp [ctorSig, InsnSig.ofWF, ctorInsnDecl, DataGroup.ctorDecl]
 
 /-- `addData` declares constructor `j` of member `i` as the instruction with the signature it
@@ -4730,7 +4761,7 @@ group, so the name is claimed with the group:
 * `Env.caseSig`: member `i`'s case instruction's signature.  Terminal; its type parameters are
   the datatype's; its one argument `scrutinee` is the datatype at its own parameters; it has
   one successor per constructor, in declaration order, named by the last component of the
-  constructor's name and receiving its payload; and it has no return type.
+  constructor's name and receiving its payload; it has no return type; and it is `pure`.
 * `InsnRef.ofAddDataCase`: the reference to it.
 
 As for constructors, the lemmas describe the signature through `TypeExpr.toRaw`. -/
@@ -4775,7 +4806,8 @@ end case
 /-- The signature `addData` derives for member `i`'s case instruction: terminal; the member's
 type parameters, by name; one argument `scrutinee`, the member applied to its own parameters;
 one successor per constructor, in declaration order, named by the last component of the
-constructor's name and receiving its payload.  No return type, variadic or regions. -/
+constructor's name and receiving its payload.  No return type, variadic or regions, and
+`pure`. -/
 public def caseSig {s : Env α} {hdr : Array (TypeDecl α)} {fresh : s.FreshTypes hdr}
     {ctors : Array (Array (Ctor α (DataTy s (s.addTypes hdr fresh))))}
     {cfresh : (s.addTypes hdr fresh).FreshNames (ctorNames ctors ++ caseNames hdr)}
@@ -4867,6 +4899,12 @@ public theorem succs_toList_caseSig :
     (succs_caseSig (cfresh := cfresh) (adm := adm) (i := i) (hi := hi))
   simp only [Array.toList_map, List.map_map, Function.comp_def] at h
   exact h
+
+/-- The signature of a datatype's case instruction, as the environment derives it, declares the
+effect `pure`: eliminating a value reads no mutable state. -/
+@[simp] public theorem effect_caseSig :
+    (caseSig (cfresh := cfresh) (adm := adm) i hi).effect = .pure := by
+  simp [caseSig, InsnSig.ofWF, caseInsnDecl, DataGroup.caseDecl]
 
 /-- `addData` declares member `i`'s case instruction as the instruction with the signature it
 derives, marked as that case instruction. -/

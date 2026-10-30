@@ -1,0 +1,192 @@
+-- The model of the PySpec fixture StrataPythonTestExtra/Specs/dispatch_test/servicelib/__init__.py,
+-- written by hand by the rules of docs/PythonToDyn.md §12:
+--
+--   from .Messaging import Messaging
+--   from .Storage import Storage
+--   from .Database import Database
+--   from typing import Literal, overload
+--
+--   @overload
+--   def connect(service_name: Literal["storage"]) -> Storage: ...
+--   @overload
+--   def connect(service_name: Literal["messaging"]) -> Messaging: ...
+--   @overload
+--   def connect(service_name: Literal["database"]) -> Database: ...
+--
+-- The module body imports the three classes from their model modules, as the source does. It
+-- binds no name of `typing`: the module's `__getattr__` makes it an unknown value. The three
+-- overloads become the one extern `@servicelib.connect` (§12.1). Its stubs have the same
+-- parameters, so it has the clauses for the binding and for the presence of `service_name`
+-- first (§12.2), and the dispatch clause tests a value that is defined. The dispatch clause is
+-- also the declared type of `service_name`, the union of the stubs' Literal types. The stubs
+-- have no other parameter and no `@requires`, so they add no clause of their own. Each stub
+-- gives one free ensures clause. Its return type is a model class, so the clause tests the
+-- result with `py.typeIsSubclass` and then `py.isInstance`, as a trusted assumption allows
+-- (§12.3, §12.9). The stubs have no `@modifies`, so the frame holds only what the arguments
+-- reach (§12.5).
+-- Compared with ToLaurel and V1: they dispatch at the call, on position 0 or the keyword
+-- `service_name`, and give the result the stub's class. They check neither the other arguments
+-- nor the binding, so the model's requires clauses are stronger. The model says that the call
+-- may raise.
+module servicelib {
+  func @|servicelib.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("servicelib")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %Messaging.0 : py.Value = py.importFrom("servicelib.Messaging", "Messaging") ^propagate.0()
+      %Messaging.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib", "Messaging")
+      %set.2 : base.Unit = base.refSet[py.Value](%Messaging.cell.0, %Messaging.0)
+      %Storage.0 : py.Value = py.importFrom("servicelib.Storage", "Storage") ^propagate.0()
+      %Storage.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib", "Storage")
+      %set.3 : base.Unit = base.refSet[py.Value](%Storage.cell.0, %Storage.0)
+      %Database.0 : py.Value = py.importFrom("servicelib.Database", "Database") ^propagate.0()
+      %Database.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib", "Database")
+      %set.4 : base.Unit = base.refSet[py.Value](%Database.cell.0, %Database.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@servicelib.connect)
+      %connect.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib", "connect")
+      %set.5 : base.Unit = base.refSet[py.Value](%connect.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@servicelib.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib", "__getattr__")
+      %set.6 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  extern func @servicelib.connect(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "arguments bind to 'connect'" {
+      pre.0():
+        %ok.0 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "service_name")
+        ret(%ok.0)
+    }
+    requires "'service_name' is required" {
+      pre.1():
+        %undef.0 : py.Value = py.undef("service_name")
+        %service_name.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "service_name", %undef.0)
+        %ok.1 : base.Bool = py.isDefined(%service_name.0)
+        ret(%ok.1)
+    }
+    requires "'connect' called with unknown string" {
+      pre.2():
+        %undef.1 : py.Value = py.undef("service_name")
+        %service_name.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "service_name", %undef.1)
+        %ok.2 : base.Bool = py.strIsOneOf(%service_name.1, "storage", "messaging", "database")
+        ret(%ok.2)
+    }
+    free ensures "overload of 'connect' for 'storage'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %service_name.2 : py.Value = base.old[py.Value, py.Value] ^fail.0() {
+          old.0():
+            %undef.2 : py.Value = py.undef("service_name")
+            %service_name.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "service_name", %undef.2)
+            %res.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%service_name.3)
+            ret(%res.0)
+        }
+        %str.0 : py.Value = py.strLit("storage")
+        %eq.0 : py.Value = py.eq(%service_name.2, %str.0) ^fail.0()
+        %chosen.0 : base.Bool = py.truthy(%eq.0) ^fail.0()
+        branch(%chosen.0) ^chosen.0() ^other.0()
+      chosen.0():
+        %Storage.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Storage", "Storage")
+        %Storage.0 : py.Value = base.refGet[py.Value](%Storage.cell.0)
+        %Storage.1 : py.Value = py.requireDefined(%Storage.0, "AttributeError", "module 'servicelib.Storage' has no attribute 'Storage'") ^fail.0()
+        %sub.0 : base.Bool = py.typeIsSubclass(%result.0, %Storage.1) ^fail.0()
+        branch(%sub.0) ^isSub.0() ^no.0()
+      isSub.0():
+        %ok.3 : base.Bool = py.isInstance(%result.0, %Storage.1) ^fail.0()
+        ret(%ok.3)
+      no.0():
+        ret(false)
+      other.0():
+        ret(true)
+      raised.0(%exc.0 : py.Value):
+        ret(true)
+      fail.0(%e.0 : py.Value):
+        ret(true)
+    }
+    free ensures "overload of 'connect' for 'messaging'" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %service_name.4 : py.Value = base.old[py.Value, py.Value] ^fail.1() {
+          old.1():
+            %undef.3 : py.Value = py.undef("service_name")
+            %service_name.5 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "service_name", %undef.3)
+            %res.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%service_name.5)
+            ret(%res.1)
+        }
+        %str.1 : py.Value = py.strLit("messaging")
+        %eq.1 : py.Value = py.eq(%service_name.4, %str.1) ^fail.1()
+        %chosen.1 : base.Bool = py.truthy(%eq.1) ^fail.1()
+        branch(%chosen.1) ^chosen.1() ^other.1()
+      chosen.1():
+        %Messaging.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Messaging", "Messaging")
+        %Messaging.0 : py.Value = base.refGet[py.Value](%Messaging.cell.0)
+        %Messaging.1 : py.Value = py.requireDefined(%Messaging.0, "AttributeError", "module 'servicelib.Messaging' has no attribute 'Messaging'") ^fail.1()
+        %sub.1 : base.Bool = py.typeIsSubclass(%result.1, %Messaging.1) ^fail.1()
+        branch(%sub.1) ^isSub.1() ^no.1()
+      isSub.1():
+        %ok.4 : base.Bool = py.isInstance(%result.1, %Messaging.1) ^fail.1()
+        ret(%ok.4)
+      no.1():
+        ret(false)
+      other.1():
+        ret(true)
+      raised.1(%exc.1 : py.Value):
+        ret(true)
+      fail.1(%e.1 : py.Value):
+        ret(true)
+    }
+    free ensures "overload of 'connect' for 'database'" {
+      post.2(%r.2 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.2) ^ok.2() ^raised.2()
+      ok.2(%result.2 : py.Value):
+        %service_name.6 : py.Value = base.old[py.Value, py.Value] ^fail.2() {
+          old.2():
+            %undef.4 : py.Value = py.undef("service_name")
+            %service_name.7 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "service_name", %undef.4)
+            %res.2 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%service_name.7)
+            ret(%res.2)
+        }
+        %str.2 : py.Value = py.strLit("database")
+        %eq.2 : py.Value = py.eq(%service_name.6, %str.2) ^fail.2()
+        %chosen.2 : base.Bool = py.truthy(%eq.2) ^fail.2()
+        branch(%chosen.2) ^chosen.2() ^other.2()
+      chosen.2():
+        %Database.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Database", "Database")
+        %Database.0 : py.Value = base.refGet[py.Value](%Database.cell.0)
+        %Database.1 : py.Value = py.requireDefined(%Database.0, "AttributeError", "module 'servicelib.Database' has no attribute 'Database'") ^fail.2()
+        %sub.2 : base.Bool = py.typeIsSubclass(%result.2, %Database.1) ^fail.2()
+        branch(%sub.2) ^isSub.2() ^no.2()
+      isSub.2():
+        %ok.5 : base.Bool = py.isInstance(%result.2, %Database.1) ^fail.2()
+        ret(%ok.5)
+      no.2():
+        ret(false)
+      other.2():
+        ret(true)
+      raised.2(%exc.2 : py.Value):
+        ret(true)
+      fail.2(%e.2 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.1)
+    })
+  extern func @servicelib.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

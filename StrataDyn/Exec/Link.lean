@@ -49,8 +49,10 @@ sees nothing, and a region's entry block what its instruction sees and the regio
 the blocks may come in any order.  Validation (`Check.lean`) checks every scope on every edge
 into its block.
 
-TODO: prove `link_wf`, that linking a module that `Module.WF` accepts gives one that `WF`
-accepts.  Nothing proves it yet; a run validates the linked module and rejects it otherwise.
+TODO: prove `link_wf`, that linking a module without extern functions that `Module.WF` accepts
+gives one that `WF` accepts.  Nothing proves it yet; a run validates the linked module and
+rejects it otherwise.  A module with an extern function does not run yet: an extern has no
+blocks, so linking or validation rejects it.
 -/
 
 namespace Strata.Dyn.Exec
@@ -302,7 +304,8 @@ def linkTermApp (op : Name) (key : Nat × Array Ty) (args : List Nat) (succs : L
   | _, _ => linkError s!"{nameStr op}: not a terminal instruction"
 
 /-- The constant `dst = c`, declared at type `type`.  A function constant is a code pointer, a
-closure with no captures, which must be at its function's signature. -/
+closure with no captures, which must be at its function's signature.  A ghost reference may occur
+only in a contract, which linking does not reach, so one here is an error. -/
 def linkConst {env : Env Unit} (dst : Nat) (type : TypeExpr env) :
     Const → LinkM M (LInsn M.at)
   | .func f => do
@@ -318,6 +321,7 @@ def linkConst {env : Env Unit} (dst : Nat) (type : TypeExpr env) :
   | .int i => return .const dst ⟨M.int, M.ofInt Run i⟩
   | .float x => return .const dst ⟨M.float, M.ofFloat Run x⟩
   | .str x => return .const dst ⟨M.str, M.ofStr Run x⟩
+  | .ghost g => linkError s!"{nameStr g}: a ghost reference outside a contract"
 
 end
 

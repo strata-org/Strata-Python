@@ -8,11 +8,11 @@ module m_runtime_globals {
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_runtime_globals", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %mod.0 : py.Value = py.importModule("builtins") ^propagate.0()
-      %builtins.cell.0 : base.Ref(py.Value) = py.globalCell("m_runtime_globals", "builtins")
-      %set.2 : base.Unit = base.refSet[py.Value](%builtins.cell.0, %mod.0)
+      %|builtins.cell.0| : base.Ref(py.Value) = py.globalCell("m_runtime_globals", "builtins")
+      %set.2 : base.Unit = base.refSet[py.Value](%|builtins.cell.0|, %mod.0)
       %print.0 : py.Value = py.loadGlobal("m_runtime_globals", "print") ^propagate.0()
-      %builtins.0 : py.Value = py.loadGlobal("m_runtime_globals", "builtins") ^propagate.0()
-      %log.0 : base.Unit = py.setAttr(%builtins.0, "log", %print.0) ^propagate.0()
+      %|builtins.0| : py.Value = py.loadGlobal("m_runtime_globals", "builtins") ^propagate.0()
+      %log.0 : base.Unit = py.setAttr(%|builtins.0|, "log", %print.0) ^propagate.0()
       %log.1 : py.Value = py.loadGlobal("m_runtime_globals", "log") ^propagate.0()
       %str.1 : py.Value = py.strLit("hi")
       %tuple.0 : py.Value = py.mkTuple(%str.1)
@@ -36,11 +36,8 @@ module m_runtime_globals {
   }
   func @m_runtime_globals.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %log.0 : py.Value = py.loadGlobal("m_runtime_globals", "log") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%log.0)
       ret(%ret.0)
@@ -50,11 +47,8 @@ module m_runtime_globals {
   }
   func @m_runtime_globals.g(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "g() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "g() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %later.0 : py.Value = py.loadGlobal("m_runtime_globals", "later") ^propagate.0()
       %missing.0 : py.Value = py.loadGlobal("m_runtime_globals", "missing") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%later.0, %missing.0)

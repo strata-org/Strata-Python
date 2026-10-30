@@ -69,7 +69,8 @@ mutual
 
 end
 
-/-- `fn` with `f` applied to each use, regions included. -/
+/-- `fn` with `f` applied to each use of its body, regions included.  Its contract stays as it
+is. -/
 @[expose] def Func.mapUses (f : ValId → ValId) (fn : Func env α) : Func env α :=
   { fn with blocks := ⟨Block.mapUsesList f fn.blocks.toList⟩ }
 

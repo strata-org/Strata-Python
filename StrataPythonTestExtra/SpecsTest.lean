@@ -4,9 +4,10 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
-meta import StrataPython.Specs
+meta import all StrataPython.Specs
 meta import all StrataPython.Specs.DDM
 meta import StrataPython.Specs.ToLaurel
+meta import StrataLaurel.Implementation.Grammar.AbstractToConcreteTreeTranslator
 meta import StrataPython.PythonDialect
 meta import StrataPythonTest.Util.Python
 
@@ -214,6 +215,19 @@ class "ClassWithInit" {
     }
   ]
   exhaustive: false
+  function "__init__"{
+    args: [
+      self : ident("main.ClassWithInit") [default: ]
+    ]
+    kwonly: [
+    ]
+    return: ident("typing.Any")
+    overload: false
+    preconditions: [
+    ]
+    postconditions: [
+    ]
+  }
 }
 #end
 
@@ -276,9 +290,10 @@ meta def runNativeCase (stem : String)
         | .ok (sigs, warnings) => check sigs warnings
         | .error e => throw <| IO.userError e
 
-/-- Like `runNativeCase` but expects a translation error whose message contains
-    `needle` (empty `needle` accepts any error). -/
-meta def expectNativeCaseError (stem : String) (needle : String) : IO Unit :=
+/-- Like `runNativeCase` but expects a translation error, and returns its message; `none` when
+    `withPython` skips the Python tests. -/
+meta def nativeCaseError (stem : String) : IO (Option String) := do
+  let msg ← IO.mkRef none
   withPython fun pythonCmd => do
     IO.FS.withTempFile fun _handle dialectFile => do
       IO.FS.writeBinFile dialectFile StrataPython.Python.toIon
@@ -294,9 +309,15 @@ meta def expectNativeCaseError (stem : String) (needle : String) : IO Unit :=
             |>.toBaseIO
         match r with
         | .ok _ => throw <| IO.userError s!"{stem}: expected a hard error, but translation succeeded"
-        | .error e =>
-          unless e.contains needle do
-            throw <| IO.userError s!"{stem}: expected error containing \"{needle}\", got: {e}"
+        | .error e => msg.set (some e)
+  msg.get
+
+/-- Expect a translation error whose message contains `needle` (empty `needle` accepts any
+    error). -/
+meta def expectNativeCaseError (stem : String) (needle : String) : IO Unit := do
+  let some e ← nativeCaseError stem | return
+  unless e.contains needle do
+    throw <| IO.userError s!"{stem}: expected error containing \"{needle}\", got: {e}"
 
 meta def findFn (sigs : Array Signature) (name : String) : IO Specs.FunctionDecl := do
   let some d := sigs.findSome?
@@ -600,6 +621,349 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
   expect (c.invariants.size == 1) s!"expected 1 class invariant, got {c.invariants.size}"
   let m ← findMethod c "m"
   expect (m.preconditions.size == 1) s!"expected 1 method precondition, got {m.preconditions.size}"
+
+/-- A warning without its `file:line:col: ` prefix. -/
+meta def warningText (w : String) : String :=
+  ": ".intercalate ((w.splitOn ": ").drop 1)
+
+-- A stub's `__init__` is read like any other method: the method `__init__` has the
+-- typed parameters `region` and `n`, the body asserts and then the `@requires` as
+-- preconditions, the `@admit` and the `@modifies` target. The top-level
+-- `self.helper = self._Helper()` declares the field `helper`. The assignment nested in
+-- the `if` declares no field: it is skipped with a warning, and the assert next to it
+-- applies only when `n > 0`.
+/--
+info: program PythonSpecs;
+class "C" {
+  bases: []
+  fields: [
+    count : ident("builtins.int")
+    helper : ident("native_cases.init_contract._Helper")"_Helper()"
+  ]
+  classVars: [
+  ]
+  subclasses: [
+    class "_Helper" {
+      bases: []
+      fields: [
+      ]
+      classVars: [
+      ]
+      subclasses: [
+      ]
+      exhaustive: false
+    }
+  ]
+  exhaustive: false
+  function "__init__"{
+    args: [
+      self : ident("native_cases.init_contract.C") [default: ]
+      region : ident("builtins.str") [default: ]
+      n : ident("builtins.int") [default: ]
+    ]
+    kwonly: [
+    ]
+    return: ident("_types.NoneType")
+    overload: false
+    preconditions: [
+      ensure(stringLen(region) >=_int 1, "region must not be empty")
+      ensure(pcmp("gt", n, 0) => n <=_int 3, "n is small")
+      ensure(stringLen(region) <=_int 10, )
+    ]
+    postconditions: [
+      admitted stringLen(region) >=_int 2
+    ]
+    modifies: [
+      (self[count])
+    ]
+  }
+}
+
+warnings: #[skipped Assign in function body]
+-/
+#guard_msgs in
+#eval runNativeCase "init_contract" fun sigs warnings => do
+  IO.println (toDDMProgram sigs)
+  IO.println s!"warnings: {warnings.map warningText}"
+
+-- The Laurel translation of a stub's `__init__` is a procedure like any other
+-- method's: `self` is dropped from its inputs, each declared type, body assert and
+-- `@requires` is a `requires` clause, and the `@admit` is a free postcondition.
+/--
+info: types:
+  composite native_cases_init_contract_C { var count: Any var helper: native_cases_init_contract__Helper }
+  composite native_cases_init_contract__Helper { }
+procedures:
+  procedure native_cases_init_contract_C@__init__(region: Any, n: Any)
+  returns (result: Any)
+  requires Any..isfrom_str(region) summary "declared type of parameter 'region'"
+  requires Any..isfrom_int(n) summary "declared type of parameter 'n'"
+  requires Any_to_bool(PGe(from_int(Str.Length(Any..as_string!(region))), from_int(1))) summary "region must not be empty"
+  requires Any_to_bool(PGt(n, from_int(0))) ==> Any_to_bool(PLe(n, from_int(3))) summary "n is small"
+  requires Any_to_bool(PLe(from_int(Str.Length(Any..as_string!(region))), from_int(10))) summary "precondition 2"
+  opaque
+  free ensures Any_to_bool(PGe(from_int(Str.Length(Any..as_string!(region))), from_int(2))) summary "admitted postcondition of 'native_cases_init_contract_C@__init__'"
+  modifies *;
+errors: #[]
+-/
+#guard_msgs in
+#eval runNativeCase "init_contract" fun sigs _ => do
+  let r := Specs.ToLaurel.signaturesToLaurel "init_contract.py" sigs
+    (StrataPython.ModuleName.ofString! "native_cases.init_contract")
+  IO.println "types:"
+  for td in r.program.types do
+    IO.println s!"  {Strata.Laurel.formatTypeDefinition td}"
+  IO.println "procedures:"
+  for proc in r.program.staticProcedures do
+    IO.println s!"  {Strata.Laurel.formatProcedure proc}"
+  IO.println s!"errors: {r.errors.map (·.message.message)}"
+
+-- A method with `*args` is a hard error, which rejects the whole model.
+#guard_msgs in
+#eval expectNativeCaseError "args_method" "m: *args is not supported"
+
+-- A stub `__init__` with `*args` is rejected like any other method.
+#guard_msgs in
+#eval expectNativeCaseError "args_init" "__init__: *args is not supported"
+
+-- A positional-only parameter is a hard error.
+#guard_msgs in
+#eval expectNativeCaseError "posonly_function" "f: positional-only parameters are not supported"
+
+-- Type parameters on a function are a hard error.
+#guard_msgs in
+#eval expectNativeCaseError "def_type_params" "f: type parameters are not supported"
+
+-- Class keywords, a metaclass included, and type parameters on a class are hard errors.
+#guard_msgs in
+#eval expectNativeCaseError "class_keywords" "C: class keywords, such as metaclass=, are not supported"
+
+#guard_msgs in
+#eval expectNativeCaseError "class_metaclass" "C: class keywords, such as metaclass=, are not supported"
+
+#guard_msgs in
+#eval expectNativeCaseError "class_type_params" "C: type parameters are not supported"
+
+-- The same holds for a nested class, and decorators on a nested class are a hard error too.
+#guard_msgs in
+#eval expectNativeCaseError "nested_class_keywords"
+  "Inner: class keywords, such as metaclass=, are not supported"
+
+#guard_msgs in
+#eval expectNativeCaseError "nested_class_metaclass"
+  "Inner: class keywords, such as metaclass=, are not supported"
+
+#guard_msgs in
+#eval expectNativeCaseError "nested_class_type_params" "Inner: type parameters are not supported"
+
+#guard_msgs in
+#eval expectNativeCaseError "nested_class_decorator"
+  "Inner: decorators on a nested class are not supported"
+
+-- The translation goes on after a class that it rejects: the function after the class is read,
+-- and its own error is reported too.
+/-- info: [true, true] -/
+#guard_msgs in
+#eval do
+  let some e ← nativeCaseError "class_keywords_then_fn" | return
+  IO.println [e.contains "C: class keywords, such as metaclass=, are not supported",
+    e.contains "g: positional-only parameters are not supported"]
+
+/-- The errors that `pySpecArg` reports for the parameter `x: int`, built by hand
+    with the given source ranges and type comment. -/
+meta def pySpecArgErrors (loc typeLoc : SourceRange) (comment : Option String) :
+    IO (Array String) := do
+  let r : SourceRange := { start := ⟨1⟩, stop := ⟨2⟩ }
+  let intType : expr SourceRange := .Name r ⟨r, "int"⟩ (.Load r)
+  let a : arg SourceRange := .mk_arg loc ⟨r, "x"⟩ ⟨typeLoc, some intType⟩
+    ⟨r, comment.map (⟨r, ·⟩)⟩
+  let ctx : PySpecContext := {
+    eventSet := {}, pythonCmd := "", dialectFile := "", pythonFile := "t.py",
+    strataDir := "", baseSearchPath := "", currentModulePrefix := none,
+    fileMapsRef := ← IO.mkRef {}, currentModule := .ofString! "t" }
+  let (_, s) ← (pySpecArg {} none a none).run ctx |>.run { errors := #[], warnings := #[] }
+  return s.errors.map (·.message.message)
+
+-- `pySpecArg` accepts a well-formed parameter. It reports a parameter without a
+-- source range, an annotation with a source range, and a type comment.
+/--
+info: #[]
+#[internal: argument x has no source location]
+#[internal: the annotation of argument x has a source location]
+#[x: type comments are not supported]
+-/
+#guard_msgs in
+#eval do
+  let r : SourceRange := { start := ⟨1⟩, stop := ⟨2⟩ }
+  IO.println (← pySpecArgErrors r default none)
+  IO.println (← pySpecArgErrors default default none)
+  IO.println (← pySpecArgErrors r r none)
+  IO.println (← pySpecArgErrors r default (some "int"))
+
+/-- The errors that `translate` reports for the module body `body`. -/
+meta def translateErrors (body : Array (stmt SourceRange)) : IO (Array String) := do
+  let ctx : PySpecContext := {
+    eventSet := {}, pythonCmd := "", dialectFile := "", pythonFile := "t.py",
+    strataDir := "", baseSearchPath := "", currentModulePrefix := none,
+    fileMapsRef := ← IO.mkRef {}, currentModule := .ofString! "t" }
+  let (_, s) ← (translate body).run ctx |>.run { errors := #[], warnings := #[] }
+  return s.errors.map (·.message.message)
+
+/-- The errors that `translate` reports for the stub `def f(): ...`, built by hand with the
+    given source range on each list or optional field, and the given type comment. -/
+meta def functionDefErrors (fieldLoc : SourceRange) (comment : Option String) :
+    IO (Array String) := do
+  let r : SourceRange := { start := ⟨1⟩, stop := ⟨2⟩ }
+  let noArgs : arguments SourceRange :=
+    .mk_arguments r ⟨default, #[]⟩ ⟨default, #[]⟩ ⟨default, none⟩ ⟨default, #[]⟩
+      ⟨default, #[]⟩ ⟨default, none⟩ ⟨default, #[]⟩
+  let ellipsis : stmt SourceRange := .Expr r (.Constant r (.ConEllipsis r) ⟨default, none⟩)
+  translateErrors #[.FunctionDef r ⟨r, "f"⟩ noArgs ⟨fieldLoc, #[ellipsis]⟩ ⟨fieldLoc, #[]⟩
+    ⟨fieldLoc, none⟩ ⟨fieldLoc, comment.map (⟨r, ·⟩)⟩ ⟨fieldLoc, #[]⟩]
+
+-- `translate` accepts a well-formed stub function. It reports a source range on a list or
+-- optional field of the function, and a type comment, which the Python parser never gives.
+/--
+info: #[]
+#[internal: the body of function f has a source location, internal: the decorator list of function f has a source location, internal: the return annotation of function f has a source location, internal: the type comment of function f has a source location, internal: the type parameter list of function f has a source location]
+#[f: type comments are not supported]
+-/
+#guard_msgs in
+#eval do
+  let r : SourceRange := { start := ⟨1⟩, stop := ⟨2⟩ }
+  IO.println (← functionDefErrors default none)
+  IO.println (← functionDefErrors r none)
+  IO.println (← functionDefErrors default (some "() -> None"))
+
+-- `translate` accepts a well-formed `class C: pass`, and it reports a source range on the
+-- class's name, which the Python parser never gives.
+/--
+info: #[]
+#[internal: the name of class C has a source location]
+-/
+#guard_msgs in
+#eval do
+  let r : SourceRange := { start := ⟨1⟩, stop := ⟨2⟩ }
+  let classC (nameLoc : SourceRange) : stmt SourceRange :=
+    .ClassDef r ⟨nameLoc, "C"⟩ ⟨default, #[]⟩ ⟨default, #[]⟩ ⟨default, #[.Pass r]⟩
+      ⟨default, #[]⟩ ⟨default, #[]⟩
+  IO.println (← translateErrors #[classC default])
+  IO.println (← translateErrors #[classC r])
+
+/-- Print each class's methods with their parameters and `@overload` marks, then the
+    Laurel procedures, the Laurel errors and the parser's warnings of the native case
+    `stem`. -/
+meta def printMethodsAndProcedures (stem : String) : IO Unit :=
+  runNativeCase stem fun sigs warnings => do
+    for sig in sigs do
+      if let .classDef c := sig then
+        let shown := c.methods.toList.map fun m =>
+          let params := ", ".intercalate (m.args.args.toList.map (·.name))
+          s!"{if m.isOverload then "@overload " else ""}{m.name}({params})"
+        IO.println s!"class {c.name}: {shown}"
+    let r := Specs.ToLaurel.signaturesToLaurel s!"{stem}.py" sigs
+      (StrataPython.ModuleName.ofString! s!"native_cases.{stem}")
+    IO.println s!"procedures: {r.program.staticProcedures.map (·.name.text)}"
+    IO.println "errors:"
+    for e in r.errors do
+      IO.println s!"  {e.message.kind.category}: {e.message.message}"
+    IO.println s!"warnings: {warnings.map warningText}"
+
+-- The `@overload` stubs of `__init__` are recorded, and they get no Laurel procedure,
+-- as top-level `@overload` stubs get none.
+/--
+info: class C: [@overload __init__(self, x), @overload __init__(self, x)]
+procedures: []
+errors:
+warnings: #[]
+-/
+#guard_msgs in
+#eval printMethodsAndProcedures "overload_init"
+
+-- The `@overload` stubs of a method are recorded, and they get no Laurel procedure.
+-- A plain definition of the same name, and any other method, get one.
+/--
+info: class C: [@overload m(self, x), @overload m(self, x), n(self)]
+class D: [@overload m(self, x), @overload m(self, x), m(self, x)]
+procedures: [native_cases_overload_method_C@n, native_cases_overload_method_D@m]
+errors:
+warnings: #[]
+-/
+#guard_msgs in
+#eval printMethodsAndProcedures "overload_method"
+
+-- A class defines each method name at most once without `@overload`.
+#guard_msgs in
+#eval expectNativeCaseError "duplicate_init" "C.__init__ is already defined"
+
+#guard_msgs in
+#eval expectNativeCaseError "duplicate_method" "C.m is already defined"
+
+-- A stub's `__init__` follows the rules of every method: a default other than `None`
+-- is a hard error.
+#guard_msgs in
+#eval expectNativeCaseError "init_default" "Unexpected value Python.Constant(Python.ConPos(0)"
+
+-- Each contract on an `@overload` stub of a method (`@requires`, `@ensures`, `@admit`,
+-- `@modifies`, `@ghost`) is rejected, since the stub gets no Laurel procedure that
+-- could carry it. Stubs with only a signature still load (`overload_method` above).
+/--
+info: class P: [@overload m(self, x), @overload m(self, x)]
+procedures: []
+errors:
+  unsupportedOverloadContract: A precondition (@requires or assert) is not supported on @overload stub 'P.m': x >=_int 0. No procedure is generated for it, so the precondition would be silently dropped. Attach the contract to a non-overload declaration instead.
+  unsupportedPostcondition: Modeled @ensures cannot be verified for 'P.m': result >=_int 0. An @overload stub is a dispatch-only declaration; no procedure is generated for it, so the postcondition would be silently dropped. Attach the contract to a non-overload declaration instead.
+  unsupportedAdmit: @admit is not supported on @overload stub 'P.m': pcmp("eq", result, 7). No procedure is generated for a dispatch-only declaration, so there is nothing to carry the assumed postcondition. Attach the @admit to a non-overload declaration instead.
+  unsupportedOverloadContract: @modifies is not supported on @overload stub 'P.m': x. No procedure is generated for it, so the frame would be silently dropped. Attach the contract to a non-overload declaration instead.
+  unsupportedOverloadContract: @ghost is not supported on @overload stub 'P.m': g. No procedure is generated for it, so the ghost would be silently dropped. Attach it to a non-overload declaration instead.
+warnings: #[]
+-/
+#guard_msgs in
+#eval printMethodsAndProcedures "overload_method_requires"
+
+-- The parser does not read the body of an `@overload` stub, so an assert in it is a
+-- hard error.
+#guard_msgs in
+#eval expectNativeCaseError "overload_method_assert"
+  "P.m: an @overload stub cannot have assert, if or for statements"
+
+-- The same holds for a stub of a top-level function.
+#guard_msgs in
+#eval expectNativeCaseError "overload_function_assert"
+  "f: an @overload stub cannot have assert, if or for statements"
+
+-- An assert in an `@overload` stub's body is a hard error at any depth, on both paths. Each
+-- stub of `overload_nested_assert` nests one assert in another kind of block, except
+-- `no_assert`.
+/--
+info: [in_while, in_while_else, in_with, in_try, in_handler, in_try_else, in_finally, in_try_star, in_match, in_def, in_class, in_async_for, in_async_with, in_async_def, P.m]
+-/
+#guard_msgs in
+#eval do
+  let some e ← nativeCaseError "overload_nested_assert" | return
+  let stubs := ["in_while", "in_while_else", "in_with", "in_try", "in_handler", "in_try_else",
+    "in_finally", "in_try_star", "in_match", "in_def", "in_class", "in_async_for",
+    "in_async_with", "in_async_def", "no_assert", "P.m"]
+  IO.println <| stubs.filter fun n =>
+    e.contains s!" {n}: an @overload stub cannot have assert, if or for statements"
+
+-- Two `@overload` stubs of `__init__` that both assign `self.h = self._H()` declare
+-- the field `h` once.
+/--
+info: fields: [h = _H()]
+warnings: #[overload body is not `...`, overload body is not `...`]
+-/
+#guard_msgs in
+#eval runNativeCase "overload_init_fields" fun sigs warnings => do
+  let c ← findClass sigs "C"
+  IO.println s!"fields: {c.fields.toList.map fun f => s!"{f.name} = {f.constValue.getD "-"}"}"
+  IO.println s!"warnings: {warnings.map warningText}"
+
+-- Two `@overload` stubs of `__init__` that assign one field different classes are a
+-- hard error.
+#guard_msgs in
+#eval expectNativeCaseError "overload_init_field_conflict"
+  "C.__init__ assigns self.h both _H() and _G()"
 
 -- A Dict[int, _] quantifier is rejected because the logical model has string keys.
 #guard_msgs in

@@ -74,7 +74,8 @@ meta def setupFixture (pythonCmd : System.FilePath)
           "servicelib.Database", "servicelib.Counter", "servicelib.Contract",
           "servicelib.Admitted", "servicelib.Ghost", "servicelib.GhostProbe",
           "servicelib.GhostOld", "servicelib.GhostOldNoFrame",
-          "servicelib.ParamType"])
+          "servicelib.ParamType", "servicelib.Ctor", "servicelib.CtorError",
+          "servicelib.Overloaded"])
         (warningOutput := .none)
         (pythonCmd := toString pythonCmd) |>.toBaseIO with
     | .ok () => pure ()
@@ -611,6 +612,130 @@ must discharge a caller assertion that the return type alone cannot. -/
       unless foundAdmittedAssertion do
         throw <| IO.userError
           "Expected the @admit assumption to discharge the caller assertion"
+/-! ## Constructor contracts of a model
+
+These tests pin results that are wrong today. The Laurel front ends check the contract
+of a model's `__init__` at no call yet (card "Laurel front ends: Check model
+constructor contracts"). So a call of a model class that breaks the precondition of
+its `__init__` creates no obligation, and every obligation holds. -/
+
+/-- Print the outcome of each obligation that has a summary, and whether every
+    obligation holds. -/
+meta def printVCs (vcs : Array Core.VCResult) : IO Unit := do
+  for r in vcs do
+    if let some summary := r.obligation.metadata.getPropertySummary then
+      IO.println s!"{summary}: {r.formatOutcome}"
+  IO.println s!"every obligation holds: {vcs.all (·.isSuccess)}"
+
+/-- Print the outcome of each obligation of `scriptName` that has a summary, and
+    whether every obligation holds. -/
+meta def printOutcomes (pythonCmd : System.FilePath) (scriptName : String)
+    (pyspecModules : Array String) : IO Unit := do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    match ← runAnalyzeAndVerify pythonCmd tmpDir scriptName (useRoots := true)
+        (pyspecModules := pyspecModules) with
+    | .error msg => throw <| IO.userError s!"Pipeline failed: {msg}"
+    | .ok vcs => printVCs vcs
+
+-- Wrong today: `K("").m()` breaks the assert `len(region) >= 1` of `K.__init__`.
+/--
+info: (call_method ensures) Return type constraint: ✔️ always true if reached
+every obligation holds: true
+-/
+#guard_msgs in
+#eval withPython fun pythonCmd =>
+  printOutcomes pythonCmd "test_ctor_contract_method.py" #["servicelib.Ctor"]
+
+-- Wrong today: `use(K(""))` breaks the assert `len(region) >= 1` of `K.__init__`.
+/--
+info: (pass_new_instance ensures) Return type constraint: ✔️ always true if reached
+every obligation holds: true
+-/
+#guard_msgs in
+#eval withPython fun pythonCmd =>
+  printOutcomes pythonCmd "test_ctor_contract_arg.py" #["servicelib.Ctor"]
+
+-- Wrong today: `raise ClientError("resp", "op")` breaks the `@requires`
+-- `len(operation) >= 3` of `ClientError.__init__`.
+/--
+info: (raise_client_error ensures) Return type constraint: ✔️ always true if reached
+every obligation holds: true
+-/
+#guard_msgs in
+#eval withPython fun pythonCmd =>
+  printOutcomes pythonCmd "test_ctor_contract_raise.py" #["servicelib.CtorError"]
+
+/-! ## An overloaded `__init__` in a model
+
+The `@overload` stubs of `__init__` get no procedure. So the model loads, and a program
+that does not construct the class verifies. -/
+
+/--
+info: (call_method ensures) Return type constraint: ✔️ always true if reached
+every obligation holds: true
+-/
+#guard_msgs in
+#eval withPython fun pythonCmd =>
+  printOutcomes pythonCmd "test_overloaded_init.py" #["servicelib.Overloaded"]
+
+-- A call of the class, here as an expression statement, fails visibly. V1 gives this
+-- error for such a call of any model class, overloaded `__init__` or not.
+/-- info: [Resolution failed: 'O' is not defined] -/
+#guard_msgs in
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    setupFixture pythonCmd tmpDir
+    let testIon ← compileTestScript pythonCmd (testDir / "test_overloaded_init_call.py") tmpDir
+    match ← (pythonAndSpecToLaurel testIon.toString
+        (dispatchModules := #["servicelib"])
+        (pyspecModules := #["servicelib.Overloaded"])
+        (specDir := tmpDir)).run (← quietCtx) |>.toBaseIO with
+    | .error () => throw <| IO.userError "Python-to-Laurel translation failed"
+    | .ok laurel =>
+      let (_, errors) ← translateCombinedLaurel laurel
+      IO.println (errors.map (·.message))
+
+-- A call of an overloaded method with no contract creates no obligation, and it
+-- assumes nothing about its result, so the assert after it is not proved.
+/--
+info: r is 7: ❓ unknown
+(call_overloaded ensures) Return type constraint: ✔️ always true if reached
+every obligation holds: false
+-/
+#guard_msgs in
+#eval withPython fun pythonCmd =>
+  printOutcomes pythonCmd "test_overloaded_method_call.py" #["servicelib.Overloaded"]
+
+/-! ## A `@requires` on a top-level `@overload` stub
+
+This test pins a result that is wrong today. The Laurel translation drops the
+`@requires` of a top-level `@overload` stub without a message, so the call
+`connect("s")`, which breaks `len(service_name) > 100`, creates no obligation. -/
+
+/--
+info: (connect_short_name ensures) Return type constraint: ✔️ always true if reached
+every obligation holds: true
+-/
+#guard_msgs in
+#eval withPython fun pythonCmd => do
+  IO.FS.withTempDir fun tmpDir => do
+    IO.FS.withTempFile fun _handle dialectFile => do
+      IO.FS.writeBinFile dialectFile Python.toIon
+      match ← pySpecsDir testDir tmpDir dialectFile (modules := #["overload_requires"])
+          (warningOutput := .none) (pythonCmd := toString pythonCmd) |>.toBaseIO with
+      | .ok () => pure ()
+      | .error msg => throw <| IO.userError s!"pySpecsDir failed: {msg}"
+    let testIon ← compileTestScript pythonCmd (testDir / "test_overload_requires.py") tmpDir
+    match ← (pythonAndSpecToLaurel testIon.toString
+        (dispatchModules := #["overload_requires"])
+        (specDir := tmpDir)).run (← quietCtx) |>.toBaseIO with
+    | .error () => throw <| IO.userError "Python-to-Laurel translation failed"
+    | .ok laurel =>
+      match ← verifyLaurel laurel (useRoots := true) with
+      | .error msg => throw <| IO.userError s!"Verification failed: {msg}"
+      | .ok vcs => printVCs vcs
+
 /-! ## Module-scope ghosts -/
 
 /-- Every obligation must verify; some summary must contain `provedPart`. -/

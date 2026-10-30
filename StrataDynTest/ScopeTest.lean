@@ -70,7 +70,8 @@ private def scopedBy (fn : Func E Unit) (t : Body.Tree) : Bool :=
 private def rule {env : Env Unit} (fn : Func env Unit) : Bool := decide (fn.Reachable ∧ fn.Scopable)
 
 private def fn (bs : Array (Block E Unit)) : Func E Unit :=
-  { name := .str .base "f", retType := Demo.Value, blocks := bs, names := #[], info := () }
+  { name := .str .base "f", params := (bs[0]?.map (·.params)).getD #[], retType := Demo.Value,
+    blocks := bs, names := #[], info := () }
 
 /-- `ret %x`. -/
 private def ret (x : Nat) : Terminator E Unit := .ret () ⟨x⟩
@@ -232,8 +233,7 @@ returns `%x`.  Each use is of a value defined up to `n` blocks above it.  The ch
 each block's ancestors and each value's definitions once, so the chain of 10,000 blocks checks
 in time linear in its size, up to the maps' logarithms; looking along each use's chain would
 take time quadratic in it.  The rule's check computes the tree first, and then checks the same
-way.  On this shape, where every block may fail to `h`, computing the tree takes time quadratic
-in the chain's length, so the test checks the rule on a chain of 1,000 blocks. -/
+way. -/
 
 /-- Block `b.i` of the chain. -/
 private def bl (i : Nat) : Label := ⟨.num (.str .base "b") i⟩
@@ -259,7 +259,7 @@ private def chainTree (n : Nat) : LabelMap Point :=
 -- The entry's parameter, 10,000 blocks up, and the last block's own result.
 #guard scopedBy (longChain 10000 0) (chainTree 10000).find?
 #guard scopedBy (longChain 10000 10000) (chainTree 10000).find?
-#guard rule (longChain 1000 1000)
+#guard rule (longChain 10000 10000)
 -- The handler's parameter is not in scope in the chain.
 #guard !scopedBy (longChain 10000 10001) (chainTree 10000).find?
 #guard !rule (longChain 1000 1001)
@@ -289,7 +289,8 @@ private def body (s : String) (x y : Nat) : Array (Block Reg.env Unit) :=
 
 /-- `f(%0 : Bool, %1 : Int)` whose entry runs `is` and returns `%x`. -/
 private def rfn (is : Array (Instruction Reg.env Unit)) (x : Nat) : Func Reg.env Unit :=
-  { name := .str .base "f", retType := Base.Int, names := #[], info := ()
+  { name := .str .base "f", params := #[⟨⟨0⟩, Base.Bool⟩, ⟨⟨1⟩, Base.Int⟩], retType := Base.Int,
+    names := #[], info := ()
     blocks := #[{ label := lbl "entry", params := #[⟨⟨0⟩, Base.Bool⟩, ⟨⟨1⟩, Base.Int⟩],
                   instrs := is, term := .ret () ⟨x⟩, info := () }] }
 
@@ -336,7 +337,8 @@ end Regions
 /-- `entry(%0)`: `%1 = mkTuple %0`, then `loop %9 { lb(%2): %4 = mkTuple %1; ret %8 } ^done`,
 and `done(%3)` returns `%0`.  `%9` and `%8` are undefined; the loop body's `%1` is in scope. -/
 private def termRegion : Func E Unit :=
-  { name := .str .base "g", retType := Demo.Value, names := #[], info := ()
+  { name := .str .base "g", params := #[⟨⟨0⟩, Demo.Value⟩], retType := Demo.Value, names := #[],
+    info := ()
     blocks := #[
       { label := lbl "entry", params := #[⟨⟨0⟩, Demo.Value⟩], info := ()
         instrs := #[.apply () ⟨⟨1⟩, Demo.Value⟩ Demo.mkTuple.ref ⟨#[], rfl⟩ #[⟨0⟩] #[] #[]]

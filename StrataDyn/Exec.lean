@@ -63,9 +63,10 @@ def loop (cond : Region ε [] Bool) (body : Region ε [] Unit) (_st : Option Uni
   before `E`'s rules name them.
 * **The table** (`Exec/Table.lean`): `#dyn_coverage` and `#dyn_sem_table`, which
   generates the decoding of tags and one wrapper per instruction.
-* **The base's rules** (`Exec/Base.lean`): its types' Lean types and its terminators' rules,
-  which every environment that extends `Base` inherits: the module that generates its table
-  imports `StrataDyn.Exec.Base`.
+* **The base's rules** (`Exec/Base.lean`): its types' Lean types, its terminators' rules, and
+  the rules of the contracts' `old` and `cellLoc`, which stop with a gap.  Every environment that
+  extends `Base` inherits them: the module that generates its table imports
+  `StrataDyn.Exec.Base`.
 * **Linking** (`Exec/Link.lean`) resolves every name through 2-3 trees once; **validation**
   (`Exec/Check.lean`) checks the linked module's tags and scopes once.
 * **The machine** (`Exec/Machine.lean`): a first-order state, `step` with events,

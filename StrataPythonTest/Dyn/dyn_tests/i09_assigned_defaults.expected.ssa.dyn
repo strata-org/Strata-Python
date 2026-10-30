@@ -1,0 +1,51 @@
+module i09_assigned_defaults {
+  func @|i09_assigned_defaults.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("i09_assigned_defaults")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("i09_assigned_defaults", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("i09_assigned_defaults", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %list.0 : py.Value = py.mkList
+      %a.default.0 : base.Ref(py.Value) = base.refNew[py.Value](%list.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@i09_assigned_defaults.h, %a.default.0)
+      %h.cell.0 : base.Ref(py.Value) = py.globalCell("i09_assigned_defaults", "h")
+      %set.2 : base.Unit = base.refSet[py.Value](%h.cell.0, %clo.0)
+      %int.0 : py.Value = py.intLit(10)
+      %list.1 : py.Value = py.mkList(%int.0)
+      %tuple.0 : py.Value = py.mkTuple(%list.1)
+      %h.0 : py.Value = py.loadGlobal("i09_assigned_defaults", "h") ^propagate.0()
+      %__defaults__.0 : base.Unit = py.setAttr(%h.0, "__defaults__", %tuple.0) ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("i09_assigned_defaults", "print") ^propagate.0()
+      %h.1 : py.Value = py.loadGlobal("i09_assigned_defaults", "h") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%h.1, %tuple.1, %kwargs.0) ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%call.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.2, %kwargs.1) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @i09_assigned_defaults.h(%a.default.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%a.default.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %a.0 : py.Value = py.undef("a")
+      %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
+      %a.default.1 : py.Value = base.refGet[py.Value](%a.default.0)
+      %defaults.0 : py.Value = py.mkTuple(%a.default.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "a") ^propagate.0()
+      %a.1 : py.Value = py.tupleGet(%bound.0, 0)
+      %a.3 : py.Value = py.requireDefined(%a.1, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%a.3)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

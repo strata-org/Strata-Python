@@ -89,6 +89,7 @@ private def fDone : Block base Unit where
 
 private def f : Func base Unit where
   name    := .str .base "f"
+  params  := fEntry.params
   retType := Base.Int
   blocks  := #[fEntry, fBump, fDone]
   names   := #["cond", "zero", "cell", "one", "unit", "result"].map fun s => Name.num (.str .base s) 0
@@ -150,6 +151,7 @@ private def gHandler : Block sig1 Unit where
 
 private def g : Func sig1 Unit where
   name    := .str .base "g"
+  params  := gEntry.params
   retType := intT1
   blocks  := #[gEntry, gHandler]
   names   := (Array.range 8).map (Name.num .base ·)
@@ -196,6 +198,7 @@ private def hErr : Block base Unit where
 
 private def h : Func base Unit where
   name    := .str .base "h"
+  params  := hEntry.params
   retType := Base.Int
   blocks  := #[hEntry, hOk, hErr]
   names   := (Array.range 8).map (Name.num .base ·)
@@ -470,6 +473,7 @@ reference at any `base.Fn`; the module decides which. -/
 /-- `ref() : Unit`, which takes a code pointer to `target` at `type` and returns unit. -/
 private def refTo (target : Name) (type : TypeExpr base) : Func base Unit where
   name    := .str .base "ref"
+  params  := #[]
   retType := Base.Unit
   blocks  := #[{ label := lbl "entry", params := #[], info := (),
                  instrs := #[.const () (d 0 type) (.func target), .const () (d 1 Base.Unit) .unit],

@@ -30,11 +30,8 @@ module tc01_literals {
       %n.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%n.6)
       %b.0 : py.Value = py.undef("b")
       %b.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%b.0)
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %int.0 : py.Value = py.intLit(42)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
       %str.0 : py.Value = py.strLit("hello")

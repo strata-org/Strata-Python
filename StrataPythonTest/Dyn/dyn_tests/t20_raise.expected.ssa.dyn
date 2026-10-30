@@ -38,11 +38,8 @@ module t20_raise {
   }
   func @t20_raise.fail_hard(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "fail_hard() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "fail_hard() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %ValueError.0 : py.Value = py.loadGlobal("t20_raise", "ValueError") ^propagate.0()
       %str.0 : py.Value = py.strLit("bad input")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -56,11 +53,8 @@ module t20_raise {
   }
   func @t20_raise.reraise_example(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "reraise_example() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "reraise_example() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %fail_hard.0 : py.Value = py.loadGlobal("t20_raise", "fail_hard") ^catch.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -90,29 +84,13 @@ module t20_raise {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %msg.0 : py.Value = py.undef("msg")
       %msg.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%msg.0)
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
       %msg.1 : py.Value = py.undef("msg")
-      %fill.0 : py.Value = py.mkTuple(%msg.1)
-      %none.0 : py.Value = py.noneLit
-      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
-      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
-      %int.0 : py.Value = py.intLit(0)
-      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
-      %str.0 : py.Value = py.strLit("msg")
-      %msg.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
-      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
-      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
-      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
-      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
-      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "raise_with_msg() got multiple values for argument 'msg'") ^propagate.0()
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "raise_with_msg() got an unexpected keyword argument {}") ^propagate.0()
-      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "raise_with_msg() takes 1 positional argument but {} {was} given") ^propagate.0()
-      %msg.7 : py.Value = py.requireDefined(%msg.2, "TypeError", "raise_with_msg() missing 1 required positional argument: 'msg'") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple(%msg.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "msg") ^propagate.0()
+      %msg.2 : py.Value = py.tupleGet(%bound.0, 0)
       %RuntimeError.0 : py.Value = py.loadGlobal("t20_raise", "RuntimeError") ^propagate.0()
-      %msg.10 : py.Value = py.requireDefined(%msg.7, "UnboundLocalError", "cannot access local variable 'msg' where it is not associated with a value") ^propagate.0()
-      %tuple.0 : py.Value = py.mkTuple(%msg.10)
+      %msg.5 : py.Value = py.requireDefined(%msg.2, "UnboundLocalError", "cannot access local variable 'msg' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%msg.5)
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%RuntimeError.0, %tuple.0, %kwargs.1) ^propagate.0()
       %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
@@ -125,11 +103,8 @@ module t20_raise {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %e.0 : py.Value = py.undef("e")
       %e.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%e.0)
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "reraise_named() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "reraise_named() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %fail_hard.0 : py.Value = py.loadGlobal("t20_raise", "fail_hard") ^catch.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -142,13 +117,13 @@ module t20_raise {
       branch(%match.0) ^except.0() ^next.0()
     except.0():
       %print.0 : py.Value = py.loadGlobal("t20_raise", "print") ^clear.0()
-      %e.5 : py.Value = py.requireDefined(%exc.0, "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^clear.0()
-      %tuple.1 : py.Value = py.mkTuple(%e.5)
+      %e.3 : py.Value = py.requireDefined(%exc.0, "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^clear.0()
+      %tuple.1 : py.Value = py.mkTuple(%e.3)
       %kwargs.2 : py.Value = py.mkKwargs
       %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.2) ^clear.0()
       jump ^clear.0(%exc.0)
     clear.0(%exc.1 : py.Value):
-      %e.6 : py.Value = py.undef("e")
+      %e.4 : py.Value = py.undef("e")
       jump ^unwind.0(%exc.1)
     next.0():
       jump ^unwind.0(%exc.0)
@@ -165,11 +140,8 @@ module t20_raise {
   }
   func @t20_raise.reraise_bare(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "reraise_bare() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "reraise_bare() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %fail_hard.0 : py.Value = py.loadGlobal("t20_raise", "fail_hard") ^catch.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -195,11 +167,8 @@ module t20_raise {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %y.0 : py.Value = py.undef("y")
       %y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%y.0)
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "reraise_after_work() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "reraise_after_work() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %fail_hard.0 : py.Value = py.loadGlobal("t20_raise", "fail_hard") ^catch.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs

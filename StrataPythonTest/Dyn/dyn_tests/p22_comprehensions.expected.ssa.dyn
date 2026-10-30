@@ -99,42 +99,17 @@ module p22_comprehensions {
       %k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%k.0)
       %y.0 : py.Value = py.undef("y")
       %y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%y.0)
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
       %xs.1 : py.Value = py.undef("xs")
       %ys.1 : py.Value = py.undef("ys")
-      %fill.0 : py.Value = py.mkTuple(%xs.1, %ys.1)
-      %none.0 : py.Value = py.noneLit
-      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
-      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
-      %int.0 : py.Value = py.intLit(0)
-      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
-      %str.0 : py.Value = py.strLit("xs")
-      %xs.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
-      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
-      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
-      %int.1 : py.Value = py.intLit(1)
-      %pos.1 : py.Value = py.getItem(%pad.0, %int.1) ^propagate.0()
-      %str.1 : py.Value = py.strLit("ys")
-      %ys.2 : py.Value = py.dictGet(%kwargs.0, %str.1, %pos.1)
-      %inKw.1 : py.Value = py.in(%str.1, %kwargs.0) ^propagate.0()
-      %discard.1 : base.Unit = py.dictDiscard(%kwargs.0, %str.1)
-      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
-      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
-      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "f() got multiple values for argument 'xs'") ^propagate.0()
-      %filled.1 : py.Value = py.lt(%int.1, %nargs.0) ^propagate.0()
-      %both.1 : py.Value = py.mult(%inKw.1, %filled.1) ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%both.1, 0, "TypeError", "f() got multiple values for argument 'ys'") ^propagate.0()
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.2 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
-      %check.3 : base.Unit = py.requireAtMost(%nargs.0, 2, "TypeError", "f() takes 2 positional arguments but {} {was} given") ^propagate.0()
-      %xs.3 : py.Value = py.requireDefined(%xs.2, "TypeError", "f() missing 1 required positional argument: 'xs'") ^propagate.0()
-      %ys.3 : py.Value = py.requireDefined(%ys.2, "TypeError", "f() missing 1 required positional argument: 'ys'") ^propagate.0()
-      %xs.5 : py.Value = py.requireDefined(%xs.3, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple(%xs.1, %ys.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "xs", "ys") ^propagate.0()
+      %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %ys.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %xs.4 : py.Value = py.requireDefined(%xs.2, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %acc.0 : py.Value = py.mkList
       %x.0 : py.Value = py.undef("x")
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
-      %each.0 : base.Unit = py.forEach(%xs.5) ^propagate.0() {
+      %each.0 : base.Unit = py.forEach(%xs.4) ^propagate.0() {
         each.0(%item.0 : py.Value):
           %x.2 : py.Value = py.requireDefined(%item.0, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.1()
           %cond.0 : base.Bool = py.truthy(%x.2) ^propagate.1()
@@ -151,16 +126,16 @@ module p22_comprehensions {
           %exc.1 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.0)
           ret(%exc.1)
       }
-      %xs.7 : py.Value = py.requireDefined(%xs.3, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %xs.6 : py.Value = py.requireDefined(%xs.2, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %acc.1 : py.Value = py.mkDict ^propagate.0()
       %x.5 : py.Value = py.undef("x")
       %x.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%x.5)
       %y.1 : py.Value = py.undef("y")
       %y.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%y.1)
-      %each.1 : base.Unit = py.forEach(%xs.7) ^propagate.0() {
+      %each.1 : base.Unit = py.forEach(%xs.6) ^propagate.0() {
         each.1(%item.1 : py.Value):
-          %ys.5 : py.Value = py.requireDefined(%ys.3, "UnboundLocalError", "cannot access local variable 'ys' where it is not associated with a value") ^propagate.2()
-          %each.2 : base.Unit = py.forEach(%ys.5) ^propagate.2() {
+          %ys.4 : py.Value = py.requireDefined(%ys.2, "UnboundLocalError", "cannot access local variable 'ys' where it is not associated with a value") ^propagate.2()
+          %each.2 : base.Unit = py.forEach(%ys.4) ^propagate.2() {
             each.2(%item.2 : py.Value):
               %x.7 : py.Value = py.requireDefined(%item.1, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.3()
               %y.3 : py.Value = py.requireDefined(%item.2, "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.3()
@@ -179,11 +154,11 @@ module p22_comprehensions {
           %exc.5 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.4)
           ret(%exc.5)
       }
-      %xs.9 : py.Value = py.requireDefined(%xs.3, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %xs.8 : py.Value = py.requireDefined(%xs.2, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %acc.2 : py.Value = py.mkSet ^propagate.0()
       %x.8 : py.Value = py.undef("x")
       %x.cell.2 : base.Ref(py.Value) = base.refNew[py.Value](%x.8)
-      %each.3 : base.Unit = py.forEach(%xs.9) ^propagate.0() {
+      %each.3 : base.Unit = py.forEach(%xs.8) ^propagate.0() {
         each.3(%item.3 : py.Value):
           %x.10 : py.Value = py.requireDefined(%item.3, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.4()
           %add.0 : base.Unit = py.setAdd(%acc.2, %x.10) ^propagate.4()
@@ -194,15 +169,15 @@ module p22_comprehensions {
           %exc.7 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.6)
           ret(%exc.7)
       }
-      %str.2 : py.Value = py.strLit("generator expression")
-      %unsupported.0 : py.Value = py.unsupported(%str.2)
-      %int.2 : py.Value = py.intLit(2)
+      %str.0 : py.Value = py.strLit("generator expression")
+      %unsupported.0 : py.Value = py.unsupported(%str.0)
+      %int.0 : py.Value = py.intLit(2)
       %a.2 : py.Value = py.requireDefined(%acc.0, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %b.2 : py.Value = py.requireDefined(%acc.1, "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
-      %c.8 : py.Value = py.requireDefined(%acc.2, "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
+      %c.12 : py.Value = py.requireDefined(%acc.2, "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
       %d.2 : py.Value = py.requireDefined(%unsupported.0, "UnboundLocalError", "cannot access local variable 'd' where it is not associated with a value") ^propagate.0()
       %x.11 : py.Value = py.loadGlobal("p22_comprehensions", "x") ^propagate.0()
-      %tuple.0 : py.Value = py.mkTuple(%a.2, %b.2, %c.8, %d.2, %x.11)
+      %tuple.0 : py.Value = py.mkTuple(%a.2, %b.2, %c.12, %d.2, %x.11)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.0)
       ret(%ret.0)
     propagate.0(%exc.8 : py.Value):

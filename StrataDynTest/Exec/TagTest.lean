@@ -119,7 +119,7 @@ private def useExc : Except (FailedFunc Tg.env Unit Unit) {fn : Func Tg.env Unit
 /-- The run of `useExc`, its result read back as an `Except Int Bool`. -/
 private def runExc : Option (Except Int Bool) := do
   let f ← useExc.toOption
-  let m ← (Module.Raw.check ⟨.str .base "m", #[f.1], ()⟩).toOption
+  let m ← (Module.Raw.check { name := .str .base "m", funcs := #[f.1], info := () }).toOption
   (runModule TgSem.model m (.str .base "useExc") #[] 100).read? (Except Int Bool)
 
 #guard match runExc with | some (.error 7) => true | _ => false
@@ -133,7 +133,8 @@ private def tn (s : String) : Name := .str .base s
 private def tfn (name : String) (ret : TypeExpr TE) (params : Array (ValDecl TE))
     (instrs : Array (Instruction TE Unit)) (out : Nat) : Func TE Unit :=
   let f : Func TE Unit :=
-    ⟨tn name, ret, #[⟨⟨tn "entry"⟩, params, instrs, .ret () ⟨out⟩, ()⟩], #[], ()⟩
+    { name := tn name, params, retType := ret,
+      blocks := #[⟨⟨tn "entry"⟩, params, instrs, .ret () ⟨out⟩, ()⟩], names := #[], info := () }
   { f with names := (Array.range (ValDecl.idBound f.defs)).map (.num (.str .base "v")) }
 
 /-- `m2f(x : Meters) : Feet`. -/
@@ -153,7 +154,7 @@ private def useMeters : Func TE Unit :=
 /-- `useMeters 4`: an `Int` argument at `Meters`, whose tag is `Int`'s, and a `Feet` result
 read as an `Int`. -/
 private def runMeters : Option Int := do
-  let m ← (Module.Raw.check ⟨tn "m", #[m2f, useMeters], ()⟩).toOption
+  let m ← (Module.Raw.check { name := tn "m", funcs := #[m2f, useMeters], info := () }).toOption
   (runModule TgSem.model m (tn "useMeters") #[TgSem.model.arg (4 : Int)] 100).read? Int
 
 #guard runMeters = some 12

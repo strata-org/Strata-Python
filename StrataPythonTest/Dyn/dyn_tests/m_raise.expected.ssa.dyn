@@ -97,29 +97,13 @@ module m_raise {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %msg.0 : py.Value = py.undef("msg")
       %msg.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%msg.0)
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
       %msg.1 : py.Value = py.undef("msg")
-      %fill.0 : py.Value = py.mkTuple(%msg.1)
-      %none.0 : py.Value = py.noneLit
-      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
-      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
-      %int.0 : py.Value = py.intLit(0)
-      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
-      %str.0 : py.Value = py.strLit("msg")
-      %msg.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
-      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
-      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
-      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
-      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
-      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "instance() got multiple values for argument 'msg'") ^propagate.0()
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "instance() got an unexpected keyword argument {}") ^propagate.0()
-      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "instance() takes 1 positional argument but {} {was} given") ^propagate.0()
-      %msg.7 : py.Value = py.requireDefined(%msg.2, "TypeError", "instance() missing 1 required positional argument: 'msg'") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple(%msg.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "msg") ^propagate.0()
+      %msg.2 : py.Value = py.tupleGet(%bound.0, 0)
       %ValueError.0 : py.Value = py.loadGlobal("m_raise", "ValueError") ^propagate.0()
-      %msg.10 : py.Value = py.requireDefined(%msg.7, "UnboundLocalError", "cannot access local variable 'msg' where it is not associated with a value") ^propagate.0()
-      %tuple.0 : py.Value = py.mkTuple(%msg.10)
+      %msg.5 : py.Value = py.requireDefined(%msg.2, "UnboundLocalError", "cannot access local variable 'msg' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%msg.5)
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%ValueError.0, %tuple.0, %kwargs.1) ^propagate.0()
       %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
@@ -130,11 +114,8 @@ module m_raise {
   }
   func @m_raise.cls(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "cls() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "cls() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %Oops.0 : py.Value = py.loadGlobal("m_raise", "Oops") ^propagate.0()
       %exc.0 : py.Value = py.toException(%Oops.0) ^propagate.0()
       jump ^propagate.0(%exc.0)
@@ -146,30 +127,14 @@ module m_raise {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %e.0 : py.Value = py.undef("e")
       %e.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%e.0)
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
       %e.1 : py.Value = py.undef("e")
-      %fill.0 : py.Value = py.mkTuple(%e.1)
-      %none.0 : py.Value = py.noneLit
-      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
-      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
-      %int.0 : py.Value = py.intLit(0)
-      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
-      %str.0 : py.Value = py.strLit("e")
-      %e.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
-      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
-      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
-      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
-      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
-      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "cause() got multiple values for argument 'e'") ^propagate.0()
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "cause() got an unexpected keyword argument {}") ^propagate.0()
-      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "cause() takes 1 positional argument but {} {was} given") ^propagate.0()
-      %e.7 : py.Value = py.requireDefined(%e.2, "TypeError", "cause() missing 1 required positional argument: 'e'") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple(%e.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "e") ^propagate.0()
+      %e.2 : py.Value = py.tupleGet(%bound.0, 0)
       %Oops.0 : py.Value = py.loadGlobal("m_raise", "Oops") ^propagate.0()
-      %e.10 : py.Value = py.requireDefined(%e.7, "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^propagate.0()
+      %e.5 : py.Value = py.requireDefined(%e.2, "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^propagate.0()
       %exc.0 : py.Value = py.toException(%Oops.0) ^propagate.0()
-      %cause.0 : base.Unit = py.setCause(%exc.0, %e.10) ^propagate.0()
+      %cause.0 : base.Unit = py.setCause(%exc.0, %e.5) ^propagate.0()
       jump ^propagate.0(%exc.0)
     propagate.0(%exc.1 : py.Value):
       %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
@@ -177,11 +142,8 @@ module m_raise {
   }
   func @m_raise.no_cause(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "no_cause() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "no_cause() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %Oops.0 : py.Value = py.loadGlobal("m_raise", "Oops") ^propagate.0()
       %str.0 : py.Value = py.strLit("quiet")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -201,28 +163,12 @@ module m_raise {
       %xs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%xs.0)
       %x.0 : py.Value = py.undef("x")
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
       %xs.1 : py.Value = py.undef("xs")
-      %fill.0 : py.Value = py.mkTuple(%xs.1)
-      %none.0 : py.Value = py.noneLit
-      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
-      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
-      %int.0 : py.Value = py.intLit(0)
-      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
-      %str.0 : py.Value = py.strLit("xs")
-      %xs.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
-      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
-      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
-      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
-      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
-      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "in_loop() got multiple values for argument 'xs'") ^propagate.0()
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "in_loop() got an unexpected keyword argument {}") ^propagate.0()
-      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "in_loop() takes 1 positional argument but {} {was} given") ^propagate.0()
-      %xs.3 : py.Value = py.requireDefined(%xs.2, "TypeError", "in_loop() missing 1 required positional argument: 'xs'") ^propagate.0()
-      %xs.5 : py.Value = py.requireDefined(%xs.3, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
-      %iter.0 : py.Value = py.getIter(%xs.5) ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple(%xs.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "xs") ^propagate.0()
+      %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %xs.4 : py.Value = py.requireDefined(%xs.2, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%xs.4) ^propagate.0()
       jump ^head.0()
     head.0():
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
@@ -245,8 +191,8 @@ module m_raise {
       %done.0 : base.Bool = py.isStopIteration(%exc.1)
       branch(%done.0) ^exit.0() ^propagate.0(%exc.1)
     exit.0():
-      %int.1 : py.Value = py.intLit(0)
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.1)
+      %int.0 : py.Value = py.intLit(0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)
     propagate.0(%exc.2 : py.Value):
       %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
@@ -256,28 +202,12 @@ module m_raise {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %x.0 : py.Value = py.undef("x")
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
       %x.1 : py.Value = py.undef("x")
-      %fill.0 : py.Value = py.mkTuple(%x.1)
-      %none.0 : py.Value = py.noneLit
-      %tail.0 : py.Value = py.getSlice(%fill.0, %nargs.0, %none.0, %none.0) ^propagate.0()
-      %pad.0 : py.Value = py.add(%args.0, %tail.0) ^propagate.0()
-      %int.0 : py.Value = py.intLit(0)
-      %pos.0 : py.Value = py.getItem(%pad.0, %int.0) ^propagate.0()
-      %str.0 : py.Value = py.strLit("x")
-      %x.2 : py.Value = py.dictGet(%kwargs.0, %str.0, %pos.0)
-      %inKw.0 : py.Value = py.in(%str.0, %kwargs.0) ^propagate.0()
-      %discard.0 : base.Unit = py.dictDiscard(%kwargs.0, %str.0)
-      %filled.0 : py.Value = py.lt(%int.0, %nargs.0) ^propagate.0()
-      %both.0 : py.Value = py.mult(%inKw.0, %filled.0) ^propagate.0()
-      %check.0 : base.Unit = py.requireAtMost(%both.0, 0, "TypeError", "both() got multiple values for argument 'x'") ^propagate.0()
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.1 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "both() got an unexpected keyword argument {}") ^propagate.0()
-      %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "both() takes 1 positional argument but {} {was} given") ^propagate.0()
-      %x.3 : py.Value = py.requireDefined(%x.2, "TypeError", "both() missing 1 required positional argument: 'x'") ^propagate.0()
-      %x.5 : py.Value = py.requireDefined(%x.3, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
-      %cond.0 : base.Bool = py.truthy(%x.5) ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple(%x.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "x") ^propagate.0()
+      %x.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %x.4 : py.Value = py.requireDefined(%x.2, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%x.4) ^propagate.0()
       branch(%cond.0) ^then.0() ^else.0()
     then.0():
       %KeyError.0 : py.Value = py.loadGlobal("m_raise", "KeyError") ^propagate.0()
@@ -293,11 +223,8 @@ module m_raise {
   }
   func @m_raise.reraise(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "reraise() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "reraise() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %exc.0 : py.Value = py.handledExc ^propagate.0()
       jump ^propagate.0(%exc.0)
     propagate.0(%exc.1 : py.Value):
@@ -306,11 +233,8 @@ module m_raise {
   }
   func @m_raise.no_active(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "no_active() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "no_active() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %exc.0 : py.Value = py.handledExc ^catch.0()
       jump ^catch.0(%exc.0)
     catch.0(%exc.1 : py.Value):
@@ -334,11 +258,8 @@ module m_raise {
   }
   func @m_raise.caller(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "caller() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "caller() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(0)
       %div.0 : py.Value = py.div(%int.0, %int.1) ^catch.0()

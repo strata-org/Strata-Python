@@ -25,12 +25,12 @@ set_option autoImplicit false
 
 `Body.domTree?` on hand-written control-flow graphs: a diamond, a loop, an irreducible loop, a
 loop entered at two blocks (where a later pass must move a parent up, and then the parent of a
-block below it), exception edges, unreachable blocks, which `Body.dropUnreached` drops, a join
-finished before the blocks that jump to it, regions through the builder, one with a block its
-entry does not reach, and a long chain of diamonds built in two orders.  Each case states the
-parents it gives, that they agree with the set-intersection reference
-(`StrataDynTest/DomRef.lean`), and that the function is reachable and scopable.  All are
-compiled checks.
+block below it), exception edges, a chain of blocks that all fail to one handler, unreachable
+blocks, which `Body.dropUnreached` drops, a join finished before the blocks that jump to it,
+regions through the builder, one with a block its entry does not reach, and a long chain of
+diamonds built in two orders.  Each case states the parents it gives, that they agree with the
+set-intersection reference (`StrataDynTest/DomRef.lean`), and that the function is reachable
+and scopable.  All are compiled checks.
 -/
 
 namespace Strata.Dyn.DomComputeTest
@@ -83,8 +83,9 @@ private def agrees (bs : List (Block E Unit)) : Bool :=
 
 /-- The function of the blocks the entry reaches. -/
 private def fn (bs : List (Block E Unit)) : Func E Unit :=
-  { name := .str .base "f", retType := Demo.Value, blocks := (Body.dropUnreached bs).toArray,
-    names := #[], info := () }
+  let blocks := (Body.dropUnreached bs).toArray
+  { name := .str .base "f", params := (blocks[0]?.map (·.params)).getD #[], retType := Demo.Value,
+    blocks, names := #[], info := () }
 
 /-- Whether the function is reachable and scopable, as `Func.WF` asks. -/
 private def rule (fn : Func E Unit) : Bool := decide (fn.Reachable ∧ fn.Scopable)
@@ -163,6 +164,19 @@ private def raising : List (Block E Unit) :=
 #guard idoms raising = [none, pt "entry" 2, pt "entry" 0, pt "entry" 1]
 #guard rule (fn raising)
 #guard agrees raising
+
+/-! ## Blocks that all fail to one handler
+
+Each block of a chain fails to `h` before its `add`, so `h` is under the start of the entry: the
+nearest common ancestor of the points that fail to it. -/
+
+private def failChain : List (Block E Unit) :=
+  [blk "entry" #[0] #[add 1 0 0 "h"] (jump "a"), blk "a" #[] #[add 2 1 1 "h"] (jump "b"),
+   blk "b" #[] #[add 3 2 2 "h"] (jump "c"), blk "c" #[] #[] (ret 3), blk "h" #[4] #[] (ret 4)]
+
+#guard idoms failChain = [none, pt "entry" 1, pt "a" 1, pt "b" 1, pt "entry" 0]
+#guard rule (fn failChain)
+#guard agrees failChain
 
 /-! ## Unreachable blocks
 

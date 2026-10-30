@@ -266,4 +266,12 @@ not reach, and per use out of scope.  Empty for a function that is both. -/
 public def Func.scopeDiagnostics (fn : Func env α) : Array String :=
   DomDiag.body fn.names {} fn.blocks #[]
 
+/-- Why the region, entered where only the values `visible` are visible, is not reachable and
+scoped: one message per block its entry does not reach, and per use out of scope.  `names` are
+the names of the values of the function or ghost it belongs to.  Empty for a region that is
+both. -/
+public def Region.scopeDiagnostics (r : Region env α) (names : Array Name)
+    (visible : Array ValId := #[]) : Array String :=
+  DomDiag.body names (visible.foldl (·.insert ·) {}) r.blocks #[]
+
 end Strata.Dyn

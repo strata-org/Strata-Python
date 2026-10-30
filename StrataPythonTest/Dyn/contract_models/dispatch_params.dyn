@@ -1,0 +1,235 @@
+-- Written for this test: the model of a PySpec module `m` with this source.
+--
+--   from servicelib.Storage import Storage
+--   from servicelib.Messaging import Messaging
+--   from typing import Literal, overload
+--
+--   @overload
+--   @requires(lambda region: len(region) >= 1)
+--   def connect(service_name: Literal["storage"], region: str) -> Storage: ...
+--   @overload
+--   def connect(service_name: Literal["messaging"]) -> Messaging: ...
+--
+-- The stubs have different parameters, so no binding clause comes before the dispatch clause.
+-- Each stub's own clauses follow it, and each applies only when the dispatch argument is the
+-- stub's literal (§12.1). They read `region` at the storage stub's own position. The presence
+-- and the type of `service_name` are the clauses before the dispatch clause and the dispatch
+-- clause itself, so the stubs' clauses do not repeat them. Each stub's return type is a model
+-- class, so its free ensures clause tests the result with `py.typeIsSubclass` and then
+-- `py.isInstance` (§12.3).
+module m {
+  func @|m.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("m")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("m", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %Storage.0 : py.Value = py.importFrom("servicelib.Storage", "Storage") ^propagate.0()
+      %Storage.cell.0 : base.Ref(py.Value) = py.globalCell("m", "Storage")
+      %set.2 : base.Unit = base.refSet[py.Value](%Storage.cell.0, %Storage.0)
+      %Messaging.0 : py.Value = py.importFrom("servicelib.Messaging", "Messaging") ^propagate.0()
+      %Messaging.cell.0 : base.Ref(py.Value) = py.globalCell("m", "Messaging")
+      %set.3 : base.Unit = base.refSet[py.Value](%Messaging.cell.0, %Messaging.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@m.connect)
+      %connect.cell.0 : base.Ref(py.Value) = py.globalCell("m", "connect")
+      %set.4 : base.Unit = base.refSet[py.Value](%connect.cell.0, %clo.0)
+      %clo.1 : py.Value = py.mkClosure[[]](@m.__getattr__)
+      %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("m", "__getattr__")
+      %set.5 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  extern func @m.connect(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    requires "'service_name' is required" {
+      pre.0():
+        %undef.0 : py.Value = py.undef("service_name")
+        %service_name.0 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "service_name", %undef.0)
+        %ok.0 : base.Bool = py.isDefined(%service_name.0)
+        ret(%ok.0)
+    }
+    requires "'connect' called with unknown string" {
+      pre.1():
+        %undef.1 : py.Value = py.undef("service_name")
+        %service_name.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "service_name", %undef.1)
+        %ok.1 : base.Bool = py.strIsOneOf(%service_name.1, "storage", "messaging")
+        ret(%ok.1)
+    }
+    requires "arguments bind to 'connect' for 'storage'" {
+      pre.2():
+        %undef.2 : py.Value = py.undef("service_name")
+        %service_name.2 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "service_name", %undef.2)
+        %str.0 : py.Value = py.strLit("storage")
+        %eq.0 : py.Value = py.eq(%service_name.2, %str.0) ^fail.0()
+        %chosen.0 : base.Bool = py.truthy(%eq.0) ^fail.0()
+        branch(%chosen.0) ^chosen.0() ^other.0()
+      chosen.0():
+        %ok.2 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 2, false, "service_name", "region")
+        ret(%ok.2)
+      other.0():
+        ret(true)
+      fail.0(%e.0 : py.Value):
+        ret(false)
+    }
+    requires "'region' is required for 'storage'" {
+      pre.3():
+        %undef.3 : py.Value = py.undef("service_name")
+        %service_name.3 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "service_name", %undef.3)
+        %str.1 : py.Value = py.strLit("storage")
+        %eq.1 : py.Value = py.eq(%service_name.3, %str.1) ^fail.1()
+        %chosen.1 : base.Bool = py.truthy(%eq.1) ^fail.1()
+        branch(%chosen.1) ^chosen.1() ^other.1()
+      chosen.1():
+        %undef.4 : py.Value = py.undef("region")
+        %region.0 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "region", %undef.4)
+        %ok.3 : base.Bool = py.isDefined(%region.0)
+        ret(%ok.3)
+      other.1():
+        ret(true)
+      fail.1(%e.1 : py.Value):
+        ret(false)
+    }
+    requires "declared type of parameter 'region' for 'storage'" {
+      pre.4():
+        %undef.5 : py.Value = py.undef("service_name")
+        %service_name.4 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "service_name", %undef.5)
+        %str.2 : py.Value = py.strLit("storage")
+        %eq.2 : py.Value = py.eq(%service_name.4, %str.2) ^fail.2()
+        %chosen.2 : base.Bool = py.truthy(%eq.2) ^fail.2()
+        branch(%chosen.2) ^chosen.2() ^other.2()
+      chosen.2():
+        %undef.6 : py.Value = py.undef("region")
+        %region.1 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "region", %undef.6)
+        %cls.0 : py.Value = py.stdClass("builtins", "str")
+        %sub.0 : base.Bool = py.typeIsSubclass(%region.1, %cls.0) ^fail.2()
+        branch(%sub.0) ^isSub.0() ^no.0()
+      isSub.0():
+        %ok.4 : base.Bool = py.isInstance(%region.1, %cls.0) ^fail.2()
+        ret(%ok.4)
+      no.0():
+        ret(false)
+      other.2():
+        ret(true)
+      fail.2(%e.2 : py.Value):
+        ret(false)
+    }
+    requires "precondition 0 for 'storage'" {
+      pre.5():
+        %undef.7 : py.Value = py.undef("service_name")
+        %service_name.5 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "service_name", %undef.7)
+        %str.3 : py.Value = py.strLit("storage")
+        %eq.3 : py.Value = py.eq(%service_name.5, %str.3) ^fail.3()
+        %chosen.3 : base.Bool = py.truthy(%eq.3) ^fail.3()
+        branch(%chosen.3) ^chosen.3() ^other.3()
+      chosen.3():
+        %undef.8 : py.Value = py.undef("region")
+        %region.2 : py.Value = py.argOf(%args.0, %kwargs.0, 1, "region", %undef.8)
+        %len.0 : py.Value = py.len(%region.2) ^fail.3()
+        %int.0 : py.Value = py.intLit(1)
+        %ge.0 : py.Value = py.gtE(%len.0, %int.0) ^fail.3()
+        %ok.5 : base.Bool = py.truthy(%ge.0) ^fail.3()
+        ret(%ok.5)
+      other.3():
+        ret(true)
+      fail.3(%e.3 : py.Value):
+        ret(false)
+    }
+    requires "arguments bind to 'connect' for 'messaging'" {
+      pre.6():
+        %undef.9 : py.Value = py.undef("service_name")
+        %service_name.6 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "service_name", %undef.9)
+        %str.4 : py.Value = py.strLit("messaging")
+        %eq.4 : py.Value = py.eq(%service_name.6, %str.4) ^fail.4()
+        %chosen.4 : base.Bool = py.truthy(%eq.4) ^fail.4()
+        branch(%chosen.4) ^chosen.4() ^other.4()
+      chosen.4():
+        %ok.6 : base.Bool = py.bindsTo(%args.0, %kwargs.0, 1, false, "service_name")
+        ret(%ok.6)
+      other.4():
+        ret(true)
+      fail.4(%e.4 : py.Value):
+        ret(false)
+    }
+    free ensures "overload of 'connect' for 'storage'" {
+      post.0(%r.0 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.0) ^ok.0() ^raised.0()
+      ok.0(%result.0 : py.Value):
+        %service_name.7 : py.Value = base.old[py.Value, py.Value] ^fail.5() {
+          old.0():
+            %undef.10 : py.Value = py.undef("service_name")
+            %service_name.8 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "service_name", %undef.10)
+            %res.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%service_name.8)
+            ret(%res.0)
+        }
+        %str.5 : py.Value = py.strLit("storage")
+        %eq.5 : py.Value = py.eq(%service_name.7, %str.5) ^fail.5()
+        %chosen.5 : base.Bool = py.truthy(%eq.5) ^fail.5()
+        branch(%chosen.5) ^chosen.5() ^other.5()
+      chosen.5():
+        %Storage.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Storage", "Storage")
+        %Storage.0 : py.Value = base.refGet[py.Value](%Storage.cell.0)
+        %Storage.1 : py.Value = py.requireDefined(%Storage.0, "AttributeError", "module 'servicelib.Storage' has no attribute 'Storage'") ^fail.5()
+        %sub.1 : base.Bool = py.typeIsSubclass(%result.0, %Storage.1) ^fail.5()
+        branch(%sub.1) ^isSub.1() ^no.1()
+      isSub.1():
+        %ok.7 : base.Bool = py.isInstance(%result.0, %Storage.1) ^fail.5()
+        ret(%ok.7)
+      no.1():
+        ret(false)
+      other.5():
+        ret(true)
+      raised.0(%exc.0 : py.Value):
+        ret(true)
+      fail.5(%e.5 : py.Value):
+        ret(true)
+    }
+    free ensures "overload of 'connect' for 'messaging'" {
+      post.1(%r.1 : base.Except(py.Value, py.Value)):
+        base.Except.case[py.Value, py.Value](%r.1) ^ok.1() ^raised.1()
+      ok.1(%result.1 : py.Value):
+        %service_name.9 : py.Value = base.old[py.Value, py.Value] ^fail.6() {
+          old.1():
+            %undef.11 : py.Value = py.undef("service_name")
+            %service_name.10 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "service_name", %undef.11)
+            %res.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%service_name.10)
+            ret(%res.1)
+        }
+        %str.6 : py.Value = py.strLit("messaging")
+        %eq.6 : py.Value = py.eq(%service_name.9, %str.6) ^fail.6()
+        %chosen.6 : base.Bool = py.truthy(%eq.6) ^fail.6()
+        branch(%chosen.6) ^chosen.6() ^other.6()
+      chosen.6():
+        %Messaging.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Messaging", "Messaging")
+        %Messaging.0 : py.Value = base.refGet[py.Value](%Messaging.cell.0)
+        %Messaging.1 : py.Value = py.requireDefined(%Messaging.0, "AttributeError", "module 'servicelib.Messaging' has no attribute 'Messaging'") ^fail.6()
+        %sub.2 : base.Bool = py.typeIsSubclass(%result.1, %Messaging.1) ^fail.6()
+        branch(%sub.2) ^isSub.2() ^no.2()
+      isSub.2():
+        %ok.8 : base.Bool = py.isInstance(%result.1, %Messaging.1) ^fail.6()
+        ret(%ok.8)
+      no.2():
+        ret(false)
+      other.6():
+        ret(true)
+      raised.1(%exc.1 : py.Value):
+        ret(true)
+      fail.6(%e.6 : py.Value):
+        ret(true)
+    }
+    writes({
+      loc.0():
+        %l.0 : base.Loc = py.reachLoc(%args.0)
+        ret(%l.0)
+    }, {
+      loc.1():
+        %l.1 : base.Loc = py.reachLoc(%kwargs.0)
+        ret(%l.1)
+    })
+  extern func @m.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value)
+    writes()
+}

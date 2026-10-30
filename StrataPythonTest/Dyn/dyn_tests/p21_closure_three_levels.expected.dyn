@@ -20,11 +20,8 @@ module p21_closure_three_levels {
       %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
       %g.0 : py.Value = py.undef("g")
       %g.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%g.0)
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %set.0 : base.Unit = base.refSet[py.Value](%a.cell.0, %int.0)
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@p21_closure_three_levels.f.g, %a.cell.0)
@@ -43,11 +40,8 @@ module p21_closure_three_levels {
       %b.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%b.0)
       %h.0 : py.Value = py.undef("h")
       %h.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%h.0)
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f.<locals>.g() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f.<locals>.g() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %int.0 : py.Value = py.intLit(2)
       %set.0 : base.Unit = base.refSet[py.Value](%b.cell.0, %int.0)
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@p21_closure_three_levels.f.g.h, %a.cell.0, %b.cell.0)
@@ -64,11 +58,8 @@ module p21_closure_three_levels {
     entry.0(%a.cell.0 : base.Ref(py.Value), %b.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %k.0 : py.Value = py.undef("k")
       %k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%k.0)
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f.<locals>.g.<locals>.h() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f.<locals>.g.<locals>.h() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@p21_closure_three_levels.f.g.h.k, %a.cell.0, %b.cell.0)
       %set.0 : base.Unit = base.refSet[py.Value](%k.cell.0, %clo.0)
       %k.1 : py.Value = base.refGet[py.Value](%k.cell.0)
@@ -81,11 +72,8 @@ module p21_closure_three_levels {
   }
   func @p21_closure_three_levels.f.g.h.k(%a.cell.0 : base.Ref(py.Value), %b.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%a.cell.0 : base.Ref(py.Value), %b.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
-      %nargs.0 : py.Value = py.tupleLen(%args.0)
-      %kw.0 : py.Value = py.undef("kwargs")
-      %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
-      %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f.<locals>.g.<locals>.h.<locals>.k() got an unexpected keyword argument {}") ^propagate.0()
-      %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f.<locals>.g.<locals>.h.<locals>.k() takes 0 positional arguments but {} {was} given") ^propagate.0()
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %a.0 : py.Value = base.refGet[py.Value](%a.cell.0)
       %a.1 : py.Value = py.requireDefined(%a.0, "NameError", "cannot access free variable 'a' where it is not associated with a value in enclosing scope") ^propagate.0()
       %b.0 : py.Value = base.refGet[py.Value](%b.cell.0)

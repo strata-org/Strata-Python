@@ -16,6 +16,9 @@ Control and data flow for any language whose operations and types come from an `
 `StrataDyn/WF.lean` states its well-formedness.  A `Module.Raw` is a module as built; a
 `Module` (`StrataDyn/WF.lean`) is one with its well-formedness proof.
 
+A module also has *ghosts* (`Ghost`): cells that only contracts can name, each with an optional
+initializer and invariant, which are regions too.
+
 Every level carries an annotation type `α`, as the DDM-generated AST does: a front end
 instantiates it at `SourceRange`, a test at `Unit`, and `map` moves between them.
 Well-formedness does not mention it.
@@ -58,6 +61,7 @@ instance : LawfulBEq ValId where
 structure ValDecl (env : Env Unit) where
   id   : ValId
   type : TypeExpr env
+deriving DecidableEq
 
 /-! ## Control transfers -/
 
@@ -108,11 +112,15 @@ inductive Const where
   | str   (s : String)
   /-- A code pointer to the function `target` of the enclosing module. -/
   | func  (target : Name)
+  /-- The cell of the ghost `name` of the enclosing module (`Ghost`): a `base.Ref` of the
+  ghost's type.  Only a contract may use it. -/
+  | ghost (name : Name)
 deriving Inhabited, Repr
 
 /-- The type the base gives a literal, in an environment that refines the base.  A function
 reference has none: it has its target's `Func.codeType`, which the module decides
-(`Module.Raw.WF`). -/
+(`Module.Raw.WF`).  A ghost reference has none either: it has the type of its ghost's cell,
+which the module decides too. -/
 @[expose] def Const.typeOf? {env : Env Unit} [base ≼ env] : Const → Option (TypeExpr env)
   | .unit    => some Base.Unit
   | .bool _  => some Base.Bool
@@ -120,6 +128,7 @@ reference has none: it has its target's `Func.codeType`, which the module decide
   | .float _ => some Base.Float64
   | .str _   => some Base.String
   | .func _  => none
+  | .ghost _ => none
 
 mutual
 
@@ -240,31 +249,147 @@ operation is. -/
     Terminator env α :=
   .jump info ⟨Label.exit, #[v]⟩
 
-/-- A function.  `blocks[0]` is the entry, and its parameters are the function's.  Its
-top-level blocks are a region in all but name: transfers stay among them, and a jump to
-`Label.exit` returns from the function.
+/-- A `requires` or `ensures` clause of a contract: a region that returns a `base.Bool`.  A
+`free` clause is assumed and never checked; only an extern function's `ensures` clauses are
+free.  `message` names the clause in diagnostics, and for a free clause says where the trust
+comes from, such as "admitted postcondition of 'f'". -/
+structure Clause (env : Env Unit) (α : Type) where
+  region  : Region env α
+  free    : Bool := false
+  message : Option String := none
+
+/-- An entry of a `reads` or `writes` frame: a set of locations.  A `cell` names a parameter of
+type `base.Ref`, and stands for the contents of that cell.  A `region` is a *frame region*: it
+takes no arguments, sees the function's parameters as a clause does, and returns a `base.Loc`. -/
+inductive FrameEntry (env : Env Unit) (α : Type) where
+  | cell (v : ValId)
+  | region (r : Region env α)
+
+/-- The cell the entry names, if it is a `cell`. -/
+@[expose] def FrameEntry.cell? {env : Env Unit} {α : Type} : FrameEntry env α → Option ValId
+  | .cell v => some v
+  | .region _ => none
+
+/-- The entry's region, if it is a `region`. -/
+@[expose] def FrameEntry.region? {env : Env Unit} {α : Type} :
+    FrameEntry env α → Option (Region env α)
+  | .cell _ => none
+  | .region r => some r
+
+/-- A function's contract: what a caller must establish before a call, and what the function
+establishes when it returns.  Most functions have none.
+
+A `requires` or `ensures` clause is a region that returns a `base.Bool` and sees the function's
+parameters: a `requires` clause takes no arguments, and an `ensures` clause takes the function's
+result.  A `requires` clause is a condition that the caller establishes at each call, in the
+state at the call.  An `ensures` clause, in the state at return, is a promise that holds at every
+exit of a defined function; a `free` one is assumed after every call and never checked.  Only an
+`ensures` clause applies `base.old`, which reads the state at the call.  No clause changes the
+state.  The clauses are evaluated in order, the `requires` clauses at the call and the `ensures`
+clauses at an exit, each only when every earlier clause returned true.  A failure in a clause
+gives `false`, or `true` in a `free` one, so a failure never makes a clause hold, nor a free
+clause assume anything.
+
+A `reads` or `writes` clause is a frame: the union of its entries' sets of locations, each entry a
+cell among the parameters or a frame region (`FrameEntry`).  A frame region runs in the state at
+the call, after the `requires` clauses returned true, so the set is fixed at the call.  Each
+failure in it goes to a block that ends in `unreachable`.  At a call where it fails, the frame is
+not well defined and states nothing.  At every exit, each location that existed at the call and
+is outside the `writes` frame holds the value it held at the call.  Every read that the call
+makes of a location that existed at the call is of a location in the `reads` frame.  State
+allocated during the call is not constrained.  Without a `writes` frame, the function may change
+any location, and without a `reads` frame, it may read any.  An extern function's frames are
+trusted. -/
+structure Contract (env : Env Unit) (α : Type) where
+  requires : Array (Clause env α) := #[]
+  ensures  : Array (Clause env α) := #[]
+  reads    : Option (Array (FrameEntry env α)) := none
+  writes   : Option (Array (FrameEntry env α)) := none
+
+/-- The cells a frame names, in order. -/
+@[expose] def FrameEntry.cellsOf {env : Env Unit} {α : Type}
+    (frame : Option (Array (FrameEntry env α))) : List ValId :=
+  (frame.getD #[]).toList.filterMap FrameEntry.cell?
+
+/-- The regions of a frame, in order. -/
+@[expose] def FrameEntry.regionsOf {env : Env Unit} {α : Type}
+    (frame : Option (Array (FrameEntry env α))) : List (Region env α) :=
+  (frame.getD #[]).toList.filterMap FrameEntry.region?
+
+/-- The regions of a contract's frames, in the order they print: the `reads` frame's, then the
+`writes` frame's. -/
+@[expose] def Contract.frameRegions {env : Env Unit} {α : Type} (c : Contract env α) :
+    List (Region env α) :=
+  FrameEntry.regionsOf c.reads ++ FrameEntry.regionsOf c.writes
+
+/-- The regions of a contract, in the order they print: those of its `requires` and `ensures`
+clauses, then its frame regions. -/
+@[expose] def Contract.regions {env : Env Unit} {α : Type} (c : Contract env α) :
+    List (Region env α) :=
+  c.requires.toList.map (·.region) ++ c.ensures.toList.map (·.region) ++ c.frameRegions
+
+/-- A function: its signature, its contract and, unless it is `extern`, its body.
+
+A defined function's `blocks[0]` is the entry, and its parameters are the function's `params`.
+Its top-level blocks are a region in all but name: transfers stay among them, and a jump to
+`Label.exit` returns from the function.  An extern function has a signature and a contract, and
+no blocks: the signature and the contract are all that a caller knows of it.  Its parameters
+get the first ids, `0, 1, …`, in the order they are declared.
 
 `names[i]` is the name value `i` prints as, `%x.1`.  A well-formed function names every value
-it defines, no two alike. -/
+it defines, no two alike, its contract's included. -/
 structure Func (env : Env Unit) (α : Type) where
-  name    : Name
-  retType : TypeExpr env
-  blocks  : Array (Block env α)
-  names   : Array Name
-  info    : α
+  name     : Name
+  params   : Array (ValDecl env)
+  retType  : TypeExpr env
+  extern   : Bool := false
+  blocks   : Array (Block env α)
+  contract : Contract env α := {}
+  names    : Array Name
+  info     : α
 
-/-- The type of a code pointer to `fn`: `base.Fn` of its entry block's parameter types and
-its return type.  A function with no entry block takes nothing. -/
+/-- The type of a code pointer to `fn`: `base.Fn` of its parameters' types and its return
+type. -/
 @[expose] def Func.codeType {env : Env Unit} [base ≼ env] {α : Type} (fn : Func env α) :
     TypeExpr env :=
-  Base.Fn (TypeList.ofTypes ((fn.blocks[0]?.map (·.params.map (·.type))).getD #[])) fn.retType
+  Base.Fn (TypeList.ofTypes (fn.params.map (·.type))) fn.retType
+
+/-- A ghost: a cell of the module that only contracts can name.  `type` is the type of its
+contents, and `const ghost` (`Const.ghost`) names its cell, a `base.Ref(type)`.
+
+* `init`, the *initializer*, takes no arguments and returns the first contents.  The
+  initializers run once, before any function, in the order the ghosts are declared.  A ghost
+  without one starts with some value that satisfies its invariant.
+* `invariant` takes the contents and returns a `base.Bool`: it holds in every state.  It is
+  trusted, so an initializer whose value does not satisfy it makes the module's trusted
+  assumptions contradict themselves.
+
+Each of these regions is a contract region, sees only its own values, and refers to no function.
+An initializer names only the ghosts declared before its own, and an invariant names no ghost.  A
+ghost changes only at a call whose `writes` frame covers its cell, or that has no `writes`
+frame.
+
+`names[i]` is the name value `i` of the ghost's regions prints as.  The values of the
+initializer come first. -/
+structure Ghost (env : Env Unit) (α : Type) where
+  name      : Name
+  type      : TypeExpr env
+  init      : Option (Region env α) := none
+  invariant : Option (Region env α) := none
+  names     : Array Name := #[]
+  info      : α
+
+/-- The regions of a ghost, in the order they print: its initializer, then its invariant. -/
+@[expose] def Ghost.regions {env : Env Unit} {α : Type} (g : Ghost env α) : List (Region env α) :=
+  g.init.toList ++ g.invariant.toList
 
 /-- An unchecked module, typed against one environment that refines the base.  A `Module` is
-one with its well-formedness proof. -/
+one with its well-formedness proof.  Its ghosts come first, as they print. -/
 structure Module.Raw (env : Env Unit) [base ≼ env] (α : Type) where
-  name  : Name
-  funcs : Array (Func env α)
-  info  : α
+  name   : Name
+  ghosts : Array (Ghost env α) := #[]
+  funcs  : Array (Func env α)
+  info   : α
 
 /-! ## Annotations
 
@@ -340,19 +465,48 @@ end
   obtain ⟨⟨_⟩⟩ := r
   simp [Region.map]
 
+/-- `Region.map` on the clause's region. -/
+@[expose] def Clause.map {env : Env Unit} {α β : Type} (f : α → β) (c : Clause env α) :
+    Clause env β where
+  region  := c.region.map f
+  free    := c.free
+  message := c.message
+
+/-- `Region.map` on the entry's region, if it has one. -/
+@[expose] def FrameEntry.map {env : Env Unit} {α β : Type} (f : α → β) :
+    FrameEntry env α → FrameEntry env β
+  | .cell v => .cell v
+  | .region r => .region (r.map f)
+
 @[expose] def Func.map {env : Env Unit} {α β : Type} (f : α → β) (fn : Func env α) :
     Func env β where
-  name    := fn.name
-  retType := fn.retType
-  blocks  := fn.blocks.map (Block.map f)
-  names   := fn.names
-  info    := f fn.info
+  name     := fn.name
+  params   := fn.params
+  retType  := fn.retType
+  extern   := fn.extern
+  blocks   := fn.blocks.map (Block.map f)
+  contract := { requires := fn.contract.requires.map (Clause.map f)
+                ensures  := fn.contract.ensures.map (Clause.map f)
+                reads    := fn.contract.reads.map (·.map (FrameEntry.map f))
+                writes   := fn.contract.writes.map (·.map (FrameEntry.map f)) }
+  names    := fn.names
+  info     := f fn.info
+
+@[expose] def Ghost.map {env : Env Unit} {α β : Type} (f : α → β) (g : Ghost env α) :
+    Ghost env β where
+  name      := g.name
+  type      := g.type
+  init      := g.init.map (Region.map f)
+  invariant := g.invariant.map (Region.map f)
+  names     := g.names
+  info      := f g.info
 
 @[expose] def Module.Raw.map {env : Env Unit} [base ≼ env] {α β : Type} (f : α → β)
     (m : Module.Raw env α) : Module.Raw env β where
-  name  := m.name
-  funcs := m.funcs.map (Func.map f)
-  info  := f m.info
+  name   := m.name
+  ghosts := m.ghosts.map (Ghost.map f)
+  funcs  := m.funcs.map (Func.map f)
+  info   := f m.info
 
 end
 
