@@ -187,15 +187,7 @@ elab "#opaque_reach " m:ident f:ident : command => do
   logInfo (listNames .anonymous (opaqueReach env f.getId))
 
 /--
-info: 8:
-  checkTarget
-  patternCaptures
-  patternExprs
-  visitComprehension
-  visitDefaults
-  visitExpr
-  visitStmt
-  visitStmts
+info: 0:
 -/
 #guard_msgs in
 #partial_defs_in StrataPython.Dyn.Scope StrataPython.Dyn.PyScope
@@ -240,10 +232,9 @@ info: 33:
 #partial_defs_in StrataPython.Dyn.Translate StrataPython.Dyn.PyTranslate
 
 /--
-info: 12:
+info: 11:
   Std.Internal.idOpaque
   Strata.Dyn.DomDiag.body
-  StrataPython.Dyn.PyScope.visitStmts
   StrataPython.Dyn.PyTranslate.findAnn
   StrataPython.Dyn.PyTranslate.transExpr
   StrataPython.Dyn.PyTranslate.transStmts
@@ -258,7 +249,7 @@ info: 12:
 #opaque_reach StrataPython.Dyn.Translate StrataPython.Dyn.PyTranslate.translate
 
 /--
-info: 11:
+info: 12:
   Strata.Dyn.Body.addAncs (proved: Strata.Dyn.Body.addAncs_good)
   Strata.Dyn.Body.chain (proved: Strata.Dyn.Body.above_iff)
   Strata.Dyn.Body.grow (proved: Strata.Dyn.Body.reached_spec)
@@ -268,6 +259,7 @@ info: 11:
   Strata.Dyn.Name.keyNatAux (proved: Strata.Dyn.Name.natVal_natDigits)
   Strata.Dyn.NatTrie.insertAt (proved: Strata.Dyn.NatTrie.find?_insertAt)
   StrataPython.Dyn.PyScope.analyzeBlock (unproved)
+  StrataPython.Dyn.PyScope.extendNamedExprScope (unproved)
   StrataPython.Dyn.PyScope.splicedChildren (unproved)
   StrataPython.Dyn.PyTranslate.enclosingPlace (unproved)
 -/
@@ -321,5 +313,22 @@ termination_by fuel
 #guard_msgs in #uses_fuel listRangeFuel
 /-- info: false -/
 #guard_msgs in #uses_fuel wfFuel
+
+/-! ## Equations
+
+A total definition has equations that a proof can unfold. -/
+
+open StrataPython.Dyn.PyScope in
+open StrataDDM (SourceRange) in
+/-- `case [x, *rest]:` captures `x` and `rest`, in order. -/
+example (sr : SourceRange) :
+    patternCaptures (.MatchSequence sr ⟨sr, #[.MatchAs sr ⟨sr, none⟩ ⟨sr, some ⟨sr, "x"⟩⟩,
+      .MatchStar sr ⟨sr, some ⟨sr, "rest"⟩⟩]⟩) = #[("x", sr), ("rest", sr)] := by
+  simp [patternCaptures]
+
+open StrataPython.Dyn.PyScope in
+/-- An empty statement list records nothing. -/
+example : visitStmts #[] = pure () := by
+  simp [visitStmts]
 
 end StrataPython.Dyn.TotalityTest

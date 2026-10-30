@@ -1,0 +1,38 @@
+module
+  patterns: local (assigned)
+  keys: local (assigned)
+  annotated: local (assigned)
+  function patterns
+    params: cmd
+    cmd: local (parameter, referenced)
+    Color: global implicit (referenced)
+    Keys: global implicit (referenced)
+    v: local (assigned)
+    Point: global implicit (referenced)
+    Origin: global implicit (referenced)
+    Kind: global implicit (referenced)
+    Shape: global implicit (referenced)
+    n: local (assigned, referenced)
+    LIMIT: global implicit (referenced)
+  function keys
+    KEY_ONLY: global implicit (referenced)
+  lambda <lambda>
+    params: a
+    a: local (parameter, referenced)
+  lambda <lambda>
+    params: b
+    b: local (parameter, referenced)
+  lambda <lambda>
+    params: d
+    d: local (parameter, referenced)
+  lambda <lambda>
+    params: c
+    c: local (parameter, referenced)
+  function annotated
+    params: p, *v, k, **kw
+    p: local (parameter)
+    k: local (parameter)
+    v: local (parameter)
+    kw: local (parameter)
+diagnostics:
+  unsupported at 3:4-13:16: 'match' is not supported

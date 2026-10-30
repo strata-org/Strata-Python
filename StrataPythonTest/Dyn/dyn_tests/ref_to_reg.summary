@@ -1,5 +1,5 @@
-promoted cells: 872
-functions with a removed read: 343
+promoted cells: 883
+functions with a removed read: 347
 candidates left as cells:
   p23_walrus.expected.dyn: p23_walrus.f: last.cell.0
   p23_walrus.expected.dyn: p23_walrus.g: deep.cell.0

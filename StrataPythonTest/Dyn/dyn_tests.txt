@@ -213,3 +213,4 @@ dom | yes |
 rr01_handler_param | yes |
 rr02_merges | yes |
 rr03_frame_lambda | yes |
+p47_scope_visit_order | yes | match

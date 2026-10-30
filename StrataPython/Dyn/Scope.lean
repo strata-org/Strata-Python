@@ -8,6 +8,7 @@ module
 public import StrataPython.PythonDialect
 public import StrataDDM.Util.SourceRange
 public import Lean.Data.Position
+import StrataPython.Dyn.Termination
 
 set_option autoImplicit false
 
@@ -474,15 +475,16 @@ private def checkKeywords (kws : Array (keyword SourceRange)) : CollectM Unit :=
 
 /-- Report a starred target outside a tuple or list, or two starred targets in one, as
 CPython's compiler does. -/
-private partial def checkTarget : expr SourceRange → CollectM Unit
+private def checkTarget : expr SourceRange → CollectM Unit
   | .Starred sr _ _ => compilerError "starred assignment target must be in a list or tuple" sr
   | .Tuple sr ts _ | .List sr ts _ => do
     if let .error msg := starredIndex? ts.val then return ← compilerError msg sr
-    for t in ts.val do
-      match t with
-      | .Starred _ v _ => checkTarget v
-      | t => checkTarget t
+    for _ht : t in ts.val do
+      match t, _ht with
+      | .Starred _ v _, _ht => checkTarget v
+      | t, _ht => checkTarget t
   | _ => pure ()
+termination_by e => sizeOf e
 
 private def mangled (name : String) : CollectM String := do
   return mangle (← get).privateName name
@@ -621,7 +623,7 @@ private def extendNamedExprScope (name : String) (range : SourceRange) : Collect
       return
 
 /-- The names a `match` pattern captures, with their ranges. -/
-private partial def patternCaptures : pattern SourceRange → Array (String × SourceRange)
+private def patternCaptures : pattern SourceRange → Array (String × SourceRange)
   | .MatchValue .. | .MatchSingleton .. => #[]
   | .MatchSequence _ ps => ps.val.flatMap patternCaptures
   | .MatchMapping sr _ ps rest =>
@@ -629,19 +631,11 @@ private partial def patternCaptures : pattern SourceRange → Array (String × S
   | .MatchClass _ _ ps _ kps =>
     ps.val.flatMap patternCaptures ++ kps.val.flatMap patternCaptures
   | .MatchStar sr n => (n.val.map fun n => (n.val, sr)).toArray
-  | .MatchAs sr p n =>
-    (p.val.map patternCaptures).getD #[] ++ (n.val.map fun n => (n.val, sr)).toArray
+  | .MatchAs sr ⟨_, p⟩ n =>
+    (match p with | some p => patternCaptures p | none => #[]) ++
+      (n.val.map fun n => (n.val, sr)).toArray
   | .MatchOr _ ps => ps.val.flatMap patternCaptures
-
-/-- The expressions a `match` pattern evaluates: values, mapping keys and classes. -/
-private partial def patternExprs : pattern SourceRange → Array (expr SourceRange)
-  | .MatchValue _ e => #[e]
-  | .MatchSingleton .. | .MatchStar .. => #[]
-  | .MatchSequence _ ps | .MatchOr _ ps => ps.val.flatMap patternExprs
-  | .MatchMapping _ keys ps _ => keys.val ++ ps.val.flatMap patternExprs
-  | .MatchClass _ cls ps _ kps => #[cls] ++ ps.val.flatMap patternExprs ++
-      kps.val.flatMap patternExprs
-  | .MatchAs _ p _ => (p.val.map patternExprs).getD #[]
+termination_by p => sizeOf p
 
 /-- The `yield` error inside a comprehension or generator expression named `name`. -/
 private def yieldInComprehension (name : String) : String :=
@@ -664,11 +658,18 @@ private def inLoopBody : CollectM Unit → CollectM Unit := withInLoop true
 /-- A function or class body, where an enclosing loop does not count. -/
 private def outsideLoop : CollectM Unit → CollectM Unit := withInLoop false
 
+/-- Run `act` on the iteration target of the comprehension `cur`: `symtable`'s
+`ste_comp_iter_target`. -/
+private def withIterTarget (cur : ScopeId) (act : CollectM Unit) : CollectM Unit := do
+  modifyScope cur fun p => { p with inIterTarget := true }
+  act
+  modifyScope cur fun p => { p with inIterTarget := false }
+
 mutual
 
-private partial def visitExpr (e : expr SourceRange) : CollectM Unit := do
+private def visitExpr (e : expr SourceRange) : CollectM Unit := do
   match e with
-  | .BoolOp _ _ vs => vs.val.forM visitExpr
+  | .BoolOp _ _ vs => for v in vs.val do visitExpr v
   | .NamedExpr sr target value =>
     if (← curScope).inIterExpr > 0 then
       syntaxError "assignment expression cannot be used in a comprehension iterable expression"
@@ -688,10 +689,12 @@ private partial def visitExpr (e : expr SourceRange) : CollectM Unit := do
     leave saved
   | .IfExp _ c t f => visitExpr c; visitExpr t; visitExpr f
   | .Dict _ keys values =>
-    for k in keys.val do
-      if let .some_expr _ k := k then visitExpr k
-    values.val.forM visitExpr
-  | .Set _ elts => elts.val.forM visitExpr
+    for _hk : k in keys.val do
+      match k, _hk with
+      | .some_expr _ k, _hk => visitExpr k
+      | .missing_expr _, _ => pure ()
+    for v in values.val do visitExpr v
+  | .Set _ elts => for x in elts.val do visitExpr x
   | .ListComp sr elt gens =>
     visitComprehension sr .inlinedComprehension "<listcomp>" gens.val elt none
   | .SetComp sr elt gens =>
@@ -702,16 +705,25 @@ private partial def visitExpr (e : expr SourceRange) : CollectM Unit := do
     visitComprehension sr .comprehension "<genexpr>" gens.val elt none
   | .Await _ x => visitExpr x
   | .YieldFrom sr x => visitExpr x; checkYield "'yield from'" sr
-  | .Yield sr x => x.val.forM visitExpr; checkYield "'yield'" sr
-  | .Compare _ l _ rs => visitExpr l; rs.val.forM visitExpr
+  | .Yield sr ⟨_, x⟩ =>
+    if let some x := x then visitExpr x
+    checkYield "'yield'" sr
+  | .Compare _ l _ rs => visitExpr l; for r in rs.val do visitExpr r
   | .Call _ f args kws =>
     visitExpr f
-    args.val.forM visitExpr
-    kws.val.forM fun k => visitExpr k.value
+    for a in args.val do visitExpr a
+    for _hk : k in kws.val do
+      match k, _hk with
+      | .mk_keyword _ _ v, _hk =>
+        visitExpr v
     checkKeywords kws.val
-  | .FormattedValue _ v _ spec => visitExpr v; spec.val.forM visitExpr
-  | .Interpolation _ v _ _ spec => visitExpr v; spec.val.forM visitExpr
-  | .JoinedStr _ vs | .TemplateStr _ vs => vs.val.forM visitExpr
+  | .FormattedValue _ v _ ⟨_, spec⟩ =>
+    visitExpr v
+    if let some s := spec then visitExpr s
+  | .Interpolation _ v _ _ ⟨_, spec⟩ =>
+    visitExpr v
+    if let some s := spec then visitExpr s
+  | .JoinedStr _ vs | .TemplateStr _ vs => for v in vs.val do visitExpr v
   | .Constant .. => pure ()
   | .Attribute _ v _ _ => visitExpr v
   | .Subscript _ v i _ => visitExpr v; visitExpr i
@@ -724,12 +736,16 @@ private partial def visitExpr (e : expr SourceRange) : CollectM Unit := do
       if (← curScope).kind.isFunctionLike && name == "super" then
         addDef "__class__" { referenced := true } sr
     | _ => addDef name { assigned := true } sr
-  | .List _ elts _ | .Tuple _ elts _ => elts.val.forM visitExpr
-  | .Slice _ lo hi step => lo.val.forM visitExpr; hi.val.forM visitExpr; step.val.forM visitExpr
+  | .List _ elts _ | .Tuple _ elts _ => for x in elts.val do visitExpr x
+  | .Slice _ ⟨_, lo⟩ ⟨_, hi⟩ ⟨_, step⟩ =>
+    if let some x := lo then visitExpr x
+    if let some x := hi then visitExpr x
+    if let some x := step then visitExpr x
+termination_by sizeOf e
 
 /-- `yield` (`what`) is allowed only in a function, and not in a comprehension or generator
 expression.  CPython's compiler reports the first, its symbol table the second. -/
-private partial def checkYield (what : String) (sr : SourceRange) : CollectM Unit := do
+private def checkYield (what : String) (sr : SourceRange) : CollectM Unit := do
   let p ← curScope
   if p.kind.isComprehension then syntaxError (yieldInComprehension p.name) sr
   else if p.kind matches .module | .classBody then compilerError s!"{what} outside function" sr
@@ -740,50 +756,80 @@ private partial def checkYield (what : String) (sr : SourceRange) : CollectM Uni
     if earlier then modifyScope (← get).cur fun p => { p with generator := some sr }
 
 /-- The defaults of `args`, which the enclosing scope evaluates. -/
-private partial def visitDefaults (args : arguments SourceRange) : CollectM Unit := do
+private def visitDefaults (args : arguments SourceRange) : CollectM Unit := do
   let .mk_arguments _ _ _ _ _ kwDefaults _ defaults := args
-  defaults.val.forM visitExpr
-  for d in kwDefaults.val do
-    if let .some_expr _ d := d then visitExpr d
+  for d in defaults.val do visitExpr d
+  for _hd : d in kwDefaults.val do
+    match d, _hd with
+    | .some_expr _ d, _hd => visitExpr d
+    | .missing_expr _, _ => pure ()
+termination_by sizeOf args
+
+/-- The annotation of the parameter `a`, if it has one. -/
+private def visitArgAnnotation (a : arg SourceRange) : CollectM Unit := do
+  let .mk_arg _ _ ⟨_, ann⟩ _ := a
+  if let some t := ann then visitExpr t
 
 /-- `symtable_handle_comprehension`: the enclosing scope evaluates the outermost iterable;
 everything else is in the comprehension's scope, of kind `kind`. -/
-private partial def visitComprehension (sr : SourceRange) (kind : ScopeKind) (name : String)
+private def visitComprehension (sr : SourceRange) (kind : ScopeKind) (name : String)
     (gens : Array (comprehension SourceRange)) (elt : expr SourceRange)
     (value : Option (expr SourceRange)) : CollectM Unit := do
-  let some (comprehension.mk_comprehension _ target iter ifs _) := gens[0]? | return
-  let outer := (← get).cur
-  modifyScope outer fun p => { p with inIterExpr := p.inIterExpr + 1 }
-  visitExpr iter
-  modifyScope outer fun p => { p with inIterExpr := p.inIterExpr - 1 }
-  let saved ← enter kind name sr
-  let cur := (← get).cur
-  addDefIn cur ".0" { param := true } sr
-  let dotZero : Param := { name := ".0", kind := .positional, range := sr }
-  modifyScope cur fun p => { p with params := #[dotZero] }
-  let iterTarget (t : expr SourceRange) : CollectM Unit := do
-    modifyScope cur fun p => { p with inIterTarget := true }
-    visitExpr t
-    modifyScope cur fun p => { p with inIterTarget := false }
-  iterTarget target
-  checkTarget target
-  ifs.val.forM visitExpr
-  for g in gens[1:] do
-    let .mk_comprehension _ target iter ifs _ := g
-    iterTarget target
-    modifyScope cur fun p => { p with inIterExpr := p.inIterExpr + 1 }
+  match hg : (gens[0]? : Option (comprehension SourceRange)) with
+  | none => return
+  | some (comprehension.mk_comprehension _ target iter ifs _) =>
+    have hsize : sizeOf target + sizeOf iter + sizeOf ifs < sizeOf gens := by
+      have hmem := Array.sizeOf_lt_of_mem (Array.mem_of_getElem? hg); simp at hmem; omega
+    let outer := (← get).cur
+    modifyScope outer fun p => { p with inIterExpr := p.inIterExpr + 1 }
     visitExpr iter
-    modifyScope cur fun p => { p with inIterExpr := p.inIterExpr - 1 }
+    modifyScope outer fun p => { p with inIterExpr := p.inIterExpr - 1 }
+    let saved ← enter kind name sr
+    let cur := (← get).cur
+    addDefIn cur ".0" { param := true } sr
+    let dotZero : Param := { name := ".0", kind := .positional, range := sr }
+    modifyScope cur fun p => { p with params := #[dotZero] }
+    withIterTarget cur (visitExpr target)
     checkTarget target
-    ifs.val.forM visitExpr
-  value.forM visitExpr
-  visitExpr elt
-  leave saved
+    for c in ifs.val do visitExpr c
+    for h : i in [1:gens.size] do
+      have hlt := Array.sizeOf_getElem gens i (by get_elem_tactic)
+      match hg : gens[i] with
+      | .mk_comprehension _ target iter ifs _ =>
+        have hsize : sizeOf target + sizeOf iter + sizeOf ifs < sizeOf gens := by
+          rw [hg] at hlt; simp at hlt; omega
+        withIterTarget cur (visitExpr target)
+        modifyScope cur fun p => { p with inIterExpr := p.inIterExpr + 1 }
+        visitExpr iter
+        modifyScope cur fun p => { p with inIterExpr := p.inIterExpr - 1 }
+        checkTarget target
+        for c in ifs.val do visitExpr c
+    if let some v := value then visitExpr v
+    visitExpr elt
+    leave saved
+termination_by sizeOf gens + sizeOf elt + sizeOf value
 
-private partial def visitStmts (ss : Array (stmt SourceRange)) : CollectM Unit :=
-  ss.forM visitStmt
+/-- Visit the expressions a `match` pattern evaluates: values, mapping keys and classes. -/
+private def visitPatternExprs (p : pattern SourceRange) : CollectM Unit := do
+  match p with
+  | .MatchValue _ e => visitExpr e
+  | .MatchSingleton .. | .MatchStar .. => pure ()
+  | .MatchSequence _ ps | .MatchOr _ ps => for q in ps.val do visitPatternExprs q
+  | .MatchMapping _ keys ps _ =>
+    for k in keys.val do visitExpr k
+    for q in ps.val do visitPatternExprs q
+  | .MatchClass _ cls ps _ kps =>
+    visitExpr cls
+    for q in ps.val do visitPatternExprs q
+    for q in kps.val do visitPatternExprs q
+  | .MatchAs _ ⟨_, q⟩ _ => if let some q := q then visitPatternExprs q
+termination_by sizeOf p
 
-private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
+private def visitStmts (ss : Array (stmt SourceRange)) : CollectM Unit := do
+  for s in ss do visitStmt s
+termination_by sizeOf ss
+
+private def visitStmt (s : stmt SourceRange) : CollectM Unit := do
   match s with
   | .FunctionDef sr ⟨_, name⟩ args body decorators returns _ typeParams
   | .AsyncFunctionDef sr ⟨_, name⟩ args body decorators returns _ typeParams =>
@@ -791,11 +837,15 @@ private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
     addDef name { assigned := true } sr
     -- In the order of 3.12's symbol table, which records the child scopes in that order.
     visitDefaults args
-    decorators.val.forM visitExpr
+    for d in decorators.val do visitExpr d
     unless (← get).futureAnnotations do
-      let .mk_arguments _ posOnly pos varPos kwOnly _ varKw _ := args
-      let params := posOnly.val ++ pos.val ++ varPos.val.toArray ++ varKw.val.toArray ++ kwOnly.val
-      (params.filterMap (fun (.mk_arg _ _ a _) => a.val) ++ returns.val.toArray).forM visitExpr
+      let .mk_arguments _ ⟨_, posOnly⟩ ⟨_, pos⟩ ⟨_, varPos⟩ ⟨_, kwOnly⟩ _ ⟨_, varKw⟩ _ := args
+      for a in posOnly do visitArgAnnotation a
+      for a in pos do visitArgAnnotation a
+      if let some a := varPos then visitArgAnnotation a
+      if let some a := varKw then visitArgAnnotation a
+      for a in kwOnly do visitArgAnnotation a
+      if let ⟨_, some r⟩ := returns then visitExpr r
     let saved ← enter .function name sr
     visitParams args
     outsideLoop (visitStmts body.val)
@@ -803,30 +853,33 @@ private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
   | .ClassDef sr ⟨_, name⟩ bases kws body decorators typeParams =>
     if !typeParams.val.isEmpty then unsupported "type parameters are not supported" sr
     addDef name { assigned := true } sr
-    bases.val.forM visitExpr
-    kws.val.forM fun k => visitExpr k.value
+    for b in bases.val do visitExpr b
+    for _hk : k in kws.val do
+      match k, _hk with
+      | .mk_keyword _ _ v, _hk =>
+        visitExpr v
     checkKeywords kws.val
-    decorators.val.forM visitExpr
+    for d in decorators.val do visitExpr d
     let outerPrivate := (← get).privateName
     modify fun st => { st with privateName := some name }
     let saved ← enter .classBody name sr
     outsideLoop (visitStmts body.val)
     leave saved
     modify fun st => { st with privateName := outerPrivate }
-  | .Return sr v =>
+  | .Return sr ⟨_, v⟩ =>
     if (← curScope).kind matches .module | .classBody then
       compilerError "'return' outside function" sr
-    v.val.forM visitExpr
-  | .Delete _ ts => ts.val.forM visitExpr
+    if let some v := v then visitExpr v
+  | .Delete _ ts => for t in ts.val do visitExpr t
   | .Assign _ ts v _ =>
-    ts.val.forM visitExpr
+    for t in ts.val do visitExpr t
     visitExpr v
     ts.val.forM checkTarget
   | .TypeAlias sr n _ _ =>
     unsupported "'type' statements are not supported" sr
     visitExpr n
   | .AugAssign _ t _ v => visitExpr t; visitExpr v
-  | .AnnAssign sr target ann value simple =>
+  | .AnnAssign sr target ann ⟨_, value⟩ simple =>
     match target with
     | .Name nsr ⟨_, name⟩ _ =>
       let m ← mangled name
@@ -836,12 +889,12 @@ private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
         let what := if cur.declaredGlobal then "global" else "nonlocal"
         syntaxError s!"annotated name '{name}' can't be {what}" sr
       if simple then addDef name { annotated := true, assigned := true } nsr
-      else if value.val.isSome then addDef name { assigned := true } nsr
+      else if value.isSome then addDef name { assigned := true } nsr
     | _ => visitExpr target
     -- `symtable` visits the annotation, then the value; CPython 3.12 evaluates it in a module
     -- or class body.
     unless (← get).futureAnnotations do visitExpr ann
-    value.val.forM visitExpr
+    if let some v := value then visitExpr v
   | .For _ t it body orelse _ | .AsyncFor _ t it body orelse _ =>
     visitExpr t
     visitExpr it
@@ -857,20 +910,26 @@ private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
     visitStmts body.val
     visitStmts orelse.val
   | .With _ items body _ | .AsyncWith _ items body _ =>
-    for .mk_withitem _ ctx vars in items.val do
-      visitExpr ctx
-      vars.val.forM fun t => do visitExpr t; checkTarget t
+    for _hi : i in items.val do
+      match i, _hi with
+      | .mk_withitem _ ctx ⟨_, vars⟩, _hi =>
+        visitExpr ctx
+        if let some t := vars then visitExpr t; checkTarget t
     visitStmts body.val
   | .Match sr subject cases =>
     unsupported "'match' is not supported" sr
     visitExpr subject
-    for .mk_match_case _ p guard body in cases.val do
-      (patternExprs p).forM visitExpr
-      for (n, nsr) in patternCaptures p do
-        addDef n { assigned := true } nsr
-      guard.val.forM visitExpr
-      visitStmts body.val
-  | .Raise _ exc cause => exc.val.forM visitExpr; cause.val.forM visitExpr
+    for _hc : c in cases.val do
+      match c, _hc with
+      | .mk_match_case _ p ⟨_, guard⟩ body, _hc =>
+        visitPatternExprs p
+        for (n, nsr) in patternCaptures p do
+          addDef n { assigned := true } nsr
+        if let some g := guard then visitExpr g
+        visitStmts body.val
+  | .Raise _ ⟨_, exc⟩ ⟨_, cause⟩ =>
+    if let some e := exc then visitExpr e
+    if let some c := cause then visitExpr c
   | .Try _ body handlers orelse finalbody | .TryStar _ body handlers orelse finalbody =>
     visitStmts body.val
     visitStmts orelse.val
@@ -881,12 +940,16 @@ private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
         -- CPython reports only the first.
         compilerError "default 'except:' must be last" hsr
         break
-    for .ExceptHandler hsr ty name hbody in handlers.val do
-      ty.val.forM visitExpr
-      if let some n := name.val then addDef n.val { assigned := true } hsr
-      visitStmts hbody.val
+    for _hh : h in handlers.val do
+      match h, _hh with
+      | .ExceptHandler hsr ⟨_, ty⟩ name hbody, _hh =>
+        if let some t := ty then visitExpr t
+        if let some n := name.val then addDef n.val { assigned := true } hsr
+        visitStmts hbody.val
     visitStmts finalbody.val
-  | .Assert _ t m => visitExpr t; m.val.forM visitExpr
+  | .Assert _ t ⟨_, m⟩ =>
+    visitExpr t
+    if let some m := m then visitExpr m
   | .Import sr aliases => aliases.val.forM (visitAlias · none false sr)
   | .ImportFrom sr modName aliases level =>
     let level := (level.val.map (·.value)).getD 0
@@ -901,9 +964,10 @@ private partial def visitStmt (s : stmt SourceRange) : CollectM Unit := do
   | .Break sr => unless (← get).inLoop do compilerError "'break' outside loop" sr
   | .Continue sr => unless (← get).inLoop do compilerError "'continue' not properly in loop" sr
   | .Pass _ => pure ()
+termination_by sizeOf s
 
 /-- `global name` (`isGlobal`) or `nonlocal name` at `sr`. -/
-private partial def declare (isGlobal : Bool) (name : String) (sr : SourceRange) :
+private def declare (isGlobal : Bool) (name : String) (sr : SourceRange) :
     CollectM Unit := do
   let kw := if isGlobal then "global" else "nonlocal"
   let m ← mangled name

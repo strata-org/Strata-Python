@@ -1,0 +1,31 @@
+module top
+  annotated: local (assigned)
+  keys: local (assigned)
+  patterns: local (assigned)
+  function patterns
+    Color: global implicit (referenced)
+    Keys: global implicit (referenced)
+    Kind: global implicit (referenced)
+    LIMIT: global implicit (referenced)
+    Origin: global implicit (referenced)
+    Point: global implicit (referenced)
+    Shape: global implicit (referenced)
+    cmd: local (parameter, referenced)
+    n: local (assigned, referenced)
+    v: local (assigned)
+  function keys
+    KEY_ONLY: global implicit (referenced)
+  function lambda
+    a: local (parameter, referenced)
+  function lambda
+    b: local (parameter, referenced)
+  function lambda
+    d: local (parameter, referenced)
+  function lambda
+    c: local (parameter, referenced)
+  function annotated
+    k: local (parameter)
+    kw: local (parameter)
+    p: local (parameter)
+    v: local (parameter)
+qualnames: <lambda>, <lambda>, <lambda>, <lambda>, annotated, keys, patterns
