@@ -219,7 +219,7 @@ info: 10:
 #opaque_reach StrataPython.Dyn.Translate StrataPython.Dyn.PyTranslate.translate
 
 /--
-info: 15:
+info: 9:
   Strata.Dyn.Body.addAncs (proved: Strata.Dyn.Body.addAncs_good)
   Strata.Dyn.Body.chain (proved: Strata.Dyn.Body.above_iff)
   Strata.Dyn.Body.grow (proved: Strata.Dyn.Body.reached_spec)
@@ -228,12 +228,6 @@ info: 15:
   Strata.Dyn.Body.search (unproved)
   Strata.Dyn.Name.keyNatAux (proved: Strata.Dyn.Name.natVal_natDigits)
   Strata.Dyn.NatTrie.insertAt (proved: Strata.Dyn.NatTrie.find?_insertAt)
-  StrataPython.Dyn.PyScope.analyzeBlock (unproved)
-  StrataPython.Dyn.PyScope.extendNamedExprScope (unproved)
-  StrataPython.Dyn.PyScope.splicedChildren (unproved)
-  StrataPython.Dyn.PyTranslate.childScope? (unproved)
-  StrataPython.Dyn.PyTranslate.enclosingPlace (unproved)
-  StrataPython.Dyn.PyTranslate.firstParam? (unproved)
   StrataPython.Dyn.PyTranslate.freshName (proved: StrataPython.Dyn.PyTranslate.freshName_not_mem)
 -/
 #guard_msgs in

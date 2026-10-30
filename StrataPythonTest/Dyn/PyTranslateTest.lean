@@ -8,6 +8,7 @@ public import StrataDyn.DDM
 public import StrataDyn.WF
 public import StrataPython.Dyn.Translate
 import all StrataPython.Dyn.Translate
+import all StrataPython.Dyn.Scope
 import StrataDyn.Env.WF
 -- The translator and the checker both run as compiled code below.
 meta import StrataDyn.DDM
@@ -246,5 +247,33 @@ private def sameRange : Result := translate "m" #[
 #guard sameRange.diagnostics.map (·.message) =
   #["m.f.1 is queued twice", "m references a function it does not define: m.<module>"]
 #guard sameRange.module.raw.funcs.isEmpty
+
+/-! ## A scope table that lacks a scope or a parent -/
+
+open StrataPython.Dyn.PyScope (Scope Table)
+
+/-- An inlined comprehension, with no parent, where `x` is free. -/
+private def orphanScope : Scope where
+  kind := .inlinedComprehension
+  name := "<listcomp>"
+  qualname := ""
+  parent := none
+  children := #[]
+  params := #[]
+  symbols := #[{ name := "x", scope := .free, uses := default }]
+  range := .none
+  privateName := none
+  needsClassCell := false
+
+/-- A table whose only scope is `orphanScope`. -/
+private def orphanTable : Table :=
+  { scopes := #[orphanScope], imports := #[], diagnostics := #[], ordered := by
+      simp [PyScope.Ordered, orphanScope] }
+
+-- A missing start scope, a scope id out of range, and a comprehension without a parent: each
+-- is a bug, and gives `.missing`, not `.global`.
+#guard enclosingHold orphanTable "x" none matches .missing
+#guard enclosingHold orphanTable "x" (some 1) matches .missing
+#guard enclosingHold orphanTable "x" (some 0) matches .missing
 
 end StrataPython.Dyn.PyTranslateTest

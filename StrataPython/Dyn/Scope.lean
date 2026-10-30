@@ -312,6 +312,13 @@ def formatRange (fileMap : Option Lean.FileMap) (sr : SourceRange) : String :=
       s!"{a.line}:{a.column}-{b.line}:{b.column}"
     | none => s!"{sr.start}-{sr.stop}"
 
+/-- Each scope's parent comes before it in `xs`, and each of its children comes after it and is
+in `xs`. -/
+def Ordered {β : Type} (parent : β → Option ScopeId) (children : β → Array ScopeId)
+    (xs : Array β) : Prop :=
+  ∀ i (h : i < xs.size), (∀ q : Nat, parent xs[i] = some q → q < i) ∧
+    ∀ c : Nat, c ∈ children xs[i] → i < c ∧ c < xs.size
+
 /-- The scopes, imports and diagnostics of a module. -/
 structure Table where
   /-- Every scope in preorder; `scopes[0]` is the module. -/
@@ -320,7 +327,17 @@ structure Table where
   imports : Array Import
   /-- Compile-time errors and rejected constructs, in the order CPython finds them. -/
   diagnostics : Array Diagnostic
-  deriving Repr, Inhabited
+  /-- The proof that a walk from any scope, up through parents or down through children, ends. -/
+  ordered : Ordered Scope.parent Scope.children scopes
+  deriving Repr
+
+instance : Inhabited Table :=
+  ⟨{ scopes := #[], imports := #[], diagnostics := #[], ordered := by simp [Ordered] }⟩
+
+/-- A scope's parent comes before it in the table. -/
+theorem Table.parent_lt (t : Table) {i : Nat} (h : i < t.scopes.size) {q : Nat}
+    (hq : t.scopes[i].parent = some q) : q < i :=
+  (t.ordered i h).1 q hq
 
 /-- `name` mangled inside a class whose name is `privateName`: `__x` in class `_C` is
 `_C__x`.  Names ending in `__`, dotted names, and names in classes named only with
@@ -440,6 +457,8 @@ private structure CollectState where
   /-- Visiting a loop body of the current function or class body: where `break` and
   `continue` may appear. -/
   inLoop : Bool := false
+  hcur : cur < scopes.size
+  hord : Ordered Pending.parent Pending.children scopes
 
 private abbrev CollectM := StateM CollectState
 
@@ -447,8 +466,28 @@ private def curScope : CollectM Pending := do
   let st ← get
   return st.scopes[st.cur]!
 
-private def modifyScope (s : ScopeId) (f : Pending → Pending) : CollectM Unit :=
-  modify fun st => { st with scopes := st.scopes.modify s f }
+/-- Changing scope `s` with a function `f` that keeps each scope's parent and children keeps
+`Ordered`. -/
+private theorem Ordered.modify_of_links {ps : Array Pending}
+    (h : Ordered Pending.parent Pending.children ps) (s : ScopeId) (f : Pending → Pending)
+    (hf : ∀ p, (f p).parent = p.parent ∧ (f p).children = p.children) :
+    Ordered Pending.parent Pending.children (ps.modify s f) := by
+  intro i hi
+  have hi' : i < ps.size := by simpa using hi
+  have hord := h i hi'
+  simp only [Array.getElem_modify, Array.size_modify]
+  split
+  · rw [(hf _).1, (hf _).2]; exact hord
+  · exact hord
+
+/-- Change what scope `s` holds; `f` must keep its links. -/
+private def modifyScope (s : ScopeId) (f : Pending → Pending)
+    (hf : ∀ p, (f p).parent = p.parent ∧ (f p).children = p.children := by
+      intro p; constructor <;> (try split) <;> rfl) : CollectM Unit :=
+  modify fun st => { st with
+    scopes := st.scopes.modify s f
+    hcur := by simpa using st.hcur
+    hord := st.hord.modify_of_links s f hf }
 
 private def report (kind : DiagnosticKind) (message : String) (range : SourceRange) :
     CollectM Unit :=
@@ -527,22 +566,69 @@ private def recordDirective (s : ScopeId) (name : String) (range : SourceRange) 
     if p.directives.contains name then p
     else { p with directives := p.directives.insert name range }
 
-/-- Open a child scope of the current one and make it current; return the old one.  A
-scope opened inside a comprehension's iterable is inside it too: `symtable_enter_block`. -/
-private def enter (kind : ScopeKind) (name : String) (range : SourceRange) :
-    CollectM ScopeId := do
+/-- Appending a scope `child`, whose parent is `cur` and which has no children, keeps `Ordered`
+if `g` adds the new index to the children of `cur` and keeps the rest of the links. -/
+private theorem Ordered.push_child {ps : Array Pending}
+    (h : Ordered Pending.parent Pending.children ps) {cur : ScopeId} (hc : cur < ps.size)
+    (g : Pending → Pending) (hgp : ∀ p, (g p).parent = p.parent)
+    (hgc : ∀ p, (g p).children = p.children.push ps.size)
+    (child : Pending) (hp : child.parent = some cur) (hch : child.children = #[]) :
+    Ordered Pending.parent Pending.children ((ps.modify cur g).push child) := by
+  intro i hi
+  have hsize : ((ps.modify cur g).push child).size = ps.size + 1 := by simp
+  rw [hsize] at hi ⊢
+  by_cases hlt : i < ps.size
+  · have ⟨h1, h2⟩ := h i hlt
+    rw [Array.getElem_push_lt (by simpa using hlt), Array.getElem_modify]
+    split
+    · rename_i heq
+      subst heq
+      refine ⟨by rw [hgp]; exact h1, fun c hc' => ?_⟩
+      rw [hgc, Array.mem_push] at hc'
+      rcases hc' with hc' | rfl
+      · have hlt' := h2 c hc'; omega
+      · omega
+    · exact ⟨h1, fun c hc' => by have hlt' := h2 c hc'; omega⟩
+  · have hi' : i = ps.size := by omega
+    subst hi'
+    have hlast : ((ps.modify cur g).push child)[ps.size]'(by simp) = child := by
+      simp [Array.getElem_push]
+    rw [hlast]
+    refine ⟨fun q hq => ?_, by simp [hch]⟩
+    rw [hp] at hq
+    cases hq
+    exact hc
+
+/-- Open a child scope of the current one and make it current.  A scope opened inside a
+comprehension's iterable is inside it too: `symtable_enter_block`. -/
+private def enter (kind : ScopeKind) (name : String) (range : SourceRange) : CollectM Unit := do
   let st ← get
   let id := st.scopes.size
+  have hid : id = st.scopes.size := rfl
   let child : Pending :=
     { kind, name, parent := some st.cur, range, privateName := st.privateName
       inIterExpr := st.scopes[st.cur]!.inIterExpr }
-  set { st with scopes := (st.scopes.modify st.cur fun p =>
-                             { p with children := p.children.push id }).push child
-                cur := id }
-  return st.cur
+  set ({ st with
+    scopes := (st.scopes.modify st.cur fun p =>
+      { p with children := p.children.push id }).push child
+    cur := id
+    hcur := by simp [hid]
+    hord := st.hord.push_child st.hcur (fun p => { p with children := p.children.push id })
+      (fun _ => rfl) (fun _ => rfl) child rfl rfl } : CollectState)
 
-private def leave (saved : ScopeId) : CollectM Unit :=
-  modify fun st => { st with cur := saved }
+/-- Make the parent of the current scope current.  After `enter`, this is the scope that was
+current before it.  The module has no parent: leaving it is an internal error. -/
+private def leave : CollectM Unit :=
+  modify fun st =>
+    match hp : (st.scopes[st.cur]'st.hcur).parent with
+    | some q =>
+      have hq := (st.hord st.cur st.hcur).1 q hp
+      have hc := st.hcur
+      { st with cur := q, hcur := Nat.lt_trans hq hc }
+    | none =>
+      let d : Diagnostic :=
+        { kind := .internal, message := "the module scope was left", range := .none }
+      { st with diagnostics := st.diagnostics.push d }
 
 /-- Bind each parameter of `args`, recording the signature: `symtable_visit_arguments`.
 CPython adds positional-only, positional and keyword-only parameters, then `*args`, then
@@ -586,41 +672,64 @@ private def visitAlias (a : alias SourceRange) (fromModule : Option String)
     { scope := st.cur, name := mangle st.privateName bound, target, loads, range := sr }
   set { st with imports := st.imports.push i }
 
+/-- Where the walk up from scope `s` for the walrus target `name` stops, as
+`symtable_extend_namedexpr_scope` walks: past comprehensions, to the first other scope. -/
+private inductive WalrusStop where
+  /-- A comprehension iterates over `name`. -/
+  | rebindsIteration
+  /-- The function or lambda `s`. -/
+  | function (s : ScopeId)
+  | module
+  | classBody
+  /-- No enclosing scope was found.  This does not happen: every comprehension has a
+  parent. -/
+  | none
+
+/-- The walk up from scope `s` for the walrus target `name`, by recursion on the scope id:
+each parent comes before its scope. -/
+private def walrusStop (ps : Array Pending) (h : Ordered Pending.parent Pending.children ps)
+    (name : String) (s : ScopeId) : WalrusStop :=
+  if hs : s < ps.size then
+    let p := ps[s]
+    match p.kind with
+    | .comprehension | .inlinedComprehension =>
+      if (p.uses[name]?.map fun u => u.compIter && u.assigned).getD false then .rebindsIteration
+      else
+        match hq : p.parent with
+        | some q => walrusStop ps h name q
+        | none => .none
+    | .function | .lambda => .function s
+    | .module => .module
+    | .classBody => .classBody
+  else .none
+termination_by s
+decreasing_by exact (h s hs).1 q hq
+
 /-- Find the scope a walrus inside a comprehension binds in, and bind it there:
 `symtable_extend_namedexpr_scope`. -/
 private def extendNamedExprScope (name : String) (range : SourceRange) : CollectM Unit := do
   let name ← mangled name
-  let cur := (← get).cur
-  let mut s := cur
-  for _ in [0:(← get).scopes.size] do
-    let p := (← get).scopes[s]!
-    match p.kind with
-    | .comprehension | .inlinedComprehension =>
-      if (p.uses[name]?.map fun u => u.compIter && u.assigned).getD false then
-        syntaxError
-          s!"assignment expression cannot rebind comprehension iteration variable '{name}'"
-          range
-        return
-      match p.parent with
-      | some q => s := q
-      | none => return
-    | .function | .lambda =>
-      if (← usesIn s name).declaredGlobal then
-        addDefIn cur name { declaredGlobal := true } range
-      else
-        addDefIn cur name { declaredNonlocal := true } range
-      recordDirective cur name range
-      addDefIn s name { assigned := true } range
-      return
-    | .module =>
+  let st ← get
+  let cur := st.cur
+  match walrusStop st.scopes st.hord name cur with
+  | .rebindsIteration =>
+    syntaxError s!"assignment expression cannot rebind comprehension iteration variable '{name}'"
+      range
+  | .function s =>
+    if (← usesIn s name).declaredGlobal then
       addDefIn cur name { declaredGlobal := true } range
-      recordDirective cur name range
-      addDefIn 0 name { declaredGlobal := true } range
-      return
-    | .classBody =>
-      syntaxError "assignment expression within a comprehension cannot be used in a class body"
-        range
-      return
+    else
+      addDefIn cur name { declaredNonlocal := true } range
+    recordDirective cur name range
+    addDefIn s name { assigned := true } range
+  | .module =>
+    addDefIn cur name { declaredGlobal := true } range
+    recordDirective cur name range
+    addDefIn 0 name { declaredGlobal := true } range
+  | .classBody =>
+    syntaxError "assignment expression within a comprehension cannot be used in a class body"
+      range
+  | .none => report .internal s!"no scope encloses the comprehension that binds '{name}'" range
 
 /-- The names a `match` pattern captures, with their ranges. -/
 private def patternCaptures : pattern SourceRange → Array (String × SourceRange)
@@ -683,10 +792,10 @@ private def visitExpr (e : expr SourceRange) : CollectM Unit := do
   | .UnaryOp _ _ x => visitExpr x
   | .Lambda sr args body =>
     visitDefaults args
-    let saved ← enter .lambda "<lambda>" sr
+    enter .lambda "<lambda>" sr
     visitParams args
     visitExpr body
-    leave saved
+    leave
   | .IfExp _ c t f => visitExpr c; visitExpr t; visitExpr f
   | .Dict _ keys values =>
     for _hk : k in keys.val do
@@ -784,7 +893,7 @@ private def visitComprehension (sr : SourceRange) (kind : ScopeKind) (name : Str
     modifyScope outer fun p => { p with inIterExpr := p.inIterExpr + 1 }
     visitExpr iter
     modifyScope outer fun p => { p with inIterExpr := p.inIterExpr - 1 }
-    let saved ← enter kind name sr
+    enter kind name sr
     let cur := (← get).cur
     addDefIn cur ".0" { param := true } sr
     let dotZero : Param := { name := ".0", kind := .positional, range := sr }
@@ -806,7 +915,7 @@ private def visitComprehension (sr : SourceRange) (kind : ScopeKind) (name : Str
         for c in ifs.val do visitExpr c
     if let some v := value then visitExpr v
     visitExpr elt
-    leave saved
+    leave
 termination_by sizeOf gens + sizeOf elt + sizeOf value
 
 /-- Visit the expressions a `match` pattern evaluates: values, mapping keys and classes. -/
@@ -846,10 +955,10 @@ private def visitStmt (s : stmt SourceRange) : CollectM Unit := do
       if let some a := varKw then visitArgAnnotation a
       for a in kwOnly do visitArgAnnotation a
       if let ⟨_, some r⟩ := returns then visitExpr r
-    let saved ← enter .function name sr
+    enter .function name sr
     visitParams args
     outsideLoop (visitStmts body.val)
-    leave saved
+    leave
   | .ClassDef sr ⟨_, name⟩ bases kws body decorators typeParams =>
     if !typeParams.val.isEmpty then unsupported "type parameters are not supported" sr
     addDef name { assigned := true } sr
@@ -862,9 +971,9 @@ private def visitStmt (s : stmt SourceRange) : CollectM Unit := do
     for d in decorators.val do visitExpr d
     let outerPrivate := (← get).privateName
     modify fun st => { st with privateName := some name }
-    let saved ← enter .classBody name sr
+    enter .classBody name sr
     outsideLoop (visitStmts body.val)
-    leave saved
+    leave
     modify fun st => { st with privateName := outerPrivate }
   | .Return sr ⟨_, v⟩ =>
     if (← curScope).kind matches .module | .classBody then
@@ -1005,10 +1114,14 @@ private abbrev AnalyzeM := StateM Analysis
 
 /-- The children of `s`, with each inlined comprehension replaced by its own children,
 recursively: CPython's `ste_children` after splicing. -/
-private def splicedChildren (scopes : Array Pending) : Nat → ScopeId → Array ScopeId
-  | 0, _ => #[]
-  | fuel + 1, s => scopes[s]!.children.flatMap fun c =>
-    if scopes[c]!.kind == .inlinedComprehension then splicedChildren scopes fuel c else #[c]
+private def splicedChildren (tree : Array Pending)
+    (h : Ordered Pending.parent Pending.children tree) (s : ScopeId) : Array ScopeId :=
+  if hs : s < tree.size then
+    tree[s].children.attach.flatMap fun ⟨c, hc⟩ =>
+      have hlt := (h s hs).2 c hc
+      if tree[c].kind == ScopeKind.inlinedComprehension then splicedChildren tree h c else #[c]
+  else #[]
+termination_by tree.size - s
 
 /-- Merge the names of the inlined comprehension `c`, just classified, into its parent `s`.
 `scopes` is the classification of `s` so far and `compFree` the free names of `c`; return
@@ -1017,14 +1130,16 @@ both updated, with the names `c` makes cells added to `cells`.
 A name new to `s` is added with the comprehension's flags and classification.  A free
 name that `s` binds is no longer free, unless a scope nested in `c` uses it or `s` is a
 class body. -/
-private def inlineComprehension (s c : ScopeId) (scopes : Std.HashMap String NameScope)
+private def inlineComprehension (tree : Array Pending)
+    (htree : Ordered Pending.parent Pending.children tree) (s c : ScopeId)
+    (scopes : Std.HashMap String NameScope)
     (compFree cells : Std.HashSet String) :
     AnalyzeM (Std.HashMap String NameScope × Std.HashSet String × Std.HashSet String) := do
   let a ← get
   let comp := a.pending[c]!
   let compScopes := a.scopes[c]!
   let parentKind := a.pending[s]!.kind
-  let nested := splicedChildren a.pending a.pending.size c
+  let nested := splicedChildren tree htree c
   let mut scopes := scopes
   let mut compFree := compFree
   let mut cells := cells
@@ -1059,10 +1174,10 @@ private def inlineComprehension (s c : ScopeId) (scopes : Std.HashMap String Nam
 /-- Classify the names of scope `s` and its descendants.  `bound` is the set of names the
 enclosing functions bind, `none` for the module.  Return the free names of `s` and its
 descendants that `s` does not bind. -/
-private def analyzeBlock :
-    Nat → ScopeId → Option (Std.HashSet String) → AnalyzeM (Std.HashSet String)
-  | 0, _, _ => return {}
-  | fuel + 1, s, bound => do
+private def analyzeBlock (tree : Array Pending)
+    (htree : Ordered Pending.parent Pending.children tree) (s : ScopeId)
+    (bound : Option (Std.HashSet String)) : AnalyzeM (Std.HashSet String) := do
+  if hs : s < tree.size then
     let p := (← get).pending[s]!
     let err (msg : String) (name : String) : AnalyzeM Unit :=
       let range := (p.directives[name]?).getD p.range
@@ -1102,10 +1217,12 @@ private def analyzeBlock :
         if p.kind.isFunctionLike then locals.fold (·.insert ·) outer else outer
     let mut childFree : Std.HashSet String := {}
     let mut cells : Std.HashSet String := {}
-    for c in p.children do
-      let mut f ← analyzeBlock fuel c (some newBound)
-      if (← get).pending[c]!.kind == .inlinedComprehension then
-        let r ← inlineComprehension s c result f cells
+    -- Phase 2 never changes the links, so the children are those of phase 1's tree.
+    for hc : c in tree[s].children do
+      have hlt := (htree s hs).2 c hc
+      let mut f ← analyzeBlock tree htree c (some newBound)
+      if tree[c].kind == ScopeKind.inlinedComprehension then
+        let r ← inlineComprehension tree htree s c result f cells
         result := r.1
         f := r.2.1
         cells := r.2.2
@@ -1142,6 +1259,8 @@ private def analyzeBlock :
                              passThrough := a.passThrough.set! s extra
                              freeClass := a.freeClass.set! s freeClass }
     return childFree.fold (·.insert ·) free
+  else return {}
+termination_by tree.size - s
 
 /-- CPython's `__qualname__` for each scope, given the parents' classifications.  A scope
 in an inlined comprehension is named after the scope the comprehension is inlined into. -/
@@ -1183,29 +1302,37 @@ def analyze (stmts : Array (stmt SourceRange)) : Table := Id.run do
   let root : Pending :=
     { kind := .module, name := "<module>", parent := none, range := .none, privateName := none }
   let ((), st) := (visitStmts stmts).run
-    { scopes := #[root], futureAnnotations := hasFutureAnnotations stmts }
+    { scopes := #[root], futureAnnotations := hasFutureAnnotations stmts, hcur := by simp
+      hord := by intro i hi; simp at hi; subst hi; simp [root] }
   let n := st.scopes.size
   let init : Analysis :=
     { pending := st.scopes, scopes := Array.replicate n {}
       passThrough := Array.replicate n #[], freeClass := Array.replicate n {}
       needsClassCell := Array.replicate n false }
-  let (_, a) := (analyzeBlock n 0 none).run init
+  let (_, a) := (analyzeBlock st.scopes st.hord 0 none).run init
   let quals := qualnames a.pending a.scopes
-  let scopes := a.pending.mapIdx fun i p =>
+  -- The links come from phase 1's tree, which phase 2 does not change; the rest from phase 2.
+  let scopes := st.scopes.mapIdx fun i t =>
+    let p := a.pending[i]!
     let names := p.names ++ a.passThrough[i]!
     let symbols := names.map fun name =>
       let uses := (p.uses[name]?).getD {}
       { name
         scope := (a.scopes[i]![name]?).getD .globalImplicit
         uses := { uses with freeClass := a.freeClass[i]!.contains name } : Symbol }
-    { kind := p.kind, name := p.name, qualname := quals[i]!, parent := p.parent
-      children := p.children, params := p.params, symbols, range := p.range
+    { kind := p.kind, name := p.name, qualname := quals[i]!, parent := t.parent
+      children := t.children, params := p.params, symbols, range := p.range
       privateName := p.privateName, needsClassCell := a.needsClassCell[i]!
       generator := p.generator : Scope }
   -- As in CPython, the symbol table's errors, from the walk and then the analysis, come before
   -- the compiler's.
   let (compiler, walk) := st.diagnostics.partition (·.compiler)
-  return { scopes, imports := st.imports, diagnostics := walk ++ a.diagnostics ++ compiler }
+  have ordered : Ordered Scope.parent Scope.children scopes := by
+    intro i hi
+    have hi' : i < st.scopes.size := by simpa [scopes] using hi
+    simpa [scopes] using st.hord i hi'
+  return { scopes, imports := st.imports, diagnostics := walk ++ a.diagnostics ++ compiler,
+           ordered }
 
 end -- public section
 

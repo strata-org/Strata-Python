@@ -1,0 +1,13 @@
+module top
+  g: global explicit (declared_global)
+  k: local (assigned)
+  m: local (assigned)
+  function lambda
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+    y: local (assigned, referenced)
+  function m
+    g: global explicit (assigned, declared_global)
+    x: local (assigned, referenced, comp_iter)
+    xs: local (parameter, referenced)
+qualnames: <lambda>, m

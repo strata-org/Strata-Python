@@ -215,3 +215,6 @@ rr01_handler_param | yes |
 rr02_merges | yes |
 rr03_frame_lambda | yes |
 p47_scope_visit_order | yes | match
+p48_walrus_targets | yes |
+p49_super_nested_comp | yes |
+p50_free_nested_comp | yes |

@@ -1,0 +1,27 @@
+module
+  f: local (assigned)
+  function f
+    params: k, a
+    k: local (parameter)
+    a: local (parameter, referenced)
+    b: local (assigned, referenced, comp_iter)
+    c: local (assigned, referenced, comp_iter)
+    _: local (assigned, comp_iter)
+    inlined comprehension f.<locals>.<listcomp>
+      params: .0
+      .0: local (parameter)
+      b: local (assigned, referenced, comp_iter)
+      c: local (assigned, referenced, comp_iter)
+      _: local (assigned, comp_iter)
+      k: free (referenced)
+      inlined comprehension f.<locals>.<listcomp>.<listcomp>
+        params: .0
+        .0: local (parameter)
+        c: local (assigned, referenced, comp_iter)
+        _: local (assigned, comp_iter)
+        k: free (referenced)
+        inlined comprehension f.<locals>.<listcomp>.<listcomp>.<listcomp>
+          params: .0
+          .0: local (parameter)
+          _: local (assigned, comp_iter)
+          k: free (referenced)

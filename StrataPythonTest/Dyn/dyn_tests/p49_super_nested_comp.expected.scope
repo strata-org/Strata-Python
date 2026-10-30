@@ -1,0 +1,32 @@
+module
+  A: local (assigned, referenced)
+  B: local (assigned)
+  class A
+    m: local (assigned)
+    function A.m
+      params: self, i
+      self: local (parameter)
+      i: local (parameter, referenced)
+  class B (needs __class__ cell)
+    m: local (assigned)
+    function B.m
+      params: self, rows
+      self: local (parameter)
+      rows: local (parameter, referenced)
+      r: local (assigned, referenced, comp_iter)
+      i: local (assigned, referenced, comp_iter)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+      inlined comprehension B.m.<locals>.<listcomp>
+        params: .0
+        .0: local (parameter)
+        r: local (assigned, referenced, comp_iter)
+        i: local (assigned, referenced, comp_iter)
+        super: global implicit (referenced)
+        __class__: free (referenced)
+        inlined comprehension B.m.<locals>.<listcomp>.<listcomp>
+          params: .0
+          .0: local (parameter)
+          i: local (assigned, referenced, comp_iter)
+          super: global implicit (referenced)
+          __class__: free (referenced)

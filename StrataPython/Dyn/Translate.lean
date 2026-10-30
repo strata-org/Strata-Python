@@ -262,35 +262,54 @@ def curScope : TransM Scope := return (← read).cur
 def mangled (name : String) : TransM String := do
   return mangle (← curScope).privateName name
 
+/-- Where the scope that binds a name keeps it, for a name that is free in an inlined
+comprehension. -/
+inductive EnclosingHold where
+  /-- A global or a builtin. -/
+  | global
+  /-- In a local cell of the frame. -/
+  | cell
+  /-- In a cell that the frame captured. -/
+  | free
+  /-- The scope table lacks a scope or a parent that it should have: a bug. -/
+  | missing
+
+/-- How the scope `id?` holds the mangled `name`.  If the scope is an inlined comprehension
+where `name` is free, its parent decides instead, and so on up the table: each parent comes
+before its scope. -/
+def enclosingHold (t : Table) (name : String) : Option ScopeId → EnclosingHold
+  | none => .missing
+  | some id =>
+    if hid : id < t.scopes.size then
+      let sc := t.scopes[id]
+      match sc.kind, ((sc.symbol? name).map (·.scope) : Option NameScope) with
+      | .module, _ => .global
+      | .inlinedComprehension, some .free =>
+        match hp : sc.parent with
+        | some q =>
+          have hlt : q < id := t.parent_lt hid hp
+          enclosingHold t name (some q)
+        | none => .missing
+      | _, some .«local» | _, some .cell =>
+        if sc.kind == .classBody then
+          if !((sc.symbol? name).any (·.uses.freeClass)) then .global else .free
+        else .cell
+      | _, some .free => .free
+      | _, _ => .global
+    else .missing
+termination_by id? => id?.getD 0
+
 /-- Classify `name`, which must be mangled, as the scope `start` encloses it, for a name
 an inlined comprehension does not bind.  An enclosing comprehension that binds it holds it in
 its cell; a function holds it in its local or captured cell.  The comprehension skips a
 class's names, so in a class body it is the cell the body captures, if it is free there or
 `free_class`, and a global otherwise. -/
 def enclosingPlace (name : String) (start : Option ScopeId) : TransM Place := do
-  let table := (← read).table
-  let mut id? := start
-  for _ in [:table.scopes.size] do
-    let some id := id? | return .global
-    let some sc := table.scopes[id]? | return .global
-    match sc.kind, ((sc.symbol? name).map (·.scope) : Option NameScope) with
-    | .module, _ => return .global
-    | .inlinedComprehension, some .free => id? := sc.parent
-    | _, some .«local» | _, some .cell =>
-      if sc.kind == .classBody then
-        if !((sc.symbol? name).any (·.uses.freeClass)) then return .global
-        return match ← build (cellOf? name) with
-          | some c => .free c
-          | none => .unresolved
-      return match ← build (cellOf? name) with
-        | some c => .cell c
-        | none => .unresolved
-    | _, some .free =>
-      return match ← build (cellOf? name) with
-        | some c => .free c
-        | none => .unresolved
-    | _, _ => return .global
-  return .global
+  match enclosingHold (← read).table name start with
+  | .global => return .global
+  | .missing => return .unresolved
+  | .cell => return ((← build (cellOf? name)).map .cell).getD .unresolved
+  | .free => return ((← build (cellOf? name)).map .free).getD .unresolved
 
 /-- Classify `name`, which must be mangled. -/
 def place (name : String) : TransM Place := do
@@ -747,19 +766,11 @@ at the definition into a default cell, which the closure captures (§5.3). -/
 def defaultCellParams (args : arguments SourceRange) : Array ParamWithDefault :=
   (params args).filter (·.default.any (!isConstantDefault ·))
 
-/-- The scope that the `def`, `class`, `lambda` or comprehension at `range` opens.  It is a
-child of the current scope, or, inside an inlined comprehension, of the scope enclosing it,
-as a `lambda` in a comprehension is. -/
-def childScope? (range : SourceRange) : TransM (Option ScopeId) := do
-  let table := (← read).table
-  let mut id? := some (← read).scope
-  for _ in [:table.scopes.size] do
-    let some id := id? | return none
-    if let some c := table.childAt? id range then return some c
-    id? := match table.scopes[id]? with
-      | some sc => if sc.kind == .inlinedComprehension then sc.parent else none
-      | none => none
-  return none
+/-- The scope that the `def`, `class`, `lambda` or comprehension at `range` opens: a child of
+the current scope.  Inside an inlined comprehension, the current scope is the comprehension's,
+as in the scope pass, and the scopes opened in it are its children. -/
+def childScope? (range : SourceRange) : TransM (Option ScopeId) :=
+  return (← read).table.childAt? (← read).scope range
 
 /-- The frame's key for a class's own `__class__` cell, which its methods capture.  It is not a
 Python name: a class nested in a method also captures the method's `__class__`, which its
@@ -781,16 +792,30 @@ def superRebound : TransM Bool := do
     (sc.kind == .module && sym.scope == .«local») ||
       (sym.scope == .globalExplicit && (sym.uses.assigned || sym.uses.imported))
 
+/-- The scope `sc`, or the first scope enclosing it that is not an inlined comprehension, or
+`none` if a parent is missing. -/
+def pastComprehensions (t : Table) (sc : Scope) : Option Scope :=
+  if sc.kind != .inlinedComprehension then some sc
+  else match sc.parent with
+    | none => none
+    | some p => go p
+where
+  go (p : ScopeId) : Option Scope :=
+    if hp : p < t.scopes.size then
+      let ps := t.scopes[p]
+      if ps.kind != .inlinedComprehension then some ps
+      else match hq : ps.parent with
+        | none => none
+        | some q =>
+          have hlt : q < p := t.parent_lt hp hq
+          go q
+    else none
+  termination_by p
+
 /-- The first positional parameter of the function the current code runs in, skipping
 inlined comprehensions: the object a zero-argument `super()` binds. -/
 def firstParam? : TransM (Option String) := do
-  let table := (← read).table
-  let mut sc := (← read).cur
-  for _ in [:table.scopes.size] do
-    if sc.kind != .inlinedComprehension then break
-    let some p := sc.parent | return none
-    let some ps := table.scopes[p]? | return none
-    sc := ps
+  let some sc := pastComprehensions (← read).table (← read).cur | return none
   if !(sc.kind matches .function | .lambda) then return none
   return (sc.params.find? fun p => p.kind matches .posOnly | .positional).map (·.name)
 
@@ -2205,7 +2230,9 @@ def translate (moduleName : String) (stmts : Array (stmt SourceRange)) : Result 
         transStmts stmts
   let (funcs, st) := emitQueued ctx {} (by simp) st 0 #[body]
   let (module, ds) := assemble mname funcs range
-  let diagnostics := (table.syntaxErrors ++ st.diagnostics ++ ds).insertionSort
+  -- The scope pass's internal errors are bugs, reported like the translator's.
+  let internal := table.diagnostics.filter (·.kind == .internal)
+  let diagnostics := (table.syntaxErrors ++ internal ++ st.diagnostics ++ ds).insertionSort
     fun a b => a.range.start.byteIdx < b.range.start.byteIdx
   return { module, diagnostics }
 

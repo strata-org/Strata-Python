@@ -1,0 +1,9 @@
+module top
+  f: local (assigned)
+  function f
+    _: local (assigned, comp_iter)
+    a: local (parameter, referenced)
+    b: local (assigned, referenced, comp_iter)
+    c: local (assigned, referenced, comp_iter)
+    k: local (parameter)
+qualnames: f
