@@ -6,6 +6,8 @@
 module
 import all StrataPython.Dyn.Scope
 import all StrataPython.Dyn.Translate
+-- So that `rfl` can unfold the decimal reader.
+import all StrataDyn.FloatText
 -- So that Lake builds it before this test: `#fuel_loops` needs its theorems.
 import StrataPython.Dyn.TranslateProps
 public meta import Lean.Elab.Command
@@ -203,12 +205,9 @@ info: 0:
 #partial_defs_in StrataPython.Dyn.Translate StrataPython.Dyn.PyTranslate
 
 /--
-info: 9:
-  Lean.Syntax.decodeScientificLitVal?.decode
+info: 6:
   Std.Internal.idOpaque
   String.Internal.append
-  String.Internal.get
-  String.Internal.length
   String.hash
   System.Platform.getNumBits
   WellFounded.opaqueFix
@@ -318,5 +317,13 @@ example (sr : SourceRange) (t a : expr SourceRange)
     (v : Ann (Option (expr SourceRange)) SourceRange) (simple : StrataPython.int SourceRange) :
     findAnn #[.If sr t ⟨sr, #[.AnnAssign sr a t v simple]⟩ ⟨sr, #[]⟩] = true := by
   simp [findAnn, findAnnIn]
+
+open StrataPython.Dyn.PyTranslate in
+/-- A proof can say whether a float literal is read: `1.5e-07` is `15 * 10^-8`. -/
+example : decodeScientific "1.5e-07" = some (15, true, 8) := by decide
+
+open StrataPython.Dyn.PyTranslate in
+/-- A proof can say which Float a literal denotes. -/
+example : parseFloat? "22.22177891178025" = some (Float.ofBits 0x403638C680B509E5) := by rfl
 
 end StrataPython.Dyn.TotalityTest

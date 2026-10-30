@@ -3,6 +3,7 @@ module top
   function f
     b: local (assigned)
     n: local (assigned)
+    r: local (assigned)
     w: local (assigned)
     x: local (assigned)
     y: local (assigned)

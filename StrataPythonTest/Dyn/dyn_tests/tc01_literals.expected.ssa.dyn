@@ -24,8 +24,10 @@ module tc01_literals {
       %z.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%z.0)
       %w.0 : py.Value = py.undef("w")
       %w.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%w.0)
-      %n.5 : py.Value = py.undef("n")
-      %n.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%n.5)
+      %r.0 : py.Value = py.undef("r")
+      %r.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%r.0)
+      %n.6 : py.Value = py.undef("n")
+      %n.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%n.6)
       %b.0 : py.Value = py.undef("b")
       %b.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%b.0)
       %nargs.0 : py.Value = py.tupleLen(%args.0)
@@ -37,6 +39,7 @@ module tc01_literals {
       %str.0 : py.Value = py.strLit("hello")
       %bool.0 : py.Value = py.boolLit(true)
       %float.0 : py.Value = py.floatLit(3.14)
+      %float.1 : py.Value = py.floatLit(2222177891178025e-14)
       %none.0 : py.Value = py.noneLit
       %bytes.0 : py.Value = py.bytesLit("raw")
       %none.1 : py.Value = py.noneLit

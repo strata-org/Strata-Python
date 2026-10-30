@@ -11,6 +11,7 @@ public import Lean.Data.Position
 import StrataPython.Dyn.Termination
 import Strata.Util.ListUtilsProps
 import Std.Data.HashSet.Lemmas
+import StrataDyn.FloatText
 -- Emitting instructions over `Py.env` needs the signature representation at
 -- code-generation time.
 import StrataDyn.Env.WF
@@ -543,9 +544,64 @@ def cmpOp (op : cmpop SourceRange) (a b : ValId) : TransM ValId :=
 
 /-! ## Literals -/
 
-/-- The `Float` a Python float literal denotes. -/
+/-- The decimal literal `s` as `(m, neg, x)`, which denotes `m * 10^-x` if `neg`, else
+`m * 10^x`: for example, `1.5e-3` gives `(15, true, 4)`.  It recurses on the characters, and
+it is meant to read what Lean's `Syntax.decodeScientificLitVal?` reads: the tests compare the
+two on every string of up to 5 characters.  It needs a `.` or an exponent, so `15` gives
+`none`.  It is looser than Python: `_` may appear anywhere after the first digit, and `1.` and
+`1e+` are read too. -/
+def decodeScientific (s : String) : Option (Nat × Bool × Nat) :=
+  match s.toList with
+  | c :: cs => if c.isDigit then intPart (c :: cs) 0 else none
+  | [] => none
+where
+  /-- The value of a digit. -/
+  digit? (c : Char) : Option Nat :=
+    if '0' ≤ c && c ≤ '9' then some (c.toNat - '0'.toNat) else none
+  /-- The digits before the `.` or the `e`, read into `val`. -/
+  intPart : List Char → Nat → Option (Nat × Bool × Nat)
+    | [], _ => none
+    | c :: cs, val =>
+      match digit? c with
+      | some d => intPart cs (10 * val + d)
+      | none =>
+        if c == '_' then intPart cs val
+        else if c == '.' then fracPart cs val 0
+        else if c == 'e' || c == 'E' then expSign cs val 0
+        else none
+  /-- The digits after the `.`, read into `val`; `e` counts them. -/
+  fracPart : List Char → Nat → Nat → Option (Nat × Bool × Nat)
+    | [], val, e => some (val, true, e)
+    | c :: cs, val, e =>
+      match digit? c with
+      | some d => fracPart cs (10 * val + d) (e + 1)
+      | none =>
+        if c == '_' then fracPart cs val e
+        else if c == 'e' || c == 'E' then expSign cs val e
+        else none
+  /-- The sign of the exponent, if there is one. -/
+  expSign : List Char → Nat → Nat → Option (Nat × Bool × Nat)
+    | [], _, _ => none
+    | c :: cs, val, e =>
+      if c == '-' then expDigits cs val e true 0
+      else if c == '+' then expDigits cs val e false 0
+      else expDigits (c :: cs) val e false 0
+  /-- The digits of the exponent, read into `exp`.  The result's exponent is `±exp - e`,
+  because `val` also holds the `e` digits after the `.`. -/
+  expDigits : List Char → Nat → Nat → Bool → Nat → Option (Nat × Bool × Nat)
+    | [], val, e, neg, exp =>
+      if neg then some (val, neg, exp + e)
+      else if exp ≥ e then some (val, neg, exp - e)
+      else some (val, true, e - exp)
+    | c :: cs, val, e, neg, exp =>
+      match digit? c with
+      | some d => expDigits cs val e neg (10 * exp + d)
+      | none => if c == '_' then expDigits cs val e neg exp else none
+
+/-- The `Float` a Python float literal denotes: the nearest binary64 value, ties to even. -/
 def parseFloat? (s : String) : Option Float :=
-  (Lean.Syntax.decodeScientificLitVal? s).map fun (m, e, x) => OfScientific.ofScientific m e x
+  (decodeScientific s).map fun (m, neg, x) =>
+    FloatText.ofDecimal ⟨false, m, if neg then -(x : Int) else x⟩
 
 /-- The string whose code units are the octets of `b`, as `py.bytesLit` takes. -/
 def bytesText (b : ByteArray) : String := String.ofList (b.toList.map (Char.ofNat ·.toNat))

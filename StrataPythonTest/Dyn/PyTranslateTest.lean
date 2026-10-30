@@ -248,6 +248,40 @@ private def sameRange : Result := translate "m" #[
   #["m.f.1 is queued twice", "m references a function it does not define: m.<module>"]
 #guard sameRange.module.raw.funcs.isEmpty
 
+/-! ## Float literals -/
+
+/-- Every string of up to `n` characters from `alphabet`. -/
+private def stringsUpTo (alphabet : List Char) : Nat → List String
+  | 0 => [""]
+  | n + 1 => "" :: (alphabet.flatMap fun c => (stringsUpTo alphabet n).map (c.toString ++ ·))
+
+-- `decodeScientific` reads what Lean's `Syntax.decodeScientificLitVal?` reads: every string
+-- of up to 5 characters from these, and the forms CPython's `str` gives a float.
+#guard (stringsUpTo ['0', '7', '.', 'e', 'E', '+', '-', '_', 'x'] 5).length = 66430
+#guard (stringsUpTo ['0', '7', '.', 'e', 'E', '+', '-', '_', 'x'] 5).all fun s =>
+  decodeScientific s == Lean.Syntax.decodeScientificLitVal? s
+#guard ["1.5", "3.14", "1e+16", "1.5e-07", "1234567890.0987654321", "inf", "nan"].all fun s =>
+  decodeScientific s == Lean.Syntax.decodeScientificLitVal? s
+
+#guard decodeScientific "1.5e-07" = some (15, true, 8)
+#guard decodeScientific "1e+16" = some (1, false, 16)
+#guard decodeScientific "inf" = none
+-- The bits CPython gives `2.5`: `struct.unpack("<Q", struct.pack("<d", 2.5))`.
+#guard (parseFloat? "2.5").map Float.toBits = some 0x4004000000000000
+-- Literals that need exact rounding.  The bits are CPython's.
+-- 22.22177891178025 is very close to the midpoint between two Floats.
+#guard (parseFloat? "22.22177891178025").map Float.toBits = some 0x403638C680B509E5
+-- A positive exponent.
+#guard (parseFloat? "4.313120861556003e+189").map Float.toBits = some 0x674EFA33F63E1FE1
+-- A tie, which rounds to the even neighbour.
+#guard (parseFloat? "9007199254740993.0").map Float.toBits = some 0x4340000000000000
+-- The largest subnormal.
+#guard (parseFloat? "2.2250738585072011e-308").map Float.toBits = some 0x000FFFFFFFFFFFFF
+-- Just above half the smallest subnormal, so it rounds up to it.
+#guard (parseFloat? "2.4703282292062328e-324").map Float.toBits = some 0x1
+-- Just below half the smallest subnormal, so it rounds down to zero.
+#guard (parseFloat? "2.4703282292062327e-324").map Float.toBits = some 0x0
+
 /-! ## A scope table that lacks a scope or a parent -/
 
 open StrataPython.Dyn.PyScope (Scope Table)
