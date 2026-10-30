@@ -41,6 +41,13 @@ public def hiddenLie (x : Int) : Int := lieRef x
 /-- `revH` is `myRevH`: a lemma that a swap in this module may use. -/
 public theorem revH_eq_myRevH : @revH = @myRevH := by funext xs; rfl
 
+section
+attribute [local csimp] revH_eq_myRevH
+/-- `xs` reversed, compiled here with the local swap of `revH` for `myRevH`, so it runs
+`lieRevH`.  The lemma is public, so a module that imports this one follows the swap. -/
+@[expose] public def swappedHere (xs : Array Int) : Array Int := revH xs
+end
+
 /-- The compiled code of `myRevB`: it drops everything. -/
 @[expose] public def lieRevB (_xs : Array Int) : Array Int := #[]
 /-- `xs` reversed, run as `lieRevB`. -/
@@ -84,11 +91,21 @@ attribute [local csimp] pRd_eq_myRd
 @[expose] public def swappedRd (x : Int) : Int := pRd x 0
 end
 
+/-- The compiled code of `myRevP`: it drops everything. -/
+@[expose] public def lieRevP (_xs : Array Int) : Array Int := #[]
+/-- `xs` reversed, run as `lieRevP`. -/
+@[implemented_by lieRevP, expose] public def myRevP (xs : Array Int) : Array Int := xs.reverse
+/-- `xs` reversed. -/
+@[expose] public def revP (xs : Array Int) : Array Int := xs.reverse
+/-- `revP` is `myRevP`, privately: a module that imports this one can't see the lemma. -/
+private theorem revP_eq_myRevP : @revP = @myRevP := by funext xs; rfl
+
 section
-attribute [local csimp] revH_eq_myRevH
-/-- `xs` reversed, compiled here with the local swap of `revH` for `myRevH`, so it runs
-`lieRevH`.  The lemma is public, so a module that imports this one follows the swap. -/
-@[expose] public def swappedHere (xs : Array Int) : Array Int := revH xs
+attribute [local csimp] revP_eq_myRevP
+/-- `xs` reversed, compiled here with the private swap of `revP` for `myRevP`, so it runs
+`lieRevP`; a caller doesn't inline it, so a module that imports this one sees neither the
+lemma nor the compiled code. -/
+@[expose, noinline] public def swappedHereNI (xs : Array Int) : Array Int := revP xs
 end
 
 /-- The identity. -/
@@ -103,6 +120,26 @@ section
 attribute [local csimp] fPv_eq_gPv
 /-- `fPv x + gPv 0 - 100`, compiled here as `gPv x + gPv 0 - 100` by the private swap. -/
 @[expose] public def privSwapped (x : Int) : Int := fPv x + gPv 0 - 100
+end
+
+section
+open Strata.Dyn.Exec
+variable {ε : Eff} {E : Type}
+
+/-- `semanticGap`. -/
+@[expose] public def gapP (x : Int) : Sem ε E Int := semanticGap s!"{x}"
+/-- `semanticGap` too, but its code names `Fault.badCell` on a branch that never runs. -/
+@[expose] public def gapOrBadCellP (x : Int) : Sem ε E Int :=
+  if x = x then semanticGap s!"{x}" else .stop (.fault (.badCell 0))
+/-- `gapP` is `gapOrBadCellP`, privately: a module that imports this one can't see the lemma. -/
+private theorem gapP_eq_gapOrBadCellP : @gapP = @gapOrBadCellP := by
+  funext ε E x
+  simp [gapP, gapOrBadCellP]
+
+attribute [local csimp] gapP_eq_gapOrBadCellP
+/-- `semanticGap`, compiled here as `gapOrBadCellP` by the private swap; a caller doesn't inline
+it, so a module that imports this one sees neither the lemma nor the compiled code. -/
+@[expose, noinline] public def faultSwappedNI (x : Int) : Sem ε E Int := gapP x
 end
 
 /-- A type whose derived `BEq` this module does not expose. -/

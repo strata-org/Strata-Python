@@ -229,6 +229,20 @@ initialize langExt : SimplePersistentEnvExtension Lean.Name Lean.NameSet ←
     addEntryFn := fun s n => s.insert n
     addImportedFn := fun ess => ess.foldl (fun s es => es.foldl (fun s n => s.insert n) s) {} }
 
+/-- A table that `#dyn_sem_table` made: its namespace `S`, its `S.table`, and the declarations
+the command emitted, the only ones that may use the machine's heap and call capabilities. -/
+structure TableEntry where
+  ns : Lean.Name
+  table : Lean.Name
+  emitted : Array Lean.Name
+  deriving Inhabited
+
+/-- The tables `#dyn_sem_table` made. -/
+initialize tableExt : SimplePersistentEnvExtension TableEntry (Array TableEntry) ←
+  registerSimplePersistentEnvExtension {
+    addEntryFn := fun a e => a.push e
+    addImportedFn := fun ess => ess.foldl (fun a es => a ++ es) #[] }
+
 /-- The type rule for the type whose Lean name is `key`. -/
 def findTypeRule? (env : Environment) (key : Lean.Name) : Option TypeRule :=
   (typeExt.getState env).entries.find? key
@@ -735,6 +749,8 @@ definitions that the rule's definition doesn't reach; and it follows a `local` s
 module made with a public lemma, through the lemma. But a swap whose lemma is private to another
 module, or in a module that is imported only privately, is not visible to the check when the
 rule's own code doesn't show it, and nor is another module's `@[init]` attribute.
+`recheckTableModules` (`Exec/Recheck.lean`) checks every built table again where every module,
+with its private declarations, is visible.
 
 The check reads Lean's compiler data, and checks that a `@[csimp]` entry's lemma states its swap
 (`statesSwap`) and that an `_unsafe_rec` comes from a recursive definition (`recursiveByLean`).

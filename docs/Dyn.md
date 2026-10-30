@@ -1091,12 +1091,18 @@ meta code that writes compiled code or compiler data. A review of a module with 
 module of ours that it imports, looks for such meta code: `run_cmd`, `run_elab`, `run_meta`, an
 `#eval` of a `CommandElabM`, `TermElabM`, `MetaM` or `CoreM` action, and our own elaborators.
 
-The check sees a `local` swap that another module made with a public lemma: it follows the
-lemma. It may also see a swap whose code the rule's compiled code inlines: it does when that
-code calls one of our definitions that the rule's definition doesn't reach. But in a `module` file, a table can't
-see another module's private declarations, so a swap whose lemma is private there, or in a
-module imported only privately, is not visible to it otherwise, and nor is another module's
-`@[init]` attribute.
+The check sees a `local` swap that another module made with a public lemma: it follows the lemma. It
+may also see a swap whose code the rule's compiled code inlines: it does when that code calls one of
+our definitions that the rule's definition doesn't reach. But in a `module` file, a table can't see
+another module's private declarations, so a swap whose lemma is private there, or in a module
+imported only privately, is not visible to it otherwise, and nor is another module's `@[init]`
+attribute. `recheckTableModules` (`StrataDyn/Exec/Recheck.lean`) checks every built module that
+holds a table again, each in its own process of the `dynRecheck` executable, which imports it alone,
+where every module, with its private declarations and compiled code, is visible. `lake test` runs it
+(`StrataPythonTestExtra/DynRecheckTest.lean`), and it reports the five deliberate cases of
+`StrataDynTest/Exec/RecheckSwapTest.lean`, which pass in their own module. It sees only the
+package's built modules: a table in a test file that is not a library module is not rechecked, and
+another package that defines tables runs it on its own build.
 
 The check covers the tables that `#dyn_sem_table` makes. A `Table` or `Model` built by hand,
 or any other consumer that runs registered rules, must run the same check (`notAsProved`).

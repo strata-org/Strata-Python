@@ -938,6 +938,9 @@ def elabSemTable (s e : Ident) (world? : Option Term) (trace : Bool) : CommandEl
       (← `({ typeNames := $(cx.own `typeNames), interp := $(cx.own `interp), W := $(cx.own `W),
              w0 := $(cx.own `w0), ops := $(cx.own `ops) }))
       (reducible := true)
+    let tableName ← liftCoreM <| withoutExporting <| resolveGlobalConstNoOverload (mkIdent `table)
+    let emitted ← liftCoreM <| emittedSince before tableNs
+    modifyEnv (tableExt.addEntry · { ns := tableNs, table := tableName, emitted })
     -- What the engine needs of the base, if `E` extends it.
     if let [some cUnit, some cBool, some cInt, some cFloat, some cStr] :=
         baseTypeNames.map (typeHead[·]?) then
