@@ -234,8 +234,9 @@ in `@m.|<module>|`. The translator implements every row (`allocName`).
 | a name the module already uses | a numeric suffix: a second `def f` is `m.f.1` |
 
 **Annotations.** The translator wraps each statement and each expression in
-`withRange node.ann`, which sets the builder's default annotation (`withInfo`). Everything the construct emits, including synthesized blocks and
-prologue code, carries that source range.
+`withRange node.ann`, which sets the builder's default annotation (`withInfo`) to an `Info`
+with that range. Everything the construct emits, including synthesized blocks and prologue
+code, carries that source range.
 
 **Reachability.** The builder has an *open block* when instructions can still be emitted
 (`Build.State.body.label` is some label). A statement that ends the open block is `return`,
@@ -262,7 +263,7 @@ returns a checked module. Such a module is for diagnostics only: the run has fai
 ## 4. Translator state
 
 The translator runs in
-`TransM = ReaderT Ctx (StateT TState (PyM SourceRange))`, with
+`TransM = ReaderT Ctx (StateT TState (PyM Info))`, with
 `PyM α = StateT Frame (BuildM Py.env α)` below it. `Build.State`, the generic builder state,
 holds value ids, labels, the open block and the default annotation. `Frame` holds the
 emission state of the Python builder. `Ctx` is fixed while one function is translated, and

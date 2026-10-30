@@ -7,6 +7,7 @@ module
 public import StrataPython.Dyn.Build
 public import StrataPython.Dyn.Scope
 public import StrataDyn.WF
+public import StrataDyn.Attr
 public import Lean.Data.Position
 import StrataPython.Dyn.Termination
 import Strata.Util.ListUtilsProps
@@ -90,7 +91,7 @@ rejected construct, in source order. -/
 structure Result where
   /-- The module, checked.  A function whose build failed, or that is not well formed, is a
   stub whose body is `unreachable`, and a diagnostic reports it. -/
-  module : Module Py.env SourceRange
+  module : Module Py.env Info
   diagnostics : Array Diagnostic
 
 /-- Whether the translation succeeded: no diagnostic. -/
@@ -168,18 +169,18 @@ structure TState where
   targeted : Std.HashSet Label := {}
 
 /-- Translating one Python function. -/
-abbrev TransM := ReaderT Ctx (StateT TState (PyM SourceRange))
+abbrev TransM := ReaderT Ctx (StateT TState (PyM Info))
 
 variable {β : Type}
 
 /-- Run a `PyBuild` action. -/
-def build (x : PyM SourceRange β) : TransM β := monadLift x
+def build (x : PyM Info β) : TransM β := monadLift x
 
 /-- Run `act` with `r` as the default annotation. -/
 def withRange (r : SourceRange) (act : TransM β) : TransM β := do
   let ctx ← read
   let s ← get
-  let (b, s') ← build (PyBuild.withInfo r ((act.run ctx).run s))
+  let (b, s') ← build (PyBuild.withInfo { range := r } ((act.run ctx).run s))
   set s'
   return b
 
@@ -1417,7 +1418,7 @@ def compExpr (sr : SourceRange) (kind : CompKind) (elt : expr SourceRange)
     | .list => build (emitTotal (.str .base "acc") Py.mkList.ref #[])
     | .set => build (emitFailing (.str .base "acc") Py.mkSet.ref #[])
     | .dict => build (emitFailing (.str .base "acc") Py.mkDict.ref #[])
-  let saved := (← build (get : PyM SourceRange PyBuild.Frame)).locals
+  let saved := (← build (get : PyM Info PyBuild.Frame)).locals
   withReader ({ · with scope, cur, classNs := none }) do
     for x in cur.regionLocals do discard <| build (declareLocal x)
     have hlist := sizeOf_toList_lt gens
@@ -1707,7 +1708,7 @@ def classDef (sr : SourceRange) (name : String) (bases : Array (expr SourceRange
       some <$> build (newCell (cellStem "__class__") undef)
     else pure none
   -- The body captures the cell under `classCellKey`, for this closure only.
-  let saved := (← build (get : PyM SourceRange PyBuild.Frame)).locals
+  let saved := (← build (get : PyM Info PyBuild.Frame)).locals
   if let some c := classCell then build (captureCell classCellKey c)
   let f? ← queueFunc sr scope cur none body none #[]
   build (modify fun fr => { fr with locals := saved })
@@ -2129,7 +2130,7 @@ def docstring? (stmts : Array (stmt SourceRange)) : Option String :=
 
 /-- Run `act` as the body of a function, then return `None` if it falls off the end. -/
 def runBody (ctx : Ctx) (st : TState) (range : SourceRange) (act : TransM Unit) :
-    PyM SourceRange TState := do
+    PyM Info TState := do
   let body : TransM Unit := withRange range do
     act
     if ← isOpen then build emitReturnNone
@@ -2142,9 +2143,9 @@ internal-error diagnostic at `range` for each misuse, or else one saying that th
 not well formed.  That one names each unreachable block and each use out of scope
 (`Func.scopeDiagnostics`). -/
 def builtFunc (name : Name) (params : Array (Name × TypeExpr Py.env)) (range : SourceRange)
-    (body : Array ValId → PyM SourceRange TState) :
-    {fn : Func Py.env SourceRange // fn.WF} × TState :=
-  match buildFuncTypedWith name params range (fun ps => body ps.toArray) with
+    (body : Array ValId → PyM Info TState) :
+    {fn : Func Py.env Info // fn.WF} × TState :=
+  match buildFuncTypedWith name params { range } (fun ps => body ps.toArray) with
   | .ok r => r
   | .error e =>
     let messages :=
@@ -2153,14 +2154,14 @@ def builtFunc (name : Name) (params : Array (Name × TypeExpr Py.env)) (range : 
       else #[s!"{nameText name} is not well formed: \
         {"; ".intercalate e.func.scopeDiagnostics.toList}"]
     let ds := messages.map fun message => ({ kind := .internal, message, range } : Diagnostic)
-    (stubFunc name params range, { e.value with diagnostics := e.value.diagnostics ++ ds })
+    (stubFunc name params { range }, { e.value with diagnostics := e.value.diagnostics ++ ds })
 
 /-- Emit the function `job` queues.  Its parameters are the cells it captures, in
 `capturedVars` order, then its default cells, then `args` and `kwargs`.  A class body reads
 its namespace from `args[0]`, stores `__module__`, `__qualname__` and its docstring, as
 CPython 3.12 does, then runs. -/
 def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) :
-    {fn : Func Py.env SourceRange // fn.WF} × TState :=
+    {fn : Func Py.env Info // fn.WF} × TState :=
   let ctx := { ctx with scope := job.scope, cur := job.cur }
   let free := capturedVars job.cur
   let defaults := funcDefaults job.args
@@ -2211,8 +2212,8 @@ internal error, and is skipped: each scope is queued once.  Return the functions
 state after the last. -/
 def emitQueued (ctx : Ctx) (done : Std.HashSet ScopeId)
     (hdone : ∀ x ∈ done, x < ctx.table.scopes.size) (st : TState) (i : Nat)
-    (funcs : Array {fn : Func Py.env SourceRange // fn.WF}) :
-    Array {fn : Func Py.env SourceRange // fn.WF} × TState :=
+    (funcs : Array {fn : Func Py.env Info // fn.WF}) :
+    Array {fn : Func Py.env Info // fn.WF} × TState :=
   if h : i < st.pending.size then
     let job := st.pending[i]
     if hj : job.scope < ctx.table.scopes.size ∧ job.scope ∉ done then
@@ -2239,7 +2240,7 @@ decreasing_by
   · apply Prod.Lex.right; omega
 
 /-- The module `name` with no functions. -/
-def emptyModule (name : Name) (info : SourceRange) : Module Py.env SourceRange :=
+def emptyModule (name : Name) (info : Info) : Module Py.env Info :=
   ⟨{ name, funcs := #[], info },
     ⟨by simp [Module.Raw.funcNames, Array.mapK_eq_map_fun], by simp, by simp⟩⟩
 
@@ -2247,8 +2248,8 @@ def emptyModule (name : Name) (info : SourceRange) : Module Py.env SourceRange :
 `range` for each function named twice, of which the first is kept.  The translator only
 references functions it emits, so the module's check does not fail; if it did, the module
 would be empty, with a diagnostic. -/
-def assemble (name : Name) (funcs : Array {fn : Func Py.env SourceRange // fn.WF})
-    (range : SourceRange) : Module Py.env SourceRange × Array Diagnostic := Id.run do
+def assemble (name : Name) (funcs : Array {fn : Func Py.env Info // fn.WF})
+    (range : SourceRange) : Module Py.env Info × Array Diagnostic := Id.run do
   let mut seen : Std.HashSet Name := {}
   let mut distinct := #[]
   let mut ds := #[]
@@ -2259,12 +2260,12 @@ def assemble (name : Name) (funcs : Array {fn : Func Py.env SourceRange // fn.WF
     else
       seen := seen.insert f.val.name
       distinct := distinct.push f
-  match Module.ofChecked name distinct range with
+  match Module.ofChecked name distinct { range } with
   | .ok m => return (m, ds)
   | .error bad =>
     let message := s!"{nameText name} references a function it does not define: \
       {", ".intercalate (bad.map nameText).toList}"
-    return (emptyModule name range, ds.push { kind := .internal, message, range })
+    return (emptyModule name { range }, ds.push { kind := .internal, message, range })
 
 /-- The Dyn name of the Python module `m`: one segment per dotted component. -/
 def moduleNameOf (m : String) : Name :=
@@ -2280,7 +2281,7 @@ def translate (moduleName : String) (stmts : Array (stmt SourceRange)) : Result 
     | some a, some b => ⟨a.ann.start, b.ann.stop⟩
     | _, _ => .none
   let some cur := table.scopes[0]?
-    | return { module := emptyModule mname range
+    | return { module := emptyModule mname { range }
                diagnostics := #[{ kind := .internal, message := "no module scope", range }] }
   let ctx : Ctx :=
     { table, module := moduleName, moduleName := mname, scope := 0, cur,

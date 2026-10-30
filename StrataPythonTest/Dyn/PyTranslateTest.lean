@@ -80,6 +80,30 @@ private def withComplex : Result := translate "m" #[assign "x" (int 1), fDef, ca
 -- The module body, then `f`.
 #guard supported.module.raw.funcs.map (nameText ·.name) = #["m.<module>", "m.f"]
 
+/-- Bytes `a` to `b`. -/
+private def rangeAt (a b : Nat) : SourceRange := ⟨⟨a⟩, ⟨b⟩⟩
+
+/-- The integer literal `n` at `r`. -/
+private def intAt (r : SourceRange) (n : Nat) : expr SourceRange :=
+  .Constant r (.ConPos r ⟨r, n⟩) ⟨r, none⟩
+
+/-- `x = 1` at bytes 0 to 5, then `y = 2` at 6 to 11. -/
+private def ranged : Result := translate "m"
+  #[.Assign (rangeAt 0 5) ⟨none', #[store "x"]⟩ (intAt (rangeAt 4 5) 1) ⟨none', none⟩,
+    .Assign (rangeAt 6 11) ⟨none', #[store "y"]⟩ (intAt (rangeAt 10 11) 2) ⟨none', none⟩]
+
+/-- The ranges of `fn`'s applications. -/
+private def ranges (fn : Func Py.env Info) : Array SourceRange :=
+  fn.blocks.flatMap fun b => b.instrs.filterMap fun | .apply i .. => some i.range | _ => none
+
+-- The module and its body span both statements.  Each literal's instruction carries the
+-- literal's range, and each store its statement's.  The rest (setting `__name__` and
+-- `__doc__`, returning `None`) carries the body's range.
+#guard ranged.module.raw.info.range == rangeAt 0 11
+#guard ranged.module.raw.funcs.map (·.info.range) == #[rangeAt 0 11]
+#guard ((ranged.module.raw.funcs[0]?.map ranges).getD #[]).filter (· != rangeAt 0 11) ==
+  #[rangeAt 4 5, rangeAt 0 5, rangeAt 0 5, rangeAt 10 11, rangeAt 6 11, rangeAt 6 11]
+
 -- A rejected complex literal is a diagnostic.
 #guard withComplex.diagnostics.map (·.message) = #["complex literal is not supported"]
 
@@ -109,29 +133,29 @@ private def fName : Name := .str (.str .base "m") "f"
 private def gName : Name := .str (.str .base "m") "g"
 
 /-- Build `name`, taking one value, with `body`. -/
-private def built (name : Name) (body : PyBuild.PyM SourceRange Unit) :
-    {fn : Func Py.env SourceRange // fn.WF} × Array String :=
+private def built (name : Name) (body : PyBuild.PyM Info Unit) :
+    {fn : Func Py.env Info // fn.WF} × Array String :=
   let (f, st) := builtFunc name #[(.str .base "a", Py.Value)] none' fun _ => do
     body
     return ({} : TState)
   (f, st.diagnostics.map fun d => s!"{d.kind.text}: {d.message}")
 
 /-- A body that closes its block twice, a misuse. -/
-private def misused : PyBuild.PyM SourceRange Unit := do
-  (Build.unreachable : BuildM Py.env SourceRange Unit)
-  (Build.unreachable : BuildM Py.env SourceRange Unit)
+private def misused : PyBuild.PyM Info Unit := do
+  (Build.unreachable : BuildM Py.env Info Unit)
+  (Build.unreachable : BuildM Py.env Info Unit)
 
 /-- A body that returns a `Bool`, so the function is not well formed. -/
-private def wrongResult : PyBuild.PyM SourceRange Unit := do
+private def wrongResult : PyBuild.PyM Info Unit := do
   (do Build.ret (← Build.emitConst (.str .base "r") (.bool true)) :
-    BuildM Py.env SourceRange Unit)
+    BuildM Py.env Info Unit)
 
 /-- A body that refers to `m.g` and returns `None`. -/
-private def callsG : PyBuild.PyM SourceRange Unit := do
-  let _ ← (PyBuild.emitFunc gName #[Py.Value] : PyBuild.PyM SourceRange ValId)
+private def callsG : PyBuild.PyM Info Unit := do
+  let _ ← (PyBuild.emitFunc gName #[Py.Value] : PyBuild.PyM Info ValId)
   PyBuild.emitReturnNone
 
-private def printed (r : {fn : Func Py.env SourceRange // fn.WF} × Array String) : IO Unit := do
+private def printed (r : {fn : Func Py.env Info // fn.WF} × Array String) : IO Unit := do
   for d in r.2 do IO.println d
   IO.println (r.1.val.format .full)
 
@@ -158,19 +182,19 @@ module m.g {
 /-- A body that branches on `True` to `l` and `r`, both of which jump to `j`.  `l` defines a
 `None`, and `j` returns it if `outside`, where it is out of scope, as `r` also enters `j`;
 otherwise `j` returns a `None` of its own. -/
-private def joins (outside : Bool) : PyBuild.PyM SourceRange Unit := do
-  let c ← (Build.emitConst (.str .base "c") (.bool true) : BuildM Py.env SourceRange ValId)
-  let l ← (Build.freshLabel "l" : BuildM Py.env SourceRange Label)
-  let r ← (Build.freshLabel "r" : BuildM Py.env SourceRange Label)
-  let j ← (Build.freshLabel "j" : BuildM Py.env SourceRange Label)
-  (Build.finishBlock (.branch none' c (Build.goto l) (Build.goto r)) :
-    BuildM Py.env SourceRange Unit)
-  (Build.startBlock l : BuildM Py.env SourceRange Unit)
+private def joins (outside : Bool) : PyBuild.PyM Info Unit := do
+  let c ← (Build.emitConst (.str .base "c") (.bool true) : BuildM Py.env Info ValId)
+  let l ← (Build.freshLabel "l" : BuildM Py.env Info Label)
+  let r ← (Build.freshLabel "r" : BuildM Py.env Info Label)
+  let j ← (Build.freshLabel "j" : BuildM Py.env Info Label)
+  (Build.finishBlock (.branch {} c (Build.goto l) (Build.goto r)) :
+    BuildM Py.env Info Unit)
+  (Build.startBlock l : BuildM Py.env Info Unit)
   let v ← PyBuild.noneLit
-  (Build.finishBlock (.jump none' (Build.goto j)) : BuildM Py.env SourceRange Unit)
-  (Build.startBlock r : BuildM Py.env SourceRange Unit)
-  (Build.finishBlock (.jump none' (Build.goto j)) : BuildM Py.env SourceRange Unit)
-  (Build.startBlock j : BuildM Py.env SourceRange Unit)
+  (Build.finishBlock (.jump {} (Build.goto j)) : BuildM Py.env Info Unit)
+  (Build.startBlock r : BuildM Py.env Info Unit)
+  (Build.finishBlock (.jump {} (Build.goto j)) : BuildM Py.env Info Unit)
+  (Build.startBlock j : BuildM Py.env Info Unit)
   if outside then PyBuild.emitReturn v else PyBuild.emitReturnNone
 
 -- A use out of scope is an internal error that says why.

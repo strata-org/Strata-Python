@@ -45,7 +45,7 @@ structure Frame where
   locals : Build.StrMap ValId := ∅
 
 /-- Emitting a Python function, with `α` the annotation a front end threads through —
-`SourceRange` in the translator, `Unit` in a test. -/
+`Info` in the translator, `Unit` in a test. -/
 abbrev PyM (α : Type) := StateT Frame (BuildM Py.env α)
 
 /-- A typed value of a Python function. -/
