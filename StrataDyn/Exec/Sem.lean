@@ -537,6 +537,18 @@ class HasPart (W : Type) (P : Type) where
   get : W → P
   set : W → P → W
 
+/-- The laws of a part: reading after writing gives what was written, writing what was read changes
+nothing, and the second of two writes wins.  `#dyn_world` proves them for each field of a world.
+A table doesn't require them: a proof about a rule takes them as hypotheses. -/
+class LawfulHasPart (W : Type) (P : Type) [HasPart W P] : Prop where
+  get_set : ∀ (w : W) (p : P), HasPart.get (HasPart.set w p) = p
+  set_get : ∀ (w : W), HasPart.set w (HasPart.get w : P) = w
+  set_set : ∀ (w : W) (p q : P), HasPart.set (HasPart.set w p) q = HasPart.set w q
+
+/-- Writing part `P` leaves part `Q` as it is. -/
+def HasPart.Indep (W P Q : Type) [HasPart W P] [HasPart W Q] : Prop :=
+  ∀ (w : W) (p : P), (HasPart.get (HasPart.set w p) : Q) = HasPart.get w
+
 set_option synthInstance.checkSynthOrder false in
 /-- A part is state: `getThe P`, `modifyThe P`.  A rule names the part, so the instance is
 chosen by `P`. -/

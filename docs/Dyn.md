@@ -834,9 +834,13 @@ The world is the state a run threads through its rules, such as output. `#dyn_se
 takes it as `(world := W)`, and it defaults to `Unit`. A rule reaches the parts it names
 through `[HasPart ε.W P]`, with `getThe P`, `modifyThe P` and `modifyGetThe P`. The world's
 type is abstract in a rule, so a rule reads only the parts it names. It can still put back a
-world it read earlier, whole, and `HasPart` states no laws. Each of the three is one `update`
-request: the machine takes the world out of its state and hands it to the request,
-which returns the new world, so a part that `modifyThe` updates is held by nothing else:
+world it read earlier, whole. Each of the three is one `update` request: the machine takes the world
+out of its state and hands it to the request, which returns the new world, so a part that
+`modifyThe` updates is held by nothing else. A part's laws are `LawfulHasPart`, which a proof about
+a rule takes as hypotheses; a table doesn't require them. Reading after writing gives what was
+written, writing what was read changes nothing, and the second of two writes wins. `#dyn_world W`
+derives each field's part and its laws, and, for each ordered pair of parts, that writing the first
+leaves the second as it is (`HasPart.Indep`):
 
 ```lean
 structure World where
@@ -844,7 +848,7 @@ structure World where
   ticks : Ticks := {}
   deriving Inhabited, Repr, DecidableEq
 
-instance : HasPart World Output := ⟨(·.out), fun w o => { w with out := o }⟩
+#dyn_world World
 
 @[dyn_sem While.print] def print (x : Int) : Sem ε E Unit :=
   modifyThe Output fun o => { o with items := o.items.push x }

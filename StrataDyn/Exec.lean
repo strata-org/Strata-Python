@@ -8,6 +8,7 @@ public import StrataDyn.Exec.Sem
 public import StrataDyn.Exec.Rules
 public import StrataDyn.Exec.Table
 public import StrataDyn.Exec.Types
+public import StrataDyn.Exec.World
 
 /-!
 # Executable semantics
@@ -61,6 +62,8 @@ def loop (cond : Region ε [] Bool) (body : Region ε [] Unit) (_st : Option Uni
   each registration against the `environment` record.
 * **Types** (`Exec/Types.lean`): `#dyn_types E`, which generates each datatype's Lean type,
   before `E`'s rules name them.
+* **Worlds** (`Exec/World.lean`): `#dyn_world W`, which derives the parts of a language's
+  world, their laws, and that writing one part leaves another as it is.
 * **The table** (`Exec/Table.lean`): `#dyn_coverage` and `#dyn_sem_table`, which
   generates the decoding of tags and one wrapper per instruction.
 * **The base's rules** (`Exec/Base.lean`): its types' Lean types, its terminators' rules, and

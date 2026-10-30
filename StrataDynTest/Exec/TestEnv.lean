@@ -161,8 +161,7 @@ structure World where
   ticks : Ticks := {}
   deriving Inhabited, Repr, DecidableEq
 
-instance : HasPart World Output := ⟨(·.out), fun w o => { w with out := o }⟩
-instance : HasPart World Ticks := ⟨(·.ticks), fun w t => { w with ticks := t }⟩
+#dyn_world World
 
 variable {ε : Eff} {E : Type}
 

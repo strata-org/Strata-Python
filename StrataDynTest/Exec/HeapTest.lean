@@ -143,8 +143,7 @@ public structure HpWorld (σ : Type) [Store σ] where
 
 public instance {σ : Type} [Store σ] : Inhabited (HpWorld σ) := ⟨{}⟩
 
-public instance {σ : Type} [Store σ] : HasPart (HpWorld σ) (Globals σ) :=
-  ⟨(·.globals), fun _ g => { globals := g }⟩
+#dyn_world HpWorld
 
 /-- The global cell: the one the world keeps, or a new one, which it then keeps.  It takes its
 capabilities one by one, without a language's class. -/
