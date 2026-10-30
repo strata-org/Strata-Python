@@ -18,10 +18,12 @@ public import StrataPython.Dyn.Sem.Mro
 public import StrataPython.Dyn.Sem.MroProps
 public import StrataPython.Dyn.Sem.Unicode
 public import StrataPython.Dyn.Sem.Format
+public import StrataPython.Dyn.Sem.Arith
 
 /-!
 # The Python semantics
 
 Python's values, their hashes, the tables of dicts and sets, C3, the formatting of ints, floats
-and strs, and the Unicode tables, for the rules of the `py` operations.
+and strs, the Unicode tables, and the arithmetic of ints, bools and floats with the indices of a
+slice, for the rules of the `py` operations.
 -/
