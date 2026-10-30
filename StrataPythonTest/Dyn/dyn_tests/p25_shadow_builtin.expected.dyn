@@ -7,10 +7,10 @@ module p25_shadow_builtin {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p25_shadow_builtin", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@p25_shadow_builtin.len)
+      %clo.0 : py.Value = py.mkClosure[[]](@p25_shadow_builtin.len)
       %len.cell.0 : base.Ref(py.Value) = py.globalCell("p25_shadow_builtin", "len")
       %set.2 : base.Unit = base.refSet[py.Value](%len.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure(@p25_shadow_builtin.f)
+      %clo.1 : py.Value = py.mkClosure[[]](@p25_shadow_builtin.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p25_shadow_builtin", "f")
       %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.1)
       %none.1 : py.Value = py.noneLit

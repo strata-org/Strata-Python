@@ -110,16 +110,16 @@ inductive Const where
   | func  (target : Name)
 deriving Inhabited, Repr
 
-/-- The type the base gives a constant, in an environment that refines the base: a literal's
-type, and for a function reference the untyped `base.Code`.  A function reference may instead
-have its target's `Func.codeType`, which the module decides (`Module.Raw.WF`). -/
-@[expose] def Const.typeOf {env : Env Unit} [base ⊑ env] : Const → TypeExpr env
-  | .unit    => Base.Unit
-  | .bool _  => Base.Bool
-  | .int _   => Base.Int
-  | .float _ => Base.Float64
-  | .str _   => Base.String
-  | .func _  => Base.Code
+/-- The type the base gives a literal, in an environment that refines the base.  A function
+reference has none: it has its target's `Func.codeType`, which the module decides
+(`Module.Raw.WF`). -/
+@[expose] def Const.typeOf? {env : Env Unit} [base ⊑ env] : Const → Option (TypeExpr env)
+  | .unit    => some Base.Unit
+  | .bool _  => some Base.Bool
+  | .int _   => some Base.Int
+  | .float _ => some Base.Float64
+  | .str _   => some Base.String
+  | .func _  => none
 
 mutual
 

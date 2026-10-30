@@ -7,7 +7,7 @@ module e06_nonlocal_and_global {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("e06_nonlocal_and_global", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@e06_nonlocal_and_global.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@e06_nonlocal_and_global.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("e06_nonlocal_and_global", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -26,7 +26,7 @@ module e06_nonlocal_and_global {
       %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "f() got an unexpected keyword argument {}") ^propagate.0()
       %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "f() takes 0 positional arguments but {} {was} given") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
-      %clo.0 : py.Value = py.mkClosure(@e06_nonlocal_and_global.f.g)
+      %clo.0 : py.Value = py.mkClosure[[]](@e06_nonlocal_and_global.f.g)
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)

@@ -13,7 +13,7 @@ module p08_import_rebound {
       %none.1 : py.Value = py.noneLit
       %os.cell.1 : base.Ref(py.Value) = py.globalCell("p08_import_rebound", "os")
       %set.3 : base.Unit = base.refSet[py.Value](%os.cell.1, %none.1)
-      %clo.0 : py.Value = py.mkClosure(@p08_import_rebound.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@p08_import_rebound.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p08_import_rebound", "f")
       %set.4 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.2 : py.Value = py.noneLit

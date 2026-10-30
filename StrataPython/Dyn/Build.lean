@@ -117,8 +117,9 @@ def emitConst (name : Name) (c : Const) (info : Option α := none) : PyM α ValI
 
 /-! ## Operations
 
-One emitter per result type and failure behaviour.  Every Python operation is monomorphic,
-so `typeArgs` is always `ta[]`, which `infer_type_args` fills in. -/
+One emitter per result type and failure behaviour.  Every Python operation but `mkClosure`
+is monomorphic, so `typeArgs` is `ta[]`, which `infer_type_args` fills in; `mkClosure` gives
+its own. -/
 
 /-- An operation that cannot fail and produces a Python value. -/
 def emitTotal {isig : InsnSig Py.env} (name : Name) (r : InsnRef Py.env isig)
@@ -268,21 +269,34 @@ def delAttr (obj : ValId) (name : String) (info : Option α := none) : PyM α Va
 
 /-! ## Closures
 
-A code pointer is a constant naming a function of the *module*; a closure pairs it with the
-cells it captures.  A module-level function is the case with no cells. -/
+A code pointer is a constant naming a function of the *module*, at the function's code type;
+a closure pairs it with the cells it captures.  A module-level function is the case with no
+cells. -/
 
-/-- Emit a code pointer to `target`, a function the module defines: the constant
-`.func target`, at the untyped `base.Code`, which `py.mkClosure` takes. -/
-def emitFunc (target : Name) (info : Option α := none) : PyM α ValId :=
-  Build.emitFunc (env := Py.env) target Base.Code info
+/-- The code type of a translated Python function taking `params`: `base.Fn params failing`. -/
+def codeType (params : Array (TypeExpr Py.env)) : TypeExpr Py.env :=
+  Base.Fn (TypeList.ofTypes params) Py.failing
 
-/-- A callable value: the code, and the cells it captures. -/
-def mkClosure (code : ValId) (cells : Array ValId) (info : Option α := none) : PyM α ValId :=
+/-- Emit a code pointer to `target`, a function the module defines that takes `params`: the
+constant `.func target`, at its code type, which `py.mkClosure` takes. -/
+def emitFunc (target : Name) (params : Array (TypeExpr Py.env)) (info : Option α := none) :
+    PyM α ValId :=
+  Build.emitFunc (env := Py.env) target (codeType params) info
+
+/-- A callable value: the code, a pointer to a function that takes the cells, of the types
+`cellTypes`, then `args` and `kwargs`, and the cells it captures.  `mkClosure`'s type argument
+is `cellTypes`. -/
+def mkClosure (code : ValId) (cellTypes : Array (TypeExpr Py.env)) (cells : Array ValId)
+    (info : Option α := none) : PyM α ValId := do
+  let ta? ← Build.checkTypeArgs (env := Py.env) (α := α) (type := some Py.Value) Py.mkClosure.ref
+    #[.list (.ofTypes cellTypes)]
   emitTotal (.str .base "clo") Py.mkClosure.ref (#[code] ++ cells) info
+    (typeArgs := match ta? with | some ta => .given ta | none => .infer)
 
-/-- A callable value for a module-level function, which captures nothing. -/
+/-- A callable value for a module-level function, which takes `args` and `kwargs` and
+captures nothing. -/
 def funcValue (target : Name) (info : Option α := none) : PyM α ValId := do
-  mkClosure (← emitFunc target info) #[] info
+  mkClosure (← emitFunc target #[Py.Value, Py.Value] info) #[] #[] info
 
 /-! ## Locals
 
@@ -577,12 +591,12 @@ def emitPropagate (e : ValId) (info : Option α := none) : PyM α Unit := do
 /-- `buildFuncTyped` below, also returning the result of `body`, on failure too, as
 `Build.run` does. -/
 def buildFuncTypedWith (name : Name) (params : Array (Name × TypeExpr Py.env)) (info : α)
-    (body : Array ValId → PyM α β) :
+    (body : Vector ValId params.size → PyM α β) :
     Except (Build.FailedFunc Py.env α β) ({fn : Func Py.env α // fn.WF} × β) :=
   Build.run name Py.failing info do
-    let ps ← params.mapM fun (p, t) => Build.freshVal p t
+    let ps ← params.toVector.mapM fun (p, t) => Build.freshVal p t
     let propagate ← Build.freshLabel "propagate"
-    let _ ← Build.startFreshBlock ps "entry"
+    let _ ← Build.startFreshBlock ps.toArray "entry"
     let (r, _) ← (body (ps.map (·.id))).run { handler := Build.goto propagate }
     -- The handler, emitted last: it takes the exception and hands it back.
     let exc ← Build.freshVal (.str .base "exc") Py.Value
@@ -595,21 +609,24 @@ def buildFuncTypedWith (name : Name) (params : Array (Name × TypeExpr Py.env)) 
 `buildFunc` is the form whose parameters are all Python values.  This one also takes
 others, such as a closure's captured cells, which arrive as `Ref Value` parameters.
 
-Before `body` runs, the handler is in place: it takes the exception and returns it to the
-caller.  `body` must finish every block it opens: ending with a block open is an error, and
-so is any other error `Dyn.Build` records.  It fails with the `Build.FailedFunc` if there is
-one or the function is not well formed.  The entry block is labelled `entry.0` and the
-handler `propagate.0`. -/
+`body` receives the parameters as a `Vector` of the size of `params`, so indexing them with
+a literal is checked when it elaborates.  Before `body` runs, the handler is in place: it
+takes the exception and returns it to the caller.  `body` must finish every block it opens:
+ending with a block open is an error, and so is any other error `Dyn.Build` records.  It
+fails with the `Build.FailedFunc` if there is one or the function is not well formed.  The
+entry block is labelled `entry.0` and the handler `propagate.0`. -/
 def buildFuncTyped (name : Name) (params : Array (Name × TypeExpr Py.env)) (info : α)
-    (body : Array ValId → PyM α Unit) :
+    (body : Vector ValId params.size → PyM α Unit) :
     Except (Build.FailedFunc Py.env α Unit) {fn : Func Py.env α // fn.WF} :=
   Prod.fst <$> buildFuncTypedWith name params info body
 
-/-- Emit a Python function, every parameter a Python value, and check it. -/
+/-- Emit a Python function, every parameter a Python value, and check it.  `body` receives
+the parameters as a `Vector` of the size of `params`. -/
 def buildFunc (name : Name) (params : Array String) (info : α)
-    (body : Array ValId → PyM α Unit) :
+    (body : Vector ValId params.size → PyM α Unit) :
     Except (Build.FailedFunc Py.env α Unit) {fn : Func Py.env α // fn.WF} :=
-  buildFuncTyped name (params.map (stem ·, Py.Value)) info body
+  buildFuncTyped name (params.map (stem ·, Py.Value)) info
+    fun args => body (args.cast (Array.size_map ..))
 
 /-- The stub of the function `buildFuncTyped name params` would build, `Build.stub` at its
 signature. -/

@@ -209,7 +209,7 @@ def terminateWith {isig : InsnSig env} (r : InsnRef env isig) (args : Array ValI
     | some ta => finishBlock (.apply i r ta args succs rs) (some i)
     | none => modify fun s => { s with body := { s.body with label := none } }
 
-/-- Where a statement starts emitting: the next value's id, and the number of fresh labels. -/
+/-- Where a statement starts emitting. -/
 structure Mark where
   /-- The id of the next value. -/
   vals : Nat
@@ -321,10 +321,11 @@ def unit [base ⊑ env] (stem : Name) (info : Option α := none) :
     m (Val env Base.Unit) :=
   liftBuild (Val.mk <$> emitConst stem .unit info)
 
-/-- A code pointer to `target`, at the untyped `base.Code`. -/
-def code [base ⊑ env] (target : Name) (info : Option α := none) :
-    m (Val env Base.Code) :=
-  liftBuild (Val.mk <$> emitFunc target Base.Code info)
+/-- A code pointer to `target`, at the type the expected type gives, `target`'s code type
+`Base.Fn as r`.  Lean does not check it against `target`'s; `Build.run` does. -/
+def code [base ⊑ env] (target : Name) {t : TypeExpr env} (info : Option α := none) :
+    m (Val env t) :=
+  liftBuild (Val.mk <$> emitFunc target t info)
 
 /-- `let% x ← e`: `let x ← e`, with the value or block `e` returns named after `x` if `e` made
 it and nothing named it (`Build.named`).  `let% mut x ← e` and `let% x : T ← e` are `let`'s. -/

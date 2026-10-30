@@ -14,7 +14,7 @@ module t21_combined {
       %Optional.cell.0 : base.Ref(py.Value) = py.globalCell("t21_combined", "Optional")
       %set.3 : base.Unit = base.refSet[py.Value](%Optional.cell.0, %Optional.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure(@|t21_combined.ResourceManager.<body>|)
+      %clo.0 : py.Value = py.mkClosure[[]](@|t21_combined.ResourceManager.<body>|)
       %str.1 : py.Value = py.strLit("ResourceManager")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs
@@ -27,7 +27,7 @@ module t21_combined {
       %ResourceManager.1 : py.Value = py.loadGlobal("t21_combined", "ResourceManager") ^propagate.0()
       %str.4 : py.Value = py.strLit("return")
       %int.0 : py.Value = py.loadGlobal("t21_combined", "int") ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure(@t21_combined.process_items)
+      %clo.1 : py.Value = py.mkClosure[[]](@t21_combined.process_items)
       %annotations.0 : py.Value = py.mkDict(%str.2, %list.0, %str.3, %ResourceManager.1, %str.4, %int.0) ^propagate.0()
       %__annotations__.0 : base.Unit = py.setAttr(%clo.1, "__annotations__", %annotations.0) ^propagate.0()
       %process_items.cell.0 : base.Ref(py.Value) = py.globalCell("t21_combined", "process_items")
@@ -103,7 +103,7 @@ module t21_combined {
       %str.8 : py.Value = py.loadGlobal("t21_combined", "str") ^propagate.0()
       jump ^join.1(%str.8)
     join.1(%str.9 : py.Value):
-      %clo.0 : py.Value = py.mkClosure(@t21_combined.ResourceManager.__init__)
+      %clo.0 : py.Value = py.mkClosure[[]](@t21_combined.ResourceManager.__init__)
       %annotations.0 : py.Value = py.mkDict(%str.4, %str.9) ^propagate.0()
       %__annotations__.0 : base.Unit = py.setAttr(%clo.0, "__annotations__", %annotations.0) ^propagate.0()
       %str.10 : py.Value = py.strLit("__init__")
@@ -138,7 +138,7 @@ module t21_combined {
       %bool.2 : py.Value = py.loadGlobal("t21_combined", "bool") ^propagate.0()
       jump ^join.4(%bool.2)
     join.4(%bool.3 : py.Value):
-      %clo.1 : py.Value = py.mkClosure(@t21_combined.ResourceManager.add_resource)
+      %clo.1 : py.Value = py.mkClosure[[]](@t21_combined.ResourceManager.add_resource)
       %annotations.1 : py.Value = py.mkDict(%str.11, %str.16, %str.17, %str.22, %str.23, %bool.3) ^propagate.0()
       %__annotations__.1 : base.Unit = py.setAttr(%clo.1, "__annotations__", %annotations.1) ^propagate.0()
       %str.25 : py.Value = py.strLit("add_resource")
@@ -173,7 +173,7 @@ module t21_combined {
       jump ^join.7(%str.37)
     join.7(%str.38 : py.Value):
       %item.0 : py.Value = py.getItem(%Optional.3, %str.38) ^propagate.0()
-      %clo.2 : py.Value = py.mkClosure(@t21_combined.ResourceManager.get_resource)
+      %clo.2 : py.Value = py.mkClosure[[]](@t21_combined.ResourceManager.get_resource)
       %annotations.2 : py.Value = py.mkDict(%str.26, %str.31, %str.32, %item.0) ^propagate.0()
       %__annotations__.2 : base.Unit = py.setAttr(%clo.2, "__annotations__", %annotations.2) ^propagate.0()
       %str.39 : py.Value = py.strLit("get_resource")

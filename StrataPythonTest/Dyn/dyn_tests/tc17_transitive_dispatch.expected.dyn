@@ -10,7 +10,7 @@ module tc17_transitive_dispatch {
       %mod.0 : py.Value = py.importModule("cloudkit") ^propagate.0()
       %cloudkit.cell.0 : base.Ref(py.Value) = py.globalCell("tc17_transitive_dispatch", "cloudkit")
       %set.2 : base.Unit = base.refSet[py.Value](%cloudkit.cell.0, %mod.0)
-      %clo.0 : py.Value = py.mkClosure(@tc17_transitive_dispatch.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@tc17_transitive_dispatch.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("tc17_transitive_dispatch", "f")
       %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit

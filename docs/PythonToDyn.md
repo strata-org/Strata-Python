@@ -31,11 +31,11 @@ comprehension scoping follow CPython 3.12.
 *program* is a module of functions written against one environment. The *base*
 environment declares the datatype `base.Unit` with the one constructor `base.unit`,
 `base.Bool`, `base.Int`, `base.Float64`, `base.String`, `base.Sequence a`, `base.Ref a` (a
-mutable cell), `base.Code` (an opaque code pointer), `base.Fn as r` (a typed one) and the
-datatype `base.Except e a` with constructors `base.ok` and `base.error`. It also declares
-the cell instructions `base.refNew`, `base.refGet` and `base.refSet`, and `base.callCode`,
-a call through a `base.Fn`. The Python lowering uses only `base.Code`. Python's environment
-extends the base (§2).
+mutable cell), `base.Fn as r` (a code pointer to a function taking `as` and returning `r`)
+and the datatype `base.Except e a` with constructors `base.ok` and `base.error`. It also
+declares the cell instructions `base.refNew`, `base.refGet` and `base.refSet`, and
+`base.callCode`, a call through a `base.Fn`. The Python lowering takes code pointers only to
+build closures, with `py.mkClosure`. Python's environment extends the base (§2).
 
 **Signatures.** An instruction's signature is written in the environment DSL:
 
@@ -55,7 +55,7 @@ result, and has a type. Block parameters take the place of phi nodes.
 
 | Kind | Meaning |
 |---|---|
-| `const` | a literal of a base type (`unit`, `bool`, `int`, `float`, `str`), or `const @m.f`, a `base.Code` pointer to the function `m.f` of the same module |
+| `const` | a literal of a base type (`unit`, `bool`, `int`, `float`, `str`), or `const @m.f`, a pointer to the function `m.f` of the same module, at its code type `base.Fn as r` |
 | `apply` | an application of a declared instruction, including a datatype constructor, at explicit type arguments |
 
 **Successors.** An instruction may declare *successors*: the places it may transfer to instead
@@ -178,8 +178,12 @@ are in `StrataPython/Dyn/Build.lean`.
   `completionNormal`, `completionReturn (value)`, `completionRaise (exc)`, `completionBreak`
   and `completionContinue`. `py.Completion.case` has five successors in that order. Only the
   `return` and `raise` successors receive a payload.
-- **Closures.** `const @m.f` is a `base.Code`, and `py.mkClosure code cells…` pairs it with
-  captured cells to make a callable `py.Value`. `py.call f args kwargs` calls any callable.
+- **Closures.** `const @m.f` is a `base.Fn(as, base.Except(py.Value, py.Value))`, with `as`
+  `m.f`'s parameter types: its cells, then `args` and `kwargs`. `py.mkClosure[cs] code cells…`
+  pairs it with the cells it captures, one operand per element of `cs`, the cells' types, to
+  make a callable `py.Value`:
+  `insn mkClosure [(cs : list)] (code : Fn [*cs, Value, Value] failing) (*cells : cs) : Value`.
+  `py.call f args kwargs` calls any callable.
 - **Function results.** A translated function returns `base.Except(py.Value, py.Value)`.
   `base.ok v` is a normal return and `base.error e` propagates an exception to the caller.
   `py.call` receives `error e` and transfers it to its own `err` successor.
@@ -428,9 +432,10 @@ At the definition site, in source order:
 2. Evaluate each non-constant default value into a fresh *default cell*.
 3. Evaluate the parameter annotations, in CPython 3.12's order (positional, positional-only,
    `*args`, keyword-only, `**kwargs`), then the return annotation.
-4. Emit `const @m.f…` and `py.mkClosure code cells…`. The cells are the ones the callee
-   captures, in `capturedVars` order (§6.6), then its default cells. A top-level function has
-   only default cells.
+4. Emit `const @m.f…`, at `m.f`'s code type, and `py.mkClosure[cs] code cells…`, with `cs`
+   the cells' types, `m.f`'s parameter types but `args` and `kwargs`. The cells are the ones
+   the callee captures, in `capturedVars` order (§6.6), then its default cells. A top-level
+   function has only default cells.
 5. If there are annotations, store them as `f.__annotations__`: a dict from each mangled
    parameter name, and `"return"`, to its annotation. With none, nothing is stored, and the
    run-time model gives `{}`, as CPython does.
@@ -438,7 +443,8 @@ At the definition site, in source order:
 7. Write the result to the name's cell (a `lambda` is an expression and has no name).
 
 ```
-    %21 : py.Value = py.mkClosure(@m.outer.inner, %3)  -- %3: outer's cell for x
+    %21 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m.outer.inner, %3)
+      -- %3: outer's cell for x
     %22 : base.Unit = base.refSet[py.Value](%4, %21)  -- inner = …
 ```
 
@@ -689,8 +695,9 @@ captures its `free_class` names (§6.7), in the same order of first use. The `mk
 site passes the same cells in the same order.
 
 Capture emits no extra instructions. The inner function reads and writes the outer
-function's own cell, which gives `nonlocal` and late binding. `mkClosure` takes
-`base.Ref(py.Value)` operands, so capturing a value is a type error. A `const @m.f` naming a
+function's own cell, which gives `nonlocal` and late binding. `mkClosure` takes one operand
+per element of its type argument, each a `base.Ref(py.Value)`, so capturing a value is a type
+error. A `const @m.f` naming a
 function the module does not define fails `Module.Raw.WF`.
 
 ### 6.7 Classes
@@ -979,7 +986,7 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 
 | Operation | Signature (DSL) | Needed by |
 |---|---|---|
-| `mkGenerator` | `insn mkGenerator (code : Code) (cells : Ref Value…) : Value` | generators (stage 1, opaque) |
+| `mkGenerator` | `insn mkGenerator [(as : list)] (code : Fn as failing) (cells : Ref Value…) : Value` | generators (stage 1, opaque) |
 
 **Declarations to fix:**
 

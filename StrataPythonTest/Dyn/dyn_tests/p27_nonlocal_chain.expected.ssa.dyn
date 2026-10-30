@@ -7,7 +7,7 @@ module p27_nonlocal_chain {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p27_nonlocal_chain", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@p27_nonlocal_chain.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@p27_nonlocal_chain.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p27_nonlocal_chain", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -28,7 +28,7 @@ module p27_nonlocal_chain {
       %int.0 : py.Value = py.intLit(0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure(@|p27_nonlocal_chain.f.C.<body>|, %x.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|p27_nonlocal_chain.f.C.<body>|, %x.cell.0)
       %str.0 : py.Value = py.strLit("C")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.0)
       %kwargs.1 : py.Value = py.mkKwargs
@@ -61,7 +61,7 @@ module p27_nonlocal_chain {
       %int.1 : py.Value = py.intLit(1)
       %str.4 : py.Value = py.strLit("x")
       %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %int.1) ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure(@p27_nonlocal_chain.f.C.m, %x.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@p27_nonlocal_chain.f.C.m, %x.cell.0)
       %str.5 : py.Value = py.strLit("m")
       %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.0) ^propagate.0()
       %none.0 : py.Value = py.noneLit

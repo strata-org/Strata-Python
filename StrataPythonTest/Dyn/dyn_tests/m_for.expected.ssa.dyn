@@ -138,7 +138,7 @@ module m_for {
       %done.5 : base.Bool = py.isStopIteration(%exc.5)
       branch(%done.5) ^exit.4() ^propagate.0(%exc.5)
     exit.4():
-      %clo.0 : py.Value = py.mkClosure(@m_for.first)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_for.first)
       %first.cell.0 : base.Ref(py.Value) = py.globalCell("m_for", "first")
       %set.9 : base.Unit = base.refSet[py.Value](%first.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit

@@ -7,7 +7,7 @@ module p22_comprehensions {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p22_comprehensions", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@p22_comprehensions.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@p22_comprehensions.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p22_comprehensions", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %range.0 : py.Value = py.loadGlobal("p22_comprehensions", "range") ^propagate.0()

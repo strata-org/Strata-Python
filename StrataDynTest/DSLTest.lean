@@ -86,7 +86,7 @@ public environment Demo extends Base where
   /-- A tuple of `elems`. -/
   insn mkTuple (*elems : Value) : Value
   /-- A closure over `code` and the captured `cells`. -/
-  insn mkClosure (code : Code) (*cells : Ref Value) : Value
+  insn mkClosure [(as : list)] (code : Fn as failing) (*cells : Ref Value) : Value
   /-- Run `then` if `cond` holds, else `else`. -/
   insn «if» [a] (cond : Bool) (&«then» &«else» : a) : a
   /-- Run `body`; if it raises, run `handler` on the exception. -/

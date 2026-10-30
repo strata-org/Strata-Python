@@ -61,10 +61,26 @@ the caller. -/
 private def f : Built :=
   buildFunc (Py.pn "f") #["x"] () fun args => do
     let y ← declareLocal "y"
-    let _ ← writeCell y (← emitFailing (.str .base "sum") Py.add.ref #[args[0]!, ← intLit 1])
+    let _ ← writeCell y (← emitFailing (.str .base "sum") Py.add.ref #[args[0], ← intLit 1])
     emitReturn (← readCell y (stem "y"))
 
 #guard f.isOk
+
+-- `buildFunc` passes the parameters as a `Vector` of their number, so an index past them is a
+-- compile error.
+example : Built := buildFunc (Py.pn "f") #["x"] () fun args => emitReturn args[0]
+
+/--
+error: failed to prove index is valid, possible solutions:
+  - Use `have`-expressions to prove the index is valid
+  - Use `a[i]!` notation instead, runtime check is performed, and 'Panic' error message is produced if index is not valid
+  - Use `a[i]?` notation instead, result is an `Option` type
+  - Use `a[i]'h` notation instead, where `h` is a proof that index is valid
+args : Vector ValId #["x"].size
+⊢ 1 < #["x"].size
+-/
+#guard_msgs in
+example : Built := buildFunc (Py.pn "f") #["x"] () fun args => emitReturn args[1]
 
 /-- info: module py.f {
   func @py.f(%x.0 : py.Value) -> base.Except(py.Value, py.Value) {
@@ -107,7 +123,7 @@ successor. -/
 private def hWith (takesExc : Bool) : Built :=
   buildFunc (Py.pn "h") #["x"] () fun args => do
     let except ← freshLabel
-    withHandler except do emitReturn (← getAttr args[0]! "foo")
+    withHandler except do emitReturn (← getAttr args[0] "foo")
     -- `except:` — the exception is bound and ignored.
     if takesExc then discard <| startBlockWith except (.str .base "exc") else startBlock except
     emitReturnNone
@@ -137,7 +153,7 @@ private def r : Built :=
   buildFunc (Py.pn "r") #["x"] () fun args => do
     let k ← freshLabel
     let c ← noneLit
-    withHandlerTo (Build.goto k #[c]) do jump (← raiseTo args[0]!)
+    withHandlerTo (Build.goto k #[c]) do jump (← raiseTo args[0])
     let pc ← freshVal (.str .base "c")
     let pe ← freshVal (.str .base "exc")
     startBlock k #[pc, pe]
@@ -174,7 +190,7 @@ what was pending. -/
 
 private def k : Built :=
   buildFunc (Py.pn "k") #["x"] () fun args => do
-    let #[x] := args | return
+    let x := args[0]
     discard <| tryFinally
       (fun fin => do jump (Build.goto fin #[← compReturn (← getAttr x "foo")]))
       (fun _ => discard <| getAttr x "cleanup")
@@ -198,7 +214,7 @@ the entry, `finRaise` and `fin`.  Nothing in it can fail, so nothing reaches `su
 propagating handler, and the builder drops them. -/
 private def kReturns : Built :=
   buildFunc (Py.pn "k") #["x"] () fun args => do
-    let #[x] := args | return
+    let x := args[0]
     discard <| tryFinally
       (fun _ => discard <| getAttr x "foo")
       (fun prev => do
@@ -214,7 +230,7 @@ private def kReturns : Built :=
 `superseded.0`, which raises to `bb.0` with `c`, then the failure. -/
 private def kBound : Built :=
   buildFunc (Py.pn "k") #["x"] () fun args => do
-    let #[x] := args | return
+    let x := args[0]
     let h ← freshLabel
     let c ← noneLit
     withHandlerTo (Build.goto h #[c]) do
@@ -286,20 +302,24 @@ private def supersededPassesExc (fn : Func Py.env Unit) : Bool :=
       return inner
 
 `inner` is a function of the module: `emitFunc` names it, and the module's check verifies
-that the module defines it.  `mkClosure` pairs the code with the cell holding `x`.  The two
+that the module defines it.  It takes the cell it captures, then `args` and `kwargs`, as every
+translated function does.  `mkClosure` pairs the code with the cell holding `x`.  The two
 functions are printed as a module. -/
 
 private def inner : Built :=
-  buildFuncTyped (Py.pn "inner") #[(cellStem "x", Py.cell)] () fun args => do
-    emitReturn (← readCell args[0]! (stem "x"))
+  buildFuncTyped (Py.pn "inner")
+      #[(cellStem "x", Py.cell), (stem "args", Py.Value), (stem "kwargs", Py.Value)] ()
+      fun args => do
+    emitReturn (← readCell args[0] (stem "x"))
 
 /-- `outer`, whose closure names `target` and captures the cell holding `x`, or `x` itself if
 `byValue`. -/
 private def outerWith (target : Name) (byValue : Bool) : Built :=
   buildFunc (Py.pn "outer") #["x"] () fun args => do
     let cell ← declareLocal "x"
-    let _ ← writeCell cell args[0]!
-    emitReturn (← mkClosure (← emitFunc target) #[if byValue then args[0]! else cell])
+    let _ ← writeCell cell args[0]
+    emitReturn (← mkClosure (← emitFunc target #[Py.cell, Py.Value, Py.Value]) #[Py.cell]
+      #[if byValue then args[0] else cell])
 
 /-- The module of `outer`, whose closure names `target` and captures `x` as `outerWith` does,
 and `inner`. -/
@@ -320,12 +340,12 @@ private def closures : Except (FailedFunc Py.env Unit Unit) (Module.Raw Py.env U
       %x.1 : py.Value = py.undef("x")
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.1)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.0)
-      %clo.0 : py.Value = py.mkClosure(@py.inner, %x.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@py.inner, %x.cell.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%clo.0)
       ret(%ret.0)
   }
-  func @py.inner(%x.cell.0 : base.Ref(py.Value)) -> base.Except(py.Value, py.Value) {
-    entry.0(%x.cell.0 : base.Ref(py.Value)):
+  func @py.inner(%x.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%x.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.0)
       ret(%ret.0)
@@ -412,28 +432,29 @@ private def globals : Built :=
 
 /-! ## A function named like an operation
 
-    def add(x):          # in module `m`
+    def add(*args, **kwargs):          # in module `m`
       add              # the function itself
-      return x + x
+      return args + args
 
 The function `m.add` prints as `@m.add`, in its header and in the constant that refers to it,
-so neither reads as the operation `py.add`. -/
+so neither reads as the operation `py.add`.  It takes `args` and `kwargs`, as every translated
+function does, and its closure captures nothing. -/
 
 private def mAdd : Name := .str (.str .base "m") "add"
 
 private def addFn : Built :=
-  buildFunc mAdd #["x"] () fun args => do
+  buildFunc mAdd #["args", "kwargs"] () fun args => do
     let _ ← funcValue mAdd
-    emitReturn (← emitFailing (.str .base "sum") Py.add.ref #[args[0]!, args[0]!])
+    emitReturn (← emitFailing (.str .base "sum") Py.add.ref #[args[0], args[0]])
 
 -- It refers to itself, so it is a module on its own.
 #guard addFn.toOption.any fun f => (Module.ofChecked mAdd #[f] ()).isOk
 
 /-- info: module m.add {
-  func @m.add(%x.0 : py.Value) -> base.Except(py.Value, py.Value) {
-    entry.0(%x.0 : py.Value):
-      %clo.0 : py.Value = py.mkClosure(@m.add)
-      %sum.0 : py.Value = py.add(%x.0, %x.0) ^propagate.0()
+  func @m.add(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %clo.0 : py.Value = py.mkClosure[[]](@m.add)
+      %sum.0 : py.Value = py.add(%args.0, %args.0) ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%sum.0)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -450,25 +471,25 @@ Emitting where no block is open, or leaving a block open, is an error, and `buil
 fails. -/
 
 /-- The errors `buildFunc` fails with for `body`, as the body of a function of `x`, or none. -/
-private def errors (body : Array ValId → PyM Unit Unit) : Array String :=
+private def errors (body : Vector ValId 1 → PyM Unit Unit) : Array String :=
   match buildFunc (Py.pn "f") #["x"] () body with
   | .ok _ => #[]
   | .error e => e.misuses
 
 /-- A write after `return None`, which has closed the block. -/
-private def writeAfterReturn (args : Array ValId) : PyM Unit Unit := do
+private def writeAfterReturn (args : Vector ValId 1) : PyM Unit Unit := do
   let y ← declareLocal "y"
   emitReturnNone
-  let _ ← writeCell y args[0]!
+  let _ ← writeCell y args[0]
 
 /-- info: #["instruction %6 emitted with no block open"] -/
 #guard_msgs in
 #eval errors writeAfterReturn
 
 /-- A body that never closes the entry block: the handler would open over it. -/
-private def entryLeftOpen (args : Array ValId) : PyM Unit Unit := do
+private def entryLeftOpen (args : Vector ValId 1) : PyM Unit Unit := do
   let y ← declareLocal "y"
-  let _ ← writeCell y args[0]!
+  let _ ← writeCell y args[0]
 
 /-- info: #["block propagate.0 opened while block entry.0 is open"] -/
 #guard_msgs in
@@ -483,8 +504,8 @@ transfer leaves its region. -/
 private def c : Built :=
   buildFunc (Py.pn "c") #["xs", "ys"] () fun args => do
     let acc ← emitTotal (.str .base "acc") Py.mkList.ref #[]
-    forEach args[0]! fun x => do
-      forEach args[1]! fun y => do
+    forEach args[0] fun x => do
+      forEach args[1] fun y => do
         let s ← emitFailing (.str .base "s") Py.add.ref #[x, y]
         let _ ← emitEffect (.str .base "append") Py.listAppend.ref #[acc, s]
     emitReturn acc
@@ -510,7 +531,7 @@ private partial def errTargetsDeep (bs : Array (Block Py.env Unit)) : List Label
 /-- A body that ends closed, raising to the region's handler, is well formed too. -/
 private def cClosed : Built :=
   buildFunc (Py.pn "c") #["xs"] () fun args => do
-    forEach args[0]! fun x => do jump (← raiseTo x)
+    forEach args[0] fun x => do jump (← raiseTo x)
     emitReturnNone
 
 #guard cClosed.isOk
@@ -537,7 +558,7 @@ is defined, and the second would not see `%ns.0`. -/
 /-- `except KeyError as e: continue` in a function: `clear.0` has no predecessor. -/
 private def leave : Except (FailedFunc Py.env Unit Unit) {fn : Func Py.env Unit // fn.WF} :=
   buildFuncTyped (Py.pn "leave") #[(stem "f", Py.Value)] () fun ps => do
-    let some f := ps[0]? | return
+    let f := ps[0]
     let catchL ← freshLabel "catch"
     let clearL ← freshLabel "clear"
     let unwindL ← freshLabel "unwind"
@@ -588,7 +609,7 @@ private def leave : Except (FailedFunc Py.env Unit Unit) {fn : Func Py.env Unit 
 /-- `try: pass` / `except Exception: ...` in a class body: `catch.0` has no predecessor. -/
 private def classBody : Except (FailedFunc Py.env Unit Unit) {fn : Func Py.env Unit // fn.WF} :=
   buildFuncTyped (Py.pn "C_body") #[(stem "args", Py.Value)] () fun ps => do
-    let some args := ps[0]? | return
+    let args := ps[0]
     let ns ← emitFailing (.str .base "ns") Py.getItem.ref #[args, ← intLit 0]
     let catchL ← freshLabel "catch"
     let join ← freshLabel "join"

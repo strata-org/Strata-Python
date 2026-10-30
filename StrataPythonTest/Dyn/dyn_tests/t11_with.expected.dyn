@@ -8,7 +8,7 @@ module t11_with {
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("t11_with", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure(@|t11_with.MyCtx.<body>|)
+      %clo.0 : py.Value = py.mkClosure[[]](@|t11_with.MyCtx.<body>|)
       %str.1 : py.Value = py.strLit("MyCtx")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs
@@ -44,7 +44,7 @@ module t11_with {
     unreachable.2():
       unreachable
     join.0():
-      %clo.1 : py.Value = py.mkClosure(@t11_with.risky)
+      %clo.1 : py.Value = py.mkClosure[[]](@t11_with.risky)
       %risky.cell.0 : base.Ref(py.Value) = py.globalCell("t11_with", "risky")
       %set.5 : base.Unit = base.refSet[py.Value](%risky.cell.0, %clo.1)
       %MyCtx.2 : py.Value = py.loadGlobal("t11_with", "MyCtx") ^propagate.0()
@@ -113,10 +113,10 @@ module t11_with {
       %str.2 : py.Value = py.strLit("MyCtx")
       %str.3 : py.Value = py.strLit("__qualname__")
       %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure(@t11_with.MyCtx.__enter__)
+      %clo.0 : py.Value = py.mkClosure[[]](@t11_with.MyCtx.__enter__)
       %str.4 : py.Value = py.strLit("__enter__")
       %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure(@t11_with.MyCtx.__exit__)
+      %clo.1 : py.Value = py.mkClosure[[]](@t11_with.MyCtx.__exit__)
       %str.5 : py.Value = py.strLit("__exit__")
       %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
       %none.0 : py.Value = py.noneLit

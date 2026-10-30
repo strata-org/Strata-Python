@@ -8,7 +8,7 @@ module p34_match {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p34_match", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@p34_match.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@p34_match.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p34_match", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit

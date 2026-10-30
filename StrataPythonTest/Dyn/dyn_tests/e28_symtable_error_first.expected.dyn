@@ -10,7 +10,7 @@ module e28_symtable_error_first {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("e28_symtable_error_first", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@e28_symtable_error_first.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@e28_symtable_error_first.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("e28_symtable_error_first", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit

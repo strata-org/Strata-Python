@@ -9,7 +9,7 @@ module e20_yield_in_dictcomp {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("e20_yield_in_dictcomp", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@e20_yield_in_dictcomp.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@e20_yield_in_dictcomp.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("e20_yield_in_dictcomp", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit

@@ -7,7 +7,7 @@ module i06_call_errors {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("i06_call_errors", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@i06_call_errors.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@i06_call_errors.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("i06_call_errors", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %str.1 : py.Value = py.strLit("a")
@@ -131,7 +131,7 @@ module i06_call_errors {
       %pop.5 : base.Unit = py.popExcept(%prev.2)
       jump ^propagate.0(%exc.8)
     join.2():
-      %clo.1 : py.Value = py.mkClosure(@i06_call_errors.g)
+      %clo.1 : py.Value = py.mkClosure[[]](@i06_call_errors.g)
       %g.cell.0 : base.Ref(py.Value) = py.globalCell("i06_call_errors", "g")
       %set.13 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
       %g.0 : py.Value = py.loadGlobal("i06_call_errors", "g") ^catch.3()

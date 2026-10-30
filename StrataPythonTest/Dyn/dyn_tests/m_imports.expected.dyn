@@ -26,7 +26,7 @@ module m_imports {
       %pi.0 : py.Value = py.importFrom("math", "pi") ^propagate.0()
       %pi.cell.0 : base.Ref(py.Value) = py.globalCell("m_imports", "pi")
       %set.7 : base.Unit = base.refSet[py.Value](%pi.cell.0, %pi.0)
-      %clo.0 : py.Value = py.mkClosure(@m_imports.local_import)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_imports.local_import)
       %local_import.cell.0 : base.Ref(py.Value) = py.globalCell("m_imports", "local_import")
       %set.8 : base.Unit = base.refSet[py.Value](%local_import.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit

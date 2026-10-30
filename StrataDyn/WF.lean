@@ -25,8 +25,7 @@ what the thing it names demands:
 * an `Instruction`'s operands have the types its signature demands at the type
   arguments it supplies, and its result is what that signature returns, a constructor's
   as any other operation's.  A constant has its literal's type, and a function reference a
-  code pointer's, `base.Code` or a `base.Fn` type.  An operation is not terminal, and supplies exactly the
-  successors and regions its signature declares: each successor is a non-entry block of
+  `base.Fn` type.  An operation is not terminal, and supplies exactly the successors and regions its signature declares: each successor is a non-entry block of
   its own region, or the region's exit, and receives exactly the parameters it declares;
   each region is well formed at the signature's region types;
 * a `Terminator` is checked as an instruction's operation is, but must be terminal and
@@ -41,8 +40,7 @@ what the thing it names demands:
   function's return type; every block of every body is reachable from the body's entry, and
   some legal tree of each body puts every use in scope;
 * a `Module.Raw` names no function twice, its functions are all well formed, and every
-  function reference names one of them, at that function's code type or at the untyped
-  `base.Code`.
+  function reference names one of them, at that function's code type.
 
 A function's rules depend on the function alone, so a function can be checked before its
 module is assembled.
@@ -221,23 +219,23 @@ abbrev RegionType (env : Env Unit) := Array (TypeExpr env) × TypeExpr env
   | _ => false
 
 /-- A constant's rule, at the type `t` of the value it defines: a literal has the type the
-base gives it, and a function reference is a code pointer, of the untyped `base.Code` or of a
-`base.Fn` type.  Which `Fn` its target allows is the module's rule, `Module.Raw.WF`. -/
+base gives it, and a function reference is a code pointer, of a `base.Fn` type.  Which `Fn`
+its target allows is the module's rule, `Module.Raw.WF`. -/
 @[expose] def Const.WF {env : Env Unit} [base ⊑ env] (t : TypeExpr env) : Const → Prop
-  | .func _ => t = Base.Code ∨ t.toRaw.isAppOf Base.Fn.name = true
-  | c => t = c.typeOf
+  | .func _ => t.toRaw.isAppOf Base.Fn.name = true
+  | c => c.typeOf? = some t
 
 instance {env : Env Unit} [base ⊑ env] (t : TypeExpr env) : (c : Const) → Decidable (c.WF t)
-  | .func _ => inferInstanceAs (Decidable (_ ∨ _))
-  | .unit | .bool _ | .int _ | .float _ | .str _ => inferInstanceAs (Decidable (t = _))
+  | .func _ => inferInstanceAs (Decidable (_ = true))
+  | .unit | .bool _ | .int _ | .float _ | .str _ => inferInstanceAs (Decidable (_ = some t))
 
 mutual
 
 /-- An instruction's rule, in the context `ctx`, with `bs` the blocks its successors may name.
 
 * A constant satisfies `Const.WF` at the type of the value it defines.  A function
-  reference's type is `base.Code` or a `base.Fn` type; whether it names a function of the
-  module, and at that function's code type, is `Module.Raw.WF`'s rule.
+  reference's type is a `base.Fn` type; whether it names a function of the module, and at
+  that function's code type, is `Module.Raw.WF`'s rule.
 * An application has a return type, which its result has at the type arguments, satisfies
   `InsnSig.callWF`, and supplies one region per declared region, each well formed at the
   declared types.  A constructor is applied as any operation is: its signature is the one
@@ -713,16 +711,12 @@ structure FuncUse (env : Env Unit) where
   target : Name
   type : TypeExpr env
 
-/-- Whether a reference fits its target's code type `ct`: it has that type, or the untyped
-`base.Code`. -/
--- `base.Code` is accepted until Python's lowering emits typed references.
-@[expose] def FuncUse.Fits {env : Env Unit} [base ⊑ env] (u : FuncUse env)
-    (ct : TypeExpr env) : Prop :=
-  u.type = ct ∨ u.type = Base.Code
+/-- Whether a reference fits its target's code type `ct`: it has that type. -/
+@[expose] def FuncUse.Fits {env : Env Unit} (u : FuncUse env) (ct : TypeExpr env) : Prop :=
+  u.type = ct
 
-instance {env : Env Unit} [base ⊑ env] (u : FuncUse env) (ct : TypeExpr env) :
-    Decidable (u.Fits ct) :=
-  inferInstanceAs (Decidable (_ ∨ _))
+instance {env : Env Unit} (u : FuncUse env) (ct : TypeExpr env) : Decidable (u.Fits ct) :=
+  inferInstanceAs (Decidable (_ = _))
 
 /-- The function references of `fn`'s constants, regions included. -/
 @[expose] def Func.funcRefs {env : Env Unit} {α : Type} (fn : Func env α) :

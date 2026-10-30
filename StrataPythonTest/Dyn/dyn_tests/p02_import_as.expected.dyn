@@ -13,7 +13,7 @@ module p02_import_as {
       %mod.1 : py.Value = py.importModule("json") ^propagate.0()
       %j.cell.0 : base.Ref(py.Value) = py.globalCell("p02_import_as", "j")
       %set.3 : base.Unit = base.refSet[py.Value](%j.cell.0, %mod.1)
-      %clo.0 : py.Value = py.mkClosure(@p02_import_as.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@p02_import_as.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p02_import_as", "f")
       %set.4 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit

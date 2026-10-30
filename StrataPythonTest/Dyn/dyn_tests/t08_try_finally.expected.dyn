@@ -7,10 +7,10 @@ module t08_try_finally {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("t08_try_finally", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@t08_try_finally.work)
+      %clo.0 : py.Value = py.mkClosure[[]](@t08_try_finally.work)
       %work.cell.0 : base.Ref(py.Value) = py.globalCell("t08_try_finally", "work")
       %set.2 : base.Unit = base.refSet[py.Value](%work.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure(@t08_try_finally.cleanup)
+      %clo.1 : py.Value = py.mkClosure[[]](@t08_try_finally.cleanup)
       %cleanup.cell.0 : base.Ref(py.Value) = py.globalCell("t08_try_finally", "cleanup")
       %set.3 : base.Unit = base.refSet[py.Value](%cleanup.cell.0, %clo.1)
       %work.0 : py.Value = py.loadGlobal("t08_try_finally", "work") ^finRaise.0()

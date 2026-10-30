@@ -7,7 +7,7 @@ module tc04_comparisons {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("tc04_comparisons", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@tc04_comparisons.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@tc04_comparisons.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("tc04_comparisons", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit

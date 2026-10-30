@@ -194,15 +194,16 @@ def declare (s : CollectState) (id : Ident) (as? : Option String)
   return { ref := id, envName, lean, doc?, ctx }
 
 /-- The Lean names a type `T` declares besides its own: `T.ref`, `T.name`, `T.name_ref` and
-`T.decl_ref`, `T.con` for a type without parameters, and a datatype's case instruction `T.case`,
-with its `sig`, `name` and `ref`.  A constructor `c` of `T` is `T.c`, so `declare` rejects each
-of these as a constructor name.  `Internal.T.ty` and `Internal.T.toRaw_ty` are under
-`Internal`, which the environment reserves. -/
+`T.decl_ref`, `T.con` for a type without parameters, and for a datatype its case instruction
+`T.case`, with its `sig`, `name` and `ref`, and `T.Val`, its Lean type in the executable
+semantics (`#dyn_types`).  A constructor `c` of `T` is `T.c`, so `declare` rejects each of
+these as a constructor name.  `Internal.T.ty` and `Internal.T.toRaw_ty` are under `Internal`,
+which the environment reserves. -/
 def typeGenerated (lean : Name) (nullary : Bool) (data : Bool := false) : List Name :=
   [lean ++ `ref, lean ++ `name, lean ++ `name_ref, lean ++ `decl_ref] ++
     (if nullary then [lean ++ `con] else []) ++
     if data then [lean ++ `case, lean ++ `case ++ `sig, lean ++ `case ++ `name,
-      lean ++ `case ++ `ref] else []
+      lean ++ `case ++ `ref, lean ++ `Val] else []
 
 /-- The names `T.c` would shadow on `T`'s handle, which `declare` rejects as constructor names
 too: the fields `decl`, `kinds`, `env` and `apply`. -/

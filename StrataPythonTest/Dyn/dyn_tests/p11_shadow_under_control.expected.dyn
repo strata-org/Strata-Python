@@ -10,10 +10,10 @@ module p11_shadow_under_control {
       %int.0 : py.Value = py.intLit(0)
       %total.cell.0 : base.Ref(py.Value) = py.globalCell("p11_shadow_under_control", "total")
       %set.2 : base.Unit = base.refSet[py.Value](%total.cell.0, %int.0)
-      %clo.0 : py.Value = py.mkClosure(@p11_shadow_under_control.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@p11_shadow_under_control.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p11_shadow_under_control", "f")
       %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure(@p11_shadow_under_control.g)
+      %clo.1 : py.Value = py.mkClosure[[]](@p11_shadow_under_control.g)
       %g.cell.0 : base.Ref(py.Value) = py.globalCell("p11_shadow_under_control", "g")
       %set.4 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
       %none.1 : py.Value = py.noneLit

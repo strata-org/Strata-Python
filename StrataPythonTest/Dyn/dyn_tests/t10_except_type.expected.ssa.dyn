@@ -9,7 +9,7 @@ module t10_except_type {
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %str.1 : py.Value = py.strLit("return")
       %int.0 : py.Value = py.loadGlobal("t10_except_type", "int") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure(@t10_except_type.risky)
+      %clo.0 : py.Value = py.mkClosure[[]](@t10_except_type.risky)
       %annotations.0 : py.Value = py.mkDict(%str.1, %int.0) ^propagate.0()
       %__annotations__.0 : base.Unit = py.setAttr(%clo.0, "__annotations__", %annotations.0) ^propagate.0()
       %risky.cell.0 : base.Ref(py.Value) = py.globalCell("t10_except_type", "risky")

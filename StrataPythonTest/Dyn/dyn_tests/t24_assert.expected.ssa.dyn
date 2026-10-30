@@ -11,7 +11,7 @@ module t24_assert {
       %int.0 : py.Value = py.loadGlobal("t24_assert", "int") ^propagate.0()
       %str.2 : py.Value = py.strLit("return")
       %none.1 : py.Value = py.noneLit
-      %clo.0 : py.Value = py.mkClosure(@t24_assert.validate)
+      %clo.0 : py.Value = py.mkClosure[[]](@t24_assert.validate)
       %annotations.0 : py.Value = py.mkDict(%str.1, %int.0, %str.2, %none.1) ^propagate.0()
       %__annotations__.0 : base.Unit = py.setAttr(%clo.0, "__annotations__", %annotations.0) ^propagate.0()
       %validate.cell.0 : base.Ref(py.Value) = py.globalCell("t24_assert", "validate")
@@ -22,7 +22,7 @@ module t24_assert {
       %int.2 : py.Value = py.loadGlobal("t24_assert", "int") ^propagate.0()
       %str.5 : py.Value = py.strLit("return")
       %none.2 : py.Value = py.noneLit
-      %clo.1 : py.Value = py.mkClosure(@t24_assert.check_bounds)
+      %clo.1 : py.Value = py.mkClosure[[]](@t24_assert.check_bounds)
       %annotations.1 : py.Value = py.mkDict(%str.3, %int.1, %str.4, %int.2, %str.5, %none.2) ^propagate.0()
       %__annotations__.1 : base.Unit = py.setAttr(%clo.1, "__annotations__", %annotations.1) ^propagate.0()
       %check_bounds.cell.0 : base.Ref(py.Value) = py.globalCell("t24_assert", "check_bounds")

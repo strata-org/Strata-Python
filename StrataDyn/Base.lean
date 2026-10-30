@@ -81,10 +81,6 @@ public environment Base where
   /-- `base.unreachable`: control never gets here. -/
   terminal insn unreachable
 
-  /-- `base.Code`, an untyped code pointer, which a function reference may have instead of
-  its target's `base.Fn`.  The base fixes no calling convention for it. -/
-  -- Python's lowering uses it until it moves to `base.Fn`.
-  type Code
   /-- `base.Fn as r`, a typed code pointer: to a function that takes arguments of the types
   `as`, in order, and returns an `r`.  A function reference has its target's `Fn` type,
   `Func.codeType`.  A datatype may recurse through `r`. -/

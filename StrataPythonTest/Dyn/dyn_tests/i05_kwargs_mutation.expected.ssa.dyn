@@ -7,7 +7,7 @@ module i05_kwargs_mutation {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("i05_kwargs_mutation", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@i05_kwargs_mutation.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@i05_kwargs_mutation.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("i05_kwargs_mutation", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %str.1 : py.Value = py.strLit("a")
@@ -37,7 +37,7 @@ module i05_kwargs_mutation {
       %tuple.3 : py.Value = py.mkTuple(%m.15)
       %kwargs.3 : py.Value = py.mkKwargs
       %call.3 : py.Value = py.call(%print.1, %tuple.3, %kwargs.3) ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure(@i05_kwargs_mutation.g)
+      %clo.1 : py.Value = py.mkClosure[[]](@i05_kwargs_mutation.g)
       %g.cell.0 : base.Ref(py.Value) = py.globalCell("i05_kwargs_mutation", "g")
       %set.4 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
       %int.1 : py.Value = py.intLit(1)

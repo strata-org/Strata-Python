@@ -7,7 +7,7 @@ module e13_walrus_comprehension_iterable {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("e13_walrus_comprehension_iterable", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@e13_walrus_comprehension_iterable.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@e13_walrus_comprehension_iterable.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("e13_walrus_comprehension_iterable", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit

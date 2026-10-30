@@ -10,7 +10,7 @@ module p20_global_mutated {
       %int.0 : py.Value = py.intLit(0)
       %counter.cell.0 : base.Ref(py.Value) = py.globalCell("p20_global_mutated", "counter")
       %set.2 : base.Unit = base.refSet[py.Value](%counter.cell.0, %int.0)
-      %clo.0 : py.Value = py.mkClosure(@p20_global_mutated.read)
+      %clo.0 : py.Value = py.mkClosure[[]](@p20_global_mutated.read)
       %read.cell.0 : base.Ref(py.Value) = py.globalCell("p20_global_mutated", "read")
       %set.3 : base.Unit = base.refSet[py.Value](%read.cell.0, %clo.0)
       %int.1 : py.Value = py.intLit(5)

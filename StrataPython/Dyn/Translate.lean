@@ -875,6 +875,26 @@ def firstParam? : TransM (Option String) := do
   if !(sc.kind matches .function | .lambda) then return none
   return (sc.params.find? fun p => p.kind matches .posOnly | .positional).map (·.name)
 
+/-- The default cells of a function with arguments `args`, by name. -/
+def funcDefaults : Option (arguments SourceRange) → Array String
+  | some a => (defaultCellParams a).map (·.name)
+  | none => #[]
+
+/-- The cell parameters of the function of scope `cur` with arguments `args`, a class body's
+if `none`: the cells it captures, in `capturedVars` order, then its default cells.  A class's
+own `__class__` cell is captured under `classCellKey`, named like any cell. -/
+def funcCells (cur : Scope) (args : Option (arguments SourceRange)) :
+    Array (Name × TypeExpr Py.env) :=
+  (capturedVars cur).map (fun x => (cellStem (if x == classCellKey then "__class__" else x),
+      Py.cell)) ++
+    (funcDefaults args).map (defaultStem ·, Py.cell)
+
+/-- The parameters of the function of scope `cur` with arguments `args`: its cells
+(`funcCells`), then `args` and `kwargs`. -/
+def funcParams (cur : Scope) (args : Option (arguments SourceRange)) :
+    Array (Name × TypeExpr Py.env) :=
+  funcCells cur args ++ #[(stem "args", Py.Value), (stem "kwargs", Py.Value)]
+
 /-- Queue the function of scope `cur` at `sr` and return its closure, capturing the cells of
 `capturedVars cur` from the frame, then `extra`.  A class body is named `m.C.<body>`.  Each
 scope is queued once, as each AST node is lowered once and has its own range; `emitQueued`
@@ -898,7 +918,9 @@ def queueFunc (sr : SourceRange) (scope : ScopeId) (cur : Scope)
   let fname ← allocName (if args.isNone then s!"{cur.qualname}.<body>" else cur.qualname)
   let job : FuncJob := { name := fname, scope, cur, args, body, range := sr, stub }
   modify fun s => { s with pending := s.pending.push job }
-  some <$> build (mkClosure (← build (emitFunc fname)) (cells ++ extra))
+  let params := (funcParams cur args).map (·.2)
+  let cellTypes := (funcCells cur args).map (·.2)
+  some <$> build (mkClosure (← build (emitFunc fname params)) cellTypes (cells ++ extra))
 
 /-- `f` with the decorators `decs`, already evaluated, applied bottom to top. -/
 def decorate (decs : Array ValId) (f : ValId) : TransM ValId := do
@@ -2122,7 +2144,7 @@ not well formed.  That one names each unreachable block and each use out of scop
 def builtFunc (name : Name) (params : Array (Name × TypeExpr Py.env)) (range : SourceRange)
     (body : Array ValId → PyM SourceRange TState) :
     {fn : Func Py.env SourceRange // fn.WF} × TState :=
-  match buildFuncTypedWith name params range body with
+  match buildFuncTypedWith name params range (fun ps => body ps.toArray) with
   | .ok r => r
   | .error e =>
     let messages :=
@@ -2141,15 +2163,8 @@ def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) :
     {fn : Func Py.env SourceRange // fn.WF} × TState :=
   let ctx := { ctx with scope := job.scope, cur := job.cur }
   let free := capturedVars job.cur
-  let defaults : Array String := match job.args with
-    | some a => (defaultCellParams a).map (·.name)
-    | none => #[]
-  -- A class's own `__class__` cell is captured under `classCellKey`, named like any cell.
-  let argTypes := free.map (fun x => (cellStem (if x == classCellKey then "__class__" else x),
-      Py.cell)) ++
-    defaults.map (defaultStem ·, Py.cell) ++
-    #[(stem "args", Py.Value), (stem "kwargs", Py.Value)]
-  builtFunc job.name argTypes job.range fun ps =>
+  let defaults := funcDefaults job.args
+  builtFunc job.name (funcParams job.cur job.args) job.range fun ps =>
     runBody ctx st job.range do
       match job.stub with
       | some what =>

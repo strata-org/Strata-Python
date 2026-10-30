@@ -7,10 +7,10 @@ module m_decorators {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_decorators", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@m_decorators.trace)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_decorators.trace)
       %trace.cell.0 : base.Ref(py.Value) = py.globalCell("m_decorators", "trace")
       %set.2 : base.Unit = base.refSet[py.Value](%trace.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure(@m_decorators.tag)
+      %clo.1 : py.Value = py.mkClosure[[]](@m_decorators.tag)
       %tag.cell.0 : base.Ref(py.Value) = py.globalCell("m_decorators", "tag")
       %set.3 : base.Unit = base.refSet[py.Value](%tag.cell.0, %clo.1)
       %trace.0 : py.Value = py.loadGlobal("m_decorators", "trace") ^propagate.0()
@@ -27,7 +27,7 @@ module m_decorators {
       %kwargs.1 : py.Value = py.mkKwargs
       %call.1 : py.Value = py.call(%len.0, %tuple.1, %kwargs.1) ^propagate.0()
       %c.default.0 : base.Ref(py.Value) = base.refNew[py.Value](%call.1)
-      %clo.2 : py.Value = py.mkClosure(@m_decorators.f, %b.default.0, %c.default.0)
+      %clo.2 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@m_decorators.f, %b.default.0, %c.default.0)
       %args.0 : py.Value = py.mkTuple(%clo.2)
       %kwargs.2 : py.Value = py.mkKwargs
       %decorated.0 : py.Value = py.call(%call.0, %args.0, %kwargs.2) ^propagate.0()
@@ -36,10 +36,10 @@ module m_decorators {
       %decorated.1 : py.Value = py.call(%trace.0, %args.1, %kwargs.3) ^propagate.0()
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_decorators", "f")
       %set.4 : base.Unit = base.refSet[py.Value](%f.cell.0, %decorated.1)
-      %clo.3 : py.Value = py.mkClosure(@m_decorators.outer)
+      %clo.3 : py.Value = py.mkClosure[[]](@m_decorators.outer)
       %outer.cell.0 : base.Ref(py.Value) = py.globalCell("m_decorators", "outer")
       %set.5 : base.Unit = base.refSet[py.Value](%outer.cell.0, %clo.3)
-      %clo.4 : py.Value = py.mkClosure(@m_decorators.order)
+      %clo.4 : py.Value = py.mkClosure[[]](@m_decorators.order)
       %order.cell.0 : base.Ref(py.Value) = py.globalCell("m_decorators", "order")
       %set.6 : base.Unit = base.refSet[py.Value](%order.cell.0, %clo.4)
       %none.1 : py.Value = py.noneLit
@@ -213,7 +213,7 @@ module m_decorators {
       %int.1 : py.Value = py.intLit(1)
       %add.0 : py.Value = py.add(%n.9, %int.1) ^propagate.0()
       %x.default.0 : base.Ref(py.Value) = base.refNew[py.Value](%add.0)
-      %clo.0 : py.Value = py.mkClosure(@m_decorators.outer.g, %n.cell.0, %x.default.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@m_decorators.outer.g, %n.cell.0, %x.default.0)
       %set.1 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.0)
       %g.1 : py.Value = base.refGet[py.Value](%g.cell.0)
       %g.2 : py.Value = py.requireDefined(%g.1, "UnboundLocalError", "cannot access local variable 'g' where it is not associated with a value") ^propagate.0()
@@ -276,7 +276,7 @@ module m_decorators {
       %kwargs.4 : py.Value = py.mkKwargs
       %call.3 : py.Value = py.call(%log.11, %tuple.3, %kwargs.4) ^propagate.0()
       %c.default.0 : base.Ref(py.Value) = base.refNew[py.Value](%call.3)
-      %clo.0 : py.Value = py.mkClosure(@m_decorators.order.h, %a.default.0, %c.default.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@m_decorators.order.h, %a.default.0, %c.default.0)
       %args.1 : py.Value = py.mkTuple(%clo.0)
       %kwargs.5 : py.Value = py.mkKwargs
       %decorated.0 : py.Value = py.call(%call.1, %args.1, %kwargs.5) ^propagate.0()

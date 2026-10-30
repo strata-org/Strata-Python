@@ -7,10 +7,10 @@ module c3_break_finally {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("c3_break_finally", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@c3_break_finally.cleanup)
+      %clo.0 : py.Value = py.mkClosure[[]](@c3_break_finally.cleanup)
       %cleanup.cell.0 : base.Ref(py.Value) = py.globalCell("c3_break_finally", "cleanup")
       %set.2 : base.Unit = base.refSet[py.Value](%cleanup.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure(@c3_break_finally.f)
+      %clo.1 : py.Value = py.mkClosure[[]](@c3_break_finally.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("c3_break_finally", "f")
       %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.1)
       %none.1 : py.Value = py.noneLit

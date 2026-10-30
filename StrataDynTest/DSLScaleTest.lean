@@ -60,7 +60,7 @@ public environment Scale extends Base where
   insn noneLit  : Value
   insn call (func args kwargs : Value) (^err (exc : Value)) : Value
   insn qualifiedRef (moduleName name : String) (^err (exc : Value)) : Value
-  insn mkClosure (code : Code) (*cells : (Ref Value)) : Value
+  insn mkClosure [(as : list)] (code : Fn as Value) (*cells : (Ref Value)) : Value
   insn attr (obj : Value) (name : String) (^err (exc : Value)) : Value
   insn setAttr (obj : Value) (name : String) (val : Value) (^err (exc : Value)) : Unit
   insn add (lhs rhs : Value) (^err (exc : Value)) : Value
@@ -121,7 +121,7 @@ public environment Scale extends Base where
   insn noneLit2  : Value
   insn call2 (func args kwargs : Value) (^err (exc : Value)) : Value
   insn qualifiedRef2 (moduleName name : String) (^err (exc : Value)) : Value
-  insn mkClosure2 (code : Code) (*cells : (Ref Value)) : Value
+  insn mkClosure2 [(as : list)] (code : Fn as Value) (*cells : (Ref Value)) : Value
   insn attr2 (obj : Value) (name : String) (^err (exc : Value)) : Value
   insn setAttr2 (obj : Value) (name : String) (val : Value) (^err (exc : Value)) : Unit
   insn add2 (lhs rhs : Value) (^err (exc : Value)) : Value
@@ -180,7 +180,7 @@ public environment Scale extends Base where
   insn noneLit3  : Value
   insn call3 (func args kwargs : Value) (^err (exc : Value)) : Value
   insn qualifiedRef3 (moduleName name : String) (^err (exc : Value)) : Value
-  insn mkClosure3 (code : Code) (*cells : (Ref Value)) : Value
+  insn mkClosure3 [(as : list)] (code : Fn as Value) (*cells : (Ref Value)) : Value
   insn attr3 (obj : Value) (name : String) (^err (exc : Value)) : Value
   insn setAttr3 (obj : Value) (name : String) (val : Value) (^err (exc : Value)) : Unit
   insn add3 (lhs rhs : Value) (^err (exc : Value)) : Value
@@ -241,7 +241,7 @@ public environment Scale extends Base where
   insn noneLit4  : Value
   insn call4 (func args kwargs : Value) (^err (exc : Value)) : Value
   insn qualifiedRef4 (moduleName name : String) (^err (exc : Value)) : Value
-  insn mkClosure4 (code : Code) (*cells : (Ref Value)) : Value
+  insn mkClosure4 [(as : list)] (code : Fn as Value) (*cells : (Ref Value)) : Value
   insn attr4 (obj : Value) (name : String) (^err (exc : Value)) : Value
   insn setAttr4 (obj : Value) (name : String) (val : Value) (^err (exc : Value)) : Unit
   insn add4 (lhs rhs : Value) (^err (exc : Value)) : Value

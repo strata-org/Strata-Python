@@ -13,7 +13,7 @@ module tc13_from_import {
       %pi.0 : py.Value = py.importFrom("math", "pi") ^propagate.0()
       %pi.cell.0 : base.Ref(py.Value) = py.globalCell("tc13_from_import", "pi")
       %set.3 : base.Unit = base.refSet[py.Value](%pi.cell.0, %pi.0)
-      %clo.0 : py.Value = py.mkClosure(@tc13_from_import.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@tc13_from_import.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("tc13_from_import", "f")
       %set.4 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit

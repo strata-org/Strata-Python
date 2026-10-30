@@ -7,7 +7,7 @@ module p28_global_nested {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p28_global_nested", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@p28_global_nested.outer)
+      %clo.0 : py.Value = py.mkClosure[[]](@p28_global_nested.outer)
       %outer.cell.0 : base.Ref(py.Value) = py.globalCell("p28_global_nested", "outer")
       %set.2 : base.Unit = base.refSet[py.Value](%outer.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -29,9 +29,9 @@ module p28_global_nested {
       %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "outer() takes 0 positional arguments but {} {was} given") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
-      %clo.0 : py.Value = py.mkClosure(@p28_global_nested.outer.mid)
+      %clo.0 : py.Value = py.mkClosure[[]](@p28_global_nested.outer.mid)
       %set.1 : base.Unit = base.refSet[py.Value](%mid.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure(@p28_global_nested.outer.g, %x.cell.0)
+      %clo.1 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@p28_global_nested.outer.g, %x.cell.0)
       %set.2 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
       %mid.1 : py.Value = base.refGet[py.Value](%mid.cell.0)
       %mid.2 : py.Value = py.requireDefined(%mid.1, "UnboundLocalError", "cannot access local variable 'mid' where it is not associated with a value") ^propagate.0()
@@ -53,7 +53,7 @@ module p28_global_nested {
       %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
       %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "outer.<locals>.mid() got an unexpected keyword argument {}") ^propagate.0()
       %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "outer.<locals>.mid() takes 0 positional arguments but {} {was} given") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure(@p28_global_nested.outer.mid.inner)
+      %clo.0 : py.Value = py.mkClosure[[]](@p28_global_nested.outer.mid.inner)
       %set.0 : base.Unit = base.refSet[py.Value](%inner.cell.0, %clo.0)
       %inner.1 : py.Value = base.refGet[py.Value](%inner.cell.0)
       %inner.2 : py.Value = py.requireDefined(%inner.1, "UnboundLocalError", "cannot access local variable 'inner' where it is not associated with a value") ^propagate.0()
@@ -70,7 +70,7 @@ module p28_global_nested {
       %kw.1 : py.Value = py.dictFirstKey(%kwargs.0, %kw.0)
       %check.0 : base.Unit = py.requireUndefined(%kw.1, "TypeError", "outer.<locals>.g() got an unexpected keyword argument {}") ^propagate.0()
       %check.1 : base.Unit = py.requireAtMost(%nargs.0, 0, "TypeError", "outer.<locals>.g() takes 0 positional arguments but {} {was} given") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure(@p28_global_nested.helper, %x.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@p28_global_nested.helper, %x.cell.0)
       %helper.cell.0 : base.Ref(py.Value) = py.globalCell("p28_global_nested", "helper")
       %set.0 : base.Unit = base.refSet[py.Value](%helper.cell.0, %clo.0)
       %none.0 : py.Value = py.noneLit

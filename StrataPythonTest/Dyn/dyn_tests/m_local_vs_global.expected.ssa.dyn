@@ -10,10 +10,10 @@ module m_local_vs_global {
       %int.0 : py.Value = py.intLit(1)
       %x.cell.0 : base.Ref(py.Value) = py.globalCell("m_local_vs_global", "x")
       %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
-      %clo.0 : py.Value = py.mkClosure(@m_local_vs_global.reads_global)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_local_vs_global.reads_global)
       %reads_global.cell.0 : base.Ref(py.Value) = py.globalCell("m_local_vs_global", "reads_global")
       %set.3 : base.Unit = base.refSet[py.Value](%reads_global.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure(@m_local_vs_global.shadows_global)
+      %clo.1 : py.Value = py.mkClosure[[]](@m_local_vs_global.shadows_global)
       %shadows_global.cell.0 : base.Ref(py.Value) = py.globalCell("m_local_vs_global", "shadows_global")
       %set.4 : base.Unit = base.refSet[py.Value](%shadows_global.cell.0, %clo.1)
       %none.1 : py.Value = py.noneLit

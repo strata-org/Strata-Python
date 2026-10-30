@@ -42,7 +42,7 @@ module p05_import_try {
       %set.5 : base.Unit = base.refSet[py.Value](%path.cell.1, %none.1)
       jump ^join.1()
     join.1():
-      %clo.0 : py.Value = py.mkClosure(@p05_import_try.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@p05_import_try.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p05_import_try", "f")
       %set.6 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.2 : py.Value = py.noneLit

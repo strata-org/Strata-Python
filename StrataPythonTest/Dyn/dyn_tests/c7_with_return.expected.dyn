@@ -7,10 +7,10 @@ module c7_with_return {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("c7_with_return", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@c7_with_return.acquire)
+      %clo.0 : py.Value = py.mkClosure[[]](@c7_with_return.acquire)
       %acquire.cell.0 : base.Ref(py.Value) = py.globalCell("c7_with_return", "acquire")
       %set.2 : base.Unit = base.refSet[py.Value](%acquire.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure(@c7_with_return.f)
+      %clo.1 : py.Value = py.mkClosure[[]](@c7_with_return.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("c7_with_return", "f")
       %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.1)
       %none.1 : py.Value = py.noneLit

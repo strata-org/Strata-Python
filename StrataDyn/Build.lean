@@ -257,15 +257,22 @@ def emit (d : ValDecl env) (instr : Instruction env α) : BuildM env α ValId :=
     modify fun s => { s with body.instrs := s.body.instrs.push instr }
   return d.id
 
-/-- Emit a constant, named after `name`, at the type the base gives it. -/
+/-- Emit a literal, named after `name`, at the type the base gives it.  A function reference
+takes its type from `emitFunc`; given one, it is an error, and nothing is emitted. -/
 def emitConst [base ⊑ env] (name : Name) (c : Const) (info : Option α := none) :
     BuildM env α ValId := do
-  let d ← freshVal name c.typeOf
-  emit d (.const (← resolveInfo info) d c)
+  match c.typeOf? (env := env) with
+  | some t =>
+    let d ← freshVal name t
+    emit d (.const (← resolveInfo info) d c)
+  | none =>
+    let d ← freshVal name Base.Unit
+    error s!"%{d.id.id}: a function reference emitted as a literal, with no type; use emitFunc"
+    return d.id
 
-/-- Emit a code pointer to `target`, a function of the module, at `ty`: the target's code
-type, or the untyped `base.Code`.  The module checks it, so the target may be built after the
-reference. -/
+/-- Emit a code pointer to `target`, a function of the module, at `ty`, the target's code
+type, `base.Fn` of its parameter types and its return type.  The module checks it, so the
+target may be built after the reference. -/
 def emitFunc [base ⊑ env] (target : Name) (ty : TypeExpr env) (info : Option α := none) :
     BuildM env α ValId := do
   let d ← freshVal (.str .base "code") ty
@@ -526,8 +533,8 @@ private def numberLabels (s : State env α) (blocks : Array (Block env α)) :
   | some renames =>
     (relabelBlocks (fun l => ⟨(renames.find? l.name).getD l.name⟩) blocks.toList).toArray
 
-/-- The misuses `s` recorded, each label given its final name. -/
-private def misuseTexts (s : State env α) : Array String :=
+/-- The misuses `s` recorded, each label given the name it has in the function `s` describes. -/
+def State.misuses (s : State env α) : Array String :=
   let final : Label → Name := match labelRenames s with
     | none => (·.name)
     | some renames => fun l => (renames.find? l.name).getD l.name
@@ -579,7 +586,7 @@ def run [base ⊑ env] {β : Type} (name : Name) (retType : TypeExpr env) (info 
     checkClosed "the function"
     return r) (State.init info)
   let fn := toFunc s name retType info
-  if !s.errors.isEmpty then .error ⟨r, misuseTexts s, fn⟩
+  if !s.errors.isEmpty then .error ⟨r, s.misuses, fn⟩
   else match decWF s name retType info with
     | isTrue h => .ok (⟨fn, h⟩, r)
     | isFalse _ => .error ⟨r, #[], fn⟩

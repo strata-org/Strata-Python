@@ -17,17 +17,17 @@ module p17_conditional_def {
       %cond.0 : base.Bool = py.truthy(%eq.0) ^propagate.0()
       branch(%cond.0) ^then.0() ^else.0()
     then.0():
-      %clo.0 : py.Value = py.mkClosure(@p17_conditional_def.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@p17_conditional_def.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p17_conditional_def", "f")
       %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       jump ^join.0()
     else.0():
-      %clo.1 : py.Value = py.mkClosure(@p17_conditional_def.f.1)
+      %clo.1 : py.Value = py.mkClosure[[]](@p17_conditional_def.f.1)
       %f.cell.1 : base.Ref(py.Value) = py.globalCell("p17_conditional_def", "f")
       %set.4 : base.Unit = base.refSet[py.Value](%f.cell.1, %clo.1)
       jump ^join.0()
     join.0():
-      %clo.2 : py.Value = py.mkClosure(@p17_conditional_def.g)
+      %clo.2 : py.Value = py.mkClosure[[]](@p17_conditional_def.g)
       %g.cell.0 : base.Ref(py.Value) = py.globalCell("p17_conditional_def", "g")
       %set.5 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.2)
       jump ^join.1()

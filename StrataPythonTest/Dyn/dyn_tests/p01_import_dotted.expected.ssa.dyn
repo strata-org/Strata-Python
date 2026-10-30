@@ -15,7 +15,7 @@ module p01_import_dotted {
       %mod.3 : py.Value = py.importModule("a") ^propagate.0()
       %a.cell.0 : base.Ref(py.Value) = py.globalCell("p01_import_dotted", "a")
       %set.3 : base.Unit = base.refSet[py.Value](%a.cell.0, %mod.3)
-      %clo.0 : py.Value = py.mkClosure(@p01_import_dotted.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@p01_import_dotted.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p01_import_dotted", "f")
       %set.4 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit

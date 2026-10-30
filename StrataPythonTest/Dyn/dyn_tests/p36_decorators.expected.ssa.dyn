@@ -7,10 +7,10 @@ module p36_decorators {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p36_decorators", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@p36_decorators.deco)
+      %clo.0 : py.Value = py.mkClosure[[]](@p36_decorators.deco)
       %deco.cell.0 : base.Ref(py.Value) = py.globalCell("p36_decorators", "deco")
       %set.2 : base.Unit = base.refSet[py.Value](%deco.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure(@p36_decorators.outer)
+      %clo.1 : py.Value = py.mkClosure[[]](@p36_decorators.outer)
       %outer.cell.0 : base.Ref(py.Value) = py.globalCell("p36_decorators", "outer")
       %set.3 : base.Unit = base.refSet[py.Value](%outer.cell.0, %clo.1)
       %none.1 : py.Value = py.noneLit
@@ -77,12 +77,12 @@ module p36_decorators {
       %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "outer() takes 1 positional argument but {} {was} given") ^propagate.0()
       %base.3 : py.Value = py.requireDefined(%base.2, "TypeError", "outer() missing 1 required positional argument: 'base'") ^propagate.0()
       %deco.0 : py.Value = py.loadGlobal("p36_decorators", "deco") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure(@p36_decorators.outer.inner)
+      %clo.0 : py.Value = py.mkClosure[[]](@p36_decorators.outer.inner)
       %args.1 : py.Value = py.mkTuple(%clo.0)
       %kwargs.1 : py.Value = py.mkKwargs
       %decorated.0 : py.Value = py.call(%deco.0, %args.1, %kwargs.1) ^propagate.0()
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure(@|p36_decorators.outer.K.<body>|)
+      %clo.1 : py.Value = py.mkClosure[[]](@|p36_decorators.outer.K.<body>|)
       %str.1 : py.Value = py.strLit("K")
       %base.5 : py.Value = py.requireDefined(%base.3, "UnboundLocalError", "cannot access local variable 'base' where it is not associated with a value") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%clo.1, %str.1, %base.5)

@@ -15,14 +15,14 @@ module p19_builtin_shadowed {
       %cond.0 : base.Bool = py.truthy(%argv.0) ^propagate.0()
       branch(%cond.0) ^then.0() ^else.0()
     then.0():
-      %clo.0 : py.Value = py.mkClosure(@|p19_builtin_shadowed.<lambda>|)
+      %clo.0 : py.Value = py.mkClosure[[]](@|p19_builtin_shadowed.<lambda>|)
       %len.cell.0 : base.Ref(py.Value) = py.globalCell("p19_builtin_shadowed", "len")
       %set.3 : base.Unit = base.refSet[py.Value](%len.cell.0, %clo.0)
       jump ^join.0()
     else.0():
       jump ^join.0()
     join.0():
-      %clo.1 : py.Value = py.mkClosure(@p19_builtin_shadowed.f)
+      %clo.1 : py.Value = py.mkClosure[[]](@p19_builtin_shadowed.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p19_builtin_shadowed", "f")
       %set.4 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.1)
       %none.1 : py.Value = py.noneLit

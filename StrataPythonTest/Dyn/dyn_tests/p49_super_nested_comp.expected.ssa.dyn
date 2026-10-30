@@ -8,7 +8,7 @@ module p49_super_nested_comp {
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p49_super_nested_comp", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure(@|p49_super_nested_comp.A.<body>|)
+      %clo.0 : py.Value = py.mkClosure[[]](@|p49_super_nested_comp.A.<body>|)
       %str.1 : py.Value = py.strLit("A")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs
@@ -18,7 +18,7 @@ module p49_super_nested_comp {
       %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %__class__.0 : py.Value = py.undef("__class__")
       %__class__.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%__class__.0)
-      %clo.1 : py.Value = py.mkClosure(@|p49_super_nested_comp.B.<body>|, %__class__.cell.0)
+      %clo.1 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|p49_super_nested_comp.B.<body>|, %__class__.cell.0)
       %str.2 : py.Value = py.strLit("B")
       %A.1 : py.Value = py.loadGlobal("p49_super_nested_comp", "A") ^propagate.0()
       %tuple.1 : py.Value = py.mkTuple(%clo.1, %str.2, %A.1)
@@ -52,7 +52,7 @@ module p49_super_nested_comp {
       %str.2 : py.Value = py.strLit("A")
       %str.3 : py.Value = py.strLit("__qualname__")
       %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure(@p49_super_nested_comp.A.m)
+      %clo.0 : py.Value = py.mkClosure[[]](@p49_super_nested_comp.A.m)
       %str.4 : py.Value = py.strLit("m")
       %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
       %none.0 : py.Value = py.noneLit
@@ -80,7 +80,7 @@ module p49_super_nested_comp {
       %str.2 : py.Value = py.strLit("B")
       %str.3 : py.Value = py.strLit("__qualname__")
       %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure(@p49_super_nested_comp.B.m, %__class__.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@p49_super_nested_comp.B.m, %__class__.cell.0)
       %str.4 : py.Value = py.strLit("m")
       %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
       %none.0 : py.Value = py.noneLit

@@ -22,7 +22,7 @@ set_option autoImplicit false
 
 `base.Fn as r` is the type of a code pointer to a function that takes arguments of the types
 `as` and returns an `r`, and `base.callCode` calls through one.  A reference `@m.f` has `f`'s
-code type, or the untyped `base.Code`, which cannot be called.
+code type.
 
 A module of two functions: `pos`, which takes an `Int` and returns a `Bool`, and `apply`, which
 calls `pos` through a reference.  The module checks a reference's type against its target's
@@ -103,11 +103,11 @@ example : (TypeList.ofTypes (env := base) #[Base.Int]).elems = #[Base.Int] :=
 
 /-! ## Calling through a reference
 
-At `pos`'s code type `apply` builds, and the module is well formed.  At `base.Code` the builder
+At `pos`'s code type `apply` builds, and the module is well formed.  At `base.Int` the builder
 cannot infer `callCode`'s type arguments, since `callCode` takes a `Fn`. -/
 
 #guard (apply posT).isOk
-#guard match apply Base.Code with
+#guard match apply Base.Int with
   | .error e => e.misuses == #["cannot infer the type arguments of base.callCode: the types of \
       its operands and result do not fit its signature"]
   | .ok _ => false
@@ -130,9 +130,8 @@ cannot infer `callCode`'s type arguments, since `callCode` takes a `Fn`. -/
 /-! ## A reference's type
 
 A reference is a code pointer, so the builder rejects `ref` at `base.Int`: the function is not
-well formed.  At `base.Code` and at a `Fn` the function is well formed.  Its module accepts the
-reference at `pos`'s code type and at `base.Code`, and names `ref` for a `Fn` with another result
-or another parameter. -/
+well formed.  At a `Fn` the function is well formed.  Its module accepts the reference at
+`pos`'s code type, and names `ref` for a `Fn` with another result or another parameter. -/
 
 #guard match ref Base.Int with
   | .error e => toString e == "m.ref is not well formed"
@@ -150,31 +149,18 @@ or another parameter. -/
   }
 }
 
-ok: module m {
-  func @m.pos(%x.0 : base.Int) -> base.Bool {
-    entry.0(%x.0 : base.Int):
-      ret(true)
-  }
-  func @m.ref() -> base.Bool {
-    entry.0():
-      %code.0 : base.Code = const @m.pos
-      ret(true)
-  }
-}
-
 #[m.ref]
 #[m.ref] -/
 #guard_msgs in
 #eval do
   IO.println (describe #[pos, ref posT])
-  IO.println (describe #[pos, ref Base.Code])
   IO.println (describe #[pos, ref (Base.Fn [Base.Int] Base.Int)])
   IO.println (describe #[pos, ref (Base.Fn [Base.Bool] Base.Bool)])
 
 /-! ## Reading
 
 The printed module reads back, and prints the same.  The reader takes `@m.pos` at the type
-where it is used, which must be `pos`'s code type or `base.Code`. -/
+where it is used, which must be `pos`'s code type. -/
 
 /-- Read `text`, and print the module or the diagnostics. -/
 private def readBack (text : String) : IO Unit := do
@@ -218,17 +204,18 @@ private def withRef (ty ref : String) : String := s!"module m \{
 #guard_msgs in
 #eval readBack (withRef "base.Fn([base.Int], base.Bool)" "@m.pos")
 
-/-- info: t.dyn:8:51: @m.pos has type base.Fn([base.Int], base.Bool), or base.Code, where base.Fn([base.Int], base.Int) is expected -/
+/-- info: t.dyn:8:51: @m.pos has type base.Fn([base.Int], base.Bool), where base.Fn([base.Int], base.Int) is expected -/
 #guard_msgs in
 #eval readBack (withRef "base.Fn([base.Int], base.Int)" "@m.pos")
 
 -- At `base.Bool` it does not read, beside the same reference at `Fn` above.
-/-- info: t.dyn:8:31: @m.pos has type base.Fn([base.Int], base.Bool), or base.Code, where base.Bool is expected -/
+/-- info: t.dyn:8:31: @m.pos has type base.Fn([base.Int], base.Bool), where base.Bool is expected -/
 #guard_msgs in
 #eval readBack (withRef "base.Bool" "@m.pos")
 
-/- At `base.Code` the reference reads, but `callCode` does not take it. -/
-/-- info: t.dyn:9:62: %p.0 has type base.Code, but base.callCode, operand 1 takes base.Fn([base.Int], base.Bool) -/
+-- An untyped `base.Code` is no type of the base, so the reference does not read, beside the
+-- same reference at `pos`'s code type above.
+/-- info: t.dyn:8:13: unknown type base.Code -/
 #guard_msgs in
 #eval readBack (withRef "base.Code" "@m.pos")
 

@@ -7,10 +7,10 @@ module p15_global {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p15_global", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@p15_global.set_x)
+      %clo.0 : py.Value = py.mkClosure[[]](@p15_global.set_x)
       %set_x.cell.0 : base.Ref(py.Value) = py.globalCell("p15_global", "set_x")
       %set.2 : base.Unit = base.refSet[py.Value](%set_x.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure(@p15_global.get_x)
+      %clo.1 : py.Value = py.mkClosure[[]](@p15_global.get_x)
       %get_x.cell.0 : base.Ref(py.Value) = py.globalCell("p15_global", "get_x")
       %set.3 : base.Unit = base.refSet[py.Value](%get_x.cell.0, %clo.1)
       %set_x.0 : py.Value = py.loadGlobal("p15_global", "set_x") ^propagate.0()

@@ -33,7 +33,7 @@ module m_scope_ifexp {
       %add.0 : py.Value = py.add(%a.0, %ifexp.0) ^propagate.0()
       %y.cell.0 : base.Ref(py.Value) = py.globalCell("m_scope_ifexp", "y")
       %set.6 : base.Unit = base.refSet[py.Value](%y.cell.0, %add.0)
-      %clo.0 : py.Value = py.mkClosure(@m_scope_ifexp.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_scope_ifexp.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_scope_ifexp", "f")
       %set.7 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit

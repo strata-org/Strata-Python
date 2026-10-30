@@ -18,11 +18,11 @@ module e26_outside_loop {
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %x.cell.0 : base.Ref(py.Value) = py.globalCell("e26_outside_loop", "x")
       %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %item.0)
-      %clo.0 : py.Value = py.mkClosure(@e26_outside_loop.g)
+      %clo.0 : py.Value = py.mkClosure[[]](@e26_outside_loop.g)
       %g.cell.0 : base.Ref(py.Value) = py.globalCell("e26_outside_loop", "g")
       %set.3 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure(@|e26_outside_loop.C.<body>|)
+      %clo.1 : py.Value = py.mkClosure[[]](@|e26_outside_loop.C.<body>|)
       %str.1 : py.Value = py.strLit("C")
       %tuple.0 : py.Value = py.mkTuple(%clo.1, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs

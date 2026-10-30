@@ -8,7 +8,7 @@ module p23_walrus {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p23_walrus", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@p23_walrus.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@p23_walrus.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p23_walrus", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %range.0 : py.Value = py.loadGlobal("p23_walrus", "range") ^propagate.0()
@@ -36,10 +36,10 @@ module p23_walrus {
       }
       %ys.cell.0 : base.Ref(py.Value) = py.globalCell("p23_walrus", "ys")
       %set.5 : base.Unit = base.refSet[py.Value](%ys.cell.0, %acc.0)
-      %clo.1 : py.Value = py.mkClosure(@p23_walrus.g)
+      %clo.1 : py.Value = py.mkClosure[[]](@p23_walrus.g)
       %g.cell.0 : base.Ref(py.Value) = py.globalCell("p23_walrus", "g")
       %set.6 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
-      %clo.2 : py.Value = py.mkClosure(@p23_walrus.h)
+      %clo.2 : py.Value = py.mkClosure[[]](@p23_walrus.h)
       %h.cell.0 : base.Ref(py.Value) = py.globalCell("p23_walrus", "h")
       %set.7 : base.Unit = base.refSet[py.Value](%h.cell.0, %clo.2)
       %none.1 : py.Value = py.noneLit

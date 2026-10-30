@@ -7,10 +7,10 @@ module rr02_merges {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("rr02_merges", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@rr02_merges.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@rr02_merges.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("rr02_merges", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure(@rr02_merges.g)
+      %clo.1 : py.Value = py.mkClosure[[]](@rr02_merges.g)
       %g.cell.0 : base.Ref(py.Value) = py.globalCell("rr02_merges", "g")
       %set.3 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
       %none.1 : py.Value = py.noneLit

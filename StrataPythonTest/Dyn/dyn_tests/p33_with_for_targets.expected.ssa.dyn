@@ -7,7 +7,7 @@ module p33_with_for_targets {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p33_with_for_targets", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@p33_with_for_targets.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@p33_with_for_targets.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p33_with_for_targets", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit

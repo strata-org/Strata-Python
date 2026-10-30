@@ -18,10 +18,10 @@ module m_runtime_globals {
       %tuple.0 : py.Value = py.mkTuple(%str.1)
       %kwargs.0 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%log.1, %tuple.0, %kwargs.0) ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure(@m_runtime_globals.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_runtime_globals.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_runtime_globals", "f")
       %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure(@m_runtime_globals.g)
+      %clo.1 : py.Value = py.mkClosure[[]](@m_runtime_globals.g)
       %g.cell.0 : base.Ref(py.Value) = py.globalCell("m_runtime_globals", "g")
       %set.4 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
       %int.0 : py.Value = py.intLit(1)

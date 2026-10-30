@@ -37,7 +37,7 @@ does the same from a DDM term.
   `unreachable` are the base's, and `ret(args)` is a jump to `Label.exit`.
 * A literal has the type its form fixes, which must be the type where it is used.  A function
   reference `@m.f` has the type where it is used, which must be `m.f`'s code type, read from
-  its header, or the untyped `base.Code`.
+  its header.
 * A constant written at a use becomes a `const` instruction just before it.
 * Values get ids in printed order, so the function read is canonical (`Func.Canonical`).
 * The reader checks each function against `Func.WF` as it finishes it, and explains one that is
@@ -171,7 +171,7 @@ abbrev Funcs (env : Env Unit) := NameTable (SourceRange × Option (TypeExpr env)
 
 /-- A literal, at `expected`, with `funcs` the module's functions.  A literal's type is the one
 its form fixes, and must be `expected`.  A function reference has type `expected`, which must
-be its target's code type or the untyped `base.Code`. -/
+be its target's code type. -/
 def literal {env : Env Unit} [base ⊑ env] (funcs : Funcs env) (expected : TypeExpr env)
     (c : MConst SourceRange) : Result Const := do
   let k : Const ← match c with
@@ -184,13 +184,13 @@ def literal {env : Env Unit} [base ⊑ env] (funcs : Funcs env) (expected : Type
       let f := nameOf (identText n)
       let some (_, ct?) := funcs.get? f
         | throw ⟨ann, s!"no function @{identText n} in this module"⟩
-      if expected = Base.Code ∨ ct? = some expected then return .func f
+      if ct? = some expected then return .func f
       let ct := (ct?.map typeText).getD "?"
-      throw ⟨ann, s!"@{identText n} has type {ct}, or base.Code, where {typeText expected} \
-        is expected"⟩
-  if k.typeOf = expected then pure k
-  else throw ⟨constAnn c, s!"a {typeText (k.typeOf (env := env))} literal where \
-    {typeText expected} is expected"⟩
+      throw ⟨ann, s!"@{identText n} has type {ct}, where {typeText expected} is expected"⟩
+  let t? : Option (TypeExpr env) := k.typeOf?
+  if t? = some expected then pure k
+  else throw ⟨constAnn c, s!"a {(t?.map typeText).getD "?"} literal where {typeText expected} \
+    is expected"⟩
 
 /-! ## The state of reading a function -/
 

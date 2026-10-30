@@ -10,7 +10,7 @@ module tc10_class_method {
       %mod.0 : py.Value = py.importModule("myservice") ^propagate.0()
       %myservice.cell.0 : base.Ref(py.Value) = py.globalCell("tc10_class_method", "myservice")
       %set.2 : base.Unit = base.refSet[py.Value](%myservice.cell.0, %mod.0)
-      %clo.0 : py.Value = py.mkClosure(@tc10_class_method.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@tc10_class_method.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("tc10_class_method", "f")
       %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit

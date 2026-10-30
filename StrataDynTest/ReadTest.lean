@@ -52,7 +52,7 @@ private def folded : String := "module m {
       %v.7 : base.Int = base.refGet[base.Int](%v.3)
       ret(%v.7)
   }
-  func @|m.<code>|() -> base.Code {
+  func @|m.<code>|() -> base.Fn([base.Bool], base.Int) {
     entry.0():
       ret(@m.counter)
   }
@@ -86,9 +86,9 @@ private def folded : String := "module m {
       %v.7 : base.Int = base.refGet[base.Int](%v.3)
       ret(%v.7)
   }
-  func @|m.<code>|() -> base.Code {
+  func @|m.<code>|() -> base.Fn([base.Bool], base.Int) {
     entry.0():
-      %c.0 : base.Code = const @m.counter
+      %c.0 : base.Fn([base.Bool], base.Int) = const @m.counter
       ret(%c.0)
   }
   func @m.pick(%v.0 : base.Bool) -> base.Int {
@@ -118,7 +118,7 @@ module m {
       %v.7 : base.Int = base.refGet[base.Int](%v.3)
       ret(%v.7)
   }
-  func @|m.<code>|() -> base.Code {
+  func @|m.<code>|() -> base.Fn([base.Bool], base.Int) {
     entry.0():
       ret(@m.counter)
   }
@@ -140,7 +140,7 @@ module m {
 
 /-! ## Names that need quoting
 
-A function named `f`, as printed, returns a pointer to itself, so its name is read both where
+A function named `f`, as printed, takes a pointer to itself, so its name is read both where
 it is defined and as an operand.  Each test prints the segments read, then the module
 printed again. -/
 
@@ -152,7 +152,8 @@ private def segments : Name → List String
 
 /-- Read a module whose one function is `@f`, and print its name's segments and the module. -/
 private def nameTrip (f : String) : IO Unit := do
-  let text := s!"module m \{\n  func @{f}() -> base.Code \{\n    entry.0():\n      ret(@{f})\n  }\n}\n"
+  let text := s!"module m \{\n  func @{f}() -> base.Unit \{\n    entry.0():\n      \
+    %p.0 : base.Fn([], base.Unit) = const @{f}\n      ret(unit)\n  }\n}\n"
   match ← Module.read Reg.env text "t.dyn" with
   | .error e => IO.println e
   | .ok m =>
@@ -161,9 +162,10 @@ private def nameTrip (f : String) : IO Unit := do
 
 /-- info: [["m", "café"]]
 module m {
-  func @|m.café|() -> base.Code {
+  func @|m.café|() -> base.Unit {
     entry.0():
-      ret(@|m.café|)
+      %p.0 : base.Fn([], base.Unit) = const @|m.café|
+      ret(unit)
   }
 }
 -/
@@ -172,9 +174,10 @@ module m {
 
 /-- info: [["m", "f", "<lambda>"]]
 module m {
-  func @|m.f.<lambda>|() -> base.Code {
+  func @|m.f.<lambda>|() -> base.Unit {
     entry.0():
-      ret(@|m.f.<lambda>|)
+      %p.0 : base.Fn([], base.Unit) = const @|m.f.<lambda>|
+      ret(unit)
   }
 }
 -/
@@ -184,9 +187,10 @@ module m {
 -- The quote character is escaped inside the quotes.
 /-- info: [["m", "a|b"]]
 module m {
-  func @|m.a\|b|() -> base.Code {
+  func @|m.a\|b|() -> base.Unit {
     entry.0():
-      ret(@|m.a\|b|)
+      %p.0 : base.Fn([], base.Unit) = const @|m.a\|b|
+      ret(unit)
   }
 }
 -/
@@ -196,9 +200,10 @@ module m {
 -- `_` is the root only alone; after `m.` it is a string segment.
 /-- info: [["m", "_"]]
 module m {
-  func @m._() -> base.Code {
+  func @m._() -> base.Unit {
     entry.0():
-      ret(@m._)
+      %p.0 : base.Fn([], base.Unit) = const @m._
+      ret(unit)
   }
 }
 -/
@@ -208,9 +213,10 @@ module m {
 -- The reader splits at every `.`, quoted or not, so no name it reads has a `.` in a segment.
 /-- info: [["m", "a", "b"]]
 module m {
-  func @m.a.b() -> base.Code {
+  func @m.a.b() -> base.Unit {
     entry.0():
-      ret(@m.a.b)
+      %p.0 : base.Fn([], base.Unit) = const @m.a.b
+      ret(unit)
   }
 }
 -/
@@ -571,7 +577,7 @@ module dom {
 #guard_msgs in
 #eval roundTrip (withBody "      ret(@m.g)")
 
-/-- info: t.dyn:4:10: @m.f has type base.Fn([], base.Int), or base.Code, where base.Int is expected -/
+/-- info: t.dyn:4:10: @m.f has type base.Fn([], base.Int), where base.Int is expected -/
 #guard_msgs in
 #eval roundTrip (withBody "      ret(@m.f)")
 

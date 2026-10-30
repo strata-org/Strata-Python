@@ -7,7 +7,7 @@ module i01_call_forms {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("i01_call_forms", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@i01_call_forms.show)
+      %clo.0 : py.Value = py.mkClosure[[]](@i01_call_forms.show)
       %show.cell.0 : base.Ref(py.Value) = py.globalCell("i01_call_forms", "show")
       %set.2 : base.Unit = base.refSet[py.Value](%show.cell.0, %clo.0)
       %show.0 : py.Value = py.loadGlobal("i01_call_forms", "show") ^propagate.0()

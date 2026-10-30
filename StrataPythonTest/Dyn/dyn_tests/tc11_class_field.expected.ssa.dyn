@@ -10,7 +10,7 @@ module tc11_class_field {
       %mod.0 : py.Value = py.importModule("myservice") ^propagate.0()
       %myservice.cell.0 : base.Ref(py.Value) = py.globalCell("tc11_class_field", "myservice")
       %set.2 : base.Unit = base.refSet[py.Value](%myservice.cell.0, %mod.0)
-      %clo.0 : py.Value = py.mkClosure(@tc11_class_field.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@tc11_class_field.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("tc11_class_field", "f")
       %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit

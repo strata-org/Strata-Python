@@ -10,7 +10,7 @@ module dom {
       %int.0 : py.Value = py.intLit(1)
       %dom.cell.0 : base.Ref(py.Value) = py.globalCell("dom", "dom")
       %set.2 : base.Unit = base.refSet[py.Value](%dom.cell.0, %int.0)
-      %clo.0 : py.Value = py.mkClosure(@dom.dom2)
+      %clo.0 : py.Value = py.mkClosure[[]](@dom.dom2)
       %dom2.cell.0 : base.Ref(py.Value) = py.globalCell("dom", "dom2")
       %set.3 : base.Unit = base.refSet[py.Value](%dom2.cell.0, %clo.0)
       %print.0 : py.Value = py.loadGlobal("dom", "print") ^propagate.0()

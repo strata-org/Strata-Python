@@ -7,7 +7,7 @@ module p12_del {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p12_del", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@p12_del.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@p12_del.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p12_del", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %int.0 : py.Value = py.intLit(1)

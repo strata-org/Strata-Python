@@ -8,7 +8,7 @@ module t19_attribute {
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("t19_attribute", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure(@|t19_attribute.Config.<body>|)
+      %clo.0 : py.Value = py.mkClosure[[]](@|t19_attribute.Config.<body>|)
       %str.1 : py.Value = py.strLit("Config")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs
@@ -32,7 +32,7 @@ module t19_attribute {
       %c.6 : py.Value = py.loadGlobal("t19_attribute", "c") ^propagate.0()
       %level.0 : base.Unit = py.setAttr(%c.6, "level", %int.0) ^propagate.0()
       %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure(@|t19_attribute.Inner.<body>|)
+      %clo.1 : py.Value = py.mkClosure[[]](@|t19_attribute.Inner.<body>|)
       %str.2 : py.Value = py.strLit("Inner")
       %tuple.2 : py.Value = py.mkTuple(%clo.1, %str.2)
       %kwargs.2 : py.Value = py.mkKwargs
@@ -40,7 +40,7 @@ module t19_attribute {
       %Inner.cell.0 : base.Ref(py.Value) = py.globalCell("t19_attribute", "Inner")
       %set.5 : base.Unit = base.refSet[py.Value](%Inner.cell.0, %Inner.0)
       %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.2 : py.Value = py.mkClosure(@|t19_attribute.Outer.<body>|)
+      %clo.2 : py.Value = py.mkClosure[[]](@|t19_attribute.Outer.<body>|)
       %str.3 : py.Value = py.strLit("Outer")
       %tuple.3 : py.Value = py.mkTuple(%clo.2, %str.3)
       %kwargs.3 : py.Value = py.mkKwargs
@@ -83,7 +83,7 @@ module t19_attribute {
       %str.2 : py.Value = py.strLit("Config")
       %str.3 : py.Value = py.strLit("__qualname__")
       %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure(@t19_attribute.Config.__init__)
+      %clo.0 : py.Value = py.mkClosure[[]](@t19_attribute.Config.__init__)
       %str.4 : py.Value = py.strLit("__init__")
       %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
       %none.0 : py.Value = py.noneLit
@@ -111,7 +111,7 @@ module t19_attribute {
       %str.2 : py.Value = py.strLit("Inner")
       %str.3 : py.Value = py.strLit("__qualname__")
       %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure(@t19_attribute.Inner.__init__)
+      %clo.0 : py.Value = py.mkClosure[[]](@t19_attribute.Inner.__init__)
       %str.4 : py.Value = py.strLit("__init__")
       %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
       %none.0 : py.Value = py.noneLit
@@ -139,7 +139,7 @@ module t19_attribute {
       %str.2 : py.Value = py.strLit("Outer")
       %str.3 : py.Value = py.strLit("__qualname__")
       %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure(@t19_attribute.Outer.__init__)
+      %clo.0 : py.Value = py.mkClosure[[]](@t19_attribute.Outer.__init__)
       %str.4 : py.Value = py.strLit("__init__")
       %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
       %none.0 : py.Value = py.noneLit

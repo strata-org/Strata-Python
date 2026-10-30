@@ -14,10 +14,10 @@ module p26_params {
       %b.default.0 : base.Ref(py.Value) = base.refNew[py.Value](%d.0)
       %d.1 : py.Value = py.loadGlobal("p26_params", "d") ^propagate.0()
       %g.default.0 : base.Ref(py.Value) = base.refNew[py.Value](%d.1)
-      %clo.0 : py.Value = py.mkClosure(@p26_params.f, %b.default.0, %g.default.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@p26_params.f, %b.default.0, %g.default.0)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p26_params", "f")
       %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure(@p26_params.h)
+      %clo.1 : py.Value = py.mkClosure[[]](@p26_params.h)
       %h.cell.0 : base.Ref(py.Value) = py.globalCell("p26_params", "h")
       %set.4 : base.Unit = base.refSet[py.Value](%h.cell.0, %clo.1)
       %none.1 : py.Value = py.noneLit

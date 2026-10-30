@@ -7,7 +7,7 @@ module e11_nonlocal_param {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("e11_nonlocal_param", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@e11_nonlocal_param.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@e11_nonlocal_param.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("e11_nonlocal_param", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -41,7 +41,7 @@ module e11_nonlocal_param {
       %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "f() takes 1 positional argument but {} {was} given") ^propagate.0()
       %x.3 : py.Value = py.requireDefined(%x.2, "TypeError", "f() missing 1 required positional argument: 'x'") ^propagate.0()
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.3)
-      %clo.0 : py.Value = py.mkClosure(@e11_nonlocal_param.f.g, %x.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@e11_nonlocal_param.f.g, %x.cell.0)
       %none.1 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
       ret(%ret.0)

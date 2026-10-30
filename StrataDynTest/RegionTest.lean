@@ -327,7 +327,7 @@ A module checks the references in its functions' regions too: `f`'s only referen
 private def refInRegion : Built :=
   fCX fun c x _ => do
     let thn := region #[] do
-      let _ ← Build.emitFunc (.str .base "pick") Base.Code
+      let _ ← Build.emitFunc (.str .base "pick") (Base.Fn [Base.Bool, Base.Int] Base.Int)
       finishBlock (.ret () x)
     let r ← emitApply (.str .base "r") Base.Int Reg.«if».ref #[c] (regions := #[thn, retRegion x])
     finishBlock (.ret () r)

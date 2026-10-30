@@ -213,9 +213,9 @@ example : f.blocks.size = 3 := rfl
 example : fEntry.instrs.size = 2 := rfl
 
 /-- A constant's type comes from the base, not from a declaration. -/
-example : Const.typeOf (env := base) (.int 0) = Base.Int := rfl
+example : Const.typeOf? (env := base) (.int 0) = some Base.Int := rfl
 
-example : Const.typeOf (env := base) .unit = Base.Unit := rfl
+example : Const.typeOf? (env := base) .unit = some Base.Unit := rfl
 
 /-- Annotations map at every level, and nothing else moves. -/
 example : (fEntry.map (fun _ => 7)).info = 7 := rfl
@@ -464,12 +464,11 @@ private def spare (l : Label) : Block base Unit :=
 /-! ## Function references
 
 A function-reference constant names a function of the module, and has that function's code
-type, `base.Fn` of its parameter types and its return type, or the untyped `base.Code`.  The
-module decides both: a function is well formed with a reference at any type. -/
+type, `base.Fn` of its parameter types and its return type.  A function is well formed with a
+reference at any `base.Fn`; the module decides which. -/
 
-
-/-- `ref() : Unit`, which takes a code pointer to `target` and returns unit. -/
-private def refTo (target : Name) (type : TypeExpr base := Base.Code) : Func base Unit where
+/-- `ref() : Unit`, which takes a code pointer to `target` at `type` and returns unit. -/
+private def refTo (target : Name) (type : TypeExpr base) : Func base Unit where
   name    := .str .base "ref"
   retType := Base.Unit
   blocks  := #[{ label := lbl "entry", params := #[], info := (),
@@ -479,32 +478,27 @@ private def refTo (target : Name) (type : TypeExpr base := Base.Code) : Func bas
   info    := ()
 
 /-- `ref` beside `f`. -/
-private def refModule (target : Name) (type : TypeExpr base := Base.Code) :
-    Module.Raw base Unit where
+private def refModule (target : Name) (type : TypeExpr base) : Module.Raw base Unit where
   name  := .str .base "m"
   funcs := #[refTo target type, f]
   info  := ()
-
-#guard Module.Raw.WF (refModule (.str .base "f"))
-#guard Module.Raw.WF (refModule (.str .base "ref"))
-
--- A reference to a function the module does not define.
-#guard ¬ Module.Raw.WF (refModule (.str .base "g"))
 
 /-- `f`'s code type: it takes a `Bool` and returns an `Int`. -/
 private def fnBoolIntT : TypeExpr base := Base.Fn [Base.Bool] Base.Int
 
 #guard f.codeType == fnBoolIntT
-#guard (refTo (.str .base "f")).codeType == Base.Fn [] Base.Unit
+#guard (refTo (.str .base "f") fnBoolIntT).codeType == Base.Fn [] Base.Unit
 
 -- A reference at its target's code type, to another function and to itself.
 #guard Module.Raw.WF (refModule (.str .base "f") fnBoolIntT)
 #guard Module.Raw.WF (refModule (.str .base "ref") (Base.Fn [] Base.Unit))
 
+-- A reference to a function the module does not define.
+#guard ¬ Module.Raw.WF (refModule (.str .base "g") fnBoolIntT)
+
 -- A reference is a code pointer: at `base.Int` the function itself is not well formed, beside
--- the same function at `base.Code` and at a `base.Fn`.
+-- the same function at a `base.Fn`.
 #guard ¬ wf (refTo (.str .base "f") Base.Int)
-#guard wf (refTo (.str .base "f") Base.Code)
 #guard wf (refTo (.str .base "f") (Base.Fn [Base.Int] Base.Int))
 #guard ¬ Module.Raw.WF (refModule (.str .base "f") Base.Int)
 -- At a `base.Fn` with another parameter list or another result the function is well formed,

@@ -7,10 +7,10 @@ module c6_body_raise {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("c6_body_raise", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@c6_body_raise.boom)
+      %clo.0 : py.Value = py.mkClosure[[]](@c6_body_raise.boom)
       %boom.cell.0 : base.Ref(py.Value) = py.globalCell("c6_body_raise", "boom")
       %set.2 : base.Unit = base.refSet[py.Value](%boom.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure(@c6_body_raise.f)
+      %clo.1 : py.Value = py.mkClosure[[]](@c6_body_raise.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("c6_body_raise", "f")
       %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.1)
       %none.1 : py.Value = py.noneLit

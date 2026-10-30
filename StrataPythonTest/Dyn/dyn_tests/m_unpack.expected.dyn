@@ -105,7 +105,7 @@ module m_unpack {
       %elem.25 : py.Value = py.tupleGet(%unpack.12, 1)
       %b.cell.7 : base.Ref(py.Value) = py.globalCell("m_unpack", "b")
       %set.23 : base.Unit = base.refSet[py.Value](%b.cell.7, %elem.25)
-      %clo.0 : py.Value = py.mkClosure(@m_unpack.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_unpack.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_unpack", "f")
       %set.24 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit

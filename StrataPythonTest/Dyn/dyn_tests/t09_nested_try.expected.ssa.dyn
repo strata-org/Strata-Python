@@ -7,10 +7,10 @@ module t09_nested_try {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("t09_nested_try", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@t09_nested_try.inner_risky)
+      %clo.0 : py.Value = py.mkClosure[[]](@t09_nested_try.inner_risky)
       %inner_risky.cell.0 : base.Ref(py.Value) = py.globalCell("t09_nested_try", "inner_risky")
       %set.2 : base.Unit = base.refSet[py.Value](%inner_risky.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure(@t09_nested_try.outer_risky)
+      %clo.1 : py.Value = py.mkClosure[[]](@t09_nested_try.outer_risky)
       %outer_risky.cell.0 : base.Ref(py.Value) = py.globalCell("t09_nested_try", "outer_risky")
       %set.3 : base.Unit = base.refSet[py.Value](%outer_risky.cell.0, %clo.1)
       %inner_risky.0 : py.Value = py.loadGlobal("t09_nested_try", "inner_risky") ^catch.1()

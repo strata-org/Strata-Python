@@ -10,7 +10,7 @@ module tc15_arg_count {
       %mod.0 : py.Value = py.importModule("math") ^propagate.0()
       %math.cell.0 : base.Ref(py.Value) = py.globalCell("tc15_arg_count", "math")
       %set.2 : base.Unit = base.refSet[py.Value](%math.cell.0, %mod.0)
-      %clo.0 : py.Value = py.mkClosure(@tc15_arg_count.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@tc15_arg_count.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("tc15_arg_count", "f")
       %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit

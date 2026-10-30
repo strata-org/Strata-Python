@@ -3,7 +3,8 @@
 Dyn is a typed intermediate representation for programs, defined in Lean. A front end
 translates a source language into Dyn, and analyses and interpreters work on Dyn
 rather than on the source language. This document is a self-contained reference for Dyn
-itself. [Python to Dyn](./PythonToDyn.md) describes how Python is translated into it.
+itself, and §4 shows how a language gives its programs a semantics that runs them.
+[Python to Dyn](./PythonToDyn.md) describes how Python is translated into it.
 
 ## 1. Overview
 
@@ -58,7 +59,7 @@ resolves; a checker decides the rest. A function is checked on its own, and a mo
 checked from its functions: their names are distinct, and every reference to a function names
 one of them, at its code type. A function's code type is `base.Fn as r`, with `as` its
 parameters' types and `r` its return type, and `base.callCode` calls through a value of that
-type. A reference may instead have the untyped `base.Code`, which cannot be called. A `Module.Raw` is a module as built, which may not be well formed; it still
+type. A `Module.Raw` is a module as built, which may not be well formed; it still
 prints, in full, for diagnostics. A `Module` is one with its proof of well-formedness, and is
 the same data at run time.
 
@@ -226,3 +227,354 @@ and the function itself, so it doesn't rely on the plan for that.
 The pass computes a plan, checks it (`Plan.check`), applies it, and checks the module's
 well-formedness again. If planning or either check fails, it returns no module, and names each
 function concerned with the reason.
+
+## 4. Giving a language its semantics
+
+A language gives each type a Lean type and each instruction a rule, an ordinary Lean function.
+Dyn generates from them a table, and runs modules against it. The rule interface is
+`StrataDyn.Exec` (`StrataDyn/Exec.lean`), and a module that runs programs imports
+`StrataDyn.Exec.Run`. The examples below come from the While example
+(`StrataDyn/Examples/While/Env.lean`) and the test environment `Ex`
+(`StrataDynTest/Exec/TestEnv.lean`).
+
+### Rules over Lean types
+
+A rule names Lean types only. An instruction with neither regions nor successors may take a
+pure rule, a function from its operands to its result:
+
+```lean
+@[dyn_sem While.add] def add (a b : Int) : Int := a + b
+@[dyn_sem While.lt] def lt (a b : Int) : Bool := decide (a < b)
+```
+
+Any other rule returns `Sem ε E α`, a free monad, and is written with `do`. It is generic in
+its requests `ε` and its exits `E`, and usually takes them from a `variable` line:
+
+```lean
+variable {ε : Eff} {E : Type}
+
+@[dyn_sem While.pow] def pow (_a _b : Int) : Sem ε E Int :=
+  semanticGap "while.pow: not implemented"
+```
+
+`semanticGap msg` stops the run with `Fault.gap`, for a case the semantics leaves out, and
+`semanticFailure msg` with `Fault.failure`, for one the author holds impossible. `assume b msg`
+continues if `b` holds and otherwise stops with `Fault.blocked`: the path is infeasible, which
+stands for no behaviour rather than an error, and a run reports it as its outcome. `chooseNat` asks the run's
+oracle for a number, `choose n` for one from `0` to `n`, which is the oracle's answer reduced,
+and `chooseInt` for an integer, which numbers the integers `0, -1, 1, -2, …` by the oracle's
+answer. A rule takes no fuel: the machine runs its requests as steps.
+
+Rules are trusted: a rule is what its instruction means. Registration checks a rule's type
+against its instruction's signature and the capabilities it takes, and that no instruction has
+two rules, and each table checks every rule again at its own type rules. `implemented_by` and
+`@[extern]` in a rule are flags for review, as in Lean.
+
+### Types and rules: `@[dyn_type]` and `@[dyn_sem]`
+
+`@[dyn_type T] d` makes the Lean type `d` the meaning of the primitive or opaque Dyn type
+`T`, with one Lean parameter per Dyn parameter:
+
+```lean
+attribute [dyn_type Base.Int] Int
+attribute [dyn_type Base.Sequence] Array
+attribute [dyn_type Base.Except] Except
+```
+
+A datatype takes no attribute: `#dyn_types E` generates a Lean inductive for each of `E`'s
+datatypes, with one constructor per Dyn constructor, and registers it. `#dyn_types While`
+gives `While.IntList.Val` and `While.Flow.Val`. It comes after the rules of the primitive types
+its datatypes' fields use, and before the rules that name its datatypes.
+
+`@[dyn_sem o] r` makes `r` the rule of the instruction `o`. Keys are the Lean names of the
+environment's types and instructions, `While.add` or `Base.Int`, so a misspelt key is an
+elaboration error. An instruction's key is its own name, which its emitter shares, not its
+reference `While.add.ref`.
+The engine gives `base.Ref` and `base.Fn` their meaning, the constructors and case instructions
+of a datatype are derived, and the machine implements `base.refNew`, `refGet`, `refSet` and
+`callCode`: none of these takes a rule. Dyn types that share a Lean type share a tag, so a
+semantics that must tell two types apart gives them distinct Lean types.
+
+### Operands, regions, targets and `Again`
+
+A rule's explicit arguments follow the instruction's signature, in order:
+
+1. its operands, at their Lean types, then the variadic operands as an `Array`;
+2. one `Region ε ts α` per region, whose parameters have the Lean types `ts` and whose result
+   is an `α`;
+3. one `Target E ts` per successor, the target the rule jumps along with the successor's
+   payload, of the Lean types `ts`;
+4. for a rule that loops, its state `(st : Option σ)` and then its instruction's `Again E σ`,
+   for a Lean type `σ` the rule chooses.
+
+A rule with type parameters takes one `{α : Type}` per parameter, in order. A terminal
+instruction's rule returns `Sem ε E Empty`. `While.loop` takes all four kinds:
+
+```lean
+insn loop (&cond : Bool) (&body : Flow) (^err (code : Int)) : Unit
+```
+
+```lean
+@[dyn_sem While.loop]
+def loop (cond : Region ε [] Bool) (body : Region ε [] Flow) (err : Target E [Int])
+    (_st : Option Unit) (again : Again E Unit) : Sem ε E Unit := do
+  if ← runRegion cond () then
+    flow (← runRegion body ()) err
+    jump again ()
+```
+
+The state is the rule's own: the instruction's declaration does not mention it, so neither do
+the IR, the printed form nor a front end. A loop whose variables are cells, as While's are,
+has the state `Unit`.
+
+### Jumps and regions
+
+`jump k payload` leaves along the target `k` with its payload, a value for one type, a tuple
+for several, `()` for none. A terminator's rule leaves only by `jump`:
+
+```lean
+@[dyn_sem Ex.br] def br (c : Bool) (t f : Target E []) : Sem ε E Empty :=
+  if c then jump t () else jump f ()
+```
+
+`runRegion r args` runs the region `r` on its arguments and returns its result. A rule that
+loops runs first with the state `none`. `jump again s` runs the instruction again, as a step
+of its own, on the same operands, regions and targets, with the state `some s`. A fold's state
+is its accumulator:
+
+```lean
+insn fold (init : Int) (&cond (acc : Int) : Bool) (&body (acc : Int) : Int) : Int
+```
+
+```lean
+@[dyn_sem Ex.fold]
+def fold (init : Int) (cond : Region ε [Int] Bool) (body : Region ε [Int] Int) (st : Option Int)
+    (again : Again E Int) : Sem ε E Int := do
+  let acc := st.getD init
+  if ← runRegion cond acc then jump again (← runRegion body acc)
+  return acc
+```
+
+A comprehension over `xs` handles one element per run, and its state is the elements left and
+the results so far, starting from `(xs, #[])`. `mapStep` runs the body on the first element
+and jumps to `again` with the rest:
+
+```lean
+@[dyn_sem Ex.mapList]
+def mapList (xs : Array Int) (body : Region ε [Int] (Except Int Int)) (err : Target E [Int])
+    (st : Option (Array Int × Array Int)) (again : Again E (Array Int × Array Int)) :
+    Sem ε E (Array Int) :=
+  let (rest, acc) := st.getD (xs, #[])
+  mapStep rest acc body err again
+```
+
+### The world and `HasPart`
+
+The world is the state a run threads through its rules, such as output. `#dyn_sem_table`
+takes it as `(world := W)`, and it defaults to `Unit`. A rule reaches the parts it names
+through `[HasPart ε.W P]`, with `getThe P`, `modifyThe P` and `modifyGetThe P`. The world's
+type is abstract in a rule, so a rule reads only the parts it names. It can still put back a
+world it read earlier, whole, and `HasPart` states no laws. Each of the three is one `update`
+request: the machine takes the world out of its configuration and hands it to the request,
+which returns the new world, so a part that `modifyThe` updates is held by nothing else:
+
+```lean
+structure World where
+  out : Output := {}
+  ticks : Ticks := {}
+  deriving Inhabited, Repr, DecidableEq
+
+instance : HasPart World Output := ⟨(·.out), fun w o => { w with out := o }⟩
+
+@[dyn_sem While.print] def print (x : Int) : Sem ε E Unit :=
+  modifyThe Output fun o => { o with items := o.items.push x }
+```
+
+### Refs and tags
+
+A run's cells live on the machine's heap. `Ref σ α` is a ref to a cell holding an `α`, where
+`σ` is the run token, so a rule that takes or makes a ref is generic in it,
+`{σ : Type} [Store σ]`. A ref holds a proof that the token gives, so no term generic in `σ` is
+a ref (`no_forge`). `newRef`, `readRef` and `writeRef` make, read and write cells through the
+capability `[HasHeap σ ε]`:
+
+```lean
+@[dyn_sem Ex.cellNew] def cellNew (v : Int) : Sem ε E (Ref σ Int) := newRef v
+@[dyn_sem Ex.cellGet] def cellGet (c : Ref σ Int) : Sem ε E Int := readRef c
+```
+
+`modifyRef c f` replaces a cell's contents `x` by `f x` in one request. The machine takes the
+contents out of the cell before it applies `f`, so `f` updates contents that nothing else
+holds:
+
+```lean
+@[dyn_sem Ex.cellPush] def cellPush (c : Ref σ (Array Int)) (x : Int) : Sem ε E Unit :=
+  modifyRef c (·.push x)
+```
+
+A ref is a raw ref, `Ref.Raw σ`, a location with the token's proof, and its contents' type as a
+phantom; a closure is likewise a raw closure, `FnRef.Raw σ`. The proofs name no Lean type, so a
+datatype may hold a ref or a closure of itself, as the test environment's
+`data Chain where | done | link (next : Ref Chain)` does.
+
+The machine checks every access by the cell's tag: the tag of the Lean type it holds. A rule
+that makes, reads or writes a cell at `α` takes `[TagOf σ α]`, and `[Decode σ]`, at which the
+tag decodes to `α`. A rule generic in `α` takes `[TagOf σ α]` only if it reaches a cell at `α`.
+`TagCon σ F` gives the tags of `F A` from those of `A`, and `TagCon₂ σ F` those of `F A B`, for
+a rule that reaches cells through a type constructor:
+
+```lean
+@[dyn_sem Ex.newAt]
+def newAt {A : Type} [TagOf σ A] (v : A) : Sem ε E (Ref σ A) := newRef v
+```
+
+The table supplies every tag, at the instruction's concrete types. A start argument holds no
+ref, and an access the check rejects faults with `Fault.badCell`.
+
+### Calls and closures
+
+`base.Fn as r` is a closure, `FnRef σ as r`: a function of the module and the values it
+captured. `callFn f args` calls one, and `bindFn f x` binds its first argument, making a new
+closure, both through `[HasCall σ ε]`. A call takes the signature's tags, `[SigOf σ as r]`, and
+the instances that build them from `TagOf`s are found for it:
+
+```lean
+@[dyn_sem Ex.call]
+def call (f : FnRef σ [Int] (Except Int Int)) (x : Int) (err : Target E [Int]) :
+    Sem ε E Int := do
+  match ← callFn f x with
+  | .ok v => return v
+  | .error e => jump err e
+
+@[dyn_sem Ex.bind]
+def bind {A B R : Type} [TagOf σ A] [TagOf σ B] [TagOf σ R] (f : FnRef σ [A, B] R) (x : A) :
+    Sem ε E (FnRef σ [B] R) :=
+  bindFn f x
+```
+
+The machine checks each call against the function's signature and faults with
+`Fault.badCall` on a mismatch. A language whose functions raise returns a `base.Except`, and its
+call rule inspects it, as `call` does.
+
+An instruction with a list parameter takes a rule with a `{cs : List Type}` for it. The list
+may be spliced into a closure operand's arguments and be the spread, whose operands the rule
+takes as one `Payload cs`; `⟦Fn [*cs, Int] Int⟧` is `FnRef σ (cs ++ [Int]) Int`. The rule takes
+`[TagsOf σ cs]`, the tags of the list's elements, and `bindAll` binds a closure's leading
+arguments to the payload, one `bindFn` each. This is the shape of Python's `mkClosure`:
+
+```lean
+insn mkClo [(cs : list)] (code : Fn [*cs, Int] Int) (*cells : cs) : Fn [Int] Int
+```
+
+```lean
+@[dyn_sem Ex.mkClo]
+def mkClo {cs : List Type} [TagsOf σ cs] (code : FnRef σ (cs ++ [Int]) Int) (cells : Payload cs) :
+    Sem ε E (FnRef σ [Int] Int) :=
+  bindAll cs code cells
+```
+
+A list variable may occur only there: not in the result, a region, a successor's payload or
+inside an operand's datatype.
+
+### A language's capabilities: `@[dyn_lang]`
+
+`@[dyn_lang]` declares a language's capabilities as one class, whose fields are parts of the
+world, `HasHeap`, `HasCall` and tags, or a parent language's class it extends. Each field
+becomes an instance, so a rule that takes the class has every capability:
+
+```lean
+@[dyn_lang] class Lang (σ : outParam Type) [Store σ] [Decode σ] (ε : Eff) where
+  out : HasPart ε.W Output
+  ticks : HasPart ε.W Ticks
+  heap : HasHeap σ ε
+  tagInt : TagOf σ Int
+
+variable {σ : Type} [Store σ] [Decode σ] [Lang σ ε]
+```
+
+The token is an `outParam`, so a part of the world, which does not mention it, is found
+through the class.
+
+### The table and `#dyn_coverage`
+
+`#dyn_coverage E` lists each type and instruction of `E` with its rule, `derived`, the
+engine's or `missing`, and counts the ancestors' missing rules. `#dyn_coverage E (complete)`
+is silent when every type and instruction of `E` and its ancestors has its meaning, and an error
+naming the missing ones otherwise:
+
+```lean
+#dyn_coverage While (complete)
+```
+
+`#dyn_sem_table S for E (world := W)` generates the table in the namespace `S`: the tags,
+one wrapper per instruction, and, for an environment that extends `Base`, `S.model`, which
+modules run against. An instruction with no rule is reported and left out, and a module that
+uses it faults with `Fault.missingRules` before its first step. A child environment's table
+uses its ancestors' rules.
+
+```lean
+#dyn_sem_table WhileSem for While (world := WhileRules.World)
+```
+
+### Registration errors
+
+`@[dyn_type]`, `@[dyn_sem]` and `@[dyn_lang]` check each registration against the
+`environment` declaration, and name what does not match: the operand, region, target, state,
+`Again` or result. Examples, from `StrataDynTest/Exec/RuleErrorTest.lean`, for
+`insn inc (x : Int) : Int`, `insn split (x : Int) (^neg) (^big (q r : Int)) : Int` and
+`insn drain (x : Int) (*xs : Int) (^neg) : Int`:
+
+| Rule | Error |
+|---|---|
+| `def incNat (x : Nat) : Int` | operand x of err.inc: expected Int, but incNat takes Nat |
+| `def inc2 (x _y : Int) : Int` | err.inc takes 1 operand, but inc2 takes 2 |
+| `def incSem (_x : Int) : Sem ε E Bool` | the result of incSem is Sem ε E Bool, but err.inc needs Sem ε E Int |
+| `def incFixed (x : Int) : Sem ε Nat Int` | incFixed must be generic in its requests and exits: incFixed {ε : Eff} {E : Type} … : Sem ε E … |
+| `def split1 (x : Int) (_neg : Target E []) : Sem ε E Int` | err.split has 2 successors (^neg, ^big), but split1 takes 1 target |
+| `… (_neg : Target E []) (_st : Option (Int × Array Int)) (_again : Again E Int)` | the Again of err.drain: expected Again (Int × Array Int), got Again Int |
+| `… (_neg : Target E []) (_again : Again E (Int × Array Int))` | drainNoState takes Again (Int × Array Int) without its state: a rule that loops takes (st : Option σ) before its Again |
+| `@[dyn_sem Demo.Box.box]` | demo.box is a constructor of demo.Box, derived, and takes no rule |
+| `@[dyn_sem Base.refNew]` | base.refNew is implemented by the machine, and takes no rule |
+| `[TagOf σ (List Int)]` | List Int is the Lean type of no Dyn type: register its type with @[dyn_type] |
+| `(c : Ref Run Int)` | base.Ref needs the run token: a rule that takes or makes one must be generic in it, {σ : Type} [Store σ] |
+| `{cs : Type}` for `[(cs : list)]` | type parameter cs of errCall.spread is a list, so spreadType's cs must be a List Type |
+| `… : Sem ε E (FnRef σ cs Int)` | the result of errCall.spreadOut: a list type variable may occur only in the arguments of a closure operand, as a splice, and as the spread |
+
+A module that imports two modules that both register one type or instruction gets an error
+naming both, at `@[dyn_sem]`, `#dyn_coverage`, `#dyn_types` and `#dyn_sem_table`
+(`StrataDynTest/Exec/DupTest.lean`). Two modules that register the same declaration give one
+rule (`DupSharedTest.lean`).
+
+`#dyn_sem_table` checks each rule, and each datatype's type rule, again at its own type rules.
+A rule's module may have seen another type rule, through an import that the table's module does
+not see: a rule registered where `Num ↦ Int` is an error at a table where `Num ↦ Nat`
+(`RecheckTest.lean`, `RecheckDataTest.lean`).
+
+### Running a module
+
+`runModule M m f args fuel` links the module `m` against the model `M`, checks it, and runs its
+function `f` on `args` for at most `fuel` steps. An argument is a Lean value, `M.arg x`, at the
+tag of its Lean type, found as a rule's is. A run ends as an `Outcome M`: its result, a
+`Snapshot` of the heap and the world, the steps and the oracle's answers. `o.read? α` reads the
+result as an `α`: `some x` if its tag is `α`'s, and `none` if it has another tag or the run
+faulted.
+
+```lean
+let o := runModule ExSem.model m (nm "arith")
+  #[ExSem.model.arg (3 : Int), ExSem.model.arg (4 : Int)] 10000
+o.read? Int   -- some 6
+o.read? Bool  -- none
+```
+
+`M.read? r α` reads a `Result` the same way, and `o.result` is the result itself, a value or a
+`Fault`. `runModule` runs the fused engine, `runFused`, by default; `(engine := .frames)` runs
+the reference machine, `runFrames`. Given enough fuel both end with the same outcome, snapshot
+and choices (`runFused_of_runFrames`, `runFrames_of_runFused`). Each counts fuel in its own
+steps, so on the same fuel `runFused` may finish where `runFrames` runs out, but not the
+reverse.
+
+`startCore hw i args snap` starts function `i` from a snapshot, by default `Snapshot.initial`,
+an empty heap and the initial world. A module's top level can run first, and a function of the
+module then from `o.snapshot`, the heap and the world where the top level ended
+(`StrataDynTest/Exec/HeapTest.lean`). One value holds both, so a run cannot start from one
+run's heap and another run's world.

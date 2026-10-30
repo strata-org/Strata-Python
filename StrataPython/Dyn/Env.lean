@@ -159,10 +159,11 @@ public environment Py extends Base where
   /-- The built-in `AssertionError` class, even if `builtins.AssertionError` is rebound:
   CPython's `LOAD_ASSERTION_ERROR`. -/
   insn assertionError : Value
-  /-- A callable: `code`, a code pointer, and the `cells` it captures.
-  Late binding reads a captured cell; a module-level function captures none.  `call` is its
+  /-- A callable: `code`, a pointer to a translated function that takes the `cells`, of the
+  types `cs`, then `args` and `kwargs`, and the cells it captures, one operand each.  Late
+  binding reads a captured cell; a module-level function captures none.  `call` is its
   `apply`. -/
-  insn mkClosure (code : Code) (*cells : Ref Value) : Value
+  insn mkClosure [(cs : list)] (code : Fn [*cs, Value, Value] failing) (*cells : cs) : Value
   /-- `obj.name`. -/
   insn attr (obj : Value) (name : String) (^err (exc : Value)) : Value
   /-- `obj.name = val`. -/

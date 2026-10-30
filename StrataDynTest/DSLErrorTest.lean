@@ -643,10 +643,12 @@ public environment ErrReserved extends Base where
 /-! ## Case instructions and terminal instructions -/
 
 -- `T.case` is `T`'s case instruction, so no constructor may be named `case`, and `x.U.case`
--- is declared by `U`.
+-- is declared by `U`.  `T.Val` is `T`'s Lean type in the executable semantics.
 /-- error: `ErrCase.T.case` is already generated for `x.T`; rename one with `as`
 ---
 error: `ErrCase.T.ref` is already generated for `x.T`; rename one with `as`
+---
+error: `ErrCase.T.Val` is already generated for `x.T`; rename one with `as`
 ---
 error: `x.U.case` is already declared
 -/
@@ -656,6 +658,7 @@ public environment ErrCase extends Base where
   data T where
     | «case»
     | ref
+    | Val
   data U where
     | u
   end x
@@ -685,7 +688,8 @@ public environment ErrResult extends Base where
   insn g
 
 /-- A constructor may be named `dataSig` or `dataRef`, or `ty` or `toRaw_ty`, which the type's
-`Internal.T.ty` and `Internal.T.toRaw_ty` do not take. -/
+`Internal.T.ty` and `Internal.T.toRaw_ty` do not take, and one named `Val` in the environment
+takes another Lean name. -/
 public environment OkCtorNames extends Base where
   namespace x
   data T where
@@ -693,10 +697,12 @@ public environment OkCtorNames extends Base where
     | dataRef
     | ty
     | toRaw_ty
+    | val as "Val"
 
 example : OkCtorNames.T.dataSig.name = .str (.str .base "x") "dataSig" := rfl
 example : OkCtorNames.T.ty.name = .str (.str .base "x") "ty" := rfl
 example : OkCtorNames.T.toRaw_ty.name = .str (.str .base "x") "toRaw_ty" := rfl
-example : (OkCtorNames.T.case.sig (e := OkCtorNames.env)).succs.size = 4 := rfl
+example : (OkCtorNames.T.case.sig (e := OkCtorNames.env)).succs.size = 5 := rfl
+example : OkCtorNames.T.val.name = .str (.str .base "x") "Val" := rfl
 
 end Strata.Dyn.DSLErrorTest

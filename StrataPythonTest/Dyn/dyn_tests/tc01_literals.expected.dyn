@@ -7,7 +7,7 @@ module tc01_literals {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("tc01_literals", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@tc01_literals.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@tc01_literals.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("tc01_literals", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit

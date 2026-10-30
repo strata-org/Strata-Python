@@ -99,7 +99,7 @@ module m_assert {
       %done.0 : base.Bool = py.isStopIteration(%exc.6)
       branch(%done.0) ^exit.0() ^propagate.0(%exc.6)
     exit.0():
-      %clo.0 : py.Value = py.mkClosure(@m_assert.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_assert.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "f")
       %set.4 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit

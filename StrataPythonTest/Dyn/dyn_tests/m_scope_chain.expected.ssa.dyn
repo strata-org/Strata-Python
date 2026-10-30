@@ -84,13 +84,13 @@ module m_scope_chain {
     join.3(%cmp.2 : py.Value):
       %t.cell.0 : base.Ref(py.Value) = py.globalCell("m_scope_chain", "t")
       %set.9 : base.Unit = base.refSet[py.Value](%t.cell.0, %cmp.2)
-      %clo.0 : py.Value = py.mkClosure(@m_scope_chain.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_scope_chain.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_scope_chain", "f")
       %set.10 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure(@m_scope_chain.g)
+      %clo.1 : py.Value = py.mkClosure[[]](@m_scope_chain.g)
       %g.cell.0 : base.Ref(py.Value) = py.globalCell("m_scope_chain", "g")
       %set.11 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
-      %clo.2 : py.Value = py.mkClosure(@m_scope_chain.h)
+      %clo.2 : py.Value = py.mkClosure[[]](@m_scope_chain.h)
       %h.cell.0 : base.Ref(py.Value) = py.globalCell("m_scope_chain", "h")
       %set.12 : base.Unit = base.refSet[py.Value](%h.cell.0, %clo.2)
       %none.1 : py.Value = py.noneLit

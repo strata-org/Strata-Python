@@ -30,11 +30,13 @@ reference, and one defined outside the region that uses it.
 namespace Strata.Dyn.PrintFoldTest
 
 open Strata.Dyn.Build (freshVal freshLabel startBlock startBlockWith startFreshBlock
-  emitConst emitApply finishBlock goto build FailedFunc region)
+  emitConst emitFunc emitApply finishBlock goto build FailedFunc region)
 open Strata.Dyn.RegionTest
 
 private abbrev E := Reg.env
 
+/-- `counter`'s code type. -/
+private def codeT : TypeExpr E := Base.Fn [Base.Bool] Base.Int
 
 /-- What `build` gives: a checked function, or the `FailedFunc`. -/
 private abbrev Built := Except (FailedFunc E Unit Unit) {fn : Func E Unit // fn.WF}
@@ -58,9 +60,9 @@ private def counter : Built :=
 
 /-- A reference to `counter`, returned. -/
 private def code : Built :=
-  build (.str (.str .base "m") "code") Base.Code () do
+  build (.str (.str .base "m") "code") codeT () do
     let _ ← startFreshBlock (base := "entry")
-    let f ← emitConst (.str .base "f") (.func (.str (.str .base "m") "counter"))
+    let f ← emitFunc (.str (.str .base "m") "counter") codeT
     finishBlock (.ret () f)
 
 /-- `one` is defined in the entry block and used inside the `then` region. -/
@@ -94,10 +96,10 @@ private def m : Except (FailedFunc E Unit Unit) (Module.Raw E Unit) :=
       %r.0 : base.Int = base.refGet[base.Int](%cell.0)
       ret(%r.0)
   }
-  func @m.code() -> base.Code {
+  func @m.code() -> base.Fn([base.Bool], base.Int) {
     entry.0():
-      %f.0 : base.Code = const @m.counter
-      ret(%f.0)
+      %code.0 : base.Fn([base.Bool], base.Int) = const @m.counter
+      ret(%code.0)
   }
   func @m.pick(%c.0 : base.Bool) -> base.Int {
     entry.0(%c.0 : base.Bool):
@@ -133,7 +135,7 @@ by side. -/
       %r.0 : base.Int = base.refGet[base.Int](%cell.0)
       ret(%r.0)
   }
-  func @m.code() -> base.Code {
+  func @m.code() -> base.Fn([base.Bool], base.Int) {
     entry.0():
       ret(@m.counter)
   }

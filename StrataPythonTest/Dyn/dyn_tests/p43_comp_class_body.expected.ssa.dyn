@@ -7,7 +7,7 @@ module p43_comp_class_body {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p43_comp_class_body", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@p43_comp_class_body.outer)
+      %clo.0 : py.Value = py.mkClosure[[]](@p43_comp_class_body.outer)
       %outer.cell.0 : base.Ref(py.Value) = py.globalCell("p43_comp_class_body", "outer")
       %set.2 : base.Unit = base.refSet[py.Value](%outer.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -48,7 +48,7 @@ module p43_comp_class_body {
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %__class__.0 : py.Value = py.undef("__class__")
       %__class__.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%__class__.0)
-      %clo.0 : py.Value = py.mkClosure(@|p43_comp_class_body.outer.C.<body>|, %rows.cell.0, %scale.cell.0, %__class__.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value), base.Ref(py.Value)]](@|p43_comp_class_body.outer.C.<body>|, %rows.cell.0, %scale.cell.0, %__class__.cell.0)
       %str.1 : py.Value = py.strLit("C")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
       %kwargs.1 : py.Value = py.mkKwargs
@@ -129,7 +129,7 @@ module p43_comp_class_body {
       %each.1 : base.Unit = py.forEach(%rows.9) ^propagate.0() {
         each.1(%item.1 : py.Value):
           %set.1 : base.Unit = base.refSet[py.Value](%r.cell.1, %item.1)
-          %clo.0 : py.Value = py.mkClosure(@|p43_comp_class_body.outer.C.<lambda>|, %r.cell.1)
+          %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|p43_comp_class_body.outer.C.<lambda>|, %r.cell.1)
           %append.1 : base.Unit = py.listAppend(%acc.1, %clo.0)
           %unit.1 : base.Unit = base.unit
           %ok.1 : base.Except(py.Value, base.Unit) = base.ok[py.Value, base.Unit](%unit.1)
@@ -163,7 +163,7 @@ module p43_comp_class_body {
       }
       %str.10 : py.Value = py.strLit("own")
       %store.5 : base.Unit = py.setItem(%ns.0, %str.10, %acc.2) ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure(@p43_comp_class_body.outer.C.m, %rows.cell.0, %__class__.cell.0)
+      %clo.1 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@p43_comp_class_body.outer.C.m, %rows.cell.0, %__class__.cell.0)
       %str.11 : py.Value = py.strLit("m")
       %store.6 : base.Unit = py.setItem(%ns.0, %str.11, %clo.1) ^propagate.0()
       %none.0 : py.Value = py.noneLit

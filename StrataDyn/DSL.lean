@@ -189,9 +189,9 @@ names it generates:
   both define `T.name`.  No declaration is named `env`, `names`, `mem_env`, `nameSet`,
   `nameSet_ordered`, `mem_nameSet`, `Internal` or `toP`, which the environment defines.  No
   constructor of `T` is named `ref`, `name`, `name_ref`, `decl_ref`, `case` or, if `T` has no
-  parameters, `con`, which `T` defines, or as a field of `T`'s handle:
-  `decl`, `kinds`, `env` or `apply`.  A new Lean name, with `as` to keep the environment name,
-  resolves a clash.
+  parameters, `con`, which `T` defines, `Val`, which the executable semantics generates for a
+  datatype (`#dyn_types`), or as a field of `T`'s handle: `decl`, `kinds`, `env` or `apply`.
+  A new Lean name, with `as` to keep the environment name, resolves a clash.
 * Names resolve.  Every name in a type resolves, by the rules above, to one type or
   abbreviation, every `open`ed namespace exists, and every `end` closes the innermost
   namespace, by name.  `mutual` holds only `data`.

@@ -8,7 +8,7 @@ module e18_walrus_lambda_in_iterable {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("e18_walrus_lambda_in_iterable", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@e18_walrus_lambda_in_iterable.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@e18_walrus_lambda_in_iterable.f)
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("e18_walrus_lambda_in_iterable", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -42,7 +42,7 @@ module e18_walrus_lambda_in_iterable {
       %check.2 : base.Unit = py.requireAtMost(%nargs.0, 1, "TypeError", "f() takes 1 positional argument but {} {was} given") ^propagate.0()
       %xs.3 : py.Value = py.requireDefined(%xs.2, "TypeError", "f() missing 1 required positional argument: 'xs'") ^propagate.0()
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.3)
-      %clo.0 : py.Value = py.mkClosure(@|e18_walrus_lambda_in_iterable.f.<lambda>|, %xs.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|e18_walrus_lambda_in_iterable.f.<lambda>|, %xs.cell.0)
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%clo.0, %tuple.0, %kwargs.1) ^propagate.0()

@@ -11,7 +11,7 @@ module t25_tuple_unpack {
       %list.0 : py.Value = py.loadGlobal("t25_tuple_unpack", "list") ^propagate.0()
       %str.2 : py.Value = py.strLit("return")
       %none.1 : py.Value = py.noneLit
-      %clo.0 : py.Value = py.mkClosure(@t25_tuple_unpack.process_pairs)
+      %clo.0 : py.Value = py.mkClosure[[]](@t25_tuple_unpack.process_pairs)
       %annotations.0 : py.Value = py.mkDict(%str.1, %list.0, %str.2, %none.1) ^propagate.0()
       %__annotations__.0 : base.Unit = py.setAttr(%clo.0, "__annotations__", %annotations.0) ^propagate.0()
       %process_pairs.cell.0 : base.Ref(py.Value) = py.globalCell("t25_tuple_unpack", "process_pairs")
@@ -20,7 +20,7 @@ module t25_tuple_unpack {
       %list.1 : py.Value = py.loadGlobal("t25_tuple_unpack", "list") ^propagate.0()
       %str.4 : py.Value = py.strLit("return")
       %none.2 : py.Value = py.noneLit
-      %clo.1 : py.Value = py.mkClosure(@t25_tuple_unpack.use_enumerate)
+      %clo.1 : py.Value = py.mkClosure[[]](@t25_tuple_unpack.use_enumerate)
       %annotations.1 : py.Value = py.mkDict(%str.3, %list.1, %str.4, %none.2) ^propagate.0()
       %__annotations__.1 : base.Unit = py.setAttr(%clo.1, "__annotations__", %annotations.1) ^propagate.0()
       %use_enumerate.cell.0 : base.Ref(py.Value) = py.globalCell("t25_tuple_unpack", "use_enumerate")
@@ -29,14 +29,14 @@ module t25_tuple_unpack {
       %dict.0 : py.Value = py.loadGlobal("t25_tuple_unpack", "dict") ^propagate.0()
       %str.6 : py.Value = py.strLit("return")
       %none.3 : py.Value = py.noneLit
-      %clo.2 : py.Value = py.mkClosure(@t25_tuple_unpack.dict_iteration)
+      %clo.2 : py.Value = py.mkClosure[[]](@t25_tuple_unpack.dict_iteration)
       %annotations.2 : py.Value = py.mkDict(%str.5, %dict.0, %str.6, %none.3) ^propagate.0()
       %__annotations__.2 : base.Unit = py.setAttr(%clo.2, "__annotations__", %annotations.2) ^propagate.0()
       %dict_iteration.cell.0 : base.Ref(py.Value) = py.globalCell("t25_tuple_unpack", "dict_iteration")
       %set.4 : base.Unit = base.refSet[py.Value](%dict_iteration.cell.0, %clo.2)
       %str.7 : py.Value = py.strLit("return")
       %none.4 : py.Value = py.noneLit
-      %clo.3 : py.Value = py.mkClosure(@t25_tuple_unpack.tuple_assign)
+      %clo.3 : py.Value = py.mkClosure[[]](@t25_tuple_unpack.tuple_assign)
       %annotations.3 : py.Value = py.mkDict(%str.7, %none.4) ^propagate.0()
       %__annotations__.3 : base.Unit = py.setAttr(%clo.3, "__annotations__", %annotations.3) ^propagate.0()
       %tuple_assign.cell.0 : base.Ref(py.Value) = py.globalCell("t25_tuple_unpack", "tuple_assign")

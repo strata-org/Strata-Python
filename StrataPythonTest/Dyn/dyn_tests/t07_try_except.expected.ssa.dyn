@@ -7,7 +7,7 @@ module t07_try_except {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("t07_try_except", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure(@t07_try_except.risky)
+      %clo.0 : py.Value = py.mkClosure[[]](@t07_try_except.risky)
       %risky.cell.0 : base.Ref(py.Value) = py.globalCell("t07_try_except", "risky")
       %set.2 : base.Unit = base.refSet[py.Value](%risky.cell.0, %clo.0)
       %risky.0 : py.Value = py.loadGlobal("t07_try_except", "risky") ^catch.0()

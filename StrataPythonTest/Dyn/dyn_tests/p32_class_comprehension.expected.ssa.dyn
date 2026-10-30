@@ -8,7 +8,7 @@ module p32_class_comprehension {
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p32_class_comprehension", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure(@|p32_class_comprehension.C.<body>|)
+      %clo.0 : py.Value = py.mkClosure[[]](@|p32_class_comprehension.C.<body>|)
       %str.1 : py.Value = py.strLit("C")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs
