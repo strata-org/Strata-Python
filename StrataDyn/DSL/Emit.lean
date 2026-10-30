@@ -18,7 +18,7 @@ instruction itself is `E.o.ref`.  For
 ```lean
 insn callCode [(as : list) r] (f : Fn as r) (*args : as) : r
 terminal insn Except.case [e a] (scrutinee : Except e a) (^ok (value : a)) (^error (err : e))
-insn forEach (iterable : Value) (&body (item : Value) : raising Unit) (^err (exc : Value)) : Unit
+insn compFor (iterable : Value) (&each (item : Value) : raising Unit) (^err (exc : Value)) : Unit
 ```
 
 it generates, abbreviated:
@@ -32,8 +32,8 @@ def Base.refNew … {a : TypeExpr env} (value : Val env a)
     (result : Option Name := none) (info : Option α := none) : m (Val env (Base.Ref a))
 def Base.Except.case … (scrutinee : Val env (Base.Except e a)) (ok : Target env [a])
     (error : Target env [e]) (info : Option α := none) : m Unit
-def Py.forEach … (iterable : Val env Py.Value)
-    (body : Val env Py.Value → Target env [Base.Except Py.Value Base.Unit] → m Unit)
+def Py.compFor … (iterable : Val env Py.Value)
+    (each : Val env Py.Value → Target env [Base.Except Py.Value Base.Unit] → m Unit)
     (err : Target env [Py.Value]) (result : Option Name := none) (info : Option α := none) :
     m (Val env Base.Unit)
 ```

@@ -32,8 +32,9 @@ The function's exit is a `Target` too, which `emitReturn` and `emitPropagate` le
 values most emitters give are untyped `ValId`s: `value` claims one is a Python value, where one
 is bound into a target or given to a typed emitter, and `Build.run` checks the claim.
 
-An emitter that takes a body to emit, such as `withHandler` or `forEach`, runs it in any
-`MonadPy` monad: `PyM` itself, or the translator's `TransM` above it.
+An emitter that takes a body to emit, such as `withHandler` or `listComp`, runs it in any
+`MonadPy` monad: `PyM` itself, or the translator's `TransM` above it.  `listComp` and the other
+comprehension emitters also need `MonadBuild`, which both have.
 -/
 
 namespace StrataPython.Dyn.PyBuild
@@ -374,31 +375,6 @@ def importFrom (module name : String) (info : Option α := none) : PyM α ValId 
   let m ← emitConst (.str .base "m") (.str module) info
   let n ← emitConst (.str .base "n") (.str name) info
   emitFailing (stem name) Py.importFrom.ref #[m, n] info
-
-/-! ## Regions -/
-
-section
--- `let%`.
-open Strata.Dyn.Emit
-
-/-- `py.forEach iterable`, its `err` successor the enclosing handler.  The body region takes
-the item, emitted by `body` with failures going to the region's own handler, which returns
-them as `error`.  Falling off the end of `body` returns `ok ()`. -/
-def forEach [Monad m] [MonadPy α m] [MonadBuild Py.env α m] (iterable : ValId)
-    (body : ValId → m Unit) (info : Option α := none) : m Unit := do
-  let h ← liftPy (handler (α := α))
-  discard <| Py.forEach (value iterable) (fun item exit => do
-      let propagate ← Emit.freshLabel [Py.Value] "propagate"
-      withHandler propagate (body item.id)
-      if ← liftPy (isOpen (α := α)) then
-        let% unit ← Base.Unit.unit
-        Base.jump (exit.bind (← Base.Except.ok unit))
-      let raised ← Emit.startBlock₁ propagate (stem "exc")
-      let% exc ← Base.Except.error raised
-      Base.jump (exit.bind exc))
-    h info (result := stem "each") (bodyBase := "each")
-
-end
 
 /-! ## Comprehensions
 

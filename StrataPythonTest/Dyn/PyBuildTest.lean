@@ -496,25 +496,10 @@ private def entryLeftOpen (args : Vector ValId 1) : PyM Unit Unit := do
 #guard_msgs in
 #eval errors entryLeftOpen
 
-/-! ## `def c(xs, ys): [x + y for x in xs for y in ys]`
+/-! ## `def p(xs): return [x * 2 for x in xs if x]`
 
-Two nested `forEach`s.  Each failure goes to the nearest handler: the outer `forEach`'s to the
-function's, the inner one's to the outer region's, and the `add`'s to the inner region's, so no
-transfer leaves its region. -/
-
-private def c : Built :=
-  buildFunc (Py.pn "c") #["xs", "ys"] () fun args => do
-    let acc ← emitTotal (.str .base "acc") Py.mkList.ref #[]
-    forEach args[0] fun x => do
-      forEach args[1] fun y => do
-        let s ← emitFailing (.str .base "s") Py.add.ref #[x, y]
-        let _ ← emitEffect (.str .base "append") Py.listAppend.ref #[acc, s]
-    emitReturn acc
-
-#guard c.isOk
-
--- Ids follow the printed order: the `forEach` result before its region's values.
-#guard c.toOption.any (decide ·.1.Canonical)
+A list comprehension: `listComp` runs the `for` clause, `compIf` the filter, and `compAppend`
+adds the element.  `x` is the item itself here; the translator keeps it in a cell. -/
 
 /-- The `err` successors of `bs`' instructions, regions included, in order. -/
 private partial def errTargetsDeep (bs : Array (Block Py.env Unit)) : List Label :=
@@ -522,28 +507,6 @@ private partial def errTargetsDeep (bs : Array (Block Py.env Unit)) : List Label
     | .apply _ _ _ _ _ ks rs =>
       ks.toList.map (·.label) ++ rs.toList.flatMap (errTargetsDeep ·.blocks)
     | _ => []
-
--- The handlers `c`'s failures go to, as the docstring above says.
-#guard match c with
-  | .ok fn =>
-    errTargetsDeep fn.1.blocks == [lbl "propagate" 0, lbl "propagate" 1, lbl "propagate" 2]
-  | .error _ => false
-
-/-- A body that ends closed, raising to the region's handler, is well formed too. -/
-private def cClosed : Built :=
-  buildFunc (Py.pn "c") #["xs"] () fun args => do
-    forEach args[0] fun x => do jump (← raiseTo x)
-    emitReturnNone
-
-#guard cClosed.isOk
-
--- Ids follow the printed order: the `forEach` result before its region's values.
-#guard cClosed.toOption.any (decide ·.1.Canonical)
-
-/-! ## `def p(xs): return [x * 2 for x in xs if x]`
-
-A list comprehension: `listComp` runs the `for` clause, `compIf` the filter, and `compAppend`
-adds the element.  `x` is the item itself here; the translator keeps it in a cell. -/
 
 private def p : Built :=
   buildFunc (Py.pn "p") #["xs"] () fun args => do
@@ -719,6 +682,41 @@ private def s : Built :=
   | .ok fn => errTargetsDeep fn.1.blocks == [lbl "propagate" 0, lbl "propagate" 1]
   | .error _ => false
 
+/-! ## A region that ends by raising
+
+Its body jumps to the region's own handler, so only the terminator names it, and the handler is
+still emitted. -/
+
+private def raisesInEach : Built :=
+  buildFunc (Py.pn "r") #["xs"] () fun args => do
+    let _ ← listComp args[0] fun _ x => do jump (← raiseTo x)
+    emitReturnNone
+
+#guard raisesInEach.isOk
+
+#guard raisesInEach.toOption.any (decide ·.1.Canonical)
+
+/-- info: module py.r {
+  func @py.r(%xs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%xs.0 : py.Value):
+      %list.0 : py.Value = py.listComp(%xs.0) ^propagate.0() {
+        each.0(%out.0 : py.ListAcc, %item.0 : py.Value):
+          jump ^propagate.1(%item.0)
+        propagate.1(%exc.0 : py.Value):
+          %exc.1 : base.Except(py.Value, base.Unit) = base.error[py.Value, base.Unit](%exc.0)
+          ret(%exc.1)
+      }
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
+  }
+} -/
+#guard_msgs in
+#eval do IO.println ((← IO.ofExcept raisesInEach).1.format {})
+
 /-- The printed module `m`, read back in `Py.env` and printed again, or the reader's
 diagnostics. -/
 private def readBack (m : Module.Raw Py.env Unit) : IO Unit := do
@@ -735,7 +733,7 @@ private def readBack (m : Module.Raw Py.env Unit) : IO Unit := do
 /-! ## A module of the functions above -/
 
 private def m : Except (FailedFunc Py.env Unit Unit) (Module.Raw Py.env Unit) :=
-  return { name := Py.pn "test", funcs := #[(← f).1, (← g).1, (← h).1, (← k).1, (← c).1],
+  return { name := Py.pn "test", funcs := #[(← f).1, (← g).1, (← h).1, (← k).1, (← p).1],
            info := () }
 
 #guard match m with | .ok m => (TestUtil.dottedNames m).isEmpty | .error _ => false
@@ -836,16 +834,16 @@ private def classBody : Except (FailedFunc Py.env Unit Unit) {fn : Func Py.env U
 /-! ## The function's exit inside a region
 
 `return` and a propagated failure leave by the function's exit.  Inside a region's body, such as
-a `py.forEach` body, that exit would leave the region instead, so `buildFunc` rejects them
+a `py.compFor` body, that exit would leave the region instead, so `buildFunc` rejects them
 there. -/
 
 /-- Whether `buildFunc` accepts `body`, as the body of a function of `x`. -/
 private def builds (body : Vector ValId 1 → PyM Unit Unit) : Bool :=
   (buildFunc (Py.pn "f") #["x"] () body).isOk
 
-/-- A loop whose body returns, or, for `wrong = false`, a return after the loop only. -/
+/-- A `for` clause whose body returns, or, for `wrong = false`, a return after it only. -/
 private def returnInRegion (wrong : Bool) (args : Vector ValId 1) : PyM Unit Unit := do
-  forEach args[0] fun _ => if wrong then emitReturnNone else pure ()
+  compFor args[0] fun _ => if wrong then emitReturnNone else pure ()
   emitReturnNone
 
 #guard builds (returnInRegion false)
@@ -853,10 +851,10 @@ private def returnInRegion (wrong : Bool) (args : Vector ValId 1) : PyM Unit Uni
 #guard_msgs in
 #eval errors (returnInRegion true)
 
-/-- A loop whose body propagates its item as a failure, or, for `wrong = false`, a propagation
-of the function's argument after the loop. -/
+/-- A `for` clause whose body propagates its item as a failure, or, for `wrong = false`, a
+propagation of the function's argument after it. -/
 private def propagateInRegion (wrong : Bool) (args : Vector ValId 1) : PyM Unit Unit := do
-  forEach args[0] fun x => if wrong then emitPropagate (value x) else pure ()
+  compFor args[0] fun x => if wrong then emitPropagate (value x) else pure ()
   emitPropagate (value args[0])
 
 #guard builds (propagateInRegion false)
@@ -864,12 +862,12 @@ private def propagateInRegion (wrong : Bool) (args : Vector ValId 1) : PyM Unit 
 #guard_msgs in
 #eval errors (propagateInRegion true)
 
-/-- A raising operation in a loop body whose handler is the function's exit.  `Build.withExit`
+/-- A raising operation in a `for` clause's body whose handler is the function's exit.  `Build.withExit`
 gives that exit the type of a handler, so no function built this way is well formed; the test pins
 only the misuse that the handler's check records. -/
 private def handlerInRegion (args : Vector ValId 1) : PyM Unit Unit := do
   Build.withExit (env := Py.env) (α := Unit) (m := PyM Unit) Py.Value fun k =>
-    forEach args[0] fun x => withHandlerTo k (discard <| getAttr x "foo")
+    compFor args[0] fun x => withHandlerTo k (discard <| getAttr x "foo")
   emitReturnNone
 
 /-- info: #["the function's exit is used inside region each.0, which it does not leave"] -/
