@@ -58,7 +58,7 @@ public environment R2R extends Base where
 
 /-- For each function of `m`, its plan's start maps disagree with an edge of the walk, if they
 do (`RefToRegSim.edgesAgree`); nothing is printed when they agree. -/
-private def agree (m : Module R2R.env StrataDDM.SourceRange) : IO Unit :=
+private def agree (m : Module R2R.env Info) : IO Unit :=
   for f in m.raw.funcs do
     let check : Except String (Option String) := do
       let parents ← trees f
@@ -1092,7 +1092,7 @@ private def merge : String := "module m {
 
 /-- Read `text`, and promote it with `plan`'s plans changed by `tweak`. -/
 private def promoteBy (text : String)
-    (tweak : Func R2R.env StrataDDM.SourceRange → Plan R2R.env → Except String (Plan R2R.env)) :
+    (tweak : Func R2R.env Info → Plan R2R.env → Except String (Plan R2R.env)) :
     IO Unit := do
   match ← Module.read R2R.env text "t.dyn" with
   | .error e => IO.println e
@@ -1214,14 +1214,14 @@ private def readsAs (v : ValId) (P : Plan R2R.env) : Plan R2R.env :=
   { bp with carried := bp.carried.map fun (c, d) => (c, { d with type := Base.Bool }) }) P)
 
 /-- The value named `n` in `f`. -/
-private def idOf (f : Func R2R.env StrataDDM.SourceRange) (n : String) : ValId :=
+private def idOf (f : Func R2R.env Info) (n : String) : ValId :=
   match f.names.toList.zipIdx.find? (fun (nm, _) => nameText nm == n) with
   | some (_, k) => ⟨k⟩
   | none => ⟨999⟩
 
 /-- A plan that promotes `x.0` and replaces the read `r.0` by `b.0`, the cell's initial value,
 and gives the block `l`, if any, `b.0` as `x.0`'s fixed content. -/
-private def initialValue (l : Option Label) (f : Func R2R.env StrataDDM.SourceRange) :
+private def initialValue (l : Option Label) (f : Func R2R.env Info) :
     Plan R2R.env :=
   let x := idOf f "x.0"
   let b := idOf f "b.0"
@@ -1298,7 +1298,7 @@ the cell, since its content may change on a path into the block, and the read be
 read rule, or an edge that should pass the cell fails the edge rule. -/
 
 /-- The plan without the block plans of the blocks named `ls`. -/
-private def without (ls : List String) (f : Func R2R.env StrataDDM.SourceRange)
+private def without (ls : List String) (f : Func R2R.env Info)
     (P : Plan R2R.env) : Plan R2R.env :=
   { P with blocks := f.allBlocks.foldl (init := P.blocks) fun m b =>
       if ls.contains (nameText b.label.name) then m.erase b.label else m }

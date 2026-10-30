@@ -554,6 +554,13 @@ instance {env : Env Unit} {α : Type} [base ⊑ env] (fn : Func env α) : Decida
     ⟨fun ⟨a, b, c, d, e, f, g⟩ => ⟨a, b, c, d, e, f, g⟩,
       fun ⟨a, b, c, d, e, f, g⟩ => ⟨a, b, c, d, e, f, g⟩⟩
 
+/-- `fn` annotated with `info`, still well formed: well-formedness does not mention
+annotations. -/
+def Func.setInfo {env : Env Unit} {α : Type} [base ⊑ env] (fn : {fn : Func env α // fn.WF})
+    (info : α) : {fn : Func env α // fn.WF} :=
+  ⟨{ fn.val with info }, by
+    obtain ⟨a, b, c, d, e, f, g⟩ := fn.property; exact ⟨a, b, c, d, e, f, g⟩⟩
+
 /-- Every value a well-formed function defines has a name. -/
 theorem Func.WF.mem_names {env : Env Unit} {α : Type} [base ⊑ env] {fn : Func env α}
     (h : fn.WF) {d : ValDecl env} (hd : d ∈ fn.defs) : d.id.id < fn.names.size :=

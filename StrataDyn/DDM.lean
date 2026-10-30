@@ -6,6 +6,7 @@
 module
 
 public import StrataDyn.WF
+public import StrataDyn.Attr
 public import StrataDDM.AST
 public import StrataDDM.Integration.Lean.OfAstM
 -- Private: translating a checked IR needs the environment representation at codegen time.
@@ -77,6 +78,8 @@ module m {
   `1.0`, `0.0025` or `1e22`, and is the shortest decimal that reads back as it, or `inf`,
   `-inf` or `nan`; it is a `base.Float64`.  A boolean is `true` or `false`, a string `"…"`,
   the unit `unit` and a function pointer `@m.f`.
+* A function's attributes print below its signature, a `#[key = value]` line each, then a
+  blank line.  A value is a literal, a list `[v, …]` or a record `{k = v, …}`.
 * An operation's regions follow the rest of its line, each opening with its entry block,
   whose parameters are the region's arguments:
 
@@ -209,10 +212,24 @@ op block (label : MName, params : CommaSepBy MValDecl, instrs : Seq MInsn, term 
 /* A region: its blocks in braces, entry first, so it opens with its arguments. */
 op region (blocks : Seq MBlock) : MRegion => @[prec(0)] " {" indent(2, blocks) "\n" "}";
 
+/* An attribute's value: a literal, a list, or a record of named values. */
+category MAttrValue;
+category MAttrField;
+op attrConst (c : MConst) : MAttrValue => c;
+op attrList (vs : CommaSepBy MAttrValue) : MAttrValue => "[" vs "]";
+op attrRecord (fs : CommaSepBy MAttrField) : MAttrValue => "{" fs "}";
+op attrField (key : MName, value : MAttrValue) : MAttrField => @[prec(0)] key " = " value;
+
+/* A function's attributes. */
+category MAttr;
+op attr (key : MName, value : MAttrValue) : MAttr => @[prec(0)] "\n" "#[" key " = " value "]";
+category MAttrs;
+op attrs (as : Seq MAttr) : MAttrs => @[prec(0)] as "\n";
+
 category MFunc;
-op func (name : MFuncName, params : CommaSepBy MValDecl, retType : MType, blocks : Seq MBlock)
-    : MFunc =>
-  @[prec(0)] "\n" "func " name "(" params ") -> " retType " {" indent(2, blocks) "\n" "}";
+op func (name : MFuncName, params : CommaSepBy MValDecl, retType : MType,
+         attrs : Option MAttrs, blocks : Seq MBlock) : MFunc =>
+  @[prec(0)] "\n" "func " name "(" params ") -> " retType " {" indent(2, attrs blocks) "\n" "}";
 
 op moduleDecl (name : MName, funcs : Seq MFunc) : Command =>
   @[prec(0)] "module " name " {" indent(2, funcs) "\n" "}\n";
@@ -451,16 +468,34 @@ def regionList {env : Env Unit} {α : Type} (cx : Cx) :
 
 end
 
+/-- An attribute's value. -/
+def attrValue : AttrValue → MAttrValue SourceRange
+  | .const c => .attrConst .none (const c)
+  | .list vs => .attrList .none ⟨.none, vs.attach.map fun ⟨v, _⟩ => attrValue v⟩
+  | .record fs =>
+    .attrRecord .none ⟨.none, fs.attach.map fun ⟨(k, v), h⟩ =>
+      have hv : sizeOf v < 1 + sizeOf fs := by
+        have hlt := Array.sizeOf_lt_of_mem h
+        simp only [Prod.mk.sizeOf_spec] at hlt
+        omega
+      .attrField .none (name k) (attrValue v)⟩
+
+/-- A function's attributes, absent when there are none. -/
+def attrs (as : Array Attr) : Ann (Option (MAttrs SourceRange)) SourceRange :=
+  if as.isEmpty then ⟨.none, none⟩
+  else ⟨.none, some (.attrs .none ⟨.none, as.map fun (k, v) => .attr .none (name k) (attrValue v)⟩)⟩
+
 /-- A function.  Its parameters are the entry block's, so they are read from there. -/
-def func {env : Env Unit} {α : Type} (opts : PrintOptions) (fn : Func env α) :
+def func {env : Env Unit} {α : Type} [HasAttrs α] (opts : PrintOptions) (fn : Func env α) :
     MFunc SourceRange :=
   let cx : Cx := { fold := if opts.foldConsts then folded fn.blocks else {}, names := fn.names }
   .func .none (funcName fn.name)
     ⟨.none, (fn.blocks[0]?.map (·.params.map (valDecl cx.names))).getD #[]⟩
     (type fn.retType)
+    (attrs (HasAttrs.attrs fn.info))
     ⟨.none, fn.blocks.map (block cx)⟩
 
-def module {env : Env Unit} [base ⊑ env] {α : Type} (opts : PrintOptions)
+def module {env : Env Unit} [base ⊑ env] {α : Type} [HasAttrs α] (opts : PrintOptions)
     (m : Module.Raw env α) : DDM.Command SourceRange :=
   .moduleDecl .none (name m.name) ⟨.none, m.funcs.map (func opts)⟩
 
@@ -475,34 +510,38 @@ def context : FormatContext := .ofDialects DDM.Dyn_map
 def state : FormatState where
   openDialects := DDM.Dyn_map.toList.foldl (init := {}) fun s d => s.insert d.name
 
-/-- Lay out a DDM term of this dialect. -/
+/-- Lay out a DDM term of this dialect.  A line of spaces only is printed empty, such as the
+blank line after a function's attributes. -/
 def render (c : DDM.Command SourceRange) : String :=
-  (mformat c.toAst context state).format.pretty
+  "\n".intercalate <| ((mformat c.toAst context state).format.pretty.splitOn "\n").map fun l =>
+    if l.all (· == ' ') then "" else l
 
 end Print
 
 /-- The module, printed with the given options.  Folding a module that is not well formed can
 print text that reads back as a different module. -/
-public def Module.Raw.format {env : Env Unit} [base ⊑ env] {α : Type} (opts : PrintOptions)
+public def Module.Raw.format {env : Env Unit} [base ⊑ env] {α : Type} [HasAttrs α] (opts : PrintOptions)
     (m : Module.Raw env α) : String :=
   Print.render (ToDDM.module opts m)
 
 /-- The module, printed in full. -/
-public instance {env : Env Unit} [base ⊑ env] {α : Type} : ToString (Module.Raw env α) where
+public instance {env : Env Unit} [base ⊑ env] {α : Type} [HasAttrs α] :
+    ToString (Module.Raw env α) where
   toString := Module.Raw.format .full
 
 /-- The module, printed, with constants folded by default. -/
-public def Module.format {env : Env Unit} [base ⊑ env] {α : Type} (m : Module env α)
+public def Module.format {env : Env Unit} [base ⊑ env] {α : Type} [HasAttrs α] (m : Module env α)
     (opts : PrintOptions := {}) : String :=
   m.raw.format opts
 
 /-- The module, printed with constants folded. -/
-public instance {env : Env Unit} [base ⊑ env] {α : Type} : ToString (Module env α) where
+public instance {env : Env Unit} [base ⊑ env] {α : Type} [HasAttrs α] :
+    ToString (Module env α) where
   toString m := m.format
 
 /-- One function, printed with the given options, as a module with just it in.  Folding a
 function that is not well formed can print text that reads back as a different function. -/
-public def Func.format {env : Env Unit} {α : Type} (opts : PrintOptions) (fn : Func env α) :
+public def Func.format {env : Env Unit} {α : Type} [HasAttrs α] (opts : PrintOptions) (fn : Func env α) :
     String :=
   Print.render (.moduleDecl .none (ToDDM.name fn.name) ⟨.none, #[ToDDM.func opts fn]⟩)
 

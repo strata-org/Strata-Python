@@ -105,7 +105,9 @@ branches are regions:
 
 **Annotations.** Every part of a program carries an annotation of a type the front end chooses,
 such as a source position, so that results can be reported against the original source.
-Dyn does not depend on annotations for its semantics.
+Dyn does not depend on annotations for its semantics. A front end can also state facts
+about a function as *attributes* (`StrataDyn/Attr.lean`): named values, such as a declared
+shape, that the printer writes and the reader reads back. The IR gives them no meaning.
 
 **Building.** A front end emits a function through the builder (`StrataDyn/Build.lean`),
 which checks the function when it is finished. Each instruction has a typed emitter under its
@@ -163,6 +165,9 @@ module m {
   (`1.0`, `0.0025`, `1e22`), and is the shortest decimal that reads back as it, or `inf`,
   `-inf` or `nan`; it is a `base.Float64`, so `1` is never one. A boolean is `true` or
   `false`, a string `"…"`, the unit `unit`, and a function pointer `@m.f`.
+* **Attributes** of a function print below its signature, one `#[key = value]` line each,
+  then a blank line. A value is a literal, a list `[v, …]` or a record `{k = v, …}`, and a
+  key is prefixed by the front end that gives it its meaning, such as `py.` for Python.
 * **Constants** are written at their uses by default, as in `py.intLit(1)`.
   `PrintOptions.full` prints each on its own line instead: `%c.0 : base.Int = const 1`, then
   `py.intLit(%c.0)`.

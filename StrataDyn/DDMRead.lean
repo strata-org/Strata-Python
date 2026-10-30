@@ -26,11 +26,13 @@ set_option autoImplicit false
 # Reading printed IR back
 
 `Module.read env text` parses `text` in the Dyn dialect of `StrataDyn/DDM.lean` and
-returns the well-formed `Module` it denotes in `env`, annotated with source ranges, or
-diagnostics that say what is wrong and where.  It reads both printed forms.  `Module.ofDDM`
-does the same from a DDM term.
+returns the well-formed `Module` it denotes in `env`, annotated with `Info` (source ranges,
+and each function's attributes), or diagnostics that say what is wrong and where.  It reads
+both printed forms.  `Module.ofDDM` does the same from a DDM term.
 
 * Lines that start with `--` are comments.
+* A function's attributes are read into its `Info`, each key once; a function they name must
+  be in the module.
 * Types and operations are looked up in `env`.  A list parameter's argument, of a type or of
   an operation, is a list literal `[τ, …]` of types, and an argument of the wrong kind is
   rejected.  `jump`, `branch` and
@@ -165,6 +167,18 @@ def constAnn : MConst SourceRange → SourceRange
   | .constUnit a | .constBool a _ | .constInt a _ | .constFloat a _ | .constStr a _
   | .constFunc a _ => a
 
+/-- The constant a literal denotes, with `funcs` the module's functions, by name. -/
+def constOf {β : Type} (funcs : NameTable β) : MConst SourceRange → Result Const
+  | .constUnit _ => pure .unit
+  | .constBool _ ⟨_, b⟩ => pure (.bool b)
+  | .constInt _ i => pure (.int (int i))
+  | .constFloat _ f => pure (.float (float f))
+  | .constStr _ ⟨_, s⟩ => pure (.str s)
+  | .constFunc ann (.funcName _ n) =>
+    let f := nameOf (identText n)
+    if (funcs.get? f).isSome then pure (.func f)
+    else throw ⟨ann, s!"no function @{identText n} in this module"⟩
+
 /-- A module's functions, by name: where each is, and its code type, from its header, unless
 the header's types do not read. -/
 abbrev Funcs (env : Env Unit) := NameTable (SourceRange × Option (TypeExpr env))
@@ -175,11 +189,6 @@ be its target's code type. -/
 def literal {env : Env Unit} [base ⊑ env] (funcs : Funcs env) (expected : TypeExpr env)
     (c : MConst SourceRange) : Result Const := do
   let k : Const ← match c with
-    | .constUnit _ => pure .unit
-    | .constBool _ ⟨_, b⟩ => pure (.bool b)
-    | .constInt _ i => pure (.int (int i))
-    | .constFloat _ f => pure (.float (float f))
-    | .constStr _ ⟨_, s⟩ => pure (.str s)
     | .constFunc ann (.funcName _ n) =>
       let f := nameOf (identText n)
       let some (_, ct?) := funcs.get? f
@@ -187,6 +196,7 @@ def literal {env : Env Unit} [base ⊑ env] (funcs : Funcs env) (expected : Type
       if ct? = some expected then return .func f
       let ct := (ct?.map typeText).getD "?"
       throw ⟨ann, s!"@{identText n} has type {ct}, where {typeText expected} is expected"⟩
+    | c => constOf funcs c
   let t? : Option (TypeExpr env) := k.typeOf?
   if t? = some expected then pure k
   else throw ⟨constAnn c, s!"a {(t?.map typeText).getD "?"} literal where {typeText expected} \
@@ -498,16 +508,47 @@ def headerAnn : MFunc SourceRange → SourceRange
 /-- The code type a function's header gives: `base.Fn` of its parameters' types and its
 return type, unless they do not read.  Reading the function checks it against its body. -/
 def headerCodeType? : MFunc SourceRange → Option (TypeExpr env)
-  | .func _ _ ⟨_, ps⟩ retTy _ => do
+  | .func _ _ ⟨_, ps⟩ retTy _ _ => do
     let ts ← ps.mapM fun | .valDecl _ _ ty => (type ty).toOption
     let r ← (type retTy).toOption
     pure (Base.Fn (TypeList.ofTypes ts) r)
 
+/-- The pairs of `kvs`, with their keys read as names, or an error at the second use of a
+key.  `what` names the keys in the message. -/
+def unique {β : Type} (what : String) (kvs : Array (SourceRange × MName SourceRange × β)) :
+    Result (Array (Name × β)) :=
+  let named := kvs.toList.map fun (ann, k, v) => (nameOf (identText k), (ann, k, v))
+  match NameTable.empty.insertAll? named with
+  | .ok _ => pure (kvs.map fun (_, k, v) => (nameOf (identText k), v))
+  | .error (_, ann, k, _) => throw ⟨ann, s!"{what} {identText k} is given twice"⟩
+
+/-- An attribute's value, with `funcs` the module's functions. -/
+def attrValue (funcs : Funcs env) : MAttrValue SourceRange → Result AttrValue
+  | .attrConst _ c => .const <$> constOf funcs c
+  | .attrList _ ⟨_, vs⟩ => .list <$> vs.attach.mapM fun ⟨v, _⟩ => attrValue funcs v
+  | .attrRecord _ ⟨_, fs⟩ => do
+    let kvs ← fs.attach.mapM fun
+      | ⟨.attrField a k v, h⟩ =>
+        have hv : sizeOf v < 1 + sizeOf fs := by
+          have hlt := Array.sizeOf_lt_of_mem h
+          simp only [MAttrField.attrField.sizeOf_spec] at hlt
+          omega
+        return (a, k, ← attrValue funcs v)
+    .record <$> unique "field" kvs
+
+/-- A function's attributes. -/
+def attrsOf (funcs : Funcs env) :
+    Option (MAttrs SourceRange) → Result (Array Attr)
+  | none => pure #[]
+  | some (.attrs _ ⟨_, as⟩) => do
+    unique "attribute" (← as.mapM fun | .attr a k v => return (a, k, ← attrValue funcs v))
+
 /-- A well-formed function, with `funcs` the module's functions. -/
 def func (funcs : Funcs env) (f : MFunc SourceRange) :
-    Result {fn : Func env SourceRange // fn.name = headerName f ∧ fn.WF} :=
+    Result {fn : Func env Info // fn.name = headerName f ∧ fn.WF} :=
   match f with
-  | .func ann (.funcName _ n) ⟨_, ps⟩ retTy ⟨_, ⟨blocks⟩⟩ => do
+  | .func ann (.funcName _ n) ⟨_, ps⟩ retTy ⟨_, attrs⟩ ⟨_, ⟨blocks⟩⟩ => do
+    let attrs ← attrsOf funcs attrs
     let retType ← type retTy
     let (scope, _) ← scopeOf ann retType blocks
     let run : ReadM env (Late (Array (Block env SourceRange))) := do
@@ -516,7 +557,7 @@ def func (funcs : Funcs env) (f : MFunc SourceRange) :
       return bs
     let (bs, s) ← run.run {}
     let ids : Name → ValId := fun n => (s.values.get? n).getD ⟨0⟩
-    let blocks := bs ids
+    let blocks := (bs ids).map (Block.map fun range => ({ range } : Info))
     -- The signature repeats the entry block's parameters.
     let sig ← ps.mapM fun | .valDecl _ v ty => return (valName v, ← type ty)
     let entry ← (blocks[0]?.map (·.params) |>.getD #[]).mapM fun d =>
@@ -527,8 +568,8 @@ def func (funcs : Funcs env) (f : MFunc SourceRange) :
       throw ⟨ann, s!"the parameters of @{identText n} differ from its entry block's"⟩
     let some ⟨names, hnames⟩ := s.values.fill? constName ⟨0⟩
       | throw ⟨ann, s!"no fresh name for a constant of @{identText n}"⟩
-    let fn : Func env SourceRange :=
-      { name := nameOf (identText n), retType, blocks, names, info := ann }
+    let fn : Func env Info :=
+      { name := nameOf (identText n), retType, blocks, names, info := { range := ann, attrs } }
     -- The value names' table proves the names distinct; the rest of `Func.WF` is decided.
     if h : 0 < fn.blocks.size ∧ Label.Distinct (Label.exit :: fn.labels) ∧
         ValDecl.idBound fn.defs ≤ fn.names.size ∧ fn.BodyWF ∧ (fn.Reachable ∧ fn.Scopable) then
@@ -540,7 +581,7 @@ def func (funcs : Funcs env) (f : MFunc SourceRange) :
 
 /-- The functions `l` denotes, each well formed, or the diagnostics of all that are not. -/
 def funcList (funcs : Funcs env) : (l : List (MFunc SourceRange)) →
-    Except (Array ReadDiagnostic) {fs : List (Func env SourceRange) //
+    Except (Array ReadDiagnostic) {fs : List (Func env Info) //
       fs.map (·.name) = l.map headerName ∧ ∀ f ∈ fs, f.WF}
   | [] => .ok ⟨[], rfl, by simp⟩
   | f :: l =>
@@ -556,14 +597,15 @@ end Read
 open Read in
 /-- The module a DDM term of the Dyn dialect denotes in `env`, or the diagnostics. -/
 public def Module.ofDDM {env : Env Unit} [base ⊑ env] (c : DDM.Command SourceRange) :
-    Except (Array ReadDiagnostic) (Module env SourceRange) := do
+    Except (Array ReadDiagnostic) (Module env Info) := do
   let .moduleDecl ann n ⟨_, fs⟩ := c
   let headers := fs.toList
   let ⟨funcs, hfuncs⟩ ← (NameTable.empty.insertAll? (headers.map fun f =>
       (headerName f, (headerAnn f, headerCodeType? (env := env) f)))).mapError
     fun (f, r, _) => #[⟨r, s!"function @{ToDDM.nameText f} is defined twice"⟩]
   let ⟨list, hnames, hwf⟩ ← funcList (env := env) funcs headers
-  let m : Module.Raw env SourceRange := { name := nameOf (identText n), funcs := list.toArray, info := ann }
+  let m : Module.Raw env Info :=
+    { name := nameOf (identText n), funcs := list.toArray, info := { range := ann } }
   have hm : m.funcNames = (headers.map headerName).toArray := by
     simp [m, Module.Raw.funcNames, Array.mapK_eq_map_fun, hnames]
   have hnodup : (headers.map headerName).Nodup := by
@@ -634,10 +676,11 @@ public instance : ToString Read.Errors := ⟨fun e => "\n".intercalate e.toArray
 
 open Read in
 /-- Parse `text` in the Dyn dialect and read the module it denotes in `env`: the module,
-annotated with source ranges, or the diagnostics, each as `file:line:column: message`. -/
+annotated with source ranges and attributes, or the diagnostics, each as
+`file:line:column: message`. -/
 public def Module.read (env : Env Unit) [base ⊑ env] (text : String)
     (fileName : String := "<input>") :
-    IO (Except Read.Errors (Module env SourceRange)) := do
+    IO (Except Read.Errors (Module env Info)) := do
   let msgs : Array String ← match ← parse text fileName with
     | .error msgs => pure msgs
     | .ok c =>
