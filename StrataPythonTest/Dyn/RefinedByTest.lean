@@ -83,9 +83,9 @@ example : TypeExpr Ext3.env := cellOfInt
 private def body {e : Env Unit} [Py.env ⊑ e] : BuildM e Unit Unit := do
   let x ← Build.freshVal (.str .base "x") Base.Int
   let _ ← Build.startFreshBlock #[x]
-  let cell ← Build.emitApply (.str .base "cell") (Base.Ref Base.Int) Base.refNew
+  let cell ← Build.emitApply (.str .base "cell") (Base.Ref Base.Int) Base.refNew.ref
       #[x.id]
-  let got ← Build.emitApply (.str .base "got") Base.Int Base.refGet #[cell]
+  let got ← Build.emitApply (.str .base "got") Base.Int Base.refGet.ref #[cell]
   Build.finishBlock (.ret () got)
 
 #guard (Build.build (env := Py.env) (.str .base "f") Base.Int () body).isOk
@@ -110,7 +110,7 @@ reference, by proof irrelevance. -/
 private theorem byHand : base ≤ Ext3.env :=
   Env.Le.trans (Py.toBase (e := Py.env)).le (Env.le_of_subset Ext3.hsub)
 
-example : @Base.refNew Ext3.env ⟨byHand⟩ = Base.refNew := rfl
+example : @Base.refNew.ref Ext3.env ⟨byHand⟩ = Base.refNew.ref := rfl
 
 example (h₁ h₂ : base ⊑ Ext3.env) : @Base.refNew.sig _ h₁ = @Base.refNew.sig _ h₂ := rfl
 

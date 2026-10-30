@@ -156,30 +156,30 @@ each of `blocks` but the head, which is the entry. -/
   (blocks.drop 1).foldl (init := (∅ : BlockSigs env).insert Label.exit #[result])
     fun m b => m.insert b.label (b.params.map (·.type))
 
-/-- The parameter types a transfer to `k` implies for its target: what it supplies,
-then what it leaves for the site. -/
-@[expose] def BlockValue.implies? {env : Env Unit} (ctx : Ctx env) (k : BlockValue)
+/-- The parameter types the target `k` implies for its block: what it binds, then what it
+leaves for the operation. -/
+@[expose] def Target.Raw.implies? {env : Env Unit} (ctx : Ctx env) (k : Target.Raw)
     (expects : Array (TypeExpr env)) : Option (Array (TypeExpr env)) :=
   (ctx.typesOf? k.args).map (· ++ expects)
 
-/-- A transfer is well formed when its target is a block of `bs` and declares exactly
-the parameters the transfer implies. -/
-@[expose, reducible] def BlockValue.WF {env : Env Unit} (ctx : Ctx env) (bs : BlockSigs env)
-    (k : BlockValue) (expects : Array (TypeExpr env)) : Prop :=
-  Agrees (bs.find? k.target) (k.implies? ctx expects)
+/-- A target is well formed when its label is a block of `bs` that declares exactly the
+parameters the target implies. -/
+@[expose, reducible] def Target.Raw.WF {env : Env Unit} (ctx : Ctx env) (bs : BlockSigs env)
+    (k : Target.Raw) (expects : Array (TypeExpr env)) : Prop :=
+  Agrees (bs.find? k.label) (k.implies? ctx expects)
 
-/-- Each transfer of `ks` is well formed at the corresponding entry of `expects`: one per
+/-- Each target of `ks` is well formed at the corresponding entry of `expects`: one per
 entry, in order, as an operation's successors against their declared values. -/
-@[expose, reducible] def BlockValue.AllWF {env : Env Unit} (ctx : Ctx env)
-    (bs : BlockSigs env) (ks : Array BlockValue)
+@[expose, reducible] def Target.Raw.AllWF {env : Env Unit} (ctx : Ctx env)
+    (bs : BlockSigs env) (ks : Array Target.Raw)
     (expects : Array (Array (TypeExpr env))) : Prop :=
-  ks.size = expects.size ∧ ∀ p ∈ ks.zip expects, BlockValue.WF ctx bs p.1 p.2
+  ks.size = expects.size ∧ ∀ p ∈ ks.zip expects, Target.Raw.WF ctx bs p.1 p.2
 
-instance {env : Env Unit} (ctx : Ctx env) (bs : BlockSigs env) (ks : Array BlockValue)
+instance {env : Env Unit} (ctx : Ctx env) (bs : BlockSigs env) (ks : Array Target.Raw)
     (expects : Array (Array (TypeExpr env))) :
-    Decidable (BlockValue.AllWF ctx bs ks expects) :=
+    Decidable (Target.Raw.AllWF ctx bs ks expects) :=
   inferInstanceAs (Decidable (ks.size = expects.size ∧
-    ∀ p ∈ ks.zip expects, BlockValue.WF ctx bs p.1 p.2))
+    ∀ p ∈ ks.zip expects, Target.Raw.WF ctx bs p.1 p.2))
 
 /-! ## Operations -/
 
@@ -194,9 +194,9 @@ its signature demands at `typeArgs`, and it names one block of `bs` per declared
 each receiving that successor's declared values after what the site pre-binds. -/
 @[expose, reducible] def InsnSig.callWF {env : Env Unit} (ctx : Ctx env) (bs : BlockSigs env)
     (isig : InsnSig env) (typeArgs : TypeArgs env isig.scope)
-    (args : Array ValId) (succs : Array BlockValue) : Prop :=
+    (args : Array ValId) (succs : Array Target.Raw) : Prop :=
   Agrees (ctx.typesOf? args) (isig.operandTypes? typeArgs args.size) ∧
-    BlockValue.AllWF ctx bs succs (isig.succTypes typeArgs)
+    Target.Raw.AllWF ctx bs succs (isig.succTypes typeArgs)
 
 /-- What a region must be: its entry block's parameter types, and the type its exit takes. -/
 abbrev RegionType (env : Env Unit) := Array (TypeExpr env) × TypeExpr env

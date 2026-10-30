@@ -141,23 +141,23 @@ private def notInferred {isig : InsnSig Ops.env} (_r : InsnRef Ops.env isig)
   | .error e => some (e.text "it")
 
 -- `callCode`'s list comes from its function's type, and its spread checks against it.
-#guard inferred Base.callCode (some intT) #[fnT #[intT, boolT] intT, intT, boolT] ==
+#guard inferred Base.callCode.ref (some intT) #[fnT #[intT, boolT] intT, intT, boolT] ==
   some #[.list (.ofTypes #[intT, boolT]), .ty intT]
 -- With no result type given, the function's type gives `r` too.
-#guard inferred Base.callCode none #[fnT #[intT, boolT] intT, intT, boolT] ==
+#guard inferred Base.callCode.ref none #[fnT #[intT, boolT] intT, intT, boolT] ==
   some #[.list (.ofTypes #[intT, boolT]), .ty intT]
 -- An operand of the wrong type, or one too many, fits no arguments.
-#guard notInferred Base.callCode (some intT) #[fnT #[intT, boolT] intT, intT, intT] ==
+#guard notInferred Base.callCode.ref (some intT) #[fnT #[intT, boolT] intT, intT, intT] ==
   some "cannot infer the type arguments of it: the types of its operands and result do not fit its signature"
-#guard notInferred Base.callCode (some intT) #[fnT #[intT] intT, intT, intT] ==
+#guard notInferred Base.callCode.ref (some intT) #[fnT #[intT] intT, intT, intT] ==
   some "cannot infer the type arguments of it: the types of its operands and result do not fit its signature"
 
 -- `refSet`'s cell type gives `a`, and `Except.case`'s scrutinee gives `e` and `a`.
-#guard inferred Base.refSet (some Base.Unit) #[Base.Ref intT, intT] == some #[.ty intT]
-#guard inferred Base.Except.case none #[Base.Except boolT intT] == some #[.ty boolT, .ty intT]
+#guard inferred Base.refSet.ref (some Base.Unit) #[Base.Ref intT, intT] == some #[.ty intT]
+#guard inferred Base.Except.case.ref none #[Base.Except boolT intT] == some #[.ty boolT, .ty intT]
 
 -- What nothing fixes is reported by name.
-#guard notInferred Ops.phantom (some intT) #[intT] ==
+#guard notInferred Ops.phantom.ref (some intT) #[intT] ==
   some "cannot infer type argument(s) `a` of it: they occur in no operand's type and not in its result type; pass them with `(typeArgs := ta[…])`"
 
 /-! ## The builder
@@ -185,7 +185,7 @@ private def call (ops : Array Nat) : Built :=
     let y ← freshVal (.str .base "y") boolT
     let _ ← startFreshBlock #[g, x, y] "entry"
     let ps := #[g.id, x.id, y.id]
-    let r ← emitApply (.str .base "r") intT Base.callCode (#[g.id] ++ ops.filterMap (ps[·]?))
+    let r ← emitApply (.str .base "r") intT Base.callCode.ref (#[g.id] ++ ops.filterMap (ps[·]?))
     finishBlock (.ret () r)
 
 #guard (call #[1, 2]).isOk
@@ -193,11 +193,11 @@ private def call (ops : Array Nat) : Built :=
   #["cannot infer the type arguments of base.callCode: the types of its operands and result do not fit its signature"]
 
 /-- `f(%x : Int) : Int`, returning `phantom(%x)`, with `ta` its type arguments. -/
-private def phantom (ta : TypeArgsOf (Ops.phantom (e := Ops.env)) (some intT)) : Built :=
+private def phantom (ta : TypeArgsOf (Ops.phantom.ref (e := Ops.env)) (some intT)) : Built :=
   build (.str .base "f") intT () do
     let x ← freshVal (.str .base "x") intT
     let _ ← startFreshBlock #[x] "entry"
-    let r ← emitApply (.str .base "r") intT Ops.phantom #[x.id] (typeArgs := ta)
+    let r ← emitApply (.str .base "r") intT Ops.phantom.ref #[x.id] (typeArgs := ta)
     finishBlock (.ret () r)
 
 #guard (phantom ta[Base.Bool]).isOk
@@ -209,13 +209,13 @@ private def phantom (ta : TypeArgsOf (Ops.phantom (e := Ops.env)) (some intT)) :
 /--
 error: could not synthesize default value for parameter 'typeArgs' using tactics
 ---
-error: cannot infer type argument(s) `a` of Ops.phantom: they occur in no operand's type and not in its result type; pass them with `(typeArgs := ta[…])`
+error: cannot infer type argument(s) `a` of Ops.phantom.ref: they occur in no operand's type and not in its result type; pass them with `(typeArgs := ta[…])`
 -/
 #guard_msgs in
 example (x : ValId) : BuildM Ops.env Unit ValId :=
-  emitApply (.str .base "r") intT Ops.phantom #[x]
+  emitApply (.str .base "r") intT Ops.phantom.ref #[x]
 example (x : ValId) : BuildM Ops.env Unit ValId :=
-  emitApply (.str .base "r") intT Ops.phantom #[x] (typeArgs := ta[Base.Bool])
+  emitApply (.str .base "r") intT Ops.phantom.ref #[x] (typeArgs := ta[Base.Bool])
 
 /-- `f(%e : Except Bool Int) : Int`: `Except.case` of `%e`, with no `ta[…]`, its `ok` value
 returned and its `error` replaced by `0`. -/
@@ -225,7 +225,7 @@ private def caseOf : Built :=
     let _ ← startFreshBlock #[e] "entry"
     let ok ← freshLabel "ok"
     let err ← freshLabel "err"
-    terminate Base.Except.case #[e.id] #[goto ok, goto err]
+    terminate Base.Except.case.ref #[e.id] #[goto ok, goto err]
     let v ← freshVal (.str .base "v") intT
     startBlock ok #[v]
     finishBlock (.ret () v.id)

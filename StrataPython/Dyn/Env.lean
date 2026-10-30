@@ -6,6 +6,8 @@
 module
 public import StrataDyn.IR
 public import StrataDyn.Base
+-- Public, so that `Py`'s typed emitters are public.
+public import StrataDyn.Build.Typed
 -- Constructing an `Env` value needs its representation at code-generation time.
 import StrataDyn.Env.WF
 import StrataDyn.DSL

@@ -37,21 +37,21 @@ open Strata.Dyn.DSLTest Strata.Dyn.RegionTest
 /-! ## The kinds reduce -/
 
 -- Base's instructions, at `Base.env` and at a child.
-example : KindedTypeArgsFor (Base.refGet (e := Base.env)) none := ta[Base.Int]
-example : KindedTypeArgsFor (Base.Except.ok (e := Fns.env)) none := ta[Base.String, Base.Int]
-example : KindedTypeArgsFor (Base.Except.case (e := Fns.env)) none :=
+example : KindedTypeArgsFor (Base.refGet.ref (e := Base.env)) none := ta[Base.Int]
+example : KindedTypeArgsFor (Base.Except.ok.ref (e := Fns.env)) none := ta[Base.String, Base.Int]
+example : KindedTypeArgsFor (Base.Except.case.ref (e := Fns.env)) none :=
   ta[Base.String, Base.Except Base.Int Base.Bool]
 -- A generic refinement.
-example {e : Env Unit} [Demo.env ⊑ e] : KindedTypeArgsFor (Base.refNew (e := e)) none :=
+example {e : Env Unit} [Demo.env ⊑ e] : KindedTypeArgsFor (Base.refNew.ref (e := e)) none :=
   ta[Demo.Box Demo.Value]
 -- List parameters: a literal, an empty one, and a `TypeList` term.
-example : KindedTypeArgsFor (Fns.callFn (e := Fns.env)) none :=
+example : KindedTypeArgsFor (Fns.callFn.ref (e := Fns.env)) none :=
   ta[[Base.Int, Base.Bool], Base.Int]
-example : KindedTypeArgsFor (Fns.bindFirst (e := Fns.env)) none := ta[Base.Int, [], Base.Int]
-example (l : TypeList Fns.env) : KindedTypeArgsFor (Fns.callLast (e := Fns.env)) none :=
+example : KindedTypeArgsFor (Fns.bindFirst.ref (e := Fns.env)) none := ta[Base.Int, [], Base.Int]
+example (l : TypeList Fns.env) : KindedTypeArgsFor (Fns.callLast.ref (e := Fns.env)) none :=
   ta[l, Base.Int]
 -- `ta[…]` is the chain of constructors.
-example : (ta[[Base.Int], Base.Bool] : KindedTypeArgsFor (Fns.callFn (e := Fns.env)) none) =
+example : (ta[[Base.Int], Base.Bool] : KindedTypeArgsFor (Fns.callFn.ref (e := Fns.env)) none) =
     .list (.lit #[.ty Base.Int]) (.ty Base.Bool .nil) := rfl
 
 /-! ### A hand-written signature -/
@@ -79,16 +79,16 @@ example : KindedTypeArgsFor idRef (some natTy₁) := by infer_type_args
 
 -- The type parameter is the result.
 example :
-    (by infer_type_args : KindedTypeArgsFor (Base.refGet (e := Fns.env)) (some Base.Int)) =
+    (by infer_type_args : KindedTypeArgsFor (Base.refGet.ref (e := Fns.env)) (some Base.Int)) =
       ta[Base.Int] := rfl
 -- Under a constructor, through an abbreviation-like definition.
 private def exceptT : TypeExpr Fns.env := Base.Except Base.String Base.Int
 example :
-    (by infer_type_args : KindedTypeArgsFor (Base.Except.ok (e := Fns.env)) (some exceptT)) =
+    (by infer_type_args : KindedTypeArgsFor (Base.Except.ok.ref (e := Fns.env)) (some exceptT)) =
       ta[Base.String, Base.Int] := rfl
 -- A list parameter in the result.
 example :
-    KindedTypeArgsFor (Reg.«try» (e := Reg.env)) (some (Reg.Completion Base.Int)) := by
+    KindedTypeArgsFor (Reg.«try».ref (e := Reg.env)) (some (Reg.Completion Base.Int)) := by
   infer_type_args
 
 /-! ### A list literal in the result
@@ -104,16 +104,16 @@ private environment Lits extends FnAbbrevs where
   insn cons1 [a (as : list)] (x : a) : Fn [a, *as] a
   insn snoc1 [(as : list) a] (x : a) : Fn [*as, a] a
 
-example : KindedTypeArgsFor (Lits.lit1 (e := Lits.env))
+example : KindedTypeArgsFor (Lits.lit1.ref (e := Lits.env))
     (some (Base.Fn [Base.Int] Base.Int)) := by infer_type_args
-example : KindedTypeArgsFor (Lits.lit1 (e := Lits.env))
+example : KindedTypeArgsFor (Lits.lit1.ref (e := Lits.env))
     (some (Base.Fn (TypeList.ofTypes #[Base.Int]) Base.Int)) := by infer_type_args
 -- Both infer `a := Int`.
 example :
-    (by infer_type_args : KindedTypeArgsFor (Lits.lit1 (e := Lits.env))
+    (by infer_type_args : KindedTypeArgsFor (Lits.lit1.ref (e := Lits.env))
       (some (Base.Fn [Base.Int] Base.Int))) = ta[Base.Int] := rfl
 example :
-    (by infer_type_args : KindedTypeArgsFor (Lits.lit1 (e := Lits.env))
+    (by infer_type_args : KindedTypeArgsFor (Lits.lit1.ref (e := Lits.env))
       (some (Base.Fn (TypeList.ofTypes #[Base.Int]) Base.Int))) = ta[Base.Int] := rfl
 
 /-! ### A splice among other elements
@@ -123,39 +123,39 @@ and the parameter binds the run between them. -/
 
 -- After a type: `a := Int`, `as := [Bool]`.
 example :
-    (by infer_type_args : KindedTypeArgsFor (Lits.cons1 (e := Lits.env))
+    (by infer_type_args : KindedTypeArgsFor (Lits.cons1.ref (e := Lits.env))
       (some (Base.Fn [Base.Int, Base.Bool] Base.Int))) =
       ta[Base.Int, [Base.Bool]] := rfl
 -- The run may be empty: `as := []`.
 example :
-    (by infer_type_args : KindedTypeArgsFor (Lits.cons1 (e := Lits.env))
+    (by infer_type_args : KindedTypeArgsFor (Lits.cons1.ref (e := Lits.env))
       (some (Base.Fn [Base.Int] Base.Int))) = ta[Base.Int, []] := rfl
 -- Before a type: `as := [Int, Bool]`, `a := Int`.
 example :
-    (by infer_type_args : KindedTypeArgsFor (Lits.snoc1 (e := Lits.env))
+    (by infer_type_args : KindedTypeArgsFor (Lits.snoc1.ref (e := Lits.env))
       (some (Base.Fn [Base.Int, Base.Bool, Base.Int]
         Base.Int))) = ta[[Base.Int, Base.Bool], Base.Int] := rfl
 
 -- Through an abbreviation, whose handle splices a list argument into one literal and appends a
 -- `TypeList`: `withInt [Bool] Int` is `Fn [Bool, Int] Int`, so `as := [Bool]`, `a := Int`.
 example :
-    (by infer_type_args : KindedTypeArgsFor (Lits.snoc1 (e := Lits.env))
+    (by infer_type_args : KindedTypeArgsFor (Lits.snoc1.ref (e := Lits.env))
       (some (FnAbbrevs.withInt [Base.Bool] Base.Int))) =
       ta[[Base.Bool], Base.Int] := rfl
 example :
-    (by infer_type_args : KindedTypeArgsFor (Lits.snoc1 (e := Lits.env))
+    (by infer_type_args : KindedTypeArgsFor (Lits.snoc1.ref (e := Lits.env))
       (some (FnAbbrevs.withInt (TypeList.ofTypes #[Base.Bool]) Base.Int))) =
       ta[[Base.Bool], Base.Int] := rfl
 
 -- Through `++`: `[Bool] ++ [Int]` is `[Bool, Int]`.
 example :
-    (by infer_type_args : KindedTypeArgsFor (Lits.snoc1 (e := Lits.env))
+    (by infer_type_args : KindedTypeArgsFor (Lits.snoc1.ref (e := Lits.env))
       (some (Base.Fn (TypeList.ofTypes #[Base.Bool] ++ TypeList.ofTypes #[Base.Int])
         Base.Int))) = ta[[Base.Bool], Base.Int] := rfl
 
 -- In the middle, as the DSL writes it: `as := [Bool, Int]`.
 example :
-    (by infer_type_args : KindedTypeArgsFor (FnAbbrevs.wrap (e := Lits.env))
+    (by infer_type_args : KindedTypeArgsFor (FnAbbrevs.wrap.ref (e := Lits.env))
       (some (Base.Fn [Base.Int, Base.Bool, Base.Int, Base.Bool]
         Base.Int))) = ta[[Base.Bool, Base.Int]] := rfl
 
@@ -163,16 +163,16 @@ example :
 private def emptyFn : TypeExpr Lits.env := Base.Fn [] Base.Int
 
 /--
-error: cannot infer the type arguments of Lits.cons1: its result type
+error: cannot infer the type arguments of Lits.cons1.ref: its result type
   Base.Internal.Fn.ty (TypeList.lit #[TypeList.Elem.ty (TypeExpr.var 0 ⋯), TypeList.Elem.splice 1 ⋯]) (TypeExpr.var 0 ⋯)
 does not match
   emptyFn
 pass them with `(typeArgs := ta[…])`
 -/
 #guard_msgs in
-example : KindedTypeArgsFor (Lits.cons1 (e := Lits.env)) (some emptyFn) := by infer_type_args
+example : KindedTypeArgsFor (Lits.cons1.ref (e := Lits.env)) (some emptyFn) := by infer_type_args
 
-example : KindedTypeArgsFor (Lits.cons1 (e := Lits.env))
+example : KindedTypeArgsFor (Lits.cons1.ref (e := Lits.env))
     (some (Base.Fn [Base.Int] Base.Int)) := by infer_type_args
 
 /-! ### Splices a hand-written signature writes
@@ -227,7 +227,7 @@ example : KindedTypeArgsFor twoRef (some (Base.Fn (e := envTwo)
 Its constructor's list parameter is inferred from the datatype applied to a list. -/
 
 example :
-    (by infer_type_args : KindedTypeArgsFor (Clos.Closure.mk (e := Clos.env))
+    (by infer_type_args : KindedTypeArgsFor (Clos.Closure.mk.ref (e := Clos.env))
       (some (Clos.Closure [Base.Int] Base.Int))) =
       ta[[Base.Int], Base.Int] := rfl
 
@@ -235,97 +235,97 @@ example :
 
 Each rejection is followed by the same arguments fixed. -/
 
-/-- error: type argument 1 of Clos.Closure.mk is a type, but its parameter takes a list of types -/
+/-- error: type argument 1 of Clos.Closure.mk.ref is a type, but its parameter takes a list of types -/
 #guard_msgs in
-example : KindedTypeArgsFor (Clos.Closure.mk (e := Clos.env)) none := ta[Base.Int, Base.Int]
+example : KindedTypeArgsFor (Clos.Closure.mk.ref (e := Clos.env)) none := ta[Base.Int, Base.Int]
 
-example : KindedTypeArgsFor (Clos.Closure.mk (e := Clos.env)) none := ta[[Base.Int], Base.Int]
+example : KindedTypeArgsFor (Clos.Closure.mk.ref (e := Clos.env)) none := ta[[Base.Int], Base.Int]
 
-/-- error: type argument 1 of Base.refGet is a list of types, but its parameter takes a type -/
+/-- error: type argument 1 of Base.refGet.ref is a list of types, but its parameter takes a type -/
 #guard_msgs in
-example : KindedTypeArgsFor (Base.refGet (e := Fns.env)) none := ta[[Base.Int]]
+example : KindedTypeArgsFor (Base.refGet.ref (e := Fns.env)) none := ta[[Base.Int]]
 
-example : KindedTypeArgsFor (Base.refGet (e := Fns.env)) none := ta[Base.Int]
+example : KindedTypeArgsFor (Base.refGet.ref (e := Fns.env)) none := ta[Base.Int]
 
-/-- error: type argument 1 of Base.refGet is a list of types, but its parameter takes a type -/
+/-- error: type argument 1 of Base.refGet.ref is a list of types, but its parameter takes a type -/
 #guard_msgs in
-example (l : TypeList Fns.env) : KindedTypeArgsFor (Base.refGet (e := Fns.env)) none := ta[l]
+example (l : TypeList Fns.env) : KindedTypeArgsFor (Base.refGet.ref (e := Fns.env)) none := ta[l]
 
-example (t : TypeExpr Fns.env) : KindedTypeArgsFor (Base.refGet (e := Fns.env)) none := ta[t]
+example (t : TypeExpr Fns.env) : KindedTypeArgsFor (Base.refGet.ref (e := Fns.env)) none := ta[t]
 
-/-- error: type argument 1 of Fns.callFn is a type, but its parameter takes a list of types -/
+/-- error: type argument 1 of Fns.callFn.ref is a type, but its parameter takes a list of types -/
 #guard_msgs in
-example : KindedTypeArgsFor (Fns.callFn (e := Fns.env)) none := ta[Base.Int, Base.Int]
+example : KindedTypeArgsFor (Fns.callFn.ref (e := Fns.env)) none := ta[Base.Int, Base.Int]
 
-example : KindedTypeArgsFor (Fns.callFn (e := Fns.env)) none := ta[[Base.Int], Base.Int]
+example : KindedTypeArgsFor (Fns.callFn.ref (e := Fns.env)) none := ta[[Base.Int], Base.Int]
 
-/-- error: Base.refGet takes 1 type argument(s), [a type], but 2 are given -/
+/-- error: Base.refGet.ref takes 1 type argument(s), [a type], but 2 are given -/
 #guard_msgs in
-example : KindedTypeArgsFor (Base.refGet (e := Fns.env)) none := ta[Base.Int, Base.Int]
+example : KindedTypeArgsFor (Base.refGet.ref (e := Fns.env)) none := ta[Base.Int, Base.Int]
 
-example : KindedTypeArgsFor (Base.refGet (e := Fns.env)) none := ta[Base.Int]
+example : KindedTypeArgsFor (Base.refGet.ref (e := Fns.env)) none := ta[Base.Int]
 
 /-- error: Unknown identifier `Base.Nope` -/
 #guard_msgs in
-example : KindedTypeArgsFor (Base.refGet (e := Fns.env)) none := ta[Base.Nope]
+example : KindedTypeArgsFor (Base.refGet.ref (e := Fns.env)) none := ta[Base.Nope]
 
-example : KindedTypeArgsFor (Base.refGet (e := Fns.env)) none := ta[Base.Bool]
+example : KindedTypeArgsFor (Base.refGet.ref (e := Fns.env)) none := ta[Base.Bool]
 
 /--
-error: cannot infer type argument(s) `a` of Base.refSet: they do not occur in its result type
+error: cannot infer type argument(s) `a` of Base.refSet.ref: they do not occur in its result type
   Base.Internal.Unit.ty
 pass them with `(typeArgs := ta[…])`
 -/
 #guard_msgs in
-example : KindedTypeArgsFor (Base.refSet (e := Fns.env)) (some Base.Unit) := by infer_type_args
+example : KindedTypeArgsFor (Base.refSet.ref (e := Fns.env)) (some Base.Unit) := by infer_type_args
 
-example : KindedTypeArgsFor (Base.refSet (e := Fns.env)) (some Base.Unit) := ta[Base.Int]
+example : KindedTypeArgsFor (Base.refSet.ref (e := Fns.env)) (some Base.Unit) := ta[Base.Int]
 
 /--
-error: cannot infer type argument(s) `as` of Fns.callFn: they do not occur in its result type
+error: cannot infer type argument(s) `as` of Fns.callFn.ref: they do not occur in its result type
   TypeExpr.var 1 ⋯
 pass them with `(typeArgs := ta[…])`
 -/
 #guard_msgs in
-example : KindedTypeArgsFor (Fns.callFn (e := Fns.env)) (some Base.Int) := by infer_type_args
+example : KindedTypeArgsFor (Fns.callFn.ref (e := Fns.env)) (some Base.Int) := by infer_type_args
 
-example : KindedTypeArgsFor (Fns.callFn (e := Fns.env)) (some Base.Int) :=
+example : KindedTypeArgsFor (Fns.callFn.ref (e := Fns.env)) (some Base.Int) :=
   ta[[Base.Bool], Base.Int]
 
 /--
-error: cannot infer the type arguments of Base.Except.case: it is terminal, with no result type to infer them from; pass them with `(typeArgs := ta[…])`
+error: cannot infer the type arguments of Base.Except.case.ref: it is terminal, with no result type to infer them from; pass them with `(typeArgs := ta[…])`
 -/
 #guard_msgs in
-example : KindedTypeArgsFor (Base.Except.case (e := Fns.env)) none := by infer_type_args
+example : KindedTypeArgsFor (Base.Except.case.ref (e := Fns.env)) none := by infer_type_args
 
-example : KindedTypeArgsFor (Base.Except.case (e := Fns.env)) none :=
+example : KindedTypeArgsFor (Base.Except.case.ref (e := Fns.env)) none :=
   ta[Base.String, Base.Int]
 
 /--
-error: cannot infer the type arguments of Base.refNew: its result type
+error: cannot infer the type arguments of Base.refNew.ref: its result type
   Base.Internal.Ref.ty (TypeExpr.var 0 ⋯)
 does not match
   Base.Int
 pass them with `(typeArgs := ta[…])`
 -/
 #guard_msgs in
-example : KindedTypeArgsFor (Base.refNew (e := Fns.env)) (some Base.Int) := by infer_type_args
+example : KindedTypeArgsFor (Base.refNew.ref (e := Fns.env)) (some Base.Int) := by infer_type_args
 
-example : KindedTypeArgsFor (Base.refNew (e := Fns.env)) (some (Base.Ref Base.Int)) := by
+example : KindedTypeArgsFor (Base.refNew.ref (e := Fns.env)) (some (Base.Ref Base.Int)) := by
   infer_type_args
 
 /--
-error: cannot infer the type arguments of Base.refNew: its result type
+error: cannot infer the type arguments of Base.refNew.ref: its result type
   Base.Internal.Ref.ty (TypeExpr.var 0 ⋯)
 does not match
   t
 pass them with `(typeArgs := ta[…])`
 -/
 #guard_msgs in
-example (t : TypeExpr Fns.env) : KindedTypeArgsFor (Base.refNew (e := Fns.env)) (some t) := by
+example (t : TypeExpr Fns.env) : KindedTypeArgsFor (Base.refNew.ref (e := Fns.env)) (some t) := by
   infer_type_args
 
-example (t : TypeExpr Fns.env) : KindedTypeArgsFor (Base.refNew (e := Fns.env)) (some t) :=
+example (t : TypeExpr Fns.env) : KindedTypeArgsFor (Base.refNew.ref (e := Fns.env)) (some t) :=
   ta[Base.Int]
 
 /-! ### At a builder call -/
@@ -334,21 +334,21 @@ example (t : TypeExpr Fns.env) : KindedTypeArgsFor (Base.refNew (e := Fns.env)) 
 which infers it from the operands' types when it runs (`InferTest`). -/
 open Build in
 example (c v : ValId) : BuildM Fns.env Unit ValId :=
-  emitApply (.str .base "u") Base.Unit Base.refSet #[c, v]
+  emitApply (.str .base "u") Base.Unit Base.refSet.ref #[c, v]
 
 open Build in
 example (c v : ValId) : BuildM Fns.env Unit ValId :=
-  emitApply (.str .base "u") Base.Unit Base.refSet #[c, v] (typeArgs := .infer)
+  emitApply (.str .base "u") Base.Unit Base.refSet.ref #[c, v] (typeArgs := .infer)
 
 open Build in
-/-- error: type argument 1 of Base.refSet is a list of types, but its parameter takes a type -/
+/-- error: type argument 1 of Base.refSet.ref is a list of types, but its parameter takes a type -/
 #guard_msgs in
 example (c v : ValId) : BuildM Fns.env Unit ValId :=
-  emitApply (.str .base "u") Base.Unit Base.refSet #[c, v] (typeArgs := ta[[Base.Int]])
+  emitApply (.str .base "u") Base.Unit Base.refSet.ref #[c, v] (typeArgs := ta[[Base.Int]])
 
 open Build in
 example (c v : ValId) : BuildM Fns.env Unit ValId :=
-  emitApply (.str .base "u") Base.Unit Base.refSet #[c, v] (typeArgs := ta[Base.Int])
+  emitApply (.str .base "u") Base.Unit Base.refSet.ref #[c, v] (typeArgs := ta[Base.Int])
 
 end Strata.Dyn.TypeArgsTest
 
@@ -364,6 +364,6 @@ namespace TypeArgsScopeTest
 example (c : Strata.Dyn.ValId) :
     Strata.Dyn.BuildM Strata.Dyn.DSLTest.Fns.env Unit Strata.Dyn.ValId :=
   Strata.Dyn.Build.emitApply (.str .base "v") Strata.Dyn.Base.Int
-    Strata.Dyn.Base.refGet #[c]
+    Strata.Dyn.Base.refGet.ref #[c]
 
 end TypeArgsScopeTest

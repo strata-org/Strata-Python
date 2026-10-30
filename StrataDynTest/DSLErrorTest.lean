@@ -35,7 +35,7 @@ public environment Grand extends Demo where
 example : base ⊑ Grand.env := inferInstance
 example : Demo.env ⊑ Grand.env := inferInstance
 example : TypeRef Grand.env 1 := Demo.Box.ref
-example : InsnRef Grand.env Base.refNew.sig := Base.refNew
+example : InsnRef Grand.env Base.refNew.sig := Base.refNew.ref
 example : (Grand.peek.sig (e := Grand.env)).typeArgc = 0 := rfl
 example : Vector (TypeExpr Grand.env) (Demo.unbox.sig (e := Grand.env)).typeArgc :=
   #v[Grand.Cell]

@@ -357,9 +357,9 @@ def operands (cx : Cx) (vs : Array ValId) :
   if vs.isEmpty then ⟨.none, none⟩ else ⟨.none, some (.operands .none (operandList cx vs))⟩
 
 /-- An operation's successors, each `^target(args)`. -/
-def succs (cx : Cx) (ks : Array BlockValue) :
+def succs (cx : Cx) (ks : Array Target.Raw) :
     Ann (Array (MSucc SourceRange)) SourceRange :=
-  ⟨.none, ks.map fun k => .succ .none (name k.target.name) (operandList cx k.args)⟩
+  ⟨.none, ks.map fun k => .succ .none (name k.label.name) (operandList cx k.args)⟩
 
 /-- What a function's body defines as constants, by id, and the ids its operands and
 successor arguments use, regions included. -/
@@ -372,7 +372,7 @@ namespace Uses
 def use (u : Uses) (vs : Array ValId) : Uses :=
   { u with used := vs.foldl (fun s v => s.insert v.id) u.used }
 
-def useSuccs (u : Uses) (ks : Array BlockValue) : Uses :=
+def useSuccs (u : Uses) (ks : Array Target.Raw) : Uses :=
   ks.foldl (fun u k => u.use k.args) u
 
 mutual
@@ -412,7 +412,7 @@ def term {env : Env Unit} {α : Type} (cx : Cx) : Terminator env α → MTerm So
         ⟨.none, ⟨regionList cx regions⟩⟩
     if r.name == bn "jump" then
       match ks with
-      | #[k] => if k.target == Label.exit then .termRet .none (operands cx k.args)
+      | #[k] => if k.label == Label.exit then .termRet .none (operands cx k.args)
         else generic (.str .base "jump")
       | _ => generic (.str .base "jump")
     else if r.name == bn "branch" then generic (.str .base "branch")

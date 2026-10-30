@@ -47,13 +47,13 @@ private def counter : Built :=
     let _ ← startFreshBlock #[c] "entry"
     let zero ← emitConst (.str .base "zero") (.int 0)
     let _ ← emitConst (.str .base "unused") (.bool true)
-    let cell ← emitApply (.str .base "cell") (Base.Ref Base.Int) Base.refNew #[zero]
-    let _ ← emitApply (.str .base "unit") Base.Unit Base.refSet (typeArgs := ta[Base.Int])
+    let cell ← emitApply (.str .base "cell") (Base.Ref Base.Int) Base.refNew.ref #[zero]
+    let _ ← emitApply (.str .base "unit") Base.Unit Base.refSet.ref (typeArgs := ta[Base.Int])
       #[cell, zero]
     let one ← emitConst (.str .base "one") (.int (-1))
     finishBlock (.branch () c.id (goto done #[one]) (goto done #[zero]))
     let _ ← startBlockWith done (.str .base "v") Base.Int
-    let r ← emitApply (.str .base "r") Base.Int Base.refGet #[cell]
+    let r ← emitApply (.str .base "r") Base.Int Base.refGet.ref #[cell]
     finishBlock (.ret () r)
 
 /-- A reference to `counter`, returned. -/
@@ -73,7 +73,7 @@ private def pick : Built :=
     let els := region #[] (base := "else") do
       let two ← emitConst (.str .base "two") (.int 2)
       finishBlock (.ret () two)
-    let r ← emitApply (.str .base "r") Base.Int Reg.«if» #[c.id] (regions := #[thn, els])
+    let r ← emitApply (.str .base "r") Base.Int Reg.«if».ref #[c.id] (regions := #[thn, els])
     finishBlock (.ret () r)
 
 private def m : Except (FailedFunc E Unit Unit) (Module.Raw E Unit) :=

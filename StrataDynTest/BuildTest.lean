@@ -53,15 +53,15 @@ private def f : Built Unit :=
     let bump ← freshLabel "bump"
     let _ ← startFreshBlock #[c] "entry"
     let zero ← emitConst (.str .base "k") (.int 0)
-    let cell ← emitApply (.str .base "cell") (Base.Ref Base.Int) Base.refNew #[zero]
+    let cell ← emitApply (.str .base "cell") (Base.Ref Base.Int) Base.refNew.ref #[zero]
     finishBlock (.branch () c.id (goto bump) (goto done))
     startBlock bump
     let one ← emitConst (.str .base "k") (.int (-1))
-    let _ ← emitApply (.str .base "unit") Base.Unit Base.refSet (typeArgs := ta[Base.Int])
+    let _ ← emitApply (.str .base "unit") Base.Unit Base.refSet.ref (typeArgs := ta[Base.Int])
       #[cell, one]
     finishBlock (.jump () (goto done))
     startBlock done
-    let r ← emitApply (.str .base "r") Base.Int Base.refGet #[cell]
+    let r ← emitApply (.str .base "r") Base.Int Base.refGet.ref #[cell]
     finishBlock (.ret () r)
 
 #guard f.isOk
@@ -73,7 +73,7 @@ private def f : Built Unit :=
 /-- Every terminator's targets.  A `ret` is a jump to `Label.exit`. -/
 private def targets (fn : Func base Unit) : Array Label :=
   fn.blocks.flatMap fun b => match b.term with
-    | .apply _ _ _ _ succs _ => succs.map (·.target)
+    | .apply _ _ _ _ succs _ => succs.map (·.label)
 
 /-- info: module f {
   func @f(%c.0 : base.Bool) -> base.Int {
@@ -102,12 +102,15 @@ private def h : Built Unit :=
     let errL ← freshLabel "err"
     let _ ← startFreshBlock (base := "entry")
     let msg ← emitConst (.str .base "msg") (.str "boom")
-    let e ← emitApply (.str .base "e") (Base.Except Base.String Base.Int) Base.Except.error #[msg]
-    terminate Base.Except.case (typeArgs := ta[Base.String, Base.Int]) #[e] #[goto okL, goto errL]
+    let e ← emitApply (.str .base "e") (Base.Except Base.String Base.Int) Base.Except.error.ref
+      #[msg]
+    terminate Base.Except.case.ref (typeArgs := ta[Base.String, Base.Int]) #[e]
+      #[goto okL, goto errL]
     let _ ← startBlockWith errL (.str .base "err") Base.String
     let zero ← emitConst (.str .base "zero") (.int 0)
-    let o ← emitApply (.str .base "o") (Base.Except Base.String Base.Int) Base.Except.ok #[zero]
-    terminate Base.Except.case (typeArgs := ta[Base.String, Base.Int]) #[o] #[goto okL, goto errL]
+    let o ← emitApply (.str .base "o") (Base.Except Base.String Base.Int) Base.Except.ok.ref #[zero]
+    terminate Base.Except.case.ref (typeArgs := ta[Base.String, Base.Int]) #[o]
+      #[goto okL, goto errL]
     finishBlock (.ret () (← startBlockWith okL (.str .base "v") Base.Int))
 
 #guard h.isOk
@@ -124,7 +127,7 @@ rejected. -/
 private def hSwapped : Option (Func base Unit) :=
   h.toOption.map fun ⟨h, _⟩ => { h with blocks := h.blocks.modify 0 fun b =>
       { b with
-        term := .apply () Base.Except.case ⟨#[.ty Base.String, .ty Base.Int], rfl⟩ #[⟨1⟩]
+        term := .apply () Base.Except.case.ref ⟨#[.ty Base.String, .ty Base.Int], rfl⟩ #[⟨1⟩]
           #[⟨lbl "err" 0, #[]⟩, ⟨lbl "ok" 0, #[]⟩] #[] } }
 
 #guard hSwapped.map illFormed == some true
@@ -142,8 +145,10 @@ private def hConsts : Built Unit :=
     let _ ← emitConst (.str .base "b") (.bool true)
     let _ ← emitConst (.str .base "x") (.float 1.5)
     let msg ← emitConst (.str .base "msg") (.str "boom")
-    let e ← emitApply (.str .base "e") (Base.Except Base.String Base.Int) Base.Except.error #[msg]
-    terminate Base.Except.case (typeArgs := ta[Base.String, Base.Int]) #[e] #[goto okL, goto errL]
+    let e ← emitApply (.str .base "e") (Base.Except Base.String Base.Int) Base.Except.error.ref
+      #[msg]
+    terminate Base.Except.case.ref (typeArgs := ta[Base.String, Base.Int]) #[e]
+      #[goto okL, goto errL]
     finishBlock (.ret () (← startBlockWith okL (.str .base "v") Base.Int))
     let _ ← startBlockWith errL (.str .base "err") Base.String
     finishBlock (.unreachable ())
@@ -192,7 +197,7 @@ private def annotated : Built Nat :=
     let a ← emitConst (.str .base "a") (.int 1)
     let _ ← withInfo 7 (emitConst (.str .base "b") (.int 2))
     let _ ← withInfo 7 (emitConst (.str .base "c") (.int 3) (some 9))
-    let r ← emitApply (.str .base "ret") (Base.Except Base.String Base.Int) Base.Except.ok #[a]
+    let r ← emitApply (.str .base "ret") (Base.Except Base.String Base.Int) Base.Except.ok.ref #[a]
     withInfo 5 (finishBlock (.ret 5 r))
 
 private def instrInfos (fn : Func base Nat) : Array Nat :=

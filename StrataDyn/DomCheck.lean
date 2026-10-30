@@ -122,8 +122,8 @@ it, at most `fuel` blocks. -/
 /-- A transfer to `s` leaves from its target's parent in `t` or below it, where `anc` says
 what is at or above the point it leaves from. -/
 @[expose] def jumpOK (tm : LabelMap (Block env α)) (t : Tree) (anc : Point → Bool)
-    (s : BlockValue) : Bool :=
-  ((tm.find? s.target).bind fun v => t v.label).all anc
+    (s : Target.Raw) : Bool :=
+  ((tm.find? s.label).bind fun v => t v.label).all anc
 
 /-- The transfers of the instructions `is`, the first at count `k`, are legal, where `anc j`
 says what is at or above count `j` of their block. -/
@@ -184,7 +184,7 @@ at or above there, as the maps `m` and `dm`, with block count `n`, have it. -/
 end Body
 
 /-- Every operand and every successor argument satisfies `σ`. -/
-@[expose] def usesIn (σ : ValId → Bool) (args : Array ValId) (succs : Array BlockValue) : Bool :=
+@[expose] def usesIn (σ : ValId → Bool) (args : Array ValId) (succs : Array Target.Raw) : Bool :=
   args.toList.all σ && succs.toList.all (·.args.toList.all σ)
 
 namespace Body

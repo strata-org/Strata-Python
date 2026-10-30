@@ -9,6 +9,7 @@ public meta import Lean.Elab.Tactic.ElabTerm
 public meta import Lean.Meta.Tactic.AuxLemma
 public meta import StrataDyn.Util.NameMap
 public import StrataDyn.DSL.Check
+public import StrataDyn.DSL.Emit
 
 /-!
 # The `environment` command: emitting
@@ -20,11 +21,11 @@ hand-written code does, so the kernel checks everything the elaborator emits.
 
 The stages are `private`, in `E.Internal`.  The interface is written against a generic
 refinement `e` from public pieces only, so nothing downstream reduces through a stage: `o.sig`
-from the types' `Internal.T.ty`, and `o` as the stage's reference cast to it by `InsnRef.cast`.  A
-constructor `T.c` is an instruction the same way: `T.c.sig` is written out, and `T.c` is the
-reference `InsnRef.ofAddData` gives, cast to it.  A datatype's case instruction `T.case` is one
-too: `addData` declares it with the group, and `T.case` is the reference
-`InsnRef.ofAddDataCase` gives, cast to `T.case.sig`.
+from the types' `Internal.T.ty`, and `o.ref` as the stage's reference cast to it by
+`InsnRef.cast`.  A constructor `T.c` is an instruction the same way: `T.c.sig` is written out,
+and `T.c.ref` is the reference `InsnRef.ofAddData` gives, cast to it.  A datatype's case
+instruction `T.case` is one too: `addData` declares it with the group, and `T.case.ref` is the
+reference `InsnRef.ofAddDataCase` gives, cast to `T.case.sig`.
 
 A stage's names are fresh against a `NameSet` of every name before it, from the parent's
 `nameSet`.  The sets are literal trees, `Internal.set{k}` after stage `k` and `nameSet` after
@@ -1369,9 +1370,9 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
           (← `(Strata.Dyn.InsnSig e))
           (← `({ ann := (), typeParams := #[$tps,*], argTypes := #[$args,*],
                  returnType := some $(ty retR), distinct := by simp })))
-        -- `T.c` casts the stage's reference to `T.c.sig`: the derived signature's raw data, read
-        -- from the group's literal, is `T.c.sig`'s.  The proof is under `exact`, so that the
-        -- reference, elaborated first, fixes the signature it starts from.
+        -- `T.c.ref` casts the stage's reference to `T.c.sig`: the derived signature's raw data,
+        -- read from the group's literal, is `T.c.sig`'s.  The proof is under `exact`, so that
+        -- the reference, elaborated first, fixes the signature it starts from.
         let members := ms.map (·.1.c.envName)
         let gen := cx.rawGen ks
         let hargs := bothRaw
@@ -1381,7 +1382,7 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
         let hret := bothRaw (Unhygienic.run `(Strata.Dyn.Env.returnType_ctorSig))
           (Unhygienic.run `(Strata.Dyn.map_some_eq_of $(gen retR)))
         cs := cs.push (← defCmd (docOr c.d.c.doc? s!"The constructor `{en}` of \
-            `{showName d.c.envName}`.") vis? false (mkIdent c.d.c.lean) #[]
+            `{showName d.c.envName}`.") vis? false (mkIdent (c.d.c.lean ++ `ref)) #[]
           (← `(Strata.Dyn.InsnRef e $(cx.own sigId.getId)))
           (← `(Strata.Dyn.InsnRef.cast
                 (by exact (Strata.Dyn.InsnSig.carry_eq_of_toRaw _ rfl
@@ -1410,7 +1411,7 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
         (← `(Strata.Dyn.InsnSig e))
         (← `({ ann := (), typeParams := #[$tps,*], argTypes := #[$args,*],
                returnType := none, succs := #[$succs,*], distinct := by simp })))
-      -- `T.case` casts the stage's reference to `T.case.sig`, as a constructor does.
+      -- `T.case.ref` casts the stage's reference to `T.case.sig`, as a constructor does.
       let members := ms.map (·.1.c.envName)
       let gen := cx.rawGen ks
       let hargs := bothRaw (Unhygienic.run `(Strata.Dyn.Env.argTypes_toList_caseSig))
@@ -1424,7 +1425,7 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
         (mapChain (d.succs.map fun sc => pairRaw (mapChain (sc.payload.map (argRaw ks gen)))))
       cs := cs.push (← defCmd (docOr d.d.c.doc? s!"Eliminate a `{showName md.c.envName}`: one \
           successor per constructor, in declaration order, each receiving its constructor's \
-          fields.") vis? false (mkIdent d.d.c.lean) #[]
+          fields.") vis? false (mkIdent (d.d.c.lean ++ `ref)) #[]
         (← `(Strata.Dyn.InsnRef e $(cx.own sigId.getId)))
         (← `(Strata.Dyn.InsnRef.cast
               (by exact (Strata.Dyn.InsnSig.carry_eq_of_toRaw _ rfl
@@ -1468,7 +1469,7 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
         (← `({ ann := (), typeParams := #[$tps,*], argTypes := #[$args,*],
                variadic := $variadic, returnType := $(← retTerm ty d.ret), regions := #[$regs,*],
                succs := #[$succs,*], distinct := by simp })))
-      -- `o` casts the stage's reference to `o.sig`: `sig₀`, carried twice, stands for the
+      -- `o.ref` casts the stage's reference to `o.sig`: `sig₀`, carried twice, stands for the
       -- same raw data as `o.sig`, node by node.
       let at₀ := cx.rawAt (k - 1) ks
       let gen := cx.rawGen ks
@@ -1502,7 +1503,7 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
               (Nat.lt_of_lt_of_eq (by decide : ($(quote j) : Nat) < $(quote ds.size))
                 $(cx.internal s!"ops_size{k}").symm))))
       cs := cs.push (← defCmd (docOr d.d.c.doc? s!"The instruction `{en}`.") vis? false
-        (mkIdent d.d.c.lean) #[] (← `(Strata.Dyn.InsnRef e $(cx.own sigId.getId)))
+        (mkIdent (d.d.c.lean ++ `ref)) #[] (← `(Strata.Dyn.InsnRef e $(cx.own sigId.getId)))
         (← `(Strata.Dyn.InsnRef.cast
               (by exact (Eq.trans (Strata.Dyn.InsnSig.carry_carry _ _ _)
                 (Strata.Dyn.InsnSig.carry_eq_of_toRaw _ rfl rfl $(bothRaw a₀ a₁)
@@ -1605,24 +1606,9 @@ def elabEnvironment (doc? : Option (TSyntax ``Lean.Parser.Command.docComment))
       ownTypes := res.own, inherited, parentNames, allNames := names ++ parentNames,
       lineage := #[envNs] ++ ancestors.map (·.leanNs),
       parentKeys, hId }
-  -- Record the environment for its children.  If
-  -- the generated declarations fail, the record is marked failed below.
-  let mut types : Array TypeInfo := #[]
-  let mut ops : Array OpInfo := #[]
-  for s in res.stages do
-    match s with
-    | .types ds => for d in ds do types := types.push (res.own[d.c.envName]?.getD default).1
-    | .data ms =>
-      for (d, _) in ms do types := types.push (res.own[d.c.envName]?.getD default).1
-      for (_, _, d) in ms do
-        ops := ops.push { envName := d.d.c.envName, owner := envNs, lean := d.d.c.lean,
-                          typeArgc := d.d.typeParams.size }
-    | .ops ds =>
-      for d in ds do
-        let info : OpInfo :=
-          { envName := d.d.c.envName, owner := envNs, lean := d.d.c.lean,
-            typeArgc := d.d.typeParams.size }
-        ops := ops.push info
+  -- Record the environment for its children and its emitters.  If the generated
+  -- declarations fail, the record is marked failed below.
+  let (types, ops) ← ofExcept (res.record envNs)
   let entry : EnvEntry :=
     { leanNs := envNs, isPublic, parent := parent.map (·.leanNs), types,
       abbrevs := res.abbrevs.map (·.2), ops, names, order := res.stages.flatMap stageNames }
@@ -1645,6 +1631,9 @@ def elabEnvironment (doc? : Option (TSyntax ``Lean.Parser.Command.docComment))
     modifyEnv (envEntries.addEntry · { entry with failed := true })
     logErrorAt kw "internal error: the declarations `environment` generated do not \
       elaborate; this is a bug in the elaborator, not in the block"
+    return
+  if Emit.available (← getEnv) then
+    withRef kw (Emit.generate envNs (Emit.visibility (← getEnv) isPublic vis?))
 
 elab_rules : command
   | `($[$doc?:docComment]? $[$vis?:visibility]? environment%$kw $e:ident $[extends $p?:ident]?

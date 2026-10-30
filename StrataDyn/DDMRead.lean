@@ -324,11 +324,11 @@ def scopeOf (ann : SourceRange) (result : TypeExpr env) (blocks : List (MBlock S
 /-- Successors, against the payloads `payloads` the operation `what` declares. -/
 def succs (funcs : Funcs env) (scope : Scope env) (ann : SourceRange) (what : String)
     (payloads : Array (Array (TypeExpr env))) (ss : Array (MSucc SourceRange)) :
-    ReadM env (Array (Instruction env SourceRange) × Late (Array BlockValue)) := do
+    ReadM env (Array (Instruction env SourceRange) × Late (Array Target.Raw)) := do
   if ss.size ≠ payloads.size then
     fail ann s!"{what} takes {payloads.size} successor(s), given {ss.size}"
   let mut pre := #[]
-  let mut ks : Array (Late BlockValue) := #[]
+  let mut ks : Array (Late Target.Raw) := #[]
   for (s, payload) in ss.zip payloads do
     let .succ sann l ⟨_, args⟩ := s
     let target := nameOf (identText l)

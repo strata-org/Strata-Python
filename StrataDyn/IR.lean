@@ -83,13 +83,18 @@ instance : Inhabited Label := ⟨⟨.base⟩⟩
 result as its one argument.  No block carries it. -/
 @[expose] def Label.exit : Label := ⟨.base⟩
 
-/-- Where to go and what to pass: a block label with a prefix of its arguments already
-bound.  What the target still expects is what the operation taking the transfer supplies: its
-successor's declared payload. -/
-structure BlockValue where
-  target : Label
-  args   : Array ValId
+/-- What fills one of an operation's successors: a block label with a prefix of its arguments
+already bound.  The operation supplies the rest, its successor's declared payload: the bound
+arguments come first, and the payload fills the block's remaining parameters, in order.  (MLIR's
+`SuccessorOperands` puts the values the operation produces first instead.) -/
+structure Target.Raw where
+  label : Label
+  args  : Array ValId
 deriving Inhabited, BEq
+
+/-- `k`, with its next argument bound to `v`. -/
+@[inline] def Target.Raw.bind (k : Target.Raw) (v : ValId) : Target.Raw :=
+  { k with args := k.args.push v }
 
 /-! ## Instructions -/
 
@@ -140,7 +145,7 @@ inductive Instruction (env : Env Unit) (α : Type) where
           {isig : InsnSig env} (r : InsnRef env isig)
           (typeArgs : TypeArgs env isig.scope)
           (args : Array ValId)
-          (succs : Array BlockValue)
+          (succs : Array Target.Raw)
           (regions : Array (Region env α))
 
 /-- How a block ends: an application of a terminal operation, one its signature marks
@@ -151,7 +156,7 @@ inductive Terminator (env : Env Unit) (α : Type) where
   | apply (info : α) {isig : InsnSig env} (r : InsnRef env isig)
           (typeArgs : TypeArgs env isig.scope)
           (args : Array ValId)
-          (succs : Array BlockValue)
+          (succs : Array Target.Raw)
           (regions : Array (Region env α))
 
 /-- A basic block: one entry, and every exit named by the terminator. -/
@@ -186,7 +191,7 @@ define are not included. -/
 
 /-- Where an instruction may transfer instead of falling through. -/
 @[expose] def Instruction.succs {env : Env Unit} {α : Type} :
-    Instruction env α → Array BlockValue
+    Instruction env α → Array Target.Raw
   | .const .. => #[]
   | .apply _ _ _ _ _ succs _ => succs
 
@@ -202,7 +207,7 @@ define are not included. -/
 
 /-- Where a terminator may transfer. -/
 @[expose] def Terminator.succs {env : Env Unit} {α : Type} :
-    Terminator env α → Array BlockValue
+    Terminator env α → Array Target.Raw
   | .apply _ _ _ _ succs _ => succs
 
 /-- A terminator's regions. -/
@@ -217,18 +222,18 @@ operation is. -/
 
 /-- `jump k`: continue at `k`. -/
 @[expose] def Terminator.jump {env : Env Unit} [base ⊑ env] {α : Type} (info : α)
-    (k : BlockValue) : Terminator env α :=
-  .apply info Base.jump ⟨#[], rfl⟩ #[] #[k] #[]
+    (k : Target.Raw) : Terminator env α :=
+  .apply info Base.jump.ref ⟨#[], rfl⟩ #[] #[k] #[]
 
 /-- `branch cond t f`: continue at `t` if `cond` holds, else at `f`. -/
 @[expose] def Terminator.branch {env : Env Unit} [base ⊑ env] {α : Type} (info : α)
-    (cond : ValId) (t f : BlockValue) : Terminator env α :=
-  .apply info Base.branch ⟨#[], rfl⟩ #[cond] #[t, f] #[]
+    (cond : ValId) (t f : Target.Raw) : Terminator env α :=
+  .apply info Base.branch.ref ⟨#[], rfl⟩ #[cond] #[t, f] #[]
 
 /-- `unreachable`: control never gets here. -/
 @[expose] def Terminator.unreachable {env : Env Unit} [base ⊑ env] {α : Type} (info : α) :
     Terminator env α :=
-  .apply info Base.unreachable ⟨#[], rfl⟩ #[] #[] #[]
+  .apply info Base.unreachable.ref ⟨#[], rfl⟩ #[] #[] #[]
 
 /-- `ret v`: leave the enclosing body with `v`, a jump to `Label.exit`. -/
 @[expose] def Terminator.ret {env : Env Unit} [base ⊑ env] {α : Type} (info : α) (v : ValId) :

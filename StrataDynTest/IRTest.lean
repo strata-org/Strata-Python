@@ -42,7 +42,7 @@ private def d (n : Nat) (t : TypeExpr base) : ValDecl base := ⟨⟨n⟩, t⟩
 private def lbl (s : String) : Label := ⟨.str .base s⟩
 
 /-- A transfer to `s`, binding nothing. -/
-private def to (s : String) : BlockValue := ⟨lbl s, #[]⟩
+private def to (s : String) : Target.Raw := ⟨lbl s, #[]⟩
 
 /-! ## A cell written under a condition
 
@@ -67,7 +67,7 @@ private def fEntry : Block base Unit where
   params := #[d 0 Base.Bool]
   instrs := #[
     .const () (d 1 Base.Int) (.int 0),
-    .apply () (d 2 (Base.Ref Base.Int)) Base.refNew tInt #[⟨1⟩] #[] #[]]
+    .apply () (d 2 (Base.Ref Base.Int)) Base.refNew.ref tInt #[⟨1⟩] #[] #[]]
   term := .branch () ⟨0⟩ (to "bump") (to "done")
   info := ()
 
@@ -76,14 +76,14 @@ private def fBump : Block base Unit where
   params := #[]
   instrs := #[
     .const () (d 3 Base.Int) (.int 1),
-    .apply () (d 4 Base.Unit) Base.refSet tInt #[⟨2⟩, ⟨3⟩] #[] #[]]
+    .apply () (d 4 Base.Unit) Base.refSet.ref tInt #[⟨2⟩, ⟨3⟩] #[] #[]]
   term := .jump () (to "done")
   info := ()
 
 private def fDone : Block base Unit where
   label  := lbl "done"
   params := #[]
-  instrs := #[.apply () (d 5 Base.Int) Base.refGet tInt #[⟨2⟩] #[] #[]]
+  instrs := #[.apply () (d 5 Base.Int) Base.refGet.ref tInt #[⟨2⟩] #[] #[]]
   term := .ret () ⟨5⟩
   info := ()
 
@@ -109,7 +109,7 @@ A handler needs an operation that can fail, and the base declares none: failure 
 language's own business, and `ok` and `error` are constructors rather than operations.  So
 this section declares one, which doubles as the smallest environment extending the base.
 
-The handler is `div`'s `err` successor, a `BlockValue` with no arguments bound, so the
+The handler fills `div`'s `err` successor, as a `Target.Raw` with no arguments bound, so the
 payload `String` is exactly what the target still expects. -/
 
 private def divName : Name := .str .base "div"
@@ -176,8 +176,8 @@ private def hEntry : Block base Unit where
   params := #[]
   instrs := #[
     .const () (d 0 Base.String) (.str "boom"),
-    .apply () (d 1 (Base.Except Base.String Base.Int)) Base.Except.error tStrInt #[⟨0⟩] #[] #[]]
-  term := .apply () Base.Except.case tStrInt #[⟨1⟩] #[to "ok", to "err"] #[]
+    .apply () (d 1 (Base.Except Base.String Base.Int)) Base.Except.error.ref tStrInt #[⟨0⟩] #[] #[]]
+  term := .apply () Base.Except.case.ref tStrInt #[⟨1⟩] #[to "ok", to "err"] #[]
   info := ()
 
 private def hOk : Block base Unit where
@@ -244,7 +244,7 @@ One mistake per function, each of a kind a translator actually makes. -/
 private def badResult : Func base Unit :=
   { f with blocks := #[{ fEntry with instrs := #[
       .const () (d 1 Base.Int) (.int 0),
-      .apply () (d 2 Base.Int) Base.refNew tInt #[⟨1⟩] #[] #[]] }, fBump, fDone] }
+      .apply () (d 2 Base.Int) Base.refNew.ref tInt #[⟨1⟩] #[] #[]] }, fBump, fDone] }
 
 #guard illFormed badResult
 
@@ -253,7 +253,7 @@ swapped. -/
 private def badOperand : Func base Unit :=
   { f with blocks := #[fEntry, { fBump with instrs := #[
       .const () (d 3 Base.Int) (.int 1),
-      .apply () (d 4 Base.Unit) Base.refSet tInt #[⟨3⟩, ⟨2⟩] #[] #[]] }, fDone] }
+      .apply () (d 4 Base.Unit) Base.refSet.ref tInt #[⟨3⟩, ⟨2⟩] #[] #[]] }, fDone] }
 
 #guard illFormed badOperand
 
@@ -261,7 +261,7 @@ private def badOperand : Func base Unit :=
 private def badArity : Func base Unit :=
   { f with blocks := #[fEntry, { fBump with instrs := #[
       .const () (d 3 Base.Int) (.int 1),
-      .apply () (d 4 Base.Unit) Base.refSet tInt #[⟨2⟩] #[] #[]] }, fDone] }
+      .apply () (d 4 Base.Unit) Base.refSet.ref tInt #[⟨2⟩] #[] #[]] }, fDone] }
 
 #guard illFormed badArity
 
@@ -282,7 +282,7 @@ private def badArgs : Func base Unit :=
 private def badDefs : Func base Unit :=
   { f with blocks := #[fEntry, { fBump with instrs := #[
       .const () (d 1 Base.Int) (.int 1),
-      .apply () (d 4 Base.Unit) Base.refSet tInt #[⟨2⟩, ⟨1⟩] #[] #[]] }, fDone] }
+      .apply () (d 4 Base.Unit) Base.refSet.ref tInt #[⟨2⟩, ⟨1⟩] #[] #[]] }, fDone] }
 
 #guard illFormed badDefs
 
@@ -290,7 +290,7 @@ private def badDefs : Func base Unit :=
 private def badHandler : Func base Unit :=
   { f with blocks := #[{ fEntry with instrs := #[
       .const () (d 1 Base.Int) (.int 0),
-      .apply () (d 2 (Base.Ref Base.Int)) Base.refNew tInt #[⟨1⟩] #[to "done"] #[]] },
+      .apply () (d 2 (Base.Ref Base.Int)) Base.refNew.ref tInt #[⟨1⟩] #[to "done"] #[]] },
     fBump, fDone] }
 
 #guard illFormed badHandler
@@ -300,7 +300,7 @@ error. -/
 private def badArm : Func base Unit :=
   { h with blocks :=
       #[{ hEntry with
-          term := .apply () Base.Except.case tStrInt #[⟨1⟩] #[to "err", to "ok"] #[] },
+          term := .apply () Base.Except.case.ref tStrInt #[⟨1⟩] #[to "err", to "ok"] #[] },
         hOk, hErr] }
 
 -- Blocks are named, not numbered: reordering the non-entry blocks changes nothing.
@@ -338,16 +338,17 @@ example : (Base.Except.error.sig (e := base)).typeArgc = 2 := rfl
 #guard (Base.Except.ok.sig (e := base)).argTypes.map (·.name) == #["value"]
 
 -- The constructors' references know which constructor of `Except` they are.
-#guard (Base.Except.ok (e := base)).ctorAddr?.map (fun a => (a.dataIdx, a.idx)) == some (0, 0)
-#guard (Base.Except.error (e := base)).ctorAddr?.map (fun a => (a.dataIdx, a.idx)) ==
+#guard (Base.Except.ok.ref (e := base)).ctorAddr?.map (fun a => (a.dataIdx, a.idx)) == some (0, 0)
+#guard (Base.Except.error.ref (e := base)).ctorAddr?.map (fun a => (a.dataIdx, a.idx)) ==
   some (0, 1)
-#guard (Base.refNew (e := base)).ctorAddr?.isNone
+#guard (Base.refNew.ref (e := base)).ctorAddr?.isNone
 
 /-- `h`'s constructor, with its operands and type arguments replaced. -/
 private def withError (e a : TypeExpr base) (arg : ValId) : Func base Unit :=
   { h with blocks := #[{ hEntry with instrs := #[
       .const () (d 0 Base.String) (.str "boom"),
-      .apply () (d 1 (Base.Except Base.String Base.Int)) Base.Except.error ⟨#[.ty e, .ty a], rfl⟩
+      .apply () (d 1 (Base.Except Base.String Base.Int)) Base.Except.error.ref
+        ⟨#[.ty e, .ty a], rfl⟩
         #[arg] #[] #[]] },
       hOk, hErr] }
 
@@ -357,7 +358,7 @@ private def withError (e a : TypeExpr base) (arg : ValId) : Func base Unit :=
 private def badPayload : Func base Unit :=
   { h with blocks := #[{ hEntry with instrs := #[
       .const () (d 0 Base.Int) (.int 0),
-      .apply () (d 1 (Base.Except Base.String Base.Int)) Base.Except.error tStrInt #[⟨0⟩] #[]
+      .apply () (d 1 (Base.Except Base.String Base.Int)) Base.Except.error.ref tStrInt #[⟨0⟩] #[]
         #[]] },
     hOk, hErr] }
 
@@ -371,7 +372,7 @@ private def badPayload : Func base Unit :=
 private def badCtorArity : Func base Unit :=
   { h with blocks := #[{ hEntry with instrs := #[
       .const () (d 0 Base.String) (.str "boom"),
-      .apply () (d 1 (Base.Except Base.String Base.Int)) Base.Except.error tStrInt #[⟨0⟩, ⟨0⟩]
+      .apply () (d 1 (Base.Except Base.String Base.Int)) Base.Except.error.ref tStrInt #[⟨0⟩, ⟨0⟩]
         #[] #[]] },
     hOk, hErr] }
 
@@ -381,7 +382,8 @@ private def badCtorArity : Func base Unit :=
 private def hOkVal : Func base Unit :=
   { h with blocks := #[{ hEntry with instrs := #[
       .const () (d 0 Base.Int) (.int 3),
-      .apply () (d 1 (Base.Except Base.String Base.Int)) Base.Except.ok tStrInt #[⟨0⟩] #[] #[]] },
+      .apply () (d 1 (Base.Except Base.String Base.Int)) Base.Except.ok.ref tStrInt #[⟨0⟩] #[]
+        #[]] },
     hOk, hErr] }
 
 #guard wf hOkVal
@@ -396,28 +398,28 @@ private def hWith (term : Terminator base Unit) : Func base Unit :=
   { h with blocks := #[{ hEntry with term }, hOk, hErr] }
 
 -- A case with a successor too few.
-#guard illFormed (hWith (.apply () Base.Except.case tStrInt #[⟨1⟩] #[to "ok"] #[]))
+#guard illFormed (hWith (.apply () Base.Except.case.ref tStrInt #[⟨1⟩] #[to "ok"] #[]))
 
 -- A case with a successor too many.
 #guard illFormed (hWith
-    (.apply () Base.Except.case tStrInt #[⟨1⟩] #[to "ok", to "err", to "err"] #[]))
+    (.apply () Base.Except.case.ref tStrInt #[⟨1⟩] #[to "ok", to "err", to "err"] #[]))
 
 -- A case at the wrong type arguments: at `Int, String` the scrutinee is `Except Int String`,
 -- and `ok` receives a `String`.
 #guard illFormed (hWith
-    (.apply () Base.Except.case tIntStr #[⟨1⟩] #[to "ok", to "err"] #[]))
+    (.apply () Base.Except.case.ref tIntStr #[⟨1⟩] #[to "ok", to "err"] #[]))
 
 -- A case on a value that is not of the datatype.
 #guard illFormed (hWith
-    (.apply () Base.Except.case tStrInt #[⟨0⟩] #[to "ok", to "err"] #[]))
+    (.apply () Base.Except.case.ref tStrInt #[⟨0⟩] #[to "ok", to "err"] #[]))
 
 -- A non-terminal operation as a terminator: `refGet` falls through.
 #guard illFormed { f with blocks := #[fEntry, fBump,
-    { fDone with term := .apply () Base.refGet tInt #[⟨2⟩] #[] #[] }] }
+    { fDone with term := .apply () Base.refGet.ref tInt #[⟨2⟩] #[] #[] }] }
 
 /-- `jump`, applied as an instruction. -/
 private def jumpInsn : Instruction base Unit :=
-  .apply () (d 6 Base.Unit) Base.jump ⟨#[], rfl⟩ #[] #[to "done"] #[]
+  .apply () (d 6 Base.Unit) Base.jump.ref ⟨#[], rfl⟩ #[] #[to "done"] #[]
 
 -- A terminal operation as an instruction: `jump` never falls through.
 #guard illFormed { f with blocks := #[fEntry,
@@ -428,7 +430,7 @@ example : (Terminator.ret () ⟨5⟩ : Terminator base Unit) = .jump () ⟨Label
 
 -- `ret` written out as a jump to the exit is accepted as `ret` is.
 #guard wf { f with blocks := #[fEntry, fBump,
-    { fDone with term := .apply () Base.jump ⟨#[], rfl⟩ #[] #[⟨Label.exit, #[⟨5⟩]⟩] #[] }] }
+    { fDone with term := .apply () Base.jump.ref ⟨#[], rfl⟩ #[] #[⟨Label.exit, #[⟨5⟩]⟩] #[] }] }
 
 -- A jump to the exit with a value of the wrong type: `%2` is the cell, not an `Int`.
 #guard illFormed { f with blocks := #[fEntry, fBump, { fDone with term := .ret () ⟨2⟩ }] }

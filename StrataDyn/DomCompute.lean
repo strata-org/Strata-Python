@@ -79,11 +79,11 @@ abbrev Pos := Nat × Nat
 from, and its target. -/
 @[expose] def instrEdges : Nat → List (Instruction env α) → List (Nat × Label)
   | _, [] => []
-  | k, i :: is => i.succs.toList.map (k, ·.target) ++ instrEdges (k + 1) is
+  | k, i :: is => i.succs.toList.map (k, ·.label) ++ instrEdges (k + 1) is
 
 /-- The transfers out of block `b`: the count each leaves from, and its target. -/
 @[expose] def edges (b : Block env α) : List (Nat × Label) :=
-  instrEdges 0 b.instrs.toList ++ b.term.succs.toList.map (b.instrs.size, ·.target)
+  instrEdges 0 b.instrs.toList ++ b.term.succs.toList.map (b.instrs.size, ·.label)
 
 /-- The positions of the blocks `bs`, the first at `i`, by label. -/
 @[expose] def positions : Nat → List (Block env α) → LabelMap Nat → LabelMap Nat

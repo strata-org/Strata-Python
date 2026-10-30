@@ -49,7 +49,7 @@ private def lbl (base : String) (n : Nat) : Label := ⟨.num (.str .base base) n
 /-- The successor targets of `fn`'s instructions, in order. -/
 private def errTargets (fn : Func Py.env Unit) : Array Label :=
   fn.blocks.flatMap fun b => b.instrs.flatMap fun
-    | .apply _ _ _ _ _ ks _ => ks.map (·.target)
+    | .apply _ _ _ _ _ ks _ => ks.map (·.label)
     | _ => #[]
 
 /-! ## `def f(x): y = x + 1; return y`
@@ -61,7 +61,7 @@ the caller. -/
 private def f : Built :=
   buildFunc (Py.pn "f") #["x"] () fun args => do
     let y ← declareLocal "y"
-    let _ ← writeCell y (← emitFailing (.str .base "sum") Py.add #[args[0]!, ← intLit 1])
+    let _ ← writeCell y (← emitFailing (.str .base "sum") Py.add.ref #[args[0]!, ← intLit 1])
     emitReturn (← readCell y (stem "y"))
 
 #guard f.isOk
@@ -202,7 +202,7 @@ private def kReturns : Built :=
     discard <| tryFinally
       (fun _ => discard <| getAttr x "foo")
       (fun prev => do
-        discard <| emitEffect (.str .base "pop") Py.popExcept #[prev]
+        discard <| emitEffect (.str .base "pop") Py.popExcept.ref #[prev]
         emitReturnNone)
       (pure { normal := .unreachable, «return» := .unreachable, raise := .unreachable })
 
@@ -232,7 +232,7 @@ private def supersededPassesExc (fn : Func Py.env Unit) : Bool :=
   fn.blocks.any fun b =>
     let .apply _ _ _ _ ks _ := b.term
     let args := ks.flatMap (·.args)
-    b.label == lbl "superseded" 0 && ks.map (·.target) == #[lbl "bb" 0] &&
+    b.label == lbl "superseded" 0 && ks.map (·.label) == #[lbl "bb" 0] &&
       args.size == 2 && args[1]? == (b.params.map (·.id))[0]?
 
 #guard kBound.isOk
@@ -375,7 +375,7 @@ private def globals : Built :=
     let _ ← writeGlobal "m" "c" (← importModule "a.b")
     let _ ← writeGlobal "m" "y" (← importFrom "a.b" "x")
     let n ← loadGlobal "m" "n"
-    let sum ← emitFailing (.str .base "sum") Py.add #[n, ← intLit 1]
+    let sum ← emitFailing (.str .base "sum") Py.add.ref #[n, ← intLit 1]
     let _ ← writeGlobal "m" "n" sum
     emitReturnNone
 
@@ -424,7 +424,7 @@ private def mAdd : Name := .str (.str .base "m") "add"
 private def addFn : Built :=
   buildFunc mAdd #["x"] () fun args => do
     let _ ← funcValue mAdd
-    emitReturn (← emitFailing (.str .base "sum") Py.add #[args[0]!, args[0]!])
+    emitReturn (← emitFailing (.str .base "sum") Py.add.ref #[args[0]!, args[0]!])
 
 -- It refers to itself, so it is a module on its own.
 #guard addFn.toOption.any fun f => (Module.ofChecked mAdd #[f] ()).isOk
@@ -482,11 +482,11 @@ transfer leaves its region. -/
 
 private def c : Built :=
   buildFunc (Py.pn "c") #["xs", "ys"] () fun args => do
-    let acc ← emitTotal (.str .base "acc") Py.mkList #[]
+    let acc ← emitTotal (.str .base "acc") Py.mkList.ref #[]
     forEach args[0]! fun x => do
       forEach args[1]! fun y => do
-        let s ← emitFailing (.str .base "s") Py.add #[x, y]
-        let _ ← emitEffect (.str .base "append") Py.listAppend #[acc, s]
+        let s ← emitFailing (.str .base "s") Py.add.ref #[x, y]
+        let _ ← emitEffect (.str .base "append") Py.listAppend.ref #[acc, s]
     emitReturn acc
 
 #guard c.isOk
@@ -498,7 +498,7 @@ private def c : Built :=
 private partial def errTargetsDeep (bs : Array (Block Py.env Unit)) : List Label :=
   bs.toList.flatMap fun b => b.instrs.toList.flatMap fun
     | .apply _ _ _ _ _ ks rs =>
-      ks.toList.map (·.target) ++ rs.toList.flatMap (errTargetsDeep ·.blocks)
+      ks.toList.map (·.label) ++ rs.toList.flatMap (errTargetsDeep ·.blocks)
     | _ => []
 
 -- The handlers `c`'s failures go to, as the docstring above says.
@@ -544,17 +544,17 @@ private def leave : Except (FailedFunc Py.env Unit Unit) {fn : Func Py.env Unit 
     let join ← freshLabel "join"
     let outer ← handler
     withHandler catchL do
-      let _ ← emitFailing (.str .base "call") Py.getItem #[f, f]
+      let _ ← emitFailing (.str .base "call") Py.getItem.ref #[f, f]
     jump (Build.goto join)
     let exc ← startBlockWith catchL (.str .base "exc")
-    let prev ← emitTotal (.str .base "prev") Py.mkTuple #[exc]
+    let prev ← emitTotal (.str .base "prev") Py.mkTuple.ref #[exc]
     withHandler unwindL do
-      let _ ← emitFailing (.str .base "match") Py.getItem #[exc, exc]
+      let _ ← emitFailing (.str .base "match") Py.getItem.ref #[exc, exc]
     jump (Build.goto join)
     let x ← startBlockWith clearL (.str .base "exc")
     jump { Build.goto unwindL with args := #[x] }
     let y ← startBlockWith unwindL (.str .base "exc")
-    let _ ← emitTotal (.str .base "pop") Py.mkTuple #[prev]
+    let _ ← emitTotal (.str .base "pop") Py.mkTuple.ref #[prev]
     jump { outer with args := outer.args.push y }
     startBlock join
     emitReturnNone
@@ -589,12 +589,12 @@ private def leave : Except (FailedFunc Py.env Unit Unit) {fn : Func Py.env Unit 
 private def classBody : Except (FailedFunc Py.env Unit Unit) {fn : Func Py.env Unit // fn.WF} :=
   buildFuncTyped (Py.pn "C_body") #[(stem "args", Py.Value)] () fun ps => do
     let some args := ps[0]? | return
-    let ns ← emitFailing (.str .base "ns") Py.getItem #[args, ← intLit 0]
+    let ns ← emitFailing (.str .base "ns") Py.getItem.ref #[args, ← intLit 0]
     let catchL ← freshLabel "catch"
     let join ← freshLabel "join"
     jump (Build.goto join)
     let exc ← startBlockWith catchL (.str .base "exc")
-    let _ ← emitFailing (.str .base "Exception") Py.getItem #[ns, exc]
+    let _ ← emitFailing (.str .base "Exception") Py.getItem.ref #[ns, exc]
     jump (Build.goto join)
     startBlock join
     emitReturnNone

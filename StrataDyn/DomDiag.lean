@@ -49,15 +49,15 @@ def valText (names : Array Name) (x : ValId) : String :=
 public def pointText (p : Point) : String := s!"{labelText p.label} after {p.count} instructions"
 
 /-- The values used by an instruction or terminator: its operands and successor arguments. -/
-def uses (args : Array ValId) (succs : Array BlockValue) : Array ValId :=
+def uses (args : Array ValId) (succs : Array Target.Raw) : Array ValId :=
   args ++ succs.flatMap (·.args)
 
 /-- The transfers out of block `b`: the count each leaves from, and its target. -/
 public def edges (b : Block env α) : Array (Nat × Label) := Id.run do
   let mut out := #[]
   for h : k in [:b.instrs.size] do
-    for s in b.instrs[k].succs do out := out.push (k, s.target)
-  for s in b.term.succs do out := out.push (b.instrs.size, s.target)
+    for s in b.instrs[k].succs do out := out.push (k, s.label)
+  for s in b.term.succs do out := out.push (b.instrs.size, s.label)
   return out
 
 /-- A path from the entry `e` to the point `y` that avoids the point `d`, as the blocks it

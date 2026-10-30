@@ -6,7 +6,8 @@
 module
 public import StrataDyn.Env.Handle
 import StrataDyn.Env.WF
-import StrataDyn.DSL
+-- The command alone, without the typed emitters, so the timings below are the command's.
+import StrataDyn.DSL.Core
 public import StrataDyn.Base
 -- The `#guard`s below run the signatures as compiled code.
 meta import StrataDyn.WF
@@ -299,10 +300,15 @@ example {n : Name} : n ∈ Scale.env ↔ n ∈ Scale.names :=
 
 section
 variable {e : Env _root_.Unit} [Scale.env ⊑ e]
-example : InsnRef e Scale.add2.sig := Scale.add2
-example : InsnRef e Scale.strConcat4.sig := Scale.strConcat4
-example : InsnRef e Base.refNew.sig := Base.refNew
+example : InsnRef e Scale.add2.sig := Scale.add2.ref
+example : InsnRef e Scale.strConcat4.sig := Scale.strConcat4.ref
+example : InsnRef e Base.refNew.sig := Base.refNew.ref
 end
+
+-- This module imports `StrataDyn.DSL.Core` and not the typed builder, so `Scale` has no
+-- emitters: `Scale.add2.ref` above is the instruction, and `Scale.add2` names no constant.
+/-- error: Unknown identifier `Scale.add2` -/
+#guard_msgs in #check Scale.add2
 
 /-! ## A block past a stage's size
 
@@ -1100,8 +1106,8 @@ public environment Wide extends Base where
 section
 variable {e : Env _root_.Unit} [Wide.env ⊑ e]
 example : TypeRef e 0 := Wide.T259.ref
-example : InsnRef e Wide.w0.sig := Wide.w0
-example : InsnRef e Wide.w519.sig := Wide.w519
+example : InsnRef e Wide.w0.sig := Wide.w0.ref
+example : InsnRef e Wide.w519.sig := Wide.w519.ref
 end
 
 end Strata.Dyn.DSLScaleTest

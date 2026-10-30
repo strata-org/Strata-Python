@@ -95,7 +95,7 @@ theorem pt_root (e : Block env α) (rest : List (Block env α)) :
 theorem mem_instrEdges_inv :
     ∀ {k₀ : Nat} {is : List (Instruction env α)} {k : Nat} {l : Label},
       (k, l) ∈ instrEdges k₀ is →
-        ∃ i s, is[k - k₀]? = some i ∧ k₀ ≤ k ∧ s ∈ i.succs ∧ s.target = l
+        ∃ i s, is[k - k₀]? = some i ∧ k₀ ≤ k ∧ s ∈ i.succs ∧ s.label = l
   | _, [], _, _, h => absurd h List.not_mem_nil
   | k₀, i :: is, k, l, h => by
     rcases List.mem_append.mp h with h | h

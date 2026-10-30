@@ -50,7 +50,7 @@ private def pt (s : String) (k : Nat) : Point := ⟨lbl s, k⟩
 
 /-- `%r = add %a %b ^h()`. -/
 private def add (r a b : Nat) (h : String) (hargs : Array ValId := #[]) : Instruction E Unit :=
-  .apply () (d r) Demo.add ⟨#[], rfl⟩ #[⟨a⟩, ⟨b⟩] #[⟨lbl h, hargs⟩] #[]
+  .apply () (d r) Demo.add.ref ⟨#[], rfl⟩ #[⟨a⟩, ⟨b⟩] #[⟨lbl h, hargs⟩] #[]
 
 /-- Block `s` with parameters `ps` (ids), instructions `is` and terminator `t`. -/
 private def blk (s : String) (ps : Array Nat) (is : Array (Instruction E Unit))
@@ -191,7 +191,7 @@ other's values, and `j`, entered from `r` alone, sees `r`'s and not `l`'s. -/
 
 private def diamond (lUse jUse : Nat) : Func E Unit :=
   fn #[blk "entry" #[0, 5] #[]
-      (.apply () Demo.br ⟨#[], rfl⟩ #[⟨5⟩] #[⟨lbl "l", #[]⟩, ⟨lbl "r", #[]⟩] #[]),
+      (.apply () Demo.br.ref ⟨#[], rfl⟩ #[⟨5⟩] #[⟨lbl "l", #[]⟩, ⟨lbl "r", #[]⟩] #[]),
     blk "l" #[] #[add 1 0 0 "h"] (.ret () ⟨lUse⟩),
     blk "r" #[] #[add 2 0 0 "h"] (jump "j"),
     blk "j" #[] #[] (ret jUse),
@@ -210,7 +210,7 @@ other reasons; the checker still keeps every point that defines a value. -/
 
 private def twice (lUse jUse : Nat) : Func E Unit :=
   fn #[blk "entry" #[0, 5] #[]
-      (.apply () Demo.br ⟨#[], rfl⟩ #[⟨5⟩] #[⟨lbl "l", #[]⟩, ⟨lbl "r", #[]⟩] #[]),
+      (.apply () Demo.br.ref ⟨#[], rfl⟩ #[⟨5⟩] #[⟨lbl "l", #[]⟩, ⟨lbl "r", #[]⟩] #[]),
     blk "l" #[] #[add 1 0 0 "h"] (.ret () ⟨lUse⟩),
     blk "r" #[] #[add 1 0 0 "h"] (ret 1),
     blk "j" #[] #[] (ret jUse),
@@ -240,7 +240,7 @@ private def bl (i : Nat) : Label := ⟨.num (.str .base "b") i⟩
 /-- Block `i` of a chain of `n` blocks, the last returning `%x`. -/
 private def link (n x i : Nat) : Block E Unit :=
   { label := bl i, params := if i = 0 then #[d 0] else #[], info := ()
-    instrs := #[.apply () (d (i + 1)) Demo.add ⟨#[], rfl⟩ #[⟨0⟩, ⟨i⟩] #[⟨lbl "h", #[]⟩] #[]]
+    instrs := #[.apply () (d (i + 1)) Demo.add.ref ⟨#[], rfl⟩ #[⟨0⟩, ⟨i⟩] #[⟨lbl "h", #[]⟩] #[]]
     term := if i + 1 = n then ret x else .jump () ⟨bl (i + 1), #[]⟩ }
 
 /-- A chain of `n` blocks returning `%x`, and a handler under the entry's start that every
@@ -279,7 +279,7 @@ open Strata.Dyn.RegionTest
 
 /-- `%r = reg.if[Int] %c { then } { else }`, with `%c` id 0. -/
 private def ifI (r : Nat) (thn els : Array (Block Reg.env Unit)) : Instruction Reg.env Unit :=
-  .apply () ⟨⟨r⟩, Base.Int⟩ Reg.«if» ⟨#[.ty Base.Int], rfl⟩ #[⟨0⟩] #[] #[⟨thn⟩, ⟨els⟩]
+  .apply () ⟨⟨r⟩, Base.Int⟩ Reg.«if».ref ⟨#[.ty Base.Int], rfl⟩ #[⟨0⟩] #[] #[⟨thn⟩, ⟨els⟩]
 
 /-- A region body returning `%x`, after defining `%y` as `1`. -/
 private def body (s : String) (x y : Nat) : Array (Block Reg.env Unit) :=
@@ -332,12 +332,12 @@ private def builtBody (useS : Bool) : BuildM E Unit Unit := do
   let x ← freshVal (.str .base "x") Demo.Value
   let _ ← startFreshBlock #[x] "entry"
   let h ← freshLabel "h"
-  let a ← emitApply (.str .base "a") Demo.Value Demo.add #[x.id, x.id] #[goto h]
+  let a ← emitApply (.str .base "a") Demo.Value Demo.add.ref #[x.id, x.id] #[goto h]
   let b ← freshLabel "b"
   let c ← freshLabel "c"
   finishBlock (.jump () (goto b))
   startBlock b
-  let s ← emitApply (.str .base "s") Demo.Value Demo.add #[a, a] #[goto h]
+  let s ← emitApply (.str .base "s") Demo.Value Demo.add.ref #[a, a] #[goto h]
   finishBlock (.jump () (goto c))
   startBlock c
   finishBlock (.ret () (if useS then s else a))
@@ -371,9 +371,9 @@ private def joinBody (useT : Bool) : BuildM E Unit Unit := do
   let r ← freshLabel "r"
   let j ← freshLabel "j"
   let h ← freshLabel "h"
-  terminate Demo.br #[c.id] #[goto l, goto r]
+  terminate Demo.br.ref #[c.id] #[goto l, goto r]
   startBlock l
-  let t ← emitApply (.str .base "t") Demo.Value Demo.add #[x.id, x.id] #[goto h]
+  let t ← emitApply (.str .base "t") Demo.Value Demo.add.ref #[x.id, x.id] #[goto h]
   finishBlock (.jump () (goto j))
   startBlock r
   finishBlock (.jump () (goto j))

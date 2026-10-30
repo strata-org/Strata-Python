@@ -588,8 +588,8 @@ theorem instrJumpsOK_iff (tm : LabelMap (Block env α)) (anc : Nat → Point →
 
 /-- `jumpOK` holds exactly when `anc` holds of the target's parent. -/
 theorem jumpOK_iff {bs : List (Block env α)} {tm : LabelMap (Block env α)} (ht : TreeOf bs tm)
-    (anc : Point → Bool) (s : BlockValue) : jumpOK tm t anc s = true ↔
-      ∀ v p, v ∈ bs → v.label = s.target → t v.label = some p → anc p = true := by
+    (anc : Point → Bool) (s : Target.Raw) : jumpOK tm t anc s = true ↔
+      ∀ v p, v ∈ bs → v.label = s.label → t v.label = some p → anc p = true := by
   simp only [jumpOK, Option.all_eq_true, Option.bind_eq_some_iff]
   constructor
   · exact fun h v p hv hl hp => h p ⟨v, (ht _ _).mpr ⟨hv, hl⟩, hp⟩
@@ -755,7 +755,7 @@ open Body
 variable {env : Env Unit} {α : Type}
 
 /-- `usesIn` holds exactly when every operand and successor argument satisfies `σ`. -/
-theorem usesIn_iff (σ : ValId → Bool) (args : Array ValId) (succs : Array BlockValue) :
+theorem usesIn_iff (σ : ValId → Bool) (args : Array ValId) (succs : Array Target.Raw) :
     usesIn σ args succs = true ↔ ∀ x, (x ∈ args ∨ ∃ s ∈ succs, x ∈ s.args) → σ x = true := by
   simp only [usesIn, Bool.and_eq_true, List.all_eq_true, Array.mem_toList_iff]
   constructor

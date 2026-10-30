@@ -67,8 +67,8 @@ inductive Shaped : List (Block env α) → Prop
 
 /-- The labels the instruction or terminator at count `k` of block `b` transfers to. -/
 @[expose] def targets (b : Block env α) (k : Nat) : List Label :=
-  ((b.instrs[k]?.map fun i => i.succs.toList.map (·.target)).getD []) ++
-    if k = b.instrs.size then b.term.succs.toList.map (·.target) else []
+  ((b.instrs[k]?.map fun i => i.succs.toList.map (·.label)).getD []) ++
+    if k = b.instrs.size then b.term.succs.toList.map (·.label) else []
 
 /-- Whether control may pass from `u` to `w`: `Edge`, checked. -/
 @[expose] def edgeB (bs : List (Block env α)) (u w : Point) : Bool :=

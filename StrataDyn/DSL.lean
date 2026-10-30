@@ -4,16 +4,18 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
-public import StrataDyn.DSL.Syntax
-public import StrataDyn.DSL.Elab
+public import StrataDyn.DSL.Core
+public import StrataDyn.Build.Typed
 
 /-!
 # The `environment` command
 
 Declares a Dyn environment, a few lines per declaration, and generates the `Env` value, its
-references and the proofs that it is well formed.  A module that declares an environment
-imports this one, `public import StrataDyn.Env.Handle` and `import StrataDyn.Env.WF`;
-a module that only uses one imports neither this module nor `Env.WF`.
+references, its typed emitters and the proofs that it is well formed.  A module that declares
+an environment imports this one, `public import StrataDyn.Env.Handle` and
+`import StrataDyn.Env.WF`; a module that only uses one imports neither this module nor
+`Env.WF`.  This module imports the typed builder, `StrataDyn.Build.Typed`, so every environment
+declared through it gets its emitters; `StrataDyn.DSL.Core` is the command without it.
 
 ```lean
 /-- A demo language. -/
@@ -124,11 +126,11 @@ and in every refinement of it:
   `T.case [a …] (scrutinee : T a …) (^c₁ (x : τ)) …`, environment name `T`'s followed by
   `case` (`demo.Box.case`), with one successor per constructor, in declaration order,
   receiving its fields.  It is an instruction like any other: `T.case.name`, `T.case.sig` and
-  `T.case`.  `Env.addData` declares it with the group, after the group's constructors, and
-  `T.case` is the reference `InsnRef.ofAddDataCase` gives.
+  `T.case.ref`.  `Env.addData` declares it with the group, after the group's constructors, and
+  `T.case.ref` is the reference `InsnRef.ofAddDataCase` gives.
 * For a constructor `c` of `T`: `T.c.name`; `T.c.sig : InsnSig e`, with `T`'s parameters as
   type parameters, the fields as arguments and `T a …` as the result; and
-  `T.c : InsnRef e T.c.sig`.
+  `T.c.ref : InsnRef e T.c.sig`.
 * Handles, after everything else (`StrataDyn.Env.Handle`), the one way to write a type: for
   a type `T` without parameters, `T : TypeExpr e s`, its type expression in every `e` that
   refines its environment, and `T.con : TypeCon []`, its declaration; for one whose parameters
@@ -136,15 +138,20 @@ and in every refinement of it:
   or a `TypeList e s` for a list parameter; for an `abbrev` `n`, the same, applying its body's
   handles.  So `Base.Except Base.Int Py.Value` is a `TypeExpr e` in every `e` that refines
   `Py.env`.
-* For an `insn` `o`: `o.name`, `o.sig : InsnSig e` and `o : InsnRef e o.sig`.  A list
+* For an `insn` `o`: `o.name`, `o.sig : InsnSig e` and `o.ref : InsnRef e o.sig`.  A list
   parameter is a `TypeList.var` in `o.sig`, and a list-typed variadic a `Variadic.spread`.
+* Typed emitters: for each instruction, constructor and case instruction `o`, its emitter `o`,
+  under the instruction's own name, which emits `o` in any `MonadBuild env α m` and whose Lean
+  type is `o`'s signature over type expressions, so Lean infers its type arguments from its
+  operands (`StrataDyn.DSL.Emit`).  `Base` is declared below the builder, with
+  `StrataDyn.DSL.Core`, so its emitters come from `dyn_emitters Base`, in `Build.Typed`.
 
-A declaration's docstring goes on `T.ref` and `T`'s handle, `T.c`, `n`'s handle or `o`.  The
-interface's own implicit binders are named `e`, the refinement, and `s`, the scope of
-`Internal.T.ty`, so a caller can pin them: `(Demo.unbox.sig (e := Demo.env))`.  A parameter of
-`Internal.T.ty` named `e` or `s` is renamed to a fresh name, primed past the other parameters
-(`Base.Internal.Except.ty e' a`; `type T (e) (e')` gives `Internal.T.ty e'' e'`).  The
-`RefinedBy` instance binder is anonymous.
+A declaration's docstring goes on `T.ref` and `T`'s handle, `T.c.ref`, `n`'s handle or `o.ref`,
+and on the emitter `T.c` or `o`.  The interface's own implicit binders are named `e`, the
+refinement, and `s`, the scope of `Internal.T.ty`, so a caller can pin them:
+`(Demo.unbox.sig (e := Demo.env))`.  A parameter of `Internal.T.ty` named `e` or `s` is renamed
+to a fresh name, primed past the other parameters (`Base.Internal.Except.ty e' a`;
+`type T (e) (e')` gives `Internal.T.ty e'' e'`).  The `RefinedBy` instance binder is anonymous.
 
 The interface has the command's visibility.  Everything else, the stages that build `env`
 and their lemmas, is `private`, in `E.Internal`, beside the public `Internal.T.ty` and
@@ -153,10 +160,10 @@ and their lemmas, is `private`, in `E.Internal`, beside the public `Internal.T.t
 * the names (`abbrev`s), `names`, `nameSet`, `Internal.T.ty`, `o.sig`, `T.c.sig`,
   `T.case.sig` and the handles are `@[expose]`, so `rfl`, `decide` and `decide +kernel`
   unfold them downstream, and `#v[…]` checks against `o.sig.typeArgc`;
-* `env`, `T.ref`, `T.c`, `T.case`, `o` and the theorems are not.  `T.name_ref` and
-  `T.decl_ref` stand in for unfolding `T.ref`.  A `decide +kernel` that evaluates `env`
-  itself, such as `Func.WF`, needs `import all` of the declaring module and of Dyn's
-  modules it reduces through.
+* `env`, `T.ref`, `T.c.ref`, `T.case.ref`, `o.ref`, the emitters and the theorems are not.
+  `T.name_ref` and `T.decl_ref` stand in for unfolding `T.ref`.  A `decide +kernel` that
+  evaluates `env` itself, such as `Func.WF`, needs `import all` of the declaring module and of
+  Dyn's modules it reduces through.
 
 The emitted proofs are by `decide`, `decide +kernel`, `simp`, lemma applications and
 `dyn_kernel_rfl`, an `Eq.refl` that only the kernel checks, never `native_decide`, so the
@@ -213,22 +220,26 @@ internal error at `environment`.
 (`RefinedBy`, scoped in `Strata.Dyn`) reads "`s` refines `t`" and carries a proof of
 `t ≤ s`.  A child's stages extend its parent's environment, so the child proves
 `P.env ≤ E.env` by `Env.le_of_subset`.  Each environment generates one upward rule, `toP`, so
-under `[E.env ⊑ e]` every ancestor's references resolve: `Base.refNew : InsnRef e
+under `[E.env ⊑ e]` every ancestor's references resolve: `Base.refNew.ref : InsnRef e
 Base.refNew.sig` in any refinement of `Demo`.  An environment has one parent.
 
 A child reads its parent from the record every `environment` command leaves, which crosses
 module boundaries, not by evaluating `P.env`; the record lists the names, which `mem_env`
-spells out.  It also uses the parent's `names`, `mem_env`, `nameSet`, `nameSet_ordered` and
-`mem_nameSet`, and its types' `ref`, `name`, `name_ref`, `decl_ref`, `Internal.T.ty` and
-`Internal.T.toRaw_ty`, so the parent must be at least as visible as the child: a public child
-cannot extend a private environment, and in a `module` its file `public import`s `P`'s module.
-A private child needs only `import`.  Each mistake is reported at the `extends` argument.
+spells out, and every instruction's signature.  It also uses the parent's `names`, `mem_env`,
+`nameSet`, `nameSet_ordered` and `mem_nameSet`, and its types' `ref`, `name`, `name_ref`,
+`decl_ref`, `Internal.T.ty` and `Internal.T.toRaw_ty`, so the parent must be at least as
+visible as the child: a public child cannot extend a private environment, and in a `module` its
+file `public import`s `P`'s module.  A private child needs only `import`.  Each mistake is
+reported at the `extends` argument.
 
 ## Modules
 
+* `DSL/Core.lean`: the command, without the typed builder.
 * `DSL/Syntax.lean`: the grammar.
-* `DSL/Model.lean`: the record an environment leaves for its children.  A resolved type is a
-  `TypeExpr.Raw`, of the core's kinds.
+* `DSL/Model.lean`: the record an environment leaves for its children, its typed emitters and
+  any later reader: each type, and each instruction with its resolved signature and kind.  A
+  resolved type is a `TypeExpr.Raw`, of the core's kinds.
 * `DSL/Check.lean`: collecting and resolving the block, and every check.
 * `DSL/Elab.lean`: emitting the declarations, and the command.
+* `DSL/Emit.lean`: generating the typed emitters, and `dyn_emitters`.
 -/

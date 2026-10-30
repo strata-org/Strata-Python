@@ -96,11 +96,11 @@ instruction count. -/
 /-- Control may pass from `u` to the start of block `v`: a successor of the instruction or
 terminator at `u` names `v`. -/
 inductive Jump : Point → Block env α → Prop
-  | instr {b v : Block env α} {i : Instruction env α} {k : Nat} {s : BlockValue} :
-      b ∈ bs → b.instrs[k]? = some i → s ∈ i.succs → v ∈ bs → v.label = s.target →
+  | instr {b v : Block env α} {i : Instruction env α} {k : Nat} {s : Target.Raw} :
+      b ∈ bs → b.instrs[k]? = some i → s ∈ i.succs → v ∈ bs → v.label = s.label →
       Jump ⟨b.label, k⟩ v
-  | term {b v : Block env α} {s : BlockValue} :
-      b ∈ bs → s ∈ b.term.succs → v ∈ bs → v.label = s.target →
+  | term {b v : Block env α} {s : Target.Raw} :
+      b ∈ bs → s ∈ b.term.succs → v ∈ bs → v.label = s.label →
       Jump ⟨b.label, b.instrs.size⟩ v
 
 /-- The tree `t` of the body is legal. -/

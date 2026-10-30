@@ -58,9 +58,10 @@ result, and has a type. Block parameters take the place of phi nodes.
 | `const` | a literal of a base type (`unit`, `bool`, `int`, `float`, `str`), or `const @m.f`, a `base.Code` pointer to the function `m.f` of the same module |
 | `apply` | an application of a declared instruction, including a datatype constructor, at explicit type arguments |
 
-**Successors.** An instruction may declare *successors*: blocks it transfers to instead of
-falling through. A successor site is a label with a prefix of that block's arguments already
-bound. The instruction supplies the rest. The `err` successor of a raising Python operation
+**Successors.** An instruction may declare *successors*: the places it may transfer to instead
+of falling through, each with a payload, the values it passes. What fills a successor is a
+*target* (`Target.Raw`): a label with a prefix of that block's arguments already bound. The
+instruction supplies the rest, after them. The `err` successor of a raising Python operation
 supplies the exception. So `^h(%7)` passes `%7` and then the exception to block `h`.
 
 **Terminators.** A block ends with an application of a *terminal* instruction: one that never
@@ -255,7 +256,7 @@ emission state of the Python builder. `Ctx` is fixed while one function is trans
 
 | State | Field | Exists? | Set by |
 |---|---|---|---|
-| enclosing handler: the block every raising operation names as `err` | `Frame.handler : BlockValue` | yes | `buildFuncTypedWith` (`propagate.0`), `withHandler` and `withHandlerTo` (`try`, `with`, `for`) |
+| enclosing handler: the block every raising operation names as `err` | `Frame.handler : Target.Raw` | yes | `buildFuncTypedWith` (`propagate.0`), `withHandler` and `withHandlerTo` (`try`, `with`, `for`) |
 | locals: name ↦ cell | `Frame.locals` | yes | `declareLocal` |
 | scope: the `PyScope.Table`, the current `ScopeId` and its `Scope` (with the `__qualname__`), giving each name's kind (`local`, `cell`, `free`, `globalExplicit`, `globalImplicit`). Imports are `Table.imports`, a separate list of fully qualified targets | `Ctx.table`, `Ctx.scope`, `Ctx.cur` | yes | `PyScope.analyze` (§5.1), `transFunc` |
 | the Python module name, the Dyn module name, the names some scope binds as globals | `Ctx.module`, `Ctx.moduleName`, `Ctx.globals` | yes | `translate` |
@@ -979,9 +980,9 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 
 - The scope and the exits stack live in the translator's state, `TransM` (§4).
 - `PyBuild.buildFuncTypedWith` builds and checks a function and returns its body's result.
-- `Frame.handler` is a `BlockValue`, so a handler can pre-bind arguments (`withHandlerTo`).
-- `dispatch` and `dispatchArms` take `Label`s. Direct successors that pre-bind arguments need
-  `BlockValue`s.
+- `Frame.handler` is a `Target.Raw`, so a handler can pre-bind arguments (`withHandlerTo`).
+- `dispatch` and `dispatchArms` take `Label`s. Targets that pre-bind arguments need a
+  `Target.Raw` each.
 - `tryFinally`, `protect` and `dispatchArms` run their bodies in any `MonadPy` monad, so the
   translator passes `TransM` bodies. `forEach` does the same, for comprehensions.
 - `exitWalk` handles `loop`, `handler` and `cleanup` entries.

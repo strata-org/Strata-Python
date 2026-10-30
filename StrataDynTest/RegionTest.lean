@@ -79,7 +79,7 @@ private def pick : Built :=
       finishBlock (.jump () (goto j #[one]))
       finishBlock (.ret () (← startBlockWith j (.str .base "v") Base.Int))
     let els := region #[] (finishBlock (.ret () x.id)) "else"
-    let r ← emitApply (.str .base "r") Base.Int Reg.«if» #[c.id] (regions := #[thn, els])
+    let r ← emitApply (.str .base "r") Base.Int Reg.«if».ref #[c.id] (regions := #[thn, els])
     finishBlock (.ret () r)
 
 #guard pick.isOk
@@ -123,7 +123,7 @@ private def pickWith : Built :=
       Prod.fst <$> Build.regionWith #[] (base := "else") do
         modify (· + 1)
         (finishBlock (.ret () x.id) : BuildM E Unit Unit)
-    let (r, n) ← (Build.emitApplyWith (.str .base "r") Base.Int Reg.«if» #[c.id]
+    let (r, n) ← (Build.emitApplyWith (.str .base "r") Base.Int Reg.«if».ref #[c.id]
       (regions := #[thn, els]) : StateT Nat (BuildM E Unit) ValId).run 0
     if n != 2 then Build.error s!"the regions ran {n} times"
     finishBlock (.ret () r)
@@ -159,21 +159,22 @@ private def guarded : Built :=
     let body := region #[] (base := "body") do
       let ok := region #[] (base := "ok") do
         let k ← emitConst (.str .base "k") (.int 0)
-        let n ← emitApply (.str .base "n") (Reg.Completion Base.Int) Reg.Completion.normal #[k]
+        let n ← emitApply (.str .base "n") (Reg.Completion Base.Int) Reg.Completion.normal.ref #[k]
         finishBlock (.ret () n)
       let bad := region #[] (base := "bad") do
         let k ← emitConst (.str .base "k") (.int 1)
-        let n ← emitApply (.str .base "n") (Reg.Completion Base.Int) Reg.Completion.normal #[k]
+        let n ← emitApply (.str .base "n") (Reg.Completion Base.Int) Reg.Completion.normal.ref #[k]
         finishBlock (.ret () n)
-      let r ← emitApply (.str .base "r") (Reg.Completion Base.Int) Reg.«if» #[c.id]
+      let r ← emitApply (.str .base "r") (Reg.Completion Base.Int) Reg.«if».ref #[c.id]
         (regions := #[ok, bad])
       finishBlock (.ret () r)
     let handler := do
       let exc ← freshVal (.str .base "exc") Reg.Exc
       region #[exc] (base := "handler") do
-        let z ← emitApply (.str .base "z") (Reg.Completion Base.Int) Reg.Completion.raise #[exc.id]
+        let z ← emitApply (.str .base "z") (Reg.Completion Base.Int) Reg.Completion.raise.ref
+          #[exc.id]
         finishBlock (.ret () z)
-    let r ← emitApply (.str .base "r") (Reg.Completion Base.Int) Reg.«try» #[]
+    let r ← emitApply (.str .base "r") (Reg.Completion Base.Int) Reg.«try».ref #[]
       (regions := #[body, handler])
     finishBlock (.ret () r)
 
@@ -246,7 +247,7 @@ private def retRegion (v : ValId) : BuildM E Unit (Region E Unit) :=
 
 -- An `if` with its `else` missing.
 #guard rejected (fCX fun c x _ => do
-    let r ← emitApply (.str .base "r") Base.Int Reg.«if» #[c] (regions := #[retRegion x])
+    let r ← emitApply (.str .base "r") Base.Int Reg.«if».ref #[c] (regions := #[retRegion x])
     finishBlock (.ret () r))
 
 /-- A handler region whose entry takes an `Int` rather than the exception. -/
@@ -256,13 +257,13 @@ private def wrongEntry : Built :=
     let body := region #[] do
       let k ← emitConst (.str .base "k") (.int 0)
       finishBlock (.ret () (← emitApply (.str .base "n") (Reg.Completion Base.Int)
-          Reg.Completion.normal #[k]))
+          Reg.Completion.normal.ref #[k]))
     let handler := do
       let i ← freshVal (.str .base "i") Base.Int
       region #[i] do
         finishBlock (.ret () (← emitApply (.str .base "n") (Reg.Completion Base.Int)
-            Reg.Completion.normal #[i.id]))
-    let r ← emitApply (.str .base "r") (Reg.Completion Base.Int) Reg.«try» #[]
+            Reg.Completion.normal.ref #[i.id]))
+    let r ← emitApply (.str .base "r") (Reg.Completion Base.Int) Reg.«try».ref #[]
       (regions := #[body, handler])
     finishBlock (.ret () r)
 
@@ -271,7 +272,7 @@ private def wrongEntry : Built :=
 -- A `then` region returning the condition, not an `Int`.
 #guard rejected (fCX fun c x _ => do
     let regions := #[retRegion c, retRegion x]
-    finishBlock (.ret () (← emitApply (.str .base "r") Base.Int Reg.«if»
+    finishBlock (.ret () (← emitApply (.str .base "r") Base.Int Reg.«if».ref
         #[c] (regions := regions))))
 
 /-- A `then` region that jumps to a block of the function rather than returning. -/
@@ -279,7 +280,7 @@ private def escape (escapes : Bool) : Built :=
   fCX fun c x _ => do
     let done ← freshLabel "done"
     let thn := region #[] (finishBlock (if escapes then .jump () (goto done) else .ret () x))
-    let _ ← emitApply (.str .base "r") Base.Int Reg.«if» #[c]
+    let _ ← emitApply (.str .base "r") Base.Int Reg.«if».ref #[c]
       (regions := #[thn, retRegion x])
     finishBlock (.jump () (goto done))
     startBlock done
@@ -294,7 +295,7 @@ private def escape (escapes : Bool) : Built :=
 private def outerExit (fromRegion : Bool) : Built :=
   fCX (ret := Base.Bool) fun c x _ => do
     let regions := #[retRegion (if fromRegion then c else x), retRegion x]
-    let _ ← emitApply (.str .base "r") Base.Int Reg.«if» #[c] (regions := regions)
+    let _ ← emitApply (.str .base "r") Base.Int Reg.«if».ref #[c] (regions := regions)
     finishBlock (.ret () c)
 
 #guard (outerExit false).isOk
@@ -308,7 +309,7 @@ private def outerExit (fromRegion : Bool) : Built :=
       finishBlock (.jump () (goto entry))
       startBlock entry
       finishBlock (.ret () x)
-    let r ← emitApply (.str .base "r") Base.Int Reg.«if» #[c] (regions := #[thn, retRegion x])
+    let r ← emitApply (.str .base "r") Base.Int Reg.«if».ref #[c] (regions := #[thn, retRegion x])
     finishBlock (.ret () r) with
   | .error e => e.misuses == #["block bb.0 opened twice: its label is already used"] &&
       !decide e.func.WF
@@ -328,7 +329,7 @@ private def refInRegion : Built :=
     let thn := region #[] do
       let _ ← Build.emitFunc (.str .base "pick") Base.Code
       finishBlock (.ret () x)
-    let r ← emitApply (.str .base "r") Base.Int Reg.«if» #[c] (regions := #[thn, retRegion x])
+    let r ← emitApply (.str .base "r") Base.Int Reg.«if».ref #[c] (regions := #[thn, retRegion x])
     finishBlock (.ret () r)
 
 /-- What a module of `fs` gives through `Module.ofChecked`, then through `Module.Raw.check`:

@@ -53,6 +53,13 @@ public environment HdKid extends Hd where
 
 abbrev W := Hd.env
 
+-- `StrataDyn.DSL` imports the typed builder, so `Hd` has typed emitters (`TypedEmitTest` tests
+-- them): the instruction is `Hd.excNew.ref`, and `Hd.excNew` is its emitter.  An environment
+-- declared with `StrataDyn.DSL.Core` alone has none (`DSLScaleTest`).
+example : InsnRef W Hd.excNew.sig := Hd.excNew.ref
+example (v : Val W Base.Int) : BuildM W Unit (Val W (Base.Ref (Base.Except Base.Int Base.Bool))) :=
+  Hd.excNew v
+
 /-! ## Names
 
 A handle is the constant `Base.Int`.  The namespace's constants keep their names and meaning. -/
@@ -90,8 +97,8 @@ example : Base.Except.name = (Base.Except).name := rfl
 example : Base.Except.decl.params.size = 2 := rfl
 example : Base.Int.con.decl.name = Base.Int.name := rfl
 -- The constructor's namespace still holds its instructions.
-/-- info: Base.Except.ok : InsnRef Base.env Base.Except.ok.sig -/
-#guard_msgs in #check (Base.Except.ok : InsnRef Base.env _)
+/-- info: Base.Except.ok.ref : InsnRef Base.env Base.Except.ok.sig -/
+#guard_msgs in #check (Base.Except.ok.ref : InsnRef Base.env _)
 
 /-! ## Generic code over type constructors
 
@@ -526,12 +533,12 @@ private def f : Built :=
     let errL ← freshLabel "err"
     let _ ← startFreshBlock (base := "entry")
     let zero ← emitConst (.str .base "k") (.int 0)
-    let cell ← emitApply (.str .base "cell") (Base.Ref Base.Int) Base.refNew #[zero]
-    let _ ← emitApply (.str .base "u") Base.Unit Base.refSet (typeArgs := ta[Base.Int])
+    let cell ← emitApply (.str .base "cell") (Base.Ref Base.Int) Base.refNew.ref #[zero]
+    let _ ← emitApply (.str .base "u") Base.Unit Base.refSet.ref (typeArgs := ta[Base.Int])
       #[cell, zero]
-    let r ← emitApply (.str .base "r") Base.Int Base.refGet #[cell]
-    let x ← emitApply (.str .base "x") (Base.Except Hd.IntList Base.Int) Base.Except.ok #[r]
-    terminate Base.Except.case (typeArgs := ta[Hd.IntList, Base.Int]) #[x]
+    let r ← emitApply (.str .base "r") Base.Int Base.refGet.ref #[cell]
+    let x ← emitApply (.str .base "x") (Base.Except Hd.IntList Base.Int) Base.Except.ok.ref #[r]
+    terminate Base.Except.case.ref (typeArgs := ta[Hd.IntList, Base.Int]) #[x]
       #[goto okL, goto errL]
     let _ ← startBlockWith errL (.str .base "e") Hd.IntList
     finishBlock (.ret () zero)
@@ -561,7 +568,7 @@ private def g : Built :=
     let _ ← startFreshBlock #[fv] "entry"
     let a ← emitConst (.str .base "a") (.int 1)
     let b ← emitConst (.str .base "b") (.bool true)
-    let r ← emitApply (.str .base "r") Base.Int Base.callCode
+    let r ← emitApply (.str .base "r") Base.Int Base.callCode.ref
       (typeArgs := ta[[Base.Int, Base.Bool], Base.Int]) #[fv.id, a, b]
     finishBlock (.ret () r)
 
@@ -577,11 +584,11 @@ private def g : Built :=
 
 /-- A new cell holding `v`, in any refinement of `Base`. -/
 def newIntCell {e : Env Unit} [Base.env ⊑ e] (v : ValId) : BuildM e Unit ValId :=
-  emitApply (.str .base "cell") (Base.Ref Base.Int) Base.refNew #[v]
+  emitApply (.str .base "cell") (Base.Ref Base.Int) Base.refNew.ref #[v]
 
 /-- An `Except` of a `Hd` list, in any refinement of `Hd`. -/
 def okList {e : Env Unit} [W ⊑ e] (v : ValId) : BuildM e Unit ValId :=
-  emitApply (.str .base "x") (Base.Except Base.Int Hd.IntList) Base.Except.ok #[v]
+  emitApply (.str .base "x") (Base.Except Base.Int Hd.IntList) Base.Except.ok.ref #[v]
 
 /-! ## Computed types
 

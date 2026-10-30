@@ -195,13 +195,14 @@ def declare (s : CollectState) (id : Ident) (as? : Option String)
 
 /-- The Lean names a type `T` declares besides its own: `T.ref`, `T.name`, `T.name_ref` and
 `T.decl_ref`, `T.con` for a type without parameters, and a datatype's case instruction `T.case`,
-with its `sig` and `name`.  A constructor `c` of `T` is `T.c`, so `declare` rejects each of
-these as a constructor name.  `Internal.T.ty` and `Internal.T.toRaw_ty` are under `Internal`,
-which the environment reserves. -/
+with its `sig`, `name` and `ref`.  A constructor `c` of `T` is `T.c`, so `declare` rejects each
+of these as a constructor name.  `Internal.T.ty` and `Internal.T.toRaw_ty` are under
+`Internal`, which the environment reserves. -/
 def typeGenerated (lean : Name) (nullary : Bool) (data : Bool := false) : List Name :=
   [lean ++ `ref, lean ++ `name, lean ++ `name_ref, lean ++ `decl_ref] ++
     (if nullary then [lean ++ `con] else []) ++
-    if data then [lean ++ `case, lean ++ `case ++ `sig, lean ++ `case ++ `name] else []
+    if data then [lean ++ `case, lean ++ `case ++ `sig, lean ++ `case ++ `name,
+      lean ++ `case ++ `ref] else []
 
 /-- The names `T.c` would shadow on `T`'s handle, which `declare` rejects as constructor names
 too: the fields `decl`, `kinds`, `env` and `apply`. -/
@@ -212,8 +213,9 @@ def typeShadowed (lean : Name) : List Name :=
 `case` under the datatype's. -/
 def caseName (envName : Name) : Name := leanName (dynName envName).caseName
 
-/-- The Lean names an instruction or a constructor generates besides its own. -/
-def opGenerated (lean : Name) : List Name := [lean ++ `sig, lean ++ `name]
+/-- The Lean names an instruction or a constructor generates besides its own, which is its
+typed emitter: `o.sig`, `o.name` and its reference `o.ref`. -/
+def opGenerated (lean : Name) : List Name := [lean ++ `sig, lean ++ `name, lean ++ `ref]
 
 /-- Read the type parameters of a `type` or `data`. -/
 def readTyParams (ps : Array (TSyntax `Strata.Dyn.DSL.dynTyParam)) :
@@ -377,20 +379,6 @@ inductive Known where
 structure RCtor where
   d : CtorD
   args : Array (String × Ty)
-  deriving Inhabited
-
-/-- A region, resolved: its name, entry parameters and the type it leaves with. -/
-structure RRegion where
-  name : String
-  params : Array (String × Ty)
-  ret : Ty
-  deriving Inhabited
-
-/-- A successor, resolved: its name and the types of the values it receives, a list for a
-spread, which receives one value per element. -/
-structure RSucc where
-  name : String
-  payload : Array Ty
   deriving Inhabited
 
 /-- An instruction, resolved. -/
@@ -825,7 +813,7 @@ def resolve (rc : ResolveCtx) (ancestors : Array EnvEntry) (items : Array Item) 
         let ctors := (d.ctors.getD #[]).map (·.c.envName)
         let info : TypeInfo :=
           { envName := d.c.envName, owner := rc.envNs, lean := d.c.lean,
-            params := d.params.map (fun (x, _, b, k) => (x, b, k)), ctors }
+            params := d.params.map (fun (x, _, b, k) => (x, b, k)), ctors, isData := true }
         own := own.insert d.c.envName (info, k, j)
         known := known.insert d.c.envName (.type info (some (k, j)))
       let members := ds.map (·.c.envName)
@@ -882,6 +870,46 @@ def resolveOpens (namespaces : Std.HashSet Name) (opens : Array (Ident × Name))
     match (scopeCandidates ns o.getId).find? namespaces.contains with
     | some n => return some n
     | none => err o s!"unknown namespace `{showName o.getId}`"; return none
+
+/-! ## The record -/
+
+/-- The record of an instruction the block declares, of kind `kind`. -/
+def ROp.info (envNs : Name) (kind : OpKind) (r : ROp) : OpInfo :=
+  { envName := r.d.c.envName, owner := envNs, lean := r.d.c.lean, kind,
+    typeParams := r.d.typeParams.map fun (x, _, k) => (x, k), args := r.args,
+    variadic := r.variadic, regions := r.regions, succs := r.succs, ret := r.ret,
+    doc := r.d.c.doc?.map (·.getDocString) }
+
+/-- What the block records: its types, and its instructions with their signatures, in
+declaration order.  A datatype group's constructors come before its case instructions, as
+`stageNames` lists them.  It is an internal error for a stage to hold a type that `own` does
+not record; `resolve` records each type it puts in a stage, so no block reaches it. -/
+def Resolved.record (envNs : Name) (res : Resolved) :
+    Except String (Array TypeInfo × Array OpInfo) := do
+  let info (d : TypeD) : Except String TypeInfo :=
+    match res.own[d.c.envName]? with
+    | some (i, _) => pure i
+    | none => throw s!"internal error: type `{d.c.envName}` has no record"
+  let mut types : Array TypeInfo := #[]
+  let mut ops : Array OpInfo := #[]
+  for s in res.stages do
+    match s with
+    | .types ds => for d in ds do types := types.push (← info d)
+    | .data ms =>
+      for (d, _) in ms do types := types.push (← info d)
+      for (d, rcs, _) in ms do
+        let self : Ty :=
+          .app (dynName d.c.envName) (TypeExpr.Raw.vars (d.params.map (·.2.2.2)))
+        for h : j in [0:rcs.size] do
+          let c := rcs[j]
+          ops := ops.push
+            { envName := c.d.c.envName, owner := envNs, lean := c.d.c.lean,
+              kind := .ctor d.c.envName j, typeParams := d.params.map fun (x, _, _, k) => (x, k),
+              args := c.args,
+              ret := some self, doc := c.d.c.doc?.map (·.getDocString) }
+      for (d, _, r) in ms do ops := ops.push (r.info envNs (.case d.c.envName))
+    | .ops ds => for d in ds do ops := ops.push (d.info envNs .decl)
+  return (types, ops)
 
 end Strata.Dyn.DSL
 

@@ -78,8 +78,8 @@ theorem positions_find?_of : ∀ {k : Nat} {bs : List (Block env α)} {m : Label
 
 /-- Every successor of an instruction is among `instrEdges`, at the instruction's count. -/
 theorem mem_instrEdges_of : ∀ {k₀ : Nat} {is : List (Instruction env α)} {j : Nat}
-    {i : Instruction env α} {s : BlockValue}, is[j]? = some i → s ∈ i.succs →
-      (k₀ + j, s.target) ∈ instrEdges k₀ is
+    {i : Instruction env α} {s : Target.Raw}, is[j]? = some i → s ∈ i.succs →
+      (k₀ + j, s.label) ∈ instrEdges k₀ is
   | _, [], _, _, _, h, _ => by simp at h
   | k₀, i₁ :: is, 0, i, s, h, hs => by
     cases h

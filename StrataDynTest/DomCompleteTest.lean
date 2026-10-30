@@ -69,7 +69,7 @@ private def pt (s : String) (k : Nat) : Point := ⟨lbl s, k⟩
 
 /-- `%r = add %a %b ^h()`. -/
 private def add (r a b : Nat) (h : String) : Instruction E Unit :=
-  .apply () (d r) Demo.add ⟨#[], rfl⟩ #[⟨a⟩, ⟨b⟩] #[⟨lbl h, #[]⟩] #[]
+  .apply () (d r) Demo.add.ref ⟨#[], rfl⟩ #[⟨a⟩, ⟨b⟩] #[⟨lbl h, #[]⟩] #[]
 
 /-- `ret %x`. -/
 private def ret (x : Nat) : Terminator E Unit := .ret () ⟨x⟩
@@ -79,7 +79,7 @@ private def jump (s : String) : Terminator E Unit := .jump () ⟨lbl s, #[]⟩
 
 /-- `br %c ^t() ^f()`. -/
 private def br (c : Nat) (t f : String) : Terminator E Unit :=
-  .apply () Demo.br ⟨#[], rfl⟩ #[⟨c⟩] #[⟨lbl t, #[]⟩, ⟨lbl f, #[]⟩] #[]
+  .apply () Demo.br.ref ⟨#[], rfl⟩ #[⟨c⟩] #[⟨lbl t, #[]⟩, ⟨lbl f, #[]⟩] #[]
 
 /-- Block `s` with parameters `ps` (ids), instructions `is` and terminator `t`. -/
 private def blk (s : String) (ps : Array Nat) (is : Array (Instruction E Unit))
@@ -215,13 +215,13 @@ private def withRegion : Except (FailedFunc E Unit Unit) {fn : Func E Unit // fn
     let _ ← startFreshBlock #[x, c] "entry"
     let thn := region #[] (base := "t") do
       let t2 ← freshLabel "t2"
-      let _ ← emitApply (.str .base "s") Demo.Value Demo.add #[x.id, x.id] #[goto t2]
+      let _ ← emitApply (.str .base "s") Demo.Value Demo.add.ref #[x.id, x.id] #[goto t2]
       finishBlock (.jump () (goto t2 #[x.id]))
       let v ← freshVal (.str .base "v") Demo.Value
       startBlock t2 #[v]
       finishBlock (.ret () v.id)
     let els := region #[] (finishBlock (.ret () x.id)) "e"
-    let r ← emitApply (.str .base "r") Demo.Value Demo.«if» #[c.id] (regions := #[thn, els])
+    let r ← emitApply (.str .base "r") Demo.Value Demo.«if».ref #[c.id] (regions := #[thn, els])
     finishBlock (.ret () r)
 
 #guard match withRegion with

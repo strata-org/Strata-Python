@@ -58,7 +58,7 @@ private def apply (ty : TypeExpr base) : Built :=
     let x ← freshVal (.str .base "x") Base.Int
     let _ ← startFreshBlock #[x] "entry"
     let p ← emitFunc (mn "pos") ty
-    let r ← emitApply (.str .base "r") Base.Bool Base.callCode #[p, x.id]
+    let r ← emitApply (.str .base "r") Base.Bool Base.callCode.ref #[p, x.id]
     finishBlock (.ret () r)
 
 /-- `ref() : Bool`, which only takes a reference to `pos` at `ty`. -/

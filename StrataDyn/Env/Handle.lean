@@ -11,51 +11,57 @@ import StrataDyn.Env.WF
 set_option autoImplicit false
 
 /-!
-# Type handles
+# Type constructors
 
-A handle `T : TypeCon ks` names a declared type, or an abbreviation, whose parameters have the
-kinds `ks`.  The `environment` command gives each one a handle under its own name, except that a
-type without parameters is its type expression itself, with its handle `T.con`:
+Dyn's types are type expressions, `TypeExpr e s` (`StrataDyn/Env.lean`): a type whose
+names resolve in the environment `e`, over the type variables of the scope `s`.  A list of types
+is a `TypeList e s`, which may also splice the scope's list variables.
+
+This module defines `TypeCon ks`, a type constructor: a declared type, or an abbreviation, whose
+parameters have the kinds `ks`, applied to type expressions to give a type expression.  The
+`environment` command defines one for each type and abbreviation with parameters, under its own
+name.  A type or abbreviation without parameters is defined as a type expression itself, and its
+`TypeCon []` is `T.con`:
 
 ```lean
 Base.Int : TypeExpr e s                              -- under [Base.env ⊑ e]
-Base.Int.con : TypeCon []                            -- its handle
-Base.Except : TypeCon [.type, .type]                 -- a type constructor
+Base.Int.con : TypeCon []                            -- its type constructor
+Base.Except : TypeCon [.type, .type]
 Base.Fn : TypeCon [.list, .type]                     -- a list parameter takes a list
 (Base.Except Base.Int Base.Bool : TypeExpr e)        -- applied, under [Base.env ⊑ e]
 (Base.Fn [Base.Int, Base.Ref Base.Int] Base.Bool : TypeExpr e)
 (Base.Fn (TypeList.var 0 h) Base.Bool : TypeExpr e #[.list])   -- a list variable
 ```
 
-A handle is a function of type expressions: applied, it is a `TypeExpr e s` in every `e` that
-refines its environment `T.env`, and its arguments are type expressions of that `e`, a list
-parameter's a `List (TypeExpr e s)` or a `TypeList e s`, which may splice list variables.  The
-argument's type chooses the form, and a literal of handles takes the environment and scope of
-the application.  `TypeCon.ListArg` explains how Lean makes that choice, and what it costs.  A
-type without parameters is a type expression, as an applied handle is, so Lean chooses its
-environment by unification wherever the two meet.
-Instance search proves `[T.env ⊑ e]` at each application, so a parent's handles and a child's
-mix in one type, in any order, and a type that names a child's or a sibling's type where the
-child is not in scope fails there.  Generic code takes type expressions:
+A type expression that names a declared type `T` exists in `e` only if `e` refines the
+environment that declares `T`: each use of `T` requires `[T.env ⊑ e]`, which instance search
+proves from the `extends` chain.  So in a child environment a type can name both the child's
+types and its parent's, and a child's type in its parent fails with
+`failed to synthesize Hd.env ⊑ Base.env`.
+
+Lean takes `e` from the expected type: the builder's environment for an operand or a result,
+the declared type of a definition, or, for an argument, the application it is passed to.
+Without one, as in `let t := Base.Ref Base.Int`, Lean cannot choose `e`.
+
+A list parameter takes a `List (TypeExpr e s)` or a `TypeList e s`, and the argument's type
+chooses which; `TypeCon.ListArg` explains how, and what it costs.
+
+Generic code takes type expressions:
 `{e} [Base.env ⊑ e] (t : TypeExpr e s) : TypeExpr e s := Base.Ref t`.
 
-A handle has no environment of its own beyond `T.env`, so the environment it is used in comes
-from the expected type, or, for an argument, from the application around it.  Without one, as
-in `let t := Base.Ref Base.Int`, Lean cannot choose it.
-
-An applied handle is its type's `Internal.T.ty` by `rfl`, a list of type expressions as the
-literal of its types, `TypeList.lit #[.ty t₁, …]`, and a `TypeList` as itself.  `Internal.T.ty`
-is what generated signatures and proofs are written with; users write handles.  An
-abbreviation applies its body's handles, so it unifies with the constructor its body applies,
-and an abbreviation that splices a list parameter among other elements builds one literal from
-a list of type expressions, and appends a `TypeList`.
+An applied type constructor is its type's `Internal.T.ty` by `rfl`, a list of type expressions
+as the literal of its types, `TypeList.lit #[.ty t₁, …]`, and a `TypeList` as itself.
+`Internal.T.ty` is what generated signatures and proofs are written with; users write type
+constructors.  An abbreviation applies its body's type constructors, so it unifies with the
+constructor its body applies, and an abbreviation that splices a list parameter among other
+elements builds one literal from a list of type expressions, and appends a `TypeList`.
 
 Lean elaborates a list literal of more than 32 elements as nested `let`s, at a cost superlinear
 in its length.  For long type lists, build them as a list value, such as `List.replicate n
 Base.Int`.
 
-* `TypeCon ks`: a handle: its declaration, its environment and its application.
-* `TypeCon.Fn e s ks`: the function a handle applies as.
+* `TypeCon ks`: a type constructor: its declaration, its environment and its application.
+* `TypeCon.Fn e s ks`: the function a type constructor applies as.
 * `TypeCon.ListArg`: the two forms of a list parameter's argument.
 * `TypeCon.name`, `TypeCon.applyArgs?`: its name, and its type expression at arguments given
   as data.

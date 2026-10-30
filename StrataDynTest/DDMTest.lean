@@ -50,7 +50,7 @@ private def f : Built Fns.env :=
     let x ← freshVal (.str .base "x") intT
     let y ← freshVal (.str .base "y") boolT
     let _ ← startFreshBlock #[g, x, y] "entry"
-    let r ← emitApply (.str .base "r") intT Fns.apply #[g.id, x.id, y.id]
+    let r ← emitApply (.str .base "r") intT Fns.apply.ref #[g.id, x.id, y.id]
     finishBlock (.ret () r)
 
 #guard f.isOk
@@ -169,8 +169,8 @@ private def callF (targs : Array (TypeArg Fns.env)) (ops : Array Nat) :
     let y ← freshVal (.str .base "y") boolT
     let _ ← startFreshBlock #[g, x, y] "entry"
     let ps := #[g.id, x.id, y.id]
-    let some ta ← Build.checkTypeArgs Fns.callFn targs | finishBlock (.ret () x.id)
-    let r ← emitApply (.str .base "r") intT Fns.callFn (#[g.id] ++ ops.filterMap (ps[·]?))
+    let some ta ← Build.checkTypeArgs Fns.callFn.ref targs | finishBlock (.ret () x.id)
+    let r ← emitApply (.str .base "r") intT Fns.callFn.ref (#[g.id] ++ ops.filterMap (ps[·]?))
       (typeArgs := .given ta)
     finishBlock (.ret () r)
 
@@ -213,10 +213,10 @@ private def chainF (ret : TypeExpr Fns.env) : Built Fns.env :=
     let y ← freshVal (.str .base "y") boolT
     let _ ← startFreshBlock #[g, h, x, y] "entry"
     let bools : TypeList Fns.env := .ofTypes #[boolT]
-    let b ← emitApply (.str .base "b") ret Fns.bindFirst (typeArgs := ta[intT, bools, intT])
+    let b ← emitApply (.str .base "b") ret Fns.bindFirst.ref (typeArgs := ta[intT, bools, intT])
       #[g.id, x.id]
-    let _ ← emitApply (.str .base "c") intT Fns.callFn (typeArgs := ta[bools, intT]) #[b, y.id]
-    let r ← emitApply (.str .base "r") intT Fns.callLast (typeArgs := ta[bools, intT])
+    let _ ← emitApply (.str .base "c") intT Fns.callFn.ref (typeArgs := ta[bools, intT]) #[b, y.id]
+    let r ← emitApply (.str .base "r") intT Fns.callLast.ref (typeArgs := ta[bools, intT])
       #[h.id, y.id, x.id]
     finishBlock (.ret () r)
 
@@ -228,7 +228,7 @@ private def bindF (ret : TypeExpr Fns.env) : Built Fns.env :=
     let g ← freshVal (.str .base "g") (Base.Fn [intT, boolT] intT)
     let x ← freshVal (.str .base "x") intT
     let _ ← startFreshBlock #[g, x] "entry"
-    let _ ← emitApply (.str .base "b") ret Fns.bindFirst
+    let _ ← emitApply (.str .base "b") ret Fns.bindFirst.ref
       (typeArgs := ta[intT, [boolT], intT]) #[g.id, x.id]
     finishBlock (.ret () x.id)
 
@@ -323,13 +323,14 @@ private def closF (caseArgs : Array (TypeArg Clos.env)) : Built Clos.env :=
     let x ← freshVal (.str .base "x") Base.Int
     let _ ← startFreshBlock #[g, x] "entry"
     let k ← freshLabel "mk"
-    let c ← emitApply (.str .base "c") closT Clos.Closure.mk #[g.id, x.id]
-    let some ta ← checkTypeArgs Clos.Closure.case caseArgs | finishBlock (.ret () x.id)
-    terminate Clos.Closure.case #[c] #[goto k] (typeArgs := .given ta)
+    let c ← emitApply (.str .base "c") closT Clos.Closure.mk.ref #[g.id, x.id]
+    let some ta ← checkTypeArgs Clos.Closure.case.ref caseArgs | finishBlock (.ret () x.id)
+    terminate Clos.Closure.case.ref #[c] #[goto k] (typeArgs := .given ta)
     let f ← freshVal (.str .base "f") fnInt
     let v ← freshVal (.str .base "v") Base.Int
     startBlock k #[f, v]
-    let r ← emitApply (.str .base "r") Base.Int Fns.callFn (typeArgs := ta[[Base.Int], Base.Int])
+    let r ← emitApply (.str .base "r") Base.Int Fns.callFn.ref
+      (typeArgs := ta[[Base.Int], Base.Int])
       #[f.id, v.id]
     finishBlock (.ret () r)
 

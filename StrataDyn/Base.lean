@@ -7,7 +7,8 @@ module
 public import StrataDyn.Env.Handle
 -- Private: building an `Env` value needs its representation at code-generation time.
 import StrataDyn.Env.WF
-import StrataDyn.DSL
+-- The command alone: the typed builder, which `StrataDyn.DSL` adds, is built over `Base`.
+import StrataDyn.DSL.Core
 
 set_option autoImplicit false
 

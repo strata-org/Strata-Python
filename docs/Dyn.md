@@ -26,7 +26,9 @@ Dyn separates the vocabulary a language provides from the programs written in it
 * A **program** is a module of functions written against one environment. A function is a
   set of blocks. A block takes parameters, runs a sequence of instructions, and ends with a
   terminal instruction, such as a jump to another block or a return. Each value is defined
-  once and has a type from the environment.
+  once and has a type from the environment. An instruction's signature may declare
+  *successors*, each with a payload. An application fills each with a *target*: a block and a
+  prefix of its arguments, to which the instruction passes the payload after them.
 
 Environments are built in layers. The **base environment** declares what every language
 needs, and a language's environment refines the base by adding its own types and
@@ -105,6 +107,21 @@ iteration variable per evaluation, as in CPython. An `if` whose branches are reg
 **Annotations.** Every part of a program carries an annotation of a type the front end chooses,
 such as a source position, so that results can be reported against the original source.
 Dyn does not depend on annotations for its semantics.
+
+**Building.** A front end emits a function through the builder (`StrataDyn/Build.lean`),
+which checks the function when it is finished. Each instruction has a typed emitter under its
+own name, whose Lean type is the instruction's signature, so Lean checks the operands and infers
+the type arguments; the instruction itself is `o.ref`. Where `Strata.Dyn.Emit` is open,
+`let% x ← e` names the value or block `e` makes after the Lean binder `x`. Other values are
+named after their instruction, or after an explicit `result`, and other blocks `bb`, or after an
+explicit base:
+
+```lean
+let% cell ← Base.refNew zero                    -- %cell.0
+let% r ← Base.refGet (← Base.refNew zero)       -- %refNew.0, then %r.0
+let% x ← Base.refGet cell (result := n "read")  -- %read.0
+let% ok ← Emit.freshLabel [Base.Int]            -- ^ok.0
+```
 
 Dyn is implemented in the directory `StrataDyn`. Declarations are defined in
 the namespace `Strata.Dyn`.

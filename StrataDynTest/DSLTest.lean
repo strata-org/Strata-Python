@@ -45,7 +45,7 @@ example : base ⊑ Base.env := inferInstance
 
 example : (Base.Int.ref (e := Base.env)).name = bn "Int" := rfl
 example : Base.Except.ok.name = bn "ok" := rfl
-example : (Base.Except.error (e := base)).name = bn "error" := rfl
+example : (Base.Except.error.ref (e := base)).name = bn "error" := rfl
 
 /-- `#v[…]` type-checks against a generated signature's `typeArgc`. -/
 example : Vector (TypeExpr Base.env) (Base.refNew.sig (e := Base.env)).typeArgc :=
@@ -144,10 +144,10 @@ section
 variable {e : Env _root_.Unit} [Demo.env ⊑ e]
 example : TypeExpr e := Base.Ref Demo.Value
 example : TypeExpr e := Demo.raising Base.Int
-example : InsnRef e Base.refNew.sig := Base.refNew
-example : InsnRef e Demo.add.sig := Demo.add
-example : InsnRef e Demo.Box.box.sig := Demo.Box.box
-example : InsnRef e Base.Except.ok.sig := Base.Except.ok
+example : InsnRef e Base.refNew.sig := Base.refNew.ref
+example : InsnRef e Demo.add.sig := Demo.add.ref
+example : InsnRef e Demo.Box.box.sig := Demo.Box.box.ref
+example : InsnRef e Base.Except.ok.sig := Base.Except.ok.ref
 end
 
 /-! ### Parameters named as the generated binders
@@ -529,8 +529,8 @@ example : TyVars.Pair.mk.sig (e := TyVars.env) =
 
 section
 variable {e : Env _root_.Unit} [TyVars.env ⊑ e]
-example : InsnRef e TyVars.id.sig := TyVars.id
-example : InsnRef e TyVars.Pair.mk.sig := TyVars.Pair.mk
+example : InsnRef e TyVars.id.sig := TyVars.id.ref
+example : InsnRef e TyVars.Pair.mk.sig := TyVars.Pair.mk.ref
 end
 
 /-! ### Constructors are instructions
@@ -554,11 +554,11 @@ example : (Base.Except.ok.sig (e := Base.env)).typeArgc = 2 := rfl
   (Demo.Box.box.sig (e := Demo.env)).variadic.isNone
 -- A constructor's reference is marked with where it sits: `Odd`'s only constructor is the
 -- first of its group's second member.
-#guard (Demo.Odd.succO (e := Demo.env)).ctorAddr?.map (fun a => (a.dataIdx, a.idx)) ==
+#guard (Demo.Odd.succO.ref (e := Demo.env)).ctorAddr?.map (fun a => (a.dataIdx, a.idx)) ==
   some (1, 0)
-#guard (Demo.Box.empty (e := Demo.env)).ctorAddr?.map (fun a => (a.dataIdx, a.idx)) ==
+#guard (Demo.Box.empty.ref (e := Demo.env)).ctorAddr?.map (fun a => (a.dataIdx, a.idx)) ==
   some (0, 1)
-#guard (Demo.add (e := Demo.env)).ctorAddr?.isNone
+#guard (Demo.add.ref (e := Demo.env)).ctorAddr?.isNone
 
 /-! ### Case instructions
 
@@ -576,7 +576,7 @@ example : (Demo.Box.case.sig (e := Demo.env)).terminal = true := rfl
 #guard (Demo.Even.case.sig (e := Demo.env)).succs.map (fun p => (p.name, p.type.size)) ==
   #[("zero", 0), ("succE", 1)]
 #guard (Demo.Odd.case.sig (e := Demo.env)).succs.map (·.name) == #["succO"]
-#guard (Demo.Box.case (e := Demo.env)).ctorAddr?.isNone
+#guard (Demo.Box.case.ref (e := Demo.env)).ctorAddr?.isNone
 example : (Demo.Box.case.sig (e := Demo.env)).succs.map (·.type) =
     #[#[.ty (TypeExpr.var 0 (by decide))], #[]] := by simp [Demo.Box.case.sig]
 example : (Demo.Box.case.sig (e := Demo.env)).argTypes.map (·.type) =
@@ -588,22 +588,22 @@ example : (Demo.Box.case.sig (e := Demo.env)).argTypes.map (·.type) =
 private def body {e : Env _root_.Unit} [Demo.env ⊑ e] : BuildM e _root_.Unit _root_.Unit := do
   let x ← Build.freshVal (.str .base "x") Demo.Value
   let _ ← Build.startFreshBlock #[x]
-  let t ← Build.emitApply (.str .base "t") Demo.Value Demo.mkTuple #[x.id, x.id, x.id]
-  let b ← Build.emitApply (.str .base "b") (Demo.Box Demo.Value) Demo.Box.box
+  let t ← Build.emitApply (.str .base "t") Demo.Value Demo.mkTuple.ref #[x.id, x.id, x.id]
+  let b ← Build.emitApply (.str .base "b") (Demo.Box Demo.Value) Demo.Box.box.ref
       #[t]
   let cell ← Build.emitApply (.str .base "cell") (Base.Ref (Demo.Box Demo.Value))
-      Base.refNew
+      Base.refNew.ref
     #[b]
-  let got ← Build.emitApply (.str .base "got") (Demo.Box Demo.Value) Base.refGet
+  let got ← Build.emitApply (.str .base "got") (Demo.Box Demo.Value) Base.refGet.ref
     #[cell]
-  let v ← Build.emitApply (.str .base "v") (Demo.raising Demo.Value) Demo.unbox
+  let v ← Build.emitApply (.str .base "v") (Demo.raising Demo.Value) Demo.unbox.ref
       #[got]
   let h ← Build.freshLabel "handler"
-  let _ ← Build.emitApply (.str .base "s") Demo.Value Demo.add #[t, x.id] #[Build.goto h]
+  let _ ← Build.emitApply (.str .base "s") Demo.Value Demo.add.ref #[t, x.id] #[Build.goto h]
   Build.finishBlock (.ret () v)
   let exc ← Build.freshVal (.str .base "exc") Demo.Value
   Build.startBlock h #[exc]
-  let r ← Build.emitApply (.str .base "r") (Demo.raising Demo.Value) Base.Except.error
+  let r ← Build.emitApply (.str .base "r") (Demo.raising Demo.Value) Base.Except.error.ref
     #[exc.id]
   Build.finishBlock (.ret () r)
 

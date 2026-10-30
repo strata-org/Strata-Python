@@ -48,7 +48,7 @@ private def rejected (b : Built) : Bool :=
 
 /-- Finish the open block by returning `exc` as a failure. -/
 private def propagate (exc : ValId) : BuildM E Unit Unit := do
-  let r ← emitApply (.str .base "r") (Demo.raising Demo.Value) Base.Except.error #[exc]
+  let r ← emitApply (.str .base "r") (Demo.raising Demo.Value) Base.Except.error.ref #[exc]
   finishBlock (.ret () r)
 
 /-- `f(x : Value)`, whose entry `body x h` emits, and whose handler `h` takes an exception of
@@ -76,9 +76,9 @@ private def sum : Built :=
     let h ← freshLabel "handler"
     let l ← freshLabel "left"
     let r ← freshLabel "right"
-    let s ← emitApply (.str .base "s") Demo.Value Demo.add #[x.id, x.id] #[goto h]
-    let _ ← emitApply (.str .base "u") Base.Unit Demo.fork #[] #[goto l, goto r #[c.id]]
-    let ok ← emitApply (.str .base "ok") (Demo.raising Demo.Value) Base.Except.ok #[s]
+    let s ← emitApply (.str .base "s") Demo.Value Demo.add.ref #[x.id, x.id] #[goto h]
+    let _ ← emitApply (.str .base "u") Base.Unit Demo.fork.ref #[] #[goto l, goto r #[c.id]]
+    let ok ← emitApply (.str .base "ok") (Demo.raising Demo.Value) Base.Except.ok.ref #[s]
     finishBlock (.ret () ok)
     propagate <| ← startBlockWith h (.str .base "exc") Demo.Value
     let a ← freshVal (.str .base "a") Demo.Value
@@ -106,11 +106,11 @@ private def raiser : Built :=
     let yes ← freshLabel "yes"
     let no ← freshLabel "no"
     let h ← freshLabel "handler"
-    finishBlock (.apply () Demo.br ⟨#[], rfl⟩ #[c.id] #[goto yes, goto no] #[])
+    finishBlock (.apply () Demo.br.ref ⟨#[], rfl⟩ #[c.id] #[goto yes, goto no] #[])
     startBlock yes
-    finishBlock (.apply () Demo.raise ⟨#[], rfl⟩ #[x.id] #[goto h] #[])
+    finishBlock (.apply () Demo.raise.ref ⟨#[], rfl⟩ #[x.id] #[goto h] #[])
     startBlock no
-    let ok ← emitApply (.str .base "ok") (Demo.raising Demo.Value) Base.Except.ok #[x.id]
+    let ok ← emitApply (.str .base "ok") (Demo.raising Demo.Value) Base.Except.ok.ref #[x.id]
     finishBlock (.ret () ok)
     propagate (← startBlockWith h (.str .base "exc") Demo.Value)
 
@@ -130,7 +130,7 @@ private def counter : Built :=
       let t ← emitConst (.str .base "t") (.bool false)
       finishBlock (.ret () t)
     let done ← freshLabel "done"
-    terminate Demo.loop #[zero] #[goto done] #[pure body] (typeArgs := ta[Base.Int])
+    terminate Demo.loop.ref #[zero] #[goto done] #[pure body] (typeArgs := ta[Base.Int])
     let n ← freshVal (.str .base "n") Base.Int
     startBlock done #[n]
     finishBlock (.ret () n.id)
@@ -191,9 +191,9 @@ block's last line, with no result. -/
 /-! ## What it rejects -/
 
 /-- `x + x`, with successors `ks`, returned as a success. -/
-private def addRet (x : ValId) (ks : Array BlockValue) : BuildM E Unit Unit := do
-  let s ← emitApply (.str .base "s") Demo.Value Demo.add #[x, x] ks
-  finishBlock (.ret () (← emitApply (.str .base "ok") (Demo.raising Demo.Value) Base.Except.ok
+private def addRet (x : ValId) (ks : Array Target.Raw) : BuildM E Unit Unit := do
+  let s ← emitApply (.str .base "s") Demo.Value Demo.add.ref #[x, x] ks
+  finishBlock (.ret () (← emitApply (.str .base "ok") (Demo.raising Demo.Value) Base.Except.ok.ref
     #[s]))
 
 /-- `add` declares one successor; here it is given none, and then two. -/
@@ -215,11 +215,11 @@ private def outsideRegion : Built :=
     let _ ← startFreshBlock #[x, c] "entry"
     let h ← freshLabel "handler"
     let thn := region #[] (base := "then") do
-      let s ← emitApply (.str .base "s") Demo.Value Demo.add #[x.id, x.id] #[goto h]
+      let s ← emitApply (.str .base "s") Demo.Value Demo.add.ref #[x.id, x.id] #[goto h]
       finishBlock (.ret () s)
     let els := region #[] (finishBlock (.ret () x.id)) "else"
-    let r ← emitApply (.str .base "r") Demo.Value Demo.«if» #[c.id] (regions := #[thn, els])
-    let ok ← emitApply (.str .base "ok") (Demo.raising Demo.Value) Base.Except.ok #[r]
+    let r ← emitApply (.str .base "r") Demo.Value Demo.«if».ref #[c.id] (regions := #[thn, els])
+    let ok ← emitApply (.str .base "ok") (Demo.raising Demo.Value) Base.Except.ok.ref #[r]
     finishBlock (.ret () ok)
     propagate (← startBlockWith h (.str .base "exc") Demo.Value)
 
@@ -236,14 +236,14 @@ private def toEntry : Built :=
 
 -- A terminal instruction in the middle of a block.
 #guard rejected (handled fun x h => do
-    let _ ← emitApply (.str .base "u") Base.Unit Demo.raise #[x] #[goto h]
-    finishBlock (.ret () (← emitApply (.str .base "ok") (Demo.raising Demo.Value) Base.Except.ok
+    let _ ← emitApply (.str .base "u") Base.Unit Demo.raise.ref #[x] #[goto h]
+    finishBlock (.ret () (← emitApply (.str .base "ok") (Demo.raising Demo.Value) Base.Except.ok.ref
         #[x])))
 
 -- A non-terminal instruction in terminator position: `add` would fall through, and
 -- there is nothing to fall through to.
 #guard rejected (handled fun x h =>
-    finishBlock (.apply () Demo.add ⟨#[], rfl⟩ #[x, x] #[goto h] #[]))
+    finishBlock (.apply () Demo.add.ref ⟨#[], rfl⟩ #[x, x] #[goto h] #[]))
 
 /-- A terminal instruction's region is still checked: `loop`'s body must return `Bool`. -/
 private def badLoopBody : Built :=
@@ -253,7 +253,7 @@ private def badLoopBody : Built :=
     let i ← freshVal (.str .base "i") Base.Int
     let body ← region #[i] (finishBlock (.ret () i.id)) "body"
     let done ← freshLabel "done"
-    terminate Demo.loop #[zero] #[goto done] #[pure body] (typeArgs := ta[Base.Int])
+    terminate Demo.loop.ref #[zero] #[goto done] #[pure body] (typeArgs := ta[Base.Int])
     let n ← freshVal (.str .base "n") Base.Int
     startBlock done #[n]
     finishBlock (.ret () n.id)
@@ -275,7 +275,7 @@ private def refInLoop : Built :=
       let _ ← Build.emitFunc (.str .base "counter") Base.Code
       finishBlock (.ret () (← emitConst (.str .base "t") (.bool false)))
     let done ← freshLabel "done"
-    terminate Demo.loop #[zero] #[goto done] #[pure body] (typeArgs := ta[Base.Int])
+    terminate Demo.loop.ref #[zero] #[goto done] #[pure body] (typeArgs := ta[Base.Int])
     let n ← freshVal (.str .base "n") Base.Int
     startBlock done #[n]
     finishBlock (.ret () n.id)

@@ -76,10 +76,10 @@ private def roundTrip (params : Array (TypeExpr Tup.env)) : Built :=
     let a ← freshVal (.str .base "a") intT
     let b ← freshVal (.str .base "b") boolT
     let _ ← startFreshBlock #[a, b] "entry"
-    let t ← emitApply (.str .base "t") (Tup.Tuple [intT, boolT]) Tup.tuple
+    let t ← emitApply (.str .base "t") (Tup.Tuple [intT, boolT]) Tup.tuple.ref
       #[a.id, b.id]
     let k ← freshLabel "k"
-    terminate Tup.untuple #[t] #[goto k]
+    terminate Tup.untuple.ref #[t] #[goto k]
     let ps ← params.mapM (freshVal (.str .base "p"))
     startBlock k ps
     finishBlock (.ret () ((ps[0]?.map (·.id)).getD a.id))
@@ -97,11 +97,11 @@ private def splitInto (params : Array (TypeExpr Tup.env)) : Built :=
     let a ← freshVal (.str .base "a") intT
     let b ← freshVal (.str .base "b") boolT
     let _ ← startFreshBlock #[a, b] "entry"
-    let t ← emitApply (.str .base "t") (Tup.Tuple [intT, boolT]) Tup.tuple
+    let t ← emitApply (.str .base "t") (Tup.Tuple [intT, boolT]) Tup.tuple.ref
       #[a.id, b.id]
     let n ← emitConst (.str .base "n") (.int 0)
     let k ← freshLabel "k"
-    terminate Tup.split #[n, t] #[goto k]
+    terminate Tup.split.ref #[n, t] #[goto k]
     let ps ← params.mapM (freshVal (.str .base "p"))
     startBlock k ps
     finishBlock (.ret () ((ps[0]?.map (·.id)).getD a.id))
