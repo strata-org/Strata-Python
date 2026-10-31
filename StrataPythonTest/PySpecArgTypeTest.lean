@@ -107,10 +107,10 @@ bodiless, so the spec is the only place these can live. -/
 /--
 info: procedure test_typed_func(x: Any, y: Any)
   returns (result: Any)
-  requires Any..isfrom_int(x)( summary "declared type of parameter 'x'")
-  requires Any..isfrom_str(y)( summary "declared type of parameter 'y'")
+  requires Any..isfrom_int(x) summary "declared type of parameter 'x'"
+  requires Any..isfrom_str(y) summary "declared type of parameter 'y'"
   opaque
-  free ensures Any..isfrom_float(result)( summary "return type of 'test_typed_func'")
+  free ensures Any..isfrom_float(result) summary "return type of 'test_typed_func'"
   modifies *;
 -/
 #guard_msgs in
