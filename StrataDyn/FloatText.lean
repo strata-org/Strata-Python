@@ -18,6 +18,9 @@ The printer and the reader agree on this pair:
   `ofDecimal` reads back as `f`, the nearest one if several have that many, as Python's
   `repr` chooses.  `none` for the non-finite values.
 
+For long decimal strings, `FloatText.ofDigits neg ds e` gives `ofDecimal` of the number with the
+decimal digits `ds` times `10 ^ e`, at a cost linear in the length of `ds`.
+
 All arithmetic is on `Nat`, so the conversions are exact.
 -/
 
@@ -121,6 +124,44 @@ def shortest (f : Float) : Option Decimal :=
       |>.getD ((candidates 17).headD (0, 0))
     let (q, e) := trimZeros q e
     some ⟨neg, q, e⟩
+
+/-! ## Long decimal strings -/
+
+/-- The value of the digits `ds` in base `base`, most significant first, computed by halves, so
+that a long string costs a few multiplications of large numbers, not one per digit. -/
+def digitsValue (base : Nat) (ds : Array Nat) : Nat := go 0 ds.size
+where
+  go (lo hi : Nat) : Nat :=
+    if _h : hi - lo ≤ 16 then
+      (List.range (hi - lo)).foldl (fun acc i => acc * base + ds.getD (lo + i) 0) 0
+    else
+      let mid := lo + (hi - lo) / 2
+      go lo mid * base ^ (hi - mid) + go mid hi
+  termination_by hi - lo
+  decreasing_by all_goals omega
+
+/-- How many significant digits `ofDigits` reads exactly. A midpoint between two adjacent
+binary64 values has at most 768 significant digits (`(2 ^ 54 - 1) * 5 ^ 1075` has 768). Let `T` be
+the first 800 significant digits of a number, and `u` the unit of its 800th digit. Only a midpoint
+strictly between `T` and `T + u` could change the rounding, and such a midpoint has its leading
+digit where `T` has it, so its at most 768 significant digits end above the 800th, and it is a
+multiple of `u`. So no midpoint lies strictly between `T` and `T + u`, and the number rounds as `T` if its other digits are all zero,
+and otherwise as `T` followed by a digit 1. This argument is not proved: no theorem states that
+`ofDigits` gives the nearest binary64 value. -/
+def keptDigits : Nat := 800
+
+/-- The binary64 value nearest `±n * 10 ^ e`, ties to even, where `n` has the decimal digits `ds`
+(most significant first, leading zeros allowed). It drops the digits after the first
+`keptDigits` significant ones, adds one digit 1 if any dropped digit is not zero, and calls
+`ofDecimal`. The cost is linear in the length of `ds`, plus that of `ofDecimal` on at most 801
+digits. -/
+def ofDigits (neg : Bool) (ds : List Nat) (e : Int) : Float :=
+  let sig := ds.dropWhile (· == 0)
+  let kept := sig.take keptDigits
+  let extra := sig.length - kept.length
+  let sticky := (sig.drop keptDigits).any (· != 0)
+  let mantissa := digitsValue 10 (kept ++ if sticky then [1] else []).toArray
+  ofDecimal ⟨neg, mantissa, e + extra - (if sticky then 1 else 0)⟩
 
 end
 
