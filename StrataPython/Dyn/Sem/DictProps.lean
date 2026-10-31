@@ -13,7 +13,8 @@ set_option autoImplicit false
 # Properties of dict tables
 
 Key theorems:
-* `DictTable.objPositions_eq`: the object index gives the scan;
+* `DictTable.objPositions_eq` and `DictTable.userImmPositions_eq`: the object indexes give the
+  scan;
 * `DictTable.groupCount_spec`: `groupCount` counts the distinct hashes of the live entries of
   one hash kind and key class, and `DictTable.kindGroupCount_spec` those of one hash kind.
 -/
@@ -23,6 +24,10 @@ namespace StrataPython.Dyn.Sem.DictTable
 /-- `objPositions` is the scan. -/
 public theorem objPositions_eq (t : DictTable) (id : ObjId) :
     t.objPositions id = positionsBy DictEntry.objKey t.entries id := t.byObj.wf id
+
+/-- `userImmPositions` is the scan. -/
+public theorem userImmPositions_eq (t : DictTable) (k : Value) :
+    t.userImmPositions k = positionsBy DictEntry.userImmKey t.entries k := t.byUserImm.wf k
 
 /-- `groupCount k c` is the length of a list without duplicates of exactly the hashes `h` such
 that some live entry has the hash `h`, the hash kind `k` and the key class `c`. -/

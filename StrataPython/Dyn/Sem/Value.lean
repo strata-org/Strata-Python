@@ -24,10 +24,8 @@ a mutable object of the store.
 * A hash (`Hash`) is exact, or symbolic with a source (`HashSrc`).  Two hashes are equal under
   every seed when both are exact and equal, or both are symbolic with equal sources.
 
-Key theorems: `Hash.encode_inj` and `encodeHashes_inj` (the encoding of hashes determines them);
-the injectivity of each kind of source other than `reduced` (`HashSrc.buffer_inj` and its
-siblings) and their distinct tags (`HashSrc.tag_buffer` and its siblings), so that two sources
-are equal only when the same kind is applied to equal arguments; `HashSrc.reduced_reduced`.
+The theorems about hashes and their sources, and the lawfulness of `Value.beq`, are in
+`ValueProps.lean`.
 -/
 
 namespace StrataPython.Dyn.Sem
@@ -46,7 +44,9 @@ structure PyStr where
   s : String
   ascii : Bool
   ascii_eq : ascii = isAscii s
-  deriving DecidableEq, Repr, Hashable, Ord
+  deriving DecidableEq, Repr, Ord
+
+instance : Hashable PyStr := ⟨fun p => hash p.s⟩
 
 /-- The `str` whose text is `s`. -/
 def PyStr.ofString (s : String) : PyStr := ⟨s, isAscii s, rfl⟩
@@ -67,16 +67,19 @@ inductive DescrKind where
   | getset
   /-- `member_descriptor`: `slice.__dict__["start"]`. -/
   | member
-  deriving DecidableEq, Repr, Inhabited, Hashable, Ord
+  deriving DecidableEq, Repr, Inhabited, Ord
+
+instance : Hashable DescrKind := ⟨fun k => hash k.ctorIdx⟩
 
 end
 
-/-- What a symbolic hash is computed from, encoded as a list of numbers.  Only the functions of
-the namespace `HashSrc` below build one (its constructor is private), and two of them build equal
-sources exactly when they are the same function applied to equal arguments, except that
-`reduced` gives back a source that is already reduced.  The order is the order of the codes. -/
+/-- What a symbolic hash is computed from, encoded as a list of numbers.  The semantics builds
+one only with the functions of the namespace `HashSrc` below (their bodies are exposed, so that
+rules that reach them can be registered), and two of them build equal sources exactly when they
+are the same function applied to equal arguments, except that `reduced` gives back a source that
+is already reduced.  The order is the order of the codes. -/
 public structure HashSrc where
-  private mk ::
+  mk ::
   code : List Nat
 
 namespace HashSrc
@@ -101,7 +104,11 @@ on an address. -/
 inductive Hash where
   | exact (h : Int)
   | symbolic (src : HashSrc)
-  deriving DecidableEq, Repr, Hashable, Ord
+  deriving DecidableEq, Repr, Ord
+
+instance : Hashable Hash := ⟨fun
+  | .exact h => mixHash 0 (hash h)
+  | .symbolic src => mixHash 1 (hash src)⟩
 
 /-- An integer as two numbers: its sign and its absolute value. -/
 def encodeInt (i : Int) : List Nat := [if i < 0 then 1 else 0, i.natAbs]
@@ -115,43 +122,14 @@ def Hash.encode : Hash → List Nat
 def encodeHashes (hs : List Hash) : List Nat :=
   hs.length :: hs.flatMap fun h => let c := h.encode; c.length :: c
 
-/-- `encodeInt` is injective. -/
-public theorem encodeInt_inj {a b : Int} (h : encodeInt a = encodeInt b) : a = b := by
-  simp only [encodeInt, List.cons.injEq, and_true] at h
-  obtain ⟨hs, hn⟩ := h
-  by_cases ha : a < 0 <;> by_cases hb : b < 0 <;> simp [ha, hb] at hs <;> omega
-
-/-- A hash's encoding determines it. -/
-public theorem Hash.encode_inj {a b : Hash} (h : a.encode = b.encode) : a = b := by
-  cases a <;> cases b <;> simp [Hash.encode] at h
-  · rw [encodeInt_inj h]
-  · rename_i s t; rw [HashSrc.ext h.2]
-
 /-- The parts of `encodeHashes`, after the count. -/
 public def encodeParts (hs : List Hash) : List Nat := hs.flatMap fun h => h.encode.length :: h.encode
-
-/-- The parts of two lists of hashes of one length, followed by anything, determine the lists. -/
-public theorem encodeParts_append_inj : ∀ {hs hs' : List Hash} {r r' : List Nat},
-    hs.length = hs'.length → encodeParts hs ++ r = encodeParts hs' ++ r' → hs = hs' ∧ r = r'
-  | [], [], _, _, _, h => by simpa [encodeParts] using h
-  | a :: as, b :: bs, r, r', hl, h => by
-    simp only [encodeParts, List.flatMap_cons, List.cons_append, List.append_assoc,
-      List.cons.injEq] at h
-    obtain ⟨hlen, h⟩ := h
-    obtain ⟨hab, hrest⟩ := List.append_inj h hlen
-    have hab' := Hash.encode_inj hab
-    obtain ⟨h1, h2⟩ := encodeParts_append_inj (by simpa using hl) hrest
-    exact ⟨by rw [hab', h1], h2⟩
-
-/-- `encodeHashes` is injective. -/
-public theorem encodeHashes_inj {hs hs' : List Hash} (h : encodeHashes hs = encodeHashes hs') : hs = hs' := by
-  simp only [encodeHashes, List.cons.injEq] at h
-  have hparts := encodeParts_append_inj (r := []) (r' := []) h.1 (by simpa [encodeParts] using h.2)
-  exact hparts.1
 
 end
 
 namespace HashSrc
+
+@[expose] section
 
 /-- The bytes that CPython hashes: a `bytes`' octets, or a `str`'s PEP 393 buffer. -/
 public def buffer (b : List UInt8) : HashSrc := ⟨0 :: b.map (·.toNat)⟩
@@ -192,141 +170,7 @@ public def isAddr (src : HashSrc) : Bool :=
 /-- The tag that starts each constructor's code: different constructors build different sources. -/
 public def tag (s : HashSrc) : Option Nat := s.code.head?
 
-/-- A buffer source starts with its own tag. -/
-public theorem tag_buffer (b : List UInt8) : (buffer b).tag = some 0 := by
-  unfold tag buffer; rfl
-/-- A address source starts with its own tag. -/
-public theorem tag_addr (id : ObjId) : (addr id).tag = some 1 := by
-  unfold tag addr; rfl
-/-- A constant source starts with its own tag. -/
-public theorem tag_const (b : Builtin) : (const b).tag = some 2 := by
-  unfold tag const; rfl
-/-- A tuple source starts with its own tag. -/
-public theorem tag_tuple (ps : List Hash) : (tuple ps).tag = some 3 := by
-  unfold tag tuple; rfl
-/-- A frozenset source starts with its own tag. -/
-public theorem tag_frozenset (ps : List Hash) : (frozenset ps).tag = some 4 := by
-  unfold tag frozenset; rfl
-/-- A combined source starts with its own tag. -/
-public theorem tag_combine (t : String) (ps : List Hash) : (combine t ps).tag = some 5 := by
-  unfold tag combine; rfl
-/-- A singleton source starts with its own tag. -/
-public theorem tag_singleton (e : Bool) : (singleton e).tag = some 7 := by
-  unfold tag singleton; rfl
-/-- A built-in function source starts with its own tag. -/
-public theorem tag_builtinFn (b : Builtin) : (builtinFn b).tag = some 8 := by
-  unfold tag builtinFn; rfl
-/-- A descriptor source starts with its own tag. -/
-public theorem tag_descr (t : Builtin) (n : String) : (descr t n).tag = some 9 := by
-  unfold tag descr; rfl
-
-/-- A source that `reduced` makes starts with the tag `6`. -/
-public theorem tag_reduced (src : HashSrc) : src.reduced.tag = some 6 := by
-  unfold tag reduced
-  split
-  · rename_i hc; simp [hc]
-  · rfl
-
-/-- `reduced` is injective on the sources it doesn't give back: those not reduced already. -/
-public theorem reduced_inj {a b : HashSrc} (ha : a.tag ≠ some 6) (hb : b.tag ≠ some 6)
-    (h : a.reduced = b.reduced) : a = b := by
-  rcases a with ⟨ca⟩
-  rcases b with ⟨cb⟩
-  have hca : ∀ t, ca ≠ 6 :: t := fun t e => ha (by simp [tag, e])
-  have hcb : ∀ t, cb ≠ 6 :: t := fun t e => hb (by simp [tag, e])
-  have hra : reduced ⟨ca⟩ = ⟨6 :: ca⟩ := by
-    unfold reduced; split
-    · rename_i t e; exact absurd e (hca t)
-    · rfl
-  have hrb : reduced ⟨cb⟩ = ⟨6 :: cb⟩ := by
-    unfold reduced; split
-    · rename_i t e; exact absurd e (hcb t)
-    · rfl
-  rw [hra, hrb] at h
-  have hc := congrArg code h
-  simp only [List.cons.injEq, true_and] at hc
-  rw [hc]
-
-/-- Equal buffer sources have equal bytes. -/
-public theorem buffer_inj {a b : List UInt8} (h : buffer a = buffer b) : a = b := by
-  have hc := congrArg code h
-  simp only [buffer, List.cons.injEq, true_and] at hc
-  exact (List.map_inj_right (fun x y hxy => UInt8.toNat_inj.mp hxy)).mp hc
-
-/-- Equal address sources are of one object. -/
-public theorem addr_inj {a b : ObjId} (h : addr a = addr b) : a = b := by
-  have hc := congrArg code h
-  simpa [addr] using hc
-
-/-- `ctorIdx` is injective on built-in constants. -/
-public theorem _root_.StrataPython.Dyn.Sem.Builtin.ctorIdx_inj {a b : Builtin}
-    (h : a.ctorIdx = b.ctorIdx) : a = b := by
-  rw [← Builtin.ofNat_ctorIdx a, h, Builtin.ofNat_ctorIdx]
-
-/-- Equal constant sources are of one constant. -/
-public theorem const_inj {a b : Builtin} (h : const a = const b) : a = b := by
-  have hc := congrArg code h
-  simp only [const, List.cons.injEq, and_true, true_and] at hc
-  exact Builtin.ctorIdx_inj hc
-
-/-- Equal built-in function sources are of one function. -/
-public theorem builtinFn_inj {a b : Builtin} (h : builtinFn a = builtinFn b) : a = b := by
-  have hc := congrArg code h
-  simp only [builtinFn, List.cons.injEq, and_true, true_and] at hc
-  exact Builtin.ctorIdx_inj hc
-
-/-- Equal tuple sources have equal parts. -/
-public theorem tuple_inj {a b : List Hash} (h : tuple a = tuple b) : a = b := by
-  have hc := congrArg code h
-  simp only [tuple, List.cons.injEq, true_and] at hc
-  exact encodeHashes_inj hc
-
-/-- Equal frozenset sources have equal parts. -/
-public theorem frozenset_inj {a b : List Hash} (h : frozenset a = frozenset b) : a = b := by
-  have hc := congrArg code h
-  simp only [frozenset, List.cons.injEq, true_and] at hc
-  exact encodeHashes_inj hc
-
-/-- Equal singleton sources are of one singleton. -/
-public theorem singleton_inj {a b : Bool} (h : singleton a = singleton b) : a = b := by
-  have hc := congrArg code h
-  cases a <;> cases b <;> simp_all [singleton]
-
-/-- A string's characters as numbers determine it. -/
-private theorem chars_inj {a b : String}
-    (h : a.toList.map (·.toNat) = b.toList.map (·.toNat)) : a = b := by
-  have hl : a.toList = b.toList := (List.map_inj_right (fun x y hxy => Char.toNat_inj.mp hxy)).mp h
-  exact String.toList_inj.mp hl
-
-/-- Equal combined sources have equal tags and parts. -/
-public theorem combine_inj {t t' : String} {a b : List Hash} (h : combine t a = combine t' b) :
-    t = t' ∧ a = b := by
-  have hc := congrArg code h
-  simp only [combine, List.cons.injEq] at hc
-  have hl := hc.2.1
-  have hrest := hc.2.2
-  have hlen : (t.toList.map (·.toNat)).length = (t'.toList.map (·.toNat)).length := by
-    simp only [List.length_map, String.length_toList, hl]
-  obtain ⟨hchars, hparts⟩ := List.append_inj hrest hlen
-  exact ⟨chars_inj hchars, encodeHashes_inj hparts⟩
-
-/-- Equal descriptor sources are of one descriptor. -/
-public theorem descr_inj {t t' : Builtin} {n n' : String} (h : descr t n = descr t' n') :
-    t = t' ∧ n = n' := by
-  have hc := congrArg code h
-  simp only [descr, List.cons.injEq] at hc
-  obtain ⟨-, hi, -, hchars⟩ := hc
-  exact ⟨Builtin.ctorIdx_inj hi, chars_inj hchars⟩
-
-/-- Reducing a reduced source gives it back. -/
-public theorem reduced_reduced (s : HashSrc) : s.reduced.reduced = s.reduced := by
-  rcases s with ⟨c⟩
-  cases c with
-  | nil => rfl
-  | cons x xs =>
-    by_cases hx : x = 6
-    · subst hx; rfl
-    · simp [reduced, hx]
+end
 
 end HashSrc
 
@@ -364,7 +208,69 @@ inductive Value where
   | traceback
   /-- An object of the store. -/
   | obj (id : ObjId)
-  deriving BEq, Repr, Inhabited, Hashable
+  deriving Repr, Inhabited
+
+/-- Structural equality of values, floats by their bits: a total function, so that rules that
+compare values can be registered. -/
+def Value.beq : Value → Value → Bool
+  | .undef a, .undef b => a == b
+  | .none, .none | .notImplemented, .notImplemented | .ellipsis, .ellipsis => true
+  | .bool a, .bool b => a == b
+  | .int a, .int b => a == b
+  | .float a, .float b => a == b
+  | .str a, .str b => a == b
+  | .bytes a, .bytes b => a == b
+  | .tuple xs, .tuple ys =>
+    xs.size == ys.size && (xs.attach.zip ys).all fun (⟨x, _⟩, y) => Value.beq x y
+  | .range a b c, .range d e f => a == d && b == e && c == f
+  | .slice a b c, .slice d e f => Value.beq a d && Value.beq b e && Value.beq c f
+  | .symHash a, .symHash b => a == b
+  | .builtin a, .builtin b => a == b
+  | .descr t n k, .descr t' n' k' => t == t' && n == n' && k == k'
+  | .bound s t n k, .bound s' t' n' k' => Value.beq s s' && t == t' && n == n' && k == k'
+  | .method f s, .method f' s' => Value.beq f f' && Value.beq s s'
+  | .traceback, .traceback => true
+  | .obj a, .obj b => a == b
+  | _, _ => false
+termination_by a => sizeOf a
+decreasing_by
+  all_goals simp_wf
+  all_goals first
+    | omega
+    | (have := Array.sizeOf_lt_of_mem ‹_ ∈ xs›; omega)
+
+instance : BEq Value := ⟨Value.beq⟩
+
+/-- A hash of a value that agrees with `Value.beq`: a total function, so that rules that index
+values can be registered. -/
+def Value.hashV : Value → UInt64
+  | .undef a => mixHash 0 (hash a)
+  | .none => 1
+  | .notImplemented => 2
+  | .ellipsis => 3
+  | .bool b => mixHash 4 (hash b)
+  | .int i => mixHash 5 (hash i)
+  | .float f => mixHash 6 (hash f)
+  | .str s => mixHash 7 (hash s)
+  | .bytes b => mixHash 8 (hash b)
+  | .tuple xs => xs.attach.foldl (fun acc ⟨x, _⟩ => mixHash acc (Value.hashV x)) 9
+  | .range a b c => mixHash 10 (mixHash (hash a) (mixHash (hash b) (hash c)))
+  | .slice a b c => mixHash 11 (mixHash a.hashV (mixHash b.hashV c.hashV))
+  | .symHash a => mixHash 12 (hash a)
+  | .builtin b => mixHash 13 (hash b)
+  | .descr t n k => mixHash 14 (mixHash (hash t) (mixHash (hash n) (hash k)))
+  | .bound s t n k => mixHash 15 (mixHash s.hashV (mixHash (hash t) (mixHash (hash n) (hash k))))
+  | .method f s => mixHash 16 (mixHash f.hashV s.hashV)
+  | .traceback => 17
+  | .obj id => mixHash 18 (hash id)
+termination_by v => sizeOf v
+decreasing_by
+  all_goals simp_wf
+  all_goals first
+    | omega
+    | (have := Array.sizeOf_lt_of_mem ‹_ ∈ xs›; omega)
+
+instance : Hashable Value := ⟨Value.hashV⟩
 
 /-- The `float` `f`. -/
 def Value.ofFloat (f : Float) : Value := .float f.toBits

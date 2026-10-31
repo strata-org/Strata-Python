@@ -1195,10 +1195,14 @@ theorem certified : WhileSem.model.Certified accounts :=
 
 A table rejects a rule that gives a ref another contents' type (`Ref.mk` is banned in rules), so
 no certified table has one. `CertTest` builds such an operation by hand, as a table would build it
-from the rule `⟨c.raw⟩`, and shows that it is not certified (`retype_not_certified`). `dyn_cert` does not prove the certificate
-of a rule that builds a closure over a list of cells, such as `ex.mkClo`, which has the shape of
-Python's `mkClosure`: such a rule needs a hand-written certificate, with a lemma for `bindAll` by
-induction on the list; this package has none yet.
+from the rule `⟨c.raw⟩`, and shows that it is not certified (`retype_not_certified`). If such a
+rule reads, writes or updates the cell through the retyped ref, the machine's spec rejects the
+request, at any accounts (`Accounts.sat_retyped_cell`, in `StrataDyn/Exec/CertModelProps.lean`),
+as a read at the test environment's accounts shows (`StrataDynTest/Exec/CertModelPropsTest.lean`).
+
+`dyn_cert` does not prove the certificate of a rule that builds a closure over a list of cells,
+such as `ex.mkClo`, which has the shape of Python's `mkClosure`: such a rule needs a hand-written
+certificate, with a lemma for `bindAll` by induction on the list; this package has none yet.
 
 ## 5. Reasoning about runs
 
@@ -1330,6 +1334,12 @@ valid. `link_rulesOK` carries it to every instruction and terminator of a linked
 `LModule.RulesOK`. It is an instance of `link_inv` (`StrataDyn/Exec/LinkInv.lean`), which carries
 any property of linked instructions that the table's wrappers give, and that the instructions
 linking makes with no wrapper have, to every function and region of a linked module.
+
+A language whose rules are written once over primitives may prove its certificates primitive by
+primitive. `StrataDyn/Exec/CertCaps.lean` says what such a proof may assume of each capability at a
+typing of the heap: `Refs` gives where the refs of a value are (its account), and `HeapSpec`,
+`CallSpec` and `PartSpec` say what the machine's spec promises of the heap, of calls and of a part
+of the world. Python's rules take this route (`StrataPython/Dyn/Sem/`).
 
 ### Effects and verdicts
 

@@ -205,7 +205,10 @@ def main():
     for k in order:
         lines.append(f"  | {lean_ident(k)}")
     lines += [
-        "  deriving DecidableEq, Repr, Inhabited, Ord, Hashable",
+        "  deriving DecidableEq, Repr, Inhabited, Ord",
+        "",
+        "/-- A built-in constant's hash, by its constructor; written by hand, so that its body is exposed. -/",
+        "public instance : Hashable Builtin := ⟨fun b => hash b.ctorIdx⟩",
         "",
         "/-- A built-in constant's data, as CPython 3.12 has it. -/",
         "public structure BuiltinInfo where",
@@ -247,6 +250,14 @@ def main():
         )
     lines += [
         "",
+        "/-- The type of each built-in constant, `type(x)`. -/",
+        "def Builtin.typeOf : Builtin → Builtin",
+    ]
+    for k in order:
+        kind, obj = entries[k]
+        lines.append(f"  | .{lean_ident(k)} => .{lean_ident(key_of(entries, type(obj)))}")
+    lines += [
+        "",
         "/-- Every built-in constant, in `dir(builtins)`'s order, then the other types. -/",
         "def Builtin.allConstants : Array Builtin := #[" + ", ".join(f".{lean_ident(k)}" for k in order) + "]",
         "",
@@ -261,6 +272,9 @@ def main():
         lines.append(f"  | {lean_str(name)} => some .{lean_ident(key)}")
     lines += [
         "  | _ => none",
+        "",
+        "/-- Every name of the `builtins` module's dict, in the dict's order (`list(vars(builtins))`). -/",
+        "def Builtin.dictNames : Array String := #[" + ", ".join(lean_str(n) for n in vars(builtins)) + "]",
         "",
         "/-- The names of `dir(builtins)` bound to a `str`, with their values. -/",
         "def Builtin.strNames : List (String × String) := [" + ", ".join(

@@ -227,7 +227,10 @@ public inductive Builtin where
   | «_sitebuiltins._Printer»
   | «_frozen_importlib.ModuleSpec»
   | «traceback»
-  deriving DecidableEq, Repr, Inhabited, Ord, Hashable
+  deriving DecidableEq, Repr, Inhabited, Ord
+
+/-- A built-in constant's hash, by its constructor; written by hand, so that its body is exposed. -/
+public instance : Hashable Builtin := ⟨fun b => hash b.ctorIdx⟩
 
 /-- A built-in constant's data, as CPython 3.12 has it. -/
 public structure BuiltinInfo where
@@ -435,6 +438,196 @@ def Builtin.info : Builtin → BuiltinInfo
   | .«_frozen_importlib.ModuleSpec» => ⟨.type, "ModuleSpec", "ModuleSpec", "_frozen_importlib", "ModuleSpec", #[.«object»], #[.«_frozen_importlib.ModuleSpec», .«object»], .«object», .addr⟩
   | .«traceback» => ⟨.type, "traceback", "traceback", "builtins", "traceback", #[.«object»], #[.«traceback», .«object»], .«traceback», .addr⟩
 
+/-- The type of each built-in constant, `type(x)`. -/
+def Builtin.typeOf : Builtin → Builtin
+  | .«ArithmeticError» => .«type»
+  | .«AssertionError» => .«type»
+  | .«AttributeError» => .«type»
+  | .«BaseException» => .«type»
+  | .«BaseExceptionGroup» => .«type»
+  | .«BlockingIOError» => .«type»
+  | .«BrokenPipeError» => .«type»
+  | .«BufferError» => .«type»
+  | .«BytesWarning» => .«type»
+  | .«ChildProcessError» => .«type»
+  | .«ConnectionAbortedError» => .«type»
+  | .«ConnectionError» => .«type»
+  | .«ConnectionRefusedError» => .«type»
+  | .«ConnectionResetError» => .«type»
+  | .«DeprecationWarning» => .«type»
+  | .«EOFError» => .«type»
+  | .«EncodingWarning» => .«type»
+  | .«OSError» => .«type»
+  | .«Exception» => .«type»
+  | .«ExceptionGroup» => .«type»
+  | .«FileExistsError» => .«type»
+  | .«FileNotFoundError» => .«type»
+  | .«FloatingPointError» => .«type»
+  | .«FutureWarning» => .«type»
+  | .«GeneratorExit» => .«type»
+  | .«ImportError» => .«type»
+  | .«ImportWarning» => .«type»
+  | .«IndentationError» => .«type»
+  | .«IndexError» => .«type»
+  | .«InterruptedError» => .«type»
+  | .«IsADirectoryError» => .«type»
+  | .«KeyError» => .«type»
+  | .«KeyboardInterrupt» => .«type»
+  | .«LookupError» => .«type»
+  | .«MemoryError» => .«type»
+  | .«ModuleNotFoundError» => .«type»
+  | .«NameError» => .«type»
+  | .«NotADirectoryError» => .«type»
+  | .«NotImplementedError» => .«type»
+  | .«OverflowError» => .«type»
+  | .«PendingDeprecationWarning» => .«type»
+  | .«PermissionError» => .«type»
+  | .«ProcessLookupError» => .«type»
+  | .«RecursionError» => .«type»
+  | .«ReferenceError» => .«type»
+  | .«ResourceWarning» => .«type»
+  | .«RuntimeError» => .«type»
+  | .«RuntimeWarning» => .«type»
+  | .«StopAsyncIteration» => .«type»
+  | .«StopIteration» => .«type»
+  | .«SyntaxError» => .«type»
+  | .«SyntaxWarning» => .«type»
+  | .«SystemError» => .«type»
+  | .«SystemExit» => .«type»
+  | .«TabError» => .«type»
+  | .«TimeoutError» => .«type»
+  | .«TypeError» => .«type»
+  | .«UnboundLocalError» => .«type»
+  | .«UnicodeDecodeError» => .«type»
+  | .«UnicodeEncodeError» => .«type»
+  | .«UnicodeError» => .«type»
+  | .«UnicodeTranslateError» => .«type»
+  | .«UnicodeWarning» => .«type»
+  | .«UserWarning» => .«type»
+  | .«ValueError» => .«type»
+  | .«Warning» => .«type»
+  | .«ZeroDivisionError» => .«type»
+  | .«__build_class__» => .«builtin_function_or_method»
+  | .«__import__» => .«builtin_function_or_method»
+  | .«BuiltinImporter» => .«type»
+  | .«__spec__» => .«_frozen_importlib.ModuleSpec»
+  | .«abs» => .«builtin_function_or_method»
+  | .«aiter» => .«builtin_function_or_method»
+  | .«all» => .«builtin_function_or_method»
+  | .«anext» => .«builtin_function_or_method»
+  | .«any» => .«builtin_function_or_method»
+  | .«ascii» => .«builtin_function_or_method»
+  | .«bin» => .«builtin_function_or_method»
+  | .«bool» => .«type»
+  | .«breakpoint» => .«builtin_function_or_method»
+  | .«bytearray» => .«type»
+  | .«bytes» => .«type»
+  | .«callable» => .«builtin_function_or_method»
+  | .«chr» => .«builtin_function_or_method»
+  | .«classmethod» => .«type»
+  | .«compile» => .«builtin_function_or_method»
+  | .«complex» => .«type»
+  | .«copyright» => .«_sitebuiltins._Printer»
+  | .«credits» => .«_sitebuiltins._Printer»
+  | .«delattr» => .«builtin_function_or_method»
+  | .«dict» => .«type»
+  | .«dir» => .«builtin_function_or_method»
+  | .«divmod» => .«builtin_function_or_method»
+  | .«enumerate» => .«type»
+  | .«eval» => .«builtin_function_or_method»
+  | .«exec» => .«builtin_function_or_method»
+  | .«exit» => .«_sitebuiltins.Quitter»
+  | .«filter» => .«type»
+  | .«float» => .«type»
+  | .«format» => .«builtin_function_or_method»
+  | .«frozenset» => .«type»
+  | .«getattr» => .«builtin_function_or_method»
+  | .«globals» => .«builtin_function_or_method»
+  | .«hasattr» => .«builtin_function_or_method»
+  | .«hash» => .«builtin_function_or_method»
+  | .«help» => .«_sitebuiltins._Helper»
+  | .«hex» => .«builtin_function_or_method»
+  | .«id» => .«builtin_function_or_method»
+  | .«input» => .«builtin_function_or_method»
+  | .«int» => .«type»
+  | .«isinstance» => .«builtin_function_or_method»
+  | .«issubclass» => .«builtin_function_or_method»
+  | .«iter» => .«builtin_function_or_method»
+  | .«len» => .«builtin_function_or_method»
+  | .«license» => .«_sitebuiltins._Printer»
+  | .«list» => .«type»
+  | .«locals» => .«builtin_function_or_method»
+  | .«map» => .«type»
+  | .«max» => .«builtin_function_or_method»
+  | .«memoryview» => .«type»
+  | .«min» => .«builtin_function_or_method»
+  | .«next» => .«builtin_function_or_method»
+  | .«object» => .«type»
+  | .«oct» => .«builtin_function_or_method»
+  | .«open» => .«builtin_function_or_method»
+  | .«ord» => .«builtin_function_or_method»
+  | .«pow» => .«builtin_function_or_method»
+  | .«print» => .«builtin_function_or_method»
+  | .«property» => .«type»
+  | .«quit» => .«_sitebuiltins.Quitter»
+  | .«range» => .«type»
+  | .«repr» => .«builtin_function_or_method»
+  | .«reversed» => .«type»
+  | .«round» => .«builtin_function_or_method»
+  | .«set» => .«type»
+  | .«setattr» => .«builtin_function_or_method»
+  | .«slice» => .«type»
+  | .«sorted» => .«builtin_function_or_method»
+  | .«staticmethod» => .«type»
+  | .«str» => .«type»
+  | .«sum» => .«builtin_function_or_method»
+  | .«super» => .«type»
+  | .«tuple» => .«type»
+  | .«type» => .«type»
+  | .«vars» => .«builtin_function_or_method»
+  | .«zip» => .«type»
+  | .«list_iterator» => .«type»
+  | .«tuple_iterator» => .«type»
+  | .«str_ascii_iterator» => .«type»
+  | .«str_iterator» => .«type»
+  | .«bytes_iterator» => .«type»
+  | .«range_iterator» => .«type»
+  | .«longrange_iterator» => .«type»
+  | .«dict_keyiterator» => .«type»
+  | .«dict_valueiterator» => .«type»
+  | .«dict_itemiterator» => .«type»
+  | .«list_reverseiterator» => .«type»
+  | .«dict_reversekeyiterator» => .«type»
+  | .«dict_reversevalueiterator» => .«type»
+  | .«dict_reverseitemiterator» => .«type»
+  | .«set_iterator» => .«type»
+  | .«callable_iterator» => .«type»
+  | .«dict_keys» => .«type»
+  | .«dict_values» => .«type»
+  | .«dict_items» => .«type»
+  | .«NoneType» => .«type»
+  | .«NotImplementedType» => .«type»
+  | .«ellipsis» => .«type»
+  | .«function» => .«type»
+  | .«builtin_function_or_method» => .«type»
+  | .«method_descriptor» => .«type»
+  | .«wrapper_descriptor» => .«type»
+  | .«method-wrapper» => .«type»
+  | .«classmethod_descriptor» => .«type»
+  | .«getset_descriptor» => .«type»
+  | .«member_descriptor» => .«type»
+  | .«mappingproxy» => .«type»
+  | .«module» => .«type»
+  | .«types.GenericAlias» => .«type»
+  | .«types.UnionType» => .«type»
+  | .«method» => .«type»
+  | .«cell» => .«type»
+  | .«_sitebuiltins.Quitter» => .«type»
+  | .«_sitebuiltins._Helper» => .«type»
+  | .«_sitebuiltins._Printer» => .«type»
+  | .«_frozen_importlib.ModuleSpec» => .«type»
+  | .«traceback» => .«type»
+
 /-- Every built-in constant, in `dir(builtins)`'s order, then the other types. -/
 def Builtin.allConstants : Array Builtin := #[.«ArithmeticError», .«AssertionError», .«AttributeError», .«BaseException», .«BaseExceptionGroup», .«BlockingIOError», .«BrokenPipeError», .«BufferError», .«BytesWarning», .«ChildProcessError», .«ConnectionAbortedError», .«ConnectionError», .«ConnectionRefusedError», .«ConnectionResetError», .«DeprecationWarning», .«EOFError», .«EncodingWarning», .«OSError», .«Exception», .«ExceptionGroup», .«FileExistsError», .«FileNotFoundError», .«FloatingPointError», .«FutureWarning», .«GeneratorExit», .«ImportError», .«ImportWarning», .«IndentationError», .«IndexError», .«InterruptedError», .«IsADirectoryError», .«KeyError», .«KeyboardInterrupt», .«LookupError», .«MemoryError», .«ModuleNotFoundError», .«NameError», .«NotADirectoryError», .«NotImplementedError», .«OverflowError», .«PendingDeprecationWarning», .«PermissionError», .«ProcessLookupError», .«RecursionError», .«ReferenceError», .«ResourceWarning», .«RuntimeError», .«RuntimeWarning», .«StopAsyncIteration», .«StopIteration», .«SyntaxError», .«SyntaxWarning», .«SystemError», .«SystemExit», .«TabError», .«TimeoutError», .«TypeError», .«UnboundLocalError», .«UnicodeDecodeError», .«UnicodeEncodeError», .«UnicodeError», .«UnicodeTranslateError», .«UnicodeWarning», .«UserWarning», .«ValueError», .«Warning», .«ZeroDivisionError», .«__build_class__», .«__import__», .«BuiltinImporter», .«__spec__», .«abs», .«aiter», .«all», .«anext», .«any», .«ascii», .«bin», .«bool», .«breakpoint», .«bytearray», .«bytes», .«callable», .«chr», .«classmethod», .«compile», .«complex», .«copyright», .«credits», .«delattr», .«dict», .«dir», .«divmod», .«enumerate», .«eval», .«exec», .«exit», .«filter», .«float», .«format», .«frozenset», .«getattr», .«globals», .«hasattr», .«hash», .«help», .«hex», .«id», .«input», .«int», .«isinstance», .«issubclass», .«iter», .«len», .«license», .«list», .«locals», .«map», .«max», .«memoryview», .«min», .«next», .«object», .«oct», .«open», .«ord», .«pow», .«print», .«property», .«quit», .«range», .«repr», .«reversed», .«round», .«set», .«setattr», .«slice», .«sorted», .«staticmethod», .«str», .«sum», .«super», .«tuple», .«type», .«vars», .«zip», .«list_iterator», .«tuple_iterator», .«str_ascii_iterator», .«str_iterator», .«bytes_iterator», .«range_iterator», .«longrange_iterator», .«dict_keyiterator», .«dict_valueiterator», .«dict_itemiterator», .«list_reverseiterator», .«dict_reversekeyiterator», .«dict_reversevalueiterator», .«dict_reverseitemiterator», .«set_iterator», .«callable_iterator», .«dict_keys», .«dict_values», .«dict_items», .«NoneType», .«NotImplementedType», .«ellipsis», .«function», .«builtin_function_or_method», .«method_descriptor», .«wrapper_descriptor», .«method-wrapper», .«classmethod_descriptor», .«getset_descriptor», .«member_descriptor», .«mappingproxy», .«module», .«types.GenericAlias», .«types.UnionType», .«method», .«cell», .«_sitebuiltins.Quitter», .«_sitebuiltins._Helper», .«_sitebuiltins._Printer», .«_frozen_importlib.ModuleSpec», .«traceback»]
 
@@ -589,6 +782,9 @@ def Builtin.ofName? : String → Option Builtin
   | "vars" => some .«vars»
   | "zip" => some .«zip»
   | _ => none
+
+/-- Every name of the `builtins` module's dict, in the dict's order (`list(vars(builtins))`). -/
+def Builtin.dictNames : Array String := #["__name__", "__doc__", "__package__", "__loader__", "__spec__", "__build_class__", "__import__", "abs", "all", "any", "ascii", "bin", "breakpoint", "callable", "chr", "compile", "delattr", "dir", "divmod", "eval", "exec", "format", "getattr", "globals", "hasattr", "hash", "hex", "id", "input", "isinstance", "issubclass", "iter", "aiter", "len", "locals", "max", "min", "next", "anext", "oct", "ord", "pow", "print", "repr", "round", "setattr", "sorted", "sum", "vars", "None", "Ellipsis", "NotImplemented", "False", "True", "bool", "memoryview", "bytearray", "bytes", "classmethod", "complex", "dict", "enumerate", "filter", "float", "frozenset", "property", "int", "list", "map", "object", "range", "reversed", "set", "slice", "staticmethod", "str", "super", "tuple", "type", "zip", "__debug__", "BaseException", "BaseExceptionGroup", "Exception", "GeneratorExit", "KeyboardInterrupt", "SystemExit", "ArithmeticError", "AssertionError", "AttributeError", "BufferError", "EOFError", "ImportError", "LookupError", "MemoryError", "NameError", "OSError", "ReferenceError", "RuntimeError", "StopAsyncIteration", "StopIteration", "SyntaxError", "SystemError", "TypeError", "ValueError", "Warning", "FloatingPointError", "OverflowError", "ZeroDivisionError", "BytesWarning", "DeprecationWarning", "EncodingWarning", "FutureWarning", "ImportWarning", "PendingDeprecationWarning", "ResourceWarning", "RuntimeWarning", "SyntaxWarning", "UnicodeWarning", "UserWarning", "BlockingIOError", "ChildProcessError", "ConnectionError", "FileExistsError", "FileNotFoundError", "InterruptedError", "IsADirectoryError", "NotADirectoryError", "PermissionError", "ProcessLookupError", "TimeoutError", "IndentationError", "IndexError", "KeyError", "ModuleNotFoundError", "NotImplementedError", "RecursionError", "UnboundLocalError", "UnicodeError", "BrokenPipeError", "ConnectionAbortedError", "ConnectionRefusedError", "ConnectionResetError", "TabError", "UnicodeDecodeError", "UnicodeEncodeError", "UnicodeTranslateError", "ExceptionGroup", "EnvironmentError", "IOError", "open", "quit", "exit", "copyright", "credits", "license", "help"]
 
 /-- The names of `dir(builtins)` bound to a `str`, with their values. -/
 def Builtin.strNames : List (String × String) := [("__doc__", "Built-in functions, types, exceptions, and other objects.\n\nThis module provides direct access to all 'built-in'\nidentifiers of Python; for example, builtins.len is\nthe full name for the built-in function len().\n\nThis module is not normally accessed explicitly by most\napplications, but can be useful in modules that provide\nobjects with the same name as a built-in value, but in\nwhich the built-in of that name is also needed."), ("__name__", "builtins"), ("__package__", "")]

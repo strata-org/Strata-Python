@@ -4,7 +4,7 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
-public import StrataPython.Dyn.Sem.Value
+public import StrataPython.Dyn.Sem.ValueProps
 public import StrataPython.Dyn.Sem.Index
 
 set_option autoImplicit false
@@ -18,8 +18,10 @@ whose deleted entries are holes.  Iteration visits the live entries in order.
 A lookup needs the entries whose hash equals the key's, in insertion order.  The simple version
 scans the array (`DictTable.positions`); the table also keeps an `Index` by hash, which carries the
 proof that it equals the scan, and `@[csimp]` swaps it in.  An index by the object id of the key
-serves identity lookups, and `Groups` count the distinct hashes of the live entries by hash kind,
-and by hash kind and key class, for the check of possibly equal hashes.
+serves identity lookups, and one by the key itself, for the keys of class `user` that are not
+objects (a tuple that holds one), serves the check of a key whose hash changed.  `Groups` count the distinct hashes of the
+live entries by hash kind, and by hash kind and key class, for the check of possibly equal
+hashes.
 
 Two more fields serve the rules: `deleted`, a sticky flag set by a deletion and cleared only by
 `clear`, and `keysVersion`, which changes whenever a key is added or removed, so that an iterator
@@ -45,14 +47,18 @@ inductive KeyClass where
   /-- An instance of a user class, or of a subclass of a built-in type (its type can gain an
   `__eq__` at any time), or a value with such a member. -/
   | user
-  deriving DecidableEq, Repr, Inhabited, Hashable, Ord
+  deriving DecidableEq, Repr, Inhabited, Ord
+
+instance : Hashable KeyClass := ⟨fun k => hash k.ctorIdx⟩
 
 /-- The kind of a stored hash, for the check of possibly equal hashes. -/
 inductive HashKind where
   | exact
   | addr
   | otherSymbolic
-  deriving DecidableEq, Repr, Inhabited, Hashable, Ord
+  deriving DecidableEq, Repr, Inhabited, Ord
+
+instance : Hashable HashKind := ⟨fun k => hash k.ctorIdx⟩
 
 /-- The kind of `h`. -/
 def Hash.kind : Hash → HashKind
@@ -76,6 +82,13 @@ def DictEntry.objKey : Option DictEntry → Option ObjId := fun e? => e?.bind fu
   | .obj id => some id
   | _ => none
 
+/-- The key of an entry of class `user` that is not an object: a tuple or slice that holds one. -/
+def DictEntry.userImmKey : Option DictEntry → Option Value := fun e? => e?.bind fun e =>
+  match e.key, e.cls with
+  | .obj _, _ => none
+  | k, .user => some k
+  | _, _ => none
+
 /-- The hash kind and key class of an entry, with its hash. -/
 def DictEntry.groupKey : Option DictEntry → Option ((HashKind × KeyClass) × Hash) := fun e? =>
   e?.map fun e => ((e.hash.kind, e.cls), e.hash)
@@ -98,13 +111,14 @@ structure DictTable where
   keysVersion : Nat
   byHash : Index (Option DictEntry) Hash DictEntry.hashKey entries
   byObj : Index (Option DictEntry) ObjId DictEntry.objKey entries
+  byUserImm : Index (Option DictEntry) Value DictEntry.userImmKey entries
   groups : Groups (Option DictEntry) (HashKind × KeyClass) Hash DictEntry.groupKey entries
   kindGroups : Groups (Option DictEntry) HashKind Hash DictEntry.kindKey entries
 
 namespace DictTable
 
 /-- The empty dict. -/
-def empty : DictTable := ⟨#[], #[], 0, false, 0, .empty, .empty, .empty, .empty⟩
+def empty : DictTable := ⟨#[], #[], 0, false, 0, .empty, .empty, .empty, .empty, .empty⟩
 
 instance : Inhabited DictTable := ⟨empty⟩
 
@@ -122,6 +136,10 @@ def positionsFast (t : DictTable) (h : Hash) : Array Nat := t.byHash.map.getD h 
 /-- The positions of the live entries whose key is the object `id`, through its index. -/
 def objPositions (t : DictTable) (id : ObjId) : Array Nat := t.byObj.map.getD id #[]
 
+/-- The positions of the live entries of class `user` whose key is `k`, a tuple or slice, through
+its index. -/
+def userImmPositions (t : DictTable) (k : Value) : Array Nat := t.byUserImm.map.getD k #[]
+
 /-- The number of distinct hashes of kind `k` among the live entries of key class `c`. -/
 def groupCount (t : DictTable) (k : HashKind) (c : KeyClass) : Nat := t.groups.count (k, c)
 
@@ -138,13 +156,14 @@ def value (t : DictTable) (i : Nat) : Value := t.values.getD i (.undef "")
 def insertNew (t : DictTable) (e : DictEntry) (v : Value) : DictTable :=
   -- Taking `t` apart first leaves each array and map with one reference, so that it is updated in
   -- place.
-  let ⟨entries, values, used, deleted, keysVersion, byHash, byObj, groups, kindGroups⟩ := t
+  let ⟨entries, values, used, deleted, keysVersion, byHash, byObj, byUserImm, groups, kindGroups⟩ := t
   let byHash := byHash.push (some e)
   let byObj := byObj.push (some e)
+  let byUserImm := byUserImm.push (some e)
   let groups := groups.push (some e)
   let kindGroups := kindGroups.push (some e)
   { entries := entries.push (some e), values := values.push v, used := used + 1, deleted,
-    keysVersion := keysVersion + 1, byHash, byObj, groups, kindGroups }
+    keysVersion := keysVersion + 1, byHash, byObj, byUserImm, groups, kindGroups }
 
 /-- `t` with the value at position `i` replaced; the keys don't change. -/
 def setValue (t : DictTable) (i : Nat) (v : Value) : DictTable :=
@@ -152,29 +171,31 @@ def setValue (t : DictTable) (i : Nat) (v : Value) : DictTable :=
 
 /-- `t` with the live entry at position `i` deleted: a hole, and the deletion flag set. -/
 def deleteAt (t : DictTable) (i : Nat) : DictTable :=
-  let ⟨entries, values, used, deleted, keysVersion, byHash, byObj, groups, kindGroups⟩ := t
+  let ⟨entries, values, used, deleted, keysVersion, byHash, byObj, byUserImm, groups, kindGroups⟩ := t
   if hi : i < entries.size then
     match entries[i] with
     | some _ =>
       let byHash := byHash.setNone i hi none rfl
       let byObj := byObj.setNone i hi none rfl
+      let byUserImm := byUserImm.setNone i hi none rfl
       let groups := groups.set i hi none
       let kindGroups := kindGroups.set i hi none
       { entries := entries.set i none hi, values := values.setIfInBounds i (.undef ""),
-        used := used - 1, deleted := true, keysVersion := keysVersion + 1, byHash, byObj, groups, kindGroups }
-    | none => ⟨entries, values, used, deleted, keysVersion, byHash, byObj, groups, kindGroups⟩
-  else ⟨entries, values, used, deleted, keysVersion, byHash, byObj, groups, kindGroups⟩
+        used := used - 1, deleted := true, keysVersion := keysVersion + 1, byHash, byObj, byUserImm, groups, kindGroups }
+    | none => ⟨entries, values, used, deleted, keysVersion, byHash, byObj, byUserImm, groups, kindGroups⟩
+  else ⟨entries, values, used, deleted, keysVersion, byHash, byObj, byUserImm, groups, kindGroups⟩
 
 /-- `t` without its last slot, a hole. -/
 def popHole (t : DictTable) (hb : t.entries.back? = some none) : DictTable :=
   match t, hb with
-  | ⟨entries, values, used, deleted, keysVersion, byHash, byObj, groups, kindGroups⟩, hb =>
+  | ⟨entries, values, used, deleted, keysVersion, byHash, byObj, byUserImm, groups, kindGroups⟩, hb =>
     let byHash := byHash.pop (by simp [hb, DictEntry.hashKey])
     let byObj := byObj.pop (by simp [hb, DictEntry.objKey])
+    let byUserImm := byUserImm.pop (by simp [hb, DictEntry.userImmKey])
     let groups := groups.pop (by simp [hb, DictEntry.groupKey])
     let kindGroups := kindGroups.pop (by simp [hb, DictEntry.kindKey])
     { entries := entries.pop, values := values.pop, used, deleted, keysVersion, byHash, byObj,
-      groups, kindGroups }
+      byUserImm, groups, kindGroups }
 
 /-- `popHole` drops the last slot. -/
 private theorem entries_popHole (t : DictTable) (hb : t.entries.back? = some none) :
