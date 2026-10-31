@@ -25,7 +25,8 @@ def caseFiles : List (System.FilePath × System.FilePath) :=
   let dir : System.FilePath := "StrataPythonTest/Dyn/Sem/Library"
   [(dir / "gen_str_cases.py", dir / "StrCases.lean"),
    (dir / "gen_strmethod_cases.py", dir / "StrMethodCases.lean"),
-   (dir / "gen_number_cases.py", dir / "NumberCases.lean")]
+   (dir / "gen_number_cases.py", dir / "NumberCases.lean"),
+   (dir / "gen_codec_cases.py", dir / "CodecCases.lean")]
 def scratchDir : System.FilePath := ".lake/build/library-cases-check"
 
 /-- Run `python script args`, failing on a non-zero exit; its standard output. -/

@@ -60,6 +60,7 @@ public import StrataPython.Dyn.Sem.Table
 public import StrataPython.Dyn.Sem.Library.Unicode
 public import StrataPython.Dyn.Sem.Library.Str
 public import StrataPython.Dyn.Sem.Library.Numbers
+public import StrataPython.Dyn.Sem.Library.Codecs
 
 /-!
 # The Python semantics
