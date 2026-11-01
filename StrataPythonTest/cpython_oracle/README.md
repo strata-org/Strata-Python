@@ -303,3 +303,18 @@ Two buckets are **exclusions**, where no conclusion about Strata is drawn:
 |---|---|
 | `loweringBroken` | the generated program does not behave as the original under CPython |
 | `oracleNotClean` | CPython itself does not run the method cleanly: it fails, errors, or is **skipped**. Some tests assert on bytecode, which varies by build; and a skip-only decorator, though dropped from the generated program, is still live when the oracle runs the pristine source — a method CPython never ran states no expectation to compare against |
+
+## The second backend: the Python semantics
+
+`runner_dyn.py` and `StrataPythonTestExtra/CpythonOracleDynTest.lean` run the same methods with the
+Python semantics (`pydyn run`) instead of `pyInterpret`, and compare whole traces with CPython's
+(`StrataPythonTest/Dyn/trace.py`, `StrataPythonTest/Util/SemDiff.lean`). They have their own build
+directory, `build_dyn/`, their own verdict file, `verdicts_dyn.txt` (one line per method, in the
+format of `StrataDyn/Exec/Diff.lean`), and their own list of excluded methods, `excluded_dyn.txt`;
+the first backend's files stay as they are. The exclusion buckets are this backend's, computed on
+the machine that runs the test: `oracleNotClean`, and `loweringBroken` when the generated program
+fails as a plain program, or a traced run of it doesn't end cleanly. A method that the list or this
+machine excludes is left out of the comparison. Any change of verdict fails, in either direction.
+
+    SEM_UPDATE=1 lake env lean StrataPythonTestExtra/CpythonOracleDynTest.lean   # record
+    CPYTHON_ORACLE_DYN=0                                                          # skip it
