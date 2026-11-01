@@ -36,7 +36,7 @@ module i11_constant_default {
       %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
       %int.0 : py.Value = py.intLit(1000)
       %defaults.0 : py.Value = py.mkTuple(%int.0)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "a") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "a") ^propagate.0()
       %a.1 : py.Value = py.tupleGet(%bound.0, 0)
       %a.3 : py.Value = py.requireDefined(%a.1, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%a.3)

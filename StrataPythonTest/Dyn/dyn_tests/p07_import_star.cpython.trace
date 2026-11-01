@@ -1,0 +1,49 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+ALLOW_MISSING = <ALLOW_MISSING object>
+__doc__ = None
+__name__ = '__main__'
+abspath = <function object>
+altsep = None
+basename = <function object>
+commonpath = <function object>
+commonprefix = <function object>
+curdir = '.'
+defpath = '/bin:/usr/bin'
+devnull = '/dev/null'
+dirname = <function object>
+exists = <function object>
+expanduser = <function object>
+expandvars = <function object>
+extsep = '.'
+getatime = <function object>
+getctime = <function object>
+getmtime = <function object>
+getsize = <function object>
+isabs = <function object>
+isdir = <function object>
+isfile = <function object>
+isjunction = <function object>
+islink = <function object>
+ismount = <function object>
+join = <function object>
+lexists = <function object>
+normcase = <function object>
+normpath = <builtin_function_or_method object>
+pardir = '..'
+pathsep = ':'
+realpath = <function object>
+relpath = <function object>
+samefile = <function object>
+sameopenfile = <function object>
+samestat = <function object>
+sep = '/'
+split = <function object>
+splitdrive = <function object>
+splitext = <function object>
+splitroot = <function object>
+supports_unicode_filenames = False
+x = 'a/b'

@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+dict_iteration = <function object>
+process_pairs = <function object>
+tuple_assign = <function object>
+use_enumerate = <function object>

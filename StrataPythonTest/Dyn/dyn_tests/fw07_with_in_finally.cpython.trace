@@ -1,0 +1,15 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Ctx = <class 'Ctx'>
+__doc__ = None
+__name__ = '__main__'
+log = []
+normal_exit = <function object>
+note = <function object>
+reraise_pending = <function object>
+return_in_with = <function object>
+suppress_in_finally = <function object>
+sys = <module object>

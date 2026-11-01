@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+Meta = <class 'Meta'>
+Ns = <class 'Ns'>
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+x = 1

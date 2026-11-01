@@ -32,7 +32,7 @@ module p34_match {
       %whole.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%whole.0)
       %cmd.1 : py.Value = py.undef("cmd")
       %defaults.0 : py.Value = py.mkTuple(%cmd.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "cmd") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "cmd") ^propagate.0()
       %cmd.2 : py.Value = py.tupleGet(%bound.0, 0)
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)

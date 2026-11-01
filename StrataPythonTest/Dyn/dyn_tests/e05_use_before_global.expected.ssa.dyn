@@ -17,7 +17,7 @@ module e05_use_before_global {
   func @e05_use_before_global.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
       %print.0 : py.Value = py.loadGlobal("e05_use_before_global", "print") ^propagate.0()
       %x.0 : py.Value = py.loadGlobal("e05_use_before_global", "x") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%x.0)

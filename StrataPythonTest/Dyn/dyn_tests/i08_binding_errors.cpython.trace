@@ -1,0 +1,34 @@
+--- stdout 904
+missing: h() missing 1 required positional argument: 'x'
+missing_second: g() missing 1 required positional argument: 'y'
+missing_both: g() missing 2 required positional arguments: 'x' and 'y'
+missing_kwonly: k() missing 1 required keyword-only argument: 'key'
+too_many: h() takes 1 positional argument but 2 were given
+too_many_three: g() takes 2 positional arguments but 3 were given
+too_many_default: d() takes from 1 to 2 positional arguments but 3 were given
+too_many_one: z() takes 0 positional arguments but 1 was given
+too_many_two: z() takes 0 positional arguments but 2 were given
+unexpected: h() got an unexpected keyword argument 'y'
+unexpected_default: d() got an unexpected keyword argument 'z'
+dup_first: g() got multiple values for argument 'x'
+dup_second: g() got multiple values for argument 'y'
+dup_beats_toomany: g() got multiple values for argument 'y'
+h 1
+g 1 2
+d 1 2
+k 1 2
+po 1 2
+z
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+d = <function object>
+g = <function object>
+h = <function object>
+k = <function object>
+po = <function object>
+t = <function object>
+z = <function object>

@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised ValueError: outer
+  cause KeyError
+--- globals
+__doc__ = None
+__name__ = '__main__'

@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+__doc__ = None
+__name__ = '__main__'
+super = <builtin_function_or_method object>

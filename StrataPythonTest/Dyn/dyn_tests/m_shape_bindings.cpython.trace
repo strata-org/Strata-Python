@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised ModuleNotFoundError: No module named 'pydantic'
+--- globals
+Enum = <class 'Enum'>
+__doc__ = None
+__name__ = '__main__'
+ctypes = <module object>

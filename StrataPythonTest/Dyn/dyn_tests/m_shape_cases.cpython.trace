@@ -1,0 +1,54 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Account = <class 'Account'>
+Annotated = <class 'Annotated'>
+CM = <class 'CM'>
+Chain = <class 'Chain'>
+ClassVar = <_SpecialForm object>
+CompVar = <class 'CompVar'>
+CompWalrus = <class 'CompWalrus'>
+Deep = <class 'Deep'>
+DeepInFunc = <class 'DeepInFunc'>
+Early = <class 'Early'>
+Forms = <class 'Forms'>
+Gen = <class 'Gen'>
+GlobalInit = <class 'GlobalInit'>
+GlobalSlots = <class 'GlobalSlots'>
+InFunc = <class 'InFunc'>
+M = <class 'M'>
+Meta = <class 'Meta'>
+NamedTuple = <function object>
+Odd = <class 'Odd'>
+Outer = <class 'Outer'>
+Over = <class 'Over'>
+P = <class 'P'>
+R1 = <class 'R1'>
+R2 = <class 'R2'>
+R3 = <class 'R3'>
+R4 = <class 'R4'>
+R5 = <class 'R5'>
+R6 = <class 'R6'>
+R7 = <class 'R7'>
+S1 = <class 'S1'>
+S2 = <class 'S2'>
+S3 = <class 'S3'>
+S4 = <class 'S4'>
+Spread = <class 'Spread'>
+Star = <class 'Star'>
+Two = <class 'Two'>
+TypedDict = <function object>
+ViaClass = <class 'ViaClass'>
+ViaClassBody = <class 'ViaClassBody'>
+__doc__ = None
+__name__ = '__main__'
+a = 'p'
+b = 'q'
+deco = <function object>
+flag = True
+g = <function object>
+make_base = <function object>
+opts = {'metaclass': <class 'Meta'>}
+overload = <function object>

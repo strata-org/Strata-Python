@@ -27,7 +27,7 @@ module tc17_transitive_dispatch {
       %result.0 : py.Value = py.undef("result")
       %result.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%result.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
       %cloudkit.0 : py.Value = py.loadGlobal("tc17_transitive_dispatch", "cloudkit") ^propagate.0()
       %client.0 : py.Value = py.attr(%cloudkit.0, "client") ^propagate.0()
       %str.0 : py.Value = py.strLit("database")

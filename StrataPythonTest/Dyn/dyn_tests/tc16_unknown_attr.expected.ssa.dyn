@@ -25,7 +25,7 @@ module tc16_unknown_attr {
       %x.0 : py.Value = py.undef("x")
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
       %math.0 : py.Value = py.loadGlobal("tc16_unknown_attr", "math") ^propagate.0()
       %nonexistent.0 : py.Value = py.attr(%math.0, "nonexistent") ^propagate.0()
       %none.0 : py.Value = py.noneLit

@@ -126,7 +126,7 @@ module e27_yield_outside_function {
       %D.0 : py.Value = py.undef("D")
       %D.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%D.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@|e27_yield_outside_function.f.D.<body>|, "D", "e27_yield_outside_function")
       %str.0 : py.Value = py.strLit("D")
@@ -147,7 +147,7 @@ module e27_yield_outside_function {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %x.1 : py.Value = py.undef("x")
       %defaults.0 : py.Value = py.mkTuple(%x.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "x") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "g", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
       %none.0 : py.Value = py.noneLit
@@ -231,7 +231,7 @@ module e27_yield_outside_function {
       %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
       %self.1 : py.Value = py.undef("self")
       %defaults.0 : py.Value = py.mkTuple(%self.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "self") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "E.m", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %none.0 : py.Value = py.noneLit

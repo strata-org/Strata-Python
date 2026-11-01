@@ -1,0 +1,14 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Ctx = <class 'Ctx'>
+__doc__ = None
+__name__ = '__main__'
+after_suppress = <function object>
+bare_raise_in_with = <function object>
+log = []
+note = <function object>
+return_in_clause = <function object>
+sys = <module object>

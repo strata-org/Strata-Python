@@ -3,6 +3,7 @@
 # Movie, built without its required key year, which one path then sets to a str.  Each class
 # body's attributes state the declarations as written.
 import random
+random.seed(0)
 from typing import TypedDict
 
 

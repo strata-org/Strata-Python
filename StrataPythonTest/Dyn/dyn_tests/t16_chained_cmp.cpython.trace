@@ -1,0 +1,15 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__annotations__ = {'x': <class 'int'>, 'y': <class 'int'>, 'z': <class 'int'>}
+__doc__ = None
+__name__ = '__main__'
+r1 = True
+r2 = True
+r3 = True
+r4 = False
+x = 5
+y = 10
+z = 15

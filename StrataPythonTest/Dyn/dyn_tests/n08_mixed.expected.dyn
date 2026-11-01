@@ -88,7 +88,7 @@ module n08_mixed {
       %a.1 : py.Value = py.undef("a")
       %b.1 : py.Value = py.undef("b")
       %defaults.0 : py.Value = py.mkTuple(%a.1, %b.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "a", "b") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "sync_add", 0, 2, false, false, "a", "b") ^propagate.0()
       %a.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.2)
       %b.2 : py.Value = py.tupleGet(%bound.0, 1)

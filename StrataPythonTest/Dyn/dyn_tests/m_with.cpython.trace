@@ -1,0 +1,19 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Body = <class 'Body'>
+Ctx = <class 'Ctx'>
+__doc__ = None
+__name__ = '__main__'
+always_raises = <function object>
+loop = <function object>
+note = <function object>
+reraised = <function object>
+shadowed = <function object>
+suppressed = <function object>
+sys = <module object>
+target_fails = <function object>
+top = <Ctx object>
+two = <function object>

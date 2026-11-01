@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised NameError: name 'v' is not defined
+--- globals
+__annotations__ = {}
+__doc__ = None
+__name__ = '__main__'

@@ -1,0 +1,29 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+a = 3
+b = 3
+c = 1
+check = <function object>
+cleanup = <function object>
+d = 3
+drain = <function object>
+e = 5
+f = 3
+g = 5
+i = 1
+inner_items = [4, 5]
+j = 4
+k = 3
+loop_else_return = <function object>
+m = 3
+manual = <list_iterator object>
+nested_return = <function object>
+note = <function object>
+outer_items = [1, 2, 3]
+probe = <function object>
+raiser = <function object>

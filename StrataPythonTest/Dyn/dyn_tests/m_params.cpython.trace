@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: f() missing 1 required keyword-only argument: 'd'
+--- globals
+__doc__ = None
+__name__ = '__main__'
+f = <function object>

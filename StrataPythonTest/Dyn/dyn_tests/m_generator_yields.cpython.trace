@@ -1,0 +1,20 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+async_generator = <function object>
+class_decorator_first = <function object>
+dict_iterable = <function object>
+first_annotation = <function object>
+generator_iterable = <function object>
+keyword_only_annotation = <function object>
+kwargs_annotation = <function object>
+list_iterable = <function object>
+positional_annotation = <function object>
+positional_only_annotation = <function object>
+return_annotation = <function object>
+set_iterable = <function object>
+varargs_annotation = <function object>

@@ -36,7 +36,7 @@ module p42_comp_reads_outer {
       %xs.1 : py.Value = py.undef("xs")
       %n.7 : py.Value = py.undef("n")
       %defaults.0 : py.Value = py.mkTuple(%xs.1, %n.7)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "xs", "n") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 2, false, false, "xs", "n") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %n.8 : py.Value = py.tupleGet(%bound.0, 1)
       %int.0 : py.Value = py.intLit(2)
@@ -79,7 +79,7 @@ module p42_comp_reads_outer {
       %k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%k.0)
       %xs.1 : py.Value = py.undef("xs")
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "xs") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "g", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %int.0 : py.Value = py.intLit(2)
       %str.0 : py.Value = py.strLit("generator expression")
@@ -100,7 +100,7 @@ module p42_comp_reads_outer {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %xs.1 : py.Value = py.undef("xs")
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "xs") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "h", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %int.0 : py.Value = py.intLit(2)
       %set.1 : base.Unit = base.refSet[py.Value](%k.cell.0, %int.0)
@@ -135,7 +135,7 @@ module p42_comp_reads_outer {
       %inner.0 : py.Value = py.undef("inner")
       %inner.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%inner.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer", 0, 0, false, false) ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %set.0 : base.Unit = base.refSet[py.Value](%m.cell.0, %int.0)
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@p42_comp_reads_outer.outer.inner, "inner", "p42_comp_reads_outer", %m.cell.0)
@@ -149,7 +149,7 @@ module p42_comp_reads_outer {
   func @|p42_comp_reads_outer.h.<lambda>|(%k.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%k.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "h.<locals>.<lambda>", 0, 0, false, false) ^propagate.0()
       %k.0 : py.Value = base.refGet[py.Value](%k.cell.0)
       %k.1 : py.Value = py.requireDefined(%k.0, "k", "NameError", "cannot access free variable 'k' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%k.1)
@@ -166,7 +166,7 @@ module p42_comp_reads_outer {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %xs.1 : py.Value = py.undef("xs")
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "xs") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer.<locals>.inner", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %xs.4 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")

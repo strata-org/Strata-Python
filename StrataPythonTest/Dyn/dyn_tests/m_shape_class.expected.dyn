@@ -584,7 +584,7 @@ module m_shape_class {
       %x.1 : py.Value = py.undef("x")
       %y.1 : py.Value = py.undef("y")
       %defaults.0 : py.Value = py.mkTuple(%self.1, %x.1, %y.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 3, false, false, "self", "x", "y") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Point.__init__", 0, 3, false, false, "self", "x", "y") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %x.2 : py.Value = py.tupleGet(%bound.0, 1)
@@ -646,7 +646,7 @@ module m_shape_class {
       %this.1 : py.Value = py.undef("this")
       %a.1 : py.Value = py.undef("a")
       %defaults.0 : py.Value = py.mkTuple(%this.1, %a.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "this", "a") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Slotted.__init__", 0, 2, false, false, "this", "a") ^propagate.0()
       %this.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%this.cell.0, %this.2)
       %a.2 : py.Value = py.tupleGet(%bound.0, 1)
@@ -672,7 +672,7 @@ module m_shape_class {
       %self.1 : py.Value = py.undef("self")
       %items.1 : py.Value = py.undef("items")
       %defaults.0 : py.Value = py.mkTuple(%self.1, %items.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "self", "items") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Box.__init__", 0, 2, false, false, "self", "items") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %items.2 : py.Value = py.tupleGet(%bound.0, 1)
@@ -715,7 +715,7 @@ module m_shape_class {
       %later.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%later.0)
       %self.1 : py.Value = py.undef("self")
       %defaults.0 : py.Value = py.mkTuple(%self.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "self") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "More.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %int.0 : py.Value = py.intLit(1)
@@ -749,7 +749,7 @@ module m_shape_class {
       %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
       %self.1 : py.Value = py.undef("self")
       %defaults.0 : py.Value = py.mkTuple(%self.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "self") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Conn.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %bytes.0 : py.Value = py.bytesLit("")
@@ -769,7 +769,7 @@ module m_shape_class {
       %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
       %self.1 : py.Value = py.undef("self")
       %defaults.0 : py.Value = py.mkTuple(%self.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "self") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Conn.__init__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %list.0 : py.Value = py.mkList
@@ -792,7 +792,7 @@ module m_shape_class {
       %self.1 : py.Value = py.undef("self")
       %other.1 : py.Value = py.undef("other")
       %defaults.0 : py.Value = py.mkTuple(%self.1, %other.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "self", "other") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Rb.__init__", 0, 2, false, false, "self", "other") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
@@ -814,7 +814,7 @@ module m_shape_class {
   func @m_shape_class.Point.__init__.later(%self.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%self.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Point.__init__.<locals>.later", 0, 0, false, false) ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %self.0 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.1 : py.Value = py.requireDefined(%self.0, "self", "NameError", "cannot access free variable 'self' where it is not associated with a value in enclosing scope") ^propagate.0()
@@ -829,7 +829,7 @@ module m_shape_class {
   func @m_shape_class.More.__init__.later(%self.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%self.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "More.__init__.<locals>.later", 0, 0, false, false) ^propagate.0()
       %int.0 : py.Value = py.intLit(2)
       %self.0 : py.Value = base.refGet[py.Value](%self.cell.0)
       %self.1 : py.Value = py.requireDefined(%self.0, "self", "NameError", "cannot access free variable 'self' where it is not associated with a value in enclosing scope") ^propagate.0()

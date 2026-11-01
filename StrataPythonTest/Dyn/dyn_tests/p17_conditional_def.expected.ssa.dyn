@@ -42,7 +42,7 @@ module p17_conditional_def {
   func @p17_conditional_def.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)
@@ -53,7 +53,7 @@ module p17_conditional_def {
   func @p17_conditional_def.f.1(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
       %int.0 : py.Value = py.intLit(2)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)
@@ -64,7 +64,7 @@ module p17_conditional_def {
   func @p17_conditional_def.g(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "g", 0, 0, false, false) ^propagate.0()
       %f.0 : py.Value = py.loadGlobal("p17_conditional_def", "f") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs

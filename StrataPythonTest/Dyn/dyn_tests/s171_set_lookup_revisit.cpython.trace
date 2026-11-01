@@ -1,0 +1,24 @@
+--- PYTHONHASHSEED=0
+--- stdout 8
+False 1
+
+--- outcome
+ok
+--- globals
+K = <class 'K'>
+__doc__ = None
+__name__ = '__main__'
+n = 1
+r = False
+--- PYTHONHASHSEED=1
+--- stdout 9
+False 13
+
+--- outcome
+ok
+--- globals
+K = <class 'K'>
+__doc__ = None
+__name__ = '__main__'
+n = 13
+r = False

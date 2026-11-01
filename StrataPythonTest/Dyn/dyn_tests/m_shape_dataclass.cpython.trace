@@ -1,0 +1,14 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+ClassVar = <_SpecialForm object>
+InitVar = <class 'InitVar'>
+KW_ONLY = <_KW_ONLY_TYPE object>
+P = <class 'P'>
+Q = <class 'Q'>
+__doc__ = None
+__name__ = '__main__'
+dataclass = <function object>
+dataclasses = <module object>

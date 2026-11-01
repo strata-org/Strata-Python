@@ -1,0 +1,33 @@
+module s18_star_set {
+  func @|s18_star_set.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s18_star_set")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s18_star_set", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s18_star_set", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %print.0 : py.Value = py.loadGlobal("s18_star_set", "print") ^propagate.0()
+      %int.0 : py.Value = py.intLit(3)
+      %set.2 : py.Value = py.constSet(%int.0) ^propagate.0()
+      %kwargs.0 : py.Value = py.mkKwargs
+      %args.0 : py.Value = py.argsTuple(%print.0, %set.2) ^propagate.0()
+      %call.0 : py.Value = py.call(%print.0, %args.0, %kwargs.0) ^propagate.0()
+      %print.1 : py.Value = py.loadGlobal("s18_star_set", "print") ^propagate.0()
+      %str.1 : py.Value = py.strLit("k")
+      %int.1 : py.Value = py.intLit(1)
+      %str.2 : py.Value = py.strLit("j")
+      %int.2 : py.Value = py.intLit(2)
+      %dict.0 : py.Value = py.mkDict(%str.1, %int.1, %str.2, %int.2) ^propagate.0()
+      %kwargs.1 : py.Value = py.mkKwargs
+      %args.1 : py.Value = py.argsTuple(%print.1, %dict.0) ^propagate.0()
+      %call.1 : py.Value = py.call(%print.1, %args.1, %kwargs.1) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

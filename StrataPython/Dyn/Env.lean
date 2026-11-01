@@ -231,7 +231,7 @@ public environment Py extends Base where
   positional-only, the first `nPos` names are positional (`nPosOnly ≤ nPos`), and the others
   keyword-only.  `varPos` and `varKw` say whether the function has `*args` and `**kw`.
   `defaults` is a tuple with one entry per name: the parameter's default, or `undef` if it has
-  none.
+  none.  `qualname` is the function's `__qualname__`, which the error messages name.
 
   The positional arguments bind to the first `nPos` names, in order.  Each keyword binds to the
   first parameter, other than a positional-only one, that it is or that it equals by `==`.
@@ -242,8 +242,11 @@ public environment Py extends Base where
   It returns a tuple: one value per name, then the extra positional arguments as a tuple if
   `varPos`, then the remaining keywords as a new dict, in their order, if `varKw`.
 
-  It raises the `TypeError` that CPython raises, in CPython's order.  The text of its
-  `TypeError`'s message is not specified.  First, it takes each keyword in order.  A keyword that
+  It raises the `TypeError` that CPython raises, with CPython's message, in CPython's order.  The
+  messages name the function by `qualname`, the translator's qualified name, where CPython uses
+  the function object's current `__qualname__`: the two stay equal, since a write of a function's
+  `__qualname__` or `__code__` stops with a gap.
+  First, it takes each keyword in order.  A keyword that
   is not a `str` is an error, and so is a keyword that binds to a parameter that is already bound:
   a parameter given twice.  At the first keyword that binds to no parameter, without `**kw`: if
   any keyword of the call names a positional-only parameter, the positional-only error;
@@ -253,8 +256,8 @@ public environment Py extends Base where
   It also raises whatever the user code that binding runs raises: a keyword's `__eq__` and the
   truth test of its result, the keyword's `__hash__` when the `**kw` dict stores it, and the
   keyword's `__str__` when CPython formats an error message. -/
-  calls insn bindArgs (args kwargs defaults : Value) (nPosOnly nPos : Int) (varPos varKw : Bool)
-    (*names : String) (^err (exc : Value)) : Value
+  calls insn bindArgs (args kwargs defaults : Value) (qualname : String) (nPosOnly nPos : Int)
+    (varPos varKw : Bool) (*names : String) (^err (exc : Value)) : Value
   /-- The value `moduleName.name` refers to. -/
   insn qualifiedRef (moduleName name : String) (^err (exc : Value)) : Value
   /-- The built-in `AssertionError` class, even if `builtins.AssertionError` is rebound:

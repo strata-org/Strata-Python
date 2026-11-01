@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+msg = 'bad input'
+result = -1
+risky = <function object>
+value = 0

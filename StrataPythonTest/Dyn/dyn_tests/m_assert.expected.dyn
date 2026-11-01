@@ -115,7 +115,7 @@ module m_assert {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %x.1 : py.Value = py.undef("x")
       %defaults.0 : py.Value = py.mkTuple(%x.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "x") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)

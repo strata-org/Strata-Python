@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+add = <function object>
+do_nothing = <function object>
+greet = <function object>
+msg = 'Hello world'
+msg2 = 'Hi world'
+result = 3

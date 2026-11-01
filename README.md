@@ -8,8 +8,9 @@ Python language support for Strata. This package translates Python programs into
 lake build
 ```
 
-This builds the `StrataPython` library and the
-`StrataPythonTest` compile-time tests.
+This builds the default targets, among them the `StrataPython` library and the `StrataPythonSem`
+library (the Python semantics and its proofs, which `StrataPython` doesn't import). The
+compile-time tests need `lake build StrataPythonTest StrataDynTest`.
 
 ## Package Purpose
 
@@ -136,7 +137,8 @@ declared by a layered environment. It is split across two directories:
 | Directory | Contents | Tests |
 |---|---|---|
 | `StrataDyn/` | The core IR, builder, environment DSL, well-formedness checker, the printer and reader of its text form, and in `StrataDyn/Core/` the translation of Dyn types to Core types (namespace `Strata.Dyn`). Imports nothing from StrataPython | `StrataDynTest/`; `StrataPythonTestExtra/DynReadTest.lean` reads every translator golden back, and `DynRefToRegTest.lean` runs ref-to-reg on each |
-| `StrataPython/Dyn/` | Python on Dyn: the Python environment (`Env.lean`), the emission helpers (`Build.lean`), name resolution (`Scope.lean`), the declared shapes of classes (`Shape.lean`), the shape check of comprehensions (`CompShape.lean`), the size lemmas and tactic that the termination proofs of name resolution and the translator share (`Termination.lean`), the translator (`Translate.lean`) and properties of it (`TranslateProps.lean`) and the `pydyn dyn` command (`Cli.lean`) | `StrataPythonTest/Dyn/`; `StrataPythonTestExtra/DynTranslateTest.lean` and `PyScopeTest.lean` run the translator and the scope pass over the programs in `StrataPythonTest/Dyn/dyn_tests/`, listed in `StrataPythonTest/Dyn/dyn_tests.txt` |
+| `StrataPython/Dyn/` | Python on Dyn: the Python environment (`Env.lean`), the emission helpers (`Build.lean`), name resolution (`Scope.lean`), the declared shapes of classes (`Shape.lean`), the shape check of comprehensions (`CompShape.lean`), the size lemmas and tactic that the termination proofs of name resolution and the translator share (`Termination.lean`), the translator (`Translate.lean`) and properties of it (`TranslateProps.lean`) and the `pydyn` commands (`Cli.lean`) | `StrataPythonTest/Dyn/`; `StrataPythonTestExtra/DynTranslateTest.lean` and `PyScopeTest.lean` run the translator and the scope pass over the programs in `StrataPythonTest/Dyn/dyn_tests/`, listed in `StrataPythonTest/Dyn/dyn_tests.txt` |
+| `StrataPython/Dyn/Sem/` | The Python semantics, the library `StrataPythonSem`: a rule for each `py.*` operation except the contract operations (`Rules/`, over the protocols of `Proto/`), the world they run on, and the proofs that each rule stays within its effect and keeps its certificate; `docs/PythonToDyn.md` §13 describes it | `StrataPythonTest/Dyn/Sem/`; `StrataPythonTestExtra/SemDiffTest.lean` compares `pydyn run` with CPython 3.12 on the corpus, and `SemScaleTest.lean` checks how its cost grows |
 
 [`docs/Dyn.md`](./docs/Dyn.md) is the Dyn reference, and
 [`docs/PythonToDyn.md`](./docs/PythonToDyn.md) specifies how Python lowers to it.
@@ -148,8 +150,10 @@ writing a new front end, built as its own Verso project.
 Python Ion file. `lake exe pydyn read FILE` reads a printed Dyn module, such as a
 translator golden, and prints it again. Both print constants folded into their uses, or
 with `--full` each on its own line. `lake exe pydyn
-features FILE` prints the Python features a Python Ion file uses; `pydyn --help` lists the
-subcommands.
+features FILE` prints the Python features a Python Ion file uses. `lake exe pydyn run FILE` runs a
+`.py` file with the Python semantics and prints its trace: its output, its outcome and its
+globals, or the gap where the semantics stops (`docs/PythonToDyn.md` §13.1). `pydyn --help` lists
+the subcommands.
 
 ## Spec quantifiers
 
@@ -247,3 +251,4 @@ PYTHON=python lake test -- RegexDiffTest
 | `StrataPython.Pipeline` | Full pyAnalyzeLaurel pipeline |
 | `Strata.Dyn` | The Dyn IR (`StrataDyn/`) |
 | `StrataPython.Dyn` | Python on Dyn (`PyScope`, `PyBuild`, `PyTranslate`) |
+| `StrataPython.Dyn.Sem` | The Python semantics (`StrataPython/Dyn/Sem/`) |

@@ -1,0 +1,10 @@
+--- stdout 2
+5
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+counter = 5
+read = <function object>

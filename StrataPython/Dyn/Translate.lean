@@ -1671,13 +1671,14 @@ def prologue (ps : Array ParamWithDefault) (defaults : Array (String × ValId))
         #[← build (emitConst (.str .base "n") (.str p.name))])
   let fill ← build (emitTotal (.str .base "defaults") Py.mkTuple.ref (← named.mapM fillSlot))
   let const (c : Const) : TransM ValId := build (emitConst (.str .base "c") c)
+  let qualname ← const (.str (← curScope).qualname)
   let nPosOnly ← const (.int (ps.filter (·.kind == .posOnly)).size)
   let nPos ← const (.int (ps.filter isPos).size)
   let hasVarPos ← const (.bool varPos.isSome)
   let hasVarKw ← const (.bool varKw.isSome)
   let names ← named.mapM fun p => const (.str p.name)
   let bound ← build (emitFailing (.str .base "bound") Py.bindArgs.ref
-    (#[args, kwargs, fill, nPosOnly, nPos, hasVarPos, hasVarKw] ++ names))
+    (#[args, kwargs, fill, qualname, nPosOnly, nPos, hasVarPos, hasVarKw] ++ names))
   let take (i : Nat) (name : String) : TransM Unit := do
     let v ← build (emitTotal (stem name) Py.tupleGet.ref #[bound, ← const (.int i)])
     writeName name v .none

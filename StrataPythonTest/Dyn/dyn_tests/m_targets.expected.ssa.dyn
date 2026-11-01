@@ -129,7 +129,7 @@ module m_targets {
       %p.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%p.0)
       %p.1 : py.Value = py.undef("p")
       %defaults.0 : py.Value = py.mkTuple(%p.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "p") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "p") ^propagate.0()
       %p.2 : py.Value = py.tupleGet(%bound.0, 0)
       %int.0 : py.Value = py.intLit(1)
       %p.4 : py.Value = py.requireDefined(%p.2, "p", "UnboundLocalError", "cannot access local variable 'p' where it is not associated with a value") ^propagate.0()

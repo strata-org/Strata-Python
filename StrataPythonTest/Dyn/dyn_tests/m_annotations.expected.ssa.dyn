@@ -365,7 +365,7 @@ module m_annotations {
       %h.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%h.0)
       %o.1 : py.Value = py.undef("o")
       %defaults.0 : py.Value = py.mkTuple(%o.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "o") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "o") ^propagate.0()
       %o.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%o.cell.0, %o.2)
       %int.0 : py.Value = py.intLit(3)
@@ -397,7 +397,7 @@ module m_annotations {
       %C.0 : py.Value = py.undef("C")
       %C.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%C.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "g", 0, 0, false, false) ^propagate.0()
       %int.0 : py.Value = py.intLit(5)
       %set.0 : base.Unit = base.refSet[py.Value](%__annotations__.cell.0, %int.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
@@ -423,7 +423,7 @@ module m_annotations {
   func @m_annotations.anns(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "anns", 0, 0, false, false) ^propagate.0()
       %__annotations__.0 : py.Value = py.loadGlobal("m_annotations", "__annotations__") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%__annotations__.0)
       ret(%ret.0)
@@ -439,7 +439,7 @@ module m_annotations {
       %b.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%b.0)
       %self.1 : py.Value = py.undef("self")
       %defaults.0 : py.Value = py.mkTuple(%self.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "self") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "S.m", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %int.0 : py.Value = py.intLit(0)
       %b.2 : py.Value = py.requireDefined(%int.0, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
@@ -513,7 +513,7 @@ module m_annotations {
       %j.0 : py.Value = py.undef("j")
       %j.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%j.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f.<locals>.h", 0, 0, false, false) ^propagate.0()
       %int.0 : py.Value = py.intLit(0)
       %j.2 : py.Value = py.requireDefined(%int.0, "j", "UnboundLocalError", "cannot access local variable 'j' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%j.2)

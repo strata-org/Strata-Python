@@ -1,0 +1,15 @@
+--- stdout 26
+Q 1 eq
+Q 2 eq
+Q 1 eq
+True
+
+--- outcome
+ok
+--- globals
+Q = <class 'Q'>
+__doc__ = None
+__name__ = '__main__'
+q1 = <Q object>
+q2 = <Q object>
+s = {'a', 'b', 'c', 'd', <Q object>, <Q object>}

@@ -1,0 +1,2 @@
+module
+  x: local (assigned, referenced)

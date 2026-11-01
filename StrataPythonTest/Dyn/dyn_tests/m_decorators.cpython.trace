@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+order = <function object>
+outer = <function object>
+tag = <function object>
+trace = <function object>

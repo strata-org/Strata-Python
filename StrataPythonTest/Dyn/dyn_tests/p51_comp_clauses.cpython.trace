@@ -1,0 +1,27 @@
+--- stdout 257
+walrus_filter([0, 1, 2]) ([10, 20], 20)
+walrus_filter([1, 0]) ([10], 0)
+walrus_filter([]) UnboundLocalError cannot access local variable 'y' where it is not associated with a value
+walrus_key([1, 2]) ({10: 11, 20: 21}, 20)
+walrus_key([1, 1]) ({10: 11}, 10)
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+between = <function object>
+blocks = <function object>
+folds = <function object>
+in_try = <function object>
+later = <function object>
+later_if = <function object>
+later_unbound = <function object>
+nested = <function object>
+show = <function object>
+targets = <function object>
+unhashable = <function object>
+walrus_filter = <function object>
+walrus_filter_only = <function object>
+walrus_key = <function object>
+walrus_key_only = <function object>

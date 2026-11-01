@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__annotations__ = {'total': <class 'int'>, 'even_sum': <class 'int'>}
+__doc__ = None
+__name__ = '__main__'
+even_sum = 2
+items = [1, 2, 3]
+total = 6
+x = 3

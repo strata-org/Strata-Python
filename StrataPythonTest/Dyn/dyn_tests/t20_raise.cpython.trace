@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+fail_hard = <function object>
+raise_with_msg = <function object>
+reraise_after_work = <function object>
+reraise_bare = <function object>
+reraise_example = <function object>
+reraise_named = <function object>

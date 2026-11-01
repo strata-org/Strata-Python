@@ -1,0 +1,15 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__annotations__ = {'a': <class 'bool'>, 'b': <class 'bool'>}
+__doc__ = None
+__name__ = '__main__'
+a = True
+b = False
+r1 = False
+r2 = True
+r3 = True
+x = 42
+y = 'world'

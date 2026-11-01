@@ -1,0 +1,14 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__annotations__ = {'cond': <class 'bool'>}
+__doc__ = None
+__name__ = '__main__'
+cond = True
+use_x = 1
+use_y = 10
+x = 1
+y = 10
+z = 'a'

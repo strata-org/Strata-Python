@@ -29,7 +29,7 @@ module p02_import_as {
       %p.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%p.0)
       %p.1 : py.Value = py.undef("p")
       %defaults.0 : py.Value = py.mkTuple(%p.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "p") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "p") ^propagate.0()
       %p.2 : py.Value = py.tupleGet(%bound.0, 0)
       %osp.0 : py.Value = py.loadGlobal("p02_import_as", "osp") ^propagate.0()
       %basename.0 : py.Value = py.attr(%osp.0, "basename") ^propagate.0()

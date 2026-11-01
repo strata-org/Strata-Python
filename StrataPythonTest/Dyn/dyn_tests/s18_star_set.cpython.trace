@@ -1,0 +1,9 @@
+--- stdout 6
+3
+k j
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'

@@ -20,7 +20,7 @@ module c1_return_finally {
   func @c1_return_finally.cleanup(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "cleanup", 0, 0, false, false) ^propagate.0()
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
@@ -34,7 +34,7 @@ module c1_return_finally {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %x.1 : py.Value = py.undef("x")
       %defaults.0 : py.Value = py.mkTuple(%x.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "x") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %int.0 : py.Value = py.intLit(1)
       %comp.0 : py.Completion = py.completionReturn(%int.0)

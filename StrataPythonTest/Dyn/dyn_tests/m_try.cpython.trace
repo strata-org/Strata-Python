@@ -1,0 +1,18 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+clause_raises = <function object>
+clauses = <function object>
+closure = <function object>
+finally_raise = <function object>
+in_inner_body = <function object>
+leave = <function object>
+nested = <function object>
+no_match = <function object>
+not_inherited = <function object>
+two_handlers = <function object>

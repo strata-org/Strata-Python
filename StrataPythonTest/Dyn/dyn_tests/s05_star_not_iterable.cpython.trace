@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: print() argument after * must be an iterable, not int
+--- globals
+__doc__ = None
+__name__ = '__main__'
+n = 5

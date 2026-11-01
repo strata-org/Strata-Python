@@ -43,7 +43,7 @@ module p41_comp_nested {
       %v.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%v.0)
       %rows.1 : py.Value = py.undef("rows")
       %defaults.0 : py.Value = py.mkTuple(%rows.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "rows") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "rows") ^propagate.0()
       %rows.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%rows.cell.0, %rows.2)
       %rows.3 : py.Value = base.refGet[py.Value](%rows.cell.0)
@@ -52,8 +52,8 @@ module p41_comp_nested {
       %r.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%r.1)
       %row.1 : py.Value = py.undef("row")
       %row.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%row.1)
-      %c.7 : py.Value = py.undef("c")
-      %c.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%c.7)
+      %c.8 : py.Value = py.undef("c")
+      %c.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%c.8)
       %list.0 : py.Value = py.listComp(%rows.4) ^propagate.0() {
         each.0(%out.0 : py.ListAcc, %item.0 : py.Value):
           %unpack.0 : py.Value = py.unpackSeq(%item.0, 2) ^propagate.1()
@@ -65,18 +65,18 @@ module p41_comp_nested {
             elt.0():
               %row.2 : py.Value = base.refGet[py.Value](%row.cell.1)
               %row.3 : py.Value = py.requireDefined(%row.2, "row", "UnboundLocalError", "cannot access local variable 'row' where it is not associated with a value") ^propagate.2()
-              %c.8 : py.Value = py.undef("c")
-              %c.cell.2 : base.Ref(py.Value) = base.refNew[py.Value](%c.8)
+              %c.9 : py.Value = py.undef("c")
+              %c.cell.2 : base.Ref(py.Value) = base.refNew[py.Value](%c.9)
               %list.1 : py.Value = py.listComp(%row.3) ^propagate.2() {
                 each.1(%out.1 : py.ListAcc, %item.1 : py.Value):
                   %set.3 : base.Unit = base.refSet[py.Value](%c.cell.2, %item.1)
                   %append.1 : base.Unit = py.compAppend(%out.1) ^propagate.3() {
                     elt.1():
-                      %c.9 : py.Value = base.refGet[py.Value](%c.cell.2)
-                      %c.10 : py.Value = py.requireDefined(%c.9, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.4()
+                      %c.10 : py.Value = base.refGet[py.Value](%c.cell.2)
+                      %c.11 : py.Value = py.requireDefined(%c.10, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.4()
                       %r.2 : py.Value = base.refGet[py.Value](%r.cell.1)
                       %r.3 : py.Value = py.requireDefined(%r.2, "r", "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^propagate.4()
-                      %mult.0 : py.Value = py.mult(%c.10, %r.3) ^propagate.4()
+                      %mult.0 : py.Value = py.mult(%c.11, %r.3) ^propagate.4()
                       %ok.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%mult.0)
                       ret(%ok.0)
                     propagate.4(%exc.0 : py.Value):
@@ -220,7 +220,7 @@ module p41_comp_nested {
       %j.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%j.0)
       %rows.1 : py.Value = py.undef("rows")
       %defaults.0 : py.Value = py.mkTuple(%rows.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "rows") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "h", 0, 1, false, false, "rows") ^propagate.0()
       %rows.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%rows.cell.0, %rows.2)
       %str.0 : py.Value = py.strLit("generator expression")

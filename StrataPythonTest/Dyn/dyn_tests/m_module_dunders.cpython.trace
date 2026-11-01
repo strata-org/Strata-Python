@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+raised NameError: name '__file__' is not defined
+--- globals
+__doc__ = 'The module docstring.'
+__name__ = '__main__'
+doc = 'The module docstring.'
+f = <function object>
+g = <function object>

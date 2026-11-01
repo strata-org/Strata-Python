@@ -21,7 +21,7 @@ module tc07_if_else {
       %y.0 : py.Value = py.undef("y")
       %y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%y.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
       %bool.0 : py.Value = py.boolLit(true)
       %cond.0 : base.Bool = py.truthy(%bool.0) ^propagate.0()
       branch(%cond.0) ^then.0() ^else.0()

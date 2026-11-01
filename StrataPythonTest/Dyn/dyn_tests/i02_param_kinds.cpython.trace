@@ -1,0 +1,28 @@
+--- stdout 106
+1 2
+1 2
+1 2
+1 ()
+1 (2, 3)
+1 {}
+1 {'a': 2, 'b': 3}
+1 {'a': 2}
+1 (2, 3) {'k': 4}
+1 2
+1 2
+1 2
+1 2
+1 {'a': 2}
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+absorb = <function object>
+both = <function object>
+kw = <function object>
+kwonly = <function object>
+pos = <function object>
+posonly = <function object>
+rest = <function object>

@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+adder = <function object>
+bad = <function object>
+g = <function object>
+gen = <function object>
+h = <function object>
+yields = <function object>

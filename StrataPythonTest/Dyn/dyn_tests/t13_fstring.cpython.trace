@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__annotations__ = {'name': <class 'str'>, 'age': <class 'int'>}
+__doc__ = None
+__name__ = '__main__'
+age = 30
+detail = 'world is 30 years old'
+greeting = 'Hello world'
+name = 'world'
+plain = 'no interpolation'

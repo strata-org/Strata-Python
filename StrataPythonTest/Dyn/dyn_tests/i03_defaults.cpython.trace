@@ -1,0 +1,15 @@
+--- stdout 86
+1 None 3 x 1.5 True
+1 2 3 x 1.5 True
+1 None 9 x 1.5 True
+1 None 3 x 1.5 False
+1 7
+1 2
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+c = <function object>
+kwd = <function object>

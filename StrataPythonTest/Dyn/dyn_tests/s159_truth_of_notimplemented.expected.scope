@@ -1,0 +1,4 @@
+module
+  print: global implicit (referenced)
+  NotImplemented: global implicit (referenced)
+  globals: global implicit (referenced)

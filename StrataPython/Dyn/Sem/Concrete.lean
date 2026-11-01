@@ -1030,6 +1030,13 @@ def callFunc (f args kwargs : Value) : PyM σ .calls true Value := do
   | .obj id => callClosure id args kwargs
   | _ => PyM.gap "a call of a value other than a function object is not modelled yet"
 
+/-- The module table. -/
+def modulesGet : PyM σ .reads true (Modules σ) :=
+  ⟨fun _ _ _ k _ => do k (← getThe (Modules σ)), by
+    intro rs ps S tg V hc s hs hh e' he β Q QW k ke hk hke
+    exact ContOK.getThe (fun _ => hk _) (fun h => absurd h (Level.ne_pure_up he (by decide))),
+    by intro _; unfold StartFree; intros; rfl⟩
+
 /-- What `f` gives of the payload of the object `v`; `none` for a value that is not an object. -/
 def partView {σ : Type} [Store σ] [Decode σ] {e : Level} {fr : Bool} [Level.AtLeast .reads e]
     {α : Type} (v : Value) (f : PayloadG Empty → Option α) : PyM σ e fr (Option α) :=
@@ -1114,6 +1121,8 @@ instance {e : Level} {fr : Bool} [Level.AtLeast .reads e] : PyReads (PyM σ e fr
   listView l := match l with
     | .obj id => (Prim.listOf ·) <$> (Prim.objGet id).relax.lift Level.AtLeast.le
     | _ => pure none
+  moduleGet n := (fun (ms : Modules σ) => (ms.map[n]?).map fun e => Value.obj e.obj) <$>
+    (Prim.modulesGet.relax.lift Level.AtLeast.le)
   tupleView v := Prim.partView v fun | .tuple xs => some xs | _ => none
   strView v := Prim.partView v fun | .str s => some s | _ => none
   bytesView v := Prim.partView v fun | .bytes b => some b | _ => none

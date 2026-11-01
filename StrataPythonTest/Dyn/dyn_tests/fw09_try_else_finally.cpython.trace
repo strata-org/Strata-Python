@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+clause_raises = <function object>
+else_raises = <function object>
+leaves_early = <function object>
+log = []
+note = <function object>
+sys = <module object>

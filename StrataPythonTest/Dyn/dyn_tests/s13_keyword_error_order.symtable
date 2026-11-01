@@ -1,0 +1,5 @@
+module top
+  k: local (assigned, referenced)
+  function k
+    a: local (parameter, referenced)
+qualnames: k

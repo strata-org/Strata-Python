@@ -31,7 +31,7 @@ module p12_del {
       %x.0 : py.Value = py.undef("x")
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %x.2 : py.Value = py.requireDefined(%int.0, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %x.3 : py.Value = py.undef("x")

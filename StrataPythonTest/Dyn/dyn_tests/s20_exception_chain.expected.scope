@@ -1,0 +1,3 @@
+module
+  ValueError: global implicit (referenced)
+  KeyError: global implicit (referenced)

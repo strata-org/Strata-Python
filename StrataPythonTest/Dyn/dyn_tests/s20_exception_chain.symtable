@@ -1,0 +1,4 @@
+module top
+  KeyError: global implicit (referenced)
+  ValueError: global implicit (referenced)
+qualnames: 

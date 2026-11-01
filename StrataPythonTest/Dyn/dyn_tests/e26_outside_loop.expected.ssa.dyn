@@ -52,7 +52,7 @@ module e26_outside_loop {
   func @e26_outside_loop.g(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "g", 0, 0, false, false) ^propagate.0()
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)

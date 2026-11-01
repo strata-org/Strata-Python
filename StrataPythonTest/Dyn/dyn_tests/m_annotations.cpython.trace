@@ -1,0 +1,19 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+P = <class 'P'>
+R = <class 'R'>
+S = <class 'S'>
+__annotations__ = {'n': <class 'int'>}
+__doc__ = None
+__name__ = '__main__'
+ann = {'n': <class 'int'>}
+anns = <function object>
+dataclass = <function object>
+f = <function object>
+g = <function object>
+gen = <function object>
+m = 2
+n = 1

@@ -49,7 +49,7 @@ module fw07_with_in_finally {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %x.1 : py.Value = py.undef("x")
       %defaults.0 : py.Value = py.mkTuple(%x.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "x") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "note", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
       %log.0 : py.Value = py.loadGlobal("fw07_with_in_finally", "log") ^propagate.0()
@@ -107,7 +107,7 @@ module fw07_with_in_finally {
   func @fw07_with_in_finally.normal_exit(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "normal_exit", 0, 0, false, false) ^propagate.0()
       %KeyError.0 : py.Value = py.loadGlobal("fw07_with_in_finally", "KeyError") ^finRaise.0()
       %str.0 : py.Value = py.strLit("pending")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -170,7 +170,7 @@ module fw07_with_in_finally {
   func @fw07_with_in_finally.suppress_in_finally(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "suppress_in_finally", 0, 0, false, false) ^propagate.0()
       %KeyError.0 : py.Value = py.loadGlobal("fw07_with_in_finally", "KeyError") ^finRaise.0()
       %str.0 : py.Value = py.strLit("pending")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -246,7 +246,7 @@ module fw07_with_in_finally {
   func @fw07_with_in_finally.reraise_pending(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "reraise_pending", 0, 0, false, false) ^propagate.0()
       %KeyError.0 : py.Value = py.loadGlobal("fw07_with_in_finally", "KeyError") ^finRaise.0()
       %str.0 : py.Value = py.strLit("pending")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -306,7 +306,7 @@ module fw07_with_in_finally {
   func @fw07_with_in_finally.return_in_with(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "return_in_with", 0, 0, false, false) ^propagate.0()
       %KeyError.0 : py.Value = py.loadGlobal("fw07_with_in_finally", "KeyError") ^finRaise.0()
       %str.0 : py.Value = py.strLit("pending")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -376,7 +376,7 @@ module fw07_with_in_finally {
       %self.1 : py.Value = py.undef("self")
       %suppress.1 : py.Value = py.undef("suppress")
       %defaults.0 : py.Value = py.mkTuple(%self.1, %suppress.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "self", "suppress") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Ctx.__init__", 0, 2, false, false, "self", "suppress") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %suppress.2 : py.Value = py.tupleGet(%bound.0, 1)
@@ -399,7 +399,7 @@ module fw07_with_in_finally {
       %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
       %self.1 : py.Value = py.undef("self")
       %defaults.0 : py.Value = py.mkTuple(%self.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "self") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Ctx.__enter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -425,7 +425,7 @@ module fw07_with_in_finally {
       %v.1 : py.Value = py.undef("v")
       %tb.1 : py.Value = py.undef("tb")
       %defaults.0 : py.Value = py.mkTuple(%self.1, %t.1, %v.1, %tb.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 4, false, false, "self", "t", "v", "tb") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Ctx.__exit__", 0, 4, false, false, "self", "t", "v", "tb") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %t.2 : py.Value = py.tupleGet(%bound.0, 1)

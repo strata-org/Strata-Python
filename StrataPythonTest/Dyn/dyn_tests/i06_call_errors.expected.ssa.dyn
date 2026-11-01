@@ -182,7 +182,7 @@ module i06_call_errors {
       %kwargs.1 : py.Value = py.undef("kwargs")
       %kwargs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%kwargs.1)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, true) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, true) ^propagate.0()
       %kwargs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %print.0 : py.Value = py.loadGlobal("i06_call_errors", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("unreachable")
@@ -201,7 +201,7 @@ module i06_call_errors {
       %args.1 : py.Value = py.undef("args")
       %args.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%args.1)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, true, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "g", 0, 0, true, false) ^propagate.0()
       %args.2 : py.Value = py.tupleGet(%bound.0, 0)
       %print.0 : py.Value = py.loadGlobal("i06_call_errors", "print") ^propagate.0()
       %str.0 : py.Value = py.strLit("unreachable")

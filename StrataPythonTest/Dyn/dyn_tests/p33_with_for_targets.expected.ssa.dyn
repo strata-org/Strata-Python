@@ -41,7 +41,7 @@ module p33_with_for_targets {
       %path.1 : py.Value = py.undef("path")
       %pairs.1 : py.Value = py.undef("pairs")
       %defaults.0 : py.Value = py.mkTuple(%path.1, %pairs.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "path", "pairs") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 2, false, false, "path", "pairs") ^propagate.0()
       %path.2 : py.Value = py.tupleGet(%bound.0, 0)
       %pairs.2 : py.Value = py.tupleGet(%bound.0, 1)
       %open.0 : py.Value = py.loadGlobal("p33_with_for_targets", "open") ^propagate.0()
@@ -126,7 +126,7 @@ module p33_with_for_targets {
       %pairs.4 : py.Value = py.requireDefined(%pairs.2, "pairs", "UnboundLocalError", "cannot access local variable 'pairs' where it is not associated with a value") ^propagate.0()
       %iter.0 : py.Value = py.getIter(%pairs.4) ^propagate.0()
       jump ^head.0(%a.0, %b.0, %c.0)
-    head.0(%a.3 : py.Value, %b.3 : py.Value, %c.80 : py.Value):
+    head.0(%a.3 : py.Value, %b.3 : py.Value, %c.81 : py.Value):
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %unpack.0 : py.Value = py.unpackSeq(%item.0, 2) ^propagate.0()
       %elem.0 : py.Value = py.tupleGet(%unpack.0, 0)
@@ -154,10 +154,10 @@ module p33_with_for_targets {
       %data.2 : py.Value = py.requireDefined(%data.6, "data", "UnboundLocalError", "cannot access local variable 'data' where it is not associated with a value") ^propagate.0()
       %a.2 : py.Value = py.requireDefined(%a.3, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %b.2 : py.Value = py.requireDefined(%b.3, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
-      %c.16 : py.Value = py.requireDefined(%c.80, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
+      %c.17 : py.Value = py.requireDefined(%c.81, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
       %n.22 : py.Value = py.requireDefined(%iAdd.0, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
       %m.6 : py.Value = py.requireDefined(%int.2, "m", "UnboundLocalError", "cannot access local variable 'm' where it is not associated with a value") ^propagate.0()
-      %tuple.3 : py.Value = py.mkTuple(%data.2, %a.2, %b.2, %c.16, %n.22, %m.6)
+      %tuple.3 : py.Value = py.mkTuple(%data.2, %a.2, %b.2, %c.17, %n.22, %m.6)
       %ret.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.3)
       ret(%ret.1)
     propagate.0(%exc.5 : py.Value):

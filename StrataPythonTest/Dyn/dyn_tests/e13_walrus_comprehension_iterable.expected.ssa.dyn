@@ -21,7 +21,7 @@ module e13_walrus_comprehension_iterable {
       %x.0 : py.Value = py.undef("x")
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
       %list.0 : py.Value = py.mkList(%int.0, %int.1)

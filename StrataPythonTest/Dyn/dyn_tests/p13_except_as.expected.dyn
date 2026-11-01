@@ -21,7 +21,7 @@ module p13_except_as {
       %e.0 : py.Value = py.undef("e")
       %e.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%e.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
       %g.0 : py.Value = py.loadGlobal("p13_except_as", "g") ^catch.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs

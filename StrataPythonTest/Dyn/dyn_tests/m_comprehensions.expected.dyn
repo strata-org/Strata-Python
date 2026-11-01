@@ -49,7 +49,7 @@ module m_comprehensions {
       %pairs.1 : py.Value = py.undef("pairs")
       %ys.1 : py.Value = py.undef("ys")
       %defaults.0 : py.Value = py.mkTuple(%pairs.1, %ys.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "pairs", "ys") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 2, false, false, "pairs", "ys") ^propagate.0()
       %pairs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%pairs.cell.0, %pairs.2)
       %ys.2 : py.Value = py.tupleGet(%bound.0, 1)
@@ -255,13 +255,13 @@ module m_comprehensions {
       %a.2 : py.Value = py.requireDefined(%a.1, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %b.1 : py.Value = base.refGet[py.Value](%b.cell.0)
       %b.2 : py.Value = py.requireDefined(%b.1, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
-      %c.9 : py.Value = base.refGet[py.Value](%c.cell.0)
-      %c.10 : py.Value = py.requireDefined(%c.9, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
+      %c.10 : py.Value = base.refGet[py.Value](%c.cell.0)
+      %c.11 : py.Value = py.requireDefined(%c.10, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
       %d.1 : py.Value = base.refGet[py.Value](%d.cell.0)
       %d.2 : py.Value = py.requireDefined(%d.1, "d", "UnboundLocalError", "cannot access local variable 'd' where it is not associated with a value") ^propagate.0()
       %e.20 : py.Value = base.refGet[py.Value](%e.cell.0)
       %e.22 : py.Value = py.requireDefined(%e.20, "e", "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^propagate.0()
-      %tuple.1 : py.Value = py.mkTuple(%a.2, %b.2, %c.10, %d.2, %e.22)
+      %tuple.1 : py.Value = py.mkTuple(%a.2, %b.2, %c.11, %d.2, %e.22)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.1)
       ret(%ret.0)
     propagate.0(%exc.26 : py.Value):
@@ -276,7 +276,7 @@ module m_comprehensions {
       %C.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%C.0)
       %n.4 : py.Value = py.undef("n")
       %defaults.0 : py.Value = py.mkTuple(%n.4)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "n") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer", 0, 1, false, false, "n") ^propagate.0()
       %n.5 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%n.cell.0, %n.5)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
@@ -301,7 +301,7 @@ module m_comprehensions {
       %D.0 : py.Value = py.undef("D")
       %D.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%D.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "shadowed", 0, 0, false, false) ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %set.0 : base.Unit = base.refSet[py.Value](%n.cell.0, %int.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
@@ -322,7 +322,7 @@ module m_comprehensions {
   func @|m_comprehensions.f.<lambda>|(%y.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%y.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f.<locals>.<lambda>", 0, 0, false, false) ^propagate.0()
       %y.0 : py.Value = base.refGet[py.Value](%y.cell.0)
       %y.1 : py.Value = py.requireDefined(%y.0, "y", "NameError", "cannot access free variable 'y' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%y.1)

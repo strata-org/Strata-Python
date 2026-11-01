@@ -1,0 +1,14 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Account = <class 'Account'>
+Movie = <class 'Movie'>
+TypedDict = <function object>
+__doc__ = None
+__name__ = '__main__'
+a = <Account object>
+coin = <function object>
+m = {'title': 'Alien', 'year': 'unknown'}
+random = <module object>

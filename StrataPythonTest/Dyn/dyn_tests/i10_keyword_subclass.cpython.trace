@@ -1,0 +1,12 @@
+--- stdout 51
+caught: raised by __eq__ during argument binding
+1
+
+--- outcome
+ok
+--- globals
+OtherHash = <class 'OtherHash'>
+RaisingEq = <class 'RaisingEq'>
+__doc__ = None
+__name__ = '__main__'
+f = <function object>

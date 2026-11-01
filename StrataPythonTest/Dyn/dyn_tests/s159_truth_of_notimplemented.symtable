@@ -1,0 +1,5 @@
+module top
+  NotImplemented: global implicit (referenced)
+  globals: global implicit (referenced)
+  print: global implicit (referenced)
+qualnames: 

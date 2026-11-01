@@ -542,7 +542,7 @@ module t30_loop_try_nested {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %x.1 : py.Value = py.undef("x")
       %defaults.0 : py.Value = py.mkTuple(%x.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "x") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "probe", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
@@ -559,7 +559,7 @@ module t30_loop_try_nested {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %x.1 : py.Value = py.undef("x")
       %defaults.0 : py.Value = py.mkTuple(%x.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "x") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "check", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
@@ -573,7 +573,7 @@ module t30_loop_try_nested {
   func @t30_loop_try_nested.cleanup(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "cleanup", 0, 0, false, false) ^propagate.0()
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
@@ -587,7 +587,7 @@ module t30_loop_try_nested {
       %tag.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%tag.0)
       %tag.1 : py.Value = py.undef("tag")
       %defaults.0 : py.Value = py.mkTuple(%tag.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "tag") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "note", 0, 1, false, false, "tag") ^propagate.0()
       %tag.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%tag.cell.0, %tag.2)
       %tag.3 : py.Value = base.refGet[py.Value](%tag.cell.0)
@@ -601,7 +601,7 @@ module t30_loop_try_nested {
   func @t30_loop_try_nested.raiser(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "raiser", 0, 0, false, false) ^propagate.0()
       %StopIteration.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "StopIteration") ^propagate.0()
       %exc.0 : py.Value = py.toException(%StopIteration.0) ^propagate.0()
       jump ^propagate.0(%exc.0)
@@ -617,7 +617,7 @@ module t30_loop_try_nested {
       %h.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%h.0)
       %it.1 : py.Value = py.undef("it")
       %defaults.0 : py.Value = py.mkTuple(%it.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "it") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "drain", 0, 1, false, false, "it") ^propagate.0()
       %it.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%it.cell.0, %it.2)
       jump ^head.0()
@@ -702,7 +702,7 @@ module t30_loop_try_nested {
       %outer.1 : py.Value = py.undef("outer")
       %inner.1 : py.Value = py.undef("inner")
       %defaults.0 : py.Value = py.mkTuple(%outer.1, %inner.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "outer", "inner") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "nested_return", 0, 2, false, false, "outer", "inner") ^propagate.0()
       %outer.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%outer.cell.0, %outer.2)
       %inner.2 : py.Value = py.tupleGet(%bound.0, 1)
@@ -803,7 +803,7 @@ module t30_loop_try_nested {
       %r.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%r.0)
       %items.1 : py.Value = py.undef("items")
       %defaults.0 : py.Value = py.mkTuple(%items.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "items") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "loop_else_return", 0, 1, false, false, "items") ^propagate.0()
       %items.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%items.cell.0, %items.2)
       %items.3 : py.Value = base.refGet[py.Value](%items.cell.0)

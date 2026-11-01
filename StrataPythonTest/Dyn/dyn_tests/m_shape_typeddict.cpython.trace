@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+raised ModuleNotFoundError: No module named 'typing_extensions'
+--- globals
+Callable = <_CallableType object>
+Literal = <_LiteralSpecialForm object>
+NotRequired = <_SpecialForm object>
+Required = <_SpecialForm object>
+TD = <function object>
+__doc__ = None
+__name__ = '__main__'
+typing = <module object>

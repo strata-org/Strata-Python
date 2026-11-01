@@ -1,0 +1,4 @@
+module top
+  a: local (assigned)
+  x: local (assigned)
+qualnames: 

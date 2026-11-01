@@ -1,0 +1,15 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+d = {'a': 1, 'b': 2, 'c': 3}
+elem = 1
+every_other = [10, 3, 5]
+first = 1
+nums = [10, 2, 3, 4, 5]
+sliced = [2, 3]
+t = (1, 'two', 3.0)
+val = 1

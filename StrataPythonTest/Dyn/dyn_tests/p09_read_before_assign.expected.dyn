@@ -25,7 +25,7 @@ module p09_read_before_assign {
       %x.0 : py.Value = py.undef("x")
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "with_global", 0, 0, false, false) ^propagate.0()
       %print.0 : py.Value = py.loadGlobal("p09_read_before_assign", "print") ^propagate.0()
       %x.1 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.2 : py.Value = py.requireDefined(%x.1, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
@@ -46,7 +46,7 @@ module p09_read_before_assign {
       %y.0 : py.Value = py.undef("y")
       %y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%y.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "without_global", 0, 0, false, false) ^propagate.0()
       %print.0 : py.Value = py.loadGlobal("p09_read_before_assign", "print") ^propagate.0()
       %y.1 : py.Value = base.refGet[py.Value](%y.cell.0)
       %y.2 : py.Value = py.requireDefined(%y.1, "y", "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()

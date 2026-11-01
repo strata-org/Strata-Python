@@ -46,7 +46,7 @@ module fw10_return_value_timing {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %x.1 : py.Value = py.undef("x")
       %defaults.0 : py.Value = py.mkTuple(%x.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "x") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "note", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %log.0 : py.Value = py.loadGlobal("fw10_return_value_timing", "log") ^propagate.0()
       %append.0 : py.Value = py.attr(%log.0, "append") ^propagate.0()
@@ -66,7 +66,7 @@ module fw10_return_value_timing {
       %x.0 : py.Value = py.undef("x")
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "deletes", 0, 0, false, false) ^propagate.0()
       %str.0 : py.Value = py.strLit("try")
       %x.2 : py.Value = py.requireDefined(%str.0, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^finRaise.0()
       %comp.0 : py.Completion = py.completionReturn(%x.2)
@@ -103,7 +103,7 @@ module fw10_return_value_timing {
       %x.0 : py.Value = py.undef("x")
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "closure", 0, 0, false, false) ^propagate.0()
       %str.0 : py.Value = py.strLit("try")
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %str.0)
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|fw10_return_value_timing.closure.<lambda>|, "<lambda>", "fw10_return_value_timing", %x.cell.0)
@@ -172,7 +172,7 @@ module fw10_return_value_timing {
       %b.0 : py.Value = py.undef("b")
       %b.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%b.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "in_with", 0, 0, false, false) ^propagate.0()
       %Box.0 : py.Value = py.loadGlobal("fw10_return_value_timing", "Box") ^propagate.0()
       %str.0 : py.Value = py.strLit("body")
       %bool.0 : py.Value = py.boolLit(false)
@@ -229,7 +229,7 @@ module fw10_return_value_timing {
       %b.0 : py.Value = py.undef("b")
       %b.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%b.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "value_raises", 0, 0, false, false) ^propagate.0()
       %Box.0 : py.Value = py.loadGlobal("fw10_return_value_timing", "Box") ^propagate.0()
       %str.0 : py.Value = py.strLit("body")
       %bool.0 : py.Value = py.boolLit(true)
@@ -280,7 +280,7 @@ module fw10_return_value_timing {
   func @|fw10_return_value_timing.closure.<lambda>|(%x.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%x.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "closure.<locals>.<lambda>", 0, 0, false, false) ^propagate.0()
       %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.1 : py.Value = py.requireDefined(%x.0, "x", "NameError", "cannot access free variable 'x' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.1)
@@ -301,7 +301,7 @@ module fw10_return_value_timing {
       %value.1 : py.Value = py.undef("value")
       %suppress.1 : py.Value = py.undef("suppress")
       %defaults.0 : py.Value = py.mkTuple(%self.1, %value.1, %suppress.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 3, false, false, "self", "value", "suppress") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Box.__init__", 0, 3, false, false, "self", "value", "suppress") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %value.2 : py.Value = py.tupleGet(%bound.0, 1)
       %suppress.2 : py.Value = py.tupleGet(%bound.0, 2)
@@ -324,7 +324,7 @@ module fw10_return_value_timing {
       %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
       %self.1 : py.Value = py.undef("self")
       %defaults.0 : py.Value = py.mkTuple(%self.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "self") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Box.__enter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
@@ -348,7 +348,7 @@ module fw10_return_value_timing {
       %v.1 : py.Value = py.undef("v")
       %tb.1 : py.Value = py.undef("tb")
       %defaults.0 : py.Value = py.mkTuple(%self.1, %t.1, %v.1, %tb.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 4, false, false, "self", "t", "v", "tb") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Box.__exit__", 0, 4, false, false, "self", "t", "v", "tb") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %t.2 : py.Value = py.tupleGet(%bound.0, 1)
       %v.2 : py.Value = py.tupleGet(%bound.0, 2)

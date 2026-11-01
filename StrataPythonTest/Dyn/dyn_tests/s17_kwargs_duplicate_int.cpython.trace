@@ -1,0 +1,7 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: print() got multiple values for keyword argument '1'
+--- globals
+__doc__ = None
+__name__ = '__main__'

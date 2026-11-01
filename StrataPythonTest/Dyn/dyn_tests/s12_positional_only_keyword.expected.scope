@@ -1,0 +1,5 @@
+module
+  h: local (assigned, referenced)
+  function h
+    params: a, /
+    a: local (parameter, referenced)

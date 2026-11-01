@@ -25,7 +25,7 @@ module rr01_handler_param {
       %a.1 : py.Value = py.undef("a")
       %b.1 : py.Value = py.undef("b")
       %defaults.0 : py.Value = py.mkTuple(%a.1, %b.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "a", "b") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 2, false, false, "a", "b") ^propagate.0()
       %a.2 : py.Value = py.tupleGet(%bound.0, 0)
       %b.2 : py.Value = py.tupleGet(%bound.0, 1)
       %int.0 : py.Value = py.intLit(0)

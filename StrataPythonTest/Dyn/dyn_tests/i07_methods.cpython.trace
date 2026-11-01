@@ -1,0 +1,18 @@
+--- stdout 94
+a 5 1 () {}
+b 5 1 (1, 2) {}
+c 5 1 (1,) {'k': 2}
+d 1 0 () {}
+hello world
+hello there
+hello you
+
+--- outcome
+ok
+--- globals
+Base = <class 'Base'>
+Child = <class 'Child'>
+K = <class 'K'>
+__doc__ = None
+__name__ = '__main__'
+k = <K object>

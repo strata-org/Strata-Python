@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+raised FileNotFoundError: [Errno 2] No such file or directory: 'f'
+--- globals
+MatchCase = <class 'MatchCase'>
+TryBody = <class 'TryBody'>
+TryElse = <class 'TryElse'>
+TryFinally = <class 'TryFinally'>
+TryHandler = <class 'TryHandler'>
+__doc__ = None
+__name__ = '__main__'

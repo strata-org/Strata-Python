@@ -24,7 +24,7 @@ module e09_duplicate_argument {
       %b.1 : py.Value = py.undef("b")
       %a.2 : py.Value = py.undef("a")
       %defaults.0 : py.Value = py.mkTuple(%a.1, %b.1, %a.2)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 3, false, false, "a", "b", "a") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 3, false, false, "a", "b", "a") ^propagate.0()
       %a.3 : py.Value = py.tupleGet(%bound.0, 0)
       %b.2 : py.Value = py.tupleGet(%bound.0, 1)
       %a.4 : py.Value = py.tupleGet(%bound.0, 2)

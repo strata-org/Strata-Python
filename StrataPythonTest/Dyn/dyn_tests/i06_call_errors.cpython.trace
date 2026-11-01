@@ -1,0 +1,14 @@
+--- stdout 231
+dup: __main__.f() got multiple values for keyword argument 'a'
+nonstr: keywords must be strings
+nonmap: __main__.f() argument after ** must be a mapping, not list
+noniter: __main__.g() argument after * must be an iterable, not int
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+g = <function object>
+m = {'a': 1}

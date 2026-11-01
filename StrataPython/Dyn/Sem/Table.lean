@@ -14,6 +14,7 @@ public import StrataPython.Dyn.Sem.Rules.Ops
 public import StrataPython.Dyn.Sem.Rules.Containers
 public import StrataPython.Dyn.Sem.Rules.Globals
 public import StrataPython.Dyn.Sem.Rules.Closures
+public import StrataPython.Dyn.Sem.Rules.Calls
 public meta import StrataPython.Dyn.Env
 public meta import StrataDyn.DDM
 

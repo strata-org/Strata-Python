@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+nested = [[], [0], [0, 2], [0, 3, 6]]
+z = [0, 1, 2]

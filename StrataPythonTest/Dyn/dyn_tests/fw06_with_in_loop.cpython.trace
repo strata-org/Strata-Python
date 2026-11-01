@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Suppress = <class 'Suppress'>
+__doc__ = None
+__name__ = '__main__'
+log = []
+loop_in_with = <function object>
+note = <function object>
+with_in_loop = <function object>

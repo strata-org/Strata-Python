@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+data = [1, 2, 3, 4, 5]
+filtered = [6, 8, 10]
+y = 10

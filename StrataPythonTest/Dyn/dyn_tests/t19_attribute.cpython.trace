@@ -1,0 +1,14 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Config = <class 'Config'>
+Inner = <class 'Inner'>
+Outer = <class 'Outer'>
+__doc__ = None
+__name__ = '__main__'
+c = <Config object>
+flag = False
+o = <Outer object>
+v = 42

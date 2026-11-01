@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+C = <class 'Counter'>
+__doc__ = None
+__name__ = '__main__'
+make = <function object>
+os = <module object>

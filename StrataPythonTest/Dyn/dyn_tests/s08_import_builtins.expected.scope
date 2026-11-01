@@ -1,0 +1,7 @@
+module
+  import builtins: module builtins
+  import length: member len of builtins
+  import p: member print of builtins
+  builtins: local (imported)
+  length: local (imported)
+  p: local (imported, referenced)

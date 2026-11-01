@@ -1,0 +1,3 @@
+module
+  import nope: member nope of builtins
+  nope: local (imported)

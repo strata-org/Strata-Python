@@ -1,0 +1,15 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Ctx = <class 'Ctx'>
+NoExit = <class 'NoExit'>
+__doc__ = None
+__name__ = '__main__'
+log = []
+missing_exit = <function object>
+note = <function object>
+other_exit = <function object>
+rebound_manager = <function object>
+replaced_in_body = <function object>

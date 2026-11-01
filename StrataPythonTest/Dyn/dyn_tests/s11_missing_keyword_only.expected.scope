@@ -1,0 +1,6 @@
+module
+  g: local (assigned, referenced)
+  function g
+    params: *, j, k
+    j: local (parameter, referenced)
+    k: local (parameter)

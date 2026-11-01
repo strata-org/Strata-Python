@@ -1,0 +1,17 @@
+--- stdout 27
+value: 1
+value: 2
+value: 3
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+create_config = <function object>
+extra_args = [10, 20]
+extra_kwargs = {'debug': True}
+flexible = <function object>
+items = [1, 2, 3]
+log_all = <function object>
+params = {'Bucket': 'my-bucket', 'Key': 'my-key'}

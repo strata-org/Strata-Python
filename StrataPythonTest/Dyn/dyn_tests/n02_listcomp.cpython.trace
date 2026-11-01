@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+doubled = [2, 4, 6, 8, 10]
+items = [1, 2, 3, 4, 5]
+total = 30

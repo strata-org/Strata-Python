@@ -46,7 +46,7 @@ module fw02_with_exit_raises {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %x.1 : py.Value = py.undef("x")
       %defaults.0 : py.Value = py.mkTuple(%x.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "x") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "note", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
       %log.0 : py.Value = py.loadGlobal("fw02_with_exit_raises", "log") ^propagate.0()
@@ -101,7 +101,7 @@ module fw02_with_exit_raises {
   func @fw02_with_exit_raises.on_raise(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "on_raise", 0, 0, false, false) ^propagate.0()
       %Failing.0 : py.Value = py.loadGlobal("fw02_with_exit_raises", "Failing") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -140,7 +140,7 @@ module fw02_with_exit_raises {
   func @fw02_with_exit_raises.on_normal(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "on_normal", 0, 0, false, false) ^propagate.0()
       %Failing.0 : py.Value = py.loadGlobal("fw02_with_exit_raises", "Failing") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -194,7 +194,7 @@ module fw02_with_exit_raises {
       %e.0 : py.Value = py.undef("e")
       %e.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%e.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "on_return", 0, 0, false, false) ^propagate.0()
       %Failing.0 : py.Value = py.loadGlobal("fw02_with_exit_raises", "Failing") ^catch.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
@@ -256,7 +256,7 @@ module fw02_with_exit_raises {
   func @fw02_with_exit_raises.in_handler(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "in_handler", 0, 0, false, false) ^propagate.0()
       %KeyError.0 : py.Value = py.loadGlobal("fw02_with_exit_raises", "KeyError") ^catch.0()
       %str.0 : py.Value = py.strLit("handled")
       %tuple.0 : py.Value = py.mkTuple(%str.0)
@@ -333,7 +333,7 @@ module fw02_with_exit_raises {
       %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
       %self.1 : py.Value = py.undef("self")
       %defaults.0 : py.Value = py.mkTuple(%self.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "self") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Failing.__enter__", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
@@ -359,7 +359,7 @@ module fw02_with_exit_raises {
       %v.1 : py.Value = py.undef("v")
       %tb.1 : py.Value = py.undef("tb")
       %defaults.0 : py.Value = py.mkTuple(%self.1, %t.1, %v.1, %tb.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 4, false, false, "self", "t", "v", "tb") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Failing.__exit__", 0, 4, false, false, "self", "t", "v", "tb") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %t.2 : py.Value = py.tupleGet(%bound.0, 1)

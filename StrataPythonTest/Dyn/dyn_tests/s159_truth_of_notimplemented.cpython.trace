@@ -1,0 +1,9 @@
+--- stdout 11
+False
+True
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'

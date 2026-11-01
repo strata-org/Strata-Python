@@ -1,0 +1,15 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Optional = <_SpecialForm object>
+ResourceManager = <class 'ResourceManager'>
+__doc__ = None
+__name__ = '__main__'
+data = [{'key': 'a', 'value': '1'}, {'key': 'b', 'value': '2'}]
+json = <module object>
+mgr = <ResourceManager object>
+process_items = <function object>
+result = '1'
+total = 2

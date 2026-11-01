@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Ctx = <class 'Ctx'>
+__doc__ = None
+__name__ = '__main__'
+chained = <function object>
+log = []
+note = <function object>
+order = <function object>

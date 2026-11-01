@@ -1,0 +1,16 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+a = {'x': 1}
+b = {'y': 2}
+empty = {}
+literal_then_star = {'z': 3, 'x': 1}
+mixed = {'p': 0, 'x': 1, 'q': 1, 'y': 2, 'r': 2}
+only_literal = {'k': 1, 'j': 2}
+only_star = {'x': 1}
+star_then_literal = {'x': 1, 'z': 3}
+two_stars = {'x': 1, 'y': 2}

@@ -41,7 +41,7 @@ module m_imports {
       %sys.0 : py.Value = py.undef("sys")
       %sys.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%sys.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "local_import", 0, 0, false, false) ^propagate.0()
       %mod.0 : py.Value = py.importModule("sys") ^propagate.0()
       %set.0 : base.Unit = base.refSet[py.Value](%sys.cell.0, %mod.0)
       %sys.1 : py.Value = base.refGet[py.Value](%sys.cell.0)

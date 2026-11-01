@@ -7,9 +7,11 @@ module
 import StrataPython.Dyn.Sem.Table
 import StrataDyn.DDMRead
 import StrataDyn.Exec.Run
+import StrataPython.Dyn.Sem.Run
 meta import StrataPython.Dyn.Sem.Table
 meta import StrataDyn.DDMRead
 meta import StrataDyn.Exec.Run
+meta import StrataPython.Dyn.Sem.Run
 
 set_option autoImplicit false
 
@@ -141,6 +143,126 @@ def mainTotal (body : String) : String := s!"module m \{
 #guard_msgs in
 #eval run (main "      %u.0 : py.Value = py.undef(\"__class__\")
       %v.0 : py.Value = py.requireDefined(%u.0, \"__class__\", \"RuntimeError\", \"super(): empty __class__ cell\") ^err.0()")
+
+-- `bindArgs` binds as CPython 3.12 does: `def f(a, b=2, *r, c, d=4, **k)` called as
+-- `f(1, 5, 6, c=3, e=7)` gives `a=1, b=5, c=3, d=4, r=(6,), k={'e': 7}`.
+/-- info: (1, 5, 3, 4, (6,)) -/
+#guard_msgs in
+#eval run (main "      %i1.0 : py.Value = py.intLit(1)
+      %i5.0 : py.Value = py.intLit(5)
+      %i6.0 : py.Value = py.intLit(6)
+      %i3.0 : py.Value = py.intLit(3)
+      %i7.0 : py.Value = py.intLit(7)
+      %i2.0 : py.Value = py.intLit(2)
+      %i4.0 : py.Value = py.intLit(4)
+      %c.0 : py.Value = py.strLit(\"c\")
+      %ke.0 : py.Value = py.strLit(\"e\")
+      %ua.0 : py.Value = py.undef(\"a\")
+      %uc.0 : py.Value = py.undef(\"c\")
+      %args.0 : py.Value = py.mkTuple(%i1.0, %i5.0, %i6.0)
+      %kw.0 : py.Value = py.mkKwargs(%c.0, %i3.0, %ke.0, %i7.0)
+      %d.0 : py.Value = py.mkTuple(%ua.0, %i2.0, %uc.0, %i4.0)
+      %b.0 : py.Value = py.bindArgs(%args.0, %kw.0, %d.0, \"f\", 0, 2, true, true, \"a\", \"b\", \"c\", \"d\") ^err.0()
+      %t0.0 : py.Value = py.tupleGet(%b.0, 0)
+      %t1.0 : py.Value = py.tupleGet(%b.0, 1)
+      %t2.0 : py.Value = py.tupleGet(%b.0, 2)
+      %t3.0 : py.Value = py.tupleGet(%b.0, 3)
+      %t4.0 : py.Value = py.tupleGet(%b.0, 4)
+      %v.0 : py.Value = py.mkTuple(%t0.0, %t1.0, %t2.0, %t3.0, %t4.0)")
+
+/-- info: dict ['e': 7] -/
+#guard_msgs in
+#eval run (main "      %i1.0 : py.Value = py.intLit(1)
+      %i5.0 : py.Value = py.intLit(5)
+      %i6.0 : py.Value = py.intLit(6)
+      %i3.0 : py.Value = py.intLit(3)
+      %i7.0 : py.Value = py.intLit(7)
+      %i2.0 : py.Value = py.intLit(2)
+      %i4.0 : py.Value = py.intLit(4)
+      %c.0 : py.Value = py.strLit(\"c\")
+      %ke.0 : py.Value = py.strLit(\"e\")
+      %ua.0 : py.Value = py.undef(\"a\")
+      %uc.0 : py.Value = py.undef(\"c\")
+      %args.0 : py.Value = py.mkTuple(%i1.0, %i5.0, %i6.0)
+      %kw.0 : py.Value = py.mkKwargs(%c.0, %i3.0, %ke.0, %i7.0)
+      %d.0 : py.Value = py.mkTuple(%ua.0, %i2.0, %uc.0, %i4.0)
+      %b.0 : py.Value = py.bindArgs(%args.0, %kw.0, %d.0, \"f\", 0, 2, true, true, \"a\", \"b\", \"c\", \"d\") ^err.0()
+      %v.0 : py.Value = py.tupleGet(%b.0, 5)")
+
+-- Too many positional arguments, with the keyword-only ones that were given.
+/-- info: exception TypeError('f() takes from 1 to 2 positional arguments but 3 positional arguments (and 1 keyword-only argument) were given',), context None, traceback <traceback>, fields [] -/
+#guard_msgs in
+#eval run (main "      %i1.0 : py.Value = py.intLit(1)
+      %i2.0 : py.Value = py.intLit(2)
+      %c.0 : py.Value = py.strLit(\"c\")
+      %ua.0 : py.Value = py.undef(\"a\")
+      %uc.0 : py.Value = py.undef(\"c\")
+      %args.0 : py.Value = py.mkTuple(%i1.0, %i1.0, %i1.0)
+      %kw.0 : py.Value = py.mkKwargs(%c.0, %i1.0)
+      %d.0 : py.Value = py.mkTuple(%ua.0, %i2.0, %uc.0)
+      %v.0 : py.Value = py.bindArgs(%args.0, %kw.0, %d.0, \"f\", 0, 2, false, false, \"a\", \"b\", \"c\") ^err.0()")
+
+/-- info: exception TypeError('K.m() takes 0 positional arguments but 1 was given',), context None, traceback <traceback>, fields [] -/
+#guard_msgs in
+#eval run (main "      %i1.0 : py.Value = py.intLit(1)
+      %args.0 : py.Value = py.mkTuple(%i1.0)
+      %kw.0 : py.Value = py.mkKwargs()
+      %d.0 : py.Value = py.mkTuple()
+      %v.0 : py.Value = py.bindArgs(%args.0, %kw.0, %d.0, \"K.m\", 0, 0, false, false) ^err.0()")
+
+-- Every missing positional parameter is listed, as CPython's `format_missing` does, then every
+-- missing keyword-only one.
+/-- info: exception TypeError("h() missing 3 required positional arguments: 'a', 'b', and 'c'",), context None, traceback <traceback>, fields [] -/
+#guard_msgs in
+#eval run (main "      %ua.0 : py.Value = py.undef(\"a\")
+      %args.0 : py.Value = py.mkTuple()
+      %kw.0 : py.Value = py.mkKwargs()
+      %d.0 : py.Value = py.mkTuple(%ua.0, %ua.0, %ua.0)
+      %v.0 : py.Value = py.bindArgs(%args.0, %kw.0, %d.0, \"h\", 0, 3, false, false, \"a\", \"b\", \"c\") ^err.0()")
+
+/-- info: exception TypeError("q() missing 2 required keyword-only arguments: 'a' and 'b'",), context None, traceback <traceback>, fields [] -/
+#guard_msgs in
+#eval run (main "      %ua.0 : py.Value = py.undef(\"a\")
+      %args.0 : py.Value = py.mkTuple()
+      %kw.0 : py.Value = py.mkKwargs()
+      %d.0 : py.Value = py.mkTuple(%ua.0, %ua.0)
+      %v.0 : py.Value = py.bindArgs(%args.0, %kw.0, %d.0, \"q\", 0, 0, false, false, \"a\", \"b\") ^err.0()")
+
+-- A keyword that repeats a positional argument, and one that names no parameter; the first error
+-- in the keywords' order wins.
+/-- info: exception TypeError("f() got multiple values for argument 'a'",), context None, traceback <traceback>, fields [] -/
+#guard_msgs in
+#eval run (main "      %i1.0 : py.Value = py.intLit(1)
+      %a.0 : py.Value = py.strLit(\"a\")
+      %b.0 : py.Value = py.strLit(\"b\")
+      %ua.0 : py.Value = py.undef(\"a\")
+      %args.0 : py.Value = py.mkTuple(%i1.0)
+      %kw.0 : py.Value = py.mkKwargs(%a.0, %i1.0, %b.0, %i1.0)
+      %d.0 : py.Value = py.mkTuple(%ua.0)
+      %v.0 : py.Value = py.bindArgs(%args.0, %kw.0, %d.0, \"f\", 0, 1, false, false, \"a\") ^err.0()")
+
+/-- info: exception TypeError("f() got an unexpected keyword argument 'b'",), context None, traceback <traceback>, fields [] -/
+#guard_msgs in
+#eval run (main "      %i1.0 : py.Value = py.intLit(1)
+      %a.0 : py.Value = py.strLit(\"a\")
+      %b.0 : py.Value = py.strLit(\"b\")
+      %ua.0 : py.Value = py.undef(\"a\")
+      %args.0 : py.Value = py.mkTuple(%i1.0)
+      %kw.0 : py.Value = py.mkKwargs(%b.0, %i1.0, %a.0, %i1.0)
+      %d.0 : py.Value = py.mkTuple(%ua.0)
+      %v.0 : py.Value = py.bindArgs(%args.0, %kw.0, %d.0, \"f\", 0, 1, false, false, \"a\") ^err.0()")
+
+-- A keyword that names a positional-only parameter, without `**kw`, gaps: CPython's message, which
+-- lists every positional-only parameter that a keyword names, is not modelled yet.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a keyword that names a positional-only parameter" -/
+#guard_msgs in
+#eval run (main "      %i1.0 : py.Value = py.intLit(1)
+      %a.0 : py.Value = py.strLit(\"a\")
+      %ua.0 : py.Value = py.undef(\"a\")
+      %args.0 : py.Value = py.mkTuple()
+      %kw.0 : py.Value = py.mkKwargs(%a.0, %i1.0)
+      %d.0 : py.Value = py.mkTuple(%ua.0)
+      %v.0 : py.Value = py.bindArgs(%args.0, %kw.0, %d.0, \"p\", 1, 1, false, false, \"a\") ^err.0()")
 
 -- `is` on singletons is exact; on two equal ints it depends on CPython's caching, so it gaps.
 /-- info: True -/
@@ -1626,5 +1748,171 @@ def mainTotal (body : String) : String := s!"module m \{
       ret(%v.0)
   }
 }"
+
+/-- A module whose body sets the global `x`, with functions that read it, raise, and gap. -/
+def fnsModule : String := "module m {
+  func @m.body() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %i.0 : py.Value = py.intLit(1)
+      %c.0 : base.Ref(py.Value) = py.globalCell(\"m\", \"x\")
+      %s.0 : base.Unit = base.refSet[py.Value](%c.0, %i.0)
+      %n.0 : py.Value = py.noneLit
+      %r.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%n.0)
+      ret(%r.0)
+  }
+  func @m.get() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %v.0 : py.Value = py.loadGlobal(\"m\", \"x\") ^err.0()
+      %r.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%v.0)
+      ret(%r.0)
+    err.0(%e.0 : py.Value):
+      %r.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%e.0)
+      ret(%r.1)
+  }
+  func @m.boom() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %v.0 : py.Value = py.loadGlobal(\"m\", \"nope\") ^err.0()
+      %r.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%v.0)
+      ret(%r.0)
+    err.0(%e.0 : py.Value):
+      %r.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%e.0)
+      ret(%r.1)
+  }
+  func @m.stop() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %n.0 : py.Value = py.noneLit
+      %s.0 : base.Unit = py.setAttr(%n.0, \"a\", %n.0) ^err.0()
+      %r.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%n.0)
+      ret(%r.0)
+    err.0(%e.0 : py.Value):
+      %r.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%e.0)
+      ret(%r.1)
+  }
+}"
+
+/-- The trace of `fnsModule`'s body, then of the functions `fns`. -/
+def runFns (fns : List String) : IO Unit := do
+  match ← Module.read Py.env fnsModule "t.dyn" with
+  | .error e => IO.println s!"read: {e}"
+  | .ok m => IO.print (runModuleThen m (.str (.str .base "m") "body") "m"
+      (fns.map fun f => .str (.str .base "m") f))
+
+-- Each function runs where the previous run ended: `get` reads the body's `x`.  An exception is
+-- the function's result, and the next function runs; after a gap, no function runs.
+/-- info: --- stdout 0
+
+--- outcome
+ok
+--- globals
+x = 1
+--- result m.get
+1
+--- result m.boom
+raised NameError: name 'nope' is not defined
+--- result m.get
+1
+--- result m.stop
+--- gap not modelled yet: py.setAttr
+--- result m.get
+--- gap not modelled yet: py.setAttr
+--- result m.none
+--- fault no function m.none
+-/
+#guard_msgs in
+#eval runFns ["get", "boom", "get", "stop", "get", "none"]
+
+-- A gap in the body's outcome ends the trace: the exception's type, then the gap, and no globals
+-- and no function after it.
+/-- info: --- stdout 0
+
+--- outcome
+raised NameError
+--- gap an exception whose text has a line break
+-/
+#guard_msgs in
+#eval do
+  match ← Module.read Py.env "module m {
+  func @m.body() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %u.0 : py.Value = py.undef(\"x\")
+      %v.0 : py.Value = py.requireDefined(%u.0, \"x\", \"NameError\", \"a\\nb\") ^err.0()
+      %r.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%v.0)
+      ret(%r.0)
+    err.0(%e.0 : py.Value):
+      %r.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%e.0)
+      ret(%r.1)
+  }
+  func @m.get() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %n.0 : py.Value = py.noneLit
+      %r.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%n.0)
+      ret(%r.0)
+  }
+}" "t.dyn" with
+  | .error e => IO.println s!"read: {e}"
+  | .ok m => IO.print (runModuleThen m (.str (.str .base "m") "body") "m" [.str (.str .base "m") "get"])
+
+-- So does a gap in the globals: a global `int` too long to print.
+/-- info: --- stdout 0
+
+--- outcome
+ok
+--- globals
+--- gap the repr of an int with too many digits
+-/
+#guard_msgs in
+#eval do
+  match ← Module.read Py.env s!"module m \{
+  func @m.body() -> base.Except(py.Value, py.Value) \{
+    entry.0():
+      %s.0 : py.Value = py.intLit({String.ofList (List.replicate 5000 '9')})
+      %c.0 : base.Ref(py.Value) = py.globalCell(\"m\", \"x\")
+      %u.0 : base.Unit = base.refSet[py.Value](%c.0, %s.0)
+      %n.0 : py.Value = py.noneLit
+      %r.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%n.0)
+      ret(%r.0)
+  }
+  func @m.get() -> base.Except(py.Value, py.Value) \{
+    entry.0():
+      %n.0 : py.Value = py.noneLit
+      %r.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%n.0)
+      ret(%r.0)
+  }
+}" "t.dyn" with
+  | .error e => IO.println s!"read: {e}"
+  | .ok m => IO.print (runModuleThen m (.str (.str .base "m") "body") "m" [.str (.str .base "m") "get"])
+
+/-! ## The outcome's lines of an exception -/
+
+/-- The lines of an outcome, or the gap's message. -/
+def outcomeText (r : RenderM (List String)) : String :=
+  match r with
+  | .ok ls => "\n".intercalate ls
+  | .error msg => s!"gap: {msg}"
+
+/-- An exception object of the built-in class `b` with the one argument `msg`. -/
+def excObj (b : Builtin) (msg : String) (e : ExcState := {}) : Obj Run :=
+  { cls := .builtin b, payload := .exc { e with args := .tuple #[.ofString msg] } }
+
+/-- A `ValueError("outer")` raised from a `KeyError("inner")`, whose context is the
+`ValueError`: a chain with a cycle. -/
+def chainStore : ObjStore Run :=
+  { objs := #[excObj .ValueError "outer" { cause := .obj 1, suppressContext := true },
+      excObj .KeyError "inner" { context := .obj 0 }] }
+
+-- A cause is printed as `cause`, a context as `context`, and the walk stops at an exception
+-- it has already printed, as CPython's traceback printer does.
+/-- info: raised ValueError: outer
+  cause KeyError -/
+#guard_msgs in #eval IO.println (outcomeText (excLines chainStore 100 (.obj 0)))
+
+/-- info: raised KeyError: 'inner'
+  context ValueError -/
+#guard_msgs in #eval IO.println (outcomeText (excLines chainStore 100 (.obj 1)))
+
+-- A message with a line break is a gap: printed, it could forge a section's header.
+/-- info: gap: an exception whose text has a line break -/
+#guard_msgs in
+#eval IO.println (outcomeText (excLines { objs := #[excObj .ValueError "x\n--- gap g"] } 100 (.obj 0)))
 
 end StrataPython.Dyn.Sem.RunTest

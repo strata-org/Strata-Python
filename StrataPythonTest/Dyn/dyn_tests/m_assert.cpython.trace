@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised NameError: name 'c' is not defined
+--- globals
+AssertionError = <class 'KeyError'>
+__doc__ = None
+__name__ = '__main__'

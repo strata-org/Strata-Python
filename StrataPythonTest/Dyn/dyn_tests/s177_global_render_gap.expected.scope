@@ -1,0 +1,3 @@
+module
+  a: local (assigned)
+  x: local (assigned)

@@ -1,0 +1,14 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Failing = <class 'Failing'>
+__doc__ = None
+__name__ = '__main__'
+in_handler = <function object>
+log = []
+note = <function object>
+on_normal = <function object>
+on_raise = <function object>
+on_return = <function object>

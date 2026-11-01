@@ -1,0 +1,19 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Oops = <class 'Oops'>
+__doc__ = None
+__name__ = '__main__'
+both = <function object>
+caller = <function object>
+cause = <function object>
+cls = <function object>
+flag = False
+gen = <function object>
+in_loop = <function object>
+instance = <function object>
+no_active = <function object>
+no_cause = <function object>
+reraise = <function object>

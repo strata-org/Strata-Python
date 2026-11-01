@@ -44,9 +44,11 @@ public import StrataPython.Dyn.Sem.Rules.Values
 public import StrataPython.Dyn.Sem.Rules.Ops
 public import StrataPython.Dyn.Sem.Proto.Ops
 public import StrataPython.Dyn.Sem.Proto.Containers
+public import StrataPython.Dyn.Sem.Proto.Calls
 public import StrataPython.Dyn.Sem.Rules.Containers
 public import StrataPython.Dyn.Sem.Rules.Globals
 public import StrataPython.Dyn.Sem.Rules.Closures
+public import StrataPython.Dyn.Sem.Rules.Calls
 public import StrataPython.Dyn.Sem.Rules.GlobalsProps
 public import StrataPython.Dyn.Sem.Table
 

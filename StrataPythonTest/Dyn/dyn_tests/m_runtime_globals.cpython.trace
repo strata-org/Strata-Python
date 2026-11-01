@@ -1,0 +1,12 @@
+--- stdout 3
+hi
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+builtins = <module object>
+f = <function object>
+g = <function object>
+later = 1

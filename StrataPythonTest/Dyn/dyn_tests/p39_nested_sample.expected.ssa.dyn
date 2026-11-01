@@ -38,7 +38,7 @@ module p39_nested_sample {
       %total.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%total.0)
       %prefix.1 : py.Value = py.undef("prefix")
       %defaults.0 : py.Value = py.mkTuple(%prefix.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "prefix") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "make", 0, 1, false, false, "prefix") ^propagate.0()
       %prefix.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%prefix.cell.0, %prefix.2)
       %mod.0 : py.Value = py.importModule("json") ^propagate.0()
@@ -107,7 +107,7 @@ module p39_nested_sample {
   func @p39_nested_sample.make.total(%count.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%count.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "make.<locals>.total", 0, 0, false, false) ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|p39_nested_sample.make.total.<lambda>|, "<lambda>", "p39_nested_sample", %count.cell.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%clo.0)
       ret(%ret.0)
@@ -121,7 +121,7 @@ module p39_nested_sample {
       %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
       %self.1 : py.Value = py.undef("self")
       %defaults.0 : py.Value = py.mkTuple(%self.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "self") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "make.<locals>.Box.show", 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %count.0 : py.Value = base.refGet[py.Value](%count.cell.0)
       %count.1 : py.Value = py.requireDefined(%count.0, "count", "NameError", "cannot access free variable 'count' where it is not associated with a value in enclosing scope") ^propagate.0()
@@ -149,7 +149,7 @@ module p39_nested_sample {
   func @|p39_nested_sample.make.total.<lambda>|(%count.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%count.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "make.<locals>.total.<locals>.<lambda>", 0, 0, false, false) ^propagate.0()
       %count.0 : py.Value = base.refGet[py.Value](%count.cell.0)
       %count.1 : py.Value = py.requireDefined(%count.0, "count", "NameError", "cannot access free variable 'count' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%count.1)

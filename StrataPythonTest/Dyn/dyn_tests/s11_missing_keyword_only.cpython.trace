@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: g() missing 2 required keyword-only arguments: 'j' and 'k'
+--- globals
+__doc__ = None
+__name__ = '__main__'
+g = <function object>

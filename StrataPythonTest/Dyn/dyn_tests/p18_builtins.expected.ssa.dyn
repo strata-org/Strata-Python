@@ -20,7 +20,7 @@ module p18_builtins {
       %xs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%xs.0)
       %xs.1 : py.Value = py.undef("xs")
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "xs") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %sorted.0 : py.Value = py.loadGlobal("p18_builtins", "sorted") ^propagate.0()
       %reversed.0 : py.Value = py.loadGlobal("p18_builtins", "reversed") ^propagate.0()

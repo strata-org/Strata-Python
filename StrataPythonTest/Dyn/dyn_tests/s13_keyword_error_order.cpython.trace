@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: k() got an unexpected keyword argument 'b'
+--- globals
+__doc__ = None
+__name__ = '__main__'
+k = <function object>

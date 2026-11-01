@@ -1,0 +1,14 @@
+--- stdout 77
+
+1 2 3
+1-2
+ab!
+None True False 1.5 -0.0 100000000000000000000 x
+no newline
+|
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'

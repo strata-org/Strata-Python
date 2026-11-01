@@ -17,6 +17,8 @@ import StrataPython.Dyn.Cli
   `StrataPython.Dyn.Cli`.
 * `pyspec SEARCH_PATH MODULE`: the IR modules of a PySpec model module and the model modules it
   imports, from `StrataPython.Dyn.Cli`.
+* `run FILE`: the trace of a run of a `.py` file with the Python semantics, from
+  `StrataPython.Dyn.Cli`.
 * `features FILE`: the Python features a Python Ion file uses, from
   `StrataPython.Cli`.
 
@@ -26,6 +28,7 @@ def commands : List Command :=
   [ StrataPython.Dyn.Cli.dynCommand,
     StrataPython.Dyn.Cli.readCommand,
     StrataPython.Dyn.Cli.pyspecCommand,
+    StrataPython.Dyn.Cli.runCommand,
     StrataPython.Cli.pyFeaturesCommand ]
 
 def commandMap : Std.HashMap String Command :=

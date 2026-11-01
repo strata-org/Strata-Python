@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__annotations__ = {'i': <class 'int'>, 'j': <class 'int'>, 'k': <class 'int'>, 'total': <class 'int'>}
+__doc__ = None
+__name__ = '__main__'
+i = 10
+j = 6
+k = 10
+total = 25

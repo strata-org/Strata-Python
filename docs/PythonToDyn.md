@@ -18,7 +18,8 @@ marks what it implements, and the module docstring has a recipe for adding a con
 The tests are the programs `NAME.py` in `StrataPythonTest/Dyn/dyn_tests/`.
 `StrataPythonTestExtra/DynTranslateTest.lean` runs every one, as listed in
 `StrataPythonTest/Dyn/dyn_tests.txt`, and compares each one marked supported with its
-golden, `NAME.expected.dyn` beside `NAME.py`.
+golden, `NAME.expected.dyn` beside `NAME.py`. §13 describes the semantics that runs the
+translated programs, and the test that compares their runs with CPython's.
 
 **Design decisions.** Every local is a cell declared in the entry block. The translator does
 no SSA construction: promoting cells to SSA values is a later ref-to-reg pass. Control flow is
@@ -2385,3 +2386,107 @@ as that module's class, where CPython raises `AttributeError`. `SpecsTest` pins 
 `StrataPythonTest/Dyn/pyspec_models.txt` lists, and compares each module with its golden in
 `StrataPythonTest/Dyn/pyspec_models/`. For a rejected set, it compares the rule IDs with the
 list, and the rejections with their messages with a golden there.
+
+## 13. Semantics
+
+`StrataPython/Dyn/Sem/` gives each `py.*` operation except the contract operations a rule that
+does what CPython 3.12 does
+(`Rules/`, over the generic protocols of `Proto/`), as `docs/Dyn.md` §3 describes. A rule that
+reaches a case the semantics doesn't model yet stops the run with a gap, whose message names the
+case, e.g. `not modelled yet: py.setAttr` or `import of module sys is not modelled yet`. A gap is
+never a wrong result: the run stops there. Outside the known differences of §13.4 and the bugs of
+§13.5, a run that doesn't stop with a gap gives CPython's result.
+
+That claim trusts these assumptions about the CPython run:
+- the default limit of 4,300 digits for converting an `int` to and from a `str`: no
+  `sys.set_int_max_str_digits`, no `PYTHONINTMAXSTRDIGITS` and no `-X int_max_str_digits`;
+- the default recursion limit of 1,000: no `sys.setrecursionlimit`;
+- no `-O` (so `assert` statements run and `__debug__` is `True`);
+- enough memory, so that no `MemoryError` is raised;
+- the platform's `libm` for a float `**`, whose result the model takes from the host's `pow`.
+
+It also trusts one contract that the semantics follows, which a run checks only in part. The
+semantics's primitives (`StrataPython/Dyn/Sem/Dom.lean`) have writes that may only target objects
+made since the operation's first activation started, by the operation or by code that it called
+(`PyNew`). An activation is one run of the rule, from its operands or from a resumed step, so the
+contract lets a later activation write an object that an earlier one made. A rule that reads the
+store's size when its activation started checks a stronger condition: its own writes stop with a
+model-invariant gap at an object older than the current activation. A rule at the `writes` level
+that doesn't read the start (`PyM σ .writes true`) doesn't check the contract, so for it the
+contract is trusted.
+
+### 13.1 Running a program
+
+`pydyn run FILE.py [--fuel N]` translates the file as module `__main__`, runs its body, and prints
+its trace (`StrataPython/Dyn/Sem/Run.lean`):
+
+```
+--- stdout <n>
+<the n characters that the program printed, exactly, then one newline>
+--- outcome
+ok                         (or: raised <ExcType>: <str(exc)>, then "  cause <ExcType>" or
+                            "  context <ExcType>" for each link of the exception's chain)
+--- globals
+<name> = <value>           (sorted by name; no dunder names but __name__, __doc__ and
+                            __annotations__)
+```
+
+A value prints as its `repr` for `None`, `bool`, `int`, `float`, `str`, `bytes`, `range` and
+`slice`. Lists, tuples, dicts, sets and frozensets print in full, a set's members sorted. A class
+prints as `<class 'Q'>`, and any other object as `<T object>`. A gap prints `--- gap <message>`
+and ends the trace: in place of the outcome, after the outcome's header (and after a line
+`raised <ExcType>` when the exception's type is known, which CPython's outcome must match), or in
+place of the first global that can't be printed. A text with a line break is such a gap too, since it could forge a
+section's header. A run out of fuel prints `--- out of fuel`.
+
+### 13.2 The differential test
+
+`StrataPythonTestExtra/SemDiffTest.lean` runs every program of `StrataPythonTest/Dyn/dyn_tests/`
+with `pydyn run`, and compares its trace with CPython's, which `StrataPythonTest/Dyn/trace.py`
+prints in the same form. Each program gets a verdict, pinned in
+`StrataPythonTest/Dyn/sem_expected.txt`:
+
+```
+<name> | agree                  (the two traces are equal)
+<name> | gap | <message>        (the run stops with a gap, or the translator rejects the program)
+<name> | known | <reason>       (a difference or a bug documented in §13.4 or §13.5; the run's own
+                                trace is pinned in NAME.known.trace)
+<name> | syntax                 (the translator and CPython both report a syntax error)
+```
+
+A run that stops with a gap must agree with CPython up to the gap. A gap right after the output
+needs only a beginning of CPython's output. A later gap needs the whole output, and the sections
+before the gap, to be CPython's. The test fails on any other difference, on a run out of fuel, on
+a fault, on a model-invariant gap, on an internal error of the translator, and on any change of
+verdict or of a known difference's trace. CPython's traces are goldens, `NAME.cpython.trace` beside
+`NAME.py`.
+CPython runs each program twice, with `PYTHONHASHSEED` 0 and 1. If the two traces differ, the
+golden holds both, with each address replaced by `0x?`, and the semantics must stop with a gap on
+the program. `SEM_UPDATE=1` rewrites the goldens and the verdicts. `StrataPythonTest/Util/SemDiff.lean`
+gives the verdict of one program, for other differential tests with their own programs.
+
+### 13.3 What is modelled
+
+- The values `None`, `bool`, `int`, `float`, `str`, `bytes`, `tuple`, `range`, `slice`,
+  `Ellipsis` and `NotImplemented`, with their hashes, their arithmetic and their comparisons.
+- Lists, dicts, sets and frozensets: building them, item access, slices, unpacking, `in`, and the
+  operators on them.
+- Global names, with the fallback to `builtins`, and closures with their cells.
+- Calls of function objects, with positional and keyword arguments and `*` and `**` arguments.
+  `**` builds a new dict and leaves the operand unchanged.
+- `print`, with `sep` and `end`, for arguments whose `str` runs no protocol: `None`, `bool`,
+  `int`, `float` and `str`.
+- `import builtins` and `from builtins import name`.
+
+### 13.4 Known differences
+
+The semantics knows of no difference from CPython that isn't a gap or a bug (§13.5).
+
+### 13.5 Known bugs
+
+These give a wrong result. Each is pinned by a corpus program, with a `known` verdict whose reason
+names this section, until it is fixed.
+
+- A lone surrogate in a `str` literal, such as `"\udc80"`, reaches the translator as its escape
+  text, the six characters `\udc80`. So `"\udc80" == "\\udc80"` is `True`, where CPython gives
+  `False`.

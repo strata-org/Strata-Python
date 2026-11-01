@@ -1,7 +1,7 @@
 module
   import random: module random
   import TypedDict: member TypedDict of typing
-  random: local (imported)
+  random: local (imported, referenced)
   TypedDict: local (imported, referenced)
   coin: local (assigned, referenced)
   Account: local (assigned, referenced)

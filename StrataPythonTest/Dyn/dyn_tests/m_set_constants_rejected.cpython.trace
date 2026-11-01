@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+a = {17, 3, 9}

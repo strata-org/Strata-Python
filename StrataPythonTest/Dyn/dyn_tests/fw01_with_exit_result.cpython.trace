@@ -1,0 +1,14 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Ctx = <class 'Ctx'>
+Flag = <class 'Flag'>
+__doc__ = None
+__name__ = '__main__'
+falls_off = <function object>
+log = []
+note = <function object>
+raises = <function object>
+returns = <function object>

@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Point = <class 'Point'>
+__doc__ = None
+__name__ = '__main__'
+d = 7
+p = <Point object>

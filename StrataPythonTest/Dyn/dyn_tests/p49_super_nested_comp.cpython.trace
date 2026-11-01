@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+__doc__ = None
+__name__ = '__main__'

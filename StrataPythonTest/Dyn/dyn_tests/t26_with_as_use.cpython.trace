@@ -1,0 +1,22 @@
+--- PYTHONHASHSEED=0
+--- stdout 31
+<__main__.MyCtx object at 0x?>
+
+--- outcome
+ok
+--- globals
+MyCtx = <class 'MyCtx'>
+__doc__ = None
+__name__ = '__main__'
+ctx = <MyCtx object>
+--- PYTHONHASHSEED=1
+--- stdout 31
+<__main__.MyCtx object at 0x?>
+
+--- outcome
+ok
+--- globals
+MyCtx = <class 'MyCtx'>
+__doc__ = None
+__name__ = '__main__'
+ctx = <MyCtx object>

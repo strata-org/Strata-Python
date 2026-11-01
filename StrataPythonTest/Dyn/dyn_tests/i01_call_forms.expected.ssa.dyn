@@ -128,7 +128,7 @@ module i01_call_forms {
       %kwargs.1 : py.Value = py.undef("kwargs")
       %kwargs.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%kwargs.1)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, true, true) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "show", 0, 0, true, true) ^propagate.0()
       %args.2 : py.Value = py.tupleGet(%bound.0, 0)
       %kwargs.2 : py.Value = py.tupleGet(%bound.0, 1)
       %print.0 : py.Value = py.loadGlobal("i01_call_forms", "print") ^propagate.0()

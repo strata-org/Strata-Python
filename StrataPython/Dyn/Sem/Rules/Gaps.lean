@@ -25,18 +25,6 @@ open Strata.Dyn.Exec
 
 variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
 
-@[dyn_sem Py.bindArgs] def bindArgs (_args _kwargs _defaults : Value) (_nPosOnly _nPos : Int)
-    (_varPos _varKw : Bool) (_names : Array String) (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .calls) "not modelled yet: py.bindArgs")
-
-@[dyn_sem Py.call] def call (_func : Value) (_args : Value) (_kwargs : Value)
-    (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.call")
-
-@[dyn_sem Py.qualifiedRef] def qualifiedRef (_moduleName : String) (_name : String)
-    (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.qualifiedRef")
-
 @[dyn_sem Py.attr] def attr (_obj : Value) (_name : String) (err : Target E [Value])
     : Sem ε E Value :=
   runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .calls) "not modelled yet: py.attr")
@@ -49,29 +37,9 @@ variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
     : Sem ε E Unit :=
   runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.delAttr")
 
-@[dyn_sem Py.importModule] def importModule (_module : String) (err : Target E [Value])
-    : Sem ε E Value :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.importModule")
-
-@[dyn_sem Py.importFrom] def importFrom (_module : String) (_name : String)
-    (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.importFrom")
-
-@[dyn_sem Py.mkKwargs] def mkKwargs (_kvs : (Array Value)) : Sem ε E Value :=
-  runTotalFree "py.mkKwargs" #[] (PyM.gap (σ := σ) (fr := true) (e := .pure) "not modelled yet: py.mkKwargs")
-
-@[dyn_sem Py.argsTuple] def argsTuple (_callee : Value) (_iterable : Value)
-    (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.argsTuple")
-
-@[dyn_sem Py.dictMerge] def dictMerge (_callee : Value) (_dict : Value) (_other : Value)
-    (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .calls) "not modelled yet: py.dictMerge")
-
 @[dyn_sem Py.dictUpdate] def dictUpdate (_dict : Value) (_other : Value) (err : Target E [Value])
     : Sem ε E Value :=
   runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .calls) "not modelled yet: py.dictUpdate")
-
 
 @[dyn_sem Py.getIter] def getIter (_obj : Value) (err : Target E [Value]) : Sem ε E Value :=
   runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.getIter")

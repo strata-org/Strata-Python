@@ -1,0 +1,20 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+a = {1, 17, 9}
+b = {1, 9}
+c = {17, 5, 9}
+d = [1, 17, -9]
+e = False
+f = True
+g = False
+h = False
+k = False
+m = {1, 2, 3}
+n = {1, 17, 9}
+x = 5
+y = 9

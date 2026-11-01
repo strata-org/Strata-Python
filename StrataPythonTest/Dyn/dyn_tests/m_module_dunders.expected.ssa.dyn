@@ -49,7 +49,7 @@ module m_module_dunders {
   func @m_module_dunders.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
       %__name__.0 : py.Value = py.loadGlobal("m_module_dunders", "__name__") ^propagate.0()
       %__doc__.0 : py.Value = py.loadGlobal("m_module_dunders", "__doc__") ^propagate.0()
       %str.0 : py.Value = py.strLit("module attribute __spec__")
@@ -71,7 +71,7 @@ module m_module_dunders {
       %__file__.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%__file__.0)
       %__file__.1 : py.Value = py.undef("__file__")
       %defaults.0 : py.Value = py.mkTuple(%__file__.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "__file__") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "g", 0, 1, false, false, "__file__") ^propagate.0()
       %__file__.2 : py.Value = py.tupleGet(%bound.0, 0)
       %__file__.4 : py.Value = py.requireDefined(%__file__.2, "__file__", "UnboundLocalError", "cannot access local variable '__file__' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%__file__.4)

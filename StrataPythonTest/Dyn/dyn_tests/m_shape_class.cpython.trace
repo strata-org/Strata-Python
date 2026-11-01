@@ -1,0 +1,18 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Bare = <class 'Bare'>
+Box = <class 'Box'>
+ClassVar = <_SpecialForm object>
+Conn = <class 'Conn'>
+GenInit = <class 'GenInit'>
+More = <class 'More'>
+Opt = <_SpecialForm object>
+Point = <class 'Point'>
+Rb = <class 'Rb'>
+Slotted = <class 'Slotted'>
+__doc__ = None
+__name__ = '__main__'
+flag = True

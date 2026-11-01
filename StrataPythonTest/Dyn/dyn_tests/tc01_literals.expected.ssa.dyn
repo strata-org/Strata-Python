@@ -31,7 +31,7 @@ module tc01_literals {
       %b.0 : py.Value = py.undef("b")
       %b.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%b.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
       %int.0 : py.Value = py.intLit(42)
       %str.0 : py.Value = py.strLit("hello")
       %bool.0 : py.Value = py.boolLit(true)

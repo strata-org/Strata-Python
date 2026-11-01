@@ -22,7 +22,7 @@ module m_while {
       %i.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
       %n.4 : py.Value = py.undef("n")
       %defaults.0 : py.Value = py.mkTuple(%n.4)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "n") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "loop", 0, 1, false, false, "n") ^propagate.0()
       %n.5 : py.Value = py.tupleGet(%bound.0, 0)
       %int.0 : py.Value = py.intLit(0)
       jump ^head.0(%int.0)

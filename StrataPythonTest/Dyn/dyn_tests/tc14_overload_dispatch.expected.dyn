@@ -27,7 +27,7 @@ module tc14_overload_dispatch {
       %cache_client.0 : py.Value = py.undef("cache_client")
       %cache_client.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%cache_client.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
       %cloudkit.0 : py.Value = py.loadGlobal("tc14_overload_dispatch", "cloudkit") ^propagate.0()
       %client.0 : py.Value = py.attr(%cloudkit.0, "client") ^propagate.0()
       %str.0 : py.Value = py.strLit("database")

@@ -1,0 +1,256 @@
+c1_return_finally | agree
+c2_return_in_for_finally | agree
+c3_break_finally | agree
+c4_continue_finally | agree
+c5_body_finally_vs_loop_exit | agree
+c6_body_raise | agree
+c7_with_return | agree
+dom | agree
+e01_nonlocal_unbound | syntax
+e02_global_param | syntax
+e03_nonlocal_module | syntax
+e04_assign_before_global | syntax
+e05_use_before_global | syntax
+e06_nonlocal_and_global | syntax
+e07_walrus_class_comprehension | syntax
+e08_walrus_rebinds_iteration | syntax
+e09_duplicate_argument | syntax
+e10_import_star_in_function | syntax
+e11_nonlocal_param | syntax
+e12_nonlocal_top_function | syntax
+e13_walrus_comprehension_iterable | syntax
+e14_nonlocal_class_scope | syntax
+e15_comprehension_inner_rebind | syntax
+e16_yield_in_comprehension | syntax
+e17_yield_in_genexpr | syntax
+e18_walrus_lambda_in_iterable | syntax
+e19_walrus_rebinds_outer_iteration | syntax
+e20_yield_in_dictcomp | syntax
+e21_repeated_keyword | syntax
+e22_starred_target | syntax
+e23_multiple_starred | syntax
+e24_default_except_not_last | syntax
+e25_break_outside_loop | syntax
+e26_outside_loop | syntax
+e27_yield_outside_function | syntax
+e28_symtable_error_first | syntax
+fw01_with_exit_result | gap | a call of a built-in callable is not modelled yet
+fw02_with_exit_raises | gap | a call of a built-in callable is not modelled yet
+fw03_with_in_except | gap | import of module sys is not modelled yet
+fw04_with_two_items | gap | a call of a built-in callable is not modelled yet
+fw05_with_lookup_once | gap | a call of a built-in callable is not modelled yet
+fw06_with_in_loop | gap | a call of a built-in callable is not modelled yet
+fw07_with_in_finally | gap | import of module sys is not modelled yet
+fw08_try_in_with | gap | import of module sys is not modelled yet
+fw09_try_else_finally | gap | import of module sys is not modelled yet
+fw10_return_value_timing | gap | a call of a built-in callable is not modelled yet
+i01_call_forms | gap | a call of a built-in callable is not modelled yet
+i02_param_kinds | gap | str() of this value is not modelled yet
+i03_defaults | agree
+i04_dict_unpack | gap | not modelled yet: py.dictUpdate
+i05_kwargs_mutation | gap | a call of a built-in callable is not modelled yet
+i06_call_errors | gap | a TypeError that names a function is not modelled yet
+i07_methods | gap | a call of a built-in callable is not modelled yet
+i08_binding_errors | gap | not modelled yet: py.pushExcInfo
+i09_assigned_defaults | gap | not modelled yet: py.setAttr
+i10_keyword_subclass | gap | a call of a built-in callable is not modelled yet
+i11_constant_default | gap | is on two equal immediates depends on CPython's caching
+m_annotations | gap | the translator does not support generator function
+m_annotations_nested | gap | the translator does not support match, try/except*
+m_assert | agree
+m_attr_mangle | gap | a call of a built-in callable is not modelled yet
+m_builtins | gap | a call of a built-in callable is not modelled yet
+m_calls | agree
+m_class_namespace | gap | a call of a built-in callable is not modelled yet
+m_class_return | syntax
+m_classes | gap | a call of a built-in callable is not modelled yet
+m_closures | agree
+m_complex | gap | the translator does not support complex literal
+m_comprehensions | agree
+m_cond | agree
+m_decorators | gap | a call of a built-in callable is not modelled yet
+m_del | agree
+m_displays | agree
+m_expressions | agree
+m_finally | gap | import of module sys is not modelled yet
+m_for | agree
+m_fstring | gap | not modelled yet: py.strConcat
+m_func_annotations | gap | not modelled yet: py.attr
+m_future_annotations | gap | the translator does not support from __future__ import annotations
+m_generator_yields | gap | the translator does not support generator function, async def
+m_global_decl | agree
+m_if | agree
+m_imports | gap | import of module os is not modelled yet
+m_lambda | gap | the translator does not support generator function
+m_local_vs_global | agree
+m_module_bytes_doc | agree
+m_module_dunders | gap | the translator does not support module attribute __spec__, module attribute __package__, module attribute __loader__, module attribute __file__, module attribute __cached__, module attribute __builtins__, module attribute __annotations__, module attribute __path__
+m_operators | agree
+m_params | agree
+m_raise | gap | the translator does not support generator function
+m_rejected | gap | the translator does not support relative import, import *
+m_runtime_globals | gap | not modelled yet: py.setAttr
+m_scope_boolop | agree
+m_scope_chain | agree
+m_scope_ifexp | agree
+m_scope_nested | agree
+m_set_constants | gap | not modelled yet: py.getIter
+m_set_constants_comp_rejected | gap | the translator does not support a set display that CPython folds into a constant
+m_set_constants_rejected | gap | the translator does not support a set display that CPython folds into a constant
+m_shape_bindings | gap | the translator does not support match
+m_shape_cases | gap | the translator does not support generator function
+m_shape_class | gap | the translator does not support generator function
+m_shape_dataclass | gap | import of module dataclasses is not modelled yet
+m_shape_rigid | gap | import of module random is not modelled yet
+m_shape_typeddict | gap | import of module typing is not modelled yet
+m_subscripts | agree
+m_super | gap | the translator does not support super() without a positional parameter, super() outside a class
+m_super_global | gap | a call of a built-in callable is not modelled yet
+m_super_hook | gap | a call of a built-in callable is not modelled yet
+m_super_named | gap | a call of a built-in callable is not modelled yet
+m_super_rebound | gap | the translator does not support super() with super rebound
+m_targets | agree
+m_try | gap | the translator does not support try/except*
+m_unbound_local | agree
+m_unpack | agree
+m_walrus | agree
+m_while | agree
+m_with | gap | import of module sys is not modelled yet
+n01_async | gap | the translator does not support async def
+n02_listcomp | gap | not modelled yet: py.listComp
+n03_dictcomp | gap | not modelled yet: py.dictComp
+n04_generator | gap | the translator does not support generator expression
+n05_lambda | agree
+n06_yield | gap | the translator does not support generator function
+n07_walrus | gap | not modelled yet: py.listComp
+n08_mixed | gap | the translator does not support async def
+p01_import_dotted | gap | import of module os.path is not modelled yet
+p02_import_as | gap | import of module os.path is not modelled yet
+p03_from_import | gap | import of module os.path is not modelled yet
+p04_import_in_function | agree
+p05_import_try | gap | import of module simplejson is not modelled yet
+p06_import_relative | gap | the translator does not support relative import
+p07_import_star | gap | the translator does not support import *
+p08_import_rebound | gap | import of module os is not modelled yet
+p09_read_before_assign | agree
+p10_conditional_local | agree
+p11_shadow_under_control | agree
+p12_del | agree
+p13_except_as | agree
+p14_class_body | gap | a call of a built-in callable is not modelled yet
+p15_global | agree
+p16_closures | agree
+p17_conditional_def | gap | import of module sys is not modelled yet
+p18_builtins | agree
+p19_builtin_shadowed | gap | import of module sys is not modelled yet
+p20_global_mutated | agree
+p21_closure_three_levels | agree
+p22_comprehensions | gap | the translator does not support generator expression
+p23_walrus | gap | the translator does not support generator expression
+p24_lambda | agree
+p25_shadow_builtin | agree
+p26_params | agree
+p27_nonlocal_chain | agree
+p28_global_nested | agree
+p29_mangling | gap | a call of a built-in callable is not modelled yet
+p30_super | gap | a call of a built-in callable is not modelled yet
+p31_free_class | agree
+p32_class_comprehension | gap | a call of a built-in callable is not modelled yet
+p33_with_for_targets | agree
+p34_match | gap | the translator does not support match
+p35_async | gap | the translator does not support async def
+p36_decorators | agree
+p37_global_import | agree
+p38_type_alias | gap | the translator does not support type alias, type parameters
+p39_nested_sample | gap | import of module os.path is not modelled yet
+p40_comp_shadow | gap | a call of a built-in callable is not modelled yet
+p41_comp_nested | gap | the translator does not support generator expression
+p42_comp_reads_outer | gap | the translator does not support generator expression
+p43_comp_class_body | agree
+p44_comp_and_genexpr | gap | the translator does not support generator expression
+p45_comp_walrus | gap | a call of a built-in callable is not modelled yet
+p46_comp_lambda | gap | a call of a built-in callable is not modelled yet
+p47_scope_visit_order | gap | the translator does not support match
+p48_walrus_targets | agree
+p49_super_nested_comp | gap | a call of a built-in callable is not modelled yet
+p50_free_nested_comp | agree
+p51_comp_clauses | gap | not modelled yet: py.listComp
+rr01_handler_param | agree
+rr02_merges | agree
+rr03_frame_lambda | agree
+s01_print | agree
+s02_print_bad_sep | agree
+s03_call_args | agree
+s04_not_callable | agree
+s05_star_not_iterable | agree
+s06_kwargs_not_str | agree
+s07_kwargs_duplicate | agree
+s08_import_builtins | agree
+s09_import_missing | agree
+s10_missing_arguments | agree
+s11_missing_keyword_only | agree
+s12_positional_only_keyword | gap | a keyword that names a positional-only parameter
+s13_keyword_error_order | agree
+s14_print_bad_keyword | agree
+s159_truth_of_notimplemented | gap | the truth of NotImplemented, which warns, is not modelled yet
+s15_print_sep_before_end | agree
+s16_kwargs_not_mapping | agree
+s171_set_lookup_revisit | gap | a call of a built-in callable is not modelled yet
+s172_set_subset_revisit | gap | a call of a built-in callable is not modelled yet
+s173_set_lookup_two_candidates | gap | a call of a built-in callable is not modelled yet
+s176_set_lookup_two_members | gap | a call of a built-in callable is not modelled yet
+s177_global_render_gap | gap | the repr of an int with too many digits
+s17_kwargs_duplicate_int | agree
+s18_star_set | agree
+s19_recursion_depth | gap | Python call depth over 900
+s20_exception_chain | gap | a call of a built-in callable is not modelled yet
+s21_lone_surrogate | known | bug: a lone surrogate in a str literal reaches the translator as its escape text (docs/PythonToDyn.md §13.5)
+s22_print_flush | gap | print's keyword argument flush is not modelled yet
+s23_print_bad_before_flush | agree
+t01_assign | agree
+t02_operators | agree
+t03_if_else | agree
+t04_while | agree
+t05_for | gap | not modelled yet: py.getIter
+t06_function | gap | not modelled yet: py.setAttr
+t07_try_except | gap | a call of a built-in callable is not modelled yet
+t08_try_finally | gap | not modelled yet: py.pushPending
+t09_nested_try | gap | a call of a built-in callable is not modelled yet
+t10_except_type | gap | not modelled yet: py.setAttr
+t11_with | gap | a call of a built-in callable is not modelled yet
+t12_class | gap | a call of a built-in callable is not modelled yet
+t13_fstring | gap | not modelled yet: py.fmtValue
+t14_bool_short | agree
+t15_ifexp | agree
+t16_chained_cmp | agree
+t17_import | gap | import of module os is not modelled yet
+t18_data_struct | agree
+t19_attribute | gap | a call of a built-in callable is not modelled yet
+t20_raise | gap | not modelled yet: py.setAttr
+t21_combined | gap | import of module json is not modelled yet
+t22_star_args | gap | not modelled yet: py.setAttr
+t23_kwargs_boto3 | gap | import of module boto3 is not modelled yet
+t24_assert | gap | not modelled yet: py.setAttr
+t25_tuple_unpack | gap | not modelled yet: py.setAttr
+t26_with_as_use | gap | a call of a built-in callable is not modelled yet
+t27_module_vars | gap | import of module logging is not modelled yet
+t28_try_else | gap | not modelled yet: py.pushPending
+t29_dict_unpack | gap | not modelled yet: py.dictUpdate
+t30_loop_try_nested | gap | not modelled yet: py.getIter
+tc01_literals | agree
+tc02_arithmetic | agree
+tc03_string_ops | agree
+tc04_comparisons | agree
+tc05_unary | agree
+tc06_collections | agree
+tc07_if_else | agree
+tc08_fstring | agree
+tc09_import | gap | import of module math is not modelled yet
+tc10_class_method | gap | import of module myservice is not modelled yet
+tc11_class_field | gap | import of module myservice is not modelled yet
+tc12_exhaustive | gap | import of module myservice is not modelled yet
+tc13_from_import | gap | import of module math is not modelled yet
+tc14_overload_dispatch | gap | import of module cloudkit is not modelled yet
+tc15_arg_count | gap | import of module math is not modelled yet
+tc16_unknown_attr | gap | import of module math is not modelled yet
+tc17_transitive_dispatch | gap | import of module cloudkit is not modelled yet

@@ -1,0 +1,28 @@
+module s177_global_render_gap {
+  func @|s177_global_render_gap.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s177_global_render_gap")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s177_global_render_gap", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s177_global_render_gap", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %int.0 : py.Value = py.intLit(7)
+      %int.1 : py.Value = py.intLit(2)
+      %floorDiv.0 : py.Value = py.floorDiv(%int.0, %int.1) ^propagate.0()
+      %a.cell.0 : base.Ref(py.Value) = py.globalCell("s177_global_render_gap", "a")
+      %set.2 : base.Unit = base.refSet[py.Value](%a.cell.0, %floorDiv.0)
+      %int.2 : py.Value = py.intLit(10)
+      %int.3 : py.Value = py.intLit(5000)
+      %pow.0 : py.Value = py.pow(%int.2, %int.3) ^propagate.0()
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("s177_global_render_gap", "x")
+      %set.3 : base.Unit = base.refSet[py.Value](%x.cell.0, %pow.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

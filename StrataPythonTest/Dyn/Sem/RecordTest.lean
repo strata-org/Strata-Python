@@ -85,6 +85,7 @@ instance : PyReads TM Toy where
   numBinary _ _ _ := pure none
   numUnary _ _ := pure none
   listView _ := pure none
+  moduleGet _ := pure none
   tupleView _ := pure none
   strView _ := pure none
   bytesView _ := pure none

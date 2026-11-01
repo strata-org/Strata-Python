@@ -1,0 +1,15 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+a = None
+b = None
+cleanup = <function object>
+inner = None
+outer = None
+risky = <function object>
+x = None
+y = None

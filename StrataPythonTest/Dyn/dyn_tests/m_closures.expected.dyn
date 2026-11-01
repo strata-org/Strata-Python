@@ -36,7 +36,7 @@ module m_closures {
       %drop.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%drop.0)
       %p.1 : py.Value = py.undef("p")
       %defaults.0 : py.Value = py.mkTuple(%p.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "p") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "make", 0, 1, false, false, "p") ^propagate.0()
       %p.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%p.cell.0, %p.2)
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_closures.make.get, "get", "m_closures", %p.cell.0)
@@ -61,7 +61,7 @@ module m_closures {
       %mid.0 : py.Value = py.undef("mid")
       %mid.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%mid.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer", 0, 0, false, false) ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_closures.outer.mid, "mid", "m_closures", %x.cell.0)
@@ -82,7 +82,7 @@ module m_closures {
       %h.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%h.0)
       %flag.1 : py.Value = py.undef("flag")
       %defaults.0 : py.Value = py.mkTuple(%flag.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "flag") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "twice", 0, 1, false, false, "flag") ^propagate.0()
       %flag.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%flag.cell.0, %flag.2)
       %flag.3 : py.Value = base.refGet[py.Value](%flag.cell.0)
@@ -117,7 +117,7 @@ module m_closures {
       %a.1 : py.Value = py.undef("a")
       %b.1 : py.Value = py.undef("b")
       %defaults.0 : py.Value = py.mkTuple(%a.1, %b.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "a", "b") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "pair", 0, 2, false, false, "a", "b") ^propagate.0()
       %a.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.2)
       %b.2 : py.Value = py.tupleGet(%bound.0, 1)
@@ -141,7 +141,7 @@ module m_closures {
       %y.0 : py.Value = py.undef("y")
       %y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%y.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "early", 0, 0, false, false) ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_closures.early.h, "h", "m_closures", %y.cell.0)
       %set.0 : base.Unit = base.refSet[py.Value](%h.cell.0, %clo.0)
       %y.1 : py.Value = base.refGet[py.Value](%y.cell.0)
@@ -163,7 +163,7 @@ module m_closures {
   func @m_closures.make.get(%p.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%p.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "make.<locals>.get", 0, 0, false, false) ^propagate.0()
       %p.0 : py.Value = base.refGet[py.Value](%p.cell.0)
       %p.1 : py.Value = py.requireDefined(%p.0, "p", "NameError", "cannot access free variable 'p' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%p.1)
@@ -175,7 +175,7 @@ module m_closures {
   func @m_closures.make.drop(%p.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%p.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "make.<locals>.drop", 0, 0, false, false) ^propagate.0()
       %p.0 : py.Value = base.refGet[py.Value](%p.cell.0)
       %p.1 : py.Value = py.requireDefined(%p.0, "p", "NameError", "cannot access free variable 'p' where it is not associated with a value in enclosing scope") ^propagate.0()
       %p.2 : py.Value = py.undef("p")
@@ -192,7 +192,7 @@ module m_closures {
       %inner.0 : py.Value = py.undef("inner")
       %inner.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%inner.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer.<locals>.mid", 0, 0, false, false) ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_closures.outer.mid.inner, "inner", "m_closures", %x.cell.0)
       %set.0 : base.Unit = base.refSet[py.Value](%inner.cell.0, %clo.0)
       %inner.1 : py.Value = base.refGet[py.Value](%inner.cell.0)
@@ -206,7 +206,7 @@ module m_closures {
   func @m_closures.twice.h(%flag.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%flag.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "twice.<locals>.h", 0, 0, false, false) ^propagate.0()
       %flag.0 : py.Value = base.refGet[py.Value](%flag.cell.0)
       %flag.1 : py.Value = py.requireDefined(%flag.0, "flag", "NameError", "cannot access free variable 'flag' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%flag.1)
@@ -218,7 +218,7 @@ module m_closures {
   func @m_closures.twice.h.1(%flag.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%flag.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "twice.<locals>.h", 0, 0, false, false) ^propagate.0()
       %flag.0 : py.Value = base.refGet[py.Value](%flag.cell.0)
       %flag.1 : py.Value = py.requireDefined(%flag.0, "flag", "NameError", "cannot access free variable 'flag' where it is not associated with a value in enclosing scope") ^propagate.0()
       %not.0 : py.Value = py.not(%flag.1) ^propagate.0()
@@ -231,7 +231,7 @@ module m_closures {
   func @m_closures.pair.g(%b.cell.0 : base.Ref(py.Value), %a.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%b.cell.0 : base.Ref(py.Value), %a.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "pair.<locals>.g", 0, 0, false, false) ^propagate.0()
       %b.0 : py.Value = base.refGet[py.Value](%b.cell.0)
       %b.1 : py.Value = py.requireDefined(%b.0, "b", "NameError", "cannot access free variable 'b' where it is not associated with a value in enclosing scope") ^propagate.0()
       %a.0 : py.Value = base.refGet[py.Value](%a.cell.0)
@@ -246,7 +246,7 @@ module m_closures {
   func @m_closures.early.h(%y.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%y.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "early.<locals>.h", 0, 0, false, false) ^propagate.0()
       %y.0 : py.Value = base.refGet[py.Value](%y.cell.0)
       %y.1 : py.Value = py.requireDefined(%y.0, "y", "NameError", "cannot access free variable 'y' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%y.1)
@@ -258,7 +258,7 @@ module m_closures {
   func @m_closures.outer.mid.inner(%x.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%x.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer.<locals>.mid.<locals>.inner", 0, 0, false, false) ^propagate.0()
       %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
       %x.1 : py.Value = py.requireDefined(%x.0, "x", "NameError", "cannot access free variable 'x' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.1)

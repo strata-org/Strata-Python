@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+Config = <class 'Config'>
+Priv = <class 'Priv'>
+__doc__ = None
+__name__ = '__main__'
+deco = <function object>
+g = 1
+outer = <function object>

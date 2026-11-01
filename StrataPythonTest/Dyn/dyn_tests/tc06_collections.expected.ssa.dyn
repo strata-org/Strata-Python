@@ -25,7 +25,7 @@ module tc06_collections {
       %d.0 : py.Value = py.undef("d")
       %d.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%d.0)
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
       %int.2 : py.Value = py.intLit(3)

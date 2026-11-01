@@ -102,7 +102,7 @@ module p51_comp_clauses {
       %xs.1 : py.Value = py.undef("xs")
       %ys.1 : py.Value = py.undef("ys")
       %defaults.0 : py.Value = py.mkTuple(%xs.1, %ys.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "xs", "ys") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "between", 0, 2, false, false, "xs", "ys") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %ys.2 : py.Value = py.tupleGet(%bound.0, 1)
@@ -191,7 +191,7 @@ module p51_comp_clauses {
       %xs.1 : py.Value = py.undef("xs")
       %ys.1 : py.Value = py.undef("ys")
       %defaults.0 : py.Value = py.mkTuple(%xs.1, %ys.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "xs", "ys") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "later_if", 0, 2, false, false, "xs", "ys") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %ys.2 : py.Value = py.tupleGet(%bound.0, 1)
@@ -283,7 +283,7 @@ module p51_comp_clauses {
       %xs.1 : py.Value = py.undef("xs")
       %ys.1 : py.Value = py.undef("ys")
       %defaults.0 : py.Value = py.mkTuple(%xs.1, %ys.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "xs", "ys") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "later", 0, 2, false, false, "xs", "ys") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %ys.2 : py.Value = py.tupleGet(%bound.0, 1)
@@ -376,7 +376,7 @@ module p51_comp_clauses {
       %xs.1 : py.Value = py.undef("xs")
       %ys.1 : py.Value = py.undef("ys")
       %defaults.0 : py.Value = py.mkTuple(%xs.1, %ys.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "xs", "ys") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "later_unbound", 0, 2, false, false, "xs", "ys") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %ys.2 : py.Value = py.tupleGet(%bound.0, 1)
@@ -459,7 +459,7 @@ module p51_comp_clauses {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %xs.1 : py.Value = py.undef("xs")
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "xs") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "walrus_filter", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
@@ -532,7 +532,7 @@ module p51_comp_clauses {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %xs.1 : py.Value = py.undef("xs")
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "xs") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "walrus_key", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
@@ -592,7 +592,7 @@ module p51_comp_clauses {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %xs.1 : py.Value = py.undef("xs")
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "xs") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "walrus_filter_only", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
@@ -662,7 +662,7 @@ module p51_comp_clauses {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %xs.1 : py.Value = py.undef("xs")
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "xs") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "walrus_key_only", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
@@ -725,7 +725,7 @@ module p51_comp_clauses {
       %d.1 : py.Value = py.undef("d")
       %xs.1 : py.Value = py.undef("xs")
       %defaults.0 : py.Value = py.mkTuple(%o.1, %d.1, %xs.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 3, false, false, "o", "d", "xs") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "targets", 0, 3, false, false, "o", "d", "xs") ^propagate.0()
       %o.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%o.cell.0, %o.2)
       %d.2 : py.Value = py.tupleGet(%bound.0, 1)
@@ -809,7 +809,7 @@ module p51_comp_clauses {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %xs.1 : py.Value = py.undef("xs")
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "xs") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "unhashable", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
@@ -899,7 +899,7 @@ module p51_comp_clauses {
       %xs.1 : py.Value = py.undef("xs")
       %d.1 : py.Value = py.undef("d")
       %defaults.0 : py.Value = py.mkTuple(%xs.1, %d.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "xs", "d") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "blocks", 0, 2, false, false, "xs", "d") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %d.2 : py.Value = py.tupleGet(%bound.0, 1)
@@ -1016,7 +1016,7 @@ module p51_comp_clauses {
       %y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%y.0)
       %xss.1 : py.Value = py.undef("xss")
       %defaults.0 : py.Value = py.mkTuple(%xss.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "xss") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "nested", 0, 1, false, false, "xss") ^propagate.0()
       %xss.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xss.cell.0, %xss.2)
       %xss.3 : py.Value = base.refGet[py.Value](%xss.cell.0)
@@ -1200,7 +1200,7 @@ module p51_comp_clauses {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %xs.1 : py.Value = py.undef("xs")
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "xs") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "in_try", 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
@@ -1261,7 +1261,7 @@ module p51_comp_clauses {
       %f.1 : py.Value = py.undef("f")
       %xs.1 : py.Value = py.undef("xs")
       %defaults.0 : py.Value = py.mkTuple(%f.1, %xs.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "f", "xs") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "folds", 0, 2, false, false, "f", "xs") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%f.cell.0, %f.2)
       %xs.2 : py.Value = py.tupleGet(%bound.0, 1)
@@ -1345,7 +1345,7 @@ module p51_comp_clauses {
       %label.1 : py.Value = py.undef("label")
       %f.1 : py.Value = py.undef("f")
       %defaults.0 : py.Value = py.mkTuple(%label.1, %f.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "label", "f") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "show", 0, 2, false, false, "label", "f") ^propagate.0()
       %label.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%label.cell.0, %label.2)
       %f.2 : py.Value = py.tupleGet(%bound.0, 1)
@@ -1408,7 +1408,7 @@ module p51_comp_clauses {
   func @|p51_comp_clauses.<lambda>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
       %walrus_filter.0 : py.Value = py.loadGlobal("p51_comp_clauses", "walrus_filter") ^propagate.0()
       %int.0 : py.Value = py.intLit(0)
       %int.1 : py.Value = py.intLit(1)
@@ -1426,7 +1426,7 @@ module p51_comp_clauses {
   func @|p51_comp_clauses.<lambda>.1|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
       %walrus_filter.0 : py.Value = py.loadGlobal("p51_comp_clauses", "walrus_filter") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(0)
@@ -1443,7 +1443,7 @@ module p51_comp_clauses {
   func @|p51_comp_clauses.<lambda>.2|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
       %walrus_filter.0 : py.Value = py.loadGlobal("p51_comp_clauses", "walrus_filter") ^propagate.0()
       %list.0 : py.Value = py.mkList
       %tuple.0 : py.Value = py.mkTuple(%list.0)
@@ -1458,7 +1458,7 @@ module p51_comp_clauses {
   func @|p51_comp_clauses.<lambda>.3|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
       %walrus_key.0 : py.Value = py.loadGlobal("p51_comp_clauses", "walrus_key") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(2)
@@ -1475,7 +1475,7 @@ module p51_comp_clauses {
   func @|p51_comp_clauses.<lambda>.4|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
       %walrus_key.0 : py.Value = py.loadGlobal("p51_comp_clauses", "walrus_key") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %int.1 : py.Value = py.intLit(1)

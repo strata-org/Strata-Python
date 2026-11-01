@@ -13,6 +13,7 @@ import StrataDyn.DDM
 import StrataDyn.DDMRead
 import StrataDyn.Env.WF
 import StrataPython.Dyn.PySpec.Load
+import StrataPython.Dyn.Sem.Run
 
 /-! # The `dyn`, `pyspec` and `read` commands
 
@@ -35,6 +36,9 @@ count is a usage error of the CLI framework, status 1.
 and prints them; with `--out DIR`, it writes each to `DIR/<module>.dyn` instead. It prints
 each rejection with its rule ID. `PYTHON` selects the interpreter that runs PySpec's parser.
 Exit status: 0 if the set translated, 1 if it is rejected, 2 if PySpec fails.
+
+`run FILE [--fuel N]` translates `FILE` as module `__main__`, runs it with the Python semantics,
+and prints its trace (`StrataPython.Dyn.Sem.runModuleThen`).
 
 `read FILE` reads a printed Dyn module, such as a translator golden, against the Python
 environment with `Module.read`, and prints it again: folded, or with `--full` in full.  Exit
@@ -148,6 +152,39 @@ def pyspecCommand : _root_.Command where
     rejected, 2 if PySpec fails. PYTHON selects the interpreter that runs PySpec's parser."
   callback := fun v flags => do
     let code ← runPySpec v[0] v[1] (flags.getString "out") (printOptions flags)
+    unless code == 0 do IO.Process.exit code.toUInt8
+
+/-- `--fuel N`: the steps a run may take. -/
+private def fuelFlag : Flag :=
+  { name := "fuel", help := "The steps a run may take (default 10^9).", takesArg := .arg "N" }
+
+/-- Translate `path` as module `__main__`, run it with the Python semantics, and print its
+trace, returning the exit status. -/
+private def runRun (path : String) (fuel : Nat) : IO UInt32 := do
+  let (stmts, src) ← match ← load path with
+    | .ok r => pure r
+    | .error m => IO.eprintln s!"pydyn run: {m}"; return 2
+  let fileMap := src.map Lean.FileMap.ofString
+  let r := translate "__main__" stmts
+  unless r.ok do
+    for d in r.diagnostics do IO.println (formatDiagnostic fileMap d)
+    return 1
+  IO.print (StrataPython.Dyn.Sem.runModuleThen r.module
+    (.str (.str .base "__main__") "<module>") "__main__" []
+    { fuel })
+  return 0
+
+/-- The `run` subcommand. -/
+def runCommand : _root_.Command where
+  name := "run"
+  args := [ "file" ]
+  flags := [fuelFlag]
+  help := "Translate a Python program as module __main__, run it with the Python semantics, and \
+    print its trace: its stdout, its outcome and its globals. Exit status: 0 if it ran, 1 if \
+    the translation has diagnostics, 2 if FILE cannot be parsed or read."
+  callback := fun v flags => do
+    let fuel := ((flags.getString "fuel").bind String.toNat?).getD 1000000000
+    let code ← runRun v[0] fuel
     unless code == 0 do IO.Process.exit code.toUInt8
 
 /-- Read and print the module in `path` with `opts`, returning the exit status. -/

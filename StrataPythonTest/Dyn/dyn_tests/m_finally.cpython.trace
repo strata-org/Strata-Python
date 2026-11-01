@@ -1,0 +1,22 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Body = <class 'Body'>
+__doc__ = None
+__name__ = '__main__'
+all_parts = <function object>
+break_drops = <function object>
+continue_in_finally = <function object>
+finally_in_finally = <function object>
+handled = <function object>
+in_handler = <function object>
+loop_in_finally = <function object>
+nested = <function object>
+note = <function object>
+reraise = <function object>
+return_drops = <function object>
+return_in_handler = <function object>
+superseded = <function object>
+sys = <module object>

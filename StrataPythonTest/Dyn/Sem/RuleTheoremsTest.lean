@@ -57,6 +57,7 @@ public environment PyT extends Py where
   insn frozenWalk (^err (exc : Value)) : Value
   insn frozenMerge (^err (exc : Value)) : Value
   insn frozenAdd (^err (exc : Value)) : Value
+  insn importGaps (k : base.Int) (^err (exc : Value)) : Value
   end pt
 
 #dyn_types PyT
@@ -97,6 +98,24 @@ public def classOfNew (x : Value) (err : Target E [Value]) : Sem ε E Value :=
   runRule err #[] (do
     let l ← PyPure.allocExc x #[] #[] (PyPure.imm (m := PyM σ .reads true) Imm.none)
     PyReads.classOf l : PyM σ .reads true Value)
+
+/-- The import rules' gaps: an import after `builtins.__import__` was replaced (`k = 0`) or deleted
+(`k = 1`); a reference into another module than `builtins` (`2`) and to a name that `builtins`
+lacks (`3`); and `from builtins import __dict__` (otherwise). -/
+@[dyn_sem PyT.importGaps, expose] public def importGaps (k : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRuleFree err #[] (do
+    let imp := Value.ofString "__import__"
+    if k == 0 then
+      PyWrites.dictSet (Value.obj 0) imp Value.none none fun _ => pure false
+      return ← Proto.importModule "builtins"
+    if k == 1 then
+      discard <| PyWrites.dictDelete (Value.obj 0) imp none fun _ => pure false
+      return ← Proto.importFrom "builtins" "len"
+    if k == 2 then return ← Proto.qualifiedRef "math" "pi"
+    if k == 3 then return ← Proto.qualifiedRef "builtins" "nope"
+    Proto.importFrom "builtins" "__dict__"
+    : PyM σ .writes true Value)
 
 /-- An own-object write to the `builtins` dict, which is older than the operation. -/
 @[dyn_sem PyT.setOld, expose] public def setOld (k : Value) : Sem ε E Value :=
@@ -408,6 +427,7 @@ def ptEffect : String → Effects.Level
   | "pt.classOfNew" => .reads
   | "pt.probeCase" => .reads
   | "pt.requireIn" => .writes
+  | "pt.importGaps" => .writes
   | "pt.eqVal" => .calls
   | "pt.setAny" => .writes
   | "pt.dictPrims" | "pt.setPrims" | "pt.slotInexact" | "pt.popInexact" | "pt.listPrims"
@@ -779,6 +799,28 @@ example {σ : Type} [Store σ] [Decode σ] : PyM σ .reads true Unit := PyWrites
 
 -- Every instruction of `Py` has a rule, but the contract operations, whose rules come with the
 -- semantics of contracts.
+-- The import rules stop with a gap where CPython would call a replaced `__import__`, or read a
+-- module that the model doesn't hold.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "an import after builtins.__import__ was replaced is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.importGaps(0) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "an import after builtins.__import__ was deleted is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.importGaps(1) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a reference into module math is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.importGaps(2) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "builtins.nope is missing" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.importGaps(3) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "from builtins import __dict__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.importGaps(4) ^err.0()"
+
 /--
 error: Py is not fully covered: no rule for py.argOf, py.extraKwargs, py.bindsTo, py.stdClass, py.isInstance, py.typeIsSubclass, py.len, py.reSearch, py.strIsOneOf, py.intIsOneOf, py.isImmutableScalar, py.dictKeysWithin, py.allIn, py.anyIn, py.allItems, py.anyItems, py.attrLoc, py.itemLoc, py.objLoc, py.reachLoc, py.instanceState
 -/

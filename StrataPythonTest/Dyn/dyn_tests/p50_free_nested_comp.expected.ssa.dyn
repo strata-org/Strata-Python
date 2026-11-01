@@ -29,14 +29,14 @@ module p50_free_nested_comp {
       %k.1 : py.Value = py.undef("k")
       %a.1 : py.Value = py.undef("a")
       %defaults.0 : py.Value = py.mkTuple(%k.1, %a.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "k", "a") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 2, false, false, "k", "a") ^propagate.0()
       %k.2 : py.Value = py.tupleGet(%bound.0, 0)
       %a.2 : py.Value = py.tupleGet(%bound.0, 1)
       %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %b.1 : py.Value = py.undef("b")
       %b.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%b.1)
-      %c.9 : py.Value = py.undef("c")
-      %c.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%c.9)
+      %c.10 : py.Value = py.undef("c")
+      %c.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%c.10)
       %_.1 : py.Value = py.undef("_")
       %_.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%_.1)
       %list.0 : py.Value = py.listComp(%a.4) ^propagate.0() {
@@ -44,18 +44,18 @@ module p50_free_nested_comp {
           %append.0 : base.Unit = py.compAppend(%out.0) ^propagate.1() {
             elt.0():
               %b.3 : py.Value = py.requireDefined(%item.0, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.2()
-              %c.10 : py.Value = py.undef("c")
-              %c.cell.2 : base.Ref(py.Value) = base.refNew[py.Value](%c.10)
+              %c.11 : py.Value = py.undef("c")
+              %c.cell.2 : base.Ref(py.Value) = base.refNew[py.Value](%c.11)
               %_.2 : py.Value = py.undef("_")
               %_.cell.2 : base.Ref(py.Value) = base.refNew[py.Value](%_.2)
               %list.1 : py.Value = py.listComp(%b.3) ^propagate.2() {
                 each.1(%out.1 : py.ListAcc, %item.1 : py.Value):
                   %append.1 : base.Unit = py.compAppend(%out.1) ^propagate.3() {
                     elt.1():
-                      %c.12 : py.Value = py.requireDefined(%item.1, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.4()
+                      %c.13 : py.Value = py.requireDefined(%item.1, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.4()
                       %_.3 : py.Value = py.undef("_")
                       %_.cell.3 : base.Ref(py.Value) = base.refNew[py.Value](%_.3)
-                      %list.2 : py.Value = py.listComp(%c.12) ^propagate.4() {
+                      %list.2 : py.Value = py.listComp(%c.13) ^propagate.4() {
                         each.2(%out.2 : py.ListAcc, %item.2 : py.Value):
                           %append.2 : base.Unit = py.compAppend(%out.2) ^propagate.5() {
                             elt.2():

@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+early = <function object>
+make = <function object>
+outer = <function object>
+pair = <function object>
+twice = <function object>

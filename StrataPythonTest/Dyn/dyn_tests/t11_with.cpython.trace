@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+raised ValueError: fail
+--- globals
+MyCtx = <class 'MyCtx'>
+__doc__ = None
+__name__ = '__main__'
+ctx = <MyCtx object>
+risky = <function object>
+x = 1

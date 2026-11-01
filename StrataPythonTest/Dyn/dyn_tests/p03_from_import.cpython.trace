@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+OrderedDict = <class 'OrderedDict'>
+__doc__ = None
+__name__ = '__main__'
+base = <function object>
+dd = <class 'defaultdict'>
+f = <function object>
+join = <function object>

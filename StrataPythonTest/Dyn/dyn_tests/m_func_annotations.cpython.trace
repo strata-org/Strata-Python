@@ -1,0 +1,19 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+K = <class 'K'>
+__doc__ = None
+__name__ = '__main__'
+enclosing = <function object>
+keys = <function object>
+log = ['default', 'a', 'p', 'v', 'k', 'kw', 'return', ['a', 'p', 'v', 'k', 'kw', 'return'], <function object>]
+note = <function object>
+ordered = <function object>
+outer = <function object>
+plain = <function object>
+scopes = <function object>
+scopes_keyword = <function object>
+scopes_positional = <function object>

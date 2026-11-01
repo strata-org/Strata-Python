@@ -1,0 +1,18 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+MAX_RETRIES = 3
+__annotations__ = {'threshold': <class 'float'>}
+__doc__ = None
+__name__ = '__main__'
+boolop_assignment = <function object>
+ifexp_assignment = <function object>
+local_shadows_module_var = <function object>
+logger = <Logger object>
+logging = <module object>
+mixed_imports_and_vars = <function object>
+param_shadows_module_var = <function object>
+threshold = 0.5
+use_module_vars = <function object>

@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+g = <function object>
+h = <function object>
+outer = <function object>

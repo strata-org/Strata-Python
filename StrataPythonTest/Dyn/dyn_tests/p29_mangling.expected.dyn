@@ -78,7 +78,7 @@ module p29_mangling {
       %self.1 : py.Value = py.undef("self")
       %_Foo__p.1 : py.Value = py.undef("_Foo__p")
       %defaults.0 : py.Value = py.mkTuple(%self.1, %_Foo__p.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "self", "_Foo__p") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "_Foo.__m", 0, 2, false, false, "self", "_Foo__p") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %_Foo__p.2 : py.Value = py.tupleGet(%bound.0, 1)

@@ -194,6 +194,8 @@ class PyReads (m : Type → Type 1) (V : outParam Type) extends PyPure m V where
   bytesView : V → m (Option (Array UInt8))
   /-- The number of the built-in part of an instance of a subclass of `int` or `float`. -/
   numView : V → m (Option Arith.Num)
+  /-- The module object of the module `name`, if the module table has it. -/
+  moduleGet : String → m (Option V)
   /-- The entries of the dict `d`, in order: each key, its value and its stored hash. -/
   dictEntries : V → m (Array (V × V × Hash))
   /-- Position `i` of the entry array of the dict `d`, in constant time. -/

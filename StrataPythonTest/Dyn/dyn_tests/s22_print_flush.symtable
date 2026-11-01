@@ -1,0 +1,3 @@
+module top
+  print: global implicit (referenced)
+qualnames: 

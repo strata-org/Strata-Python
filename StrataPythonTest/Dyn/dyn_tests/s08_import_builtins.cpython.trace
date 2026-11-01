@@ -1,0 +1,11 @@
+--- stdout 9
+imported
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+builtins = <module object>
+length = <builtin_function_or_method object>
+p = <builtin_function_or_method object>

@@ -23,7 +23,7 @@ module p36_decorators {
       %fn.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%fn.0)
       %fn.1 : py.Value = py.undef("fn")
       %defaults.0 : py.Value = py.mkTuple(%fn.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "fn") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "deco", 0, 1, false, false, "fn") ^propagate.0()
       %fn.2 : py.Value = py.tupleGet(%bound.0, 0)
       %fn.4 : py.Value = py.requireDefined(%fn.2, "fn", "UnboundLocalError", "cannot access local variable 'fn' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%fn.4)
@@ -42,7 +42,7 @@ module p36_decorators {
       %K.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%K.0)
       %base.1 : py.Value = py.undef("base")
       %defaults.0 : py.Value = py.mkTuple(%base.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "base") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer", 0, 1, false, false, "base") ^propagate.0()
       %base.2 : py.Value = py.tupleGet(%bound.0, 0)
       %deco.0 : py.Value = py.loadGlobal("p36_decorators", "deco") ^propagate.0()
       %clo.0 : py.Value = py.mkClosure[[]](@p36_decorators.outer.inner, "inner", "p36_decorators")
@@ -70,7 +70,7 @@ module p36_decorators {
   func @p36_decorators.outer.inner(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "outer.<locals>.inner", 0, 0, false, false) ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
       ret(%ret.0)

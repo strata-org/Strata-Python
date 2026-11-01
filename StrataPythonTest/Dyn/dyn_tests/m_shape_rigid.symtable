@@ -5,7 +5,7 @@ module top
   a: local (assigned)
   coin: local (assigned, referenced)
   m: local (assigned, referenced)
-  random: local (imported)
+  random: local (imported, referenced)
   function coin
     random: global implicit (referenced)
   class Account

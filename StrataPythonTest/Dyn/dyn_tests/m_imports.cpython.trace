@@ -1,0 +1,13 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+ET = <module object>
+M = <class 'Mapping'>
+__doc__ = None
+__name__ = '__main__'
+j = <module object>
+local_import = <function object>
+os = <module object>
+pi = 3.141592653589793

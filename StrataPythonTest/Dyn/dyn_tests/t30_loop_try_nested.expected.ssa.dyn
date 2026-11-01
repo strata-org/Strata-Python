@@ -542,7 +542,7 @@ module t30_loop_try_nested {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %x.1 : py.Value = py.undef("x")
       %defaults.0 : py.Value = py.mkTuple(%x.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "x") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "probe", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.4)
@@ -557,7 +557,7 @@ module t30_loop_try_nested {
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
       %x.1 : py.Value = py.undef("x")
       %defaults.0 : py.Value = py.mkTuple(%x.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "x") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "check", 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.4)
@@ -569,7 +569,7 @@ module t30_loop_try_nested {
   func @t30_loop_try_nested.cleanup(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "cleanup", 0, 0, false, false) ^propagate.0()
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)
@@ -583,7 +583,7 @@ module t30_loop_try_nested {
       %tag.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%tag.0)
       %tag.1 : py.Value = py.undef("tag")
       %defaults.0 : py.Value = py.mkTuple(%tag.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "tag") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "note", 0, 1, false, false, "tag") ^propagate.0()
       %tag.2 : py.Value = py.tupleGet(%bound.0, 0)
       %tag.4 : py.Value = py.requireDefined(%tag.2, "tag", "UnboundLocalError", "cannot access local variable 'tag' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tag.4)
@@ -595,7 +595,7 @@ module t30_loop_try_nested {
   func @t30_loop_try_nested.raiser(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "raiser", 0, 0, false, false) ^propagate.0()
       %StopIteration.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "StopIteration") ^propagate.0()
       %exc.0 : py.Value = py.toException(%StopIteration.0) ^propagate.0()
       jump ^propagate.0(%exc.0)
@@ -611,7 +611,7 @@ module t30_loop_try_nested {
       %h.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%h.0)
       %it.1 : py.Value = py.undef("it")
       %defaults.0 : py.Value = py.mkTuple(%it.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "it") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "drain", 0, 1, false, false, "it") ^propagate.0()
       %it.2 : py.Value = py.tupleGet(%bound.0, 0)
       jump ^head.0()
     head.0():
@@ -692,7 +692,7 @@ module t30_loop_try_nested {
       %outer.1 : py.Value = py.undef("outer")
       %inner.1 : py.Value = py.undef("inner")
       %defaults.0 : py.Value = py.mkTuple(%outer.1, %inner.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "outer", "inner") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "nested_return", 0, 2, false, false, "outer", "inner") ^propagate.0()
       %outer.2 : py.Value = py.tupleGet(%bound.0, 0)
       %inner.2 : py.Value = py.tupleGet(%bound.0, 1)
       %outer.4 : py.Value = py.requireDefined(%outer.2, "outer", "UnboundLocalError", "cannot access local variable 'outer' where it is not associated with a value") ^propagate.0()
@@ -785,7 +785,7 @@ module t30_loop_try_nested {
       %r.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%r.0)
       %items.1 : py.Value = py.undef("items")
       %defaults.0 : py.Value = py.mkTuple(%items.1)
-      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "items") ^propagate.0()
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "loop_else_return", 0, 1, false, false, "items") ^propagate.0()
       %items.2 : py.Value = py.tupleGet(%bound.0, 0)
       %items.4 : py.Value = py.requireDefined(%items.2, "items", "UnboundLocalError", "cannot access local variable 'items' where it is not associated with a value") ^propagate.0()
       %iter.0 : py.Value = py.getIter(%items.4) ^propagate.0()
