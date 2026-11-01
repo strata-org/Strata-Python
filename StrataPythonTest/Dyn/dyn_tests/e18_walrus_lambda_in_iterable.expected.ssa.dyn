@@ -7,7 +7,7 @@ module e18_walrus_lambda_in_iterable {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("e18_walrus_lambda_in_iterable", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@e18_walrus_lambda_in_iterable.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@e18_walrus_lambda_in_iterable.f, "f", "e18_walrus_lambda_in_iterable")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("e18_walrus_lambda_in_iterable", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -25,7 +25,7 @@ module e18_walrus_lambda_in_iterable {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
-      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|e18_walrus_lambda_in_iterable.f.<lambda>|, %xs.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|e18_walrus_lambda_in_iterable.f.<lambda>|, "<lambda>", "e18_walrus_lambda_in_iterable", %xs.cell.0)
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%clo.0, %tuple.0, %kwargs.1) ^propagate.0()
@@ -35,7 +35,7 @@ module e18_walrus_lambda_in_iterable {
         each.0(%out.0 : py.ListAcc, %item.0 : py.Value):
           %append.0 : base.Unit = py.compAppend(%out.0) ^propagate.1() {
             elt.0():
-              %x.3 : py.Value = py.requireDefined(%item.0, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.2()
+              %x.3 : py.Value = py.requireDefined(%item.0, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.2()
               %ok.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.3)
               ret(%ok.0)
             propagate.2(%exc.0 : py.Value):
@@ -62,7 +62,7 @@ module e18_walrus_lambda_in_iterable {
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %xs.0 : py.Value = base.refGet[py.Value](%xs.cell.0)
-      %xs.1 : py.Value = py.requireDefined(%xs.0, "NameError", "cannot access free variable 'xs' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %xs.1 : py.Value = py.requireDefined(%xs.0, "xs", "NameError", "cannot access free variable 'xs' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%xs.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):

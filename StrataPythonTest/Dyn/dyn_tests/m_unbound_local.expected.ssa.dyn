@@ -10,10 +10,10 @@ module m_unbound_local {
       %int.0 : py.Value = py.intLit(0)
       %y.cell.0 : base.Ref(py.Value) = py.globalCell("m_unbound_local", "y")
       %set.2 : base.Unit = base.refSet[py.Value](%y.cell.0, %int.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@m_unbound_local.with_global)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_unbound_local.with_global, "with_global", "m_unbound_local")
       %with_global.cell.0 : base.Ref(py.Value) = py.globalCell("m_unbound_local", "with_global")
       %set.3 : base.Unit = base.refSet[py.Value](%with_global.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@m_unbound_local.without_global)
+      %clo.1 : py.Value = py.mkClosure[[]](@m_unbound_local.without_global, "without_global", "m_unbound_local")
       %without_global.cell.0 : base.Ref(py.Value) = py.globalCell("m_unbound_local", "without_global")
       %set.4 : base.Unit = base.refSet[py.Value](%without_global.cell.0, %clo.1)
       %none.1 : py.Value = py.noneLit
@@ -28,9 +28,9 @@ module m_unbound_local {
       %y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%y.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
-      %y.2 : py.Value = py.requireDefined(%y.0, "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
+      %y.2 : py.Value = py.requireDefined(%y.0, "y", "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
-      %z.2 : py.Value = py.requireDefined(%y.2, "UnboundLocalError", "cannot access local variable 'z' where it is not associated with a value") ^propagate.0()
+      %z.2 : py.Value = py.requireDefined(%y.2, "z", "UnboundLocalError", "cannot access local variable 'z' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%z.2)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -45,9 +45,9 @@ module m_unbound_local {
       %v.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%v.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
-      %v.2 : py.Value = py.requireDefined(%v.0, "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
+      %v.2 : py.Value = py.requireDefined(%v.0, "v", "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
-      %w.2 : py.Value = py.requireDefined(%v.2, "UnboundLocalError", "cannot access local variable 'w' where it is not associated with a value") ^propagate.0()
+      %w.2 : py.Value = py.requireDefined(%v.2, "w", "UnboundLocalError", "cannot access local variable 'w' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%w.2)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):

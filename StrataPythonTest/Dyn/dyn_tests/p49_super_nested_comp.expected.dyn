@@ -8,7 +8,7 @@ module p49_super_nested_comp {
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p49_super_nested_comp", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@|p49_super_nested_comp.A.<body>|)
+      %clo.0 : py.Value = py.mkClosure[[]](@|p49_super_nested_comp.A.<body>|, "A", "p49_super_nested_comp")
       %str.1 : py.Value = py.strLit("A")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs
@@ -18,7 +18,7 @@ module p49_super_nested_comp {
       %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %__class__.0 : py.Value = py.undef("__class__")
       %__class__.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%__class__.0)
-      %clo.1 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|p49_super_nested_comp.B.<body>|, %__class__.cell.0)
+      %clo.1 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|p49_super_nested_comp.B.<body>|, "B", "p49_super_nested_comp", %__class__.cell.0)
       %str.2 : py.Value = py.strLit("B")
       %A.1 : py.Value = py.loadGlobal("p49_super_nested_comp", "A") ^propagate.0()
       %tuple.1 : py.Value = py.mkTuple(%clo.1, %str.2, %A.1)
@@ -55,7 +55,7 @@ module p49_super_nested_comp {
       %str.2 : py.Value = py.strLit("A")
       %str.3 : py.Value = py.strLit("__qualname__")
       %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@p49_super_nested_comp.A.m)
+      %clo.0 : py.Value = py.mkClosure[[]](@p49_super_nested_comp.A.m, "m", "p49_super_nested_comp")
       %str.4 : py.Value = py.strLit("m")
       %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
       %none.0 : py.Value = py.noneLit
@@ -87,7 +87,7 @@ module p49_super_nested_comp {
       %str.2 : py.Value = py.strLit("B")
       %str.3 : py.Value = py.strLit("__qualname__")
       %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@p49_super_nested_comp.B.m, %__class__.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@p49_super_nested_comp.B.m, "m", "p49_super_nested_comp", %__class__.cell.0)
       %str.4 : py.Value = py.strLit("m")
       %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
       %none.0 : py.Value = py.noneLit
@@ -112,7 +112,7 @@ module p49_super_nested_comp {
       %i.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%i.cell.0, %i.2)
       %i.3 : py.Value = base.refGet[py.Value](%i.cell.0)
-      %i.4 : py.Value = py.requireDefined(%i.3, "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %i.4 : py.Value = py.requireDefined(%i.3, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%i.4)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -138,7 +138,7 @@ module p49_super_nested_comp {
       %rows.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%rows.cell.0, %rows.2)
       %rows.3 : py.Value = base.refGet[py.Value](%rows.cell.0)
-      %rows.4 : py.Value = py.requireDefined(%rows.3, "UnboundLocalError", "cannot access local variable 'rows' where it is not associated with a value") ^propagate.0()
+      %rows.4 : py.Value = py.requireDefined(%rows.3, "rows", "UnboundLocalError", "cannot access local variable 'rows' where it is not associated with a value") ^propagate.0()
       %r.1 : py.Value = py.undef("r")
       %r.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%r.1)
       %i.1 : py.Value = py.undef("i")
@@ -149,7 +149,7 @@ module p49_super_nested_comp {
           %append.0 : base.Unit = py.compAppend(%out.0) ^propagate.1() {
             elt.0():
               %r.2 : py.Value = base.refGet[py.Value](%r.cell.1)
-              %r.3 : py.Value = py.requireDefined(%r.2, "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^propagate.2()
+              %r.3 : py.Value = py.requireDefined(%r.2, "r", "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^propagate.2()
               %i.2 : py.Value = py.undef("i")
               %i.cell.2 : base.Ref(py.Value) = base.refNew[py.Value](%i.2)
               %list.1 : py.Value = py.listComp(%r.3) ^propagate.2() {
@@ -159,15 +159,15 @@ module p49_super_nested_comp {
                     elt.1():
                       %super.0 : py.Value = py.loadGlobal("p49_super_nested_comp", "super") ^propagate.4()
                       %__class__.0 : py.Value = base.refGet[py.Value](%__class__.cell.0)
-                      %__class__.1 : py.Value = py.requireDefined(%__class__.0, "NameError", "cannot access free variable '__class__' where it is not associated with a value in enclosing scope") ^propagate.4()
+                      %__class__.1 : py.Value = py.requireDefined(%__class__.0, "__class__", "NameError", "cannot access free variable '__class__' where it is not associated with a value in enclosing scope") ^propagate.4()
                       %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
-                      %self.4 : py.Value = py.requireDefined(%self.3, "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.4()
+                      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.4()
                       %args.1 : py.Value = py.mkTuple(%__class__.1, %self.4)
                       %kwargs.1 : py.Value = py.mkKwargs
                       %super.1 : py.Value = py.call(%super.0, %args.1, %kwargs.1) ^propagate.4()
                       %m.1 : py.Value = py.attr(%super.1, "m") ^propagate.4()
                       %i.3 : py.Value = base.refGet[py.Value](%i.cell.2)
-                      %i.4 : py.Value = py.requireDefined(%i.3, "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.4()
+                      %i.4 : py.Value = py.requireDefined(%i.3, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.4()
                       %tuple.0 : py.Value = py.mkTuple(%i.4)
                       %kwargs.2 : py.Value = py.mkKwargs
                       %call.0 : py.Value = py.call(%m.1, %tuple.0, %kwargs.2) ^propagate.4()

@@ -8,7 +8,7 @@ module m_class_namespace {
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_class_namespace", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@|m_class_namespace.Ns.<body>|)
+      %clo.0 : py.Value = py.mkClosure[[]](@|m_class_namespace.Ns.<body>|, "Ns", "m_class_namespace")
       %str.1 : py.Value = py.strLit("Ns")
       %dict.0 : py.Value = py.loadGlobal("m_class_namespace", "dict") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1, %dict.0)
@@ -17,7 +17,7 @@ module m_class_namespace {
       %Ns.cell.0 : base.Ref(py.Value) = py.globalCell("m_class_namespace", "Ns")
       %set.2 : base.Unit = base.refSet[py.Value](%Ns.cell.0, %Ns.0)
       %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure[[]](@|m_class_namespace.Meta.<body>|)
+      %clo.1 : py.Value = py.mkClosure[[]](@|m_class_namespace.Meta.<body>|, "Meta", "m_class_namespace")
       %str.2 : py.Value = py.strLit("Meta")
       %type.0 : py.Value = py.loadGlobal("m_class_namespace", "type") ^propagate.0()
       %tuple.1 : py.Value = py.mkTuple(%clo.1, %str.2, %type.0)
@@ -29,7 +29,7 @@ module m_class_namespace {
       %x.cell.0 : base.Ref(py.Value) = py.globalCell("m_class_namespace", "x")
       %set.4 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
       %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.2 : py.Value = py.mkClosure[[]](@|m_class_namespace.C.<body>|)
+      %clo.2 : py.Value = py.mkClosure[[]](@|m_class_namespace.C.<body>|, "C", "m_class_namespace")
       %str.3 : py.Value = py.strLit("C")
       %tuple.2 : py.Value = py.mkTuple(%clo.2, %str.3)
       %str.4 : py.Value = py.strLit("metaclass")
@@ -38,7 +38,7 @@ module m_class_namespace {
       %C.0 : py.Value = py.call(%__build_class__.2, %tuple.2, %kwargs.2) ^propagate.0()
       %C.cell.0 : base.Ref(py.Value) = py.globalCell("m_class_namespace", "C")
       %set.5 : base.Unit = base.refSet[py.Value](%C.cell.0, %C.0)
-      %clo.3 : py.Value = py.mkClosure[[]](@m_class_namespace.f)
+      %clo.3 : py.Value = py.mkClosure[[]](@m_class_namespace.f, "f", "m_class_namespace")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_class_namespace", "f")
       %set.6 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.3)
       %none.1 : py.Value = py.noneLit
@@ -70,7 +70,7 @@ module m_class_namespace {
       %str.2 : py.Value = py.strLit("Ns")
       %str.3 : py.Value = py.strLit("__qualname__")
       %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@m_class_namespace.Ns.__getitem__)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_class_namespace.Ns.__getitem__, "__getitem__", "m_class_namespace")
       %str.4 : py.Value = py.strLit("__getitem__")
       %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
       %none.0 : py.Value = py.noneLit
@@ -111,7 +111,7 @@ module m_class_namespace {
       %classmethod.2 : py.Value = py.loadGlobal("m_class_namespace", "classmethod") ^propagate.0()
       jump ^join.1(%classmethod.2)
     join.1(%classmethod.3 : py.Value):
-      %clo.0 : py.Value = py.mkClosure[[]](@m_class_namespace.Meta.__prepare__)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_class_namespace.Meta.__prepare__, "__prepare__", "m_class_namespace")
       %args.1 : py.Value = py.mkTuple(%clo.0)
       %kwargs.1 : py.Value = py.mkKwargs
       %decorated.0 : py.Value = py.call(%classmethod.3, %args.1, %kwargs.1) ^propagate.0()
@@ -184,7 +184,7 @@ module m_class_namespace {
       jump ^deleted.0()
     undefined.0(%exc.0 : py.Value):
       %z.0 : py.Value = py.undef("z")
-      %z.1 : py.Value = py.requireDefined(%z.0, "NameError", "name 'z' is not defined") ^propagate.0()
+      %z.1 : py.Value = py.requireDefined(%z.0, "z", "NameError", "name 'z' is not defined") ^propagate.0()
       unreachable
     deleted.0():
       %int.1 : py.Value = py.intLit(0)
@@ -228,14 +228,14 @@ module m_class_namespace {
       %int.0 : py.Value = py.intLit(2)
       %set.0 : base.Unit = base.refSet[py.Value](%v.cell.0, %int.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|m_class_namespace.f.D.<body>|, %v.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|m_class_namespace.f.D.<body>|, "D", "m_class_namespace", %v.cell.0)
       %str.0 : py.Value = py.strLit("D")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.0)
       %str.1 : py.Value = py.strLit("metaclass")
       %Meta.0 : py.Value = py.loadGlobal("m_class_namespace", "Meta") ^propagate.0()
       %kwargs.1 : py.Value = py.mkKwargs(%str.1, %Meta.0)
       %D.1 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.1) ^propagate.0()
-      %D.3 : py.Value = py.requireDefined(%D.1, "UnboundLocalError", "cannot access local variable 'D' where it is not associated with a value") ^propagate.0()
+      %D.3 : py.Value = py.requireDefined(%D.1, "D", "UnboundLocalError", "cannot access local variable 'D' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%D.3)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -256,8 +256,8 @@ module m_class_namespace {
       %key.2 : py.Value = py.tupleGet(%bound.0, 1)
       %dict.0 : py.Value = py.loadGlobal("m_class_namespace", "dict") ^propagate.0()
       %__getitem__.0 : py.Value = py.attr(%dict.0, "__getitem__") ^propagate.0()
-      %self.4 : py.Value = py.requireDefined(%self.2, "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
-      %key.4 : py.Value = py.requireDefined(%key.2, "UnboundLocalError", "cannot access local variable 'key' where it is not associated with a value") ^propagate.0()
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %key.4 : py.Value = py.requireDefined(%key.2, "key", "UnboundLocalError", "cannot access local variable 'key' where it is not associated with a value") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%self.4, %key.4)
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%__getitem__.0, %tuple.0, %kwargs.1) ^propagate.0()
@@ -322,7 +322,7 @@ module m_class_namespace {
       branch(%found.1) ^join.1(%v.1) ^absent.1()
     absent.1():
       %v.2 : py.Value = base.refGet[py.Value](%v.cell.0)
-      %v.3 : py.Value = py.requireDefined(%v.2, "NameError", "cannot access free variable 'v' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %v.3 : py.Value = py.requireDefined(%v.2, "v", "NameError", "cannot access free variable 'v' where it is not associated with a value in enclosing scope") ^propagate.0()
       jump ^join.1(%v.3)
     join.1(%v.4 : py.Value):
       %str.5 : py.Value = py.strLit("w")

@@ -99,7 +99,7 @@ module m_assert {
       %done.0 : base.Bool = py.isStopIteration(%exc.6)
       branch(%done.0) ^exit.0() ^propagate.0(%exc.6)
     exit.0():
-      %clo.0 : py.Value = py.mkClosure[[]](@m_assert.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_assert.f, "f", "m_assert")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_assert", "f")
       %set.4 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -119,7 +119,7 @@ module m_assert {
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.4 : py.Value = py.requireDefined(%x.3, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%x.4) ^propagate.0()
       branch(%cond.0) ^ok.0() ^fail.0()
     fail.0():
@@ -128,7 +128,7 @@ module m_assert {
       jump ^propagate.0(%exc.0)
     ok.0():
       %x.5 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.6 : py.Value = py.requireDefined(%x.5, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.6 : py.Value = py.requireDefined(%x.5, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.6)
       ret(%ret.0)
     propagate.0(%exc.1 : py.Value):

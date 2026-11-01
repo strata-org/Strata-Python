@@ -7,7 +7,7 @@ module m_while {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_while", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@m_while.loop)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_while.loop, "loop", "m_while")
       %loop.cell.0 : base.Ref(py.Value) = py.globalCell("m_while", "loop")
       %set.2 : base.Unit = base.refSet[py.Value](%loop.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -27,16 +27,16 @@ module m_while {
       %int.0 : py.Value = py.intLit(0)
       jump ^head.0(%int.0)
     head.0(%i.11 : py.Value):
-      %i.2 : py.Value = py.requireDefined(%i.11, "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
-      %n.7 : py.Value = py.requireDefined(%n.5, "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
+      %i.2 : py.Value = py.requireDefined(%i.11, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %n.7 : py.Value = py.requireDefined(%n.5, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
       %lt.0 : py.Value = py.lt(%i.2, %n.7) ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%lt.0) ^propagate.0()
       branch(%cond.0) ^body.0() ^else.0()
     body.0():
-      %i.4 : py.Value = py.requireDefined(%i.11, "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %i.4 : py.Value = py.requireDefined(%i.11, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
       %int.1 : py.Value = py.intLit(1)
       %iAdd.0 : py.Value = py.iAdd(%i.4, %int.1) ^propagate.0()
-      %i.6 : py.Value = py.requireDefined(%iAdd.0, "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %i.6 : py.Value = py.requireDefined(%iAdd.0, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
       %int.2 : py.Value = py.intLit(2)
       %eq.0 : py.Value = py.eq(%i.6, %int.2) ^propagate.0()
       %cond.1 : base.Bool = py.truthy(%eq.0) ^propagate.0()
@@ -46,7 +46,7 @@ module m_while {
     else.1():
       jump ^join.0()
     join.0():
-      %i.8 : py.Value = py.requireDefined(%iAdd.0, "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %i.8 : py.Value = py.requireDefined(%iAdd.0, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
       %int.3 : py.Value = py.intLit(5)
       %eq.1 : py.Value = py.eq(%i.8, %int.3) ^propagate.0()
       %cond.2 : base.Bool = py.truthy(%eq.1) ^propagate.0()
@@ -62,7 +62,7 @@ module m_while {
       %neg.0 : py.Value = py.uSub(%int.4) ^propagate.0()
       jump ^exit.0(%neg.0)
     exit.0(%i.12 : py.Value):
-      %i.10 : py.Value = py.requireDefined(%i.12, "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %i.10 : py.Value = py.requireDefined(%i.12, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%i.10)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):

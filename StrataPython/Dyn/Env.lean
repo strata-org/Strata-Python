@@ -196,9 +196,10 @@ public environment Py extends Base where
   /-- `bool(val)`, as the `Bool` a `branch` takes.  Raises, because `__bool__` and `__len__`
   are arbitrary code. -/
   calls insn truthy (val : Value) (^err (exc : Value)) : Bool
-  /-- `val`, or a raised `excType(msg)` if it is unassigned: a check without a branch.
-  `excType` names a built-in exception class. -/
-  reads insn requireDefined (val : Value) (excType msg : String) (^err (exc : Value)) : Value
+  /-- `val`, the value of the variable `name`, or a raised `excType(msg)` if it is unassigned: a
+  check without a branch.  `excType` names a built-in exception class.  A `NameError` carries
+  `name` as its `name`. -/
+  reads insn requireDefined (val : Value) (name excType msg : String) (^err (exc : Value)) : Value
 
   -- Literals: a base constant, boxed into a Python value.
 
@@ -259,11 +260,13 @@ public environment Py extends Base where
   /-- The built-in `AssertionError` class, even if `builtins.AssertionError` is rebound:
   CPython's `LOAD_ASSERTION_ERROR`. -/
   pure insn assertionError : Value
-  /-- A callable: `code`, a pointer to a translated function that takes the `cells`, of the
-  types `cs`, then `args` and `kwargs`, and the cells it captures, one operand each.  Late
-  binding reads a captured cell; a module-level function captures none.  `call` is its
-  `apply`.  It reads the module's `__name__`, the function's `__module__`. -/
-  reads insn mkClosure [(cs : list)] (code : Fn [*cs, Value, Value] failing) (*cells : cs) : Value
+  /-- A callable named `name` (its `__name__`), whose globals are those of the module `module`:
+  `code`, a pointer to a translated function that takes the `cells`, of the types `cs`, then
+  `args` and `kwargs`, and the cells it captures, one operand each.  Its `__module__` is the
+  value of the module's `__name__` global when it is made.  Late binding reads a captured cell;
+  a module-level function captures none.  `call` is its `apply`. -/
+  reads insn mkClosure [(cs : list)] (code : Fn [*cs, Value, Value] failing) (name module : String)
+    (*cells : cs) : Value
   /-- `obj.name`. -/
   calls insn attr (obj : Value) (name : String) (^err (exc : Value)) : Value
   /-- `obj.name = val`. -/

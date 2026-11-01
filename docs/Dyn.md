@@ -1202,7 +1202,8 @@ as a read at the test environment's accounts shows (`StrataDynTest/Exec/CertMode
 
 `dyn_cert` does not prove the certificate of a rule that builds a closure over a list of cells,
 such as `ex.mkClo`, which has the shape of Python's `mkClosure`: such a rule needs a hand-written
-certificate, with a lemma for `bindAll` by induction on the list; this package has none yet.
+certificate, with the lemma `Accounts.bindAll_sat` for `bindAll` (in
+`StrataDyn/Exec/CertModelProps.lean`), proved by induction on the list.
 
 ## 5. Reasoning about runs
 

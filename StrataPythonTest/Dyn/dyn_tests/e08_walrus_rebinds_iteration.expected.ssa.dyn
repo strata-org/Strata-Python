@@ -7,7 +7,7 @@ module e08_walrus_rebinds_iteration {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("e08_walrus_rebinds_iteration", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@e08_walrus_rebinds_iteration.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@e08_walrus_rebinds_iteration.f, "f", "e08_walrus_rebinds_iteration")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("e08_walrus_rebinds_iteration", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -24,7 +24,7 @@ module e08_walrus_rebinds_iteration {
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
-      %xs.4 : py.Value = py.requireDefined(%xs.2, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %xs.4 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
       %x.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%x.1)
       %list.0 : py.Value = py.listComp(%xs.4) ^propagate.0() {

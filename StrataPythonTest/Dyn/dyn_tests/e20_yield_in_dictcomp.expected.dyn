@@ -9,7 +9,7 @@ module e20_yield_in_dictcomp {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("e20_yield_in_dictcomp", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@e20_yield_in_dictcomp.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@e20_yield_in_dictcomp.f, "f", "e20_yield_in_dictcomp")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("e20_yield_in_dictcomp", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -28,7 +28,7 @@ module e20_yield_in_dictcomp {
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
-      %xs.4 : py.Value = py.requireDefined(%xs.3, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
       %x.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%x.1)
       %dict.0 : py.Value = py.dictComp(%xs.4) ^propagate.0() {
@@ -37,7 +37,7 @@ module e20_yield_in_dictcomp {
           %store.0 : base.Unit = py.compStore(%out.0) ^propagate.1() {
             key.0():
               %x.2 : py.Value = base.refGet[py.Value](%x.cell.1)
-              %x.3 : py.Value = py.requireDefined(%x.2, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.2()
+              %x.3 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.2()
               %ok.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.3)
               ret(%ok.0)
             propagate.2(%exc.0 : py.Value):

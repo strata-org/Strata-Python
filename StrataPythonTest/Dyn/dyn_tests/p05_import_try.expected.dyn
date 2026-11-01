@@ -42,7 +42,7 @@ module p05_import_try {
       %set.5 : base.Unit = base.refSet[py.Value](%path.cell.1, %none.1)
       jump ^join.1()
     join.1():
-      %clo.0 : py.Value = py.mkClosure[[]](@p05_import_try.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@p05_import_try.f, "f", "p05_import_try")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p05_import_try", "f")
       %set.6 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.2 : py.Value = py.noneLit
@@ -64,7 +64,7 @@ module p05_import_try {
       %json.0 : py.Value = py.loadGlobal("p05_import_try", "json") ^propagate.0()
       %dumps.0 : py.Value = py.attr(%json.0, "dumps") ^propagate.0()
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.4 : py.Value = py.requireDefined(%x.3, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%x.4)
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%dumps.0, %tuple.0, %kwargs.1) ^propagate.0()

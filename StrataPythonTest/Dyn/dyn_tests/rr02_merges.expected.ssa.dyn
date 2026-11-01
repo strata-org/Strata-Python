@@ -7,10 +7,10 @@ module rr02_merges {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("rr02_merges", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@rr02_merges.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@rr02_merges.f, "f", "rr02_merges")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("rr02_merges", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@rr02_merges.g)
+      %clo.1 : py.Value = py.mkClosure[[]](@rr02_merges.g, "g", "rr02_merges")
       %g.cell.0 : base.Ref(py.Value) = py.globalCell("rr02_merges", "g")
       %set.3 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
       %none.1 : py.Value = py.noneLit
@@ -39,12 +39,12 @@ module rr02_merges {
       %ys.2 : py.Value = py.tupleGet(%bound.0, 1)
       %int.0 : py.Value = py.intLit(0)
       %int.1 : py.Value = py.intLit(0)
-      %xs.4 : py.Value = py.requireDefined(%xs.2, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %xs.4 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %iter.0 : py.Value = py.getIter(%xs.4) ^propagate.0()
       jump ^head.0(%int.0, %int.1)
     head.0(%total.5 : py.Value, %count.5 : py.Value):
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
-      %x.2 : py.Value = py.requireDefined(%item.0, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.2 : py.Value = py.requireDefined(%item.0, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %int.2 : py.Value = py.intLit(0)
       %lt.0 : py.Value = py.lt(%x.2, %int.2) ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%lt.0) ^propagate.0()
@@ -54,13 +54,13 @@ module rr02_merges {
     else.0():
       jump ^join.0()
     join.0():
-      %ys.4 : py.Value = py.requireDefined(%ys.2, "UnboundLocalError", "cannot access local variable 'ys' where it is not associated with a value") ^propagate.0()
+      %ys.4 : py.Value = py.requireDefined(%ys.2, "ys", "UnboundLocalError", "cannot access local variable 'ys' where it is not associated with a value") ^propagate.0()
       %iter.1 : py.Value = py.getIter(%ys.4) ^propagate.0()
       jump ^head.1(%total.5)
     head.1(%total.6 : py.Value):
       %item.1 : py.Value = py.next(%iter.1) ^stop.1()
-      %y.2 : py.Value = py.requireDefined(%item.1, "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
-      %x.4 : py.Value = py.requireDefined(%item.0, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %y.2 : py.Value = py.requireDefined(%item.1, "y", "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
+      %x.4 : py.Value = py.requireDefined(%item.0, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %eq.0 : py.Value = py.eq(%y.2, %x.4) ^propagate.0()
       %cond.1 : base.Bool = py.truthy(%eq.0) ^propagate.0()
       branch(%cond.1) ^then.1() ^else.1()
@@ -69,15 +69,15 @@ module rr02_merges {
     else.1():
       jump ^join.1()
     join.1():
-      %total.2 : py.Value = py.requireDefined(%total.6, "UnboundLocalError", "cannot access local variable 'total' where it is not associated with a value") ^propagate.0()
-      %y.4 : py.Value = py.requireDefined(%item.1, "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
+      %total.2 : py.Value = py.requireDefined(%total.6, "total", "UnboundLocalError", "cannot access local variable 'total' where it is not associated with a value") ^propagate.0()
+      %y.4 : py.Value = py.requireDefined(%item.1, "y", "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
       %add.0 : py.Value = py.add(%total.2, %y.4) ^propagate.0()
       jump ^head.1(%add.0)
     stop.1(%exc.0 : py.Value):
       %done.0 : base.Bool = py.isStopIteration(%exc.0)
       branch(%done.0) ^exit.1() ^propagate.0(%exc.0)
     exit.1():
-      %count.2 : py.Value = py.requireDefined(%count.5, "UnboundLocalError", "cannot access local variable 'count' where it is not associated with a value") ^propagate.0()
+      %count.2 : py.Value = py.requireDefined(%count.5, "count", "UnboundLocalError", "cannot access local variable 'count' where it is not associated with a value") ^propagate.0()
       %int.3 : py.Value = py.intLit(1)
       %add.1 : py.Value = py.add(%count.2, %int.3) ^propagate.0()
       jump ^head.0(%total.6, %add.1)
@@ -85,8 +85,8 @@ module rr02_merges {
       %done.1 : base.Bool = py.isStopIteration(%exc.1)
       branch(%done.1) ^exit.0() ^propagate.0(%exc.1)
     exit.0():
-      %total.4 : py.Value = py.requireDefined(%total.5, "UnboundLocalError", "cannot access local variable 'total' where it is not associated with a value") ^propagate.0()
-      %count.4 : py.Value = py.requireDefined(%count.5, "UnboundLocalError", "cannot access local variable 'count' where it is not associated with a value") ^propagate.0()
+      %total.4 : py.Value = py.requireDefined(%total.5, "total", "UnboundLocalError", "cannot access local variable 'total' where it is not associated with a value") ^propagate.0()
+      %count.4 : py.Value = py.requireDefined(%count.5, "count", "UnboundLocalError", "cannot access local variable 'count' where it is not associated with a value") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%total.4, %count.4)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.0)
       ret(%ret.0)
@@ -110,15 +110,15 @@ module rr02_merges {
       %int.1 : py.Value = py.intLit(0)
       jump ^head.0(%int.0, %int.1)
     head.0(%i.7 : py.Value, %s.5 : py.Value):
-      %i.2 : py.Value = py.requireDefined(%i.7, "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
-      %n.8 : py.Value = py.requireDefined(%n.6, "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
+      %i.2 : py.Value = py.requireDefined(%i.7, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %n.8 : py.Value = py.requireDefined(%n.6, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
       %lt.0 : py.Value = py.lt(%i.2, %n.8) ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%lt.0) ^propagate.0()
       branch(%cond.0) ^body.0() ^exit.0(%s.5)
     body.0():
-      %s.2 : py.Value = py.requireDefined(%s.5, "UnboundLocalError", "cannot access local variable 's' where it is not associated with a value") ^finRaise.0()
+      %s.2 : py.Value = py.requireDefined(%s.5, "s", "UnboundLocalError", "cannot access local variable 's' where it is not associated with a value") ^finRaise.0()
       %h.0 : py.Value = py.loadGlobal("rr02_merges", "h") ^finRaise.0()
-      %i.4 : py.Value = py.requireDefined(%i.7, "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^finRaise.0()
+      %i.4 : py.Value = py.requireDefined(%i.7, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^finRaise.0()
       %tuple.0 : py.Value = py.mkTuple(%i.4)
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%h.0, %tuple.0, %kwargs.1) ^finRaise.0()
@@ -130,7 +130,7 @@ module rr02_merges {
       jump ^fin.0(%comp.1, %s.5)
     fin.0(%pending.0 : py.Completion, %s.6 : py.Value):
       %prev.0 : py.Value = py.pushPending(%pending.0)
-      %i.6 : py.Value = py.requireDefined(%i.7, "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^superseded.0()
+      %i.6 : py.Value = py.requireDefined(%i.7, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^superseded.0()
       %int.2 : py.Value = py.intLit(1)
       %add.1 : py.Value = py.add(%i.6, %int.2) ^superseded.0()
       %pop.0 : base.Unit = py.popExcept(%prev.0)
@@ -144,7 +144,7 @@ module rr02_merges {
     join.0():
       jump ^head.0(%add.1, %s.6)
     exit.0(%s.7 : py.Value):
-      %s.4 : py.Value = py.requireDefined(%s.7, "UnboundLocalError", "cannot access local variable 's' where it is not associated with a value") ^propagate.0()
+      %s.4 : py.Value = py.requireDefined(%s.7, "s", "UnboundLocalError", "cannot access local variable 's' where it is not associated with a value") ^propagate.0()
       %ret.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%s.4)
       ret(%ret.1)
     propagate.0(%exc.2 : py.Value):

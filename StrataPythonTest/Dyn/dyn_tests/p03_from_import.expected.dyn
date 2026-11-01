@@ -19,7 +19,7 @@ module p03_from_import {
       %defaultdict.0 : py.Value = py.importFrom("collections", "defaultdict") ^propagate.0()
       %dd.cell.0 : base.Ref(py.Value) = py.globalCell("p03_from_import", "dd")
       %set.5 : base.Unit = base.refSet[py.Value](%dd.cell.0, %defaultdict.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@p03_from_import.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@p03_from_import.f, "f", "p03_from_import")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p03_from_import", "f")
       %set.6 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -40,10 +40,10 @@ module p03_from_import {
       %set.0 : base.Unit = base.refSet[py.Value](%p.cell.0, %p.2)
       %join.0 : py.Value = py.loadGlobal("p03_from_import", "join") ^propagate.0()
       %p.3 : py.Value = base.refGet[py.Value](%p.cell.0)
-      %p.4 : py.Value = py.requireDefined(%p.3, "UnboundLocalError", "cannot access local variable 'p' where it is not associated with a value") ^propagate.0()
+      %p.4 : py.Value = py.requireDefined(%p.3, "p", "UnboundLocalError", "cannot access local variable 'p' where it is not associated with a value") ^propagate.0()
       %base.0 : py.Value = py.loadGlobal("p03_from_import", "base") ^propagate.0()
       %p.5 : py.Value = base.refGet[py.Value](%p.cell.0)
-      %p.6 : py.Value = py.requireDefined(%p.5, "UnboundLocalError", "cannot access local variable 'p' where it is not associated with a value") ^propagate.0()
+      %p.6 : py.Value = py.requireDefined(%p.5, "p", "UnboundLocalError", "cannot access local variable 'p' where it is not associated with a value") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%p.6)
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%base.0, %tuple.0, %kwargs.1) ^propagate.0()

@@ -14,7 +14,7 @@ module p39_nested_sample {
       %Counter.0 : py.Value = py.importFrom("collections", "Counter") ^propagate.0()
       %C.cell.0 : base.Ref(py.Value) = py.globalCell("p39_nested_sample", "C")
       %set.3 : base.Unit = base.refSet[py.Value](%C.cell.0, %Counter.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@p39_nested_sample.make)
+      %clo.0 : py.Value = py.mkClosure[[]](@p39_nested_sample.make, "make", "p39_nested_sample")
       %make.cell.0 : base.Ref(py.Value) = py.globalCell("p39_nested_sample", "make")
       %set.4 : base.Unit = base.refSet[py.Value](%make.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -46,14 +46,14 @@ module p39_nested_sample {
       %int.0 : py.Value = py.intLit(0)
       %set.2 : base.Unit = base.refSet[py.Value](%count.cell.0, %int.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value), base.Ref(py.Value)]](@|p39_nested_sample.make.Box.<body>|, %prefix.cell.0, %count.cell.0, %json.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value), base.Ref(py.Value)]](@|p39_nested_sample.make.Box.<body>|, "Box", "p39_nested_sample", %prefix.cell.0, %count.cell.0, %json.cell.0)
       %str.0 : py.Value = py.strLit("Box")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.0)
       %kwargs.1 : py.Value = py.mkKwargs
       %Box.1 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.1) ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@p39_nested_sample.make.total, %count.cell.0)
-      %Box.3 : py.Value = py.requireDefined(%Box.1, "UnboundLocalError", "cannot access local variable 'Box' where it is not associated with a value") ^propagate.0()
-      %total.2 : py.Value = py.requireDefined(%clo.1, "UnboundLocalError", "cannot access local variable 'total' where it is not associated with a value") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@p39_nested_sample.make.total, "total", "p39_nested_sample", %count.cell.0)
+      %Box.3 : py.Value = py.requireDefined(%Box.1, "Box", "UnboundLocalError", "cannot access local variable 'Box' where it is not associated with a value") ^propagate.0()
+      %total.2 : py.Value = py.requireDefined(%clo.1, "total", "UnboundLocalError", "cannot access local variable 'total' where it is not associated with a value") ^propagate.0()
       %tuple.1 : py.Value = py.mkTuple(%Box.3, %total.2)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.1)
       ret(%ret.0)
@@ -89,12 +89,12 @@ module p39_nested_sample {
       branch(%found.1) ^join.1(%prefix.1) ^absent.1()
     absent.1():
       %prefix.2 : py.Value = base.refGet[py.Value](%prefix.cell.0)
-      %prefix.3 : py.Value = py.requireDefined(%prefix.2, "NameError", "cannot access free variable 'prefix' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %prefix.3 : py.Value = py.requireDefined(%prefix.2, "prefix", "NameError", "cannot access free variable 'prefix' where it is not associated with a value in enclosing scope") ^propagate.0()
       jump ^join.1(%prefix.3)
     join.1(%prefix.4 : py.Value):
       %str.5 : py.Value = py.strLit("label")
       %store.2 : base.Unit = py.setItem(%ns.0, %str.5, %prefix.4) ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value), base.Ref(py.Value)]](@p39_nested_sample.make.Box.show, %count.cell.0, %json.cell.0, %prefix.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value), base.Ref(py.Value)]](@p39_nested_sample.make.Box.show, "show", "p39_nested_sample", %count.cell.0, %json.cell.0, %prefix.cell.0)
       %str.6 : py.Value = py.strLit("show")
       %store.3 : base.Unit = py.setItem(%ns.0, %str.6, %clo.0) ^propagate.0()
       %none.0 : py.Value = py.noneLit
@@ -108,7 +108,7 @@ module p39_nested_sample {
     entry.0(%count.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|p39_nested_sample.make.total.<lambda>|, %count.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|p39_nested_sample.make.total.<lambda>|, "<lambda>", "p39_nested_sample", %count.cell.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%clo.0)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -124,17 +124,17 @@ module p39_nested_sample {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %count.0 : py.Value = base.refGet[py.Value](%count.cell.0)
-      %count.1 : py.Value = py.requireDefined(%count.0, "NameError", "cannot access free variable 'count' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %count.1 : py.Value = py.requireDefined(%count.0, "count", "NameError", "cannot access free variable 'count' where it is not associated with a value in enclosing scope") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %iAdd.0 : py.Value = py.iAdd(%count.1, %int.0) ^propagate.0()
       %set.1 : base.Unit = base.refSet[py.Value](%count.cell.0, %iAdd.0)
       %json.0 : py.Value = base.refGet[py.Value](%json.cell.0)
-      %json.1 : py.Value = py.requireDefined(%json.0, "NameError", "cannot access free variable 'json' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %json.1 : py.Value = py.requireDefined(%json.0, "json", "NameError", "cannot access free variable 'json' where it is not associated with a value in enclosing scope") ^propagate.0()
       %dumps.0 : py.Value = py.attr(%json.1, "dumps") ^propagate.0()
       %prefix.0 : py.Value = base.refGet[py.Value](%prefix.cell.0)
-      %prefix.1 : py.Value = py.requireDefined(%prefix.0, "NameError", "cannot access free variable 'prefix' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %prefix.1 : py.Value = py.requireDefined(%prefix.0, "prefix", "NameError", "cannot access free variable 'prefix' where it is not associated with a value in enclosing scope") ^propagate.0()
       %count.2 : py.Value = base.refGet[py.Value](%count.cell.0)
-      %count.3 : py.Value = py.requireDefined(%count.2, "NameError", "cannot access free variable 'count' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %count.3 : py.Value = py.requireDefined(%count.2, "count", "NameError", "cannot access free variable 'count' where it is not associated with a value in enclosing scope") ^propagate.0()
       %label.0 : py.Value = py.loadGlobal("p39_nested_sample", "label") ^propagate.0()
       %list.0 : py.Value = py.mkList(%prefix.1, %count.3, %label.0)
       %tuple.0 : py.Value = py.mkTuple(%list.0)
@@ -151,7 +151,7 @@ module p39_nested_sample {
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %count.0 : py.Value = base.refGet[py.Value](%count.cell.0)
-      %count.1 : py.Value = py.requireDefined(%count.0, "NameError", "cannot access free variable 'count' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %count.1 : py.Value = py.requireDefined(%count.0, "count", "NameError", "cannot access free variable 'count' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%count.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):

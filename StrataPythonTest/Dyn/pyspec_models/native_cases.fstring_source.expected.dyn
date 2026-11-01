@@ -4,10 +4,10 @@ module native_cases.fstring_source {
       %str.0 : py.Value = py.strLit("native_cases.fstring_source")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.fstring_source", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@native_cases.fstring_source.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@native_cases.fstring_source.f, "f", "native_cases.fstring_source")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.fstring_source", "f")
       %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@native_cases.fstring_source.__getattr__)
+      %clo.1 : py.Value = py.mkClosure[[]](@native_cases.fstring_source.__getattr__, "__getattr__", "native_cases.fstring_source")
       %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.fstring_source", "__getattr__")
       %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
       %none.0 : py.Value = py.noneLit

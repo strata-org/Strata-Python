@@ -13,8 +13,9 @@ set_option autoImplicit false
 
 Key theorems: `Within.lift` (a lower level implies a higher one) and `Within.bind`, which make
 `Within` compose as a rule's computation does; `pure_reads_alike`: two readings of a `pure` tree
-from the same heap and from worlds that `immEq` relates end alike.  Each recursive theorem
-follows the mutual recursion of its definition through an update.
+from the same heap and from worlds that `immEq` relates end alike; `bindAll_within`: the binds of
+a closure's arguments change nothing that `Within` counts.  Each recursive theorem follows the
+mutual recursion of its definition through an update.
 
 The definitions are in `Exec/Effects.lean`: the levels (`Level`), what a language says about its
 world (`WorldSpec`), `Within`, `FnAll` and `VarAll`, and the readings (`Reading.read`, `EnvImm`).
@@ -242,6 +243,28 @@ theorem pure_reads_alike.after {sp : WorldSpec W St} {s : St} {post : Cells → 
       exact pure_reads_alike hE oracle t N d h w₁ w₂ hW hw
 end
 end
+
+end
+
+@[expose] public section
+variable {σ : Type} [Store σ] [Decode σ] {W : Type} {rs : List (List Ty × Ty)}
+  {ps : List (List Ty)} {S R : Type}
+
+/-- **The binds of `bindAll` change nothing that `Within` counts**: binding values into `f`,
+then going on with `k`, is within `e` from `N` when `k` of every closure is. -/
+theorem bindAll_within {St : Type} (sp : WorldSpec W St) (s₀ : St) (e : Level) (post : Cells → R → Prop)
+    {as : List Type} {r : Type} [s : SigOf σ as r] :
+    ∀ (tys : List Ty) (f : FnRef σ (tys.map (Decode.decode σ) ++ as) r) (vs : Payload (tys.map (Decode.decode σ)))
+      (k : FnRef σ as r → Tree (Decode.decode σ) σ W rs ps S R) (N : Cells),
+      (∀ g, Within sp s₀ e post N (k g)) →
+      Within sp s₀ e post N
+        (@Sem.bind (MEff (Decode.decode σ) σ W rs) (Out (Decode.decode σ) ps S) _ _
+          (@bindAll σ _ _ (MEff (Decode.decode σ) σ W rs) (Out (Decode.decode σ) ps S)
+            HasCall.mreq as r s (tys.map (Decode.decode σ)) ⟨tys, rfl⟩ f vs) k)
+  | [], f, (), _, _, hk => hk f
+  | [_], _, _, _, _, hk => fun _ => hk _
+  | _ :: t' :: ts, _, (_, xs), k, N, hk => fun _ =>
+    bindAll_within sp s₀ e post (t' :: ts) _ xs k N hk
 
 end
 

@@ -10,7 +10,7 @@ module tc11_class_field {
       %mod.0 : py.Value = py.importModule("myservice") ^propagate.0()
       %myservice.cell.0 : base.Ref(py.Value) = py.globalCell("tc11_class_field", "myservice")
       %set.2 : base.Unit = base.refSet[py.Value](%myservice.cell.0, %mod.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@tc11_class_field.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@tc11_class_field.f, "f", "tc11_class_field")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("tc11_class_field", "f")
       %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -33,7 +33,7 @@ module tc11_class_field {
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%Client.0, %tuple.0, %kwargs.1) ^propagate.0()
-      %client.2 : py.Value = py.requireDefined(%call.0, "UnboundLocalError", "cannot access local variable 'client' where it is not associated with a value") ^propagate.0()
+      %client.2 : py.Value = py.requireDefined(%call.0, "client", "UnboundLocalError", "cannot access local variable 'client' where it is not associated with a value") ^propagate.0()
       %service_name.0 : py.Value = py.attr(%client.2, "service_name") ^propagate.0()
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)

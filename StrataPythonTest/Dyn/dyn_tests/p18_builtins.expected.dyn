@@ -7,7 +7,7 @@ module p18_builtins {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p18_builtins", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@p18_builtins.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@p18_builtins.f, "f", "p18_builtins")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p18_builtins", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -26,7 +26,7 @@ module p18_builtins {
       %sorted.0 : py.Value = py.loadGlobal("p18_builtins", "sorted") ^propagate.0()
       %reversed.0 : py.Value = py.loadGlobal("p18_builtins", "reversed") ^propagate.0()
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
-      %xs.4 : py.Value = py.requireDefined(%xs.3, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%xs.4)
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%reversed.0, %tuple.0, %kwargs.1) ^propagate.0()
@@ -41,7 +41,7 @@ module p18_builtins {
       %call.2 : py.Value = py.call(%divmod.0, %tuple.2, %kwargs.3) ^propagate.0()
       %frozenset.0 : py.Value = py.loadGlobal("p18_builtins", "frozenset") ^propagate.0()
       %xs.5 : py.Value = base.refGet[py.Value](%xs.cell.0)
-      %xs.6 : py.Value = py.requireDefined(%xs.5, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %xs.6 : py.Value = py.requireDefined(%xs.5, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %tuple.3 : py.Value = py.mkTuple(%xs.6)
       %kwargs.4 : py.Value = py.mkKwargs
       %call.3 : py.Value = py.call(%frozenset.0, %tuple.3, %kwargs.4) ^propagate.0()

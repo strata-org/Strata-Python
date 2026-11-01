@@ -7,19 +7,19 @@ module m_closures {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_closures", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@m_closures.make)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_closures.make, "make", "m_closures")
       %make.cell.0 : base.Ref(py.Value) = py.globalCell("m_closures", "make")
       %set.2 : base.Unit = base.refSet[py.Value](%make.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@m_closures.outer)
+      %clo.1 : py.Value = py.mkClosure[[]](@m_closures.outer, "outer", "m_closures")
       %outer.cell.0 : base.Ref(py.Value) = py.globalCell("m_closures", "outer")
       %set.3 : base.Unit = base.refSet[py.Value](%outer.cell.0, %clo.1)
-      %clo.2 : py.Value = py.mkClosure[[]](@m_closures.twice)
+      %clo.2 : py.Value = py.mkClosure[[]](@m_closures.twice, "twice", "m_closures")
       %twice.cell.0 : base.Ref(py.Value) = py.globalCell("m_closures", "twice")
       %set.4 : base.Unit = base.refSet[py.Value](%twice.cell.0, %clo.2)
-      %clo.3 : py.Value = py.mkClosure[[]](@m_closures.pair)
+      %clo.3 : py.Value = py.mkClosure[[]](@m_closures.pair, "pair", "m_closures")
       %pair.cell.0 : base.Ref(py.Value) = py.globalCell("m_closures", "pair")
       %set.5 : base.Unit = base.refSet[py.Value](%pair.cell.0, %clo.3)
-      %clo.4 : py.Value = py.mkClosure[[]](@m_closures.early)
+      %clo.4 : py.Value = py.mkClosure[[]](@m_closures.early, "early", "m_closures")
       %early.cell.0 : base.Ref(py.Value) = py.globalCell("m_closures", "early")
       %set.6 : base.Unit = base.refSet[py.Value](%early.cell.0, %clo.4)
       %none.1 : py.Value = py.noneLit
@@ -39,10 +39,10 @@ module m_closures {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "p") ^propagate.0()
       %p.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%p.cell.0, %p.2)
-      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_closures.make.get, %p.cell.0)
-      %clo.1 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_closures.make.drop, %p.cell.0)
-      %get.2 : py.Value = py.requireDefined(%clo.0, "UnboundLocalError", "cannot access local variable 'get' where it is not associated with a value") ^propagate.0()
-      %drop.2 : py.Value = py.requireDefined(%clo.1, "UnboundLocalError", "cannot access local variable 'drop' where it is not associated with a value") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_closures.make.get, "get", "m_closures", %p.cell.0)
+      %clo.1 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_closures.make.drop, "drop", "m_closures", %p.cell.0)
+      %get.2 : py.Value = py.requireDefined(%clo.0, "get", "UnboundLocalError", "cannot access local variable 'get' where it is not associated with a value") ^propagate.0()
+      %drop.2 : py.Value = py.requireDefined(%clo.1, "drop", "UnboundLocalError", "cannot access local variable 'drop' where it is not associated with a value") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%get.2, %drop.2)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.0)
       ret(%ret.0)
@@ -60,8 +60,8 @@ module m_closures {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
-      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_closures.outer.mid, %x.cell.0)
-      %mid.2 : py.Value = py.requireDefined(%clo.0, "UnboundLocalError", "cannot access local variable 'mid' where it is not associated with a value") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_closures.outer.mid, "mid", "m_closures", %x.cell.0)
+      %mid.2 : py.Value = py.requireDefined(%clo.0, "mid", "UnboundLocalError", "cannot access local variable 'mid' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%mid.2)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -80,17 +80,17 @@ module m_closures {
       %flag.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%flag.cell.0, %flag.2)
       %flag.3 : py.Value = base.refGet[py.Value](%flag.cell.0)
-      %flag.4 : py.Value = py.requireDefined(%flag.3, "UnboundLocalError", "cannot access local variable 'flag' where it is not associated with a value") ^propagate.0()
+      %flag.4 : py.Value = py.requireDefined(%flag.3, "flag", "UnboundLocalError", "cannot access local variable 'flag' where it is not associated with a value") ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%flag.4) ^propagate.0()
       branch(%cond.0) ^then.0() ^else.0()
     then.0():
-      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_closures.twice.h, %flag.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_closures.twice.h, "h", "m_closures", %flag.cell.0)
       jump ^join.0(%clo.0)
     else.0():
-      %clo.1 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_closures.twice.h.1, %flag.cell.0)
+      %clo.1 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_closures.twice.h.1, "h", "m_closures", %flag.cell.0)
       jump ^join.0(%clo.1)
     join.0(%h.3 : py.Value):
-      %h.2 : py.Value = py.requireDefined(%h.3, "UnboundLocalError", "cannot access local variable 'h' where it is not associated with a value") ^propagate.0()
+      %h.2 : py.Value = py.requireDefined(%h.3, "h", "UnboundLocalError", "cannot access local variable 'h' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%h.2)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -113,8 +113,8 @@ module m_closures {
       %set.0 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.2)
       %b.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%b.cell.0, %b.2)
-      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@m_closures.pair.g, %b.cell.0, %a.cell.0)
-      %g.2 : py.Value = py.requireDefined(%clo.0, "UnboundLocalError", "cannot access local variable 'g' where it is not associated with a value") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@m_closures.pair.g, "g", "m_closures", %b.cell.0, %a.cell.0)
+      %g.2 : py.Value = py.requireDefined(%clo.0, "g", "UnboundLocalError", "cannot access local variable 'g' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%g.2)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -131,13 +131,13 @@ module m_closures {
       %y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%y.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_closures.early.h, %y.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_closures.early.h, "h", "m_closures", %y.cell.0)
       %y.1 : py.Value = base.refGet[py.Value](%y.cell.0)
-      %y.2 : py.Value = py.requireDefined(%y.1, "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
+      %y.2 : py.Value = py.requireDefined(%y.1, "y", "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %set.2 : base.Unit = base.refSet[py.Value](%y.cell.0, %int.0)
-      %h.2 : py.Value = py.requireDefined(%clo.0, "UnboundLocalError", "cannot access local variable 'h' where it is not associated with a value") ^propagate.0()
-      %r.2 : py.Value = py.requireDefined(%y.2, "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^propagate.0()
+      %h.2 : py.Value = py.requireDefined(%clo.0, "h", "UnboundLocalError", "cannot access local variable 'h' where it is not associated with a value") ^propagate.0()
+      %r.2 : py.Value = py.requireDefined(%y.2, "r", "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%h.2, %r.2)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.0)
       ret(%ret.0)
@@ -150,7 +150,7 @@ module m_closures {
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %p.0 : py.Value = base.refGet[py.Value](%p.cell.0)
-      %p.1 : py.Value = py.requireDefined(%p.0, "NameError", "cannot access free variable 'p' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %p.1 : py.Value = py.requireDefined(%p.0, "p", "NameError", "cannot access free variable 'p' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%p.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -162,7 +162,7 @@ module m_closures {
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %p.0 : py.Value = base.refGet[py.Value](%p.cell.0)
-      %p.1 : py.Value = py.requireDefined(%p.0, "NameError", "cannot access free variable 'p' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %p.1 : py.Value = py.requireDefined(%p.0, "p", "NameError", "cannot access free variable 'p' where it is not associated with a value in enclosing scope") ^propagate.0()
       %p.2 : py.Value = py.undef("p")
       %set.0 : base.Unit = base.refSet[py.Value](%p.cell.0, %p.2)
       %none.0 : py.Value = py.noneLit
@@ -178,8 +178,8 @@ module m_closures {
       %inner.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%inner.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_closures.outer.mid.inner, %x.cell.0)
-      %inner.2 : py.Value = py.requireDefined(%clo.0, "UnboundLocalError", "cannot access local variable 'inner' where it is not associated with a value") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_closures.outer.mid.inner, "inner", "m_closures", %x.cell.0)
+      %inner.2 : py.Value = py.requireDefined(%clo.0, "inner", "UnboundLocalError", "cannot access local variable 'inner' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%inner.2)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -191,7 +191,7 @@ module m_closures {
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %flag.0 : py.Value = base.refGet[py.Value](%flag.cell.0)
-      %flag.1 : py.Value = py.requireDefined(%flag.0, "NameError", "cannot access free variable 'flag' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %flag.1 : py.Value = py.requireDefined(%flag.0, "flag", "NameError", "cannot access free variable 'flag' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%flag.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -203,7 +203,7 @@ module m_closures {
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %flag.0 : py.Value = base.refGet[py.Value](%flag.cell.0)
-      %flag.1 : py.Value = py.requireDefined(%flag.0, "NameError", "cannot access free variable 'flag' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %flag.1 : py.Value = py.requireDefined(%flag.0, "flag", "NameError", "cannot access free variable 'flag' where it is not associated with a value in enclosing scope") ^propagate.0()
       %not.0 : py.Value = py.not(%flag.1) ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%not.0)
       ret(%ret.0)
@@ -216,9 +216,9 @@ module m_closures {
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %b.0 : py.Value = base.refGet[py.Value](%b.cell.0)
-      %b.1 : py.Value = py.requireDefined(%b.0, "NameError", "cannot access free variable 'b' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %b.1 : py.Value = py.requireDefined(%b.0, "b", "NameError", "cannot access free variable 'b' where it is not associated with a value in enclosing scope") ^propagate.0()
       %a.0 : py.Value = base.refGet[py.Value](%a.cell.0)
-      %a.1 : py.Value = py.requireDefined(%a.0, "NameError", "cannot access free variable 'a' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %a.1 : py.Value = py.requireDefined(%a.0, "a", "NameError", "cannot access free variable 'a' where it is not associated with a value in enclosing scope") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%b.1, %a.1)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.0)
       ret(%ret.0)
@@ -231,7 +231,7 @@ module m_closures {
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %y.0 : py.Value = base.refGet[py.Value](%y.cell.0)
-      %y.1 : py.Value = py.requireDefined(%y.0, "NameError", "cannot access free variable 'y' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %y.1 : py.Value = py.requireDefined(%y.0, "y", "NameError", "cannot access free variable 'y' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%y.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -243,7 +243,7 @@ module m_closures {
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.1 : py.Value = py.requireDefined(%x.0, "NameError", "cannot access free variable 'x' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %x.1 : py.Value = py.requireDefined(%x.0, "x", "NameError", "cannot access free variable 'x' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):

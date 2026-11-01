@@ -52,7 +52,7 @@ module m_set_constants {
         each.0(%out.0 : py.ListAcc, %item.1 : py.Value):
           %append.0 : base.Unit = py.compAppend(%out.0) ^propagate.1() {
             elt.0():
-              %y.2 : py.Value = py.requireDefined(%item.1, "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.2()
+              %y.2 : py.Value = py.requireDefined(%item.1, "y", "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.2()
               %ok.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%y.2)
               ret(%ok.0)
             propagate.2(%exc.1 : py.Value):

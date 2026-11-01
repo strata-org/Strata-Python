@@ -4,10 +4,10 @@ module servicelib.Contract {
       %str.0 : py.Value = py.strLit("servicelib.Contract")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Contract", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@servicelib.Contract.modeled_text)
+      %clo.0 : py.Value = py.mkClosure[[]](@servicelib.Contract.modeled_text, "modeled_text", "servicelib.Contract")
       %modeled_text.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Contract", "modeled_text")
       %set.1 : base.Unit = base.refSet[py.Value](%modeled_text.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@servicelib.Contract.__getattr__)
+      %clo.1 : py.Value = py.mkClosure[[]](@servicelib.Contract.__getattr__, "__getattr__", "servicelib.Contract")
       %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Contract", "__getattr__")
       %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
       %none.0 : py.Value = py.noneLit

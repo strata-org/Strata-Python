@@ -45,9 +45,15 @@ def checkRepr [PyPure m V] (v : V) : m String := do
   | some (.str s) => pure (Format.strRepr s.s)
   | _ => PyPure.gap "the repr of a value other than an int or a str in a check's message"
 
-/-- `v`, or a raised `excType(msg)` if `v` is unassigned. -/
-def requireDefined [PyReads m V] (v : V) (excType msg : String) : m V := do
-  if ← PyPure.isUndef v then raiseBuiltin excType msg else pure v
+/-- `v`, the value of the variable `name`, or a raised `excType(msg)` if `v` is unassigned.  A
+`NameError` carries `name` as its `name`, as CPython's `_PyEval_FormatExcCheckArg` sets it; the
+other classes (`UnboundLocalError` included) carry none. -/
+def requireDefined [PyReads m V] (v : V) (name excType msg : String) : m V := do
+  if ← PyPure.isUndef v then
+    let fields := if excType == "NameError" then #[("name", PyPure.imm (m := m) (.str (.ofString name)))]
+      else #[]
+    raiseBuiltin excType msg fields
+  else pure v
 
 /-- `a is b`. -/
 def isOp [PyPure m V] (a b : V) : m Bool := do

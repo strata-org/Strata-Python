@@ -18,7 +18,7 @@ set_option autoImplicit false
 `PyM σ e free α` is a computation of a rule at the effect `e`, generic in the machine's requests
 and in the rule's exits, with the proofs that it reaches only the cells and closures it is given
 and stays within `e`.  Every rule that
-touches Python's state, except `globalCell`, runs one `PyM` computation, through `runRule` or
+touches Python's state, except `globalCell` and `mkClosure`, runs one `PyM` computation, through `runRule` or
 `runTotal`, or, when `free`, through `runRuleFree` or `runTotalFree`, which don't read the store
 first.
 

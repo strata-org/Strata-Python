@@ -7,10 +7,10 @@ module m_if {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_if", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@m_if.classify)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_if.classify, "classify", "m_if")
       %classify.cell.0 : base.Ref(py.Value) = py.globalCell("m_if", "classify")
       %set.2 : base.Unit = base.refSet[py.Value](%classify.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@m_if.sign)
+      %clo.1 : py.Value = py.mkClosure[[]](@m_if.sign, "sign", "m_if")
       %sign.cell.0 : base.Ref(py.Value) = py.globalCell("m_if", "sign")
       %set.3 : base.Unit = base.refSet[py.Value](%sign.cell.0, %clo.1)
       %none.1 : py.Value = py.noneLit
@@ -29,7 +29,7 @@ module m_if {
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.4 : py.Value = py.requireDefined(%x.3, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(0)
       %lt.0 : py.Value = py.lt(%x.4, %int.0) ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%lt.0) ^propagate.0()
@@ -40,7 +40,7 @@ module m_if {
       jump ^join.0()
     else.0():
       %x.5 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.6 : py.Value = py.requireDefined(%x.5, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.6 : py.Value = py.requireDefined(%x.5, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %int.1 : py.Value = py.intLit(0)
       %eq.0 : py.Value = py.eq(%x.6, %int.1) ^propagate.0()
       %cond.1 : base.Bool = py.truthy(%eq.0) ^propagate.0()
@@ -57,7 +57,7 @@ module m_if {
       jump ^join.0()
     join.0():
       %r.1 : py.Value = base.refGet[py.Value](%r.cell.0)
-      %r.2 : py.Value = py.requireDefined(%r.1, "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^propagate.0()
+      %r.2 : py.Value = py.requireDefined(%r.1, "r", "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%r.2)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -74,7 +74,7 @@ module m_if {
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.4 : py.Value = py.requireDefined(%x.3, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(0)
       %lt.0 : py.Value = py.lt(%x.4, %int.0) ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%lt.0) ^propagate.0()

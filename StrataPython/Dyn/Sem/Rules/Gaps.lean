@@ -13,8 +13,8 @@ set_option autoImplicit false
 # The operations that are not modelled yet
 
 Each rule here stops with the gap "not modelled yet: <op>", at its operation's declared effect.  A
-commit that models an operation moves its rule out of this file.  `py.mkClosure` and the
-contract operations have no rule.
+commit that models an operation moves its rule out of this file.  The contract operations have
+no rule.
 -/
 
 namespace StrataPython.Dyn.Sem.Rules

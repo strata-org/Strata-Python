@@ -251,19 +251,24 @@ are in `StrataPython/Dyn/Build.lean`.
   `py.qualifiedRef module name` reads `module.name` at each use; the translator uses it only
   for builtins that are not names in the source, such as `__build_class__`.
 - **Definedness.** Only `isDefined` and `requireDefined` may consume a value that could be
-  `undef`. `requireDefined v excType msg` passes `v` through, or raises `excType(msg)` if `v` is
-  undefined. One exception is a prologue's defaults tuple (§5.4): it holds `undef` for a
-  parameter without a default, `py.mkTuple` builds it, and `py.bindArgs` reads it.
+  `undef`. `requireDefined v name excType msg` passes `v` through, or raises `excType(msg)` if `v`
+  is undefined; a `NameError` carries the variable's `name`, as CPython's does. One exception is a
+  prologue's defaults tuple (§5.4): it holds `undef` for a parameter without a default,
+  `py.mkTuple` builds it, and `py.bindArgs` reads it.
 - **Completions.** `py.Completion` records how a protected block finished. It is a datatype
   whose five constructors are instructions:
   `completionNormal`, `completionReturn (value)`, `completionRaise (exc)`, `completionBreak`
   and `completionContinue`. `py.Completion.case` has five successors in that order. Only the
   `return` and `raise` successors receive a payload.
 - **Closures.** `const @m.f` is a `base.Fn(as, base.Except(py.Value, py.Value))`, with `as`
-  `m.f`'s parameter types: its cells, then `args` and `kwargs`. `py.mkClosure[cs] code cells…`
-  pairs it with the cells it captures, one operand per element of `cs`, the cells' types, to
-  make a callable `py.Value`:
-  `reads insn mkClosure [(cs : list)] (code : Fn [*cs, Value, Value] failing) (*cells : cs) : Value`.
+  `m.f`'s parameter types: its cells, then `args` and `kwargs`. `py.mkClosure[cs] code name
+  module cells…` pairs it with the cells it captures, one operand per element of `cs` (the
+  cells' types), to make a callable `py.Value`. Its `__name__` is `name`. Its globals are those
+  of the module `module`, and its `__module__` is the value of that module's `__name__` global
+  when it is made:
+  `reads insn mkClosure [(cs : list)] (code : Fn [*cs, Value, Value] failing) (name module : String)
+  (*cells : cs) : Value`. `name` is the last part of the function's `__qualname__`, unmangled
+  (`__m`, `<lambda>`).
   `py.call f args kwargs` calls any callable.
 - **Function results.** A translated function returns `base.Except(py.Value, py.Value)`.
   `base.ok v` is a normal return and `base.error e` propagates an exception to the caller.
@@ -481,7 +486,7 @@ decided at each read, so a global assigned from another module and a builtin add
 
 ```
     %12 : py.Value = base.refGet[py.Value](%3)
-    %15 : py.Value = py.requireDefined(%12, "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
+    %15 : py.Value = py.requireDefined(%12, "y", "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
 ```
 
 `len` read in a function:
@@ -517,8 +522,8 @@ At the definition site, in source order:
 2. Evaluate each non-constant default value into a fresh *default cell*.
 3. Evaluate the parameter annotations, in CPython 3.12's order (positional, positional-only,
    `*args`, keyword-only, `**kwargs`), then the return annotation.
-4. Emit `const @m.f…`, at `m.f`'s code type, and `py.mkClosure[cs] code cells…`, with `cs`
-   the cells' types, `m.f`'s parameter types but `args` and `kwargs`. The cells are the ones
+4. Emit `const @m.f…`, at `m.f`'s code type, and `py.mkClosure[cs] code name module cells…`,
+   with `cs` the cells' types, `m.f`'s parameter types but `args` and `kwargs`. The cells are the ones
    the callee captures, in `capturedVars` order (§6.6), then its default cells. A top-level
    function has only default cells.
 5. If there are annotations, store them as `f.__annotations__`: a dict from each mangled
@@ -528,7 +533,7 @@ At the definition site, in source order:
 7. Write the result to the name's cell (a `lambda` is an expression and has no name).
 
 ```
-    %21 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m.outer.inner, %3)
+    %21 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m.outer.inner, "inner", "m", %3)
       -- %3: outer's cell for x
     %22 : base.Unit = base.refSet[py.Value](%4, %21)  -- inner = …
 ```
@@ -773,7 +778,7 @@ captures its `free_class` names (§6.7), in the same order of first use. The `mk
 site passes the same cells in the same order.
 
 Capture emits no extra instructions. The inner function reads and writes the outer
-function's own cell, which gives `nonlocal` and late binding. `mkClosure` takes one operand
+function's own cell, which gives `nonlocal` and late binding. `mkClosure` takes one cell operand
 per element of its type argument, each a `base.Ref(py.Value)`, so capturing a value is a type
 error. A `const @m.f` naming a
 function the module does not define fails `Module.Raw.WF`.
@@ -1386,8 +1391,8 @@ The exceptions are the trusted modeling assumptions of §12.9.
 * **Module body.** It is a module body as §5.2 describes. It sets `__name__`, but not `__doc__`:
   the model's docstring isn't the library's, so the module's `__getattr__` makes `__doc__` an
   unknown value, as for any name that the model leaves out. It binds each function's global
-  cell to `py.mkClosure[[]](@servicelib.Storage.f)`. It builds each class with
-  `__build_class__` (§6.7). It binds the module's `__getattr__` (below). It binds
+  cell to `py.mkClosure[[]](@servicelib.Storage.f, "f", "servicelib.Storage")`. It builds each
+  class with `__build_class__` (§6.7). It binds the module's `__getattr__` (below). It binds
   each name that the source imports from another model module, such as `from .Storage import
   Storage`, with `py.importFrom`. It binds no name that the source imports from the standard
   library, such as `Dict` from `typing`: the module's `__getattr__` makes such a name an

@@ -22,7 +22,7 @@ module n03_dictcomp {
           %store.0 : base.Unit = py.compStore(%out.0) ^propagate.1() {
             key.0():
               %k.1 : py.Value = base.refGet[py.Value](%k.cell.0)
-              %k.2 : py.Value = py.requireDefined(%k.1, "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.2()
+              %k.2 : py.Value = py.requireDefined(%k.1, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.2()
               %ok.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%k.2)
               ret(%ok.0)
             propagate.2(%exc.0 : py.Value):
@@ -32,7 +32,7 @@ module n03_dictcomp {
             value.0():
               %len.0 : py.Value = py.loadGlobal("n03_dictcomp", "len") ^propagate.3()
               %k.3 : py.Value = base.refGet[py.Value](%k.cell.0)
-              %k.4 : py.Value = py.requireDefined(%k.3, "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.3()
+              %k.4 : py.Value = py.requireDefined(%k.3, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.3()
               %tuple.0 : py.Value = py.mkTuple(%k.4)
               %kwargs.0 : py.Value = py.mkKwargs
               %call.0 : py.Value = py.call(%len.0, %tuple.0, %kwargs.0) ^propagate.3()

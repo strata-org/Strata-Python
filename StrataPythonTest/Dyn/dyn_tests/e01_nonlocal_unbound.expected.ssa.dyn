@@ -7,7 +7,7 @@ module e01_nonlocal_unbound {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("e01_nonlocal_unbound", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@e01_nonlocal_unbound.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@e01_nonlocal_unbound.f, "f", "e01_nonlocal_unbound")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("e01_nonlocal_unbound", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -20,7 +20,7 @@ module e01_nonlocal_unbound {
       %g.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%g.0)
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
-      %g.2 : py.Value = py.requireDefined(%g.0, "UnboundLocalError", "cannot access local variable 'g' where it is not associated with a value") ^propagate.0()
+      %g.2 : py.Value = py.requireDefined(%g.0, "g", "UnboundLocalError", "cannot access local variable 'g' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%g.2)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):

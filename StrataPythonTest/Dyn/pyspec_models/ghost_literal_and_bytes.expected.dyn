@@ -19,10 +19,10 @@ module ghost_literal_and_bytes {
       %str.0 : py.Value = py.strLit("ghost_literal_and_bytes")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("ghost_literal_and_bytes", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@ghost_literal_and_bytes.read)
+      %clo.0 : py.Value = py.mkClosure[[]](@ghost_literal_and_bytes.read, "read", "ghost_literal_and_bytes")
       %read.cell.0 : base.Ref(py.Value) = py.globalCell("ghost_literal_and_bytes", "read")
       %set.1 : base.Unit = base.refSet[py.Value](%read.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@ghost_literal_and_bytes.__getattr__)
+      %clo.1 : py.Value = py.mkClosure[[]](@ghost_literal_and_bytes.__getattr__, "__getattr__", "ghost_literal_and_bytes")
       %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("ghost_literal_and_bytes", "__getattr__")
       %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
       %none.0 : py.Value = py.noneLit

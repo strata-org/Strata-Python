@@ -52,6 +52,8 @@ def run (text : String) : IO Unit := do
         | some { cls, payload := .exc e, .. } =>
           IO.println s!"exception {showV cls}{showV e.args}, context {showV e.context}, \
             traceback {showV e.traceback}, fields {e.fields.toList.map fun (n, v) => (n, showV v)}"
+        | some { cls, payload := .func f, .. } =>
+          IO.println s!"{showV cls} {f.name} of {showV f.module}"
         | some { payload := .list xs n, .. } =>
           IO.println s!"list [{", ".intercalate (xs.toList.map showV)}], resizes {n}"
         | some { cls, payload := .dict t, .. } =>
@@ -121,18 +123,24 @@ def mainTotal (body : String) : String := s!"module m \{
 /-- info: 7 -/
 #guard_msgs in
 #eval run (main "      %i.0 : py.Value = py.intLit(7)
-      %v.0 : py.Value = py.requireDefined(%i.0, \"UnboundLocalError\", \"x {}\") ^err.0()")
+      %v.0 : py.Value = py.requireDefined(%i.0, \"x\", \"UnboundLocalError\", \"x {}\") ^err.0()")
 
 /-- info: exception UnboundLocalError('x {}',), context None, traceback <traceback>, fields [] -/
 #guard_msgs in
 #eval run (main "      %u.0 : py.Value = py.undef(\"x\")
-      %v.0 : py.Value = py.requireDefined(%u.0, \"UnboundLocalError\", \"x {}\") ^err.0()")
+      %v.0 : py.Value = py.requireDefined(%u.0, \"x\", \"UnboundLocalError\", \"x {}\") ^err.0()")
 
--- A `NameError` from `requireDefined` has no `name` field yet: the operation carries no name.
-/-- info: exception NameError('x',), context None, traceback <traceback>, fields [] -/
+-- A `NameError` from `requireDefined` carries the variable's name, as CPython's does for a free
+-- variable; an `UnboundLocalError` (above) and a `RuntimeError` carry none.
+/-- info: exception NameError("cannot access free variable 'w'",), context None, traceback <traceback>, fields [(name, 'w')] -/
 #guard_msgs in
-#eval run (main "      %u.0 : py.Value = py.undef(\"x\")
-      %v.0 : py.Value = py.requireDefined(%u.0, \"NameError\", \"x\") ^err.0()")
+#eval run (main "      %u.0 : py.Value = py.undef(\"w\")
+      %v.0 : py.Value = py.requireDefined(%u.0, \"w\", \"NameError\", \"cannot access free variable 'w'\") ^err.0()")
+
+/-- info: exception RuntimeError('super(): empty __class__ cell',), context None, traceback <traceback>, fields [] -/
+#guard_msgs in
+#eval run (main "      %u.0 : py.Value = py.undef(\"__class__\")
+      %v.0 : py.Value = py.requireDefined(%u.0, \"__class__\", \"RuntimeError\", \"super(): empty __class__ cell\") ^err.0()")
 
 -- `is` on singletons is exact; on two equal ints it depends on CPython's caching, so it gaps.
 /-- info: True -/
@@ -1543,5 +1551,80 @@ def mainTotal (body : String) : String := s!"module m \{
       %s.0 : py.Value = py.mkSet() ^err.0()
       %u.0 : base.Unit = py.setUpdate(%s.0, %m.0) ^err.0()
       %v.0 : py.Value = py.unpackSeq(%s.0, 5) ^err.0()")
+
+-- `mkClosure` makes a function object that holds the closure, its `__name__`, and its `__module__`,
+-- the module's `__name__` global: `None` here, where the module has none.
+/-- info: function f of None -/
+#guard_msgs in
+#eval run "module m {
+  func @m.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %r.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%args.0)
+      ret(%r.0)
+  }
+  func @m.main() -> py.Value {
+    entry.0():
+      %v.0 : py.Value = py.mkClosure[[]](@m.f, \"f\", \"m\")
+      ret(%v.0)
+  }
+}"
+
+-- A closure over a cell is a function object.  The calls of RuleTheoremsTest check that the cell
+-- is bound into the code.
+/-- info: function g of None -/
+#guard_msgs in
+#eval run "module m {
+  func @m.g(%c.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%c.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = base.refGet[py.Value](%c.0)
+      %r.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.0)
+      ret(%r.0)
+  }
+  func @m.main() -> py.Value {
+    entry.0():
+      %i.0 : py.Value = py.intLit(1)
+      %c.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
+      %v.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m.g, \"g\", \"m\", %c.0)
+      ret(%v.0)
+  }
+}"
+
+-- After `__name__ = "renamed"`, a new function's `__module__` is `'renamed'`; after `del __name__`
+-- (the cell unassigned), it is `None`, as in CPython.
+/-- info: function f of 'renamed' -/
+#guard_msgs in
+#eval run "module m {
+  func @m.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %r.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%args.0)
+      ret(%r.0)
+  }
+  func @m.main() -> py.Value {
+    entry.0():
+      %c.0 : base.Ref(py.Value) = py.globalCell(\"m\", \"__name__\")
+      %n.0 : py.Value = py.strLit(\"renamed\")
+      %s.0 : base.Unit = base.refSet[py.Value](%c.0, %n.0)
+      %v.0 : py.Value = py.mkClosure[[]](@m.f, \"f\", \"m\")
+      ret(%v.0)
+  }
+}"
+
+/-- info: function f of None -/
+#guard_msgs in
+#eval run "module m {
+  func @m.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %r.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%args.0)
+      ret(%r.0)
+  }
+  func @m.main() -> py.Value {
+    entry.0():
+      %c.0 : base.Ref(py.Value) = py.globalCell(\"m\", \"__name__\")
+      %u.0 : py.Value = py.undef(\"__name__\")
+      %s.0 : base.Unit = base.refSet[py.Value](%c.0, %u.0)
+      %v.0 : py.Value = py.mkClosure[[]](@m.f, \"f\", \"m\")
+      ret(%v.0)
+  }
+}"
 
 end StrataPython.Dyn.Sem.RunTest

@@ -7,7 +7,7 @@ module tc07_if_else {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("tc07_if_else", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@tc07_if_else.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@tc07_if_else.f, "f", "tc07_if_else")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("tc07_if_else", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -32,7 +32,7 @@ module tc07_if_else {
       %str.0 : py.Value = py.strLit("hello")
       jump ^join.0(%str.0)
     join.0(%x.3 : py.Value):
-      %x.2 : py.Value = py.requireDefined(%x.3, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.2 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %none.0 : py.Value = py.noneLit
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
       ret(%ret.0)

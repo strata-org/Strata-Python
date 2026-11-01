@@ -10,47 +10,47 @@ module m_finally {
       %mod.0 : py.Value = py.importModule("sys") ^propagate.0()
       %sys.cell.0 : base.Ref(py.Value) = py.globalCell("m_finally", "sys")
       %set.2 : base.Unit = base.refSet[py.Value](%sys.cell.0, %mod.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@m_finally.note)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_finally.note, "note", "m_finally")
       %note.cell.0 : base.Ref(py.Value) = py.globalCell("m_finally", "note")
       %set.3 : base.Unit = base.refSet[py.Value](%note.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@m_finally.reraise)
+      %clo.1 : py.Value = py.mkClosure[[]](@m_finally.reraise, "reraise", "m_finally")
       %reraise.cell.0 : base.Ref(py.Value) = py.globalCell("m_finally", "reraise")
       %set.4 : base.Unit = base.refSet[py.Value](%reraise.cell.0, %clo.1)
-      %clo.2 : py.Value = py.mkClosure[[]](@m_finally.handled)
+      %clo.2 : py.Value = py.mkClosure[[]](@m_finally.handled, "handled", "m_finally")
       %handled.cell.0 : base.Ref(py.Value) = py.globalCell("m_finally", "handled")
       %set.5 : base.Unit = base.refSet[py.Value](%handled.cell.0, %clo.2)
-      %clo.3 : py.Value = py.mkClosure[[]](@m_finally.return_drops)
+      %clo.3 : py.Value = py.mkClosure[[]](@m_finally.return_drops, "return_drops", "m_finally")
       %return_drops.cell.0 : base.Ref(py.Value) = py.globalCell("m_finally", "return_drops")
       %set.6 : base.Unit = base.refSet[py.Value](%return_drops.cell.0, %clo.3)
-      %clo.4 : py.Value = py.mkClosure[[]](@m_finally.break_drops)
+      %clo.4 : py.Value = py.mkClosure[[]](@m_finally.break_drops, "break_drops", "m_finally")
       %break_drops.cell.0 : base.Ref(py.Value) = py.globalCell("m_finally", "break_drops")
       %set.7 : base.Unit = base.refSet[py.Value](%break_drops.cell.0, %clo.4)
-      %clo.5 : py.Value = py.mkClosure[[]](@m_finally.continue_in_finally)
+      %clo.5 : py.Value = py.mkClosure[[]](@m_finally.continue_in_finally, "continue_in_finally", "m_finally")
       %continue_in_finally.cell.0 : base.Ref(py.Value) = py.globalCell("m_finally", "continue_in_finally")
       %set.8 : base.Unit = base.refSet[py.Value](%continue_in_finally.cell.0, %clo.5)
-      %clo.6 : py.Value = py.mkClosure[[]](@m_finally.superseded)
+      %clo.6 : py.Value = py.mkClosure[[]](@m_finally.superseded, "superseded", "m_finally")
       %superseded.cell.0 : base.Ref(py.Value) = py.globalCell("m_finally", "superseded")
       %set.9 : base.Unit = base.refSet[py.Value](%superseded.cell.0, %clo.6)
-      %clo.7 : py.Value = py.mkClosure[[]](@m_finally.in_handler)
+      %clo.7 : py.Value = py.mkClosure[[]](@m_finally.in_handler, "in_handler", "m_finally")
       %in_handler.cell.0 : base.Ref(py.Value) = py.globalCell("m_finally", "in_handler")
       %set.10 : base.Unit = base.refSet[py.Value](%in_handler.cell.0, %clo.7)
-      %clo.8 : py.Value = py.mkClosure[[]](@m_finally.all_parts)
+      %clo.8 : py.Value = py.mkClosure[[]](@m_finally.all_parts, "all_parts", "m_finally")
       %all_parts.cell.0 : base.Ref(py.Value) = py.globalCell("m_finally", "all_parts")
       %set.11 : base.Unit = base.refSet[py.Value](%all_parts.cell.0, %clo.8)
-      %clo.9 : py.Value = py.mkClosure[[]](@m_finally.nested)
+      %clo.9 : py.Value = py.mkClosure[[]](@m_finally.nested, "nested", "m_finally")
       %nested.cell.0 : base.Ref(py.Value) = py.globalCell("m_finally", "nested")
       %set.12 : base.Unit = base.refSet[py.Value](%nested.cell.0, %clo.9)
-      %clo.10 : py.Value = py.mkClosure[[]](@m_finally.finally_in_finally)
+      %clo.10 : py.Value = py.mkClosure[[]](@m_finally.finally_in_finally, "finally_in_finally", "m_finally")
       %finally_in_finally.cell.0 : base.Ref(py.Value) = py.globalCell("m_finally", "finally_in_finally")
       %set.13 : base.Unit = base.refSet[py.Value](%finally_in_finally.cell.0, %clo.10)
-      %clo.11 : py.Value = py.mkClosure[[]](@m_finally.loop_in_finally)
+      %clo.11 : py.Value = py.mkClosure[[]](@m_finally.loop_in_finally, "loop_in_finally", "m_finally")
       %loop_in_finally.cell.0 : base.Ref(py.Value) = py.globalCell("m_finally", "loop_in_finally")
       %set.14 : base.Unit = base.refSet[py.Value](%loop_in_finally.cell.0, %clo.11)
-      %clo.12 : py.Value = py.mkClosure[[]](@m_finally.return_in_handler)
+      %clo.12 : py.Value = py.mkClosure[[]](@m_finally.return_in_handler, "return_in_handler", "m_finally")
       %return_in_handler.cell.0 : base.Ref(py.Value) = py.globalCell("m_finally", "return_in_handler")
       %set.15 : base.Unit = base.refSet[py.Value](%return_in_handler.cell.0, %clo.12)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.13 : py.Value = py.mkClosure[[]](@|m_finally.Body.<body>|)
+      %clo.13 : py.Value = py.mkClosure[[]](@|m_finally.Body.<body>|, "Body", "m_finally")
       %str.1 : py.Value = py.strLit("Body")
       %tuple.0 : py.Value = py.mkTuple(%clo.13, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs
@@ -101,7 +101,7 @@ module m_finally {
       %defaults.0 : py.Value = py.mkTuple(%x.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
-      %x.4 : py.Value = py.requireDefined(%x.2, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.4)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -116,7 +116,7 @@ module m_finally {
       %defaults.0 : py.Value = py.mkTuple(%f.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "f") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
-      %f.4 : py.Value = py.requireDefined(%f.2, "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.0()
+      %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%f.4, %tuple.0, %kwargs.1) ^finRaise.0()
@@ -144,7 +144,7 @@ module m_finally {
       %defaults.0 : py.Value = py.mkTuple(%f.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "f") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
-      %f.4 : py.Value = py.requireDefined(%f.2, "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.0()
+      %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%f.4, %tuple.0, %kwargs.1) ^finRaise.0()
@@ -194,7 +194,7 @@ module m_finally {
       %defaults.0 : py.Value = py.mkTuple(%f.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "f") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
-      %f.4 : py.Value = py.requireDefined(%f.2, "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.0()
+      %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%f.4, %tuple.0, %kwargs.1) ^finRaise.0()
@@ -227,12 +227,12 @@ module m_finally {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "f", "xs") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
       %xs.2 : py.Value = py.tupleGet(%bound.0, 1)
-      %xs.4 : py.Value = py.requireDefined(%xs.2, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %xs.4 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %iter.0 : py.Value = py.getIter(%xs.4) ^propagate.0()
       jump ^head.0()
     head.0():
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
-      %f.4 : py.Value = py.requireDefined(%f.2, "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.0()
+      %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%f.4, %tuple.0, %kwargs.1) ^finRaise.0()
@@ -270,12 +270,12 @@ module m_finally {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "f", "xs") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
       %xs.2 : py.Value = py.tupleGet(%bound.0, 1)
-      %xs.4 : py.Value = py.requireDefined(%xs.2, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %xs.4 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %iter.0 : py.Value = py.getIter(%xs.4) ^propagate.0()
       jump ^head.0()
     head.0():
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
-      %f.4 : py.Value = py.requireDefined(%f.2, "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.0()
+      %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%f.4, %tuple.0, %kwargs.1) ^finRaise.0()
@@ -287,7 +287,7 @@ module m_finally {
     fin.0(%pending.0 : py.Completion):
       %prev.0 : py.Value = py.pushPending(%pending.0)
       %note.0 : py.Value = py.loadGlobal("m_finally", "note") ^superseded.0()
-      %x.2 : py.Value = py.requireDefined(%item.0, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^superseded.0()
+      %x.2 : py.Value = py.requireDefined(%item.0, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^superseded.0()
       %tuple.1 : py.Value = py.mkTuple(%x.2)
       %kwargs.2 : py.Value = py.mkKwargs
       %call.1 : py.Value = py.call(%note.0, %tuple.1, %kwargs.2) ^superseded.0()
@@ -315,7 +315,7 @@ module m_finally {
       %defaults.0 : py.Value = py.mkTuple(%f.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "f") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
-      %f.4 : py.Value = py.requireDefined(%f.2, "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.0()
+      %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%f.4, %tuple.0, %kwargs.1) ^finRaise.0()
@@ -363,7 +363,7 @@ module m_finally {
       %match.0 : base.Bool = py.excMatch(%exc.1, %KeyError.1) ^unwind.0()
       branch(%match.0) ^except.0() ^next.0()
     except.0():
-      %f.4 : py.Value = py.requireDefined(%f.2, "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.0()
+      %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.0()
       %tuple.1 : py.Value = py.mkTuple
       %kwargs.2 : py.Value = py.mkKwargs
       %call.1 : py.Value = py.call(%f.4, %tuple.1, %kwargs.2) ^finRaise.0()
@@ -375,7 +375,7 @@ module m_finally {
     fin.0(%pending.0 : py.Completion):
       %prev.1 : py.Value = py.pushPending(%pending.0)
       %note.0 : py.Value = py.loadGlobal("m_finally", "note") ^superseded.0()
-      %e.4 : py.Value = py.requireDefined(%exc.1, "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^superseded.0()
+      %e.4 : py.Value = py.requireDefined(%exc.1, "e", "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^superseded.0()
       %tuple.2 : py.Value = py.mkTuple(%e.4)
       %kwargs.3 : py.Value = py.mkKwargs
       %call.2 : py.Value = py.call(%note.0, %tuple.2, %kwargs.3) ^superseded.0()
@@ -423,7 +423,7 @@ module m_finally {
       %defaults.0 : py.Value = py.mkTuple(%f.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "f") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
-      %f.4 : py.Value = py.requireDefined(%f.2, "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()
+      %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%f.4, %tuple.0, %kwargs.1) ^catch.0()
@@ -452,7 +452,7 @@ module m_finally {
     fin.0(%pending.0 : py.Completion, %r.6 : py.Value):
       %prev.1 : py.Value = py.pushPending(%pending.0)
       %note.0 : py.Value = py.loadGlobal("m_finally", "note") ^superseded.0()
-      %r.2 : py.Value = py.requireDefined(%r.6, "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^superseded.0()
+      %r.2 : py.Value = py.requireDefined(%r.6, "r", "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^superseded.0()
       %tuple.1 : py.Value = py.mkTuple(%r.2)
       %kwargs.2 : py.Value = py.mkKwargs
       %call.1 : py.Value = py.call(%note.0, %tuple.1, %kwargs.2) ^superseded.0()
@@ -469,7 +469,7 @@ module m_finally {
       %pop.3 : base.Unit = py.popExcept(%prev.1)
       jump ^propagate.0(%exc.3)
     join.0():
-      %r.4 : py.Value = py.requireDefined(%r.6, "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^propagate.0()
+      %r.4 : py.Value = py.requireDefined(%r.6, "r", "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^propagate.0()
       %ret.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%r.4)
       ret(%ret.1)
     propagate.0(%exc.4 : py.Value):
@@ -484,7 +484,7 @@ module m_finally {
       %defaults.0 : py.Value = py.mkTuple(%f.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "f") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
-      %f.4 : py.Value = py.requireDefined(%f.2, "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.1()
+      %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.1()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%f.4, %tuple.0, %kwargs.1) ^finRaise.1()
@@ -557,7 +557,7 @@ module m_finally {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "f", "g") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
       %g.2 : py.Value = py.tupleGet(%bound.0, 1)
-      %f.4 : py.Value = py.requireDefined(%f.2, "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.0()
+      %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%f.4, %tuple.0, %kwargs.1) ^finRaise.0()
@@ -568,7 +568,7 @@ module m_finally {
       jump ^fin.0(%comp.1)
     fin.0(%pending.0 : py.Completion):
       %prev.0 : py.Value = py.pushPending(%pending.0)
-      %g.4 : py.Value = py.requireDefined(%g.2, "UnboundLocalError", "cannot access local variable 'g' where it is not associated with a value") ^finRaise.1()
+      %g.4 : py.Value = py.requireDefined(%g.2, "g", "UnboundLocalError", "cannot access local variable 'g' where it is not associated with a value") ^finRaise.1()
       %tuple.1 : py.Value = py.mkTuple
       %kwargs.2 : py.Value = py.mkKwargs
       %call.1 : py.Value = py.call(%g.4, %tuple.1, %kwargs.2) ^finRaise.1()
@@ -632,7 +632,7 @@ module m_finally {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "f", "xs") ^propagate.0()
       %f.2 : py.Value = py.tupleGet(%bound.0, 0)
       %xs.2 : py.Value = py.tupleGet(%bound.0, 1)
-      %f.4 : py.Value = py.requireDefined(%f.2, "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.0()
+      %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%f.4, %tuple.0, %kwargs.1) ^finRaise.0()
@@ -643,13 +643,13 @@ module m_finally {
       jump ^fin.0(%comp.1)
     fin.0(%pending.0 : py.Completion):
       %prev.0 : py.Value = py.pushPending(%pending.0)
-      %xs.4 : py.Value = py.requireDefined(%xs.2, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^superseded.0()
+      %xs.4 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^superseded.0()
       %iter.0 : py.Value = py.getIter(%xs.4) ^superseded.0()
       jump ^head.0()
     head.0():
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %note.0 : py.Value = py.loadGlobal("m_finally", "note") ^superseded.0()
-      %x.2 : py.Value = py.requireDefined(%item.0, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^superseded.0()
+      %x.2 : py.Value = py.requireDefined(%item.0, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^superseded.0()
       %tuple.1 : py.Value = py.mkTuple(%x.2)
       %kwargs.2 : py.Value = py.mkKwargs
       %call.1 : py.Value = py.call(%note.0, %tuple.1, %kwargs.2) ^superseded.0()
@@ -701,7 +701,7 @@ module m_finally {
       %match.0 : base.Bool = py.excMatch(%exc.1, %KeyError.1) ^unwind.0()
       branch(%match.0) ^except.0() ^next.0()
     except.0():
-      %f.4 : py.Value = py.requireDefined(%f.2, "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.0()
+      %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^finRaise.0()
       %tuple.1 : py.Value = py.mkTuple
       %kwargs.2 : py.Value = py.mkKwargs
       %call.1 : py.Value = py.call(%f.4, %tuple.1, %kwargs.2) ^finRaise.0()
@@ -712,7 +712,7 @@ module m_finally {
       jump ^fin.0(%comp.1)
     fin.0(%pending.0 : py.Completion):
       %prev.1 : py.Value = py.pushPending(%pending.0)
-      %e.4 : py.Value = py.requireDefined(%exc.1, "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^superseded.0()
+      %e.4 : py.Value = py.requireDefined(%exc.1, "e", "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^superseded.0()
       %pop.0 : base.Unit = py.popExcept(%prev.1)
       %pop.1 : base.Unit = py.popExcept(%prev.0)
       %e.5 : py.Value = py.undef("e")

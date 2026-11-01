@@ -7,7 +7,7 @@ module i05_kwargs_mutation {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("i05_kwargs_mutation", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@i05_kwargs_mutation.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@i05_kwargs_mutation.f, "f", "i05_kwargs_mutation")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("i05_kwargs_mutation", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %str.1 : py.Value = py.strLit("a")
@@ -37,7 +37,7 @@ module i05_kwargs_mutation {
       %tuple.3 : py.Value = py.mkTuple(%m.15)
       %kwargs.3 : py.Value = py.mkKwargs
       %call.3 : py.Value = py.call(%print.1, %tuple.3, %kwargs.3) ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure[[]](@i05_kwargs_mutation.g)
+      %clo.1 : py.Value = py.mkClosure[[]](@i05_kwargs_mutation.g, "g", "i05_kwargs_mutation")
       %g.cell.0 : base.Ref(py.Value) = py.globalCell("i05_kwargs_mutation", "g")
       %set.4 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
       %int.1 : py.Value = py.intLit(1)
@@ -76,12 +76,12 @@ module i05_kwargs_mutation {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, true) ^propagate.0()
       %kwargs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %int.0 : py.Value = py.intLit(1)
-      %kwargs.4 : py.Value = py.requireDefined(%kwargs.2, "UnboundLocalError", "cannot access local variable 'kwargs' where it is not associated with a value") ^propagate.0()
+      %kwargs.4 : py.Value = py.requireDefined(%kwargs.2, "kwargs", "UnboundLocalError", "cannot access local variable 'kwargs' where it is not associated with a value") ^propagate.0()
       %str.0 : py.Value = py.strLit("added")
       %store.0 : base.Unit = py.setItem(%kwargs.4, %str.0, %int.0) ^propagate.0()
       %print.0 : py.Value = py.loadGlobal("i05_kwargs_mutation", "print") ^propagate.0()
       %len.0 : py.Value = py.loadGlobal("i05_kwargs_mutation", "len") ^propagate.0()
-      %kwargs.6 : py.Value = py.requireDefined(%kwargs.2, "UnboundLocalError", "cannot access local variable 'kwargs' where it is not associated with a value") ^propagate.0()
+      %kwargs.6 : py.Value = py.requireDefined(%kwargs.2, "kwargs", "UnboundLocalError", "cannot access local variable 'kwargs' where it is not associated with a value") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%kwargs.6)
       %kwargs.7 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%len.0, %tuple.0, %kwargs.7) ^propagate.0()
@@ -103,7 +103,7 @@ module i05_kwargs_mutation {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, true, false) ^propagate.0()
       %args.2 : py.Value = py.tupleGet(%bound.0, 0)
       %print.0 : py.Value = py.loadGlobal("i05_kwargs_mutation", "print") ^propagate.0()
-      %args.4 : py.Value = py.requireDefined(%args.2, "UnboundLocalError", "cannot access local variable 'args' where it is not associated with a value") ^propagate.0()
+      %args.4 : py.Value = py.requireDefined(%args.2, "args", "UnboundLocalError", "cannot access local variable 'args' where it is not associated with a value") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%args.4)
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()

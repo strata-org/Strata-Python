@@ -13,7 +13,7 @@ module p02_import_as {
       %mod.1 : py.Value = py.importModule("json") ^propagate.0()
       %j.cell.0 : base.Ref(py.Value) = py.globalCell("p02_import_as", "j")
       %set.3 : base.Unit = base.refSet[py.Value](%j.cell.0, %mod.1)
-      %clo.0 : py.Value = py.mkClosure[[]](@p02_import_as.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@p02_import_as.f, "f", "p02_import_as")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p02_import_as", "f")
       %set.4 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -35,14 +35,14 @@ module p02_import_as {
       %osp.0 : py.Value = py.loadGlobal("p02_import_as", "osp") ^propagate.0()
       %basename.0 : py.Value = py.attr(%osp.0, "basename") ^propagate.0()
       %p.3 : py.Value = base.refGet[py.Value](%p.cell.0)
-      %p.4 : py.Value = py.requireDefined(%p.3, "UnboundLocalError", "cannot access local variable 'p' where it is not associated with a value") ^propagate.0()
+      %p.4 : py.Value = py.requireDefined(%p.3, "p", "UnboundLocalError", "cannot access local variable 'p' where it is not associated with a value") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%p.4)
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%basename.0, %tuple.0, %kwargs.1) ^propagate.0()
       %j.0 : py.Value = py.loadGlobal("p02_import_as", "j") ^propagate.0()
       %dumps.0 : py.Value = py.attr(%j.0, "dumps") ^propagate.0()
       %p.5 : py.Value = base.refGet[py.Value](%p.cell.0)
-      %p.6 : py.Value = py.requireDefined(%p.5, "UnboundLocalError", "cannot access local variable 'p' where it is not associated with a value") ^propagate.0()
+      %p.6 : py.Value = py.requireDefined(%p.5, "p", "UnboundLocalError", "cannot access local variable 'p' where it is not associated with a value") ^propagate.0()
       %tuple.1 : py.Value = py.mkTuple(%p.6)
       %kwargs.2 : py.Value = py.mkKwargs
       %call.1 : py.Value = py.call(%dumps.0, %tuple.1, %kwargs.2) ^propagate.0()

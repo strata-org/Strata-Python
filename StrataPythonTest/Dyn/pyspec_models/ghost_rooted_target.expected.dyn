@@ -19,10 +19,10 @@ module ghost_rooted_target {
       %str.0 : py.Value = py.strLit("ghost_rooted_target")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("ghost_rooted_target", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@ghost_rooted_target.put)
+      %clo.0 : py.Value = py.mkClosure[[]](@ghost_rooted_target.put, "put", "ghost_rooted_target")
       %put.cell.0 : base.Ref(py.Value) = py.globalCell("ghost_rooted_target", "put")
       %set.1 : base.Unit = base.refSet[py.Value](%put.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@ghost_rooted_target.__getattr__)
+      %clo.1 : py.Value = py.mkClosure[[]](@ghost_rooted_target.__getattr__, "__getattr__", "ghost_rooted_target")
       %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("ghost_rooted_target", "__getattr__")
       %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
       %none.0 : py.Value = py.noneLit

@@ -7,7 +7,7 @@ module p43_comp_class_body {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p43_comp_class_body", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@p43_comp_class_body.outer)
+      %clo.0 : py.Value = py.mkClosure[[]](@p43_comp_class_body.outer, "outer", "p43_comp_class_body")
       %outer.cell.0 : base.Ref(py.Value) = py.globalCell("p43_comp_class_body", "outer")
       %set.2 : base.Unit = base.refSet[py.Value](%outer.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -32,13 +32,13 @@ module p43_comp_class_body {
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %__class__.0 : py.Value = py.undef("__class__")
       %__class__.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%__class__.0)
-      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value), base.Ref(py.Value)]](@|p43_comp_class_body.outer.C.<body>|, %rows.cell.0, %scale.cell.0, %__class__.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value), base.Ref(py.Value)]](@|p43_comp_class_body.outer.C.<body>|, "C", "p43_comp_class_body", %rows.cell.0, %scale.cell.0, %__class__.cell.0)
       %str.0 : py.Value = py.strLit("C")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.0)
       %kwargs.1 : py.Value = py.mkKwargs
       %C.1 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.1) ^propagate.0()
       %set.2 : base.Unit = base.refSet[py.Value](%__class__.cell.0, %C.1)
-      %C.3 : py.Value = py.requireDefined(%C.1, "UnboundLocalError", "cannot access local variable 'C' where it is not associated with a value") ^propagate.0()
+      %C.3 : py.Value = py.requireDefined(%C.1, "C", "UnboundLocalError", "cannot access local variable 'C' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%C.3)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -76,7 +76,7 @@ module p43_comp_class_body {
       branch(%found.1) ^join.1(%rows.1) ^absent.1()
     absent.1():
       %rows.2 : py.Value = base.refGet[py.Value](%rows.cell.0)
-      %rows.3 : py.Value = py.requireDefined(%rows.2, "NameError", "cannot access free variable 'rows' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %rows.3 : py.Value = py.requireDefined(%rows.2, "rows", "NameError", "cannot access free variable 'rows' where it is not associated with a value in enclosing scope") ^propagate.0()
       jump ^join.1(%rows.3)
     join.1(%rows.4 : py.Value):
       %r.0 : py.Value = py.undef("r")
@@ -85,9 +85,9 @@ module p43_comp_class_body {
         each.0(%out.0 : py.ListAcc, %item.0 : py.Value):
           %append.0 : base.Unit = py.compAppend(%out.0) ^propagate.1() {
             elt.0():
-              %r.2 : py.Value = py.requireDefined(%item.0, "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^propagate.2()
+              %r.2 : py.Value = py.requireDefined(%item.0, "r", "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^propagate.2()
               %scale.0 : py.Value = base.refGet[py.Value](%scale.cell.0)
-              %scale.1 : py.Value = py.requireDefined(%scale.0, "NameError", "cannot access free variable 'scale' where it is not associated with a value in enclosing scope") ^propagate.2()
+              %scale.1 : py.Value = py.requireDefined(%scale.0, "scale", "NameError", "cannot access free variable 'scale' where it is not associated with a value in enclosing scope") ^propagate.2()
               %mult.0 : py.Value = py.mult(%r.2, %scale.1) ^propagate.2()
               %k.0 : py.Value = py.loadGlobal("p43_comp_class_body", "k") ^propagate.2()
               %add.0 : py.Value = py.add(%mult.0, %k.0) ^propagate.2()
@@ -113,7 +113,7 @@ module p43_comp_class_body {
       branch(%found.2) ^join.2(%rows.6) ^absent.2()
     absent.2():
       %rows.7 : py.Value = base.refGet[py.Value](%rows.cell.0)
-      %rows.8 : py.Value = py.requireDefined(%rows.7, "NameError", "cannot access free variable 'rows' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %rows.8 : py.Value = py.requireDefined(%rows.7, "rows", "NameError", "cannot access free variable 'rows' where it is not associated with a value in enclosing scope") ^propagate.0()
       jump ^join.2(%rows.8)
     join.2(%rows.9 : py.Value):
       %r.3 : py.Value = py.undef("r")
@@ -123,7 +123,7 @@ module p43_comp_class_body {
           %set.1 : base.Unit = base.refSet[py.Value](%r.cell.1, %item.1)
           %append.1 : base.Unit = py.compAppend(%out.1) ^propagate.3() {
             elt.1():
-              %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|p43_comp_class_body.outer.C.<lambda>|, %r.cell.1)
+              %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|p43_comp_class_body.outer.C.<lambda>|, "<lambda>", "p43_comp_class_body", %r.cell.1)
               %ok.2 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%clo.0)
               ret(%ok.2)
           }
@@ -143,7 +143,7 @@ module p43_comp_class_body {
       branch(%found.3) ^join.3(%rows.11) ^absent.3()
     absent.3():
       %rows.12 : py.Value = base.refGet[py.Value](%rows.cell.0)
-      %rows.13 : py.Value = py.requireDefined(%rows.12, "NameError", "cannot access free variable 'rows' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %rows.13 : py.Value = py.requireDefined(%rows.12, "rows", "NameError", "cannot access free variable 'rows' where it is not associated with a value in enclosing scope") ^propagate.0()
       jump ^join.3(%rows.13)
     join.3(%rows.14 : py.Value):
       %_.0 : py.Value = py.undef("_")
@@ -168,7 +168,7 @@ module p43_comp_class_body {
       }
       %str.10 : py.Value = py.strLit("own")
       %store.5 : base.Unit = py.setItem(%ns.0, %str.10, %list.2) ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@p43_comp_class_body.outer.C.m, %rows.cell.0, %__class__.cell.0)
+      %clo.1 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@p43_comp_class_body.outer.C.m, "m", "p43_comp_class_body", %rows.cell.0, %__class__.cell.0)
       %str.11 : py.Value = py.strLit("m")
       %store.6 : base.Unit = py.setItem(%ns.0, %str.11, %clo.1) ^propagate.0()
       %none.0 : py.Value = py.noneLit
@@ -183,7 +183,7 @@ module p43_comp_class_body {
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %r.0 : py.Value = base.refGet[py.Value](%r.cell.0)
-      %r.1 : py.Value = py.requireDefined(%r.0, "NameError", "cannot access free variable 'r' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %r.1 : py.Value = py.requireDefined(%r.0, "r", "NameError", "cannot access free variable 'r' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%r.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -201,7 +201,7 @@ module p43_comp_class_body {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "self") ^propagate.0()
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %rows.0 : py.Value = base.refGet[py.Value](%rows.cell.0)
-      %rows.1 : py.Value = py.requireDefined(%rows.0, "NameError", "cannot access free variable 'rows' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %rows.1 : py.Value = py.requireDefined(%rows.0, "rows", "NameError", "cannot access free variable 'rows' where it is not associated with a value in enclosing scope") ^propagate.0()
       %_.1 : py.Value = py.undef("_")
       %_.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%_.1)
       %list.0 : py.Value = py.listComp(%rows.1) ^propagate.0() {
@@ -209,9 +209,9 @@ module p43_comp_class_body {
           %append.0 : base.Unit = py.compAppend(%out.0) ^propagate.1() {
             elt.0():
               %super.0 : py.Value = py.loadGlobal("p43_comp_class_body", "super") ^propagate.2()
-              %self.4 : py.Value = py.requireDefined(%self.2, "RuntimeError", "super(): arg[0] deleted") ^propagate.2()
+              %self.4 : py.Value = py.requireDefined(%self.2, "self", "RuntimeError", "super(): arg[0] deleted") ^propagate.2()
               %__class__.0 : py.Value = base.refGet[py.Value](%__class__.cell.0)
-              %__class__.1 : py.Value = py.requireDefined(%__class__.0, "RuntimeError", "super(): empty __class__ cell") ^propagate.2()
+              %__class__.1 : py.Value = py.requireDefined(%__class__.0, "__class__", "RuntimeError", "super(): empty __class__ cell") ^propagate.2()
               %args.1 : py.Value = py.mkTuple(%__class__.1, %self.4)
               %kwargs.1 : py.Value = py.mkKwargs
               %super.1 : py.Value = py.call(%super.0, %args.1, %kwargs.1) ^propagate.2()

@@ -112,7 +112,8 @@ def raisedBuiltin {α : Type} (x : TM α) (b : Builtin) : Bool :=
 
 #guard (loadGlobal (m := TM) "m" "g").run matches .ok (.imm (.int 3))
 #guard raisedBuiltin (loadGlobal (m := TM) "m" "nope") .NameError
-#guard raisedBuiltin (requireDefined (m := TM) Toy.undef "UnboundLocalError" "x") .UnboundLocalError
+#guard raisedBuiltin (requireDefined (m := TM) Toy.undef "x" "UnboundLocalError" "x") .UnboundLocalError
+#guard (requireDefined (m := TM) (Toy.imm (.int 2)) "x" "UnboundLocalError" "x").run matches .ok (.imm (.int 2))
 #guard (mkDict (m := TM) #[Toy.imm (.int 1), Toy.imm .none]).run matches .ok (.obj 2)
 #guard (isOp (m := TM) Toy.undef Toy.undef).run matches .error (.inl _)
 -- An operator on an object of a user class stops with a gap until the dunder lookup exists.

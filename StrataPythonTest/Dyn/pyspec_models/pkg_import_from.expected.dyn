@@ -7,10 +7,10 @@ module pkg_import_from {
       %ServiceClass.0 : py.Value = py.importFrom("service", "ServiceClass") ^propagate.0()
       %ServiceClass.cell.0 : base.Ref(py.Value) = py.globalCell("pkg_import_from", "ServiceClass")
       %set.1 : base.Unit = base.refSet[py.Value](%ServiceClass.cell.0, %ServiceClass.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@pkg_import_from.use_service)
+      %clo.0 : py.Value = py.mkClosure[[]](@pkg_import_from.use_service, "use_service", "pkg_import_from")
       %use_service.cell.0 : base.Ref(py.Value) = py.globalCell("pkg_import_from", "use_service")
       %set.2 : base.Unit = base.refSet[py.Value](%use_service.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@pkg_import_from.__getattr__)
+      %clo.1 : py.Value = py.mkClosure[[]](@pkg_import_from.__getattr__, "__getattr__", "pkg_import_from")
       %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("pkg_import_from", "__getattr__")
       %set.3 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
       %none.0 : py.Value = py.noneLit
@@ -39,7 +39,7 @@ module pkg_import_from {
         %s.6 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "s", %undef.1)
         %ServiceClass.cell.0 : base.Ref(py.Value) = py.globalCell("service.module", "ServiceClass")
         %ServiceClass.0 : py.Value = base.refGet[py.Value](%ServiceClass.cell.0)
-        %ServiceClass.1 : py.Value = py.requireDefined(%ServiceClass.0, "NameError", "name 'ServiceClass' is not defined") ^fail.2()
+        %ServiceClass.1 : py.Value = py.requireDefined(%ServiceClass.0, "ServiceClass", "NameError", "name 'ServiceClass' is not defined") ^fail.2()
         %sub.0 : base.Bool = py.typeIsSubclass(%s.6, %ServiceClass.1) ^fail.2()
         branch(%sub.0) ^then.0() ^else.0()
       then.0():

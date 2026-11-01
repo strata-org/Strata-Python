@@ -30,10 +30,10 @@ module m {
       %Messaging.0 : py.Value = py.importFrom("servicelib.Messaging", "Messaging") ^propagate.0()
       %Messaging.cell.0 : base.Ref(py.Value) = py.globalCell("m", "Messaging")
       %set.3 : base.Unit = base.refSet[py.Value](%Messaging.cell.0, %Messaging.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@m.connect)
+      %clo.0 : py.Value = py.mkClosure[[]](@m.connect, "connect", "m")
       %connect.cell.0 : base.Ref(py.Value) = py.globalCell("m", "connect")
       %set.4 : base.Unit = base.refSet[py.Value](%connect.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@m.__getattr__)
+      %clo.1 : py.Value = py.mkClosure[[]](@m.__getattr__, "__getattr__", "m")
       %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("m", "__getattr__")
       %set.5 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
       %none.1 : py.Value = py.noneLit
@@ -171,7 +171,7 @@ module m {
       chosen.5():
         %Storage.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Storage", "Storage")
         %Storage.0 : py.Value = base.refGet[py.Value](%Storage.cell.0)
-        %Storage.1 : py.Value = py.requireDefined(%Storage.0, "AttributeError", "module 'servicelib.Storage' has no attribute 'Storage'") ^fail.5()
+        %Storage.1 : py.Value = py.requireDefined(%Storage.0, "Storage", "AttributeError", "module 'servicelib.Storage' has no attribute 'Storage'") ^fail.5()
         %sub.1 : base.Bool = py.typeIsSubclass(%result.0, %Storage.1) ^fail.5()
         branch(%sub.1) ^isSub.1() ^no.1()
       isSub.1():
@@ -204,7 +204,7 @@ module m {
       chosen.6():
         %Messaging.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Messaging", "Messaging")
         %Messaging.0 : py.Value = base.refGet[py.Value](%Messaging.cell.0)
-        %Messaging.1 : py.Value = py.requireDefined(%Messaging.0, "AttributeError", "module 'servicelib.Messaging' has no attribute 'Messaging'") ^fail.6()
+        %Messaging.1 : py.Value = py.requireDefined(%Messaging.0, "Messaging", "AttributeError", "module 'servicelib.Messaging' has no attribute 'Messaging'") ^fail.6()
         %sub.2 : base.Bool = py.typeIsSubclass(%result.1, %Messaging.1) ^fail.6()
         branch(%sub.2) ^isSub.2() ^no.2()
       isSub.2():

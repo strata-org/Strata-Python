@@ -7,10 +7,10 @@ module c7_with_return {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("c7_with_return", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@c7_with_return.acquire)
+      %clo.0 : py.Value = py.mkClosure[[]](@c7_with_return.acquire, "acquire", "c7_with_return")
       %acquire.cell.0 : base.Ref(py.Value) = py.globalCell("c7_with_return", "acquire")
       %set.2 : base.Unit = base.refSet[py.Value](%acquire.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@c7_with_return.f)
+      %clo.1 : py.Value = py.mkClosure[[]](@c7_with_return.f, "f", "c7_with_return")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("c7_with_return", "f")
       %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.1)
       %none.1 : py.Value = py.noneLit
@@ -50,7 +50,7 @@ module c7_with_return {
       %entered.0 : py.Value = py.call(%enter.0, %args.1, %kwargs.2) ^propagate.0()
       %set.1 : base.Unit = base.refSet[py.Value](%r.cell.0, %entered.0)
       %r.1 : py.Value = base.refGet[py.Value](%r.cell.0)
-      %r.2 : py.Value = py.requireDefined(%r.1, "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^wexc.0()
+      %r.2 : py.Value = py.requireDefined(%r.1, "r", "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^wexc.0()
       %comp.0 : py.Completion = py.completionReturn(%r.2)
       jump ^fin.0(%comp.0)
     wexc.0(%exc.0 : py.Value):

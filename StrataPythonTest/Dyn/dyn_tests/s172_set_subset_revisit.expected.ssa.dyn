@@ -11,7 +11,7 @@ module s172_set_subset_revisit {
       %n.cell.0 : base.Ref(py.Value) = py.globalCell("s172_set_subset_revisit", "n")
       %set.2 : base.Unit = base.refSet[py.Value](%n.cell.0, %int.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@|s172_set_subset_revisit.Q.<body>|)
+      %clo.0 : py.Value = py.mkClosure[[]](@|s172_set_subset_revisit.Q.<body>|, "Q", "s172_set_subset_revisit")
       %str.1 : py.Value = py.strLit("Q")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs
@@ -63,10 +63,10 @@ module s172_set_subset_revisit {
       %str.2 : py.Value = py.strLit("Q")
       %str.3 : py.Value = py.strLit("__qualname__")
       %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@s172_set_subset_revisit.Q.__hash__)
+      %clo.0 : py.Value = py.mkClosure[[]](@s172_set_subset_revisit.Q.__hash__, "__hash__", "s172_set_subset_revisit")
       %str.4 : py.Value = py.strLit("__hash__")
       %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure[[]](@s172_set_subset_revisit.Q.__eq__)
+      %clo.1 : py.Value = py.mkClosure[[]](@s172_set_subset_revisit.Q.__eq__, "__eq__", "s172_set_subset_revisit")
       %str.5 : py.Value = py.strLit("__eq__")
       %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
       %none.0 : py.Value = py.noneLit

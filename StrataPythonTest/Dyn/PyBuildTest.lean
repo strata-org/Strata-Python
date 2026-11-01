@@ -320,7 +320,7 @@ private def outerWith (target : Name) (byValue : Bool) : Built :=
     let cell ← declareLocal "x"
     let _ ← writeCell cell args[0]
     emitReturn (← mkClosure (← emitFunc target #[Py.cell, Py.Value, Py.Value]) #[Py.cell]
-      #[if byValue then args[0] else cell])
+      #[if byValue then args[0] else cell] "inner" "m")
 
 /-- The module of `outer`, whose closure names `target` and captures `x` as `outerWith` does,
 and `inner`. -/
@@ -341,7 +341,7 @@ private def closures : Except (FailedFunc Py.env Unit Unit) (Module.Raw Py.env U
       %x.1 : py.Value = py.undef("x")
       %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.1)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.0)
-      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@py.inner, %x.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@py.inner, "inner", "m", %x.cell.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%clo.0)
       ret(%ret.0)
   }
@@ -445,7 +445,7 @@ private def mAdd : Name := .str (.str .base "m") "add"
 
 private def addFn : Built :=
   buildFunc mAdd #["args", "kwargs"] () fun args => do
-    let _ ← funcValue mAdd
+    let _ ← funcValue mAdd "add" "m"
     emitReturn (← emitFailing (.str .base "sum") Py.add.ref #[args[0], args[0]])
 
 -- It refers to itself, so it is a module on its own.
@@ -454,7 +454,7 @@ private def addFn : Built :=
 /-- info: module m.add {
   func @m.add(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
     entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
-      %clo.0 : py.Value = py.mkClosure[[]](@m.add)
+      %clo.0 : py.Value = py.mkClosure[[]](@m.add, "add", "m")
       %sum.0 : py.Value = py.add(%args.0, %args.0) ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%sum.0)
       ret(%ret.0)

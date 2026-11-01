@@ -23,7 +23,7 @@ a value holds only object ids.
 
 `ObjG F` is an object whose function payload is an `F`.  The store holds `Obj σ`, whose function
 payload holds a closure; the primitives of the rules make and change `ObjData`, whose function
-payload is empty, so that no rule makes a function object.
+payload is empty, so that no rule makes a function object other than `mkClosure`.
 -/
 
 namespace StrataPython.Dyn.Sem
@@ -89,12 +89,12 @@ instance : Inhabited ClassObj :=
   ⟨⟨"", "", "", #[], #[], .empty, .none, true, #[], false, #[], false,
   false, none, false⟩⟩
 
-/-- A translated function: its closure, with its cells bound in, its `__name__` and its module's
-name. -/
+/-- A translated function: its closure, with its cells bound in, its `__name__`, and its
+`__module__`, the value of its module's `__name__` global when it was made. -/
 structure FuncObj (σ : Type) [Store σ] where
   closure : FnRef σ [Value, Value] (Except Value Value)
   name : String
-  module : String
+  module : Value
 
 /-- The state of an exception: its `args`, its chaining, and the fields of its class
 (`StopIteration.value`, `NameError.name`, …) by name. -/

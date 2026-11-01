@@ -7,19 +7,19 @@ module t30_loop_try_nested {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@t30_loop_try_nested.probe)
+      %clo.0 : py.Value = py.mkClosure[[]](@t30_loop_try_nested.probe, "probe", "t30_loop_try_nested")
       %probe.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "probe")
       %set.2 : base.Unit = base.refSet[py.Value](%probe.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@t30_loop_try_nested.check)
+      %clo.1 : py.Value = py.mkClosure[[]](@t30_loop_try_nested.check, "check", "t30_loop_try_nested")
       %check.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "check")
       %set.3 : base.Unit = base.refSet[py.Value](%check.cell.0, %clo.1)
-      %clo.2 : py.Value = py.mkClosure[[]](@t30_loop_try_nested.cleanup)
+      %clo.2 : py.Value = py.mkClosure[[]](@t30_loop_try_nested.cleanup, "cleanup", "t30_loop_try_nested")
       %cleanup.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "cleanup")
       %set.4 : base.Unit = base.refSet[py.Value](%cleanup.cell.0, %clo.2)
-      %clo.3 : py.Value = py.mkClosure[[]](@t30_loop_try_nested.note)
+      %clo.3 : py.Value = py.mkClosure[[]](@t30_loop_try_nested.note, "note", "t30_loop_try_nested")
       %note.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "note")
       %set.5 : base.Unit = base.refSet[py.Value](%note.cell.0, %clo.3)
-      %clo.4 : py.Value = py.mkClosure[[]](@t30_loop_try_nested.raiser)
+      %clo.4 : py.Value = py.mkClosure[[]](@t30_loop_try_nested.raiser, "raiser", "t30_loop_try_nested")
       %raiser.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "raiser")
       %set.6 : base.Unit = base.refSet[py.Value](%raiser.cell.0, %clo.4)
       %int.0 : py.Value = py.intLit(1)
@@ -500,13 +500,13 @@ module t30_loop_try_nested {
       %pop.23 : base.Unit = py.popExcept(%prev.11)
       jump ^propagate.0(%exc.32)
     join.12():
-      %clo.5 : py.Value = py.mkClosure[[]](@t30_loop_try_nested.drain)
+      %clo.5 : py.Value = py.mkClosure[[]](@t30_loop_try_nested.drain, "drain", "t30_loop_try_nested")
       %drain.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "drain")
       %set.22 : base.Unit = base.refSet[py.Value](%drain.cell.0, %clo.5)
-      %clo.6 : py.Value = py.mkClosure[[]](@t30_loop_try_nested.nested_return)
+      %clo.6 : py.Value = py.mkClosure[[]](@t30_loop_try_nested.nested_return, "nested_return", "t30_loop_try_nested")
       %nested_return.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "nested_return")
       %set.23 : base.Unit = base.refSet[py.Value](%nested_return.cell.0, %clo.6)
-      %clo.7 : py.Value = py.mkClosure[[]](@t30_loop_try_nested.loop_else_return)
+      %clo.7 : py.Value = py.mkClosure[[]](@t30_loop_try_nested.loop_else_return, "loop_else_return", "t30_loop_try_nested")
       %loop_else_return.cell.0 : base.Ref(py.Value) = py.globalCell("t30_loop_try_nested", "loop_else_return")
       %set.24 : base.Unit = base.refSet[py.Value](%loop_else_return.cell.0, %clo.7)
       %drain.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "drain") ^propagate.0()
@@ -546,7 +546,7 @@ module t30_loop_try_nested {
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.4 : py.Value = py.requireDefined(%x.3, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.4)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -563,7 +563,7 @@ module t30_loop_try_nested {
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.4 : py.Value = py.requireDefined(%x.3, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.4)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -591,7 +591,7 @@ module t30_loop_try_nested {
       %tag.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%tag.cell.0, %tag.2)
       %tag.3 : py.Value = base.refGet[py.Value](%tag.cell.0)
-      %tag.4 : py.Value = py.requireDefined(%tag.3, "UnboundLocalError", "cannot access local variable 'tag' where it is not associated with a value") ^propagate.0()
+      %tag.4 : py.Value = py.requireDefined(%tag.3, "tag", "UnboundLocalError", "cannot access local variable 'tag' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tag.4)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -628,7 +628,7 @@ module t30_loop_try_nested {
     body.0():
       %next.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "next") ^catch.0()
       %it.3 : py.Value = base.refGet[py.Value](%it.cell.0)
-      %it.4 : py.Value = py.requireDefined(%it.3, "UnboundLocalError", "cannot access local variable 'it' where it is not associated with a value") ^catch.0()
+      %it.4 : py.Value = py.requireDefined(%it.3, "it", "UnboundLocalError", "cannot access local variable 'it' where it is not associated with a value") ^catch.0()
       %tuple.0 : py.Value = py.mkTuple(%it.4)
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%next.0, %tuple.0, %kwargs.1) ^catch.0()
@@ -652,7 +652,7 @@ module t30_loop_try_nested {
     join.1():
       %probe.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "probe") ^finRaise.0()
       %h.1 : py.Value = base.refGet[py.Value](%h.cell.0)
-      %h.2 : py.Value = py.requireDefined(%h.1, "UnboundLocalError", "cannot access local variable 'h' where it is not associated with a value") ^finRaise.0()
+      %h.2 : py.Value = py.requireDefined(%h.1, "h", "UnboundLocalError", "cannot access local variable 'h' where it is not associated with a value") ^finRaise.0()
       %tuple.1 : py.Value = py.mkTuple(%h.2)
       %kwargs.2 : py.Value = py.mkKwargs
       %call.1 : py.Value = py.call(%probe.0, %tuple.1, %kwargs.2) ^finRaise.0()
@@ -708,14 +708,14 @@ module t30_loop_try_nested {
       %inner.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%inner.cell.0, %inner.2)
       %outer.3 : py.Value = base.refGet[py.Value](%outer.cell.0)
-      %outer.4 : py.Value = py.requireDefined(%outer.3, "UnboundLocalError", "cannot access local variable 'outer' where it is not associated with a value") ^propagate.0()
+      %outer.4 : py.Value = py.requireDefined(%outer.3, "outer", "UnboundLocalError", "cannot access local variable 'outer' where it is not associated with a value") ^propagate.0()
       %iter.0 : py.Value = py.getIter(%outer.4) ^propagate.0()
       jump ^head.0()
     head.0():
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %set.2 : base.Unit = base.refSet[py.Value](%p.cell.0, %item.0)
       %inner.3 : py.Value = base.refGet[py.Value](%inner.cell.0)
-      %inner.4 : py.Value = py.requireDefined(%inner.3, "UnboundLocalError", "cannot access local variable 'inner' where it is not associated with a value") ^finRaise.0()
+      %inner.4 : py.Value = py.requireDefined(%inner.3, "inner", "UnboundLocalError", "cannot access local variable 'inner' where it is not associated with a value") ^finRaise.0()
       %iter.1 : py.Value = py.getIter(%inner.4) ^finRaise.0()
       jump ^head.1()
     head.1():
@@ -723,7 +723,7 @@ module t30_loop_try_nested {
       %set.3 : base.Unit = base.refSet[py.Value](%q.cell.0, %item.1)
       %check.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "check") ^finRaise.1()
       %q.1 : py.Value = base.refGet[py.Value](%q.cell.0)
-      %q.2 : py.Value = py.requireDefined(%q.1, "UnboundLocalError", "cannot access local variable 'q' where it is not associated with a value") ^finRaise.1()
+      %q.2 : py.Value = py.requireDefined(%q.1, "q", "UnboundLocalError", "cannot access local variable 'q' where it is not associated with a value") ^finRaise.1()
       %tuple.0 : py.Value = py.mkTuple(%q.2)
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%check.0, %tuple.0, %kwargs.1) ^finRaise.1()
@@ -731,7 +731,7 @@ module t30_loop_try_nested {
       branch(%cond.0) ^then.0() ^else.0()
     then.0():
       %q.3 : py.Value = base.refGet[py.Value](%q.cell.0)
-      %q.4 : py.Value = py.requireDefined(%q.3, "UnboundLocalError", "cannot access local variable 'q' where it is not associated with a value") ^finRaise.1()
+      %q.4 : py.Value = py.requireDefined(%q.3, "q", "UnboundLocalError", "cannot access local variable 'q' where it is not associated with a value") ^finRaise.1()
       %comp.0 : py.Completion = py.completionReturn(%q.4)
       jump ^fin.1(%comp.0)
     else.0():
@@ -807,7 +807,7 @@ module t30_loop_try_nested {
       %items.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%items.cell.0, %items.2)
       %items.3 : py.Value = base.refGet[py.Value](%items.cell.0)
-      %items.4 : py.Value = py.requireDefined(%items.3, "UnboundLocalError", "cannot access local variable 'items' where it is not associated with a value") ^propagate.0()
+      %items.4 : py.Value = py.requireDefined(%items.3, "items", "UnboundLocalError", "cannot access local variable 'items' where it is not associated with a value") ^propagate.0()
       %iter.0 : py.Value = py.getIter(%items.4) ^propagate.0()
       jump ^head.0()
     head.0():
@@ -815,7 +815,7 @@ module t30_loop_try_nested {
       %set.1 : base.Unit = base.refSet[py.Value](%r.cell.0, %item.0)
       %check.0 : py.Value = py.loadGlobal("t30_loop_try_nested", "check") ^propagate.0()
       %r.1 : py.Value = base.refGet[py.Value](%r.cell.0)
-      %r.2 : py.Value = py.requireDefined(%r.1, "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^propagate.0()
+      %r.2 : py.Value = py.requireDefined(%r.1, "r", "UnboundLocalError", "cannot access local variable 'r' where it is not associated with a value") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%r.2)
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%check.0, %tuple.0, %kwargs.1) ^propagate.0()

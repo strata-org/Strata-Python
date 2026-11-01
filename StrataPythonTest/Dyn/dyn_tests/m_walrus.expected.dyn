@@ -56,10 +56,10 @@ module m_walrus {
       %list.0 : py.Value = py.mkList(%a.0, %w.0)
       %z.cell.0 : base.Ref(py.Value) = py.globalCell("m_walrus", "z")
       %set.9 : base.Unit = base.refSet[py.Value](%z.cell.0, %list.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@m_walrus.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_walrus.f, "f", "m_walrus")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_walrus", "f")
       %set.10 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@m_walrus.h)
+      %clo.1 : py.Value = py.mkClosure[[]](@m_walrus.h, "h", "m_walrus")
       %h.cell.0 : base.Ref(py.Value) = py.globalCell("m_walrus", "h")
       %set.11 : base.Unit = base.refSet[py.Value](%h.cell.0, %clo.1)
       %none.1 : py.Value = py.noneLit
@@ -87,7 +87,7 @@ module m_walrus {
       %g.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%g.cell.0, %g.2)
       %g.3 : py.Value = base.refGet[py.Value](%g.cell.0)
-      %g.4 : py.Value = py.requireDefined(%g.3, "UnboundLocalError", "cannot access local variable 'g' where it is not associated with a value") ^propagate.0()
+      %g.4 : py.Value = py.requireDefined(%g.3, "g", "UnboundLocalError", "cannot access local variable 'g' where it is not associated with a value") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%g.4, %tuple.0, %kwargs.1) ^propagate.0()
@@ -97,13 +97,13 @@ module m_walrus {
       %set.3 : base.Unit = base.refSet[py.Value](%b.cell.0, %int.0)
       %set.4 : base.Unit = base.refSet[py.Value](%a.cell.0, %int.0)
       %x.1 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.2 : py.Value = py.requireDefined(%x.1, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.2 : py.Value = py.requireDefined(%x.1, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %y.1 : py.Value = base.refGet[py.Value](%y.cell.0)
-      %y.2 : py.Value = py.requireDefined(%y.1, "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
+      %y.2 : py.Value = py.requireDefined(%y.1, "y", "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
       %a.1 : py.Value = base.refGet[py.Value](%a.cell.0)
-      %a.2 : py.Value = py.requireDefined(%a.1, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %a.2 : py.Value = py.requireDefined(%a.1, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %b.1 : py.Value = base.refGet[py.Value](%b.cell.0)
-      %b.2 : py.Value = py.requireDefined(%b.1, "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
+      %b.2 : py.Value = py.requireDefined(%b.1, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
       %tuple.1 : py.Value = py.mkTuple(%x.2, %y.2, %a.2, %b.2)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.1)
       ret(%ret.0)
@@ -121,7 +121,7 @@ module m_walrus {
       %g.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%g.cell.0, %g.2)
       %g.3 : py.Value = base.refGet[py.Value](%g.cell.0)
-      %g.4 : py.Value = py.requireDefined(%g.3, "UnboundLocalError", "cannot access local variable 'g' where it is not associated with a value") ^propagate.0()
+      %g.4 : py.Value = py.requireDefined(%g.3, "g", "UnboundLocalError", "cannot access local variable 'g' where it is not associated with a value") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%g.4, %tuple.0, %kwargs.1) ^propagate.0()

@@ -7,16 +7,16 @@ module p46_comp_lambda {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p46_comp_lambda", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@p46_comp_lambda.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@p46_comp_lambda.f, "f", "p46_comp_lambda")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p46_comp_lambda", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@p46_comp_lambda.g)
+      %clo.1 : py.Value = py.mkClosure[[]](@p46_comp_lambda.g, "g", "p46_comp_lambda")
       %g.cell.0 : base.Ref(py.Value) = py.globalCell("p46_comp_lambda", "g")
       %set.3 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
-      %clo.2 : py.Value = py.mkClosure[[]](@p46_comp_lambda.h)
+      %clo.2 : py.Value = py.mkClosure[[]](@p46_comp_lambda.h, "h", "p46_comp_lambda")
       %h.cell.0 : base.Ref(py.Value) = py.globalCell("p46_comp_lambda", "h")
       %set.4 : base.Unit = base.refSet[py.Value](%h.cell.0, %clo.2)
-      %clo.3 : py.Value = py.mkClosure[[]](@p46_comp_lambda.k)
+      %clo.3 : py.Value = py.mkClosure[[]](@p46_comp_lambda.k, "k", "p46_comp_lambda")
       %k.cell.0 : base.Ref(py.Value) = py.globalCell("p46_comp_lambda", "k")
       %set.5 : base.Unit = base.refSet[py.Value](%k.cell.0, %clo.3)
       %range.0 : py.Value = py.loadGlobal("p46_comp_lambda", "range") ^propagate.0()
@@ -31,7 +31,7 @@ module p46_comp_lambda {
           %set.6 : base.Unit = base.refSet[py.Value](%n.cell.0, %item.0)
           %append.0 : base.Unit = py.compAppend(%out.0) ^propagate.1() {
             elt.0():
-              %clo.4 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|p46_comp_lambda.<lambda>|, %n.cell.0)
+              %clo.4 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|p46_comp_lambda.<lambda>|, "<lambda>", "p46_comp_lambda", %n.cell.0)
               %ok.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%clo.4)
               ret(%ok.0)
           }
@@ -63,7 +63,7 @@ module p46_comp_lambda {
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
-      %xs.4 : py.Value = py.requireDefined(%xs.3, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
       %x.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%x.1)
       %list.0 : py.Value = py.listComp(%xs.4) ^propagate.0() {
@@ -71,7 +71,7 @@ module p46_comp_lambda {
           %set.1 : base.Unit = base.refSet[py.Value](%x.cell.1, %item.0)
           %append.0 : base.Unit = py.compAppend(%out.0) ^propagate.1() {
             elt.0():
-              %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|p46_comp_lambda.f.<lambda>|, %x.cell.1)
+              %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|p46_comp_lambda.f.<lambda>|, "<lambda>", "p46_comp_lambda", %x.cell.1)
               %ok.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%clo.0)
               ret(%ok.0)
           }
@@ -104,7 +104,7 @@ module p46_comp_lambda {
       %int.0 : py.Value = py.intLit(0)
       %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
-      %xs.4 : py.Value = py.requireDefined(%xs.3, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
       %x.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%x.1)
       %list.0 : py.Value = py.listComp(%xs.4) ^propagate.0() {
@@ -112,7 +112,7 @@ module p46_comp_lambda {
           %set.2 : base.Unit = base.refSet[py.Value](%x.cell.1, %item.0)
           %append.0 : base.Unit = py.compAppend(%out.0) ^propagate.1() {
             elt.0():
-              %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|p46_comp_lambda.g.<lambda>|, %x.cell.1)
+              %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|p46_comp_lambda.g.<lambda>|, "<lambda>", "p46_comp_lambda", %x.cell.1)
               %ok.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%clo.0)
               ret(%ok.0)
           }
@@ -125,9 +125,9 @@ module p46_comp_lambda {
       }
       %set.3 : base.Unit = base.refSet[py.Value](%fs.cell.0, %list.0)
       %fs.1 : py.Value = base.refGet[py.Value](%fs.cell.0)
-      %fs.2 : py.Value = py.requireDefined(%fs.1, "UnboundLocalError", "cannot access local variable 'fs' where it is not associated with a value") ^propagate.0()
+      %fs.2 : py.Value = py.requireDefined(%fs.1, "fs", "UnboundLocalError", "cannot access local variable 'fs' where it is not associated with a value") ^propagate.0()
       %x.2 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.3 : py.Value = py.requireDefined(%x.2, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.3 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%fs.2, %x.3)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.0)
       ret(%ret.0)
@@ -154,7 +154,7 @@ module p46_comp_lambda {
       %ys.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%ys.cell.0, %ys.2)
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
-      %xs.4 : py.Value = py.requireDefined(%xs.3, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
       %x.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%x.1)
       %y.1 : py.Value = py.undef("y")
@@ -163,13 +163,13 @@ module p46_comp_lambda {
         each.0(%out.0 : py.ListAcc, %item.0 : py.Value):
           %set.2 : base.Unit = base.refSet[py.Value](%x.cell.1, %item.0)
           %ys.3 : py.Value = base.refGet[py.Value](%ys.cell.0)
-          %ys.4 : py.Value = py.requireDefined(%ys.3, "UnboundLocalError", "cannot access local variable 'ys' where it is not associated with a value") ^propagate.1()
+          %ys.4 : py.Value = py.requireDefined(%ys.3, "ys", "UnboundLocalError", "cannot access local variable 'ys' where it is not associated with a value") ^propagate.1()
           %for.0 : base.Unit = py.compFor(%ys.4) ^propagate.1() {
             each.1(%item.1 : py.Value):
               %set.3 : base.Unit = base.refSet[py.Value](%y.cell.1, %item.1)
               %append.0 : base.Unit = py.compAppend(%out.0) ^propagate.2() {
                 elt.0():
-                  %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@|p46_comp_lambda.h.<lambda>|, %x.cell.1, %y.cell.1)
+                  %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@|p46_comp_lambda.h.<lambda>|, "<lambda>", "p46_comp_lambda", %x.cell.1, %y.cell.1)
                   %ok.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%clo.0)
                   ret(%ok.0)
               }
@@ -205,7 +205,7 @@ module p46_comp_lambda {
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
-      %xs.4 : py.Value = py.requireDefined(%xs.3, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
       %x.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%x.1)
       %list.0 : py.Value = py.listComp(%xs.4) ^propagate.0() {
@@ -214,9 +214,9 @@ module p46_comp_lambda {
           %append.0 : base.Unit = py.compAppend(%out.0) ^propagate.1() {
             elt.0():
               %x.2 : py.Value = base.refGet[py.Value](%x.cell.1)
-              %x.3 : py.Value = py.requireDefined(%x.2, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.2()
+              %x.3 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.2()
               %y.default.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.3)
-              %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|p46_comp_lambda.k.<lambda>|, %y.default.0)
+              %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|p46_comp_lambda.k.<lambda>|, "<lambda>", "p46_comp_lambda", %y.default.0)
               %ok.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%clo.0)
               ret(%ok.0)
             propagate.2(%exc.0 : py.Value):
@@ -241,7 +241,7 @@ module p46_comp_lambda {
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %n.0 : py.Value = base.refGet[py.Value](%n.cell.0)
-      %n.1 : py.Value = py.requireDefined(%n.0, "NameError", "cannot access free variable 'n' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %n.1 : py.Value = py.requireDefined(%n.0, "n", "NameError", "cannot access free variable 'n' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%n.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -253,7 +253,7 @@ module p46_comp_lambda {
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.1 : py.Value = py.requireDefined(%x.0, "NameError", "cannot access free variable 'x' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %x.1 : py.Value = py.requireDefined(%x.0, "x", "NameError", "cannot access free variable 'x' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -265,7 +265,7 @@ module p46_comp_lambda {
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.1 : py.Value = py.requireDefined(%x.0, "NameError", "cannot access free variable 'x' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %x.1 : py.Value = py.requireDefined(%x.0, "x", "NameError", "cannot access free variable 'x' where it is not associated with a value in enclosing scope") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.1)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -277,9 +277,9 @@ module p46_comp_lambda {
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 0, false, false) ^propagate.0()
       %x.0 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.1 : py.Value = py.requireDefined(%x.0, "NameError", "cannot access free variable 'x' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %x.1 : py.Value = py.requireDefined(%x.0, "x", "NameError", "cannot access free variable 'x' where it is not associated with a value in enclosing scope") ^propagate.0()
       %y.0 : py.Value = base.refGet[py.Value](%y.cell.0)
-      %y.1 : py.Value = py.requireDefined(%y.0, "NameError", "cannot access free variable 'y' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %y.1 : py.Value = py.requireDefined(%y.0, "y", "NameError", "cannot access free variable 'y' where it is not associated with a value in enclosing scope") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%x.1, %y.1)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.0)
       ret(%ret.0)
@@ -297,7 +297,7 @@ module p46_comp_lambda {
       %y.1 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%y.cell.0, %y.1)
       %y.2 : py.Value = base.refGet[py.Value](%y.cell.0)
-      %y.3 : py.Value = py.requireDefined(%y.2, "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
+      %y.3 : py.Value = py.requireDefined(%y.2, "y", "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%y.3)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):

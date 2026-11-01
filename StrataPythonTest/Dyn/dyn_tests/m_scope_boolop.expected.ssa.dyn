@@ -38,10 +38,10 @@ module m_scope_boolop {
       %list.0 : py.Value = py.mkList(%a.1, %bool.1)
       %y.cell.0 : base.Ref(py.Value) = py.globalCell("m_scope_boolop", "y")
       %set.6 : base.Unit = base.refSet[py.Value](%y.cell.0, %list.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@m_scope_boolop.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_scope_boolop.f, "f", "m_scope_boolop")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_scope_boolop", "f")
       %set.7 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@m_scope_boolop.g)
+      %clo.1 : py.Value = py.mkClosure[[]](@m_scope_boolop.g, "g", "m_scope_boolop")
       %g.cell.0 : base.Ref(py.Value) = py.globalCell("m_scope_boolop", "g")
       %set.8 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
       %none.1 : py.Value = py.noneLit
@@ -67,12 +67,12 @@ module m_scope_boolop {
       %a.2 : py.Value = py.tupleGet(%bound.0, 0)
       %b.2 : py.Value = py.tupleGet(%bound.0, 1)
       %c.12 : py.Value = py.tupleGet(%bound.0, 2)
-      %a.4 : py.Value = py.requireDefined(%a.2, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
-      %b.4 : py.Value = py.requireDefined(%b.2, "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
+      %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %b.4 : py.Value = py.requireDefined(%b.2, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%b.4) ^propagate.0()
       branch(%cond.0) ^join.0(%b.4) ^or.0()
     or.0():
-      %c.14 : py.Value = py.requireDefined(%c.12, "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
+      %c.14 : py.Value = py.requireDefined(%c.12, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
       jump ^join.0(%c.14)
     join.0(%bool.0 : py.Value):
       %add.0 : py.Value = py.add(%a.4, %bool.0) ^propagate.0()
@@ -98,18 +98,18 @@ module m_scope_boolop {
       %a.2 : py.Value = py.tupleGet(%bound.0, 0)
       %b.2 : py.Value = py.tupleGet(%bound.0, 1)
       %c.12 : py.Value = py.tupleGet(%bound.0, 2)
-      %a.4 : py.Value = py.requireDefined(%a.2, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
-      %b.4 : py.Value = py.requireDefined(%b.2, "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
+      %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %b.4 : py.Value = py.requireDefined(%b.2, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%b.4) ^propagate.0()
       branch(%cond.0) ^and.0() ^join.1(%b.4)
     and.0():
-      %c.14 : py.Value = py.requireDefined(%c.12, "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
+      %c.14 : py.Value = py.requireDefined(%c.12, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
       jump ^join.1(%c.14)
     join.1(%bool.0 : py.Value):
       %cond.1 : base.Bool = py.truthy(%bool.0) ^propagate.0()
       branch(%cond.1) ^join.0(%bool.0) ^or.0()
     or.0():
-      %a.6 : py.Value = py.requireDefined(%a.2, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %a.6 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       jump ^join.0(%a.6)
     join.0(%bool.1 : py.Value):
       %mult.0 : py.Value = py.mult(%a.4, %bool.1) ^propagate.0()

@@ -44,10 +44,10 @@ module servicelib {
       %Database.0 : py.Value = py.importFrom("servicelib.Database", "Database") ^propagate.0()
       %Database.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib", "Database")
       %set.4 : base.Unit = base.refSet[py.Value](%Database.cell.0, %Database.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@servicelib.connect)
+      %clo.0 : py.Value = py.mkClosure[[]](@servicelib.connect, "connect", "servicelib")
       %connect.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib", "connect")
       %set.5 : base.Unit = base.refSet[py.Value](%connect.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@servicelib.__getattr__)
+      %clo.1 : py.Value = py.mkClosure[[]](@servicelib.__getattr__, "__getattr__", "servicelib")
       %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib", "__getattr__")
       %set.6 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
       %none.1 : py.Value = py.noneLit
@@ -95,7 +95,7 @@ module servicelib {
       chosen.0():
         %Storage.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Storage", "Storage")
         %Storage.0 : py.Value = base.refGet[py.Value](%Storage.cell.0)
-        %Storage.1 : py.Value = py.requireDefined(%Storage.0, "AttributeError", "module 'servicelib.Storage' has no attribute 'Storage'") ^fail.0()
+        %Storage.1 : py.Value = py.requireDefined(%Storage.0, "Storage", "AttributeError", "module 'servicelib.Storage' has no attribute 'Storage'") ^fail.0()
         %sub.0 : base.Bool = py.typeIsSubclass(%result.0, %Storage.1) ^fail.0()
         branch(%sub.0) ^isSub.0() ^no.0()
       isSub.0():
@@ -128,7 +128,7 @@ module servicelib {
       chosen.1():
         %Messaging.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Messaging", "Messaging")
         %Messaging.0 : py.Value = base.refGet[py.Value](%Messaging.cell.0)
-        %Messaging.1 : py.Value = py.requireDefined(%Messaging.0, "AttributeError", "module 'servicelib.Messaging' has no attribute 'Messaging'") ^fail.1()
+        %Messaging.1 : py.Value = py.requireDefined(%Messaging.0, "Messaging", "AttributeError", "module 'servicelib.Messaging' has no attribute 'Messaging'") ^fail.1()
         %sub.1 : base.Bool = py.typeIsSubclass(%result.1, %Messaging.1) ^fail.1()
         branch(%sub.1) ^isSub.1() ^no.1()
       isSub.1():
@@ -161,7 +161,7 @@ module servicelib {
       chosen.2():
         %Database.cell.0 : base.Ref(py.Value) = py.globalCell("servicelib.Database", "Database")
         %Database.0 : py.Value = base.refGet[py.Value](%Database.cell.0)
-        %Database.1 : py.Value = py.requireDefined(%Database.0, "AttributeError", "module 'servicelib.Database' has no attribute 'Database'") ^fail.2()
+        %Database.1 : py.Value = py.requireDefined(%Database.0, "Database", "AttributeError", "module 'servicelib.Database' has no attribute 'Database'") ^fail.2()
         %sub.2 : base.Bool = py.typeIsSubclass(%result.2, %Database.1) ^fail.2()
         branch(%sub.2) ^isSub.2() ^no.2()
       isSub.2():

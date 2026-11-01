@@ -23,10 +23,10 @@ module native_cases.module_ghost_ref {
       %str.0 : py.Value = py.strLit("native_cases.module_ghost_ref")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.module_ghost_ref", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@native_cases.module_ghost_ref.read_counter)
+      %clo.0 : py.Value = py.mkClosure[[]](@native_cases.module_ghost_ref.read_counter, "read_counter", "native_cases.module_ghost_ref")
       %read_counter.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.module_ghost_ref", "read_counter")
       %set.1 : base.Unit = base.refSet[py.Value](%read_counter.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@native_cases.module_ghost_ref.__getattr__)
+      %clo.1 : py.Value = py.mkClosure[[]](@native_cases.module_ghost_ref.__getattr__, "__getattr__", "native_cases.module_ghost_ref")
       %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("native_cases.module_ghost_ref", "__getattr__")
       %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
       %none.0 : py.Value = py.noneLit

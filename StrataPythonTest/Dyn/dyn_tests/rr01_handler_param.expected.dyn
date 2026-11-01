@@ -7,7 +7,7 @@ module rr01_handler_param {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("rr01_handler_param", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@rr01_handler_param.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@rr01_handler_param.f, "f", "rr01_handler_param")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("rr01_handler_param", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -34,14 +34,14 @@ module rr01_handler_param {
       %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
       %g.0 : py.Value = py.loadGlobal("rr01_handler_param", "g") ^catch.0()
       %a.3 : py.Value = base.refGet[py.Value](%a.cell.0)
-      %a.4 : py.Value = py.requireDefined(%a.3, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^catch.0()
+      %a.4 : py.Value = py.requireDefined(%a.3, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^catch.0()
       %tuple.0 : py.Value = py.mkTuple(%a.4)
       %kwargs.1 : py.Value = py.mkKwargs
       %call.0 : py.Value = py.call(%g.0, %tuple.0, %kwargs.1) ^catch.0()
       %set.3 : base.Unit = base.refSet[py.Value](%x.cell.0, %call.0)
       %g.1 : py.Value = py.loadGlobal("rr01_handler_param", "g") ^catch.0()
       %b.3 : py.Value = base.refGet[py.Value](%b.cell.0)
-      %b.4 : py.Value = py.requireDefined(%b.3, "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^catch.0()
+      %b.4 : py.Value = py.requireDefined(%b.3, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^catch.0()
       %tuple.1 : py.Value = py.mkTuple(%b.4)
       %kwargs.2 : py.Value = py.mkKwargs
       %call.1 : py.Value = py.call(%g.1, %tuple.1, %kwargs.2) ^catch.0()
@@ -54,7 +54,7 @@ module rr01_handler_param {
       branch(%match.0) ^except.0() ^next.0()
     except.0():
       %x.1 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.2 : py.Value = py.requireDefined(%x.1, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^unwind.0()
+      %x.2 : py.Value = py.requireDefined(%x.1, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^unwind.0()
       %pop.0 : base.Unit = py.popExcept(%prev.0)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.2)
       ret(%ret.0)
@@ -65,7 +65,7 @@ module rr01_handler_param {
       jump ^propagate.0(%exc.1)
     join.0():
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.4 : py.Value = py.requireDefined(%x.3, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %ret.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.4)
       ret(%ret.1)
     propagate.0(%exc.2 : py.Value):

@@ -20,8 +20,7 @@ set_option autoImplicit false
 * A rule written over `PyM` gets its theorem; a rule written directly in `Sem`, without a lemma
   of its own, fails `#py_rule_theorems`; so does a `PyM` rule above its declared effect.
 * A computation at `reads` can't use a `writes` primitive: Lean finds no instance.
-* `#dyn_coverage Py (complete)` names what has no rule yet: `py.mkClosure` and the contract
-  operations.
+* `#dyn_coverage Py (complete)` names what has no rule yet: the contract operations.
 -/
 
 namespace StrataPython.Dyn.Sem.RuleTheoremsTest
@@ -134,7 +133,7 @@ that holds an object, and tuples nested 901 and 900 deep. -/
 public def requireIn (x : Value) (err : Target E [Value]) : Sem ε E Value :=
   runRuleFree err #[] (do
     PyWrites.setHandled x
-    Proto.requireDefined (Value.undef "y") "NameError" "m" : PyM σ .writes true Value)
+    Proto.requireDefined (Value.undef "y") "y" "NameError" "m" : PyM σ .writes true Value)
 
 /-- A lookup whose `__eq__` changes the found entry's value: the result is the new value.  The
 key is an object of a class that is not built in (the `builtins` dict stands for it), so that
@@ -449,10 +448,28 @@ example : ImplOK PyTSem.interp ptTags .writes PyTSem.impl.pt.raiseIn := PyTSem.i
 example : ImplWithin PyTSem.interp .reads PyTSem.impl.pt.classOfNew := PyTSem.ok.pt.classOfNew
 example : ImplOK PyTSem.interp ptTags .reads PyTSem.impl.pt.classOfNew := PyTSem.implOK.pt.classOfNew
 
+/-- Run `@m.main` of the module `text`, and print its result or its fault; with `excDetail`, an
+exception's class, arguments and context instead of its object. -/
+def runText (text : String) (excDetail : Bool) : IO Unit := do
+  match ← Module.read PyT.env text "t.dyn" with
+  | .error e => IO.println s!"read: {e}"
+  | .ok m =>
+    let o := runModule PyTSem.model m (.str (.str .base "m") "main") #[] 1000
+    match o.result, o.read? Value with
+    | .ok _, some (.obj id) =>
+      if !excDetail then IO.println (reprStr (Value.obj id)) else
+      match o.snapshot.world.store.get? id with
+      | some { cls, payload := .exc e, .. } =>
+        IO.println s!"exception {reprStr cls} {reprStr e.args} context {reprStr e.context}"
+      | _ => IO.println s!"object {id}"
+    | .ok _, some v => IO.println (reprStr v)
+    | .ok _, none => IO.println "a result that is not a value"
+    | .fault f, _ => IO.println s!"fault: {repr f}"
+
 /-- Run `@m.main`, whose body ends with `%v.0`, and print its result, or the class, arguments
 and context of the exception it raises, or its fault. -/
-def run (body : String) : IO Unit := do
-  let text := s!"module m \{
+def run (body : String) : IO Unit :=
+  runText s!"module m \{
   func @m.main() -> py.Value \{
     entry.0():
 {body}
@@ -460,19 +477,10 @@ def run (body : String) : IO Unit := do
     err.0(%e.0 : py.Value):
       ret(%e.0)
   }
-}"
-  match ← Module.read PyT.env text "t.dyn" with
-  | .error e => IO.println s!"read: {e}"
-  | .ok m =>
-    let o := runModule PyTSem.model m (.str (.str .base "m") "main") #[] 1000
-    match o.result, o.read? Value with
-    | .ok _, some (.obj id) => match o.snapshot.world.store.get? id with
-      | some { cls, payload := .exc e, .. } =>
-        IO.println s!"exception {reprStr cls} {reprStr e.args} context {reprStr e.context}"
-      | _ => IO.println s!"object {id}"
-    | .ok _, some v => IO.println (reprStr v)
-    | .ok _, none => IO.println "a result that is not a value"
-    | .fault f, _ => IO.println s!"fault: {repr f}"
+}" true
+
+/-- Run `@m.main` of the module `text` and print its result or its fault. -/
+def runModule' (text : String) : IO Unit := runText text false
 
 -- An exception raised while another is handled has it as its `__context__`.
 /--
@@ -696,6 +704,59 @@ info: StrataPython.Dyn.Sem.Value.tuple
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.frozenOr ^err.0()"
 
+-- A closure made by `mkClosure` runs its code on the cells it captured: late binding reads the
+-- cell when the call runs (`c = 1`, then `c = 2`, then the call gives `2`).
+/-- info: StrataPython.Dyn.Sem.Value.int 2 -/
+#guard_msgs in
+#eval runModule' "module m {
+  func @m.g(%c.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%c.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = base.refGet[py.Value](%c.0)
+      %r.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.0)
+      ret(%r.0)
+  }
+  func @m.main() -> py.Value {
+    entry.0():
+      %i.0 : py.Value = py.intLit(1)
+      %c.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
+      %f.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m.g, \"g\", \"m\", %c.0)
+      %j.0 : py.Value = py.intLit(2)
+      %s.0 : base.Unit = base.refSet[py.Value](%c.0, %j.0)
+      %v.0 : py.Value = pt.callNew(%f.0) ^err.0()
+      ret(%v.0)
+    err.0(%e.0 : py.Value):
+      ret(%e.0)
+  }
+}"
+
+-- Two cells are bound in operand order: the code gets `(1, 2)`.
+/--
+info: StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.int 1, StrataPython.Dyn.Sem.Value.int 2]
+-/
+#guard_msgs in
+#eval runModule' "module m {
+  func @m.g(%a.0 : base.Ref(py.Value), %b.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%a.0 : base.Ref(py.Value), %b.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = base.refGet[py.Value](%a.0)
+      %y.0 : py.Value = base.refGet[py.Value](%b.0)
+      %t.0 : py.Value = py.mkTuple(%x.0, %y.0)
+      %r.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%t.0)
+      ret(%r.0)
+  }
+  func @m.main() -> py.Value {
+    entry.0():
+      %i.0 : py.Value = py.intLit(1)
+      %j.0 : py.Value = py.intLit(2)
+      %a.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
+      %b.0 : base.Ref(py.Value) = base.refNew[py.Value](%j.0)
+      %f.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@m.g, \"g\", \"m\", %a.0, %b.0)
+      %v.0 : py.Value = pt.callNew(%f.0) ^err.0()
+      ret(%v.0)
+    err.0(%e.0 : py.Value):
+      ret(%e.0)
+  }
+}"
+
 -- A call of a value or object that is not a function object is not modelled yet.
 /-- info: fault: Strata.Dyn.Exec.Fault.gap "a call of a value other than a function object is not modelled yet" -/
 #guard_msgs in
@@ -716,8 +777,10 @@ Hint: Type class instance resolution failures can be inspected with the `set_opt
 #guard_msgs in
 example {σ : Type} [Store σ] [Decode σ] : PyM σ .reads true Unit := PyWrites.write "x"
 
+-- Every instruction of `Py` has a rule, but the contract operations, whose rules come with the
+-- semantics of contracts.
 /--
-error: Py is not fully covered: no rule for py.mkClosure, py.argOf, py.extraKwargs, py.bindsTo, py.stdClass, py.isInstance, py.typeIsSubclass, py.len, py.reSearch, py.strIsOneOf, py.intIsOneOf, py.isImmutableScalar, py.dictKeysWithin, py.allIn, py.anyIn, py.allItems, py.anyItems, py.attrLoc, py.itemLoc, py.objLoc, py.reachLoc, py.instanceState
+error: Py is not fully covered: no rule for py.argOf, py.extraKwargs, py.bindsTo, py.stdClass, py.isInstance, py.typeIsSubclass, py.len, py.reSearch, py.strIsOneOf, py.intIsOneOf, py.isImmutableScalar, py.dictKeysWithin, py.allIn, py.anyIn, py.allItems, py.anyItems, py.attrLoc, py.itemLoc, py.objLoc, py.reachLoc, py.instanceState
 -/
 #guard_msgs in
 #dyn_coverage Py (complete)

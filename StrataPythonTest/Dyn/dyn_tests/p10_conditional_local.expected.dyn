@@ -7,10 +7,10 @@ module p10_conditional_local {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p10_conditional_local", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@p10_conditional_local.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@p10_conditional_local.f, "f", "p10_conditional_local")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p10_conditional_local", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@p10_conditional_local.g)
+      %clo.1 : py.Value = py.mkClosure[[]](@p10_conditional_local.g, "g", "p10_conditional_local")
       %g.cell.0 : base.Ref(py.Value) = py.globalCell("p10_conditional_local", "g")
       %set.3 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
       %none.1 : py.Value = py.noneLit
@@ -29,7 +29,7 @@ module p10_conditional_local {
       %c.8 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%c.cell.0, %c.8)
       %c.9 : py.Value = base.refGet[py.Value](%c.cell.0)
-      %c.10 : py.Value = py.requireDefined(%c.9, "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
+      %c.10 : py.Value = py.requireDefined(%c.9, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%c.10) ^propagate.0()
       branch(%cond.0) ^then.0() ^else.0()
     then.0():
@@ -40,7 +40,7 @@ module p10_conditional_local {
       jump ^join.0()
     join.0():
       %v.1 : py.Value = base.refGet[py.Value](%v.cell.0)
-      %v.2 : py.Value = py.requireDefined(%v.1, "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
+      %v.2 : py.Value = py.requireDefined(%v.1, "v", "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%v.2)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -61,14 +61,14 @@ module p10_conditional_local {
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
-      %xs.4 : py.Value = py.requireDefined(%xs.3, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %iter.0 : py.Value = py.getIter(%xs.4) ^propagate.0()
       jump ^head.0()
     head.0():
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %set.1 : base.Unit = base.refSet[py.Value](%i.cell.0, %item.0)
       %i.1 : py.Value = base.refGet[py.Value](%i.cell.0)
-      %i.2 : py.Value = py.requireDefined(%i.1, "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %i.2 : py.Value = py.requireDefined(%i.1, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
       %set.2 : base.Unit = base.refSet[py.Value](%last.cell.0, %i.2)
       jump ^head.0()
     stop.0(%exc.0 : py.Value):
@@ -76,7 +76,7 @@ module p10_conditional_local {
       branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
     exit.0():
       %last.1 : py.Value = base.refGet[py.Value](%last.cell.0)
-      %last.2 : py.Value = py.requireDefined(%last.1, "UnboundLocalError", "cannot access local variable 'last' where it is not associated with a value") ^propagate.0()
+      %last.2 : py.Value = py.requireDefined(%last.1, "last", "UnboundLocalError", "cannot access local variable 'last' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%last.2)
       ret(%ret.0)
     propagate.0(%exc.1 : py.Value):

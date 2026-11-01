@@ -11,7 +11,7 @@ module t24_assert {
       %int.0 : py.Value = py.loadGlobal("t24_assert", "int") ^propagate.0()
       %str.2 : py.Value = py.strLit("return")
       %none.1 : py.Value = py.noneLit
-      %clo.0 : py.Value = py.mkClosure[[]](@t24_assert.validate)
+      %clo.0 : py.Value = py.mkClosure[[]](@t24_assert.validate, "validate", "t24_assert")
       %annotations.0 : py.Value = py.mkDict(%str.1, %int.0, %str.2, %none.1) ^propagate.0()
       %__annotations__.0 : base.Unit = py.setAttr(%clo.0, "__annotations__", %annotations.0) ^propagate.0()
       %validate.cell.0 : base.Ref(py.Value) = py.globalCell("t24_assert", "validate")
@@ -22,7 +22,7 @@ module t24_assert {
       %int.2 : py.Value = py.loadGlobal("t24_assert", "int") ^propagate.0()
       %str.5 : py.Value = py.strLit("return")
       %none.2 : py.Value = py.noneLit
-      %clo.1 : py.Value = py.mkClosure[[]](@t24_assert.check_bounds)
+      %clo.1 : py.Value = py.mkClosure[[]](@t24_assert.check_bounds, "check_bounds", "t24_assert")
       %annotations.1 : py.Value = py.mkDict(%str.3, %int.1, %str.4, %int.2, %str.5, %none.2) ^propagate.0()
       %__annotations__.1 : base.Unit = py.setAttr(%clo.1, "__annotations__", %annotations.1) ^propagate.0()
       %check_bounds.cell.0 : base.Ref(py.Value) = py.globalCell("t24_assert", "check_bounds")
@@ -46,7 +46,7 @@ module t24_assert {
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
       %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.4 : py.Value = py.requireDefined(%x.3, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(0)
       %gt.0 : py.Value = py.gt(%x.4, %int.0) ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%gt.0) ^propagate.0()
@@ -62,7 +62,7 @@ module t24_assert {
     ok.0():
       %isinstance.0 : py.Value = py.loadGlobal("t24_assert", "isinstance") ^propagate.0()
       %x.5 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.6 : py.Value = py.requireDefined(%x.5, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.6 : py.Value = py.requireDefined(%x.5, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %int.1 : py.Value = py.loadGlobal("t24_assert", "int") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%x.6, %int.1)
       %kwargs.2 : py.Value = py.mkKwargs
@@ -75,12 +75,12 @@ module t24_assert {
       jump ^propagate.0(%exc.1)
     ok.1():
       %x.7 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.8 : py.Value = py.requireDefined(%x.7, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.8 : py.Value = py.requireDefined(%x.7, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %int.2 : py.Value = py.intLit(2)
       %mult.0 : py.Value = py.mult(%x.8, %int.2) ^propagate.0()
       %set.1 : base.Unit = base.refSet[py.Value](%result.cell.0, %mult.0)
       %result.1 : py.Value = base.refGet[py.Value](%result.cell.0)
-      %result.2 : py.Value = py.requireDefined(%result.1, "UnboundLocalError", "cannot access local variable 'result' where it is not associated with a value") ^propagate.0()
+      %result.2 : py.Value = py.requireDefined(%result.1, "result", "UnboundLocalError", "cannot access local variable 'result' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%result.2)
       ret(%ret.0)
     propagate.0(%exc.2 : py.Value):
@@ -102,9 +102,9 @@ module t24_assert {
       %hi.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%hi.cell.0, %hi.2)
       %lo.3 : py.Value = base.refGet[py.Value](%lo.cell.0)
-      %lo.4 : py.Value = py.requireDefined(%lo.3, "UnboundLocalError", "cannot access local variable 'lo' where it is not associated with a value") ^propagate.0()
+      %lo.4 : py.Value = py.requireDefined(%lo.3, "lo", "UnboundLocalError", "cannot access local variable 'lo' where it is not associated with a value") ^propagate.0()
       %hi.3 : py.Value = base.refGet[py.Value](%hi.cell.0)
-      %hi.4 : py.Value = py.requireDefined(%hi.3, "UnboundLocalError", "cannot access local variable 'hi' where it is not associated with a value") ^propagate.0()
+      %hi.4 : py.Value = py.requireDefined(%hi.3, "hi", "UnboundLocalError", "cannot access local variable 'hi' where it is not associated with a value") ^propagate.0()
       %lt.0 : py.Value = py.lt(%lo.4, %hi.4) ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%lt.0) ^propagate.0()
       branch(%cond.0) ^ok.0() ^fail.0()
@@ -114,7 +114,7 @@ module t24_assert {
       jump ^propagate.0(%exc.0)
     ok.0():
       %lo.5 : py.Value = base.refGet[py.Value](%lo.cell.0)
-      %lo.6 : py.Value = py.requireDefined(%lo.5, "UnboundLocalError", "cannot access local variable 'lo' where it is not associated with a value") ^propagate.0()
+      %lo.6 : py.Value = py.requireDefined(%lo.5, "lo", "UnboundLocalError", "cannot access local variable 'lo' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(0)
       %gtE.0 : py.Value = py.gtE(%lo.6, %int.0) ^propagate.0()
       %cond.1 : base.Bool = py.truthy(%gtE.0) ^propagate.0()
@@ -123,7 +123,7 @@ module t24_assert {
       %AssertionError.1 : py.Value = py.assertionError
       %str.0 : py.Value = py.strLit("lo must be non-negative, got ")
       %lo.7 : py.Value = base.refGet[py.Value](%lo.cell.0)
-      %lo.8 : py.Value = py.requireDefined(%lo.7, "UnboundLocalError", "cannot access local variable 'lo' where it is not associated with a value") ^propagate.0()
+      %lo.8 : py.Value = py.requireDefined(%lo.7, "lo", "UnboundLocalError", "cannot access local variable 'lo' where it is not associated with a value") ^propagate.0()
       %str.1 : py.Value = py.strLit("")
       %fmt.0 : py.Value = py.fmtValue(%lo.8, %str.1) ^propagate.0()
       %fstr.0 : py.Value = py.strConcat(%str.0, %fmt.0)

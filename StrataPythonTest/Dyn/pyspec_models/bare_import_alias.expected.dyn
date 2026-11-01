@@ -4,10 +4,10 @@ module bare_import_alias {
       %str.0 : py.Value = py.strLit("bare_import_alias")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("bare_import_alias", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@bare_import_alias.use_alias)
+      %clo.0 : py.Value = py.mkClosure[[]](@bare_import_alias.use_alias, "use_alias", "bare_import_alias")
       %use_alias.cell.0 : base.Ref(py.Value) = py.globalCell("bare_import_alias", "use_alias")
       %set.1 : base.Unit = base.refSet[py.Value](%use_alias.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@bare_import_alias.__getattr__)
+      %clo.1 : py.Value = py.mkClosure[[]](@bare_import_alias.__getattr__, "__getattr__", "bare_import_alias")
       %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("bare_import_alias", "__getattr__")
       %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
       %none.0 : py.Value = py.noneLit
@@ -33,7 +33,7 @@ module bare_import_alias {
         %s.6 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "s", %undef.1)
         %SiblingClass.cell.0 : base.Ref(py.Value) = py.globalCell("SiblingModule", "SiblingClass")
         %SiblingClass.0 : py.Value = base.refGet[py.Value](%SiblingClass.cell.0)
-        %SiblingClass.1 : py.Value = py.requireDefined(%SiblingClass.0, "NameError", "name 'SiblingClass' is not defined") ^fail.2()
+        %SiblingClass.1 : py.Value = py.requireDefined(%SiblingClass.0, "SiblingClass", "NameError", "name 'SiblingClass' is not defined") ^fail.2()
         %sub.0 : base.Bool = py.typeIsSubclass(%s.6, %SiblingClass.1) ^fail.2()
         branch(%sub.0) ^then.0() ^else.0()
       then.0():

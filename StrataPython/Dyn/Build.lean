@@ -285,20 +285,23 @@ def emitFunc (target : Name) (params : Array (TypeExpr Py.env)) (info : Option �
     PyM α ValId :=
   Build.emitFunc (env := Py.env) target (codeType params) info
 
-/-- A callable value: the code, a pointer to a function that takes the cells, of the types
-`cellTypes`, then `args` and `kwargs`, and the cells it captures.  `mkClosure`'s type argument
-is `cellTypes`. -/
+/-- A callable value named `name` in the module `module`: the code, a pointer to a function that
+takes the cells, of the types `cellTypes`, then `args` and `kwargs`, and the cells it captures.
+`mkClosure`'s type argument is `cellTypes`. -/
 def mkClosure (code : ValId) (cellTypes : Array (TypeExpr Py.env)) (cells : Array ValId)
-    (info : Option α := none) : PyM α ValId := do
+    (name module : String) (info : Option α := none) : PyM α ValId := do
   let ta? ← Build.checkTypeArgs (env := Py.env) (α := α) (type := some Py.Value) Py.mkClosure.ref
     #[.list (.ofTypes cellTypes)]
-  emitTotal (.str .base "clo") Py.mkClosure.ref (#[code] ++ cells) info
+  let n ← emitConst (.str .base "name") (.str name) info
+  let m ← emitConst (.str .base "module") (.str module) info
+  emitTotal (.str .base "clo") Py.mkClosure.ref (#[code, n, m] ++ cells) info
     (typeArgs := match ta? with | some ta => .given ta | none => .infer)
 
-/-- A callable value for a module-level function, which takes `args` and `kwargs` and
-captures nothing. -/
-def funcValue (target : Name) (info : Option α := none) : PyM α ValId := do
-  mkClosure (← emitFunc target #[Py.Value, Py.Value] info) #[] #[] info
+/-- A callable value for a module-level function named `name` in `module`, which takes `args`
+and `kwargs` and captures nothing. -/
+def funcValue (target : Name) (name module : String) (info : Option α := none) :
+    PyM α ValId := do
+  mkClosure (← emitFunc target #[Py.Value, Py.Value] info) #[] #[] name module info
 
 /-! ## Locals
 
@@ -350,9 +353,10 @@ def globalCell (module name : String) (info : Option α := none) : PyM α ValId 
 fallback: the check of `DELETE_NAME` and `DELETE_GLOBAL`.  Reads use `loadGlobal`. -/
 def requireGlobal (module name : String) (info : Option α := none) : PyM α ValId := do
   let v ← readCell (← globalCell module name info) (stem name) info
+  let n ← emitConst (.str .base "name") (.str name) info
   let excType ← emitConst (.str .base "e") (.str "NameError") info
   let msg ← emitConst (.str .base "msg") (.str s!"name '{name}' is not defined") info
-  emitFailing (stem name) Py.requireDefined.ref #[v, excType, msg] info
+  emitFailing (stem name) Py.requireDefined.ref #[v, n, excType, msg] info
 
 /-- Read the name `name` in `module`: its global, else its builtin, else `NameError`. -/
 def loadGlobal (module name : String) (info : Option α := none) : PyM α ValId := do

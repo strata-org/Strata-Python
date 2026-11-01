@@ -23,7 +23,7 @@ module m_shape_bindings {
       %flag.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "flag")
       %set.6 : base.Unit = base.refSet[py.Value](%flag.cell.0, %bool.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Status.<body>|)
+      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Status.<body>|, "Status", "m_shape_bindings")
       %str.1 : py.Value = py.strLit("Status")
       %Enum.1 : py.Value = py.loadGlobal("m_shape_bindings", "Enum") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1, %Enum.1)
@@ -32,7 +32,7 @@ module m_shape_bindings {
       %Status.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "Status")
       %set.7 : base.Unit = base.refSet[py.Value](%Status.cell.0, %Status.0)
       %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Registers.<body>|)
+      %clo.1 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Registers.<body>|, "Registers", "m_shape_bindings")
       %str.2 : py.Value = py.strLit("Registers")
       %ctypes.0 : py.Value = py.loadGlobal("m_shape_bindings", "ctypes") ^propagate.0()
       %Structure.0 : py.Value = py.attr(%ctypes.0, "Structure") ^propagate.0()
@@ -42,7 +42,7 @@ module m_shape_bindings {
       %Registers.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "Registers")
       %set.8 : base.Unit = base.refSet[py.Value](%Registers.cell.0, %Registers.0)
       %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.2 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Product.<body>|)
+      %clo.2 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Product.<body>|, "Product", "m_shape_bindings")
       %str.3 : py.Value = py.strLit("Product")
       %BaseModel.1 : py.Value = py.loadGlobal("m_shape_bindings", "BaseModel") ^propagate.0()
       %tuple.2 : py.Value = py.mkTuple(%clo.2, %str.3, %BaseModel.1)
@@ -51,18 +51,18 @@ module m_shape_bindings {
       %Product.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "Product")
       %set.9 : base.Unit = base.refSet[py.Value](%Product.cell.0, %Product.0)
       %__build_class__.3 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.3 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Kinds.<body>|)
+      %clo.3 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Kinds.<body>|, "Kinds", "m_shape_bindings")
       %str.4 : py.Value = py.strLit("Kinds")
       %tuple.3 : py.Value = py.mkTuple(%clo.3, %str.4)
       %kwargs.3 : py.Value = py.mkKwargs
       %Kinds.0 : py.Value = py.call(%__build_class__.3, %tuple.3, %kwargs.3) ^propagate.0()
       %Kinds.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "Kinds")
       %set.10 : base.Unit = base.refSet[py.Value](%Kinds.cell.0, %Kinds.0)
-      %clo.4 : py.Value = py.mkClosure[[]](@m_shape_bindings.f)
+      %clo.4 : py.Value = py.mkClosure[[]](@m_shape_bindings.f, "f", "m_shape_bindings")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "f")
       %set.11 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.4)
       %__build_class__.4 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.5 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Walrus.<body>|)
+      %clo.5 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Walrus.<body>|, "Walrus", "m_shape_bindings")
       %str.5 : py.Value = py.strLit("Walrus")
       %tuple.4 : py.Value = py.mkTuple(%clo.5, %str.5)
       %kwargs.4 : py.Value = py.mkKwargs
@@ -70,7 +70,7 @@ module m_shape_bindings {
       %Walrus.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "Walrus")
       %set.12 : base.Unit = base.refSet[py.Value](%Walrus.cell.0, %Walrus.0)
       %__build_class__.5 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.6 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Handlers.<body>|)
+      %clo.6 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Handlers.<body>|, "Handlers", "m_shape_bindings")
       %str.6 : py.Value = py.strLit("Handlers")
       %tuple.5 : py.Value = py.mkTuple(%clo.6, %str.6)
       %kwargs.5 : py.Value = py.mkKwargs
@@ -78,18 +78,18 @@ module m_shape_bindings {
       %Handlers.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "Handlers")
       %set.13 : base.Unit = base.refSet[py.Value](%Handlers.cell.0, %Handlers.0)
       %__build_class__.6 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.7 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Flags.<body>|)
+      %clo.7 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Flags.<body>|, "Flags", "m_shape_bindings")
       %str.7 : py.Value = py.strLit("Flags")
       %tuple.6 : py.Value = py.mkTuple(%clo.7, %str.7)
       %kwargs.6 : py.Value = py.mkKwargs
       %Flags.0 : py.Value = py.call(%__build_class__.6, %tuple.6, %kwargs.6) ^propagate.0()
       %Flags.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "Flags")
       %set.14 : base.Unit = base.refSet[py.Value](%Flags.cell.0, %Flags.0)
-      %clo.8 : py.Value = py.mkClosure[[]](@m_shape_bindings.outer)
+      %clo.8 : py.Value = py.mkClosure[[]](@m_shape_bindings.outer, "outer", "m_shape_bindings")
       %outer.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_bindings", "outer")
       %set.15 : base.Unit = base.refSet[py.Value](%outer.cell.0, %clo.8)
       %__build_class__.7 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.9 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Rejected.<body>|)
+      %clo.9 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Rejected.<body>|, "Rejected", "m_shape_bindings")
       %str.8 : py.Value = py.strLit("Rejected")
       %tuple.7 : py.Value = py.mkTuple(%clo.9, %str.8)
       %kwargs.7 : py.Value = py.mkKwargs
@@ -271,7 +271,7 @@ module m_shape_bindings {
     join.3(%__annotations__.5 : py.Value):
       %str.15 : py.Value = py.strLit("sku")
       %store.4 : base.Unit = py.setItem(%__annotations__.5, %str.15, %str.13) ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@m_shape_bindings.Product.total)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_shape_bindings.Product.total, "total", "m_shape_bindings")
       %str.16 : py.Value = py.strLit("total")
       %store.5 : base.Unit = py.setItem(%ns.0, %str.16, %clo.0) ^propagate.0()
       %none.0 : py.Value = py.noneLit
@@ -484,7 +484,7 @@ module m_shape_bindings {
       jump ^deleted.0()
     undefined.0(%exc.4 : py.Value):
       %err.0 : py.Value = py.undef("err")
-      %err.1 : py.Value = py.requireDefined(%err.0, "NameError", "name 'err' is not defined") ^propagate.0()
+      %err.1 : py.Value = py.requireDefined(%err.0, "err", "NameError", "name 'err' is not defined") ^propagate.0()
       unreachable
     deleted.0():
       jump ^join.7()
@@ -499,7 +499,7 @@ module m_shape_bindings {
       jump ^deleted.2()
     undefined.2(%exc.8 : py.Value):
       %k.0 : py.Value = py.undef("k")
-      %k.1 : py.Value = py.requireDefined(%k.0, "NameError", "name 'k' is not defined") ^propagate.0()
+      %k.1 : py.Value = py.requireDefined(%k.0, "k", "NameError", "name 'k' is not defined") ^propagate.0()
       unreachable
     deleted.2():
       %int.13 : py.Value = py.intLit(4)
@@ -578,7 +578,7 @@ module m_shape_bindings {
       %str.44 : py.Value = py.strLit("q")
       %store.25 : base.Unit = py.setItem(%ns.0, %str.44, %sub.0) ^propagate.0()
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Kinds.Inner.<body>|)
+      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Kinds.Inner.<body>|, "Inner", "m_shape_bindings")
       %str.45 : py.Value = py.strLit("Inner")
       %tuple.5 : py.Value = py.mkTuple(%clo.0, %str.45)
       %kwargs.5 : py.Value = py.mkKwargs
@@ -727,7 +727,7 @@ module m_shape_bindings {
       %str.29 : py.Value = py.strLit("lk")
       %store.22 : base.Unit = py.setItem(%ns.0, %str.29, %int.18) ^propagate.0()
       %b.default.0 : base.Ref(py.Value) = base.refNew[py.Value](%int.18)
-      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@|m_shape_bindings.Walrus.<lambda>|, %a.default.0, %b.default.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@|m_shape_bindings.Walrus.<lambda>|, "<lambda>", "m_shape_bindings", %a.default.0, %b.default.0)
       %str.30 : py.Value = py.strLit("lam")
       %store.23 : base.Unit = py.setItem(%ns.0, %str.30, %clo.0) ^propagate.0()
       %int.19 : py.Value = py.intLit(1)
@@ -837,7 +837,7 @@ module m_shape_bindings {
     join.5(%bool.1 : py.Value):
       %str.54 : py.Value = py.strLit("sc")
       %store.45 : base.Unit = py.setItem(%ns.0, %str.54, %bool.1) ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Walrus.<lambda>.1|)
+      %clo.1 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Walrus.<lambda>.1|, "<lambda>", "m_shape_bindings")
       %str.55 : py.Value = py.strLit("dec")
       %store.46 : base.Unit = py.setItem(%ns.0, %str.55, %clo.1) ^propagate.0()
       %int.34 : py.Value = py.intLit(1)
@@ -856,7 +856,7 @@ module m_shape_bindings {
     join.7(%int.38 : py.Value):
       %str.59 : py.Value = py.strLit("ra")
       %store.48 : base.Unit = py.setItem(%ns.0, %str.59, %int.38) ^propagate.0()
-      %clo.2 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_shape_bindings.Walrus.m, %v.default.0)
+      %clo.2 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@m_shape_bindings.Walrus.m, "m", "m_shape_bindings", %v.default.0)
       %annotations.0 : py.Value = py.mkDict(%str.57, %int.38) ^propagate.0()
       %__annotations__.0 : base.Unit = py.setAttr(%clo.2, "__annotations__", %annotations.0) ^propagate.0()
       %args.3 : py.Value = py.mkTuple(%clo.2)
@@ -865,7 +865,7 @@ module m_shape_bindings {
       %str.60 : py.Value = py.strLit("m")
       %store.49 : base.Unit = py.setItem(%ns.0, %str.60, %decorated.0) ^propagate.0()
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.3 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Walrus.Inner.<body>|)
+      %clo.3 : py.Value = py.mkClosure[[]](@|m_shape_bindings.Walrus.Inner.<body>|, "Inner", "m_shape_bindings")
       %str.61 : py.Value = py.strLit("Inner")
       %str.62 : py.Value = py.strLit("object")
       %object.0 : py.Value = py.undef("object")
@@ -1028,7 +1028,7 @@ module m_shape_bindings {
       jump ^deleted.0()
     undefined.0(%exc.2 : py.Value):
       %err.0 : py.Value = py.undef("err")
-      %err.1 : py.Value = py.requireDefined(%err.0, "NameError", "name 'err' is not defined") ^propagate.0()
+      %err.1 : py.Value = py.requireDefined(%err.0, "err", "NameError", "name 'err' is not defined") ^propagate.0()
       unreachable
     deleted.0():
       jump ^join.1()
@@ -1041,7 +1041,7 @@ module m_shape_bindings {
       jump ^deleted.1()
     undefined.1(%exc.4 : py.Value):
       %err.2 : py.Value = py.undef("err")
-      %err.3 : py.Value = py.requireDefined(%err.2, "NameError", "name 'err' is not defined") ^unwind.0()
+      %err.3 : py.Value = py.requireDefined(%err.2, "err", "NameError", "name 'err' is not defined") ^unwind.0()
       unreachable
     deleted.1():
       jump ^unwind.0(%exc.3)
@@ -1159,12 +1159,12 @@ module m_shape_bindings {
       %int.0 : py.Value = py.intLit(0)
       %set.0 : base.Unit = base.refSet[py.Value](%v.cell.0, %int.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|m_shape_bindings.outer.Uses.<body>|, %v.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|m_shape_bindings.outer.Uses.<body>|, "Uses", "m_shape_bindings", %v.cell.0)
       %str.0 : py.Value = py.strLit("Uses")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.0)
       %kwargs.1 : py.Value = py.mkKwargs
       %Uses.1 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.1) ^propagate.0()
-      %Uses.3 : py.Value = py.requireDefined(%Uses.1, "UnboundLocalError", "cannot access local variable 'Uses' where it is not associated with a value") ^propagate.0()
+      %Uses.3 : py.Value = py.requireDefined(%Uses.1, "Uses", "UnboundLocalError", "cannot access local variable 'Uses' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%Uses.3)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -1273,7 +1273,7 @@ module m_shape_bindings {
       %defaults.0 : py.Value = py.mkTuple(%g.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "g") ^propagate.0()
       %g.2 : py.Value = py.tupleGet(%bound.0, 0)
-      %g.4 : py.Value = py.requireDefined(%g.2, "UnboundLocalError", "cannot access local variable 'g' where it is not associated with a value") ^propagate.0()
+      %g.4 : py.Value = py.requireDefined(%g.2, "g", "UnboundLocalError", "cannot access local variable 'g' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%g.4)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):

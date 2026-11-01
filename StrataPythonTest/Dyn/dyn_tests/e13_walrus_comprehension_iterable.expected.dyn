@@ -8,7 +8,7 @@ module e13_walrus_comprehension_iterable {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("e13_walrus_comprehension_iterable", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@e13_walrus_comprehension_iterable.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@e13_walrus_comprehension_iterable.f, "f", "e13_walrus_comprehension_iterable")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("e13_walrus_comprehension_iterable", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -35,7 +35,7 @@ module e13_walrus_comprehension_iterable {
           %append.0 : base.Unit = py.compAppend(%out.0) ^propagate.1() {
             elt.0():
               %x.2 : py.Value = base.refGet[py.Value](%x.cell.1)
-              %x.3 : py.Value = py.requireDefined(%x.2, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.2()
+              %x.3 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.2()
               %ok.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.3)
               ret(%ok.0)
             propagate.2(%exc.0 : py.Value):

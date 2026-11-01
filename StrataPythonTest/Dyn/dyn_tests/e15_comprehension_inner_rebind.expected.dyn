@@ -8,7 +8,7 @@ module e15_comprehension_inner_rebind {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("e15_comprehension_inner_rebind", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@e15_comprehension_inner_rebind.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@e15_comprehension_inner_rebind.f, "f", "e15_comprehension_inner_rebind")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("e15_comprehension_inner_rebind", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -29,7 +29,7 @@ module e15_comprehension_inner_rebind {
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
-      %xs.4 : py.Value = py.requireDefined(%xs.3, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %i.1 : py.Value = py.undef("i")
       %i.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%i.1)
       %list.0 : py.Value = py.listComp(%xs.4) ^propagate.0() {
@@ -38,7 +38,7 @@ module e15_comprehension_inner_rebind {
           %if.0 : base.Unit = py.compIf ^propagate.1() {
             cond.0():
               %i.2 : py.Value = base.refGet[py.Value](%i.cell.1)
-              %i.3 : py.Value = py.requireDefined(%i.2, "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.2()
+              %i.3 : py.Value = py.requireDefined(%i.2, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.2()
               %set.2 : base.Unit = base.refSet[py.Value](%j.cell.0, %i.3)
               %cond.0 : base.Bool = py.truthy(%i.3) ^propagate.2()
               branch(%cond.0) ^true.0() ^false.0()
@@ -54,14 +54,14 @@ module e15_comprehension_inner_rebind {
           } {
             then.0():
               %xs.5 : py.Value = base.refGet[py.Value](%xs.cell.0)
-              %xs.6 : py.Value = py.requireDefined(%xs.5, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.3()
+              %xs.6 : py.Value = py.requireDefined(%xs.5, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.3()
               %for.0 : base.Unit = py.compFor(%xs.6) ^propagate.3() {
                 each.1(%item.1 : py.Value):
                   %set.3 : base.Unit = base.refSet[py.Value](%j.cell.0, %item.1)
                   %append.0 : base.Unit = py.compAppend(%out.0) ^propagate.4() {
                     elt.0():
                       %i.4 : py.Value = base.refGet[py.Value](%i.cell.1)
-                      %i.5 : py.Value = py.requireDefined(%i.4, "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.5()
+                      %i.5 : py.Value = py.requireDefined(%i.4, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.5()
                       %ok.2 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%i.5)
                       ret(%ok.2)
                     propagate.5(%exc.2 : py.Value):

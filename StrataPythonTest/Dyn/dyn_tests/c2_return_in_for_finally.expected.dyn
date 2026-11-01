@@ -7,10 +7,10 @@ module c2_return_in_for_finally {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("c2_return_in_for_finally", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@c2_return_in_for_finally.cleanup)
+      %clo.0 : py.Value = py.mkClosure[[]](@c2_return_in_for_finally.cleanup, "cleanup", "c2_return_in_for_finally")
       %cleanup.cell.0 : base.Ref(py.Value) = py.globalCell("c2_return_in_for_finally", "cleanup")
       %set.2 : base.Unit = base.refSet[py.Value](%cleanup.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@c2_return_in_for_finally.f)
+      %clo.1 : py.Value = py.mkClosure[[]](@c2_return_in_for_finally.f, "f", "c2_return_in_for_finally")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("c2_return_in_for_finally", "f")
       %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.1)
       %none.1 : py.Value = py.noneLit
@@ -40,14 +40,14 @@ module c2_return_in_for_finally {
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%xs.cell.0, %xs.2)
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
-      %xs.4 : py.Value = py.requireDefined(%xs.3, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^finRaise.0()
+      %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^finRaise.0()
       %iter.0 : py.Value = py.getIter(%xs.4) ^finRaise.0()
       jump ^head.0()
     head.0():
       %item.0 : py.Value = py.next(%iter.0) ^stop.0()
       %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %item.0)
       %x.1 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.2 : py.Value = py.requireDefined(%x.1, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^finRaise.0()
+      %x.2 : py.Value = py.requireDefined(%x.1, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^finRaise.0()
       %comp.0 : py.Completion = py.completionReturn(%x.2)
       jump ^fin.0(%comp.0)
     stop.0(%exc.0 : py.Value):

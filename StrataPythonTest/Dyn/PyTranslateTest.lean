@@ -159,7 +159,7 @@ private def binding : Result := translate "m" #[bindingDef]
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@m.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@m.f, "f", "m")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("m", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -204,7 +204,7 @@ private def binding : Result := translate "m" #[bindingDef]
       %kw.1 : py.Value = py.tupleGet(%bound.0, 6)
       %set.6 : base.Unit = base.refSet[py.Value](%kw.cell.0, %kw.1)
       %a.3 : py.Value = base.refGet[py.Value](%a.cell.0)
-      %a.4 : py.Value = py.requireDefined(%a.3, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %a.4 : py.Value = py.requireDefined(%a.3, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%a.4)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):

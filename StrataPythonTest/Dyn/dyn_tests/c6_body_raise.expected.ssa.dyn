@@ -7,10 +7,10 @@ module c6_body_raise {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("c6_body_raise", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@c6_body_raise.boom)
+      %clo.0 : py.Value = py.mkClosure[[]](@c6_body_raise.boom, "boom", "c6_body_raise")
       %boom.cell.0 : base.Ref(py.Value) = py.globalCell("c6_body_raise", "boom")
       %set.2 : base.Unit = base.refSet[py.Value](%boom.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@c6_body_raise.f)
+      %clo.1 : py.Value = py.mkClosure[[]](@c6_body_raise.f, "f", "c6_body_raise")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("c6_body_raise", "f")
       %set.3 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.1)
       %none.1 : py.Value = py.noneLit
@@ -42,7 +42,7 @@ module c6_body_raise {
       %defaults.0 : py.Value = py.mkTuple(%xs.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "xs") ^propagate.0()
       %xs.2 : py.Value = py.tupleGet(%bound.0, 0)
-      %xs.4 : py.Value = py.requireDefined(%xs.2, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %xs.4 : py.Value = py.requireDefined(%xs.2, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %iter.0 : py.Value = py.getIter(%xs.4) ^propagate.0()
       jump ^head.0()
     head.0():

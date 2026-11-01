@@ -5,14 +5,14 @@ module special_method_returns {
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("special_method_returns", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@|special_method_returns.Money.<body>|)
+      %clo.0 : py.Value = py.mkClosure[[]](@|special_method_returns.Money.<body>|, "<body>", "special_method_returns")
       %str.1 : py.Value = py.strLit("Money")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs
       %Money.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
       %Money.cell.0 : base.Ref(py.Value) = py.globalCell("special_method_returns", "Money")
       %set.1 : base.Unit = base.refSet[py.Value](%Money.cell.0, %Money.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@special_method_returns.__getattr__)
+      %clo.1 : py.Value = py.mkClosure[[]](@special_method_returns.__getattr__, "__getattr__", "special_method_returns")
       %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("special_method_returns", "__getattr__")
       %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
       %none.0 : py.Value = py.noneLit
@@ -48,7 +48,7 @@ module special_method_returns {
         %self.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "self", %undef.2)
         %Money.cell.0 : base.Ref(py.Value) = py.globalCell("special_method_returns", "Money")
         %Money.0 : py.Value = base.refGet[py.Value](%Money.cell.0)
-        %Money.1 : py.Value = py.requireDefined(%Money.0, "NameError", "name 'Money' is not defined") ^fail.3()
+        %Money.1 : py.Value = py.requireDefined(%Money.0, "Money", "NameError", "name 'Money' is not defined") ^fail.3()
         %sub.0 : base.Bool = py.typeIsSubclass(%self.1, %Money.1) ^fail.3()
         ret(%sub.0)
       fail.3(%e.1 : py.Value):
@@ -77,7 +77,7 @@ module special_method_returns {
       ok.0(%result.0 : py.Value):
         %Money.cell.1 : base.Ref(py.Value) = py.globalCell("special_method_returns", "Money")
         %Money.2 : py.Value = base.refGet[py.Value](%Money.cell.1)
-        %Money.3 : py.Value = py.requireDefined(%Money.2, "NameError", "name 'Money' is not defined") ^fail.5()
+        %Money.3 : py.Value = py.requireDefined(%Money.2, "Money", "NameError", "name 'Money' is not defined") ^fail.5()
         %sub.2 : base.Bool = py.typeIsSubclass(%result.0, %Money.3) ^fail.5()
         branch(%sub.2) ^then.1() ^else.1()
       then.1():
@@ -139,7 +139,7 @@ module special_method_returns {
         %self.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "self", %undef.2)
         %Money.cell.0 : base.Ref(py.Value) = py.globalCell("special_method_returns", "Money")
         %Money.0 : py.Value = base.refGet[py.Value](%Money.cell.0)
-        %Money.1 : py.Value = py.requireDefined(%Money.0, "NameError", "name 'Money' is not defined") ^fail.3()
+        %Money.1 : py.Value = py.requireDefined(%Money.0, "Money", "NameError", "name 'Money' is not defined") ^fail.3()
         %sub.0 : base.Bool = py.typeIsSubclass(%self.1, %Money.1) ^fail.3()
         ret(%sub.0)
       fail.3(%e.1 : py.Value):
@@ -214,7 +214,7 @@ module special_method_returns {
         %self.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "self", %undef.1)
         %Money.cell.0 : base.Ref(py.Value) = py.globalCell("special_method_returns", "Money")
         %Money.0 : py.Value = base.refGet[py.Value](%Money.cell.0)
-        %Money.1 : py.Value = py.requireDefined(%Money.0, "NameError", "name 'Money' is not defined") ^fail.2()
+        %Money.1 : py.Value = py.requireDefined(%Money.0, "Money", "NameError", "name 'Money' is not defined") ^fail.2()
         %sub.0 : base.Bool = py.typeIsSubclass(%self.1, %Money.1) ^fail.2()
         ret(%sub.0)
       fail.2(%e.1 : py.Value):
@@ -272,7 +272,7 @@ module special_method_returns {
         %self.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "self", %undef.1)
         %Money.cell.0 : base.Ref(py.Value) = py.globalCell("special_method_returns", "Money")
         %Money.0 : py.Value = base.refGet[py.Value](%Money.cell.0)
-        %Money.1 : py.Value = py.requireDefined(%Money.0, "NameError", "name 'Money' is not defined") ^fail.2()
+        %Money.1 : py.Value = py.requireDefined(%Money.0, "Money", "NameError", "name 'Money' is not defined") ^fail.2()
         %sub.0 : base.Bool = py.typeIsSubclass(%self.1, %Money.1) ^fail.2()
         ret(%sub.0)
       fail.2(%e.1 : py.Value):
@@ -284,7 +284,7 @@ module special_method_returns {
       ok.0(%result.0 : py.Value):
         %Money.cell.1 : base.Ref(py.Value) = py.globalCell("special_method_returns", "Money")
         %Money.2 : py.Value = base.refGet[py.Value](%Money.cell.1)
-        %Money.3 : py.Value = py.requireDefined(%Money.2, "NameError", "name 'Money' is not defined") ^fail.3()
+        %Money.3 : py.Value = py.requireDefined(%Money.2, "Money", "NameError", "name 'Money' is not defined") ^fail.3()
         %sub.1 : base.Bool = py.typeIsSubclass(%result.0, %Money.3) ^fail.3()
         branch(%sub.1) ^then.0() ^else.0()
       then.0():
@@ -326,7 +326,7 @@ module special_method_returns {
         %self.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "self", %undef.1)
         %Money.cell.0 : base.Ref(py.Value) = py.globalCell("special_method_returns", "Money")
         %Money.0 : py.Value = base.refGet[py.Value](%Money.cell.0)
-        %Money.1 : py.Value = py.requireDefined(%Money.0, "NameError", "name 'Money' is not defined") ^fail.1()
+        %Money.1 : py.Value = py.requireDefined(%Money.0, "Money", "NameError", "name 'Money' is not defined") ^fail.1()
         %sub.0 : base.Bool = py.typeIsSubclass(%self.1, %Money.1) ^fail.1()
         ret(%sub.0)
       fail.1(%e.1 : py.Value):
@@ -372,22 +372,22 @@ module special_method_returns {
       %str.1 : py.Value = py.strLit("Money")
       %str.2 : py.Value = py.strLit("__qualname__")
       %store.1 : base.Unit = py.setItem(%ns.0, %str.2, %str.1) ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@special_method_returns.Money.__init__)
+      %clo.0 : py.Value = py.mkClosure[[]](@special_method_returns.Money.__init__, "__init__", "special_method_returns")
       %str.3 : py.Value = py.strLit("__init__")
       %store.2 : base.Unit = py.setItem(%ns.0, %str.3, %clo.0) ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure[[]](@special_method_returns.Money.__getattr__)
+      %clo.1 : py.Value = py.mkClosure[[]](@special_method_returns.Money.__getattr__, "__getattr__", "special_method_returns")
       %str.4 : py.Value = py.strLit("__getattr__")
       %store.3 : base.Unit = py.setItem(%ns.0, %str.4, %clo.1) ^propagate.0()
-      %clo.2 : py.Value = py.mkClosure[[]](@special_method_returns.Money.__add__)
+      %clo.2 : py.Value = py.mkClosure[[]](@special_method_returns.Money.__add__, "__add__", "special_method_returns")
       %str.5 : py.Value = py.strLit("__add__")
       %store.4 : base.Unit = py.setItem(%ns.0, %str.5, %clo.2) ^propagate.0()
-      %clo.3 : py.Value = py.mkClosure[[]](@special_method_returns.Money.__eq__)
+      %clo.3 : py.Value = py.mkClosure[[]](@special_method_returns.Money.__eq__, "__eq__", "special_method_returns")
       %str.6 : py.Value = py.strLit("__eq__")
       %store.5 : base.Unit = py.setItem(%ns.0, %str.6, %clo.3) ^propagate.0()
-      %clo.4 : py.Value = py.mkClosure[[]](@special_method_returns.Money.__length_hint__)
+      %clo.4 : py.Value = py.mkClosure[[]](@special_method_returns.Money.__length_hint__, "__length_hint__", "special_method_returns")
       %str.7 : py.Value = py.strLit("__length_hint__")
       %store.6 : base.Unit = py.setItem(%ns.0, %str.7, %clo.4) ^propagate.0()
-      %clo.5 : py.Value = py.mkClosure[[]](@special_method_returns.Money.doubled)
+      %clo.5 : py.Value = py.mkClosure[[]](@special_method_returns.Money.doubled, "doubled", "special_method_returns")
       %str.8 : py.Value = py.strLit("doubled")
       %store.7 : base.Unit = py.setItem(%ns.0, %str.8, %clo.5) ^propagate.0()
       %none.0 : py.Value = py.noneLit

@@ -11,7 +11,7 @@ module t24_assert {
       %int.0 : py.Value = py.loadGlobal("t24_assert", "int") ^propagate.0()
       %str.2 : py.Value = py.strLit("return")
       %none.1 : py.Value = py.noneLit
-      %clo.0 : py.Value = py.mkClosure[[]](@t24_assert.validate)
+      %clo.0 : py.Value = py.mkClosure[[]](@t24_assert.validate, "validate", "t24_assert")
       %annotations.0 : py.Value = py.mkDict(%str.1, %int.0, %str.2, %none.1) ^propagate.0()
       %__annotations__.0 : base.Unit = py.setAttr(%clo.0, "__annotations__", %annotations.0) ^propagate.0()
       %validate.cell.0 : base.Ref(py.Value) = py.globalCell("t24_assert", "validate")
@@ -22,7 +22,7 @@ module t24_assert {
       %int.2 : py.Value = py.loadGlobal("t24_assert", "int") ^propagate.0()
       %str.5 : py.Value = py.strLit("return")
       %none.2 : py.Value = py.noneLit
-      %clo.1 : py.Value = py.mkClosure[[]](@t24_assert.check_bounds)
+      %clo.1 : py.Value = py.mkClosure[[]](@t24_assert.check_bounds, "check_bounds", "t24_assert")
       %annotations.1 : py.Value = py.mkDict(%str.3, %int.1, %str.4, %int.2, %str.5, %none.2) ^propagate.0()
       %__annotations__.1 : base.Unit = py.setAttr(%clo.1, "__annotations__", %annotations.1) ^propagate.0()
       %check_bounds.cell.0 : base.Ref(py.Value) = py.globalCell("t24_assert", "check_bounds")
@@ -44,7 +44,7 @@ module t24_assert {
       %defaults.0 : py.Value = py.mkTuple(%x.1)
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 1, false, false, "x") ^propagate.0()
       %x.2 : py.Value = py.tupleGet(%bound.0, 0)
-      %x.4 : py.Value = py.requireDefined(%x.2, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(0)
       %gt.0 : py.Value = py.gt(%x.4, %int.0) ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%gt.0) ^propagate.0()
@@ -59,7 +59,7 @@ module t24_assert {
       jump ^propagate.0(%exc.0)
     ok.0():
       %isinstance.0 : py.Value = py.loadGlobal("t24_assert", "isinstance") ^propagate.0()
-      %x.6 : py.Value = py.requireDefined(%x.2, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.6 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %int.1 : py.Value = py.loadGlobal("t24_assert", "int") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%x.6, %int.1)
       %kwargs.2 : py.Value = py.mkKwargs
@@ -71,10 +71,10 @@ module t24_assert {
       %exc.1 : py.Value = py.toException(%AssertionError.1) ^propagate.0()
       jump ^propagate.0(%exc.1)
     ok.1():
-      %x.8 : py.Value = py.requireDefined(%x.2, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.8 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %int.2 : py.Value = py.intLit(2)
       %mult.0 : py.Value = py.mult(%x.8, %int.2) ^propagate.0()
-      %result.2 : py.Value = py.requireDefined(%mult.0, "UnboundLocalError", "cannot access local variable 'result' where it is not associated with a value") ^propagate.0()
+      %result.2 : py.Value = py.requireDefined(%mult.0, "result", "UnboundLocalError", "cannot access local variable 'result' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%result.2)
       ret(%ret.0)
     propagate.0(%exc.2 : py.Value):
@@ -93,8 +93,8 @@ module t24_assert {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "lo", "hi") ^propagate.0()
       %lo.2 : py.Value = py.tupleGet(%bound.0, 0)
       %hi.2 : py.Value = py.tupleGet(%bound.0, 1)
-      %lo.4 : py.Value = py.requireDefined(%lo.2, "UnboundLocalError", "cannot access local variable 'lo' where it is not associated with a value") ^propagate.0()
-      %hi.4 : py.Value = py.requireDefined(%hi.2, "UnboundLocalError", "cannot access local variable 'hi' where it is not associated with a value") ^propagate.0()
+      %lo.4 : py.Value = py.requireDefined(%lo.2, "lo", "UnboundLocalError", "cannot access local variable 'lo' where it is not associated with a value") ^propagate.0()
+      %hi.4 : py.Value = py.requireDefined(%hi.2, "hi", "UnboundLocalError", "cannot access local variable 'hi' where it is not associated with a value") ^propagate.0()
       %lt.0 : py.Value = py.lt(%lo.4, %hi.4) ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%lt.0) ^propagate.0()
       branch(%cond.0) ^ok.0() ^fail.0()
@@ -103,7 +103,7 @@ module t24_assert {
       %exc.0 : py.Value = py.toException(%AssertionError.0) ^propagate.0()
       jump ^propagate.0(%exc.0)
     ok.0():
-      %lo.6 : py.Value = py.requireDefined(%lo.2, "UnboundLocalError", "cannot access local variable 'lo' where it is not associated with a value") ^propagate.0()
+      %lo.6 : py.Value = py.requireDefined(%lo.2, "lo", "UnboundLocalError", "cannot access local variable 'lo' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(0)
       %gtE.0 : py.Value = py.gtE(%lo.6, %int.0) ^propagate.0()
       %cond.1 : base.Bool = py.truthy(%gtE.0) ^propagate.0()
@@ -111,7 +111,7 @@ module t24_assert {
     fail.1():
       %AssertionError.1 : py.Value = py.assertionError
       %str.0 : py.Value = py.strLit("lo must be non-negative, got ")
-      %lo.8 : py.Value = py.requireDefined(%lo.2, "UnboundLocalError", "cannot access local variable 'lo' where it is not associated with a value") ^propagate.0()
+      %lo.8 : py.Value = py.requireDefined(%lo.2, "lo", "UnboundLocalError", "cannot access local variable 'lo' where it is not associated with a value") ^propagate.0()
       %str.1 : py.Value = py.strLit("")
       %fmt.0 : py.Value = py.fmtValue(%lo.8, %str.1) ^propagate.0()
       %fstr.0 : py.Value = py.strConcat(%str.0, %fmt.0)

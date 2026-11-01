@@ -7,7 +7,7 @@ module m_params {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("m_params", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@m_params.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_params.f, "f", "m_params")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_params", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %f.0 : py.Value = py.loadGlobal("m_params", "f") ^propagate.0()
@@ -54,7 +54,7 @@ module m_params {
       %e.1 : py.Value = py.tupleGet(%bound.0, 4)
       %rest.1 : py.Value = py.tupleGet(%bound.0, 5)
       %kw.1 : py.Value = py.tupleGet(%bound.0, 6)
-      %a.4 : py.Value = py.requireDefined(%a.2, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%a.4)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):

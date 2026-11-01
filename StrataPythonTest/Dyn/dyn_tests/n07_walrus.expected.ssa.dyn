@@ -22,7 +22,7 @@ module n07_walrus {
         each.0(%out.0 : py.ListAcc, %item.0 : py.Value):
           %if.0 : base.Unit = py.compIf ^propagate.1() {
             cond.0():
-              %x.2 : py.Value = py.requireDefined(%item.0, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.2()
+              %x.2 : py.Value = py.requireDefined(%item.0, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.2()
               %int.5 : py.Value = py.intLit(2)
               %mult.0 : py.Value = py.mult(%x.2, %int.5) ^propagate.2()
               %y.cell.0 : base.Ref(py.Value) = py.globalCell("n07_walrus", "y")

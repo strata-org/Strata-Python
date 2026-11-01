@@ -4,10 +4,10 @@ module frame_nested_item {
       %str.0 : py.Value = py.strLit("frame_nested_item")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("frame_nested_item", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@frame_nested_item.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@frame_nested_item.f, "f", "frame_nested_item")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("frame_nested_item", "f")
       %set.1 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@frame_nested_item.__getattr__)
+      %clo.1 : py.Value = py.mkClosure[[]](@frame_nested_item.__getattr__, "__getattr__", "frame_nested_item")
       %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("frame_nested_item", "__getattr__")
       %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
       %none.0 : py.Value = py.noneLit

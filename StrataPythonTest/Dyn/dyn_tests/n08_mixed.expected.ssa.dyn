@@ -16,7 +16,7 @@ module n08_mixed {
       %int.1 : py.Value = py.loadGlobal("n08_mixed", "int") ^propagate.0()
       %str.3 : py.Value = py.strLit("return")
       %int.2 : py.Value = py.loadGlobal("n08_mixed", "int") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@n08_mixed.sync_add)
+      %clo.0 : py.Value = py.mkClosure[[]](@n08_mixed.sync_add, "sync_add", "n08_mixed")
       %annotations.0 : py.Value = py.mkDict(%str.1, %int.0, %str.2, %int.1, %str.3, %int.2) ^propagate.0()
       %__annotations__.0 : base.Unit = py.setAttr(%clo.0, "__annotations__", %annotations.0) ^propagate.0()
       %sync_add.cell.0 : base.Ref(py.Value) = py.globalCell("n08_mixed", "sync_add")
@@ -25,7 +25,7 @@ module n08_mixed {
       %str.5 : py.Value = py.loadGlobal("n08_mixed", "str") ^propagate.0()
       %str.6 : py.Value = py.strLit("return")
       %str.7 : py.Value = py.loadGlobal("n08_mixed", "str") ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure[[]](@n08_mixed.async_fetch)
+      %clo.1 : py.Value = py.mkClosure[[]](@n08_mixed.async_fetch, "async_fetch", "n08_mixed")
       %annotations.1 : py.Value = py.mkDict(%str.4, %str.5, %str.6, %str.7) ^propagate.0()
       %__annotations__.1 : base.Unit = py.setAttr(%clo.1, "__annotations__", %annotations.1) ^propagate.0()
       %async_fetch.cell.0 : base.Ref(py.Value) = py.globalCell("n08_mixed", "async_fetch")
@@ -43,7 +43,7 @@ module n08_mixed {
         each.0(%out.0 : py.ListAcc, %item.0 : py.Value):
           %append.0 : base.Unit = py.compAppend(%out.0) ^propagate.1() {
             elt.0():
-              %x.2 : py.Value = py.requireDefined(%item.0, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.2()
+              %x.2 : py.Value = py.requireDefined(%item.0, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.2()
               %int.6 : py.Value = py.intLit(2)
               %mult.0 : py.Value = py.mult(%x.2, %int.6) ^propagate.2()
               %ok.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%mult.0)
@@ -88,8 +88,8 @@ module n08_mixed {
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, 0, 2, false, false, "a", "b") ^propagate.0()
       %a.2 : py.Value = py.tupleGet(%bound.0, 0)
       %b.2 : py.Value = py.tupleGet(%bound.0, 1)
-      %a.4 : py.Value = py.requireDefined(%a.2, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
-      %b.4 : py.Value = py.requireDefined(%b.2, "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
+      %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %b.4 : py.Value = py.requireDefined(%b.2, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
       %add.0 : py.Value = py.add(%a.4, %b.4) ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%add.0)
       ret(%ret.0)

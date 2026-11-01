@@ -363,11 +363,12 @@ def place (name : String) : TransM Place := do
     | none => return .unresolved
   | some .globalExplicit | some .globalImplicit | none => return .global
 
-/-- `py.requireDefined v excType msg`. -/
+/-- `py.requireDefined v name excType msg`. -/
 def requireDefined (v : ValId) (name excType msg : String) : TransM ValId := do
+  let n ← build (emitConst (.str .base "name") (.str name))
   let e ← build (emitConst (.str .base "e") (.str excType))
   let m ← build (emitConst (.str .base "msg") (.str msg))
-  build (emitFailing (stem name) Py.requireDefined.ref #[v, e, m])
+  build (emitFailing (stem name) Py.requireDefined.ref #[v, n, e, m])
 
 /-- Read the local `name`'s cell `c`, raising `UnboundLocalError` if it is unassigned. -/
 def readLocal (c : ValId) (name : String) : TransM ValId := do
@@ -877,7 +878,8 @@ def queueFunc (sr : SourceRange) (scope : ScopeId) (cur : Scope)
   modify fun s => { s with pending := s.pending.push job }
   let params := (funcParams cur args).map (·.2)
   let cellTypes := (funcCells cur args).map (·.2)
-  some <$> build (mkClosure (← build (emitFunc fname params)) cellTypes (cells ++ extra))
+  some <$> build (mkClosure (← build (emitFunc fname params)) cellTypes (cells ++ extra) cur.name
+    (← read).module)
 
 /-- `f` with the decorators `decs`, already evaluated, applied bottom to top. -/
 def decorate (decs : Array ValId) (f : ValId) : TransM ValId := do

@@ -62,8 +62,9 @@ def octets (s : String) : Option (Array UInt8) :=
     | none => PyM.failure "py.bytesLit: operand assumption failed"
 
 @[dyn_sem Py.requireDefined]
-def requireDefined (v : Value) (excType msg : String) (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] (Proto.requireDefined (m := PyM σ .reads true) v excType msg)
+def requireDefined (v : Value) (name excType msg : String) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRuleFree err #[] (Proto.requireDefined (m := PyM σ .reads true) v name excType msg)
 
 @[dyn_sem Py.is_] def is_ (a b : Value) : Sem ε E Value :=
   runTotalFree "py.is" #[] ((Value.bool ·) <$> Proto.isOp (m := PyM σ .pure true) a b)

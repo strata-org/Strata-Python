@@ -7,7 +7,7 @@ module tc08_fstring {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("tc08_fstring", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@tc08_fstring.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@tc08_fstring.f, "f", "tc08_fstring")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("tc08_fstring", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -26,7 +26,7 @@ module tc08_fstring {
       %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %int.0)
       %str.0 : py.Value = py.strLit("value is ")
       %x.1 : py.Value = base.refGet[py.Value](%x.cell.0)
-      %x.2 : py.Value = py.requireDefined(%x.1, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %x.2 : py.Value = py.requireDefined(%x.1, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
       %str.1 : py.Value = py.strLit("")
       %fmt.0 : py.Value = py.fmtValue(%x.2, %str.1) ^propagate.0()
       %fstr.0 : py.Value = py.strConcat(%str.0, %fmt.0)

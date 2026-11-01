@@ -540,12 +540,12 @@ def translateClass (t : Table) (globals : Array String) (c : ModelClass) : ModM 
       let _ ← emitActing (nm "store") Py.setItem.ref #[ns, ← strLit n, v]
     store "__module__" (← loadGlobal c.module "__name__")
     store "__qualname__" (← strLit c.qualName)
-    unless hasInit do store "__init__" (← funcValue initName)
-    unless ownGetattr do store "__getattr__" (← funcValue getattrName)
+    unless hasInit do store "__init__" (← funcValue initName "__init__" c.module)
+    unless ownGetattr do store "__getattr__" (← funcValue getattrName "__getattr__" c.module)
     let mut known : Array String := #[]
     for (_, b) in bindings do
       match b with
-      | .func n => store n (← funcValue (qualified c.module (segs ++ [n])))
+      | .func n => store n (← funcValue (qualified c.module (segs ++ [n])) n c.module)
       | .field f => if let some mk := f.value.bind literalValue? then store f.name (← mk)
       | .classVar cv =>
         let v ← if known.contains cv.value then
@@ -556,7 +556,7 @@ def translateClass (t : Table) (globals : Array String) (c : ModelClass) : ModM 
         let inner := qualified c.module (segs ++ [s.name, "<body>"])
         let bc ← emitFailing (nm "__build_class__") Py.qualifiedRef.ref
           #[← emitConst (nm "m") (.str "builtins"), ← emitConst (nm "n") (.str "__build_class__")]
-        let clo ← funcValue inner
+        let clo ← funcValue inner "<body>" c.module
         let bases ← s.bases.mapM fun b => do match t.classOf? b with
           | some bc' => do
             let v ← requireGlobal bc'.module bc'.path[0]!
@@ -638,7 +638,7 @@ def moduleBody (t : Table) (m : ModelInput) : Except String {fn : Func Py.env In
         let c : ModelClass := { module, path := #[d.name], decl := d }
         let bc ← emitFailing (nm "__build_class__") Py.qualifiedRef.ref
           #[← emitConst (nm "m") (.str "builtins"), ← emitConst (nm "n") (.str "__build_class__")]
-        let clo ← funcValue (qualified module [d.name, "<body>"])
+        let clo ← funcValue (qualified module [d.name, "<body>"]) "<body>" module
         let bases ← d.bases.mapM fun b => do match t.classOf? b with
           | some bc' => readCell (← globalCell bc'.module bc'.path[0]!) (nm b.name)
           | none => emitFailing (nm b.name) Py.qualifiedRef.ref #[← emitConst (nm "m") (.str (toString b.pythonModule)), ← emitConst (nm "n") (.str b.name)]
@@ -646,10 +646,10 @@ def moduleBody (t : Table) (m : ModelInput) : Except String {fn : Func Py.env In
         let kw ← emitTotal (nm "kwargs") Py.mkKwargs.ref #[]
         let _ ← writeGlobal module d.name (← emitFailing (nm d.name) Py.call.ref #[bc, tup, kw])
       | .functionDecl f =>
-        let _ ← writeGlobal module f.name (← funcValue (qualified module [f.name]))
+        let _ ← writeGlobal module f.name (← funcValue (qualified module [f.name]) f.name module)
       | _ => pure ()
     unless m.definesGetattr do
-      let _ ← writeGlobal module "__getattr__" (← funcValue (qualified module ["__getattr__"]))
+      let _ ← writeGlobal module "__getattr__" (← funcValue (qualified module ["__getattr__"]) "__getattr__" module)
     emitReturnNone).mapError toString
 
 /-- The overload stubs of the name `n` in `m`, and its last non-overload declaration. -/

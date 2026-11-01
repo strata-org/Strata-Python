@@ -13,6 +13,7 @@ public import StrataPython.Dyn.Sem.Rules.Values
 public import StrataPython.Dyn.Sem.Rules.Ops
 public import StrataPython.Dyn.Sem.Rules.Containers
 public import StrataPython.Dyn.Sem.Rules.Globals
+public import StrataPython.Dyn.Sem.Rules.Closures
 public meta import StrataPython.Dyn.Env
 public meta import StrataDyn.DDM
 
@@ -31,8 +32,8 @@ Key definitions and theorems:
 * `pyAcct` and `pyAccounts`, where the machine's values and Python's world hold refs, and
   `pyCertLaws`, which says that their spec has the laws that the rule monad relies on;
 * `ImplOK.cert`, which turns a rule's `ImplOK` into its certificate;
-* `PySem.okOf.py.globalCell` and `PySem.certOf.py.globalCell`, the own proofs of the rule written
-  directly in `Sem`;
+* `PySem.okOf.py.globalCell`, `PySem.certOf.py.globalCell`, `PySem.okOf.py.mkClosure` and
+  `PySem.certOf.py.mkClosure`, the own proofs of the two rules written directly in `Sem`;
 * `PySem.certified`: Python's table is certified (`Model.Certified`), which ref-to-reg's soundness
   theorem takes.
 -/
@@ -297,6 +298,92 @@ theorem PySem.okOf.py.globalCell :
         rfl
       · exact ⟨Nat.le_refl _, fun _ _ _ h => h, Modules.extends_withCell _ _ _ _ _, rfl, rfl⟩
       · exact immEq_withCell h _ _ _ _
+
+/-- **`mkClosure` satisfies the machine's spec at Python's accounts**, for every state validity:
+it binds valid cells into a valid code pointer, reads the module's `__name__` cell, and allocates a
+function object whose closure is valid, so the store stays valid. -/
+theorem mkClosure_implOK (targs : Vector Ty PySem.impl.py.mkClosure.typeArgc)
+    (StOK : Typing → PySem.impl.py.mkClosure.St Run targs → Prop) :
+    pyAccounts.ImplOK StOK (PySem.impl.py.mkClosure.shape targs) (PySem.impl.py.mkClosure.fn Run targs) := by
+  dsimp only [PySem.impl.py.mkClosure, Accounts.ImplOK, Accounts.FnOK]
+  intro G a0 h0 a1 _ a2 _
+  refine pyAccounts.fnOK_ofPayload _ G _ _ fun vs hvs => ?_
+  dsimp only [Accounts.VarOK, Accounts.TreeOK, Rules.mkClosure]
+  letI : Decode Run := ⟨PySem.interp Run⟩
+  letI : Refs Run (Modules Run) := modulesRefs (pyTags Run).value
+  have hworld : ∀ (G : Typing) (w : World Run), (pyAccounts.spec [] [] StOK).World G w ↔
+      RefsOK (σ := Run) G w.store ∧ RefsOK (σ := Run) G w.modules := fun G w =>
+    Typing.allValid_append
+  -- The function object of a valid closure keeps the store valid.
+  have halloc : ∀ G₂ (g : FnRef Run [Value, Value] (Except Value Value)) m,
+      G₂.CapValid g.captured →
+      (pyAccounts.spec [] [] StOK).Sat (fun S₁ x => pyAccounts.ResOK S₁ (some PySem.T.py.Value) x) G₂
+        (modifyGetThe (ObjStore Run) fun st => (Value.obj st.size, (st.alloc (Rules.funcObj g a1 m)).fst)) := by
+    intro G₂ g m hg
+    rw [modifyGetThe_eq (ε := MEff (PySem.interp Run) Run (World Run) []) (P := ObjStore Run)]
+    refine Spec.sat_update.mpr fun w' hw' => ⟨(hworld G₂ _).mpr ⟨fun l hl => ?_, ((hworld G₂ w').mp hw').2⟩,
+      Spec.sat_ret.mpr (valOK_value _ _)⟩
+    change l ∈ Refs.refs (σ := Run) ((HasPart.get w' : ObjStore Run).alloc (Rules.funcObj g a1 m)).1 at hl
+    rw [refs_alloc, List.mem_append] at hl
+    rcases hl with hl | hl
+    · exact ((hworld G₂ w').mp hw').1 l hl
+    · exact refsOK_fn.mpr hg l hl
+  refine Accounts.bindAll_sat (s := _) pyAccounts StOK _ _ _ vs _ G ?_ hvs fun G₁ _ g hg => ?_
+  · have h' := pyAccounts.fn (targs[0].elems ++ [PySem.T.py.Value, PySem.T.py.Value])
+      (PySem.T.base.Except PySem.T.py.Value PySem.T.py.Value) a0
+    have hc := Typing.capValid_of_allValid ((congrArg G.AllValid h').mp h0)
+    simp only [RunModel.fnOf] at hc
+    exact (congrArg G.CapValid (Accounts.captured_cast
+      (Ty.decodeList_eq_map Run (PySem.H Run) (targs[0].elems ++ [PySem.T.py.Value, PySem.T.py.Value]))
+      rfl a0)).mp hc
+  · dsimp only [Rules.moduleName, bind, Sem.bind, Sem.bindAfter, getThe, MonadStateOf.get,
+      Sem.instMonadStateOf, pure]
+    refine Spec.sat_update.mpr fun w hw => ⟨hw, ?_⟩
+    dsimp only
+    split
+    · rename_i r hr
+      have hv := valid_of_cell? (pyTags Run).value ((hworld G₁ w).mp hw).2 hr
+      refine Spec.sat_vis.mpr ⟨hv, fun G₂ he _ _ => ?_⟩
+      simp only [Sem.bind]
+      split <;> exact halloc G₂ g _ (Typing.CapValid.mono he hg)
+    · exact halloc G₁ g _ hg
+
+/-- `mkClosure` stays within its declared effect: its binds change nothing that `Within` counts, and
+the function object that it allocates is new. -/
+theorem PySem.okOf.py.mkClosure :
+    ImplWithin PySem.interp (pyDeclaredEffect "py.mkClosure") PySem.impl.py.mkClosure := by
+  intro σ _ targs
+  letI : Decode σ := ⟨PySem.interp σ⟩
+  intro a0 a1 a2
+  refine FnAll_ofPayload _ _ _ fun vs => ?_
+  dsimp only [PySem.impl.py.mkClosure, VarAll, Rules.mkClosure, bind]
+  refine .inr fun s N => Strata.Dyn.Exec.Effects.bindAll_within (σ := σ) (s := _) _ s _ _ _ _ vs _ N
+    fun g => ?_
+  dsimp only [Rules.moduleName, bind, Sem.bind, Sem.bindAfter, getThe, MonadStateOf.get,
+    Sem.instMonadStateOf, pure]
+  have hne : pyDeclaredEffect "py.mkClosure" ≠ .pure := by decide
+  refine ⟨fun _ w => Same.refl s w, fun h => absurd h hne, fun w => ?_⟩
+  rw [Strata.Dyn.Exec.Effects.Within.after_eq]
+  dsimp only
+  split
+  · refine ⟨fun h => absurd h hne, fun v => ?_⟩
+    dsimp only [Sem.bind]
+    split
+    all_goals
+      simp only [modifyGetThe_eq]
+      exact ⟨fun _ w => same_allocObj s _ w,
+        fun _ _ _ h => ⟨immEq_allocObj _ h, congrArg (fun n => Sem.ret (Value.obj n)) h.1⟩,
+        fun _ => trivial⟩
+  · simp only [modifyGetThe_eq]
+    exact ⟨fun _ w => same_allocObj s _ w,
+      fun _ _ _ h => ⟨immEq_allocObj _ h, congrArg (fun n => Sem.ret (Value.obj n)) h.1⟩,
+      fun _ => trivial⟩
+
+/-- `mkClosure`'s certificate at Python's model. -/
+theorem PySem.certOf.py.mkClosure (k : Nat) :
+    PySem.model.OpCertified pyAccounts k PySem.impl.py.mkClosure := fun targs =>
+  mkClosure_implOK targs _
+
 end
 
 public section

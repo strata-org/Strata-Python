@@ -5,7 +5,7 @@ module inherited_init {
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("inherited_init", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@|inherited_init.B.<body>|)
+      %clo.0 : py.Value = py.mkClosure[[]](@|inherited_init.B.<body>|, "<body>", "inherited_init")
       %str.1 : py.Value = py.strLit("B")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs
@@ -13,7 +13,7 @@ module inherited_init {
       %B.cell.0 : base.Ref(py.Value) = py.globalCell("inherited_init", "B")
       %set.1 : base.Unit = base.refSet[py.Value](%B.cell.0, %B.0)
       %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure[[]](@|inherited_init.C.<body>|)
+      %clo.1 : py.Value = py.mkClosure[[]](@|inherited_init.C.<body>|, "<body>", "inherited_init")
       %B.cell.1 : base.Ref(py.Value) = py.globalCell("inherited_init", "B")
       %B.1 : py.Value = base.refGet[py.Value](%B.cell.1)
       %str.2 : py.Value = py.strLit("C")
@@ -22,7 +22,7 @@ module inherited_init {
       %C.0 : py.Value = py.call(%__build_class__.1, %tuple.1, %kwargs.1) ^propagate.0()
       %C.cell.0 : base.Ref(py.Value) = py.globalCell("inherited_init", "C")
       %set.2 : base.Unit = base.refSet[py.Value](%C.cell.0, %C.0)
-      %clo.2 : py.Value = py.mkClosure[[]](@inherited_init.__getattr__)
+      %clo.2 : py.Value = py.mkClosure[[]](@inherited_init.__getattr__, "__getattr__", "inherited_init")
       %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("inherited_init", "__getattr__")
       %set.3 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.2)
       %none.0 : py.Value = py.noneLit
@@ -58,7 +58,7 @@ module inherited_init {
         %self.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "self", %undef.2)
         %B.cell.0 : base.Ref(py.Value) = py.globalCell("inherited_init", "B")
         %B.0 : py.Value = base.refGet[py.Value](%B.cell.0)
-        %B.1 : py.Value = py.requireDefined(%B.0, "NameError", "name 'B' is not defined") ^fail.3()
+        %B.1 : py.Value = py.requireDefined(%B.0, "B", "NameError", "name 'B' is not defined") ^fail.3()
         %sub.0 : base.Bool = py.typeIsSubclass(%self.1, %B.1) ^fail.3()
         ret(%sub.0)
       fail.3(%e.1 : py.Value):
@@ -108,10 +108,10 @@ module inherited_init {
       %str.1 : py.Value = py.strLit("B")
       %str.2 : py.Value = py.strLit("__qualname__")
       %store.1 : base.Unit = py.setItem(%ns.0, %str.2, %str.1) ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@inherited_init.B.__getattr__)
+      %clo.0 : py.Value = py.mkClosure[[]](@inherited_init.B.__getattr__, "__getattr__", "inherited_init")
       %str.3 : py.Value = py.strLit("__getattr__")
       %store.2 : base.Unit = py.setItem(%ns.0, %str.3, %clo.0) ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure[[]](@inherited_init.B.__init__)
+      %clo.1 : py.Value = py.mkClosure[[]](@inherited_init.B.__init__, "__init__", "inherited_init")
       %str.4 : py.Value = py.strLit("__init__")
       %store.3 : base.Unit = py.setItem(%ns.0, %str.4, %clo.1) ^propagate.0()
       %none.0 : py.Value = py.noneLit
@@ -136,7 +136,7 @@ module inherited_init {
       %str.1 : py.Value = py.strLit("C")
       %str.2 : py.Value = py.strLit("__qualname__")
       %store.1 : base.Unit = py.setItem(%ns.0, %str.2, %str.1) ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@inherited_init.C.__getattr__)
+      %clo.0 : py.Value = py.mkClosure[[]](@inherited_init.C.__getattr__, "__getattr__", "inherited_init")
       %str.3 : py.Value = py.strLit("__getattr__")
       %store.2 : base.Unit = py.setItem(%ns.0, %str.3, %clo.0) ^propagate.0()
       %none.0 : py.Value = py.noneLit

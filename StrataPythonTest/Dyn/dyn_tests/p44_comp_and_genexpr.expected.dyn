@@ -8,7 +8,7 @@ module p44_comp_and_genexpr {
       %none.0 : py.Value = py.noneLit
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("p44_comp_and_genexpr", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@p44_comp_and_genexpr.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@p44_comp_and_genexpr.f, "f", "p44_comp_and_genexpr")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("p44_comp_and_genexpr", "f")
       %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
       %none.1 : py.Value = py.noneLit
@@ -36,7 +36,7 @@ module p44_comp_and_genexpr {
       %y.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%y.cell.0, %y.2)
       %xs.3 : py.Value = base.refGet[py.Value](%xs.cell.0)
-      %xs.4 : py.Value = py.requireDefined(%xs.3, "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
+      %xs.4 : py.Value = py.requireDefined(%xs.3, "xs", "UnboundLocalError", "cannot access local variable 'xs' where it is not associated with a value") ^propagate.0()
       %x.1 : py.Value = py.undef("x")
       %x.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%x.1)
       %list.0 : py.Value = py.listComp(%xs.4) ^propagate.0() {
@@ -45,9 +45,9 @@ module p44_comp_and_genexpr {
           %append.0 : base.Unit = py.compAppend(%out.0) ^propagate.1() {
             elt.0():
               %x.2 : py.Value = base.refGet[py.Value](%x.cell.1)
-              %x.3 : py.Value = py.requireDefined(%x.2, "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.2()
+              %x.3 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.2()
               %y.3 : py.Value = base.refGet[py.Value](%y.cell.0)
-              %y.4 : py.Value = py.requireDefined(%y.3, "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.2()
+              %y.4 : py.Value = py.requireDefined(%y.3, "y", "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.2()
               %add.0 : py.Value = py.add(%x.3, %y.4) ^propagate.2()
               %ok.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%add.0)
               ret(%ok.0)
@@ -67,9 +67,9 @@ module p44_comp_and_genexpr {
       %unsupported.0 : py.Value = py.unsupported(%str.0)
       %set.4 : base.Unit = base.refSet[py.Value](%b.cell.0, %unsupported.0)
       %a.1 : py.Value = base.refGet[py.Value](%a.cell.0)
-      %a.2 : py.Value = py.requireDefined(%a.1, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %a.2 : py.Value = py.requireDefined(%a.1, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %b.1 : py.Value = base.refGet[py.Value](%b.cell.0)
-      %b.2 : py.Value = py.requireDefined(%b.1, "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
+      %b.2 : py.Value = py.requireDefined(%b.1, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%a.2, %b.2)
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.0)
       ret(%ret.0)

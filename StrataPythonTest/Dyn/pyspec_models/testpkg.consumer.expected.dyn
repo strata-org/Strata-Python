@@ -4,10 +4,10 @@ module testpkg.consumer {
       %str.0 : py.Value = py.strLit("testpkg.consumer")
       %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("testpkg.consumer", "__name__")
       %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
-      %clo.0 : py.Value = py.mkClosure[[]](@testpkg.consumer.use_helper)
+      %clo.0 : py.Value = py.mkClosure[[]](@testpkg.consumer.use_helper, "use_helper", "testpkg.consumer")
       %use_helper.cell.0 : base.Ref(py.Value) = py.globalCell("testpkg.consumer", "use_helper")
       %set.1 : base.Unit = base.refSet[py.Value](%use_helper.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@testpkg.consumer.__getattr__)
+      %clo.1 : py.Value = py.mkClosure[[]](@testpkg.consumer.__getattr__, "__getattr__", "testpkg.consumer")
       %__getattr__.cell.0 : base.Ref(py.Value) = py.globalCell("testpkg.consumer", "__getattr__")
       %set.2 : base.Unit = base.refSet[py.Value](%__getattr__.cell.0, %clo.1)
       %none.0 : py.Value = py.noneLit
@@ -33,7 +33,7 @@ module testpkg.consumer {
         %h.1 : py.Value = py.argOf(%args.0, %kwargs.0, 0, "h", %undef.1)
         %HelperClass.cell.0 : base.Ref(py.Value) = py.globalCell("testpkg.helper", "HelperClass")
         %HelperClass.0 : py.Value = base.refGet[py.Value](%HelperClass.cell.0)
-        %HelperClass.1 : py.Value = py.requireDefined(%HelperClass.0, "NameError", "name 'HelperClass' is not defined") ^fail.2()
+        %HelperClass.1 : py.Value = py.requireDefined(%HelperClass.0, "HelperClass", "NameError", "name 'HelperClass' is not defined") ^fail.2()
         %sub.0 : base.Bool = py.typeIsSubclass(%h.1, %HelperClass.1) ^fail.2()
         branch(%sub.0) ^then.0() ^else.0()
       then.0():

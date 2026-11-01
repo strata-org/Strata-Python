@@ -19,19 +19,19 @@ module m_scope_nested {
       %int.3 : py.Value = py.intLit(3)
       %d.cell.0 : base.Ref(py.Value) = py.globalCell("m_scope_nested", "d")
       %set.5 : base.Unit = base.refSet[py.Value](%d.cell.0, %int.3)
-      %clo.0 : py.Value = py.mkClosure[[]](@m_scope_nested.f)
+      %clo.0 : py.Value = py.mkClosure[[]](@m_scope_nested.f, "f", "m_scope_nested")
       %f.cell.0 : base.Ref(py.Value) = py.globalCell("m_scope_nested", "f")
       %set.6 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
-      %clo.1 : py.Value = py.mkClosure[[]](@m_scope_nested.g)
+      %clo.1 : py.Value = py.mkClosure[[]](@m_scope_nested.g, "g", "m_scope_nested")
       %g.cell.0 : base.Ref(py.Value) = py.globalCell("m_scope_nested", "g")
       %set.7 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.1)
-      %clo.2 : py.Value = py.mkClosure[[]](@m_scope_nested.h)
+      %clo.2 : py.Value = py.mkClosure[[]](@m_scope_nested.h, "h", "m_scope_nested")
       %h.cell.0 : base.Ref(py.Value) = py.globalCell("m_scope_nested", "h")
       %set.8 : base.Unit = base.refSet[py.Value](%h.cell.0, %clo.2)
-      %clo.3 : py.Value = py.mkClosure[[]](@m_scope_nested.w)
+      %clo.3 : py.Value = py.mkClosure[[]](@m_scope_nested.w, "w", "m_scope_nested")
       %w.cell.0 : base.Ref(py.Value) = py.globalCell("m_scope_nested", "w")
       %set.9 : base.Unit = base.refSet[py.Value](%w.cell.0, %clo.3)
-      %clo.4 : py.Value = py.mkClosure[[]](@m_scope_nested.k)
+      %clo.4 : py.Value = py.mkClosure[[]](@m_scope_nested.k, "k", "m_scope_nested")
       %k.cell.0 : base.Ref(py.Value) = py.globalCell("m_scope_nested", "k")
       %set.10 : base.Unit = base.refSet[py.Value](%k.cell.0, %clo.4)
       %none.1 : py.Value = py.noneLit
@@ -58,32 +58,32 @@ module m_scope_nested {
       %b.2 : py.Value = py.tupleGet(%bound.0, 1)
       %c.13 : py.Value = py.tupleGet(%bound.0, 2)
       %d.2 : py.Value = py.tupleGet(%bound.0, 3)
-      %a.4 : py.Value = py.requireDefined(%a.2, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
-      %c.16 : py.Value = py.requireDefined(%c.13, "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
+      %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %c.16 : py.Value = py.requireDefined(%c.13, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%c.16) ^propagate.0()
       branch(%cond.0) ^then.0() ^else.0()
     then.0():
-      %b.4 : py.Value = py.requireDefined(%b.2, "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
+      %b.4 : py.Value = py.requireDefined(%b.2, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
       jump ^join.1(%b.4)
     else.0():
-      %d.4 : py.Value = py.requireDefined(%d.2, "UnboundLocalError", "cannot access local variable 'd' where it is not associated with a value") ^propagate.0()
+      %d.4 : py.Value = py.requireDefined(%d.2, "d", "UnboundLocalError", "cannot access local variable 'd' where it is not associated with a value") ^propagate.0()
       jump ^join.1(%d.4)
     join.1(%ifexp.0 : py.Value):
       %cond.1 : base.Bool = py.truthy(%ifexp.0) ^propagate.0()
       branch(%cond.1) ^join.0(%ifexp.0) ^or.0()
     or.0():
-      %c.18 : py.Value = py.requireDefined(%c.13, "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
+      %c.18 : py.Value = py.requireDefined(%c.13, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
       %cond.2 : base.Bool = py.truthy(%c.18) ^propagate.0()
       branch(%cond.2) ^and.0() ^join.2(%c.18)
     and.0():
-      %b.6 : py.Value = py.requireDefined(%b.2, "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
+      %b.6 : py.Value = py.requireDefined(%b.2, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
       %cond.3 : base.Bool = py.truthy(%b.6) ^propagate.0()
       branch(%cond.3) ^then.1() ^else.1()
     then.1():
-      %d.6 : py.Value = py.requireDefined(%d.2, "UnboundLocalError", "cannot access local variable 'd' where it is not associated with a value") ^propagate.0()
+      %d.6 : py.Value = py.requireDefined(%d.2, "d", "UnboundLocalError", "cannot access local variable 'd' where it is not associated with a value") ^propagate.0()
       jump ^join.3(%d.6)
     else.1():
-      %a.6 : py.Value = py.requireDefined(%a.2, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %a.6 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       jump ^join.3(%a.6)
     join.3(%ifexp.1 : py.Value):
       jump ^join.2(%ifexp.1)
@@ -117,25 +117,25 @@ module m_scope_nested {
       %b.2 : py.Value = py.tupleGet(%bound.0, 1)
       %c.13 : py.Value = py.tupleGet(%bound.0, 2)
       %d.2 : py.Value = py.tupleGet(%bound.0, 3)
-      %a.4 : py.Value = py.requireDefined(%a.2, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
-      %d.4 : py.Value = py.requireDefined(%d.2, "UnboundLocalError", "cannot access local variable 'd' where it is not associated with a value") ^propagate.0()
+      %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %d.4 : py.Value = py.requireDefined(%d.2, "d", "UnboundLocalError", "cannot access local variable 'd' where it is not associated with a value") ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%d.4) ^propagate.0()
       branch(%cond.0) ^then.0() ^else.0()
     then.0():
-      %b.4 : py.Value = py.requireDefined(%b.2, "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
+      %b.4 : py.Value = py.requireDefined(%b.2, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
       %cond.1 : base.Bool = py.truthy(%b.4) ^propagate.0()
       branch(%cond.1) ^join.1(%b.4) ^or.0()
     or.0():
-      %c.16 : py.Value = py.requireDefined(%c.13, "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
+      %c.16 : py.Value = py.requireDefined(%c.13, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
       jump ^join.1(%c.16)
     join.1(%bool.0 : py.Value):
       jump ^join.0(%bool.0)
     else.0():
-      %c.18 : py.Value = py.requireDefined(%c.13, "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
+      %c.18 : py.Value = py.requireDefined(%c.13, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
       %cond.2 : base.Bool = py.truthy(%c.18) ^propagate.0()
       branch(%cond.2) ^and.0() ^join.2(%c.18)
     and.0():
-      %d.6 : py.Value = py.requireDefined(%d.2, "UnboundLocalError", "cannot access local variable 'd' where it is not associated with a value") ^propagate.0()
+      %d.6 : py.Value = py.requireDefined(%d.2, "d", "UnboundLocalError", "cannot access local variable 'd' where it is not associated with a value") ^propagate.0()
       jump ^join.2(%d.6)
     join.2(%bool.1 : py.Value):
       jump ^join.0(%bool.1)
@@ -167,27 +167,27 @@ module m_scope_nested {
       %b.2 : py.Value = py.tupleGet(%bound.0, 1)
       %c.13 : py.Value = py.tupleGet(%bound.0, 2)
       %d.2 : py.Value = py.tupleGet(%bound.0, 3)
-      %a.4 : py.Value = py.requireDefined(%a.2, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
-      %b.4 : py.Value = py.requireDefined(%b.2, "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
+      %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %b.4 : py.Value = py.requireDefined(%b.2, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%b.4) ^propagate.0()
       branch(%cond.0) ^join.1(%b.4) ^or.0()
     or.0():
-      %c.16 : py.Value = py.requireDefined(%c.13, "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
+      %c.16 : py.Value = py.requireDefined(%c.13, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
       jump ^join.1(%c.16)
     join.1(%bool.0 : py.Value):
       %add.0 : py.Value = py.add(%a.4, %bool.0) ^propagate.0()
       %cond.1 : base.Bool = py.truthy(%add.0) ^propagate.0()
       branch(%cond.1) ^and.0() ^else.0()
     and.0():
-      %d.4 : py.Value = py.requireDefined(%d.2, "UnboundLocalError", "cannot access local variable 'd' where it is not associated with a value") ^propagate.0()
+      %d.4 : py.Value = py.requireDefined(%d.2, "d", "UnboundLocalError", "cannot access local variable 'd' where it is not associated with a value") ^propagate.0()
       %cond.2 : base.Bool = py.truthy(%d.4) ^propagate.0()
       branch(%cond.2) ^then.1() ^else.1()
     then.1():
-      %c.18 : py.Value = py.requireDefined(%c.13, "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
+      %c.18 : py.Value = py.requireDefined(%c.13, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
       %cond.3 : base.Bool = py.truthy(%c.18) ^propagate.0()
       branch(%cond.3) ^then.0() ^else.0()
     else.1():
-      %b.6 : py.Value = py.requireDefined(%b.2, "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
+      %b.6 : py.Value = py.requireDefined(%b.2, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
       %cond.4 : base.Bool = py.truthy(%b.6) ^propagate.0()
       branch(%cond.4) ^then.0() ^else.0()
     then.0():
@@ -222,24 +222,24 @@ module m_scope_nested {
       %c.12 : py.Value = py.tupleGet(%bound.0, 2)
       jump ^head.0(%a.2)
     head.0(%a.9 : py.Value):
-      %a.4 : py.Value = py.requireDefined(%a.9, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
-      %b.4 : py.Value = py.requireDefined(%b.2, "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
+      %a.4 : py.Value = py.requireDefined(%a.9, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %b.4 : py.Value = py.requireDefined(%b.2, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%b.4) ^propagate.0()
       branch(%cond.0) ^join.0(%b.4) ^or.0()
     or.0():
-      %c.14 : py.Value = py.requireDefined(%c.12, "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
+      %c.14 : py.Value = py.requireDefined(%c.12, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
       jump ^join.0(%c.14)
     join.0(%bool.0 : py.Value):
       %lt.0 : py.Value = py.lt(%a.4, %bool.0) ^propagate.0()
       %cond.1 : base.Bool = py.truthy(%lt.0) ^propagate.0()
       branch(%cond.1) ^body.0() ^exit.0()
     body.0():
-      %a.6 : py.Value = py.requireDefined(%a.9, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %a.6 : py.Value = py.requireDefined(%a.9, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %int.0 : py.Value = py.intLit(1)
       %add.0 : py.Value = py.add(%a.6, %int.0) ^propagate.0()
       jump ^head.0(%add.0)
     exit.0():
-      %a.8 : py.Value = py.requireDefined(%a.9, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %a.8 : py.Value = py.requireDefined(%a.9, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%a.8)
       ret(%ret.0)
     propagate.0(%exc.0 : py.Value):
@@ -262,17 +262,17 @@ module m_scope_nested {
       %a.2 : py.Value = py.tupleGet(%bound.0, 0)
       %b.2 : py.Value = py.tupleGet(%bound.0, 1)
       %c.12 : py.Value = py.tupleGet(%bound.0, 2)
-      %a.4 : py.Value = py.requireDefined(%a.2, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %a.4 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %cond.0 : base.Bool = py.truthy(%a.4) ^propagate.0()
       branch(%cond.0) ^ok.0() ^fail.0()
     fail.0():
       %AssertionError.0 : py.Value = py.assertionError
-      %a.6 : py.Value = py.requireDefined(%a.2, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
-      %b.4 : py.Value = py.requireDefined(%b.2, "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
+      %a.6 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %b.4 : py.Value = py.requireDefined(%b.2, "b", "UnboundLocalError", "cannot access local variable 'b' where it is not associated with a value") ^propagate.0()
       %cond.1 : base.Bool = py.truthy(%b.4) ^propagate.0()
       branch(%cond.1) ^join.0(%b.4) ^or.0()
     or.0():
-      %c.14 : py.Value = py.requireDefined(%c.12, "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
+      %c.14 : py.Value = py.requireDefined(%c.12, "c", "UnboundLocalError", "cannot access local variable 'c' where it is not associated with a value") ^propagate.0()
       jump ^join.0(%c.14)
     join.0(%bool.0 : py.Value):
       %add.0 : py.Value = py.add(%a.6, %bool.0) ^propagate.0()
@@ -282,7 +282,7 @@ module m_scope_nested {
       %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
       jump ^propagate.0(%exc.0)
     ok.0():
-      %a.8 : py.Value = py.requireDefined(%a.2, "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %a.8 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
       %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%a.8)
       ret(%ret.0)
     propagate.0(%exc.1 : py.Value):
