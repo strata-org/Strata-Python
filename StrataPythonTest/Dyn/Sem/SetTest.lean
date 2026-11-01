@@ -210,6 +210,26 @@ def aGone : SetTable :=
 #guard (withA.search (.exact (hashA.placement.toNat : Int))).map (·.candidates) == some []
 #guard (withA.search hashA).map (·.candidates.length) == some 1
 
+/-- `s.add(x)` for the `str` `x`, whose hash is symbolic. -/
+def addStr (t : SetTable) (x : String) : SetTable :=
+  let h : Hash := .symbolic (.buffer x.toUTF8.toList)
+  match t.search h with
+  | some s => if s.candidates.isEmpty then t.addNew s h (.ofString x) .builtin else t
+  | none => t
+
+/-- An inexact table of 40 `str`s and 60 `int`s, with some removed, after its resizes. -/
+def mixed : SetTable :=
+  let t := (List.range 40).foldl (fun t i => addStr t s!"k{i}") .empty
+  run (((List.range 60).map fun (i : Nat) => (true, ((i : Int) * 7))) ++
+    ((List.range 20).map fun (i : Nat) => (false, ((i : Int) * 14)))) t
+
+-- In a layout that isn't CPython's, the search of each member's hash still finds exactly the
+-- entries with that hash, which a lookup relies on.
+#guard !mixed.exactLayout && mixed.used == 80
+#guard mixed.active.all fun (_, h, _) =>
+  ((mixed.search h).map fun s => s.candidates.eraseDups.mergeSort) ==
+    some ((mixed.active.filter (·.2.1 == h)).map (·.1)).mergeSort
+
 -- The groups: two user objects of one hash are one group; an `int` is another.
 #guard (collide 1 2 1).groupCount .exact .user == 1
 #guard (collide 1 2 1).groupCount .exact .builtin == 1

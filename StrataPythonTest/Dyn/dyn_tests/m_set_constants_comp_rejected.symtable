@@ -1,0 +1,5 @@
+module top
+  a: local (assigned)
+  x: local (assigned, referenced, comp_iter)
+  y: local (assigned, comp_iter)
+qualnames: 

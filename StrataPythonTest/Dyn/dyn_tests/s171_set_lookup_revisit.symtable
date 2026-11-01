@@ -1,0 +1,15 @@
+module top
+  K: local (assigned, referenced)
+  n: global explicit (assigned, referenced, declared_global)
+  print: global implicit (referenced)
+  r: local (assigned, referenced)
+  class K
+    __eq__: local (assigned)
+    __hash__: local (assigned)
+    function __hash__
+      self: local (parameter)
+    function __eq__
+      n: global explicit (assigned, declared_global)
+      o: local (parameter)
+      self: local (parameter)
+qualnames: K, K.__eq__, K.__hash__

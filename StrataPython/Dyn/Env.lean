@@ -394,6 +394,10 @@ public environment Py extends Base where
   pure insn mkList (*elems : Value) : Value
   /-- A set of `elems`: CPython's `BUILD_SET`.  Raises as `mkDict` does for a key. -/
   calls insn mkSet (*elems : Value) (^err (exc : Value)) : Value
+  /-- A set of the constants `elems`, which CPython's compiler folds into a frozenset constant: its
+  layout depends on how the module was compiled and loaded, so the semantics doesn't assume the
+  set's order. -/
+  calls insn constSet (*elems : Value) (^err (exc : Value)) : Value
   /-- A tuple of `elems`. -/
   pure insn mkTuple (*elems : Value) : Value
   /-- `obj[key]`. -/

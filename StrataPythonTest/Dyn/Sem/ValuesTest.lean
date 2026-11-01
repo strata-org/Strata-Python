@@ -37,9 +37,13 @@ open StrataPython.Dyn.Sem
 #guard pyEqImm (.ofFloat 0.0) (.ofFloat (-0.0)) == some true
 #guard pyEqImm (.ofString "a") (.bytes #[97]) == some false
 #guard pyEqImm .none .none == some true
--- What the model doesn't decide yet: a NaN, an int against a float, a symbolic hash.
+-- An int against a float, exactly: `2 ** 53 + 1 == 2.0 ** 53` is `False`.
+#guard pyEqImm (.int 1) (.ofFloat 1.0) == some true
+#guard pyEqImm (.ofFloat 1.5) (.bool true) == some false
+#guard pyEqImm (.int (2 ^ 53 + 1)) (.ofFloat (2.0 ^ 53)) == some false
+#guard pyEqImm (.int 1) (.ofFloat (0.0 / 0.0)) == some false
+-- What the model doesn't decide yet: a NaN against a float, a symbolic hash.
 #guard pyEqImm (.ofFloat (0.0 / 0.0)) (.ofFloat (0.0 / 0.0)) == none
-#guard pyEqImm (.int 1) (.ofFloat 1.0) == none
 #guard pyEqImm (.symHash (HashSrc.buffer [97])) (.int 1) == none
 
 -- Structural equality: floats by their bits, members in order.

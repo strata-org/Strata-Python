@@ -1,0 +1,15 @@
+module
+  n: global explicit (assigned, referenced, declared_global)
+  Q: local (assigned, referenced)
+  print: global implicit (referenced)
+  class Q
+    __hash__: local (assigned)
+    __eq__: local (assigned)
+    function Q.__hash__
+      params: self
+      self: local (parameter)
+    function Q.__eq__
+      params: self, o
+      self: local (parameter)
+      o: local (parameter)
+      n: global explicit (assigned, declared_global)

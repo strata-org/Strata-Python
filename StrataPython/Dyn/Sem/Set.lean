@@ -229,16 +229,23 @@ def nextEntry (t : SetTable) : (fuel : Nat) → (i : Nat) → Option Nat
     | .entry .. => some i
     | _ => t.nextEntry fuel ((i + 1) % t.slots.size)
 
-/-- `set_pop`: the first entry from the finger on, wrapping around, and the table without it,
-with the finger after it; `none` for an empty set. -/
-def pop (t : SetTable) : Option ((Hash × Value) × SetTable) :=
+/-- The slot of the member that `pop` removes, with its hash and the member. -/
+def popAt? (t : SetTable) : Option (Nat × Hash × Value) :=
   if t.used = 0 then none
   else
     match t.nextEntry t.slots.size (t.finger % t.slots.size) with
     | some i => match t.slot i with
-      | .entry h k _ => some ((h, k), { t.discardAt i with finger := i + 1 })
+      | .entry h k _ => some (i, h, k)
       | _ => none
     | none => none
+
+/-- `t` without its member at slot `i`, with the finger after it, as `pop` leaves it. -/
+def removePopped (t : SetTable) (i : Nat) : SetTable := { t.discardAt i with finger := i + 1 }
+
+/-- `set_pop`: the first entry from the finger on, wrapping around, and the table without it,
+with the finger after it; `none` for an empty set. -/
+def pop (t : SetTable) : Option ((Hash × Value) × SetTable) :=
+  t.popAt?.map fun (i, h, k) => ((h, k), t.removePopped i)
 
 /-- `set_clear_internal`: an empty table of the minimum size, keeping the finger. -/
 def clear (t : SetTable) : SetTable := { empty with finger := t.finger, version := t.version + 1 }

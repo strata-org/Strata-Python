@@ -141,10 +141,14 @@ structure ModuleObj where
 inductive PayloadG (F : Type) where
   /-- An instance of a user class. -/
   | plain
-  | list (elems : Array Value)
+  /-- A list: its elements, and a counter that moves at every change of its length and at each
+  preallocation, where CPython may change the list's `allocated`, which `list.sort` checks. -/
+  | list (elems : Array Value) (resizes : Nat)
   | dict (d : DictTable)
   | set (s : SetTable)
-  | frozenset (s : SetTable)
+  /-- A frozenset, `closed` once built: only an open one takes writes, and only a closed one is read
+  as a value (hashed, compared, iterated). -/
+  | frozenset (s : SetTable) (closed : Bool)
   /-- The built-in part of an instance of a subclass of `tuple`, `str`, `int`, `float` or
   `bytes`. -/
   | tuple (elems : Array Value)
@@ -199,13 +203,25 @@ def PayloadG.modDict {F : Type} (f : DictTable → DictTable) : PayloadG F → P
   | .dict t => .dict (f t)
   | p => p
 
+/-- A list payload's elements and resize count changed by `f`; any other payload as it is. -/
+def PayloadG.modList {F : Type} (f : Array Value → Nat → Array Value × Nat) :
+    PayloadG F → PayloadG F
+  | .list xs n => let (xs', n') := f xs n; .list xs' n'
+  | p => p
+
+/-- A set or frozenset payload's table changed by `f`; any other payload as it is. -/
+def PayloadG.modSet {F : Type} (f : SetTable → SetTable) : PayloadG F → PayloadG F
+  | .set t => .set (f t)
+  | .frozenset t c => .frozenset (f t) c
+  | p => p
+
 /-- A payload with an empty function payload, as one with any. -/
 def PayloadG.lift {F : Type} : PayloadData → PayloadG F
   | .plain => .plain
-  | .list e => .list e
+  | .list e n => .list e n
   | .dict d => .dict d
   | .set s => .set s
-  | .frozenset s => .frozenset s
+  | .frozenset s c => .frozenset s c
   | .tuple e => .tuple e
   | .str s => .str s
   | .int i => .int i
@@ -227,10 +243,10 @@ def PayloadG.lift {F : Type} : PayloadData → PayloadG F
 /-- A payload as a rule sees it: a function payload is seen as `none`. -/
 def PayloadG.data? {F : Type} : PayloadG F → Option PayloadData
   | .plain => some .plain
-  | .list e => some (.list e)
+  | .list e n => some (.list e n)
   | .dict d => some (.dict d)
   | .set s => some (.set s)
-  | .frozenset s => some (.frozenset s)
+  | .frozenset s c => some (.frozenset s c)
   | .tuple e => some (.tuple e)
   | .str s => some (.str s)
   | .int i => some (.int i)

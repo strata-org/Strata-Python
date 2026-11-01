@@ -1,0 +1,9 @@
+module
+  a: local (assigned)
+  y: local (assigned, comp_iter)
+  x: local (assigned, referenced, comp_iter)
+  inlined comprehension <listcomp>
+    params: .0
+    .0: local (parameter)
+    y: local (assigned, comp_iter)
+    x: local (assigned, referenced, comp_iter)

@@ -88,6 +88,13 @@ m_complex | yes | complex literal
 m_cond | yes |
 m_del | yes |
 m_displays | yes |
+m_set_constants | yes |
+m_set_constants_comp_rejected | yes | a set display that CPython folds into a constant
+m_set_constants_rejected | yes | a set display that CPython folds into a constant
+s171_set_lookup_revisit | yes |
+s172_set_subset_revisit | yes |
+s173_set_lookup_two_candidates | yes |
+s176_set_lookup_two_members | yes |
 m_expressions | yes |
 m_for | yes |
 m_fstring | yes |

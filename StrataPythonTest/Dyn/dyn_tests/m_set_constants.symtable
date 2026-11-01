@@ -1,0 +1,15 @@
+module top
+  a: local (assigned)
+  b: local (assigned)
+  c: local (assigned)
+  d: local (assigned)
+  e: local (assigned)
+  f: local (assigned)
+  g: local (assigned)
+  h: local (assigned)
+  k: local (assigned)
+  m: local (assigned)
+  n: local (assigned)
+  x: local (assigned, referenced)
+  y: local (assigned)
+qualnames: 

@@ -10,6 +10,8 @@ public import StrataDyn.Exec.CertModelProps
 public import StrataDyn.Exec.EffectsProps
 public import StrataDyn.Exec.CertTactic
 public import StrataPython.Dyn.Sem.Rules.Values
+public import StrataPython.Dyn.Sem.Rules.Ops
+public import StrataPython.Dyn.Sem.Rules.Containers
 public import StrataPython.Dyn.Sem.Rules.Globals
 public meta import StrataPython.Dyn.Env
 public meta import StrataDyn.DDM

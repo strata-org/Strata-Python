@@ -39,10 +39,10 @@ def floatEq (a b : UInt64) : Option Bool :=
   else some (a == b || (Arith.isZero a && Arith.isZero b))
 
 /-- `a == b` for two values that are not objects, as CPython 3.12 compares them, where that
-needs no protocol: numbers by value (`True == 1`), strings and bytes by content, tuples and
-slices member by member, ranges as sequences, and constants by identity; values of two other
-kinds are never equal.  `none` where the model doesn't decide it yet: a NaN, an `int` against
-a `float`, a symbolic hash, a bound method. -/
+needs no protocol: numbers by value (`True == 1`, `1 == 1.0`), strings and bytes by content,
+tuples and slices member by member, ranges as sequences, and constants by identity; values of
+two other kinds are never equal.  `none` where the model doesn't decide it yet: a NaN against a
+float, a symbolic hash, a bound method. -/
 def pyEqImm : Value → Value → Option Bool
   | .int a, .int b => some (a == b)
   | .bool a, .bool b => some (a == b)
@@ -66,7 +66,10 @@ def pyEqImm : Value → Value → Option Bool
   | a, b =>
     if a.isConstant && b.isConstant then some (a == b)
     else match a, b with
-      | .float _, .int _ | .int _, .float _ | .float _, .bool _ | .bool _, .float _ => none
+      | .float x, .int y => some (Arith.compare .eq (.float x) (.int y))
+      | .int x, .float y => some (Arith.compare .eq (.int x) (.float y))
+      | .float x, .bool y => some (Arith.compare .eq (.float x) (.bool y))
+      | .bool x, .float y => some (Arith.compare .eq (.bool x) (.float y))
       | .symHash _, _ | _, .symHash _ | .bound .., _ | _, .bound .. | .method .., _
       | _, .method .. | .traceback, _ | _, .traceback | .undef _, _ | _, .undef _
       | .obj _, _ | _, .obj _ => none
@@ -102,34 +105,43 @@ structure LookupOps.{u} (m : Type → Type u) where
   /-- The dict's keys' version now, to see a change during a comparison. -/
   keysVersion : m Nat
 
-namespace DictTable
-
 /-- The number of groups of kind `k`, other than `h`'s own, that a probe of class `kc` must
-consider: every group of the kind when the probe may run user code or is a symbolic hash value,
-and otherwise the groups with a key of class `symHash` or `user`. -/
-def collisionGroups (t : DictTable) (kc : KeyClass) (h : Hash) (k : HashKind) : Nat :=
+consider, in a table whose groups by hash kind and key class are `groups` and whose groups by hash
+kind are `kinds`: every group of the kind when the probe may run user code or is a symbolic hash
+value, and otherwise the groups with a key of class `symHash` or `user`. -/
+def collisionCount (groups : Std.HashMap (HashKind × KeyClass) (Std.HashMap Hash Nat))
+    (kinds : Std.HashMap HashKind (Std.HashMap Hash Nat)) (kc : KeyClass) (h : Hash)
+    (k : HashKind) : Nat :=
   if kc != .builtin then
-    t.kindGroupCount k - (if h.kind == k && !(t.positions h).isEmpty then 1 else 0)
+    (kinds.getD k ∅).size - (if h.kind == k && (kinds.getD k ∅).contains h then 1 else 0)
   else
-    let s := t.groups.map.getD (k, .symHash) ∅
-    let u := t.groups.map.getD (k, .user) ∅
+    let s := groups.getD (k, .symHash) ∅
+    let u := groups.getD (k, .user) ∅
     let both := s.fold (init := 0) fun n g _ => if u.contains g then n + 1 else n
     s.size + u.size - both - (if h.kind == k && (s.contains h || u.contains h) then 1 else 0)
 
 /-- The hashes of the groups that a probe of class `kc` and hash `h` must consider, by kind, in
-the order of their first live entries: exact, address, other symbolic. -/
+the order of the entries `es` (hash and class): exact, address, other symbolic. -/
+def collisionHashesOf (es : List (Hash × KeyClass)) (kc : KeyClass) (h : Hash) :
+    Array Hash × Array Hash × Array Hash :=
+  es.foldl (init := (#[], #[], #[])) fun (ex, ad, os) (eh, ec) =>
+    if eh != h && h.possiblyEq eh && kc.collides ec then
+      match eh.kind with
+      | .exact => if ex.contains eh then (ex, ad, os) else (ex.push eh, ad, os)
+      | .addr => if ad.contains eh then (ex, ad, os) else (ex, ad.push eh, os)
+      | .otherSymbolic => if os.contains eh then (ex, ad, os) else (ex, ad, os.push eh)
+    else (ex, ad, os)
+
+namespace DictTable
+
+/-- `collisionCount` in the dict table `t`. -/
+def collisionGroups (t : DictTable) (kc : KeyClass) (h : Hash) (k : HashKind) : Nat :=
+  collisionCount t.groups.map t.kindGroups.map kc h k
+
+/-- `collisionHashesOf` the live entries of `t`, in order. -/
 def collisionHashes (t : DictTable) (kc : KeyClass) (h : Hash) :
     Array Hash × Array Hash × Array Hash :=
-  t.entries.foldl (init := (#[], #[], #[])) fun (ex, ad, os) e? =>
-    match e? with
-    | some e =>
-      if e.hash != h && h.possiblyEq e.hash && kc.collides e.cls then
-        match e.hash.kind with
-        | .exact => if ex.contains e.hash then (ex, ad, os) else (ex.push e.hash, ad, os)
-        | .addr => if ad.contains e.hash then (ex, ad, os) else (ex, ad.push e.hash, os)
-        | .otherSymbolic => if os.contains e.hash then (ex, ad, os) else (ex, ad, os.push e.hash)
-      else (ex, ad, os)
-    | none => (ex, ad, os)
+  collisionHashesOf (t.entries.toList.filterMap fun e? => e?.map fun e => (e.hash, e.cls)) kc h
 
 end DictTable
 
@@ -204,6 +216,73 @@ def dictLookup (ops : LookupOps m) (t : DictTable) (k : Value) (kc : KeyClass) (
       (kc == .user || cands.any fun j => (t.entry? j).any (·.cls == .user)) then
     ops.gap "a dict lookup after a deletion depends on CPython's table layout"
   lookupLoop ops t kc k (← ops.keysVersion) cands
+
+/-- Compare the probe with the set entries at the slots `cs` in order, until one is equal; a gap
+if `unchanged` says that the set changed during a comparison that may run user code.  Unless the
+order is CPython's (`ordered`), also a gap after a false comparison if that entry or a later one
+may run user code: CPython's probe sequence may visit an entry's slot again and compare it again,
+as often as its layout decides. -/
+def setLoop (ops : LookupOps m) (unchanged : m Bool) (t : SetTable) (kc : KeyClass) (k : Value)
+    (ordered : Bool) : List Nat → m (Option Nat)
+  | [] => pure none
+  | i :: rest => do
+    let .entry eh ek ec := t.slot i | setLoop ops unchanged t kc k ordered rest
+    let r ← lookupCompare ops kc k ⟨eh, ek, ec⟩
+    if kc.mayRunUser ec then
+      if !(← unchanged) then ops.gap "a set that changes during a lookup is not modelled yet"
+    if r then pure (some i) else
+    if !ordered && (kc.mayRunUser ec || rest.any fun j => match t.slot j with
+        | .entry _ _ c => kc.mayRunUser c
+        | _ => false) then
+      ops.gap "a set lookup after a false __eq__ depends on CPython's table layout"
+    setLoop ops unchanged t kc k ordered rest
+
+/-- **The slot of the key `k`**, of class `kc` and hash `h`, in the set table `t`, as CPython 3.12
+finds it, or `none`.  The entries with the hash `h` are those that the search of `h` finds
+(`SetTable.search`).  While the table's layout is exact, they are compared in CPython's order;
+otherwise their order may differ from CPython's, which is a gap where a comparison may run user
+code.  Hashes that may collide are chosen among, as in `dictLookup`. -/
+def setLookup (ops : LookupOps m) (unchanged : m Bool) (t : SetTable) (k : Value) (kc : KeyClass)
+    (h : Hash) : m (Option Nat) := do
+  let count := collisionCount t.groups.map t.kindGroups.map kc h
+  let e := if h.kind == .exact then 0 else count .exact
+  let a := if h.kind == .addr then 0 else count .addr
+  let b := count .otherSymbolic
+  let pick ← if b == 0 && e == 0 && a == 0 then pure 0 else match ops.chooser with
+    | some choose => choose (2 ^ b * (1 + e) * (1 + a) - 1)
+    | none => ops.gap "a set lookup where hashes may collide, at a level without choices"
+  -- `t.active` walks the whole table, so only the paths that need it compute it.
+  let classOf (i : Nat) : Option KeyClass := match t.slot i with
+    | .entry _ _ c => some c
+    | _ => none
+  let (cands, ordered) ← if pick == 0 then
+      -- Every entry is placed along the probe sequence of its own hash's number, also in a layout
+      -- that isn't CPython's, so the search finds every entry with the hash `h`; only its order is
+      -- CPython's just for an exact layout.
+      match t.search h with
+        | some s =>
+          pure (if t.exactLayout then (s.candidates, true) else (s.candidates.eraseDups, false))
+        | none => ops.gap (modelInvariantPrefix ++ "a set table without an empty slot")
+    else do
+      let active := t.active
+      let (exs, ads, oss) := collisionHashesOf
+        (active.filterMap fun (i, eh, _) => (classOf i).map (eh, ·)) kc h
+      if exs.size != e || ads.size != a || oss.size != b then
+        ops.gap
+          (modelInvariantPrefix ++ "the group counts of a set table disagree with its entries")
+      let ei := pick % (1 + e)
+      let r := pick / (1 + e)
+      let ai := r % (1 + a)
+      let bits := r / (1 + a)
+      let chosen : Array Hash :=
+        (if ei == 0 then #[] else exs[ei - 1]?.toArray) ++
+          (if ai == 0 then #[] else ads[ai - 1]?.toArray) ++
+          (oss.zipIdx.filterMap fun (g, j) => if bits.testBit j then some g else none)
+      pure ((active.filter fun (_, eh, _) => eh == h || chosen.contains eh).map (·.1), false)
+  if !ordered && cands.length ≥ 2 &&
+      (kc == .user || cands.any fun i => classOf i == some .user) then
+    ops.gap "a set lookup whose order of comparisons depends on the table's layout"
+  setLoop ops unchanged t kc k ordered cands
 
 end
 

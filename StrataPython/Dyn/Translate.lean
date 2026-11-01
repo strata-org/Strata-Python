@@ -970,6 +970,80 @@ where
     | some a => return a
     | none => chunk #[]
 
+/-- Whether `op` is `in` or `not in`. -/
+def isMembership : cmpop SourceRange → Bool
+  | .In _ | .NotIn _ => true
+  | _ => false
+
+/-! ## Constant sets
+
+CPython's compiler turns a set display whose elements are all constants into a frozenset
+constant: as an operand of `for`, of a comprehension's `for`, or of a last `in` or `not in` of a
+comparison (the AST optimizer's `fold_iter`), and as a value when it has more than two elements
+(`starunpack_helper`).  The constant's layout, and so its order, depends on how the module was
+compiled and loaded: a module loaded from its `.pyc` gets the order in which marshal wrote the
+frozenset.  So every set display of constants is lowered to `py.constSet`, a set whose layout the
+semantics doesn't assume, in every position and of every size. -/
+
+mutual
+/-- Whether `e` is an `int` constant: an integer literal, or `-`, `+` or `~` applied to one. -/
+def isIntConst (e : expr SourceRange) : Bool :=
+  match e with
+  | .Constant _ (.ConPos ..) _ | .Constant _ (.ConNeg ..) _ => true
+  | .UnaryOp _ (.USub _) x | .UnaryOp _ (.UAdd _) x | .UnaryOp _ (.Invert _) x => isIntConst x
+  | _ => false
+
+/-- Whether `e` is a number constant: an `int` constant, a float literal, or `-` or `+` applied
+to a number constant. -/
+def isNumConst (e : expr SourceRange) : Bool :=
+  match e with
+  | .Constant _ (.ConFloat ..) _ => true
+  | .UnaryOp _ (.USub _) x | .UnaryOp _ (.UAdd _) x => isNumConst x
+  | e => isIntConst e
+end
+
+/-- Whether `e` is a constant that the model knows CPython folds: a literal other than a complex
+one, a number constant, or a tuple of constants; `false` for anything else, including what CPython's
+AST optimizer could still fold into a constant (`mayFold`). -/
+def isConst (e : expr SourceRange) : Bool :=
+  match e with
+  | .Constant _ c _ => !(c matches .ConComplex ..)
+  | .UnaryOp .. => isNumConst e
+  | .Tuple _ ⟨_, vs⟩ _ => vs.attach.all fun (x : { v // v ∈ vs }) => isConst x.1
+  | _ => false
+termination_by sizeOf e
+decreasing_by
+  have := Array.sizeOf_lt_of_mem x.2; simp_all; omega
+
+/-- Whether CPython's AST optimizer may fold `e` into a constant: every leaf of `e` is a constant
+or `__debug__`, under operators, subscripts and tuples. -/
+def mayFold (e : expr SourceRange) : Bool :=
+  match e with
+  | .Constant .. => true
+  | .Name _ ⟨_, n⟩ _ => n == "__debug__"
+  | .UnaryOp _ _ x => mayFold x
+  | .BinOp _ l _ r => mayFold l && mayFold r
+  | .Subscript _ v k _ => mayFold v && mayFold k
+  | .Slice .. => true
+  | .Tuple _ ⟨_, vs⟩ _ => vs.attach.all fun (x : { v // v ∈ vs }) => mayFold x.1
+  | _ => false
+termination_by sizeOf e
+decreasing_by
+  all_goals first
+    | (have := Array.sizeOf_lt_of_mem x.2; simp_all; omega)
+    | (simp_all; omega)
+
+/-- Whether the set display with the elements `vs` is lowered to `py.constSet`: `true` if every
+element is a constant (`isConst`); an error if CPython may fold the display into a constant
+(`folds`: in an operand of `for` or `in`, or as a value with more than two elements), every element
+is one that CPython's AST optimizer may fold into a constant, and some element is not a constant
+that the model knows. -/
+def constDisplay? (vs : Array (expr SourceRange)) (folds : Bool) : Except Unit Bool :=
+  if vs.isEmpty then .ok false
+  else if vs.all isConst then .ok true
+  else if folds && vs.all mayFold then .error ()
+  else .ok false
+
 mutual
 
 /-- Lower an expression to the value it produces. -/
@@ -1001,7 +1075,7 @@ def transExpr (e : expr SourceRange) : TransM ValId := withRange e.ann do
     | none => standIn "lambda"
   | .IfExp _ c a b => ifExp c a b
   | .Dict _ ks vs => dictDisplay ks.val vs.val
-  | .Set _ vs => setDisplay vs.val
+  | .Set sr vs => setDisplay sr vs.val
   | .List _ vs _ => listDisplay vs.val
   | .Tuple _ vs _ => tupleDisplay vs.val
   | .ListComp sr elt gens => compExpr sr .list elt none gens.val
@@ -1046,7 +1120,9 @@ def compare (l : expr SourceRange) (ops : Array (cmpop SourceRange))
   if h : (ops.zip rs).size = 1 then
     have hget := Array.sizeOf_getElem (ops.zip rs) 0 (by omega)
     have hsnd := sizeOf_snd_lt (ops.zip rs)[0]
-    return ← cmpOp (ops.zip rs)[0].1 a (← transExpr (ops.zip rs)[0].2)
+    let b ← if isMembership (ops.zip rs)[0].1 then iterOperand (ops.zip rs)[0].2
+      else transExpr (ops.zip rs)[0].2
+    return ← cmpOp (ops.zip rs)[0].1 a b
   let join ← build (freshLabel [Py.Value] "join")
   let to (v : ValId) := join.goto.bind (value v)
   jump (to (← chainLinks a (ops.zip rs) to))
@@ -1063,7 +1139,9 @@ def chainLinks (a : ValId) (links : Array (cmpop SourceRange × expr SourceRange
   for h : i in [:links.size] do
     have hget := Array.sizeOf_getElem links i (by get_elem_tactic)
     have hsnd := sizeOf_snd_lt links[i]
-    let b ← transExpr links[i].2
+    -- A set display of constants as the last `in` or `not in`'s operand is folded.
+    let b ← if i + 1 = links.size && isMembership links[i].1 then iterOperand links[i].2
+      else transExpr links[i].2
     last ← cmpOp links[i].1 lhs b
     if i + 1 < links.size then
       let t ← build (truthy last)
@@ -1202,8 +1280,13 @@ def tupleDisplay (vs : Array (expr SourceRange)) (pre : Array ValId := #[]) :
 termination_by sizeOf vs + 1
 
 /-- `{a, *x, b}`: as `listDisplay`, with `BUILD_SET`, `SET_UPDATE` and `SET_ADD`.  A set of
-more than `stackUseGuideline` elements starts empty, as in CPython. -/
-def setDisplay (vs : Array (expr SourceRange)) : TransM ValId := do
+more than `stackUseGuideline` elements starts empty, as in CPython.  A set of constants is
+`py.constSet` (`constSet`). -/
+def setDisplay (sr : SourceRange) (vs : Array (expr SourceRange)) : TransM ValId := do
+  match constDisplay? vs (vs.size > 2) with
+  | .error () => return ← unsupportedValue "a set display that CPython folds into a constant" sr
+  | .ok true => return ← constSet vs
+  | .ok false => pure ()
   let parts := if vs.size > stackUseGuideline then (#[], vs) else splitStarred vs
   have hparts : ∀ x, x ∈ parts.1 ∨ x ∈ parts.2 → x ∈ vs := by
     intro x hx; simp only [parts] at hx; split at hx
@@ -1220,7 +1303,25 @@ def setDisplay (vs : Array (expr SourceRange)) : TransM ValId := do
       discard <| build (emitActing (.str .base "update") Py.setUpdate.ref #[st, ← transExpr x])
     | v, hmem => discard <| build (emitActing (.str .base "add") Py.setAdd.ref #[st, ← transExpr v])
   return st
+termination_by sizeOf vs + 1
+
+/-- The set display `vs` of constants: `py.constSet` of its elements. -/
+def constSet (vs : Array (expr SourceRange)) : TransM ValId := do
+  let elems ← vs.attach.mapM fun ⟨x, hx⟩ =>
+    have hmem := Array.sizeOf_lt_of_mem hx
+    transExpr x
+  build (emitFailing (.str .base "set") Py.constSet.ref elems)
 termination_by sizeOf vs
+
+/-- An operand of `for`, of a comprehension's `for`, or of a last `in` or `not in`, where CPython's
+AST optimizer folds a set display of constants of any size (`fold_iter`). -/
+def iterOperand (e : expr SourceRange) : TransM ValId := do
+  match e with
+  | .Set sr ⟨a, vs⟩ => match constDisplay? vs true with
+    | .error () => unsupportedValue "a set display that CPython folds into a constant" sr
+    | .ok _ => transExpr (.Set sr ⟨a, vs⟩)
+  | e => transExpr e
+termination_by sizeOf e + 1
 
 /-- `{k: v, **d}`, as CPython builds it: a run of pairs is cut into chunks of `dictChunk`,
 each built by `pairs`, and each later chunk and each `**d` is `DICT_UPDATE`. -/
@@ -1369,7 +1470,7 @@ def compExpr (sr : SourceRange) (kind : CompKind) (elt : expr SourceRange)
   let some scope ← childScope? sr | return ← unsupportedValue s!"{what} without a scope" sr
   let some cur := ctx.table.scopes[scope]?
     | internalError s!"scope {scope} is not in the table" sr; standIn what
-  let it ← transExpr iter0
+  let it ← iterOperand iter0
   let saved := (← build (get : PyM Info PyBuild.Frame)).locals
   let r ← withReader ({ · with scope, cur, classNs := none }) do
     for x in cur.regionLocals do discard <| build (declareLocal x)
@@ -1408,7 +1509,7 @@ where
   rest (out : ValId) (gs : List (comprehension SourceRange)) : TransM Unit := do
     match gs with
     | c@(.mk_comprehension _ _ iter _ _) :: later =>
-      compFor (← transExpr iter) fun item => clause out item (c :: later)
+      compFor (← iterOperand iter) fun item => clause out item (c :: later)
     | [] =>
       match kind, value with
       | .dict, some v => compStore out (transExpr elt) (transExpr v)
@@ -2004,7 +2105,7 @@ def forStmt (sr : SourceRange) (target iter : expr SourceRange)
   match assigner sr target with
   | .error t => badTarget t
   | .ok assign =>
-    let it ← build (emitFailing (.str .base "iter") Py.getIter.ref #[← transExpr iter])
+    let it ← build (emitFailing (.str .base "iter") Py.getIter.ref #[← iterOperand iter])
     let head ← build (freshLabel [] "head")
     let stop ← build (freshLabel [Py.Value] "stop")
     let elseL? ← if orelse.isEmpty then pure none else some <$> build (freshLabel [] "else")

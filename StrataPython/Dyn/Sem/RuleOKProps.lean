@@ -12,10 +12,10 @@ set_option autoImplicit false
 /-!
 # Properties of `RuleOK`
 
-Key theorems: `runRule_ok`, `runTotal_ok`, `runRuleFree_ok` and `runTotalFree_ok`, which give
-`RuleOK` for every rule that runs a `PyM` computation; `RuleOK.lift`, which lifts `RuleOK` to a
-higher effect; and `ImplOK.within`, which gives `ImplWithin` from `ImplOK`, at the spec `pySpec`,
-which has the laws (`pySpec_laws`).
+Key theorems: `runRule_ok`, `runTotal_ok`, `runRuleFree_ok`, `runTotalFree_ok` and
+`runRuleIf_ok`, which give `RuleOK` for every rule that runs a `PyM` computation; `RuleOK.lift`,
+which lifts `RuleOK` to a higher effect; and `ImplOK.within`, which gives `ImplWithin` from
+`ImplOK`, at the spec `pySpec`, which has the laws (`pySpec_laws`).
 
 The definitions are in `RuleOK.lean`: `RuleOK`, with `StartWithin` and `AnyStart`, `ImplOK`,
 `ImplWithin` and `pySpec`.
@@ -119,6 +119,18 @@ theorem runTotalFree_ok {e : Level} {α : Type} (op : String) (m : PyM σ e true
   ruleOK_free m tg _ _ fun s => m.2.1 rs ps S tg V hc s #[] (handlesOK_nil s) e (Nat.le_refl _)
     Q _ pure (fun _ => semanticGap s!"an exception in an operation that can't raise: {op}")
     (contOK_ret s hQ) (fun _ => contOK_gap s _)
+
+/-- **A rule that runs one of two `PyM` computations, chosen by a condition on its operands,
+satisfies `V` and is within its effect**, as `runRule_ok` and `runRuleFree_ok` give for each. -/
+theorem runRuleIf_ok {e : Level} {α : Type} (cond : Bool) (m : PyM σ e false α)
+    (mFree : PyM σ e true α) (tg : Tags σ) (hc : PyCertLaws rs tg V) (Q : Typing → α → Prop)
+    (hQ : ∀ g a, Q g a) (hX : ∀ g x, V.Exit g x) (err : Target (Out (Dec σ) ps S) [Value]) :
+    RuleOK V Q e
+      (@runRuleIf σ _ _ (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) e α cond err #[] m mFree) := by
+  unfold runRuleIf
+  split
+  · exact runRule_ok m tg hc Q hQ hX err
+  · exact runRuleFree_ok mFree tg hc Q hQ hX err
 
 /-- `RuleOK` at a lower effect gives it at a higher one. -/
 theorem RuleOK.lift {e e' : Level} {Q : Typing → R → Prop} {t : BTree σ rs ps S R}

@@ -150,6 +150,16 @@ omit [Decode σ] in
 theorem keepsClosures_modDict (f : DictTable → DictTable) :
     KeepsClosures (σ := σ) (PayloadG.modDict f) := by keeps_closures
 
+omit [Decode σ] in
+/-- A set payload's change adds no closure. -/
+theorem keepsClosures_modSet (f : SetTable → SetTable) :
+    KeepsClosures (σ := σ) (PayloadG.modSet f) := by keeps_closures
+
+omit [Decode σ] in
+/-- A list payload's change adds no closure. -/
+theorem keepsClosures_modList (f : Array Value → Nat → Array Value × Nat) :
+    KeepsClosures (σ := σ) (PayloadG.modList f) := by keeps_closures
+
 /-- **What a computation relies on of a spec `V` of the machine at the engine boundary**, with
 the tags `tg` (the capability specs, `Exec/CertCaps.lean`): its cell requests on `Value`s, its calls
 of translated functions, and every part of the world. -/
@@ -459,6 +469,12 @@ jumps along `err` with the exception that `m` raises. -/
 @[inline] def runTotalFree {α : Type} (op : String) (hs : Handles ε E) (m : PyM σ e true α) :
     Sem ε E α :=
   m.1 hs ⟨0⟩ pure fun _ => semanticGap s!"an exception in an operation that can't raise: {op}"
+
+/-- **A rule that runs `m` if `cond`, and else `mFree`, which needs no start**: `runRule` or
+`runRuleFree`, so that the cases that need the start are the only ones that read it. -/
+@[inline] def runRuleIf {α : Type} (cond : Bool) (err : Target E [Value]) (hs : Handles ε E)
+    (m : PyM σ e false α) (mFree : PyM σ e true α) : Sem ε E α :=
+  if cond then runRule err hs m else runRuleFree err hs mFree
 
 end
 

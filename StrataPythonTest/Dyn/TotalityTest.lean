@@ -301,11 +301,12 @@ example : visitStmts #[] = pure () := by
 open StrataPython.Dyn.PyTranslate in
 open StrataPython (expr cmpop) in
 open StrataDDM (SourceRange) in
-/-- A comparison with one operator evaluates its operands, then compares them. -/
-example (l r : expr SourceRange) (op : cmpop SourceRange) :
+/-- A comparison with one operator other than `in` and `not in` evaluates its operands, then
+compares them. -/
+example (l r : expr SourceRange) (op : cmpop SourceRange) (hop : isMembership op = false) :
     PyTranslate.compare l #[op] #[r] =
       (do let a ← transExpr l; cmpOp op a (← transExpr r)) := by
-  simp [PyTranslate.compare]
+  simp [PyTranslate.compare, hop]
 
 open StrataPython.Dyn.PyTranslate in
 /-- An empty statement list emits nothing. -/

@@ -223,14 +223,23 @@ def lastLive (t : DictTable) : Nat → Option Nat
   | 0 => none
   | n + 1 => if (t.entry? n).isSome then some n else t.lastLive n
 
+/-- The position of the entry that `popitem` removes, the last live one, with the entry and its
+value. -/
+def popitemAt? (t : DictTable) : Option (Nat × DictEntry × Value) := do
+  let i ← t.lastLive t.entries.size
+  let e ← t.entry? i
+  return (i, e, t.value i)
+
+/-- `t` without its live entry at `i`, as `popitem` leaves it. -/
+def removePopped (t : DictTable) (i : Nat) : DictTable := (t.deleteAt i).dropHolesFrom i
+
 /-- `dict.popitem`: the last live entry with its value, and `t` without it.  The entry array then
 ends at the popped entry's position, as CPython's `dk_nentries` does: the holes after that
 position go, so that the next `popitem` doesn't pass them again, and the holes before it stay,
 which a reverse iterator sees. -/
 def popitem (t : DictTable) : Option ((DictEntry × Value) × DictTable) := do
-  let i ← t.lastLive t.entries.size
-  let e ← t.entry? i
-  return ((e, t.value i), (t.deleteAt i).dropHolesFrom i)
+  let (i, e, v) ← t.popitemAt?
+  return ((e, v), t.removePopped i)
 
 /-- `dict.clear`: no entries, the deletion flag cleared, and a new version of the keys. -/
 def clear (t : DictTable) : DictTable := { empty with keysVersion := t.keysVersion + 1 }

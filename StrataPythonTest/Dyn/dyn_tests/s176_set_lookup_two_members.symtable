@@ -1,0 +1,20 @@
+module top
+  Q: local (assigned, referenced)
+  print: global implicit (referenced)
+  q1: local (assigned, referenced)
+  q2: local (assigned, referenced)
+  s: local (assigned, referenced)
+  class Q
+    __eq__: local (assigned)
+    __hash__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      n: local (parameter, referenced)
+      self: local (parameter, referenced)
+    function __hash__
+      self: local (parameter)
+    function __eq__
+      o: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+qualnames: Q, Q.__eq__, Q.__hash__, Q.__init__

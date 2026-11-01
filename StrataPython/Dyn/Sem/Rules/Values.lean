@@ -13,9 +13,9 @@ set_option autoImplicit false
 /-!
 # Values and checks
 
-Literals, definedness, the checks, `is`, `assertionError`, `unsupported`, and two rules with hard
-cases: `loadGlobal` (a cell found in the world, then the `builtins` dict) and `mkDict` (hashing
-while it builds).
+Literals, tuples and slices, definedness, the checks, `is`, `assertionError`, `unsupported`, and
+two rules with hard cases: `loadGlobal` (a cell found in the world, then the `builtins` dict) and
+`mkDict` (hashing while it builds).
 -/
 
 namespace StrataPython.Dyn.Sem.Rules
@@ -46,6 +46,10 @@ variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
 @[dyn_sem Py.ellipsisLit] def ellipsisLit : Value := .ellipsis
 
 @[dyn_sem Py.assertionError] def assertionError : Value := .builtin .AssertionError
+
+@[dyn_sem Py.mkTuple] def mkTuple (elems : Array Value) : Value := .tuple elems
+
+@[dyn_sem Py.mkSlice] def mkSlice (lo hi step : Value) : Value := .slice lo hi step
 
 /-- The octets of `s`, one per character, if every character is below 256. -/
 def octets (s : String) : Option (Array UInt8) :=

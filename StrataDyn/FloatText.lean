@@ -23,7 +23,9 @@ All arithmetic is on `Nat`, so the conversions are exact.
 
 namespace Strata.Dyn.FloatText
 
-public section
+-- Exposed, so that `#dyn_sem_table`'s check of the axioms that a rule reaches can see these
+-- definitions.
+@[expose] public section
 
 /-- A finite decimal: `±mantissa * 10 ^ exponent`. -/
 structure Decimal where
