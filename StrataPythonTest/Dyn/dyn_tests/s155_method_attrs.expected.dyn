@@ -1,0 +1,184 @@
+module s155_method_attrs {
+  func @|s155_method_attrs.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s155_method_attrs")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s155_method_attrs", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s155_method_attrs", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|s155_method_attrs.C.<body>|, "<body>", "s155_method_attrs")
+      %str.1 : py.Value = py.strLit("C")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %C.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %C.cell.0 : base.Ref(py.Value) = py.globalCell("s155_method_attrs", "C")
+      %set.2 : base.Unit = base.refSet[py.Value](%C.cell.0, %C.0)
+      %C.1 : py.Value = py.loadGlobal("s155_method_attrs", "C") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%C.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %c.cell.0 : base.Ref(py.Value) = py.globalCell("s155_method_attrs", "c")
+      %set.3 : base.Unit = base.refSet[py.Value](%c.cell.0, %call.0)
+      %print.0 : py.Value = py.loadGlobal("s155_method_attrs", "print") ^propagate.0()
+      %c.2 : py.Value = py.loadGlobal("s155_method_attrs", "c") ^propagate.0()
+      %m.8 : py.Value = py.attr(%c.2, "m") ^propagate.0()
+      %__name__.0 : py.Value = py.attr(%m.8, "__name__") ^propagate.0()
+      %c.3 : py.Value = py.loadGlobal("s155_method_attrs", "c") ^propagate.0()
+      %m.10 : py.Value = py.attr(%c.3, "m") ^propagate.0()
+      %__module__.0 : py.Value = py.attr(%m.10, "__module__") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%__name__.0, %__module__.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.2, %kwargs.2) ^propagate.0()
+      %print.1 : py.Value = py.loadGlobal("s155_method_attrs", "print") ^propagate.0()
+      %C.2 : py.Value = py.loadGlobal("s155_method_attrs", "C") ^propagate.0()
+      %cm.0 : py.Value = py.attr(%C.2, "cm") ^propagate.0()
+      %__name__.1 : py.Value = py.attr(%cm.0, "__name__") ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple(%__name__.1)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.1, %tuple.3, %kwargs.3) ^propagate.0()
+      %c.4 : py.Value = py.loadGlobal("s155_method_attrs", "c") ^catch.0()
+      %m.14 : py.Value = py.attr(%c.4, "m") ^catch.0()
+      %nope.0 : py.Value = py.attr(%m.14, "nope") ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %AttributeError.0 : py.Value = py.loadGlobal("s155_method_attrs", "AttributeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %AttributeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s155_method_attrs", "e")
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.2 : py.Value = py.loadGlobal("s155_method_attrs", "print") ^clear.0()
+      %str.2 : py.Value = py.strLit("AttributeError")
+      %e.0 : py.Value = py.loadGlobal("s155_method_attrs", "e") ^clear.0()
+      %args.0 : py.Value = py.attr(%e.0, "args") ^clear.0()
+      %int.0 : py.Value = py.intLit(0)
+      %item.0 : py.Value = py.getItem(%args.0, %int.0) ^clear.0()
+      %tuple.4 : py.Value = py.mkTuple(%str.2, %item.0)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.2, %tuple.4, %kwargs.4) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("s155_method_attrs", "e")
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("s155_method_attrs", "e")
+      %set.6 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %print.3 : py.Value = py.loadGlobal("s155_method_attrs", "print") ^propagate.0()
+      %c.7 : py.Value = py.loadGlobal("s155_method_attrs", "c") ^propagate.0()
+      %m.23 : py.Value = py.attr(%c.7, "m") ^propagate.0()
+      %__func__.0 : py.Value = py.attr(%m.23, "__func__") ^propagate.0()
+      %C.3 : py.Value = py.loadGlobal("s155_method_attrs", "C") ^propagate.0()
+      %m.25 : py.Value = py.attr(%C.3, "m") ^propagate.0()
+      %is.0 : py.Value = py.is(%__func__.0, %m.25)
+      %c.8 : py.Value = py.loadGlobal("s155_method_attrs", "c") ^propagate.0()
+      %m.27 : py.Value = py.attr(%c.8, "m") ^propagate.0()
+      %__self__.0 : py.Value = py.attr(%m.27, "__self__") ^propagate.0()
+      %c.9 : py.Value = py.loadGlobal("s155_method_attrs", "c") ^propagate.0()
+      %is.1 : py.Value = py.is(%__self__.0, %c.9)
+      %C.4 : py.Value = py.loadGlobal("s155_method_attrs", "C") ^propagate.0()
+      %cm.1 : py.Value = py.attr(%C.4, "cm") ^propagate.0()
+      %__self__.1 : py.Value = py.attr(%cm.1, "__self__") ^propagate.0()
+      %C.5 : py.Value = py.loadGlobal("s155_method_attrs", "C") ^propagate.0()
+      %is.2 : py.Value = py.is(%__self__.1, %C.5)
+      %tuple.5 : py.Value = py.mkTuple(%is.0, %is.1, %is.2)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%print.3, %tuple.5, %kwargs.5) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.3 : py.Value):
+      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+      ret(%exc.4)
+  }
+  func @|s155_method_attrs.C.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "m", binding = "def"}, {name = "cm", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s155_method_attrs", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("C")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s155_method_attrs.C.m, "m", "s155_method_attrs")
+      %str.4 : py.Value = py.strLit("m")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %str.5 : py.Value = py.strLit("classmethod")
+      %classmethod.0 : py.Value = py.undef("classmethod")
+      %classmethod.1 : py.Value = py.getOptionalItem(%ns.0, %str.5, %classmethod.0) ^propagate.0()
+      %found.1 : base.Bool = py.isDefined(%classmethod.1)
+      branch(%found.1) ^join.1(%classmethod.1) ^absent.1()
+    absent.1():
+      %classmethod.2 : py.Value = py.loadGlobal("s155_method_attrs", "classmethod") ^propagate.0()
+      jump ^join.1(%classmethod.2)
+    join.1(%classmethod.3 : py.Value):
+      %clo.1 : py.Value = py.mkClosure[[]](@s155_method_attrs.C.cm, "cm", "s155_method_attrs")
+      %args.1 : py.Value = py.mkTuple(%clo.1)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %decorated.0 : py.Value = py.call(%classmethod.3, %args.1, %kwargs.1) ^propagate.0()
+      %str.6 : py.Value = py.strLit("cm")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.6, %decorated.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s155_method_attrs.C.m(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "C.m", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %int.0 : py.Value = py.intLit(1)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s155_method_attrs.C.cm(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %cls.0 : py.Value = py.undef("cls")
+      %cls.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%cls.0)
+      %cls.1 : py.Value = py.undef("cls")
+      %defaults.0 : py.Value = py.mkTuple(%cls.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "C.cm", 0, 1, false, false, "cls") ^propagate.0()
+      %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%cls.cell.0, %cls.2)
+      %int.0 : py.Value = py.intLit(2)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

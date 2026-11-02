@@ -1,0 +1,10 @@
+module top
+  I: local (assigned, referenced)
+  IndexError: global implicit (referenced)
+  print: global implicit (referenced)
+  x: local (assigned)
+  class I
+    __index__: local (assigned)
+    function __index__
+      self: local (parameter)
+qualnames: I, I.__index__

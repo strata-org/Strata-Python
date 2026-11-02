@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Two = <class 'Two'>
+__doc__ = None
+__name__ = '__main__'
+same = True
+xs = [1, 2, 1, 2]
+ys = [1, 2, 1, 2]

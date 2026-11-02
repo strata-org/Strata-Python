@@ -1,0 +1,16 @@
+module top
+  C: local (assigned, referenced)
+  D: local (assigned)
+  c: local (assigned, referenced)
+  print: global implicit (referenced)
+  class D
+    __set__: local (assigned)
+    function __set__
+      o: local (parameter)
+      print: global implicit (referenced)
+      self: local (parameter)
+      v: local (parameter)
+  class C
+    D: global implicit (referenced)
+    x: local (assigned)
+qualnames: C, D, D.__set__

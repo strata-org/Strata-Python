@@ -59,6 +59,7 @@ functions, and the tags of `Value`, of a global cell and of a function's result.
   out : HasPart ε.W Output
   heap : HasHeap σ ε
   call : HasCall σ ε
+  bracket : HasBracket ε
   tagValue : TagOf σ Value
   tagCell : TagOf σ (Ref σ Value)
   tagExcept : TagOf σ (Except Value Value)
@@ -91,7 +92,8 @@ structure Tags (σ : Type) [Store σ] [Decode σ] where
 /-- `PyLang` at the engine boundary, with the tags `tg`. -/
 @[reducible] def bInst (rs : List (List Ty × Ty)) (tg : Tags σ) : PyLang σ (BEff σ rs) :=
   PyLang.mk inferInstance inferInstance inferInstance inferInstance inferInstance inferInstance
-    (HasHeap.mreq (I := Dec σ)) (HasCall.mreq (I := Dec σ)) tg.value tg.cell tg.exc
+    (HasHeap.mreq (I := Dec σ)) (HasCall.mreq (I := Dec σ)) (HasBracket.mreq (I := Dec σ))
+    tg.value tg.cell tg.exc
 
 /-- A tree at the engine boundary. -/
 abbrev BTree (σ : Type) [Store σ] [Decode σ] (rs : List (List Ty × Ty)) (ps : List (List Ty))
@@ -237,7 +239,7 @@ theorem within_update {f : World σ → World σ × BTree σ rs ps S R}
     (hs : e ≠ .writes → ∀ w, Same s w (f w).1)
     (hi : e = .pure → ∀ w₁ w₂, ImmEq s w₁ w₂ → ImmEq s (f w₁).1 (f w₂).1 ∧ (f w₁).2 = (f w₂).2)
     (hk : ∀ w N, Within spec s e QW N (f w).2) : ∀ N, Within spec s e QW N (.update f) :=
-  fun N => ⟨hs, hi, fun w => by rw [Within.after_eq]; exact hk w N⟩
+  fun N => ⟨fun he w => .inr (hs he w), hi, fun w => by rw [Within.after_eq]; exact hk w N⟩
 
 /-- A world update that keeps every possible world possible, that changes no protected state
 below `writes`, and that, at `pure`, maps two worlds that `ImmEq` relates to two related worlds
@@ -248,7 +250,7 @@ theorem update {f : World σ → World σ × BTree σ rs ps S R}
     (hi : e = .pure → ∀ w₁ w₂, ImmEq s w₁ w₂ → ImmEq s (f w₁).1 (f w₂).1 ∧ (f w₁).2 = (f w₂).2)
     (hk : ∀ w, ContOK V s e Q QW (f w).2) : ContOK V s e Q QW (.update f) :=
   ⟨fun g => Spec.sat_update.mpr fun w hw' => ⟨hw g w hw', (hk w).1 g⟩,
-    fun N => ⟨hs, hi, fun w => by rw [Within.after_eq]; exact (hk w).2 N⟩⟩
+    fun N => ⟨fun he w => .inr (hs he w), hi, fun w => by rw [Within.after_eq]; exact (hk w).2 N⟩⟩
 
 /-- A read of the world, whose continuation a `pure` operation can't tell apart on worlds that
 `ImmEq` relates. -/
@@ -261,7 +263,7 @@ theorem read {k : World σ → BTree σ rs ps S R} (hk : ∀ w, ContOK V s e Q Q
 theorem within_read {k : World σ → BTree σ rs ps S R} (hkw : ∀ w N, Within spec s e QW N (k w))
     (hp : e = .pure → ∀ w₁ w₂, ImmEq s w₁ w₂ → k w₁ = k w₂) :
     ∀ N, Within spec s e QW N (.update fun w => (w, k w)) :=
-  fun N => ⟨fun _ w => Same.refl s w, fun he w₁ w₂ h => ⟨h, hp he w₁ w₂ h⟩,
+  fun N => ⟨fun _ w => .inr (Same.refl s w), fun he w₁ w₂ h => ⟨h, hp he w₁ w₂ h⟩,
     fun w => by rw [Within.after_eq]; exact hkw w N⟩
 
 /-- A read of the world whose continuation's `Sat` half may use that the world is possible. -/

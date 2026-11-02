@@ -1,0 +1,178 @@
+module s58_isinstance_class {
+  func @|s58_isinstance_class.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s58_isinstance_class")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s58_isinstance_class", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s58_isinstance_class", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|s58_isinstance_class.A.<body>|, "<body>", "s58_isinstance_class")
+      %str.1 : py.Value = py.strLit("A")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %A.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %A.cell.0 : base.Ref(py.Value) = py.globalCell("s58_isinstance_class", "A")
+      %set.2 : base.Unit = base.refSet[py.Value](%A.cell.0, %A.0)
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|s58_isinstance_class.ClassOf.<body>|, "<body>", "s58_isinstance_class")
+      %str.2 : py.Value = py.strLit("ClassOf")
+      %tuple.1 : py.Value = py.mkTuple(%clo.1, %str.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %ClassOf.0 : py.Value = py.call(%__build_class__.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %ClassOf.cell.0 : base.Ref(py.Value) = py.globalCell("s58_isinstance_class", "ClassOf")
+      %set.3 : base.Unit = base.refSet[py.Value](%ClassOf.cell.0, %ClassOf.0)
+      %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@|s58_isinstance_class.B.<body>|, "<body>", "s58_isinstance_class")
+      %str.3 : py.Value = py.strLit("B")
+      %tuple.2 : py.Value = py.mkTuple(%clo.2, %str.3)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %B.0 : py.Value = py.call(%__build_class__.2, %tuple.2, %kwargs.2) ^propagate.0()
+      %B.cell.0 : base.Ref(py.Value) = py.globalCell("s58_isinstance_class", "B")
+      %set.4 : base.Unit = base.refSet[py.Value](%B.cell.0, %B.0)
+      %print.0 : py.Value = py.loadGlobal("s58_isinstance_class", "print") ^propagate.0()
+      %isinstance.0 : py.Value = py.loadGlobal("s58_isinstance_class", "isinstance") ^propagate.0()
+      %B.1 : py.Value = py.loadGlobal("s58_isinstance_class", "B") ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%B.1, %tuple.3, %kwargs.3) ^propagate.0()
+      %A.1 : py.Value = py.loadGlobal("s58_isinstance_class", "A") ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple(%call.0, %A.1)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%isinstance.0, %tuple.4, %kwargs.4) ^propagate.0()
+      %tuple.5 : py.Value = py.mkTuple(%call.1)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.0, %tuple.5, %kwargs.5) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s58_isinstance_class.A.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s58_isinstance_class", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("A")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s58_isinstance_class.ClassOf.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__get__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s58_isinstance_class", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("ClassOf")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s58_isinstance_class.ClassOf.__get__, "__get__", "s58_isinstance_class")
+      %str.4 : py.Value = py.strLit("__get__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s58_isinstance_class.B.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__class__", value = {call = "ClassOf", args = [], keywords = []}}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s58_isinstance_class", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("B")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %str.4 : py.Value = py.strLit("ClassOf")
+      %ClassOf.0 : py.Value = py.undef("ClassOf")
+      %ClassOf.1 : py.Value = py.getOptionalItem(%ns.0, %str.4, %ClassOf.0) ^propagate.0()
+      %found.1 : base.Bool = py.isDefined(%ClassOf.1)
+      branch(%found.1) ^join.1(%ClassOf.1) ^absent.1()
+    absent.1():
+      %ClassOf.2 : py.Value = py.loadGlobal("s58_isinstance_class", "ClassOf") ^propagate.0()
+      jump ^join.1(%ClassOf.2)
+    join.1(%ClassOf.3 : py.Value):
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%ClassOf.3, %tuple.0, %kwargs.1) ^propagate.0()
+      %str.5 : py.Value = py.strLit("__class__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.5, %call.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s58_isinstance_class.ClassOf.__get__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %o.0 : py.Value = py.undef("o")
+      %o.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%o.0)
+      %t.0 : py.Value = py.undef("t")
+      %t.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%t.0)
+      %self.1 : py.Value = py.undef("self")
+      %o.1 : py.Value = py.undef("o")
+      %t.1 : py.Value = py.undef("t")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %o.1, %t.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "ClassOf.__get__", 0, 3, false, false, "self", "o", "t") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %o.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %t.2 : py.Value = py.tupleGet(%bound.0, 2)
+      %A.0 : py.Value = py.loadGlobal("s58_isinstance_class", "A") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%A.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

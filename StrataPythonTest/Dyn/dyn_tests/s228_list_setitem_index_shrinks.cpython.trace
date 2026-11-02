@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised IndexError: list assignment index out of range
+--- globals
+Shrink = <class 'Shrink'>
+__doc__ = None
+__name__ = '__main__'
+xs = [1]

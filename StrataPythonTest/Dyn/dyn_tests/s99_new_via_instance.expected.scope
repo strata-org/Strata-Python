@@ -1,0 +1,17 @@
+module
+  C: local (assigned, referenced)
+  D: local (assigned, referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  class C
+    __new__: local (assigned)
+    __init_subclass__: local (assigned)
+    function C.__new__
+      params: cls
+      cls: local (parameter, referenced)
+      object: global implicit (referenced)
+    function C.__init_subclass__
+      params: cls
+      cls: local (parameter, referenced)
+      print: global implicit (referenced)
+  class D

@@ -1,0 +1,16 @@
+module
+  C: local (assigned, referenced)
+  c: local (assigned, referenced)
+  print: global implicit (referenced)
+  AttributeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  class C
+    m: local (assigned)
+    cm: local (assigned)
+    classmethod: global implicit (referenced)
+    function C.m
+      params: self
+      self: local (parameter)
+    function C.cm
+      params: cls
+      cls: local (parameter)

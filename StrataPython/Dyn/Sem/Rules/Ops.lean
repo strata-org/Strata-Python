@@ -4,7 +4,7 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
-public import StrataPython.Dyn.Sem.Concrete
+public import StrataPython.Dyn.Sem.Assembly
 public import StrataPython.Dyn.Sem.PyTypes
 public import StrataPython.Dyn.Sem.Proto.Containers
 
@@ -14,7 +14,7 @@ set_option autoImplicit false
 # Operators
 
 The binary and in-place operators, the unary operators, `not`, the truth test and the
-comparisons, on built-in values (`Proto/Ops.lean`).  The in-place operators give the same results
+comparisons, on built-in values and through user dunders (`Proto/Ops.lean`).  The in-place operators give the same results
 as the binary ones, except where they change a list, a dict or a set (`Proto/Containers.lean`).
 The binary operators that make a new set or dict from two objects read the operation's start,
 so that they can fill it below `writes`; the others, and the in-place operators, which run at
@@ -144,22 +144,22 @@ variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
   runRuleFree err #[] (Proto.truthy (m := PyM σ .calls true) val)
 
 @[dyn_sem Py.eq] def eq (lhs rhs : Value) (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] ((Value.bool ·) <$> Proto.richCompare (m := PyM σ .calls true) .eq lhs rhs)
+  runRuleFree err #[] (Proto.richCompareV (m := PyM σ .calls true) .eq lhs rhs)
 
 @[dyn_sem Py.notEq] def notEq (lhs rhs : Value) (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] ((Value.bool ·) <$> Proto.richCompare (m := PyM σ .calls true) .ne lhs rhs)
+  runRuleFree err #[] (Proto.richCompareV (m := PyM σ .calls true) .ne lhs rhs)
 
 @[dyn_sem Py.lt] def lt (lhs rhs : Value) (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] ((Value.bool ·) <$> Proto.richCompare (m := PyM σ .calls true) .lt lhs rhs)
+  runRuleFree err #[] (Proto.richCompareV (m := PyM σ .calls true) .lt lhs rhs)
 
 @[dyn_sem Py.ltE] def ltE (lhs rhs : Value) (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] ((Value.bool ·) <$> Proto.richCompare (m := PyM σ .calls true) .le lhs rhs)
+  runRuleFree err #[] (Proto.richCompareV (m := PyM σ .calls true) .le lhs rhs)
 
 @[dyn_sem Py.gt] def gt (lhs rhs : Value) (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] ((Value.bool ·) <$> Proto.richCompare (m := PyM σ .calls true) .gt lhs rhs)
+  runRuleFree err #[] (Proto.richCompareV (m := PyM σ .calls true) .gt lhs rhs)
 
 @[dyn_sem Py.gtE] def gtE (lhs rhs : Value) (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] ((Value.bool ·) <$> Proto.richCompare (m := PyM σ .calls true) .ge lhs rhs)
+  runRuleFree err #[] (Proto.richCompareV (m := PyM σ .calls true) .ge lhs rhs)
 
 end
 

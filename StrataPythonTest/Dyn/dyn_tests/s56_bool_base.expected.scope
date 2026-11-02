@@ -1,0 +1,5 @@
+module
+  B: local (assigned)
+  bool: global implicit (referenced)
+  print: global implicit (referenced)
+  class B

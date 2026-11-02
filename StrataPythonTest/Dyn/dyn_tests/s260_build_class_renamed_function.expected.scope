@@ -1,0 +1,5 @@
+module
+  f: local (assigned, referenced)
+  C: local (assigned)
+  __build_class__: global implicit (referenced)
+  function f

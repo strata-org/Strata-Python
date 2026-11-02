@@ -1,0 +1,28 @@
+module top
+  C: local (assigned, referenced)
+  D: local (assigned, referenced)
+  M: local (assigned, referenced)
+  print: global implicit (referenced)
+  s: local (assigned, referenced)
+  super: global implicit (referenced)
+  type: global implicit (referenced)
+  class M
+    __call__: local (assigned)
+    m: local (assigned)
+    function __call__
+      __class__: free (referenced)
+      a: local (parameter, referenced)
+      cls: local (parameter)
+      print: global implicit (referenced)
+      super: global implicit (referenced)
+    function m
+      __class__: free (referenced)
+      cls: local (parameter)
+      super: global implicit (referenced)
+  class C
+    __init__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      x: local (parameter, referenced)
+  class D
+qualnames: C, C.__init__, D, M, M.__call__, M.m

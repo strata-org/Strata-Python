@@ -11,7 +11,7 @@ module s171_set_lookup_revisit {
       %n.cell.0 : base.Ref(py.Value) = py.globalCell("s171_set_lookup_revisit", "n")
       %set.2 : base.Unit = base.refSet[py.Value](%n.cell.0, %int.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@|s171_set_lookup_revisit.K.<body>|, "K", "s171_set_lookup_revisit")
+      %clo.0 : py.Value = py.mkClosure[[]](@|s171_set_lookup_revisit.K.<body>|, "<body>", "s171_set_lookup_revisit")
       %str.1 : py.Value = py.strLit("K")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs

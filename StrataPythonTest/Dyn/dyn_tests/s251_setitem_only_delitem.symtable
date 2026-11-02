@@ -1,0 +1,8 @@
+module top
+  L: local (assigned, referenced)
+  class L
+    __delitem__: local (assigned)
+    function __delitem__
+      k: local (parameter)
+      self: local (parameter)
+qualnames: L, L.__delitem__

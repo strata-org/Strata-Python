@@ -1,0 +1,16 @@
+module top
+  A: local (assigned, referenced)
+  B: local (assigned, referenced)
+  M: local (assigned, referenced)
+  object: global implicit (referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  class M
+    mro: local (assigned)
+    function mro
+      cls: local (parameter, referenced)
+      object: global implicit (referenced)
+  class A
+    x: local (assigned)
+  class B
+qualnames: A, B, M, M.mro

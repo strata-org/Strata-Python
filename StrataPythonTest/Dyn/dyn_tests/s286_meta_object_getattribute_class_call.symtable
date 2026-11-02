@@ -1,0 +1,14 @@
+module top
+  C: local (assigned, referenced)
+  M: local (assigned, referenced)
+  type: global implicit (referenced)
+  x: local (assigned)
+  class M
+    __getattribute__: local (assigned)
+    object: global implicit (referenced)
+  class C
+    __new__: local (assigned)
+    function __new__
+      cls: local (parameter, referenced)
+      object: global implicit (referenced)
+qualnames: C, C.__new__, M

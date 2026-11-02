@@ -1,0 +1,19 @@
+module
+  K: local (assigned)
+  D: local (assigned)
+  C: local (assigned, referenced)
+  print: global implicit (referenced)
+  class K
+    __call__: local (assigned)
+    function K.__call__
+      params: self, a, b, c
+      self: local (parameter)
+      a: local (parameter)
+      b: local (parameter)
+      c: local (parameter, referenced)
+  class D
+    __get__: local (assigned)
+    K: global implicit (referenced)
+  class C
+    x: local (assigned)
+    D: global implicit (referenced)

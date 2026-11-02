@@ -1,0 +1,12 @@
+--- stdout 0
+
+--- outcome
+raised RecursionError: maximum recursion depth exceeded in comparison
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+a = <no render: RecursionError>
+b = <no render: RecursionError>
+nest_list = <function object>
+nest_tuple = <function object>

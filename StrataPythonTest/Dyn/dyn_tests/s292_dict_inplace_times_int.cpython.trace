@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unsupported operand type(s) for *=: 'dict' and 'int'
+--- globals
+__doc__ = None
+__name__ = '__main__'
+d = {}

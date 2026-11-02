@@ -1,0 +1,8 @@
+module top
+  C: local (assigned, referenced)
+  class C
+    __eq__: local (assigned)
+    function __eq__
+      o: local (parameter)
+      self: local (parameter)
+qualnames: C, C.__eq__

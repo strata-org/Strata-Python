@@ -1,0 +1,6 @@
+module top
+  C: local (assigned)
+  __build_class__: global implicit (referenced)
+  f: local (assigned, referenced)
+  function f
+qualnames: f

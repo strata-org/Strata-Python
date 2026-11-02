@@ -1,0 +1,8 @@
+module
+  Base: local (assigned, referenced)
+  D: local (assigned)
+  print: global implicit (referenced)
+  class Base
+  lambda <lambda>
+    print: global implicit (referenced)
+  class D

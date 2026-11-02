@@ -1,0 +1,37 @@
+module s192_property_new_not_subtype {
+  func @|s192_property_new_not_subtype.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s192_property_new_not_subtype")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s192_property_new_not_subtype", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s192_property_new_not_subtype", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %property.0 : py.Value = py.loadGlobal("s192_property_new_not_subtype", "property") ^propagate.0()
+      %__new__.0 : py.Value = py.attr(%property.0, "__new__") ^propagate.0()
+      %list.0 : py.Value = py.loadGlobal("s192_property_new_not_subtype", "list") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%list.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%__new__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("s192_property_new_not_subtype", "x")
+      %set.2 : base.Unit = base.refSet[py.Value](%x.cell.0, %call.0)
+      %print.0 : py.Value = py.loadGlobal("s192_property_new_not_subtype", "print") ^propagate.0()
+      %type.0 : py.Value = py.loadGlobal("s192_property_new_not_subtype", "type") ^propagate.0()
+      %x.0 : py.Value = py.loadGlobal("s192_property_new_not_subtype", "x") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%x.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%type.0, %tuple.1, %kwargs.1) ^propagate.0()
+      %list.1 : py.Value = py.loadGlobal("s192_property_new_not_subtype", "list") ^propagate.0()
+      %is.0 : py.Value = py.is(%call.1, %list.1)
+      %tuple.2 : py.Value = py.mkTuple(%is.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.0, %tuple.2, %kwargs.2) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

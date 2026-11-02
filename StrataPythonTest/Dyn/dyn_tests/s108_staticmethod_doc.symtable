@@ -1,0 +1,7 @@
+module top
+  f: local (assigned, referenced)
+  print: global implicit (referenced)
+  sm: local (assigned, referenced)
+  staticmethod: global implicit (referenced)
+  function f
+qualnames: f

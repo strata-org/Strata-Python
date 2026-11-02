@@ -1,0 +1,6 @@
+module top
+  E: local (assigned, referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  class E
+qualnames: E

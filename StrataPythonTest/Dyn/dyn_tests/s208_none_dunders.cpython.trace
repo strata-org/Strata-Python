@@ -1,0 +1,14 @@
+--- stdout 36
+True
+None
+False
+None
+NotImplemented
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+r = <method-wrapper object>
+x = None

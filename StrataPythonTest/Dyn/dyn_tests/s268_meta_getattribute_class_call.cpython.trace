@@ -1,0 +1,13 @@
+--- stdout 23
+made
+ga __new__
+called
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+MM = <class 'MM'>
+__doc__ = None
+__name__ = '__main__'
+x = <C object>

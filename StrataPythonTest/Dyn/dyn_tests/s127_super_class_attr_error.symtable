@@ -1,0 +1,12 @@
+module top
+  A: local (assigned, referenced)
+  B: local (assigned, referenced)
+  super: global implicit (referenced)
+  class A
+  class B
+    __getattribute__: local (assigned)
+    function __getattribute__
+      n: local (parameter, referenced)
+      object: global implicit (referenced)
+      self: local (parameter, referenced)
+qualnames: A, B, B.__getattribute__

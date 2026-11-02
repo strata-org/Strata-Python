@@ -1,0 +1,11 @@
+--- stdout 3
+42
+
+--- outcome
+raised NameError: cannot access free variable '__class__' where it is not associated with a value in enclosing scope
+--- globals
+A = 42
+Meta = <class 'Meta'>
+__doc__ = None
+__name__ = '__main__'
+saved = <function object>

@@ -64,9 +64,11 @@ structure ClassObj where
   bases : Array Value
   /-- Its method resolution order, computed once by C3; it starts with the class itself. -/
   mro : Array Value
-  /-- Its namespace, in insertion order. -/
-  ns : DictTable := .empty
-  /-- The nearest class in its base chain whose instances have a layout of their own. -/
+  /-- Its namespace: a dict object, which no rule hands to Python code (`C.__dict__` is a
+  mappingproxy over it). -/
+  ns : ObjId
+  /-- The nearest class in its base chain whose instances have a layout of their own; `None` when
+  that is the class itself (a class with slots of its own). -/
   solidBase : Value
   /-- Whether its instances get a `__dict__`. -/
   instanceDict : Bool := true
@@ -86,7 +88,7 @@ structure ClassObj where
   hasDel : Bool := false
 
 instance : Inhabited ClassObj :=
-  ⟨⟨"", "", "", #[], #[], .empty, .none, true, #[], false, #[], false,
+  ⟨⟨"", "", "", #[], #[], 0, .none, true, #[], false, #[], false,
   false, none, false⟩⟩
 
 /-- A translated function: its closure, with its cells bound in, its `__name__`, and its
@@ -95,6 +97,11 @@ structure FuncObj (σ : Type) [Store σ] where
   closure : FnRef σ [Value, Value] (Except Value Value)
   name : String
   module : Value
+  /-- Its `__annotations__`, once a value is set. -/
+  annotations : Option Value := none
+  /-- Whether it is a translated class body, which `__build_class__` runs on a namespace: set when
+  the function is made, from its name `<body>`, and changed by no write of `__name__`. -/
+  classBody : Bool := false
 
 /-- The state of an exception: its `args`, its chaining, and the fields of its class
 (`StopIteration.value`, `NameError.name`, …) by name. -/
@@ -163,13 +170,17 @@ inductive PayloadG (F : Type) where
   | iter (it : IterState)
   | module (m : ModuleObj)
   | property (fget fset fdel doc : Value)
-  | classmethod (f : Value)
-  | staticmethod (f : Value)
+  /-- A `classmethod` with its callable; `none` until `__init__` sets it (CPython's `NULL`). -/
+  | classmethod (f : Option Value)
+  /-- A `staticmethod` with its callable; `none` until `__init__` sets it. -/
+  | staticmethod (f : Option Value)
   | super (thisType obj : Value)
   /-- An object without a dict, whose state the semantics doesn't model yet. -/
   | opaque (tag : String) (state : Array Value)
   /-- The descriptor of slot `index` of the class `owner`. -/
   | member (owner : Value) (name : String) (index : Nat)
+  /-- A read-only view of the dict `d`: a class's `__dict__`. -/
+  | mappingProxy (d : Value)
 
 instance {F : Type} : Inhabited (PayloadG F) := ⟨.plain⟩
 
@@ -239,6 +250,7 @@ def PayloadG.lift {F : Type} : PayloadData → PayloadG F
   | .super t o => .super t o
   | .opaque t s => .opaque t s
   | .member o n i => .member o n i
+  | .mappingProxy d => .mappingProxy d
 
 /-- A payload as a rule sees it: a function payload is seen as `none`. -/
 def PayloadG.data? {F : Type} : PayloadG F → Option PayloadData
@@ -264,6 +276,7 @@ def PayloadG.data? {F : Type} : PayloadG F → Option PayloadData
   | .super t o => some (.super t o)
   | .opaque t s => some (.opaque t s)
   | .member o n i => some (.member o n i)
+  | .mappingProxy d => some (.mappingProxy d)
 
 /-- An object with an empty function payload, as one with any. -/
 def ObjG.lift {F : Type} (o : ObjData) : ObjG F := { o with payload := o.payload.lift }

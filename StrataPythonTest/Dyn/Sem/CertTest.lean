@@ -176,11 +176,11 @@ open Lean Meta in
     if (Compiler.getImplementedBy? env name).isSome then throwError "{user} is implemented by other code"
   if n < 10 then throwError "only {n} definitions found"
 
-/-- `isUndef` at `PyM` is the tree that answers at once, by unfolding. -/
+/-- `undefName?` at `PyM` is the tree that answers at once, by unfolding. -/
 example {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε] (hs : Handles ε E)
-    (s : Start) {β : Type} (k : Bool → Sem ε E β) (ke : Value → Sem ε E β) (v : Value) :
-    (PyPure.isUndef (m := PyM σ .pure true) v).1 hs s k ke =
-      k (match v with | .undef _ => true | _ => false) := rfl
+    (s : Start) {β : Type} (k : Option String → Sem ε E β) (ke : Value → Sem ε E β) (v : Value) :
+    (PyPure.undefName? (m := PyM σ .pure true) v).1 hs s k ke =
+      k (match v with | .undef n => some n | _ => none) := rfl
 
 end
 

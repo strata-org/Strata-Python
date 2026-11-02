@@ -14,7 +14,7 @@ module fw05_with_lookup_once {
       %note.cell.0 : base.Ref(py.Value) = py.globalCell("fw05_with_lookup_once", "note")
       %set.3 : base.Unit = base.refSet[py.Value](%note.cell.0, %clo.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure[[]](@|fw05_with_lookup_once.Ctx.<body>|, "Ctx", "fw05_with_lookup_once")
+      %clo.1 : py.Value = py.mkClosure[[]](@|fw05_with_lookup_once.Ctx.<body>|, "<body>", "fw05_with_lookup_once")
       %str.1 : py.Value = py.strLit("Ctx")
       %tuple.0 : py.Value = py.mkTuple(%clo.1, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs
@@ -31,7 +31,7 @@ module fw05_with_lookup_once {
       %rebound_manager.cell.0 : base.Ref(py.Value) = py.globalCell("fw05_with_lookup_once", "rebound_manager")
       %set.7 : base.Unit = base.refSet[py.Value](%rebound_manager.cell.0, %clo.4)
       %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.5 : py.Value = py.mkClosure[[]](@|fw05_with_lookup_once.NoExit.<body>|, "NoExit", "fw05_with_lookup_once")
+      %clo.5 : py.Value = py.mkClosure[[]](@|fw05_with_lookup_once.NoExit.<body>|, "<body>", "fw05_with_lookup_once")
       %str.2 : py.Value = py.strLit("NoExit")
       %tuple.1 : py.Value = py.mkTuple(%clo.5, %str.2)
       %kwargs.1 : py.Value = py.mkKwargs
@@ -149,7 +149,7 @@ module fw05_with_lookup_once {
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "replaced_in_body", 0, 0, false, false) ^propagate.0()
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@|fw05_with_lookup_once.replaced_in_body.Local.<body>|, "Local", "fw05_with_lookup_once")
+      %clo.0 : py.Value = py.mkClosure[[]](@|fw05_with_lookup_once.replaced_in_body.Local.<body>|, "<body>", "fw05_with_lookup_once")
       %str.0 : py.Value = py.strLit("Local")
       %Ctx.0 : py.Value = py.loadGlobal("fw05_with_lookup_once", "Ctx") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.0, %Ctx.0)

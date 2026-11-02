@@ -1,0 +1,48 @@
+module top
+  A: local (assigned, referenced)
+  B: local (assigned, referenced)
+  G: local (assigned)
+  K: local (assigned, referenced)
+  S: local (assigned)
+  classmethod: global implicit (referenced)
+  cm: local (assigned, referenced)
+  f: local (assigned, referenced)
+  print: global implicit (referenced)
+  s: local (assigned, referenced)
+  staticmethod: global implicit (referenced)
+  class S
+    __init__: local (assigned)
+    function __init__
+      __class__: free (referenced)
+      f: local (parameter)
+      self: local (parameter)
+      super: global implicit (referenced)
+      function lambda
+  class A
+    S: global implicit (referenced)
+    m: local (assigned)
+  function f
+  class K
+    __call__: local (assigned)
+    __name__: local (assigned)
+    property: global implicit (referenced)
+    function __call__
+      self: local (parameter)
+    function __name__
+      print: global implicit (referenced)
+      self: local (parameter)
+  class G
+    __call__: local (assigned)
+    __doc__: local (assigned)
+    property: global implicit (referenced)
+    function __call__
+      o: local (parameter)
+      self: local (parameter)
+    function __doc__
+      print: global implicit (referenced)
+      self: local (parameter)
+  class B
+    G: global implicit (referenced)
+    property: global implicit (referenced)
+    x: local (assigned)
+qualnames: A, B, G, G.__call__, G.__doc__, K, K.__call__, K.__name__, S, S.__init__, S.__init__.<locals>.<lambda>, f

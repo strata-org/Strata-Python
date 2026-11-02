@@ -1,0 +1,9 @@
+module top
+  A: local (assigned, referenced)
+  s: local (assigned)
+  class A
+    __hash__: local (assigned)
+    property: global implicit (referenced)
+    function __hash__
+      self: local (parameter)
+qualnames: A, A.__hash__

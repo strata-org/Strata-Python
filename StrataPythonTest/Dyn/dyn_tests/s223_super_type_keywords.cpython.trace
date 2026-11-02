@@ -1,0 +1,11 @@
+--- stdout 76
+TE super() takes no keyword arguments
+TE2 type() takes no keyword arguments
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+__doc__ = None
+__name__ = '__main__'
+a = <A object>

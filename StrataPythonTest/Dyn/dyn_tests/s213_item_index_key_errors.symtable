@@ -1,0 +1,43 @@
+module top
+  A: local (assigned)
+  Big: local (assigned)
+  Boom: local (assigned)
+  err: local (assigned, referenced)
+  print: global implicit (referenced)
+  r: local (assigned, referenced)
+  r1: local (assigned, referenced)
+  r2: local (assigned, referenced)
+  r3: local (assigned, referenced)
+  r4: local (assigned, referenced)
+  s1: local (assigned, referenced)
+  s2: local (assigned, referenced)
+  s3: local (assigned, referenced)
+  s4: local (assigned, referenced)
+  function err
+    Exception: global implicit (referenced)
+    e: local (assigned, referenced)
+    f: local (parameter, referenced)
+    type: global implicit (referenced)
+  class Big
+    __index__: local (assigned)
+    function __index__
+      self: local (parameter)
+  class Boom
+    __index__: local (assigned)
+    function __index__
+      KeyError: global implicit (referenced)
+      self: local (parameter)
+  class A
+  function s1
+    A: global implicit (referenced)
+    Big: global implicit (referenced)
+  function s2
+    A: global implicit (referenced)
+    Big: global implicit (referenced)
+  function s3
+    A: global implicit (referenced)
+    Boom: global implicit (referenced)
+  function s4
+    A: global implicit (referenced)
+    Boom: global implicit (referenced)
+qualnames: A, Big, Big.__index__, Boom, Boom.__index__, err, s1, s2, s3, s4

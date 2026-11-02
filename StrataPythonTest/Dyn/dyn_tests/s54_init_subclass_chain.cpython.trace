@@ -1,0 +1,13 @@
+--- stdout 28
+base Mid
+base Leaf
+mid Leaf
+
+--- outcome
+ok
+--- globals
+Base = <class 'Base'>
+Leaf = <class 'Leaf'>
+Mid = <class 'Mid'>
+__doc__ = None
+__name__ = '__main__'

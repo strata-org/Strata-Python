@@ -1,0 +1,10 @@
+--- stdout 76
+TE descriptor '__getattribute__' requires a 'int' object but received a 'A'
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+__doc__ = None
+__name__ = '__main__'
+a = <A object>

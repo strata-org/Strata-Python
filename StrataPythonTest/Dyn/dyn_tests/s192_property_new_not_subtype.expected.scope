@@ -1,0 +1,6 @@
+module
+  x: local (assigned, referenced)
+  property: global implicit (referenced)
+  list: global implicit (referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)

@@ -1,0 +1,15 @@
+module
+  M: local (assigned, referenced)
+  type: global implicit (referenced)
+  C: local (assigned, referenced)
+  r: local (assigned, referenced)
+  print: global implicit (referenced)
+  class M
+    __getattribute__: local (assigned)
+    object: global implicit (referenced)
+  class C
+    k: local (assigned)
+    classmethod: global implicit (referenced)
+    function C.k
+      params: cls
+      cls: local (parameter)

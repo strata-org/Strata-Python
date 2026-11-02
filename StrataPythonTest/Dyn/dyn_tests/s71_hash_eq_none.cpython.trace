@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: unhashable type: 'C'
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'

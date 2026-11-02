@@ -1,0 +1,6 @@
+module top
+  Outer: local (assigned)
+  class Outer
+    C: local (assigned)
+    class C
+qualnames: Outer, Outer.C

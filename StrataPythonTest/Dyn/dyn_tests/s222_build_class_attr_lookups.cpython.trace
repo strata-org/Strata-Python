@@ -1,0 +1,21 @@
+--- stdout 111
+getattr __mro_entries__
+TE Weird() takes no arguments
+Real
+MM prepare 2
+MM prepare 3
+TE M() takes no arguments
+
+--- outcome
+ok
+--- globals
+Holder = <class 'Holder'>
+M = <class 'M'>
+MM = <class 'MM'>
+Real = <class 'Real'>
+Weird = <class 'Weird'>
+X = <class 'X'>
+__doc__ = None
+__name__ = '__main__'
+h = <Holder object>
+w = <Weird object>

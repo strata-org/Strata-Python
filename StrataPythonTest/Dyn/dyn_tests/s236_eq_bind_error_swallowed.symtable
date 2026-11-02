@@ -1,0 +1,9 @@
+module top
+  A: local (assigned, referenced)
+  r: local (assigned)
+  class A
+    __eq__: local (assigned)
+    property: global implicit (referenced)
+    function __eq__
+      self: local (parameter)
+qualnames: A, A.__eq__

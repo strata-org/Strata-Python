@@ -1,0 +1,12 @@
+module
+  n: global explicit (assigned, referenced, declared_global)
+  C: local (assigned, referenced)
+  print: global implicit (referenced)
+  class C
+    __eq__: local (assigned)
+    function C.__eq__
+      params: self, o
+      self: local (parameter)
+      o: local (parameter)
+      n: global explicit (assigned, referenced, declared_global)
+      NotImplemented: global implicit (referenced)

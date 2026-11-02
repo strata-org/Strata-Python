@@ -1,0 +1,12 @@
+--- stdout 13
+isc 1
+init 1
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+Base = <class 'Base'>
+M = <class 'M'>
+__doc__ = None
+__name__ = '__main__'

@@ -1,0 +1,7 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: type 'bool' is not an acceptable base type
+--- globals
+__doc__ = None
+__name__ = '__main__'

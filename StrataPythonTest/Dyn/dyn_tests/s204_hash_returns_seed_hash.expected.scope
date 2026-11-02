@@ -1,0 +1,11 @@
+module
+  K: local (assigned, referenced)
+  s: local (assigned)
+  print: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  class K
+    __hash__: local (assigned)
+    function K.__hash__
+      params: self
+      self: local (parameter)

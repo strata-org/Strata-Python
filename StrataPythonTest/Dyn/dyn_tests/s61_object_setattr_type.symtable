@@ -1,0 +1,6 @@
+module top
+  C: local (assigned, referenced)
+  object: global implicit (referenced)
+  print: global implicit (referenced)
+  class C
+qualnames: C

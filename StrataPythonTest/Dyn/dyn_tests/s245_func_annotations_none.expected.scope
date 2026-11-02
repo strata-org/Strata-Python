@@ -1,0 +1,7 @@
+module
+  f: local (assigned, referenced)
+  int: global implicit (referenced)
+  r: local (assigned)
+  function f
+    params: x
+    x: local (parameter)

@@ -1,0 +1,11 @@
+--- stdout 5
+True
+
+--- outcome
+raised RecursionError: maximum recursion depth exceeded in comparison
+--- globals
+E = <class 'E'>
+__doc__ = None
+__name__ = '__main__'
+nest = <function object>
+tup = <function object>

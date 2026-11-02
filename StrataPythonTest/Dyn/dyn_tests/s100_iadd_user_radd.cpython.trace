@@ -1,0 +1,11 @@
+--- stdout 10
+radd True
+
+--- outcome
+ok
+--- globals
+Y = <class 'Y'>
+__doc__ = None
+__name__ = '__main__'
+a = 'radd'
+b = [0]

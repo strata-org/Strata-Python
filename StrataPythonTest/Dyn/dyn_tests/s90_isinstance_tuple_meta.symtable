@@ -1,0 +1,15 @@
+module top
+  A: local (assigned, referenced)
+  M: local (assigned, referenced)
+  int: global implicit (referenced)
+  isinstance: global implicit (referenced)
+  print: global implicit (referenced)
+  str: global implicit (referenced)
+  type: global implicit (referenced)
+  class M
+    __instancecheck__: local (assigned)
+    function __instancecheck__
+      cls: local (parameter)
+      obj: local (parameter)
+  class A
+qualnames: A, M, M.__instancecheck__

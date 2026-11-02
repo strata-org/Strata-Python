@@ -1,0 +1,135 @@
+module s267_class_getitem_get_none {
+  func @|s267_class_getitem_get_none.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s267_class_getitem_get_none")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s267_class_getitem_get_none", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s267_class_getitem_get_none", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|s267_class_getitem_get_none.NoneGet.<body>|, "<body>", "s267_class_getitem_get_none")
+      %str.1 : py.Value = py.strLit("NoneGet")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %NoneGet.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %NoneGet.cell.0 : base.Ref(py.Value) = py.globalCell("s267_class_getitem_get_none", "NoneGet")
+      %set.2 : base.Unit = base.refSet[py.Value](%NoneGet.cell.0, %NoneGet.0)
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|s267_class_getitem_get_none.A.<body>|, "<body>", "s267_class_getitem_get_none")
+      %str.2 : py.Value = py.strLit("A")
+      %tuple.1 : py.Value = py.mkTuple(%clo.1, %str.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %A.0 : py.Value = py.call(%__build_class__.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %A.cell.0 : base.Ref(py.Value) = py.globalCell("s267_class_getitem_get_none", "A")
+      %set.3 : base.Unit = base.refSet[py.Value](%A.cell.0, %A.0)
+      %A.1 : py.Value = py.loadGlobal("s267_class_getitem_get_none", "A") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %item.0 : py.Value = py.getItem(%A.1, %int.0) ^propagate.0()
+      %r.cell.0 : base.Ref(py.Value) = py.globalCell("s267_class_getitem_get_none", "r")
+      %set.4 : base.Unit = base.refSet[py.Value](%r.cell.0, %item.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s267_class_getitem_get_none.NoneGet.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__get__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s267_class_getitem_get_none", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("NoneGet")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s267_class_getitem_get_none.NoneGet.__get__, "__get__", "s267_class_getitem_get_none")
+      %str.4 : py.Value = py.strLit("__get__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s267_class_getitem_get_none.A.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__class_getitem__", value = {call = "NoneGet", args = [], keywords = []}}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s267_class_getitem_get_none", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("A")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %str.4 : py.Value = py.strLit("NoneGet")
+      %NoneGet.0 : py.Value = py.undef("NoneGet")
+      %NoneGet.1 : py.Value = py.getOptionalItem(%ns.0, %str.4, %NoneGet.0) ^propagate.0()
+      %found.1 : base.Bool = py.isDefined(%NoneGet.1)
+      branch(%found.1) ^join.1(%NoneGet.1) ^absent.1()
+    absent.1():
+      %NoneGet.2 : py.Value = py.loadGlobal("s267_class_getitem_get_none", "NoneGet") ^propagate.0()
+      jump ^join.1(%NoneGet.2)
+    join.1(%NoneGet.3 : py.Value):
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%NoneGet.3, %tuple.0, %kwargs.1) ^propagate.0()
+      %str.5 : py.Value = py.strLit("__class_getitem__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.5, %call.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s267_class_getitem_get_none.NoneGet.__get__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %obj.0 : py.Value = py.undef("obj")
+      %obj.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%obj.0)
+      %owner.0 : py.Value = py.undef("owner")
+      %owner.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%owner.0)
+      %self.1 : py.Value = py.undef("self")
+      %obj.1 : py.Value = py.undef("obj")
+      %none.0 : py.Value = py.noneLit
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %obj.1, %none.0)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "NoneGet.__get__", 0, 3, false, false, "self", "obj", "owner") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %obj.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %owner.1 : py.Value = py.tupleGet(%bound.0, 2)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

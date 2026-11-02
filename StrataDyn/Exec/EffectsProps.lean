@@ -14,8 +14,10 @@ set_option autoImplicit false
 Key theorems: `Within.lift` (a lower level implies a higher one) and `Within.bind`, which make
 `Within` compose as a rule's computation does; `pure_reads_alike`: two readings of a `pure` tree
 from the same heap and from worlds that `immEq` relates end alike; `bindAll_within`: the binds of
-a closure's arguments change nothing that `Within` counts.  Each recursive theorem follows the
-mutual recursion of its definition through an update.
+a closure's arguments change nothing that `Within` counts; `Within.callBracket`: a tree inside a
+call bracket (`callBracket`) is within `calls`; `sat_callBracket`: the call bracket keeps every
+spec (`Exec.Spec.Sat`).  Each recursive theorem follows the mutual recursion of its definition
+through an update.
 
 The definitions are in `Exec/Effects.lean`: the levels (`Level`), what a language says about its
 world (`WorldSpec`), `Within`, `FnAll` and `VarAll`, and the readings (`Reading.read`, `EnvImm`).
@@ -51,6 +53,11 @@ theorem Level.ne_pure_up {e e' : Level} (h : e.le e') (he : e ≠ .pure) : e' �
 private theorem Level.ne_writes {e e' : Level} (h : e.le e') (h' : e' ≠ .writes) : e ≠ .writes := by
   cases e <;> cases e' <;> simp_all [Level.le, Level.rank]
 
+/-- Between `calls` and a level other than `writes`, the level is `calls`. -/
+private theorem Level.calls_stay {e e' : Level} (h : e.le e') (h' : e' ≠ .writes) (hc : e = .calls) :
+    e' = .calls := by
+  cases e <;> cases e' <;> simp_all [Level.le, Level.rank]
+
 /-- Above `calls` or `writes`, the level is `calls` or `writes`. -/
 theorem Level.calls_up {e e' : Level} (h : e.le e') (h' : e = .calls ∨ e = .writes) :
     e' = .calls ∨ e' = .writes := by
@@ -69,7 +76,8 @@ theorem Within.lift {sp : WorldSpec W St} {s : St} {e e' : Level} {post : Cells 
   | .stop _, _, _ => trivial
   | .choose k, _, h =>
       ⟨fun h' => h.1 (Level.eq_pure (h' ▸ he)), fun i => Within.lift he (k i) (h.2 i)⟩
-  | .update f, _, h => ⟨fun h' => h.1 (Level.ne_writes he h'),
+  | .update f, _, h => ⟨fun h' w => (h.1 (Level.ne_writes he h') w).imp
+        (fun hc => ⟨Level.calls_stay he h' hc.1, hc.2⟩) id,
       fun h' => h.2.1 (Level.eq_pure (h' ▸ he)), fun w => Within.after_lift he (f w) (h.2.2 w)⟩
   | .vis (.region _ _) k, _, h => fun o => Within.lift he (k o) (h o)
   | .vis (.call _ _ _ _) k, _, h => ⟨Level.calls_up he h.1, fun o => Within.lift he (k o) (h.2 o)⟩
@@ -134,6 +142,117 @@ theorem Within.after_bind {sp : WorldSpec W St} {s : St} {e : Level} {R' : Type}
     ∀ (p : W × Tree I σ W rs ps S R) {N : Cells}, Within.after sp s e mid N p →
       Within.after sp s e post N (Sem.bindAfter p f)
   | (_, t), _, h => Within.bind hf t h
+end
+
+mutual
+/-- **A guarded tree is within `calls`**: if `t` is within `writes`, then `callBracket sp.inCall msg t`
+is within `calls`, from the same start, cells and post-condition.  An update whose world or new
+world is inside a bracket is allowed at `calls`; any other guarded update gives the world back and
+stops, which `same` allows since it is reflexive; a write to a cell, a region and a jump have become
+gaps; every other request is allowed at `calls`.  By induction on the tree. -/
+theorem Within.callBracket {sp : WorldSpec W St} {s : St} {post : Cells → R → Prop} (msg : String) :
+    ∀ (t : Tree I σ W rs ps S R) {N : Cells}, Within sp s .writes post N t →
+      Within sp s .calls post N (Exec.callBracket sp.inCall msg t)
+  | .ret _, _, h => h
+  | .stop (.fault _), _, _ => trivial
+  | .stop (.jump _), _, _ => trivial
+  | .choose k, _, h => ⟨by decide, fun i => Within.callBracket msg (k i) (h.2 i)⟩
+  | .update f, _, h => by
+      refine ⟨fun _ w => ?_, fun hp => absurd hp (by decide), fun w => ?_⟩
+      rotate_left
+      · show Within.after sp s .calls post _ (if sp.inCall w then _ else _)
+        rw [Exec.callBracket_update_eq]
+        exact Within.after_callBracket msg (sp.inCall w || sp.inCall (f w).1) w (f w) (h.2.2 w)
+      show (Level.calls = .calls ∧ (sp.inCall w ||
+          sp.inCall (if sp.inCall w then callBracketKeep sp.inCall msg (f w)
+            else callBracketAfter sp.inCall msg (sp.inCall (f w).1) w (f w)).1) = true) ∨
+        sp.same s w (if sp.inCall w then callBracketKeep sp.inCall msg (f w)
+            else callBracketAfter sp.inCall msg (sp.inCall (f w).1) w (f w)).1
+      rw [Exec.callBracket_update_eq]
+      show (Level.calls = .calls ∧ (sp.inCall w ||
+          sp.inCall (callBracketAfter sp.inCall msg (sp.inCall w || sp.inCall (f w).1) w (f w)).1)
+            = true) ∨
+        sp.same s w (callBracketAfter sp.inCall msg (sp.inCall w || sp.inCall (f w).1) w (f w)).1
+      obtain ⟨w', t⟩ := f w
+      by_cases hc : (sp.inCall w || sp.inCall w') = true
+      · simp only [callBracketAfter, hc, ↓reduceIte]
+        exact .inl ⟨trivial, by simp_all⟩
+      · simp only [callBracketAfter, Bool.not_eq_true] at hc ⊢
+        simp only [hc, Bool.false_eq_true, ↓reduceIte]
+        exact .inr (sp.same_refl s w)
+  | .vis (.region _ _) _, _, _ => trivial
+  | .vis (.call _ _ _ _) k, _, h => ⟨.inl rfl, fun o => Within.callBracket msg (k o) (h.2 o)⟩
+  | .vis (.new _ _) k, _, h => fun r => Within.callBracket msg (k r) (h r)
+  | .vis (.get _ _) k, _, h =>
+      ⟨fun hp => absurd hp (by decide), fun v => Within.callBracket msg (k v) (h.2 v)⟩
+  | .vis (.set _ _ _) _, _, _ => trivial
+  | .vis (.modify _ _ _) _, _, _ => trivial
+  | .vis (.bind _ _ _ _ _) k, _, h => fun g => Within.callBracket msg (k g) (h g)
+
+/-- **The call bracket keeps an update within `calls`**: if an update's new world and
+continuation `p` are within `writes`, then what `callBracketAfter` makes of them, read on the
+world `w₀`, is within `calls`. -/
+theorem Within.after_callBracket {sp : WorldSpec W St} {s : St} {post : Cells → R → Prop} (msg : String)
+    (keep : Bool) (w₀ : W) :
+    ∀ (p : W × Tree I σ W rs ps S R) {N : Cells}, Within.after sp s .writes post N p →
+      Within.after sp s .calls post N (callBracketAfter sp.inCall msg keep w₀ p)
+  | (_, t), _, h => by
+      cases keep
+      · exact trivial
+      · exact Within.callBracket msg t h
+end
+
+end
+
+section
+variable {I : Ty → Type} {σ : Type} [Store σ] {W : Type} {rs : List (List Ty × Ty)} {E R G : Type}
+  {V : Exec.Spec G (MEff I σ W rs) E} {Q : G → R → Prop}
+
+mutual
+/-- **The call bracket keeps a spec**: if `t` satisfies `V`, so does `callBracket inCall msg t`,
+for every spec `V` of trees at the engine boundary.  The bracket passes the requests `call`,
+`new`, `get` and `bind` on, and turns `region`, `set`, `modify` and every jump into a fault, which
+satisfies every spec; at an update it keeps either the new world or the old one, and both are
+possible worlds.  By induction on the tree. -/
+theorem sat_callBracket (inCall : W → Bool) (msg : String) :
+    ∀ (t : Sem (MEff I σ W rs) E R) {g : G}, V.Sat Q g t → V.Sat Q g (Exec.callBracket inCall msg t)
+  | .ret _, _, h => h
+  | .stop (.jump _), _, _ => Spec.sat_fault
+  | .stop (.fault _), _, h => h
+  | .choose k, _, h => Spec.sat_choose.mpr fun i =>
+      sat_callBracket inCall msg (k i) (Spec.sat_choose.mp h i)
+  | .update f, g, h => by
+      rw [Exec.callBracket, Spec.Sat]
+      intro w hw
+      rw [Exec.callBracket_update_eq]
+      rw [Spec.Sat] at h
+      exact sat_callBracket.after inCall msg (inCall w || inCall (f w).1) w hw (f w) (h w hw)
+  | .vis (.region _ _) _, _, _ => Spec.sat_fault
+  | .vis (.call _ _ _ _) k, _, h => Spec.sat_vis.mpr ⟨(Spec.sat_vis.mp h).1, fun g₁ he o ho =>
+      sat_callBracket inCall msg (k o) ((Spec.sat_vis.mp h).2 g₁ he o ho)⟩
+  | .vis (.new _ _) k, _, h => Spec.sat_vis.mpr ⟨(Spec.sat_vis.mp h).1, fun g₁ he o ho =>
+      sat_callBracket inCall msg (k o) ((Spec.sat_vis.mp h).2 g₁ he o ho)⟩
+  | .vis (.get _ _) k, _, h => Spec.sat_vis.mpr ⟨(Spec.sat_vis.mp h).1, fun g₁ he o ho =>
+      sat_callBracket inCall msg (k o) ((Spec.sat_vis.mp h).2 g₁ he o ho)⟩
+  | .vis (.set _ _ _) _, _, _ => Spec.sat_fault
+  | .vis (.modify _ _ _) _, _, _ => Spec.sat_fault
+  | .vis (.bind _ _ _ _ _) k, _, h => Spec.sat_vis.mpr ⟨(Spec.sat_vis.mp h).1, fun g₁ he o ho =>
+      sat_callBracket inCall msg (k o) ((Spec.sat_vis.mp h).2 g₁ he o ho)⟩
+
+/-- **The call bracket keeps a spec after an update**: if an update's new world and continuation
+`p`, read on the possible world `w₀`, satisfy `V`, so does what `callBracketAfter` makes of them:
+`p` with its continuation guarded, or `w₀` unchanged with a gap. -/
+theorem sat_callBracket.after (inCall : W → Bool) (msg : String) (keep : Bool) (w₀ : W) {g : G}
+    (hw₀ : V.World g w₀) :
+    ∀ (p : W × Sem (MEff I σ W rs) E R), Spec.SatAfter V Q g p →
+      Spec.SatAfter V Q g (callBracketAfter inCall msg keep w₀ p)
+  | (_, t), h => by
+      rw [Spec.SatAfter] at h
+      cases keep
+      · simp only [callBracketAfter, Bool.false_eq_true, ↓reduceIte, Spec.SatAfter]
+        exact ⟨hw₀, Spec.sat_fault⟩
+      · simp only [callBracketAfter, ↓reduceIte, Spec.SatAfter]
+        exact ⟨h.1, sat_callBracket inCall msg t h.2⟩
 end
 
 end

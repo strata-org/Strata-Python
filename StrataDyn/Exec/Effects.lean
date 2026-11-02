@@ -37,8 +37,9 @@ inductive Level where
   /-- May read mutable state, and changes none. -/
   | reads
   /-- May read mutable state and call functions (`call` requests), which may change it; the rule's
-  own updates change no state that it must leave alone (`WorldSpec.same`).  Which functions it calls
-  is part of its rule's meaning, not bounded by its effect. -/
+  own updates change no state that it must leave alone (`WorldSpec.same`), except inside a call
+  bracket (`WorldSpec.inCall`), where a built-in that runs user code counts as a call.  Which
+  functions it calls is part of its rule's meaning, not bounded by its effect. -/
   | calls
   /-- May change mutable state. -/
   | writes
@@ -59,12 +60,20 @@ state, and what the operation made itself); `same s w w'` holds when `w'` change
 state of `w` that an operation must leave alone (it may add new objects and memo entries, and
 change bookkeeping parts).  `same s` is a preorder: it is reflexive, since a rule reads the world
 with an update that gives the world back, and transitive, so that a run of updates that each keep
-`same` keeps it relative to the world before the first one. -/
+`same` keeps it relative to the world before the first one.  `inCall w` holds when `w` is inside a
+call bracket: a built-in that runs user code counts as a call, so an update of such a world may
+change anything at `calls` (`callBracket`); a language without such built-ins keeps the default.
+`Within` can't tell a bracket's edge from another update that changes what `inCall` reads (the
+marker), so a language that uses brackets must keep four rules: the marker changes only at the edges
+of a call; an edge changes nothing that `same` guards; no other update reads the marker; and every
+function that a call runs, runs with the marker lowered. Then every change of state at `calls` is
+inside a call. -/
 structure WorldSpec (W St : Type) where
   immEq : St → W → W → Prop
   same : St → W → W → Prop
   same_refl : ∀ s w, same s w w
   same_trans : ∀ s w₁ w₂ w₃, same s w₁ w₂ → same s w₂ w₃ → same s w₁ w₃
+  inCall : W → Bool := fun _ => false
 
 /-- A set of cell locations. -/
 abbrev Cells := Nat → Prop
@@ -79,8 +88,9 @@ operation's start `s`, with the post-condition `post` on the new cells and the r
 leaves.  `N` holds the cells that a `new` of this activation made, which the operation may read
 and write at every level.  A region's run is not counted: its answer is any value.
 - `writes`: anything;
-- `calls`: no update of the world changes state it must leave alone, and no write to an older
-  cell; calls are allowed;
+- `calls`: no update of the world changes state it must leave alone, unless the world or the new
+  world is inside a call bracket (`WorldSpec.inCall`), and no write to an older cell; calls are
+  allowed;
 - `reads`: as `calls`, and no call;
 - `pure`: as `reads`, no read of an older cell, no oracle choice, and every update of the world
   maps two worlds that `immEq` relates to two worlds that it relates, with the same
@@ -92,7 +102,8 @@ def Within (sp : WorldSpec W St) (s : St) (e : Level) (post : Cells → R → Pr
   | N, .ret a => post N a
   | _, .stop _ => True
   | N, .choose k => e ≠ .pure ∧ ∀ i, Within sp s e post N (k i)
-  | N, .update f => (e ≠ .writes → ∀ w, sp.same s w (f w).1) ∧
+  | N, .update f => (e ≠ .writes → ∀ w,
+        (e = .calls ∧ (sp.inCall w || sp.inCall (f w).1) = true) ∨ sp.same s w (f w).1) ∧
       (e = .pure → ∀ w₁ w₂, sp.immEq s w₁ w₂ →
         sp.immEq s (f w₁).1 (f w₂).1 ∧ (f w₁).2 = (f w₂).2) ∧
       ∀ w, Within.after sp s e post N (f w)

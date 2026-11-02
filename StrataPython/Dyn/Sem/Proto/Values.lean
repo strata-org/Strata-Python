@@ -6,6 +6,7 @@
 module
 public import StrataPython.Dyn.Sem.Dom
 public import StrataPython.Dyn.Sem.Format
+public import StrataPython.Dyn.Env
 
 set_option autoImplicit false
 
@@ -49,7 +50,11 @@ def checkRepr [PyPure m V] (v : V) : m String := do
 `NameError` carries `name` as its `name`, as CPython's `_PyEval_FormatExcCheckArg` sets it; the
 other classes (`UnboundLocalError` included) carry none. -/
 def requireDefined [PyReads m V] (v : V) (name excType msg : String) : m V := do
-  if ← PyPure.isUndef v then
+  if let some n ← PyPure.undefName? v then
+    -- CPython fills a class's `__class__` cell inside `type.__new__`, the model after
+    -- `__build_class__` returns; in between, the cell holds the mark `Py.classCreating`.
+    if n == Py.classCreating then
+      PyPure.gap "the __class__ cell while a class is created is not modelled yet"
     let fields := if excType == "NameError" then #[("name", PyPure.imm (m := m) (.str (.ofString name)))]
       else #[]
     raiseBuiltin excType msg fields

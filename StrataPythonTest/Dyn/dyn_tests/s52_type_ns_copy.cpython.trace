@@ -1,0 +1,10 @@
+--- stdout 8
+1 False
+
+--- outcome
+ok
+--- globals
+X = <class 'X'>
+__doc__ = None
+__name__ = '__main__'
+d = {'a': 2}

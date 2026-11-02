@@ -1,0 +1,6 @@
+module top
+  E: local (assigned)
+  Exception: global implicit (referenced)
+  class E
+    __slots__: local (assigned)
+qualnames: E

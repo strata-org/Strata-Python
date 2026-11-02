@@ -1,0 +1,14 @@
+--- stdout 16
+imm mm only imm
+
+--- outcome
+ok
+--- globals
+M = <class 'M'>
+N = <class 'N'>
+O = <class 'O'>
+__doc__ = None
+__name__ = '__main__'
+m = 'imm'
+n = 'mm'
+o = 'only imm'

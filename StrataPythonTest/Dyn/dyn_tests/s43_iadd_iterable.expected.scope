@@ -1,0 +1,10 @@
+module
+  Y: local (assigned, referenced)
+  a: local (assigned, referenced)
+  print: global implicit (referenced)
+  class Y
+    __iter__: local (assigned)
+    function Y.__iter__
+      params: self
+      self: local (parameter)
+      iter: global implicit (referenced)

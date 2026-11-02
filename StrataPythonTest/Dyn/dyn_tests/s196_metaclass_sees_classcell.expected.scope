@@ -1,0 +1,22 @@
+module
+  Meta: local (assigned, referenced)
+  type: global implicit (referenced)
+  A: local (assigned)
+  class Meta (needs __class__ cell)
+    __new__: local (assigned)
+    function Meta.__new__
+      params: m, name, bases, ns
+      m: local (parameter, referenced)
+      name: local (parameter, referenced)
+      bases: local (parameter, referenced)
+      ns: local (parameter, referenced)
+      print: global implicit (referenced)
+      len: global implicit (referenced)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+  class A (needs __class__ cell)
+    f: local (assigned)
+    function A.f
+      params: self
+      self: local (parameter)
+      __class__: free (referenced)

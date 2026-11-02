@@ -1,0 +1,9 @@
+--- stdout 15
+AttributeError
+
+--- outcome
+ok
+--- globals
+L = <class 'L'>
+__doc__ = None
+__name__ = '__main__'

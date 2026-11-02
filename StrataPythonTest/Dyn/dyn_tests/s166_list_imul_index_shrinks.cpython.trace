@@ -1,0 +1,10 @@
+--- stdout 6
+empty
+
+--- outcome
+ok
+--- globals
+I = <class 'I'>
+__doc__ = None
+__name__ = '__main__'
+l = []

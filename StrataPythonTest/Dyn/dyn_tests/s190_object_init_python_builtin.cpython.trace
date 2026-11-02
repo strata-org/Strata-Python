@@ -1,0 +1,7 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: _Helper.__init__() takes exactly one argument (the instance to initialize)
+--- globals
+__doc__ = None
+__name__ = '__main__'

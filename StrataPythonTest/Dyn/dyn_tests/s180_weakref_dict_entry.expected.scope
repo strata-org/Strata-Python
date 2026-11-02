@@ -1,0 +1,5 @@
+module
+  E: local (assigned, referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  class E

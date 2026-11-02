@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: object.__new__() takes exactly one argument (the type to instantiate)
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+__doc__ = None
+__name__ = '__main__'

@@ -1,0 +1,11 @@
+--- stdout 6
+1 2 2
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+c = <C object>
+n = 2

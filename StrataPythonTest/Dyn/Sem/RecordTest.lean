@@ -41,8 +41,8 @@ instance : MonadExcept Toy TM where
 
 instance : PyPure TM Toy where
   imm i := .imm i
-  immView v := pure (match v with | .imm i => some i | _ => none)
-  isUndef v := pure (v matches .undef)
+  immViewAll v := pure (match v with | .imm i => some i | _ => none)
+  undefName? v := pure (if v matches .undef then some "x" else none)
   identical _ _ := pure .unknown
   addrHash _ := pure (.exact 0)
   gap msg := ⟨.error (.inl msg)⟩
@@ -54,6 +54,7 @@ instance : PyPure TM Toy where
   hashValue _ := pure (.imm (.int 0))
   allocList _ := pure (.obj 3)
   allocSet _ _ := pure (.obj 4)
+  allocObj _ _ := pure (.obj 5)
 
 instance : PyNew TM Toy where
   dictSetNew _ _ _ _ _ := pure ()
@@ -74,6 +75,7 @@ instance : PyNew TM Toy where
   setClearNew _ := pure ()
   setReplaceNew _ _ := pure ()
   setFreezeNew _ := pure ()
+  classSetMroNew _ _ := pure ()
 
 instance : PyReads TM Toy where
   classOf v := pure (match v with | .obj _ => .obj 99 | _ => .imm (.builtin .int))
@@ -101,9 +103,23 @@ instance : PyReads TM Toy where
   setView _ := pure none
   setHasUser _ := pure false
   dictHasUser _ := pure false
+  setWalkKinds _ := pure ⟨false, false, false⟩
+  dictWalkKinds _ := pure ⟨false, false, false⟩
   setLen _ := pure 0
   setCopy _ _ := pure (.obj 4)
   setSlotAt _ _ := pure .past
+  allocInstance _ _ _ _ := pure (.obj 6)
+  objView _ := pure none
+  objDict _ := pure none
+  slotGet _ _ := pure none
+  moduleAdd _ _ := pure ()
+  depthC := pure 0
+  withDepth _ body := body
+  withPyDepth _ body := body
+
+instance : PyCalls TM Toy where
+  callFunc _ _ _ := ⟨.error (.inl "no call")⟩
+  callBuiltin _ _ _ := ⟨.error (.inl "no call")⟩
 
 /-- Whether a computation raised the built-in class `b`. -/
 def raisedBuiltin {α : Type} (x : TM α) (b : Builtin) : Bool :=
@@ -117,20 +133,23 @@ def raisedBuiltin {α : Type} (x : TM α) (b : Builtin) : Bool :=
 #guard (requireDefined (m := TM) (Toy.imm (.int 2)) "x" "UnboundLocalError" "x").run matches .ok (.imm (.int 2))
 #guard (mkDict (m := TM) #[Toy.imm (.int 1), Toy.imm .none]).run matches .ok (.obj 2)
 #guard (isOp (m := TM) Toy.undef Toy.undef).run matches .error (.inl _)
--- An operator on an object of a user class stops with a gap until the dunder lookup exists.
+-- An operator on an object whose class has no MRO in the record stops with a gap.
 /-- The gap message of a computation, if it stopped with one. -/
 def gapOf {α : Type} (x : TM α) : Option String :=
   match x.run with
   | .error (.inl msg) => some msg
   | _ => none
 
-#guard gapOf (binaryOp (m := TM) .add (Toy.obj 5) (Toy.imm (.int 1))) == some Proto.userGap
-#guard gapOf (richCompare (m := TM) .lt (Toy.obj 5) (Toy.obj 6)) == some Proto.userGap
+#guard gapOf (binaryOp (m := TM) .add (Toy.obj 5) (Toy.imm (.int 1))) ==
+  some "a lookup on a type that is not a class"
+#guard gapOf (richCompare (m := TM) .lt (Toy.obj 5) (Toy.obj 6)) ==
+  some "a lookup on a type that is not a class"
 -- The container combinators run too.
 #guard (getItem (m := TM) (Toy.imm (.tuple #[.imm (.int 7), .imm (.int 8)])) (.imm (.int (-1)))).run
   matches .ok (.imm (.int 8))
 #guard raisedBuiltin (getItem (m := TM) (Toy.imm (.tuple #[])) (.imm (.int 0))) .IndexError
-#guard gapOf (contains (m := TM) (Toy.imm (.int 1)) (Toy.obj 5)) == some Proto.userGap
+#guard gapOf (contains (m := TM) (Toy.imm (.int 1)) (Toy.obj 5)) ==
+  some "a lookup on a type that is not a class"
 -- An int whose number depends on the hash seed stops the operators with a gap.
 /-- An int whose number depends on the hash seed: `hash("a")`. -/
 def seeded : Toy :=

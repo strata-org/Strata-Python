@@ -1,0 +1,4 @@
+module
+  C: local (assigned, referenced)
+  class C
+    __contains__: local (assigned)

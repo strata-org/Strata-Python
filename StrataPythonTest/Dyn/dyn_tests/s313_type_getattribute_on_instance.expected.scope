@@ -1,0 +1,9 @@
+module
+  A: local (assigned, referenced)
+  print: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  AttributeError: global implicit (referenced)
+  class A
+    __getattribute__: local (assigned)
+    type: global implicit (referenced)

@@ -65,15 +65,106 @@ inductive SlotAt (V : Type) where
   | hole
   | past
 
+/-- A class as generic code makes and reads it: its names, bases and MRO after the class itself,
+its namespace (a dict), its solid base, and its flags (`Store.lean`'s `ClassObj`). -/
+structure ClassData (V : Type) where
+  name : String
+  qualname : String
+  module : String
+  bases : Array V
+  /-- Its method resolution order after the class itself. -/
+  mroTail : Array V
+  /-- Its namespace: a dict, which no rule hands to Python code. -/
+  ns : V
+  /-- Its solid base; `None` for a class with slots of its own, which is its own solid base. -/
+  solidBase : V
+  instanceDict : Bool := true
+  slots : Array String := #[]
+  immutable : Bool := false
+  gapped : Array String := #[]
+  writesGap : Bool := false
+  instanceWritesGap : Bool := false
+  tpName : Option String := none
+  hasDel : Bool := false
+
+/-- A native function as generic code makes and reads it (`Store.lean`'s `NativeFn`). -/
+structure NativeData (V : Type) where
+  key : String
+  kind : NativeKind
+  captured : Array V := #[]
+  name : String
+  qualname : String
+  module : String
+  defaults : Option V := none
+  kwdefaults : Option V := none
+  gapped : Array String := #[]
+
+/-- What an object other than a container is, as generic code sees it; a list, a dict, a set, a
+frozenset and the built-in part of a subclass instance have views of their own. -/
+inductive ObjView (V : Type) where
+  /-- An instance of a user class, or of a subclass of a built-in type. -/
+  | inst
+  | cls (c : ClassData V)
+  /-- A translated function: its `__name__`, its `__module__`, its `__annotations__` once set, and
+  whether it is a class body; never its closure. -/
+  | func (name : String) (module : V) (annotations : Option V) (classBody : Bool)
+  | native (f : NativeData V)
+  | exc
+  | iter
+  | module (name : String) (gapped : Array String) (writesGap : Bool)
+  | property (fget fset fdel doc : V)
+  /-- A `classmethod` with its callable; `none` until `__init__` sets it (CPython's `NULL`). -/
+  | classmethod (f : Option V)
+  /-- A `staticmethod` with its callable; `none` until `__init__` sets it. -/
+  | staticmethod (f : Option V)
+  | super (thisType obj : V)
+  | opaque (tag : String) (state : Array V)
+  /-- The descriptor of slot `index` of the class `owner`. -/
+  | member (owner : V) (name : String) (index : Nat)
+  /-- A read-only view of the dict `d`. -/
+  | mappingProxy (d : V)
+
+/-- A new object other than a container or an instance, with its final contents. -/
+inductive NewObj (V : Type) where
+  | cls (c : ClassData V)
+  | native (f : NativeData V)
+  | module (name : String) (gapped : Array String) (writesGap : Bool)
+  | property (fget fset fdel doc : V)
+  /-- A `classmethod` with its callable; `none` until `__init__` sets it (CPython's `NULL`). -/
+  | classmethod (f : Option V)
+  /-- A `staticmethod` with its callable; `none` until `__init__` sets it. -/
+  | staticmethod (f : Option V)
+  | super (thisType obj : V)
+  | opaque (tag : String) (state : Array V)
+  | member (owner : V) (name : String) (index : Nat)
+  | mappingProxy (d : V)
+
+/-- The built-in part of a new instance: none for an instance of a plain user class; else the
+state of the built-in type that its class derives from. -/
+inductive BuiltinPart (V : Type) where
+  | plain
+  | list (elems : Array V)
+  | dict
+  | set
+  | frozenset
+  | tuple (elems : Array V)
+  | str (s : PyStr)
+  | int (i : Int)
+  | float (bits : UInt64)
+  | bytes (b : Array UInt8)
+  | exc (args : Array V)
+
 /-- What a `pure` rule may do: make and view immediates, compare identities, make objects with
 their final contents, run a region, and stop with a gap. -/
 class PyPure (m : Type → Type 1) (V : outParam Type) extends Monad m, MonadExcept V m where
   /-- The value of an immediate. -/
   imm : Imm V → V
-  /-- `v` as an immediate; `none` for an object or an unassigned value. -/
-  immView : V → m (Option (Imm V))
-  /-- Whether `v` is unassigned. -/
-  isUndef : V → m Bool
+  /-- `v` as an immediate, an `int` whose number depends on the hash seed (`symHash`) included;
+  `none` for an object or an unassigned value.  Generic code reads `immView`, which gaps on such an
+  `int`, unless it handles that case itself. -/
+  immViewAll : V → m (Option (Imm V))
+  /-- The name of `v` if it is unassigned. -/
+  undefName? : V → m (Option String)
   /-- `is`. -/
   identical : V → V → m IdResult
   /-- The hash of `v`'s address, for `object.__hash__`. -/
@@ -100,6 +191,9 @@ class PyPure (m : Type → Type 1) (V : outParam Type) extends Monad m, MonadExc
   allocList : Array V → m V
   /-- A new empty set, a frozenset if `frozen`, whose order starts inexact if `inexact`. -/
   allocSet : (frozen inexact : Bool) → m V
+  /-- A new object of the class `cls` with the contents `o`; a new class goes first in its own
+  MRO. -/
+  allocObj : V → NewObj V → m V
 
 /-- Stop with a model-invariant gap (`Invariant.lean`): a case that the model's own code rules
 out. -/
@@ -159,6 +253,41 @@ class PyNew (m : Type → Type 1) (V : outParam Type) where
   of an open one as a value (`setView`), are model invariants. Every maker of a frozenset closes it
   before it escapes. Its abstract reading is a no-op. -/
   setFreezeNew : V → m Unit
+  /-- Give the class `c` the MRO `mro` after itself, from a user `mro()`. -/
+  classSetMroNew : V → Array V → m Unit
+
+/-- Which members of the tables that a walk compares may meet a different key's hash while one
+may run user code: a member of key class `user` with an address hash (`userAddr`), one with any
+other hash (`userOther`), and any member with an exact or other symbolic hash (`nonAddr`). Two
+different live objects never share an address hash. -/
+structure WalkKinds where
+  userAddr : Bool
+  userOther : Bool
+  nonAddr : Bool
+  deriving Inhabited
+
+/-- Whether a walk over tables of the kinds `ks` may run user code: a `user` member whose hash
+may equal another key's. -/
+def WalkKinds.mayRunUser (ks : List WalkKinds) : Bool :=
+  ks.any (·.userOther) || (ks.any (·.userAddr) && ks.any (·.nonAddr))
+
+/-- The count of nested C levels at which the model stops with a gap, 995 below CPython 3.12's
+C recursion limit, where it raises `RecursionError` (lists nested 9,995 deep compare, 9,996 deep
+raise).  As in CPython, each comparison counts 1 and each call into Python 2 more; the margin
+covers a dict or set key's own comparison levels, which the model doesn't count (`keyDepth`). -/
+def cDepthLimit : Nat := 9000
+
+/-- `v` as an immediate; `none` for an object or an unassigned value.  An `int` whose number
+depends on the hash seed stops with a gap, so that no consumer can take it for a known number. -/
+@[inline] def PyPure.immView {m : Type → Type 1} {V : Type} [PyPure m V] (v : V) :
+    m (Option (Imm V)) := do
+  match ← PyPure.immViewAll v with
+  | some (.symHash _) => PyPure.gap "a hash whose number the model does not know"
+  | r => pure r
+
+/-- Whether `v` is unassigned. -/
+@[inline] def PyPure.isUndef {m : Type → Type 1} {V : Type} [PyPure m V] (v : V) : m Bool :=
+  return (← PyPure.undefName? v).isSome
 
 /-- What a `reads` rule may do in addition: read mutable state, and raise a new exception. -/
 class PyReads (m : Type → Type 1) (V : outParam Type) extends PyPure m V where
@@ -223,6 +352,10 @@ class PyReads (m : Type → Type 1) (V : outParam Type) extends PyPure m V where
   setHasUser : V → m Bool
   /-- Whether comparing a key of the dict `d` may run user code, in constant time. -/
   dictHasUser : V → m Bool
+  /-- The kinds of the members of the set `s`, for `WalkKinds.mayRunUser`, in constant time. -/
+  setWalkKinds : V → m WalkKinds
+  /-- The kinds of the keys of the dict `d`, as `setWalkKinds`. -/
+  dictWalkKinds : V → m WalkKinds
   /-- The number of members of the set `s`. -/
   setLen : V → m Nat
   /-- A new set (a frozenset if `frozen`) with the members of `s`, as CPython's `set_merge` into
@@ -230,11 +363,38 @@ class PyReads (m : Type → Type 1) (V : outParam Type) extends PyPure m V where
   setCopy : V → (frozen : Bool) → m V
   /-- Slot `i` of the table of the set `s`, in constant time; a gap if its layout is inexact. -/
   setSlotAt : V → Nat → m (SlotAt V)
+  /-- A new instance of the class `cls` with the built-in part `p`, its `__dict__`'s first
+  entries `dict` and its slot values `slots` (`none` for an unset slot): a model invariant (`PyM.failure`) when
+  they don't fit the class's layout or `dict` repeats a name. -/
+  allocInstance : V → BuiltinPart V → Array (String × V) → Array (Option V) → m V
+  /-- What the object `v` is, other than a container; `none` for an immediate. -/
+  objView : V → m (Option (ObjView V))
+  /-- The `__dict__` of the object `v` (a dict), if it has one. -/
+  objDict : V → m (Option V)
+  /-- Slot `i` of the object `v`, if it is set. -/
+  slotGet : V → Nat → m (Option V)
+  /-- Add the module `name`, whose object is `v`, to the module table: a model invariant (`PyM.failure`) if
+  the table has it.  Only a new entry, which a `reads` operation may add, as it may make a global
+  cell. -/
+  moduleAdd : String → V → m Unit
+  /-- The count of nested C levels, CPython's C recursion count. -/
+  depthC : m Nat
+  /-- `body` one nested C level deeper by `n`: a gap past the model's limit, below CPython's
+  `RecursionError`; the count is back as it was after `body`. -/
+  withDepth : {α : Type} → Nat → m α → m α
+  /-- `body` `n` Python frames deeper: a gap past the model's limit, below CPython's
+  `RecursionError`; the count is back as it was after `body`.  A port of a Python function counts
+  each frame that CPython spends inside it, at least as many as CPython. -/
+  withPyDepth : {α : Type} → Nat → m α → m α
 
 /-- What a `calls` rule may do in addition: call Python code. -/
 class PyCalls (m : Type → Type 1) (V : outParam Type) extends PyReads m V where
   /-- Call a function object with an args tuple and a kwargs dict, one Python call deeper. -/
   callFunc : V → V → V → m V
+  /-- Call a built-in callable (a built-in function, a built-in method, bound or not, or a native
+  function) with an args tuple and a kwargs dict, through the assembly's bodies (`Impls`), inside
+  a call bracket below `writes`. -/
+  callBuiltin : V → V → V → m V
 
 /-- What a `writes` rule may do in addition: change existing state. -/
 class PyWrites (m : Type → Type 1) (V : outParam Type) extends PyCalls m V where
@@ -278,7 +438,34 @@ class PyWrites (m : Type → Type 1) (V : outParam Type) extends PyCalls m V whe
   setClear : V → m Unit
   /-- `setReplaceNew` on any set. -/
   setReplace : V → V → m Unit
+  /-- Set slot `i` of the object `o` to `v`. -/
+  slotSet : V → Nat → V → m Unit
+  /-- Unset slot `i` of the object `o`. -/
+  slotDel : V → Nat → m Unit
+  /-- Set the `__name__` and `__qualname__` of the class `c`. -/
+  classSetName : V → String → String → m Unit
+  /-- Set the `__name__` of the function `f`. -/
+  funcSetName : V → String → m Unit
+  /-- Set the `__annotations__` of the function `f`. -/
+  funcSetAnnotations : V → V → m Unit
+  /-- The `__dict__` of the object `v`, made empty first if it has none yet. -/
+  objEnsureDict : V → m V
+  /-- Set the state of the property, `classmethod` or `staticmethod` `v` to `s`, an object of the
+  same kind. -/
+  stateSet : V → NewObj V → m Unit
 
+/-- **The body of a built-in callable**, generic in the record: from its `self` (the callee itself
+for a function), its args tuple and its kwargs dict, its result.  It runs at `writes`, inside the
+call bracket of a caller below `writes`. -/
+abbrev BuiltinImpl : Type 2 :=
+  ∀ {m : Type → Type 1} {V : Type} [PyWrites m V] [PyNew m V], V → V → V → m V
+
+/-- The bodies of the built-in callables, which `Assembly` joins from each piece's part: by
+built-in function, by built-in type and method name, and by native function's key. -/
+structure Impls : Type 2 where
+  function : Builtin → Option BuiltinImpl := fun _ => none
+  method : Builtin → String → Option BuiltinImpl := fun _ _ => none
+  native : String → Option BuiltinImpl := fun _ => none
 
 end
 

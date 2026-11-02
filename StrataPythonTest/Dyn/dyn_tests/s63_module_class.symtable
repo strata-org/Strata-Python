@@ -1,0 +1,5 @@
+module top
+  builtins: local (imported, referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+qualnames: 

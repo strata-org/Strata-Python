@@ -1,0 +1,4 @@
+module
+  C: local (assigned, referenced)
+  object: global implicit (referenced)
+  class C

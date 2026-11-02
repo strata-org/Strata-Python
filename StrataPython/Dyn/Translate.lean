@@ -878,8 +878,9 @@ def queueFunc (sr : SourceRange) (scope : ScopeId) (cur : Scope)
   modify fun s => { s with pending := s.pending.push job }
   let params := (funcParams cur args).map (·.2)
   let cellTypes := (funcCells cur args).map (·.2)
-  some <$> build (mkClosure (← build (emitFunc fname params)) cellTypes (cells ++ extra) cur.name
-    (← read).module)
+  -- A class body is named `<body>`, which no `def` can be, so that `__build_class__` knows it.
+  some <$> build (mkClosure (← build (emitFunc fname params)) cellTypes (cells ++ extra)
+    (if args.isNone then "<body>" else cur.name) (← read).module)
 
 /-- `f` with the decorators `decs`, already evaluated, applied bottom to top. -/
 def decorate (decs : Array ValId) (f : ValId) : TransM ValId := do
@@ -2177,7 +2178,8 @@ def builtFunc (name : Name) (params : Array (Name × TypeExpr Py.env)) (range : 
 /-- Emit the function `job` queues.  Its parameters are the cells it captures, in
 `capturedVars` order, then its default cells, then `args` and `kwargs`.  A class body reads
 its namespace from `args[0]`, stores `__module__`, `__qualname__` and its docstring, as
-CPython 3.12 does, then runs. -/
+CPython 3.12 does, then runs; if its methods use `__class__`, it ends by putting the mark
+`Py.classCreating` in the cell and returning it. -/
 def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) :
     {fn : Func Py.env Info // fn.WF} × TState :=
   let ctx := { ctx with scope := job.scope, cur := job.cur }
@@ -2207,6 +2209,15 @@ def transFunc (ctx : Ctx) (st : TState) (job : FuncJob) :
               withRange r do writeName "__doc__" (← build (strLit doc)) r
               transStmts (job.body.extract 1)
             | _ => transStmts job.body
+          -- Where CPython's body stores and returns its `__class__` cell, this one puts the
+          -- mark `Py.classCreating` in the cell and returns it.
+          if sc.needsClassCell && (← isOpen) then
+            let some c ← build (cellOf? classCellKey)
+              | internalError "a class body without its __class__ cell" job.range
+            let n ← build (emitConst (.str .base "n") (.str Py.classCreating))
+            let mark ← build (emitTotal (stem "__class__") Py.undef.ref #[n])
+            discard <| build (writeCell c mark)
+            build (emitReturn mark)
         | some a =>
           for sym in sc.symbols do
             if sym.scope == .«local» || sym.scope == .cell then

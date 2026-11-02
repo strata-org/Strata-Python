@@ -1,0 +1,18 @@
+module top
+  Base: local (assigned, referenced)
+  C: local (assigned)
+  ValueError: global implicit (referenced)
+  print: global implicit (referenced)
+  saved: local (assigned, referenced)
+  class Base
+    __init_subclass__: local (assigned)
+    function __init_subclass__
+      ValueError: global implicit (referenced)
+      cls: local (parameter, referenced)
+      saved: global implicit (referenced)
+  class C
+    f: local (assigned)
+    function f
+      __class__: free (referenced)
+      self: local (parameter)
+qualnames: Base, Base.__init_subclass__, C, C.f

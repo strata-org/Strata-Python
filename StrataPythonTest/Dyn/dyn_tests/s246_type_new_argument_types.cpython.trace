@@ -1,0 +1,7 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: type.__new__() argument 1 must be str, not int
+--- globals
+__doc__ = None
+__name__ = '__main__'

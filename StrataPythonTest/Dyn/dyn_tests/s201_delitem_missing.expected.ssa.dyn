@@ -1,0 +1,198 @@
+module s201_delitem_missing {
+  func @|s201_delitem_missing.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s201_delitem_missing")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s201_delitem_missing", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s201_delitem_missing", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|s201_delitem_missing.L.<body>|, "<body>", "s201_delitem_missing")
+      %str.1 : py.Value = py.strLit("L")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %L.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %L.cell.0 : base.Ref(py.Value) = py.globalCell("s201_delitem_missing", "L")
+      %set.2 : base.Unit = base.refSet[py.Value](%L.cell.0, %L.0)
+      %L.1 : py.Value = py.loadGlobal("s201_delitem_missing", "L") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%L.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("s201_delitem_missing", "x")
+      %set.3 : base.Unit = base.refSet[py.Value](%x.cell.0, %call.0)
+      %int.0 : py.Value = py.intLit(1)
+      %x.0 : py.Value = py.loadGlobal("s201_delitem_missing", "x") ^propagate.0()
+      %int.1 : py.Value = py.intLit(0)
+      %store.0 : base.Unit = py.setItem(%x.0, %int.1, %int.0) ^propagate.0()
+      %x.1 : py.Value = py.loadGlobal("s201_delitem_missing", "x") ^catch.0()
+      %int.2 : py.Value = py.intLit(0)
+      %del.0 : base.Unit = py.delItem(%x.1, %int.2) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %AttributeError.0 : py.Value = py.loadGlobal("s201_delitem_missing", "AttributeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %AttributeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s201_delitem_missing", "e")
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.0 : py.Value = py.loadGlobal("s201_delitem_missing", "print") ^clear.0()
+      %str.2 : py.Value = py.strLit("AttributeError")
+      %e.0 : py.Value = py.loadGlobal("s201_delitem_missing", "e") ^clear.0()
+      %args.0 : py.Value = py.attr(%e.0, "args") ^clear.0()
+      %int.3 : py.Value = py.intLit(0)
+      %item.0 : py.Value = py.getItem(%args.0, %int.3) ^clear.0()
+      %tuple.2 : py.Value = py.mkTuple(%str.2, %item.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.2, %kwargs.2) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("s201_delitem_missing", "e")
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("s201_delitem_missing", "e")
+      %set.6 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      %TypeError.0 : py.Value = py.loadGlobal("s201_delitem_missing", "TypeError") ^unwind.0()
+      %match.1 : base.Bool = py.excMatch(%exc.0, %TypeError.0) ^unwind.0()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %print.1 : py.Value = py.loadGlobal("s201_delitem_missing", "print") ^unwind.0()
+      %str.3 : py.Value = py.strLit("TypeError")
+      %tuple.3 : py.Value = py.mkTuple(%str.3)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.1, %tuple.3, %kwargs.3) ^unwind.0()
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^join.0()
+    next.1():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.2 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %x.2 : py.Value = py.loadGlobal("s201_delitem_missing", "x") ^catch.1()
+      %int.4 : py.Value = py.intLit(1)
+      %int.5 : py.Value = py.intLit(2)
+      %none.1 : py.Value = py.noneLit
+      %slice.0 : py.Value = py.mkSlice(%int.4, %int.5, %none.1)
+      %del.1 : base.Unit = py.delItem(%x.2, %slice.0) ^catch.1()
+      jump ^join.1()
+    catch.1(%exc.3 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.3)
+      %AttributeError.1 : py.Value = py.loadGlobal("s201_delitem_missing", "AttributeError") ^unwind.1()
+      %match.2 : base.Bool = py.excMatch(%exc.3, %AttributeError.1) ^unwind.1()
+      branch(%match.2) ^except.2() ^next.2()
+    except.2():
+      %e.cell.3 : base.Ref(py.Value) = py.globalCell("s201_delitem_missing", "e")
+      %set.7 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.3)
+      %print.2 : py.Value = py.loadGlobal("s201_delitem_missing", "print") ^clear.1()
+      %str.4 : py.Value = py.strLit("AttributeError")
+      %e.3 : py.Value = py.loadGlobal("s201_delitem_missing", "e") ^clear.1()
+      %args.1 : py.Value = py.attr(%e.3, "args") ^clear.1()
+      %int.6 : py.Value = py.intLit(0)
+      %item.1 : py.Value = py.getItem(%args.1, %int.6) ^clear.1()
+      %tuple.4 : py.Value = py.mkTuple(%str.4, %item.1)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.2, %tuple.4, %kwargs.4) ^clear.1()
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      %e.4 : py.Value = py.undef("e")
+      %e.cell.4 : base.Ref(py.Value) = py.globalCell("s201_delitem_missing", "e")
+      %set.8 : base.Unit = base.refSet[py.Value](%e.cell.4, %e.4)
+      jump ^join.1()
+    clear.1(%exc.4 : py.Value):
+      %e.5 : py.Value = py.undef("e")
+      %e.cell.5 : base.Ref(py.Value) = py.globalCell("s201_delitem_missing", "e")
+      %set.9 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.5)
+      jump ^unwind.1(%exc.4)
+    next.2():
+      %TypeError.1 : py.Value = py.loadGlobal("s201_delitem_missing", "TypeError") ^unwind.1()
+      %match.3 : base.Bool = py.excMatch(%exc.3, %TypeError.1) ^unwind.1()
+      branch(%match.3) ^except.3() ^next.3()
+    except.3():
+      %print.3 : py.Value = py.loadGlobal("s201_delitem_missing", "print") ^unwind.1()
+      %str.5 : py.Value = py.strLit("TypeError")
+      %tuple.5 : py.Value = py.mkTuple(%str.5)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%print.3, %tuple.5, %kwargs.5) ^unwind.1()
+      %pop.4 : base.Unit = py.popExcept(%prev.1)
+      jump ^join.1()
+    next.3():
+      jump ^unwind.1(%exc.3)
+    unwind.1(%exc.5 : py.Value):
+      %pop.5 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.5)
+    join.1():
+      %none.2 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.2)
+      ret(%ret.0)
+    propagate.0(%exc.6 : py.Value):
+      %exc.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.6)
+      ret(%exc.7)
+  }
+  func @|s201_delitem_missing.L.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__setitem__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s201_delitem_missing", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("L")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s201_delitem_missing.L.__setitem__, "__setitem__", "s201_delitem_missing")
+      %str.4 : py.Value = py.strLit("__setitem__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s201_delitem_missing.L.__setitem__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %k.0 : py.Value = py.undef("k")
+      %k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%k.0)
+      %v.0 : py.Value = py.undef("v")
+      %v.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%v.0)
+      %self.1 : py.Value = py.undef("self")
+      %k.1 : py.Value = py.undef("k")
+      %v.1 : py.Value = py.undef("v")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %k.1, %v.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "L.__setitem__", 0, 3, false, false, "self", "k", "v") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %k.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %v.2 : py.Value = py.tupleGet(%bound.0, 2)
+      %print.0 : py.Value = py.loadGlobal("s201_delitem_missing", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("set")
+      %k.4 : py.Value = py.requireDefined(%k.2, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
+      %v.4 : py.Value = py.requireDefined(%v.2, "v", "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%str.0, %k.4, %v.4)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

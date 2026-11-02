@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: descriptor '__eq__' requires a 'tuple' object but received a 'C'
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'

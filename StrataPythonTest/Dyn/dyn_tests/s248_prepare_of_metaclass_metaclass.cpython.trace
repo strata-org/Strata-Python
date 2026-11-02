@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: MM.__prepare__() missing 1 required positional argument: 'bases'
+--- globals
+MM = <class 'MM'>
+__doc__ = None
+__name__ = '__main__'

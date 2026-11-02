@@ -1,0 +1,18 @@
+--- stdout 152
+True True True True
+aa True True 2
+2 True True True
+True True True True
+True True
+None None
+True True abc True True
+True 1 True
+True b
+3 True True True
+
+--- outcome
+raised TypeError: can only concatenate str (not "int") to str
+--- globals
+N = NotImplemented
+__doc__ = None
+__name__ = '__main__'

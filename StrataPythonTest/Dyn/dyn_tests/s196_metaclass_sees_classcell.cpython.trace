@@ -1,0 +1,10 @@
+--- stdout 7
+4 True
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+Meta = <class 'Meta'>
+__doc__ = None
+__name__ = '__main__'

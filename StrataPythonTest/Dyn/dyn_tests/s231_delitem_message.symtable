@@ -1,0 +1,4 @@
+module top
+  A: local (assigned, referenced)
+  class A
+qualnames: A

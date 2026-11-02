@@ -1,0 +1,19 @@
+module top
+  E: local (assigned, referenced)
+  nest: local (assigned, referenced)
+  print: global implicit (referenced)
+  function nest
+    k: local (parameter, assigned, referenced)
+    x: local (parameter, assigned, referenced)
+  class E
+    __eq__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      n: local (parameter, referenced)
+      self: local (parameter, referenced)
+    function __eq__
+      E: global implicit (referenced)
+      nest: global implicit (referenced)
+      other: local (parameter)
+      self: local (parameter, referenced)
+qualnames: E, E.__eq__, E.__init__, nest

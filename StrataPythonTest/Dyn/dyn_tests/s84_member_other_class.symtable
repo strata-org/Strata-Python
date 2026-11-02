@@ -1,0 +1,9 @@
+module top
+  A: local (assigned, referenced)
+  B: local (assigned, referenced)
+  b: local (assigned, referenced)
+  print: global implicit (referenced)
+  class A
+    __slots__: local (assigned)
+  class B
+qualnames: A, B

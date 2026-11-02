@@ -1,0 +1,18 @@
+module
+  P: local (assigned, referenced)
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  c: local (assigned, referenced)
+  print: global implicit (referenced)
+  l: local (assigned, referenced)
+  Q: local (assigned, referenced)
+  class P
+    __index__: local (assigned)
+    function P.__index__
+      params: self
+      self: local (parameter)
+  class Q
+    __index__: local (assigned)
+    function Q.__index__
+      params: self
+      self: local (parameter)

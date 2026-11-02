@@ -1,0 +1,9 @@
+module top
+  Base: local (assigned, referenced)
+  D: local (assigned)
+  print: global implicit (referenced)
+  class Base
+  function lambda
+    print: global implicit (referenced)
+  class D
+qualnames: <lambda>, Base, D

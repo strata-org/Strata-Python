@@ -1,0 +1,33 @@
+module top
+  C: local (assigned, referenced)
+  D: local (assigned, referenced)
+  P: local (assigned)
+  Q: local (assigned, referenced)
+  d: local (assigned, referenced)
+  print: global implicit (referenced)
+  property: global implicit (referenced)
+  q: local (assigned, referenced)
+  class P
+    __init__: local (assigned)
+    function __init__
+      __class__: free (referenced)
+      self: local (parameter)
+      super: global implicit (referenced)
+      x: cell (parameter)
+      function lambda
+        s: local (parameter)
+        x: free (referenced)
+  class C
+    P: global implicit (referenced)
+    a: local (assigned)
+  class Q
+  class D
+    property: global implicit (referenced)
+    v: local (assigned, referenced)
+    function v
+      self: local (parameter)
+    function v
+      print: global implicit (referenced)
+      self: local (parameter)
+      x: local (parameter, referenced)
+qualnames: C, D, D.v, D.v, P, P.__init__, P.__init__.<locals>.<lambda>, Q

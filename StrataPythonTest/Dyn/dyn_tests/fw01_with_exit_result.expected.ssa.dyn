@@ -14,7 +14,7 @@ module fw01_with_exit_result {
       %note.cell.0 : base.Ref(py.Value) = py.globalCell("fw01_with_exit_result", "note")
       %set.3 : base.Unit = base.refSet[py.Value](%note.cell.0, %clo.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure[[]](@|fw01_with_exit_result.Flag.<body>|, "Flag", "fw01_with_exit_result")
+      %clo.1 : py.Value = py.mkClosure[[]](@|fw01_with_exit_result.Flag.<body>|, "<body>", "fw01_with_exit_result")
       %str.1 : py.Value = py.strLit("Flag")
       %tuple.0 : py.Value = py.mkTuple(%clo.1, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs
@@ -22,7 +22,7 @@ module fw01_with_exit_result {
       %Flag.cell.0 : base.Ref(py.Value) = py.globalCell("fw01_with_exit_result", "Flag")
       %set.4 : base.Unit = base.refSet[py.Value](%Flag.cell.0, %Flag.0)
       %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.2 : py.Value = py.mkClosure[[]](@|fw01_with_exit_result.Ctx.<body>|, "Ctx", "fw01_with_exit_result")
+      %clo.2 : py.Value = py.mkClosure[[]](@|fw01_with_exit_result.Ctx.<body>|, "<body>", "fw01_with_exit_result")
       %str.2 : py.Value = py.strLit("Ctx")
       %tuple.1 : py.Value = py.mkTuple(%clo.2, %str.2)
       %kwargs.1 : py.Value = py.mkKwargs

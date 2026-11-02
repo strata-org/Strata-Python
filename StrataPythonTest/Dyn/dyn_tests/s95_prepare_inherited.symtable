@@ -1,0 +1,17 @@
+module top
+  C: local (assigned)
+  M: local (assigned, referenced)
+  N: local (assigned, referenced)
+  type: global implicit (referenced)
+  class M
+    __prepare__: local (assigned)
+    classmethod: global implicit (referenced)
+    function __prepare__
+      bases: local (parameter)
+      kw: local (parameter, referenced)
+      mcls: local (parameter)
+      name: local (parameter, referenced)
+      print: global implicit (referenced)
+  class N
+  class C
+qualnames: C, M, M.__prepare__, N

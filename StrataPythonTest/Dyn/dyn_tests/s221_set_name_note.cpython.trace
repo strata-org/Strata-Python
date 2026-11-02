@@ -1,0 +1,10 @@
+--- stdout 54
+Error calling __set_name__ on 'D' instance 'x' in 'C'
+
+--- outcome
+ok
+--- globals
+D = <class 'D'>
+__doc__ = None
+__name__ = '__main__'
+n = ["Error calling __set_name__ on 'D' instance 'x' in 'C'"]

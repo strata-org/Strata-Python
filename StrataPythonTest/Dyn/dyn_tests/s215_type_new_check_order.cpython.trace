@@ -1,0 +1,29 @@
+--- stdout 340
+TypeError __dict__ slot disallowed: we already got one
+TypeError __slots__ must be identifiers
+TypeError nonempty __slots__ not supported for subtype of 'int'
+TypeError nonempty __slots__ not supported for subtype of 'I'
+made
+TypeError __slots__ items must be strings, not 'int'
+TypeError multiple bases have instance lay-out conflict
+made
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+I = <class 'I'>
+S = <class 'S'>
+__doc__ = None
+__name__ = '__main__'
+dict_from_second_base = <function object>
+dict_twice = <function object>
+f = <function object>
+int_subclass_subtype = <function object>
+int_subtype = <function object>
+item_before_mro = <function object>
+layout_conflict = <function object>
+make = <function object>
+not_identifier = <function object>
+qualname_slot = <function object>

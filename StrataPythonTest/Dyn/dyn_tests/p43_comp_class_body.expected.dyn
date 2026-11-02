@@ -32,7 +32,7 @@ module p43_comp_class_body {
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
       %__class__.0 : py.Value = py.undef("__class__")
       %__class__.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%__class__.0)
-      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value), base.Ref(py.Value)]](@|p43_comp_class_body.outer.C.<body>|, "C", "p43_comp_class_body", %rows.cell.0, %scale.cell.0, %__class__.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value), base.Ref(py.Value)]](@|p43_comp_class_body.outer.C.<body>|, "<body>", "p43_comp_class_body", %rows.cell.0, %scale.cell.0, %__class__.cell.0)
       %str.0 : py.Value = py.strLit("C")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.0)
       %kwargs.1 : py.Value = py.mkKwargs
@@ -176,8 +176,9 @@ module p43_comp_class_body {
       %clo.1 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@p43_comp_class_body.outer.C.m, "m", "p43_comp_class_body", %rows.cell.0, %__class__.cell.0)
       %str.11 : py.Value = py.strLit("m")
       %store.6 : base.Unit = py.setItem(%ns.0, %str.11, %clo.1) ^propagate.0()
-      %none.0 : py.Value = py.noneLit
-      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      %__class__.1 : py.Value = py.undef(".class being created")
+      %set.3 : base.Unit = base.refSet[py.Value](%__class__.cell.0, %__class__.1)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%__class__.1)
       ret(%ret.0)
     propagate.0(%exc.10 : py.Value):
       %exc.11 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.10)

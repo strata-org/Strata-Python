@@ -1,0 +1,5 @@
+module top
+  len: global implicit (referenced)
+  object: global implicit (referenced)
+  print: global implicit (referenced)
+qualnames: 

@@ -1,0 +1,18 @@
+module top
+  A: local (assigned, referenced)
+  B: local (assigned, referenced)
+  ClassOf: local (assigned)
+  isinstance: global implicit (referenced)
+  print: global implicit (referenced)
+  class A
+  class ClassOf
+    __get__: local (assigned)
+    function __get__
+      A: global implicit (referenced)
+      o: local (parameter)
+      self: local (parameter)
+      t: local (parameter)
+  class B
+    ClassOf: global implicit (referenced)
+    __class__: local (assigned)
+qualnames: A, B, ClassOf, ClassOf.__get__

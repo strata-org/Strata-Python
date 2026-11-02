@@ -1,0 +1,32 @@
+module s238_object_eq_keywords {
+  func @|s238_object_eq_keywords.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s238_object_eq_keywords")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s238_object_eq_keywords", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s238_object_eq_keywords", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %object.0 : py.Value = py.loadGlobal("s238_object_eq_keywords", "object") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%object.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %o.cell.0 : base.Ref(py.Value) = py.globalCell("s238_object_eq_keywords", "o")
+      %set.2 : base.Unit = base.refSet[py.Value](%o.cell.0, %call.0)
+      %o.0 : py.Value = py.loadGlobal("s238_object_eq_keywords", "o") ^propagate.0()
+      %__eq__.0 : py.Value = py.attr(%o.0, "__eq__") ^propagate.0()
+      %o.1 : py.Value = py.loadGlobal("s238_object_eq_keywords", "o") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%o.1)
+      %str.1 : py.Value = py.strLit("k")
+      %int.0 : py.Value = py.intLit(1)
+      %kwargs.1 : py.Value = py.mkKwargs(%str.1, %int.0)
+      %call.1 : py.Value = py.call(%__eq__.0, %tuple.1, %kwargs.1) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

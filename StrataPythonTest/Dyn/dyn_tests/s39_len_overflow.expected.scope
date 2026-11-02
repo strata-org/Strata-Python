@@ -1,0 +1,8 @@
+module
+  C: local (assigned, referenced)
+  print: global implicit (referenced)
+  class C
+    __len__: local (assigned)
+    function C.__len__
+      params: self
+      self: local (parameter)

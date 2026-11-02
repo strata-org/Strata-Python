@@ -1,0 +1,19 @@
+--- PYTHONHASHSEED=0
+--- stdout 0
+
+--- outcome
+raised MemoryError: 
+--- globals
+L = <class 'L'>
+__doc__ = None
+__name__ = '__main__'
+--- PYTHONHASHSEED=1
+--- stdout 11
+ValueError
+
+--- outcome
+ok
+--- globals
+L = <class 'L'>
+__doc__ = None
+__name__ = '__main__'

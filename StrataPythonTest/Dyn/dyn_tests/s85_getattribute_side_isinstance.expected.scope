@@ -1,0 +1,14 @@
+module
+  n: global explicit (assigned, referenced, declared_global)
+  B: local (assigned, referenced)
+  print: global implicit (referenced)
+  isinstance: global implicit (referenced)
+  int: global implicit (referenced)
+  class B
+    __getattribute__: local (assigned)
+    function B.__getattribute__
+      params: self, name
+      self: local (parameter, referenced)
+      name: local (parameter, referenced)
+      n: global explicit (assigned, referenced, declared_global)
+      object: global implicit (referenced)

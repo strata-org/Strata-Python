@@ -78,7 +78,7 @@ rule's type.  Linking
 instantiates it at the machine's token.  A pure rule's wrapper applies the rule to them.  A
 rule's wrapper also applies it to one `Region.slot` per region, one target per successor, its
 state and its `Again` if it loops, and its capabilities: the table's decoding as `Decode σ`,
-`HasHeap.mreq` and `HasCall.mreq` at the machine's requests `MEff`, and each tag the rule takes
+`HasHeap.mreq`, `HasCall.mreq` and `HasBracket.mreq` at the machine's requests `MEff`, and each tag the rule takes
 at the Lean types it names, with the proof `rfl`:
 
 ```
@@ -399,13 +399,15 @@ partial def ltyTerm (cx : TableCtx) (vars holes : Array Term) : LTy → CommandE
       | throwError "#dyn_sem_table: a capability names {.ofConstName d}, the Lean type of no type of this table"
     if σ? then `(@$(rootId d) σ _ $as*) else pure (Syntax.mkApp (rootId d) as)
 
-/-- A capability, as a value: a part of the world by instance search, the machine's cells and
-calls, a tag at the Lean types it names, and a language's bundle field by field.  The table's
+/-- A capability, as a value: a part of the world by instance search, the machine's cells,
+calls and call bracket, a tag at the Lean types it names, and a language's bundle field by field.  The table's
 decoding is the instance `Decode σ` in scope. -/
 partial def capTermOf (cx : TableCtx) (vars : Array Term) (interp rs : Term) :
     Lead → CommandElabM Term
   | .heap => `($(execId "HasHeap.mreq") (σ := σ) (I := $interp) (W := $(cx.world)) (rs := $rs))
   | .call => `($(execId "HasCall.mreq") (σ := σ) (I := $interp) (W := $(cx.world)) (rs := $rs))
+  | .bracket =>
+    `($(execId "HasBracket.mreq") (σ := σ) (I := $interp) (W := $(cx.world)) (rs := $rs))
   | .tag t => do `(⟨$(← tagTerm cx vars #[] t), rfl⟩)
   | .sig as r => do
     let as ← as.toArray.mapM (tagTerm cx vars #[])

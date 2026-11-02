@@ -138,6 +138,110 @@ elab "py_op_cert" : tactic => Tactic.withMainContext do
   unless (← getEnv).contains c do throwError "py_op_cert: no certificate {c}"
   Tactic.evalTactic (← `(tactic| exact $(mkIdent c) _))
 
+/-- The first constant of `forbidden` that `e` names, or a projection in `projs` (a structure and a
+field index) that it makes, other than as the head of an operand of the constructor `mk` of a
+language's class, itself or by `inferInstance` (a table's instance of the class at the world, which
+hands the part to the rule); that operand's arguments are walked. -/
+partial def findForbidden (mk : Lean.Name) (forbidden : Array Lean.Name) (projs : Array (Lean.Name × Nat))
+    (e : Expr) : Option Lean.Name :=
+  let go := findForbidden mk forbidden projs
+  match e with
+  | .const c _ => if forbidden.contains c then some c else none
+  | .app .. =>
+    if e.getAppFn.constName? == some mk then
+      e.getAppArgs.findSome? fun a =>
+        -- The part's instance itself, or `inferInstance` of it.
+        let inst := if a.isAppOf ``inferInstance then a.getAppArgs.back? else some a
+        -- The instance's own arguments (its types and instances) are walked too.
+        match inst with
+        | some i => if i.getAppFn.constName?.any forbidden.contains then i.getAppArgs.findSome? go else go a
+        | none => go a
+    else go e.getAppFn <|> e.getAppArgs.findSome? go
+  | .lam _ t b _ | .forallE _ t b _ => go t <|> go b
+  | .letE _ t v b _ => go t <|> go v <|> go b
+  | .proj s i b => if projs.contains (s, i) then some (s ++ `proj) else go b
+  | .mdata _ b => go b
+  | _ => none
+
+/-- The libraries of this package, whose definitions `#py_part_writers` walks. -/
+def partWritersRoots : List Lean.Name :=
+  [`StrataDyn, `StrataDynTest, `StrataPython, `StrataPythonTest, `StrataPythonTestExtra, `Pylate,
+    `PylateTests]
+
+/-- `#py_part_writers T (lang := L) (forbidden := [c₁, …]) (trusted := [t₁, …])` fails unless no
+definition that the operations of the table `T` reach names a forbidden constant (a guarded part's
+instance, the class field that hands it to a rule, or the world's constructor) outside the trusted
+names, other than as an operand of `L.mk`, the table's instance of the language's class.  A forbidden
+field also forbids the other ways to take it out of its structure: the structure's `casesOn`, `rec`
+and `recOn` (which a `match` or a pattern compiles to), and a raw projection of that field.  The
+walk starts at `T.ops`, takes every definition of a module of this package (`partWritersRoots`),
+private and auxiliary ones included, and never enters a trusted name.  It fails at a definition of
+this package whose code proofs don't see (an `opaque`, `partial` or `noncomputable` definition, or
+one with `@[implemented_by]` or `@[extern]`) and at an axiom of this package that isn't a proof, so that a write can't
+hide in one.  Theorems and the definitions of other packages are not walked: they can't name the
+world. -/
+syntax (name := pyPartWriters) "#py_part_writers " ident " (" &"lang" " := " ident ")"
+  " (" &"forbidden" " := " "[" ident,* "]" ")" " (" &"trusted" " := " "[" ident,* "]" ")" : command
+
+elab_rules : command
+  | `(#py_part_writers $tbl (lang := $lang) (forbidden := [$fs,*]) (trusted := [$ts,*])) => do
+    let res (i : Ident) : CommandElabM Lean.Name := liftCoreM <| realizeGlobalConstNoOverload i
+    let mk := (← res lang) ++ `mk
+    let mut forbidden ← fs.getElems.mapM res
+    let trusted ← ts.getElems.mapM res
+    let ops ← res (mkIdentFrom tbl (tbl.getId.eraseMacroScopes ++ `ops))
+    let env ← getEnv
+    -- A forbidden field: its structure's eliminators, and its raw projection.
+    let mut projs : Array (Lean.Name × Nat) := #[]
+    for f in forbidden do
+      if let some info := env.getProjectionFnInfo? f then
+        let s := info.ctorName.getPrefix
+        projs := projs.push (s, info.i)
+        for elim in [`casesOn, `rec, `recOn] do
+          if env.contains (s ++ elim) then forbidden := forbidden.push (s ++ elim)
+    let ours (n : Lean.Name) : Bool := match env.getModuleIdxFor? n with
+      | some i => partWritersRoots.contains (env.header.moduleNames[i.toNat]!).getRoot
+      | none => true
+    let mut parent : Lean.NameMap Lean.Name := {}
+    let mut seen : Lean.NameSet := {}
+    let mut todo : Array Lean.Name := #[ops]
+    let pathTo (parent : Lean.NameMap Lean.Name) (n : Lean.Name) : String := Id.run do
+      let mut path := [n]
+      let mut cur := n
+      for _ in [0:parent.size] do
+        match parent.find? cur with
+        | some p => path := p :: path; cur := p
+        | none => break
+      return " → ".intercalate (path.map toString)
+    while h : todo.size > 0 do
+      let n := todo[todo.size - 1]
+      todo := todo.pop
+      if seen.contains n then continue
+      seen := seen.insert n
+      if trusted.contains n then continue
+      if (Lean.Compiler.getImplementedBy? env n).isSome || Lean.isExtern env n ||
+          Lean.isNoncomputable env n then
+        throwError m!"#py_part_writers: {.ofConstName ops} reaches {.ofConstName n} ({pathTo parent n}), \
+          whose compiled code is other code than its definition, or which has none"
+      match env.find? n with
+      | some (.defnInfo d) =>
+        if let some c := findForbidden mk forbidden projs d.value then
+          throwError m!"#py_part_writers: {.ofConstName ops} reaches {.ofConstName n} ({pathTo parent n}), \
+            which names {.ofConstName c} outside the trusted primitives"
+        for c in d.value.getUsedConstants do
+          if ours c && !seen.contains c then
+            unless parent.contains c do parent := parent.insert c n
+            todo := todo.push c
+      | some (.opaqueInfo _) =>
+        throwError m!"#py_part_writers: {.ofConstName ops} reaches {.ofConstName n} ({pathTo parent n}), \
+          an opaque or partial definition whose code proofs don't see"
+      | some (.axiomInfo a) =>
+        -- An imported proof whose body isn't exposed is an axiom too; only data counts.
+        if ours n && !(← liftTermElabM (Meta.isProp a.type)) then
+          throwError m!"#py_part_writers: {.ofConstName ops} reaches {.ofConstName n} ({pathTo parent n}), \
+            an axiom of this package"
+      | _ => pure ()
+
 end
 
 end StrataPython.Dyn.Sem

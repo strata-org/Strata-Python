@@ -4,9 +4,9 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
-public import StrataPython.Dyn.Sem.Concrete
+public import StrataPython.Dyn.Sem.Assembly
 public import StrataPython.Dyn.Sem.PyTypes
-public import StrataPython.Dyn.Sem.Proto.Calls
+public import StrataPython.Dyn.Sem.Proto.Attrs
 
 set_option autoImplicit false
 
@@ -27,19 +27,19 @@ open Strata.Dyn.Exec
 variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
 
 @[dyn_sem Py.call] def call (func args kwargs : Value) (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] (Proto.call (m := PyM σ .writes true) func args kwargs)
+  runRuleFree err #[] (Proto.callN (m := PyM σ .writes true) Proto.dispatchDepth func args kwargs)
 
 @[dyn_sem Py.qualifiedRef] def qualifiedRef (moduleName name : String) (err : Target E [Value]) :
     Sem ε E Value :=
-  runRuleFree err #[] (Proto.qualifiedRef (m := PyM σ .reads true) moduleName name)
+  runRuleFree err #[] (Proto.qualifiedRef (m := PyM σ .calls true) moduleName name)
 
 @[dyn_sem Py.importModule] def importModule (module : String) (err : Target E [Value]) :
     Sem ε E Value :=
-  runRuleFree err #[] (Proto.importModule (m := PyM σ .reads true) module)
+  runRuleFree err #[] (Proto.importModule (m := PyM σ .calls true) module)
 
 @[dyn_sem Py.importFrom] def importFrom (module name : String) (err : Target E [Value]) :
     Sem ε E Value :=
-  runRuleFree err #[] (Proto.importFrom (m := PyM σ .reads true) module name)
+  runRuleFree err #[] (Proto.importFrom (m := PyM σ .calls true) module name)
 
 @[dyn_sem Py.bindArgs]
 def bindArgs (args kwargs defaults : Value) (qualname : String) (nPosOnly nPos : Int)
@@ -52,7 +52,7 @@ def bindArgs (args kwargs defaults : Value) (qualname : String) (nPosOnly nPos :
 
 @[dyn_sem Py.argsTuple] def argsTuple (callee iterable : Value) (err : Target E [Value]) :
     Sem ε E Value :=
-  runRuleFree err #[] (Proto.argsTuple (m := PyM σ .reads true) callee iterable)
+  runRuleFree err #[] (Proto.argsTuple (m := PyM σ .calls true) callee iterable)
 
 @[dyn_sem Py.dictMerge] def dictMerge (callee dict other : Value) (err : Target E [Value]) :
     Sem ε E Value :=

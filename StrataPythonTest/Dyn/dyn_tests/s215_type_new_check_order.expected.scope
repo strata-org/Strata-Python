@@ -1,0 +1,69 @@
+module
+  make: local (assigned, referenced)
+  dict_twice: local (assigned, referenced)
+  not_identifier: local (assigned, referenced)
+  int_subtype: local (assigned, referenced)
+  I: local (assigned)
+  int: global implicit (referenced)
+  int_subclass_subtype: local (assigned, referenced)
+  A: local (assigned, referenced)
+  S: local (assigned)
+  dict_from_second_base: local (assigned, referenced)
+  B: local (assigned)
+  item_before_mro: local (assigned, referenced)
+  layout_conflict: local (assigned, referenced)
+  qualname_slot: local (assigned, referenced)
+  f: local (assigned, referenced)
+  function make
+    params: f
+    f: local (parameter, referenced)
+    print: global implicit (referenced)
+    TypeError: global implicit (referenced)
+    ValueError: global implicit (referenced)
+    e: local (assigned, referenced)
+    type: global implicit (referenced)
+  function dict_twice
+    X: local (assigned)
+    class dict_twice.<locals>.X
+      __slots__: local (assigned)
+  function not_identifier
+    X: local (assigned)
+    class not_identifier.<locals>.X
+      __slots__: local (assigned)
+  function int_subtype
+    Y: local (assigned)
+    int: global implicit (referenced)
+    class int_subtype.<locals>.Y
+      __slots__: local (assigned)
+  class I
+  function int_subclass_subtype
+    J: local (assigned)
+    I: global implicit (referenced)
+    class int_subclass_subtype.<locals>.J
+      __slots__: local (assigned)
+  class A
+  class S
+    __slots__: local (assigned)
+  function dict_from_second_base
+    C: local (assigned)
+    S: global implicit (referenced)
+    A: global implicit (referenced)
+    class dict_from_second_base.<locals>.C
+      __slots__: local (assigned)
+  class B
+  function item_before_mro
+    C: local (assigned)
+    A: global implicit (referenced)
+    B: global implicit (referenced)
+    class item_before_mro.<locals>.C
+      __slots__: local (assigned)
+  function layout_conflict
+    D: local (assigned)
+    int: global implicit (referenced)
+    str: global implicit (referenced)
+    bool: global implicit (referenced)
+    class layout_conflict.<locals>.D
+  function qualname_slot
+    X: local (assigned)
+    class qualname_slot.<locals>.X
+      __slots__: local (assigned)

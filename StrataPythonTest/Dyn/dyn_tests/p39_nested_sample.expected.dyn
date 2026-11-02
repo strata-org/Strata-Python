@@ -46,7 +46,7 @@ module p39_nested_sample {
       %int.0 : py.Value = py.intLit(0)
       %set.2 : base.Unit = base.refSet[py.Value](%count.cell.0, %int.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value), base.Ref(py.Value)]](@|p39_nested_sample.make.Box.<body>|, "Box", "p39_nested_sample", %prefix.cell.0, %count.cell.0, %json.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value), base.Ref(py.Value)]](@|p39_nested_sample.make.Box.<body>|, "<body>", "p39_nested_sample", %prefix.cell.0, %count.cell.0, %json.cell.0)
       %str.0 : py.Value = py.strLit("Box")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.0)
       %kwargs.1 : py.Value = py.mkKwargs

@@ -1,0 +1,27 @@
+module s247_type_new_none_bases {
+  func @|s247_type_new_none_bases.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s247_type_new_none_bases")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s247_type_new_none_bases", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s247_type_new_none_bases", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %type.0 : py.Value = py.loadGlobal("s247_type_new_none_bases", "type") ^propagate.0()
+      %__new__.0 : py.Value = py.attr(%type.0, "__new__") ^propagate.0()
+      %type.1 : py.Value = py.loadGlobal("s247_type_new_none_bases", "type") ^propagate.0()
+      %str.1 : py.Value = py.strLit("X")
+      %none.1 : py.Value = py.noneLit
+      %dict.0 : py.Value = py.mkDict ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%type.1, %str.1, %none.1, %dict.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%__new__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %none.2 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.2)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

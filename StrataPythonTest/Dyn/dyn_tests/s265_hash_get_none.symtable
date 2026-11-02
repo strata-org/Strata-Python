@@ -1,0 +1,14 @@
+module top
+  A: local (assigned, referenced)
+  NoneGet: local (assigned)
+  s: local (assigned)
+  class NoneGet
+    __get__: local (assigned)
+    function __get__
+      obj: local (parameter)
+      owner: local (parameter)
+      self: local (parameter)
+  class A
+    NoneGet: global implicit (referenced)
+    __hash__: local (assigned)
+qualnames: A, NoneGet, NoneGet.__get__

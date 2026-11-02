@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: not all arguments converted during string formatting
+--- globals
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+s = 'x'

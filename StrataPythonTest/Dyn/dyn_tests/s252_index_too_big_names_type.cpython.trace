@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised IndexError: cannot fit 'Big' into an index-sized integer
+--- globals
+Big = <class 'Big'>
+__doc__ = None
+__name__ = '__main__'

@@ -1,0 +1,10 @@
+--- stdout 73
+RT uninitialized classmethod object
+RT uninitialized staticmethod object
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'

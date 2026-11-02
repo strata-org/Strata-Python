@@ -1,0 +1,6 @@
+module top
+  B: local (assigned, referenced)
+  f: local (assigned, referenced)
+  super: global implicit (referenced)
+  class B
+qualnames: B

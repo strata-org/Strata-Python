@@ -14,7 +14,7 @@ module fw06_with_in_loop {
       %note.cell.0 : base.Ref(py.Value) = py.globalCell("fw06_with_in_loop", "note")
       %set.3 : base.Unit = base.refSet[py.Value](%note.cell.0, %clo.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure[[]](@|fw06_with_in_loop.Suppress.<body>|, "Suppress", "fw06_with_in_loop")
+      %clo.1 : py.Value = py.mkClosure[[]](@|fw06_with_in_loop.Suppress.<body>|, "<body>", "fw06_with_in_loop")
       %str.1 : py.Value = py.strLit("Suppress")
       %tuple.0 : py.Value = py.mkTuple(%clo.1, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs

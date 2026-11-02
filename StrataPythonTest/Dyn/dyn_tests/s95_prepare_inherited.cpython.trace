@@ -1,0 +1,10 @@
+--- stdout 12
+prepare C 1
+
+--- outcome
+raised TypeError: C.__init_subclass__() takes no keyword arguments
+--- globals
+M = <class 'M'>
+N = <class 'N'>
+__doc__ = None
+__name__ = '__main__'

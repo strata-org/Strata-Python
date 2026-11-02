@@ -1,0 +1,6 @@
+module
+  E: local (assigned, referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  AttributeError: global implicit (referenced)
+  class E

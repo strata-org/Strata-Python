@@ -1,0 +1,23 @@
+module
+  Base: local (assigned, referenced)
+  Mid: local (assigned, referenced)
+  Leaf: local (assigned)
+  class Base (needs __class__ cell)
+    __init_subclass__: local (assigned)
+    function Base.__init_subclass__
+      params: cls, **kw
+      cls: local (parameter, referenced)
+      kw: local (parameter, referenced)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+      print: global implicit (referenced)
+  class Mid (needs __class__ cell)
+    __init_subclass__: local (assigned)
+    function Mid.__init_subclass__
+      params: cls, **kw
+      cls: local (parameter, referenced)
+      kw: local (parameter, referenced)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+      print: global implicit (referenced)
+  class Leaf

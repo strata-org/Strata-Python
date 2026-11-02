@@ -121,7 +121,8 @@ itself may do, its regions aside. From the least to the most:
 * `reads`: it may read mutable state, as `base.refGet` does.
 * `calls`: it may call code that the IR does not show, such as a user-defined method (a Python
   `__eq__` or a JavaScript getter), and that code may read or change any state it can reach. The
-  operation changes state only inside its calls; its own updates change none. Which functions it
+  operation changes state only inside its calls; its own updates change none, except inside a call
+  bracket, where a built-in that runs user code counts as a call (§4). Which functions it
   calls is part of its rule's meaning, checked by conformance (the verdict files of §5), not
   bounded by its effect.
 * `writes`: the operation itself may change state, as `base.refSet` does.
@@ -949,8 +950,8 @@ inside an operand's datatype.
 ### A language's capabilities: `@[dyn_lang]`
 
 `@[dyn_lang]` declares a language's capabilities as one class, whose fields are parts of the
-world, `HasHeap`, `HasCall` and tags, or a parent language's class it extends. Each field
-becomes an instance, so a rule that takes the class has every capability:
+world, `HasHeap`, `HasCall`, the call bracket `HasBracket` and tags, or a parent language's
+class it extends. Each field becomes an instance, so a rule that takes the class has every capability:
 
 ```lean
 @[dyn_lang] class Lang (σ : outParam Type) [Store σ] [Decode σ] (ε : Eff) where
@@ -964,6 +965,17 @@ variable {σ : Type} [Store σ] [Decode σ] [Lang σ ε]
 
 The token is an `outParam`, so a part of the world, which does not mention it, is found
 through the class.
+
+A language whose built-ins run user code (a built-in `sorted` that calls a key function) takes
+`HasBracket`, and says which worlds are inside a bracket with `HasInCall`. Its `callBracket` runs a
+tree inside a call bracket: a world update is kept only when its old or its new world is inside a
+bracket, and a cell write, an update of a cell in place, a region or a jump stops with a gap.
+`Within` at `calls` (§5) then lets an update change anything when its old or its new world is
+inside a bracket (`WorldSpec.inCall`, §5): the built-in counts as a call (`Within.callBracket`).
+`Within` can't tell a bracket's edge from another update that changes the marker, so a language that
+uses brackets must keep four rules: the marker changes only at the edges of a call; an edge changes
+nothing that `same` guards; no other update reads the marker; and every function that a call runs, runs
+with the marker lowered. Then every change of state at `calls` is inside a call.
 
 ### The table and `#dyn_coverage`
 
@@ -1045,17 +1057,19 @@ definitions may call only what its own definition reaches. The table checks its 
 the world parts' instances the same way. Outside proofs, propositions and predicates, which never
 run, a rule may also not see where a ref's cell or a closure's function is (`Ref.loc`, `FnRef.idx`,
 `FnRef.captured`, the fields of `Ref.Raw` and `FnRef.Raw`, a match on them, or a request taken from
-a heap or call capability that the rule built itself): a pass that removes or renumbers cells must
+a heap, call or bracket capability that the rule built itself): a pass that removes or renumbers cells must
 not change a rule's result. Nor may it build a `Ref.Raw` or `FnRef.Raw` itself: a ref's validity is
 a proof, but at the machine's own token it is `True`, so a rule could point a ref at any cell, or
 rebuild a closure with another closure's captures. Nor may it build or take apart a machine request
 (`MReq`), which holds locations: only the handles that a table passes to it build requests, only the
 machine reads them, and only the
-declarations that a table emits may name `Region.slot`, `HasHeap.mreq` or `HasCall.mreq`. Every
+declarations that a table emits may name `Region.slot`, `HasHeap.mreq`, `HasCall.mreq` or `HasBracket.mreq`. Every
 error names the rule, or the initial world, and, except for an axiom found inside a proof, the path
 to what it reaches. Equality of refs and of closures stays allowed, since it shows nothing of where
-they are, and so do `MReq.Out`, which computes only a type, and `MReq.writesCell`, whose one bit
-depends only on a request's constructor. A name that the check trusts this way must still run its
+they are, and so do `MReq.Out`, which computes only a type, `MReq.writesCell`, whose one bit
+depends only on a request's constructor, and the call bracket's code (`callBracket`,
+`callBracketKeep` and `callBracketAfter`), which rebuilds a body's requests unchanged but for the
+gaps it puts in. A name that the check trusts this way must still run its
 definition: a `@[csimp]` swap of it, or of a request's or a ref's constructor, field or eliminator,
 which its code uses, is rejected. Nor may a rule build a ref or a closure from a raw one
 (`Ref.mk`, `FnRef.mk`): wrapping a ref's raw cell at another type (`⟨r.raw⟩`) would give it
@@ -1348,8 +1362,8 @@ of the world. Python's rules take this route (`StrataPython/Dyn/Sem/`).
 says that a rule's tree `t` stays within the effect `e`, relative to the operation's start `s`. A
 language describes its world with a `WorldSpec`: `same s w w'` says that `w'` changes no state of
 `w` that an operation must leave alone (it may add new objects and memo entries, and change
-bookkeeping parts), and `immEq s w₁ w₂` says that a `pure` operation can't tell `w₁` and `w₂`
-apart. `Within.lift` raises a tree to a higher effect, and `Within.bind` composes two trees.
+bookkeeping parts), `immEq s w₁ w₂` says that a `pure` operation can't tell `w₁` and `w₂`
+apart, and `inCall w` says that `w` is inside a call bracket (§4). `Within.lift` raises a tree to a higher effect, and `Within.bind` composes two trees.
 `pure_reads_alike` gives `pure` its meaning: two readings of a `pure` tree from the same heap and
 from worlds that `immEq` relates give the same result, when the answers of its regions can't tell
 such worlds apart (`EnvImm`). A `pure` tree also makes no oracle choice.

@@ -1,0 +1,13 @@
+--- stdout 15
+True abab True
+
+--- outcome
+raised IndexError: tuple index out of range
+--- globals
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+a = [1, 1]
+b = 'abab'
+c = (3, 3)
+l = [10, 20, 30]

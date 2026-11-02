@@ -1,0 +1,13 @@
+--- stdout 27
+eq 1
+eq 2
+False True False
+
+--- outcome
+ok
+--- globals
+V = <class 'V'>
+__doc__ = None
+__name__ = '__main__'
+a = {'a': <V object>, 'b': <V object>, 'z': 9}
+b = {'a': 0, 'b': 0, 'c': 0}

@@ -1,0 +1,9 @@
+--- stdout 9
+isc Base
+
+--- outcome
+ok
+--- globals
+Base = <class 'Base'>
+__doc__ = None
+__name__ = '__main__'

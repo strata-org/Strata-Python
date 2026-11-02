@@ -17,7 +17,7 @@ module fw08_try_in_with {
       %note.cell.0 : base.Ref(py.Value) = py.globalCell("fw08_try_in_with", "note")
       %set.4 : base.Unit = base.refSet[py.Value](%note.cell.0, %clo.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure[[]](@|fw08_try_in_with.Ctx.<body>|, "Ctx", "fw08_try_in_with")
+      %clo.1 : py.Value = py.mkClosure[[]](@|fw08_try_in_with.Ctx.<body>|, "<body>", "fw08_try_in_with")
       %str.1 : py.Value = py.strLit("Ctx")
       %tuple.0 : py.Value = py.mkTuple(%clo.1, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs

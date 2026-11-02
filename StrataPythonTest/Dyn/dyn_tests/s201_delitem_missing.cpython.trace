@@ -1,0 +1,12 @@
+--- stdout 62
+set 0 1
+AttributeError __delitem__
+AttributeError __delitem__
+
+--- outcome
+ok
+--- globals
+L = <class 'L'>
+__doc__ = None
+__name__ = '__main__'
+x = <L object>

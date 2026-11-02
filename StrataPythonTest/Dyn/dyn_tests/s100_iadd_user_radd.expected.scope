@@ -1,0 +1,11 @@
+module
+  Y: local (assigned, referenced)
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  print: global implicit (referenced)
+  class Y
+    __radd__: local (assigned)
+    function Y.__radd__
+      params: self, o
+      self: local (parameter)
+      o: local (parameter)

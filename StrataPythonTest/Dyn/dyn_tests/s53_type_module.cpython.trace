@@ -1,0 +1,9 @@
+--- stdout 9
+__main__
+
+--- outcome
+ok
+--- globals
+X = <class 'X'>
+__doc__ = None
+__name__ = '__main__'

@@ -1,0 +1,25 @@
+--- stdout 39
+3 4 1 7
+5 6
+1 2
+1 2 3 4 1 2
+True False
+
+--- outcome
+raised AttributeError: 'A' object has no attribute 'x'
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+C = <class 'C'>
+J = <class 'J'>
+M = <class 'M'>
+N = <class 'N'>
+Q = <class 'Q'>
+__doc__ = None
+__name__ = '__main__'
+a = <A object>
+a2 = <A object>
+b = <B object>
+c = <C object>
+j = <J object>
+n = <N object>

@@ -11,18 +11,15 @@ set_option autoImplicit false
 /-!
 # Calls
 
-Generic over the record of primitives, CPython 3.12's calls of function objects and of `print`:
+Generic over the record of primitives, CPython 3.12's `print` and the lowering of call arguments:
 
-* `call`: a function object runs its closure on the args tuple and the kwargs dict; the built-in
-  `print`; a value that is not callable raises `TypeError` ("'int' object is not callable");
 * `print` writes the `str` of each argument, with `sep` and `end`; `str` of a value other than a
   `str`, `int`, `bool`, `float` or `None` stops with a gap until `str` and `repr` exist;
 * the lowering of call arguments: `mkKwargs`, `argsTuple` (`f(*it)`) and `dictMerge` (`f(**m)`).
 
-Any other callee, a user object included, stops with a gap until the dunder lookup of a type and
-the built-ins exist.  A `TypeError` of `argsTuple` or `dictMerge` whose message names a function
-object (CPython's `__main__.g()`) also stops with a gap, since the model doesn't hold a
-function's `__qualname__`.
+The calls themselves are `callN`'s (`Lookup.lean`).  A `TypeError` of `argsTuple` or `dictMerge`
+whose message names a function object (CPython's `__main__.g()`) stops with a gap, since the
+model doesn't hold a function's `__qualname__`.
 -/
 
 namespace StrataPython.Dyn.Sem.Proto
@@ -34,7 +31,7 @@ variable {m : Type → Type 1} {V : Type}
 
 /-- `str(v)` for a value whose `str` runs no protocol: a `str`, an `int`, a `bool`, a `float` or
 `None`; `none` for any other value. -/
-def plainStr? [PyReads m V] (v : V) : m (Option String) := do
+def plainStr? [PyCalls m V] (v : V) : m (Option String) := do
   match ← PyPure.immView v with
   | some (.str s) => pure (some s.s)
   | some (.bool b) => pure (some (if b then "True" else "False"))
@@ -46,12 +43,12 @@ def plainStr? [PyReads m V] (v : V) : m (Option String) := do
   | _ => pure none
 
 /-- `str(v)`, for the values that `plainStr?` covers; a gap for any other. -/
-def plainStr [PyReads m V] (v : V) : m String := do
+def plainStr [PyCalls m V] (v : V) : m String := do
   let some s ← plainStr? v | PyPure.gap "str() of this value is not modelled yet"
   pure s
 
 /-- A `sep` or `end` keyword of `print`: a `str`, or `None` for the default `d`. -/
-def printText [PyReads m V] (what : String) (d : String) (v : V) : m String := do
+def printText [PyCalls m V] (what : String) (d : String) (v : V) : m String := do
   match ← PyPure.immView v with
   | some (.str s) => pure s.s
   | some .none => pure d
@@ -87,38 +84,11 @@ def printCall [PyWrites m V] (args kwargs : V) : m V := do
   PyWrites.write fin
   pure (PyPure.imm (m := m) .none)
 
-/-- `TypeError` if a key of the kwargs dict `kwargs` is not a `str`, as CPython's
-`_PyStack_UnpackDict` raises it. -/
-def checkKwargs [PyReads m V] (kwargs : V) : m Unit := do
-  for (k, _, _) in ← PyReads.dictEntries kwargs do
-    if !((← PyPure.immView k) matches some (.str _)) then
-      userCheck k k
-      raiseBuiltin "TypeError" "keywords must be strings"
-
-/-- Whether `v` is a function object. -/
-def isFunction [PyReads m V] (v : V) : m Bool := return (← builtinClass? v) matches some .function
-
-/-- `f(*args, **kwargs)` for the callables that exist so far. -/
-def call [PyWrites m V] (f args kwargs : V) : m V := do
-  match ← PyPure.immView f with
-  | some (.builtin .print) =>
-    checkKwargs kwargs
-    printCall args kwargs
-  | some (.builtin _) | some (.descr ..) | some (.bound ..) | some (.method ..) =>
-    PyPure.gap "a call of a built-in callable is not modelled yet"
-  | some _ => raiseBuiltin "TypeError" s!"'{← typeName f}' object is not callable"
-  | none =>
-    if ← isFunction f then
-      checkKwargs kwargs
-      return ← PyCalls.callFunc f args kwargs
-    userCheck f f
-    PyPure.gap "a call of this built-in object is not modelled yet"
-
 /-- The description of the callee `f` in a `TypeError` about its arguments, as CPython's
 `_PyObject_FunctionStr` gives it: `print()`, or `module.Q()` for a built-in function or type of
 another module.  A function object and any other callee stop with a gap: the message needs their
 `__qualname__` or their `str`. -/
-def calleeName [PyReads m V] (f : V) : m String := do
+def calleeName [PyCalls m V] (f : V) : m String := do
   match ← PyPure.immView f with
   | some (.builtin b) =>
     if b.info.kind == .other then PyPure.gap "a TypeError that names this built-in is not modelled yet"
@@ -128,7 +98,7 @@ def calleeName [PyReads m V] (f : V) : m String := do
 
 /-- `tuple(it)` for `f(*it)`: CPython's `CALL_FUNCTION_EX`, for a built-in sequence or a dict;
 `TypeError` naming `f` for a value that is not iterable. -/
-def argsTuple [PyReads m V] (f it : V) : m V := do
+def argsTuple [PyCalls m V] (f it : V) : m V := do
   if let some (.tuple _) ← PyPure.immView it then return it
   userCheck it it
   if (← seqOf it).isSome || (← isDict it) || (← anySet? it).isSome then
@@ -141,7 +111,7 @@ def argsTuple [PyReads m V] (f it : V) : m V := do
 /-- A new dict with the entries of `d`, then those of `other`, for `f(**other)`: CPython's
 `DICT_MERGE` into the kwargs dict that the call builds; a key already present raises `TypeError`
 naming `f`.  The operand `d` stays as it was. -/
-def dictMerge [PyReads m V] [PyNew m V] (f d other : V) : m V := do
+def dictMerge [PyCalls m V] [PyNew m V] (f d other : V) : m V := do
   userCheck other other
   if !(← isDict other) then
     -- A built-in type, function or method may have `keys` (the type `dict` has), so it gaps.
@@ -154,6 +124,7 @@ def dictMerge [PyReads m V] [PyNew m V] (f d other : V) : m V := do
         s!"{← calleeName f} argument after ** must be a mapping, not {← typeName other}"
     PyPure.gap "a ** argument that is not a dict is not modelled yet"
   let merged ← PyReads.dictCopy d
+  guardDictWalk other merged
   for (k, v, h) in ← PyReads.dictEntries other do
     if (← PyReads.dictFind merged k (some h) (keyEq k)).isSome then
       -- CPython 3.12 names the key by its `str`, a `str` key or not.
@@ -164,7 +135,7 @@ def dictMerge [PyReads m V] [PyNew m V] (f d other : V) : m V := do
 
 /-- A gap unless `builtins.__import__` is the built-in one: CPython's `IMPORT_NAME` calls it
 whenever it has been replaced. -/
-def importCheck [PyReads m V] : m Unit := do
+def importCheck [PyCalls m V] : m Unit := do
   match ← PyReads.builtinGet "__import__" with
   | some v =>
     if !((← PyPure.immView v) matches some (.builtin .«__import__»)) then
@@ -172,7 +143,7 @@ def importCheck [PyReads m V] : m Unit := do
   | none => PyPure.gap "an import after builtins.__import__ was deleted is not modelled yet"
 
 /-- `import module`: the `builtins` module; any other module stops with a gap. -/
-def importModule [PyReads m V] (module : String) : m V := do
+def importModule [PyCalls m V] (module : String) : m V := do
   importCheck
   if module == "builtins" then
     if let some v ← PyReads.moduleGet "builtins" then return v
@@ -180,7 +151,7 @@ def importModule [PyReads m V] (module : String) : m V := do
 
 /-- `from module import name`: an entry of the `builtins` module, or CPython's `ImportError`;
 any other module stops with a gap. -/
-def importFrom [PyReads m V] (module name : String) : m V := do
+def importFrom [PyCalls m V] (module name : String) : m V := do
   importCheck
   if module != "builtins" then PyPure.gap s!"import of module {module} is not modelled yet"
   match ← PyReads.builtinGet name with
@@ -196,7 +167,7 @@ def importFrom [PyReads m V] (module name : String) : m V := do
 
 /-- `module.name` for the `builtins` module, which the translator uses for names that are not in
 the source; a missing name, or any other module, stops with a gap. -/
-def qualifiedRef [PyReads m V] (module name : String) : m V := do
+def qualifiedRef [PyCalls m V] (module name : String) : m V := do
   if module != "builtins" then PyPure.gap s!"a reference into module {module} is not modelled yet"
   let some v ← PyReads.builtinGet name | PyPure.gap s!"builtins.{name} is missing"
   pure v

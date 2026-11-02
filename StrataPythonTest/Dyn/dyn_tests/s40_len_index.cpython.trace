@@ -1,0 +1,10 @@
+--- stdout 6
+false
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+I = <class 'I'>
+__doc__ = None
+__name__ = '__main__'

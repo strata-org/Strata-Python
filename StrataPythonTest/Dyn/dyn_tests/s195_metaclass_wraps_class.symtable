@@ -1,0 +1,21 @@
+module top
+  A: local (assigned, referenced)
+  Meta: local (assigned, referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  class Meta
+    __new__: local (assigned)
+    function __new__
+      __class__: free (referenced)
+      bases: local (parameter, referenced)
+      c: local (assigned, referenced)
+      m: local (parameter, referenced)
+      name: local (parameter, referenced)
+      ns: local (parameter, referenced)
+      super: global implicit (referenced)
+  class A
+    f: local (assigned)
+    function f
+      __class__: free (referenced)
+      self: local (parameter)
+qualnames: A, A.f, Meta, Meta.__new__

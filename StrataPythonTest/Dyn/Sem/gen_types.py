@@ -222,6 +222,12 @@ def main():
         "  mro : Array Builtin",
         "  /-- CPython's `solid_base`, for a type; the constant itself otherwise. -/",
         "  solidBase : Builtin",
+        "  /-- The `__itemsize__` of a type (nonzero for a variable-size one such as `int`); 0 otherwise. -/",
+        "  itemsize : Nat",
+        "  /-- Whether a class may derive from the type (CPython's `Py_TPFLAGS_BASETYPE`). -/",
+        "  basetype : Bool",
+        "  /-- Whether the instances of a type have a `__dict__` (CPython's `tp_dictoffset != 0`). -/",
+        "  instanceDict : Bool",
         "  hash : BuiltinHash",
         "",
         "@[expose] public section",
@@ -237,15 +243,20 @@ def main():
             bases = [key_of(entries, b) for b in obj.__bases__]
             mro = [key_of(entries, b) for b in obj.__mro__]
             solid = key_of(entries, solid_base(obj))
+            itemsize = obj.__itemsize__
+            basetype = bool(obj.__flags__ & (1 << 10))
+            instdict = obj.__dictoffset__ != 0
         else:
             name = getattr(obj, "__name__", k) if kind == "function" else k
             qual = getattr(obj, "__qualname__", name) if kind == "function" else k
             mod = "builtins"
-            tpn, bases, mro, solid = "", [], [], k
+            tpn, bases, mro, solid, itemsize, basetype = "", [], [], k, 0, False
+            instdict = False
         arr = lambda xs: "#[" + ", ".join(f".{lean_ident(x)}" for x in xs) + "]"
         lines.append(
             f"  | .{lean_ident(k)} => ⟨.{kind}, {lean_str(name)}, {lean_str(qual)}, "
             f"{lean_str(mod)}, {lean_str(tpn)}, {arr(bases)}, {arr(mro)}, .{lean_ident(solid)}, "
+            f"{itemsize}, {'true' if basetype else 'false'}, {'true' if instdict else 'false'}, "
             f".{hash_kind(obj)}⟩"
         )
     lines += [

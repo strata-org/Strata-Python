@@ -1,0 +1,15 @@
+module
+  M: local (assigned, referenced)
+  type: global implicit (referenced)
+  C: local (assigned)
+  r: local (assigned)
+  class M
+    __new__: local (assigned)
+    function M.__new__
+      params: mcls, *a, **k
+      mcls: local (parameter, referenced)
+      a: local (parameter, referenced)
+      k: local (parameter)
+      type: global implicit (referenced)
+      C: global implicit (referenced)
+  class C

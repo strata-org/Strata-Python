@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: C.__init_subclass__() takes no arguments (1 given)
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'

@@ -1,0 +1,16 @@
+--- stdout 237
+1 can't apply this __setattr__ to M object
+2 can't apply this __setattr__ to type object
+3  expected 2 arguments, got 1
+4 can't apply this __delattr__ to M object
+5 attribute name must be string, not 'int'
+6  expected 2 arguments, got 1
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+M = <class 'M'>
+__doc__ = None
+__name__ = '__main__'

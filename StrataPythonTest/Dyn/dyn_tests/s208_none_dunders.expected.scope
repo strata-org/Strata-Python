@@ -1,0 +1,5 @@
+module
+  x: local (assigned, referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  r: local (assigned, referenced)

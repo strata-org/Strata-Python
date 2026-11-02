@@ -1,0 +1,18 @@
+module top
+  L: local (assigned, referenced)
+  OverflowError: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  x: local (assigned, referenced)
+  class L
+    __iter__: local (assigned)
+    __length_hint__: local (assigned)
+    function __iter__
+      iter: global implicit (referenced)
+      self: local (parameter)
+    function __length_hint__
+      self: local (parameter)
+qualnames: L, L.__iter__, L.__length_hint__

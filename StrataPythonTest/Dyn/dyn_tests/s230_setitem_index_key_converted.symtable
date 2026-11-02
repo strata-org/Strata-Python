@@ -1,0 +1,9 @@
+module top
+  A: local (assigned, referenced)
+  Big: local (assigned, referenced)
+  class A
+  class Big
+    __index__: local (assigned)
+    function __index__
+      self: local (parameter)
+qualnames: A, Big, Big.__index__

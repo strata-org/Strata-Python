@@ -1,0 +1,15 @@
+module
+  MM: local (assigned, referenced)
+  type: global implicit (referenced)
+  M: local (assigned, referenced)
+  X: local (assigned)
+  class MM
+    __prepare__: local (assigned)
+    function MM.__prepare__
+      params: cls, name, bases
+      cls: local (parameter)
+      name: local (parameter, referenced)
+      bases: local (parameter)
+      print: global implicit (referenced)
+  class M
+  class X

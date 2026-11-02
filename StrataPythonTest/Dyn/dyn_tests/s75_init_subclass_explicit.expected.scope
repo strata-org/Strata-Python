@@ -1,0 +1,8 @@
+module
+  Base: local (assigned, referenced)
+  class Base
+    __init_subclass__: local (assigned)
+    function Base.__init_subclass__
+      params: cls
+      cls: local (parameter, referenced)
+      print: global implicit (referenced)

@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: type() doesn't support MRO entry resolution; use types.new_class()
+--- globals
+E = <class 'E'>
+__doc__ = None
+__name__ = '__main__'

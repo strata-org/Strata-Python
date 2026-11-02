@@ -1,0 +1,9 @@
+module top
+  I: local (assigned, referenced)
+  globals: global implicit (referenced)
+  print: global implicit (referenced)
+  class I
+    __index__: local (assigned)
+    function __index__
+      self: local (parameter)
+qualnames: I, I.__index__

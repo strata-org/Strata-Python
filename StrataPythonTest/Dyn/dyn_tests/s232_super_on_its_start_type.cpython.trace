@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: descriptor '__init__' of 'object' object needs an argument
+--- globals
+B = <class 'B'>
+__doc__ = None
+__name__ = '__main__'
+f = <wrapper_descriptor object>

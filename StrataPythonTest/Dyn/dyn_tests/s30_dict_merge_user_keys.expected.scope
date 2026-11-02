@@ -1,0 +1,22 @@
+module
+  P: local (assigned, referenced)
+  p1: local (assigned, referenced)
+  p2: local (assigned, referenced)
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  c: local (assigned, referenced)
+  print: global implicit (referenced)
+  K: local (assigned, referenced)
+  k: local (assigned, referenced)
+  d: local (assigned)
+  class P
+  class K
+    __hash__: local (assigned)
+    __eq__: local (assigned)
+    function K.__hash__
+      params: self
+      self: local (parameter)
+    function K.__eq__
+      params: self, other
+      self: local (parameter, referenced)
+      other: local (parameter, referenced)

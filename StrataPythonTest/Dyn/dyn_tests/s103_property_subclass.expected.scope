@@ -1,0 +1,36 @@
+module
+  P: local (assigned)
+  property: global implicit (referenced)
+  C: local (assigned, referenced)
+  print: global implicit (referenced)
+  Q: local (assigned, referenced)
+  q: local (assigned, referenced)
+  D: local (assigned, referenced)
+  d: local (assigned, referenced)
+  class P (needs __class__ cell)
+    __init__: local (assigned)
+    function P.__init__
+      params: self, x
+      self: local (parameter)
+      x: cell (parameter)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+      lambda P.__init__.<locals>.<lambda>
+        params: s
+        s: local (parameter)
+        x: free (referenced)
+  class C
+    a: local (assigned)
+    P: global implicit (referenced)
+  class Q
+  class D
+    v: local (assigned, referenced)
+    property: global implicit (referenced)
+    function D.v
+      params: self
+      self: local (parameter)
+    function D.v
+      params: self, x
+      self: local (parameter)
+      x: local (parameter, referenced)
+      print: global implicit (referenced)

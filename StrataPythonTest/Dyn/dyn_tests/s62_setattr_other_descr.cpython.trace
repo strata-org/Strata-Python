@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: descriptor '__setitem__' requires a 'dict' object but received a 'C'
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+c = <C object>

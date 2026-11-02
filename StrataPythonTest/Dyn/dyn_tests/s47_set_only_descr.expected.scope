@@ -1,0 +1,16 @@
+module
+  D: local (assigned)
+  C: local (assigned, referenced)
+  c: local (assigned, referenced)
+  print: global implicit (referenced)
+  class D
+    __set__: local (assigned)
+    function D.__set__
+      params: self, o, v
+      self: local (parameter)
+      o: local (parameter)
+      v: local (parameter)
+      print: global implicit (referenced)
+  class C
+    x: local (assigned)
+    D: global implicit (referenced)

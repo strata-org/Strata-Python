@@ -15,6 +15,7 @@ public import StrataPython.Dyn.Sem.Rules.Containers
 public import StrataPython.Dyn.Sem.Rules.Globals
 public import StrataPython.Dyn.Sem.Rules.Closures
 public import StrataPython.Dyn.Sem.Rules.Calls
+public import StrataPython.Dyn.Sem.Rules.Attrs
 public meta import StrataPython.Dyn.Env
 public meta import StrataDyn.DDM
 
@@ -279,7 +280,8 @@ theorem PySem.okOf.py.globalCell :
     · simp only [modifyGetThe_eq]
       refine fun o => ⟨fun _ w₂ => ?_, fun _ w₂ w₃ h => ⟨?_, ?_⟩, fun w₂ =>
         ⟨fun _ w₃ => ?_, fun _ w₃ w₄ h => ⟨?_, rfl⟩, fun _ => trivial⟩⟩
-      · change Same (startOf w.store) w₂ { w₂ with store :=
+      · refine .inr ?_
+        change Same (startOf w.store) w₂ { w₂ with store :=
           if ((HasPart.get w : Modules σ).map[a0]?).isNone = true then
             (w₂.store.alloc (Rules.moduleObj a0)).1 else w₂.store }
         split
@@ -297,7 +299,7 @@ theorem PySem.okOf.py.globalCell :
         dsimp only
         rw [hs]
         rfl
-      · exact ⟨Nat.le_refl _, fun _ _ _ h => h, Modules.extends_withCell _ _ _ _ _, rfl, rfl⟩
+      · exact .inr ⟨Nat.le_refl _, fun _ _ _ h => h, Modules.extends_withCell _ _ _ _ _, rfl, rfl⟩
       · exact immEq_withCell h _ _ _ _
 
 /-- **`mkClosure` satisfies the machine's spec at Python's accounts**, for every state validity:
@@ -363,7 +365,7 @@ theorem PySem.okOf.py.mkClosure :
   dsimp only [Rules.moduleName, bind, Sem.bind, Sem.bindAfter, getThe, MonadStateOf.get,
     Sem.instMonadStateOf, pure]
   have hne : pyDeclaredEffect "py.mkClosure" ≠ .pure := by decide
-  refine ⟨fun _ w => Same.refl s w, fun h => absurd h hne, fun w => ?_⟩
+  refine ⟨fun _ w => .inr (Same.refl s w), fun h => absurd h hne, fun w => ?_⟩
   rw [Strata.Dyn.Exec.Effects.Within.after_eq]
   dsimp only
   split
@@ -372,11 +374,11 @@ theorem PySem.okOf.py.mkClosure :
     split
     all_goals
       simp only [modifyGetThe_eq]
-      exact ⟨fun _ w => same_allocObj s _ w,
+      exact ⟨fun _ w => .inr (same_allocObj s _ w),
         fun _ _ _ h => ⟨immEq_allocObj _ h, congrArg (fun n => Sem.ret (Value.obj n)) h.1⟩,
         fun _ => trivial⟩
   · simp only [modifyGetThe_eq]
-    exact ⟨fun _ w => same_allocObj s _ w,
+    exact ⟨fun _ w => .inr (same_allocObj s _ w),
       fun _ _ _ h => ⟨immEq_allocObj _ h, congrArg (fun n => Sem.ret (Value.obj n)) h.1⟩,
       fun _ => trivial⟩
 
@@ -388,6 +390,35 @@ theorem PySem.certOf.py.mkClosure (k : Nat) :
 end
 
 public section
+/-! The call bracket's marker is in `Depth`, so `Within` at `calls` bounds the changes outside a
+bracket only if nothing but the bracket's edges changes the marker, and nothing else reads it
+(`docs/PythonToDyn.md` §13).  No operation names `Depth`'s instance, the class field that hands it
+to a rule, the world's constructor, the marker's field, or the bracket's test of it, other than
+through the primitives that keep the marker (`withDepth`, `withPyDepth`, `depthGet`) or change it
+at a bracket's edges (`bracketed`, `callClosureT`), the bracket itself, the effects' statement
+(`spec`, whose `inCall` field reads the marker but is itself forbidden, and the proposition
+`Within`), and the other parts' instances.  And no operation calls a closure
+other than through `callClosureT`, which lowers the marker for the callee. -/
+#py_part_writers PySem (lang := PyLang)
+  (forbidden := [World.instHasPart_depth, PyLang.depth, World.mk, Depth.bracket,
+    Strata.Dyn.Exec.HasInCall.inCall, Strata.Dyn.Exec.Effects.WorldSpec.inCall, Strata.Dyn.Exec.HasCall.callReq])
+  (trusted := [Prim.bracketed, Prim.callClosureT, Prim.withDepth, Prim.withPyDepth, Prim.depthGet,
+    instHasInCallWorld, Strata.Dyn.Exec.HasBracket.mreq, spec, Strata.Dyn.Exec.Effects.Within,
+    World.instHasPart_depth, World.instHasPart_store, World.instHasPart_modules, World.instHasPart_handled,
+    World.instHasPart_guard, World.instHasPart_out])
+
+/-! No Python rule blocks or fails: a case the rules don't model stops with a gap, and a Python rule
+never stops with `Fault.blocked` (which `assume` gives) or `Fault.failure`, so that a verifier never
+reads a path CPython takes as one that can't happen.  The one operation that reaches
+`Fault.failure` is the language-neutral `base.unreachable`, for code that no run reaches: the dead
+arms of a completion dispatch, the code after a `NameError` that always raises, and the stubs of a
+module whose translation has diagnostics, which is never run.  The check trusts that operation's
+entry in the table, not the helper, so that no Python rule can call the helper. -/
+#py_part_writers PySem (lang := PyLang)
+  (forbidden := [Strata.Dyn.Exec.Fault.failure, Strata.Dyn.Exec.Fault.blocked])
+  (trusted := [StrataPython.Dyn.Sem.PySem.impl.base.unreachable])
+
+
 #py_rule_theorems PySem for Py (effects := pyDeclaredEffect) (tags := pyTags)
   (accounts := pyAccounts)
 end

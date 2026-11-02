@@ -1,0 +1,10 @@
+--- stdout 10
+what's up
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+p = <slotted_prop object>
+slotted_prop = <class 'slotted_prop'>

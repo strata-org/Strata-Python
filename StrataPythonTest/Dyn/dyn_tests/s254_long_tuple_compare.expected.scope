@@ -1,0 +1,5 @@
+module
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  r: local (assigned)
+  s: local (assigned)

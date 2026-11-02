@@ -1,0 +1,24 @@
+module
+  A: local (assigned, referenced)
+  o: local (assigned, referenced)
+  print: global implicit (referenced)
+  len: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  d: local (assigned)
+  m1: local (assigned, referenced)
+  s: local (assigned)
+  m2: local (assigned, referenced)
+  r: local (assigned)
+  range: global implicit (referenced)
+  m3: local (assigned, referenced)
+  B: local (assigned, referenced)
+  b: local (assigned)
+  m4: local (assigned, referenced)
+  n: local (assigned, referenced)
+  class A
+    __index__: local (assigned)
+    function A.__index__
+      params: self
+      self: local (parameter)
+  class B

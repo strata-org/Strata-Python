@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised AttributeError: 'A' object has no attribute 'q'
+--- globals
+A = <class 'A'>
+__doc__ = None
+__name__ = '__main__'
+a = <A object>

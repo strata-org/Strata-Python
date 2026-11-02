@@ -1,0 +1,21 @@
+module
+  X: local (assigned, referenced)
+  calls: global explicit (assigned, declared_global)
+  nine: local (assigned, referenced)
+  one: local (assigned, referenced)
+  s: local (assigned, referenced)
+  t: local (assigned)
+  r: local (assigned)
+  class X
+    __hash__: local (assigned)
+    __eq__: local (assigned)
+    function X.__hash__
+      params: self
+      self: local (parameter)
+    function X.__eq__
+      params: self, other
+      self: local (parameter)
+      other: local (parameter)
+      calls: global explicit (assigned, declared_global)
+      s: global implicit (referenced)
+      t: global implicit (referenced)

@@ -4,7 +4,7 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
-public import StrataPython.Dyn.Sem.Concrete
+public import StrataPython.Dyn.Sem.Assembly
 public import StrataPython.Dyn.Sem.PyTypes
 
 set_option autoImplicit false

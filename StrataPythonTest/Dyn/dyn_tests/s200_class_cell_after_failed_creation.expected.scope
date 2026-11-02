@@ -1,0 +1,19 @@
+module
+  saved: local (assigned, referenced)
+  Base: local (assigned, referenced)
+  C: local (assigned)
+  ValueError: global implicit (referenced)
+  print: global implicit (referenced)
+  class Base
+    __init_subclass__: local (assigned)
+    function Base.__init_subclass__
+      params: cls
+      cls: local (parameter, referenced)
+      saved: global implicit (referenced)
+      ValueError: global implicit (referenced)
+  class C (needs __class__ cell)
+    f: local (assigned)
+    function C.f
+      params: self
+      self: local (parameter)
+      __class__: free (referenced)

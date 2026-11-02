@@ -48,6 +48,9 @@ public environment PyT extends Py where
   insn slotInexact (^err (exc : Value)) : Value
   insn popInexact (n : base.Int) (^err (exc : Value)) : Value
   insn frozenSeal (k : base.Int) (^err (exc : Value)) : Value
+  insn nativeDepth (k : base.Int) (^err (exc : Value)) : Value
+  insn nativeGapped (k : base.Int) (^err (exc : Value)) : Value
+  insn classDescr (k : base.Int) (^err (exc : Value)) : Value
   insn listPrims (^err (exc : Value)) : Value
   insn oldPrims (^err (exc : Value)) : Value
   insn newPrims (^err (exc : Value)) : Value
@@ -58,6 +61,10 @@ public environment PyT extends Py where
   insn frozenMerge (^err (exc : Value)) : Value
   insn frozenAdd (^err (exc : Value)) : Value
   insn importGaps (k : base.Int) (^err (exc : Value)) : Value
+  insn objPrims (^err (exc : Value)) : Value
+  insn bindCase (i : base.Int) (^err (exc : Value)) : Value
+  insn subclassOps (^err (exc : Value)) : Value
+  insn subclassContainers (^err (exc : Value)) : Value
   end pt
 
 #dyn_types PyT
@@ -234,6 +241,157 @@ and 8, then three pops; `setTrim` on a set with two dummies; and `setReserve` on
       slotValue before, slotValue after, slotValue at31]))
     : PyM σ .reads false Value)
 
+/-- The object primitives that the operations of this piece don't reach, or reach only in part, on
+a new class `C` with the slots `a` and `b` and no instance dict, and an instance of it: set slot 1,
+read slots 1 and 0, delete slot 1 and read it again; the instance's `__dict__` (none); rename the
+class `D`; give it the MRO `(D, int, object)`; add a module `mm` and read it back; and set and
+read the count of running `__build_class__` calls; and the bytes of an instance of a class
+`B(bytes)`. -/
+@[dyn_sem PyT.objPrims, expose] public def objPrims (err : Target E [Value]) : Sem ε E Value :=
+  runRule err #[] (do
+    let object := Value.builtin .object
+    let c ← PyPure.allocObj (.builtin .type) (.cls
+      { name := "C", qualname := "C", «module» := "m", bases := #[object], mroTail := #[object],
+        ns := ← PyPure.allocDict, solidBase := .none, instanceDict := false, slots := #["a", "b"] })
+    let o ← PyReads.allocInstance c .plain #[] #[none, none]
+    PyWrites.slotSet o 1 (.int 7)
+    let s1 ← PyReads.slotGet o 1
+    let s0 ← PyReads.slotGet o 0
+    PyWrites.slotDel o 1
+    let s1' ← PyReads.slotGet o 1
+    let d ← PyReads.objDict o
+    PyWrites.classSetName c "D" "D"
+    PyNew.classSetMroNew c #[.builtin .int, object]
+    let some cd ← Proto.classData? c | pure (Value.ofString "not a class")
+    let mo ← PyPure.allocObj (.builtin .module) (.module "mm" #[] false)
+    PyReads.moduleAdd "mm" mo
+    let back ← PyReads.moduleGet "mm"
+    let bytes := Value.builtin .bytes
+    let bc ← PyPure.allocObj (.builtin .type) (.cls
+      { name := "B", qualname := "B", «module» := "m", bases := #[bytes], mroTail := #[bytes, object],
+        ns := ← PyPure.allocDict, solidBase := bytes })
+    let bv ← PyReads.bytesView (← PyReads.allocInstance bc (.bytes #[1]) #[] #[])
+    pure (Value.tuple #[s1.getD (.ofString "unset"), s0.getD (.ofString "unset"),
+      s1'.getD (.ofString "unset"), .bool d.isSome, .ofString cd.name, .ofString cd.qualname,
+      .tuple cd.mroTail, .bool (back == some mo), .bool (bv == some #[1])])
+    : PyM σ .writes false Value)
+
+/-- A signature for the binder's tests. -/
+public def sigOf (name qualname : String) (style : Builtins.BindStyle) (posonly minpos maxpos : Nat)
+    (kwnames : Array String := #[]) : Builtins.BuiltinSig :=
+  { name, qualname, style, posonly, minpos, maxpos, kwnames }
+
+/-- The signature of `sum`, with the message style of Argument Clinic with keywords. -/
+public def sumSig : Builtins.BuiltinSig := sigOf "sum" "sum" .keywords 1 1 2 #["start"]
+
+/-- The binder's case `i`: a built-in's signature, positional arguments and keywords, as in
+CPython 3.12's calls `[].append()`, `[].append(x=1)`, `"a".upper(1)`, `[].pop(1, 2)`,
+`divmod(1)`, `getattr(1)`, `sum()`, `sum(1, 2, 3)`, `sum([], x=1)`, `"a".split(" ", sep=" ")`,
+`round()`, `[].sort(1)`, `"a".splitlines(1, 2)`, `(1).__add__()`, `(1).__add__(x=1)`,
+`sum(a=1, b=2, c=3)` and `sum([1], start=5)`. -/
+public def bindArgsOf (i : Int) : Builtins.BuiltinSig × Array Value × Array (String × Value) :=
+  let one := Value.int 1
+  let append := sigOf "append" "list.append" .methO 0 0 0
+  let add := sigOf "__add__" "int.__add__" .wrapper 0 0 1
+  match i with
+  | 0 => (append, #[], #[])
+  | 1 => (append, #[], #[("x", one)])
+  | 2 => (sigOf "upper" "str.upper" .noArgs 0 0 0, #[one], #[])
+  | 3 => (sigOf "pop" "list.pop" .posOnly 1 0 1, #[one, one], #[])
+  | 4 => (sigOf "divmod" "divmod" .posOnly 2 2 2, #[one], #[])
+  | 5 => (sigOf "getattr" "getattr" .posOnly 3 2 3, #[one], #[])
+  | 6 => (sumSig, #[], #[])
+  | 7 => (sumSig, #[one, one, one], #[])
+  | 8 => (sumSig, #[one], #[("x", one)])
+  | 9 => (sigOf "split" "str.split" .keywords 0 0 2 #["sep", "maxsplit"], #[.ofString " "],
+      #[("sep", .ofString " ")])
+  | 10 => (sigOf "round" "round" .keywords 0 1 2 #["number", "ndigits"], #[], #[])
+  | 11 => (sigOf "sort" "list.sort" .keywords 0 0 0 #["key", "reverse"], #[one], #[])
+  | 12 => (sigOf "splitlines" "str.splitlines" .keywords 0 0 1 #["keepends"], #[one, one], #[])
+  | 13 => (add, #[], #[])
+  | 14 => (add, #[], #[("x", one)])
+  | 15 => (sumSig, #[], #[("a", one), ("b", one), ("c", one)])
+  | _ => (sumSig, #[.tuple #[one]], #[("start", .int 5)])
+
+/-- The binder on case `i` of `bindArgsOf`: the bound parameters (`'unset'` for one not given)
+and the collected positional arguments, or the binder's `TypeError`. -/
+@[dyn_sem PyT.bindCase, expose] public def bindCase (i : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let (sig, xs, kws) := bindArgsOf i
+    let kw ← PyPure.allocDict
+    for (k, v) in kws do PyNew.dictSetNew kw (Value.ofString k) v none fun _ => pure false
+    let b ← Builtins.bindBuiltinArgs sig (Value.tuple xs) kw
+    pure (Value.tuple #[.tuple (b.params.map (·.getD (.ofString "unset"))), .tuple b.rest])
+    : PyM σ .reads false Value)
+
+/-- The operators on `x = I(5)` for a class `I(int)` with no dunders of its own, which run
+`int`'s slots on its built-in part: `x + 1`, `1 + x`, `x == 5`, `hash(x)`, `-x`, `bool(x)`, and
+`t[x]` for a tuple `t` of six elements, as CPython gives them. -/
+@[dyn_sem PyT.subclassOps, expose] public def subclassOps (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let int := Value.builtin .int
+    let object := Value.builtin .object
+    let i ← PyPure.allocObj (.builtin .type) (.cls
+      { name := "I", qualname := "I", «module» := "m", bases := #[int], mroTail := #[int, object],
+        ns := ← PyPure.allocDict, solidBase := int })
+    let x ← PyReads.allocInstance i (.int 5) #[] #[]
+    let one := Value.int 1
+    let t := Value.tuple ((List.range 6).toArray.map (Value.int ∘ Int.ofNat))
+    pure (Value.tuple #[← Proto.binaryOp .add x one, ← Proto.binaryOp .add one x,
+      .bool (← Proto.richCompare .eq x (.int 5)), ← PyPure.hashValue (← Proto.hash x),
+      ← Proto.unaryOp .neg x, .bool (← Proto.truthy x), ← Proto.getItem t x])
+    : PyM σ .calls false Value)
+
+/-- A class `name(base)` with no dunders of its own. -/
+public def subclassOf (name : String) (base : Builtin) : PyM σ .writes false Value := do
+  PyPure.allocObj (.builtin .type) (.cls
+    { name, qualname := name, «module» := "m", bases := #[.builtin base],
+      mroTail := #[.builtin base, .builtin .object], ns := ← PyPure.allocDict,
+      solidBase := .builtin base.info.solidBase })
+
+/-- The operators on instances of classes `L(list)`, `T(tuple)` and `D(dict)` with no dunders of
+their own, which run the built-in type's slots on the built-in part: for `l = L([1, 2])`,
+`t = T((1, 2))` and `d = D({1: 'a'})`, the results of `(l + [3])[2]`, `l == [1, 2]`, `bool(l)`,
+`2 in l`, `l[0] = 9` then `l[0]`, `(t * 2)[3]`, `t == (1, 2)`, `t < (1, 3)`, `d[1]`, `1 in d`, and
+`d == {1: 'a'}`, and, for `s = {1}` and `t = S2({2})` with a class `S2(set)`, whether `s |= t`
+gives `s` itself and `2 in s`, as CPython gives them. -/
+@[dyn_sem PyT.subclassContainers, expose] public def subclassContainers (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let one := Value.int 1
+    let two := Value.int 2
+    let l ← PyReads.allocInstance (← subclassOf "L" .list) (.list #[one, two]) #[] #[]
+    let t ← PyReads.allocInstance (← subclassOf "T" .tuple) (.tuple #[one, two]) #[] #[]
+    let d ← PyReads.allocInstance (← subclassOf "D" .dict) .dict #[] #[]
+    PyWrites.dictSet d one (.ofString "a") none fun _ => pure false
+    let l3 ← Proto.binaryOp .add l (← PyPure.allocList #[.int 3])
+    let r1 ← Proto.getItem l3 two
+    let r2 ← Proto.richCompare .eq l (← PyPure.allocList #[one, two])
+    let r3 ← Proto.truthy l
+    let r4 ← Proto.contains two l
+    Proto.setItem l (.int 0) (.int 9)
+    let r5 ← Proto.getItem l (.int 0)
+    let r6 ← Proto.getItem (← Proto.binaryOp .mul t two) (.int 3)
+    let r7 ← Proto.richCompare .eq t (.tuple #[one, two])
+    let r8 ← Proto.richCompare .lt t (.tuple #[one, .int 3])
+    let r9 ← Proto.getItem d one
+    let r10 ← Proto.contains one d
+    let e ← PyPure.allocDict
+    PyNew.dictSetNew e one (.ofString "a") none fun _ => pure false
+    let r11 ← Proto.richCompare .eq d e
+    -- `s |= t` with `t = S2({2})` for a class `S2(set)` changes `s` in place.
+    let st ← PyPure.allocSet false false
+    PyNew.setAddNew st one none fun _ => pure false
+    let t2 ← PyReads.allocInstance (← subclassOf "S2" .set) .set #[] #[]
+    PyWrites.setAdd t2 two none fun _ => pure false
+    let r12 ← Proto.inplaceOp .or st t2
+    let r13 ← Proto.contains two st
+    pure (Value.tuple #[r1, .bool r2, .bool r3, .bool r4, r5, r6, .bool r7, .bool r8, r9,
+      .bool r10, .bool r11, .bool ((← PyPure.identical r12 st) == .yes), .bool r13])
+    : PyM σ .writes false Value)
+
 /-- `setSlotAt` on a set whose layout is inexact: `{'a'}`. -/
 @[dyn_sem PyT.slotInexact, expose] public def slotInexact (err : Target E [Value]) :
     Sem ε E Value :=
@@ -251,6 +409,54 @@ and 8, then three pops; `setTrim` on a set with two dummies; and `setReserve` on
     for x in ["a", "b"].take n.toNat do
       PyNew.setAddNew s (Value.ofString x) none fun _ => pure false
     pure ((← PyNew.setPopNew s).getD .none) : PyM σ .reads false Value)
+
+/-- The body of the native `selfcall`: a call of itself. -/
+public def selfcallBody : BuiltinImpl := fun self args kwargs => PyCalls.callBuiltin self args kwargs
+
+/-- A table of bodies that holds only `selfcall`'s. -/
+public def selfcallImpls : Impls :=
+  { native := fun key => if key == "selfcall" then some selfcallBody else none }
+
+/-- A native whose body calls itself, of kind `function` if `k` is `0` and of a built-in kind
+otherwise, called through a table that holds only its body. -/
+@[dyn_sem PyT.nativeDepth, expose] public def nativeDepth (k : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let impls := selfcallImpls
+    let f ← PyPure.allocObj (.builtin .function) (.native
+      { key := "selfcall", kind := if k == 0 then .function else .builtinFunctionOrMethod,
+        name := "f", qualname := "f", «module» := "m" })
+    callBuiltinWith impls 5000 f (.tuple #[]) (← PyPure.allocDict)
+    : PyM σ .writes true Value)
+
+/-- A read of the attribute `__class__` (`k = 0`) or `__doc__` (otherwise) of a native whose
+`__doc__` read gaps. -/
+@[dyn_sem PyT.nativeGapped, expose] public def nativeGapped (k : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let f ← PyPure.allocObj (.builtin .function) (.native
+      { key := "selfcall", kind := .function, name := "f", qualname := "f", «module» := "m",
+        gapped := #["__doc__"] })
+    Proto.getAttr f (if k == 0 then "__class__" else "__doc__")
+    : PyM σ .writes true Value)
+
+/-- The class-method descriptor `dict.__dict__["fromkeys"]`: called on `(list, (1,))` (`0`), on
+`(5, (1,))` (`1`) and on no argument (`2`); its `__get__` on `(None, list)` (`3`), on `(5, None)`
+(`4`) and on `(None, dict)` (`5`). -/
+@[dyn_sem PyT.classDescr, expose] public def classDescr (k : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let fk : Value := .descr .dict "fromkeys" .classMethod
+    let l : Value := .tuple #[.int 1]
+    let none₁ := Value.none
+    match k with
+    | 0 => Proto.callN 5 fk (.tuple #[.builtin .list, l]) (← PyPure.allocDict)
+    | 1 => Proto.callN 5 fk (.tuple #[.int 5, l]) (← PyPure.allocDict)
+    | 2 => Proto.callN 5 fk (.tuple #[]) (← PyPure.allocDict)
+    | 3 => Proto.descrGetN 5 fk none (.builtin .list)
+    | 4 => Proto.descrGetN 5 fk (some (.int 5)) none₁
+    | _ => Proto.descrGetN 5 fk none (.builtin .dict)
+    : PyM σ .writes true Value)
 
 /-- The resize counter of a new list after `listReserveNew` with `0`, then with `3`. -/
 @[dyn_sem PyT.listPrims, expose] public def listPrims (err : Target E [Value]) : Sem ε E Value :=
@@ -325,10 +531,10 @@ built-in part on plain values, which have none. -/
     else .symbolic (HashSrc.addr 0)) : PyM σ .pure true Value)
 
 /-- `{frozenset({1})} == {frozenset({1})}`: a walk of sets whose members are frozensets, which
-compare as `KeyClass.user`, and so stop with a gap here. -/
+compare as `KeyClass.user`, so the walk follows the live table. -/
 @[dyn_sem PyT.frozenWalk, expose] public def frozenWalk (err : Target E [Value]) : Sem ε E Value :=
   runRule err #[] (do
-    let mk : PyM σ .reads false Value := do
+    let mk : PyM σ .calls false Value := do
       let f ← PyPure.allocSet true false
       PyNew.setAddNew f (Value.int 1) none fun _ => pure false
       PyNew.setFreezeNew f
@@ -337,10 +543,11 @@ compare as `KeyClass.user`, and so stop with a gap here. -/
       pure s
     let a ← mk
     let b ← mk
-    return Value.bool (← Proto.richCompare .eq a b) : PyM σ .reads false Value)
+    return Value.bool (← Proto.richCompare .eq a b) : PyM σ .calls false Value)
 
 /-- `s |= t` for `s = {1}` and `t = {frozenset({1})}`: `setMerge`'s path that compares, on a set
-whose member may run user code when compared, which stops with a gap here. -/
+whose member may run user code when compared: the primitive gaps, since it walks `t` as it was
+(`setMergeWith` walks the live table instead). -/
 @[dyn_sem PyT.frozenMerge, expose] public def frozenMerge (err : Target E [Value]) :
     Sem ε E Value :=
   runRule err #[] (do
@@ -352,7 +559,7 @@ whose member may run user code when compared, which stops with a gap here. -/
     let s ← PyPure.allocSet false false
     PyNew.setAddNew s (Value.int 1) none fun _ => pure false
     PyNew.setMergeNew s t Proto.memberEq
-    pure Value.none : PyM σ .reads false Value)
+    pure Value.none : PyM σ .calls false Value)
 
 /-- `PyWrites.setAdd` on a frozenset: the old-object writes refuse it, since a frozenset is
 immutable. -/
@@ -431,10 +638,11 @@ def ptEffect : String → Effects.Level
   | "pt.eqVal" => .calls
   | "pt.setAny" => .writes
   | "pt.dictPrims" | "pt.setPrims" | "pt.slotInexact" | "pt.popInexact" | "pt.listPrims"
-  | "pt.newPrims" => .reads
-  | "pt.oldPrims" | "pt.frozenSeal" => .writes
-  | "pt.frozenOr" | "pt.frozenAdd" => .writes
-  | "pt.frozenWalk" | "pt.frozenMerge" => .reads
+  | "pt.newPrims" | "pt.bindCase" => .reads
+  | "pt.oldPrims" | "pt.frozenSeal" | "pt.nativeDepth" | "pt.nativeGapped" | "pt.classDescr" => .writes
+  | "pt.frozenOr" | "pt.frozenAdd" | "pt.objPrims" => .writes
+  | "pt.frozenWalk" | "pt.frozenMerge" | "pt.subclassOps" => .calls
+  | "pt.subclassContainers" => .writes
   | _ => .pure
 
 /-- The tags of `PyLang` in `PyTSem`. -/
@@ -450,6 +658,15 @@ error: #py_rule_theorems: the rule of pt.tooHigh is not a `runRule`, `runTotal`,
 -/
 #guard_msgs in
 #py_rule_theorems PyTSem for PyT (effects := ptEffect) (tags := ptTags)
+
+-- `#py_part_writers` passes on a table whose rules write `Depth` only through the trusted primitives
+-- (`PartWritersTest` has the writes it rejects).
+#guard_msgs in
+#py_part_writers PyTSem (lang := PyLang)
+  (forbidden := [World.instHasPart_depth, PyLang.depth, World.mk])
+  (trusted := [Prim.bracketed, Prim.callClosureT, Prim.withDepth, Prim.withPyDepth, Prim.depthGet,
+    World.instHasPart_depth, World.instHasPart_store, World.instHasPart_modules,
+    World.instHasPart_handled, World.instHasPart_guard, World.instHasPart_out])
 
 -- The other rules got their theorems: within their effects, and satisfying every spec that has the
 -- laws.
@@ -643,6 +860,169 @@ info: StrataPython.Dyn.Sem.Value.tuple
 -/
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.newPrims ^err.0()"
+/--
+info: StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.int 7, StrataPython.Dyn.Sem.Value.str { s := "unset", ascii := true, ascii_eq := _ },
+    StrataPython.Dyn.Sem.Value.str { s := "unset", ascii := true, ascii_eq := _ },
+    StrataPython.Dyn.Sem.Value.bool false, StrataPython.Dyn.Sem.Value.str { s := "D", ascii := true, ascii_eq := _ },
+    StrataPython.Dyn.Sem.Value.str { s := "D", ascii := true, ascii_eq := _ },
+    StrataPython.Dyn.Sem.Value.tuple
+      #[StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.int),
+        StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.object)],
+    StrataPython.Dyn.Sem.Value.bool true, StrataPython.Dyn.Sem.Value.bool true]
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.objPrims ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "list.append() takes exactly one argument (0 given)", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.bindCase(0) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "list.append() takes no keyword arguments", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.bindCase(1) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "str.upper() takes no arguments (1 given)", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.bindCase(2) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "pop expected at most 1 argument, got 2", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.bindCase(3) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "divmod expected 2 arguments, got 1", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.bindCase(4) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "getattr expected at least 2 arguments, got 1", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.bindCase(5) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "sum() takes at least 1 positional argument (0 given)", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.bindCase(6) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "sum() takes at most 2 arguments (3 given)", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.bindCase(7) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "'x' is an invalid keyword argument for sum()", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.bindCase(8) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "argument for split() given by name ('sep') and position (1)", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.bindCase(9) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "round() missing required argument 'number' (pos 1)", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.bindCase(10) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "sort() takes no positional arguments", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.bindCase(11) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "splitlines() takes at most 1 argument (2 given)", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.bindCase(12) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "expected 1 argument, got 0", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.bindCase(13) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "wrapper __add__() takes no keyword arguments", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.bindCase(14) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "sum() takes at most 2 keyword arguments (3 given)", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.bindCase(15) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.tuple
+      #[StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.int 1], StrataPython.Dyn.Sem.Value.int 5],
+    StrataPython.Dyn.Sem.Value.tuple #[]]
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.bindCase(16) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.int 6, StrataPython.Dyn.Sem.Value.int 6, StrataPython.Dyn.Sem.Value.bool true,
+    StrataPython.Dyn.Sem.Value.int 5, StrataPython.Dyn.Sem.Value.int (-5), StrataPython.Dyn.Sem.Value.bool true,
+    StrataPython.Dyn.Sem.Value.int 5]
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.subclassOps ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.int 3, StrataPython.Dyn.Sem.Value.bool true, StrataPython.Dyn.Sem.Value.bool true,
+    StrataPython.Dyn.Sem.Value.bool true, StrataPython.Dyn.Sem.Value.int 9, StrataPython.Dyn.Sem.Value.int 2,
+    StrataPython.Dyn.Sem.Value.bool true, StrataPython.Dyn.Sem.Value.bool true,
+    StrataPython.Dyn.Sem.Value.str { s := "a", ascii := true, ascii_eq := _ }, StrataPython.Dyn.Sem.Value.bool true,
+    StrataPython.Dyn.Sem.Value.bool true, StrataPython.Dyn.Sem.Value.bool true, StrataPython.Dyn.Sem.Value.bool true]
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.subclassContainers ^err.0()"
 
 -- A frozenset is a value only once closed: hashing an open one, or writing to a closed one, is a
 -- model invariant; every maker closes what it makes.
@@ -663,6 +1043,76 @@ info: StrataPython.Dyn.Sem.Value.tuple
 -/
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.frozenSeal(2) ^err.0()"
+
+-- A native of kind `function` is a Python frame: its own recursion stops at the Python depth limit.
+-- A native of another kind counts none, and stops at the bound of nested built-in calls.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "Python call depth over 900" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.nativeDepth(0) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "built-in calls nested deeper than the model follows" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.nativeDepth(1) ^err.0()"
+
+-- A native's gapped attribute stops with a gap when it is read; its other attributes read as usual.
+/-- info: StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.function) -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.nativeGapped(0) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "the attribute __doc__ of the built-in f is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.nativeGapped(1) ^err.0()"
+
+-- A class-method descriptor checks its class, called and in `__get__`, as CPython 3.12 does.
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "descriptor 'fromkeys' requires a subtype of 'dict' but received 'list'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.classDescr(0) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "descriptor 'fromkeys' for type 'dict' needs a type, not a 'int' as arg 2", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.classDescr(1) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "descriptor 'fromkeys' of 'dict' object needs an argument", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.classDescr(2) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "descriptor 'fromkeys' requires a subtype of 'dict' but received 'list'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.classDescr(3) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "descriptor 'fromkeys' requires a subtype of 'dict' but received 'int'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.classDescr(4) ^err.0()"
+
+/--
+info: StrataPython.Dyn.Sem.Value.bound
+  (StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.dict))
+  (StrataPython.Dyn.Sem.Builtin.dict)
+  "fromkeys"
+  (StrataPython.Dyn.Sem.DescrKind.classMethod)
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.classDescr(5) ^err.0()"
 
 -- `pop` of an inexact set of two members gives a member that depends on the hash seed: a gap. With
 -- one member, it has one answer.
@@ -700,9 +1150,9 @@ info: StrataPython.Dyn.Sem.Value.tuple
       %h.0 : py.Value = pt.hashDeep(%i.0)
       %v.0 : py.Value = pt.pick(%h.0) ^err.0()"
 
--- A walk of sets whose members are frozensets stops with a gap: a frozenset key may run user
--- code when compared.
-/-- info: fault: Strata.Dyn.Exec.Fault.gap "a walk of a set whose comparisons may run user code is not modelled yet" -/
+-- A walk of sets whose members are frozensets, which may run user code when compared, walks the
+-- live table.
+/-- info: StrataPython.Dyn.Sem.Value.bool true -/
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.frozenWalk ^err.0()"
 

@@ -1,0 +1,9 @@
+--- stdout 77
+TE descriptor '__getattribute__' requires a 'type' object but received a 'A'
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+__doc__ = None
+__name__ = '__main__'

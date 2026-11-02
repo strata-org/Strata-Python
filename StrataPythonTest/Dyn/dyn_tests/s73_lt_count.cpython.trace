@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: '<' not supported between instances of 'C' and 'int'
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+n = 1

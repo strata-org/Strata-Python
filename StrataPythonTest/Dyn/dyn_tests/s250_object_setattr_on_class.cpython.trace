@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: can't apply this __setattr__ to type object
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'

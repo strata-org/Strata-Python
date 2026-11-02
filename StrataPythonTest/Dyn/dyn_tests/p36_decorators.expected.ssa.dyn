@@ -50,7 +50,7 @@ module p36_decorators {
       %kwargs.1 : py.Value = py.mkKwargs
       %decorated.0 : py.Value = py.call(%deco.0, %args.1, %kwargs.1) ^propagate.0()
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure[[]](@|p36_decorators.outer.K.<body>|, "K", "p36_decorators")
+      %clo.1 : py.Value = py.mkClosure[[]](@|p36_decorators.outer.K.<body>|, "<body>", "p36_decorators")
       %str.0 : py.Value = py.strLit("K")
       %base.4 : py.Value = py.requireDefined(%base.2, "base", "UnboundLocalError", "cannot access local variable 'base' where it is not associated with a value") ^propagate.0()
       %tuple.0 : py.Value = py.mkTuple(%clo.1, %str.0, %base.4)

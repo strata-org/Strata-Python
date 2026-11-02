@@ -1,0 +1,8 @@
+module
+  L: local (assigned, referenced)
+  class L
+    __delitem__: local (assigned)
+    function L.__delitem__
+      params: self, k
+      self: local (parameter)
+      k: local (parameter)

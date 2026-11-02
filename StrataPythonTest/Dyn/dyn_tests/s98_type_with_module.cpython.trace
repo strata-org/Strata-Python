@@ -1,0 +1,10 @@
+--- stdout 17
+1 False True m Q
+
+--- outcome
+ok
+--- globals
+X = <class 'Q'>
+__doc__ = None
+__name__ = '__main__'
+d = {'a': 2, '__module__': 'm', '__qualname__': 'Q'}

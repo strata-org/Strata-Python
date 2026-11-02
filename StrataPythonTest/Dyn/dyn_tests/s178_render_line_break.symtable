@@ -1,0 +1,5 @@
+module top
+  a: local (assigned)
+  type: global implicit (referenced)
+  z: local (assigned)
+qualnames: 

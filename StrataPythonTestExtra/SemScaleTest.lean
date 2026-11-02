@@ -11,7 +11,8 @@ meta import StrataPythonTest.Util.Python
 /-! # Loops of calls and container writes run fast
 
 Runs `pydyn run` on loops of 200000 steps: calls that each allocate a kwargs dict and a list, and
-writes that grow a dict, a list and a set, and deletions that shrink a list.  Each run takes about 2 seconds, and the test fails if
+writes that grow a dict, a list and a set, deletions that shrink a list, the walks of a tuple of
+a million members, and an empty `str` repeated `2 ** 40` times.  Each run takes about 2 seconds, and the test fails if
 one takes more than 30 seconds; a store or a container that copied itself on each write would take
 minutes.
 -/
@@ -29,7 +30,9 @@ private meta def programs : List (String × String × String) := [
   ("set", "s = {-1}\ni = 0\nwhile i < 200000:\n    s |= {i}\n    i = i + 1\nn = i\n",
     "n = 200000"),
   ("list deletion", "l = [0] * 200000\ni = 200000\nwhile i > 0:\n    del l[-1]\n    i = i - 1\n",
-    "l = []")]
+    "l = []"),
+  ("long tuples", "t = (0,) * 1000000\na = t == t[:]\nb = 1 in t\nc = t < t[:]\n", "c = False"),
+  ("empty str repetition", "s = '' * 2 ** 40\n", "s = ''")]
 
 -- `pydyn run` parses the program with Python, so the test needs it, as the other tests do.
 #eval StrataPython.withPython fun _ => do

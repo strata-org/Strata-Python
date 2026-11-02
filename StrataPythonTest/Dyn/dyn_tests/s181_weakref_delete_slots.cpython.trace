@@ -1,0 +1,14 @@
+--- stdout 30
+AttributeError
+AttributeError
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+S = <class 'S'>
+T = <class 'T'>
+__doc__ = None
+__name__ = '__main__'
+e = <E object>
+t = <T object>

@@ -1,0 +1,30 @@
+module top
+  A: local (assigned, referenced)
+  B: local (assigned, referenced)
+  C: local (assigned, referenced)
+  DocDescr: local (assigned)
+  NewClass: local (assigned, referenced)
+  print: global implicit (referenced)
+  class DocDescr
+    __get__: local (assigned)
+    function __get__
+      obj: local (parameter, referenced)
+      owner: local (parameter, referenced)
+      self: local (parameter)
+  class NewClass
+    DocDescr: global implicit (referenced)
+    __doc__: local (assigned)
+  class A
+    __doc__: local (assigned)
+    classmethod: global implicit (referenced)
+    property: global implicit (referenced)
+    function __doc__
+      cls: local (parameter, referenced)
+  class B
+    __doc__: local (assigned)
+    classmethod: global implicit (referenced)
+    property: global implicit (referenced)
+    function __doc__
+      cls: local (parameter)
+  class C
+qualnames: A, A.__doc__, B, B.__doc__, C, DocDescr, DocDescr.__get__, NewClass

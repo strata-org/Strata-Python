@@ -1,0 +1,14 @@
+module top
+  C: local (assigned, referenced)
+  K: local (assigned)
+  print: global implicit (referenced)
+  class K
+    __call__: local (assigned)
+    function __call__
+      self: local (parameter)
+      x: local (parameter)
+      y: local (parameter, referenced)
+  class C
+    K: global implicit (referenced)
+    __call__: local (assigned)
+qualnames: C, K, K.__call__

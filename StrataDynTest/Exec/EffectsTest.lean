@@ -34,9 +34,11 @@ def t : Ty := .app 2 []
 abbrev T := Tree I Run Nat [] [] Unit Nat
 
 /-- The world's parity is immutable, and the world may only grow. -/
-def sp : WorldSpec Nat Unit :=
-  ⟨fun _ w₁ w₂ => w₁ % 2 = w₂ % 2, fun _ w w' => w ≤ w', fun _ w => Nat.le_refl w,
-    fun _ _ _ _ => Nat.le_trans⟩
+def sp : WorldSpec Nat Unit where
+  immEq _ w₁ w₂ := w₁ % 2 = w₂ % 2
+  same _ w w' := w ≤ w'
+  same_refl _ w := Nat.le_refl w
+  same_trans _ _ _ _ := Nat.le_trans
 
 /-- No cell made by this activation yet. -/
 def none' : Cells := fun _ => False
@@ -98,7 +100,7 @@ example : Within sp () .calls anyPost none' call0 := ⟨.inl rfl, fun _ => trivi
 -- An update whose continuation reads only what `immEq` keeps is `pure`; reading more is not.
 /-- `parity` is `pure`. -/
 theorem parity_pure : Within sp () .pure anyPost none' parity :=
-  ⟨fun _ w => Nat.le_refl w, fun _ w₁ w₂ (h : w₁ % 2 = w₂ % 2) => ⟨h, by simp only [h]⟩,
+  ⟨fun _ w => .inr (Nat.le_refl w), fun _ w₁ w₂ (h : w₁ % 2 = w₂ % 2) => ⟨h, by simp only [h]⟩,
     fun _ => trivial⟩
 example : ¬ Within sp () .pure anyPost none' whole := fun h => by
   have := (h.2.1 rfl 0 2 rfl).2
@@ -106,12 +108,13 @@ example : ¬ Within sp () .pure anyPost none' whole := fun h => by
 
 -- An update that `same` allows is fine at every level; one that it doesn't is `writes` only.
 example : Within sp () .pure anyPost none' grow :=
-  ⟨fun _ w => Nat.le_succ w, fun _ w₁ w₂ (h : w₁ % 2 = w₂ % 2) => ⟨by
+  ⟨fun _ w => .inr (Nat.le_succ w), fun _ w₁ w₂ (h : w₁ % 2 = w₂ % 2) => ⟨by
     show (w₁ + 1) % 2 = (w₂ + 1) % 2
     omega, rfl⟩, fun _ => trivial⟩
 example : ¬ Within sp () .calls anyPost none' reset := fun h => by
-  have := h.1 (by decide) 1
-  cases this
+  rcases h.1 (by decide) 1 with h' | h'
+  · cases h'.2
+  · cases h'
 example : Within sp () .writes anyPost none' reset :=
   ⟨fun h => absurd rfl h, (fun h => nomatch h), fun _ => trivial⟩
 
@@ -127,7 +130,7 @@ example : ¬ Within sp () .pure anyPost none' leak := fun h => by
 -- A read of the whole world is fine at `reads`: its update gives the world back, and
 -- `same` is reflexive.
 example : Within sp () .reads anyPost none' whole :=
-  ⟨fun _ w => Nat.le_refl w, (fun h => nomatch h), fun _ => trivial⟩
+  ⟨fun _ w => .inr (Nat.le_refl w), (fun h => nomatch h), fun _ => trivial⟩
 
 -- `lift`: the `reads` tree is also `writes`.
 example : Within sp () .writes anyPost none' get7 :=
@@ -292,5 +295,74 @@ example : FnAll (· < 10) [t, t]
 example : VarAll (I := I) (· = 1) none (1 : Nat) := rfl
 example : VarAll (I := I) (X := Nat) (· ≤ 0) (some t) (fun xs => xs.size - xs.size) :=
   fun _ => by simp
+
+-- The call bracket: with worlds from `10` up inside a bracket, `reset`, which `same` forbids
+-- below `writes`, is within `calls` once guarded.
+/-- `sp`, with the worlds from `10` up inside a call bracket. -/
+def spB : WorldSpec Nat Unit := { sp with inCall := fun w => decide (10 ≤ w) }
+
+example : ¬ Within spB () .calls anyPost none' reset := fun h => by
+  rcases h.1 (by decide) 1 with h' | h'
+  · cases h'.2
+  · cases h'
+example : Within spB () .calls anyPost none' (callBracket spB.inCall "g" reset) :=
+  Within.callBracket "g" reset ⟨fun h => absurd rfl h, (fun h => nomatch h),
+    fun _ => trivial⟩
+
+-- Inside the bracket the guarded update runs; outside it stops with the gap, the world as it was.
+#guard (Reading.read zeroEnv (fun _ => 0) (callBracket spB.inCall "g" reset) 0 ⟨#[], #[]⟩ 12).world
+  == 0
+#guard (Reading.read zeroEnv (fun _ => 0) (callBracket spB.inCall "g" reset) 0 ⟨#[], #[]⟩ 3).world
+  == 3
+#guard (match (Reading.read zeroEnv (fun _ => 0) (callBracket spB.inCall "g" reset) 0 ⟨#[], #[]⟩
+    3).out with
+  | .stop (.fault (.gap m)) => m == "g" | _ => false)
+
+-- An update into the bracket runs too, from a world outside it: setting the world to `12` from `3`
+-- (as a language restores its marker after a call that lowered it).
+/-- An update that sets the world to `12`. -/
+def enter : T := .update fun _ => (12, .ret 0)
+
+#guard (Reading.read zeroEnv (fun _ => 0) (callBracket spB.inCall "g" enter) 0 ⟨#[], #[]⟩ 3).world
+  == 12
+
+-- A write to a cell inside the bracket stops with the gap, and so do an update of a cell in place,
+-- a jump and a region.
+#guard (match (Reading.read zeroEnv (fun _ => 0) (callBracket spB.inCall "g" set0) 0 ⟨#[], #[]⟩
+    12).out with
+  | .stop (.fault (.gap m)) => m == "g" | _ => false)
+#guard (match (Reading.read zeroEnv (fun _ => 0) (callBracket spB.inCall "g" mod0) 0 ⟨#[], #[]⟩
+    12).out with
+  | .stop (.fault (.gap m)) => m == "g" | _ => false)
+#guard (match (Reading.read zeroEnv (fun _ => 0) (callBracket spB.inCall "g" (.stop (.jump (.again ())) : T))
+    0 ⟨#[], #[]⟩ 12).out with
+  | .stop (.fault (.gap m)) => m == "g" | _ => false)
+#guard (match callBracket spB.inCall "g" runIt with
+  | .stop (.fault (.gap m)) => m == "g" | _ => false)
+
+-- The other requests pass through the bracket unchanged: a call, a new cell and a read of it, a
+-- bind, a choice, and a fault other than the bracket's gap.
+section
+/-- An environment that answers each call with `0`. -/
+def callEnv : Reading.Env I Nat [] where
+  answer q h w := match q with
+    | .call _ _ _ _ => .ok (0, h, w)
+    | _ => .error (.gap "no region")
+  bind _ _ _ _ _ := none
+
+/-- The result of the bracketed tree `x` from the world `w`, if it returns. -/
+def bracketOut (x : T) (w : Nat) : Option Nat :=
+  match (Reading.read callEnv (fun _ => 7) (callBracket spB.inCall "g" x) 0 ⟨#[], #[]⟩ w).out with
+  | .done r => some r
+  | .stop _ => none
+
+#guard bracketOut (.vis (.call ([], t) 0 0 ()) fun v => .ret (v + 1)) 12 == some 1
+#guard bracketOut (.vis (.new t 5) fun r => .vis (.get t r.loc) fun v => .ret v) 12 == some 5
+#guard bracketOut (.choose fun i => .ret i) 12 == some 7
+#guard bracketOut (.vis (.bind t 4 ([], t) 3 0) fun g => .ret g.captured) 12 == some 1
+#guard (match (Reading.read callEnv (fun _ => 0) (callBracket spB.inCall "g" (.stop (.fault (.failure "f")) : T))
+    0 ⟨#[], #[]⟩ 12).out with
+  | .stop (.fault (.failure m)) => m == "f" | _ => false)
+end
 
 end Strata.Dyn.Exec.EffectsTest

@@ -1,0 +1,54 @@
+module s234_int_bitwise_on_bools {
+  func @|s234_int_bitwise_on_bools.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s234_int_bitwise_on_bools")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s234_int_bitwise_on_bools", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s234_int_bitwise_on_bools", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %int.0 : py.Value = py.loadGlobal("s234_int_bitwise_on_bools", "int") ^propagate.0()
+      %__and__.0 : py.Value = py.attr(%int.0, "__and__") ^propagate.0()
+      %bool.0 : py.Value = py.boolLit(true)
+      %bool.1 : py.Value = py.boolLit(true)
+      %tuple.0 : py.Value = py.mkTuple(%bool.0, %bool.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%__and__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %a.cell.0 : base.Ref(py.Value) = py.globalCell("s234_int_bitwise_on_bools", "a")
+      %set.2 : base.Unit = base.refSet[py.Value](%a.cell.0, %call.0)
+      %int.1 : py.Value = py.loadGlobal("s234_int_bitwise_on_bools", "int") ^propagate.0()
+      %__or__.0 : py.Value = py.attr(%int.1, "__or__") ^propagate.0()
+      %bool.2 : py.Value = py.boolLit(false)
+      %bool.3 : py.Value = py.boolLit(true)
+      %tuple.1 : py.Value = py.mkTuple(%bool.2, %bool.3)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%__or__.0, %tuple.1, %kwargs.1) ^propagate.0()
+      %b.cell.0 : base.Ref(py.Value) = py.globalCell("s234_int_bitwise_on_bools", "b")
+      %set.3 : base.Unit = base.refSet[py.Value](%b.cell.0, %call.1)
+      %int.2 : py.Value = py.loadGlobal("s234_int_bitwise_on_bools", "int") ^propagate.0()
+      %__xor__.0 : py.Value = py.attr(%int.2, "__xor__") ^propagate.0()
+      %bool.4 : py.Value = py.boolLit(true)
+      %bool.5 : py.Value = py.boolLit(false)
+      %tuple.2 : py.Value = py.mkTuple(%bool.4, %bool.5)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%__xor__.0, %tuple.2, %kwargs.2) ^propagate.0()
+      %c.cell.0 : base.Ref(py.Value) = py.globalCell("s234_int_bitwise_on_bools", "c")
+      %set.4 : base.Unit = base.refSet[py.Value](%c.cell.0, %call.2)
+      %bool.6 : py.Value = py.loadGlobal("s234_int_bitwise_on_bools", "bool") ^propagate.0()
+      %__and__.1 : py.Value = py.attr(%bool.6, "__and__") ^propagate.0()
+      %bool.7 : py.Value = py.boolLit(true)
+      %bool.8 : py.Value = py.boolLit(true)
+      %tuple.3 : py.Value = py.mkTuple(%bool.7, %bool.8)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%__and__.1, %tuple.3, %kwargs.3) ^propagate.0()
+      %d.cell.0 : base.Ref(py.Value) = py.globalCell("s234_int_bitwise_on_bools", "d")
+      %set.5 : base.Unit = base.refSet[py.Value](%d.cell.0, %call.3)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

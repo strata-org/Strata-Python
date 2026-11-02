@@ -1,0 +1,11 @@
+module top
+  C: local (assigned, referenced)
+  n: global explicit (assigned, declared_global)
+  class C
+    __lt__: local (assigned)
+    function __lt__
+      NotImplemented: global implicit (referenced)
+      n: global explicit (assigned, referenced, declared_global)
+      o: local (parameter)
+      self: local (parameter)
+qualnames: C, C.__lt__

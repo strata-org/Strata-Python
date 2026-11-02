@@ -1,0 +1,17 @@
+--- stdout 13
+5
+up
+set 4
+3
+
+--- outcome
+raised TypeError: 'x' is an invalid keyword argument for property()
+--- globals
+C = <class 'C'>
+D = <class 'D'>
+P = <class 'P'>
+Q = <class 'Q'>
+__doc__ = None
+__name__ = '__main__'
+d = <D object>
+q = <Q object>

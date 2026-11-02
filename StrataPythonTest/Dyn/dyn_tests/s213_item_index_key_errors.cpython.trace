@@ -1,0 +1,24 @@
+--- stdout 140
+IndexError cannot fit 'Big' into an index-sized integer
+IndexError cannot fit 'Big' into an index-sized integer
+KeyError boom
+KeyError boom
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+Big = <class 'Big'>
+Boom = <class 'Boom'>
+__doc__ = None
+__name__ = '__main__'
+err = <function object>
+r = ('KeyError', 'boom')
+r1 = ('IndexError', "cannot fit 'Big' into an index-sized integer")
+r2 = ('IndexError', "cannot fit 'Big' into an index-sized integer")
+r3 = ('KeyError', 'boom')
+r4 = ('KeyError', 'boom')
+s1 = <function object>
+s2 = <function object>
+s3 = <function object>
+s4 = <function object>

@@ -1,0 +1,24 @@
+module
+  log: local (assigned)
+  D: local (assigned)
+  Base: local (assigned, referenced)
+  C: local (assigned)
+  class D
+    __set_name__: local (assigned)
+    function D.__set_name__
+      params: self, owner, name
+      self: local (parameter)
+      owner: local (parameter)
+      name: local (parameter, referenced)
+      print: global implicit (referenced)
+  class Base
+    __init_subclass__: local (assigned)
+    function Base.__init_subclass__
+      params: cls, **kw
+      cls: local (parameter, referenced)
+      kw: local (parameter)
+      print: global implicit (referenced)
+  class C
+    a: local (assigned)
+    D: global implicit (referenced)
+    b: local (assigned)

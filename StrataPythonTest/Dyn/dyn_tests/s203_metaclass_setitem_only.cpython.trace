@@ -1,0 +1,11 @@
+--- stdout 40
+meta set 1 2
+AttributeError __delitem__
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+M = <class 'M'>
+__doc__ = None
+__name__ = '__main__'

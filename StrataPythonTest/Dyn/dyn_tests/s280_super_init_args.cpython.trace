@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: super() argument 1 must be type, not int
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+s = <super object>

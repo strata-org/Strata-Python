@@ -1,0 +1,10 @@
+module top
+  P: local (assigned, referenced)
+  print: global implicit (referenced)
+  s: local (assigned, referenced)
+  class P
+    __rmod__: local (assigned)
+    function __rmod__
+      o: local (parameter)
+      self: local (parameter)
+qualnames: P, P.__rmod__

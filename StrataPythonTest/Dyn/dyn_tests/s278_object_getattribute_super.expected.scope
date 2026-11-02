@@ -1,0 +1,13 @@
+module
+  A: local (assigned, referenced)
+  B: local (assigned, referenced)
+  s: local (assigned, referenced)
+  super: global implicit (referenced)
+  r: local (assigned)
+  object: global implicit (referenced)
+  class A
+    f: local (assigned)
+    function A.f
+      params: self
+      self: local (parameter)
+  class B

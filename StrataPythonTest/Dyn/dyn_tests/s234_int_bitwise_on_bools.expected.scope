@@ -1,0 +1,7 @@
+module
+  a: local (assigned)
+  int: global implicit (referenced)
+  b: local (assigned)
+  c: local (assigned)
+  d: local (assigned)
+  bool: global implicit (referenced)

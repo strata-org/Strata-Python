@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised AttributeError: type object 'ééééééééééééééééééééééééé' has no attribute 'x'
+--- globals
+__doc__ = None
+__name__ = '__main__'
+éééééééééééééééééééééééééééééé = <class 'éééééééééééééééééééééééééééééé'>

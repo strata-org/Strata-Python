@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised AttributeError: __delitem__
+--- globals
+L = <class 'L'>
+__doc__ = None
+__name__ = '__main__'

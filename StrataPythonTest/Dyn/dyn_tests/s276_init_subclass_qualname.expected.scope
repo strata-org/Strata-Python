@@ -1,0 +1,5 @@
+module
+  Outer: local (assigned)
+  class Outer
+    C: local (assigned)
+    class Outer.C

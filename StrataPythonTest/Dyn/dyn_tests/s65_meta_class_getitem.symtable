@@ -1,0 +1,12 @@
+module top
+  C: local (assigned, referenced)
+  M: local (assigned, referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  class M
+  class C
+    __class_getitem__: local (assigned)
+    function __class_getitem__
+      cls: local (parameter)
+      k: local (parameter, referenced)
+qualnames: C, C.__class_getitem__, M

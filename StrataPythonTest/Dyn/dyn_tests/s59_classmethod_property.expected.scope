@@ -1,0 +1,10 @@
+module
+  C: local (assigned, referenced)
+  print: global implicit (referenced)
+  class C
+    x: local (assigned)
+    classmethod: global implicit (referenced)
+    property: global implicit (referenced)
+    function C.x
+      params: cls
+      cls: local (parameter)

@@ -14,7 +14,7 @@ module fw04_with_two_items {
       %note.cell.0 : base.Ref(py.Value) = py.globalCell("fw04_with_two_items", "note")
       %set.3 : base.Unit = base.refSet[py.Value](%note.cell.0, %clo.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure[[]](@|fw04_with_two_items.Ctx.<body>|, "Ctx", "fw04_with_two_items")
+      %clo.1 : py.Value = py.mkClosure[[]](@|fw04_with_two_items.Ctx.<body>|, "<body>", "fw04_with_two_items")
       %str.1 : py.Value = py.strLit("Ctx")
       %tuple.0 : py.Value = py.mkTuple(%clo.1, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs

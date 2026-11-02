@@ -1,0 +1,11 @@
+module
+  E: local (assigned, referenced)
+  X: local (assigned)
+  type: global implicit (referenced)
+  class E
+    __mro_entries__: local (assigned)
+    function E.__mro_entries__
+      params: self, bases
+      self: local (parameter)
+      bases: local (parameter)
+      object: global implicit (referenced)

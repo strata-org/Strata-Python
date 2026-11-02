@@ -1,0 +1,11 @@
+module top
+  AttributeError: global implicit (referenced)
+  L: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  print: global implicit (referenced)
+  class L
+    __delitem__: local (assigned)
+    function __delitem__
+      k: local (parameter)
+      self: local (parameter)
+qualnames: L, L.__delitem__

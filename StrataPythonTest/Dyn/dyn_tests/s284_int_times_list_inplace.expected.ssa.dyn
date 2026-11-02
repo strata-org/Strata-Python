@@ -1,0 +1,28 @@
+module s284_int_times_list_inplace {
+  func @|s284_int_times_list_inplace.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s284_int_times_list_inplace")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s284_int_times_list_inplace", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s284_int_times_list_inplace", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %int.0 : py.Value = py.intLit(2)
+      %n.cell.0 : base.Ref(py.Value) = py.globalCell("s284_int_times_list_inplace", "n")
+      %set.2 : base.Unit = base.refSet[py.Value](%n.cell.0, %int.0)
+      %n.4 : py.Value = py.loadGlobal("s284_int_times_list_inplace", "n") ^propagate.0()
+      %int.1 : py.Value = py.intLit(1)
+      %int.2 : py.Value = py.intLit(2)
+      %list.0 : py.Value = py.mkList(%int.1, %int.2)
+      %iMult.0 : py.Value = py.iMult(%n.4, %list.0) ^propagate.0()
+      %n.cell.1 : base.Ref(py.Value) = py.globalCell("s284_int_times_list_inplace", "n")
+      %set.3 : base.Unit = base.refSet[py.Value](%n.cell.1, %iMult.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

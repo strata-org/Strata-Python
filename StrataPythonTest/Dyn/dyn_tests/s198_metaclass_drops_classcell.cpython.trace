@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised RuntimeError: __class__ not set defining 'A' as <class '__main__.A'>. Was __classcell__ propagated to type.__new__?
+--- globals
+Meta = <class 'Meta'>
+__doc__ = None
+__name__ = '__main__'

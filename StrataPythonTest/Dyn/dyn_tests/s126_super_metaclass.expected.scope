@@ -1,0 +1,30 @@
+module
+  M: local (assigned, referenced)
+  type: global implicit (referenced)
+  C: local (assigned, referenced)
+  s: local (assigned, referenced)
+  super: global implicit (referenced)
+  print: global implicit (referenced)
+  D: local (assigned, referenced)
+  class M (needs __class__ cell)
+    __call__: local (assigned)
+    m: local (assigned)
+    function M.__call__
+      params: cls, *a
+      cls: local (parameter)
+      a: local (parameter, referenced)
+      print: global implicit (referenced)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+    function M.m
+      params: cls
+      cls: local (parameter)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+  class C
+    __init__: local (assigned)
+    function C.__init__
+      params: self, x
+      self: local (parameter, referenced)
+      x: local (parameter, referenced)
+  class D

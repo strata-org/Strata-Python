@@ -1,0 +1,29 @@
+module s194_object_init_no_instances {
+  func @|s194_object_init_no_instances.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s194_object_init_no_instances")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s194_object_init_no_instances", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s194_object_init_no_instances", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %print.0 : py.Value = py.loadGlobal("s194_object_init_no_instances", "print") ^propagate.0()
+      %object.0 : py.Value = py.loadGlobal("s194_object_init_no_instances", "object") ^propagate.0()
+      %__init__.0 : py.Value = py.attr(%object.0, "__init__") ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("s194_object_init_no_instances", "len") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %tuple.0 : py.Value = py.mkTuple(%len.0, %int.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%__init__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%call.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.1) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

@@ -1,0 +1,21 @@
+module
+  saved: global explicit (assigned, referenced, declared_global)
+  Meta: local (assigned, referenced)
+  type: global implicit (referenced)
+  A: local (assigned, referenced)
+  print: global implicit (referenced)
+  class Meta
+    __new__: local (assigned)
+    function Meta.__new__
+      params: m, name, bases, ns
+      m: local (parameter)
+      name: local (parameter)
+      bases: local (parameter)
+      ns: local (parameter, referenced)
+      saved: global explicit (assigned, declared_global)
+  class A (needs __class__ cell)
+    f: local (assigned)
+    function A.f
+      params: self
+      self: local (parameter)
+      __class__: free (referenced)

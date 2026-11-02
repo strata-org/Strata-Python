@@ -1,0 +1,11 @@
+--- stdout 8
+False 1
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+n = 1
+r = False

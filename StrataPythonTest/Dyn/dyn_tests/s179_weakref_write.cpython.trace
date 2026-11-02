@@ -1,0 +1,11 @@
+--- stdout 29
+AttributeError on write
+None
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+__doc__ = None
+__name__ = '__main__'
+e = <E object>

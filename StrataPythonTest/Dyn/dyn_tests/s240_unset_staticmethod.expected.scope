@@ -1,0 +1,5 @@
+module
+  C: local (assigned, referenced)
+  staticmethod: global implicit (referenced)
+  r: local (assigned)
+  class C

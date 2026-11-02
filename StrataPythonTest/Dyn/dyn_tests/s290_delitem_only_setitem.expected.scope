@@ -1,0 +1,9 @@
+module
+  L: local (assigned, referenced)
+  class L
+    __setitem__: local (assigned)
+    function L.__setitem__
+      params: self, k, v
+      self: local (parameter)
+      k: local (parameter)
+      v: local (parameter)

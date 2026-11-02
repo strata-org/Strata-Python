@@ -1,0 +1,165 @@
+module s68_mro_override {
+  func @|s68_mro_override.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s68_mro_override")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s68_mro_override", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s68_mro_override", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|s68_mro_override.M.<body>|, "<body>", "s68_mro_override")
+      %str.1 : py.Value = py.strLit("M")
+      %type.0 : py.Value = py.loadGlobal("s68_mro_override", "type") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1, %type.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %M.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %M.cell.0 : base.Ref(py.Value) = py.globalCell("s68_mro_override", "M")
+      %set.2 : base.Unit = base.refSet[py.Value](%M.cell.0, %M.0)
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|s68_mro_override.A.<body>|, "<body>", "s68_mro_override")
+      %str.2 : py.Value = py.strLit("A")
+      %tuple.1 : py.Value = py.mkTuple(%clo.1, %str.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %A.0 : py.Value = py.call(%__build_class__.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %A.cell.0 : base.Ref(py.Value) = py.globalCell("s68_mro_override", "A")
+      %set.3 : base.Unit = base.refSet[py.Value](%A.cell.0, %A.0)
+      %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@|s68_mro_override.B.<body>|, "<body>", "s68_mro_override")
+      %str.3 : py.Value = py.strLit("B")
+      %A.1 : py.Value = py.loadGlobal("s68_mro_override", "A") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%clo.2, %str.3, %A.1)
+      %str.4 : py.Value = py.strLit("metaclass")
+      %M.1 : py.Value = py.loadGlobal("s68_mro_override", "M") ^propagate.0()
+      %kwargs.2 : py.Value = py.mkKwargs(%str.4, %M.1)
+      %B.0 : py.Value = py.call(%__build_class__.2, %tuple.2, %kwargs.2) ^propagate.0()
+      %B.cell.0 : base.Ref(py.Value) = py.globalCell("s68_mro_override", "B")
+      %set.4 : base.Unit = base.refSet[py.Value](%B.cell.0, %B.0)
+      %print.0 : py.Value = py.loadGlobal("s68_mro_override", "print") ^propagate.0()
+      %B.1 : py.Value = py.loadGlobal("s68_mro_override", "B") ^propagate.0()
+      %__mro__.0 : py.Value = py.attr(%B.1, "__mro__") ^propagate.0()
+      %B.2 : py.Value = py.loadGlobal("s68_mro_override", "B") ^propagate.0()
+      %object.0 : py.Value = py.loadGlobal("s68_mro_override", "object") ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple(%B.2, %object.0)
+      %eq.0 : py.Value = py.eq(%__mro__.0, %tuple.3) ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple(%eq.0)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.4, %kwargs.3) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s68_mro_override.M.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["type"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "mro", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s68_mro_override", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("M")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s68_mro_override.M.mro, "mro", "s68_mro_override")
+      %str.4 : py.Value = py.strLit("mro")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s68_mro_override.A.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "x", value = 1}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s68_mro_override", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("A")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %int.1 : py.Value = py.intLit(1)
+      %str.4 : py.Value = py.strLit("x")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %int.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s68_mro_override.B.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["A"]]
+    #[py.keywords = [{name = "metaclass", value = "M"}]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s68_mro_override", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("B")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s68_mro_override.M.mro(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %cls.0 : py.Value = py.undef("cls")
+      %cls.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%cls.0)
+      %cls.1 : py.Value = py.undef("cls")
+      %defaults.0 : py.Value = py.mkTuple(%cls.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M.mro", 0, 1, false, false, "cls") ^propagate.0()
+      %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %cls.4 : py.Value = py.requireDefined(%cls.2, "cls", "UnboundLocalError", "cannot access local variable 'cls' where it is not associated with a value") ^propagate.0()
+      %object.0 : py.Value = py.loadGlobal("s68_mro_override", "object") ^propagate.0()
+      %list.0 : py.Value = py.mkList(%cls.4, %object.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%list.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

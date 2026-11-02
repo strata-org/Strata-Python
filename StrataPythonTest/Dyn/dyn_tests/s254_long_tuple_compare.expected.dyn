@@ -1,0 +1,40 @@
+module s254_long_tuple_compare {
+  func @|s254_long_tuple_compare.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s254_long_tuple_compare")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s254_long_tuple_compare", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s254_long_tuple_compare", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %int.0 : py.Value = py.intLit(0)
+      %tuple.0 : py.Value = py.mkTuple(%int.0)
+      %int.1 : py.Value = py.intLit(100000)
+      %mult.0 : py.Value = py.mult(%tuple.0, %int.1) ^propagate.0()
+      %a.cell.0 : base.Ref(py.Value) = py.globalCell("s254_long_tuple_compare", "a")
+      %set.2 : base.Unit = base.refSet[py.Value](%a.cell.0, %mult.0)
+      %int.2 : py.Value = py.intLit(0)
+      %tuple.1 : py.Value = py.mkTuple(%int.2)
+      %int.3 : py.Value = py.intLit(100000)
+      %mult.1 : py.Value = py.mult(%tuple.1, %int.3) ^propagate.0()
+      %b.cell.0 : base.Ref(py.Value) = py.globalCell("s254_long_tuple_compare", "b")
+      %set.3 : base.Unit = base.refSet[py.Value](%b.cell.0, %mult.1)
+      %a.0 : py.Value = py.loadGlobal("s254_long_tuple_compare", "a") ^propagate.0()
+      %b.0 : py.Value = py.loadGlobal("s254_long_tuple_compare", "b") ^propagate.0()
+      %eq.0 : py.Value = py.eq(%a.0, %b.0) ^propagate.0()
+      %r.cell.0 : base.Ref(py.Value) = py.globalCell("s254_long_tuple_compare", "r")
+      %set.4 : base.Unit = base.refSet[py.Value](%r.cell.0, %eq.0)
+      %int.4 : py.Value = py.intLit(1)
+      %a.1 : py.Value = py.loadGlobal("s254_long_tuple_compare", "a") ^propagate.0()
+      %in.0 : py.Value = py.in(%int.4, %a.1) ^propagate.0()
+      %s.cell.0 : base.Ref(py.Value) = py.globalCell("s254_long_tuple_compare", "s")
+      %set.5 : base.Unit = base.refSet[py.Value](%s.cell.0, %in.0)
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

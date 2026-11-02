@@ -1,0 +1,36 @@
+--- stdout 122
+and
+eq 1 5
+eq 2 2
+sub
+eq 5 1
+eq 2 2
+le
+eq 5 1
+False
+or
+eq 1 9
+xor
+eq 1 1
+isub
+eq 9 13
+eq
+False
+mutation
+eq 5 1
+True False
+
+--- outcome
+ok
+--- globals
+K = <class 'K'>
+M = <class 'M'>
+__doc__ = None
+__name__ = '__main__'
+a = {<M object>, <M object>}
+b = {<M object>, <M object>}
+c = {<K object>}
+d = {<M object>, <M object>}
+k1 = <M object>
+k2 = <M object>
+k5 = <K object>

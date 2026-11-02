@@ -1,0 +1,10 @@
+module
+  P: local (assigned, referenced)
+  p1: local (assigned, referenced)
+  p2: local (assigned, referenced)
+  p3: local (assigned, referenced)
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  print: global implicit (referenced)
+  c: local (assigned, referenced)
+  class P

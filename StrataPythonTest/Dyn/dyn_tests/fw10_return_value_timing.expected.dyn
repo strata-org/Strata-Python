@@ -20,7 +20,7 @@ module fw10_return_value_timing {
       %closure.cell.0 : base.Ref(py.Value) = py.globalCell("fw10_return_value_timing", "closure")
       %set.5 : base.Unit = base.refSet[py.Value](%closure.cell.0, %clo.2)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.3 : py.Value = py.mkClosure[[]](@|fw10_return_value_timing.Box.<body>|, "Box", "fw10_return_value_timing")
+      %clo.3 : py.Value = py.mkClosure[[]](@|fw10_return_value_timing.Box.<body>|, "<body>", "fw10_return_value_timing")
       %str.1 : py.Value = py.strLit("Box")
       %tuple.0 : py.Value = py.mkTuple(%clo.3, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs

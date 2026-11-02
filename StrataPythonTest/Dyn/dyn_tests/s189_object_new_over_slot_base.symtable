@@ -1,0 +1,18 @@
+module top
+  A: local (assigned, referenced)
+  B: local (assigned, referenced)
+  print: global implicit (referenced)
+  class A
+    __new__: local (assigned)
+    function __new__
+      a: local (parameter)
+      cls: local (parameter, referenced)
+      object: global implicit (referenced)
+  class B
+    __init__: local (assigned)
+    __new__: local (assigned)
+    object: global implicit (referenced)
+    function __init__
+      self: local (parameter, referenced)
+      x: local (parameter, referenced)
+qualnames: A, A.__new__, B, B.__init__

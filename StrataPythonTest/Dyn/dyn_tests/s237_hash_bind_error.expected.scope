@@ -1,0 +1,9 @@
+module
+  A: local (assigned, referenced)
+  s: local (assigned)
+  class A
+    __hash__: local (assigned)
+    property: global implicit (referenced)
+    function A.__hash__
+      params: self
+      self: local (parameter)

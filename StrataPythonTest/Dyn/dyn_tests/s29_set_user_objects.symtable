@@ -1,0 +1,11 @@
+module top
+  P: local (assigned, referenced)
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  c: local (assigned, referenced)
+  p1: local (assigned, referenced)
+  p2: local (assigned, referenced)
+  p3: local (assigned, referenced)
+  print: global implicit (referenced)
+  class P
+qualnames: P

@@ -1,0 +1,12 @@
+--- stdout 80
+3 True 2.5 3
+True True True True
+-3 False 1 9 0.5
+True False 7 1 -4
+-6 -2.5 3.5
+
+--- outcome
+raised TypeError: descriptor '__add__' requires a 'int' object but received a 'str'
+--- globals
+__doc__ = None
+__name__ = '__main__'

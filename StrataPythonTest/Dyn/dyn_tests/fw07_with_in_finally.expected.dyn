@@ -17,7 +17,7 @@ module fw07_with_in_finally {
       %note.cell.0 : base.Ref(py.Value) = py.globalCell("fw07_with_in_finally", "note")
       %set.4 : base.Unit = base.refSet[py.Value](%note.cell.0, %clo.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure[[]](@|fw07_with_in_finally.Ctx.<body>|, "Ctx", "fw07_with_in_finally")
+      %clo.1 : py.Value = py.mkClosure[[]](@|fw07_with_in_finally.Ctx.<body>|, "<body>", "fw07_with_in_finally")
       %str.1 : py.Value = py.strLit("Ctx")
       %tuple.0 : py.Value = py.mkTuple(%clo.1, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs

@@ -1,0 +1,486 @@
+module s222_build_class_attr_lookups {
+  func @|s222_build_class_attr_lookups.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s222_build_class_attr_lookups")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s222_build_class_attr_lookups", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s222_build_class_attr_lookups", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|s222_build_class_attr_lookups.Weird.<body>|, "<body>", "s222_build_class_attr_lookups")
+      %str.1 : py.Value = py.strLit("Weird")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %Weird.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %Weird.cell.0 : base.Ref(py.Value) = py.globalCell("s222_build_class_attr_lookups", "Weird")
+      %set.2 : base.Unit = base.refSet[py.Value](%Weird.cell.0, %Weird.0)
+      %Weird.1 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "Weird") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%Weird.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %w.cell.0 : base.Ref(py.Value) = py.globalCell("s222_build_class_attr_lookups", "w")
+      %set.3 : base.Unit = base.refSet[py.Value](%w.cell.0, %call.0)
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^catch.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|s222_build_class_attr_lookups.X.<body>|, "<body>", "s222_build_class_attr_lookups")
+      %str.2 : py.Value = py.strLit("X")
+      %w.0 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "w") ^catch.0()
+      %tuple.2 : py.Value = py.mkTuple(%clo.1, %str.2, %w.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %X.0 : py.Value = py.call(%__build_class__.1, %tuple.2, %kwargs.2) ^catch.0()
+      %X.cell.0 : base.Ref(py.Value) = py.globalCell("s222_build_class_attr_lookups", "X")
+      %set.4 : base.Unit = base.refSet[py.Value](%X.cell.0, %X.0)
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %TypeError.0 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "TypeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %TypeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s222_build_class_attr_lookups", "e")
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.0 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "print") ^clear.0()
+      %str.3 : py.Value = py.strLit("TE")
+      %e.0 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "e") ^clear.0()
+      %args.0 : py.Value = py.attr(%e.0, "args") ^clear.0()
+      %int.0 : py.Value = py.intLit(0)
+      %item.0 : py.Value = py.getItem(%args.0, %int.0) ^clear.0()
+      %tuple.3 : py.Value = py.mkTuple(%str.3, %item.0)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.3, %kwargs.3) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("s222_build_class_attr_lookups", "e")
+      %set.6 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("s222_build_class_attr_lookups", "e")
+      %set.7 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@|s222_build_class_attr_lookups.Holder.<body>|, "<body>", "s222_build_class_attr_lookups")
+      %str.4 : py.Value = py.strLit("Holder")
+      %tuple.4 : py.Value = py.mkTuple(%clo.2, %str.4)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %Holder.0 : py.Value = py.call(%__build_class__.2, %tuple.4, %kwargs.4) ^propagate.0()
+      %Holder.cell.0 : base.Ref(py.Value) = py.globalCell("s222_build_class_attr_lookups", "Holder")
+      %set.8 : base.Unit = base.refSet[py.Value](%Holder.cell.0, %Holder.0)
+      %Holder.1 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "Holder") ^propagate.0()
+      %tuple.5 : py.Value = py.mkTuple
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%Holder.1, %tuple.5, %kwargs.5) ^propagate.0()
+      %h.cell.0 : base.Ref(py.Value) = py.globalCell("s222_build_class_attr_lookups", "h")
+      %set.9 : base.Unit = base.refSet[py.Value](%h.cell.0, %call.2)
+      %__build_class__.3 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.3 : py.Value = py.mkClosure[[]](@|s222_build_class_attr_lookups.Real.<body>|, "<body>", "s222_build_class_attr_lookups")
+      %str.5 : py.Value = py.strLit("Real")
+      %tuple.6 : py.Value = py.mkTuple(%clo.3, %str.5)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %Real.0 : py.Value = py.call(%__build_class__.3, %tuple.6, %kwargs.6) ^propagate.0()
+      %Real.cell.0 : base.Ref(py.Value) = py.globalCell("s222_build_class_attr_lookups", "Real")
+      %set.10 : base.Unit = base.refSet[py.Value](%Real.cell.0, %Real.0)
+      %clo.4 : py.Value = py.mkClosure[[]](@|s222_build_class_attr_lookups.<lambda>|, "<lambda>", "s222_build_class_attr_lookups")
+      %h.0 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "h") ^propagate.0()
+      %__mro_entries__.0 : base.Unit = py.setAttr(%h.0, "__mro_entries__", %clo.4) ^propagate.0()
+      %__build_class__.4 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.5 : py.Value = py.mkClosure[[]](@|s222_build_class_attr_lookups.X.<body>.1|, "<body>", "s222_build_class_attr_lookups")
+      %str.6 : py.Value = py.strLit("X")
+      %h.1 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "h") ^propagate.0()
+      %tuple.7 : py.Value = py.mkTuple(%clo.5, %str.6, %h.1)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %X.1 : py.Value = py.call(%__build_class__.4, %tuple.7, %kwargs.7) ^propagate.0()
+      %X.cell.1 : base.Ref(py.Value) = py.globalCell("s222_build_class_attr_lookups", "X")
+      %set.11 : base.Unit = base.refSet[py.Value](%X.cell.1, %X.1)
+      %print.1 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "print") ^propagate.0()
+      %X.2 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "X") ^propagate.0()
+      %__mro__.0 : py.Value = py.attr(%X.2, "__mro__") ^propagate.0()
+      %int.1 : py.Value = py.intLit(1)
+      %item.1 : py.Value = py.getItem(%__mro__.0, %int.1) ^propagate.0()
+      %__name__.0 : py.Value = py.attr(%item.1, "__name__") ^propagate.0()
+      %tuple.8 : py.Value = py.mkTuple(%__name__.0)
+      %kwargs.8 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.1, %tuple.8, %kwargs.8) ^propagate.0()
+      %__build_class__.5 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.6 : py.Value = py.mkClosure[[]](@|s222_build_class_attr_lookups.MM.<body>|, "<body>", "s222_build_class_attr_lookups")
+      %str.7 : py.Value = py.strLit("MM")
+      %type.0 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "type") ^propagate.0()
+      %tuple.9 : py.Value = py.mkTuple(%clo.6, %str.7, %type.0)
+      %kwargs.9 : py.Value = py.mkKwargs
+      %MM.0 : py.Value = py.call(%__build_class__.5, %tuple.9, %kwargs.9) ^propagate.0()
+      %MM.cell.0 : base.Ref(py.Value) = py.globalCell("s222_build_class_attr_lookups", "MM")
+      %set.12 : base.Unit = base.refSet[py.Value](%MM.cell.0, %MM.0)
+      %__build_class__.6 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.7 : py.Value = py.mkClosure[[]](@|s222_build_class_attr_lookups.M.<body>|, "<body>", "s222_build_class_attr_lookups")
+      %str.8 : py.Value = py.strLit("M")
+      %tuple.10 : py.Value = py.mkTuple(%clo.7, %str.8)
+      %str.9 : py.Value = py.strLit("metaclass")
+      %MM.1 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "MM") ^propagate.0()
+      %kwargs.10 : py.Value = py.mkKwargs(%str.9, %MM.1)
+      %M.0 : py.Value = py.call(%__build_class__.6, %tuple.10, %kwargs.10) ^propagate.0()
+      %M.cell.0 : base.Ref(py.Value) = py.globalCell("s222_build_class_attr_lookups", "M")
+      %set.13 : base.Unit = base.refSet[py.Value](%M.cell.0, %M.0)
+      %__build_class__.7 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^catch.1()
+      %clo.8 : py.Value = py.mkClosure[[]](@|s222_build_class_attr_lookups.X.<body>.2|, "<body>", "s222_build_class_attr_lookups")
+      %str.10 : py.Value = py.strLit("X")
+      %tuple.11 : py.Value = py.mkTuple(%clo.8, %str.10)
+      %str.11 : py.Value = py.strLit("metaclass")
+      %M.1 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "M") ^catch.1()
+      %kwargs.11 : py.Value = py.mkKwargs(%str.11, %M.1)
+      %X.3 : py.Value = py.call(%__build_class__.7, %tuple.11, %kwargs.11) ^catch.1()
+      %X.cell.2 : base.Ref(py.Value) = py.globalCell("s222_build_class_attr_lookups", "X")
+      %set.14 : base.Unit = base.refSet[py.Value](%X.cell.2, %X.3)
+      jump ^join.1()
+    catch.1(%exc.3 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.3)
+      %TypeError.1 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "TypeError") ^unwind.1()
+      %match.1 : base.Bool = py.excMatch(%exc.3, %TypeError.1) ^unwind.1()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %e.cell.3 : base.Ref(py.Value) = py.globalCell("s222_build_class_attr_lookups", "e")
+      %set.15 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.3)
+      %print.2 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "print") ^clear.1()
+      %str.12 : py.Value = py.strLit("TE")
+      %e.3 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "e") ^clear.1()
+      %args.1 : py.Value = py.attr(%e.3, "args") ^clear.1()
+      %int.2 : py.Value = py.intLit(0)
+      %item.2 : py.Value = py.getItem(%args.1, %int.2) ^clear.1()
+      %tuple.12 : py.Value = py.mkTuple(%str.12, %item.2)
+      %kwargs.12 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%print.2, %tuple.12, %kwargs.12) ^clear.1()
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      %e.4 : py.Value = py.undef("e")
+      %e.cell.4 : base.Ref(py.Value) = py.globalCell("s222_build_class_attr_lookups", "e")
+      %set.16 : base.Unit = base.refSet[py.Value](%e.cell.4, %e.4)
+      jump ^join.1()
+    clear.1(%exc.4 : py.Value):
+      %e.5 : py.Value = py.undef("e")
+      %e.cell.5 : base.Ref(py.Value) = py.globalCell("s222_build_class_attr_lookups", "e")
+      %set.17 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.5)
+      jump ^unwind.1(%exc.4)
+    next.1():
+      jump ^unwind.1(%exc.3)
+    unwind.1(%exc.5 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.5)
+    join.1():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.6 : py.Value):
+      %exc.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.6)
+      ret(%exc.7)
+  }
+  func @|s222_build_class_attr_lookups.Weird.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__getattr__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Weird")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s222_build_class_attr_lookups.Weird.__getattr__, "__getattr__", "s222_build_class_attr_lookups")
+      %str.4 : py.Value = py.strLit("__getattr__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s222_build_class_attr_lookups.X.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["w"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("X")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s222_build_class_attr_lookups.Holder.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Holder")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s222_build_class_attr_lookups.Real.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Real")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s222_build_class_attr_lookups.<lambda>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %bases.0 : py.Value = py.undef("bases")
+      %bases.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%bases.0)
+      %bases.1 : py.Value = py.undef("bases")
+      %defaults.0 : py.Value = py.mkTuple(%bases.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 1, false, false, "bases") ^propagate.0()
+      %bases.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%bases.cell.0, %bases.2)
+      %Real.0 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "Real") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%Real.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%tuple.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s222_build_class_attr_lookups.X.<body>.1|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["h"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("X")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s222_build_class_attr_lookups.MM.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["type"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "__prepare__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("MM")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s222_build_class_attr_lookups.MM.__prepare__, "__prepare__", "s222_build_class_attr_lookups")
+      %str.4 : py.Value = py.strLit("__prepare__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s222_build_class_attr_lookups.M.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.keywords = [{name = "metaclass", value = "MM"}]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("M")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s222_build_class_attr_lookups.X.<body>.2|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.keywords = [{name = "metaclass", value = "M"}]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("X")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s222_build_class_attr_lookups.Weird.__getattr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %n.2 : py.Value = py.undef("n")
+      %n.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%n.2)
+      %self.1 : py.Value = py.undef("self")
+      %n.5 : py.Value = py.undef("n")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %n.5)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Weird.__getattr__", 0, 2, false, false, "self", "n") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %n.6 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%n.cell.0, %n.6)
+      %print.0 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("getattr")
+      %n.8 : py.Value = base.refGet[py.Value](%n.cell.0)
+      %n.9 : py.Value = py.requireDefined(%n.8, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%str.0, %n.9)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %AttributeError.0 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "AttributeError") ^propagate.0()
+      %n.11 : py.Value = base.refGet[py.Value](%n.cell.0)
+      %n.12 : py.Value = py.requireDefined(%n.11, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%n.12)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%AttributeError.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%call.1) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @s222_build_class_attr_lookups.MM.__prepare__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %args.1 : py.Value = py.undef("args")
+      %args.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%args.1)
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "MM.__prepare__", 0, 0, true, false) ^propagate.0()
+      %args.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%args.cell.0, %args.2)
+      %print.0 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("MM prepare")
+      %len.0 : py.Value = py.loadGlobal("s222_build_class_attr_lookups", "len") ^propagate.0()
+      %args.3 : py.Value = base.refGet[py.Value](%args.cell.0)
+      %args.4 : py.Value = py.requireDefined(%args.3, "args", "UnboundLocalError", "cannot access local variable 'args' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%args.4)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%len.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%str.0, %call.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %dict.0 : py.Value = py.mkDict ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%dict.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

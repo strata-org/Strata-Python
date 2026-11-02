@@ -416,12 +416,19 @@ def firstList {α : Type} (xs : List α) (empty : Exec.Target E []) : Sem ε E �
 @[dyn_sem Err.twice] def twiceNoArg (body : Exec.Region ε [] Int) : Sem ε E Int := runRegion body ()
 
 /--
-error: twiceInh may require only parts of the world, HasPart ε.W P, the machine's cells, HasHeap σ ε, its calls, HasCall σ ε, and tags, TagOf σ α, SigOf σ as r, TagCon σ F, TagCon₂ σ F and TagsOf σ cs, but requires Inhabited
+error: twiceInh may require only parts of the world, HasPart ε.W P, the machine's cells, HasHeap σ ε, its calls, HasCall σ ε, the call bracket, HasBracket ε, and tags, TagOf σ α, SigOf σ as r, TagCon σ F, TagCon₂ σ F and TagsOf σ cs, but requires Inhabited
   ε.W
 -/
 #guard_msgs in
 @[dyn_sem Err.twice]
 def twiceInh [Inhabited ε.W] (body : Exec.Region ε [Int] Int) : Sem ε E Int := runRegion body 0
+
+-- A bracket at other requests than the rule's is refused.
+/-- error: twiceBr takes HasBracket (MEff (fun x => Nat) Run Nat []), which is not at its requests -/
+#guard_msgs in
+@[dyn_sem Err.twice]
+def twiceBr [HasBracket (Exec.MEff (I := fun _ => Nat) (σ := Run) Nat [])] (body : Exec.Region ε [Int] Int) :
+    Sem ε E Int := runRegion body 0
 
 @[dyn_sem Err.twice] def twice (body : Exec.Region ε [Int] Int) : Sem ε E Int := do
   let x ← runRegion body 0
@@ -536,7 +543,7 @@ end
   n : Nat
 
 /--
-error: field n of NatLang is not a capability: parts of the world, HasPart ε.W P, the machine's cells, HasHeap σ ε, its calls, HasCall σ ε, and tags, TagOf σ α, SigOf σ as r, TagCon σ F, TagCon₂ σ F and TagsOf σ cs
+error: field n of NatLang is not a capability: parts of the world, HasPart ε.W P, the machine's cells, HasHeap σ ε, its calls, HasCall σ ε, the call bracket, HasBracket ε, and tags, TagOf σ α, SigOf σ as r, TagCon σ F, TagCon₂ σ F and TagsOf σ cs
 -/
 #guard_msgs in
 @[dyn_lang] class NatLang (σ : outParam Type) [Store σ] [Decode σ] (ε : Eff) where
@@ -567,7 +574,7 @@ variable {σ : Type} [Store σ] [Decode σ]
 
 -- A plain class is not a capability; the language's is.
 /--
-error: callByPlain may require only parts of the world, HasPart ε.W P, the machine's cells, HasHeap σ ε, its calls, HasCall σ ε, and tags, TagOf σ α, SigOf σ as r, TagCon σ F, TagCon₂ σ F and TagsOf σ cs, but requires Plain
+error: callByPlain may require only parts of the world, HasPart ε.W P, the machine's cells, HasHeap σ ε, its calls, HasCall σ ε, the call bracket, HasBracket ε, and tags, TagOf σ α, SigOf σ as r, TagCon σ F, TagCon₂ σ F and TagsOf σ cs, but requires Plain
   σ ε
 -/
 #guard_msgs in
@@ -1452,6 +1459,8 @@ environment CellErr extends Base where
   insn peekFn (f : Fn [Int] Int) : Int
   insn peekHeap (c : Ref Int) : Int
   insn buildHeap (c : Ref Int) : Bool
+  insn ownBracket (x : Int) : Int
+  insn takesBracket (x : Int) : Int
   insn named (c : Ref Int) : Int
   insn asked (c : Ref Int) : Int
   insn provedIn (c : Ref Int) : Int
@@ -1575,6 +1584,30 @@ rule's result must not change.  Equality of refs shows nothing of where they are
 /-- error: rule buildHeap for cellErr.buildHeap reaches HasHeap.mreq (buildHeap → HasHeap.mreq), the machine's own capability, which only the declarations a table command emits may build: its requests name cells, closures or regions that only the machine may choose -/
 #guard_msgs in
 #dyn_check_rule CellErr.buildHeap
+
+-- A rule that builds the call bracket itself, which rewrites a tree's requests, is rejected; its
+-- twin, which takes the bracket as a capability, passes.
+/-- Every world is inside a bracket, for the test. -/
+instance : HasInCall Unit := ⟨fun _ => true⟩
+
+@[dyn_sem CellErr.ownBracket] def ownBracket {σ : Type} [Store σ] (x : Int) : Int :=
+  let t : Sem (MEff (fun _ => Int) σ Unit []) Empty Int :=
+    (@HasBracket.mreq σ _ (fun _ => Int) Unit [] _).bracket "g" (.ret x)
+  match t with
+  | .ret v => v
+  | _ => -1
+
+/-- error: rule ownBracket for cellErr.ownBracket reaches HasBracket.mreq (ownBracket → HasBracket.mreq), the machine's own capability, which only the declarations a table command emits may build: it rewrites the requests of a tree -/
+#guard_msgs in
+#dyn_check_rule CellErr.ownBracket
+
+#guard_msgs in
+@[dyn_sem CellErr.takesBracket]
+def takesBracket {ε : Eff} {E : Type} [HasBracket ε] (x : Int) : Sem ε E Int :=
+  HasBracket.bracket "g" (.ret x)
+
+#guard_msgs in
+#dyn_check_rule CellErr.takesBracket
 
 /-! A proposition never runs, so a location or the machine's capability inside one, or inside a
 proof, changes no result of a rule with code (a `noncomputable` one is rejected below): a rule

@@ -1,0 +1,14 @@
+module top
+  C: local (assigned, referenced)
+  print: global implicit (referenced)
+  class C
+    classmethod: global implicit (referenced)
+    f: local (assigned)
+    g: local (assigned)
+    staticmethod: global implicit (referenced)
+    function f
+      C: global implicit (referenced)
+      cls: local (parameter, referenced)
+    function g
+      a: local (parameter, referenced)
+qualnames: C, C.f, C.g

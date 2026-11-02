@@ -1,0 +1,17 @@
+module top
+  P: local (assigned, referenced)
+  Q: local (assigned, referenced)
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  c: local (assigned, referenced)
+  l: local (assigned, referenced)
+  print: global implicit (referenced)
+  class P
+    __index__: local (assigned)
+    function __index__
+      self: local (parameter)
+  class Q
+    __index__: local (assigned)
+    function __index__
+      self: local (parameter)
+qualnames: P, P.__index__, Q, Q.__index__

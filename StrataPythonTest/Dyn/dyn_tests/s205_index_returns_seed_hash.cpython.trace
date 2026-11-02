@@ -1,0 +1,9 @@
+--- stdout 11
+IndexError
+
+--- outcome
+ok
+--- globals
+I = <class 'I'>
+__doc__ = None
+__name__ = '__main__'

@@ -1,0 +1,36 @@
+module top
+  Holder: local (assigned, referenced)
+  M: local (assigned, referenced)
+  MM: local (assigned, referenced)
+  Real: local (assigned)
+  TypeError: global implicit (referenced)
+  Weird: local (assigned, referenced)
+  X: local (assigned, referenced)
+  e: local (assigned, referenced)
+  h: local (assigned, referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  w: local (assigned, referenced)
+  class Weird
+    __getattr__: local (assigned)
+    function __getattr__
+      AttributeError: global implicit (referenced)
+      n: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter)
+  class X
+  class Holder
+  class Real
+  function lambda
+    Real: global implicit (referenced)
+    bases: local (parameter)
+  class X
+  class MM
+    __prepare__: local (assigned)
+    function __prepare__
+      args: local (parameter, referenced)
+      len: global implicit (referenced)
+      print: global implicit (referenced)
+  class M
+  class X
+qualnames: <lambda>, Holder, M, MM, MM.__prepare__, Real, Weird, Weird.__getattr__, X, X, X

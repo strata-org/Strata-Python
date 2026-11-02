@@ -1,0 +1,108 @@
+module s38_seq_order_raw {
+  func @|s38_seq_order_raw.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s38_seq_order_raw")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s38_seq_order_raw", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s38_seq_order_raw", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|s38_seq_order_raw.C.<body>|, "<body>", "s38_seq_order_raw")
+      %str.1 : py.Value = py.strLit("C")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %C.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %C.cell.0 : base.Ref(py.Value) = py.globalCell("s38_seq_order_raw", "C")
+      %set.2 : base.Unit = base.refSet[py.Value](%C.cell.0, %C.0)
+      %print.0 : py.Value = py.loadGlobal("s38_seq_order_raw", "print") ^propagate.0()
+      %C.1 : py.Value = py.loadGlobal("s38_seq_order_raw", "C") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%C.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %list.0 : py.Value = py.mkList(%call.0)
+      %C.2 : py.Value = py.loadGlobal("s38_seq_order_raw", "C") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%C.2, %tuple.2, %kwargs.2) ^propagate.0()
+      %list.1 : py.Value = py.mkList(%call.1)
+      %lt.0 : py.Value = py.lt(%list.0, %list.1) ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple(%lt.0)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.0, %tuple.3, %kwargs.3) ^propagate.0()
+      %print.1 : py.Value = py.loadGlobal("s38_seq_order_raw", "print") ^propagate.0()
+      %C.3 : py.Value = py.loadGlobal("s38_seq_order_raw", "C") ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%C.3, %tuple.4, %kwargs.4) ^propagate.0()
+      %tuple.5 : py.Value = py.mkTuple(%call.3)
+      %C.4 : py.Value = py.loadGlobal("s38_seq_order_raw", "C") ^propagate.0()
+      %tuple.6 : py.Value = py.mkTuple
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%C.4, %tuple.6, %kwargs.5) ^propagate.0()
+      %tuple.7 : py.Value = py.mkTuple(%call.4)
+      %lt.1 : py.Value = py.lt(%tuple.5, %tuple.7) ^propagate.0()
+      %tuple.8 : py.Value = py.mkTuple(%lt.1)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%print.1, %tuple.8, %kwargs.6) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s38_seq_order_raw.C.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__lt__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s38_seq_order_raw", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("C")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s38_seq_order_raw.C.__lt__, "__lt__", "s38_seq_order_raw")
+      %str.4 : py.Value = py.strLit("__lt__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s38_seq_order_raw.C.__lt__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %o.0 : py.Value = py.undef("o")
+      %o.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%o.0)
+      %self.1 : py.Value = py.undef("self")
+      %o.1 : py.Value = py.undef("o")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %o.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "C.__lt__", 0, 2, false, false, "self", "o") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %o.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%o.cell.0, %o.2)
+      %str.0 : py.Value = py.strLit("yes")
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%str.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

@@ -1,0 +1,4 @@
+module
+  C: local (assigned, referenced)
+  class C
+    __class_getitem__: local (assigned)

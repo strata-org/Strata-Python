@@ -1,0 +1,7 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: type.__new__(int): int is not a subtype of type
+--- globals
+__doc__ = None
+__name__ = '__main__'

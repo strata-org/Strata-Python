@@ -1,0 +1,26 @@
+module top
+  C: local (assigned, referenced)
+  a: local (assigned)
+  b: local (assigned)
+  nest_list: local (assigned, referenced)
+  nest_tuple: local (assigned, referenced)
+  print: global implicit (referenced)
+  function nest_list
+    i: local (assigned, referenced)
+    inner: local (parameter, referenced)
+    n: local (parameter, referenced)
+    x: local (assigned, referenced)
+  function nest_tuple
+    i: local (assigned, referenced)
+    n: local (parameter, referenced)
+    x: local (assigned, referenced)
+  class C
+    __init__: local (assigned)
+    function __init__
+      C: global implicit (referenced)
+      a: global implicit (referenced)
+      b: global implicit (referenced)
+      k: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter)
+qualnames: C, C.__init__, nest_list, nest_tuple

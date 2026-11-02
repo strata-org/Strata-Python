@@ -1,0 +1,3 @@
+module
+  A: local (assigned, referenced)
+  class A

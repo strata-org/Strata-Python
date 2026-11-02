@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised KeyError: 1
+--- globals
+C = <class 'C'>
+D = <class 'D'>
+__doc__ = None
+__name__ = '__main__'

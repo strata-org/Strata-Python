@@ -1,0 +1,12 @@
+module
+  E: local (assigned, referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  AttributeError: global implicit (referenced)
+  S: local (assigned, referenced)
+  T: local (assigned, referenced)
+  t: local (assigned, referenced)
+  class E
+  class S
+    __slots__: local (assigned)
+  class T

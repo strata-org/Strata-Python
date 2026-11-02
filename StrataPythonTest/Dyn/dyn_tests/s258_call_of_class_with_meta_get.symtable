@@ -1,0 +1,18 @@
+module top
+  C: local (assigned, referenced)
+  K: local (assigned)
+  M: local (assigned, referenced)
+  r: local (assigned)
+  type: global implicit (referenced)
+  class M
+    __get__: local (assigned)
+    function __get__
+      cls: local (parameter)
+      obj: local (parameter)
+      owner: local (parameter)
+      function lambda
+  class K
+  class C
+    K: global implicit (referenced)
+    __call__: local (assigned)
+qualnames: C, K, M, M.__get__, M.__get__.<locals>.<lambda>

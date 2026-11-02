@@ -4,7 +4,7 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
-public import StrataPython.Dyn.Sem.Concrete
+public import StrataPython.Dyn.Sem.Assembly
 public import StrataPython.Dyn.Sem.PyTypes
 
 set_option autoImplicit false
@@ -26,10 +26,12 @@ open Strata.Dyn.Exec
 
 variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
 
-/-- The function object of the closure `f`, named `name`, whose `__module__` is `modName`. -/
+/-- The function object of the closure `f`, named `name`, whose `__module__` is `modName`; a class
+body if its name is `<body>`, which no `def` can have. -/
 def funcObj (f : FnRef σ [Value, Value] (Except Value Value)) (name : String) (modName : Value) :
     Obj σ :=
-  ⟨.builtin .function, none, #[], .func ⟨f, name, modName⟩⟩
+  ⟨.builtin .function, none, #[],
+    .func { closure := f, name, «module» := modName, classBody := name == "<body>" }⟩
 
 /-- The value of the global `__name__` of `module`: `None` if it has no cell, or its cell is
 unassigned. -/

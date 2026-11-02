@@ -1,0 +1,9 @@
+module top
+  E: local (assigned, referenced)
+  Exception: global implicit (referenced)
+  F: local (assigned)
+  class E
+    __slots__: local (assigned)
+  class F
+    __slots__: local (assigned)
+qualnames: E, F

@@ -1,0 +1,18 @@
+module top
+  B: local (assigned)
+  C: local (assigned, referenced)
+  S: local (assigned)
+  r: local (assigned)
+  super: global implicit (referenced)
+  class S
+    __get__: local (assigned)
+    function __get__
+      obj: local (parameter)
+      owner: local (parameter)
+      self: local (parameter)
+  class B
+  class C
+    B: global implicit (referenced)
+    S: global implicit (referenced)
+    x: local (assigned)
+qualnames: B, C, S, S.__get__

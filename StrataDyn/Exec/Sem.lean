@@ -31,13 +31,14 @@ instances, which the wrapper builds.
   a closure; the wrapper builds each at the concrete types, with a proof by `rfl`.
 * **Rules**: `Sem ε E α`, a free monad, with `Target E ts` exits, the operation's own entry
   `Again E S` with the rule's state `S`, `Region ε ts α` handles, `HasPart` parts of the
-  world, `HasHeap σ ε`, the machine's cells, and `HasCall σ ε`, calls of closures and their
-  partial application.  `jump`, `semanticGap`, `semanticFailure`, `assume`, `chooseNat`,
+  world, `HasHeap σ ε`, the machine's cells, `HasCall σ ε`, calls of closures and their
+  partial application, and `HasBracket ε`, the call bracket of a built-in that runs user code,
+  with `HasInCall`, the worlds inside one.  `jump`, `semanticGap`, `semanticFailure`, `assume`, `chooseNat`,
   `choose`, `chooseInt`, `runRegion`, `newRef`, `readRef`, `writeRef`, `modifyRef`, `callFn`
   and `bindFn` build its terms.
 * **The engine boundary**: `Args`, `Exit`, `Out`, `Fn`, the machine's requests
-  `MReq` and `MEff`, and the handles the wrappers build, `Region.slot`, `HasHeap.mreq` and
-  `HasCall.mreq`.
+  `MReq` and `MEff`, and the handles the wrappers build, `Region.slot`, `HasHeap.mreq`,
+  `HasCall.mreq` and `HasBracket.mreq`.
 * **The table**: `Shape`, `Impl`, `OpImpl`, `Table`, `Model`, and `RunModel`, a model at the
   token, which linking and the machine see.  `Table.stateOf` gives each operation's state
   type, by its position and its type arguments' tags, so that the machine's states
@@ -798,6 +799,76 @@ request; the casts are the tags' proofs, and cost nothing at run time. -/
     (fun s _ _ x => cast s.ok.2 x)
     (fun t s f x => .bind t.tag (cast t.ok.symm x) s.sig f.idx f.captured)
     (fun _ s _ _ g => cast (congr (congrArg (FnRef σ) s.ok.1) s.ok.2) g)
+
+end
+
+/-- Which worlds are inside a call bracket (`HasBracket`): a language whose built-ins run user
+code marks them in a bookkeeping part of its world. -/
+class HasInCall (W : Type) where
+  inCall : W → Bool
+
+/-- **The call bracket, as a rule's capability**: `bracket msg t` runs the body `t` of a built-in
+that runs user code, so that it changes the world only inside a bracket, and stops with the gap
+`msg` where it would do anything else (`callBracket`).  Only a table's wrappers build it. -/
+class HasBracket (ε : Eff) where
+  bracket : {E β : Type} → String → Sem ε E β → Sem ε E β
+
+section
+variable {σ : Type} [Store σ] {I : Ty → Type} {W : Type} {rs : List (List Ty × Ty)} {E R : Type}
+
+mutual
+/-- **The call bracket**: `t` with each update `f` run as itself when its world or its new world
+is inside a bracket (`inCall`), and stopped with the gap `msg` otherwise, where it would change
+state that a `calls` operation must leave alone; each write to a cell, each jump and each region
+also stops with the gap.  A
+built-in that runs user code runs its body this way, between the updates that raise and lower its
+bracket's marker, so that every update of the body's own code sees a marked world (a call it
+makes runs with the marker lowered, and the marker is raised again when it returns), and a jump
+can't skip the lowering. -/
+def callBracket (inCall : W → Bool) (msg : String) :
+    Sem (MEff I σ W rs) E R → Sem (MEff I σ W rs) E R
+  | .ret a => .ret a
+  | .stop (.fault f) => .stop (.fault f)
+  | .stop (.jump _) => .stop (.fault (.gap msg))
+  | .choose k => .choose fun i => callBracket inCall msg (k i)
+  | .update f => .update fun w =>
+    -- Inside a bracket the old world is never needed again, so `f` may update it in place.
+    if inCall w then callBracketKeep inCall msg (f w)
+    else callBracketAfter inCall msg (inCall (f w).1) w (f w)
+  | .vis (.region _ _) _ => .stop (.fault (.gap msg))
+  | .vis (.call sig idx cap args) k => .vis (.call sig idx cap args) fun o => callBracket inCall msg (k o)
+  | .vis (.new t v) k => .vis (.new t v) fun o => callBracket inCall msg (k o)
+  | .vis (.get t l) k => .vis (.get t l) fun o => callBracket inCall msg (k o)
+  | .vis (.set _ _ _) _ => .stop (.fault (.gap msg))
+  | .vis (.modify _ _ _) _ => .stop (.fault (.gap msg))
+  | .vis (.bind t v sig idx cap) k => .vis (.bind t v sig idx cap) fun o => callBracket inCall msg (k o)
+
+/-- `callBracket` of an update's new world and continuation, which an update inside a bracket
+keeps. -/
+def callBracketKeep (inCall : W → Bool) (msg : String) :
+    W × Sem (MEff I σ W rs) E R → W × Sem (MEff I σ W rs) E R
+  | (w, t) => (w, callBracket inCall msg t)
+
+/-- `callBracket` of an update's new world and continuation, read on the world `w₀`: the new world
+and the guarded continuation if `keep`, else `w₀` as it was and the gap. -/
+def callBracketAfter (inCall : W → Bool) (msg : String) (keep : Bool) (w₀ : W) :
+    W × Sem (MEff I σ W rs) E R → W × Sem (MEff I σ W rs) E R
+  | (w, t) => if keep then (w, callBracket inCall msg t) else (w₀, .stop (.fault (.gap msg)))
+end
+
+/-- `callBracket`'s update of the world `w` is `callBracketAfter` with the new world kept when the
+world or the new world is inside a bracket: the in-place case is only a faster way to compute it. -/
+theorem callBracket_update_eq (inCall : W → Bool) (msg : String)
+    (f : W → W × Sem (MEff I σ W rs) E R) (w : W) :
+    (if inCall w then callBracketKeep inCall msg (f w)
+      else callBracketAfter inCall msg (inCall (f w).1) w (f w)) =
+      callBracketAfter inCall msg (inCall w || inCall (f w).1) w (f w) := by
+  rcases hf : f w with ⟨w', t⟩
+  cases h : inCall w <;> simp [callBracketKeep, callBracketAfter]
+
+/-- The call bracket at the machine's requests, with the worlds that `HasInCall` marks. -/
+@[reducible] def HasBracket.mreq [HasInCall W] : HasBracket (MEff I σ W rs) :=
+  ⟨fun msg t => callBracket HasInCall.inCall msg t⟩
 
 end
 

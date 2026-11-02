@@ -1,0 +1,14 @@
+module top
+  C: local (assigned, referenced)
+  I: local (assigned)
+  print: global implicit (referenced)
+  class I
+    __index__: local (assigned)
+    function __index__
+      self: local (parameter)
+  class C
+    __len__: local (assigned)
+    function __len__
+      I: global implicit (referenced)
+      self: local (parameter)
+qualnames: C, C.__len__, I, I.__index__

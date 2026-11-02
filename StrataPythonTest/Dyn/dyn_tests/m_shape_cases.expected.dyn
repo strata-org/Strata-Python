@@ -27,7 +27,7 @@ module m_shape_cases {
       %flag.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "flag")
       %set.7 : base.Unit = base.refSet[py.Value](%flag.cell.0, %bool.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_cases.Account.<body>|, "Account", "m_shape_cases")
+      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_cases.Account.<body>|, "<body>", "m_shape_cases")
       %str.1 : py.Value = py.strLit("Account")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs
@@ -35,7 +35,7 @@ module m_shape_cases {
       %Account.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "Account")
       %set.8 : base.Unit = base.refSet[py.Value](%Account.cell.0, %Account.0)
       %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure[[]](@|m_shape_cases.Outer.<body>|, "Outer", "m_shape_cases")
+      %clo.1 : py.Value = py.mkClosure[[]](@|m_shape_cases.Outer.<body>|, "<body>", "m_shape_cases")
       %str.2 : py.Value = py.strLit("Outer")
       %tuple.1 : py.Value = py.mkTuple(%clo.1, %str.2)
       %kwargs.1 : py.Value = py.mkKwargs
@@ -46,7 +46,7 @@ module m_shape_cases {
       %make_base.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "make_base")
       %set.10 : base.Unit = base.refSet[py.Value](%make_base.cell.0, %clo.2)
       %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.3 : py.Value = py.mkClosure[[]](@|m_shape_cases.Meta.<body>|, "Meta", "m_shape_cases")
+      %clo.3 : py.Value = py.mkClosure[[]](@|m_shape_cases.Meta.<body>|, "<body>", "m_shape_cases")
       %str.3 : py.Value = py.strLit("Meta")
       %type.0 : py.Value = py.loadGlobal("m_shape_cases", "type") ^propagate.0()
       %tuple.2 : py.Value = py.mkTuple(%clo.3, %str.3, %type.0)
@@ -64,7 +64,7 @@ module m_shape_cases {
       %set.13 : base.Unit = base.refSet[py.Value](%deco.cell.0, %clo.4)
       %deco.0 : py.Value = py.loadGlobal("m_shape_cases", "deco") ^propagate.0()
       %__build_class__.3 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.5 : py.Value = py.mkClosure[[]](@|m_shape_cases.Odd.<body>|, "Odd", "m_shape_cases")
+      %clo.5 : py.Value = py.mkClosure[[]](@|m_shape_cases.Odd.<body>|, "<body>", "m_shape_cases")
       %str.5 : py.Value = py.strLit("Odd")
       %make_base.0 : py.Value = py.loadGlobal("m_shape_cases", "make_base") ^propagate.0()
       %tuple.3 : py.Value = py.mkTuple
@@ -87,7 +87,7 @@ module m_shape_cases {
       %b.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "b")
       %set.16 : base.Unit = base.refSet[py.Value](%b.cell.0, %str.8)
       %__build_class__.4 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.6 : py.Value = py.mkClosure[[]](@|m_shape_cases.Spread.<body>|, "Spread", "m_shape_cases")
+      %clo.6 : py.Value = py.mkClosure[[]](@|m_shape_cases.Spread.<body>|, "<body>", "m_shape_cases")
       %str.9 : py.Value = py.strLit("Spread")
       %tuple.5 : py.Value = py.mkTuple(%clo.6, %str.9)
       %kwargs.6 : py.Value = py.mkKwargs
@@ -97,7 +97,7 @@ module m_shape_cases {
       %Spread.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "Spread")
       %set.17 : base.Unit = base.refSet[py.Value](%Spread.cell.0, %Spread.0)
       %__build_class__.5 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.7 : py.Value = py.mkClosure[[]](@|m_shape_cases.S1.<body>|, "S1", "m_shape_cases")
+      %clo.7 : py.Value = py.mkClosure[[]](@|m_shape_cases.S1.<body>|, "<body>", "m_shape_cases")
       %str.10 : py.Value = py.strLit("S1")
       %tuple.6 : py.Value = py.mkTuple(%clo.7, %str.10)
       %kwargs.7 : py.Value = py.mkKwargs
@@ -105,7 +105,7 @@ module m_shape_cases {
       %S1.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "S1")
       %set.18 : base.Unit = base.refSet[py.Value](%S1.cell.0, %S1.0)
       %__build_class__.6 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.8 : py.Value = py.mkClosure[[]](@|m_shape_cases.S2.<body>|, "S2", "m_shape_cases")
+      %clo.8 : py.Value = py.mkClosure[[]](@|m_shape_cases.S2.<body>|, "<body>", "m_shape_cases")
       %str.11 : py.Value = py.strLit("S2")
       %tuple.7 : py.Value = py.mkTuple(%clo.8, %str.11)
       %kwargs.8 : py.Value = py.mkKwargs
@@ -113,7 +113,7 @@ module m_shape_cases {
       %S2.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "S2")
       %set.19 : base.Unit = base.refSet[py.Value](%S2.cell.0, %S2.0)
       %__build_class__.7 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.9 : py.Value = py.mkClosure[[]](@|m_shape_cases.S3.<body>|, "S3", "m_shape_cases")
+      %clo.9 : py.Value = py.mkClosure[[]](@|m_shape_cases.S3.<body>|, "<body>", "m_shape_cases")
       %str.12 : py.Value = py.strLit("S3")
       %tuple.8 : py.Value = py.mkTuple(%clo.9, %str.12)
       %kwargs.9 : py.Value = py.mkKwargs
@@ -142,7 +142,7 @@ module m_shape_cases {
       %P.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "P")
       %set.22 : base.Unit = base.refSet[py.Value](%P.cell.0, %call.2)
       %__build_class__.8 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.10 : py.Value = py.mkClosure[[]](@|m_shape_cases.R1.<body>|, "R1", "m_shape_cases")
+      %clo.10 : py.Value = py.mkClosure[[]](@|m_shape_cases.R1.<body>|, "<body>", "m_shape_cases")
       %str.17 : py.Value = py.strLit("R1")
       %tuple.12 : py.Value = py.mkTuple(%clo.10, %str.17)
       %kwargs.12 : py.Value = py.mkKwargs
@@ -150,7 +150,7 @@ module m_shape_cases {
       %R1.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "R1")
       %set.23 : base.Unit = base.refSet[py.Value](%R1.cell.0, %R1.0)
       %__build_class__.9 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.11 : py.Value = py.mkClosure[[]](@|m_shape_cases.R2.<body>|, "R2", "m_shape_cases")
+      %clo.11 : py.Value = py.mkClosure[[]](@|m_shape_cases.R2.<body>|, "<body>", "m_shape_cases")
       %str.18 : py.Value = py.strLit("R2")
       %tuple.13 : py.Value = py.mkTuple(%clo.11, %str.18)
       %kwargs.13 : py.Value = py.mkKwargs
@@ -158,7 +158,7 @@ module m_shape_cases {
       %R2.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "R2")
       %set.24 : base.Unit = base.refSet[py.Value](%R2.cell.0, %R2.0)
       %__build_class__.10 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.12 : py.Value = py.mkClosure[[]](@|m_shape_cases.R3.<body>|, "R3", "m_shape_cases")
+      %clo.12 : py.Value = py.mkClosure[[]](@|m_shape_cases.R3.<body>|, "<body>", "m_shape_cases")
       %str.19 : py.Value = py.strLit("R3")
       %tuple.14 : py.Value = py.mkTuple(%clo.12, %str.19)
       %kwargs.14 : py.Value = py.mkKwargs
@@ -166,7 +166,7 @@ module m_shape_cases {
       %R3.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "R3")
       %set.25 : base.Unit = base.refSet[py.Value](%R3.cell.0, %R3.0)
       %__build_class__.11 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.13 : py.Value = py.mkClosure[[]](@|m_shape_cases.R4.<body>|, "R4", "m_shape_cases")
+      %clo.13 : py.Value = py.mkClosure[[]](@|m_shape_cases.R4.<body>|, "<body>", "m_shape_cases")
       %str.20 : py.Value = py.strLit("R4")
       %tuple.15 : py.Value = py.mkTuple(%clo.13, %str.20)
       %kwargs.15 : py.Value = py.mkKwargs
@@ -174,7 +174,7 @@ module m_shape_cases {
       %R4.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "R4")
       %set.26 : base.Unit = base.refSet[py.Value](%R4.cell.0, %R4.0)
       %__build_class__.12 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.14 : py.Value = py.mkClosure[[]](@|m_shape_cases.Gen.<body>|, "Gen", "m_shape_cases")
+      %clo.14 : py.Value = py.mkClosure[[]](@|m_shape_cases.Gen.<body>|, "<body>", "m_shape_cases")
       %str.21 : py.Value = py.strLit("Gen")
       %tuple.16 : py.Value = py.mkTuple(%clo.14, %str.21)
       %kwargs.16 : py.Value = py.mkKwargs
@@ -188,7 +188,7 @@ module m_shape_cases {
       %g.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "g")
       %set.29 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.16)
       %__build_class__.13 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.17 : py.Value = py.mkClosure[[]](@|m_shape_cases.Forms.<body>|, "Forms", "m_shape_cases")
+      %clo.17 : py.Value = py.mkClosure[[]](@|m_shape_cases.Forms.<body>|, "<body>", "m_shape_cases")
       %str.22 : py.Value = py.strLit("Forms")
       %tuple.17 : py.Value = py.mkTuple(%clo.17, %str.22)
       %kwargs.17 : py.Value = py.mkKwargs
@@ -196,7 +196,7 @@ module m_shape_cases {
       %Forms.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "Forms")
       %set.30 : base.Unit = base.refSet[py.Value](%Forms.cell.0, %Forms.0)
       %__build_class__.14 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.18 : py.Value = py.mkClosure[[]](@|m_shape_cases.Star.<body>|, "Star", "m_shape_cases")
+      %clo.18 : py.Value = py.mkClosure[[]](@|m_shape_cases.Star.<body>|, "<body>", "m_shape_cases")
       %str.23 : py.Value = py.strLit("Star")
       %tuple.18 : py.Value = py.mkTuple(%clo.18, %str.23)
       %kwargs.18 : py.Value = py.mkKwargs
@@ -204,7 +204,7 @@ module m_shape_cases {
       %Star.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "Star")
       %set.31 : base.Unit = base.refSet[py.Value](%Star.cell.0, %Star.0)
       %__build_class__.15 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.19 : py.Value = py.mkClosure[[]](@|m_shape_cases.S4.<body>|, "S4", "m_shape_cases")
+      %clo.19 : py.Value = py.mkClosure[[]](@|m_shape_cases.S4.<body>|, "<body>", "m_shape_cases")
       %str.24 : py.Value = py.strLit("S4")
       %tuple.19 : py.Value = py.mkTuple(%clo.19, %str.24)
       %kwargs.19 : py.Value = py.mkKwargs
@@ -212,7 +212,7 @@ module m_shape_cases {
       %S4.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "S4")
       %set.32 : base.Unit = base.refSet[py.Value](%S4.cell.0, %S4.0)
       %__build_class__.16 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.20 : py.Value = py.mkClosure[[]](@|m_shape_cases.R5.<body>|, "R5", "m_shape_cases")
+      %clo.20 : py.Value = py.mkClosure[[]](@|m_shape_cases.R5.<body>|, "<body>", "m_shape_cases")
       %str.25 : py.Value = py.strLit("R5")
       %tuple.20 : py.Value = py.mkTuple(%clo.20, %str.25)
       %kwargs.20 : py.Value = py.mkKwargs
@@ -220,7 +220,7 @@ module m_shape_cases {
       %R5.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "R5")
       %set.33 : base.Unit = base.refSet[py.Value](%R5.cell.0, %R5.0)
       %__build_class__.17 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.21 : py.Value = py.mkClosure[[]](@|m_shape_cases.R6.<body>|, "R6", "m_shape_cases")
+      %clo.21 : py.Value = py.mkClosure[[]](@|m_shape_cases.R6.<body>|, "<body>", "m_shape_cases")
       %str.26 : py.Value = py.strLit("R6")
       %tuple.21 : py.Value = py.mkTuple(%clo.21, %str.26)
       %kwargs.21 : py.Value = py.mkKwargs
@@ -228,7 +228,7 @@ module m_shape_cases {
       %R6.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "R6")
       %set.34 : base.Unit = base.refSet[py.Value](%R6.cell.0, %R6.0)
       %__build_class__.18 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.22 : py.Value = py.mkClosure[[]](@|m_shape_cases.R7.<body>|, "R7", "m_shape_cases")
+      %clo.22 : py.Value = py.mkClosure[[]](@|m_shape_cases.R7.<body>|, "<body>", "m_shape_cases")
       %str.27 : py.Value = py.strLit("R7")
       %tuple.22 : py.Value = py.mkTuple(%clo.22, %str.27)
       %kwargs.22 : py.Value = py.mkKwargs
@@ -236,7 +236,7 @@ module m_shape_cases {
       %R7.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "R7")
       %set.35 : base.Unit = base.refSet[py.Value](%R7.cell.0, %R7.0)
       %__build_class__.19 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.23 : py.Value = py.mkClosure[[]](@|m_shape_cases.Over.<body>|, "Over", "m_shape_cases")
+      %clo.23 : py.Value = py.mkClosure[[]](@|m_shape_cases.Over.<body>|, "<body>", "m_shape_cases")
       %str.28 : py.Value = py.strLit("Over")
       %tuple.23 : py.Value = py.mkTuple(%clo.23, %str.28)
       %kwargs.23 : py.Value = py.mkKwargs
@@ -244,7 +244,7 @@ module m_shape_cases {
       %Over.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "Over")
       %set.36 : base.Unit = base.refSet[py.Value](%Over.cell.0, %Over.0)
       %__build_class__.20 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.24 : py.Value = py.mkClosure[[]](@|m_shape_cases.Two.<body>|, "Two", "m_shape_cases")
+      %clo.24 : py.Value = py.mkClosure[[]](@|m_shape_cases.Two.<body>|, "<body>", "m_shape_cases")
       %str.29 : py.Value = py.strLit("Two")
       %tuple.24 : py.Value = py.mkTuple(%clo.24, %str.29)
       %kwargs.24 : py.Value = py.mkKwargs
@@ -252,7 +252,7 @@ module m_shape_cases {
       %Two.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "Two")
       %set.37 : base.Unit = base.refSet[py.Value](%Two.cell.0, %Two.0)
       %__build_class__.21 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.25 : py.Value = py.mkClosure[[]](@|m_shape_cases.Chain.<body>|, "Chain", "m_shape_cases")
+      %clo.25 : py.Value = py.mkClosure[[]](@|m_shape_cases.Chain.<body>|, "<body>", "m_shape_cases")
       %str.30 : py.Value = py.strLit("Chain")
       %tuple.25 : py.Value = py.mkTuple(%clo.25, %str.30)
       %kwargs.25 : py.Value = py.mkKwargs
@@ -260,7 +260,7 @@ module m_shape_cases {
       %Chain.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "Chain")
       %set.38 : base.Unit = base.refSet[py.Value](%Chain.cell.0, %Chain.0)
       %__build_class__.22 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.26 : py.Value = py.mkClosure[[]](@|m_shape_cases.ViaClass.<body>|, "ViaClass", "m_shape_cases")
+      %clo.26 : py.Value = py.mkClosure[[]](@|m_shape_cases.ViaClass.<body>|, "<body>", "m_shape_cases")
       %str.31 : py.Value = py.strLit("ViaClass")
       %tuple.26 : py.Value = py.mkTuple(%clo.26, %str.31)
       %kwargs.26 : py.Value = py.mkKwargs
@@ -268,7 +268,7 @@ module m_shape_cases {
       %ViaClass.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "ViaClass")
       %set.39 : base.Unit = base.refSet[py.Value](%ViaClass.cell.0, %ViaClass.0)
       %__build_class__.23 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.27 : py.Value = py.mkClosure[[]](@|m_shape_cases.ViaClassBody.<body>|, "ViaClassBody", "m_shape_cases")
+      %clo.27 : py.Value = py.mkClosure[[]](@|m_shape_cases.ViaClassBody.<body>|, "<body>", "m_shape_cases")
       %str.32 : py.Value = py.strLit("ViaClassBody")
       %tuple.27 : py.Value = py.mkTuple(%clo.27, %str.32)
       %kwargs.27 : py.Value = py.mkKwargs
@@ -276,7 +276,7 @@ module m_shape_cases {
       %ViaClassBody.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "ViaClassBody")
       %set.40 : base.Unit = base.refSet[py.Value](%ViaClassBody.cell.0, %ViaClassBody.0)
       %__build_class__.24 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.28 : py.Value = py.mkClosure[[]](@|m_shape_cases.InFunc.<body>|, "InFunc", "m_shape_cases")
+      %clo.28 : py.Value = py.mkClosure[[]](@|m_shape_cases.InFunc.<body>|, "<body>", "m_shape_cases")
       %str.33 : py.Value = py.strLit("InFunc")
       %tuple.28 : py.Value = py.mkTuple(%clo.28, %str.33)
       %kwargs.28 : py.Value = py.mkKwargs
@@ -284,7 +284,7 @@ module m_shape_cases {
       %InFunc.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "InFunc")
       %set.41 : base.Unit = base.refSet[py.Value](%InFunc.cell.0, %InFunc.0)
       %__build_class__.25 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.29 : py.Value = py.mkClosure[[]](@|m_shape_cases.Deep.<body>|, "Deep", "m_shape_cases")
+      %clo.29 : py.Value = py.mkClosure[[]](@|m_shape_cases.Deep.<body>|, "<body>", "m_shape_cases")
       %str.34 : py.Value = py.strLit("Deep")
       %tuple.29 : py.Value = py.mkTuple(%clo.29, %str.34)
       %kwargs.29 : py.Value = py.mkKwargs
@@ -292,7 +292,7 @@ module m_shape_cases {
       %Deep.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "Deep")
       %set.42 : base.Unit = base.refSet[py.Value](%Deep.cell.0, %Deep.0)
       %__build_class__.26 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.30 : py.Value = py.mkClosure[[]](@|m_shape_cases.DeepInFunc.<body>|, "DeepInFunc", "m_shape_cases")
+      %clo.30 : py.Value = py.mkClosure[[]](@|m_shape_cases.DeepInFunc.<body>|, "<body>", "m_shape_cases")
       %str.35 : py.Value = py.strLit("DeepInFunc")
       %tuple.30 : py.Value = py.mkTuple(%clo.30, %str.35)
       %kwargs.30 : py.Value = py.mkKwargs
@@ -300,7 +300,7 @@ module m_shape_cases {
       %DeepInFunc.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "DeepInFunc")
       %set.43 : base.Unit = base.refSet[py.Value](%DeepInFunc.cell.0, %DeepInFunc.0)
       %__build_class__.27 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.31 : py.Value = py.mkClosure[[]](@|m_shape_cases.Early.<body>|, "Early", "m_shape_cases")
+      %clo.31 : py.Value = py.mkClosure[[]](@|m_shape_cases.Early.<body>|, "<body>", "m_shape_cases")
       %str.36 : py.Value = py.strLit("Early")
       %tuple.31 : py.Value = py.mkTuple(%clo.31, %str.36)
       %kwargs.31 : py.Value = py.mkKwargs
@@ -308,7 +308,7 @@ module m_shape_cases {
       %Early.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "Early")
       %set.44 : base.Unit = base.refSet[py.Value](%Early.cell.0, %Early.0)
       %__build_class__.28 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.32 : py.Value = py.mkClosure[[]](@|m_shape_cases.CM.<body>|, "CM", "m_shape_cases")
+      %clo.32 : py.Value = py.mkClosure[[]](@|m_shape_cases.CM.<body>|, "<body>", "m_shape_cases")
       %str.37 : py.Value = py.strLit("CM")
       %tuple.32 : py.Value = py.mkTuple(%clo.32, %str.37)
       %kwargs.32 : py.Value = py.mkKwargs
@@ -316,7 +316,7 @@ module m_shape_cases {
       %CM.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "CM")
       %set.45 : base.Unit = base.refSet[py.Value](%CM.cell.0, %CM.0)
       %__build_class__.29 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.33 : py.Value = py.mkClosure[[]](@|m_shape_cases.CompVar.<body>|, "CompVar", "m_shape_cases")
+      %clo.33 : py.Value = py.mkClosure[[]](@|m_shape_cases.CompVar.<body>|, "<body>", "m_shape_cases")
       %str.38 : py.Value = py.strLit("CompVar")
       %tuple.33 : py.Value = py.mkTuple(%clo.33, %str.38)
       %kwargs.33 : py.Value = py.mkKwargs
@@ -324,7 +324,7 @@ module m_shape_cases {
       %CompVar.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "CompVar")
       %set.46 : base.Unit = base.refSet[py.Value](%CompVar.cell.0, %CompVar.0)
       %__build_class__.30 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.34 : py.Value = py.mkClosure[[]](@|m_shape_cases.CompWalrus.<body>|, "CompWalrus", "m_shape_cases")
+      %clo.34 : py.Value = py.mkClosure[[]](@|m_shape_cases.CompWalrus.<body>|, "<body>", "m_shape_cases")
       %str.39 : py.Value = py.strLit("CompWalrus")
       %tuple.34 : py.Value = py.mkTuple(%clo.34, %str.39)
       %kwargs.34 : py.Value = py.mkKwargs
@@ -332,7 +332,7 @@ module m_shape_cases {
       %CompWalrus.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "CompWalrus")
       %set.47 : base.Unit = base.refSet[py.Value](%CompWalrus.cell.0, %CompWalrus.0)
       %__build_class__.31 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.35 : py.Value = py.mkClosure[[]](@|m_shape_cases.GlobalSlots.<body>|, "GlobalSlots", "m_shape_cases")
+      %clo.35 : py.Value = py.mkClosure[[]](@|m_shape_cases.GlobalSlots.<body>|, "<body>", "m_shape_cases")
       %str.40 : py.Value = py.strLit("GlobalSlots")
       %tuple.35 : py.Value = py.mkTuple(%clo.35, %str.40)
       %kwargs.35 : py.Value = py.mkKwargs
@@ -340,7 +340,7 @@ module m_shape_cases {
       %GlobalSlots.cell.0 : base.Ref(py.Value) = py.globalCell("m_shape_cases", "GlobalSlots")
       %set.48 : base.Unit = base.refSet[py.Value](%GlobalSlots.cell.0, %GlobalSlots.0)
       %__build_class__.32 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.36 : py.Value = py.mkClosure[[]](@|m_shape_cases.GlobalInit.<body>|, "GlobalInit", "m_shape_cases")
+      %clo.36 : py.Value = py.mkClosure[[]](@|m_shape_cases.GlobalInit.<body>|, "<body>", "m_shape_cases")
       %str.41 : py.Value = py.strLit("GlobalInit")
       %tuple.36 : py.Value = py.mkTuple(%clo.36, %str.41)
       %kwargs.36 : py.Value = py.mkKwargs
@@ -623,7 +623,7 @@ module m_shape_cases {
       jump ^annotated.0()
     annotated.0():
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_cases.Outer.__Base.<body>|, "__Base", "m_shape_cases")
+      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_cases.Outer.__Base.<body>|, "<body>", "m_shape_cases")
       %str.6 : py.Value = py.strLit("__Base")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.6)
       %kwargs.1 : py.Value = py.mkKwargs
@@ -662,7 +662,7 @@ module m_shape_cases {
       %str.12 : py.Value = py.strLit("z")
       %store.5 : base.Unit = py.setItem(%__annotations__.5, %str.12, %_Outer__T.3) ^propagate.0()
       %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.1 : py.Value = py.mkClosure[[]](@|m_shape_cases.Outer.Inner.<body>|, "Inner", "m_shape_cases")
+      %clo.1 : py.Value = py.mkClosure[[]](@|m_shape_cases.Outer.Inner.<body>|, "<body>", "m_shape_cases")
       %str.13 : py.Value = py.strLit("Inner")
       %str.14 : py.Value = py.strLit("_Outer__Base")
       %_Outer__Base.0 : py.Value = py.undef("_Outer__Base")
@@ -2233,7 +2233,7 @@ module m_shape_cases {
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_cases.R5.__init__.Helper.<body>|, "Helper", "m_shape_cases")
+      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_cases.R5.__init__.Helper.<body>|, "<body>", "m_shape_cases")
       %str.0 : py.Value = py.strLit("Helper")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.0)
       %kwargs.1 : py.Value = py.mkKwargs
@@ -2454,7 +2454,7 @@ module m_shape_cases {
       %other.2 : py.Value = py.tupleGet(%bound.0, 1)
       %set.1 : base.Unit = base.refSet[py.Value](%other.cell.0, %other.2)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@|m_shape_cases.ViaClass.__init__.K.<body>|, "K", "m_shape_cases", %other.cell.0, %self.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@|m_shape_cases.ViaClass.__init__.K.<body>|, "<body>", "m_shape_cases", %other.cell.0, %self.cell.0)
       %str.0 : py.Value = py.strLit("K")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.0)
       %kwargs.1 : py.Value = py.mkKwargs
@@ -2555,7 +2555,7 @@ module m_shape_cases {
       %self.2 : py.Value = py.tupleGet(%bound.0, 0)
       %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_cases.Deep.__init__.A.<body>|, "A", "m_shape_cases")
+      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_cases.Deep.__init__.A.<body>|, "<body>", "m_shape_cases")
       %str.0 : py.Value = py.strLit("A")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.0)
       %kwargs.1 : py.Value = py.mkKwargs
@@ -2936,7 +2936,7 @@ module m_shape_cases {
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "ViaClassBody.__init__.<locals>.f", 0, 0, false, false) ^propagate.0()
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@|m_shape_cases.ViaClassBody.__init__.f.K.<body>|, "K", "m_shape_cases", %self.cell.0, %other.cell.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value), base.Ref(py.Value)]](@|m_shape_cases.ViaClassBody.__init__.f.K.<body>|, "<body>", "m_shape_cases", %self.cell.0, %other.cell.0)
       %str.0 : py.Value = py.strLit("K")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.0)
       %kwargs.1 : py.Value = py.mkKwargs
@@ -2956,7 +2956,7 @@ module m_shape_cases {
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "InFunc.__init__.<locals>.f", 0, 0, false, false) ^propagate.0()
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_cases.InFunc.__init__.f.H.<body>|, "H", "m_shape_cases")
+      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_cases.InFunc.__init__.f.H.<body>|, "<body>", "m_shape_cases")
       %str.0 : py.Value = py.strLit("H")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.0)
       %kwargs.1 : py.Value = py.mkKwargs
@@ -2991,7 +2991,7 @@ module m_shape_cases {
       %str.3 : py.Value = py.strLit("__qualname__")
       %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_cases.Deep.__init__.A.B.<body>|, "B", "m_shape_cases")
+      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_cases.Deep.__init__.A.B.<body>|, "<body>", "m_shape_cases")
       %str.4 : py.Value = py.strLit("B")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.4)
       %kwargs.1 : py.Value = py.mkKwargs
@@ -3012,7 +3012,7 @@ module m_shape_cases {
       %defaults.0 : py.Value = py.mkTuple
       %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "DeepInFunc.__init__.<locals>.f", 0, 0, false, false) ^propagate.0()
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_cases.DeepInFunc.__init__.f.A.<body>|, "A", "m_shape_cases")
+      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_cases.DeepInFunc.__init__.f.A.<body>|, "<body>", "m_shape_cases")
       %str.0 : py.Value = py.strLit("A")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.0)
       %kwargs.1 : py.Value = py.mkKwargs
@@ -3207,7 +3207,7 @@ module m_shape_cases {
       %str.3 : py.Value = py.strLit("__qualname__")
       %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_cases.DeepInFunc.__init__.f.A.B.<body>|, "B", "m_shape_cases")
+      %clo.0 : py.Value = py.mkClosure[[]](@|m_shape_cases.DeepInFunc.__init__.f.A.B.<body>|, "<body>", "m_shape_cases")
       %str.4 : py.Value = py.strLit("B")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.4)
       %kwargs.1 : py.Value = py.mkKwargs

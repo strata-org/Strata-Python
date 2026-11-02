@@ -1,0 +1,10 @@
+module
+  Two: local (assigned, referenced)
+  xs: local (assigned, referenced)
+  ys: local (assigned, referenced)
+  same: local (assigned)
+  class Two
+    __index__: local (assigned)
+    function Two.__index__
+      params: self
+      self: local (parameter)

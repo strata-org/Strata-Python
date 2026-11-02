@@ -1,0 +1,7 @@
+module
+  a: local (assigned)
+  object: global implicit (referenced)
+  b: local (assigned)
+  f: local (assigned, referenced)
+  c: local (assigned)
+  function f

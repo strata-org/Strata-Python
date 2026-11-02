@@ -1,0 +1,11 @@
+--- stdout 12
+failed
+True
+
+--- outcome
+ok
+--- globals
+Base = <class 'Base'>
+__doc__ = None
+__name__ = '__main__'
+saved = [<function object>]

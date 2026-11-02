@@ -1,0 +1,18 @@
+module top
+  C: local (assigned)
+  D: local (assigned)
+  ValueError: global implicit (referenced)
+  e: local (assigned, referenced)
+  n: local (assigned, referenced)
+  print: global implicit (referenced)
+  class D
+    __set_name__: local (assigned)
+    function __set_name__
+      ValueError: global implicit (referenced)
+      name: local (parameter)
+      owner: local (parameter)
+      self: local (parameter)
+  class C
+    D: global implicit (referenced)
+    x: local (assigned)
+qualnames: C, D, D.__set_name__

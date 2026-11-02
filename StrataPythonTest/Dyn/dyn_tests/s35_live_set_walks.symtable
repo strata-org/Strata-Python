@@ -1,0 +1,41 @@
+module top
+  K: local (assigned, referenced)
+  M: local (assigned, referenced)
+  a: global explicit (assigned, referenced, declared_global)
+  b: local (assigned, referenced)
+  c: local (assigned)
+  d: local (assigned, referenced)
+  k1: local (assigned, referenced)
+  k2: local (assigned, referenced)
+  k5: local (assigned)
+  print: global implicit (referenced)
+  class K
+    __eq__: local (assigned)
+    __hash__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      n: local (parameter, referenced)
+      self: local (parameter, referenced)
+    function __hash__
+      self: local (parameter, referenced)
+    function __eq__
+      other: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+  class M
+    __eq__: local (assigned)
+    __hash__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      n: local (parameter, referenced)
+      self: local (parameter, referenced)
+    function __hash__
+      self: local (parameter, referenced)
+    function __eq__
+      M: global implicit (referenced)
+      a: global explicit (assigned, declared_global)
+      k2: global implicit (referenced)
+      other: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+qualnames: K, K.__eq__, K.__hash__, K.__init__, M, M.__eq__, M.__hash__, M.__init__

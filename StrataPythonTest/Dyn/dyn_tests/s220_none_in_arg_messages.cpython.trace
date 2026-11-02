@@ -1,0 +1,11 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+msg = 'BaseExceptionGroup.__new__() argument 1 must be str, not None'
+msg1 = 'type.__new__() argument 1 must be str, not None'
+msg2 = 'type.__new__() argument 2 must be tuple, not None'
+msg3 = 'type.__new__() argument 3 must be dict, not None'

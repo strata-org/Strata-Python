@@ -1,0 +1,7 @@
+module top
+  C: local (assigned, referenced)
+  print: global implicit (referenced)
+  class C
+    eq: local (assigned)
+    tuple: global implicit (referenced)
+qualnames: C

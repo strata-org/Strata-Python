@@ -1,0 +1,7 @@
+module
+  slotted_prop: local (assigned, referenced)
+  property: global implicit (referenced)
+  p: local (assigned, referenced)
+  print: global implicit (referenced)
+  class slotted_prop
+    __slots__: local (assigned)

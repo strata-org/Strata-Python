@@ -14,7 +14,7 @@ module t21_combined {
       %Optional.cell.0 : base.Ref(py.Value) = py.globalCell("t21_combined", "Optional")
       %set.3 : base.Unit = base.refSet[py.Value](%Optional.cell.0, %Optional.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@|t21_combined.ResourceManager.<body>|, "ResourceManager", "t21_combined")
+      %clo.0 : py.Value = py.mkClosure[[]](@|t21_combined.ResourceManager.<body>|, "<body>", "t21_combined")
       %str.1 : py.Value = py.strLit("ResourceManager")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs

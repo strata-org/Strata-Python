@@ -1,0 +1,8 @@
+module top
+  a: local (assigned)
+  b: local (assigned)
+  bool: global implicit (referenced)
+  c: local (assigned)
+  d: local (assigned)
+  int: global implicit (referenced)
+qualnames: 

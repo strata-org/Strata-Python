@@ -256,6 +256,9 @@ are in `StrataPython/Dyn/Build.lean`.
   is undefined; a `NameError` carries the variable's `name`, as CPython's does. One exception is a
   prologue's defaults tuple (§5.4): it holds `undef` for a parameter without a default,
   `py.mkTuple` builds it, and `py.bindArgs` reads it.
+  An `undef`'s name is part of its meaning: the name `Py.classCreating` marks the `__class__` cell
+  of a class that is still being created, which the semantics reads as a gap, not as an
+  unassigned variable. So a pass must keep the names of `undef`s.
 - **Completions.** `py.Completion` records how a protected block finished. It is a datatype
   whose five constructors are instructions:
   `completionNormal`, `completionReturn (value)`, `completionRaise (exc)`, `completionBreak`
@@ -838,14 +841,17 @@ which CPython would then call with no arguments. A class nested in a method has 
 `__class__` cells: its own, which its methods capture, and the method's, which its body
 reads.
 
-This differs from CPython mainly in one way. CPython fills the cell inside `type.__new__`,
-before `__set_name__` and `__init_subclass__` run. Here it is filled after `__build_class__`
-returns, so a `super()` or `__class__` that runs while the class is created (in
-`__set_name__`, `__init_subclass__` or a metaclass) finds the cell undefined (§9, Q6;
-`m_super_hook.py`). And the cell holds whatever `__build_class__` returns: CPython's cell
-holds the class `type.__new__` makes, and stays empty if the metaclass never calls it; and
-CPython raises `RuntimeError` ("__class__ not set …") when a metaclass drops
-`__classcell__`.
+This differs from CPython in one way. CPython's body stores the cell as
+`__classcell__` in the namespace and returns it, and `type.__new__` fills it, before
+`__set_name__` and `__init_subclass__` run. Here the body instead puts the mark
+`undef ".class being created"` in the cell and returns it, and the class statement fills the
+cell after `__build_class__` returns. The semantics stops with a gap in two cases (§13):
+- a read of the cell that finds the mark, i.e. a `super()` or `__class__` that runs while the
+  class is created (in `__set_name__`, `__init_subclass__` or a metaclass), or after a failed
+  creation (§9, Q6; `m_super_hook.py`);
+- `__build_class__` with a metaclass other than `type` when the body returns the mark, since
+  user code could then see the namespace without `__classcell__`, or get the cell another
+  value (`s195` to `s198`).
 
 **Declared shapes.** Each class body's function states the class's declarations as
 attributes (`docs/Dyn.md` §2), which `StrataPython/Dyn/Shape.lean` computes, for Pylate to
@@ -1242,8 +1248,9 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
    creates the cell and stores it as `ns["__classcell__"]` for `type.__new__` to fill, but no
    instruction turns a `base.Ref(py.Value)` into a `py.Value`. So the class statement creates
    the cell and fills it after `__build_class__` returns (§6.7). A `super()` that runs while
-   the class is created finds the cell undefined. Filling it in time would need an operation
-   that installs the cell in the namespace.
+      the class is created finds the cell marked as being created, and the semantics stops
+   there. Filling it in time would need an operation that installs the cell in the
+   namespace.
 7. **Unpacking.** *Resolved.* Two operations: `unpackSeq` for a target without a starred
    element and `unpackEx` for one with it, as CPython's `UNPACK_SEQUENCE` and `UNPACK_EX`.
 8. **Global fallback.** *Resolved.* The scope pass classifies a module global and a builtin
@@ -2391,7 +2398,7 @@ list, and the rejections with their messages with a golden there.
 
 `StrataPython/Dyn/Sem/` gives each `py.*` operation except the contract operations a rule that
 does what CPython 3.12 does
-(`Rules/`, over the generic protocols of `Proto/`), as `docs/Dyn.md` §3 describes. A rule that
+(`Rules/`, over the generic protocols of `Proto/`), as `docs/Dyn.md` §4 describes. A rule that
 reaches a case the semantics doesn't model yet stops the run with a gap, whose message names the
 case, e.g. `not modelled yet: py.setAttr` or `import of module sys is not modelled yet`. A gap is
 never a wrong result: the run stops there. Outside the known differences of §13.4 and the bugs of
@@ -2411,9 +2418,36 @@ made since the operation's first activation started, by the operation or by code
 (`PyNew`). An activation is one run of the rule, from its operands or from a resumed step, so the
 contract lets a later activation write an object that an earlier one made. A rule that reads the
 store's size when its activation started checks a stronger condition: its own writes stop with a
-model-invariant gap at an object older than the current activation. A rule at the `writes` level
-that doesn't read the start (`PyM σ .writes true`) doesn't check the contract, so for it the
-contract is trusted.
+model-invariant gap at an object older than the current activation. Code at `PyM σ .writes true`
+doesn't read the start and doesn't check the contract, so for it the contract is trusted: a rule at
+the `writes` level that runs without the start, and the body of every built-in, which
+`callBuiltin` runs there even for a rule that read its start.
+
+Each rule stays within its operation's declared effect (`docs/Dyn.md` §1), which
+`#py_rule_theorems` proves in `StrataPython/Dyn/Sem/Table.lean`. A rule written once over the
+record can change the world only through the record's primitives, and the record has no writing
+primitive at `calls`: it runs a built-in only through `callBuiltin`, inside a call bracket. The core
+asks a language that uses call brackets to keep four rules on the bracket's marker,
+`Depth.bracket` (`docs/Dyn.md` §4). Python keeps them so:
+- The marker changes only at the edges of a call, no other update reads it, and every function
+  that a call runs, runs with the marker lowered. `#py_part_writers` checks this on every
+  definition of this package that the table reaches, outside the primitives that change or keep
+  the marker (`Prim.bracketed`, `Prim.callClosureT`, `withDepth`, `withPyDepth` and `depthGet`),
+  the bracket itself, and the effects' statement (`spec` and the proposition `Within`):
+  - such a definition doesn't name `Depth`'s instance, or the class field that hands it to a rule,
+    by its name, a `match`, an eliminator or a raw projection;
+  - it doesn't name the world's constructor, the marker's field or the bracket's test of it;
+  - it doesn't name the request that calls a closure;
+  - it isn't `opaque`, `partial`, `noncomputable`, `@[implemented_by]`, `@[extern]` or an axiom.
+
+  `spec`'s field `inCall` reads the marker, so it is forbidden too.
+- An edge changes nothing that `same` guards, and `callClosureT` lowers the marker for the call.
+  `Prim.bracketed_restores` and `Prim.callClosureT_restores` prove that each edge sets only the
+  depth, and that `callClosureT` lowers the marker for the call;
+  `Prim.withDepth_keeps_bracket` and `Prim.withPyDepth_keeps_bracket` prove that the depth counts
+  keep it.
+
+Inside a bracket a region doesn't run: the bracket stops the run with its gap there.
 
 ### 13.1 Running a program
 
@@ -2469,14 +2503,43 @@ gives the verdict of one program, for other differential tests with their own pr
 
 - The values `None`, `bool`, `int`, `float`, `str`, `bytes`, `tuple`, `range`, `slice`,
   `Ellipsis` and `NotImplemented`, with their hashes, their arithmetic and their comparisons.
-- Lists, dicts, sets and frozensets: building them, item access, slices, unpacking, `in`, and the
-  operators on them.
+- Lists, dicts, sets and frozensets: the displays and the operations that make them, item access,
+  slices, unpacking, `in`, and the operators on them. The built-ins `list()`, `dict()`, `set()` and
+  `frozenset()` are not modelled yet and stop with a gap. A walk over a set whose order may differ
+  from CPython's (a set display of constants, or a set built from one) stops with a gap: `pop`,
+  `repr`, and a comparison that may run user code.
 - Global names, with the fallback to `builtins`, and closures with their cells.
 - Calls of function objects, with positional and keyword arguments and `*` and `**` arguments.
   `**` builds a new dict and leaves the operand unchanged.
 - `print`, with `sep` and `end`, for arguments whose `str` runs no protocol: `None`, `bool`,
   `int`, `float` and `str`.
 - `import builtins` and `from builtins import name`.
+- Classes: `__build_class__` and `type.__new__`, with the metaclass, the MRO by C3, `__slots__`,
+  `__set_name__` and `__init_subclass__`; instances made by `object.__new__`; `super`,
+  `property`, `classmethod`, `staticmethod` and `isinstance`. A write or a deletion of a class's
+  `__new__` after its creation stops with a gap: it changes the class's `tp_new` by rules that
+  depend on the class's history, so a class's creation decides its `tp_new` in the model.
+  A class whose methods use `__class__` or `super()` stops with a gap when a metaclass other
+  than `type` makes it, or when the cell is read while the class is created (§6.7).
+- Attributes: descriptors, instance dicts and slots, and a user `__getattribute__`,
+  `__getattr__`, `__setattr__` and `__delattr__`.
+- The dunders of user classes for the operators, comparisons, truth, `hash`, item access and `in`,
+  tried in the order of CPython's slots.
+- Classes and attributes stop with a gap where the descriptor protocol depends on more than a
+  value's built-in part: an instance of a subclass of `property`, `classmethod` or `staticmethod`
+  (and their `__init__` on one), a class whose metaclass defines `__get__`, `__set__` or
+  `__delete__`, a class call or a `__class_getitem__` that a metaclass's own attribute hooks may
+  answer, an instance dict from a base other than the best base, `object.__getattribute__` of
+  anything but a plain instance or immediate, an unbound `super` object, an unset `classmethod` or
+  `staticmethod`, `__build_class__` called with a function that is not a class body, and an
+  in-place `+=` or `*=` on an instance of a subclass of `list`. A message with a class name
+  longer than 50 bytes of UTF-8 stops with a gap too, since CPython cuts such names.
+- CPython's recursion limit: nested comparisons and calls into Python count toward it, and a run
+  stops with a gap where CPython would raise `RecursionError`.
+- Warnings: the semantics emits no warning. A warning records itself in the module's
+  `__warningregistry__`, which a program can read, so where CPython 3.12 warns, the semantics
+  stops with a gap: `~` on a `bool`, an `__index__` that returns a `bool` or an instance of a
+  subclass of `int`, and the truth of `NotImplemented` (each a `DeprecationWarning`).
 
 ### 13.4 Known differences
 

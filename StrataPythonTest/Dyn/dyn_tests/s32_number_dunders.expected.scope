@@ -1,0 +1,5 @@
+module
+  print: global implicit (referenced)
+  NotImplemented: global implicit (referenced)
+  int: global implicit (referenced)
+  float: global implicit (referenced)

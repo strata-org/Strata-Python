@@ -1,0 +1,17 @@
+module
+  A: local (assigned, referenced)
+  B: local (assigned, referenced)
+  print: global implicit (referenced)
+  class A
+    f: local (assigned)
+    function A.f
+      params: self
+      self: local (parameter)
+  class B (needs __class__ cell)
+    g: local (assigned)
+    function B.g
+      params: self
+      self: local (parameter)
+      s: local (assigned, referenced)
+      super: global implicit (referenced)
+      __class__: free (referenced)

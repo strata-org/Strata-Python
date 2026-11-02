@@ -1,0 +1,4 @@
+module top
+  ValueError: global implicit (referenced)
+  object: global implicit (referenced)
+qualnames: 

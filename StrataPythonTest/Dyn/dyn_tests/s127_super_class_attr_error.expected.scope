@@ -1,0 +1,12 @@
+module
+  A: local (assigned, referenced)
+  B: local (assigned, referenced)
+  super: global implicit (referenced)
+  class A
+  class B
+    __getattribute__: local (assigned)
+    function B.__getattribute__
+      params: self, n
+      self: local (parameter, referenced)
+      n: local (parameter, referenced)
+      object: global implicit (referenced)

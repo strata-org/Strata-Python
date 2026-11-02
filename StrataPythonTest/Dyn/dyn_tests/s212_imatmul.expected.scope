@@ -1,0 +1,37 @@
+module
+  M: local (assigned, referenced)
+  N: local (assigned, referenced)
+  O: local (assigned, referenced)
+  m: local (assigned, referenced)
+  n: local (assigned, referenced)
+  o: local (assigned, referenced)
+  print: global implicit (referenced)
+  class M
+    __imatmul__: local (assigned)
+    __matmul__: local (assigned)
+    function M.__imatmul__
+      params: self, o
+      self: local (parameter)
+      o: local (parameter)
+    function M.__matmul__
+      params: self, o
+      self: local (parameter)
+      o: local (parameter)
+  class N
+    __imatmul__: local (assigned)
+    __matmul__: local (assigned)
+    function N.__imatmul__
+      params: self, o
+      self: local (parameter)
+      o: local (parameter)
+      NotImplemented: global implicit (referenced)
+    function N.__matmul__
+      params: self, o
+      self: local (parameter)
+      o: local (parameter)
+  class O
+    __imatmul__: local (assigned)
+    function O.__imatmul__
+      params: self, o
+      self: local (parameter)
+      o: local (parameter)

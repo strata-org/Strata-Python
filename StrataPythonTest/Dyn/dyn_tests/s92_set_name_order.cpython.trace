@@ -1,0 +1,14 @@
+--- stdout 28
+set_name a
+set_name b
+isc C
+
+--- outcome
+ok
+--- globals
+Base = <class 'Base'>
+C = <class 'C'>
+D = <class 'D'>
+__doc__ = None
+__name__ = '__main__'
+log = []

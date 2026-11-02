@@ -1,0 +1,8 @@
+module top
+  Base: local (assigned, referenced)
+  class Base
+    __init_subclass__: local (assigned)
+    function __init_subclass__
+      cls: local (parameter, referenced)
+      print: global implicit (referenced)
+qualnames: Base, Base.__init_subclass__

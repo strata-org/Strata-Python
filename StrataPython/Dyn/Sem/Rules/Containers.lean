@@ -4,7 +4,7 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
-public import StrataPython.Dyn.Sem.Concrete
+public import StrataPython.Dyn.Sem.Assembly
 public import StrataPython.Dyn.Sem.PyTypes
 public import StrataPython.Dyn.Sem.Proto.Containers
 
@@ -14,7 +14,7 @@ set_option autoImplicit false
 # Containers
 
 Item access, slices, unpacking, `in`, and the lists, tuples, dicts and sets that the emitting
-code builds, on built-in values (`Proto/Containers.lean`).
+code builds, on built-in values and through user dunders (`Proto/Containers.lean`).
 -/
 
 namespace StrataPython.Dyn.Sem.Rules
@@ -59,11 +59,11 @@ variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
 
 @[dyn_sem Py.unpackSeq] def unpackSeq (val : Value) (n : Int) (err : Target E [Value]) :
     Sem ε E Value :=
-  runRuleFree err #[] (Proto.unpackSeq (m := PyM σ .reads true) val n.toNat)
+  runRuleFree err #[] (Proto.unpackSeq (m := PyM σ .calls true) val n.toNat)
 
 @[dyn_sem Py.unpackEx] def unpackEx (val : Value) (before after : Int) (err : Target E [Value]) :
     Sem ε E Value :=
-  runRuleFree err #[] (Proto.unpackEx (m := PyM σ .reads true) val before.toNat after.toNat)
+  runRuleFree err #[] (Proto.unpackEx (m := PyM σ .calls true) val before.toNat after.toNat)
 
 @[dyn_sem Py.listToTuple] def listToTuple (list : Value) : Sem ε E Value :=
   runTotalFree "py.listToTuple" #[] (e := .reads) (σ := σ) do

@@ -189,7 +189,8 @@ public environment Py extends Base where
 
   -- Definedness and checks.
 
-  /-- A value not yet assigned.  `name` is diagnostic only. -/
+  /-- A value not yet assigned.  `name` is diagnostic, except `Py.classCreating`, which marks the
+  `__class__` cell of a class being created; so a pass must keep the names of `undef`s. -/
   pure insn undef (name : String) : Value
   /-- Whether `val` is assigned, as the `Bool` a `branch` takes. -/
   pure insn isDefined (val : Value) : Bool
@@ -756,6 +757,11 @@ namespace Py
 
 /-- `py.<s>`, the name of a declaration in Python's namespace. -/
 public abbrev pn (s : String) : Name := .str (.str .base "py") s
+
+/-- The name of the unassigned value that a class body whose methods use `__class__` puts in the
+`__class__` cell and returns, so that the cell reads as "being created" until the class
+statement fills it after `__build_class__` returns.  It is not an identifier. -/
+@[expose] public def classCreating : String := ".class being created"
 
 end Py
 

@@ -1,0 +1,7 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: property.__new__(list): list is not a subtype of property
+--- globals
+__doc__ = None
+__name__ = '__main__'

@@ -1,0 +1,13 @@
+module top
+  AttributeError: global implicit (referenced)
+  E: local (assigned, referenced)
+  S: local (assigned, referenced)
+  T: local (assigned, referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  t: local (assigned, referenced)
+  class E
+  class S
+    __slots__: local (assigned)
+  class T
+qualnames: E, S, T

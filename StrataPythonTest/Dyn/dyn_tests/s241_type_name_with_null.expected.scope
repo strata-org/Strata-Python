@@ -1,0 +1,3 @@
+module
+  X: local (assigned)
+  type: global implicit (referenced)

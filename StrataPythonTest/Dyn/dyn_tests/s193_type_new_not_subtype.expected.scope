@@ -1,0 +1,4 @@
+module
+  t: local (assigned)
+  type: global implicit (referenced)
+  int: global implicit (referenced)

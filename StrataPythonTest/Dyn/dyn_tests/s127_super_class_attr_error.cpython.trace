@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: super(type, obj): obj must be an instance or subtype of type
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+__doc__ = None
+__name__ = '__main__'

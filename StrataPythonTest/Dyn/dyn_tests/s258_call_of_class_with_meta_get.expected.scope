@@ -1,0 +1,18 @@
+module
+  M: local (assigned, referenced)
+  type: global implicit (referenced)
+  K: local (assigned)
+  C: local (assigned, referenced)
+  r: local (assigned)
+  class M
+    __get__: local (assigned)
+    function M.__get__
+      params: cls, obj, owner
+      cls: local (parameter)
+      obj: local (parameter)
+      owner: local (parameter)
+      lambda M.__get__.<locals>.<lambda>
+  class K
+  class C
+    __call__: local (assigned)
+    K: global implicit (referenced)

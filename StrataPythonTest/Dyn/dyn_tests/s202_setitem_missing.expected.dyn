@@ -1,0 +1,117 @@
+module s202_setitem_missing {
+  func @|s202_setitem_missing.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s202_setitem_missing")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s202_setitem_missing", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s202_setitem_missing", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|s202_setitem_missing.L.<body>|, "<body>", "s202_setitem_missing")
+      %str.1 : py.Value = py.strLit("L")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %L.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %L.cell.0 : base.Ref(py.Value) = py.globalCell("s202_setitem_missing", "L")
+      %set.2 : base.Unit = base.refSet[py.Value](%L.cell.0, %L.0)
+      %int.0 : py.Value = py.intLit(2)
+      %L.1 : py.Value = py.loadGlobal("s202_setitem_missing", "L") ^catch.0()
+      %tuple.1 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%L.1, %tuple.1, %kwargs.1) ^catch.0()
+      %int.1 : py.Value = py.intLit(1)
+      %store.0 : base.Unit = py.setItem(%call.0, %int.1, %int.0) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %AttributeError.0 : py.Value = py.loadGlobal("s202_setitem_missing", "AttributeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %AttributeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %print.0 : py.Value = py.loadGlobal("s202_setitem_missing", "print") ^unwind.0()
+      %str.2 : py.Value = py.strLit("AttributeError")
+      %tuple.2 : py.Value = py.mkTuple(%str.2)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.2, %kwargs.2) ^unwind.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      jump ^join.0()
+    next.0():
+      %TypeError.0 : py.Value = py.loadGlobal("s202_setitem_missing", "TypeError") ^unwind.0()
+      %match.1 : base.Bool = py.excMatch(%exc.0, %TypeError.0) ^unwind.0()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %print.1 : py.Value = py.loadGlobal("s202_setitem_missing", "print") ^unwind.0()
+      %str.3 : py.Value = py.strLit("TypeError")
+      %tuple.3 : py.Value = py.mkTuple(%str.3)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.1, %tuple.3, %kwargs.3) ^unwind.0()
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^join.0()
+    next.1():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.1 : py.Value):
+      %pop.2 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.1)
+    join.0():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
+  }
+  func @|s202_setitem_missing.L.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__delitem__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s202_setitem_missing", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("L")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s202_setitem_missing.L.__delitem__, "__delitem__", "s202_setitem_missing")
+      %str.4 : py.Value = py.strLit("__delitem__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s202_setitem_missing.L.__delitem__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %k.0 : py.Value = py.undef("k")
+      %k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%k.0)
+      %self.1 : py.Value = py.undef("self")
+      %k.1 : py.Value = py.undef("k")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %k.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "L.__delitem__", 0, 2, false, false, "self", "k") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %k.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%k.cell.0, %k.2)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

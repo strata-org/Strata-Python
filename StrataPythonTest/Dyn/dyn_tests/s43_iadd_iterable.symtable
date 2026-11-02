@@ -1,0 +1,10 @@
+module top
+  Y: local (assigned, referenced)
+  a: local (assigned, referenced)
+  print: global implicit (referenced)
+  class Y
+    __iter__: local (assigned)
+    function __iter__
+      iter: global implicit (referenced)
+      self: local (parameter)
+qualnames: Y, Y.__iter__

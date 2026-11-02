@@ -28,7 +28,7 @@ public import StrataPython.Dyn.Sem.Dom
 public import StrataPython.Dyn.Sem.Basics
 public import StrataPython.Dyn.Sem.Exceptions
 public import StrataPython.Dyn.Sem.Monad
-public import StrataPython.Dyn.Sem.Concrete
+public import StrataPython.Dyn.Sem.Assembly
 public import StrataPython.Dyn.Sem.ConcreteProps
 public import StrataPython.Dyn.Sem.RuleOK
 public import StrataPython.Dyn.Sem.RuleOKProps
@@ -49,6 +49,7 @@ public import StrataPython.Dyn.Sem.Rules.Containers
 public import StrataPython.Dyn.Sem.Rules.Globals
 public import StrataPython.Dyn.Sem.Rules.Closures
 public import StrataPython.Dyn.Sem.Rules.Calls
+public import StrataPython.Dyn.Sem.Rules.Attrs
 public import StrataPython.Dyn.Sem.Rules.GlobalsProps
 public import StrataPython.Dyn.Sem.Table
 

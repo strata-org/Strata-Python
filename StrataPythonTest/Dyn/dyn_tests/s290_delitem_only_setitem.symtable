@@ -1,0 +1,9 @@
+module top
+  L: local (assigned, referenced)
+  class L
+    __setitem__: local (assigned)
+    function __setitem__
+      k: local (parameter)
+      self: local (parameter)
+      v: local (parameter)
+qualnames: L, L.__setitem__

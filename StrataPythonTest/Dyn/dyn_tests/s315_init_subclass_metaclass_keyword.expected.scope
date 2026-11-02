@@ -1,0 +1,23 @@
+module
+  Base: local (assigned, referenced)
+  M: local (assigned, referenced)
+  type: global implicit (referenced)
+  A: local (assigned)
+  class Base
+    __init_subclass__: local (assigned)
+    function Base.__init_subclass__
+      params: cls, flag
+      cls: local (parameter)
+      flag: local (parameter, referenced)
+      print: global implicit (referenced)
+  class M
+    __init__: local (assigned)
+    function M.__init__
+      params: cls, name, bases, ns, flag
+      cls: local (parameter)
+      name: local (parameter)
+      bases: local (parameter)
+      ns: local (parameter)
+      flag: local (parameter, referenced)
+      print: global implicit (referenced)
+  class A

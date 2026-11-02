@@ -1,0 +1,15 @@
+module top
+  AttributeError: global implicit (referenced)
+  C: local (assigned, referenced)
+  c: local (assigned, referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  class C
+    classmethod: global implicit (referenced)
+    cm: local (assigned)
+    m: local (assigned)
+    function m
+      self: local (parameter)
+    function cm
+      cls: local (parameter)
+qualnames: C, C.cm, C.m

@@ -1,0 +1,9 @@
+module top
+  C: local (assigned, referenced)
+  print: global implicit (referenced)
+  class C
+    __lt__: local (assigned)
+    function __lt__
+      o: local (parameter)
+      self: local (parameter)
+qualnames: C, C.__lt__

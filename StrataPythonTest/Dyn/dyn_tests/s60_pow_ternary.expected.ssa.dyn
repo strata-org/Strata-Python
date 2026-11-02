@@ -1,0 +1,29 @@
+module s60_pow_ternary {
+  func @|s60_pow_ternary.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s60_pow_ternary")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s60_pow_ternary", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s60_pow_ternary", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %print.0 : py.Value = py.loadGlobal("s60_pow_ternary", "print") ^propagate.0()
+      %int.0 : py.Value = py.intLit(2)
+      %__pow__.0 : py.Value = py.attr(%int.0, "__pow__") ^propagate.0()
+      %int.1 : py.Value = py.intLit(3)
+      %int.2 : py.Value = py.intLit(5)
+      %tuple.0 : py.Value = py.mkTuple(%int.1, %int.2)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%__pow__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%call.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.1) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

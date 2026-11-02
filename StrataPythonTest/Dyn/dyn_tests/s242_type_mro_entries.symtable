@@ -1,0 +1,11 @@
+module top
+  E: local (assigned, referenced)
+  X: local (assigned)
+  type: global implicit (referenced)
+  class E
+    __mro_entries__: local (assigned)
+    function __mro_entries__
+      bases: local (parameter)
+      object: global implicit (referenced)
+      self: local (parameter)
+qualnames: E, E.__mro_entries__

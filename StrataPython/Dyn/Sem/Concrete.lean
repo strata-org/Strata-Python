@@ -50,6 +50,25 @@ def alloc (o : ObjData) : PyM σ .pure true Value :=
         (fun _ => hk _),
       by intro _; unfold StartFree; intros; rfl⟩
 
+/-- A new object of the class `cls` with the contents `f id`, for its own id `id`, so that a class
+can go first in its own MRO. -/
+def allocWith (cls : Value) (f : ObjId → ObjData) : PyM σ .pure true Value :=
+  if cls.isImmClass then PyM.failure "an object of a class whose values are immediates"
+  else
+    ⟨fun _ _ _ k _ => do
+      let n ← modifyGetThe (ObjStore σ) fun st =>
+        (st.size, (st.alloc ({ f st.size with cls } : ObjData).lift).1)
+      k (.obj n), by
+      intro rs ps S tg V hc s hs hh e' _ β Q QW k ke hk hke
+      refine ContOK.modifyGetThe _ hc.store (fun _ _ h => refsOK_alloc_lift _ h)
+        (fun _ w => same_allocObj s _ w) (fun _ w₁ w₂ h => ?_) (fun _ => hk _)
+      have hsz : (HasPart.get w₁ : ObjStore σ).size = (HasPart.get w₂ : ObjStore σ).size := h.1
+      refine ⟨?_, congrArg (fun n => k (Value.obj n)) hsz⟩
+      have := immEq_allocObj ({ f (HasPart.get w₁ : ObjStore σ).size with cls } : ObjData).lift h
+      rw [hsz] at this ⊢
+      exact this,
+      by intro _; unfold StartFree; intros; rfl⟩
+
 /-- The object `id`, if it exists and is not a function object, whose closure no rule may see. -/
 def objGet (id : ObjId) : PyM σ .reads true (Option ObjData) :=
   ⟨fun _ _ _ k _ => do
@@ -102,7 +121,7 @@ def globalGet (module name : String) : PyM σ .reads true (Option Value) :=
     letI : TagOf σ Value := tg.value
     have hnp : e' ≠ .pure := Level.ne_pure_up he (by decide)
     refine ⟨fun g => ?_,
-      fun N => ⟨fun _ w => Same.refl s w, (fun h => absurd h hnp), fun w => ?_⟩⟩
+      fun N => ⟨fun _ w => .inr (Same.refl s w), (fun h => absurd h hnp), fun w => ?_⟩⟩
     · dsimp only [treeOf, globalGetT, Sem.bind, bind, pure, getThe, MonadStateOf.get,
         Sem.instMonadStateOf, Sem.bindAfter]
       refine Spec.sat_update.mpr fun w hw => ⟨hw, ?_⟩
@@ -118,15 +137,17 @@ def globalGet (module name : String) : PyM σ .reads true (Option Value) :=
       · exact (hk _).2 N,
     by intro _; unfold StartFree; intros; rfl⟩
 
-/-- Call the function object `id` with `args` and `kwargs`, one Python call deeper, and go on
-with `k` of its result or `ke` of its exception: the depth is read before the call and written
-back after it, so the call leaves it as it found it. -/
+/-- Call the function object `id` with `args` and `kwargs`, one Python call deeper and outside any
+call bracket, and go on with `k` of its result or `ke` of its exception: the depth is read before
+the call and written back after it, so the call leaves it as it found it. -/
 def callClosureT {ε : Eff} {E β : Type} [PyLang σ ε] (id : ObjId) (args kwargs : Value)
     (k : Value → Sem ε E β) (ke : Value → Sem ε E β) : Sem ε E β := do
   let st ← getThe (ObjStore σ)
   match ((st.get? id).map (·.payload) : Option (ObjPayload σ)) with
   | some (PayloadG.func f) =>
-    let d ← modifyGetThe Depth fun d => (d, { d with py := d.py + 1 })
+    -- The callee runs outside any call bracket: a bracket permits only the updates of the
+    -- built-in body that opened it, not those of the rules that run in the Python code it calls.
+    let d ← modifyGetThe Depth fun d => (d, { d with py := d.py + 1, bracket := 0 })
     let r ← callFn (s := funcSig (ε := ε)) f.closure (args, kwargs)
     modifyThe Depth fun _ => d
     contOf k ke r
@@ -170,6 +191,43 @@ def callClosure (id : ObjId) (args kwargs : Value) : PyM σ .calls true Value :=
       · trivial,
     by intro _; unfold StartFree; intros; rfl⟩
 
+/-- **The call bracket of a built-in that runs user code**: run `body`, a computation at
+`writes`, with a bracket open, so that at `calls` it changes the world only inside the bracket and
+stops with the gap `msg` where it would do anything else (`callBracket`), then close the bracket.
+Each update that `body` makes counts as part of a call, as CPython's built-in method runs inside a
+call of its own. -/
+def bracketed {α : Type} (msg : String) (body : PyM σ .writes true α) : PyM σ .calls true α :=
+  ⟨fun hs s _ k ke => do
+    let d ← modifyGetThe Depth fun d => (d, { d with bracket := d.bracket + 1 })
+    let r ← HasBracket.bracket msg
+      (body.1 hs s (fun a => .ret (Except.ok a)) (fun x => .ret (Except.error x)))
+    modifyThe Depth fun _ => d
+    contOf k ke r, by
+    intro rs ps S tg V hc s hs hh e' he β Q QW k ke hk hke
+    have hnp : e' ≠ .pure := Level.ne_pure_up he (by decide)
+    have hck := ContOK.cont hk hke
+    refine ContOK.modifyGetThe _ hc.depth (fun _ _ _ => refsOK_nil rfl) (fun _ w => same_depth s _ w)
+      (fun h => absurd h hnp) (fun d => ?_)
+    -- The body's tree, with continuations that return its outcome, satisfies `V` and is within
+    -- `writes`.
+    have hbody : ContOK V s .writes (fun _ _ => True) (fun _ _ => True)
+        (treeOf body.1 rs ps S tg hs s (fun a => .ret (Except.ok a))
+          (fun x => .ret (Except.error x))) :=
+      body.2.1 rs ps S tg V hc s hs hh .writes (Nat.le_refl _) _ _ _ _
+        (fun _ => ⟨fun _ => Spec.sat_ret.mpr trivial, fun _ => trivial⟩)
+        (fun _ => ⟨fun _ => Spec.sat_ret.mpr trivial, fun _ => trivial⟩)
+    have hx : TreeOK V s e' (callBracket HasInCall.inCall msg
+        (treeOf body.1 rs ps S tg hs s (fun a => .ret (Except.ok a))
+          (fun x => .ret (Except.error x)))) :=
+      ⟨fun g => sat_callBracket _ msg _ (hbody.1 g),
+        fun N => Within.lift (Level.le_trans (by decide) he)
+          _ (Within.callBracket (sp := spec) msg _ (hbody.2 N))⟩
+    exact ContOK.bind hx fun r =>
+      ContOK.modifyThe _ hc.depth (fun _ _ _ => refsOK_nil rfl) (fun _ w => same_depth s _ w)
+        (fun h => absurd h hnp) (hck r),
+    by intro hfr; unfold StartFree; intro ε E _ hs s s' β k ke
+       simp only [body.2.2 rfl hs s s']⟩
+
 /-- The depth of Python calls and CPython's C recursion count. -/
 def depthGet : PyM σ .reads true Depth :=
   ⟨fun _ _ _ k _ => do
@@ -178,6 +236,61 @@ def depthGet : PyM σ .reads true Depth :=
     intro rs ps S tg V hc s hs hh e' he β Q QW k ke hk hke
     exact ContOK.getThe (fun _ => hk _) (fun h => absurd h (Level.ne_pure_up he (by decide))),
     by intro _; unfold StartFree; intros; rfl⟩
+
+/-- `body` with `Depth.c` raised by `n`, as CPython's `Py_EnterRecursiveCall` raises its count
+around a nested level: a gap when the count would pass `cDepthLimit`, and the count back as it was
+when `body` returns or raises. -/
+def withDepth {e : Level} {fr : Bool} {α : Type} (hnp0 : e ≠ .pure) (n : Nat)
+    (body : PyM σ e fr α) : PyM σ e fr α :=
+  ⟨fun hs s _ k ke => do
+    let d ← getThe Depth
+    if cDepthLimit < d.c + n then semanticGap s!"a C recursion depth over {cDepthLimit}" else
+    modifyThe Depth fun d' => { d' with c := d.c + n }
+    body.1 hs s (fun a => do modifyThe Depth fun d' => { d' with c := d.c }; k a)
+      (fun x => do modifyThe Depth fun d' => { d' with c := d.c }; ke x), by
+    intro rs ps S tg V hc s hs hh e' he β Q QW k ke hk hke
+    have hnp : e' ≠ .pure := Level.ne_pure_up he hnp0
+    refine ContOK.getThe (fun d => ?_) (fun h => absurd h hnp)
+    split
+    · exact ContOK.fault _
+    · refine ContOK.modifyThe _ hc.depth (fun _ _ _ => refsOK_nil rfl) (fun _ w => same_depth s _ w)
+        (fun h => absurd h hnp) ?_
+      exact body.2.1 rs ps S tg V hc s hs hh e' he Q QW _ _
+        (fun a => ContOK.modifyThe _ hc.depth (fun _ _ _ => refsOK_nil rfl) (fun _ w => same_depth s _ w)
+          (fun h => absurd h hnp) (hk a))
+        (fun x => ContOK.modifyThe _ hc.depth (fun _ _ _ => refsOK_nil rfl) (fun _ w => same_depth s _ w)
+          (fun h => absurd h hnp) (hke x)),
+    by intro hfr; unfold StartFree; intro ε E _ hs s s' β k ke
+       simp only [body.2.2 hfr hs s s']⟩
+
+/-- The limit of the depth of Python calls, below CPython's 1000. -/
+def pyDepthLimit : Nat := 900
+
+/-- `body` with `Depth.py` raised by `n`, as `n` Python frames: a gap when the count would pass
+`pyDepthLimit`, as a call of a function object stops, and the count back as it was when `body`
+returns or raises. -/
+def withPyDepth {e : Level} {fr : Bool} {α : Type} (hnp0 : e ≠ .pure) (n : Nat)
+    (body : PyM σ e fr α) : PyM σ e fr α :=
+  ⟨fun hs s _ k ke => do
+    let d ← getThe Depth
+    if pyDepthLimit < d.py + n then semanticGap s!"Python call depth over {pyDepthLimit}" else
+    modifyThe Depth fun d' => { d' with py := d.py + n }
+    body.1 hs s (fun a => do modifyThe Depth fun d' => { d' with py := d.py }; k a)
+      (fun x => do modifyThe Depth fun d' => { d' with py := d.py }; ke x), by
+    intro rs ps S tg V hc s hs hh e' he β Q QW k ke hk hke
+    have hnp : e' ≠ .pure := Level.ne_pure_up he hnp0
+    refine ContOK.getThe (fun d => ?_) (fun h => absurd h hnp)
+    split
+    · exact ContOK.fault _
+    · refine ContOK.modifyThe _ hc.depth (fun _ _ _ => refsOK_nil rfl) (fun _ w => same_depth s _ w)
+        (fun h => absurd h hnp) ?_
+      exact body.2.1 rs ps S tg V hc s hs hh e' he Q QW _ _
+        (fun a => ContOK.modifyThe _ hc.depth (fun _ _ _ => refsOK_nil rfl) (fun _ w => same_depth s _ w)
+          (fun h => absurd h hnp) (hk a))
+        (fun x => ContOK.modifyThe _ hc.depth (fun _ _ _ => refsOK_nil rfl) (fun _ w => same_depth s _ w)
+          (fun h => absurd h hnp) (hke x)),
+    by intro hfr; unfold StartFree; intro ε E _ hs s s' β k ke
+       simp only [body.2.2 hfr hs s s']⟩
 
 /-- Set the exception being handled. -/
 def setHandled (v : Value) : PyM σ .writes true Unit :=
@@ -393,7 +506,10 @@ def _root_.StrataPython.Dyn.Sem.Value.deeperThan : Nat → Value → Bool
 
 /-- The depth of nested tuples and slices that a key of a dict or set may have.  CPython compares
 nested keys until its C recursion limit, near a depth of 10000, and then raises `RecursionError`;
-a deeper key stops with a gap, so that the key's own hash and comparison end well before that. -/
+a deeper key stops with a gap.  The primitives compare a key's levels without counting them on
+`Depth.c`: a key's comparison needs at most `keyDepth + 1` levels, fewer than the 995 between
+`cDepthLimit` and CPython's limit, so a comparison that the model finishes doesn't raise in
+CPython. -/
 def keyDepth : Nat := 900
 
 /-- The key class and the hash of the key `k`: `h?` is the hash combinator's result for a key
@@ -588,6 +704,18 @@ def _root_.StrataPython.Dyn.Sem.SetTable.reserve (t : SetTable) (n : Nat) : SetT
 def _root_.StrataPython.Dyn.Sem.SetTable.hasUser (t : SetTable) : Bool :=
   [HashKind.exact, .addr, .otherSymbolic].any fun k => t.groupCount k .user != 0
 
+/-- The kinds of the members of the set table `t`, for `WalkKinds.mayRunUser`. -/
+def _root_.StrataPython.Dyn.Sem.SetTable.walkKinds (t : SetTable) : WalkKinds :=
+  { userAddr := t.groupCount .addr .user != 0,
+    userOther := t.groupCount .exact .user != 0 || t.groupCount .otherSymbolic .user != 0,
+    nonAddr := t.kindGroupCount .exact != 0 || t.kindGroupCount .otherSymbolic != 0 }
+
+/-- The kinds of the keys of the dict table `t`, for `WalkKinds.mayRunUser`. -/
+def _root_.StrataPython.Dyn.Sem.DictTable.walkKinds (t : DictTable) : WalkKinds :=
+  { userAddr := t.groupCount .addr .user != 0,
+    userOther := t.groupCount .exact .user != 0 || t.groupCount .otherSymbolic .user != 0,
+    nonAddr := t.kindGroupCount .exact != 0 || t.kindGroupCount .otherSymbolic != 0 }
+
 /-- Whether a key of the dict table `t` may run user code when compared. -/
 def _root_.StrataPython.Dyn.Sem.DictTable.hasUser (t : DictTable) : Bool :=
   [HashKind.exact, .addr, .otherSymbolic].any fun k => t.groupCount k .user != 0
@@ -666,7 +794,7 @@ def setPopWith (read : PyM σ e fr SetTable) (modify : (SetTable → SetTable) �
 /-- A gap if walking the table `src` while comparing with the members of `t` could run user code:
 CPython walks the live table, which user code may change, and the model walks `src` as it was. -/
 def walkGuard (src t : SetTable) : PyM σ e fr Unit := do
-  if src.hasUser || t.hasUser then
+  if WalkKinds.mayRunUser [src.walkKinds, t.walkKinds] then
     PyM.gap "a walk of a set whose comparisons may run user code is not modelled yet"
 
 /-- After members were added in the order of the table `src`, mark the set that `read` gives
@@ -957,6 +1085,237 @@ def setSlotAt (s : Value) (i : Nat) : PyM σ .reads true (SlotAt Value) := do
   | .entry h k _ => pure (.entry k h)
   | _ => pure .hole
 
+/-! ## Objects other than containers -/
+
+/-- The payload of a new object `id` with the contents `o`, if its references are objects where
+they must be (a class's namespace). -/
+def newPayload (id : ObjId) : NewObj Value → Option PayloadData
+  | .cls c => match c.ns with
+    | .obj n => some <| .cls
+        { name := c.name, qualname := c.qualname, «module» := c.module, bases := c.bases,
+          mro := #[.obj id] ++ c.mroTail, ns := n, solidBase := c.solidBase,
+          instanceDict := c.instanceDict, slots := c.slots, immutable := c.immutable,
+          gapped := c.gapped, writesGap := c.writesGap, instanceWritesGap := c.instanceWritesGap,
+          tpName := c.tpName, hasDel := c.hasDel }
+    | _ => none
+  | .native f => some <| .native
+      { key := f.key, kind := f.kind, captured := f.captured, name := f.name,
+        qualname := f.qualname, «module» := f.module, defaults := f.defaults,
+        kwdefaults := f.kwdefaults, gapped := f.gapped }
+  | .module n g w => some (.module ⟨n, g, w⟩)
+  | .property a b c d => some (.property a b c d)
+  | .classmethod f => some (.classmethod f)
+  | .staticmethod f => some (.staticmethod f)
+  | .super t o => some (.super t o)
+  | .opaque t st => some (.opaque t st)
+  | .member o n i => some (.member o n i)
+  | .mappingProxy d => some (.mappingProxy d)
+
+/-- A new object of the class `cls` with the contents `o`. -/
+def allocObj (cls : Value) (o : NewObj Value) : PyM σ .pure true Value :=
+  if (newPayload 0 o).isNone then PyM.failure "a new object whose namespace is not a dict"
+  else allocWith cls fun id => ⟨cls, none, #[], (newPayload id o).getD .plain⟩
+
+/-- The class `c` of an object, as generic code sees it. -/
+def classDataOf (c : ClassObj) : ClassData Value :=
+  { name := c.name, qualname := c.qualname, «module» := c.module, bases := c.bases,
+    mroTail := c.mro.extract 1 c.mro.size, ns := .obj c.ns, solidBase := c.solidBase,
+    instanceDict := c.instanceDict, slots := c.slots, immutable := c.immutable,
+    gapped := c.gapped, writesGap := c.writesGap, instanceWritesGap := c.instanceWritesGap,
+    tpName := c.tpName, hasDel := c.hasDel }
+
+/-- What the payload `p` is, other than a container. -/
+def viewOf : PayloadData → ObjView Value
+  | .cls c => .cls (classDataOf c)
+  | .native f => .native
+      { key := f.key, kind := f.kind, captured := f.captured, name := f.name,
+        qualname := f.qualname, «module» := f.module, defaults := f.defaults,
+        kwdefaults := f.kwdefaults, gapped := f.gapped }
+  | .exc _ => .exc
+  | .iter _ => .iter
+  | .module m => .module m.name m.gapped m.writesGap
+  | .property a b c d => .property a b c d
+  | .classmethod f => .classmethod f
+  | .staticmethod f => .staticmethod f
+  | .super t o => .super t o
+  | .opaque t st => .opaque t st
+  | .member o n i => .member o n i
+  | .mappingProxy d => .mappingProxy d
+  | _ => .inst
+
+/-- What the store object `o` is, other than a container; a translated function shows its name
+and module only, never its closure. -/
+def viewOfObj (o : Obj σ) : ObjView Value :=
+  match o.payload with
+  | .func f => .func f.name f.module f.annotations f.classBody
+  | p => (p.data?.map viewOf).getD .inst
+
+/-- What the object `v` is, other than a container. -/
+def objView (v : Value) : PyM σ .reads true (Option (ObjView Value)) :=
+  match v with
+  | .obj id =>
+    ⟨fun _ _ _ k _ => do
+      let st ← getThe (ObjStore σ)
+      k ((st.get? id).map viewOfObj), by
+      intro rs ps S tg V hc s hs hh e' he β Q QW k ke hk hke
+      exact ContOK.getThe (fun _ => hk _)
+        (fun h => absurd h (Level.ne_pure_up he (by decide))),
+      by intro _; unfold StartFree; intros; rfl⟩
+  | _ => pure none
+
+/-- The payload of a new instance's built-in part. -/
+def partPayload : BuiltinPart Value → PayloadData
+  | .plain => .plain
+  | .list xs => .list xs 0
+  | .dict => .dict .empty
+  | .set => .set .empty
+  | .frozenset => .frozenset .empty false
+  | .tuple xs => .tuple xs
+  | .str x => .str x
+  | .int i => .int i
+  | .float b => .float b
+  | .bytes b => .bytes b
+  | .exc args => .exc { args := .tuple args, traceback := .traceback }
+
+/-- The number of slots of the classes `mro`, which is a class's MRO: its instances' layout. -/
+def slotCount : List Value → PyM σ .reads true Nat
+  | [] => pure 0
+  | .obj id :: rest => do
+    let own ← match ← objGet id with
+      | some { payload := .cls c, .. } => pure c.slots.size
+      | _ => pure 0
+    return own + (← slotCount rest)
+  | _ :: rest => slotCount rest
+
+/-- Whether the instances of the class `cls` get a `__dict__`, and their number of slots. -/
+def layoutOf (cls : Value) : PyM σ .reads true (Bool × Nat) := do
+  match cls with
+  | .obj id => match ← objGet id with
+    | some { payload := .cls c, .. } => return (c.instanceDict, ← slotCount c.mro.toList)
+    | _ => PyM.failure s!"object {id} is not a class"
+  | _ => pure (false, 0)
+
+/-- A dict table with the entries `kvs`, whose keys are `str`s, in order. -/
+def strTable (kvs : Array (String × Value)) : PyM σ .pure true DictTable :=
+  kvs.foldlM (init := .empty) fun t (k, v) => do
+    let key := Value.ofString k
+    let (kc, h) ← probeOf key none
+    pure (t.insertNew ⟨h, key, kc⟩ v)
+
+/-- A new instance of the class `cls` with the built-in part `p`, its `__dict__`'s first entries
+`dict` and its slot values `slots`. -/
+def allocInstance (cls : Value) (p : BuiltinPart Value) (dict : Array (String × Value))
+    (slots : Array (Option Value)) : PyM σ .reads true Value := do
+  let (hasDict, n) ← layoutOf cls
+  if !hasDict && !dict.isEmpty then PyM.failure "dict entries for a class without an instance dict"
+  if slots.size != n then PyM.failure "slot values that don't fit the class's layout"
+  if (dict.map (·.1)).toList.eraseDups.length != dict.size then
+    PyM.failure "an instance dict that repeats a name"
+  let d ← if hasDict then
+      some <$> ((do allocDictOf (← strTable dict)) : PyM σ .pure true Value).lift (by decide)
+    else pure none
+  let dictId := match d with | some (.obj i) => some i | _ => none
+  (alloc ⟨cls, dictId, slots.map (·.getD (.undef "")), partPayload p⟩).lift (by decide)
+
+/-- Give the class `id`'s MRO after itself `tail`, as `modify` changes a payload. -/
+def withMroTail (id : ObjId) (tail : Array Value) : ObjPayload σ → ObjPayload σ
+  | .cls c => .cls { c with mro := #[.obj id] ++ tail }
+  | p => p
+
+/-- Give the class `c`, which the operation made, the MRO `tail` after itself. -/
+def classSetMroNew (c : Value) (tail : Array Value) : PyM σ .pure false Unit :=
+  match c with
+  | .obj id => modifyOwnPayload id (withMroTail id tail) (by keeps_closures)
+  | _ => PyM.failure "a class that is not an object"
+
+/-- Give any class `c` the MRO `tail` after itself. -/
+def classSetMro (c : Value) (tail : Array Value) : PyM σ .writes true Unit :=
+  match c with
+  | .obj id => modifyPayload id (withMroTail id tail) (by keeps_closures)
+  | _ => PyM.failure "a class that is not an object"
+
+/-- Set the `__name__` and `__qualname__` of the class `c`. -/
+def classSetName (c : Value) (name qualname : String) : PyM σ .writes true Unit :=
+  match c with
+  | .obj id => modifyPayload id (fun
+    | .cls k => .cls { k with name, qualname }
+    | p => p) (by keeps_closures)
+  | _ => PyM.failure "a class that is not an object"
+
+/-- Set the `__annotations__` of the function `f`. -/
+def funcSetAnnotations (f : Value) (a : Value) : PyM σ .writes true Unit :=
+  match f with
+  | .obj id => modifyPayload id (fun
+    | .func fo => .func { fo with annotations := some a }
+    | p => p) (by keeps_closures)
+  | _ => PyM.failure "a function that is not an object"
+
+/-- Set the state of the property, `classmethod` or `staticmethod` `v` to `s`, of the same kind;
+a model invariant (`PyM.failure`) for any other kind. -/
+def stateSet (v : Value) (s : NewObj Value) : PyM σ .writes true Unit := do
+  let .obj id := v | PyM.failure "an object's state for a value that is not an object"
+  let some o ← (objGet id).lift (by decide) | PyM.failure s!"object {id} does not exist"
+  match o.payload, s with
+  | .property .., .property a b c d => modifyPayload id (fun _ => .property a b c d) (by keeps_closures)
+  | .classmethod _, .classmethod f => modifyPayload id (fun _ => .classmethod f) (by keeps_closures)
+  | .staticmethod _, .staticmethod f => modifyPayload id (fun _ => .staticmethod f) (by keeps_closures)
+  | _, _ => PyM.failure "an object's state of another kind"
+
+/-- Set the `__name__` of the function `f`. -/
+def funcSetName (f : Value) (name : String) : PyM σ .writes true Unit :=
+  match f with
+  | .obj id => modifyPayload id (fun
+    | .func fo => .func { fo with name }
+    | p => p) (by keeps_closures)
+  | _ => PyM.failure "a function that is not an object"
+
+/-- The `__dict__` of the object `v`, if it has one. -/
+def objDict (v : Value) : PyM σ .reads true (Option Value) :=
+  match v with
+  | .obj id =>
+    ⟨fun _ _ _ k _ => do
+      let st ← getThe (ObjStore σ)
+      k (((st.get? id).bind (·.dict)).map Value.obj), by
+      intro rs ps S tg V hc s hs hh e' he β Q QW k ke hk hke
+      exact ContOK.getThe (fun _ => hk _)
+        (fun h => absurd h (Level.ne_pure_up he (by decide))),
+      by intro _; unfold StartFree; intros; rfl⟩
+  | _ => pure none
+
+/-- Slot `i` of the object `v`, if it is set. -/
+def slotGet (v : Value) (i : Nat) : PyM σ .reads true (Option Value) :=
+  match v with
+  | .obj id =>
+    ⟨fun _ _ _ k _ => do
+      let st ← getThe (ObjStore σ)
+      k (((st.get? id).bind (·.slots[i]?)).bind fun x =>
+        match x with | .undef _ => none | x => some x), by
+      intro rs ps S tg V hc s hs hh e' he β Q QW k ke hk hke
+      exact ContOK.getThe (fun _ => hk _)
+        (fun h => absurd h (Level.ne_pure_up he (by decide))),
+      by intro _; unfold StartFree; intros; rfl⟩
+  | _ => pure none
+
+/-- Change the object `id` by `f`, in place, at `writes`. -/
+def modifyObj (id : ObjId) (f : Obj σ → Obj σ)
+    (hf : ∀ o, ∀ l ∈ Refs.refs (σ := σ) (f o), l ∈ Refs.refs (σ := σ) o) :
+    PyM σ .writes true Unit :=
+  ⟨fun _ _ _ k _ => do
+    modifyThe (ObjStore σ) fun st => st.update id f
+    k (), by
+    intro rs ps S tg V hc s hs hh e' he β Q QW k ke hk hke
+    obtain rfl := Level.writes_up he rfl
+    exact ContOK.modifyThe _ hc.store (fun _ _ h => refsOK_update id f hf h)
+      (fun h => absurd rfl h) (fun h => nomatch h)
+      (hk _),
+    by intro _; unfold StartFree; intros; rfl⟩
+
+/-- Set slot `i` of the object `v` to `x`, or unset it when `x` is `undef`. -/
+def slotPut (v : Value) (i : Nat) (x : Value) : PyM σ .writes true Unit :=
+  match v with
+  | .obj id => modifyObj id (fun o => { o with slots := o.slots.setIfInBounds i x }) fun _ _ h => h
+  | _ => PyM.failure "a slot of a value that is not an object"
+
 /-- The entry `name` of the `builtins` module's dict, object `0`. -/
 def builtinGet (name : String) : PyM σ .reads true (Option Value) :=
   dictFind (.obj 0) (.ofString name) none fun _ =>
@@ -1019,9 +1378,6 @@ def hashValue (h : Hash) : PyM σ .pure true Value :=
   | .symbolic src =>
     if src.storeAddrFree then pure (.symHash src) else PyM.gap "hash(x) depends on an address"
 
-/-- The limit of the depth of Python calls, below CPython's 1000. -/
-def pyDepthLimit : Nat := 900
-
 /-- Call a function object with an args tuple and a kwargs dict. -/
 def callFunc (f args kwargs : Value) : PyM σ .calls true Value := do
   let d ← depthGet.lift (by decide)
@@ -1035,6 +1391,31 @@ def modulesGet : PyM σ .reads true (Modules σ) :=
   ⟨fun _ _ _ k _ => do k (← getThe (Modules σ)), by
     intro rs ps S tg V hc s hs hh e' he β Q QW k ke hk hke
     exact ContOK.getThe (fun _ => hk _) (fun h => absurd h (Level.ne_pure_up he (by decide))),
+    by intro _; unfold StartFree; intros; rfl⟩
+
+/-- The `__dict__` of the object `v`, made empty first if it has none yet. -/
+def objEnsureDict (v : Value) : PyM σ .writes true Value := do
+  if let some d ← (objDict v).relax.lift (by decide) then return d
+  let .obj id := v | PyM.failure "a dict for a value that is not an object"
+  let d ← (allocDict.lift (by decide) : PyM σ .writes true Value)
+  let .obj did := d | PyM.failure "a new dict that is not an object"
+  modifyObj id (fun o => { o with dict := some did }) fun _ _ h => h
+  pure d
+
+/-- Add the module `name`, whose object is `v`, to the module table. -/
+def moduleAdd (name : String) (v : Value) : PyM σ .reads true Unit := do
+  let .obj id := v | PyM.failure "a module that is not an object"
+  if (← modulesGet).map[name]?.isSome then PyM.failure s!"module {name} is already in the table"
+  ⟨fun _ _ _ k _ => do
+    modifyThe (Modules σ) fun m => m.addNew name id
+    k (), by
+    intro rs ps S tg V hc s hs hh e' he β Q QW k ke hk hke
+    letI : Refs σ (Modules σ) := modulesRefs tg.value
+    refine ContOK.modifyThe _ hc.modules (fun G m h l hl => ?_) (fun _ w => ?_)
+      (fun hp => absurd hp (Level.ne_pure_up he (by decide))) (hk _)
+    · obtain ⟨k, n, r, hr, rfl⟩ := (mem_modulesRefs tg.value _ l).mp hl
+      exact h _ ((mem_modulesRefs tg.value m _).mpr ⟨k, n, r, Modules.cell?_addNew _ _ _ _ _ _ hr, rfl⟩)
+    · exact ⟨Nat.le_refl _, fun _ _ _ h => h, Modules.extends_addNew _ _ _, rfl, rfl⟩,
     by intro _; unfold StartFree; intros; rfl⟩
 
 /-- What `f` gives of the payload of the object `v`; `none` for a value that is not an object. -/
@@ -1053,8 +1434,8 @@ variable {σ : Type} [Store σ] [Decode σ]
 
 instance {e : Level} {fr : Bool} : PyPure (PyM σ e fr) Value where
   imm i := i.toValue
-  immView v := (Prim.immView v).relax.lift Level.AtLeast.le
-  isUndef v := pure (match v with | .undef _ => true | _ => false)
+  immViewAll v := (Prim.immView v).relax.lift Level.AtLeast.le
+  undefName? v := pure (match v with | .undef n => some n | _ => none)
   identical a b := pure (a.identical b)
   addrHash v := (Prim.addrHash v).relax.lift Level.AtLeast.le
   gap msg := PyM.gap msg
@@ -1068,6 +1449,7 @@ instance {e : Level} {fr : Bool} : PyPure (PyM σ e fr) Value where
   hashValue h := (Prim.hashValue h).relax.lift Level.AtLeast.le
   allocList xs := (Prim.allocList xs).relax.lift Level.AtLeast.le
   allocSet frozen inexact := (Prim.allocSet frozen inexact).relax.lift Level.AtLeast.le
+  allocObj c o := (Prim.allocObj c o).relax.lift Level.AtLeast.le
 
 instance {e : Level} : PyNew (PyM σ e false) Value where
   dictSetNew := Prim.dictSetNew
@@ -1088,6 +1470,7 @@ instance {e : Level} : PyNew (PyM σ e false) Value where
   listAppendNew l v := (Prim.listChangeNew l (.append v)).lift Level.AtLeast.le
   listSpliceNew l lo hi xs := (Prim.listChangeNew l (.splice lo hi xs)).lift Level.AtLeast.le
   listReserveNew l k := (Prim.listChangeNew l (.reserve k)).lift Level.AtLeast.le
+  classSetMroNew c t := (Prim.classSetMroNew c t).lift Level.AtLeast.le
 
 instance : PyNew (PyM σ .writes true) Value where
   dictSetNew := Prim.dictSet
@@ -1108,6 +1491,7 @@ instance : PyNew (PyM σ .writes true) Value where
   listAppendNew l v := Prim.listChange l (.append v)
   listSpliceNew l lo hi xs := Prim.listChange l (.splice lo hi xs)
   listReserveNew l k := Prim.listChange l (.reserve k)
+  classSetMroNew := Prim.classSetMro
 
 instance {e : Level} {fr : Bool} [Level.AtLeast .reads e] : PyReads (PyM σ e fr) Value where
   classOf v := (Prim.classOf v).relax.lift Level.AtLeast.le
@@ -1147,15 +1531,59 @@ instance {e : Level} {fr : Bool} [Level.AtLeast .reads e] : PyReads (PyM σ e fr
   setView s := (Prim.setViewOf s).relax.lift Level.AtLeast.le
   setHasUser s := (·.1.hasUser) <$> (Prim.setRead s).relax.lift Level.AtLeast.le
   dictHasUser d := (·.hasUser) <$> (Prim.dictTable d).relax.lift Level.AtLeast.le
+  setWalkKinds s := (·.1.walkKinds) <$> (Prim.setRead s).relax.lift Level.AtLeast.le
+  dictWalkKinds d := (·.walkKinds) <$> (Prim.dictTable d).relax.lift Level.AtLeast.le
   setLen s := (·.1.used) <$> (Prim.setRead s).relax.lift Level.AtLeast.le
   setCopy s frozen := (Prim.setCopy s frozen).relax.lift Level.AtLeast.le
   setSlotAt s i := (Prim.setSlotAt s i).relax.lift Level.AtLeast.le
+  allocInstance c p d sl := (Prim.allocInstance c p d sl).relax.lift Level.AtLeast.le
+  objView v := (Prim.objView v).relax.lift Level.AtLeast.le
+  objDict v := (Prim.objDict v).relax.lift Level.AtLeast.le
+  slotGet v i := (Prim.slotGet v i).relax.lift Level.AtLeast.le
+  moduleAdd n v := (Prim.moduleAdd n v).relax.lift Level.AtLeast.le
+  depthC := (·.c) <$> Prim.depthGet.relax.lift Level.AtLeast.le
+  withDepth n body := Prim.withDepth (Level.ne_pure_up (e := .reads) Level.AtLeast.le (by decide)) n body
+  withPyDepth n body :=
+    Prim.withPyDepth (Level.ne_pure_up (e := .reads) Level.AtLeast.le (by decide)) n body
 
-instance {e : Level} {fr : Bool} [Level.AtLeast .reads e] [Level.AtLeast .calls e] :
-    PyCalls (PyM σ e fr) Value where
+/-- Which body a built-in callable runs: a built-in function's, a built-in type's method's, or a
+native function's, by its key. -/
+inductive ImplKey where
+  | function (b : Builtin)
+  | method (t : Builtin) (name : String)
+  | native (key : String)
+
+/-- The body of `k` in `impls`. -/
+def Impls.find (impls : Impls) : ImplKey → Option BuiltinImpl
+  | .function b => impls.function b
+  | .method t name => impls.method t name
+  | .native key => impls.native key
+
+/-- The body that the built-in callable `f` runs on `args`, with its `self`: a built-in
+function's own, a bound method's object, an unbound method's first argument, or a native
+function. -/
+def resolveBuiltin (f args : Value) : PyM σ .reads true (Option (ImplKey × Value × Value)) := do
+  match f with
+  | .builtin b => pure (some (.function b, f, args))
+  | .bound self t name _ => pure (some (.method t name, self, args))
+  | .descr t name _ => match args with
+    | .tuple xs => match xs[0]? with
+      | some self =>
+        if (← Prim.classOf self) == .builtin t then
+          pure (some (.method t name, self, .tuple (xs.extract 1 xs.size)))
+        else PyM.gap s!"a call of the descriptor {t.info.name}.{name} on another type is not modelled yet"
+      | none => PyM.gap s!"a call of the descriptor {t.info.name}.{name} without an argument is not modelled yet"
+    | _ => PyM.failure "an args value that is not a tuple"
+  | .obj _ => match ← Prim.objView f with
+    | some (.native nf) => pure (some (.native nf.key, f, args))
+    | _ => pure none
+  | _ => pure none
+
+/-- The record at `PyM σ .writes fr`, with `cb` as its calls of built-ins. -/
+@[reducible] def writesRecord {fr : Bool} (cb : Value → Value → Value → PyM σ .writes true Value) :
+    PyWrites (PyM σ .writes fr) Value where
   callFunc f a k := (Prim.callFunc f a k).relax.lift Level.AtLeast.le
-
-instance {fr : Bool} : PyWrites (PyM σ .writes fr) Value where
+  callBuiltin f a k := (cb f a k).relax
   setHandled v := (Prim.setHandled v).relax
   write t := (Prim.writeOut t).relax
   dictSet := Prim.dictSet
@@ -1176,6 +1604,47 @@ instance {fr : Bool} : PyWrites (PyM σ .writes fr) Value where
   setTrim := Prim.setTrim false
   setClear := Prim.setClear false
   setReplace := Prim.setReplace false
+  slotSet o i v := (Prim.slotPut o i v).relax
+  slotDel o i := (Prim.slotPut o i (.undef "")).relax
+  classSetName c n q := (Prim.classSetName c n q).relax
+  funcSetName f n := (Prim.funcSetName f n).relax
+  stateSet v st := (Prim.stateSet v st).relax
+  funcSetAnnotations f a := (Prim.funcSetAnnotations f a).relax
+  objEnsureDict v := (Prim.objEnsureDict v).relax
+
+/-- The record at `PyM σ .calls fr`, with `cb` as its calls of built-ins, each in a call
+bracket. -/
+@[reducible] def callsRecord {fr : Bool} (cb : Value → Value → Value → PyM σ .writes true Value) :
+    PyCalls (PyM σ .calls fr) Value where
+  callFunc f a k := (Prim.callFunc f a k).relax
+  callBuiltin f a k := (Prim.bracketed "a built-in that runs user code changed the world outside its call"
+    (cb f a k)).relax
+
+/-- **The calls of built-ins**, with the bodies `impls`: a call at fuel `n + 1` runs its body with a
+record whose own calls of built-ins have fuel `n`, so that the bodies, which are generic in the
+record, can call built-ins too.  Running out of fuel stops with a gap. -/
+def callBuiltinWith (impls : Impls) : Nat → Value → Value → Value → PyM σ .writes true Value
+  | 0, _, _, _ => PyM.gap "built-in calls nested deeper than the model follows"
+  | n + 1, f, args, kwargs => do
+    let some (key, self, args) ← (resolveBuiltin f args).relax.lift (by decide) |
+      PyM.gap "a call of this built-in callable is not modelled yet"
+    match impls.find key with
+    | some impl =>
+      let run := @impl (PyM σ .writes true) Value (writesRecord (callBuiltinWith impls n)) _ self args
+        kwargs
+      -- A native of kind `function` stands for a Python function: its call is one Python frame,
+      -- as a call of a function object is.
+      match ← (Prim.objView f).relax.lift (by decide) with
+      | some (.native nf) =>
+        if nf.kind == .function then Prim.withPyDepth (by decide) 1 run else run
+      | _ => run
+    | none => PyM.gap (match key with
+      | .function b => s!"built-in {b.info.name} is not modelled yet"
+      | .method t name => s!"built-in method {t.info.name}.{name} is not modelled yet"
+      | .native k => s!"native function {k} has no body")
+
+/-- How deep the calls of built-ins may nest. -/
+def builtinFuel : Nat := 10000
 
 end
 

@@ -1,0 +1,52 @@
+module
+  S: local (assigned)
+  staticmethod: global implicit (referenced)
+  A: local (assigned, referenced)
+  print: global implicit (referenced)
+  f: local (assigned, referenced)
+  s: local (assigned, referenced)
+  cm: local (assigned, referenced)
+  classmethod: global implicit (referenced)
+  K: local (assigned, referenced)
+  G: local (assigned)
+  B: local (assigned, referenced)
+  class S (needs __class__ cell)
+    __init__: local (assigned)
+    function S.__init__
+      params: self, f
+      self: local (parameter)
+      f: local (parameter)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+      lambda S.__init__.<locals>.<lambda>
+  class A
+    m: local (assigned)
+    S: global implicit (referenced)
+  function f
+  class K
+    __call__: local (assigned)
+    __name__: local (assigned)
+    property: global implicit (referenced)
+    function K.__call__
+      params: self
+      self: local (parameter)
+    function K.__name__
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+  class G
+    __call__: local (assigned)
+    __doc__: local (assigned)
+    property: global implicit (referenced)
+    function G.__call__
+      params: self, o
+      self: local (parameter)
+      o: local (parameter)
+    function G.__doc__
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+  class B
+    x: local (assigned)
+    property: global implicit (referenced)
+    G: global implicit (referenced)

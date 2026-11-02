@@ -1,0 +1,7 @@
+module top
+  H: local (assigned)
+  help: global implicit (referenced)
+  type: global implicit (referenced)
+  class H
+    __slots__: local (assigned)
+qualnames: H

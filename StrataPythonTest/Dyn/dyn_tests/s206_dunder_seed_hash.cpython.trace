@@ -1,0 +1,24 @@
+--- PYTHONHASHSEED=0
+--- stdout 12
+False
+False
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+h = 4644417185603328019
+r = 4644417185603328020
+--- PYTHONHASHSEED=1
+--- stdout 12
+False
+False
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+h = -3012895188637184397
+r = -3012895188637184396

@@ -1,0 +1,11 @@
+module
+  C: local (assigned, referenced)
+  print: global implicit (referenced)
+  RuntimeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  x: local (assigned, referenced)
+  class C
+    m: local (assigned)
+    classmethod: global implicit (referenced)
+    s: local (assigned)
+    staticmethod: global implicit (referenced)

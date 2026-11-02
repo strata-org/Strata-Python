@@ -1,0 +1,9 @@
+module top
+  Shrink: local (assigned, referenced)
+  xs: local (assigned, referenced)
+  class Shrink
+    __index__: local (assigned)
+    function __index__
+      self: local (parameter)
+      xs: global implicit (referenced)
+qualnames: Shrink, Shrink.__index__

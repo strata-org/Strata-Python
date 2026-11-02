@@ -8,7 +8,7 @@ module s176_set_lookup_two_members {
       %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s176_set_lookup_two_members", "__doc__")
       %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
       %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
-      %clo.0 : py.Value = py.mkClosure[[]](@|s176_set_lookup_two_members.Q.<body>|, "Q", "s176_set_lookup_two_members")
+      %clo.0 : py.Value = py.mkClosure[[]](@|s176_set_lookup_two_members.Q.<body>|, "<body>", "s176_set_lookup_two_members")
       %str.1 : py.Value = py.strLit("Q")
       %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
       %kwargs.0 : py.Value = py.mkKwargs

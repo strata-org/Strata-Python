@@ -1,0 +1,7 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: Outer.C.__init_subclass__() takes no keyword arguments
+--- globals
+__doc__ = None
+__name__ = '__main__'

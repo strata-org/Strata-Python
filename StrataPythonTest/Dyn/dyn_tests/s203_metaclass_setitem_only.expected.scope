@@ -1,0 +1,16 @@
+module
+  M: local (assigned, referenced)
+  type: global implicit (referenced)
+  A: local (assigned, referenced)
+  AttributeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  class M
+    __setitem__: local (assigned)
+    function M.__setitem__
+      params: cls, k, v
+      cls: local (parameter)
+      k: local (parameter, referenced)
+      v: local (parameter, referenced)
+      print: global implicit (referenced)
+  class A

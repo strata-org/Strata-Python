@@ -1,0 +1,4 @@
+module
+  a: local (assigned)
+  z: local (assigned)
+  type: global implicit (referenced)

@@ -1,0 +1,11 @@
+module top
+  A: local (assigned, referenced)
+  AttributeError: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  a: local (assigned, referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  class A
+    __getattribute__: local (assigned)
+    int: global implicit (referenced)
+qualnames: A

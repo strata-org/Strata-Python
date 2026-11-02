@@ -1,0 +1,68 @@
+module s31_function_attrs {
+  func @|s31_function_attrs.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s31_function_attrs")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s31_function_attrs", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s31_function_attrs", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@s31_function_attrs.f, "f", "s31_function_attrs")
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("s31_function_attrs", "f")
+      %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %str.1 : py.Value = py.strLit("g")
+      %f.0 : py.Value = py.loadGlobal("s31_function_attrs", "f") ^propagate.0()
+      %__name__.0 : base.Unit = py.setAttr(%f.0, "__name__", %str.1) ^propagate.0()
+      %int.0 : py.Value = py.intLit(5)
+      %f.1 : py.Value = py.loadGlobal("s31_function_attrs", "f") ^propagate.0()
+      %tag.0 : base.Unit = py.setAttr(%f.1, "tag", %int.0) ^propagate.0()
+      %str.2 : py.Value = py.strLit("x")
+      %int.1 : py.Value = py.intLit(1)
+      %dict.0 : py.Value = py.mkDict(%str.2, %int.1) ^propagate.0()
+      %f.2 : py.Value = py.loadGlobal("s31_function_attrs", "f") ^propagate.0()
+      %__annotations__.0 : base.Unit = py.setAttr(%f.2, "__annotations__", %dict.0) ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("s31_function_attrs", "print") ^propagate.0()
+      %f.3 : py.Value = py.loadGlobal("s31_function_attrs", "f") ^propagate.0()
+      %__name__.1 : py.Value = py.attr(%f.3, "__name__") ^propagate.0()
+      %f.4 : py.Value = py.loadGlobal("s31_function_attrs", "f") ^propagate.0()
+      %tag.1 : py.Value = py.attr(%f.4, "tag") ^propagate.0()
+      %f.5 : py.Value = py.loadGlobal("s31_function_attrs", "f") ^propagate.0()
+      %__annotations__.1 : py.Value = py.attr(%f.5, "__annotations__") ^propagate.0()
+      %str.3 : py.Value = py.strLit("x")
+      %item.0 : py.Value = py.getItem(%__annotations__.1, %str.3) ^propagate.0()
+      %f.6 : py.Value = py.loadGlobal("s31_function_attrs", "f") ^propagate.0()
+      %__dict__.0 : py.Value = py.attr(%f.6, "__dict__") ^propagate.0()
+      %str.4 : py.Value = py.strLit("tag")
+      %item.1 : py.Value = py.getItem(%__dict__.0, %str.4) ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%__name__.1, %tag.1, %item.0, %item.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %f.7 : py.Value = py.loadGlobal("s31_function_attrs", "f") ^propagate.0()
+      %tag.2 : base.Unit = py.delAttr(%f.7, "tag") ^propagate.0()
+      %int.2 : py.Value = py.intLit(3)
+      %f.8 : py.Value = py.loadGlobal("s31_function_attrs", "f") ^propagate.0()
+      %__name__.2 : base.Unit = py.setAttr(%f.8, "__name__", %int.2) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s31_function_attrs.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %x.1 : py.Value = py.undef("x")
+      %defaults.0 : py.Value = py.mkTuple(%x.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 1, false, false, "x") ^propagate.0()
+      %x.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

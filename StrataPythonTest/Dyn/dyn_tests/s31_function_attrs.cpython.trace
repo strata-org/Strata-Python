@@ -1,0 +1,9 @@
+--- stdout 8
+g 5 1 5
+
+--- outcome
+raised TypeError: __name__ must be set to a string object
+--- globals
+__doc__ = None
+__name__ = '__main__'
+f = <function object>

@@ -1,0 +1,5 @@
+module
+  C: local (assigned, referenced)
+  o: local (assigned, referenced)
+  r: local (assigned)
+  class C

@@ -72,7 +72,8 @@ module that imports both keeps the first and records the second (`Registry`), an
   * The capabilities, which the wrapper supplies, are: parts of the world, `HasPart ε.W P`; the
     machine's cells, `HasHeap σ ε`, through which the rule makes, reads, writes and updates
     cells (`newRef`, `readRef`, `writeRef`, `modifyRef`); its calls, `HasCall σ ε`, through
-    which it calls and binds closures (`callFn`, `bindFn`, `bindAll`); and the tags those
+    which it calls and binds closures (`callFn`, `bindFn`, `bindAll`); the call bracket,
+    `HasBracket ε`, inside which a built-in runs user code (`HasBracket.bracket`); and the tags those
     need, `TagOf σ α`, `SigOf σ as r`, `TagCon σ F`, `TagCon₂ σ F` and `TagsOf σ cs`, at Lean
     types of the instruction's environment.  A generic rule takes `[TagOf σ A]` only if it
     reaches a cell or a call at `A`.  A rule that takes a tag takes `[Decode σ]`, which the
@@ -161,6 +162,8 @@ inductive Lead where
   | heap
   /-- `[HasCall σ ε]`, the machine's calls. -/
   | call
+  /-- `[HasBracket ε]`, the call bracket of a built-in that runs user code. -/
+  | bracket
   /-- `[TagOf σ t]`. -/
   | tag (t : LTy)
   /-- `[SigOf σ as r]`. -/
@@ -834,11 +837,13 @@ that proofs see only as values.  `runST` and `runEST` apply the code to `Void.mk
 could also do itself, and `ST.Prim.mkRef` makes every cell. -/
 def stRunners : List Lean.Name := [``runST, ``runEST, ``Void.mk, ``ST.Prim.mkRef]
 
-/-- The machine's region, heap and call capabilities.  Their requests name cells, closures or an
-operation's regions, which only the machine may choose, so only a wrapper that the table
-generates may use them: a rule that built one itself could ask for a region it wasn't passed, or
-take a location out of the request. -/
-def engineCapabilities : List Lean.Name := [``Region.slot, ``HasHeap.mreq, ``HasCall.mreq]
+/-- The machine's region, heap and call capabilities, and its call bracket.  The requests of the
+first three name cells, closures or an operation's regions, which only the machine may choose, so
+only a wrapper that the table generates may use them: a rule that built one itself could ask for
+a region it wasn't passed, or take a location out of the request.  The bracket rewrites a tree's
+requests, which a rule's own code must not do. -/
+def engineCapabilities : List Lean.Name :=
+  [``Region.slot, ``HasHeap.mreq, ``HasCall.mreq, ``HasBracket.mreq]
 
 /-- The constructors of a ref and of a closure from a raw one.  A rule that used one could give a
 ref or a closure another type than the one the machine made it at (`⟨r.raw⟩`), so only a wrapper
@@ -853,11 +858,14 @@ def machineFaults : List Lean.Name :=
   [``Fault.badCall, ``Fault.badCell, ``Fault.outOfFuel, ``Fault.missingRules, ``Fault.invalid,
    ``Fault.noFunction]
 
-/-- Names the walk doesn't enter, though they take a request apart: `MReq.Out` computes only a
-type from a request, which a run erases, and `MReq.writesCell` gives one bit that depends only on
-the request's constructor, never on a location (its value on each constructor is pinned by
-`rfl`). -/
-def trustedRequestConsts : List Lean.Name := [``MReq.Out, ``MReq.writesCell]
+/-- Names the walk doesn't enter, though they build or take apart a request: `MReq.Out` computes
+only a type from a request, which a run erases; `MReq.writesCell` gives one bit that depends only
+on the request's constructor, never on a location (its value on each constructor is pinned by
+`rfl`); and `callBracket`, with `callBracketKeep` and `callBracketAfter`, the call bracket's code,
+which rebuilds a body's requests unchanged, except that it turns a cell write, a region or a jump
+into a gap (`Within.callBracket`, `sat_callBracket`). -/
+def trustedRequestConsts : List Lean.Name :=
+  [``MReq.Out, ``MReq.writesCell, ``callBracket, ``callBracketKeep, ``callBracketAfter]
 
 /-- The directories of `paths`, other than Lean's own library `sysLib`, that hold a module named
 `Init`, `Std` or `Lean`, as `has` tells whether a file or directory exists.  The check trusts
@@ -1100,10 +1108,15 @@ def findNotAsProved (decl : Lean.Name) (what : MessageData)
             {.ofConstName g}: no swap of it is allowed, so that code compiled later that names it \
             runs it as defined")
     if engineCapabilities.contains n then
-      if byWrapper then continue
-      return (some <| mkFinding parent .capability n <| m!"{subject parent n} reaches {pathMsg parent decl n}, the machine's own capability, which only \
-        the declarations a table command emits may build: its requests name cells, closures or \
-        regions that only the machine may choose")
+      -- The bracket's code is walked as any other, so that its compiled code (`callBracket`) is
+      -- what its definition reaches; the other capabilities build only requests.
+      if byWrapper then
+        if n != ``HasBracket.mreq then continue
+      else
+        let why := if n == ``HasBracket.mreq then "it rewrites the requests of a tree"
+          else "its requests name cells, closures or regions that only the machine may choose"
+        return (some <| mkFinding parent .capability n <| m!"{subject parent n} reaches {pathMsg parent decl n}, the machine's own capability, which only \
+          the declarations a table command emits may build: {why}")
     if refConstructors.contains n then
       if byWrapper then continue
       return (some <| mkFinding parent .refConstructor n <| m!"{subject parent n} reaches {pathMsg parent decl n}, which builds a ref or a closure from \
@@ -1302,7 +1315,8 @@ def findNotAsProved (decl : Lean.Name) (what : MessageData)
       let c := match c0 with
         | .str f s => if (s == "_redArg" || s == "_boxed") && env.contains f then f else c0
         | _ => c0
-      if c != c0 then work := work.push (c0, c)
+      -- A trusted name's code is not walked, so neither is its `_redArg` or `_boxed` code.
+      if c != c0 && !trustedRequestConsts.contains c then work := work.push (c0, c)
       if env.contains c && isLeanLibrary env c then continue
       let uc := Lean.Compiler.mkUnsafeRecName c
       -- Not reached at all, then not by `owner`: the check below fails.  `owner` itself and its
@@ -1347,14 +1361,15 @@ def emittedSince (before : Environment) (ns : Lean.Name) : CoreM (Array Lean.Nam
 /-- The capabilities a rule may take, as a message. -/
 def capsMsg : MessageData :=
   m!"parts of the world, HasPart ε.W P, the machine's cells, HasHeap σ ε, its calls, \
-    HasCall σ ε, and tags, TagOf σ α, SigOf σ as r, TagCon σ F, TagCon₂ σ F and TagsOf σ cs"
+    HasCall σ ε, the call bracket, HasBracket ε, and tags, TagOf σ α, SigOf σ as r, TagCon σ F, \
+    TagCon₂ σ F and TagsOf σ cs"
 
 /-- The capability classes. -/
 def capClasses : List Lean.Name :=
-  [``HasPart, ``HasHeap, ``HasCall, ``TagOf, ``SigOf, ``TagCon, ``TagCon₂, ``TagsOf]
+  [``HasPart, ``HasHeap, ``HasCall, ``HasBracket, ``TagOf, ``SigOf, ``TagCon, ``TagCon₂, ``TagsOf]
 
 /-- What a capability the wrapper supplies is, if `ty` is one: a part of the world, the
-machine's cells or calls, or a tag, at the token `sigma` and the requests `eff`, over the rule's
+machine's cells or calls, the call bracket, or a tag, at the token `sigma` and the requests `eff`, over the rule's
 type variables `vars`. -/
 def capOf? (byDecl : Std.HashMap Lean.Name TypeRule) (vars : Array Expr) (what : MessageData)
     (sigma : Option Expr) (eff : Expr) (ty : Expr) : MetaM (Option Lead) := do
@@ -1370,6 +1385,10 @@ def capOf? (byDecl : Std.HashMap Lean.Name TypeRule) (vars : Array Expr) (what :
     return some .part
   | (``HasHeap, #[σ, _, _, eff₁]) => atReqs σ eff₁; return some .heap
   | (``HasCall, #[σ, _, _, eff₁]) => atReqs σ eff₁; return some .call
+  | (``HasBracket, #[eff₁]) =>
+    unless ← isDefEq eff₁ eff do
+      throwError "{what} takes {ty}, which is not at its requests"
+    return some .bracket
   | (``TagOf, #[σ, _, _, α]) => atToken σ; return some (.tag (← ltyOf byDecl vars #[] α))
   | (``SigOf, #[σ, _, _, as, r]) =>
     atToken σ

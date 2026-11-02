@@ -65,6 +65,22 @@ def run (text : String) : IO Unit := do
       | none => IO.println "a result that is not a value"
     | .fault f => IO.println s!"fault: {repr f}"
 
+-- No built-in function or method gets a body from two pieces' parts: the first part would win
+-- silently.
+#guard Impls.overlaps Assembly.parts == []
+-- The check finds an overlap: a part joined with itself fills `print` twice.
+#guard (Impls.overlaps [opsImpls, opsImpls]).contains "print"
+
+/-- CPython 3.12's C recursion limit, as lists nested 9,995 deep compare and 9,996 deep raise
+`RecursionError` (measured on 3.12.15). -/
+def cpythonCLimit : Nat := 9995
+
+-- The model doesn't count a dict or set key's own comparison levels on `Depth.c`: that is sound
+-- only while a key's comparison (at most `keyDepth + 1` levels) fits in the margin between the
+-- model's limit and CPython's. CPython's costs per level match the model's: 1 for a comparison,
+-- 3 for a user `__eq__` (its comparison and the call), 1 for a tuple level.
+#guard cDepthLimit + Prim.keyDepth + 1 < cpythonCLimit
+
 /-- info: 3 -/
 #guard_msgs in
 #eval run "module m {
@@ -317,13 +333,13 @@ def mainTotal (body : String) : String := s!"module m \{
       %f.0 : py.Value = py.floatLit(1.0)
       %v.0 : py.Value = py.mkDict(%i.0, %i.0, %f.0, %i.0) ^err.0()")
 
--- An odd count of a display's operands, and a key that is an object, gap.
+-- An odd count of a display's operands gaps; a dict key raises CPython's `TypeError`.
 /-- info: fault: Strata.Dyn.Exec.Fault.gap "model invariant: mkDict: operand assumption failed" -/
 #guard_msgs in
 #eval run (main "      %i.0 : py.Value = py.intLit(1)
       %v.0 : py.Value = py.mkDict(%i.0) ^err.0()")
 
-/-- info: fault: Strata.Dyn.Exec.Fault.gap "a dict key that is an object is not modelled yet" -/
+/-- info: exception TypeError("unhashable type: 'dict'",), context None, traceback <traceback>, fields [] -/
 #guard_msgs in
 #eval run (main "      %i.0 : py.Value = py.intLit(1)
       %d.0 : py.Value = py.mkDict ^err.0()
@@ -345,7 +361,13 @@ def mainTotal (body : String) : String := s!"module m \{
 #guard_msgs in
 #eval run (mainTotal "      %v.0 : py.Value = py.bytesLit(\"a\\u00ff\")")
 
-/-- info: fault: Strata.Dyn.Exec.Fault.gap "not modelled yet: py.attr" -/
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "not modelled yet: py.repr" -/
+#guard_msgs in
+#eval run (main "      %i.0 : py.Value = py.intLit(1)
+      %v.0 : py.Value = py.repr(%i.0) ^err.0()")
+
+-- An attribute that `int` lacks raises CPython's `AttributeError`, with its name and object.
+/-- info: exception AttributeError("'int' object has no attribute 'x'",), context None, traceback <traceback>, fields [(name, 'x'), (obj, 1)] -/
 #guard_msgs in
 #eval run (main "      %i.0 : py.Value = py.intLit(1)
       %v.0 : py.Value = py.attr(%i.0, \"x\") ^err.0()")
@@ -1781,7 +1803,7 @@ def fnsModule : String := "module m {
   func @m.stop() -> base.Except(py.Value, py.Value) {
     entry.0():
       %n.0 : py.Value = py.noneLit
-      %s.0 : base.Unit = py.setAttr(%n.0, \"a\", %n.0) ^err.0()
+      %s.0 : py.Value = py.repr(%n.0) ^err.0()
       %r.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%n.0)
       ret(%r.0)
     err.0(%e.0 : py.Value):
@@ -1812,9 +1834,9 @@ raised NameError: name 'nope' is not defined
 --- result m.get
 1
 --- result m.stop
---- gap not modelled yet: py.setAttr
+--- gap not modelled yet: py.repr
 --- result m.get
---- gap not modelled yet: py.setAttr
+--- gap not modelled yet: py.repr
 --- result m.none
 --- fault no function m.none
 -/

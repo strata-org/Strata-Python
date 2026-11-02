@@ -1,0 +1,12 @@
+module
+  M: local (assigned, referenced)
+  type: global implicit (referenced)
+  A: local (assigned, referenced)
+  B: local (assigned, referenced)
+  object: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  class M
+  class A
+  class B

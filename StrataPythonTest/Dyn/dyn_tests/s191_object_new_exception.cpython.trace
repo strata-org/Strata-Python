@@ -1,0 +1,7 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: object.__new__(ValueError) is not safe, use ValueError.__new__()
+--- globals
+__doc__ = None
+__name__ = '__main__'

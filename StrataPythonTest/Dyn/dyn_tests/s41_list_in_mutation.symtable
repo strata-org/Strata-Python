@@ -1,0 +1,11 @@
+module top
+  K: local (assigned, referenced)
+  lst: local (assigned, referenced)
+  print: global implicit (referenced)
+  class K
+    __eq__: local (assigned)
+    function __eq__
+      lst: global implicit (referenced)
+      o: local (parameter)
+      self: local (parameter)
+qualnames: K, K.__eq__

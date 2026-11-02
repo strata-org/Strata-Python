@@ -1,0 +1,38 @@
+module
+  A: local (assigned, referenced)
+  a: local (assigned, referenced)
+  print: global implicit (referenced)
+  B: local (assigned, referenced)
+  b: local (assigned, referenced)
+  C: local (assigned, referenced)
+  c: local (assigned, referenced)
+  J: local (assigned, referenced)
+  j: local (assigned, referenced)
+  M: local (assigned, referenced)
+  N: local (assigned, referenced)
+  n: local (assigned, referenced)
+  Q: local (assigned, referenced)
+  a2: local (assigned, referenced)
+  class A
+    __slots__: local (assigned)
+    z: local (assigned)
+    setp: local (assigned)
+    function A.setp
+      params: self, v
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+  class B
+    __slots__: local (assigned)
+  class C
+  class J
+    __slots__: local (assigned)
+  class M
+  class N
+    __slots__: local (assigned)
+  class Q
+    __slots__: local (assigned)
+    __eq__: local (assigned)
+    function Q.__eq__
+      params: self, other
+      self: local (parameter)
+      other: local (parameter)

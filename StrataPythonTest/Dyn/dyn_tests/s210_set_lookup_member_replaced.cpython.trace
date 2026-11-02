@@ -1,0 +1,12 @@
+--- stdout 5
+True
+
+--- outcome
+ok
+--- globals
+K = <class 'K'>
+__doc__ = None
+__name__ = '__main__'
+calls = 2
+s = {0, 1180591620717411303424}
+z = 0

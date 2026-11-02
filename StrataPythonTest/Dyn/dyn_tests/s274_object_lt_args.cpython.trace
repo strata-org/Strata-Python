@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: expected 1 argument, got 0
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+o = <C object>

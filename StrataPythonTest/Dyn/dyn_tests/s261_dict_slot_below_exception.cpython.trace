@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: __dict__ slot disallowed: we already got one
+--- globals
+E = <class 'E'>
+__doc__ = None
+__name__ = '__main__'

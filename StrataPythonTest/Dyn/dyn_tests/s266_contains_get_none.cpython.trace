@@ -1,0 +1,9 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: 'A' object is not a container
+--- globals
+A = <class 'A'>
+NoneGet = <class 'NoneGet'>
+__doc__ = None
+__name__ = '__main__'

@@ -1,0 +1,25 @@
+--- stdout 225
+TypeError
+unsupported operand type(s) for *=: 'dict' and 'list'
+unsupported operand type(s) for *=: 'set' and 'list'
+unsupported operand type(s) for *=: 'range' and 'list'
+unsupported operand type(s) for *=: 'B' and 'list'
+2
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+__doc__ = None
+__name__ = '__main__'
+b = <B object>
+d = {}
+m1 = "unsupported operand type(s) for *=: 'dict' and 'list'"
+m2 = "unsupported operand type(s) for *=: 'set' and 'list'"
+m3 = "unsupported operand type(s) for *=: 'range' and 'list'"
+m4 = "unsupported operand type(s) for *=: 'B' and 'list'"
+n = [1, 1]
+o = <A object>
+r = range(0, 2)
+s = {1}

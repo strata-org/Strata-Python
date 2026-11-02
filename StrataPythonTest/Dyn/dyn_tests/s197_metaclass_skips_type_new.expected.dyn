@@ -1,0 +1,176 @@
+module s197_metaclass_skips_type_new {
+  func @|s197_metaclass_skips_type_new.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s197_metaclass_skips_type_new")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s197_metaclass_skips_type_new", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s197_metaclass_skips_type_new", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %none.1 : py.Value = py.noneLit
+      %saved.cell.0 : base.Ref(py.Value) = py.globalCell("s197_metaclass_skips_type_new", "saved")
+      %set.2 : base.Unit = base.refSet[py.Value](%saved.cell.0, %none.1)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|s197_metaclass_skips_type_new.Meta.<body>|, "<body>", "s197_metaclass_skips_type_new")
+      %str.1 : py.Value = py.strLit("Meta")
+      %type.0 : py.Value = py.loadGlobal("s197_metaclass_skips_type_new", "type") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1, %type.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %Meta.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %Meta.cell.0 : base.Ref(py.Value) = py.globalCell("s197_metaclass_skips_type_new", "Meta")
+      %set.3 : base.Unit = base.refSet[py.Value](%Meta.cell.0, %Meta.0)
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %__class__.0 : py.Value = py.undef("__class__")
+      %__class__.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%__class__.0)
+      %clo.1 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|s197_metaclass_skips_type_new.A.<body>|, "<body>", "s197_metaclass_skips_type_new", %__class__.cell.0)
+      %str.2 : py.Value = py.strLit("A")
+      %tuple.1 : py.Value = py.mkTuple(%clo.1, %str.2)
+      %str.3 : py.Value = py.strLit("metaclass")
+      %Meta.1 : py.Value = py.loadGlobal("s197_metaclass_skips_type_new", "Meta") ^propagate.0()
+      %kwargs.1 : py.Value = py.mkKwargs(%str.3, %Meta.1)
+      %A.0 : py.Value = py.call(%__build_class__.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %set.4 : base.Unit = base.refSet[py.Value](%__class__.cell.0, %A.0)
+      %A.cell.0 : base.Ref(py.Value) = py.globalCell("s197_metaclass_skips_type_new", "A")
+      %set.5 : base.Unit = base.refSet[py.Value](%A.cell.0, %A.0)
+      %print.0 : py.Value = py.loadGlobal("s197_metaclass_skips_type_new", "print") ^propagate.0()
+      %A.1 : py.Value = py.loadGlobal("s197_metaclass_skips_type_new", "A") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%A.1)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.2, %kwargs.2) ^propagate.0()
+      %print.1 : py.Value = py.loadGlobal("s197_metaclass_skips_type_new", "print") ^propagate.0()
+      %saved.0 : py.Value = py.loadGlobal("s197_metaclass_skips_type_new", "saved") ^propagate.0()
+      %none.2 : py.Value = py.noneLit
+      %tuple.3 : py.Value = py.mkTuple(%none.2)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%saved.0, %tuple.3, %kwargs.3) ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple(%call.1)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.1, %tuple.4, %kwargs.4) ^propagate.0()
+      %none.3 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.3)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s197_metaclass_skips_type_new.Meta.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["type"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "__new__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s197_metaclass_skips_type_new", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Meta")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s197_metaclass_skips_type_new.Meta.__new__, "__new__", "s197_metaclass_skips_type_new")
+      %str.4 : py.Value = py.strLit("__new__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s197_metaclass_skips_type_new.A.<body>|(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.keywords = [{name = "metaclass", value = "Meta"}]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "f", binding = "def"}]]
+
+    entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s197_metaclass_skips_type_new", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("A")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@s197_metaclass_skips_type_new.A.f, "f", "s197_metaclass_skips_type_new", %__class__.cell.0)
+      %str.4 : py.Value = py.strLit("f")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %__class__.0 : py.Value = py.undef(".class being created")
+      %set.0 : base.Unit = base.refSet[py.Value](%__class__.cell.0, %__class__.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%__class__.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s197_metaclass_skips_type_new.Meta.__new__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %m.0 : py.Value = py.undef("m")
+      %m.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%m.0)
+      %name.0 : py.Value = py.undef("name")
+      %name.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%name.0)
+      %bases.0 : py.Value = py.undef("bases")
+      %bases.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%bases.0)
+      %ns.0 : py.Value = py.undef("ns")
+      %ns.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%ns.0)
+      %m.1 : py.Value = py.undef("m")
+      %name.1 : py.Value = py.undef("name")
+      %bases.1 : py.Value = py.undef("bases")
+      %ns.1 : py.Value = py.undef("ns")
+      %defaults.0 : py.Value = py.mkTuple(%m.1, %name.1, %bases.1, %ns.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Meta.__new__", 0, 4, false, false, "m", "name", "bases", "ns") ^propagate.0()
+      %m.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%m.cell.0, %m.2)
+      %name.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%name.cell.0, %name.2)
+      %bases.2 : py.Value = py.tupleGet(%bound.0, 2)
+      %set.2 : base.Unit = base.refSet[py.Value](%bases.cell.0, %bases.2)
+      %ns.2 : py.Value = py.tupleGet(%bound.0, 3)
+      %set.3 : base.Unit = base.refSet[py.Value](%ns.cell.0, %ns.2)
+      %ns.3 : py.Value = base.refGet[py.Value](%ns.cell.0)
+      %ns.4 : py.Value = py.requireDefined(%ns.3, "ns", "UnboundLocalError", "cannot access local variable 'ns' where it is not associated with a value") ^propagate.0()
+      %str.0 : py.Value = py.strLit("f")
+      %item.0 : py.Value = py.getItem(%ns.4, %str.0) ^propagate.0()
+      %saved.cell.0 : base.Ref(py.Value) = py.globalCell("s197_metaclass_skips_type_new", "saved")
+      %set.4 : base.Unit = base.refSet[py.Value](%saved.cell.0, %item.0)
+      %int.0 : py.Value = py.intLit(42)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s197_metaclass_skips_type_new.A.f(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "A.f", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %__class__.0 : py.Value = base.refGet[py.Value](%__class__.cell.0)
+      %__class__.1 : py.Value = py.requireDefined(%__class__.0, "__class__", "NameError", "cannot access free variable '__class__' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%__class__.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

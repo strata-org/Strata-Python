@@ -1,0 +1,18 @@
+module
+  K: local (assigned, referenced)
+  seen: global explicit (assigned, declared_global)
+  s: local (assigned, referenced)
+  x: local (assigned, referenced)
+  r: local (assigned)
+  class K
+    __hash__: local (assigned)
+    __eq__: local (assigned)
+    function K.__hash__
+      params: self
+      self: local (parameter)
+    function K.__eq__
+      params: self, other
+      self: local (parameter)
+      other: local (parameter, referenced)
+      seen: global explicit (assigned, declared_global)
+      type: global implicit (referenced)

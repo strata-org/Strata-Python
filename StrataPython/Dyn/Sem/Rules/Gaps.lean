@@ -4,7 +4,7 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
-public import StrataPython.Dyn.Sem.Concrete
+public import StrataPython.Dyn.Sem.Assembly
 public import StrataPython.Dyn.Sem.PyTypes
 
 set_option autoImplicit false
@@ -24,18 +24,6 @@ open Strata.Dyn.Exec
 @[expose] public section
 
 variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
-
-@[dyn_sem Py.attr] def attr (_obj : Value) (_name : String) (err : Target E [Value])
-    : Sem ε E Value :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .calls) "not modelled yet: py.attr")
-
-@[dyn_sem Py.setAttr] def setAttr (_obj : Value) (_name : String) (_val : Value)
-    (err : Target E [Value]) : Sem ε E Unit :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.setAttr")
-
-@[dyn_sem Py.delAttr] def delAttr (_obj : Value) (_name : String) (err : Target E [Value])
-    : Sem ε E Unit :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.delAttr")
 
 @[dyn_sem Py.dictUpdate] def dictUpdate (_dict : Value) (_other : Value) (err : Target E [Value])
     : Sem ε E Value :=

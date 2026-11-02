@@ -1,0 +1,18 @@
+module
+  D: local (assigned)
+  C: local (assigned)
+  ValueError: global implicit (referenced)
+  e: local (assigned, referenced)
+  n: local (assigned, referenced)
+  print: global implicit (referenced)
+  class D
+    __set_name__: local (assigned)
+    function D.__set_name__
+      params: self, owner, name
+      self: local (parameter)
+      owner: local (parameter)
+      name: local (parameter)
+      ValueError: global implicit (referenced)
+  class C
+    x: local (assigned)
+    D: global implicit (referenced)

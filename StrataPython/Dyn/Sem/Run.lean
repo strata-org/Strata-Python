@@ -104,6 +104,9 @@ def renderN (st : ObjStore Run) : Nat → List ObjId → Value → RenderM Strin
       else match v.classOfImm with
         | some (.builtin c) => pure s!"<{c.info.name} object>"
         | _ => throw s!"the trace does not render the built-in {b.info.name}"
+    | .descr _ _ k => pure s!"<{k.descrType.info.name} object>"
+    | .bound _ _ _ k => pure s!"<{k.boundType.info.name} object>"
+    | .method .. => pure "<method object>"
     | .ellipsis => pure "Ellipsis"
     | .notImplemented => pure "NotImplemented"
     | .range a b c => do

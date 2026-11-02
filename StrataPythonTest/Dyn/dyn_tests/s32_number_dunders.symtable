@@ -1,0 +1,6 @@
+module top
+  NotImplemented: global implicit (referenced)
+  float: global implicit (referenced)
+  int: global implicit (referenced)
+  print: global implicit (referenced)
+qualnames: 

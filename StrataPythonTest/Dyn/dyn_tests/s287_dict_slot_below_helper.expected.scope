@@ -1,0 +1,6 @@
+module
+  H: local (assigned)
+  type: global implicit (referenced)
+  help: global implicit (referenced)
+  class H
+    __slots__: local (assigned)

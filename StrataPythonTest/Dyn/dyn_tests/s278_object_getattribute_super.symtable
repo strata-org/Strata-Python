@@ -1,0 +1,13 @@
+module top
+  A: local (assigned, referenced)
+  B: local (assigned, referenced)
+  object: global implicit (referenced)
+  r: local (assigned)
+  s: local (assigned, referenced)
+  super: global implicit (referenced)
+  class A
+    f: local (assigned)
+    function f
+      self: local (parameter)
+  class B
+qualnames: A, A.f, B

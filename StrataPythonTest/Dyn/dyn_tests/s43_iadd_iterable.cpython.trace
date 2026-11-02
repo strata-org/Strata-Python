@@ -1,0 +1,10 @@
+--- stdout 2
+2
+
+--- outcome
+ok
+--- globals
+Y = <class 'Y'>
+__doc__ = None
+__name__ = '__main__'
+a = [0, 1, 2]

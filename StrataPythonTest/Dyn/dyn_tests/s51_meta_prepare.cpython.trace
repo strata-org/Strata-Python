@@ -1,0 +1,11 @@
+--- stdout 12
+prepare C
+1
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+M = <class 'M'>
+__doc__ = None
+__name__ = '__main__'

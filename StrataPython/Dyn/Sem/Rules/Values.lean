@@ -4,7 +4,7 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
-public import StrataPython.Dyn.Sem.Concrete
+public import StrataPython.Dyn.Sem.Assembly
 public import StrataPython.Dyn.Sem.PyTypes
 public import StrataPython.Dyn.Sem.Proto.Values
 
@@ -82,7 +82,7 @@ def loadGlobal (module name : String) (err : Target E [Value]) : Sem ε E Value 
   runRuleFree err #[] (Proto.loadGlobal (m := PyM σ .calls true) module name)
 
 @[dyn_sem Py.mkDict] def mkDict (kvs : Array Value) (err : Target E [Value]) : Sem ε E Value :=
-  runRule err #[] (Proto.mkDict (m := PyM σ .calls false) kvs)
+  runRule err #[] (Proto.mkDictHashed (m := PyM σ .calls false) kvs)
 
 end
 

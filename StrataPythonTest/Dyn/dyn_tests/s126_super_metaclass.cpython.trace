@@ -1,0 +1,13 @@
+--- stdout 22
+meta call
+True 3 True
+
+--- outcome
+raised TypeError: super(type, obj): obj must be an instance or subtype of type
+--- globals
+C = <class 'C'>
+D = <class 'D'>
+M = <class 'M'>
+__doc__ = None
+__name__ = '__main__'
+s = <super object>

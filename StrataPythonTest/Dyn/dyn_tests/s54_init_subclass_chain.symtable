@@ -1,0 +1,22 @@
+module top
+  Base: local (assigned, referenced)
+  Leaf: local (assigned)
+  Mid: local (assigned, referenced)
+  class Base
+    __init_subclass__: local (assigned)
+    function __init_subclass__
+      __class__: free (referenced)
+      cls: local (parameter, referenced)
+      kw: local (parameter, referenced)
+      print: global implicit (referenced)
+      super: global implicit (referenced)
+  class Mid
+    __init_subclass__: local (assigned)
+    function __init_subclass__
+      __class__: free (referenced)
+      cls: local (parameter, referenced)
+      kw: local (parameter, referenced)
+      print: global implicit (referenced)
+      super: global implicit (referenced)
+  class Leaf
+qualnames: Base, Base.__init_subclass__, Leaf, Mid, Mid.__init_subclass__

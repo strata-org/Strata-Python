@@ -1,0 +1,17 @@
+module
+  M: local (assigned, referenced)
+  type: global implicit (referenced)
+  N: local (assigned, referenced)
+  C: local (assigned)
+  class M
+    __prepare__: local (assigned)
+    classmethod: global implicit (referenced)
+    function M.__prepare__
+      params: mcls, name, bases, **kw
+      mcls: local (parameter)
+      name: local (parameter, referenced)
+      bases: local (parameter)
+      kw: local (parameter, referenced)
+      print: global implicit (referenced)
+  class N
+  class C

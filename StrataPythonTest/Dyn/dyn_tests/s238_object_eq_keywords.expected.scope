@@ -1,0 +1,3 @@
+module
+  o: local (assigned, referenced)
+  object: global implicit (referenced)

@@ -1,0 +1,13 @@
+module top
+  A: local (assigned, referenced)
+  B: local (assigned, referenced)
+  isinstance: global implicit (referenced)
+  print: global implicit (referenced)
+  class A
+  class B
+    __class__: local (assigned)
+    property: global implicit (referenced)
+    function __class__
+      A: global implicit (referenced)
+      self: local (parameter)
+qualnames: A, B, B.__class__

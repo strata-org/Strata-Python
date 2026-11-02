@@ -1,0 +1,6 @@
+module
+  A: local (assigned, referenced)
+  a: local (assigned, referenced)
+  class A
+    __slots__: local (assigned)
+    z: local (assigned)

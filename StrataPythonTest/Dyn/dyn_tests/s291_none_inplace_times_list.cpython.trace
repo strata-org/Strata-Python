@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: can't multiply sequence by non-int of type 'NoneType'
+--- globals
+__doc__ = None
+__name__ = '__main__'
+x = None

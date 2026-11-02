@@ -1,0 +1,11 @@
+--- stdout 12
+no cls
+made
+
+--- outcome
+ok
+--- globals
+Base = <class 'Base'>
+D = <class 'D'>
+__doc__ = None
+__name__ = '__main__'

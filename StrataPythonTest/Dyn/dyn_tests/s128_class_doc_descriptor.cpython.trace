@@ -1,0 +1,16 @@
+--- stdout 67
+class NewClass instance of NewClass
+A doc for A
+Second
+Plain Plain
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+C = <class 'C'>
+DocDescr = <class 'DocDescr'>
+NewClass = <class 'NewClass'>
+__doc__ = None
+__name__ = '__main__'

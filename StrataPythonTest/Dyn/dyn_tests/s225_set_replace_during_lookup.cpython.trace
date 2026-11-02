@@ -1,0 +1,14 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+X = <class 'X'>
+__doc__ = None
+__name__ = '__main__'
+calls = 2
+nine = 9
+one = 1
+r = False
+s = {1, 9}
+t = {1, 9}

@@ -1,0 +1,9 @@
+module top
+  C: local (assigned, referenced)
+  print: global implicit (referenced)
+  class C
+    property: global implicit (referenced)
+    x: local (assigned)
+    function x
+      self: local (parameter)
+qualnames: C, C.x

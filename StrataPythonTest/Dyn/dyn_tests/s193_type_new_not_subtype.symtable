@@ -1,0 +1,5 @@
+module top
+  int: global implicit (referenced)
+  t: local (assigned)
+  type: global implicit (referenced)
+qualnames: 

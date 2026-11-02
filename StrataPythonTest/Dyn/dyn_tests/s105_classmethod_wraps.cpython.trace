@@ -1,0 +1,22 @@
+--- stdout 38
+1
+f __main__
+1
+name read
+k
+doc read
+3
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+G = <class 'G'>
+K = <class 'K'>
+S = <class 'S'>
+__doc__ = None
+__name__ = '__main__'
+cm = <classmethod object>
+f = <function object>
+s = <staticmethod object>

@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+Change = <class 'Change'>
+__doc__ = None
+__name__ = '__main__'
+r = 9
+xs = [9, 2, 3]

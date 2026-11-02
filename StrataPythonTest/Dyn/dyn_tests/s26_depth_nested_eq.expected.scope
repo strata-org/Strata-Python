@@ -1,0 +1,21 @@
+module
+  nest: local (assigned, referenced)
+  E: local (assigned, referenced)
+  print: global implicit (referenced)
+  function nest
+    params: x, k
+    x: local (parameter, assigned, referenced)
+    k: local (parameter, assigned, referenced)
+  class E
+    __init__: local (assigned)
+    __eq__: local (assigned)
+    function E.__init__
+      params: self, n
+      self: local (parameter, referenced)
+      n: local (parameter, referenced)
+    function E.__eq__
+      params: self, other
+      self: local (parameter, referenced)
+      other: local (parameter)
+      nest: global implicit (referenced)
+      E: global implicit (referenced)

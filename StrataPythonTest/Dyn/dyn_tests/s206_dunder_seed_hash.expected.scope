@@ -1,0 +1,5 @@
+module
+  h: local (assigned, referenced)
+  r: local (assigned, referenced)
+  print: global implicit (referenced)
+  NotImplemented: global implicit (referenced)

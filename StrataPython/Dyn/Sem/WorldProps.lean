@@ -52,7 +52,8 @@ theorem Same.trans {s : Start} {w₁ w₂ w₃ : World σ} (h₁ : Same s w₁ w
 
 /-- Python's world, for the effects. -/
 def spec : Effects.WorldSpec (World σ) Start :=
-  ⟨ImmEq, Same, Same.refl, fun _ _ _ _ => Same.trans⟩
+  { immEq := ImmEq, same := Same, same_refl := Same.refl,
+    same_trans := fun _ _ _ _ => Same.trans, inCall := HasInCall.inCall }
 
 /-- Adding a cell keeps every entry and every cell of the table. -/
 theorem Modules.extends_withCell (m : Modules σ) (module name : String) (obj : ObjId)
@@ -172,6 +173,34 @@ theorem Modules.obj?_withCell (m : Modules σ) (module name : String) (obj : Obj
   · subst hk
     split <;> rename_i h₀ <;> simp [h₀]
   · split <;> simp [Std.TreeMap.getElem?_insert, Std.LawfulEqCmp.compare_eq_iff_eq, hk, Ne.symm hk]
+
+/-- A new module entry keeps every entry and every cell of the table. -/
+theorem Modules.extends_addNew (m : Modules σ) (name : String) (obj : ObjId) :
+    m.Extends (m.addNew name obj) := by
+  intro k e he
+  unfold Modules.addNew
+  split
+  · exact ⟨e, he, rfl, fun _ _ h => h⟩
+  · rename_i h₀
+    by_cases hk : name = k
+    · subst hk
+      simp only [Option.isSome_iff_ne_none, ne_eq, Decidable.not_not] at h₀
+      rw [h₀] at he
+      cases he
+    · exact ⟨e, by simp [Std.TreeMap.getElem?_insert, Std.LawfulEqCmp.compare_eq_iff_eq, hk, he],
+        rfl, fun _ _ h => h⟩
+
+/-- A new module entry adds no cell. -/
+theorem Modules.cell?_addNew (m : Modules σ) (name : String) (obj : ObjId) (k n : String)
+    (r : Ref σ Value) (h : (m.addNew name obj).cell? k n = some r) : m.cell? k n = some r := by
+  unfold Modules.addNew at h
+  split at h
+  · exact h
+  · by_cases hk : name = k
+    · subst hk
+      simp [Modules.cell?] at h
+    · simpa [Modules.cell?, Std.TreeMap.getElem?_insert, Std.LawfulEqCmp.compare_eq_iff_eq, hk]
+        using h
 
 /-- Adding the same cell to two module tables with the same lookups gives tables with the same
 lookups. -/

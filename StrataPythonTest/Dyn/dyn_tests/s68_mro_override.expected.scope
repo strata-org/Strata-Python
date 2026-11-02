@@ -1,0 +1,16 @@
+module
+  M: local (assigned, referenced)
+  type: global implicit (referenced)
+  A: local (assigned, referenced)
+  B: local (assigned, referenced)
+  print: global implicit (referenced)
+  object: global implicit (referenced)
+  class M
+    mro: local (assigned)
+    function M.mro
+      params: cls
+      cls: local (parameter, referenced)
+      object: global implicit (referenced)
+  class A
+    x: local (assigned)
+  class B

@@ -1,0 +1,10 @@
+--- stdout 2
+d
+
+--- outcome
+raised AttributeError: 'int' object attribute '__doc__' is read-only
+--- globals
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+sm = <staticmethod object>
