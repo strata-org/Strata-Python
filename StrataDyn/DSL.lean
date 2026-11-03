@@ -100,7 +100,7 @@ of an ancestor.  Instructions cannot mention instructions.
 
 ## What it generates
 
-In namespace `E`, every reference is generic over `{e} [env ⊑ e]`, so it holds in `E.env`
+In namespace `E`, every reference is generic over `{e} [env ≼ e]`, so it holds in `E.env`
 and in every refinement of it:
 
 * `env : Env Unit`, carrying the command's docstring: `P.env` (or the empty environment) and
@@ -114,7 +114,7 @@ and in every refinement of it:
   `mem_nameSet : n ∈ env ↔ n ∈ nameSet`.  Each stage's freshness check adds that stage's
   names to the set before it, from the parent's `nameSet`, so the kernel adds each name once,
   in the stage that declares it.
-* `toP`, the instance `P.env ⊑ e` (`Demo.toBase`).
+* `toP`, the instance `P.env ≼ e` (`Demo.toBase`).
 * For a `type` or `data` `T` with `n` parameters: `T.name`, its environment name; `T.ref`, a
   `TypeRef e n`; and the `@[simp]` theorems `T.name_ref` and `T.decl_ref`, its name and
   declaration.  What its handle applies, `Internal.T.ty`, a `TypeExpr e s` taking `n`
@@ -216,11 +216,11 @@ internal error at `environment`.
 
 ## Extending
 
-`extends P` builds on `P.env`, which must be declared with `environment`.  `t ⊑ s`
+`extends P` builds on `P.env`, which must be declared with `environment`.  `t ≼ s`
 (`RefinedBy`, scoped in `Strata.Dyn`) reads "`s` refines `t`" and carries a proof of
 `t ≤ s`.  A child's stages extend its parent's environment, so the child proves
 `P.env ≤ E.env` by `Env.le_of_subset`.  Each environment generates one upward rule, `toP`, so
-under `[E.env ⊑ e]` every ancestor's references resolve: `Base.refNew.ref : InsnRef e
+under `[E.env ≼ e]` every ancestor's references resolve: `Base.refNew.ref : InsnRef e
 Base.refNew.sig` in any refinement of `Demo`.  An environment has one parent.
 
 A child reads its parent from the record every `environment` command leaves, which crosses

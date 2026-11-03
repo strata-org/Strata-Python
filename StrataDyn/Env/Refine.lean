@@ -41,7 +41,7 @@ Some key concepts include:
 * `LeBy.of_subset`, `le_of_subset`: an extension refines what it extends.
 * `LeBy.annOf?`: how `LeBy R` relates the annotation a name is declared with (`Env.annOf?`).
 * `ofLE`: carry a checked form or a reference along a refinement.
-* `RefinedBy`, `t ⊑ s`: the order as a class, for instance search.
+* `RefinedBy`, `t ≼ s`: the order as a class, for instance search.
 -/
 
 namespace Strata.Dyn
@@ -311,23 +311,23 @@ end
 end Env
 
 /--
-`t ⊑ s`: `s` refines `t`, as a class.
+`t ≼ s`: `s` refines `t`, as a class.
 
-Each environment states its parent as an instance, so instance search finds `t ⊑ s` for every
-ancestor `t` of `s`.  Code written under `[t ⊑ e]` uses `t`'s references in any refinement `e`.
+Each environment states its parent as an instance, so instance search finds `t ≼ s` for every
+ancestor `t` of `s`.  Code written under `[t ≼ e]` uses `t`'s references in any refinement `e`.
 -/
 public class RefinedBy (t s : Env α) : Prop where
   /-- `s` refines `t`. -/
   le : t ≤ s
 
-@[inherit_doc] scoped infix:50 " ⊑ " => RefinedBy
+@[inherit_doc] scoped infix:50 " ≼ " => RefinedBy
 
-/-- `s ⊒ t`: `s` refines `t`, the same as `t ⊑ s`.  Input only; terms print with `⊑`. -/
-scoped syntax:50 term:51 " ⊒ " term:51 : term
-macro_rules | `($s ⊒ $t) => `(RefinedBy $t $s)
+/-- `s ≽ t`: `s` refines `t`, the same as `t ≼ s`.  Input only; terms print with `≼`. -/
+scoped syntax:50 term:51 " ≽ " term:51 : term
+macro_rules | `($s ≽ $t) => `(RefinedBy $t $s)
 
 /-- Every environment refines itself. -/
-public instance (priority := high) RefinedBy.refl {t : Env α} : t ⊑ t := ⟨Env.Le.refl _⟩
+public instance (priority := high) RefinedBy.refl {t : Env α} : t ≼ t := ⟨Env.Le.refl _⟩
 
 /-! ## Transport
 

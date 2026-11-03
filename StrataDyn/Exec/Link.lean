@@ -345,7 +345,7 @@ def missingTerm (op : Name) : LTerm M :=
 end
 
 section
-variable {M : Model} {env : Env Unit} [base ⊑ env] {α : Type}
+variable {M : Model} {env : Env Unit} [base ≼ env] {α : Type}
 
 /-- The ids a target passes. -/
 def siteIds (succs : Array Target.Raw) : List Nat := succs.toList.flatMap (·.args.toList.map (·.id))
@@ -602,7 +602,7 @@ def sigOf (M : Model) {env : Env Unit} {α : Type} (f : Func env α) : Except Fa
 
 /-- Link `m` against the model `M` at the machine's token, reporting every missing rule at once,
 in order of first use. -/
-def link (M : Model) {env : Env Unit} [base ⊑ env] {α : Type} (m : Module env α) :
+def link (M : Model) {env : Env Unit} [base ≼ env] {α : Type} (m : Module env α) :
     Except Fault (LModule M.at) := do
   let m := m.raw
   let some funcs := NameMap.ofArray? (m.funcs.toList.zipIdx.map fun (f, i) => (f.name, i)).toArray |

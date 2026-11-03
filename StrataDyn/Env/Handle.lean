@@ -24,20 +24,20 @@ name.  A type or abbreviation without parameters is defined as a type expression
 `TypeCon []` is `T.con`:
 
 ```lean
-Base.Int : TypeExpr e s                              -- under [Base.env ⊑ e]
+Base.Int : TypeExpr e s                              -- under [Base.env ≼ e]
 Base.Int.con : TypeCon []                            -- its type constructor
 Base.Except : TypeCon [.type, .type]
 Base.Fn : TypeCon [.list, .type]                     -- a list parameter takes a list
-(Base.Except Base.Int Base.Bool : TypeExpr e)        -- applied, under [Base.env ⊑ e]
+(Base.Except Base.Int Base.Bool : TypeExpr e)        -- applied, under [Base.env ≼ e]
 (Base.Fn [Base.Int, Base.Ref Base.Int] Base.Bool : TypeExpr e)
 (Base.Fn (TypeList.var 0 h) Base.Bool : TypeExpr e #[.list])   -- a list variable
 ```
 
 A type expression that names a declared type `T` exists in `e` only if `e` refines the
-environment that declares `T`: each use of `T` requires `[T.env ⊑ e]`, which instance search
+environment that declares `T`: each use of `T` requires `[T.env ≼ e]`, which instance search
 proves from the `extends` chain.  So in a child environment a type can name both the child's
 types and its parent's, and a child's type in its parent fails with
-`failed to synthesize Hd.env ⊑ Base.env`.
+`failed to synthesize Hd.env ≼ Base.env`.
 
 Lean takes `e` from the expected type: the builder's environment for an operand or a result,
 the declared type of a definition, or, for an argument, the application it is passed to.
@@ -47,7 +47,7 @@ A list parameter takes a `List (TypeExpr e s)` or a `TypeList e s`, and the argu
 chooses which; `TypeCon.ListArg` explains how, and what it costs.
 
 Generic code takes type expressions:
-`{e} [Base.env ⊑ e] (t : TypeExpr e s) : TypeExpr e s := Base.Ref t`.
+`{e} [Base.env ≼ e] (t : TypeExpr e s) : TypeExpr e s := Base.Ref t`.
 
 An applied type constructor is its type's `Internal.T.ty` by `rfl`, a list of type expressions
 as the literal of its types, `TypeList.lit #[.ty t₁, …]`, and a `TypeList` as itself.
@@ -72,7 +72,7 @@ namespace Strata.Dyn
 @[expose] public section
 
 /-- Refinement composes. -/
-theorem RefinedBy.trans {a b c : Env Unit} (h₁ : a ⊑ b) (h₂ : b ⊑ c) : a ⊑ c :=
+theorem RefinedBy.trans {a b c : Env Unit} (h₁ : a ≼ b) (h₂ : b ≼ c) : a ≼ c :=
   ⟨Env.Le.trans h₁.le h₂.le⟩
 
 /-- The form of a list parameter's argument.  A handle's list parameter accepts a plain
@@ -157,20 +157,20 @@ structure TypeCon (ks : List Kind) where
   the most refined environment that declares a name of its body. -/
   env : Env Unit
   /-- It, applied, in every refinement of `env`. -/
-  apply : {e : Env Unit} → [env ⊑ e] → {s : Array Kind} → TypeCon.Fn e s ks
+  apply : {e : Env Unit} → [env ≼ e] → {s : Array Kind} → TypeCon.Fn e s ks
 
 instance {ks : List Kind} :
-    CoeFun (TypeCon ks) (fun T => {e : Env Unit} → [T.env ⊑ e] → {s : Array Kind} →
+    CoeFun (TypeCon ks) (fun T => {e : Env Unit} → [T.env ≼ e] → {s : Array Kind} →
       TypeCon.Fn e s ks) :=
   ⟨TypeCon.apply⟩
 attribute [coe] TypeCon.apply
 
 set_option synthInstance.checkSynthOrder false in
-instance {T : TypeCon []} {e : Env Unit} [T.env ⊑ e] {s : Array Kind} :
+instance {T : TypeCon []} {e : Env Unit} [T.env ≼ e] {s : Array Kind} :
     CoeDep (TypeCon []) T (TypeExpr e s) := ⟨T.apply⟩
 
 set_option synthInstance.checkSynthOrder false in
-instance {T : TypeCon []} {e : Env Unit} [T.env ⊑ e] {s : Array Kind} :
+instance {T : TypeCon []} {e : Env Unit} [T.env ≼ e] {s : Array Kind} :
     CoeDep (TypeCon []) T (TypeArg e s) := ⟨.ty T.apply⟩
 
 /-- Type expressions, as a list. -/
@@ -204,7 +204,7 @@ def applyFn? {E : Env Unit} {s : Array Kind} :
 
 /-- `T` applied to `args` in `E`, if they have its kinds: its type expression, built from
 data, the one `T` applied to them directly gives. -/
-def applyArgs? {ks : List Kind} (T : TypeCon ks) (E : Env Unit) [T.env ⊑ E] {s : Array Kind}
+def applyArgs? {ks : List Kind} (T : TypeCon ks) (E : Env Unit) [T.env ≼ E] {s : Array Kind}
     (args : List (Arg E s)) : Option (TypeExpr E s) :=
   applyFn? (@T.apply E _ s) args
 

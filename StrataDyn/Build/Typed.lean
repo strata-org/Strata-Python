@@ -293,37 +293,37 @@ def param (stem : Name) (t : TypeExpr env) : m (ValDecl env × Val env t) :=
 
 /-- Close the open block by leaving the enclosing body with `v`.  Lean does not check `t`
 against the body's result type; a region's body has its exit as a `Target [r]`, which it does. -/
-def ret [base ⊑ env] {t : TypeExpr env} (v : Val env t) (info : Option α := none) : m Unit :=
+def ret [base ≼ env] {t : TypeExpr env} (v : Val env t) (info : Option α := none) : m Unit :=
   liftBuild (Build.ret v.id info)
 
 /-- The integer constant `i`. -/
-def int [base ⊑ env] (stem : Name) (i : Int) (info : Option α := none) :
+def int [base ≼ env] (stem : Name) (i : Int) (info : Option α := none) :
     m (Val env Base.Int) :=
   liftBuild (Val.mk <$> emitConst stem (.int i) info)
 
 /-- The Boolean constant `b`. -/
-def bool [base ⊑ env] (stem : Name) (b : Bool) (info : Option α := none) :
+def bool [base ≼ env] (stem : Name) (b : Bool) (info : Option α := none) :
     m (Val env Base.Bool) :=
   liftBuild (Val.mk <$> emitConst stem (.bool b) info)
 
 /-- The string constant `s`. -/
-def str [base ⊑ env] (stem : Name) (s : String) (info : Option α := none) :
+def str [base ≼ env] (stem : Name) (s : String) (info : Option α := none) :
     m (Val env Base.String) :=
   liftBuild (Val.mk <$> emitConst stem (.str s) info)
 
 /-- The float constant `f`. -/
-def float [base ⊑ env] (stem : Name) (f : Float) (info : Option α := none) :
+def float [base ≼ env] (stem : Name) (f : Float) (info : Option α := none) :
     m (Val env Base.Float64) :=
   liftBuild (Val.mk <$> emitConst stem (.float f) info)
 
 /-- The unit constant. -/
-def unit [base ⊑ env] (stem : Name) (info : Option α := none) :
+def unit [base ≼ env] (stem : Name) (info : Option α := none) :
     m (Val env Base.Unit) :=
   liftBuild (Val.mk <$> emitConst stem .unit info)
 
 /-- A code pointer to `target`, at the type the expected type gives, `target`'s code type
 `Base.Fn as r`.  Lean does not check it against `target`'s; `Build.run` does. -/
-def code [base ⊑ env] (target : Name) {t : TypeExpr env} (info : Option α := none) :
+def code [base ≼ env] (target : Name) {t : TypeExpr env} (info : Option α := none) :
     m (Val env t) :=
   liftBuild (Val.mk <$> emitFunc target t info)
 

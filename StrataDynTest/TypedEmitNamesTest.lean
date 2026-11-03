@@ -64,7 +64,7 @@ suffix. -/
 
 /--
 info: Strata.Dyn.TypedEmitNamesTest.Tn.clash {env : Env Unit} {α : Type} {m : Type → Type} [Monad m] [MonadBuild env α m]
-  [Tn.env ⊑ env] {d0 : TypeExpr env} (d1 bodyBase : Val env d0)
+  [Tn.env ≼ env] {d0 : TypeExpr env} (d1 bodyBase : Val env d0)
   (body : Val env d0 → Val env Base.Int → Target env [d0] → m Unit) (result : Option Name := none)
   (info : Option α := none) (bodyBase_ : String := "body") : m (Val env d0)
 -/
@@ -106,7 +106,7 @@ meaning. -/
 
 /--
 info: Strata.Dyn.TypedEmitNamesTest.Tn.sub {env : Env Unit} {α : Type} {m : Type → Type} [Monad m] [MonadBuild env α m]
-  [Tn.env ⊑ env] {m__ m_ : TypeExpr env} (result__ result_ : Val env m__) (y : Val env m_)
+  [Tn.env ≼ env] {m__ m_ : TypeExpr env} (result__ result_ : Val env m__) (y : Val env m_)
   (result : Option Name := none) (info : Option α := none) : m (Val env m__)
 -/
 #guard_msgs in #check Tn.sub

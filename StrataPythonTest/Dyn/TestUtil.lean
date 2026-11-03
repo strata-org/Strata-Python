@@ -58,7 +58,7 @@ def hasDottedSegment : Name → Bool
   | .str p s => s.contains '.' || hasDottedSegment p
 
 /-- The names of `m`, of functions, labels and values, with a `.` inside a string segment. -/
-def dottedNames {env : Env Unit} [base ⊑ env] {α : Type} (m : Module.Raw env α) : Array Name :=
+def dottedNames {env : Env Unit} [base ≼ env] {α : Type} (m : Module.Raw env α) : Array Name :=
   m.funcs.flatMap fun f =>
     (#[f.name] ++ (f.allBlocks.map (·.label.name)).toArray ++ f.names).filter hasDottedSegment
 

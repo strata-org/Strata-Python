@@ -38,7 +38,7 @@ open Strata.Dyn.Build (freshVal startFreshBlock emitApply finishBlock build Fail
 open Strata.Dyn.DSLTest
 
 /-- What `build` gives in `env`: a checked function, or the `FailedFunc`. -/
-private abbrev Built (env : Env Unit) [base ⊑ env] :=
+private abbrev Built (env : Env Unit) [base ≼ env] :=
   Except (FailedFunc env Unit Unit) {fn : Func env Unit // fn.WF}
 
 private def intT : TypeExpr Fns.env := Base.Int

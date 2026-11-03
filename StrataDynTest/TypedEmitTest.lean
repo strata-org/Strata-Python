@@ -94,44 +94,44 @@ def n (s : String) : Name := .str .base s
 /-! ## Signatures
 
 A type parameter is an implicit type expression of `env`, and a successor takes a `Target` of its
-payload.  Nothing else is bound: the emitter's instance `[Te.env ⊑ env]` defines every type its
+payload.  Nothing else is bound: the emitter's instance `[Te.env ≼ env]` defines every type its
 signature names. -/
 
 /--
 info: Strata.Dyn.TypedEmitTest.Te.pick {env : Env Unit} {α : Type} {m : Type → Type} [Monad m] [MonadBuild env α m]
-  [Te.env ⊑ env] {a : TypeExpr env} (cond : Val env Base.Bool) (x y : Val env a) (result : Option Name := none)
+  [Te.env ≼ env] {a : TypeExpr env} (cond : Val env Base.Bool) (x y : Val env a) (result : Option Name := none)
   (info : Option α := none) : m (Val env a)
 -/
 #guard_msgs in #check Te.pick
 /--
 info: Strata.Dyn.TypedEmitTest.Te.invoke {env : Env Unit} {α : Type} {m : Type → Type} [Monad m] [MonadBuild env α m]
-  [Te.env ⊑ env] {as : List (TypeExpr env)} {r : TypeExpr env} (f : Val env (↑Base.Fn as r)) (args : Vals env as)
+  [Te.env ≼ env] {as : List (TypeExpr env)} {r : TypeExpr env} (f : Val env (↑Base.Fn as r)) (args : Vals env as)
   (err : Target env [Te.Value]) (result : Option Name := none) (info : Option α := none) : m (Val env r)
 -/
 #guard_msgs in #check Te.invoke
 /--
 info: Strata.Dyn.TypedEmitTest.Te.forEach {env : Env Unit} {α : Type} {m : Type → Type} [Monad m] [MonadBuild env α m]
-  [Te.env ⊑ env] (n : Val env Base.Int)
+  [Te.env ≼ env] (n : Val env Base.Int)
   (body : Val env Base.Int → Target env [↑Base.Except Te.Value Base.Unit] → m Unit) (err : Target env [Te.Value])
   (result : Option Name := none) (info : Option α := none) (bodyBase : String := "body") : m (Val env Base.Unit)
 -/
 #guard_msgs in #check Te.forEach
 /--
 info: Strata.Dyn.TypedEmitTest.Te.unpack {env : Env Unit} {α : Type} {m : Type → Type} [Monad m] [MonadBuild env α m]
-  [Te.env ⊑ env] {as : List (TypeExpr env)} (f : Val env (↑Base.Fn as Base.Int)) (k : Target env as)
+  [Te.env ≼ env] {as : List (TypeExpr env)} (f : Val env (↑Base.Fn as Base.Int)) (k : Target env as)
   (info : Option α := none) : m Unit
 -/
 #guard_msgs in #check Te.unpack
 -- A type only the result has is computed from the type parameters.
 /--
-info: Strata.Dyn.Base.refNew {env : Env Unit} {α : Type} {m : Type → Type} [Monad m] [MonadBuild env α m] [Base.env ⊑ env]
+info: Strata.Dyn.Base.refNew {env : Env Unit} {α : Type} {m : Type → Type} [Monad m] [MonadBuild env α m] [Base.env ≼ env]
   {a : TypeExpr env} (value : Val env a) (result : Option Name := none) (info : Option α := none) :
   m (Val env (↑Base.Ref a))
 -/
 #guard_msgs in #check Base.refNew
 /--
 info: Strata.Dyn.TypedEmitTest.Te.box {env : Env Unit} {α : Type} {m : Type → Type} [Monad m] [MonadBuild env α m]
-  [Te.env ⊑ env] {a : TypeExpr env} (x : Val env a) (result : Option Name := none) (info : Option α := none) :
+  [Te.env ≼ env] {a : TypeExpr env} (x : Val env a) (result : Option Name := none) (info : Option α := none) :
   m (Val env (↑Base.Ref (↑Base.Sequence a)))
 -/
 #guard_msgs in #check Te.box
@@ -143,14 +143,14 @@ built and taken apart.  No type argument is written: each is inferred from an op
 successor, or, for `Except.ok`'s error type, the expected result. -/
 
 /-- What `build` gives in the environment `e`. -/
-abbrev BuiltIn (e : Env Unit) [base ⊑ e] :=
+abbrev BuiltIn (e : Env Unit) [base ≼ e] :=
   Except (Build.FailedFunc e Unit Unit) {fn : Func e Unit // fn.WF}
 
 /-- What `build` gives in `W`. -/
 abbrev Built := BuiltIn W
 
 /-- The module `m` of `f`, printed, or why it was not built. -/
-private def showMod {e : Env Unit} [base ⊑ e] (f : BuiltIn e) : String :=
+private def showMod {e : Env Unit} [base ≼ e] (f : BuiltIn e) : String :=
   match f with
   | .error e => toString e
   | .ok f => match Module.ofChecked (.str .base "m") #[f] () with
@@ -302,13 +302,13 @@ result type, fixes the parameter. -/
 
 /--
 info: Strata.Dyn.TypedEmitTest.Te.withRef {env : Env Unit} {α : Type} {m : Type → Type} [Monad m] [MonadBuild env α m]
-  [Te.env ⊑ env] {a : TypeExpr env} (init : Val env a) (body : Val env (↑Base.Ref a) → Target env [Base.Unit] → m Unit)
+  [Te.env ≼ env] {a : TypeExpr env} (init : Val env a) (body : Val env (↑Base.Ref a) → Target env [Base.Unit] → m Unit)
   (result : Option Name := none) (info : Option α := none) (bodyBase : String := "body") : m (Val env Base.Unit)
 -/
 #guard_msgs in #check Te.withRef
 /--
 info: Strata.Dyn.TypedEmitTest.Te.attempt {env : Env Unit} {α : Type} {m : Type → Type} [Monad m] [MonadBuild env α m]
-  [Te.env ⊑ env] {a : TypeExpr env} (body : Target env [↑Base.Except Te.Value a] → m Unit)
+  [Te.env ≼ env] {a : TypeExpr env} (body : Target env [↑Base.Except Te.Value a] → m Unit)
   (result : Option Name := none) (info : Option α := none) (bodyBase : String := "body") : m (Val env a)
 -/
 #guard_msgs in #check Te.attempt
@@ -369,7 +369,7 @@ has, and `case`'s `cons` successor takes both of `cons`'s fields. -/
 
 /--
 info: Strata.Dyn.TypedEmitTest.Te.L.case {env : Env Unit} {α : Type} {m : Type → Type} [Monad m] [MonadBuild env α m]
-  [Te.env ⊑ env] {a : TypeExpr env} (scrutinee : Val env (↑Te.L a)) (nil : Target env [])
+  [Te.env ≼ env] {a : TypeExpr env} (scrutinee : Val env (↑Te.L a)) (nil : Target env [])
   (cons : Target env [a, ↑Te.L a]) (info : Option α := none) : m Unit
 -/
 #guard_msgs in #check Te.L.case
@@ -598,7 +598,7 @@ example : ReaderT Nat (StateT Nat (ExceptT String (BuildM W Unit))) (Val W Base.
   let% c ← Base.refNew vInt
   Base.refGet c
 -- Generic in the environment.
-example {e : Env Unit} [W ⊑ e] (c : Val e (Base.Ref Te.Value)) : BuildM e Unit (Val e Te.Value) :=
+example {e : Env Unit} [W ≼ e] (c : Val e (Base.Ref Te.Value)) : BuildM e Unit (Val e Te.Value) :=
   Base.refGet c
 
 end
@@ -724,7 +724,7 @@ example : BuildM W Unit (Val W Base.Int) := do
 -- child's builder is not the parent's.
 /--
 error: failed to synthesize instance of type class
-  TeKid.env ⊑ W
+  TeKid.env ≼ W
 
 Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
 -/

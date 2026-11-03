@@ -444,7 +444,7 @@ partial def rawData (members : Array Name) : Ty → Term
   | .list es =>
     Unhygienic.run `(Strata.Dyn.DataTy.toRaw_list_of $(dataChain (es.map (rawData members))))
 
-/-- A proof of `stage t ≤ e`, under `[h : env ⊑ e]`. -/
+/-- A proof of `stage t ≤ e`, under `[h : env ≼ e]`. -/
 def liftTo (t : Nat) : Term :=
   if t == cx.m then Unhygienic.run `(Strata.Dyn.RefinedBy.le (self := $(cx.hId)))
   else Unhygienic.run `(Strata.Dyn.Env.Le.trans
@@ -745,7 +745,7 @@ environment E where
   abbrev withInt ((cs : list) r) := Fn [*cs, Int] r
 
 -- A type without parameters: its type expression, and its declaration as a handle.
-def E.Int {e} [h : E.env ⊑ e] {s} : TypeExpr e s := @E.Internal.Int.ty e h s
+def E.Int {e} [h : E.env ≼ e] {s} : TypeExpr e s := @E.Internal.Int.ty e h s
 def E.Int.con : TypeCon [] := ⟨Int's declaration, rfl, E.env, fun {e} [h] {s} =>
   @E.Internal.Int.ty e h s⟩
 -- A type with parameters: its declaration, its environment, and its `Internal.T.ty`.  A list
@@ -755,7 +755,7 @@ def E.Fn : TypeCon [.list, .type] := ⟨…, E.env, fun {e} [h] {s} {a0} x0 x1 =
   @E.Internal.Fn.ty e h s (a0.toTypeList x0) x1⟩
 -- An abbreviation: its body's handles applied, in the most refined environment that declares
 -- a name of the body.  A list parameter spliced among other elements is spliced by `splice`.
-def E.IntRef {e} [E.env ⊑ e] {s} : TypeExpr e s := (E.Ref E.Int : TypeExpr e s)
+def E.IntRef {e} [E.env ≼ e] {s} : TypeExpr e s := (E.Ref E.Int : TypeExpr e s)
 def E.IntRef.con : TypeCon [] := ⟨…, E.env, fun {e} [_] {s} => (E.Ref E.Int : TypeExpr e s)⟩
 def E.RefRef : TypeCon [.type] := ⟨…, E.env, fun {e} [h] {s} x0 =>
   (E.Ref (E.Ref x0) : TypeExpr e s)⟩
@@ -840,7 +840,7 @@ where
     | some i, some j => some (min i j)
     | r, none | none, r => r
 
-/-- A handle: `⟨decl, rfl, env, fun {e} [h : env ⊑ e] {s} xs => body⟩`, at kinds `ks`, where a
+/-- A handle: `⟨decl, rfl, env, fun {e} [h : env ≼ e] {s} xs => body⟩`, at kinds `ks`, where a
 list parameter `x{i}` is preceded by `{a{i} : TypeCon.ListArg}`. -/
 def handleVal (decl env : Term) (xs : Array (Ident × Option Ident)) (body : Term) (named : Bool) :
     CommandElabM Term := do
@@ -855,7 +855,7 @@ def handleVal (decl env : Term) (xs : Array (Ident × Option Ident)) (body : Ter
         [Strata.Dyn.RefinedBy $env e] {s : _root_.Array Strata.Dyn.Kind} => $fn⟩)
 
 /-- A handle without parameters: `T`, its type expression in every refinement of `env`,
-`fun {e} [h : env ⊑ e] {s} => body`, documented by `doc`, and `T.con : TypeCon []`, its
+`fun {e} [h : env ≼ e] {s} => body`, documented by `doc`, and `T.con : TypeCon []`, its
 declaration. -/
 def nullaryCmds (cx : EmitCtx) (id : Name) (what : String)
     (doc : TSyntax ``Lean.Parser.Command.docComment) (decl env body : Term) (named : Bool) :

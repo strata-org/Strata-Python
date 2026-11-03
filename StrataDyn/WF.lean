@@ -221,11 +221,11 @@ abbrev RegionType (env : Env Unit) := Array (TypeExpr env) × TypeExpr env
 /-- A constant's rule, at the type `t` of the value it defines: a literal has the type the
 base gives it, and a function reference is a code pointer, of a `base.Fn` type.  Which `Fn`
 its target allows is the module's rule, `Module.Raw.WF`. -/
-@[expose] def Const.WF {env : Env Unit} [base ⊑ env] (t : TypeExpr env) : Const → Prop
+@[expose] def Const.WF {env : Env Unit} [base ≼ env] (t : TypeExpr env) : Const → Prop
   | .func _ => t.toRaw.isAppOf Base.Fn.name = true
   | c => c.typeOf? = some t
 
-instance {env : Env Unit} [base ⊑ env] (t : TypeExpr env) : (c : Const) → Decidable (c.WF t)
+instance {env : Env Unit} [base ≼ env] (t : TypeExpr env) : (c : Const) → Decidable (c.WF t)
   | .func _ => inferInstanceAs (Decidable (_ = true))
   | .unit | .bool _ | .int _ | .float _ | .str _ => inferInstanceAs (Decidable (_ = some t))
 
@@ -240,7 +240,7 @@ mutual
   `InsnSig.callWF`, and supplies one region per declared region, each well formed at the
   declared types.  A constructor is applied as any operation is: its signature is the one
   `Env.addData` derived from its datatype. -/
-@[expose] def Instruction.WF {env : Env Unit} {α : Type} [base ⊑ env]
+@[expose] def Instruction.WF {env : Env Unit} {α : Type} [base ≼ env]
     (ctx : Ctx env) (bs : BlockSigs env) : Instruction env α → Prop
   | .const _ d c => c.WF d.type
   | @Instruction.apply _ _ _ d isig _ typeArgs args succs ⟨regions⟩ =>
@@ -249,7 +249,7 @@ mutual
       Region.WFList ctx (isig.regionTypes typeArgs) regions
 
 /-- `Instruction.WF` of each. -/
-@[expose] def Instruction.WFList {env : Env Unit} {α : Type} [base ⊑ env]
+@[expose] def Instruction.WFList {env : Env Unit} {α : Type} [base ≼ env]
     (ctx : Ctx env) (bs : BlockSigs env) :
     List (Instruction env α) → Prop
   | [] => True
@@ -258,7 +258,7 @@ mutual
 /-- A terminator's rule: a terminal operation, one with no return type, satisfying
 `InsnSig.callWF`, that supplies its regions as `Instruction.apply` does.  Any successor may be
 taken and any region run. -/
-@[expose] def Terminator.WF {env : Env Unit} {α : Type} [base ⊑ env]
+@[expose] def Terminator.WF {env : Env Unit} {α : Type} [base ≼ env]
     (ctx : Ctx env) (bs : BlockSigs env) : Terminator env α → Prop
   | @Terminator.apply _ _ _ isig _ typeArgs args succs ⟨regions⟩ =>
     isig.returnType = none ∧ isig.callWF ctx bs typeArgs args succs ∧
@@ -266,13 +266,13 @@ taken and any region run. -/
 
 /-- A block is well formed when its instructions and its terminator are, against the
 blocks `bs` of its region.  `Func.ctx?` checks its parameters. -/
-@[expose] def Block.WF {env : Env Unit} {α : Type} [base ⊑ env]
+@[expose] def Block.WF {env : Env Unit} {α : Type} [base ≼ env]
     (ctx : Ctx env) (bs : BlockSigs env) : Block env α → Prop
   | ⟨_, _, ⟨instrs⟩, term, _⟩ =>
     Instruction.WFList ctx bs instrs ∧ Terminator.WF ctx bs term
 
 /-- `Block.WF` of each. -/
-@[expose] def Block.WFList {env : Env Unit} {α : Type} [base ⊑ env]
+@[expose] def Block.WFList {env : Env Unit} {α : Type} [base ≼ env]
     (ctx : Ctx env) (bs : BlockSigs env) : List (Block env α) → Prop
   | [] => True
   | b :: l => Block.WF ctx bs b ∧ Block.WFList ctx bs l
@@ -281,13 +281,13 @@ blocks `bs` of its region.  `Func.ctx?` checks its parameters. -/
 every block is well formed against the region's own blocks and its exit, taking `sig`'s
 result.  So control leaves the region only through its exit, with a value of the declared
 type. -/
-@[expose] def Region.WF {env : Env Unit} {α : Type} [base ⊑ env]
+@[expose] def Region.WF {env : Env Unit} {α : Type} [base ≼ env]
     (ctx : Ctx env) (sig : RegionType env) : Region env α → Prop
   | ⟨⟨blocks⟩⟩ =>
     Region.entryWF sig.1 blocks ∧ Block.WFList ctx (BlockSigs.of blocks sig.2) blocks
 
 /-- One region per signature, each well formed at it: the same number, in the same order. -/
-@[expose] def Region.WFList {env : Env Unit} {α : Type} [base ⊑ env]
+@[expose] def Region.WFList {env : Env Unit} {α : Type} [base ≼ env]
     (ctx : Ctx env) :
     List (RegionType env) → List (Region env α) → Prop
   | [], [] => True
@@ -298,7 +298,7 @@ end
 
 section Decide
 
-variable {env : Env Unit} {α : Type} [base ⊑ env] (ctx : Ctx env)
+variable {env : Env Unit} {α : Type} [base ≼ env] (ctx : Ctx env)
 
 mutual
 
@@ -521,13 +521,13 @@ theorem ValDecl.idBound_le_iff {env : Env Unit} (ds : List (ValDecl env)) (n : N
 top-level block is well formed, in the context those definitions give, against the top-level
 blocks and the exit.  No transfer names an entry block, the function's or a region's:
 `BlockSigs.of` leaves entries out. -/
-@[expose, reducible] def Func.BodyWF {env : Env Unit} {α : Type} [base ⊑ env]
+@[expose, reducible] def Func.BodyWF {env : Env Unit} {α : Type} [base ≼ env]
     (fn : Func env α) : Prop :=
   OptHolds fn.ctx? fun ctx => ∀ b ∈ fn.blocks, Block.WF ctx fn.blockSigs b
 
 /-- A well-formed function.  It depends on the function alone: that the functions it
 references exist is its module's rule, `Module.Raw.WF`. -/
-structure Func.WF {env : Env Unit} {α : Type} [base ⊑ env] (fn : Func env α) : Prop where
+structure Func.WF {env : Env Unit} {α : Type} [base ≼ env] (fn : Func env α) : Prop where
   /-- It has an entry block. -/
   entry : 0 < fn.blocks.size
   /-- No label occurs twice, counting every region, and none is `Label.exit`. -/
@@ -546,7 +546,7 @@ structure Func.WF {env : Env Unit} {α : Type} [base ⊑ env] (fn : Func env α)
 
 /-- Decide `Func.WF`, its last two fields together, as `Func.checkDom` decides them
 (`StrataDyn/DomDecide.lean`). -/
-instance {env : Env Unit} {α : Type} [base ⊑ env] (fn : Func env α) : Decidable fn.WF :=
+instance {env : Env Unit} {α : Type} [base ≼ env] (fn : Func env α) : Decidable fn.WF :=
   have := Name.decNodup fn.names
   decidable_of_iff (0 < fn.blocks.size ∧ Label.Distinct (Label.exit :: fn.labels) ∧
       fn.names.toList.Nodup ∧ ValDecl.idBound fn.defs ≤ fn.names.size ∧ Func.BodyWF fn ∧
@@ -556,19 +556,19 @@ instance {env : Env Unit} {α : Type} [base ⊑ env] (fn : Func env α) : Decida
 
 /-- `fn` annotated with `info`, still well formed: well-formedness does not mention
 annotations. -/
-def Func.setInfo {env : Env Unit} {α : Type} [base ⊑ env] (fn : {fn : Func env α // fn.WF})
+def Func.setInfo {env : Env Unit} {α : Type} [base ≼ env] (fn : {fn : Func env α // fn.WF})
     (info : α) : {fn : Func env α // fn.WF} :=
   ⟨{ fn.val with info }, by
     obtain ⟨a, b, c, d, e, f, g⟩ := fn.property; exact ⟨a, b, c, d, e, f, g⟩⟩
 
 /-- Every value a well-formed function defines has a name. -/
-theorem Func.WF.mem_names {env : Env Unit} {α : Type} [base ⊑ env] {fn : Func env α}
+theorem Func.WF.mem_names {env : Env Unit} {α : Type} [base ≼ env] {fn : Func env α}
     (h : fn.WF) {d : ValDecl env} (hd : d ∈ fn.defs) : d.id.id < fn.names.size :=
   (ValDecl.idBound_le_iff _ _).mp h.valuesNamed d hd
 
 /-- A well-formed function is dominance-correct: every use is defined at a point that every
 path from its body's entry to the use passes through. -/
-theorem Func.WF.domCorrect {env : Env Unit} {α : Type} [base ⊑ env] {fn : Func env α}
+theorem Func.WF.domCorrect {env : Env Unit} {α : Type} [base ≼ env] {fn : Func env α}
     (h : fn.WF) : fn.DomCorrect :=
   h.scoping.domCorrect
 
@@ -734,23 +734,23 @@ instance {env : Env Unit} (u : FuncUse env) (ct : TypeExpr env) : Decidable (u.F
     | _ => refs
 
 /-- The names of a module's functions, in order. -/
-@[expose] def Module.Raw.funcNames {env : Env Unit} [base ⊑ env] {α : Type}
+@[expose] def Module.Raw.funcNames {env : Env Unit} [base ≼ env] {α : Type}
     (m : Module.Raw env α) : Array Name :=
   m.funcs.mapK (·.name)
 
 /-- Each function's name with its code type, in order. -/
-@[expose] def Module.Raw.funcSigs {env : Env Unit} [base ⊑ env] {α : Type}
+@[expose] def Module.Raw.funcSigs {env : Env Unit} [base ≼ env] {α : Type}
     (m : Module.Raw env α) : Array (Name × TypeExpr env) :=
   m.funcs.mapK fun f => (f.name, f.codeType)
 
 /-- Each function's code type, by name, which function references are checked against: empty
 if two functions share a name. -/
-@[expose] def Module.Raw.codeTypes {env : Env Unit} [base ⊑ env] {α : Type}
+@[expose] def Module.Raw.codeTypes {env : Env Unit} [base ≼ env] {α : Type}
     (m : Module.Raw env α) : NameMap (TypeExpr env) :=
   (NameMap.ofArray? m.funcSigs).getD ∅
 
 /-- A well-formed module. -/
-structure Module.Raw.WF {env : Env Unit} [base ⊑ env] {α : Type} (m : Module.Raw env α) :
+structure Module.Raw.WF {env : Env Unit} [base ≼ env] {α : Type} (m : Module.Raw env α) :
     Prop where
   /-- No two functions share a name. -/
   funcNamesUnique : m.funcNames.toList.Nodup
@@ -759,7 +759,7 @@ structure Module.Raw.WF {env : Env Unit} [base ⊑ env] {α : Type} (m : Module.
   /-- Every function reference names a function of the module, and fits its code type. -/
   refs : ∀ f ∈ m.funcs, ∀ u ∈ f.funcRefs, OptHolds (m.codeTypes.find? u.target) u.Fits
 
-instance {env : Env Unit} [base ⊑ env] {α : Type} (m : Module.Raw env α) : Decidable m.WF :=
+instance {env : Env Unit} [base ≼ env] {α : Type} (m : Module.Raw env α) : Decidable m.WF :=
   have := Name.decNodup m.funcNames
   let cts := m.codeTypes
   decidable_of_iff (m.funcNames.toList.Nodup ∧ (∀ f ∈ m.funcs, f.WF) ∧
@@ -767,14 +767,14 @@ instance {env : Env Unit} [base ⊑ env] {α : Type} (m : Module.Raw env α) : D
     ⟨fun ⟨a, b, c⟩ => ⟨a, b, c⟩, fun ⟨a, b, c⟩ => ⟨a, b, c⟩⟩
 
 /-- A module with its well-formedness proof. -/
-structure Module (env : Env Unit) [base ⊑ env] (α : Type) where
+structure Module (env : Env Unit) [base ≼ env] (α : Type) where
   raw : Module.Raw env α
   wf : raw.WF
 
 /-- The names `check` gives for an ill-formed `m`: all of them if two coincide, otherwise
 those of the functions `bad` flags or that reference a function `m` does not define, or one
 at a type that does not fit its code type. -/
-private def Module.Raw.faulty {env : Env Unit} [base ⊑ env] {α : Type} (m : Module.Raw env α)
+private def Module.Raw.faulty {env : Env Unit} [base ≼ env] {α : Type} (m : Module.Raw env α)
     (bad : Func env α → Bool) : Array Name :=
   match NameMap.ofArray? m.funcSigs with
   | none => m.funcNames
@@ -786,14 +786,14 @@ private def Module.Raw.faulty {env : Env Unit} [base ⊑ env] {α : Type} (m : M
 /-- `m` with its well-formedness proof, or the names of its functions that are not well
 formed: those that fail `Func.WF` or have a reference that names no function of `m` or does
 not fit its target's code type, or all of them if `m` names a function twice. -/
-def Module.Raw.check {env : Env Unit} [base ⊑ env] {α : Type} (m : Module.Raw env α) :
+def Module.Raw.check {env : Env Unit} [base ≼ env] {α : Type} (m : Module.Raw env α) :
     Except (Array Name) (Module env α) :=
   if h : m.WF then .ok ⟨m, h⟩ else .error (m.faulty fun f => !decide f.WF)
 
 /-- The module `name` of the well-formed functions `fs`, or the names `Module.Raw.check`
 gives.  Only the module's own rules are decided: distinct names, and references that name its
 functions at types that fit. -/
-def Module.ofChecked {env : Env Unit} [base ⊑ env] {α : Type} (name : Name)
+def Module.ofChecked {env : Env Unit} [base ≼ env] {α : Type} (name : Name)
     (fs : Array {f : Func env α // f.WF}) (info : α) : Except (Array Name) (Module env α) :=
   let m : Module.Raw env α := { name, funcs := fs.map (·.val), info }
   have := Name.decNodup m.funcNames
@@ -809,13 +809,13 @@ def Module.ofChecked {env : Env Unit} [base ⊑ env] {α : Type} (name : Name)
 end
 
 /-- A well-formed module names no function twice. -/
-public theorem Module.Raw.WF.nodup {env : Env Unit} [base ⊑ env] {α : Type}
+public theorem Module.Raw.WF.nodup {env : Env Unit} [base ≼ env] {α : Type}
     {m : Module.Raw env α} (h : m.WF) : (m.funcs.toList.map (·.name)).Nodup := by
   simpa [Module.Raw.funcNames, Array.mapK_eq_map_fun] using h.funcNamesUnique
 
 /-- The map a well-formed module checks function references against gives each function's
 code type, and nothing else. -/
-public theorem Module.Raw.WF.find?_codeTypes {env : Env Unit} [base ⊑ env] {α : Type}
+public theorem Module.Raw.WF.find?_codeTypes {env : Env Unit} [base ≼ env] {α : Type}
     {m : Module.Raw env α} (h : m.WF) (n : Name) (t : TypeExpr env) :
     m.codeTypes.find? n = some t ↔ ∃ f ∈ m.funcs, f.name = n ∧ f.codeType = t := by
   have hnd : (m.funcSigs.toList.map Prod.fst).Nodup := by
@@ -828,7 +828,7 @@ public theorem Module.Raw.WF.find?_codeTypes {env : Env Unit} [base ⊑ env] {α
 
 /-- In a well-formed module, every function reference names one of its functions, and fits
 that function's code type. -/
-public theorem Module.Raw.WF.ref_fits {env : Env Unit} [base ⊑ env] {α : Type}
+public theorem Module.Raw.WF.ref_fits {env : Env Unit} [base ≼ env] {α : Type}
     {m : Module.Raw env α} (h : m.WF) {f : Func env α} (hf : f ∈ m.funcs) {u : FuncUse env}
     (hu : u ∈ f.funcRefs) : ∃ g ∈ m.funcs, g.name = u.target ∧ u.Fits g.codeType := by
   obtain ⟨t, ht, hfit⟩ := h.refs f hf u hu

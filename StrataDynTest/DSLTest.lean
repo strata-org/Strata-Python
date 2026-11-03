@@ -41,7 +41,7 @@ example : .str (.str .base "base") "Except" ∈ Base.env := by simp
 example : .str (bn "Except") "case" ∈ Base.env := by simp
 example : bn "Nope" ∉ base := by simp
 example : .str .base "Unit" ∉ Base.env := by simp
-example : base ⊑ Base.env := inferInstance
+example : base ≼ Base.env := inferInstance
 
 example : (Base.Int.ref (e := Base.env)).name = bn "Int" := rfl
 example : Base.Except.ok.name = bn "ok" := rfl
@@ -137,11 +137,11 @@ example : .str (.str .base "demo") "nope" ∉ Demo.env := by simp
 
 /-- The parent's references resolve in the child, and in every refinement of it. -/
 example : TypeRef Demo.env 1 := Base.Ref.ref
-example : Base.env ⊑ Demo.env := inferInstance
-example : base ⊑ Demo.env := inferInstance
+example : Base.env ≼ Demo.env := inferInstance
+example : base ≼ Demo.env := inferInstance
 
 section
-variable {e : Env _root_.Unit} [Demo.env ⊑ e]
+variable {e : Env _root_.Unit} [Demo.env ≼ e]
 example : TypeExpr e := Base.Ref Demo.Value
 example : TypeExpr e := Demo.raising Base.Int
 example : InsnRef e Base.refNew.sig := Base.refNew.ref
@@ -168,7 +168,7 @@ public environment Clash extends Base where
   end clash
 
 section
-variable {e : Env _root_.Unit} [Clash.env ⊑ e] {s : Array Kind} (x y z : TypeExpr e s)
+variable {e : Env _root_.Unit} [Clash.env ≼ e] {s : Array Kind} (x y z : TypeExpr e s)
 example : Clash.T x y =
     .app Clash.T.ref #v[x, y] (by rw [TypeRef.kinds, Clash.T.decl_ref]; rfl) := rfl
 example : Clash.D x y =
@@ -190,7 +190,7 @@ example : (Clash.T Base.Int Base.Bool : TypeExpr Clash.env) =
   rfl
 
 section
-variable {e : Env _root_.Unit} [Demo.env ⊑ e] {s : Array Kind} (x y : TypeExpr e s)
+variable {e : Env _root_.Unit} [Demo.env ≼ e] {s : Array Kind} (x y : TypeExpr e s)
 -- A parameter that clashes with no other is primed once, and one that clashes with nothing
 -- keeps its name.
 example : Base.Internal.Except.ty (e' := x) (a := y) = Base.Except x y := rfl
@@ -308,7 +308,7 @@ public environment OwnDeep extends Base where
 #guard ((FnsDeep.d40.sig (e := FnsDeep.env)).succs.map (·.type.size)) == #[2]
 
 /-- `Fn [Fn [Int] Int] Int`, in `e`. -/
-private abbrev fn2 {e : Env _root_.Unit} [Fns.env ⊑ e] : TypeExpr e :=
+private abbrev fn2 {e : Env _root_.Unit} [Fns.env ≼ e] : TypeExpr e :=
   Base.Fn [Base.Fn [Base.Int] Base.Int] Base.Int
 
 /-- The nested argument is the type written with handles. -/
@@ -324,7 +324,7 @@ example : FnsNestedGrand.g5.sig (e := FnsNestedGrand.env) =
       returnType := some (FnsNested.nest Base.Int) } := rfl
 
 section
-variable {e : Env _root_.Unit} [Fns.env ⊑ e] {s : Array Kind} (x : TypeExpr e s)
+variable {e : Env _root_.Unit} [Fns.env ≼ e] {s : Array Kind} (x : TypeExpr e s)
 example : Fns.unary x = Base.Fn [x] x := rfl
 end
 
@@ -423,7 +423,7 @@ example : FnAbbrevs.applyMid.sig (e := FnAbbrevs.env) =
       returnType := some Base.Int, distinct := by decide } := rfl
 
 section
-variable {e : Env _root_.Unit} [FnAbbrevs.env ⊑ e] {s : Array Kind} (l : TypeList e s)
+variable {e : Env _root_.Unit} [FnAbbrevs.env ≼ e] {s : Array Kind} (l : TypeList e s)
   (r : TypeExpr e s)
 example : FnAbbrevs.fnOf l r = Base.Fn l r := rfl
 example : FnAbbrevs.withInt l r = Base.Fn (TypeList.ofTypes #[] ++ l ++ .ofTypes #[Base.Int]) r :=
@@ -528,7 +528,7 @@ example : TyVars.Pair.mk.sig (e := TyVars.env) =
       distinct := by decide } := rfl
 
 section
-variable {e : Env _root_.Unit} [TyVars.env ⊑ e]
+variable {e : Env _root_.Unit} [TyVars.env ≼ e]
 example : InsnRef e TyVars.id.sig := TyVars.id.ref
 example : InsnRef e TyVars.Pair.mk.sig := TyVars.Pair.mk.ref
 end
@@ -585,7 +585,7 @@ example : (Demo.Box.case.sig (e := Demo.env)).argTypes.map (·.type) =
 /-! ### A function over it -/
 
 /-- A builder generic over every refinement of `Demo`. -/
-private def body {e : Env _root_.Unit} [Demo.env ⊑ e] : BuildM e _root_.Unit _root_.Unit := do
+private def body {e : Env _root_.Unit} [Demo.env ≼ e] : BuildM e _root_.Unit _root_.Unit := do
   let x ← Build.freshVal (.str .base "x") Demo.Value
   let _ ← Build.startFreshBlock #[x]
   let t ← Build.emitApply (.str .base "t") Demo.Value Demo.mkTuple.ref #[x.id, x.id, x.id]

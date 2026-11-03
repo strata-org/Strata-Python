@@ -495,7 +495,7 @@ def func {env : Env Unit} {α : Type} [HasAttrs α] (opts : PrintOptions) (fn : 
     (attrs (HasAttrs.attrs fn.info))
     ⟨.none, fn.blocks.map (block cx)⟩
 
-def module {env : Env Unit} [base ⊑ env] {α : Type} [HasAttrs α] (opts : PrintOptions)
+def module {env : Env Unit} [base ≼ env] {α : Type} [HasAttrs α] (opts : PrintOptions)
     (m : Module.Raw env α) : DDM.Command SourceRange :=
   .moduleDecl .none (name m.name) ⟨.none, m.funcs.map (func opts)⟩
 
@@ -520,22 +520,22 @@ end Print
 
 /-- The module, printed with the given options.  Folding a module that is not well formed can
 print text that reads back as a different module. -/
-public def Module.Raw.format {env : Env Unit} [base ⊑ env] {α : Type} [HasAttrs α] (opts : PrintOptions)
+public def Module.Raw.format {env : Env Unit} [base ≼ env] {α : Type} [HasAttrs α] (opts : PrintOptions)
     (m : Module.Raw env α) : String :=
   Print.render (ToDDM.module opts m)
 
 /-- The module, printed in full. -/
-public instance {env : Env Unit} [base ⊑ env] {α : Type} [HasAttrs α] :
+public instance {env : Env Unit} [base ≼ env] {α : Type} [HasAttrs α] :
     ToString (Module.Raw env α) where
   toString := Module.Raw.format .full
 
 /-- The module, printed, with constants folded by default. -/
-public def Module.format {env : Env Unit} [base ⊑ env] {α : Type} [HasAttrs α] (m : Module env α)
+public def Module.format {env : Env Unit} [base ≼ env] {α : Type} [HasAttrs α] (m : Module env α)
     (opts : PrintOptions := {}) : String :=
   m.raw.format opts
 
 /-- The module, printed with constants folded. -/
-public instance {env : Env Unit} [base ⊑ env] {α : Type} [HasAttrs α] :
+public instance {env : Env Unit} [base ≼ env] {α : Type} [HasAttrs α] :
     ToString (Module env α) where
   toString m := m.format
 

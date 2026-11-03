@@ -24,7 +24,7 @@ insn forEach (iterable : Value) (&body (item : Value) : raising Unit) (^err (exc
 it generates, abbreviated:
 
 ```lean
-def Base.callCode {env α m} [Monad m] [MonadBuild env α m] [Base.env ⊑ env]
+def Base.callCode {env α m} [Monad m] [MonadBuild env α m] [Base.env ≼ env]
     {as : List (TypeExpr env)} {r : TypeExpr env}
     (f : Val env (Base.Fn as r)) (args : Vals env as)
     (result : Option Name := none) (info : Option α := none) : m (Val env r)
@@ -40,7 +40,7 @@ def Py.forEach … (iterable : Val env Py.Value)
 
 * Each type parameter is an implicit type expression of `env`, `{a : TypeExpr env}`, or list
   of them.  Lean finds it by unifying the operands' and successors' types with the signature,
-  or from the expected result type.  The emitter's instance `[E.env ⊑ env]` defines every type
+  or from the expected result type.  The emitter's instance `[E.env ≼ env]` defines every type
   the signature names.
 * A variadic `(*xs : τ)` is an `Array (Val env τ)`; a spread `(*xs : as)` a `Vals env as`.
 * A successor `(^k (y : τ))` takes a `Target env [τ]`, a spread payload spliced in:

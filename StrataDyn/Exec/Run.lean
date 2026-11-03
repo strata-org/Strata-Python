@@ -132,7 +132,7 @@ def RunEnd.outcome {M : RunModel} {m : LModule M} {B : Ty} (fuel : Nat) : RunEnd
   | .timeout s _ => ⟨.fault .outOfFuel, ⟨s.core.heap, s.core.world⟩, fuel, s.drawn⟩
 
 /-- The module's function `f`, linked and validated. -/
-def prepare (M : Model) {env : Env Unit} [base ⊑ env] {α : Type} (prog : Module env α)
+def prepare (M : Model) {env : Env Unit} [base ≼ env] {α : Type} (prog : Module env α)
     (f : Name) : Except Fault ((lm : LModule M.at) ×' WF lm ×' Nat) :=
   match link M prog with
   | .error e => .error e
@@ -157,7 +157,7 @@ def runPrepared {M : RunModel} {lm : LModule M} (hw : WF lm) (i : Nat)
 /-- Run function `f` of `prog` on `args` for at most `fuel` steps of `engine`, with the
 oracle `oracle`: link, validate, then run.  The arguments are values at every token, so none
 holds a ref or a closure.  A fault before the first step takes no steps. -/
-def runModule (M : Model) {env : Env Unit} [base ⊑ env] {α : Type} (prog : Module env α)
+def runModule (M : Model) {env : Env Unit} [base ≼ env] {α : Type} (prog : Module env α)
     (f : Name) (args : Array M.Arg) (fuel : Nat) (oracle : Nat → Nat := fun _ => 0)
     (engine : Engine := .fused) : Outcome M :=
   match prepare M prog f with
@@ -174,7 +174,7 @@ structure DebugRun (M : Model) (ρ : Type) where
 /-- A debugger's loop: run function `f` of `prog` with `hook`, and each time the hook stops the
 run, note where and resume, at most `maxStops` times.  A hook that never modifies resumes as
 the uninterrupted run would go on (`runHooked_resume`). -/
-def debugRun (M : Model) {env : Env Unit} [base ⊑ env] {α : Type} (prog : Module env α)
+def debugRun (M : Model) {env : Env Unit} [base ≼ env] {α : Type} (prog : Module env α)
     (f : Name) (args : Array M.Arg) (fuel : Nat) {ρ : Type}
     (hook : {m : LModule M.at} → {B : Ty} → Hook m B ρ) (st : ρ)
     (oracle : Nat → Nat := fun _ => 0) (maxStops : Nat := 100) :

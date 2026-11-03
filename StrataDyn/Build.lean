@@ -259,7 +259,7 @@ def emit (d : ValDecl env) (instr : Instruction env α) : BuildM env α ValId :=
 
 /-- Emit a literal, named after `name`, at the type the base gives it.  A function reference
 takes its type from `emitFunc`; given one, it is an error, and nothing is emitted. -/
-def emitConst [base ⊑ env] (name : Name) (c : Const) (info : Option α := none) :
+def emitConst [base ≼ env] (name : Name) (c : Const) (info : Option α := none) :
     BuildM env α ValId := do
   match c.typeOf? (env := env) with
   | some t =>
@@ -273,7 +273,7 @@ def emitConst [base ⊑ env] (name : Name) (c : Const) (info : Option α := none
 /-- Emit a code pointer to `target`, a function of the module, at `ty`, the target's code
 type, `base.Fn` of its parameter types and its return type.  The module checks it, so the
 target may be built after the reference. -/
-def emitFunc [base ⊑ env] (target : Name) (ty : TypeExpr env) (info : Option α := none) :
+def emitFunc [base ≼ env] (target : Name) (ty : TypeExpr env) (info : Option α := none) :
     BuildM env α ValId := do
   let d ← freshVal (.str .base "code") ty
   emit d (.const (← resolveInfo info) d (.func target))
@@ -430,23 +430,23 @@ def terminate {isig : InsnSig env} (r : InsnRef env isig) (args : Array ValId :=
   | none => modify fun s => { s with body := { s.body with label := none } }
 
 /-- Close the open block with `jump k`. -/
-def jump [base ⊑ env] (k : Target.Raw) (info : Option α := none) : BuildM env α Unit := do
+def jump [base ≼ env] (k : Target.Raw) (info : Option α := none) : BuildM env α Unit := do
   let i ← resolveInfo info
   finishBlock (.jump i k) (some i)
 
 /-- Close the open block with `branch cond t f`. -/
-def branch [base ⊑ env] (cond : ValId) (t f : Target.Raw) (info : Option α := none) :
+def branch [base ≼ env] (cond : ValId) (t f : Target.Raw) (info : Option α := none) :
     BuildM env α Unit := do
   let i ← resolveInfo info
   finishBlock (.branch i cond t f) (some i)
 
 /-- Close the open block by leaving the enclosing body with `v`: a jump to `Label.exit`. -/
-def ret [base ⊑ env] (v : ValId) (info : Option α := none) : BuildM env α Unit := do
+def ret [base ≼ env] (v : ValId) (info : Option α := none) : BuildM env α Unit := do
   let i ← resolveInfo info
   finishBlock (.ret i v) (some i)
 
 /-- Close the open block with `unreachable`. -/
-def unreachable [base ⊑ env] (info : Option α := none) : BuildM env α Unit := do
+def unreachable [base ≼ env] (info : Option α := none) : BuildM env α Unit := do
   let i ← resolveInfo info
   finishBlock (.unreachable i) (some i)
 
@@ -564,7 +564,7 @@ instance {β : Type} : ToString (FailedFunc env α β) :=
     else "\n".intercalate e.misuses.toList⟩
 
 /-- Decide `Func.WF` of the function `toFunc` gives. -/
-private def decWF [base ⊑ env] (s : State env α) (name : Name) (retType : TypeExpr env)
+private def decWF [base ≼ env] (s : State env α) (name : Name) (retType : TypeExpr env)
     (info : α) : Decidable (toFunc s name retType info).WF :=
   inferInstance
 
@@ -578,7 +578,7 @@ def checkRegionsClosed : BuildM env α Unit := do
 the checked function and what the builder returned, or a `FailedFunc` when the builder recorded
 a misuse, such as a block left open at the end, or the function is not well formed.  `info`
 annotates the function, and is the default annotation for everything in it. -/
-def run [base ⊑ env] {β : Type} (name : Name) (retType : TypeExpr env) (info : α)
+def run [base ≼ env] {β : Type} (name : Name) (retType : TypeExpr env) (info : α)
     (m : BuildM env α β) : Except (FailedFunc env α β) ({fn : Func env α // fn.WF} × β) :=
   let (r, s) := (do
     let r ← m
@@ -592,7 +592,7 @@ def run [base ⊑ env] {β : Type} (name : Name) (retType : TypeExpr env) (info 
     | isFalse _ => .error ⟨r, #[], fn⟩
 
 /-- `run`, for a builder that returns nothing: the checked function, or a `FailedFunc`. -/
-def build [base ⊑ env] (name : Name) (retType : TypeExpr env) (info : α)
+def build [base ≼ env] (name : Name) (retType : TypeExpr env) (info : α)
     (m : BuildM env α Unit) : Except (FailedFunc env α Unit) {fn : Func env α // fn.WF} :=
   Prod.fst <$> run name retType info m
 
@@ -627,7 +627,7 @@ private theorem nodup_of_map_eq_range {β : Type} (l : List β) (k : β → Nat)
   List.Pairwise.of_map k (fun _ _ hk he => hk (congrArg k he)) (h ▸ List.nodup_range)
 
 /-- `unreachable` is well formed anywhere. -/
-private theorem unreachable_wf [base ⊑ env] (ctx : Ctx env) (bs : BlockSigs env) (i : α) :
+private theorem unreachable_wf [base ≼ env] (ctx : Ctx env) (bs : BlockSigs env) (i : α) :
     Terminator.WF ctx bs (Terminator.unreachable (env := env) i) := by
   simp [Terminator.unreachable, Terminator.WF, InsnSig.callWF, Target.Raw.AllWF, Agrees,
     OptHolds, Ctx.typesOf?, InsnSig.operandTypes?, InsnSig.succTypes, InsnSig.regionTypes,
@@ -638,7 +638,7 @@ private def stubParams (params : Array (Name × TypeExpr env)) : Array (ValDecl 
   params.mapIdx fun i p => ⟨⟨i⟩, p.2⟩
 
 /-- The function `stub` gives. -/
-private def stubFunc [base ⊑ env] (name : Name) (params : Array (Name × TypeExpr env))
+private def stubFunc [base ≼ env] (name : Name) (params : Array (Name × TypeExpr env))
     (retType : TypeExpr env) (info : α) : Func env α :=
   { name, retType, info
     blocks := #[{ label := ⟨.num (.str .base "entry") 0⟩, params := stubParams params,
@@ -695,7 +695,7 @@ private theorem scopable_single {Λ : ValId → Prop} (b : Block env α) (hi : b
       rw [hmem hc, hr] at h
       simp at h
 
-private theorem stubFunc_wf [base ⊑ env] (name : Name) (params : Array (Name × TypeExpr env))
+private theorem stubFunc_wf [base ≼ env] (name : Name) (params : Array (Name × TypeExpr env))
     (retType : TypeExpr env) (info : α) : (stubFunc name params retType info).WF := by
   have hdefs : (stubFunc name params retType info).defs = (stubParams params).toList := by
     simp [stubFunc, Func.defs, Block.defsList, Instruction.defsList, Terminator.defs,
@@ -722,7 +722,7 @@ private theorem stubFunc_wf [base ⊑ env] (name : Name) (params : Array (Name �
 /-- The stub of the function `name`, which takes `params` and returns `retType`: one block,
 `entry.0`, taking the parameters and ending in `unreachable`.  Parameter `i` is value `i`,
 named `x.i` for its name `x`.  A stub is always well formed. -/
-def stub [base ⊑ env] (name : Name) (params : Array (Name × TypeExpr env))
+def stub [base ≼ env] (name : Name) (params : Array (Name × TypeExpr env))
     (retType : TypeExpr env) (info : α) : {fn : Func env α // fn.WF} :=
   ⟨stubFunc name params retType info, stubFunc_wf name params retType info⟩
 

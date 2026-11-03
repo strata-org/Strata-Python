@@ -43,7 +43,7 @@ open Std (HashMap)
 
 public section
 
-variable {env : Env Unit} [base ⊑ env] {α : Type}
+variable {env : Env Unit} [base ≼ env] {α : Type}
 
 /-- A value: a symbol, or a cell, by its location. -/
 inductive Val where

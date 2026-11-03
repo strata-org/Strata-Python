@@ -32,8 +32,8 @@ public environment Grand extends Demo where
     | cell (ref : Ref Value) (box : Box Int)
   insn peek (c : Cell) : raising Value
 
-example : base ⊑ Grand.env := inferInstance
-example : Demo.env ⊑ Grand.env := inferInstance
+example : base ≼ Grand.env := inferInstance
+example : Demo.env ≼ Grand.env := inferInstance
 example : TypeRef Grand.env 1 := Demo.Box.ref
 example : InsnRef Grand.env Base.refNew.sig := Base.refNew.ref
 example : (Grand.peek.sig (e := Grand.env)).typeArgc = 0 := rfl

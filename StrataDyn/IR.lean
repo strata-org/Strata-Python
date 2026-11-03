@@ -113,7 +113,7 @@ deriving Inhabited, Repr
 /-- The type the base gives a literal, in an environment that refines the base.  A function
 reference has none: it has its target's `Func.codeType`, which the module decides
 (`Module.Raw.WF`). -/
-@[expose] def Const.typeOf? {env : Env Unit} [base ⊑ env] : Const → Option (TypeExpr env)
+@[expose] def Const.typeOf? {env : Env Unit} [base ≼ env] : Const → Option (TypeExpr env)
   | .unit    => some Base.Unit
   | .bool _  => some Base.Bool
   | .int _   => some Base.Int
@@ -221,22 +221,22 @@ The base's terminal operations, as terminators.  A `T.case` is applied as any ot
 operation is. -/
 
 /-- `jump k`: continue at `k`. -/
-@[expose] def Terminator.jump {env : Env Unit} [base ⊑ env] {α : Type} (info : α)
+@[expose] def Terminator.jump {env : Env Unit} [base ≼ env] {α : Type} (info : α)
     (k : Target.Raw) : Terminator env α :=
   .apply info Base.jump.ref ⟨#[], rfl⟩ #[] #[k] #[]
 
 /-- `branch cond t f`: continue at `t` if `cond` holds, else at `f`. -/
-@[expose] def Terminator.branch {env : Env Unit} [base ⊑ env] {α : Type} (info : α)
+@[expose] def Terminator.branch {env : Env Unit} [base ≼ env] {α : Type} (info : α)
     (cond : ValId) (t f : Target.Raw) : Terminator env α :=
   .apply info Base.branch.ref ⟨#[], rfl⟩ #[cond] #[t, f] #[]
 
 /-- `unreachable`: control never gets here. -/
-@[expose] def Terminator.unreachable {env : Env Unit} [base ⊑ env] {α : Type} (info : α) :
+@[expose] def Terminator.unreachable {env : Env Unit} [base ≼ env] {α : Type} (info : α) :
     Terminator env α :=
   .apply info Base.unreachable.ref ⟨#[], rfl⟩ #[] #[] #[]
 
 /-- `ret v`: leave the enclosing body with `v`, a jump to `Label.exit`. -/
-@[expose] def Terminator.ret {env : Env Unit} [base ⊑ env] {α : Type} (info : α) (v : ValId) :
+@[expose] def Terminator.ret {env : Env Unit} [base ≼ env] {α : Type} (info : α) (v : ValId) :
     Terminator env α :=
   .jump info ⟨Label.exit, #[v]⟩
 
@@ -255,13 +255,13 @@ structure Func (env : Env Unit) (α : Type) where
 
 /-- The type of a code pointer to `fn`: `base.Fn` of its entry block's parameter types and
 its return type.  A function with no entry block takes nothing. -/
-@[expose] def Func.codeType {env : Env Unit} [base ⊑ env] {α : Type} (fn : Func env α) :
+@[expose] def Func.codeType {env : Env Unit} [base ≼ env] {α : Type} (fn : Func env α) :
     TypeExpr env :=
   Base.Fn (TypeList.ofTypes ((fn.blocks[0]?.map (·.params.map (·.type))).getD #[])) fn.retType
 
 /-- An unchecked module, typed against one environment that refines the base.  A `Module` is
 one with its well-formedness proof. -/
-structure Module.Raw (env : Env Unit) [base ⊑ env] (α : Type) where
+structure Module.Raw (env : Env Unit) [base ≼ env] (α : Type) where
   name  : Name
   funcs : Array (Func env α)
   info  : α
@@ -348,7 +348,7 @@ end
   names   := fn.names
   info    := f fn.info
 
-@[expose] def Module.Raw.map {env : Env Unit} [base ⊑ env] {α β : Type} (f : α → β)
+@[expose] def Module.Raw.map {env : Env Unit} [base ≼ env] {α β : Type} (f : α → β)
     (m : Module.Raw env α) : Module.Raw env β where
   name  := m.name
   funcs := m.funcs.map (Func.map f)

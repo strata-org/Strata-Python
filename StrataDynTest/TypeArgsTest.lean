@@ -42,7 +42,7 @@ example : KindedTypeArgsFor (Base.Except.ok.ref (e := Fns.env)) none := ta[Base.
 example : KindedTypeArgsFor (Base.Except.case.ref (e := Fns.env)) none :=
   ta[Base.String, Base.Except Base.Int Base.Bool]
 -- A generic refinement.
-example {e : Env Unit} [Demo.env ⊑ e] : KindedTypeArgsFor (Base.refNew.ref (e := e)) none :=
+example {e : Env Unit} [Demo.env ≼ e] : KindedTypeArgsFor (Base.refNew.ref (e := e)) none :=
   ta[Demo.Box Demo.Value]
 -- List parameters: a literal, an empty one, and a `TypeList` term.
 example : KindedTypeArgsFor (Fns.callFn.ref (e := Fns.env)) none :=
@@ -197,12 +197,12 @@ private def twoSig : InsnSig Lits.env :=
 private theorem midFresh : midName ∉ Lits.env := by rw [Lits.mem_env]; decide
 private abbrev envMid : Env Unit := Lits.env.addInsn midName midSig midFresh
 private def midRef := InsnRef.ofAddInsn Lits.env midName midSig midFresh
-private instance : Lits.env ⊑ envMid := ⟨Env.le_of_subset (Env.subset_addInsn _ _ _ _)⟩
+private instance : Lits.env ≼ envMid := ⟨Env.le_of_subset (Env.subset_addInsn _ _ _ _)⟩
 
 private theorem twoFresh : twoName ∉ Lits.env := by rw [Lits.mem_env]; decide
 private abbrev envTwo : Env Unit := Lits.env.addInsn twoName twoSig twoFresh
 private def twoRef := InsnRef.ofAddInsn Lits.env twoName twoSig twoFresh
-private instance : Lits.env ⊑ envTwo := ⟨Env.le_of_subset (Env.subset_addInsn _ _ _ _)⟩
+private instance : Lits.env ≼ envTwo := ⟨Env.le_of_subset (Env.subset_addInsn _ _ _ _)⟩
 
 -- In the middle: `as := [Bool, Int]`.
 example :

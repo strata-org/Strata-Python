@@ -54,7 +54,7 @@ public section
 
 namespace RefToReg
 
-variable {env : Env Unit} [base ⊑ env] {α : Type}
+variable {env : Env Unit} [base ≼ env] {α : Type}
 
 /-- A base cell operation has no successors and no regions. -/
 theorem cellOp?_plain {i : Instruction env α} {o : CellOp} (h : cellOp? i = some o) :
@@ -100,7 +100,7 @@ theorem drops_plain {P : Plan env} {i : Instruction env α} (h : P.drops i = tru
       | cons _ _ => simp at hr
   · simp at h
 
-omit [base ⊑ env] in
+omit [base ≼ env] in
 /-- The edge rewrite keeps the target's label. -/
 @[simp] theorem Plan.edge_label (P : Plan env) (m : CMap) (k : Target.Raw) :
     (P.edge m k).label = k.label := rfl
@@ -188,7 +188,7 @@ open RefToReg
 target, in every body, regions included, in order.  The rewrite adds block parameters and edge
 arguments, removes instructions that have no edges and no regions, and replaces uses of
 values. -/
-theorem Func.edgeShape_apply {env : Env Unit} [base ⊑ env] {α : Type} (P : Plan env)
+theorem Func.edgeShape_apply {env : Env Unit} [base ≼ env] {α : Type} (P : Plan env)
     (S : Std.HashMap Label CMap) (fn : Func env α) :
     edgeShape (P.apply S fn).blocks.toList = edgeShape fn.blocks.toList := by
   simp only [Plan.apply]
@@ -199,7 +199,7 @@ theorem Func.edgeShape_apply {env : Env Unit} [base ⊑ env] {α : Type} (P : Pl
 
 namespace RefToReg.Plan
 
-variable {env : Env Unit} [base ⊑ env] {α : Type} {P : Plan env} {S : Starts} {fn : Func env α}
+variable {env : Env Unit} [base ≼ env] {α : Type} {P : Plan env} {S : Starts} {fn : Func env α}
 
 /-- A checked plan meets the rules about the walk's events: a body's entry takes nothing new,
 each edge passes what its target expects, and each removed read is replaced by its cell's
@@ -247,7 +247,7 @@ end RefToReg.Plan
 
 namespace RefToReg
 
-variable {env : Env Unit} [base ⊑ env] {α : Type}
+variable {env : Env Unit} [base ≼ env] {α : Type}
 
 /-- The walk's content map after `is` is `View.step` folded over them. -/
 theorem walkInstrs_snd (V : View) : ∀ (m : CMap) (is : List (Instruction env α)),
@@ -268,7 +268,7 @@ variable (P : Plan env) (S : Std.HashMap Label CMap)
 @[simp] private theorem view_step (m : CMap) (i : Instruction env α) :
     (P.view S).step m i = P.step m i := rfl
 
-omit [base ⊑ env] in
+omit [base ≼ env] in
 /-- `edgesOf` of two lists is the edges of each. -/
 private theorem edgesOf_append (a b : List (Block env α)) :
     edgesOf (a ++ b) = edgesOf a ++ edgesOf b := by

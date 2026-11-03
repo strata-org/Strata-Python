@@ -38,7 +38,7 @@ operations. We have a general notion of refinement for environments that capture
 environments with new operations as well as replacing abstract types with more precise
 definitions (such as inductive types).
 
-We write `t ≤ s`, or `t ⊑ s` for the class that instance search uses, when `s` refines `t`:
+We write `t ≤ s`, or `t ≼ s` for the class that instance search uses, when `s` refines `t`:
 
 * **Types:** every type of `t` is a type of `s`, with the same parameters. An abstract type of
   `t` may be a datatype in `s`.

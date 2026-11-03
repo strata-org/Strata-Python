@@ -186,7 +186,7 @@ abbrev Funcs (env : Env Unit) := NameTable (SourceRange × Option (TypeExpr env)
 /-- A literal, at `expected`, with `funcs` the module's functions.  A literal's type is the one
 its form fixes, and must be `expected`.  A function reference has type `expected`, which must
 be its target's code type. -/
-def literal {env : Env Unit} [base ⊑ env] (funcs : Funcs env) (expected : TypeExpr env)
+def literal {env : Env Unit} [base ≼ env] (funcs : Funcs env) (expected : TypeExpr env)
     (c : MConst SourceRange) : Result Const := do
   let k : Const ← match c with
     | .constFunc ann (.funcName _ n) =>
@@ -235,7 +235,7 @@ structure State (env : Env Unit) where
 /-- Reading a function: its state, and the first problem found. -/
 abbrev ReadM (env : Env Unit) := StateT (State env) (Except ReadDiagnostic)
 
-variable {env : Env Unit} [base ⊑ env]
+variable {env : Env Unit} [base ≼ env]
 
 /-- Stop at the problem `msg`, at `range`. -/
 def fail {β : Type} (range : SourceRange) (msg : String) : ReadM env β :=
@@ -596,7 +596,7 @@ end Read
 
 open Read in
 /-- The module a DDM term of the Dyn dialect denotes in `env`, or the diagnostics. -/
-public def Module.ofDDM {env : Env Unit} [base ⊑ env] (c : DDM.Command SourceRange) :
+public def Module.ofDDM {env : Env Unit} [base ≼ env] (c : DDM.Command SourceRange) :
     Except (Array ReadDiagnostic) (Module env Info) := do
   let .moduleDecl ann n ⟨_, fs⟩ := c
   let headers := fs.toList
@@ -678,7 +678,7 @@ open Read in
 /-- Parse `text` in the Dyn dialect and read the module it denotes in `env`: the module,
 annotated with source ranges and attributes, or the diagnostics, each as
 `file:line:column: message`. -/
-public def Module.read (env : Env Unit) [base ⊑ env] (text : String)
+public def Module.read (env : Env Unit) [base ≼ env] (text : String)
     (fileName : String := "<input>") :
     IO (Except Read.Errors (Module env Info)) := do
   let msgs : Array String ← match ← parse text fileName with

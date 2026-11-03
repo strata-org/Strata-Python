@@ -21,7 +21,7 @@ typed one, `Except`, and the terminal operations of control flow.  `Unit` and `E
 datatypes; the rest of the types are primitive.
 
 `Base` is an `environment` block, so a language environment declares it as its parent with
-`extends Base`.  In every `e` with `Base.env ⊑ e`:
+`extends Base`.  In every `e` with `Base.env ≼ e`:
 
 * `Base.T.ref : TypeRef e n`, and the handle `Base.T`, its type expression, applied to its
   arguments if it has parameters;

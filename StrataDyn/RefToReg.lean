@@ -57,7 +57,7 @@ public section
 
 namespace RefToReg
 
-variable {env : Env Unit} [base ⊑ env] {α : Type}
+variable {env : Env Unit} [base ≼ env] {α : Type}
 
 /-! ## The cell operations -/
 
@@ -985,7 +985,7 @@ end RefToReg
 open RefToReg in
 /-- The module with every function's cells promoted by `planner`'s plans, checked; or each
 function concerned with the reason. -/
-@[expose] def refToRegWith {env : Env Unit} [base ⊑ env] {α : Type}
+@[expose] def refToRegWith {env : Env Unit} [base ≼ env] {α : Type}
     (planner : Std.HashMap Label Point → Func env α → Except String (Plan env))
     (m : Module env α) :
     Except (Array (Name × String)) (Module env α) :=
@@ -1002,7 +1002,7 @@ function concerned with the reason. -/
   | .error names => .error (names.map (·, "the promoted function is not well formed"))
 
 /-- **Ref-to-reg**: the module with every promotable cell promoted, by `RefToReg.plan`. -/
-@[expose] def refToReg {env : Env Unit} [base ⊑ env] {α : Type} (m : Module env α) :
+@[expose] def refToReg {env : Env Unit} [base ≼ env] {α : Type} (m : Module env α) :
     Except (Array (Name × String)) (Module env α) :=
   refToRegWith RefToReg.plan m
 

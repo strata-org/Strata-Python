@@ -19,7 +19,7 @@ set_option autoImplicit false
 
 `Py` extends `Base` with `py.Value`, the type of every Python value; `py.Completion`, how a
 protected block finished; and one instruction per Python operation.  In every `e` with
-`Py.env ⊑ e`:
+`Py.env ≼ e`:
 
 * the handles `Py.Value`, `Py.Completion`, and the abbreviations `Py.raising a`, `Py.failing`
   and `Py.cell`, its types, so the builder writes `Py.raising Base.Unit`;

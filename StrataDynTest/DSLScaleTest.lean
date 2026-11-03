@@ -299,7 +299,7 @@ example {n : Name} : n ∈ Scale.env ↔ n ∈ Scale.names :=
 #guard (Scale.strConcat4.sig (e := Scale.env)).variadic.map (·.name) == some "parts"
 
 section
-variable {e : Env _root_.Unit} [Scale.env ⊑ e]
+variable {e : Env _root_.Unit} [Scale.env ≼ e]
 example : InsnRef e Scale.add2.sig := Scale.add2.ref
 example : InsnRef e Scale.strConcat4.sig := Scale.strConcat4.ref
 example : InsnRef e Base.refNew.sig := Base.refNew.ref
@@ -1104,7 +1104,7 @@ public environment Wide extends Base where
 #guard (Wide.w519.sig (e := Wide.env)).argTypes.map (·.name) == #["x", "y"]
 
 section
-variable {e : Env _root_.Unit} [Wide.env ⊑ e]
+variable {e : Env _root_.Unit} [Wide.env ≼ e]
 example : TypeRef e 0 := Wide.T259.ref
 example : InsnRef e Wide.w0.sig := Wide.w0.ref
 example : InsnRef e Wide.w519.sig := Wide.w519.ref

@@ -65,7 +65,7 @@ example (v : Val W Base.Int) : BuildM W Unit (Val W (Base.Ref (Base.Except Base.
 A handle is the constant `Base.Int`.  The namespace's constants keep their names and meaning. -/
 
 /--
-info: Strata.Dyn.Base.Int {e : Env Unit} [Base.env ⊑ e] {s : Array Kind} : TypeExpr e s
+info: Strata.Dyn.Base.Int {e : Env Unit} [Base.env ≼ e] {s : Array Kind} : TypeExpr e s
 -/
 #guard_msgs in #check Base.Int
 /-- info: Strata.Dyn.Base.Except : TypeCon [Kind.type, Kind.type] -/
@@ -73,23 +73,23 @@ info: Strata.Dyn.Base.Int {e : Env Unit} [Base.env ⊑ e] {s : Array Kind} : Typ
 /-- info: Strata.Dyn.Base.Fn : TypeCon [Kind.list, Kind.type] -/
 #guard_msgs in #check Base.Fn
 /--
-info: Strata.Dyn.HandleTest.Hd.IntRef {e : Env Unit} [Base.env ⊑ e] {s : Array Kind} : TypeExpr e s
+info: Strata.Dyn.HandleTest.Hd.IntRef {e : Env Unit} [Base.env ≼ e] {s : Array Kind} : TypeExpr e s
 -/
 #guard_msgs in #check Hd.IntRef
 -- An abbreviation with parameters is a handle like a type's: no binders beyond its kinds.
 /-- info: Strata.Dyn.HandleTest.Hd.withInt : TypeCon [Kind.list, Kind.type] -/
 #guard_msgs in #check Hd.withInt
 
--- `Base.Internal.Int.ty`, at `[Base.env ⊑ e]`, is what the handle applies.
+-- `Base.Internal.Int.ty`, at `[Base.env ≼ e]`, is what the handle applies.
 /--
-info: @Base.Internal.Int.ty : {e : Env Unit} → [Base.env ⊑ e] → {s : Array Kind} → TypeExpr e s
+info: @Base.Internal.Int.ty : {e : Env Unit} → [Base.env ≼ e] → {s : Array Kind} → TypeExpr e s
 -/
 #guard_msgs in #check @Base.Internal.Int.ty
 example : Base.Int.con.apply (e := W) (s := #[]) = Base.Internal.Int.ty := rfl
 example : (Base.Int : TypeExpr W) = Base.Internal.Int.ty := rfl
 -- `Base.Fn` takes a list of type expressions or a `TypeList` for its list parameter.
 /--
-info: @Base.Internal.Fn.ty : {e : Env Unit} → [Base.env ⊑ e] → {s : Array Kind} → TypeList e s → TypeExpr e s → TypeExpr e s
+info: @Base.Internal.Fn.ty : {e : Env Unit} → [Base.env ≼ e] → {s : Array Kind} → TypeList e s → TypeExpr e s → TypeExpr e s
 -/
 #guard_msgs in #check @Base.Internal.Fn.ty
 example : Base.Except.name = (Base.Except).name := rfl
@@ -130,7 +130,7 @@ example : Base.Fn.applyArgs? W (s := #[]) [.list [Base.Int], .ty Base.Bool] =
 #guard (Base.Except.applyArgs? Base.env (s := #[]) [.ty Base.Int]).isNone
 
 -- A constructor variable applies as a function, in an environment that refines its own.
-@[reducible] def twice (T : TypeCon [.type]) {e : Env Unit} [T.env ⊑ e] (t : TypeExpr e) :
+@[reducible] def twice (T : TypeCon [.type]) {e : Env Unit} [T.env ≼ e] (t : TypeExpr e) :
     TypeExpr e :=
   T (T t)
 example : (twice Base.Ref Base.Int : TypeExpr W) =
@@ -203,7 +203,7 @@ private structure Typed {e : Env Unit} (t : TypeExpr e) where
 
 /-- What an emitter taking a `Base.Ref a` operand does with `a`: it is solved by
 unification. -/
-private def deref {e : Env Unit} [Base.env ⊑ e] {a : TypeExpr e} (v : Typed (Base.Ref a)) :
+private def deref {e : Env Unit} [Base.env ≼ e] {a : TypeExpr e} (v : Typed (Base.Ref a)) :
     Typed a :=
   ⟨v.id⟩
 
@@ -213,7 +213,7 @@ example (v : Typed (e := W) (Hd.PairRef Base.Bool)) : Typed (e := W) (Hd.Pair Ba
   deref v
 
 /-- What an emitter calling a `Base.Fn as r` operand does with `as` and `r`. -/
-private def callee {e : Env Unit} [Base.env ⊑ e] {as : List (TypeExpr e)} {r : TypeExpr e}
+private def callee {e : Env Unit} [Base.env ≼ e] {as : List (TypeExpr e)} {r : TypeExpr e}
     (v : Typed (Base.Fn as r)) : Typed r :=
   ⟨v.id⟩
 
@@ -275,23 +275,23 @@ example : (HdAb.ex8 HdAb.Leaf : TypeExpr HdAb.env) =
 
 -- In any scope, and generic in the environment.
 example : (Base.Int : TypeExpr W #[.type, .list]) = Base.Int := rfl
-example {e : Env Unit} [W ⊑ e] : (Base.Except Base.Int Hd.IntList : TypeExpr e) =
+example {e : Env Unit} [W ≼ e] : (Base.Except Base.Int Hd.IntList : TypeExpr e) =
     Base.Internal.Except.ty Base.Int Hd.IntList := rfl
 -- Generic code takes type expressions.
-example {e : Env Unit} [Base.env ⊑ e] {s : Array Kind} (t : TypeExpr e s) : TypeExpr e s :=
+example {e : Env Unit} [Base.env ≼ e] {s : Array Kind} (t : TypeExpr e s) : TypeExpr e s :=
   Base.Ref t
-example {e : Env Unit} [Hd.env ⊑ e] {s : Array Kind} (t : TypeExpr e s) : TypeExpr e s :=
+example {e : Env Unit} [Hd.env ≼ e] {s : Array Kind} (t : TypeExpr e s) : TypeExpr e s :=
   Hd.PairRef t
 
 /-! ## Rejections
 
-A type is defined only where every name it mentions is: instance search proves `[T.env ⊑ e]` at
+A type is defined only where every name it mentions is: instance search proves `[T.env ≼ e]` at
 each handle, and fails at the first that `e` does not refine. -/
 
 -- A child's type, in the parent: rejected, since `Base.env` does not refine `Hd.env`.
 /--
 error: failed to synthesize instance of type class
-  Hd.env ⊑ Base.env
+  Hd.env ≼ Base.env
 
 Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
 -/
@@ -301,7 +301,7 @@ example : TypeExpr Base.env := Base.Except Base.Int Base.Bool
 -- A child's constructor, in the parent.
 /--
 error: failed to synthesize instance of type class
-  Hd.Pair.env ⊑ Base.env
+  Hd.Pair.env ≼ Base.env
 
 Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
 -/
@@ -311,7 +311,7 @@ example : TypeExpr W := Hd.Pair Base.Int
 -- An abbreviation, in the parent: rejected only if a name of its body is the child's.
 /--
 error: failed to synthesize instance of type class
-  Hd.PairRef.env ⊑ Base.env
+  Hd.PairRef.env ≼ Base.env
 
 Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
 -/
@@ -329,7 +329,7 @@ public environment HdSib extends Base where
 -- Siblings' handles do not mix: neither environment refines the other.
 /--
 error: failed to synthesize instance of type class
-  HdSib.env ⊑ W
+  HdSib.env ≼ W
 
 Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
 -/
@@ -338,7 +338,7 @@ example : TypeExpr W := Base.Except HdSib.S Hd.IntList
 example : TypeExpr HdSib.env := Base.Except HdSib.S Base.Int
 /--
 error: failed to synthesize instance of type class
-  HdSib.B.env ⊑ W
+  HdSib.B.env ≼ W
 
 Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
 -/
@@ -347,17 +347,17 @@ example : TypeExpr W := HdSib.B Hd.IntList
 example : TypeExpr HdSib.env := HdSib.B Base.Int
 /--
 error: failed to synthesize instance of type class
-  HdSib.env ⊑ W
+  HdSib.env ≼ W
 
 Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
 ---
 error: failed to synthesize instance of type class
-  HdKid.env ⊑ W
+  HdKid.env ≼ W
 
 Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
 ---
 error: failed to synthesize instance of type class
-  HdSib.env ⊑ W
+  HdSib.env ≼ W
 
 Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
 -/
@@ -367,7 +367,7 @@ example : TypeExpr HdKid.env := Base.Fn [Base.Int, Hd.IntList, HdKid.Leaf, Base.
 -- Without an expected type, the environment is not known.
 /--
 error: typeclass instance problem is stuck
-  Base.env ⊑ ?m.11
+  Base.env ≼ ?m.11
 
 Note: Lean will not try to resolve this typeclass instance problem because the third type argument to `RefinedBy` is a metavariable. This argument must be fully determined before Lean will try to resolve the typeclass.
 
@@ -440,7 +440,7 @@ example : (Base.Fn [] Base.Bool : TypeExpr W) = Base.Internal.Fn.ty (.lit #[]) B
 example : (Base.Fn (TypeList.ofTypes #[Base.Int]) Base.Bool : TypeExpr W) =
     Base.Internal.Fn.ty (.ofTypes #[Base.Int]) Base.Bool := rfl
 -- In generic code, at a `TypeList`; at a list, below.
-example {e : Env Unit} [Base.env ⊑ e] {s : Array Kind} (l : TypeList e s) (r : TypeExpr e s) :
+example {e : Env Unit} [Base.env ≼ e] {s : Array Kind} (l : TypeList e s) (r : TypeExpr e s) :
     TypeExpr e s :=
   Base.Fn l r
 -- An abbreviation's list parameter takes either too, and splices a list variable.
@@ -583,11 +583,11 @@ private def g : Built :=
 #eval IO.println (showMod g)
 
 /-- A new cell holding `v`, in any refinement of `Base`. -/
-def newIntCell {e : Env Unit} [Base.env ⊑ e] (v : ValId) : BuildM e Unit ValId :=
+def newIntCell {e : Env Unit} [Base.env ≼ e] (v : ValId) : BuildM e Unit ValId :=
   emitApply (.str .base "cell") (Base.Ref Base.Int) Base.refNew.ref #[v]
 
 /-- An `Except` of a `Hd` list, in any refinement of `Hd`. -/
-def okList {e : Env Unit} [W ⊑ e] (v : ValId) : BuildM e Unit ValId :=
+def okList {e : Env Unit} [W ≼ e] (v : ValId) : BuildM e Unit ValId :=
   emitApply (.str .base "x") (Base.Except Base.Int Hd.IntList) Base.Except.ok.ref #[v]
 
 /-! ## Computed types
@@ -633,13 +633,13 @@ def args2 : List (TypeExpr Base.env) := [Base.Int, Base.Bool]
 example : (Base.Fn args2 Base.Int : TypeExpr Base.env) =
     Base.Internal.Fn.ty (.lit #[.ty Base.Int, .ty Base.Bool]) Base.Int := rfl
 example (n : Nat) : TypeExpr Base.env := Base.Fn (List.replicate n Base.Int) Base.Int
-example {e : Env Unit} [Base.env ⊑ e] (ts : List (TypeExpr e)) (r : TypeExpr e) :
+example {e : Env Unit} [Base.env ≼ e] (ts : List (TypeExpr e)) (r : TypeExpr e) :
     TypeExpr e :=
   Base.Fn ts r
 -- `Typed`, at a type expression, and a generic `mkRef`: there is one type expression per
 -- type, so a typed value built in generic code has the type written directly.
 /-- A typed operand of `Base.Ref t`, in any refinement of `Base`. -/
-private def mkRef {e : Env Unit} [Base.env ⊑ e] (t : TypeExpr e) (n : Nat) :
+private def mkRef {e : Env Unit} [Base.env ≼ e] (t : TypeExpr e) (n : Nat) :
     Typed (Base.Ref t) := ⟨n⟩
 example : Typed (e := W) (Base.Ref Base.Int) := mkRef (e := W) Base.Int 0
 example : Typed (e := W) (Base.Ref Hd.IntList) := mkRef (e := W) Hd.IntList 0

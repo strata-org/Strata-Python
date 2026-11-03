@@ -38,6 +38,6 @@ environment PrivChild extends Demo where
   type A
   insn f (x : Value) : A
 
-example : Demo.env ⊑ PrivChild.env := inferInstance
+example : Demo.env ≼ PrivChild.env := inferInstance
 
 end Strata.Dyn.DSLPrivTest

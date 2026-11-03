@@ -51,18 +51,18 @@ def env : Env Unit := Py.env.addType boxD boxFresh
 theorem hsub : Py.env ⊆ env := Env.subset_addType _ _ _
 
 /-- `Ext3`'s declared parent is `Py`. -/
-instance toPy {e : Env Unit} [h : env ⊑ e] : Py.env ⊑ e :=
+instance toPy {e : Env Unit} [h : env ≼ e] : Py.env ≼ e :=
   ⟨Env.Le.trans (Env.le_of_subset hsub) h.le⟩
 
 end Ext3
 
 /-! ## Concrete queries -/
 
-example : base ⊑ base := inferInstance
-example : base ⊑ Py.env := inferInstance
-example : base ⊑ Ext3.env := inferInstance
-example : Py.env ⊑ Ext3.env := inferInstance
-example : Ext3.env ⊑ Ext3.env := inferInstance
+example : base ≼ base := inferInstance
+example : base ≼ Py.env := inferInstance
+example : base ≼ Ext3.env := inferInstance
+example : Py.env ≼ Ext3.env := inferInstance
+example : Ext3.env ≼ Ext3.env := inferInstance
 
 /-- The same base reference, in each level. -/
 example : TypeRef base 1 := Base.Ref.ref
@@ -71,16 +71,16 @@ example : TypeRef Ext3.env 1 := Base.Ref.ref
 
 /-! ## The generic case
 
-Over `[Py.env ⊑ e]`, the base is reached through `Py`'s declared parent, so no second
+Over `[Py.env ≼ e]`, the base is reached through `Py`'s declared parent, so no second
 hypothesis is needed. -/
 
-private def cellOfInt {e : Env Unit} [Py.env ⊑ e] : TypeExpr e := Base.Ref Base.Int
+private def cellOfInt {e : Env Unit} [Py.env ≼ e] : TypeExpr e := Base.Ref Base.Int
 
 example : TypeExpr Ext3.env := cellOfInt
 
 /-- A builder generic over every refinement of `Py`: the same code emits into `Py.env` and
 `Ext3.env`. -/
-private def body {e : Env Unit} [Py.env ⊑ e] : BuildM e Unit Unit := do
+private def body {e : Env Unit} [Py.env ≼ e] : BuildM e Unit Unit := do
   let x ← Build.freshVal (.str .base "x") Base.Int
   let _ ← Build.startFreshBlock #[x]
   let cell ← Build.emitApply (.str .base "cell") (Base.Ref Base.Int) Base.refNew.ref
@@ -95,16 +95,16 @@ private def body {e : Env Unit} [Py.env ⊑ e] : BuildM e Unit Unit := do
 
 /--
 error: failed to synthesize instance of type class
-  Py.env ⊑ base
+  Py.env ≼ base
 
 Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
 -/
 #guard_msgs in
-example : Py.env ⊑ base := inferInstance
+example : Py.env ≼ base := inferInstance
 
 /-! ## Coherence
 
-A proof of `base ⊑ Ext3.env` written by hand and the one search finds give the same
+A proof of `base ≼ Ext3.env` written by hand and the one search finds give the same
 reference, by proof irrelevance. -/
 
 private theorem byHand : base ≤ Ext3.env :=
@@ -112,7 +112,7 @@ private theorem byHand : base ≤ Ext3.env :=
 
 example : @Base.refNew.ref Ext3.env ⟨byHand⟩ = Base.refNew.ref := rfl
 
-example (h₁ h₂ : base ⊑ Ext3.env) : @Base.refNew.sig _ h₁ = @Base.refNew.sig _ h₂ := rfl
+example (h₁ h₂ : base ≼ Ext3.env) : @Base.refNew.sig _ h₁ = @Base.refNew.sig _ h₂ := rfl
 
 /-! ## Order
 
@@ -164,26 +164,27 @@ example : ba ≤ ab := show Env.LeBy _ ba ab from
 
 end Order
 
-/-! ## `⊒`
+/-! ## `≽`
 
-`s ⊒ t` is `t ⊑ s` written larger first.  It is input syntax only: a goal stated with it
-prints with `⊑`. -/
+`s ≽ t` is `t ≼ s` written larger first.  It is input syntax only: a goal stated with it
+prints with `≼`. -/
 
-example : Ext3.env ⊒ base := inferInstance
+example : Ext3.env ≽ base := inferInstance
 
-example {e : Env _root_.Unit} [e ⊒ Py.env] : TypeExpr e := Base.Ref Base.Int
+example {e : Env _root_.Unit} [e ≽ Py.env] : TypeExpr e := Base.Ref Base.Int
 
-/-- info: Py.env ⊑ Ext3.env : Prop -/
+/-- info: Py.env ≼ Ext3.env : Prop -/
 #guard_msgs in
-#check (Ext3.env ⊒ Py.env)
+#check (Ext3.env ≽ Py.env)
 
 /-! ## `Lean.Order`'s `⊑`
 
-Its notation is scoped too.  With both open, the overload is resolved by type. -/
+Its notation is scoped too.  With both open, `⊑` is the order and `≼` is refinement. -/
 
 section
 open Lean.Order
-example : base ⊑ Py.env := inferInstance
+example : base ≼ Py.env := inferInstance
+example {α : Type} [PartialOrder α] (x : α) : x ⊑ x := PartialOrder.rel_refl
 end
 
 end StrataPython.Dyn.RefinedByTest

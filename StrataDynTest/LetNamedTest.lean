@@ -63,7 +63,7 @@ instruction's name, and so does one `e` returns without emitting it. -/
 /-- Read `cell`, then write `v` to it, and return what was read.  The caller's binder names the
 result. -/
 private def swapIn {env : Env Unit} {α : Type} {m : Type → Type} [Monad m] [MonadBuild env α m]
-    [base ⊑ env] {t : TypeExpr env} (cell : Val env (Base.Ref t)) (v : Val env t) :
+    [base ≼ env] {t : TypeExpr env} (cell : Val env (Base.Ref t)) (v : Val env t) :
     m (Val env t) := do
   let old ← Base.refGet cell
   let _ ← Base.refSet cell v
@@ -71,7 +71,7 @@ private def swapIn {env : Env Unit} {α : Type} {m : Type → Type} [Monad m] [M
 
 /-- `swapIn`, whose own `let%` names its result: the innermost name wins. -/
 private def swapNamed {env : Env Unit} {α : Type} {m : Type → Type} [Monad m] [MonadBuild env α m]
-    [base ⊑ env] {t : TypeExpr env} (cell : Val env (Base.Ref t)) (v : Val env t) :
+    [base ≼ env] {t : TypeExpr env} (cell : Val env (Base.Ref t)) (v : Val env t) :
     m (Val env t) := do
   let% prev ← Base.refGet cell
   let _ ← Base.refSet cell v
@@ -191,7 +191,7 @@ private def g : Built :=
 
 /-- Two fresh cells of `v`. -/
 private def twoCells {env : Env Unit} {α : Type} {m : Type → Type} [Monad m] [MonadBuild env α m]
-    [base ⊑ env] {t : TypeExpr env} (v : Val env t) :
+    [base ≼ env] {t : TypeExpr env} (v : Val env t) :
     m (Val env (Base.Ref t) × Val env (Base.Ref t)) := do
   return (← Base.refNew v, ← Base.refNew v)
 
@@ -240,7 +240,7 @@ renamed blocks leave no gap among the `bb`s. -/
 
 /-- A fresh block taking an `Int`, labelled by its caller's binder. -/
 private def intBlock {env : Env Unit} {α : Type} {m : Type → Type} [Monad m] [MonadBuild env α m]
-    [base ⊑ env] : m (BlockRef env [Base.Int]) :=
+    [base ≼ env] : m (BlockRef env [Base.Int]) :=
   freshLabel [Base.Int]
 
 private def blocks : Built :=
