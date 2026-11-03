@@ -15,6 +15,7 @@ public import StrataPython.Specs.Diagnostics
 public import StrataPython.Specs.Decorators
 import StrataPython.Specs.Native
 import StrataPython.Specs.MessageKind
+import StrataPython.Dyn.Scope
 import        Strata.Util.DecideProp
 
 namespace StrataPython.ModuleName
@@ -220,6 +221,9 @@ structure PySpecContext where
   /-- Python module name for the current file (e.g., "boto3.dynamodb").
       Used as `pythonModule` for locally-defined classes. -/
   currentModule : ModuleName
+  /-- Whether CPython evaluates the expression being read when it imports the model, as it does
+      an assignment's value; PySpec reads an annotation as a stub type, without evaluating it. -/
+  evaluated : Bool := false
 
 /-- Resolve a module name to a file path, registering the file's FileMap
     for source-location error reporting.  Returns `(filePath, isInit)`
@@ -236,6 +240,52 @@ def PySpecContext.readModule (ctx : PySpecContext) (mod : ModuleName)
     pure (pythonPath, isInit)
   | .error msg =>
     throw s!"Could not read file {pythonPath}: {msg}"
+
+/-- The public names of CPython 3.12's `builtins`. `StdBasesTest` checks the list against
+CPython. -/
+public def builtinNames : Std.HashSet String := Std.HashSet.ofList
+  ["ArithmeticError", "AssertionError", "AttributeError", "BaseException", "BaseExceptionGroup",
+   "BlockingIOError", "BrokenPipeError", "BufferError", "BytesWarning", "ChildProcessError",
+   "ConnectionAbortedError", "ConnectionError", "ConnectionRefusedError",
+   "ConnectionResetError", "DeprecationWarning", "EOFError", "Ellipsis", "EncodingWarning",
+   "EnvironmentError", "Exception", "ExceptionGroup", "False", "FileExistsError",
+   "FileNotFoundError", "FloatingPointError", "FutureWarning", "GeneratorExit", "IOError",
+   "ImportError", "ImportWarning", "IndentationError", "IndexError", "InterruptedError",
+   "IsADirectoryError", "KeyError", "KeyboardInterrupt", "LookupError", "MemoryError",
+   "ModuleNotFoundError", "NameError", "None", "NotADirectoryError", "NotImplemented",
+   "NotImplementedError", "OSError", "OverflowError", "PendingDeprecationWarning",
+   "PermissionError", "ProcessLookupError", "RecursionError", "ReferenceError",
+   "ResourceWarning", "RuntimeError", "RuntimeWarning", "StopAsyncIteration", "StopIteration",
+   "SyntaxError", "SyntaxWarning", "SystemError", "SystemExit", "TabError", "TimeoutError",
+   "True", "TypeError", "UnboundLocalError", "UnicodeDecodeError", "UnicodeEncodeError",
+   "UnicodeError", "UnicodeTranslateError", "UnicodeWarning", "UserWarning", "ValueError",
+   "Warning", "ZeroDivisionError", "abs", "aiter", "all", "anext", "any", "ascii", "bin",
+   "bool", "breakpoint", "bytearray", "bytes", "callable", "chr", "classmethod", "compile",
+   "complex", "copyright", "credits", "delattr", "dict", "dir", "divmod", "enumerate", "eval",
+   "exec", "exit", "filter", "float", "format", "frozenset", "getattr", "globals", "hasattr",
+   "hash", "help", "hex", "id", "input", "int", "isinstance", "issubclass", "iter", "len",
+   "license", "list", "locals", "map", "max", "memoryview", "min", "next", "object", "oct",
+   "open", "ord", "pow", "print", "property", "quit", "range", "repr", "reversed", "round",
+   "set", "setattr", "slice", "sorted", "staticmethod", "str", "sum", "super", "tuple", "type",
+   "vars", "zip"]
+
+/-- Whether CPython 3.12 imports the file `file` as the module `name`: a source, a compiled
+file or an extension module, whose suffix `importlib.machinery.all_suffixes()` gives. -/
+def isModuleFile (name file : String) : Bool :=
+  file == name ++ ".py" || file == name ++ ".pyc" ||
+    (file.startsWith (name ++ ".") && file.endsWith ".so")
+
+/-- The file of the search path that CPython imports in place of the standard module `mod`:
+a module or a package `__init__` of `mod`, or of its top-level package. -/
+def shadowingFile? (ctx : PySpecContext) (mod : ModuleName) : BaseIO (Option System.FilePath) := do
+  let top : ModuleName := ⟨#[mod.components[0]'mod.components_size_pos], by simp⟩
+  for m in #[top, mod] do
+    let dir := m.foldlDirs (init := ctx.baseSearchPath) (· / ·)
+    for (d, name) in [(dir, m.back), (dir / m.back, "__init__")] do
+      if let .ok entries ← d.readDir.toBaseIO then
+        for e in entries do
+          if isModuleFile name e.fileName then return some e.path
+  return none
 
 def preludeAtoms : List (String × PythonIdent) := [
   ("bool", .builtinsBool),
@@ -555,7 +605,16 @@ def pySpecValue (expr : expr SourceRange) : PySpecM SpecValue := do
   | .BinOp loc x op y => do
     match op with
     | .BitOr _ =>
-      return .typeValue <| .union loc (← pySpecType x) (← pySpecType y)
+      let (okx, vx) ← runChecked <| pySpecValue x
+      let (oky, vy) ← runChecked <| pySpecValue y
+      -- CPython can't evaluate `|` of a string, such as `"Foo" | int`, or of two `None`s.
+      if (← read).evaluated && (vx matches .stringConst .. || vy matches .stringConst ..
+          || (vx matches .noneConst && vy matches .noneConst)) then
+        specError loc "this | raises a TypeError when CPython evaluates it"
+        return default
+      let tx ← if okx then valueAsType x.ann vx else pure default
+      let ty ← if oky then valueAsType y.ann vy else pure default
+      return .typeValue <| .union loc tx ty
     | _ =>
       specError loc s!"Unsupported binary operator {repr op}"
       return default
@@ -624,15 +683,14 @@ decreasing_by
   · decreasing_tactic
   · decreasing_tactic
 
+end
+
 def pySpecType (e : expr SourceRange) : PySpecM SpecType := do
   let (success, v) ← runChecked <| pySpecValue e
   if success then
     valueAsType e.ann v
   else
     return default
-termination_by 2 * sizeOf e + 1
-
-end
 
 -- Check expression is compatible with value
 def pyDefaultValue (val : expr SourceRange) (_tp : SpecType) : PySpecM Unit := do
@@ -835,6 +893,29 @@ partial def collectNames (e : expr StrataDDM.SourceRange)
     let a := upper.elim a (collectNames · a)
     step.elim a (collectNames · a)
 
+
+/-- The identifiers in the string constants of the annotation `e`, as the forward reference
+`"A"` names `A`. -/
+partial def stringAnnotationNames (e : expr StrataDDM.SourceRange)
+    (acc : Std.HashSet String) : Std.HashSet String :=
+  match e with
+  | .Constant _ (.ConString _ ⟨_, str⟩) _ =>
+    let isIdent (c : Char) := c.isAlphanum || c == '_' || c.toNat > 127
+    let add (a : Std.HashSet String) (w : List Char) : Std.HashSet String :=
+      match w.reverse with
+      | [] => a
+      | c :: _ => if c.isDigit then a else a.insert (String.ofList w.reverse)
+    let (a, w) := str.toList.foldl (init := (acc, ([] : List Char))) fun (a, w) c =>
+      if isIdent c then (a, c :: w) else (add a w, [])
+    add a w
+  -- The values of `Literal[...]` are strings, not forward references.
+  | .Subscript _ (.Name _ ⟨_, "Literal"⟩ _) _ _ | .Subscript _ (.Attribute _ _ ⟨_, "Literal"⟩ _) _ _ =>
+    acc
+  | .Subscript _ obj slice _ => stringAnnotationNames slice (stringAnnotationNames obj acc)
+  | .BinOp _ l _ r => stringAnnotationNames r (stringAnnotationNames l acc)
+  | .Tuple _ ⟨_, elts⟩ _ | .List _ ⟨_, elts⟩ _ =>
+    elts.foldl (init := acc) fun a e => stringAnnotationNames e a
+  | _ => acc
 
 structure SpecAssertionContext where
   filePath : System.FilePath
@@ -1842,6 +1923,13 @@ decreasing_by
       match_case.mk_match_case.sizeOf_spec, StrataDDM.Ann.mk.sizeOf_spec] at *
     omega
 
+/-- Reject the arguments of the call `form` that run when the module is imported, but that
+PySpec doesn't read. -/
+def rejectUnreadArguments (form : Decorators.DecoratorForm) : PySpecM Unit := do
+  for (loc, what) in form.unreadArguments do
+    specError loc s!"{what} in {form.display}(...) runs when the module is imported, and PySpec \
+      doesn't read it"
+
 def pySpecFunctionArgs (fnLoc : SourceRange)
                        (className : Option String)
                        (funName : String)
@@ -1859,6 +1947,7 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
     let absorbed ←
       match Decorators.DecoratorForm.ofExpr? pyd with
       | some form =>
+        rejectUnreadArguments form
         match ← scheme.absorb form nativeBundle with
         | some bundle' => nativeBundle := bundle'; pure true
         | none => pure false
@@ -1951,7 +2040,8 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
   -- `init=` expressions are translated below in the assertion monad. Resolve
   -- the type paired with its ghost so name/type/init never drift apart.
   let ghostsWithTypes : Array (Native.RawGhost × Option SpecType) ←
-    nativeBundle.ghosts.mapM fun g => do return (g, ← g.type.mapM pySpecType)
+    nativeBundle.ghosts.mapM fun g => do
+      return (g, ← withReader ({ · with evaluated := true }) (g.type.mapM pySpecType))
   let unloweredReceiver :=
     if isMethod then specArgs[0]?.map (·.name) else none
   let as ← collectAssertions argDecls returnType <|
@@ -1997,6 +2087,12 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
     for (kind, loc) in nativeBundle.extra do
       recordDropped kind loc
     for (g, gtype) in ghostsWithTypes do
+      -- CPython evaluates `init=` when it imports the model, but PySpec reads it when the
+      -- function is called.
+      if let some iE := g.init then
+        unless iE matches .Constant .. | .UnaryOp _ (.USub _) (.Constant _ (.ConPos ..) _)
+            | .UnaryOp _ (.USub _) (.Constant _ (.ConFloat ..) _) do
+          recordDropped .ghostInit iE.ann
       let ginit : Option SpecExpr ←
         match g.init with
         | some iE => translateContractValue? .initializer iE
@@ -2018,6 +2114,145 @@ def pySpecFunctionArgs (fnLoc : SourceRange)
     ghosts := as.ghosts
     dropped := as.dropped
   }
+
+/-- The names of PySpec's own forms, such as `@requires(...)` and `ghost(...)`, which PySpec
+recognizes by name. -/
+def nativeFormNames : Array String :=
+  #["requires", "ensures", "admit", "modifies", "ghost", "invariant", "exhaustive"]
+
+/-- Reject a binding of one of `nativeFormNames`, or of `Exception`, which a class base reads as
+the builtin: PySpec would still read the name its own way, although CPython would use the
+model's binding. -/
+def checkNativeBinding (loc : SourceRange) (scope : String) (name : String) : PySpecM Unit := do
+  if nativeFormNames.contains name then
+    specError loc s!"{scope} binds '{name}', which PySpec reads only as its own '{name}' form; \
+      a model can't bind this name"
+  else if name == "Exception" then
+    specError loc s!"{scope} binds 'Exception', which PySpec reads as the builtin in a class's \
+      bases; a model can't bind this name"
+
+/-- The expressions of the class-body statement `s` that CPython evaluates in the class body,
+and that PySpec reads at module level: annotations, default values, decorators and bases. -/
+def classScopeExprs (s : stmt SourceRange) : Array (expr SourceRange) :=
+  let argExprs (a : arguments SourceRange) : Array (expr SourceRange) :=
+    let .mk_arguments _ ⟨_, posonly⟩ ⟨_, pos⟩ ⟨_, vararg⟩ ⟨_, kwonly⟩ ⟨_, kwDefaults⟩ ⟨_, kwarg⟩
+      ⟨_, defaults⟩ := a
+    let params := posonly ++ pos ++ kwonly ++ vararg.toArray ++ kwarg.toArray
+    let annotations := params.filterMap fun p => let .mk_arg _ _ ⟨_, t⟩ _ := p; t
+    let kwDefaults := kwDefaults.filterMap fun
+      | .some_expr _ v => some v
+      | .missing_expr _ => none
+    annotations ++ defaults ++ kwDefaults
+  match s with
+  | .AnnAssign _ _ annotation _ _ => #[annotation]
+  | .FunctionDef _ _ args _ ⟨_, decorators⟩ ⟨_, returns⟩ _ _ =>
+    decorators ++ argExprs args ++ returns.toArray
+  | .ClassDef _ _ ⟨_, bases⟩ ⟨_, keywords⟩ _ ⟨_, decorators⟩ _ =>
+    decorators ++ bases ++ keywords.map (·.value)
+  | _ => #[]
+
+/-- The literal of a class field's value: an int, bool, float or `None`, a number possibly
+negated. -/
+def fieldLiteral? (e : expr SourceRange) : Option SpecExpr :=
+  match e with
+  | .Constant loc (.ConPos _ ⟨_, n⟩) _ => some (.intLit (Int.ofNat n) loc)
+  | .Constant loc (.ConNeg _ ⟨_, n⟩) _ => some (.intLit (Int.negOfNat n) loc)
+  | .UnaryOp loc (.USub _) (.Constant _ (.ConPos _ ⟨_, n⟩) _) => some (.intLit (Int.negOfNat n) loc)
+  | .Constant loc (.ConFloat _ ⟨_, f⟩) _ => some (.floatLit f loc)
+  | .UnaryOp loc (.USub _) (.Constant _ (.ConFloat _ ⟨_, f⟩) _) => some (.floatLit s!"-{f}" loc)
+  | .Constant loc (.ConTrue _) _ => some (.boolLit true loc)
+  | .Constant loc (.ConFalse _) _ => some (.boolLit false loc)
+  | .Constant loc (.ConNone _) _ => some (.noneLit loc)
+  | _ => none
+
+/-! ### Private names
+
+In a class body, CPython renames a private name, `__x` in the class `C`, to `_C__x`: in names,
+attribute names, `def`, `class` and parameter names, annotations and defaults, also inside the
+body's functions and lambdas. It doesn't rename string constants, the keyword names of a call, or
+the body of a nested class, which renames with its own class name. PySpec reads every name as
+written, so it rejects each one that CPython would rename. -/
+
+/-- `n` at `loc`, if CPython renames it in the class `cls`. -/
+private def privateAt (cls : String) (n : String) (loc : SourceRange) :
+    Array (String × SourceRange) :=
+  if StrataPython.Dyn.PyScope.mangle (some cls) n != n then #[(n, loc)] else #[]
+
+mutual
+
+/-- The names in `e` that CPython renames in the class `cls`. -/
+private partial def exprPrivateNames (cls : String) (e : expr SourceRange) :
+    Array (String × SourceRange) :=
+  let go := exprPrivateNames cls
+  let all (es : Array (expr SourceRange)) := es.flatMap go
+  let comps (gens : Array (comprehension SourceRange)) := gens.flatMap fun
+    | .mk_comprehension _ target iter ⟨_, ifs⟩ _ => go target ++ go iter ++ all ifs
+  match e with
+  | .BoolOp _ _ ⟨_, values⟩ => all values
+  | .NamedExpr _ target value => go target ++ go value
+  | .BinOp _ l _ r => go l ++ go r
+  | .UnaryOp _ _ operand => go operand
+  | .Lambda _ args body => argsPrivateNames cls args ++ go body
+  | .IfExp _ test body orelse => go test ++ go body ++ go orelse
+  | .Dict _ ⟨_, keys⟩ ⟨_, values⟩ =>
+    keys.flatMap (fun | .some_expr _ k => go k | .missing_expr _ => #[]) ++ all values
+  | .Set _ ⟨_, elts⟩ | .Tuple _ ⟨_, elts⟩ _ | .List _ ⟨_, elts⟩ _ => all elts
+  | .ListComp _ elt ⟨_, gens⟩ | .SetComp _ elt ⟨_, gens⟩ | .GeneratorExp _ elt ⟨_, gens⟩ =>
+    go elt ++ comps gens
+  | .DictComp _ key value ⟨_, gens⟩ => go key ++ go value ++ comps gens
+  | .Await _ inner | .YieldFrom _ inner => go inner
+  | .Yield _ ⟨_, value⟩ => value.elim #[] go
+  | .Compare _ left _ ⟨_, comparators⟩ => go left ++ all comparators
+  | .Call _ func ⟨_, args⟩ ⟨_, kwargs⟩ =>
+    go func ++ all args ++ kwargs.flatMap fun | .mk_keyword _ _ v => go v
+  | .FormattedValue _ value _ ⟨_, fmtSpec⟩ => go value ++ fmtSpec.elim #[] go
+  | .Interpolation _ value _ _ ⟨_, fmtSpec⟩ => go value ++ fmtSpec.elim #[] go
+  | .JoinedStr _ ⟨_, values⟩ | .TemplateStr _ ⟨_, values⟩ => all values
+  | .Constant .. => #[]
+  | .Attribute loc value ⟨_, attr⟩ _ => go value ++ privateAt cls attr loc
+  | .Subscript _ value slice _ => go value ++ go slice
+  | .Starred _ value _ => go value
+  | .Name loc ⟨_, n⟩ _ => privateAt cls n loc
+  | .Slice _ ⟨_, lower⟩ ⟨_, upper⟩ ⟨_, step⟩ =>
+    lower.elim #[] go ++ upper.elim #[] go ++ step.elim #[] go
+
+/-- The parameter names, annotations and defaults in `args` that CPython renames in `cls`. -/
+private partial def argsPrivateNames (cls : String) (args : arguments SourceRange) :
+    Array (String × SourceRange) :=
+  let arg : arg SourceRange → Array (String × SourceRange)
+    | .mk_arg loc ⟨_, n⟩ ⟨_, ann⟩ _ => privateAt cls n loc ++ ann.elim #[] (exprPrivateNames cls)
+  match args with
+  | .mk_arguments _ ⟨_, posonly⟩ ⟨_, posArgs⟩ ⟨_, vararg⟩ ⟨_, kwonly⟩ ⟨_, kwDefaults⟩ ⟨_, kwarg⟩
+      ⟨_, defaults⟩ =>
+    (posonly ++ posArgs ++ kwonly).flatMap arg ++ vararg.elim #[] arg ++ kwarg.elim #[] arg ++
+      kwDefaults.flatMap (fun | .some_expr _ d => exprPrivateNames cls d | .missing_expr _ => #[])
+      ++ defaults.flatMap (exprPrivateNames cls)
+
+/-- The names in the statement `s` of the class `cls`'s body, or of a method's body, that CPython
+renames. A nested class contributes its name and its header, not its body. A statement kind that
+PySpec rejects, in a class body or in a method body, contributes nothing. -/
+private partial def stmtPrivateNames (cls : String) (s : stmt SourceRange) :
+    Array (String × SourceRange) :=
+  let go := exprPrivateNames cls
+  let body (ss : Array (stmt SourceRange)) := ss.flatMap (stmtPrivateNames cls)
+  match s with
+  | .FunctionDef loc ⟨_, n⟩ args ⟨_, b⟩ ⟨_, decorators⟩ ⟨_, returns⟩ _ _ =>
+    privateAt cls n loc ++ argsPrivateNames cls args ++ decorators.flatMap go ++
+      returns.elim #[] go ++ body b
+  | .ClassDef loc ⟨_, n⟩ ⟨_, bases⟩ ⟨_, keywords⟩ _ ⟨_, decorators⟩ _ =>
+    privateAt cls n loc ++ bases.flatMap go ++ keywords.flatMap (fun | .mk_keyword _ _ v => go v)
+      ++ decorators.flatMap go
+  | .AnnAssign _ target annotation ⟨_, value⟩ _ => go target ++ go annotation ++ value.elim #[] go
+  | .Assign _ ⟨_, targets⟩ value _ => targets.flatMap go ++ go value
+  | .Expr _ value => go value
+  | .Assert _ test ⟨_, msg⟩ => go test ++ msg.elim #[] go
+  | .If _ test ⟨_, b⟩ ⟨_, orelse⟩ => go test ++ body b ++ body orelse
+  | .For _ target iter ⟨_, b⟩ ⟨_, orelse⟩ _ => go target ++ go iter ++ body b ++ body orelse
+  | .Return _ ⟨_, value⟩ => value.elim #[] go
+  | .Raise _ ⟨_, exc⟩ ⟨_, cause⟩ => exc.elim #[] go ++ cause.elim #[] go
+  | _ => #[]
+
+end
 
 /-- Resolve an array of base class expressions into PythonIdents. -/
 private def resolveBaseClasses (bases : Array (expr SourceRange))
@@ -2053,6 +2288,7 @@ def classDecorators (decorators : Array (expr SourceRange)) :
     match Decorators.DecoratorForm.ofExpr? cd with
     | none => specError cd.ann "Unsupported class decorator expression."
     | some form =>
+      rejectUnreadArguments form
       if !form.isCall && form.name == "exhaustive" && form.qualifier == none then
         isExhaustive := true
       else
@@ -2061,10 +2297,19 @@ def classDecorators (decorators : Array (expr SourceRange)) :
         | none => specError cd.ann s!"Class decorator @{form.display} not supported."
   return (isExhaustive, classBundle)
 
+/-- Read the body of the class `className`. `moduleBound` holds the names that the module bound
+before the class statement, and `preBound` the names of this class and of the classes around it
+that had a binding before their class statement. -/
 partial def pySpecClassBody (loc : SourceRange) (className : String)
     (bases : Array PythonIdent)
     (body : Array (stmt StrataDDM.SourceRange))
-    (classInvariants : Array Native.RawInvariant := #[]) : PySpecM ClassDef := do
+    (classInvariants : Array Native.RawInvariant := #[])
+    (moduleBound : Std.HashSet String := {}) (preBound : Std.HashSet String := {}) :
+    PySpecM ClassDef := do
+  for stmt in body do
+    for (n, nloc) in stmtPrivateNames className stmt do
+      specError nloc s!"the class body of {className} uses the private name '{n}', which \
+        CPython renames to '{StrataPython.Dyn.PyScope.mangle (some className) n}'"
   let mut usedNames : Std.HashSet String := {}
   let mut fields : Array ClassField := #[]
   -- The class of each field that an `__init__` assignment declares.
@@ -2072,15 +2317,49 @@ partial def pySpecClassBody (loc : SourceRange) (className : String)
   let mut classVars : Array ClassVariable := #[]
   let mut subclasses : Array ClassDef := #[]
   let mut methods : Array FunctionDecl := #[]
+  -- The names that the class body has bound so far.
+  let mut bodyBound : Std.HashSet String := {}
   for stmt in body do
+    let bound : Option String := match stmt with
+      | .FunctionDef _ ⟨_, n⟩ .. | .ClassDef _ ⟨_, n⟩ .. => some n
+      | .Assign _ ⟨_, #[.Name _ ⟨_, n⟩ _]⟩ _ _ => some n
+      | .AnnAssign _ (.Name _ ⟨_, n⟩ _) _ ⟨_, some _⟩ _ => some n
+      | _ => none
+    if let some n := bound then checkNativeBinding stmt.ann s!"the class body of {className}" n
+    -- CPython evaluates these expressions in the class body, where they read the body's own
+    -- bindings, but PySpec reads their names at module level.
+    for e in classScopeExprs stmt do
+      let names := stringAnnotationNames e (collectNames e {})
+      for n in names.toList do
+        if bodyBound.contains n then
+          specError e.ann s!"the class body of {className} reads '{n}', which it binds itself; \
+            PySpec reads the module's '{n}' instead"
+        -- The name of a class whose statement is still running reads the binding that the name
+        -- had before it, but PySpec reads the class. A quoted name stays a string in CPython.
+        else if preBound.contains n && (collectNames e {}).contains n then
+          specError e.ann s!"the class body of {className} reads '{n}', which CPython reads as \
+            the '{n}' bound before the class statement; write \"{n}\" to name the class"
+    if let some n := bound then bodyBound := bodyBound.insert n
     match stmt with
+    | .Expr _ (.Constant ..) => pure () -- a constant runs no code; a docstring only sets `__doc__`
     | .Expr _ _ =>
-      specWarning stmt.ann s!"skipped Expr in class body ({className})"
-    | .AnnAssign _ target annotation _ _ =>
+      specError stmt.ann s!"an expression statement in the class body of {className} is not \
+        supported, because it may change what the model means; only a constant is allowed"
+    | .AnnAssign _ target annotation ⟨_, value⟩ _ =>
       match target with
       | .Name _ ⟨_, fieldName⟩ _ =>
         let fieldType ← pySpecType annotation
-        fields := fields.push { name := fieldName, type := fieldType }
+        -- Any value other than a literal may run code when the class is created.
+        let lit ← match value with
+          | none => pure none
+          | some v => match fieldLiteral? v with
+            | some l => pure (some l)
+            | none =>
+              specError v.ann s!"the value of the field {fieldName} of {className} is not \
+                supported; only an int, bool, float or None literal is allowed"
+              pure none
+        fields := fields.push
+          { name := fieldName, type := fieldType, source := .body lit, loc := stmt.ann }
       | _ => specError stmt.ann s!"Unsupported field target"
     | .ClassDef innerLoc ⟨_, innerClassName⟩ ⟨_, innerBases⟩ ⟨_, innerKeywords⟩ ⟨_, innerStmts⟩
                 ⟨_, innerDecorators⟩ ⟨_, innerTypeParams⟩ =>
@@ -2092,14 +2371,16 @@ partial def pySpecClassBody (loc : SourceRange) (className : String)
         continue
       let (innerExhaustive, innerBundle) ← classDecorators innerDecorators
       let innerBaseIdents ← resolveBaseClasses innerBases
+      -- PySpec reads a nested class's bare name at module level, as CPython does, so only the
+      -- names of the classes around it carry over.
       let innerDef ← pySpecClassBody innerLoc innerClassName innerBaseIdents innerStmts
-        innerBundle.invariants
+        innerBundle.invariants moduleBound preBound
       subclasses := subclasses.push { innerDef with exhaustive := innerExhaustive }
     | .Assign _ ⟨_, targets⟩ value _typeAnn =>
       if h : targets.size = 1 then
         match targets[0], value with
         | .Name _ ⟨_, varName⟩ _, .Name _ ⟨_, varValue⟩ _ =>
-          classVars := classVars.push { name := varName, value := varValue }
+          classVars := classVars.push { name := varName, value := varValue, loc := stmt.ann }
         | _, _ => specError stmt.ann s!"Unsupported class variable assignment"
       else
         specError stmt.ann s!"Only single target expected in class variable"
@@ -2128,7 +2409,7 @@ partial def pySpecClassBody (loc : SourceRange) (className : String)
                   let f : ClassField := {
                     name := fieldName,
                     type := .ident loc pyIdent #[],
-                    constValue := some s!"{innerClsName}()" }
+                    source := .init s!"{innerClsName}()", loc := initStmt.ann }
                   -- Several `__init__` stubs (`@overload`) may assign the field: it is
                   -- declared once, and the assignments must agree on its class.
                   match initFieldClasses[fieldName]? with
@@ -2437,6 +2718,11 @@ partial def parseAndResolveModule (loc : SourceRange) (mod : ModuleName)
     : PySpecM (Option (Std.HashMap String SpecValue)) := do
   match (←get).typeSigs.rank[mod]? with
   | some types =>
+    -- CPython imports a module of the search path in place of the standard one.
+    if mod ∈ preludeSig.rank && toString mod != "builtins" then
+      if let some path ← shadowingFile? (←read) mod then
+        specError loc s!"the search path has the module {path}, which CPython imports in place \
+          of the standard '{mod}'; PySpec reads only the standard '{mod}'"
     return types
   | none =>
     let (success, r) ← runChecked <| resolveModule loc mod
@@ -2517,7 +2803,7 @@ private partial def translateModuleGhost (form : Decorators.DecoratorForm) : PyS
     specError form.loc
       s!"ghost: name=\"{raw.name}\" collides with the reserved result binder"
     return
-  let type? ← raw.type.mapM pySpecType
+  let type? ← withReader ({ · with evaluated := true }) (raw.type.mapM pySpecType)
   let mut init? : Option SpecExpr := none
   let mut initOk := true
   if let some initExpr := raw.init then
@@ -2629,6 +2915,7 @@ private partial def preScanModule (body : Array (stmt StrataDDM.SourceRange)) :
           let savedNames := (←get).nameMap
           modify fun s =>
             { s with nameMap := ghostScope.fold (init := s.nameMap) fun m k v => m.insert k v }
+          rejectUnreadArguments form
           translateModuleGhost form
           modify fun s => { s with nameMap := savedNames }
       -- A walrus target binds at module scope.
@@ -2657,11 +2944,17 @@ partial def translate (body : Array (stmt StrataDDM.SourceRange)) : PySpecM Unit
       ((s.elements.extract sigsBefore).filter fun
         | .ghostDecl _ => true
         | _ => false) }
+  -- The names that the module body has bound so far.
+  let mut moduleBound : Std.HashSet String := {}
   for h : i in [0:body.size] do
     let stmt := body[i]
+    for n in stmtBoundNames stmt do
+      checkNativeBinding stmt.ann "the model" n
+    let boundBefore := moduleBound
+    moduleBound := (stmtBoundNames stmt).fold (init := moduleBound) fun acc n => acc.insert n
     match stmt with
     | .Assign loc ⟨_, targets⟩ value _typeAnn =>
-      let (success, v) ← runChecked <| pySpecValue value
+      let (success, v) ← runChecked <| withReader ({ · with evaluated := true }) <| pySpecValue value
       if not success then
         continue
       let .isTrue eq := decideProp (targets.size = 1)
@@ -2682,10 +2975,14 @@ partial def translate (body : Array (stmt StrataDDM.SourceRange)) : PySpecM Unit
         pushSignature <| .typeDef d
       | _ =>
         specWarning loc s!"skipped non-type Assign ({name})"
+    | .Expr _ (.Constant ..) => pure () -- a constant runs no code; a docstring only sets `__doc__`
     | .Expr .. =>
-      -- Ghosts were registered by the pre-scan; anything else is skipped.
+      -- Unshadowed `ghost(...)` forms were registered by the pre-scan. Any other expression,
+      -- such as `setattr(typing, "Unpack", dict)` or `1 // 0`, runs code that PySpec doesn't
+      -- read.
       if (moduleGhostForm? stmt).isNone || shadowedGhosts.contains i then
-        specWarning stmt.ann "skipped Expr at module level"
+        specError stmt.ann "an expression statement at module level is not supported, because \
+          it may change what the model means; only a constant or a ghost(...) form is allowed"
     | .FunctionDef loc
                    ⟨_funNameLoc, funName⟩
                    args
@@ -2734,7 +3031,11 @@ partial def translate (body : Array (stmt StrataDDM.SourceRange)) : PySpecM Unit
       let (success, _) ← runChecked <| recordTypeDef loc className
       -- Add the class to nameMap so it can be used in forward references
       setNameValue className (.typeValue (.ident loc ((← read).currentModule.mkIdent className) #[]))
-      let d ← pySpecClassBody loc className baseIdents stmts classBundle.invariants
+      let bound : Std.HashSet String :=
+        if builtinNames.contains className || boundBefore.contains className then {className}
+        else {}
+      let d ← pySpecClassBody loc className baseIdents stmts classBundle.invariants boundBefore
+        bound
       let d := { d with exhaustive := isExhaustive }
       if success then
         pushSignature (.classDef d)

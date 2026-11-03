@@ -73,6 +73,26 @@ public def lambdaBinderNames (lamArgs : arguments SourceRange) : Array String :=
   let .mk_arguments _ ⟨_, posonly⟩ ⟨_, pos⟩ _ ⟨_, kwonly⟩ _ _ _ := lamArgs
   (posonly ++ pos ++ kwonly).map fun a => let .mk_arg _ ⟨_, n⟩ _ _ := a; n
 
+/-- The arguments of the call `f` that run when the module is imported, but that PySpec
+    doesn't read: each `**` mapping, each argument after the first that is neither a lambda nor
+    a constant, and the default values of each lambda argument. -/
+public def DecoratorForm.unreadArguments (f : DecoratorForm) : Array (SourceRange × String) :=
+  let starStar := f.kwargs.filterMap fun kw =>
+    match kw.arg with
+    | ⟨_, none⟩ => some (kw.value.ann, "a ** argument")
+    | _ => none
+  let defaults := (f.args.getD #[]).filterMap fun a =>
+    match a with
+    | .Lambda loc (.mk_arguments _ _ _ _ _ ⟨_, kwDefaults⟩ _ ⟨_, defaults⟩) _ =>
+      if defaults.size > 0 || kwDefaults.any (· matches .some_expr ..) then
+        some (loc, "a default value of a lambda parameter")
+      else none
+    | _ => none
+  let others := ((f.args.getD #[]).extract 1).filterMap fun a =>
+    if a matches .Lambda .. | .Constant .. then none
+    else some (a.ann, "an argument other than a lambda or a constant")
+  starStar ++ others ++ defaults
+
 /-- All parameter names of a function's argument list, including the `*args`
     (vararg) and `**kwargs` (kwarg) names. Used to compute the set of valid
     contract-lambda binders, so a binder matching the function's `**kwargs`

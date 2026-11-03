@@ -210,7 +210,7 @@ private def misplacedEntryReadErrorTest : IO Unit := do
 /-- Every `DroppedKind`, a dropped entry's source text, and both `**kwargs` forms survive the
     round trip; an invariant entry among the postconditions is a read error. -/
 private def droppedAndKwargsRoundTripTest : IO Unit := do
-  let kinds : Array DroppedKind := #[.assert, .requires, .ensures, .admit, .modifies]
+  let kinds : Array DroppedKind := #[.assert, .requires, .ensures, .admit, .modifies, .ghostInit]
   let any := SpecType.ident rtLoc .typingAny
   for unpacked in [false, true] do
     let kwargs := some ("kw", if unpacked then KwargsType.unpacked any else .each any)
@@ -253,7 +253,8 @@ private def droppedAndKwargsRoundTripTest : IO Unit := do
   | .ok _ => throw <| IO.userError "an invariant entry among the postconditions must be a read error"
 
 /-- Through Ion bytes: `writeDDM` states the format version, and `readDDMVersioned` reads it
-    with the signatures; a file without the format command reads with no version; an invariant
+    with the signatures, a class field's literal value and the positions of fields and class
+    variables included; a file without the format command reads with no version; an invariant
     entry of an old file reads with the binder `self` and no source text. -/
 private def ionFileTest : IO Unit := do
   let d : FunctionDecl := {
@@ -261,7 +262,17 @@ private def ionFileTest : IO Unit := do
     returnType := SpecType.ident rtLoc .typingAny, isOverload := false
     preconditions := #[], postconditions := #[]
     dropped := #[{ kind := .modifies, source := "x.y()" }] }
-  let c : ClassDef := { loc := rtLoc, name := "C", methods := #[], invariants :=
+  let intTy := SpecType.ident rtLoc .builtinsInt
+  let fields : Array ClassField := #[
+    { name := "x", type := intTy, source := .body (some (.intLit (-1) rtLoc)),
+      loc := { start := ⟨3⟩, stop := ⟨9⟩ } },
+    { name := "b", type := intTy, source := .body (some (.boolLit true rtLoc)) },
+    { name := "f", type := intTy, source := .body (some (.floatLit "-2.5" rtLoc)) },
+    { name := "n", type := intTy, source := .body (some (.noneLit rtLoc)) },
+    { name := "y", type := intTy, source := .init "_H()" }, { name := "z", type := intTy }]
+  let classVars : Array ClassVariable :=
+    #[{ name := "K", value := "int", loc := { start := ⟨12⟩, stop := ⟨19⟩ } }]
+  let c : ClassDef := { loc := rtLoc, name := "C", methods := #[], fields, classVars, invariants :=
     #[{ source := "lambda s: s.x", binder := "s", formula := none }] }
   IO.FS.withTempDir fun dir => do
     let file := dir / "m.pyspec.st.ion"
@@ -273,6 +284,21 @@ private def ionFileTest : IO Unit := do
     | .functionDecl d', .classDef c' =>
       unless d'.dropped.map (·.source) == #["x.y()"] && c'.invariants.map (·.binder) == #["s"] do
         throw <| IO.userError "the dropped clause or the invariant changed through Ion"
+      let fields := c'.fields.map fun f => (f.name, match f.source with
+        | .body (some (.intLit i _)) => s!"int {i}"
+        | .body (some (.boolLit b _)) => s!"bool {b}"
+        | .body (some (.floatLit v _)) => s!"float {v}"
+        | .body (some (.noneLit _)) => "None"
+        | .body (some _) => "other"
+        | .body none => "none"
+        | .init c => s!"init {c}")
+      unless fields == #[("x", "int -1"), ("b", "bool true"), ("f", "float -2.5"), ("n", "None"),
+          ("y", "init _H()"), ("z", "none")] do
+        throw <| IO.userError s!"the fields changed through Ion: {fields}"
+      let locs := c'.fields.map (·.loc.start.byteIdx) ++
+        c'.classVars.map (·.loc.start.byteIdx)
+      unless locs == #[3, 0, 0, 0, 0, 0, 12] do
+        throw <| IO.userError s!"the positions of the fields and class variables changed through Ion: {locs}"
     | _, _ => throw <| IO.userError "the signatures changed kind through Ion"
     -- A file without the format command, as an older PySpec wrote it.
     let old := dir / "old.pyspec.st.ion"

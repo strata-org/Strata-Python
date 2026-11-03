@@ -962,6 +962,9 @@ inductive DroppedKind where
   | ensures
   | admit
   | modifies
+  /-- The `init=` of a function's `@ghost`, other than a constant: CPython evaluates it when it
+      imports the model. -/
+  | ghostInit
 deriving Inhabited, Repr, DecidableEq, BEq
 
 /-- Stable serialization tag for `DroppedKind`. -/
@@ -971,6 +974,7 @@ deriving Inhabited, Repr, DecidableEq, BEq
   | .ensures => "ensures"
   | .admit => "admit"
   | .modifies => "modifies"
+  | .ghostInit => "ghost init="
 
 /-- Parse a `DroppedKind.tag` back into a `DroppedKind`. -/
 @[expose] def DroppedKind.ofTag? : String → Option DroppedKind
@@ -979,6 +983,7 @@ deriving Inhabited, Repr, DecidableEq, BEq
   | "ensures" => some .ensures
   | "admit" => some .admit
   | "modifies" => some .modifies
+  | "ghost init=" => some .ghostInit
   | _ => none
 
 /-- A clause that PySpec could not read faithfully, with its source text as written: one that
@@ -1035,16 +1040,43 @@ structure FunctionDecl where
   dropped : Array DroppedClause := #[]
 deriving Inhabited
 
+/-- Where a class field comes from. -/
+inductive FieldSource where
+  /-- The class body declares the field, as in `x: int`, with the literal value it gives the
+      field, if any, as in `x: int = 0`. -/
+  | body (value : Option SpecExpr)
+  /-- The stub's `__init__` assigns the field, as in `self.x = self._C()`; `call` is `_C()`. -/
+  | init (call : String)
+deriving Inhabited
+
 structure ClassField where
   name : String
   type : SpecType
-  /-- An optional constant value for the field (e.g., from `self.x = expr` in `__init__`). -/
-  constValue : Option String := none
+  source : FieldSource := .body none
+  /-- Where the field is declared: for a class-body field, this orders it among the class
+      body's bindings; for an `__init__` field, it is the assignment in `__init__`. -/
+  loc : SourceRange := .none
 deriving Inhabited
+
+namespace ClassField
+
+/-- The literal value that the class body gives the field. -/
+def value : ClassField → Option SpecExpr
+  | { source := .body v, .. } => v
+  | _ => none
+
+/-- The call `_C()` of an `__init__` field, `self.x = self._C()`. -/
+def initCall? : ClassField → Option String
+  | { source := .init c, .. } => some c
+  | _ => none
+
+end ClassField
 
 structure ClassVariable where
   name : String
   value : String
+  /-- Where the class variable is bound, which orders it among the class body's bindings. -/
+  loc : SourceRange := .none
 deriving Inhabited
 
 structure ClassDef where

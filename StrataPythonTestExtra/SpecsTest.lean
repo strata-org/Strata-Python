@@ -272,7 +272,9 @@ meta def testCase : IO Unit := withPython fun pythonCmd => do
 /-- Translate a `native_cases/<stem>.py` fixture, returning its signatures and
     warnings. `check` receives them on success; a translation error is rethrown. -/
 meta def runNativeCase (stem : String)
-    (check : Array Signature → Array String → IO Unit) : IO Unit :=
+    (check : Array Signature → Array String → IO Unit)
+    (dir : System.FilePath := testDir / "native_cases") (searchPath : System.FilePath := testDir)
+    (modulePrefix : String := "native_cases.") : IO Unit :=
   withPython fun pythonCmd => do
     IO.FS.withTempFile fun _handle dialectFile => do
       IO.FS.writeBinFile dialectFile StrataPython.Python.toIon
@@ -282,9 +284,9 @@ meta def runNativeCase (stem : String)
             (pythonCmd := toString pythonCmd)
             (dialectFile := dialectFile)
             (strataDir := strataDir)
-            (pythonFile := testDir / "native_cases" / (stem ++ ".py"))
-            (searchPath := testDir)
-            (StrataPython.ModuleName.ofString! ("native_cases." ++ stem))
+            (pythonFile := dir / (stem ++ ".py"))
+            (searchPath := searchPath)
+            (StrataPython.ModuleName.ofString! (modulePrefix ++ stem))
             |>.toBaseIO
         match r with
         | .ok (sigs, warnings) => check sigs warnings
@@ -292,7 +294,9 @@ meta def runNativeCase (stem : String)
 
 /-- Like `runNativeCase` but expects a translation error, and returns its message; `none` when
     `withPython` skips the Python tests. -/
-meta def nativeCaseError (stem : String) : IO (Option String) := do
+meta def nativeCaseError (stem : String) (dir : System.FilePath := testDir / "native_cases")
+    (searchPath : System.FilePath := testDir) (modulePrefix : String := "native_cases.") :
+    IO (Option String) := do
   let msg ← IO.mkRef none
   withPython fun pythonCmd => do
     IO.FS.withTempFile fun _handle dialectFile => do
@@ -303,9 +307,9 @@ meta def nativeCaseError (stem : String) : IO (Option String) := do
             (pythonCmd := toString pythonCmd)
             (dialectFile := dialectFile)
             (strataDir := strataDir)
-            (pythonFile := testDir / "native_cases" / (stem ++ ".py"))
-            (searchPath := testDir)
-            (StrataPython.ModuleName.ofString! ("native_cases." ++ stem))
+            (pythonFile := dir / (stem ++ ".py"))
+            (searchPath := searchPath)
+            (StrataPython.ModuleName.ofString! (modulePrefix ++ stem))
             |>.toBaseIO
         match r with
         | .ok _ => throw <| IO.userError s!"{stem}: expected a hard error, but translation succeeded"
@@ -318,6 +322,21 @@ meta def expectNativeCaseError (stem : String) (needle : String) : IO Unit := do
   let some e ← nativeCaseError stem | return
   unless e.contains needle do
     throw <| IO.userError s!"{stem}: expected error containing \"{needle}\", got: {e}"
+
+/-- Expect one error line for each `(line, message)`: on that line of the fixture, with a
+message that starts with `message`. -/
+meta def expectNativeCaseErrorsAt (stem : String) (expected : Array (Nat × String))
+    (dir : System.FilePath := testDir / "native_cases") (searchPath : System.FilePath := testDir)
+    (modulePrefix : String := "native_cases.") : IO Unit := do
+  let some e ← nativeCaseError stem dir searchPath modulePrefix | return
+  let lines := e.splitOn "\n"
+  for (line, msg) in expected do
+    let found := lines.any fun l =>
+      match (l.splitOn s!"{stem}.py:{line}:").drop 1 with
+      | rest :: _ => ((rest.splitOn ": ").drop 1 |> ": ".intercalate).startsWith msg
+      | [] => false
+    unless found do
+      throw <| IO.userError s!"{stem}: expected an error on line {line} starting with \"{msg}\", got: {e}"
 
 meta def findFn (sigs : Array Signature) (name : String) : IO Specs.FunctionDecl := do
   let some d := sigs.findSome?
@@ -643,13 +662,10 @@ meta def expect (cond : Bool) (msg : String) : IO Unit :=
   expect ((m.args.args.map (toString ·.type)) == #["native_cases.typing_import_kept.C", "typing.List[builtins.int]"])
     s!"m: {m.args.args.map (toString ·.type)}"
 
--- A pin of a result that is wrong today: a method named `dict` shadows the builtin in the
--- class body, but PySpec still reads `-> dict` as the builtin. The check above covers typing
--- names only.
+-- A method named `dict` shadows the builtin in the rest of the class body, so the model is
+-- rejected.
 #guard_msgs in
-#eval runNativeCase "method_named_dict" fun sigs _ => do
-  let m ← findMethod (← findClass sigs "C") "m"
-  expect (toString m.returnType == "builtins.dict") s!"m returns {m.returnType}"
+#eval expectNativeCaseErrorsAt "method_named_dict" #[(7, "the class body of C reads 'dict'")]
 -- PySpec reads `x != "A"` as `not (x == "A")`, and `"k" not in d` as `not ("k" in d)`, also
 -- inside a quantifier and as the condition of an `if`.
 #guard_msgs in
@@ -1386,7 +1402,7 @@ warnings: #[]
 #guard_msgs in
 #eval runNativeCase "overload_init_fields" fun sigs warnings => do
   let c ← findClass sigs "C"
-  IO.println s!"fields: {c.fields.toList.map fun f => s!"{f.name} = {f.constValue.getD "-"}"}"
+  IO.println s!"fields: {c.fields.toList.map fun f => s!"{f.name} = {f.initCall?.getD "-"}"}"
   IO.println s!"warnings: {warnings.map warningText}"
 
 -- Two `@overload` stubs of `__init__` that assign one field different classes are a
@@ -2107,56 +2123,230 @@ meta def findModuleGhost (sigs : Array Signature) (name : String) : IO Specs.Gho
 #guard_msgs in
 #eval expectNativeCaseError "forward_class_base_rejected" "Unknown base class 'B'"
 
--- A shadowed `ghost` name is an ordinary expression, not a declaration form.
+-- A binding of `ghost` is rejected, and the `ghost(...)` after it is an ordinary call, which is
+-- rejected too.
 #guard_msgs in
-#eval runNativeCase "ghost_name_shadowed" fun sigs warnings => do
-  let ghosts := sigs.filterMap fun | .ghostDecl g => some g.name | _ => none
-  expect ghosts.isEmpty
-    s!"a shadowed ghost name still produced ghost declaration(s): {ghosts}"
-  expect (warnings.any (·.contains "skipped Expr at module level"))
-    "the shadowed ghost call was not reported as a skipped expression"
+#eval expectNativeCaseErrorsAt "ghost_name_shadowed" #[(2, "the model binds 'ghost'"), (3, "an expression statement at module level")]
 
--- A function definition shadowing `ghost` is detected like an assignment.
+-- The same holds for a binding by a def.
 #guard_msgs in
-#eval runNativeCase "ghost_name_shadowed_def" fun sigs warnings => do
-  let ghosts := sigs.filterMap fun | .ghostDecl g => some g.name | _ => none
-  expect ghosts.isEmpty
-    s!"a def-shadowed ghost name still produced ghost declaration(s): {ghosts}"
-  expect (warnings.any (·.contains "skipped Expr at module level"))
-    "the def-shadowed ghost call was not reported as a skipped expression"
+#eval expectNativeCaseErrorsAt "ghost_name_shadowed_def" #[(2, "the model binds 'ghost'"), (6, "an expression statement at module level")]
 
--- An import alias shadowing `ghost` is detected like an assignment.
+-- The same holds for a binding by an import alias.
 #guard_msgs in
-#eval runNativeCase "ghost_name_shadowed_import" fun sigs warnings => do
-  let ghosts := sigs.filterMap fun | .ghostDecl g => some g.name | _ => none
-  expect ghosts.isEmpty
-    s!"an import-shadowed ghost name still produced ghost declaration(s): {ghosts}"
-  expect (warnings.any (·.contains "skipped Expr at module level"))
-    "the import-shadowed ghost call was not reported as a skipped expression"
+#eval expectNativeCaseErrorsAt "ghost_name_shadowed_import" #[(2, "the model binds 'ghost'"), (4, "an expression statement at module level")]
 
--- A tuple assignment shadowing `ghost` is detected; the unsupported tuple
--- target itself stays a fatal error.
+-- An expression statement at module level or in a class body may change what the model
+-- means, so it is an error; a constant, such as a docstring or `...`, is allowed.
 #guard_msgs in
-#eval expectNativeCaseError "ghost_name_shadowed_tuple" "Unsupported target"
+#eval expectNativeCaseError "module_expr_setattr" "an expression statement at module level is not supported"
 
--- A module-level walrus binding shadowing `ghost` is detected like an
--- assignment.
 #guard_msgs in
-#eval runNativeCase "ghost_name_shadowed_walrus" fun sigs warnings => do
-  let ghosts := sigs.filterMap fun | .ghostDecl g => some g.name | _ => none
-  expect ghosts.isEmpty
-    s!"a walrus-shadowed ghost name still produced ghost declaration(s): {ghosts}"
-  expect (warnings.any (·.contains "skipped Expr at module level"))
-    "the walrus-shadowed ghost call was not reported as a skipped expression"
+#eval expectNativeCaseError "module_expr_raises" "an expression statement at module level is not supported"
 
--- A walrus nested inside another expression still shadows `ghost`.
 #guard_msgs in
-#eval runNativeCase "ghost_name_shadowed_walrus_nested" fun sigs warnings => do
-  let ghosts := sigs.filterMap fun | .ghostDecl g => some g.name | _ => none
-  expect ghosts.isEmpty
-    s!"a nested-walrus-shadowed ghost name still produced ghost declaration(s): {ghosts}"
-  expect (warnings.any (·.contains "skipped Expr at module level"))
-    "the nested-walrus-shadowed ghost call was not reported as a skipped expression"
+#eval expectNativeCaseError "class_expr_call" "an expression statement in the class body of C is not supported"
+
+#guard_msgs in
+#eval expectNativeCaseErrorsAt "class_field_value"
+  #[(6, "the value of the field x of C is not supported"),
+    (7, "the value of the field y of C is not supported")]
+
+-- An int, bool, float or None literal is kept as the field's value.
+#guard_msgs in
+#eval runNativeCase "class_field_literals" fun sigs warnings => do
+  let some c := sigs.findSome? (fun | .classDef c => some c | _ => none)
+    | throw <| IO.userError "class C not found"
+  let values := c.fields.map fun f => (f.name, match f.value with
+    | some (.intLit i _) => s!"int {i}"
+    | some (.floatLit v _) => s!"float {v}"
+    | some (.boolLit b _) => s!"bool {b}"
+    | some (.noneLit _) => "None"
+    | some _ => "other"
+    | none => "none")
+  expect (values == #[("a", "int -1"), ("b", "float -2.5"), ("c", "bool true"), ("d", "None"),
+      ("e", "none")]) s!"values: {values}"
+  expect warnings.isEmpty s!"warnings: {warnings}"
+
+-- An assignment's value runs when the model is imported, so its `|` must evaluate under
+-- CPython; an annotation is read as a stub type.
+#guard_msgs in
+#eval expectNativeCaseErrorsAt "union_string_value" #[(1, "this | raises a TypeError")]
+
+#guard_msgs in
+#eval expectNativeCaseErrorsAt "union_none_value" #[(1, "this | raises a TypeError")]
+
+#guard_msgs in
+#eval runNativeCase "union_value_allowed" fun sigs warnings => do
+  let f ← findFn sigs "f"
+  let types := f.args.args.map (toString ·.type)
+  expect (types == #["Union[_types.NoneType, builtins.int]",
+      "Union[_types.NoneType, typing.List[builtins.int]]"])
+    s!"types: {types}"
+  expect warnings.isEmpty s!"warnings: {warnings}"
+
+#guard_msgs in
+#eval runNativeCase "stub_self_reference" fun sigs warnings => do
+  let some c := sigs.findSome? (fun | .classDef c => some c | _ => none)
+    | throw <| IO.userError "class C not found"
+  let some m := c.methods.find? (·.name == "m")
+    | throw <| IO.userError "method m not found"
+  let types := (m.args.args.map (toString ·.type)).push (toString m.returnType)
+  expect (types == #["native_cases.stub_self_reference.C", "native_cases.stub_self_reference.C",
+      "native_cases.stub_self_reference.C"]) s!"types: {types}"
+  expect warnings.isEmpty s!"warnings: {warnings}"
+
+-- PySpec reads `requires`, `ghost` and its other forms by name, so a model can't bind them.
+#guard_msgs in
+#eval expectNativeCaseErrorsAt "module_binds_requires" #[(7, "the model binds 'requires'")]
+
+#guard_msgs in
+#eval expectNativeCaseErrorsAt "class_binds_ensures" #[(2, "the class body of C binds 'ensures'")]
+
+#guard_msgs in
+#eval expectNativeCaseErrorsAt "binds_exception" #[(2, "the model binds 'Exception'")]
+
+-- CPython renames a private name of a class body, and PySpec reads names as written.
+#guard_msgs in
+#eval expectNativeCaseErrorsAt "private_names" #[
+  (7, "the class body of C uses the private name '__f', which CPython renames to '_C__f'"),
+  (8, "the class body of C uses the private name '__T'"),
+  (9, "the class body of C uses the private name '__Inner'"),
+  (11, "the class body of C uses the private name '__m'"),
+  (13, "the class body of C uses the private name '__a'"),
+  (13, "the class body of C uses the private name '__kw'"),
+  (15, "the class body of C uses the private name '__T'"),
+  (17, "the class body of C uses the private name '__y'"),
+  (21, "the class body of C uses the private name '__g'"),
+  (23, "the class body of C uses the private name '__z'"),
+  (24, "the class body of C uses the private name '__c'"),
+  (26, "the class body of C uses the private name '__i'"),
+  (27, "the class body of C uses the private name '__i'")]
+
+#guard_msgs in
+#eval expectNativeCaseErrorsAt "private_nested_base" #[
+  (5, "the class body of O uses the private name '__B', which CPython renames to '_O__B'")]
+
+-- A `**` mapping and a lambda's default values run when the module is imported, but PySpec
+-- doesn't read them.
+#guard_msgs in
+#eval expectNativeCaseErrorsAt "unread_arguments" #[
+  (4, "a ** argument in ghost(...) runs when the module is imported, and PySpec doesn't read it"),
+  (6, "a ** argument in requires(...)"),
+  (10, "a default value of a lambda parameter in requires(...)"),
+  (14, "a default value of a lambda parameter in requires(...)"),
+  (18, "a ** argument in invariant(...)"),
+  (22, "an argument other than a lambda or a constant in admit(...)"),
+  (26, "a default value of a lambda parameter in requires(...)"),
+  (30, "this | raises a TypeError when CPython evaluates it"),
+  (32, "this | raises a TypeError when CPython evaluates it")]
+
+-- CPython evaluates the init= of a function's ghost when it imports the model, but PySpec reads
+-- it when the function is called, so an init= other than a constant is recorded as dropped.
+#guard_msgs in
+#eval runNativeCase "ghost_init_runs" fun sigs _ => do
+  let got ← #["f", "literal", "negative", "negated_none"].mapM fun n => do
+    return (← findFn sigs n).dropped.map fun c => (c.kind.tag, c.source)
+  expect (got == #[#[("ghost init=", "len(\"ab\")")], #[], #[], #[("ghost init=", "-None")]])
+    s!"dropped: {got}"
+
+-- CPython evaluates a class body's annotations, defaults, decorators and bases in the class
+-- body, where they read the names that the body bound before them.
+#guard_msgs in
+#eval expectNativeCaseErrorsAt "class_body_bindings" #[
+  (15, "the class body of C reads 'K', which it binds itself; PySpec reads the module's 'K' instead"),
+  (18, "the class body of C reads 'K'"),
+  (21, "the class body of C reads 'K'"),
+  (24, "the class body of C reads 'K'"),
+  (29, "the class body of C reads 'int'"),
+  (32, "the class body of C reads 'K'"),
+  (37, "the class body of C reads 'overload'")]
+
+-- Inside its own class statement, a class's unquoted name reads the binding that the name had
+-- before the statement: a builtin, a function or an import.
+#guard_msgs in
+#eval expectNativeCaseErrorsAt "class_own_name" #[
+  (3, "the class body of TimeoutError reads 'TimeoutError', which CPython reads as the \
+    'TimeoutError' bound before the class statement; write \"TimeoutError\" to name the class"),
+  (10, "the class body of D reads 'D', which CPython reads as the 'D' bound before"),
+  (15, "the class body of Inner reads 'Warning', which CPython reads as the 'Warning' bound before"),
+  (21, "the class body of BaseClass reads 'BaseClass', which CPython reads as the 'BaseClass' bound before")]
+
+-- An annotation that names its own class raises NameError when CPython imports the module, and
+-- PySpec reads it as a stub does.
+#guard_msgs in
+#eval runNativeCase "own_class_annotation" fun sigs _ => do
+  let c ← findClass sigs "D"
+  let returns ← #["clone", "same", "int"].mapM fun n => return toString (← findMethod c n).returnType
+  expect (returns == #["native_cases.own_class_annotation.D", "native_cases.own_class_annotation.D",
+    "builtins.int"]) s!"returns: {returns}"
+  let o ← findClass sigs "O"
+  let nested ← o.subclasses.mapM fun c => do return toString (← findMethod c "f").returnType
+  expect (nested == #["native_cases.own_class_annotation.I", "builtins.int"]) s!"O's classes: {nested}"
+  let t ← findClass sigs "TimeoutError"
+  let r := toString (← findMethod t "f").returnType
+  expect (r == "native_cases.own_class_annotation.TimeoutError") s!"TimeoutError.f returns {r}"
+
+-- CPython imports a `typing` module of the search path in place of the standard one: a module,
+-- a package or a compiled module, also when only an imported model imports `typing`.
+#guard_msgs in
+#eval do
+  let shadow := "which CPython imports in place of the standard 'typing'"
+  let cases : List (String × String × Nat) := [("shadowed_typing", "model", 1),
+    ("shadowed_typing", "indirect", 1), ("shadowed_typing_package", "model", 1),
+    ("shadowed_typing_compiled", "model", 1)]
+  for (dir, stem, line) in cases do
+    let some e ← nativeCaseError stem (dir := testDir / dir) (searchPath := testDir / dir)
+      (modulePrefix := "") | return
+    unless e.contains shadow && (stem != "indirect" || e.contains "other.py:1:") &&
+        (stem == "indirect" || e.contains s!"{stem}.py:{line}:") do
+      throw <| IO.userError s!"{dir}/{stem}: {e}"
+
+-- CPython never imports a `builtins` module of the search path, since `builtins` is built in.
+#guard_msgs in
+#eval runNativeCase "model" (dir := testDir / "shadowed_builtins")
+    (searchPath := testDir / "shadowed_builtins") (modulePrefix := "") fun sigs _ => do
+  discard <| findFn sigs "f"
+
+-- PySpec records where each field and class variable is, in source order.
+#guard_msgs in
+#eval runNativeCase "body_positions" fun sigs _ => do
+  let c ← findClass sigs "C"
+  let a := c.fields[0]!.loc.start.byteIdx
+  let k := c.classVars[0]!.loc.start.byteIdx
+  let b := c.fields[1]!.loc.start.byteIdx
+  expect (0 < a && a < k && k < b) s!"positions: a {a}, K {k}, b {b}"
+
+#guard_msgs in
+#eval runNativeCase "private_class_decorator" fun sigs warnings => do
+  let c ← findClass sigs "C"
+  expect (c.invariants.map (·.source) == #["lambda self: self.__x >= 0"])
+    s!"invariants: {c.invariants.map (·.source)}"
+  expect warnings.isEmpty s!"warnings: {warnings}"
+
+#guard_msgs in
+#eval runNativeCase "private_not_renamed" fun sigs warnings => do
+  let f ← findFn sigs "f"
+  expect (f.args.args.map (toString ·.type) == #["builtins.int"]) "f's parameter type"
+  expect warnings.isEmpty s!"warnings: {warnings}"
+
+#guard_msgs in
+#eval runNativeCase "docstrings_allowed" fun sigs warnings => do
+  let names := sigs.filterMap fun | .classDef c => some c.name | _ => none
+  expect (names == #["C"]) s!"classes: {names}"
+  expect warnings.isEmpty s!"warnings: {warnings}"
+
+-- The same holds for a binding by a tuple assignment, whose target is also unsupported.
+#guard_msgs in
+#eval expectNativeCaseErrorsAt "ghost_name_shadowed_tuple" #[(2, "Unsupported target"), (2, "the model binds 'ghost'"), (3, "an expression statement at module level")]
+
+-- The same holds for a binding by a walrus statement.
+#guard_msgs in
+#eval expectNativeCaseErrorsAt "ghost_name_shadowed_walrus" #[(2, "the model binds 'ghost'"), (3, "an expression statement at module level")]
+
+-- The same holds for a walrus nested inside another expression.
+#guard_msgs in
+#eval expectNativeCaseErrorsAt "ghost_name_shadowed_walrus_nested" #[(2, "the model binds 'ghost'"), (3, "an expression statement at module level")]
 
 -- A walrus rebinding a type alias drops the stale binding: the later ghost
 -- `type=` use is rejected instead of resolving to the pre-rebind value.

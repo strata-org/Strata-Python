@@ -172,6 +172,9 @@ category SnapshotDecl;
 op mkSnapshotDecl(name : Str, capture : SpecExprDecl) : SnapshotDecl =>
   "snapshot " name " = " capture "\n";
 
+op mkClassFieldValueDecl(name : Ident, fieldType : SpecType, value : SpecExprDecl) : ClassFieldDecl =>
+  name " : " fieldType " = " value "\n";
+
 category GhostDecl;
 op mkGhostDecl(name : Str, ghostType : Option SpecType, ghostInit : Option SpecExprDecl) : GhostDecl =>
   "ghost " name " [type= " ghostType "] [init= " ghostInit "]\n";
@@ -473,14 +476,16 @@ def FunctionDecl.toDDM (d : FunctionDecl) : DDM.FunDecl SourceRange :=
       else some (.mkGhostsClause .none ⟨.none, d.ghosts.map (·.toDDM)⟩)⟩)
 
 def ClassVariable.toDDM (cv : ClassVariable) : DDM.ClassVarDecl SourceRange :=
-  .mkClassVarDecl .none ⟨.none, cv.name⟩ ⟨.none, cv.value⟩
+  .mkClassVarDecl cv.loc ⟨.none, cv.name⟩ ⟨.none, cv.value⟩
 
 partial def ClassDef.toDDMDecl (d : ClassDef) : DDM.ClassDecl SourceRange :=
   .mkClassDecl d.loc (.mk .none d.name)
     ⟨.none, d.bases.map (·.toDDM)⟩
     ⟨.none, d.fields.map fun f =>
-      .mkClassFieldDecl .none ⟨.none, f.name⟩ f.type.toDDM
-        ⟨.none, f.constValue.map (⟨.none, ·⟩)⟩⟩
+      match f.source with
+      | .body (some v) => .mkClassFieldValueDecl f.loc ⟨.none, f.name⟩ f.type.toDDM v.toDDM
+      | .body none => .mkClassFieldDecl f.loc ⟨.none, f.name⟩ f.type.toDDM ⟨.none, none⟩
+      | .init c => .mkClassFieldDecl f.loc ⟨.none, f.name⟩ f.type.toDDM ⟨.none, some ⟨.none, c⟩⟩⟩
     ⟨.none, d.classVars.map (·.toDDM)⟩
     ⟨.none, d.subclasses.map (·.toDDMDecl)⟩
     ⟨.none, d.methods.map (·.toDDM)⟩
@@ -721,10 +726,16 @@ def DDM.ClassDecl.fromDDM (d : DDM.ClassDecl SourceRange) : FromDDM Specs.ClassD
       match PythonIdent.ofString s with
       | some id => pure id
       | none => .throw ann s!"Bad base class identifier: '{s}'"
-    fields := ← fields.mapM fun (.mkClassFieldDecl _ ⟨_, n⟩ tp ⟨_, cv⟩) => do
-      pure { name := n, type := ← tp.fromDDM, constValue := cv.map (·.2) : ClassField }
-    classVars := classVars.map fun (.mkClassVarDecl _ ⟨_, n⟩ ⟨_, v⟩) =>
-      { name := n, value := v : ClassVariable }
+    fields := ← fields.mapM fun
+      | .mkClassFieldDecl loc ⟨_, n⟩ tp ⟨_, cv⟩ => do
+        let source := match cv with
+          | some ⟨_, c⟩ => .init c
+          | none => .body none
+        pure { name := n, type := ← tp.fromDDM, source, loc : ClassField }
+      | .mkClassFieldValueDecl loc ⟨_, n⟩ tp v => do
+        pure { name := n, type := ← tp.fromDDM, source := .body (some v.fromDDM), loc : ClassField }
+    classVars := classVars.map fun (.mkClassVarDecl loc ⟨_, n⟩ ⟨_, v⟩) =>
+      { name := n, value := v, loc : ClassVariable }
     subclasses := ← subclasses.mapM (·.fromDDM)
     methods := ← methods.mapM (·.fromDDM)
     exhaustive := exhaustive
@@ -762,8 +773,10 @@ def DDM.Command.fromDDM (cmd : DDM.Command SourceRange) : FromDDM Specs.Signatur
 /-- The version of what PySpec records in its Ion files. It goes up whenever PySpec changes
     what it records, not only when the Ion shape changes, so that a consumer can refuse a file
     that an older PySpec wrote. Version 1 records the clauses that PySpec could not read
-    faithfully, invariant sources, the source text of f-string parts, and `Unpack`. -/
-public def formatVersion : Nat := 1
+    faithfully, invariant sources, the source text of f-string parts, and `Unpack`. Version 2
+    also records the values of class fields, and comes from a PySpec that rejects the model code
+    that it reads differently from CPython. -/
+public def formatVersion : Nat := 2
 
 /-- Reads Python spec signatures from a DDM Ion file, with the format version that the file
     states, if any. -/
