@@ -135,7 +135,7 @@ declared by a layered environment. It is split across two directories:
 
 | Directory | Contents | Tests |
 |---|---|---|
-| `StrataDyn/` | The core IR, builder, environment DSL, well-formedness checker, and the printer and reader of its text form (namespace `Strata.Dyn`). Imports nothing from StrataPython | `StrataDynTest/`; `StrataPythonTestExtra/DynReadTest.lean` reads every translator golden back, and `DynRefToRegTest.lean` runs ref-to-reg on each |
+| `StrataDyn/` | The core IR, builder, environment DSL, well-formedness checker, the printer and reader of its text form, and in `StrataDyn/Core/` the translation of Dyn types to Core types (namespace `Strata.Dyn`). Imports nothing from StrataPython | `StrataDynTest/`; `StrataPythonTestExtra/DynReadTest.lean` reads every translator golden back, and `DynRefToRegTest.lean` runs ref-to-reg on each |
 | `StrataPython/Dyn/` | Python on Dyn: the Python environment (`Env.lean`), the emission helpers (`Build.lean`), name resolution (`Scope.lean`), the declared shapes of classes (`Shape.lean`), the size lemmas and tactic that the termination proofs of name resolution and the translator share (`Termination.lean`), the translator (`Translate.lean`) and properties of it (`TranslateProps.lean`) and the `pydyn dyn` command (`Cli.lean`) | `StrataPythonTest/Dyn/`; `StrataPythonTestExtra/DynTranslateTest.lean` and `PyScopeTest.lean` run the translator and the scope pass over the programs in `StrataPythonTest/Dyn/dyn_tests/`, listed in `StrataPythonTest/Dyn/dyn_tests.txt` |
 
 [`docs/Dyn.md`](./docs/Dyn.md) is the Dyn reference, and

@@ -3,8 +3,8 @@
 Dyn is a typed intermediate representation for programs, defined in Lean. A front end
 translates a source language into Dyn, and analyses and interpreters work on Dyn
 rather than on the source language. This document is a self-contained reference for Dyn
-itself. §4 shows how a language gives its programs a semantics that runs them, and §5 how to
-reason about those runs.
+itself. §4 shows how a language gives its programs a semantics that runs them, §5 how to
+reason about those runs, and §6 how Dyn's types are translated to Core.
 [Python to Dyn](./PythonToDyn.md) describes how Python is translated into it.
 
 ## 1. Overview
@@ -691,3 +691,69 @@ ends iff, under some oracle, `runFused` runs out of fuel on every fuel (`diverge
 debugger's hook runs `step`: one that only observes ends at the configuration of the run under
 its oracle (`runHooked_observer`), and a run that it stops and `runFused` resumes ends at a
 configuration of the uninterrupted run (`runHooked_resume`).
+
+## 6. Dyn types in Core
+
+A translator that emits Core needs Dyn's types as Core types. `StrataDyn/Core/Types.lean`
+translates them, and nothing else: no values, operations or control flow.
+`StrataDyn/Core/Denote.lean` proves that the translation preserves meaning.
+
+### Policies
+
+A policy chooses how each primitive type is represented in Core: as an uninterpreted Core type
+constructor applied to the translated arguments, or as a Core type built from them, such as
+`Int` as Core's `int`. A policy sees a primitive's name and parameters only, not its
+annotation, so a representation cannot depend on metadata. A type whose values can fault, loop
+or write the store should stay opaque: the example policy represents the function type as one
+nullary Core type, `Closure`, and leaves calls to the value lowering.
+
+Datatypes are not the policy's choice. A group whose members have a Core form becomes one Core
+datatype block, with binders the translation derives from recursive references and aligns
+across the group. Members may name or order their type parameters differently, but the aligned
+parameter sets must be identical, including unused parameters, and each member's parameters
+must remain distinct. Non-recursive members with different parameter sets belong in separate
+groups. A group without a Core form has no block; the checker below reports why.
+
+### Translation and checking
+
+Translating a type cannot fail: every checked Dyn type expression has a Core type under a scope
+that says what its variables stand for, and `compile` lists an environment's Core type
+declarations in declaration order, leaving out groups without a Core form. Whether the
+environment is supported is a separate question, decided by `checkEnv`: it walks the
+declarations, extends a Core context with each as Core's declaration rules would (datatypes,
+known types and the generated datatype functions; registering the names as program identifiers
+is the embedding program's step), and either returns the final context with a proof of support
+or names the first declaration that fails. It rejects a list parameter on a nominal type, since
+Core's constructors have a fixed arity (a list parameter is fine where a concrete
+representation consumes it); an empty datatype; a group whose members cannot share binders,
+because the alignment identifies two parameters of a member or leaves different parameter
+sets across members, which Core's declaration checker also forbids; a Core name already taken;
+a concrete representation using a constructor the context does not know at that arity; and the shapes
+Core's own datatype checker refuses, such as nested or non-uniform recursion, uninhabited types
+and non-positive occurrences. Support certifies Core's declaration checks, not that the
+generated functions typecheck; the tests check that as well. Emitted names are readable and
+injective: `base.Except` becomes `$dyn.type.base.Except`.
+
+### Types for signatures and instantiations
+
+For an instruction signature without list parameters, open a generic scope over its type
+parameters: it gives each a Core type variable, which every type of the signature shares, and
+`scheme` closes a translated type into a Core type scheme quantified over them. A signature
+with a list parameter has no generic scope, since a list cannot be a Core type variable. For an
+instantiation, build a scope from the consumer's Core arguments, which are checked once for
+count, kind and well-formedness in the context; translating under it substitutes them, splicing
+list arguments into list literals. That every constructor a translation relies on is present in
+the context the checker builds is not yet proved; until it is, consumers take the union of the
+two signatures.
+
+### What the proofs say
+
+Dyn types have a direct meaning as Lean types, independent of Core, with the meaning of each
+constructor supplied as a parameter. This is not yet the run-time semantics of §4; connecting
+the two, the function type included, is a later step. Translation preserves meaning under two
+assumptions: each constructor's Core representation agrees with its supplied Dyn meaning,
+nominal datatypes included, and the variable assignments on both sides agree. This holds for
+every type expression, type-list splices included, and also in Core's own denotation when its
+custom constructors are interpreted compositionally. Each emitted datatype agrees with its Dyn
+declaration for one unfolding, with recursive occurrences interpreted by arbitrary carriers;
+relating the recursive types themselves is left to the implementation translator.

@@ -80,6 +80,39 @@ def key : Name → Nat
 | .num n i => 257 + 259 * keyNat i (key n)
 | .str n s => 256 + 259 * keyBytes s.toByteArray.data.toList (key n)
 
+/-! ### A name as readable text
+
+* `escaped`: an injective encoding of a name as text (`Name.escaped_inj`), its segments from
+  the root outwards, a string segment introduced by `.` and a numeric segment by `#`.
+* `escapeChars`: a string segment's body, with each `.`, `#`, `'`, `!` and `$` preceded by `'`. -/
+
+/-- The characters a string segment's body cannot show bare: the two segment markers, the
+escape character, and the two characters Core's generated names are suffixed with (`!` for an
+unsafe selector, `$Elim` for an eliminator), so that no Dyn name spells another's suffixed
+form. -/
+def isMark (c : Char) : Bool := c == '.' || c == '#' || c == '\'' || c == '!' || c == '$'
+
+/-- A string segment's body, each mark preceded by `'`. -/
+def escapeChars : List Char → List Char
+  | [] => []
+  | c :: cs => if isMark c then '\'' :: c :: escapeChars cs else c :: escapeChars cs
+
+/-- The characters of `escaped`. -/
+def escapedChars : Name → List Char
+  | .base => []
+  | .num n i => escapedChars n ++ '#' :: Nat.toDigits 10 i
+  | .str n s => escapedChars n ++ '.' :: escapeChars s.toList
+
+/-- An injective encoding of a name as readable text (`Name.escaped_inj`): each segment from
+the root outwards, a string segment as `.` and its body with every `.`, `#`, `'`, `!` and `$`
+preceded by `'`, a numeric segment as `#` and its decimal digits.  `.base` is `""`, `base.Except`
+is `".base.Except"`, `.num (.str .base "f") 3` is `".f#3"`, `.str .base "a.b"` is `".a'.b"` and
+`.str .base "x!"` is `".x'!"`.
+
+The escape character is `'` because Strata's SMT-LIB emission passes `$`, `.`, `#`, `'` and `!`
+through as they are but rewrites `%`, `~`, `` ` ``, `|` and `\`. -/
+def escaped (n : Name) : String := String.ofList (escapedChars n)
+
 end Name
 
 end

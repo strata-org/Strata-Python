@@ -13,6 +13,7 @@ set_option autoImplicit false
 
 * The order on `Name` is a lawful total order: `Std.TransOrd Name` and `Std.LawfulEqOrd Name`.
 * `key_inj`: `Name.key` is injective.
+* `escaped_inj`: `Name.escaped` is injective.
 -/
 
 namespace Strata.Dyn
@@ -312,6 +313,135 @@ public theorem key_inj {x y : Name} (h : key x = key y) : x = y := by
 /-- Keys are equal exactly when names are. -/
 @[simp, grind =] public theorem key_eq_key {x y : Name} : key x = key y ↔ x = y :=
   ⟨key_inj, fun h => h ▸ rfl⟩
+
+/-! ### `escaped` is injective
+
+`escapedChars n` is the texts of `segs n` in a row (`escapedChars_eq`).  Each text starts with
+its marker and the escape keeps the markers out of a string segment's body, so a body ends where
+the next marker is and the texts are read back one segment at a time (`flatMap_segChars_inj`);
+the segments determine the name (`segs_inj`). -/
+
+/-- One segment's text: its marker, then its body. -/
+def segChars : Option String × Nat → List Char
+  | (some s, _) => '.' :: escapeChars s.toList
+  | (none, i) => '#' :: Nat.toDigits 10 i
+
+/-- `escapedChars` writes the segments' texts in a row. -/
+theorem escapedChars_eq : ∀ n : Name, escapedChars n = (segs n).flatMap segChars
+  | .base => rfl
+  | .num n i => by simp [escapedChars, segs, segChars, escapedChars_eq n]
+  | .str n s => by simp [escapedChars, segs, segChars, escapedChars_eq n]
+
+/-- The text after a segment's body: nothing, or the next segment's marker. -/
+def Boundary : List Char → Prop
+  | [] => True
+  | c :: _ => c = '.' ∨ c = '#'
+
+/-- Segments' texts in a row start at a boundary. -/
+theorem boundary_flatMap : ∀ l : List (Option String × Nat), Boundary (l.flatMap segChars)
+  | [] => trivial
+  | (some _, _) :: _ => Or.inl rfl
+  | (none, _) :: _ => Or.inr rfl
+
+/-- A string segment's body never starts with a marker. -/
+theorem escapeChars_head (d : Char) (t : List Char) :
+    ∃ c r, escapeChars (d :: t) = c :: r ∧ c ≠ '.' ∧ c ≠ '#' := by
+  simp only [escapeChars]
+  split
+  · exact ⟨'\'', _, rfl, by decide, by decide⟩
+  · rename_i h
+    exact ⟨d, _, rfl, fun e => h (by subst e; decide), fun e => h (by subst e; decide)⟩
+
+/-- A body and the boundary after it are read back from their text. -/
+theorem escapeChars_inj : ∀ (s t r₁ r₂ : List Char), Boundary r₁ → Boundary r₂ →
+    escapeChars s ++ r₁ = escapeChars t ++ r₂ → s = t ∧ r₁ = r₂
+  | [], [], _, _, _, _, h => ⟨rfl, h⟩
+  | [], d :: t, r₁, _, hb, _, h => by
+      obtain ⟨c, r, hc, hc₁, hc₂⟩ := escapeChars_head d t
+      rw [hc] at h
+      simp only [escapeChars, List.nil_append, List.cons_append] at h
+      subst h
+      exact absurd hb (fun h => h.elim hc₁ hc₂)
+  | d :: t, [], _, r₂, _, hb, h => by
+      obtain ⟨c, r, hc, hc₁, hc₂⟩ := escapeChars_head d t
+      rw [hc] at h
+      simp only [escapeChars, List.nil_append, List.cons_append] at h
+      subst h
+      exact absurd hb (fun h => h.elim hc₁ hc₂)
+  | c :: s, d :: t, r₁, r₂, hb₁, hb₂, h => by
+      by_cases hc : isMark c = true <;> by_cases hd : isMark d = true <;>
+        simp only [escapeChars, hc, hd, Bool.false_eq_true, ↓reduceIte, List.cons_append,
+          List.cons.injEq, true_and] at h
+      · obtain ⟨rfl, h⟩ := h
+        obtain ⟨rfl, rfl⟩ := escapeChars_inj s t r₁ r₂ hb₁ hb₂ h
+        exact ⟨rfl, rfl⟩
+      -- An escape character in the bare position would itself have been escaped.
+      · exact absurd (by rw [← h.1]; decide) hd
+      · exact absurd (by rw [h.1]; decide) hc
+      · obtain ⟨rfl, h⟩ := h
+        obtain ⟨rfl, rfl⟩ := escapeChars_inj s t r₁ r₂ hb₁ hb₂ h
+        exact ⟨rfl, rfl⟩
+
+/-- A decimal digit is not a mark. -/
+theorem isMark_toDigits {i : Nat} {c : Char} (h : c ∈ Nat.toDigits 10 i) : isMark c = false := by
+  have hd := Nat.isDigit_of_mem_toDigits (by decide) (by decide) h
+  simp only [isMark, Bool.or_eq_false_iff, beq_eq_false_iff_ne]
+  and_intros <;> rintro rfl <;> exact absurd hd (by decide)
+
+/-- A body without marks is its own text. -/
+theorem escapeChars_of_forall : ∀ l : List Char, (∀ c ∈ l, isMark c = false) → escapeChars l = l
+  | [], _ => rfl
+  | c :: l, h => by
+      obtain ⟨hc, hl⟩ := List.forall_mem_cons.mp h
+      simp only [escapeChars, hc, Bool.false_eq_true, ↓reduceIte, escapeChars_of_forall l hl]
+
+/-- Segments as `segs` makes them: a string segment carries `0`. -/
+def Canonical (l : List (Option String × Nat)) : Prop := ∀ p ∈ l, p.1 ≠ none → p.2 = 0
+
+/-- A name's segments are canonical. -/
+theorem canonical_segs : ∀ n : Name, Canonical (segs n)
+  | .base => fun _ h => absurd h List.not_mem_nil
+  | .num n i => by
+      simp only [Canonical, segs, List.forall_mem_append, List.forall_mem_singleton]
+      exact ⟨canonical_segs n, fun h => (h rfl).elim⟩
+  | .str n s => by
+      simp only [Canonical, segs, List.forall_mem_append, List.forall_mem_singleton]
+      exact ⟨canonical_segs n, fun _ => trivial⟩
+
+/-- Segments are read back from their texts in a row. -/
+theorem flatMap_segChars_inj : ∀ (l m : List (Option String × Nat)), Canonical l → Canonical m →
+    l.flatMap segChars = m.flatMap segChars → l = m
+  | [], [], _, _, _ => rfl
+  | [], (o, _) :: _, _, _, h | (o, _) :: _, [], _, _, h => by cases o <;> simp [segChars] at h
+  | (o₁, i) :: l, (o₂, j) :: m, hl, hm, h => by
+      obtain ⟨hp, hl₁⟩ := List.forall_mem_cons.mp hl
+      obtain ⟨hq, hm₁⟩ := List.forall_mem_cons.mp hm
+      simp only [List.flatMap_cons] at h
+      rcases o₁ with _ | s <;> rcases o₂ with _ | t <;>
+        simp only [segChars, List.cons_append, List.cons.injEq, true_and] at h
+      · rw [← escapeChars_of_forall _ (fun _ => isMark_toDigits),
+          ← escapeChars_of_forall (Nat.toDigits 10 j) (fun _ => isMark_toDigits)] at h
+        obtain ⟨hd, hr⟩ := escapeChars_inj _ _ _ _ (boundary_flatMap l) (boundary_flatMap m) h
+        obtain rfl : i = j := by
+          rw [← Nat.ofDigitChars_ten_toDigits (n := i), hd, Nat.ofDigitChars_ten_toDigits]
+        rw [flatMap_segChars_inj l m hl₁ hm₁ hr]
+      · exact absurd h.1 (by decide)
+      · exact absurd h.1 (by decide)
+      · obtain ⟨hs, hr⟩ := escapeChars_inj _ _ _ _ (boundary_flatMap l) (boundary_flatMap m) h
+        obtain rfl : i = 0 := hp (Option.some_ne_none _)
+        obtain rfl : j = 0 := hq (Option.some_ne_none _)
+        rw [String.toList_inj.mp hs, flatMap_segChars_inj l m hl₁ hm₁ hr]
+
+/-- `escaped` is injective. -/
+public theorem escaped_inj {x y : Name} (h : escaped x = escaped y) : x = y := by
+  have h := congrArg String.toList h
+  simp only [escaped, String.toList_ofList, escapedChars_eq] at h
+  exact segs_inj (flatMap_segChars_inj _ _ (canonical_segs x) (canonical_segs y) h)
+
+/-- Escapes are equal exactly when names are. -/
+@[simp, grind =] public theorem escaped_eq_escaped {x y : Name} :
+    escaped x = escaped y ↔ x = y :=
+  ⟨escaped_inj, fun h => h ▸ rfl⟩
 
 end Name
 

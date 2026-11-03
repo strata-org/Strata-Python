@@ -961,6 +961,14 @@ theorem checkElems_of_checkPayloadList {P : Name → Option (Array (Param TyPara
     | list => exact he h.1
 end
 
+/-- Soundness of `checkPayload`: a payload is well formed at its kind under any relation the
+resolver implies, when what a `.non` position may refer to the resolver accepts too. -/
+theorem wfRel_of_checkPayload {P : Name → Option (Array (Param TyParam))}
+    {R N : Name → Array Kind → Bool} {Rel : Name → Array Kind → Prop}
+    (hR : ∀ n ks, R n ks = true → Rel n ks) (hN : ∀ n ks, N n ks = true → R n ks = true)
+    {scope : Array Kind} (e : Raw) (h : checkPayload P R N scope e = true) : WFRel Rel scope e :=
+  wfRel_of_check hR e (check_of_checkPayload hN e h)
+
 /-- `checkList` is `check` of every element. -/
 private theorem checkList_iff {R : Name → Array Kind → Bool} {scope : Array Kind} :
     ∀ l : List Raw, checkList R scope l = true ↔ ∀ a ∈ l, check R scope a = true

@@ -35,8 +35,10 @@ An environment's fields are private.  Clients read it through its lookups:
 * `typeOf?`, `dataOf?`: the type and the datatype a name names.
 * `DeclaresInsn`: the instruction a name names, as a checked signature and a kind.
 * `annOf?`, `ctorAddr?`: the annotation a name is declared with, and which constructor it is.
+* `entries`: every declaration in declaration order, each checked, for a pass over the
+  environment.
 
-Each has lemmas for `empty` and the `add*` operations.  The raw declarations they read are
+Each lookup has lemmas for `empty` and the `add*` operations.  The raw declarations they read are
 private.
 
 Checked forms and references carry to every environment that keeps their lookups
@@ -899,6 +901,16 @@ namespace Env
 theorem resolvesType_of_typeOf? {s : Env α} {n : Name} {d : TypeDecl α}
     (h : s.raw.typeOf? n = some d) : s.ResolvesType n d := ⟨d, h, rfl⟩
 
+/-- A reference is valid at the end of an environment exactly when the name resolves to a
+type of those kinds. -/
+theorem refBefore_size_iff {s : Env α} {n : Name} {a : Array Kind} :
+    s.RefBefore s.size n a ↔ ∃ d, s.raw.typeOf? n = some d ∧ d.kinds = a := by
+  constructor
+  · intro hr
+    obtain ⟨_, d, _, _, hd, ha⟩ := Raw.refBefore_iff.mp hr
+    exact ⟨d, hd, ha⟩
+  · rintro ⟨d, hd, rfl⟩
+    exact refBefore_of_resolves hd
 
 end Env
 
@@ -954,6 +966,30 @@ public theorem TypeRef.refBefore {env : Env α} {arity : Nat} (r : TypeRef env a
   obtain ⟨n, d, rfl, d', hr, he⟩ := r
   have hb := Env.refBefore_of_resolves hr
   rwa [TypeDecl.kinds_eq_of_erase_eq he] at hb
+
+/-- The reference stored for a valid name: the inverse of `TypeRef.refBefore`, up to the
+annotation a reference may carry. -/
+public def TypeRef.ofRefBefore {env : Env α} {n : Name} {ks : Array Kind}
+    (h : env.RefBefore env.size n ks) : TypeRef env ks.size :=
+  have hs : (env.typeOf? n).isSome := by
+    obtain ⟨d, hd, -⟩ := Env.refBefore_size_iff.mp h
+    exact Option.isSome_iff_exists.mpr ⟨d, hd⟩
+  ⟨n, (env.typeOf? n).get hs,
+    by
+      obtain ⟨d, hd, hk⟩ := Env.refBefore_size_iff.mp h
+      have : (env.typeOf? n).get hs = d := Option.get_of_eq_some hs hd
+      rw [this, ← hk]
+      simp [TypeDecl.kinds, TypeDecl.arity, TyParam.kinds],
+    Env.resolvesType_of_typeOf? (Option.some_get hs).symm⟩
+
+/-- Resolution preserves the complete parameter kinds, not only their number. -/
+public theorem TypeRef.kinds_ofRefBefore {env : Env α} {n : Name} {ks : Array Kind}
+    (h : env.RefBefore env.size n ks) : (TypeRef.ofRefBefore h).kinds = ks := by
+  obtain ⟨d, hd, hk⟩ := Env.refBefore_size_iff.mp h
+  change env.typeOf? n = some d at hd
+  change ((env.typeOf? n).get _).kinds = ks
+  rw [Option.get_of_eq_some _ hd]
+  exact hk
 
 /-! ## Payload types of a datatype group
 
@@ -3392,17 +3428,6 @@ theorem declaresInsn_ofWF {s : Env α} {n : Name} {d : InsnDecl.Raw α}
   rw [InsnSig.decl_ofWF_of_name _ hname]
   exact h
 
-/-- A reference is valid at the end of an environment exactly when the name resolves to a
-type of those kinds. -/
-theorem refBefore_size_iff {s : Env α} {n : Name} {a : Array Kind} :
-    s.RefBefore s.size n a ↔ ∃ d, s.raw.typeOf? n = some d ∧ d.kinds = a := by
-  constructor
-  · intro hr
-    obtain ⟨_, d, _, _, hd, ha⟩ := Raw.refBefore_iff.mp hr
-    exact ⟨d, hd, ha⟩
-  · rintro ⟨d, hd, rfl⟩
-    exact refBefore_of_resolves hd
-
 /-- The annotation `n` is declared with, if `n` is declared: an instruction's own, or the
 annotation of the type `n` names, which for a datatype is its member's. -/
 public def annOf? (s : Env α) (n : Name) : Option α :=
@@ -3957,28 +3982,39 @@ namespace Env
 
 * `get?`, `get`: look a declaration up by name, as a `Decl`. -/
 
+/-! ### Stored declarations, checked
+
+Each kind of stored declaration has one checked form, which `get?` and `entries` share. -/
+
+/-- The reference to the primitive type stored under `name`. -/
+def TypeRef.ofStoredType {s : Env α} {name : Name} {d : TypeDecl α}
+    (h : s.declOf? name = some (.type d)) : TypeRef s d.arity :=
+  ⟨name, d, rfl, resolvesType_of_typeOf? (typeOf?_of_type h)⟩
+
+/-- The reference to the instruction stored under `name`, with its checked signature.  A
+constructor and a case instruction are instructions like any other. -/
+def InsnRef.ofStoredInsn {s : Env α} {name : Name} {d : InsnDecl.Raw α}
+    (h : s.declOf? name = some (.insn d)) : (isig : InsnSig s) × InsnRef s isig :=
+  have hwf : InsnDecl.Raw.WF (s.RefBefore s.size) d :=
+    Decl.Raw.wf_insn_iff.mp (declWF_of_declOf? h)
+  have hname : d.name = name := by simpa using name_of_declOf? h
+  ⟨InsnSig.ofWF d hwf, ⟨name, ResolvesInsn.of_resolves (k := d.kind)
+    (by rw [InsnSig.decl_ofWF_of_name hwf hname]; exact h)⟩⟩
+
 /-- The declaration named `name`, checked. -/
 public def get? (s : Env α) (name : Name) : Option (Decl s) :=
   match h : s.declOf? name with
   | none => none
-  | some (.type d) =>
-    some (.type ⟨name, d, rfl, resolvesType_of_typeOf? (typeOf?_of_type h)⟩)
+  | some (.type _) => some (.type (TypeRef.ofStoredType h))
   -- A datatype head is a type reference, as a primitive is.
   | some (.dataHead g) =>
     some (.type ⟨name, g.first.toTypeDecl, rfl, resolvesType_of_typeOf? (typeOf?_of_dataHead h)⟩)
   -- A member past the head is a type too; `aliasWF` says its group has it.
-  | some (.dataRest mn hd i) =>
+  | some (.dataRest ..) =>
     have hs : (s.raw.typeOf? name).isSome := isSome_typeOf?_of_dataRest h
     some (.type ⟨name, (s.raw.typeOf? name).get hs, rfl,
       resolvesType_of_typeOf? (Option.some_get hs).symm⟩)
-  -- A constructor is an instruction like any other.
-  | some (.insn d) =>
-    have hwf : InsnDecl.Raw.WF (s.RefBefore s.size) d :=
-      Decl.Raw.wf_insn_iff.mp (declWF_of_declOf? h)
-    have hname : d.name = name := by simpa using name_of_declOf? h
-    some (.insn (isig := InsnSig.ofWF d hwf)
-      ⟨name, ResolvesInsn.of_resolves (k := d.kind)
-        (by rw [InsnSig.decl_ofWF_of_name hwf hname]; exact h)⟩)
+  | some (.insn _) => some (.insn (InsnRef.ofStoredInsn h).2)
 
 -- Not `@[simp]`: the left-hand side, `Decl.name` of a variable, would match everywhere.
 /-- A lookup answers under the name asked for. -/
@@ -4006,6 +4042,95 @@ public def get (s : Env α) (name : Name) (p : name ∈ s) : Decl s :=
 public theorem get?_eq_some_get {s : Env α} {n : Name} (p : n ∈ s) :
     s.get? n = some (s.get n p) :=
   (Option.some_get _).symm
+
+/-! ### The declarations, in order
+
+`entries` is the eliminator for an environment: its declarations in declaration order, each in
+its checked form, so a pass over them in a monad is `for e in s.entries do …`, with every
+type expression already checked in `s`.  Well-formedness forbids forward references, so a pass
+in order meets each type's dependencies before the type, and a mutual group's members
+together. -/
+
+/-- A reference valid before some position is valid in the whole environment. -/
+theorem refBefore_size_of_refBefore {s : Env α} {i : Nat} {n : Name} {ks : Array Kind}
+    (h : s.RefBefore i n ks) : s.RefBefore s.size n ks := by
+  obtain ⟨j, t, hj, -, ht, hk⟩ := Raw.refBefore_iff.mp h
+  have hkey : s.raw.decls.keys[j]? = some n := IndexMap.getElem?_keys_of_idxOf?_eq_some hj
+  exact Raw.refBefore_iff.mpr ⟨j, t, hj, (Array.getElem?_eq_some_iff.mp hkey).1, ht, hk⟩
+
+/-- Every constructor field of a stored group is a type in the environment, under the
+parameters of its member: the group's check, `groupWF`, is sound. -/
+theorem wfType_field_of_dataHead {s : Env α} {n : Name} {g : DataGroup α TypeExpr.Raw}
+    (h : s.declOf? n = some (.dataHead g)) {m : DatatypeDecl α TypeExpr.Raw}
+    (hm : m ∈ g.members) {c : Ctor α TypeExpr.Raw} (hc : c ∈ m.ctors) {p : Param TypeExpr.Raw}
+    (hp : p ∈ c.args) : TypeExpr.WFType (s.RefBefore s.size) (TyParam.kinds m.params) p.type := by
+  obtain ⟨i, -, hkey⟩ := idx_of_declOf? h
+  have hg := s.wf.groupWF i n g hkey (by rw [declOf?_eq_raw] at h; exact h)
+  simp only [Raw.checkGroup, Bool.and_eq_true, DataGroup.checkWith,
+    Array.all_eq_true_iff_forall_mem] at hg
+  obtain ⟨⟨hkind, hpay⟩, -⟩ := hg.2 m hm c hc p hp
+  refine TypeExpr.WF.of_wfRel (TypeExpr.Raw.wfRel_of_checkPayload ?_ ?_ p.type hpay)
+    (by simpa using hkind)
+  · intro n ks hb
+    exact refBefore_size_of_refBefore (Raw.refBefore_check_eq_true.mp hb)
+  · intro n ks hb
+    exact Raw.refBefore_check_eq_true.mpr
+      (Raw.RefBefore.mono (Nat.le_add_right i g.members.size) (Raw.refBefore_check_eq_true.mp hb))
+
+/-- A member of a mutual group of `s`: its type declaration, and its constructors, each field
+a type in `s` under the member's parameters. -/
+public structure Datatype (s : Env α) where
+  decl : TypeDecl α
+  ctors : Array (Ctor α (TypeExpr s (TyParam.kinds decl.params)))
+
+/-- A mutual group of datatypes of `s`: a non-empty array of members, headed by the first. -/
+public structure Group (s : Env α) where
+  members : Array (Datatype s)
+  nonEmpty : 0 < members.size
+
+/-- The datatype the group is headed by, and whose name addresses it. -/
+public def Group.first {s : Env α} (g : Group s) : Datatype s := g.members[0]'g.nonEmpty
+
+/-- A declaration of `s`, as `entries` lists them, checked in `s`: a primitive type, a mutual
+group of datatypes, or an instruction, a constructor or case instruction included. -/
+public inductive Entry (s : Env α) where
+  | type {arity : Nat} (r : TypeRef s arity)
+  | data (g : Group s)
+  | insn {isig : InsnSig s} (r : InsnRef s isig)
+
+/-- The name an entry is declared under: a group's is its head's. -/
+public def Entry.name {s : Env α} : Entry s → Name
+  | .type r => r.name
+  | .data g => g.first.decl.name
+  | .insn r => r.name
+
+/-- The entry a stored declaration is, if it is one: a member alias is listed with its group. -/
+def Entry.ofStored {s : Env α} {name : Name} {d : Decl.Raw α} (h : s.declOf? name = some d) :
+    Option (Entry s) :=
+  match d, h with
+  | .type _, h => some (.type (TypeRef.ofStoredType h))
+  | .dataHead g, h => some (.data {
+      members := g.members.attach.map fun ⟨m, hm⟩ => {
+        decl := m.toTypeDecl
+        ctors := m.ctors.attach.map fun ⟨c, hc⟩ => {
+          ann := c.ann
+          name := c.name
+          args := c.args.attach.map fun ⟨p, hp⟩ =>
+            ⟨p.name, ⟨p.type, wfType_field_of_dataHead h hm hc hp⟩⟩ } }
+      nonEmpty := by simpa using g.nonEmpty })
+  | .dataRest .., _ => none
+  | .insn _, h => some (.insn (InsnRef.ofStoredInsn h).2)
+
+/-- A declaration in the environment's ordered storage resolves under its own name. -/
+theorem stored_of_mem_vals (s : Env α) {d : Decl.Raw α}
+    (hd : d ∈ s.raw.decls.vals) : s.declOf? d.name = some d := by
+  obtain ⟨i, hi, rfl⟩ := Array.getElem_of_mem hd
+  exact s.raw.getElem?_getElem_vals i hi
+
+/-- The declarations of `s`, in declaration order, checked in `s`. -/
+public def entries (s : Env α) : Array (Entry s) :=
+  s.raw.decls.vals.attach.filterMap fun ⟨_, hd⟩ =>
+    Entry.ofStored (stored_of_mem_vals s hd)
 
 /-- Add an instruction declaration under `name`. -/
 public def addInsn (s : Env α) (name : Name) (isig : InsnSig s) (fresh : name ∉ s) : Env α :=
