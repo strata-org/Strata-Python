@@ -20,10 +20,11 @@ set_option autoImplicit false
 * `NameSet.insertAll?`: add names to a set, failing at one already there.
 * `NameMap.find?`, `NameMap.contains`, `n ∈ m`: look a name up.
 
-`NameSet.of?_isSome_iff` is the duplicate check (`List.Nodup`) and `NameSet.mem_of?` says
-what the set holds; `NameMap.ofArray?_isSome_iff`, `find?_ofArray?` and `mem_ofArray?` are the
-map versions.  `insertAll?`'s lemmas, `insertAll?_isSome_iff` and `insertAll?_spec`, need the
-set `Ordered`, which `∅` is and `insertAll?` keeps.
+`NameSet.of?_isSome_iff` is the duplicate check (`List.Nodup`), `NameSet.nodup_of_isSome_of?`
+its form for strings, and `NameSet.mem_of?` says what the set holds;
+`NameMap.ofArray?_isSome_iff`, `find?_ofArray?` and `mem_ofArray?` are the map versions.
+`insertAll?`'s lemmas, `insertAll?_isSome_iff` and `insertAll?_spec`, need the set `Ordered`,
+which `∅` is and `insertAll?` keeps.
 -/
 
 namespace Strata.Dyn
@@ -147,6 +148,12 @@ theorem of?_isSome_iff {ns : Array Name} : (of? ns).isSome = true ↔ ns.toList.
   rcases ns with ⟨l⟩
   rw [of?, NameMap.ofArray?_isSome_iff]
   simp only [List.map_map, Function.comp_def, List.map_id_fun', id_eq]
+
+/-- Strings are distinct when `of?` builds a set of them as one-segment names. -/
+theorem nodup_of_isSome_of? {l : List String}
+    (h : (of? (l.map (Name.str .base)).toArray).isSome = true) : l.Nodup :=
+  List.Pairwise.of_map (S := (· ≠ ·)) (Name.str .base) (fun _ _ hne he => hne (congrArg _ he))
+    (of?_isSome_iff.mp h)
 
 /-- `of?`'s result holds exactly the names of `ns`. -/
 theorem mem_of? {ns : Array Name} {s : NameSet} (h : of? ns = some s) (n : Name) :

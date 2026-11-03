@@ -27,6 +27,10 @@ and `T.c.ref` is the reference `InsnRef.ofAddData` gives, cast to it.  A datatyp
 instruction `T.case` is one too: `addData` declares it with the group, and `T.case.ref` is the
 reference `InsnRef.ofAddDataCase` gives, cast to `T.case.sig`.
 
+Each cast's equation is a theorem, `Internal.o.ref_eq`, and so is the distinctness of each
+signature's names, `Internal.o.sig_distinct` and `Internal.o.sig₀_distinct`, so that
+`Elab.async` proves them off the main thread.
+
 A stage's names are fresh against a `NameSet` of every name before it, from the parent's
 `nameSet`.  The sets are literal trees, `Internal.set{k}` after stage `k` and `nameSet` after
 the last, which the elaborator computes and writes itself (`dyn_name_set%`).  The kernel
@@ -495,6 +499,24 @@ def thmCmd (doc : TSyntax ``Lean.Parser.Command.docComment)
     `($doc:docComment @[simp] $[$vis?:visibility]? theorem $id:ident $bs* : $ty := $val)
   else
     `($doc:docComment $[$vis?:visibility]? theorem $id:ident $bs* : $ty := $val)
+
+/-- `private theorem id : List.Nodup [n₁, …]`: the names are distinct, by
+`NameSet.nodup_of_isSome_of?`, which the kernel checks.  A signature's `distinct` field takes
+it as `by exact id`, not as a term, for two reasons: a tactic proof may name a private
+theorem from an exposed definition, and it runs after the signature's other fields are
+elaborated.  The second matters past 32 names, where Lean writes the literal as nested `have`s
+in this theorem's type and nested `let`s in the field's, which do not unify while the other
+fields are still holes. -/
+def distinctCmd (doc : String) (id : Ident) (names : Array String) : CommandElabM Command := do
+  thmCmd (mkDoc doc) EmitCtx.stageVis? false id #[]
+    (← `(List.Nodup ([$(names.map Syntax.mkStrLit),*] : List String)))
+    (← `(Strata.Dyn.NameSet.nodup_of_isSome_of? (by dyn_kernel_rfl)))
+
+/-- An instruction's names, in the order of `InsnSig.distinct`: its type parameters, arguments,
+variadic, regions and successors. -/
+def opNames (d : ROp) : Array String :=
+  d.d.typeParams.map (·.1) ++ d.args.map (·.1) ++ ((d.variadic.map (#[·.1])).getD #[]) ++
+    d.regions.map (·.name) ++ d.succs.map (·.name)
 
 /-- The docstring of a declaration: the user's, or a fixed one. -/
 def docOr (doc? : Option (TSyntax ``Lean.Parser.Command.docComment)) (s : String) :
@@ -1153,13 +1175,17 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
         let succs ← d.succs.mapM fun sc => do
           let ts := sc.payload.map (argTerm ks tyK)
           `(⟨$(quote sc.name), #[$ts,*]⟩)
+        let distinct := `Internal ++ d.d.c.lean ++ `sig₀_distinct
+        cs := cs.push (← distinctCmd s!"The names of `{showName d.d.c.envName}`'s signature, \
+            in stage {k - 1}, are distinct." (mkIdent distinct) (opNames d))
         cs := cs.push (← defCmd (mkDoc s!"The signature of `{showName d.d.c.envName}`, in \
             stage {k - 1}.") svis? false sig0 #[]
           (← `(Strata.Dyn.InsnSig $prev))
           (← `({ ann := (), typeParams := #[$tps,*], argTypes := #[$args,*],
                  variadic := $variadic, returnType := $(← retTerm tyK d.ret),
                  regions := #[$regs,*], succs := #[$succs,*],
-                 effect := $(effectTerm d.d.effect) })))
+                 effect := $(effectTerm d.d.effect),
+                 distinct := by exact $(cx.own distinct) })))
         pairs := pairs.push (← `(($(nameId d.d.c.envName), $(cx.own sig0.getId))))
       let ns : Array Term := ds.map fun d => nameId d.d.c.envName
       cs := cs.push (← defCmd (mkDoc s!"Stage {k}: instructions.") svis? false (I "ops") #[]
@@ -1359,7 +1385,8 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
     let addDataTerm ← `(Strata.Dyn.Env.addData $(cx.stage (k - 1)) $(cx.internal s!"hdr{k}")
       $(cx.internal s!"fresh{k}") $(cx.internal s!"ctors{k}") $(cx.internal s!"cfresh{k}")
       $(cx.internal s!"adm{k}"))
-    for (d, ctors, _) in ms do
+    for h : j in [0:ms.size] do
+      let (d, ctors, _) := ms[j]
       let n := d.params.size
       let ks := d.params.map (·.2.2.2)
       let vars ← ks.zipIdx.mapM fun
@@ -1369,19 +1396,22 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
       let tps ← d.params.mapM fun (x, _, _, kd) => `(⟨$(quote x), $(kindTerm kd)⟩)
       -- A list parameter is the literal that splices it.
       let retR : Ty := .app (dynName d.c.envName) (TypeExpr.Raw.vars ks)
-      for c in ctors do
+      for h : jc in [0:ctors.size] do
+        let c := ctors[jc]
         let en := showName c.d.c.envName
         let sigId := mkIdent (c.d.c.lean ++ `sig)
         let args ← c.args.mapM fun (x, t) => `(⟨$(quote x), $(ty t)⟩)
+        let distinct := `Internal ++ c.d.c.lean ++ `sig_distinct
+        cs := cs.push (← distinctCmd s!"The names of `{en}`'s signature are distinct."
+          (mkIdent distinct) (d.params.map (·.1) ++ c.args.map (·.1)))
         cs := cs.push (← defCmd (mkDoc s!"The signature of `{en}`, a constructor of \
             `{showName d.c.envName}`.") vis? cx.expose sigId #[]
           (← `(Strata.Dyn.InsnSig e))
           (← `({ ann := (), typeParams := #[$tps,*], argTypes := #[$args,*],
                  returnType := some $(ty retR), effect := Strata.Dyn.Effect.pure,
-                 distinct := by simp })))
-        -- `T.c.ref` casts the stage's reference to `T.c.sig`: the derived signature's raw data,
-        -- read from the group's literal, is `T.c.sig`'s.  The proof is under `exact`, so that
-        -- the reference, elaborated first, fixes the signature it starts from.
+                 distinct := by exact $(cx.own distinct) })))
+        -- `Internal.T.c.ref_eq`: the derived signature's raw data, read from the group's literal,
+        -- is `T.c.sig`'s.
         let members := ms.map (·.1.c.envName)
         let gen := cx.rawGen ks
         let hargs := bothRaw
@@ -1390,20 +1420,26 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
           (mapChain (c.args.map fun (_, t) => pairRaw (gen t)))
         let hret := bothRaw (Unhygienic.run `(Strata.Dyn.Env.returnType_ctorSig))
           (Unhygienic.run `(Strata.Dyn.map_some_eq_of $(gen retR)))
+        let refEq := `Internal ++ c.d.c.lean ++ `ref_eq
+        cs := cs.push (← thmCmd (mkDoc s!"`{en}`'s signature, carried from its stage, is \
+            `{(c.d.c.lean ++ `sig).toString (escape := false)}`.") svis? false (mkIdent refEq) #[]
+          (← `(Strata.Dyn.InsnSig.ofLE (s := $addDataTerm) $(cx.liftTo k)
+                (Strata.Dyn.Env.ctorSig $(quote j) $(quote jc)) = $(cx.own sigId.getId)))
+          (← `(Strata.Dyn.InsnSig.carry_eq_of_toRaw _ rfl
+                (Eq.trans Strata.Dyn.Env.typeParams_toList_ctorSig rfl) $hargs
+                (congrArg (Option.map _) Strata.Dyn.Env.variadic_ctorSig) $hret
+                (congrArg (fun a => List.map _ (Array.toList a))
+                  Strata.Dyn.Env.regions_ctorSig)
+                (congrArg (fun a => List.map _ (Array.toList a))
+                  Strata.Dyn.Env.succs_ctorSig) Strata.Dyn.Env.effect_ctorSig)))
         cs := cs.push (← defCmd (docOr c.d.c.doc? s!"The constructor `{en}` of \
             `{showName d.c.envName}`.") vis? false (mkIdent (c.d.c.lean ++ `ref)) #[]
           (← `(Strata.Dyn.InsnRef e $(cx.own sigId.getId)))
-          (← `(Strata.Dyn.InsnRef.cast
-                (by exact (Strata.Dyn.InsnSig.carry_eq_of_toRaw _ rfl
-                  (Eq.trans Strata.Dyn.Env.typeParams_toList_ctorSig rfl) $hargs
-                  (congrArg (Option.map _) Strata.Dyn.Env.variadic_ctorSig) $hret
-                  (congrArg (fun a => List.map _ (Array.toList a))
-                    Strata.Dyn.Env.regions_ctorSig)
-                  (congrArg (fun a => List.map _ (Array.toList a))
-                    Strata.Dyn.Env.succs_ctorSig) Strata.Dyn.Env.effect_ctorSig))
+          (← `(Strata.Dyn.InsnRef.cast $(cx.own refEq)
                 (Strata.Dyn.InsnRef.ofLE (s := $addDataTerm)
                   $(cx.liftTo k) $(cx.own (`Internal ++ c.d.c.lean ++ `ref₀))))))
-    for (md, _, d) in ms do
+    for h : j in [0:ms.size] do
+      let (md, _, d) := ms[j]
       let en := showName d.d.c.envName
       let sigId := mkIdent (d.d.c.lean ++ `sig)
       let ks := d.d.typeParams.map (·.2.2)
@@ -1416,12 +1452,14 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
       let succs ← d.succs.mapM fun sc => do
         let ts := sc.payload.map (argTerm ks ty)
         `(⟨$(quote sc.name), #[$ts,*]⟩)
+      let distinct := `Internal ++ d.d.c.lean ++ `sig_distinct
+      cs := cs.push (← distinctCmd s!"The names of `{en}`'s signature are distinct."
+        (mkIdent distinct) (opNames d))
       cs := cs.push (← defCmd (mkDoc s!"The signature of `{en}`.") vis? cx.expose sigId #[]
         (← `(Strata.Dyn.InsnSig e))
         (← `({ ann := (), typeParams := #[$tps,*], argTypes := #[$args,*],
                returnType := none, succs := #[$succs,*], effect := Strata.Dyn.Effect.pure,
-               distinct := by simp })))
-      -- `T.case.ref` casts the stage's reference to `T.case.sig`, as a constructor does.
+               distinct := by exact $(cx.own distinct) })))
       let members := ms.map (·.1.c.envName)
       let gen := cx.rawGen ks
       let hargs := bothRaw (Unhygienic.run `(Strata.Dyn.Env.argTypes_toList_caseSig))
@@ -1433,17 +1471,22 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
       let hsuccs := bothRaw
         (Unhygienic.run `(Eq.trans Strata.Dyn.Env.succs_toList_caseSig $fields))
         (mapChain (d.succs.map fun sc => pairRaw (mapChain (sc.payload.map (argRaw ks gen)))))
+      let refEq := `Internal ++ d.d.c.lean ++ `ref_eq
+      cs := cs.push (← thmCmd (mkDoc s!"`{en}`'s signature, carried from its stage, is \
+          `{(d.d.c.lean ++ `sig).toString (escape := false)}`.") svis? false (mkIdent refEq) #[]
+        (← `(Strata.Dyn.InsnSig.ofLE (s := $addDataTerm) $(cx.liftTo k)
+              (Strata.Dyn.Env.caseSig $(quote j)) = $(cx.own sigId.getId)))
+        (← `(Strata.Dyn.InsnSig.carry_eq_of_toRaw _ rfl
+              (Eq.trans Strata.Dyn.Env.typeParams_toList_caseSig rfl) $hargs
+              (congrArg (Option.map _) Strata.Dyn.Env.variadic_caseSig)
+              (congrArg (Option.map _) Strata.Dyn.Env.returnType_caseSig)
+              (congrArg (fun a => List.map _ (Array.toList a))
+                Strata.Dyn.Env.regions_caseSig) $hsuccs Strata.Dyn.Env.effect_caseSig)))
       cs := cs.push (← defCmd (docOr d.d.c.doc? s!"Eliminate a `{showName md.c.envName}`: one \
           successor per constructor, in declaration order, each receiving its constructor's \
           fields.") vis? false (mkIdent (d.d.c.lean ++ `ref)) #[]
         (← `(Strata.Dyn.InsnRef e $(cx.own sigId.getId)))
-        (← `(Strata.Dyn.InsnRef.cast
-              (by exact (Strata.Dyn.InsnSig.carry_eq_of_toRaw _ rfl
-                (Eq.trans Strata.Dyn.Env.typeParams_toList_caseSig rfl) $hargs
-                (congrArg (Option.map _) Strata.Dyn.Env.variadic_caseSig)
-                (congrArg (Option.map _) Strata.Dyn.Env.returnType_caseSig)
-                (congrArg (fun a => List.map _ (Array.toList a))
-                  Strata.Dyn.Env.regions_caseSig) $hsuccs Strata.Dyn.Env.effect_caseSig))
+        (← `(Strata.Dyn.InsnRef.cast $(cx.own refEq)
               (Strata.Dyn.InsnRef.ofLE (s := $addDataTerm)
                 $(cx.liftTo k) $(cx.own (`Internal ++ d.d.c.lean ++ `ref₀))))))
   for h : i in [0:stages.size] do
@@ -1454,8 +1497,8 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
       let en := showName d.d.c.envName
       let sigId := mkIdent (d.d.c.lean ++ `sig)
       -- The signature, written against `e` from public pieces: the types' `Internal.T.ty`,
-      -- `var` and `RegionSig.of`.  `decide` refuses goals over the free `e`, so `simp` proves the
-      -- distinctness obligations.
+      -- `var` and `RegionSig.of`.  `simp` proves the regions' parameters distinct, as `decide`
+      -- refuses goals over the free `e`.
       let ks := d.d.typeParams.map (·.2.2)
       let vars ← ks.zipIdx.mapM fun
         | (.type, l) => `(Strata.Dyn.TypeExpr.var $(quote l) (by decide))
@@ -1474,13 +1517,17 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
       let succs ← d.succs.mapM fun sc => do
         let ts := sc.payload.map (argTerm ks ty)
         `(⟨$(quote sc.name), #[$ts,*]⟩)
+      let distinct := `Internal ++ d.d.c.lean ++ `sig_distinct
+      cs := cs.push (← distinctCmd s!"The names of `{en}`'s signature are distinct."
+        (mkIdent distinct) (opNames d))
       cs := cs.push (← defCmd (mkDoc s!"The signature of `{en}`.") vis? cx.expose sigId #[]
         (← `(Strata.Dyn.InsnSig e))
         (← `({ ann := (), typeParams := #[$tps,*], argTypes := #[$args,*],
                variadic := $variadic, returnType := $(← retTerm ty d.ret), regions := #[$regs,*],
-               succs := #[$succs,*], effect := $(effectTerm d.d.effect), distinct := by simp })))
-      -- `o.ref` casts the stage's reference to `o.sig`: `sig₀`, carried twice, stands for the
-      -- same raw data as `o.sig`, node by node.
+               succs := #[$succs,*], effect := $(effectTerm d.d.effect),
+               distinct := by exact $(cx.own distinct) })))
+      -- `Internal.o.ref_eq`: `sig₀`, carried twice, has the same raw data as `o.sig`, node by
+      -- node.
       let at₀ := cx.rawAt (k - 1) ks
       let gen := cx.rawGen ks
       let side (raw : Ty → Term) : Term × Term × Term × Term × Term :=
@@ -1512,12 +1559,18 @@ def emitCommands (cx : EmitCtx) (stages : Array Stage) (abbrevs : Array (AbbrevD
               $(cx.internal s!"fresh{k}") $(quote j)
               (Nat.lt_of_lt_of_eq (by decide : ($(quote j) : Nat) < $(quote ds.size))
                 $(cx.internal s!"ops_size{k}").symm))))
+      let refEq := `Internal ++ d.d.c.lean ++ `ref_eq
+      cs := cs.push (← thmCmd (mkDoc s!"`{en}`'s signature, carried from its stage, is \
+          `{(d.d.c.lean ++ `sig).toString (escape := false)}`.") svis? false (mkIdent refEq) #[]
+        (← `(Strata.Dyn.InsnSig.ofLE $(cx.liftTo k)
+              (Strata.Dyn.InsnSig.ofLE (Strata.Dyn.Env.le_of_subset $(cx.internal s!"hst{k}"))
+                $(cx.own (`Internal ++ d.d.c.lean ++ `sig₀))) = $(cx.own sigId.getId)))
+        (← `(Eq.trans (Strata.Dyn.InsnSig.carry_carry _ _ _)
+              (Strata.Dyn.InsnSig.carry_eq_of_toRaw _ rfl rfl $(bothRaw a₀ a₁)
+                $(bothRaw v₀ v₁) $(bothRaw r₀ r₁) $(bothRaw g₀ g₁) $(bothRaw s₀ s₁) rfl))))
       cs := cs.push (← defCmd (docOr d.d.c.doc? s!"The instruction `{en}`.") vis? false
         (mkIdent (d.d.c.lean ++ `ref)) #[] (← `(Strata.Dyn.InsnRef e $(cx.own sigId.getId)))
-        (← `(Strata.Dyn.InsnRef.cast
-              (by exact (Eq.trans (Strata.Dyn.InsnSig.carry_carry _ _ _)
-                (Strata.Dyn.InsnSig.carry_eq_of_toRaw _ rfl rfl $(bothRaw a₀ a₁)
-                  $(bothRaw v₀ v₁) $(bothRaw r₀ r₁) $(bothRaw g₀ g₁) $(bothRaw s₀ s₁) rfl)))
+        (← `(Strata.Dyn.InsnRef.cast $(cx.own refEq)
               (Strata.Dyn.InsnRef.ofLE $(cx.liftTo k)
                 $(cx.own (`Internal ++ d.d.c.lean ++ `ref₀))))))
   cs := cs.push (← `(command| end))
@@ -1633,7 +1686,8 @@ def elabEnvironment (doc? : Option (TSyntax ``Lean.Parser.Command.docComment))
   let errorsBefore := (← get).messages.toList.filter (·.severity == .error) |>.length
   withRef kw do
     elabCommand (← `(command| namespace $(mkIdent envShort)))
-    for c in cmds do elabCommand c
+    -- Without info trees: `checkUnivs` takes time quadratic in a command's declarations.
+    for c in cmds do withEnableInfoTree false (elabCommand c)
     elabCommand (← `(command| end $(mkIdent envShort)))
   let errorsAfter := (← get).messages.toList.filter (·.severity == .error) |>.length
   if errorsAfter > errorsBefore then

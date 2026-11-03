@@ -309,7 +309,8 @@ def generate (envNs : Name) (vis? : Option (TSyntax ``Lean.Parser.Command.visibi
     | throwError "`{envNs}` is not an environment"
   let cx : Ctx := { envNs, types := typesOf env envNs, vis? }
   for s in entry.ops do
-    elabCommand (← emitterCmd cx s)
+    -- Without an info tree, like `environment`'s generated commands.
+    withEnableInfoTree false (elabCommand (← emitterCmd cx s))
 
 /-- Whether the typed builder is imported, so that the emitters can be generated. -/
 def available (env : Environment) : Bool := env.contains `Strata.Dyn.MonadBuild

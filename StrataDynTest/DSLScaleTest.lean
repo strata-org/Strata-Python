@@ -1129,4 +1129,35 @@ example : .str (.str .base "wide") "w519" ∈ Wide.env := by rw [Wide.mem_nameSe
 example : .str (.str .base "base") "Unit" ∈ Wide.env := by rw [Wide.mem_nameSet]; decide
 example : .str (.str .base "wide") "nope" ∉ Wide.env := by rw [Wide.mem_nameSet]; decide
 
+/-! ## Signatures past a list literal's chunk
+
+Lean writes a list literal of more than 32 elements as nested `have`s in the distinctness
+theorem's type and as nested `let`s in the signature's field, and the two unify only once the
+signature's other fields are elaborated.  `Long` passes 32 names in one field (an instruction
+and a constructor of 40 arguments each, and a case instruction of 33 successors) and only in
+total (an instruction of 20 type parameters and 20 arguments). -/
+
+/-- Signatures of more than 32 names. -/
+public environment Long extends Base where
+  namespace long
+  type Value
+  data Row where
+    | row (a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 : Value)
+  data Many where
+    | c01 | c02 | c03 | c04 | c05 | c06 | c07 | c08 | c09 | c10 | c11 | c12 | c13 | c14 | c15 | c16 | c17 | c18 | c19 | c20 | c21 | c22 | c23 | c24 | c25 | c26 | c27 | c28 | c29 | c30 | c31 | c32 | c33
+  insn wide (a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 : Value) : Value
+  insn mixed [t01 t02 t03 t04 t05 t06 t07 t08 t09 t10 t11 t12 t13 t14 t15 t16 t17 t18 t19 t20] (a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 : Value) : Value
+  end long
+
+#guard (Long.wide.sig (e := Long.env)).argTypes.map (·.name) ==
+  #["a01", "a02", "a03", "a04", "a05", "a06", "a07", "a08", "a09", "a10", "a11", "a12", "a13", "a14", "a15", "a16", "a17", "a18", "a19", "a20", "a21", "a22", "a23", "a24", "a25", "a26", "a27", "a28", "a29", "a30", "a31", "a32", "a33", "a34", "a35", "a36", "a37", "a38", "a39", "a40"]
+#guard (Long.Row.row.sig (e := Long.env)).argTypes.map (·.name) ==
+  #["a01", "a02", "a03", "a04", "a05", "a06", "a07", "a08", "a09", "a10", "a11", "a12", "a13", "a14", "a15", "a16", "a17", "a18", "a19", "a20", "a21", "a22", "a23", "a24", "a25", "a26", "a27", "a28", "a29", "a30", "a31", "a32", "a33", "a34", "a35", "a36", "a37", "a38", "a39", "a40"]
+#guard (Long.mixed.sig (e := Long.env)).typeParams.map (·.name) ==
+  #["t01", "t02", "t03", "t04", "t05", "t06", "t07", "t08", "t09", "t10", "t11", "t12", "t13", "t14", "t15", "t16", "t17", "t18", "t19", "t20"]
+#guard (Long.mixed.sig (e := Long.env)).argTypes.map (·.name) ==
+  #["a01", "a02", "a03", "a04", "a05", "a06", "a07", "a08", "a09", "a10", "a11", "a12", "a13", "a14", "a15", "a16", "a17", "a18", "a19", "a20"]
+#guard (Long.Many.case.sig (e := Long.env)).succs.map (·.name) ==
+  #["c01", "c02", "c03", "c04", "c05", "c06", "c07", "c08", "c09", "c10", "c11", "c12", "c13", "c14", "c15", "c16", "c17", "c18", "c19", "c20", "c21", "c22", "c23", "c24", "c25", "c26", "c27", "c28", "c29", "c30", "c31", "c32", "c33"]
+
 end Strata.Dyn.DSLScaleTest
