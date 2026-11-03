@@ -225,7 +225,10 @@ def pySpecsCommand : _root_.Command where
       | .ok () => pure ()
       | .error msg => exitFailure msg
 
-def pyAnalyzeLaurelCommand (mkDischarge : Core.MkDischargeFn := Core.mkDischargeFn) : _root_.Command where
+/-- `mkDischarge` gives the discharge factory for a run, from the options parsed for it. -/
+def pyAnalyzeLaurelCommand
+    (mkDischarge : VerifyOptions → Core.MkDischargeFn := fun _ => Core.mkDischargeFn) :
+    _root_.Command where
   name := "pyAnalyzeLaurel"
   args := [ "file" ]
   flags := verifyOptionsFlags ++ [
@@ -315,7 +318,7 @@ def pyAnalyzeLaurelCommand (mkDischarge : Core.MkDischargeFn := Core.mkDischarge
       verifyOptions := options
       entryPoint, isBugFinding
       outputMode, skipVerification
-      metricsHandle, mkDischarge
+      metricsHandle, mkDischarge := mkDischarge options
       useV2
     }
 
