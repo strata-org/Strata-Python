@@ -17,8 +17,7 @@ set_option autoImplicit false
 /-!
 # Runs, compiled
 
-Each program of `Programs.lean` under `#eval`, on both engines: its outcome, and how many steps
-each engine took.
+Each program of `Programs.lean` under `#eval`: its outcome, and how many fused steps it took.
 -/
 
 namespace Strata.Dyn.ExecTest.EvalTest
@@ -50,10 +49,10 @@ def needs (f : String) : List (Func E Unit) :=
   | _ => []
 
 /-- Run `f` on `args`, in a module of what it needs. -/
-def run (f : String) (args : Array Int) (fuel : Nat := 10000) (oracle : Nat → Nat := fun _ => 0)
-    (engine : Engine := .fused) : Outcome ExSem.model :=
+def run (f : String) (args : Array Int) (fuel : Nat := 10000) (oracle : Nat → Nat := fun _ => 0) :
+    Outcome ExSem.model :=
   match mod (needs f) with
-  | .ok m => runModule ExSem.model m (nm f) (args.map (ExSem.model.arg ·)) fuel oracle engine
+  | .ok m => runModule ExSem.model m (nm f) (args.map (ExSem.model.arg ·)) fuel oracle
   | .error e => .failed ExSem.model e
 
 section
@@ -75,12 +74,6 @@ def faultOf (r : Result (ExSem.model.interp σ)) : Option Fault := match r with
 
 end
 
-/-- What a run produced, for comparing engines: its value, its fault, the world and the
-choices made. -/
-def summary (o : Outcome ExSem.model) :
-    Option Int × Option (Bool × Int) × Option Fault × ExRules.World × Nat :=
-  (intOf o.result, excOf o.result, faultOf o.result, o.snapshot.world, o.drawn)
-
 /-- A run, as a line. -/
 def line (f : String) (args : Array Int) (oracle : Nat → Nat := fun _ => 0) : String :=
   let show₁ (o : Outcome ExSem.model) : String :=
@@ -91,33 +84,31 @@ def line (f : String) (args : Array Int) (oracle : Nat → Nat := fun _ => 0) : 
       | _, _, _ => "?"
     s!"{r} after {o.steps}"
   let a := run f args (oracle := oracle)
-  let b := run f args (oracle := oracle) (engine := .frames)
-  s!"{f} {args}: {show₁ a} fused, {b.steps} by step; drawn {a.drawn}, \
-    printed {a.snapshot.world.out.items}"
+  s!"{f} {args}: {show₁ a} fused steps; drawn {a.drawn}, printed {a.snapshot.world.out.items}"
 
 /--
-info: arith #[3, 4]: 6 after 4 fused, 6 by step; drawn 0, printed #[]
-sum #[10]: 45 after 65 fused, 89 by step; drawn 0, printed #[]
-safeDiv #[7, 0]: -1 after 3 fused, 6 by step; drawn 0, printed #[]
-chain #[5]: 106 after 13 fused, 20 by step; drawn 0, printed #[]
-fib #[10]: ok 55 after 1589 fused, 2120 by step; drawn 0, printed #[]
-closure #[5]: 19 after 21 fused, 30 by step; drawn 0, printed #[]
-count #[4]: 4 after 44 fused, 64 by step; drawn 0, printed #[]
-noisy #[5]: 5 after 6 fused, 12 by step; drawn 1, printed #[5]
-coins #[]: 123 after 10 fused, 15 by step; drawn 3, printed #[]
-gapAfter #[2]: fault Strata.Dyn.Exec.Fault.gap "ex.gap" after 2 fused, 4 by step; drawn 0, printed #[2]
-halts #[]: fault Strata.Dyn.Exec.Fault.failure "ex.halt" after 1 fused, 2 by step; drawn 0, printed #[]
-fibC #[10]: 55 after 1412 fused, 1943 by step; drawn 0, printed #[]
-useTwice #[5]: 7 after 13 fused, 21 by step; drawn 0, printed #[]
-viaCell #[5]: 6 after 8 fused, 12 by step; drawn 0, printed #[]
-squares #[4, -1]: 10409 after 32 fused, 50 by step; drawn 0, printed #[0, 1, 2, 3]
-squares #[0, -1]: 0 after 4 fused, 6 by step; drawn 0, printed #[]
-squares #[5, 2]: -2 after 24 fused, 39 by step; drawn 0, printed #[0, 1, 2]
-squaresR #[4, -1]: 10409 after 32 fused, 50 by step; drawn 0, printed #[0, 1, 2, 3]
-squaresR #[0, -1]: 0 after 4 fused, 6 by step; drawn 0, printed #[]
-squaresR #[5, 2]: -2 after 24 fused, 39 by step; drawn 0, printed #[0, 1, 2]
-tables #[3]: 10404 after 55 fused, 81 by step; drawn 0, printed #[]
-powAbove #[100]: 128 after 54 fused, 93 by step; drawn 0, printed #[1, 2, 4, 8, 16, 32, 64]
+info: arith #[3, 4]: 6 after 4 fused steps; drawn 0, printed #[]
+sum #[10]: 45 after 65 fused steps; drawn 0, printed #[]
+safeDiv #[7, 0]: -1 after 3 fused steps; drawn 0, printed #[]
+chain #[5]: 106 after 13 fused steps; drawn 0, printed #[]
+fib #[10]: ok 55 after 1589 fused steps; drawn 0, printed #[]
+closure #[5]: 19 after 21 fused steps; drawn 0, printed #[]
+count #[4]: 4 after 44 fused steps; drawn 0, printed #[]
+noisy #[5]: 5 after 6 fused steps; drawn 1, printed #[5]
+coins #[]: 123 after 10 fused steps; drawn 3, printed #[]
+gapAfter #[2]: fault Strata.Dyn.Exec.Fault.gap "ex.gap" after 2 fused steps; drawn 0, printed #[2]
+halts #[]: fault Strata.Dyn.Exec.Fault.failure "ex.halt" after 1 fused steps; drawn 0, printed #[]
+fibC #[10]: 55 after 1412 fused steps; drawn 0, printed #[]
+useTwice #[5]: 7 after 13 fused steps; drawn 0, printed #[]
+viaCell #[5]: 6 after 8 fused steps; drawn 0, printed #[]
+squares #[4, -1]: 10409 after 32 fused steps; drawn 0, printed #[0, 1, 2, 3]
+squares #[0, -1]: 0 after 4 fused steps; drawn 0, printed #[]
+squares #[5, 2]: -2 after 24 fused steps; drawn 0, printed #[0, 1, 2]
+squaresR #[4, -1]: 10409 after 32 fused steps; drawn 0, printed #[0, 1, 2, 3]
+squaresR #[0, -1]: 0 after 4 fused steps; drawn 0, printed #[]
+squaresR #[5, 2]: -2 after 24 fused steps; drawn 0, printed #[0, 1, 2]
+tables #[3]: 10404 after 55 fused steps; drawn 0, printed #[]
+powAbove #[100]: 128 after 54 fused steps; drawn 0, printed #[1, 2, 4, 8, 16, 32, 64]
 -/
 #guard_msgs in
 #eval IO.println ("\n".intercalate [line "arith" #[3, 4], line "sum" #[10], line "safeDiv" #[7, 0],

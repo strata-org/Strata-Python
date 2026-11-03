@@ -68,11 +68,14 @@ def loop (cond : Region ε [] Bool) (body : Region ε [] Unit) (_st : Option Uni
   imports `StrataDyn.Exec.Base`.
 * **Linking** (`Exec/Link.lean`) resolves every name through 2-3 trees once; **validation**
   (`Exec/Check.lean`) checks the linked module's tags and scopes once.
-* **The machine** (`Exec/Machine.lean`): a first-order configuration, `step` with events,
-  `runFrames` and hooks.  **The fused run** (`Exec/Fused.lean`), `runFused`, which ends as
-  `runFrames` does on some fuel at least as large (`runFused_eq`).  `Exec/Run.lean` starts and
-  runs a module, from a `Snapshot` of a heap and a world, the initial one or where an earlier
-  run ended.
+* **The machine** (`Exec/Machine.lean`): a first-order state, `step` with events,
+  and hooks.  `Exec/Trace.lean` gives the step relation of `step`, whose runs, with no fuel,
+  and their behaviours are what proofs are about; the run under one oracle is one of them, and
+  every run is the run under some oracle.  **The fused run** (`Exec/Fused.lean`), `runFused`,
+  the engine for execution, which stops or ends where the run under its oracle stands after at
+  least as many steps (`runFused_eq`).  `Exec/Run.lean` starts and runs
+  a module, from a `Snapshot` of a heap and a world, the initial one or where an earlier run
+  ended.
 
 ## Design
 

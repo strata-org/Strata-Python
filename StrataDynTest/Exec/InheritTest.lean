@@ -26,7 +26,7 @@ child's wrapper builds the parent's tags from the child's own decoding.
 
 * `ExKid` extends `Ex` with a datatype and a calling rule of its own, whose language class
   extends `Ex.Lang`.  Its table runs `Ex`'s programs, calls of closures and partial application
-  included, as `Ex`'s table does, on both engines.
+  included, as `Ex`'s table does.
 * `WhileKid` extends `While` with one instruction.  Its table runs While's programs, cells
   included, as `While`'s does.
 -/
@@ -85,12 +85,11 @@ open Strata.Dyn.ExecTest.Programs
 `Except Int Int` or a fault, as a string, with its steps. -/
 def runIn (M : Model) [∀ (σ : Type) [Store σ], @TagOf σ _ (M.decode σ) Int]
     [@TagOf Run _ (M.decode Run) (Except Int Int)]
-    (fs : List (Func Programs.E Unit)) (f : String) (args : Array Int) (engine : Engine) :
-    String :=
+    (fs : List (Func Programs.E Unit)) (f : String) (args : Array Int) : String :=
   match mod fs with
   | .error e => s!"fault {repr e}"
   | .ok m =>
-    let o := runModule M m (nm f) (args.map (M.arg ·)) 10000 (engine := engine)
+    let o := runModule M m (nm f) (args.map (M.arg ·)) 10000
     let r := match o.read? Int, o.read? (Except Int Int), o.result with
       | some v, _, _ => s!"{v}"
       | _, some (.ok v), _ => s!"ok {v}"
@@ -100,21 +99,17 @@ def runIn (M : Model) [∀ (σ : Type) [Store σ], @TagOf σ _ (M.decode σ) Int
     s!"{r} after {o.steps}"
 
 /-- A run in `Ex`'s table. -/
-def runEx (fs : List (Func Programs.E Unit)) (f : String) (args : Array Int) (engine : Engine) :
-    String :=
-  runIn ExSem.model fs f args engine
+def runEx (fs : List (Func Programs.E Unit)) (f : String) (args : Array Int) : String :=
+  runIn ExSem.model fs f args
 
 /-- The same run in `ExKid`'s table. -/
-def runKid (fs : List (Func Programs.E Unit)) (f : String) (args : Array Int) (engine : Engine) :
-    String :=
-  runIn ExKidSem.model fs f args engine
+def runKid (fs : List (Func Programs.E Unit)) (f : String) (args : Array Int) : String :=
+  runIn ExKidSem.model fs f args
 
-/-- The child's table runs `f` as the parent's does, on both engines, with the same result. -/
+/-- The child's table runs `f` as the parent's does, with the same result. -/
 def same (fs : List (Func Programs.E Unit)) (f : String) (args : Array Int) : Option String :=
-  let a := runKid fs f args .fused
-  if a == runEx fs f args .fused && runKid fs f args .frames == runEx fs f args .frames then
-    some a
-  else none
+  let a := runKid fs f args
+  if a == runEx fs f args then some a else none
 
 -- `ex.call` (raising) and `ex.callInt`, each a rule's checked call, in the child's table.
 #guard same [inc, fib] "fib" #[10] = some "ok 55 after 1589"
@@ -152,22 +147,20 @@ section
 open Strata.Dyn.While Strata.Dyn.While.Programs
 
 /-- The `Int`, or the `ok` of the `Except Int Int`, a While program's function `f` returns on
-`args`, in `M`, on `engine`, with its steps. -/
+`args`, in `M`, with its steps. -/
 def runWhile (M : Model) [∀ (σ : Type) [Store σ], @TagOf σ _ (M.decode σ) Int]
     [@TagOf Run _ (M.decode Run) (Except Int Int)]
-    (p : Ast.Program) (f : String) (args : Array Int) (engine : Engine) :
-    Option (Option Int × Nat) :=
+    (p : Ast.Program) (f : String) (args : Array Int) : Option (Option Int × Nat) :=
   match lower p with
   | .error _ => none
   | .ok m =>
-    let o := runModule M m (nm f) (args.map (M.arg ·)) 100000 (engine := engine)
+    let o := runModule M m (nm f) (args.map (M.arg ·)) 100000
     some ((o.read? Int).orElse fun _ => (o.read? (Except Int Int)).bind (·.toOption), o.steps)
 
-/-- `f` in While's table and in the child's, on both engines. -/
+/-- `f` in the child's table, if it runs as in While's. -/
 def whileSame (p : Ast.Program) (f : String) (args : Array Int) : Option (Option Int × Nat) :=
-  let parent (e : Engine) := runWhile WhileSem.model p f args e
-  let kid (e : Engine) := runWhile WhileKidSem.model p f args e
-  if kid .fused == parent .fused && kid .frames == parent .frames then kid .fused else none
+  let kid := runWhile WhileKidSem.model p f args
+  if kid == runWhile WhileSem.model p f args then kid else none
 
 #guard (whileSame fib "fib" #[10]).map (·.1) = some (some 55)
 #guard (whileSame cells "counter" #[5]).map (·.1) = some (some 5)

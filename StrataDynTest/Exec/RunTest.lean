@@ -17,7 +17,7 @@ set_option autoImplicit false
 /-!
 # Runs
 
-Each program of `Programs.lean` on both engines, checked by `#guard`.
+Each program of `Programs.lean`, checked by `#guard`.
 -/
 
 namespace Strata.Dyn.ExecTest.RunTest
@@ -62,16 +62,15 @@ def needs (f : String) : List (Func E Unit) :=
 /-- Run `f` of the checked module `m` on `args`; a module that is not well formed faults
 before the first step. -/
 def runIn (m : Except Fault (Module E Unit)) (f : Name) (args : Array ExSem.model.Arg)
-    (fuel : Nat := 10000) (oracle : Nat → Nat := fun _ => 0) (engine : Engine := .fused) :
-    Outcome ExSem.model :=
+    (fuel : Nat := 10000) (oracle : Nat → Nat := fun _ => 0) : Outcome ExSem.model :=
   match m with
-  | .ok m => runModule ExSem.model m f args fuel oracle engine
+  | .ok m => runModule ExSem.model m f args fuel oracle
   | .error e => .failed ExSem.model e
 
 /-- Run `f` on `args`, in a module of what it needs. -/
-def run (f : String) (args : Array Int) (fuel : Nat := 10000) (oracle : Nat → Nat := fun _ => 0)
-    (engine : Engine := .fused) : Outcome ExSem.model :=
-  runIn (mod (needs f)) (nm f) (args.map (ExSem.model.arg ·)) fuel oracle engine
+def run (f : String) (args : Array Int) (fuel : Nat := 10000) (oracle : Nat → Nat := fun _ => 0) :
+    Outcome ExSem.model :=
+  runIn (mod (needs f)) (nm f) (args.map (ExSem.model.arg ·)) fuel oracle
 
 section
 variable {σ : Type} [Store σ]
@@ -92,7 +91,7 @@ def faultOf (r : Result (ExSem.model.interp σ)) : Option Fault := match r with
 
 end
 
-/-- What a run produced, for comparing engines: its value, its fault, the world and the
+/-- What a run produced: its value, its fault, the world and the
 choices made. -/
 def summary (o : Outcome ExSem.model) :
     Option Int × Option (Bool × Int) × Option Fault × ExRules.World × Nat :=
@@ -187,29 +186,24 @@ Each program on `runFused`. -/
 -- A terminator's failure.
 #guard faultOf (run "halts" #[]).result = some (.failure "ex.halt")
 
--- An assumption that holds continues, and one that fails blocks the path, on both engines.
+-- An assumption that holds continues, and one that fails blocks the path.
 #guard intOf (run "assumePos" #[5]).result = some 5
-#guard intOf (run "assumePos" #[5] (engine := .frames)).result = some 5
 #guard faultOf (run "assumePos" #[-5]).result = some (.blocked "ex.assume")
-#guard faultOf (run "assumePos" #[-5] (engine := .frames)).result = some (.blocked "ex.assume")
 
 -- An unbounded choice is the oracle's number, under each oracle, and `chooseInt` numbers the
 -- integers `0, -1, 1, -2, 2, …`.
 #guard intOf (run "pickN" #[] (oracle := fun _ => 7)).result = some 7
 #guard intOf (run "pickN" #[] (oracle := fun _ => 123456789)).result = some 123456789
-#guard intOf (run "pickN" #[] (oracle := fun _ => 7) (engine := .frames)).result = some 7
 #guard (List.range 5).map (fun k => intOf (run "pickI" #[] (oracle := fun _ => k)).result) =
   [some 0, some (-1), some 1, some (-2), some 2]
 
 -- A closure over two cells, made by one rule's binds, reads the cells when it is called; one
 -- over no cells is the code pointer.
 #guard intOf (run "twoCells" #[3]).result = some 123
-#guard intOf (run "twoCells" #[3] (engine := .frames)).result = some 123
 #guard intOf (run "noCells" #[3]).result = some 4
 
 -- `choose 2` reduces the oracle's `7` below `3`.
 #guard intOf (run "pick2" #[] (oracle := fun _ => 7)).result = some 1
-#guard intOf (run "pick2" #[] (oracle := fun _ => 7) (engine := .frames)).result = some 1
 
 -- Running out of fuel.
 #guard faultOf (run "sum" #[100] (fuel := 50)).result = some .outOfFuel
@@ -225,43 +219,6 @@ Each program on `runFused`. -/
 #guard faultOf (runIn (mod [Programs.chain]) (nm "chain") #[ExSem.model.arg (1 : Int)] 100).result =
   some (.invalid "not well formed: [chain]")
 
-/-! ## The engines agree
-
-`runFused` and `runFrames` end the same way on each program, `runFused` in fewer steps. -/
-
-/-- Both engines' summaries, and whether `runFused` took at most as many steps. -/
-def agree (f : String) (args : Array Int) (oracle : Nat → Nat := fun _ => 0) : Bool :=
-  let a := run f args (oracle := oracle)
-  let b := run f args (oracle := oracle) (engine := .frames)
-  summary a = summary b && a.steps ≤ b.steps
-
-#guard agree "arith" #[3, 4]
-#guard agree "sum" #[10]
-#guard agree "sumLate" #[10]
-#guard agree "safeDiv" #[7, 0]
-#guard agree "chain" #[5]
-#guard agree "fib" #[6]
-#guard agree "fibC" #[6]
-#guard agree "useTwice" #[5]
-#guard agree "bad" #[1]
-#guard agree "typed" #[5]
-#guard agree "closure" #[5]
-#guard agree "callsClo" #[4]
-#guard agree "count" #[3]
-#guard agree "squares" #[4, -1]
-#guard agree "squares" #[0, -1]
-#guard agree "squares" #[5, 2]
-#guard agree "squaresR" #[4, -1]
-#guard agree "squaresR" #[0, -1]
-#guard agree "squaresR" #[5, 2]
-#guard agree "tables" #[3]
-#guard agree "powAbove" #[100]
-#guard agree "powAbove" #[1]
-#guard agree "noisy" #[5] (fun _ => 3)
-#guard agree "coins" #[] (fun i => i + 1)
-#guard agree "gapAfter" #[2]
-#guard agree "halts" #[]
-
 /-! ## Checked calls
 
 Every closure a module makes is at its function's signature, so a call's check fails only on a
@@ -269,7 +226,7 @@ closure from outside: here, a start argument at the machine's token.  `twiceAt` 
 argument twice by `base.callCode`. -/
 
 /-- Run `twiceAt` on a closure of function `idx` with captures cell `captured`, and `x`. -/
-def twiceOn (idx captured : Nat) (x : Int) (engine : Engine := .fused) : Option Fault × Option Int :=
+def twiceOn (idx captured : Nat) (x : Int) : Option Fault × Option Int :=
   match mod [incI, inc, twiceAt] with
   | .error e => (some e, none)
   | .ok m => match prepare ExSem.model m (nm "twiceAt") with
@@ -277,7 +234,7 @@ def twiceOn (idx captured : Nat) (x : Int) (engine : Engine := .fused) : Option 
     | .ok ⟨_, hw, i⟩ =>
       let f : FnRef Run [Int] Int := ⟨⟨idx, captured, trivial⟩⟩
       let o := runPrepared hw i #[⟨ExSem.T.base.Fn (.list [ExSem.T.base.Int]) ExSem.T.base.Int, f⟩,
-        ⟨ExSem.T.base.Int, x⟩] 1000 (fun _ => 0) engine
+        ⟨ExSem.T.base.Int, x⟩] 1000 (fun _ => 0)
       (faultOf o.result, intOf o.result)
 
 -- At `incI`, its signature: two calls.
@@ -287,7 +244,6 @@ def twiceOn (idx captured : Nat) (x : Int) (engine : Engine := .fused) : Option 
 #guard twiceOn 0 3 5 = (some (.badCall (nm "incI")), none)
 -- Past the module's functions.
 #guard twiceOn 7 0 5 = (some (.badCall (.num .base 7)), none)
-#guard [(0, 0), (1, 0), (0, 3), (7, 0)].all fun (i, c) => twiceOn i c 5 = twiceOn i c 5 .frames
 
 /-! ## The machine, directly -/
 
@@ -311,8 +267,8 @@ def endResult {m : LModule ExSem.model.at} {B : Ty} :
   | .done r _ _ _ => some r
   | .timeout .. => none
 
--- A timeout resumes: `runFrames` on 30 steps, then `runFused`, ends as one run does.
-#guard withStart "sum" #[10] (fun hw s h => match runFrames hw (fun _ => 0) 30 s h with
+-- A timeout resumes: `runFused` on 30 steps, then on more, ends as one run does.
+#guard withStart "sum" #[10] (fun hw s h => match runFused hw (fun _ => 0) 30 s h with
   | .timeout s₁ h₁ => (endResult (runFused hw (fun _ => 0) 1000 s₁ h₁)).bind intOf
   | .done .. => none) none = some 45
 

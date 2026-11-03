@@ -129,10 +129,9 @@ def int (n : Int) : BaseSem.model.Arg := BaseSem.model.arg n
 /-- `e : Except Int Int` as an argument. -/
 def exc (e : Except Int Int) : BaseSem.model.Arg := BaseSem.model.arg e
 
-def run (f : String) (args : Array BaseSem.model.Arg) (engine : Engine := .fused) :
-    Outcome BaseSem.model :=
+def run (f : String) (args : Array BaseSem.model.Arg) : Outcome BaseSem.model :=
   match all with
-  | .ok m => runModule BaseSem.model m (nm f) args 1000 (engine := engine)
+  | .ok m => runModule BaseSem.model m (nm f) args 1000
   | .error _ => .failed BaseSem.model (.invalid "not well formed")
 
 def intOf (o : Outcome BaseSem.model) : Option Int := o.read? Int
@@ -162,9 +161,5 @@ end
 #guard match (run "never" #[]).result with
   | .fault (.failure _) => true
   | _ => false
-
--- The step loop agrees.
-#guard intOf (run "flip" #[] (engine := .frames)) = some 7
-#guard intOf (run "twice" #[int 6] (engine := .frames)) = some 6
 
 end Strata.Dyn.ExecTest.BaseTest

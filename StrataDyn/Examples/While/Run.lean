@@ -28,13 +28,12 @@ open Strata.Dyn.Exec
 /-- A value of the While model at the token `σ`. -/
 abbrev Val (σ : Type) [Store σ] := Dyn (WhileSem.model.interp σ)
 
-/-- Lower `p` and run its function `f` on `args` for at most `fuel` steps of `engine`, with
-the oracle `oracle`. -/
+/-- Lower `p` and run its function `f` on `args` for at most `fuel` fused steps, with the
+oracle `oracle`. -/
 def run (p : Ast.Program) (f : String) (args : Array Int) (fuel : Nat := 100000)
-    (oracle : Nat → Nat := fun _ => 0) (engine : Engine := .fused) :
-    Except String (Outcome WhileSem.model) := do
+    (oracle : Nat → Nat := fun _ => 0) : Except String (Outcome WhileSem.model) := do
   let m ← lower p
-  return runModule WhileSem.model m (nm f) (args.map (WhileSem.model.arg ·)) fuel oracle engine
+  return runModule WhileSem.model m (nm f) (args.map (WhileSem.model.arg ·)) fuel oracle
 
 def showList : While.IntList.Val → String
   | .nil => "nil"

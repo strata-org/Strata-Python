@@ -40,7 +40,7 @@ instances, which the wrapper builds.
   `HasCall.mreq`.
 * **The table**: `Shape`, `Impl`, `OpImpl`, `Table`, `Model`, and `RunModel`, a model at the
   token, which linking and the machine see.  `Table.stateOf` gives each operation's state
-  type, by its position and its type arguments' tags, so that the machine's configurations
+  type, by its position and its type arguments' tags, so that the machine's states
   name a rule's state type with no type among their data.
 
 ## Requests
@@ -343,7 +343,7 @@ inductive Fault where
   /-- An access found no value of the ref's tag at its location: a location past the heap's
   end, or one holding another tag.  A ref is checked at every access. -/
   | badCell (loc : Nat)
-  /-- The fuel ran out.  The machine returns the configuration; `run` reports this. -/
+  /-- The fuel ran out.  The machine returns the state; `run` reports this. -/
   | outOfFuel
   /-- Operations the module uses that the table has no rule for, reported before the first
   step. -/

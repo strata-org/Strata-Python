@@ -3,7 +3,8 @@
 Dyn is a typed intermediate representation for programs, defined in Lean. A front end
 translates a source language into Dyn, and analyses and interpreters work on Dyn
 rather than on the source language. This document is a self-contained reference for Dyn
-itself, and §4 shows how a language gives its programs a semantics that runs them.
+itself. §4 shows how a language gives its programs a semantics that runs them, and §5 how to
+reason about those runs.
 [Python to Dyn](./PythonToDyn.md) describes how Python is translated into it.
 
 ## 1. Overview
@@ -34,9 +35,10 @@ Dyn separates the vocabulary a language provides from the programs written in it
 Environments are built in layers. The **base environment** declares what every language
 needs, and a language's environment refines the base by adding its own types and
 instructions. For example, Python's environment adds a value type and the Python
-operations. We have a general notion of refinement for environments that captures extending
-environments with new operations as well as replacing abstract types with more precise
-definitions (such as inductive types).
+operations. We have a general notion of refinement for environments, **environment
+refinement**, that captures extending environments with new operations as well as replacing
+abstract types with more precise definitions (such as inductive types). It is unrelated to the
+trace refinement of programs (§5, "Trace refinement").
 
 We write `t ≤ s`, or `t ≼ s` for the class that instance search uses, when `s` refines `t`:
 
@@ -48,8 +50,8 @@ We write `t ≤ s`, or `t ≼ s` for the class that instance search uses, when `
 * **Annotations:** `≤` requires each annotation of `t` to equal that of its refinement in `s`.
   `Env.LeBy R` relates them by `R` instead.
 
-`s` may declare more than `t`. Refinement ignores positions: the same declarations in another
-order refine each other.
+`s` may declare more than `t`. Environment refinement ignores positions: the same declarations
+in another order refine each other.
 
 Environments and programs come with a well-formedness check. A well-formed environment is one
 whose type references all resolve to earlier declarations. A well-formed program uses only
@@ -265,10 +267,12 @@ variable {ε : Eff} {E : Type}
 `semanticGap msg` stops the run with `Fault.gap`, for a case the semantics leaves out, and
 `semanticFailure msg` with `Fault.failure`, for one the author holds impossible. `assume b msg`
 continues if `b` holds and otherwise stops with `Fault.blocked`: the path is infeasible, which
-stands for no behaviour rather than an error, and a run reports it as its outcome. `chooseNat` asks the run's
-oracle for a number, `choose n` for one from `0` to `n`, which is the oracle's answer reduced,
-and `chooseInt` for an integer, which numbers the integers `0, -1, 1, -2, …` by the oracle's
-answer. A rule takes no fuel: the machine runs its requests as steps.
+stands for no behaviour rather than an error, and a run reports it as its outcome. `chooseNat`
+asks the run's oracle for a number, `choose n` for one from `0` to `n`, which is the oracle's
+answer reduced, and `chooseInt` for an integer, which numbers the integers `0, -1, 1, -2, …` by
+the oracle's answer. A choice is internal nondeterminism, which a translation may resolve (§5,
+"Trace refinement"); input from the environment is a world request. A rule takes no fuel: the
+machine runs its requests as steps.
 
 Rules are trusted: a rule is what its instruction means. Registration checks a rule's type
 against its instruction's signature and the capabilities it takes, and that no instruction has
@@ -380,7 +384,7 @@ takes it as `(world := W)`, and it defaults to `Unit`. A rule reaches the parts 
 through `[HasPart ε.W P]`, with `getThe P`, `modifyThe P` and `modifyGetThe P`. The world's
 type is abstract in a rule, so a rule reads only the parts it names. It can still put back a
 world it read earlier, whole, and `HasPart` states no laws. Each of the three is one `update`
-request: the machine takes the world out of its configuration and hands it to the request,
+request: the machine takes the world out of its state and hands it to the request,
 which returns the new world, so a part that `modifyThe` updates is held by nothing else:
 
 ```lean
@@ -572,14 +576,118 @@ o.read? Bool  -- none
 ```
 
 `M.read? r α` reads a `Result` the same way, and `o.result` is the result itself, a value or a
-`Fault`. `runModule` runs the fused engine, `runFused`, by default; `(engine := .frames)` runs
-the reference machine, `runFrames`. Given enough fuel both end with the same outcome, snapshot
-and choices (`runFused_of_runFrames`, `runFrames_of_runFused`). Each counts fuel in its own
-steps, so on the same fuel `runFused` may finish where `runFrames` runs out, but not the
-reverse.
+`Fault`. `runModule` runs the fused engine, `runFused`, which counts fuel in fused steps. A
+fused step performs a transition and the edges, entries and world requests it decides, so a run
+takes fewer fused steps than steps of `step`. Section 5 relates the two.
 
 `startCore hw i args snap` starts function `i` from a snapshot, by default `Snapshot.initial`,
 an empty heap and the initial world. A module's top level can run first, and a function of the
 module then from `o.snapshot`, the heap and the world where the top level ended
 (`StrataDynTest/Exec/HeapTest.lean`). One value holds both, so a run cannot start from one
 run's heap and another run's world.
+
+## 5. Reasoning about runs
+
+This section is about proofs over the runs of linked modules: what a run does when it never
+ends, and how the behaviours of two modules compare.
+
+### Runs and behaviours
+
+A module's machine is `step`, a function of the module, an oracle and a state. What the module
+does is the set of its runs. `StrataDyn/Exec/Trace.lean` defines its step relation,
+`StepRel hwf`, which steps wherever some oracle does, and `RunFrom hwf s h`, the runs of that
+relation from `s`. A run is a configuration at every time: running in a state, `.running ⟨s₁, h₁⟩`,
+or ended, `.ended ⟨result, snapshot, drawn⟩`, which every later time keeps. A run answers each
+choice freely, and its behaviour does not record how. No theorem takes fuel, so runs that never
+end are covered.
+
+* `Reach hwf s h p` holds when steps of the module lead from `s` to `p`.
+* `Diverges hwf s h` holds when some run from `s` never ends.
+* `always` proves a property of every configuration of every run from a property of states that
+  each step, under every oracle, preserves and a property of how runs end that each final step
+  establishes. A proof about a module states its fact for one step under one oracle, and
+  `always` gives it for every run.
+
+A run's behaviour, `behW hwf obs run`, is what an observer of the world sees. At each state the
+observer records `obs` of the world, and drops a record equal to the one before. The behaviour
+has three forms. `.term t x` is a run that ends with the result `x` after the records `t`.
+`.silent t` is a run that never ends and records nothing after `t`, such as `while (true) { }`.
+`.react σ` is a run that never ends and records without end, such as a loop that prints. Neither
+the heap nor the choices made are part of the behaviour. A later run started from the run's
+snapshot reads the heap. `behW hwf obs run` is the library's `run.beh (obsW obs) Final.result`.
+
+`Trace.Run.beh_extends_iff` says that the finite prefixes of a behaviour are exactly the prefixes
+of `run.obsUpTo (obsW obs) n` for some `n`, and `Trace.Run.beh_ended` that a run that has ended
+after `n` steps behaves as `.term (run.obsUpTo (obsW obs) n) x`, where `x` is its result.
+
+### Trace refinement
+
+To compare two modules, a translation and its source, `Trace.Improves wrong b₁ b` holds when the
+target's behaviour `b₁` is the source's `b`, or `b` ends with a wrong result after records that
+`b₁` extends. For Dyn the wrong results are `Result.Wrong`: the faults `failure`, `badCall` and
+`badCell`. `blocked` and `gap` are not wrong, so a target run that blocks must match a source run
+that blocks after the same records, or a source run that goes wrong after records that the target
+run's extend. Trace refinement, `Exec.Refines hwf hwf₁ obs wrong c c₁`, takes the source `c`
+first and the target `c₁` second, and says that every run of the target improves on some run of
+the source. It constrains only the target's runs: a target that blocks at once refines a source
+with some run that blocks at once, though the source's other runs do not block.
+
+**What `choose` means.** A choice is internal nondeterminism: freedom that the implementation
+has, such as an unspecified order, a hash seed or a havocked value. Trace refinement picks the
+source's answers to match the target's run, so a translation may resolve a choice, drop it or
+move it: `x := choose; print(x)` compiled to `print(5)` refines its source. Input from the
+environment must come through the world (`update`), which is observed, and a translation must
+keep it. So `input()` or the time of day is a world request, not a `choose`.
+
+Trace refinement over runs lets a source run that goes wrong early excuse every target run
+whose records extend it, whatever choices the target made. A translation that keeps every choice
+as it is proves more, trace refinement under one oracle (`Exec.OracleRefines`): under every
+oracle the target's run improves on the source's run under the same oracle. Then the source going
+wrong on some answers excuses the target only on those answers. `OracleRefines.refines` gives
+`Refines` from it. `refines_iff` states `Refines` with oracles: for every oracle of the target,
+some oracle of the source.
+
+Trace refinement over a relation says nothing of a target state with no step, since such a
+state has no run (`Trace.Total`). Dyn's relation is total (`stepRel_total`), and its faults are
+outcomes, not stuck states. `Refines.trans` composes the trace refinements of two passes, and
+`OracleRefines.trans` the trace refinements under one oracle of two passes that keep choices.
+
+`StrataDyn/Util/Trace.lean` states runs, behaviours and trace refinement for any step relation,
+and gives three ways to prove trace refinement:
+
+* `Sim`, a forward simulation of a step function by a step function, with a measure: every
+  source step is matched by target steps, or by none and the measure decreases (`Sim.refines`).
+  Under one oracle, Dyn's machine is a function, so a translation that keeps choices one to one
+  proves a `Sim` under each oracle, and `Exec.oracleRefines_of_sim` gives refinement under one
+  oracle.
+* `BSim` and `BSimStep` (`StrataDyn/Util/Trace/Backward.lean`), backward simulations. With
+  `BSimStep`, the proof takes each target step from related states and gives source steps to a
+  related state, or no source step and a smaller measure. The source steps and their answers to
+  choices are chosen by the proof, so a translation may drop or move a choice. `BSim` is the form
+  in which each match takes one or more steps on each side, and `BSimStep.toBSim` converts.
+  `StrataDynTest/Util/ChoiceTest.lean` proves that dropping an unused choice refines its source
+  this way.
+* `RunMatch`, a forward matching of two given runs, to which the other two reduce.
+
+### Computing a run
+
+The run under one oracle, `oracleRun hwf oracle s h`, is one of the runs. Its configurations,
+`trace hwf oracle s h n`, compute, so a prefix can be checked with `#guard`. What its first `n`
+steps show is computed in one pass by `obsTrace` (`oracleRun_obsUpTo`); evaluating `obsUpTo` of a
+run directly recomputes the run at every step. `StrataDynTest/Exec/TraceTest.lean` checks
+prefixes of While programs this way, and proves the three forms of behaviour for small machines.
+
+Every run is the run under some oracle (`complete`), so a state has a run that never ends iff
+some oracle's run never ends (`diverges_iff`).
+
+`StrataDyn/Exec/Fused.lean` proves that the fused engine follows the runs. `runFused` on `n` fuel
+under an oracle stops or ends at the configuration that the run under that oracle has after some
+`t ≥ n` steps (`runFused_eq`), so every state at which it stops can be reached
+(`reach_runFused`). When it ends, the run under that oracle ends with the same result, snapshot
+and choices, and behaves as `.term` with that result (`beh_of_runFused`). A run that has ended
+after `n` steps, `runFused` under its oracle ends on `n` fuel (`runFused_of_run`). Some run never
+ends iff, under some oracle, `runFused` runs out of fuel on every fuel (`diverges_iff_fused`).
+`runFused` runs a rule's world updates in one step, so it does not stop between them. A
+debugger's hook runs `step`: one that only observes ends at the configuration of the run under
+its oracle (`runHooked_observer`), and a run that it stops and `runFused` resumes ends at a
+configuration of the uninterrupted run (`runHooked_resume`).

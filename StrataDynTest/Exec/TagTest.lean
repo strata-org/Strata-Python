@@ -150,15 +150,13 @@ private def useMeters : Func TE Unit :=
     .const () (tv 3 (Base.Fn [Tg.Meters] Tg.Feet)) (.func (tn "m2f")),
     .apply () (tv 4 Tg.Feet) Tg.toFeet.ref ⟨#[], rfl⟩ #[⟨3⟩, ⟨2⟩] #[] #[]] 4
 
-/-- `useMeters 4`, on `engine`: an `Int` argument at `Meters`, whose tag is `Int`'s, and a
-`Feet` result read as an `Int`. -/
-private def runMeters (engine : Engine) : Option Int := do
+/-- `useMeters 4`: an `Int` argument at `Meters`, whose tag is `Int`'s, and a `Feet` result
+read as an `Int`. -/
+private def runMeters : Option Int := do
   let m ← (Module.Raw.check ⟨tn "m", #[m2f, useMeters], ()⟩).toOption
-  (runModule TgSem.model m (tn "useMeters") #[TgSem.model.arg (4 : Int)] 100
-    (engine := engine)).read? Int
+  (runModule TgSem.model m (tn "useMeters") #[TgSem.model.arg (4 : Int)] 100).read? Int
 
-#guard runMeters .fused = some 12
-#guard runMeters .frames = some 12
+#guard runMeters = some 12
 
 end
 

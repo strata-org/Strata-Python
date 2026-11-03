@@ -15,18 +15,20 @@ meta import StrataDyn.Env.WF
 set_option autoImplicit false
 
 /-!
-# Differential tests: `runFused` against iterating `step`
+# Differential tests: `runFused` against the trace
 
 What `runFused_eq` and its corollaries say, checked on runs as well as proved, so that a
 statement that is true but not what was meant would show:
 
-* both engines end with the same outcome, heap, world and number of choices;
-* each fused step's configuration is the step loop's at the matching `exec` or `again` one;
-* at every fuel `k`, `runFused k` ends as `runFrames t` does for some `t ≥ k`, a run that
-  `runFrames k` finishes `runFused k` finishes, and a fused timeout is a step-loop timeout;
-* the same, from the step loop's configurations in every mode, not only from the start;
+* `runFused` ends with the outcome, heap, world and number of choices the trace ends with;
+* each fused step stops in the trace's state at the matching `exec` or `again` step, which the
+  theorems do not say;
+* at every fuel `k`, `runFused k` stops or ends at the trace's configuration after some
+  `t ≥ k` steps (`runFused_eq`), and a run whose trace has ended after `k` steps `runFused k`
+  ends (`runFused_of_trace`);
+* the same, from the trace's states in every mode, not only from the start;
 * a hook that stops the run after `k` steps, resumed with `runFused`, ends as the run does;
-* a hook that only observes runs as `runFrames` does.
+* a hook that only observes ends at the trace's configuration (`runHooked_observer`).
 -/
 
 namespace Strata.Dyn.ExecTest.FusedDiffTest
@@ -139,18 +141,18 @@ variable {m : LModule ExSem.model.at} (hw : WF m) (oracle : Nat → Nat) {B : Ty
 def heapFP (hp : Heap ExSem.model.at) : String :=
   s!"heap {hp.cells.toList.map dynStr} {hp.caps.toList.map (·.map dynStr)}"
 
-/-- A run's end, fingerprinted. -/
-def endFP : RunEnd m B → String
-  | .done r ⟨hp, w⟩ d l => s!"done {resultStr r} {w.out.items} \
-      {w.ticks.n} drawn {d} left {l} {heapFP hp}"
-  | .timeout s _ => s!"timeout {stateFP s}"
+/-- A configuration, fingerprinted. -/
+def configFP : Exec.Config m B → String
+  | .ended ⟨r, ⟨hp, w⟩, d⟩ => s!"done {resultStr r} {w.out.items} \
+      {w.ticks.n} drawn {d} {heapFP hp}"
+  | .running ⟨s, _⟩ => s!"running {stateFP s}"
 
-/-- The configuration before each step of the step loop, and its end. -/
-def trace : Nat → (s : State ExSem.model.at) → StateOK m B s → Array (String × String) →
+/-- The state before each step of the trace, and its end, collected in one pass. -/
+def walk : Nat → (s : State ExSem.model.at) → StateOK m B s → Array (String × String) →
     Array (String × String) × Option String
   | 0, _, _, acc => (acc, none)
   | n + 1, s, h, acc => match step hw oracle s h with
-    | .next _ s₁ h₁ => trace n s₁ h₁ (acc.push (stateFP s))
+    | .next _ s₁ h₁ => walk n s₁ h₁ (acc.push (stateFP s))
     | .final r hp w d => (acc.push (stateFP s), some s!"done {resultStr r} \
         {w.out.items} {w.ticks.n} drawn {d} {heapFP hp}")
 
@@ -167,42 +169,39 @@ def fuelsFor (n : Nat) : List Nat :=
   else ((List.range 20) ++ (List.range 21).map (· * (n / 20)) ++
     (List.range 6).map (n + 2 - ·)).eraseDups
 
-/-- The claims about `runFused`, at `fuels`, from `s`, whose step loop visits `tr` and ends
-after `N` steps: the problems found, and how many fuels were checked. -/
+/-- The claims about `runFused`, at `fuels`, from `s`, whose trace visits `tr` and ends after
+`N` steps: the problems found. -/
 def claims (s : State ExSem.model.at) (h : StateOK m B s) (tr : Array (String × String)) (N : Nat)
     (fuels : List Nat) : Array String := Id.run do
   let mut bad := #[]
   for k in fuels do
     let fu := runFused hw oracle k s h
-    let fr := runFrames hw oracle k s h
     match fu with
-    | .done _ _ _ l =>
-      if endFP (runFrames hw oracle (N + l) s h) != endFP fu || N + l < k then
-        bad := bad.push s!"claim 1 at {k}"
+    | .done .. =>
+      if configFP (Exec.trace hw oracle s h (max k N)) != configFP fu.config then
+        bad := bad.push s!"runFused_eq at {k}"
     | .timeout s₁ _ =>
       let hit := (List.range (tr.size - min k tr.size)).find? fun i => tr[i + k]? == some (stateFP s₁)
       match hit with
-      | none => bad := bad.push s!"claim 1 at {k}: the fused timeout is no later configuration"
+      | none => bad := bad.push s!"runFused_eq at {k}: the fused timeout is no later state"
       | some i =>
-        if endFP (runFrames hw oracle (i + k) s h) != endFP fu then
-          bad := bad.push s!"claim 1 at {k}: runFrames {i + k}"
-    match fr, fu with
-    | .done r sn d l, .done r₁ sn₁ d₁ l₁ =>
-      if endFP (m := m) (B := B) (.done r sn d 0) != endFP (m := m) (B := B) (.done r₁ sn₁ d₁ 0) ||
-          l₁ < l then
-        bad := bad.push s!"claim 2 at {k}"
-    | .done .., .timeout .. => bad := bad.push s!"claim 2 at {k}: the fused run timed out"
-    | .timeout .., .done .. => pure ()
-    | .timeout .., .timeout .. => pure ()
+        if configFP (Exec.trace hw oracle s h (i + k)) != configFP fu.config then
+          bad := bad.push s!"runFused_eq at {k}: trace {i + k}"
+    match Exec.trace hw oracle s h k, fu with
+    | .ended f, .done .. =>
+      if configFP (m := m) (B := B) (.ended f) != configFP fu.config then
+        bad := bad.push s!"runFused_of_trace at {k}"
+    | .ended _, .timeout .. => bad := bad.push s!"runFused_of_trace at {k}: the fused run timed out"
+    | .running _, _ => pure ()
   return bad
 
-/-- Compare the engines from `s`, an `exec` configuration: the problems found, the step
-counts, the outcome, and how many claims were checked.  A fused step ends where the step loop
-is about to run an instruction or to run a rule again. -/
+/-- Compare `runFused` with the trace from `s`, an `exec` state: the problems found, the step
+counts, the outcome, and how many claims were checked.  A fused step ends where the trace is
+about to run an instruction or to run a rule again. -/
 def compare (s : State ExSem.model.at) (h : StateOK m B s) (fuel : Nat) :
     Array String × Nat × Nat × String × Nat := Id.run do
   let mut bad := #[]
-  let (tr, fend) := trace hw oracle fuel s h #[]
+  let (tr, fend) := walk hw oracle fuel s h #[]
   let N := tr.size
   let pos := (List.range N).filter fun i =>
     (tr[i]?.map (·.1)) == some "exec" || (tr[i]?.map (·.1)) == some "again"
@@ -213,13 +212,13 @@ def compare (s : State ExSem.model.at) (h : StateOK m B s) (fuel : Nat) :
     | .timeout s₁ _ =>
       n := j + 1
       if (pos[j]?.bind (tr[·]?)) != some (stateFP s₁) then
-        bad := bad.push s!"fused step {j}: not the step loop's configuration"
+        bad := bad.push s!"fused step {j}: not the trace's state"
     | .done .. => pure ()
   match fend, runFused hw oracle (N + 5) s h with
   | some e, .done r ⟨hp, w⟩ d _ =>
     if e != s!"done {resultStr r} {w.out.items} \
         {w.ticks.n} drawn {d} {heapFP hp}" then
-      bad := bad.push "the engines end differently"
+      bad := bad.push "runFused and the trace end differently"
   | _, _ => bad := bad.push "a run did not end"
   -- The claims, from the start and from configurations in every mode.
   let firsts := ["jump", "call", "ret", "request", "again", "done"].filterMap fun k =>
@@ -228,13 +227,13 @@ def compare (s : State ExSem.model.at) (h : StateOK m B s) (fuel : Nat) :
     (List.range 10).map (· * (N / 10)) ++ firsts ++ [N - 1]).eraseDups.filter (· < N)
   let mut checked := 0
   for j in starts do
-    match runFrames hw oracle j s h with
-    | .timeout sj hj =>
+    match Exec.trace hw oracle s h j with
+    | .running ⟨sj, hj⟩ =>
       let fuels := fuelsFor (N - j)
       checked := checked + fuels.length
       bad := bad ++ (claims hw oracle sj hj (tr.extract j N) (N - j) fuels).map
         (s!"from step {j}: " ++ ·)
-    | .done .. => pure ()
+    | .ended _ => pure ()
   -- Stop after `k` steps, then resume fused.
   for k in (fuelsFor N).filter (fun k => k != 0 && k < N) do
     checked := checked + 1
@@ -250,7 +249,8 @@ def compare (s : State ExSem.model.at) (h : StateOK m B s) (fuel : Nat) :
   -- An observer.
   match runHooked hw oracle countAll (N + 5) 0 s h with
   | (e, c) =>
-    if (e.toRunEnd.map endFP) != some (endFP (runFrames hw oracle (N + 5) s h)) || c + 1 != N then
+    let traced := configFP (Exec.trace hw oracle s h (N + 5))
+    if (e.toRunEnd.map (configFP ∘ RunEnd.config)) != some traced || c + 1 != N then
       bad := bad.push "observer"
   return (bad, n, N, fend.getD "timeout", checked)
 

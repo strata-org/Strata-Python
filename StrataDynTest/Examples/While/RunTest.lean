@@ -16,8 +16,7 @@ set_option autoImplicit false
 # Running While programs
 
 Every example program lowers to a well-formed module, and every example runs to its expected
-outcome on `runFused` and on `runFrames`, which agree.  Then the world, the oracle, and the
-lowering's errors.
+outcome.  Then the world, the oracle, and the lowering's errors.
 -/
 
 namespace Strata.Dyn.While.RunTest
@@ -58,73 +57,60 @@ def deadCatch : Program := #while
 
 /-! ## The examples -/
 
-/-- The run of example `e` on `engine`, or the lowering's error. -/
-def outcome (e : Example) (engine : Engine := .fused) :
-    Except String (Outcome WhileSem.model) :=
-  run e.prog e.entry e.args (engine := engine)
+/-- The run of example `e`, or the lowering's error. -/
+def outcome (e : Example) : Except String (Outcome WhileSem.model) :=
+  run e.prog e.entry e.args
 
-/-- How example `e` ended on `engine`. -/
-def showRun (e : Example) (engine : Engine := .fused) : String :=
-  match outcome e engine with
+/-- How example `e` ended. -/
+def showRun (e : Example) : String :=
+  match outcome e with
   | .ok o => showOutcome o
   | .error msg => s!"lowering error: {msg}"
-
-/-- Whether both engines end `e` alike, with the same world and choices, `runFused` in at most
-as many steps. -/
-def agree (e : Example) : Bool :=
-  match outcome e .fused, outcome e .frames with
-  | .ok a, .ok b => showOutcome a == showOutcome b && a.snapshot.world == b.snapshot.world &&
-    a.drawn == b.drawn && a.steps ≤ b.steps
-  | _, _ => false
 
 -- Every example ends as expected.
 #guard examples.all fun e => showRun e == e.expected
 
--- The engines agree on every example.
-#guard examples.all agree
-
-/-- An example, as a line: its outcome, its steps on each engine, and what it printed. -/
+/-- An example, as a line: its outcome, its fused steps, and what it printed. -/
 def line (e : Example) : String :=
-  match outcome e .fused, outcome e .frames with
-  | .ok a, .ok b =>
-    s!"{e.name}: {showOutcome a} after {a.steps} fused, {b.steps} by step; \
+  match outcome e with
+  | .ok a => s!"{e.name}: {showOutcome a} after {a.steps} fused steps; \
       printed {a.snapshot.world.out.items}"
-  | _, _ => s!"{e.name}: {showRun e}"
+  | .error _ => s!"{e.name}: {showRun e}"
 
 /--
-info: arith: ok 37 after 11 fused, 13 by step; printed #[]
-sum 100: ok 5050 after 606 fused, 810 by step; printed #[]
-gcd 12 18: ok 6 after 21 fused, 31 by step; printed #[]
-gcd 1071 462: ok 21 after 21 fused, 31 by step; printed #[]
-fact 20: ok 2432902008176640000 after 139 fused, 181 by step; printed #[]
-fib 15: ok 610 after 17752 fused, 24657 by step; printed #[]
-length (range 10): ok 10 after 155 fused, 225 by step; printed #[]
-total (range 100): ok 5050 after 1315 fused, 1925 by step; printed #[]
-reverse (range 4): ok 4 :: 3 :: 2 :: 1 :: nil after 67 fused, 101 by step; printed #[]
-head (range 0) or 7: ok 7 after 11 fused, 19 by step; printed #[]
-safeDiv 7 2: ok 3 after 3 fused, 5 by step; printed #[]
-safeDiv 7 0: ok -1 after 5 fused, 8 by step; printed #[]
-viaCall 5: ok 6 after 15 fused, 23 by step; printed #[]
-viaCall -1: ok 42 after 13 fused, 20 by step; printed #[]
-nested 0: ok 101 after 9 fused, 14 by step; printed #[]
-boom 1: raised 1 after 4 fused, 7 by step; printed #[]
-spin: fault out of fuel after 100000 fused, 100000 by step; printed #[]
-cube 2: fault gap: while.pow: not implemented after 2 fused, 3 by step; printed #[]
-counter 10: ok 10 after 88 fused, 112 by step; printed #[]
-escape 1: ok 16 after 19 fused, 25 by step; printed #[]
-alias 21: ok 42 after 7 fused, 9 by step; printed #[]
-two 3: ok 74 after 20 fused, 26 by step; printed #[]
-stack 3: ok 2 :: 1 :: 0 :: nil after 44 fused, 60 by step; printed #[]
-rcounter 10: ok 10 after 109 fused, 153 by step; printed #[]
-nested 3: ok 304 after 251 fused, 327 by step; printed #[]
-rgap 2: fault gap: while.pow: not implemented after 7 fused, 9 by step; printed #[]
-rgap -1: ok -1 after 9 fused, 13 by step; printed #[]
-rspin: fault out of fuel after 100000 fused, 100000 by step; printed #[]
-rcatch 5: ok 1000 after 108 fused, 138 by step; printed #[]
-rescape 3: ok 21 after 45 fused, 65 by step; printed #[]
-logged 3: ok 5 after 55 fused, 78 by step; printed #[0, 10, 20, 1]
-coins 3: ok 0 after 62 fused, 81 by step; printed #[]
-wcounter 7: ok 7 after 64 fused, 106 by step; printed #[]
+info: arith: ok 37 after 11 fused steps; printed #[]
+sum 100: ok 5050 after 606 fused steps; printed #[]
+gcd 12 18: ok 6 after 21 fused steps; printed #[]
+gcd 1071 462: ok 21 after 21 fused steps; printed #[]
+fact 20: ok 2432902008176640000 after 139 fused steps; printed #[]
+fib 15: ok 610 after 17752 fused steps; printed #[]
+length (range 10): ok 10 after 155 fused steps; printed #[]
+total (range 100): ok 5050 after 1315 fused steps; printed #[]
+reverse (range 4): ok 4 :: 3 :: 2 :: 1 :: nil after 67 fused steps; printed #[]
+head (range 0) or 7: ok 7 after 11 fused steps; printed #[]
+safeDiv 7 2: ok 3 after 3 fused steps; printed #[]
+safeDiv 7 0: ok -1 after 5 fused steps; printed #[]
+viaCall 5: ok 6 after 15 fused steps; printed #[]
+viaCall -1: ok 42 after 13 fused steps; printed #[]
+nested 0: ok 101 after 9 fused steps; printed #[]
+boom 1: raised 1 after 4 fused steps; printed #[]
+spin: fault out of fuel after 100000 fused steps; printed #[]
+cube 2: fault gap: while.pow: not implemented after 2 fused steps; printed #[]
+counter 10: ok 10 after 88 fused steps; printed #[]
+escape 1: ok 16 after 19 fused steps; printed #[]
+alias 21: ok 42 after 7 fused steps; printed #[]
+two 3: ok 74 after 20 fused steps; printed #[]
+stack 3: ok 2 :: 1 :: 0 :: nil after 44 fused steps; printed #[]
+rcounter 10: ok 10 after 109 fused steps; printed #[]
+nested 3: ok 304 after 251 fused steps; printed #[]
+rgap 2: fault gap: while.pow: not implemented after 7 fused steps; printed #[]
+rgap -1: ok -1 after 9 fused steps; printed #[]
+rspin: fault out of fuel after 100000 fused steps; printed #[]
+rcatch 5: ok 1000 after 108 fused steps; printed #[]
+rescape 3: ok 21 after 45 fused steps; printed #[]
+logged 3: ok 5 after 55 fused steps; printed #[0, 10, 20, 1]
+coins 3: ok 0 after 62 fused steps; printed #[]
+wcounter 7: ok 7 after 64 fused steps; printed #[]
 -/
 #guard_msgs in
 #eval IO.println ("\n".intercalate (examples.map line))
@@ -132,9 +118,9 @@ wcounter 7: ok 7 after 64 fused, 106 by step; printed #[]
 /-! ## The world and the oracle -/
 
 /-- `run`'s outcome, its world, and its choices, if the program lowers. -/
-def world (p : Program) (f : String) (args : Array Int) (oracle : Nat → Nat := fun _ => 0)
-    (engine : Engine := .fused) : Option (String × WhileRules.World × Nat) :=
-  (run p f args (oracle := oracle) (engine := engine)).toOption.map fun o =>
+def world (p : Program) (f : String) (args : Array Int) (oracle : Nat → Nat := fun _ => 0) :
+    Option (String × WhileRules.World × Nat) :=
+  (run p f args (oracle := oracle)).toOption.map fun o =>
     (showOutcome o, o.snapshot.world, o.drawn)
 
 -- `print` appends to the output, inside a region too, and `tick` counts.
@@ -146,8 +132,6 @@ def world (p : Program) (f : String) (args : Array Int) (oracle : Nat → Nat :=
 
 -- `pick(1)` asks the oracle, which answers from a tape, then `0`.
 #guard (world coins "coins" #[3] (tapeOracle [1, 0, 1])).map (fun (s, _, d) => (s, d)) =
-  some ("ok 5", 3)
-#guard (world coins "coins" #[3] (tapeOracle [1, 0, 1]) .frames).map (fun (s, _, d) => (s, d)) =
   some ("ok 5", 3)
 -- An answer above the bound is reduced below it: `7 % 2 = 1`.
 #guard (world coins "coins" #[2] (tapeOracle [7, 7])).map (·.1) = some "ok 3"
@@ -188,7 +172,5 @@ def mkUse : Program := #while
 
 #guard (run mkUse "use" #[5]).toOption.map showOutcome = some "ok 5"
 #guard (run mkUse "use" #[0]).toOption.map showOutcome = some "raised 1"
-#guard (run mkUse "use" #[5] (engine := .frames)).toOption.map showOutcome = some "ok 5"
-#guard (run mkUse "use" #[0] (engine := .frames)).toOption.map showOutcome = some "raised 1"
 
 end Strata.Dyn.While.RunTest

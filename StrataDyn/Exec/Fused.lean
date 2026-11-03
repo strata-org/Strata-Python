@@ -4,39 +4,43 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
-public import StrataDyn.Exec.Machine
+public import StrataDyn.Exec.Trace
 
 set_option autoImplicit false
 
 /-!
 # The fused run
 
-`runFused` runs as `runFrames` does, but performs each transition in the step that decides it:
+`runFused` runs as `step` does, but performs each transition in the step that decides it:
 an edge, an entry into a body, and a rule's choices and world accesses take no step of their
-own, and no event is built.  It is the engine for execution; `step` stays the reference, and
-hooks and debuggers use it.  A fused step ends in an `FStep`: a running configuration, a frame
-about to leave with a value, or a rule about to run again with a new state.  The loop,
-`fusedLoop` and `fusedLeave`, continues from each; `fusedLoop` runs both a configuration and a
-rule about to run again (`FPend`).  A leave that a step does not
+own, and no event is built.  It is the engine for execution; the runs of `step` are the
+definition that proofs use, and hooks and debuggers run `step`.  A fused step ends in an
+`FStep`: a running state, a frame about to leave with a value, or a rule about to run again
+with a new state.  The loop, `fusedLoop` and `fusedLeave`, continues from each; `fusedLoop`
+runs both a state and a rule about to run again (`FPend`).  A leave that a step does not
 perform is a step of its own, because resuming the waiting rule may leave again, to the rule
 below, and so on; stopping there keeps the loop structural.  So is a run of a rule again, whose
 new tree is no part of the old one.
 
-* `runFused_eq`: `runFused n` ends as `runFrames t` does for some `t ≥ n`, with the same
-  outcome, snapshot and number of choices, or at the same configuration.
-* `runFused_of_runFrames`: a run that `runFrames` finishes on `n` fuel, `runFused` finishes on
-  `n` too, with at least as much fuel left.
-* `runFrames_of_runFused` and `runFrames_timeout`: the converses, up to more fuel.
+* `runFused_eq`: `runFused n` under an oracle stops or ends at the
+  configuration that the run under that oracle has after some `t ≥ n` steps.  So
+  `reach_runFused`: it stops only where the module can be.
+* `beh_of_runFused`: when `runFused` ends, the run under the same oracle ends with the same
+  outcome, snapshot and number of choices, and its behaviour ends with that outcome.
+* `runFused_of_trace`, `runFused_of_run`: a run that has ended after `n` steps, `runFused`
+  under its oracle ends on `n` fuel.
+* `diverges_iff_fused`: some run never ends iff, under some oracle, `runFused` runs out of
+  fuel on every fuel.
 * `runHooked_fused`: a hook that only observes, run long enough, ends as `runFused` does.
 * `runHooked_resume`: a run that a hook which never modifies stopped, resumed with
-  `runFused`, ends as the uninterrupted `runFrames` does.
+  `runFused`, ends at a configuration of the trace of the uninterrupted run.
 
-`runFused n` and `runFrames n` differ in general.  A rule's requests are each a step of
-`runFrames` but all part of one fused step, so `t` grows with the number of requests one rule
-makes, and no bound `t ≤ c · n` with a fixed `c` holds across models.  While's `sum 100` ends
-after 606 fused steps and 810 by step (`StrataDynTest/Examples/While/RunTest.lean`), so on
-606 fuel `runFused` finishes and `runFrames` runs out.  So `runFused_eq` relates a fused run
-to `runFrames` on some fuel `t ≥ n`, not on `n`.
+A fused step and a step differ in general.  A rule's requests are each a step but all part of
+one fused step, so `t` grows with the number of requests one rule makes, and no bound
+`t ≤ c · n` with a fixed `c` holds across models.  While's `sum 100` ends after 606 fused steps
+(`StrataDynTest/Examples/While/RunTest.lean`) and its trace after 810
+(`StrataDynTest/Exec/TraceTest.lean`).  So `runFused_eq` relates `runFused n` to the trace
+after some `t ≥ n` steps, not after `n`.
 -/
 
 namespace Strata.Dyn.Exec
@@ -47,7 +51,7 @@ section
 variable {M : RunModel} {m : LModule M} (hwf : WF m) (oracle : Nat → Nat) {B : Ty}
 
 variable (m B) in
-/-- A fused step's outcome: a running configuration, a frame about to leave with a value, a
+/-- A fused step's outcome: a running state, a frame about to leave with a value, a
 rule about to run again with a new state, or the run's outcome, the heap, the world and the
 number of choices made. -/
 inductive FStep where
@@ -106,7 +110,7 @@ def fsettleLoop (c : Core M) (i : Inst M) (hi : InstOK m c.top i)
   | .stop (.fault f) => .final (.fault f) c.heap c.world drawn
   | .choose k => fsettleLoop c i hi hK (drawn + 1) (k (oracle drawn))
   | .update f =>
-    -- Taking the configuration apart first leaves `f` the only holder of the world.
+    -- Taking the state apart first leaves `f` the only holder of the world.
     match c, hi, hK with
     | ⟨top, conts, heap, w⟩, hi, hK => fsettleAfter top conts heap i hi hK drawn (f w)
   | .vis (.region j args) k => fvisitRegion hwf c i hi hK drawn j args k
@@ -261,17 +265,17 @@ inductive FPend where
   | again (r : Reentry M)
 
 variable (m B) in
-/-- What running from `p` in `c` needs: `StateOK` of the configuration it stands for. -/
+/-- What running from `p` in `c` needs: `StateOK` of the state it stands for. -/
 def FPend.OK (c : Core M) : FPend M → Prop
   | .exec => CoreOK m B c
   | .again r => InstOK m c.top r.inst ∧ ContsOK m B c.top.func.ret c.conts
 
 -- The loop matches each fused step's outcome where it is made, so that the common one, a running
--- configuration, is never built as an `FStep`.  A rule about to run again is a state of
+-- state, is never built as an `FStep`.  A rule about to run again is a state of
 -- `fusedLoop` itself, so that a loop of re-entries and bodies stays one loop of the compiled
 -- code: a call from one function to another with as many arguments is no tail call there.
 mutual
-/-- Run at most `fuel` fused steps from a running configuration, or from a rule about to run
+/-- Run at most `fuel` fused steps from a running state, or from a rule about to run
 again. -/
 @[specialize] def fusedLoop : Nat → (c : Core M) → Nat → (p : FPend M) → p.OK m B c → RunEnd m B
   | 0, c, d, .exec, h => .timeout ⟨c, .exec, d, ()⟩ h
@@ -305,7 +309,7 @@ end
   | .again c r d h => fusedLoop hwf oracle n c d (.again r) h
   | .final r hp w d => .done r ⟨hp, w⟩ d n
 
-/-- Run at most `fuel` fused steps.  A configuration with another pending transition first
+/-- Run at most `fuel` fused steps.  A state with another pending transition first
 performs it as `step` does, for one unit of fuel. -/
 @[specialize] def runFused : Nat → (s : State M) → StateOK m B s → RunEnd m B
   | n, ⟨c, .exec, d, _⟩, h => fusedLoop hwf oracle n c d .exec h
@@ -315,47 +319,19 @@ performs it as `step` does, for one unit of fuel. -/
     | .next _ s₁ h₁ => runFused n s₁ h₁
     | .final r hp w d => .done r ⟨hp, w⟩ d n
 
-/-! ## `runFused` against `runFrames`
+/-! ## `runFused` against the trace
 
 Each fused transition is a run of zero or more steps after the first: `fexec_sim` says that
-`exec`'s result, continued for `j + k` steps, is where `fexec` leads, continued for `j`.
+`exec`'s result, followed for `j + k` steps, is where `fexec` leads, followed for `j`.
 `settle_sim` and `leave_sim` say the same of a rule's tree and of a leaving frame, by induction
 on the tree. -/
 
-/-- A step's outcome, continued by `runFrames` for `n` more steps. -/
-def StepR.run : StepR m B → Nat → RunEnd m B
-  | .next _ s h, n => runFrames hwf oracle n s h
-  | .final r hp w d, n => .done r ⟨hp, w⟩ d n
-
-/-- A fused step's outcome, continued by `runFrames` for `n` more steps. -/
-def FStep.run : FStep m B → Nat → RunEnd m B
-  | .next c d h, n => runFrames hwf oracle n ⟨c, .exec, d, ()⟩ h
-  | .leave c v d h, n => runFrames hwf oracle n ⟨c, .ret v, d, ()⟩ h
-  | .again c r d h, n => runFrames hwf oracle n ⟨c, .again r, d, ()⟩ h
-  | .final r hp w d, n => .done r ⟨hp, w⟩ d n
-
-/-- A run's end, continued by `runFrames` for `j` more steps. -/
-def RunEnd.resume : RunEnd m B → Nat → RunEnd m B
-  | .done r sn d l, j => .done r sn d (l + j)
-  | .timeout s h, j => runFrames hwf oracle j s h
-
-/-- Running `n + 1` steps takes one step, then runs `n` more from where it left off. -/
-theorem runFrames_succ (n : Nat) (s : State M) (h : StateOK m B s) :
-    runFrames hwf oracle (n + 1) s h = (step hwf oracle s h).run hwf oracle n := by
-  show (match step hwf oracle s h with
-    | .next _ s₁ h₁ => runFrames hwf oracle n s₁ h₁
-    | .final r hp w d => .done r ⟨hp, w⟩ d n) = _
-  cases step hwf oracle s h <;> rfl
-
-/-- A run on `n + j` fuel is the run on `n`, resumed for `j`. -/
-theorem runFrames_add : ∀ (n j : Nat) (s : State M) (h : StateOK m B s),
-    runFrames hwf oracle (n + j) s h = (runFrames hwf oracle n s h).resume hwf oracle j
-  | 0, j, s, h => by rw [Nat.zero_add]; rfl
-  | n + 1, j, s, h => by
-    rw [Nat.add_right_comm, runFrames_succ, runFrames_succ]
-    cases step hwf oracle s h with
-    | next _ s₁ h₁ => exact runFrames_add n j s₁ h₁
-    | final r hp w d => rfl
+/-- A fused step's outcome, followed by the trace for `n` more steps. -/
+def FStep.run : FStep m B → Nat → Config m B
+  | .next c d h, n => trace hwf oracle ⟨c, .exec, d, ()⟩ h n
+  | .leave c v d h, n => trace hwf oracle ⟨c, .ret v, d, ()⟩ h n
+  | .again c r d h, n => trace hwf oracle ⟨c, .again r, d, ()⟩ h n
+  | .final r hp w d, _ => .ended ⟨r, ⟨hp, w⟩, d⟩
 
 /-- A transfer, made pending by `step` and run `k` steps further, is where `ftransfer`
 leads. -/
@@ -397,14 +373,14 @@ private theorem settleLoop_sim (i : Inst M) (t : i.Tree) :
     obtain ⟨t, ht⟩ := ih (oracle drawn) c hi hK (drawn + 1) (.answer (.choose (oracle drawn)))
     refine ⟨t + 1, fun j => ?_⟩
     rw [← Nat.add_assoc]
-    exact (runFrames_succ hwf oracle (j + t) _ _).trans (ht j)
+    exact (trace_succ (j + t) _ _).trans (ht j)
   case update =>
     intro f ih c hi hK drawn _
     obtain ⟨top, conts, heap, w⟩ := c
     obtain ⟨t, ht⟩ := ih w top conts heap hi hK drawn (.answer .world)
     refine ⟨t + 1, fun j => ?_⟩
     rw [← Nat.add_assoc]
-    exact (runFrames_succ hwf oracle (j + t) _ _).trans (ht j)
+    exact (trace_succ (j + t) _ _).trans (ht j)
   case after =>
     exact fun w k ih top conts heap hi hK drawn ev => ih ⟨top, conts, heap, w⟩ hi hK drawn ev
   case vis =>
@@ -430,7 +406,7 @@ private theorem settleLoop_sim (i : Inst M) (t : i.Tree) :
         hK drawn (.answer (.cell .new c.heap.cells.size))
       refine ⟨n + 1, fun j => ?_⟩
       rw [← Nat.add_assoc]
-      exact (runFrames_succ hwf oracle (j + n) _ _).trans (hn j)
+      exact (trace_succ (j + n) _ _).trans (hn j)
     | get t l =>
       intro c hi hK drawn _
       by_cases hh : c.heap.Holds l t
@@ -438,12 +414,12 @@ private theorem settleLoop_sim (i : Inst M) (t : i.Tree) :
           (.answer (.cell .get l))
         refine ⟨n + 1, fun j => ?_⟩
         rw [← Nat.add_assoc]
-        refine (runFrames_succ hwf oracle (j + n) _ _).trans ?_
+        refine (trace_succ (j + n) _ _).trans ?_
         dsimp only [step, serve, fsettleLoop]
         rw [Heap.cell_pos hh, Heap.cell_pos hh]
         exact hn j
       · refine ⟨2, fun j => ?_⟩
-        refine (runFrames_succ hwf oracle (j + 1) _ _).trans ?_
+        refine (trace_succ (j + 1) _ _).trans ?_
         dsimp only [step, serve, fsettleLoop]
         rw [Heap.cell_neg hh, Heap.cell_neg hh]
         rfl
@@ -454,12 +430,12 @@ private theorem settleLoop_sim (i : Inst M) (t : i.Tree) :
           (.answer (.cell .set l))
         refine ⟨n + 1, fun j => ?_⟩
         rw [← Nat.add_assoc]
-        refine (runFrames_succ hwf oracle (j + n) _ _).trans ?_
+        refine (trace_succ (j + n) _ _).trans ?_
         dsimp only [step, serve, fsettleLoop]
         rw [Heap.cell_pos hh, Heap.cell_pos hh]
         exact hn j
       · refine ⟨2, fun j => ?_⟩
-        refine (runFrames_succ hwf oracle (j + 1) _ _).trans ?_
+        refine (trace_succ (j + 1) _ _).trans ?_
         dsimp only [step, serve, fsettleLoop]
         rw [Heap.cell_neg hh, Heap.cell_neg hh]
         rfl
@@ -470,12 +446,12 @@ private theorem settleLoop_sim (i : Inst M) (t : i.Tree) :
           (.answer (.cell .modify l))
         refine ⟨n + 1, fun j => ?_⟩
         rw [← Nat.add_assoc]
-        refine (runFrames_succ hwf oracle (j + n) _ _).trans ?_
+        refine (trace_succ (j + n) _ _).trans ?_
         dsimp only [step, serve, fsettleLoop]
         rw [Heap.cell_pos hh, Heap.cell_pos hh]
         exact hn j
       · refine ⟨2, fun j => ?_⟩
-        refine (runFrames_succ hwf oracle (j + 1) _ _).trans ?_
+        refine (trace_succ (j + 1) _ _).trans ?_
         dsimp only [step, serve, fsettleLoop]
         rw [Heap.cell_neg hh, Heap.cell_neg hh]
         rfl
@@ -488,12 +464,12 @@ private theorem settleLoop_sim (i : Inst M) (t : i.Tree) :
           (.answer (.capture (c.heap.caps.size + 1)))
         refine ⟨n + 1, fun j => ?_⟩
         rw [← Nat.add_assoc]
-        refine (runFrames_succ hwf oracle (j + n) _ _).trans ?_
+        refine (trace_succ (j + n) _ _).trans ?_
         dsimp only [step, serve, fsettleLoop]
         rw [LModule.callee_pos hcall, LModule.callee_pos hcall]
         exact hn j
       · refine ⟨2, fun j => ?_⟩
-        refine (runFrames_succ hwf oracle (j + 1) _ _).trans ?_
+        refine (trace_succ (j + 1) _ _).trans ?_
         dsimp only [step, serve, fsettleLoop]
         rw [LModule.callee_neg fun caps h => hh ⟨caps, h⟩, LModule.callee_neg fun caps h => hh ⟨caps, h⟩]
         rfl
@@ -528,7 +504,7 @@ private theorem leaveOnce_sim : ∀ st : FStep m B, ∃ k, ∀ j,
     obtain ⟨k, hk⟩ := leave_sim hwf oracle c v h d
     refine ⟨k + 1, fun j => ?_⟩
     rw [← Nat.add_assoc]
-    exact (runFrames_succ hwf oracle (j + k) _ _).trans (hk j)
+    exact (trace_succ (j + k) _ _).trans (hk j)
   | .next .. | .again .. | .final .. => ⟨0, fun _ => rfl⟩
 
 /-- A step from `Mode.again`, run `k` steps further, is where `fagain` leads. -/
@@ -591,7 +567,7 @@ where
         exact ⟨1, fun _ => rfl⟩
     | .sem .. :: _, _ => settle_sim hwf oracle _ _ _ _ _ _ _
 
-/-- A fused loop from a running configuration takes `fexec`'s step, then continues. -/
+/-- A fused loop from a running state takes `fexec`'s step, then continues. -/
 private theorem fusedLoop_succ (n : Nat) (c : Core M) (d : Nat) (h : CoreOK m B c) :
     fusedLoop hwf oracle (n + 1) c d .exec h = (fexec hwf oracle c h d).loop hwf oracle n := by
   refine (fusedLoop.eq_3 ..).trans ?_
@@ -612,33 +588,36 @@ private theorem fusedLoop_again_succ (n : Nat) (c : Core M) (r : Reentry M) (d :
   refine (fusedLoop.eq_4 ..).trans ?_
   cases fagain hwf oracle c r h d <;> rfl
 
-/-- A fused loop on `n` fuel ends as `runFrames` does, from where the fused step left off, on
-some `t ≥ n`. -/
+/-- A fused loop on `n` fuel stops or ends at the configuration that the trace from where the
+fused step left off has after some `t ≥ n` steps. -/
 private theorem fusedLoop_eq : ∀ (n : Nat) (st : FStep m B),
-    ∃ t, n ≤ t ∧ st.run hwf oracle t = st.loop hwf oracle n
+    ∃ t, n ≤ t ∧ st.run hwf oracle t = (st.loop hwf oracle n).config
   | 0, .final _ _ _ _ | 0, .next _ _ _ | 0, .leave _ _ _ _ | 0, .again _ _ _ _ =>
     ⟨0, Nat.le_refl 0, rfl⟩
   | n + 1, .final _ _ _ _ => ⟨n + 1, Nat.le_refl _, rfl⟩
   | n + 1, .next c d h => by
     obtain ⟨k, hk⟩ := fexec_sim hwf oracle c h d
     obtain ⟨t, hnt, ht⟩ := fusedLoop_eq n (fexec hwf oracle c h d)
-    exact ⟨t + k + 1, by omega, (runFrames_succ hwf oracle _ _ _).trans
-      ((hk t).trans (ht.trans (fusedLoop_succ hwf oracle n c d h).symm))⟩
+    exact ⟨t + k + 1, by omega, (trace_succ _ _ _).trans
+      ((hk t).trans (ht.trans (congrArg RunEnd.config (fusedLoop_succ hwf oracle n c d h).symm)))⟩
   | n + 1, .leave c v d h => by
     obtain ⟨k, hk⟩ := leave_sim hwf oracle c v h d
     obtain ⟨t, hnt, ht⟩ := fusedLoop_eq n (fleave hwf oracle c v h d)
-    exact ⟨t + k + 1, by omega, (runFrames_succ hwf oracle _ _ _).trans
-      ((hk t).trans (ht.trans (fusedLeave_succ hwf oracle n c v d h).symm))⟩
+    exact ⟨t + k + 1, by omega, (trace_succ _ _ _).trans
+      ((hk t).trans (ht.trans
+        (congrArg RunEnd.config (fusedLeave_succ hwf oracle n c v d h).symm)))⟩
   | n + 1, .again c r d h => by
     obtain ⟨k, hk⟩ := fagain_sim hwf oracle c r h d
     obtain ⟨t, hnt, ht⟩ := fusedLoop_eq n (fagain hwf oracle c r h d)
-    exact ⟨t + k + 1, by omega, (runFrames_succ hwf oracle _ _ _).trans
-      ((hk t).trans (ht.trans (fusedLoop_again_succ hwf oracle n c r d h).symm))⟩
+    exact ⟨t + k + 1, by omega, (trace_succ _ _ _).trans
+      ((hk t).trans (ht.trans
+        (congrArg RunEnd.config (fusedLoop_again_succ hwf oracle n c r d h).symm)))⟩
 
-/-- `runFused` on `n` fuel ends as `runFrames` does on some `t ≥ n`: with the same outcome,
-snapshot and number of choices, or at the same configuration. -/
+/-- **The fused run follows the trace.** `runFused` on `n` fuel stops or ends at the
+configuration that the trace has after some `t ≥ n` steps: in the same state, or with the same
+outcome, snapshot and number of choices. -/
 theorem runFused_eq : ∀ (n : Nat) (s : State M) (h : StateOK m B s),
-    ∃ t, n ≤ t ∧ runFrames hwf oracle t s h = runFused hwf oracle n s h
+    ∃ t, n ≤ t ∧ trace hwf oracle s h t = (runFused hwf oracle n s h).config
   | n, ⟨c, .exec, d, ()⟩, h => by
     cases n <;> exact fusedLoop_eq hwf oracle _ (.next c d h)
   | n, ⟨c, .ret v, d, ()⟩, h => by
@@ -651,69 +630,109 @@ theorem runFused_eq : ∀ (n : Nat) (s : State M) (h : StateOK m B s),
     -- A pending transition: one step, then the rest of the run.
     have hr : ∀ e : StepR m B, ∃ t, n ≤ t ∧ e.run hwf oracle t = (match e with
         | .next _ s₁ h₁ => runFused hwf oracle n s₁ h₁
-        | .final r hp w d => .done r ⟨hp, w⟩ d n) := fun
+        | .final r hp w d => .done r ⟨hp, w⟩ d n).config := fun
       | .next _ s₁ h₁ => runFused_eq n s₁ h₁
       | .final _ _ _ _ => ⟨n, Nat.le_refl n, rfl⟩
     obtain ⟨t, hnt, ht⟩ := hr (step hwf oracle _ h)
-    exact ⟨t + 1, Nat.succ_le_succ hnt, (runFrames_succ hwf oracle t _ h).trans ht⟩
+    exact ⟨t + 1, Nat.succ_le_succ hnt, (trace_succ t _ h).trans ht⟩
 
-/-- If `runFused` ends with an outcome, `runFrames` ends with the same outcome, snapshot and
-number of choices on any fuel from some `t ≥ n` on. -/
-theorem runFrames_of_runFused {n : Nat} {s : State M} {h : StateOK m B s}
-    {r : Result M.interp} {sn : Snapshot M} {d l : Nat}
+/-- **The fused run stops where the module can be**: where `runFused` stops or ends is reached
+by steps of the module. -/
+theorem reach_runFused (n : Nat) (s : State M) (h : StateOK m B s) :
+    Reach hwf s h (runFused hwf oracle n s h).config := by
+  obtain ⟨t, _, ht⟩ := runFused_eq hwf oracle n s h
+  rw [← ht]
+  exact (oracleRun hwf oracle s h).reach t
+
+/-- **Termination on the fused engine.** If `runFused` ends with an outcome, the run under the
+same oracle ends with the same outcome, snapshot and number of choices after some `t ≥ n`
+steps, and behaves as what those steps show and that outcome. -/
+theorem beh_of_runFused {O : Type} [DecidableEq O] (obs : M.W → O) {n : Nat} {s : State M}
+    {h : StateOK m B s} {r : Result M.interp} {sn : Snapshot M} {d l : Nat}
     (hf : runFused hwf oracle n s h = .done r sn d l) :
-    ∃ t, n ≤ t ∧ ∀ j, runFrames hwf oracle (t + j) s h = .done r sn d (l + j) := by
+    ∃ t, n ≤ t ∧ trace hwf oracle s h t = .ended ⟨r, sn, d⟩ ∧
+      behW hwf obs (oracleRun hwf oracle s h) =
+        .term ((oracleRun hwf oracle s h).obsUpTo (obsW obs) t) r := by
   obtain ⟨t, hnt, ht⟩ := runFused_eq hwf oracle n s h
-  refine ⟨t, hnt, fun j => ?_⟩
-  rw [runFrames_add, ht, hf]
-  rfl
+  rw [hf] at ht
+  have ht₁ : (oracleRun hwf oracle s h).cfg t = .ended ⟨r, sn, d⟩ := ht
+  exact ⟨t, hnt, ht₁, Trace.Run.beh_ended _ ht₁⟩
 
-/-- A run that `runFrames` ends with an outcome on `n` fuel, `runFused` ends with the same
-outcome, snapshot and number of choices on `n`, with at least as much fuel left. -/
-theorem runFused_of_runFrames {n : Nat} {s : State M} {h : StateOK m B s}
-    {r : Result M.interp} {sn : Snapshot M} {d l : Nat}
-    (hd : runFrames hwf oracle n s h = .done r sn d l) :
-    ∃ l₁, l ≤ l₁ ∧ runFused hwf oracle n s h = .done r sn d l₁ := by
+/-- **The fused engine ends what ends.** If the run under `oracle` has ended after `n` steps,
+`runFused` on `n` fuel ends it, with the same outcome, snapshot and number of choices. -/
+theorem runFused_of_trace {n : Nat} {s : State M} {h : StateOK m B s} {f : Final M}
+    (he : trace hwf oracle s h n = .ended f) :
+    ∃ l, runFused hwf oracle n s h = .done f.result f.snapshot f.drawn l := by
   obtain ⟨t, hnt, ht⟩ := runFused_eq hwf oracle n s h
-  obtain ⟨j, rfl⟩ := Nat.exists_eq_add_of_le hnt
-  refine ⟨l + j, Nat.le_add_right l j, ?_⟩
-  rw [← ht, runFrames_add, hd]
-  rfl
-
-/-- If `runFused` runs out of fuel, so does `runFrames` on the same fuel, and on some `t ≥ n` it
-stops at the same configuration. -/
-theorem runFrames_timeout {n : Nat} {s s₁ : State M} {h : StateOK m B s} {h₁ : StateOK m B s₁}
-    (hf : runFused hwf oracle n s h = .timeout s₁ h₁) :
-    (∃ s₂ h₂, runFrames hwf oracle n s h = .timeout s₂ h₂) ∧
-      ∃ t, n ≤ t ∧ runFrames hwf oracle t s h = .timeout s₁ h₁ := by
-  refine ⟨?_, hf ▸ runFused_eq hwf oracle n s h⟩
-  cases hd : runFrames hwf oracle n s h with
-  | timeout s₂ h₂ => exact ⟨s₂, h₂, rfl⟩
+  have he₁ : trace hwf oracle s h t = .ended f := (oracleRun hwf oracle s h).ended_le he hnt
+  rw [he₁] at ht
+  cases hf : runFused hwf oracle n s h with
   | done r sn d l =>
-    obtain ⟨_, _, he⟩ := runFused_of_runFrames hwf oracle hd
-    exact nomatch hf.symm.trans he
+    rw [hf] at ht
+    cases ht
+    exact ⟨l, rfl⟩
+  | timeout s₁ h₁ =>
+    rw [hf] at ht
+    exact nomatch ht
 
-/-- A hook that only observes, run long enough, ends as `runFused` does. -/
+/-- **The fused engine ends every run that ends.** If a run of the module has ended after `n`
+steps, `runFused` under some oracle ends on `n` fuel, with the same outcome, snapshot and number
+of choices. -/
+theorem runFused_of_run {n : Nat} {s : State M} {h : StateOK m B s} (r : RunFrom hwf s h)
+    {f : Final M} (he : r.cfg n = .ended f) :
+    ∃ oracle l, runFused hwf oracle n s h = .done f.result f.snapshot f.drawn l := by
+  obtain ⟨o, ho⟩ := complete r
+  rw [ho] at he
+  exact ⟨o, runFused_of_trace hwf o he⟩
+
+/-- The run under `oracle` never ends iff `runFused` under `oracle` runs out of fuel on every
+fuel. -/
+theorem trace_running_iff_fused {s : State M} {h : StateOK m B s} :
+    (∀ n, ∃ c, trace hwf oracle s h n = .running c) ↔
+      ∀ n, ∃ s₁ h₁, runFused hwf oracle n s h = .timeout s₁ h₁ := by
+  constructor
+  · intro hd n
+    cases hf : runFused hwf oracle n s h with
+    | timeout s₁ h₁ => exact ⟨s₁, h₁, rfl⟩
+    | done r sn d l =>
+      obtain ⟨t, _, ht⟩ := runFused_eq hwf oracle n s h
+      obtain ⟨_, hc⟩ := hd t
+      rw [hf] at ht
+      exact nomatch hc.symm.trans ht
+  · intro hd n
+    obtain ⟨t, hnt, ht⟩ := runFused_eq hwf oracle n s h
+    obtain ⟨s₁, h₁, hf⟩ := hd n
+    rw [hf] at ht
+    exact (oracleRun hwf oracle s h).running_le ht hnt
+
+/-- **Divergence on the fused engine**: some run of the module never ends iff, under some
+oracle, `runFused` runs out of fuel on every fuel. -/
+theorem diverges_iff_fused {s : State M} {h : StateOK m B s} :
+    Diverges hwf s h ↔ ∃ oracle, ∀ n, ∃ s₁ h₁, runFused hwf oracle n s h = .timeout s₁ h₁ := by
+  rw [diverges_iff]
+  exact exists_congr fun o => trace_running_iff_fused hwf o
+
+/-- A hook that only observes, run long enough, ends where `runFused` does. -/
 theorem runHooked_fused {ρ : Type} (hook : Hook m B ρ)
     (hobs : ∀ st ev s, ∃ st₁, hook st ev s = .continue st₁) (n : Nat) (st : ρ) (s : State M)
     (h : StateOK m B s) :
-    ∃ t, n ≤ t ∧
-      (runHooked hwf oracle hook t st s h).1.toRunEnd = some (runFused hwf oracle n s h) := by
+    ∃ t, n ≤ t ∧ (runHooked hwf oracle hook t st s h).1.toRunEnd.map RunEnd.config =
+      some (runFused hwf oracle n s h).config := by
   obtain ⟨t, hnt, ht⟩ := runFused_eq hwf oracle n s h
-  exact ⟨t, hnt, ht ▸ runHooked_observer hwf oracle hook hobs t st s h⟩
+  exact ⟨t, hnt, (runHooked_observer hook hobs t st s h).trans (congrArg some ht)⟩
 
-/-- A run that a hook which never modifies stopped, resumed with `runFused` on `j` fuel, ends
-as `runFrames` does from the start, on the steps taken before the stop and some `t ≥ j`
-after it.  This is what a debugger's stop-then-resume rests on. -/
+/-- A run that a hook which never modifies stopped, resumed with `runFused` on `j` fuel, stops
+or ends at the configuration that the trace of the uninterrupted run has after the steps taken
+before the stop and some `t ≥ j` after it.  This is what a debugger's stop-then-resume rests on. -/
 theorem runHooked_resume {ρ : Type} (hook : Hook m B ρ)
     (hnm : ∀ st ev s st₁ s₁ h₁, hook st ev s ≠ .modify st₁ s₁ h₁) {n : Nat} {st : ρ}
     {s s₁ : State M} {h : StateOK m B s} {h₁ : StateOK m B s₁} {l : Nat}
     (hs : (runHooked hwf oracle hook n st s h).1 = .stopped s₁ h₁ l) (j : Nat) :
-    ∃ t, j ≤ t ∧ runFrames hwf oracle (n - l + t) s h = runFused hwf oracle j s₁ h₁ := by
-  obtain ⟨_, hstop⟩ := runHooked_stopped hwf oracle hook hnm n st s h hs
+    ∃ t, j ≤ t ∧ trace hwf oracle s h (n - l + t) = (runFused hwf oracle j s₁ h₁).config := by
+  obtain ⟨_, hstop⟩ := runHooked_stopped hook hnm n st s h hs
   obtain ⟨t, hjt, ht⟩ := runFused_eq hwf oracle j s₁ h₁
   refine ⟨t, hjt, ?_⟩
-  rw [runFrames_add, hstop]
+  rw [trace_add, hstop]
   exact ht
 
 end

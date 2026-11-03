@@ -13,10 +13,10 @@ set_option autoImplicit false
 /-!
 # Running a module
 
-* `start`: the configuration that runs a function of a linked, validated module on arguments,
+* `start`: the state that runs a function of a linked, validated module on arguments,
   from a `Snapshot` of a heap and a world: by default `Snapshot.initial`, or where an earlier
   run ended, `o.snapshot`.
-* `runModule`: link, validate, start and run, on `runFused` or on `runFrames`, the reference.
+* `runModule`: link, validate, start and run on `runFused`.
   An argument is a Lean value at its tag, `M.arg x`, and `M.read? r α`, or `o.read? α` on an
   outcome, reads a result as an `α`.  Both find `α`'s tag as a rule does, as a `TagOf σ α`, at
   the model's decoding.
@@ -77,7 +77,7 @@ def startCore (hwf : WF m) (i : Nat) (args : List (Dyn M.interp))
                 conts := [], heap := snap.heap, world := snap.world },
               start_ok hwf hf hb ha snap⟩⟩
 
-/-- A configuration running function `i` on `args`, which must fit its entry block, from the
+/-- A state running function `i` on `args`, which must fit its entry block, from the
 heap and the world of `snap`, and its return code. -/
 def start (hwf : WF m) (i : Nat) (args : List (Dyn M.interp)) (snap : Snapshot M := .initial) :
     Except Fault ((B : Ty) × { s : State M // StateOK m B s }) :=
@@ -88,14 +88,8 @@ end
 /-- The oracle that answers the choices in `tape`, in order, then `0`. -/
 def tapeOracle (tape : List Nat) : Nat → Nat := fun i => tape.getD i 0
 
-/-- The loop that runs a module: `runFused`, or `runFrames`, the reference. -/
-inductive Engine where
-  | fused
-  | frames
-  deriving Repr, DecidableEq
-
 /-- How a run at a run model ended: its result, the snapshot of its heap and world, from which
-another run can start, the steps the engine took, and the choices it made. -/
+another run can start, the fused steps taken, and the choices made. -/
 structure Ran (M : RunModel) where
   result : Result M.interp
   snapshot : Snapshot M
@@ -142,27 +136,23 @@ def prepare (M : Model) {env : Env Unit} [base ≼ env] {α : Type} (prog : Modu
       | none => .error (.noFunction f)
       | some i => .ok ⟨lm, hw, i⟩
 
-/-- Run function `i` of the validated module `lm` on `args` for at most `fuel` steps of
-`engine`, with the oracle `oracle`. -/
+/-- Run function `i` of the validated module `lm` on `args` for at most `fuel` fused steps,
+with the oracle `oracle`. -/
 def runPrepared {M : RunModel} {lm : LModule M} (hw : WF lm) (i : Nat)
-    (args : Array (Dyn M.interp)) (fuel : Nat) (oracle : Nat → Nat) (engine : Engine) : Ran M :=
+    (args : Array (Dyn M.interp)) (fuel : Nat) (oracle : Nat → Nat) : Ran M :=
   match startCore hw i args.toList with
   | .error e => ⟨.fault e, .initial, 0, 0⟩
-  | .ok ⟨_, c, h⟩ =>
-    let s : State M := ⟨c, .exec, 0, ()⟩
-    (match engine with
-     | .fused => runFused hw oracle fuel s h
-     | .frames => runFrames hw oracle fuel s h).outcome fuel
+  | .ok ⟨_, c, h⟩ => (runFused hw oracle fuel ⟨c, .exec, 0, ()⟩ h).outcome fuel
 
-/-- Run function `f` of `prog` on `args` for at most `fuel` steps of `engine`, with the
-oracle `oracle`: link, validate, then run.  The arguments are values at every token, so none
+/-- Run function `f` of `prog` on `args` for at most `fuel` fused steps, with the oracle
+`oracle`: link, validate, then run.  The arguments are values at every token, so none
 holds a ref or a closure.  A fault before the first step takes no steps. -/
 def runModule (M : Model) {env : Env Unit} [base ≼ env] {α : Type} (prog : Module env α)
-    (f : Name) (args : Array M.Arg) (fuel : Nat) (oracle : Nat → Nat := fun _ => 0)
-    (engine : Engine := .fused) : Outcome M :=
+    (f : Name) (args : Array M.Arg) (fuel : Nat) (oracle : Nat → Nat := fun _ => 0) :
+    Outcome M :=
   match prepare M prog f with
   | .error e => .failed M e
-  | .ok ⟨_, hw, i⟩ => runPrepared hw i (args.map (· Run)) fuel oracle engine
+  | .ok ⟨_, hw, i⟩ => runPrepared hw i (args.map (· Run)) fuel oracle
 
 /-- What a debugging run saw: where its hook stopped it, in order, the outcome, or `none` if
 the fuel ran out, and the hook's final state. -/

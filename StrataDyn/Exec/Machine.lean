@@ -11,12 +11,12 @@ set_option autoImplicit false
 /-!
 # The machine
 
-A deterministic, fuel-driven, small-step machine for well-formed linked modules, in the style
-of Crucible's simulator: `step` is a first-order function over inspectable configurations,
+A deterministic, small-step machine for well-formed linked modules, in the style
+of Crucible's simulator: `step` is a first-order function over inspectable states,
 and each step reports an `Event`.  It runs at the token `Run`.
 
-A configuration, `State`, is a `Core` (the running frame, the frames waiting on a body, the
-heap and the world), the pending transition `Mode`, how many choices the oracle has made, and
+The machine's state, `State`, is a `Core` (the running frame, the frames waiting on a body,
+the heap and the world), the pending transition `Mode`, how many choices the oracle has made, and
 a slot for a path condition.  The oracle, a stream `Nat → Nat`, is a parameter of the run, like
 the module.  A frame's code is the program's, and `block` and `pc` locate it.  The one closure
 is the continuation of a rule paused at a request.
@@ -44,9 +44,9 @@ A closure is called in one of two ways.  `base.callCode` is the machine's, and w
 exists, and takes what the closure captured and then the call's tags, and returns the call's
 tag.  A rule's partial application makes a new captures cell, after the same check.
 
-The configuration carries an invariant, `StateOK`, and `step` preserves it, so the machine
+The state carries an invariant, `StateOK`, and `step` preserves it, so the machine
 never checks a tag or a binding of the program's own values.  `StateOK` of a pending mode is
-what performing it needs: `CoreOK` of the configuration it leads to, `LeftOK` for a leaving
+what performing it needs: `CoreOK` of the state it leads to, `LeftOK` for a leaving
 frame, `InstOK` for a paused rule.  `CoreOK` is:
 
 * **The store.** A frame's bindings are an array with a slot for each value of its body,
@@ -70,13 +70,12 @@ environment's, and the machine only threads it.
 What remains are the genuine faults: running out of fuel, a rule's gap or failure, and an
 access or a call that its check refutes.
 
-**Fuel.** Every step costs one unit, whatever its mode, so `runFrames 1` is a debugger's single
-step.  When the fuel runs out, `runFrames` returns the configuration, from which the run can
-resume.
-
-**Hooks** are pure functions `ρ → Event → State → Action`; `runHooked` consults one after each
-step.  `runHooked_observer` says that a hook that only observes runs as `runFrames` does, and
-`runHooked_stopped` that a hook that never modifies stops where `runFrames` would time out.
+**Hooks** are pure functions `ρ → Event → State → Action`; `runHooked` runs at most some
+number of steps and consults one after each.  Every step costs one unit of fuel, whatever its
+mode, so `runHooked` on one unit is a debugger's single step.  When the fuel runs out or the
+hook stops the run, `runHooked` returns the state, from which the run can resume.
+`Exec/Trace.lean` relates a hooked run to the run's trace, and `Exec/Fused.lean` gives the
+engine for execution, `runFused`.
 -/
 
 namespace Strata.Dyn.Exec
@@ -393,7 +392,7 @@ theorem Agree.bindSite :
 
 end
 
-/-! ## Frames and configurations -/
+/-! ## Frames and states -/
 
 section
 variable (M : RunModel)
@@ -515,7 +514,7 @@ inductive Mode where
   | again (r : Reentry M)
   | done (r : Result M.interp)
 
-/-- A configuration of the machine. -/
+/-- A state of the machine. -/
 structure State where
   core : Core M
   mode : Mode M := .exec
@@ -640,7 +639,7 @@ def CoreOK (B : Ty) (s : Core M) : Prop :=
 def LeftOK (B : Ty) (s : Core M) (v : Dyn M.interp) : Prop :=
   v.1 = s.top.func.ret ∧ ContsOK m B s.top.func.ret s.conts
 
-/-- The invariant of a configuration: what performing its pending transition needs.  A pending
+/-- The invariant of a state: what performing its pending transition needs.  A pending
 edge or entry holds the frame it leads to, which runs checked code; a rule at a request or about
 to run again runs in the top frame. -/
 def StateOK (B : Ty) (s : State M) : Prop :=
@@ -1364,7 +1363,7 @@ section
 variable {M : RunModel} {m : LModule M} (hwf : WF m) (oracle : Nat → Nat) {B : Ty}
 
 variable (m B) in
-/-- A step: its event and the next configuration, or, from a configuration whose run has
+/-- A step: its event and the next state, or, from a state whose run has
 ended, the outcome, the heap, the world and the number of choices made. -/
 inductive StepR where
   | next (e : Event) (s : State M) (h : StateOK m B s)
@@ -1426,7 +1425,7 @@ pause at a world request.  `ev` is the step's event. -/
     let pick := oracle drawn
     settle hwf c i h.1 h.2 (drawn + 1) (.answer (.choose pick)) (k pick)
   | .update f =>
-    -- Taking the configuration apart first leaves `f` the only holder of the world.
+    -- Taking the state apart first leaves `f` the only holder of the world.
     match c, h with
     | ⟨top, conts, heap, w⟩, h =>
       let p := f w
@@ -1554,36 +1553,28 @@ waiting on the body. -/
 
 variable (m B) in
 /-- How a run of at most some fuel ended: an outcome, the snapshot of its heap and world, the
-number of choices made and the fuel left, or the configuration where the fuel ran out, from
+number of choices made and the fuel left, or the state where the fuel ran out, from
 which the run can resume. -/
 inductive RunEnd where
   | done (r : Result M.interp) (snap : Snapshot M) (drawn left : Nat)
   | timeout (s : State M) (h : StateOK m B s)
 
-/-- Run at most `fuel` steps.  Every step costs one unit of fuel, so `runFrames 1` is a
-debugger's single step. -/
-@[specialize] def runFrames : Nat → (s : State M) → StateOK m B s → RunEnd m B
-  | 0, s, h => .timeout s h
-  | n + 1, s, h => match step hwf oracle s h with
-    | .next _ s₁ h₁ => runFrames n s₁ h₁
-    | .final r hp w d => .done r ⟨hp, w⟩ d n
-
 /-! ## Hooks
 
-A hook is a pure function of its own state, a step's event and the configuration the step led
-to.  It continues, continues from another well-formed configuration, or stops the run, which
-returns the configuration so that a driver can resume it.  `runFrames` stays a loop of its
-own, so a run without a hook pays nothing for hooks.
+A hook is a pure function of its own state, a step's event and the machine state the step led
+to.  It continues, continues from another well-formed state, or stops the run, which
+returns the state so that a driver can resume it.  `runFused` is a loop of its own, so a
+run without a hook pays nothing for hooks.
 
-`Action.modify` must supply the configuration's `StateOK`, so a generic hook can modify only
-to a configuration whose invariant it can prove outright, such as a fault.  That is a
-deliberate limit: a hook is not given the invariant of the configuration it sees. -/
+`Action.modify` must supply the state's `StateOK`, so a generic hook can modify only
+to a state whose invariant it can prove outright, such as a fault.  That is a
+deliberate limit: a hook is not given the invariant of the state it sees. -/
 
 variable (m B) in
 /-- What a hook asks for after a step. -/
 inductive Action (ρ : Type) where
   | continue (st : ρ)
-  /-- Continue from `s` instead: a well-formed configuration. -/
+  /-- Continue from `s` instead: a well-formed state. -/
   | modify (st : ρ) (s : State M) (h : StateOK m B s)
   | stop (st : ρ)
 
@@ -1592,7 +1583,7 @@ variable (m B) in
 abbrev Hook (ρ : Type) : Type := ρ → Event → State M → Action m B ρ
 
 variable (m B) in
-/-- How a hooked run ended: as a run does, or stopped by the hook at a configuration, with
+/-- How a hooked run ended: as a run does, or stopped by the hook at a state, with
 the fuel left. -/
 inductive HookEnd where
   | done (r : Result M.interp) (snap : Snapshot M) (drawn left : Nat)
@@ -1616,54 +1607,6 @@ def runHooked {ρ : Type} (hook : Hook m B ρ) : Nat → ρ → (s : State M) �
       | .continue st₁ => runHooked hook n st₁ s₁ h₁
       | .modify st₁ s₂ h₂ => runHooked hook n st₁ s₂ h₂
       | .stop st₁ => (.stopped s₁ h₁ n, st₁)
-
-/-- A hook that only observes runs as `runFrames` does. -/
-theorem runHooked_observer {ρ : Type} (hook : Hook m B ρ)
-    (hobs : ∀ st ev s, ∃ st₁, hook st ev s = .continue st₁) :
-    ∀ (n : Nat) (st : ρ) (s : State M) (h : StateOK m B s),
-      (runHooked hwf oracle hook n st s h).1.toRunEnd = some (runFrames hwf oracle n s h)
-  | 0, _, _, _ => rfl
-  | n + 1, st, s, h => by
-    rw [runHooked, runFrames]
-    cases step hwf oracle s h with
-    | final r hp w d => rfl
-    | next ev s₁ h₁ =>
-      obtain ⟨st₁, hst⟩ := hobs st ev s₁
-      dsimp only
-      rw [hst]
-      exact runHooked_observer hook hobs n st₁ s₁ h₁
-
-/-- A hook that never modifies, if it stops a run on `n` fuel with `l` left, stops it where
-`runFrames` on the `n - l` steps taken times out. -/
-theorem runHooked_stopped {ρ : Type} (hook : Hook m B ρ)
-    (hnm : ∀ st ev s st₁ s₁ h₁, hook st ev s ≠ .modify st₁ s₁ h₁) :
-    ∀ (n : Nat) (st : ρ) (s : State M) (h : StateOK m B s) {s₁ : State M}
-      {h₁ : StateOK m B s₁} {l : Nat}, (runHooked hwf oracle hook n st s h).1 = .stopped s₁ h₁ l →
-      l ≤ n ∧ runFrames hwf oracle (n - l) s h = .timeout s₁ h₁
-  | 0, _, _, _, _, _, _, hs => nomatch hs
-  | n + 1, st, s, h, s₁, h₁, l, hs => by
-    rw [runHooked] at hs
-    cases hstep : step hwf oracle s h with
-    | final r hp w d =>
-      rw [hstep] at hs
-      exact nomatch hs
-    | next ev s₂ h₂ =>
-      rw [hstep] at hs
-      dsimp only at hs
-      cases hk : hook st ev s₂ with
-      | «continue» st₁ =>
-        rw [hk] at hs
-        obtain ⟨hl, ht⟩ := runHooked_stopped hook hnm n st₁ s₂ h₂ hs
-        refine ⟨Nat.le_succ_of_le hl, ?_⟩
-        rw [Nat.sub_add_comm hl, runFrames, hstep]
-        exact ht
-      | modify st₁ s₃ h₃ => exact absurd hk (hnm _ _ _ _ _ _)
-      | stop st₁ =>
-        rw [hk] at hs
-        cases hs
-        refine ⟨Nat.le_succ _, ?_⟩
-        rw [Nat.add_sub_cancel_left, runFrames, hstep]
-        rfl
 
 end
 
