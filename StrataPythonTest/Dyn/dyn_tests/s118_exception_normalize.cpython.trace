@@ -1,0 +1,10 @@
+--- stdout 21
+normalized
+Exception
+
+--- outcome
+ok
+--- globals
+B = <class 'B'>
+__doc__ = None
+__name__ = '__main__'

@@ -1,0 +1,15 @@
+module top
+  C: local (assigned, referenced)
+  E: local (assigned)
+  Exception: global implicit (referenced)
+  r: local (assigned)
+  class E
+    __get__: local (assigned)
+    function __get__
+      obj: local (parameter)
+      owner: local (parameter)
+      self: local (parameter)
+  class C
+    E: global implicit (referenced)
+    x: local (assigned)
+qualnames: C, E, E.__get__

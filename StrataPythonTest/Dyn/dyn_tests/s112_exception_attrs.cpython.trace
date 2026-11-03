@@ -1,0 +1,35 @@
+--- stdout 411
+context TypeError exception context must be None or derive from BaseException
+suppress TypeError attribute value type must be bool
+traceback TypeError __traceback__ must be a traceback or None
+args TypeError args may not be deleted
+cause TypeError exception cause must be None or derive from BaseException
+del context TypeError __context__ may not be deleted
+True True
+1 2 True
+None
+q
+True True True
+1 True 2
+3
+
+--- outcome
+ok
+--- globals
+U = <class 'U'>
+__doc__ = None
+__name__ = '__main__'
+a = <ValueError object>
+b = <KeyError object>
+cause = <function object>
+ctx = <function object>
+d = {'y': 2, 'x': 1}
+dargs = <function object>
+dctx = <function object>
+e = <ValueError object>
+f = <ValueError object>
+n = <NameError object>
+run = <function object>
+sup = <function object>
+tb = <function object>
+u = <U object>

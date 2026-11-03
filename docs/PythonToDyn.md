@@ -2498,6 +2498,8 @@ CPython runs each program twice, with `PYTHONHASHSEED` 0 and 1. If the two trace
 golden holds both, with each address replaced by `0x?`, and the semantics must stop with a gap on
 the program. `SEM_UPDATE=1` rewrites the goldens and the verdicts. `StrataPythonTest/Util/SemDiff.lean`
 gives the verdict of one program, for other differential tests with their own programs.
+`StrataPythonTestExtra/HasattrUserTest.lean` compares `hasattr` on built-in and user-made values
+with CPython 3.12, over 1422 generated cases.
 
 ### 13.3 What is modelled
 
@@ -2534,6 +2536,19 @@ gives the verdict of one program, for other differential tests with their own pr
   `staticmethod`, `__build_class__` called with a function that is not a class body, and an
   in-place `+=` or `*=` on an instance of a subclass of `list`. A message with a class name
   longer than 50 bytes of UTF-8 stops with a gap too, since CPython cuts such names.
+- Exceptions: `raise` and `raise ... from` with an exception or `None`, `try`, `except` with a
+  class or a tuple of classes, `finally`, a bare `raise`, and `with`. The built-in exception
+  classes, made by calling them, with their `args`, their fields (e.g. `OSError`'s `errno` and
+  the subclass that its `errno` selects), `str` and `repr`, `add_note` and the construction of
+  `ExceptionGroup`. The `__context__` chain with CPython's cut of a cycle, and `__cause__` and
+  `__suppress_context__`. These stop with a gap: the unicode errors and the `SyntaxError` family,
+  `ExceptionGroup`'s methods, a cause that is a class or neither an exception nor `None`, an
+  exception class whose call gives an exception of another class, a raise of an exception whose
+  class's metaclass defines `__subclasscheck__`, a class whose `__new__` comes from another
+  built-in base than its `tp_new`, an `AttributeError` without `name` and `obj` that an
+  attribute read raises, an exception whose class defines `__get__`, `__set__` or `__delete__`,
+  and the `str()` of an uncaught exception whose class defines `__str__`. A traceback is opaque:
+  its attributes and `with_traceback` stop with a gap.
 - CPython's recursion limit: nested comparisons and calls into Python count toward it, and a run
   stops with a gap where CPython would raise `RecursionError`.
 - Warnings: the semantics emits no warning. A warning records itself in the module's

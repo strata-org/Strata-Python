@@ -1,0 +1,7 @@
+module
+  E: local (assigned, referenced)
+  Exception: global implicit (referenced)
+  class E
+  lambda <lambda>
+    params: self
+    self: local (parameter)

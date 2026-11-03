@@ -1,0 +1,22 @@
+--- stdout 647
+None True True
+eg msg TypeError BaseExceptionGroup.__new__() argument 1 must be str, not int
+eg seq TypeError second argument (exceptions) must be a sequence
+eg empty ValueError second argument (exceptions) must be a non-empty sequence
+eg item ValueError Item 0 of second argument (exceptions) is not an exception
+eg nest TypeError Cannot nest BaseExceptions in an ExceptionGroup
+eg message AttributeError readonly attribute
+note type TypeError note must be a str, not 'int'
+note list TypeError Cannot add note: __notes__ is not a list
+init kw TypeError ValueError() takes no keyword arguments
+os kw TypeError OSError() takes no keyword arguments
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+e = <ValueError object>
+g = <ExceptionGroup object>
+run = <function object>
+wmsg = <function object>

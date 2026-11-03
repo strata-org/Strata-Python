@@ -1,0 +1,15 @@
+--- stdout 385
+BaseException.__new__(int): int is not a subtype of BaseException
+BaseException.__new__(X): X is not a type object (int)
+ValueError.__new__(KeyError): KeyError is not a subtype of ValueError
+BaseException.__new__(OSError) is not safe, use OSError.__new__()
+1 2
+property.__new__(int): int is not a subtype of property
+OSError.__new__(ValueError): ValueError is not a subtype of OSError
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+__doc__ = None
+__name__ = '__main__'

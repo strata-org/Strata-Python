@@ -1,0 +1,19 @@
+module
+  O: local (assigned, referenced)
+  OSError: global implicit (referenced)
+  o: local (assigned, referenced)
+  print: global implicit (referenced)
+  len: global implicit (referenced)
+  class O (needs __class__ cell)
+    __new__: local (assigned)
+    __init__: local (assigned)
+    function O.__new__
+      params: cls, *a
+      cls: local (parameter, referenced)
+      a: local (parameter, referenced)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+    function O.__init__
+      params: self, *a
+      self: local (parameter)
+      a: local (parameter)

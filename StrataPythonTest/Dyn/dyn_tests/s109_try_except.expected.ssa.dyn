@@ -1,0 +1,384 @@
+module s109_try_except {
+  func @|s109_try_except.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s109_try_except")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s109_try_except", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s109_try_except", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(0)
+      %floorDiv.0 : py.Value = py.floorDiv(%int.0, %int.1) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %ZeroDivisionError.0 : py.Value = py.loadGlobal("s109_try_except", "ZeroDivisionError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %ZeroDivisionError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s109_try_except", "e")
+      %set.2 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.0 : py.Value = py.loadGlobal("s109_try_except", "print") ^clear.0()
+      %str.1 : py.Value = py.strLit("caught")
+      %e.0 : py.Value = py.loadGlobal("s109_try_except", "e") ^clear.0()
+      %args.0 : py.Value = py.attr(%e.0, "args") ^clear.0()
+      %int.2 : py.Value = py.intLit(0)
+      %item.0 : py.Value = py.getItem(%args.0, %int.2) ^clear.0()
+      %tuple.0 : py.Value = py.mkTuple(%str.1, %item.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.0) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("s109_try_except", "e")
+      %set.3 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("s109_try_except", "e")
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %dict.0 : py.Value = py.mkDict ^catch.1()
+      %int.3 : py.Value = py.intLit(1)
+      %item.1 : py.Value = py.getItem(%dict.0, %int.3) ^catch.1()
+      jump ^join.1()
+    catch.1(%exc.3 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.3)
+      %ValueError.0 : py.Value = py.loadGlobal("s109_try_except", "ValueError") ^unwind.1()
+      %KeyError.0 : py.Value = py.loadGlobal("s109_try_except", "KeyError") ^unwind.1()
+      %tuple.1 : py.Value = py.mkTuple(%ValueError.0, %KeyError.0)
+      %match.1 : base.Bool = py.excMatch(%exc.3, %tuple.1) ^unwind.1()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %print.1 : py.Value = py.loadGlobal("s109_try_except", "print") ^unwind.1()
+      %str.2 : py.Value = py.strLit("tuple")
+      %tuple.2 : py.Value = py.mkTuple(%str.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.1, %tuple.2, %kwargs.1) ^unwind.1()
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      jump ^join.1()
+    next.1():
+      jump ^unwind.1(%exc.3)
+    unwind.1(%exc.4 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.4)
+    join.1():
+      %int.4 : py.Value = py.intLit(1)
+      %int.5 : py.Value = py.intLit(0)
+      %floorDiv.1 : py.Value = py.floorDiv(%int.4, %int.5) ^catch.3()
+      jump ^join.3()
+    catch.3(%exc.5 : py.Value):
+      %prev.2 : py.Value = py.pushExcInfo(%exc.5)
+      %ZeroDivisionError.1 : py.Value = py.loadGlobal("s109_try_except", "ZeroDivisionError") ^unwind.3()
+      %match.2 : base.Bool = py.excMatch(%exc.5, %ZeroDivisionError.1) ^unwind.3()
+      branch(%match.2) ^except.2() ^next.2()
+    except.2():
+      %dict.1 : py.Value = py.mkDict ^unwind.3()
+      %str.3 : py.Value = py.strLit("k")
+      %item.2 : py.Value = py.getItem(%dict.1, %str.3) ^unwind.3()
+      %pop.4 : base.Unit = py.popExcept(%prev.2)
+      jump ^join.3()
+    next.2():
+      jump ^unwind.3(%exc.5)
+    unwind.3(%exc.6 : py.Value):
+      %pop.5 : base.Unit = py.popExcept(%prev.2)
+      jump ^catch.2(%exc.6)
+    join.3():
+      jump ^join.2()
+    catch.2(%exc.7 : py.Value):
+      %prev.3 : py.Value = py.pushExcInfo(%exc.7)
+      %KeyError.1 : py.Value = py.loadGlobal("s109_try_except", "KeyError") ^unwind.2()
+      %match.3 : base.Bool = py.excMatch(%exc.7, %KeyError.1) ^unwind.2()
+      branch(%match.3) ^except.3() ^next.3()
+    except.3():
+      %e.cell.3 : base.Ref(py.Value) = py.globalCell("s109_try_except", "e")
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.7)
+      %print.2 : py.Value = py.loadGlobal("s109_try_except", "print") ^clear.1()
+      %type.0 : py.Value = py.loadGlobal("s109_try_except", "type") ^clear.1()
+      %e.3 : py.Value = py.loadGlobal("s109_try_except", "e") ^clear.1()
+      %__context__.0 : py.Value = py.attr(%e.3, "__context__") ^clear.1()
+      %tuple.3 : py.Value = py.mkTuple(%__context__.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%type.0, %tuple.3, %kwargs.2) ^clear.1()
+      %ZeroDivisionError.2 : py.Value = py.loadGlobal("s109_try_except", "ZeroDivisionError") ^clear.1()
+      %is.0 : py.Value = py.is(%call.2, %ZeroDivisionError.2)
+      %e.4 : py.Value = py.loadGlobal("s109_try_except", "e") ^clear.1()
+      %__cause__.0 : py.Value = py.attr(%e.4, "__cause__") ^clear.1()
+      %none.1 : py.Value = py.noneLit
+      %is.1 : py.Value = py.is(%__cause__.0, %none.1)
+      %e.5 : py.Value = py.loadGlobal("s109_try_except", "e") ^clear.1()
+      %__suppress_context__.0 : py.Value = py.attr(%e.5, "__suppress_context__") ^clear.1()
+      %tuple.4 : py.Value = py.mkTuple(%is.0, %is.1, %__suppress_context__.0)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.2, %tuple.4, %kwargs.3) ^clear.1()
+      %pop.6 : base.Unit = py.popExcept(%prev.3)
+      %e.6 : py.Value = py.undef("e")
+      %e.cell.4 : base.Ref(py.Value) = py.globalCell("s109_try_except", "e")
+      %set.6 : base.Unit = base.refSet[py.Value](%e.cell.4, %e.6)
+      jump ^join.2()
+    clear.1(%exc.8 : py.Value):
+      %e.7 : py.Value = py.undef("e")
+      %e.cell.5 : base.Ref(py.Value) = py.globalCell("s109_try_except", "e")
+      %set.7 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.7)
+      jump ^unwind.2(%exc.8)
+    next.3():
+      jump ^unwind.2(%exc.7)
+    unwind.2(%exc.9 : py.Value):
+      %pop.7 : base.Unit = py.popExcept(%prev.3)
+      jump ^propagate.0(%exc.9)
+    join.2():
+      %int.6 : py.Value = py.intLit(1)
+      %int.7 : py.Value = py.intLit(0)
+      %floorDiv.2 : py.Value = py.floorDiv(%int.6, %int.7) ^finRaise.0()
+      %comp.0 : py.Completion = py.completionNormal
+      jump ^fin.0(%comp.0)
+    finRaise.0(%exc.10 : py.Value):
+      %comp.1 : py.Completion = py.completionRaise(%exc.10)
+      jump ^fin.0(%comp.1)
+    fin.0(%pending.0 : py.Completion):
+      %prev.4 : py.Value = py.pushPending(%pending.0)
+      %print.3 : py.Value = py.loadGlobal("s109_try_except", "print") ^superseded.0()
+      %str.4 : py.Value = py.strLit("finally")
+      %tuple.5 : py.Value = py.mkTuple(%str.4)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%print.3, %tuple.5, %kwargs.4) ^superseded.0()
+      %pop.8 : base.Unit = py.popExcept(%prev.4)
+      py.Completion.case(%pending.0) ^join.5() ^unreachable.0() ^catch.4() ^unreachable.1() ^unreachable.2()
+    unreachable.0(%val.0 : py.Value):
+      unreachable
+    unreachable.1():
+      unreachable
+    unreachable.2():
+      unreachable
+    superseded.0(%exc.11 : py.Value):
+      %pop.9 : base.Unit = py.popExcept(%prev.4)
+      jump ^catch.4(%exc.11)
+    join.5():
+      jump ^join.4()
+    catch.4(%exc.12 : py.Value):
+      %prev.5 : py.Value = py.pushExcInfo(%exc.12)
+      %ZeroDivisionError.3 : py.Value = py.loadGlobal("s109_try_except", "ZeroDivisionError") ^unwind.4()
+      %match.4 : base.Bool = py.excMatch(%exc.12, %ZeroDivisionError.3) ^unwind.4()
+      branch(%match.4) ^except.4() ^next.4()
+    except.4():
+      %print.4 : py.Value = py.loadGlobal("s109_try_except", "print") ^unwind.4()
+      %str.5 : py.Value = py.strLit("after finally")
+      %tuple.6 : py.Value = py.mkTuple(%str.5)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%print.4, %tuple.6, %kwargs.5) ^unwind.4()
+      %pop.10 : base.Unit = py.popExcept(%prev.5)
+      jump ^join.4()
+    next.4():
+      jump ^unwind.4(%exc.12)
+    unwind.4(%exc.13 : py.Value):
+      %pop.11 : base.Unit = py.popExcept(%prev.5)
+      jump ^propagate.0(%exc.13)
+    join.4():
+      %exc.14 : py.Value = py.handledExc ^catch.5()
+      jump ^catch.5(%exc.14)
+    catch.5(%exc.15 : py.Value):
+      %prev.6 : py.Value = py.pushExcInfo(%exc.15)
+      %RuntimeError.0 : py.Value = py.loadGlobal("s109_try_except", "RuntimeError") ^unwind.5()
+      %match.5 : base.Bool = py.excMatch(%exc.15, %RuntimeError.0) ^unwind.5()
+      branch(%match.5) ^except.5() ^next.5()
+    except.5():
+      %e.cell.6 : base.Ref(py.Value) = py.globalCell("s109_try_except", "e")
+      %set.8 : base.Unit = base.refSet[py.Value](%e.cell.6, %exc.15)
+      %print.5 : py.Value = py.loadGlobal("s109_try_except", "print") ^clear.2()
+      %e.8 : py.Value = py.loadGlobal("s109_try_except", "e") ^clear.2()
+      %args.1 : py.Value = py.attr(%e.8, "args") ^clear.2()
+      %int.8 : py.Value = py.intLit(0)
+      %item.3 : py.Value = py.getItem(%args.1, %int.8) ^clear.2()
+      %tuple.7 : py.Value = py.mkTuple(%item.3)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.6 : py.Value = py.call(%print.5, %tuple.7, %kwargs.6) ^clear.2()
+      %pop.12 : base.Unit = py.popExcept(%prev.6)
+      %e.9 : py.Value = py.undef("e")
+      %e.cell.7 : base.Ref(py.Value) = py.globalCell("s109_try_except", "e")
+      %set.9 : base.Unit = base.refSet[py.Value](%e.cell.7, %e.9)
+      jump ^join.6()
+    clear.2(%exc.16 : py.Value):
+      %e.10 : py.Value = py.undef("e")
+      %e.cell.8 : base.Ref(py.Value) = py.globalCell("s109_try_except", "e")
+      %set.10 : base.Unit = base.refSet[py.Value](%e.cell.8, %e.10)
+      jump ^unwind.5(%exc.16)
+    next.5():
+      jump ^unwind.5(%exc.15)
+    unwind.5(%exc.17 : py.Value):
+      %pop.13 : base.Unit = py.popExcept(%prev.6)
+      jump ^propagate.0(%exc.17)
+    join.6():
+      %clo.0 : py.Value = py.mkClosure[[]](@s109_try_except.f, "f", "s109_try_except")
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("s109_try_except", "f")
+      %set.11 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.0)
+      %f.0 : py.Value = py.loadGlobal("s109_try_except", "f") ^catch.6()
+      %tuple.8 : py.Value = py.mkTuple
+      %kwargs.7 : py.Value = py.mkKwargs
+      %call.7 : py.Value = py.call(%f.0, %tuple.8, %kwargs.7) ^catch.6()
+      jump ^join.7()
+    catch.6(%exc.18 : py.Value):
+      %prev.7 : py.Value = py.pushExcInfo(%exc.18)
+      %ZeroDivisionError.4 : py.Value = py.loadGlobal("s109_try_except", "ZeroDivisionError") ^unwind.6()
+      %match.6 : base.Bool = py.excMatch(%exc.18, %ZeroDivisionError.4) ^unwind.6()
+      branch(%match.6) ^except.6() ^next.6()
+    except.6():
+      %e.cell.9 : base.Ref(py.Value) = py.globalCell("s109_try_except", "e")
+      %set.12 : base.Unit = base.refSet[py.Value](%e.cell.9, %exc.18)
+      %print.6 : py.Value = py.loadGlobal("s109_try_except", "print") ^clear.3()
+      %str.6 : py.Value = py.strLit("reraised")
+      %e.11 : py.Value = py.loadGlobal("s109_try_except", "e") ^clear.3()
+      %__context__.1 : py.Value = py.attr(%e.11, "__context__") ^clear.3()
+      %tuple.9 : py.Value = py.mkTuple(%str.6, %__context__.1)
+      %kwargs.8 : py.Value = py.mkKwargs
+      %call.8 : py.Value = py.call(%print.6, %tuple.9, %kwargs.8) ^clear.3()
+      %pop.14 : base.Unit = py.popExcept(%prev.7)
+      %e.12 : py.Value = py.undef("e")
+      %e.cell.10 : base.Ref(py.Value) = py.globalCell("s109_try_except", "e")
+      %set.13 : base.Unit = base.refSet[py.Value](%e.cell.10, %e.12)
+      jump ^join.7()
+    clear.3(%exc.19 : py.Value):
+      %e.13 : py.Value = py.undef("e")
+      %e.cell.11 : base.Ref(py.Value) = py.globalCell("s109_try_except", "e")
+      %set.14 : base.Unit = base.refSet[py.Value](%e.cell.11, %e.13)
+      jump ^unwind.6(%exc.19)
+    next.6():
+      jump ^unwind.6(%exc.18)
+    unwind.6(%exc.20 : py.Value):
+      %pop.15 : base.Unit = py.popExcept(%prev.7)
+      jump ^propagate.0(%exc.20)
+    join.7():
+      %ValueError.1 : py.Value = py.loadGlobal("s109_try_except", "ValueError") ^catch.8()
+      %str.7 : py.Value = py.strLit("a")
+      %tuple.10 : py.Value = py.mkTuple(%str.7)
+      %kwargs.9 : py.Value = py.mkKwargs
+      %call.9 : py.Value = py.call(%ValueError.1, %tuple.10, %kwargs.9) ^catch.8()
+      %exc.21 : py.Value = py.toException(%call.9) ^catch.8()
+      jump ^catch.8(%exc.21)
+    catch.8(%exc.22 : py.Value):
+      %prev.8 : py.Value = py.pushExcInfo(%exc.22)
+      %ValueError.2 : py.Value = py.loadGlobal("s109_try_except", "ValueError") ^unwind.8()
+      %match.7 : base.Bool = py.excMatch(%exc.22, %ValueError.2) ^unwind.8()
+      branch(%match.7) ^except.7() ^next.7()
+    except.7():
+      %a.cell.0 : base.Ref(py.Value) = py.globalCell("s109_try_except", "a")
+      %set.15 : base.Unit = base.refSet[py.Value](%a.cell.0, %exc.22)
+      %KeyError.2 : py.Value = py.loadGlobal("s109_try_except", "KeyError") ^catch.9()
+      %str.8 : py.Value = py.strLit("b")
+      %tuple.11 : py.Value = py.mkTuple(%str.8)
+      %kwargs.10 : py.Value = py.mkKwargs
+      %call.10 : py.Value = py.call(%KeyError.2, %tuple.11, %kwargs.10) ^catch.9()
+      %exc.23 : py.Value = py.toException(%call.10) ^catch.9()
+      jump ^catch.9(%exc.23)
+    catch.9(%exc.24 : py.Value):
+      %prev.9 : py.Value = py.pushExcInfo(%exc.24)
+      %KeyError.3 : py.Value = py.loadGlobal("s109_try_except", "KeyError") ^unwind.9()
+      %match.8 : base.Bool = py.excMatch(%exc.24, %KeyError.3) ^unwind.9()
+      branch(%match.8) ^except.8() ^next.8()
+    except.8():
+      %b.cell.0 : base.Ref(py.Value) = py.globalCell("s109_try_except", "b")
+      %set.16 : base.Unit = base.refSet[py.Value](%b.cell.0, %exc.24)
+      %b.0 : py.Value = py.loadGlobal("s109_try_except", "b") ^clear.5()
+      %bb.cell.0 : base.Ref(py.Value) = py.globalCell("s109_try_except", "bb")
+      %set.17 : base.Unit = base.refSet[py.Value](%bb.cell.0, %b.0)
+      %a.0 : py.Value = py.loadGlobal("s109_try_except", "a") ^clear.5()
+      %exc.25 : py.Value = py.toException(%a.0) ^clear.5()
+      jump ^clear.5(%exc.25)
+    clear.5(%exc.26 : py.Value):
+      %b.1 : py.Value = py.undef("b")
+      %b.cell.1 : base.Ref(py.Value) = py.globalCell("s109_try_except", "b")
+      %set.18 : base.Unit = base.refSet[py.Value](%b.cell.1, %b.1)
+      jump ^unwind.9(%exc.26)
+    next.8():
+      jump ^unwind.9(%exc.24)
+    unwind.9(%exc.27 : py.Value):
+      %pop.16 : base.Unit = py.popExcept(%prev.9)
+      jump ^clear.4(%exc.27)
+    clear.4(%exc.28 : py.Value):
+      %a.1 : py.Value = py.undef("a")
+      %a.cell.1 : base.Ref(py.Value) = py.globalCell("s109_try_except", "a")
+      %set.19 : base.Unit = base.refSet[py.Value](%a.cell.1, %a.1)
+      jump ^unwind.8(%exc.28)
+    next.7():
+      jump ^unwind.8(%exc.22)
+    unwind.8(%exc.29 : py.Value):
+      %pop.17 : base.Unit = py.popExcept(%prev.8)
+      jump ^catch.7(%exc.29)
+    catch.7(%exc.30 : py.Value):
+      %prev.10 : py.Value = py.pushExcInfo(%exc.30)
+      %ValueError.3 : py.Value = py.loadGlobal("s109_try_except", "ValueError") ^unwind.7()
+      %match.9 : base.Bool = py.excMatch(%exc.30, %ValueError.3) ^unwind.7()
+      branch(%match.9) ^except.9() ^next.9()
+    except.9():
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("s109_try_except", "x")
+      %set.20 : base.Unit = base.refSet[py.Value](%x.cell.0, %exc.30)
+      %print.7 : py.Value = py.loadGlobal("s109_try_except", "print") ^clear.6()
+      %x.0 : py.Value = py.loadGlobal("s109_try_except", "x") ^clear.6()
+      %__context__.2 : py.Value = py.attr(%x.0, "__context__") ^clear.6()
+      %bb.0 : py.Value = py.loadGlobal("s109_try_except", "bb") ^clear.6()
+      %is.2 : py.Value = py.is(%__context__.2, %bb.0)
+      %bb.1 : py.Value = py.loadGlobal("s109_try_except", "bb") ^clear.6()
+      %__context__.3 : py.Value = py.attr(%bb.1, "__context__") ^clear.6()
+      %none.2 : py.Value = py.noneLit
+      %is.3 : py.Value = py.is(%__context__.3, %none.2)
+      %tuple.12 : py.Value = py.mkTuple(%is.2, %is.3)
+      %kwargs.11 : py.Value = py.mkKwargs
+      %call.11 : py.Value = py.call(%print.7, %tuple.12, %kwargs.11) ^clear.6()
+      %pop.18 : base.Unit = py.popExcept(%prev.10)
+      %x.1 : py.Value = py.undef("x")
+      %x.cell.1 : base.Ref(py.Value) = py.globalCell("s109_try_except", "x")
+      %set.21 : base.Unit = base.refSet[py.Value](%x.cell.1, %x.1)
+      jump ^join.8()
+    clear.6(%exc.31 : py.Value):
+      %x.2 : py.Value = py.undef("x")
+      %x.cell.2 : base.Ref(py.Value) = py.globalCell("s109_try_except", "x")
+      %set.22 : base.Unit = base.refSet[py.Value](%x.cell.2, %x.2)
+      jump ^unwind.7(%exc.31)
+    next.9():
+      jump ^unwind.7(%exc.30)
+    unwind.7(%exc.32 : py.Value):
+      %pop.19 : base.Unit = py.popExcept(%prev.10)
+      jump ^propagate.0(%exc.32)
+    join.8():
+      %none.3 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.3)
+      ret(%ret.0)
+    propagate.0(%exc.33 : py.Value):
+      %exc.34 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.33)
+      ret(%exc.34)
+  }
+  func @s109_try_except.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(0)
+      %floorDiv.0 : py.Value = py.floorDiv(%int.0, %int.1) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %ZeroDivisionError.0 : py.Value = py.loadGlobal("s109_try_except", "ZeroDivisionError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %ZeroDivisionError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      jump ^unwind.0(%exc.0)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.1 : py.Value):
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.1)
+    join.0():
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.2 : py.Value):
+      %exc.3 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.2)
+      ret(%exc.3)
+  }
+}
+

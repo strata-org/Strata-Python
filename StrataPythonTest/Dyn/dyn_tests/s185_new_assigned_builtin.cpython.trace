@@ -1,0 +1,9 @@
+--- stdout 8
+reached
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'

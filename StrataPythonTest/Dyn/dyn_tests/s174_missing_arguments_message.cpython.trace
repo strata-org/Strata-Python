@@ -1,0 +1,10 @@
+--- stdout 57
+f() missing 2 required positional arguments: 'a' and 'b'
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+f = <function object>
+msg = "f() missing 2 required positional arguments: 'a' and 'b'"

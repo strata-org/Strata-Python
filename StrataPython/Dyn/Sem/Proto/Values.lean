@@ -37,14 +37,17 @@ def raiseBuiltin [PyReads m V] {α : Type} (cls msg : String)
     #[PyPure.imm (m := m) (.str (.ofString msg))] fields
   | none => PyPure.gap s!"raising the exception class {cls}, which is not built in"
 
-/-- `repr(v)` for an `int` or a `str`, as the checks' messages need. -/
+/-- `repr(v)` for `None`, a `bool`, an `int`, a `float` or a `str`, as the checks' messages need. -/
 def checkRepr [PyPure m V] (v : V) : m String := do
   match ← PyPure.immView v with
+  | some .none => pure "None"
+  | some (.bool b) => pure (if b then "True" else "False")
   | some (.int i) => match Format.intRepr i with
     | .ok s => pure s
     | .error _ => PyPure.gap "the repr of an int with too many digits in a check's message"
+  | some (.float bits) => pure (Format.floatRepr bits)
   | some (.str s) => pure (Format.strRepr s.s)
-  | _ => PyPure.gap "the repr of a value other than an int or a str in a check's message"
+  | _ => PyPure.gap "the repr of a value other than None, a bool, an int, a float or a str in a check's message"
 
 /-- `v`, the value of the variable `name`, or a raised `excType(msg)` if `v` is unassigned.  A
 `NameError` carries `name` as its `name`, as CPython's `_PyEval_FormatExcCheckArg` sets it; the

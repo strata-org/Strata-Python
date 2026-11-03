@@ -1,0 +1,10 @@
+--- stdout 12
+2 no such 2
+
+--- outcome
+ok
+--- globals
+O = <class 'O'>
+__doc__ = None
+__name__ = '__main__'
+o = <O object>

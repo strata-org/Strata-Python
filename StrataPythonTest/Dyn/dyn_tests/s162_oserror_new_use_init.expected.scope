@@ -1,0 +1,16 @@
+module
+  C: local (assigned, referenced)
+  ValueError: global implicit (referenced)
+  OSError: global implicit (referenced)
+  c: local (assigned, referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  D: local (assigned, referenced)
+  d: local (assigned, referenced)
+  class C
+  class D
+    __init__: local (assigned)
+    function D.__init__
+      params: self, *a
+      self: local (parameter)
+      a: local (parameter)

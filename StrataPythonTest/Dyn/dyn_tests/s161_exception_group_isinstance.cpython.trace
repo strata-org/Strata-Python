@@ -1,0 +1,11 @@
+--- stdout 26
+class read
+ExceptionGroup
+
+--- outcome
+ok
+--- globals
+K = <class 'K'>
+__doc__ = None
+__name__ = '__main__'
+g = <ExceptionGroup object>

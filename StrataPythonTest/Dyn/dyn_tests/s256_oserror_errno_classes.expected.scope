@@ -1,0 +1,5 @@
+module
+  names: local (assigned)
+  i: local (assigned, referenced)
+  type: global implicit (referenced)
+  OSError: global implicit (referenced)

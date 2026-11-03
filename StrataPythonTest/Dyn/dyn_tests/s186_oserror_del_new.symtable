@@ -1,0 +1,18 @@
+module top
+  O: local (assigned, referenced)
+  OSError: global implicit (referenced)
+  len: global implicit (referenced)
+  o: local (assigned, referenced)
+  print: global implicit (referenced)
+  class O
+    __init__: local (assigned)
+    __new__: local (assigned)
+    function __new__
+      __class__: free (referenced)
+      a: local (parameter, referenced)
+      cls: local (parameter, referenced)
+      super: global implicit (referenced)
+    function __init__
+      a: local (parameter)
+      self: local (parameter)
+qualnames: O, O.__init__, O.__new__

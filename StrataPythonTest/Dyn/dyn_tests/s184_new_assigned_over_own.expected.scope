@@ -1,0 +1,13 @@
+module
+  C: local (assigned, referenced)
+  Exception: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  print: global implicit (referenced)
+  class C (needs __class__ cell)
+    __new__: local (assigned)
+    function C.__new__
+      params: cls, *a
+      cls: local (parameter, referenced)
+      a: local (parameter, referenced)
+      super: global implicit (referenced)
+      __class__: free (referenced)

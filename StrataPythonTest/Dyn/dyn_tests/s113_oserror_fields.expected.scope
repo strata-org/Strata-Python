@@ -1,0 +1,34 @@
+module
+  e: local (assigned, referenced)
+  OSError: global implicit (referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  E: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  e2: local (assigned, referenced)
+  NotFound: local (assigned, referenced)
+  class E
+    __init__: local (assigned)
+    function E.__init__
+      params: self, a, b, c
+      self: local (parameter)
+      a: local (parameter)
+      b: local (parameter)
+      c: local (parameter)
+  class E (needs __class__ cell)
+    __init__: local (assigned)
+    function E.__init__
+      params: self, *a, **k
+      self: local (parameter)
+      a: local (parameter, referenced)
+      k: local (parameter)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+  class NotFound (needs __class__ cell)
+    __init__: local (assigned)
+    function NotFound.__init__
+      params: self, path
+      self: local (parameter)
+      path: local (parameter, referenced)
+      super: global implicit (referenced)
+      __class__: free (referenced)

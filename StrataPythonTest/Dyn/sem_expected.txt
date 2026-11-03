@@ -51,7 +51,7 @@ i04_dict_unpack | gap | not modelled yet: py.dictUpdate
 i05_kwargs_mutation | gap | built-in len is not modelled yet
 i06_call_errors | gap | a TypeError that names a function is not modelled yet
 i07_methods | gap | built-in len is not modelled yet
-i08_binding_errors | gap | not modelled yet: py.pushExcInfo
+i08_binding_errors | gap | str() of this value is not modelled yet
 i09_assigned_defaults | gap | a write to the attribute function.__defaults__ is not modelled yet
 i10_keyword_subclass | gap | built-in method str.__new__ is not modelled yet
 i11_constant_default | gap | is on two equal immediates depends on CPython's caching
@@ -196,8 +196,25 @@ s105_classmethod_wraps | gap | staticmethod.__init__ on an instance of a subclas
 s106_readonly_attr | agree
 s107_readonly_attr_del | agree
 s108_staticmethod_doc | agree
+s109_try_except | agree
 s10_missing_arguments | agree
+s110_exception_classes | agree
+s111_exception_errors | agree
+s112_exception_attrs | agree
+s113_oserror_fields | agree
+s114_exception_inits | agree
+s115_exception_new_checks | agree
+s116_context_cycles | agree
+s117_raise_from_class | gap | a cause that is a class or not an exception is not modelled yet
+s118_exception_normalize | gap | an exception class whose call gives an exception of another class is not modelled yet
+s119_attribute_error_fields | gap | an AttributeError without name and obj from an attribute read is not modelled yet
 s11_missing_keyword_only | agree
+s120_import_error_outcome | agree
+s121_exception_str_repr | agree
+s122_exception_errors_more | agree
+s123_exception_user_str_outcome | gap | the str() of an uncaught E
+s124_new_static_base | agree
+s125_new_other_base | gap | a class whose __new__ comes from another built-in base than its tp_new is not modelled yet
 s126_super_metaclass | agree
 s127_super_class_attr_error | agree
 s128_class_doc_descriptor | agree
@@ -205,18 +222,23 @@ s12_positional_only_keyword | gap | a keyword that names a positional-only param
 s135_printf_gap | gap | printf-style formatting is not modelled yet
 s13_keyword_error_order | agree
 s14_print_bad_keyword | agree
-s155_method_attrs | gap | not modelled yet: py.pushExcInfo
+s155_method_attrs | gap | the attribute method.__func__ is not modelled yet
 s156_weakref_attr | gap | the __weakref__ that a user class's namespace holds is not modelled yet
 s157_super_dict | gap | the __dict__ that a user class's namespace holds is not modelled yet
 s158_index_returns_bool | gap | an __index__ that returns a strict subclass of int, which warns, is not modelled yet
 s159_truth_of_notimplemented | gap | the truth of NotImplemented, which warns, is not modelled yet
 s15_print_sep_before_end | agree
-s165_list_imul_index_grows | gap | not modelled yet: py.pushExcInfo
-s166_list_imul_index_shrinks | gap | not modelled yet: py.pushExcInfo
+s160_raise_metaclass_subclasscheck | gap | a raise of an exception whose class's metaclass defines __subclasscheck__ is not modelled yet
+s161_exception_group_isinstance | agree
+s162_oserror_new_use_init | agree
+s165_list_imul_index_grows | agree
+s166_list_imul_index_shrinks | agree
 s16_kwargs_not_mapping | agree
 s171_set_lookup_revisit | gap | a set lookup after a false __eq__ depends on CPython's table layout
 s172_set_subset_revisit | gap | a set lookup after a false __eq__ depends on CPython's table layout
 s173_set_lookup_two_candidates | gap | a set lookup after a false __eq__ depends on CPython's table layout
+s174_missing_arguments_message | agree
+s175_lookup_attr_swallows | agree
 s176_set_lookup_two_members | gap | a set lookup whose order of comparisons depends on the table's layout
 s177_global_render_gap | gap | the repr of an int with too many digits
 s178_render_line_break | gap | a render with a line break
@@ -225,10 +247,15 @@ s17_kwargs_duplicate_int | agree
 s180_weakref_dict_entry | gap | the __weakref__ that a user class's namespace holds is not modelled yet
 s181_weakref_delete_slots | gap | the __weakref__ that a user class's namespace holds is not modelled yet
 s183_object_new_assigned | gap | a write to the attribute __new__ of a class is not modelled yet
+s184_new_assigned_over_own | gap | a write to the attribute __new__ of a class is not modelled yet
+s185_new_assigned_builtin | gap | a write to the attribute __new__ of a class is not modelled yet
+s186_oserror_del_new | gap | a write to the attribute __new__ of a class is not modelled yet
+s187_object_new_slot_base | agree
+s188_object_init_tp_new | agree
 s189_object_new_over_slot_base | agree
 s18_star_set | agree
 s190_object_init_python_builtin | agree
-s191_object_new_exception | gap | object.__new__ of a class whose static base is ValueError is not modelled yet
+s191_object_new_exception | agree
 s192_property_new_not_subtype | agree
 s193_type_new_not_subtype | agree
 s194_object_init_no_instances | agree
@@ -238,29 +265,29 @@ s197_metaclass_skips_type_new | gap | a class that uses __class__ or super(), ma
 s198_metaclass_drops_classcell | gap | a class that uses __class__ or super(), made by a metaclass other than type
 s199_metaclass_without_cell | gap | built-in len is not modelled yet
 s19_recursion_depth | gap | Python call depth over 900
-s200_class_cell_after_failed_creation | gap | built-in method ValueError.__new__ is not modelled yet
-s201_delitem_missing | gap | not modelled yet: py.pushExcInfo
-s202_setitem_missing | gap | not modelled yet: py.pushExcInfo
-s203_metaclass_setitem_only | gap | not modelled yet: py.pushExcInfo
+s200_class_cell_after_failed_creation | gap | the __class__ cell while a class is created is not modelled yet
+s201_delitem_missing | agree
+s202_setitem_missing | agree
+s203_metaclass_setitem_only | agree
 s204_hash_returns_seed_hash | agree
 s205_index_returns_seed_hash | gap | a hash whose number the model does not know
 s206_dunder_seed_hash | gap | a hash whose number the model does not know
 s207_length_hint_seed_hash | gap | iteration of a user object is not modelled yet
 s208_none_dunders | gap | built-in method NoneType.__repr__ is not modelled yet
 s209_unset_wrappers | gap | an unset classmethod is not modelled yet
-s20_exception_chain | gap | built-in method ValueError.__new__ is not modelled yet
+s20_exception_chain | agree
 s210_set_lookup_member_replaced | gap | a set that changes during a lookup is not modelled yet
 s211_set_add_member_replaced | gap | a set that changes during a lookup is not modelled yet
 s212_imatmul | agree
-s213_item_index_key_errors | gap | not modelled yet: py.pushExcInfo
-s214_inplace_repeat_slots | gap | not modelled yet: py.pushExcInfo
+s213_item_index_key_errors | gap | not modelled yet: py.getIter
+s214_inplace_repeat_slots | gap | built-in method range.__new__ is not modelled yet
 s215_type_new_check_order | gap | not modelled yet: py.getIter
 s21_lone_surrogate | known | bug: a lone surrogate in a str literal reaches the translator as its escape text (docs/PythonToDyn.md §13.5)
-s220_none_in_arg_messages | gap | built-in method ValueError.__new__ is not modelled yet
-s221_set_name_note | gap | built-in method ValueError.__new__ is not modelled yet
-s222_build_class_attr_lookups | gap | built-in method Exception.__new__ is not modelled yet
-s223_super_type_keywords | gap | not modelled yet: py.pushExcInfo
-s224_object_setattr_messages | gap | not modelled yet: py.pushExcInfo
+s220_none_in_arg_messages | agree
+s221_set_name_note | agree
+s222_build_class_attr_lookups | gap | built-in len is not modelled yet
+s223_super_type_keywords | agree
+s224_object_setattr_messages | agree
 s225_set_replace_during_lookup | gap | a set that changes during a lookup is not modelled yet
 s226_type_one_arg_keywords | agree
 s227_list_index_changes_list | agree
@@ -293,6 +320,8 @@ s251_setitem_only_delitem | agree
 s252_index_too_big_names_type | agree
 s253_list_inplace_repeat | agree
 s254_long_tuple_compare | agree
+s255_unicode_error_member_write | gap | a write to the attribute UnicodeEncodeError.start is not modelled yet
+s256_oserror_errno_classes | agree
 s257_object_ne_builtin_self | agree
 s258_call_of_class_with_meta_get | gap | a class whose metaclass defines a descriptor method is not modelled yet
 s259_super_subclass_get | gap | a descriptor of a subclass of a built-in descriptor type is not modelled yet
@@ -330,6 +359,8 @@ s28_dict_eq_mutation | agree
 s290_delitem_only_setitem | agree
 s291_none_inplace_times_list | agree
 s292_dict_inplace_times_int | agree
+s293_exception_class_get | gap | an exception whose class defines a descriptor method is not modelled yet
+s294_set_name_note_long_class_name | agree
 s295_nonascii_class_name_in_message | gap | a message with a class name longer than 50 bytes is not modelled yet
 s29_set_user_objects | gap | a slot of a set whose layout is inexact
 s30_dict_merge_user_keys | gap | a walk of a dict whose comparisons may run user code is not modelled yet
@@ -413,11 +444,11 @@ t03_if_else | agree
 t04_while | agree
 t05_for | gap | not modelled yet: py.getIter
 t06_function | agree
-t07_try_except | gap | built-in method ValueError.__new__ is not modelled yet
-t08_try_finally | gap | not modelled yet: py.pushPending
-t09_nested_try | gap | built-in method ValueError.__new__ is not modelled yet
-t10_except_type | gap | built-in method ValueError.__new__ is not modelled yet
-t11_with | gap | not modelled yet: py.enterMethod
+t07_try_except | agree
+t08_try_finally | agree
+t09_nested_try | agree
+t10_except_type | gap | built-in method str.__new__ is not modelled yet
+t11_with | agree
 t12_class | agree
 t13_fstring | gap | not modelled yet: py.fmtValue
 t14_bool_short | agree
@@ -432,9 +463,9 @@ t22_star_args | gap | not modelled yet: py.getIter
 t23_kwargs_boto3 | gap | import of module boto3 is not modelled yet
 t24_assert | agree
 t25_tuple_unpack | agree
-t26_with_as_use | gap | not modelled yet: py.enterMethod
+t26_with_as_use | gap | str() of this value is not modelled yet
 t27_module_vars | gap | import of module logging is not modelled yet
-t28_try_else | gap | not modelled yet: py.pushPending
+t28_try_else | agree
 t29_dict_unpack | gap | not modelled yet: py.dictUpdate
 t30_loop_try_nested | gap | not modelled yet: py.getIter
 tc01_literals | agree

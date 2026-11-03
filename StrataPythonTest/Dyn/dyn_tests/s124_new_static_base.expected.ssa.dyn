@@ -1,0 +1,532 @@
+module s124_new_static_base {
+  func @|s124_new_static_base.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s124_new_static_base")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s124_new_static_base", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s124_new_static_base", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %__class__.0 : py.Value = py.undef("__class__")
+      %__class__.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%__class__.0)
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|s124_new_static_base.A.<body>|, "<body>", "s124_new_static_base", %__class__.cell.0)
+      %str.1 : py.Value = py.strLit("A")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %A.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %set.2 : base.Unit = base.refSet[py.Value](%__class__.cell.0, %A.0)
+      %A.cell.0 : base.Ref(py.Value) = py.globalCell("s124_new_static_base", "A")
+      %set.3 : base.Unit = base.refSet[py.Value](%A.cell.0, %A.0)
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|s124_new_static_base.C.<body>|, "<body>", "s124_new_static_base")
+      %str.2 : py.Value = py.strLit("C")
+      %A.1 : py.Value = py.loadGlobal("s124_new_static_base", "A") ^propagate.0()
+      %FileNotFoundError.0 : py.Value = py.loadGlobal("s124_new_static_base", "FileNotFoundError") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%clo.1, %str.2, %A.1, %FileNotFoundError.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %C.0 : py.Value = py.call(%__build_class__.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %C.cell.0 : base.Ref(py.Value) = py.globalCell("s124_new_static_base", "C")
+      %set.4 : base.Unit = base.refSet[py.Value](%C.cell.0, %C.0)
+      %BaseException.0 : py.Value = py.loadGlobal("s124_new_static_base", "BaseException") ^catch.0()
+      %__new__.0 : py.Value = py.attr(%BaseException.0, "__new__") ^catch.0()
+      %C.1 : py.Value = py.loadGlobal("s124_new_static_base", "C") ^catch.0()
+      %tuple.2 : py.Value = py.mkTuple(%C.1)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%__new__.0, %tuple.2, %kwargs.2) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %TypeError.0 : py.Value = py.loadGlobal("s124_new_static_base", "TypeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %TypeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %t.cell.0 : base.Ref(py.Value) = py.globalCell("s124_new_static_base", "t")
+      %set.5 : base.Unit = base.refSet[py.Value](%t.cell.0, %exc.0)
+      %print.0 : py.Value = py.loadGlobal("s124_new_static_base", "print") ^clear.0()
+      %t.0 : py.Value = py.loadGlobal("s124_new_static_base", "t") ^clear.0()
+      %args.0 : py.Value = py.attr(%t.0, "args") ^clear.0()
+      %int.0 : py.Value = py.intLit(0)
+      %item.0 : py.Value = py.getItem(%args.0, %int.0) ^clear.0()
+      %tuple.3 : py.Value = py.mkTuple(%item.0)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.3, %kwargs.3) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %t.1 : py.Value = py.undef("t")
+      %t.cell.1 : base.Ref(py.Value) = py.globalCell("s124_new_static_base", "t")
+      %set.6 : base.Unit = base.refSet[py.Value](%t.cell.1, %t.1)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %t.2 : py.Value = py.undef("t")
+      %t.cell.2 : base.Ref(py.Value) = py.globalCell("s124_new_static_base", "t")
+      %set.7 : base.Unit = base.refSet[py.Value](%t.cell.2, %t.2)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@|s124_new_static_base.C.<body>.1|, "<body>", "s124_new_static_base")
+      %str.3 : py.Value = py.strLit("C")
+      %KeyError.0 : py.Value = py.loadGlobal("s124_new_static_base", "KeyError") ^propagate.0()
+      %StopIteration.0 : py.Value = py.loadGlobal("s124_new_static_base", "StopIteration") ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple(%clo.2, %str.3, %KeyError.0, %StopIteration.0)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %C.2 : py.Value = py.call(%__build_class__.2, %tuple.4, %kwargs.4) ^propagate.0()
+      %C.cell.1 : base.Ref(py.Value) = py.globalCell("s124_new_static_base", "C")
+      %set.8 : base.Unit = base.refSet[py.Value](%C.cell.1, %C.2)
+      %C.3 : py.Value = py.loadGlobal("s124_new_static_base", "C") ^propagate.0()
+      %int.1 : py.Value = py.intLit(1)
+      %tuple.5 : py.Value = py.mkTuple(%int.1)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%C.3, %tuple.5, %kwargs.5) ^propagate.0()
+      %c.cell.0 : base.Ref(py.Value) = py.globalCell("s124_new_static_base", "c")
+      %set.9 : base.Unit = base.refSet[py.Value](%c.cell.0, %call.2)
+      %print.1 : py.Value = py.loadGlobal("s124_new_static_base", "print") ^propagate.0()
+      %c.6 : py.Value = py.loadGlobal("s124_new_static_base", "c") ^propagate.0()
+      %value.0 : py.Value = py.attr(%c.6, "value") ^propagate.0()
+      %c.7 : py.Value = py.loadGlobal("s124_new_static_base", "c") ^propagate.0()
+      %args.1 : py.Value = py.attr(%c.7, "args") ^propagate.0()
+      %int.2 : py.Value = py.intLit(0)
+      %item.1 : py.Value = py.getItem(%args.1, %int.2) ^propagate.0()
+      %tuple.6 : py.Value = py.mkTuple(%value.0, %item.1)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.1, %tuple.6, %kwargs.6) ^propagate.0()
+      %__build_class__.3 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %__class__.1 : py.Value = py.undef("__class__")
+      %__class__.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%__class__.1)
+      %clo.3 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|s124_new_static_base.B.<body>|, "<body>", "s124_new_static_base", %__class__.cell.1)
+      %str.4 : py.Value = py.strLit("B")
+      %OSError.0 : py.Value = py.loadGlobal("s124_new_static_base", "OSError") ^propagate.0()
+      %tuple.7 : py.Value = py.mkTuple(%clo.3, %str.4, %OSError.0)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %B.0 : py.Value = py.call(%__build_class__.3, %tuple.7, %kwargs.7) ^propagate.0()
+      %set.10 : base.Unit = base.refSet[py.Value](%__class__.cell.1, %B.0)
+      %B.cell.0 : base.Ref(py.Value) = py.globalCell("s124_new_static_base", "B")
+      %set.11 : base.Unit = base.refSet[py.Value](%B.cell.0, %B.0)
+      %__build_class__.4 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.4 : py.Value = py.mkClosure[[]](@|s124_new_static_base.X.<body>|, "<body>", "s124_new_static_base")
+      %str.5 : py.Value = py.strLit("X")
+      %ValueError.0 : py.Value = py.loadGlobal("s124_new_static_base", "ValueError") ^propagate.0()
+      %B.1 : py.Value = py.loadGlobal("s124_new_static_base", "B") ^propagate.0()
+      %tuple.8 : py.Value = py.mkTuple(%clo.4, %str.5, %ValueError.0, %B.1)
+      %kwargs.8 : py.Value = py.mkKwargs
+      %X.0 : py.Value = py.call(%__build_class__.4, %tuple.8, %kwargs.8) ^propagate.0()
+      %X.cell.0 : base.Ref(py.Value) = py.globalCell("s124_new_static_base", "X")
+      %set.12 : base.Unit = base.refSet[py.Value](%X.cell.0, %X.0)
+      %X.1 : py.Value = py.loadGlobal("s124_new_static_base", "X") ^catch.1()
+      %int.3 : py.Value = py.intLit(2)
+      %str.6 : py.Value = py.strLit("y")
+      %tuple.9 : py.Value = py.mkTuple(%int.3, %str.6)
+      %kwargs.9 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%X.1, %tuple.9, %kwargs.9) ^catch.1()
+      %print.2 : py.Value = py.loadGlobal("s124_new_static_base", "print") ^catch.1()
+      %str.7 : py.Value = py.strLit("made")
+      %tuple.10 : py.Value = py.mkTuple(%str.7)
+      %kwargs.10 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%print.2, %tuple.10, %kwargs.10) ^catch.1()
+      jump ^join.1()
+    catch.1(%exc.3 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.3)
+      %TypeError.1 : py.Value = py.loadGlobal("s124_new_static_base", "TypeError") ^unwind.1()
+      %match.1 : base.Bool = py.excMatch(%exc.3, %TypeError.1) ^unwind.1()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %t.cell.3 : base.Ref(py.Value) = py.globalCell("s124_new_static_base", "t")
+      %set.13 : base.Unit = base.refSet[py.Value](%t.cell.3, %exc.3)
+      %print.3 : py.Value = py.loadGlobal("s124_new_static_base", "print") ^clear.1()
+      %t.3 : py.Value = py.loadGlobal("s124_new_static_base", "t") ^clear.1()
+      %args.2 : py.Value = py.attr(%t.3, "args") ^clear.1()
+      %int.4 : py.Value = py.intLit(0)
+      %item.2 : py.Value = py.getItem(%args.2, %int.4) ^clear.1()
+      %tuple.11 : py.Value = py.mkTuple(%item.2)
+      %kwargs.11 : py.Value = py.mkKwargs
+      %call.6 : py.Value = py.call(%print.3, %tuple.11, %kwargs.11) ^clear.1()
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      %t.4 : py.Value = py.undef("t")
+      %t.cell.4 : base.Ref(py.Value) = py.globalCell("s124_new_static_base", "t")
+      %set.14 : base.Unit = base.refSet[py.Value](%t.cell.4, %t.4)
+      jump ^join.1()
+    clear.1(%exc.4 : py.Value):
+      %t.5 : py.Value = py.undef("t")
+      %t.cell.5 : base.Ref(py.Value) = py.globalCell("s124_new_static_base", "t")
+      %set.15 : base.Unit = base.refSet[py.Value](%t.cell.5, %t.5)
+      jump ^unwind.1(%exc.4)
+    next.1():
+      jump ^unwind.1(%exc.3)
+    unwind.1(%exc.5 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.5)
+    join.1():
+      %clo.5 : py.Value = py.mkClosure[[]](@s124_new_static_base.t, "t", "s124_new_static_base")
+      %t.cell.6 : base.Ref(py.Value) = py.globalCell("s124_new_static_base", "t")
+      %set.16 : base.Unit = base.refSet[py.Value](%t.cell.6, %clo.5)
+      %t.6 : py.Value = py.loadGlobal("s124_new_static_base", "t") ^propagate.0()
+      %clo.6 : py.Value = py.mkClosure[[]](@|s124_new_static_base.<lambda>|, "<lambda>", "s124_new_static_base")
+      %tuple.12 : py.Value = py.mkTuple(%clo.6)
+      %kwargs.12 : py.Value = py.mkKwargs
+      %call.7 : py.Value = py.call(%t.6, %tuple.12, %kwargs.12) ^propagate.0()
+      %t.7 : py.Value = py.loadGlobal("s124_new_static_base", "t") ^propagate.0()
+      %clo.7 : py.Value = py.mkClosure[[]](@|s124_new_static_base.<lambda>.1|, "<lambda>", "s124_new_static_base")
+      %tuple.13 : py.Value = py.mkTuple(%clo.7)
+      %kwargs.13 : py.Value = py.mkKwargs
+      %call.8 : py.Value = py.call(%t.7, %tuple.13, %kwargs.13) ^propagate.0()
+      %t.8 : py.Value = py.loadGlobal("s124_new_static_base", "t") ^propagate.0()
+      %clo.8 : py.Value = py.mkClosure[[]](@|s124_new_static_base.<lambda>.2|, "<lambda>", "s124_new_static_base")
+      %tuple.14 : py.Value = py.mkTuple(%clo.8)
+      %kwargs.14 : py.Value = py.mkKwargs
+      %call.9 : py.Value = py.call(%t.8, %tuple.14, %kwargs.14) ^propagate.0()
+      %t.9 : py.Value = py.loadGlobal("s124_new_static_base", "t") ^propagate.0()
+      %clo.9 : py.Value = py.mkClosure[[]](@|s124_new_static_base.<lambda>.3|, "<lambda>", "s124_new_static_base")
+      %tuple.15 : py.Value = py.mkTuple(%clo.9)
+      %kwargs.15 : py.Value = py.mkKwargs
+      %call.10 : py.Value = py.call(%t.9, %tuple.15, %kwargs.15) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.6 : py.Value):
+      %exc.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.6)
+      ret(%exc.7)
+  }
+  func @|s124_new_static_base.A.<body>|(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__new__", binding = "def"}]]
+
+    entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s124_new_static_base", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("A")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@s124_new_static_base.A.__new__, "__new__", "s124_new_static_base", %__class__.cell.0)
+      %str.4 : py.Value = py.strLit("__new__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %__class__.0 : py.Value = py.undef(".class being created")
+      %set.0 : base.Unit = base.refSet[py.Value](%__class__.cell.0, %__class__.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%__class__.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s124_new_static_base.C.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["A", "FileNotFoundError"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s124_new_static_base", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("C")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s124_new_static_base.C.<body>.1|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["KeyError", "StopIteration"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s124_new_static_base", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("C")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s124_new_static_base.B.<body>|(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["OSError"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "__new__", binding = "def"}]]
+
+    entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s124_new_static_base", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("B")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@s124_new_static_base.B.__new__, "__new__", "s124_new_static_base", %__class__.cell.0)
+      %str.4 : py.Value = py.strLit("__new__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %__class__.0 : py.Value = py.undef(".class being created")
+      %set.0 : base.Unit = base.refSet[py.Value](%__class__.cell.0, %__class__.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%__class__.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s124_new_static_base.X.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["ValueError", "B"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s124_new_static_base", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("X")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s124_new_static_base.t(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %f.0 : py.Value = py.undef("f")
+      %f.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%f.0)
+      %e.0 : py.Value = py.undef("e")
+      %e.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%e.0)
+      %f.1 : py.Value = py.undef("f")
+      %defaults.0 : py.Value = py.mkTuple(%f.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "t", 0, 1, false, false, "f") ^propagate.0()
+      %f.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%f.4, %tuple.0, %kwargs.1) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %TypeError.0 : py.Value = py.loadGlobal("s124_new_static_base", "TypeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %TypeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %print.0 : py.Value = py.loadGlobal("s124_new_static_base", "print") ^clear.0()
+      %e.4 : py.Value = py.requireDefined(%exc.0, "e", "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^clear.0()
+      %args.1 : py.Value = py.attr(%e.4, "args") ^clear.0()
+      %int.0 : py.Value = py.intLit(0)
+      %item.0 : py.Value = py.getItem(%args.1, %int.0) ^clear.0()
+      %tuple.1 : py.Value = py.mkTuple(%item.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.2) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.5 : py.Value = py.undef("e")
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.6 : py.Value = py.undef("e")
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.3 : py.Value):
+      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+      ret(%exc.4)
+  }
+  func @|s124_new_static_base.<lambda>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %NameError.0 : py.Value = py.loadGlobal("s124_new_static_base", "NameError") ^propagate.0()
+      %str.0 : py.Value = py.strLit("a")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %str.1 : py.Value = py.strLit("name")
+      %str.2 : py.Value = py.strLit("n")
+      %str.3 : py.Value = py.strLit("x")
+      %int.0 : py.Value = py.intLit(1)
+      %kwargs.1 : py.Value = py.mkKwargs(%str.1, %str.2, %str.3, %int.0)
+      %call.0 : py.Value = py.call(%NameError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s124_new_static_base.<lambda>.1|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %AttributeError.0 : py.Value = py.loadGlobal("s124_new_static_base", "AttributeError") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %str.0 : py.Value = py.strLit("name")
+      %int.0 : py.Value = py.intLit(1)
+      %str.1 : py.Value = py.strLit("obj")
+      %int.1 : py.Value = py.intLit(2)
+      %str.2 : py.Value = py.strLit("x")
+      %int.2 : py.Value = py.intLit(3)
+      %kwargs.1 : py.Value = py.mkKwargs(%str.0, %int.0, %str.1, %int.1, %str.2, %int.2)
+      %call.0 : py.Value = py.call(%AttributeError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s124_new_static_base.<lambda>.2|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %ImportError.0 : py.Value = py.loadGlobal("s124_new_static_base", "ImportError") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %str.0 : py.Value = py.strLit("name")
+      %int.0 : py.Value = py.intLit(1)
+      %str.1 : py.Value = py.strLit("path")
+      %int.1 : py.Value = py.intLit(2)
+      %str.2 : py.Value = py.strLit("name_from")
+      %int.2 : py.Value = py.intLit(3)
+      %str.3 : py.Value = py.strLit("x")
+      %int.3 : py.Value = py.intLit(4)
+      %kwargs.1 : py.Value = py.mkKwargs(%str.0, %int.0, %str.1, %int.1, %str.2, %int.2, %str.3, %int.3)
+      %call.0 : py.Value = py.call(%ImportError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s124_new_static_base.<lambda>.3|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %NameError.0 : py.Value = py.loadGlobal("s124_new_static_base", "NameError") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %str.0 : py.Value = py.strLit("x")
+      %int.0 : py.Value = py.intLit(1)
+      %kwargs.1 : py.Value = py.mkKwargs(%str.0, %int.0)
+      %call.0 : py.Value = py.call(%NameError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s124_new_static_base.A.__new__(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %cls.0 : py.Value = py.undef("cls")
+      %cls.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%cls.0)
+      %a.0 : py.Value = py.undef("a")
+      %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
+      %cls.1 : py.Value = py.undef("cls")
+      %defaults.0 : py.Value = py.mkTuple(%cls.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "A.__new__", 0, 1, true, false, "cls") ^propagate.0()
+      %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %a.1 : py.Value = py.tupleGet(%bound.0, 1)
+      %super.0 : py.Value = py.loadGlobal("s124_new_static_base", "super") ^propagate.0()
+      %__class__.0 : py.Value = base.refGet[py.Value](%__class__.cell.0)
+      %__class__.1 : py.Value = py.requireDefined(%__class__.0, "__class__", "NameError", "cannot access free variable '__class__' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %cls.4 : py.Value = py.requireDefined(%cls.2, "cls", "UnboundLocalError", "cannot access local variable 'cls' where it is not associated with a value") ^propagate.0()
+      %args.1 : py.Value = py.mkTuple(%__class__.1, %cls.4)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %super.1 : py.Value = py.call(%super.0, %args.1, %kwargs.1) ^propagate.0()
+      %__new__.0 : py.Value = py.attr(%super.1, "__new__") ^propagate.0()
+      %cls.6 : py.Value = py.requireDefined(%cls.2, "cls", "UnboundLocalError", "cannot access local variable 'cls' where it is not associated with a value") ^propagate.0()
+      %list.0 : py.Value = py.mkList(%cls.6)
+      %a.3 : py.Value = py.requireDefined(%a.1, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %extend.0 : base.Unit = py.listExtend(%list.0, %a.3) ^propagate.0()
+      %tuple.0 : py.Value = py.listToTuple(%list.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%__new__.0, %tuple.0, %kwargs.2) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s124_new_static_base.B.__new__(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %cls.0 : py.Value = py.undef("cls")
+      %cls.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%cls.0)
+      %a.0 : py.Value = py.undef("a")
+      %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
+      %cls.1 : py.Value = py.undef("cls")
+      %defaults.0 : py.Value = py.mkTuple(%cls.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.__new__", 0, 1, true, false, "cls") ^propagate.0()
+      %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %a.1 : py.Value = py.tupleGet(%bound.0, 1)
+      %super.0 : py.Value = py.loadGlobal("s124_new_static_base", "super") ^propagate.0()
+      %__class__.0 : py.Value = base.refGet[py.Value](%__class__.cell.0)
+      %__class__.1 : py.Value = py.requireDefined(%__class__.0, "__class__", "NameError", "cannot access free variable '__class__' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %cls.4 : py.Value = py.requireDefined(%cls.2, "cls", "UnboundLocalError", "cannot access local variable 'cls' where it is not associated with a value") ^propagate.0()
+      %args.1 : py.Value = py.mkTuple(%__class__.1, %cls.4)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %super.1 : py.Value = py.call(%super.0, %args.1, %kwargs.1) ^propagate.0()
+      %__new__.0 : py.Value = py.attr(%super.1, "__new__") ^propagate.0()
+      %cls.6 : py.Value = py.requireDefined(%cls.2, "cls", "UnboundLocalError", "cannot access local variable 'cls' where it is not associated with a value") ^propagate.0()
+      %list.0 : py.Value = py.mkList(%cls.6)
+      %a.3 : py.Value = py.requireDefined(%a.1, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %extend.0 : base.Unit = py.listExtend(%list.0, %a.3) ^propagate.0()
+      %tuple.0 : py.Value = py.listToTuple(%list.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%__new__.0, %tuple.0, %kwargs.2) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

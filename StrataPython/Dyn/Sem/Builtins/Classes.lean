@@ -116,14 +116,15 @@ def tpNameOf [PyReads m V] (c : V) : m String := do
 
 /-- **CPython's `tp_new_wrapper`** for `t.__new__(subtype, ...)`, with the arguments `args`
 (`subtype` first): `TypeError` unless `subtype` is a class that is `t` or a subclass of it, and
-unless `subtype`'s `staticbase` has `t`'s `tp_new`; a `staticbase` other than `t` stops with a gap. -/
+unless `subtype`'s `staticbase` has `t`'s `tp_new`. Where `Builtin.newId` doesn't know the C
+function of a `tp_new`, a `staticbase` other than `t` stops with a gap. -/
 def tpNewCheck [PyReads m V] (t : Builtin) (args : V) : m Unit := do
   let tName := t.info.tpName
   let some sub := (← tupleItems args)[0]? |
     raiseBuiltin "TypeError" s!"{tName}.__new__(): not enough arguments"
   if !(← isType sub) then
     raiseBuiltin "TypeError" s!"{tName}.__new__(X): X is not a type object ({← tpNameOf (← PyReads.classOf sub)})"
-  let (_, b) ← staticBaseOf tpNewFuel sub
+  let (sb, b) ← staticBaseOf tpNewFuel sub
   -- `sub`'s static base has `t`'s `tp_new`, so `sub` is `t` or a subclass of it: the check of a
   -- class call, which always passes, walks the bases once.
   if b == t then return
@@ -131,9 +132,11 @@ def tpNewCheck [PyReads m V] (t : Builtin) (args : V) : m Unit := do
   if !(← isSubclass sub tV) then
     let sn ← tpNameOf sub
     raiseBuiltin "TypeError" s!"{tName}.__new__({sn}): {sn} is not a subtype of {tName}"
-  -- Whether the static base's `tp_new` is `t`'s C function, as `tp_new_wrapper` checks, is not
-  -- modelled yet.
-  PyPure.gap s!"{tName}.__new__ of a class whose static base is {b.info.name} is not modelled yet"
+  match b.newId, t.newId with
+  | some x, some y =>
+    if x != y then
+      raiseBuiltin "TypeError" s!"{tName}.__new__({← tpNameOf sub}) is not safe, use {← tpNameOf sb}.__new__()"
+  | _, _ => PyPure.gap s!"{tName}.__new__ of a class whose static base is {b.info.name} is not modelled yet"
 
 /-- CPython's `_PyType_CalculateMetaclass`: the most derived of `mcls` and the bases' metaclasses,
 or its `TypeError`. -/
@@ -174,12 +177,10 @@ def slotCountOf [PyReads m V] : List V → m Nat
     return own + (← slotCountOf rest)
 
 /-- Append `note` to the exception `exc`'s `__notes__`, read with the attribute protocol and made
-a new list if there is none, as `BaseException.add_note` does.  An exception has no `__dict__`
-yet, so a note on one stops with a gap. -/
+a new list if there is none, as `BaseException.add_note` does (`_PyObject_LookupAttr`, which
+swallows any `AttributeError`). -/
 def addNoteTo [PyWrites m V] [PyNew m V] (exc note : V) : m Unit := do
-  if (← PyReads.objView exc) matches some .exc then
-    PyPure.gap "a note on an exception is not modelled yet"
-  let notes ← tryCatch (some <$> getAttr exc "__notes__") fun x => do
+  let notes ← tryCatch (some <$> getAttrRaw exc "__notes__") fun x => do
     if ← isAttributeError x then pure none else throw x
   let notes ← match notes with
     | some l => pure l
@@ -214,7 +215,7 @@ def typeNew [PyWrites m V] [PyNew m V] (_self args kwargs : V) : m V := do
   -- `type_new_get_bases`: a base that is not a type but has `__mro_entries__` is an error here.
   for b in bases0 do
     if !(← isType b) then
-      let me? ← tryCatch (some <$> getAttr b "__mro_entries__") fun x => do
+      let me? ← tryCatch (some <$> getAttrRaw b "__mro_entries__") fun x => do
         if ← isAttributeError x then pure none else throw x
       if me?.isSome then
         raiseBuiltin "TypeError" "type() doesn't support MRO entry resolution; use types.new_class()"
@@ -374,8 +375,9 @@ def buildClass [PyWrites m V] [PyNew m V] (_self args kwargs : V) : m V := do
   let mut changed := false
   for b in origBases do
     if ← isType b then bases := bases.push b; continue
-    -- `update_bases` reads the attribute with the attribute protocol, as `getattr` does.
-    let me? ← tryCatch (some <$> getAttr b "__mro_entries__") fun x => do
+    -- `update_bases` reads the attribute with `_PyObject_LookupAttr`, which swallows any
+    -- `AttributeError`.
+    let me? ← tryCatch (some <$> getAttrRaw b "__mro_entries__") fun x => do
       if ← isAttributeError x then pure none else throw x
     match me? with
     | none => bases := bases.push b
@@ -398,7 +400,7 @@ def buildClass [PyWrites m V] [PyNew m V] (_self args kwargs : V) : m V := do
   let basesV := PyPure.imm (m := m) (.tuple bases)
   -- The namespace, from `mcls.__prepare__` read with the attribute protocol, which
   -- `type.__prepare__` makes an empty dict.
-  let prepare ← tryCatch (some <$> getAttr mcls "__prepare__") fun x => do
+  let prepare ← tryCatch (some <$> getAttrRaw mcls "__prepare__") fun x => do
     if ← isAttributeError x then pure none else throw x
   let prepare ← match prepare with
     | some p =>
@@ -620,7 +622,7 @@ def superNew [PyWrites m V] (_self args kwargs : V) : m V := do
   let asType ← if ← isType obj then isSubclass obj thisType else pure false
   if !asType && !(← isSubclass (← PyReads.classOf obj) thisType) then
     -- `_PyObject_LookupAttr`: an `AttributeError` means no `__class__`.
-    let ca? ← tryCatch (some <$> getAttr obj "__class__") fun x => do
+    let ca? ← tryCatch (some <$> getAttrRaw obj "__class__") fun x => do
       if ← isAttributeError x then pure none else throw x
     if let some ca := ca? then
       if (← isType ca) && (← PyPure.identical ca (← PyReads.classOf obj)) != .yes then
@@ -659,7 +661,7 @@ built-in, whose `__doc__` the model doesn't hold. -/
 def callableDoc? [PyCalls m V] (f : V) : m (Option V) := do
   if (← PyPure.immView f).isSome then return none
   if (← PyReads.objView f) matches some (.func ..) then return none
-  tryCatch (some <$> getAttr f "__doc__") fun x => do
+  tryCatch (some <$> getAttrRaw f "__doc__") fun x => do
     if ← isAttributeError x then pure (some (PyPure.imm (m := m) .none)) else throw x
 
 /-- **`property.__init__(self, fget=None, fset=None, fdel=None, doc=None)`**, CPython's
@@ -760,7 +762,7 @@ def wrapperInit [PyWrites m V] (static : Bool) (self args kwargs : V) : m V := d
       if (← PyPure.immView (← PyReads.classOf f)) matches some (.builtin _) then
         return PyPure.imm (m := m) .none
       for k in wrapsNames do
-        let v ← tryCatch (some <$> getAttr f k) fun x => do
+        let v ← tryCatch (some <$> getAttrRaw f k) fun x => do
           if ← isAttributeError x then pure none else throw x
         if let some v := v then setAttr self k (some v)
   pure (PyPure.imm (m := m) .none)
@@ -776,7 +778,7 @@ def objectIsinstance [PyCalls m V] (obj cls : V) : m Bool := do
     raiseBuiltin "TypeError" "isinstance() arg 2 must be a type, a tuple of types, or a union"
   let t ← PyReads.classOf obj
   if ← isSubclass t cls then return true
-  let icls ← tryCatch (some <$> getAttr obj "__class__") fun x => do
+  let icls ← tryCatch (some <$> getAttrRaw obj "__class__") fun x => do
     if ← isAttributeError x then pure none else throw x
   match icls with
   | some ic =>

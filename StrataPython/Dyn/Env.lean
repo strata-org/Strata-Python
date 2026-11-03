@@ -533,12 +533,12 @@ public environment Py extends Base where
   module docstring describes.  Raises `TypeError: exceptions must derive from BaseException`
   otherwise, a `TypeError` if `val()` returns a non-exception, or whatever `val()` raises. -/
   insn toException (val : Value) (^err (e : Value)) : Value
-  /-- `raise exc from cause`, for the exception `exc` that `toException` returned: sets
-  `exc.__cause__` to `cause`, or to `cause()` if it is an exception class, and
-  `exc.__suppress_context__` to `True`.  A `None` cause clears `__cause__`.  Raises
-  `TypeError: exception causes must derive from BaseException` for any other `cause`, as CPython
-  does, or whatever `cause()` raises.  Unlike CPython, which sets the cause before the context, a
-  failure here leaves `exc` with the `__context__` that `toException` set. -/
+  /-- `raise exc from cause`, after `toException`: sets `exc.__cause__` to `cause`, or to
+  `cause()` when `cause` is an exception class, and `exc.__suppress_context__` to `True`; `None`
+  clears the cause.  Any other `cause` raises `TypeError: exception causes must derive from
+  BaseException`.  CPython makes and checks the cause before it sets `exc`'s context, but this
+  operation runs after `toException`, which has set it: the order differs when making or
+  checking the cause runs user code or raises. -/
   insn setCause (exc cause : Value) (^err (e : Value)) : Unit
   /-- Makes the exception `exc` the exception being handled, and returns the one handled before,
   or `None`: CPython's `PUSH_EXC_INFO`, on entering an `except` handler or a `with`'s exception

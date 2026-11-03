@@ -1,0 +1,32 @@
+--- stdout 621
+'x' is an invalid keyword argument for NameError()
+'x' is an invalid keyword argument for ImportError()
+'x' is an invalid keyword argument for AttributeError()
+b
+5
+a
+None None
+builtins nope None cannot import name 'nope' from 'builtins' (unknown location)
+Cannot nest BaseExceptions in 'MyEG'
+BaseExceptionGroup m (1 sub-exception)
+m (2 sub-exceptions) m list
+readonly attribute
+setattr __notes__
+x
+note must be a str, not 'int'
+Cannot add note: __notes__ is not a list
+BaseException.add_note() takes exactly one argument (0 given)
+calling <class 'B'> should have returned an instance of BaseException, not <class 'int'>
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+MyEG = <class 'MyEG'>
+MyIE = <class 'MyIE'>
+MyNE = <class 'MyNE'>
+__doc__ = None
+__name__ = '__main__'
+g = <BaseExceptionGroup object>
+g2 = <ExceptionGroup object>
+t = <function object>

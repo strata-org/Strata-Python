@@ -1,0 +1,545 @@
+module s113_oserror_fields {
+  func @|s113_oserror_fields.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s113_oserror_fields")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s113_oserror_fields", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s113_oserror_fields", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %OSError.0 : py.Value = py.loadGlobal("s113_oserror_fields", "OSError") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %str.1 : py.Value = py.strLit("a")
+      %none.1 : py.Value = py.noneLit
+      %tuple.0 : py.Value = py.mkTuple(%int.0, %str.1, %none.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%OSError.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s113_oserror_fields", "e")
+      %set.2 : base.Unit = base.refSet[py.Value](%e.cell.0, %call.0)
+      %print.0 : py.Value = py.loadGlobal("s113_oserror_fields", "print") ^propagate.0()
+      %e.0 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %args.0 : py.Value = py.attr(%e.0, "args") ^propagate.0()
+      %int.1 : py.Value = py.intLit(1)
+      %str.2 : py.Value = py.strLit("a")
+      %none.2 : py.Value = py.noneLit
+      %tuple.1 : py.Value = py.mkTuple(%int.1, %str.2, %none.2)
+      %eq.0 : py.Value = py.eq(%args.0, %tuple.1) ^propagate.0()
+      %e.1 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %filename.0 : py.Value = py.attr(%e.1, "filename") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%eq.0, %filename.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.2, %kwargs.1) ^propagate.0()
+      %OSError.1 : py.Value = py.loadGlobal("s113_oserror_fields", "OSError") ^propagate.0()
+      %int.2 : py.Value = py.intLit(1)
+      %str.3 : py.Value = py.strLit("a")
+      %none.3 : py.Value = py.noneLit
+      %none.4 : py.Value = py.noneLit
+      %str.4 : py.Value = py.strLit("f2")
+      %tuple.3 : py.Value = py.mkTuple(%int.2, %str.3, %none.3, %none.4, %str.4)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%OSError.1, %tuple.3, %kwargs.2) ^propagate.0()
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("s113_oserror_fields", "e")
+      %set.3 : base.Unit = base.refSet[py.Value](%e.cell.1, %call.2)
+      %print.1 : py.Value = py.loadGlobal("s113_oserror_fields", "print") ^propagate.0()
+      %e.2 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %args.1 : py.Value = py.attr(%e.2, "args") ^propagate.0()
+      %int.3 : py.Value = py.intLit(1)
+      %str.5 : py.Value = py.strLit("a")
+      %none.5 : py.Value = py.noneLit
+      %none.6 : py.Value = py.noneLit
+      %str.6 : py.Value = py.strLit("f2")
+      %tuple.4 : py.Value = py.mkTuple(%int.3, %str.5, %none.5, %none.6, %str.6)
+      %eq.1 : py.Value = py.eq(%args.1, %tuple.4) ^propagate.0()
+      %e.3 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %filename.1 : py.Value = py.attr(%e.3, "filename") ^propagate.0()
+      %e.4 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %filename2.0 : py.Value = py.attr(%e.4, "filename2") ^propagate.0()
+      %tuple.5 : py.Value = py.mkTuple(%eq.1, %filename.1, %filename2.0)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.1, %tuple.5, %kwargs.3) ^propagate.0()
+      %OSError.2 : py.Value = py.loadGlobal("s113_oserror_fields", "OSError") ^propagate.0()
+      %bool.0 : py.Value = py.boolLit(true)
+      %str.7 : py.Value = py.strLit("x")
+      %tuple.6 : py.Value = py.mkTuple(%bool.0, %str.7)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%OSError.2, %tuple.6, %kwargs.4) ^propagate.0()
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("s113_oserror_fields", "e")
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.2, %call.4)
+      %print.2 : py.Value = py.loadGlobal("s113_oserror_fields", "print") ^propagate.0()
+      %type.0 : py.Value = py.loadGlobal("s113_oserror_fields", "type") ^propagate.0()
+      %e.5 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %tuple.7 : py.Value = py.mkTuple(%e.5)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%type.0, %tuple.7, %kwargs.5) ^propagate.0()
+      %__name__.0 : py.Value = py.attr(%call.5, "__name__") ^propagate.0()
+      %tuple.8 : py.Value = py.mkTuple(%__name__.0)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.6 : py.Value = py.call(%print.2, %tuple.8, %kwargs.6) ^propagate.0()
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|s113_oserror_fields.E.<body>|, "<body>", "s113_oserror_fields")
+      %str.8 : py.Value = py.strLit("E")
+      %OSError.3 : py.Value = py.loadGlobal("s113_oserror_fields", "OSError") ^propagate.0()
+      %tuple.9 : py.Value = py.mkTuple(%clo.0, %str.8, %OSError.3)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %E.0 : py.Value = py.call(%__build_class__.0, %tuple.9, %kwargs.7) ^propagate.0()
+      %E.cell.0 : base.Ref(py.Value) = py.globalCell("s113_oserror_fields", "E")
+      %set.5 : base.Unit = base.refSet[py.Value](%E.cell.0, %E.0)
+      %E.1 : py.Value = py.loadGlobal("s113_oserror_fields", "E") ^propagate.0()
+      %int.4 : py.Value = py.intLit(1)
+      %int.5 : py.Value = py.intLit(2)
+      %int.6 : py.Value = py.intLit(3)
+      %tuple.10 : py.Value = py.mkTuple(%int.4, %int.5, %int.6)
+      %kwargs.8 : py.Value = py.mkKwargs
+      %call.7 : py.Value = py.call(%E.1, %tuple.10, %kwargs.8) ^propagate.0()
+      %e.cell.3 : base.Ref(py.Value) = py.globalCell("s113_oserror_fields", "e")
+      %set.6 : base.Unit = base.refSet[py.Value](%e.cell.3, %call.7)
+      %print.3 : py.Value = py.loadGlobal("s113_oserror_fields", "print") ^propagate.0()
+      %e.6 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %args.2 : py.Value = py.attr(%e.6, "args") ^propagate.0()
+      %tuple.11 : py.Value = py.mkTuple
+      %eq.2 : py.Value = py.eq(%args.2, %tuple.11) ^propagate.0()
+      %e.7 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %errno.0 : py.Value = py.attr(%e.7, "errno") ^propagate.0()
+      %tuple.12 : py.Value = py.mkTuple(%eq.2, %errno.0)
+      %kwargs.9 : py.Value = py.mkKwargs
+      %call.8 : py.Value = py.call(%print.3, %tuple.12, %kwargs.9) ^propagate.0()
+      %OSError.4 : py.Value = py.loadGlobal("s113_oserror_fields", "OSError") ^catch.0()
+      %int.7 : py.Value = py.intLit(2)
+      %str.9 : py.Value = py.strLit("x")
+      %tuple.13 : py.Value = py.mkTuple(%int.7, %str.9)
+      %str.10 : py.Value = py.strLit("k")
+      %int.8 : py.Value = py.intLit(1)
+      %kwargs.10 : py.Value = py.mkKwargs(%str.10, %int.8)
+      %call.9 : py.Value = py.call(%OSError.4, %tuple.13, %kwargs.10) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %TypeError.0 : py.Value = py.loadGlobal("s113_oserror_fields", "TypeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %TypeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.4 : base.Ref(py.Value) = py.globalCell("s113_oserror_fields", "e")
+      %set.7 : base.Unit = base.refSet[py.Value](%e.cell.4, %exc.0)
+      %print.4 : py.Value = py.loadGlobal("s113_oserror_fields", "print") ^clear.0()
+      %e.8 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^clear.0()
+      %args.3 : py.Value = py.attr(%e.8, "args") ^clear.0()
+      %int.9 : py.Value = py.intLit(0)
+      %item.0 : py.Value = py.getItem(%args.3, %int.9) ^clear.0()
+      %tuple.14 : py.Value = py.mkTuple(%item.0)
+      %kwargs.11 : py.Value = py.mkKwargs
+      %call.10 : py.Value = py.call(%print.4, %tuple.14, %kwargs.11) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.9 : py.Value = py.undef("e")
+      %e.cell.5 : base.Ref(py.Value) = py.globalCell("s113_oserror_fields", "e")
+      %set.8 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.9)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.10 : py.Value = py.undef("e")
+      %e.cell.6 : base.Ref(py.Value) = py.globalCell("s113_oserror_fields", "e")
+      %set.9 : base.Unit = base.refSet[py.Value](%e.cell.6, %e.10)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %__class__.0 : py.Value = py.undef("__class__")
+      %__class__.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%__class__.0)
+      %clo.1 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|s113_oserror_fields.E.<body>.1|, "<body>", "s113_oserror_fields", %__class__.cell.0)
+      %str.11 : py.Value = py.strLit("E")
+      %OSError.5 : py.Value = py.loadGlobal("s113_oserror_fields", "OSError") ^propagate.0()
+      %tuple.15 : py.Value = py.mkTuple(%clo.1, %str.11, %OSError.5)
+      %kwargs.12 : py.Value = py.mkKwargs
+      %E.2 : py.Value = py.call(%__build_class__.1, %tuple.15, %kwargs.12) ^propagate.0()
+      %set.10 : base.Unit = base.refSet[py.Value](%__class__.cell.0, %E.2)
+      %E.cell.1 : base.Ref(py.Value) = py.globalCell("s113_oserror_fields", "E")
+      %set.11 : base.Unit = base.refSet[py.Value](%E.cell.1, %E.2)
+      %E.3 : py.Value = py.loadGlobal("s113_oserror_fields", "E") ^propagate.0()
+      %int.10 : py.Value = py.intLit(2)
+      %str.12 : py.Value = py.strLit("x")
+      %str.13 : py.Value = py.strLit("f")
+      %tuple.16 : py.Value = py.mkTuple(%int.10, %str.12, %str.13)
+      %str.14 : py.Value = py.strLit("k")
+      %int.11 : py.Value = py.intLit(3)
+      %kwargs.13 : py.Value = py.mkKwargs(%str.14, %int.11)
+      %call.11 : py.Value = py.call(%E.3, %tuple.16, %kwargs.13) ^propagate.0()
+      %e.cell.7 : base.Ref(py.Value) = py.globalCell("s113_oserror_fields", "e")
+      %set.12 : base.Unit = base.refSet[py.Value](%e.cell.7, %call.11)
+      %print.5 : py.Value = py.loadGlobal("s113_oserror_fields", "print") ^propagate.0()
+      %e.11 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %args.4 : py.Value = py.attr(%e.11, "args") ^propagate.0()
+      %int.12 : py.Value = py.intLit(2)
+      %str.15 : py.Value = py.strLit("x")
+      %tuple.17 : py.Value = py.mkTuple(%int.12, %str.15)
+      %eq.3 : py.Value = py.eq(%args.4, %tuple.17) ^propagate.0()
+      %e.12 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %errno.1 : py.Value = py.attr(%e.12, "errno") ^propagate.0()
+      %e.13 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %filename.2 : py.Value = py.attr(%e.13, "filename") ^propagate.0()
+      %type.1 : py.Value = py.loadGlobal("s113_oserror_fields", "type") ^propagate.0()
+      %e.14 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %tuple.18 : py.Value = py.mkTuple(%e.14)
+      %kwargs.14 : py.Value = py.mkKwargs
+      %call.12 : py.Value = py.call(%type.1, %tuple.18, %kwargs.14) ^propagate.0()
+      %__name__.1 : py.Value = py.attr(%call.12, "__name__") ^propagate.0()
+      %tuple.19 : py.Value = py.mkTuple(%eq.3, %errno.1, %filename.2, %__name__.1)
+      %kwargs.15 : py.Value = py.mkKwargs
+      %call.13 : py.Value = py.call(%print.5, %tuple.19, %kwargs.15) ^propagate.0()
+      %OSError.6 : py.Value = py.loadGlobal("s113_oserror_fields", "OSError") ^propagate.0()
+      %int.13 : py.Value = py.intLit(2)
+      %str.16 : py.Value = py.strLit("x")
+      %str.17 : py.Value = py.strLit("f")
+      %int.14 : py.Value = py.intLit(7)
+      %str.18 : py.Value = py.strLit("g")
+      %int.15 : py.Value = py.intLit(8)
+      %tuple.20 : py.Value = py.mkTuple(%int.13, %str.16, %str.17, %int.14, %str.18, %int.15)
+      %kwargs.16 : py.Value = py.mkKwargs
+      %call.14 : py.Value = py.call(%OSError.6, %tuple.20, %kwargs.16) ^propagate.0()
+      %e2.cell.0 : base.Ref(py.Value) = py.globalCell("s113_oserror_fields", "e2")
+      %set.13 : base.Unit = base.refSet[py.Value](%e2.cell.0, %call.14)
+      %print.6 : py.Value = py.loadGlobal("s113_oserror_fields", "print") ^propagate.0()
+      %e2.0 : py.Value = py.loadGlobal("s113_oserror_fields", "e2") ^propagate.0()
+      %errno.2 : py.Value = py.attr(%e2.0, "errno") ^propagate.0()
+      %e2.1 : py.Value = py.loadGlobal("s113_oserror_fields", "e2") ^propagate.0()
+      %args.5 : py.Value = py.attr(%e2.1, "args") ^propagate.0()
+      %int.16 : py.Value = py.intLit(2)
+      %str.19 : py.Value = py.strLit("x")
+      %str.20 : py.Value = py.strLit("f")
+      %int.17 : py.Value = py.intLit(7)
+      %str.21 : py.Value = py.strLit("g")
+      %int.18 : py.Value = py.intLit(8)
+      %tuple.21 : py.Value = py.mkTuple(%int.16, %str.19, %str.20, %int.17, %str.21, %int.18)
+      %eq.4 : py.Value = py.eq(%args.5, %tuple.21) ^propagate.0()
+      %tuple.22 : py.Value = py.mkTuple(%errno.2, %eq.4)
+      %kwargs.17 : py.Value = py.mkKwargs
+      %call.15 : py.Value = py.call(%print.6, %tuple.22, %kwargs.17) ^propagate.0()
+      %OSError.7 : py.Value = py.loadGlobal("s113_oserror_fields", "OSError") ^propagate.0()
+      %int.19 : py.Value = py.intLit(2)
+      %none.7 : py.Value = py.noneLit
+      %tuple.23 : py.Value = py.mkTuple(%int.19, %none.7)
+      %kwargs.18 : py.Value = py.mkKwargs
+      %call.16 : py.Value = py.call(%OSError.7, %tuple.23, %kwargs.18) ^propagate.0()
+      %e.cell.8 : base.Ref(py.Value) = py.globalCell("s113_oserror_fields", "e")
+      %set.14 : base.Unit = base.refSet[py.Value](%e.cell.8, %call.16)
+      %print.7 : py.Value = py.loadGlobal("s113_oserror_fields", "print") ^propagate.0()
+      %e.15 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %__str__.0 : py.Value = py.attr(%e.15, "__str__") ^propagate.0()
+      %tuple.24 : py.Value = py.mkTuple
+      %kwargs.19 : py.Value = py.mkKwargs
+      %call.17 : py.Value = py.call(%__str__.0, %tuple.24, %kwargs.19) ^propagate.0()
+      %tuple.25 : py.Value = py.mkTuple(%call.17)
+      %kwargs.20 : py.Value = py.mkKwargs
+      %call.18 : py.Value = py.call(%print.7, %tuple.25, %kwargs.20) ^propagate.0()
+      %OSError.8 : py.Value = py.loadGlobal("s113_oserror_fields", "OSError") ^propagate.0()
+      %none.8 : py.Value = py.noneLit
+      %str.22 : py.Value = py.strLit("s")
+      %str.23 : py.Value = py.strLit("f")
+      %tuple.26 : py.Value = py.mkTuple(%none.8, %str.22, %str.23)
+      %kwargs.21 : py.Value = py.mkKwargs
+      %call.19 : py.Value = py.call(%OSError.8, %tuple.26, %kwargs.21) ^propagate.0()
+      %e.cell.9 : base.Ref(py.Value) = py.globalCell("s113_oserror_fields", "e")
+      %set.15 : base.Unit = base.refSet[py.Value](%e.cell.9, %call.19)
+      %print.8 : py.Value = py.loadGlobal("s113_oserror_fields", "print") ^propagate.0()
+      %e.16 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %__str__.1 : py.Value = py.attr(%e.16, "__str__") ^propagate.0()
+      %tuple.27 : py.Value = py.mkTuple
+      %kwargs.22 : py.Value = py.mkKwargs
+      %call.20 : py.Value = py.call(%__str__.1, %tuple.27, %kwargs.22) ^propagate.0()
+      %tuple.28 : py.Value = py.mkTuple(%call.20)
+      %kwargs.23 : py.Value = py.mkKwargs
+      %call.21 : py.Value = py.call(%print.8, %tuple.28, %kwargs.23) ^propagate.0()
+      %OSError.9 : py.Value = py.loadGlobal("s113_oserror_fields", "OSError") ^propagate.0()
+      %int.20 : py.Value = py.intLit(2)
+      %str.24 : py.Value = py.strLit("s")
+      %str.25 : py.Value = py.strLit("f")
+      %tuple.29 : py.Value = py.mkTuple(%int.20, %str.24, %str.25)
+      %kwargs.24 : py.Value = py.mkKwargs
+      %call.22 : py.Value = py.call(%OSError.9, %tuple.29, %kwargs.24) ^propagate.0()
+      %e.cell.10 : base.Ref(py.Value) = py.globalCell("s113_oserror_fields", "e")
+      %set.16 : base.Unit = base.refSet[py.Value](%e.cell.10, %call.22)
+      %none.9 : py.Value = py.noneLit
+      %e.17 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %errno.3 : base.Unit = py.setAttr(%e.17, "errno", %none.9) ^propagate.0()
+      %print.9 : py.Value = py.loadGlobal("s113_oserror_fields", "print") ^propagate.0()
+      %e.18 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %__str__.2 : py.Value = py.attr(%e.18, "__str__") ^propagate.0()
+      %tuple.30 : py.Value = py.mkTuple
+      %kwargs.25 : py.Value = py.mkKwargs
+      %call.23 : py.Value = py.call(%__str__.2, %tuple.30, %kwargs.25) ^propagate.0()
+      %tuple.31 : py.Value = py.mkTuple(%call.23)
+      %kwargs.26 : py.Value = py.mkKwargs
+      %call.24 : py.Value = py.call(%print.9, %tuple.31, %kwargs.26) ^propagate.0()
+      %OSError.10 : py.Value = py.loadGlobal("s113_oserror_fields", "OSError") ^propagate.0()
+      %int.21 : py.Value = py.intLit(2)
+      %str.26 : py.Value = py.strLit("s")
+      %tuple.32 : py.Value = py.mkTuple(%int.21, %str.26)
+      %kwargs.27 : py.Value = py.mkKwargs
+      %call.25 : py.Value = py.call(%OSError.10, %tuple.32, %kwargs.27) ^propagate.0()
+      %e.cell.11 : base.Ref(py.Value) = py.globalCell("s113_oserror_fields", "e")
+      %set.17 : base.Unit = base.refSet[py.Value](%e.cell.11, %call.25)
+      %none.10 : py.Value = py.noneLit
+      %e.19 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %filename.3 : base.Unit = py.setAttr(%e.19, "filename", %none.10) ^propagate.0()
+      %print.10 : py.Value = py.loadGlobal("s113_oserror_fields", "print") ^propagate.0()
+      %e.20 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %__str__.3 : py.Value = py.attr(%e.20, "__str__") ^propagate.0()
+      %tuple.33 : py.Value = py.mkTuple
+      %kwargs.28 : py.Value = py.mkKwargs
+      %call.26 : py.Value = py.call(%__str__.3, %tuple.33, %kwargs.28) ^propagate.0()
+      %tuple.34 : py.Value = py.mkTuple(%call.26)
+      %kwargs.29 : py.Value = py.mkKwargs
+      %call.27 : py.Value = py.call(%print.10, %tuple.34, %kwargs.29) ^propagate.0()
+      %OSError.11 : py.Value = py.loadGlobal("s113_oserror_fields", "OSError") ^propagate.0()
+      %int.22 : py.Value = py.intLit(2)
+      %str.27 : py.Value = py.strLit("s")
+      %tuple.35 : py.Value = py.mkTuple(%int.22, %str.27)
+      %kwargs.30 : py.Value = py.mkKwargs
+      %call.28 : py.Value = py.call(%OSError.11, %tuple.35, %kwargs.30) ^propagate.0()
+      %e.cell.12 : base.Ref(py.Value) = py.globalCell("s113_oserror_fields", "e")
+      %set.18 : base.Unit = base.refSet[py.Value](%e.cell.12, %call.28)
+      %none.11 : py.Value = py.noneLit
+      %e.21 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %strerror.0 : base.Unit = py.setAttr(%e.21, "strerror", %none.11) ^propagate.0()
+      %print.11 : py.Value = py.loadGlobal("s113_oserror_fields", "print") ^propagate.0()
+      %e.22 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %__str__.4 : py.Value = py.attr(%e.22, "__str__") ^propagate.0()
+      %tuple.36 : py.Value = py.mkTuple
+      %kwargs.31 : py.Value = py.mkKwargs
+      %call.29 : py.Value = py.call(%__str__.4, %tuple.36, %kwargs.31) ^propagate.0()
+      %tuple.37 : py.Value = py.mkTuple(%call.29)
+      %kwargs.32 : py.Value = py.mkKwargs
+      %call.30 : py.Value = py.call(%print.11, %tuple.37, %kwargs.32) ^propagate.0()
+      %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %__class__.1 : py.Value = py.undef("__class__")
+      %__class__.cell.1 : base.Ref(py.Value) = base.refNew[py.Value](%__class__.1)
+      %clo.2 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|s113_oserror_fields.NotFound.<body>|, "<body>", "s113_oserror_fields", %__class__.cell.1)
+      %str.28 : py.Value = py.strLit("NotFound")
+      %OSError.12 : py.Value = py.loadGlobal("s113_oserror_fields", "OSError") ^propagate.0()
+      %tuple.38 : py.Value = py.mkTuple(%clo.2, %str.28, %OSError.12)
+      %kwargs.33 : py.Value = py.mkKwargs
+      %NotFound.0 : py.Value = py.call(%__build_class__.2, %tuple.38, %kwargs.33) ^propagate.0()
+      %set.19 : base.Unit = base.refSet[py.Value](%__class__.cell.1, %NotFound.0)
+      %NotFound.cell.0 : base.Ref(py.Value) = py.globalCell("s113_oserror_fields", "NotFound")
+      %set.20 : base.Unit = base.refSet[py.Value](%NotFound.cell.0, %NotFound.0)
+      %NotFound.1 : py.Value = py.loadGlobal("s113_oserror_fields", "NotFound") ^propagate.0()
+      %str.29 : py.Value = py.strLit("a.txt")
+      %tuple.39 : py.Value = py.mkTuple(%str.29)
+      %kwargs.34 : py.Value = py.mkKwargs
+      %call.31 : py.Value = py.call(%NotFound.1, %tuple.39, %kwargs.34) ^propagate.0()
+      %e.cell.13 : base.Ref(py.Value) = py.globalCell("s113_oserror_fields", "e")
+      %set.21 : base.Unit = base.refSet[py.Value](%e.cell.13, %call.31)
+      %print.12 : py.Value = py.loadGlobal("s113_oserror_fields", "print") ^propagate.0()
+      %e.23 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %errno.4 : py.Value = py.attr(%e.23, "errno") ^propagate.0()
+      %e.24 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %filename.4 : py.Value = py.attr(%e.24, "filename") ^propagate.0()
+      %e.25 : py.Value = py.loadGlobal("s113_oserror_fields", "e") ^propagate.0()
+      %__str__.5 : py.Value = py.attr(%e.25, "__str__") ^propagate.0()
+      %tuple.40 : py.Value = py.mkTuple
+      %kwargs.35 : py.Value = py.mkKwargs
+      %call.32 : py.Value = py.call(%__str__.5, %tuple.40, %kwargs.35) ^propagate.0()
+      %tuple.41 : py.Value = py.mkTuple(%errno.4, %filename.4, %call.32)
+      %kwargs.36 : py.Value = py.mkKwargs
+      %call.33 : py.Value = py.call(%print.12, %tuple.41, %kwargs.36) ^propagate.0()
+      %none.12 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.12)
+      ret(%ret.0)
+    propagate.0(%exc.3 : py.Value):
+      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+      ret(%exc.4)
+  }
+  func @|s113_oserror_fields.E.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["OSError"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s113_oserror_fields", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("E")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s113_oserror_fields.E.__init__, "__init__", "s113_oserror_fields")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s113_oserror_fields.E.<body>.1|(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["OSError"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}]]
+
+    entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s113_oserror_fields", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("E")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@s113_oserror_fields.E.__init__.1, "__init__", "s113_oserror_fields", %__class__.cell.0)
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %__class__.0 : py.Value = py.undef(".class being created")
+      %set.0 : base.Unit = base.refSet[py.Value](%__class__.cell.0, %__class__.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%__class__.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s113_oserror_fields.NotFound.<body>|(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["OSError"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}]]
+
+    entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s113_oserror_fields", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("NotFound")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@s113_oserror_fields.NotFound.__init__, "__init__", "s113_oserror_fields", %__class__.cell.0)
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %__class__.0 : py.Value = py.undef(".class being created")
+      %set.0 : base.Unit = base.refSet[py.Value](%__class__.cell.0, %__class__.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%__class__.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s113_oserror_fields.E.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %a.0 : py.Value = py.undef("a")
+      %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
+      %b.0 : py.Value = py.undef("b")
+      %b.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%b.0)
+      %c.0 : py.Value = py.undef("c")
+      %c.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%c.0)
+      %self.1 : py.Value = py.undef("self")
+      %a.1 : py.Value = py.undef("a")
+      %b.1 : py.Value = py.undef("b")
+      %c.1 : py.Value = py.undef("c")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %a.1, %b.1, %c.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "E.__init__", 0, 4, false, false, "self", "a", "b", "c") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %a.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %b.2 : py.Value = py.tupleGet(%bound.0, 2)
+      %c.15 : py.Value = py.tupleGet(%bound.0, 3)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s113_oserror_fields.E.__init__.1(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %a.0 : py.Value = py.undef("a")
+      %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
+      %k.0 : py.Value = py.undef("k")
+      %k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%k.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "E.__init__", 0, 1, true, true, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %a.1 : py.Value = py.tupleGet(%bound.0, 1)
+      %k.1 : py.Value = py.tupleGet(%bound.0, 2)
+      %super.0 : py.Value = py.loadGlobal("s113_oserror_fields", "super") ^propagate.0()
+      %__class__.0 : py.Value = base.refGet[py.Value](%__class__.cell.0)
+      %__class__.1 : py.Value = py.requireDefined(%__class__.0, "__class__", "NameError", "cannot access free variable '__class__' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %args.1 : py.Value = py.mkTuple(%__class__.1, %self.4)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %super.1 : py.Value = py.call(%super.0, %args.1, %kwargs.1) ^propagate.0()
+      %__init__.0 : py.Value = py.attr(%super.1, "__init__") ^propagate.0()
+      %a.3 : py.Value = py.requireDefined(%a.1, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %kwargs.2 : py.Value = py.mkKwargs
+      %args.2 : py.Value = py.argsTuple(%__init__.0, %a.3) ^propagate.0()
+      %call.0 : py.Value = py.call(%__init__.0, %args.2, %kwargs.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s113_oserror_fields.NotFound.__init__(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %path.0 : py.Value = py.undef("path")
+      %path.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%path.0)
+      %self.1 : py.Value = py.undef("self")
+      %path.1 : py.Value = py.undef("path")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %path.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "NotFound.__init__", 0, 2, false, false, "self", "path") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %path.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %super.0 : py.Value = py.loadGlobal("s113_oserror_fields", "super") ^propagate.0()
+      %__class__.0 : py.Value = base.refGet[py.Value](%__class__.cell.0)
+      %__class__.1 : py.Value = py.requireDefined(%__class__.0, "__class__", "NameError", "cannot access free variable '__class__' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %args.1 : py.Value = py.mkTuple(%__class__.1, %self.4)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %super.1 : py.Value = py.call(%super.0, %args.1, %kwargs.1) ^propagate.0()
+      %__init__.0 : py.Value = py.attr(%super.1, "__init__") ^propagate.0()
+      %int.0 : py.Value = py.intLit(2)
+      %str.0 : py.Value = py.strLit("not found")
+      %path.4 : py.Value = py.requireDefined(%path.2, "path", "UnboundLocalError", "cannot access local variable 'path' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%int.0, %str.0, %path.4)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%__init__.0, %tuple.0, %kwargs.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

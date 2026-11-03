@@ -1,0 +1,10 @@
+# Test: str and repr of exceptions with zero, one or several arguments of each plain type
+print(ValueError(None).__str__())
+print(ValueError(1.5).__str__())
+print(ValueError(True).__str__())
+print(ValueError(None).__repr__())
+print(ValueError(1, None).__str__())
+print(KeyError(None).__str__())
+print(ValueError(1.5).__repr__())
+print(ValueError("a", True).__repr__())
+print(SystemExit(1, 2).code[1], (KeyError(1, 2)).__str__(), (OSError(2, "x", "a", None, "b")).__str__())

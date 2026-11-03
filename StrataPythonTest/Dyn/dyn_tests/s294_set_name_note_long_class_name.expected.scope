@@ -1,0 +1,14 @@
+module
+  D: local (assigned)
+  AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: local (assigned)
+  class D
+    __set_name__: local (assigned)
+    function D.__set_name__
+      params: self, owner, name
+      self: local (parameter)
+      owner: local (parameter)
+      name: local (parameter)
+      ValueError: global implicit (referenced)
+  class AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    d: local (assigned)
+    D: global implicit (referenced)

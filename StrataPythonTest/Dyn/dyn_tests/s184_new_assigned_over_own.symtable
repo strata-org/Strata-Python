@@ -1,0 +1,13 @@
+module top
+  C: local (assigned, referenced)
+  Exception: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  print: global implicit (referenced)
+  class C
+    __new__: local (assigned)
+    function __new__
+      __class__: free (referenced)
+      a: local (parameter, referenced)
+      cls: local (parameter, referenced)
+      super: global implicit (referenced)
+qualnames: C, C.__new__

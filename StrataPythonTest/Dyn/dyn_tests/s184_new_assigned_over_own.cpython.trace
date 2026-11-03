@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: ValueError.__new__(C): C is not a subtype of ValueError
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'

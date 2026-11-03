@@ -1,0 +1,48 @@
+module
+  A: local (assigned, referenced)
+  C: local (assigned, referenced)
+  FileNotFoundError: global implicit (referenced)
+  BaseException: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  t: local (assigned, referenced)
+  print: global implicit (referenced)
+  KeyError: global implicit (referenced)
+  StopIteration: global implicit (referenced)
+  c: local (assigned, referenced)
+  B: local (assigned, referenced)
+  OSError: global implicit (referenced)
+  X: local (assigned, referenced)
+  ValueError: global implicit (referenced)
+  class A (needs __class__ cell)
+    __new__: local (assigned)
+    function A.__new__
+      params: cls, *a
+      cls: local (parameter, referenced)
+      a: local (parameter, referenced)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+  class C
+  class C
+  class B (needs __class__ cell)
+    __new__: local (assigned)
+    function B.__new__
+      params: cls, *a
+      cls: local (parameter, referenced)
+      a: local (parameter, referenced)
+      super: global implicit (referenced)
+      __class__: free (referenced)
+  class X
+  function t
+    params: f
+    f: local (parameter, referenced)
+    TypeError: global implicit (referenced)
+    e: local (assigned, referenced)
+    print: global implicit (referenced)
+  lambda <lambda>
+    NameError: global implicit (referenced)
+  lambda <lambda>
+    AttributeError: global implicit (referenced)
+  lambda <lambda>
+    ImportError: global implicit (referenced)
+  lambda <lambda>
+    NameError: global implicit (referenced)

@@ -1131,7 +1131,7 @@ def viewOf : PayloadData → ObjView Value
       { key := f.key, kind := f.kind, captured := f.captured, name := f.name,
         qualname := f.qualname, «module» := f.module, defaults := f.defaults,
         kwdefaults := f.kwdefaults, gapped := f.gapped }
-  | .exc _ => .exc
+  | .exc e => .exc ⟨e.args, e.context, e.cause, e.suppressContext, e.traceback, e.fields⟩
   | .iter _ => .iter
   | .module m => .module m.name m.gapped m.writesGap
   | .property a b c d => .property a b c d
@@ -1175,7 +1175,7 @@ def partPayload : BuiltinPart Value → PayloadData
   | .int i => .int i
   | .float b => .float b
   | .bytes b => .bytes b
-  | .exc args => .exc { args := .tuple args, traceback := .traceback }
+  | .exc args => .exc { args := .tuple args }
 
 /-- The number of slots of the classes `mro`, which is a class's MRO: its instances' layout. -/
 def slotCount : List Value → PyM σ .reads true Nat
@@ -1260,6 +1260,25 @@ def stateSet (v : Value) (s : NewObj Value) : PyM σ .writes true Unit := do
   | .classmethod _, .classmethod f => modifyPayload id (fun _ => .classmethod f) (by keeps_closures)
   | .staticmethod _, .staticmethod f => modifyPayload id (fun _ => .staticmethod f) (by keeps_closures)
   | _, _ => PyM.failure "an object's state of another kind"
+
+/-- `e`'s exception state with the part `p` written; `__cause__` also sets
+`__suppress_context__`, as `PyException_SetCause` does. -/
+def _root_.StrataPython.Dyn.Sem.ExcState.write (e : ExcState) : ExcPart Value → ExcState
+  | .args v => { e with args := v }
+  | .context v => { e with context := v }
+  | .cause v => { e with cause := v, suppressContext := true }
+  | .suppressContext b => { e with suppressContext := b }
+  | .traceback v => { e with traceback := v }
+  | .field n v => { e with fields := e.fields.filter (·.1 != n) ++ (v.map (n, ·)).toArray }
+
+/-- Write the part `p` of the state of the exception `e`. -/
+def excSet (e : Value) (p : ExcPart Value) : PyM σ .writes true Unit := do
+  let .obj id := e | PyM.failure "an exception that is not an object"
+  let some o ← (objGet id).lift (by decide) | PyM.failure s!"object {id} does not exist"
+  let .exc _ := o.payload | PyM.failure s!"object {id} is not an exception"
+  modifyPayload id (fun
+    | .exc st => .exc (st.write p)
+    | q => q) (by keeps_closures)
 
 /-- Set the `__name__` of the function `f`. -/
 def funcSetName (f : Value) (name : String) : PyM σ .writes true Unit :=
@@ -1436,7 +1455,10 @@ instance {e : Level} {fr : Bool} : PyPure (PyM σ e fr) Value where
   imm i := i.toValue
   immViewAll v := (Prim.immView v).relax.lift Level.AtLeast.le
   undefName? v := pure (match v with | .undef n => some n | _ => none)
-  identical a b := pure (a.identical b)
+  identical a b := match a, b with
+    | .bound _ _ _ .tpNew, _ | _, .bound _ _ _ .tpNew =>
+      PyM.gap (modelInvariantPrefix ++ "a type's tp_new outside a class call")
+    | _, _ => pure (a.identical b)
   addrHash v := (Prim.addrHash v).relax.lift Level.AtLeast.le
   gap msg := PyM.gap msg
   allocExc c a f x := (Prim.allocExc c a f x).relax.lift Level.AtLeast.le
@@ -1561,11 +1583,12 @@ def Impls.find (impls : Impls) : ImplKey → Option BuiltinImpl
 
 /-- The body that the built-in callable `f` runs on `args`, with its `self`: a built-in
 function's own, a bound method's object, an unbound method's first argument, or a native
-function. -/
+function.  A type's `tp_new` (`DescrKind.tpNew`) runs the body of `tp_new` (`Impls.withNewCheck`). -/
 def resolveBuiltin (f args : Value) : PyM σ .reads true (Option (ImplKey × Value × Value)) := do
   match f with
   | .builtin b => pure (some (.function b, f, args))
-  | .bound self t name _ => pure (some (.method t name, self, args))
+  -- A type's `tp_new` as a class call runs it is its `__new__`'s body, under the key `tp_new`.
+  | .bound self t name k => pure (some (.method t (if k == .tpNew then "tp_new" else name), self, args))
   | .descr t name _ => match args with
     | .tuple xs => match xs[0]? with
       | some self =>
@@ -1609,6 +1632,7 @@ def resolveBuiltin (f args : Value) : PyM σ .reads true (Option (ImplKey × Val
   classSetName c n q := (Prim.classSetName c n q).relax
   funcSetName f n := (Prim.funcSetName f n).relax
   stateSet v st := (Prim.stateSet v st).relax
+  excSet e p := (Prim.excSet e p).relax
   funcSetAnnotations f a := (Prim.funcSetAnnotations f a).relax
   objEnsureDict v := (Prim.objEnsureDict v).relax
 
@@ -1640,7 +1664,9 @@ def callBuiltinWith (impls : Impls) : Nat → Value → Value → Value → PyM 
       | _ => run
     | none => PyM.gap (match key with
       | .function b => s!"built-in {b.info.name} is not modelled yet"
-      | .method t name => s!"built-in method {t.info.name}.{name} is not modelled yet"
+      -- A type's `tp_new` (`DescrKind.tpNew`) is its `__new__` to the program.
+      | .method t name =>
+        s!"built-in method {t.info.name}.{if name == "tp_new" then "__new__" else name} is not modelled yet"
       | .native k => s!"native function {k} has no body")
 
 /-- How deep the calls of built-ins may nest. -/

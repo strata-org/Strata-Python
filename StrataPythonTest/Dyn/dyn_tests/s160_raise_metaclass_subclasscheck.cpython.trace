@@ -1,0 +1,12 @@
+--- stdout 12
+check
+False
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+M = <class 'M'>
+__doc__ = None
+__name__ = '__main__'
+e = <E object>

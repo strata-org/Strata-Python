@@ -111,7 +111,6 @@ structure ExcState where
   cause : Value := .none
   suppressContext : Bool := false
   traceback : Value := .none
-  notes : Option Value := none
   fields : Array (String × Value) := #[]
   deriving Repr, Inhabited
 

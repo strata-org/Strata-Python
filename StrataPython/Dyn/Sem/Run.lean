@@ -105,6 +105,7 @@ def renderN (st : ObjStore Run) : Nat → List ObjId → Value → RenderM Strin
         | some (.builtin c) => pure s!"<{c.info.name} object>"
         | _ => throw s!"the trace does not render the built-in {b.info.name}"
     | .descr _ _ k => pure s!"<{k.descrType.info.name} object>"
+    | .bound _ _ _ .tpNew => throw "a type's tp_new outside a class call"
     | .bound _ _ _ k => pure s!"<{k.boundType.info.name} object>"
     | .method .. => pure "<method object>"
     | .ellipsis => pure "Ellipsis"
@@ -136,6 +137,37 @@ def renderN (st : ObjStore Run) : Nat → List ObjId → Value → RenderM Strin
 /-- `render v`. -/
 def render (st : ObjStore Run) (v : Value) : RenderM String := renderN st 100 [] v
 
+/-- `str(e)` for an exception `e` of the class `cls`: for a user class, that of the first built-in
+class of its MRO, when no user class before it defines `__str__`; `none` otherwise, since a user
+`__str__` runs code that the trace can't run. An `ImportError` whose `msg` is a `str` gives it, as
+`ImportError.__str__` does. -/
+def excStrOf (st : ObjStore Run) (cls : Value) (e : ExcState) : Option String :=
+  let builtinStr (b : Value) : Option String := match b with
+    | .builtin bt =>
+      if bt.info.mro.contains .ImportError then
+        match ((e.fields.find? (·.1 == "msg")).map (·.2) : Option Value) with
+        | some (.str s) => some s.s
+        | _ => excStr b e.args
+      else excStr b e.args
+    | _ => none
+  match cls with
+  | .obj id => match st.get? id with
+    | some { payload := .cls c, .. } =>
+      let defines (v : Value) : Bool := match v with
+        | .obj cid => match st.get? cid with
+          | some { payload := .cls c', .. } => match st.get? c'.ns with
+            | some { payload := .dict t, .. } =>
+              t.live.any fun (e, _) => e.key == .str (.ofString "__str__")
+            | _ => true
+          | _ => true
+        | _ => false
+      match c.mro.toList.find? (· matches .builtin _) with
+      | some b => if c.mro.toList.takeWhile (!· matches .builtin _) |>.any defines then none
+        else builtinStr b
+      | none => none
+    | _ => none
+  | _ => builtinStr cls
+
 /-- `raised <ExcType>` for the exception `v`, the start of its outcome line, if its type's name
 holds no line break. -/
 def excTypeLine (st : ObjStore Run) (v : Value) : Option String :=
@@ -155,7 +187,7 @@ def excLines (st : ObjStore Run) : Nat → Value → RenderM (List String)
     match st.get? id with
     | some { cls, payload := .exc e, .. } => do
       let name := className st cls
-      let some str := excStr cls e.args | throw s!"str() of a {name}"
+      let some str := excStrOf st cls e | throw s!"the str() of an uncaught {name}"
       let lines := s!"raised {name}: {str}" :: excChain st fuel [id] e
       -- A line break would let the text forge a section's header, such as a gap's.
       if lines.any (·.contains '\n') then throw "an exception whose text has a line break"

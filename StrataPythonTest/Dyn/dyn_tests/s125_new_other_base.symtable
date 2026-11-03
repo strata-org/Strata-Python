@@ -1,0 +1,9 @@
+module top
+  C: local (assigned, referenced)
+  OSError: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  c: local (assigned, referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  class C
+qualnames: C

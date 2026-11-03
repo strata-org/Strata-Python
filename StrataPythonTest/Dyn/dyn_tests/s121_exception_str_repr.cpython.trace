@@ -1,0 +1,16 @@
+--- stdout 117
+None
+1.5
+True
+ValueError(None)
+(1, None)
+None
+ValueError(1.5)
+ValueError('a', True)
+2 (1, 2) [Errno 2] x: 'a' -> 'b'
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'

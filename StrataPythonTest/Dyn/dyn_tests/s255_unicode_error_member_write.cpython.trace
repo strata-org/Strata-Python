@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised TypeError: an integer is required
+--- globals
+__doc__ = None
+__name__ = '__main__'
+e = <UnicodeEncodeError object>

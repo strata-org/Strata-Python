@@ -1,0 +1,13 @@
+module top
+  AttributeError: global implicit (referenced)
+  C: local (assigned, referenced)
+  c: local (assigned, referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  class C
+    __getattr__: local (assigned)
+    function __getattr__
+      AttributeError: global implicit (referenced)
+      n: local (parameter, referenced)
+      self: local (parameter)
+qualnames: C, C.__getattr__

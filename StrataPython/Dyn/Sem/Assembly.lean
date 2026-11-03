@@ -8,6 +8,7 @@ public import StrataPython.Dyn.Sem.Concrete
 public import StrataPython.Dyn.Sem.Proto.Calls
 public import StrataPython.Dyn.Sem.Builtins.Classes
 public import StrataPython.Dyn.Sem.Builtins.Dunders
+public import StrataPython.Dyn.Sem.Builtins.Exceptions
 
 set_option autoImplicit false
 
@@ -33,6 +34,37 @@ def Impls.join (a b : Impls) : Impls where
   function f := (a.function f).orElse fun _ => b.function f
   method t n := (a.method t n).orElse fun _ => b.method t n
   native k := (a.native k).orElse fun _ => b.native k
+
+/-- The body of `u.name` for an exception class `u` that has one of its own. -/
+def excOwnImpl : Builtin → String → Option BuiltinImpl
+  | .BaseException, "__new__" => some fun {_} {_} [_] [_] => Builtins.baseExcNew
+  | .BaseException, "__init__" => some fun {_} {_} [_] [_] => Builtins.baseExcInit
+  | .BaseException, "__str__" | .NameError, "__str__" | .AttributeError, "__str__" =>
+    some fun {_} {_} [_] [_] => Builtins.baseExcStr
+  | .BaseException, "__repr__" => some fun {_} {_} [_] [_] => Builtins.baseExcRepr
+  | .BaseException, "add_note" => some fun {_} {_} [_] [_] => Builtins.addNote
+  | .StopIteration, "__init__" => some fun {_} {_} [_] [_] => Builtins.stopIterationInit
+  | .SystemExit, "__init__" => some fun {_} {_} [_] [_] => Builtins.systemExitInit
+  | .NameError, "__init__" => some fun {_} {_} [_] [_] => Builtins.keywordFieldsInit "NameError" ["name"]
+  | .AttributeError, "__init__" =>
+    some fun {_} {_} [_] [_] => Builtins.keywordFieldsInit "AttributeError" ["name", "obj"]
+  | .ImportError, "__init__" => some fun {_} {_} [_] [_] => Builtins.importErrorInit
+  | .ImportError, "__str__" => some fun {_} {_} [_] [_] => Builtins.importErrorStr
+  | .KeyError, "__str__" => some fun {_} {_} [_] [_] => Builtins.keyErrorStr
+  | .OSError, "__new__" => some fun {_} {_} [_] [_] => Builtins.osErrorNew
+  | .OSError, "__init__" => some fun {_} {_} [_] [_] => Builtins.osErrorInit
+  | .OSError, "__str__" => some fun {_} {_} [_] [_] => Builtins.osErrorStr
+  | .BaseExceptionGroup, "__new__" => some fun {_} {_} [_] [_] => Builtins.excGroupNew
+  | .BaseExceptionGroup, "__init__" => some fun {_} {_} [_] [_] => Builtins.baseExcInit
+  | .BaseExceptionGroup, "__str__" => some fun {_} {_} [_] [_] => Builtins.excGroupStr
+  | _, _ => none
+
+/-- The body of the exception class `t`'s entry `name`: that of the nearest class of `t`'s MRO with
+one of its own. The unicode errors and the `SyntaxError` family have no bodies, so their entries
+stop with a gap. -/
+def excImpl (t : Builtin) (name : String) : Option BuiltinImpl :=
+  if t.info.mro.any ([Builtin.UnicodeError, .SyntaxError].contains ·) then none
+  else t.info.mro.toList.findSome? fun u => excOwnImpl u name
 
 /-- This piece's bodies. -/
 def opsImpls : Impls where
@@ -71,14 +103,17 @@ def opsImpls : Impls where
     | .classmethod, "__init__" => some fun {_} {_} [_] [_] => Builtins.wrapperInit false
     | .staticmethod, "__new__" => some fun {_} {_} [_] [_] => Builtins.wrapperNew true
     | .staticmethod, "__init__" => some fun {_} {_} [_] [_] => Builtins.wrapperInit true
-    | t, name => Builtins.dunderImpl t name
+    | t, name =>
+      if t.info.mro.contains .BaseException then excImpl t name else Builtins.dunderImpl t name
 
-/-- `impls` with CPython's `tp_new_wrapper` checks before every built-in type's `__new__`. -/
+/-- `impls` with CPython's `tp_new_wrapper` checks before every built-in type's `__new__`, and its
+body without them as `tp_new`, which a class call runs (`Proto.tpNewFor`). -/
 def Impls.withNewCheck (impls : Impls) : Impls :=
   { impls with method := fun t n =>
       if n == "__new__" then (impls.method t n).map fun impl {_} {_} [_] [_] self args kwargs => do
         Builtins.tpNewCheck t args
         impl self args kwargs
+      else if n == "tp_new" then impls.method t "__new__"
       else impls.method t n }
 
 /-- Each piece's part, in the order the pieces build on each other. -/

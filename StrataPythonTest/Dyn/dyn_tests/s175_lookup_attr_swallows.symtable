@@ -1,0 +1,21 @@
+module top
+  E: local (assigned, referenced)
+  Exception: global implicit (referenced)
+  P: local (assigned, referenced)
+  e: local (assigned, referenced)
+  int: global implicit (referenced)
+  isinstance: global implicit (referenced)
+  print: global implicit (referenced)
+  class E
+    __getattr__: local (assigned)
+    function __getattr__
+      AttributeError: global implicit (referenced)
+      n: local (parameter)
+      self: local (parameter)
+  class P
+    __getattribute__: local (assigned)
+    function __getattribute__
+      AttributeError: global implicit (referenced)
+      n: local (parameter)
+      self: local (parameter)
+qualnames: E, E.__getattr__, P, P.__getattribute__

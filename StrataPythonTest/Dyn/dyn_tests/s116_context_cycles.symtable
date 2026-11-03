@@ -1,0 +1,16 @@
+module top
+  IndexError: global implicit (referenced)
+  KeyError: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  c: local (assigned, referenced)
+  d: local (assigned, referenced)
+  es: local (assigned, referenced)
+  h: local (assigned, referenced)
+  i: local (assigned, referenced)
+  print: global implicit (referenced)
+  t: local (assigned, referenced)
+  x: local (assigned, referenced)
+qualnames: 

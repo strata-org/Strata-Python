@@ -1,0 +1,40 @@
+module
+  run: local (assigned, referenced)
+  KeyError: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  g: local (assigned)
+  ExceptionGroup: global implicit (referenced)
+  wmsg: local (assigned, referenced)
+  function run
+    params: name, f
+    name: local (parameter, referenced)
+    f: local (parameter, referenced)
+    Exception: global implicit (referenced)
+    e: local (assigned, referenced)
+    print: global implicit (referenced)
+    type: global implicit (referenced)
+  lambda <lambda>
+    ExceptionGroup: global implicit (referenced)
+    ValueError: global implicit (referenced)
+  lambda <lambda>
+    ExceptionGroup: global implicit (referenced)
+  lambda <lambda>
+    ExceptionGroup: global implicit (referenced)
+  lambda <lambda>
+    ExceptionGroup: global implicit (referenced)
+  lambda <lambda>
+    ExceptionGroup: global implicit (referenced)
+    KeyboardInterrupt: global implicit (referenced)
+  function wmsg
+    g: global implicit (referenced)
+  lambda <lambda>
+    e: global implicit (referenced)
+  lambda <lambda>
+    e: global implicit (referenced)
+  lambda <lambda>
+    ValueError: global implicit (referenced)
+  lambda <lambda>
+    OSError: global implicit (referenced)

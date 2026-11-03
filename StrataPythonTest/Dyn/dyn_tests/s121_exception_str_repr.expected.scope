@@ -1,0 +1,6 @@
+module
+  print: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  KeyError: global implicit (referenced)
+  SystemExit: global implicit (referenced)
+  OSError: global implicit (referenced)

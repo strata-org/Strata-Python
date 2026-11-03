@@ -1,0 +1,8 @@
+--- stdout 0
+
+--- outcome
+raised E: custom
+--- globals
+E = <class 'E'>
+__doc__ = None
+__name__ = '__main__'

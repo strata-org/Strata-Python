@@ -1,0 +1,5 @@
+module top
+  UnicodeEncodeError: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  e: local (assigned, referenced)
+qualnames: 

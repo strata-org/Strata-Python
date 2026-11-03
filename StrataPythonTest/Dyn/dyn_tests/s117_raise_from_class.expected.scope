@@ -1,0 +1,16 @@
+module
+  e: local (assigned, referenced)
+  ValueError: global implicit (referenced)
+  C: local (assigned, referenced)
+  Exception: global implicit (referenced)
+  KeyError: global implicit (referenced)
+  t: local (assigned, referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  class C
+    __init__: local (assigned)
+    function C.__init__
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+      e: global implicit (referenced)

@@ -35,45 +35,6 @@ variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
 @[dyn_sem Py.next] def next (_iter : Value) (err : Target E [Value]) : Sem ε E Value :=
   runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.next")
 
-@[dyn_sem Py.isStopIteration] def isStopIteration (_exc : Value) : Sem ε E Bool :=
-  runTotalFree "py.isStopIteration" #[]
-    (PyM.gap (σ := σ) (fr := true) (e := .reads) "not modelled yet: py.isStopIteration")
-
-@[dyn_sem Py.toException] def toException (_val : Value) (err : Target E [Value])
-    : Sem ε E Value :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.toException")
-
-@[dyn_sem Py.setCause] def setCause (_exc : Value) (_cause : Value) (err : Target E [Value])
-    : Sem ε E Unit :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.setCause")
-
-@[dyn_sem Py.pushExcInfo] def pushExcInfo (_exc : Value) : Sem ε E Value :=
-  runTotalFree "py.pushExcInfo" #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.pushExcInfo")
-
-@[dyn_sem Py.pushPending] def pushPending (_pending : Py.Completion.Val) : Sem ε E Value :=
-  runTotalFree "py.pushPending" #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.pushPending")
-
-@[dyn_sem Py.popExcept] def popExcept (_prev : Value) : Sem ε E Unit :=
-  runTotalFree "py.popExcept" #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.popExcept")
-
-@[dyn_sem Py.handledExc] def handledExc  (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .reads) "not modelled yet: py.handledExc")
-
-@[dyn_sem Py.excMatch] def excMatch (_exc : Value) (_type : Value) (err : Target E [Value])
-    : Sem ε E Bool :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .calls) "not modelled yet: py.excMatch")
-
-@[dyn_sem Py.enterMethod] def enterMethod (_mgr : Value) (err : Target E [Value])
-    : Sem ε E Value :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .calls) "not modelled yet: py.enterMethod")
-
-@[dyn_sem Py.exitMethod] def exitMethod (_mgr : Value) (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .calls) "not modelled yet: py.exitMethod")
-
-@[dyn_sem Py.exitWithExc] def exitWithExc (_exit : Value) (_exc : Value) (err : Target E [Value])
-    : Sem ε E Value :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .writes) "not modelled yet: py.exitWithExc")
-
 @[dyn_sem Py.repr] def repr (_val : Value) (err : Target E [Value]) : Sem ε E Value :=
   runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .calls) "not modelled yet: py.repr")
 

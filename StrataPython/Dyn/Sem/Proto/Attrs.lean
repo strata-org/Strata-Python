@@ -161,8 +161,8 @@ def getAttrCore [PyCalls m V] (v : V) (name : String) : m V := do
 
 /-- **`getattr(v, name)`**, CPython's `PyObject_GetAttr`: a user `__getattribute__` if `v`'s type
 has one, else the lookup by kind; then `__getattr__` of the type, when there is one and the lookup
-raised `AttributeError`. -/
-def getAttr [PyCalls m V] (v : V) (name : String) : m V := do
+raised `AttributeError`; without `set_attribute_error_context`. -/
+def getAttrRaw [PyCalls m V] (v : V) (name : String) : m V := do
   let t ← PyReads.classOf v
   let nameV := PyPure.imm (m := m) (.str (.ofString name))
   let attempt : m V := do
@@ -182,8 +182,60 @@ def getAttr [PyCalls m V] (v : V) (name : String) : m V := do
       callFound hook v t #[nameV] (← PyPure.allocDict)
     else throw x
 
+/-- **`getattr(v, name)`**, CPython's `PyObject_GetAttr`: `getAttrRaw`, and an `AttributeError`
+that it raises without `name` and `obj` stops with a gap. -/
+def getAttr [PyCalls m V] (v : V) (name : String) : m V :=
+  tryCatch (getAttrRaw v name) fun x => do
+    -- `set_attribute_error_context` writes `name` and `obj` of an `AttributeError` that has
+    -- neither, which a rule at `calls` may not do to an exception that it didn't make.
+    if ← isAttributeError x then
+      if let some (.exc d) ← PyReads.objView x then
+        if !(d.fields.any (·.1 == "name")) && !(d.fields.any (·.1 == "obj")) then
+          PyPure.gap "an AttributeError without name and obj from an attribute read is not modelled yet"
+    throw x
+
 /-- `AttributeError` with the message `msg` and no fields, as CPython's attribute writes raise it. -/
 def raiseAttrPlain [PyReads m V] {α : Type} (msg : String) : m α := raiseBuiltin "AttributeError" msg
+
+/-- A write (`val = some x`) or deletion (`none`) of the attribute `n` of the exception `v`, a
+getset or member descriptor of the exception class `t` (`k`), with CPython's checks. -/
+def excSetAttr [PyWrites m V] (v : V) (t : Builtin) (n : String) (k : DescrKind)
+    (val : Option V) : m Unit := do
+  let some (.exc _) ← PyReads.objView v |
+    PyPure.gap s!"a write to the attribute {t.info.name}.{n} of a value that is not an exception"
+  let some x := val | match n with
+    | "args" | "__context__" | "__cause__" | "__traceback__" =>
+      raiseBuiltin "TypeError" s!"{n} may not be deleted"
+    | _ => PyPure.gap s!"deleting the attribute {t.info.name}.{n} is not modelled yet"
+  let isNone := (← PyPure.immView x) matches some .none
+  let excOrNone (what : String) : m Unit := do
+    if !isNone then
+      let some mro ← mroOf (← PyReads.classOf x) |
+        raiseBuiltin "TypeError" s!"exception {what} must be None or derive from BaseException"
+      if !(← inMro (PyPure.imm (m := m) (.builtin .BaseException)) mro) then
+        raiseBuiltin "TypeError" s!"exception {what} must be None or derive from BaseException"
+  if t == .BaseExceptionGroup && (n == "message" || n == "exceptions") then
+    raiseBuiltin "AttributeError" "readonly attribute"
+  -- The unicode errors' and the `SyntaxError` family's members are not all objects: `start` and
+  -- `end` are C integers, so a write checks its value.
+  if t.info.mro.any ([Builtin.UnicodeError, .SyntaxError].contains ·) then
+    PyPure.gap s!"a write to the attribute {t.info.name}.{n} is not modelled yet"
+  match n with
+  | "args" =>
+    let items ← (← iterSeq x fun tn => s!"'{tn}' object is not iterable").items
+    PyWrites.excSet v (.args (PyPure.imm (m := m) (.tuple items)))
+  | "__context__" => excOrNone "context"; PyWrites.excSet v (.context x)
+  | "__cause__" => excOrNone "cause"; PyWrites.excSet v (.cause x)
+  | "__traceback__" =>
+    if !isNone && !((← PyPure.immView x) matches some .traceback) then
+      raiseBuiltin "TypeError" "__traceback__ must be a traceback or None"
+    PyWrites.excSet v (.traceback x)
+  | "__suppress_context__" =>
+    let some (.bool b) ← PyPure.immView x | raiseBuiltin "TypeError" "attribute value type must be bool"
+    PyWrites.excSet v (.suppressContext b)
+  | _ =>
+    if k != .member then PyPure.gap s!"a write to the attribute {t.info.name}.{n} is not modelled yet"
+    PyWrites.excSet v (.field n (some x))
 
 /-- An attribute write (`val = some x`) or deletion (`none`) on the instance `v`, as
 `PyObject_GenericSetAttr` does it: a data descriptor on the type, else `v`'s `__dict__`. -/
@@ -216,7 +268,8 @@ def genericSetAttr [PyWrites m V] (v t : V) (name : String) (val : Option V) : m
         if !(← isDict x) then
           return ← raiseBuiltin "TypeError" "__annotations__ must be set to a dict object"
         return ← PyWrites.funcSetAnnotations v x
-      | some (.descr t' n _) =>
+      | some (.descr t' n k) =>
+        if t'.info.mro.contains .BaseException then return ← excSetAttr v t' n k val
         return ← PyPure.gap s!"a write to the attribute {t'.info.name}.{n} is not modelled yet"
       | _ => match ← PyReads.objView d with
         | some (.property _ fset fdel _) =>
@@ -252,11 +305,12 @@ def genericSetAttr [PyWrites m V] (v t : V) (name : String) (val : Option V) : m
     implicitDescrGap name ((← mroOf t).getD #[])
   if name == "__dict__" && (← PyReads.objDict v).isSome then
     PyPure.gap "assigning or deleting an instance's __dict__ is not modelled yet"
-  -- A function makes its `__dict__` on its first attribute write.
+  -- A function or an exception makes its `__dict__` on its first attribute write.
   let dict? ← match ← PyReads.objDict v with
     | some d => pure (some d)
     | none => match ← PyReads.objView v with
-      | some (.func ..) => if val.isSome then some <$> PyWrites.objEnsureDict v else pure none
+      | some (.func ..) | some (.exc _) =>
+        if val.isSome then some <$> PyWrites.objEnsureDict v else pure none
       | _ => pure none
   let some dict := dict? | noDict
   let k := strKey (m := m) name

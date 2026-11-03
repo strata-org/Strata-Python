@@ -1,0 +1,14 @@
+--- stdout 87
+ok None
+TypeError P.__init__() takes exactly one argument (the instance to initialize)
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+b = <B object>
+r = None

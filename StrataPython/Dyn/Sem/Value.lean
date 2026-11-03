@@ -67,6 +67,11 @@ inductive DescrKind where
   | getset
   /-- `member_descriptor`: `slice.__dict__["start"]`. -/
   | member
+  /-- A built-in type's `tp_new` as `type_call` calls it, without `tp_new_wrapper`'s check: made
+  only by a class call's path and handed at once to the call (`Proto.callTpNew`).  A call
+  (`callN`), an identity test and a render of one stop with a model-invariant gap, and its hash
+  is unknown; its `boundType` is a plain type name, which can't gap and reveals nothing. -/
+  | tpNew
   deriving DecidableEq, Repr, Inhabited, Ord
 
 instance : Hashable DescrKind := ⟨fun k => hash k.ctorIdx⟩

@@ -1,0 +1,7 @@
+module top
+  KeyError: global implicit (referenced)
+  OSError: global implicit (referenced)
+  SystemExit: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  print: global implicit (referenced)
+qualnames: 

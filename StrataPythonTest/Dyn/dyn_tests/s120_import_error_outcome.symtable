@@ -1,0 +1,4 @@
+module top
+  ImportError: global implicit (referenced)
+  e: local (assigned, referenced)
+qualnames: 

@@ -87,6 +87,29 @@ structure ClassData (V : Type) where
   tpName : Option String := none
   hasDel : Bool := false
 
+/-- An exception's state as generic code reads it (`Store.lean`'s `ExcState`): `args` (a tuple),
+`__context__`, `__cause__`, `__suppress_context__`, `__traceback__`, and the fields of its class
+(`StopIteration.value`, `NameError.name`, ...) by name. -/
+structure ExcData (V : Type) where
+  args : V
+  context : V
+  cause : V
+  suppressContext : Bool
+  traceback : V
+  fields : Array (String × V)
+
+/-- The part of an exception's state that `excSet` writes. -/
+inductive ExcPart (V : Type) where
+  | args (v : V)
+  | context (v : V)
+  /-- `__cause__`; CPython's `PyException_SetCause` also sets `__suppress_context__`. -/
+  | cause (v : V)
+  | suppressContext (b : Bool)
+  | traceback (v : V)
+  /-- A field of the exception's class; `none` unsets it, as CPython's `NULL`, which reads as
+  `None` but which `OSError.__str__` and `PyObject_GetAttr` tell apart from `None`. -/
+  | field (name : String) (v : Option V)
+
 /-- A native function as generic code makes and reads it (`Store.lean`'s `NativeFn`). -/
 structure NativeData (V : Type) where
   key : String
@@ -109,7 +132,7 @@ inductive ObjView (V : Type) where
   whether it is a class body; never its closure. -/
   | func (name : String) (module : V) (annotations : Option V) (classBody : Bool)
   | native (f : NativeData V)
-  | exc
+  | exc (e : ExcData V)
   | iter
   | module (name : String) (gapped : Array String) (writesGap : Bool)
   | property (fget fset fdel doc : V)
@@ -453,6 +476,8 @@ class PyWrites (m : Type → Type 1) (V : outParam Type) extends PyCalls m V whe
   /-- Set the state of the property, `classmethod` or `staticmethod` `v` to `s`, an object of the
   same kind. -/
   stateSet : V → NewObj V → m Unit
+  /-- Write a part of the state of the exception `e`. -/
+  excSet : V → ExcPart V → m Unit
 
 /-- **The body of a built-in callable**, generic in the record: from its `self` (the callee itself
 for a function), its args tuple and its kwargs dict, its result.  It runs at `writes`, inside the

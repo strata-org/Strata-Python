@@ -1,0 +1,23 @@
+--- stdout 487
+t1 TypeError exceptions must derive from BaseException
+t2 TypeError calling <class '__main__.t2.<locals>.B'> should have returned an instance of BaseException, not <class 'int'>
+t4 TypeError catching classes that do not inherit from BaseException is not allowed
+t5 RuntimeError No active exception to reraise
+t6 TypeError 'NotExc' object does not support the context manager protocol
+t7 TypeError 'OnlyEnter' object does not support the context manager protocol (missed __exit__ method)
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+NotExc = <class 'NotExc'>
+OnlyEnter = <class 'OnlyEnter'>
+__doc__ = None
+__name__ = '__main__'
+run = <function object>
+t1 = <function object>
+t2 = <function object>
+t4 = <function object>
+t5 = <function object>
+t6 = <function object>
+t7 = <function object>

@@ -1,0 +1,28 @@
+module s120_import_error_outcome {
+  func @|s120_import_error_outcome.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s120_import_error_outcome")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s120_import_error_outcome", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s120_import_error_outcome", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %ImportError.0 : py.Value = py.loadGlobal("s120_import_error_outcome", "ImportError") ^propagate.0()
+      %str.1 : py.Value = py.strLit("a")
+      %tuple.0 : py.Value = py.mkTuple(%str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%ImportError.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s120_import_error_outcome", "e")
+      %set.2 : base.Unit = base.refSet[py.Value](%e.cell.0, %call.0)
+      %str.2 : py.Value = py.strLit("zzz")
+      %e.0 : py.Value = py.loadGlobal("s120_import_error_outcome", "e") ^propagate.0()
+      %msg.0 : base.Unit = py.setAttr(%e.0, "msg", %str.2) ^propagate.0()
+      %e.1 : py.Value = py.loadGlobal("s120_import_error_outcome", "e") ^propagate.0()
+      %exc.0 : py.Value = py.toException(%e.1) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+}
+

@@ -161,8 +161,11 @@ def importFrom [PyCalls m V] (module name : String) : m V := do
     -- attributes, such as `__dict__`, are all dunder names.
     if name.startsWith "__" && name.endsWith "__" then
       PyPure.gap s!"from builtins import {name} is not modelled yet"
-    raiseBuiltin "ImportError" s!"cannot import name '{name}' from 'builtins' (unknown location)"
-      #[("name", PyPure.imm (m := m) (.str (.ofString "builtins"))),
+    let msg := s!"cannot import name '{name}' from 'builtins' (unknown location)"
+    raiseBuiltin "ImportError" msg
+      #[("msg", PyPure.imm (m := m) (.str (.ofString msg))),
+        ("name", PyPure.imm (m := m) (.str (.ofString "builtins"))),
+        ("path", PyPure.imm (m := m) .none),
         ("name_from", PyPure.imm (m := m) (.str (.ofString name)))]
 
 /-- `module.name` for the `builtins` module, which the translator uses for names that are not in

@@ -1,0 +1,16 @@
+module top
+  KeyError: global implicit (referenced)
+  RuntimeError: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  ZeroDivisionError: global implicit (referenced)
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  bb: local (assigned, referenced)
+  e: local (assigned, referenced)
+  f: local (assigned, referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  x: local (assigned, referenced)
+  function f
+    ZeroDivisionError: global implicit (referenced)
+qualnames: f

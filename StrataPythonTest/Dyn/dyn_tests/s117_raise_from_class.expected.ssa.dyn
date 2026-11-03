@@ -1,0 +1,148 @@
+module s117_raise_from_class {
+  func @|s117_raise_from_class.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s117_raise_from_class")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s117_raise_from_class", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s117_raise_from_class", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %ValueError.0 : py.Value = py.loadGlobal("s117_raise_from_class", "ValueError") ^propagate.0()
+      %str.1 : py.Value = py.strLit("v")
+      %tuple.0 : py.Value = py.mkTuple(%str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%ValueError.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s117_raise_from_class", "e")
+      %set.2 : base.Unit = base.refSet[py.Value](%e.cell.0, %call.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|s117_raise_from_class.C.<body>|, "<body>", "s117_raise_from_class")
+      %str.2 : py.Value = py.strLit("C")
+      %Exception.0 : py.Value = py.loadGlobal("s117_raise_from_class", "Exception") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%clo.0, %str.2, %Exception.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %C.0 : py.Value = py.call(%__build_class__.0, %tuple.1, %kwargs.1) ^propagate.0()
+      %C.cell.0 : base.Ref(py.Value) = py.globalCell("s117_raise_from_class", "C")
+      %set.3 : base.Unit = base.refSet[py.Value](%C.cell.0, %C.0)
+      %KeyError.0 : py.Value = py.loadGlobal("s117_raise_from_class", "KeyError") ^catch.1()
+      %str.3 : py.Value = py.strLit("k")
+      %tuple.2 : py.Value = py.mkTuple(%str.3)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%KeyError.0, %tuple.2, %kwargs.2) ^catch.1()
+      %exc.0 : py.Value = py.toException(%call.1) ^catch.1()
+      jump ^catch.1(%exc.0)
+    catch.1(%exc.1 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.1)
+      %KeyError.1 : py.Value = py.loadGlobal("s117_raise_from_class", "KeyError") ^unwind.1()
+      %match.0 : base.Bool = py.excMatch(%exc.1, %KeyError.1) ^unwind.1()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.0 : py.Value = py.loadGlobal("s117_raise_from_class", "e") ^unwind.1()
+      %C.1 : py.Value = py.loadGlobal("s117_raise_from_class", "C") ^unwind.1()
+      %exc.2 : py.Value = py.toException(%e.0) ^unwind.1()
+      %cause.0 : base.Unit = py.setCause(%exc.2, %C.1) ^unwind.1()
+      jump ^unwind.1(%exc.2)
+    next.0():
+      jump ^unwind.1(%exc.1)
+    unwind.1(%exc.3 : py.Value):
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      jump ^catch.0(%exc.3)
+    catch.0(%exc.4 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.4)
+      %ValueError.1 : py.Value = py.loadGlobal("s117_raise_from_class", "ValueError") ^unwind.0()
+      %match.1 : base.Bool = py.excMatch(%exc.4, %ValueError.1) ^unwind.0()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %t.cell.0 : base.Ref(py.Value) = py.globalCell("s117_raise_from_class", "t")
+      %set.4 : base.Unit = base.refSet[py.Value](%t.cell.0, %exc.4)
+      %print.0 : py.Value = py.loadGlobal("s117_raise_from_class", "print") ^clear.0()
+      %type.0 : py.Value = py.loadGlobal("s117_raise_from_class", "type") ^clear.0()
+      %t.0 : py.Value = py.loadGlobal("s117_raise_from_class", "t") ^clear.0()
+      %__cause__.0 : py.Value = py.attr(%t.0, "__cause__") ^clear.0()
+      %tuple.3 : py.Value = py.mkTuple(%__cause__.0)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%type.0, %tuple.3, %kwargs.3) ^clear.0()
+      %__name__.0 : py.Value = py.attr(%call.2, "__name__") ^clear.0()
+      %tuple.4 : py.Value = py.mkTuple(%__name__.0)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.0, %tuple.4, %kwargs.4) ^clear.0()
+      %pop.1 : base.Unit = py.popExcept(%prev.1)
+      %t.1 : py.Value = py.undef("t")
+      %t.cell.1 : base.Ref(py.Value) = py.globalCell("s117_raise_from_class", "t")
+      %set.5 : base.Unit = base.refSet[py.Value](%t.cell.1, %t.1)
+      jump ^join.0()
+    clear.0(%exc.5 : py.Value):
+      %t.2 : py.Value = py.undef("t")
+      %t.cell.2 : base.Ref(py.Value) = py.globalCell("s117_raise_from_class", "t")
+      %set.6 : base.Unit = base.refSet[py.Value](%t.cell.2, %t.2)
+      jump ^unwind.0(%exc.5)
+    next.1():
+      jump ^unwind.0(%exc.4)
+    unwind.0(%exc.6 : py.Value):
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.6)
+    join.0():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.7 : py.Value):
+      %exc.8 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.7)
+      ret(%exc.8)
+  }
+  func @|s117_raise_from_class.C.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["Exception"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s117_raise_from_class", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("C")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s117_raise_from_class.C.__init__, "__init__", "s117_raise_from_class")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s117_raise_from_class.C.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "C.__init__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %print.0 : py.Value = py.loadGlobal("s117_raise_from_class", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("C sees")
+      %e.0 : py.Value = py.loadGlobal("s117_raise_from_class", "e") ^propagate.0()
+      %__context__.0 : py.Value = py.attr(%e.0, "__context__") ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %is.0 : py.Value = py.is(%__context__.0, %none.0)
+      %tuple.0 : py.Value = py.mkTuple(%str.0, %is.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

@@ -1,0 +1,4 @@
+module
+  e: local (assigned, referenced)
+  ValueError: global implicit (referenced)
+  UnicodeEncodeError: global implicit (referenced)

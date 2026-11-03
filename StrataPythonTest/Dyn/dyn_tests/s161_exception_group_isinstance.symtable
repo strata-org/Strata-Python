@@ -1,0 +1,15 @@
+module top
+  BaseExceptionGroup: global implicit (referenced)
+  K: local (assigned, referenced)
+  KeyboardInterrupt: global implicit (referenced)
+  g: local (assigned, referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  class K
+    __class__: local (assigned)
+    property: global implicit (referenced)
+    function __class__
+      ValueError: global implicit (referenced)
+      print: global implicit (referenced)
+      self: local (parameter)
+qualnames: K, K.__class__

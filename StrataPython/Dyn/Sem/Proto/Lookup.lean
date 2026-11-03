@@ -210,7 +210,9 @@ def builtinGetsetGet [PyReads m V] (t : Builtin) (name : String) (obj : V) : m V
     | _ => match ← classData? obj with
       | some cd => match ← dictFindStr cd.ns "__module__" with
         | some x => pure x
-        | none => raiseBuiltin "AttributeError" "__module__"
+        | none =>
+          let nameV := PyPure.imm (m := m) (.str (.ofString "__module__"))
+          raiseBuiltin "AttributeError" "__module__" #[("name", nameV), ("obj", obj)]
       | none => gapIt
   | .type, "__mro__" => match ← mroOf obj with
     | some mro => return PyPure.imm (m := m) (.tuple mro)
@@ -239,7 +241,24 @@ def builtinGetsetGet [PyReads m V] (t : Builtin) (name : String) (obj : V) : m V
   | .function, "__dict__" => match ← PyReads.objDict obj with
     | some d => pure d
     | none => PyPure.gap "the __dict__ of a function that has none yet is not modelled yet"
-  | _, _ => gapIt
+  | t, name =>
+    -- An exception's state, and the member fields of its class (`None` until set).
+    if !t.info.mro.contains .BaseException then gapIt else
+    let some (.exc d) ← PyReads.objView obj | gapIt
+    match name, (t.ownNames.find? (·.1 == name)).map (·.2) with
+    | "args", _ => pure d.args
+    | "__context__", _ => pure d.context
+    | "__cause__", _ => pure d.cause
+    | "__traceback__", _ => pure d.traceback
+    | "__suppress_context__", _ => pure (PyPure.imm (m := m) (.bool d.suppressContext))
+    | "__dict__", _ => match ← PyReads.objDict obj with
+      | some dict => pure dict
+      | none => PyPure.gap "the __dict__ of an exception that has none yet is not modelled yet"
+    | n, some AttrKind.member =>
+      -- The unicode errors' and the `SyntaxError` family's members are not all objects.
+      if t.info.mro.any ([Builtin.UnicodeError, .SyntaxError].contains ·) then gapIt else
+      pure ((d.fields.find? (·.1 == n)).map (·.2) |>.getD (PyPure.imm (m := m) .none))
+    | _, _ => gapIt
 
 /-- The args tuple `args` with `x` in front. -/
 def prepend [PyPure m V] (x args : V) : m V := do
@@ -343,7 +362,7 @@ def descrKindCheck [PyReads m V] (d : V) : m Unit := do
       for n in ["__get__", "__set__", "__delete__"] do
         if (← lookupType mt n).isSome then
           PyPure.gap "a class whose metaclass defines a descriptor method is not modelled yet"
-  | some .exc =>
+  | some (.exc _) =>
     let t ← PyReads.classOf d
     if !((← PyPure.immView t) matches some (.builtin _)) then
       for n in ["__get__", "__set__", "__delete__"] do
@@ -414,6 +433,22 @@ def bestBase [PyReads m V] (bases : Array V) : m V := do
   | some (b, _) => pure b
   | none => PyPure.gap "a class without bases"
 
+/-- The class whose C function is the `tp_new` of the built-in exception class `u`, as
+`exceptions.c` defines them: `OSError_new` for `FileNotFoundError`, `BaseException_new` for
+`ValueError`. -/
+def excNewClass (u : Builtin) : Builtin :=
+  if u.info.mro.contains .OSError then .OSError
+  else if u.info.mro.contains .BaseExceptionGroup then .BaseExceptionGroup
+  else if u.info.mro.contains .MemoryError then .MemoryError
+  else .BaseException
+
+/-- The C function of the `tp_new` of the built-in type `b`, named by the type that defines it,
+where the model knows it: the exception classes, `object` and `type`. -/
+def _root_.StrataPython.Dyn.Sem.Builtin.newId (b : Builtin) : Option Builtin :=
+  if b.info.mro.contains .BaseException then some (excNewClass b)
+  else if b == .object || b == .type then some b
+  else none
+
 /-- What a class's `tp_new` is: CPython's `slot_tp_new`, which calls the `__new__` that the MRO
 gives, decided at the class `decidedAt` of the class's chain of `tp_base`s (every class of the chain
 before `decidedAt` has the same `tp_new`); or the `tp_new` of the built-in type `b`. -/
@@ -467,6 +502,34 @@ def metaGetattributeCheck [PyReads m V] (cls : V) : m Unit := do
     if !((← PyPure.immView ga) matches some (.descr .type "__getattribute__" _)) then
       PyPure.gap "a class call whose metaclass defines __getattribute__ is not modelled yet"
 
+/-- What a class call runs for `__new__`, as `type_call` does. -/
+inductive ClassNew (V : Type) where
+  /-- The `tp_new` of the built-in type `t`, bound to `self`, called directly (`callTpNew`). -/
+  | builtin (self : V) (t : Builtin)
+  /-- The `__new__` that the class's MRO gives, called as `slot_tp_new` calls it. -/
+  | slot
+
+/-- What a call of the class `cls`, whose MRO gives `new` as its `__new__`, runs for it: when `new`
+is a built-in type's `__new__` and that type's C function is `cls`'s `tp_new` (`tpNewOf`), that
+`tp_new` itself, without `tp_new_wrapper`'s check; when `cls`'s `tp_new` is `slot_tp_new`, or `new`
+is not built in, `new` itself; and `none` when `new` is a built-in type's `__new__` other than
+`cls`'s `tp_new`. -/
+def tpNewFor [PyReads m V] (cls new : V) : m (Option (ClassNew V)) := do
+  match ← PyPure.immView new with
+  | some (.bound s u "__new__" _) =>
+    match ← tpNewOf tpNewFuel cls with
+    | .builtin b =>
+      if b == u || (b.newId.isSome && b.newId == u.newId) then return some (.builtin s u)
+      else return none
+    | .slot _ => return some .slot
+  | _ => return some .slot
+
+/-- **The `tp_new` of the built-in type `t`, bound to `self`, called as `type_call` calls it**:
+its body, without `tp_new_wrapper`'s check.  The `.tpNew` value that names it is made here and
+handed to `callBuiltin` at once, which doesn't keep it: this call is the value's whole life. -/
+def callTpNew [PyCalls m V] (self : V) (t : Builtin) (args kwargs : V) : m V :=
+  PyCalls.callBuiltin (PyPure.imm (m := m) (.bound self t "__new__" .tpNew)) args kwargs
+
 mutual
 /-- **`f(*args, **kwargs)`**, CPython's `PyObject_Call`, at the dispatch depth `n`: a function
 object runs its closure; a built-in callable or a native function its body (`callBuiltin`); a bound
@@ -487,7 +550,9 @@ def callN [PyCalls m V] : Nat → V → V → V → m V
         let (cls, rest) ← classDescrSelf t name args
         PyCalls.callBuiltin (PyPure.imm (m := m) (.bound cls t name kind)) rest kwargs
       else PyCalls.callBuiltin f args kwargs
-    | some (.bound ..) => PyCalls.callBuiltin f args kwargs
+    | some (.bound _ _ _ k) =>
+      if k == .tpNew then PyPure.modelInvariant "a type's tp_new outside a class call"
+      else PyCalls.callBuiltin f args kwargs
     | some (.method func self) => callN n func (← prepend self args) kwargs
     | some _ => raiseBuiltin "TypeError" s!"'{← typeName f}' object is not callable"
     | none => match ← PyReads.objView f with
@@ -531,8 +596,14 @@ def typeCallN [PyCalls m V] : Nat → Bool → V → V → V → m V
       let some new ← lookupType cls "__new__" |
         PyPure.gap s!"a class without __new__"
       metaGetattributeCheck cls
-      let newF ← descrGetN n new none cls
-      let obj ← callN n newF (← prepend cls args) kwargs
+      -- `type_call` runs the class's `tp_new`, not the `__new__` that the MRO gives: where that
+      -- is a built-in type's, the two must be the same C function.
+      let some tpNew ← tpNewFor cls new |
+        PyPure.gap "a class whose __new__ comes from another built-in base than its tp_new is not modelled yet"
+      let obj ← match tpNew with
+        -- `type_call` calls the type's `tp_new` directly, without `tp_new_wrapper`'s check.
+        | .builtin s u => callTpNew s u (← prepend cls args) kwargs
+        | .slot => callN n (← descrGetN n new none cls) (← prepend cls args) kwargs
       -- `__init__` runs only on an instance of `cls`.
       let some objMro ← mroOf (← PyReads.classOf obj) | return obj
       let mut isInst := false
@@ -572,6 +643,7 @@ def descrGetN [PyCalls m V] : Nat → V → Option V → V → m V
         classDescrCheck t name cls
         pure (PyPure.imm (m := m) (.bound cls t name k))
       | .staticMethod => pure d
+      | .tpNew => PyPure.modelInvariant "a type's tp_new outside a class call"
       | .getset | .member => if noObj then pure d else do
           descrCheck (PyPure.imm (m := m) (.builtin t)) name obj
           -- `type_get_doc`: a class's own `__doc__`, bound by its `__get__` when it has one.

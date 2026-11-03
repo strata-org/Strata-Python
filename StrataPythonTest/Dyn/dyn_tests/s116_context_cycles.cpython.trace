@@ -1,0 +1,20 @@
+--- stdout 85
+True True True True
+True True True True
+True True True True
+True True
+True True True
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+a = <KeyError object>
+b = <IndexError object>
+c = <TypeError object>
+d = <IndexError object>
+es = [<ValueError object>, <ValueError object>, <ValueError object>, <ValueError object>, <ValueError object>]
+h = <ValueError object>
+i = 4
+x = <KeyError object>

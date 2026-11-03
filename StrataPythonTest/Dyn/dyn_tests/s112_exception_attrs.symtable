@@ -1,0 +1,46 @@
+module top
+  Exception: global implicit (referenced)
+  KeyError: global implicit (referenced)
+  NameError: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  U: local (assigned, referenced)
+  ValueError: global implicit (referenced)
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  c: local (assigned, referenced)
+  cause: local (assigned, referenced)
+  ctx: local (assigned, referenced)
+  d: local (assigned, referenced)
+  dargs: local (assigned, referenced)
+  dctx: local (assigned, referenced)
+  e: local (assigned, referenced)
+  f: local (assigned, referenced)
+  n: local (assigned, referenced)
+  print: global implicit (referenced)
+  run: local (assigned, referenced)
+  sup: local (assigned, referenced)
+  tb: local (assigned, referenced)
+  tuple: global implicit (referenced)
+  type: global implicit (referenced)
+  u: local (assigned, referenced)
+  function run
+    Exception: global implicit (referenced)
+    e: local (assigned, referenced)
+    f: local (parameter, referenced)
+    name: local (parameter, referenced)
+    print: global implicit (referenced)
+    type: global implicit (referenced)
+  function ctx
+    e: global implicit (referenced)
+  function sup
+    e: global implicit (referenced)
+  function tb
+    e: global implicit (referenced)
+  function dargs
+    e: global implicit (referenced)
+  function cause
+    e: global implicit (referenced)
+  function dctx
+    e: global implicit (referenced)
+  class U
+qualnames: U, cause, ctx, dargs, dctx, run, sup, tb

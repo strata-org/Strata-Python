@@ -1,0 +1,401 @@
+module s122_exception_errors_more {
+  func @|s122_exception_errors_more.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s122_exception_errors_more")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s122_exception_errors_more", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s122_exception_errors_more", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@s122_exception_errors_more.run, "run", "s122_exception_errors_more")
+      %run.cell.0 : base.Ref(py.Value) = py.globalCell("s122_exception_errors_more", "run")
+      %set.2 : base.Unit = base.refSet[py.Value](%run.cell.0, %clo.0)
+      %KeyError.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "KeyError") ^catch.1()
+      %str.1 : py.Value = py.strLit("k")
+      %tuple.0 : py.Value = py.mkTuple(%str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%KeyError.0, %tuple.0, %kwargs.0) ^catch.1()
+      %exc.0 : py.Value = py.toException(%call.0) ^catch.1()
+      jump ^catch.1(%exc.0)
+    catch.1(%exc.1 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.1)
+      %KeyError.1 : py.Value = py.loadGlobal("s122_exception_errors_more", "KeyError") ^unwind.1()
+      %match.0 : base.Bool = py.excMatch(%exc.1, %KeyError.1) ^unwind.1()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %ValueError.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "ValueError") ^unwind.1()
+      %str.2 : py.Value = py.strLit("v")
+      %tuple.1 : py.Value = py.mkTuple(%str.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%ValueError.0, %tuple.1, %kwargs.1) ^unwind.1()
+      %none.1 : py.Value = py.noneLit
+      %exc.2 : py.Value = py.toException(%call.1) ^unwind.1()
+      %cause.0 : base.Unit = py.setCause(%exc.2, %none.1) ^unwind.1()
+      jump ^unwind.1(%exc.2)
+    next.0():
+      jump ^unwind.1(%exc.1)
+    unwind.1(%exc.3 : py.Value):
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      jump ^catch.0(%exc.3)
+    catch.0(%exc.4 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.4)
+      %ValueError.1 : py.Value = py.loadGlobal("s122_exception_errors_more", "ValueError") ^unwind.0()
+      %match.1 : base.Bool = py.excMatch(%exc.4, %ValueError.1) ^unwind.0()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s122_exception_errors_more", "e")
+      %set.3 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.4)
+      %print.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "print") ^clear.0()
+      %e.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "e") ^clear.0()
+      %__cause__.0 : py.Value = py.attr(%e.0, "__cause__") ^clear.0()
+      %e.1 : py.Value = py.loadGlobal("s122_exception_errors_more", "e") ^clear.0()
+      %__suppress_context__.0 : py.Value = py.attr(%e.1, "__suppress_context__") ^clear.0()
+      %type.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "type") ^clear.0()
+      %e.2 : py.Value = py.loadGlobal("s122_exception_errors_more", "e") ^clear.0()
+      %__context__.0 : py.Value = py.attr(%e.2, "__context__") ^clear.0()
+      %tuple.2 : py.Value = py.mkTuple(%__context__.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%type.0, %tuple.2, %kwargs.2) ^clear.0()
+      %KeyError.2 : py.Value = py.loadGlobal("s122_exception_errors_more", "KeyError") ^clear.0()
+      %is.0 : py.Value = py.is(%call.2, %KeyError.2)
+      %tuple.3 : py.Value = py.mkTuple(%__cause__.0, %__suppress_context__.0, %is.0)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.0, %tuple.3, %kwargs.3) ^clear.0()
+      %pop.1 : base.Unit = py.popExcept(%prev.1)
+      %e.3 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("s122_exception_errors_more", "e")
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.3)
+      jump ^join.0()
+    clear.0(%exc.5 : py.Value):
+      %e.4 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("s122_exception_errors_more", "e")
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.4)
+      jump ^unwind.0(%exc.5)
+    next.1():
+      jump ^unwind.0(%exc.4)
+    unwind.0(%exc.6 : py.Value):
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.6)
+    join.0():
+      %run.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "run") ^propagate.0()
+      %str.3 : py.Value = py.strLit("eg msg")
+      %clo.1 : py.Value = py.mkClosure[[]](@|s122_exception_errors_more.<lambda>|, "<lambda>", "s122_exception_errors_more")
+      %tuple.4 : py.Value = py.mkTuple(%str.3, %clo.1)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%run.0, %tuple.4, %kwargs.4) ^propagate.0()
+      %run.1 : py.Value = py.loadGlobal("s122_exception_errors_more", "run") ^propagate.0()
+      %str.4 : py.Value = py.strLit("eg seq")
+      %clo.2 : py.Value = py.mkClosure[[]](@|s122_exception_errors_more.<lambda>.1|, "<lambda>", "s122_exception_errors_more")
+      %tuple.5 : py.Value = py.mkTuple(%str.4, %clo.2)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%run.1, %tuple.5, %kwargs.5) ^propagate.0()
+      %run.2 : py.Value = py.loadGlobal("s122_exception_errors_more", "run") ^propagate.0()
+      %str.5 : py.Value = py.strLit("eg empty")
+      %clo.3 : py.Value = py.mkClosure[[]](@|s122_exception_errors_more.<lambda>.2|, "<lambda>", "s122_exception_errors_more")
+      %tuple.6 : py.Value = py.mkTuple(%str.5, %clo.3)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.6 : py.Value = py.call(%run.2, %tuple.6, %kwargs.6) ^propagate.0()
+      %run.3 : py.Value = py.loadGlobal("s122_exception_errors_more", "run") ^propagate.0()
+      %str.6 : py.Value = py.strLit("eg item")
+      %clo.4 : py.Value = py.mkClosure[[]](@|s122_exception_errors_more.<lambda>.3|, "<lambda>", "s122_exception_errors_more")
+      %tuple.7 : py.Value = py.mkTuple(%str.6, %clo.4)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %call.7 : py.Value = py.call(%run.3, %tuple.7, %kwargs.7) ^propagate.0()
+      %run.4 : py.Value = py.loadGlobal("s122_exception_errors_more", "run") ^propagate.0()
+      %str.7 : py.Value = py.strLit("eg nest")
+      %clo.5 : py.Value = py.mkClosure[[]](@|s122_exception_errors_more.<lambda>.4|, "<lambda>", "s122_exception_errors_more")
+      %tuple.8 : py.Value = py.mkTuple(%str.7, %clo.5)
+      %kwargs.8 : py.Value = py.mkKwargs
+      %call.8 : py.Value = py.call(%run.4, %tuple.8, %kwargs.8) ^propagate.0()
+      %ExceptionGroup.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "ExceptionGroup") ^propagate.0()
+      %str.8 : py.Value = py.strLit("m")
+      %ValueError.2 : py.Value = py.loadGlobal("s122_exception_errors_more", "ValueError") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %tuple.9 : py.Value = py.mkTuple(%int.0)
+      %kwargs.9 : py.Value = py.mkKwargs
+      %call.9 : py.Value = py.call(%ValueError.2, %tuple.9, %kwargs.9) ^propagate.0()
+      %list.0 : py.Value = py.mkList(%call.9)
+      %tuple.10 : py.Value = py.mkTuple(%str.8, %list.0)
+      %kwargs.10 : py.Value = py.mkKwargs
+      %call.10 : py.Value = py.call(%ExceptionGroup.0, %tuple.10, %kwargs.10) ^propagate.0()
+      %g.cell.0 : base.Ref(py.Value) = py.globalCell("s122_exception_errors_more", "g")
+      %set.6 : base.Unit = base.refSet[py.Value](%g.cell.0, %call.10)
+      %clo.6 : py.Value = py.mkClosure[[]](@s122_exception_errors_more.wmsg, "wmsg", "s122_exception_errors_more")
+      %wmsg.cell.0 : base.Ref(py.Value) = py.globalCell("s122_exception_errors_more", "wmsg")
+      %set.7 : base.Unit = base.refSet[py.Value](%wmsg.cell.0, %clo.6)
+      %run.5 : py.Value = py.loadGlobal("s122_exception_errors_more", "run") ^propagate.0()
+      %str.9 : py.Value = py.strLit("eg message")
+      %wmsg.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "wmsg") ^propagate.0()
+      %tuple.11 : py.Value = py.mkTuple(%str.9, %wmsg.0)
+      %kwargs.11 : py.Value = py.mkKwargs
+      %call.11 : py.Value = py.call(%run.5, %tuple.11, %kwargs.11) ^propagate.0()
+      %ValueError.3 : py.Value = py.loadGlobal("s122_exception_errors_more", "ValueError") ^propagate.0()
+      %tuple.12 : py.Value = py.mkTuple
+      %kwargs.12 : py.Value = py.mkKwargs
+      %call.12 : py.Value = py.call(%ValueError.3, %tuple.12, %kwargs.12) ^propagate.0()
+      %e.cell.3 : base.Ref(py.Value) = py.globalCell("s122_exception_errors_more", "e")
+      %set.8 : base.Unit = base.refSet[py.Value](%e.cell.3, %call.12)
+      %run.6 : py.Value = py.loadGlobal("s122_exception_errors_more", "run") ^propagate.0()
+      %str.10 : py.Value = py.strLit("note type")
+      %clo.7 : py.Value = py.mkClosure[[]](@|s122_exception_errors_more.<lambda>.5|, "<lambda>", "s122_exception_errors_more")
+      %tuple.13 : py.Value = py.mkTuple(%str.10, %clo.7)
+      %kwargs.13 : py.Value = py.mkKwargs
+      %call.13 : py.Value = py.call(%run.6, %tuple.13, %kwargs.13) ^propagate.0()
+      %int.1 : py.Value = py.intLit(5)
+      %e.5 : py.Value = py.loadGlobal("s122_exception_errors_more", "e") ^propagate.0()
+      %__notes__.0 : base.Unit = py.setAttr(%e.5, "__notes__", %int.1) ^propagate.0()
+      %run.7 : py.Value = py.loadGlobal("s122_exception_errors_more", "run") ^propagate.0()
+      %str.11 : py.Value = py.strLit("note list")
+      %clo.8 : py.Value = py.mkClosure[[]](@|s122_exception_errors_more.<lambda>.6|, "<lambda>", "s122_exception_errors_more")
+      %tuple.14 : py.Value = py.mkTuple(%str.11, %clo.8)
+      %kwargs.14 : py.Value = py.mkKwargs
+      %call.14 : py.Value = py.call(%run.7, %tuple.14, %kwargs.14) ^propagate.0()
+      %run.8 : py.Value = py.loadGlobal("s122_exception_errors_more", "run") ^propagate.0()
+      %str.12 : py.Value = py.strLit("init kw")
+      %clo.9 : py.Value = py.mkClosure[[]](@|s122_exception_errors_more.<lambda>.7|, "<lambda>", "s122_exception_errors_more")
+      %tuple.15 : py.Value = py.mkTuple(%str.12, %clo.9)
+      %kwargs.15 : py.Value = py.mkKwargs
+      %call.15 : py.Value = py.call(%run.8, %tuple.15, %kwargs.15) ^propagate.0()
+      %run.9 : py.Value = py.loadGlobal("s122_exception_errors_more", "run") ^propagate.0()
+      %str.13 : py.Value = py.strLit("os kw")
+      %clo.10 : py.Value = py.mkClosure[[]](@|s122_exception_errors_more.<lambda>.8|, "<lambda>", "s122_exception_errors_more")
+      %tuple.16 : py.Value = py.mkTuple(%str.13, %clo.10)
+      %kwargs.16 : py.Value = py.mkKwargs
+      %call.16 : py.Value = py.call(%run.9, %tuple.16, %kwargs.16) ^propagate.0()
+      %none.2 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.2)
+      ret(%ret.0)
+    propagate.0(%exc.7 : py.Value):
+      %exc.8 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.7)
+      ret(%exc.8)
+  }
+  func @s122_exception_errors_more.run(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %name.0 : py.Value = py.undef("name")
+      %name.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%name.0)
+      %f.0 : py.Value = py.undef("f")
+      %f.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%f.0)
+      %e.0 : py.Value = py.undef("e")
+      %e.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%e.0)
+      %name.1 : py.Value = py.undef("name")
+      %f.1 : py.Value = py.undef("f")
+      %defaults.0 : py.Value = py.mkTuple(%name.1, %f.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "run", 0, 2, false, false, "name", "f") ^propagate.0()
+      %name.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %f.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %f.4 : py.Value = py.requireDefined(%f.2, "f", "UnboundLocalError", "cannot access local variable 'f' where it is not associated with a value") ^catch.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%f.4, %tuple.0, %kwargs.1) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %Exception.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "Exception") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %Exception.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %print.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "print") ^clear.0()
+      %name.6 : py.Value = py.requireDefined(%name.2, "name", "UnboundLocalError", "cannot access local variable 'name' where it is not associated with a value") ^clear.0()
+      %type.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "type") ^clear.0()
+      %e.5 : py.Value = py.requireDefined(%exc.0, "e", "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^clear.0()
+      %tuple.1 : py.Value = py.mkTuple(%e.5)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%type.0, %tuple.1, %kwargs.2) ^clear.0()
+      %__name__.0 : py.Value = py.attr(%call.1, "__name__") ^clear.0()
+      %e.8 : py.Value = py.requireDefined(%exc.0, "e", "UnboundLocalError", "cannot access local variable 'e' where it is not associated with a value") ^clear.0()
+      %args.1 : py.Value = py.attr(%e.8, "args") ^clear.0()
+      %int.0 : py.Value = py.intLit(0)
+      %item.0 : py.Value = py.getItem(%args.1, %int.0) ^clear.0()
+      %tuple.2 : py.Value = py.mkTuple(%name.6, %__name__.0, %item.0)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.0, %tuple.2, %kwargs.3) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.9 : py.Value = py.undef("e")
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.10 : py.Value = py.undef("e")
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.3 : py.Value):
+      %exc.4 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.3)
+      ret(%exc.4)
+  }
+  func @|s122_exception_errors_more.<lambda>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %ExceptionGroup.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "ExceptionGroup") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %ValueError.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "ValueError") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%ValueError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %list.0 : py.Value = py.mkList(%call.0)
+      %tuple.1 : py.Value = py.mkTuple(%int.0, %list.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%ExceptionGroup.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s122_exception_errors_more.<lambda>.1|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %ExceptionGroup.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "ExceptionGroup") ^propagate.0()
+      %str.0 : py.Value = py.strLit("m")
+      %int.0 : py.Value = py.intLit(5)
+      %tuple.0 : py.Value = py.mkTuple(%str.0, %int.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%ExceptionGroup.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s122_exception_errors_more.<lambda>.2|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %ExceptionGroup.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "ExceptionGroup") ^propagate.0()
+      %str.0 : py.Value = py.strLit("m")
+      %list.0 : py.Value = py.mkList
+      %tuple.0 : py.Value = py.mkTuple(%str.0, %list.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%ExceptionGroup.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s122_exception_errors_more.<lambda>.3|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %ExceptionGroup.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "ExceptionGroup") ^propagate.0()
+      %str.0 : py.Value = py.strLit("m")
+      %int.0 : py.Value = py.intLit(1)
+      %list.0 : py.Value = py.mkList(%int.0)
+      %tuple.0 : py.Value = py.mkTuple(%str.0, %list.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%ExceptionGroup.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s122_exception_errors_more.<lambda>.4|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %ExceptionGroup.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "ExceptionGroup") ^propagate.0()
+      %str.0 : py.Value = py.strLit("m")
+      %KeyboardInterrupt.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "KeyboardInterrupt") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%KeyboardInterrupt.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %list.0 : py.Value = py.mkList(%call.0)
+      %tuple.1 : py.Value = py.mkTuple(%str.0, %list.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%ExceptionGroup.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s122_exception_errors_more.wmsg(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "wmsg", 0, 0, false, false) ^propagate.0()
+      %str.0 : py.Value = py.strLit("n")
+      %g.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "g") ^propagate.0()
+      %message.0 : base.Unit = py.setAttr(%g.0, "message", %str.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s122_exception_errors_more.<lambda>.5|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %e.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "e") ^propagate.0()
+      %add_note.0 : py.Value = py.attr(%e.0, "add_note") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %tuple.0 : py.Value = py.mkTuple(%int.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%add_note.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s122_exception_errors_more.<lambda>.6|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %e.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "e") ^propagate.0()
+      %add_note.0 : py.Value = py.attr(%e.0, "add_note") ^propagate.0()
+      %str.0 : py.Value = py.strLit("x")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%add_note.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s122_exception_errors_more.<lambda>.7|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %ValueError.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "ValueError") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %str.0 : py.Value = py.strLit("x")
+      %int.0 : py.Value = py.intLit(1)
+      %kwargs.1 : py.Value = py.mkKwargs(%str.0, %int.0)
+      %call.0 : py.Value = py.call(%ValueError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s122_exception_errors_more.<lambda>.8|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %OSError.0 : py.Value = py.loadGlobal("s122_exception_errors_more", "OSError") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %str.0 : py.Value = py.strLit("a")
+      %tuple.0 : py.Value = py.mkTuple(%int.0, %str.0)
+      %str.1 : py.Value = py.strLit("k")
+      %int.1 : py.Value = py.intLit(2)
+      %kwargs.1 : py.Value = py.mkKwargs(%str.1, %int.1)
+      %call.0 : py.Value = py.call(%OSError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

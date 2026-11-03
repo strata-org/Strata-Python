@@ -30,6 +30,7 @@ def DescrKind.descrType : DescrKind → Builtin
   | .staticMethod => .staticmethod
   | .getset => .getset_descriptor
   | .member => .member_descriptor
+  | .tpNew => .builtin_function_or_method
 
 /-- The type of a descriptor of the kind `k`, bound to an object. -/
 def DescrKind.boundType : DescrKind → Builtin

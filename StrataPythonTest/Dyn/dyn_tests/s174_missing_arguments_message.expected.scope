@@ -1,0 +1,10 @@
+module
+  f: local (assigned, referenced)
+  msg: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  function f
+    params: a, b
+    a: local (parameter, referenced)
+    b: local (parameter)

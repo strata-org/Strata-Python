@@ -1,0 +1,24 @@
+--- stdout 234
+True None
+True None None
+PermissionError
+True None
+OSError() takes no keyword arguments
+True 2 f E
+None True
+[Errno 2] None
+[Errno None] s: 'f'
+[Errno None] s: 'f'
+[Errno 2] s: None
+[Errno 2] None
+2 a.txt [Errno 2] not found: 'a.txt'
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+NotFound = <class 'NotFound'>
+__doc__ = None
+__name__ = '__main__'
+e = <NotFound object>
+e2 = <OSError object>

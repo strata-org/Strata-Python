@@ -1,0 +1,16 @@
+module top
+  B: local (assigned, referenced)
+  BaseException: global implicit (referenced)
+  Exception: global implicit (referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  class B
+    __new__: local (assigned)
+    function __new__
+      Exception: global implicit (referenced)
+      KeyError: global implicit (referenced)
+      a: local (parameter, referenced)
+      cls: local (parameter)
+      print: global implicit (referenced)
+qualnames: B, B.__new__

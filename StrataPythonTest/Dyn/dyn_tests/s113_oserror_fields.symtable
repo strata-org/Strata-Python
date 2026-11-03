@@ -1,0 +1,32 @@
+module top
+  E: local (assigned, referenced)
+  NotFound: local (assigned, referenced)
+  OSError: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  e2: local (assigned, referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  class E
+    __init__: local (assigned)
+    function __init__
+      a: local (parameter)
+      b: local (parameter)
+      c: local (parameter)
+      self: local (parameter)
+  class E
+    __init__: local (assigned)
+    function __init__
+      __class__: free (referenced)
+      a: local (parameter, referenced)
+      k: local (parameter)
+      self: local (parameter)
+      super: global implicit (referenced)
+  class NotFound
+    __init__: local (assigned)
+    function __init__
+      __class__: free (referenced)
+      path: local (parameter, referenced)
+      self: local (parameter)
+      super: global implicit (referenced)
+qualnames: E, E, E.__init__, E.__init__, NotFound, NotFound.__init__

@@ -1,0 +1,16 @@
+module top
+  E: local (assigned, referenced)
+  Exception: global implicit (referenced)
+  M: local (assigned, referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  t: local (assigned, referenced)
+  type: global implicit (referenced)
+  class M
+    __subclasscheck__: local (assigned)
+    function __subclasscheck__
+      cls: local (parameter)
+      print: global implicit (referenced)
+      sub: local (parameter)
+  class E
+qualnames: E, M, M.__subclasscheck__

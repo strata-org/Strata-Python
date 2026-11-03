@@ -1,0 +1,20 @@
+--- stdout 359
+BaseException.__new__(C) is not safe, use FileNotFoundError.__new__()
+None 1
+ValueError.__new__(X) is not safe, use OSError.__new__()
+NameError() takes at most 1 keyword argument (2 given)
+AttributeError() takes at most 2 keyword arguments (3 given)
+ImportError() takes at most 3 keyword arguments (4 given)
+'x' is an invalid keyword argument for NameError()
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+C = <class 'C'>
+X = <class 'X'>
+__doc__ = None
+__name__ = '__main__'
+c = <C object>
+t = <function object>

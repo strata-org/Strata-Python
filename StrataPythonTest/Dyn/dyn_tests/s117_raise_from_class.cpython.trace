@@ -1,0 +1,11 @@
+--- stdout 14
+C sees True
+C
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+e = <ValueError object>

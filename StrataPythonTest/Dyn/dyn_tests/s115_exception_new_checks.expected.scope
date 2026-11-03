@@ -1,0 +1,21 @@
+module
+  BaseException: global implicit (referenced)
+  int: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  x: local (assigned, referenced)
+  ValueError: global implicit (referenced)
+  KeyError: global implicit (referenced)
+  type: global implicit (referenced)
+  OSError: global implicit (referenced)
+  E: local (assigned, referenced)
+  property: global implicit (referenced)
+  class E (needs __class__ cell)
+    __new__: local (assigned)
+    function E.__new__
+      params: cls, *a
+      cls: local (parameter, referenced)
+      a: local (parameter, referenced)
+      super: global implicit (referenced)
+      __class__: free (referenced)

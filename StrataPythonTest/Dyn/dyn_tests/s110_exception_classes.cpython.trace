@@ -1,0 +1,27 @@
+--- stdout 200
+a 2 ('a', 2) ValueError('a')
+1 True v
+1 m 'k'
+True 2 no file [Errno 2] no file [Errno 2] no: 'f.txt'
+True m m (1 sub-exception) True
+n1
+5
+E True True
+m v True
+True
+enter
+body 7
+exit True w
+after with
+
+--- outcome
+raised E: end
+--- globals
+C = <class 'C'>
+E = <class 'E'>
+__doc__ = None
+__name__ = '__main__'
+e = <ValueError object>
+g = <ExceptionGroup object>
+o = <FileNotFoundError object>
+v = 7

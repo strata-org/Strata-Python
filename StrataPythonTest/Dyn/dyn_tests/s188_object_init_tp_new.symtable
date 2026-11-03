@@ -1,0 +1,21 @@
+module top
+  A: local (assigned, referenced)
+  B: local (assigned, referenced)
+  P: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  b: local (assigned, referenced)
+  e: local (assigned, referenced)
+  object: global implicit (referenced)
+  print: global implicit (referenced)
+  r: local (assigned, referenced)
+  class A
+    __new__: local (assigned)
+    function __new__
+      a: local (parameter)
+      cls: local (parameter, referenced)
+      object: global implicit (referenced)
+  class B
+    __new__: local (assigned)
+    object: global implicit (referenced)
+  class P
+qualnames: A, A.__new__, B, P

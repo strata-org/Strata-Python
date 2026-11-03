@@ -1,0 +1,43 @@
+module
+  E: local (assigned)
+  Exception: global implicit (referenced)
+  NotExc: local (assigned)
+  OnlyEnter: local (assigned)
+  t1: local (assigned, referenced)
+  t2: local (assigned, referenced)
+  t4: local (assigned, referenced)
+  t5: local (assigned, referenced)
+  t6: local (assigned, referenced)
+  t7: local (assigned, referenced)
+  run: local (assigned, referenced)
+  class E
+  class NotExc
+  class OnlyEnter
+    __enter__: local (assigned)
+    function OnlyEnter.__enter__
+      params: self
+      self: local (parameter)
+  function t1
+  function t2
+    B: local (assigned, referenced)
+    Exception: global implicit (referenced)
+    class t2.<locals>.B
+      __new__: local (assigned)
+      function t2.<locals>.B.__new__
+        params: cls
+        cls: local (parameter)
+  function t4
+    E: global implicit (referenced)
+    ValueError: global implicit (referenced)
+  function t5
+  function t6
+    NotExc: global implicit (referenced)
+  function t7
+    OnlyEnter: global implicit (referenced)
+  function run
+    params: t
+    t: local (parameter, referenced)
+    Exception: global implicit (referenced)
+    e: local (assigned, referenced)
+    print: global implicit (referenced)
+    type: global implicit (referenced)

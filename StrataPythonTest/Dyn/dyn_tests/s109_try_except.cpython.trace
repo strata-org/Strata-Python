@@ -1,0 +1,17 @@
+--- stdout 141
+caught integer division or modulo by zero
+tuple
+True True False
+finally
+after finally
+No active exception to reraise
+reraised None
+True True
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+bb = <KeyError object>
+f = <function object>

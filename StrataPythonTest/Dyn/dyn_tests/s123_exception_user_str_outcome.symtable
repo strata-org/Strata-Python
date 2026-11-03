@@ -1,0 +1,7 @@
+module top
+  E: local (assigned, referenced)
+  Exception: global implicit (referenced)
+  class E
+  function lambda
+    self: local (parameter)
+qualnames: <lambda>, E
