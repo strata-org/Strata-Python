@@ -155,6 +155,21 @@ def prepare (M : Model) {env : Env Unit} [base ≼ env] {α : Type} (prog : Modu
       | none => .error (.noFunction f)
       | some i => .ok ⟨lm, hw, i⟩
 
+/-- A prepared module is a linked one. -/
+theorem link_of_prepare {M : Model} {env : Env Unit} [base ≼ env] {α : Type} {m : Module env α}
+    {f : Name} {lm : LModule M.at} {hw : WF lm} {i : Nat}
+    (hp : prepare M m f = .ok ⟨lm, hw, i⟩) : link M m = .ok lm := by
+  unfold prepare at hp
+  split at hp
+  · exact nomatch hp
+  · rename_i lm₀ hl
+    split at hp
+    · exact nomatch hp
+    · split at hp
+      · exact nomatch hp
+      · cases hp
+        exact hl
+
 /-- Run function `i` of the validated module `lm` on `args` for at most `fuel` fused steps,
 with the oracle `oracle`. -/
 def runPrepared {M : RunModel} {lm : LModule M} (hw : WF lm) (i : Nat)

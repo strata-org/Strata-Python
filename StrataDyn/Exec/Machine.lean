@@ -262,6 +262,24 @@ end
 
 /-! ## Operands -/
 
+/-- `R` holds of the elements of two lists, pairwise. -/
+inductive All₂ {α β : Type} (R : α → β → Prop) : List α → List β → Prop where
+  | nil : All₂ R [] []
+  | cons {a : α} {b : β} {as : List α} {bs : List β} :
+      R a b → All₂ R as bs → All₂ R (a :: as) (b :: bs)
+
+/-- A pairwise relation implies a weaker one. -/
+theorem All₂.imp {α β : Type} {R S : α → β → Prop} (h : ∀ a b, R a b → S a b) :
+    ∀ {as : List α} {bs : List β}, All₂ R as bs → All₂ S as bs
+  | _, _, .nil => .nil
+  | _, _, .cons hab hs => .cons (h _ _ hab) (hs.imp h)
+
+/-- Pairwise related lists have the same length. -/
+theorem All₂.length_eq {α β : Type} {R : α → β → Prop} :
+    ∀ {as : List α} {bs : List β}, All₂ R as bs → as.length = bs.length
+  | _, _, .nil => rfl
+  | _, _, .cons _ hs => congrArg (· + 1) hs.length_eq
+
 section
 variable {M : RunModel}
 
@@ -318,6 +336,105 @@ theorem size_bindSite :
   | _, _, (_, _) :: ps, [], .cons _ xs, h =>
     (size_bindSite _ ps [] xs (fits_set h _)).trans (Array.size_set _)
   | _, _, (_, _) :: _, [], .nil, _ => rfl
+
+/-- Two slots that hold the same value give it at the same tag. -/
+theorem getT_congr {env env₁ : Array (Dyn M.interp)} {v v₁ : Nat} {t : Ty}
+    (h : HasTy env v t) (h₁ : HasTy env₁ v₁ t) (he : env₁[v₁]? = env[v]?) :
+    getT env₁ v₁ t h₁ = getT env v t h := by
+  have hd : env₁[v₁]'h₁.1 = env[v]'h.1 := by
+    rw [Array.getElem?_eq_getElem h₁.1, Array.getElem?_eq_getElem h.1] at he
+    exact Option.some.inj he
+  have key : ∀ (d₁ d : Dyn M.interp) (p₁ : d₁.1 = t) (p : d.1 = t), d₁ = d →
+      cast (congrArg M.interp p₁) d₁.2 = cast (congrArg M.interp p) d.2 := by
+    intro d₁ d p₁ p e
+    subst e
+    rfl
+  exact key _ _ (h₁.2 h₁.1) (h.2 h.1) hd
+
+/-- `f` applied to the values of `vs`, one at a time. -/
+def apply1 (env : Array (Dyn M.interp)) {R : Type} :
+    (ts : List Ty) → Fn M.interp R ts → (vs : List Nat) → Typed env vs ts → R
+  | [], f, [], _ => f
+  | t :: ts, f, v :: vs, h => apply1 env ts (f (getT env v t h.1)) vs h.2
+  | [], _, _ :: _, h => h.elim
+  | _ :: _, _, [], h => h.elim
+
+/-- `applyFn`, which takes two operands at a time where it can, is `apply1`. -/
+private theorem applyFn_eq_apply1 (env : Array (Dyn M.interp)) {R : Type} :
+    ∀ (ts : List Ty) (f : Fn M.interp R ts) (vs : List Nat) (h : Typed env vs ts),
+      applyFn env ts f vs h = apply1 env ts f vs h
+  | [], _, [], _ => rfl
+  | [_], _, [_], _ => rfl
+  | _ :: _ :: ts, f, _ :: _ :: vs, h => by
+    rw [applyFn, applyFn_eq_apply1 env ts _ vs h.2.2]
+    rfl
+  | [_], _, _ :: _ :: _, h => h.2.elim
+  | _ :: _ :: _, _, [_], h => h.2.elim
+  | [], _, _ :: _, h => h.elim
+  | _ :: _, _, [], h => h.elim
+
+/-- Operands that hold the same values give `f` the same arguments. -/
+private theorem apply1_congr {env env₁ : Array (Dyn M.interp)} {R : Type} :
+    ∀ {vs₁ vs : List Nat}, All₂ (fun v₁ v => env₁[v₁]? = env[v]?) vs₁ vs →
+      ∀ (ts : List Ty) (f : Fn M.interp R ts) (h₁ : Typed env₁ vs₁ ts) (h : Typed env vs ts),
+        apply1 env₁ ts f vs₁ h₁ = apply1 env ts f vs h
+  | _, _, .nil, [], _, _, _ => rfl
+  | _, _, .nil, _ :: _, _, h₁, _ => h₁.elim
+  | _, _, .cons _ _, [], _, h₁, _ => h₁.elim
+  | _, _, .cons he hs, _ :: ts, f, h₁, h => by
+    rw [apply1, apply1, getT_congr h.1 h₁.1 he]
+    exact apply1_congr hs ts _ h₁.2 h.2
+
+/-- Operands that hold the same values give `f` the same arguments. -/
+theorem applyFn_congr {env env₁ : Array (Dyn M.interp)} {R : Type} {vs₁ vs : List Nat}
+    (hs : All₂ (fun v₁ v => env₁[v₁]? = env[v]?) vs₁ vs) (ts : List Ty) (f : Fn M.interp R ts)
+    (h₁ : Typed env₁ vs₁ ts) (h : Typed env vs ts) :
+    applyFn env₁ ts f vs₁ h₁ = applyFn env ts f vs h := by
+  rw [applyFn_eq_apply1, applyFn_eq_apply1]
+  exact apply1_congr hs ts f h₁ h
+
+/-- Operands that hold the same values have the same values. -/
+theorem lookupAll_congr {env env₁ : Array (Dyn M.interp)} :
+    ∀ {vs₁ vs : List Nat}, All₂ (fun v₁ v => env₁[v₁]? = env[v]?) vs₁ vs →
+      ∀ (h₁ : AllBound env₁ vs₁) (h : AllBound env vs), lookupAll env₁ vs₁ h₁ = lookupAll env vs h
+  | _, _, .nil, _, _ => rfl
+  | _, _, .cons he hs, h₁, h => by
+    rw [lookupAll, lookupAll, lookupAll_congr hs h₁.2 h.2]
+    refine congrArg (· :: _) ?_
+    rw [Array.getElem?_eq_getElem h₁.1, Array.getElem?_eq_getElem h.1] at he
+    exact Option.some.inj he
+
+/-- The values of `vs`, as their lookups. -/
+theorem lookupAll_getElem? {env : Array (Dyn M.interp)} :
+    ∀ {vs : List Nat} (h : AllBound env vs) (k : Nat) (hk : k < vs.length),
+      (lookupAll env vs h)[k]? = env[vs[k]]?
+  | [], _, _, hk => absurd hk (Nat.not_lt_zero _)
+  | v :: _, h, 0, _ => by
+    rw [lookupAll, List.getElem?_cons_zero, List.getElem_cons_zero, Array.getElem?_eq_getElem h.1]
+    rfl
+  | _ :: vs, h, k + 1, hk => by
+    rw [lookupAll, List.getElem?_cons_succ]
+    exact lookupAll_getElem? h.2 k (Nat.lt_of_succ_lt_succ hk)
+
+/-- `lookupAll` gives a value per operand. -/
+theorem length_lookupAll {env : Array (Dyn M.interp)} :
+    ∀ {vs : List Nat} (h : AllBound env vs), (lookupAll env vs h).length = vs.length
+  | [], _ => rfl
+  | _ :: _, h => congrArg (· + 1) (length_lookupAll h.2)
+
+/-- Binding parameters leaves every other slot as it was. -/
+theorem bindSite_other {w : Nat} :
+    ∀ (env : Array (Dyn M.interp)) {ts : List Ty} (ps : Ctx) (ds : List (Dyn M.interp))
+      (xs : Args M.interp ts) (h : ∀ p ∈ ps, p.1 < env.size), w ∉ ps.map (·.1) →
+      (bindSite env ps ds xs h)[w]? = env[w]?
+  | env, _, (p, _) :: ps, d :: ds, xs, h, hw => by
+    rw [bindSite, bindSite_other _ ps ds xs _ (fun hm => hw (List.mem_cons_of_mem _ hm))]
+    exact Array.getElem?_set_ne _ (fun he => hw (he ▸ List.mem_cons_self))
+  | env, _, (p, _) :: ps, [], .cons x xs, h, hw => by
+    rw [bindSite, bindSite_other _ ps [] xs _ (fun hm => hw (List.mem_cons_of_mem _ hm))]
+    exact Array.getElem?_set_ne _ (fun he => hw (he ▸ List.mem_cons_self))
+  | _, _, [], _, _, _, _ => rfl
+  | _, _, (_, _) :: _, [], .nil, _, _ => rfl
 
 /-- The one value a transfer to a body's exit passes: its arguments and its payload, which
 validation makes exactly one value. -/

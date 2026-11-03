@@ -627,6 +627,45 @@ The pass changes only a function's body. The function's parameters, its contract
 is extern stay as they are, and a cell that a contract region makes is not promoted. So an
 extern function, which has no body, stays as it is.
 
+### What the pass keeps
+
+`StrataDyn/RefToRegSound/` proves that a target that promotes its source's cells keeps the
+source's behaviour, for a model whose rules are certified (§5, "Certificates").
+`refToReg_sound_cell` takes a source module linked and validated, a well-formed linked target,
+and the hypothesis `PromotionOK lm lm₁`: the linked target promotes the linked source's cells,
+block by block, as the certificate in `RefToRegSound/Cert.lean` describes it. For every start of
+a function on arguments that hold no ref, every observation of the world and every oracle, the
+target's run improves on the source's run under the same oracle, up to a bad cell: the two runs
+show the same, or the source faults with a bad cell after showing what the target also shows.
+This is trace refinement under one oracle (`Exec.OracleRefines`, §5, "Trace refinement"), and
+the only wrong result it excuses is a bad cell. Promotion keeps every choice, so the oracle is
+shared. `refToReg_sound` is a weaker corollary, which excuses every wrong result of the source:
+a failed rule or a bad call as well as a bad cell.
+When no rule of the linked source stops with a bad cell itself (§5, "Heap safety"),
+`refToReg_sound_eq` gives equal behaviours under every oracle, and `refToReg_sound_runs` that
+every run of each behaves as some run of the other. `WhileCert.refToReg_sound_while` states
+`refToReg_sound_cell` at While's table. These theorems observe the world, not how many choices a
+run makes: the simulation behind them keeps that number too, but the behaviour does not record
+it.
+
+The theorems hold for any target that `PromotionOK` relates to the source, and do not mention
+the pass. That the pass's output, linked, satisfies `PromotionOK` is the static half of the
+proof, which relates `refToReg`'s plan, through linking, to the linked code. It is not yet
+proved; proving that `refToReg` establishes `PromotionOK` is the next step. The second rule
+above, "an operation reaches only the cells it is given", is not assumed: it is the model's
+certificate, which linking carries to every instruction of the linked module (`link_rulesOK`).
+
+The certificate tracks, at each point of a block, facts relating the source frame to the target
+frame: a target value holds a source value, or a promoted cell's content, and a source value is
+a promoted cell. A value an `eq` fact names is valid in the source heap's typing without the
+promoted locations, so it holds no promoted cell. So a `refGet` or `refSet` of a cell that is not
+promoted stays, with a cell operand that an `eq` fact relates to the source's, also when the
+function did not allocate the cell, as for a parameter or a closure's captured cell. A rule's
+certificate holds at that typing too, so the rule asks for no promoted cell, and the source and
+target heaps, which agree off the promoted cells, answer it alike. An operation with regions
+names the promoted cells its regions may write; its regions read the contents of the others.
+
+
 ## 4. Giving a language its semantics
 
 A language gives each type a Lean type and each instruction a rule, an ordinary Lean function.
@@ -1093,9 +1132,9 @@ and gives three ways to prove trace refinement:
 
 * `Sim`, a forward simulation of a step function by a step function, with a measure: every
   source step is matched by target steps, or by none and the measure decreases (`Sim.refines`).
-  Under one oracle, Dyn's machine is a function, so a translation that keeps choices one to one
-  proves a `Sim` under each oracle, and `Exec.oracleRefines_of_sim` gives refinement under one
-  oracle.
+  Under one oracle, Dyn's machine is a function, so a translation that keeps choices one to one,
+  such as ref-to-reg, proves a `Sim` under each oracle, and `Exec.oracleRefines_of_sim` gives
+  trace refinement under one oracle.
 * `BSim` and `BSimStep` (`StrataDyn/Util/Trace/Backward.lean`), backward simulations. With
   `BSimStep`, the proof takes each target step from related states and gives source steps to a
   related state, or no source step and a smaller measure. The source steps and their answers to
