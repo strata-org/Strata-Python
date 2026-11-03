@@ -1091,6 +1091,7 @@ partial def checkAssign (target : VariableMd) (value : StmtExprMd) (rest : List 
     | .StaticCall callee args _ => checkAssignStaticCall md id.text targetTy callee args rest retTy grade
     | .New classId => checkAssignNew md id.text targetTy classId rest retTy grade
     | _ => checkAssignVar md id.text targetTy value rest retTy grade
+  | .Stack _ => throw "checkAssign: a stack target should have been turned into a local"
 
 /-- ⟦·⟧⇐ₚ (assign, generic RHS):
 ```

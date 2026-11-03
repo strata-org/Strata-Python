@@ -936,7 +936,7 @@ partial def renameParamsToInputs (paramNames : List String) (e : StmtExprMd) : S
     | .Local name =>
       if paramNames.contains name.text then { v with val := .Local { name with text := s!"{pythonGeneratedPrefix}in_{name.text}" } } else v
     | .Field t fn => { v with val := .Field (rw t) fn }
-    | .Declare _ => v
+    | .Declare _ | .Stack _ => v
   let rwVarList := fun (l : List VariableMd) => l.map rwVar
   let val := match e.val with
     | .Var v => .Var (rwVar { val := v, source := e.source }).val
