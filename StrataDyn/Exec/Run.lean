@@ -77,6 +77,25 @@ def startCore (hwf : WF m) (i : Nat) (args : List (Dyn M.interp))
                 conts := [], heap := snap.heap, world := snap.world },
               start_ok hwf hf hb ha snap⟩⟩
 
+/-- **A successful start** runs the entry frame of function `i` on `args`, with nothing waiting,
+on the heap and the world of `snap`. -/
+theorem startCore_entry {hwf : WF m} {i : Nat} {args : List (Dyn M.interp)} {snap : Snapshot M}
+    {B : Ty} {c : Core M} {hc : CoreOK m B c} (hst : startCore hwf i args snap = .ok ⟨B, c, hc⟩) :
+    ∃ (fn : LBody M) (b : LBlock M) (hf : m.funcs[i]? = some fn) (hb : fn.blocks[0]? = some b),
+      c = { top := Frame.entry fn b (freshStore M fn.slots) args .nil (fresh_fits fn)
+              (hwf.fits_of_getElem? hf hb),
+            conts := [], heap := snap.heap, world := snap.world } := by
+  unfold startCore at hst
+  cases he : entry? m i args with
+  | error e =>
+    rw [he] at hst
+    exact nomatch hst
+  | ok p =>
+    rw [he] at hst
+    obtain ⟨⟨fn, b⟩, hf, hb, ha⟩ := p
+    cases hst
+    exact ⟨fn, b, hf, hb, rfl⟩
+
 /-- A state running function `i` on `args`, which must fit its entry block, from the
 heap and the world of `snap`, and its return code. -/
 def start (hwf : WF m) (i : Nat) (args : List (Dyn M.interp)) (snap : Snapshot M := .initial) :

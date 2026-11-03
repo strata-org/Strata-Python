@@ -190,6 +190,19 @@ def LInsn.dst : LInsn M → Nat
 /-- The parameters' tags. -/
 def LBlock.paramTys (b : LBlock M) : List Ty := b.params.map (·.2)
 
+/-- Every instruction of the block satisfies `insn`, and its terminator satisfies `term`. -/
+def LBlock.All (b : LBlock M) (insn : LInsn M → Prop) (term : LTerm M → Prop) : Prop :=
+  (∀ i ∈ b.insns, insn i) ∧ term b.term
+
+/-- Every instruction of the body's blocks satisfies `insn`, and every terminator `term`. -/
+def LBody.All (g : LBody M) (insn : LInsn M → Prop) (term : LTerm M → Prop) : Prop :=
+  ∀ b ∈ g.blocks, b.All insn term
+
+/-- Every instruction of every function and region of the module satisfies `insn`, and every
+terminator `term`. -/
+def LModule.All (m : LModule M) (insn : LInsn M → Prop) (term : LTerm M → Prop) : Prop :=
+  (∀ g ∈ m.funcs, g.All insn term) ∧ ∀ g ∈ m.regions, g.All insn term
+
 end
 
 /-! ## Linking -/

@@ -965,10 +965,51 @@ run's heap and another run's world.
 A run ignores contracts and ghosts, and a module with an extern function does not run yet:
 `runModule` rejects it with `Fault.invalid` (`StrataDynTest/Exec/BaseTest.lean`).
 
+### Certifying a table: `dyn_cert`
+
+A rule is an ordinary Lean function, generic in the run token, and Lean does not prove that it
+is parametric: a rule can still build a ref at the machine's token classically. Proofs about
+runs that rely on rules reaching only what they are given, such as ref-to-reg's, therefore need
+the table to be *certified* (§5, "Certificates"). A language certifies its table in two steps.
+
+First, `Accounts M` (`StrataDyn/Exec/CertModel.lean`) gives the *account* of a value of each
+tag: the cells its refs name, at their contents' tags, and the captures cells of its closures.
+It also gives the accounts of the world and of each rule's state. A ref's and a closure's
+accounts are fixed by the engine, and the literals that link hold none: linking rejects a
+ghost's cell, `ghost @m.g`, outside a contract. An account that leaves refs out
+makes the certificates of the rules that reach them unprovable, so it fails safe.
+
+Second, `dyn_cert` proves each operation's certificate. It unfolds the wrapper, the rule, the
+rule's helpers and the language's class, then takes the goal apart with `Spec.Sat`'s lemmas,
+splitting each `if`, `match` and `Bool`. `dyn_cert [h₁, …]` adds the accounts' definitions,
+which it unfolds by reduction, so an account at a known tag is computed. When goals are left,
+it fails and shows them, each a request, result, exit or world it could not show valid.
+
+`#dyn_certs S A [h₁, …]` runs `dyn_cert [h₁, …]` on every operation of table `S`, each as its
+own theorem: `cert.op : S.model.OpCertified A k S.impl.op` for the operation `op` at position
+`k`. It then proves `cert.ops`, that the operations of `S.ops` are certified, from those
+theorems alone, so the table's certificate does not elaborate the operations' proofs again.
+Lean elaborates the operations' proofs in parallel, and a proof that fails names its operation.
+An operation whose `cert.op` is declared before the command, with a proof written by hand, is
+not proved again. While's certificate (`StrataDyn/Examples/While/Cert.lean`) is:
+
+```lean
+#dyn_certs WhileSem accounts [accounts, acct]
+
+theorem certified : WhileSem.model.Certified accounts :=
+  Model.certified_of_ops cert.ops
+```
+
+A rule that gives a ref another contents' type, as the test environment's `ex.retype` does, has
+no certificate (`StrataDynTest/Exec/CertTest.lean`). `dyn_cert` does not prove the certificate
+of a rule that builds a closure over a list of cells, such as `ex.mkClo`, which has the shape of
+Python's `mkClosure`: such a rule needs a hand-written certificate, with a lemma for `bindAll` by
+induction on the list; this package has none yet.
+
 ## 5. Reasoning about runs
 
 This section is about proofs over the runs of linked modules: what a run does when it never
-ends, and how the behaviours of two modules compare.
+ends, how the behaviours of two modules compare, and what a run of a certified table may touch.
 
 ### Runs and behaviours
 
@@ -1070,6 +1111,69 @@ ends iff, under some oracle, `runFused` runs out of fuel on every fuel (`diverge
 debugger's hook runs `step`: one that only observes ends at the configuration of the run under
 its oracle (`runHooked_observer`), and a run that it stops and `runFused` resumes ends at a
 configuration of the uninterrupted run (`runHooked_resume`).
+
+### Certificates
+
+A rule's *certificate* says that it reaches only the cells and captures cells it is given. Every
+ref and closure the rule hands the machine, in a request, a result, an exit or the world, is
+valid in the typing of the heap at that point, whenever everything the machine handed it was. A
+typing does not record which function a closure names or at which signature: the machine checks
+that at every call.
+
+`StrataDyn/Exec/Spec.lean` states what a tree may do once for every proof about a rule. A
+`Spec G ε E` says, at a ghost state `g : G` (a value that only proofs carry, not a module's
+ghost of §1), which requests a rule may make, which answers it
+may get, which worlds the machine may hold and which exits the rule may take. `Spec.Sat V Q g t`
+says that the tree `t` makes only allowed requests and, under allowed answers, returns a value
+`Q` holds of or takes an allowed exit. The simp lemma `sat_bind` takes a goal through a `do`
+block, and `RegionSpec.sat` through a region.
+
+For certificates the ghost state is a typing of the heap, `Typing` (`StrataDyn/Exec/Cert.lean`):
+a tag for some cells and tags for some captures cells, which grows by extension.
+`Accounts.spec` is the machine as a rule's tree sees it, over typings and the accounts of §4.
+`Model.Certified M A` says that every wrapper respects every typing under which its operands are
+valid. `link_rulesOK` carries it to every instruction and terminator of a linked module,
+`LModule.RulesOK`. It is an instance of `link_inv` (`StrataDyn/Exec/LinkInv.lean`), which carries
+any property of linked instructions that the table's wrappers give, and that the instructions
+linking makes with no wrapper have, to every function and region of a linked module.
+
+### The frame theorem
+
+`StrataDyn/Exec/Frame.lean` proves that a run of a module whose rules are certified leaves alone
+what it cannot reach. `Reachable A heap roots` is the set of locations reached from a list of
+roots, through the accounts of the cells and captures cells reached. The run invariant, `Inv`, is
+a typing of the heap that misses a set of locations `P`, in which every value of the state is
+valid. Every step keeps it at an extension of the typing (`step_inv`), so `frame` says that at
+every configuration of every run, and at the end if there is one, the cells at `P` are as they
+were. `frame_startCore` starts the run at a function's entry, with `P` unreachable from the
+arguments and the world.
+
+`StrataDyn/Exec/Call.lean` states the same for one call. A step never reads the frames waiting
+below the running ones until the bottom one returns, so every run of a call is, until the callee
+returns, a run of the callee from `bodyStart` with those frames below (`run_call`, which gives a
+`CalleeRun`; under one oracle it is an equality of traces, `trace_call`). `frame_call` says that
+every run of a call keeps the cells the callee cannot reach, along each of its callee's runs,
+until it returns and when the caller resumes (`CallKeeps`). A fact proved of every run of the
+callee holds of the same callee run. `frame_call_of_run` applies `frame_call` at a pending call
+that a run reaches from a state where the run invariant holds, such as a function's start, and
+`StrataDynTest/Exec/LinkedCallTest.lean` uses it on two While functions that go through `lower`
+and `link`.
+
+### Heap safety
+
+A run of a module whose rules are certified uses only the cells it may
+(`StrataDyn/Exec/Safety.lean`). Every ref the run holds is valid in a typing of the heap, so
+every access that the machine checks finds a cell of its tag (`access_ok`). A rule may still stop
+with `Fault.badCell` itself, since a certificate says nothing of faults. `LModule.Avoids` says
+that no rule of a linked module does. With it, `never_badCell` says that no run from a state
+where the run invariant holds faults with a bad cell at any configuration or ends with one.
+`never_badCell_startCore` starts it from a function's entry, on arguments that hold no
+ref, from the engine's start or from the snapshot where another run ended. A typing does not
+record the function a closure names, so `Fault.badCall` is not covered.
+`StrataDynTest/Exec/SafetyTest.lean` proves it for a module linked by hand at While's run
+model, in which no rule's tree runs: its instructions are the machine's own and its terminators
+are returns. Beside it, a run of `ex.retype` faults with a bad cell. Nothing yet proves
+`LModule.Avoids` for a module that `link` makes from a table.
 
 ## 6. Dyn types in Core
 

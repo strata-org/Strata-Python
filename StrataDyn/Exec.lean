@@ -77,6 +77,13 @@ def loop (cond : Region ε [] Bool) (body : Region ε [] Unit) (_st : Option Uni
   least as many steps (`runFused_eq`).  `Exec/Run.lean` starts and runs
   a module, from a `Snapshot` of a heap and a world, the initial one or where an earlier run
   ended.
+* **Certificates**: what a rule's tree may do (`Exec/Spec.lean`), typings of the heap
+  (`Exec/Cert.lean`), accounts and certified tables (`Exec/CertModel.lean`), the `dyn_cert`
+  tactic and the `#dyn_certs` command (`Exec/CertTactic.lean`), and linking's program logic
+  (`Exec/LinkInv.lean`), by which a certified table certifies every linked module
+  (`Exec/CertLink.lean`).  A run of a certified module keeps what it cannot reach
+  (`Exec/Frame.lean`, `Exec/Call.lean` for one call) and never faults on a cell the machine
+  checks (`Exec/Safety.lean`).
 
 ## Design
 
