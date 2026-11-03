@@ -950,7 +950,7 @@ partial def renameParamsToInputs (paramNames : List String) (e : StmtExprMd) : S
     | .ReferenceEquals l r => .ReferenceEquals (rw l) (rw r)
     | .AsType t ty => .AsType (rw t) ty
     | .IsType t ty => .IsType (rw t) ty
-    | .InstanceCall t c args => .InstanceCall (rw t) c (rwList args)
+    | .InstanceCall t c args tys => .InstanceCall (rw t) c (rwList args) tys
     | .Old v => .Old (rw v)
     | .Fresh v => .Fresh (rw v)
     | .Assert c s => .Assert (rw c) s
