@@ -1,0 +1,10 @@
+--- stdout 28
+before
+list_reverseiterator
+
+--- outcome
+ok
+--- globals
+R = <class 'R'>
+__doc__ = None
+__name__ = '__main__'

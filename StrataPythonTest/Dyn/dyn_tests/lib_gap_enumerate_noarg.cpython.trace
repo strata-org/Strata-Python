@@ -1,0 +1,8 @@
+--- stdout 7
+before
+
+--- outcome
+raised TypeError: enumerate() missing required argument 'iterable'
+--- globals
+__doc__ = None
+__name__ = '__main__'

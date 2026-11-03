@@ -1,0 +1,10 @@
+--- stdout 2
+1
+
+--- outcome
+raised TypeError: 'S' object does not support indexing
+--- globals
+S = <class 'S'>
+__doc__ = None
+__name__ = '__main__'
+r = <reversed object>

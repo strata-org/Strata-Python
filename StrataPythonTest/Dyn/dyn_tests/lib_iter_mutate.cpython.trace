@@ -1,0 +1,32 @@
+--- stdout 124
+True 5
+True 0
+dictionary changed size during iteration
+98
+gt 5 1
+gt 4 5
+5 3
+False 3 0 2 4
+Set changed size during iteration
+
+--- outcome
+ok
+--- globals
+Clear = <class 'Clear'>
+Ext = <class 'Ext'>
+Grow = <class 'Grow'>
+Q = <class 'Q'>
+Skip = <class 'Skip'>
+__doc__ = None
+__name__ = '__main__'
+addkey = <function object>
+addmember = <function object>
+d = {1: 0, 2: 0, 11: 0}
+it = <list_iterator object>
+l = [<Grow object>, <Grow object>, <Grow object>, <Grow object>, <Grow object>]
+m = []
+n = [1, 2, <Ext object>, 30, 40]
+q = [<Q object>, <Q object>, <Q object>]
+r = <Q object>
+s = {1, 11, 2}
+seen = [0, 2, 4]

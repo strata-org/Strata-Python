@@ -1,0 +1,12 @@
+--- stdout 4
+z
+x
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+d = {'x': 0, 'z': 0, 'w': 0}
+it = <dict_reversekeyiterator object>
+k = 'x'

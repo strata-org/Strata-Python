@@ -1,0 +1,819 @@
+module lib_zip_enumerate {
+  func @|lib_zip_enumerate.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("lib_zip_enumerate")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_zip_enumerate.count, "count", "lib_zip_enumerate")
+      %count.cell.0 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "count")
+      %set.2 : base.Unit = base.refSet[py.Value](%count.cell.0, %clo.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|lib_zip_enumerate.Again.<body>|, "<body>", "lib_zip_enumerate")
+      %str.1 : py.Value = py.strLit("Again")
+      %tuple.0 : py.Value = py.mkTuple(%clo.1, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %Again.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %Again.cell.0 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "Again")
+      %set.3 : base.Unit = base.refSet[py.Value](%Again.cell.0, %Again.0)
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@|lib_zip_enumerate.Logged.<body>|, "<body>", "lib_zip_enumerate")
+      %str.2 : py.Value = py.strLit("Logged")
+      %tuple.1 : py.Value = py.mkTuple(%clo.2, %str.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %Logged.0 : py.Value = py.call(%__build_class__.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %Logged.cell.0 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "Logged")
+      %set.4 : base.Unit = base.refSet[py.Value](%Logged.cell.0, %Logged.0)
+      %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.3 : py.Value = py.mkClosure[[]](@|lib_zip_enumerate.LoudIter.<body>|, "<body>", "lib_zip_enumerate")
+      %str.3 : py.Value = py.strLit("LoudIter")
+      %tuple.2 : py.Value = py.mkTuple(%clo.3, %str.3)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %LoudIter.0 : py.Value = py.call(%__build_class__.2, %tuple.2, %kwargs.2) ^propagate.0()
+      %LoudIter.cell.0 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "LoudIter")
+      %set.5 : base.Unit = base.refSet[py.Value](%LoudIter.cell.0, %LoudIter.0)
+      %clo.4 : py.Value = py.mkClosure[[]](@lib_zip_enumerate.show, "show", "lib_zip_enumerate")
+      %show.cell.0 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "show")
+      %set.6 : base.Unit = base.refSet[py.Value](%show.cell.0, %clo.4)
+      %show.0 : py.Value = py.loadGlobal("lib_zip_enumerate", "show") ^propagate.0()
+      %zip.0 : py.Value = py.loadGlobal("lib_zip_enumerate", "zip") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %int.2 : py.Value = py.intLit(3)
+      %list.0 : py.Value = py.mkList(%int.0, %int.1, %int.2)
+      %str.4 : py.Value = py.strLit("ab")
+      %tuple.3 : py.Value = py.mkTuple(%list.0, %str.4)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%zip.0, %tuple.3, %kwargs.3) ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple(%call.0)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%show.0, %tuple.4, %kwargs.4) ^propagate.0()
+      %show.1 : py.Value = py.loadGlobal("lib_zip_enumerate", "show") ^propagate.0()
+      %enumerate.0 : py.Value = py.loadGlobal("lib_zip_enumerate", "enumerate") ^propagate.0()
+      %str.5 : py.Value = py.strLit("xy")
+      %tuple.5 : py.Value = py.mkTuple(%str.5)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%enumerate.0, %tuple.5, %kwargs.5) ^propagate.0()
+      %tuple.6 : py.Value = py.mkTuple(%call.2)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%show.1, %tuple.6, %kwargs.6) ^propagate.0()
+      %show.2 : py.Value = py.loadGlobal("lib_zip_enumerate", "show") ^propagate.0()
+      %enumerate.1 : py.Value = py.loadGlobal("lib_zip_enumerate", "enumerate") ^propagate.0()
+      %str.6 : py.Value = py.strLit("xy")
+      %int.3 : py.Value = py.intLit(10)
+      %tuple.7 : py.Value = py.mkTuple(%str.6, %int.3)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%enumerate.1, %tuple.7, %kwargs.7) ^propagate.0()
+      %tuple.8 : py.Value = py.mkTuple(%call.4)
+      %kwargs.8 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%show.2, %tuple.8, %kwargs.8) ^propagate.0()
+      %show.3 : py.Value = py.loadGlobal("lib_zip_enumerate", "show") ^propagate.0()
+      %enumerate.2 : py.Value = py.loadGlobal("lib_zip_enumerate", "enumerate") ^propagate.0()
+      %str.7 : py.Value = py.strLit("z")
+      %tuple.9 : py.Value = py.mkTuple(%str.7)
+      %str.8 : py.Value = py.strLit("start")
+      %int.4 : py.Value = py.intLit(3)
+      %neg.0 : py.Value = py.uSub(%int.4) ^propagate.0()
+      %kwargs.9 : py.Value = py.mkKwargs(%str.8, %neg.0)
+      %call.6 : py.Value = py.call(%enumerate.2, %tuple.9, %kwargs.9) ^propagate.0()
+      %tuple.10 : py.Value = py.mkTuple(%call.6)
+      %kwargs.10 : py.Value = py.mkKwargs
+      %call.7 : py.Value = py.call(%show.3, %tuple.10, %kwargs.10) ^propagate.0()
+      %show.4 : py.Value = py.loadGlobal("lib_zip_enumerate", "show") ^propagate.0()
+      %enumerate.3 : py.Value = py.loadGlobal("lib_zip_enumerate", "enumerate") ^propagate.0()
+      %str.9 : py.Value = py.strLit("z")
+      %int.5 : py.Value = py.intLit(10)
+      %int.6 : py.Value = py.intLit(20)
+      %pow.0 : py.Value = py.pow(%int.5, %int.6) ^propagate.0()
+      %tuple.11 : py.Value = py.mkTuple(%str.9, %pow.0)
+      %kwargs.11 : py.Value = py.mkKwargs
+      %call.8 : py.Value = py.call(%enumerate.3, %tuple.11, %kwargs.11) ^propagate.0()
+      %tuple.12 : py.Value = py.mkTuple(%call.8)
+      %kwargs.12 : py.Value = py.mkKwargs
+      %call.9 : py.Value = py.call(%show.4, %tuple.12, %kwargs.12) ^propagate.0()
+      %show.5 : py.Value = py.loadGlobal("lib_zip_enumerate", "show") ^propagate.0()
+      %enumerate.4 : py.Value = py.loadGlobal("lib_zip_enumerate", "enumerate") ^propagate.0()
+      %LoudIter.1 : py.Value = py.loadGlobal("lib_zip_enumerate", "LoudIter") ^propagate.0()
+      %tuple.13 : py.Value = py.mkTuple
+      %kwargs.13 : py.Value = py.mkKwargs
+      %call.10 : py.Value = py.call(%LoudIter.1, %tuple.13, %kwargs.13) ^propagate.0()
+      %Logged.1 : py.Value = py.loadGlobal("lib_zip_enumerate", "Logged") ^propagate.0()
+      %tuple.14 : py.Value = py.mkTuple
+      %kwargs.14 : py.Value = py.mkKwargs
+      %call.11 : py.Value = py.call(%Logged.1, %tuple.14, %kwargs.14) ^propagate.0()
+      %tuple.15 : py.Value = py.mkTuple(%call.10, %call.11)
+      %kwargs.15 : py.Value = py.mkKwargs
+      %call.12 : py.Value = py.call(%enumerate.4, %tuple.15, %kwargs.15) ^propagate.0()
+      %tuple.16 : py.Value = py.mkTuple(%call.12)
+      %kwargs.16 : py.Value = py.mkKwargs
+      %call.13 : py.Value = py.call(%show.5, %tuple.16, %kwargs.16) ^propagate.0()
+      %zip.1 : py.Value = py.loadGlobal("lib_zip_enumerate", "zip") ^propagate.0()
+      %int.7 : py.Value = py.intLit(1)
+      %int.8 : py.Value = py.intLit(2)
+      %list.1 : py.Value = py.mkList(%int.7, %int.8)
+      %int.9 : py.Value = py.intLit(3)
+      %list.2 : py.Value = py.mkList(%int.9)
+      %tuple.17 : py.Value = py.mkTuple(%list.1, %list.2)
+      %kwargs.17 : py.Value = py.mkKwargs
+      %call.14 : py.Value = py.call(%zip.1, %tuple.17, %kwargs.17) ^propagate.0()
+      %z.cell.0 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "z")
+      %set.7 : base.Unit = base.refSet[py.Value](%z.cell.0, %call.14)
+      %print.0 : py.Value = py.loadGlobal("lib_zip_enumerate", "print") ^propagate.0()
+      %next.0 : py.Value = py.loadGlobal("lib_zip_enumerate", "next") ^propagate.0()
+      %z.0 : py.Value = py.loadGlobal("lib_zip_enumerate", "z") ^propagate.0()
+      %tuple.18 : py.Value = py.mkTuple(%z.0)
+      %kwargs.18 : py.Value = py.mkKwargs
+      %call.15 : py.Value = py.call(%next.0, %tuple.18, %kwargs.18) ^propagate.0()
+      %int.10 : py.Value = py.intLit(1)
+      %item.0 : py.Value = py.getItem(%call.15, %int.10) ^propagate.0()
+      %next.1 : py.Value = py.loadGlobal("lib_zip_enumerate", "next") ^propagate.0()
+      %z.1 : py.Value = py.loadGlobal("lib_zip_enumerate", "z") ^propagate.0()
+      %str.10 : py.Value = py.strLit("end")
+      %tuple.19 : py.Value = py.mkTuple(%z.1, %str.10)
+      %kwargs.19 : py.Value = py.mkKwargs
+      %call.16 : py.Value = py.call(%next.1, %tuple.19, %kwargs.19) ^propagate.0()
+      %tuple.20 : py.Value = py.mkTuple(%item.0, %call.16)
+      %kwargs.20 : py.Value = py.mkKwargs
+      %call.17 : py.Value = py.call(%print.0, %tuple.20, %kwargs.20) ^propagate.0()
+      %print.1 : py.Value = py.loadGlobal("lib_zip_enumerate", "print") ^propagate.0()
+      %count.0 : py.Value = py.loadGlobal("lib_zip_enumerate", "count") ^propagate.0()
+      %zip.2 : py.Value = py.loadGlobal("lib_zip_enumerate", "zip") ^propagate.0()
+      %tuple.21 : py.Value = py.mkTuple
+      %kwargs.21 : py.Value = py.mkKwargs
+      %call.18 : py.Value = py.call(%zip.2, %tuple.21, %kwargs.21) ^propagate.0()
+      %tuple.22 : py.Value = py.mkTuple(%call.18)
+      %kwargs.22 : py.Value = py.mkKwargs
+      %call.19 : py.Value = py.call(%count.0, %tuple.22, %kwargs.22) ^propagate.0()
+      %count.1 : py.Value = py.loadGlobal("lib_zip_enumerate", "count") ^propagate.0()
+      %zip.3 : py.Value = py.loadGlobal("lib_zip_enumerate", "zip") ^propagate.0()
+      %list.3 : py.Value = py.mkList
+      %tuple.23 : py.Value = py.mkTuple(%list.3)
+      %kwargs.23 : py.Value = py.mkKwargs
+      %call.20 : py.Value = py.call(%zip.3, %tuple.23, %kwargs.23) ^propagate.0()
+      %tuple.24 : py.Value = py.mkTuple(%call.20)
+      %kwargs.24 : py.Value = py.mkKwargs
+      %call.21 : py.Value = py.call(%count.1, %tuple.24, %kwargs.24) ^propagate.0()
+      %tuple.25 : py.Value = py.mkTuple(%call.19, %call.21)
+      %kwargs.25 : py.Value = py.mkKwargs
+      %call.22 : py.Value = py.call(%print.1, %tuple.25, %kwargs.25) ^propagate.0()
+      %Again.1 : py.Value = py.loadGlobal("lib_zip_enumerate", "Again") ^propagate.0()
+      %tuple.26 : py.Value = py.mkTuple
+      %kwargs.26 : py.Value = py.mkKwargs
+      %call.23 : py.Value = py.call(%Again.1, %tuple.26, %kwargs.26) ^propagate.0()
+      %a.cell.0 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "a")
+      %set.8 : base.Unit = base.refSet[py.Value](%a.cell.0, %call.23)
+      %zip.4 : py.Value = py.loadGlobal("lib_zip_enumerate", "zip") ^propagate.0()
+      %a.0 : py.Value = py.loadGlobal("lib_zip_enumerate", "a") ^propagate.0()
+      %tuple.27 : py.Value = py.mkTuple(%a.0)
+      %kwargs.27 : py.Value = py.mkKwargs
+      %call.24 : py.Value = py.call(%zip.4, %tuple.27, %kwargs.27) ^propagate.0()
+      %z.cell.1 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "z")
+      %set.9 : base.Unit = base.refSet[py.Value](%z.cell.1, %call.24)
+      %range.0 : py.Value = py.loadGlobal("lib_zip_enumerate", "range") ^propagate.0()
+      %int.11 : py.Value = py.intLit(3)
+      %tuple.28 : py.Value = py.mkTuple(%int.11)
+      %kwargs.28 : py.Value = py.mkKwargs
+      %call.25 : py.Value = py.call(%range.0, %tuple.28, %kwargs.28) ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%call.25) ^propagate.0()
+      jump ^head.0()
+    head.0():
+      %item.1 : py.Value = py.next(%iter.0) ^stop.0()
+      %_.cell.0 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "_")
+      %set.10 : base.Unit = base.refSet[py.Value](%_.cell.0, %item.1)
+      %print.2 : py.Value = py.loadGlobal("lib_zip_enumerate", "print") ^propagate.0()
+      %count.2 : py.Value = py.loadGlobal("lib_zip_enumerate", "count") ^propagate.0()
+      %z.2 : py.Value = py.loadGlobal("lib_zip_enumerate", "z") ^propagate.0()
+      %tuple.29 : py.Value = py.mkTuple(%z.2)
+      %kwargs.29 : py.Value = py.mkKwargs
+      %call.26 : py.Value = py.call(%count.2, %tuple.29, %kwargs.29) ^propagate.0()
+      %tuple.30 : py.Value = py.mkTuple(%call.26)
+      %kwargs.30 : py.Value = py.mkKwargs
+      %call.27 : py.Value = py.call(%print.2, %tuple.30, %kwargs.30) ^propagate.0()
+      jump ^head.0()
+    stop.0(%exc.0 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.0)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+    exit.0():
+      %enumerate.5 : py.Value = py.loadGlobal("lib_zip_enumerate", "enumerate") ^propagate.0()
+      %Again.2 : py.Value = py.loadGlobal("lib_zip_enumerate", "Again") ^propagate.0()
+      %tuple.31 : py.Value = py.mkTuple
+      %kwargs.31 : py.Value = py.mkKwargs
+      %call.28 : py.Value = py.call(%Again.2, %tuple.31, %kwargs.31) ^propagate.0()
+      %tuple.32 : py.Value = py.mkTuple(%call.28)
+      %kwargs.32 : py.Value = py.mkKwargs
+      %call.29 : py.Value = py.call(%enumerate.5, %tuple.32, %kwargs.32) ^propagate.0()
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "e")
+      %set.11 : base.Unit = base.refSet[py.Value](%e.cell.0, %call.29)
+      %range.1 : py.Value = py.loadGlobal("lib_zip_enumerate", "range") ^propagate.0()
+      %int.12 : py.Value = py.intLit(3)
+      %tuple.33 : py.Value = py.mkTuple(%int.12)
+      %kwargs.33 : py.Value = py.mkKwargs
+      %call.30 : py.Value = py.call(%range.1, %tuple.33, %kwargs.33) ^propagate.0()
+      %iter.1 : py.Value = py.getIter(%call.30) ^propagate.0()
+      jump ^head.1()
+    head.1():
+      %item.2 : py.Value = py.next(%iter.1) ^stop.1()
+      %_.cell.1 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "_")
+      %set.12 : base.Unit = base.refSet[py.Value](%_.cell.1, %item.2)
+      %print.3 : py.Value = py.loadGlobal("lib_zip_enumerate", "print") ^propagate.0()
+      %count.3 : py.Value = py.loadGlobal("lib_zip_enumerate", "count") ^propagate.0()
+      %e.0 : py.Value = py.loadGlobal("lib_zip_enumerate", "e") ^propagate.0()
+      %tuple.34 : py.Value = py.mkTuple(%e.0)
+      %kwargs.34 : py.Value = py.mkKwargs
+      %call.31 : py.Value = py.call(%count.3, %tuple.34, %kwargs.34) ^propagate.0()
+      %tuple.35 : py.Value = py.mkTuple(%call.31)
+      %kwargs.35 : py.Value = py.mkKwargs
+      %call.32 : py.Value = py.call(%print.3, %tuple.35, %kwargs.35) ^propagate.0()
+      jump ^head.1()
+    stop.1(%exc.1 : py.Value):
+      %done.1 : base.Bool = py.isStopIteration(%exc.1)
+      branch(%done.1) ^exit.1() ^propagate.0(%exc.1)
+    exit.1():
+      %iter.2 : py.Value = py.loadGlobal("lib_zip_enumerate", "iter") ^propagate.0()
+      %int.13 : py.Value = py.intLit(1)
+      %int.14 : py.Value = py.intLit(2)
+      %int.15 : py.Value = py.intLit(3)
+      %list.4 : py.Value = py.mkList(%int.13, %int.14, %int.15)
+      %tuple.36 : py.Value = py.mkTuple(%list.4)
+      %kwargs.36 : py.Value = py.mkKwargs
+      %call.33 : py.Value = py.call(%iter.2, %tuple.36, %kwargs.36) ^propagate.0()
+      %it.cell.0 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "it")
+      %set.13 : base.Unit = base.refSet[py.Value](%it.cell.0, %call.33)
+      %zip.5 : py.Value = py.loadGlobal("lib_zip_enumerate", "zip") ^propagate.0()
+      %it.0 : py.Value = py.loadGlobal("lib_zip_enumerate", "it") ^propagate.0()
+      %it.1 : py.Value = py.loadGlobal("lib_zip_enumerate", "it") ^propagate.0()
+      %tuple.37 : py.Value = py.mkTuple(%it.0, %it.1)
+      %kwargs.37 : py.Value = py.mkKwargs
+      %call.34 : py.Value = py.call(%zip.5, %tuple.37, %kwargs.37) ^propagate.0()
+      %z.cell.2 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "z")
+      %set.14 : base.Unit = base.refSet[py.Value](%z.cell.2, %call.34)
+      %print.4 : py.Value = py.loadGlobal("lib_zip_enumerate", "print") ^propagate.0()
+      %next.2 : py.Value = py.loadGlobal("lib_zip_enumerate", "next") ^propagate.0()
+      %z.3 : py.Value = py.loadGlobal("lib_zip_enumerate", "z") ^propagate.0()
+      %tuple.38 : py.Value = py.mkTuple(%z.3)
+      %kwargs.38 : py.Value = py.mkKwargs
+      %call.35 : py.Value = py.call(%next.2, %tuple.38, %kwargs.38) ^propagate.0()
+      %int.16 : py.Value = py.intLit(1)
+      %item.3 : py.Value = py.getItem(%call.35, %int.16) ^propagate.0()
+      %tuple.39 : py.Value = py.mkTuple(%item.3)
+      %kwargs.39 : py.Value = py.mkKwargs
+      %call.36 : py.Value = py.call(%print.4, %tuple.39, %kwargs.39) ^propagate.0()
+      %print.5 : py.Value = py.loadGlobal("lib_zip_enumerate", "print") ^propagate.0()
+      %type.0 : py.Value = py.loadGlobal("lib_zip_enumerate", "type") ^propagate.0()
+      %zip.6 : py.Value = py.loadGlobal("lib_zip_enumerate", "zip") ^propagate.0()
+      %tuple.40 : py.Value = py.mkTuple
+      %kwargs.40 : py.Value = py.mkKwargs
+      %call.37 : py.Value = py.call(%zip.6, %tuple.40, %kwargs.40) ^propagate.0()
+      %tuple.41 : py.Value = py.mkTuple(%call.37)
+      %kwargs.41 : py.Value = py.mkKwargs
+      %call.38 : py.Value = py.call(%type.0, %tuple.41, %kwargs.41) ^propagate.0()
+      %__name__.0 : py.Value = py.attr(%call.38, "__name__") ^propagate.0()
+      %type.1 : py.Value = py.loadGlobal("lib_zip_enumerate", "type") ^propagate.0()
+      %enumerate.6 : py.Value = py.loadGlobal("lib_zip_enumerate", "enumerate") ^propagate.0()
+      %list.5 : py.Value = py.mkList
+      %tuple.42 : py.Value = py.mkTuple(%list.5)
+      %kwargs.42 : py.Value = py.mkKwargs
+      %call.39 : py.Value = py.call(%enumerate.6, %tuple.42, %kwargs.42) ^propagate.0()
+      %tuple.43 : py.Value = py.mkTuple(%call.39)
+      %kwargs.43 : py.Value = py.mkKwargs
+      %call.40 : py.Value = py.call(%type.1, %tuple.43, %kwargs.43) ^propagate.0()
+      %__name__.1 : py.Value = py.attr(%call.40, "__name__") ^propagate.0()
+      %iter.3 : py.Value = py.loadGlobal("lib_zip_enumerate", "iter") ^propagate.0()
+      %z.4 : py.Value = py.loadGlobal("lib_zip_enumerate", "z") ^propagate.0()
+      %tuple.44 : py.Value = py.mkTuple(%z.4)
+      %kwargs.44 : py.Value = py.mkKwargs
+      %call.41 : py.Value = py.call(%iter.3, %tuple.44, %kwargs.44) ^propagate.0()
+      %z.5 : py.Value = py.loadGlobal("lib_zip_enumerate", "z") ^propagate.0()
+      %is.0 : py.Value = py.is(%call.41, %z.5)
+      %tuple.45 : py.Value = py.mkTuple(%__name__.0, %__name__.1, %is.0)
+      %kwargs.45 : py.Value = py.mkKwargs
+      %call.42 : py.Value = py.call(%print.5, %tuple.45, %kwargs.45) ^propagate.0()
+      %int.17 : py.Value = py.intLit(1)
+      %int.18 : py.Value = py.intLit(2)
+      %list.6 : py.Value = py.mkList(%int.17, %int.18)
+      %int.19 : py.Value = py.intLit(3)
+      %list.7 : py.Value = py.mkList(%int.19)
+      %tuple.46 : py.Value = py.mkTuple(%list.6, %list.7)
+      %str.11 : py.Value = py.strLit("strict")
+      %bool.0 : py.Value = py.boolLit(true)
+      %dict.0 : py.Value = py.mkDict(%str.11, %bool.0) ^propagate.0()
+      %tuple.47 : py.Value = py.mkTuple(%tuple.46, %dict.0)
+      %int.20 : py.Value = py.intLit(1)
+      %list.8 : py.Value = py.mkList(%int.20)
+      %int.21 : py.Value = py.intLit(3)
+      %int.22 : py.Value = py.intLit(4)
+      %list.9 : py.Value = py.mkList(%int.21, %int.22)
+      %int.23 : py.Value = py.intLit(5)
+      %int.24 : py.Value = py.intLit(6)
+      %list.10 : py.Value = py.mkList(%int.23, %int.24)
+      %tuple.48 : py.Value = py.mkTuple(%list.8, %list.9, %list.10)
+      %str.12 : py.Value = py.strLit("strict")
+      %bool.1 : py.Value = py.boolLit(true)
+      %dict.1 : py.Value = py.mkDict(%str.12, %bool.1) ^propagate.0()
+      %tuple.49 : py.Value = py.mkTuple(%tuple.48, %dict.1)
+      %int.25 : py.Value = py.intLit(1)
+      %int.26 : py.Value = py.intLit(2)
+      %list.11 : py.Value = py.mkList(%int.25, %int.26)
+      %int.27 : py.Value = py.intLit(3)
+      %int.28 : py.Value = py.intLit(4)
+      %list.12 : py.Value = py.mkList(%int.27, %int.28)
+      %int.29 : py.Value = py.intLit(5)
+      %list.13 : py.Value = py.mkList(%int.29)
+      %tuple.50 : py.Value = py.mkTuple(%list.11, %list.12, %list.13)
+      %str.13 : py.Value = py.strLit("strict")
+      %bool.2 : py.Value = py.boolLit(true)
+      %dict.2 : py.Value = py.mkDict(%str.13, %bool.2) ^propagate.0()
+      %tuple.51 : py.Value = py.mkTuple(%tuple.50, %dict.2)
+      %list.14 : py.Value = py.mkList(%tuple.47, %tuple.49, %tuple.51)
+      %iter.4 : py.Value = py.getIter(%list.14) ^propagate.0()
+      jump ^head.2()
+    head.2():
+      %item.4 : py.Value = py.next(%iter.4) ^stop.2()
+      %unpack.0 : py.Value = py.unpackSeq(%item.4, 2) ^propagate.0()
+      %elem.0 : py.Value = py.tupleGet(%unpack.0, 0)
+      %args.cell.0 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "args")
+      %set.15 : base.Unit = base.refSet[py.Value](%args.cell.0, %elem.0)
+      %elem.1 : py.Value = py.tupleGet(%unpack.0, 1)
+      %kwargs.cell.0 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "kwargs")
+      %set.16 : base.Unit = base.refSet[py.Value](%kwargs.cell.0, %elem.1)
+      %count.4 : py.Value = py.loadGlobal("lib_zip_enumerate", "count") ^catch.0()
+      %zip.7 : py.Value = py.loadGlobal("lib_zip_enumerate", "zip") ^catch.0()
+      %args.0 : py.Value = py.loadGlobal("lib_zip_enumerate", "args") ^catch.0()
+      %kwargs.46 : py.Value = py.mkKwargs
+      %kwargs.47 : py.Value = py.loadGlobal("lib_zip_enumerate", "kwargs") ^catch.0()
+      %merge.0 : py.Value = py.dictMerge(%zip.7, %kwargs.46, %kwargs.47) ^catch.0()
+      %args.1 : py.Value = py.argsTuple(%zip.7, %args.0) ^catch.0()
+      %call.43 : py.Value = py.call(%zip.7, %args.1, %merge.0) ^catch.0()
+      %tuple.52 : py.Value = py.mkTuple(%call.43)
+      %kwargs.48 : py.Value = py.mkKwargs
+      %call.44 : py.Value = py.call(%count.4, %tuple.52, %kwargs.48) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.2 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.2)
+      %ValueError.0 : py.Value = py.loadGlobal("lib_zip_enumerate", "ValueError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.2, %ValueError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "e")
+      %set.17 : base.Unit = base.refSet[py.Value](%e.cell.1, %exc.2)
+      %print.6 : py.Value = py.loadGlobal("lib_zip_enumerate", "print") ^clear.0()
+      %e.1 : py.Value = py.loadGlobal("lib_zip_enumerate", "e") ^clear.0()
+      %args.2 : py.Value = py.attr(%e.1, "args") ^clear.0()
+      %int.30 : py.Value = py.intLit(0)
+      %item.5 : py.Value = py.getItem(%args.2, %int.30) ^clear.0()
+      %tuple.53 : py.Value = py.mkTuple(%item.5)
+      %kwargs.49 : py.Value = py.mkKwargs
+      %call.45 : py.Value = py.call(%print.6, %tuple.53, %kwargs.49) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "e")
+      %set.18 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^join.0()
+    clear.0(%exc.3 : py.Value):
+      %e.3 : py.Value = py.undef("e")
+      %e.cell.3 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "e")
+      %set.19 : base.Unit = base.refSet[py.Value](%e.cell.3, %e.3)
+      jump ^unwind.0(%exc.3)
+    next.0():
+      jump ^unwind.0(%exc.2)
+    unwind.0(%exc.4 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.4)
+    join.0():
+      jump ^head.2()
+    stop.2(%exc.5 : py.Value):
+      %done.2 : base.Bool = py.isStopIteration(%exc.5)
+      branch(%done.2) ^exit.2() ^propagate.0(%exc.5)
+    exit.2():
+      %print.7 : py.Value = py.loadGlobal("lib_zip_enumerate", "print") ^propagate.0()
+      %count.5 : py.Value = py.loadGlobal("lib_zip_enumerate", "count") ^propagate.0()
+      %zip.8 : py.Value = py.loadGlobal("lib_zip_enumerate", "zip") ^propagate.0()
+      %int.31 : py.Value = py.intLit(1)
+      %list.15 : py.Value = py.mkList(%int.31)
+      %int.32 : py.Value = py.intLit(2)
+      %list.16 : py.Value = py.mkList(%int.32)
+      %tuple.54 : py.Value = py.mkTuple(%list.15, %list.16)
+      %str.14 : py.Value = py.strLit("strict")
+      %bool.3 : py.Value = py.boolLit(true)
+      %kwargs.50 : py.Value = py.mkKwargs(%str.14, %bool.3)
+      %call.46 : py.Value = py.call(%zip.8, %tuple.54, %kwargs.50) ^propagate.0()
+      %tuple.55 : py.Value = py.mkTuple(%call.46)
+      %kwargs.51 : py.Value = py.mkKwargs
+      %call.47 : py.Value = py.call(%count.5, %tuple.55, %kwargs.51) ^propagate.0()
+      %tuple.56 : py.Value = py.mkTuple(%call.47)
+      %kwargs.52 : py.Value = py.mkKwargs
+      %call.48 : py.Value = py.call(%print.7, %tuple.56, %kwargs.52) ^propagate.0()
+      %zip.9 : py.Value = py.loadGlobal("lib_zip_enumerate", "zip") ^propagate.0()
+      %int.33 : py.Value = py.intLit(5)
+      %tuple.57 : py.Value = py.mkTuple(%int.33)
+      %dict.3 : py.Value = py.mkDict ^propagate.0()
+      %tuple.58 : py.Value = py.mkTuple(%zip.9, %tuple.57, %dict.3)
+      %zip.10 : py.Value = py.loadGlobal("lib_zip_enumerate", "zip") ^propagate.0()
+      %list.17 : py.Value = py.mkList
+      %tuple.59 : py.Value = py.mkTuple(%list.17)
+      %str.15 : py.Value = py.strLit("x")
+      %int.34 : py.Value = py.intLit(1)
+      %dict.4 : py.Value = py.mkDict(%str.15, %int.34) ^propagate.0()
+      %tuple.60 : py.Value = py.mkTuple(%zip.10, %tuple.59, %dict.4)
+      %zip.11 : py.Value = py.loadGlobal("lib_zip_enumerate", "zip") ^propagate.0()
+      %list.18 : py.Value = py.mkList
+      %tuple.61 : py.Value = py.mkTuple(%list.18)
+      %str.16 : py.Value = py.strLit("strict")
+      %bool.4 : py.Value = py.boolLit(true)
+      %str.17 : py.Value = py.strLit("x")
+      %int.35 : py.Value = py.intLit(1)
+      %dict.5 : py.Value = py.mkDict(%str.16, %bool.4, %str.17, %int.35) ^propagate.0()
+      %tuple.62 : py.Value = py.mkTuple(%zip.11, %tuple.61, %dict.5)
+      %enumerate.7 : py.Value = py.loadGlobal("lib_zip_enumerate", "enumerate") ^propagate.0()
+      %list.19 : py.Value = py.mkList
+      %int.36 : py.Value = py.intLit(1)
+      %int.37 : py.Value = py.intLit(2)
+      %tuple.63 : py.Value = py.mkTuple(%list.19, %int.36, %int.37)
+      %dict.6 : py.Value = py.mkDict ^propagate.0()
+      %tuple.64 : py.Value = py.mkTuple(%enumerate.7, %tuple.63, %dict.6)
+      %enumerate.8 : py.Value = py.loadGlobal("lib_zip_enumerate", "enumerate") ^propagate.0()
+      %list.20 : py.Value = py.mkList
+      %tuple.65 : py.Value = py.mkTuple(%list.20)
+      %str.18 : py.Value = py.strLit("start")
+      %str.19 : py.Value = py.strLit("a")
+      %dict.7 : py.Value = py.mkDict(%str.18, %str.19) ^propagate.0()
+      %tuple.66 : py.Value = py.mkTuple(%enumerate.8, %tuple.65, %dict.7)
+      %enumerate.9 : py.Value = py.loadGlobal("lib_zip_enumerate", "enumerate") ^propagate.0()
+      %int.38 : py.Value = py.intLit(5)
+      %tuple.67 : py.Value = py.mkTuple(%int.38)
+      %dict.8 : py.Value = py.mkDict ^propagate.0()
+      %tuple.68 : py.Value = py.mkTuple(%enumerate.9, %tuple.67, %dict.8)
+      %enumerate.10 : py.Value = py.loadGlobal("lib_zip_enumerate", "enumerate") ^propagate.0()
+      %list.21 : py.Value = py.mkList
+      %tuple.69 : py.Value = py.mkTuple(%list.21)
+      %str.20 : py.Value = py.strLit("x")
+      %int.39 : py.Value = py.intLit(1)
+      %dict.9 : py.Value = py.mkDict(%str.20, %int.39) ^propagate.0()
+      %tuple.70 : py.Value = py.mkTuple(%enumerate.10, %tuple.69, %dict.9)
+      %list.22 : py.Value = py.mkList(%tuple.58, %tuple.60, %tuple.62, %tuple.64, %tuple.66, %tuple.68, %tuple.70)
+      %iter.5 : py.Value = py.getIter(%list.22) ^propagate.0()
+      jump ^head.3()
+    head.3():
+      %item.6 : py.Value = py.next(%iter.5) ^stop.3()
+      %unpack.1 : py.Value = py.unpackSeq(%item.6, 3) ^propagate.0()
+      %elem.2 : py.Value = py.tupleGet(%unpack.1, 0)
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "f")
+      %set.20 : base.Unit = base.refSet[py.Value](%f.cell.0, %elem.2)
+      %elem.3 : py.Value = py.tupleGet(%unpack.1, 1)
+      %args.cell.1 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "args")
+      %set.21 : base.Unit = base.refSet[py.Value](%args.cell.1, %elem.3)
+      %elem.4 : py.Value = py.tupleGet(%unpack.1, 2)
+      %kwargs.cell.1 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "kwargs")
+      %set.22 : base.Unit = base.refSet[py.Value](%kwargs.cell.1, %elem.4)
+      %f.0 : py.Value = py.loadGlobal("lib_zip_enumerate", "f") ^catch.1()
+      %args.3 : py.Value = py.loadGlobal("lib_zip_enumerate", "args") ^catch.1()
+      %kwargs.53 : py.Value = py.mkKwargs
+      %kwargs.54 : py.Value = py.loadGlobal("lib_zip_enumerate", "kwargs") ^catch.1()
+      %merge.1 : py.Value = py.dictMerge(%f.0, %kwargs.53, %kwargs.54) ^catch.1()
+      %args.4 : py.Value = py.argsTuple(%f.0, %args.3) ^catch.1()
+      %call.49 : py.Value = py.call(%f.0, %args.4, %merge.1) ^catch.1()
+      jump ^join.1()
+    catch.1(%exc.6 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.6)
+      %TypeError.0 : py.Value = py.loadGlobal("lib_zip_enumerate", "TypeError") ^unwind.1()
+      %match.1 : base.Bool = py.excMatch(%exc.6, %TypeError.0) ^unwind.1()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %e.cell.4 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "e")
+      %set.23 : base.Unit = base.refSet[py.Value](%e.cell.4, %exc.6)
+      %print.8 : py.Value = py.loadGlobal("lib_zip_enumerate", "print") ^clear.1()
+      %e.4 : py.Value = py.loadGlobal("lib_zip_enumerate", "e") ^clear.1()
+      %args.5 : py.Value = py.attr(%e.4, "args") ^clear.1()
+      %int.40 : py.Value = py.intLit(0)
+      %item.7 : py.Value = py.getItem(%args.5, %int.40) ^clear.1()
+      %tuple.71 : py.Value = py.mkTuple(%item.7)
+      %kwargs.55 : py.Value = py.mkKwargs
+      %call.50 : py.Value = py.call(%print.8, %tuple.71, %kwargs.55) ^clear.1()
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      %e.5 : py.Value = py.undef("e")
+      %e.cell.5 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "e")
+      %set.24 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.5)
+      jump ^join.1()
+    clear.1(%exc.7 : py.Value):
+      %e.6 : py.Value = py.undef("e")
+      %e.cell.6 : base.Ref(py.Value) = py.globalCell("lib_zip_enumerate", "e")
+      %set.25 : base.Unit = base.refSet[py.Value](%e.cell.6, %e.6)
+      jump ^unwind.1(%exc.7)
+    next.1():
+      jump ^unwind.1(%exc.6)
+    unwind.1(%exc.8 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.8)
+    join.1():
+      jump ^head.3()
+    stop.3(%exc.9 : py.Value):
+      %done.3 : base.Bool = py.isStopIteration(%exc.9)
+      branch(%done.3) ^exit.3() ^propagate.0(%exc.9)
+    exit.3():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.10 : py.Value):
+      %exc.11 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.10)
+      ret(%exc.11)
+  }
+  func @lib_zip_enumerate.count(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %it.0 : py.Value = py.undef("it")
+      %it.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%it.0)
+      %n.2 : py.Value = py.undef("n")
+      %n.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%n.2)
+      %_.0 : py.Value = py.undef("_")
+      %_.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%_.0)
+      %it.1 : py.Value = py.undef("it")
+      %defaults.0 : py.Value = py.mkTuple(%it.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "count", 0, 1, false, false, "it") ^propagate.0()
+      %it.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(0)
+      %it.4 : py.Value = py.requireDefined(%it.2, "it", "UnboundLocalError", "cannot access local variable 'it' where it is not associated with a value") ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%it.4) ^propagate.0()
+      jump ^head.0(%int.0)
+    head.0(%n.9 : py.Value):
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %n.6 : py.Value = py.requireDefined(%n.9, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
+      %int.1 : py.Value = py.intLit(1)
+      %iAdd.0 : py.Value = py.iAdd(%n.6, %int.1) ^propagate.0()
+      jump ^head.0(%iAdd.0)
+    stop.0(%exc.0 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.0)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+    exit.0():
+      %n.8 : py.Value = py.requireDefined(%n.9, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%n.8)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @|lib_zip_enumerate.Again.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_zip_enumerate", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Again")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_zip_enumerate.Again.__init__, "__init__", "lib_zip_enumerate")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@lib_zip_enumerate.Again.__iter__, "__iter__", "lib_zip_enumerate")
+      %str.5 : py.Value = py.strLit("__iter__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@lib_zip_enumerate.Again.__next__, "__next__", "lib_zip_enumerate")
+      %str.6 : py.Value = py.strLit("__next__")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.6, %clo.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_zip_enumerate.Logged.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__index__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_zip_enumerate", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Logged")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_zip_enumerate.Logged.__index__, "__index__", "lib_zip_enumerate")
+      %str.4 : py.Value = py.strLit("__index__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_zip_enumerate.LoudIter.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__iter__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_zip_enumerate", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("LoudIter")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_zip_enumerate.LoudIter.__iter__, "__iter__", "lib_zip_enumerate")
+      %str.4 : py.Value = py.strLit("__iter__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_zip_enumerate.show(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %it.0 : py.Value = py.undef("it")
+      %it.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%it.0)
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %it.1 : py.Value = py.undef("it")
+      %defaults.0 : py.Value = py.mkTuple(%it.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "show", 0, 1, false, false, "it") ^propagate.0()
+      %it.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %it.4 : py.Value = py.requireDefined(%it.2, "it", "UnboundLocalError", "cannot access local variable 'it' where it is not associated with a value") ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%it.4) ^propagate.0()
+      jump ^head.0()
+    head.0():
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %print.0 : py.Value = py.loadGlobal("lib_zip_enumerate", "print") ^propagate.0()
+      %x.2 : py.Value = py.requireDefined(%item.0, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %item.1 : py.Value = py.getItem(%x.2, %int.0) ^propagate.0()
+      %x.4 : py.Value = py.requireDefined(%item.0, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %int.1 : py.Value = py.intLit(1)
+      %item.2 : py.Value = py.getItem(%x.4, %int.1) ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%item.1, %item.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      jump ^head.0()
+    stop.0(%exc.0 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.0)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+    exit.0():
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @lib_zip_enumerate.Again.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Again.__init__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(0)
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %calls.0 : base.Unit = py.setAttr(%self.4, "calls", %int.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_zip_enumerate.Again.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Again.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_zip_enumerate.Again.__next__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Again.__next__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %calls.0 : py.Value = py.attr(%self.4, "calls") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %iAdd.0 : py.Value = py.iAdd(%calls.0, %int.0) ^propagate.0()
+      %calls.1 : base.Unit = py.setAttr(%self.4, "calls", %iAdd.0) ^propagate.0()
+      %self.6 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %calls.2 : py.Value = py.attr(%self.6, "calls") ^propagate.0()
+      %int.1 : py.Value = py.intLit(1)
+      %eq.0 : py.Value = py.eq(%calls.2, %int.1) ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%eq.0) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %int.2 : py.Value = py.intLit(1)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.2)
+      ret(%ret.0)
+    else.0():
+      jump ^join.0()
+    join.0():
+      %self.8 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %calls.3 : py.Value = py.attr(%self.8, "calls") ^propagate.0()
+      %int.3 : py.Value = py.intLit(3)
+      %int.4 : py.Value = py.intLit(4)
+      %tuple.0 : py.Value = py.mkTuple(%int.3, %int.4)
+      %in.0 : py.Value = py.in(%calls.3, %tuple.0) ^propagate.0()
+      %cond.1 : base.Bool = py.truthy(%in.0) ^propagate.0()
+      branch(%cond.1) ^then.1() ^else.1()
+    then.1():
+      %self.10 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %calls.4 : py.Value = py.attr(%self.10, "calls") ^propagate.0()
+      %ret.1 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%calls.4)
+      ret(%ret.1)
+    else.1():
+      jump ^join.1()
+    join.1():
+      %StopIteration.0 : py.Value = py.loadGlobal("lib_zip_enumerate", "StopIteration") ^propagate.0()
+      %exc.0 : py.Value = py.toException(%StopIteration.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @lib_zip_enumerate.Logged.__index__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Logged.__index__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %print.0 : py.Value = py.loadGlobal("lib_zip_enumerate", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("start")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %int.0 : py.Value = py.intLit(5)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_zip_enumerate.LoudIter.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "LoudIter.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %print.0 : py.Value = py.loadGlobal("lib_zip_enumerate", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("iter")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %iter.0 : py.Value = py.loadGlobal("lib_zip_enumerate", "iter") ^propagate.0()
+      %int.0 : py.Value = py.intLit(7)
+      %list.0 : py.Value = py.mkList(%int.0)
+      %tuple.1 : py.Value = py.mkTuple(%list.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%iter.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

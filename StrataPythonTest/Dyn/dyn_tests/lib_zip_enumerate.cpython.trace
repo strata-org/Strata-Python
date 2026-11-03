@@ -1,0 +1,51 @@
+--- stdout 549
+1 a
+2 b
+0 x
+1 y
+10 x
+11 y
+-3 z
+100000000000000000000 z
+start
+iter
+5 7
+3 end
+0 0
+1
+2
+0
+1
+2
+0
+2
+zip enumerate True
+zip() argument 2 is shorter than argument 1
+zip() argument 2 is longer than argument 1
+zip() argument 3 is shorter than arguments 1-2
+1
+'int' object is not iterable
+'x' is an invalid keyword argument for zip()
+zip() takes at most 1 keyword argument (2 given)
+enumerate() takes at most 2 arguments (3 given)
+'str' object cannot be interpreted as an integer
+'int' object is not iterable
+'x' is an invalid keyword argument for enumerate()
+
+--- outcome
+ok
+--- globals
+Again = <class 'Again'>
+Logged = <class 'Logged'>
+LoudIter = <class 'LoudIter'>
+_ = 2
+__doc__ = None
+__name__ = '__main__'
+a = <Again object>
+args = ([],)
+count = <function object>
+f = <class 'enumerate'>
+it = <list_iterator object>
+kwargs = {'x': 1}
+show = <function object>
+z = <zip object>

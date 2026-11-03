@@ -1,0 +1,6 @@
+module
+  Z: local (assigned, referenced)
+  zip: global implicit (referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  class Z

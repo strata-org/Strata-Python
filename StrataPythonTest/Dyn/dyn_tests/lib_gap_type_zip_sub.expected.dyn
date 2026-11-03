@@ -1,0 +1,47 @@
+module lib_gap_type_zip_sub {
+  func @|lib_gap_type_zip_sub.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("lib_gap_type_zip_sub")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_type_zip_sub", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_type_zip_sub", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %print.0 : py.Value = py.loadGlobal("lib_gap_type_zip_sub", "print") ^propagate.0()
+      %str.1 : py.Value = py.strLit("before")
+      %tuple.0 : py.Value = py.mkTuple(%str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %print.1 : py.Value = py.loadGlobal("lib_gap_type_zip_sub", "print") ^propagate.0()
+      %type.0 : py.Value = py.loadGlobal("lib_gap_type_zip_sub", "type") ^propagate.0()
+      %type.1 : py.Value = py.loadGlobal("lib_gap_type_zip_sub", "type") ^propagate.0()
+      %str.2 : py.Value = py.strLit("T")
+      %zip.0 : py.Value = py.loadGlobal("lib_gap_type_zip_sub", "zip") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%zip.0)
+      %str.3 : py.Value = py.strLit("__module__")
+      %str.4 : py.Value = py.strLit("m")
+      %dict.0 : py.Value = py.mkDict(%str.3, %str.4) ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%str.2, %tuple.1, %dict.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%type.1, %tuple.2, %kwargs.1) ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %list.0 : py.Value = py.mkList(%int.0)
+      %tuple.3 : py.Value = py.mkTuple(%list.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%call.1, %tuple.3, %kwargs.2) ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple(%call.2)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%type.0, %tuple.4, %kwargs.3) ^propagate.0()
+      %__name__.0 : py.Value = py.attr(%call.3, "__name__") ^propagate.0()
+      %tuple.5 : py.Value = py.mkTuple(%__name__.0)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%print.1, %tuple.5, %kwargs.4) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

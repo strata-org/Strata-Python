@@ -1,0 +1,22 @@
+--- stdout 211
+True False c p 1180591620717411303427 8
+unsupported operand type(s) for +: 'int' and 'str'
+b
+1180591620717411303422 1180591620717411303427 1180591620717411303424 -5 True True 1180591620717411303424
+False True 0
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+a = 'a'
+b = 'b'
+big = 1180591620717411303424
+c = 'c'
+e = ''
+ints = {-5, 1, 1180591620717411303424, 2}
+one = 1
+p = 'p'
+q = 'q'
+two = 2

@@ -1,0 +1,15 @@
+module top
+  S: local (assigned, referenced)
+  next: global implicit (referenced)
+  print: global implicit (referenced)
+  r: local (assigned, referenced)
+  reversed: global implicit (referenced)
+  class S
+    __getitem__: local (assigned)
+    __len__: local (assigned)
+    function __len__
+      self: local (parameter)
+    function __getitem__
+      i: local (parameter, referenced)
+      self: local (parameter)
+qualnames: S, S.__getitem__, S.__len__

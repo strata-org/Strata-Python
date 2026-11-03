@@ -1,0 +1,8 @@
+--- stdout 7
+before
+
+--- outcome
+raised TypeError: 'start' is an invalid keyword argument for enumerate()
+--- globals
+__doc__ = None
+__name__ = '__main__'

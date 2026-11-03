@@ -1,0 +1,55 @@
+module top
+  Bad: local (assigned, referenced)
+  Countdown: local (assigned, referenced)
+  Loud: local (assigned, referenced)
+  Raises: local (assigned, referenced)
+  Sized: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  all: global implicit (referenced)
+  any: global implicit (referenced)
+  args: local (assigned, referenced)
+  e: local (assigned, referenced)
+  it: local (assigned, referenced)
+  next: global implicit (referenced)
+  print: global implicit (referenced)
+  range: global implicit (referenced)
+  class Loud
+    __bool__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function __bool__
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+  class Sized
+    __len__: local (assigned)
+    function __len__
+      self: local (parameter)
+  class Countdown
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function __init__
+      n: local (parameter, referenced)
+      self: local (parameter, referenced)
+    function __iter__
+      self: local (parameter, referenced)
+    function __next__
+      StopIteration: global implicit (referenced)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+  class Bad
+    __bool__: local (assigned)
+    function __bool__
+      self: local (parameter)
+  class Raises
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function __iter__
+      self: local (parameter, referenced)
+    function __next__
+      ValueError: global implicit (referenced)
+      self: local (parameter)
+qualnames: Bad, Bad.__bool__, Countdown, Countdown.__init__, Countdown.__iter__, Countdown.__next__, Loud, Loud.__bool__, Loud.__init__, Raises, Raises.__iter__, Raises.__next__, Sized, Sized.__len__

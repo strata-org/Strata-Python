@@ -1,0 +1,60 @@
+module
+  count: local (assigned, referenced)
+  Again: local (assigned, referenced)
+  Logged: local (assigned, referenced)
+  LoudIter: local (assigned, referenced)
+  show: local (assigned, referenced)
+  zip: global implicit (referenced)
+  enumerate: global implicit (referenced)
+  z: local (assigned, referenced)
+  print: global implicit (referenced)
+  next: global implicit (referenced)
+  a: local (assigned, referenced)
+  _: local (assigned)
+  range: global implicit (referenced)
+  e: local (assigned, referenced)
+  it: local (assigned, referenced)
+  iter: global implicit (referenced)
+  type: global implicit (referenced)
+  args: local (assigned, referenced)
+  kwargs: local (assigned, referenced)
+  ValueError: global implicit (referenced)
+  f: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  function count
+    params: it
+    it: local (parameter, referenced)
+    n: local (assigned, referenced)
+    _: local (assigned)
+  class Again
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function Again.__init__
+      params: self
+      self: local (parameter, referenced)
+    function Again.__iter__
+      params: self
+      self: local (parameter, referenced)
+    function Again.__next__
+      params: self
+      self: local (parameter, referenced)
+      StopIteration: global implicit (referenced)
+  class Logged
+    __index__: local (assigned)
+    function Logged.__index__
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+  class LoudIter
+    __iter__: local (assigned)
+    function LoudIter.__iter__
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+      iter: global implicit (referenced)
+  function show
+    params: it
+    it: local (parameter, referenced)
+    x: local (assigned, referenced)
+    print: global implicit (referenced)

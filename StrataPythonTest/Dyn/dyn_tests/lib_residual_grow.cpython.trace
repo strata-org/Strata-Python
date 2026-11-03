@@ -1,0 +1,11 @@
+--- stdout 8
+False 6
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+Grow = <class 'Grow'>
+__doc__ = None
+__name__ = '__main__'
+l = [<Grow object>, <Grow object>, <Grow object>, <Grow object>, <Grow object>, <Grow object>]

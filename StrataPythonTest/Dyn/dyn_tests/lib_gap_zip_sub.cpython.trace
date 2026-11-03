@@ -1,0 +1,10 @@
+--- stdout 9
+before
+Z
+
+--- outcome
+ok
+--- globals
+Z = <class 'Z'>
+__doc__ = None
+__name__ = '__main__'

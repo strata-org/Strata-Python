@@ -1,0 +1,71 @@
+module top
+  Ends: local (assigned, referenced)
+  HintSteps: local (assigned, referenced)
+  It: local (assigned, referenced)
+  Steps: local (assigned, referenced)
+  e: local (assigned, referenced)
+  enumerate: global implicit (referenced)
+  it: local (assigned, referenced)
+  next: global implicit (referenced)
+  print: global implicit (referenced)
+  r: local (assigned, referenced)
+  rest: local (assigned, referenced)
+  reversed: global implicit (referenced)
+  s: local (assigned, referenced)
+  function rest
+    it: local (parameter, referenced)
+    out: local (assigned, referenced)
+    x: local (assigned, referenced)
+  class It
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+    function __iter__
+      self: local (parameter, referenced)
+    function __next__
+      StopIteration: global implicit (referenced)
+      next: global implicit (referenced)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+  class Steps
+    __getitem__: local (assigned)
+    __init__: local (assigned)
+    __len__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+    function __len__
+      self: local (parameter)
+    function __getitem__
+      i: local (parameter, referenced)
+      next: global implicit (referenced)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+  class Ends
+    __getitem__: local (assigned)
+    __init__: local (assigned)
+    __len__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+    function __len__
+      self: local (parameter)
+    function __getitem__
+      i: local (parameter, referenced)
+      print: global implicit (referenced)
+      rest: global implicit (referenced)
+      self: local (parameter, referenced)
+  class HintSteps
+    __getitem__: local (assigned)
+    __init__: local (assigned)
+    __len__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+    function __len__
+      next: global implicit (referenced)
+      rest: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __getitem__
+      i: local (parameter, referenced)
+      self: local (parameter)
+qualnames: Ends, Ends.__getitem__, Ends.__init__, Ends.__len__, HintSteps, HintSteps.__getitem__, HintSteps.__init__, HintSteps.__len__, It, It.__init__, It.__iter__, It.__next__, Steps, Steps.__getitem__, Steps.__init__, Steps.__len__, rest

@@ -576,10 +576,14 @@ public def nextOf (kind : Builtin) (st : Value → IterState) : PyM σ .writes t
   | none => pure (.ofString "end")
 
 @[dyn_sem PyT.zipNext, expose] public def zipNext (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] (nextOf .zip fun l => .zip #[l] false)
+  runRuleFree err #[] (do
+    let it ← Proto.getIter (m := PyM σ .writes true) (← intList [1, 2, 3])
+    nextOf .zip fun _ => .zip #[it] false)
 
 @[dyn_sem PyT.enumNext, expose] public def enumNext (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] (nextOf .enumerate fun l => .enumerate l 0)
+  runRuleFree err #[] (do
+    let it ← Proto.getIter (m := PyM σ .writes true) (← intList [1, 2, 3])
+    nextOf .enumerate fun _ => .enumerate it 0)
 
 @[dyn_sem PyT.revNext, expose] public def revNext (err : Target E [Value]) : Sem ε E Value :=
   runRuleFree err #[] (nextOf .reversed fun l => .reversed .reversed l 2)
@@ -3849,21 +3853,24 @@ info: StrataPython.Dyn.Sem.Value.tuple
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.iterBounds ^err.0()"
 
--- `zip`, `enumerate` and the reverse iterators step by their type's `__next__`, a body that this
--- piece's tables don't have.
-/-- info: fault: Strata.Dyn.Exec.Fault.gap "built-in method zip.__next__ is not modelled yet" -/
+-- `zip`, `enumerate` and the reverse iterators step by their type's `__next__`: a `zip` and an
+-- `enumerate` over `iter([1, 2, 3])` give `(1,)` and `(0, 1)`, the reverse iterators the list's
+-- last item, and the one over an empty dict ends.
+/-- info: StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.int 1] -/
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.zipNext ^err.0()"
-/-- info: fault: Strata.Dyn.Exec.Fault.gap "built-in method enumerate.__next__ is not modelled yet" -/
+/-- info: StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.int 0, StrataPython.Dyn.Sem.Value.int 1] -/
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.enumNext ^err.0()"
-/-- info: fault: Strata.Dyn.Exec.Fault.gap "built-in method reversed.__next__ is not modelled yet" -/
+/-- info: StrataPython.Dyn.Sem.Value.int 3 -/
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.revNext ^err.0()"
-/-- info: fault: Strata.Dyn.Exec.Fault.gap "built-in method list_reverseiterator.__next__ is not modelled yet" -/
+/-- info: StrataPython.Dyn.Sem.Value.int 3 -/
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.listRevNext ^err.0()"
-/-- info: fault: Strata.Dyn.Exec.Fault.gap "built-in method dict_reversekeyiterator.__next__ is not modelled yet" -/
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.StopIteration) StrataPython.Dyn.Sem.Value.tuple #[] context StrataPython.Dyn.Sem.Value.none
+-/
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.dictRevNext ^err.0()"
 

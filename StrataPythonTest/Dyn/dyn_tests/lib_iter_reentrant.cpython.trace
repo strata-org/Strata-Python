@@ -1,0 +1,29 @@
+--- stdout 65
+(0, 2)
+(1, 2)
+(2, 3)
+inner 3
+3
+1
+[0]
+inner [2, 1, 0]
+2
+[]
+2
+0
+[]
+
+--- outcome
+ok
+--- globals
+Ends = <class 'Ends'>
+HintSteps = <class 'HintSteps'>
+It = <class 'It'>
+Steps = <class 'Steps'>
+__doc__ = None
+__name__ = '__main__'
+e = <enumerate object>
+it = <It object>
+r = <reversed object>
+rest = <function object>
+s = <HintSteps object>

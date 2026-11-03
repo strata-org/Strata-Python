@@ -1,0 +1,7 @@
+module top
+  R: local (assigned, referenced)
+  print: global implicit (referenced)
+  reversed: global implicit (referenced)
+  type: global implicit (referenced)
+  class R
+qualnames: R

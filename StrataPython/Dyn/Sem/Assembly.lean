@@ -12,6 +12,7 @@ public import StrataPython.Dyn.Sem.Builtins.Dunders
 public import StrataPython.Dyn.Sem.Builtins.Exceptions
 public import StrataPython.Dyn.Sem.Builtins.Iter
 public import StrataPython.Dyn.Sem.Builtins.Strings
+public import StrataPython.Dyn.Sem.Library.Iterators
 
 set_option autoImplicit false
 
@@ -125,8 +126,13 @@ def Impls.withNewCheck (impls : Impls) : Impls :=
       else if n == "tp_new" then impls.method t "__new__"
       else impls.method t n }
 
+/-- The bodies of `Library`'s built-in functions and methods. -/
+def libraryImpls : Impls where
+  function := Library.iterablesFunction
+  method := Library.iteratorsMethod
+
 /-- Each piece's part, in the order the pieces build on each other. -/
-def Assembly.parts : List Impls := [opsImpls]
+def Assembly.parts : List Impls := [opsImpls, libraryImpls]
 
 /-- The bodies of every piece, in the order the pieces build on each other. -/
 def Assembly.impls : Impls := (Assembly.parts.foldr Impls.join {}).withNewCheck
@@ -154,12 +160,19 @@ variable {σ : Type} [Store σ] [Decode σ]
 as a list of frames: one constructor per piece. -/
 inductive PyLoopState (V : Type) where
   | ops (s : Proto.OpsLoopState V)
+  | library (s : Library.LoopState V)
 
 instance {V : Type} : HasLoopPart (PyLoopState V) (Proto.OpsLoopState V) where
   inj := .ops
-  proj | .ops s => some s
+  proj | .ops s => some s | _ => none
   proj_inj _ := rfl
-  inj_of_proj s p h := by cases s; cases h; rfl
+  inj_of_proj s p h := by cases s <;> simp at h; cases h; rfl
+
+instance {V : Type} : HasLoopPart (PyLoopState V) (Library.LoopState V) where
+  inj := .library
+  proj | .library s => some s | _ => none
+  proj_inj _ := rfl
+  inj_of_proj s p h := by cases s <;> simp at h; cases h; rfl
 
 /-- How deep the machines' starts and resumes may nest inside one step of `py.call`: a bound on the
 nesting within a step, not on the length of a run, which `Again` carries from step to step. A deeper
@@ -188,16 +201,20 @@ def startChecks {m : Type → Type 1} {V : Type} [PyReads m V] (f args : V) : m 
 
 mutual
 /-- **The first step of every piece's step machine of a built-in callable**, with the fuel `n` for
-the nested calls, after `startChecks`: no piece has a machine of its own yet. -/
+the nested calls, after `startChecks`: `Library`'s machines, whose calls start and resume with
+one unit less. -/
 def machinesStart : Nat → Value → Value → Value →
     PyM σ .writes true (Option (CallStep (PyLoopState Value) Value))
   | 0, _, _, _ => PyM.gap "a call dispatch nested deeper than the model follows"
-  | _ + 1, f, args, _ => do
+  | n + 1, f, args, kwargs => do
     startChecks f args
-    pure none
+    letI : PyMachines (PyM σ .writes true) Value (PyLoopState Value) :=
+      { startStep := machinesStart n, resume := machinesResume n }
+    Library.machineStart f args kwargs
 
-/-- **The resume entry of every piece**, with the fuel `n` for the nested resumes: this piece's
-frames resume through `Proto.opsResume`, whose inner machines start and resume with one unit
+/-- **The resume entry of every piece**, with the fuel `n` for the nested resumes: the frames of
+`Proto.OpsLoopState` resume through `Proto.opsResume` and `Library`'s through
+`Library.machineResume`, whose inner machines start and resume with one unit
 less. -/
 def machinesResume : Nat → PyLoopState Value → List (PyLoopState Value) →
     PyM σ .writes true (CallStep (PyLoopState Value) Value)
@@ -207,6 +224,7 @@ def machinesResume : Nat → PyLoopState Value → List (PyLoopState Value) →
       { startStep := machinesStart n, resume := machinesResume n }
     match s with
     | .ops f => Proto.opsResume f rest
+    | .library f => Library.machineResume f rest
 end
 
 instance : PyMachines (PyM σ .writes true) Value (PyLoopState Value) :=

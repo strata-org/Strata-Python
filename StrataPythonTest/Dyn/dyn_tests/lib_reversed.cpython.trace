@@ -1,0 +1,75 @@
+--- stdout 489
+len
+len
+reversed 3
+getitem 2
+20
+getitem 1
+10
+getitem 0
+0
+0
+o
+3
+2
+1
+5
+4
+b
+a
+list_reverseiterator reversed
+3 2
+0 0
+0
+z
+y
+x
+3 dict_reversekeyiterator
+dictionary changed size during iteration
+dictionary changed size during iteration
+0
+reversed expected 1 argument, got 0
+reversed expected 1 argument, got 2
+reversed() takes no keyword arguments
+'int' object is not reversible
+'NotRev' object is not reversible
+2
+0 0
+0
+0
+ValueError x
+0 0
+'P' object is not reversible
+reversed
+3
+2
+1
+z 3
+y 2
+x 1
+
+--- outcome
+ok
+--- globals
+Bad = <class 'Bad'>
+M = <class 'M'>
+NotRev = <class 'NotRev'>
+Own = <class 'Own'>
+P = <class 'P'>
+Seq = <class 'Seq'>
+Short = <class 'Short'>
+Stop = <class 'Stop'>
+__doc__ = None
+__name__ = '__main__'
+args = (<NotRev object>,)
+count = <function object>
+d = {'x': 1, 'y': 2, 'z': 3}
+d2 = {1: 0}
+it = <dict_reversekeyiterator object>
+k = 'x'
+kwargs = {}
+l = [7, 8, 9]
+r = <reversed object>
+s = <Short object>
+v = 1
+x = 'a'

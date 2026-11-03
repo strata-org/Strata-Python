@@ -1,0 +1,7 @@
+module top
+  E: local (assigned, referenced)
+  enumerate: global implicit (referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  class E
+qualnames: E

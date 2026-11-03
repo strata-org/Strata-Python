@@ -1,0 +1,1444 @@
+module lib_reversed {
+  func @|lib_reversed.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("lib_reversed")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_reversed.count, "count", "lib_reversed")
+      %count.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "count")
+      %set.2 : base.Unit = base.refSet[py.Value](%count.cell.0, %clo.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|lib_reversed.Seq.<body>|, "<body>", "lib_reversed")
+      %str.1 : py.Value = py.strLit("Seq")
+      %tuple.0 : py.Value = py.mkTuple(%clo.1, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %Seq.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %Seq.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "Seq")
+      %set.3 : base.Unit = base.refSet[py.Value](%Seq.cell.0, %Seq.0)
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@|lib_reversed.Own.<body>|, "<body>", "lib_reversed")
+      %str.2 : py.Value = py.strLit("Own")
+      %tuple.1 : py.Value = py.mkTuple(%clo.2, %str.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %Own.0 : py.Value = py.call(%__build_class__.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %Own.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "Own")
+      %set.4 : base.Unit = base.refSet[py.Value](%Own.cell.0, %Own.0)
+      %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.3 : py.Value = py.mkClosure[[]](@|lib_reversed.NotRev.<body>|, "<body>", "lib_reversed")
+      %str.3 : py.Value = py.strLit("NotRev")
+      %tuple.2 : py.Value = py.mkTuple(%clo.3, %str.3)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %NotRev.0 : py.Value = py.call(%__build_class__.2, %tuple.2, %kwargs.2) ^propagate.0()
+      %NotRev.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "NotRev")
+      %set.5 : base.Unit = base.refSet[py.Value](%NotRev.cell.0, %NotRev.0)
+      %reversed.0 : py.Value = py.loadGlobal("lib_reversed", "reversed") ^propagate.0()
+      %Seq.1 : py.Value = py.loadGlobal("lib_reversed", "Seq") ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%Seq.1, %tuple.3, %kwargs.3) ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple(%call.0)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%reversed.0, %tuple.4, %kwargs.4) ^propagate.0()
+      %r.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "r")
+      %set.6 : base.Unit = base.refSet[py.Value](%r.cell.0, %call.1)
+      %print.0 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %type.0 : py.Value = py.loadGlobal("lib_reversed", "type") ^propagate.0()
+      %r.0 : py.Value = py.loadGlobal("lib_reversed", "r") ^propagate.0()
+      %tuple.5 : py.Value = py.mkTuple(%r.0)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%type.0, %tuple.5, %kwargs.5) ^propagate.0()
+      %__name__.0 : py.Value = py.attr(%call.2, "__name__") ^propagate.0()
+      %r.1 : py.Value = py.loadGlobal("lib_reversed", "r") ^propagate.0()
+      %__length_hint__.0 : py.Value = py.attr(%r.1, "__length_hint__") ^propagate.0()
+      %tuple.6 : py.Value = py.mkTuple
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%__length_hint__.0, %tuple.6, %kwargs.6) ^propagate.0()
+      %tuple.7 : py.Value = py.mkTuple(%__name__.0, %call.3)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%print.0, %tuple.7, %kwargs.7) ^propagate.0()
+      %r.2 : py.Value = py.loadGlobal("lib_reversed", "r") ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%r.2) ^propagate.0()
+      jump ^head.0()
+    head.0():
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "x")
+      %set.7 : base.Unit = base.refSet[py.Value](%x.cell.0, %item.0)
+      %print.1 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %x.0 : py.Value = py.loadGlobal("lib_reversed", "x") ^propagate.0()
+      %tuple.8 : py.Value = py.mkTuple(%x.0)
+      %kwargs.8 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%print.1, %tuple.8, %kwargs.8) ^propagate.0()
+      jump ^head.0()
+    stop.0(%exc.0 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.0)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+    exit.0():
+      %print.2 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %r.3 : py.Value = py.loadGlobal("lib_reversed", "r") ^propagate.0()
+      %__length_hint__.1 : py.Value = py.attr(%r.3, "__length_hint__") ^propagate.0()
+      %tuple.9 : py.Value = py.mkTuple
+      %kwargs.9 : py.Value = py.mkKwargs
+      %call.6 : py.Value = py.call(%__length_hint__.1, %tuple.9, %kwargs.9) ^propagate.0()
+      %tuple.10 : py.Value = py.mkTuple(%call.6)
+      %kwargs.10 : py.Value = py.mkKwargs
+      %call.7 : py.Value = py.call(%print.2, %tuple.10, %kwargs.10) ^propagate.0()
+      %print.3 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %next.0 : py.Value = py.loadGlobal("lib_reversed", "next") ^propagate.0()
+      %reversed.1 : py.Value = py.loadGlobal("lib_reversed", "reversed") ^propagate.0()
+      %Own.1 : py.Value = py.loadGlobal("lib_reversed", "Own") ^propagate.0()
+      %tuple.11 : py.Value = py.mkTuple
+      %kwargs.11 : py.Value = py.mkKwargs
+      %call.8 : py.Value = py.call(%Own.1, %tuple.11, %kwargs.11) ^propagate.0()
+      %tuple.12 : py.Value = py.mkTuple(%call.8)
+      %kwargs.12 : py.Value = py.mkKwargs
+      %call.9 : py.Value = py.call(%reversed.1, %tuple.12, %kwargs.12) ^propagate.0()
+      %tuple.13 : py.Value = py.mkTuple(%call.9)
+      %kwargs.13 : py.Value = py.mkKwargs
+      %call.10 : py.Value = py.call(%next.0, %tuple.13, %kwargs.13) ^propagate.0()
+      %tuple.14 : py.Value = py.mkTuple(%call.10)
+      %kwargs.14 : py.Value = py.mkKwargs
+      %call.11 : py.Value = py.call(%print.3, %tuple.14, %kwargs.14) ^propagate.0()
+      %reversed.2 : py.Value = py.loadGlobal("lib_reversed", "reversed") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %int.2 : py.Value = py.intLit(3)
+      %list.0 : py.Value = py.mkList(%int.0, %int.1, %int.2)
+      %tuple.15 : py.Value = py.mkTuple(%list.0)
+      %kwargs.15 : py.Value = py.mkKwargs
+      %call.12 : py.Value = py.call(%reversed.2, %tuple.15, %kwargs.15) ^propagate.0()
+      %iter.1 : py.Value = py.getIter(%call.12) ^propagate.0()
+      jump ^head.1()
+    head.1():
+      %item.1 : py.Value = py.next(%iter.1) ^stop.1()
+      %x.cell.1 : base.Ref(py.Value) = py.globalCell("lib_reversed", "x")
+      %set.8 : base.Unit = base.refSet[py.Value](%x.cell.1, %item.1)
+      %print.4 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %x.1 : py.Value = py.loadGlobal("lib_reversed", "x") ^propagate.0()
+      %tuple.16 : py.Value = py.mkTuple(%x.1)
+      %kwargs.16 : py.Value = py.mkKwargs
+      %call.13 : py.Value = py.call(%print.4, %tuple.16, %kwargs.16) ^propagate.0()
+      jump ^head.1()
+    stop.1(%exc.1 : py.Value):
+      %done.1 : base.Bool = py.isStopIteration(%exc.1)
+      branch(%done.1) ^exit.1() ^propagate.0(%exc.1)
+    exit.1():
+      %reversed.3 : py.Value = py.loadGlobal("lib_reversed", "reversed") ^propagate.0()
+      %int.3 : py.Value = py.intLit(4)
+      %int.4 : py.Value = py.intLit(5)
+      %tuple.17 : py.Value = py.mkTuple(%int.3, %int.4)
+      %tuple.18 : py.Value = py.mkTuple(%tuple.17)
+      %kwargs.17 : py.Value = py.mkKwargs
+      %call.14 : py.Value = py.call(%reversed.3, %tuple.18, %kwargs.17) ^propagate.0()
+      %iter.2 : py.Value = py.getIter(%call.14) ^propagate.0()
+      jump ^head.2()
+    head.2():
+      %item.2 : py.Value = py.next(%iter.2) ^stop.2()
+      %x.cell.2 : base.Ref(py.Value) = py.globalCell("lib_reversed", "x")
+      %set.9 : base.Unit = base.refSet[py.Value](%x.cell.2, %item.2)
+      %print.5 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %x.2 : py.Value = py.loadGlobal("lib_reversed", "x") ^propagate.0()
+      %tuple.19 : py.Value = py.mkTuple(%x.2)
+      %kwargs.18 : py.Value = py.mkKwargs
+      %call.15 : py.Value = py.call(%print.5, %tuple.19, %kwargs.18) ^propagate.0()
+      jump ^head.2()
+    stop.2(%exc.2 : py.Value):
+      %done.2 : base.Bool = py.isStopIteration(%exc.2)
+      branch(%done.2) ^exit.2() ^propagate.0(%exc.2)
+    exit.2():
+      %reversed.4 : py.Value = py.loadGlobal("lib_reversed", "reversed") ^propagate.0()
+      %str.4 : py.Value = py.strLit("ab")
+      %tuple.20 : py.Value = py.mkTuple(%str.4)
+      %kwargs.19 : py.Value = py.mkKwargs
+      %call.16 : py.Value = py.call(%reversed.4, %tuple.20, %kwargs.19) ^propagate.0()
+      %iter.3 : py.Value = py.getIter(%call.16) ^propagate.0()
+      jump ^head.3()
+    head.3():
+      %item.3 : py.Value = py.next(%iter.3) ^stop.3()
+      %x.cell.3 : base.Ref(py.Value) = py.globalCell("lib_reversed", "x")
+      %set.10 : base.Unit = base.refSet[py.Value](%x.cell.3, %item.3)
+      %print.6 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %x.3 : py.Value = py.loadGlobal("lib_reversed", "x") ^propagate.0()
+      %tuple.21 : py.Value = py.mkTuple(%x.3)
+      %kwargs.20 : py.Value = py.mkKwargs
+      %call.17 : py.Value = py.call(%print.6, %tuple.21, %kwargs.20) ^propagate.0()
+      jump ^head.3()
+    stop.3(%exc.3 : py.Value):
+      %done.3 : base.Bool = py.isStopIteration(%exc.3)
+      branch(%done.3) ^exit.3() ^propagate.0(%exc.3)
+    exit.3():
+      %print.7 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %type.1 : py.Value = py.loadGlobal("lib_reversed", "type") ^propagate.0()
+      %reversed.5 : py.Value = py.loadGlobal("lib_reversed", "reversed") ^propagate.0()
+      %list.1 : py.Value = py.mkList
+      %tuple.22 : py.Value = py.mkTuple(%list.1)
+      %kwargs.21 : py.Value = py.mkKwargs
+      %call.18 : py.Value = py.call(%reversed.5, %tuple.22, %kwargs.21) ^propagate.0()
+      %tuple.23 : py.Value = py.mkTuple(%call.18)
+      %kwargs.22 : py.Value = py.mkKwargs
+      %call.19 : py.Value = py.call(%type.1, %tuple.23, %kwargs.22) ^propagate.0()
+      %__name__.1 : py.Value = py.attr(%call.19, "__name__") ^propagate.0()
+      %type.2 : py.Value = py.loadGlobal("lib_reversed", "type") ^propagate.0()
+      %reversed.6 : py.Value = py.loadGlobal("lib_reversed", "reversed") ^propagate.0()
+      %tuple.24 : py.Value = py.mkTuple
+      %tuple.25 : py.Value = py.mkTuple(%tuple.24)
+      %kwargs.23 : py.Value = py.mkKwargs
+      %call.20 : py.Value = py.call(%reversed.6, %tuple.25, %kwargs.23) ^propagate.0()
+      %tuple.26 : py.Value = py.mkTuple(%call.20)
+      %kwargs.24 : py.Value = py.mkKwargs
+      %call.21 : py.Value = py.call(%type.2, %tuple.26, %kwargs.24) ^propagate.0()
+      %__name__.2 : py.Value = py.attr(%call.21, "__name__") ^propagate.0()
+      %tuple.27 : py.Value = py.mkTuple(%__name__.1, %__name__.2)
+      %kwargs.25 : py.Value = py.mkKwargs
+      %call.22 : py.Value = py.call(%print.7, %tuple.27, %kwargs.25) ^propagate.0()
+      %int.5 : py.Value = py.intLit(1)
+      %int.6 : py.Value = py.intLit(2)
+      %int.7 : py.Value = py.intLit(3)
+      %list.2 : py.Value = py.mkList(%int.5, %int.6, %int.7)
+      %l.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "l")
+      %set.11 : base.Unit = base.refSet[py.Value](%l.cell.0, %list.2)
+      %reversed.7 : py.Value = py.loadGlobal("lib_reversed", "reversed") ^propagate.0()
+      %l.0 : py.Value = py.loadGlobal("lib_reversed", "l") ^propagate.0()
+      %tuple.28 : py.Value = py.mkTuple(%l.0)
+      %kwargs.26 : py.Value = py.mkKwargs
+      %call.23 : py.Value = py.call(%reversed.7, %tuple.28, %kwargs.26) ^propagate.0()
+      %r.cell.1 : base.Ref(py.Value) = py.globalCell("lib_reversed", "r")
+      %set.12 : base.Unit = base.refSet[py.Value](%r.cell.1, %call.23)
+      %print.8 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %next.1 : py.Value = py.loadGlobal("lib_reversed", "next") ^propagate.0()
+      %r.4 : py.Value = py.loadGlobal("lib_reversed", "r") ^propagate.0()
+      %tuple.29 : py.Value = py.mkTuple(%r.4)
+      %kwargs.27 : py.Value = py.mkKwargs
+      %call.24 : py.Value = py.call(%next.1, %tuple.29, %kwargs.27) ^propagate.0()
+      %r.5 : py.Value = py.loadGlobal("lib_reversed", "r") ^propagate.0()
+      %__length_hint__.2 : py.Value = py.attr(%r.5, "__length_hint__") ^propagate.0()
+      %tuple.30 : py.Value = py.mkTuple
+      %kwargs.28 : py.Value = py.mkKwargs
+      %call.25 : py.Value = py.call(%__length_hint__.2, %tuple.30, %kwargs.28) ^propagate.0()
+      %tuple.31 : py.Value = py.mkTuple(%call.24, %call.25)
+      %kwargs.29 : py.Value = py.mkKwargs
+      %call.26 : py.Value = py.call(%print.8, %tuple.31, %kwargs.29) ^propagate.0()
+      %l.1 : py.Value = py.loadGlobal("lib_reversed", "l") ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %none.2 : py.Value = py.noneLit
+      %none.3 : py.Value = py.noneLit
+      %slice.0 : py.Value = py.mkSlice(%none.1, %none.2, %none.3)
+      %del.0 : base.Unit = py.delItem(%l.1, %slice.0) ^propagate.0()
+      %print.9 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %count.0 : py.Value = py.loadGlobal("lib_reversed", "count") ^propagate.0()
+      %r.6 : py.Value = py.loadGlobal("lib_reversed", "r") ^propagate.0()
+      %tuple.32 : py.Value = py.mkTuple(%r.6)
+      %kwargs.30 : py.Value = py.mkKwargs
+      %call.27 : py.Value = py.call(%count.0, %tuple.32, %kwargs.30) ^propagate.0()
+      %r.7 : py.Value = py.loadGlobal("lib_reversed", "r") ^propagate.0()
+      %__length_hint__.3 : py.Value = py.attr(%r.7, "__length_hint__") ^propagate.0()
+      %tuple.33 : py.Value = py.mkTuple
+      %kwargs.31 : py.Value = py.mkKwargs
+      %call.28 : py.Value = py.call(%__length_hint__.3, %tuple.33, %kwargs.31) ^propagate.0()
+      %tuple.34 : py.Value = py.mkTuple(%call.27, %call.28)
+      %kwargs.32 : py.Value = py.mkKwargs
+      %call.29 : py.Value = py.call(%print.9, %tuple.34, %kwargs.32) ^propagate.0()
+      %int.8 : py.Value = py.intLit(7)
+      %int.9 : py.Value = py.intLit(8)
+      %int.10 : py.Value = py.intLit(9)
+      %list.3 : py.Value = py.mkList(%int.8, %int.9, %int.10)
+      %l.2 : py.Value = py.loadGlobal("lib_reversed", "l") ^propagate.0()
+      %int.11 : py.Value = py.intLit(0)
+      %int.12 : py.Value = py.intLit(0)
+      %none.4 : py.Value = py.noneLit
+      %slice.1 : py.Value = py.mkSlice(%int.11, %int.12, %none.4)
+      %store.0 : base.Unit = py.setItem(%l.2, %slice.1, %list.3) ^propagate.0()
+      %print.10 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %count.1 : py.Value = py.loadGlobal("lib_reversed", "count") ^propagate.0()
+      %r.8 : py.Value = py.loadGlobal("lib_reversed", "r") ^propagate.0()
+      %tuple.35 : py.Value = py.mkTuple(%r.8)
+      %kwargs.33 : py.Value = py.mkKwargs
+      %call.30 : py.Value = py.call(%count.1, %tuple.35, %kwargs.33) ^propagate.0()
+      %tuple.36 : py.Value = py.mkTuple(%call.30)
+      %kwargs.34 : py.Value = py.mkKwargs
+      %call.31 : py.Value = py.call(%print.10, %tuple.36, %kwargs.34) ^propagate.0()
+      %str.5 : py.Value = py.strLit("x")
+      %int.13 : py.Value = py.intLit(1)
+      %str.6 : py.Value = py.strLit("y")
+      %int.14 : py.Value = py.intLit(2)
+      %str.7 : py.Value = py.strLit("z")
+      %int.15 : py.Value = py.intLit(3)
+      %dict.0 : py.Value = py.mkDict(%str.5, %int.13, %str.6, %int.14, %str.7, %int.15) ^propagate.0()
+      %d.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "d")
+      %set.13 : base.Unit = base.refSet[py.Value](%d.cell.0, %dict.0)
+      %reversed.8 : py.Value = py.loadGlobal("lib_reversed", "reversed") ^propagate.0()
+      %d.0 : py.Value = py.loadGlobal("lib_reversed", "d") ^propagate.0()
+      %tuple.37 : py.Value = py.mkTuple(%d.0)
+      %kwargs.35 : py.Value = py.mkKwargs
+      %call.32 : py.Value = py.call(%reversed.8, %tuple.37, %kwargs.35) ^propagate.0()
+      %iter.4 : py.Value = py.getIter(%call.32) ^propagate.0()
+      jump ^head.4()
+    head.4():
+      %item.4 : py.Value = py.next(%iter.4) ^stop.4()
+      %k.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "k")
+      %set.14 : base.Unit = base.refSet[py.Value](%k.cell.0, %item.4)
+      %print.11 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %k.0 : py.Value = py.loadGlobal("lib_reversed", "k") ^propagate.0()
+      %tuple.38 : py.Value = py.mkTuple(%k.0)
+      %kwargs.36 : py.Value = py.mkKwargs
+      %call.33 : py.Value = py.call(%print.11, %tuple.38, %kwargs.36) ^propagate.0()
+      jump ^head.4()
+    stop.4(%exc.4 : py.Value):
+      %done.4 : base.Bool = py.isStopIteration(%exc.4)
+      branch(%done.4) ^exit.4() ^propagate.0(%exc.4)
+    exit.4():
+      %reversed.9 : py.Value = py.loadGlobal("lib_reversed", "reversed") ^propagate.0()
+      %d.1 : py.Value = py.loadGlobal("lib_reversed", "d") ^propagate.0()
+      %tuple.39 : py.Value = py.mkTuple(%d.1)
+      %kwargs.37 : py.Value = py.mkKwargs
+      %call.34 : py.Value = py.call(%reversed.9, %tuple.39, %kwargs.37) ^propagate.0()
+      %it.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "it")
+      %set.15 : base.Unit = base.refSet[py.Value](%it.cell.0, %call.34)
+      %print.12 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %it.0 : py.Value = py.loadGlobal("lib_reversed", "it") ^propagate.0()
+      %__length_hint__.4 : py.Value = py.attr(%it.0, "__length_hint__") ^propagate.0()
+      %tuple.40 : py.Value = py.mkTuple
+      %kwargs.38 : py.Value = py.mkKwargs
+      %call.35 : py.Value = py.call(%__length_hint__.4, %tuple.40, %kwargs.38) ^propagate.0()
+      %type.3 : py.Value = py.loadGlobal("lib_reversed", "type") ^propagate.0()
+      %it.1 : py.Value = py.loadGlobal("lib_reversed", "it") ^propagate.0()
+      %tuple.41 : py.Value = py.mkTuple(%it.1)
+      %kwargs.39 : py.Value = py.mkKwargs
+      %call.36 : py.Value = py.call(%type.3, %tuple.41, %kwargs.39) ^propagate.0()
+      %__name__.3 : py.Value = py.attr(%call.36, "__name__") ^propagate.0()
+      %tuple.42 : py.Value = py.mkTuple(%call.35, %__name__.3)
+      %kwargs.40 : py.Value = py.mkKwargs
+      %call.37 : py.Value = py.call(%print.12, %tuple.42, %kwargs.40) ^propagate.0()
+      %int.16 : py.Value = py.intLit(1)
+      %int.17 : py.Value = py.intLit(0)
+      %dict.1 : py.Value = py.mkDict(%int.16, %int.17) ^propagate.0()
+      %d2.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "d2")
+      %set.16 : base.Unit = base.refSet[py.Value](%d2.cell.0, %dict.1)
+      %reversed.10 : py.Value = py.loadGlobal("lib_reversed", "reversed") ^propagate.0()
+      %d2.0 : py.Value = py.loadGlobal("lib_reversed", "d2") ^propagate.0()
+      %tuple.43 : py.Value = py.mkTuple(%d2.0)
+      %kwargs.41 : py.Value = py.mkKwargs
+      %call.38 : py.Value = py.call(%reversed.10, %tuple.43, %kwargs.41) ^propagate.0()
+      %it.cell.1 : base.Ref(py.Value) = py.globalCell("lib_reversed", "it")
+      %set.17 : base.Unit = base.refSet[py.Value](%it.cell.1, %call.38)
+      %int.18 : py.Value = py.intLit(0)
+      %d2.1 : py.Value = py.loadGlobal("lib_reversed", "d2") ^propagate.0()
+      %int.19 : py.Value = py.intLit(2)
+      %store.1 : base.Unit = py.setItem(%d2.1, %int.19, %int.18) ^propagate.0()
+      %next.2 : py.Value = py.loadGlobal("lib_reversed", "next") ^catch.0()
+      %it.2 : py.Value = py.loadGlobal("lib_reversed", "it") ^catch.0()
+      %tuple.44 : py.Value = py.mkTuple(%it.2)
+      %kwargs.42 : py.Value = py.mkKwargs
+      %call.39 : py.Value = py.call(%next.2, %tuple.44, %kwargs.42) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.5 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.5)
+      %RuntimeError.0 : py.Value = py.loadGlobal("lib_reversed", "RuntimeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.5, %RuntimeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "e")
+      %set.18 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.5)
+      %print.13 : py.Value = py.loadGlobal("lib_reversed", "print") ^clear.0()
+      %e.0 : py.Value = py.loadGlobal("lib_reversed", "e") ^clear.0()
+      %args.0 : py.Value = py.attr(%e.0, "args") ^clear.0()
+      %int.20 : py.Value = py.intLit(0)
+      %item.5 : py.Value = py.getItem(%args.0, %int.20) ^clear.0()
+      %tuple.45 : py.Value = py.mkTuple(%item.5)
+      %kwargs.43 : py.Value = py.mkKwargs
+      %call.40 : py.Value = py.call(%print.13, %tuple.45, %kwargs.43) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("lib_reversed", "e")
+      %set.19 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
+      jump ^join.0()
+    clear.0(%exc.6 : py.Value):
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("lib_reversed", "e")
+      %set.20 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^unwind.0(%exc.6)
+    next.0():
+      jump ^unwind.0(%exc.5)
+    unwind.0(%exc.7 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.7)
+    join.0():
+      %d2.2 : py.Value = py.loadGlobal("lib_reversed", "d2") ^propagate.0()
+      %int.21 : py.Value = py.intLit(2)
+      %del.1 : base.Unit = py.delItem(%d2.2, %int.21) ^propagate.0()
+      %next.3 : py.Value = py.loadGlobal("lib_reversed", "next") ^catch.1()
+      %it.3 : py.Value = py.loadGlobal("lib_reversed", "it") ^catch.1()
+      %tuple.46 : py.Value = py.mkTuple(%it.3)
+      %kwargs.44 : py.Value = py.mkKwargs
+      %call.41 : py.Value = py.call(%next.3, %tuple.46, %kwargs.44) ^catch.1()
+      jump ^join.1()
+    catch.1(%exc.8 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.8)
+      %RuntimeError.1 : py.Value = py.loadGlobal("lib_reversed", "RuntimeError") ^unwind.1()
+      %match.1 : base.Bool = py.excMatch(%exc.8, %RuntimeError.1) ^unwind.1()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %e.cell.3 : base.Ref(py.Value) = py.globalCell("lib_reversed", "e")
+      %set.21 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.8)
+      %print.14 : py.Value = py.loadGlobal("lib_reversed", "print") ^clear.1()
+      %e.3 : py.Value = py.loadGlobal("lib_reversed", "e") ^clear.1()
+      %args.1 : py.Value = py.attr(%e.3, "args") ^clear.1()
+      %int.22 : py.Value = py.intLit(0)
+      %item.6 : py.Value = py.getItem(%args.1, %int.22) ^clear.1()
+      %tuple.47 : py.Value = py.mkTuple(%item.6)
+      %kwargs.45 : py.Value = py.mkKwargs
+      %call.42 : py.Value = py.call(%print.14, %tuple.47, %kwargs.45) ^clear.1()
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      %e.4 : py.Value = py.undef("e")
+      %e.cell.4 : base.Ref(py.Value) = py.globalCell("lib_reversed", "e")
+      %set.22 : base.Unit = base.refSet[py.Value](%e.cell.4, %e.4)
+      jump ^join.1()
+    clear.1(%exc.9 : py.Value):
+      %e.5 : py.Value = py.undef("e")
+      %e.cell.5 : base.Ref(py.Value) = py.globalCell("lib_reversed", "e")
+      %set.23 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.5)
+      jump ^unwind.1(%exc.9)
+    next.1():
+      jump ^unwind.1(%exc.8)
+    unwind.1(%exc.10 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.10)
+    join.1():
+      %print.15 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %it.4 : py.Value = py.loadGlobal("lib_reversed", "it") ^propagate.0()
+      %__length_hint__.5 : py.Value = py.attr(%it.4, "__length_hint__") ^propagate.0()
+      %tuple.48 : py.Value = py.mkTuple
+      %kwargs.46 : py.Value = py.mkKwargs
+      %call.43 : py.Value = py.call(%__length_hint__.5, %tuple.48, %kwargs.46) ^propagate.0()
+      %tuple.49 : py.Value = py.mkTuple(%call.43)
+      %kwargs.47 : py.Value = py.mkKwargs
+      %call.44 : py.Value = py.call(%print.15, %tuple.49, %kwargs.47) ^propagate.0()
+      %tuple.50 : py.Value = py.mkTuple
+      %dict.2 : py.Value = py.mkDict ^propagate.0()
+      %tuple.51 : py.Value = py.mkTuple(%tuple.50, %dict.2)
+      %int.23 : py.Value = py.intLit(1)
+      %int.24 : py.Value = py.intLit(2)
+      %tuple.52 : py.Value = py.mkTuple(%int.23, %int.24)
+      %dict.3 : py.Value = py.mkDict ^propagate.0()
+      %tuple.53 : py.Value = py.mkTuple(%tuple.52, %dict.3)
+      %list.4 : py.Value = py.mkList
+      %tuple.54 : py.Value = py.mkTuple(%list.4)
+      %str.8 : py.Value = py.strLit("x")
+      %int.25 : py.Value = py.intLit(1)
+      %dict.4 : py.Value = py.mkDict(%str.8, %int.25) ^propagate.0()
+      %tuple.55 : py.Value = py.mkTuple(%tuple.54, %dict.4)
+      %int.26 : py.Value = py.intLit(5)
+      %tuple.56 : py.Value = py.mkTuple(%int.26)
+      %dict.5 : py.Value = py.mkDict ^propagate.0()
+      %tuple.57 : py.Value = py.mkTuple(%tuple.56, %dict.5)
+      %NotRev.1 : py.Value = py.loadGlobal("lib_reversed", "NotRev") ^propagate.0()
+      %tuple.58 : py.Value = py.mkTuple
+      %kwargs.48 : py.Value = py.mkKwargs
+      %call.45 : py.Value = py.call(%NotRev.1, %tuple.58, %kwargs.48) ^propagate.0()
+      %tuple.59 : py.Value = py.mkTuple(%call.45)
+      %dict.6 : py.Value = py.mkDict ^propagate.0()
+      %tuple.60 : py.Value = py.mkTuple(%tuple.59, %dict.6)
+      %list.5 : py.Value = py.mkList(%tuple.51, %tuple.53, %tuple.55, %tuple.57, %tuple.60)
+      %iter.5 : py.Value = py.getIter(%list.5) ^propagate.0()
+      jump ^head.5()
+    head.5():
+      %item.7 : py.Value = py.next(%iter.5) ^stop.5()
+      %unpack.0 : py.Value = py.unpackSeq(%item.7, 2) ^propagate.0()
+      %elem.0 : py.Value = py.tupleGet(%unpack.0, 0)
+      %args.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "args")
+      %set.24 : base.Unit = base.refSet[py.Value](%args.cell.0, %elem.0)
+      %elem.1 : py.Value = py.tupleGet(%unpack.0, 1)
+      %kwargs.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "kwargs")
+      %set.25 : base.Unit = base.refSet[py.Value](%kwargs.cell.0, %elem.1)
+      %reversed.11 : py.Value = py.loadGlobal("lib_reversed", "reversed") ^catch.2()
+      %args.2 : py.Value = py.loadGlobal("lib_reversed", "args") ^catch.2()
+      %kwargs.49 : py.Value = py.mkKwargs
+      %kwargs.50 : py.Value = py.loadGlobal("lib_reversed", "kwargs") ^catch.2()
+      %merge.0 : py.Value = py.dictMerge(%reversed.11, %kwargs.49, %kwargs.50) ^catch.2()
+      %args.3 : py.Value = py.argsTuple(%reversed.11, %args.2) ^catch.2()
+      %call.46 : py.Value = py.call(%reversed.11, %args.3, %merge.0) ^catch.2()
+      jump ^join.2()
+    catch.2(%exc.11 : py.Value):
+      %prev.2 : py.Value = py.pushExcInfo(%exc.11)
+      %TypeError.0 : py.Value = py.loadGlobal("lib_reversed", "TypeError") ^unwind.2()
+      %match.2 : base.Bool = py.excMatch(%exc.11, %TypeError.0) ^unwind.2()
+      branch(%match.2) ^except.2() ^next.2()
+    except.2():
+      %e.cell.6 : base.Ref(py.Value) = py.globalCell("lib_reversed", "e")
+      %set.26 : base.Unit = base.refSet[py.Value](%e.cell.6, %exc.11)
+      %print.16 : py.Value = py.loadGlobal("lib_reversed", "print") ^clear.2()
+      %e.6 : py.Value = py.loadGlobal("lib_reversed", "e") ^clear.2()
+      %args.4 : py.Value = py.attr(%e.6, "args") ^clear.2()
+      %int.27 : py.Value = py.intLit(0)
+      %item.8 : py.Value = py.getItem(%args.4, %int.27) ^clear.2()
+      %tuple.61 : py.Value = py.mkTuple(%item.8)
+      %kwargs.51 : py.Value = py.mkKwargs
+      %call.47 : py.Value = py.call(%print.16, %tuple.61, %kwargs.51) ^clear.2()
+      %pop.4 : base.Unit = py.popExcept(%prev.2)
+      %e.7 : py.Value = py.undef("e")
+      %e.cell.7 : base.Ref(py.Value) = py.globalCell("lib_reversed", "e")
+      %set.27 : base.Unit = base.refSet[py.Value](%e.cell.7, %e.7)
+      jump ^join.2()
+    clear.2(%exc.12 : py.Value):
+      %e.8 : py.Value = py.undef("e")
+      %e.cell.8 : base.Ref(py.Value) = py.globalCell("lib_reversed", "e")
+      %set.28 : base.Unit = base.refSet[py.Value](%e.cell.8, %e.8)
+      jump ^unwind.2(%exc.12)
+    next.2():
+      jump ^unwind.2(%exc.11)
+    unwind.2(%exc.13 : py.Value):
+      %pop.5 : base.Unit = py.popExcept(%prev.2)
+      jump ^propagate.0(%exc.13)
+    join.2():
+      jump ^head.5()
+    stop.5(%exc.14 : py.Value):
+      %done.5 : base.Bool = py.isStopIteration(%exc.14)
+      branch(%done.5) ^exit.5() ^propagate.0(%exc.14)
+    exit.5():
+      %__build_class__.3 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.4 : py.Value = py.mkClosure[[]](@|lib_reversed.Short.<body>|, "<body>", "lib_reversed")
+      %str.9 : py.Value = py.strLit("Short")
+      %tuple.62 : py.Value = py.mkTuple(%clo.4, %str.9)
+      %kwargs.52 : py.Value = py.mkKwargs
+      %Short.0 : py.Value = py.call(%__build_class__.3, %tuple.62, %kwargs.52) ^propagate.0()
+      %Short.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "Short")
+      %set.29 : base.Unit = base.refSet[py.Value](%Short.cell.0, %Short.0)
+      %reversed.12 : py.Value = py.loadGlobal("lib_reversed", "reversed") ^propagate.0()
+      %Short.1 : py.Value = py.loadGlobal("lib_reversed", "Short") ^propagate.0()
+      %tuple.63 : py.Value = py.mkTuple
+      %kwargs.53 : py.Value = py.mkKwargs
+      %call.48 : py.Value = py.call(%Short.1, %tuple.63, %kwargs.53) ^propagate.0()
+      %tuple.64 : py.Value = py.mkTuple(%call.48)
+      %kwargs.54 : py.Value = py.mkKwargs
+      %call.49 : py.Value = py.call(%reversed.12, %tuple.64, %kwargs.54) ^propagate.0()
+      %r.cell.2 : base.Ref(py.Value) = py.globalCell("lib_reversed", "r")
+      %set.30 : base.Unit = base.refSet[py.Value](%r.cell.2, %call.49)
+      %print.17 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %next.4 : py.Value = py.loadGlobal("lib_reversed", "next") ^propagate.0()
+      %r.9 : py.Value = py.loadGlobal("lib_reversed", "r") ^propagate.0()
+      %tuple.65 : py.Value = py.mkTuple(%r.9)
+      %kwargs.55 : py.Value = py.mkKwargs
+      %call.50 : py.Value = py.call(%next.4, %tuple.65, %kwargs.55) ^propagate.0()
+      %tuple.66 : py.Value = py.mkTuple(%call.50)
+      %kwargs.56 : py.Value = py.mkKwargs
+      %call.51 : py.Value = py.call(%print.17, %tuple.66, %kwargs.56) ^propagate.0()
+      %print.18 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %count.2 : py.Value = py.loadGlobal("lib_reversed", "count") ^propagate.0()
+      %r.10 : py.Value = py.loadGlobal("lib_reversed", "r") ^propagate.0()
+      %tuple.67 : py.Value = py.mkTuple(%r.10)
+      %kwargs.57 : py.Value = py.mkKwargs
+      %call.52 : py.Value = py.call(%count.2, %tuple.67, %kwargs.57) ^propagate.0()
+      %r.11 : py.Value = py.loadGlobal("lib_reversed", "r") ^propagate.0()
+      %__length_hint__.6 : py.Value = py.attr(%r.11, "__length_hint__") ^propagate.0()
+      %tuple.68 : py.Value = py.mkTuple
+      %kwargs.58 : py.Value = py.mkKwargs
+      %call.53 : py.Value = py.call(%__length_hint__.6, %tuple.68, %kwargs.58) ^propagate.0()
+      %tuple.69 : py.Value = py.mkTuple(%call.52, %call.53)
+      %kwargs.59 : py.Value = py.mkKwargs
+      %call.54 : py.Value = py.call(%print.18, %tuple.69, %kwargs.59) ^propagate.0()
+      %Short.2 : py.Value = py.loadGlobal("lib_reversed", "Short") ^propagate.0()
+      %tuple.70 : py.Value = py.mkTuple
+      %kwargs.60 : py.Value = py.mkKwargs
+      %call.55 : py.Value = py.call(%Short.2, %tuple.70, %kwargs.60) ^propagate.0()
+      %s.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "s")
+      %set.31 : base.Unit = base.refSet[py.Value](%s.cell.0, %call.55)
+      %reversed.13 : py.Value = py.loadGlobal("lib_reversed", "reversed") ^propagate.0()
+      %s.0 : py.Value = py.loadGlobal("lib_reversed", "s") ^propagate.0()
+      %tuple.71 : py.Value = py.mkTuple(%s.0)
+      %kwargs.61 : py.Value = py.mkKwargs
+      %call.56 : py.Value = py.call(%reversed.13, %tuple.71, %kwargs.61) ^propagate.0()
+      %r.cell.3 : base.Ref(py.Value) = py.globalCell("lib_reversed", "r")
+      %set.32 : base.Unit = base.refSet[py.Value](%r.cell.3, %call.56)
+      %int.28 : py.Value = py.intLit(1)
+      %s.1 : py.Value = py.loadGlobal("lib_reversed", "s") ^propagate.0()
+      %n.134 : base.Unit = py.setAttr(%s.1, "n", %int.28) ^propagate.0()
+      %print.19 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %r.12 : py.Value = py.loadGlobal("lib_reversed", "r") ^propagate.0()
+      %__length_hint__.7 : py.Value = py.attr(%r.12, "__length_hint__") ^propagate.0()
+      %tuple.72 : py.Value = py.mkTuple
+      %kwargs.62 : py.Value = py.mkKwargs
+      %call.57 : py.Value = py.call(%__length_hint__.7, %tuple.72, %kwargs.62) ^propagate.0()
+      %tuple.73 : py.Value = py.mkTuple(%call.57)
+      %kwargs.63 : py.Value = py.mkKwargs
+      %call.58 : py.Value = py.call(%print.19, %tuple.73, %kwargs.63) ^propagate.0()
+      %__build_class__.4 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.5 : py.Value = py.mkClosure[[]](@|lib_reversed.Stop.<body>|, "<body>", "lib_reversed")
+      %str.10 : py.Value = py.strLit("Stop")
+      %tuple.74 : py.Value = py.mkTuple(%clo.5, %str.10)
+      %kwargs.64 : py.Value = py.mkKwargs
+      %Stop.0 : py.Value = py.call(%__build_class__.4, %tuple.74, %kwargs.64) ^propagate.0()
+      %Stop.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "Stop")
+      %set.33 : base.Unit = base.refSet[py.Value](%Stop.cell.0, %Stop.0)
+      %print.20 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %count.3 : py.Value = py.loadGlobal("lib_reversed", "count") ^propagate.0()
+      %reversed.14 : py.Value = py.loadGlobal("lib_reversed", "reversed") ^propagate.0()
+      %Stop.1 : py.Value = py.loadGlobal("lib_reversed", "Stop") ^propagate.0()
+      %tuple.75 : py.Value = py.mkTuple
+      %kwargs.65 : py.Value = py.mkKwargs
+      %call.59 : py.Value = py.call(%Stop.1, %tuple.75, %kwargs.65) ^propagate.0()
+      %tuple.76 : py.Value = py.mkTuple(%call.59)
+      %kwargs.66 : py.Value = py.mkKwargs
+      %call.60 : py.Value = py.call(%reversed.14, %tuple.76, %kwargs.66) ^propagate.0()
+      %tuple.77 : py.Value = py.mkTuple(%call.60)
+      %kwargs.67 : py.Value = py.mkKwargs
+      %call.61 : py.Value = py.call(%count.3, %tuple.77, %kwargs.67) ^propagate.0()
+      %tuple.78 : py.Value = py.mkTuple(%call.61)
+      %kwargs.68 : py.Value = py.mkKwargs
+      %call.62 : py.Value = py.call(%print.20, %tuple.78, %kwargs.68) ^propagate.0()
+      %__build_class__.5 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.6 : py.Value = py.mkClosure[[]](@|lib_reversed.Bad.<body>|, "<body>", "lib_reversed")
+      %str.11 : py.Value = py.strLit("Bad")
+      %tuple.79 : py.Value = py.mkTuple(%clo.6, %str.11)
+      %kwargs.69 : py.Value = py.mkKwargs
+      %Bad.0 : py.Value = py.call(%__build_class__.5, %tuple.79, %kwargs.69) ^propagate.0()
+      %Bad.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "Bad")
+      %set.34 : base.Unit = base.refSet[py.Value](%Bad.cell.0, %Bad.0)
+      %reversed.15 : py.Value = py.loadGlobal("lib_reversed", "reversed") ^propagate.0()
+      %Bad.1 : py.Value = py.loadGlobal("lib_reversed", "Bad") ^propagate.0()
+      %tuple.80 : py.Value = py.mkTuple
+      %kwargs.70 : py.Value = py.mkKwargs
+      %call.63 : py.Value = py.call(%Bad.1, %tuple.80, %kwargs.70) ^propagate.0()
+      %tuple.81 : py.Value = py.mkTuple(%call.63)
+      %kwargs.71 : py.Value = py.mkKwargs
+      %call.64 : py.Value = py.call(%reversed.15, %tuple.81, %kwargs.71) ^propagate.0()
+      %r.cell.4 : base.Ref(py.Value) = py.globalCell("lib_reversed", "r")
+      %set.35 : base.Unit = base.refSet[py.Value](%r.cell.4, %call.64)
+      %next.5 : py.Value = py.loadGlobal("lib_reversed", "next") ^catch.3()
+      %r.13 : py.Value = py.loadGlobal("lib_reversed", "r") ^catch.3()
+      %tuple.82 : py.Value = py.mkTuple(%r.13)
+      %kwargs.72 : py.Value = py.mkKwargs
+      %call.65 : py.Value = py.call(%next.5, %tuple.82, %kwargs.72) ^catch.3()
+      jump ^join.3()
+    catch.3(%exc.15 : py.Value):
+      %prev.3 : py.Value = py.pushExcInfo(%exc.15)
+      %ValueError.0 : py.Value = py.loadGlobal("lib_reversed", "ValueError") ^unwind.3()
+      %match.3 : base.Bool = py.excMatch(%exc.15, %ValueError.0) ^unwind.3()
+      branch(%match.3) ^except.3() ^next.3()
+    except.3():
+      %e.cell.9 : base.Ref(py.Value) = py.globalCell("lib_reversed", "e")
+      %set.36 : base.Unit = base.refSet[py.Value](%e.cell.9, %exc.15)
+      %print.21 : py.Value = py.loadGlobal("lib_reversed", "print") ^clear.3()
+      %str.12 : py.Value = py.strLit("ValueError")
+      %e.9 : py.Value = py.loadGlobal("lib_reversed", "e") ^clear.3()
+      %args.5 : py.Value = py.attr(%e.9, "args") ^clear.3()
+      %int.29 : py.Value = py.intLit(0)
+      %item.9 : py.Value = py.getItem(%args.5, %int.29) ^clear.3()
+      %tuple.83 : py.Value = py.mkTuple(%str.12, %item.9)
+      %kwargs.73 : py.Value = py.mkKwargs
+      %call.66 : py.Value = py.call(%print.21, %tuple.83, %kwargs.73) ^clear.3()
+      %pop.6 : base.Unit = py.popExcept(%prev.3)
+      %e.10 : py.Value = py.undef("e")
+      %e.cell.10 : base.Ref(py.Value) = py.globalCell("lib_reversed", "e")
+      %set.37 : base.Unit = base.refSet[py.Value](%e.cell.10, %e.10)
+      jump ^join.3()
+    clear.3(%exc.16 : py.Value):
+      %e.11 : py.Value = py.undef("e")
+      %e.cell.11 : base.Ref(py.Value) = py.globalCell("lib_reversed", "e")
+      %set.38 : base.Unit = base.refSet[py.Value](%e.cell.11, %e.11)
+      jump ^unwind.3(%exc.16)
+    next.3():
+      jump ^unwind.3(%exc.15)
+    unwind.3(%exc.17 : py.Value):
+      %pop.7 : base.Unit = py.popExcept(%prev.3)
+      jump ^propagate.0(%exc.17)
+    join.3():
+      %print.22 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %r.14 : py.Value = py.loadGlobal("lib_reversed", "r") ^propagate.0()
+      %__length_hint__.8 : py.Value = py.attr(%r.14, "__length_hint__") ^propagate.0()
+      %tuple.84 : py.Value = py.mkTuple
+      %kwargs.74 : py.Value = py.mkKwargs
+      %call.67 : py.Value = py.call(%__length_hint__.8, %tuple.84, %kwargs.74) ^propagate.0()
+      %count.4 : py.Value = py.loadGlobal("lib_reversed", "count") ^propagate.0()
+      %r.15 : py.Value = py.loadGlobal("lib_reversed", "r") ^propagate.0()
+      %tuple.85 : py.Value = py.mkTuple(%r.15)
+      %kwargs.75 : py.Value = py.mkKwargs
+      %call.68 : py.Value = py.call(%count.4, %tuple.85, %kwargs.75) ^propagate.0()
+      %tuple.86 : py.Value = py.mkTuple(%call.67, %call.68)
+      %kwargs.76 : py.Value = py.mkKwargs
+      %call.69 : py.Value = py.call(%print.22, %tuple.86, %kwargs.76) ^propagate.0()
+      %__build_class__.6 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.7 : py.Value = py.mkClosure[[]](@|lib_reversed.P.<body>|, "<body>", "lib_reversed")
+      %str.13 : py.Value = py.strLit("P")
+      %tuple.87 : py.Value = py.mkTuple(%clo.7, %str.13)
+      %kwargs.77 : py.Value = py.mkKwargs
+      %P.0 : py.Value = py.call(%__build_class__.6, %tuple.87, %kwargs.77) ^propagate.0()
+      %P.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "P")
+      %set.39 : base.Unit = base.refSet[py.Value](%P.cell.0, %P.0)
+      %reversed.16 : py.Value = py.loadGlobal("lib_reversed", "reversed") ^catch.4()
+      %P.1 : py.Value = py.loadGlobal("lib_reversed", "P") ^catch.4()
+      %tuple.88 : py.Value = py.mkTuple
+      %kwargs.78 : py.Value = py.mkKwargs
+      %call.70 : py.Value = py.call(%P.1, %tuple.88, %kwargs.78) ^catch.4()
+      %tuple.89 : py.Value = py.mkTuple(%call.70)
+      %kwargs.79 : py.Value = py.mkKwargs
+      %call.71 : py.Value = py.call(%reversed.16, %tuple.89, %kwargs.79) ^catch.4()
+      jump ^join.4()
+    catch.4(%exc.18 : py.Value):
+      %prev.4 : py.Value = py.pushExcInfo(%exc.18)
+      %TypeError.1 : py.Value = py.loadGlobal("lib_reversed", "TypeError") ^unwind.4()
+      %match.4 : base.Bool = py.excMatch(%exc.18, %TypeError.1) ^unwind.4()
+      branch(%match.4) ^except.4() ^next.4()
+    except.4():
+      %e.cell.12 : base.Ref(py.Value) = py.globalCell("lib_reversed", "e")
+      %set.40 : base.Unit = base.refSet[py.Value](%e.cell.12, %exc.18)
+      %print.23 : py.Value = py.loadGlobal("lib_reversed", "print") ^clear.4()
+      %e.12 : py.Value = py.loadGlobal("lib_reversed", "e") ^clear.4()
+      %args.6 : py.Value = py.attr(%e.12, "args") ^clear.4()
+      %int.30 : py.Value = py.intLit(0)
+      %item.10 : py.Value = py.getItem(%args.6, %int.30) ^clear.4()
+      %tuple.90 : py.Value = py.mkTuple(%item.10)
+      %kwargs.80 : py.Value = py.mkKwargs
+      %call.72 : py.Value = py.call(%print.23, %tuple.90, %kwargs.80) ^clear.4()
+      %pop.8 : base.Unit = py.popExcept(%prev.4)
+      %e.13 : py.Value = py.undef("e")
+      %e.cell.13 : base.Ref(py.Value) = py.globalCell("lib_reversed", "e")
+      %set.41 : base.Unit = base.refSet[py.Value](%e.cell.13, %e.13)
+      jump ^join.4()
+    clear.4(%exc.19 : py.Value):
+      %e.14 : py.Value = py.undef("e")
+      %e.cell.14 : base.Ref(py.Value) = py.globalCell("lib_reversed", "e")
+      %set.42 : base.Unit = base.refSet[py.Value](%e.cell.14, %e.14)
+      jump ^unwind.4(%exc.19)
+    next.4():
+      jump ^unwind.4(%exc.18)
+    unwind.4(%exc.20 : py.Value):
+      %pop.9 : base.Unit = py.popExcept(%prev.4)
+      jump ^propagate.0(%exc.20)
+    join.4():
+      %__build_class__.7 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.8 : py.Value = py.mkClosure[[]](@|lib_reversed.M.<body>|, "<body>", "lib_reversed")
+      %str.14 : py.Value = py.strLit("M")
+      %tuple.91 : py.Value = py.mkTuple(%clo.8, %str.14)
+      %kwargs.81 : py.Value = py.mkKwargs
+      %M.0 : py.Value = py.call(%__build_class__.7, %tuple.91, %kwargs.81) ^propagate.0()
+      %M.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "M")
+      %set.43 : base.Unit = base.refSet[py.Value](%M.cell.0, %M.0)
+      %print.24 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %type.4 : py.Value = py.loadGlobal("lib_reversed", "type") ^propagate.0()
+      %reversed.17 : py.Value = py.loadGlobal("lib_reversed", "reversed") ^propagate.0()
+      %M.1 : py.Value = py.loadGlobal("lib_reversed", "M") ^propagate.0()
+      %tuple.92 : py.Value = py.mkTuple
+      %kwargs.82 : py.Value = py.mkKwargs
+      %call.73 : py.Value = py.call(%M.1, %tuple.92, %kwargs.82) ^propagate.0()
+      %tuple.93 : py.Value = py.mkTuple(%call.73)
+      %kwargs.83 : py.Value = py.mkKwargs
+      %call.74 : py.Value = py.call(%reversed.17, %tuple.93, %kwargs.83) ^propagate.0()
+      %tuple.94 : py.Value = py.mkTuple(%call.74)
+      %kwargs.84 : py.Value = py.mkKwargs
+      %call.75 : py.Value = py.call(%type.4, %tuple.94, %kwargs.84) ^propagate.0()
+      %__name__.4 : py.Value = py.attr(%call.75, "__name__") ^propagate.0()
+      %tuple.95 : py.Value = py.mkTuple(%__name__.4)
+      %kwargs.85 : py.Value = py.mkKwargs
+      %call.76 : py.Value = py.call(%print.24, %tuple.95, %kwargs.85) ^propagate.0()
+      %reversed.18 : py.Value = py.loadGlobal("lib_reversed", "reversed") ^propagate.0()
+      %d.2 : py.Value = py.loadGlobal("lib_reversed", "d") ^propagate.0()
+      %values.0 : py.Value = py.attr(%d.2, "values") ^propagate.0()
+      %tuple.96 : py.Value = py.mkTuple
+      %kwargs.86 : py.Value = py.mkKwargs
+      %call.77 : py.Value = py.call(%values.0, %tuple.96, %kwargs.86) ^propagate.0()
+      %tuple.97 : py.Value = py.mkTuple(%call.77)
+      %kwargs.87 : py.Value = py.mkKwargs
+      %call.78 : py.Value = py.call(%reversed.18, %tuple.97, %kwargs.87) ^propagate.0()
+      %iter.6 : py.Value = py.getIter(%call.78) ^propagate.0()
+      jump ^head.6()
+    head.6():
+      %item.11 : py.Value = py.next(%iter.6) ^stop.6()
+      %v.cell.0 : base.Ref(py.Value) = py.globalCell("lib_reversed", "v")
+      %set.44 : base.Unit = base.refSet[py.Value](%v.cell.0, %item.11)
+      %print.25 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %v.0 : py.Value = py.loadGlobal("lib_reversed", "v") ^propagate.0()
+      %tuple.98 : py.Value = py.mkTuple(%v.0)
+      %kwargs.88 : py.Value = py.mkKwargs
+      %call.79 : py.Value = py.call(%print.25, %tuple.98, %kwargs.88) ^propagate.0()
+      jump ^head.6()
+    stop.6(%exc.21 : py.Value):
+      %done.6 : base.Bool = py.isStopIteration(%exc.21)
+      branch(%done.6) ^exit.6() ^propagate.0(%exc.21)
+    exit.6():
+      %reversed.19 : py.Value = py.loadGlobal("lib_reversed", "reversed") ^propagate.0()
+      %d.3 : py.Value = py.loadGlobal("lib_reversed", "d") ^propagate.0()
+      %items.0 : py.Value = py.attr(%d.3, "items") ^propagate.0()
+      %tuple.99 : py.Value = py.mkTuple
+      %kwargs.89 : py.Value = py.mkKwargs
+      %call.80 : py.Value = py.call(%items.0, %tuple.99, %kwargs.89) ^propagate.0()
+      %tuple.100 : py.Value = py.mkTuple(%call.80)
+      %kwargs.90 : py.Value = py.mkKwargs
+      %call.81 : py.Value = py.call(%reversed.19, %tuple.100, %kwargs.90) ^propagate.0()
+      %iter.7 : py.Value = py.getIter(%call.81) ^propagate.0()
+      jump ^head.7()
+    head.7():
+      %item.12 : py.Value = py.next(%iter.7) ^stop.7()
+      %unpack.1 : py.Value = py.unpackSeq(%item.12, 2) ^propagate.0()
+      %elem.2 : py.Value = py.tupleGet(%unpack.1, 0)
+      %k.cell.1 : base.Ref(py.Value) = py.globalCell("lib_reversed", "k")
+      %set.45 : base.Unit = base.refSet[py.Value](%k.cell.1, %elem.2)
+      %elem.3 : py.Value = py.tupleGet(%unpack.1, 1)
+      %v.cell.1 : base.Ref(py.Value) = py.globalCell("lib_reversed", "v")
+      %set.46 : base.Unit = base.refSet[py.Value](%v.cell.1, %elem.3)
+      %print.26 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %k.1 : py.Value = py.loadGlobal("lib_reversed", "k") ^propagate.0()
+      %v.1 : py.Value = py.loadGlobal("lib_reversed", "v") ^propagate.0()
+      %tuple.101 : py.Value = py.mkTuple(%k.1, %v.1)
+      %kwargs.91 : py.Value = py.mkKwargs
+      %call.82 : py.Value = py.call(%print.26, %tuple.101, %kwargs.91) ^propagate.0()
+      jump ^head.7()
+    stop.7(%exc.22 : py.Value):
+      %done.7 : base.Bool = py.isStopIteration(%exc.22)
+      branch(%done.7) ^exit.7() ^propagate.0(%exc.22)
+    exit.7():
+      %none.5 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.5)
+      ret(%ret.0)
+    propagate.0(%exc.23 : py.Value):
+      %exc.24 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.23)
+      ret(%exc.24)
+  }
+  func @lib_reversed.count(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %it.0 : py.Value = py.undef("it")
+      %it.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%it.0)
+      %n.2 : py.Value = py.undef("n")
+      %n.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%n.2)
+      %_.0 : py.Value = py.undef("_")
+      %_.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%_.0)
+      %it.1 : py.Value = py.undef("it")
+      %defaults.0 : py.Value = py.mkTuple(%it.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "count", 0, 1, false, false, "it") ^propagate.0()
+      %it.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(0)
+      %it.4 : py.Value = py.requireDefined(%it.2, "it", "UnboundLocalError", "cannot access local variable 'it' where it is not associated with a value") ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%it.4) ^propagate.0()
+      jump ^head.0(%int.0)
+    head.0(%n.9 : py.Value):
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %n.6 : py.Value = py.requireDefined(%n.9, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
+      %int.1 : py.Value = py.intLit(1)
+      %iAdd.0 : py.Value = py.iAdd(%n.6, %int.1) ^propagate.0()
+      jump ^head.0(%iAdd.0)
+    stop.0(%exc.0 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.0)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+    exit.0():
+      %n.8 : py.Value = py.requireDefined(%n.9, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%n.8)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @|lib_reversed.Seq.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__len__", binding = "def"}, {name = "__getitem__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_reversed", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Seq")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_reversed.Seq.__len__, "__len__", "lib_reversed")
+      %str.4 : py.Value = py.strLit("__len__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@lib_reversed.Seq.__getitem__, "__getitem__", "lib_reversed")
+      %str.5 : py.Value = py.strLit("__getitem__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_reversed.Own.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__reversed__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_reversed", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Own")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_reversed.Own.__reversed__, "__reversed__", "lib_reversed")
+      %str.4 : py.Value = py.strLit("__reversed__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_reversed.NotRev.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__reversed__", value = unit}, {name = "__len__", binding = "def"}, {name = "__getitem__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_reversed", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("NotRev")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %str.4 : py.Value = py.strLit("__reversed__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %none.0) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_reversed.NotRev.__len__, "__len__", "lib_reversed")
+      %str.5 : py.Value = py.strLit("__len__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@lib_reversed.NotRev.__getitem__, "__getitem__", "lib_reversed")
+      %str.6 : py.Value = py.strLit("__getitem__")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.6, %clo.1) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_reversed.Short.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__len__", binding = "def"}, {name = "__getitem__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_reversed", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Short")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_reversed.Short.__init__, "__init__", "lib_reversed")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@lib_reversed.Short.__len__, "__len__", "lib_reversed")
+      %str.5 : py.Value = py.strLit("__len__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@lib_reversed.Short.__getitem__, "__getitem__", "lib_reversed")
+      %str.6 : py.Value = py.strLit("__getitem__")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.6, %clo.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_reversed.Stop.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__len__", binding = "def"}, {name = "__getitem__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_reversed", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Stop")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_reversed.Stop.__len__, "__len__", "lib_reversed")
+      %str.4 : py.Value = py.strLit("__len__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@lib_reversed.Stop.__getitem__, "__getitem__", "lib_reversed")
+      %str.5 : py.Value = py.strLit("__getitem__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_reversed.Bad.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__len__", binding = "def"}, {name = "__getitem__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_reversed", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Bad")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_reversed.Bad.__len__, "__len__", "lib_reversed")
+      %str.4 : py.Value = py.strLit("__len__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@lib_reversed.Bad.__getitem__, "__getitem__", "lib_reversed")
+      %str.5 : py.Value = py.strLit("__getitem__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_reversed.P.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__reversed__", binding = "def"}, {name = "__len__", binding = "def"}, {name = "__getitem__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_reversed", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("P")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %str.4 : py.Value = py.strLit("property")
+      %property.0 : py.Value = py.undef("property")
+      %property.1 : py.Value = py.getOptionalItem(%ns.0, %str.4, %property.0) ^propagate.0()
+      %found.1 : base.Bool = py.isDefined(%property.1)
+      branch(%found.1) ^join.1(%property.1) ^absent.1()
+    absent.1():
+      %property.2 : py.Value = py.loadGlobal("lib_reversed", "property") ^propagate.0()
+      jump ^join.1(%property.2)
+    join.1(%property.3 : py.Value):
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_reversed.P.__reversed__, "__reversed__", "lib_reversed")
+      %args.1 : py.Value = py.mkTuple(%clo.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %decorated.0 : py.Value = py.call(%property.3, %args.1, %kwargs.1) ^propagate.0()
+      %str.5 : py.Value = py.strLit("__reversed__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.5, %decorated.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@lib_reversed.P.__len__, "__len__", "lib_reversed")
+      %str.6 : py.Value = py.strLit("__len__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.6, %clo.1) ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@lib_reversed.P.__getitem__, "__getitem__", "lib_reversed")
+      %str.7 : py.Value = py.strLit("__getitem__")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.7, %clo.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_reversed.M.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__getitem__", value = "dict.__getitem__"}, {name = "__len__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_reversed", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("M")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %str.4 : py.Value = py.strLit("dict")
+      %dict.0 : py.Value = py.undef("dict")
+      %dict.1 : py.Value = py.getOptionalItem(%ns.0, %str.4, %dict.0) ^propagate.0()
+      %found.1 : base.Bool = py.isDefined(%dict.1)
+      branch(%found.1) ^join.1(%dict.1) ^absent.1()
+    absent.1():
+      %dict.2 : py.Value = py.loadGlobal("lib_reversed", "dict") ^propagate.0()
+      jump ^join.1(%dict.2)
+    join.1(%dict.3 : py.Value):
+      %__getitem__.0 : py.Value = py.attr(%dict.3, "__getitem__") ^propagate.0()
+      %str.5 : py.Value = py.strLit("__getitem__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.5, %__getitem__.0) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_reversed.M.__len__, "__len__", "lib_reversed")
+      %str.6 : py.Value = py.strLit("__len__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.6, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_reversed.Seq.__len__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Seq.__len__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %print.0 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("len")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %int.0 : py.Value = py.intLit(3)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_reversed.Seq.__getitem__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %i.0 : py.Value = py.undef("i")
+      %i.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
+      %self.1 : py.Value = py.undef("self")
+      %i.1 : py.Value = py.undef("i")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %i.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Seq.__getitem__", 0, 2, false, false, "self", "i") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %i.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %print.0 : py.Value = py.loadGlobal("lib_reversed", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("getitem")
+      %i.4 : py.Value = py.requireDefined(%i.2, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%str.0, %i.4)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %i.6 : py.Value = py.requireDefined(%i.2, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %int.0 : py.Value = py.intLit(10)
+      %mult.0 : py.Value = py.mult(%i.6, %int.0) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%mult.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_reversed.Own.__reversed__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Own.__reversed__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %iter.0 : py.Value = py.loadGlobal("lib_reversed", "iter") ^propagate.0()
+      %str.0 : py.Value = py.strLit("own")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%iter.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_reversed.NotRev.__len__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "NotRev.__len__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(1)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_reversed.NotRev.__getitem__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %i.0 : py.Value = py.undef("i")
+      %i.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
+      %self.1 : py.Value = py.undef("self")
+      %i.1 : py.Value = py.undef("i")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %i.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "NotRev.__getitem__", 0, 2, false, false, "self", "i") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %i.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %i.4 : py.Value = py.requireDefined(%i.2, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%i.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_reversed.Short.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Short.__init__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(3)
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %n.2 : base.Unit = py.setAttr(%self.4, "n", %int.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_reversed.Short.__len__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Short.__len__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %n.2 : py.Value = py.attr(%self.4, "n") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%n.2)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_reversed.Short.__getitem__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %i.0 : py.Value = py.undef("i")
+      %i.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
+      %self.1 : py.Value = py.undef("self")
+      %i.1 : py.Value = py.undef("i")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %i.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Short.__getitem__", 0, 2, false, false, "self", "i") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %i.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %i.4 : py.Value = py.requireDefined(%i.2, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %eq.0 : py.Value = py.eq(%i.4, %int.0) ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%eq.0) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %IndexError.0 : py.Value = py.loadGlobal("lib_reversed", "IndexError") ^propagate.0()
+      %exc.0 : py.Value = py.toException(%IndexError.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    else.0():
+      jump ^join.0()
+    join.0():
+      %i.6 : py.Value = py.requireDefined(%i.2, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%i.6)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @lib_reversed.Stop.__len__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Stop.__len__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(2)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_reversed.Stop.__getitem__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %i.0 : py.Value = py.undef("i")
+      %i.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
+      %self.1 : py.Value = py.undef("self")
+      %i.1 : py.Value = py.undef("i")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %i.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Stop.__getitem__", 0, 2, false, false, "self", "i") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %i.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %StopIteration.0 : py.Value = py.loadGlobal("lib_reversed", "StopIteration") ^propagate.0()
+      %exc.0 : py.Value = py.toException(%StopIteration.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @lib_reversed.Bad.__len__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Bad.__len__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(3)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_reversed.Bad.__getitem__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %i.0 : py.Value = py.undef("i")
+      %i.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
+      %self.1 : py.Value = py.undef("self")
+      %i.1 : py.Value = py.undef("i")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %i.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Bad.__getitem__", 0, 2, false, false, "self", "i") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %i.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %i.4 : py.Value = py.requireDefined(%i.2, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %int.0 : py.Value = py.intLit(2)
+      %eq.0 : py.Value = py.eq(%i.4, %int.0) ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%eq.0) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %ValueError.0 : py.Value = py.loadGlobal("lib_reversed", "ValueError") ^propagate.0()
+      %str.0 : py.Value = py.strLit("x")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%ValueError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    else.0():
+      jump ^join.0()
+    join.0():
+      %i.6 : py.Value = py.requireDefined(%i.2, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%i.6)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @lib_reversed.P.__reversed__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "P.__reversed__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_reversed.P.__len__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "P.__len__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(1)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_reversed.P.__getitem__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %i.0 : py.Value = py.undef("i")
+      %i.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
+      %self.1 : py.Value = py.undef("self")
+      %i.1 : py.Value = py.undef("i")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %i.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "P.__getitem__", 0, 2, false, false, "self", "i") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %i.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %i.4 : py.Value = py.requireDefined(%i.2, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%i.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_reversed.M.__len__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M.__len__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(1)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

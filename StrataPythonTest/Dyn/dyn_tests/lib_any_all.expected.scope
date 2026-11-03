@@ -1,0 +1,63 @@
+module
+  Loud: local (assigned, referenced)
+  Sized: local (assigned, referenced)
+  Countdown: local (assigned, referenced)
+  Bad: local (assigned, referenced)
+  Raises: local (assigned, referenced)
+  print: global implicit (referenced)
+  any: global implicit (referenced)
+  all: global implicit (referenced)
+  range: global implicit (referenced)
+  it: local (assigned, referenced)
+  next: global implicit (referenced)
+  args: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  ValueError: global implicit (referenced)
+  class Loud
+    __init__: local (assigned)
+    __bool__: local (assigned)
+    function Loud.__init__
+      params: self, v
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function Loud.__bool__
+      params: self
+      self: local (parameter, referenced)
+      print: global implicit (referenced)
+  class Sized
+    __len__: local (assigned)
+    function Sized.__len__
+      params: self
+      self: local (parameter)
+  class Countdown
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function Countdown.__init__
+      params: self, n
+      self: local (parameter, referenced)
+      n: local (parameter, referenced)
+    function Countdown.__iter__
+      params: self
+      self: local (parameter, referenced)
+    function Countdown.__next__
+      params: self
+      self: local (parameter, referenced)
+      StopIteration: global implicit (referenced)
+      print: global implicit (referenced)
+  class Bad
+    __bool__: local (assigned)
+    function Bad.__bool__
+      params: self
+      self: local (parameter)
+  class Raises
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function Raises.__iter__
+      params: self
+      self: local (parameter, referenced)
+    function Raises.__next__
+      params: self
+      self: local (parameter)
+      ValueError: global implicit (referenced)

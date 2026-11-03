@@ -1,0 +1,84 @@
+module
+  l: local (assigned, referenced)
+  Grow: local (assigned, referenced)
+  print: global implicit (referenced)
+  any: global implicit (referenced)
+  len: global implicit (referenced)
+  m: local (assigned, referenced)
+  Clear: local (assigned, referenced)
+  all: global implicit (referenced)
+  d: local (assigned, referenced)
+  addkey: local (assigned, referenced)
+  max: global implicit (referenced)
+  RuntimeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  n: local (assigned, referenced)
+  Ext: local (assigned, referenced)
+  sum: global implicit (referenced)
+  q: local (assigned, referenced)
+  Q: local (assigned, referenced)
+  r: local (assigned, referenced)
+  it: local (assigned, referenced)
+  iter: global implicit (referenced)
+  seen: local (assigned, referenced)
+  Skip: local (assigned, referenced)
+  s: local (assigned, referenced)
+  addmember: local (assigned, referenced)
+  min: global implicit (referenced)
+  class Grow
+    __bool__: local (assigned)
+    function Grow.__bool__
+      params: self
+      self: local (parameter, referenced)
+      len: global implicit (referenced)
+      l: global implicit (referenced)
+      Grow: global implicit (referenced)
+  class Clear
+    __bool__: local (assigned)
+    function Clear.__bool__
+      params: self
+      self: local (parameter)
+      m: global implicit (referenced)
+  function addkey
+    params: k
+    k: local (parameter, referenced)
+    d: global implicit (referenced)
+  class Ext
+    __radd__: local (assigned)
+    function Ext.__radd__
+      params: self, other
+      self: local (parameter)
+      other: local (parameter, referenced)
+      n: global implicit (referenced)
+      len: global implicit (referenced)
+  class Q
+    __init__: local (assigned)
+    __gt__: local (assigned)
+    function Q.__init__
+      params: self, v
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function Q.__gt__
+      params: self, other
+      self: local (parameter, referenced)
+      other: local (parameter, referenced)
+      print: global implicit (referenced)
+      q: global implicit (referenced)
+  class Skip
+    __init__: local (assigned)
+    __bool__: local (assigned)
+    function Skip.__init__
+      params: self, v
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function Skip.__bool__
+      params: self
+      self: local (parameter, referenced)
+      seen: global implicit (referenced)
+      len: global implicit (referenced)
+      next: global implicit (referenced)
+      it: global implicit (referenced)
+  function addmember
+    params: x
+    x: local (parameter, referenced)
+    s: global implicit (referenced)

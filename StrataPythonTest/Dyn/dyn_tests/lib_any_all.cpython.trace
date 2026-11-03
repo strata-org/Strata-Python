@@ -1,0 +1,40 @@
+--- stdout 385
+False True
+True False
+bool False
+bool True
+True
+bool True
+bool False
+False
+False False
+False True True
+False True False True False
+next 3
+True
+next 2
+2
+next 2
+next 1
+next 0
+False
+False True
+any() takes exactly one argument (0 given)
+any() takes exactly one argument (2 given)
+'int' object is not iterable
+any() takes no keyword arguments
+__bool__ should return bool, returned int
+boom
+
+--- outcome
+ok
+--- globals
+Bad = <class 'Bad'>
+Countdown = <class 'Countdown'>
+Loud = <class 'Loud'>
+Raises = <class 'Raises'>
+Sized = <class 'Sized'>
+__doc__ = None
+__name__ = '__main__'
+args = (1, 2)
+it = <Countdown object>

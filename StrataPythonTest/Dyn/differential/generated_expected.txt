@@ -3,15 +3,15 @@ gen_1_1 | gap | built-in getattr is not modelled yet
 gen_1_10 | gap | built-in method list.append is not modelled yet
 gen_1_100 | gap | built-in method set.__new__ is not modelled yet
 gen_1_101 | gap | built-in method dict.__new__ is not modelled yet
-gen_1_102 | gap | built-in sum is not modelled yet
+gen_1_102 | gap | built-in method list.count is not modelled yet
 gen_1_103 | gap | built-in method set.__new__ is not modelled yet
-gen_1_104 | gap | built-in max is not modelled yet
+gen_1_104 | gap | built-in method set.__new__ is not modelled yet
 gen_1_105 | gap | a slot of a set whose layout is inexact
 gen_1_106 | gap | built-in method set.__new__ is not modelled yet
-gen_1_107 | gap | built-in sum is not modelled yet
+gen_1_107 | gap | built-in method list.append is not modelled yet
 gen_1_108 | gap | a slot of a set whose layout is inexact
 gen_1_109 | gap | built-in hash is not modelled yet
-gen_1_11 | gap | built-in sum is not modelled yet
+gen_1_11 | gap | built-in method list.append is not modelled yet
 gen_1_110 | gap | built-in method set.__new__ is not modelled yet
 gen_1_111 | gap | built-in method set.__new__ is not modelled yet
 gen_1_112 | gap | built-in method str.encode is not modelled yet
@@ -20,24 +20,24 @@ gen_1_114 | gap | built-in issubclass is not modelled yet
 gen_1_115 | gap | built-in issubclass is not modelled yet
 gen_1_116 | gap | built-in method set.__new__ is not modelled yet
 gen_1_117 | gap | built-in method dict.get is not modelled yet
-gen_1_118 | gap | built-in any is not modelled yet
+gen_1_118 | gap | built-in method list.__new__ is not modelled yet
 gen_1_119 | gap | built-in method dict.pop is not modelled yet
 gen_1_12 | gap | built-in hash is not modelled yet
 gen_1_120 | gap | built-in method str.replace is not modelled yet
 gen_1_121 | gap | built-in method str.rjust is not modelled yet
-gen_1_122 | gap | built-in method reversed.__new__ is not modelled yet
+gen_1_122 | gap | built-in method list.__new__ is not modelled yet
 gen_1_123 | gap | built-in method set.__new__ is not modelled yet
 gen_1_124 | gap | built-in method str.replace is not modelled yet
 gen_1_125 | gap | built-in method int.__new__ is not modelled yet
 gen_1_126 | gap | built-in method set.__new__ is not modelled yet
 gen_1_127 | gap | built-in method list.append is not modelled yet
-gen_1_128 | gap | built-in method reversed.__new__ is not modelled yet
-gen_1_129 | gap | built-in max is not modelled yet
+gen_1_128 | gap | built-in method list.__new__ is not modelled yet
+gen_1_129 | gap | built-in hash is not modelled yet
 gen_1_13 | gap | built-in method str.upper is not modelled yet
 gen_1_130 | gap | built-in method str.startswith is not modelled yet
 gen_1_131 | gap | built-in method set.__new__ is not modelled yet
 gen_1_132 | gap | built-in method list.append is not modelled yet
-gen_1_133 | gap | built-in all is not modelled yet
+gen_1_133 | gap | built-in method set.__new__ is not modelled yet
 gen_1_134 | gap | built-in hash is not modelled yet
 gen_1_135 | gap | built-in method dict.popitem is not modelled yet
 gen_1_136 | gap | built-in method set.__new__ is not modelled yet
@@ -45,12 +45,12 @@ gen_1_137 | gap | built-in hash is not modelled yet
 gen_1_138 | gap | built-in method str.maketrans is not modelled yet
 gen_1_139 | gap | built-in method list.append is not modelled yet
 gen_1_14 | gap | built-in method str.format is not modelled yet
-gen_1_140 | gap | built-in min is not modelled yet
+gen_1_140 | gap | built-in method int.__new__ is not modelled yet
 gen_1_141 | gap | a slot of a set whose layout is inexact
 gen_1_142 | gap | built-in method str.split is not modelled yet
 gen_1_143 | gap | built-in method tuple.__new__ is not modelled yet
 gen_1_144 | gap | built-in method dict.__new__ is not modelled yet
-gen_1_145 | gap | built-in sum is not modelled yet
+gen_1_145 | gap | built-in method list.append is not modelled yet
 gen_1_146 | gap | built-in method set.__new__ is not modelled yet
 gen_1_147 | gap | built-in method set.__new__ is not modelled yet
 gen_1_148 | gap | built-in method dict.setdefault is not modelled yet
@@ -78,7 +78,7 @@ gen_1_167 | gap | built-in method list.count is not modelled yet
 gen_1_168 | gap | built-in method set.__new__ is not modelled yet
 gen_1_169 | gap | a slot of a set whose layout is inexact
 gen_1_17 | gap | built-in method dict.get is not modelled yet
-gen_1_170 | gap | built-in sum is not modelled yet
+gen_1_170 | gap | built-in method list.append is not modelled yet
 gen_1_171 | gap | built-in method dict.fromkeys is not modelled yet
 gen_1_172 | gap | built-in sorted is not modelled yet
 gen_1_173 | gap | built-in method list.append is not modelled yet
@@ -93,7 +93,7 @@ gen_1_180 | gap | built-in method str.encode is not modelled yet
 gen_1_181 | gap | built-in method str.startswith is not modelled yet
 gen_1_182 | gap | built-in method dict.__new__ is not modelled yet
 gen_1_183 | gap | built-in method set.__new__ is not modelled yet
-gen_1_184 | gap | built-in sum is not modelled yet
+gen_1_184 | gap | built-in method list.append is not modelled yet
 gen_1_185 | gap | built-in method str.format_map is not modelled yet
 gen_1_186 | gap | built-in method str.translate is not modelled yet
 gen_1_187 | gap | built-in getattr is not modelled yet
@@ -102,21 +102,21 @@ gen_1_189 | gap | built-in method str.isdecimal is not modelled yet
 gen_1_19 | gap | built-in divmod is not modelled yet
 gen_1_190 | gap | built-in method range.count is not modelled yet
 gen_1_191 | gap | built-in method str.expandtabs is not modelled yet
-gen_1_192 | gap | built-in sum is not modelled yet
-gen_1_193 | gap | built-in method reversed.__new__ is not modelled yet
+gen_1_192 | gap | built-in method list.insert is not modelled yet
+gen_1_193 | gap | built-in method list.__new__ is not modelled yet
 gen_1_194 | gap | built-in method dict.get is not modelled yet
 gen_1_195 | gap | built-in method str.format_map is not modelled yet
-gen_1_196 | gap | built-in method enumerate.__new__ is not modelled yet
+gen_1_196 | gap | built-in method list.__new__ is not modelled yet
 gen_1_197 | gap | built-in method list.__new__ is not modelled yet
-gen_1_198 | gap | built-in sum is not modelled yet
+gen_1_198 | gap | built-in method list.append is not modelled yet
 gen_1_199 | gap | built-in method str.translate is not modelled yet
 gen_1_2 | gap | built-in sorted is not modelled yet
 gen_1_20 | gap | built-in method set.__new__ is not modelled yet
 gen_1_200 | gap | built-in method tuple.__new__ is not modelled yet
-gen_1_201 | gap | built-in method reversed.__new__ is not modelled yet
+gen_1_201 | gap | built-in method list.__new__ is not modelled yet
 gen_1_202 | gap | built-in method str.format_map is not modelled yet
 gen_1_203 | gap | built-in method dict.copy is not modelled yet
-gen_1_204 | gap | built-in min is not modelled yet
+gen_1_204 | gap | built-in method tuple.__new__ is not modelled yet
 gen_1_205 | gap | built-in method set.__new__ is not modelled yet
 gen_1_206 | gap | built-in method tuple.__new__ is not modelled yet
 gen_1_207 | gap | built-in method set.__new__ is not modelled yet
@@ -125,7 +125,7 @@ gen_1_209 | gap | built-in abs is not modelled yet
 gen_1_21 | gap | built-in method str.format_map is not modelled yet
 gen_1_210 | gap | built-in method str.maketrans is not modelled yet
 gen_1_211 | gap | built-in method str.maketrans is not modelled yet
-gen_1_212 | gap | built-in max is not modelled yet
+gen_1_212 | gap | built-in method str.replace is not modelled yet
 gen_1_213 | gap | built-in abs is not modelled yet
 gen_1_214 | gap | built-in method list.append is not modelled yet
 gen_1_215 | gap | built-in method list.append is not modelled yet
@@ -152,28 +152,28 @@ gen_1_233 | gap | built-in sorted is not modelled yet
 gen_1_234 | gap | built-in method str.upper is not modelled yet
 gen_1_235 | gap | a slot of a set whose layout is inexact
 gen_1_236 | gap | built-in method str.encode is not modelled yet
-gen_1_237 | gap | built-in sum is not modelled yet
+gen_1_237 | gap | built-in method list.append is not modelled yet
 gen_1_238 | gap | built-in method list.count is not modelled yet
-gen_1_239 | gap | built-in method zip.__new__ is not modelled yet
-gen_1_24 | gap | built-in sum is not modelled yet
+gen_1_239 | gap | built-in method list.__new__ is not modelled yet
+gen_1_24 | gap | built-in method range.index is not modelled yet
 gen_1_240 | gap | built-in issubclass is not modelled yet
 gen_1_241 | gap | built-in sorted is not modelled yet
-gen_1_242 | gap | built-in max is not modelled yet
+gen_1_242 | gap | built-in getattr is not modelled yet
 gen_1_243 | gap | built-in method int.__new__ is not modelled yet
 gen_1_244 | gap | built-in method dict.get is not modelled yet
 gen_1_245 | gap | built-in method set.__new__ is not modelled yet
 gen_1_246 | gap | built-in method list.__new__ is not modelled yet
 gen_1_247 | gap | a slot of a set whose layout is inexact
 gen_1_248 | gap | built-in divmod is not modelled yet
-gen_1_249 | gap | built-in sum is not modelled yet
+gen_1_249 | gap | built-in method str.replace is not modelled yet
 gen_1_25 | gap | built-in method str.translate is not modelled yet
 gen_1_250 | gap | built-in method str.upper is not modelled yet
 gen_1_251 | gap | built-in method tuple.__new__ is not modelled yet
 gen_1_252 | gap | built-in method str.isdigit is not modelled yet
 gen_1_253 | gap | built-in method list.__new__ is not modelled yet
-gen_1_254 | gap | built-in method reversed.__new__ is not modelled yet
-gen_1_255 | gap | built-in min is not modelled yet
-gen_1_256 | gap | built-in sum is not modelled yet
+gen_1_254 | gap | built-in method list.__new__ is not modelled yet
+gen_1_255 | gap | a slot of a set whose layout is inexact
+gen_1_256 | gap | built-in method list.append is not modelled yet
 gen_1_257 | gap | built-in method str.isspace is not modelled yet
 gen_1_258 | gap | built-in method dict.__new__ is not modelled yet
 gen_1_259 | gap | built-in method tuple.__new__ is not modelled yet
@@ -184,7 +184,7 @@ gen_1_262 | gap | built-in method list.reverse is not modelled yet
 gen_1_263 | gap | built-in method list.__new__ is not modelled yet
 gen_1_264 | gap | built-in method set.__new__ is not modelled yet
 gen_1_265 | gap | built-in abs is not modelled yet
-gen_1_266 | gap | built-in method reversed.__new__ is not modelled yet
+gen_1_266 | gap | built-in method list.__new__ is not modelled yet
 gen_1_267 | gap | built-in method str.encode is not modelled yet
 gen_1_268 | gap | built-in method float.__new__ is not modelled yet
 gen_1_269 | gap | built-in method range.index is not modelled yet
@@ -203,18 +203,18 @@ gen_1_28 | gap | built-in method set.__new__ is not modelled yet
 gen_1_280 | gap | built-in method dict.__new__ is not modelled yet
 gen_1_281 | gap | built-in method str.endswith is not modelled yet
 gen_1_282 | gap | built-in method set.__new__ is not modelled yet
-gen_1_283 | gap | built-in sum is not modelled yet
+gen_1_283 | gap | built-in method list.append is not modelled yet
 gen_1_284 | gap | built-in method list.__new__ is not modelled yet
 gen_1_285 | gap | built-in hash is not modelled yet
 gen_1_286 | gap | built-in method set.__new__ is not modelled yet
 gen_1_287 | gap | built-in method int.__new__ is not modelled yet
 gen_1_288 | gap | built-in method str.replace is not modelled yet
 gen_1_289 | gap | a slot of a set whose layout is inexact
-gen_1_29 | gap | built-in sum is not modelled yet
+gen_1_29 | gap | built-in method list.__new__ is not modelled yet
 gen_1_290 | gap | built-in divmod is not modelled yet
 gen_1_291 | gap | built-in method str.ljust is not modelled yet
 gen_1_292 | gap | built-in sorted is not modelled yet
-gen_1_293 | gap | built-in method reversed.__new__ is not modelled yet
+gen_1_293 | gap | built-in method list.__new__ is not modelled yet
 gen_1_294 | gap | built-in abs is not modelled yet
 gen_1_295 | gap | built-in method list.__new__ is not modelled yet
 gen_1_296 | gap | built-in method set.__new__ is not modelled yet
@@ -223,17 +223,17 @@ gen_1_298 | gap | built-in method str.expandtabs is not modelled yet
 gen_1_299 | gap | built-in method list.clear is not modelled yet
 gen_1_3 | gap | built-in getattr is not modelled yet
 gen_1_30 | gap | built-in method str.isascii is not modelled yet
-gen_1_300 | gap | built-in sum is not modelled yet
+gen_1_300 | gap | built-in method list.__new__ is not modelled yet
 gen_1_301 | gap | built-in method frozenset.__new__ is not modelled yet
 gen_1_302 | gap | built-in method str.expandtabs is not modelled yet
 gen_1_303 | gap | built-in method dict.fromkeys is not modelled yet
 gen_1_304 | gap | built-in method dict.get is not modelled yet
 gen_1_305 | gap | built-in setattr is not modelled yet
-gen_1_306 | gap | built-in min is not modelled yet
+gen_1_306 | gap | built-in method str.format is not modelled yet
 gen_1_307 | gap | built-in method str.isspace is not modelled yet
 gen_1_308 | gap | built-in callable is not modelled yet
 gen_1_309 | gap | built-in method float.__new__ is not modelled yet
-gen_1_31 | gap | built-in method enumerate.__new__ is not modelled yet
+gen_1_31 | gap | built-in method list.__new__ is not modelled yet
 gen_1_310 | gap | built-in hex is not modelled yet
 gen_1_311 | gap | built-in method list.copy is not modelled yet
 gen_1_312 | gap | built-in method set.__new__ is not modelled yet
@@ -243,21 +243,21 @@ gen_1_315 | gap | a slot of a set whose layout is inexact
 gen_1_316 | gap | built-in method list.__new__ is not modelled yet
 gen_1_317 | gap | built-in method set.__new__ is not modelled yet
 gen_1_318 | gap | built-in sorted is not modelled yet
-gen_1_319 | gap | built-in all is not modelled yet
+gen_1_319 | gap | built-in method list.append is not modelled yet
 gen_1_32 | gap | built-in method set.__new__ is not modelled yet
 gen_1_320 | gap | built-in setattr is not modelled yet
-gen_1_321 | gap | built-in max is not modelled yet
-gen_1_322 | gap | built-in method reversed.__new__ is not modelled yet
+gen_1_321 | agree
+gen_1_322 | gap | built-in method list.__new__ is not modelled yet
 gen_1_323 | gap | built-in method list.__new__ is not modelled yet
-gen_1_324 | gap | built-in sum is not modelled yet
-gen_1_325 | gap | built-in max is not modelled yet
+gen_1_324 | gap | built-in method str.format_map is not modelled yet
+gen_1_325 | gap | built-in method list.__new__ is not modelled yet
 gen_1_326 | gap | built-in method str.format is not modelled yet
 gen_1_327 | gap | built-in method list.index is not modelled yet
 gen_1_328 | gap | built-in method str.format_map is not modelled yet
 gen_1_329 | gap | built-in method str.strip is not modelled yet
 gen_1_33 | gap | built-in method list.append is not modelled yet
 gen_1_330 | gap | built-in method tuple.__new__ is not modelled yet
-gen_1_331 | gap | built-in max is not modelled yet
+gen_1_331 | gap | built-in method str.islower is not modelled yet
 gen_1_332 | gap | built-in method set.__new__ is not modelled yet
 gen_1_333 | gap | built-in method str.format_map is not modelled yet
 gen_1_334 | gap | built-in method list.__new__ is not modelled yet
@@ -290,25 +290,25 @@ gen_1_358 | gap | built-in method range.count is not modelled yet
 gen_1_359 | gap | built-in method float.__new__ is not modelled yet
 gen_1_36 | gap | built-in hex is not modelled yet
 gen_1_360 | gap | built-in method list.count is not modelled yet
-gen_1_361 | gap | built-in min is not modelled yet
+gen_1_361 | gap | built-in hash is not modelled yet
 gen_1_362 | gap | built-in divmod is not modelled yet
 gen_1_363 | gap | built-in method dict.pop is not modelled yet
 gen_1_364 | gap | built-in method int.__new__ is not modelled yet
 gen_1_365 | gap | built-in method list.append is not modelled yet
 gen_1_366 | gap | built-in method str.replace is not modelled yet
-gen_1_367 | gap | built-in min is not modelled yet
+gen_1_367 | gap | built-in issubclass is not modelled yet
 gen_1_368 | gap | built-in method range.index is not modelled yet
 gen_1_369 | gap | built-in sorted is not modelled yet
 gen_1_37 | gap | built-in method str.encode is not modelled yet
 gen_1_370 | gap | built-in method str.isnumeric is not modelled yet
-gen_1_371 | gap | built-in method enumerate.__new__ is not modelled yet
+gen_1_371 | gap | built-in method list.__new__ is not modelled yet
 gen_1_372 | gap | built-in method str.maketrans is not modelled yet
 gen_1_373 | gap | built-in method set.__new__ is not modelled yet
 gen_1_374 | gap | built-in method str.maketrans is not modelled yet
 gen_1_375 | gap | built-in method int.__new__ is not modelled yet
-gen_1_376 | gap | built-in method zip.__new__ is not modelled yet
+gen_1_376 | gap | built-in method list.__new__ is not modelled yet
 gen_1_377 | gap | built-in method set.__new__ is not modelled yet
-gen_1_378 | gap | built-in method reversed.__new__ is not modelled yet
+gen_1_378 | gap | built-in method list.__new__ is not modelled yet
 gen_1_379 | gap | built-in method tuple.__new__ is not modelled yet
 gen_1_38 | gap | built-in method list.count is not modelled yet
 gen_1_380 | gap | built-in method set.__new__ is not modelled yet
@@ -325,9 +325,9 @@ gen_1_39 | gap | built-in method list.append is not modelled yet
 gen_1_390 | gap | built-in method float.__new__ is not modelled yet
 gen_1_391 | gap | built-in method set.__new__ is not modelled yet
 gen_1_392 | gap | built-in method str.translate is not modelled yet
-gen_1_393 | gap | built-in max is not modelled yet
+gen_1_393 | gap | built-in method str.removesuffix is not modelled yet
 gen_1_394 | gap | built-in hasattr is not modelled yet
-gen_1_395 | gap | built-in method zip.__new__ is not modelled yet
+gen_1_395 | gap | built-in method list.__new__ is not modelled yet
 gen_1_396 | gap | built-in divmod is not modelled yet
 gen_1_397 | gap | built-in method list.__new__ is not modelled yet
 gen_1_398 | gap | built-in method str.maketrans is not modelled yet
@@ -340,7 +340,7 @@ gen_1_402 | gap | built-in method set.__new__ is not modelled yet
 gen_1_403 | gap | built-in method tuple.__new__ is not modelled yet
 gen_1_404 | gap | built-in method str.translate is not modelled yet
 gen_1_405 | gap | built-in method str.isnumeric is not modelled yet
-gen_1_406 | gap | built-in sum is not modelled yet
+gen_1_406 | gap | built-in method str.rjust is not modelled yet
 gen_1_407 | gap | built-in method str.format_map is not modelled yet
 gen_1_408 | gap | built-in method set.__new__ is not modelled yet
 gen_1_409 | gap | built-in method tuple.__new__ is not modelled yet
@@ -355,7 +355,7 @@ gen_1_416 | gap | built-in method dict.get is not modelled yet
 gen_1_417 | gap | built-in method set.__new__ is not modelled yet
 gen_1_418 | gap | built-in method set.__new__ is not modelled yet
 gen_1_419 | gap | built-in divmod is not modelled yet
-gen_1_42 | gap | built-in sum is not modelled yet
+gen_1_42 | gap | built-in method list.append is not modelled yet
 gen_1_420 | gap | a slot of a set whose layout is inexact
 gen_1_421 | gap | built-in callable is not modelled yet
 gen_1_422 | gap | built-in method str.join is not modelled yet
@@ -363,29 +363,29 @@ gen_1_423 | gap | built-in method str.endswith is not modelled yet
 gen_1_424 | gap | built-in method list.append is not modelled yet
 gen_1_425 | gap | built-in method list.append is not modelled yet
 gen_1_426 | gap | built-in hash is not modelled yet
-gen_1_427 | gap | built-in method enumerate.__new__ is not modelled yet
+gen_1_427 | gap | built-in method list.__new__ is not modelled yet
 gen_1_428 | gap | built-in method list.append is not modelled yet
 gen_1_429 | gap | built-in method list.__new__ is not modelled yet
 gen_1_43 | gap | built-in method str.translate is not modelled yet
-gen_1_430 | gap | built-in method reversed.__new__ is not modelled yet
+gen_1_430 | gap | built-in method list.__new__ is not modelled yet
 gen_1_431 | gap | built-in method str.translate is not modelled yet
 gen_1_432 | gap | built-in method frozenset.__new__ is not modelled yet
 gen_1_433 | gap | built-in setattr is not modelled yet
 gen_1_434 | gap | built-in divmod is not modelled yet
 gen_1_435 | gap | built-in method str.format is not modelled yet
 gen_1_436 | gap | built-in method tuple.__new__ is not modelled yet
-gen_1_437 | gap | built-in min is not modelled yet
+gen_1_437 | gap | built-in method dict.pop is not modelled yet
 gen_1_438 | gap | built-in method int.__new__ is not modelled yet
 gen_1_439 | gap | built-in callable is not modelled yet
 gen_1_44 | gap | a slot of a set whose layout is inexact
-gen_1_440 | gap | built-in max is not modelled yet
+gen_1_440 | gap | built-in method list.append is not modelled yet
 gen_1_441 | gap | built-in method int.__new__ is not modelled yet
 gen_1_442 | gap | built-in method str.rjust is not modelled yet
 gen_1_443 | gap | built-in method list.__new__ is not modelled yet
 gen_1_444 | gap | built-in method list.__new__ is not modelled yet
-gen_1_445 | gap | built-in method zip.__new__ is not modelled yet
+gen_1_445 | gap | built-in method list.__new__ is not modelled yet
 gen_1_446 | gap | built-in method list.__new__ is not modelled yet
-gen_1_447 | gap | built-in sum is not modelled yet
+gen_1_447 | gap | built-in getattr is not modelled yet
 gen_1_448 | gap | built-in method set.__new__ is not modelled yet
 gen_1_449 | gap | built-in method set.__new__ is not modelled yet
 gen_1_45 | gap | built-in method tuple.__new__ is not modelled yet
@@ -398,20 +398,20 @@ gen_1_455 | gap | built-in method str.rindex is not modelled yet
 gen_1_456 | gap | built-in method int.__new__ is not modelled yet
 gen_1_457 | gap | a slot of a set whose layout is inexact
 gen_1_458 | gap | built-in setattr is not modelled yet
-gen_1_459 | gap | built-in max is not modelled yet
+gen_1_459 | gap | built-in method range.index is not modelled yet
 gen_1_46 | gap | built-in method str.rpartition is not modelled yet
 gen_1_460 | gap | built-in method str.isupper is not modelled yet
-gen_1_461 | gap | built-in sum is not modelled yet
-gen_1_462 | gap | built-in any is not modelled yet
+gen_1_461 | gap | built-in method list.append is not modelled yet
+gen_1_462 | gap | built-in method str.join is not modelled yet
 gen_1_463 | gap | built-in setattr is not modelled yet
 gen_1_464 | gap | built-in divmod is not modelled yet
 gen_1_465 | gap | built-in method list.append is not modelled yet
 gen_1_466 | gap | a slot of a set whose layout is inexact
-gen_1_467 | gap | built-in sum is not modelled yet
+gen_1_467 | gap | built-in method list.append is not modelled yet
 gen_1_468 | gap | built-in method str.isalnum is not modelled yet
-gen_1_469 | gap | built-in sum is not modelled yet
+gen_1_469 | gap | built-in method list.__new__ is not modelled yet
 gen_1_47 | gap | built-in sorted is not modelled yet
-gen_1_470 | gap | built-in sum is not modelled yet
+gen_1_470 | gap | built-in hasattr is not modelled yet
 gen_1_471 | gap | built-in method str.translate is not modelled yet
 gen_1_472 | gap | a slot of a set whose layout is inexact
 gen_1_473 | gap | built-in method int.__new__ is not modelled yet
@@ -420,12 +420,12 @@ gen_1_475 | gap | built-in method str.translate is not modelled yet
 gen_1_476 | gap | built-in divmod is not modelled yet
 gen_1_477 | gap | built-in method str.format is not modelled yet
 gen_1_478 | gap | built-in method float.__new__ is not modelled yet
-gen_1_479 | gap | built-in max is not modelled yet
+gen_1_479 | gap | built-in abs is not modelled yet
 gen_1_48 | gap | built-in sorted is not modelled yet
 gen_1_480 | gap | built-in method list.__new__ is not modelled yet
 gen_1_481 | gap | built-in method str.translate is not modelled yet
 gen_1_482 | gap | built-in method list.append is not modelled yet
-gen_1_483 | gap | built-in sum is not modelled yet
+gen_1_483 | gap | built-in setattr is not modelled yet
 gen_1_484 | gap | built-in sorted is not modelled yet
 gen_1_485 | gap | built-in method dict.__new__ is not modelled yet
 gen_1_486 | gap | a slot of a set whose layout is inexact
@@ -439,7 +439,7 @@ gen_1_492 | gap | built-in method list.count is not modelled yet
 gen_1_493 | gap | built-in method list.append is not modelled yet
 gen_1_494 | gap | built-in method set.__new__ is not modelled yet
 gen_1_495 | gap | built-in issubclass is not modelled yet
-gen_1_496 | gap | built-in any is not modelled yet
+gen_1_496 | gap | built-in method tuple.__new__ is not modelled yet
 gen_1_497 | gap | built-in method set.__new__ is not modelled yet
 gen_1_498 | gap | built-in method str.translate is not modelled yet
 gen_1_499 | gap | built-in method str.isdecimal is not modelled yet
@@ -467,7 +467,7 @@ gen_1_68 | gap | built-in method list.__new__ is not modelled yet
 gen_1_69 | gap | built-in method list.append is not modelled yet
 gen_1_7 | gap | built-in hasattr is not modelled yet
 gen_1_70 | gap | built-in method list.__new__ is not modelled yet
-gen_1_71 | gap | built-in max is not modelled yet
+gen_1_71 | gap | built-in method list.append is not modelled yet
 gen_1_72 | gap | built-in setattr is not modelled yet
 gen_1_73 | gap | built-in method str.join is not modelled yet
 gen_1_74 | gap | built-in method str.encode is not modelled yet
@@ -475,7 +475,7 @@ gen_1_75 | gap | built-in method str.translate is not modelled yet
 gen_1_76 | gap | built-in method float.__new__ is not modelled yet
 gen_1_77 | gap | built-in hasattr is not modelled yet
 gen_1_78 | gap | built-in method str.translate is not modelled yet
-gen_1_79 | gap | built-in method enumerate.__new__ is not modelled yet
+gen_1_79 | gap | built-in method list.__new__ is not modelled yet
 gen_1_8 | gap | built-in method set.__new__ is not modelled yet
 gen_1_80 | gap | built-in sorted is not modelled yet
 gen_1_81 | gap | built-in method str.translate is not modelled yet
@@ -489,12 +489,12 @@ gen_1_88 | gap | built-in method set.__new__ is not modelled yet
 gen_1_89 | gap | built-in method str.encode is not modelled yet
 gen_1_9 | gap | built-in hasattr is not modelled yet
 gen_1_90 | gap | built-in method str.ljust is not modelled yet
-gen_1_91 | gap | built-in sum is not modelled yet
+gen_1_91 | gap | built-in method list.append is not modelled yet
 gen_1_92 | gap | built-in method str.format_map is not modelled yet
-gen_1_93 | gap | built-in sum is not modelled yet
+gen_1_93 | gap | built-in method set.__new__ is not modelled yet
 gen_1_94 | gap | built-in method str.format is not modelled yet
 gen_1_95 | gap | built-in method str.capitalize is not modelled yet
 gen_1_96 | gap | built-in method str.format_map is not modelled yet
 gen_1_97 | gap | built-in method str.strip is not modelled yet
-gen_1_98 | gap | built-in max is not modelled yet
+gen_1_98 | gap | built-in method frozenset.__new__ is not modelled yet
 gen_1_99 | gap | built-in method str.translate is not modelled yet

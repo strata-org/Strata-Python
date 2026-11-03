@@ -1,0 +1,16 @@
+--- stdout 17
+5 2
+3 3 5
+5 2
+40
+
+--- outcome
+ok
+--- globals
+Caller = <class 'Caller'>
+Countdown = <class 'Countdown'>
+Down = <class 'Down'>
+Keys = <class 'Keys'>
+__doc__ = None
+__name__ = '__main__'
+rows = [<Countdown object>, <Countdown object>, <Countdown object>]

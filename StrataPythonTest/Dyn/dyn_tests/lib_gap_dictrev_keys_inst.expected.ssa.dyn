@@ -1,0 +1,111 @@
+module lib_gap_dictrev_keys_inst {
+  func @|lib_gap_dictrev_keys_inst.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("lib_gap_dictrev_keys_inst")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_dictrev_keys_inst", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_dictrev_keys_inst", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|lib_gap_dictrev_keys_inst.C.<body>|, "<body>", "lib_gap_dictrev_keys_inst")
+      %str.1 : py.Value = py.strLit("C")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %C.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %C.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_dictrev_keys_inst", "C")
+      %set.2 : base.Unit = base.refSet[py.Value](%C.cell.0, %C.0)
+      %C.1 : py.Value = py.loadGlobal("lib_gap_dictrev_keys_inst", "C") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%C.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %c.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_dictrev_keys_inst", "c")
+      %set.3 : base.Unit = base.refSet[py.Value](%c.cell.0, %call.0)
+      %int.0 : py.Value = py.intLit(0)
+      %c.3 : py.Value = py.loadGlobal("lib_gap_dictrev_keys_inst", "c") ^propagate.0()
+      %x.0 : base.Unit = py.setAttr(%c.3, "x", %int.0) ^propagate.0()
+      %int.1 : py.Value = py.intLit(0)
+      %c.5 : py.Value = py.loadGlobal("lib_gap_dictrev_keys_inst", "c") ^propagate.0()
+      %y.0 : base.Unit = py.setAttr(%c.5, "y", %int.1) ^propagate.0()
+      %int.2 : py.Value = py.intLit(0)
+      %c.7 : py.Value = py.loadGlobal("lib_gap_dictrev_keys_inst", "c") ^propagate.0()
+      %z.0 : base.Unit = py.setAttr(%c.7, "z", %int.2) ^propagate.0()
+      %reversed.0 : py.Value = py.loadGlobal("lib_gap_dictrev_keys_inst", "reversed") ^propagate.0()
+      %c.8 : py.Value = py.loadGlobal("lib_gap_dictrev_keys_inst", "c") ^propagate.0()
+      %__dict__.0 : py.Value = py.attr(%c.8, "__dict__") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%__dict__.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%reversed.0, %tuple.2, %kwargs.2) ^propagate.0()
+      %it.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_dictrev_keys_inst", "it")
+      %set.4 : base.Unit = base.refSet[py.Value](%it.cell.0, %call.1)
+      %print.0 : py.Value = py.loadGlobal("lib_gap_dictrev_keys_inst", "print") ^propagate.0()
+      %next.0 : py.Value = py.loadGlobal("lib_gap_dictrev_keys_inst", "next") ^propagate.0()
+      %it.0 : py.Value = py.loadGlobal("lib_gap_dictrev_keys_inst", "it") ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple(%it.0)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%next.0, %tuple.3, %kwargs.3) ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple(%call.2)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.0, %tuple.4, %kwargs.4) ^propagate.0()
+      %c.9 : py.Value = py.loadGlobal("lib_gap_dictrev_keys_inst", "c") ^propagate.0()
+      %__dict__.1 : py.Value = py.attr(%c.9, "__dict__") ^propagate.0()
+      %str.2 : py.Value = py.strLit("y")
+      %del.0 : base.Unit = py.delItem(%__dict__.1, %str.2) ^propagate.0()
+      %int.3 : py.Value = py.intLit(0)
+      %c.12 : py.Value = py.loadGlobal("lib_gap_dictrev_keys_inst", "c") ^propagate.0()
+      %__dict__.2 : py.Value = py.attr(%c.12, "__dict__") ^propagate.0()
+      %str.3 : py.Value = py.strLit("w")
+      %store.0 : base.Unit = py.setItem(%__dict__.2, %str.3, %int.3) ^propagate.0()
+      %it.1 : py.Value = py.loadGlobal("lib_gap_dictrev_keys_inst", "it") ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%it.1) ^propagate.0()
+      jump ^head.0()
+    head.0():
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %k.cell.0 : base.Ref(py.Value) = py.globalCell("lib_gap_dictrev_keys_inst", "k")
+      %set.5 : base.Unit = base.refSet[py.Value](%k.cell.0, %item.0)
+      %print.1 : py.Value = py.loadGlobal("lib_gap_dictrev_keys_inst", "print") ^propagate.0()
+      %k.0 : py.Value = py.loadGlobal("lib_gap_dictrev_keys_inst", "k") ^propagate.0()
+      %tuple.5 : py.Value = py.mkTuple(%k.0)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%print.1, %tuple.5, %kwargs.5) ^propagate.0()
+      jump ^head.0()
+    stop.0(%exc.0 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.0)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+    exit.0():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @|lib_gap_dictrev_keys_inst.C.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_gap_dictrev_keys_inst", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("C")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

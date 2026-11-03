@@ -1,0 +1,20 @@
+module top
+  C: local (assigned, referenced)
+  Grow: local (assigned, referenced)
+  iter: global implicit (referenced)
+  l: local (assigned, referenced)
+  len: global implicit (referenced)
+  print: global implicit (referenced)
+  sum: global implicit (referenced)
+  class Grow
+    __bool__: local (assigned)
+    function __bool__
+      Grow: global implicit (referenced)
+      l: global implicit (referenced)
+      len: global implicit (referenced)
+      self: local (parameter)
+  class C
+    __radd__: local (assigned)
+    any: global implicit (referenced)
+    staticmethod: global implicit (referenced)
+qualnames: C, Grow, Grow.__bool__

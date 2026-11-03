@@ -1,0 +1,44 @@
+module top
+  Caller: local (assigned, referenced)
+  Countdown: local (assigned, referenced)
+  Down: local (assigned)
+  Keys: local (assigned, referenced)
+  all: global implicit (referenced)
+  any: global implicit (referenced)
+  max: global implicit (referenced)
+  min: global implicit (referenced)
+  print: global implicit (referenced)
+  rows: local (assigned, referenced)
+  sum: global implicit (referenced)
+  class Countdown
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    function __init__
+      n: local (parameter, referenced)
+      self: local (parameter, referenced)
+    function __iter__
+      Down: global implicit (referenced)
+      self: local (parameter, referenced)
+  class Down
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function __init__
+      n: local (parameter, referenced)
+      self: local (parameter, referenced)
+    function __iter__
+      self: local (parameter, referenced)
+    function __next__
+      StopIteration: global implicit (referenced)
+      self: local (parameter, referenced)
+  class Caller
+    __call__: local (assigned)
+    staticmethod: global implicit (referenced)
+    sum: global implicit (referenced)
+  class Keys
+    total: local (assigned)
+    function total
+      self: local (parameter)
+      sum: global implicit (referenced)
+      x: local (parameter, referenced)
+qualnames: Caller, Countdown, Countdown.__init__, Countdown.__iter__, Down, Down.__init__, Down.__iter__, Down.__next__, Keys, Keys.total

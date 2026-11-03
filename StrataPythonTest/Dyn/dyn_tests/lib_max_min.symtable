@@ -1,0 +1,48 @@
+module top
+  A: local (assigned, referenced)
+  Countdown: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  args: local (assigned, referenced)
+  e: local (assigned, referenced)
+  eight: local (assigned, referenced)
+  five: local (assigned, referenced)
+  kwargs: local (assigned, referenced)
+  len: global implicit (referenced)
+  max: global implicit (referenced)
+  min: global implicit (referenced)
+  neg: local (assigned, referenced)
+  print: global implicit (referenced)
+  three: local (assigned, referenced)
+  type: global implicit (referenced)
+  class A
+    __gt__: local (assigned)
+    __init__: local (assigned)
+    __lt__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function __gt__
+      other: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __lt__
+      other: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+  class Countdown
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function __init__
+      n: local (parameter, referenced)
+      self: local (parameter, referenced)
+    function __iter__
+      self: local (parameter, referenced)
+    function __next__
+      StopIteration: global implicit (referenced)
+      self: local (parameter, referenced)
+  function neg
+    print: global implicit (referenced)
+    x: local (parameter, referenced)
+qualnames: A, A.__gt__, A.__init__, A.__lt__, Countdown, Countdown.__init__, Countdown.__iter__, Countdown.__next__, neg

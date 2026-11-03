@@ -412,9 +412,9 @@ test_dict.DictTest.test_repr | agree
 test_dict.DictTest.test_repr_deep | gap | import of module test is not modelled yet
 test_dict.DictTest.test_resize1 | agree
 test_dict.DictTest.test_resize2 | gap | a dict lookup after a false __eq__ depends on CPython's table layout
-test_dict.DictTest.test_reverse_iterator_for_empty_dict | gap | built-in method reversed.__new__ is not modelled yet
-test_dict.DictTest.test_reverse_iterator_for_shared_shared_dicts | gap | built-in method reversed.__new__ is not modelled yet
-test_dict.DictTest.test_reversed | gap | built-in method reversed.__new__ is not modelled yet
+test_dict.DictTest.test_reverse_iterator_for_empty_dict | gap | built-in method list.__new__ is not modelled yet
+test_dict.DictTest.test_reverse_iterator_for_shared_shared_dicts | gap | built-in method list.__new__ is not modelled yet
+test_dict.DictTest.test_reversed | gap | built-in method list.__new__ is not modelled yet
 test_dict.DictTest.test_reverseitemiterator_pickling | gap | import of module collections is not modelled yet
 test_dict.DictTest.test_reverseiterator_pickling | gap | import of module pickle is not modelled yet
 test_dict.DictTest.test_reversevaluesiterator_pickling | gap | import of module pickle is not modelled yet
@@ -437,7 +437,7 @@ test_dict.DictTest.test_valuesiterator_pickling | gap | import of module pickle 
 test_dict.DictTest.test_views_mapping | gap | the attribute type.__dict__ is not modelled yet
 test_dictcomps.DictComprehensionTest.test_assignment_idiom_in_comprehensions | agree
 test_dictcomps.DictComprehensionTest.test_basics | agree
-test_dictcomps.DictComprehensionTest.test_evaluation_order | gap | built-in method zip.__new__ is not modelled yet
+test_dictcomps.DictComprehensionTest.test_evaluation_order | gap | built-in method list.append is not modelled yet
 test_dictcomps.DictComprehensionTest.test_global_visibility | agree
 test_dictcomps.DictComprehensionTest.test_local_visibility | agree
 test_dictcomps.DictComprehensionTest.test_scope_isolation | agree
@@ -860,7 +860,7 @@ test_iter.TestCase.test_seq_class_for | gap | import of module pickle is not mod
 test_iter.TestCase.test_seq_class_iter | gap | import of module pickle is not modelled yet
 test_iter.TestCase.test_sinkstate_callable | gap | built-in method list.__new__ is not modelled yet
 test_iter.TestCase.test_sinkstate_dict | gap | built-in method dict.keys is not modelled yet
-test_iter.TestCase.test_sinkstate_enumerate | gap | built-in method enumerate.__new__ is not modelled yet
+test_iter.TestCase.test_sinkstate_enumerate | gap | built-in method list.__new__ is not modelled yet
 test_iter.TestCase.test_sinkstate_list | gap | built-in method list.__new__ is not modelled yet
 test_iter.TestCase.test_sinkstate_range | gap | built-in method list.__new__ is not modelled yet
 test_iter.TestCase.test_sinkstate_sequence | gap | built-in method list.__new__ is not modelled yet
@@ -870,7 +870,7 @@ test_iter.TestCase.test_sinkstate_yield | gap | the translator does not support 
 test_iter.TestCase.test_unicode_join_endcase | gap | import of module test is not modelled yet
 test_iter.TestCase.test_unpack_iter | gap | import of module test is not modelled yet
 test_iter.TestCase.test_writelines | gap | import of module test is not modelled yet
-test_keywordonlyarg.KeywordOnlyArgTestCase.testFunctionCall | gap | built-in sum is not modelled yet
+test_keywordonlyarg.KeywordOnlyArgTestCase.testFunctionCall | gap | built-in method dict.values is not modelled yet
 test_keywordonlyarg.KeywordOnlyArgTestCase.testKwDefaults | gap | the attribute function.__code__ is not modelled yet
 test_keywordonlyarg.KeywordOnlyArgTestCase.testRaiseErrorFuncallWithUnexpectedKeywordArgument | agree
 test_keywordonlyarg.KeywordOnlyArgTestCase.test_issue13343 | gap | import of module unittest is not modelled yet

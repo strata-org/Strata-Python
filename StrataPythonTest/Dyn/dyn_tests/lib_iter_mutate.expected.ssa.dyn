@@ -1,0 +1,816 @@
+module lib_iter_mutate {
+  func @|lib_iter_mutate.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("lib_iter_mutate")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %int.0 : py.Value = py.intLit(0)
+      %int.1 : py.Value = py.intLit(0)
+      %int.2 : py.Value = py.intLit(0)
+      %list.0 : py.Value = py.mkList(%int.0, %int.1, %int.2)
+      %l.cell.0 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "l")
+      %set.2 : base.Unit = base.refSet[py.Value](%l.cell.0, %list.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|lib_iter_mutate.Grow.<body>|, "<body>", "lib_iter_mutate")
+      %str.1 : py.Value = py.strLit("Grow")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %Grow.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %Grow.cell.0 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "Grow")
+      %set.3 : base.Unit = base.refSet[py.Value](%Grow.cell.0, %Grow.0)
+      %Grow.1 : py.Value = py.loadGlobal("lib_iter_mutate", "Grow") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%Grow.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %l.0 : py.Value = py.loadGlobal("lib_iter_mutate", "l") ^propagate.0()
+      %int.3 : py.Value = py.intLit(0)
+      %store.0 : base.Unit = py.setItem(%l.0, %int.3, %call.0) ^propagate.0()
+      %Grow.2 : py.Value = py.loadGlobal("lib_iter_mutate", "Grow") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%Grow.2, %tuple.2, %kwargs.2) ^propagate.0()
+      %l.1 : py.Value = py.loadGlobal("lib_iter_mutate", "l") ^propagate.0()
+      %int.4 : py.Value = py.intLit(1)
+      %store.1 : base.Unit = py.setItem(%l.1, %int.4, %call.1) ^propagate.0()
+      %Grow.3 : py.Value = py.loadGlobal("lib_iter_mutate", "Grow") ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%Grow.3, %tuple.3, %kwargs.3) ^propagate.0()
+      %l.2 : py.Value = py.loadGlobal("lib_iter_mutate", "l") ^propagate.0()
+      %int.5 : py.Value = py.intLit(2)
+      %store.2 : base.Unit = py.setItem(%l.2, %int.5, %call.2) ^propagate.0()
+      %print.0 : py.Value = py.loadGlobal("lib_iter_mutate", "print") ^propagate.0()
+      %any.0 : py.Value = py.loadGlobal("lib_iter_mutate", "any") ^propagate.0()
+      %l.3 : py.Value = py.loadGlobal("lib_iter_mutate", "l") ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple(%l.3)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%any.0, %tuple.4, %kwargs.4) ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("lib_iter_mutate", "len") ^propagate.0()
+      %l.4 : py.Value = py.loadGlobal("lib_iter_mutate", "l") ^propagate.0()
+      %tuple.5 : py.Value = py.mkTuple(%l.4)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%len.0, %tuple.5, %kwargs.5) ^propagate.0()
+      %tuple.6 : py.Value = py.mkTuple(%call.3, %call.4)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%print.0, %tuple.6, %kwargs.6) ^propagate.0()
+      %list.1 : py.Value = py.mkList
+      %m.cell.0 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "m")
+      %set.4 : base.Unit = base.refSet[py.Value](%m.cell.0, %list.1)
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|lib_iter_mutate.Clear.<body>|, "<body>", "lib_iter_mutate")
+      %str.2 : py.Value = py.strLit("Clear")
+      %tuple.7 : py.Value = py.mkTuple(%clo.1, %str.2)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %Clear.0 : py.Value = py.call(%__build_class__.1, %tuple.7, %kwargs.7) ^propagate.0()
+      %Clear.cell.0 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "Clear")
+      %set.5 : base.Unit = base.refSet[py.Value](%Clear.cell.0, %Clear.0)
+      %m.20 : py.Value = py.loadGlobal("lib_iter_mutate", "m") ^propagate.0()
+      %Clear.1 : py.Value = py.loadGlobal("lib_iter_mutate", "Clear") ^propagate.0()
+      %tuple.8 : py.Value = py.mkTuple
+      %kwargs.8 : py.Value = py.mkKwargs
+      %call.6 : py.Value = py.call(%Clear.1, %tuple.8, %kwargs.8) ^propagate.0()
+      %list.2 : py.Value = py.mkList(%call.6)
+      %iAdd.0 : py.Value = py.iAdd(%m.20, %list.2) ^propagate.0()
+      %m.cell.1 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "m")
+      %set.6 : base.Unit = base.refSet[py.Value](%m.cell.1, %iAdd.0)
+      %m.24 : py.Value = py.loadGlobal("lib_iter_mutate", "m") ^propagate.0()
+      %int.6 : py.Value = py.intLit(0)
+      %list.3 : py.Value = py.mkList(%int.6)
+      %iAdd.1 : py.Value = py.iAdd(%m.24, %list.3) ^propagate.0()
+      %m.cell.2 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "m")
+      %set.7 : base.Unit = base.refSet[py.Value](%m.cell.2, %iAdd.1)
+      %print.1 : py.Value = py.loadGlobal("lib_iter_mutate", "print") ^propagate.0()
+      %all.0 : py.Value = py.loadGlobal("lib_iter_mutate", "all") ^propagate.0()
+      %m.29 : py.Value = py.loadGlobal("lib_iter_mutate", "m") ^propagate.0()
+      %tuple.9 : py.Value = py.mkTuple(%m.29)
+      %kwargs.9 : py.Value = py.mkKwargs
+      %call.7 : py.Value = py.call(%all.0, %tuple.9, %kwargs.9) ^propagate.0()
+      %len.1 : py.Value = py.loadGlobal("lib_iter_mutate", "len") ^propagate.0()
+      %m.32 : py.Value = py.loadGlobal("lib_iter_mutate", "m") ^propagate.0()
+      %tuple.10 : py.Value = py.mkTuple(%m.32)
+      %kwargs.10 : py.Value = py.mkKwargs
+      %call.8 : py.Value = py.call(%len.1, %tuple.10, %kwargs.10) ^propagate.0()
+      %tuple.11 : py.Value = py.mkTuple(%call.7, %call.8)
+      %kwargs.11 : py.Value = py.mkKwargs
+      %call.9 : py.Value = py.call(%print.1, %tuple.11, %kwargs.11) ^propagate.0()
+      %int.7 : py.Value = py.intLit(1)
+      %int.8 : py.Value = py.intLit(0)
+      %int.9 : py.Value = py.intLit(2)
+      %int.10 : py.Value = py.intLit(0)
+      %dict.0 : py.Value = py.mkDict(%int.7, %int.8, %int.9, %int.10) ^propagate.0()
+      %d.cell.0 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "d")
+      %set.8 : base.Unit = base.refSet[py.Value](%d.cell.0, %dict.0)
+      %clo.2 : py.Value = py.mkClosure[[]](@lib_iter_mutate.addkey, "addkey", "lib_iter_mutate")
+      %addkey.cell.0 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "addkey")
+      %set.9 : base.Unit = base.refSet[py.Value](%addkey.cell.0, %clo.2)
+      %max.0 : py.Value = py.loadGlobal("lib_iter_mutate", "max") ^catch.0()
+      %d.0 : py.Value = py.loadGlobal("lib_iter_mutate", "d") ^catch.0()
+      %tuple.12 : py.Value = py.mkTuple(%d.0)
+      %str.3 : py.Value = py.strLit("key")
+      %addkey.0 : py.Value = py.loadGlobal("lib_iter_mutate", "addkey") ^catch.0()
+      %kwargs.12 : py.Value = py.mkKwargs(%str.3, %addkey.0)
+      %call.10 : py.Value = py.call(%max.0, %tuple.12, %kwargs.12) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %RuntimeError.0 : py.Value = py.loadGlobal("lib_iter_mutate", "RuntimeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %RuntimeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "e")
+      %set.10 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.2 : py.Value = py.loadGlobal("lib_iter_mutate", "print") ^clear.0()
+      %e.0 : py.Value = py.loadGlobal("lib_iter_mutate", "e") ^clear.0()
+      %args.0 : py.Value = py.attr(%e.0, "args") ^clear.0()
+      %int.11 : py.Value = py.intLit(0)
+      %item.0 : py.Value = py.getItem(%args.0, %int.11) ^clear.0()
+      %tuple.13 : py.Value = py.mkTuple(%item.0)
+      %kwargs.13 : py.Value = py.mkKwargs
+      %call.11 : py.Value = py.call(%print.2, %tuple.13, %kwargs.13) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "e")
+      %set.11 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "e")
+      %set.12 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %int.12 : py.Value = py.intLit(1)
+      %int.13 : py.Value = py.intLit(2)
+      %list.4 : py.Value = py.mkList(%int.12, %int.13)
+      %n.cell.0 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "n")
+      %set.13 : base.Unit = base.refSet[py.Value](%n.cell.0, %list.4)
+      %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.3 : py.Value = py.mkClosure[[]](@|lib_iter_mutate.Ext.<body>|, "<body>", "lib_iter_mutate")
+      %str.4 : py.Value = py.strLit("Ext")
+      %tuple.14 : py.Value = py.mkTuple(%clo.3, %str.4)
+      %kwargs.14 : py.Value = py.mkKwargs
+      %Ext.0 : py.Value = py.call(%__build_class__.2, %tuple.14, %kwargs.14) ^propagate.0()
+      %Ext.cell.0 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "Ext")
+      %set.14 : base.Unit = base.refSet[py.Value](%Ext.cell.0, %Ext.0)
+      %n.46 : py.Value = py.loadGlobal("lib_iter_mutate", "n") ^propagate.0()
+      %Ext.1 : py.Value = py.loadGlobal("lib_iter_mutate", "Ext") ^propagate.0()
+      %tuple.15 : py.Value = py.mkTuple
+      %kwargs.15 : py.Value = py.mkKwargs
+      %call.12 : py.Value = py.call(%Ext.1, %tuple.15, %kwargs.15) ^propagate.0()
+      %list.5 : py.Value = py.mkList(%call.12)
+      %iAdd.2 : py.Value = py.iAdd(%n.46, %list.5) ^propagate.0()
+      %n.cell.1 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "n")
+      %set.15 : base.Unit = base.refSet[py.Value](%n.cell.1, %iAdd.2)
+      %print.3 : py.Value = py.loadGlobal("lib_iter_mutate", "print") ^propagate.0()
+      %sum.0 : py.Value = py.loadGlobal("lib_iter_mutate", "sum") ^propagate.0()
+      %n.52 : py.Value = py.loadGlobal("lib_iter_mutate", "n") ^propagate.0()
+      %tuple.16 : py.Value = py.mkTuple(%n.52)
+      %kwargs.16 : py.Value = py.mkKwargs
+      %call.13 : py.Value = py.call(%sum.0, %tuple.16, %kwargs.16) ^propagate.0()
+      %tuple.17 : py.Value = py.mkTuple(%call.13)
+      %kwargs.17 : py.Value = py.mkKwargs
+      %call.14 : py.Value = py.call(%print.3, %tuple.17, %kwargs.17) ^propagate.0()
+      %list.6 : py.Value = py.mkList
+      %q.cell.0 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "q")
+      %set.16 : base.Unit = base.refSet[py.Value](%q.cell.0, %list.6)
+      %__build_class__.3 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.4 : py.Value = py.mkClosure[[]](@|lib_iter_mutate.Q.<body>|, "<body>", "lib_iter_mutate")
+      %str.5 : py.Value = py.strLit("Q")
+      %tuple.18 : py.Value = py.mkTuple(%clo.4, %str.5)
+      %kwargs.18 : py.Value = py.mkKwargs
+      %Q.0 : py.Value = py.call(%__build_class__.3, %tuple.18, %kwargs.18) ^propagate.0()
+      %Q.cell.0 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "Q")
+      %set.17 : base.Unit = base.refSet[py.Value](%Q.cell.0, %Q.0)
+      %q.0 : py.Value = py.loadGlobal("lib_iter_mutate", "q") ^propagate.0()
+      %Q.1 : py.Value = py.loadGlobal("lib_iter_mutate", "Q") ^propagate.0()
+      %int.14 : py.Value = py.intLit(1)
+      %tuple.19 : py.Value = py.mkTuple(%int.14)
+      %kwargs.19 : py.Value = py.mkKwargs
+      %call.15 : py.Value = py.call(%Q.1, %tuple.19, %kwargs.19) ^propagate.0()
+      %Q.2 : py.Value = py.loadGlobal("lib_iter_mutate", "Q") ^propagate.0()
+      %int.15 : py.Value = py.intLit(5)
+      %tuple.20 : py.Value = py.mkTuple(%int.15)
+      %kwargs.20 : py.Value = py.mkKwargs
+      %call.16 : py.Value = py.call(%Q.2, %tuple.20, %kwargs.20) ^propagate.0()
+      %Q.3 : py.Value = py.loadGlobal("lib_iter_mutate", "Q") ^propagate.0()
+      %int.16 : py.Value = py.intLit(4)
+      %tuple.21 : py.Value = py.mkTuple(%int.16)
+      %kwargs.21 : py.Value = py.mkKwargs
+      %call.17 : py.Value = py.call(%Q.3, %tuple.21, %kwargs.21) ^propagate.0()
+      %Q.4 : py.Value = py.loadGlobal("lib_iter_mutate", "Q") ^propagate.0()
+      %int.17 : py.Value = py.intLit(3)
+      %tuple.22 : py.Value = py.mkTuple(%int.17)
+      %kwargs.22 : py.Value = py.mkKwargs
+      %call.18 : py.Value = py.call(%Q.4, %tuple.22, %kwargs.22) ^propagate.0()
+      %Q.5 : py.Value = py.loadGlobal("lib_iter_mutate", "Q") ^propagate.0()
+      %int.18 : py.Value = py.intLit(2)
+      %tuple.23 : py.Value = py.mkTuple(%int.18)
+      %kwargs.23 : py.Value = py.mkKwargs
+      %call.19 : py.Value = py.call(%Q.5, %tuple.23, %kwargs.23) ^propagate.0()
+      %list.7 : py.Value = py.mkList(%call.15, %call.16, %call.17, %call.18, %call.19)
+      %iAdd.3 : py.Value = py.iAdd(%q.0, %list.7) ^propagate.0()
+      %q.cell.1 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "q")
+      %set.18 : base.Unit = base.refSet[py.Value](%q.cell.1, %iAdd.3)
+      %max.1 : py.Value = py.loadGlobal("lib_iter_mutate", "max") ^propagate.0()
+      %q.1 : py.Value = py.loadGlobal("lib_iter_mutate", "q") ^propagate.0()
+      %tuple.24 : py.Value = py.mkTuple(%q.1)
+      %kwargs.24 : py.Value = py.mkKwargs
+      %call.20 : py.Value = py.call(%max.1, %tuple.24, %kwargs.24) ^propagate.0()
+      %r.cell.0 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "r")
+      %set.19 : base.Unit = base.refSet[py.Value](%r.cell.0, %call.20)
+      %print.4 : py.Value = py.loadGlobal("lib_iter_mutate", "print") ^propagate.0()
+      %r.0 : py.Value = py.loadGlobal("lib_iter_mutate", "r") ^propagate.0()
+      %v.0 : py.Value = py.attr(%r.0, "v") ^propagate.0()
+      %len.2 : py.Value = py.loadGlobal("lib_iter_mutate", "len") ^propagate.0()
+      %q.2 : py.Value = py.loadGlobal("lib_iter_mutate", "q") ^propagate.0()
+      %tuple.25 : py.Value = py.mkTuple(%q.2)
+      %kwargs.25 : py.Value = py.mkKwargs
+      %call.21 : py.Value = py.call(%len.2, %tuple.25, %kwargs.25) ^propagate.0()
+      %tuple.26 : py.Value = py.mkTuple(%v.0, %call.21)
+      %kwargs.26 : py.Value = py.mkKwargs
+      %call.22 : py.Value = py.call(%print.4, %tuple.26, %kwargs.26) ^propagate.0()
+      %iter.0 : py.Value = py.loadGlobal("lib_iter_mutate", "iter") ^propagate.0()
+      %int.19 : py.Value = py.intLit(0)
+      %int.20 : py.Value = py.intLit(1)
+      %int.21 : py.Value = py.intLit(0)
+      %int.22 : py.Value = py.intLit(1)
+      %int.23 : py.Value = py.intLit(0)
+      %list.8 : py.Value = py.mkList(%int.19, %int.20, %int.21, %int.22, %int.23)
+      %tuple.27 : py.Value = py.mkTuple(%list.8)
+      %kwargs.27 : py.Value = py.mkKwargs
+      %call.23 : py.Value = py.call(%iter.0, %tuple.27, %kwargs.27) ^propagate.0()
+      %it.cell.0 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "it")
+      %set.20 : base.Unit = base.refSet[py.Value](%it.cell.0, %call.23)
+      %list.9 : py.Value = py.mkList
+      %seen.cell.0 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "seen")
+      %set.21 : base.Unit = base.refSet[py.Value](%seen.cell.0, %list.9)
+      %__build_class__.4 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.5 : py.Value = py.mkClosure[[]](@|lib_iter_mutate.Skip.<body>|, "<body>", "lib_iter_mutate")
+      %str.6 : py.Value = py.strLit("Skip")
+      %tuple.28 : py.Value = py.mkTuple(%clo.5, %str.6)
+      %kwargs.28 : py.Value = py.mkKwargs
+      %Skip.0 : py.Value = py.call(%__build_class__.4, %tuple.28, %kwargs.28) ^propagate.0()
+      %Skip.cell.0 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "Skip")
+      %set.22 : base.Unit = base.refSet[py.Value](%Skip.cell.0, %Skip.0)
+      %iter.1 : py.Value = py.loadGlobal("lib_iter_mutate", "iter") ^propagate.0()
+      %Skip.1 : py.Value = py.loadGlobal("lib_iter_mutate", "Skip") ^propagate.0()
+      %int.24 : py.Value = py.intLit(0)
+      %tuple.29 : py.Value = py.mkTuple(%int.24)
+      %kwargs.29 : py.Value = py.mkKwargs
+      %call.24 : py.Value = py.call(%Skip.1, %tuple.29, %kwargs.29) ^propagate.0()
+      %Skip.2 : py.Value = py.loadGlobal("lib_iter_mutate", "Skip") ^propagate.0()
+      %int.25 : py.Value = py.intLit(1)
+      %tuple.30 : py.Value = py.mkTuple(%int.25)
+      %kwargs.30 : py.Value = py.mkKwargs
+      %call.25 : py.Value = py.call(%Skip.2, %tuple.30, %kwargs.30) ^propagate.0()
+      %Skip.3 : py.Value = py.loadGlobal("lib_iter_mutate", "Skip") ^propagate.0()
+      %int.26 : py.Value = py.intLit(2)
+      %tuple.31 : py.Value = py.mkTuple(%int.26)
+      %kwargs.31 : py.Value = py.mkKwargs
+      %call.26 : py.Value = py.call(%Skip.3, %tuple.31, %kwargs.31) ^propagate.0()
+      %Skip.4 : py.Value = py.loadGlobal("lib_iter_mutate", "Skip") ^propagate.0()
+      %int.27 : py.Value = py.intLit(3)
+      %tuple.32 : py.Value = py.mkTuple(%int.27)
+      %kwargs.32 : py.Value = py.mkKwargs
+      %call.27 : py.Value = py.call(%Skip.4, %tuple.32, %kwargs.32) ^propagate.0()
+      %Skip.5 : py.Value = py.loadGlobal("lib_iter_mutate", "Skip") ^propagate.0()
+      %int.28 : py.Value = py.intLit(4)
+      %tuple.33 : py.Value = py.mkTuple(%int.28)
+      %kwargs.33 : py.Value = py.mkKwargs
+      %call.28 : py.Value = py.call(%Skip.5, %tuple.33, %kwargs.33) ^propagate.0()
+      %list.10 : py.Value = py.mkList(%call.24, %call.25, %call.26, %call.27, %call.28)
+      %tuple.34 : py.Value = py.mkTuple(%list.10)
+      %kwargs.34 : py.Value = py.mkKwargs
+      %call.29 : py.Value = py.call(%iter.1, %tuple.34, %kwargs.34) ^propagate.0()
+      %it.cell.1 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "it")
+      %set.23 : base.Unit = base.refSet[py.Value](%it.cell.1, %call.29)
+      %print.5 : py.Value = py.loadGlobal("lib_iter_mutate", "print") ^propagate.0()
+      %any.1 : py.Value = py.loadGlobal("lib_iter_mutate", "any") ^propagate.0()
+      %it.0 : py.Value = py.loadGlobal("lib_iter_mutate", "it") ^propagate.0()
+      %tuple.35 : py.Value = py.mkTuple(%it.0)
+      %kwargs.35 : py.Value = py.mkKwargs
+      %call.30 : py.Value = py.call(%any.1, %tuple.35, %kwargs.35) ^propagate.0()
+      %len.3 : py.Value = py.loadGlobal("lib_iter_mutate", "len") ^propagate.0()
+      %seen.0 : py.Value = py.loadGlobal("lib_iter_mutate", "seen") ^propagate.0()
+      %tuple.36 : py.Value = py.mkTuple(%seen.0)
+      %kwargs.36 : py.Value = py.mkKwargs
+      %call.31 : py.Value = py.call(%len.3, %tuple.36, %kwargs.36) ^propagate.0()
+      %seen.1 : py.Value = py.loadGlobal("lib_iter_mutate", "seen") ^propagate.0()
+      %int.29 : py.Value = py.intLit(0)
+      %item.1 : py.Value = py.getItem(%seen.1, %int.29) ^propagate.0()
+      %seen.2 : py.Value = py.loadGlobal("lib_iter_mutate", "seen") ^propagate.0()
+      %int.30 : py.Value = py.intLit(1)
+      %item.2 : py.Value = py.getItem(%seen.2, %int.30) ^propagate.0()
+      %seen.3 : py.Value = py.loadGlobal("lib_iter_mutate", "seen") ^propagate.0()
+      %int.31 : py.Value = py.intLit(2)
+      %item.3 : py.Value = py.getItem(%seen.3, %int.31) ^propagate.0()
+      %tuple.37 : py.Value = py.mkTuple(%call.30, %call.31, %item.1, %item.2, %item.3)
+      %kwargs.37 : py.Value = py.mkKwargs
+      %call.32 : py.Value = py.call(%print.5, %tuple.37, %kwargs.37) ^propagate.0()
+      %int.32 : py.Value = py.intLit(1)
+      %int.33 : py.Value = py.intLit(2)
+      %set.24 : py.Value = py.constSet(%int.32, %int.33) ^propagate.0()
+      %s.cell.0 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "s")
+      %set.25 : base.Unit = base.refSet[py.Value](%s.cell.0, %set.24)
+      %clo.6 : py.Value = py.mkClosure[[]](@lib_iter_mutate.addmember, "addmember", "lib_iter_mutate")
+      %addmember.cell.0 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "addmember")
+      %set.26 : base.Unit = base.refSet[py.Value](%addmember.cell.0, %clo.6)
+      %min.0 : py.Value = py.loadGlobal("lib_iter_mutate", "min") ^catch.1()
+      %s.0 : py.Value = py.loadGlobal("lib_iter_mutate", "s") ^catch.1()
+      %tuple.38 : py.Value = py.mkTuple(%s.0)
+      %str.7 : py.Value = py.strLit("key")
+      %addmember.0 : py.Value = py.loadGlobal("lib_iter_mutate", "addmember") ^catch.1()
+      %kwargs.38 : py.Value = py.mkKwargs(%str.7, %addmember.0)
+      %call.33 : py.Value = py.call(%min.0, %tuple.38, %kwargs.38) ^catch.1()
+      jump ^join.1()
+    catch.1(%exc.3 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.3)
+      %RuntimeError.1 : py.Value = py.loadGlobal("lib_iter_mutate", "RuntimeError") ^unwind.1()
+      %match.1 : base.Bool = py.excMatch(%exc.3, %RuntimeError.1) ^unwind.1()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %e.cell.3 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "e")
+      %set.27 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.3)
+      %print.6 : py.Value = py.loadGlobal("lib_iter_mutate", "print") ^clear.1()
+      %e.3 : py.Value = py.loadGlobal("lib_iter_mutate", "e") ^clear.1()
+      %args.1 : py.Value = py.attr(%e.3, "args") ^clear.1()
+      %int.34 : py.Value = py.intLit(0)
+      %item.4 : py.Value = py.getItem(%args.1, %int.34) ^clear.1()
+      %tuple.39 : py.Value = py.mkTuple(%item.4)
+      %kwargs.39 : py.Value = py.mkKwargs
+      %call.34 : py.Value = py.call(%print.6, %tuple.39, %kwargs.39) ^clear.1()
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      %e.4 : py.Value = py.undef("e")
+      %e.cell.4 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "e")
+      %set.28 : base.Unit = base.refSet[py.Value](%e.cell.4, %e.4)
+      jump ^join.1()
+    clear.1(%exc.4 : py.Value):
+      %e.5 : py.Value = py.undef("e")
+      %e.cell.5 : base.Ref(py.Value) = py.globalCell("lib_iter_mutate", "e")
+      %set.29 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.5)
+      jump ^unwind.1(%exc.4)
+    next.1():
+      jump ^unwind.1(%exc.3)
+    unwind.1(%exc.5 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.5)
+    join.1():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.6 : py.Value):
+      %exc.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.6)
+      ret(%exc.7)
+  }
+  func @|lib_iter_mutate.Grow.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__bool__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_iter_mutate", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Grow")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_iter_mutate.Grow.__bool__, "__bool__", "lib_iter_mutate")
+      %str.4 : py.Value = py.strLit("__bool__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_iter_mutate.Clear.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__bool__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_iter_mutate", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Clear")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_iter_mutate.Clear.__bool__, "__bool__", "lib_iter_mutate")
+      %str.4 : py.Value = py.strLit("__bool__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_iter_mutate.addkey(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %k.0 : py.Value = py.undef("k")
+      %k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%k.0)
+      %k.1 : py.Value = py.undef("k")
+      %defaults.0 : py.Value = py.mkTuple(%k.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "addkey", 0, 1, false, false, "k") ^propagate.0()
+      %k.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(0)
+      %d.0 : py.Value = py.loadGlobal("lib_iter_mutate", "d") ^propagate.0()
+      %k.4 : py.Value = py.requireDefined(%k.2, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
+      %int.1 : py.Value = py.intLit(10)
+      %add.0 : py.Value = py.add(%k.4, %int.1) ^propagate.0()
+      %store.0 : base.Unit = py.setItem(%d.0, %add.0, %int.0) ^propagate.0()
+      %k.6 : py.Value = py.requireDefined(%k.2, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%k.6)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_iter_mutate.Ext.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__radd__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_iter_mutate", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Ext")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_iter_mutate.Ext.__radd__, "__radd__", "lib_iter_mutate")
+      %str.4 : py.Value = py.strLit("__radd__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_iter_mutate.Q.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__gt__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_iter_mutate", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Q")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_iter_mutate.Q.__init__, "__init__", "lib_iter_mutate")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@lib_iter_mutate.Q.__gt__, "__gt__", "lib_iter_mutate")
+      %str.5 : py.Value = py.strLit("__gt__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|lib_iter_mutate.Skip.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__bool__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("lib_iter_mutate", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Skip")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@lib_iter_mutate.Skip.__init__, "__init__", "lib_iter_mutate")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@lib_iter_mutate.Skip.__bool__, "__bool__", "lib_iter_mutate")
+      %str.5 : py.Value = py.strLit("__bool__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_iter_mutate.addmember(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %x.1 : py.Value = py.undef("x")
+      %defaults.0 : py.Value = py.mkTuple(%x.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "addmember", 0, 1, false, false, "x") ^propagate.0()
+      %x.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %s.0 : py.Value = py.loadGlobal("lib_iter_mutate", "s") ^propagate.0()
+      %update.0 : py.Value = py.attr(%s.0, "update") ^propagate.0()
+      %x.4 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %int.0 : py.Value = py.intLit(10)
+      %add.0 : py.Value = py.add(%x.4, %int.0) ^propagate.0()
+      %set.1 : py.Value = py.mkSet(%add.0) ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%set.1)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%update.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %x.6 : py.Value = py.requireDefined(%x.2, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%x.6)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_iter_mutate.Grow.__bool__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Grow.__bool__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %len.0 : py.Value = py.loadGlobal("lib_iter_mutate", "len") ^propagate.0()
+      %l.0 : py.Value = py.loadGlobal("lib_iter_mutate", "l") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%l.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%len.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %int.0 : py.Value = py.intLit(5)
+      %lt.0 : py.Value = py.lt(%call.0, %int.0) ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%lt.0) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %Grow.0 : py.Value = py.loadGlobal("lib_iter_mutate", "Grow") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%Grow.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %list.0 : py.Value = py.mkList(%call.1)
+      %l.1 : py.Value = py.loadGlobal("lib_iter_mutate", "l") ^propagate.0()
+      %len.1 : py.Value = py.loadGlobal("lib_iter_mutate", "len") ^propagate.0()
+      %l.2 : py.Value = py.loadGlobal("lib_iter_mutate", "l") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%l.2)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%len.1, %tuple.2, %kwargs.3) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %none.1 : py.Value = py.noneLit
+      %slice.0 : py.Value = py.mkSlice(%call.2, %none.0, %none.1)
+      %store.0 : base.Unit = py.setItem(%l.1, %slice.0, %list.0) ^propagate.0()
+      jump ^join.0()
+    else.0():
+      jump ^join.0()
+    join.0():
+      %len.2 : py.Value = py.loadGlobal("lib_iter_mutate", "len") ^propagate.0()
+      %l.3 : py.Value = py.loadGlobal("lib_iter_mutate", "l") ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple(%l.3)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%len.2, %tuple.3, %kwargs.4) ^propagate.0()
+      %int.1 : py.Value = py.intLit(5)
+      %eq.0 : py.Value = py.eq(%call.3, %int.1) ^propagate.0()
+      %cond.1 : base.Bool = py.truthy(%eq.0) ^propagate.0()
+      branch(%cond.1) ^and.0() ^join.1(%eq.0)
+    and.0():
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %l.4 : py.Value = py.loadGlobal("lib_iter_mutate", "l") ^propagate.0()
+      %int.2 : py.Value = py.intLit(4)
+      %item.0 : py.Value = py.getItem(%l.4, %int.2) ^propagate.0()
+      %is.0 : py.Value = py.is(%self.4, %item.0)
+      jump ^join.1(%is.0)
+    join.1(%bool.0 : py.Value):
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%bool.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_iter_mutate.Clear.__bool__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Clear.__bool__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %m.1 : py.Value = py.loadGlobal("lib_iter_mutate", "m") ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %none.1 : py.Value = py.noneLit
+      %none.2 : py.Value = py.noneLit
+      %slice.0 : py.Value = py.mkSlice(%none.0, %none.1, %none.2)
+      %del.0 : base.Unit = py.delItem(%m.1, %slice.0) ^propagate.0()
+      %bool.0 : py.Value = py.boolLit(true)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%bool.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_iter_mutate.Ext.__radd__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %other.0 : py.Value = py.undef("other")
+      %other.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%other.0)
+      %self.1 : py.Value = py.undef("self")
+      %other.1 : py.Value = py.undef("other")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %other.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Ext.__radd__", 0, 2, false, false, "self", "other") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %other.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %int.0 : py.Value = py.intLit(30)
+      %int.1 : py.Value = py.intLit(40)
+      %list.0 : py.Value = py.mkList(%int.0, %int.1)
+      %n.5 : py.Value = py.loadGlobal("lib_iter_mutate", "n") ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("lib_iter_mutate", "len") ^propagate.0()
+      %n.8 : py.Value = py.loadGlobal("lib_iter_mutate", "n") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%n.8)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%len.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %none.1 : py.Value = py.noneLit
+      %slice.0 : py.Value = py.mkSlice(%call.0, %none.0, %none.1)
+      %store.0 : base.Unit = py.setItem(%n.5, %slice.0, %list.0) ^propagate.0()
+      %other.4 : py.Value = py.requireDefined(%other.2, "other", "UnboundLocalError", "cannot access local variable 'other' where it is not associated with a value") ^propagate.0()
+      %int.2 : py.Value = py.intLit(25)
+      %add.0 : py.Value = py.add(%other.4, %int.2) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%add.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_iter_mutate.Q.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %v.0 : py.Value = py.undef("v")
+      %v.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%v.0)
+      %self.1 : py.Value = py.undef("self")
+      %v.1 : py.Value = py.undef("v")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %v.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Q.__init__", 0, 2, false, false, "self", "v") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %v.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %v.4 : py.Value = py.requireDefined(%v.2, "v", "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %v.5 : base.Unit = py.setAttr(%self.4, "v", %v.4) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_iter_mutate.Q.__gt__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %other.0 : py.Value = py.undef("other")
+      %other.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%other.0)
+      %self.1 : py.Value = py.undef("self")
+      %other.1 : py.Value = py.undef("other")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %other.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Q.__gt__", 0, 2, false, false, "self", "other") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %other.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %print.0 : py.Value = py.loadGlobal("lib_iter_mutate", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("gt")
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %v.0 : py.Value = py.attr(%self.4, "v") ^propagate.0()
+      %other.4 : py.Value = py.requireDefined(%other.2, "other", "UnboundLocalError", "cannot access local variable 'other' where it is not associated with a value") ^propagate.0()
+      %v.1 : py.Value = py.attr(%other.4, "v") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%str.0, %v.0, %v.1)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %q.0 : py.Value = py.loadGlobal("lib_iter_mutate", "q") ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%q.0) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %q.1 : py.Value = py.loadGlobal("lib_iter_mutate", "q") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %neg.0 : py.Value = py.uSub(%int.0) ^propagate.0()
+      %del.0 : base.Unit = py.delItem(%q.1, %neg.0) ^propagate.0()
+      jump ^join.0()
+    else.0():
+      jump ^join.0()
+    join.0():
+      %self.6 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %v.2 : py.Value = py.attr(%self.6, "v") ^propagate.0()
+      %other.6 : py.Value = py.requireDefined(%other.2, "other", "UnboundLocalError", "cannot access local variable 'other' where it is not associated with a value") ^propagate.0()
+      %v.3 : py.Value = py.attr(%other.6, "v") ^propagate.0()
+      %gt.0 : py.Value = py.gt(%v.2, %v.3) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%gt.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_iter_mutate.Skip.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %v.0 : py.Value = py.undef("v")
+      %v.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%v.0)
+      %self.1 : py.Value = py.undef("self")
+      %v.1 : py.Value = py.undef("v")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %v.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Skip.__init__", 0, 2, false, false, "self", "v") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %v.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %v.4 : py.Value = py.requireDefined(%v.2, "v", "UnboundLocalError", "cannot access local variable 'v' where it is not associated with a value") ^propagate.0()
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %v.5 : base.Unit = py.setAttr(%self.4, "v", %v.4) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @lib_iter_mutate.Skip.__bool__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Skip.__bool__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %self.4 : py.Value = py.requireDefined(%self.2, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %v.0 : py.Value = py.attr(%self.4, "v") ^propagate.0()
+      %list.0 : py.Value = py.mkList(%v.0)
+      %seen.0 : py.Value = py.loadGlobal("lib_iter_mutate", "seen") ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("lib_iter_mutate", "len") ^propagate.0()
+      %seen.1 : py.Value = py.loadGlobal("lib_iter_mutate", "seen") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%seen.1)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%len.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %none.1 : py.Value = py.noneLit
+      %slice.0 : py.Value = py.mkSlice(%call.0, %none.0, %none.1)
+      %store.0 : base.Unit = py.setItem(%seen.0, %slice.0, %list.0) ^propagate.0()
+      %next.0 : py.Value = py.loadGlobal("lib_iter_mutate", "next") ^propagate.0()
+      %it.0 : py.Value = py.loadGlobal("lib_iter_mutate", "it") ^propagate.0()
+      %none.2 : py.Value = py.noneLit
+      %tuple.1 : py.Value = py.mkTuple(%it.0, %none.2)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%next.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %bool.0 : py.Value = py.boolLit(false)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%bool.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

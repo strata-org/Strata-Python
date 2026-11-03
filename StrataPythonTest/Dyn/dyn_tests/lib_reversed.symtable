@@ -1,0 +1,106 @@
+module top
+  Bad: local (assigned, referenced)
+  M: local (assigned, referenced)
+  NotRev: local (assigned, referenced)
+  Own: local (assigned, referenced)
+  P: local (assigned, referenced)
+  RuntimeError: global implicit (referenced)
+  Seq: local (assigned, referenced)
+  Short: local (assigned, referenced)
+  Stop: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  args: local (assigned, referenced)
+  count: local (assigned, referenced)
+  d: local (assigned, referenced)
+  d2: local (assigned, referenced)
+  e: local (assigned, referenced)
+  it: local (assigned, referenced)
+  k: local (assigned, referenced)
+  kwargs: local (assigned, referenced)
+  l: local (assigned, referenced)
+  next: global implicit (referenced)
+  print: global implicit (referenced)
+  r: local (assigned, referenced)
+  reversed: global implicit (referenced)
+  s: local (assigned, referenced)
+  type: global implicit (referenced)
+  v: local (assigned, referenced)
+  x: local (assigned, referenced)
+  function count
+    _: local (assigned)
+    it: local (parameter, referenced)
+    n: local (assigned, referenced)
+  class Seq
+    __getitem__: local (assigned)
+    __len__: local (assigned)
+    function __len__
+      print: global implicit (referenced)
+      self: local (parameter)
+    function __getitem__
+      i: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter)
+  class Own
+    __reversed__: local (assigned)
+    function __reversed__
+      iter: global implicit (referenced)
+      self: local (parameter)
+  class NotRev
+    __getitem__: local (assigned)
+    __len__: local (assigned)
+    __reversed__: local (assigned)
+    function __len__
+      self: local (parameter)
+    function __getitem__
+      i: local (parameter, referenced)
+      self: local (parameter)
+  class Short
+    __getitem__: local (assigned)
+    __init__: local (assigned)
+    __len__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+    function __len__
+      self: local (parameter, referenced)
+    function __getitem__
+      IndexError: global implicit (referenced)
+      i: local (parameter, referenced)
+      self: local (parameter)
+  class Stop
+    __getitem__: local (assigned)
+    __len__: local (assigned)
+    function __len__
+      self: local (parameter)
+    function __getitem__
+      StopIteration: global implicit (referenced)
+      i: local (parameter)
+      self: local (parameter)
+  class Bad
+    __getitem__: local (assigned)
+    __len__: local (assigned)
+    function __len__
+      self: local (parameter)
+    function __getitem__
+      ValueError: global implicit (referenced)
+      i: local (parameter, referenced)
+      self: local (parameter)
+  class P
+    __getitem__: local (assigned)
+    __len__: local (assigned)
+    __reversed__: local (assigned)
+    property: global implicit (referenced)
+    function __reversed__
+      self: local (parameter)
+    function __len__
+      self: local (parameter)
+    function __getitem__
+      i: local (parameter, referenced)
+      self: local (parameter)
+  class M
+    __getitem__: local (assigned)
+    __len__: local (assigned)
+    dict: global implicit (referenced)
+    function __len__
+      self: local (parameter)
+qualnames: Bad, Bad.__getitem__, Bad.__len__, M, M.__len__, NotRev, NotRev.__getitem__, NotRev.__len__, Own, Own.__reversed__, P, P.__getitem__, P.__len__, P.__reversed__, Seq, Seq.__getitem__, Seq.__len__, Short, Short.__getitem__, Short.__init__, Short.__len__, Stop, Stop.__getitem__, Stop.__len__, count
