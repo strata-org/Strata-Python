@@ -1,1 +1,1 @@
-Core type checking failed: \[call Resource@__exit__\(arg\$9, out LaurelResult\$10, out maybe_except\$11\);\]: Ill-formed call: the call to Resource@__exit__ passes 1 input argument, but Resource@__exit__ has 2 input parameters
+Core type checking failed: \[call Resource@__exit__\(\$inputCopy77, out LaurelResult\$10, out maybe_except\$11\);\]: Ill-formed call: the call to Resource@__exit__ passes 1 input argument, but Resource@__exit__ has 2 input parameters \(py\$in_self, py\$in_args\)

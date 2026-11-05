@@ -1,0 +1,1 @@
+With assumes ignored the comprehension fixpoint runs until the interpreter times out, which depends on host speed.

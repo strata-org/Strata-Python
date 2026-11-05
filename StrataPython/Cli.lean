@@ -614,6 +614,7 @@ def pyInterpretCommand : _root_.Command where
         IO.Process.exit ExitCode.userError
     match core.run (moreFns := StrataPython.RuntimeFactory) with
     | .ok E =>
+      let E := { E with ignoreAssumes := true }
       -- Run the entry point(s) the producer marked (the Python→Laurel
       -- translator marks the synthetic `__main__` wrapper). Fall back to a
       -- by-name `__main__` lookup if nothing is marked, so a Core program from

@@ -102,6 +102,9 @@ def collect() -> list[tuple[str, str | None, str | None, str, str]]:
         if not (TESTS_DIR / f"{name}.py").is_file():
             continue
         desired = read_token(desired_file)
+        if (EXPECTED_DIR / f"{name}.skip").is_file():
+            rows.append((name, desired, "skip", "no-answer", "skipped — not run"))
+            continue
         expected_file = EXPECTED_DIR / f"{name}.expected"
         expected = (
             expected_file.read_text(encoding="utf-8").strip()
