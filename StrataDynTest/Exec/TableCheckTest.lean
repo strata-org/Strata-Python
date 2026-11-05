@@ -163,6 +163,28 @@ environment TcOpen extends Base where
 #guard_msgs in
 #dyn_sem_table OpenSem for TcOpen
 
+/-- `lieRevB` called openly on a literal. -/
+@[noinline] def openA (xs : Array Int) : Array Int := xs ++ Helpers.lieRevB #[1, 2, 3]
+/-- `swappedB` on the same literal, which the compiler runs as `lieRevB`: the closed term
+`lieRevB #[1, 2, 3]` is shared with `openA`. -/
+@[noinline] def hiddenB (xs : Array Int) : Array Int := xs ++ Helpers.swappedB #[1, 2, 3]
+
+/-- One instruction, with a rule that reaches the shared closed term through `openA` first and
+`hiddenB` second: `openA` reaching `lieRevB` doesn't explain the call for `hiddenB`. -/
+environment TcShared extends Base where
+  namespace tcShared
+  open base
+  insn f (xs : Sequence Int) : Sequence Int
+  end tcShared
+
+#dyn_types TcShared
+
+@[dyn_sem TcShared.f] def viaShared (xs : Array Int) : Array Int := openA xs ++ hiddenB xs
+
+/-- error: the table SharedSem: rule viaShared for tcShared.f reaches hiddenB (SharedSem.ops → SharedSem.impl.tcShared.f → SharedSem.rule.tcShared.f → viaShared → hiddenB), whose compiled code calls Strata.Dyn.ExecTest.Helpers.lieRevB, which its definition does not reach: it was compiled with a swap that the check cannot see, such as a local @[csimp] lemma -/
+#guard_msgs in
+#dyn_sem_table SharedSem for TcShared
+
 /-- A loop rule that reads a world part whose getter runs other code: the walk reaches the part's
 instance through the loop's wrapper, and the error names the rule. -/
 environment TcLoop extends Base where

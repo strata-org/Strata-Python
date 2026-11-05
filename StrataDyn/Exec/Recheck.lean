@@ -101,8 +101,11 @@ have enabled initializers (`enableInitializersExecution`). -/
 def recheckOneModule (m : Lean.Name) (pkg : Lean.NameSet) (mods : Array Lean.Name)
     (ending : List Lean.Name := endingPartials) : IO (Array String) := do
   let env ← importModules #[{ module := m }] {} (loadExts := true) (level := .private)
+  -- The budget of the package's largest tables, which elaborate under
+  -- `set_option maxHeartbeats 1000000`; `Core.Context.maxHeartbeats` counts in thousands.
   let (found, _) ← (recheckModule m pkg mods ending |>.run' {} {}).toIO
-    { fileName := s!"<recheck {m}>", fileMap := default } { env }
+    { fileName := s!"<recheck {m}>", fileMap := default, maxHeartbeats := 1000000 * 1000 }
+    { env }
   return found
 
 /-- Every finding of the tables of the built modules under `root`, whose sources are under

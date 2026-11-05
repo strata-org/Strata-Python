@@ -100,10 +100,10 @@ def decl (name : FuncName) (args : List ArgDecl)
   assert! keywordOnly <= args.size
 
   let argIndexMap : Std.HashMap String (Fin args.size) :=
-    Fin.foldl args.size (init := {}) fun m i =>
+    Fin.foldl args.size (fun m i =>
       let a := args[i]
       assert! a.name ∉ m
-      m.insert a.name i
+      m.insert a.name i) {}
 
   let .isTrue posOnlyBound := (inferInstance : Decidable (posOnlyCount <= keywordOnly))
     | return panic! "Invalid number of position-only parameters."

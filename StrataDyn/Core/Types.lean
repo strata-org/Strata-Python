@@ -260,9 +260,9 @@ def constructor {α : Type} {env : Env α} {arity : Nat} (t : TypeRef env arity)
 
 inductive Error where
   /-- A scope was given the wrong number of arguments. -/
-  | parameterCount (given expected : Nat)
+  | parameterCount (actual expected : Nat)
   /-- A scope was given an argument of the wrong kind at a de Bruijn level. -/
-  | parameterKind (level : Nat) (given expected : Kind)
+  | parameterKind (level : Nat) (actual expected : Kind)
   /-- A consumer's Core type is not well formed in the context. -/
   | illFormed (type : LMonoTy)
   /-- A list parameter cannot be a Core type variable. -/

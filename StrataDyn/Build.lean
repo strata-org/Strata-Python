@@ -161,7 +161,7 @@ structure FreshLabel where
   /-- Its base, which the function numbers again when it is finished. -/
   base : Name
   /-- Whether its caller gave the base.  `renameLabel` replaces only a base that was not. -/
-  given : Bool
+  giv : Bool
 
 /-- A piece of a misuse's message: text, or a label, which the message gives its final name. -/
 inductive MsgPart where
@@ -240,14 +240,14 @@ def resolveInfo (info : Option α) : BuildM env α α := do
 
 /-- A fresh value of type `t`, named `stem.n`, with `n` the number of values named after
 `stem` before it in the finished function.  `stem` is structured: `x.cell` is the segments `x`
-and `cell`, never one segment with a `.` in it.  `given` is false for a stem the emitter chose
+and `cell`, never one segment with a `.` in it.  `giv` is false for a stem the emitter chose
 itself, which `rename` may replace. -/
-def freshVal (stem : Name) (t : TypeExpr env) (given : Bool := true) :
+def freshVal (stem : Name) (t : TypeExpr env) (giv : Bool := true) :
     BuildM env α (ValDecl env) := do
   let s ← get
   set { s with
     nextVal := s.nextVal + 1
-    stems := s.stems.push (stem, given)
+    stems := s.stems.push (stem, giv)
     types := s.types.push t }
   return ⟨⟨s.nextVal⟩, t⟩
 
@@ -333,14 +333,14 @@ def resolveTypeArgs {isig : InsnSig env} (r : InsnRef env isig) {type : Option (
     | .error e => error (e.text (nameText r.name)); return none
 
 /-- `emitApply`, with regions built in any monad `BuildM` lifts into, such as a front end's
-builder.  Its type arguments are `emitApply`'s.  `given` is false for a `name` the caller did
+builder.  Its type arguments are `emitApply`'s.  `giv` is false for a `name` the caller did
 not choose, which `rename` may replace. -/
 def emitApplyWith {m : Type → Type} [Monad m] [MonadLiftT (BuildM env α) m] {isig : InsnSig env}
     (name : Name) (type : TypeExpr env) (r : InsnRef env isig) (args : Array ValId)
     (succs : Array Target.Raw := #[]) (regions : Array (m (Region env α)) := #[])
     (info : Option α := none) (typeArgs : TypeArgsOf r (some type) := by infer_type_args)
-    (given : Bool := true) : m ValId := do
-  let d ← (freshVal name type given : BuildM env α (ValDecl env))
+    (giv : Bool := true) : m ValId := do
+  let d ← (freshVal name type giv : BuildM env α (ValDecl env))
   let rs ← regions.mapM id
   (do
     let some ta ← resolveTypeArgs r args typeArgs | return d.id
@@ -385,9 +385,9 @@ def renameLabel (start : Nat) (base : String) (l : Label) : BuildM env α Unit :
     for h : i in [start:s.freshLabels.size] do
       let f := s.freshLabels[i]
       if f.name == l.name then
-        if f.given then return s
+        if f.giv then return s
         return { s with
-          freshLabels := s.freshLabels.set i { f with base := .str .base base, given := true } }
+          freshLabels := s.freshLabels.set i { f with base := .str .base base, giv := true } }
     return s
 
 /-- Close the open block with `term`.  The block carries the annotation it was started with, if
@@ -435,15 +435,15 @@ namespace Raw
 def goto (label : Label) (args : Array ValId := #[]) : Target.Raw := ⟨label, args⟩
 
 /-- A label for a block not yet built, which a transfer can name: `base.n`, with `n` the
-next suffix for `base`.  `given` is false for a base the caller did not choose, which
+next suffix for `base`.  `giv` is false for a base the caller did not choose, which
 `renameLabel` may replace. -/
-def freshLabel (base : String := blockBase) (given : Bool := true) : BuildM env α Label := do
+def freshLabel (base : String := blockBase) (giv : Bool := true) : BuildM env α Label := do
   let s ← get
   let suffix := s.labelSuffixes.getD base 0
   let name := .num (.str .base base) suffix
   set { s with
     labelSuffixes := s.labelSuffixes.insert base (suffix + 1)
-    freshLabels := s.freshLabels.push { name, base := .str .base base, given } }
+    freshLabels := s.freshLabels.push { name, base := .str .base base, giv } }
   return ⟨name⟩
 
 /-- Open the block called `label`, taking `params`.  With `info`, the block carries that

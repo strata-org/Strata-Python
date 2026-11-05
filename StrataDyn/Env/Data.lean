@@ -37,22 +37,22 @@ deriving DecidableEq, Repr
 /-- Why arguments do not fit the parameters they are passed to: the wrong number of them, or
 argument `i`, counted from 0, of the wrong kind.  Each caller words it for its own messages. -/
 inductive KindError where
-  | count (given expected : Nat)
-  | kind (i : Nat) (given expected : Kind)
+  | count (giv expected : Nat)
+  | kind (i : Nat) (giv expected : Kind)
 deriving DecidableEq, Repr
 
-/-- The first argument of `given`, counted from `i`, whose kind is not its parameter's in
+/-- The first argument of `giv`, counted from `i`, whose kind is not its parameter's in
 `expected`. -/
 private def KindError.firstKind? (i : Nat) : List Kind → List Kind → Option KindError
   | g :: gs, e :: es => if g = e then firstKind? (i + 1) gs es else some (.kind i g e)
   | _, _ => none
 
-/-- The first way arguments of kinds `given` fail to fit parameters of kinds `expected`: a count
+/-- The first way arguments of kinds `giv` fail to fit parameters of kinds `expected`: a count
 that differs, else the first argument of the wrong kind.  `none` exactly when they fit
 (`check?_eq_none_iff`), so a caller decides the fit and words the failure with this one check. -/
-def KindError.check? (expected given : Array Kind) : Option KindError :=
-  if given.size ≠ expected.size then some (.count given.size expected.size)
-  else firstKind? 0 given.toList expected.toList
+def KindError.check? (expected giv : Array Kind) : Option KindError :=
+  if giv.size ≠ expected.size then some (.count giv.size expected.size)
+  else firstKind? 0 giv.toList expected.toList
 
 /-- Kinds of the same length have no argument of the wrong kind exactly when they are equal. -/
 private theorem KindError.firstKind?_eq_none_iff :
@@ -68,10 +68,10 @@ private theorem KindError.firstKind?_eq_none_iff :
     · simp [firstKind?, hge]
 
 /-- The arguments fit exactly when their kinds are the parameters'. -/
-theorem KindError.check?_eq_none_iff {expected given : Array Kind} :
-    check? expected given = none ↔ given = expected := by
+theorem KindError.check?_eq_none_iff {expected giv : Array Kind} :
+    check? expected giv = none ↔ giv = expected := by
   unfold check?
-  by_cases hs : given.size = expected.size
+  by_cases hs : giv.size = expected.size
   · rw [ite_eq_right (fun h => h hs), firstKind?_eq_none_iff (by simpa using hs), Array.toList_inj]
   · rw [ite_eq_left hs]
     exact ⟨fun h => absurd h (by simp), fun h => absurd (h ▸ rfl) hs⟩

@@ -1300,13 +1300,17 @@ def findNotAsProved (decl : Lean.Name) (what : MessageData)
   let mut directOf : Lean.NameMap Lean.NameSet := {}
   -- A name the compiler made (`f._lambda_1`, `g._closed_0`, `List.map._at_.f._spec_1`) is code
   -- too, whatever name it extends: its own calls are checked the same way.
-  let mut checked : Lean.NameSet := {}
+  -- Compiled code can be shared between owners (a closed term such as `f._redArg._closed_0`
+  -- that several callers use), so it is checked once for each owner that reaches it: one owner
+  -- reaching a callee does not explain the call for another.
+  let mut checked : Lean.NameMap Lean.NameSet := {}
   let mut work := compiled.map fun n => (n, n)
   while h : work.size > 0 do
     let (n, owner) := work[work.size - 1]
     work := work.pop
-    if checked.contains n then continue
-    checked := checked.insert n
+    let seen := checked.getD owner {}
+    if seen.contains n then continue
+    checked := checked.insert owner (seen.insert n)
     let some d := Lean.IR.findEnvDecl env n | continue
     for c0 in Lean.IR.collectUsedDecls env [d] do
       -- `f._redArg` (`f` without its unused parameters) and `f._boxed` are `f`'s own code, so a

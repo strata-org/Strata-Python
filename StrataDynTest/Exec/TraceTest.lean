@@ -211,7 +211,7 @@ def printer : Program := #while
 #guard_msgs in
 #print axioms Exec.reach_runFused
 
-/-- info: 'Strata.Dyn.Exec.always' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Strata.Dyn.Exec.always' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in
 #print axioms Exec.always
 
