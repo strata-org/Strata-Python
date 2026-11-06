@@ -72,6 +72,8 @@ public import StrataPython.Dyn.Sem.Library.Constructors
 public import StrataPython.Dyn.Sem.Library.Collections
 public import StrataPython.Dyn.Sem.Library.Machines
 public import StrataPython.Dyn.Sem.Contracts.LocationsProps
+public import StrataPython.Dyn.Sem.Contracts.Regex
+public import StrataPython.Dyn.Sem.Contracts.RegexProps
 
 /-!
 # The Python semantics
@@ -81,5 +83,6 @@ and strs, the Unicode tables, and the arithmetic of ints, bools and floats with 
 slice; the objects and the world; the record of primitives and the rule monad `PyM`, with their
 proofs; the rules of the `py` operations, and their table `PySem`, with the theorems that each
 rule stays within its declared effect and reaches only the cells and closures it is given, and that
-the table is certified (`PySem.certified`).
+the table is certified (`PySem.certified`); and the regular-expression matcher of `py.reSearch`,
+with its theorem.
 -/
