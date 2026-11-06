@@ -16,7 +16,8 @@ set_option autoImplicit false
 # Emitting Python
 
 `PyM` emits a Python function over `Py.env`, on top of `Dyn.Build`.  It carries the
-enclosing handler: every raising operation passes it as its `err` successor.
+enclosing handler, which every raising operation passes as its `err` successor, and the
+function's exit.
 
 The sections below group the operations.
 
@@ -24,6 +25,12 @@ A function body is emitted inside `buildFunc`, which installs the handler that r
 failure to the caller before the body runs.  Misusing blocks is an error, as in
 `Dyn.Build`, and `buildFunc` fails if one was recorded or the function is not well formed.
 Block parameters are not decided here: locals stay in cells until ref-to-reg.
+
+Blocks are `BlockRef`s, made by `freshLabel` with their parameters' types, and transfers are
+`Target`s made from them, so Lean checks that a jump or a handler passes what its block takes.
+The function's exit is a `Target` too, which `emitReturn` and `emitPropagate` leave by.  The
+values most emitters give are untyped `ValId`s: `value` claims one is a Python value, where one
+is bound into a target or given to a typed emitter, and `Build.run` checks the claim.
 
 An emitter that takes a body to emit, such as `withHandler` or `forEach`, runs it in any
 `MonadPy` monad: `PyM` itself, or the translator's `TransM` above it.
@@ -35,12 +42,20 @@ open Strata.Dyn
 
 public section
 
+/-- A typed value of a Python function. -/
+abbrev PyVal := Val Py.env
+
+/-- A typed target in a Python function. -/
+abbrev PyTarget := Target Py.env
+
 /-- What Python carries on top of the generic builder. -/
 structure Frame where
-  /-- Where a failing operation transfers.  Never absent: `buildFunc` installs a handler
-  that returns the failure to the caller before the body is emitted.  Its arguments are
-  pre-bound, and `err` supplies the exception after them. -/
-  handler : Target.Raw
+  /-- Where a failing operation transfers, which takes the exception.  Never absent:
+  `buildFunc` installs a handler that returns the failure to the caller before the body is
+  emitted.  It may bind arguments of its block before the exception. -/
+  handler : PyTarget [Py.Value]
+  /-- The function's exit, which returns a `Py.failing`. -/
+  exit : PyTarget [Py.failing]
   /-- The cell holding each local in scope. -/
   locals : Build.StrMap ValId := ∅
 
@@ -48,11 +63,9 @@ structure Frame where
 `Info` in the translator, `Unit` in a test. -/
 abbrev PyM (α : Type) := StateT Frame (BuildM Py.env α)
 
-/-- A typed value of a Python function. -/
-abbrev PyVal := Val Py.env
-
-/-- A typed target in a Python function. -/
-abbrev PyTarget := Target Py.env
+/-- The Python value `v`.  Lean does not check that `v` is one: the emitters give untyped
+ids. -/
+@[inline] def value (v : ValId) : PyVal Py.Value := Val.ofId Py.Value v
 
 /-- A monad that emits Python by running `PyM α`: `PyM α` itself, or a reader or state layer
 over one, such as the translator's `TransM`. -/
@@ -73,21 +86,21 @@ instance {σ : Type} [Monad m] [MonadPy α m] : MonadPy α (StateT σ m) :=
 
 /-! ## The enclosing handler -/
 
-/-- Where a failing operation currently reports. -/
-def handler : PyM α Target.Raw := (·.handler) <$> get
+/-- Where a failing operation currently reports: the `err` successor a raising operation
+takes. -/
+def handler : PyM α (PyTarget [Py.Value]) := (·.handler) <$> get
 
-/-- The enclosing handler, as the `err` successor a typed emitter takes.  The frame keeps it
-untyped, so its payload is checked only by `Build.run`. -/
-def handlerTarget : PyM α (PyTarget [Py.Value]) :=
-  Target.ofRaw [Py.Value] <$> handler
+/-- The enclosing handler, as a raising operation's `err` successor, with a misuse recorded if
+it is an exit that does not leave the innermost open body. -/
+private def checkedHandler : PyM α Target.Raw := do Build.checkedTarget (α := α) (← handler)
 
 /-- The enclosing handler with the exception `e` passed: where raising `e` transfers. -/
-def raiseTo (e : ValId) : PyM α Target.Raw := do
-  return (← handler).bind e
+def raiseTo (e : ValId) : PyM α (PyTarget []) := do
+  return (← handler).bind (value e)
 
-/-- Emit `act` with failures going to `k`, whose arguments are pre-bound, restoring the old
-handler afterwards, so handlers nest as `try`s do. -/
-def withHandlerTo [Monad m] [MonadPy α m] (k : Target.Raw) (act : m β) : m β := do
+/-- Emit `act` with failures going to `k`, restoring the old handler afterwards, so handlers
+nest as `try`s do. -/
+def withHandlerTo [Monad m] [MonadPy α m] (k : PyTarget [Py.Value]) (act : m β) : m β := do
   let saved ← liftPy (handler (α := α))
   liftPy (modify ({ · with handler := k }) : PyM α Unit)
   let r ← act
@@ -95,8 +108,8 @@ def withHandlerTo [Monad m] [MonadPy α m] (k : Target.Raw) (act : m β) : m β 
   return r
 
 /-- Emit `act` with failures going to the block `l`, which takes only the exception. -/
-def withHandler [Monad m] [MonadPy α m] (l : Label) (act : m β) : m β :=
-  withHandlerTo (Build.goto l) act
+def withHandler [Monad m] [MonadPy α m] (l : BlockRef Py.env [Py.Value]) (act : m β) : m β :=
+  withHandlerTo l.goto act
 
 /-! ## Annotations
 
@@ -132,7 +145,7 @@ handler. -/
 def emitFailing {isig : InsnSig Py.env} (name : Name) (r : InsnRef Py.env isig)
     (args : Array ValId) (info : Option α := none)
     (typeArgs : TypeArgsOf r (some Py.Value) := by infer_type_args) : PyM α ValId := do
-  Build.emitApply name Py.Value r args #[← handler] (info := info) (typeArgs := typeArgs)
+  Build.emitApply name Py.Value r args #[← checkedHandler] (info := info) (typeArgs := typeArgs)
 
 /-- An operation that cannot fail and only acts: its result is `()`. -/
 def emitEffect {isig : InsnSig Py.env} (name : Name) (r : InsnRef Py.env isig)
@@ -145,7 +158,7 @@ enclosing handler. -/
 def emitActing {isig : InsnSig Py.env} (name : Name) (r : InsnRef Py.env isig)
     (args : Array ValId) (info : Option α := none)
     (typeArgs : TypeArgsOf r (some Base.Unit) := by infer_type_args) : PyM α ValId := do
-  Build.emitApply name Base.Unit r args #[← handler] (info := info) (typeArgs := typeArgs)
+  Build.emitApply name Base.Unit r args #[← checkedHandler] (info := info) (typeArgs := typeArgs)
 
 /-- An operation producing a base `Bool`, which is what a `branch` takes. -/
 def emitTest {isig : InsnSig Py.env} (name : Name) (r : InsnRef Py.env isig)
@@ -157,14 +170,14 @@ def emitTest {isig : InsnSig Py.env} (name : Name) (r : InsnRef Py.env isig)
 are arbitrary code — so its `err` successor is the enclosing handler. -/
 def truthy (v : ValId) (info : Option α := none) : PyM α ValId := do
   Build.emitApply (env := Py.env) (.str .base "cond") Base.Bool Py.truthy.ref #[v]
-    #[← handler] (info := info)
+    #[← checkedHandler] (info := info)
 
 /-- Whether the exception `exc` matches `except type`: the base `Bool` a `branch` takes.  It
 fails for a `type` that is not an exception class, so its `err` successor is the enclosing
 handler. -/
 def excMatch (exc type : ValId) (info : Option α := none) : PyM α ValId := do
   Build.emitApply (env := Py.env) (.str .base "match") Base.Bool Py.excMatch.ref #[exc, type]
-    #[← handler] (info := info)
+    #[← checkedHandler] (info := info)
 
 /-! ## Literals
 
@@ -206,44 +219,32 @@ def cellStem (x : String) : Name := .str (stem x) "cell"
 `default`. -/
 def defaultStem (x : String) : Name := .str (stem x) "default"
 
-/-- A fresh Python value, named after `name`. -/
-def freshVal (name : Name) : PyM α (ValDecl Py.env) :=
-  Build.freshVal (env := Py.env) (α := α) name Py.Value
+/-- A block not yet emitted, taking values of types `ps`: `base.n`. -/
+def freshLabel (ps : List (TypeExpr Py.env) := []) (base : String := Build.blockBase) :
+    PyM α (BlockRef Py.env ps) :=
+  Emit.freshLabel ps base
 
-/-- A label for a block not yet emitted: `base.n`. -/
-def freshLabel (base : String := Build.blockBase) : PyM α Label :=
-  Build.freshLabel (env := Py.env) (α := α) base
+/-- Open the block `l`, which takes nothing.  Opening a block while another is open is an
+error. -/
+def startBlock (l : BlockRef Py.env []) : PyM α Unit :=
+  discard <| Emit.startBlock l
 
-/-- Open the block called `label`, taking `params`.  Opening a block while another is open
-is an error. -/
-def startBlock (label : Label) (params : Array (ValDecl Py.env) := #[]) : PyM α Unit :=
-  Build.startBlock (α := α) label params
-
-/-- Open a fresh block, labelled `base.n`, and hand back its label. -/
-def startFreshBlock (params : Array (ValDecl Py.env) := #[])
-    (base : String := Build.blockBase) : PyM α Label :=
-  Build.startFreshBlock (α := α) params base
-
-/-- Open the block called `label`, taking one fresh value of type `t` named after `name`, and
-hand back that value: a handler's exception, a join's result. -/
-def startBlockWith (label : Label) (name : Name) (t : TypeExpr Py.env := Py.Value) :
-    PyM α ValId :=
-  Build.startBlockWith (α := α) label name t
+/-- Open the block `l`, which takes one value, named after `name`, and hand back that value: a
+handler's exception, a join's result. -/
+def startBlockWith {t : TypeExpr Py.env} (l : BlockRef Py.env [t]) (name : Name) :
+    PyM α (PyVal t) :=
+  Emit.startBlock₁ l name
 
 /-- Whether a block is open, so that instructions can be emitted. -/
 def isOpen : PyM α Bool := do return (← getThe (Build.State Py.env α)).body.label.isSome
 
-/-- Close the open block with `term`.  With no block open, it is an error. -/
-def finishBlock (term : Terminator Py.env α) (info : Option α := none) : PyM α Unit :=
-  Build.finishBlock term info
-
 /-- Close the open block with `jump k`. -/
-def jump (k : Target.Raw) (info : Option α := none) : PyM α Unit :=
-  Build.jump (env := Py.env) k info
+def jump (k : PyTarget []) (info : Option α := none) : PyM α Unit := do
+  Emit.jump k info
 
 /-- Close the open block with `branch cond t f`. -/
-def branch (cond : ValId) (t f : Target.Raw) (info : Option α := none) : PyM α Unit :=
-  Build.branch (env := Py.env) cond t f info
+def branch (cond : ValId) (t f : PyTarget []) (info : Option α := none) : PyM α Unit := do
+  Emit.branch (Val.ofId Base.Bool cond) t f info
 
 /-- Close the open block with `unreachable`. -/
 def unreachable (info : Option α := none) : PyM α Unit :=
@@ -385,10 +386,10 @@ the item, emitted by `body` with failures going to the region's own handler, whi
 them as `error`.  Falling off the end of `body` returns `ok ()`. -/
 def forEach [Monad m] [MonadPy α m] [MonadBuild Py.env α m] (iterable : ValId)
     (body : ValId → m Unit) (info : Option α := none) : m Unit := do
-  let h ← liftPy (handlerTarget (α := α))
-  discard <| Py.forEach ⟨iterable⟩ (fun item exit => do
+  let h ← liftPy (handler (α := α))
+  discard <| Py.forEach (value iterable) (fun item exit => do
       let propagate ← Emit.freshLabel [Py.Value] "propagate"
-      withHandler propagate.label (body item.id)
+      withHandler propagate (body item.id)
       if ← liftPy (isOpen (α := α)) then
         let% unit ← Base.Unit.unit
         Base.jump (exit.bind (← Base.Except.ok unit))
@@ -405,33 +406,25 @@ How a block that a `finally` protects finished, as a value.  A `finally` body is
 once, takes the pending completion as its parameter, and ends by dispatching on it; `Py`'s
 module docstring shows the shape. -/
 
-/-- A fresh completion-typed value: what a `finally` or dispatch block takes. -/
-def freshComp (name : Name) : PyM α (ValDecl Py.env) :=
-  Build.freshVal (env := Py.env) (α := α) name Py.Completion
+/-- A `normal` completion. -/
+def compNormal (info : Option α := none) : PyM α (PyVal Py.Completion) :=
+  Py.Completion.completionNormal (result := some (.str .base "comp")) (info := info)
 
-/-- Build a completion: apply one constructor of `py.Completion`, which takes no type
-arguments. -/
-def emitComp {isig : InsnSig Py.env} (ctor : InsnRef Py.env isig) (args : Array ValId)
-    (info : Option α := none)
-    (typeArgs : TypeArgsOf ctor (some Py.Completion) := by infer_type_args) :
-    PyM α ValId :=
-  Build.emitApply (.str .base "comp") Py.Completion ctor args (info := info)
-    (typeArgs := typeArgs)
+/-- A `return` completion of `v`. -/
+def compReturn (v : ValId) (info : Option α := none) : PyM α (PyVal Py.Completion) :=
+  Py.Completion.completionReturn (value v) (result := some (.str .base "comp")) (info := info)
 
-def compNormal (info : Option α := none) : PyM α ValId :=
-  emitComp Py.Completion.completionNormal.ref #[] info
+/-- A `raise` completion of `e`. -/
+def compRaise (e : PyVal Py.Value) (info : Option α := none) : PyM α (PyVal Py.Completion) :=
+  Py.Completion.completionRaise e (result := some (.str .base "comp")) (info := info)
 
-def compReturn (v : ValId) (info : Option α := none) : PyM α ValId :=
-  emitComp Py.Completion.completionReturn.ref #[v] info
+/-- A `break` completion. -/
+def compBreak (info : Option α := none) : PyM α (PyVal Py.Completion) :=
+  Py.Completion.completionBreak (result := some (.str .base "comp")) (info := info)
 
-def compRaise (e : ValId) (info : Option α := none) : PyM α ValId :=
-  emitComp Py.Completion.completionRaise.ref #[e] info
-
-def compBreak (info : Option α := none) : PyM α ValId :=
-  emitComp Py.Completion.completionBreak.ref #[] info
-
-def compContinue (info : Option α := none) : PyM α ValId :=
-  emitComp Py.Completion.completionContinue.ref #[] info
+/-- A `continue` completion. -/
+def compContinue (info : Option α := none) : PyM α (PyVal Py.Completion) :=
+  Py.Completion.completionContinue (result := some (.str .base "comp")) (info := info)
 
 /-! ### Dispatching a completion
 
@@ -441,23 +434,22 @@ is in scope exactly where it exists. -/
 /-- Emit the dispatch for the pending completion `c`, ending the open block.
 
 One `py.Completion.case`, one successor per constructor, in `py.Completion`'s declaration
-order.  `onRaise` and `onReturn` each receive their payload as a parameter; `onNormal`,
-`onBreak` and `onContinue` carry nothing and so take none. -/
-def dispatch (c : ValId) (onRaise onReturn onBreak onContinue onNormal : Label)
+order.  `onReturn` and `onRaise` each receive their payload; `onNormal`, `onBreak` and
+`onContinue` carry nothing. -/
+def dispatch (c : PyVal Py.Completion) (onNormal : PyTarget [])
+    (onReturn onRaise : PyTarget [Py.Value]) (onBreak onContinue : PyTarget [])
     (info : Option α := none) : PyM α Unit :=
-  Build.terminate (env := Py.env) Py.Completion.case.ref #[c]
-    #[Build.goto onNormal, Build.goto onReturn, Build.goto onRaise, Build.goto onBreak,
-      Build.goto onContinue] (info := info)
+  Py.Completion.case c onNormal onReturn onRaise onBreak onContinue info
 
 /-! ### Dispatching to blocks
 
 `dispatchArms` is `dispatch` with each successor's block, or its target, given with it. -/
 
-/-- What one successor of a dispatch does.  `β` is its payload: `ValId` for `return` and
-`raise`, `Unit` for the others. -/
-inductive Arm (m : Type → Type) (β : Type) where
-  /-- Go straight to `l`, which takes the payload if there is one. -/
-  | to (l : Label)
+/-- What one successor of a dispatch does.  `ps` is its payload's types, and `β` the payload:
+a Python value for `return` and `raise`, `Unit` for the others. -/
+inductive Arm (m : Type → Type) (ps : List (TypeExpr Py.env)) (β : Type) where
+  /-- Go straight to `k`. -/
+  | to (k : PyTarget ps)
   /-- A fresh block labelled `base.n`, taking the payload.  `emit` emits its body, given the
   payload, and must finish the block: leaving it open is an error. -/
   | block (base : String) (emit : β → m Unit)
@@ -468,42 +460,45 @@ inductive Arm (m : Type → Type) (β : Type) where
 /-- The successors of a dispatch, one per constructor of `py.Completion`.  `break` and
 `continue` default to `unreachable`. -/
 structure Arms (m : Type → Type) where
-  normal : Arm m Unit
-  «return» : Arm m ValId
-  raise : Arm m ValId
-  «break» : Arm m Unit := .unreachable
-  «continue» : Arm m Unit := .unreachable
+  normal : Arm m [] Unit
+  «return» : Arm m [Py.Value] (PyVal Py.Value)
+  raise : Arm m [Py.Value] (PyVal Py.Value)
+  «break» : Arm m [] Unit := .unreachable
+  «continue» : Arm m [] Unit := .unreachable
 
-/-- The label `a` transfers to: its own, or a fresh one for the block it emits. -/
-def Arm.target [Monad m] [MonadPy α m] {β : Type} : Arm m β → m Label
-  | .to l => pure l
-  | .block base _ => liftPy (freshLabel (α := α) base)
-  | .unreachable => liftPy (freshLabel (α := α) "unreachable")
-
-/-- Emit `a`'s block, if it has one.  `start` opens it and hands back the payload. -/
-def Arm.emitAt [Monad m] [MonadPy α m] {β : Type} (a : Arm m β) (start : m β) : m Unit :=
+/-- Where `a` transfers, and what emits its block if it has one, a fresh block that `start`
+opens, handing back the payload. -/
+def Arm.prepare [Monad m] [MonadPy α m] {ps : List (TypeExpr Py.env)} {β : Type}
+    (a : Arm m ps β) (start : BlockRef Py.env ps → m β) : m (PyTarget ps × m Unit) :=
   match a with
-  | .to _ => pure ()
-  | .block _ emit => do emit (← start)
+  | .to k => pure (k, pure ())
+  | .block base emit => do
+    let l ← liftPy (freshLabel (α := α) ps base)
+    return (l.goto, do emit (← start l))
   | .unreachable => do
-    let _ ← start
-    liftPy (PyBuild.unreachable (α := α))
+    let l ← liftPy (freshLabel (α := α) ps "unreachable")
+    return (l.goto, do
+      let _ ← start l
+      liftPy (PyBuild.unreachable (α := α)))
 
 /-- Emit the dispatch for the completion `c`, ending the open block, then the blocks its
 successors emit, in `py.Completion`'s declaration order.  The `return` and `raise` blocks take
 their payload, named `val` and `exc`. -/
-def dispatchArms [Monad m] [MonadPy α m] (c : ValId) (arms : Arms m) : m Unit := do
-  let normal ← arms.normal.target
-  let ret ← arms.return.target
-  let raise ← arms.raise.target
-  let brk ← arms.break.target
-  let cont ← arms.continue.target
-  liftPy (dispatch (α := α) c raise ret brk cont normal)
-  arms.normal.emitAt (liftPy (startBlock (α := α) normal))
-  arms.return.emitAt (liftPy (startBlockWith (α := α) ret (.str .base "val")))
-  arms.raise.emitAt (liftPy (startBlockWith (α := α) raise (.str .base "exc")))
-  arms.break.emitAt (liftPy (startBlock (α := α) brk))
-  arms.continue.emitAt (liftPy (startBlock (α := α) cont))
+def dispatchArms [Monad m] [MonadPy α m] (c : PyVal Py.Completion) (arms : Arms m) :
+    m Unit := do
+  let startWith (name : String) (l : BlockRef Py.env [Py.Value]) : m (PyVal Py.Value) :=
+    liftPy (startBlockWith (α := α) l (.str .base name))
+  let (normal, emitNormal) ← arms.normal.prepare fun l => liftPy (startBlock (α := α) l)
+  let (ret, emitRet) ← arms.return.prepare (startWith "val")
+  let (raise, emitRaise) ← arms.raise.prepare (startWith "exc")
+  let (brk, emitBrk) ← arms.break.prepare fun l => liftPy (startBlock (α := α) l)
+  let (cont, emitCont) ← arms.continue.prepare fun l => liftPy (startBlock (α := α) l)
+  liftPy (dispatch (α := α) c normal ret raise brk cont)
+  emitNormal
+  emitRet
+  emitRaise
+  emitBrk
+  emitCont
 
 /-! ### A protected block, and `try`/`finally` -/
 
@@ -514,15 +509,15 @@ block that takes one.
   exception a `raise` completion.
 * Falling off the end passes a `normal` completion.
 * A `return`, `break` or `continue` is `body`'s own: it jumps to `k` with its completion. -/
-def protect [Monad m] [MonadPy α m] (k : Label) (body : m Unit) (handlerBase : String) :
-    m Unit := do
-  let caught ← liftPy (freshLabel (α := α) handlerBase)
+def protect [Monad m] [MonadPy α m] (k : BlockRef Py.env [Py.Completion]) (body : m Unit)
+    (handlerBase : String) : m Unit := do
+  let caught ← liftPy (freshLabel (α := α) [Py.Value] handlerBase)
   withHandler caught body
   if ← liftPy (isOpen (α := α)) then
-    liftPy (α := α) do jump (Build.goto k #[← compNormal])
+    liftPy (α := α) do jump (k.goto.bind (← compNormal))
   liftPy (α := α) do
     let e ← startBlockWith caught (.str .base "exc")
-    jump (Build.goto k #[← compRaise e])
+    jump (k.goto.bind (← compRaise e))
 
 /-- Emit `try: body finally: final` by completion (§7.2 of `docs/PythonToDyn.md`), ending
 the open block.
@@ -542,15 +537,15 @@ one handled before, which every way out of `final` restores with `popExcept`.
   done.
 
 Returns whether `final` finished normally, so the dispatch was emitted. -/
-def tryFinally [Monad m] [MonadPy α m] (body : Label → m Unit) (final : ValId → m Unit)
-    (arms : m (Arms m)) : m Bool := do
+def tryFinally [Monad m] [MonadPy α m] (body : BlockRef Py.env [Py.Completion] → m Unit)
+    (final : ValId → m Unit) (arms : m (Arms m)) : m Bool := do
   let outer ← liftPy (handler (α := α))
-  let fin ← liftPy (freshLabel (α := α) "fin")
+  let fin ← liftPy (freshLabel (α := α) [Py.Completion] "fin")
   protect fin (body fin) "finRaise"
   let (pending, prev, superseded) ← liftPy (α := α) do
-    let pending ← startBlockWith fin (.str .base "pending") Py.Completion
-    let prev ← emitTotal (.str .base "prev") Py.pushPending.ref #[pending]
-    return (pending, prev, ← freshLabel "superseded")
+    let pending ← startBlockWith fin (.str .base "pending")
+    let prev ← emitTotal (.str .base "prev") Py.pushPending.ref #[pending.id]
+    return (pending, prev, ← freshLabel [Py.Value] "superseded")
   let pop := liftPy (α := α) (discard <| emitEffect (.str .base "pop") Py.popExcept.ref #[prev])
   withHandler superseded (final prev)
   let finished ← liftPy (isOpen (α := α))
@@ -559,32 +554,36 @@ def tryFinally [Monad m] [MonadPy α m] (body : Label → m Unit) (final : ValId
     dispatchArms pending (← arms)
   let e ← liftPy (startBlockWith (α := α) superseded (.str .base "exc"))
   pop
-  liftPy (jump (α := α) { outer with args := outer.args.push e })
+  liftPy (jump (α := α) (outer.bind e))
   return finished
 
 /-! ## Leaving a function
 
 A Python function returns `Except Value Value`, so returning a value is `ok` and
-propagating a failure is `error`, each applied at `Value, Value`.  Both finish the open
+propagating a failure is `error`.  Both leave by the function's exit, finishing the open
 block. -/
+
+section
+-- `let%`.
+open Strata.Dyn.Emit
 
 /-- `return v`. -/
 def emitReturn (v : ValId) (info : Option α := none) : PyM α Unit := do
   let i ← resolveInfo info
-  let r ← Build.emitApply (env := Py.env) (.str .base "ret") Py.failing Base.Except.ok.ref
-    #[v] (info := some i)
-  Build.ret (env := Py.env) r (some i)
+  let% ret : PyVal Py.failing ← Base.Except.ok (value v) (info := some i)
+  Emit.ret (← get).exit ret (some i)
 
 /-- `return None`, which is what falling off the end does. -/
 def emitReturnNone (info : Option α := none) : PyM α Unit := do
   emitReturn (← noneLit info) info
 
 /-- Return the failure `e` to the caller. -/
-def emitPropagate (e : ValId) (info : Option α := none) : PyM α Unit := do
+def emitPropagate (e : PyVal Py.Value) (info : Option α := none) : PyM α Unit := do
   let i ← resolveInfo info
-  let r ← Build.emitApply (env := Py.env) (.str .base "exc") Py.failing Base.Except.error.ref
-    #[e] (info := some i)
-  Build.ret (env := Py.env) r (some i)
+  let% exc : PyVal Py.failing ← Base.Except.error e (info := some i)
+  Emit.ret (← get).exit exc (some i)
+
+end
 
 /-! ## A whole function -/
 
@@ -593,15 +592,13 @@ def emitPropagate (e : ValId) (info : Option α := none) : PyM α Unit := do
 def buildFuncTypedWith (name : Name) (params : Array (Name × TypeExpr Py.env)) (info : α)
     (body : Vector ValId params.size → PyM α β) :
     Except (Build.FailedFunc Py.env α β) ({fn : Func Py.env α // fn.WF} × β) :=
-  Build.run name Py.failing info do
-    let ps ← params.toVector.mapM fun (p, t) => Build.freshVal p t
-    let propagate ← Build.freshLabel "propagate"
-    let _ ← Build.startFreshBlock ps.toArray "entry"
-    let (r, _) ← (body (ps.map (·.id))).run { handler := Build.goto propagate }
+  Emit.func name params.toList Py.failing info fun ps exit => do
+    let propagate ← Emit.freshLabel [Py.Value] "propagate"
+    let frame : Frame := { handler := propagate.goto, exit }
+    let (r, _) ← (body (ps.idsVec.cast (by simp))).run frame
     -- The handler, emitted last: it takes the exception and hands it back.
-    let exc ← Build.freshVal (.str .base "exc") Py.Value
-    Build.startBlock propagate #[exc]
-    let _ ← (emitPropagate exc.id).run { handler := Build.goto propagate }
+    let exc ← Emit.startBlock₁ propagate (stem "exc")
+    let _ ← (emitPropagate exc).run frame
     return r
 
 /-- Emit a Python function whose parameters have the given types, and check it.

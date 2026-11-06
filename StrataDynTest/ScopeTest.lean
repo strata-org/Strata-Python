@@ -36,8 +36,8 @@ out of scope, which fails with an explanation.
 namespace Strata.Dyn.ScopeTest
 
 open Strata.Dyn.DSLTest
-open Strata.Dyn.Build (freshVal freshLabel startBlock startBlockWith startFreshBlock
-  emitApply finishBlock terminate goto build FailedFunc)
+open Strata.Dyn.Build (freshVal emitApply finishBlock terminate build FailedFunc)
+open Strata.Dyn.Build.Raw (freshLabel startBlock startBlockWith startFreshBlock goto)
 
 private abbrev E := Demo.env
 

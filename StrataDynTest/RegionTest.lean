@@ -47,8 +47,8 @@ public environment Reg extends Base where
   insn «try» [a] (&body : Completion a) (&handler (exc : Exc) : Completion a) : Completion a
   end reg
 
-open Strata.Dyn.Build (freshVal freshLabel startBlock startBlockWith startFreshBlock
-  emitConst emitApply finishBlock goto build FailedFunc region)
+open Strata.Dyn.Build (freshVal emitConst emitApply finishBlock build FailedFunc region)
+open Strata.Dyn.Build.Raw (freshLabel startBlock startBlockWith startFreshBlock goto)
 
 private abbrev E := Reg.env
 

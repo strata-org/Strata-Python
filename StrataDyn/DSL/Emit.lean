@@ -56,8 +56,8 @@ def Py.forEach … (iterable : Val env Py.Value)
 
 The emitter applies `Build.emitApplyNamed` or `Build.terminateWith`, with the type arguments
 given, so `Build.run` checks what it emits as it checks any other instruction.  A successor
-that is the exit of a region other than the innermost open one is recorded as a misuse
-(`Build.checkExits`).
+that is an exit not leaving the innermost open body, a region's or the function's, is recorded
+as a misuse (`Build.checkExits`).
 
 `result`, `info`, `env`, `α` and `m` are the emitter's own binders.  A type parameter or operand
 of one of these names takes `_` suffixes until it meets no name of the signature, so `result`
@@ -250,7 +250,7 @@ def emitterCmd (cx : Ctx) (s : OpInfo) : CommandElabM Command := do
       ($kId : $(dyn `Target) env $(handleList cx n (.list (payload.flatMap fun
         | .list es => es
         | t => #[t]))))))
-    succs := succs.push (← `($(dyn `Target.raw) $kId))
+    succs := succs.push (← `($(dyn `Target.rawUnchecked) $kId))
     exits := exits.push (← `($(dyn `Target.exitOf) $kId))
   if s.ret.isSome then
     bs := bs.push (← `(bracketedBinder|
@@ -285,7 +285,7 @@ def emitterCmd (cx : Ctx) (s : OpInfo) : CommandElabM Command := do
         ← `(let _ : _root_.MonadLiftT ($(dyn `BuildM) env α) m := $lift
           $(dyn `Build.terminateWith) (env := env) (m := m) $ref $rest #[$succs,*]
             #[$regions,*] info (typeArgs := $typeArgs)))
-  -- An exit among the successors must be the innermost open region's.
+  -- An exit among the successors must leave the innermost open body.
   let val ← if exits.isEmpty then pure val else
     `(_root_.Bind.bind ($(dyn `MonadBuild.liftBuild)
       ($(dyn `Build.checkExits) (env := env) (α := α) #[$exits,*])) fun _ => $val)

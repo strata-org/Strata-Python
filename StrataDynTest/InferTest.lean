@@ -165,8 +165,8 @@ private def notInferred {isig : InsnSig Ops.env} (_r : InsnRef Ops.env isig)
 With no `ta[…]`, the builder infers what the result type does not fix when it runs.  What it
 cannot infer is a misuse, which names the instruction and says to write the arguments. -/
 
-open Build (freshVal startFreshBlock emitApply terminate finishBlock build goto freshLabel
-  startBlock FailedFunc)
+open Build (freshVal emitApply terminate finishBlock build FailedFunc)
+open Build.Raw (startFreshBlock goto freshLabel startBlock)
 
 /-- What `build` gives: a checked function, or the `FailedFunc`. -/
 private abbrev Built := Except (FailedFunc Ops.env Unit Unit) {fn : Func Ops.env Unit // fn.WF}

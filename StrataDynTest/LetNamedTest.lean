@@ -41,8 +41,9 @@ public environment Ln extends Base where
 /-- The environment the functions below are built in. -/
 abbrev W := Ln.env
 
-/-- What `build` gives. -/
-abbrev Built := Except (Build.FailedFunc W Unit Unit) {fn : Func W Unit // fn.WF}
+/-- What `Emit.func` gives. -/
+abbrev Built :=
+  Except (Build.FailedFunc W Unit Unit) ({fn : Func W Unit // fn.WF} × Unit)
 
 /-- The name `s`. -/
 def n (s : String) : Name := .str .base s
@@ -51,7 +52,7 @@ def n (s : String) : Name := .str .base s
 private def showMod (f : Built) : String :=
   match f with
   | .error e => toString e
-  | .ok f => match Module.ofChecked (.str .base "m") #[f] () with
+  | .ok (f, _) => match Module.ofChecked (.str .base "m") #[f] () with
     | .ok m => toString m
     | .error _ => "the module is not well formed"
 
@@ -78,8 +79,7 @@ private def swapNamed {env : Env Unit} {α : Type} {m : Type → Type} [Monad m]
   return prev
 
 private def f (c : Bool) (k : Nat) : Built :=
-  Build.build (n "f") Base.Int () do
-    let _ ← Build.startFreshBlock (base := "entry")
+  Emit.func (n "f") [] Base.Int () fun _ exit => do
     let zero ← int (n "k") 0
     let% cell ← Base.refNew zero
     -- Nested: the inner value is emitted before the statement runs.
@@ -101,7 +101,7 @@ private def f (c : Bool) (k : Nat) : Built :=
     let% given ← Base.refGet plain (result := n "read")
     -- Returned, not emitted: `given` keeps its name.
     let% same ← pure given
-    ret same
+    ret exit same
 
 /-- info: module m {
   func @f() -> base.Int {
@@ -155,8 +155,7 @@ private def f (c : Bool) (k : Nat) : Built :=
 values its body emits keep their own.  A reassignment is plain Lean: it names nothing. -/
 
 private def g : Built :=
-  Build.build (n "g") Base.Int () do
-    let _ ← Build.startFreshBlock (base := "entry")
+  Emit.func (n "g") [] Base.Int () fun _ exit => do
     let zero ← int (n "k") 0
     let% mut cell : Val W (Base.Ref Base.Int) ← Base.refNew zero
     for _ in [0:2] do
@@ -164,7 +163,7 @@ private def g : Built :=
     let% total ← Ln.block (fun exit => do
       let% inside ← Base.refGet cell
       Base.jump (exit.bind inside))
-    ret total
+    ret exit total
 
 /-- info: module m {
   func @g() -> base.Int {
@@ -196,12 +195,11 @@ private def twoCells {env : Env Unit} {α : Type} {m : Type → Type} [Monad m] 
   return (← Base.refNew v, ← Base.refNew v)
 
 private def p : Built :=
-  Build.build (n "p") Base.Int () do
-    let _ ← Build.startFreshBlock (base := "entry")
+  Emit.func (n "p") [] Base.Int () fun _ exit => do
     let (a, b) ← twoCells (← int (n "k") 0)
     let% x ← Base.refGet a
     let _ ← Base.refGet b
-    ret x
+    ret exit x
 
 /-- info: module m {
   func @p() -> base.Int {
@@ -244,7 +242,7 @@ private def intBlock {env : Env Unit} {α : Type} {m : Type → Type} [Monad m] 
   freshLabel [Base.Int]
 
 private def blocks : Built :=
-  Build.build (n "blocks") Base.Int () do
+  Emit.func (n "blocks") [] Base.Int () fun _ exit => do
     let% ok ← freshLabel [Base.Int]
     let% given ← freshLabel [Base.Int] "explicit"
     let% made ← intBlock
@@ -252,7 +250,6 @@ private def blocks : Built :=
     let plain ← freshLabel [Base.Int]
     let first := ok
     let% ok ← freshLabel [Base.Int]
-    let _ ← Build.startFreshBlock (base := "entry")
     Base.jump (same.goto.bind (← int (n "k") 0))
     let% x ← startBlock₁ first
     Base.jump (given.goto.bind x)
@@ -262,7 +259,7 @@ private def blocks : Built :=
     Base.jump (ok.goto.bind z)
     let% w ← startBlock₁ ok
     Base.jump (plain.goto.bind w)
-    ret (← startBlock₁ plain)
+    ret exit (← startBlock₁ plain)
 
 /-- info: module m {
   func @blocks() -> base.Int {
@@ -288,12 +285,11 @@ is `ok.0` in the message, as in the function. -/
 
 /-- A function whose block `ok` is left open, unless `close`. -/
 private def leftOpen (close : Bool) : Built :=
-  Build.build (n "leftOpen") Base.Int () do
-    let _ ← Build.startFreshBlock (base := "entry")
+  Emit.func (n "leftOpen") [] Base.Int () fun _ exit => do
     let% ok ← freshLabel [Base.Int]
     Base.jump (ok.goto.bind (← int (n "k") 0))
     let x ← startBlock₁ ok
-    if close then ret x
+    if close then ret exit x
 
 /-- info: the function ends with block ok.0 open -/
 #guard_msgs in

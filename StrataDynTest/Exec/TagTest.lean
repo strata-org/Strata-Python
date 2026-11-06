@@ -28,7 +28,8 @@ with the builder's type handles.
 namespace Strata.Dyn.TagTest
 
 open Strata.Dyn.Exec
-open Strata.Dyn.Build (startFreshBlock emitConst emitApply finishBlock build FailedFunc)
+open Strata.Dyn.Build (emitConst emitApply finishBlock build FailedFunc)
+open Strata.Dyn.Build.Raw (startFreshBlock)
 
 /-! ## Shared tags
 

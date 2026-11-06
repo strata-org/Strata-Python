@@ -512,8 +512,8 @@ example : Array (TypeArg W) := #[.ty (Base.Ref Base.Int)]
 
 /-! ## The builder -/
 
-open Strata.Dyn.Build (freshVal freshLabel startBlockWith startFreshBlock emitConst
-  emitApply finishBlock terminate goto build FailedFunc)
+open Strata.Dyn.Build (freshVal emitConst emitApply finishBlock terminate build FailedFunc)
+open Strata.Dyn.Build.Raw (freshLabel startBlockWith startFreshBlock goto)
 
 /-- What `build` gives. -/
 private abbrev Built := Except (FailedFunc W Unit Unit) {fn : Func W Unit // fn.WF}

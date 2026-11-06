@@ -82,7 +82,7 @@ example : TypeExpr Ext3.env := cellOfInt
 `Ext3.env`. -/
 private def body {e : Env Unit} [Py.env ≼ e] : BuildM e Unit Unit := do
   let x ← Build.freshVal (.str .base "x") Base.Int
-  let _ ← Build.startFreshBlock #[x]
+  let _ ← Build.Raw.startFreshBlock #[x]
   let cell ← Build.emitApply (.str .base "cell") (Base.Ref Base.Int) Base.refNew.ref
       #[x.id]
   let got ← Build.emitApply (.str .base "got") Base.Int Base.refGet.ref #[cell]

@@ -268,13 +268,13 @@ def openWithVars (l : Label) (scope : List (String × VTy × ValId))
     ps := ps.push p
     vars := (x, t, p.id) :: vars
   let e ← extra.mapM fun (x, t) => build (Build.freshVal (nm x) t.ty)
-  build (Build.startBlock l (ps ++ e.toArray))
+  build (Build.Raw.startBlock l (ps ++ e.toArray))
   modify fun s => { s with vars }
   return e.map (·.id)
 
 /-- End the open block with a jump to `l`, passing the variables of `scope`. -/
 def jumpWith (l : Label) (scope : List (String × VTy × ValId)) : M Unit := do
-  build (Build.jump (Build.goto l (← values (varNames scope))))
+  build (Build.Raw.jump (Build.Raw.goto l (← values (varNames scope))))
 
 /-- Keep only the variables of `outer`, at their current values. -/
 def restoreScope (outer : List (String × VTy × ValId)) : M Unit :=
@@ -308,17 +308,17 @@ def errSite : M Target.Raw := do
   | .none => throw "the condition of a region while cannot raise"
   | .propagate l | .yield l =>
     modify fun s => { s with used := l :: s.used }
-    return Build.goto l
+    return Build.Raw.goto l
   | .catch l vars =>
     modify fun s => { s with used := l :: s.used }
-    return Build.goto l (← values vars)
+    return Build.Raw.goto l (← values vars)
 
 /-- Leave the function with `v`, as `ok v` if it may raise. -/
 def retValue (v : ValId) : M Unit := do
   let self := (← read).self
   if self.raises then
-    build (Build.ret (← app "ok" self.retTy Base.Except.ok.ref #[v]))
-  else build (Build.ret v)
+    build (Build.Raw.ret (← app "ok" self.retTy Base.Except.ok.ref #[v]))
+  else build (Build.Raw.ret v)
 
 /-- Raise `v`, an `Int`, to the handler in effect, ending the open block. -/
 def raiseValue (v : ValId) : M Unit := do
@@ -326,11 +326,11 @@ def raiseValue (v : ValId) : M Unit := do
   | .none => throw "the condition of a region while cannot raise"
   | .propagate _ =>
     let self := (← read).self
-    build (Build.ret (← app "error" self.retTy Base.Except.error.ref #[v]))
-  | .yield _ => build (Build.ret (← app "flow" flowT While.Flow.raise.ref #[v]))
+    build (Build.Raw.ret (← app "error" self.retTy Base.Except.error.ref #[v]))
+  | .yield _ => build (Build.Raw.ret (← app "flow" flowT While.Flow.raise.ref #[v]))
   | .catch l vars =>
     modify fun s => { s with used := l :: s.used }
-    build (Build.jump (Build.goto l ((← values vars).push v)))
+    build (Build.Raw.jump (Build.Raw.goto l ((← values vars).push v)))
 
 /-- A binary operator. -/
 inductive BinOp where
@@ -407,12 +407,12 @@ def callFun (f : FunSig) (args : Array ValId) : M ValId := do
   let fv ← build (Build.emitFunc (nm f.name) (ty := f.codeType))
   let r ← app "r" f.retTy Base.callCode.ref (#[fv] ++ args)
   if !f.raises then return r
-  let ok ← build (Build.freshLabel "ok")
+  let ok ← build (Build.Raw.freshLabel "ok")
   let site ← errSite
   let n := (← buildErrors).size
-  build (Build.terminate Base.Except.case.ref #[r] #[Build.goto ok, site])
+  build (Build.terminate Base.Except.case.ref #[r] #[Build.Raw.goto ok, site])
   checkBuild n
-  build (Build.startBlockWith ok (nm "x") f.ret.ty)
+  build (Build.Raw.startBlockWith ok (nm "x") f.ret.ty)
 
 mutual
 
@@ -471,27 +471,27 @@ def lowerExpr : Exp SourceRange → M (ValId × VTy)
     let (v, te) ← lowerExpr e
     expect .list te "scrutinee of case"
     let outer := (← get).vars
-    let nilL ← build (Build.freshLabel "nil")
-    let consL ← build (Build.freshLabel "cons")
-    let joinL ← build (Build.freshLabel "join")
+    let nilL ← build (Build.Raw.freshLabel "nil")
+    let consL ← build (Build.Raw.freshLabel "cons")
+    let joinL ← build (Build.Raw.freshLabel "join")
     let n := (← buildErrors).size
-    build (Build.terminate While.IntList.case.ref #[v] #[Build.goto nilL, Build.goto consL])
+    build (Build.terminate While.IntList.case.ref #[v] #[Build.Raw.goto nilL, Build.Raw.goto consL])
     checkBuild n
-    build (Build.startBlock nilL)
+    build (Build.Raw.startBlock nilL)
     let (rn, tn) ← lowerExpr onNil
-    build (Build.jump (Build.goto joinL #[rn]))
+    build (Build.Raw.jump (Build.Raw.goto joinL #[rn]))
     let ph ← build (Build.freshVal (nm h) Base.Int)
     let pt ← build (Build.freshVal (nm t) While.IntList)
-    build (Build.startBlock consL #[ph, pt])
+    build (Build.Raw.startBlock consL #[ph, pt])
     if (← get).vars.any (fun (y, _) => y == h || y == t) || h == t then
       throw s!"case: {h} or {t} is already declared"
     bindVar h .int ph.id
     bindVar t .list pt.id
     let (rc, tc) ← lowerExpr onCons
     expect tn tc "branches of case"
-    build (Build.jump (Build.goto joinL #[rc]))
+    build (Build.Raw.jump (Build.Raw.goto joinL #[rc]))
     modify fun s => { s with vars := outer }
-    return (← build (Build.startBlockWith joinL (nm "r") tn.ty), tn)
+    return (← build (Build.Raw.startBlockWith joinL (nm "r") tn.ty), tn)
   | .call _ ⟨_, f⟩ ⟨_, ⟨args⟩⟩ => do
     let vs ← lowerArgs args
     let some sig := (← read).sigs.find? (·.name == f) | throw s!"unknown function {f}"
@@ -519,13 +519,13 @@ def region (raises : Bool) (body : M (Option ValId)) : M (BM (Dyn.Region E Unit)
   let inner : LState := { s with readOnly := s.vars.map (·.1), inRegion := true,
                                  handler := .none, used := [] }
   return Build.region #[] do
-    let raised ← Build.freshLabel "raised"
+    let raised ← Build.Raw.freshLabel "raised"
     let act : M Unit := do
       if raises then modify fun s => { s with handler := .yield raised }
-      if let some v ← body then build (Build.ret v)
+      if let some v ← body then build (Build.Raw.ret v)
       if (← get).used.contains raised then
-        let e ← build (Build.startBlockWith raised (nm "e") Base.Int)
-        build (Build.ret (← app "flow" flowT While.Flow.raise.ref #[e]))
+        let e ← build (Build.Raw.startBlockWith raised (nm "e") Base.Int)
+        build (Build.Raw.ret (← app "flow" flowT While.Flow.raise.ref #[e]))
     match ← ((act.run ctx).run inner).run with
     | .ok _ => pure ()
     | .error msg =>
@@ -580,15 +580,15 @@ def lowerStmt : Stmt SourceRange → M Bool
     let (vc, tc) ← lowerExpr c
     expect .bool tc "condition of if"
     let outer := (← get).vars
-    let thenL ← build (Build.freshLabel "then")
-    let elseL ← build (Build.freshLabel "else")
-    let joinL ← build (Build.freshLabel "join")
-    build (Build.branch vc (Build.goto thenL) (Build.goto elseL))
-    build (Build.startBlock thenL)
+    let thenL ← build (Build.Raw.freshLabel "then")
+    let elseL ← build (Build.Raw.freshLabel "else")
+    let joinL ← build (Build.Raw.freshLabel "join")
+    build (Build.Raw.branch vc (Build.Raw.goto thenL) (Build.Raw.goto elseL))
+    build (Build.Raw.startBlock thenL)
     let t₁ ← inScope (lowerBody th)
     unless t₁ do jumpWith joinL outer
     modify fun s => { s with vars := outer }
-    build (Build.startBlock elseL)
+    build (Build.Raw.startBlock elseL)
     let t₂ ← inScope (lowerElse el)
     unless t₂ do jumpWith joinL outer
     if t₁ && t₂ then return true
@@ -596,20 +596,20 @@ def lowerStmt : Stmt SourceRange → M Bool
     return false
   | .while _ c body => do
     let outer := (← get).vars
-    let headL ← build (Build.freshLabel "head")
-    let bodyL ← build (Build.freshLabel "body")
-    let exitL ← build (Build.freshLabel "exit")
+    let headL ← build (Build.Raw.freshLabel "head")
+    let bodyL ← build (Build.Raw.freshLabel "body")
+    let exitL ← build (Build.Raw.freshLabel "exit")
     jumpWith headL outer
     let _ ← openWithVars headL outer
     let atHead := (← get).vars
     let (vc, tc) ← lowerExpr c
     expect .bool tc "condition of while"
-    build (Build.branch vc (Build.goto bodyL) (Build.goto exitL))
+    build (Build.Raw.branch vc (Build.Raw.goto bodyL) (Build.Raw.goto exitL))
     let afterCond := (← get).vars
-    build (Build.startBlock bodyL)
+    build (Build.Raw.startBlock bodyL)
     let t ← inScope (lowerBody body)
     unless t do jumpWith headL atHead
-    build (Build.startBlock exitL)
+    build (Build.Raw.startBlock exitL)
     modify fun s => { s with vars := afterCond }
     return false
   | .regionWhile _ c body => do
@@ -642,8 +642,8 @@ def lowerStmt : Stmt SourceRange → M Bool
   | .try _ body ⟨_, x⟩ handler => do
     let outer := (← get).vars
     if outer.any (·.1 == x) then throw s!"{x} is already declared"
-    let handlerL ← build (Build.freshLabel "catch")
-    let joinL ← build (Build.freshLabel "join")
+    let handlerL ← build (Build.Raw.freshLabel "catch")
+    let joinL ← build (Build.Raw.freshLabel "join")
     let saved := (← get).handler
     modify fun s => { s with handler := .catch handlerL (varNames outer) }
     let t₁ ← inScope (lowerBody body)
@@ -694,8 +694,8 @@ def lowerFun (sigs : List FunSig) (self : FunSig) (f : Command SourceRange) :
   let (_, params, _) := f.sig
   let built := Build.run (nm self.name) self.retTy () do
     let ps ← params.toArray.mapM fun (x, t) => Build.freshVal (nm x) t.ty
-    let _ ← Build.startFreshBlock ps "entry"
-    let raiseL ← Build.freshLabel "raise"
+    let _ ← Build.Raw.startFreshBlock ps "entry"
+    let raiseL ← Build.Raw.freshLabel "raise"
     let s : LState := { handler := if self.raises then .propagate raiseL else .none }
     let act : M Unit := do
       for (x, t) in params, p in ps do
@@ -706,7 +706,7 @@ def lowerFun (sigs : List FunSig) (self : FunSig) (f : Command SourceRange) :
         if self.ret == .unit then retValue (← const .unit)
         else build Build.unreachable
       if (← get).used.contains raiseL then
-        let e ← build (Build.startBlockWith raiseL (nm "e") Base.Int)
+        let e ← build (Build.Raw.startBlockWith raiseL (nm "e") Base.Int)
         raiseValue e
     ((act.run { sigs, self }).run s).run
   match built with

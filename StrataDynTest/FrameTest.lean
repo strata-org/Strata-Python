@@ -58,8 +58,9 @@ public environment Demo extends Base where
   pure terminal insn tryNth (cs : Sequence (Ref Int)) (i : Int) (^ok (c : Ref Int)) (^err (e : Int))
   end demo
 
-open Strata.Dyn.Build (freshVal startBlock startFreshBlock freshLabel emitConst emitApply
-  finishBlock terminate goto build FailedFunc region withFailureBlock withPropagatingBlock)
+open Strata.Dyn.Build (freshVal emitConst emitApply finishBlock terminate build FailedFunc region
+  withFailureBlock withPropagatingBlock)
+open Strata.Dyn.Build.Raw (startBlock startFreshBlock freshLabel goto)
 
 private abbrev E := Demo.env
 
@@ -562,7 +563,7 @@ Each rejection breaks one rule, in the builder and in the reader. -/
     let l ← cellLoc c
     let fail ← freshLabel "fail"
     retNthLoc fail cs i
-    let _ ← Build.startBlockWith fail (nm "e") intT
+    let _ ← Build.Raw.startBlockWith fail (nm "e") intT
     finishBlock (.ret () l)]) == ["failures"]
 
 /-- info: t.dyn:6:8: in a frame region of @m.f, the failure successor of %n.0 goes to fail.0, which does not end in unreachable; a failure must be unreachable -/
@@ -582,7 +583,7 @@ Each rejection breaks one rule, in the builder and in the reader. -/
   Build.writes #[.region do
     let fail ← freshLabel "fail"
     retNthLoc fail cs i
-    let _ ← Build.startBlockWith fail (nm "e") intT
+    let _ ← Build.Raw.startBlockWith fail (nm "e") intT
     let _ ← cellLoc c
     finishBlock (.unreachable ())]) == ["failures"]
 
@@ -604,7 +605,7 @@ Each rejection breaks one rule, in the builder and in the reader. -/
     let body := region #[] (base := "body") do
       let recover ← freshLabel "recover"
       okLoc (← emitApply (nm "n") cellT Demo.nth.ref #[cs, i] (succs := #[goto recover]))
-      let _ ← Build.startBlockWith recover (nm "e") intT
+      let _ ← Build.Raw.startBlockWith recover (nm "e") intT
       okLoc c
     finishBlock (.ret () (← emitApply (nm "l") locT Demo.attempt.ref #[] (succs := #[goto fail])
       (regions := #[body]))))]) == ["propagates"]
@@ -637,8 +638,8 @@ Each rejection breaks one rule, in the builder and in the reader. -/
     let ok ← freshLabel "ok"
     let no ← freshLabel "no"
     terminate Demo.tryNth.ref #[cs, i] (succs := #[goto ok, goto no])
-    retLoc (← Build.startBlockWith ok (nm "n") cellT)
-    let _ ← Build.startBlockWith no (nm "e") intT
+    retLoc (← Build.Raw.startBlockWith ok (nm "n") cellT)
+    let _ ← Build.Raw.startBlockWith no (nm "e") intT
     Build.unreachable]) == ["terminators"]
 
 /-- info: t.dyn:5:8: a contract region of @m.f ends loc.0 with demo.tryNth; a contract region may end a block only with ret, jump, branch, unreachable or a case instruction -/

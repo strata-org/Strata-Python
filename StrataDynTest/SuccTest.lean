@@ -31,8 +31,8 @@ namespace Strata.Dyn.SuccTest
 
 open Strata.Dyn.DSLTest
 
-open Strata.Dyn.Build (freshVal freshLabel startBlock startBlockWith startFreshBlock
-  emitConst emitApply finishBlock terminate goto build FailedFunc region)
+open Strata.Dyn.Build (freshVal emitConst emitApply finishBlock terminate build FailedFunc region)
+open Strata.Dyn.Build.Raw (freshLabel startBlock startBlockWith startFreshBlock goto)
 
 private abbrev E := Demo.env
 

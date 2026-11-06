@@ -587,7 +587,7 @@ example : (Demo.Box.case.sig (e := Demo.env)).argTypes.map (·.type) =
 /-- A builder generic over every refinement of `Demo`. -/
 private def body {e : Env _root_.Unit} [Demo.env ≼ e] : BuildM e _root_.Unit _root_.Unit := do
   let x ← Build.freshVal (.str .base "x") Demo.Value
-  let _ ← Build.startFreshBlock #[x]
+  let _ ← Build.Raw.startFreshBlock #[x]
   let t ← Build.emitApply (.str .base "t") Demo.Value Demo.mkTuple.ref #[x.id, x.id, x.id]
   let b ← Build.emitApply (.str .base "b") (Demo.Box Demo.Value) Demo.Box.box.ref
       #[t]
@@ -598,11 +598,11 @@ private def body {e : Env _root_.Unit} [Demo.env ≼ e] : BuildM e _root_.Unit _
     #[cell]
   let v ← Build.emitApply (.str .base "v") (Demo.raising Demo.Value) Demo.unbox.ref
       #[got]
-  let h ← Build.freshLabel "handler"
-  let _ ← Build.emitApply (.str .base "s") Demo.Value Demo.add.ref #[t, x.id] #[Build.goto h]
+  let h ← Build.Raw.freshLabel "handler"
+  let _ ← Build.emitApply (.str .base "s") Demo.Value Demo.add.ref #[t, x.id] #[Build.Raw.goto h]
   Build.finishBlock (.ret () v)
   let exc ← Build.freshVal (.str .base "exc") Demo.Value
-  Build.startBlock h #[exc]
+  Build.Raw.startBlock h #[exc]
   let r ← Build.emitApply (.str .base "r") (Demo.raising Demo.Value) Base.Except.error.ref
     #[exc.id]
   Build.finishBlock (.ret () r)

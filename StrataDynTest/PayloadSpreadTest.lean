@@ -54,8 +54,8 @@ example : Tup.untuple.sig (e := Tup.env) =
 example : (Tup.split.sig (e := Tup.env)).succs =
     #[⟨"k", #[.ty Base.Int, .list (.var 0 (by decide))]⟩] := rfl
 
-open Build (freshVal startFreshBlock emitApply emitConst terminate finishBlock build goto
-  freshLabel startBlock FailedFunc)
+open Build (freshVal emitApply emitConst terminate finishBlock build FailedFunc)
+open Build.Raw (startFreshBlock goto freshLabel startBlock)
 
 private def intT : TypeExpr Tup.env := Base.Int
 private def boolT : TypeExpr Tup.env := Base.Bool

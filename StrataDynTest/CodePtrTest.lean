@@ -31,8 +31,8 @@ code type, and the reader reads `@m.pos` at the type where it is used.
 
 namespace Strata.Dyn.CodePtrTest
 
-open Strata.Dyn.Build (freshVal startFreshBlock emitConst emitFunc emitApply finishBlock build
-  FailedFunc)
+open Strata.Dyn.Build (freshVal emitConst emitFunc emitApply finishBlock build FailedFunc)
+open Strata.Dyn.Build.Raw (startFreshBlock)
 
 /-- What `build` gives: a checked function, or the `FailedFunc`. -/
 private abbrev Built := Except (FailedFunc base Unit Unit) {fn : Func base Unit // fn.WF}

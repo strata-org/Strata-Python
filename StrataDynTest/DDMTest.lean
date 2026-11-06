@@ -34,7 +34,8 @@ builder and the reader; and the applications printed and read back.
 
 namespace Strata.Dyn.DDMTest
 
-open Strata.Dyn.Build (freshVal startFreshBlock emitApply finishBlock build FailedFunc)
+open Strata.Dyn.Build (freshVal emitApply finishBlock build FailedFunc)
+open Strata.Dyn.Build.Raw (startFreshBlock)
 open Strata.Dyn.DSLTest
 
 /-- What `build` gives in `env`: a checked function, or the `FailedFunc`. -/
@@ -312,7 +313,8 @@ at the list `[Int]`, inferred from the result type, and its case instruction at 
 written out; its successor receives the function and the `Int`, and calls the one with the
 other. -/
 
-open Build (freshLabel startBlock terminate goto checkTypeArgs) in
+open Build (terminate checkTypeArgs) in
+open Build.Raw (freshLabel startBlock goto) in
 /-- Build a closure of `g : Fn [Int] Int` and `x`, take it apart, and call its function on its
 environment.  The case instruction's type arguments are `caseArgs`, given as data. -/
 private def closF (caseArgs : Array (TypeArg Clos.env)) : Built Clos.env :=

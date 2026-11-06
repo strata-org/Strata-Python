@@ -153,8 +153,8 @@ terminator, in the clause or in a region nested in it.  (A terminal operation th
 control flow, such as `eff.stop`, breaks another rule, `Region.EndsInControl`, which
 `StrataDynTest/ContractRegionTest.lean` tests.) -/
 
-open Strata.Dyn.Build (freshVal startFreshBlock emitConst emitApply finishBlock terminate build
-  FailedFunc region)
+open Strata.Dyn.Build (freshVal emitConst emitApply finishBlock terminate build FailedFunc region)
+open Strata.Dyn.Build.Raw (startFreshBlock)
 
 /-- What `build` gives: a checked function, or the `FailedFunc`. -/
 private abbrev Built := Except (FailedFunc E Unit Unit) {fn : Func E Unit // fn.WF}

@@ -351,7 +351,8 @@ emission state of the Python builder. `Ctx` is fixed while one function is trans
 
 | State | Field | Exists? | Set by |
 |---|---|---|---|
-| enclosing handler: the block every raising operation names as `err` | `Frame.handler : Target.Raw` | yes | `buildFuncTypedWith` (`propagate.0`), `withHandler` and `withHandlerTo` (`try`, `with`, `for`) |
+| enclosing handler: the block every raising operation names as `err` | `Frame.handler : PyTarget [Py.Value]` | yes | `buildFuncTypedWith` (`propagate.0`), `withHandler` and `withHandlerTo` (`try`, `with`, `for`) |
+| the function's exit, which `return` and a propagated failure leave by | `Frame.exit : PyTarget [Py.failing]` | yes | `buildFuncTypedWith` |
 | locals: name ↦ cell | `Frame.locals` | yes | `declareLocal` |
 | scope: the `PyScope.Table`, the current `ScopeId` and its `Scope` (with the `__qualname__`), giving each name's kind (`local`, `cell`, `free`, `globalExplicit`, `globalImplicit`). Imports are `Table.imports`, a separate list of fully qualified targets | `Ctx.table`, `Ctx.scope`, `Ctx.cur` | yes | `PyScope.analyze` (§5.1), `transFunc` |
 | the Python module name, the Dyn module name, the names some scope binds as globals | `Ctx.module`, `Ctx.moduleName`, `Ctx.globals` | yes | `translate` |
@@ -1113,9 +1114,10 @@ other path goes through `fin`, which calls `__exit__` once. `with a, b: B` is
 
 - The scope and the exits stack live in the translator's state, `TransM` (§4).
 - `PyBuild.buildFuncTypedWith` builds and checks a function and returns its body's result.
-- `Frame.handler` is a `Target.Raw`, so a handler can pre-bind arguments (`withHandlerTo`).
-- `dispatch` and `dispatchArms` take `Label`s. Targets that pre-bind arguments need a
-  `Target.Raw` each.
+- Blocks are `BlockRef`s and transfers `Target`s, so Lean checks what a jump passes against
+  what its block takes. `Frame.handler` is a `Target` that takes the exception, and may
+  pre-bind arguments of its block before it (`withHandlerTo`).
+- `dispatch` and `dispatchArms` take `Target`s, in `py.Completion.case`'s successor order.
 - `tryFinally`, `protect` and `dispatchArms` run their bodies in any `MonadPy` monad, so the
   translator passes `TransM` bodies. `forEach` does the same, for comprehensions.
 - `exitWalk` handles `loop`, `handler` and `cleanup` entries.

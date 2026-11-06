@@ -51,12 +51,12 @@ The operations:
   instruction, `emitApplyWith` with regions built in any monad `BuildM` lifts into, and
   `emitApplyNamed` named after the instruction unless given a name;
 * `checkTypeArgs`: type arguments given as data, checked against an instruction's kinds;
-* `goto`: a transfer to a block;
-* `freshLabel`, `renameLabel`, `startBlock`, `startBlockWith`, `startFreshBlock`: allocate,
-  rename and open blocks;
-* `finishBlock`, `terminate`, `jump`, `branch`, `ret`, `unreachable`: close the open block
-  with a terminator: any terminal operation, a datatype's `case` among them, or the base's
-  control flow;
+* `renameLabel`: a new base for a fresh label;
+* `finishBlock`, `terminate`, `unreachable`: close the open block with a terminator, any
+  terminal operation, a datatype's `case` among them;
+* `Raw.goto`, `Raw.freshLabel`, `Raw.startBlock`, `Raw.startBlockWith`, `Raw.startFreshBlock`,
+  `Raw.jump`, `Raw.branch`, `Raw.ret`: the untyped layer, which makes blocks and targets from
+  bare labels and closes blocks with the base's control flow;
 * `region`, `regionWith`: emit an operation's nested body, `regionWith` from any monad
   `BuildM` lifts into;
 * `requires`, `ensures`, `reads`, `writes`: emit a clause of the function's contract, a frame's
@@ -88,7 +88,8 @@ Types are written as handles (`StrataDyn.Env.Handle`): `Base.Int`, `Py.Value`,
 
 `StrataDyn.Build.Typed` adds a typed emitter per instruction, `o`, whose Lean type is
 the instruction's signature: Lean checks its operands, successors and result type at the call,
-and infers its type arguments.
+and infers its type arguments.  It also gives typed blocks, targets and function exits, which
+a front end uses in place of `Build.Raw`.
 
 The builder records each misuse as an error: an instruction emitted with no block open, a
 block opened while another is open or under a label already used, a block finished when none
@@ -140,7 +141,7 @@ structure Body (env : Env Unit) (α : Type) where
   instrs : Array (Instruction env α) := #[]
   blocks : Array (Block env α) := #[]
 
-/-- A label `freshLabel` allocated. -/
+/-- A label `Raw.freshLabel` allocated. -/
 structure FreshLabel where
   /-- The name it was allocated. -/
   name : Name
@@ -369,23 +370,8 @@ def emitApply {isig : InsnSig env} (name : Name) (type : TypeExpr env)
 
 /-! ## Blocks -/
 
-/-- A target at `label`, binding `args`. -/
-def goto (label : Label) (args : Array ValId := #[]) : Target.Raw := ⟨label, args⟩
-
 /-- The default base of a label: `bb`. -/
 def blockBase : String := "bb"
-
-/-- A label for a block not yet built, which a transfer can name: `base.n`, with `n` the
-next suffix for `base`.  `given` is false for a base the caller did not choose, which
-`renameLabel` may replace. -/
-def freshLabel (base : String := blockBase) (given : Bool := true) : BuildM env α Label := do
-  let s ← get
-  let suffix := s.labelSuffixes.getD base 0
-  let name := .num (.str .base base) suffix
-  set { s with
-    labelSuffixes := s.labelSuffixes.insert base (suffix + 1)
-    freshLabels := s.freshLabels.push { name, base := .str .base base, given } }
-  return ⟨name⟩
 
 /-- Give `l` the base `base`, if it is the `start`th fresh label or a later one and its caller
 did not choose its base.  Its base is then given, so an enclosing `renameLabel` keeps it. -/
@@ -398,6 +384,59 @@ def renameLabel (start : Nat) (base : String) (l : Label) : BuildM env α Unit :
         return { s with
           freshLabels := s.freshLabels.set i { f with base := .str .base base, given := true } }
     return s
+
+/-- Close the open block with `term`.  With no block open, it is an error. -/
+def finishBlock (term : Terminator env α) (info : Option α := none) : BuildM env α Unit := do
+  let info ← resolveInfo info
+  let s ← get
+  match s.body.label with
+  | none => error "a block finished with no block open"
+  | some l =>
+    let b : Block env α :=
+      { label := l, params := s.body.params, instrs := s.body.instrs, term, info }
+    set { s with body := { blocks := s.body.blocks.push b } }
+
+/-- Close the open block by applying the terminal operation `r`.  Its type arguments are
+`emitApply`'s; with no result, they are inferred from the operands' types.  If that fails, the
+block is dropped, and the error is recorded. -/
+def terminate {isig : InsnSig env} (r : InsnRef env isig) (args : Array ValId := #[])
+    (succs : Array Target.Raw := #[]) (regions : Array (BuildM env α (Region env α)) := #[])
+    (info : Option α := none) (typeArgs : TypeArgsOf r none := by infer_type_args) :
+    BuildM env α Unit := do
+  let i ← resolveInfo info
+  let rs ← regions.mapM id
+  match ← resolveTypeArgs r args typeArgs with
+  | some ta => finishBlock (.apply i r ta args succs rs) (some i)
+  | none => modify fun s => { s with body := { s.body with label := none } }
+
+/-- Close the open block with `unreachable`. -/
+def unreachable [base ≼ env] (info : Option α := none) : BuildM env α Unit := do
+  let i ← resolveInfo info
+  finishBlock (.unreachable i) (some i)
+
+/-! ## The untyped layer
+
+`Build.Raw` makes blocks and targets from bare labels, and closes blocks with them: a label is
+any name, and a target any label with any arguments.  Lean checks none of it; `run` does.  The
+typed operations (`StrataDyn.Build.Typed`) are built on it, and give a block its parameters'
+types and a target its payload's. -/
+
+namespace Raw
+
+/-- A target at `label`, binding `args`. -/
+def goto (label : Label) (args : Array ValId := #[]) : Target.Raw := ⟨label, args⟩
+
+/-- A label for a block not yet built, which a transfer can name: `base.n`, with `n` the
+next suffix for `base`.  `given` is false for a base the caller did not choose, which
+`renameLabel` may replace. -/
+def freshLabel (base : String := blockBase) (given : Bool := true) : BuildM env α Label := do
+  let s ← get
+  let suffix := s.labelSuffixes.getD base 0
+  let name := .num (.str .base base) suffix
+  set { s with
+    labelSuffixes := s.labelSuffixes.insert base (suffix + 1)
+    freshLabels := s.freshLabels.push { name, base := .str .base base, given } }
+  return ⟨name⟩
 
 /-- Open the block called `label`, taking `params`.  It is an error to open a block while
 another is open, which loses the other block, or under a label already used in the function or
@@ -430,30 +469,6 @@ def startFreshBlock (params : Array (ValDecl env) := #[]) (base : String := bloc
   startBlock l params
   return l
 
-/-- Close the open block with `term`.  With no block open, it is an error. -/
-def finishBlock (term : Terminator env α) (info : Option α := none) : BuildM env α Unit := do
-  let info ← resolveInfo info
-  let s ← get
-  match s.body.label with
-  | none => error "a block finished with no block open"
-  | some l =>
-    let b : Block env α :=
-      { label := l, params := s.body.params, instrs := s.body.instrs, term, info }
-    set { s with body := { blocks := s.body.blocks.push b } }
-
-/-- Close the open block by applying the terminal operation `r`.  Its type arguments are
-`emitApply`'s; with no result, they are inferred from the operands' types.  If that fails, the
-block is dropped, and the error is recorded. -/
-def terminate {isig : InsnSig env} (r : InsnRef env isig) (args : Array ValId := #[])
-    (succs : Array Target.Raw := #[]) (regions : Array (BuildM env α (Region env α)) := #[])
-    (info : Option α := none) (typeArgs : TypeArgsOf r none := by infer_type_args) :
-    BuildM env α Unit := do
-  let i ← resolveInfo info
-  let rs ← regions.mapM id
-  match ← resolveTypeArgs r args typeArgs with
-  | some ta => finishBlock (.apply i r ta args succs rs) (some i)
-  | none => modify fun s => { s with body := { s.body with label := none } }
-
 /-- Close the open block with `jump k`. -/
 def jump [base ≼ env] (k : Target.Raw) (info : Option α := none) : BuildM env α Unit := do
   let i ← resolveInfo info
@@ -470,10 +485,7 @@ def ret [base ≼ env] (v : ValId) (info : Option α := none) : BuildM env α Un
   let i ← resolveInfo info
   finishBlock (.ret i v) (some i)
 
-/-- Close the open block with `unreachable`. -/
-def unreachable [base ≼ env] (info : Option α := none) : BuildM env α Unit := do
-  let i ← resolveInfo info
-  finishBlock (.unreachable i) (some i)
+end Raw
 
 /-! ## Regions -/
 
@@ -492,7 +504,7 @@ def regionWith {m : Type → Type} {β : Type} [Monad m] [MonadLiftT (BuildM env
     m (Region env α × β) := do
   let saved ← (modifyGet fun s => (s.body, { s with body := {} }) : BuildM env α (Body env α))
   let info := (← (get : BuildM env α (State env α))).info
-  let entry ← (startFreshBlock params base : BuildM env α Label)
+  let entry ← (Raw.startFreshBlock params base : BuildM env α Label)
   (modify fun s => { s with regions := s.regions.push entry } : BuildM env α Unit)
   let r ← body
   (checkClosed s!"region {base}" : BuildM env α Unit)
@@ -592,13 +604,13 @@ ensures` clause gives `true`.  `body` must finish every block it opens. -/
 def withFailureBlock [base ≼ env] {β : Type} (payload : Array (TypeExpr env))
     (value : Option Bool) (body : Label → BuildM env α β) (info : Option α := none) :
     BuildM env α β := do
-  let l ← freshLabel "fail"
+  let l ← Raw.freshLabel "fail"
   let i ← resolveInfo info
   let r ← body l
   if ← targeted l then
-    startBlock l (← payload.mapM (freshVal (.str .base "e")))
+    Raw.startBlock l (← payload.mapM (freshVal (.str .base "e")))
     match value with
-    | some c => ret (← emitConst (.str .base "value") (.bool c) (some i)) (some i)
+    | some c => Raw.ret (← emitConst (.str .base "value") (.bool c) (some i)) (some i)
     | none => unreachable (some i)
   return r
 
@@ -609,12 +621,12 @@ is a `base.Except(e, a)` passes the failure on to the operation that owns it.  `
 every block it opens. -/
 def withPropagatingBlock [base ≼ env] {β : Type} (e a : TypeExpr env)
     (body : Label → BuildM env α β) (info : Option α := none) : BuildM env α β := do
-  let l ← freshLabel "propagate"
+  let l ← Raw.freshLabel "propagate"
   let i ← resolveInfo info
   let r ← body l
   if ← targeted l then
-    let exc ← startBlockWith l (.str .base "exc") e
-    ret (← emitApply (.str .base "err") (Base.Except e a) Base.Except.error.ref #[exc]
+    let exc ← Raw.startBlockWith l (.str .base "exc") e
+    Raw.ret (← emitApply (.str .base "err") (Base.Except e a) Base.Except.error.ref #[exc]
       (info := some i) (typeArgs := ta[e, a])) (some i)
   return r
 
@@ -627,7 +639,7 @@ transfers to it.  `body` finishes every block it opens, each returning a `base.E
 Only an `ensures` clause may apply `base.old`. -/
 def old [base ≼ env] (name : Name) (e a : TypeExpr env) (err : Label)
     (body : Label → BuildM env α Unit) (info : Option α := none) : BuildM env α ValId :=
-  emitApply name a Base.old.ref #[] (succs := #[goto err])
+  emitApply name a Base.old.ref #[] (succs := #[Raw.goto err])
     (regions := #[region #[] (withPropagatingBlock e a body info) "old"]) (info := info)
     (typeArgs := ta[e, a])
 

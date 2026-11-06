@@ -489,6 +489,22 @@ let% x ← Base.refGet cell (result := n "read")  -- %read.0
 let% ok ← Emit.freshLabel [Base.Int]            -- ^ok.0
 ```
 
+Blocks and transfers are typed too. `Emit.freshLabel ps` gives a block whose parameters have
+the types `ps`, and a successor takes a target that still expects its payload. `Emit.func`
+emits a function, giving its body the parameters and the function's exit, as a region's body is
+given its region's. The builder rejects a typed exit used where it does not leave the innermost
+body being emitted. For example, this function returns its argument through a block:
+
+```lean
+Emit.func (n "first") [(n "x", Base.Int)] Base.Int () fun (.cons x .nil) exit => do
+  let% done ← Emit.freshLabel [Base.Int]
+  Base.jump (done.goto.bind x)
+  Emit.ret exit (← Emit.startBlock₁ done)
+```
+
+The untyped layer below, `Build.Raw`, takes bare labels, for a front end whose types are known
+only when it runs.
+
 Dyn is implemented in the directory `StrataDyn`. Declarations are defined in
 the namespace `Strata.Dyn`.
 

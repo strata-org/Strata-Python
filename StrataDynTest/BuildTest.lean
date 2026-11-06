@@ -28,8 +28,9 @@ forward branch names a label long before its block is finished.
 
 namespace Strata.Dyn.BuildTest
 
-open Strata.Dyn.Build (freshVal freshLabel startBlock startBlockWith startFreshBlock
-  emitConst emitApply finishBlock terminate goto build FailedFunc region withInfo)
+open Strata.Dyn.Build (freshVal emitConst emitApply finishBlock terminate build FailedFunc region
+  withInfo)
+open Strata.Dyn.Build.Raw (freshLabel startBlock startBlockWith startFreshBlock goto)
 
 
 /-- What `build` gives: a checked function, or the `FailedFunc`. -/

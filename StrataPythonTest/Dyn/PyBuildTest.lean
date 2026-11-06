@@ -122,10 +122,12 @@ successor. -/
 /-- `h`, whose `except` block declares the exception if `takesExc`. -/
 private def hWith (takesExc : Bool) : Built :=
   buildFunc (Py.pn "h") #["x"] () fun args => do
-    let except ← freshLabel
+    let except ← freshLabel [Py.Value]
     withHandler except do emitReturn (← getAttr args[0] "foo")
-    -- `except:` — the exception is bound and ignored.
-    if takesExc then discard <| startBlockWith except (.str .base "exc") else startBlock except
+    -- `except:` — the exception is bound and ignored.  Opening the block without it takes the
+    -- untyped layer, `Build.Raw`.
+    if takesExc then discard <| startBlockWith except (.str .base "exc")
+    else Build.Raw.startBlock (env := Py.env) (α := Unit) except.label
     emitReturnNone
 
 private def h : Built := hWith true
@@ -151,12 +153,10 @@ successor does.  Here the handler `bb.0(c, exc)` pre-binds `c` to `None`. -/
 
 private def r : Built :=
   buildFunc (Py.pn "r") #["x"] () fun args => do
-    let k ← freshLabel
+    let k ← freshLabel [Py.Value, Py.Value]
     let c ← noneLit
-    withHandlerTo (Build.goto k #[c]) do jump (← raiseTo args[0])
-    let pc ← freshVal (.str .base "c")
-    let pe ← freshVal (.str .base "exc")
-    startBlock k #[pc, pe]
+    withHandlerTo (k.goto.bind (value c)) do jump (← raiseTo args[0])
+    let .cons _ (.cons pe .nil) ← Emit.startBlock k (.str .base "exc")
     emitReturn pe.id
 
 #guard r.isOk
@@ -192,10 +192,10 @@ private def k : Built :=
   buildFunc (Py.pn "k") #["x"] () fun args => do
     let x := args[0]
     discard <| tryFinally
-      (fun fin => do jump (Build.goto fin #[← compReturn (← getAttr x "foo")]))
+      (fun fin => do jump (fin.goto.bind (← compReturn (← getAttr x "foo"))))
       (fun _ => discard <| getAttr x "cleanup")
       (pure { normal := .block "normal" fun _ => emitReturnNone
-              «return» := .block "ret" emitReturn
+              «return» := .block "ret" fun v => emitReturn v.id
               raise := .block "raise" emitPropagate })
 
 #guard k.isOk
@@ -231,16 +231,15 @@ private def kReturns : Built :=
 private def kBound : Built :=
   buildFunc (Py.pn "k") #["x"] () fun args => do
     let x := args[0]
-    let h ← freshLabel
+    let h ← freshLabel [Py.Value, Py.Value]
     let c ← noneLit
-    withHandlerTo (Build.goto h #[c]) do
+    let hc := h.goto.bind (value c)
+    withHandlerTo hc do
       discard <| tryFinally (fun _ => pure ()) (fun _ => discard <| getAttr x "cleanup")
         (pure { normal := .block "normal" fun _ => emitReturnNone
                 «return» := .unreachable
-                raise := .block "raise" fun e => jump (Build.goto h #[c, e]) })
-    let pc ← freshVal (.str .base "c")
-    let pe ← freshVal (.str .base "exc")
-    startBlock h #[pc, pe]
+                raise := .block "raise" fun e => jump (hc.bind e) })
+    let .cons _ (.cons pe .nil) ← Emit.startBlock h (.str .base "exc")
     emitReturn pe.id
 
 /-- Whether `superseded.0` jumps to `bb.0` with two arguments, the second its parameter. -/
@@ -559,24 +558,24 @@ is defined, and the second would not see `%ns.0`. -/
 private def leave : Except (FailedFunc Py.env Unit Unit) {fn : Func Py.env Unit // fn.WF} :=
   buildFuncTyped (Py.pn "leave") #[(stem "f", Py.Value)] () fun ps => do
     let f := ps[0]
-    let catchL ← freshLabel "catch"
-    let clearL ← freshLabel "clear"
-    let unwindL ← freshLabel "unwind"
-    let join ← freshLabel "join"
+    let catchL ← freshLabel [Py.Value] "catch"
+    let clearL ← freshLabel [Py.Value] "clear"
+    let unwindL ← freshLabel [Py.Value] "unwind"
+    let join ← freshLabel [] "join"
     let outer ← handler
     withHandler catchL do
       let _ ← emitFailing (.str .base "call") Py.getItem.ref #[f, f]
-    jump (Build.goto join)
+    jump join.goto
     let exc ← startBlockWith catchL (.str .base "exc")
-    let prev ← emitTotal (.str .base "prev") Py.mkTuple.ref #[exc]
+    let prev ← emitTotal (.str .base "prev") Py.mkTuple.ref #[exc.id]
     withHandler unwindL do
-      let _ ← emitFailing (.str .base "match") Py.getItem.ref #[exc, exc]
-    jump (Build.goto join)
+      let _ ← emitFailing (.str .base "match") Py.getItem.ref #[exc.id, exc.id]
+    jump join.goto
     let x ← startBlockWith clearL (.str .base "exc")
-    jump { Build.goto unwindL with args := #[x] }
+    jump (unwindL.goto.bind x)
     let y ← startBlockWith unwindL (.str .base "exc")
     let _ ← emitTotal (.str .base "pop") Py.mkTuple.ref #[prev]
-    jump { outer with args := outer.args.push y }
+    jump (outer.bind y)
     startBlock join
     emitReturnNone
 
@@ -611,12 +610,12 @@ private def classBody : Except (FailedFunc Py.env Unit Unit) {fn : Func Py.env U
   buildFuncTyped (Py.pn "C_body") #[(stem "args", Py.Value)] () fun ps => do
     let args := ps[0]
     let ns ← emitFailing (.str .base "ns") Py.getItem.ref #[args, ← intLit 0]
-    let catchL ← freshLabel "catch"
-    let join ← freshLabel "join"
-    jump (Build.goto join)
+    let catchL ← freshLabel [Py.Value] "catch"
+    let join ← freshLabel [] "join"
+    jump join.goto
     let exc ← startBlockWith catchL (.str .base "exc")
-    let _ ← emitFailing (.str .base "Exception") Py.getItem.ref #[ns, exc]
-    jump (Build.goto join)
+    let _ ← emitFailing (.str .base "Exception") Py.getItem.ref #[ns, exc.id]
+    jump join.goto
     startBlock join
     emitReturnNone
 
@@ -639,5 +638,48 @@ private def classBody : Except (FailedFunc Py.env Unit Unit) {fn : Func Py.env U
 #eval match classBody with
   | .ok f => IO.println (f.1.format {})
   | .error e => IO.println (toString e)
+
+/-! ## The function's exit inside a region
+
+`return` and a propagated failure leave by the function's exit.  Inside a region's body, such as
+a `py.forEach` body, that exit would leave the region instead, so `buildFunc` rejects them
+there. -/
+
+/-- Whether `buildFunc` accepts `body`, as the body of a function of `x`. -/
+private def builds (body : Vector ValId 1 → PyM Unit Unit) : Bool :=
+  (buildFunc (Py.pn "f") #["x"] () body).isOk
+
+/-- A loop whose body returns, or, for `wrong = false`, a return after the loop only. -/
+private def returnInRegion (wrong : Bool) (args : Vector ValId 1) : PyM Unit Unit := do
+  forEach args[0] fun _ => if wrong then emitReturnNone else pure ()
+  emitReturnNone
+
+#guard builds (returnInRegion false)
+/-- info: #["the function's exit is used inside region each.0, which it does not leave"] -/
+#guard_msgs in
+#eval errors (returnInRegion true)
+
+/-- A loop whose body propagates its item as a failure, or, for `wrong = false`, a propagation
+of the function's argument after the loop. -/
+private def propagateInRegion (wrong : Bool) (args : Vector ValId 1) : PyM Unit Unit := do
+  forEach args[0] fun x => if wrong then emitPropagate (value x) else pure ()
+  emitPropagate (value args[0])
+
+#guard builds (propagateInRegion false)
+/-- info: #["the function's exit is used inside region each.0, which it does not leave"] -/
+#guard_msgs in
+#eval errors (propagateInRegion true)
+
+/-- A raising operation in a loop body whose handler is the function's exit.  `Build.withExit`
+gives that exit the type of a handler, so no function built this way is well formed; the test pins
+only the misuse that the handler's check records. -/
+private def handlerInRegion (args : Vector ValId 1) : PyM Unit Unit := do
+  Build.withExit (env := Py.env) (α := Unit) (m := PyM Unit) Py.Value fun k =>
+    forEach args[0] fun x => withHandlerTo k (discard <| getAttr x "foo")
+  emitReturnNone
+
+/-- info: #["the function's exit is used inside region each.0, which it does not leave"] -/
+#guard_msgs in
+#eval errors handlerInRegion
 
 end StrataPython.Dyn.PyBuildTest

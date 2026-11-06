@@ -55,8 +55,9 @@ each test program as supported or not.
 1. Replace its rejection in `transStmt` or `transExpr` with a case that lowers it.
 2. Read and write names with `readName` and `writeName`.
 3. Emit operations with the `PyBuild` emitters, through `build`.  Open blocks with
-   `freshLabel` and `startBlock`, and end them with `jump` or `branch`.  Start a join block
-   only if `targeted` holds for its label.
+   `freshLabel`, with the types they take, and `startBlock`, and end them with `jump` or
+   `branch` to a target made from a block.  Start a join block only if `targeted` holds for
+   it.
 4. Run a body that `break`, `continue` or `return` leaves under `withExit`.
 5. Add a program to `StrataPythonTest/Dyn/dyn_tests/`, list it in
    `StrataPythonTest/Dyn/dyn_tests.txt`, and write its golden `NAME.expected.dyn`
@@ -117,15 +118,15 @@ end -- public section
 /-- A construct that `break`, `continue` and `return` leave through, innermost last. -/
 inductive Exit where
   /-- A loop: `break` jumps to `brk`, `continue` to `cont`. -/
-  | loop (brk cont : Label)
+  | loop (brk cont : BlockRef Py.env [])
   /-- The body of an `except` clause or a `finally`, left through `leaveHandler`: `prev` is
   the exception handled before, `name` the name the clause binds and where, and `outer` the
   handler around the `try`. -/
-  | handler (prev : ValId) (name : Option (String × SourceRange)) (outer : Target.Raw)
+  | handler (prev : ValId) (name : Option (String × SourceRange)) (outer : PyTarget [Py.Value])
   /-- A `try` with a `finally`, or a `with`: a `return`, `break` or `continue` jumps to `fin`
   with its completion, and the dispatch after the `finally` body or `__exit__` carries it
   on. -/
-  | cleanup (fin : Label)
+  | cleanup (fin : BlockRef Py.env [Py.Completion])
 
 /-- The parts of a class statement that a class body's declared shape needs besides the body:
 the private name where the class statement runs, and its bases, keywords and decorators. -/
@@ -235,21 +236,22 @@ def unsupportedValue (what : String) (range : SourceRange) : TransM ValId := do
 def isOpen : TransM Bool := build PyBuild.isOpen
 
 /-- Whether some transfer names `l`. -/
-def targeted (l : Label) : TransM Bool := return (← get).targeted.contains l
+def targeted {ps : List (TypeExpr Py.env)} (l : BlockRef Py.env ps) : TransM Bool :=
+  return (← get).targeted.contains l.label
 
-def recordTarget (l : Label) : TransM Unit :=
-  modify fun s => { s with targeted := s.targeted.insert l }
+def recordTarget {ps : List (TypeExpr Py.env)} (k : PyTarget ps) : TransM Unit :=
+  modify fun s => { s with targeted := s.targeted.insert k.rawUnchecked.label }
 
-/-- End the open block with `jump l(args)`. -/
-def jump (l : Label) (args : Array ValId := #[]) : TransM Unit := do
-  recordTarget l
-  build (PyBuild.jump (Build.goto l args))
+/-- End the open block with `jump k`. -/
+def jump (k : PyTarget []) : TransM Unit := do
+  recordTarget k
+  build (PyBuild.jump k)
 
-/-- End the open block with `branch c t(targs) f(fargs)`. -/
-def branch (c : ValId) (t f : Label) (targs fargs : Array ValId := #[]) : TransM Unit := do
+/-- End the open block with `branch c t f`. -/
+def branch (c : ValId) (t f : PyTarget []) : TransM Unit := do
   recordTarget t
   recordTarget f
-  build (PyBuild.branch c (Build.goto t targs) (Build.goto f fargs))
+  build (PyBuild.branch c t f)
 
 /-! ## Names
 
@@ -399,12 +401,13 @@ def readNs (ns : ValId) (name : String) (fallback : TransM ValId) : TransM ValId
   let n ← build (emitConst (.str .base "n") (.str name))
   let miss ← build (emitTotal (stem name) Py.undef.ref #[n])
   let v ← build (emitFailing (stem name) Py.getOptionalItem.ref #[ns, key, miss])
-  let join ← build (freshLabel "join")
-  let absent ← build (freshLabel "absent")
-  branch (← build (emitTest (.str .base "found") Py.isDefined.ref #[v])) join absent #[v]
+  let join ← build (freshLabel [Py.Value] "join")
+  let absent ← build (freshLabel [] "absent")
+  branch (← build (emitTest (.str .base "found") Py.isDefined.ref #[v])) (join.goto.bind (value v))
+    absent.goto
   build (startBlock absent)
-  jump join #[← fallback]
-  build (startBlockWith join (stem name))
+  jump (join.goto.bind (value (← fallback)))
+  Val.id <$> build (startBlockWith join (stem name))
 
 /-- Read the name `name` at `range`. -/
 def readName (name : String) (range : SourceRange) : TransM ValId := do
@@ -459,10 +462,10 @@ def deleteName (name : String) (range : SourceRange) : TransM Unit := do
   | .nsName ns =>
     -- As CPython's `DELETE_NAME`, any failure of `del ns[name]` raises `NameError`.
     let key ← build (strLit name)
-    let failed ← build (freshLabel "undefined")
-    let done ← build (freshLabel "deleted")
+    let failed ← build (freshLabel [Py.Value] "undefined")
+    let done ← build (freshLabel [] "deleted")
     discard <| build (withHandler failed (emitActing (.str .base "del") Py.delItem.ref #[ns, key]))
-    jump done
+    jump done.goto
     discard <| build (startBlockWith failed (.str .base "exc"))
     discard <| requireDefined (← undef) name "NameError" s!"name '{name}' is not defined"
     build unreachable
@@ -482,9 +485,9 @@ def setupAnnotations : TransM Unit := do
     | none => do
       let cell ← build (globalCell (← read).module "__annotations__")
       build (readCell cell (stem "__annotations__"))
-  let found ← build (freshLabel "annotated")
-  let make ← build (freshLabel "annotations")
-  branch (← build (emitTest (.str .base "found") Py.isDefined.ref #[v])) found make
+  let found ← build (freshLabel [] "annotated")
+  let make ← build (freshLabel [] "annotations")
+  branch (← build (emitTest (.str .base "found") Py.isDefined.ref #[v])) found.goto make.goto
   build (startBlock make)
   let d ← build (emitFailing (.str .base "dict") Py.mkDict.ref #[])
   match ns? with
@@ -492,7 +495,7 @@ def setupAnnotations : TransM Unit := do
     let key ← build (strLit "__annotations__")
     discard <| build (emitActing (.str .base "store") Py.setItem.ref #[ns, key, d])
   | none => discard <| build (writeGlobal (← read).module "__annotations__" d)
-  jump found
+  jump found.goto
   build (startBlock found)
 
 /-- `LOAD_NAME __annotations__`: the class namespace's, else the module's.  Like CPython, it
@@ -1042,16 +1045,17 @@ def compare (l : expr SourceRange) (ops : Array (cmpop SourceRange))
     have hget := Array.sizeOf_getElem (ops.zip rs) 0 (by omega)
     have hsnd := sizeOf_snd_lt (ops.zip rs)[0]
     return ← cmpOp (ops.zip rs)[0].1 a (← transExpr (ops.zip rs)[0].2)
-  let join ← build (freshLabel "join")
-  jump join #[← chainLinks a (ops.zip rs) join (#[·])]
-  build (startBlockWith join (.str .base "cmp"))
+  let join ← build (freshLabel [Py.Value] "join")
+  let to (v : ValId) := join.goto.bind (value v)
+  jump (to (← chainLinks a (ops.zip rs) to))
+  Val.id <$> build (startBlockWith join (.str .base "cmp"))
 termination_by sizeOf l + sizeOf ops + sizeOf rs + 1
 
 /-- The links `op₀ r₀ op₁ r₁ …` of a comparison chain whose left operand `a` is evaluated,
 in CPython's order: each operand is evaluated once.  Every link but the last is tested, and
-a false one jumps to `exit` with `args` of its result.  Returns the last link's result. -/
+a false one jumps to `exit` of its result.  Returns the last link's result. -/
 def chainLinks (a : ValId) (links : Array (cmpop SourceRange × expr SourceRange))
-    (exit : Label) (args : ValId → Array ValId) : TransM ValId := do
+    (exit : ValId → PyTarget []) : TransM ValId := do
   let mut lhs := a
   let mut last := a
   for h : i in [:links.size] do
@@ -1061,8 +1065,8 @@ def chainLinks (a : ValId) (links : Array (cmpop SourceRange × expr SourceRange
     last ← cmpOp links[i].1 lhs b
     if i + 1 < links.size then
       let t ← build (truthy last)
-      let next ← build (freshLabel "cmp")
-      branch t next exit #[] (args last)
+      let next ← build (freshLabel [] "cmp")
+      branch t next.goto (exit last)
       build (startBlock next)
     lhs := b
   return last
@@ -1108,58 +1112,59 @@ termination_by b => sizeOf b
 /-- `a and b …` (`isAnd`) or `a or b …`, as a value: each operand but the last is tested, and
 the first that decides the result is the result. -/
 def boolOp (isAnd : Bool) (vs : Array (expr SourceRange)) : TransM ValId := do
-  let join ← build (freshLabel "join")
+  let join ← build (freshLabel [Py.Value] "join")
   for h : i in [:vs.size] do
     let v ← transExpr vs[i]
+    let decided := join.goto.bind (value v)
     if i + 1 < vs.size then
       let t ← build (truthy v)
-      let next ← build (freshLabel (if isAnd then "and" else "or"))
-      if isAnd then branch t next join #[] #[v] else branch t join next #[v]
+      let next ← build (freshLabel [] (if isAnd then "and" else "or"))
+      if isAnd then branch t next.goto decided else branch t decided next.goto
       build (startBlock next)
     else
-      jump join #[v]
-  build (startBlockWith join (.str .base "bool"))
+      jump decided
+  Val.id <$> build (startBlockWith join (.str .base "bool"))
 termination_by sizeOf vs
 
 /-- `a if c else b`, as a value.  `c` is a condition. -/
 def ifExp (c a b : expr SourceRange) : TransM ValId := do
-  let thenL ← build (freshLabel "then")
-  let elseL ← build (freshLabel "else")
-  let join ← build (freshLabel "join")
-  transCond c thenL elseL
+  let thenL ← build (freshLabel [] "then")
+  let elseL ← build (freshLabel [] "else")
+  let join ← build (freshLabel [Py.Value] "join")
+  transCond c thenL.goto elseL.goto
   build (startBlock thenL)
-  jump join #[← transExpr a]
+  jump (join.goto.bind (value (← transExpr a)))
   build (startBlock elseL)
-  jump join #[← transExpr b]
-  build (startBlockWith join (.str .base "ifexp"))
+  jump (join.goto.bind (value (← transExpr b)))
+  Val.id <$> build (startBlockWith join (.str .base "ifexp"))
 termination_by sizeOf c + sizeOf a + sizeOf b + 2
 
 /-- Lower `e` as a condition: end the open block with a jump to `t` if `e` is true and to `f`
 otherwise, as CPython's `compiler_jump_if` does.  `not`, `and`, `or`, `x if c else y` and a
 chained comparison become branches, so each operand's truth is tested at most once. -/
-def transCond (e : expr SourceRange) (t f : Label) : TransM Unit := withRange e.ann do
+def transCond (e : expr SourceRange) (t f : PyTarget []) : TransM Unit := withRange e.ann do
   match e with
   | .UnaryOp _ (.Not _) x => transCond x f t
   | .BoolOp _ op ⟨_, vs⟩ =>
     let isAnd := op matches .And _
     for h : i in [:vs.size] do
       if i + 1 < vs.size then
-        let next ← build (freshLabel (if isAnd then "and" else "or"))
-        if isAnd then transCond vs[i] next f else transCond vs[i] t next
+        let next ← build (freshLabel [] (if isAnd then "and" else "or"))
+        if isAnd then transCond vs[i] next.goto f else transCond vs[i] t next.goto
         build (startBlock next)
       else
         transCond vs[i] t f
   | .IfExp _ c a b =>
-    let thenL ← build (freshLabel "then")
-    let elseL ← build (freshLabel "else")
-    transCond c thenL elseL
+    let thenL ← build (freshLabel [] "then")
+    let elseL ← build (freshLabel [] "else")
+    transCond c thenL.goto elseL.goto
     build (startBlock thenL)
     transCond a t f
     build (startBlock elseL)
     transCond b t f
   | .Compare _ l ops rs =>
     have hzip := sizeOf_zip_le ops.val rs.val
-    let last ← chainLinks (← transExpr l) (ops.val.zip rs.val) f fun _ => #[]
+    let last ← chainLinks (← transExpr l) (ops.val.zip rs.val) fun _ => f
     branch (← build (truthy last)) t f
   | other => branch (← build (truthy (← transExpr other))) t f
 termination_by sizeOf e + 1
@@ -1389,10 +1394,10 @@ where
       | .error t => do badTarget t; pure fun _ => pure ()
     forEach it fun item => do
       assign item
-      let skip ← build (freshLabel "skip")
+      let skip ← build (freshLabel [] "skip")
       for c in ifs.val do
-        let next ← build (freshLabel "if")
-        transCond c next skip
+        let next ← build (freshLabel [] "if")
+        transCond c next.goto skip.goto
         build (startBlock next)
       match later with
       | c@(.mk_comprehension _ _ iter _ _) :: rest => clause acc (← transExpr iter) (c :: rest)
@@ -1408,7 +1413,7 @@ where
           let x ← transExpr elt
           discard <| build (emitEffect (.str .base "append") Py.listAppend.ref #[acc, x])
       if ← targeted skip then
-        jump skip
+        jump skip.goto
         build (startBlock skip)
   termination_by sizeOf gs + sizeOf elt + sizeOf value
 
@@ -1657,7 +1662,8 @@ def popExcept (prev : ValId) : TransM Unit :=
 /-- Leave an `except` clause or a `finally` body other than by a failure, as CPython does:
 under `outer`, the handler around the `try`, make `prev` the exception being handled again,
 then unbind `name` if the clause binds one. -/
-def leaveHandler (prev : ValId) (name : Option (String × SourceRange)) (outer : Target.Raw) :
+def leaveHandler (prev : ValId) (name : Option (String × SourceRange))
+    (outer : PyTarget [Py.Value]) :
     TransM Unit :=
   withHandlerTo outer do
     popExcept prev
@@ -1673,36 +1679,36 @@ def exitWalk (brk : Bool) (ret : Option ValId) (range : SourceRange) : TransM Un
     return ← internalError (if brk then "'break' outside loop" else "'continue' outside loop") range
   for e in exits.reverse do
     match e, ret with
-    | .loop b c, none => return ← jump (if brk then b else c)
+    | .loop b c, none => return ← jump (if brk then b else c).goto
     | .loop .., some _ => pure ()
     | .handler prev name outer, _ => leaveHandler prev name outer
     | .cleanup fin, _ =>
       let c ← build <| match ret with
         | some v => compReturn v
         | none => if brk then compBreak else compContinue
-      return ← jump fin #[c]
+      return ← jump (fin.goto.bind c)
   if let some v := ret then build (emitReturn v)
 
 /-- The arms of the dispatch after a `finally` body or a `with`'s `__exit__`, which do from
 outside the statement at `sr` what the completion would have done: `join` is the code after
 it, and `outer` the handler around it. -/
-def exitArms (join : Label) (outer : Target.Raw) (sr : SourceRange) : TransM (Arms TransM) := do
+def exitArms (join : BlockRef Py.env []) (outer : PyTarget [Py.Value]) (sr : SourceRange) :
+    TransM (Arms TransM) := do
   let exits := (← get).exits
   -- `break` or `continue` jumps straight to the loop when it is the innermost entry.
-  let loopArm (brk : Bool) : TransM (Arm TransM Unit) := do
+  let loopArm (brk : Bool) : TransM (Arm TransM [] Unit) := do
     if !exits.any (· matches .loop ..) then return .unreachable
     match exits.back? with
     | some (.loop b c) =>
-      let l := if brk then b else c
-      recordTarget l
-      return .to l
+      let k := (if brk then b else c).goto
+      recordTarget k
+      return .to k
     | _ => return .block (if brk then "brk" else "cont") fun _ => exitWalk brk none sr
   return {
-    normal := .to join
+    normal := .to join.goto
     «return» := if (← curScope).kind matches .module | .classBody then .unreachable
-      else .block "ret" fun v => exitWalk false (some v) sr
-    raise := if outer.args.isEmpty then .to outer.label
-      else .block "reraise" fun e => build (PyBuild.jump { outer with args := outer.args.push e })
+      else .block "ret" fun v => exitWalk false (some v.id) sr
+    raise := .to outer
     «break» := ← loopArm true
     «continue» := ← loopArm false }
 
@@ -1797,36 +1803,36 @@ termination_by sizeOf s
 /-- `if test: body else: orelse` (§6.2).  `elif` is an `if` in `orelse`. -/
 def ifStmt (test : expr SourceRange) (body orelse : Array (stmt SourceRange)) :
     TransM Unit := do
-  let thenL ← build (freshLabel "then")
-  let elseL ← build (freshLabel "else")
-  let join ← build (freshLabel "join")
-  transCond test thenL elseL
+  let thenL ← build (freshLabel [] "then")
+  let elseL ← build (freshLabel [] "else")
+  let join ← build (freshLabel [] "join")
+  transCond test thenL.goto elseL.goto
   build (startBlock thenL)
   transStmts body
-  if ← isOpen then jump join
+  if ← isOpen then jump join.goto
   build (startBlock elseL)
   transStmts orelse
-  if ← isOpen then jump join
+  if ← isOpen then jump join.goto
   if ← targeted join then build (startBlock join)
 termination_by sizeOf test + sizeOf body + sizeOf orelse + 1
 
 /-- `while test: body else: orelse` (§6.4). -/
 def whileStmt (test : expr SourceRange) (body orelse : Array (stmt SourceRange)) :
     TransM Unit := do
-  let head ← build (freshLabel "head")
-  let bodyL ← build (freshLabel "body")
-  let elseL? ← if orelse.isEmpty then pure none else some <$> build (freshLabel "else")
-  let exit ← build (freshLabel "exit")
-  jump head
+  let head ← build (freshLabel [] "head")
+  let bodyL ← build (freshLabel [] "body")
+  let elseL? ← if orelse.isEmpty then pure none else some <$> build (freshLabel [] "else")
+  let exit ← build (freshLabel [] "exit")
+  jump head.goto
   build (startBlock head)
-  transCond test bodyL (elseL?.getD exit)
+  transCond test bodyL.goto (elseL?.getD exit).goto
   build (startBlock bodyL)
   withExit (.loop exit head) (transStmts body)
-  if ← isOpen then jump head
+  if ← isOpen then jump head.goto
   if let some l := elseL? then
     build (startBlock l)
     transStmts orelse
-    if ← isOpen then jump exit
+    if ← isOpen then jump exit.goto
   if ← targeted exit then build (startBlock exit)
 termination_by sizeOf test + sizeOf body + sizeOf orelse + 1
 
@@ -1835,9 +1841,9 @@ termination_by sizeOf test + sizeOf body + sizeOf orelse + 1
 `msg`, through `toException`, as CPython's `RAISE_VARARGS` does. -/
 def assertStmt (test : expr SourceRange) (msg : Option (expr SourceRange)) :
     TransM Unit := do
-  let ok ← build (freshLabel "ok")
-  let fail ← build (freshLabel "fail")
-  transCond test ok fail
+  let ok ← build (freshLabel [] "ok")
+  let fail ← build (freshLabel [] "fail")
+  transCond test ok.goto fail.goto
   build (startBlock fail)
   let cls ← build (emitTotal (.str .base "AssertionError") Py.assertionError.ref #[])
   let v ← match msg with
@@ -1869,14 +1875,15 @@ runs after `body`, under that handler. -/
 def tryStmt (body : Array (stmt SourceRange)) (handlers : Array (excepthandler SourceRange))
     (orelse : Array (stmt SourceRange)) : TransM Unit := do
   let outer ← build handler
-  let catchL ← build (freshLabel "catch")
-  let unwind ← build (freshLabel "unwind")
-  let join ← build (freshLabel "join")
+  let catchL ← build (freshLabel [Py.Value] "catch")
+  let unwind ← build (freshLabel [Py.Value] "unwind")
+  let join ← build (freshLabel [] "join")
   withHandler catchL (transStmts body)
   if ← isOpen then
     transStmts orelse
-    if ← isOpen then jump join
-  let exc ← build (startBlockWith catchL (.str .base "exc"))
+    if ← isOpen then jump join.goto
+  let excV ← build (startBlockWith catchL (.str .base "exc"))
+  let exc := excV.id
   let prev ← build (emitTotal (.str .base "prev") Py.pushExcInfo.ref #[exc])
   withHandler unwind do
     for hm : h in handlers do
@@ -1890,16 +1897,16 @@ def tryStmt (body : Array (stmt SourceRange)) (handlers : Array (excepthandler S
             clause exc prev outer join unwind name hbody
             break
         let m ← build (excMatch exc (← transExpr t))
-        let bodyL ← build (freshLabel "except")
-        let next ← build (freshLabel "next")
-        branch m bodyL next
+        let bodyL ← build (freshLabel [] "except")
+        let next ← build (freshLabel [] "next")
+        branch m bodyL.goto next.goto
         build (startBlock bodyL)
         clause exc prev outer join unwind name hbody
         build (startBlock next)
-    if ← isOpen then jump unwind #[exc]
+    if ← isOpen then jump (unwind.goto.bind excV)
   let x ← build (startBlockWith unwind (.str .base "exc"))
   popExcept prev
-  build (PyBuild.jump { outer with args := outer.args.push x })
+  build (PyBuild.jump (outer.bind x))
   if ← targeted join then build (startBlock join)
 termination_by sizeOf body + sizeOf handlers + sizeOf orelse + 1
 
@@ -1912,7 +1919,7 @@ def tryFinallyStmt (sr : SourceRange) (body : Array (stmt SourceRange))
     (handlers : Array (excepthandler SourceRange)) (orelse final : Array (stmt SourceRange)) :
     TransM Unit := do
   let outer ← build handler
-  let join ← build (freshLabel "join")
+  let join ← build (freshLabel [] "join")
   let finished ← tryFinally
     (fun fin => withExit (.cleanup fin) do
       if handlers.isEmpty then transStmts body else tryStmt body handlers orelse)
@@ -1938,32 +1945,32 @@ def withStmt (sr : SourceRange) (items : List (withitem SourceRange))
     let noArgs ← build (emitTotal (.str .base "args") Py.mkTuple.ref #[])
     let kw ← build (emitTotal (.str .base "kwargs") Py.mkKwargs.ref #[])
     let v ← build (emitFailing (.str .base "entered") Py.call.ref #[enter, noArgs, kw])
-    let wexc ← build (freshLabel "wexc")
-    let fin ← build (freshLabel "fin")
-    let join ← build (freshLabel "join")
+    let wexc ← build (freshLabel [Py.Value] "wexc")
+    let fin ← build (freshLabel [Py.Completion] "fin")
+    let join ← build (freshLabel [] "join")
     -- The body, and the assignment to the target, which `__exit__` covers too.
     withExit (.cleanup fin) <| withHandler wexc do
       if let some assign := assign? then assign v
       withStmt sr rest body
-    if ← isOpen then jump fin #[← build compNormal]
+    if ← isOpen then jump (fin.goto.bind (← build compNormal))
     -- An exception: `__exit__(type, exc, tb)` while it is the one being handled.
     let exc ← build (startBlockWith wexc (.str .base "exc"))
-    let prev ← build (emitTotal (.str .base "prev") Py.pushExcInfo.ref #[exc])
-    let unwind ← build (freshLabel "unwind")
-    let suppress ← build (freshLabel "suppress")
+    let prev ← build (emitTotal (.str .base "prev") Py.pushExcInfo.ref #[exc.id])
+    let unwind ← build (freshLabel [Py.Value] "unwind")
+    let suppress ← build (freshLabel [] "suppress")
     withHandler unwind do
-      let r ← build (emitFailing (.str .base "exited") Py.exitWithExc.ref #[exit, exc])
+      let r ← build (emitFailing (.str .base "exited") Py.exitWithExc.ref #[exit, exc.id])
       let b ← build (truthy r)
-      branch b suppress unwind #[] #[exc]
+      branch b suppress.goto (unwind.goto.bind exc)
     build (startBlock suppress)
     popExcept prev
-    jump join
+    jump join.goto
     let x ← build (startBlockWith unwind (.str .base "exc"))
     popExcept prev
-    build (PyBuild.jump { outer with args := outer.args.push x })
+    build (PyBuild.jump (outer.bind x))
     -- Every other way out, if there is one: `__exit__(None, None, None)`, then the dispatch.
     if ← targeted fin then
-      let pending ← build (startBlockWith fin (.str .base "pending") Py.Completion)
+      let pending ← build (startBlockWith fin (.str .base "pending"))
       let n ← build noneLit
       let t ← build (emitTotal (.str .base "args") Py.mkTuple.ref #[n, n, n])
       let kw ← build (emitTotal (.str .base "kwargs") Py.mkKwargs.ref #[])
@@ -1976,20 +1983,21 @@ termination_by sizeOf items + sizeOf body + 1
 then leaves the handler (`leaveHandler`) and jumps to `join`.  `prev` is the exception handled
 before, `outer` the handler around the `try`, and `unwind` the block that restores `prev` and
 raises again.  With a `name`, a failure first unbinds it, in `clear`. -/
-def clause (exc prev : ValId) (outer : Target.Raw) (join unwind : Label)
+def clause (exc prev : ValId) (outer : PyTarget [Py.Value]) (join : BlockRef Py.env [])
+    (unwind : BlockRef Py.env [Py.Value])
     (name : Option (String × SourceRange)) (body : Array (stmt SourceRange)) : TransM Unit :=
   withReader ({ · with handled := some exc }) do
     let clear? ← name.mapM fun (n, r) => do
       writeName n exc r
-      build (freshLabel "clear")
+      build (freshLabel [Py.Value] "clear")
     withExit (.handler prev name outer) (withHandler (clear?.getD unwind) (transStmts body))
     if ← isOpen then
       leaveHandler prev name outer
-      jump join
+      jump join.goto
     if let (some clear, some (n, r)) := (clear?, name) then
       let x ← build (startBlockWith clear (.str .base "exc"))
       unbindName n r
-      jump unwind #[x]
+      jump (unwind.goto.bind x)
 termination_by sizeOf body + 1
 
 /-- `for target in iter: body else: orelse` at `sr` (§6.4).  Only `next` raises to `stop`,
@@ -2001,24 +2009,24 @@ def forStmt (sr : SourceRange) (target iter : expr SourceRange)
   | .error t => badTarget t
   | .ok assign =>
     let it ← build (emitFailing (.str .base "iter") Py.getIter.ref #[← transExpr iter])
-    let head ← build (freshLabel "head")
-    let stop ← build (freshLabel "stop")
-    let elseL? ← if orelse.isEmpty then pure none else some <$> build (freshLabel "else")
-    let exit ← build (freshLabel "exit")
-    jump head
+    let head ← build (freshLabel [] "head")
+    let stop ← build (freshLabel [Py.Value] "stop")
+    let elseL? ← if orelse.isEmpty then pure none else some <$> build (freshLabel [] "else")
+    let exit ← build (freshLabel [] "exit")
+    jump head.goto
     build (startBlock head)
     assign (← build (withHandler stop (emitFailing (.str .base "item") Py.next.ref #[it])))
     withExit (.loop exit head) (transStmts body)
-    if ← isOpen then jump head
+    if ← isOpen then jump head.goto
     let e ← build (startBlockWith stop (.str .base "exc"))
-    let done ← build (emitTest (.str .base "done") Py.isStopIteration.ref #[e])
-    let finished := elseL?.getD exit
+    let done ← build (emitTest (.str .base "done") Py.isStopIteration.ref #[e.id])
+    let finished := (elseL?.getD exit).goto
     recordTarget finished
-    build (PyBuild.branch done (Build.goto finished) (← build (raiseTo e)))
+    build (PyBuild.branch done finished ((← build handler).bind e))
     if let some l := elseL? then
       build (startBlock l)
       transStmts orelse
-      if ← isOpen then jump exit
+      if ← isOpen then jump exit.goto
     if ← targeted exit then build (startBlock exit)
 termination_by sizeOf target + sizeOf iter + sizeOf body + sizeOf orelse + 1
 

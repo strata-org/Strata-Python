@@ -71,8 +71,9 @@ public environment Demo extends Base where
   pure terminal insn run (&body : Bool) (^k (b : Bool))
   end demo
 
-open Strata.Dyn.Build (freshVal startBlock startFreshBlock freshLabel emitConst emitApply
-  finishBlock terminate goto build FailedFunc region withFailureBlock withPropagatingBlock)
+open Strata.Dyn.Build (freshVal emitConst emitApply finishBlock terminate build FailedFunc region
+  withFailureBlock withPropagatingBlock)
+open Strata.Dyn.Build.Raw (startBlock startFreshBlock freshLabel goto)
 
 private abbrev E := Demo.env
 
@@ -678,7 +679,7 @@ private def withClauses (clauses : String) : String := s!"module m \{
   let fail ← freshLabel "fail"
   let f ← emitConst (nm "f") (.bool false)
   quotNonNeg fail x y
-  let _ ← Build.startBlockWith fail (nm "e") intT
+  let _ ← Build.Raw.startBlockWith fail (nm "e") intT
   finishBlock (.ret () f)) == ["failures"]
 
 /-- info: t.dyn:6:8: in a requires clause of @m.f, the failure successor of %q.0 goes to fail.0, which does not end in unreachable or in ret of a constant that it defines -/
@@ -890,8 +891,8 @@ region that may propagate. -/
   let isOk ← freshLabel "isOk"
   let isErr ← freshLabel "isErr"
   terminate Base.Except.case.ref #[v] (succs := #[goto isOk, goto isErr])
-  finishBlock (.ret () (← Build.startBlockWith isOk (nm "r") boolT))
-  let _ ← Build.startBlockWith isErr (nm "e") intT
+  finishBlock (.ret () (← Build.Raw.startBlockWith isOk (nm "r") boolT))
+  let _ ← Build.Raw.startBlockWith isErr (nm "e") intT
   finishBlock (.ret () (← emitConst (nm "t") (.bool true)))) == ["propagates"]
 
 /-- info: t.dyn:8:12: in a region nested in a contract of @m.f, the failure successor of %q.0 goes to propagate.0, but this region's operation does not pass failures on, so the failure must be unreachable -/
@@ -974,7 +975,7 @@ fail, going on to `ok.0` or to `fail`. -/
 private def tryDivIn (fail : Label) (x y : ValId) : BuildM E Unit Unit := do
   let ok ← freshLabel "ok"
   terminate Demo.tryDiv.ref #[x, y] (succs := #[goto ok, goto fail])
-  let q ← Build.startBlockWith ok (nm "q") intT
+  let q ← Build.Raw.startBlockWith ok (nm "q") intT
   let zero ← emitConst (nm "zero") (.int 0)
   finishBlock (.ret () (← emitApply (nm "ok") boolT Demo.ge.ref #[q, zero]))
 
@@ -1000,10 +1001,10 @@ private def tryDivIn (fail : Label) (x y : ValId) : BuildM E Unit Unit := do
     let ok ← freshLabel "ok"
     let no ← freshLabel "no"
     terminate Demo.tryDiv.ref #[x, y] (succs := #[goto ok, goto no])
-    let q ← Build.startBlockWith ok (nm "q") intT
+    let q ← Build.Raw.startBlockWith ok (nm "q") intT
     let ge ← emitApply (nm "b") boolT Demo.ge.ref #[q, ← emitConst (nm "zero") (.int 0)]
     finishBlock (.ret () (← emitApply (nm "v") exT Base.Except.ok.ref #[ge]))
-    let _ ← Build.startBlockWith no (nm "e") intT
+    let _ ← Build.Raw.startBlockWith no (nm "e") intT
     let t ← emitConst (nm "t") (.bool true)
     finishBlock (.ret () (← emitApply (nm "v") exT Base.Except.ok.ref #[t]))) == ["terminators"]
 
@@ -1035,10 +1036,10 @@ private def runs : Built := withContract fun x y => Build.requires do
     let no ← freshLabel "no"
     let q ← emitApply (nm "q") intT Demo.div.ref #[x, y] (succs := #[goto no])
     finishBlock (.ret () (← emitApply (nm "ok") boolT Demo.ge.ref #[q, y]))
-    let _ ← Build.startBlockWith no (nm "e") intT
+    let _ ← Build.Raw.startBlockWith no (nm "e") intT
     finishBlock (.ret () (← emitConst (nm "f") (.bool false)))
   terminate Demo.run.ref (succs := #[goto done]) (regions := #[body])
-  let b ← Build.startBlockWith done (nm "b") boolT
+  let b ← Build.Raw.startBlockWith done (nm "b") boolT
   finishBlock (.ret () b)
 
 -- The region of a terminator is nested in the clause, and may not propagate.  Its failure

@@ -29,8 +29,8 @@ reference, and one defined outside the region that uses it.
 
 namespace Strata.Dyn.PrintFoldTest
 
-open Strata.Dyn.Build (freshVal freshLabel startBlock startBlockWith startFreshBlock
-  emitConst emitFunc emitApply finishBlock goto build FailedFunc region)
+open Strata.Dyn.Build (freshVal emitConst emitFunc emitApply finishBlock build FailedFunc region)
+open Strata.Dyn.Build.Raw (freshLabel startBlock startBlockWith startFreshBlock goto)
 open Strata.Dyn.RegionTest
 
 private abbrev E := Reg.env

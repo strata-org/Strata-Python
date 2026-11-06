@@ -53,8 +53,8 @@ the search finds no path there: the use is in scope under some tree, just not un
 namespace Strata.Dyn.DomCompleteTest
 
 open Strata.Dyn.DSLTest
-open Strata.Dyn.Build (freshVal freshLabel startBlock startFreshBlock emitApply finishBlock
-  region goto build FailedFunc)
+open Strata.Dyn.Build (freshVal emitApply finishBlock region build FailedFunc)
+open Strata.Dyn.Build.Raw (freshLabel startBlock startFreshBlock goto)
 
 private abbrev E := Demo.env
 

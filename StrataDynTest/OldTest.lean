@@ -64,8 +64,9 @@ public environment Demo extends Base where
   pure terminal insn run (&body : Bool) (^k (b : Bool))
   end demo
 
-open Strata.Dyn.Build (freshVal startBlock startFreshBlock freshLabel emitConst emitApply
-  finishBlock terminate goto build FailedFunc region withFailureBlock withPropagatingBlock)
+open Strata.Dyn.Build (freshVal emitConst emitApply finishBlock terminate build FailedFunc region
+  withFailureBlock withPropagatingBlock)
+open Strata.Dyn.Build.Raw (startBlock startFreshBlock freshLabel goto)
 
 private abbrev E := Demo.env
 
@@ -612,7 +613,7 @@ Each rejection breaks one rule. -/
     withFailureBlock #[intT] none fun fail => do
       retGe (← oldGet fail c.id) (← emitConst (nm "zero") (.int 0))
   terminate Demo.run.ref (succs := #[goto done]) (regions := #[body])
-  let _ ← Build.startBlockWith done (nm "b") boolT
+  let _ ← Build.Raw.startBlockWith done (nm "b") boolT
   finishBlock (.ret () (← emitConst (nm "z") (.int 0)))) == ["old"]
 
 /-- info: t.dyn:6:10: base.old is allowed only in an ensures clause, but @m.f uses it in its body -/
@@ -858,7 +859,7 @@ Each rejection breaks one rule. -/
     let recover ← freshLabel "recover"
     let v ← emitApply (nm "v") intT Base.refGet.ref #[c]
     okInt (← emitApply (nm "d") intT Demo.div.ref #[v, v] (succs := #[goto recover]))
-    let _ ← Build.startBlockWith recover (nm "e") intT
+    let _ ← Build.Raw.startBlockWith recover (nm "e") intT
     okInt (← emitConst (nm "zero") (.int 0))) == ["propagates"]
 
 /-- info: t.dyn:8:12: in a region nested in a contract of @m.f, the failure successor of %d.0 goes to recover.0, which does not pass the failure on with base.error -/

@@ -142,26 +142,25 @@ info: Strata.Dyn.TypedEmitTest.Te.box {env : Env Unit} {α : Type} {m : Type →
 built and taken apart.  No type argument is written: each is inferred from an operand, a
 successor, or, for `Except.ok`'s error type, the expected result. -/
 
-/-- What `build` gives in the environment `e`. -/
+/-- What `Emit.func` gives in the environment `e`. -/
 abbrev BuiltIn (e : Env Unit) [base ≼ e] :=
-  Except (Build.FailedFunc e Unit Unit) {fn : Func e Unit // fn.WF}
+  Except (Build.FailedFunc e Unit Unit) ({fn : Func e Unit // fn.WF} × Unit)
 
-/-- What `build` gives in `W`. -/
+/-- What `Emit.func` gives in `W`. -/
 abbrev Built := BuiltIn W
 
 /-- The module `m` of `f`, printed, or why it was not built. -/
 private def showMod {e : Env Unit} [base ≼ e] (f : BuiltIn e) : String :=
   match f with
   | .error e => toString e
-  | .ok f => match Module.ofChecked (.str .base "m") #[f] () with
+  | .ok (f, _) => match Module.ofChecked (.str .base "m") #[f] () with
     | .ok m => toString m
     | .error _ => "the module is not well formed"
 
 private def f : Built :=
-  Build.build (n "f") Base.Int () do
+  Emit.func (n "f") [] Base.Int () fun _ exit => do
     let% ok ← freshLabel [Base.Int]
     let% err ← freshLabel [Te.IntList]
-    let _ ← Build.startFreshBlock (base := "entry")
     let zero ← int (n "k") 0
     let% cell ← Base.refNew zero
     let _ ← Base.refSet (result := n "u") cell zero
@@ -169,8 +168,8 @@ private def f : Built :=
     let% x : Val W (Base.Except Te.IntList Base.Int) ← Base.Except.ok r
     Base.Except.case x ok.goto err.goto
     let _ ← startBlock₁ err (n "e")
-    ret zero
-    ret (← startBlock₁ ok)
+    ret exit zero
+    ret exit (← startBlock₁ ok)
 
 /-- info: module m {
   func @f() -> base.Int {
@@ -192,15 +191,14 @@ private def f : Built :=
 /-- `g(%fn : Fn [Int, Bool] Int)`: `callCode` and `invoke`, whose spread is `vals[…]` and whose
 list type argument is inferred from the code pointer's type. -/
 private def g : Built :=
-  Build.build (n "g") Base.Int () do
-    let (fd, fv) ← param (n "fn") (Base.Fn [Base.Int, Base.Bool] Base.Int)
+  Emit.func (n "g") [(n "fn", Base.Fn [Base.Int, Base.Bool] Base.Int)] Base.Int ()
+      fun (.cons fv .nil) exit => do
     let% err ← freshLabel [Te.Value]
-    let _ ← Build.startFreshBlock #[fd] "entry"
     let a ← int (n "a") 1
     let b ← bool (n "b") true
     let% r ← Base.callCode fv vals[a, b]
     let% s ← Te.invoke fv vals[r, b] err.goto
-    ret s
+    ret exit s
     let _ ← startBlock₁ err (n "exc")
     Base.unreachable
 
@@ -217,14 +215,29 @@ private def g : Built :=
 #guard_msgs in
 #eval IO.println (showMod g)
 
+/-- `g`, built without `Emit.func`: by `Build.run`, with its parameter and entry block made
+through the untyped layer, and left by `Build.Raw.ret`.  It is the same function. -/
+private def gRaw : Built :=
+  Build.run (n "g") Base.Int () do
+    let (fd, fv) ← param (n "fn") (Base.Fn [Base.Int, Base.Bool] Base.Int)
+    let% err ← freshLabel [Te.Value]
+    let _ ← Build.Raw.startFreshBlock #[fd] "entry"
+    let a ← int (n "a") 1
+    let b ← bool (n "b") true
+    let% r ← Base.callCode fv vals[a, b]
+    let% s ← Te.invoke fv vals[r, b] err.goto
+    Build.Raw.ret s.id
+    let _ ← startBlock₁ err (n "exc")
+    Base.unreachable
+
+#guard showMod gRaw == showMod g
+
 /-- Regions: an `if` whose branches leave by their exit with the result, and a `forEach` whose
 body leaves with `ok ()`, and a `guard`, which ends the block. -/
 private def h : Built :=
-  Build.build (n "h") Base.Int () do
-    let (cd, c) ← param (n "c") Base.Bool
+  Emit.func (n "h") [(n "c", Base.Bool)] Base.Int () fun (.cons c .nil) exit => do
     let% k ← freshLabel [Base.Int]
     let% err ← freshLabel [Te.Value]
-    let _ ← Build.startFreshBlock #[cd] "entry"
     let one ← int (n "one") 1
     let% r ← Te.if c
       (fun exit => Base.jump (exit.bind one))
@@ -236,7 +249,7 @@ private def h : Built :=
         Base.jump (exit.bind (← Base.Except.ok u)))
       err.goto
     Te.guard (fun exit => Base.jump (exit.bind r)) k.goto
-    ret (← startBlock₁ k)
+    ret exit (← startBlock₁ k)
     let _ ← startBlock₁ err (n "exc")
     Base.unreachable
 
@@ -275,13 +288,12 @@ info: module m {
 /-- A spread payload: `unpack`'s successor takes one value per argument type of `f`, so its
 block's parameters are `as`. -/
 private def u : Built :=
-  Build.build (n "u") Base.Int () do
-    let (fd, fv) ← param (n "fn") (Base.Fn [Base.Int, Base.Bool] Base.Int)
+  Emit.func (n "u") [(n "fn", Base.Fn [Base.Int, Base.Bool] Base.Int)] Base.Int ()
+      fun (.cons fv .nil) exit => do
     let kL ← freshLabel [Base.Int, Base.Bool] "k"
-    let _ ← Build.startFreshBlock #[fd] "entry"
     Te.unpack fv kL.goto
     let .cons x (.cons _ .nil) ← startBlock kL (n "x")
-    ret x
+    ret exit x
 
 /-- info: module m {
   func @u(%fn.0 : base.Fn([base.Int, base.Bool], base.Int)) -> base.Int {
@@ -330,15 +342,13 @@ end
 
 /-- `w(%x : Int)`: both, without annotations. -/
 private def w : Built :=
-  Build.build (n "w") Base.Int () do
-    let (xd, x) ← param (n "x") Base.Int
-    let _ ← Build.startFreshBlock #[xd] "entry"
+  Emit.func (n "w") [(n "x", Base.Int)] Base.Int () fun (.cons x .nil) exit => do
     let _ ← Te.withRef (result := n "w") x (fun r exit => do
       let _ ← Base.refGet (result := n "g") r
       Base.jump (exit.bind (← Base.Unit.unit (result := n "u"))))
     let% t ← Te.attempt (fun exit => do
       Base.jump (exit.bind (← Base.Except.ok x)))
-    ret t
+    ret exit t
 
 /--
 info: module m {
@@ -376,18 +386,16 @@ info: Strata.Dyn.TypedEmitTest.Te.L.case {env : Env Unit} {α : Type} {m : Type 
 
 /-- `list(%x : Int)`: the list `[x]`, taken apart. -/
 private def list : Built :=
-  Build.build (n "list") Base.Int () do
-    let (xd, x) ← param (n "x") Base.Int
+  Emit.func (n "list") [(n "x", Base.Int)] Base.Int () fun (.cons x .nil) exit => do
     let nilL ← freshLabel [] "nil"
     let consL ← freshLabel [Base.Int, Te.L Base.Int] "cons"
-    let _ ← Build.startFreshBlock #[xd] "entry"
     let% e ← Te.L.nil
     let% l ← Te.L.cons x e
     Te.L.case l nilL.goto consL.goto
     let _ ← startBlock nilL
-    ret x
+    ret exit x
     let .cons h (.cons _ .nil) ← startBlock consL (n "c")
-    ret h
+    ret exit h
 
 /--
 info: module m {
@@ -412,11 +420,9 @@ info: module m {
 
 /-- `kid(%x : Leaf)`: `x` wrapped, and read back. -/
 private def kid : BuiltIn TeKid.env :=
-  Build.build (n "kid") TeKid.Leaf () do
-    let (xd, x) ← param (n "x") TeKid.Leaf
-    let _ ← Build.startFreshBlock #[xd] "entry"
+  Emit.func (n "kid") [(n "x", TeKid.Leaf)] TeKid.Leaf () fun (.cons x .nil) exit => do
     let% c ← TeKid.wrap x
-    ret (← Base.refGet (result := n "r") c)
+    ret exit (← Base.refGet (result := n "r") c)
 
 /--
 info: module m {
@@ -431,23 +437,23 @@ info: module m {
 #guard_msgs in
 #eval IO.println (showMod kid)
 
-/-! ## Region exits
+/-! ## Exits
 
-Every region's exit is `ret`, which leaves the innermost body.  So the builder records a misuse
-when a block is closed with the exit of a region other than the innermost open one: an
-enclosing region's, which would leave the inner region instead, or one that has ended. -/
+Every exit is `ret`, which leaves the innermost body, a region's or the function's.  So the
+builder records a misuse when a block is closed with an exit that does not leave the innermost
+open body: an enclosing region's, which would leave the inner region instead, one that has
+ended, or the function's inside a region. -/
 
 /-- `outer` and, inside it, `inner`.  With `wrong`, `inner`'s body leaves with `outer`'s exit,
 meaning to leave `outer` with `1`; otherwise it leaves `inner` with its own. -/
 private def nested (wrong : Bool) : Built :=
-  Build.build (n "nested") Base.Int () do
-    let _ ← Build.startFreshBlock (base := "entry")
+  Emit.func (n "nested") [] Base.Int () fun _ exit => do
     let r ← Te.block (result := n "outer") (fun (outer : Target W [Base.Int]) => do
       let one ← int (n "one") 1
       let _ ← Te.block (result := n "inner") (fun (inner : Target W [Base.Int]) =>
         Base.jump ((if wrong then outer else inner).bind one))
       Base.jump (outer.bind (← int (n "two") 2)))
-    ret r
+    ret exit r
 
 /--
 info: module m {
@@ -474,16 +480,15 @@ info: module m {
 /-- A region whose exit is kept, in the state of a `StateT` over the builder, and, with `wrong`,
 used after the region ends. -/
 private def kept (wrong : Bool) : Built :=
-  Build.build (n "kept") Base.Int () <| StateT.run' (s := none) (show
+  Emit.func (n "kept") [] Base.Int () fun _ fexit => StateT.run' (s := none) (show
       StateT (Option (Target W [Base.Int])) (BuildM W Unit) Unit from do
-    let _ ← liftBuild (Build.startFreshBlock (base := "entry"))
     let one ← int (n "one") 1
     let r ← Te.block (result := n "b") (fun exit => do
       set (some exit)
       Base.jump (exit.bind one))
     match ← get with
-    | some exit => if wrong then Base.jump (exit.bind r) else ret r
-    | none => ret r)
+    | some exit => if wrong then Base.jump (exit.bind r) else ret fexit r
+    | none => ret fexit r)
 
 /--
 info: module m {
@@ -503,25 +508,105 @@ info: module m {
 #guard_msgs in
 #eval IO.println (showMod (kept true))
 
+/-- A region whose body, with `wrong`, leaves by the function's exit, meaning to return `1` from
+the function; otherwise it leaves by its own. -/
+private def funcInside (wrong : Bool) : Built :=
+  Emit.func (n "funcInside") [] Base.Int () fun _ exit => do
+    let one ← int (n "one") 1
+    let r ← Te.block (result := n "b") (fun inner =>
+      Base.jump ((if wrong then exit else inner).bind one))
+    ret exit r
+
+/--
+info: module m {
+  func @funcInside() -> base.Int {
+    entry.0():
+      %b.0 : base.Int = te.block[base.Int] {
+        body.0():
+          ret(1)
+      }
+      ret(%b.0)
+  }
+}
+-/
+#guard_msgs in
+#eval IO.println (showMod (funcInside false))
+/-- info: the function's exit is used inside region body.0, which it does not leave -/
+#guard_msgs in
+#eval IO.println (showMod (funcInside true))
+
+/-- `funcInside`, its region's body closed by `ret`, which checks its exit too. -/
+private def retInside (wrong : Bool) : Built :=
+  Emit.func (n "retInside") [] Base.Int () fun _ exit => do
+    let one ← int (n "one") 1
+    let r ← Te.block (result := n "b") (fun inner => ret (if wrong then exit else inner) one)
+    ret exit r
+
+/--
+info: module m {
+  func @retInside() -> base.Int {
+    entry.0():
+      %b.0 : base.Int = te.block[base.Int] {
+        body.0():
+          ret(1)
+      }
+      ret(%b.0)
+  }
+}
+-/
+#guard_msgs in
+#eval IO.println (showMod (retInside false))
+/-- info: the function's exit is used inside region body.0, which it does not leave -/
+#guard_msgs in
+#eval IO.println (showMod (retInside true))
+
+/-- `funcInside`, its region's body closed by `Build.Raw.jump` to a target that
+`Build.checkedTarget` gives, which checks the exit too. -/
+private def checkedInside (wrong : Bool) : Built :=
+  Emit.func (n "checkedInside") [] Base.Int () fun _ exit => do
+    let one ← int (n "one") 1
+    let r ← Te.block (result := n "b") (fun inner => liftBuild do
+      Build.Raw.jump (← Build.checkedTarget ((if wrong then exit else inner).bind one)))
+    ret exit r
+
+/--
+info: module m {
+  func @checkedInside() -> base.Int {
+    entry.0():
+      %b.0 : base.Int = te.block[base.Int] {
+        body.0():
+          ret(1)
+      }
+      ret(%b.0)
+  }
+}
+-/
+#guard_msgs in
+#eval IO.println (showMod (checkedInside false))
+/-- info: the function's exit is used inside region body.0, which it does not leave -/
+#guard_msgs in
+#eval IO.println (showMod (checkedInside true))
+
 /-! ## A region body that throws
 
 A front end in `ExceptT` can throw out of a region's body and catch the error outside it.  The
-region is then never closed, and the enclosing block is lost, so `Build.run` records a misuse. -/
+region is then never closed, and the enclosing block is lost, so `Build.run` records a misuse:
+the region left open, and the function's exit then used inside it. -/
 
 /-- A cell of `1`, then a block whose body, with `fail`, throws, which is caught. -/
-private def lower (fail : Bool) : ExceptT String (BuildM W Unit) Unit := do
-  let _ ← liftBuild (Build.startFreshBlock (base := "entry"))
+private def lower (fexit : Target W [Base.Int]) (fail : Bool) :
+    ExceptT String (BuildM W Unit) Unit := do
   let _ ← Base.refNew (result := n "c") (← int (n "one") 1)
   try
     let _ ← Te.block (result := n "b") (fun (exit : Target W [Base.Int]) => do
       if fail then throw "unsupported"
       Base.jump (exit.bind (← int (n "two") 2)))
   catch _ => pure ()
-  ret (← int (n "zero") 0)
+  ret fexit (← int (n "zero") 0)
 
 /-- `lower fail`, built. -/
 private def lowered (fail : Bool) : Built :=
-  Build.build (n "lowered") Base.Int () do let _ ← (lower fail).run
+  Emit.func (n "lowered") [] Base.Int () fun _ exit => do let _ ← (lower exit fail).run
 
 /--
 info: module m {
@@ -538,7 +623,10 @@ info: module m {
 -/
 #guard_msgs in
 #eval IO.println (showMod (lowered false))
-/-- info: region body.0 is still open when the function ends: its body did not return -/
+/--
+info: the function's exit is used inside region body.0, which it does not leave
+region body.0 is still open when the function ends: its body did not return
+-/
 #guard_msgs in
 #eval IO.println (showMod (lowered true))
 
@@ -758,12 +846,11 @@ type: Lean accepts the emit, and the check rejects the function. -/
 /-- `refGet` of a `Bool` cast to a `Ref Int`, or, the accepted twin, of a `Ref Int` cast to
 itself. -/
 private def castAs (wrong : Bool) : Built :=
-  Build.build (n "castAs") Base.Int () do
-    let _ ← Build.startFreshBlock (base := "entry")
+  Emit.func (n "castAs") [] Base.Int () fun _ exit => do
     let% c ← Base.refNew (← int (n "one") 1)
     let b ← bool (n "b") true
     let% r ← Base.refGet (if wrong then b.cast (Base.Ref Base.Int) else c.cast (Base.Ref Base.Int))
-    ret r
+    ret exit r
 
 /--
 info: module m {
@@ -782,12 +869,10 @@ info: module m {
 #guard_msgs in
 #eval IO.println (showMod (castAs true))
 
-/-- `Emit.ret` does not check its value against the function's result type: leaving `Int`'s
-function with a `Bool`, or, the accepted twin, with an `Int`. -/
-private def retAs (wrong : Bool) : Built :=
-  Build.build (n "retAs") Base.Int () do
-    let _ ← Build.startFreshBlock (base := "entry")
-    if wrong then ret (← bool (n "b") true) else ret (← int (n "i") 1)
+/-- The function's exit takes its result type, so leaving `Int`'s function with a `Bool` is
+rejected by Lean, beside the accepted twin, which leaves it with an `Int`. -/
+private def retAs : Built :=
+  Emit.func (n "retAs") [] Base.Int () fun _ exit => do ret exit (← int (n "i") 1)
 
 /-- info: module m {
   func @retAs() -> base.Int {
@@ -796,28 +881,37 @@ private def retAs (wrong : Bool) : Built :=
   }
 } -/
 #guard_msgs in
-#eval IO.println (showMod (retAs false))
-/-- info: retAs is not well formed -/
-#guard_msgs in
-#eval IO.println (showMod (retAs true))
+#eval IO.println (showMod retAs)
+/--
+error: Application type mismatch: The argument
+  b
+has type
+  Val W Base.Bool
+but is expected to have type
+  Val W Base.Int
+-/
+#guard_msgs (substring := true) in
+example (exit : Target W [Base.Int]) (b : Val W Base.Bool) : BuildM W Unit Unit := ret exit b
+example (exit : Target W [Base.Int]) (i : Val W Base.Int) : BuildM W Unit Unit := ret exit i
 
-/-- `Target.ofRaw` gives a target the payload it is told: `Except.case`'s `ok` successor,
-a block taking a `Bool` claimed to take an `Int`, or, the accepted twin, one taking an `Int`. -/
+/-- A successor's payload is its target's type, so a wrong one is made through the untyped
+layer: `Except.case`'s `ok` successor at a block taking a `Bool`, which `Build.run` rejects, or,
+the accepted twin, the typed emit, at a block taking an `Int`. -/
 private def succAs (wrong : Bool) : Built :=
-  Build.build (n "succAs") Base.Int () do
-    let (xd, x) ← param (n "x") (Base.Except Base.String Base.Int)
+  Emit.func (n "succAs") [(n "x", Base.Except Base.String Base.Int)] Base.Int ()
+      fun (.cons x .nil) exit => do
     let okB ← freshLabel [Base.Bool] "okB"
     let okI ← freshLabel [Base.Int] "okI"
     let errL ← freshLabel [Base.String] "err"
-    let _ ← Build.startFreshBlock #[xd] "entry"
-    let ok : Target W [Base.Int] := if wrong then Target.ofRaw [Base.Int] okB.goto.raw
-      else okI.goto
-    Base.Except.case x ok errL.goto
+    if wrong then
+      Build.terminate Base.Except.case.ref #[x.id]
+        #[Build.Raw.goto okB.label, errL.goto.rawUnchecked]
+    else Base.Except.case x okI.goto errL.goto
     let _ ← startBlock₁ okB (n "b")
-    ret (← int (n "zero") 0)
-    ret (← startBlock₁ okI (n "i"))
+    ret exit (← int (n "zero") 0)
+    ret exit (← startBlock₁ okI (n "i"))
     let _ ← startBlock₁ errL (n "e")
-    ret (← int (n "one") 1)
+    ret exit (← int (n "one") 1)
 
 /--
 info: module m {
@@ -840,8 +934,8 @@ info: module m {
 /-! ## Blocks and targets come from the builder
 
 `BlockRef` and `Target` have private constructors, so a block is made by `freshLabel`, and a
-target by `goto`, `bind`, `bindAll`, a region's exit or `Target.ofRaw`.  Making either directly
-from a label or a raw target is rejected, beside its accepted twin. -/
+target by `goto`, `bind`, `bindAll`, or as a region's or the function's exit.  Making either
+directly from a label or a raw target is rejected, beside its accepted twin. -/
 
 /-- error: Invalid `⟨...⟩` notation: Constructor for `Strata.Dyn.BlockRef` is marked as private -/
 #guard_msgs in
@@ -851,7 +945,7 @@ example : BuildM W Unit (BlockRef W []) := freshLabel []
 /-- error: Invalid `⟨...⟩` notation: Constructor for `Strata.Dyn.Target` is marked as private -/
 #guard_msgs in
 example (r : Target.Raw) : Target W [] := ⟨r, none⟩
-example (r : Target.Raw) : Target W [] := Target.ofRaw [] r
+example (l : BlockRef W []) : Target W [] := l.goto
 
 /-! ## Docstrings
 

@@ -41,13 +41,16 @@ guarantees the function is well formed.
   makes.
 * `Target env ps`, what fills a successor whose payload is `ps`: a block with a prefix of its
   arguments bound, that still expects `ps`.  `BlockRef.goto`, `Target.bind` and
-  `Target.bindAll` make one, and a region's body is given its exit as one, which knows its
-  region.  `Target.raw` is the untyped target.  Their constructors are private, so a block or a
-  target comes from these operations, or from the escape `Target.ofRaw`.
+  `Target.bindAll` make one, and a region's body, or a function's, is given its exit as one,
+  which knows what it leaves.  `Build.checkedTarget` checks a target's exit and gives the
+  untyped target, and `Target.rawUnchecked` gives it without the check.  Their constructors are
+  private, so a block or a target comes from these operations only; `Build.Raw` is the
+  untyped layer below them.
 * `MonadBuild env α m`: a monad that emits into a function over `env`, `BuildM` or a front
   end's builder over it.  The emitters run in any of them.
+* `func`: emit a function, whose body is given its parameters and its exit.
 * `freshLabel`, `startBlock`, `startBlock₁`, `param`, `int`, `bool`, `str`, `float`, `unit`,
-  `code`, `ret`: the builder's operations at typed values.
+  `code`, `jump`, `branch`, `ret`: the builder's operations at typed values.
 * `Build.named` and `let%`: a value or a block named after the Lean binder it is bound to.
 
 ## Names
@@ -75,19 +78,19 @@ function is an error at the statement.
 
 ## Exits
 
-Every region's exit is the same label, `Label.exit`, which leaves the innermost body being
-emitted.  So the builder keeps the open regions, and the exit a region's body is given names
-its region.  An instruction given the exit of a region other than the innermost open one, an
-enclosing region's or one that has ended, is recorded as a misuse, and `Build.run` rejects the
-function.
+Every exit is the same label, `Label.exit`, which leaves the innermost body being emitted, a
+region's or the function's.  So the builder keeps the open regions, and the exit a body is given
+names what it leaves (`Build.Exit`): its region, or the function.  An instruction given an exit
+that does not leave the innermost open body is recorded as a misuse, and `Build.run` rejects
+the function: an enclosing region's exit, the exit of a region that has ended, or the
+function's exit inside a region.
 
 ## Escapes
 
-`Val.ofId`, `Val.cast` and `Target.ofRaw` give a value or a target whatever type they
-are told, for a type known only when the builder runs or a value kept untyped by a front end.
-Lean checks nothing about them, and `Emit.ret` does not check its value against the function's
-result type: these are checked by `Build.run` only, which rejects the function if the claimed
-type is wrong.  `Val.id` and `Target.raw` go back to the untyped builder.
+`Val.ofId` and `Val.cast` give a value whatever type they are told, for a type known only when
+the builder runs or a value kept untyped by a front end.  Lean checks nothing about them:
+`Build.run` does, and rejects the function if the claimed type is wrong.  `Val.id` and
+`Build.checkedTarget` go back to the untyped builder.
 -/
 
 namespace Strata.Dyn
@@ -95,6 +98,11 @@ namespace Strata.Dyn
 public section
 
 /-! ## Typed blocks and targets -/
+
+/-- What an exit leaves: the region whose entry block is `entry`, or the function. -/
+inductive Build.Exit where
+  | region (entry : Label)
+  | func
 
 /-- A block, over `env`, whose parameters have the types `ps`.  `Emit.freshLabel` makes one. -/
 structure BlockRef (env : Env Unit) (ps : List (TypeExpr env)) where
@@ -106,13 +114,14 @@ structure BlockRef (env : Env Unit) (ps : List (TypeExpr env)) where
 still expects values of the types `ps`.  `ps` is a phantom.  The bound arguments come first,
 and the operation's payload fills the block's remaining parameters, in order.  (MLIR's
 `SuccessorOperands` puts the values the operation produces first instead.)  `BlockRef.goto`,
-`Target.bind`, `Target.bindAll` and `Build.withExit` make one, and `Target.ofRaw` is the escape. -/
+`Target.bind`, `Target.bindAll`, `Build.withExit` and `Emit.func` make one. -/
 structure Target (env : Env Unit) (ps : List (TypeExpr env)) where
   private mk ::
-  /-- The target, as the builder takes it. -/
-  raw : Target.Raw
-  /-- The entry label of the region this is the exit of, if it is one. -/
-  exitOf : Option Label := none
+  /-- The target, as the builder takes it, without the check that an exit leaves the innermost
+  open body.  `Build.checkedTarget` makes that check. -/
+  rawUnchecked : Target.Raw
+  /-- What this leaves, if it is an exit. -/
+  exitOf : Option Build.Exit := none
 
 namespace BlockRef
 
@@ -131,15 +140,12 @@ variable {env : Env Unit}
 /-- `k`, with its next argument bound to `v`. -/
 @[inline] def bind {t : TypeExpr env} {ps : List (TypeExpr env)} (k : Target env (t :: ps))
     (v : Val env t) : Target env ps :=
-  { k with raw := k.raw.bind v.id }
+  { k with rawUnchecked := k.rawUnchecked.bind v.id }
 
 /-- `k`, with all its arguments bound to `vs`. -/
 @[inline] def bindAll {ps : List (TypeExpr env)} (k : Target env ps) (vs : Vals env ps) :
     Target env [] :=
-  { k with raw := { k.raw with args := vs.idsTo k.raw.args } }
-
-/-- `r`, as a target expecting `ps`, not the exit of any region.  Lean does not check `ps`. -/
-@[inline] def ofRaw (ps : List (TypeExpr env)) (r : Target.Raw) : Target env ps := ⟨r, none⟩
+  { k with rawUnchecked := { k.rawUnchecked with args := vs.idsTo k.rawUnchecked.args } }
 
 end Target
 
@@ -177,26 +183,40 @@ variable {env : Env Unit} {α : Type} {m : Type → Type} [Monad m] [MonadBuild 
     MonadLiftT (BuildM env α) m :=
   ⟨liftBuild⟩
 
-/-- Record a misuse for each of `exits`, the regions whose exits an instruction is given, that
-is not the innermost open region: an enclosing one, which the exit would not leave, or one that
-has ended. -/
-def checkExits (exits : Array (Option Label)) : BuildM env α Unit := do
+/-- Record a misuse for each of `exits`, what the exits an instruction is given leave, that
+does not leave the innermost open body: an enclosing region, a region that has ended, or the
+function inside a region. -/
+def checkExits (exits : Array (Option Exit)) : BuildM env α Unit := do
   let regions := (← get).regions
   for e in exits do
-    let some r := e | continue
-    if regions.back? == some r then continue
-    -- The innermost open region, if the exit's region encloses it.
-    match regions.back?.filter fun _ => regions.contains r with
-    | some inner =>
-      errorParts #[.text "the exit of region ", .label r, .text " is used inside region ",
-        .label inner, .text ", which it does not leave"]
-    | none =>
-      errorParts #[.text "the exit of region ", .label r, .text " is used after the region ends"]
+    match e with
+    | none => continue
+    | some .func =>
+      if let some inner := regions.back? then
+        errorParts #[.text "the function's exit is used inside region ", .label inner,
+          .text ", which it does not leave"]
+    | some (.region r) =>
+      if regions.back? == some r then continue
+      -- The innermost open region, if the exit's region encloses it.
+      match regions.back?.filter fun _ => regions.contains r with
+      | some inner =>
+        errorParts #[.text "the exit of region ", .label r, .text " is used inside region ",
+          .label inner, .text ", which it does not leave"]
+      | none =>
+        errorParts #[.text "the exit of region ", .label r,
+          .text " is used after the region ends"]
 
-/-- `body`, given the exit of the innermost open region, which leaves it with an `r`. -/
+/-- `k`, as the builder takes it, with a misuse recorded if `k` is an exit that does not leave
+the innermost open body. -/
+def checkedTarget {ps : List (TypeExpr env)} (k : Target env ps) : BuildM env α Target.Raw := do
+  checkExits #[k.exitOf]
+  return k.rawUnchecked
+
+/-- `body`, given the exit of the innermost open body, a region's or else the function's, which
+leaves it with an `r`. -/
 def withExit {β : Type} (r : TypeExpr env) (body : Target env [r] → m β) : m β := do
   let inner ← liftBuild (do return (← get).regions.back? : BuildM env α (Option Label))
-  body ⟨⟨Label.exit, #[]⟩, inner⟩
+  body ⟨⟨Label.exit, #[]⟩, some (match inner with | some l => .region l | none => .func)⟩
 
 /-- `terminate`, with regions built in any monad that emits into the function. -/
 def terminateWith {isig : InsnSig env} (r : InsnRef env isig) (args : Array ValId)
@@ -255,7 +275,7 @@ variable {env : Env Unit} {α : Type} {m : Type → Type} [Monad m] [MonadBuild 
 `bb.n`, and `let%` may rename it. -/
 def freshLabel (ps : List (TypeExpr env)) (base : Option String := none) :
     m (BlockRef env ps) :=
-  liftBuild (do return ⟨← Build.freshLabel (base.getD blockBase) base.isSome⟩ :
+  liftBuild (do return ⟨← Raw.freshLabel (base.getD blockBase) base.isSome⟩ :
     BuildM env α (BlockRef env ps))
 
 /-- Fresh values of types `ts`, each named after `stem`. -/
@@ -273,7 +293,7 @@ def startBlock {ps : List (TypeExpr env)} (l : BlockRef env ps) (stem : Name := 
     m (Vals env ps) :=
   liftBuild do
     let (ds, vs) ← freshVals stem ps
-    Build.startBlock l.label ds
+    Raw.startBlock l.label ds
     return vs
 
 /-- Open the block `l`, which takes one value, and return it.  The value is named after `stem`
@@ -282,7 +302,7 @@ def startBlock₁ {t : TypeExpr env} (l : BlockRef env [t]) (stem : Option Name 
     m (Val env t) :=
   liftBuild do
     let d ← freshVal (stem.getD (.str .base "v")) t stem.isSome
-    Build.startBlock l.label #[d]
+    Raw.startBlock l.label #[d]
     return ⟨d.id⟩
 
 /-- A fresh value of type `t` named after `stem`, as a block's or a function's parameter. -/
@@ -291,10 +311,44 @@ def param (stem : Name) (t : TypeExpr env) : m (ValDecl env × Val env t) :=
     let d ← freshVal stem t
     return (d, ⟨d.id⟩)
 
-/-- Close the open block by leaving the enclosing body with `v`.  Lean does not check `t`
-against the body's result type; a region's body has its exit as a `Target [r]`, which it does. -/
-def ret [base ≼ env] {t : TypeExpr env} (v : Val env t) (info : Option α := none) : m Unit :=
-  liftBuild (Build.ret v.id info)
+/-- Close the open block with a jump to `k`, which `Build.checkedTarget` checks. -/
+def jump [base ≼ env] (k : Target env []) (info : Option α := none) : m Unit :=
+  liftBuild do Raw.jump (← checkedTarget k) info
+
+/-- Close the open block with a branch on `cond` to `t` or `f`, which `Build.checkedTarget`
+checks. -/
+def branch [base ≼ env] (cond : Val env Base.Bool) (t f : Target env []) (info : Option α := none) :
+    m Unit :=
+  liftBuild do Raw.branch cond.id (← checkedTarget t) (← checkedTarget f) info
+
+/-- Close the open block by leaving the body that `exit` is the exit of, a region's or the
+function's, with `v`. -/
+def ret [base ≼ env] {t : TypeExpr env} (exit : Target env [t]) (v : Val env t)
+    (info : Option α := none) : m Unit :=
+  jump (exit.bind v) info
+
+/-- Fresh values named and typed after `ps`, their declarations appended to `acc`. -/
+private def freshParams (acc : Array (ValDecl env)) : (ps : List (Name × TypeExpr env)) →
+    BuildM env α (Array (ValDecl env) × Vals env (ps.map (·.2)))
+  | [] => return (acc, .nil)
+  | (x, t) :: ps => do
+    let d ← freshVal x t
+    let (ds, vs) ← freshParams (acc.push d) ps
+    return (ds, .cons ⟨d.id⟩ vs)
+
+/-- Emit the function `name`, which returns an `r`, and check it.  Its entry block, labelled
+after `entry`, `entry.0` by default, takes values named and typed after `params`, the
+function's parameters.  `body` is given them and the function's exit, which leaves it with an
+`r`, and must finish every block it opens.  The result is `Build.run`'s. -/
+def func [base ≼ env] {β : Type} (name : Name) (params : List (Name × TypeExpr env))
+    (r : TypeExpr env) (info : α)
+    (body : Vals env (params.map (·.2)) → Target env [r] → BuildM env α β)
+    (entry : String := "entry") :
+    Except (FailedFunc env α β) ({fn : Func env α // fn.WF} × β) :=
+  Build.run name r info do
+    let (ds, vs) ← freshParams #[] params
+    Raw.startBlock (← Raw.freshLabel entry) ds
+    withExit r (body vs)
 
 /-- The integer constant `i`. -/
 def int [base ≼ env] (stem : Name) (i : Int) (info : Option α := none) :

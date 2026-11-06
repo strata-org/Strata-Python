@@ -85,9 +85,9 @@ public environment Demo extends Base where
   pure terminal insn run (&body : Bool) (^k (b : Bool))
   end demo
 
-open Strata.Dyn.Build (freshVal startBlock startFreshBlock freshLabel emitConst emitFunc
-  emitApply emitGhost finishBlock terminate goto build FailedFunc FailedGhost region
-  withFailureBlock withPropagatingBlock)
+open Strata.Dyn.Build (freshVal emitConst emitFunc emitApply emitGhost finishBlock terminate build
+  FailedFunc FailedGhost region withFailureBlock withPropagatingBlock)
+open Strata.Dyn.Build.Raw (startBlock startFreshBlock freshLabel goto)
 
 private abbrev E := Demo.env
 
@@ -785,7 +785,7 @@ private def nestedBodyGhost : Built :=
     let _ ← startFreshBlock #[] "entry"
     let fail ← freshLabel "fail"
     finishBlock (.ret () (← attempt fail do retOk (← readGhost "count")))
-    let _ ← Build.startBlockWith fail (nm "e") intT
+    let _ ← Build.Raw.startBlockWith fail (nm "e") intT
     Build.unreachable
 
 #guard failing nestedBodyGhost == ["ghosts"]
@@ -816,7 +816,7 @@ private def termBodyGhost : Built :=
     let k ← freshLabel "k"
     terminate Demo.run.ref (succs := #[goto k])
       (regions := #[region #[] (base := "body") do nonNeg (← readGhost "count")])
-    let _ ← Build.startBlockWith k (nm "b") boolT
+    let _ ← Build.Raw.startBlockWith k (nm "b") boolT
     retZero
 
 #guard failing termBodyGhost == ["ghosts"]
@@ -1066,7 +1066,7 @@ private def noArg : Option (Ghost E Unit) :=
     let q ← emitApply (nm "q") intT Demo.div.ref #[← emitConst (nm "ten") (.int 10), v]
       (succs := #[goto fail])
     nonNeg q
-    let _ ← Build.startBlockWith fail (nm "e") intT
+    let _ ← Build.Raw.startBlockWith fail (nm "e") intT
     finishBlock (.ret () (← emitConst (nm "t") (.bool true)))) ()) == ["failures"]
 
 /-- info: t.dyn:4:6: in the invariant of ghost @m.g, the failure successor of %q.0 goes to fail.0, which returns true; a failure must be unreachable -/
@@ -1087,7 +1087,7 @@ private def noArg : Option (Ghost E Unit) :=
       retOk (← emitApply (nm "q") intT Demo.div.ref
         #[← emitConst (nm "one") (.int 1), ← emitConst (nm "zero") (.int 0)]
         (succs := #[goto recover]))
-      let e ← Build.startBlockWith recover (nm "e") intT
+      let e ← Build.Raw.startBlockWith recover (nm "e") intT
       retOk e
     finishBlock (.ret () (← emitApply (nm "v") intT Demo.attempt.ref #[] (succs := #[goto fail])
       (regions := #[body]))))) none ()) == ["propagates"]
@@ -1115,8 +1115,8 @@ private def noArg : Option (Ghost E Unit) :=
     let ok ← freshLabel "ok"
     let no ← freshLabel "no"
     terminate Demo.tryDiv.ref #[← emitConst (nm "ten") (.int 10), v] (succs := #[goto ok, goto no])
-    nonNeg (← Build.startBlockWith ok (nm "q") intT)
-    let _ ← Build.startBlockWith no (nm "e") intT
+    nonNeg (← Build.Raw.startBlockWith ok (nm "q") intT)
+    let _ ← Build.Raw.startBlockWith no (nm "e") intT
     Build.unreachable) ()) == ["terminators"]
 
 /-- info: t.dyn:4:6: a contract region of ghost @m.g ends inv.0 with demo.tryDiv; a contract region may end a block only with ret, jump, branch, unreachable or a case instruction -/

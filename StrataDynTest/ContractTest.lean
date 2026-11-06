@@ -48,8 +48,8 @@ public environment Spec extends Base where
   pure insn isFn (f : Fn [Int] Bool) : Bool
   end spec
 
-open Strata.Dyn.Build (freshVal startBlock startFreshBlock freshLabel emitConst emitFunc
-  emitApply finishBlock goto build FailedFunc region)
+open Strata.Dyn.Build (freshVal emitConst emitFunc emitApply finishBlock build FailedFunc region)
+open Strata.Dyn.Build.Raw (startBlock startFreshBlock freshLabel goto)
 
 private abbrev E := Spec.env
 

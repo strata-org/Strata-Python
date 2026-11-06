@@ -238,7 +238,7 @@ private def misused : PyBuild.PyM Info Unit := do
 
 /-- A body that returns a `Bool`, so the function is not well formed. -/
 private def wrongResult : PyBuild.PyM Info Unit := do
-  (do Build.ret (← Build.emitConst (.str .base "r") (.bool true)) :
+  (do Build.Raw.ret (← Build.emitConst (.str .base "r") (.bool true)) :
     BuildM Py.env Info Unit)
 
 /-- A body that refers to `m.g` and returns `None`. -/
@@ -275,17 +275,17 @@ module m.g {
 otherwise `j` returns a `None` of its own. -/
 private def joins (outside : Bool) : PyBuild.PyM Info Unit := do
   let c ← (Build.emitConst (.str .base "c") (.bool true) : BuildM Py.env Info ValId)
-  let l ← (Build.freshLabel "l" : BuildM Py.env Info Label)
-  let r ← (Build.freshLabel "r" : BuildM Py.env Info Label)
-  let j ← (Build.freshLabel "j" : BuildM Py.env Info Label)
-  (Build.finishBlock (.branch {} c (Build.goto l) (Build.goto r)) :
+  let l ← (Build.Raw.freshLabel "l" : BuildM Py.env Info Label)
+  let r ← (Build.Raw.freshLabel "r" : BuildM Py.env Info Label)
+  let j ← (Build.Raw.freshLabel "j" : BuildM Py.env Info Label)
+  (Build.finishBlock (.branch {} c (Build.Raw.goto l) (Build.Raw.goto r)) :
     BuildM Py.env Info Unit)
-  (Build.startBlock l : BuildM Py.env Info Unit)
+  (Build.Raw.startBlock l : BuildM Py.env Info Unit)
   let v ← PyBuild.noneLit
-  (Build.finishBlock (.jump {} (Build.goto j)) : BuildM Py.env Info Unit)
-  (Build.startBlock r : BuildM Py.env Info Unit)
-  (Build.finishBlock (.jump {} (Build.goto j)) : BuildM Py.env Info Unit)
-  (Build.startBlock j : BuildM Py.env Info Unit)
+  (Build.finishBlock (.jump {} (Build.Raw.goto j)) : BuildM Py.env Info Unit)
+  (Build.Raw.startBlock r : BuildM Py.env Info Unit)
+  (Build.finishBlock (.jump {} (Build.Raw.goto j)) : BuildM Py.env Info Unit)
+  (Build.Raw.startBlock j : BuildM Py.env Info Unit)
   if outside then PyBuild.emitReturn v else PyBuild.emitReturnNone
 
 -- A use out of scope is an internal error that says why.

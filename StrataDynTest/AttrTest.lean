@@ -33,7 +33,7 @@ private def key (s : String) : Name := (Name.base.str "t").str s
 /-- `@m.f`, returning `0`, given the attributes `attrs` after it is built. -/
 private def built (attrs : Array Attr) : String :=
   match Build.build (env := Reg.env) (.str (.str .base "m") "f") Base.Int ({} : Info) do
-    let _ ← Build.startFreshBlock #[] "entry"
+    let _ ← Build.Raw.startFreshBlock #[] "entry"
     let c ← Build.emitConst (.str .base "c") (.int 0)
     Build.finishBlock (.ret {} c) with
   | .ok fn => Func.format .full (Func.setInfo fn { attrs }).val

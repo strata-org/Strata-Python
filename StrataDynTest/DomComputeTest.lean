@@ -36,8 +36,8 @@ and scopable.  All are compiled checks.
 namespace Strata.Dyn.DomComputeTest
 
 open Strata.Dyn.DSLTest
-open Strata.Dyn.Build (freshVal freshLabel startBlock startFreshBlock emitApply emitConst
-  finishBlock region goto build FailedFunc)
+open Strata.Dyn.Build (freshVal emitApply emitConst finishBlock region build FailedFunc)
+open Strata.Dyn.Build.Raw (freshLabel startBlock startFreshBlock goto)
 
 private abbrev E := Demo.env
 

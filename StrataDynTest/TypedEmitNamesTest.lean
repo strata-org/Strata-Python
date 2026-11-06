@@ -45,14 +45,15 @@ public environment Tn extends Base where
 /-- The name `s`. -/
 def n (s : String) : Name := .str .base s
 
-/-- What `build` gives. -/
-abbrev Built := Except (Build.FailedFunc Tn.env Unit Unit) {fn : Func Tn.env Unit // fn.WF}
+/-- What `Emit.func` gives. -/
+abbrev Built :=
+  Except (Build.FailedFunc Tn.env Unit Unit) ({fn : Func Tn.env Unit // fn.WF} × Unit)
 
 /-- The module `m` of `f`, printed, or why it was not built. -/
 private def showMod (f : Built) : String :=
   match f with
   | .error e => toString e
-  | .ok f => match Module.ofChecked (.str .base "m") #[f] () with
+  | .ok (f, _) => match Module.ofChecked (.str .base "m") #[f] () with
     | .ok m => toString m
     | .error _ => "the module is not well formed"
 
@@ -72,14 +73,12 @@ info: Strata.Dyn.TypedEmitNamesTest.Tn.clash {env : Env Unit} {α : Type} {m : T
 
 /-- `clash(%x : Int)`, the operands given by name. -/
 private def clash : Built :=
-  Build.build (n "clash") Base.Int () do
-    let (xd, x) ← param (n "x") Base.Int
-    let _ ← Build.startFreshBlock #[xd] "entry"
+  Emit.func (n "clash") [(n "x", Base.Int)] Base.Int () fun (.cons x .nil) exit => do
     let% r ← Tn.clash (d1 := x) (bodyBase := x) (bodyBase_ := "loop")
       (body := fun p q exit => do
         let _ ← Base.refNew (result := n "c") q
         Base.jump (exit.bind p))
-    ret r
+    ret exit r
 
 /--
 info: module m {
@@ -114,13 +113,11 @@ info: Strata.Dyn.TypedEmitNamesTest.Tn.sub {env : Env Unit} {α : Type} {m : Typ
 /-- `renamed(%b : Bool)`: `sub` of `1`, `2` and `b`, at two types, the second operand given by
 name. -/
 private def renamed : Built :=
-  Build.build (n "renamed") Base.Int () do
-    let (bd, b) ← param (n "b") Base.Bool
-    let _ ← Build.startFreshBlock #[bd] "entry"
+  Emit.func (n "renamed") [(n "b", Base.Bool)] Base.Int () fun (.cons b .nil) exit => do
     let one ← int (n "one") 1
     let two ← int (n "two") 2
     let% r ← Tn.sub one b (result_ := two)
-    ret r
+    ret exit r
 
 /--
 info: module m {
@@ -141,14 +138,12 @@ or `Bind`, the first components of constants it uses, does not shadow them. -/
 
 /-- `rooted(%x : Int)`: both instructions. -/
 private def rooted : Built :=
-  Build.build (n "rooted") Base.Int () do
-    let (xd, x) ← param (n "x") Base.Int
+  Emit.func (n "rooted") [(n "x", Base.Int)] Base.Int () fun (.cons x .nil) exit => do
     let kL ← freshLabel [Base.Int] "k"
-    let _ ← Build.startFreshBlock #[xd] "entry"
     let% r ← Tn.rooted x (fun p exit => Base.jump (exit.bind p))
     let% s ← Tn.rootedSwap r kL.goto
-    ret s
-    ret (← startBlock₁ kL (n "v"))
+    ret exit s
+    ret exit (← startBlock₁ kL (n "v"))
 
 /--
 info: module m {

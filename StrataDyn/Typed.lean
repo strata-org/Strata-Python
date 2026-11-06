@@ -19,7 +19,8 @@ that made the value, and `Build.run` checks the function.
 
 * `Val env t`, a value of type `t`; `Val.ofId` and `Val.cast` give one whatever type they are
   told.
-* `Vals env ts`, a value per type of `ts`, written `vals[x, y]` where `Strata.Dyn` is open.
+* `Vals env ts`, a value per type of `ts`, written `vals[x, y]` where `Strata.Dyn` is open;
+  `Vals.ids` and `Vals.idsVec` go back to their ids.
 
 The typed blocks and targets are in `StrataDyn.Build.Typed`, beside the builder operations
 that make them.
@@ -64,6 +65,17 @@ def idsTo {ts : List (TypeExpr env)} (acc : Array ValId) : Vals env ts → Array
 
 /-- The values' ids. -/
 @[inline] def ids {ts : List (TypeExpr env)} (vs : Vals env ts) : Array ValId := vs.idsTo #[]
+
+/-- `idsTo` appends an id per value. -/
+private theorem size_idsTo {ts : List (TypeExpr env)} (acc : Array ValId) (vs : Vals env ts) :
+    (vs.idsTo acc).size = acc.size + ts.length := by
+  induction vs generalizing acc with
+  | nil => rfl
+  | cons v vs ih => rw [idsTo, ih, Array.size_push, List.length_cons]; omega
+
+/-- The values' ids, as a vector with one per type of `ts`. -/
+@[inline] def idsVec {ts : List (TypeExpr env)} (vs : Vals env ts) : Vector ValId ts.length :=
+  ⟨vs.ids, by simp [ids, size_idsTo]⟩
 
 end Vals
 
