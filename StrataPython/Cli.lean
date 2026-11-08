@@ -6,6 +6,7 @@
 module
 
 public import Strata.Cli.Framework
+public import Strata.Cli.CoreCommands
 public import Strata.Cli.VerifyOptions
 public import Strata.Backends.CBMC.CollectSymbols
 public import Strata.Backends.CBMC.GOTO.CoreToGOTOPipeline
@@ -650,6 +651,20 @@ def pyFeaturesCommand : _root_.Command where
       | .error msg => exitFailure msg
     let result := StrataPython.FeatureUsage.analyzeFeatures stmts
     IO.print (StrataPython.FeatureUsage.formatReport result)
+
+/-- The Python front end: the Python dialects and the Python commands. -/
+def pythonFrontend : Strata.Cli.CliFrontend where
+  dialects := [StrataPython.Python, StrataPython.Specs.DDM.PythonSpecs]
+  group := fun mkDischarge =>
+    { name := "Python"
+      commands := [pyAnalyzeLaurelCommand mkDischarge,
+                   pyResolveOverloadsCommand,
+                   pySpecsCommand,
+                   pySpecToLaurelCommand,
+                   pyAnalyzeLaurelToGotoCommand,
+                   pyAnalyzeToGotoCommand,
+                   pyTranslateLaurelCommand,
+                   pyInterpretCommand] }
 
 end StrataPython.Cli
 
