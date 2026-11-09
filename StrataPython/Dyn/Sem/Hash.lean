@@ -79,6 +79,29 @@ def Hash.allExact? : List Hash → Option (List Int)
   | .exact h :: rest => (Hash.allExact? rest).map (h :: ·)
   | .symbolic _ :: _ => none
 
+/-- `Hash.allExact?` with an accumulator, so that a long list doesn't grow the native stack; the
+compiled code of `Hash.allExact?` (`Hash.allExact?_eq_allExactTR`). -/
+def Hash.allExactTR (hs : List Hash) : Option (List Int) := go hs []
+where
+  /-- The numbers of `hs` after the numbers `acc` (in reverse), if every hash of `hs` is exact. -/
+  go : List Hash → List Int → Option (List Int)
+    | [], acc => some acc.reverse
+    | .exact h :: rest, acc => go rest (h :: acc)
+    | .symbolic _ :: _, _ => none
+
+/-- The accumulator of `Hash.allExactTR.go` comes first, reversed, in front of the numbers that
+`Hash.allExact?` gives; by induction on the list. -/
+private theorem Hash.allExactTR_go_eq (hs : List Hash) (acc : List Int) :
+    Hash.allExactTR.go hs acc = (Hash.allExact? hs).map (acc.reverse ++ ·) := by
+  induction hs generalizing acc with
+  | nil => simp [Hash.allExactTR.go, Hash.allExact?]
+  | cons h t ih => cases h <;> simp [Hash.allExactTR.go, Hash.allExact?, ih, Option.map_map,
+      Function.comp_def]
+
+/-- `Hash.allExact?` and its tail-recursive version `Hash.allExactTR` are the same function. -/
+@[csimp] theorem Hash.allExact?_eq_allExactTR : @Hash.allExact? = @Hash.allExactTR := by
+  funext hs; simp [Hash.allExactTR, Hash.allExactTR_go_eq]
+
 /-- The hash of a tuple whose members have the hashes `hs`. -/
 def tupleHash (hs : List Hash) : Hash :=
   match Hash.allExact? hs with
@@ -172,7 +195,7 @@ def Value.immHash : Value → HashResult
     | Option.none => .unknown
   | .str s => .hash (strHash s)
   | .bytes b => .hash (bytesHash b)
-  | .tuple elems => match Value.immHashes elems.toList with
+  | .tuple elems => match Value.immHashes elems.toList [] with
     | .ok hs => .hash (tupleHash hs)
     | .error r => r
   | .range start stop step =>
@@ -197,11 +220,12 @@ def Value.immHash : Value → HashResult
   | .obj _ => .needsStore
   | .undef _ | .bound .. | .method .. | .traceback => .unknown
 
-/-- The hashes of `vs`, or the result of the first one that has no hash here. -/
-def Value.immHashes : List Value → Except HashResult (List Hash)
-  | [] => .ok []
-  | v :: vs => match Value.immHash v with
-    | .hash h => (Value.immHashes vs).map (h :: ·)
+/-- The hashes of `vs` after the hashes `acc` (in reverse), or the result of the first one that
+has no hash here.  Tail-recursive, so that a long tuple doesn't grow the native stack. -/
+def Value.immHashes : List Value → List Hash → Except HashResult (List Hash)
+  | [], acc => .ok acc.reverse
+  | v :: vs, acc => match Value.immHash v with
+    | .hash h => Value.immHashes vs (h :: acc)
     | r => .error r
 
 end

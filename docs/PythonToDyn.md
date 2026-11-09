@@ -2592,3 +2592,48 @@ names this section, until it is fixed.
 - A lone surrogate in a `str` literal, such as `"\udc80"`, reaches the translator as its escape
   text, the six characters `\udc80`. So `"\udc80" == "\\udc80"` is `True`, where CPython gives
   `False`.
+
+### 13.6 Cost
+
+What a step of a translated program costs when `pydyn run` runs it, on top of a plain loop step
+(`n = n + i`, about 3 µs): the fastest of three runs of a loop of 100,000 iterations, minus the
+same loop with the plain step only.
+
+| Step | Cost |
+|---|---|
+| `o.x`, on a class 2 deep (with `object`) | 21 µs |
+| `o.x`, on a class 5 deep | 52 µs |
+| `o.x = i` | 16 µs |
+| `o.m()` | 33 µs |
+| `A()`, with a user `__init__` | 65 µs |
+| `isinstance(o, A)` | 12 µs |
+| `len(repr(x))` of a `float` | 41 µs |
+| `i in {1, 2, 3}` (a set display of constants, built at each evaluation) | 23 µs |
+| `d["a"]` | 8 µs |
+
+Most of an attribute read's cost is per class of the MRO: three namespace lookups of a `str` key
+for each class, about 10 µs a class.
+
+`StrataPythonTestExtra/SemLoopsTest.lean` runs seven loops (`print`, a `try` whose `except`
+catches, `l += [i]`, `d[i] = i`, `del d[i]`, `o.x = i` and a call of a Python function) at 100,000
+and at 1,000,000 iterations. It fails if a run doesn't end with the outcome `ok`, or if a run of
+1,000,000 takes more than 12 times the run of 100,000, as a quadratic cost would; each takes about
+9 times as long. Its runs take a few minutes, so it runs only when `SEM_LOOPS` is set.
+
+A non-ASCII `str` also keeps its characters in an array (`PyStr.chars`, 8 bytes a character),
+computed the first time it is indexed, sliced or measured with `len`, so that later indexing and
+slicing take constant time a character.
+
+Two kinds of input can exhaust `pydyn`'s native stack, and then `pydyn` may run for minutes or
+abort, and it gives no result:
+- Deep nesting, before the model's C depth limit (`cDepthLimit`, 9,000) stops it with a gap. For
+  example, `a < b` on two tuples nested 1,250 deep makes `pydyn` abort, where CPython answers at
+  once.
+- One operation over a value of about a million members, such as the `repr` of a list, a tuple or
+  a dict of 1,000,000 members, or a dict or set key that is a tuple of 1,000,000 members holding an
+  object, a `str` or a tuple (a tuple of numbers hashes within the stack). A loop inside a rule over one value's members takes native stack for each member until
+  the rule ends. `StrataPythonTestExtra/SemScaleTest.lean` runs these reprs at 100,000 members.
+
+The rules' meaning is defined for every size; only the compiled runner aborts, so no verdict
+depends on this limit.
+

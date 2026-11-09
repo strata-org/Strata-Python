@@ -146,24 +146,30 @@ def dictFindStr [PyReads m V] (d : V) (name : String) : m (Option V) := do
     PyPure.gap "a namespace whose keys run user code is not modelled yet"
 
 /-- The entry `name` of the namespace of the class `c` (a class object or a built-in type), if it
-has one; a gap for a name that the class gaps. -/
-def lookupOwn [PyReads m V] (c : V) (name : String) : m (Option V) := do
+has one; a gap for a name that the class gaps.  `k` is `name` as a `str` key, built once for a walk
+of several classes. -/
+def lookupOwnK [PyReads m V] (c : V) (name : String) (k : V) : m (Option V) := do
   match ← PyPure.immView c with
   | some (.builtin b) => builtinEntry b name
   | _ => match ← classData? c with
     | some cd =>
       if cd.gapped.contains name then
         PyPure.gap s!"the attribute {cd.name}.{name} is not modelled yet"
-      dictFindStr cd.ns name
+      PyReads.dictFind cd.ns k none fun _ =>
+        PyPure.gap "a namespace whose keys run user code is not modelled yet"
     | none => pure none
 
-/-- The first entry `name` along the classes `mro`. -/
-def lookupMro [PyReads m V] (mro : List V) (name : String) : m (Option V) :=
+/-- The first entry `name` along the classes `mro`, with `k` as in `lookupOwnK`. -/
+def lookupMroK [PyReads m V] (mro : List V) (name : String) (k : V) : m (Option V) :=
   match mro with
   | [] => pure none
   | c :: rest => do
-    if let some v ← lookupOwn c name then return some v
-    lookupMro rest name
+    if let some v ← lookupOwnK c name k then return some v
+    lookupMroK rest name k
+
+/-- The first entry `name` along the classes `mro`. -/
+def lookupMro [PyReads m V] (mro : List V) (name : String) : m (Option V) :=
+  lookupMroK mro name (PyPure.imm (m := m) (.str (.ofString name)))
 
 /-- **`_PyType_Lookup(t, name)`**: the first entry `name` along the MRO of the class `t`. -/
 def lookupType [PyReads m V] (t : V) (name : String) : m (Option V) := do
@@ -180,20 +186,40 @@ def defaultGetattrOwner [PyReads m V] (t : V) : m (Option Builtin) := do
       if b.ownNames.any (·.1 == "__getattribute__") then return some b
   return none
 
-/-- Whether `lookupType t name` finds a plain value (a `str`, an `int` or `None`) in a built-in
-type's table, which no descriptor protocol applies to: a write of the attribute goes to the
-instance then, without the value, which the model may not hold. -/
-def lookupIsPlainValue [PyReads m V] (t : V) (name : String) : m Bool := do
+/-- `(lookupType t n₁, lookupType t n₂)`, in one walk of the MRO of the class `t`. -/
+def lookupType2 [PyReads m V] (t : V) (n₁ n₂ : String) : m (Option V × Option V) := do
   let some mro ← mroOf t | PyPure.gap "a lookup on a type that is not a class"
+  let k₁ := PyPure.imm (m := m) (.str (.ofString n₁))
+  let k₂ := PyPure.imm (m := m) (.str (.ofString n₂))
+  let mut r₁ : Option V := none
+  let mut r₂ : Option V := none
+  for c in mro do
+    if r₁.isNone then r₁ ← lookupOwnK c n₁ k₁
+    if r₂.isNone then r₂ ← lookupOwnK c n₂ k₂
+    if r₁.isSome && r₂.isSome then break
+  return (r₁, r₂)
+
+/-- What `lookupTypeEntry` finds: nothing; a plain value (a `str`, an `int` or `None`) in the
+table of the built-in type `b`; or an entry. -/
+inductive TypeEntry (V : Type) where
+  | none
+  | plain (b : Builtin)
+  | entry (v : V)
+
+/-- `lookupType t name` in one walk of the MRO, with a plain value of a built-in type's table told
+apart.  No descriptor protocol applies to such a value, so an attribute write goes to the
+instance, and the model may not hold the value itself. -/
+def lookupTypeEntry [PyReads m V] (t : V) (name : String) : m (TypeEntry V) := do
+  let some mro ← mroOf t | PyPure.gap "a lookup on a type that is not a class"
+  let k := PyPure.imm (m := m) (.str (.ofString name))
   for c in mro do
     match ← PyPure.immView c with
     | some (.builtin b) =>
-      if let some (_, k) := b.ownNames.find? (·.1 == name) then
-        return k == .strValue || k == .intValue || k == .noneValue
-    | _ =>
-      if let some cd ← classData? c then
-        if (← dictFindStr cd.ns name).isSome then return false
-  return false
+      if let some (_, kind) := b.ownNames.find? (·.1 == name) then
+        if kind == .strValue || kind == .intValue || kind == .noneValue then return .plain b
+        if let some v ← builtinEntry b name then return .entry v
+    | _ => if let some v ← lookupOwnK c name k then return .entry v
+  return .none
 
 /-- Whether the class of `v` is exactly the built-in type `b`. -/
 def classIs [PyReads m V] (v : V) (b : Builtin) : m Bool := do

@@ -38,18 +38,66 @@ abbrev ObjId := Nat
 /-- Whether every character of `s` is ASCII. -/
 def isAscii (s : String) : Bool := s.toList.all fun c => c.val < 128
 
-/-- A Python `str`: its text, and whether every character is ASCII, so that indexing an ASCII
-string is by byte. -/
+/-- A Python `str`: its text, whether every character is ASCII, so that indexing an ASCII string
+is by byte, and its characters, computed once when a non-ASCII string is first indexed, so that
+indexing it is by position.  The text decides the other fields. -/
 structure PyStr where
   s : String
   ascii : Bool
   ascii_eq : ascii = isAscii s
-  deriving DecidableEq, Repr, Ord
+  chars : Thunk (Array Char)
+  chars_eq : chars.get = s.toList.toArray
+
+/-- Two `str`s with the same text are equal. -/
+theorem PyStr.eq_of_s {a b : PyStr} (h : a.s = b.s) : a = b := by
+  cases a with | mk s₁ a₁ ha₁ c₁ hc₁ => cases b with | mk s₂ a₂ ha₂ c₂ hc₂ =>
+  cases h
+  have hc : c₁ = c₂ := by
+    cases c₁; cases c₂; simp only [Thunk.get] at hc₁ hc₂; congr; funext u; cases u; simp [hc₁, hc₂]
+  subst ha₁ ha₂ hc; rfl
+
+instance : DecidableEq PyStr := fun a b =>
+  if h : a.s = b.s then isTrue (PyStr.eq_of_s h) else isFalse fun e => h (e ▸ rfl)
 
 instance : Hashable PyStr := ⟨fun p => hash p.s⟩
 
+/-- `str`s are ordered by their text, which decides the other fields. -/
+instance : Ord PyStr := ⟨fun a b => compare a.s b.s⟩
+
+instance : Repr PyStr where
+  reprPrec p _ := Std.Format.bracket "{ "
+    (f!"s := {repr p.s}," ++ Std.Format.line ++ f!"ascii := {repr p.ascii}," ++ Std.Format.line ++
+      "ascii_eq := _") " }"
+
 /-- The `str` whose text is `s`. -/
-def PyStr.ofString (s : String) : PyStr := ⟨s, isAscii s, rfl⟩
+def PyStr.ofString (s : String) : PyStr :=
+  ⟨s, isAscii s, rfl, Thunk.mk fun _ => s.toList.toArray, rfl⟩
+
+/-- Whether the concatenation of two texts is ASCII. -/
+private theorem isAscii_append (a b : String) : isAscii (a ++ b) = (isAscii a && isAscii b) := by
+  simp [isAscii, String.toList_append, List.all_append]
+
+/-- `x + y` for two `str`s: whether the result is ASCII comes from the two parts, without a scan
+of the result. -/
+def PyStr.append (x y : PyStr) : PyStr :=
+  -- The thunk holds the new text only, not `x` and `y`, so that a chain of concatenations keeps
+  -- no earlier text alive.
+  let t := x.s ++ y.s
+  ⟨t, x.ascii && y.ascii, by rw [x.ascii_eq, y.ascii_eq, isAscii_append],
+    Thunk.mk fun _ => t.toList.toArray, rfl⟩
+
+/-- `PyStr.append` gives the `str` whose text is the concatenation. -/
+theorem PyStr.append_eq_ofString (x y : PyStr) : x.append y = .ofString (x.s ++ y.s) :=
+  PyStr.eq_of_s rfl
+
+/-- The character at position `i` of `t`, `i` in range: by byte for an ASCII string, else by
+position in its characters. -/
+def PyStr.charAt (t : PyStr) (i : Nat) : Char :=
+  if t.ascii then String.Pos.Raw.get t.s ⟨i⟩ else t.chars.get.getD i ' '
+
+/-- The number of characters of `t`. -/
+def PyStr.length (t : PyStr) : Nat :=
+  if t.ascii then t.s.utf8ByteSize else t.chars.get.size
 
 instance : Inhabited PyStr := ⟨.ofString ""⟩
 

@@ -316,7 +316,7 @@ def concatSeq [PyReads m V] (a b : V) : m (Option V) := do
   if let some xs ← listOf? a then
     if let some ys ← listOf? b then return some (← PyPure.allocList (xs ++ ys))
   match ← seqImm? a, ← seqImm? b with
-  | some (.str x), some (.str y) => return some (PyPure.imm (m := m) (.str (.ofString (x.s ++ y.s))))
+  | some (.str x), some (.str y) => return some (PyPure.imm (m := m) (.str (x.append y)))
   | some (.bytes x), some (.bytes y) => return some (PyPure.imm (m := m) (.bytes (x ++ y)))
   | some (.tuple x), some (.tuple y) => return some (PyPure.imm (m := m) (.tuple (x ++ y)))
   | _, _ => return none

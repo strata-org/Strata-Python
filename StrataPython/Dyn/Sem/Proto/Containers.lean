@@ -50,7 +50,7 @@ def Seq.typeName {V : Type} : Seq V → String
 /-- The number of elements of a sequence. -/
 def Seq.length {V : Type} : Seq V → Nat
   | .tuple xs | .list _ xs => xs.size
-  | .str s => if s.ascii then s.s.utf8ByteSize else s.s.length
+  | .str s => s.length
   | .bytes b => b.size
   | .range a b c => rangeLen a b c
 
@@ -146,8 +146,9 @@ def Seq.at [PyPure m V] (s : Seq V) (i : Nat) : V :=
   match s with
   | .tuple xs | .list _ xs => xs.getD i (PyPure.imm (m := m) .none)
   | .str t =>
-    -- An ASCII `str` is indexed by byte, in constant time.
-    let ch := if t.ascii then String.Pos.Raw.get t.s ⟨i⟩ else t.s.toList.getD i ' '
+    -- A `str` is indexed in constant time, after a non-ASCII one's first use builds its characters
+    -- (`PyStr.charAt`).
+    let ch := t.charAt i
     PyPure.imm (m := m) (.str (.ofString (String.singleton ch)))
   | .bytes b => PyPure.imm (m := m) (.int (b.getD i 0).toNat)
   | .range a _ c => PyPure.imm (m := m) (.int (a + i * c))
@@ -221,8 +222,7 @@ def sliceOf [PyCalls m V] (s : Seq V) (lo hi step : V) : m V := do
   | .tuple xs => pure (PyPure.imm (m := m) (.tuple (ps.toArray.map fun p => xs.getD p (PyPure.imm (m := m) .none))))
   | .list _ xs => PyPure.allocList (ps.toArray.map fun p => xs.getD p (PyPure.imm (m := m) .none))
   | .str t =>
-    let cs := t.s.toList.toArray
-    pure (PyPure.imm (m := m) (.str (.ofString (String.ofList (ps.map fun p => cs.getD p ' ')))))
+    pure (PyPure.imm (m := m) (.str (.ofString (String.ofList (ps.map t.charAt)))))
   | .bytes b => pure (PyPure.imm (m := m) (.bytes (ps.toArray.map fun p => b.getD p 0)))
   | .range a z c => rangeSlice a z c lo hi step
 

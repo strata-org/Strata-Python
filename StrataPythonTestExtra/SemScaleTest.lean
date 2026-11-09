@@ -13,9 +13,11 @@ meta import StrataPythonTest.Util.Python
 Runs `pydyn run` on loops of 200000 steps: calls that each allocate a kwargs dict and a list, and
 writes that grow a dict, a list and a set, deletions that shrink a list, the iteration of a
 non-ASCII `str`, a loop after many iterators of a non-ASCII `str` that stopped early, the walks of
-a tuple of a million members, and an empty `str` repeated `2 ** 40` times.  Each run takes about 2 seconds, and the test fails if
-one takes more than 30 seconds; a store or a container that copied itself on each write would take
-minutes.
+a tuple of a million members, an empty `str` repeated `2 ** 40` times, indexing and growing a
+non-ASCII `str`, the hash of a tuple of a million members, and the reprs of a tuple, a list and a
+dict of 100,000 members, and `<` of two tuples nested 800 deep (sizes that run within the native
+stack today, docs/PythonToDyn.md §13.6).  Each run takes a few seconds, and the test fails if one takes more
+than 30 seconds; a store or a container that copied itself on each write would take minutes.
 -/
 
 namespace StrataPython.SemScaleTest
@@ -37,7 +39,17 @@ private meta def programs : List (String × String × String) := [
   ("stopped str iterators", "i = 0\nwhile i < 100000:\n    for c in 'éa':\n        break\n    i = i + 1\n\
     l = [0] * 100000\nn = 0\nfor x in l:\n    n = n + 1\n", "n = 100000"),
   ("long tuples", "t = (0,) * 1000000\na = t == t[:]\nb = 1 in t\nc = t < t[:]\n", "c = False"),
-  ("empty str repetition", "s = '' * 2 ** 40\n", "s = ''")]
+  ("empty str repetition", "s = '' * 2 ** 40\n", "s = ''"),
+  ("non-ASCII str indexing", "s = 'é' * 100000\nn = 0\ni = 0\nwhile i < 100000:\n    \
+    if s[i] == 'é':\n        n = n + 1\n    i = i + 1\n", "n = 100000"),
+  ("str concatenation", "s = ''\ni = 0\nwhile i < 100000:\n    s += 'é'\n    i = i + 1\n\
+    n = len(s)\ndel s\n", "n = 100000"),
+  ("hash of a long tuple", "t = (0,) * 1000000\nr = len({t})\ndel t\n", "r = 1"),
+  ("reprs of long containers", "t = (0,) * 100000\nl = [0] * 100000\nd = {}\ni = 0\n\
+    while i < 100000:\n    d[i] = i\n    i = i + 1\na = len(repr(t))\nb = len(repr(l))\n\
+    c = len(repr(d))\ndel t, l, d\n", "c = 1377780"),
+  ("deep tuple comparison", "a = 0\nb = 0\ni = 0\nwhile i < 800:\n    a = (a,)\n    b = (b, 1)\n    \
+    i = i + 1\nr = a < b\ndel a, b\n", "r = True")]
 
 -- `pydyn run` parses the program with Python, so the test needs it, as the other tests do.
 #eval StrataPython.withPython fun _ => do

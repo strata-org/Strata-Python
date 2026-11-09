@@ -55,10 +55,13 @@ type, then `v`'s `__dict__`, then any other descriptor or class attribute. -/
 def genericGetAttr [PyCalls m V] (v t : V) (name : String) : m V := do
   -- A plain value of a built-in type's table is no data descriptor, so the instance dict comes
   -- first; the model may not hold the value itself.
-  if ← lookupIsPlainValue t name then
-    if let some dict ← PyReads.objDict v then
-      if let some x ← dictFindStr dict name then return x
-  let descr ← lookupType t name
+  let descr ← match ← lookupTypeEntry t name with
+    | .plain b =>
+      if let some dict ← PyReads.objDict v then
+        if let some x ← dictFindStr dict name then return x
+      builtinEntry b name
+    | .entry d => pure (some d)
+    | .none => pure none
   if let some d := descr then
     if (← isDataDescr d) && (← hasGet d) then return ← descrGetN dispatchDepth d (some v) t
   if let some dict ← PyReads.objDict v then
@@ -165,8 +168,9 @@ raised `AttributeError`; without `set_attribute_error_context`. -/
 def getAttrRaw [PyCalls m V] (v : V) (name : String) : m V := do
   let t ← PyReads.classOf v
   let nameV := PyPure.imm (m := m) (.str (.ofString name))
+  let (ga?, hook?) ← lookupType2 t "__getattribute__" "__getattr__"
   let attempt : m V := do
-    match ← lookupType t "__getattribute__" with
+    match ga? with
     | some ga =>
       match ← PyPure.immView ga with
       | some (.descr b "__getattribute__" _) =>
@@ -175,7 +179,7 @@ def getAttrRaw [PyCalls m V] (v : V) (name : String) : m V := do
           modelled yet"
       | _ => callFound ga v t #[nameV] (← PyPure.allocDict)
     | none => getAttrCore v name
-  match ← lookupType t "__getattr__" with
+  match hook? with
   | none => attempt
   | some hook => tryCatch attempt fun x => do
     if ← isAttributeError x then
@@ -244,8 +248,10 @@ def genericSetAttr [PyWrites m V] (v t : V) (name : String) (val : Option V) : m
     if cd.instanceWritesGap then
       PyPure.gap s!"an attribute write to an instance of {cd.name} is not modelled yet"
   let noAttr : m Unit := raiseAttrPlain s!"'{← classNameOf t}' object has no attribute '{name}'"
-  let plain ← lookupIsPlainValue t name
-  let descr ← if plain then pure none else lookupType t name
+  let (plain, descr) ← match ← lookupTypeEntry t name with
+    | .plain .. => pure (true, none)
+    | .entry d => pure (false, some d)
+    | .none => pure (false, none)
   -- With no `__dict__`, a name that the type has is read-only.
   let noDict : m Unit := do
     if plain || descr.isSome then
