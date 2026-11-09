@@ -563,9 +563,9 @@ private def pythonGradualTypes : Std.HashSet String :=
       if kt.arity == 0 && !laurelPrims.contains kt.name then some kt.name else none
   ((["Any", "re_Match"] : List String) ++ corePrims).foldl (fun s n => s.insert n) {}
 
-/-- Wrap `e` in a unary `StaticCall` to the named prelude function. -/
+/-- Wrap `e` in a unary static `Call` to the named prelude function. -/
 private def pyCoerceCall (name : String) (e : Laurel.StmtExprMd) : Laurel.StmtExprMd :=
-  { val := .StaticCall { text := name, uniqueId := none } [e] [], source := e.source }
+  { val := .Call none { text := name, uniqueId := none } [e] [], source := e.source }
 
 /-- Classify a Python/Laurel `HighType` to the prelude box/unbox vocabulary key.
     Mirrors the elaborator's `eraseType` (Elaborate.lean): user-defined classes are
@@ -604,7 +604,7 @@ private def pythonRealizeCoercion : Laurel.Coercion → Laurel.StmtExprMd → La
     -- `Error` is the `Any.exception (get_error : Error)` constructor: box an exception
     -- value into `Any` (used when an `Error`-typed value flows into an `Any` slot).
     | "Error" => pyCoerceCall "exception" e
-    | "void" => { val := .StaticCall { text := "from_None", uniqueId := none } [] [], source := e.source }
+    | "void" => { val := .Call none { text := "from_None", uniqueId := none } [] [], source := e.source }
     | _ => e   -- already Any or a type with no boxing witness: pass through
   | .project target, e =>
     match pyTypeKey target with

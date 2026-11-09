@@ -1720,7 +1720,7 @@ partial def resolveAlias (f : SourceRange → ResolvedAnn) : StrataPython.alias 
 
 /-- Resolves a `with` item: uses `typeOfExpr` on the context expression to find the class,
     then looks up `__enter__` and `__exit__` in its method list. Annotates with `.withCtx`
-    carrying both sigs so Translation can emit `StaticCall enter [mgr]` / `StaticCall exit [mgr]`. -/
+    carrying both sigs so Translation can emit static calls `enter [mgr]` / `exit [mgr]`. -/
 partial def resolveWithitem (ctx : Ctx) (f : SourceRange → ResolvedAnn) : StrataPython.withitem SourceRange → ResolveM (StrataPython.withitem ResolvedAnn)
   | .mk_withitem a ctxExpr optVars => do
       let enterId := PythonIdentifier.builtin "__enter__"
