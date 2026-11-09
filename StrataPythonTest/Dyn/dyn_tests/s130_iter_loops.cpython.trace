@@ -1,0 +1,56 @@
+--- stdout 472
+iter
+hint
+next 1
+next 2
+next 3
+3 1 2 3
+iter
+next 1
+next 2
+2 1 2
+iter
+next 1
+iter
+hint
+next 2
+next 3
+next 4
+1 2 2 3 4
+iter
+hint
+next 1
+next 2
+2 1 2
+iter
+next 1
+next 2
+iter
+next 1
+next 2
+True False True False
+3 0 1 2
+1 4
+iter
+next 1
+iter
+hint
+not enough values to unpack (expected at least 2, got 1)
+Value after * must be an iterable, not int
+print() argument after * must be an iterable, not int
+cannot unpack non-iterable int object
+argument of type 'int' is not iterable
+
+--- outcome
+ok
+--- globals
+G = <class 'G'>
+It = <class 'It'>
+__doc__ = None
+__name__ = '__main__'
+a = 1
+b = [2, 3]
+c = 4
+f = <function object>
+show = <function object>
+t = (1, 2)

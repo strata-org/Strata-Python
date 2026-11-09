@@ -1,0 +1,13 @@
+--- stdout 86
+5 7 1 8 9
+ValueError attempt to assign sequence of size 2 to extended slice of size 3
+
+--- outcome
+ok
+--- globals
+Two = <class 'Two'>
+Two2 = <class 'Two2'>
+__doc__ = None
+__name__ = '__main__'
+xs = [7, 1, 8, 3, 9]
+ys = [0, 1, 2, 3, 4]

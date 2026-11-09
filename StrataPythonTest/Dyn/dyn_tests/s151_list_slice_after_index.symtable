@@ -1,0 +1,44 @@
+module top
+  Append: local (assigned, referenced)
+  Back: local (assigned, referenced)
+  Boom: local (assigned, referenced)
+  Cut: local (assigned, referenced)
+  Drop: local (assigned, referenced)
+  Insert: local (assigned, referenced)
+  KeyError: global implicit (referenced)
+  e: local (assigned)
+  len: global implicit (referenced)
+  print: global implicit (referenced)
+  xs: local (assigned, referenced)
+  ys: local (assigned, referenced)
+  class Drop
+    __index__: local (assigned)
+    function __index__
+      self: local (parameter)
+      xs: global implicit (referenced)
+  class Insert
+    __index__: local (assigned)
+    function __index__
+      self: local (parameter)
+      xs: global implicit (referenced)
+  class Append
+    __index__: local (assigned)
+    function __index__
+      len: global implicit (referenced)
+      self: local (parameter)
+      xs: global implicit (referenced)
+  class Back
+    __index__: local (assigned)
+    function __index__
+      self: local (parameter)
+  class Cut
+    __index__: local (assigned)
+    function __index__
+      self: local (parameter)
+      xs: global implicit (referenced)
+  class Boom
+    __index__: local (assigned)
+    function __index__
+      KeyError: global implicit (referenced)
+      self: local (parameter)
+qualnames: Append, Append.__index__, Back, Back.__index__, Boom, Boom.__index__, Cut, Cut.__index__, Drop, Drop.__index__, Insert, Insert.__index__

@@ -1,0 +1,694 @@
+module s150_list_index_after_index {
+  func @|s150_list_index_after_index.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s150_list_index_after_index")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|s150_list_index_after_index.Clear.<body>|, "<body>", "s150_list_index_after_index")
+      %str.1 : py.Value = py.strLit("Clear")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %Clear.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %Clear.cell.0 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "Clear")
+      %set.2 : base.Unit = base.refSet[py.Value](%Clear.cell.0, %Clear.0)
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %list.0 : py.Value = py.mkList(%int.0, %int.1)
+      %xs.cell.0 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "xs")
+      %set.3 : base.Unit = base.refSet[py.Value](%xs.cell.0, %list.0)
+      %int.2 : py.Value = py.intLit(5)
+      %xs.0 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^catch.0()
+      %Clear.1 : py.Value = py.loadGlobal("s150_list_index_after_index", "Clear") ^catch.0()
+      %tuple.1 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%Clear.1, %tuple.1, %kwargs.1) ^catch.0()
+      %store.0 : base.Unit = py.setItem(%xs.0, %call.0, %int.2) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %IndexError.0 : py.Value = py.loadGlobal("s150_list_index_after_index", "IndexError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %IndexError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "e")
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.0 : py.Value = py.loadGlobal("s150_list_index_after_index", "print") ^clear.0()
+      %str.2 : py.Value = py.strLit("IndexError")
+      %tuple.2 : py.Value = py.mkTuple(%str.2)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.2, %kwargs.2) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.0 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "e")
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.0)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "e")
+      %set.6 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.1)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %print.1 : py.Value = py.loadGlobal("s150_list_index_after_index", "print") ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("s150_list_index_after_index", "len") ^propagate.0()
+      %xs.1 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple(%xs.1)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%len.0, %tuple.3, %kwargs.3) ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple(%call.2)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.1, %tuple.4, %kwargs.4) ^propagate.0()
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|s150_list_index_after_index.ClearAll.<body>|, "<body>", "s150_list_index_after_index")
+      %str.3 : py.Value = py.strLit("ClearAll")
+      %tuple.5 : py.Value = py.mkTuple(%clo.1, %str.3)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %ClearAll.0 : py.Value = py.call(%__build_class__.1, %tuple.5, %kwargs.5) ^propagate.0()
+      %ClearAll.cell.0 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "ClearAll")
+      %set.7 : base.Unit = base.refSet[py.Value](%ClearAll.cell.0, %ClearAll.0)
+      %int.3 : py.Value = py.intLit(1)
+      %int.4 : py.Value = py.intLit(2)
+      %list.1 : py.Value = py.mkList(%int.3, %int.4)
+      %xs.cell.1 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "xs")
+      %set.8 : base.Unit = base.refSet[py.Value](%xs.cell.1, %list.1)
+      %xs.2 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^catch.1()
+      %ClearAll.1 : py.Value = py.loadGlobal("s150_list_index_after_index", "ClearAll") ^catch.1()
+      %tuple.6 : py.Value = py.mkTuple
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%ClearAll.1, %tuple.6, %kwargs.6) ^catch.1()
+      %del.0 : base.Unit = py.delItem(%xs.2, %call.4) ^catch.1()
+      jump ^join.1()
+    catch.1(%exc.3 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.3)
+      %IndexError.1 : py.Value = py.loadGlobal("s150_list_index_after_index", "IndexError") ^unwind.1()
+      %match.1 : base.Bool = py.excMatch(%exc.3, %IndexError.1) ^unwind.1()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %e.cell.3 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "e")
+      %set.9 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.3)
+      %print.2 : py.Value = py.loadGlobal("s150_list_index_after_index", "print") ^clear.1()
+      %str.4 : py.Value = py.strLit("IndexError")
+      %tuple.7 : py.Value = py.mkTuple(%str.4)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%print.2, %tuple.7, %kwargs.7) ^clear.1()
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.4 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "e")
+      %set.10 : base.Unit = base.refSet[py.Value](%e.cell.4, %e.2)
+      jump ^join.1()
+    clear.1(%exc.4 : py.Value):
+      %e.3 : py.Value = py.undef("e")
+      %e.cell.5 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "e")
+      %set.11 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.3)
+      jump ^unwind.1(%exc.4)
+    next.1():
+      jump ^unwind.1(%exc.3)
+    unwind.1(%exc.5 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.5)
+    join.1():
+      %print.3 : py.Value = py.loadGlobal("s150_list_index_after_index", "print") ^propagate.0()
+      %len.1 : py.Value = py.loadGlobal("s150_list_index_after_index", "len") ^propagate.0()
+      %xs.3 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^propagate.0()
+      %tuple.8 : py.Value = py.mkTuple(%xs.3)
+      %kwargs.8 : py.Value = py.mkKwargs
+      %call.6 : py.Value = py.call(%len.1, %tuple.8, %kwargs.8) ^propagate.0()
+      %tuple.9 : py.Value = py.mkTuple(%call.6)
+      %kwargs.9 : py.Value = py.mkKwargs
+      %call.7 : py.Value = py.call(%print.3, %tuple.9, %kwargs.9) ^propagate.0()
+      %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@|s150_list_index_after_index.Last.<body>|, "<body>", "s150_list_index_after_index")
+      %str.5 : py.Value = py.strLit("Last")
+      %tuple.10 : py.Value = py.mkTuple(%clo.2, %str.5)
+      %kwargs.10 : py.Value = py.mkKwargs
+      %Last.0 : py.Value = py.call(%__build_class__.2, %tuple.10, %kwargs.10) ^propagate.0()
+      %Last.cell.0 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "Last")
+      %set.12 : base.Unit = base.refSet[py.Value](%Last.cell.0, %Last.0)
+      %int.5 : py.Value = py.intLit(1)
+      %int.6 : py.Value = py.intLit(2)
+      %int.7 : py.Value = py.intLit(3)
+      %list.2 : py.Value = py.mkList(%int.5, %int.6, %int.7)
+      %xs.cell.2 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "xs")
+      %set.13 : base.Unit = base.refSet[py.Value](%xs.cell.2, %list.2)
+      %int.8 : py.Value = py.intLit(5)
+      %xs.4 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^catch.2()
+      %Last.1 : py.Value = py.loadGlobal("s150_list_index_after_index", "Last") ^catch.2()
+      %tuple.11 : py.Value = py.mkTuple
+      %kwargs.11 : py.Value = py.mkKwargs
+      %call.8 : py.Value = py.call(%Last.1, %tuple.11, %kwargs.11) ^catch.2()
+      %store.1 : base.Unit = py.setItem(%xs.4, %call.8, %int.8) ^catch.2()
+      jump ^join.2()
+    catch.2(%exc.6 : py.Value):
+      %prev.2 : py.Value = py.pushExcInfo(%exc.6)
+      %IndexError.2 : py.Value = py.loadGlobal("s150_list_index_after_index", "IndexError") ^unwind.2()
+      %match.2 : base.Bool = py.excMatch(%exc.6, %IndexError.2) ^unwind.2()
+      branch(%match.2) ^except.2() ^next.2()
+    except.2():
+      %e.cell.6 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "e")
+      %set.14 : base.Unit = base.refSet[py.Value](%e.cell.6, %exc.6)
+      %print.4 : py.Value = py.loadGlobal("s150_list_index_after_index", "print") ^clear.2()
+      %str.6 : py.Value = py.strLit("IndexError")
+      %tuple.12 : py.Value = py.mkTuple(%str.6)
+      %kwargs.12 : py.Value = py.mkKwargs
+      %call.9 : py.Value = py.call(%print.4, %tuple.12, %kwargs.12) ^clear.2()
+      %pop.4 : base.Unit = py.popExcept(%prev.2)
+      %e.4 : py.Value = py.undef("e")
+      %e.cell.7 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "e")
+      %set.15 : base.Unit = base.refSet[py.Value](%e.cell.7, %e.4)
+      jump ^join.2()
+    clear.2(%exc.7 : py.Value):
+      %e.5 : py.Value = py.undef("e")
+      %e.cell.8 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "e")
+      %set.16 : base.Unit = base.refSet[py.Value](%e.cell.8, %e.5)
+      jump ^unwind.2(%exc.7)
+    next.2():
+      jump ^unwind.2(%exc.6)
+    unwind.2(%exc.8 : py.Value):
+      %pop.5 : base.Unit = py.popExcept(%prev.2)
+      jump ^propagate.0(%exc.8)
+    join.2():
+      %print.5 : py.Value = py.loadGlobal("s150_list_index_after_index", "print") ^propagate.0()
+      %len.2 : py.Value = py.loadGlobal("s150_list_index_after_index", "len") ^propagate.0()
+      %xs.5 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^propagate.0()
+      %tuple.13 : py.Value = py.mkTuple(%xs.5)
+      %kwargs.13 : py.Value = py.mkKwargs
+      %call.10 : py.Value = py.call(%len.2, %tuple.13, %kwargs.13) ^propagate.0()
+      %tuple.14 : py.Value = py.mkTuple(%call.10)
+      %kwargs.14 : py.Value = py.mkKwargs
+      %call.11 : py.Value = py.call(%print.5, %tuple.14, %kwargs.14) ^propagate.0()
+      %__build_class__.3 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.3 : py.Value = py.mkClosure[[]](@|s150_list_index_after_index.Grow.<body>|, "<body>", "s150_list_index_after_index")
+      %str.7 : py.Value = py.strLit("Grow")
+      %tuple.15 : py.Value = py.mkTuple(%clo.3, %str.7)
+      %kwargs.15 : py.Value = py.mkKwargs
+      %Grow.0 : py.Value = py.call(%__build_class__.3, %tuple.15, %kwargs.15) ^propagate.0()
+      %Grow.cell.0 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "Grow")
+      %set.17 : base.Unit = base.refSet[py.Value](%Grow.cell.0, %Grow.0)
+      %int.9 : py.Value = py.intLit(1)
+      %int.10 : py.Value = py.intLit(2)
+      %int.11 : py.Value = py.intLit(3)
+      %list.3 : py.Value = py.mkList(%int.9, %int.10, %int.11)
+      %xs.cell.3 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "xs")
+      %set.18 : base.Unit = base.refSet[py.Value](%xs.cell.3, %list.3)
+      %print.6 : py.Value = py.loadGlobal("s150_list_index_after_index", "print") ^propagate.0()
+      %xs.6 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^propagate.0()
+      %Grow.1 : py.Value = py.loadGlobal("s150_list_index_after_index", "Grow") ^propagate.0()
+      %tuple.16 : py.Value = py.mkTuple
+      %kwargs.16 : py.Value = py.mkKwargs
+      %call.12 : py.Value = py.call(%Grow.1, %tuple.16, %kwargs.16) ^propagate.0()
+      %item.0 : py.Value = py.getItem(%xs.6, %call.12) ^propagate.0()
+      %tuple.17 : py.Value = py.mkTuple(%item.0)
+      %kwargs.17 : py.Value = py.mkKwargs
+      %call.13 : py.Value = py.call(%print.6, %tuple.17, %kwargs.17) ^propagate.0()
+      %__build_class__.4 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.4 : py.Value = py.mkClosure[[]](@|s150_list_index_after_index.Shrink.<body>|, "<body>", "s150_list_index_after_index")
+      %str.8 : py.Value = py.strLit("Shrink")
+      %tuple.18 : py.Value = py.mkTuple(%clo.4, %str.8)
+      %kwargs.18 : py.Value = py.mkKwargs
+      %Shrink.0 : py.Value = py.call(%__build_class__.4, %tuple.18, %kwargs.18) ^propagate.0()
+      %Shrink.cell.0 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "Shrink")
+      %set.19 : base.Unit = base.refSet[py.Value](%Shrink.cell.0, %Shrink.0)
+      %int.12 : py.Value = py.intLit(1)
+      %int.13 : py.Value = py.intLit(2)
+      %list.4 : py.Value = py.mkList(%int.12, %int.13)
+      %xs.cell.4 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "xs")
+      %set.20 : base.Unit = base.refSet[py.Value](%xs.cell.4, %list.4)
+      %print.7 : py.Value = py.loadGlobal("s150_list_index_after_index", "print") ^catch.3()
+      %xs.7 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^catch.3()
+      %Shrink.1 : py.Value = py.loadGlobal("s150_list_index_after_index", "Shrink") ^catch.3()
+      %tuple.19 : py.Value = py.mkTuple
+      %kwargs.19 : py.Value = py.mkKwargs
+      %call.14 : py.Value = py.call(%Shrink.1, %tuple.19, %kwargs.19) ^catch.3()
+      %item.1 : py.Value = py.getItem(%xs.7, %call.14) ^catch.3()
+      %tuple.20 : py.Value = py.mkTuple(%item.1)
+      %kwargs.20 : py.Value = py.mkKwargs
+      %call.15 : py.Value = py.call(%print.7, %tuple.20, %kwargs.20) ^catch.3()
+      jump ^join.3()
+    catch.3(%exc.9 : py.Value):
+      %prev.3 : py.Value = py.pushExcInfo(%exc.9)
+      %IndexError.3 : py.Value = py.loadGlobal("s150_list_index_after_index", "IndexError") ^unwind.3()
+      %match.3 : base.Bool = py.excMatch(%exc.9, %IndexError.3) ^unwind.3()
+      branch(%match.3) ^except.3() ^next.3()
+    except.3():
+      %e.cell.9 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "e")
+      %set.21 : base.Unit = base.refSet[py.Value](%e.cell.9, %exc.9)
+      %print.8 : py.Value = py.loadGlobal("s150_list_index_after_index", "print") ^clear.3()
+      %str.9 : py.Value = py.strLit("IndexError")
+      %tuple.21 : py.Value = py.mkTuple(%str.9)
+      %kwargs.21 : py.Value = py.mkKwargs
+      %call.16 : py.Value = py.call(%print.8, %tuple.21, %kwargs.21) ^clear.3()
+      %pop.6 : base.Unit = py.popExcept(%prev.3)
+      %e.6 : py.Value = py.undef("e")
+      %e.cell.10 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "e")
+      %set.22 : base.Unit = base.refSet[py.Value](%e.cell.10, %e.6)
+      jump ^join.3()
+    clear.3(%exc.10 : py.Value):
+      %e.7 : py.Value = py.undef("e")
+      %e.cell.11 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "e")
+      %set.23 : base.Unit = base.refSet[py.Value](%e.cell.11, %e.7)
+      jump ^unwind.3(%exc.10)
+    next.3():
+      jump ^unwind.3(%exc.9)
+    unwind.3(%exc.11 : py.Value):
+      %pop.7 : base.Unit = py.popExcept(%prev.3)
+      jump ^propagate.0(%exc.11)
+    join.3():
+      %__build_class__.5 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.5 : py.Value = py.mkClosure[[]](@|s150_list_index_after_index.Boom.<body>|, "<body>", "s150_list_index_after_index")
+      %str.10 : py.Value = py.strLit("Boom")
+      %tuple.22 : py.Value = py.mkTuple(%clo.5, %str.10)
+      %kwargs.22 : py.Value = py.mkKwargs
+      %Boom.0 : py.Value = py.call(%__build_class__.5, %tuple.22, %kwargs.22) ^propagate.0()
+      %Boom.cell.0 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "Boom")
+      %set.24 : base.Unit = base.refSet[py.Value](%Boom.cell.0, %Boom.0)
+      %int.14 : py.Value = py.intLit(1)
+      %int.15 : py.Value = py.intLit(2)
+      %list.5 : py.Value = py.mkList(%int.14, %int.15)
+      %xs.cell.5 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "xs")
+      %set.25 : base.Unit = base.refSet[py.Value](%xs.cell.5, %list.5)
+      %int.16 : py.Value = py.intLit(0)
+      %xs.8 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^catch.4()
+      %Boom.1 : py.Value = py.loadGlobal("s150_list_index_after_index", "Boom") ^catch.4()
+      %tuple.23 : py.Value = py.mkTuple
+      %kwargs.23 : py.Value = py.mkKwargs
+      %call.17 : py.Value = py.call(%Boom.1, %tuple.23, %kwargs.23) ^catch.4()
+      %store.2 : base.Unit = py.setItem(%xs.8, %call.17, %int.16) ^catch.4()
+      jump ^join.4()
+    catch.4(%exc.12 : py.Value):
+      %prev.4 : py.Value = py.pushExcInfo(%exc.12)
+      %KeyError.0 : py.Value = py.loadGlobal("s150_list_index_after_index", "KeyError") ^unwind.4()
+      %match.4 : base.Bool = py.excMatch(%exc.12, %KeyError.0) ^unwind.4()
+      branch(%match.4) ^except.4() ^next.4()
+    except.4():
+      %e.cell.12 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "e")
+      %set.26 : base.Unit = base.refSet[py.Value](%e.cell.12, %exc.12)
+      %print.9 : py.Value = py.loadGlobal("s150_list_index_after_index", "print") ^clear.4()
+      %str.11 : py.Value = py.strLit("KeyError")
+      %len.3 : py.Value = py.loadGlobal("s150_list_index_after_index", "len") ^clear.4()
+      %xs.9 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^clear.4()
+      %tuple.24 : py.Value = py.mkTuple(%xs.9)
+      %kwargs.24 : py.Value = py.mkKwargs
+      %call.18 : py.Value = py.call(%len.3, %tuple.24, %kwargs.24) ^clear.4()
+      %xs.10 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^clear.4()
+      %int.17 : py.Value = py.intLit(0)
+      %item.2 : py.Value = py.getItem(%xs.10, %int.17) ^clear.4()
+      %xs.11 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^clear.4()
+      %int.18 : py.Value = py.intLit(1)
+      %item.3 : py.Value = py.getItem(%xs.11, %int.18) ^clear.4()
+      %tuple.25 : py.Value = py.mkTuple(%str.11, %call.18, %item.2, %item.3)
+      %kwargs.25 : py.Value = py.mkKwargs
+      %call.19 : py.Value = py.call(%print.9, %tuple.25, %kwargs.25) ^clear.4()
+      %pop.8 : base.Unit = py.popExcept(%prev.4)
+      %e.8 : py.Value = py.undef("e")
+      %e.cell.13 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "e")
+      %set.27 : base.Unit = base.refSet[py.Value](%e.cell.13, %e.8)
+      jump ^join.4()
+    clear.4(%exc.13 : py.Value):
+      %e.9 : py.Value = py.undef("e")
+      %e.cell.14 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "e")
+      %set.28 : base.Unit = base.refSet[py.Value](%e.cell.14, %e.9)
+      jump ^unwind.4(%exc.13)
+    next.4():
+      jump ^unwind.4(%exc.12)
+    unwind.4(%exc.14 : py.Value):
+      %pop.9 : base.Unit = py.popExcept(%prev.4)
+      jump ^propagate.0(%exc.14)
+    join.4():
+      %xs.12 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^catch.5()
+      %Boom.2 : py.Value = py.loadGlobal("s150_list_index_after_index", "Boom") ^catch.5()
+      %tuple.26 : py.Value = py.mkTuple
+      %kwargs.26 : py.Value = py.mkKwargs
+      %call.20 : py.Value = py.call(%Boom.2, %tuple.26, %kwargs.26) ^catch.5()
+      %del.1 : base.Unit = py.delItem(%xs.12, %call.20) ^catch.5()
+      jump ^join.5()
+    catch.5(%exc.15 : py.Value):
+      %prev.5 : py.Value = py.pushExcInfo(%exc.15)
+      %KeyError.1 : py.Value = py.loadGlobal("s150_list_index_after_index", "KeyError") ^unwind.5()
+      %match.5 : base.Bool = py.excMatch(%exc.15, %KeyError.1) ^unwind.5()
+      branch(%match.5) ^except.5() ^next.5()
+    except.5():
+      %e.cell.15 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "e")
+      %set.29 : base.Unit = base.refSet[py.Value](%e.cell.15, %exc.15)
+      %print.10 : py.Value = py.loadGlobal("s150_list_index_after_index", "print") ^clear.5()
+      %str.12 : py.Value = py.strLit("KeyError")
+      %len.4 : py.Value = py.loadGlobal("s150_list_index_after_index", "len") ^clear.5()
+      %xs.13 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^clear.5()
+      %tuple.27 : py.Value = py.mkTuple(%xs.13)
+      %kwargs.27 : py.Value = py.mkKwargs
+      %call.21 : py.Value = py.call(%len.4, %tuple.27, %kwargs.27) ^clear.5()
+      %xs.14 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^clear.5()
+      %int.19 : py.Value = py.intLit(0)
+      %item.4 : py.Value = py.getItem(%xs.14, %int.19) ^clear.5()
+      %xs.15 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^clear.5()
+      %int.20 : py.Value = py.intLit(1)
+      %item.5 : py.Value = py.getItem(%xs.15, %int.20) ^clear.5()
+      %tuple.28 : py.Value = py.mkTuple(%str.12, %call.21, %item.4, %item.5)
+      %kwargs.28 : py.Value = py.mkKwargs
+      %call.22 : py.Value = py.call(%print.10, %tuple.28, %kwargs.28) ^clear.5()
+      %pop.10 : base.Unit = py.popExcept(%prev.5)
+      %e.10 : py.Value = py.undef("e")
+      %e.cell.16 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "e")
+      %set.30 : base.Unit = base.refSet[py.Value](%e.cell.16, %e.10)
+      jump ^join.5()
+    clear.5(%exc.16 : py.Value):
+      %e.11 : py.Value = py.undef("e")
+      %e.cell.17 : base.Ref(py.Value) = py.globalCell("s150_list_index_after_index", "e")
+      %set.31 : base.Unit = base.refSet[py.Value](%e.cell.17, %e.11)
+      jump ^unwind.5(%exc.16)
+    next.5():
+      jump ^unwind.5(%exc.15)
+    unwind.5(%exc.17 : py.Value):
+      %pop.11 : base.Unit = py.popExcept(%prev.5)
+      jump ^propagate.0(%exc.17)
+    join.5():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.18 : py.Value):
+      %exc.19 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.18)
+      ret(%exc.19)
+  }
+  func @|s150_list_index_after_index.Clear.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__index__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s150_list_index_after_index", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Clear")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s150_list_index_after_index.Clear.__index__, "__index__", "s150_list_index_after_index")
+      %str.4 : py.Value = py.strLit("__index__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s150_list_index_after_index.ClearAll.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__index__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s150_list_index_after_index", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("ClearAll")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s150_list_index_after_index.ClearAll.__index__, "__index__", "s150_list_index_after_index")
+      %str.4 : py.Value = py.strLit("__index__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s150_list_index_after_index.Last.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__index__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s150_list_index_after_index", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Last")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s150_list_index_after_index.Last.__index__, "__index__", "s150_list_index_after_index")
+      %str.4 : py.Value = py.strLit("__index__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s150_list_index_after_index.Grow.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__index__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s150_list_index_after_index", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Grow")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s150_list_index_after_index.Grow.__index__, "__index__", "s150_list_index_after_index")
+      %str.4 : py.Value = py.strLit("__index__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s150_list_index_after_index.Shrink.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__index__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s150_list_index_after_index", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Shrink")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s150_list_index_after_index.Shrink.__index__, "__index__", "s150_list_index_after_index")
+      %str.4 : py.Value = py.strLit("__index__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s150_list_index_after_index.Boom.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__index__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s150_list_index_after_index", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Boom")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s150_list_index_after_index.Boom.__index__, "__index__", "s150_list_index_after_index")
+      %str.4 : py.Value = py.strLit("__index__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s150_list_index_after_index.Clear.__index__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Clear.__index__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %xs.0 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %int.1 : py.Value = py.intLit(2)
+      %none.0 : py.Value = py.noneLit
+      %slice.0 : py.Value = py.mkSlice(%int.0, %int.1, %none.0)
+      %del.0 : base.Unit = py.delItem(%xs.0, %slice.0) ^propagate.0()
+      %int.2 : py.Value = py.intLit(0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.2)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s150_list_index_after_index.ClearAll.__index__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "ClearAll.__index__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %xs.0 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %none.1 : py.Value = py.noneLit
+      %none.2 : py.Value = py.noneLit
+      %slice.0 : py.Value = py.mkSlice(%none.0, %none.1, %none.2)
+      %del.0 : base.Unit = py.delItem(%xs.0, %slice.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s150_list_index_after_index.Last.__index__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Last.__index__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %xs.0 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %int.1 : py.Value = py.intLit(3)
+      %none.0 : py.Value = py.noneLit
+      %slice.0 : py.Value = py.mkSlice(%int.0, %int.1, %none.0)
+      %del.0 : base.Unit = py.delItem(%xs.0, %slice.0) ^propagate.0()
+      %int.2 : py.Value = py.intLit(1)
+      %neg.0 : py.Value = py.uSub(%int.2) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%neg.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s150_list_index_after_index.Grow.__index__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Grow.__index__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(9)
+      %list.0 : py.Value = py.mkList(%int.0)
+      %xs.0 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("s150_list_index_after_index", "len") ^propagate.0()
+      %xs.1 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%xs.1)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%len.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %none.1 : py.Value = py.noneLit
+      %slice.0 : py.Value = py.mkSlice(%call.0, %none.0, %none.1)
+      %store.0 : base.Unit = py.setItem(%xs.0, %slice.0, %list.0) ^propagate.0()
+      %int.1 : py.Value = py.intLit(1)
+      %neg.0 : py.Value = py.uSub(%int.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%neg.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s150_list_index_after_index.Shrink.__index__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Shrink.__index__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %xs.0 : py.Value = py.loadGlobal("s150_list_index_after_index", "xs") ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %none.1 : py.Value = py.noneLit
+      %none.2 : py.Value = py.noneLit
+      %slice.0 : py.Value = py.mkSlice(%none.0, %none.1, %none.2)
+      %del.0 : base.Unit = py.delItem(%xs.0, %slice.0) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s150_list_index_after_index.Boom.__index__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Boom.__index__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %KeyError.0 : py.Value = py.loadGlobal("s150_list_index_after_index", "KeyError") ^propagate.0()
+      %exc.0 : py.Value = py.toException(%KeyError.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+}
+

@@ -1,0 +1,10 @@
+--- stdout 0
+
+--- outcome
+ok
+--- globals
+G = <class 'G'>
+__doc__ = None
+__name__ = '__main__'
+msg = "'G' object does not support indexing"
+x = 0

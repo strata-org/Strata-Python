@@ -1,0 +1,37 @@
+--- stdout 120
+7
+15
+1
+2
+33
+17
+9
+25
+15
+7
+eq -1
+eq -1
+eq -1
+eq -1
+eq -1
+eq -1
+eq -1
+eq -1
+eq -1
+eq -1
+eq -1
+eq -1
+eq -1
+eq -2
+False
+True
+
+--- outcome
+ok
+--- globals
+K = <class 'K'>
+__doc__ = None
+__name__ = '__main__'
+s = {1, 17, 2, 25, 33, 9}
+t = {15, 7}
+x = 'a'

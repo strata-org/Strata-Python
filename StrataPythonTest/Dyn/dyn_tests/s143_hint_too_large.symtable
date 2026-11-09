@@ -1,0 +1,22 @@
+module top
+  It: local (assigned, referenced)
+  MemoryError: global implicit (referenced)
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  len: global implicit (referenced)
+  print: global implicit (referenced)
+  class It
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __length_hint__: local (assigned)
+    __next__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+    function __iter__
+      self: local (parameter, referenced)
+    function __next__
+      StopIteration: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __length_hint__
+      self: local (parameter)
+qualnames: It, It.__init__, It.__iter__, It.__length_hint__, It.__next__

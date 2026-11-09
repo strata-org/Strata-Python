@@ -1110,6 +1110,7 @@ def newPayload (id : ObjId) : NewObj Value → Option PayloadData
   | .opaque t st => some (.opaque t st)
   | .member o n i => some (.member o n i)
   | .mappingProxy d => some (.mappingProxy d)
+  | .iter it => some (.iter it none)
 
 /-- A new object of the class `cls` with the contents `o`. -/
 def allocObj (cls : Value) (o : NewObj Value) : PyM σ .pure true Value :=
@@ -1132,7 +1133,7 @@ def viewOf : PayloadData → ObjView Value
         qualname := f.qualname, «module» := f.module, defaults := f.defaults,
         kwdefaults := f.kwdefaults, gapped := f.gapped }
   | .exc e => .exc ⟨e.args, e.context, e.cause, e.suppressContext, e.traceback, e.fields⟩
-  | .iter _ => .iter
+  | .iter it _ => .iter it
   | .module m => .module m.name m.gapped m.writesGap
   | .property a b c d => .property a b c d
   | .classmethod f => .classmethod f
@@ -1279,6 +1280,44 @@ def excSet (e : Value) (p : ExcPart Value) : PyM σ .writes true Unit := do
   modifyPayload id (fun
     | .exc st => .exc (st.write p)
     | q => q) (by keeps_closures)
+
+/-- Set the state of the iterator `it` to `s`, dropping its byte offset of a `str`. -/
+def iterSet (it : Value) (s : IterState) : PyM σ .writes true Unit :=
+  match it with
+  | .obj id => modifyPayload id (fun
+      | .iter _ _ => .iter s none
+      | q => q) (by keeps_closures)
+  | _ => PyM.failure "an iterator that is not an object"
+
+/-- The byte offset of the character `i` of `s`, found from the start. -/
+def strBytePos (s : String) (i : Nat) : String.Pos.Raw :=
+  (List.range i).foldl (fun p _ => String.Pos.Raw.next s p) 0
+
+/-- **The next character of the `str` iterator `it`**, or `none` at its end, and the iterator moved
+on. A non-ASCII `str` keeps the byte offset of the next character in the iterator's payload, so
+that each step takes constant time; an ASCII one is indexed by byte. -/
+def strIterNext (it : Value) : PyM σ .writes true (Option Value) := do
+  let .obj id := it | PyM.failure "a str iterator that is not an object"
+  let some { payload := .iter (.seq kind target i) cached, .. } ← (objGet id).relax.lift (by decide) |
+    PyM.failure "a str iterator that is not a sequence iterator"
+  let ps ← match target with
+    | .str ps => pure ps
+    | .obj tid => match ← (objGet tid).relax.lift (by decide) with
+      | some { payload := .str ps, .. } => pure ps
+      | _ => PyM.failure "a str iterator over a value that is not a str"
+    | _ => PyM.failure "a str iterator over a value that is not a str"
+  let pos : String.Pos.Raw := if ps.ascii then ⟨i⟩ else match cached with
+    | some (j, b) => if j == i then ⟨b⟩ else strBytePos ps.s i
+    | none => strBytePos ps.s i
+  if String.Pos.Raw.atEnd ps.s pos then
+    iterSet it (.done kind)
+    return none
+  let c := String.Pos.Raw.get ps.s pos
+  let next := if ps.ascii then none else some (i + 1, (String.Pos.Raw.next ps.s pos).byteIdx)
+  modifyPayload id (fun
+    | .iter _ _ => .iter (.seq kind target (i + 1)) next
+    | q => q) (by keeps_closures)
+  return some (Value.ofString (String.singleton c))
 
 /-- Set the `__name__` of the function `f`. -/
 def funcSetName (f : Value) (name : String) : PyM σ .writes true Unit :=
@@ -1633,6 +1672,8 @@ def resolveBuiltin (f args : Value) : PyM σ .reads true (Option (ImplKey × Val
   funcSetName f n := (Prim.funcSetName f n).relax
   stateSet v st := (Prim.stateSet v st).relax
   excSet e p := (Prim.excSet e p).relax
+  iterSet it st := (Prim.iterSet it st).relax
+  strIterNext it := (Prim.strIterNext it).relax
   funcSetAnnotations f a := (Prim.funcSetAnnotations f a).relax
   objEnsureDict v := (Prim.objEnsureDict v).relax
 

@@ -78,7 +78,7 @@ open StrataPython.Dyn.Sem
 #guard Builtin.bool.info.solidBase == .int
 
 -- Every constant appears once in `allConstants`.
-#guard Builtin.allConstants.size == 187
+#guard Builtin.allConstants.size == 188
 #guard (Builtin.allConstants.toList.eraseDups).length == Builtin.allConstants.size
 
 end StrataPython.Dyn.Sem.BuiltinTest

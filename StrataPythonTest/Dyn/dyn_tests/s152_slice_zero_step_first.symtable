@@ -1,0 +1,25 @@
+module top
+  A: local (assigned, referenced)
+  P: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  len: global implicit (referenced)
+  print: global implicit (referenced)
+  seq: local (assigned, referenced)
+  xs: local (assigned, referenced)
+  class A
+    __index__: local (assigned)
+    function __index__
+      print: global implicit (referenced)
+      self: local (parameter)
+  class P
+    __index__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      name: local (parameter, referenced)
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function __index__
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+qualnames: A, A.__index__, P, P.__index__, P.__init__

@@ -133,7 +133,7 @@ inductive ObjView (V : Type) where
   | func (name : String) (module : V) (annotations : Option V) (classBody : Bool)
   | native (f : NativeData V)
   | exc (e : ExcData V)
-  | iter
+  | iter (it : IterStateG V)
   | module (name : String) (gapped : Array String) (writesGap : Bool)
   | property (fget fset fdel doc : V)
   /-- A `classmethod` with its callable; `none` until `__init__` sets it (CPython's `NULL`). -/
@@ -150,6 +150,7 @@ inductive ObjView (V : Type) where
 /-- A new object other than a container or an instance, with its final contents. -/
 inductive NewObj (V : Type) where
   | cls (c : ClassData V)
+  | iter (it : IterStateG V)
   | native (f : NativeData V)
   | module (name : String) (gapped : Array String) (writesGap : Bool)
   | property (fget fset fdel doc : V)
@@ -478,6 +479,12 @@ class PyWrites (m : Type → Type 1) (V : outParam Type) extends PyCalls m V whe
   stateSet : V → NewObj V → m Unit
   /-- Write a part of the state of the exception `e`. -/
   excSet : V → ExcPart V → m Unit
+  /-- Set the state of the iterator `it` to `s`. -/
+  iterSet : V → IterStateG V → m Unit
+  /-- Step the built-in iterator `it` of a `str` (or of a `str` subclass instance's `str`): its next
+  character as a `str`, and the iterator moved on; `none` when the iterator has ended.  An abstract
+  instance that doesn't know whether it has ended gives both outcomes. -/
+  strIterNext : V → m (Option V)
 
 /-- **The body of a built-in callable**, generic in the record: from its `self` (the callee itself
 for a function), its args tuple and its kwargs dict, its result.  It runs at `writes`, inside the
@@ -491,6 +498,30 @@ structure Impls : Type 2 where
   function : Builtin → Option BuiltinImpl := fun _ => none
   method : Builtin → String → Option BuiltinImpl := fun _ _ => none
   native : String → Option BuiltinImpl := fun _ => none
+
+/-- What a call that can suspend gives: its result, or the frames of the built-in step machines
+that it suspended, the outermost first. -/
+inductive CallStep (S V : Type) where
+  | done (v : V)
+  | suspend (frames : List S)
+
+/-- **A loop state `S` that holds a piece's part `P`**: `Assembly` joins the pieces' loop states, one
+constructor per piece, and each piece reaches its own frames through `inj` and `proj`. A `proj` that
+gives `none` is another piece's frame. -/
+class HasLoopPart (S : Type) (P : Type) where
+  inj : P → S
+  proj : S → Option P
+  proj_inj : ∀ p, proj (inj p) = some p
+  inj_of_proj : ∀ s p, proj s = some p → s = inj p
+
+/-- **The built-in step machines of every piece, at the joined loop state `S`**, which `Assembly`
+instantiates: the first step of the machine of a built-in callable `f` called with `args` and
+`kwargs`, `none` when `f` is not a step machine; and the resume entry, which resumes the machine
+that the frame names, with the frames of its inner calls. -/
+class PyMachines (m : Type → Type 1) (V : outParam Type) (S : Type) where
+  startStep : V → V → V → m (Option (CallStep S V))
+  resume : S → List S → m (CallStep S V)
+
 
 end
 

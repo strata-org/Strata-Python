@@ -1,0 +1,10 @@
+--- stdout 12
+MemoryError
+
+--- outcome
+ok
+--- globals
+It = <class 'It'>
+M = <class 'M'>
+__doc__ = None
+__name__ = '__main__'

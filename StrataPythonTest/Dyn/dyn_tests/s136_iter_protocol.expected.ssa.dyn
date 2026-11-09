@@ -1,0 +1,1976 @@
+module s136_iter_protocol {
+  func @|s136_iter_protocol.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s136_iter_protocol")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %int.0 : py.Value = py.intLit(0)
+      %Z.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "Z")
+      %set.2 : base.Unit = base.refSet[py.Value](%Z.cell.0, %int.0)
+      %iter.0 : py.Value = py.loadGlobal("s136_iter_protocol", "iter") ^propagate.0()
+      %int.1 : py.Value = py.intLit(1)
+      %int.2 : py.Value = py.intLit(2)
+      %int.3 : py.Value = py.intLit(3)
+      %list.0 : py.Value = py.mkList(%int.1, %int.2, %int.3)
+      %tuple.0 : py.Value = py.mkTuple(%list.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%iter.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %it.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "it")
+      %set.3 : base.Unit = base.refSet[py.Value](%it.cell.0, %call.0)
+      %print.0 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %int.4 : py.Value = py.intLit(2)
+      %it.0 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^propagate.0()
+      %in.0 : py.Value = py.in(%int.4, %it.0) ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%in.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.1) ^propagate.0()
+      %print.1 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %next.0 : py.Value = py.loadGlobal("s136_iter_protocol", "next") ^propagate.0()
+      %it.1 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%it.1)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%next.0, %tuple.2, %kwargs.2) ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple(%call.2)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.1, %tuple.3, %kwargs.3) ^propagate.0()
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|s136_iter_protocol.C.<body>|, "<body>", "s136_iter_protocol")
+      %str.1 : py.Value = py.strLit("C")
+      %tuple.4 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %C.0 : py.Value = py.call(%__build_class__.0, %tuple.4, %kwargs.4) ^propagate.0()
+      %C.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "C")
+      %set.4 : base.Unit = base.refSet[py.Value](%C.cell.0, %C.0)
+      %iter.1 : py.Value = py.loadGlobal("s136_iter_protocol", "iter") ^catch.0()
+      %C.1 : py.Value = py.loadGlobal("s136_iter_protocol", "C") ^catch.0()
+      %tuple.5 : py.Value = py.mkTuple
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%C.1, %tuple.5, %kwargs.5) ^catch.0()
+      %tuple.6 : py.Value = py.mkTuple(%call.4)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%iter.1, %tuple.6, %kwargs.6) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %TypeError.0 : py.Value = py.loadGlobal("s136_iter_protocol", "TypeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %TypeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.2 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^clear.0()
+      %e.0 : py.Value = py.loadGlobal("s136_iter_protocol", "e") ^clear.0()
+      %args.0 : py.Value = py.attr(%e.0, "args") ^clear.0()
+      %int.5 : py.Value = py.intLit(0)
+      %item.0 : py.Value = py.getItem(%args.0, %int.5) ^clear.0()
+      %tuple.7 : py.Value = py.mkTuple(%item.0)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %call.6 : py.Value = py.call(%print.2, %tuple.7, %kwargs.7) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.6 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.7 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %C.2 : py.Value = py.loadGlobal("s136_iter_protocol", "C") ^catch.1()
+      %tuple.8 : py.Value = py.mkTuple
+      %kwargs.8 : py.Value = py.mkKwargs
+      %call.7 : py.Value = py.call(%C.2, %tuple.8, %kwargs.8) ^catch.1()
+      %iter.2 : py.Value = py.getIter(%call.7) ^catch.1()
+      jump ^head.0()
+    head.0():
+      %item.1 : py.Value = py.next(%iter.2) ^stop.0()
+      %x.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "x")
+      %set.8 : base.Unit = base.refSet[py.Value](%x.cell.0, %item.1)
+      jump ^head.0()
+    stop.0(%exc.3 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.3)
+      branch(%done.0) ^exit.0() ^catch.1(%exc.3)
+    exit.0():
+      jump ^join.1()
+    catch.1(%exc.4 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.4)
+      %TypeError.1 : py.Value = py.loadGlobal("s136_iter_protocol", "TypeError") ^unwind.1()
+      %match.1 : base.Bool = py.excMatch(%exc.4, %TypeError.1) ^unwind.1()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %e.cell.3 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.9 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.4)
+      %print.3 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^clear.1()
+      %e.3 : py.Value = py.loadGlobal("s136_iter_protocol", "e") ^clear.1()
+      %args.1 : py.Value = py.attr(%e.3, "args") ^clear.1()
+      %int.6 : py.Value = py.intLit(0)
+      %item.2 : py.Value = py.getItem(%args.1, %int.6) ^clear.1()
+      %tuple.9 : py.Value = py.mkTuple(%item.2)
+      %kwargs.9 : py.Value = py.mkKwargs
+      %call.8 : py.Value = py.call(%print.3, %tuple.9, %kwargs.9) ^clear.1()
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      %e.4 : py.Value = py.undef("e")
+      %e.cell.4 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.10 : base.Unit = base.refSet[py.Value](%e.cell.4, %e.4)
+      jump ^join.1()
+    clear.1(%exc.5 : py.Value):
+      %e.5 : py.Value = py.undef("e")
+      %e.cell.5 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.11 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.5)
+      jump ^unwind.1(%exc.5)
+    next.1():
+      jump ^unwind.1(%exc.4)
+    unwind.1(%exc.6 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.6)
+    join.1():
+      %list.1 : py.Value = py.mkList
+      %C.3 : py.Value = py.loadGlobal("s136_iter_protocol", "C") ^catch.2()
+      %tuple.10 : py.Value = py.mkTuple
+      %kwargs.10 : py.Value = py.mkKwargs
+      %call.9 : py.Value = py.call(%C.3, %tuple.10, %kwargs.10) ^catch.2()
+      %extend.0 : base.Unit = py.listExtend(%list.1, %call.9) ^catch.2()
+      jump ^join.2()
+    catch.2(%exc.7 : py.Value):
+      %prev.2 : py.Value = py.pushExcInfo(%exc.7)
+      %TypeError.2 : py.Value = py.loadGlobal("s136_iter_protocol", "TypeError") ^unwind.2()
+      %match.2 : base.Bool = py.excMatch(%exc.7, %TypeError.2) ^unwind.2()
+      branch(%match.2) ^except.2() ^next.2()
+    except.2():
+      %e.cell.6 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.12 : base.Unit = base.refSet[py.Value](%e.cell.6, %exc.7)
+      %print.4 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^clear.2()
+      %e.6 : py.Value = py.loadGlobal("s136_iter_protocol", "e") ^clear.2()
+      %args.2 : py.Value = py.attr(%e.6, "args") ^clear.2()
+      %int.7 : py.Value = py.intLit(0)
+      %item.3 : py.Value = py.getItem(%args.2, %int.7) ^clear.2()
+      %tuple.11 : py.Value = py.mkTuple(%item.3)
+      %kwargs.11 : py.Value = py.mkKwargs
+      %call.10 : py.Value = py.call(%print.4, %tuple.11, %kwargs.11) ^clear.2()
+      %pop.4 : base.Unit = py.popExcept(%prev.2)
+      %e.7 : py.Value = py.undef("e")
+      %e.cell.7 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.13 : base.Unit = base.refSet[py.Value](%e.cell.7, %e.7)
+      jump ^join.2()
+    clear.2(%exc.8 : py.Value):
+      %e.8 : py.Value = py.undef("e")
+      %e.cell.8 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.14 : base.Unit = base.refSet[py.Value](%e.cell.8, %e.8)
+      jump ^unwind.2(%exc.8)
+    next.2():
+      jump ^unwind.2(%exc.7)
+    unwind.2(%exc.9 : py.Value):
+      %pop.5 : base.Unit = py.popExcept(%prev.2)
+      jump ^propagate.0(%exc.9)
+    join.2():
+      %print.5 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^catch.3()
+      %int.8 : py.Value = py.intLit(1)
+      %C.4 : py.Value = py.loadGlobal("s136_iter_protocol", "C") ^catch.3()
+      %tuple.12 : py.Value = py.mkTuple
+      %kwargs.12 : py.Value = py.mkKwargs
+      %call.11 : py.Value = py.call(%C.4, %tuple.12, %kwargs.12) ^catch.3()
+      %in.1 : py.Value = py.in(%int.8, %call.11) ^catch.3()
+      %tuple.13 : py.Value = py.mkTuple(%in.1)
+      %kwargs.13 : py.Value = py.mkKwargs
+      %call.12 : py.Value = py.call(%print.5, %tuple.13, %kwargs.13) ^catch.3()
+      jump ^join.3()
+    catch.3(%exc.10 : py.Value):
+      %prev.3 : py.Value = py.pushExcInfo(%exc.10)
+      %TypeError.3 : py.Value = py.loadGlobal("s136_iter_protocol", "TypeError") ^unwind.3()
+      %match.3 : base.Bool = py.excMatch(%exc.10, %TypeError.3) ^unwind.3()
+      branch(%match.3) ^except.3() ^next.3()
+    except.3():
+      %e.cell.9 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.15 : base.Unit = base.refSet[py.Value](%e.cell.9, %exc.10)
+      %print.6 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^clear.3()
+      %e.9 : py.Value = py.loadGlobal("s136_iter_protocol", "e") ^clear.3()
+      %args.3 : py.Value = py.attr(%e.9, "args") ^clear.3()
+      %int.9 : py.Value = py.intLit(0)
+      %item.4 : py.Value = py.getItem(%args.3, %int.9) ^clear.3()
+      %tuple.14 : py.Value = py.mkTuple(%item.4)
+      %kwargs.14 : py.Value = py.mkKwargs
+      %call.13 : py.Value = py.call(%print.6, %tuple.14, %kwargs.14) ^clear.3()
+      %pop.6 : base.Unit = py.popExcept(%prev.3)
+      %e.10 : py.Value = py.undef("e")
+      %e.cell.10 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.16 : base.Unit = base.refSet[py.Value](%e.cell.10, %e.10)
+      jump ^join.3()
+    clear.3(%exc.11 : py.Value):
+      %e.11 : py.Value = py.undef("e")
+      %e.cell.11 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.17 : base.Unit = base.refSet[py.Value](%e.cell.11, %e.11)
+      jump ^unwind.3(%exc.11)
+    next.3():
+      jump ^unwind.3(%exc.10)
+    unwind.3(%exc.12 : py.Value):
+      %pop.7 : base.Unit = py.popExcept(%prev.3)
+      jump ^propagate.0(%exc.12)
+    join.3():
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|s136_iter_protocol.C.<body>.1|, "<body>", "s136_iter_protocol")
+      %str.2 : py.Value = py.strLit("C")
+      %tuple.15 : py.Value = py.mkTuple(%clo.1, %str.2)
+      %kwargs.15 : py.Value = py.mkKwargs
+      %C.5 : py.Value = py.call(%__build_class__.1, %tuple.15, %kwargs.15) ^propagate.0()
+      %C.cell.1 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "C")
+      %set.18 : base.Unit = base.refSet[py.Value](%C.cell.1, %C.5)
+      %iter.3 : py.Value = py.loadGlobal("s136_iter_protocol", "iter") ^catch.4()
+      %C.6 : py.Value = py.loadGlobal("s136_iter_protocol", "C") ^catch.4()
+      %tuple.16 : py.Value = py.mkTuple
+      %kwargs.16 : py.Value = py.mkKwargs
+      %call.14 : py.Value = py.call(%C.6, %tuple.16, %kwargs.16) ^catch.4()
+      %tuple.17 : py.Value = py.mkTuple(%call.14)
+      %kwargs.17 : py.Value = py.mkKwargs
+      %call.15 : py.Value = py.call(%iter.3, %tuple.17, %kwargs.17) ^catch.4()
+      %it.cell.1 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "it")
+      %set.19 : base.Unit = base.refSet[py.Value](%it.cell.1, %call.15)
+      %print.7 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^catch.4()
+      %type.0 : py.Value = py.loadGlobal("s136_iter_protocol", "type") ^catch.4()
+      %it.2 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^catch.4()
+      %tuple.18 : py.Value = py.mkTuple(%it.2)
+      %kwargs.18 : py.Value = py.mkKwargs
+      %call.16 : py.Value = py.call(%type.0, %tuple.18, %kwargs.18) ^catch.4()
+      %__name__.0 : py.Value = py.attr(%call.16, "__name__") ^catch.4()
+      %tuple.19 : py.Value = py.mkTuple(%__name__.0)
+      %kwargs.19 : py.Value = py.mkKwargs
+      %call.17 : py.Value = py.call(%print.7, %tuple.19, %kwargs.19) ^catch.4()
+      %next.1 : py.Value = py.loadGlobal("s136_iter_protocol", "next") ^catch.4()
+      %it.3 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^catch.4()
+      %tuple.20 : py.Value = py.mkTuple(%it.3)
+      %kwargs.20 : py.Value = py.mkKwargs
+      %call.18 : py.Value = py.call(%next.1, %tuple.20, %kwargs.20) ^catch.4()
+      jump ^join.4()
+    catch.4(%exc.13 : py.Value):
+      %prev.4 : py.Value = py.pushExcInfo(%exc.13)
+      %TypeError.4 : py.Value = py.loadGlobal("s136_iter_protocol", "TypeError") ^unwind.4()
+      %match.4 : base.Bool = py.excMatch(%exc.13, %TypeError.4) ^unwind.4()
+      branch(%match.4) ^except.4() ^next.4()
+    except.4():
+      %e.cell.12 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.20 : base.Unit = base.refSet[py.Value](%e.cell.12, %exc.13)
+      %print.8 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^clear.4()
+      %e.12 : py.Value = py.loadGlobal("s136_iter_protocol", "e") ^clear.4()
+      %args.4 : py.Value = py.attr(%e.12, "args") ^clear.4()
+      %int.10 : py.Value = py.intLit(0)
+      %item.5 : py.Value = py.getItem(%args.4, %int.10) ^clear.4()
+      %tuple.21 : py.Value = py.mkTuple(%item.5)
+      %kwargs.21 : py.Value = py.mkKwargs
+      %call.19 : py.Value = py.call(%print.8, %tuple.21, %kwargs.21) ^clear.4()
+      %pop.8 : base.Unit = py.popExcept(%prev.4)
+      %e.13 : py.Value = py.undef("e")
+      %e.cell.13 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.21 : base.Unit = base.refSet[py.Value](%e.cell.13, %e.13)
+      jump ^join.4()
+    clear.4(%exc.14 : py.Value):
+      %e.14 : py.Value = py.undef("e")
+      %e.cell.14 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.22 : base.Unit = base.refSet[py.Value](%e.cell.14, %e.14)
+      jump ^unwind.4(%exc.14)
+    next.4():
+      jump ^unwind.4(%exc.13)
+    unwind.4(%exc.15 : py.Value):
+      %pop.9 : base.Unit = py.popExcept(%prev.4)
+      jump ^propagate.0(%exc.15)
+    join.4():
+      %list.2 : py.Value = py.mkList
+      %C.7 : py.Value = py.loadGlobal("s136_iter_protocol", "C") ^catch.5()
+      %tuple.22 : py.Value = py.mkTuple
+      %kwargs.22 : py.Value = py.mkKwargs
+      %call.20 : py.Value = py.call(%C.7, %tuple.22, %kwargs.22) ^catch.5()
+      %extend.1 : base.Unit = py.listExtend(%list.2, %call.20) ^catch.5()
+      jump ^join.5()
+    catch.5(%exc.16 : py.Value):
+      %prev.5 : py.Value = py.pushExcInfo(%exc.16)
+      %TypeError.5 : py.Value = py.loadGlobal("s136_iter_protocol", "TypeError") ^unwind.5()
+      %match.5 : base.Bool = py.excMatch(%exc.16, %TypeError.5) ^unwind.5()
+      branch(%match.5) ^except.5() ^next.5()
+    except.5():
+      %e.cell.15 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.23 : base.Unit = base.refSet[py.Value](%e.cell.15, %exc.16)
+      %print.9 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^clear.5()
+      %e.15 : py.Value = py.loadGlobal("s136_iter_protocol", "e") ^clear.5()
+      %args.5 : py.Value = py.attr(%e.15, "args") ^clear.5()
+      %int.11 : py.Value = py.intLit(0)
+      %item.6 : py.Value = py.getItem(%args.5, %int.11) ^clear.5()
+      %tuple.23 : py.Value = py.mkTuple(%item.6)
+      %kwargs.23 : py.Value = py.mkKwargs
+      %call.21 : py.Value = py.call(%print.9, %tuple.23, %kwargs.23) ^clear.5()
+      %pop.10 : base.Unit = py.popExcept(%prev.5)
+      %e.16 : py.Value = py.undef("e")
+      %e.cell.16 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.24 : base.Unit = base.refSet[py.Value](%e.cell.16, %e.16)
+      jump ^join.5()
+    clear.5(%exc.17 : py.Value):
+      %e.17 : py.Value = py.undef("e")
+      %e.cell.17 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.25 : base.Unit = base.refSet[py.Value](%e.cell.17, %e.17)
+      jump ^unwind.5(%exc.17)
+    next.5():
+      jump ^unwind.5(%exc.16)
+    unwind.5(%exc.18 : py.Value):
+      %pop.11 : base.Unit = py.popExcept(%prev.5)
+      jump ^propagate.0(%exc.18)
+    join.5():
+      %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@|s136_iter_protocol.R.<body>|, "<body>", "s136_iter_protocol")
+      %str.3 : py.Value = py.strLit("R")
+      %tuple.24 : py.Value = py.mkTuple(%clo.2, %str.3)
+      %kwargs.24 : py.Value = py.mkKwargs
+      %R.0 : py.Value = py.call(%__build_class__.2, %tuple.24, %kwargs.24) ^propagate.0()
+      %R.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "R")
+      %set.26 : base.Unit = base.refSet[py.Value](%R.cell.0, %R.0)
+      %iter.4 : py.Value = py.loadGlobal("s136_iter_protocol", "iter") ^catch.6()
+      %R.1 : py.Value = py.loadGlobal("s136_iter_protocol", "R") ^catch.6()
+      %tuple.25 : py.Value = py.mkTuple
+      %kwargs.25 : py.Value = py.mkKwargs
+      %call.22 : py.Value = py.call(%R.1, %tuple.25, %kwargs.25) ^catch.6()
+      %tuple.26 : py.Value = py.mkTuple(%call.22)
+      %kwargs.26 : py.Value = py.mkKwargs
+      %call.23 : py.Value = py.call(%iter.4, %tuple.26, %kwargs.26) ^catch.6()
+      jump ^join.6()
+    catch.6(%exc.19 : py.Value):
+      %prev.6 : py.Value = py.pushExcInfo(%exc.19)
+      %TypeError.6 : py.Value = py.loadGlobal("s136_iter_protocol", "TypeError") ^unwind.6()
+      %match.6 : base.Bool = py.excMatch(%exc.19, %TypeError.6) ^unwind.6()
+      branch(%match.6) ^except.6() ^next.6()
+    except.6():
+      %e.cell.18 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.27 : base.Unit = base.refSet[py.Value](%e.cell.18, %exc.19)
+      %print.10 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^clear.6()
+      %e.18 : py.Value = py.loadGlobal("s136_iter_protocol", "e") ^clear.6()
+      %args.6 : py.Value = py.attr(%e.18, "args") ^clear.6()
+      %int.12 : py.Value = py.intLit(0)
+      %item.7 : py.Value = py.getItem(%args.6, %int.12) ^clear.6()
+      %tuple.27 : py.Value = py.mkTuple(%item.7)
+      %kwargs.27 : py.Value = py.mkKwargs
+      %call.24 : py.Value = py.call(%print.10, %tuple.27, %kwargs.27) ^clear.6()
+      %pop.12 : base.Unit = py.popExcept(%prev.6)
+      %e.19 : py.Value = py.undef("e")
+      %e.cell.19 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.28 : base.Unit = base.refSet[py.Value](%e.cell.19, %e.19)
+      jump ^join.6()
+    clear.6(%exc.20 : py.Value):
+      %e.20 : py.Value = py.undef("e")
+      %e.cell.20 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.29 : base.Unit = base.refSet[py.Value](%e.cell.20, %e.20)
+      jump ^unwind.6(%exc.20)
+    next.6():
+      jump ^unwind.6(%exc.19)
+    unwind.6(%exc.21 : py.Value):
+      %pop.13 : base.Unit = py.popExcept(%prev.6)
+      jump ^propagate.0(%exc.21)
+    join.6():
+      %list.3 : py.Value = py.mkList
+      %R.2 : py.Value = py.loadGlobal("s136_iter_protocol", "R") ^catch.7()
+      %tuple.28 : py.Value = py.mkTuple
+      %kwargs.28 : py.Value = py.mkKwargs
+      %call.25 : py.Value = py.call(%R.2, %tuple.28, %kwargs.28) ^catch.7()
+      %extend.2 : base.Unit = py.listExtend(%list.3, %call.25) ^catch.7()
+      jump ^join.7()
+    catch.7(%exc.22 : py.Value):
+      %prev.7 : py.Value = py.pushExcInfo(%exc.22)
+      %TypeError.7 : py.Value = py.loadGlobal("s136_iter_protocol", "TypeError") ^unwind.7()
+      %match.7 : base.Bool = py.excMatch(%exc.22, %TypeError.7) ^unwind.7()
+      branch(%match.7) ^except.7() ^next.7()
+    except.7():
+      %e.cell.21 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.30 : base.Unit = base.refSet[py.Value](%e.cell.21, %exc.22)
+      %print.11 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^clear.7()
+      %e.21 : py.Value = py.loadGlobal("s136_iter_protocol", "e") ^clear.7()
+      %args.7 : py.Value = py.attr(%e.21, "args") ^clear.7()
+      %int.13 : py.Value = py.intLit(0)
+      %item.8 : py.Value = py.getItem(%args.7, %int.13) ^clear.7()
+      %tuple.29 : py.Value = py.mkTuple(%item.8)
+      %kwargs.29 : py.Value = py.mkKwargs
+      %call.26 : py.Value = py.call(%print.11, %tuple.29, %kwargs.29) ^clear.7()
+      %pop.14 : base.Unit = py.popExcept(%prev.7)
+      %e.22 : py.Value = py.undef("e")
+      %e.cell.22 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.31 : base.Unit = base.refSet[py.Value](%e.cell.22, %e.22)
+      jump ^join.7()
+    clear.7(%exc.23 : py.Value):
+      %e.23 : py.Value = py.undef("e")
+      %e.cell.23 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.32 : base.Unit = base.refSet[py.Value](%e.cell.23, %e.23)
+      jump ^unwind.7(%exc.23)
+    next.7():
+      jump ^unwind.7(%exc.22)
+    unwind.7(%exc.24 : py.Value):
+      %pop.15 : base.Unit = py.popExcept(%prev.7)
+      jump ^propagate.0(%exc.24)
+    join.7():
+      %R.3 : py.Value = py.loadGlobal("s136_iter_protocol", "R") ^catch.8()
+      %tuple.30 : py.Value = py.mkTuple
+      %kwargs.30 : py.Value = py.mkKwargs
+      %call.27 : py.Value = py.call(%R.3, %tuple.30, %kwargs.30) ^catch.8()
+      %unpack.0 : py.Value = py.unpackEx(%call.27, 1, 0) ^catch.8()
+      %elem.0 : py.Value = py.tupleGet(%unpack.0, 0)
+      %a.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "a")
+      %set.33 : base.Unit = base.refSet[py.Value](%a.cell.0, %elem.0)
+      %elem.1 : py.Value = py.tupleGet(%unpack.0, 1)
+      %b.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "b")
+      %set.34 : base.Unit = base.refSet[py.Value](%b.cell.0, %elem.1)
+      jump ^join.8()
+    catch.8(%exc.25 : py.Value):
+      %prev.8 : py.Value = py.pushExcInfo(%exc.25)
+      %TypeError.8 : py.Value = py.loadGlobal("s136_iter_protocol", "TypeError") ^unwind.8()
+      %match.8 : base.Bool = py.excMatch(%exc.25, %TypeError.8) ^unwind.8()
+      branch(%match.8) ^except.8() ^next.8()
+    except.8():
+      %e.cell.24 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.35 : base.Unit = base.refSet[py.Value](%e.cell.24, %exc.25)
+      %print.12 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^clear.8()
+      %e.24 : py.Value = py.loadGlobal("s136_iter_protocol", "e") ^clear.8()
+      %args.8 : py.Value = py.attr(%e.24, "args") ^clear.8()
+      %int.14 : py.Value = py.intLit(0)
+      %item.9 : py.Value = py.getItem(%args.8, %int.14) ^clear.8()
+      %tuple.31 : py.Value = py.mkTuple(%item.9)
+      %kwargs.31 : py.Value = py.mkKwargs
+      %call.28 : py.Value = py.call(%print.12, %tuple.31, %kwargs.31) ^clear.8()
+      %pop.16 : base.Unit = py.popExcept(%prev.8)
+      %e.25 : py.Value = py.undef("e")
+      %e.cell.25 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.36 : base.Unit = base.refSet[py.Value](%e.cell.25, %e.25)
+      jump ^join.8()
+    clear.8(%exc.26 : py.Value):
+      %e.26 : py.Value = py.undef("e")
+      %e.cell.26 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.37 : base.Unit = base.refSet[py.Value](%e.cell.26, %e.26)
+      jump ^unwind.8(%exc.26)
+    next.8():
+      jump ^unwind.8(%exc.25)
+    unwind.8(%exc.27 : py.Value):
+      %pop.17 : base.Unit = py.popExcept(%prev.8)
+      jump ^propagate.0(%exc.27)
+    join.8():
+      %clo.3 : py.Value = py.mkClosure[[]](@s136_iter_protocol.f, "f", "s136_iter_protocol")
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "f")
+      %set.38 : base.Unit = base.refSet[py.Value](%f.cell.0, %clo.3)
+      %f.0 : py.Value = py.loadGlobal("s136_iter_protocol", "f") ^catch.9()
+      %R.4 : py.Value = py.loadGlobal("s136_iter_protocol", "R") ^catch.9()
+      %tuple.32 : py.Value = py.mkTuple
+      %kwargs.32 : py.Value = py.mkKwargs
+      %call.29 : py.Value = py.call(%R.4, %tuple.32, %kwargs.32) ^catch.9()
+      %kwargs.33 : py.Value = py.mkKwargs
+      %args.9 : py.Value = py.argsTuple(%f.0, %call.29) ^catch.9()
+      %call.30 : py.Value = py.call(%f.0, %args.9, %kwargs.33) ^catch.9()
+      jump ^join.9()
+    catch.9(%exc.28 : py.Value):
+      %prev.9 : py.Value = py.pushExcInfo(%exc.28)
+      %TypeError.9 : py.Value = py.loadGlobal("s136_iter_protocol", "TypeError") ^unwind.9()
+      %match.9 : base.Bool = py.excMatch(%exc.28, %TypeError.9) ^unwind.9()
+      branch(%match.9) ^except.9() ^next.9()
+    except.9():
+      %e.cell.27 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.39 : base.Unit = base.refSet[py.Value](%e.cell.27, %exc.28)
+      %print.13 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^clear.9()
+      %e.27 : py.Value = py.loadGlobal("s136_iter_protocol", "e") ^clear.9()
+      %args.10 : py.Value = py.attr(%e.27, "args") ^clear.9()
+      %int.15 : py.Value = py.intLit(0)
+      %item.10 : py.Value = py.getItem(%args.10, %int.15) ^clear.9()
+      %tuple.33 : py.Value = py.mkTuple(%item.10)
+      %kwargs.34 : py.Value = py.mkKwargs
+      %call.31 : py.Value = py.call(%print.13, %tuple.33, %kwargs.34) ^clear.9()
+      %pop.18 : base.Unit = py.popExcept(%prev.9)
+      %e.28 : py.Value = py.undef("e")
+      %e.cell.28 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.40 : base.Unit = base.refSet[py.Value](%e.cell.28, %e.28)
+      jump ^join.9()
+    clear.9(%exc.29 : py.Value):
+      %e.29 : py.Value = py.undef("e")
+      %e.cell.29 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.41 : base.Unit = base.refSet[py.Value](%e.cell.29, %e.29)
+      jump ^unwind.9(%exc.29)
+    next.9():
+      jump ^unwind.9(%exc.28)
+    unwind.9(%exc.30 : py.Value):
+      %pop.19 : base.Unit = py.popExcept(%prev.9)
+      jump ^propagate.0(%exc.30)
+    join.9():
+      %int.16 : py.Value = py.intLit(1)
+      %R.5 : py.Value = py.loadGlobal("s136_iter_protocol", "R") ^catch.10()
+      %tuple.34 : py.Value = py.mkTuple
+      %kwargs.35 : py.Value = py.mkKwargs
+      %call.32 : py.Value = py.call(%R.5, %tuple.34, %kwargs.35) ^catch.10()
+      %in.2 : py.Value = py.in(%int.16, %call.32) ^catch.10()
+      jump ^join.10()
+    catch.10(%exc.31 : py.Value):
+      %prev.10 : py.Value = py.pushExcInfo(%exc.31)
+      %TypeError.10 : py.Value = py.loadGlobal("s136_iter_protocol", "TypeError") ^unwind.10()
+      %match.10 : base.Bool = py.excMatch(%exc.31, %TypeError.10) ^unwind.10()
+      branch(%match.10) ^except.10() ^next.10()
+    except.10():
+      %e.cell.30 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.42 : base.Unit = base.refSet[py.Value](%e.cell.30, %exc.31)
+      %print.14 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^clear.10()
+      %e.30 : py.Value = py.loadGlobal("s136_iter_protocol", "e") ^clear.10()
+      %args.11 : py.Value = py.attr(%e.30, "args") ^clear.10()
+      %int.17 : py.Value = py.intLit(0)
+      %item.11 : py.Value = py.getItem(%args.11, %int.17) ^clear.10()
+      %tuple.35 : py.Value = py.mkTuple(%item.11)
+      %kwargs.36 : py.Value = py.mkKwargs
+      %call.33 : py.Value = py.call(%print.14, %tuple.35, %kwargs.36) ^clear.10()
+      %pop.20 : base.Unit = py.popExcept(%prev.10)
+      %e.31 : py.Value = py.undef("e")
+      %e.cell.31 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.43 : base.Unit = base.refSet[py.Value](%e.cell.31, %e.31)
+      jump ^join.10()
+    clear.10(%exc.32 : py.Value):
+      %e.32 : py.Value = py.undef("e")
+      %e.cell.32 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.44 : base.Unit = base.refSet[py.Value](%e.cell.32, %e.32)
+      jump ^unwind.10(%exc.32)
+    next.10():
+      jump ^unwind.10(%exc.31)
+    unwind.10(%exc.33 : py.Value):
+      %pop.21 : base.Unit = py.popExcept(%prev.10)
+      jump ^propagate.0(%exc.33)
+    join.10():
+      %__build_class__.3 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.4 : py.Value = py.mkClosure[[]](@|s136_iter_protocol.N.<body>|, "<body>", "s136_iter_protocol")
+      %str.4 : py.Value = py.strLit("N")
+      %tuple.36 : py.Value = py.mkTuple(%clo.4, %str.4)
+      %kwargs.37 : py.Value = py.mkKwargs
+      %N.0 : py.Value = py.call(%__build_class__.3, %tuple.36, %kwargs.37) ^propagate.0()
+      %N.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "N")
+      %set.45 : base.Unit = base.refSet[py.Value](%N.cell.0, %N.0)
+      %__build_class__.4 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.5 : py.Value = py.mkClosure[[]](@|s136_iter_protocol.R.<body>.1|, "<body>", "s136_iter_protocol")
+      %str.5 : py.Value = py.strLit("R")
+      %tuple.37 : py.Value = py.mkTuple(%clo.5, %str.5)
+      %kwargs.38 : py.Value = py.mkKwargs
+      %R.6 : py.Value = py.call(%__build_class__.4, %tuple.37, %kwargs.38) ^propagate.0()
+      %R.cell.1 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "R")
+      %set.46 : base.Unit = base.refSet[py.Value](%R.cell.1, %R.6)
+      %iter.5 : py.Value = py.loadGlobal("s136_iter_protocol", "iter") ^propagate.0()
+      %R.7 : py.Value = py.loadGlobal("s136_iter_protocol", "R") ^propagate.0()
+      %tuple.38 : py.Value = py.mkTuple
+      %kwargs.39 : py.Value = py.mkKwargs
+      %call.34 : py.Value = py.call(%R.7, %tuple.38, %kwargs.39) ^propagate.0()
+      %tuple.39 : py.Value = py.mkTuple(%call.34)
+      %kwargs.40 : py.Value = py.mkKwargs
+      %call.35 : py.Value = py.call(%iter.5, %tuple.39, %kwargs.40) ^propagate.0()
+      %it.cell.2 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "it")
+      %set.47 : base.Unit = base.refSet[py.Value](%it.cell.2, %call.35)
+      %print.15 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %type.1 : py.Value = py.loadGlobal("s136_iter_protocol", "type") ^propagate.0()
+      %it.4 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^propagate.0()
+      %tuple.40 : py.Value = py.mkTuple(%it.4)
+      %kwargs.41 : py.Value = py.mkKwargs
+      %call.36 : py.Value = py.call(%type.1, %tuple.40, %kwargs.41) ^propagate.0()
+      %__name__.1 : py.Value = py.attr(%call.36, "__name__") ^propagate.0()
+      %next.2 : py.Value = py.loadGlobal("s136_iter_protocol", "next") ^propagate.0()
+      %it.5 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^propagate.0()
+      %tuple.41 : py.Value = py.mkTuple(%it.5)
+      %kwargs.42 : py.Value = py.mkKwargs
+      %call.37 : py.Value = py.call(%next.2, %tuple.41, %kwargs.42) ^propagate.0()
+      %tuple.42 : py.Value = py.mkTuple(%__name__.1, %call.37)
+      %kwargs.43 : py.Value = py.mkKwargs
+      %call.38 : py.Value = py.call(%print.15, %tuple.42, %kwargs.43) ^propagate.0()
+      %__build_class__.5 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.6 : py.Value = py.mkClosure[[]](@|s136_iter_protocol.R2.<body>|, "<body>", "s136_iter_protocol")
+      %str.6 : py.Value = py.strLit("R2")
+      %tuple.43 : py.Value = py.mkTuple(%clo.6, %str.6)
+      %kwargs.44 : py.Value = py.mkKwargs
+      %R2.0 : py.Value = py.call(%__build_class__.5, %tuple.43, %kwargs.44) ^propagate.0()
+      %R2.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "R2")
+      %set.48 : base.Unit = base.refSet[py.Value](%R2.cell.0, %R2.0)
+      %iter.6 : py.Value = py.loadGlobal("s136_iter_protocol", "iter") ^catch.11()
+      %R2.1 : py.Value = py.loadGlobal("s136_iter_protocol", "R2") ^catch.11()
+      %tuple.44 : py.Value = py.mkTuple
+      %kwargs.45 : py.Value = py.mkKwargs
+      %call.39 : py.Value = py.call(%R2.1, %tuple.44, %kwargs.45) ^catch.11()
+      %tuple.45 : py.Value = py.mkTuple(%call.39)
+      %kwargs.46 : py.Value = py.mkKwargs
+      %call.40 : py.Value = py.call(%iter.6, %tuple.45, %kwargs.46) ^catch.11()
+      jump ^join.11()
+    catch.11(%exc.34 : py.Value):
+      %prev.11 : py.Value = py.pushExcInfo(%exc.34)
+      %TypeError.11 : py.Value = py.loadGlobal("s136_iter_protocol", "TypeError") ^unwind.11()
+      %match.11 : base.Bool = py.excMatch(%exc.34, %TypeError.11) ^unwind.11()
+      branch(%match.11) ^except.11() ^next.11()
+    except.11():
+      %e.cell.33 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.49 : base.Unit = base.refSet[py.Value](%e.cell.33, %exc.34)
+      %print.16 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^clear.11()
+      %e.33 : py.Value = py.loadGlobal("s136_iter_protocol", "e") ^clear.11()
+      %args.12 : py.Value = py.attr(%e.33, "args") ^clear.11()
+      %int.18 : py.Value = py.intLit(0)
+      %item.12 : py.Value = py.getItem(%args.12, %int.18) ^clear.11()
+      %tuple.46 : py.Value = py.mkTuple(%item.12)
+      %kwargs.47 : py.Value = py.mkKwargs
+      %call.41 : py.Value = py.call(%print.16, %tuple.46, %kwargs.47) ^clear.11()
+      %pop.22 : base.Unit = py.popExcept(%prev.11)
+      %e.34 : py.Value = py.undef("e")
+      %e.cell.34 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.50 : base.Unit = base.refSet[py.Value](%e.cell.34, %e.34)
+      jump ^join.11()
+    clear.11(%exc.35 : py.Value):
+      %e.35 : py.Value = py.undef("e")
+      %e.cell.35 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.51 : base.Unit = base.refSet[py.Value](%e.cell.35, %e.35)
+      jump ^unwind.11(%exc.35)
+    next.11():
+      jump ^unwind.11(%exc.34)
+    unwind.11(%exc.36 : py.Value):
+      %pop.23 : base.Unit = py.popExcept(%prev.11)
+      jump ^propagate.0(%exc.36)
+    join.11():
+      %int.19 : py.Value = py.intLit(1)
+      %int.20 : py.Value = py.intLit(1)
+      %int.21 : py.Value = py.intLit(2)
+      %int.22 : py.Value = py.intLit(2)
+      %dict.0 : py.Value = py.mkDict(%int.19, %int.20, %int.21, %int.22) ^propagate.0()
+      %d.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "d")
+      %set.52 : base.Unit = base.refSet[py.Value](%d.cell.0, %dict.0)
+      %iter.7 : py.Value = py.loadGlobal("s136_iter_protocol", "iter") ^propagate.0()
+      %d.0 : py.Value = py.loadGlobal("s136_iter_protocol", "d") ^propagate.0()
+      %tuple.47 : py.Value = py.mkTuple(%d.0)
+      %kwargs.48 : py.Value = py.mkKwargs
+      %call.42 : py.Value = py.call(%iter.7, %tuple.47, %kwargs.48) ^propagate.0()
+      %it.cell.3 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "it")
+      %set.53 : base.Unit = base.refSet[py.Value](%it.cell.3, %call.42)
+      %print.17 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %next.3 : py.Value = py.loadGlobal("s136_iter_protocol", "next") ^propagate.0()
+      %it.6 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^propagate.0()
+      %tuple.48 : py.Value = py.mkTuple(%it.6)
+      %kwargs.49 : py.Value = py.mkKwargs
+      %call.43 : py.Value = py.call(%next.3, %tuple.48, %kwargs.49) ^propagate.0()
+      %tuple.49 : py.Value = py.mkTuple(%call.43)
+      %kwargs.50 : py.Value = py.mkKwargs
+      %call.44 : py.Value = py.call(%print.17, %tuple.49, %kwargs.50) ^propagate.0()
+      %int.23 : py.Value = py.intLit(5)
+      %d.1 : py.Value = py.loadGlobal("s136_iter_protocol", "d") ^propagate.0()
+      %int.24 : py.Value = py.intLit(1)
+      %store.0 : base.Unit = py.setItem(%d.1, %int.24, %int.23) ^propagate.0()
+      %print.18 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %next.4 : py.Value = py.loadGlobal("s136_iter_protocol", "next") ^propagate.0()
+      %it.7 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^propagate.0()
+      %tuple.50 : py.Value = py.mkTuple(%it.7)
+      %kwargs.51 : py.Value = py.mkKwargs
+      %call.45 : py.Value = py.call(%next.4, %tuple.50, %kwargs.51) ^propagate.0()
+      %tuple.51 : py.Value = py.mkTuple(%call.45)
+      %kwargs.52 : py.Value = py.mkKwargs
+      %call.46 : py.Value = py.call(%print.18, %tuple.51, %kwargs.52) ^propagate.0()
+      %print.19 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %next.5 : py.Value = py.loadGlobal("s136_iter_protocol", "next") ^propagate.0()
+      %it.8 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^propagate.0()
+      %str.7 : py.Value = py.strLit("end")
+      %tuple.52 : py.Value = py.mkTuple(%it.8, %str.7)
+      %kwargs.53 : py.Value = py.mkKwargs
+      %call.47 : py.Value = py.call(%next.5, %tuple.52, %kwargs.53) ^propagate.0()
+      %tuple.53 : py.Value = py.mkTuple(%call.47)
+      %kwargs.54 : py.Value = py.mkKwargs
+      %call.48 : py.Value = py.call(%print.19, %tuple.53, %kwargs.54) ^propagate.0()
+      %int.25 : py.Value = py.intLit(9)
+      %d.2 : py.Value = py.loadGlobal("s136_iter_protocol", "d") ^propagate.0()
+      %int.26 : py.Value = py.intLit(9)
+      %store.1 : base.Unit = py.setItem(%d.2, %int.26, %int.25) ^propagate.0()
+      %print.20 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %next.6 : py.Value = py.loadGlobal("s136_iter_protocol", "next") ^propagate.0()
+      %it.9 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^propagate.0()
+      %str.8 : py.Value = py.strLit("end2")
+      %tuple.54 : py.Value = py.mkTuple(%it.9, %str.8)
+      %kwargs.55 : py.Value = py.mkKwargs
+      %call.49 : py.Value = py.call(%next.6, %tuple.54, %kwargs.55) ^propagate.0()
+      %tuple.55 : py.Value = py.mkTuple(%call.49)
+      %kwargs.56 : py.Value = py.mkKwargs
+      %call.50 : py.Value = py.call(%print.20, %tuple.55, %kwargs.56) ^propagate.0()
+      %int.27 : py.Value = py.intLit(1)
+      %Z.0 : py.Value = py.loadGlobal("s136_iter_protocol", "Z") ^propagate.0()
+      %add.0 : py.Value = py.add(%int.27, %Z.0) ^propagate.0()
+      %int.28 : py.Value = py.intLit(2)
+      %int.29 : py.Value = py.intLit(3)
+      %set.54 : py.Value = py.mkSet(%add.0, %int.28, %int.29) ^propagate.0()
+      %s.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "s")
+      %set.55 : base.Unit = base.refSet[py.Value](%s.cell.0, %set.54)
+      %iter.8 : py.Value = py.loadGlobal("s136_iter_protocol", "iter") ^propagate.0()
+      %s.0 : py.Value = py.loadGlobal("s136_iter_protocol", "s") ^propagate.0()
+      %tuple.56 : py.Value = py.mkTuple(%s.0)
+      %kwargs.57 : py.Value = py.mkKwargs
+      %call.51 : py.Value = py.call(%iter.8, %tuple.56, %kwargs.57) ^propagate.0()
+      %it.cell.4 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "it")
+      %set.56 : base.Unit = base.refSet[py.Value](%it.cell.4, %call.51)
+      %print.21 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %next.7 : py.Value = py.loadGlobal("s136_iter_protocol", "next") ^propagate.0()
+      %it.10 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^propagate.0()
+      %tuple.57 : py.Value = py.mkTuple(%it.10)
+      %kwargs.58 : py.Value = py.mkKwargs
+      %call.52 : py.Value = py.call(%next.7, %tuple.57, %kwargs.58) ^propagate.0()
+      %tuple.58 : py.Value = py.mkTuple(%call.52)
+      %kwargs.59 : py.Value = py.mkKwargs
+      %call.53 : py.Value = py.call(%print.21, %tuple.58, %kwargs.59) ^propagate.0()
+      %s.1 : py.Value = py.loadGlobal("s136_iter_protocol", "s") ^propagate.0()
+      %int.30 : py.Value = py.intLit(3)
+      %Z.1 : py.Value = py.loadGlobal("s136_iter_protocol", "Z") ^propagate.0()
+      %add.1 : py.Value = py.add(%int.30, %Z.1) ^propagate.0()
+      %set.57 : py.Value = py.mkSet(%add.1) ^propagate.0()
+      %iSub.0 : py.Value = py.iSub(%s.1, %set.57) ^propagate.0()
+      %s.cell.1 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "s")
+      %set.58 : base.Unit = base.refSet[py.Value](%s.cell.1, %iSub.0)
+      %s.2 : py.Value = py.loadGlobal("s136_iter_protocol", "s") ^propagate.0()
+      %int.31 : py.Value = py.intLit(4)
+      %Z.2 : py.Value = py.loadGlobal("s136_iter_protocol", "Z") ^propagate.0()
+      %add.2 : py.Value = py.add(%int.31, %Z.2) ^propagate.0()
+      %set.59 : py.Value = py.mkSet(%add.2) ^propagate.0()
+      %iBitOr.0 : py.Value = py.iBitOr(%s.2, %set.59) ^propagate.0()
+      %s.cell.2 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "s")
+      %set.60 : base.Unit = base.refSet[py.Value](%s.cell.2, %iBitOr.0)
+      %it.11 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^propagate.0()
+      %iter.9 : py.Value = py.getIter(%it.11) ^propagate.0()
+      jump ^head.1()
+    head.1():
+      %item.13 : py.Value = py.next(%iter.9) ^stop.1()
+      %x.cell.1 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "x")
+      %set.61 : base.Unit = base.refSet[py.Value](%x.cell.1, %item.13)
+      %print.22 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %x.0 : py.Value = py.loadGlobal("s136_iter_protocol", "x") ^propagate.0()
+      %tuple.59 : py.Value = py.mkTuple(%x.0)
+      %kwargs.60 : py.Value = py.mkKwargs
+      %call.54 : py.Value = py.call(%print.22, %tuple.59, %kwargs.60) ^propagate.0()
+      jump ^head.1()
+    stop.1(%exc.37 : py.Value):
+      %done.1 : base.Bool = py.isStopIteration(%exc.37)
+      branch(%done.1) ^exit.1() ^propagate.0(%exc.37)
+    exit.1():
+      %int.32 : py.Value = py.intLit(1)
+      %Z.3 : py.Value = py.loadGlobal("s136_iter_protocol", "Z") ^propagate.0()
+      %add.3 : py.Value = py.add(%int.32, %Z.3) ^propagate.0()
+      %int.33 : py.Value = py.intLit(2)
+      %int.34 : py.Value = py.intLit(3)
+      %set.62 : py.Value = py.mkSet(%add.3, %int.33, %int.34) ^propagate.0()
+      %s2.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "s2")
+      %set.63 : base.Unit = base.refSet[py.Value](%s2.cell.0, %set.62)
+      %iter.10 : py.Value = py.loadGlobal("s136_iter_protocol", "iter") ^propagate.0()
+      %s2.0 : py.Value = py.loadGlobal("s136_iter_protocol", "s2") ^propagate.0()
+      %tuple.60 : py.Value = py.mkTuple(%s2.0)
+      %kwargs.61 : py.Value = py.mkKwargs
+      %call.55 : py.Value = py.call(%iter.10, %tuple.60, %kwargs.61) ^propagate.0()
+      %it2.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "it2")
+      %set.64 : base.Unit = base.refSet[py.Value](%it2.cell.0, %call.55)
+      %print.23 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %next.8 : py.Value = py.loadGlobal("s136_iter_protocol", "next") ^propagate.0()
+      %it2.0 : py.Value = py.loadGlobal("s136_iter_protocol", "it2") ^propagate.0()
+      %tuple.61 : py.Value = py.mkTuple(%it2.0)
+      %kwargs.62 : py.Value = py.mkKwargs
+      %call.56 : py.Value = py.call(%next.8, %tuple.61, %kwargs.62) ^propagate.0()
+      %tuple.62 : py.Value = py.mkTuple(%call.56)
+      %kwargs.63 : py.Value = py.mkKwargs
+      %call.57 : py.Value = py.call(%print.23, %tuple.62, %kwargs.63) ^propagate.0()
+      %s2.1 : py.Value = py.loadGlobal("s136_iter_protocol", "s2") ^propagate.0()
+      %int.35 : py.Value = py.intLit(1)
+      %Z.4 : py.Value = py.loadGlobal("s136_iter_protocol", "Z") ^propagate.0()
+      %add.4 : py.Value = py.add(%int.35, %Z.4) ^propagate.0()
+      %set.65 : py.Value = py.mkSet(%add.4) ^propagate.0()
+      %iSub.1 : py.Value = py.iSub(%s2.1, %set.65) ^propagate.0()
+      %s2.cell.1 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "s2")
+      %set.66 : base.Unit = base.refSet[py.Value](%s2.cell.1, %iSub.1)
+      %s2.2 : py.Value = py.loadGlobal("s136_iter_protocol", "s2") ^propagate.0()
+      %int.36 : py.Value = py.intLit(9)
+      %Z.5 : py.Value = py.loadGlobal("s136_iter_protocol", "Z") ^propagate.0()
+      %add.5 : py.Value = py.add(%int.36, %Z.5) ^propagate.0()
+      %set.67 : py.Value = py.mkSet(%add.5) ^propagate.0()
+      %iBitOr.1 : py.Value = py.iBitOr(%s2.2, %set.67) ^propagate.0()
+      %s2.cell.2 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "s2")
+      %set.68 : base.Unit = base.refSet[py.Value](%s2.cell.2, %iBitOr.1)
+      %it2.1 : py.Value = py.loadGlobal("s136_iter_protocol", "it2") ^propagate.0()
+      %iter.11 : py.Value = py.getIter(%it2.1) ^propagate.0()
+      jump ^head.2()
+    head.2():
+      %item.14 : py.Value = py.next(%iter.11) ^stop.2()
+      %x.cell.2 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "x")
+      %set.69 : base.Unit = base.refSet[py.Value](%x.cell.2, %item.14)
+      %print.24 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %x.1 : py.Value = py.loadGlobal("s136_iter_protocol", "x") ^propagate.0()
+      %tuple.63 : py.Value = py.mkTuple(%x.1)
+      %kwargs.64 : py.Value = py.mkKwargs
+      %call.58 : py.Value = py.call(%print.24, %tuple.63, %kwargs.64) ^propagate.0()
+      jump ^head.2()
+    stop.2(%exc.38 : py.Value):
+      %done.2 : base.Bool = py.isStopIteration(%exc.38)
+      branch(%done.2) ^exit.2() ^propagate.0(%exc.38)
+    exit.2():
+      %int.37 : py.Value = py.intLit(1)
+      %Z.6 : py.Value = py.loadGlobal("s136_iter_protocol", "Z") ^propagate.0()
+      %add.6 : py.Value = py.add(%int.37, %Z.6) ^propagate.0()
+      %int.38 : py.Value = py.intLit(2)
+      %int.39 : py.Value = py.intLit(3)
+      %set.70 : py.Value = py.mkSet(%add.6, %int.38, %int.39) ^propagate.0()
+      %s.cell.3 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "s")
+      %set.71 : base.Unit = base.refSet[py.Value](%s.cell.3, %set.70)
+      %iter.12 : py.Value = py.loadGlobal("s136_iter_protocol", "iter") ^propagate.0()
+      %s.3 : py.Value = py.loadGlobal("s136_iter_protocol", "s") ^propagate.0()
+      %tuple.64 : py.Value = py.mkTuple(%s.3)
+      %kwargs.65 : py.Value = py.mkKwargs
+      %call.59 : py.Value = py.call(%iter.12, %tuple.64, %kwargs.65) ^propagate.0()
+      %it.cell.5 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "it")
+      %set.72 : base.Unit = base.refSet[py.Value](%it.cell.5, %call.59)
+      %print.25 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %it.12 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^propagate.0()
+      %__length_hint__.0 : py.Value = py.attr(%it.12, "__length_hint__") ^propagate.0()
+      %tuple.65 : py.Value = py.mkTuple
+      %kwargs.66 : py.Value = py.mkKwargs
+      %call.60 : py.Value = py.call(%__length_hint__.0, %tuple.65, %kwargs.66) ^propagate.0()
+      %tuple.66 : py.Value = py.mkTuple(%call.60)
+      %kwargs.67 : py.Value = py.mkKwargs
+      %call.61 : py.Value = py.call(%print.25, %tuple.66, %kwargs.67) ^propagate.0()
+      %next.9 : py.Value = py.loadGlobal("s136_iter_protocol", "next") ^propagate.0()
+      %it.13 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^propagate.0()
+      %tuple.67 : py.Value = py.mkTuple(%it.13)
+      %kwargs.68 : py.Value = py.mkKwargs
+      %call.62 : py.Value = py.call(%next.9, %tuple.67, %kwargs.68) ^propagate.0()
+      %print.26 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %it.14 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^propagate.0()
+      %__length_hint__.1 : py.Value = py.attr(%it.14, "__length_hint__") ^propagate.0()
+      %tuple.68 : py.Value = py.mkTuple
+      %kwargs.69 : py.Value = py.mkKwargs
+      %call.63 : py.Value = py.call(%__length_hint__.1, %tuple.68, %kwargs.69) ^propagate.0()
+      %tuple.69 : py.Value = py.mkTuple(%call.63)
+      %kwargs.70 : py.Value = py.mkKwargs
+      %call.64 : py.Value = py.call(%print.26, %tuple.69, %kwargs.70) ^propagate.0()
+      %s.4 : py.Value = py.loadGlobal("s136_iter_protocol", "s") ^propagate.0()
+      %int.40 : py.Value = py.intLit(7)
+      %Z.7 : py.Value = py.loadGlobal("s136_iter_protocol", "Z") ^propagate.0()
+      %add.7 : py.Value = py.add(%int.40, %Z.7) ^propagate.0()
+      %set.73 : py.Value = py.mkSet(%add.7) ^propagate.0()
+      %iBitOr.2 : py.Value = py.iBitOr(%s.4, %set.73) ^propagate.0()
+      %s.cell.4 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "s")
+      %set.74 : base.Unit = base.refSet[py.Value](%s.cell.4, %iBitOr.2)
+      %print.27 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %it.15 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^propagate.0()
+      %__length_hint__.2 : py.Value = py.attr(%it.15, "__length_hint__") ^propagate.0()
+      %tuple.70 : py.Value = py.mkTuple
+      %kwargs.71 : py.Value = py.mkKwargs
+      %call.65 : py.Value = py.call(%__length_hint__.2, %tuple.70, %kwargs.71) ^propagate.0()
+      %tuple.71 : py.Value = py.mkTuple(%call.65)
+      %kwargs.72 : py.Value = py.mkKwargs
+      %call.66 : py.Value = py.call(%print.27, %tuple.71, %kwargs.72) ^propagate.0()
+      %next.10 : py.Value = py.loadGlobal("s136_iter_protocol", "next") ^catch.12()
+      %it.16 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^catch.12()
+      %tuple.72 : py.Value = py.mkTuple(%it.16)
+      %kwargs.73 : py.Value = py.mkKwargs
+      %call.67 : py.Value = py.call(%next.10, %tuple.72, %kwargs.73) ^catch.12()
+      jump ^join.12()
+    catch.12(%exc.39 : py.Value):
+      %prev.12 : py.Value = py.pushExcInfo(%exc.39)
+      %RuntimeError.0 : py.Value = py.loadGlobal("s136_iter_protocol", "RuntimeError") ^unwind.12()
+      %match.12 : base.Bool = py.excMatch(%exc.39, %RuntimeError.0) ^unwind.12()
+      branch(%match.12) ^except.12() ^next.12()
+    except.12():
+      %e.cell.36 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.75 : base.Unit = base.refSet[py.Value](%e.cell.36, %exc.39)
+      %print.28 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^clear.12()
+      %e.36 : py.Value = py.loadGlobal("s136_iter_protocol", "e") ^clear.12()
+      %args.13 : py.Value = py.attr(%e.36, "args") ^clear.12()
+      %int.41 : py.Value = py.intLit(0)
+      %item.15 : py.Value = py.getItem(%args.13, %int.41) ^clear.12()
+      %it.17 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^clear.12()
+      %__length_hint__.3 : py.Value = py.attr(%it.17, "__length_hint__") ^clear.12()
+      %tuple.73 : py.Value = py.mkTuple
+      %kwargs.74 : py.Value = py.mkKwargs
+      %call.68 : py.Value = py.call(%__length_hint__.3, %tuple.73, %kwargs.74) ^clear.12()
+      %tuple.74 : py.Value = py.mkTuple(%item.15, %call.68)
+      %kwargs.75 : py.Value = py.mkKwargs
+      %call.69 : py.Value = py.call(%print.28, %tuple.74, %kwargs.75) ^clear.12()
+      %pop.24 : base.Unit = py.popExcept(%prev.12)
+      %e.37 : py.Value = py.undef("e")
+      %e.cell.37 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.76 : base.Unit = base.refSet[py.Value](%e.cell.37, %e.37)
+      jump ^join.12()
+    clear.12(%exc.40 : py.Value):
+      %e.38 : py.Value = py.undef("e")
+      %e.cell.38 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.77 : base.Unit = base.refSet[py.Value](%e.cell.38, %e.38)
+      jump ^unwind.12(%exc.40)
+    next.12():
+      jump ^unwind.12(%exc.39)
+    unwind.12(%exc.41 : py.Value):
+      %pop.25 : base.Unit = py.popExcept(%prev.12)
+      jump ^propagate.0(%exc.41)
+    join.12():
+      %s.5 : py.Value = py.loadGlobal("s136_iter_protocol", "s") ^propagate.0()
+      %int.42 : py.Value = py.intLit(7)
+      %Z.8 : py.Value = py.loadGlobal("s136_iter_protocol", "Z") ^propagate.0()
+      %add.8 : py.Value = py.add(%int.42, %Z.8) ^propagate.0()
+      %set.78 : py.Value = py.mkSet(%add.8) ^propagate.0()
+      %iSub.2 : py.Value = py.iSub(%s.5, %set.78) ^propagate.0()
+      %s.cell.5 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "s")
+      %set.79 : base.Unit = base.refSet[py.Value](%s.cell.5, %iSub.2)
+      %print.29 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %it.18 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^propagate.0()
+      %__length_hint__.4 : py.Value = py.attr(%it.18, "__length_hint__") ^propagate.0()
+      %tuple.75 : py.Value = py.mkTuple
+      %kwargs.76 : py.Value = py.mkKwargs
+      %call.70 : py.Value = py.call(%__length_hint__.4, %tuple.75, %kwargs.76) ^propagate.0()
+      %tuple.76 : py.Value = py.mkTuple(%call.70)
+      %kwargs.77 : py.Value = py.mkKwargs
+      %call.71 : py.Value = py.call(%print.29, %tuple.76, %kwargs.77) ^propagate.0()
+      %next.11 : py.Value = py.loadGlobal("s136_iter_protocol", "next") ^catch.13()
+      %it.19 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^catch.13()
+      %tuple.77 : py.Value = py.mkTuple(%it.19)
+      %kwargs.78 : py.Value = py.mkKwargs
+      %call.72 : py.Value = py.call(%next.11, %tuple.77, %kwargs.78) ^catch.13()
+      jump ^join.13()
+    catch.13(%exc.42 : py.Value):
+      %prev.13 : py.Value = py.pushExcInfo(%exc.42)
+      %RuntimeError.1 : py.Value = py.loadGlobal("s136_iter_protocol", "RuntimeError") ^unwind.13()
+      %match.13 : base.Bool = py.excMatch(%exc.42, %RuntimeError.1) ^unwind.13()
+      branch(%match.13) ^except.13() ^next.13()
+    except.13():
+      %e.cell.39 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.80 : base.Unit = base.refSet[py.Value](%e.cell.39, %exc.42)
+      %print.30 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^clear.13()
+      %e.39 : py.Value = py.loadGlobal("s136_iter_protocol", "e") ^clear.13()
+      %args.14 : py.Value = py.attr(%e.39, "args") ^clear.13()
+      %int.43 : py.Value = py.intLit(0)
+      %item.16 : py.Value = py.getItem(%args.14, %int.43) ^clear.13()
+      %it.20 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^clear.13()
+      %__length_hint__.5 : py.Value = py.attr(%it.20, "__length_hint__") ^clear.13()
+      %tuple.78 : py.Value = py.mkTuple
+      %kwargs.79 : py.Value = py.mkKwargs
+      %call.73 : py.Value = py.call(%__length_hint__.5, %tuple.78, %kwargs.79) ^clear.13()
+      %tuple.79 : py.Value = py.mkTuple(%item.16, %call.73)
+      %kwargs.80 : py.Value = py.mkKwargs
+      %call.74 : py.Value = py.call(%print.30, %tuple.79, %kwargs.80) ^clear.13()
+      %pop.26 : base.Unit = py.popExcept(%prev.13)
+      %e.40 : py.Value = py.undef("e")
+      %e.cell.40 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.81 : base.Unit = base.refSet[py.Value](%e.cell.40, %e.40)
+      jump ^join.13()
+    clear.13(%exc.43 : py.Value):
+      %e.41 : py.Value = py.undef("e")
+      %e.cell.41 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.82 : base.Unit = base.refSet[py.Value](%e.cell.41, %e.41)
+      jump ^unwind.13(%exc.43)
+    next.13():
+      jump ^unwind.13(%exc.42)
+    unwind.13(%exc.44 : py.Value):
+      %pop.27 : base.Unit = py.popExcept(%prev.13)
+      jump ^propagate.0(%exc.44)
+    join.13():
+      %int.44 : py.Value = py.intLit(1)
+      %int.45 : py.Value = py.intLit(2)
+      %int.46 : py.Value = py.intLit(3)
+      %list.4 : py.Value = py.mkList(%int.44, %int.45, %int.46)
+      %l.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "l")
+      %set.83 : base.Unit = base.refSet[py.Value](%l.cell.0, %list.4)
+      %iter.13 : py.Value = py.loadGlobal("s136_iter_protocol", "iter") ^propagate.0()
+      %l.0 : py.Value = py.loadGlobal("s136_iter_protocol", "l") ^propagate.0()
+      %tuple.80 : py.Value = py.mkTuple(%l.0)
+      %kwargs.81 : py.Value = py.mkKwargs
+      %call.75 : py.Value = py.call(%iter.13, %tuple.80, %kwargs.81) ^propagate.0()
+      %it.cell.6 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "it")
+      %set.84 : base.Unit = base.refSet[py.Value](%it.cell.6, %call.75)
+      %print.31 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %it.21 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^propagate.0()
+      %__length_hint__.6 : py.Value = py.attr(%it.21, "__length_hint__") ^propagate.0()
+      %tuple.81 : py.Value = py.mkTuple
+      %kwargs.82 : py.Value = py.mkKwargs
+      %call.76 : py.Value = py.call(%__length_hint__.6, %tuple.81, %kwargs.82) ^propagate.0()
+      %tuple.82 : py.Value = py.mkTuple(%call.76)
+      %kwargs.83 : py.Value = py.mkKwargs
+      %call.77 : py.Value = py.call(%print.31, %tuple.82, %kwargs.83) ^propagate.0()
+      %next.12 : py.Value = py.loadGlobal("s136_iter_protocol", "next") ^propagate.0()
+      %it.22 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^propagate.0()
+      %tuple.83 : py.Value = py.mkTuple(%it.22)
+      %kwargs.84 : py.Value = py.mkKwargs
+      %call.78 : py.Value = py.call(%next.12, %tuple.83, %kwargs.84) ^propagate.0()
+      %l.1 : py.Value = py.loadGlobal("s136_iter_protocol", "l") ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %none.2 : py.Value = py.noneLit
+      %none.3 : py.Value = py.noneLit
+      %slice.0 : py.Value = py.mkSlice(%none.1, %none.2, %none.3)
+      %del.0 : base.Unit = py.delItem(%l.1, %slice.0) ^propagate.0()
+      %print.32 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %it.23 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^propagate.0()
+      %__length_hint__.7 : py.Value = py.attr(%it.23, "__length_hint__") ^propagate.0()
+      %tuple.84 : py.Value = py.mkTuple
+      %kwargs.85 : py.Value = py.mkKwargs
+      %call.79 : py.Value = py.call(%__length_hint__.7, %tuple.84, %kwargs.85) ^propagate.0()
+      %tuple.85 : py.Value = py.mkTuple(%call.79)
+      %kwargs.86 : py.Value = py.mkKwargs
+      %call.80 : py.Value = py.call(%print.32, %tuple.85, %kwargs.86) ^propagate.0()
+      %print.33 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %next.13 : py.Value = py.loadGlobal("s136_iter_protocol", "next") ^propagate.0()
+      %it.24 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^propagate.0()
+      %str.9 : py.Value = py.strLit("e")
+      %tuple.86 : py.Value = py.mkTuple(%it.24, %str.9)
+      %kwargs.87 : py.Value = py.mkKwargs
+      %call.81 : py.Value = py.call(%next.13, %tuple.86, %kwargs.87) ^propagate.0()
+      %tuple.87 : py.Value = py.mkTuple(%call.81)
+      %kwargs.88 : py.Value = py.mkKwargs
+      %call.82 : py.Value = py.call(%print.33, %tuple.87, %kwargs.88) ^propagate.0()
+      %l.2 : py.Value = py.loadGlobal("s136_iter_protocol", "l") ^propagate.0()
+      %int.47 : py.Value = py.intLit(5)
+      %list.5 : py.Value = py.mkList(%int.47)
+      %iAdd.0 : py.Value = py.iAdd(%l.2, %list.5) ^propagate.0()
+      %l.cell.1 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "l")
+      %set.85 : base.Unit = base.refSet[py.Value](%l.cell.1, %iAdd.0)
+      %print.34 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %it.25 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^propagate.0()
+      %__length_hint__.8 : py.Value = py.attr(%it.25, "__length_hint__") ^propagate.0()
+      %tuple.88 : py.Value = py.mkTuple
+      %kwargs.89 : py.Value = py.mkKwargs
+      %call.83 : py.Value = py.call(%__length_hint__.8, %tuple.88, %kwargs.89) ^propagate.0()
+      %next.14 : py.Value = py.loadGlobal("s136_iter_protocol", "next") ^propagate.0()
+      %it.26 : py.Value = py.loadGlobal("s136_iter_protocol", "it") ^propagate.0()
+      %str.10 : py.Value = py.strLit("e2")
+      %tuple.89 : py.Value = py.mkTuple(%it.26, %str.10)
+      %kwargs.90 : py.Value = py.mkKwargs
+      %call.84 : py.Value = py.call(%next.14, %tuple.89, %kwargs.90) ^propagate.0()
+      %tuple.90 : py.Value = py.mkTuple(%call.83, %call.84)
+      %kwargs.91 : py.Value = py.mkKwargs
+      %call.85 : py.Value = py.call(%print.34, %tuple.90, %kwargs.91) ^propagate.0()
+      %iter.14 : py.Value = py.loadGlobal("s136_iter_protocol", "iter") ^propagate.0()
+      %range.0 : py.Value = py.loadGlobal("s136_iter_protocol", "range") ^propagate.0()
+      %int.48 : py.Value = py.intLit(5)
+      %tuple.91 : py.Value = py.mkTuple(%int.48)
+      %kwargs.92 : py.Value = py.mkKwargs
+      %call.86 : py.Value = py.call(%range.0, %tuple.91, %kwargs.92) ^propagate.0()
+      %tuple.92 : py.Value = py.mkTuple(%call.86)
+      %kwargs.93 : py.Value = py.mkKwargs
+      %call.87 : py.Value = py.call(%iter.14, %tuple.92, %kwargs.93) ^propagate.0()
+      %r.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "r")
+      %set.86 : base.Unit = base.refSet[py.Value](%r.cell.0, %call.87)
+      %next.15 : py.Value = py.loadGlobal("s136_iter_protocol", "next") ^propagate.0()
+      %r.0 : py.Value = py.loadGlobal("s136_iter_protocol", "r") ^propagate.0()
+      %tuple.93 : py.Value = py.mkTuple(%r.0)
+      %kwargs.94 : py.Value = py.mkKwargs
+      %call.88 : py.Value = py.call(%next.15, %tuple.93, %kwargs.94) ^propagate.0()
+      %print.35 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %r.1 : py.Value = py.loadGlobal("s136_iter_protocol", "r") ^propagate.0()
+      %__length_hint__.9 : py.Value = py.attr(%r.1, "__length_hint__") ^propagate.0()
+      %tuple.94 : py.Value = py.mkTuple
+      %kwargs.95 : py.Value = py.mkKwargs
+      %call.89 : py.Value = py.call(%__length_hint__.9, %tuple.94, %kwargs.95) ^propagate.0()
+      %tuple.95 : py.Value = py.mkTuple(%call.89)
+      %kwargs.96 : py.Value = py.mkKwargs
+      %call.90 : py.Value = py.call(%print.35, %tuple.95, %kwargs.96) ^propagate.0()
+      %__build_class__.6 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.7 : py.Value = py.mkClosure[[]](@|s136_iter_protocol.Lh.<body>|, "<body>", "s136_iter_protocol")
+      %str.11 : py.Value = py.strLit("Lh")
+      %tuple.96 : py.Value = py.mkTuple(%clo.7, %str.11)
+      %kwargs.97 : py.Value = py.mkKwargs
+      %Lh.0 : py.Value = py.call(%__build_class__.6, %tuple.96, %kwargs.97) ^propagate.0()
+      %Lh.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "Lh")
+      %set.87 : base.Unit = base.refSet[py.Value](%Lh.cell.0, %Lh.0)
+      %print.36 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("s136_iter_protocol", "len") ^propagate.0()
+      %list.6 : py.Value = py.mkList
+      %Lh.1 : py.Value = py.loadGlobal("s136_iter_protocol", "Lh") ^propagate.0()
+      %tuple.97 : py.Value = py.mkTuple
+      %kwargs.98 : py.Value = py.mkKwargs
+      %call.91 : py.Value = py.call(%Lh.1, %tuple.97, %kwargs.98) ^propagate.0()
+      %extend.3 : base.Unit = py.listExtend(%list.6, %call.91) ^propagate.0()
+      %tuple.98 : py.Value = py.mkTuple(%list.6)
+      %kwargs.99 : py.Value = py.mkKwargs
+      %call.92 : py.Value = py.call(%len.0, %tuple.98, %kwargs.99) ^propagate.0()
+      %tuple.99 : py.Value = py.mkTuple(%call.92)
+      %kwargs.100 : py.Value = py.mkKwargs
+      %call.93 : py.Value = py.call(%print.36, %tuple.99, %kwargs.100) ^propagate.0()
+      %__build_class__.7 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.8 : py.Value = py.mkClosure[[]](@|s136_iter_protocol.Lh2.<body>|, "<body>", "s136_iter_protocol")
+      %str.12 : py.Value = py.strLit("Lh2")
+      %tuple.100 : py.Value = py.mkTuple(%clo.8, %str.12)
+      %kwargs.101 : py.Value = py.mkKwargs
+      %Lh2.0 : py.Value = py.call(%__build_class__.7, %tuple.100, %kwargs.101) ^propagate.0()
+      %Lh2.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "Lh2")
+      %set.88 : base.Unit = base.refSet[py.Value](%Lh2.cell.0, %Lh2.0)
+      %list.7 : py.Value = py.mkList
+      %Lh2.1 : py.Value = py.loadGlobal("s136_iter_protocol", "Lh2") ^catch.14()
+      %tuple.101 : py.Value = py.mkTuple
+      %kwargs.102 : py.Value = py.mkKwargs
+      %call.94 : py.Value = py.call(%Lh2.1, %tuple.101, %kwargs.102) ^catch.14()
+      %extend.4 : base.Unit = py.listExtend(%list.7, %call.94) ^catch.14()
+      jump ^join.14()
+    catch.14(%exc.45 : py.Value):
+      %prev.14 : py.Value = py.pushExcInfo(%exc.45)
+      %ValueError.0 : py.Value = py.loadGlobal("s136_iter_protocol", "ValueError") ^unwind.14()
+      %match.14 : base.Bool = py.excMatch(%exc.45, %ValueError.0) ^unwind.14()
+      branch(%match.14) ^except.14() ^next.14()
+    except.14():
+      %e.cell.42 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.89 : base.Unit = base.refSet[py.Value](%e.cell.42, %exc.45)
+      %print.37 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^clear.14()
+      %str.13 : py.Value = py.strLit("ValueError")
+      %e.42 : py.Value = py.loadGlobal("s136_iter_protocol", "e") ^clear.14()
+      %args.15 : py.Value = py.attr(%e.42, "args") ^clear.14()
+      %int.49 : py.Value = py.intLit(0)
+      %item.17 : py.Value = py.getItem(%args.15, %int.49) ^clear.14()
+      %tuple.102 : py.Value = py.mkTuple(%str.13, %item.17)
+      %kwargs.103 : py.Value = py.mkKwargs
+      %call.95 : py.Value = py.call(%print.37, %tuple.102, %kwargs.103) ^clear.14()
+      %pop.28 : base.Unit = py.popExcept(%prev.14)
+      %e.43 : py.Value = py.undef("e")
+      %e.cell.43 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.90 : base.Unit = base.refSet[py.Value](%e.cell.43, %e.43)
+      jump ^join.14()
+    clear.14(%exc.46 : py.Value):
+      %e.44 : py.Value = py.undef("e")
+      %e.cell.44 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.91 : base.Unit = base.refSet[py.Value](%e.cell.44, %e.44)
+      jump ^unwind.14(%exc.46)
+    next.14():
+      jump ^unwind.14(%exc.45)
+    unwind.14(%exc.47 : py.Value):
+      %pop.29 : base.Unit = py.popExcept(%prev.14)
+      jump ^propagate.0(%exc.47)
+    join.14():
+      %__build_class__.8 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.9 : py.Value = py.mkClosure[[]](@|s136_iter_protocol.Lh3.<body>|, "<body>", "s136_iter_protocol")
+      %str.14 : py.Value = py.strLit("Lh3")
+      %tuple.103 : py.Value = py.mkTuple(%clo.9, %str.14)
+      %kwargs.104 : py.Value = py.mkKwargs
+      %Lh3.0 : py.Value = py.call(%__build_class__.8, %tuple.103, %kwargs.104) ^propagate.0()
+      %Lh3.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "Lh3")
+      %set.92 : base.Unit = base.refSet[py.Value](%Lh3.cell.0, %Lh3.0)
+      %print.38 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %len.1 : py.Value = py.loadGlobal("s136_iter_protocol", "len") ^propagate.0()
+      %list.8 : py.Value = py.mkList
+      %Lh3.1 : py.Value = py.loadGlobal("s136_iter_protocol", "Lh3") ^propagate.0()
+      %tuple.104 : py.Value = py.mkTuple
+      %kwargs.105 : py.Value = py.mkKwargs
+      %call.96 : py.Value = py.call(%Lh3.1, %tuple.104, %kwargs.105) ^propagate.0()
+      %extend.5 : base.Unit = py.listExtend(%list.8, %call.96) ^propagate.0()
+      %tuple.105 : py.Value = py.mkTuple(%list.8)
+      %kwargs.106 : py.Value = py.mkKwargs
+      %call.97 : py.Value = py.call(%len.1, %tuple.105, %kwargs.106) ^propagate.0()
+      %tuple.106 : py.Value = py.mkTuple(%call.97)
+      %kwargs.107 : py.Value = py.mkKwargs
+      %call.98 : py.Value = py.call(%print.38, %tuple.106, %kwargs.107) ^propagate.0()
+      %__build_class__.9 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.10 : py.Value = py.mkClosure[[]](@|s136_iter_protocol.Lh4.<body>|, "<body>", "s136_iter_protocol")
+      %str.15 : py.Value = py.strLit("Lh4")
+      %tuple.107 : py.Value = py.mkTuple(%clo.10, %str.15)
+      %kwargs.108 : py.Value = py.mkKwargs
+      %Lh4.0 : py.Value = py.call(%__build_class__.9, %tuple.107, %kwargs.108) ^propagate.0()
+      %Lh4.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "Lh4")
+      %set.93 : base.Unit = base.refSet[py.Value](%Lh4.cell.0, %Lh4.0)
+      %print.39 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %len.2 : py.Value = py.loadGlobal("s136_iter_protocol", "len") ^propagate.0()
+      %list.9 : py.Value = py.mkList
+      %Lh4.1 : py.Value = py.loadGlobal("s136_iter_protocol", "Lh4") ^propagate.0()
+      %tuple.108 : py.Value = py.mkTuple
+      %kwargs.109 : py.Value = py.mkKwargs
+      %call.99 : py.Value = py.call(%Lh4.1, %tuple.108, %kwargs.109) ^propagate.0()
+      %extend.6 : base.Unit = py.listExtend(%list.9, %call.99) ^propagate.0()
+      %tuple.109 : py.Value = py.mkTuple(%list.9)
+      %kwargs.110 : py.Value = py.mkKwargs
+      %call.100 : py.Value = py.call(%len.2, %tuple.109, %kwargs.110) ^propagate.0()
+      %tuple.110 : py.Value = py.mkTuple(%call.100)
+      %kwargs.111 : py.Value = py.mkKwargs
+      %call.101 : py.Value = py.call(%print.39, %tuple.110, %kwargs.111) ^propagate.0()
+      %__build_class__.10 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.11 : py.Value = py.mkClosure[[]](@|s136_iter_protocol.Lh5.<body>|, "<body>", "s136_iter_protocol")
+      %str.16 : py.Value = py.strLit("Lh5")
+      %tuple.111 : py.Value = py.mkTuple(%clo.11, %str.16)
+      %kwargs.112 : py.Value = py.mkKwargs
+      %Lh5.0 : py.Value = py.call(%__build_class__.10, %tuple.111, %kwargs.112) ^propagate.0()
+      %Lh5.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "Lh5")
+      %set.94 : base.Unit = base.refSet[py.Value](%Lh5.cell.0, %Lh5.0)
+      %print.40 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %len.3 : py.Value = py.loadGlobal("s136_iter_protocol", "len") ^propagate.0()
+      %list.10 : py.Value = py.mkList
+      %Lh5.1 : py.Value = py.loadGlobal("s136_iter_protocol", "Lh5") ^propagate.0()
+      %tuple.112 : py.Value = py.mkTuple
+      %kwargs.113 : py.Value = py.mkKwargs
+      %call.102 : py.Value = py.call(%Lh5.1, %tuple.112, %kwargs.113) ^propagate.0()
+      %extend.7 : base.Unit = py.listExtend(%list.10, %call.102) ^propagate.0()
+      %tuple.113 : py.Value = py.mkTuple(%list.10)
+      %kwargs.114 : py.Value = py.mkKwargs
+      %call.103 : py.Value = py.call(%len.3, %tuple.113, %kwargs.114) ^propagate.0()
+      %tuple.114 : py.Value = py.mkTuple(%call.103)
+      %kwargs.115 : py.Value = py.mkKwargs
+      %call.104 : py.Value = py.call(%print.40, %tuple.114, %kwargs.115) ^propagate.0()
+      %__build_class__.11 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.12 : py.Value = py.mkClosure[[]](@|s136_iter_protocol.Lh6.<body>|, "<body>", "s136_iter_protocol")
+      %str.17 : py.Value = py.strLit("Lh6")
+      %tuple.115 : py.Value = py.mkTuple(%clo.12, %str.17)
+      %kwargs.116 : py.Value = py.mkKwargs
+      %Lh6.0 : py.Value = py.call(%__build_class__.11, %tuple.115, %kwargs.116) ^propagate.0()
+      %Lh6.cell.0 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "Lh6")
+      %set.95 : base.Unit = base.refSet[py.Value](%Lh6.cell.0, %Lh6.0)
+      %list.11 : py.Value = py.mkList
+      %Lh6.1 : py.Value = py.loadGlobal("s136_iter_protocol", "Lh6") ^catch.15()
+      %tuple.116 : py.Value = py.mkTuple
+      %kwargs.117 : py.Value = py.mkKwargs
+      %call.105 : py.Value = py.call(%Lh6.1, %tuple.116, %kwargs.117) ^catch.15()
+      %extend.8 : base.Unit = py.listExtend(%list.11, %call.105) ^catch.15()
+      jump ^join.15()
+    catch.15(%exc.48 : py.Value):
+      %prev.15 : py.Value = py.pushExcInfo(%exc.48)
+      %RuntimeError.2 : py.Value = py.loadGlobal("s136_iter_protocol", "RuntimeError") ^unwind.15()
+      %match.15 : base.Bool = py.excMatch(%exc.48, %RuntimeError.2) ^unwind.15()
+      branch(%match.15) ^except.15() ^next.15()
+    except.15():
+      %e.cell.45 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.96 : base.Unit = base.refSet[py.Value](%e.cell.45, %exc.48)
+      %print.41 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^clear.15()
+      %str.18 : py.Value = py.strLit("RuntimeError")
+      %e.45 : py.Value = py.loadGlobal("s136_iter_protocol", "e") ^clear.15()
+      %args.16 : py.Value = py.attr(%e.45, "args") ^clear.15()
+      %int.50 : py.Value = py.intLit(0)
+      %item.18 : py.Value = py.getItem(%args.16, %int.50) ^clear.15()
+      %tuple.117 : py.Value = py.mkTuple(%str.18, %item.18)
+      %kwargs.118 : py.Value = py.mkKwargs
+      %call.106 : py.Value = py.call(%print.41, %tuple.117, %kwargs.118) ^clear.15()
+      %pop.30 : base.Unit = py.popExcept(%prev.15)
+      %e.46 : py.Value = py.undef("e")
+      %e.cell.46 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.97 : base.Unit = base.refSet[py.Value](%e.cell.46, %e.46)
+      jump ^join.15()
+    clear.15(%exc.49 : py.Value):
+      %e.47 : py.Value = py.undef("e")
+      %e.cell.47 : base.Ref(py.Value) = py.globalCell("s136_iter_protocol", "e")
+      %set.98 : base.Unit = base.refSet[py.Value](%e.cell.47, %e.47)
+      jump ^unwind.15(%exc.49)
+    next.15():
+      jump ^unwind.15(%exc.48)
+    unwind.15(%exc.50 : py.Value):
+      %pop.31 : base.Unit = py.popExcept(%prev.15)
+      jump ^propagate.0(%exc.50)
+    join.15():
+      %none.4 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.4)
+      ret(%ret.0)
+    propagate.0(%exc.51 : py.Value):
+      %exc.52 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.51)
+      ret(%exc.52)
+  }
+  func @|s136_iter_protocol.C.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__iter__", value = unit}, {name = "__getitem__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s136_iter_protocol", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("C")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %str.4 : py.Value = py.strLit("__iter__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %none.0) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s136_iter_protocol.C.__getitem__, "__getitem__", "s136_iter_protocol")
+      %str.5 : py.Value = py.strLit("__getitem__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.0) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s136_iter_protocol.C.<body>.1|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__getitem__", value = unit}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s136_iter_protocol", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("C")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %str.4 : py.Value = py.strLit("__getitem__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %none.0) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s136_iter_protocol.R.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__iter__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s136_iter_protocol", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("R")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s136_iter_protocol.R.__iter__, "__iter__", "s136_iter_protocol")
+      %str.4 : py.Value = py.strLit("__iter__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s136_iter_protocol.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %a.0 : py.Value = py.undef("a")
+      %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, true, false) ^propagate.0()
+      %a.1 : py.Value = py.tupleGet(%bound.0, 0)
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s136_iter_protocol.N.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__next__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s136_iter_protocol", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("N")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s136_iter_protocol.N.__next__, "__next__", "s136_iter_protocol")
+      %str.4 : py.Value = py.strLit("__next__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s136_iter_protocol.R.<body>.1|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__iter__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s136_iter_protocol", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("R")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s136_iter_protocol.R.__iter__.1, "__iter__", "s136_iter_protocol")
+      %str.4 : py.Value = py.strLit("__iter__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s136_iter_protocol.R2.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__iter__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s136_iter_protocol", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("R2")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s136_iter_protocol.R2.__iter__, "__iter__", "s136_iter_protocol")
+      %str.4 : py.Value = py.strLit("__iter__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s136_iter_protocol.Lh.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__len__", binding = "def"}, {name = "__length_hint__", binding = "def"}, {name = "__iter__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s136_iter_protocol", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Lh")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s136_iter_protocol.Lh.__len__, "__len__", "s136_iter_protocol")
+      %str.4 : py.Value = py.strLit("__len__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@s136_iter_protocol.Lh.__length_hint__, "__length_hint__", "s136_iter_protocol")
+      %str.5 : py.Value = py.strLit("__length_hint__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@s136_iter_protocol.Lh.__iter__, "__iter__", "s136_iter_protocol")
+      %str.6 : py.Value = py.strLit("__iter__")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.6, %clo.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s136_iter_protocol.Lh2.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__len__", binding = "def"}, {name = "__iter__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s136_iter_protocol", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Lh2")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s136_iter_protocol.Lh2.__len__, "__len__", "s136_iter_protocol")
+      %str.4 : py.Value = py.strLit("__len__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@s136_iter_protocol.Lh2.__iter__, "__iter__", "s136_iter_protocol")
+      %str.5 : py.Value = py.strLit("__iter__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s136_iter_protocol.Lh3.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__length_hint__", value = unit}, {name = "__iter__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s136_iter_protocol", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Lh3")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %str.4 : py.Value = py.strLit("__length_hint__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %none.0) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s136_iter_protocol.Lh3.__iter__, "__iter__", "s136_iter_protocol")
+      %str.5 : py.Value = py.strLit("__iter__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.0) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s136_iter_protocol.Lh4.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__length_hint__", binding = "def"}, {name = "__iter__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s136_iter_protocol", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Lh4")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s136_iter_protocol.Lh4.__length_hint__, "__length_hint__", "s136_iter_protocol")
+      %str.4 : py.Value = py.strLit("__length_hint__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@s136_iter_protocol.Lh4.__iter__, "__iter__", "s136_iter_protocol")
+      %str.5 : py.Value = py.strLit("__iter__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s136_iter_protocol.Lh5.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__length_hint__", binding = "def"}, {name = "__iter__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s136_iter_protocol", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Lh5")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s136_iter_protocol.Lh5.__length_hint__, "__length_hint__", "s136_iter_protocol")
+      %str.4 : py.Value = py.strLit("__length_hint__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@s136_iter_protocol.Lh5.__iter__, "__iter__", "s136_iter_protocol")
+      %str.5 : py.Value = py.strLit("__iter__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s136_iter_protocol.Lh6.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__length_hint__", binding = "def"}, {name = "__iter__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s136_iter_protocol", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Lh6")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s136_iter_protocol.Lh6.__length_hint__, "__length_hint__", "s136_iter_protocol")
+      %str.4 : py.Value = py.strLit("__length_hint__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@s136_iter_protocol.Lh6.__iter__, "__iter__", "s136_iter_protocol")
+      %str.5 : py.Value = py.strLit("__iter__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s136_iter_protocol.C.__getitem__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %i.0 : py.Value = py.undef("i")
+      %i.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
+      %self.1 : py.Value = py.undef("self")
+      %i.1 : py.Value = py.undef("i")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %i.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "C.__getitem__", 0, 2, false, false, "self", "i") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %i.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %i.4 : py.Value = py.requireDefined(%i.2, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%i.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s136_iter_protocol.R.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "R.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(5)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s136_iter_protocol.N.__next__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "N.__next__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(1)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s136_iter_protocol.R.__iter__.1(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "R.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %N.0 : py.Value = py.loadGlobal("s136_iter_protocol", "N") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%N.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s136_iter_protocol.R2.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "R2.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(1)
+      %list.0 : py.Value = py.mkList(%int.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%list.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s136_iter_protocol.Lh.__len__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Lh.__len__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %TypeError.0 : py.Value = py.loadGlobal("s136_iter_protocol", "TypeError") ^propagate.0()
+      %str.0 : py.Value = py.strLit("no")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%TypeError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @s136_iter_protocol.Lh.__length_hint__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Lh.__length_hint__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %print.0 : py.Value = py.loadGlobal("s136_iter_protocol", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("hint")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s136_iter_protocol.Lh.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Lh.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %iter.0 : py.Value = py.loadGlobal("s136_iter_protocol", "iter") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %list.0 : py.Value = py.mkList(%int.0, %int.1)
+      %tuple.0 : py.Value = py.mkTuple(%list.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%iter.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s136_iter_protocol.Lh2.__len__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Lh2.__len__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %ValueError.0 : py.Value = py.loadGlobal("s136_iter_protocol", "ValueError") ^propagate.0()
+      %str.0 : py.Value = py.strLit("v")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%ValueError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @s136_iter_protocol.Lh2.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Lh2.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %iter.0 : py.Value = py.loadGlobal("s136_iter_protocol", "iter") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %list.0 : py.Value = py.mkList(%int.0, %int.1)
+      %tuple.0 : py.Value = py.mkTuple(%list.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%iter.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s136_iter_protocol.Lh3.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Lh3.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %iter.0 : py.Value = py.loadGlobal("s136_iter_protocol", "iter") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %list.0 : py.Value = py.mkList(%int.0, %int.1)
+      %tuple.0 : py.Value = py.mkTuple(%list.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%iter.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s136_iter_protocol.Lh4.__length_hint__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Lh4.__length_hint__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %bool.0 : py.Value = py.boolLit(true)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%bool.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s136_iter_protocol.Lh4.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Lh4.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %iter.0 : py.Value = py.loadGlobal("s136_iter_protocol", "iter") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %list.0 : py.Value = py.mkList(%int.0, %int.1)
+      %tuple.0 : py.Value = py.mkTuple(%list.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%iter.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s136_iter_protocol.Lh5.__length_hint__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Lh5.__length_hint__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %TypeError.0 : py.Value = py.loadGlobal("s136_iter_protocol", "TypeError") ^propagate.0()
+      %exc.0 : py.Value = py.toException(%TypeError.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @s136_iter_protocol.Lh5.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Lh5.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %iter.0 : py.Value = py.loadGlobal("s136_iter_protocol", "iter") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %list.0 : py.Value = py.mkList(%int.0, %int.1)
+      %tuple.0 : py.Value = py.mkTuple(%list.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%iter.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s136_iter_protocol.Lh6.__length_hint__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Lh6.__length_hint__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %RuntimeError.0 : py.Value = py.loadGlobal("s136_iter_protocol", "RuntimeError") ^propagate.0()
+      %str.0 : py.Value = py.strLit("r")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%RuntimeError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @s136_iter_protocol.Lh6.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Lh6.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %iter.0 : py.Value = py.loadGlobal("s136_iter_protocol", "iter") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %list.0 : py.Value = py.mkList(%int.0, %int.1)
+      %tuple.0 : py.Value = py.mkTuple(%list.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%iter.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

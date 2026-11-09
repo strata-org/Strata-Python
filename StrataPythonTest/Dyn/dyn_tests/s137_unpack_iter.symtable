@@ -1,0 +1,194 @@
+module top
+  A: local (assigned, referenced)
+  B: local (assigned, referenced)
+  Bad: local (assigned, referenced)
+  C: local (assigned, referenced)
+  D: local (assigned, referenced)
+  E: local (assigned, referenced)
+  Exception: global implicit (referenced)
+  F: local (assigned, referenced)
+  G: local (assigned, referenced)
+  H: local (assigned, referenced)
+  I: local (assigned, referenced)
+  It: local (assigned, referenced)
+  J: local (assigned, referenced)
+  K: local (assigned, referenced)
+  KI: local (assigned)
+  KeyError: global implicit (referenced)
+  M: local (assigned, referenced)
+  Meta: local (assigned, referenced)
+  Meta2: local (assigned, referenced)
+  NI: local (assigned, referenced)
+  T: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  d: local (assigned, referenced)
+  e: local (assigned, referenced)
+  iter: global implicit (referenced)
+  j: local (assigned, referenced)
+  len: global implicit (referenced)
+  object: global implicit (referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  class It
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function __init__
+      n: local (parameter, referenced)
+      self: local (parameter, referenced)
+    function __iter__
+      self: local (parameter, referenced)
+    function __next__
+      StopIteration: global implicit (referenced)
+      self: local (parameter, referenced)
+  class G
+    __getitem__: local (assigned)
+    function __getitem__
+      IndexError: global implicit (referenced)
+      i: local (parameter, referenced)
+      self: local (parameter)
+  class Bad
+    keys: local (assigned)
+    function keys
+      AttributeError: global implicit (referenced)
+      self: local (parameter)
+  class K
+    keys: local (assigned)
+    function keys
+      self: local (parameter)
+  class NI
+    __iter__: local (assigned)
+    function __iter__
+      TypeError: global implicit (referenced)
+      self: local (parameter)
+  class G
+    __getitem__: local (assigned)
+    keys: local (assigned)
+    function __getitem__
+      KeyError: global implicit (referenced)
+      k: local (parameter)
+      self: local (parameter)
+    function keys
+      self: local (parameter)
+  class KI
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+    function __iter__
+      self: local (parameter, referenced)
+    function __next__
+      StopIteration: global implicit (referenced)
+      self: local (parameter, referenced)
+  class M
+    __getitem__: local (assigned)
+    keys: local (assigned)
+    function keys
+      KI: global implicit (referenced)
+      self: local (parameter)
+    function __getitem__
+      k: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter)
+  class H
+    __eq__: local (assigned)
+    __hash__: local (assigned)
+    __init__: local (assigned)
+    function __init__
+      n: local (parameter, referenced)
+      self: local (parameter, referenced)
+    function __hash__
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __eq__
+      o: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+  class M
+    __getitem__: local (assigned)
+    __init__: local (assigned)
+    keys: local (assigned)
+    function __init__
+      ks: local (parameter, referenced)
+      self: local (parameter, referenced)
+    function keys
+      self: local (parameter, referenced)
+    function __getitem__
+      k: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter)
+  class Meta
+    __call__: local (assigned)
+    function __call__
+      __class__: free (referenced)
+      a: local (parameter, referenced)
+      cls: local (parameter)
+      len: global implicit (referenced)
+      print: global implicit (referenced)
+      super: global implicit (referenced)
+  class A
+    __init__: local (assigned)
+    function __init__
+      print: global implicit (referenced)
+      self: local (parameter)
+      x: local (parameter, referenced)
+  class B
+    __init__: local (assigned)
+    __new__: local (assigned)
+    function __new__
+      cls: local (parameter)
+      print: global implicit (referenced)
+      x: local (parameter, referenced)
+    function __init__
+      print: global implicit (referenced)
+      self: local (parameter)
+      x: local (parameter)
+  class C
+    __init__: local (assigned)
+    function __init__
+      self: local (parameter)
+  class D
+    __call__: local (assigned)
+    function __call__
+      self: local (parameter)
+      y: local (parameter, referenced)
+  class E
+    __call__: local (assigned)
+  class F
+    c: local (assigned)
+    classmethod: global implicit (referenced)
+    s: local (assigned)
+    staticmethod: global implicit (referenced)
+    function s
+      x: local (parameter, referenced)
+    function c
+      cls: local (parameter, referenced)
+      x: local (parameter)
+  class Meta2
+  class G
+    __init__: local (assigned)
+    function __init__
+      q: local (parameter, referenced)
+      self: local (parameter, referenced)
+  class H
+  class I
+    __init__: local (assigned)
+    __new__: local (assigned)
+    function __new__
+      D: global implicit (referenced)
+      cls: local (parameter)
+      object: global implicit (referenced)
+    function __init__
+      print: global implicit (referenced)
+      self: local (parameter)
+  class J
+    __init__: local (assigned)
+    function __init__
+      a: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter)
+  class K
+qualnames: A, A.__init__, B, B.__init__, B.__new__, Bad, Bad.keys, C, C.__init__, D, D.__call__, E, F, F.c, F.s, G, G, G, G.__getitem__, G.__getitem__, G.__init__, G.keys, H, H, H.__eq__, H.__hash__, H.__init__, I, I.__init__, I.__new__, It, It.__init__, It.__iter__, It.__next__, J, J.__init__, K, K, K.keys, KI, KI.__init__, KI.__iter__, KI.__next__, M, M, M.__getitem__, M.__getitem__, M.__init__, M.keys, M.keys, Meta, Meta.__call__, Meta2, NI, NI.__iter__

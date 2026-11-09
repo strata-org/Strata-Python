@@ -1,0 +1,67 @@
+module top
+  Bad: local (assigned)
+  KI: local (assigned)
+  M: local (assigned, referenced)
+  M2: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  d: local (assigned, referenced)
+  e: local (assigned, referenced)
+  g: local (assigned, referenced)
+  len: global implicit (referenced)
+  print: global implicit (referenced)
+  r: local (assigned, referenced)
+  t: local (assigned, referenced)
+  class M
+    __getitem__: local (assigned)
+    keys: local (assigned)
+    function keys
+      print: global implicit (referenced)
+      self: local (parameter)
+    function __getitem__
+      k: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter)
+  class KI
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __length_hint__: local (assigned)
+    __next__: local (assigned)
+    function __iter__
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __init__
+      self: local (parameter, referenced)
+    function __next__
+      StopIteration: global implicit (referenced)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __length_hint__
+      print: global implicit (referenced)
+      self: local (parameter)
+  class M2
+    __getitem__: local (assigned)
+    keys: local (assigned)
+    function keys
+      KI: global implicit (referenced)
+      print: global implicit (referenced)
+      self: local (parameter)
+    function __getitem__
+      k: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter)
+  function g
+    kw: local (parameter, referenced)
+  class Bad
+    keys: local (assigned)
+    function keys
+      self: local (parameter)
+  function lambda
+    print: global implicit (referenced)
+  function lambda
+  function lambda
+    Bad: global implicit (referenced)
+    print: global implicit (referenced)
+  function lambda
+    M2: global implicit (referenced)
+    print: global implicit (referenced)
+qualnames: <lambda>, <lambda>, <lambda>, <lambda>, Bad, Bad.keys, KI, KI.__init__, KI.__iter__, KI.__length_hint__, KI.__next__, M, M.__getitem__, M.keys, M2, M2.__getitem__, M2.keys, g

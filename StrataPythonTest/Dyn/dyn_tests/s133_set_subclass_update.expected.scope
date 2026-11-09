@@ -1,0 +1,12 @@
+module
+  S: local (assigned, referenced)
+  set: global implicit (referenced)
+  s: local (assigned, referenced)
+  print: global implicit (referenced)
+  len: global implicit (referenced)
+  class S
+    __iter__: local (assigned)
+    function S.__iter__
+      params: self
+      self: local (parameter)
+      iter: global implicit (referenced)

@@ -1,0 +1,19 @@
+--- stdout 39
+a é
+a € 2
+a
+é
+€
+😀
+b
+😀 é b str_iterator
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+c = 'b'
+it = <str_iterator object>
+it2 = <str_iterator object>
+s = 'aé€😀b'

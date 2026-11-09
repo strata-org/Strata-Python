@@ -7,6 +7,7 @@ module
 public import StrataPython.Dyn.Sem.Assembly
 public import StrataPython.Dyn.Sem.PyTypes
 public import StrataPython.Dyn.Sem.Proto.Containers
+public import StrataPython.Dyn.Sem.Proto.Iter
 
 set_option autoImplicit false
 
@@ -25,11 +26,13 @@ open Strata.Dyn.Exec
 
 variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
 
-@[dyn_sem Py.in_] def in_ (lhs rhs : Value) (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] ((Value.bool ·) <$> Proto.contains (m := PyM σ .calls true) lhs rhs)
+@[dyn_sem Py.in_] def in_ (lhs rhs : Value) (err : Target E [Value]) (st : Option Value)
+    (again : Again E Value) : Sem ε E Value :=
+  runLoopFree err again st #[] (Proto.inStep (m := PyM σ .calls true) false lhs rhs)
 
-@[dyn_sem Py.notIn] def notIn (lhs rhs : Value) (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] ((Value.bool ! ·) <$> Proto.contains (m := PyM σ .calls true) lhs rhs)
+@[dyn_sem Py.notIn] def notIn (lhs rhs : Value) (err : Target E [Value]) (st : Option Value)
+    (again : Again E Value) : Sem ε E Value :=
+  runLoopFree err again st #[] (Proto.inStep (m := PyM σ .calls true) true lhs rhs)
 
 @[dyn_sem Py.mkList] def mkList (elems : Array Value) : Sem ε E Value :=
   runTotalFree "py.mkList" #[] (PyPure.allocList (m := PyM σ .pure true) elems)
@@ -59,11 +62,13 @@ variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
 
 @[dyn_sem Py.unpackSeq] def unpackSeq (val : Value) (n : Int) (err : Target E [Value]) :
     Sem ε E Value :=
-  runRuleFree err #[] (Proto.unpackSeq (m := PyM σ .calls true) val n.toNat)
+  runRuleFree err #[] (Proto.unpackSeqAll (m := PyM σ .writes true) val n.toNat)
 
-@[dyn_sem Py.unpackEx] def unpackEx (val : Value) (before after : Int) (err : Target E [Value]) :
+@[dyn_sem Py.unpackEx] def unpackEx (val : Value) (before after : Int) (err : Target E [Value])
+    (st : Option (Proto.UnpackState Value)) (again : Again E (Proto.UnpackState Value)) :
     Sem ε E Value :=
-  runRuleFree err #[] (Proto.unpackEx (m := PyM σ .calls true) val before.toNat after.toNat)
+  runLoopFree err again st #[]
+    (Proto.unpackExStep (m := PyM σ .writes true) val before.toNat after.toNat)
 
 @[dyn_sem Py.listToTuple] def listToTuple (list : Value) : Sem ε E Value :=
   runTotalFree "py.listToTuple" #[] (e := .reads) (σ := σ) do
@@ -87,16 +92,16 @@ variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
 @[dyn_sem Py.setAdd] def setAdd (set value : Value) (err : Target E [Value]) : Sem ε E Unit :=
   runRuleFree err #[] (Proto.setAddItem (m := PyM σ .writes true) set value)
 
-@[dyn_sem Py.setUpdate] def setUpdate (set iterable : Value) (err : Target E [Value]) :
-    Sem ε E Unit :=
-  runRuleFree err #[] (Proto.setUpdate (m := PyM σ .writes true) set iterable)
+@[dyn_sem Py.setUpdate] def setUpdate (set iterable : Value) (err : Target E [Value])
+    (st : Option Value) (again : Again E Value) : Sem ε E Unit :=
+  runLoopFree err again st #[] (Proto.setUpdateStep (m := PyM σ .writes true) set iterable)
 
 @[dyn_sem Py.listAppend] def listAppend (list value : Value) : Sem ε E Unit :=
   runTotalFree "py.listAppend" #[] (PyWrites.listAppend (m := PyM σ .writes true) list value)
 
-@[dyn_sem Py.listExtend] def listExtend (list iterable : Value) (err : Target E [Value]) :
-    Sem ε E Unit :=
-  runRuleFree err #[] (Proto.listExtend (m := PyM σ .writes true) list iterable)
+@[dyn_sem Py.listExtend] def listExtend (list iterable : Value) (err : Target E [Value])
+    (st : Option Value) (again : Again E Value) : Sem ε E Unit :=
+  runLoopFree err again st #[] (Proto.listExtendStep (m := PyM σ .writes true) list iterable)
 
 end
 

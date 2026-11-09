@@ -1,0 +1,15 @@
+module top
+  U: local (assigned, referenced)
+  ValueError: global implicit (referenced)
+  e: local (assigned, referenced)
+  len: global implicit (referenced)
+  print: global implicit (referenced)
+  class U
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function __iter__
+      self: local (parameter, referenced)
+    function __next__
+      StopIteration: global implicit (referenced)
+      self: local (parameter)
+qualnames: U, U.__iter__, U.__next__

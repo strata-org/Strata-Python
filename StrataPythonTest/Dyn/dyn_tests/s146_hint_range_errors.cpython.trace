@@ -1,0 +1,14 @@
+--- stdout 216
+OverflowError Python int too large to convert to C ssize_t
+ValueError __length_hint__() should return >= 0
+OverflowError Python int too large to convert to C ssize_t
+ValueError __length_hint__() should return >= 0
+1
+
+--- outcome
+ok
+--- globals
+H = <class 'H'>
+__doc__ = None
+__name__ = '__main__'
+v = 1048576

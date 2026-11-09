@@ -1,0 +1,57 @@
+module top
+  BadLen: local (assigned, referenced)
+  H: local (assigned, referenced)
+  NegLen: local (assigned, referenced)
+  NotImplemented: global implicit (referenced)
+  RuntimeError: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  bad: local (assigned, referenced)
+  bi: local (assigned, referenced)
+  big: local (assigned, referenced)
+  c: local (assigned, referenced)
+  d: local (assigned, referenced)
+  e: local (assigned, referenced)
+  it: local (assigned, referenced)
+  iter: global implicit (referenced)
+  k: local (assigned, referenced)
+  l: local (assigned, referenced)
+  len: global implicit (referenced)
+  li: local (assigned, referenced)
+  next: global implicit (referenced)
+  print: global implicit (referenced)
+  r: local (assigned, referenced)
+  range: global implicit (referenced)
+  type: global implicit (referenced)
+  x: local (assigned)
+  class H
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __length_hint__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function __length_hint__
+      self: local (parameter, referenced)
+    function __iter__
+      iter: global implicit (referenced)
+      self: local (parameter)
+  class BadLen
+    __iter__: local (assigned)
+    __len__: local (assigned)
+    function __len__
+      self: local (parameter)
+    function __iter__
+      iter: global implicit (referenced)
+      self: local (parameter)
+  class NegLen
+    __iter__: local (assigned)
+    __len__: local (assigned)
+    function __len__
+      self: local (parameter)
+    function __iter__
+      iter: global implicit (referenced)
+      self: local (parameter)
+qualnames: BadLen, BadLen.__iter__, BadLen.__len__, H, H.__init__, H.__iter__, H.__length_hint__, NegLen, NegLen.__iter__, NegLen.__len__

@@ -1,0 +1,32 @@
+module top
+  C: local (assigned, referenced)
+  D: local (assigned)
+  E: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  len: global implicit (referenced)
+  print: global implicit (referenced)
+  class D
+    __get__: local (assigned)
+    function __get__
+      TypeError: global implicit (referenced)
+      cls: local (parameter)
+      obj: local (parameter)
+      self: local (parameter)
+  class C
+    D: global implicit (referenced)
+    __iter__: local (assigned)
+    __length_hint__: local (assigned)
+    function __iter__
+      iter: global implicit (referenced)
+      self: local (parameter)
+  class E
+    __iter__: local (assigned)
+    __length_hint__: local (assigned)
+    function __length_hint__
+      TypeError: global implicit (referenced)
+      self: local (parameter)
+    function __iter__
+      iter: global implicit (referenced)
+      self: local (parameter)
+qualnames: C, C.__iter__, D, D.__get__, E, E.__iter__, E.__length_hint__

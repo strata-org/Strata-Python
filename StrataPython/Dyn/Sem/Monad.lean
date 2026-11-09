@@ -472,6 +472,27 @@ jumps along `err` with the exception that `m` raises. -/
     Sem ε E α :=
   m.1 hs ⟨0⟩ pure fun _ => semanticGap s!"an exception in an operation that can't raise: {op}"
 
+/-- The continuation of a looping rule: the result on `.done`, and `jump again` on `.more`. -/
+@[inline] def loopCont {S α : Type} (again : Again E S) : LoopStep S α → Sem ε E α
+  | .done a => pure a
+  | .more s => jump again s
+
+/-- **A rule that loops**, one activation of it: it reads the start of this activation, runs `m`
+on the state `st` that the activation before it saved (`none` at the first), and jumps `again`
+with the state that `m` gives to go on from, or along `err` with the exception that `m` raises. -/
+@[inline] def runLoop {S α : Type} {fr : Bool} (err : Target E [Value]) (again : Again E S)
+    (st : Option S) (hs : Handles ε E) (m : Option S → PyM σ e fr (LoopStep S α)) :
+    Sem ε E α := do
+  let store ← getThe (ObjStore σ)
+  (m st).1 hs (startOf store) (loopCont again) (jump err)
+
+/-- **A rule that loops, whose computation needs no start**: as `runLoop`, without reading the
+store. -/
+@[inline] def runLoopFree {S α : Type} (err : Target E [Value]) (again : Again E S)
+    (st : Option S) (hs : Handles ε E) (m : Option S → PyM σ e true (LoopStep S α)) :
+    Sem ε E α :=
+  (m st).1 hs ⟨0⟩ (loopCont again) (jump err)
+
 /-- **A rule that runs `m` if `cond`, and else `mFree`, which needs no start**: `runRule` or
 `runRuleFree`, so that the cases that need the start are the only ones that read it. -/
 @[inline] def runRuleIf {α : Type} (cond : Bool) (err : Target E [Value]) (hs : Handles ε E)

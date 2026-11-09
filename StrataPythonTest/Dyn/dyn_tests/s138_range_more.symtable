@@ -1,0 +1,112 @@
+module top
+  B: local (assigned, referenced)
+  I: local (assigned, referenced)
+  IndexError: global implicit (referenced)
+  It: local (assigned, referenced)
+  It2: local (assigned, referenced)
+  It3: local (assigned)
+  S: local (assigned, referenced)
+  SE: local (assigned)
+  SI: local (assigned, referenced)
+  StopIteration: global implicit (referenced)
+  V: local (assigned)
+  ValueError: global implicit (referenced)
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  bi: local (assigned, referenced)
+  c: local (assigned, referenced)
+  ci: local (assigned, referenced)
+  e: local (assigned, referenced)
+  f: local (assigned, referenced)
+  g: local (assigned, referenced)
+  h: local (assigned, referenced)
+  h2: local (assigned, referenced)
+  it: local (assigned, referenced)
+  it2: local (assigned, referenced)
+  it3: local (assigned, referenced)
+  it4: local (assigned, referenced)
+  iter: global implicit (referenced)
+  k: local (assigned, referenced)
+  len: global implicit (referenced)
+  next: global implicit (referenced)
+  print: global implicit (referenced)
+  r: local (assigned, referenced)
+  range: global implicit (referenced)
+  rv: local (assigned, referenced)
+  t: local (assigned, referenced)
+  type: global implicit (referenced)
+  class I
+    __index__: local (assigned)
+    function __index__
+      print: global implicit (referenced)
+      self: local (parameter)
+  class S
+    __eq__: local (assigned)
+    function __eq__
+      o: local (parameter, referenced)
+      print: global implicit (referenced)
+      self: local (parameter)
+  function f
+    c: global implicit (referenced)
+  class V
+    __eq__: local (assigned)
+    function __eq__
+      o: local (parameter)
+      print: global implicit (referenced)
+      self: local (parameter)
+  function g
+    V: global implicit (referenced)
+  function h
+    StopIteration: global implicit (referenced)
+  class SE
+  function h2
+    SE: global implicit (referenced)
+  class B
+    __eq__: local (assigned)
+    function __eq__
+      ValueError: global implicit (referenced)
+      o: local (parameter)
+      self: local (parameter)
+  function k
+  function lambda
+  class It
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+    function __iter__
+      self: local (parameter, referenced)
+    function __next__
+      StopIteration: global implicit (referenced)
+      self: local (parameter, referenced)
+  class SI
+  class It2
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function __next__
+      SI: global implicit (referenced)
+      self: local (parameter)
+    function __iter__
+      self: local (parameter, referenced)
+  function f
+    a: local (parameter, referenced)
+    len: global implicit (referenced)
+  class It3
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function __next__
+      ValueError: global implicit (referenced)
+      self: local (parameter)
+    function __iter__
+      self: local (parameter, referenced)
+  function lambda
+    It3: global implicit (referenced)
+  function lambda
+    It3: global implicit (referenced)
+  function lambda
+    It3: global implicit (referenced)
+    f: global implicit (referenced)
+  function lambda
+    It3: global implicit (referenced)
+qualnames: <lambda>, <lambda>, <lambda>, <lambda>, <lambda>, B, B.__eq__, I, I.__index__, It, It.__init__, It.__iter__, It.__next__, It2, It2.__iter__, It2.__next__, It3, It3.__iter__, It3.__next__, S, S.__eq__, SE, SI, V, V.__eq__, f, f, g, h, h2, k

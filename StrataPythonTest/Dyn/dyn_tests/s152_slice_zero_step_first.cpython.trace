@@ -1,0 +1,22 @@
+--- stdout 86
+ValueError
+ValueError
+ValueError
+ValueError
+ValueError
+ValueError
+3
+step
+start
+stop
+1
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+seq = 'abc'
+xs = [1, 2, 3]

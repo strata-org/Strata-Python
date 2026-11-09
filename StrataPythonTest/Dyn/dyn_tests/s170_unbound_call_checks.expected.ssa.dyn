@@ -1,0 +1,102 @@
+module s170_unbound_call_checks {
+  func @|s170_unbound_call_checks.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s170_unbound_call_checks")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s170_unbound_call_checks", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s170_unbound_call_checks", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %tuple.0 : py.Value = py.loadGlobal("s170_unbound_call_checks", "tuple") ^catch.0()
+      %__new__.0 : py.Value = py.attr(%tuple.0, "__new__") ^catch.0()
+      %zip.0 : py.Value = py.loadGlobal("s170_unbound_call_checks", "zip") ^catch.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %list.0 : py.Value = py.mkList(%int.0, %int.1)
+      %tuple.1 : py.Value = py.mkTuple(%zip.0, %list.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%__new__.0, %tuple.1, %kwargs.0) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %TypeError.0 : py.Value = py.loadGlobal("s170_unbound_call_checks", "TypeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %TypeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s170_unbound_call_checks", "e")
+      %set.2 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.0 : py.Value = py.loadGlobal("s170_unbound_call_checks", "print") ^clear.0()
+      %e.0 : py.Value = py.loadGlobal("s170_unbound_call_checks", "e") ^clear.0()
+      %args.0 : py.Value = py.attr(%e.0, "args") ^clear.0()
+      %int.2 : py.Value = py.intLit(0)
+      %item.0 : py.Value = py.getItem(%args.0, %int.2) ^clear.0()
+      %tuple.2 : py.Value = py.mkTuple(%item.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.2, %kwargs.1) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("s170_unbound_call_checks", "e")
+      %set.3 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("s170_unbound_call_checks", "e")
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %list.1 : py.Value = py.loadGlobal("s170_unbound_call_checks", "list") ^catch.1()
+      %extend.0 : py.Value = py.attr(%list.1, "extend") ^catch.1()
+      %int.3 : py.Value = py.intLit(1)
+      %tuple.3 : py.Value = py.mkTuple(%int.3)
+      %int.4 : py.Value = py.intLit(2)
+      %list.2 : py.Value = py.mkList(%int.4)
+      %tuple.4 : py.Value = py.mkTuple(%tuple.3, %list.2)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%extend.0, %tuple.4, %kwargs.2) ^catch.1()
+      jump ^join.1()
+    catch.1(%exc.3 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.3)
+      %TypeError.1 : py.Value = py.loadGlobal("s170_unbound_call_checks", "TypeError") ^unwind.1()
+      %match.1 : base.Bool = py.excMatch(%exc.3, %TypeError.1) ^unwind.1()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %e.cell.3 : base.Ref(py.Value) = py.globalCell("s170_unbound_call_checks", "e")
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.3)
+      %print.1 : py.Value = py.loadGlobal("s170_unbound_call_checks", "print") ^clear.1()
+      %e.3 : py.Value = py.loadGlobal("s170_unbound_call_checks", "e") ^clear.1()
+      %args.1 : py.Value = py.attr(%e.3, "args") ^clear.1()
+      %int.5 : py.Value = py.intLit(0)
+      %item.1 : py.Value = py.getItem(%args.1, %int.5) ^clear.1()
+      %tuple.5 : py.Value = py.mkTuple(%item.1)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.1, %tuple.5, %kwargs.3) ^clear.1()
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      %e.4 : py.Value = py.undef("e")
+      %e.cell.4 : base.Ref(py.Value) = py.globalCell("s170_unbound_call_checks", "e")
+      %set.6 : base.Unit = base.refSet[py.Value](%e.cell.4, %e.4)
+      jump ^join.1()
+    clear.1(%exc.4 : py.Value):
+      %e.5 : py.Value = py.undef("e")
+      %e.cell.5 : base.Ref(py.Value) = py.globalCell("s170_unbound_call_checks", "e")
+      %set.7 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.5)
+      jump ^unwind.1(%exc.4)
+    next.1():
+      jump ^unwind.1(%exc.3)
+    unwind.1(%exc.5 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.5)
+    join.1():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.6 : py.Value):
+      %exc.7 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.6)
+      ret(%exc.7)
+  }
+}
+

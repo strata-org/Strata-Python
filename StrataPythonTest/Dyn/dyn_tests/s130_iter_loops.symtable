@@ -1,0 +1,45 @@
+module top
+  G: local (assigned, referenced)
+  It: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  c: local (assigned, referenced)
+  e: local (assigned, referenced)
+  f: local (assigned, referenced)
+  len: global implicit (referenced)
+  print: global implicit (referenced)
+  show: local (assigned, referenced)
+  t: local (assigned, referenced)
+  class It
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __length_hint__: local (assigned)
+    __next__: local (assigned)
+    function __init__
+      n: local (parameter, referenced)
+      self: local (parameter, referenced)
+    function __iter__
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __next__
+      StopIteration: global implicit (referenced)
+      print: global implicit (referenced)
+      self: local (parameter, referenced)
+    function __length_hint__
+      print: global implicit (referenced)
+      self: local (parameter)
+  class G
+    __getitem__: local (assigned)
+    function __getitem__
+      IndexError: global implicit (referenced)
+      i: local (parameter, referenced)
+      self: local (parameter)
+  function show
+    len: global implicit (referenced)
+    print: global implicit (referenced)
+    xs: local (parameter, referenced)
+  function f
+    args: local (parameter, referenced)
+qualnames: G, G.__getitem__, It, It.__init__, It.__iter__, It.__length_hint__, It.__next__, f, show

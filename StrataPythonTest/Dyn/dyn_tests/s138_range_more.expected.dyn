@@ -1,0 +1,1693 @@
+module s138_range_more {
+  func @|s138_range_more.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s138_range_more")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|s138_range_more.I.<body>|, "<body>", "s138_range_more")
+      %str.1 : py.Value = py.strLit("I")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %I.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %I.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "I")
+      %set.2 : base.Unit = base.refSet[py.Value](%I.cell.0, %I.0)
+      %range.0 : py.Value = py.loadGlobal("s138_range_more", "range") ^propagate.0()
+      %I.1 : py.Value = py.loadGlobal("s138_range_more", "I") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%I.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%call.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%range.0, %tuple.2, %kwargs.2) ^propagate.0()
+      %r.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "r")
+      %set.3 : base.Unit = base.refSet[py.Value](%r.cell.0, %call.1)
+      %print.0 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("s138_range_more", "len") ^propagate.0()
+      %r.0 : py.Value = py.loadGlobal("s138_range_more", "r") ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple(%r.0)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%len.0, %tuple.3, %kwargs.3) ^propagate.0()
+      %r.1 : py.Value = py.loadGlobal("s138_range_more", "r") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %neg.0 : py.Value = py.uSub(%int.0) ^propagate.0()
+      %item.0 : py.Value = py.getItem(%r.1, %neg.0) ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple(%call.2, %item.0)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.0, %tuple.4, %kwargs.4) ^propagate.0()
+      %range.1 : py.Value = py.loadGlobal("s138_range_more", "range") ^propagate.0()
+      %int.1 : py.Value = py.intLit(5)
+      %I.2 : py.Value = py.loadGlobal("s138_range_more", "I") ^propagate.0()
+      %tuple.5 : py.Value = py.mkTuple
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%I.2, %tuple.5, %kwargs.5) ^propagate.0()
+      %int.2 : py.Value = py.intLit(1)
+      %neg.1 : py.Value = py.uSub(%int.2) ^propagate.0()
+      %tuple.6 : py.Value = py.mkTuple(%int.1, %call.4, %neg.1)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%range.1, %tuple.6, %kwargs.6) ^propagate.0()
+      %r.cell.1 : base.Ref(py.Value) = py.globalCell("s138_range_more", "r")
+      %set.4 : base.Unit = base.refSet[py.Value](%r.cell.1, %call.5)
+      %print.1 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %len.1 : py.Value = py.loadGlobal("s138_range_more", "len") ^propagate.0()
+      %r.2 : py.Value = py.loadGlobal("s138_range_more", "r") ^propagate.0()
+      %tuple.7 : py.Value = py.mkTuple(%r.2)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %call.6 : py.Value = py.call(%len.1, %tuple.7, %kwargs.7) ^propagate.0()
+      %r.3 : py.Value = py.loadGlobal("s138_range_more", "r") ^propagate.0()
+      %int.3 : py.Value = py.intLit(0)
+      %item.1 : py.Value = py.getItem(%r.3, %int.3) ^propagate.0()
+      %tuple.8 : py.Value = py.mkTuple(%call.6, %item.1)
+      %kwargs.8 : py.Value = py.mkKwargs
+      %call.7 : py.Value = py.call(%print.1, %tuple.8, %kwargs.8) ^propagate.0()
+      %print.2 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %len.2 : py.Value = py.loadGlobal("s138_range_more", "len") ^propagate.0()
+      %range.2 : py.Value = py.loadGlobal("s138_range_more", "range") ^propagate.0()
+      %int.4 : py.Value = py.intLit(10)
+      %int.5 : py.Value = py.intLit(0)
+      %int.6 : py.Value = py.intLit(3)
+      %neg.2 : py.Value = py.uSub(%int.6) ^propagate.0()
+      %tuple.9 : py.Value = py.mkTuple(%int.4, %int.5, %neg.2)
+      %kwargs.9 : py.Value = py.mkKwargs
+      %call.8 : py.Value = py.call(%range.2, %tuple.9, %kwargs.9) ^propagate.0()
+      %tuple.10 : py.Value = py.mkTuple(%call.8)
+      %kwargs.10 : py.Value = py.mkKwargs
+      %call.9 : py.Value = py.call(%len.2, %tuple.10, %kwargs.10) ^propagate.0()
+      %range.3 : py.Value = py.loadGlobal("s138_range_more", "range") ^propagate.0()
+      %int.7 : py.Value = py.intLit(10)
+      %int.8 : py.Value = py.intLit(0)
+      %int.9 : py.Value = py.intLit(3)
+      %neg.3 : py.Value = py.uSub(%int.9) ^propagate.0()
+      %tuple.11 : py.Value = py.mkTuple(%int.7, %int.8, %neg.3)
+      %kwargs.11 : py.Value = py.mkKwargs
+      %call.10 : py.Value = py.call(%range.3, %tuple.11, %kwargs.11) ^propagate.0()
+      %int.10 : py.Value = py.intLit(2)
+      %item.2 : py.Value = py.getItem(%call.10, %int.10) ^propagate.0()
+      %tuple.12 : py.Value = py.mkTuple(%call.9, %item.2)
+      %kwargs.12 : py.Value = py.mkKwargs
+      %call.11 : py.Value = py.call(%print.2, %tuple.12, %kwargs.12) ^propagate.0()
+      %range.4 : py.Value = py.loadGlobal("s138_range_more", "range") ^propagate.0()
+      %int.11 : py.Value = py.intLit(0)
+      %int.12 : py.Value = py.intLit(10)
+      %int.13 : py.Value = py.intLit(2)
+      %tuple.13 : py.Value = py.mkTuple(%int.11, %int.12, %int.13)
+      %kwargs.13 : py.Value = py.mkKwargs
+      %call.12 : py.Value = py.call(%range.4, %tuple.13, %kwargs.13) ^propagate.0()
+      %r.cell.2 : base.Ref(py.Value) = py.globalCell("s138_range_more", "r")
+      %set.5 : base.Unit = base.refSet[py.Value](%r.cell.2, %call.12)
+      %print.3 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %r.4 : py.Value = py.loadGlobal("s138_range_more", "r") ^propagate.0()
+      %int.14 : py.Value = py.intLit(1)
+      %int.15 : py.Value = py.intLit(3)
+      %none.1 : py.Value = py.noneLit
+      %slice.0 : py.Value = py.getSlice(%r.4, %int.14, %int.15, %none.1) ^propagate.0()
+      %int.16 : py.Value = py.intLit(0)
+      %item.3 : py.Value = py.getItem(%slice.0, %int.16) ^propagate.0()
+      %len.3 : py.Value = py.loadGlobal("s138_range_more", "len") ^propagate.0()
+      %r.5 : py.Value = py.loadGlobal("s138_range_more", "r") ^propagate.0()
+      %int.17 : py.Value = py.intLit(1)
+      %int.18 : py.Value = py.intLit(3)
+      %none.2 : py.Value = py.noneLit
+      %slice.1 : py.Value = py.getSlice(%r.5, %int.17, %int.18, %none.2) ^propagate.0()
+      %tuple.14 : py.Value = py.mkTuple(%slice.1)
+      %kwargs.14 : py.Value = py.mkKwargs
+      %call.13 : py.Value = py.call(%len.3, %tuple.14, %kwargs.14) ^propagate.0()
+      %len.4 : py.Value = py.loadGlobal("s138_range_more", "len") ^propagate.0()
+      %r.6 : py.Value = py.loadGlobal("s138_range_more", "r") ^propagate.0()
+      %none.3 : py.Value = py.noneLit
+      %none.4 : py.Value = py.noneLit
+      %int.19 : py.Value = py.intLit(1)
+      %neg.4 : py.Value = py.uSub(%int.19) ^propagate.0()
+      %slice.2 : py.Value = py.getSlice(%r.6, %none.3, %none.4, %neg.4) ^propagate.0()
+      %tuple.15 : py.Value = py.mkTuple(%slice.2)
+      %kwargs.15 : py.Value = py.mkKwargs
+      %call.14 : py.Value = py.call(%len.4, %tuple.15, %kwargs.15) ^propagate.0()
+      %r.7 : py.Value = py.loadGlobal("s138_range_more", "r") ^propagate.0()
+      %none.5 : py.Value = py.noneLit
+      %none.6 : py.Value = py.noneLit
+      %int.20 : py.Value = py.intLit(1)
+      %neg.5 : py.Value = py.uSub(%int.20) ^propagate.0()
+      %slice.3 : py.Value = py.getSlice(%r.7, %none.5, %none.6, %neg.5) ^propagate.0()
+      %int.21 : py.Value = py.intLit(0)
+      %item.4 : py.Value = py.getItem(%slice.3, %int.21) ^propagate.0()
+      %tuple.16 : py.Value = py.mkTuple(%item.3, %call.13, %call.14, %item.4)
+      %kwargs.16 : py.Value = py.mkKwargs
+      %call.15 : py.Value = py.call(%print.3, %tuple.16, %kwargs.16) ^propagate.0()
+      %print.4 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %range.5 : py.Value = py.loadGlobal("s138_range_more", "range") ^propagate.0()
+      %int.22 : py.Value = py.intLit(3)
+      %tuple.17 : py.Value = py.mkTuple(%int.22)
+      %kwargs.17 : py.Value = py.mkKwargs
+      %call.16 : py.Value = py.call(%range.5, %tuple.17, %kwargs.17) ^propagate.0()
+      %range.6 : py.Value = py.loadGlobal("s138_range_more", "range") ^propagate.0()
+      %int.23 : py.Value = py.intLit(0)
+      %int.24 : py.Value = py.intLit(3)
+      %tuple.18 : py.Value = py.mkTuple(%int.23, %int.24)
+      %kwargs.18 : py.Value = py.mkKwargs
+      %call.17 : py.Value = py.call(%range.6, %tuple.18, %kwargs.18) ^propagate.0()
+      %eq.0 : py.Value = py.eq(%call.16, %call.17) ^propagate.0()
+      %range.7 : py.Value = py.loadGlobal("s138_range_more", "range") ^propagate.0()
+      %int.25 : py.Value = py.intLit(0)
+      %tuple.19 : py.Value = py.mkTuple(%int.25)
+      %kwargs.19 : py.Value = py.mkKwargs
+      %call.18 : py.Value = py.call(%range.7, %tuple.19, %kwargs.19) ^propagate.0()
+      %range.8 : py.Value = py.loadGlobal("s138_range_more", "range") ^propagate.0()
+      %int.26 : py.Value = py.intLit(5)
+      %int.27 : py.Value = py.intLit(2)
+      %tuple.20 : py.Value = py.mkTuple(%int.26, %int.27)
+      %kwargs.20 : py.Value = py.mkKwargs
+      %call.19 : py.Value = py.call(%range.8, %tuple.20, %kwargs.20) ^propagate.0()
+      %eq.1 : py.Value = py.eq(%call.18, %call.19) ^propagate.0()
+      %range.9 : py.Value = py.loadGlobal("s138_range_more", "range") ^propagate.0()
+      %int.28 : py.Value = py.intLit(1)
+      %int.29 : py.Value = py.intLit(2)
+      %int.30 : py.Value = py.intLit(5)
+      %tuple.21 : py.Value = py.mkTuple(%int.28, %int.29, %int.30)
+      %kwargs.21 : py.Value = py.mkKwargs
+      %call.20 : py.Value = py.call(%range.9, %tuple.21, %kwargs.21) ^propagate.0()
+      %range.10 : py.Value = py.loadGlobal("s138_range_more", "range") ^propagate.0()
+      %int.31 : py.Value = py.intLit(1)
+      %int.32 : py.Value = py.intLit(3)
+      %int.33 : py.Value = py.intLit(7)
+      %tuple.22 : py.Value = py.mkTuple(%int.31, %int.32, %int.33)
+      %kwargs.22 : py.Value = py.mkKwargs
+      %call.21 : py.Value = py.call(%range.10, %tuple.22, %kwargs.22) ^propagate.0()
+      %eq.2 : py.Value = py.eq(%call.20, %call.21) ^propagate.0()
+      %tuple.23 : py.Value = py.mkTuple(%eq.0, %eq.1, %eq.2)
+      %kwargs.23 : py.Value = py.mkKwargs
+      %call.22 : py.Value = py.call(%print.4, %tuple.23, %kwargs.23) ^propagate.0()
+      %r.8 : py.Value = py.loadGlobal("s138_range_more", "r") ^catch.0()
+      %int.34 : py.Value = py.intLit(10)
+      %item.5 : py.Value = py.getItem(%r.8, %int.34) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %IndexError.0 : py.Value = py.loadGlobal("s138_range_more", "IndexError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %IndexError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "e")
+      %set.6 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.5 : py.Value = py.loadGlobal("s138_range_more", "print") ^clear.0()
+      %e.0 : py.Value = py.loadGlobal("s138_range_more", "e") ^clear.0()
+      %args.0 : py.Value = py.attr(%e.0, "args") ^clear.0()
+      %int.35 : py.Value = py.intLit(0)
+      %item.6 : py.Value = py.getItem(%args.0, %int.35) ^clear.0()
+      %tuple.24 : py.Value = py.mkTuple(%item.6)
+      %kwargs.24 : py.Value = py.mkKwargs
+      %call.23 : py.Value = py.call(%print.5, %tuple.24, %kwargs.24) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("s138_range_more", "e")
+      %set.7 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("s138_range_more", "e")
+      %set.8 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %print.6 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %int.36 : py.Value = py.intLit(3)
+      %r.9 : py.Value = py.loadGlobal("s138_range_more", "r") ^propagate.0()
+      %in.0 : py.Value = py.in(%int.36, %r.9) ^propagate.0()
+      %int.37 : py.Value = py.intLit(4)
+      %r.10 : py.Value = py.loadGlobal("s138_range_more", "r") ^propagate.0()
+      %in.1 : py.Value = py.in(%int.37, %r.10) ^propagate.0()
+      %int.38 : py.Value = py.intLit(2)
+      %neg.6 : py.Value = py.uSub(%int.38) ^propagate.0()
+      %r.11 : py.Value = py.loadGlobal("s138_range_more", "r") ^propagate.0()
+      %in.2 : py.Value = py.in(%neg.6, %r.11) ^propagate.0()
+      %tuple.25 : py.Value = py.mkTuple(%in.0, %in.1, %in.2)
+      %kwargs.25 : py.Value = py.mkKwargs
+      %call.24 : py.Value = py.call(%print.6, %tuple.25, %kwargs.25) ^propagate.0()
+      %range.11 : py.Value = py.loadGlobal("s138_range_more", "range") ^propagate.0()
+      %int.39 : py.Value = py.intLit(2)
+      %int.40 : py.Value = py.intLit(70)
+      %pow.0 : py.Value = py.pow(%int.39, %int.40) ^propagate.0()
+      %neg.7 : py.Value = py.uSub(%pow.0) ^propagate.0()
+      %int.41 : py.Value = py.intLit(2)
+      %int.42 : py.Value = py.intLit(70)
+      %pow.1 : py.Value = py.pow(%int.41, %int.42) ^propagate.0()
+      %int.43 : py.Value = py.intLit(2)
+      %int.44 : py.Value = py.intLit(69)
+      %pow.2 : py.Value = py.pow(%int.43, %int.44) ^propagate.0()
+      %tuple.26 : py.Value = py.mkTuple(%neg.7, %pow.1, %pow.2)
+      %kwargs.26 : py.Value = py.mkKwargs
+      %call.25 : py.Value = py.call(%range.11, %tuple.26, %kwargs.26) ^propagate.0()
+      %b.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "b")
+      %set.9 : base.Unit = base.refSet[py.Value](%b.cell.0, %call.25)
+      %print.7 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %len.5 : py.Value = py.loadGlobal("s138_range_more", "len") ^propagate.0()
+      %b.0 : py.Value = py.loadGlobal("s138_range_more", "b") ^propagate.0()
+      %tuple.27 : py.Value = py.mkTuple(%b.0)
+      %kwargs.27 : py.Value = py.mkKwargs
+      %call.26 : py.Value = py.call(%len.5, %tuple.27, %kwargs.27) ^propagate.0()
+      %type.0 : py.Value = py.loadGlobal("s138_range_more", "type") ^propagate.0()
+      %iter.0 : py.Value = py.loadGlobal("s138_range_more", "iter") ^propagate.0()
+      %b.1 : py.Value = py.loadGlobal("s138_range_more", "b") ^propagate.0()
+      %tuple.28 : py.Value = py.mkTuple(%b.1)
+      %kwargs.28 : py.Value = py.mkKwargs
+      %call.27 : py.Value = py.call(%iter.0, %tuple.28, %kwargs.28) ^propagate.0()
+      %tuple.29 : py.Value = py.mkTuple(%call.27)
+      %kwargs.29 : py.Value = py.mkKwargs
+      %call.28 : py.Value = py.call(%type.0, %tuple.29, %kwargs.29) ^propagate.0()
+      %__name__.0 : py.Value = py.attr(%call.28, "__name__") ^propagate.0()
+      %tuple.30 : py.Value = py.mkTuple(%call.26, %__name__.0)
+      %kwargs.30 : py.Value = py.mkKwargs
+      %call.29 : py.Value = py.call(%print.7, %tuple.30, %kwargs.30) ^propagate.0()
+      %iter.1 : py.Value = py.loadGlobal("s138_range_more", "iter") ^propagate.0()
+      %b.2 : py.Value = py.loadGlobal("s138_range_more", "b") ^propagate.0()
+      %tuple.31 : py.Value = py.mkTuple(%b.2)
+      %kwargs.31 : py.Value = py.mkKwargs
+      %call.30 : py.Value = py.call(%iter.1, %tuple.31, %kwargs.31) ^propagate.0()
+      %bi.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "bi")
+      %set.10 : base.Unit = base.refSet[py.Value](%bi.cell.0, %call.30)
+      %next.0 : py.Value = py.loadGlobal("s138_range_more", "next") ^propagate.0()
+      %bi.0 : py.Value = py.loadGlobal("s138_range_more", "bi") ^propagate.0()
+      %tuple.32 : py.Value = py.mkTuple(%bi.0)
+      %kwargs.32 : py.Value = py.mkKwargs
+      %call.31 : py.Value = py.call(%next.0, %tuple.32, %kwargs.32) ^propagate.0()
+      %print.8 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %next.1 : py.Value = py.loadGlobal("s138_range_more", "next") ^propagate.0()
+      %bi.1 : py.Value = py.loadGlobal("s138_range_more", "bi") ^propagate.0()
+      %tuple.33 : py.Value = py.mkTuple(%bi.1)
+      %kwargs.33 : py.Value = py.mkKwargs
+      %call.32 : py.Value = py.call(%next.1, %tuple.33, %kwargs.33) ^propagate.0()
+      %int.45 : py.Value = py.intLit(2)
+      %int.46 : py.Value = py.intLit(70)
+      %pow.3 : py.Value = py.pow(%int.45, %int.46) ^propagate.0()
+      %neg.8 : py.Value = py.uSub(%pow.3) ^propagate.0()
+      %int.47 : py.Value = py.intLit(2)
+      %int.48 : py.Value = py.intLit(69)
+      %pow.4 : py.Value = py.pow(%int.47, %int.48) ^propagate.0()
+      %add.0 : py.Value = py.add(%neg.8, %pow.4) ^propagate.0()
+      %eq.3 : py.Value = py.eq(%call.32, %add.0) ^propagate.0()
+      %bi.2 : py.Value = py.loadGlobal("s138_range_more", "bi") ^propagate.0()
+      %__length_hint__.0 : py.Value = py.attr(%bi.2, "__length_hint__") ^propagate.0()
+      %tuple.34 : py.Value = py.mkTuple
+      %kwargs.34 : py.Value = py.mkKwargs
+      %call.33 : py.Value = py.call(%__length_hint__.0, %tuple.34, %kwargs.34) ^propagate.0()
+      %tuple.35 : py.Value = py.mkTuple(%eq.3, %call.33)
+      %kwargs.35 : py.Value = py.mkKwargs
+      %call.34 : py.Value = py.call(%print.8, %tuple.35, %kwargs.35) ^propagate.0()
+      %range.12 : py.Value = py.loadGlobal("s138_range_more", "range") ^propagate.0()
+      %int.49 : py.Value = py.intLit(2)
+      %int.50 : py.Value = py.intLit(63)
+      %pow.5 : py.Value = py.pow(%int.49, %int.50) ^propagate.0()
+      %int.51 : py.Value = py.intLit(2)
+      %sub.0 : py.Value = py.sub(%pow.5, %int.51) ^propagate.0()
+      %int.52 : py.Value = py.intLit(2)
+      %int.53 : py.Value = py.intLit(63)
+      %pow.6 : py.Value = py.pow(%int.52, %int.53) ^propagate.0()
+      %int.54 : py.Value = py.intLit(2)
+      %add.1 : py.Value = py.add(%pow.6, %int.54) ^propagate.0()
+      %tuple.36 : py.Value = py.mkTuple(%sub.0, %add.1)
+      %kwargs.36 : py.Value = py.mkKwargs
+      %call.35 : py.Value = py.call(%range.12, %tuple.36, %kwargs.36) ^propagate.0()
+      %c.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "c")
+      %set.11 : base.Unit = base.refSet[py.Value](%c.cell.0, %call.35)
+      %iter.2 : py.Value = py.loadGlobal("s138_range_more", "iter") ^propagate.0()
+      %c.57 : py.Value = py.loadGlobal("s138_range_more", "c") ^propagate.0()
+      %tuple.37 : py.Value = py.mkTuple(%c.57)
+      %kwargs.37 : py.Value = py.mkKwargs
+      %call.36 : py.Value = py.call(%iter.2, %tuple.37, %kwargs.37) ^propagate.0()
+      %ci.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "ci")
+      %set.12 : base.Unit = base.refSet[py.Value](%ci.cell.0, %call.36)
+      %print.9 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %type.1 : py.Value = py.loadGlobal("s138_range_more", "type") ^propagate.0()
+      %ci.0 : py.Value = py.loadGlobal("s138_range_more", "ci") ^propagate.0()
+      %tuple.38 : py.Value = py.mkTuple(%ci.0)
+      %kwargs.38 : py.Value = py.mkKwargs
+      %call.37 : py.Value = py.call(%type.1, %tuple.38, %kwargs.38) ^propagate.0()
+      %__name__.1 : py.Value = py.attr(%call.37, "__name__") ^propagate.0()
+      %next.2 : py.Value = py.loadGlobal("s138_range_more", "next") ^propagate.0()
+      %ci.1 : py.Value = py.loadGlobal("s138_range_more", "ci") ^propagate.0()
+      %tuple.39 : py.Value = py.mkTuple(%ci.1)
+      %kwargs.39 : py.Value = py.mkKwargs
+      %call.38 : py.Value = py.call(%next.2, %tuple.39, %kwargs.39) ^propagate.0()
+      %int.55 : py.Value = py.intLit(2)
+      %int.56 : py.Value = py.intLit(63)
+      %pow.7 : py.Value = py.pow(%int.55, %int.56) ^propagate.0()
+      %sub.1 : py.Value = py.sub(%call.38, %pow.7) ^propagate.0()
+      %tuple.40 : py.Value = py.mkTuple(%__name__.1, %sub.1)
+      %kwargs.40 : py.Value = py.mkKwargs
+      %call.39 : py.Value = py.call(%print.9, %tuple.40, %kwargs.40) ^propagate.0()
+      %range.13 : py.Value = py.loadGlobal("s138_range_more", "range") ^propagate.0()
+      %int.57 : py.Value = py.intLit(5)
+      %neg.9 : py.Value = py.uSub(%int.57) ^propagate.0()
+      %int.58 : py.Value = py.intLit(2)
+      %int.59 : py.Value = py.intLit(63)
+      %pow.8 : py.Value = py.pow(%int.58, %int.59) ^propagate.0()
+      %int.60 : py.Value = py.intLit(1)
+      %sub.2 : py.Value = py.sub(%pow.8, %int.60) ^propagate.0()
+      %tuple.41 : py.Value = py.mkTuple(%neg.9, %sub.2)
+      %kwargs.41 : py.Value = py.mkKwargs
+      %call.40 : py.Value = py.call(%range.13, %tuple.41, %kwargs.41) ^propagate.0()
+      %e.cell.3 : base.Ref(py.Value) = py.globalCell("s138_range_more", "e")
+      %set.13 : base.Unit = base.refSet[py.Value](%e.cell.3, %call.40)
+      %print.10 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %type.2 : py.Value = py.loadGlobal("s138_range_more", "type") ^propagate.0()
+      %iter.3 : py.Value = py.loadGlobal("s138_range_more", "iter") ^propagate.0()
+      %e.3 : py.Value = py.loadGlobal("s138_range_more", "e") ^propagate.0()
+      %tuple.42 : py.Value = py.mkTuple(%e.3)
+      %kwargs.42 : py.Value = py.mkKwargs
+      %call.41 : py.Value = py.call(%iter.3, %tuple.42, %kwargs.42) ^propagate.0()
+      %tuple.43 : py.Value = py.mkTuple(%call.41)
+      %kwargs.43 : py.Value = py.mkKwargs
+      %call.42 : py.Value = py.call(%type.2, %tuple.43, %kwargs.43) ^propagate.0()
+      %__name__.2 : py.Value = py.attr(%call.42, "__name__") ^propagate.0()
+      %tuple.44 : py.Value = py.mkTuple(%__name__.2)
+      %kwargs.44 : py.Value = py.mkKwargs
+      %call.43 : py.Value = py.call(%print.10, %tuple.44, %kwargs.44) ^propagate.0()
+      %range.14 : py.Value = py.loadGlobal("s138_range_more", "range") ^propagate.0()
+      %int.61 : py.Value = py.intLit(0)
+      %int.62 : py.Value = py.intLit(2)
+      %int.63 : py.Value = py.intLit(63)
+      %pow.9 : py.Value = py.pow(%int.62, %int.63) ^propagate.0()
+      %int.64 : py.Value = py.intLit(1)
+      %sub.3 : py.Value = py.sub(%pow.9, %int.64) ^propagate.0()
+      %int.65 : py.Value = py.intLit(2)
+      %int.66 : py.Value = py.intLit(62)
+      %pow.10 : py.Value = py.pow(%int.65, %int.66) ^propagate.0()
+      %tuple.45 : py.Value = py.mkTuple(%int.61, %sub.3, %pow.10)
+      %kwargs.45 : py.Value = py.mkKwargs
+      %call.44 : py.Value = py.call(%range.14, %tuple.45, %kwargs.45) ^propagate.0()
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "f")
+      %set.14 : base.Unit = base.refSet[py.Value](%f.cell.0, %call.44)
+      %print.11 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %type.3 : py.Value = py.loadGlobal("s138_range_more", "type") ^propagate.0()
+      %iter.4 : py.Value = py.loadGlobal("s138_range_more", "iter") ^propagate.0()
+      %f.0 : py.Value = py.loadGlobal("s138_range_more", "f") ^propagate.0()
+      %tuple.46 : py.Value = py.mkTuple(%f.0)
+      %kwargs.46 : py.Value = py.mkKwargs
+      %call.45 : py.Value = py.call(%iter.4, %tuple.46, %kwargs.46) ^propagate.0()
+      %tuple.47 : py.Value = py.mkTuple(%call.45)
+      %kwargs.47 : py.Value = py.mkKwargs
+      %call.46 : py.Value = py.call(%type.3, %tuple.47, %kwargs.47) ^propagate.0()
+      %__name__.3 : py.Value = py.attr(%call.46, "__name__") ^propagate.0()
+      %tuple.48 : py.Value = py.mkTuple(%__name__.3)
+      %kwargs.48 : py.Value = py.mkKwargs
+      %call.47 : py.Value = py.call(%print.11, %tuple.48, %kwargs.48) ^propagate.0()
+      %range.15 : py.Value = py.loadGlobal("s138_range_more", "range") ^propagate.0()
+      %int.67 : py.Value = py.intLit(5)
+      %tuple.49 : py.Value = py.mkTuple(%int.67)
+      %kwargs.49 : py.Value = py.mkKwargs
+      %call.48 : py.Value = py.call(%range.15, %tuple.49, %kwargs.49) ^propagate.0()
+      %__reversed__.0 : py.Value = py.attr(%call.48, "__reversed__") ^propagate.0()
+      %tuple.50 : py.Value = py.mkTuple
+      %kwargs.50 : py.Value = py.mkKwargs
+      %call.49 : py.Value = py.call(%__reversed__.0, %tuple.50, %kwargs.50) ^propagate.0()
+      %rv.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "rv")
+      %set.15 : base.Unit = base.refSet[py.Value](%rv.cell.0, %call.49)
+      %print.12 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %type.4 : py.Value = py.loadGlobal("s138_range_more", "type") ^propagate.0()
+      %rv.0 : py.Value = py.loadGlobal("s138_range_more", "rv") ^propagate.0()
+      %tuple.51 : py.Value = py.mkTuple(%rv.0)
+      %kwargs.51 : py.Value = py.mkKwargs
+      %call.50 : py.Value = py.call(%type.4, %tuple.51, %kwargs.51) ^propagate.0()
+      %__name__.4 : py.Value = py.attr(%call.50, "__name__") ^propagate.0()
+      %next.3 : py.Value = py.loadGlobal("s138_range_more", "next") ^propagate.0()
+      %rv.1 : py.Value = py.loadGlobal("s138_range_more", "rv") ^propagate.0()
+      %tuple.52 : py.Value = py.mkTuple(%rv.1)
+      %kwargs.52 : py.Value = py.mkKwargs
+      %call.51 : py.Value = py.call(%next.3, %tuple.52, %kwargs.52) ^propagate.0()
+      %tuple.53 : py.Value = py.mkTuple(%__name__.4, %call.51)
+      %kwargs.53 : py.Value = py.mkKwargs
+      %call.52 : py.Value = py.call(%print.12, %tuple.53, %kwargs.53) ^propagate.0()
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|s138_range_more.S.<body>|, "<body>", "s138_range_more")
+      %str.2 : py.Value = py.strLit("S")
+      %tuple.54 : py.Value = py.mkTuple(%clo.1, %str.2)
+      %kwargs.54 : py.Value = py.mkKwargs
+      %S.0 : py.Value = py.call(%__build_class__.1, %tuple.54, %kwargs.54) ^propagate.0()
+      %S.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "S")
+      %set.16 : base.Unit = base.refSet[py.Value](%S.cell.0, %S.0)
+      %int.68 : py.Value = py.intLit(0)
+      %list.0 : py.Value = py.mkList(%int.68)
+      %c.cell.1 : base.Ref(py.Value) = py.globalCell("s138_range_more", "c")
+      %set.17 : base.Unit = base.refSet[py.Value](%c.cell.1, %list.0)
+      %clo.2 : py.Value = py.mkClosure[[]](@s138_range_more.f, "f", "s138_range_more")
+      %f.cell.1 : base.Ref(py.Value) = py.globalCell("s138_range_more", "f")
+      %set.18 : base.Unit = base.refSet[py.Value](%f.cell.1, %clo.2)
+      %iter.5 : py.Value = py.loadGlobal("s138_range_more", "iter") ^propagate.0()
+      %f.1 : py.Value = py.loadGlobal("s138_range_more", "f") ^propagate.0()
+      %S.1 : py.Value = py.loadGlobal("s138_range_more", "S") ^propagate.0()
+      %tuple.55 : py.Value = py.mkTuple
+      %kwargs.55 : py.Value = py.mkKwargs
+      %call.53 : py.Value = py.call(%S.1, %tuple.55, %kwargs.55) ^propagate.0()
+      %tuple.56 : py.Value = py.mkTuple(%f.1, %call.53)
+      %kwargs.56 : py.Value = py.mkKwargs
+      %call.54 : py.Value = py.call(%iter.5, %tuple.56, %kwargs.56) ^propagate.0()
+      %it.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "it")
+      %set.19 : base.Unit = base.refSet[py.Value](%it.cell.0, %call.54)
+      %print.13 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %next.4 : py.Value = py.loadGlobal("s138_range_more", "next") ^propagate.0()
+      %it.0 : py.Value = py.loadGlobal("s138_range_more", "it") ^propagate.0()
+      %tuple.57 : py.Value = py.mkTuple(%it.0)
+      %kwargs.57 : py.Value = py.mkKwargs
+      %call.55 : py.Value = py.call(%next.4, %tuple.57, %kwargs.57) ^propagate.0()
+      %next.5 : py.Value = py.loadGlobal("s138_range_more", "next") ^propagate.0()
+      %it.1 : py.Value = py.loadGlobal("s138_range_more", "it") ^propagate.0()
+      %str.3 : py.Value = py.strLit("end")
+      %tuple.58 : py.Value = py.mkTuple(%it.1, %str.3)
+      %kwargs.58 : py.Value = py.mkKwargs
+      %call.56 : py.Value = py.call(%next.5, %tuple.58, %kwargs.58) ^propagate.0()
+      %next.6 : py.Value = py.loadGlobal("s138_range_more", "next") ^propagate.0()
+      %it.2 : py.Value = py.loadGlobal("s138_range_more", "it") ^propagate.0()
+      %str.4 : py.Value = py.strLit("end2")
+      %tuple.59 : py.Value = py.mkTuple(%it.2, %str.4)
+      %kwargs.59 : py.Value = py.mkKwargs
+      %call.57 : py.Value = py.call(%next.6, %tuple.59, %kwargs.59) ^propagate.0()
+      %tuple.60 : py.Value = py.mkTuple(%call.55, %call.56, %call.57)
+      %kwargs.60 : py.Value = py.mkKwargs
+      %call.58 : py.Value = py.call(%print.13, %tuple.60, %kwargs.60) ^propagate.0()
+      %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.3 : py.Value = py.mkClosure[[]](@|s138_range_more.V.<body>|, "<body>", "s138_range_more")
+      %str.5 : py.Value = py.strLit("V")
+      %tuple.61 : py.Value = py.mkTuple(%clo.3, %str.5)
+      %kwargs.61 : py.Value = py.mkKwargs
+      %V.0 : py.Value = py.call(%__build_class__.2, %tuple.61, %kwargs.61) ^propagate.0()
+      %V.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "V")
+      %set.20 : base.Unit = base.refSet[py.Value](%V.cell.0, %V.0)
+      %clo.4 : py.Value = py.mkClosure[[]](@s138_range_more.g, "g", "s138_range_more")
+      %g.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "g")
+      %set.21 : base.Unit = base.refSet[py.Value](%g.cell.0, %clo.4)
+      %iter.6 : py.Value = py.loadGlobal("s138_range_more", "iter") ^propagate.0()
+      %g.0 : py.Value = py.loadGlobal("s138_range_more", "g") ^propagate.0()
+      %int.69 : py.Value = py.intLit(5)
+      %tuple.62 : py.Value = py.mkTuple(%g.0, %int.69)
+      %kwargs.62 : py.Value = py.mkKwargs
+      %call.59 : py.Value = py.call(%iter.6, %tuple.62, %kwargs.62) ^propagate.0()
+      %it2.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "it2")
+      %set.22 : base.Unit = base.refSet[py.Value](%it2.cell.0, %call.59)
+      %print.14 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %type.5 : py.Value = py.loadGlobal("s138_range_more", "type") ^propagate.0()
+      %next.7 : py.Value = py.loadGlobal("s138_range_more", "next") ^propagate.0()
+      %it2.0 : py.Value = py.loadGlobal("s138_range_more", "it2") ^propagate.0()
+      %tuple.63 : py.Value = py.mkTuple(%it2.0)
+      %kwargs.63 : py.Value = py.mkKwargs
+      %call.60 : py.Value = py.call(%next.7, %tuple.63, %kwargs.63) ^propagate.0()
+      %tuple.64 : py.Value = py.mkTuple(%call.60)
+      %kwargs.64 : py.Value = py.mkKwargs
+      %call.61 : py.Value = py.call(%type.5, %tuple.64, %kwargs.64) ^propagate.0()
+      %__name__.5 : py.Value = py.attr(%call.61, "__name__") ^propagate.0()
+      %tuple.65 : py.Value = py.mkTuple(%__name__.5)
+      %kwargs.65 : py.Value = py.mkKwargs
+      %call.62 : py.Value = py.call(%print.14, %tuple.65, %kwargs.65) ^propagate.0()
+      %clo.5 : py.Value = py.mkClosure[[]](@s138_range_more.h, "h", "s138_range_more")
+      %h.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "h")
+      %set.23 : base.Unit = base.refSet[py.Value](%h.cell.0, %clo.5)
+      %iter.7 : py.Value = py.loadGlobal("s138_range_more", "iter") ^propagate.0()
+      %h.0 : py.Value = py.loadGlobal("s138_range_more", "h") ^propagate.0()
+      %int.70 : py.Value = py.intLit(1)
+      %tuple.66 : py.Value = py.mkTuple(%h.0, %int.70)
+      %kwargs.66 : py.Value = py.mkKwargs
+      %call.63 : py.Value = py.call(%iter.7, %tuple.66, %kwargs.66) ^propagate.0()
+      %it3.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "it3")
+      %set.24 : base.Unit = base.refSet[py.Value](%it3.cell.0, %call.63)
+      %print.15 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %next.8 : py.Value = py.loadGlobal("s138_range_more", "next") ^propagate.0()
+      %it3.0 : py.Value = py.loadGlobal("s138_range_more", "it3") ^propagate.0()
+      %str.6 : py.Value = py.strLit("stop")
+      %tuple.67 : py.Value = py.mkTuple(%it3.0, %str.6)
+      %kwargs.67 : py.Value = py.mkKwargs
+      %call.64 : py.Value = py.call(%next.8, %tuple.67, %kwargs.67) ^propagate.0()
+      %next.9 : py.Value = py.loadGlobal("s138_range_more", "next") ^propagate.0()
+      %it3.1 : py.Value = py.loadGlobal("s138_range_more", "it3") ^propagate.0()
+      %str.7 : py.Value = py.strLit("stop2")
+      %tuple.68 : py.Value = py.mkTuple(%it3.1, %str.7)
+      %kwargs.68 : py.Value = py.mkKwargs
+      %call.65 : py.Value = py.call(%next.9, %tuple.68, %kwargs.68) ^propagate.0()
+      %tuple.69 : py.Value = py.mkTuple(%call.64, %call.65)
+      %kwargs.69 : py.Value = py.mkKwargs
+      %call.66 : py.Value = py.call(%print.15, %tuple.69, %kwargs.69) ^propagate.0()
+      %__build_class__.3 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.6 : py.Value = py.mkClosure[[]](@|s138_range_more.SE.<body>|, "<body>", "s138_range_more")
+      %str.8 : py.Value = py.strLit("SE")
+      %StopIteration.0 : py.Value = py.loadGlobal("s138_range_more", "StopIteration") ^propagate.0()
+      %tuple.70 : py.Value = py.mkTuple(%clo.6, %str.8, %StopIteration.0)
+      %kwargs.70 : py.Value = py.mkKwargs
+      %SE.0 : py.Value = py.call(%__build_class__.3, %tuple.70, %kwargs.70) ^propagate.0()
+      %SE.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "SE")
+      %set.25 : base.Unit = base.refSet[py.Value](%SE.cell.0, %SE.0)
+      %clo.7 : py.Value = py.mkClosure[[]](@s138_range_more.h2, "h2", "s138_range_more")
+      %h2.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "h2")
+      %set.26 : base.Unit = base.refSet[py.Value](%h2.cell.0, %clo.7)
+      %print.16 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %next.10 : py.Value = py.loadGlobal("s138_range_more", "next") ^propagate.0()
+      %iter.8 : py.Value = py.loadGlobal("s138_range_more", "iter") ^propagate.0()
+      %h2.0 : py.Value = py.loadGlobal("s138_range_more", "h2") ^propagate.0()
+      %int.71 : py.Value = py.intLit(1)
+      %tuple.71 : py.Value = py.mkTuple(%h2.0, %int.71)
+      %kwargs.71 : py.Value = py.mkKwargs
+      %call.67 : py.Value = py.call(%iter.8, %tuple.71, %kwargs.71) ^propagate.0()
+      %str.9 : py.Value = py.strLit("sub")
+      %tuple.72 : py.Value = py.mkTuple(%call.67, %str.9)
+      %kwargs.72 : py.Value = py.mkKwargs
+      %call.68 : py.Value = py.call(%next.10, %tuple.72, %kwargs.72) ^propagate.0()
+      %tuple.73 : py.Value = py.mkTuple(%call.68)
+      %kwargs.73 : py.Value = py.mkKwargs
+      %call.69 : py.Value = py.call(%print.16, %tuple.73, %kwargs.73) ^propagate.0()
+      %__build_class__.4 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.8 : py.Value = py.mkClosure[[]](@|s138_range_more.B.<body>|, "<body>", "s138_range_more")
+      %str.10 : py.Value = py.strLit("B")
+      %tuple.74 : py.Value = py.mkTuple(%clo.8, %str.10)
+      %kwargs.74 : py.Value = py.mkKwargs
+      %B.0 : py.Value = py.call(%__build_class__.4, %tuple.74, %kwargs.74) ^propagate.0()
+      %B.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "B")
+      %set.27 : base.Unit = base.refSet[py.Value](%B.cell.0, %B.0)
+      %clo.9 : py.Value = py.mkClosure[[]](@s138_range_more.k, "k", "s138_range_more")
+      %k.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "k")
+      %set.28 : base.Unit = base.refSet[py.Value](%k.cell.0, %clo.9)
+      %iter.9 : py.Value = py.loadGlobal("s138_range_more", "iter") ^propagate.0()
+      %k.0 : py.Value = py.loadGlobal("s138_range_more", "k") ^propagate.0()
+      %B.1 : py.Value = py.loadGlobal("s138_range_more", "B") ^propagate.0()
+      %tuple.75 : py.Value = py.mkTuple
+      %kwargs.75 : py.Value = py.mkKwargs
+      %call.70 : py.Value = py.call(%B.1, %tuple.75, %kwargs.75) ^propagate.0()
+      %tuple.76 : py.Value = py.mkTuple(%k.0, %call.70)
+      %kwargs.76 : py.Value = py.mkKwargs
+      %call.71 : py.Value = py.call(%iter.9, %tuple.76, %kwargs.76) ^propagate.0()
+      %it4.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "it4")
+      %set.29 : base.Unit = base.refSet[py.Value](%it4.cell.0, %call.71)
+      %next.11 : py.Value = py.loadGlobal("s138_range_more", "next") ^catch.1()
+      %it4.0 : py.Value = py.loadGlobal("s138_range_more", "it4") ^catch.1()
+      %tuple.77 : py.Value = py.mkTuple(%it4.0)
+      %kwargs.77 : py.Value = py.mkKwargs
+      %call.72 : py.Value = py.call(%next.11, %tuple.77, %kwargs.77) ^catch.1()
+      jump ^join.1()
+    catch.1(%exc.3 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.3)
+      %ValueError.0 : py.Value = py.loadGlobal("s138_range_more", "ValueError") ^unwind.1()
+      %match.1 : base.Bool = py.excMatch(%exc.3, %ValueError.0) ^unwind.1()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %e.cell.4 : base.Ref(py.Value) = py.globalCell("s138_range_more", "e")
+      %set.30 : base.Unit = base.refSet[py.Value](%e.cell.4, %exc.3)
+      %print.17 : py.Value = py.loadGlobal("s138_range_more", "print") ^clear.1()
+      %e.4 : py.Value = py.loadGlobal("s138_range_more", "e") ^clear.1()
+      %args.1 : py.Value = py.attr(%e.4, "args") ^clear.1()
+      %int.72 : py.Value = py.intLit(0)
+      %item.7 : py.Value = py.getItem(%args.1, %int.72) ^clear.1()
+      %tuple.78 : py.Value = py.mkTuple(%item.7)
+      %kwargs.78 : py.Value = py.mkKwargs
+      %call.73 : py.Value = py.call(%print.17, %tuple.78, %kwargs.78) ^clear.1()
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      %e.5 : py.Value = py.undef("e")
+      %e.cell.5 : base.Ref(py.Value) = py.globalCell("s138_range_more", "e")
+      %set.31 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.5)
+      jump ^join.1()
+    clear.1(%exc.4 : py.Value):
+      %e.6 : py.Value = py.undef("e")
+      %e.cell.6 : base.Ref(py.Value) = py.globalCell("s138_range_more", "e")
+      %set.32 : base.Unit = base.refSet[py.Value](%e.cell.6, %e.6)
+      jump ^unwind.1(%exc.4)
+    next.1():
+      jump ^unwind.1(%exc.3)
+    unwind.1(%exc.5 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.5)
+    join.1():
+      %next.12 : py.Value = py.loadGlobal("s138_range_more", "next") ^catch.2()
+      %it4.1 : py.Value = py.loadGlobal("s138_range_more", "it4") ^catch.2()
+      %tuple.79 : py.Value = py.mkTuple(%it4.1)
+      %kwargs.79 : py.Value = py.mkKwargs
+      %call.74 : py.Value = py.call(%next.12, %tuple.79, %kwargs.79) ^catch.2()
+      jump ^join.2()
+    catch.2(%exc.6 : py.Value):
+      %prev.2 : py.Value = py.pushExcInfo(%exc.6)
+      %ValueError.1 : py.Value = py.loadGlobal("s138_range_more", "ValueError") ^unwind.2()
+      %match.2 : base.Bool = py.excMatch(%exc.6, %ValueError.1) ^unwind.2()
+      branch(%match.2) ^except.2() ^next.2()
+    except.2():
+      %e.cell.7 : base.Ref(py.Value) = py.globalCell("s138_range_more", "e")
+      %set.33 : base.Unit = base.refSet[py.Value](%e.cell.7, %exc.6)
+      %print.18 : py.Value = py.loadGlobal("s138_range_more", "print") ^clear.2()
+      %str.11 : py.Value = py.strLit("again")
+      %e.7 : py.Value = py.loadGlobal("s138_range_more", "e") ^clear.2()
+      %args.2 : py.Value = py.attr(%e.7, "args") ^clear.2()
+      %int.73 : py.Value = py.intLit(0)
+      %item.8 : py.Value = py.getItem(%args.2, %int.73) ^clear.2()
+      %tuple.80 : py.Value = py.mkTuple(%str.11, %item.8)
+      %kwargs.80 : py.Value = py.mkKwargs
+      %call.75 : py.Value = py.call(%print.18, %tuple.80, %kwargs.80) ^clear.2()
+      %pop.4 : base.Unit = py.popExcept(%prev.2)
+      %e.8 : py.Value = py.undef("e")
+      %e.cell.8 : base.Ref(py.Value) = py.globalCell("s138_range_more", "e")
+      %set.34 : base.Unit = base.refSet[py.Value](%e.cell.8, %e.8)
+      jump ^join.2()
+    clear.2(%exc.7 : py.Value):
+      %e.9 : py.Value = py.undef("e")
+      %e.cell.9 : base.Ref(py.Value) = py.globalCell("s138_range_more", "e")
+      %set.35 : base.Unit = base.refSet[py.Value](%e.cell.9, %e.9)
+      jump ^unwind.2(%exc.7)
+    next.2():
+      jump ^unwind.2(%exc.6)
+    unwind.2(%exc.8 : py.Value):
+      %pop.5 : base.Unit = py.popExcept(%prev.2)
+      jump ^propagate.0(%exc.8)
+    join.2():
+      %print.19 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %len.6 : py.Value = py.loadGlobal("s138_range_more", "len") ^propagate.0()
+      %list.1 : py.Value = py.mkList
+      %iter.10 : py.Value = py.loadGlobal("s138_range_more", "iter") ^propagate.0()
+      %clo.10 : py.Value = py.mkClosure[[]](@|s138_range_more.<lambda>|, "<lambda>", "s138_range_more")
+      %int.74 : py.Value = py.intLit(0)
+      %tuple.81 : py.Value = py.mkTuple(%clo.10, %int.74)
+      %kwargs.81 : py.Value = py.mkKwargs
+      %call.76 : py.Value = py.call(%iter.10, %tuple.81, %kwargs.81) ^propagate.0()
+      %extend.0 : base.Unit = py.listExtend(%list.1, %call.76) ^propagate.0()
+      %tuple.82 : py.Value = py.mkTuple(%list.1)
+      %kwargs.82 : py.Value = py.mkKwargs
+      %call.77 : py.Value = py.call(%len.6, %tuple.82, %kwargs.82) ^propagate.0()
+      %tuple.83 : py.Value = py.mkTuple(%call.77)
+      %kwargs.83 : py.Value = py.mkKwargs
+      %call.78 : py.Value = py.call(%print.19, %tuple.83, %kwargs.83) ^propagate.0()
+      %__build_class__.5 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.11 : py.Value = py.mkClosure[[]](@|s138_range_more.It.<body>|, "<body>", "s138_range_more")
+      %str.12 : py.Value = py.strLit("It")
+      %tuple.84 : py.Value = py.mkTuple(%clo.11, %str.12)
+      %kwargs.84 : py.Value = py.mkKwargs
+      %It.0 : py.Value = py.call(%__build_class__.5, %tuple.84, %kwargs.84) ^propagate.0()
+      %It.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "It")
+      %set.36 : base.Unit = base.refSet[py.Value](%It.cell.0, %It.0)
+      %It.1 : py.Value = py.loadGlobal("s138_range_more", "It") ^propagate.0()
+      %tuple.85 : py.Value = py.mkTuple
+      %kwargs.85 : py.Value = py.mkKwargs
+      %call.79 : py.Value = py.call(%It.1, %tuple.85, %kwargs.85) ^propagate.0()
+      %it.cell.1 : base.Ref(py.Value) = py.globalCell("s138_range_more", "it")
+      %set.37 : base.Unit = base.refSet[py.Value](%it.cell.1, %call.79)
+      %print.20 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %next.13 : py.Value = py.loadGlobal("s138_range_more", "next") ^propagate.0()
+      %it.3 : py.Value = py.loadGlobal("s138_range_more", "it") ^propagate.0()
+      %tuple.86 : py.Value = py.mkTuple(%it.3)
+      %kwargs.86 : py.Value = py.mkKwargs
+      %call.80 : py.Value = py.call(%next.13, %tuple.86, %kwargs.86) ^propagate.0()
+      %next.14 : py.Value = py.loadGlobal("s138_range_more", "next") ^propagate.0()
+      %it.4 : py.Value = py.loadGlobal("s138_range_more", "it") ^propagate.0()
+      %tuple.87 : py.Value = py.mkTuple(%it.4)
+      %kwargs.87 : py.Value = py.mkKwargs
+      %call.81 : py.Value = py.call(%next.14, %tuple.87, %kwargs.87) ^propagate.0()
+      %next.15 : py.Value = py.loadGlobal("s138_range_more", "next") ^propagate.0()
+      %it.5 : py.Value = py.loadGlobal("s138_range_more", "it") ^propagate.0()
+      %str.13 : py.Value = py.strLit("d")
+      %tuple.88 : py.Value = py.mkTuple(%it.5, %str.13)
+      %kwargs.88 : py.Value = py.mkKwargs
+      %call.82 : py.Value = py.call(%next.15, %tuple.88, %kwargs.88) ^propagate.0()
+      %tuple.89 : py.Value = py.mkTuple(%call.80, %call.81, %call.82)
+      %kwargs.89 : py.Value = py.mkKwargs
+      %call.83 : py.Value = py.call(%print.20, %tuple.89, %kwargs.89) ^propagate.0()
+      %__build_class__.6 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.12 : py.Value = py.mkClosure[[]](@|s138_range_more.SI.<body>|, "<body>", "s138_range_more")
+      %str.14 : py.Value = py.strLit("SI")
+      %StopIteration.1 : py.Value = py.loadGlobal("s138_range_more", "StopIteration") ^propagate.0()
+      %tuple.90 : py.Value = py.mkTuple(%clo.12, %str.14, %StopIteration.1)
+      %kwargs.90 : py.Value = py.mkKwargs
+      %SI.0 : py.Value = py.call(%__build_class__.6, %tuple.90, %kwargs.90) ^propagate.0()
+      %SI.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "SI")
+      %set.38 : base.Unit = base.refSet[py.Value](%SI.cell.0, %SI.0)
+      %__build_class__.7 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.13 : py.Value = py.mkClosure[[]](@|s138_range_more.It2.<body>|, "<body>", "s138_range_more")
+      %str.15 : py.Value = py.strLit("It2")
+      %tuple.91 : py.Value = py.mkTuple(%clo.13, %str.15)
+      %kwargs.91 : py.Value = py.mkKwargs
+      %It2.0 : py.Value = py.call(%__build_class__.7, %tuple.91, %kwargs.91) ^propagate.0()
+      %It2.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "It2")
+      %set.39 : base.Unit = base.refSet[py.Value](%It2.cell.0, %It2.0)
+      %print.21 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %next.16 : py.Value = py.loadGlobal("s138_range_more", "next") ^propagate.0()
+      %It2.1 : py.Value = py.loadGlobal("s138_range_more", "It2") ^propagate.0()
+      %tuple.92 : py.Value = py.mkTuple
+      %kwargs.92 : py.Value = py.mkKwargs
+      %call.84 : py.Value = py.call(%It2.1, %tuple.92, %kwargs.92) ^propagate.0()
+      %str.16 : py.Value = py.strLit("dflt")
+      %tuple.93 : py.Value = py.mkTuple(%call.84, %str.16)
+      %kwargs.93 : py.Value = py.mkKwargs
+      %call.85 : py.Value = py.call(%next.16, %tuple.93, %kwargs.93) ^propagate.0()
+      %tuple.94 : py.Value = py.mkTuple(%call.85)
+      %kwargs.94 : py.Value = py.mkKwargs
+      %call.86 : py.Value = py.call(%print.21, %tuple.94, %kwargs.94) ^propagate.0()
+      %next.17 : py.Value = py.loadGlobal("s138_range_more", "next") ^catch.3()
+      %It2.2 : py.Value = py.loadGlobal("s138_range_more", "It2") ^catch.3()
+      %tuple.95 : py.Value = py.mkTuple
+      %kwargs.95 : py.Value = py.mkKwargs
+      %call.87 : py.Value = py.call(%It2.2, %tuple.95, %kwargs.95) ^catch.3()
+      %tuple.96 : py.Value = py.mkTuple(%call.87)
+      %kwargs.96 : py.Value = py.mkKwargs
+      %call.88 : py.Value = py.call(%next.17, %tuple.96, %kwargs.96) ^catch.3()
+      jump ^join.3()
+    catch.3(%exc.9 : py.Value):
+      %prev.3 : py.Value = py.pushExcInfo(%exc.9)
+      %SI.1 : py.Value = py.loadGlobal("s138_range_more", "SI") ^unwind.3()
+      %match.3 : base.Bool = py.excMatch(%exc.9, %SI.1) ^unwind.3()
+      branch(%match.3) ^except.3() ^next.3()
+    except.3():
+      %e.cell.10 : base.Ref(py.Value) = py.globalCell("s138_range_more", "e")
+      %set.40 : base.Unit = base.refSet[py.Value](%e.cell.10, %exc.9)
+      %print.22 : py.Value = py.loadGlobal("s138_range_more", "print") ^clear.3()
+      %str.17 : py.Value = py.strLit("SI")
+      %e.10 : py.Value = py.loadGlobal("s138_range_more", "e") ^clear.3()
+      %args.3 : py.Value = py.attr(%e.10, "args") ^clear.3()
+      %int.75 : py.Value = py.intLit(0)
+      %item.9 : py.Value = py.getItem(%args.3, %int.75) ^clear.3()
+      %tuple.97 : py.Value = py.mkTuple(%str.17, %item.9)
+      %kwargs.97 : py.Value = py.mkKwargs
+      %call.89 : py.Value = py.call(%print.22, %tuple.97, %kwargs.97) ^clear.3()
+      %pop.6 : base.Unit = py.popExcept(%prev.3)
+      %e.11 : py.Value = py.undef("e")
+      %e.cell.11 : base.Ref(py.Value) = py.globalCell("s138_range_more", "e")
+      %set.41 : base.Unit = base.refSet[py.Value](%e.cell.11, %e.11)
+      jump ^join.3()
+    clear.3(%exc.10 : py.Value):
+      %e.12 : py.Value = py.undef("e")
+      %e.cell.12 : base.Ref(py.Value) = py.globalCell("s138_range_more", "e")
+      %set.42 : base.Unit = base.refSet[py.Value](%e.cell.12, %e.12)
+      jump ^unwind.3(%exc.10)
+    next.3():
+      jump ^unwind.3(%exc.9)
+    unwind.3(%exc.11 : py.Value):
+      %pop.7 : base.Unit = py.popExcept(%prev.3)
+      jump ^propagate.0(%exc.11)
+    join.3():
+      %print.23 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %len.7 : py.Value = py.loadGlobal("s138_range_more", "len") ^propagate.0()
+      %list.2 : py.Value = py.mkList
+      %It2.3 : py.Value = py.loadGlobal("s138_range_more", "It2") ^propagate.0()
+      %tuple.98 : py.Value = py.mkTuple
+      %kwargs.98 : py.Value = py.mkKwargs
+      %call.90 : py.Value = py.call(%It2.3, %tuple.98, %kwargs.98) ^propagate.0()
+      %extend.1 : base.Unit = py.listExtend(%list.2, %call.90) ^propagate.0()
+      %tuple.99 : py.Value = py.mkTuple(%list.2)
+      %kwargs.99 : py.Value = py.mkKwargs
+      %call.91 : py.Value = py.call(%len.7, %tuple.99, %kwargs.99) ^propagate.0()
+      %len.8 : py.Value = py.loadGlobal("s138_range_more", "len") ^propagate.0()
+      %set.43 : py.Value = py.mkSet ^propagate.0()
+      %It2.4 : py.Value = py.loadGlobal("s138_range_more", "It2") ^propagate.0()
+      %tuple.100 : py.Value = py.mkTuple
+      %kwargs.100 : py.Value = py.mkKwargs
+      %call.92 : py.Value = py.call(%It2.4, %tuple.100, %kwargs.100) ^propagate.0()
+      %update.0 : base.Unit = py.setUpdate(%set.43, %call.92) ^propagate.0()
+      %tuple.101 : py.Value = py.mkTuple(%set.43)
+      %kwargs.101 : py.Value = py.mkKwargs
+      %call.93 : py.Value = py.call(%len.8, %tuple.101, %kwargs.101) ^propagate.0()
+      %tuple.102 : py.Value = py.mkTuple(%call.91, %call.93)
+      %kwargs.102 : py.Value = py.mkKwargs
+      %call.94 : py.Value = py.call(%print.23, %tuple.102, %kwargs.102) ^propagate.0()
+      %clo.14 : py.Value = py.mkClosure[[]](@s138_range_more.f.1, "f", "s138_range_more")
+      %f.cell.2 : base.Ref(py.Value) = py.globalCell("s138_range_more", "f")
+      %set.44 : base.Unit = base.refSet[py.Value](%f.cell.2, %clo.14)
+      %print.24 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %f.2 : py.Value = py.loadGlobal("s138_range_more", "f") ^propagate.0()
+      %It2.5 : py.Value = py.loadGlobal("s138_range_more", "It2") ^propagate.0()
+      %tuple.103 : py.Value = py.mkTuple
+      %kwargs.103 : py.Value = py.mkKwargs
+      %call.95 : py.Value = py.call(%It2.5, %tuple.103, %kwargs.103) ^propagate.0()
+      %kwargs.104 : py.Value = py.mkKwargs
+      %args.4 : py.Value = py.argsTuple(%f.2, %call.95) ^propagate.0()
+      %call.96 : py.Value = py.call(%f.2, %args.4, %kwargs.104) ^propagate.0()
+      %tuple.104 : py.Value = py.mkTuple(%call.96)
+      %kwargs.105 : py.Value = py.mkKwargs
+      %call.97 : py.Value = py.call(%print.24, %tuple.104, %kwargs.105) ^propagate.0()
+      %bool.0 : py.Value = py.boolLit(false)
+      %cond.0 : base.Bool = py.truthy(%bool.0) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %It2.6 : py.Value = py.loadGlobal("s138_range_more", "It2") ^propagate.0()
+      %tuple.105 : py.Value = py.mkTuple
+      %kwargs.106 : py.Value = py.mkKwargs
+      %call.98 : py.Value = py.call(%It2.6, %tuple.105, %kwargs.106) ^propagate.0()
+      jump ^join.4(%call.98)
+    else.0():
+      %int.76 : py.Value = py.intLit(1)
+      %list.3 : py.Value = py.mkList(%int.76)
+      jump ^join.4(%list.3)
+    join.4(%ifexp.0 : py.Value):
+      %unpack.0 : py.Value = py.unpackEx(%ifexp.0, 1, 0) ^propagate.0()
+      %elem.0 : py.Value = py.tupleGet(%unpack.0, 0)
+      %a.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "a")
+      %set.45 : base.Unit = base.refSet[py.Value](%a.cell.0, %elem.0)
+      %elem.1 : py.Value = py.tupleGet(%unpack.0, 1)
+      %b.cell.1 : base.Ref(py.Value) = py.globalCell("s138_range_more", "b")
+      %set.46 : base.Unit = base.refSet[py.Value](%b.cell.1, %elem.1)
+      %print.25 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %a.0 : py.Value = py.loadGlobal("s138_range_more", "a") ^propagate.0()
+      %len.9 : py.Value = py.loadGlobal("s138_range_more", "len") ^propagate.0()
+      %b.3 : py.Value = py.loadGlobal("s138_range_more", "b") ^propagate.0()
+      %tuple.106 : py.Value = py.mkTuple(%b.3)
+      %kwargs.107 : py.Value = py.mkKwargs
+      %call.99 : py.Value = py.call(%len.9, %tuple.106, %kwargs.107) ^propagate.0()
+      %tuple.107 : py.Value = py.mkTuple(%a.0, %call.99)
+      %kwargs.108 : py.Value = py.mkKwargs
+      %call.100 : py.Value = py.call(%print.25, %tuple.107, %kwargs.108) ^propagate.0()
+      %print.26 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %int.77 : py.Value = py.intLit(1)
+      %It2.7 : py.Value = py.loadGlobal("s138_range_more", "It2") ^propagate.0()
+      %tuple.108 : py.Value = py.mkTuple
+      %kwargs.109 : py.Value = py.mkKwargs
+      %call.101 : py.Value = py.call(%It2.7, %tuple.108, %kwargs.109) ^propagate.0()
+      %in.3 : py.Value = py.in(%int.77, %call.101) ^propagate.0()
+      %tuple.109 : py.Value = py.mkTuple(%in.3)
+      %kwargs.110 : py.Value = py.mkKwargs
+      %call.102 : py.Value = py.call(%print.26, %tuple.109, %kwargs.110) ^propagate.0()
+      %__build_class__.8 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.15 : py.Value = py.mkClosure[[]](@|s138_range_more.It3.<body>|, "<body>", "s138_range_more")
+      %str.18 : py.Value = py.strLit("It3")
+      %tuple.110 : py.Value = py.mkTuple(%clo.15, %str.18)
+      %kwargs.111 : py.Value = py.mkKwargs
+      %It3.0 : py.Value = py.call(%__build_class__.8, %tuple.110, %kwargs.111) ^propagate.0()
+      %It3.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "It3")
+      %set.47 : base.Unit = base.refSet[py.Value](%It3.cell.0, %It3.0)
+      %clo.16 : py.Value = py.mkClosure[[]](@|s138_range_more.<lambda>.1|, "<lambda>", "s138_range_more")
+      %clo.17 : py.Value = py.mkClosure[[]](@|s138_range_more.<lambda>.2|, "<lambda>", "s138_range_more")
+      %clo.18 : py.Value = py.mkClosure[[]](@|s138_range_more.<lambda>.3|, "<lambda>", "s138_range_more")
+      %clo.19 : py.Value = py.mkClosure[[]](@|s138_range_more.<lambda>.4|, "<lambda>", "s138_range_more")
+      %list.4 : py.Value = py.mkList(%clo.16, %clo.17, %clo.18, %clo.19)
+      %iter.11 : py.Value = py.getIter(%list.4) ^propagate.0()
+      jump ^head.0()
+    head.0():
+      %item.10 : py.Value = py.next(%iter.11) ^stop.0()
+      %t.cell.0 : base.Ref(py.Value) = py.globalCell("s138_range_more", "t")
+      %set.48 : base.Unit = base.refSet[py.Value](%t.cell.0, %item.10)
+      %t.0 : py.Value = py.loadGlobal("s138_range_more", "t") ^catch.4()
+      %tuple.111 : py.Value = py.mkTuple
+      %kwargs.112 : py.Value = py.mkKwargs
+      %call.103 : py.Value = py.call(%t.0, %tuple.111, %kwargs.112) ^catch.4()
+      jump ^join.5()
+    catch.4(%exc.12 : py.Value):
+      %prev.4 : py.Value = py.pushExcInfo(%exc.12)
+      %ValueError.2 : py.Value = py.loadGlobal("s138_range_more", "ValueError") ^unwind.4()
+      %match.4 : base.Bool = py.excMatch(%exc.12, %ValueError.2) ^unwind.4()
+      branch(%match.4) ^except.4() ^next.4()
+    except.4():
+      %e.cell.13 : base.Ref(py.Value) = py.globalCell("s138_range_more", "e")
+      %set.49 : base.Unit = base.refSet[py.Value](%e.cell.13, %exc.12)
+      %print.27 : py.Value = py.loadGlobal("s138_range_more", "print") ^clear.4()
+      %str.19 : py.Value = py.strLit("VE")
+      %e.13 : py.Value = py.loadGlobal("s138_range_more", "e") ^clear.4()
+      %args.5 : py.Value = py.attr(%e.13, "args") ^clear.4()
+      %int.78 : py.Value = py.intLit(0)
+      %item.11 : py.Value = py.getItem(%args.5, %int.78) ^clear.4()
+      %tuple.112 : py.Value = py.mkTuple(%str.19, %item.11)
+      %kwargs.113 : py.Value = py.mkKwargs
+      %call.104 : py.Value = py.call(%print.27, %tuple.112, %kwargs.113) ^clear.4()
+      %pop.8 : base.Unit = py.popExcept(%prev.4)
+      %e.14 : py.Value = py.undef("e")
+      %e.cell.14 : base.Ref(py.Value) = py.globalCell("s138_range_more", "e")
+      %set.50 : base.Unit = base.refSet[py.Value](%e.cell.14, %e.14)
+      jump ^join.5()
+    clear.4(%exc.13 : py.Value):
+      %e.15 : py.Value = py.undef("e")
+      %e.cell.15 : base.Ref(py.Value) = py.globalCell("s138_range_more", "e")
+      %set.51 : base.Unit = base.refSet[py.Value](%e.cell.15, %e.15)
+      jump ^unwind.4(%exc.13)
+    next.4():
+      jump ^unwind.4(%exc.12)
+    unwind.4(%exc.14 : py.Value):
+      %pop.9 : base.Unit = py.popExcept(%prev.4)
+      jump ^propagate.0(%exc.14)
+    join.5():
+      jump ^head.0()
+    stop.0(%exc.15 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.15)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.15)
+    exit.0():
+      %range.16 : py.Value = py.loadGlobal("s138_range_more", "range") ^propagate.0()
+      %int.79 : py.Value = py.intLit(2)
+      %int.80 : py.Value = py.intLit(70)
+      %pow.11 : py.Value = py.pow(%int.79, %int.80) ^propagate.0()
+      %tuple.113 : py.Value = py.mkTuple(%pow.11)
+      %kwargs.114 : py.Value = py.mkKwargs
+      %call.105 : py.Value = py.call(%range.16, %tuple.113, %kwargs.114) ^propagate.0()
+      %range.17 : py.Value = py.loadGlobal("s138_range_more", "range") ^propagate.0()
+      %int.81 : py.Value = py.intLit(2)
+      %int.82 : py.Value = py.intLit(63)
+      %pow.12 : py.Value = py.pow(%int.81, %int.82) ^propagate.0()
+      %neg.10 : py.Value = py.uSub(%pow.12) ^propagate.0()
+      %int.83 : py.Value = py.intLit(0)
+      %tuple.114 : py.Value = py.mkTuple(%neg.10, %int.83)
+      %kwargs.115 : py.Value = py.mkKwargs
+      %call.106 : py.Value = py.call(%range.17, %tuple.114, %kwargs.115) ^propagate.0()
+      %range.18 : py.Value = py.loadGlobal("s138_range_more", "range") ^propagate.0()
+      %int.84 : py.Value = py.intLit(0)
+      %int.85 : py.Value = py.intLit(10)
+      %int.86 : py.Value = py.intLit(2)
+      %int.87 : py.Value = py.intLit(63)
+      %pow.13 : py.Value = py.pow(%int.86, %int.87) ^propagate.0()
+      %neg.11 : py.Value = py.uSub(%pow.13) ^propagate.0()
+      %tuple.115 : py.Value = py.mkTuple(%int.84, %int.85, %neg.11)
+      %kwargs.116 : py.Value = py.mkKwargs
+      %call.107 : py.Value = py.call(%range.18, %tuple.115, %kwargs.116) ^propagate.0()
+      %range.19 : py.Value = py.loadGlobal("s138_range_more", "range") ^propagate.0()
+      %int.88 : py.Value = py.intLit(5)
+      %int.89 : py.Value = py.intLit(2)
+      %int.90 : py.Value = py.intLit(63)
+      %pow.14 : py.Value = py.pow(%int.89, %int.90) ^propagate.0()
+      %int.91 : py.Value = py.intLit(1)
+      %sub.4 : py.Value = py.sub(%pow.14, %int.91) ^propagate.0()
+      %tuple.116 : py.Value = py.mkTuple(%int.88, %sub.4)
+      %kwargs.117 : py.Value = py.mkKwargs
+      %call.108 : py.Value = py.call(%range.19, %tuple.116, %kwargs.117) ^propagate.0()
+      %tuple.117 : py.Value = py.mkTuple(%call.105, %call.106, %call.107, %call.108)
+      %iter.12 : py.Value = py.getIter(%tuple.117) ^propagate.0()
+      jump ^head.1()
+    head.1():
+      %item.12 : py.Value = py.next(%iter.12) ^stop.1()
+      %r.cell.3 : base.Ref(py.Value) = py.globalCell("s138_range_more", "r")
+      %set.52 : base.Unit = base.refSet[py.Value](%r.cell.3, %item.12)
+      %print.28 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %type.6 : py.Value = py.loadGlobal("s138_range_more", "type") ^propagate.0()
+      %r.12 : py.Value = py.loadGlobal("s138_range_more", "r") ^propagate.0()
+      %__reversed__.1 : py.Value = py.attr(%r.12, "__reversed__") ^propagate.0()
+      %tuple.118 : py.Value = py.mkTuple
+      %kwargs.118 : py.Value = py.mkKwargs
+      %call.109 : py.Value = py.call(%__reversed__.1, %tuple.118, %kwargs.118) ^propagate.0()
+      %tuple.119 : py.Value = py.mkTuple(%call.109)
+      %kwargs.119 : py.Value = py.mkKwargs
+      %call.110 : py.Value = py.call(%type.6, %tuple.119, %kwargs.119) ^propagate.0()
+      %__name__.6 : py.Value = py.attr(%call.110, "__name__") ^propagate.0()
+      %tuple.120 : py.Value = py.mkTuple(%__name__.6)
+      %kwargs.120 : py.Value = py.mkKwargs
+      %call.111 : py.Value = py.call(%print.28, %tuple.120, %kwargs.120) ^propagate.0()
+      jump ^head.1()
+    stop.1(%exc.16 : py.Value):
+      %done.1 : base.Bool = py.isStopIteration(%exc.16)
+      branch(%done.1) ^exit.1() ^propagate.0(%exc.16)
+    exit.1():
+      %none.7 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.7)
+      ret(%ret.0)
+    propagate.0(%exc.17 : py.Value):
+      %exc.18 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.17)
+      ret(%exc.18)
+  }
+  func @|s138_range_more.I.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__index__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s138_range_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("I")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s138_range_more.I.__index__, "__index__", "s138_range_more")
+      %str.4 : py.Value = py.strLit("__index__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s138_range_more.S.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__eq__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s138_range_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("S")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s138_range_more.S.__eq__, "__eq__", "s138_range_more")
+      %str.4 : py.Value = py.strLit("__eq__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s138_range_more.f(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, false, false) ^propagate.0()
+      %c.5 : py.Value = py.loadGlobal("s138_range_more", "c") ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %item.0 : py.Value = py.getItem(%c.5, %int.0) ^propagate.0()
+      %int.1 : py.Value = py.intLit(1)
+      %iAdd.0 : py.Value = py.iAdd(%item.0, %int.1) ^propagate.0()
+      %store.0 : base.Unit = py.setItem(%c.5, %int.0, %iAdd.0) ^propagate.0()
+      %c.8 : py.Value = py.loadGlobal("s138_range_more", "c") ^propagate.0()
+      %int.2 : py.Value = py.intLit(0)
+      %item.1 : py.Value = py.getItem(%c.8, %int.2) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%item.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s138_range_more.V.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__eq__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s138_range_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("V")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s138_range_more.V.__eq__, "__eq__", "s138_range_more")
+      %str.4 : py.Value = py.strLit("__eq__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s138_range_more.g(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "g", 0, 0, false, false) ^propagate.0()
+      %V.0 : py.Value = py.loadGlobal("s138_range_more", "V") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%V.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s138_range_more.h(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "h", 0, 0, false, false) ^propagate.0()
+      %StopIteration.0 : py.Value = py.loadGlobal("s138_range_more", "StopIteration") ^propagate.0()
+      %exc.0 : py.Value = py.toException(%StopIteration.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @|s138_range_more.SE.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["StopIteration"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s138_range_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("SE")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s138_range_more.h2(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "h2", 0, 0, false, false) ^propagate.0()
+      %SE.0 : py.Value = py.loadGlobal("s138_range_more", "SE") ^propagate.0()
+      %exc.0 : py.Value = py.toException(%SE.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @|s138_range_more.B.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__eq__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s138_range_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("B")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s138_range_more.B.__eq__, "__eq__", "s138_range_more")
+      %str.4 : py.Value = py.strLit("__eq__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s138_range_more.k(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "k", 0, 0, false, false) ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s138_range_more.<lambda>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s138_range_more.It.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s138_range_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("It")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s138_range_more.It.__init__, "__init__", "s138_range_more")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@s138_range_more.It.__iter__, "__iter__", "s138_range_more")
+      %str.5 : py.Value = py.strLit("__iter__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@s138_range_more.It.__next__, "__next__", "s138_range_more")
+      %str.6 : py.Value = py.strLit("__next__")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.6, %clo.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s138_range_more.SI.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["StopIteration"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s138_range_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("SI")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s138_range_more.It2.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__next__", binding = "def"}, {name = "__iter__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s138_range_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("It2")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s138_range_more.It2.__next__, "__next__", "s138_range_more")
+      %str.4 : py.Value = py.strLit("__next__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@s138_range_more.It2.__iter__, "__iter__", "s138_range_more")
+      %str.5 : py.Value = py.strLit("__iter__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s138_range_more.f.1(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %a.0 : py.Value = py.undef("a")
+      %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "f", 0, 0, true, false) ^propagate.0()
+      %a.1 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.1)
+      %len.0 : py.Value = py.loadGlobal("s138_range_more", "len") ^propagate.0()
+      %a.2 : py.Value = base.refGet[py.Value](%a.cell.0)
+      %a.3 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%a.3)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%len.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s138_range_more.It3.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__next__", binding = "def"}, {name = "__iter__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s138_range_more", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("It3")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s138_range_more.It3.__next__, "__next__", "s138_range_more")
+      %str.4 : py.Value = py.strLit("__next__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@s138_range_more.It3.__iter__, "__iter__", "s138_range_more")
+      %str.5 : py.Value = py.strLit("__iter__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s138_range_more.<lambda>.1|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %list.0 : py.Value = py.mkList
+      %It3.0 : py.Value = py.loadGlobal("s138_range_more", "It3") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%It3.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %extend.0 : base.Unit = py.listExtend(%list.0, %call.0) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%list.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s138_range_more.<lambda>.2|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %It3.0 : py.Value = py.loadGlobal("s138_range_more", "It3") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%It3.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %in.0 : py.Value = py.in(%int.0, %call.0) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%in.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s138_range_more.<lambda>.3|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %f.0 : py.Value = py.loadGlobal("s138_range_more", "f") ^propagate.0()
+      %It3.0 : py.Value = py.loadGlobal("s138_range_more", "It3") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%It3.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %kwargs.2 : py.Value = py.mkKwargs
+      %args.1 : py.Value = py.argsTuple(%f.0, %call.0) ^propagate.0()
+      %call.1 : py.Value = py.call(%f.0, %args.1, %kwargs.2) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s138_range_more.<lambda>.4|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %set.0 : py.Value = py.mkSet ^propagate.0()
+      %It3.0 : py.Value = py.loadGlobal("s138_range_more", "It3") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%It3.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %update.0 : base.Unit = py.setUpdate(%set.0, %call.0) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%set.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s138_range_more.I.__index__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "I.__index__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %print.0 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("index")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %int.0 : py.Value = py.intLit(3)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s138_range_more.S.__eq__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %o.0 : py.Value = py.undef("o")
+      %o.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%o.0)
+      %self.1 : py.Value = py.undef("self")
+      %o.1 : py.Value = py.undef("o")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %o.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "S.__eq__", 0, 2, false, false, "self", "o") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %o.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%o.cell.0, %o.2)
+      %print.0 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("S.eq")
+      %o.3 : py.Value = base.refGet[py.Value](%o.cell.0)
+      %o.4 : py.Value = py.requireDefined(%o.3, "o", "UnboundLocalError", "cannot access local variable 'o' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%str.0, %o.4)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %o.5 : py.Value = base.refGet[py.Value](%o.cell.0)
+      %o.6 : py.Value = py.requireDefined(%o.5, "o", "UnboundLocalError", "cannot access local variable 'o' where it is not associated with a value") ^propagate.0()
+      %int.0 : py.Value = py.intLit(2)
+      %eq.0 : py.Value = py.eq(%o.6, %int.0) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%eq.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s138_range_more.V.__eq__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %o.0 : py.Value = py.undef("o")
+      %o.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%o.0)
+      %self.1 : py.Value = py.undef("self")
+      %o.1 : py.Value = py.undef("o")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %o.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "V.__eq__", 0, 2, false, false, "self", "o") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %o.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%o.cell.0, %o.2)
+      %print.0 : py.Value = py.loadGlobal("s138_range_more", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("V.eq")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %bool.0 : py.Value = py.boolLit(false)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%bool.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s138_range_more.B.__eq__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %o.0 : py.Value = py.undef("o")
+      %o.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%o.0)
+      %self.1 : py.Value = py.undef("self")
+      %o.1 : py.Value = py.undef("o")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %o.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.__eq__", 0, 2, false, false, "self", "o") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %o.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%o.cell.0, %o.2)
+      %ValueError.0 : py.Value = py.loadGlobal("s138_range_more", "ValueError") ^propagate.0()
+      %str.0 : py.Value = py.strLit("bad eq")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%ValueError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @s138_range_more.It.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__init__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %int.0 : py.Value = py.intLit(0)
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %i.0 : base.Unit = py.setAttr(%self.4, "i", %int.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s138_range_more.It.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s138_range_more.It.__next__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__next__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %i.0 : py.Value = py.attr(%self.4, "i") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %iAdd.0 : py.Value = py.iAdd(%i.0, %int.0) ^propagate.0()
+      %i.1 : base.Unit = py.setAttr(%self.4, "i", %iAdd.0) ^propagate.0()
+      %self.5 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.6 : py.Value = py.requireDefined(%self.5, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %i.2 : py.Value = py.attr(%self.6, "i") ^propagate.0()
+      %int.1 : py.Value = py.intLit(2)
+      %gt.0 : py.Value = py.gt(%i.2, %int.1) ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%gt.0) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %StopIteration.0 : py.Value = py.loadGlobal("s138_range_more", "StopIteration") ^propagate.0()
+      %exc.0 : py.Value = py.toException(%StopIteration.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    else.0():
+      jump ^join.0()
+    join.0():
+      %self.7 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.8 : py.Value = py.requireDefined(%self.7, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %i.3 : py.Value = py.attr(%self.8, "i") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%i.3)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @s138_range_more.It2.__next__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It2.__next__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %SI.0 : py.Value = py.loadGlobal("s138_range_more", "SI") ^propagate.0()
+      %str.0 : py.Value = py.strLit("x")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%SI.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @s138_range_more.It2.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It2.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s138_range_more.It3.__next__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It3.__next__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %ValueError.0 : py.Value = py.loadGlobal("s138_range_more", "ValueError") ^propagate.0()
+      %str.0 : py.Value = py.strLit("v")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%ValueError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @s138_range_more.It3.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It3.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

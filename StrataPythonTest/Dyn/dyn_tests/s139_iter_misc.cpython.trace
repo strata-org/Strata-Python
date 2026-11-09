@@ -1,0 +1,101 @@
+--- stdout 610
+'C' object is not a container
+contains 1
+contains 1
+False True
+True True
+Eq.eq 5
+True
+get 0
+get 1
+get 2
+get 0
+get 1
+get 2
+get 3
+True False
+argument of type 'H' is not iterable
+VE ve
+argument of type 'BadIt' is not iterable
+VE nb
+eq 4
+eq 5
+eq 6
+eq 7
+True
+1
+5
+9
+33
+1
+3
+17
+Set changed size during iteration
+dictionary changed size during iteration 2
+1
+2
+10
+20
+100
+1
+3
+4 0
+iter
+len
+VE no len
+iter
+len
+VE no len
+iter
+len2
+1 2 3
+iter
+len2
+3
+iter
+iter
+len2
+not enough values to unpack (expected at least 3, got 2)
+iter
+not enough values to unpack (expected at least 3, got 1)
+iter
+iter
+len2
+1 3 5
+0 1 2
+0 2
+True
+True
+
+--- outcome
+ok
+--- globals
+Ap = <class 'Ap'>
+BadIt = <class 'BadIt'>
+Bool = <class 'Bool'>
+C = <class 'C'>
+D = <class 'D'>
+D2 = <class 'D2'>
+E = <class 'E'>
+Eq = <class 'Eq'>
+F = <class 'F'>
+G = <class 'G'>
+Grow = <class 'Grow'>
+H = <class 'H'>
+It = <class 'It'>
+It2 = <class 'It2'>
+NE = <class 'NE'>
+Z = 0
+__doc__ = None
+__name__ = '__main__'
+a = 0
+b = [1, 2]
+c = [2, 3, 4]
+d = 5
+g = <Grow object>
+k = 3
+l = [1, 2, 10, 20, 100]
+nest_list = <function object>
+nest_tuple = <function object>
+s = 4
+x = 100

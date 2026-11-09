@@ -44,6 +44,8 @@ public import StrataPython.Dyn.Sem.Rules.Values
 public import StrataPython.Dyn.Sem.Rules.Ops
 public import StrataPython.Dyn.Sem.Proto.Ops
 public import StrataPython.Dyn.Sem.Proto.Containers
+public import StrataPython.Dyn.Sem.Proto.Iter
+public import StrataPython.Dyn.Sem.Proto.Mapping
 public import StrataPython.Dyn.Sem.Proto.Calls
 public import StrataPython.Dyn.Sem.Rules.Containers
 public import StrataPython.Dyn.Sem.Rules.Globals

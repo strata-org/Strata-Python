@@ -1,0 +1,32 @@
+--- stdout 467
+0 10 20 end iterator
+2 3 5 1 4 4
+2 8 3 True False
+0 1 stop
+1 None None
+Set changed size during iteration
+again Set changed size during iteration
+TypeError object of type 'int' has no len()
+TypeError 'int' object is not iterable
+TypeError 'list' object is not an iterator
+TypeError 'float' object cannot be interpreted as an integer
+ValueError range() arg 3 must not be zero
+TypeError iter(v, w): v must be callable
+TypeError range expected at least 1 argument, got 0
+
+--- outcome
+ok
+--- globals
+G = <class 'G'>
+L = <class 'L'>
+Z = 0
+__doc__ = None
+__name__ = '__main__'
+bad = <function object>
+c = <callable_iterator object>
+it = <iterator object>
+it2 = <list_iterator object>
+r = range(2, 11, 3)
+s = {1, 2, 5}
+si = <set_iterator object>
+x = <list_iterator object>

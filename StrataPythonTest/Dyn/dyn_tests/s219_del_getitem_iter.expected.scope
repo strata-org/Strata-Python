@@ -1,0 +1,13 @@
+module
+  G: local (assigned, referenced)
+  x: local (assigned)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  msg: local (assigned)
+  class G
+    __getitem__: local (assigned)
+    function G.__getitem__
+      params: self, i
+      self: local (parameter)
+      i: local (parameter, referenced)
+      G: global implicit (referenced)

@@ -1,0 +1,27 @@
+module
+  seq: local (assigned, referenced)
+  ValueError: global implicit (referenced)
+  print: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  A: local (assigned, referenced)
+  xs: local (assigned, referenced)
+  len: global implicit (referenced)
+  P: local (assigned, referenced)
+  class A
+    __index__: local (assigned)
+    function A.__index__
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+  class P
+    __init__: local (assigned)
+    __index__: local (assigned)
+    function P.__init__
+      params: self, name, v
+      self: local (parameter, referenced)
+      name: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function P.__index__
+      params: self
+      self: local (parameter, referenced)
+      print: global implicit (referenced)

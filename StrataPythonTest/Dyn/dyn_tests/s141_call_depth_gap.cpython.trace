@@ -1,0 +1,11 @@
+--- stdout 15
+RecursionError
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+nest_list = <function object>
+nest_tuple = <function object>

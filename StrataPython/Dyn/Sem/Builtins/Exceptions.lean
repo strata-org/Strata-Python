@@ -310,6 +310,19 @@ def excGroupNew [PyWrites m V] (self args kwargs : V) : m V := do
     -- CPython accepts an instance of a subclass of `str`.
     userCheck msg msg
     raiseBuiltin "TypeError" s!"BaseExceptionGroup.__new__() argument 1 must be str, not {← argTypeName msg}"
+  -- `PySequence_Tuple`: an instance of a subclass of `list` or `tuple` is iterated by its
+  -- `__iter__`, a loop of user code when it overrides `list`'s or `tuple`'s, after its `__len__`
+  -- gives a length hint, user code too when it is overridden.
+  if ← isUserObject excs then
+    let base ← builtinBase? excs
+    for (n, gapMsg) in [("__iter__", "a looping built-in was reached inside BaseExceptionGroup.__new__"),
+        ("__len__", "a length hint of user code inside BaseExceptionGroup.__new__ is not modelled yet")] do
+      if let some f ← lookupType (← PyReads.classOf excs) n then
+        -- Only the built-in base's own dunder of that name is no user code.
+        let own := match base, ← PyPure.immView f with
+          | some b, some (.descr t n' _) => t == b && n' == n
+          | _, _ => false
+        if !own then PyPure.gap gapMsg
   let items ← match ← PyPure.immView excs with
     | some (.tuple ys) => pure ys
     | _ => match ← listOf? excs with

@@ -4,8 +4,8 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
-import StrataPython.Dyn.Sem.Proto.Containers
-meta import StrataPython.Dyn.Sem.Proto.Containers
+import StrataPython.Dyn.Sem.Proto.Iter
+meta import StrataPython.Dyn.Sem.Proto.Iter
 
 set_option autoImplicit false
 

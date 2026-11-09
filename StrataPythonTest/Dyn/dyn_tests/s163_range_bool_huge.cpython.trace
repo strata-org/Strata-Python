@@ -1,0 +1,10 @@
+--- stdout 18
+True False
+truthy
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+r = range(0, 1180591620717411303424)

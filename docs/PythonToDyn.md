@@ -2400,7 +2400,7 @@ list, and the rejections with their messages with a golden there.
 does what CPython 3.12 does
 (`Rules/`, over the generic protocols of `Proto/`), as `docs/Dyn.md` §4 describes. A rule that
 reaches a case the semantics doesn't model yet stops the run with a gap, whose message names the
-case, e.g. `not modelled yet: py.setAttr` or `import of module sys is not modelled yet`. A gap is
+case, e.g. `not modelled yet: py.listComp` or `import of module sys is not modelled yet`. A gap is
 never a wrong result: the run stops there. Outside the known differences of §13.4 and the bugs of
 §13.5, a run that doesn't stop with a gap gives CPython's result.
 
@@ -2508,8 +2508,8 @@ with CPython 3.12, over 1422 generated cases.
 - Lists, dicts, sets and frozensets: the displays and the operations that make them, item access,
   slices, unpacking, `in`, and the operators on them. The built-ins `list()`, `dict()`, `set()` and
   `frozenset()` are not modelled yet and stop with a gap. A walk over a set whose order may differ
-  from CPython's (a set display of constants, or a set built from one) stops with a gap: `pop`,
-  `repr`, and a comparison that may run user code.
+  from CPython's (a set display of constants, or a set built from one) stops with a gap: iteration,
+  `pop`, `repr`, and a comparison that may run user code.
 - Global names, with the fallback to `builtins`, and closures with their cells.
 - Calls of function objects, with positional and keyword arguments and `*` and `**` arguments.
   `**` builds a new dict and leaves the operand unchanged.
@@ -2549,6 +2549,18 @@ with CPython 3.12, over 1422 generated cases.
   attribute read raises, an exception whose class defines `__get__`, `__set__` or `__delete__`,
   and the `str()` of an uncaught exception whose class defines `__str__`. A traceback is opaque:
   its attributes and `with_traceback` stop with a gap.
+- Iteration: `for` loops, `iter` (with a sentinel too), `next` (with a default), `len` and `range`
+  (with slicing and `range.__reversed__`; the built-in `reversed` stops with a gap), over the
+  built-in containers and their iterators, user iterators and objects with `__getitem__`; and
+  `[*x]`, `{*x}`, `a, b = x`, `a, *b = x`, `f(*x)`, `f(**m)`, `{**m}` and `x in y` over them, with
+  CPython's order of calls, length hints and errors. An operation that loops over a user iterator
+  for an unbounded number of items runs one `__next__` per activation and goes on with `again`;
+  unpacking runs the `__next__` calls of its targets before a starred one in one activation. These
+  stop with a gap: a loop over a user iterator inside another operation's step (`l[:] = it`, `l +=
+  it`), the length hint of a dict iterator, a length hint beyond `2**28` (where CPython may raise
+  `MemoryError`), a dict whose keys change at the same size during its iteration, an iterator whose
+  class loses `__next__`, or an object whose class loses `__getitem__`, while a loop runs it, and
+  the comprehension operations (`py.listComp`, `py.compFor`, …).
 - CPython's recursion limit: nested comparisons and calls into Python count toward it, and a run
   stops with a gap where CPython would raise `RecursionError`.
 - Warnings: the semantics emits no warning. A warning records itself in the module's

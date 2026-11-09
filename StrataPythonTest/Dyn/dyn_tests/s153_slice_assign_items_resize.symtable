@@ -1,0 +1,12 @@
+module top
+  G: local (assigned, referenced)
+  len: global implicit (referenced)
+  print: global implicit (referenced)
+  xs: local (assigned, referenced)
+  class G
+    __iter__: local (assigned)
+    function __iter__
+      iter: global implicit (referenced)
+      self: local (parameter)
+      xs: global implicit (referenced)
+qualnames: G, G.__iter__

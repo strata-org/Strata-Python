@@ -1,0 +1,73 @@
+--- stdout 394
+index
+3 2
+index
+2 5
+4 4
+2 2 5 8
+True True True
+range object index out of range
+False True False
+4 longrange_iterator
+True 2
+longrange_iterator -2
+longrange_iterator
+longrange_iterator
+range_iterator 4
+S.eq 1
+S.eq 2
+1 end end2
+V.eq
+V
+stop stop2
+sub
+bad eq
+again bad eq
+0
+1 2 d
+dflt
+SI x
+0 0
+0
+1 0
+False
+VE v
+VE v
+VE v
+VE v
+longrange_iterator
+longrange_iterator
+longrange_iterator
+range_iterator
+
+--- outcome
+ok
+--- globals
+B = <class 'B'>
+I = <class 'I'>
+It = <class 'It'>
+It2 = <class 'It2'>
+It3 = <class 'It3'>
+S = <class 'S'>
+SE = <class 'SE'>
+SI = <class 'SI'>
+V = <class 'V'>
+__doc__ = None
+__name__ = '__main__'
+a = 1
+b = []
+bi = <longrange_iterator object>
+c = [2]
+ci = <longrange_iterator object>
+f = <function object>
+g = <function object>
+h = <function object>
+h2 = <function object>
+it = <It object>
+it2 = <callable_iterator object>
+it3 = <callable_iterator object>
+it4 = <callable_iterator object>
+k = <function object>
+r = range(5, 9223372036854775807)
+rv = <range_iterator object>
+t = <function object>

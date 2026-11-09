@@ -1,0 +1,10 @@
+--- stdout 12
+MemoryError
+
+--- outcome
+ok
+--- globals
+It = <class 'It'>
+__doc__ = None
+__name__ = '__main__'
+f = <function object>

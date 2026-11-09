@@ -1,0 +1,8 @@
+module top
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  list: global implicit (referenced)
+  print: global implicit (referenced)
+  tuple: global implicit (referenced)
+  zip: global implicit (referenced)
+qualnames: 

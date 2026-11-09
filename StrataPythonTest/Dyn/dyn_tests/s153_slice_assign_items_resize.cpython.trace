@@ -1,0 +1,10 @@
+--- stdout 6
+5 2 7
+
+--- outcome
+ok
+--- globals
+G = <class 'G'>
+__doc__ = None
+__name__ = '__main__'
+xs = [1, 2, 7, 8, 0]

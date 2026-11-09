@@ -1,0 +1,45 @@
+module top
+  Boom: local (assigned, referenced)
+  Clear: local (assigned, referenced)
+  ClearAll: local (assigned, referenced)
+  Grow: local (assigned, referenced)
+  IndexError: global implicit (referenced)
+  KeyError: global implicit (referenced)
+  Last: local (assigned, referenced)
+  Shrink: local (assigned, referenced)
+  e: local (assigned)
+  len: global implicit (referenced)
+  print: global implicit (referenced)
+  xs: local (assigned, referenced)
+  class Clear
+    __index__: local (assigned)
+    function __index__
+      self: local (parameter)
+      xs: global implicit (referenced)
+  class ClearAll
+    __index__: local (assigned)
+    function __index__
+      self: local (parameter)
+      xs: global implicit (referenced)
+  class Last
+    __index__: local (assigned)
+    function __index__
+      self: local (parameter)
+      xs: global implicit (referenced)
+  class Grow
+    __index__: local (assigned)
+    function __index__
+      len: global implicit (referenced)
+      self: local (parameter)
+      xs: global implicit (referenced)
+  class Shrink
+    __index__: local (assigned)
+    function __index__
+      self: local (parameter)
+      xs: global implicit (referenced)
+  class Boom
+    __index__: local (assigned)
+    function __index__
+      KeyError: global implicit (referenced)
+      self: local (parameter)
+qualnames: Boom, Boom.__index__, Clear, Clear.__index__, ClearAll, ClearAll.__index__, Grow, Grow.__index__, Last, Last.__index__, Shrink, Shrink.__index__

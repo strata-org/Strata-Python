@@ -1,0 +1,14 @@
+module top
+  It: local (assigned, referenced)
+  l: local (assigned, referenced)
+  len: global implicit (referenced)
+  print: global implicit (referenced)
+  class It
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function __iter__
+      self: local (parameter, referenced)
+    function __next__
+      StopIteration: global implicit (referenced)
+      self: local (parameter)
+qualnames: It, It.__iter__, It.__next__

@@ -17,6 +17,7 @@ public import StrataPython.Dyn.Sem.Rules.Closures
 public import StrataPython.Dyn.Sem.Rules.Calls
 public import StrataPython.Dyn.Sem.Rules.Attrs
 public import StrataPython.Dyn.Sem.Rules.Exceptions
+public import StrataPython.Dyn.Sem.Rules.Iter
 public meta import StrataPython.Dyn.Env
 public meta import StrataDyn.DDM
 

@@ -1,0 +1,13 @@
+--- stdout 6
+1
+2
+3
+
+--- outcome
+raised RuntimeError: dictionary keys changed during iteration
+--- globals
+__doc__ = None
+__name__ = '__main__'
+d = {2: 2, 3: 3, 1: 9}
+it = <dict_keyiterator object>
+k = 3

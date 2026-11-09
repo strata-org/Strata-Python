@@ -1,0 +1,71 @@
+--- stdout 618
+True
+3
+'C' object is not iterable
+'C' object is not iterable
+'C' object is not iterable
+argument of type 'C' is not iterable
+iterator
+'NoneType' object is not callable
+'NoneType' object is not callable
+iter() returned non-iterator of type 'int'
+iter() returned non-iterator of type 'int'
+iter() returned non-iterator of type 'int'
+iter() returned non-iterator of type 'int'
+argument of type 'R' is not iterable
+N 1
+iter() returned non-iterator of type 'list'
+1
+2
+end
+end2
+1
+2
+4
+1
+2
+3
+3
+2
+0
+Set changed size during iteration 0
+0
+Set changed size during iteration 0
+3
+0
+e
+0 e2
+4
+hint
+2
+ValueError v
+2
+2
+2
+RuntimeError r
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+Lh = <class 'Lh'>
+Lh2 = <class 'Lh2'>
+Lh3 = <class 'Lh3'>
+Lh4 = <class 'Lh4'>
+Lh5 = <class 'Lh5'>
+Lh6 = <class 'Lh6'>
+N = <class 'N'>
+R = <class 'R'>
+R2 = <class 'R2'>
+Z = 0
+__doc__ = None
+__name__ = '__main__'
+d = {1: 5, 2: 2, 9: 9}
+f = <function object>
+it = <list_iterator object>
+it2 = <set_iterator object>
+l = [5]
+r = <range_iterator object>
+s = {1, 2, 3}
+s2 = {2, 3, 9}
+x = 3

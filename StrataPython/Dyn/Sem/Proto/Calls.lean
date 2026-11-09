@@ -4,7 +4,7 @@
   SPDX-License-Identifier: Apache-2.0 OR MIT
 -/
 module
-public import StrataPython.Dyn.Sem.Proto.Containers
+public import StrataPython.Dyn.Sem.Proto.Iter
 
 set_option autoImplicit false
 
@@ -15,7 +15,8 @@ Generic over the record of primitives, CPython 3.12's `print` and the lowering o
 
 * `print` writes the `str` of each argument, with `sep` and `end`; `str` of a value other than a
   `str`, `int`, `bool`, `float` or `None` stops with a gap until `str` and `repr` exist;
-* the lowering of call arguments: `mkKwargs`, `argsTuple` (`f(*it)`) and `dictMerge` (`f(**m)`).
+* the lowering of call arguments: `mkKwargs` and `argsTupleStep` (`f(*it)`); `f(**m)` is
+  `Mapping.lean`'s.
 
 The calls themselves are `callN`'s (`Lookup.lean`).  A `TypeError` of `argsTuple` or `dictMerge`
 whose message names a function object (CPython's `__main__.g()`) stops with a gap, since the
@@ -108,30 +109,31 @@ def argsTuple [PyCalls m V] (f it : V) : m V := do
       s!"{← calleeName f} argument after * must be an iterable, not {← typeName it}"
   PyPure.gap "a * argument of this built-in type is not modelled yet"
 
-/-- A new dict with the entries of `d`, then those of `other`, for `f(**other)`: CPython's
-`DICT_MERGE` into the kwargs dict that the call builds; a key already present raises `TypeError`
-naming `f`.  The operand `d` stays as it was. -/
-def dictMerge [PyCalls m V] [PyNew m V] (f d other : V) : m V := do
-  userCheck other other
-  if !(← isDict other) then
-    -- A built-in type, function or method may have `keys` (the type `dict` has), so it gaps.
-    let plain := match ← PyPure.immView other with
-      | some (.builtin _) | some (.descr ..) | some (.bound ..) | some (.method ..) => false
-      | some _ => true
-      | none => false
-    if plain || (← listOf? other).isSome then
-      raiseBuiltin "TypeError"
-        s!"{← calleeName f} argument after ** must be a mapping, not {← typeName other}"
-    PyPure.gap "a ** argument that is not a dict is not modelled yet"
-  let merged ← PyReads.dictCopy d
-  guardDictWalk other merged
-  for (k, v, h) in ← PyReads.dictEntries other do
-    if (← PyReads.dictFind merged k (some h) (keyEq k)).isSome then
-      -- CPython 3.12 names the key by its `str`, a `str` key or not.
-      let some s ← plainStr? k | PyPure.gap "a duplicate ** key whose str runs a protocol"
-      raiseBuiltin "TypeError" s!"{← calleeName f} got multiple values for keyword argument '{s}'"
-    PyNew.dictSetNew merged k v (some h) (keyEq k)
-  pure merged
+/-- **`tuple(it)` for `f(*it)`, as CPython's `CALL_FUNCTION_EX`**, one activation of it: a tuple as
+it is, an exact built-in container at once; otherwise `TypeError` naming `f` for a value with
+neither `__iter__` nor `__getitem__`, else `iter(it)` after its length hint, the items gathered in
+a list, its iterator the state. -/
+def argsTupleStep [PyWrites m V] [PyNew m V] (f it : V) (st : Option (V × V)) :
+    m (LoopStep (V × V) V) := do
+  let (lst, iter) ← match st with
+    | some x => pure x
+    | none =>
+      if let some (.tuple _) ← PyPure.immView it then return .done it
+      if ← exactBuiltinIterable it then return .done (← argsTuple f it)
+      let t ← PyReads.classOf it
+      if (← lookupType t "__iter__").isNone && (← lookupType t "__getitem__").isNone then
+        raiseBuiltin "TypeError"
+          s!"{← calleeName f} argument after * must be an iterable, not {← typeName it}"
+      let i ← getIter it
+      hintCheck (← lengthHint it 10)
+      pure (← PyPure.allocList #[], i)
+  match ← forEachItem iterNext iter () fun x _ => do
+      PyWrites.listAppend lst x
+      pure (.next ()) with
+  | .more _ => return .more (lst, iter)
+  | .done _ =>
+    let some xs ← listOf? lst | PyPure.gap "argsTuple: the list of the items is not a list"
+    return .done (PyPure.imm (m := m) (.tuple xs))
 
 /-- A gap unless `builtins.__import__` is the built-in one: CPython's `IMPORT_NAME` calls it
 whenever it has been replaced. -/
@@ -174,6 +176,139 @@ def qualifiedRef [PyCalls m V] (module name : String) : m V := do
   if module != "builtins" then PyPure.gap s!"a reference into module {module} is not modelled yet"
   let some v ← PyReads.builtinGet name | PyPure.gap s!"builtins.{name} is missing"
   pure v
+
+/-- The frames of this piece's own step: `type.__call__` while the `__new__` that it called
+(`typeNew`, with the call's class and arguments) or the `__init__` (`typeInit`, with the object
+that `__new__` made) is a suspended machine, and an instance's `__call__` (`callLevel`). -/
+inductive OpsLoopState (V : Type) where
+  | typeNew (cls args kwargs : V)
+  | typeInit (obj : V)
+  /-- An instance's `__call__`, run one C level deeper (`_PyObject_MakeTpCall`), whose machine
+  suspended. -/
+  | callLevel
+
+section
+variable {S : Type} [PyWrites m V] [PyMachines m V S] [HasLoopPart S (OpsLoopState V)]
+
+/-- A call of `f` that a step machine may suspend: its machine's first step, or else `callN`. -/
+def stepCall (f args kwargs : V) : m (CallStep S V) := do
+  match ← PyMachines.startStep f args kwargs with
+  | some r => pure r
+  | none => .done <$> callN dispatchDepth f args kwargs
+
+/-- **The first step of a step machine for the `tp_new` of the built-in type `t`**, bound to
+`self`, as a class call starts it (`callTpNew`).  The `.tpNew` value that names it is made here and
+handed to `startStep` at once; a piece's machine reads it to choose itself and keeps no callee: this
+call is the value's whole life. -/
+def startTpNew (self : V) (t : Builtin) (args kwargs : V) : m (Option (CallStep S V)) :=
+  PyMachines.startStep (PyPure.imm (m := m) (.bound self t "__new__" .tpNew)) args kwargs
+
+/-- `type.__call__` after `__new__` made `obj`: `__init__` when `obj` is an instance of `cls`,
+which may suspend as a `typeInit` frame; then `obj`. -/
+def typeInitStep (cls obj args kwargs : V) : m (CallStep S V) := do
+  let some objMro ← mroOf (← PyReads.classOf obj) | return .done obj
+  let mut isInst := false
+  for c in objMro do
+    if (← PyPure.identical c cls) == .yes then isInst := true
+  if !isInst then return .done obj
+  let some init ← lookupType (← PyReads.classOf obj) "__init__" | return .done obj
+  let initF ← descrGetN dispatchDepth init (some obj) (← PyReads.classOf obj)
+  match ← stepCall initF args kwargs with
+  | .suspend fs => return .suspend (HasLoopPart.inj (OpsLoopState.typeInit obj) :: fs)
+  | .done r =>
+    if !((← PyPure.immView r) matches some .none) then
+      raiseBuiltin "TypeError" s!"__init__() should return None, not '{← typeName r}'"
+    return .done obj
+
+/-- **A call of the class `cls` that a step machine may suspend**: the steps of `typeCallN`, where
+the `__new__` or the `__init__` that it calls may be a machine, which suspends as a `typeNew` or a
+`typeInit` frame. A metaclass's own `__call__` and `type`'s own call go through `typeCallN`. -/
+def typeCallStep (cls args kwargs : V) : m (CallStep S V) := do
+  if (← PyPure.immView cls) matches some (.builtin .type) then
+    return .done (← typeCallN dispatchDepth true cls args kwargs)
+  if (← metaCall? cls).isSome then
+    return .done (← typeCallN dispatchDepth true cls args kwargs)
+  PyReads.withDepth 1 do
+    let some new ← lookupType cls "__new__" | PyPure.gap s!"a class without __new__"
+    metaGetattributeCheck cls
+    let some tpNew ← tpNewFor cls new |
+      PyPure.gap "a class whose __new__ comes from another built-in base than its tp_new is not modelled yet"
+    let args' ← prepend cls args
+    let step ← match tpNew with
+      -- `type_call` calls the type's `tp_new` directly, without `tp_new_wrapper`'s check.
+      | .builtin s u => do
+        match ← startTpNew s u args' kwargs with
+        | some r => pure r
+        | none => .done <$> callTpNew s u args' kwargs
+      | .slot => stepCall (← descrGetN dispatchDepth new none cls) args' kwargs
+    match step with
+    | .suspend fs =>
+      return .suspend (HasLoopPart.inj (OpsLoopState.typeNew cls args kwargs) :: fs)
+    | .done obj => typeInitStep cls obj args kwargs
+
+/-- **`callResumable f args kwargs saved`**: with no saved frames, a call of `f` as `callN` makes
+it, where a built-in step machine that the dispatch reaches (directly, through a class's
+`__new__` or `__init__`, a bound method or an instance's `__call__`) runs one step and gives
+its frames; with saved frames, the machine that the first one names resumes, with no dispatch.
+-/
+def callResumable : Nat → V → V → V → List S → m (CallStep S V)
+  | _, _, _, _, s :: rest => PyMachines.resume s rest
+  | 0, _, _, _, [] => PyPure.gap "a call dispatch nested deeper than the model follows"
+  | n + 1, f, args, kwargs, [] => do
+    if let some r ← PyMachines.startStep f args kwargs then return r
+    match ← PyPure.immView f with
+    | some (.method fn self) => callResumable n fn (← prepend self args) kwargs []
+    | some (.builtin b) =>
+      if b.info.kind == .type then typeCallStep f args kwargs
+      else .done <$> callN dispatchDepth f args kwargs
+    | some _ => .done <$> callN dispatchDepth f args kwargs
+    | none =>
+      match ← PyReads.objView f with
+      | some (.cls _) => typeCallStep f args kwargs
+      | some .inst =>
+        let t ← PyReads.classOf f
+        match ← lookupType t "__call__" with
+        | some c =>
+          -- `slot_tp_call` through `_PyObject_MakeTpCall` counts a C level, as `callN` counts it.
+          match ← PyReads.withDepth 1 do
+              callResumable n (← descrGetN dispatchDepth c (some f) t) args kwargs [] with
+          | .suspend fs => return .suspend (HasLoopPart.inj (OpsLoopState.callLevel (V := V)) :: fs)
+          | r => return r
+        | none => .done <$> callN dispatchDepth f args kwargs
+      | _ => .done <$> callN dispatchDepth f args kwargs
+
+/-- **The resume entry of this piece's frames**, one C level deeper, as the call that suspended ran:
+the inner machine resumes with the rest of the frames; a `typeNew` frame then runs `__init__` on the
+object that `__new__` made, a `typeInit` frame gives the object, and a `callLevel` frame gives the
+inner result. Every frame has an inner one below it: a frame list without one is a model
+invariant. -/
+def opsResume (fr : OpsLoopState V) (rest : List S) : m (CallStep S V) :=
+  PyReads.withDepth 1 do
+    let inner ← match rest with
+      | s :: rest' => PyMachines.resume s rest'
+      | [] => PyPure.modelInvariant "a frame list that doesn't fit the call"
+    match fr, inner with
+    | _, .suspend fs => return .suspend (HasLoopPart.inj fr :: fs)
+    | .typeNew cls args kwargs, .done obj => typeInitStep cls obj args kwargs
+    | .typeInit obj, .done r =>
+      if !((← PyPure.immView r) matches some .none) then
+        raiseBuiltin "TypeError" s!"__init__() should return None, not '{← typeName r}'"
+      return .done obj
+    | .callLevel, .done r => return .done r
+
+
+/-- **One activation of `py.call`**: `callResumable` from the frames that the activation before it
+saved; the frames of a suspended machine are the state of the next activation. -/
+def callStep (f args kwargs : V) (st : Option (List S)) : m (LoopStep (List S) V) := do
+  let saved ← match st with
+    | none => pure []
+    | some [] => PyPure.gap "py.call resumed with no frames"
+    | some fs => pure fs
+  match ← callResumable dispatchDepth f args kwargs saved with
+  | .done v => return .done v
+  | .suspend fs => return .more fs
+
+end
 
 end
 

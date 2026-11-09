@@ -1,0 +1,14 @@
+--- stdout 202
+OverflowError Python int too large to convert to C ssize_t
+OverflowError Python int too large to convert to C ssize_t
+9223372036854775807
+OverflowError Python int too large to convert to C ssize_t
+True
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+it = <longrange_iterator object>
+t = <function object>

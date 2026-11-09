@@ -16,8 +16,8 @@ sequences `tuple`, `list`, `str`, `bytes` and `range`, dicts, sets and frozenset
 
 * `getItem` with an index or a slice, `setItem` and `delItem` on a list, with CPython's
   `IndexError`s and `TypeError`s;
-* `contains`: membership in a sequence, a substring of a `str`, a byte or a sub-`bytes` of a
-  `bytes`;
+* `containsCore`: membership in a sequence, a substring of a `str`, a byte or a sub-`bytes` of a
+  `bytes`, a dict or a set;
 * `unpackSeq` and `unpackEx`, with CPython's `ValueError`s;
 * `hash`: CPython's `PyObject_Hash` on built-in values;
 * dicts: item access, `in`, `==`, `|` and `|=`;
@@ -183,8 +183,36 @@ def position (i : Int) (n : Nat) : Option Nat :=
   let j := if i < 0 then i + n else i
   if 0 ≤ j ∧ j < n then some j.toNat else none
 
+/-- A bound of a slice of a range, as `evaluate_slice_index` converts it: `none` for `None`. -/
+def rangeSliceIndex [PyCalls m V] (v : V) : m (Option Int) := do
+  if (← PyPure.immView v) matches some .none then return none
+  let some i ← indexValue? v |
+    raiseBuiltin "TypeError" "slice indices must be integers or None or have an __index__ method"
+  return some i
+
+/-- **`range(a, z, c)[lo:hi:st]`, CPython's `compute_slice`**: the slice indices of
+`_PySlice_GetLongIndices` over the range's length, with no `Py_ssize_t` bound, then the range of
+the items at them. -/
+def rangeSlice [PyCalls m V] (a z c : Int) (lo hi st : V) : m V := do
+  let len : Int := rangeLen a z c
+  let step ← match ← rangeSliceIndex st with
+    | none => pure 1
+    | some 0 => raiseBuiltin "ValueError" "slice step cannot be zero"
+    | some s => pure s
+  let (lower, upper) := if step < 0 then (-1, len - 1) else (0, len)
+  let clamp (i : Int) : Int :=
+    if i < 0 then max (i + len) lower else min i upper
+  let start := match ← rangeSliceIndex lo with
+    | none => if step < 0 then upper else lower
+    | some i => clamp i
+  let stop := match ← rangeSliceIndex hi with
+    | none => if step < 0 then lower else upper
+    | some i => clamp i
+  pure (PyPure.imm (m := m) (.range (a + start * c) (a + stop * c) (c * step)))
+
 /-- `s[a:b:c]` for a built-in sequence. -/
 def sliceOf [PyCalls m V] (s : Seq V) (lo hi step : V) : m V := do
+  if let .range a z c := s then return ← rangeSlice a z c lo hi step
   let bs ← sliceBounds lo hi step
   let s ← s.refresh (← boundsRunCode lo hi step)
   let ix ← sliceIdxOf bs s.length
@@ -196,7 +224,7 @@ def sliceOf [PyCalls m V] (s : Seq V) (lo hi step : V) : m V := do
     let cs := t.s.toList.toArray
     pure (PyPure.imm (m := m) (.str (.ofString (String.ofList (ps.map fun p => cs.getD p ' ')))))
   | .bytes b => pure (PyPure.imm (m := m) (.bytes (ps.toArray.map fun p => b.getD p 0)))
-  | .range .. => PyPure.gap "a slice of a range is not modelled yet"
+  | .range a z c => rangeSlice a z c lo hi step
 
 /-- `obj[key]` for a built-in sequence: an index or a slice. -/
 def seqGetItem [PyCalls m V] (s : Seq V) (key : V) : m V := do
@@ -421,24 +449,6 @@ def containsCore [PyCalls m V] (x s : V) : m Bool := do
       raiseBuiltin "TypeError" s!"argument of type '{← typeName s}' is not iterable"
     PyPure.gap "membership in this container is not modelled yet"
 
-/-- `x in s` for a built-in container; otherwise CPython's `TypeError`. -/
-def contains [PyCalls m V] (x s : V) : m Bool := do
-  if ← isUserObject s then
-    let t ← PyReads.classOf s
-    match ← lookupType t "__contains__" with
-    | some f =>
-      -- `slot_sq_contains` binds first: a `None` that the binding gives makes it no container.
-      let g ← descrGetN dispatchDepth f (some s) t
-      if (← PyPure.immView g) matches some .none then
-        raiseBuiltin "TypeError" s!"'{← typeName s}' object is not a container"
-      return ← truthy (← callN dispatchDepth g (PyPure.imm (m := m) (.tuple #[x])) (← PyPure.allocDict))
-    | none =>
-      if (← lookupType (← PyReads.classOf s) "__iter__").isSome ||
-          (← lookupType (← PyReads.classOf s) "__getitem__").isSome then
-        PyPure.gap "iteration of a user object is not modelled yet"
-      raiseBuiltin "TypeError" s!"argument of type '{← typeName s}' is not iterable"
-  containsCore x s
-
 /-- What iterating `v` gives, as a sequence: a built-in sequence itself, a dict's keys in order;
 `TypeError` with the message `notIterable t` for an immediate of type `t` that isn't iterable,
 and a gap for any other object. -/
@@ -446,7 +456,7 @@ def iterSeq [PyCalls m V] (v : V) (notIterable : String → String) : m (Seq V) 
   if ← isUserObject v then
     if (← lookupType (← PyReads.classOf v) "__iter__").isSome ||
         (← lookupType (← PyReads.classOf v) "__getitem__").isSome then
-      PyPure.gap "iteration of a user object is not modelled yet"
+      PyPure.gap "a looping built-in was reached inside an operation"
     raiseBuiltin "TypeError" (notIterable (← typeName v))
   match ← seqOf v with
   | some s => pure s
@@ -605,11 +615,6 @@ def listExtendWith [PyWrites m V] (l : V) (xs : Array V) (it : V)
     (notIterable : String → String) : m Unit := do
   let ys ← (← iterSeq it notIterable).items
   PyWrites.listSplice l xs.size xs.size ys
-
-/-- `l.extend(it)` for a list `l`, as CPython's `LIST_EXTEND`. -/
-def listExtend [PyWrites m V] (l it : V) : m Unit := do
-  let some xs ← listOf? l | PyPure.modelInvariant "listExtend: operand assumption failed"
-  listExtendWith l xs it fun t => s!"Value after * must be an iterable, not {t}"
 
 /-- The comparison of a set's stored member with a probe, as `keyEq`. -/
 def memberEq [PyCalls m V] (probe stored : V) : m Bool := richCompare .eq stored probe
@@ -890,12 +895,15 @@ def setAddListLive [PyWrites m V] (s l : V) : Nat → Nat → m Unit
     setAddItem s x
     setAddListLive s l fuel (i + 1)
 
-/-- `s.update(it)` for a set `s`, as CPython's `SET_UPDATE`: a set or frozenset merged in; a
+/-- `s.update(it)` for a set `s`, as CPython's `SET_UPDATE`: a set or frozenset, or an instance of
+a subclass of one, merged in; a
 dict's keys added with their stored hashes, after a resize for their number; or the elements of a
 built-in sequence added in order. -/
 def setUpdate [PyWrites m V] (s it : V) : m Unit := do
-  if ← isUserObject it then PyPure.gap "iteration of a user object is not modelled yet"
-  if (← anySet? it).isSome then return ← setMergeWith oldSetWrites s it
+  -- `set_update_internal` merges any set or frozenset, an instance of a subclass too, without its
+  -- `__iter__`.
+  if (← anySetLike? it).isSome then return ← setMergeWith oldSetWrites s it
+  if ← isUserObject it then PyPure.gap "a looping built-in was reached inside an operation"
   if ← isDict it then
     guardDictWalk it s
     let es ← PyReads.dictEntries it

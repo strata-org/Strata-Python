@@ -47,10 +47,13 @@ public environment PyT extends Py where
   insn setPrims (^err (exc : Value)) : Value
   insn slotInexact (^err (exc : Value)) : Value
   insn popInexact (n : base.Int) (^err (exc : Value)) : Value
+  insn nextView (^err (exc : Value)) : Value
+  insn setUpdateSub (^err (exc : Value)) : Value
   insn frozenSeal (k : base.Int) (^err (exc : Value)) : Value
   insn nativeDepth (k : base.Int) (^err (exc : Value)) : Value
   insn nativeGapped (k : base.Int) (^err (exc : Value)) : Value
   insn classDescr (k : base.Int) (^err (exc : Value)) : Value
+  insn startCheck (k : base.Int) (^err (exc : Value)) : Value
   insn listPrims (^err (exc : Value)) : Value
   insn oldPrims (^err (exc : Value)) : Value
   insn newPrims (^err (exc : Value)) : Value
@@ -61,10 +64,27 @@ public environment PyT extends Py where
   insn frozenMerge (^err (exc : Value)) : Value
   insn frozenAdd (^err (exc : Value)) : Value
   insn importGaps (k : base.Int) (^err (exc : Value)) : Value
+  insn groupLenHint (^err (exc : Value)) : Value
   insn objPrims (^err (exc : Value)) : Value
   insn bindCase (i : base.Int) (^err (exc : Value)) : Value
   insn subclassOps (^err (exc : Value)) : Value
   insn subclassContainers (^err (exc : Value)) : Value
+  insn resumeCase (f : Value) (^err (exc : Value)) : Value
+  insn callInst (^err (exc : Value)) : Value
+  insn callLevelStep (^err (exc : Value)) : Value
+  insn resumeDirect (^err (exc : Value)) : Value
+  insn resumeNoFit (^err (exc : Value)) : Value
+  insn foreignIter (^err (exc : Value)) : Value
+  insn foreignLen (^err (exc : Value)) : Value
+  insn strSubIter (^err (exc : Value)) : Value
+  insn iterBounds (^err (exc : Value)) : Value
+  insn zipNext (^err (exc : Value)) : Value
+  insn enumNext (^err (exc : Value)) : Value
+  insn revNext (^err (exc : Value)) : Value
+  insn listRevNext (^err (exc : Value)) : Value
+  insn dictRevNext (^err (exc : Value)) : Value
+  insn startZero (^err (exc : Value)) : Value
+  insn staleSlice (^err (exc : Value)) : Value
   end pt
 
 #dyn_types PyT
@@ -351,6 +371,124 @@ public def subclassOf (name : String) (base : Builtin) : PyM σ .writes false Va
       mroTail := #[.builtin base, .builtin .object], ns := ← PyPure.allocDict,
       solidBase := .builtin base.info.solidBase })
 
+/-- A class `T(tuple)` whose namespace binds `name` to `list`'s slot wrapper, and an instance of
+it holding `(1,)`. -/
+public def foreignSlot (name : String) : PyM σ .writes false Value := do
+  let c ← subclassOf "T" .tuple
+  let some cd ← Proto.classData? c | PyM.gap "not a class"
+  PyWrites.dictSet cd.ns (.ofString name) (.descr .list name .slotWrapper) none fun _ => pure false
+  PyReads.allocInstance c (.tuple #[.int 1]) #[] #[]
+
+/-- `iter(T((1,)))` where `T.__iter__ = list.__iter__`: the fast path doesn't apply, and the
+dispatch checks the slot wrapper's type. -/
+@[dyn_sem PyT.foreignIter, expose] public def foreignIter (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do Proto.getIter (← foreignSlot "__iter__") : PyM σ .writes false Value)
+
+/-- `BaseExceptionGroup("m", T((1,)))` where `T.__len__` is another type's: CPython's
+`PySequence_Tuple` would call it for a length hint. -/
+@[dyn_sem PyT.groupLenHint, expose] public def groupLenHint (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let c ← subclassOf "T" .tuple
+    let some cd ← Proto.classData? c | PyM.gap "not a class"
+    PyWrites.dictSet cd.ns (.ofString "__len__") (.descr .str "__len__" .slotWrapper) none fun _ => pure false
+    let inst ← PyReads.allocInstance c (.tuple #[.int 1]) #[] #[]
+    Proto.callN 5 (.builtin .BaseExceptionGroup) (.tuple #[.ofString "m", inst]) (← PyPure.allocDict)
+    : PyM σ .writes false Value)
+
+/-- `len(T((1,)))` where `T.__len__ = list.__len__`, as `foreignIter`. -/
+@[dyn_sem PyT.foreignLen, expose] public def foreignLen (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    pure (Value.int (← Proto.pyLen (← foreignSlot "__len__"))) : PyM σ .writes false Value)
+
+/-- The type of `iter(S("ab"))` for a class `S(str)`: `str_iterator`, as CPython makes for an
+ASCII instance of a subclass of `str`. -/
+@[dyn_sem PyT.strSubIter, expose] public def strSubIter (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let v ← PyReads.allocInstance (← subclassOf "S" .str) (.str (.ofString "ab")) #[] #[]
+    let some it ← Proto.builtinIter? v | PyM.gap "no iterator"
+    PyReads.classOf it : PyM σ .writes false Value)
+
+/-- A list of the ints `xs`. -/
+public def intList (xs : List Int) : PyM σ .writes true Value :=
+  PyPure.allocList (xs.toArray.map Value.int)
+
+/-- The walk bounds of iterators made directly: a `zip` over list iterators with 3 and 2 items
+left, an empty `zip`, a `zip` of that `zip`, a `zip` over a value that is no built-in iterator, an
+`enumerate`, a `reversed` and a `list_reverseiterator` at index 2, a `reversed` at index -1, a
+dict reverse iterator over 2 entries; and a nest of `zip`s with a budget of one visit and with a
+depth of one. -/
+@[dyn_sem PyT.iterBounds, expose] public def iterBounds (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[] (do
+    let l3 ← intList [1, 2, 3]
+    let l2 ← intList [1, 2]
+    let i3 ← Proto.newIter .list_iterator (.seq .list_iterator l3 0)
+    let i2 ← Proto.newIter .list_iterator (.seq .list_iterator l2 0)
+    let z ← Proto.newIter .zip (.zip #[i3, i2] false)
+    let ze ← Proto.newIter .zip (.zip #[] false)
+    let zz ← Proto.newIter .zip (.zip #[z] false)
+    let zu ← Proto.newIter .zip (.zip #[i3, .none] false)
+    let e ← Proto.newIter .enumerate (.enumerate i3 0)
+    let r ← Proto.newIter .reversed (.reversed .reversed l3 2)
+    let lr ← Proto.newIter .list_reverseiterator (.reversed .list_reverseiterator l3 2)
+    let rm ← Proto.newIter .reversed (.reversed .reversed l3 (-1))
+    let d ← PyPure.allocDict
+    PyWrites.dictSet d (.int 1) (.int 1) none fun _ => pure false
+    PyWrites.dictSet d (.int 2) (.int 2) none fun _ => pure false
+    let dr ← Proto.newIter .dict_reversekeyiterator (.dictReversed .dict_reversekeyiterator d 1 2 0 2)
+    let bounds ← [z, ze, zz, zu, e, r, lr, rm, dr].mapM fun it => Proto.walkBound it
+    let small ← (Proto.walkBoundIn 64 1 zz : PyM σ .writes true _)
+    let shallow ← (Proto.walkBoundIn 1 64 zz : PyM σ .writes true _)
+    pure (.tuple ((bounds ++ [small.1, shallow.1]).toArray.map fun n => Value.int (Int.ofNat n))) :
+    PyM σ .writes true Value)
+
+/-- The next item of an iterator of the state `st` and the type `kind`, made directly: the call of
+its type's `__next__`. -/
+public def nextOf (kind : Builtin) (st : Value → IterState) : PyM σ .writes true Value := do
+  let it ← Proto.newIter kind (st (← intList [1, 2, 3]))
+  match ← Proto.iterStep it with
+  | some v => pure v
+  | none => pure (.ofString "end")
+
+@[dyn_sem PyT.zipNext, expose] public def zipNext (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[] (nextOf .zip fun l => .zip #[l] false)
+
+@[dyn_sem PyT.enumNext, expose] public def enumNext (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[] (nextOf .enumerate fun l => .enumerate l 0)
+
+@[dyn_sem PyT.revNext, expose] public def revNext (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[] (nextOf .reversed fun l => .reversed .reversed l 2)
+
+@[dyn_sem PyT.listRevNext, expose] public def listRevNext (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRuleFree err #[] (nextOf .list_reverseiterator fun l => .reversed .list_reverseiterator l 2)
+
+@[dyn_sem PyT.dictRevNext, expose] public def dictRevNext (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRuleFree err #[] (do
+    let d ← PyPure.allocDict
+    nextOf .dict_reversekeyiterator fun _ => .dictReversed .dict_reversekeyiterator d (-1) 0 0 0)
+
+/-- A slice assignment `l[-1:] = [7]` on `[1, 2, 3]`, given the stale elements `[1]`, as when the
+list changed while its items were read: the slice is fitted to the list as it is, and the rule
+returns the list's elements after the write. -/
+@[dyn_sem PyT.staleSlice, expose] public def staleSlice (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[] (do
+    let l ← intList [1, 2, 3]
+    let key := PyPure.imm (m := PyM σ .writes true) (.slice (.int (-1)) .none .none)
+    Proto.listSetItem l #[(.int 1)] key (← intList [7])
+    let some xs ← Proto.listOf? l | pure .none
+    pure (.tuple xs))
+
+/-- `machinesStart` with no fuel left. -/
+@[dyn_sem PyT.startZero, expose] public def startZero (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[] (do
+    discard <| machinesStart 0 .none (.tuple #[]) (← PyPure.allocDict)
+    pure .none)
+
 /-- The operators on instances of classes `L(list)`, `T(tuple)` and `D(dict)` with no dunders of
 their own, which run the built-in type's slots on the built-in part: for `l = L([1, 2])`,
 `t = T((1, 2))` and `d = D({1: 'a'})`, the results of `(l + [3])[2]`, `l == [1, 2]`, `bool(l)`,
@@ -456,6 +594,28 @@ otherwise, called through a table that holds only its body. -/
     | 3 => Proto.descrGetN 5 fk none (.builtin .list)
     | 4 => Proto.descrGetN 5 fk (some (.int 5)) none₁
     | _ => Proto.descrGetN 5 fk none (.builtin .dict)
+    : PyM σ .writes true Value)
+
+/-- `startChecks`, which runs before a step machine starts, on a call of `tuple.__new__` on
+`(int, (1,))` (`0`), of `list.extend` on `(5, (1,))` (`1`), of `dict.__dict__["fromkeys"]` on
+`(list, (1,))` (`2`), and of `tuple.__new__` on `(tuple, (1,))` (`3`); and the start of a machine
+for `tuple.__new__` on `(int, (1,))` (`4`), which runs them; and a call of a `tp_new` value
+(`DescrKind.tpNew`) outside a class call (`5`). -/
+@[dyn_sem PyT.startCheck, expose] public def startCheck (k : Int) (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let l : Value := .tuple #[.int 1]
+    let new : Value := .bound (.builtin .tuple) .tuple "__new__" .method
+    match k with
+    | 0 => startChecks new (.tuple #[.builtin .int, l])
+    | 1 => startChecks (.descr .list "extend" .method) (.tuple #[.int 5, l])
+    | 2 => startChecks (.descr .dict "fromkeys" .classMethod) (.tuple #[.builtin .list, l])
+    | 3 => startChecks new (.tuple #[.builtin .tuple, l])
+    | 4 => discard <| machinesStart (σ := σ) 5 new (.tuple #[.builtin .int, l]) (← PyPure.allocDict)
+    | _ => do
+      let f := Value.bound (.builtin .tuple) .tuple "__new__" .tpNew
+      discard <| Proto.callN 5 f (Value.tuple #[.builtin .tuple, l]) (← PyPure.allocDict)
+    pure Value.none
     : PyM σ .writes true Value)
 
 /-- The resize counter of a new list after `listReserveNew` with `0`, then with `3`. -/
@@ -596,6 +756,30 @@ immutable. -/
     let hs ← rs.mapM fun r => do PyPure.hashValue (← Proto.hash r)
     pure (Value.tuple hs.toArray) : PyM σ .writes true Value)
 
+/-- `{*S}` for an instance of `S(set)` holding `{1}`, whose `__iter__` is `list`'s slot wrapper:
+`set_update_internal` merges a set subclass's table without calling its `__iter__`. -/
+@[dyn_sem PyT.setUpdateSub, expose] public def setUpdateSub (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let c ← subclassOf "S" .set
+    let some cd ← Proto.classData? c | PyM.gap "not a class"
+    PyWrites.dictSet cd.ns (.ofString "__iter__") (.descr .list "__iter__" .slotWrapper) none
+      fun _ => pure false
+    let x ← PyReads.allocInstance c .set #[] #[]
+    PyWrites.setAdd x (Value.int 1) none fun _ => pure false
+    let s ← PyPure.allocSet false false
+    match ← Proto.setUpdateStep s x none with
+    | .done () => pure (.tuple ((← Proto.setMembers s).unordered.map (·.1)))
+    | .more _ => PyM.gap "more than one activation" : PyM σ .writes false Value)
+
+/-- `next(d.keys())` for an empty dict `d`: a view, though held as an iterator's state, is not an
+iterator. -/
+@[dyn_sem PyT.nextView, expose] public def nextView (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[] (do
+    let d ← PyPure.allocDict
+    let v ← Proto.newIter .dict_keys (.view .dict_keys d)
+    Builtins.nextFn .none (.tuple #[v]) (← PyPure.allocDict) : PyM σ .writes true Value)
+
 /-- `x` in `n` nested tuples. -/
 public def nest : Nat → Value → Value
   | 0, x => x
@@ -621,6 +805,117 @@ public def nest : Nat → Value → Value
     let mf ← Proto.setMembers f
     pure (Value.tuple #[.bool (r == f), ← PyReads.classOf r,
       .tuple (mr.unordered.map (·.1)), .tuple (mf.unordered.map (·.1))]) : PyM σ .writes true Value)
+/-- The frames of the test-only step machines: `count k`, a machine at its step `k` that gives
+`k` after its third step, and `initCount k`, the same machine as an `__init__`, which gives `1`,
+so that `type.__call__` raises its `TypeError` on the resumed result; and this piece's frames. -/
+public inductive TState where
+  | count (k : Nat)
+  | initCount (k : Nat)
+  | depthAt
+  | ops (s : Proto.OpsLoopState Value)
+
+public instance : HasLoopPart TState (Proto.OpsLoopState Value) where
+  inj := .ops
+  proj | .ops s => some s | _ => none
+  proj_inj _ := rfl
+  inj_of_proj s p h := by cases s <;> simp at h; cases h; rfl
+
+mutual
+/-- The test machines' first steps, with the fuel `n`: `sum` itself, `tuple.__new__` (reached
+through a call of `tuple`) and `object.__init__` (reached through a call of `object`) are machines;
+`min`'s first step calls `sum` through `callResumable`, and gives its step. -/
+public def tStart : Nat → Value → Value → Value → PyM σ .writes true (Option (CallStep TState Value))
+  | 0, _, _, _ => PyM.gap "test calls nested too deep"
+  | n + 1, f, args, kwargs =>
+    letI : PyMachines (PyM σ .writes true) Value TState :=
+      { startStep := tStart n, resume := tResume n }
+    match f with
+    | .builtin .sum | .bound _ .tuple "__new__" _ => pure (some (.suspend [.count 1]))
+    | .bound _ .object "__init__" _ => pure (some (.suspend [.initCount 1]))
+    | .bound _ .list "__new__" _ => pure (some (.suspend [.depthAt]))
+    | .builtin .min => some <$> Proto.callResumable 5 (.builtin .sum) args kwargs []
+    | _ => pure none
+
+/-- The test machines' resume entry, with the fuel `n`. -/
+public def tResume : Nat → TState → List TState → PyM σ .writes true (CallStep TState Value)
+  | 0, _, _ => PyM.gap "test frames resumed too deep"
+  | n + 1, s, rest =>
+    letI : PyMachines (PyM σ .writes true) Value TState :=
+      { startStep := tStart n, resume := tResume n }
+    match s with
+    | .count k => pure (if k < 3 then .suspend [.count (k + 1)] else .done (.int k))
+    | .initCount k => pure (if k < 3 then .suspend [.initCount (k + 1)] else .done (.int 1))
+    | .depthAt => return .done (.int (← PyReads.depthC))
+    | .ops f => Proto.opsResume f rest
+end
+
+public instance : PyMachines (PyM σ .writes true) Value TState :=
+  { startStep := tStart 100, resume := tResume 100 }
+
+/-- One activation of a call of `f` with no arguments, through `callResumable` at the test state. -/
+public def testCallStep (f : Value) (st : Option (List TState)) :
+    PyM σ .writes true (LoopStep (List TState) Value) := do
+  Proto.callStep (S := TState) f (Value.tuple #[]) (← PyPure.allocDict) st
+
+/-- A call of `f` that the test machines may suspend, over as many activations as they need. -/
+@[dyn_sem PyT.resumeCase, expose]
+public def resumeCase (f : Value) (err : Target E [Value]) (st : Option (List TState))
+    (again : Again E (List TState)) : Sem ε E Value :=
+  runLoopFree err again st #[] (testCallStep f)
+
+/-- An instance of a class `C` whose `__call__` is `sum`, which the test machines suspend: calling it
+suspends as a `callLevel` frame over `sum`'s. -/
+@[dyn_sem PyT.callInst, expose] public def callInst (err : Target E [Value]) : Sem ε E Value :=
+  runRule err #[] (do
+    let object := Value.builtin .object
+    let ns ← PyPure.allocDict
+    PyNew.dictSetNew ns (Value.ofString "__call__") (.builtin .sum) none fun _ => pure false
+    let c ← PyPure.allocObj (.builtin .type) (.cls
+      { name := "C", qualname := "C", «module» := "m", bases := #[object], mroTail := #[object],
+        ns, solidBase := object })
+    PyReads.allocInstance c .plain #[] #[]
+    : PyM σ .writes true Value)
+
+/-- A call's step as a value: `("done", v)` or `("suspend", the number of frames)`. -/
+public def showStep : CallStep TState Value → Value
+  | .done v => .tuple #[.ofString "done", v]
+  | .suspend fs => .tuple #[.ofString "suspend", .int fs.length]
+
+/-- One step of a call of `pt.callInst`'s instance: the instance's `callLevel` frame over `sum`'s. -/
+@[dyn_sem PyT.callLevelStep, expose] public def callLevelStep (err : Target E [Value]) :
+    Sem ε E Value :=
+  runRule err #[] (do
+    let object := Value.builtin .object
+    let ns ← PyPure.allocDict
+    PyNew.dictSetNew ns (Value.ofString "__call__") (.builtin .sum) none fun _ => pure false
+    let c ← PyPure.allocObj (.builtin .type) (.cls
+      { name := "C", qualname := "C", «module» := "m", bases := #[object], mroTail := #[object],
+        ns, solidBase := object })
+    let inst ← PyReads.allocInstance c .plain #[] #[]
+    pure (showStep (← Proto.callResumable (S := TState) 5 inst (.tuple #[]) (← PyPure.allocDict) []))
+    : PyM σ .writes true Value)
+
+/-- `callResumable` with saved frames resumes the frame's machine with no dispatch of the callee
+(here `None`). -/
+public def resumeDirectM : PyM σ .writes true Value := do
+  let kw ← PyPure.allocDict
+  let r1 ← Proto.callResumable (S := TState) 5 .none (.tuple #[]) kw [.count 2]
+  let r2 ← Proto.callResumable (S := TState) 5 .none (.tuple #[]) kw [.count 3]
+  pure (.tuple #[showStep r1, showStep r2])
+
+@[dyn_sem PyT.resumeDirect, expose]
+public def resumeDirect (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[] resumeDirectM
+
+/-- A `typeInit` frame with no inner frame doesn't fit, and stops with a gap. -/
+public def resumeNoFitM : PyM σ .writes true Value := do
+  discard <| Proto.opsResume (S := TState) (.typeInit (.int 1)) []
+  pure .none
+
+@[dyn_sem PyT.resumeNoFit, expose]
+public def resumeNoFit (err : Target E [Value]) : Sem ε E Value :=
+  runRuleFree err #[] resumeNoFitM
+
 end
 
 public section
@@ -635,14 +930,18 @@ def ptEffect : String → Effects.Level
   | "pt.probeCase" => .reads
   | "pt.requireIn" => .writes
   | "pt.importGaps" => .writes
+  | "pt.groupLenHint" => .writes
   | "pt.eqVal" => .calls
   | "pt.setAny" => .writes
   | "pt.dictPrims" | "pt.setPrims" | "pt.slotInexact" | "pt.popInexact" | "pt.listPrims"
   | "pt.newPrims" | "pt.bindCase" => .reads
-  | "pt.oldPrims" | "pt.frozenSeal" | "pt.nativeDepth" | "pt.nativeGapped" | "pt.classDescr" => .writes
+  | "pt.oldPrims" | "pt.frozenSeal" | "pt.nativeDepth" | "pt.nativeGapped" | "pt.nextView" | "pt.setUpdateSub" | "pt.classDescr" | "pt.startCheck" => .writes
   | "pt.frozenOr" | "pt.frozenAdd" | "pt.objPrims" => .writes
   | "pt.frozenWalk" | "pt.frozenMerge" | "pt.subclassOps" => .calls
-  | "pt.subclassContainers" => .writes
+  | "pt.subclassContainers" | "pt.callInst" | "pt.callLevelStep" | "pt.resumeCase" | "pt.resumeDirect" | "pt.resumeNoFit"
+  | "pt.foreignIter" | "pt.foreignLen" | "pt.strSubIter" | "pt.iterBounds" | "pt.zipNext"
+  | "pt.enumNext" | "pt.revNext" | "pt.listRevNext" | "pt.dictRevNext" | "pt.startZero"
+  | "pt.staleSlice" => .writes
   | _ => .pure
 
 /-- The tags of `PyLang` in `PyTSem`. -/
@@ -652,9 +951,9 @@ def ptTags (σ : Type) [Store σ] : @Tags σ _ ⟨PyTSem.interp σ⟩ :=
     ⟨PyTSem.T.base.Except PyTSem.T.py.Value PyTSem.T.py.Value, rfl⟩⟩
 
 /--
-error: #py_rule_theorems: the rule of pt.direct is not a `runRule`, `runTotal`, `runRuleFree`, `runTotalFree` or `runRuleIf` wrapper at an effect no higher than its declared one whose results and exits hold no ref, and has no lemmas StrataPython.Dyn.Sem.RuleTheoremsTest.PyTSem.okOf.pt.direct and StrataPython.Dyn.Sem.RuleTheoremsTest.PyTSem.certOf.pt.direct
+error: #py_rule_theorems: the rule of pt.direct is not a `runRule`, `runTotal`, `runRuleFree`, `runTotalFree`, `runRuleIf`, `runLoop` or `runLoopFree` wrapper at an effect no higher than its declared one whose results and exits hold no ref, and has no lemmas StrataPython.Dyn.Sem.RuleTheoremsTest.PyTSem.okOf.pt.direct and StrataPython.Dyn.Sem.RuleTheoremsTest.PyTSem.certOf.pt.direct
 ---
-error: #py_rule_theorems: the rule of pt.tooHigh is not a `runRule`, `runTotal`, `runRuleFree`, `runTotalFree` or `runRuleIf` wrapper at an effect no higher than its declared one whose results and exits hold no ref, and has no lemmas StrataPython.Dyn.Sem.RuleTheoremsTest.PyTSem.okOf.pt.tooHigh and StrataPython.Dyn.Sem.RuleTheoremsTest.PyTSem.certOf.pt.tooHigh
+error: #py_rule_theorems: the rule of pt.tooHigh is not a `runRule`, `runTotal`, `runRuleFree`, `runTotalFree`, `runRuleIf`, `runLoop` or `runLoopFree` wrapper at an effect no higher than its declared one whose results and exits hold no ref, and has no lemmas StrataPython.Dyn.Sem.RuleTheoremsTest.PyTSem.okOf.pt.tooHigh and StrataPython.Dyn.Sem.RuleTheoremsTest.PyTSem.certOf.pt.tooHigh
 -/
 #guard_msgs in
 #py_rule_theorems PyTSem for PyT (effects := ptEffect) (tags := ptTags)
@@ -1114,6 +1413,60 @@ info: StrataPython.Dyn.Sem.Value.bound
 #guard_msgs in
 #eval run "      %v.0 : py.Value = pt.classDescr(5) ^err.0()"
 
+-- `{*S}` merges a set subclass's members without calling its `__iter__`.
+/-- info: StrataPython.Dyn.Sem.Value.tuple #[StrataPython.Dyn.Sem.Value.int 1] -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.setUpdateSub ^err.0()"
+
+-- The checks that run before a step machine starts raise CPython 3.12's `TypeError`s.
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "tuple.__new__(int): int is not a subtype of tuple", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.startCheck(0) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "descriptor 'extend' for 'list' objects doesn't apply to a 'int' object", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.startCheck(1) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "descriptor 'fromkeys' requires a subtype of 'dict' but received 'list'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.startCheck(2) ^err.0()"
+
+/-- info: StrataPython.Dyn.Sem.Value.none -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.startCheck(3) ^err.0()"
+
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str
+      { s := "tuple.__new__(int): int is not a subtype of tuple", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.startCheck(4) ^err.0()"
+
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "model invariant: a type's tp_new outside a class call" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.startCheck(5) ^err.0()"
+
+-- `next()` of a dict view raises CPython's `TypeError`: its class has no `__next__`.
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "'dict_keys' object is not an iterator", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.nextView ^err.0()"
+
 -- `pop` of an inexact set of two members gives a member that depends on the hash seed: a gap. With
 -- one member, it has one answer.
 /-- info: fault: Strata.Dyn.Exec.Fault.gap "set.pop of a set whose order is not CPython's is not modelled yet" -/
@@ -1249,6 +1602,11 @@ example {σ : Type} [Store σ] [Decode σ] : PyM σ .reads true Unit := PyWrites
 
 -- Every instruction of `Py` has a rule, but the contract operations, whose rules come with the
 -- semantics of contracts.
+-- `BaseExceptionGroup.__new__` stops with a gap where CPython would run a user length hint.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a length hint of user code inside BaseExceptionGroup.__new__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.groupLenHint ^err.0()"
+
 -- The import rules stop with a gap where CPython would call a replaced `__import__`, or read a
 -- module that the model doesn't hold.
 /-- info: fault: Strata.Dyn.Exec.Fault.gap "an import after builtins.__import__ was replaced is not modelled yet" -/
@@ -1276,5 +1634,122 @@ error: Py is not fully covered: no rule for py.argOf, py.extraKwargs, py.bindsTo
 -/
 #guard_msgs in
 #dyn_coverage Py (complete)
+
+-- A step machine that the call dispatch reaches suspends and resumes across activations: `sum`
+-- directly; `tuple.__new__` through `tuple()`, with a `typeNew` frame; and `object.__init__`
+-- through `object()`, with a `typeInit` frame, whose result `1` raises `type.__call__`'s
+-- `TypeError` after the last resume.
+/-- info: StrataPython.Dyn.Sem.Value.int 3 -/
+#guard_msgs in
+#eval run "      %f.0 : py.Value = py.qualifiedRef(\"builtins\", \"sum\") ^err.0()
+      %v.0 : py.Value = pt.resumeCase(%f.0) ^err.0()"
+/-- info: StrataPython.Dyn.Sem.Value.int 3 -/
+#guard_msgs in
+#eval run "      %f.0 : py.Value = py.qualifiedRef(\"builtins\", \"tuple\") ^err.0()
+      %v.0 : py.Value = pt.resumeCase(%f.0) ^err.0()"
+-- A resumed `__new__` runs one C level deeper, as the class call that suspended it: the test
+-- machine for `list.__new__` gives the C depth that it resumes at.
+/-- info: StrataPython.Dyn.Sem.Value.int 1 -/
+#guard_msgs in
+#eval run "      %f.0 : py.Value = py.qualifiedRef(\"builtins\", \"list\") ^err.0()
+      %v.0 : py.Value = pt.resumeCase(%f.0) ^err.0()"
+/--
+info: exception StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.TypeError) StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "__init__() should return None, not 'int'", ascii := true, ascii_eq := _ }] context StrataPython.Dyn.Sem.Value.none
+-/
+#guard_msgs in
+#eval run "      %f.0 : py.Value = py.qualifiedRef(\"builtins\", \"object\") ^err.0()
+      %v.0 : py.Value = pt.resumeCase(%f.0) ^err.0()"
+/--
+info: StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.tuple
+      #[StrataPython.Dyn.Sem.Value.str { s := "suspend", ascii := true, ascii_eq := _ },
+        StrataPython.Dyn.Sem.Value.int 1],
+    StrataPython.Dyn.Sem.Value.tuple
+      #[StrataPython.Dyn.Sem.Value.str { s := "done", ascii := true, ascii_eq := _ }, StrataPython.Dyn.Sem.Value.int 3]]
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.resumeDirect ^err.0()"
+
+-- One step of it gives two frames: the `callLevel` frame of the instance's call, over `sum`'s.
+/--
+info: StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.str { s := "suspend", ascii := true, ascii_eq := _ }, StrataPython.Dyn.Sem.Value.int 2]
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.callLevelStep ^err.0()"
+
+-- A call of an instance whose `__call__` is a machine suspends as a `callLevel` frame, and resumes
+-- through it to the machine's result.
+/-- info: StrataPython.Dyn.Sem.Value.int 3 -/
+#guard_msgs in
+#eval run "      %f.0 : py.Value = pt.callInst ^err.0()
+      %v.0 : py.Value = pt.resumeCase(%f.0) ^err.0()"
+
+-- A `typeInit` frame without the frame of its inner call stops with a gap.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "model invariant: a frame list that doesn't fit the call" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.resumeNoFit ^err.0()"
+
+-- A first step that calls through `callResumable` reaches a second machine that suspends: `min`'s
+-- first step calls `sum`, whose machine runs over the activations.
+/-- info: StrataPython.Dyn.Sem.Value.int 3 -/
+#guard_msgs in
+#eval run "      %f.0 : py.Value = py.qualifiedRef(\"builtins\", \"min\") ^err.0()
+      %v.0 : py.Value = pt.resumeCase(%f.0) ^err.0()"
+
+-- A slice assignment fits the slice to the list as it is after the items are read.
+/--
+info: StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.int 1, StrataPython.Dyn.Sem.Value.int 2, StrataPython.Dyn.Sem.Value.int 7]
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.staleSlice ^err.0()"
+
+-- `machinesStart` with no fuel left stops with a gap.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a call dispatch nested deeper than the model follows" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.startZero ^err.0()"
+
+-- The walk bounds of `zip`, `enumerate` and the reverse iterators, and of a nest past the budget
+-- or the depth.
+/--
+info: StrataPython.Dyn.Sem.Value.tuple
+  #[StrataPython.Dyn.Sem.Value.int 3, StrataPython.Dyn.Sem.Value.int 1, StrataPython.Dyn.Sem.Value.int 3,
+    StrataPython.Dyn.Sem.Value.int 1, StrataPython.Dyn.Sem.Value.int 4, StrataPython.Dyn.Sem.Value.int 4,
+    StrataPython.Dyn.Sem.Value.int 4, StrataPython.Dyn.Sem.Value.int 1, StrataPython.Dyn.Sem.Value.int 3,
+    StrataPython.Dyn.Sem.Value.int 1, StrataPython.Dyn.Sem.Value.int 1]
+-/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.iterBounds ^err.0()"
+
+-- `zip`, `enumerate` and the reverse iterators step by their type's `__next__`, a body that this
+-- piece's tables don't have.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "built-in method zip.__next__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.zipNext ^err.0()"
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "built-in method enumerate.__next__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.enumNext ^err.0()"
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "built-in method reversed.__next__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.revNext ^err.0()"
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "built-in method list_reverseiterator.__next__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.listRevNext ^err.0()"
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "built-in method dict_reversekeyiterator.__next__ is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.dictRevNext ^err.0()"
+
+-- A built-in container's fast paths run only for its own type's `__iter__` and `__len__`.
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a slot wrapper bound to an object of another type is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.foreignIter ^err.0()"
+/-- info: fault: Strata.Dyn.Exec.Fault.gap "a slot wrapper bound to an object of another type is not modelled yet" -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.foreignLen ^err.0()"
+/-- info: StrataPython.Dyn.Sem.Value.builtin (StrataPython.Dyn.Sem.Builtin.str_iterator) -/
+#guard_msgs in
+#eval run "      %v.0 : py.Value = pt.strSubIter ^err.0()"
 
 end StrataPython.Dyn.Sem.RuleTheoremsTest

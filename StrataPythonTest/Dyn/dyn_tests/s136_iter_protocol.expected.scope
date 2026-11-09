@@ -1,0 +1,132 @@
+module
+  Z: local (assigned, referenced)
+  it: local (assigned, referenced)
+  iter: global implicit (referenced)
+  print: global implicit (referenced)
+  next: global implicit (referenced)
+  C: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  x: local (assigned, referenced)
+  type: global implicit (referenced)
+  R: local (assigned, referenced)
+  a: local (assigned)
+  b: local (assigned)
+  f: local (assigned, referenced)
+  N: local (assigned)
+  R2: local (assigned, referenced)
+  d: local (assigned, referenced)
+  s: local (assigned, referenced)
+  s2: local (assigned, referenced)
+  it2: local (assigned, referenced)
+  RuntimeError: global implicit (referenced)
+  l: local (assigned, referenced)
+  r: local (assigned, referenced)
+  range: global implicit (referenced)
+  Lh: local (assigned, referenced)
+  len: global implicit (referenced)
+  Lh2: local (assigned, referenced)
+  ValueError: global implicit (referenced)
+  Lh3: local (assigned, referenced)
+  Lh4: local (assigned, referenced)
+  Lh5: local (assigned, referenced)
+  Lh6: local (assigned, referenced)
+  class C
+    __iter__: local (assigned)
+    __getitem__: local (assigned)
+    function C.__getitem__
+      params: self, i
+      self: local (parameter)
+      i: local (parameter, referenced)
+  class C
+    __getitem__: local (assigned)
+  class R
+    __iter__: local (assigned)
+    function R.__iter__
+      params: self
+      self: local (parameter)
+  function f
+    params: *a
+    a: local (parameter)
+  class N
+    __next__: local (assigned)
+    function N.__next__
+      params: self
+      self: local (parameter)
+  class R
+    __iter__: local (assigned)
+    function R.__iter__
+      params: self
+      self: local (parameter)
+      N: global implicit (referenced)
+  class R2
+    __iter__: local (assigned)
+    function R2.__iter__
+      params: self
+      self: local (parameter)
+  class Lh
+    __len__: local (assigned)
+    __length_hint__: local (assigned)
+    __iter__: local (assigned)
+    function Lh.__len__
+      params: self
+      self: local (parameter)
+      TypeError: global implicit (referenced)
+    function Lh.__length_hint__
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+    function Lh.__iter__
+      params: self
+      self: local (parameter)
+      iter: global implicit (referenced)
+  class Lh2
+    __len__: local (assigned)
+    __iter__: local (assigned)
+    function Lh2.__len__
+      params: self
+      self: local (parameter)
+      ValueError: global implicit (referenced)
+    function Lh2.__iter__
+      params: self
+      self: local (parameter)
+      iter: global implicit (referenced)
+  class Lh3
+    __length_hint__: local (assigned)
+    __iter__: local (assigned)
+    function Lh3.__iter__
+      params: self
+      self: local (parameter)
+      iter: global implicit (referenced)
+  class Lh4
+    __length_hint__: local (assigned)
+    __iter__: local (assigned)
+    function Lh4.__length_hint__
+      params: self
+      self: local (parameter)
+    function Lh4.__iter__
+      params: self
+      self: local (parameter)
+      iter: global implicit (referenced)
+  class Lh5
+    __length_hint__: local (assigned)
+    __iter__: local (assigned)
+    function Lh5.__length_hint__
+      params: self
+      self: local (parameter)
+      TypeError: global implicit (referenced)
+    function Lh5.__iter__
+      params: self
+      self: local (parameter)
+      iter: global implicit (referenced)
+  class Lh6
+    __length_hint__: local (assigned)
+    __iter__: local (assigned)
+    function Lh6.__length_hint__
+      params: self
+      self: local (parameter)
+      RuntimeError: global implicit (referenced)
+    function Lh6.__iter__
+      params: self
+      self: local (parameter)
+      iter: global implicit (referenced)

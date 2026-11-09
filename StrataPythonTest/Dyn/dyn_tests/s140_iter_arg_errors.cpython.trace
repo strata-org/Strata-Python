@@ -1,0 +1,26 @@
+--- stdout 809
+TypeError range expected at least 1 argument, got 0
+TypeError range expected at most 3 arguments, got 4
+TypeError range() takes no keyword arguments
+TypeError 'str' object cannot be interpreted as an integer
+TypeError 'str' object cannot be interpreted as an integer
+TypeError 'str' object cannot be interpreted as an integer
+ValueError range() arg 3 must not be zero
+TypeError len() takes exactly one argument (0 given)
+TypeError len() takes exactly one argument (2 given)
+TypeError len() takes no keyword arguments
+TypeError iter expected at least 1 argument, got 0
+TypeError iter expected at most 2 arguments, got 3
+TypeError iter() takes no keyword arguments
+TypeError next expected at least 1 argument, got 0
+TypeError next expected at most 2 arguments, got 3
+TypeError next() takes no keyword arguments
+
+--- outcome
+raised IndexError: tuple index out of range
+  context StopIteration
+--- globals
+__doc__ = None
+__name__ = '__main__'
+t = <function object>
+tests = [<function object>, <function object>, <function object>, <function object>, <function object>, <function object>, <function object>, <function object>, <function object>, <function object>, <function object>, <function object>, <function object>, <function object>, <function object>, <function object>, <function object>, <function object>, <function object>, <function object>, <function object>, <function object>, <function object>]

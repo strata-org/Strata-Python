@@ -1,0 +1,183 @@
+module
+  Z: local (assigned, referenced)
+  C: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  D: local (assigned, referenced)
+  E: local (assigned, referenced)
+  Eq: local (assigned, referenced)
+  F: local (assigned, referenced)
+  G: local (assigned, referenced)
+  H: local (assigned, referenced)
+  NE: local (assigned, referenced)
+  ValueError: global implicit (referenced)
+  BadIt: local (assigned, referenced)
+  Bool: local (assigned)
+  D2: local (assigned, referenced)
+  x: local (assigned, referenced)
+  Grow: local (assigned, referenced)
+  g: local (assigned, referenced)
+  Ap: local (assigned, referenced)
+  s: local (assigned, referenced)
+  RuntimeError: global implicit (referenced)
+  d: local (assigned, referenced)
+  k: local (assigned, referenced)
+  len: global implicit (referenced)
+  l: local (assigned, referenced)
+  iter: global implicit (referenced)
+  It: local (assigned, referenced)
+  It2: local (assigned, referenced)
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  c: local (assigned, referenced)
+  nest_list: local (assigned, referenced)
+  nest_tuple: local (assigned, referenced)
+  A: local (assigned)
+  B: local (assigned)
+  class C
+    __contains__: local (assigned)
+    __iter__: local (assigned)
+    function C.__iter__
+      params: self
+      self: local (parameter)
+      iter: global implicit (referenced)
+  class D
+    __contains__: local (assigned)
+    function D.__contains__
+      params: self, x
+      self: local (parameter)
+      x: local (parameter, referenced)
+      print: global implicit (referenced)
+  class E
+    __iter__: local (assigned)
+    __getitem__: local (assigned)
+    function E.__iter__
+      params: self
+      self: local (parameter)
+      iter: global implicit (referenced)
+    function E.__getitem__
+      params: self, i
+      self: local (parameter)
+      i: local (parameter)
+      print: global implicit (referenced)
+  class Eq
+    __eq__: local (assigned)
+    function Eq.__eq__
+      params: self, o
+      self: local (parameter)
+      o: local (parameter, referenced)
+      print: global implicit (referenced)
+  class F
+    __iter__: local (assigned)
+    function F.__iter__
+      params: self
+      self: local (parameter)
+      iter: global implicit (referenced)
+  class G
+    __getitem__: local (assigned)
+    function G.__getitem__
+      params: self, i
+      self: local (parameter)
+      i: local (parameter, referenced)
+      IndexError: global implicit (referenced)
+      print: global implicit (referenced)
+  class H
+  class NE
+    __iter__: local (assigned)
+    function NE.__iter__
+      params: self
+      self: local (parameter)
+      ValueError: global implicit (referenced)
+  class BadIt
+    __iter__: local (assigned)
+    function BadIt.__iter__
+      params: self
+      self: local (parameter)
+  class Bool
+    __bool__: local (assigned)
+    function Bool.__bool__
+      params: self
+      self: local (parameter)
+      ValueError: global implicit (referenced)
+  class D2
+    __contains__: local (assigned)
+    function D2.__contains__
+      params: self, x
+      self: local (parameter)
+      x: local (parameter)
+      Bool: global implicit (referenced)
+  class Grow
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    function Grow.__init__
+      params: self
+      self: local (parameter, referenced)
+    function Grow.__iter__
+      params: self
+      self: local (parameter, referenced)
+      iter: global implicit (referenced)
+  class Ap
+    __eq__: local (assigned)
+    function Ap.__eq__
+      params: self, o
+      self: local (parameter)
+      o: local (parameter)
+      g: global implicit (referenced)
+      print: global implicit (referenced)
+      len: global implicit (referenced)
+  class It
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    __len__: local (assigned)
+    function It.__init__
+      params: self, n
+      self: local (parameter, referenced)
+      n: local (parameter, referenced)
+    function It.__iter__
+      params: self
+      self: local (parameter, referenced)
+      print: global implicit (referenced)
+    function It.__next__
+      params: self
+      self: local (parameter, referenced)
+      StopIteration: global implicit (referenced)
+    function It.__len__
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+      ValueError: global implicit (referenced)
+  class It2
+    __len__: local (assigned)
+    function It2.__len__
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+  class G
+    __getitem__: local (assigned)
+    function G.__getitem__
+      params: self, i
+      self: local (parameter)
+      i: local (parameter, referenced)
+      IndexError: global implicit (referenced)
+  function nest_list
+    params: n, x
+    n: local (parameter, referenced)
+    x: local (parameter, referenced)
+    a: local (assigned, referenced)
+    i: local (assigned, referenced)
+  function nest_tuple
+    params: n
+    n: local (parameter, referenced)
+    t: local (assigned, referenced)
+    i: local (assigned, referenced)
+  class C
+    m: local (assigned)
+    function C.m
+      params: self, n
+      self: local (parameter, referenced)
+      n: local (parameter, referenced)
+      A: global implicit (referenced)
+      B: global implicit (referenced)
+      RecursionError: global implicit (referenced)

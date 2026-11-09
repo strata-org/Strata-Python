@@ -11,8 +11,9 @@ meta import StrataPythonTest.Util.Python
 /-! # Loops of calls and container writes run fast
 
 Runs `pydyn run` on loops of 200000 steps: calls that each allocate a kwargs dict and a list, and
-writes that grow a dict, a list and a set, deletions that shrink a list, the walks of a tuple of
-a million members, and an empty `str` repeated `2 ** 40` times.  Each run takes about 2 seconds, and the test fails if
+writes that grow a dict, a list and a set, deletions that shrink a list, the iteration of a
+non-ASCII `str`, a loop after many iterators of a non-ASCII `str` that stopped early, the walks of
+a tuple of a million members, and an empty `str` repeated `2 ** 40` times.  Each run takes about 2 seconds, and the test fails if
 one takes more than 30 seconds; a store or a container that copied itself on each write would take
 minutes.
 -/
@@ -31,6 +32,10 @@ private meta def programs : List (String × String × String) := [
     "n = 200000"),
   ("list deletion", "l = [0] * 200000\ni = 200000\nwhile i > 0:\n    del l[-1]\n    i = i - 1\n",
     "l = []"),
+  ("non-ASCII str iteration", "s = 'é' * 200000\nn = 0\nfor c in s:\n    n = n + 1\n",
+    "n = 200000"),
+  ("stopped str iterators", "i = 0\nwhile i < 100000:\n    for c in 'éa':\n        break\n    i = i + 1\n\
+    l = [0] * 100000\nn = 0\nfor x in l:\n    n = n + 1\n", "n = 100000"),
   ("long tuples", "t = (0,) * 1000000\na = t == t[:]\nb = 1 in t\nc = t < t[:]\n", "c = False"),
   ("empty str repetition", "s = '' * 2 ** 40\n", "s = ''")]
 

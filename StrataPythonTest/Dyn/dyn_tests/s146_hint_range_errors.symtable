@@ -1,0 +1,23 @@
+module top
+  H: local (assigned, referenced)
+  MemoryError: global implicit (referenced)
+  OverflowError: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  e: local (assigned, referenced)
+  len: global implicit (referenced)
+  print: global implicit (referenced)
+  type: global implicit (referenced)
+  v: local (assigned, referenced)
+  class H
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __length_hint__: local (assigned)
+    function __init__
+      self: local (parameter, referenced)
+      v: local (parameter, referenced)
+    function __iter__
+      iter: global implicit (referenced)
+      self: local (parameter)
+    function __length_hint__
+      self: local (parameter, referenced)
+qualnames: H, H.__init__, H.__iter__, H.__length_hint__

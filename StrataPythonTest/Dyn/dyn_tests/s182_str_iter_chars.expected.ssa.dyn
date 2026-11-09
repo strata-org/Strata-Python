@@ -1,0 +1,111 @@
+module s182_str_iter_chars {
+  func @|s182_str_iter_chars.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s182_str_iter_chars")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s182_str_iter_chars", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s182_str_iter_chars", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %str.1 : py.Value = py.strLit("aé€😀b")
+      %s.cell.0 : base.Ref(py.Value) = py.globalCell("s182_str_iter_chars", "s")
+      %set.2 : base.Unit = base.refSet[py.Value](%s.cell.0, %str.1)
+      %iter.0 : py.Value = py.loadGlobal("s182_str_iter_chars", "iter") ^propagate.0()
+      %s.0 : py.Value = py.loadGlobal("s182_str_iter_chars", "s") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%s.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%iter.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %it.cell.0 : base.Ref(py.Value) = py.globalCell("s182_str_iter_chars", "it")
+      %set.3 : base.Unit = base.refSet[py.Value](%it.cell.0, %call.0)
+      %print.0 : py.Value = py.loadGlobal("s182_str_iter_chars", "print") ^propagate.0()
+      %next.0 : py.Value = py.loadGlobal("s182_str_iter_chars", "next") ^propagate.0()
+      %it.0 : py.Value = py.loadGlobal("s182_str_iter_chars", "it") ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%it.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%next.0, %tuple.1, %kwargs.1) ^propagate.0()
+      %next.1 : py.Value = py.loadGlobal("s182_str_iter_chars", "next") ^propagate.0()
+      %it.1 : py.Value = py.loadGlobal("s182_str_iter_chars", "it") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%it.1)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%next.1, %tuple.2, %kwargs.2) ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple(%call.1, %call.2)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.0, %tuple.3, %kwargs.3) ^propagate.0()
+      %iter.1 : py.Value = py.loadGlobal("s182_str_iter_chars", "iter") ^propagate.0()
+      %s.1 : py.Value = py.loadGlobal("s182_str_iter_chars", "s") ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple(%s.1)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%iter.1, %tuple.4, %kwargs.4) ^propagate.0()
+      %it2.cell.0 : base.Ref(py.Value) = py.globalCell("s182_str_iter_chars", "it2")
+      %set.4 : base.Unit = base.refSet[py.Value](%it2.cell.0, %call.4)
+      %print.1 : py.Value = py.loadGlobal("s182_str_iter_chars", "print") ^propagate.0()
+      %next.2 : py.Value = py.loadGlobal("s182_str_iter_chars", "next") ^propagate.0()
+      %it2.0 : py.Value = py.loadGlobal("s182_str_iter_chars", "it2") ^propagate.0()
+      %tuple.5 : py.Value = py.mkTuple(%it2.0)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%next.2, %tuple.5, %kwargs.5) ^propagate.0()
+      %next.3 : py.Value = py.loadGlobal("s182_str_iter_chars", "next") ^propagate.0()
+      %it.2 : py.Value = py.loadGlobal("s182_str_iter_chars", "it") ^propagate.0()
+      %tuple.6 : py.Value = py.mkTuple(%it.2)
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.6 : py.Value = py.call(%next.3, %tuple.6, %kwargs.6) ^propagate.0()
+      %it.3 : py.Value = py.loadGlobal("s182_str_iter_chars", "it") ^propagate.0()
+      %__length_hint__.0 : py.Value = py.attr(%it.3, "__length_hint__") ^propagate.0()
+      %tuple.7 : py.Value = py.mkTuple
+      %kwargs.7 : py.Value = py.mkKwargs
+      %call.7 : py.Value = py.call(%__length_hint__.0, %tuple.7, %kwargs.7) ^propagate.0()
+      %tuple.8 : py.Value = py.mkTuple(%call.5, %call.6, %call.7)
+      %kwargs.8 : py.Value = py.mkKwargs
+      %call.8 : py.Value = py.call(%print.1, %tuple.8, %kwargs.8) ^propagate.0()
+      %s.2 : py.Value = py.loadGlobal("s182_str_iter_chars", "s") ^propagate.0()
+      %iter.2 : py.Value = py.getIter(%s.2) ^propagate.0()
+      jump ^head.0()
+    head.0():
+      %item.0 : py.Value = py.next(%iter.2) ^stop.0()
+      %c.cell.0 : base.Ref(py.Value) = py.globalCell("s182_str_iter_chars", "c")
+      %set.5 : base.Unit = base.refSet[py.Value](%c.cell.0, %item.0)
+      %print.2 : py.Value = py.loadGlobal("s182_str_iter_chars", "print") ^propagate.0()
+      %c.2 : py.Value = py.loadGlobal("s182_str_iter_chars", "c") ^propagate.0()
+      %tuple.9 : py.Value = py.mkTuple(%c.2)
+      %kwargs.9 : py.Value = py.mkKwargs
+      %call.9 : py.Value = py.call(%print.2, %tuple.9, %kwargs.9) ^propagate.0()
+      jump ^head.0()
+    stop.0(%exc.0 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.0)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.0)
+    exit.0():
+      %print.3 : py.Value = py.loadGlobal("s182_str_iter_chars", "print") ^propagate.0()
+      %next.4 : py.Value = py.loadGlobal("s182_str_iter_chars", "next") ^propagate.0()
+      %it.4 : py.Value = py.loadGlobal("s182_str_iter_chars", "it") ^propagate.0()
+      %tuple.10 : py.Value = py.mkTuple(%it.4)
+      %kwargs.10 : py.Value = py.mkKwargs
+      %call.10 : py.Value = py.call(%next.4, %tuple.10, %kwargs.10) ^propagate.0()
+      %next.5 : py.Value = py.loadGlobal("s182_str_iter_chars", "next") ^propagate.0()
+      %it2.1 : py.Value = py.loadGlobal("s182_str_iter_chars", "it2") ^propagate.0()
+      %tuple.11 : py.Value = py.mkTuple(%it2.1)
+      %kwargs.11 : py.Value = py.mkKwargs
+      %call.11 : py.Value = py.call(%next.5, %tuple.11, %kwargs.11) ^propagate.0()
+      %next.6 : py.Value = py.loadGlobal("s182_str_iter_chars", "next") ^propagate.0()
+      %it.5 : py.Value = py.loadGlobal("s182_str_iter_chars", "it") ^propagate.0()
+      %str.2 : py.Value = py.strLit("end")
+      %tuple.12 : py.Value = py.mkTuple(%it.5, %str.2)
+      %kwargs.12 : py.Value = py.mkKwargs
+      %call.12 : py.Value = py.call(%next.6, %tuple.12, %kwargs.12) ^propagate.0()
+      %type.0 : py.Value = py.loadGlobal("s182_str_iter_chars", "type") ^propagate.0()
+      %it.6 : py.Value = py.loadGlobal("s182_str_iter_chars", "it") ^propagate.0()
+      %tuple.13 : py.Value = py.mkTuple(%it.6)
+      %kwargs.13 : py.Value = py.mkKwargs
+      %call.13 : py.Value = py.call(%type.0, %tuple.13, %kwargs.13) ^propagate.0()
+      %__name__.0 : py.Value = py.attr(%call.13, "__name__") ^propagate.0()
+      %tuple.14 : py.Value = py.mkTuple(%call.10, %call.11, %call.12, %__name__.0)
+      %kwargs.14 : py.Value = py.mkKwargs
+      %call.14 : py.Value = py.call(%print.3, %tuple.14, %kwargs.14) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+}
+

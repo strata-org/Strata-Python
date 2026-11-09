@@ -1,0 +1,75 @@
+--- stdout 694
+1 2
+1 2
+0 1
+print() argument after ** must be a mapping, not Bad True False
+'Bad' object is not a mapping True
+K.keys() returned a non-iterable (type int) True
+argument of type 'NI' is not iterable True
+print() got multiple values for keyword argument 'zz' True
+KeyError zz
+get sep
+get end
+print() got multiple values for keyword argument 'sep'
+get sep
+get end
+get sep
+2
+get sep
+print() got multiple values for keyword argument 'end'
+get 1
+hash 1
+get 2
+hash 2
+2
+hash 3
+get 3
+hash 3
+keywords must be strings
+meta call 1
+init 1
+A
+new 2
+5
+__init__() should return None, not 'int'
+5
+'NoneType' object is not callable
+int
+T
+6 F 4
+9
+11
+D
+J init 5
+5
+object() takes no arguments
+K() takes no arguments
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+B = <class 'B'>
+Bad = <class 'Bad'>
+C = <class 'C'>
+D = <class 'D'>
+E = <class 'E'>
+F = <class 'F'>
+G = <class 'G'>
+H = <class 'H'>
+I = <class 'I'>
+It = <class 'It'>
+J = <class 'J'>
+K = <class 'K'>
+KI = <class 'KI'>
+M = <class 'M'>
+Meta = <class 'Meta'>
+Meta2 = <class 'Meta2'>
+NI = <class 'NI'>
+T = <class 'T'>
+__doc__ = None
+__name__ = '__main__'
+a = <A object>
+b = 1
+d = {<H object>: 0, <H object>: 0}
+j = <J object>

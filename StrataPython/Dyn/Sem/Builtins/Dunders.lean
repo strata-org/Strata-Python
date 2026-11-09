@@ -5,7 +5,7 @@
 -/
 module
 public import StrataPython.Dyn.Sem.Builtins.Bind
-public import StrataPython.Dyn.Sem.Proto.Containers
+public import StrataPython.Dyn.Sem.Proto.Iter
 
 set_option autoImplicit false
 
@@ -183,21 +183,9 @@ def seqPartV [PyReads m V] (v : V) : m (Option V) :=
 
 /-- The number of elements of a built-in container `v`, or of the built-in part of an instance of
 a subclass of one. -/
-def lenCore [PyReads m V] (v : V) : m Nat := do
-  if let some xs ← listOf? v then return xs.size
-  match ← seqImm? v with
-  | some (.str t) => return t.s.length
-  | some (.bytes b) => return b.size
-  | some (.tuple xs) => return xs.size
-  | _ =>
-    if let some (.range a b c) ← PyPure.immView v then
-      -- `range_length` converts the length to a C `Py_ssize_t`.
-      if (rangeLen a b c : Int) > (Format.ssizeMax : Int) then
-        raiseBuiltin "OverflowError" "Python int too large to convert to C ssize_t"
-      return rangeLen a b c
-    if ← isDictLike v then return ← PyReads.dictLen v
-    if (← anySetLike? v).isSome then return ← PyReads.setLen v
-    PyPure.gap "the length of this value is not modelled yet"
+def lenCore [PyCalls m V] (v : V) : m Nat := do
+  let some n ← builtinLen? v | PyPure.gap "the length of this value is not modelled yet"
+  pure n
 
 /-- `t.__len__(self)`. -/
 def lenBody [PyWrites m V] (self args kwargs : V) : m V := do

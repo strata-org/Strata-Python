@@ -1,0 +1,25 @@
+module top
+  KI: local (assigned)
+  M: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  d: local (assigned)
+  e: local (assigned, referenced)
+  msg: local (assigned)
+  class KI
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function __iter__
+      self: local (parameter, referenced)
+    function __next__
+      KI: global implicit (referenced)
+      self: local (parameter)
+  class M
+    __getitem__: local (assigned)
+    keys: local (assigned)
+    function keys
+      KI: global implicit (referenced)
+      self: local (parameter)
+    function __getitem__
+      k: local (parameter)
+      self: local (parameter)
+qualnames: KI, KI.__iter__, KI.__next__, M, M.__getitem__, M.keys

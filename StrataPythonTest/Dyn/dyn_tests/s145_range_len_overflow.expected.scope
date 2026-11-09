@@ -1,0 +1,19 @@
+module
+  t: local (assigned, referenced)
+  print: global implicit (referenced)
+  OverflowError: global implicit (referenced)
+  e: local (assigned, referenced)
+  it: local (assigned, referenced)
+  iter: global implicit (referenced)
+  range: global implicit (referenced)
+  lambda <lambda>
+    len: global implicit (referenced)
+    range: global implicit (referenced)
+  lambda <lambda>
+    range: global implicit (referenced)
+  lambda <lambda>
+    len: global implicit (referenced)
+    range: global implicit (referenced)
+  lambda <lambda>
+    len: global implicit (referenced)
+    range: global implicit (referenced)

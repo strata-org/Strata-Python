@@ -1,0 +1,9 @@
+--- stdout 123
+tuple.__new__(zip): zip is not a subtype of tuple
+descriptor 'extend' for 'list' objects doesn't apply to a 'tuple' object
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'

@@ -1,0 +1,4 @@
+module
+  r: local (assigned, referenced)
+  range: global implicit (referenced)
+  print: global implicit (referenced)

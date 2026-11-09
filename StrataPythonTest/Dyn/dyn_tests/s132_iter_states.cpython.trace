@@ -1,0 +1,36 @@
+--- stdout 311
+1
+0 dictionary changed size during iteration
+1 dictionary changed size during iteration
+1 end
+still end
+2 7
+ValueError __length_hint__() should return >= 0
+TypeError __length_hint__ must be an integer, not str
+ValueError __len__() should return >= 0
+4 10 1 True False 1
+longrange_iterator 0 3
+0 0 0
+1 0 2
+1 2 3
+
+--- outcome
+ok
+--- globals
+BadLen = <class 'BadLen'>
+H = <class 'H'>
+NegLen = <class 'NegLen'>
+__doc__ = None
+__name__ = '__main__'
+a = 1
+b = [2]
+bad = <NegLen object>
+bi = <longrange_iterator object>
+big = range(1180591620717411303424, 1180591620717411303427)
+c = 3
+d = {1: 2, 3: 4, 5: 6}
+it = <dict_keyiterator object>
+k = 1
+l = [1, 2]
+li = <list_iterator object>
+r = range(10, 0, -3)

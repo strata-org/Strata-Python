@@ -1,0 +1,4 @@
+module
+  print: global implicit (referenced)
+  len: global implicit (referenced)
+  iter: global implicit (referenced)

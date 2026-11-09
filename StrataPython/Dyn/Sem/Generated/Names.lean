@@ -163,6 +163,7 @@ def Builtin.ownNames : Builtin → Array (String × AttrKind)
   | .«dict_reverseitemiterator» => #[("__iter__", .slotWrapper), ("__next__", .slotWrapper), ("__length_hint__", .method), ("__reduce__", .method), ("__doc__", .noneValue)]
   | .«set_iterator» => #[("__iter__", .slotWrapper), ("__next__", .slotWrapper), ("__length_hint__", .method), ("__reduce__", .method), ("__doc__", .noneValue)]
   | .«callable_iterator» => #[("__iter__", .slotWrapper), ("__next__", .slotWrapper), ("__reduce__", .method), ("__doc__", .noneValue)]
+  | .«iterator» => #[("__iter__", .slotWrapper), ("__next__", .slotWrapper), ("__length_hint__", .method), ("__reduce__", .method), ("__setstate__", .method), ("__doc__", .noneValue)]
   | .«dict_keys» => #[("__repr__", .slotWrapper), ("__lt__", .slotWrapper), ("__le__", .slotWrapper), ("__eq__", .slotWrapper), ("__ne__", .slotWrapper), ("__gt__", .slotWrapper), ("__ge__", .slotWrapper), ("__iter__", .slotWrapper), ("__sub__", .slotWrapper), ("__rsub__", .slotWrapper), ("__and__", .slotWrapper), ("__rand__", .slotWrapper), ("__xor__", .slotWrapper), ("__rxor__", .slotWrapper), ("__or__", .slotWrapper), ("__ror__", .slotWrapper), ("__len__", .slotWrapper), ("__contains__", .slotWrapper), ("isdisjoint", .method), ("__reversed__", .method), ("mapping", .getset), ("__doc__", .noneValue), ("__hash__", .noneValue)]
   | .«dict_values» => #[("__repr__", .slotWrapper), ("__iter__", .slotWrapper), ("__len__", .slotWrapper), ("__reversed__", .method), ("mapping", .getset), ("__doc__", .noneValue)]
   | .«dict_items» => #[("__repr__", .slotWrapper), ("__lt__", .slotWrapper), ("__le__", .slotWrapper), ("__eq__", .slotWrapper), ("__ne__", .slotWrapper), ("__gt__", .slotWrapper), ("__ge__", .slotWrapper), ("__iter__", .slotWrapper), ("__sub__", .slotWrapper), ("__rsub__", .slotWrapper), ("__and__", .slotWrapper), ("__rand__", .slotWrapper), ("__xor__", .slotWrapper), ("__rxor__", .slotWrapper), ("__or__", .slotWrapper), ("__ror__", .slotWrapper), ("__len__", .slotWrapper), ("__contains__", .slotWrapper), ("isdisjoint", .method), ("__reversed__", .method), ("mapping", .getset), ("__doc__", .noneValue), ("__hash__", .noneValue)]
@@ -210,6 +211,7 @@ def Builtin.noInstances : Builtin → Bool
   | .«dict_reverseitemiterator» => true
   | .«set_iterator» => true
   | .«callable_iterator» => true
+  | .«iterator» => true
   | .«dict_keys» => true
   | .«dict_values» => true
   | .«dict_items» => true

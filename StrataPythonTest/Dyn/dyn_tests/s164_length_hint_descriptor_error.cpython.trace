@@ -1,0 +1,12 @@
+--- stdout 25
+TypeError from __get__
+2
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+D = <class 'D'>
+E = <class 'E'>
+__doc__ = None
+__name__ = '__main__'

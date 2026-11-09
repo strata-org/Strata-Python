@@ -1,0 +1,7 @@
+module
+  tuple: global implicit (referenced)
+  zip: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  print: global implicit (referenced)
+  list: global implicit (referenced)

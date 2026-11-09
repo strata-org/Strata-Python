@@ -1,0 +1,9 @@
+module
+  s: local (assigned, referenced)
+  it: local (assigned, referenced)
+  iter: global implicit (referenced)
+  print: global implicit (referenced)
+  next: global implicit (referenced)
+  it2: local (assigned, referenced)
+  c: local (assigned, referenced)
+  type: global implicit (referenced)

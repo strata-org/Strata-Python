@@ -1,0 +1,51 @@
+module
+  It: local (assigned, referenced)
+  G: local (assigned, referenced)
+  show: local (assigned, referenced)
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  c: local (assigned, referenced)
+  print: global implicit (referenced)
+  len: global implicit (referenced)
+  f: local (assigned, referenced)
+  t: local (assigned, referenced)
+  ValueError: global implicit (referenced)
+  e: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  class It
+    __init__: local (assigned)
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    __length_hint__: local (assigned)
+    function It.__init__
+      params: self, n
+      self: local (parameter, referenced)
+      n: local (parameter, referenced)
+    function It.__iter__
+      params: self
+      self: local (parameter, referenced)
+      print: global implicit (referenced)
+    function It.__next__
+      params: self
+      self: local (parameter, referenced)
+      StopIteration: global implicit (referenced)
+      print: global implicit (referenced)
+    function It.__length_hint__
+      params: self
+      self: local (parameter)
+      print: global implicit (referenced)
+  class G
+    __getitem__: local (assigned)
+    function G.__getitem__
+      params: self, i
+      self: local (parameter)
+      i: local (parameter, referenced)
+      IndexError: global implicit (referenced)
+  function show
+    params: xs
+    xs: local (parameter, referenced)
+    print: global implicit (referenced)
+    len: global implicit (referenced)
+  function f
+    params: *args
+    args: local (parameter, referenced)

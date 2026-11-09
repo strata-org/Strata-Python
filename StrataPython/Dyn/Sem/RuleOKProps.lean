@@ -12,10 +12,11 @@ set_option autoImplicit false
 /-!
 # Properties of `RuleOK`
 
-Key theorems: `runRule_ok`, `runTotal_ok`, `runRuleFree_ok`, `runTotalFree_ok` and
-`runRuleIf_ok`, which give `RuleOK` for every rule that runs a `PyM` computation; `RuleOK.lift`,
-which lifts `RuleOK` to a higher effect; and `ImplOK.within`, which gives `ImplWithin` from
-`ImplOK`, at the spec `pySpec`, which has the laws (`pySpec_laws`).
+Key theorems: `runRule_ok`, `runTotal_ok`, `runRuleFree_ok`, `runTotalFree_ok`,
+`runRuleIf_ok`, `runLoop_ok` and `runLoopFree_ok`, which give `RuleOK` for every rule that runs a
+`PyM` computation, each activation of a looping rule from its own start; `RuleOK.lift`, which
+lifts `RuleOK` to a higher effect; and `ImplOK.within`, which gives `ImplWithin` from `ImplOK`,
+at the spec `pySpec`, which has the laws (`pySpec_laws`).
 
 The definitions are in `RuleOK.lean`: `RuleOK`, with `StartWithin` and `AnyStart`, `ImplOK`,
 `ImplWithin` and `pySpec`.
@@ -131,6 +132,42 @@ theorem runRuleIf_ok {e : Level} {α : Type} (cond : Bool) (m : PyM σ e false �
   split
   · exact runRule_ok m tg hc Q hQ hX err
   · exact runRuleFree_ok mFree tg hc Q hQ hX err
+
+/-- The continuation of a looping rule is `ContOK` on every step, when `Q` holds of every result
+and `V` allows every exit. -/
+private theorem contOK_loop {e : Level} {α : Type} (s : Start) {Q : Typing → α → Prop}
+    (hQ : ∀ g a, Q g a) (hX : ∀ g x, V.Exit g x) (again : Again (Out (Dec σ) ps S) S)
+    (r : LoopStep S α) :
+    ContOK V s e Q (fun _ _ => True)
+      (loopCont (ε := BEff σ rs) (E := Out (Dec σ) ps S) (α := α) again r) := by
+  cases r with
+  | done a => exact contOK_ret s hQ a
+  | more x => exact contOK_jump s hX _
+
+/-- **One activation of a looping rule that runs a `PyM` computation satisfies `V` and is within
+its effect**, from the world at that activation's start, whatever state the activation before it
+saved, under the hypotheses of `runRule_ok`. -/
+theorem runLoop_ok {e : Level} {fr : Bool} {α : Type} (m : Option S → PyM σ e fr (LoopStep S α))
+    (tg : Tags σ) (hc : PyCertLaws rs tg V) (Q : Typing → α → Prop) (hQ : ∀ g a, Q g a)
+    (hX : ∀ g x, V.Exit g x) (err : Target (Out (Dec σ) ps S) [Value])
+    (again : Again (Out (Dec σ) ps S) S) (o : Option S) :
+    RuleOK V Q e
+      (@runLoop σ _ _ (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) e S α fr err again o #[] m) :=
+  ruleOK_start _ fun s => (m o).2.1 rs ps S tg V hc s #[] (handlesOK_nil s) e (Nat.le_refl _) Q _
+    (loopCont again) (jump err) (contOK_loop s hQ hX again) (fun _ => contOK_jump s hX _)
+
+/-- **One activation of a looping rule whose computation needs no start satisfies `V` and is
+within its effect from every start**, whatever state the activation before it saved, under the
+hypotheses of `runLoop_ok`. -/
+theorem runLoopFree_ok {e : Level} {α : Type} (m : Option S → PyM σ e true (LoopStep S α))
+    (tg : Tags σ) (hc : PyCertLaws rs tg V) (Q : Typing → α → Prop) (hQ : ∀ g a, Q g a)
+    (hX : ∀ g x, V.Exit g x) (err : Target (Out (Dec σ) ps S) [Value])
+    (again : Again (Out (Dec σ) ps S) S) (o : Option S) :
+    RuleOK V Q e
+      (@runLoopFree σ _ _ (BEff σ rs) (Out (Dec σ) ps S) (bInst rs tg) e S α err again o #[] m) :=
+  ruleOK_free (m o) tg _ _ fun s => (m o).2.1 rs ps S tg V hc s #[] (handlesOK_nil s) e
+    (Nat.le_refl _) Q _ (loopCont again) (jump err) (contOK_loop s hQ hX again)
+    (fun _ => contOK_jump s hX _)
 
 /-- `RuleOK` at a lower effect gives it at a higher one. -/
 theorem RuleOK.lift {e e' : Level} {Q : Typing → R → Prop} {t : BTree σ rs ps S R}

@@ -1,0 +1,50 @@
+--- stdout 466
+keys
+getitem a
+getitem b
+2 aa bb
+keys2
+KI.iter
+KI.iter
+KI.hint
+next 1
+next 2
+getitem k1
+getitem k2
+2 1 1
+keys
+getitem a
+getitem b
+3 aa 3
+keys
+getitem a
+getitem b
+aa
+print() argument after ** must be a mapping, not int
+'int' object is not a mapping
+Bad.keys() returned a non-iterable (type int)
+keys2
+KI.iter
+KI.iter
+KI.hint
+next 1
+next 2
+getitem k1
+getitem k2
+'k1' is an invalid keyword argument for print()
+keys
+print() got multiple values for keyword argument 'a'
+
+--- outcome
+ok
+--- globals
+Bad = <class 'Bad'>
+KI = <class 'KI'>
+M = <class 'M'>
+M2 = <class 'M2'>
+__doc__ = None
+__name__ = '__main__'
+d = {'a': 'aa', 'b': 'bb'}
+g = <function object>
+r = {'k1': 1, 'k2': 1}
+t = <function object>

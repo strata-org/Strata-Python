@@ -1,0 +1,8 @@
+module top
+  d: local (assigned, referenced)
+  it: local (assigned, referenced)
+  iter: global implicit (referenced)
+  k: local (assigned, referenced)
+  next: global implicit (referenced)
+  print: global implicit (referenced)
+qualnames: 

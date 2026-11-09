@@ -9,6 +9,7 @@ public import StrataPython.Dyn.Sem.Proto.Calls
 public import StrataPython.Dyn.Sem.Builtins.Classes
 public import StrataPython.Dyn.Sem.Builtins.Dunders
 public import StrataPython.Dyn.Sem.Builtins.Exceptions
+public import StrataPython.Dyn.Sem.Builtins.Iter
 
 set_option autoImplicit false
 
@@ -74,6 +75,9 @@ def opsImpls : Impls where
         Proto.printCall args kwargs
     | .«__build_class__» => some fun {_} {_} [_] [_] => Builtins.buildClass
     | .isinstance => some fun {_} {_} [_] [_] => Builtins.isinstanceFn
+    | .len => some fun {_} {_} [_] [_] => Builtins.lenFn
+    | .iter => some fun {_} {_} [_] [_] => Builtins.iterFn
+    | .next => some fun {_} {_} [_] [_] => Builtins.nextFn
     | _ => none
   method
     | .type, "__new__" => some fun {_} {_} [_] [_] => Builtins.typeNew
@@ -104,7 +108,8 @@ def opsImpls : Impls where
     | .staticmethod, "__new__" => some fun {_} {_} [_] [_] => Builtins.wrapperNew true
     | .staticmethod, "__init__" => some fun {_} {_} [_] [_] => Builtins.wrapperInit true
     | t, name =>
-      if t.info.mro.contains .BaseException then excImpl t name else Builtins.dunderImpl t name
+      if t.info.mro.contains .BaseException then excImpl t name
+      else (Builtins.iterImpl t name).orElse fun _ => Builtins.dunderImpl t name
 
 /-- `impls` with CPython's `tp_new_wrapper` checks before every built-in type's `__new__`, and its
 body without them as `tp_new`, which a class call runs (`Proto.tpNewFor`). -/
@@ -135,11 +140,67 @@ def Impls.overlaps (parts : List Impls) : List String :=
 
 variable {σ : Type} [Store σ] [Decode σ]
 
+/-- **The joined loop state of every piece's step machines**, the state of `py.call`'s activations
+as a list of frames: one constructor per piece. -/
+inductive PyLoopState (V : Type) where
+  | ops (s : Proto.OpsLoopState V)
+
+instance {V : Type} : HasLoopPart (PyLoopState V) (Proto.OpsLoopState V) where
+  inj := .ops
+  proj | .ops s => some s
+  proj_inj _ := rfl
+  inj_of_proj s p h := by cases s; cases h; rfl
+
+/-- How deep the machines' starts and resumes may nest inside one step of `py.call`: a bound on the
+nesting within a step, not on the length of a run, which `Again` carries from step to step. A deeper
+nesting stops with a gap, where CPython would raise `RecursionError`. Built-in calls have their own
+bound, `builtinFuel`. -/
+def machinesFuel : Nat := 10000
+
 instance {fr : Bool} : PyWrites (PyM σ .writes fr) Value :=
   writesRecord (callBuiltinWith Assembly.impls builtinFuel)
 
 instance {fr : Bool} : PyCalls (PyM σ .calls fr) Value :=
   callsRecord (callBuiltinWith Assembly.impls builtinFuel)
+
+/-- **CPython's checks of an unbound call of the built-in callable `f` on `args`**, which run before
+its C function and so before a step machine's first step: `tp_new_wrapper`'s for `t.__new__`, and
+the descriptor's check of its `self` or its class. -/
+def startChecks {m : Type → Type 1} {V : Type} [PyReads m V] (f args : V) : m Unit := do
+  match ← PyPure.immView f with
+  | some (.bound _ t "__new__" k) => if k != .tpNew then Builtins.tpNewCheck t args
+  | some (.descr t name kind) =>
+    if kind == .method || kind == .slotWrapper then
+      discard <| Proto.descrSelf t name (kind == .slotWrapper) args
+    else if kind == .classMethod then
+      discard <| Proto.classDescrSelf t name args
+  | _ => pure ()
+
+mutual
+/-- **The first step of every piece's step machine of a built-in callable**, with the fuel `n` for
+the nested calls, after `startChecks`: no piece has a machine of its own yet. -/
+def machinesStart : Nat → Value → Value → Value →
+    PyM σ .writes true (Option (CallStep (PyLoopState Value) Value))
+  | 0, _, _, _ => PyM.gap "a call dispatch nested deeper than the model follows"
+  | _ + 1, f, args, _ => do
+    startChecks f args
+    pure none
+
+/-- **The resume entry of every piece**, with the fuel `n` for the nested resumes: this piece's
+frames resume through `Proto.opsResume`, whose inner machines start and resume with one unit
+less. -/
+def machinesResume : Nat → PyLoopState Value → List (PyLoopState Value) →
+    PyM σ .writes true (CallStep (PyLoopState Value) Value)
+  | 0, _, _ => PyM.gap "frames resumed deeper than the model follows"
+  | n + 1, s, rest =>
+    letI : PyMachines (PyM σ .writes true) Value (PyLoopState Value) :=
+      { startStep := machinesStart n, resume := machinesResume n }
+    match s with
+    | .ops f => Proto.opsResume f rest
+end
+
+instance : PyMachines (PyM σ .writes true) Value (PyLoopState Value) :=
+  { startStep := machinesStart machinesFuel, resume := machinesResume machinesFuel }
 
 end
 

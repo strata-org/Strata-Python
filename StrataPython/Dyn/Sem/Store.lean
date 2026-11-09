@@ -114,27 +114,53 @@ structure ExcState where
   fields : Array (String × Value) := #[]
   deriving Repr, Inhabited
 
-/-- The state of a built-in iterator or view. -/
-inductive IterState where
+/-- What one activation of a looping operation gives: its result, or the state that the next
+activation goes on from. -/
+inductive LoopStep (S α : Type) where
+  | done (a : α)
+  | more (s : S)
+
+/-- The state of a built-in iterator or view, its values of the type `V`. Every iterator but a
+`zip` and an `enumerate` moves to `done` when it ends, and to `failed` after a size error, so that
+a later `next` gives the same answer, as CPython's iterators do; a `zip` and an `enumerate` call
+their inner iterators again at every step, as CPython's `zip_next` and `enum_next` do. -/
+inductive IterStateG (V : Type) where
   /-- An iterator of the type `kind` over the sequence `target` (a list, tuple, `str` or
-  `bytes`), at `index`; a reverse iterator counts down. -/
-  | seq (kind : Builtin) (target : Value) (index : Nat)
-  /-- A range iterator: the next value, the bound and the step. -/
-  | range (kind : Builtin) (next stop step : Int)
-  /-- An iterator of the type `kind` over a dict, at `index` of its entries, with the size and
-  the keys' version it started with. -/
-  | dict (kind : Builtin) (target : ObjId) (index size keysVersion : Nat)
-  /-- A set iterator, at `index` of the table, with the size it started with. -/
-  | set (target : ObjId) (index size : Nat)
+  `bytes`), at `index`. -/
+  | seq (kind : Builtin) (target : V) (index : Nat)
+  /-- A range iterator: the next value, the step, and the number of values left. -/
+  | range (kind : Builtin) (next step : Int) (left : Nat)
+  /-- An iterator of the type `kind` over the dict `target`, at `index` of its entries, with the
+  size and the keys' version it started with. -/
+  | dict (kind : Builtin) (target : V) (index size keysVersion : Nat)
+  /-- A set iterator over `target`, at `index` of the table's slots, with the size it started
+  with and the number of members it has given. -/
+  | set (target : V) (index size seen : Nat)
+  /-- CPython's `iterator` over an object with `__getitem__` and no `__iter__`, at `index`. -/
+  | getItem (target : V) (index : Nat)
   /-- A view of the type `kind` of a dict. -/
-  | view (kind : Builtin) (target : ObjId)
-  | zip (iters : Array Value)
-  | enumerate (iter : Value) (count : Int)
-  | reversed (target : Value) (index : Int)
-  | callable (func sentinel : Value)
+  | view (kind : Builtin) (target : V)
+  /-- A `zip` over the iterators `iters`, and whether it is `strict`. -/
+  | zip (iters : Array V) (strict : Bool)
+  /-- An `enumerate` over the iterator `iter`, with the count of its next item. -/
+  | enumerate (iter : V) (count : Int)
+  /-- A reverse iterator of the type `kind` (`reversed` or `list_reverseiterator`) over the
+  sequence `target`, at `index`, the next item's. -/
+  | reversed (kind : Builtin) (target : V) (index : Int)
+  /-- A reverse iterator of the type `kind` over the dict `target`, at `index` of its entries,
+  with the size and the keys' version it started with, and `left`, the number of items it may
+  still give (CPython's `di_used` and `di->len`). -/
+  | dictReversed (kind : Builtin) (target : V) (index : Int) (size keysVersion left : Nat)
+  /-- `iter(func, sentinel)`. -/
+  | callable (func sentinel : V)
+  /-- An iterator of the type `kind` after a size error with the message `msg`. -/
+  | failed (kind : Builtin) (msg : String)
   /-- An iterator of the type `kind` that has ended. -/
   | done (kind : Builtin)
   deriving Repr, Inhabited
+
+/-- The state of a built-in iterator in the store. -/
+abbrev IterState := IterStateG Value
 
 /-- A module object: its name, and whether reads of some names and every write gap. -/
 structure ModuleObj where
@@ -166,7 +192,9 @@ inductive PayloadG (F : Type) where
   | func (f : F)
   | native (f : NativeFn)
   | exc (e : ExcState)
-  | iter (it : IterState)
+  /-- An iterator; for one over a non-ASCII `str`, also the index of its next character and that
+  character's byte offset, a cache that holds only while the index is the state's own. -/
+  | iter (it : IterState) (strPos : Option (Nat × Nat))
   | module (m : ModuleObj)
   | property (fget fset fdel doc : Value)
   /-- A `classmethod` with its callable; `none` until `__init__` sets it (CPython's `NULL`). -/
@@ -241,7 +269,7 @@ def PayloadG.lift {F : Type} : PayloadData → PayloadG F
   | .func f => nomatch f
   | .native f => .native f
   | .exc e => .exc e
-  | .iter it => .iter it
+  | .iter it c => .iter it c
   | .module m => .module m
   | .property a b c d => .property a b c d
   | .classmethod f => .classmethod f
@@ -267,7 +295,7 @@ def PayloadG.data? {F : Type} : PayloadG F → Option PayloadData
   | .func _ => none
   | .native f => some (.native f)
   | .exc e => some (.exc e)
-  | .iter it => some (.iter it)
+  | .iter it c => some (.iter it c)
   | .module m => some (.module m)
   | .property a b c d => some (.property a b c d)
   | .classmethod f => some (.classmethod f)

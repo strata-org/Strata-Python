@@ -24,7 +24,8 @@ each instruction of the environment `E` that has a rule outside a pure function,
 
 The last two come from the first, which the command proves by taking the rule apart: a rule that
 runs a `PyM` computation through `runRule`, `runTotal`, `runRuleFree`, `runTotalFree` or
-`runRuleIf`, at an effect no higher than the declared one, is proved by their lemmas.  A rule with
+`runRuleIf`, or that loops through `runLoop` or `runLoopFree` (both its first and its later
+activations), at an effect no higher than the declared one, is proved by their lemmas.  A rule with
 its own lemmas `T.okOf.<instruction>` and `T.certOf.<instruction>` is proved by them.  Any other
 rule fails the build.
 -/
@@ -95,7 +96,10 @@ elab_rules : command
             | exact RuleOK.lift (of_decide_eq_true rfl) (runTotal_ok _ _ _ hc Q hQ)
             | exact RuleOK.lift (of_decide_eq_true rfl) (runRuleFree_ok _ _ hc Q hQ hX _)
             | exact RuleOK.lift (of_decide_eq_true rfl) (runTotalFree_ok _ _ _ hc Q hQ)
-            | exact RuleOK.lift (of_decide_eq_true rfl) (runRuleIf_ok _ _ _ _ hc Q hQ hX _)),
+            | exact RuleOK.lift (of_decide_eq_true rfl) (runRuleIf_ok _ _ _ _ hc Q hQ hX _)
+            | refine ⟨?_, ?_⟩ <;> (repeat intro) <;> first
+                | exact RuleOK.lift (of_decide_eq_true rfl) (runLoop_ok _ _ hc Q hQ hX _ _ _)
+                | exact RuleOK.lift (of_decide_eq_true rfl) (runLoopFree_ok _ _ hc Q hQ hX _ _ _)),
           ← `(command| $okDoc:docComment theorem $okId : ImplWithin $interpId ($eff $nameLit)
             $implId := ImplOK.within $implOKId)]
         match acc? with
@@ -120,9 +124,9 @@ elab_rules : command
       modify fun st => { st with messages := msgs }
       if failed then
         logErrorAt tbl m!"#py_rule_theorems: the rule of {o.envName} is not a `runRule`, \
-          `runTotal`, `runRuleFree`, `runTotalFree` or `runRuleIf` wrapper at an effect no higher \
-          than its declared one whose results and exits hold no ref, and has no lemmas \
-          {tblNs ++ `okOf ++ o.envName} and {tblNs ++ `certOf ++ o.envName}"
+          `runTotal`, `runRuleFree`, `runTotalFree`, `runRuleIf`, `runLoop` or `runLoopFree` \
+          wrapper at an effect no higher than its declared one whose results and exits hold no \
+          ref, and has no lemmas {tblNs ++ `okOf ++ o.envName} and {tblNs ++ `certOf ++ o.envName}"
       else
         for cmd in cmds do
           elabCommand cmd

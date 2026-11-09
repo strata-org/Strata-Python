@@ -1,0 +1,25 @@
+module top
+  A: local (assigned)
+  B: local (assigned)
+  C: local (assigned, referenced)
+  nest_list: local (assigned, referenced)
+  nest_tuple: local (assigned, referenced)
+  print: global implicit (referenced)
+  function nest_list
+    a: local (assigned, referenced)
+    i: local (assigned, referenced)
+    n: local (parameter, referenced)
+    x: local (parameter, referenced)
+  function nest_tuple
+    i: local (assigned, referenced)
+    n: local (parameter, referenced)
+    t: local (assigned, referenced)
+  class C
+    __call__: local (assigned)
+    function __call__
+      A: global implicit (referenced)
+      B: global implicit (referenced)
+      RecursionError: global implicit (referenced)
+      n: local (parameter, referenced)
+      self: local (parameter, referenced)
+qualnames: C, C.__call__, nest_list, nest_tuple

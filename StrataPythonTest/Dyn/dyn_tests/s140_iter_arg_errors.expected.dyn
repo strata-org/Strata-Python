@@ -1,0 +1,490 @@
+module s140_iter_arg_errors {
+  func @|s140_iter_arg_errors.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s140_iter_arg_errors")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s140_iter_arg_errors", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s140_iter_arg_errors", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %clo.0 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>|, "<lambda>", "s140_iter_arg_errors")
+      %clo.1 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.1|, "<lambda>", "s140_iter_arg_errors")
+      %clo.2 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.2|, "<lambda>", "s140_iter_arg_errors")
+      %clo.3 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.3|, "<lambda>", "s140_iter_arg_errors")
+      %clo.4 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.4|, "<lambda>", "s140_iter_arg_errors")
+      %clo.5 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.5|, "<lambda>", "s140_iter_arg_errors")
+      %clo.6 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.6|, "<lambda>", "s140_iter_arg_errors")
+      %clo.7 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.7|, "<lambda>", "s140_iter_arg_errors")
+      %clo.8 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.8|, "<lambda>", "s140_iter_arg_errors")
+      %clo.9 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.9|, "<lambda>", "s140_iter_arg_errors")
+      %clo.10 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.10|, "<lambda>", "s140_iter_arg_errors")
+      %clo.11 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.11|, "<lambda>", "s140_iter_arg_errors")
+      %clo.12 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.12|, "<lambda>", "s140_iter_arg_errors")
+      %clo.13 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.13|, "<lambda>", "s140_iter_arg_errors")
+      %clo.14 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.14|, "<lambda>", "s140_iter_arg_errors")
+      %clo.15 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.15|, "<lambda>", "s140_iter_arg_errors")
+      %clo.16 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.16|, "<lambda>", "s140_iter_arg_errors")
+      %clo.17 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.17|, "<lambda>", "s140_iter_arg_errors")
+      %clo.18 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.18|, "<lambda>", "s140_iter_arg_errors")
+      %clo.19 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.19|, "<lambda>", "s140_iter_arg_errors")
+      %clo.20 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.20|, "<lambda>", "s140_iter_arg_errors")
+      %clo.21 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.21|, "<lambda>", "s140_iter_arg_errors")
+      %clo.22 : py.Value = py.mkClosure[[]](@|s140_iter_arg_errors.<lambda>.22|, "<lambda>", "s140_iter_arg_errors")
+      %list.0 : py.Value = py.mkList(%clo.0, %clo.1, %clo.2, %clo.3, %clo.4, %clo.5, %clo.6, %clo.7, %clo.8, %clo.9, %clo.10, %clo.11, %clo.12, %clo.13, %clo.14, %clo.15, %clo.16, %clo.17, %clo.18, %clo.19, %clo.20, %clo.21, %clo.22)
+      %tests.cell.0 : base.Ref(py.Value) = py.globalCell("s140_iter_arg_errors", "tests")
+      %set.2 : base.Unit = base.refSet[py.Value](%tests.cell.0, %list.0)
+      %tests.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "tests") ^propagate.0()
+      %iter.0 : py.Value = py.getIter(%tests.0) ^propagate.0()
+      jump ^head.0()
+    head.0():
+      %item.0 : py.Value = py.next(%iter.0) ^stop.0()
+      %t.cell.0 : base.Ref(py.Value) = py.globalCell("s140_iter_arg_errors", "t")
+      %set.3 : base.Unit = base.refSet[py.Value](%t.cell.0, %item.0)
+      %t.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "t") ^catch.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%t.0, %tuple.0, %kwargs.0) ^catch.0()
+      %r.cell.0 : base.Ref(py.Value) = py.globalCell("s140_iter_arg_errors", "r")
+      %set.4 : base.Unit = base.refSet[py.Value](%r.cell.0, %call.0)
+      %print.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "print") ^catch.0()
+      %str.1 : py.Value = py.strLit("ok")
+      %type.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "type") ^catch.0()
+      %r.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "r") ^catch.0()
+      %tuple.1 : py.Value = py.mkTuple(%r.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%type.0, %tuple.1, %kwargs.1) ^catch.0()
+      %__name__.0 : py.Value = py.attr(%call.1, "__name__") ^catch.0()
+      %tuple.2 : py.Value = py.mkTuple(%str.1, %__name__.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%print.0, %tuple.2, %kwargs.2) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %Exception.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "Exception") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %Exception.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s140_iter_arg_errors", "e")
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.1 : py.Value = py.loadGlobal("s140_iter_arg_errors", "print") ^clear.0()
+      %type.1 : py.Value = py.loadGlobal("s140_iter_arg_errors", "type") ^clear.0()
+      %e.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "e") ^clear.0()
+      %tuple.3 : py.Value = py.mkTuple(%e.0)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%type.1, %tuple.3, %kwargs.3) ^clear.0()
+      %__name__.1 : py.Value = py.attr(%call.3, "__name__") ^clear.0()
+      %e.1 : py.Value = py.loadGlobal("s140_iter_arg_errors", "e") ^clear.0()
+      %args.0 : py.Value = py.attr(%e.1, "args") ^clear.0()
+      %int.0 : py.Value = py.intLit(0)
+      %item.1 : py.Value = py.getItem(%args.0, %int.0) ^clear.0()
+      %tuple.4 : py.Value = py.mkTuple(%__name__.1, %item.1)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%print.1, %tuple.4, %kwargs.4) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("s140_iter_arg_errors", "e")
+      %set.6 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.2)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.3 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("s140_iter_arg_errors", "e")
+      %set.7 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.3)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      jump ^head.0()
+    stop.0(%exc.3 : py.Value):
+      %done.0 : base.Bool = py.isStopIteration(%exc.3)
+      branch(%done.0) ^exit.0() ^propagate.0(%exc.3)
+    exit.0():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.4 : py.Value):
+      %exc.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
+      ret(%exc.5)
+  }
+  func @|s140_iter_arg_errors.<lambda>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %range.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "range") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%range.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.1|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %range.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "range") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %int.2 : py.Value = py.intLit(3)
+      %int.3 : py.Value = py.intLit(4)
+      %tuple.0 : py.Value = py.mkTuple(%int.0, %int.1, %int.2, %int.3)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%range.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.2|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %range.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "range") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %tuple.0 : py.Value = py.mkTuple(%int.0)
+      %str.0 : py.Value = py.strLit("x")
+      %int.1 : py.Value = py.intLit(2)
+      %kwargs.1 : py.Value = py.mkKwargs(%str.0, %int.1)
+      %call.0 : py.Value = py.call(%range.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.3|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %range.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "range") ^propagate.0()
+      %str.0 : py.Value = py.strLit("a")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%range.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.4|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %range.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "range") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %str.0 : py.Value = py.strLit("b")
+      %tuple.0 : py.Value = py.mkTuple(%int.0, %str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%range.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.5|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %range.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "range") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %str.0 : py.Value = py.strLit("c")
+      %tuple.0 : py.Value = py.mkTuple(%int.0, %int.1, %str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%range.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.6|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %range.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "range") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %int.2 : py.Value = py.intLit(0)
+      %tuple.0 : py.Value = py.mkTuple(%int.0, %int.1, %int.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%range.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.7|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "len") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%len.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.8|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "len") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %tuple.0 : py.Value = py.mkTuple(%int.0, %int.1)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%len.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.9|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "len") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %str.0 : py.Value = py.strLit("x")
+      %int.0 : py.Value = py.intLit(1)
+      %kwargs.1 : py.Value = py.mkKwargs(%str.0, %int.0)
+      %call.0 : py.Value = py.call(%len.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.10|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %iter.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "iter") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%iter.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.11|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %iter.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "iter") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %int.2 : py.Value = py.intLit(3)
+      %tuple.0 : py.Value = py.mkTuple(%int.0, %int.1, %int.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%iter.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.12|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %iter.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "iter") ^propagate.0()
+      %list.0 : py.Value = py.mkList
+      %tuple.0 : py.Value = py.mkTuple(%list.0)
+      %str.0 : py.Value = py.strLit("x")
+      %int.0 : py.Value = py.intLit(1)
+      %kwargs.1 : py.Value = py.mkKwargs(%str.0, %int.0)
+      %call.0 : py.Value = py.call(%iter.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.13|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %next.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "next") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%next.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.14|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %next.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "next") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %int.1 : py.Value = py.intLit(2)
+      %int.2 : py.Value = py.intLit(3)
+      %tuple.0 : py.Value = py.mkTuple(%int.0, %int.1, %int.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%next.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.15|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %next.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "next") ^propagate.0()
+      %iter.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "iter") ^propagate.0()
+      %list.0 : py.Value = py.mkList
+      %tuple.0 : py.Value = py.mkTuple(%list.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%iter.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%call.0)
+      %str.0 : py.Value = py.strLit("x")
+      %int.0 : py.Value = py.intLit(1)
+      %kwargs.2 : py.Value = py.mkKwargs(%str.0, %int.0)
+      %call.1 : py.Value = py.call(%next.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.16|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %next.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "next") ^propagate.0()
+      %iter.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "iter") ^propagate.0()
+      %list.0 : py.Value = py.mkList
+      %tuple.0 : py.Value = py.mkTuple(%list.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%iter.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%call.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%next.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.17|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %next.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "next") ^propagate.0()
+      %int.0 : py.Value = py.intLit(5)
+      %tuple.0 : py.Value = py.mkTuple(%int.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%next.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.18|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %next.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "next") ^propagate.0()
+      %int.0 : py.Value = py.intLit(5)
+      %int.1 : py.Value = py.intLit(6)
+      %tuple.0 : py.Value = py.mkTuple(%int.0, %int.1)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%next.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.19|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %iter.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "iter") ^propagate.0()
+      %int.0 : py.Value = py.intLit(5)
+      %int.1 : py.Value = py.intLit(6)
+      %tuple.0 : py.Value = py.mkTuple(%int.0, %int.1)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%iter.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.20|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "len") ^propagate.0()
+      %iter.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "iter") ^propagate.0()
+      %list.0 : py.Value = py.mkList
+      %tuple.0 : py.Value = py.mkTuple(%list.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%iter.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%call.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%len.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.21|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %range.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "range") ^propagate.0()
+      %float.0 : py.Value = py.floatLit(1.0)
+      %tuple.0 : py.Value = py.mkTuple(%float.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%range.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s140_iter_arg_errors.<lambda>.22|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %defaults.0 : py.Value = py.mkTuple
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "<lambda>", 0, 0, false, false) ^propagate.0()
+      %range.0 : py.Value = py.loadGlobal("s140_iter_arg_errors", "range") ^propagate.0()
+      %bool.0 : py.Value = py.boolLit(true)
+      %int.0 : py.Value = py.intLit(3)
+      %tuple.0 : py.Value = py.mkTuple(%bool.0, %int.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%range.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %int.1 : py.Value = py.intLit(0)
+      %item.0 : py.Value = py.getItem(%call.0, %int.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%item.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

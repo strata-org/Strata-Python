@@ -1,0 +1,15 @@
+module top
+  It: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  a: local (assigned)
+  caught: local (assigned)
+  e: local (assigned, referenced)
+  class It
+    __iter__: local (assigned)
+    __next__: local (assigned)
+    function __iter__
+      self: local (parameter, referenced)
+    function __next__
+      It: global implicit (referenced)
+      self: local (parameter)
+qualnames: It, It.__iter__, It.__next__

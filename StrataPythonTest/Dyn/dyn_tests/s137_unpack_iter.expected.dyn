@@ -1,0 +1,2586 @@
+module s137_unpack_iter {
+  func @|s137_unpack_iter.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s137_unpack_iter")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.It.<body>|, "<body>", "s137_unpack_iter")
+      %str.1 : py.Value = py.strLit("It")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %It.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %It.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "It")
+      %set.2 : base.Unit = base.refSet[py.Value](%It.cell.0, %It.0)
+      %It.1 : py.Value = py.loadGlobal("s137_unpack_iter", "It") ^propagate.0()
+      %int.0 : py.Value = py.intLit(2)
+      %tuple.1 : py.Value = py.mkTuple(%int.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%It.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %unpack.0 : py.Value = py.unpackSeq(%call.0, 2) ^propagate.0()
+      %elem.0 : py.Value = py.tupleGet(%unpack.0, 0)
+      %a.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "a")
+      %set.3 : base.Unit = base.refSet[py.Value](%a.cell.0, %elem.0)
+      %elem.1 : py.Value = py.tupleGet(%unpack.0, 1)
+      %b.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "b")
+      %set.4 : base.Unit = base.refSet[py.Value](%b.cell.0, %elem.1)
+      %print.0 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %a.0 : py.Value = py.loadGlobal("s137_unpack_iter", "a") ^propagate.0()
+      %b.0 : py.Value = py.loadGlobal("s137_unpack_iter", "b") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple(%a.0, %b.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.2, %kwargs.2) ^propagate.0()
+      %iter.0 : py.Value = py.loadGlobal("s137_unpack_iter", "iter") ^propagate.0()
+      %int.1 : py.Value = py.intLit(1)
+      %int.2 : py.Value = py.intLit(2)
+      %list.0 : py.Value = py.mkList(%int.1, %int.2)
+      %tuple.3 : py.Value = py.mkTuple(%list.0)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%iter.0, %tuple.3, %kwargs.3) ^propagate.0()
+      %unpack.1 : py.Value = py.unpackSeq(%call.2, 2) ^propagate.0()
+      %elem.2 : py.Value = py.tupleGet(%unpack.1, 0)
+      %a.cell.1 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "a")
+      %set.5 : base.Unit = base.refSet[py.Value](%a.cell.1, %elem.2)
+      %elem.3 : py.Value = py.tupleGet(%unpack.1, 1)
+      %b.cell.1 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "b")
+      %set.6 : base.Unit = base.refSet[py.Value](%b.cell.1, %elem.3)
+      %print.1 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %a.1 : py.Value = py.loadGlobal("s137_unpack_iter", "a") ^propagate.0()
+      %b.1 : py.Value = py.loadGlobal("s137_unpack_iter", "b") ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple(%a.1, %b.1)
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%print.1, %tuple.4, %kwargs.4) ^propagate.0()
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.G.<body>|, "<body>", "s137_unpack_iter")
+      %str.2 : py.Value = py.strLit("G")
+      %tuple.5 : py.Value = py.mkTuple(%clo.1, %str.2)
+      %kwargs.5 : py.Value = py.mkKwargs
+      %G.0 : py.Value = py.call(%__build_class__.1, %tuple.5, %kwargs.5) ^propagate.0()
+      %G.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "G")
+      %set.7 : base.Unit = base.refSet[py.Value](%G.cell.0, %G.0)
+      %G.1 : py.Value = py.loadGlobal("s137_unpack_iter", "G") ^propagate.0()
+      %tuple.6 : py.Value = py.mkTuple
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%G.1, %tuple.6, %kwargs.6) ^propagate.0()
+      %unpack.2 : py.Value = py.unpackSeq(%call.4, 2) ^propagate.0()
+      %elem.4 : py.Value = py.tupleGet(%unpack.2, 0)
+      %a.cell.2 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "a")
+      %set.8 : base.Unit = base.refSet[py.Value](%a.cell.2, %elem.4)
+      %elem.5 : py.Value = py.tupleGet(%unpack.2, 1)
+      %b.cell.2 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "b")
+      %set.9 : base.Unit = base.refSet[py.Value](%b.cell.2, %elem.5)
+      %print.2 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %a.2 : py.Value = py.loadGlobal("s137_unpack_iter", "a") ^propagate.0()
+      %b.2 : py.Value = py.loadGlobal("s137_unpack_iter", "b") ^propagate.0()
+      %tuple.7 : py.Value = py.mkTuple(%a.2, %b.2)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%print.2, %tuple.7, %kwargs.7) ^propagate.0()
+      %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.Bad.<body>|, "<body>", "s137_unpack_iter")
+      %str.3 : py.Value = py.strLit("Bad")
+      %tuple.8 : py.Value = py.mkTuple(%clo.2, %str.3)
+      %kwargs.8 : py.Value = py.mkKwargs
+      %Bad.0 : py.Value = py.call(%__build_class__.2, %tuple.8, %kwargs.8) ^propagate.0()
+      %Bad.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "Bad")
+      %set.10 : base.Unit = base.refSet[py.Value](%Bad.cell.0, %Bad.0)
+      %print.3 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^catch.0()
+      %tuple.9 : py.Value = py.mkTuple
+      %kwargs.9 : py.Value = py.mkKwargs
+      %Bad.1 : py.Value = py.loadGlobal("s137_unpack_iter", "Bad") ^catch.0()
+      %tuple.10 : py.Value = py.mkTuple
+      %kwargs.10 : py.Value = py.mkKwargs
+      %call.6 : py.Value = py.call(%Bad.1, %tuple.10, %kwargs.10) ^catch.0()
+      %merge.0 : py.Value = py.dictMerge(%print.3, %kwargs.9, %call.6) ^catch.0()
+      %call.7 : py.Value = py.call(%print.3, %tuple.9, %merge.0) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %TypeError.0 : py.Value = py.loadGlobal("s137_unpack_iter", "TypeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %TypeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.11 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.4 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^clear.0()
+      %e.0 : py.Value = py.loadGlobal("s137_unpack_iter", "e") ^clear.0()
+      %args.0 : py.Value = py.attr(%e.0, "args") ^clear.0()
+      %int.3 : py.Value = py.intLit(0)
+      %item.0 : py.Value = py.getItem(%args.0, %int.3) ^clear.0()
+      %e.1 : py.Value = py.loadGlobal("s137_unpack_iter", "e") ^clear.0()
+      %__context__.0 : py.Value = py.attr(%e.1, "__context__") ^clear.0()
+      %none.1 : py.Value = py.noneLit
+      %is.0 : py.Value = py.is(%__context__.0, %none.1)
+      %e.2 : py.Value = py.loadGlobal("s137_unpack_iter", "e") ^clear.0()
+      %__suppress_context__.0 : py.Value = py.attr(%e.2, "__suppress_context__") ^clear.0()
+      %tuple.11 : py.Value = py.mkTuple(%item.0, %is.0, %__suppress_context__.0)
+      %kwargs.11 : py.Value = py.mkKwargs
+      %call.8 : py.Value = py.call(%print.4, %tuple.11, %kwargs.11) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.3 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.12 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.3)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.4 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.13 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.4)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %dict.0 : py.Value = py.mkDict ^catch.1()
+      %Bad.2 : py.Value = py.loadGlobal("s137_unpack_iter", "Bad") ^catch.1()
+      %tuple.12 : py.Value = py.mkTuple
+      %kwargs.12 : py.Value = py.mkKwargs
+      %call.9 : py.Value = py.call(%Bad.2, %tuple.12, %kwargs.12) ^catch.1()
+      %update.0 : py.Value = py.dictUpdate(%dict.0, %call.9) ^catch.1()
+      jump ^join.1()
+    catch.1(%exc.3 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.3)
+      %TypeError.1 : py.Value = py.loadGlobal("s137_unpack_iter", "TypeError") ^unwind.1()
+      %match.1 : base.Bool = py.excMatch(%exc.3, %TypeError.1) ^unwind.1()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %e.cell.3 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.14 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.3)
+      %print.5 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^clear.1()
+      %e.5 : py.Value = py.loadGlobal("s137_unpack_iter", "e") ^clear.1()
+      %args.1 : py.Value = py.attr(%e.5, "args") ^clear.1()
+      %int.4 : py.Value = py.intLit(0)
+      %item.1 : py.Value = py.getItem(%args.1, %int.4) ^clear.1()
+      %e.6 : py.Value = py.loadGlobal("s137_unpack_iter", "e") ^clear.1()
+      %__context__.1 : py.Value = py.attr(%e.6, "__context__") ^clear.1()
+      %none.2 : py.Value = py.noneLit
+      %is.1 : py.Value = py.is(%__context__.1, %none.2)
+      %tuple.13 : py.Value = py.mkTuple(%item.1, %is.1)
+      %kwargs.13 : py.Value = py.mkKwargs
+      %call.10 : py.Value = py.call(%print.5, %tuple.13, %kwargs.13) ^clear.1()
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      %e.7 : py.Value = py.undef("e")
+      %e.cell.4 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.15 : base.Unit = base.refSet[py.Value](%e.cell.4, %e.7)
+      jump ^join.1()
+    clear.1(%exc.4 : py.Value):
+      %e.8 : py.Value = py.undef("e")
+      %e.cell.5 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.16 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.8)
+      jump ^unwind.1(%exc.4)
+    next.1():
+      jump ^unwind.1(%exc.3)
+    unwind.1(%exc.5 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.5)
+    join.1():
+      %__build_class__.3 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.3 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.K.<body>|, "<body>", "s137_unpack_iter")
+      %str.4 : py.Value = py.strLit("K")
+      %tuple.14 : py.Value = py.mkTuple(%clo.3, %str.4)
+      %kwargs.14 : py.Value = py.mkKwargs
+      %K.0 : py.Value = py.call(%__build_class__.3, %tuple.14, %kwargs.14) ^propagate.0()
+      %K.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "K")
+      %set.17 : base.Unit = base.refSet[py.Value](%K.cell.0, %K.0)
+      %dict.1 : py.Value = py.mkDict ^catch.2()
+      %K.1 : py.Value = py.loadGlobal("s137_unpack_iter", "K") ^catch.2()
+      %tuple.15 : py.Value = py.mkTuple
+      %kwargs.15 : py.Value = py.mkKwargs
+      %call.11 : py.Value = py.call(%K.1, %tuple.15, %kwargs.15) ^catch.2()
+      %update.1 : py.Value = py.dictUpdate(%dict.1, %call.11) ^catch.2()
+      jump ^join.2()
+    catch.2(%exc.6 : py.Value):
+      %prev.2 : py.Value = py.pushExcInfo(%exc.6)
+      %TypeError.2 : py.Value = py.loadGlobal("s137_unpack_iter", "TypeError") ^unwind.2()
+      %match.2 : base.Bool = py.excMatch(%exc.6, %TypeError.2) ^unwind.2()
+      branch(%match.2) ^except.2() ^next.2()
+    except.2():
+      %e.cell.6 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.18 : base.Unit = base.refSet[py.Value](%e.cell.6, %exc.6)
+      %print.6 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^clear.2()
+      %e.9 : py.Value = py.loadGlobal("s137_unpack_iter", "e") ^clear.2()
+      %args.2 : py.Value = py.attr(%e.9, "args") ^clear.2()
+      %int.5 : py.Value = py.intLit(0)
+      %item.2 : py.Value = py.getItem(%args.2, %int.5) ^clear.2()
+      %e.10 : py.Value = py.loadGlobal("s137_unpack_iter", "e") ^clear.2()
+      %__context__.2 : py.Value = py.attr(%e.10, "__context__") ^clear.2()
+      %none.3 : py.Value = py.noneLit
+      %is.2 : py.Value = py.is(%__context__.2, %none.3)
+      %tuple.16 : py.Value = py.mkTuple(%item.2, %is.2)
+      %kwargs.16 : py.Value = py.mkKwargs
+      %call.12 : py.Value = py.call(%print.6, %tuple.16, %kwargs.16) ^clear.2()
+      %pop.4 : base.Unit = py.popExcept(%prev.2)
+      %e.11 : py.Value = py.undef("e")
+      %e.cell.7 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.19 : base.Unit = base.refSet[py.Value](%e.cell.7, %e.11)
+      jump ^join.2()
+    clear.2(%exc.7 : py.Value):
+      %e.12 : py.Value = py.undef("e")
+      %e.cell.8 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.20 : base.Unit = base.refSet[py.Value](%e.cell.8, %e.12)
+      jump ^unwind.2(%exc.7)
+    next.2():
+      jump ^unwind.2(%exc.6)
+    unwind.2(%exc.8 : py.Value):
+      %pop.5 : base.Unit = py.popExcept(%prev.2)
+      jump ^propagate.0(%exc.8)
+    join.2():
+      %__build_class__.4 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.4 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.NI.<body>|, "<body>", "s137_unpack_iter")
+      %str.5 : py.Value = py.strLit("NI")
+      %tuple.17 : py.Value = py.mkTuple(%clo.4, %str.5)
+      %kwargs.17 : py.Value = py.mkKwargs
+      %NI.0 : py.Value = py.call(%__build_class__.4, %tuple.17, %kwargs.17) ^propagate.0()
+      %NI.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "NI")
+      %set.21 : base.Unit = base.refSet[py.Value](%NI.cell.0, %NI.0)
+      %int.6 : py.Value = py.intLit(1)
+      %NI.1 : py.Value = py.loadGlobal("s137_unpack_iter", "NI") ^catch.3()
+      %tuple.18 : py.Value = py.mkTuple
+      %kwargs.18 : py.Value = py.mkKwargs
+      %call.13 : py.Value = py.call(%NI.1, %tuple.18, %kwargs.18) ^catch.3()
+      %in.0 : py.Value = py.in(%int.6, %call.13) ^catch.3()
+      jump ^join.3()
+    catch.3(%exc.9 : py.Value):
+      %prev.3 : py.Value = py.pushExcInfo(%exc.9)
+      %TypeError.3 : py.Value = py.loadGlobal("s137_unpack_iter", "TypeError") ^unwind.3()
+      %match.3 : base.Bool = py.excMatch(%exc.9, %TypeError.3) ^unwind.3()
+      branch(%match.3) ^except.3() ^next.3()
+    except.3():
+      %e.cell.9 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.22 : base.Unit = base.refSet[py.Value](%e.cell.9, %exc.9)
+      %print.7 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^clear.3()
+      %e.13 : py.Value = py.loadGlobal("s137_unpack_iter", "e") ^clear.3()
+      %args.3 : py.Value = py.attr(%e.13, "args") ^clear.3()
+      %int.7 : py.Value = py.intLit(0)
+      %item.3 : py.Value = py.getItem(%args.3, %int.7) ^clear.3()
+      %e.14 : py.Value = py.loadGlobal("s137_unpack_iter", "e") ^clear.3()
+      %__context__.3 : py.Value = py.attr(%e.14, "__context__") ^clear.3()
+      %none.4 : py.Value = py.noneLit
+      %is.3 : py.Value = py.is(%__context__.3, %none.4)
+      %tuple.19 : py.Value = py.mkTuple(%item.3, %is.3)
+      %kwargs.19 : py.Value = py.mkKwargs
+      %call.14 : py.Value = py.call(%print.7, %tuple.19, %kwargs.19) ^clear.3()
+      %pop.6 : base.Unit = py.popExcept(%prev.3)
+      %e.15 : py.Value = py.undef("e")
+      %e.cell.10 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.23 : base.Unit = base.refSet[py.Value](%e.cell.10, %e.15)
+      jump ^join.3()
+    clear.3(%exc.10 : py.Value):
+      %e.16 : py.Value = py.undef("e")
+      %e.cell.11 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.24 : base.Unit = base.refSet[py.Value](%e.cell.11, %e.16)
+      jump ^unwind.3(%exc.10)
+    next.3():
+      jump ^unwind.3(%exc.9)
+    unwind.3(%exc.11 : py.Value):
+      %pop.7 : base.Unit = py.popExcept(%prev.3)
+      jump ^propagate.0(%exc.11)
+    join.3():
+      %__build_class__.5 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.5 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.G.<body>.1|, "<body>", "s137_unpack_iter")
+      %str.6 : py.Value = py.strLit("G")
+      %tuple.20 : py.Value = py.mkTuple(%clo.5, %str.6)
+      %kwargs.20 : py.Value = py.mkKwargs
+      %G.2 : py.Value = py.call(%__build_class__.5, %tuple.20, %kwargs.20) ^propagate.0()
+      %G.cell.1 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "G")
+      %set.25 : base.Unit = base.refSet[py.Value](%G.cell.1, %G.2)
+      %print.8 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^catch.4()
+      %tuple.21 : py.Value = py.mkTuple
+      %kwargs.21 : py.Value = py.mkKwargs
+      %G.3 : py.Value = py.loadGlobal("s137_unpack_iter", "G") ^catch.4()
+      %tuple.22 : py.Value = py.mkTuple
+      %kwargs.22 : py.Value = py.mkKwargs
+      %call.15 : py.Value = py.call(%G.3, %tuple.22, %kwargs.22) ^catch.4()
+      %merge.1 : py.Value = py.dictMerge(%print.8, %kwargs.21, %call.15) ^catch.4()
+      %call.16 : py.Value = py.call(%print.8, %tuple.21, %merge.1) ^catch.4()
+      jump ^join.4()
+    catch.4(%exc.12 : py.Value):
+      %prev.4 : py.Value = py.pushExcInfo(%exc.12)
+      %TypeError.4 : py.Value = py.loadGlobal("s137_unpack_iter", "TypeError") ^unwind.4()
+      %match.4 : base.Bool = py.excMatch(%exc.12, %TypeError.4) ^unwind.4()
+      branch(%match.4) ^except.4() ^next.4()
+    except.4():
+      %e.cell.12 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.26 : base.Unit = base.refSet[py.Value](%e.cell.12, %exc.12)
+      %print.9 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^clear.4()
+      %e.17 : py.Value = py.loadGlobal("s137_unpack_iter", "e") ^clear.4()
+      %args.4 : py.Value = py.attr(%e.17, "args") ^clear.4()
+      %int.8 : py.Value = py.intLit(0)
+      %item.4 : py.Value = py.getItem(%args.4, %int.8) ^clear.4()
+      %e.18 : py.Value = py.loadGlobal("s137_unpack_iter", "e") ^clear.4()
+      %__context__.4 : py.Value = py.attr(%e.18, "__context__") ^clear.4()
+      %none.5 : py.Value = py.noneLit
+      %is.4 : py.Value = py.is(%__context__.4, %none.5)
+      %tuple.23 : py.Value = py.mkTuple(%item.4, %is.4)
+      %kwargs.23 : py.Value = py.mkKwargs
+      %call.17 : py.Value = py.call(%print.9, %tuple.23, %kwargs.23) ^clear.4()
+      %pop.8 : base.Unit = py.popExcept(%prev.4)
+      %e.19 : py.Value = py.undef("e")
+      %e.cell.13 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.27 : base.Unit = base.refSet[py.Value](%e.cell.13, %e.19)
+      jump ^join.4()
+    clear.4(%exc.13 : py.Value):
+      %e.20 : py.Value = py.undef("e")
+      %e.cell.14 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.28 : base.Unit = base.refSet[py.Value](%e.cell.14, %e.20)
+      jump ^unwind.4(%exc.13)
+    next.4():
+      jump ^unwind.4(%exc.12)
+    unwind.4(%exc.14 : py.Value):
+      %pop.9 : base.Unit = py.popExcept(%prev.4)
+      jump ^propagate.0(%exc.14)
+    join.4():
+      %dict.2 : py.Value = py.mkDict ^catch.5()
+      %G.4 : py.Value = py.loadGlobal("s137_unpack_iter", "G") ^catch.5()
+      %tuple.24 : py.Value = py.mkTuple
+      %kwargs.24 : py.Value = py.mkKwargs
+      %call.18 : py.Value = py.call(%G.4, %tuple.24, %kwargs.24) ^catch.5()
+      %update.2 : py.Value = py.dictUpdate(%dict.2, %call.18) ^catch.5()
+      jump ^join.5()
+    catch.5(%exc.15 : py.Value):
+      %prev.5 : py.Value = py.pushExcInfo(%exc.15)
+      %KeyError.0 : py.Value = py.loadGlobal("s137_unpack_iter", "KeyError") ^unwind.5()
+      %match.5 : base.Bool = py.excMatch(%exc.15, %KeyError.0) ^unwind.5()
+      branch(%match.5) ^except.5() ^next.5()
+    except.5():
+      %e.cell.15 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.29 : base.Unit = base.refSet[py.Value](%e.cell.15, %exc.15)
+      %print.10 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^clear.5()
+      %str.7 : py.Value = py.strLit("KeyError")
+      %e.21 : py.Value = py.loadGlobal("s137_unpack_iter", "e") ^clear.5()
+      %args.5 : py.Value = py.attr(%e.21, "args") ^clear.5()
+      %int.9 : py.Value = py.intLit(0)
+      %item.5 : py.Value = py.getItem(%args.5, %int.9) ^clear.5()
+      %tuple.25 : py.Value = py.mkTuple(%str.7, %item.5)
+      %kwargs.25 : py.Value = py.mkKwargs
+      %call.19 : py.Value = py.call(%print.10, %tuple.25, %kwargs.25) ^clear.5()
+      %pop.10 : base.Unit = py.popExcept(%prev.5)
+      %e.22 : py.Value = py.undef("e")
+      %e.cell.16 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.30 : base.Unit = base.refSet[py.Value](%e.cell.16, %e.22)
+      jump ^join.5()
+    clear.5(%exc.16 : py.Value):
+      %e.23 : py.Value = py.undef("e")
+      %e.cell.17 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.31 : base.Unit = base.refSet[py.Value](%e.cell.17, %e.23)
+      jump ^unwind.5(%exc.16)
+    next.5():
+      jump ^unwind.5(%exc.15)
+    unwind.5(%exc.17 : py.Value):
+      %pop.11 : base.Unit = py.popExcept(%prev.5)
+      jump ^propagate.0(%exc.17)
+    join.5():
+      %__build_class__.6 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.6 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.KI.<body>|, "<body>", "s137_unpack_iter")
+      %str.8 : py.Value = py.strLit("KI")
+      %tuple.26 : py.Value = py.mkTuple(%clo.6, %str.8)
+      %kwargs.26 : py.Value = py.mkKwargs
+      %KI.0 : py.Value = py.call(%__build_class__.6, %tuple.26, %kwargs.26) ^propagate.0()
+      %KI.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "KI")
+      %set.32 : base.Unit = base.refSet[py.Value](%KI.cell.0, %KI.0)
+      %__build_class__.7 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.7 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.M.<body>|, "<body>", "s137_unpack_iter")
+      %str.9 : py.Value = py.strLit("M")
+      %tuple.27 : py.Value = py.mkTuple(%clo.7, %str.9)
+      %kwargs.27 : py.Value = py.mkKwargs
+      %M.0 : py.Value = py.call(%__build_class__.7, %tuple.27, %kwargs.27) ^propagate.0()
+      %M.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "M")
+      %set.33 : base.Unit = base.refSet[py.Value](%M.cell.0, %M.0)
+      %print.11 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^catch.6()
+      %tuple.28 : py.Value = py.mkTuple
+      %kwargs.28 : py.Value = py.mkKwargs
+      %M.1 : py.Value = py.loadGlobal("s137_unpack_iter", "M") ^catch.6()
+      %tuple.29 : py.Value = py.mkTuple
+      %kwargs.29 : py.Value = py.mkKwargs
+      %call.20 : py.Value = py.call(%M.1, %tuple.29, %kwargs.29) ^catch.6()
+      %merge.2 : py.Value = py.dictMerge(%print.11, %kwargs.28, %call.20) ^catch.6()
+      %call.21 : py.Value = py.call(%print.11, %tuple.28, %merge.2) ^catch.6()
+      jump ^join.6()
+    catch.6(%exc.18 : py.Value):
+      %prev.6 : py.Value = py.pushExcInfo(%exc.18)
+      %TypeError.5 : py.Value = py.loadGlobal("s137_unpack_iter", "TypeError") ^unwind.6()
+      %match.6 : base.Bool = py.excMatch(%exc.18, %TypeError.5) ^unwind.6()
+      branch(%match.6) ^except.6() ^next.6()
+    except.6():
+      %e.cell.18 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.34 : base.Unit = base.refSet[py.Value](%e.cell.18, %exc.18)
+      %print.12 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^clear.6()
+      %e.24 : py.Value = py.loadGlobal("s137_unpack_iter", "e") ^clear.6()
+      %args.6 : py.Value = py.attr(%e.24, "args") ^clear.6()
+      %int.10 : py.Value = py.intLit(0)
+      %item.6 : py.Value = py.getItem(%args.6, %int.10) ^clear.6()
+      %tuple.30 : py.Value = py.mkTuple(%item.6)
+      %kwargs.30 : py.Value = py.mkKwargs
+      %call.22 : py.Value = py.call(%print.12, %tuple.30, %kwargs.30) ^clear.6()
+      %pop.12 : base.Unit = py.popExcept(%prev.6)
+      %e.25 : py.Value = py.undef("e")
+      %e.cell.19 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.35 : base.Unit = base.refSet[py.Value](%e.cell.19, %e.25)
+      jump ^join.6()
+    clear.6(%exc.19 : py.Value):
+      %e.26 : py.Value = py.undef("e")
+      %e.cell.20 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.36 : base.Unit = base.refSet[py.Value](%e.cell.20, %e.26)
+      jump ^unwind.6(%exc.19)
+    next.6():
+      jump ^unwind.6(%exc.18)
+    unwind.6(%exc.20 : py.Value):
+      %pop.13 : base.Unit = py.popExcept(%prev.6)
+      jump ^propagate.0(%exc.20)
+    join.6():
+      %dict.3 : py.Value = py.mkDict ^propagate.0()
+      %M.2 : py.Value = py.loadGlobal("s137_unpack_iter", "M") ^propagate.0()
+      %tuple.31 : py.Value = py.mkTuple
+      %kwargs.31 : py.Value = py.mkKwargs
+      %call.23 : py.Value = py.call(%M.2, %tuple.31, %kwargs.31) ^propagate.0()
+      %update.3 : py.Value = py.dictUpdate(%dict.3, %call.23) ^propagate.0()
+      %d.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "d")
+      %set.37 : base.Unit = base.refSet[py.Value](%d.cell.0, %update.3)
+      %print.13 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %len.0 : py.Value = py.loadGlobal("s137_unpack_iter", "len") ^propagate.0()
+      %d.0 : py.Value = py.loadGlobal("s137_unpack_iter", "d") ^propagate.0()
+      %tuple.32 : py.Value = py.mkTuple(%d.0)
+      %kwargs.32 : py.Value = py.mkKwargs
+      %call.24 : py.Value = py.call(%len.0, %tuple.32, %kwargs.32) ^propagate.0()
+      %tuple.33 : py.Value = py.mkTuple(%call.24)
+      %kwargs.33 : py.Value = py.mkKwargs
+      %call.25 : py.Value = py.call(%print.13, %tuple.33, %kwargs.33) ^propagate.0()
+      %print.14 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^catch.7()
+      %tuple.34 : py.Value = py.mkTuple
+      %str.10 : py.Value = py.strLit("end")
+      %str.11 : py.Value = py.strLit("")
+      %kwargs.34 : py.Value = py.mkKwargs(%str.10, %str.11)
+      %M.3 : py.Value = py.loadGlobal("s137_unpack_iter", "M") ^catch.7()
+      %tuple.35 : py.Value = py.mkTuple
+      %kwargs.35 : py.Value = py.mkKwargs
+      %call.26 : py.Value = py.call(%M.3, %tuple.35, %kwargs.35) ^catch.7()
+      %merge.3 : py.Value = py.dictMerge(%print.14, %kwargs.34, %call.26) ^catch.7()
+      %call.27 : py.Value = py.call(%print.14, %tuple.34, %merge.3) ^catch.7()
+      jump ^join.7()
+    catch.7(%exc.21 : py.Value):
+      %prev.7 : py.Value = py.pushExcInfo(%exc.21)
+      %TypeError.6 : py.Value = py.loadGlobal("s137_unpack_iter", "TypeError") ^unwind.7()
+      %match.7 : base.Bool = py.excMatch(%exc.21, %TypeError.6) ^unwind.7()
+      branch(%match.7) ^except.7() ^next.7()
+    except.7():
+      %e.cell.21 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.38 : base.Unit = base.refSet[py.Value](%e.cell.21, %exc.21)
+      %print.15 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^clear.7()
+      %e.27 : py.Value = py.loadGlobal("s137_unpack_iter", "e") ^clear.7()
+      %args.7 : py.Value = py.attr(%e.27, "args") ^clear.7()
+      %int.11 : py.Value = py.intLit(0)
+      %item.7 : py.Value = py.getItem(%args.7, %int.11) ^clear.7()
+      %tuple.36 : py.Value = py.mkTuple(%item.7)
+      %kwargs.36 : py.Value = py.mkKwargs
+      %call.28 : py.Value = py.call(%print.15, %tuple.36, %kwargs.36) ^clear.7()
+      %pop.14 : base.Unit = py.popExcept(%prev.7)
+      %e.28 : py.Value = py.undef("e")
+      %e.cell.22 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.39 : base.Unit = base.refSet[py.Value](%e.cell.22, %e.28)
+      jump ^join.7()
+    clear.7(%exc.22 : py.Value):
+      %e.29 : py.Value = py.undef("e")
+      %e.cell.23 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.40 : base.Unit = base.refSet[py.Value](%e.cell.23, %e.29)
+      jump ^unwind.7(%exc.22)
+    next.7():
+      jump ^unwind.7(%exc.21)
+    unwind.7(%exc.23 : py.Value):
+      %pop.15 : base.Unit = py.popExcept(%prev.7)
+      jump ^propagate.0(%exc.23)
+    join.7():
+      %__build_class__.8 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.8 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.H.<body>|, "<body>", "s137_unpack_iter")
+      %str.12 : py.Value = py.strLit("H")
+      %tuple.37 : py.Value = py.mkTuple(%clo.8, %str.12)
+      %kwargs.37 : py.Value = py.mkKwargs
+      %H.0 : py.Value = py.call(%__build_class__.8, %tuple.37, %kwargs.37) ^propagate.0()
+      %H.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "H")
+      %set.41 : base.Unit = base.refSet[py.Value](%H.cell.0, %H.0)
+      %__build_class__.9 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.9 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.M.<body>.1|, "<body>", "s137_unpack_iter")
+      %str.13 : py.Value = py.strLit("M")
+      %tuple.38 : py.Value = py.mkTuple(%clo.9, %str.13)
+      %kwargs.38 : py.Value = py.mkKwargs
+      %M.4 : py.Value = py.call(%__build_class__.9, %tuple.38, %kwargs.38) ^propagate.0()
+      %M.cell.1 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "M")
+      %set.42 : base.Unit = base.refSet[py.Value](%M.cell.1, %M.4)
+      %dict.4 : py.Value = py.mkDict ^propagate.0()
+      %M.5 : py.Value = py.loadGlobal("s137_unpack_iter", "M") ^propagate.0()
+      %H.1 : py.Value = py.loadGlobal("s137_unpack_iter", "H") ^propagate.0()
+      %int.12 : py.Value = py.intLit(1)
+      %tuple.39 : py.Value = py.mkTuple(%int.12)
+      %kwargs.39 : py.Value = py.mkKwargs
+      %call.29 : py.Value = py.call(%H.1, %tuple.39, %kwargs.39) ^propagate.0()
+      %H.2 : py.Value = py.loadGlobal("s137_unpack_iter", "H") ^propagate.0()
+      %int.13 : py.Value = py.intLit(2)
+      %tuple.40 : py.Value = py.mkTuple(%int.13)
+      %kwargs.40 : py.Value = py.mkKwargs
+      %call.30 : py.Value = py.call(%H.2, %tuple.40, %kwargs.40) ^propagate.0()
+      %list.1 : py.Value = py.mkList(%call.29, %call.30)
+      %tuple.41 : py.Value = py.mkTuple(%list.1)
+      %kwargs.41 : py.Value = py.mkKwargs
+      %call.31 : py.Value = py.call(%M.5, %tuple.41, %kwargs.41) ^propagate.0()
+      %update.4 : py.Value = py.dictUpdate(%dict.4, %call.31) ^propagate.0()
+      %d.cell.1 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "d")
+      %set.43 : base.Unit = base.refSet[py.Value](%d.cell.1, %update.4)
+      %print.16 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %len.1 : py.Value = py.loadGlobal("s137_unpack_iter", "len") ^propagate.0()
+      %d.1 : py.Value = py.loadGlobal("s137_unpack_iter", "d") ^propagate.0()
+      %tuple.42 : py.Value = py.mkTuple(%d.1)
+      %kwargs.42 : py.Value = py.mkKwargs
+      %call.32 : py.Value = py.call(%len.1, %tuple.42, %kwargs.42) ^propagate.0()
+      %tuple.43 : py.Value = py.mkTuple(%call.32)
+      %kwargs.43 : py.Value = py.mkKwargs
+      %call.33 : py.Value = py.call(%print.16, %tuple.43, %kwargs.43) ^propagate.0()
+      %print.17 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^catch.8()
+      %tuple.44 : py.Value = py.mkTuple
+      %kwargs.44 : py.Value = py.mkKwargs
+      %M.6 : py.Value = py.loadGlobal("s137_unpack_iter", "M") ^catch.8()
+      %H.3 : py.Value = py.loadGlobal("s137_unpack_iter", "H") ^catch.8()
+      %int.14 : py.Value = py.intLit(3)
+      %tuple.45 : py.Value = py.mkTuple(%int.14)
+      %kwargs.45 : py.Value = py.mkKwargs
+      %call.34 : py.Value = py.call(%H.3, %tuple.45, %kwargs.45) ^catch.8()
+      %list.2 : py.Value = py.mkList(%call.34)
+      %tuple.46 : py.Value = py.mkTuple(%list.2)
+      %kwargs.46 : py.Value = py.mkKwargs
+      %call.35 : py.Value = py.call(%M.6, %tuple.46, %kwargs.46) ^catch.8()
+      %merge.4 : py.Value = py.dictMerge(%print.17, %kwargs.44, %call.35) ^catch.8()
+      %call.36 : py.Value = py.call(%print.17, %tuple.44, %merge.4) ^catch.8()
+      jump ^join.8()
+    catch.8(%exc.24 : py.Value):
+      %prev.8 : py.Value = py.pushExcInfo(%exc.24)
+      %TypeError.7 : py.Value = py.loadGlobal("s137_unpack_iter", "TypeError") ^unwind.8()
+      %match.8 : base.Bool = py.excMatch(%exc.24, %TypeError.7) ^unwind.8()
+      branch(%match.8) ^except.8() ^next.8()
+    except.8():
+      %e.cell.24 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.44 : base.Unit = base.refSet[py.Value](%e.cell.24, %exc.24)
+      %print.18 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^clear.8()
+      %e.30 : py.Value = py.loadGlobal("s137_unpack_iter", "e") ^clear.8()
+      %args.8 : py.Value = py.attr(%e.30, "args") ^clear.8()
+      %int.15 : py.Value = py.intLit(0)
+      %item.8 : py.Value = py.getItem(%args.8, %int.15) ^clear.8()
+      %tuple.47 : py.Value = py.mkTuple(%item.8)
+      %kwargs.47 : py.Value = py.mkKwargs
+      %call.37 : py.Value = py.call(%print.18, %tuple.47, %kwargs.47) ^clear.8()
+      %pop.16 : base.Unit = py.popExcept(%prev.8)
+      %e.31 : py.Value = py.undef("e")
+      %e.cell.25 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.45 : base.Unit = base.refSet[py.Value](%e.cell.25, %e.31)
+      jump ^join.8()
+    clear.8(%exc.25 : py.Value):
+      %e.32 : py.Value = py.undef("e")
+      %e.cell.26 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.46 : base.Unit = base.refSet[py.Value](%e.cell.26, %e.32)
+      jump ^unwind.8(%exc.25)
+    next.8():
+      jump ^unwind.8(%exc.24)
+    unwind.8(%exc.26 : py.Value):
+      %pop.17 : base.Unit = py.popExcept(%prev.8)
+      jump ^propagate.0(%exc.26)
+    join.8():
+      %__build_class__.10 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %__class__.0 : py.Value = py.undef("__class__")
+      %__class__.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%__class__.0)
+      %clo.10 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@|s137_unpack_iter.Meta.<body>|, "<body>", "s137_unpack_iter", %__class__.cell.0)
+      %str.14 : py.Value = py.strLit("Meta")
+      %type.0 : py.Value = py.loadGlobal("s137_unpack_iter", "type") ^propagate.0()
+      %tuple.48 : py.Value = py.mkTuple(%clo.10, %str.14, %type.0)
+      %kwargs.48 : py.Value = py.mkKwargs
+      %Meta.0 : py.Value = py.call(%__build_class__.10, %tuple.48, %kwargs.48) ^propagate.0()
+      %set.47 : base.Unit = base.refSet[py.Value](%__class__.cell.0, %Meta.0)
+      %Meta.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "Meta")
+      %set.48 : base.Unit = base.refSet[py.Value](%Meta.cell.0, %Meta.0)
+      %__build_class__.11 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.11 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.A.<body>|, "<body>", "s137_unpack_iter")
+      %str.15 : py.Value = py.strLit("A")
+      %tuple.49 : py.Value = py.mkTuple(%clo.11, %str.15)
+      %str.16 : py.Value = py.strLit("metaclass")
+      %Meta.1 : py.Value = py.loadGlobal("s137_unpack_iter", "Meta") ^propagate.0()
+      %kwargs.49 : py.Value = py.mkKwargs(%str.16, %Meta.1)
+      %A.0 : py.Value = py.call(%__build_class__.11, %tuple.49, %kwargs.49) ^propagate.0()
+      %A.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "A")
+      %set.49 : base.Unit = base.refSet[py.Value](%A.cell.0, %A.0)
+      %A.1 : py.Value = py.loadGlobal("s137_unpack_iter", "A") ^propagate.0()
+      %int.16 : py.Value = py.intLit(1)
+      %tuple.50 : py.Value = py.mkTuple(%int.16)
+      %kwargs.50 : py.Value = py.mkKwargs
+      %call.38 : py.Value = py.call(%A.1, %tuple.50, %kwargs.50) ^propagate.0()
+      %a.cell.3 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "a")
+      %set.50 : base.Unit = base.refSet[py.Value](%a.cell.3, %call.38)
+      %print.19 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %type.1 : py.Value = py.loadGlobal("s137_unpack_iter", "type") ^propagate.0()
+      %a.3 : py.Value = py.loadGlobal("s137_unpack_iter", "a") ^propagate.0()
+      %tuple.51 : py.Value = py.mkTuple(%a.3)
+      %kwargs.51 : py.Value = py.mkKwargs
+      %call.39 : py.Value = py.call(%type.1, %tuple.51, %kwargs.51) ^propagate.0()
+      %__name__.0 : py.Value = py.attr(%call.39, "__name__") ^propagate.0()
+      %tuple.52 : py.Value = py.mkTuple(%__name__.0)
+      %kwargs.52 : py.Value = py.mkKwargs
+      %call.40 : py.Value = py.call(%print.19, %tuple.52, %kwargs.52) ^propagate.0()
+      %__build_class__.12 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.12 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.B.<body>|, "<body>", "s137_unpack_iter")
+      %str.17 : py.Value = py.strLit("B")
+      %tuple.53 : py.Value = py.mkTuple(%clo.12, %str.17)
+      %kwargs.53 : py.Value = py.mkKwargs
+      %B.0 : py.Value = py.call(%__build_class__.12, %tuple.53, %kwargs.53) ^propagate.0()
+      %B.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "B")
+      %set.51 : base.Unit = base.refSet[py.Value](%B.cell.0, %B.0)
+      %print.20 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %B.1 : py.Value = py.loadGlobal("s137_unpack_iter", "B") ^propagate.0()
+      %int.17 : py.Value = py.intLit(2)
+      %tuple.54 : py.Value = py.mkTuple(%int.17)
+      %kwargs.54 : py.Value = py.mkKwargs
+      %call.41 : py.Value = py.call(%B.1, %tuple.54, %kwargs.54) ^propagate.0()
+      %tuple.55 : py.Value = py.mkTuple(%call.41)
+      %kwargs.55 : py.Value = py.mkKwargs
+      %call.42 : py.Value = py.call(%print.20, %tuple.55, %kwargs.55) ^propagate.0()
+      %__build_class__.13 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.13 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.C.<body>|, "<body>", "s137_unpack_iter")
+      %str.18 : py.Value = py.strLit("C")
+      %tuple.56 : py.Value = py.mkTuple(%clo.13, %str.18)
+      %kwargs.56 : py.Value = py.mkKwargs
+      %C.0 : py.Value = py.call(%__build_class__.13, %tuple.56, %kwargs.56) ^propagate.0()
+      %C.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "C")
+      %set.52 : base.Unit = base.refSet[py.Value](%C.cell.0, %C.0)
+      %C.1 : py.Value = py.loadGlobal("s137_unpack_iter", "C") ^catch.9()
+      %tuple.57 : py.Value = py.mkTuple
+      %kwargs.57 : py.Value = py.mkKwargs
+      %call.43 : py.Value = py.call(%C.1, %tuple.57, %kwargs.57) ^catch.9()
+      jump ^join.9()
+    catch.9(%exc.27 : py.Value):
+      %prev.9 : py.Value = py.pushExcInfo(%exc.27)
+      %TypeError.8 : py.Value = py.loadGlobal("s137_unpack_iter", "TypeError") ^unwind.9()
+      %match.9 : base.Bool = py.excMatch(%exc.27, %TypeError.8) ^unwind.9()
+      branch(%match.9) ^except.9() ^next.9()
+    except.9():
+      %e.cell.27 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.53 : base.Unit = base.refSet[py.Value](%e.cell.27, %exc.27)
+      %print.21 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^clear.9()
+      %e.33 : py.Value = py.loadGlobal("s137_unpack_iter", "e") ^clear.9()
+      %args.9 : py.Value = py.attr(%e.33, "args") ^clear.9()
+      %int.18 : py.Value = py.intLit(0)
+      %item.9 : py.Value = py.getItem(%args.9, %int.18) ^clear.9()
+      %tuple.58 : py.Value = py.mkTuple(%item.9)
+      %kwargs.58 : py.Value = py.mkKwargs
+      %call.44 : py.Value = py.call(%print.21, %tuple.58, %kwargs.58) ^clear.9()
+      %pop.18 : base.Unit = py.popExcept(%prev.9)
+      %e.34 : py.Value = py.undef("e")
+      %e.cell.28 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.54 : base.Unit = base.refSet[py.Value](%e.cell.28, %e.34)
+      jump ^join.9()
+    clear.9(%exc.28 : py.Value):
+      %e.35 : py.Value = py.undef("e")
+      %e.cell.29 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.55 : base.Unit = base.refSet[py.Value](%e.cell.29, %e.35)
+      jump ^unwind.9(%exc.28)
+    next.9():
+      jump ^unwind.9(%exc.27)
+    unwind.9(%exc.29 : py.Value):
+      %pop.19 : base.Unit = py.popExcept(%prev.9)
+      jump ^propagate.0(%exc.29)
+    join.9():
+      %__build_class__.14 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.14 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.D.<body>|, "<body>", "s137_unpack_iter")
+      %str.19 : py.Value = py.strLit("D")
+      %tuple.59 : py.Value = py.mkTuple(%clo.14, %str.19)
+      %kwargs.59 : py.Value = py.mkKwargs
+      %D.0 : py.Value = py.call(%__build_class__.14, %tuple.59, %kwargs.59) ^propagate.0()
+      %D.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "D")
+      %set.56 : base.Unit = base.refSet[py.Value](%D.cell.0, %D.0)
+      %print.22 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %D.1 : py.Value = py.loadGlobal("s137_unpack_iter", "D") ^propagate.0()
+      %tuple.60 : py.Value = py.mkTuple
+      %kwargs.60 : py.Value = py.mkKwargs
+      %call.45 : py.Value = py.call(%D.1, %tuple.60, %kwargs.60) ^propagate.0()
+      %int.19 : py.Value = py.intLit(4)
+      %tuple.61 : py.Value = py.mkTuple(%int.19)
+      %kwargs.61 : py.Value = py.mkKwargs
+      %call.46 : py.Value = py.call(%call.45, %tuple.61, %kwargs.61) ^propagate.0()
+      %tuple.62 : py.Value = py.mkTuple(%call.46)
+      %kwargs.62 : py.Value = py.mkKwargs
+      %call.47 : py.Value = py.call(%print.22, %tuple.62, %kwargs.62) ^propagate.0()
+      %__build_class__.15 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.15 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.E.<body>|, "<body>", "s137_unpack_iter")
+      %str.20 : py.Value = py.strLit("E")
+      %tuple.63 : py.Value = py.mkTuple(%clo.15, %str.20)
+      %kwargs.63 : py.Value = py.mkKwargs
+      %E.0 : py.Value = py.call(%__build_class__.15, %tuple.63, %kwargs.63) ^propagate.0()
+      %E.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "E")
+      %set.57 : base.Unit = base.refSet[py.Value](%E.cell.0, %E.0)
+      %E.1 : py.Value = py.loadGlobal("s137_unpack_iter", "E") ^catch.10()
+      %tuple.64 : py.Value = py.mkTuple
+      %kwargs.64 : py.Value = py.mkKwargs
+      %call.48 : py.Value = py.call(%E.1, %tuple.64, %kwargs.64) ^catch.10()
+      %int.20 : py.Value = py.intLit(1)
+      %tuple.65 : py.Value = py.mkTuple(%int.20)
+      %kwargs.65 : py.Value = py.mkKwargs
+      %call.49 : py.Value = py.call(%call.48, %tuple.65, %kwargs.65) ^catch.10()
+      jump ^join.10()
+    catch.10(%exc.30 : py.Value):
+      %prev.10 : py.Value = py.pushExcInfo(%exc.30)
+      %TypeError.9 : py.Value = py.loadGlobal("s137_unpack_iter", "TypeError") ^unwind.10()
+      %match.10 : base.Bool = py.excMatch(%exc.30, %TypeError.9) ^unwind.10()
+      branch(%match.10) ^except.10() ^next.10()
+    except.10():
+      %e.cell.30 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.58 : base.Unit = base.refSet[py.Value](%e.cell.30, %exc.30)
+      %print.23 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^clear.10()
+      %e.36 : py.Value = py.loadGlobal("s137_unpack_iter", "e") ^clear.10()
+      %args.10 : py.Value = py.attr(%e.36, "args") ^clear.10()
+      %int.21 : py.Value = py.intLit(0)
+      %item.10 : py.Value = py.getItem(%args.10, %int.21) ^clear.10()
+      %tuple.66 : py.Value = py.mkTuple(%item.10)
+      %kwargs.66 : py.Value = py.mkKwargs
+      %call.50 : py.Value = py.call(%print.23, %tuple.66, %kwargs.66) ^clear.10()
+      %pop.20 : base.Unit = py.popExcept(%prev.10)
+      %e.37 : py.Value = py.undef("e")
+      %e.cell.31 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.59 : base.Unit = base.refSet[py.Value](%e.cell.31, %e.37)
+      jump ^join.10()
+    clear.10(%exc.31 : py.Value):
+      %e.38 : py.Value = py.undef("e")
+      %e.cell.32 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.60 : base.Unit = base.refSet[py.Value](%e.cell.32, %e.38)
+      jump ^unwind.10(%exc.31)
+    next.10():
+      jump ^unwind.10(%exc.30)
+    unwind.10(%exc.32 : py.Value):
+      %pop.21 : base.Unit = py.popExcept(%prev.10)
+      jump ^propagate.0(%exc.32)
+    join.10():
+      %print.24 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %type.2 : py.Value = py.loadGlobal("s137_unpack_iter", "type") ^propagate.0()
+      %int.22 : py.Value = py.intLit(3)
+      %tuple.67 : py.Value = py.mkTuple(%int.22)
+      %kwargs.67 : py.Value = py.mkKwargs
+      %call.51 : py.Value = py.call(%type.2, %tuple.67, %kwargs.67) ^propagate.0()
+      %__name__.1 : py.Value = py.attr(%call.51, "__name__") ^propagate.0()
+      %tuple.68 : py.Value = py.mkTuple(%__name__.1)
+      %kwargs.68 : py.Value = py.mkKwargs
+      %call.52 : py.Value = py.call(%print.24, %tuple.68, %kwargs.68) ^propagate.0()
+      %type.3 : py.Value = py.loadGlobal("s137_unpack_iter", "type") ^propagate.0()
+      %str.21 : py.Value = py.strLit("T")
+      %tuple.69 : py.Value = py.mkTuple
+      %str.22 : py.Value = py.strLit("__module__")
+      %str.23 : py.Value = py.strLit("m")
+      %dict.5 : py.Value = py.mkDict(%str.22, %str.23) ^propagate.0()
+      %tuple.70 : py.Value = py.mkTuple(%str.21, %tuple.69, %dict.5)
+      %kwargs.69 : py.Value = py.mkKwargs
+      %call.53 : py.Value = py.call(%type.3, %tuple.70, %kwargs.69) ^propagate.0()
+      %T.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "T")
+      %set.61 : base.Unit = base.refSet[py.Value](%T.cell.0, %call.53)
+      %print.25 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %T.0 : py.Value = py.loadGlobal("s137_unpack_iter", "T") ^propagate.0()
+      %__name__.2 : py.Value = py.attr(%T.0, "__name__") ^propagate.0()
+      %tuple.71 : py.Value = py.mkTuple(%__name__.2)
+      %kwargs.70 : py.Value = py.mkKwargs
+      %call.54 : py.Value = py.call(%print.25, %tuple.71, %kwargs.70) ^propagate.0()
+      %__build_class__.16 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.16 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.F.<body>|, "<body>", "s137_unpack_iter")
+      %str.24 : py.Value = py.strLit("F")
+      %tuple.72 : py.Value = py.mkTuple(%clo.16, %str.24)
+      %kwargs.71 : py.Value = py.mkKwargs
+      %F.0 : py.Value = py.call(%__build_class__.16, %tuple.72, %kwargs.71) ^propagate.0()
+      %F.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "F")
+      %set.62 : base.Unit = base.refSet[py.Value](%F.cell.0, %F.0)
+      %print.26 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %F.1 : py.Value = py.loadGlobal("s137_unpack_iter", "F") ^propagate.0()
+      %s.0 : py.Value = py.attr(%F.1, "s") ^propagate.0()
+      %int.23 : py.Value = py.intLit(3)
+      %tuple.73 : py.Value = py.mkTuple(%int.23)
+      %kwargs.72 : py.Value = py.mkKwargs
+      %call.55 : py.Value = py.call(%s.0, %tuple.73, %kwargs.72) ^propagate.0()
+      %F.2 : py.Value = py.loadGlobal("s137_unpack_iter", "F") ^propagate.0()
+      %c.49 : py.Value = py.attr(%F.2, "c") ^propagate.0()
+      %int.24 : py.Value = py.intLit(1)
+      %tuple.74 : py.Value = py.mkTuple(%int.24)
+      %kwargs.73 : py.Value = py.mkKwargs
+      %call.56 : py.Value = py.call(%c.49, %tuple.74, %kwargs.73) ^propagate.0()
+      %F.3 : py.Value = py.loadGlobal("s137_unpack_iter", "F") ^propagate.0()
+      %tuple.75 : py.Value = py.mkTuple
+      %kwargs.74 : py.Value = py.mkKwargs
+      %call.57 : py.Value = py.call(%F.3, %tuple.75, %kwargs.74) ^propagate.0()
+      %s.1 : py.Value = py.attr(%call.57, "s") ^propagate.0()
+      %int.25 : py.Value = py.intLit(2)
+      %tuple.76 : py.Value = py.mkTuple(%int.25)
+      %kwargs.75 : py.Value = py.mkKwargs
+      %call.58 : py.Value = py.call(%s.1, %tuple.76, %kwargs.75) ^propagate.0()
+      %tuple.77 : py.Value = py.mkTuple(%call.55, %call.56, %call.58)
+      %kwargs.76 : py.Value = py.mkKwargs
+      %call.59 : py.Value = py.call(%print.26, %tuple.77, %kwargs.76) ^propagate.0()
+      %__build_class__.17 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.17 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.Meta2.<body>|, "<body>", "s137_unpack_iter")
+      %str.25 : py.Value = py.strLit("Meta2")
+      %type.4 : py.Value = py.loadGlobal("s137_unpack_iter", "type") ^propagate.0()
+      %tuple.78 : py.Value = py.mkTuple(%clo.17, %str.25, %type.4)
+      %kwargs.77 : py.Value = py.mkKwargs
+      %Meta2.0 : py.Value = py.call(%__build_class__.17, %tuple.78, %kwargs.77) ^propagate.0()
+      %Meta2.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "Meta2")
+      %set.63 : base.Unit = base.refSet[py.Value](%Meta2.cell.0, %Meta2.0)
+      %__build_class__.18 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.18 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.G.<body>.2|, "<body>", "s137_unpack_iter")
+      %str.26 : py.Value = py.strLit("G")
+      %tuple.79 : py.Value = py.mkTuple(%clo.18, %str.26)
+      %str.27 : py.Value = py.strLit("metaclass")
+      %Meta2.1 : py.Value = py.loadGlobal("s137_unpack_iter", "Meta2") ^propagate.0()
+      %kwargs.78 : py.Value = py.mkKwargs(%str.27, %Meta2.1)
+      %G.5 : py.Value = py.call(%__build_class__.18, %tuple.79, %kwargs.78) ^propagate.0()
+      %G.cell.2 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "G")
+      %set.64 : base.Unit = base.refSet[py.Value](%G.cell.2, %G.5)
+      %print.27 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %G.6 : py.Value = py.loadGlobal("s137_unpack_iter", "G") ^propagate.0()
+      %int.26 : py.Value = py.intLit(9)
+      %tuple.80 : py.Value = py.mkTuple(%int.26)
+      %kwargs.79 : py.Value = py.mkKwargs
+      %call.60 : py.Value = py.call(%G.6, %tuple.80, %kwargs.79) ^propagate.0()
+      %q.0 : py.Value = py.attr(%call.60, "q") ^propagate.0()
+      %tuple.81 : py.Value = py.mkTuple(%q.0)
+      %kwargs.80 : py.Value = py.mkKwargs
+      %call.61 : py.Value = py.call(%print.27, %tuple.81, %kwargs.80) ^propagate.0()
+      %__build_class__.19 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.19 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.H.<body>.1|, "<body>", "s137_unpack_iter")
+      %str.28 : py.Value = py.strLit("H")
+      %D.2 : py.Value = py.loadGlobal("s137_unpack_iter", "D") ^propagate.0()
+      %tuple.82 : py.Value = py.mkTuple(%clo.19, %str.28, %D.2)
+      %kwargs.81 : py.Value = py.mkKwargs
+      %H.4 : py.Value = py.call(%__build_class__.19, %tuple.82, %kwargs.81) ^propagate.0()
+      %H.cell.1 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "H")
+      %set.65 : base.Unit = base.refSet[py.Value](%H.cell.1, %H.4)
+      %print.28 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %H.5 : py.Value = py.loadGlobal("s137_unpack_iter", "H") ^propagate.0()
+      %tuple.83 : py.Value = py.mkTuple
+      %kwargs.82 : py.Value = py.mkKwargs
+      %call.62 : py.Value = py.call(%H.5, %tuple.83, %kwargs.82) ^propagate.0()
+      %int.27 : py.Value = py.intLit(10)
+      %tuple.84 : py.Value = py.mkTuple(%int.27)
+      %kwargs.83 : py.Value = py.mkKwargs
+      %call.63 : py.Value = py.call(%call.62, %tuple.84, %kwargs.83) ^propagate.0()
+      %tuple.85 : py.Value = py.mkTuple(%call.63)
+      %kwargs.84 : py.Value = py.mkKwargs
+      %call.64 : py.Value = py.call(%print.28, %tuple.85, %kwargs.84) ^propagate.0()
+      %__build_class__.20 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.20 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.I.<body>|, "<body>", "s137_unpack_iter")
+      %str.29 : py.Value = py.strLit("I")
+      %tuple.86 : py.Value = py.mkTuple(%clo.20, %str.29)
+      %kwargs.85 : py.Value = py.mkKwargs
+      %I.0 : py.Value = py.call(%__build_class__.20, %tuple.86, %kwargs.85) ^propagate.0()
+      %I.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "I")
+      %set.66 : base.Unit = base.refSet[py.Value](%I.cell.0, %I.0)
+      %print.29 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %type.5 : py.Value = py.loadGlobal("s137_unpack_iter", "type") ^propagate.0()
+      %I.1 : py.Value = py.loadGlobal("s137_unpack_iter", "I") ^propagate.0()
+      %tuple.87 : py.Value = py.mkTuple
+      %kwargs.86 : py.Value = py.mkKwargs
+      %call.65 : py.Value = py.call(%I.1, %tuple.87, %kwargs.86) ^propagate.0()
+      %tuple.88 : py.Value = py.mkTuple(%call.65)
+      %kwargs.87 : py.Value = py.mkKwargs
+      %call.66 : py.Value = py.call(%type.5, %tuple.88, %kwargs.87) ^propagate.0()
+      %__name__.3 : py.Value = py.attr(%call.66, "__name__") ^propagate.0()
+      %tuple.89 : py.Value = py.mkTuple(%__name__.3)
+      %kwargs.88 : py.Value = py.mkKwargs
+      %call.67 : py.Value = py.call(%print.29, %tuple.89, %kwargs.88) ^propagate.0()
+      %__build_class__.21 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.21 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.J.<body>|, "<body>", "s137_unpack_iter")
+      %str.30 : py.Value = py.strLit("J")
+      %Exception.0 : py.Value = py.loadGlobal("s137_unpack_iter", "Exception") ^propagate.0()
+      %tuple.90 : py.Value = py.mkTuple(%clo.21, %str.30, %Exception.0)
+      %kwargs.89 : py.Value = py.mkKwargs
+      %J.0 : py.Value = py.call(%__build_class__.21, %tuple.90, %kwargs.89) ^propagate.0()
+      %J.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "J")
+      %set.67 : base.Unit = base.refSet[py.Value](%J.cell.0, %J.0)
+      %J.1 : py.Value = py.loadGlobal("s137_unpack_iter", "J") ^propagate.0()
+      %int.28 : py.Value = py.intLit(5)
+      %tuple.91 : py.Value = py.mkTuple(%int.28)
+      %kwargs.90 : py.Value = py.mkKwargs
+      %call.68 : py.Value = py.call(%J.1, %tuple.91, %kwargs.90) ^propagate.0()
+      %j.cell.0 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "j")
+      %set.68 : base.Unit = base.refSet[py.Value](%j.cell.0, %call.68)
+      %print.30 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %j.0 : py.Value = py.loadGlobal("s137_unpack_iter", "j") ^propagate.0()
+      %args.11 : py.Value = py.attr(%j.0, "args") ^propagate.0()
+      %int.29 : py.Value = py.intLit(0)
+      %item.11 : py.Value = py.getItem(%args.11, %int.29) ^propagate.0()
+      %tuple.92 : py.Value = py.mkTuple(%item.11)
+      %kwargs.91 : py.Value = py.mkKwargs
+      %call.69 : py.Value = py.call(%print.30, %tuple.92, %kwargs.91) ^propagate.0()
+      %object.0 : py.Value = py.loadGlobal("s137_unpack_iter", "object") ^catch.11()
+      %int.30 : py.Value = py.intLit(1)
+      %tuple.93 : py.Value = py.mkTuple(%int.30)
+      %kwargs.92 : py.Value = py.mkKwargs
+      %call.70 : py.Value = py.call(%object.0, %tuple.93, %kwargs.92) ^catch.11()
+      jump ^join.11()
+    catch.11(%exc.33 : py.Value):
+      %prev.11 : py.Value = py.pushExcInfo(%exc.33)
+      %TypeError.10 : py.Value = py.loadGlobal("s137_unpack_iter", "TypeError") ^unwind.11()
+      %match.11 : base.Bool = py.excMatch(%exc.33, %TypeError.10) ^unwind.11()
+      branch(%match.11) ^except.11() ^next.11()
+    except.11():
+      %e.cell.33 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.69 : base.Unit = base.refSet[py.Value](%e.cell.33, %exc.33)
+      %print.31 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^clear.11()
+      %e.39 : py.Value = py.loadGlobal("s137_unpack_iter", "e") ^clear.11()
+      %args.12 : py.Value = py.attr(%e.39, "args") ^clear.11()
+      %int.31 : py.Value = py.intLit(0)
+      %item.12 : py.Value = py.getItem(%args.12, %int.31) ^clear.11()
+      %tuple.94 : py.Value = py.mkTuple(%item.12)
+      %kwargs.93 : py.Value = py.mkKwargs
+      %call.71 : py.Value = py.call(%print.31, %tuple.94, %kwargs.93) ^clear.11()
+      %pop.22 : base.Unit = py.popExcept(%prev.11)
+      %e.40 : py.Value = py.undef("e")
+      %e.cell.34 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.70 : base.Unit = base.refSet[py.Value](%e.cell.34, %e.40)
+      jump ^join.11()
+    clear.11(%exc.34 : py.Value):
+      %e.41 : py.Value = py.undef("e")
+      %e.cell.35 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.71 : base.Unit = base.refSet[py.Value](%e.cell.35, %e.41)
+      jump ^unwind.11(%exc.34)
+    next.11():
+      jump ^unwind.11(%exc.33)
+    unwind.11(%exc.35 : py.Value):
+      %pop.23 : base.Unit = py.popExcept(%prev.11)
+      jump ^propagate.0(%exc.35)
+    join.11():
+      %__build_class__.22 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.22 : py.Value = py.mkClosure[[]](@|s137_unpack_iter.K.<body>.1|, "<body>", "s137_unpack_iter")
+      %str.31 : py.Value = py.strLit("K")
+      %tuple.95 : py.Value = py.mkTuple(%clo.22, %str.31)
+      %kwargs.94 : py.Value = py.mkKwargs
+      %K.2 : py.Value = py.call(%__build_class__.22, %tuple.95, %kwargs.94) ^propagate.0()
+      %K.cell.1 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "K")
+      %set.72 : base.Unit = base.refSet[py.Value](%K.cell.1, %K.2)
+      %K.3 : py.Value = py.loadGlobal("s137_unpack_iter", "K") ^catch.12()
+      %int.32 : py.Value = py.intLit(1)
+      %tuple.96 : py.Value = py.mkTuple(%int.32)
+      %kwargs.95 : py.Value = py.mkKwargs
+      %call.72 : py.Value = py.call(%K.3, %tuple.96, %kwargs.95) ^catch.12()
+      jump ^join.12()
+    catch.12(%exc.36 : py.Value):
+      %prev.12 : py.Value = py.pushExcInfo(%exc.36)
+      %TypeError.11 : py.Value = py.loadGlobal("s137_unpack_iter", "TypeError") ^unwind.12()
+      %match.12 : base.Bool = py.excMatch(%exc.36, %TypeError.11) ^unwind.12()
+      branch(%match.12) ^except.12() ^next.12()
+    except.12():
+      %e.cell.36 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.73 : base.Unit = base.refSet[py.Value](%e.cell.36, %exc.36)
+      %print.32 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^clear.12()
+      %e.42 : py.Value = py.loadGlobal("s137_unpack_iter", "e") ^clear.12()
+      %args.13 : py.Value = py.attr(%e.42, "args") ^clear.12()
+      %int.33 : py.Value = py.intLit(0)
+      %item.13 : py.Value = py.getItem(%args.13, %int.33) ^clear.12()
+      %tuple.97 : py.Value = py.mkTuple(%item.13)
+      %kwargs.96 : py.Value = py.mkKwargs
+      %call.73 : py.Value = py.call(%print.32, %tuple.97, %kwargs.96) ^clear.12()
+      %pop.24 : base.Unit = py.popExcept(%prev.12)
+      %e.43 : py.Value = py.undef("e")
+      %e.cell.37 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.74 : base.Unit = base.refSet[py.Value](%e.cell.37, %e.43)
+      jump ^join.12()
+    clear.12(%exc.37 : py.Value):
+      %e.44 : py.Value = py.undef("e")
+      %e.cell.38 : base.Ref(py.Value) = py.globalCell("s137_unpack_iter", "e")
+      %set.75 : base.Unit = base.refSet[py.Value](%e.cell.38, %e.44)
+      jump ^unwind.12(%exc.37)
+    next.12():
+      jump ^unwind.12(%exc.36)
+    unwind.12(%exc.38 : py.Value):
+      %pop.25 : base.Unit = py.popExcept(%prev.12)
+      jump ^propagate.0(%exc.38)
+    join.12():
+      %none.6 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.6)
+      ret(%ret.0)
+    propagate.0(%exc.39 : py.Value):
+      %exc.40 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.39)
+      ret(%exc.40)
+  }
+  func @|s137_unpack_iter.It.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("It")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s137_unpack_iter.It.__init__, "__init__", "s137_unpack_iter")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@s137_unpack_iter.It.__iter__, "__iter__", "s137_unpack_iter")
+      %str.5 : py.Value = py.strLit("__iter__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@s137_unpack_iter.It.__next__, "__next__", "s137_unpack_iter")
+      %str.6 : py.Value = py.strLit("__next__")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.6, %clo.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.G.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__getitem__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("G")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s137_unpack_iter.G.__getitem__, "__getitem__", "s137_unpack_iter")
+      %str.4 : py.Value = py.strLit("__getitem__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.Bad.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "keys", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Bad")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s137_unpack_iter.Bad.keys, "keys", "s137_unpack_iter")
+      %str.4 : py.Value = py.strLit("keys")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.K.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "keys", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("K")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s137_unpack_iter.K.keys, "keys", "s137_unpack_iter")
+      %str.4 : py.Value = py.strLit("keys")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.NI.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__iter__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("NI")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s137_unpack_iter.NI.__iter__, "__iter__", "s137_unpack_iter")
+      %str.4 : py.Value = py.strLit("__iter__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.G.<body>.1|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__getitem__", binding = "def"}, {name = "keys", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("G")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s137_unpack_iter.G.__getitem__.1, "__getitem__", "s137_unpack_iter")
+      %str.4 : py.Value = py.strLit("__getitem__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@s137_unpack_iter.G.keys, "keys", "s137_unpack_iter")
+      %str.5 : py.Value = py.strLit("keys")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.KI.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__iter__", binding = "def"}, {name = "__next__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("KI")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s137_unpack_iter.KI.__init__, "__init__", "s137_unpack_iter")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@s137_unpack_iter.KI.__iter__, "__iter__", "s137_unpack_iter")
+      %str.5 : py.Value = py.strLit("__iter__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@s137_unpack_iter.KI.__next__, "__next__", "s137_unpack_iter")
+      %str.6 : py.Value = py.strLit("__next__")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.6, %clo.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.M.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "keys", binding = "def"}, {name = "__getitem__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("M")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s137_unpack_iter.M.keys, "keys", "s137_unpack_iter")
+      %str.4 : py.Value = py.strLit("keys")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@s137_unpack_iter.M.__getitem__, "__getitem__", "s137_unpack_iter")
+      %str.5 : py.Value = py.strLit("__getitem__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.H.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}, {name = "__hash__", binding = "def"}, {name = "__eq__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("H")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s137_unpack_iter.H.__init__, "__init__", "s137_unpack_iter")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@s137_unpack_iter.H.__hash__, "__hash__", "s137_unpack_iter")
+      %str.5 : py.Value = py.strLit("__hash__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@s137_unpack_iter.H.__eq__, "__eq__", "s137_unpack_iter")
+      %str.6 : py.Value = py.strLit("__eq__")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.6, %clo.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.M.<body>.1|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}, {name = "keys", binding = "def"}, {name = "__getitem__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("M")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s137_unpack_iter.M.__init__, "__init__", "s137_unpack_iter")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@s137_unpack_iter.M.keys.1, "keys", "s137_unpack_iter")
+      %str.5 : py.Value = py.strLit("keys")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@s137_unpack_iter.M.__getitem__.1, "__getitem__", "s137_unpack_iter")
+      %str.6 : py.Value = py.strLit("__getitem__")
+      %store.4 : base.Unit = py.setItem(%ns.0, %str.6, %clo.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.Meta.<body>|(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["type"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "__call__", binding = "def"}]]
+
+    entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Meta")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[base.Ref(py.Value)]](@s137_unpack_iter.Meta.__call__, "__call__", "s137_unpack_iter", %__class__.cell.0)
+      %str.4 : py.Value = py.strLit("__call__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %__class__.0 : py.Value = py.undef(".class being created")
+      %set.0 : base.Unit = base.refSet[py.Value](%__class__.cell.0, %__class__.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%__class__.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.A.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.keywords = [{name = "metaclass", value = "Meta"}]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("A")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s137_unpack_iter.A.__init__, "__init__", "s137_unpack_iter")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.B.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__new__", binding = "def"}, {name = "__init__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("B")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s137_unpack_iter.B.__new__, "__new__", "s137_unpack_iter")
+      %str.4 : py.Value = py.strLit("__new__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@s137_unpack_iter.B.__init__, "__init__", "s137_unpack_iter")
+      %str.5 : py.Value = py.strLit("__init__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.C.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("C")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s137_unpack_iter.C.__init__, "__init__", "s137_unpack_iter")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.D.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__call__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("D")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s137_unpack_iter.D.__call__, "__call__", "s137_unpack_iter")
+      %str.4 : py.Value = py.strLit("__call__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.E.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__call__", value = unit}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("E")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %str.4 : py.Value = py.strLit("__call__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %none.0) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.F.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "s", binding = "def"}, {name = "c", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("F")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %str.4 : py.Value = py.strLit("staticmethod")
+      %staticmethod.0 : py.Value = py.undef("staticmethod")
+      %staticmethod.1 : py.Value = py.getOptionalItem(%ns.0, %str.4, %staticmethod.0) ^propagate.0()
+      %found.1 : base.Bool = py.isDefined(%staticmethod.1)
+      branch(%found.1) ^join.1(%staticmethod.1) ^absent.1()
+    absent.1():
+      %staticmethod.2 : py.Value = py.loadGlobal("s137_unpack_iter", "staticmethod") ^propagate.0()
+      jump ^join.1(%staticmethod.2)
+    join.1(%staticmethod.3 : py.Value):
+      %clo.0 : py.Value = py.mkClosure[[]](@s137_unpack_iter.F.s, "s", "s137_unpack_iter")
+      %args.1 : py.Value = py.mkTuple(%clo.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %decorated.0 : py.Value = py.call(%staticmethod.3, %args.1, %kwargs.1) ^propagate.0()
+      %str.5 : py.Value = py.strLit("s")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.5, %decorated.0) ^propagate.0()
+      %str.6 : py.Value = py.strLit("classmethod")
+      %classmethod.0 : py.Value = py.undef("classmethod")
+      %classmethod.1 : py.Value = py.getOptionalItem(%ns.0, %str.6, %classmethod.0) ^propagate.0()
+      %found.2 : base.Bool = py.isDefined(%classmethod.1)
+      branch(%found.2) ^join.2(%classmethod.1) ^absent.2()
+    absent.2():
+      %classmethod.2 : py.Value = py.loadGlobal("s137_unpack_iter", "classmethod") ^propagate.0()
+      jump ^join.2(%classmethod.2)
+    join.2(%classmethod.3 : py.Value):
+      %clo.1 : py.Value = py.mkClosure[[]](@s137_unpack_iter.F.c, "c", "s137_unpack_iter")
+      %args.2 : py.Value = py.mkTuple(%clo.1)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %decorated.1 : py.Value = py.call(%classmethod.3, %args.2, %kwargs.2) ^propagate.0()
+      %str.7 : py.Value = py.strLit("c")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.7, %decorated.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.Meta2.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["type"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("Meta2")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.G.<body>.2|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.keywords = [{name = "metaclass", value = "Meta2"}]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("G")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s137_unpack_iter.G.__init__, "__init__", "s137_unpack_iter")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.H.<body>.1|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["D"]]
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("H")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.I.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__new__", binding = "def"}, {name = "__init__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("I")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s137_unpack_iter.I.__new__, "__new__", "s137_unpack_iter")
+      %str.4 : py.Value = py.strLit("__new__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@s137_unpack_iter.I.__init__, "__init__", "s137_unpack_iter")
+      %str.5 : py.Value = py.strLit("__init__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.J.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.bases = ["Exception"]]
+    #[py.fields = []]
+    #[py.bindings = [{name = "__init__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("J")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s137_unpack_iter.J.__init__, "__init__", "s137_unpack_iter")
+      %str.4 : py.Value = py.strLit("__init__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s137_unpack_iter.K.<body>.1|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s137_unpack_iter", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("K")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.It.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %n.2 : py.Value = py.undef("n")
+      %n.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%n.2)
+      %self.1 : py.Value = py.undef("self")
+      %n.5 : py.Value = py.undef("n")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %n.5)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__init__", 0, 2, false, false, "self", "n") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %n.6 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%n.cell.0, %n.6)
+      %int.0 : py.Value = py.intLit(0)
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %i.0 : base.Unit = py.setAttr(%self.4, "i", %int.0) ^propagate.0()
+      %n.7 : py.Value = base.refGet[py.Value](%n.cell.0)
+      %n.8 : py.Value = py.requireDefined(%n.7, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
+      %self.5 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.6 : py.Value = py.requireDefined(%self.5, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %n.9 : base.Unit = py.setAttr(%self.6, "n", %n.8) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.It.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.It.__next__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "It.__next__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %i.0 : py.Value = py.attr(%self.4, "i") ^propagate.0()
+      %self.5 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.6 : py.Value = py.requireDefined(%self.5, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %n.2 : py.Value = py.attr(%self.6, "n") ^propagate.0()
+      %gtE.0 : py.Value = py.gtE(%i.0, %n.2) ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%gtE.0) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %StopIteration.0 : py.Value = py.loadGlobal("s137_unpack_iter", "StopIteration") ^propagate.0()
+      %exc.0 : py.Value = py.toException(%StopIteration.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    else.0():
+      jump ^join.0()
+    join.0():
+      %self.7 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.8 : py.Value = py.requireDefined(%self.7, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %i.1 : py.Value = py.attr(%self.8, "i") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %iAdd.0 : py.Value = py.iAdd(%i.1, %int.0) ^propagate.0()
+      %i.2 : base.Unit = py.setAttr(%self.8, "i", %iAdd.0) ^propagate.0()
+      %self.9 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.10 : py.Value = py.requireDefined(%self.9, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %i.3 : py.Value = py.attr(%self.10, "i") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%i.3)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @s137_unpack_iter.G.__getitem__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %i.0 : py.Value = py.undef("i")
+      %i.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%i.0)
+      %self.1 : py.Value = py.undef("self")
+      %i.1 : py.Value = py.undef("i")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %i.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "G.__getitem__", 0, 2, false, false, "self", "i") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %i.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%i.cell.0, %i.2)
+      %i.3 : py.Value = base.refGet[py.Value](%i.cell.0)
+      %i.4 : py.Value = py.requireDefined(%i.3, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %int.0 : py.Value = py.intLit(2)
+      %gtE.0 : py.Value = py.gtE(%i.4, %int.0) ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%gtE.0) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %IndexError.0 : py.Value = py.loadGlobal("s137_unpack_iter", "IndexError") ^propagate.0()
+      %exc.0 : py.Value = py.toException(%IndexError.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    else.0():
+      jump ^join.0()
+    join.0():
+      %i.5 : py.Value = base.refGet[py.Value](%i.cell.0)
+      %i.6 : py.Value = py.requireDefined(%i.5, "i", "UnboundLocalError", "cannot access local variable 'i' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%i.6)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @s137_unpack_iter.Bad.keys(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Bad.keys", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %AttributeError.0 : py.Value = py.loadGlobal("s137_unpack_iter", "AttributeError") ^propagate.0()
+      %str.0 : py.Value = py.strLit("x")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%AttributeError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @s137_unpack_iter.K.keys(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "K.keys", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %int.0 : py.Value = py.intLit(5)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.NI.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "NI.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %TypeError.0 : py.Value = py.loadGlobal("s137_unpack_iter", "TypeError") ^propagate.0()
+      %str.0 : py.Value = py.strLit("inner")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%TypeError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @s137_unpack_iter.G.__getitem__.1(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %k.0 : py.Value = py.undef("k")
+      %k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%k.0)
+      %self.1 : py.Value = py.undef("self")
+      %k.1 : py.Value = py.undef("k")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %k.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "G.__getitem__", 0, 2, false, false, "self", "k") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %k.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%k.cell.0, %k.2)
+      %KeyError.0 : py.Value = py.loadGlobal("s137_unpack_iter", "KeyError") ^propagate.0()
+      %str.0 : py.Value = py.strLit("zz")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%KeyError.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %exc.0 : py.Value = py.toException(%call.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @s137_unpack_iter.G.keys(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "G.keys", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %str.0 : py.Value = py.strLit("a")
+      %list.0 : py.Value = py.mkList(%str.0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%list.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.KI.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "KI.__init__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %int.0 : py.Value = py.intLit(0)
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %i.0 : base.Unit = py.setAttr(%self.4, "i", %int.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.KI.__iter__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "KI.__iter__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%self.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.KI.__next__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "KI.__next__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %i.0 : py.Value = py.attr(%self.4, "i") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %iAdd.0 : py.Value = py.iAdd(%i.0, %int.0) ^propagate.0()
+      %i.1 : base.Unit = py.setAttr(%self.4, "i", %iAdd.0) ^propagate.0()
+      %self.5 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.6 : py.Value = py.requireDefined(%self.5, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %i.2 : py.Value = py.attr(%self.6, "i") ^propagate.0()
+      %int.1 : py.Value = py.intLit(3)
+      %gt.0 : py.Value = py.gt(%i.2, %int.1) ^propagate.0()
+      %cond.0 : base.Bool = py.truthy(%gt.0) ^propagate.0()
+      branch(%cond.0) ^then.0() ^else.0()
+    then.0():
+      %StopIteration.0 : py.Value = py.loadGlobal("s137_unpack_iter", "StopIteration") ^propagate.0()
+      %exc.0 : py.Value = py.toException(%StopIteration.0) ^propagate.0()
+      jump ^propagate.0(%exc.0)
+    else.0():
+      jump ^join.0()
+    join.0():
+      %str.0 : py.Value = py.strLit("sep")
+      %str.1 : py.Value = py.strLit("end")
+      %str.2 : py.Value = py.strLit("sep")
+      %list.0 : py.Value = py.mkList(%str.0, %str.1, %str.2)
+      %self.7 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.8 : py.Value = py.requireDefined(%self.7, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %i.3 : py.Value = py.attr(%self.8, "i") ^propagate.0()
+      %int.2 : py.Value = py.intLit(1)
+      %sub.0 : py.Value = py.sub(%i.3, %int.2) ^propagate.0()
+      %item.0 : py.Value = py.getItem(%list.0, %sub.0) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%item.0)
+      ret(%ret.0)
+    propagate.0(%exc.1 : py.Value):
+      %exc.2 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.1)
+      ret(%exc.2)
+  }
+  func @s137_unpack_iter.M.keys(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M.keys", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %KI.0 : py.Value = py.loadGlobal("s137_unpack_iter", "KI") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%KI.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.M.__getitem__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %k.0 : py.Value = py.undef("k")
+      %k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%k.0)
+      %self.1 : py.Value = py.undef("self")
+      %k.1 : py.Value = py.undef("k")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %k.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M.__getitem__", 0, 2, false, false, "self", "k") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %k.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%k.cell.0, %k.2)
+      %print.0 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("get")
+      %k.3 : py.Value = base.refGet[py.Value](%k.cell.0)
+      %k.4 : py.Value = py.requireDefined(%k.3, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%str.0, %k.4)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %str.1 : py.Value = py.strLit("")
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%str.1)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.H.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %n.2 : py.Value = py.undef("n")
+      %n.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%n.2)
+      %self.1 : py.Value = py.undef("self")
+      %n.5 : py.Value = py.undef("n")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %n.5)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "H.__init__", 0, 2, false, false, "self", "n") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %n.6 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%n.cell.0, %n.6)
+      %n.7 : py.Value = base.refGet[py.Value](%n.cell.0)
+      %n.8 : py.Value = py.requireDefined(%n.7, "n", "UnboundLocalError", "cannot access local variable 'n' where it is not associated with a value") ^propagate.0()
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %n.9 : base.Unit = py.setAttr(%self.4, "n", %n.8) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.H.__hash__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "H.__hash__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %print.0 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("hash")
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %n.3 : py.Value = py.attr(%self.4, "n") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%str.0, %n.3)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %self.5 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.6 : py.Value = py.requireDefined(%self.5, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %n.4 : py.Value = py.attr(%self.6, "n") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%n.4)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.H.__eq__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %o.0 : py.Value = py.undef("o")
+      %o.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%o.0)
+      %self.1 : py.Value = py.undef("self")
+      %o.1 : py.Value = py.undef("o")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %o.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "H.__eq__", 0, 2, false, false, "self", "o") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %o.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%o.cell.0, %o.2)
+      %print.0 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("eq")
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %n.5 : py.Value = py.attr(%self.4, "n") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%str.0, %n.5)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %self.5 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.6 : py.Value = py.requireDefined(%self.5, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %o.3 : py.Value = base.refGet[py.Value](%o.cell.0)
+      %o.4 : py.Value = py.requireDefined(%o.3, "o", "UnboundLocalError", "cannot access local variable 'o' where it is not associated with a value") ^propagate.0()
+      %is.0 : py.Value = py.is(%self.6, %o.4)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%is.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.M.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %ks.0 : py.Value = py.undef("ks")
+      %ks.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%ks.0)
+      %self.1 : py.Value = py.undef("self")
+      %ks.1 : py.Value = py.undef("ks")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %ks.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M.__init__", 0, 2, false, false, "self", "ks") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %ks.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%ks.cell.0, %ks.2)
+      %ks.3 : py.Value = base.refGet[py.Value](%ks.cell.0)
+      %ks.4 : py.Value = py.requireDefined(%ks.3, "ks", "UnboundLocalError", "cannot access local variable 'ks' where it is not associated with a value") ^propagate.0()
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %ks.5 : base.Unit = py.setAttr(%self.4, "ks", %ks.4) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.M.keys.1(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M.keys", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %ks.0 : py.Value = py.attr(%self.4, "ks") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%ks.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.M.__getitem__.1(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %k.0 : py.Value = py.undef("k")
+      %k.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%k.0)
+      %self.1 : py.Value = py.undef("self")
+      %k.1 : py.Value = py.undef("k")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %k.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "M.__getitem__", 0, 2, false, false, "self", "k") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %k.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%k.cell.0, %k.2)
+      %print.0 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("get")
+      %k.3 : py.Value = base.refGet[py.Value](%k.cell.0)
+      %k.4 : py.Value = py.requireDefined(%k.3, "k", "UnboundLocalError", "cannot access local variable 'k' where it is not associated with a value") ^propagate.0()
+      %n.5 : py.Value = py.attr(%k.4, "n") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%str.0, %n.5)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %int.0 : py.Value = py.intLit(0)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.Meta.__call__(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%__class__.cell.0 : base.Ref(py.Value), %args.0 : py.Value, %kwargs.0 : py.Value):
+      %cls.0 : py.Value = py.undef("cls")
+      %cls.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%cls.0)
+      %a.0 : py.Value = py.undef("a")
+      %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
+      %cls.1 : py.Value = py.undef("cls")
+      %defaults.0 : py.Value = py.mkTuple(%cls.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "Meta.__call__", 0, 1, true, false, "cls") ^propagate.0()
+      %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%cls.cell.0, %cls.2)
+      %a.1 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.1)
+      %print.0 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("meta call")
+      %len.0 : py.Value = py.loadGlobal("s137_unpack_iter", "len") ^propagate.0()
+      %a.2 : py.Value = base.refGet[py.Value](%a.cell.0)
+      %a.3 : py.Value = py.requireDefined(%a.2, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%a.3)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%len.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %tuple.1 : py.Value = py.mkTuple(%str.0, %call.0)
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.0, %tuple.1, %kwargs.2) ^propagate.0()
+      %super.0 : py.Value = py.loadGlobal("s137_unpack_iter", "super") ^propagate.0()
+      %__class__.0 : py.Value = base.refGet[py.Value](%__class__.cell.0)
+      %__class__.1 : py.Value = py.requireDefined(%__class__.0, "__class__", "NameError", "cannot access free variable '__class__' where it is not associated with a value in enclosing scope") ^propagate.0()
+      %cls.3 : py.Value = base.refGet[py.Value](%cls.cell.0)
+      %cls.4 : py.Value = py.requireDefined(%cls.3, "cls", "UnboundLocalError", "cannot access local variable 'cls' where it is not associated with a value") ^propagate.0()
+      %args.1 : py.Value = py.mkTuple(%__class__.1, %cls.4)
+      %kwargs.3 : py.Value = py.mkKwargs
+      %super.1 : py.Value = py.call(%super.0, %args.1, %kwargs.3) ^propagate.0()
+      %__call__.0 : py.Value = py.attr(%super.1, "__call__") ^propagate.0()
+      %a.4 : py.Value = base.refGet[py.Value](%a.cell.0)
+      %a.5 : py.Value = py.requireDefined(%a.4, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %kwargs.4 : py.Value = py.mkKwargs
+      %args.2 : py.Value = py.argsTuple(%__call__.0, %a.5) ^propagate.0()
+      %call.2 : py.Value = py.call(%__call__.0, %args.2, %kwargs.4) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.2)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.A.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %self.1 : py.Value = py.undef("self")
+      %x.1 : py.Value = py.undef("x")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %x.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "A.__init__", 0, 2, false, false, "self", "x") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %x.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      %print.0 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("init")
+      %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
+      %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%str.0, %x.4)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.B.__new__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %cls.0 : py.Value = py.undef("cls")
+      %cls.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%cls.0)
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %cls.1 : py.Value = py.undef("cls")
+      %x.1 : py.Value = py.undef("x")
+      %defaults.0 : py.Value = py.mkTuple(%cls.1, %x.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.__new__", 0, 2, false, false, "cls", "x") ^propagate.0()
+      %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%cls.cell.0, %cls.2)
+      %x.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      %print.0 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("new")
+      %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
+      %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%str.0, %x.4)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %int.0 : py.Value = py.intLit(5)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.B.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %self.1 : py.Value = py.undef("self")
+      %x.1 : py.Value = py.undef("x")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %x.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "B.__init__", 0, 2, false, false, "self", "x") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %x.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      %print.0 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("never")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.C.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "C.__init__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %int.0 : py.Value = py.intLit(3)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.D.__call__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %y.0 : py.Value = py.undef("y")
+      %y.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%y.0)
+      %self.1 : py.Value = py.undef("self")
+      %y.1 : py.Value = py.undef("y")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %y.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "D.__call__", 0, 2, false, false, "self", "y") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %y.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%y.cell.0, %y.2)
+      %y.3 : py.Value = base.refGet[py.Value](%y.cell.0)
+      %y.4 : py.Value = py.requireDefined(%y.3, "y", "UnboundLocalError", "cannot access local variable 'y' where it is not associated with a value") ^propagate.0()
+      %int.0 : py.Value = py.intLit(1)
+      %add.0 : py.Value = py.add(%y.4, %int.0) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%add.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.F.s(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %x.1 : py.Value = py.undef("x")
+      %defaults.0 : py.Value = py.mkTuple(%x.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "F.s", 0, 1, false, false, "x") ^propagate.0()
+      %x.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      %x.3 : py.Value = base.refGet[py.Value](%x.cell.0)
+      %x.4 : py.Value = py.requireDefined(%x.3, "x", "UnboundLocalError", "cannot access local variable 'x' where it is not associated with a value") ^propagate.0()
+      %int.0 : py.Value = py.intLit(2)
+      %mult.0 : py.Value = py.mult(%x.4, %int.0) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%mult.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.F.c(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %cls.0 : py.Value = py.undef("cls")
+      %cls.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%cls.0)
+      %x.0 : py.Value = py.undef("x")
+      %x.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%x.0)
+      %cls.1 : py.Value = py.undef("cls")
+      %x.1 : py.Value = py.undef("x")
+      %defaults.0 : py.Value = py.mkTuple(%cls.1, %x.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "F.c", 0, 2, false, false, "cls", "x") ^propagate.0()
+      %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%cls.cell.0, %cls.2)
+      %x.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%x.cell.0, %x.2)
+      %cls.3 : py.Value = base.refGet[py.Value](%cls.cell.0)
+      %cls.4 : py.Value = py.requireDefined(%cls.3, "cls", "UnboundLocalError", "cannot access local variable 'cls' where it is not associated with a value") ^propagate.0()
+      %__name__.0 : py.Value = py.attr(%cls.4, "__name__") ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%__name__.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.G.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %q.0 : py.Value = py.undef("q")
+      %q.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%q.0)
+      %self.1 : py.Value = py.undef("self")
+      %q.1 : py.Value = py.undef("q")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %q.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "G.__init__", 0, 2, false, false, "self", "q") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %q.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%q.cell.0, %q.2)
+      %q.3 : py.Value = base.refGet[py.Value](%q.cell.0)
+      %q.4 : py.Value = py.requireDefined(%q.3, "q", "UnboundLocalError", "cannot access local variable 'q' where it is not associated with a value") ^propagate.0()
+      %self.3 : py.Value = base.refGet[py.Value](%self.cell.0)
+      %self.4 : py.Value = py.requireDefined(%self.3, "self", "UnboundLocalError", "cannot access local variable 'self' where it is not associated with a value") ^propagate.0()
+      %q.5 : base.Unit = py.setAttr(%self.4, "q", %q.4) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.I.__new__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %cls.0 : py.Value = py.undef("cls")
+      %cls.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%cls.0)
+      %cls.1 : py.Value = py.undef("cls")
+      %defaults.0 : py.Value = py.mkTuple(%cls.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "I.__new__", 0, 1, false, false, "cls") ^propagate.0()
+      %cls.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%cls.cell.0, %cls.2)
+      %object.0 : py.Value = py.loadGlobal("s137_unpack_iter", "object") ^propagate.0()
+      %__new__.0 : py.Value = py.attr(%object.0, "__new__") ^propagate.0()
+      %D.0 : py.Value = py.loadGlobal("s137_unpack_iter", "D") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%D.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%__new__.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%call.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.I.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "I.__init__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %print.0 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("I init never")
+      %tuple.0 : py.Value = py.mkTuple(%str.0)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s137_unpack_iter.J.__init__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %a.0 : py.Value = py.undef("a")
+      %a.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%a.0)
+      %self.1 : py.Value = py.undef("self")
+      %a.1 : py.Value = py.undef("a")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %a.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "J.__init__", 0, 2, false, false, "self", "a") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %set.0 : base.Unit = base.refSet[py.Value](%self.cell.0, %self.2)
+      %a.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %set.1 : base.Unit = base.refSet[py.Value](%a.cell.0, %a.2)
+      %print.0 : py.Value = py.loadGlobal("s137_unpack_iter", "print") ^propagate.0()
+      %str.0 : py.Value = py.strLit("J init")
+      %a.3 : py.Value = base.refGet[py.Value](%a.cell.0)
+      %a.4 : py.Value = py.requireDefined(%a.3, "a", "UnboundLocalError", "cannot access local variable 'a' where it is not associated with a value") ^propagate.0()
+      %tuple.0 : py.Value = py.mkTuple(%str.0, %a.4)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.0, %kwargs.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

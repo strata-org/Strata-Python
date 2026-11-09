@@ -41,6 +41,14 @@ def _cell():
     return f.__closure__[0]
 
 
+class _GetItem:
+    """A class with `__getitem__` and no `__iter__`: `iter()` of an instance is CPython's
+    `iterator` type."""
+
+    def __getitem__(self, i):
+        raise IndexError
+
+
 class _Slotted:
     __slots__ = ("x",)
 
@@ -56,7 +64,7 @@ def _samples():
         iter(range(2**70)), iter(d), iter(d.values()), iter(d.items()), reversed([]),
         reversed(d), reversed(d.values()), reversed(d.items()), iter(set()), zip(),
         enumerate([]), reversed(range(1)), reversed(range(2**70)), reversed(()),
-        iter(lambda: 0, 1), d.keys(), d.values(), d.items(), None, NotImplemented, ...,
+        iter(lambda: 0, 1), iter(_GetItem()), d.keys(), d.values(), d.items(), None, NotImplemented, ...,
         lambda: 0, [].append, len, str.upper, int.__add__, (1).__add__,
         dict.__dict__["fromkeys"], type.__dict__["__name__"], _Slotted.__dict__["x"],
         type.__dict__, builtins, list[int], int | str, property(), classmethod(len),

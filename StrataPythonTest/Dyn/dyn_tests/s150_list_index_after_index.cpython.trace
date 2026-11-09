@@ -1,0 +1,24 @@
+--- stdout 82
+IndexError
+0
+IndexError
+0
+IndexError
+0
+9
+IndexError
+KeyError 2 1 2
+KeyError 2 1 2
+
+--- outcome
+ok
+--- globals
+Boom = <class 'Boom'>
+Clear = <class 'Clear'>
+ClearAll = <class 'ClearAll'>
+Grow = <class 'Grow'>
+Last = <class 'Last'>
+Shrink = <class 'Shrink'>
+__doc__ = None
+__name__ = '__main__'
+xs = [1, 2]

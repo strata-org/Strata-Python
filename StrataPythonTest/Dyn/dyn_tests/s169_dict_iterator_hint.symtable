@@ -1,0 +1,5 @@
+module top
+  iter: global implicit (referenced)
+  len: global implicit (referenced)
+  print: global implicit (referenced)
+qualnames: 
