@@ -797,7 +797,6 @@ in-place operator in its messages. -/
 def inplaceOp [PyWrites m V] [PyNew m V] (op : Arith.BinOp) (a b : V) : m V := do
   if let some v ← PyReads.numBinary op a b then return v
   symCheck a b
-  printfGap op a
   let user := (← isUserObject a) || (← isUserObject b)
   -- On an instance of a subclass of `list`, the list's in-place slots come in CPython's order
   -- among the subclass's own, which the model doesn't follow.
@@ -835,6 +834,7 @@ def inplaceOp [PyWrites m V] [PyNew m V] (op : Arith.BinOp) (a b : V) : m V := d
     for (k, v, h) in ← PyReads.dictEntries b do PyWrites.dictSet a k v (some h) (keyEq k)
     return a
   -- Then `binary_op1`.
+  if let some r ← printfFirst? op a b then return r
   if user then
     let (fwd, rev) := binDunders op
     if let some r ← binaryDunder fwd rev a b then return r

@@ -1,0 +1,32 @@
+module top
+  C: local (assigned, referenced)
+  D: local (assigned, referenced)
+  E: local (assigned, referenced)
+  F: local (assigned, referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  int: global implicit (referenced)
+  object: global implicit (referenced)
+  print: global implicit (referenced)
+  repr: global implicit (referenced)
+  class C
+    __repr__: local (assigned)
+    function __repr__
+      self: local (parameter)
+  class D
+    __repr__: local (assigned)
+    __str__: local (assigned)
+    function __str__
+      self: local (parameter)
+    function __repr__
+      self: local (parameter)
+  class E
+    __repr__: local (assigned)
+    function __repr__
+      self: local (parameter)
+  class F
+    __format__: local (assigned)
+    function __format__
+      self: local (parameter)
+      spec: local (parameter, referenced)
+qualnames: C, C.__repr__, D, D.__repr__, D.__str__, E, E.__repr__, F, F.__format__

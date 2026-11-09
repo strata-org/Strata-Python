@@ -1,0 +1,36 @@
+--- stdout 168
+str A
+g
+a 2
+repr A
+g
+g
+str A
+repr A
+A|    2|2    |a|A
+g
+str A
+a 2
+g
+str A
+2 a
+str A
+x%y a
+str A
+a
+
+1 2
+str A
+str A
+a     a
+str A
+not enough arguments for format string
+
+--- outcome
+ok
+--- globals
+A = <class 'A'>
+__doc__ = None
+__name__ = '__main__'
+fmt = '%s %s'
+g = <function object>

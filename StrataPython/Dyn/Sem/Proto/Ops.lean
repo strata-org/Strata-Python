@@ -474,21 +474,23 @@ def binaryTail [PyCalls m V] (sym : String) (op : Arith.BinOp) (a b : V) : m V :
       raiseBuiltin "TypeError" s!"can't multiply sequence by non-int of type '{← typeName b}'"
     if (← seqName? b).isSome then
       raiseBuiltin "TypeError" s!"can't multiply sequence by non-int of type '{← typeName a}'"
-  | .mod =>
-    if (← PyPure.immView a) matches some (.str _) || (← PyPure.immView a) matches some (.bytes _) then
-      PyPure.gap "printf-style formatting is not modelled yet"
   | _ => pure ()
   let msg := s!"unsupported operand type(s) for {sym}: '{← typeName a}' and '{← typeName b}'"
   raiseBuiltin "TypeError" msg
 
-/-- A gap on `a % b` when `a`'s `__mod__` is `str`'s or `bytes`'s own: CPython's `unicode_mod`
-and `bytes_mod` then format, whatever `b` is, before any `__rmod__` of `b` could run, and the
-model doesn't format yet. -/
-def printfGap [PyReads m V] (op : Arith.BinOp) (a : V) : m Unit := do
-  if op != .mod then return
-  let some f ← lookupType (← PyReads.classOf a) "__mod__" | return
-  if let some (.descr t "__mod__" _) ← PyPure.immView f then
-    if t == .str || t == .bytes then PyPure.gap "printf-style formatting is not modelled yet"
+/-- `a % b` when `a`'s `__mod__` is `str`'s or `bytes`'s own, in `binary_op1`'s order: the
+`__rmod__` of `b` first when `b`'s type is a proper subclass of `a`'s that overrides it; then `a`'s
+slot, which formats whatever `b` is (`unicode_mod`, `bytes_mod`).  `none` for any other `a % b`. -/
+def printfFirst? [PyCalls m V] (op : Arith.BinOp) (a b : V) : m (Option V) := do
+  if op != .mod then return none
+  let ta ← PyReads.classOf a
+  let some f ← lookupType ta "__mod__" | return none
+  let some (.descr t "__mod__" _) ← PyPure.immView f | return none
+  if t != .str && t != .bytes then return none
+  if ← isUserObject b then
+    if ← overridesReflected ta (← PyReads.classOf b) "__rmod__" then
+      if let some r ← trySlot b a "__rmod__" then return some r
+  return some (← callFound f a ta #[b] (← PyPure.allocDict))
 
 /-- `a op b`, CPython's `binary_op1`: the numbers, a user object's dunders in the order of CPython's
 slots, then `+` and `*`
@@ -498,7 +500,7 @@ of sequences, with the messages of their `sq_concat` and `sq_repeat`; otherwise 
 def binaryOpAs [PyCalls m V] (sym : String) (op : Arith.BinOp) (a b : V) : m V := do
   if let some v ← PyReads.numBinary op a b then return v
   symCheck a b
-  printfGap op a
+  if let some r ← printfFirst? op a b then return r
   if (← isUserObject a) || (← isUserObject b) then
     let (fwd, rev) := binDunders op
     if let some r ← binaryDunder fwd rev a b then return r

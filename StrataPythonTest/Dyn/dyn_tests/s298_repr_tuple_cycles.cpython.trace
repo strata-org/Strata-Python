@@ -1,0 +1,11 @@
+--- stdout 51
+KeyError('k') 'k' (1, [2]) ValueError()
+[([...],)]
+
+--- outcome
+ok
+--- globals
+__doc__ = None
+__name__ = '__main__'
+a = [(...,)]
+b = ([(...,)],)

@@ -13,8 +13,8 @@ set_option autoImplicit false
 # The text of an exception
 
 `excStr` is `str(e)` for an exception of a built-in class whose text is `BaseException`'s or
-`KeyError`'s, for arguments that are immediates.  The `repr` and `str` of other
-values come with their protocols; until then they are `none`, and the caller gaps.
+`KeyError`'s, for arguments that are immediates, and `none` for other arguments; the full `str`
+of an exception, through its arguments' own `str` and `repr`, is `Proto/Repr.lean`'s.
 -/
 
 namespace StrataPython.Dyn.Sem

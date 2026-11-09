@@ -1,0 +1,13 @@
+module top
+  C: local (assigned, referenced)
+  c: local (assigned, referenced)
+  print: global implicit (referenced)
+  class C
+    __repr__: local (assigned)
+    busy: local (assigned)
+    function __repr__
+      C: global implicit (referenced)
+      r: local (assigned, referenced)
+      repr: global implicit (referenced)
+      self: local (parameter, referenced)
+qualnames: C, C.__repr__

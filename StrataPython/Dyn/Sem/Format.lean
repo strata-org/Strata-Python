@@ -307,6 +307,29 @@ def strRepr (s : String) : String :=
     else '\\' :: 'U' :: hexDigits c.toNat 8
   String.ofList (quote :: cs.flatMap escape ++ [quote])
 
+/-- `repr(b)` for the bytes `b` (`bytes_repr`).  The quote is `'`, or `"` when `b` holds a `'`
+and no `"`.  A backslash, the quote, `\t`, `\n` and `\r` are escaped; a byte outside 32 to 126
+becomes `\xhh`. -/
+def bytesRepr (b : Array UInt8) : String :=
+  let quote : Char := if b.contains 39 && !b.contains 34 then '"' else '\''
+  let escape (x : UInt8) : List Char :=
+    let c := Char.ofNat x.toNat
+    if x == 92 then ['\\', '\\']
+    else if c == quote then ['\\', c]
+    else if x == 9 then ['\\', 't'] else if x == 10 then ['\\', 'n'] else if x == 13 then ['\\', 'r']
+    else if x < 32 || x ≥ 127 then '\\' :: 'x' :: hexDigits x.toNat 2
+    else [c]
+  String.ofList ('b' :: quote :: b.toList.flatMap escape ++ [quote])
+
+/-- `ascii()` of a `repr` text `s`: every character outside ASCII becomes `\xhh`, `\uhhhh` or
+`\Uhhhhhhhh` (`PyObject_ASCII`'s `backslashreplace`). -/
+def asciiEscape (s : String) : String :=
+  String.ofList <| s.toList.flatMap fun c =>
+    if c.toNat < 0x80 then [c]
+    else if c.toNat < 0x100 then '\\' :: 'x' :: hexDigits c.toNat 2
+    else if c.toNat < 0x10000 then '\\' :: 'u' :: hexDigits c.toNat 4
+    else '\\' :: 'U' :: hexDigits c.toNat 8
+
 /-! ## Format specs -/
 
 /-- The thousands separators of a format spec (CPython's `LocaleType`, without the current
@@ -695,28 +718,30 @@ def formatIntSpec (n : Int) (spec : Spec) (typeName : String) : Except Failure S
   | 'e' | 'E' | 'f' | 'F' | 'g' | 'G' | '%' => do formatFloatWith (← intToFloat n) spec
   | t => .error (unknownType t typeName)
 
-/-- `format(n, spec)` for an `int` `n` (`int.__format__`). -/
-def formatInt (n : Int) (spec : String) : Except Failure String :=
+/-- `format(n, spec)` for an `int` `n` (`int.__format__`), of the type `typeName` for messages. -/
+def formatInt (n : Int) (spec : String) (typeName : String := "int") : Except Failure String :=
   if spec.isEmpty then intRepr n
-  else do formatIntSpec n (← parseSpec spec "int" 'd' '>') "int"
+  else do formatIntSpec n (← parseSpec spec typeName 'd' '>') typeName
 
-/-- `format(x, spec)` for the `float` `x` with the bits `bits` (`float.__format__`). -/
-def formatFloat (bits : UInt64) (spec : String) : Except Failure String :=
+/-- `format(x, spec)` for the `float` `x` with the bits `bits` (`float.__format__`), of the type
+`typeName` for messages. -/
+def formatFloat (bits : UInt64) (spec : String) (typeName : String := "float") :
+    Except Failure String :=
   if spec.isEmpty then .ok (floatRepr bits)
   else do
-    let s ← parseSpec spec "float" '\x00' '>'
+    let s ← parseSpec spec typeName '\x00' '>'
     match s.type with
     | '\x00' | 'e' | 'E' | 'f' | 'F' | 'g' | 'G' | 'n' | '%' => formatFloatWith bits s
-    | t => throw (unknownType t "float")
+    | t => throw (unknownType t typeName)
 
-/-- `format(s, spec)` for a `str` `s` (`str.__format__`). -/
-def formatStr (s : String) (spec : String) : Except Failure String :=
+/-- `format(s, spec)` for a `str` `s` (`str.__format__`), of the type `typeName` for messages. -/
+def formatStr (s : String) (spec : String) (typeName : String := "str") : Except Failure String :=
   if spec.isEmpty then .ok s
   else do
-    let p ← parseSpec spec "str" 's' '<'
+    let p ← parseSpec spec typeName 's' '<'
     match p.type with
     | 's' => formatStringWith s p
-    | t => throw (unknownType t "str")
+    | t => throw (unknownType t typeName)
 
 end
 

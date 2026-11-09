@@ -445,4 +445,37 @@ module m.g {
 #guard_msgs in
 #eval printed (built gName outerAcc)
 
+-- `'lit' % (items)` as CPython 3.12's AST optimizer rewrites it into an f-string, as its bytecode
+-- shows (the literals, and each field's conversion and spec), with as many items as the number given.
+#guard printfPlan "%s %s" 2 == some (#["", " ", ""], #[('s', ""), ('s', "")])
+#guard printfPlan "%s" 1 == some (#["", ""], #[('s', "")])
+#guard printfPlan "a%%b%s" 1 == some (#["a%b", ""], #[('s', "")])
+#guard printfPlan "%5s" 1 == some (#["", ""], #[('s', ">5")])
+#guard printfPlan "%12s" 1 == some (#["", ""], #[('s', ">12")])
+#guard printfPlan "%-5s" 1 == some (#["", ""], #[('s', "5")])
+#guard printfPlan "%05s" 1 == some (#["", ""], #[('s', ">5")])
+#guard printfPlan "%+s" 1 == some (#["", ""], #[('s', "")])
+#guard printfPlan "%#r" 1 == some (#["", ""], #[('r', "")])
+#guard printfPlan "%.s" 1 == some (#["", ""], #[('s', ".0")])
+#guard printfPlan "%.2a" 1 == some (#["", ""], #[('a', ".2")])
+#guard printfPlan "%5.3s" 1 == some (#["", ""], #[('s', ">5.3")])
+#guard printfPlan "%-+ #0r" 1 == some (#["", ""], #[('r', "")])
+#guard printfPlan "%10.10s" 1 == some (#["", ""], #[('s', ">10.10")])
+#guard printfPlan "%0s" 1 == some (#["", ""], #[('s', "")])
+#guard printfPlan "%s%%" 1 == some (#["", "%"], #[('s', "")])
+#guard printfPlan "%%%s" 1 == some (#["%", ""], #[('s', "")])
+#guard printfPlan "a%%b%-5s|%05.2r" 2 == some (#["a%b", "|", ""], #[('s', "5"), ('r', ">5.2")])
+-- And the formats it keeps as a `%`.
+#guard printfPlan "%s" 2 == none
+#guard printfPlan "%s %s" 1 == none
+#guard printfPlan "%" 1 == none
+#guard printfPlan "%123s" 1 == none
+#guard printfPlan "%.123s" 1 == none
+#guard printfPlan "%d" 1 == none
+#guard printfPlan "%(a)s" 1 == none
+#guard printfPlan "%*s" 1 == none
+#guard printfPlan "%s%" 1 == none
+#guard printfPlan "%." 1 == none
+#guard printfPlan "%1." 1 == none
+
 end StrataPython.Dyn.PyTranslateTest

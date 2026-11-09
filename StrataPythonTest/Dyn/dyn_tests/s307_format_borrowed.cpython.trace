@@ -1,0 +1,9 @@
+--- stdout 82
+TypeError descriptor '__format__' for 'str' objects doesn't apply to a 'E' object
+
+--- outcome
+ok
+--- globals
+E = <class 'E'>
+__doc__ = None
+__name__ = '__main__'

@@ -356,12 +356,12 @@ def mainTotal (body : String) : String := s!"module m \{
 #eval run (mainTotal "      %n.0 : py.Value = py.noneLit
       %v.0 : py.Value = py.unsupported(%n.0)")
 
--- A bytes literal, and an operation that is not modelled yet.
+-- A bytes literal, and `repr`.
 /-- info: StrataPython.Dyn.Sem.Value.bytes #[97, 255] -/
 #guard_msgs in
 #eval run (mainTotal "      %v.0 : py.Value = py.bytesLit(\"a\\u00ff\")")
 
-/-- info: fault: Strata.Dyn.Exec.Fault.gap "not modelled yet: py.repr" -/
+/-- info: '1' -/
 #guard_msgs in
 #eval run (main "      %i.0 : py.Value = py.intLit(1)
       %v.0 : py.Value = py.repr(%i.0) ^err.0()")
@@ -1800,10 +1800,16 @@ def fnsModule : String := "module m {
       %r.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%e.0)
       ret(%r.1)
   }
+  func @m.fn(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %r.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%args.0)
+      ret(%r.0)
+  }
   func @m.stop() -> base.Except(py.Value, py.Value) {
     entry.0():
       %n.0 : py.Value = py.noneLit
-      %s.0 : py.Value = py.repr(%n.0) ^err.0()
+      %f.0 : py.Value = py.mkClosure[[]](@m.fn, \"fn\", \"m\")
+      %s.0 : py.Value = py.repr(%f.0) ^err.0()
       %r.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%n.0)
       ret(%r.0)
     err.0(%e.0 : py.Value):
@@ -1834,9 +1840,9 @@ raised NameError: name 'nope' is not defined
 --- result m.get
 1
 --- result m.stop
---- gap not modelled yet: py.repr
+--- gap a repr that shows an object's address is not modelled yet
 --- result m.get
---- gap not modelled yet: py.repr
+--- gap a repr that shows an object's address is not modelled yet
 --- result m.none
 --- fault no function m.none
 -/

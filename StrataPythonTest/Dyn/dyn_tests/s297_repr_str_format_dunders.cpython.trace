@@ -1,0 +1,18 @@
+--- stdout 233
+C! [C!, D-repr] D-str D-repr
+C! D-str D-repr D-str     3 2.500   ab  |
+__repr__ returned non-string (type int)
+__str__ returned non-string (type int)
+F:xyz
+unsupported format string passed to object.__format__
+1 5 '\xe9' [1, '\xfc']
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+D = <class 'D'>
+E = <class 'E'>
+F = <class 'F'>
+__doc__ = None
+__name__ = '__main__'

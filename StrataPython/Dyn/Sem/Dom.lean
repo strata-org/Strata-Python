@@ -33,6 +33,12 @@ namespace StrataPython.Dyn.Sem
 
 @[expose] public section
 
+/-- What CPython's `Py_ReprEnter` finds for a value: not in the guard; in it; or, for a tuple, a
+tuple with the same items in it, which may be the same tuple or another one. -/
+inductive ReprEntry where
+  | fresh | hit | unknown
+  deriving DecidableEq, Repr, Inhabited
+
 /-- The answer of `is`: yes, no, or unknown (it depends on CPython's caching). -/
 inductive IdResult where
   | yes | no | unknown
@@ -410,6 +416,11 @@ class PyReads (m : Type → Type 1) (V : outParam Type) extends PyPure m V where
   `RecursionError`; the count is back as it was after `body`.  A port of a Python function counts
   each frame that CPython spends inside it, at least as many as CPython. -/
   withPyDepth : {α : Type} → Nat → m α → m α
+  /-- What `Py_ReprEnter` finds for `v` (`ReprEntry`): an object by its identity; a tuple by its
+  items, `unknown` when a tuple with the same items is in the guard. -/
+  reprCheck : V → m ReprEntry
+  /-- `body` with `v` entered in the `repr` guard; the guard is back as it was after `body`. -/
+  withRepr : {α : Type} → V → m α → m α
 
 /-- What a `calls` rule may do in addition: call Python code. -/
 class PyCalls (m : Type → Type 1) (V : outParam Type) extends PyReads m V where

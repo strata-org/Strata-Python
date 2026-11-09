@@ -1,0 +1,8 @@
+module top
+  N: local (assigned, referenced)
+  r: local (assigned)
+  class N
+    __int__: local (assigned)
+    function __int__
+      self: local (parameter)
+qualnames: N, N.__int__

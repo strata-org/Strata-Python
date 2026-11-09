@@ -60,20 +60,6 @@ def intText (i : Int) : RenderM String :=
   | .ok s => pure s
   | .error _ => throw "the repr of an int with too many digits"
 
-/-- The `repr` of a `bytes`. -/
-def bytesText (b : Array UInt8) : String :=
-  let quote := if b.contains 39 && !b.contains 34 then '"' else '\''
-  let body := b.toList.foldl (fun acc x =>
-    let c := Char.ofNat x.toNat
-    acc ++ (if x == 92 then "\\\\"
-      else if c == quote then s!"\\{c}"
-      else if x == 9 then "\\t" else if x == 10 then "\\n" else if x == 13 then "\\r"
-      else if x < 32 || x ≥ 127 then
-        let h := Nat.toDigits 16 x.toNat
-        "\\x" ++ String.ofList (if h.length < 2 then '0' :: h else h)
-      else String.singleton c)) ""
-  s!"b{quote}{body}{quote}"
-
 /-- The name of the class `cls` of an object, for `<T object>` and an exception's type. -/
 def className (st : ObjStore Run) (cls : Value) : String :=
   match cls with
@@ -94,7 +80,7 @@ def renderN (st : ObjStore Run) : Nat → List ObjId → Value → RenderM Strin
     | .int i => intText i
     | .float bits => pure (Format.floatRepr bits)
     | .str s => pure (Format.strRepr s.s)
-    | .bytes b => pure (bytesText b)
+    | .bytes b => pure (Format.bytesRepr b)
     | .tuple xs => do
       let parts ← xs.toList.mapM r
       pure (if parts.length == 1 then s!"({parts.head!},)" else s!"({", ".intercalate parts})")

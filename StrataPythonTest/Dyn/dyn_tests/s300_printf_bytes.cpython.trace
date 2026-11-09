@@ -1,0 +1,29 @@
+--- stdout 488
+b'x yz'
+b'3  1.50 A q'
+TypeError %b requires a bytes-like object, or an object that implements __bytes__, not 'str'
+b"'\\xe9' '\\xe9'"
+b'v'
+TypeError %d format: a real number is required, not str
+TypeError float argument required, not str
+OverflowError %c arg not in range(256)
+b'ff 0XFF'
+b'BB'
+'9 9 \t'
+'12'
+TypeError %x format: an integer is required, not N
+'2.500000'
+TypeError %d format: a real number is required, not F
+TypeError not all arguments converted during string formatting
+
+--- outcome
+ok
+--- globals
+B = <class 'B'>
+F = <class 'F'>
+I = <class 'I'>
+N = <class 'N'>
+P = <class 'P'>
+__doc__ = None
+__name__ = '__main__'
+t = <function object>

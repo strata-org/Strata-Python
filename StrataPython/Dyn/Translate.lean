@@ -1047,6 +1047,70 @@ def constDisplay? (vs : Array (expr SourceRange)) (folds : Bool) : Except Unit B
   else if folds && vs.all mayFold then .error ()
   else .ok false
 
+/-- Where `printfPlan`'s scan of a `%` format is: in literal text; just after a `%`; in a unit's
+flags, with whether `-` is among them; in its width, with the digits so far; just after its `.`; or
+in its precision, with the digits so far. -/
+inductive PrintfScan where
+  | lit
+  | pct
+  | flags (ljust : Bool)
+  | width (ljust : Bool) (w digits : Nat)
+  | dot (ljust : Bool) (w : Option Nat)
+  | prec (ljust : Bool) (w : Option Nat) (p digits : Nat)
+
+/-- The format spec of the f-string field of a unit (`parse_format`): `>` unless left-justified,
+for a width over 0, then the width, then `.` and the precision. -/
+def printfSpec (ljust : Bool) (w p : Option Nat) : String :=
+  (if !ljust && w.any (· > 0) then ">" else "") ++ (w.map toString).getD "" ++
+    (p.map (s!".{·}")).getD ""
+
+/-- The plan of CPython 3.12's `optimize_format` (`Python/ast_opt.c`) for the `str` constant `fmt`
+and a tuple display of `n` items without a starred one: the literal text before each unit and
+after the last (`%%` as `%`), and each unit's conversion and the spec of its f-string field;
+`none` when CPython keeps the `%`.  A unit is rewritten when it is `%s`, `%r` or `%a` with any
+flags, of which only `-` counts, and a width and a precision of at most two digits each; the
+number of units must be `n`. -/
+def printfPlan (fmt : String) (n : Nat) : Option (Array String × Array (Char × String)) :=
+  let isDigit (c : Char) := '0' ≤ c && c ≤ '9'
+  let conv? (c : Char) := c == 's' || c == 'r' || c == 'a'
+  let step (st : PrintfScan × String × Array String × Array (Char × String)) (c : Char) :
+      Option (PrintfScan × String × Array String × Array (Char × String)) :=
+    let (scan, lit, lits, units) := st
+    let unit (lj : Bool) (w p : Option Nat) : Option (PrintfScan × String × Array String × Array (Char × String)) :=
+      if units.size ≥ n then none else some (.lit, "", lits.push lit, units.push (c, printfSpec lj w p))
+    match scan with
+    | .lit => if c == '%' then some (.pct, lit, lits, units) else some (.lit, lit.push c, lits, units)
+    | .pct => if c == '%' then some (.lit, lit.push '%', lits, units)
+      else if c == '-' then some (.flags true, lit, lits, units)
+      else if c == '+' || c == ' ' || c == '#' || c == '0' then some (.flags false, lit, lits, units)
+      else if isDigit c then some (.width false (c.toNat - 48) 1, lit, lits, units)
+      else if c == '.' then some (.dot false none, lit, lits, units)
+      else if conv? c then unit false none none
+      else none
+    | .flags lj =>
+      if c == '-' then some (.flags true, lit, lits, units)
+      else if c == '+' || c == ' ' || c == '#' || c == '0' then some (.flags lj, lit, lits, units)
+      else if isDigit c then some (.width lj (c.toNat - 48) 1, lit, lits, units)
+      else if c == '.' then some (.dot lj none, lit, lits, units)
+      else if conv? c then unit lj none none
+      else none
+    | .width lj w d =>
+      if isDigit c then (if d ≥ 2 then none else some (.width lj (w * 10 + (c.toNat - 48)) (d + 1), lit, lits, units))
+      else if c == '.' then some (.dot lj (some w), lit, lits, units)
+      else if conv? c then unit lj (some w) none
+      else none
+    | .dot lj w =>
+      if isDigit c then some (.prec lj w (c.toNat - 48) 1, lit, lits, units)
+      else if conv? c then unit lj w (some 0)
+      else none
+    | .prec lj w p d =>
+      if isDigit c then (if d ≥ 2 then none else some (.prec lj w (p * 10 + (c.toNat - 48)) (d + 1), lit, lits, units))
+      else if conv? c then unit lj w (some p)
+      else none
+  match fmt.toList.foldl (fun st c => st.bind (step · c)) (some (PrintfScan.lit, "", #[], #[])) with
+  | some (.lit, lit, lits, units) => if units.size == n then some (lits.push lit, units) else none
+  | _ => none
+
 mutual
 
 /-- Lower an expression to the value it produces. -/
@@ -1054,7 +1118,20 @@ def transExpr (e : expr SourceRange) : TransM ValId := withRange e.ann do
   match e with
   | .Constant sr c _ => literal c sr
   | .Name sr ⟨_, n⟩ _ => readName n sr
-  | .BinOp _ l op r => do
+  | .BinOp sr l op r => do
+    -- CPython 3.12's AST optimizer rewrites `'lit' % (a, b)` into an f-string (`optimize_format`).
+    if op matches .Mod _ then
+      if let .Tuple _ ⟨_, vs⟩ _ := r then
+        if !vs.any (· matches .Starred ..) then
+          match l with
+          | .Constant _ (.ConString _ ⟨_, fmt⟩) _ =>
+            if let some (lits, units) := printfPlan fmt vs.size then
+              return ← printfFString lits units vs
+          -- Another constant, a `bytes` one included, is never rewritten.
+          | .Constant .. => pure ()
+          | l =>
+            if mayFold l then
+              return ← unsupportedValue "a % format that CPython may fold into a str constant" sr
     let a ← transExpr l
     binOp op a (← transExpr r)
   | .UnaryOp _ op x => do
@@ -1180,6 +1257,30 @@ def formatted (v : expr SourceRange) (conv : StrataPython.int SourceRange)
       | _ => unsupportedValue "f-string conversion" sr  -- the parser gives no other
   build (emitFailing (.str .base "fmt") Py.fmtValue.ref #[x, sp])
 termination_by sizeOf v + sizeOf spec + 1
+
+/-- `'lit' % (a, b)` as CPython 3.12's AST optimizer rewrites it (`optimize_format`, which a move
+to another Python version must check again): the f-string of the literals `lits` around the fields
+of the items `vs`, each with its conversion and spec (`units`), each item evaluated and formatted
+before the next one. -/
+def printfFString (lits : Array String) (units : Array (Char × String))
+    (vs : Array (expr SourceRange)) : TransM ValId := do
+  let mut parts : Array ValId := #[]
+  if lits[0]! != "" then parts := parts.push (← build (strLit lits[0]!))
+  for (⟨x, hx⟩, i) in vs.attach.zipIdx do
+    have hmem := Array.sizeOf_lt_of_mem hx
+    let v ← transExpr x
+    let (c, spec) := units[i]!
+    let sp ← build (strLit spec)
+    let conv := match c with
+      | 'r' => Py.repr.ref
+      | 'a' => Py.ascii.ref
+      | _ => Py.toStr.ref
+    let cv ← build (emitFailing (.str .base (match c with | 'r' => "repr" | 'a' => "ascii" | _ => "str")) conv #[v])
+    parts := parts.push (← build (emitFailing (.str .base "fmt") Py.fmtValue.ref #[cv, sp]))
+    if lits[i + 1]! != "" then parts := parts.push (← build (strLit lits[i + 1]!))
+  if h : parts.size = 1 then return parts[0]
+  build (emitTotal (.str .base "fstr") Py.strConcat.ref parts)
+termination_by sizeOf vs
 
 /-- The bounds `lo`, `hi` and `st` of a slice, in order, `None` for an absent one. -/
 def bounds (lo hi st : Option (expr SourceRange)) : TransM (Array ValId) :=

@@ -106,14 +106,6 @@ def asciiIdentifier? (s : String) : Option Bool :=
     | c :: rest => (c.isAlpha || c == '_') && rest.all fun (d : Char) => d.isAlphanum || d == '_'
     | [] => false)
 
-/-- The `tp_name` of the class `c`: a built-in type's name, or a user class's. -/
-def tpNameOf [PyReads m V] (c : V) : m String := do
-  match ← PyPure.immView c with
-  | some (.builtin b) => pure b.info.tpName
-  | _ => match ← classData? c with
-    | some cd => pure (cd.tpName.getD cd.name)
-    | none => PyPure.gap "the tp_name of a value that is not a class"
-
 /-- **CPython's `tp_new_wrapper`** for `t.__new__(subtype, ...)`, with the arguments `args`
 (`subtype` first): `TypeError` unless `subtype` is a class that is `t` or a subclass of it, and
 unless `subtype`'s `staticbase` has `t`'s `tp_new`. Where `Builtin.newId` doesn't know the C

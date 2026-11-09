@@ -1,0 +1,12 @@
+module top
+  t: local (assigned, referenced)
+  function t
+    Exception: global implicit (referenced)
+    args: local (parameter, referenced)
+    e: local (assigned, referenced)
+    fmt: local (parameter, referenced)
+    print: global implicit (referenced)
+    r: local (assigned, referenced)
+    repr: global implicit (referenced)
+    type: global implicit (referenced)
+qualnames: t

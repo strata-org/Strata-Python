@@ -1,0 +1,18 @@
+--- stdout 274
+1 -2.5 "a'b" b'x\n' None True
+[1, 'a', (2,), (3, 4), [], {}] {1: 'x', 'k': [2]} (1,)
+range(0, 3) range(1, 10, 2) slice(1, None, 2) Ellipsis NotImplemented
+<class 'int'> <class 'list'> <built-in function len> <class 'str'> <class 'type'>
+[1, [...]]
+{'self': {...}}
+{5} set()
+
+--- outcome
+ok
+--- globals
+G = <class 'G'>
+__doc__ = None
+__name__ = '__main__'
+d = {'self': ...}
+n = 5
+x = [1, ...]

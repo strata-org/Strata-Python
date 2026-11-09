@@ -1,0 +1,8 @@
+module
+  N: local (assigned, referenced)
+  r: local (assigned)
+  class N
+    __int__: local (assigned)
+    function N.__int__
+      params: self
+      self: local (parameter)

@@ -25,22 +25,6 @@ open Strata.Dyn.Exec
 
 variable {σ : Type} [Store σ] [Decode σ] {ε : Eff} {E : Type} [PyLang σ ε]
 
-@[dyn_sem Py.repr] def repr (_val : Value) (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .calls) "not modelled yet: py.repr")
-
-@[dyn_sem Py.toStr] def toStr (_val : Value) (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .calls) "not modelled yet: py.str")
-
-@[dyn_sem Py.ascii] def ascii (_val : Value) (err : Target E [Value]) : Sem ε E Value :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .calls) "not modelled yet: py.ascii")
-
-@[dyn_sem Py.fmtValue] def fmtValue (_val : Value) (_spec : Value) (err : Target E [Value])
-    : Sem ε E Value :=
-  runRuleFree err #[] (PyM.gap (σ := σ) (fr := true) (e := .calls) "not modelled yet: py.fmtValue")
-
-@[dyn_sem Py.strConcat] def strConcat (_parts : (Array Value)) : Sem ε E Value :=
-  runTotalFree "py.strConcat" #[] (PyM.gap (σ := σ) (fr := true) (e := .pure) "not modelled yet: py.strConcat")
-
 @[dyn_sem Py.listComp] def listComp (_iterable : Value)
     (_each : Region ε [ListAcc, Value] (Except Value Unit)) (err : Target E [Value]) :
     Sem ε E Value :=

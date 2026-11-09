@@ -1,0 +1,8 @@
+module top
+  KeyError: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  a: local (assigned, referenced)
+  b: local (assigned, referenced)
+  print: global implicit (referenced)
+  repr: global implicit (referenced)
+qualnames: 

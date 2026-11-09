@@ -680,6 +680,7 @@ false, as in CPython.
 | `(a, *xs, b)` | the list display, then `listToTuple` |
 | `{k: v, **d}` | as CPython: `py.mkDict k v …` for each run of pairs (keys and values interleaved, each key before its value), and `py.dictUpdate` for each `**d`, last one winning. The first run is the dict; a later run is built, then added by `dictUpdate` |
 | a set of more than 30 elements, not all constants, a long dict run | as CPython (`STACK_USE_GUIDELINE`): a set starts empty and adds each element as it is evaluated (`setAdd`). A dict run is cut into chunks of 17 pairs; a chunk of more than 15 pairs starts empty and adds each pair (`dictSet`), and each later chunk is added by `dictUpdate`. So an unhashable key raises before the next element is evaluated |
+| `'lit' % (a, b)` | as CPython 3.12's AST optimizer rewrites it (`optimize_format` in `Python/ast_opt.c`): when the left operand is a `str` constant, the right one a tuple display without `*`, every unit `%s`, `%r` or `%a` with a width and a precision of at most two digits, and the number of units the number of items, the f-string of the literals (`%%` as `%`) and of a field `{item!c:>W.P}` for each unit, so each item is formatted before the next one is evaluated. Otherwise the `%` stays. A left operand that CPython may fold into a `str` constant (`'%s' + '%s'`) is rejected; another constant, a `bytes` one included, keeps its `%`. A move to another Python version must check this again |
 | `f"a{x}b"` | as CPython's `FORMAT_VALUE` and `BUILD_STRING`: a total `py.strConcat` over `strLit` parts and fields, or the lone part itself. A field `{x!r:spec}` evaluates `x`, then `spec` (itself an f-string, `""` if absent), then applies `py.repr` (`py.str`, `py.ascii`), then `py.fmtValue x spec`. None of these looks up a builtin: CPython ignores `builtins.repr = …` here |
 | `(x := e)` | evaluate `e`, write it to `x` (§5.1), and use the value `e`. In a comprehension, the target is the enclosing function's local, a `cell` only if a nested scope captures it (§6.8) |
 | `lambda` | §5.3, as an expression |
@@ -2513,8 +2514,19 @@ with CPython 3.12, over 1422 generated cases.
 - Global names, with the fallback to `builtins`, and closures with their cells.
 - Calls of function objects, with positional and keyword arguments and `*` and `**` arguments.
   `**` builds a new dict and leaves the operand unchanged.
-- `print`, with `sep` and `end`, for arguments whose `str` runs no protocol: `None`, `bool`,
-  `int`, `float` and `str`.
+- `print`, with `sep` and `end`, and `repr`, `str`, `ascii` and `format` (`PyObject_Repr`,
+  `PyObject_Str`, `PyObject_ASCII`, `PyObject_Format`) in f-strings and messages: the built-in
+  values, the containers with CPython's `[...]` for a list met again inside its own `repr`, and a
+  user `__repr__`, `__str__` and `__format__`; and the format spec language of `int`, `float` and
+  `str`. These stop with a gap: a `repr` that shows an address (`object.__repr__`, functions,
+  modules, methods); a tuple met inside the `repr` of a tuple with the same items, which the
+  semantics can't tell from the same tuple; and a dict whose keys change during its `repr` after a
+  deletion, since CPython's resize then moves the walk.
+- printf-style `%` for `str` and `bytes` (`PyUnicode_Format`, `_PyBytes_FormatEx`): every
+  conversion, flag, width and precision, `*`, and `%(key)`, with CPython's errors. Where CPython
+  3.12 warns (an `__int__` or `__index__` that returns an instance of a strict subclass of `int`, a
+  `__float__` that returns one of `float`), it stops with a gap, and so does a `%b` of an object
+  with the buffer protocol.
 - `import builtins` and `from builtins import name`.
 - Classes: `__build_class__` and `type.__new__`, with the metaclass, the MRO by C3, `__slots__`,
   `__set_name__` and `__init_subclass__`; instances made by `object.__new__`; `super`,

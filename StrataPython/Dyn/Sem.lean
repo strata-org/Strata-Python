@@ -52,6 +52,8 @@ public import StrataPython.Dyn.Sem.Rules.Globals
 public import StrataPython.Dyn.Sem.Rules.Closures
 public import StrataPython.Dyn.Sem.Rules.Calls
 public import StrataPython.Dyn.Sem.Rules.Attrs
+public import StrataPython.Dyn.Sem.Proto.Repr
+public import StrataPython.Dyn.Sem.Rules.Strings
 public import StrataPython.Dyn.Sem.Rules.GlobalsProps
 public import StrataPython.Dyn.Sem.Table
 

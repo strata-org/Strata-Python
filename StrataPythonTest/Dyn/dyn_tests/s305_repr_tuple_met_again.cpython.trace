@@ -1,0 +1,10 @@
+--- stdout 10
+(C(...),)
+
+--- outcome
+ok
+--- globals
+C = <class 'C'>
+__doc__ = None
+__name__ = '__main__'
+c = <C object>

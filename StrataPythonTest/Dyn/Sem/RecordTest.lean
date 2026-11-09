@@ -116,6 +116,8 @@ instance : PyReads TM Toy where
   depthC := pure 0
   withDepth _ body := body
   withPyDepth _ body := body
+  reprCheck _ := pure .fresh
+  withRepr _ body := body
 
 instance : PyCalls TM Toy where
   callFunc _ _ _ := ⟨.error (.inl "no call")⟩

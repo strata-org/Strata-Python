@@ -1,0 +1,487 @@
+module s297_repr_str_format_dunders {
+  func @|s297_repr_str_format_dunders.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s297_repr_str_format_dunders")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s297_repr_str_format_dunders", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s297_repr_str_format_dunders", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %__build_class__.0 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@|s297_repr_str_format_dunders.C.<body>|, "<body>", "s297_repr_str_format_dunders")
+      %str.1 : py.Value = py.strLit("C")
+      %tuple.0 : py.Value = py.mkTuple(%clo.0, %str.1)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %C.0 : py.Value = py.call(%__build_class__.0, %tuple.0, %kwargs.0) ^propagate.0()
+      %C.cell.0 : base.Ref(py.Value) = py.globalCell("s297_repr_str_format_dunders", "C")
+      %set.2 : base.Unit = base.refSet[py.Value](%C.cell.0, %C.0)
+      %__build_class__.1 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@|s297_repr_str_format_dunders.D.<body>|, "<body>", "s297_repr_str_format_dunders")
+      %str.2 : py.Value = py.strLit("D")
+      %tuple.1 : py.Value = py.mkTuple(%clo.1, %str.2)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %D.0 : py.Value = py.call(%__build_class__.1, %tuple.1, %kwargs.1) ^propagate.0()
+      %D.cell.0 : base.Ref(py.Value) = py.globalCell("s297_repr_str_format_dunders", "D")
+      %set.3 : base.Unit = base.refSet[py.Value](%D.cell.0, %D.0)
+      %print.0 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "print") ^propagate.0()
+      %C.1 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "C") ^propagate.0()
+      %tuple.2 : py.Value = py.mkTuple
+      %kwargs.2 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%C.1, %tuple.2, %kwargs.2) ^propagate.0()
+      %C.2 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "C") ^propagate.0()
+      %tuple.3 : py.Value = py.mkTuple
+      %kwargs.3 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%C.2, %tuple.3, %kwargs.3) ^propagate.0()
+      %D.1 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "D") ^propagate.0()
+      %tuple.4 : py.Value = py.mkTuple
+      %kwargs.4 : py.Value = py.mkKwargs
+      %call.2 : py.Value = py.call(%D.1, %tuple.4, %kwargs.4) ^propagate.0()
+      %list.0 : py.Value = py.mkList(%call.1, %call.2)
+      %D.2 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "D") ^propagate.0()
+      %tuple.5 : py.Value = py.mkTuple
+      %kwargs.5 : py.Value = py.mkKwargs
+      %call.3 : py.Value = py.call(%D.2, %tuple.5, %kwargs.5) ^propagate.0()
+      %str.3 : py.Value = py.strLit("")
+      %str.4 : py.Value = py.str(%call.3) ^propagate.0()
+      %fmt.0 : py.Value = py.fmtValue(%str.4, %str.3) ^propagate.0()
+      %repr.0 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "repr") ^propagate.0()
+      %D.3 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "D") ^propagate.0()
+      %tuple.6 : py.Value = py.mkTuple
+      %kwargs.6 : py.Value = py.mkKwargs
+      %call.4 : py.Value = py.call(%D.3, %tuple.6, %kwargs.6) ^propagate.0()
+      %tuple.7 : py.Value = py.mkTuple(%call.4)
+      %kwargs.7 : py.Value = py.mkKwargs
+      %call.5 : py.Value = py.call(%repr.0, %tuple.7, %kwargs.7) ^propagate.0()
+      %tuple.8 : py.Value = py.mkTuple(%call.0, %list.0, %fmt.0, %call.5)
+      %kwargs.8 : py.Value = py.mkKwargs
+      %call.6 : py.Value = py.call(%print.0, %tuple.8, %kwargs.8) ^propagate.0()
+      %print.1 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "print") ^propagate.0()
+      %C.3 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "C") ^propagate.0()
+      %tuple.9 : py.Value = py.mkTuple
+      %kwargs.9 : py.Value = py.mkKwargs
+      %call.7 : py.Value = py.call(%C.3, %tuple.9, %kwargs.9) ^propagate.0()
+      %str.5 : py.Value = py.strLit("")
+      %repr.1 : py.Value = py.repr(%call.7) ^propagate.0()
+      %fmt.1 : py.Value = py.fmtValue(%repr.1, %str.5) ^propagate.0()
+      %str.6 : py.Value = py.strLit(" ")
+      %D.4 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "D") ^propagate.0()
+      %tuple.10 : py.Value = py.mkTuple
+      %kwargs.10 : py.Value = py.mkKwargs
+      %call.8 : py.Value = py.call(%D.4, %tuple.10, %kwargs.10) ^propagate.0()
+      %str.7 : py.Value = py.strLit("")
+      %fmt.2 : py.Value = py.fmtValue(%call.8, %str.7) ^propagate.0()
+      %str.8 : py.Value = py.strLit(" ")
+      %D.5 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "D") ^propagate.0()
+      %tuple.11 : py.Value = py.mkTuple
+      %kwargs.11 : py.Value = py.mkKwargs
+      %call.9 : py.Value = py.call(%D.5, %tuple.11, %kwargs.11) ^propagate.0()
+      %str.9 : py.Value = py.strLit("")
+      %repr.2 : py.Value = py.repr(%call.9) ^propagate.0()
+      %fmt.3 : py.Value = py.fmtValue(%repr.2, %str.9) ^propagate.0()
+      %str.10 : py.Value = py.strLit(" ")
+      %D.6 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "D") ^propagate.0()
+      %tuple.12 : py.Value = py.mkTuple
+      %kwargs.12 : py.Value = py.mkKwargs
+      %call.10 : py.Value = py.call(%D.6, %tuple.12, %kwargs.12) ^propagate.0()
+      %str.11 : py.Value = py.strLit("")
+      %str.12 : py.Value = py.str(%call.10) ^propagate.0()
+      %fmt.4 : py.Value = py.fmtValue(%str.12, %str.11) ^propagate.0()
+      %str.13 : py.Value = py.strLit(" ")
+      %int.0 : py.Value = py.intLit(3)
+      %str.14 : py.Value = py.strLit(">5")
+      %fmt.5 : py.Value = py.fmtValue(%int.0, %str.14) ^propagate.0()
+      %str.15 : py.Value = py.strLit(" ")
+      %float.0 : py.Value = py.floatLit(2.5)
+      %str.16 : py.Value = py.strLit(".3f")
+      %fmt.6 : py.Value = py.fmtValue(%float.0, %str.16) ^propagate.0()
+      %str.17 : py.Value = py.strLit(" ")
+      %str.18 : py.Value = py.strLit("ab")
+      %str.19 : py.Value = py.strLit("^6")
+      %fmt.7 : py.Value = py.fmtValue(%str.18, %str.19) ^propagate.0()
+      %str.20 : py.Value = py.strLit("|")
+      %fstr.0 : py.Value = py.strConcat(%fmt.1, %str.6, %fmt.2, %str.8, %fmt.3, %str.10, %fmt.4, %str.13, %fmt.5, %str.15, %fmt.6, %str.17, %fmt.7, %str.20)
+      %tuple.13 : py.Value = py.mkTuple(%fstr.0)
+      %kwargs.13 : py.Value = py.mkKwargs
+      %call.11 : py.Value = py.call(%print.1, %tuple.13, %kwargs.13) ^propagate.0()
+      %__build_class__.2 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.2 : py.Value = py.mkClosure[[]](@|s297_repr_str_format_dunders.E.<body>|, "<body>", "s297_repr_str_format_dunders")
+      %str.21 : py.Value = py.strLit("E")
+      %tuple.14 : py.Value = py.mkTuple(%clo.2, %str.21)
+      %kwargs.14 : py.Value = py.mkKwargs
+      %E.0 : py.Value = py.call(%__build_class__.2, %tuple.14, %kwargs.14) ^propagate.0()
+      %E.cell.0 : base.Ref(py.Value) = py.globalCell("s297_repr_str_format_dunders", "E")
+      %set.4 : base.Unit = base.refSet[py.Value](%E.cell.0, %E.0)
+      %repr.3 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "repr") ^catch.0()
+      %E.1 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "E") ^catch.0()
+      %tuple.15 : py.Value = py.mkTuple
+      %kwargs.15 : py.Value = py.mkKwargs
+      %call.12 : py.Value = py.call(%E.1, %tuple.15, %kwargs.15) ^catch.0()
+      %tuple.16 : py.Value = py.mkTuple(%call.12)
+      %kwargs.16 : py.Value = py.mkKwargs
+      %call.13 : py.Value = py.call(%repr.3, %tuple.16, %kwargs.16) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %TypeError.0 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "TypeError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %TypeError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s297_repr_str_format_dunders", "e")
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.2 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "print") ^clear.0()
+      %e.0 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "e") ^clear.0()
+      %tuple.17 : py.Value = py.mkTuple(%e.0)
+      %kwargs.17 : py.Value = py.mkKwargs
+      %call.14 : py.Value = py.call(%print.2, %tuple.17, %kwargs.17) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("s297_repr_str_format_dunders", "e")
+      %set.6 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("s297_repr_str_format_dunders", "e")
+      %set.7 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.2 : py.Value):
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.2)
+    join.0():
+      %E.2 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "E") ^catch.1()
+      %tuple.18 : py.Value = py.mkTuple
+      %kwargs.18 : py.Value = py.mkKwargs
+      %call.15 : py.Value = py.call(%E.2, %tuple.18, %kwargs.18) ^catch.1()
+      %str.22 : py.Value = py.strLit("")
+      %str.23 : py.Value = py.str(%call.15) ^catch.1()
+      %fmt.8 : py.Value = py.fmtValue(%str.23, %str.22) ^catch.1()
+      jump ^join.1()
+    catch.1(%exc.3 : py.Value):
+      %prev.1 : py.Value = py.pushExcInfo(%exc.3)
+      %TypeError.1 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "TypeError") ^unwind.1()
+      %match.1 : base.Bool = py.excMatch(%exc.3, %TypeError.1) ^unwind.1()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %e.cell.3 : base.Ref(py.Value) = py.globalCell("s297_repr_str_format_dunders", "e")
+      %set.8 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.3)
+      %print.3 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "print") ^clear.1()
+      %e.3 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "e") ^clear.1()
+      %tuple.19 : py.Value = py.mkTuple(%e.3)
+      %kwargs.19 : py.Value = py.mkKwargs
+      %call.16 : py.Value = py.call(%print.3, %tuple.19, %kwargs.19) ^clear.1()
+      %pop.2 : base.Unit = py.popExcept(%prev.1)
+      %e.4 : py.Value = py.undef("e")
+      %e.cell.4 : base.Ref(py.Value) = py.globalCell("s297_repr_str_format_dunders", "e")
+      %set.9 : base.Unit = base.refSet[py.Value](%e.cell.4, %e.4)
+      jump ^join.1()
+    clear.1(%exc.4 : py.Value):
+      %e.5 : py.Value = py.undef("e")
+      %e.cell.5 : base.Ref(py.Value) = py.globalCell("s297_repr_str_format_dunders", "e")
+      %set.10 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.5)
+      jump ^unwind.1(%exc.4)
+    next.1():
+      jump ^unwind.1(%exc.3)
+    unwind.1(%exc.5 : py.Value):
+      %pop.3 : base.Unit = py.popExcept(%prev.1)
+      jump ^propagate.0(%exc.5)
+    join.1():
+      %__build_class__.3 : py.Value = py.qualifiedRef("builtins", "__build_class__") ^propagate.0()
+      %clo.3 : py.Value = py.mkClosure[[]](@|s297_repr_str_format_dunders.F.<body>|, "<body>", "s297_repr_str_format_dunders")
+      %str.24 : py.Value = py.strLit("F")
+      %tuple.20 : py.Value = py.mkTuple(%clo.3, %str.24)
+      %kwargs.20 : py.Value = py.mkKwargs
+      %F.0 : py.Value = py.call(%__build_class__.3, %tuple.20, %kwargs.20) ^propagate.0()
+      %F.cell.0 : base.Ref(py.Value) = py.globalCell("s297_repr_str_format_dunders", "F")
+      %set.11 : base.Unit = base.refSet[py.Value](%F.cell.0, %F.0)
+      %print.4 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "print") ^propagate.0()
+      %F.1 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "F") ^propagate.0()
+      %tuple.21 : py.Value = py.mkTuple
+      %kwargs.21 : py.Value = py.mkKwargs
+      %call.17 : py.Value = py.call(%F.1, %tuple.21, %kwargs.21) ^propagate.0()
+      %str.25 : py.Value = py.strLit("xyz")
+      %fmt.9 : py.Value = py.fmtValue(%call.17, %str.25) ^propagate.0()
+      %tuple.22 : py.Value = py.mkTuple(%fmt.9)
+      %kwargs.22 : py.Value = py.mkKwargs
+      %call.18 : py.Value = py.call(%print.4, %tuple.22, %kwargs.22) ^propagate.0()
+      %object.0 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "object") ^catch.2()
+      %tuple.23 : py.Value = py.mkTuple
+      %kwargs.23 : py.Value = py.mkKwargs
+      %call.19 : py.Value = py.call(%object.0, %tuple.23, %kwargs.23) ^catch.2()
+      %str.26 : py.Value = py.strLit("x")
+      %fmt.10 : py.Value = py.fmtValue(%call.19, %str.26) ^catch.2()
+      jump ^join.2()
+    catch.2(%exc.6 : py.Value):
+      %prev.2 : py.Value = py.pushExcInfo(%exc.6)
+      %TypeError.2 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "TypeError") ^unwind.2()
+      %match.2 : base.Bool = py.excMatch(%exc.6, %TypeError.2) ^unwind.2()
+      branch(%match.2) ^except.2() ^next.2()
+    except.2():
+      %e.cell.6 : base.Ref(py.Value) = py.globalCell("s297_repr_str_format_dunders", "e")
+      %set.12 : base.Unit = base.refSet[py.Value](%e.cell.6, %exc.6)
+      %print.5 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "print") ^clear.2()
+      %e.6 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "e") ^clear.2()
+      %tuple.24 : py.Value = py.mkTuple(%e.6)
+      %kwargs.24 : py.Value = py.mkKwargs
+      %call.20 : py.Value = py.call(%print.5, %tuple.24, %kwargs.24) ^clear.2()
+      %pop.4 : base.Unit = py.popExcept(%prev.2)
+      %e.7 : py.Value = py.undef("e")
+      %e.cell.7 : base.Ref(py.Value) = py.globalCell("s297_repr_str_format_dunders", "e")
+      %set.13 : base.Unit = base.refSet[py.Value](%e.cell.7, %e.7)
+      jump ^join.2()
+    clear.2(%exc.7 : py.Value):
+      %e.8 : py.Value = py.undef("e")
+      %e.cell.8 : base.Ref(py.Value) = py.globalCell("s297_repr_str_format_dunders", "e")
+      %set.14 : base.Unit = base.refSet[py.Value](%e.cell.8, %e.8)
+      jump ^unwind.2(%exc.7)
+    next.2():
+      jump ^unwind.2(%exc.6)
+    unwind.2(%exc.8 : py.Value):
+      %pop.5 : base.Unit = py.popExcept(%prev.2)
+      jump ^propagate.0(%exc.8)
+    join.2():
+      %print.6 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "print") ^propagate.0()
+      %int.1 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "int") ^propagate.0()
+      %__repr__.0 : py.Value = py.attr(%int.1, "__repr__") ^propagate.0()
+      %bool.0 : py.Value = py.boolLit(true)
+      %tuple.25 : py.Value = py.mkTuple(%bool.0)
+      %kwargs.25 : py.Value = py.mkKwargs
+      %call.21 : py.Value = py.call(%__repr__.0, %tuple.25, %kwargs.25) ^propagate.0()
+      %object.1 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "object") ^propagate.0()
+      %__str__.0 : py.Value = py.attr(%object.1, "__str__") ^propagate.0()
+      %int.2 : py.Value = py.intLit(5)
+      %tuple.26 : py.Value = py.mkTuple(%int.2)
+      %kwargs.26 : py.Value = py.mkKwargs
+      %call.22 : py.Value = py.call(%__str__.0, %tuple.26, %kwargs.26) ^propagate.0()
+      %str.27 : py.Value = py.strLit("é")
+      %str.28 : py.Value = py.strLit("")
+      %ascii.0 : py.Value = py.ascii(%str.27) ^propagate.0()
+      %fmt.11 : py.Value = py.fmtValue(%ascii.0, %str.28) ^propagate.0()
+      %str.29 : py.Value = py.strLit(" ")
+      %int.3 : py.Value = py.intLit(1)
+      %str.30 : py.Value = py.strLit("ü")
+      %list.1 : py.Value = py.mkList(%int.3, %str.30)
+      %str.31 : py.Value = py.strLit("")
+      %ascii.1 : py.Value = py.ascii(%list.1) ^propagate.0()
+      %fmt.12 : py.Value = py.fmtValue(%ascii.1, %str.31) ^propagate.0()
+      %fstr.1 : py.Value = py.strConcat(%fmt.11, %str.29, %fmt.12)
+      %tuple.27 : py.Value = py.mkTuple(%call.21, %call.22, %fstr.1)
+      %kwargs.27 : py.Value = py.mkKwargs
+      %call.23 : py.Value = py.call(%print.6, %tuple.27, %kwargs.27) ^propagate.0()
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.9 : py.Value):
+      %exc.10 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.9)
+      ret(%exc.10)
+  }
+  func @|s297_repr_str_format_dunders.C.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__repr__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("C")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s297_repr_str_format_dunders.C.__repr__, "__repr__", "s297_repr_str_format_dunders")
+      %str.4 : py.Value = py.strLit("__repr__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s297_repr_str_format_dunders.D.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__str__", binding = "def"}, {name = "__repr__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("D")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s297_repr_str_format_dunders.D.__str__, "__str__", "s297_repr_str_format_dunders")
+      %str.4 : py.Value = py.strLit("__str__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %clo.1 : py.Value = py.mkClosure[[]](@s297_repr_str_format_dunders.D.__repr__, "__repr__", "s297_repr_str_format_dunders")
+      %str.5 : py.Value = py.strLit("__repr__")
+      %store.3 : base.Unit = py.setItem(%ns.0, %str.5, %clo.1) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s297_repr_str_format_dunders.E.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__repr__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("E")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s297_repr_str_format_dunders.E.__repr__, "__repr__", "s297_repr_str_format_dunders")
+      %str.4 : py.Value = py.strLit("__repr__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @|s297_repr_str_format_dunders.F.<body>|(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    #[py.fields = []]
+    #[py.bindings = [{name = "__format__", binding = "def"}]]
+
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %int.0 : py.Value = py.intLit(0)
+      %ns.0 : py.Value = py.getItem(%args.0, %int.0) ^propagate.0()
+      %str.0 : py.Value = py.strLit("__name__")
+      %__name__.0 : py.Value = py.undef("__name__")
+      %__name__.1 : py.Value = py.getOptionalItem(%ns.0, %str.0, %__name__.0) ^propagate.0()
+      %found.0 : base.Bool = py.isDefined(%__name__.1)
+      branch(%found.0) ^join.0(%__name__.1) ^absent.0()
+    absent.0():
+      %__name__.2 : py.Value = py.loadGlobal("s297_repr_str_format_dunders", "__name__") ^propagate.0()
+      jump ^join.0(%__name__.2)
+    join.0(%__name__.3 : py.Value):
+      %str.1 : py.Value = py.strLit("__module__")
+      %store.0 : base.Unit = py.setItem(%ns.0, %str.1, %__name__.3) ^propagate.0()
+      %str.2 : py.Value = py.strLit("F")
+      %str.3 : py.Value = py.strLit("__qualname__")
+      %store.1 : base.Unit = py.setItem(%ns.0, %str.3, %str.2) ^propagate.0()
+      %clo.0 : py.Value = py.mkClosure[[]](@s297_repr_str_format_dunders.F.__format__, "__format__", "s297_repr_str_format_dunders")
+      %str.4 : py.Value = py.strLit("__format__")
+      %store.2 : base.Unit = py.setItem(%ns.0, %str.4, %clo.0) ^propagate.0()
+      %none.0 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s297_repr_str_format_dunders.C.__repr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "C.__repr__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %str.0 : py.Value = py.strLit("C!")
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%str.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s297_repr_str_format_dunders.D.__str__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "D.__str__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %str.0 : py.Value = py.strLit("D-str")
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%str.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s297_repr_str_format_dunders.D.__repr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "D.__repr__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %str.0 : py.Value = py.strLit("D-repr")
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%str.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s297_repr_str_format_dunders.E.__repr__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %self.1 : py.Value = py.undef("self")
+      %defaults.0 : py.Value = py.mkTuple(%self.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "E.__repr__", 0, 1, false, false, "self") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %int.0 : py.Value = py.intLit(5)
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%int.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+  func @s297_repr_str_format_dunders.F.__format__(%args.0 : py.Value, %kwargs.0 : py.Value) -> base.Except(py.Value, py.Value) {
+    entry.0(%args.0 : py.Value, %kwargs.0 : py.Value):
+      %self.0 : py.Value = py.undef("self")
+      %self.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%self.0)
+      %spec.0 : py.Value = py.undef("spec")
+      %spec.cell.0 : base.Ref(py.Value) = base.refNew[py.Value](%spec.0)
+      %self.1 : py.Value = py.undef("self")
+      %spec.1 : py.Value = py.undef("spec")
+      %defaults.0 : py.Value = py.mkTuple(%self.1, %spec.1)
+      %bound.0 : py.Value = py.bindArgs(%args.0, %kwargs.0, %defaults.0, "F.__format__", 0, 2, false, false, "self", "spec") ^propagate.0()
+      %self.2 : py.Value = py.tupleGet(%bound.0, 0)
+      %spec.2 : py.Value = py.tupleGet(%bound.0, 1)
+      %str.0 : py.Value = py.strLit("F:")
+      %spec.4 : py.Value = py.requireDefined(%spec.2, "spec", "UnboundLocalError", "cannot access local variable 'spec' where it is not associated with a value") ^propagate.0()
+      %add.0 : py.Value = py.add(%str.0, %spec.4) ^propagate.0()
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%add.0)
+      ret(%ret.0)
+    propagate.0(%exc.0 : py.Value):
+      %exc.1 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.0)
+      ret(%exc.1)
+  }
+}
+

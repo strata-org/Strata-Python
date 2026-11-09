@@ -6,10 +6,12 @@
 module
 public import StrataPython.Dyn.Sem.Concrete
 public import StrataPython.Dyn.Sem.Proto.Calls
+public import StrataPython.Dyn.Sem.Proto.Repr
 public import StrataPython.Dyn.Sem.Builtins.Classes
 public import StrataPython.Dyn.Sem.Builtins.Dunders
 public import StrataPython.Dyn.Sem.Builtins.Exceptions
 public import StrataPython.Dyn.Sem.Builtins.Iter
+public import StrataPython.Dyn.Sem.Builtins.Strings
 
 set_option autoImplicit false
 
@@ -78,6 +80,7 @@ def opsImpls : Impls where
     | .len => some fun {_} {_} [_] [_] => Builtins.lenFn
     | .iter => some fun {_} {_} [_] [_] => Builtins.iterFn
     | .next => some fun {_} {_} [_] [_] => Builtins.nextFn
+    | .repr => some fun {_} {_} [_] [_] => Builtins.reprFn
     | _ => none
   method
     | .type, "__new__" => some fun {_} {_} [_] [_] => Builtins.typeNew
@@ -109,7 +112,8 @@ def opsImpls : Impls where
     | .staticmethod, "__init__" => some fun {_} {_} [_] [_] => Builtins.wrapperInit true
     | t, name =>
       if t.info.mro.contains .BaseException then excImpl t name
-      else (Builtins.iterImpl t name).orElse fun _ => Builtins.dunderImpl t name
+      else ((Builtins.iterImpl t name).orElse fun _ => Builtins.stringImpl t name).orElse fun _ =>
+        Builtins.dunderImpl t name
 
 /-- `impls` with CPython's `tp_new_wrapper` checks before every built-in type's `__new__`, and its
 body without them as `tp_new`, which a class call runs (`Proto.tpNewFor`). -/

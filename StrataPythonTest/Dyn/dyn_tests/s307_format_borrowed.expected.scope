@@ -1,0 +1,9 @@
+module
+  E: local (assigned, referenced)
+  Exception: global implicit (referenced)
+  print: global implicit (referenced)
+  TypeError: global implicit (referenced)
+  e: local (assigned, referenced)
+  class E
+    __format__: local (assigned)
+    str: global implicit (referenced)

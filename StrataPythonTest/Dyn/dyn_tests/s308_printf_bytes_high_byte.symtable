@@ -1,0 +1,7 @@
+module top
+  OverflowError: global implicit (referenced)
+  ValueError: global implicit (referenced)
+  e: local (assigned, referenced)
+  f: local (assigned, referenced)
+  print: global implicit (referenced)
+qualnames: 

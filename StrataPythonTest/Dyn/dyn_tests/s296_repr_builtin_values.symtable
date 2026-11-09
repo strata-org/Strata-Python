@@ -1,0 +1,20 @@
+module top
+  G: local (assigned, referenced)
+  NotImplemented: global implicit (referenced)
+  d: local (assigned, referenced)
+  int: global implicit (referenced)
+  len: global implicit (referenced)
+  list: global implicit (referenced)
+  n: local (assigned, referenced)
+  print: global implicit (referenced)
+  range: global implicit (referenced)
+  repr: global implicit (referenced)
+  str: global implicit (referenced)
+  type: global implicit (referenced)
+  x: local (assigned, referenced)
+  class G
+    __getitem__: local (assigned)
+    function __getitem__
+      k: local (parameter, referenced)
+      self: local (parameter)
+qualnames: G, G.__getitem__

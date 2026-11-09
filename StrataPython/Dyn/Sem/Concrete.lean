@@ -159,6 +159,12 @@ theorem same_depth (s : Start) (d : Depth) (w : World σ) :
     Same s w (HasPart.set w d : World σ) :=
   ⟨Nat.le_refl _, fun _ _ _ h => h, Modules.Extends.refl _, rfl, rfl⟩
 
+omit [Decode σ] in
+/-- A change of the `repr` guard changes no protected state. -/
+theorem same_guard (s : Start) (g : ReprGuard) (w : World σ) :
+    Same s w (HasPart.set w g : World σ) :=
+  ⟨Nat.le_refl _, fun _ _ _ h => h, Modules.Extends.refl _, rfl, rfl⟩
+
 /-- Call the function object `id` with `args` and `kwargs`, one Python call deeper. -/
 def callClosure (id : ObjId) (args kwargs : Value) : PyM σ .calls true Value :=
   ⟨fun _ _ _ k ke => callClosureT id args kwargs k ke, by
@@ -289,6 +295,50 @@ def withPyDepth {e : Level} {fr : Bool} {α : Type} (hnp0 : e ≠ .pure) (n : Na
           (fun h => absurd h hnp) (hk a))
         (fun x => ContOK.modifyThe _ hc.depth (fun _ _ _ => refsOK_nil rfl) (fun _ w => same_depth s _ w)
           (fun h => absurd h hnp) (hke x)),
+    by intro hfr; unfold StartFree; intro ε E _ hs s s' β k ke
+       simp only [body.2.2 hfr hs s s']⟩
+
+/-- What `Py_ReprEnter` finds for the key `key` in the guard `g` (`ReprEntry`): an object by its id;
+a tuple is `unknown` when a tuple with the same items is in the guard, and fresh otherwise, since
+a tuple with other items is another tuple. -/
+def reprEntryOf (g : ReprGuard) : ReprKey → ReprEntry
+  | .obj id => if g.active.any (fun | .obj i => i == id | _ => false) then .hit else .fresh
+  -- Comparing `nodes` first keeps a chain of nested tuples from comparing deeply at each level.
+  | .tuple xs n =>
+    if g.active.any (fun | .tuple ys n' => n' == n && ys == xs | _ => false) then .unknown else .fresh
+
+/-- The key of `v` in the `repr` guard: an object by its id, any other value (a tuple) by its items. -/
+def reprKeyOf : Value → ReprKey
+  | .obj id => .obj id
+  | .tuple xs => .tuple xs (Value.tuple xs).nodes
+  | v => .tuple #[v] (Value.tuple #[v]).nodes
+
+/-- What `Py_ReprEnter` finds for `key` in the `repr` guard. -/
+def reprCheck (key : ReprKey) : PyM σ .reads true ReprEntry :=
+  ⟨fun _ _ _ k _ => do
+    let g ← getThe ReprGuard
+    k (reprEntryOf g key), by
+    intro rs ps S tg V hc s hs hh e' he β Q QW k ke hk hke
+    exact ContOK.getThe (fun _ => hk _) (fun h => absurd h (Level.ne_pure_up he (by decide))),
+    by intro _; unfold StartFree; intros; rfl⟩
+
+/-- `body` with `key` entered in the `repr` guard, as `Py_ReprEnter` enters it, and the guard back
+as it was when `body` returns or raises (`Py_ReprLeave`). -/
+def withRepr {e : Level} {fr : Bool} {α : Type} (hnp0 : e ≠ .pure) (key : ReprKey)
+    (body : PyM σ e fr α) : PyM σ e fr α :=
+  ⟨fun hs s _ k ke => do
+    let g ← modifyGetThe ReprGuard fun g => (g, { active := g.active.push key })
+    body.1 hs s (fun a => do modifyThe ReprGuard fun _ => g; k a)
+      (fun x => do modifyThe ReprGuard fun _ => g; ke x), by
+    intro rs ps S tg V hc s hs hh e' he β Q QW k ke hk hke
+    have hnp : e' ≠ .pure := Level.ne_pure_up he hnp0
+    refine ContOK.modifyGetThe _ hc.guard (fun _ _ _ => refsOK_nil rfl) (fun _ w => same_guard s _ w)
+      (fun h => absurd h hnp) (fun g => ?_)
+    exact body.2.1 rs ps S tg V hc s hs hh e' he Q QW _ _
+      (fun a => ContOK.modifyThe _ hc.guard (fun _ _ _ => refsOK_nil rfl) (fun _ w => same_guard s _ w)
+        (fun h => absurd h hnp) (hk a))
+      (fun x => ContOK.modifyThe _ hc.guard (fun _ _ _ => refsOK_nil rfl) (fun _ w => same_guard s _ w)
+        (fun h => absurd h hnp) (hke x)),
     by intro hfr; unfold StartFree; intro ε E _ hs s s' β k ke
        simp only [body.2.2 hfr hs s s']⟩
 
@@ -1606,6 +1656,9 @@ instance {e : Level} {fr : Bool} [Level.AtLeast .reads e] : PyReads (PyM σ e fr
   withDepth n body := Prim.withDepth (Level.ne_pure_up (e := .reads) Level.AtLeast.le (by decide)) n body
   withPyDepth n body :=
     Prim.withPyDepth (Level.ne_pure_up (e := .reads) Level.AtLeast.le (by decide)) n body
+  reprCheck v := (Prim.reprCheck (Prim.reprKeyOf v)).relax.lift Level.AtLeast.le
+  withRepr v body := Prim.withRepr (Level.ne_pure_up (e := .reads) Level.AtLeast.le (by decide))
+    (Prim.reprKeyOf v) body
 
 /-- Which body a built-in callable runs: a built-in function's, a built-in type's method's, or a
 native function's, by its key. -/

@@ -90,6 +90,14 @@ def classQualnameOf [PyReads m V] (t : V) : m String := do
   if n.utf8ByteSize > 50 then PyPure.gap "a message with a class name longer than 50 bytes is not modelled yet"
   pure n
 
+/-- The `tp_name` of the class `c`: a built-in type's name, or a user class's. -/
+def tpNameOf [PyReads m V] (c : V) : m String := do
+  match ← PyPure.immView c with
+  | some (.builtin b) => pure b.info.tpName
+  | _ => match ← classData? c with
+    | some cd => pure (cd.tpName.getD cd.name)
+    | none => PyPure.gap "the tp_name of a value that is not a class"
+
 /-- The `__name__` of the type of `v`, as CPython's messages give it (a built-in type's `tp_name`). -/
 def typeName [PyReads m V] (v : V) : m String := do
   let t ← PyReads.classOf v

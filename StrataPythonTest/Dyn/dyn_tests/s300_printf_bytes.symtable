@@ -1,0 +1,38 @@
+module top
+  B: local (assigned, referenced)
+  F: local (assigned, referenced)
+  I: local (assigned, referenced)
+  N: local (assigned, referenced)
+  P: local (assigned, referenced)
+  t: local (assigned, referenced)
+  function t
+    Exception: global implicit (referenced)
+    args: local (parameter, referenced)
+    e: local (assigned, referenced)
+    fmt: local (parameter, referenced)
+    print: global implicit (referenced)
+    r: local (assigned, referenced)
+    repr: global implicit (referenced)
+    type: global implicit (referenced)
+  class B
+    __bytes__: local (assigned)
+    function __bytes__
+      self: local (parameter)
+  class I
+    __index__: local (assigned)
+    function __index__
+      self: local (parameter)
+  class N
+    __int__: local (assigned)
+    function __int__
+      self: local (parameter)
+  class F
+    __float__: local (assigned)
+    function __float__
+      self: local (parameter)
+  class P
+    __rmod__: local (assigned)
+    function __rmod__
+      o: local (parameter)
+      self: local (parameter)
+qualnames: B, B.__bytes__, F, F.__float__, I, I.__index__, N, N.__int__, P, P.__rmod__, t

@@ -1,0 +1,25 @@
+--- stdout 503
+a
+ValueError unsupported format character '%' (0x25) at index 4
+"{'a': 1}"
+''
+TypeError not all arguments converted during string formatting
+'-3.500  |+0000005|0o0'
+OverflowError int too large to convert to float
+ValueError Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit
+'-ff'
+'-0xff'
+OverflowError %c arg not in range(0x110000)
+'    3|   +3| 3   |'
+TypeError not enough arguments for format string
+'INF nan'
+'R!|R!|R!|        R!|'
+
+--- outcome
+ok
+--- globals
+R = <class 'R'>
+__doc__ = None
+__name__ = '__main__'
+t = <function object>
+x = 'a'

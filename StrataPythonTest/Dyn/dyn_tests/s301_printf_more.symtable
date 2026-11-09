@@ -1,0 +1,19 @@
+module top
+  R: local (assigned, referenced)
+  print: global implicit (referenced)
+  t: local (assigned, referenced)
+  x: local (assigned, referenced)
+  function t
+    Exception: global implicit (referenced)
+    args: local (parameter, referenced)
+    e: local (assigned, referenced)
+    fmt: local (parameter, referenced)
+    print: global implicit (referenced)
+    r: local (assigned, referenced)
+    repr: global implicit (referenced)
+    type: global implicit (referenced)
+  class R
+    __repr__: local (assigned)
+    function __repr__
+      self: local (parameter)
+qualnames: R, R.__repr__, t

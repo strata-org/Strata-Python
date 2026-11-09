@@ -1,0 +1,12 @@
+module
+  K: local (assigned, referenced)
+  d: local (assigned, referenced)
+  print: global implicit (referenced)
+  class K
+    __repr__: local (assigned)
+    function K.__repr__
+      params: self
+      self: local (parameter)
+      d: global implicit (referenced)
+      i: local (assigned, referenced)
+      range: global implicit (referenced)

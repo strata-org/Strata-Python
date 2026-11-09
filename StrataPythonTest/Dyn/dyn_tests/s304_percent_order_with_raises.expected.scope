@@ -1,0 +1,15 @@
+module
+  A: local (assigned, referenced)
+  g: local (assigned, referenced)
+  x: local (assigned)
+  ValueError: global implicit (referenced)
+  print: global implicit (referenced)
+  KeyError: global implicit (referenced)
+  class A
+    __str__: local (assigned)
+    function A.__str__
+      params: self
+      self: local (parameter)
+      KeyError: global implicit (referenced)
+  function g
+    ValueError: global implicit (referenced)

@@ -66,10 +66,25 @@ structure Depth where
   bracket : Nat := 0
   deriving Repr, Inhabited, DecidableEq
 
-/-- The objects whose `repr` is being computed, as CPython's `Py_ReprEnter` list. -/
+/-- The number of values that `v` holds through tuples, itself included: the same for equal values,
+and smaller for a value inside a tuple than for the tuple. -/
+def Value.nodes : Value → Nat
+  | .tuple xs => xs.attach.foldl (fun n ⟨x, _⟩ => n + x.nodes) 1
+  | _ => 1
+termination_by v => sizeOf v
+decreasing_by have := Array.sizeOf_lt_of_mem ‹_›; simp_all; omega
+
+/-- A key of the `repr` guard: an object by its id, or a tuple by its items and their `nodes`,
+since the semantics can't tell a tuple apart from an equal one. -/
+inductive ReprKey where
+  | obj (id : ObjId)
+  | tuple (items : Array Value) (nodes : Nat)
+  deriving Repr, Inhabited
+
+/-- The values whose `repr` is being computed, as CPython's `Py_ReprEnter` list. -/
 structure ReprGuard where
-  active : Array ObjId := #[]
-  deriving Repr, Inhabited, DecidableEq
+  active : Array ReprKey := #[]
+  deriving Repr, Inhabited
 
 /-- What the program wrote to standard output, in pieces. -/
 structure Output where

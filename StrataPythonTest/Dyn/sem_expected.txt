@@ -44,14 +44,14 @@ fw07_with_in_finally | gap | import of module sys is not modelled yet
 fw08_try_in_with | gap | import of module sys is not modelled yet
 fw09_try_else_finally | gap | import of module sys is not modelled yet
 fw10_return_value_timing | agree
-i01_call_forms | gap | str() of this value is not modelled yet
-i02_param_kinds | gap | str() of this value is not modelled yet
+i01_call_forms | agree
+i02_param_kinds | agree
 i03_defaults | agree
-i04_dict_unpack | gap | str() of this value is not modelled yet
-i05_kwargs_mutation | gap | str() of this value is not modelled yet
+i04_dict_unpack | gap | built-in method dict.__new__ is not modelled yet
+i05_kwargs_mutation | gap | built-in method list.append is not modelled yet
 i06_call_errors | gap | a TypeError that names a function is not modelled yet
-i07_methods | gap | str() of this value is not modelled yet
-i08_binding_errors | gap | str() of this value is not modelled yet
+i07_methods | agree
+i08_binding_errors | agree
 i09_assigned_defaults | gap | a write to the attribute function.__defaults__ is not modelled yet
 i10_keyword_subclass | gap | built-in method str.__new__ is not modelled yet
 i11_constant_default | gap | is on two equal immediates depends on CPython's caching
@@ -74,7 +74,7 @@ m_displays | agree
 m_expressions | agree
 m_finally | gap | import of module sys is not modelled yet
 m_for | agree
-m_fstring | gap | not modelled yet: py.strConcat
+m_fstring | agree
 m_func_annotations | gap | built-in method list.append is not modelled yet
 m_future_annotations | gap | the translator does not support from __future__ import annotations
 m_generator_yields | gap | the translator does not support generator function, async def
@@ -225,7 +225,7 @@ s131_dict_merge | agree
 s132_iter_states | agree
 s133_set_subclass_update | gap | built-in method set.__new__ is not modelled yet
 s134_loop_inside_gap | gap | a looping built-in was reached inside an operation
-s135_printf_gap | gap | printf-style formatting is not modelled yet
+s135_printf_gap | agree
 s136_iter_protocol | agree
 s137_unpack_iter | agree
 s138_range_more | agree
@@ -304,7 +304,7 @@ s204_hash_returns_seed_hash | agree
 s205_index_returns_seed_hash | gap | a hash whose number the model does not know
 s206_dunder_seed_hash | gap | a hash whose number the model does not know
 s207_length_hint_seed_hash | gap | a hash whose number the model does not know
-s208_none_dunders | gap | built-in method NoneType.__repr__ is not modelled yet
+s208_none_dunders | gap | built-in method NoneType.__bool__ is not modelled yet
 s209_unset_wrappers | gap | an unset classmethod is not modelled yet
 s20_exception_chain | agree
 s210_set_lookup_member_replaced | gap | a set that changes during a lookup is not modelled yet
@@ -397,8 +397,23 @@ s292_dict_inplace_times_int | agree
 s293_exception_class_get | gap | an exception whose class defines a descriptor method is not modelled yet
 s294_set_name_note_long_class_name | agree
 s295_nonascii_class_name_in_message | gap | a message with a class name longer than 50 bytes is not modelled yet
+s296_repr_builtin_values | agree
+s297_repr_str_format_dunders | agree
+s298_repr_tuple_cycles | agree
+s299_printf_str | agree
 s29_set_user_objects | gap | a slot of a set whose layout is inexact
+s300_printf_bytes | agree
+s301_printf_more | agree
+s302_printf_literal_order | agree
+s303_printf_int_returns_bool | gap | an __int__ that returns a bool, where CPython warns, is not modelled yet
+s304_percent_order_with_raises | agree
+s305_repr_tuple_met_again | gap | the repr of a tuple met again, or of an equal tuple, is not modelled yet
+s306_repr_dict_resized | gap | a dict whose keys change during its repr, after a deletion, is not modelled yet
+s307_format_borrowed | agree
+s308_printf_bytes_high_byte | agree
+s309_printf_bytes_literal | agree
 s30_dict_merge_user_keys | gap | a walk of a dict whose comparisons may run user code is not modelled yet
+s310_repr_one_member_set | agree
 s311_borrowed_getattribute | gap | the __getattribute__ of the built-in int on another type is not modelled yet
 s312_meta_object_getattribute | gap | the __getattribute__ of the built-in object on another type is not modelled yet
 s313_type_getattribute_on_instance | gap | the __getattribute__ of the built-in type on another type is not modelled yet
@@ -485,7 +500,7 @@ t09_nested_try | agree
 t10_except_type | gap | built-in method str.__new__ is not modelled yet
 t11_with | agree
 t12_class | agree
-t13_fstring | gap | not modelled yet: py.fmtValue
+t13_fstring | agree
 t14_bool_short | agree
 t15_ifexp | agree
 t16_chained_cmp | agree
@@ -498,7 +513,7 @@ t22_star_args | agree
 t23_kwargs_boto3 | gap | import of module boto3 is not modelled yet
 t24_assert | agree
 t25_tuple_unpack | agree
-t26_with_as_use | gap | str() of this value is not modelled yet
+t26_with_as_use | gap | a repr that shows an object's address is not modelled yet
 t27_module_vars | gap | import of module logging is not modelled yet
 t28_try_else | agree
 t29_dict_unpack | agree

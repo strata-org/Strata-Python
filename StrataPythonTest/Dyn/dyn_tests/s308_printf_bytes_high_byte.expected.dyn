@@ -1,0 +1,79 @@
+module s308_printf_bytes_high_byte {
+  func @|s308_printf_bytes_high_byte.<module>|() -> base.Except(py.Value, py.Value) {
+    entry.0():
+      %str.0 : py.Value = py.strLit("s308_printf_bytes_high_byte")
+      %__name__.cell.0 : base.Ref(py.Value) = py.globalCell("s308_printf_bytes_high_byte", "__name__")
+      %set.0 : base.Unit = base.refSet[py.Value](%__name__.cell.0, %str.0)
+      %none.0 : py.Value = py.noneLit
+      %__doc__.cell.0 : base.Ref(py.Value) = py.globalCell("s308_printf_bytes_high_byte", "__doc__")
+      %set.1 : base.Unit = base.refSet[py.Value](%__doc__.cell.0, %none.0)
+      %bytes.0 : py.Value = py.bytesLit("%5ÿ")
+      %f.cell.0 : base.Ref(py.Value) = py.globalCell("s308_printf_bytes_high_byte", "f")
+      %set.2 : base.Unit = base.refSet[py.Value](%f.cell.0, %bytes.0)
+      %f.0 : py.Value = py.loadGlobal("s308_printf_bytes_high_byte", "f") ^catch.0()
+      %int.0 : py.Value = py.intLit(1)
+      %tuple.0 : py.Value = py.mkTuple(%int.0)
+      %mod.0 : py.Value = py.mod(%f.0, %tuple.0) ^catch.0()
+      jump ^join.0()
+    catch.0(%exc.0 : py.Value):
+      %prev.0 : py.Value = py.pushExcInfo(%exc.0)
+      %ValueError.0 : py.Value = py.loadGlobal("s308_printf_bytes_high_byte", "ValueError") ^unwind.0()
+      %match.0 : base.Bool = py.excMatch(%exc.0, %ValueError.0) ^unwind.0()
+      branch(%match.0) ^except.0() ^next.0()
+    except.0():
+      %e.cell.0 : base.Ref(py.Value) = py.globalCell("s308_printf_bytes_high_byte", "e")
+      %set.3 : base.Unit = base.refSet[py.Value](%e.cell.0, %exc.0)
+      %print.0 : py.Value = py.loadGlobal("s308_printf_bytes_high_byte", "print") ^clear.0()
+      %str.1 : py.Value = py.strLit("ValueError")
+      %e.0 : py.Value = py.loadGlobal("s308_printf_bytes_high_byte", "e") ^clear.0()
+      %tuple.1 : py.Value = py.mkTuple(%str.1, %e.0)
+      %kwargs.0 : py.Value = py.mkKwargs
+      %call.0 : py.Value = py.call(%print.0, %tuple.1, %kwargs.0) ^clear.0()
+      %pop.0 : base.Unit = py.popExcept(%prev.0)
+      %e.1 : py.Value = py.undef("e")
+      %e.cell.1 : base.Ref(py.Value) = py.globalCell("s308_printf_bytes_high_byte", "e")
+      %set.4 : base.Unit = base.refSet[py.Value](%e.cell.1, %e.1)
+      jump ^join.0()
+    clear.0(%exc.1 : py.Value):
+      %e.2 : py.Value = py.undef("e")
+      %e.cell.2 : base.Ref(py.Value) = py.globalCell("s308_printf_bytes_high_byte", "e")
+      %set.5 : base.Unit = base.refSet[py.Value](%e.cell.2, %e.2)
+      jump ^unwind.0(%exc.1)
+    next.0():
+      %OverflowError.0 : py.Value = py.loadGlobal("s308_printf_bytes_high_byte", "OverflowError") ^unwind.0()
+      %match.1 : base.Bool = py.excMatch(%exc.0, %OverflowError.0) ^unwind.0()
+      branch(%match.1) ^except.1() ^next.1()
+    except.1():
+      %e.cell.3 : base.Ref(py.Value) = py.globalCell("s308_printf_bytes_high_byte", "e")
+      %set.6 : base.Unit = base.refSet[py.Value](%e.cell.3, %exc.0)
+      %print.1 : py.Value = py.loadGlobal("s308_printf_bytes_high_byte", "print") ^clear.1()
+      %str.2 : py.Value = py.strLit("OverflowError")
+      %e.3 : py.Value = py.loadGlobal("s308_printf_bytes_high_byte", "e") ^clear.1()
+      %tuple.2 : py.Value = py.mkTuple(%str.2, %e.3)
+      %kwargs.1 : py.Value = py.mkKwargs
+      %call.1 : py.Value = py.call(%print.1, %tuple.2, %kwargs.1) ^clear.1()
+      %pop.1 : base.Unit = py.popExcept(%prev.0)
+      %e.4 : py.Value = py.undef("e")
+      %e.cell.4 : base.Ref(py.Value) = py.globalCell("s308_printf_bytes_high_byte", "e")
+      %set.7 : base.Unit = base.refSet[py.Value](%e.cell.4, %e.4)
+      jump ^join.0()
+    clear.1(%exc.2 : py.Value):
+      %e.5 : py.Value = py.undef("e")
+      %e.cell.5 : base.Ref(py.Value) = py.globalCell("s308_printf_bytes_high_byte", "e")
+      %set.8 : base.Unit = base.refSet[py.Value](%e.cell.5, %e.5)
+      jump ^unwind.0(%exc.2)
+    next.1():
+      jump ^unwind.0(%exc.0)
+    unwind.0(%exc.3 : py.Value):
+      %pop.2 : base.Unit = py.popExcept(%prev.0)
+      jump ^propagate.0(%exc.3)
+    join.0():
+      %none.1 : py.Value = py.noneLit
+      %ret.0 : base.Except(py.Value, py.Value) = base.ok[py.Value, py.Value](%none.1)
+      ret(%ret.0)
+    propagate.0(%exc.4 : py.Value):
+      %exc.5 : base.Except(py.Value, py.Value) = base.error[py.Value, py.Value](%exc.4)
+      ret(%exc.5)
+  }
+}
+

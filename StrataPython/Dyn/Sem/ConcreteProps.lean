@@ -18,7 +18,7 @@ the initial world (`storeOK_w0`), and allocating an object of another class (`st
 `Prim.callClosureT_restores`, `Prim.bracketed_restores`, `Prim.withDepth_restores` and
 `Prim.withPyDepth_restores`: a call and the call bracket write back the depth that they read
 before they ran their body, each edge changing nothing but the depth; each depth count writes back
-its own counter.  `Prim.withDepth_keeps_bracket` and
+its own counter.  `Prim.withRepr_restores`: the `repr` guard is written back the same way.  `Prim.withDepth_keeps_bracket` and
 `Prim.withPyDepth_keeps_bracket`: the depth counts never move the call bracket's marker.
 -/
 
@@ -128,6 +128,25 @@ theorem withDepth_keeps_bracket {ε : Eff} {E β : Type} [PyLang σ ε] [LawfulH
   · exact ⟨by rw [(hg w₁).1], (hg w₁).2⟩
   · obtain ⟨h, hh, hw⟩ := hk a; exact ⟨h, hh, fun w₂ => ⟨by rw [(hw w₂).1], (hw w₂).2⟩⟩
   · obtain ⟨h, hh, hw⟩ := hke x; exact ⟨h, hh, fun w₂ => ⟨by rw [(hw w₂).1], (hw w₂).2⟩⟩
+
+/-- **`withRepr` restores the `repr` guard**: under the guard part's laws, `withRepr` enters `key` in
+one update that changes nothing else, and runs the body with continuations that each set the guard
+back to the world's guard before it, in the update before they go on. -/
+theorem withRepr_restores {ε : Eff} {E β : Type} [PyLang σ ε] [LawfulHasPart ε.W ReprGuard]
+    {e : Effects.Level} {fr : Bool} {α : Type} (hnp0 : e ≠ .pure) (key : ReprKey)
+    (body : PyM σ e fr α) (hs : Handles ε E) (s : Start) (k : α → Sem ε E β)
+    (ke : Value → Sem ε E β) (w : ε.W) :
+    ∃ kw, (withRepr hnp0 key body).1 hs s k ke = .update kw ∧
+      (kw w).1 = HasPart.set w ({ active := (HasPart.get w : ReprGuard).active.push key } : ReprGuard) ∧
+      ∃ kb kbe, (kw w).2 = body.1 hs s kb kbe ∧
+        (∀ a, ∃ h, kb a = .update h ∧ ∀ w₂ : ε.W,
+          (h w₂).1 = HasPart.set w₂ (HasPart.get w : ReprGuard) ∧ (h w₂).2 = k a) ∧
+        (∀ x, ∃ h, kbe x = .update h ∧ ∀ w₂ : ε.W,
+          (h w₂).1 = HasPart.set w₂ (HasPart.get w : ReprGuard) ∧ (h w₂).2 = ke x) := by
+  dsimp only [withRepr, Sem.bindAfter, Sem.bind]
+  simp only [modifyGetThe_eq]
+  exact ⟨_, rfl, rfl, _, _, rfl, fun a => ⟨_, rfl, fun w₂ => ⟨rfl, rfl⟩⟩,
+    fun x => ⟨_, rfl, fun w₂ => ⟨rfl, rfl⟩⟩⟩
 
 /-- **`withPyDepth` keeps the call bracket's marker**: under the depth part's laws, when the Python
 call depth of the world `w` plus `n` is within the limit, the update that raises the depth and the

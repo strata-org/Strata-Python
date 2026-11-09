@@ -1,0 +1,10 @@
+--- stdout 35
+{'a': 1, 'b': K, 1: 1, 2: 2, 3: 3}
+
+--- outcome
+ok
+--- globals
+K = <class 'K'>
+__doc__ = None
+__name__ = '__main__'
+d = {'b': <K object>, 0: 0, 1: 1, 2: 2, 3: 3}

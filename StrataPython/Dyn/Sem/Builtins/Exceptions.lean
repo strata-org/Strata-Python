@@ -5,7 +5,7 @@
 -/
 module
 public import StrataPython.Dyn.Sem.Builtins.Classes
-public import StrataPython.Dyn.Sem.Proto.Exceptions
+public import StrataPython.Dyn.Sem.Proto.Repr
 
 set_option autoImplicit false
 
@@ -57,10 +57,8 @@ def errnoClass : Int → Option Builtin
 section
 variable {m : Type → Type 1} {V : Type}
 
-/-- `str(v)` of an argument whose `str` runs no protocol, else a gap. -/
-def argStr [PyCalls m V] (v : V) : m String := do
-  let some s ← plainStr? v | PyPure.gap "the str of an exception's argument of this type is not modelled yet"
-  pure s
+/-- `str(v)` of an exception's argument or field (`strTextOf`). -/
+def argStr [PyCalls m V] (v : V) : m String := strTextOf v
 
 /-- The items of the `args` tuple of the exception `e`. -/
 def excArgs [PyReads m V] (e : V) : m (Array V) := do tupleItems (← excData e).args
@@ -140,7 +138,7 @@ def argsStr [PyCalls m V] (xs : Array V) : m String := do
   match xs with
   | #[] => pure ""
   | #[x] => argStr x
-  | _ => return s!"({", ".intercalate (← xs.mapM checkRepr).toList})"
+  | _ => strTextOf (PyPure.imm (m := m) (.tuple xs))
 
 /-- **`BaseException.__str__`**. -/
 def baseExcStr [PyWrites m V] (self _args _kwargs : V) : m V := do
@@ -149,7 +147,7 @@ def baseExcStr [PyWrites m V] (self _args _kwargs : V) : m V := do
 /-- **`KeyError.__str__`**: the `repr` of a single argument, else `BaseException.__str__`. -/
 def keyErrorStr [PyWrites m V] (self args kwargs : V) : m V := do
   match ← excArgs self with
-  | #[x] => return PyPure.imm (m := m) (.str (.ofString (← checkRepr x)))
+  | #[x] => return PyPure.imm (m := m) (.str (.ofString (← reprTextOf x)))
   | _ => baseExcStr self args kwargs
 
 /-- The field `n` of the exception `e`, `none` if it is unset. -/
@@ -166,11 +164,10 @@ def importErrorStr [PyWrites m V] (self args kwargs : V) : m V := do
 tuple's `repr`. -/
 def baseExcRepr [PyWrites m V] (self _args _kwargs : V) : m V := do
   let n ← excTypeName self
+  -- `%R` of the one argument, or of the args tuple.
   let s ← match ← excArgs self with
-    | #[] => pure s!"{n}()"
-    | xs =>
-      let parts ← xs.mapM checkRepr
-      pure s!"{n}({", ".intercalate parts.toList})"
+    | #[x] => pure s!"{n}({← reprTextOf x})"
+    | _ => pure s!"{n}{← reprTextOf (← excData self).args}"
   return PyPure.imm (m := m) (.str (.ofString s))
 
 /-- **`BaseException.add_note(note)`**: `__notes__` read with the attribute protocol, made a new
@@ -288,8 +285,8 @@ def osErrorStr [PyWrites m V] (self args kwargs : V) : m V := do
   let en ← excField self "errno"
   let se ← excField self "strerror"
   let s? ← match ← excField self "filename", ← excField self "filename2" with
-    | some f, some f2 => pure (some s!"[Errno {← orNone en}] {← orNone se}: {← checkRepr f} -> {← checkRepr f2}")
-    | some f, none => pure (some s!"[Errno {← orNone en}] {← orNone se}: {← checkRepr f}")
+    | some f, some f2 => pure (some s!"[Errno {← orNone en}] {← orNone se}: {← reprTextOf f} -> {← reprTextOf f2}")
+    | some f, none => pure (some s!"[Errno {← orNone en}] {← orNone se}: {← reprTextOf f}")
     | none, _ => match en, se with
       | some x, some y => pure (some s!"[Errno {← argStr x}] {← argStr y}")
       | _, _ => pure none

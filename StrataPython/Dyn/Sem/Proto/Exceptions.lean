@@ -49,17 +49,14 @@ def excData [PyReads m V] (e : V) : m (ExcData V) := do
   let some (.exc d) ← PyReads.objView e | PyPure.gap "the state of a value that is not an exception"
   pure d
 
-/-- `repr(c)` of the class `c`, as CPython's `type_repr` gives it: `<class 'module.qualname'>`,
-or `<class 'tp_name'>` when the module is `builtins` or not a `str`. A metaclass other than
-`type` stops with a gap, since its `__repr__` may run code. -/
-def classRepr [PyReads m V] (c : V) : m String := do
+/-- CPython's `type_repr` of the class `c`: `<class 'module.qualname'>`, or `<class 'tp_name'>`
+when the module is `builtins` or not a `str`. -/
+def typeRepr [PyReads m V] (c : V) : m String := do
   match ← PyPure.immView c with
   | some (.builtin b) =>
     let mo := b.info.module
     return if mo == "builtins" then s!"<class '{b.info.qualname}'>" else s!"<class '{mo}.{b.info.qualname}'>"
   | _ =>
-    if !((← PyPure.immView (← PyReads.classOf c)) matches some (.builtin .type)) then
-      PyPure.gap "the repr of a class whose metaclass is not type is not modelled yet"
     match ← classData? c with
     | some cd =>
       let tpName := cd.tpName.getD cd.name
@@ -68,6 +65,14 @@ def classRepr [PyReads m V] (c : V) : m String := do
       | some mo => return if mo == "builtins" then s!"<class '{tpName}'>" else s!"<class '{mo}.{cd.qualname}'>"
       | none => return s!"<class '{tpName}'>"
     | none => PyPure.gap "the repr of a value that is not a class"
+
+/-- `repr(c)` of the class `c` in a message, `typeRepr`.  A metaclass other than `type` stops with
+a gap, since its `__repr__` may run code. -/
+def classRepr [PyReads m V] (c : V) : m String := do
+  if (← PyPure.immView c).isNone then
+    if !((← PyPure.immView (← PyReads.classOf c)) matches some (.builtin .type)) then
+      PyPure.gap "the repr of a class whose metaclass is not type is not modelled yet"
+  typeRepr c
 
 /-- The `__context__` of the exception `o`, `none` for `None`. -/
 def contextOf? [PyReads m V] (o : V) : m (Option V) := do

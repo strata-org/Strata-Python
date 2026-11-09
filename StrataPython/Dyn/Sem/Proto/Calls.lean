@@ -11,12 +11,8 @@ set_option autoImplicit false
 /-!
 # Calls
 
-Generic over the record of primitives, CPython 3.12's `print` and the lowering of call arguments:
-
-* `print` writes the `str` of each argument, with `sep` and `end`; `str` of a value other than a
-  `str`, `int`, `bool`, `float` or `None` stops with a gap until `str` and `repr` exist;
-* the lowering of call arguments: `mkKwargs` and `argsTupleStep` (`f(*it)`); `f(**m)` is
-  `Mapping.lean`'s.
+Generic over the record of primitives, the lowering of call arguments: `mkKwargs` and
+`argsTupleStep` (`f(*it)`); `f(**m)` is `Mapping.lean`'s, and `print` is `Repr.lean`'s.
 
 The calls themselves are `callN`'s (`Lookup.lean`).  A `TypeError` of `argsTuple` or `dictMerge`
 whose message names a function object (CPython's `__main__.g()`) stops with a gap, since the
@@ -42,48 +38,6 @@ def plainStr? [PyCalls m V] (v : V) : m (Option String) := do
     | .ok s => pure (some s)
     | .error f => ofFailure f
   | _ => pure none
-
-/-- `str(v)`, for the values that `plainStr?` covers; a gap for any other. -/
-def plainStr [PyCalls m V] (v : V) : m String := do
-  let some s ← plainStr? v | PyPure.gap "str() of this value is not modelled yet"
-  pure s
-
-/-- A `sep` or `end` keyword of `print`: a `str`, or `None` for the default `d`. -/
-def printText [PyCalls m V] (what : String) (d : String) (v : V) : m String := do
-  match ← PyPure.immView v with
-  | some (.str s) => pure s.s
-  | some .none => pure d
-  | _ =>
-    -- An instance of a subclass of `str` is accepted by CPython.
-    userCheck v v
-    raiseBuiltin "TypeError" s!"{what} must be None or a string, not {← typeName v}"
-
-/-- `print(*args, **kwargs)`: the `str` of each argument, joined by `sep`, then `end`, written to
-the output; `file` and `flush` stop with a gap.  As CPython's argument parsing does, an unknown
-keyword raises before `sep` is checked, and `sep` is checked before `end`. -/
-def printCall [PyWrites m V] (args kwargs : V) : m V := do
-  let some (.tuple xs) ← PyPure.immView args | PyPure.modelInvariant "print: operand assumption failed"
-  let mut sepV := none
-  let mut endV := none
-  for (k, v, _) in ← PyReads.dictEntries kwargs do
-    let some (.str s) ← PyPure.immView k | raiseBuiltin "TypeError" "keywords must be strings"
-    if s.s == "sep" then sepV := some v
-    else if s.s == "end" then endV := some v
-    else if s.s != "file" && s.s != "flush" then
-      raiseBuiltin "TypeError" s!"'{s.s}' is an invalid keyword argument for print()"
-  for (k, _, _) in ← PyReads.dictEntries kwargs do
-    if let some (.str s) ← PyPure.immView k then
-      if s.s == "file" || s.s == "flush" then
-        PyPure.gap s!"print's keyword argument {s.s} is not modelled yet"
-  let sep ← match sepV with | some v => printText "sep" " " v | none => pure " "
-  let fin ← match endV with | some v => printText "end" "\n" v | none => pure "\n"
-  -- Each argument is written as it is converted, as CPython does, so an error leaves the
-  -- earlier ones written.
-  for (x, i) in xs.toList.zipIdx do
-    if i > 0 then PyWrites.write sep
-    PyWrites.write (← plainStr x)
-  PyWrites.write fin
-  pure (PyPure.imm (m := m) .none)
 
 /-- The description of the callee `f` in a `TypeError` about its arguments, as CPython's
 `_PyObject_FunctionStr` gives it: `print()`, or `module.Q()` for a built-in function or type of

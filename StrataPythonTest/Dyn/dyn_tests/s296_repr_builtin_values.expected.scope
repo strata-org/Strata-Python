@@ -1,0 +1,20 @@
+module
+  print: global implicit (referenced)
+  repr: global implicit (referenced)
+  G: local (assigned, referenced)
+  range: global implicit (referenced)
+  NotImplemented: global implicit (referenced)
+  int: global implicit (referenced)
+  list: global implicit (referenced)
+  len: global implicit (referenced)
+  str: global implicit (referenced)
+  type: global implicit (referenced)
+  x: local (assigned, referenced)
+  d: local (assigned, referenced)
+  n: local (assigned, referenced)
+  class G
+    __getitem__: local (assigned)
+    function G.__getitem__
+      params: self, k
+      self: local (parameter)
+      k: local (parameter, referenced)
