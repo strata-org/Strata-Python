@@ -1,0 +1,204 @@
+/* ==========================================================================
+   palettes.css — colour tokens.
+
+   <html data-palette="a|b|c|d" data-theme="system|light|dark|hc">
+
+   Every token is written once with light-dark(), so the theme only sets
+   `color-scheme`: "system" leaves it to prefers-color-scheme, "light"/"dark"
+   force one side. "hc" (high contrast) replaces the tokens of every palette and
+   follows the OS light/dark preference. Layout files use only these variables.
+   ========================================================================== */
+
+html { color-scheme: light dark; }
+html[data-theme="light"] { color-scheme: light; }
+html[data-theme="dark"] { color-scheme: dark; }
+
+/* ---- A · Slate and sky: slate greys, sky accent, always-dark code panes ---- */
+html[data-palette="a"] {
+  --c-bg: light-dark(#ffffff, #0f172a);
+  --c-fg: light-dark(#334155, #cbd5e1);
+  --c-heading: light-dark(#0f172a, #f8fafc);
+  --c-muted: light-dark(#64748b, #94a3b8);
+  --c-border: light-dark(#e2e8f0, #1e293b);
+  --c-surface: light-dark(#ffffff, #1e293b);
+  --c-surface-2: light-dark(#f8fafc, #162033);
+  --c-accent: light-dark(#0284c7, #38bdf8);
+  --c-accent-soft: light-dark(#e0f2fe, rgba(56, 189, 248, 0.14));
+  --c-accent-on: light-dark(#ffffff, #0f172a);
+  --c-link: light-dark(#0369a1, #7dd3fc);
+  --c-header-bg: light-dark(rgba(255, 255, 255, 0.85), rgba(15, 23, 42, 0.8));
+  --c-header-fg: var(--c-heading);
+  --c-nav-bg: var(--c-bg);
+  --c-nav-fg: var(--c-muted);
+  --c-nav-active: var(--c-accent);
+  --c-inline-code-bg: light-dark(#f1f5f9, #1e293b);
+  --c-inline-code-fg: light-dark(#0f172a, #e2e8f0);
+  --c-code-bg: light-dark(#0f172a, #0b1222);
+  --c-code-fg: #e2e8f0;
+  --c-code-muted: #94a3b8;
+  --c-code-border: light-dark(#0f172a, #1e293b);
+  --c-code-title-bg: light-dark(#1e293b, #111a2e);
+  --c-code-lang: #38bdf8;
+  --t-kw: #f472b6; --t-ty: #7dd3fc; --t-val: #c4b5fd; --t-fn: #fde68a;
+  --t-succ: #5eead4; --t-label: #fda4af; --t-op: #e2e8f0; --t-num: #fdba74;
+  --t-str: #86efac; --t-comment: #64748b;
+  --c-hl: rgba(56, 189, 248, 0.2); --c-hl-hover: rgba(148, 163, 184, 0.12);
+  --c-popup-bg: light-dark(#ffffff, #1e293b); --c-popup-fg: light-dark(#0f172a, #e2e8f0);
+  --c-dd-bg: light-dark(#f8fafc, #131c2f); --c-dd-border: light-dark(#e2e8f0, #1e293b);
+  --c-dd-kicker: light-dark(#0284c7, #38bdf8);
+  --c-tip: light-dark(#0369a1, #7dd3fc); --c-tip-bg: light-dark(#f0f9ff, rgba(56, 189, 248, 0.08)); --c-tip-border: light-dark(#bae6fd, rgba(56, 189, 248, 0.3));
+  --c-warn: light-dark(#b45309, #fbbf24); --c-warn-bg: light-dark(#fffbeb, rgba(251, 191, 36, 0.08)); --c-warn-border: light-dark(#fde68a, rgba(251, 191, 36, 0.3));
+  --c-grad-1: #38bdf8; --c-grad-2: #818cf8; --c-grad-3: #f472b6;
+  --c-focus: light-dark(#0284c7, #38bdf8);
+}
+
+/* ---- B · Paper and ink: paper white / warm charcoal, ink blue, One Light/Dark code ---- */
+html[data-palette="b"] {
+  --c-bg: light-dark(#ffffff, #1a1a1c);
+  --c-fg: light-dark(rgba(0, 0, 0, 0.82), rgba(255, 255, 255, 0.84));
+  --c-heading: light-dark(#111111, #f4f4f4);
+  --c-muted: light-dark(#6b6b6b, #a2a2a8);
+  --c-border: light-dark(rgba(0, 0, 0, 0.12), rgba(255, 255, 255, 0.14));
+  --c-surface: light-dark(#ffffff, #232326);
+  --c-surface-2: light-dark(#f7f7f5, #222225);
+  --c-accent: light-dark(#1f5c99, #7fb2e5);
+  --c-accent-soft: light-dark(#eaf1f8, rgba(127, 178, 229, 0.14));
+  --c-accent-on: light-dark(#ffffff, #1a1a1c);
+  --c-link: light-dark(#1f5c99, #9cc4ec);
+  --c-header-bg: var(--c-bg); --c-header-fg: var(--c-heading);
+  --c-nav-bg: var(--c-bg); --c-nav-fg: var(--c-muted); --c-nav-active: var(--c-heading);
+  --c-inline-code-bg: light-dark(rgba(0, 0, 0, 0.045), rgba(255, 255, 255, 0.08));
+  --c-inline-code-fg: inherit;
+  --c-code-bg: light-dark(#f7f7f5, #222225);
+  --c-code-fg: light-dark(#383a42, #d7dae0);
+  --c-code-muted: light-dark(#7a7a7a, #9a9aa2);
+  --c-code-border: light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.1));
+  --c-code-title-bg: light-dark(#f0f0ed, #1f1f22);
+  --c-code-lang: var(--c-muted);
+  --t-kw: light-dark(#a626a4, #c678dd); --t-ty: light-dark(#986801, #e5c07b);
+  --t-val: light-dark(#0e6b72, #56b6c2); --t-fn: light-dark(#4078f2, #61afef);
+  --t-succ: light-dark(#c2185b, #e06c96); --t-label: light-dark(#b0451b, #e5936b);
+  --t-op: light-dark(#383a42, #d7dae0); --t-num: light-dark(#986801, #d19a66);
+  --t-str: light-dark(#50a14f, #98c379); --t-comment: light-dark(#8e8f96, #7f848e);
+  --c-hl: light-dark(#fff3c4, rgba(255, 214, 102, 0.16)); --c-hl-hover: light-dark(rgba(0, 0, 0, 0.04), rgba(255, 255, 255, 0.05));
+  --c-popup-bg: light-dark(#ffffff, #2a2a2e); --c-popup-fg: var(--c-fg);
+  --c-dd-bg: transparent; --c-dd-border: var(--c-border); --c-dd-kicker: var(--c-accent);
+  --c-tip: var(--c-accent); --c-tip-bg: transparent; --c-tip-border: var(--c-border);
+  --c-warn: light-dark(#9a4a00, #f0b26b); --c-warn-bg: transparent; --c-warn-border: var(--c-border);
+  --c-grad-1: #1f5c99; --c-grad-2: #7fb2e5; --c-grad-3: #e5936b;
+  --c-focus: var(--c-accent);
+}
+
+/* ---- C · Navy and violet: deep navy, violet accent, glowing code ---- */
+html[data-palette="c"] {
+  --c-bg: light-dark(#f6f9fc, #0a2540);
+  --c-fg: light-dark(#425466, #adbdcc);
+  --c-heading: light-dark(#0a2540, #ffffff);
+  --c-muted: light-dark(#6b7c93, #8898aa);
+  --c-border: light-dark(#e3e8ee, #1c3a5e);
+  --c-surface: light-dark(#ffffff, #0f2e4f);
+  --c-surface-2: light-dark(#ffffff, #0d2a49);
+  --c-accent: light-dark(#635bff, #a29bfe);
+  --c-accent-soft: light-dark(rgba(99, 91, 255, 0.1), rgba(162, 155, 254, 0.16));
+  --c-accent-on: light-dark(#ffffff, #0a2540);
+  --c-link: light-dark(#533afd, #b9b4ff);
+  --c-header-bg: light-dark(rgba(246, 249, 252, 0.9), rgba(10, 37, 64, 0.85));
+  --c-header-fg: var(--c-heading);
+  --c-nav-bg: transparent; --c-nav-fg: var(--c-muted); --c-nav-active: var(--c-accent);
+  --c-inline-code-bg: light-dark(rgba(99, 91, 255, 0.08), rgba(162, 155, 254, 0.14));
+  --c-inline-code-fg: light-dark(#3d36b8, #d6d3ff);
+  --c-code-bg: light-dark(#0a2540, #06182c);
+  --c-code-fg: #e6ebf1;
+  --c-code-muted: #8898aa;
+  --c-code-border: light-dark(#0a2540, #1c3a5e);
+  --c-code-title-bg: light-dark(#0d2c4c, #081f37);
+  --c-code-lang: #80e9ff;
+  --t-kw: #ff80bf; --t-ty: #80e9ff; --t-val: #c9b8ff; --t-fn: #ffd27a;
+  --t-succ: #7fe3b8; --t-label: #ffa27a; --t-op: #e6ebf1; --t-num: #ffd27a;
+  --t-str: #7fe3b8; --t-comment: #6b7c93;
+  --c-hl: rgba(128, 233, 255, 0.16); --c-hl-hover: rgba(255, 255, 255, 0.06);
+  --c-popup-bg: light-dark(#ffffff, #0f2e4f); --c-popup-fg: var(--c-fg);
+  --c-dd-bg: light-dark(#ffffff, #0d2a49); --c-dd-border: light-dark(#e3e8ee, #1c3a5e); --c-dd-kicker: var(--c-accent);
+  --c-tip: light-dark(#0b8a6b, #7fe3b8); --c-tip-bg: light-dark(#effaf6, rgba(127, 227, 184, 0.08)); --c-tip-border: light-dark(#b9eedc, rgba(127, 227, 184, 0.25));
+  --c-warn: light-dark(#b3420e, #ffb38a); --c-warn-bg: light-dark(#fff6ef, rgba(255, 162, 122, 0.08)); --c-warn-border: light-dark(#ffd9c2, rgba(255, 162, 122, 0.28));
+  --c-grad-1: #635bff; --c-grad-2: #00d4ff; --c-grad-3: #ff6fb1;
+  --c-focus: var(--c-accent);
+}
+
+/* ---- D · Ink and blue ------------------------------------------------------
+   Colour values after the Cloudscape Design System (https://cloudscape.design),
+   Apache-2.0. ------------------------------------------------------------------ */
+html[data-palette="d"] {
+  --c-bg: light-dark(#ffffff, #0f1b2a);
+  --c-fg: light-dark(#000716, #d1d5db);
+  --c-heading: light-dark(#000716, #e9ebed);
+  --c-muted: light-dark(#5f6b7a, #8d99a8);
+  --c-border: light-dark(#e9ebed, #414d5c);
+  --c-surface: light-dark(#ffffff, #192534);
+  --c-surface-2: light-dark(#f4f4f4, #192534);
+  --c-accent: light-dark(#0972d3, #539fe5);
+  --c-accent-soft: light-dark(#f2f8fd, #00142b);
+  --c-accent-on: light-dark(#ffffff, #0f1b2a);
+  --c-link: light-dark(#0972d3, #539fe5);
+  --c-header-bg: light-dark(#0f1b2a, #000716);
+  --c-header-fg: #ffffff;
+  --c-nav-bg: light-dark(#ffffff, #0f1b2a);
+  --c-nav-fg: light-dark(#414d5c, #d1d5db);
+  --c-nav-active: var(--c-accent);
+  --c-page-bg: light-dark(#f2f3f3, #0f1b2a);
+  --c-inline-code-bg: light-dark(#f4f4f4, #232f3e);
+  --c-inline-code-fg: inherit;
+  --c-code-bg: light-dark(#f4f4f4, #232f3e);
+  --c-code-fg: light-dark(#000716, #d1d5db);
+  --c-code-muted: light-dark(#5f6b7a, #8d99a8);
+  --c-code-border: light-dark(#e9ebed, #414d5c);
+  --c-code-title-bg: light-dark(#e9ebed, #192534);
+  --c-code-lang: light-dark(#414d5c, #d1d5db);
+  --t-kw: light-dark(#0450a2, #89bdee); --t-ty: light-dark(#037f0c, #6ccf74);
+  --t-val: light-dark(#8a3d00, #f2b07a); --t-fn: light-dark(#6237a0, #c4a3f5);
+  --t-succ: light-dark(#a3005c, #ff86b8); --t-label: light-dark(#0450a2, #89bdee);
+  --t-op: light-dark(#000716, #d1d5db); --t-num: light-dark(#8a3d00, #f2b07a);
+  --t-str: light-dark(#037f0c, #a3e0a8); --t-comment: light-dark(#5f6b7a, #8d99a8);
+  --c-hl: light-dark(#d3e7f9, #06315a); --c-hl-hover: light-dark(#f2f8fd, #0b2440);
+  --c-popup-bg: light-dark(#ffffff, #192534); --c-popup-fg: var(--c-fg);
+  /* Alerts: info for deep dives and tips, warning for warnings. */
+  --c-dd-bg: light-dark(#f2f8fd, #00142b); --c-dd-border: light-dark(#0972d3, #539fe5); --c-dd-kicker: light-dark(#0972d3, #539fe5);
+  --c-tip: light-dark(#0972d3, #539fe5); --c-tip-bg: light-dark(#f2f8fd, #00142b); --c-tip-border: light-dark(#0972d3, #539fe5);
+  --c-warn: light-dark(#8d6605, #ffe347); --c-warn-bg: light-dark(#fffce9, #191100); --c-warn-border: light-dark(#8d6605, #ffe347);
+  --c-grad-1: #0972d3; --c-grad-2: #539fe5; --c-grad-3: #232f3e;
+  --c-focus: light-dark(#0972d3, #539fe5);
+}
+
+/* ---- High contrast (any palette): WCAG AAA (>= 7:1) for all text ----------
+   light: #000 on #fff (21:1), muted #262626 (15:1), link #0000c8 (11:1).
+   dark:  #fff on #000 (21:1), muted #e0e0e0 (16:1), link #ffff00 (19.6:1).
+   Code tokens differ by weight/style/underline, not by colour. ------------- */
+html[data-theme="hc"] {
+  --c-bg: light-dark(#ffffff, #000000);
+  --c-page-bg: var(--c-bg);
+  --c-fg: light-dark(#000000, #ffffff);
+  --c-heading: var(--c-fg);
+  --c-muted: light-dark(#262626, #e0e0e0);
+  --c-border: var(--c-fg);
+  --c-surface: var(--c-bg); --c-surface-2: var(--c-bg);
+  --c-accent: light-dark(#0000c8, #ffff00);
+  --c-accent-soft: light-dark(#ffffff, #000000);
+  --c-accent-on: light-dark(#ffffff, #000000);
+  --c-link: light-dark(#0000c8, #ffff00);
+  --c-header-bg: var(--c-bg); --c-header-fg: var(--c-fg);
+  --c-nav-bg: var(--c-bg); --c-nav-fg: var(--c-fg); --c-nav-active: var(--c-link);
+  --c-inline-code-bg: var(--c-bg); --c-inline-code-fg: var(--c-fg);
+  --c-code-bg: var(--c-bg); --c-code-fg: var(--c-fg); --c-code-muted: var(--c-fg);
+  --c-code-border: var(--c-fg); --c-code-title-bg: var(--c-bg); --c-code-lang: var(--c-fg);
+  --t-kw: var(--c-fg); --t-ty: var(--c-fg); --t-val: var(--c-fg); --t-fn: var(--c-fg);
+  --t-succ: var(--c-fg); --t-label: var(--c-fg); --t-op: var(--c-fg); --t-num: var(--c-fg);
+  --t-str: var(--c-fg); --t-comment: var(--c-muted);
+  --c-hl: light-dark(#fff066, #003a80); --c-hl-hover: light-dark(#ededed, #262626);
+  --c-popup-bg: var(--c-bg); --c-popup-fg: var(--c-fg);
+  --c-dd-bg: var(--c-bg); --c-dd-border: var(--c-fg); --c-dd-kicker: var(--c-fg);
+  --c-tip: var(--c-fg); --c-tip-bg: var(--c-bg); --c-tip-border: var(--c-fg);
+  --c-warn: var(--c-fg); --c-warn-bg: var(--c-bg); --c-warn-border: var(--c-fg);
+  --c-grad-1: var(--c-bg); --c-grad-2: var(--c-bg); --c-grad-3: var(--c-bg);
+  --c-focus: light-dark(#0000c8, #ffff00);
+  --code-shadow: none;
+}

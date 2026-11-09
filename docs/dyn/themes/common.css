@@ -1,0 +1,299 @@
+/* ==========================================================================
+   common.css — component styles.
+   palettes.css and layout.css define the --c-*, --t-*, --f-* variables (light
+   and dark) and the page layout. This file only consumes them.
+   ========================================================================== */
+
+:root {
+  --radius: 10px;
+  --verso-text-font-family: var(--f-body);
+  --verso-structure-font-family: var(--f-head);
+  --verso-code-font-family: var(--f-code);
+  --verso-text-color: var(--c-fg);
+  --verso-structure-color: var(--c-fg);
+  --verso-code-color: var(--c-code-fg);
+  --verso-toc-background-color: var(--c-nav-bg, var(--c-bg));
+  --verso-toc-text-color: var(--c-nav-fg, var(--c-fg));
+  --verso-toc-border-color: var(--c-border);
+  --verso-selected-color: var(--c-accent-soft);
+  --verso-info-color: var(--c-fg);
+  --verso-warning-color: var(--c-fg);
+  --verso-code-keyword-color: var(--t-kw);
+  --verso-code-const-color: var(--t-fn);
+  --verso-code-var-color: var(--t-val);
+  --verso-burger-toc-hidden-color: var(--c-fg);
+  --verso-burger-toc-hidden-shadow-color: transparent;
+  --verso-burger-toc-visible-shadow-color: transparent;
+}
+
+html, body { background: var(--c-page-bg, var(--c-bg)); color: var(--c-fg); }
+main h1, main h2, main h3, main h4, .titlepage h1 { color: var(--c-heading); }
+/* Verso's in-page section list has empty hrefs in single-page output, so a single-page
+   build hides it (DynIntroMain.lean adds html.single-page); with one page per section
+   it is the root page's list of chapters. */
+html.single-page main section:has(> ol.section-toc) { display: none; }
+main ol.section-toc { padding-left: 0; }
+main ol.section-toc li { margin: 0.35rem 0; text-indent: 0; padding-left: 0; }
+body { font-family: var(--f-body); -webkit-font-smoothing: antialiased; }
+main a { color: var(--c-link, var(--c-accent)); }
+main code:not(.hl) {
+  font-family: var(--f-code);
+  font-size: 0.875em;
+  background: var(--c-inline-code-bg, var(--c-accent-soft));
+  color: var(--c-inline-code-fg, inherit);
+  padding: 0.1em 0.35em;
+  border-radius: 5px;
+}
+main pre code:not(.hl) { background: none; padding: 0; color: inherit; font-size: inherit; border-radius: 0; }
+main .linked-example .le-note code { background: color-mix(in srgb, var(--c-code-fg) 14%, transparent); color: inherit; padding: 0.05em 0.3em; border-radius: 4px; }
+main .authors, main .authors .author { color: var(--c-muted); font-style: normal; }
+header { background: var(--c-header-bg, var(--c-bg)); box-shadow: none; border-bottom: 1px solid var(--c-border); }
+.header-title, .header-title h1, .toc-title, #toc a { color: inherit; }
+#toc { border-right: 1px solid var(--c-border); }
+/* Verso's prev/next buttons are meaningless on a single page. */
+html.single-page .prev-next-buttons { display: none; }
+.prev-next-buttons a { border-bottom: 0 !important; color: var(--c-heading) !important; }
+.prev-next-buttons a:hover { color: var(--c-link) !important; }
+
+/* The footer every page carries (DynIntroMain.lean). */
+footer.doc-footer {
+  margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--c-border);
+  font-family: var(--f-head); font-size: 0.8rem; color: var(--c-muted);
+}
+footer.doc-footer p { margin: 0; line-height: 1.5; }
+
+/* ---------- Printed code panes (```dyn, ```whilelang, …) ---------- */
+figure.code-pane {
+  margin: 1.5rem 0;
+  border: 1px solid var(--c-code-border);
+  border-radius: var(--radius);
+  background: var(--c-code-bg);
+  overflow: hidden;
+  box-shadow: var(--code-shadow, none);
+}
+.code-pane-title {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.45rem 0.9rem;
+  font-family: var(--f-head); font-size: 0.75rem;
+  background: var(--c-code-title-bg);
+  color: var(--c-code-muted);
+  border-bottom: 1px solid var(--c-code-border);
+}
+.code-pane-lang {
+  text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600;
+  color: var(--c-code-lang, var(--c-accent));
+}
+.code-pane-name { font-family: var(--f-code); }
+.copy-btn {
+  margin-left: auto; font: inherit; font-size: 0.7rem; cursor: pointer;
+  color: var(--c-code-muted); background: transparent;
+  border: 1px solid var(--c-code-border); border-radius: 6px; padding: 0.15rem 0.5rem;
+}
+.copy-btn:hover { color: var(--c-code-fg); border-color: var(--c-code-muted); }
+pre.code-pane-body {
+  margin: 0; padding: 0.9rem 1rem; overflow-x: auto;
+  font-family: var(--f-code); font-size: 0.82rem; line-height: 1.6;
+  color: var(--c-code-fg); background: transparent;
+}
+.tk-line { display: block; min-height: 1.6em; }
+.tk-kw { color: var(--t-kw); font-weight: var(--t-kw-weight, 600); }
+.tk-ty { color: var(--t-ty); }
+.tk-val { color: var(--t-val); }
+.tk-fn { color: var(--t-fn); font-weight: 600; }
+.tk-succ { color: var(--t-succ); }
+.tk-label { color: var(--t-label); font-weight: 600; }
+.tk-op { color: var(--t-op); }
+.tk-num { color: var(--t-num); }
+.tk-str { color: var(--t-str); }
+.tk-comment { color: var(--t-comment); font-style: italic; }
+
+/* ---------- Elaborated Lean blocks (Verso's own markup) ---------- */
+code.hl.lean.block {
+  margin: 1.5rem 0 !important;
+  display: block;
+  border: 1px solid var(--c-code-border);
+  border-radius: var(--radius);
+  background: var(--c-code-bg);
+  color: var(--c-code-fg);
+  padding: 0.9rem 1rem;
+  font-size: 0.82rem; line-height: 1.6;
+  box-shadow: var(--code-shadow, none);
+  position: relative;
+}
+code.hl.lean.block::before {
+  content: "Lean · elaborated · hover for types";
+  display: block; margin: -0.9rem -1rem 0.8rem; padding: 0.45rem 0.9rem;
+  font-family: var(--f-head); font-size: 0.72rem; letter-spacing: 0.04em;
+  color: var(--c-code-muted); background: var(--c-code-title-bg);
+  border-bottom: 1px solid var(--c-code-border);
+}
+.hl.lean .keyword { color: var(--t-kw); }
+.hl.lean .const { color: var(--t-fn); }
+.hl.lean .var { color: var(--t-val); }
+.hl.lean .literal { color: var(--t-num); }
+.hl.lean .token.binding-hl, .hl.lean .literal:hover, .hl.lean .token.typed:hover {
+  background-color: var(--c-hl) !important;
+}
+pre.lean-output {
+  border-radius: var(--radius);
+  background: var(--c-surface-2);
+  color: var(--c-fg);
+  border: 1px solid var(--c-border);
+  border-left: 4px solid var(--c-accent);
+  font-family: var(--f-code); font-size: 0.82rem;
+  padding: 0.6rem 1rem; margin: -0.5rem 0 1.5rem !important;
+}
+pre.lean-output::before { content: "Output  "; color: var(--c-muted); font-family: var(--f-head); font-size: 0.75rem; }
+
+/* Hover popups (tippy). Verso hard-codes light greys; follow the theme instead. */
+.tippy-box[data-theme~='lean'], .tippy-box[data-theme~='info'],
+.tippy-box[data-theme~='warning'], .tippy-box[data-theme~='error'],
+.tippy-box[data-theme~='message'], .tippy-box[data-theme~='tactic'] {
+  background-color: var(--c-popup-bg) !important;
+  color: var(--c-popup-fg) !important;
+  border: 1px solid var(--c-border);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+}
+.tippy-box .tippy-arrow::before { border-top-color: var(--c-popup-bg) !important; border-bottom-color: var(--c-popup-bg) !important; }
+.tippy-box .hl.lean { color: var(--c-popup-fg); }
+.tippy-box .hl.lean .hover-info code, .tippy-box code { background: transparent; color: inherit; }
+
+/* ---------- Deep dive ---------- */
+details.deep-dive {
+  margin: 1.75rem 0;
+  border: 1px solid var(--c-dd-border);
+  border-radius: var(--radius);
+  background: var(--c-dd-bg);
+  overflow: hidden;
+}
+details.deep-dive > summary {
+  list-style: none; cursor: pointer;
+  display: flex; align-items: baseline; gap: 0.75rem;
+  padding: 0.8rem 1.1rem;
+  font-family: var(--f-head);
+}
+details.deep-dive > summary::-webkit-details-marker { display: none; }
+.dd-kicker {
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--c-dd-kicker); white-space: nowrap;
+}
+.dd-title { font-weight: 600; color: var(--c-fg); }
+.dd-chevron { margin-left: auto; transition: transform 0.2s; color: var(--c-muted); }
+.dd-chevron::before { content: "▸"; display: inline-block; }
+details.deep-dive[open] .dd-chevron { transform: rotate(90deg); }
+details.deep-dive > summary:hover .dd-title { color: var(--c-dd-kicker); }
+.dd-body { padding: 0 1.1rem 0.6rem; border-top: 1px solid var(--c-dd-border); }
+
+/* ---------- Callouts ---------- */
+aside.callout {
+  margin: 1.5rem 0; padding: 0.85rem 1.1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--c-callout-border, var(--c-border));
+  background: var(--c-callout-bg, var(--c-surface-2));
+}
+aside.callout .callout-title { font-family: var(--f-head); font-weight: 700; font-size: 0.9rem; }
+aside.callout .callout-title::before { margin-right: 0.45rem; }
+aside.callout-tip .callout-title { color: var(--c-tip); }
+aside.callout-tip .callout-title::before { content: "✦"; }
+aside.callout-warning .callout-title { color: var(--c-warn); }
+aside.callout-warning .callout-title::before { content: "▲"; }
+aside.callout-tip { border-color: var(--c-tip-border, var(--c-border)); background: var(--c-tip-bg, var(--c-surface-2)); }
+aside.callout-warning { border-color: var(--c-warn-border, var(--c-border)); background: var(--c-warn-bg, var(--c-surface-2)); }
+aside.callout .callout-body > p:first-child { margin-top: 0.35rem; }
+aside.callout .callout-body > p:last-child { margin-bottom: 0; }
+
+/* ---------- Figures and the pipeline diagram ---------- */
+figure.doc-figure { margin: 2rem 0; }
+figure.doc-figure > figcaption {
+  font-family: var(--f-head); font-size: 0.8rem; color: var(--c-muted);
+  margin-top: 0.6rem; line-height: 1.45;
+}
+svg.pipeline { width: 100%; height: auto; display: block; }
+svg.pipeline .pl-box rect { fill: var(--c-surface); stroke: var(--c-border); stroke-width: 1.2; }
+svg.pipeline .pl-box.pl-accent rect { fill: var(--c-accent-soft); stroke: var(--c-accent); }
+svg.pipeline text { text-anchor: middle; font-family: var(--f-head); fill: var(--c-fg); }
+svg.pipeline .pl-name { font-size: 15px; font-weight: 700; }
+svg.pipeline .pl-sub { font-size: 11.5px; fill: var(--c-muted); }
+svg.pipeline .pl-edge { stroke: var(--c-muted); stroke-width: 1.5; }
+svg.pipeline .pl-arrowhead { fill: var(--c-muted); }
+
+/* ---------- Linked interactive example ---------- */
+.linked-example {
+  margin: 1.75rem 0;
+  border: 1px solid var(--c-code-border);
+  border-radius: calc(var(--radius) + 2px);
+  background: var(--c-code-bg);
+  color: var(--c-code-fg);
+  overflow: hidden;
+  outline: none;
+  box-shadow: var(--code-shadow, none);
+}
+.linked-example:focus-visible { box-shadow: 0 0 0 3px var(--c-accent-soft); }
+.le-toolbar {
+  display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+  padding: 0.5rem 0.9rem;
+  background: var(--c-code-title-bg);
+  border-bottom: 1px solid var(--c-code-border);
+  font-family: var(--f-head); font-size: 0.78rem; color: var(--c-code-muted);
+}
+.le-badge {
+  font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--c-accent-on, #fff); background: var(--c-accent); padding: 0.15rem 0.5rem; border-radius: 99px;
+}
+.le-nav { margin-left: auto; display: flex; align-items: center; gap: 0.5rem; }
+.le-nav button {
+  font: inherit; cursor: pointer; color: var(--c-code-fg);
+  background: transparent; border: 1px solid var(--c-code-border); border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+}
+.le-nav button:hover:not(:disabled) { border-color: var(--c-accent); color: var(--c-accent); }
+.le-nav button:disabled { opacity: 0.4; cursor: default; }
+.le-step { min-width: 6.5em; text-align: center; font-variant-numeric: tabular-nums; }
+.le-panes { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); }
+@media (max-width: 900px) { .le-panes { grid-template-columns: 1fr; } }
+.le-pane + .le-pane { border-left: 1px solid var(--c-code-border); }
+@media (max-width: 900px) { .le-pane + .le-pane { border-left: 0; border-top: 1px solid var(--c-code-border); } }
+.le-title {
+  font-family: var(--f-head); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--c-code-muted); padding: 0.6rem 1rem 0;
+}
+.le-pane pre {
+  margin: 0; padding: 0.5rem 0 0.9rem; max-height: 22rem; overflow: auto; position: relative;
+  font-family: var(--f-code); font-size: 0.78rem; line-height: 1.6;
+}
+.le-line { display: block; padding: 0 1rem; border-left: 3px solid transparent; min-height: 1.6em; white-space: pre; }
+.le-link { cursor: pointer; }
+.le-link.le-hover { background: var(--c-hl-hover); }
+.le-link.le-on { background: var(--c-hl); border-left-color: var(--c-accent); }
+.le-note {
+  padding: 0.75rem 1rem; min-height: 2.8rem;
+  border-top: 1px solid var(--c-code-border);
+  font-family: var(--f-body); font-size: 0.92rem; line-height: 1.5;
+  color: var(--c-code-fg);
+  background: var(--c-code-title-bg);
+}
+
+/* ---------- Margin notes (Verso's built-in {margin}[…]) ---------- */
+.marginalia:hover, .marginalia:hover .note, .marginalia:has(.note:hover) { background-color: transparent; }
+.marginalia .note { font-size: 0.8rem; line-height: 1.45; color: var(--c-muted); font-family: var(--f-head); }
+
+/* Permalink widgets inherit link colour. */
+.permalink-widget > a { color: var(--c-muted) !important; }
+
+main .titlepage h1, main .titlepage .authors, main .titlepage { text-align: left; }
+
+/* Tables size to their content and are centred on the text column, which they do not exceed.
+   Once the column is centred between the ToC and the "On this page" rail (layout.css), a table
+   may be wider than the text, up to 60rem, staying clear of the rail; past that it scrolls. */
+main table.tabular {
+  display: block; width: max-content; max-width: 100%; margin-inline: auto; overflow-x: auto;
+}
+@container main (width >= 1212px) {
+  main table.tabular {
+    max-width: min(60rem, calc(100cqw - 15rem - 4rem));
+    margin-inline: 0; position: relative; left: 50%; transform: translateX(-50%);
+  }
+}
+/* Code that the text marks as unbreakable (`::::nowrap` and `{nowrap}`, DynIntro/Blocks.lean). */
+main code.nowrap { white-space: nowrap; }

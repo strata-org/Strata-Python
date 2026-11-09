@@ -1,0 +1,23 @@
+module main {
+  func @mean(%n.0 : base.Int, %d.0 : base.Int) -> base.Except(base.Int, base.Int) {
+    entry.0(%n.0 : base.Int, %d.0 : base.Int):
+      %s.0 : base.Ref(base.Int) = base.refNew[base.Int](0)
+      %i.0 : base.Ref(base.Int) = base.refNew[base.Int](1)
+      jump ^head.0(0, 1)
+    head.0(%c.4 : base.Int, %c.5 : base.Int):
+      %t.1 : base.Bool = while.le(%c.5, %n.0)
+      branch(%t.1) ^body.0() ^exit.0()
+    body.0():
+      %t.4 : base.Int = while.add(%c.4, %c.5)
+      %t.6 : base.Int = while.add(%c.5, 1)
+      jump ^head.0(%t.4, %t.6)
+    exit.0():
+      %t.8 : base.Int = while.div(%c.4, %d.0) ^catch.0()
+      %ok.0 : base.Except(base.Int, base.Int) = base.ok[base.Int, base.Int](%t.8)
+      ret(%ok.0)
+    catch.0(%e.0 : base.Int):
+      %t.9 : base.Int = while.sub(0, %e.0)
+      %ok.1 : base.Except(base.Int, base.Int) = base.ok[base.Int, base.Int](%t.9)
+      ret(%ok.1)
+  }
+}

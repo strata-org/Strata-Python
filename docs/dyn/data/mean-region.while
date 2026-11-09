@@ -1,0 +1,6 @@
+fun mean(n : Int, d : Int) : Int {
+  var s : Ref := ref 0;
+  var i : Ref := ref 1;
+  region while (*i <= n) { *s := *s + *i; *i := *i + 1; }
+  try { return *s / d; } catch e => { return 0 - e; }
+}

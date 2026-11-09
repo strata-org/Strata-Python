@@ -1,0 +1,83 @@
+/* ==========================================================================
+   switcher.css — font/size overrides driven by <html data-font data-code
+   data-size>, high-contrast affordances, and the switcher's own UI.
+   Loaded last, so these beat the layout's defaults.
+   ========================================================================== */
+
+/* ---- Body/heading font ---- */
+html[data-font="system"] { --f-body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; --f-head: var(--f-body); }
+html[data-font="plex-sans"] { --f-body: "IBM Plex Sans", system-ui, sans-serif; --f-head: var(--f-body); }
+html[data-font="system-serif"] { --f-body: Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif; --f-head: var(--f-body); }
+
+/* ---- Code font ---- */
+html[data-code="system"] { --f-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+html[data-code="plex-mono"] { --f-code: "IBM Plex Mono", ui-monospace, monospace; }
+
+/* ---- Text size (Verso sizes everything in rem off --verso-font-size) ---- */
+html[data-size="s"] { --verso-font-size: 14px; --verso-mobile-font-size: 14px; }
+html[data-size="l"] { --verso-font-size: 18px; --verso-mobile-font-size: 17px; }
+html[data-size="xl"] { --verso-font-size: 20px; --verso-mobile-font-size: 18px; }
+
+/* ---- Focus rings, every theme ---- */
+:focus-visible { outline: 3px solid var(--c-focus); outline-offset: 2px; }
+
+/* ---- High contrast: never colour alone ---- */
+html[data-theme="hc"] main a, html[data-theme="hc"] #toc a { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+html[data-theme="hc"] :focus-visible { outline: 4px solid var(--c-focus); outline-offset: 2px; box-shadow: 0 0 0 8px var(--c-bg); }
+html[data-theme="hc"] .tk-kw, html[data-theme="hc"] .hl.lean .keyword { font-weight: 800; }
+html[data-theme="hc"] .tk-fn, html[data-theme="hc"] .tk-label { font-weight: 800; text-decoration: underline; }
+html[data-theme="hc"] .tk-ty { text-decoration: underline dotted; }
+html[data-theme="hc"] .tk-comment { font-style: italic; }
+html[data-theme="hc"] .le-link.le-on { outline: 3px solid var(--c-fg); outline-offset: -3px; font-weight: 700; border-left-width: 8px; }
+html[data-theme="hc"] .le-link.le-hover { outline: 2px dashed var(--c-fg); outline-offset: -2px; }
+html[data-theme="hc"] .le-nav button:disabled { opacity: 1; border-style: dashed; text-decoration: line-through; }
+html[data-theme="hc"] figure.code-pane, html[data-theme="hc"] code.hl.lean.block,
+html[data-theme="hc"] .linked-example, html[data-theme="hc"] details.deep-dive,
+html[data-theme="hc"] aside.callout { border-width: 2px !important; border-style: solid !important; box-shadow: none !important; }
+html[data-theme="hc"] .le-badge { border: 2px solid var(--c-fg); background: var(--c-bg); color: var(--c-fg); }
+html[data-theme="hc"] * { text-shadow: none !important; }
+html[data-theme="hc"] .titlepage, html[data-theme="hc"] .hero-bg { background-image: none !important; }
+
+/* ---- The switcher ---- */
+.style-switcher { position: relative; margin-left: auto; margin-right: 0.75rem; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; font-size: 13px; z-index: 200; }
+.style-switcher.floating { position: fixed; top: 0.6rem; right: 0.9rem; margin: 0; }
+.ss-toggle {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font: inherit; font-weight: 600; cursor: pointer;
+  color: var(--c-header-fg, var(--c-fg));
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--c-header-fg, var(--c-fg)) 30%, transparent);
+  border-radius: 999px; padding: 0.3rem 0.75rem;
+}
+.style-switcher.floating .ss-toggle { background: var(--c-surface); color: var(--c-fg); border-color: var(--c-border); box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+.ss-toggle:hover { border-color: var(--c-header-fg, var(--c-fg)); }
+.ss-toggle .ss-aa { font-family: Georgia, serif; font-size: 15px; line-height: 1; }
+.ss-panel {
+  position: absolute; right: 0; top: calc(100% + 8px); width: 18.5rem;
+  background: var(--c-surface); color: var(--c-fg);
+  border: 1px solid var(--c-border); border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+  padding: 0.9rem; display: grid; gap: 0.65rem;
+}
+.ss-panel[hidden] { display: none; }
+.ss-panel h2 { all: unset; display: block; font-weight: 700; font-size: 13px; color: var(--c-heading, var(--c-fg)); }
+.ss-row { display: grid; grid-template-columns: 6.2rem 1fr; align-items: center; gap: 0.5rem; }
+.ss-row label { color: var(--c-muted); font-weight: 600; }
+.ss-row select {
+  font: inherit; color: var(--c-fg); background: var(--c-bg);
+  border: 1px solid var(--c-border); border-radius: 8px; padding: 0.3rem 0.4rem; width: 100%;
+}
+.ss-seg { display: flex; border: 1px solid var(--c-border); border-radius: 8px; overflow: hidden; }
+.ss-seg button { flex: 1; font: inherit; cursor: pointer; background: var(--c-bg); color: var(--c-fg); border: 0; padding: 0.3rem 0; }
+.ss-seg button + button { border-left: 1px solid var(--c-border); }
+.ss-seg button[aria-pressed="true"] { background: var(--c-accent); color: var(--c-accent-on); font-weight: 700; }
+html[data-theme="hc"] .ss-seg button[aria-pressed="true"] { text-decoration: underline; text-decoration-thickness: 2px; }
+.ss-actions { display: flex; gap: 0.5rem; }
+.ss-actions button {
+  flex: 1; font: inherit; font-weight: 600; cursor: pointer;
+  background: var(--c-bg); color: var(--c-fg);
+  border: 1px solid var(--c-border); border-radius: 8px; padding: 0.35rem 0.5rem;
+}
+.ss-actions button.primary { background: var(--c-accent); color: var(--c-accent-on); border-color: var(--c-accent); }
+.ss-link { font-family: ui-monospace, monospace; font-size: 11px; width: 100%; box-sizing: border-box; color: var(--c-muted); background: var(--c-bg); border: 1px solid var(--c-border); border-radius: 6px; padding: 0.25rem 0.4rem; }
+.ss-note { font-size: 11.5px; color: var(--c-muted); line-height: 1.4; }

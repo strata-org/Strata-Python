@@ -1,0 +1,235 @@
+/* ==========================================================================
+   dyn-widgets.css — the interactive panels and the document's own components
+   (Sources lines, checklist, AST tree, pipeline stages). The panels' colour variables
+   are mapped onto the theme's tokens (themes/palettes.css), so every palette and theme, high contrast
+   included, styles these too. Code-coloured text (.t-*) only ever sits on --c-code-bg.
+   ========================================================================== */
+
+:root {
+  --w-bg: var(--c-bg);
+  --w-fg: var(--c-fg);
+  --w-muted: var(--c-muted);
+  --w-rule: var(--c-border);
+  --w-accent: var(--c-accent);
+  --w-accent-on: var(--c-accent-on);
+  --w-code-bg: var(--c-code-bg);
+  --w-code-fg: var(--c-code-fg);
+  --w-code-rule: var(--c-code-border);
+  --w-box-bg: var(--c-surface-2);
+  --w-box-rule: var(--c-border);
+  --w-hl: var(--c-hl);
+  --w-hl-strong: color-mix(in srgb, var(--c-accent) 34%, var(--c-code-bg));
+  --w-hl-line: var(--c-hl);
+  --w-ok: light-dark(#1d7a3a, #6fd08c);
+  --w-bad: light-dark(#b3261e, #ff8a80);
+  --w-ins: color-mix(in srgb, #3caa5a 20%, var(--c-code-bg));
+  --w-chg: color-mix(in srgb, #5082e6 20%, var(--c-code-bg));
+  --w-warn-bg: var(--c-warn-bg, var(--c-surface-2));
+  --w-warn-rule: var(--c-warn-border, var(--c-border));
+  --w-deep-bg: var(--c-dd-bg);
+  --w-deep-rule: var(--c-dd-border);
+  --w-deep-label: var(--c-dd-kicker);
+}
+html[data-theme="hc"] {
+  /* WCAG AAA: highlights are the theme's own, and the states also differ by outline. */
+  --w-hl-strong: var(--c-hl);
+  --w-ok: light-dark(#005a00, #7cfc00);
+  --w-bad: light-dark(#a00000, #ff9e9e);
+  --w-ins: var(--c-hl-hover);
+  --w-chg: var(--c-hl-hover);
+}
+
+/* ---------- Code-coloured tokens (the widgets' own highlighter) ---------- */
+.t-kw { color: var(--t-kw); font-weight: var(--t-kw-weight, 600); }
+.t-val { color: var(--t-val); }
+.t-fn { color: var(--t-fn); }
+.t-label { color: var(--t-succ); font-weight: 600; }
+.t-type { color: var(--t-ty); }
+.t-op { color: var(--t-op); }
+.t-num { color: var(--t-num); }
+.t-com { color: var(--t-comment); font-style: italic; }
+.t-str { color: var(--t-str); }
+html[data-theme="hc"] .t-kw, html[data-theme="hc"] .t-label { font-weight: 700; }
+html[data-theme="hc"] .t-fn, html[data-theme="hc"] .t-op { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+
+/* ---------- Sources lines ---------- */
+.sources {
+  font-family: var(--f-head); font-size: 0.82rem; color: var(--w-muted);
+  border-top: 1px solid var(--w-deep-rule); padding-top: 0.45rem; margin-top: 0.9rem;
+}
+.sources p { margin: 0; }
+
+/* ---------- Design checklist ---------- */
+aside.checklist {
+  background: var(--w-box-bg); border: 1px solid var(--w-box-rule); border-radius: var(--radius, 8px);
+  padding: 0.6rem 1.2rem; margin: 1.25rem 0; font-size: 0.95rem;
+}
+
+/* ---------- AST tree ---------- */
+ul.tree, ul.tree ul { list-style: none; margin: 0; padding-left: 1.1rem; }
+ul.tree {
+  font-family: var(--f-code); font-size: 0.82rem; line-height: 1.6;
+  background: var(--w-code-bg); color: var(--w-code-fg);
+  border: 1px solid var(--w-code-rule); border-radius: var(--radius, 8px);
+  padding: 0.6rem 0.8rem; margin: 1.25rem 0; overflow-x: auto;
+}
+ul.tree li { position: relative; padding-left: 0.3rem; margin: 0 !important; border-left: 1px solid var(--w-code-rule); white-space: nowrap; line-height: 1.6; }
+ul.tree .cat { color: var(--t-ty); }
+ul.tree .ctor { color: var(--t-op); font-weight: 600; }
+ul.tree .leaf { color: var(--t-num); }
+
+/* ---------- Pipeline stages (figure in section 1) ---------- */
+.stages { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.6rem; font-family: var(--f-head); }
+@container (min-width: 30rem) { .stages { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container (min-width: 60rem) { .stages { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.stage { border: 1px solid var(--w-box-rule); background: var(--w-box-bg); border-radius: 8px; padding: 0.55rem 0.7rem; position: relative; min-width: 0; }
+.stage h4 { margin: 0 0 0.2rem; font-size: 0.9rem; }
+.stage p { margin: 0 0 0.4rem; font-size: 0.8rem; color: var(--w-muted); line-height: 1.4; }
+/* An excerpt wider than its stage scrolls sideways rather than being cut off. */
+.stage pre {
+  font-family: var(--f-code); font-size: 0.68rem; line-height: 1.45; margin: 0; padding: 0.4rem 0.5rem;
+  overflow-x: auto; background: var(--w-code-bg); color: var(--w-code-fg);
+  border: 1px solid var(--w-code-rule); border-radius: 5px;
+}
+.stage .num { position: absolute; top: 0.35rem; right: 0.55rem; font-size: 0.75rem; color: var(--w-muted); }
+
+/* ---------- Widgets ---------- */
+.widget {
+  border: 1px solid var(--w-box-rule); border-radius: calc(var(--radius, 8px) + 2px);
+  padding: 0.8rem 1rem 1rem; margin: 1.75rem 0; font-family: var(--f-head);
+  background: var(--c-surface, var(--w-bg)); color: var(--w-fg);
+}
+.widget > h4 { margin: 0 0 0.5rem; font-size: 1rem; color: var(--c-heading); }
+.widget p { line-height: 1.5; }
+.widget .controls { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin: 0.5rem 0; }
+.widget button, .widget select, .widget input[type=text] {
+  font: inherit; font-size: 0.88rem; padding: 0.3rem 0.7rem; border-radius: 6px;
+  border: 1px solid var(--w-box-rule); background: var(--w-box-bg); color: var(--w-fg);
+}
+.widget input[type=text] { font-family: var(--f-code); }
+.widget button { cursor: pointer; }
+.widget button:hover { border-color: var(--w-accent); }
+.widget button[disabled] { opacity: 0.5; cursor: default; }
+.widget button[aria-pressed=true], .widget button[aria-checked=true] {
+  background: var(--w-accent); color: var(--w-accent-on); border-color: var(--w-accent);
+}
+.widget .foot { font-size: 0.75rem; color: var(--w-muted); margin-top: 0.6rem; line-height: 1.45; }
+.widget .note { font-size: 0.82rem; color: var(--w-muted); }
+.widget .status { font-size: 0.85rem; padding: 0.3rem 0.6rem; border-radius: 6px; margin: 0.4rem 0; }
+.widget .status.ok { color: var(--w-ok); border: 1px solid var(--w-ok); }
+.widget .status.bad { color: var(--w-bad); border: 1px solid var(--w-bad); }
+/* A widget with side-by-side panes, and the pipeline-stages figure, grow past the text column,
+   up to 72rem, within the space between the ToC and the "On this page" rail.  Widths are in
+   cqw of <main>, the content area (book.css makes it a container), so a resized ToC is allowed
+   for.  Their panes sit side by side whenever the box itself is wide enough, whatever the
+   window. */
+.widget:has(.cols), figure.doc-figure:has(.stages) {
+  --w-avail: calc(100cqw - 4rem);
+  width: max(100%, min(72rem, var(--w-avail)));
+  max-width: none;
+  box-sizing: border-box;
+  container-type: inline-size;
+}
+@media (min-width: 1280px) {
+  .widget:has(.cols), figure.doc-figure:has(.stages) { --w-avail: calc(100cqw - 15rem - 4rem); }
+}
+/* Once the column is centred (themes/layout.css), the widget is centred on it too, never
+   reaching left of the space beside the ToC: the column starts at the wrapper's margin plus
+   its 2rem padding. */
+@container main (width >= 1212px) {
+  .widget:has(.cols), figure.doc-figure:has(.stages) {
+    margin-left: calc(max(2rem, (100cqw - 15rem - min(72rem, var(--w-avail))) / 2)
+      - max(0px, (100cqw - 15rem - var(--verso-content-max-width) - 4rem) / 2) - 2rem);
+  }
+}
+.widget .cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.8rem; }
+@container (min-width: 50rem) {
+  .widget .cols { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
+  .widget .cols.even { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}
+@container (max-width: 49.99rem) { #trace-list { max-height: 22rem; overflow-y: auto; } }
+.widget .codepanel {
+  font-family: var(--f-code); font-size: 0.78rem; line-height: 1.5;
+  background: var(--w-code-bg); color: var(--w-code-fg);
+  border: 1px solid var(--w-code-rule); border-radius: 8px;
+  padding: 0.5rem 0; overflow-x: auto; white-space: pre; margin: 0;
+}
+.codepanel .ln { display: block; padding: 0 0.7rem; min-height: 1.5em; }
+.codepanel .ln.hl { background: var(--w-hl-line); box-shadow: inset 3px 0 0 var(--w-accent); }
+.codepanel .ln.cur { background: var(--w-hl-strong); box-shadow: inset 3px 0 0 var(--w-accent); }
+.codepanel .ln.ins { background: var(--w-ins); box-shadow: inset 3px 0 0 var(--w-ok); }
+.codepanel .ln.chg { background: var(--w-chg); box-shadow: inset 3px 0 0 var(--w-accent); }
+.codepanel .seg.hl { background: var(--w-hl-strong); border-radius: 2px; }
+.codepanel .v { cursor: pointer; border-radius: 2px; }
+.codepanel .v.def { outline: 2px solid var(--w-ok); background: var(--w-ins); }
+.codepanel .v.use { background: var(--w-hl); }
+.codepanel .v.bad { outline: 2px solid var(--w-bad); }
+html[data-theme="hc"] .codepanel .seg.hl, html[data-theme="hc"] .codepanel .v.use { outline: 1px solid var(--c-fg); }
+html[data-theme="hc"] .codepanel .ln.cur { outline: 2px solid var(--c-fg); outline-offset: -2px; }
+.widget .caption {
+  min-height: 3em; font-size: 0.92rem; line-height: 1.5; margin: 0.4rem 0; padding: 0.4rem 0.6rem;
+  border-left: 3px solid var(--w-accent); background: var(--w-box-bg);
+}
+.widget .cfgwrap { overflow-x: auto; border: 1px solid var(--w-rule); border-radius: 8px; background: var(--w-box-bg); }
+.widget .cfgwrap svg { display: block; max-width: 100%; height: auto; }
+.widget svg .blk rect { fill: var(--c-surface, var(--w-bg)); stroke: var(--w-muted); stroke-width: 1.2; }
+.widget svg .blk text { fill: var(--w-fg); font-family: var(--f-code); font-size: 11px; }
+.widget svg .blk text.sub { fill: var(--w-muted); font-size: 9.5px; }
+.widget svg .edge { fill: none; stroke: var(--w-muted); stroke-width: 1.4; }
+.widget svg .edge.err { stroke: var(--w-bad); stroke-dasharray: 5 4; }
+.widget svg .edge.back { stroke: var(--w-accent); }
+.widget svg .elabel {
+  fill: var(--w-bad); font-family: var(--f-code); font-size: 9.5px;
+  paint-order: stroke; stroke: var(--w-box-bg); stroke-width: 4px; stroke-linejoin: round;
+}
+.widget svg marker path { fill: var(--w-muted); }
+.widget .domtree { font-family: var(--f-code); font-size: 0.8rem; margin: 0.4rem 0 0.8rem; }
+.widget .domtree ul { list-style: none; padding-left: 1rem; margin: 0; border-left: 1px solid var(--w-rule); }
+.widget .domtree > ul { border-left: none; padding-left: 0; }
+.widget .domtree li { margin: 0 !important; line-height: 1.6; }
+.widget .domtree .t-type { color: var(--w-muted); }
+.widget .regionbox { border: 1px dashed var(--w-box-rule); border-radius: 8px; padding: 0.5rem 0.7rem; margin-top: 0.7rem; }
+.widget .frames { font-family: var(--f-code); font-size: 0.78rem; }
+.widget ol.frames { padding-left: 2rem; margin: 0; }
+.widget ol.frames li { line-height: 1.45; margin: 0 0 0.35rem !important; }
+.widget ol.frames li.cur { background: var(--c-hl-hover); border-radius: 4px; outline: 1px solid var(--w-accent); }
+.widget .frames .frame {
+  border: 1px solid var(--w-rule); border-radius: 6px; padding: 0.3rem 0.5rem; margin-bottom: 0.4rem;
+  background: var(--w-box-bg); overflow-wrap: anywhere;
+}
+.widget .frames .frame b { font-family: var(--f-head); }
+.widget .tablewrap { overflow-x: auto; }
+.widget table.envtable { border-collapse: collapse; font-size: 0.85rem; width: 100%; margin: 0.5rem 0; }
+.widget .envtable th, .widget .envtable td {
+  border-bottom: 1px solid var(--w-rule); padding: 0.35rem 0.5rem; text-align: left; vertical-align: top;
+}
+.widget .envtable th { font-weight: 600; background: var(--w-box-bg); }
+.widget .envtable td:first-child { white-space: nowrap; }
+.widget .envtable tr.sel td { background: var(--c-hl-hover); }
+.widget .envtable tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--w-accent); }
+.widget .envtable button { font-family: var(--f-code); font-size: 0.8rem; padding: 0.1rem 0.4rem; }
+.widget .envtable td.sig {
+  font-family: var(--f-code); font-size: 0.78rem; background: var(--w-code-bg); color: var(--w-code-fg);
+  border-bottom-color: var(--w-code-rule);
+}
+.widget .envtable pre {
+  margin: 0; font-family: var(--f-code); font-size: 0.74rem; padding: 0.3rem 0.5rem; max-height: 12rem; overflow: auto;
+  background: var(--w-code-bg); color: var(--w-code-fg); border-radius: 5px; border: 1px solid var(--w-code-rule);
+}
+.js-only[hidden] { display: none !important; }
+.nojs-note { font-size: 0.82rem; color: var(--w-muted); }
+.nojs-note p { margin: 0.3rem 0; }
+.nojs-note[hidden] { display: none !important; }
+
+/* ---------- Missing features (section 7) ---------- */
+.missing-list > li { margin-bottom: 1rem; }
+.missing-list dl { margin: 0.2rem 0 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 0.15rem 0.7rem; font-size: 0.95rem; }
+.missing-list dt { font-family: var(--f-head); font-weight: 600; font-size: 0.82rem; color: var(--w-muted); padding-top: 0.15rem; }
+.missing-list dd { margin: 0; }
+.missing-list dd > p { margin: 0; }
+
+@media print {
+  .js-only, .widget .controls { display: none !important; }
+  .codepanel { white-space: pre-wrap; overflow: visible; font-size: 8pt; }
+  .widget { page-break-inside: avoid; }
+}

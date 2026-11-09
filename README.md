@@ -121,7 +121,7 @@ The package is the repository root:
 ├── StrataPythonTest/              # Compile-time tests (built with lake build)
 ├── StrataPythonTestExtra/         # Runtime tests (run with lake test, require Python)
 ├── StrataPythonFrontEndTestMain.lean # Test driver (`lake test`) for StrataPythonTestExtra
-├── docs/                          # Dyn reference and Python-to-Dyn spec
+├── docs/                          # Dyn reference, Python-to-Dyn spec, Dyn guide (dyn/)
 ├── AGENTS.md                      # Guide for AI agents working in this package
 ├── lakefile.toml
 ├── lean-toolchain
@@ -140,6 +140,8 @@ declared by a layered environment. It is split across two directories:
 
 [`docs/Dyn.md`](./docs/Dyn.md) is the Dyn reference, and
 [`docs/PythonToDyn.md`](./docs/PythonToDyn.md) specifies how Python lowers to it.
+[`docs/dyn/`](./docs/dyn/README.md) is "Introduction to Dyn", a guide for anyone
+writing a new front end, built as its own Verso project.
 
 `lake exe pydyn dyn FILE` prints the diagnostics and the Dyn module for `FILE`, a
 `.py` file (parsed with `python -m strata_python.gen`; `PYTHON` selects the interpreter) or a

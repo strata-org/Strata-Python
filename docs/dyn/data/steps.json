@@ -1,0 +1,164 @@
+[
+ {
+  "srcStart": 37,
+  "srcEnd": 74,
+  "lines": [
+   2,
+   3
+  ],
+  "match": [
+   "^\\s+entry\\.0\\(%n\\.0",
+   "^\\s+jump \\^head\\.0\\(%n\\.0, %d\\.0, 0, 1\\)$"
+  ],
+  "caption": "The declarations make the constants 0 and 1, which the entry block passes to the loop header as the first values of s and i."
+ },
+ {
+  "srcStart": 77,
+  "srcEnd": 91,
+  "lines": [
+   3,
+   4,
+   5,
+   6
+  ],
+  "match": [
+   "^\\s+jump \\^head\\.0\\(%n\\.0",
+   "^\\s+head\\.0\\(",
+   "%t\\.0 : base\\.Bool = while\\.le",
+   "^\\s+branch\\(%t\\.0\\)"
+  ],
+  "caption": "The loop header takes every variable in scope as a parameter, tests the condition, and branches to the body or the exit."
+ },
+ {
+  "srcStart": 94,
+  "srcEnd": 104,
+  "lines": [
+   8
+  ],
+  "match": [
+   "%t\\.1 : base\\.Int = while\\.add"
+  ],
+  "caption": "An assignment defines a new value: from here on, s is %t.1."
+ },
+ {
+  "srcStart": 106,
+  "srcEnd": 116,
+  "lines": [
+   9,
+   10
+  ],
+  "match": [
+   "%t\\.2 : base\\.Int = while\\.add",
+   "^\\s+jump \\^head\\.0\\(%n\\.1"
+  ],
+  "caption": "The back edge passes the current value of every variable to the header, the unchanged d included."
+ },
+ {
+  "srcStart": 122,
+  "srcEnd": 127,
+  "lines": [
+   12
+  ],
+  "match": [
+   "%t\\.3 : base\\.Int = while\\.div"
+  ],
+  "caption": "Inside the try, the handler in effect is catch.0, so the raising division gets the successor ^catch.0 with the four variables."
+ },
+ {
+  "srcStart": 135,
+  "srcEnd": 140,
+  "lines": [
+   12
+  ],
+  "match": [
+   "%t\\.3 : base\\.Int = while\\.div"
+  ],
+  "caption": "Division is a raising instruction: on success it defines %t.3, and on a zero divisor it transfers along its ^err successor."
+ },
+ {
+  "srcStart": 128,
+  "srcEnd": 141,
+  "lines": [
+   13,
+   14
+  ],
+  "match": [
+   "%ok\\.0 : base\\.Except",
+   "^\\s+ret\\(%ok\\.0\\)"
+  ],
+  "caption": "Because mean may raise (a division), its returns are wrapped in base.ok."
+ },
+ {
+  "srcStart": 144,
+  "srcEnd": 172,
+  "lines": [
+   15,
+   16,
+   17,
+   18
+  ],
+  "match": [
+   "^\\s+catch\\.0\\(",
+   "%t\\.4 : base\\.Int = while\\.sub",
+   "%ok\\.1 : base\\.Except",
+   "^\\s+ret\\(%ok\\.1\\)"
+  ],
+  "caption": "The handler takes the four values the edge binds, then the payload %e.0, which while.div supplies."
+ },
+ {
+  "srcStart": 218,
+  "srcEnd": 233,
+  "lines": [
+   22,
+   23,
+   24,
+   25
+  ],
+  "match": [
+   "%t\\.0 : base\\.Int = while\\.sub",
+   "%r\\.0 : base\\.Except",
+   "^\\s+base\\.Except\\.case",
+   "^\\s+ok\\.0\\("
+  ],
+  "caption": "A call is base.callCode on the function reference @mean, then base.Except.case, which continues at ok.0 with the result, or goes to the handler."
+ },
+ {
+  "srcStart": 237,
+  "srcEnd": 245,
+  "lines": [
+   26
+  ],
+  "match": [
+   "%u\\.0 : base\\.Unit = while\\.print"
+  ],
+  "caption": "print has nothing to return, so it defines a base.Unit value; m is the block parameter %x.0."
+ },
+ {
+  "srcStart": 249,
+  "srcEnd": 258,
+  "lines": [
+   27,
+   28
+  ],
+  "match": [
+   "%ok\\.0 : base\\.Except",
+   "^\\s+ret\\(%ok\\.0\\)"
+  ],
+  "caption": "main returns m wrapped in base.ok."
+ },
+ {
+  "srcStart": 218,
+  "srcEnd": 233,
+  "lines": [
+   29,
+   30,
+   31
+  ],
+  "match": [
+   "^\\s+raise\\.0\\(",
+   "%error\\.0 : base\\.Except",
+   "^\\s+ret\\(%error\\.0\\)"
+  ],
+  "caption": "The call's error edge goes to raise.0, the function's propagate block, which returns the error as base.error."
+ }
+]

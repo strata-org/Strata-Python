@@ -1,0 +1,11 @@
+fun mean(n : Int, d : Int) : Int {
+  var s : Int := 0;
+  var i : Int := 1;
+  while (i <= n) { s := s + i; i := i + 1; }
+  try { return s / d; } catch e => { return 0 - e; }
+}
+fun main(n : Int) : Int {
+  var m : Int := mean(n, n - 10);
+  print(m);
+  return m;
+}

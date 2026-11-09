@@ -1,0 +1,27 @@
+[
+ {
+  "entry": "main",
+  "args": [
+   20
+  ],
+  "expected": "ok 21",
+  "printed": "#[21]"
+ },
+ {
+  "entry": "main",
+  "args": [
+   10
+  ],
+  "expected": "ok -1",
+  "printed": "#[-1]"
+ },
+ {
+  "entry": "mean",
+  "args": [
+   4,
+   0
+  ],
+  "expected": "ok -1",
+  "printed": "#[]"
+ }
+]

@@ -1,0 +1,10 @@
+/* fonts.css — @font-face rules for the vendored OFL fonts.
+   Files: themes/fonts/<family>/*.woff2, each with its OFL.txt; latin subsets from the
+   @fontsource npm packages. Verso copies them to -verso-data/fonts/ via extraDataFiles. */
+@font-face { font-family: "IBM Plex Sans"; font-style: italic; font-weight: 400; font-display: swap; src: url("-verso-data/fonts/ibm-plex-sans/ibm-plex-sans-latin-400-italic.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight: 400; font-display: swap; src: url("-verso-data/fonts/ibm-plex-sans/ibm-plex-sans-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight: 600; font-display: swap; src: url("-verso-data/fonts/ibm-plex-sans/ibm-plex-sans-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Sans"; font-style: normal; font-weight: 700; font-display: swap; src: url("-verso-data/fonts/ibm-plex-sans/ibm-plex-sans-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight: 400; font-display: swap; src: url("-verso-data/fonts/ibm-plex-mono/ibm-plex-mono-latin-400-italic.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight: 400; font-display: swap; src: url("-verso-data/fonts/ibm-plex-mono/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight: 700; font-display: swap; src: url("-verso-data/fonts/ibm-plex-mono/ibm-plex-mono-latin-700-normal.woff2") format("woff2"); }

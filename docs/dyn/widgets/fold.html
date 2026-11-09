@@ -1,0 +1,49 @@
+<div class="widget" id="w-fold" role="region" aria-labelledby="w-fold-h">
+<h4 id="w-fold-h">Folded and full forms</h4>
+<div class="controls js-only" hidden>
+  <span id="fold-lbl" class="note">Form</span>
+  <span role="radiogroup" aria-labelledby="fold-lbl">
+    <button type="button" role="radio" aria-checked="true" id="fold-a">Folded</button>
+    <button type="button" role="radio" aria-checked="false" id="fold-b">Full</button>
+  </span>
+  <label for="fold-fn">Function</label>
+  <select id="fold-fn"><option value="mean">mean</option><option value="main">main</option></select>
+</div>
+<pre class="codepanel dyn" id="fold-text" aria-label="Printed function" aria-live="polite">module main {
+  func @mean(%n.0 : base.Int, %d.0 : base.Int) -&gt; base.Except(base.Int, base.Int) {
+    entry.0(%n.0 : base.Int, %d.0 : base.Int):
+      jump ^head.0(%n.0, %d.0, 0, 1)
+    head.0(%n.1 : base.Int, %d.1 : base.Int, %s.0 : base.Int, %i.0 : base.Int):
+      %t.0 : base.Bool = while.le(%i.0, %n.1)
+      branch(%t.0) ^body.0() ^exit.0()
+    body.0():
+      %t.1 : base.Int = while.add(%s.0, %i.0)
+      %t.2 : base.Int = while.add(%i.0, 1)
+      jump ^head.0(%n.1, %d.1, %t.1, %t.2)
+    exit.0():
+      %t.3 : base.Int = while.div(%s.0, %d.1) ^catch.0(%n.1, %d.1, %s.0, %i.0)
+      %ok.0 : base.Except(base.Int, base.Int) = base.ok[base.Int, base.Int](%t.3)
+      ret(%ok.0)
+    catch.0(%n.2 : base.Int, %d.2 : base.Int, %s.1 : base.Int, %i.1 : base.Int, %e.0 : base.Int):
+      %t.4 : base.Int = while.sub(0, %e.0)
+      %ok.1 : base.Except(base.Int, base.Int) = base.ok[base.Int, base.Int](%t.4)
+      ret(%ok.1)
+  }
+  func @main(%n.0 : base.Int) -&gt; base.Except(base.Int, base.Int) {
+    entry.0(%n.0 : base.Int):
+      %t.0 : base.Int = while.sub(%n.0, 10)
+      %r.0 : base.Except(base.Int, base.Int) = base.callCode[[base.Int, base.Int], base.Except(base.Int, base.Int)](@mean, %n.0, %t.0)
+      base.Except.case[base.Int, base.Int](%r.0) ^ok.0() ^raise.0()
+    ok.0(%x.0 : base.Int):
+      %u.0 : base.Unit = while.print(%x.0)
+      %ok.0 : base.Except(base.Int, base.Int) = base.ok[base.Int, base.Int](%x.0)
+      ret(%ok.0)
+    raise.0(%e.0 : base.Int):
+      %error.0 : base.Except(base.Int, base.Int) = base.error[base.Int, base.Int](%e.0)
+      ret(%error.0)
+  }
+}</pre>
+<p class="note js-only" hidden>Green lines are constants that the full form gives their own lines; blue lines are lines whose text differs between the forms.</p>
+<!--CHILDREN-->
+<div class="foot">The toggle swaps the two texts and never rewrites either.</div>
+</div>

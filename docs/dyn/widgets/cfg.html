@@ -1,0 +1,25 @@
+<div class="widget" id="w-cfg" role="region" aria-labelledby="w-cfg-h">
+<h4 id="w-cfg-h">Control-flow graph and dominator tree</h4>
+<div class="controls js-only" hidden>
+  <label for="cfg-sel">Function</label>
+  <select id="cfg-sel"></select>
+</div>
+<div class="status js-only" id="cfg-status" aria-live="polite" hidden></div>
+<div class="js-only" hidden id="cfg-main">
+  <div>
+    <div>
+      <div class="note">Graph: solid edges leave from terminators, dashed red edges from raising instructions, blue edges go back to a loop header.</div>
+      <div class="cfgwrap" id="cfg-svg"></div>
+    </div>
+    <div>
+      <div class="note">Dominator tree, computed from the graph: <code>l[j]</code> is block <code>l</code> after its first <code>j</code> printed lines</div>
+      <div class="domtree" id="cfg-tree"></div>
+    </div>
+  </div>
+  <div id="cfg-regions"></div>
+  <div class="note">Printed text. Select a value (click, or focus and press Enter) to see its definition and uses.</div>
+  <pre class="codepanel dyn" id="cfg-text" aria-label="Printed function"></pre>
+</div>
+<!--CHILDREN-->
+<div class="foot">The graph and the tree are computed in the page from the printed text, not by Dyn, which stores no tree.</div>
+</div>

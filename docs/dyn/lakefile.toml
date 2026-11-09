@@ -1,0 +1,17 @@
+name = "DynDoc"
+defaultTargets = ["dynintro"]
+
+[leanOptions]
+warningAsError = true
+
+[[require]]
+name = "verso"
+git = "https://github.com/leanprover/verso"
+rev = "v4.34.0"
+
+[[lean_lib]]
+name = "DynIntro"
+
+[[lean_exe]]
+name = "dynintro"
+root = "DynIntroMain"

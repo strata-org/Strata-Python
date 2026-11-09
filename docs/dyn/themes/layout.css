@@ -1,0 +1,135 @@
+/* ==========================================================================
+   The layout: a sticky translucent header, a quiet left nav, an
+   "On this page" rail on the right (layout.js), crisp rounded code panes.
+   ========================================================================== */
+:root {
+  --f-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --f-head: var(--f-body);
+  --f-code: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --verso-font-size: 16px;
+  --verso-header-height: 3.5rem;
+  --verso-toc-width: 17rem;
+  --verso-content-max-width: 46rem;
+  --radius: 12px;
+  --code-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px -12px rgba(15, 23, 42, 0.35);
+}
+
+header {
+  background: var(--c-header-bg);
+  backdrop-filter: saturate(180%) blur(10px);
+  -webkit-backdrop-filter: saturate(180%) blur(10px);
+  border-bottom: 1px solid var(--c-border);
+  color: var(--c-header-fg);
+}
+.header-logo-wrapper { display: none; }
+.header-title-wrapper { padding-left: 1.5rem; }
+.header-title { font-size: 1rem; font-weight: 700; margin: 0 !important; letter-spacing: -0.01em; }
+.header-title h1 { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; }
+.header-title h1::before {
+  content: ""; width: 1.4rem; height: 1.4rem; border-radius: 6px;
+  background: linear-gradient(135deg, var(--c-grad-1), var(--c-grad-2) 60%, var(--c-grad-3));
+}
+.header-title h1::after {
+  content: "Docs"; font-size: 0.7rem; font-weight: 600; color: var(--c-accent);
+  background: var(--c-accent-soft); padding: 0.15rem 0.5rem; border-radius: 999px;
+}
+
+/* Left nav */
+#toc { background: var(--c-nav-bg); border-right: 1px solid var(--c-border); padding: 1.5rem 0.5rem 0 1.25rem; box-sizing: border-box; }
+.toc-resize-handle::after { background: transparent; }
+#toc .toc-title { display: none; }
+#toc .split-toc .title {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--c-heading); margin-bottom: 0.6rem;
+}
+#toc .split-toc label.toggle-split-toc { display: none; }
+#toc .split-toc table { border-collapse: collapse; width: 100%; border-left: 1px solid var(--c-border); }
+#toc .split-toc td.num { display: none; }
+#toc .split-toc td { padding: 0; }
+#toc .split-toc td a {
+  display: block; padding: 0.38rem 0 0.38rem 1rem; margin-left: -1px;
+  border-left: 1px solid transparent; font-size: 0.875rem; color: var(--c-nav-fg); text-decoration: none;
+}
+#toc .split-toc td a:hover { color: var(--c-heading); border-left-color: var(--c-muted); }
+#toc .split-toc td a.active { color: var(--c-nav-active); border-left-color: var(--c-nav-active); font-weight: 600; }
+
+/* Content */
+main .content-wrapper { padding: 2.5rem 2rem 6rem; }
+@media (min-width: 1280px) { main .content-wrapper { margin-right: 15rem; } }
+/* Verso centres the content wrapper once <main> is 1212px wide (book.css), with `margin: 0
+   auto`. The rail's 15rem on the right would leave all the free space on the left, so centre
+   the column in the space between the ToC and the rail instead. */
+@container main (width >= 1212px) {
+  main .content-wrapper {
+    margin-left: max(0px, (100cqw - 15rem - var(--verso-content-max-width) - 4rem) / 2);
+  }
+}
+.titlepage h1 {
+  font-size: 2.4rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; margin: 0.25rem 0 0.75rem;
+}
+.titlepage h1::before {
+  content: "Guide"; display: block; font-size: 0.85rem; font-weight: 600; letter-spacing: 0;
+  color: var(--c-accent); margin-bottom: 0.6rem;
+}
+main .authors { font-size: 0.85rem; margin-bottom: 1.5rem; }
+.titlepage > p:first-of-type { font-size: 1.15rem; line-height: 1.75; }
+main p, main li { line-height: 1.75; }
+main h2 {
+  font-size: 1.55rem; font-weight: 700; letter-spacing: -0.02em; margin-top: 3.5rem;
+  scroll-margin-top: 5rem;
+}
+main h2 .number { color: var(--c-accent); font-weight: 600; margin-right: 0.35rem; }
+main a { text-decoration: none; font-weight: 600; border-bottom: 1px solid var(--c-accent); }
+main a:hover { border-bottom-width: 2px; }
+main .hl.lean a, main .permalink-widget a { border: 0; font-weight: inherit; }
+
+/* Code: dark panes with a header strip */
+figure.code-pane { border-radius: var(--radius); }
+
+/* Callouts: icon in a left column */
+aside.callout { position: relative; padding-left: 2.6rem; border-radius: var(--radius); }
+aside.callout .callout-title::before { position: absolute; left: 1.05rem; }
+
+/* Deep dive: card with accent rule */
+details.deep-dive { border-left: 3px solid var(--c-accent); border-radius: 0 var(--radius) var(--radius) 0; }
+
+/* Margin notes: inline asides in this layout (the right rail holds the page ToC) */
+.marginalia .note {
+  float: none !important; display: block; width: auto !important; margin: 0.75rem 0 !important;
+  padding: 0.5rem 0.9rem; border-left: 2px solid var(--c-border); position: static;
+}
+.marginalia .note::before { position: static; margin-right: 0.35rem; }
+
+/* On this page (built by layout.js) */
+.otp {
+  position: fixed; top: calc(var(--verso-header-height) + 2.5rem); right: 2rem; width: 12.5rem;
+  font-size: 0.82rem; display: none;
+}
+@media (min-width: 1280px) { .otp { display: block; } }
+.otp h3 { margin: 0 0 0.75rem; font-size: 0.8rem; font-weight: 700; color: var(--c-heading); }
+.otp a { display: block; padding: 0.3rem 0; color: var(--c-muted); text-decoration: none; line-height: 1.35; }
+.otp a:hover { color: var(--c-heading); }
+.otp a.active { color: var(--c-accent); font-weight: 600; }
+
+/* Notes sit inline here, so the in-text counter would trail the note. */
+.marginalia::after { display: none; }
+.marginalia .note::before { content: "Note"; font-weight: 700; }
+
+.titlepage { text-align: left; }
+
+/* Headings that wrap break into even lines; chapter titles sit a step below the title page's. */
+main h1, main h2, main h3 { text-wrap: balance; }
+main h1 { font-size: 2.1rem; line-height: 1.2; letter-spacing: -0.02em; }
+.titlepage h1 { font-size: 2.3rem; }
+/* Navigation text wraps cleanly rather than overflowing its column. */
+#toc a, .otp a { overflow-wrap: anywhere; text-wrap: pretty; }
+.prev-next-buttons { gap: 1.5rem; }
+.prev-next-buttons a { max-width: 48%; text-wrap: balance; line-height: 1.35; }
+
+/* Left nav lists the chapters only, the current one highlighted; the current chapter's
+   sections are in the "On this page" rail. Below 1280px, where the rail is hidden, the
+   left nav keeps them. */
+#toc .split-toc.book tr.current td a {
+  color: var(--c-nav-active); border-left-color: var(--c-nav-active); font-weight: 600;
+}
+@media (min-width: 1280px) { #toc .split-toc:not(.book) { display: none; } }

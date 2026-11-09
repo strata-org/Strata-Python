@@ -1,0 +1,24 @@
+<div class="widget" id="w-interp" role="region" aria-labelledby="w-interp-h">
+<h4 id="w-interp-h">Step through the printed module</h4>
+<p class="note">A small interpreter for the printed text, covering the instructions the running example uses, with semantics transcribed from While's rules. It is a reading aid, not the Lean engine.</p>
+<div class="status js-only" id="int-banner" aria-live="polite" hidden></div>
+<div class="controls js-only" hidden>
+  <label for="int-args">Run</label>
+  <input type="text" id="int-args" value="main 20" size="12" aria-describedby="int-args-help">
+  <span id="int-args-help" class="note">function, then integer arguments</span>
+  <button type="button" id="int-reset">Reset</button>
+  <button type="button" id="int-step">Step</button>
+  <button type="button" id="int-run">Run</button>
+  <span class="note" id="int-steps" aria-live="polite"></span>
+</div>
+<div class="cols js-only" hidden id="int-main">
+  <div>
+    <div class="note">Source</div><pre class="codepanel while" id="int-src" aria-label="Source"></pre>
+    <div class="note">Frames</div><div class="frames" id="int-frames" aria-live="polite"></div>
+    <div class="note">World output</div><div class="frames" id="int-out"></div>
+    <div class="note">Result</div><div class="frames" id="int-result" aria-live="polite"></div>
+  </div>
+  <div><div class="note">Dyn, folded</div><pre class="codepanel dyn" id="int-dyn" aria-label="Printed module"></pre></div>
+</div>
+<!--CHILDREN-->
+</div>

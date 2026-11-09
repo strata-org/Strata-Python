@@ -1,0 +1,31 @@
+<div class="widget" id="w-trace" role="region" aria-labelledby="w-trace-h">
+<h4 id="w-trace-h">Builder calls for <code>mean</code>, abridged</h4>
+<p class="note">The calls of the typed <code>mean</code> listing, in order, with the print of <code>mean</code> so far.</p>
+<div class="cols even">
+  <ol id="trace-list" class="frames" aria-label="Builder calls"><li><code>Emit.func (n "mean") [(n "n", Base.Int), (n "d", Base.Int)] R ()</code><br><span class="note">%n.0, %d.0; opens entry.0, and gives the body n₀, d₀ and funcExit</span></li>
+<li><code>let% head ← freshLabel [Int, Int, Int, Int]; body, exit: freshLabel []</code><br><span class="note">^head.0, ^body.0, ^exit.0</span></li>
+<li><code>freshLabel [Int, Int, Int, Int, Int] "catch"</code><br><span class="note">^catch.0</span></li>
+<li><code>int k 0, int k 1</code><br><span class="note">%k.0, %k.1 (folded in the print)</span></li>
+<li><code>Base.jump (head.goto.bindAll vals[n₀, d₀, k₀, k₁])</code><br><span class="note">closes entry.0</span></li>
+<li><code>param n, d, s, i; Build.Raw.startBlock head.label</code><br><span class="note">%n.1, %d.1, %s.0, %i.0; opens head.0</span></li>
+<li><code>let% t ← While.le i n₁</code><br><span class="note">%t.0 : base.Bool</span></li>
+<li><code>Base.branch t body.goto exit.goto</code><br><span class="note">closes head.0</span></li>
+<li><code>Emit.startBlock body</code><br><span class="note">opens body.0</span></li>
+<li><code>let% t ← While.add s i</code><br><span class="note">%t.1</span></li>
+<li><code>While.add i (← int k 1) (result := t)</code><br><span class="note">%k.2, %t.2</span></li>
+<li><code>Base.jump (head.goto.bindAll vals[n₁, d₁, t, t₁])</code><br><span class="note">closes body.0: the back edge</span></li>
+<li><code>Emit.startBlock exit</code><br><span class="note">opens exit.0</span></li>
+<li><code>let% t ← While.div s d₁ (handler.goto.bind n₁ |&gt;.bind d₁ |&gt;.bind s |&gt;.bind i)</code><br><span class="note">%t.3, with ^catch.0 expecting one Int</span></li>
+<li><code>let% ok ← Base.Except.ok t; ret funcExit ok</code><br><span class="note">%ok.0; closes exit.0</span></li>
+<li><code>param n, d, s, i, e; Build.Raw.startBlock handler.label</code><br><span class="note">%n.2, %d.2, %s.1, %i.1, %e.0; opens catch.0</span></li>
+<li><code>let% t ← While.sub (← int k 0) e</code><br><span class="note">%k.3, %t.4</span></li>
+<li><code>let% ok ← Base.Except.ok t; ret funcExit ok</code><br><span class="note">%ok.1; closes catch.0</span></li>
+<li><code>Emit.func finishes mean</code><br><span class="note">numbers the names, drops unreachable blocks (none here) and checks Func.WF</span></li></ol>
+  <pre class="codepanel dyn js-only" id="trace-print" aria-label="Partial print" hidden></pre>
+</div>
+<div class="controls js-only" hidden>
+  <button type="button" id="trace-prev" aria-label="Previous builder call">&#8592; Prev</button>
+  <button type="button" id="trace-next" aria-label="Next builder call">Next &#8594;</button>
+  <span id="trace-count" class="note" aria-live="polite"></span>
+</div>
+</div>

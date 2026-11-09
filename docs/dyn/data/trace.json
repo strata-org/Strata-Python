@@ -1,0 +1,97 @@
+[
+ {
+  "call": "Emit.func (n \"mean\") [(n \"n\", Base.Int), (n \"d\", Base.Int)] R ()",
+  "result": "%n.0, %d.0; opens entry.0, and gives the body n₀, d₀ and funcExit",
+  "upto": 2
+ },
+ {
+  "call": "let% head ← freshLabel [Int, Int, Int, Int]; body, exit: freshLabel []",
+  "result": "^head.0, ^body.0, ^exit.0",
+  "upto": 2
+ },
+ {
+  "call": "freshLabel [Int, Int, Int, Int, Int] \"catch\"",
+  "result": "^catch.0",
+  "upto": 2
+ },
+ {
+  "call": "int k 0, int k 1",
+  "result": "%k.0, %k.1 (folded in the print)",
+  "upto": 2
+ },
+ {
+  "call": "Base.jump (head.goto.bindAll vals[n₀, d₀, k₀, k₁])",
+  "result": "closes entry.0",
+  "upto": 3
+ },
+ {
+  "call": "param n, d, s, i; Build.Raw.startBlock head.label",
+  "result": "%n.1, %d.1, %s.0, %i.0; opens head.0",
+  "upto": 4
+ },
+ {
+  "call": "let% t ← While.le i n₁",
+  "result": "%t.0 : base.Bool",
+  "upto": 5
+ },
+ {
+  "call": "Base.branch t body.goto exit.goto",
+  "result": "closes head.0",
+  "upto": 6
+ },
+ {
+  "call": "Emit.startBlock body",
+  "result": "opens body.0",
+  "upto": 7
+ },
+ {
+  "call": "let% t ← While.add s i",
+  "result": "%t.1",
+  "upto": 8
+ },
+ {
+  "call": "While.add i (← int k 1) (result := t)",
+  "result": "%k.2, %t.2",
+  "upto": 9
+ },
+ {
+  "call": "Base.jump (head.goto.bindAll vals[n₁, d₁, t, t₁])",
+  "result": "closes body.0: the back edge",
+  "upto": 10
+ },
+ {
+  "call": "Emit.startBlock exit",
+  "result": "opens exit.0",
+  "upto": 11
+ },
+ {
+  "call": "let% t ← While.div s d₁ (handler.goto.bind n₁ |>.bind d₁ |>.bind s |>.bind i)",
+  "result": "%t.3, with ^catch.0 expecting one Int",
+  "upto": 12
+ },
+ {
+  "call": "let% ok ← Base.Except.ok t; ret funcExit ok",
+  "result": "%ok.0; closes exit.0",
+  "upto": 14
+ },
+ {
+  "call": "param n, d, s, i, e; Build.Raw.startBlock handler.label",
+  "result": "%n.2, %d.2, %s.1, %i.1, %e.0; opens catch.0",
+  "upto": 15
+ },
+ {
+  "call": "let% t ← While.sub (← int k 0) e",
+  "result": "%k.3, %t.4",
+  "upto": 16
+ },
+ {
+  "call": "let% ok ← Base.Except.ok t; ret funcExit ok",
+  "result": "%ok.1; closes catch.0",
+  "upto": 18
+ },
+ {
+  "call": "Emit.func finishes mean",
+  "result": "numbers the names, drops unreachable blocks (none here) and checks Func.WF",
+  "upto": 19
+ }
+]
