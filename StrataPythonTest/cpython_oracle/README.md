@@ -190,9 +190,11 @@ About **130 seconds** for the whole language-level corpus (65 files, ~1,340 meth
 4 workers; `runner.py` parallelises per method.
 
 `pyInterpret` is listed in the package's `defaultTargets`, which matters for more than
-convenience. Without it, this script and `run_py_interpret.sh` each compiled the binary
-from scratch *at the same time* — testMain launches the test files concurrently — and
-the two `lake` invocations clobbered each other's intermediate objects. The visible
+convenience. Both this script and the interpret goldens need the `pyInterpret` binary,
+and when each compiled it from scratch *at the same time* — testMain launches the test
+files concurrently — the two `lake` invocations clobbered each other's intermediate
+objects. (The interpret goldens now spawn the pre-built binary rather than compiling
+it, but it must still exist before they run, which `defaultTargets` guarantees.) The visible
 failure landed in a **third** suite: `AnalyzeGoldenTest` died compiling
 `EliminateDeterministicHoles` with "no such file or directory". Being a race, it passed
 three builds before it bit.

@@ -6,8 +6,8 @@ its own set in [`../expected_interpret_v1/`](../expected_interpret_v1).
 
 V2 runs the whole corpus, `../tests/test_*.py`; V1 runs only the 310 hand-written
 cases. Both go through `pyInterpret` — concrete execution, **no verification** —
-from `../../StrataPythonTestExtra/InterpretGoldenTest.lean`. Regenerate with
-`../run_py_interpret.sh [--v2] --update`.
+via the generated children of `../InterpretGolden/Generate.lean`. Regenerate the
+expectations with `lake exe pyInterpretUpdate [--v2]` from the package root.
 
 ## How a case joins a suite
 
@@ -40,9 +40,9 @@ Python program, not of a front end, so it lives only here;
 `../completeness_report.py` reads it together with this directory's `.expected` set.
 
 It doubles as the marker for "imported": every one of the 1,168 imported cases has a
-`.desired` and none of the 310 hand-written ones does, so `run_py_interpret.sh`
-tests for it to decide what the V1 run skips. A newly imported case is V2-only
-automatically, with no list to maintain.
+`.desired` and none of the 310 hand-written ones does, so the generator tests for it
+to decide what the V1 run skips. A newly imported case is V2-only automatically, with
+no list to maintain.
 
 ## Why the V2 set lives at the unqualified path
 
@@ -60,12 +60,11 @@ expectation a **content diff** in review.
 ## Regenerating
 
 ```
-cd StrataPythonTest
-./run_py_interpret.sh --update          # V1 set, ../expected_interpret_v1/ (310 cases)
-./run_py_interpret.sh --v2 --update     # V2 set, this directory (all 1478)
+lake exe pyInterpretUpdate          # V1 set, ../expected_interpret_v1/ (310 cases)
+lake exe pyInterpretUpdate --v2     # V2 set, this directory (all 1478)
 ```
 
-Never hand-edit these files, but note what `--update` does *not* do: a stored
+Never hand-edit these files, but note what `pyInterpretUpdate` does *not* do: a stored
 pattern that still matches is kept byte for byte, so a deliberately relaxed pattern
 survives. Only a pattern that no longer matches is rewritten, from the failure's
 first line, with assertion identifiers, `byteIdx` values and Ion source spans

@@ -169,17 +169,11 @@ test_arithmetic.py(14, 4): ❌ fail - assert(200)
 
 ## Golden Test Suite
 
-`run_py_analyze.sh` is the golden runner for `tests/test_*.py`. It compiles each
-test to Ion, runs the analyzer, normalizes unstable assertion-label IDs
-(`normalize_labels.py`), and diffs against the golden files.
-
-CI runs it for **both** front-ends, back to back, from
-`../StrataPythonTestExtra/AnalyzeGoldenTest.lean`:
-
-```
-./run_py_analyze.sh              # V1, goldens in expected_laurel_v1/
-./run_py_analyze.sh --v2         # V2, goldens in expected_laurel/
-```
+The golden runner for `tests/test_*.py` is `StrataPythonTest/AnalyzeGolden/Generate.lean`.
+It generates one child module per test under `StrataPythonTestExtra/AnalyzeGolden/Gen/`;
+each child compiles its test to Ion, runs the analyzer, normalizes unstable
+assertion-label IDs, and diffs against the golden files. The test driver runs the
+children in parallel, and CI runs them for **both** front-ends.
 
 Note the paths: `expected_laurel/` is the **V2** set, because V2 was introduced
 by rewriting those files in place so the change would be reviewable as a diff
@@ -187,30 +181,35 @@ per test. [`expected_laurel/README.md`](./expected_laurel/README.md) explains
 that and inventories what currently differs between the two front-ends.
 
 A test is part of a front-end's suite iff that front-end's directory has a
-`<name>.expected` for it. Regenerate goldens with `--update` (add `--v2` for the
-V2 set), and narrow a run with `--filter <substring>`. Each `--v2` run ends with
-a `V1/V2 divergence: N of M golden(s) differ` line.
+`<name>.expected` for it. Regenerate goldens with
+`lake exe pyAnalyzeUpdate --update` (add `--v2` for the V2 set) from the package
+root, and narrow a run with `--filter <substring>`. Each `--v2` run ends with a
+`V1/V2 divergence: N of M golden(s) differ` line.
 
-The two runs share scratch files (`tests/*.python.st.ion`, and `user_errors.txt`
-in the working directory), so they must not be run concurrently.
+Each generated child analyzes in its own scratch directory, so the children run
+concurrently. The `pyAnalyzeUpdate` write side runs its V1 and V2 passes over
+shared scratch (`tests/*.python.st.ion`, `user_errors.txt`), so those must not
+overlap.
 
 ## Interpret Test Suite
 
-`run_py_interpret.sh` runs the same `tests/test_*.py` corpus through `pyInterpret`
-— Python → Core → concrete execution, with **no verification**. It answers a
+The interpret goldens run the `tests/test_*.py` corpus through `pyInterpret`
+— Python → Core → concrete execution, with **no verification**. They answer a
 different question from the analyze suite: not "what does the verifier prove" but
 "does the model run this program at all, and does it get the right answer".
 
-CI runs it for **both** front ends, back to back, from
-`../StrataPythonTestExtra/InterpretGoldenTest.lean`:
+Unlike the analyze suite, this one is not a shell loop. `InterpretGolden/Generate.lean`
+declares one test per corpus file and generates a child module per case under
+`../StrataPythonTestExtra/InterpretGolden/Gen/`; the test driver runs those children
+concurrently, each compiling its case to Ion in a private scratch directory and
+running the `pyInterpret` binary on it. Each case runs under **both** front ends: the
+default V1 pipeline (expectations in `expected_interpret_v1/`) and then V2
+(`expected_interpret/`). The paths mirror the analyze sets: `expected_interpret/` is
+the **V2** set. See [`expected_interpret/README.md`](./expected_interpret/README.md).
 
-```
-./run_py_interpret.sh            # V1, expectations in expected_interpret_v1/
-./run_py_interpret.sh --v2       # V2, expectations in expected_interpret/
-```
-
-The paths mirror the analyze sets: `expected_interpret/` is the **V2** set. See
-[`expected_interpret/README.md`](./expected_interpret/README.md).
+The child modules are generated from the corpus directory at build time: rebuild with
+`SUBTESTS_REGEN=1` after adding or removing a `tests/test_*.py` case, and a normal
+build fails if a committed child has drifted from what the generator would emit.
 
 The two runs do not cover the same cases. V2 runs all 1,478; V1 runs only the 310
 hand-written ones, because the 1,168 imported regression cases are V2-only — V1 is
@@ -228,20 +227,24 @@ from the analyze goldens:
 | `<case>.skip` | do not run the case; the file holds the reason |
 
 So a case that fails under one front end and passes under the other has a file in
-only one of the two sets — the `V1/V2 divergence: N of M case(s) differ` line at
-the end of the `--v2` run compares whole cases, not just the files present, over the
-310 cases both front ends run.
+only one of the two sets. `lake exe pyInterpretUpdate --v2` ends with a
+`V1/V2 divergence: N of M case(s) differ` line that compares whole cases, not just
+the files present, over the 310 cases both front ends run.
 
-Regenerate with `--update` (add `--v2` for the V2 set). A stored pattern that still
-matches is kept byte for byte, so deliberate relaxations survive; one that no longer
-matches is rewritten from the actual failure with assertion identifiers and Ion byte
-offsets relaxed. Narrow a run with `--filter <substring>`.
+Regenerate the `.expected` files with `lake exe pyInterpretUpdate` (add `--v2` for
+the V2 set), run from the package root. A stored pattern that still matches is kept
+byte for byte, so deliberate relaxations survive; one that no longer matches is
+rewritten from the actual failure with assertion identifiers and Ion byte offsets
+relaxed. Narrow a run with `--filter <substring>`.
 
 `<case>.desired` sidecars record what a case ought to conclude, rather than what it
-does, and `completeness_report.py` is what reads them as expectations. The runner
+does, and `completeness_report.py` is what reads them as expectations. The generator
 reads one only to decide whether the V1 run skips the case.
 
-The two runs share `tests/*.python.st.ion`, so they must not be run concurrently.
+The generated test children, and `pyInterpretUpdate`, each compile into a private
+scratch directory, rewriting the scratch path back to the real corpus path the
+patterns embed. So they run concurrently with each other and with the analyze suite
+without sharing scratch.
 
 ## Diagnostic Commands
 

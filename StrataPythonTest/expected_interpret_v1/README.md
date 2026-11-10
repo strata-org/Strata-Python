@@ -2,7 +2,7 @@
 
 Expectations for the V1 front end (Python → Laurel → Core), the shipping pipeline,
 run concretely by `pyInterpret` with no verification. Regenerate with
-`cd StrataPythonTest && ./run_py_interpret.sh --update`.
+`lake exe pyInterpretUpdate` from the package root.
 
 These files are copies of what used to live in `../expected_interpret/`, which now
 holds the **V2** expectations. For why the two sets sit at those paths — and what
@@ -27,8 +27,8 @@ describe are exactly the ones this set does not run.
 ## Status
 
 81 cases carry an expectation and 14 are skipped, so 215 of the 310 run to
-completion. Of the 310, **124 differ** from V2; `./run_py_interpret.sh --v2` prints
-that count.
+completion. Of the 310, **124 differ** from V2; `lake exe pyInterpretUpdate --v2`
+prints that count.
 
 Six of the skips are the `test_nested_function*` family, which the interpreter's V1
 Laurel translation path does not support; three are heap-parameterized entry

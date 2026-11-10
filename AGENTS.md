@@ -35,8 +35,8 @@ verified and once executed — each run against its own per-front-end set:
 
 | Suite | Driver | V1 set | V2 set |
 |---|---|---|---|
-| analyze (SMT verification) | `StrataPythonTestExtra/AnalyzeGoldenTest.lean` → `run_py_analyze.sh` | `expected_laurel_v1/` | `expected_laurel/` |
-| interpret (concrete execution) | `StrataPythonTestExtra/InterpretGoldenTest.lean` → `run_py_interpret.sh` | `expected_interpret_v1/` | `expected_interpret/` |
+| analyze (SMT verification) | generated children from `StrataPythonTest/AnalyzeGolden/Generate.lean` | `expected_laurel_v1/` | `expected_laurel/` |
+| interpret (concrete execution) | generated children from `StrataPythonTest/InterpretGolden/Generate.lean` | `expected_interpret_v1/` | `expected_interpret/` |
 
 The interpret suite is the exception to "the whole corpus": V2 runs all 1,478 cases,
 V1 only the 310 hand-written ones. The 1,168 imported regression cases are V2-only
@@ -46,8 +46,8 @@ hand-written case does — so a new import is V2-only with no list to maintain.
 
 Watch the directory names — they are not what you would guess: the **unqualified**
 path is the **V2** set in both suites. Regenerate with
-`./run_py_analyze.sh [--v2] --update` / `./run_py_interpret.sh [--v2] --update` from
-`StrataPythonTest/`, and read
+`lake exe pyAnalyzeUpdate [--v2] --update` (analyze) and
+`lake exe pyInterpretUpdate [--v2]` (interpret), both from the package root, and read
 [`StrataPythonTest/expected_laurel/README.md`](./StrataPythonTest/expected_laurel/README.md)
 and
 [`StrataPythonTest/expected_interpret/README.md`](./StrataPythonTest/expected_interpret/README.md)

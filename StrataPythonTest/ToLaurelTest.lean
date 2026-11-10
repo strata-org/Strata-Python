@@ -1315,7 +1315,7 @@ private def expectSchemaWarningOnly (containerTy : SpecType) : IO Unit := do
 
 Semantic coverage for quantifiers (does the formula prove/refute what the
 Python means?) lives in the end-to-end suite
-`StrataPythonTestExtra/AnalyzeLaurelTest.lean`, which runs PySpec fixtures
+`StrataPythonTest/AnalyzeLaurel/Generate.lean`, which runs PySpec fixtures
 through the solver and checks pass/violation verdicts per domain.
 
 The checks here pin only what solver verdicts cannot observe: the *shape* of

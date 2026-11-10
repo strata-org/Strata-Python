@@ -44,7 +44,7 @@ done
 # pyInterpret is in the package's defaultTargets, so brazil-build has already
 # produced it by the time tests run and this `lake build` is a no-op.
 #
-# That listing matters. Without it, this script and run_py_interpret.sh both compiled
+# That listing matters. Without it, this script and the interpret goldens both compiled
 # pyInterpret from scratch AT THE SAME TIME -- testMain launches the test files
 # concurrently -- and the two lake invocations clobbered each other's intermediate
 # objects. The visible failure was in a THIRD suite: AnalyzeGoldenTest died compiling

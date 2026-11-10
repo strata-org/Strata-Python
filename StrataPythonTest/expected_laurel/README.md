@@ -4,8 +4,8 @@
 Resolution → Translation → Elaboration → Core). The V1 front-end
 (`pyAnalyzeLaurel`) has its own full set in [`../expected_laurel_v1/`](../expected_laurel_v1).
 
-Both front-ends run over the same corpus, `../tests/test_*.py`, from
-`../../StrataPythonTestExtra/AnalyzeGoldenTest.lean`. A test belongs to a
+Both front-ends run over the same corpus, `../tests/test_*.py`, through the
+generated children of `../AnalyzeGolden/Generate.lean`. A test belongs to a
 front-end's suite iff that front-end's directory has a `<name>.expected` for it;
 the two sets are expected to cover the same tests.
 
@@ -27,9 +27,9 @@ are byte-identical to what used to be here.
 ## Regenerating
 
 ```
-cd StrataPythonTest
-./run_py_analyze.sh --update          # V1 set, ../expected_laurel_v1/
-./run_py_analyze.sh --v2 --update     # V2 set, this directory
+# from the package root
+lake exe pyAnalyzeUpdate --update        # V1 set, ../expected_laurel_v1/
+lake exe pyAnalyzeUpdate --v2 --update   # V2 set, this directory
 ```
 
 Never hand-edit these files. Each run ends with a
